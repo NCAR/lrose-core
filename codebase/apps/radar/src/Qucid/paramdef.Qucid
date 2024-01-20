@@ -212,8 +212,8 @@ typedef enum {
 } render_mode_t;
 
 typedef struct {
-  string button_label;
-  string legend_label;
+  string button_name;
+  string legend_name;
   string url;
   string field_name;
   string color_map;
@@ -229,8 +229,8 @@ typedef struct {
 paramdef struct field_t {
   p_default = {
     {
-      button_label = "DBZ_F",
-      legend_label = "DBZ_F",
+      button_name = "DBZ_F",
+      legend_name = "DBZ_F",
       url = "mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur",
       field_name = "DBZ_F",
       color_map = "dbz.colors",
@@ -244,8 +244,8 @@ paramdef struct field_t {
     }
     ,
     {
-      button_label = "VEL_F",
-      legend_label = "VEL_F",
+      button_name = "VEL_F",
+      legend_name = "VEL_F",
       url = "mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur",
       field_name = "VEL_F",
       color_map = "vel.colors",
@@ -260,8 +260,8 @@ paramdef struct field_t {
   };
   p_descr = "Fields to be displayed.";
   p_help =
-    "/nbutton_label: appears on the GUI. "
-    "/nlegend_label: appears in the plot. "
+    "/nbutton_name: appears on the GUI. "
+    "/nlegend_name: appears in the plot. "
     "/nurl: location of data or data server. "
     "/nfield_name: name in the file. "
     "/ncolor_map: name of color map in color_scale_dir. "

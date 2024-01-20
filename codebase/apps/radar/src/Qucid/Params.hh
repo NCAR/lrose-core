@@ -203,8 +203,8 @@ public:
   } show_status_t;
 
   typedef struct {
-    char* button_label;
-    char* legend_label;
+    char* button_name;
+    char* legend_name;
     char* url;
     char* field_name;
     char* color_map;

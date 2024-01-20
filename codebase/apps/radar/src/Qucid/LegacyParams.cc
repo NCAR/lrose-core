@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
+#include <toolsa/TaStr.hh>
 #include <toolsa/utim.h>
 
 // constructor
@@ -1685,8 +1686,8 @@ const char *LegacyParams::_findTagText(const char *input_buf,
   
   start_line_no = *text_line_no;
   
-  sprintf(start_tag,"<%s>",tag);
-  sprintf(end_tag,"</%s>",tag);
+  snprintf(start_tag, TAG_BUF_LEN - 1, "<%s>", tag);
+  snprintf(end_tag,TAG_BUF_LEN - 1, "</%s>", tag);
   
   // Search for Start tag
   if((start_ptr = strstr(input_buf,start_tag)) == NULL) {
@@ -1914,13 +1915,12 @@ int LegacyParams::_loadKeyValPairs(const string &fname)
 
 #define NUM_PARSE_FIELDS    32
 #define PARSE_FIELD_SIZE    1024
-#define INPUT_LINE_LEN      2048
+#define INPUT_LINE_LEN      10000
 
 int LegacyParams::_initDataFields(const char *param_buf,
                                   long param_buf_len,
                                   long line_no)
 {
-  int  i,j;
   int  len,total_len;
   const char *start_ptr;
   const char *end_ptr;
@@ -1934,15 +1934,18 @@ int LegacyParams::_initDataFields(const char *param_buf,
   cerr << "fields_n: " << gParams.fields_n << endl;
   for (int ii = 0; ii < gParams.fields_n; ii++) {
     Params::field_t &fld = gParams._fields[ii];
-    cerr << "  button label: " << fld.button_label << endl;
-    cerr << "  legend label: " << fld.legend_label << endl;
+    cerr << "  button name: " << fld.button_name << endl;
+    cerr << "  legend name: " << fld.legend_name << endl;
     cerr << "  contour_low: " << fld.contour_low << endl;
   }
   cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    
 
   // read all the lines in the data information buffer
+
+  vector<Field> flds;
+  
   while((end_ptr = strchr(start_ptr,'\n')) != NULL && (total_len < param_buf_len)) {
+
     // Skip over blank, short or commented lines
     len = (end_ptr - start_ptr)+1;
     if( (len < 20)  || (*start_ptr == '#')) {
@@ -1953,14 +1956,27 @@ int LegacyParams::_initDataFields(const char *param_buf,
     }
 
     if(gd.num_datafields < MAX_DATA_FIELDS -1) {
+
+      Field fld;
+      
       // Ask for 128 extra bytes for the null and potential env var  expansion
-      gd.data_info[gd.num_datafields] = (char *)  calloc(len+128, 1);
-      STRcopy(gd.data_info[gd.num_datafields],start_ptr,len);
+      // gd.data_info[gd.num_datafields] = (char *)  calloc(len+128, 1);
+      // STRcopy(gd.data_info[gd.num_datafields],start_ptr,len);
+
+      // create space for text line
+
+      fld.text_line = new char[len + 10000];
+      STRcopy(fld.text_line, start_ptr, len);
 
       /* Do Environment variable substitution */
-      usubstitute_env(gd.data_info[gd.num_datafields], len+128);
+      // usubstitute_env(gd.data_info[gd.num_datafields], len+128);
+      usubstitute_env(fld.text_line, len+10000);
       gd.num_datafields++;
+
+      flds.push_back(fld);
+
     } else {
+
       fprintf(stderr,
               "Cidd: Warning. Too many Data Fields. Data field not processed\n");
       fprintf(stderr,"Line %ld \n",line_no);
@@ -1972,123 +1988,140 @@ int LegacyParams::_initDataFields(const char *param_buf,
     line_no++;
   }
 
-  if(gd.num_datafields <=0) {
+  if(flds.size() < 1) {
     fprintf(stderr,"CIDD requires at least one valid gridded data field to be defined\n");
     return -1;
   }
 
   /* get temp space for substrings */
-  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+  for(int i = 0; i < NUM_PARSE_FIELDS; i++) {
     cfield[i] = (char *)  calloc(PARSE_FIELD_SIZE, 1);
   }
 
   /* scan through each of the data information lines */
-  for(i = 0; i < gd.num_datafields; i++) {
+  for(size_t ii = 0; ii < flds.size(); ii++) {
 
+    Field &fld = flds[ii];
+    
     /* get space for data info */
-    gd.mrec[i] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
+    // gd.mrec[ii] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
 
     /* separate into substrings */
-    STRparse(gd.data_info[i], cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
-    STRcopy(gd.mrec[i]->legend_name,cfield[0],NAME_LENGTH);
-    STRcopy(gd.mrec[i]->button_name,cfield[1],NAME_LENGTH);
+
+    STRparse(fld.text_line, cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
+    fld.legend_name = cfield[0];
+    fld.button_name = cfield[1];
 
     if(gd.html_mode == 0) {
       /* Replace Underscores with spaces in names */
-      for(j=strlen(gd.mrec[i]->button_name)-1 ; j >= 0; j--) {
-        if(gd.replace_underscores && gd.mrec[i]->button_name[j] == '_') gd.mrec[i]->button_name[j] = ' ';
-        if(gd.replace_underscores && gd.mrec[i]->legend_name[j] == '_') gd.mrec[i]->legend_name[j] = ' ';
+      for(int jj = (int) fld.button_name.size() - 1 ; jj >= 0; jj--) {
+        if(gd.replace_underscores && fld.button_name[jj] == '_') fld.button_name[jj] = ' ';
+        if(gd.replace_underscores && fld.legend_name[jj] == '_') fld.legend_name[jj] = ' ';
       }
     }
-    STRcopy(gd.mrec[i]->url,cfield[2],URL_LENGTH);
 
-    STRcopy(gd.mrec[i]->color_file,cfield[3],NAME_LENGTH);
+    // split the URL into url and field name - the delimiter is '&'
+    
+    vector<string> toks;
+    TaStr::tokenize(cfield[2], "&", toks);
+    if (toks.size() != 2) {
+      cerr << "WARNING - bad data field line, no field name" << endl;
+      cerr << fld.text_line << endl;
+      fld.is_valid = false;
+      continue;
+    }
+    fld.url = toks[0];
+    fld.field_name = toks[1];
 
+    // other members
+    
+    fld.color_map = cfield[3];
+      
     // if units are "" or --, set to zero-length string
     if (!strcmp(cfield[4], "\"\"") || !strcmp(cfield[4], "--")) {
-      STRcopy(gd.mrec[i]->field_units,"",LABEL_LENGTH);
+      fld.field_units.clear();
     } else {
-      STRcopy(gd.mrec[i]->field_units,cfield[4],LABEL_LENGTH);
+      fld.field_units = cfield[4];
     }
 
-    gd.mrec[i]->cont_low = atof(cfield[5]);
-    gd.mrec[i]->cont_high = atof(cfield[6]);
-    gd.mrec[i]->cont_interv = atof(cfield[7]);
+    fld.contour_low = atof(cfield[5]);
+    fld.contour_high = atof(cfield[6]);
+    fld.contour_interval = atof(cfield[7]);
 
-    gd.mrec[i]->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    // gd.mrec[ii]->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
 
     if (strncasecmp(cfield[8],"rad",3) == 0) {
-      gd.mrec[i]->render_method = POLYGONS;
+      fld.render_mode = POLYGONS;
     } else {
-      gd.mrec[i]->render_method = POLYGONS;
+      fld.render_mode = POLYGONS;
     }
 
     if (strncasecmp(cfield[8],"cont",4) == 0) {
-      gd.mrec[i]->render_method = FILLED_CONTOURS;
+      fld.render_mode = FILLED_CONTOURS;
     }
 
     if (strncasecmp(cfield[8],"lcont",4) == 0) {
-      gd.mrec[i]->render_method = LINE_CONTOURS;
+      fld.render_mode = LINE_CONTOURS;
     }
 
     if (strncasecmp(cfield[8],"dcont",4) == 0) {
-      gd.mrec[i]->render_method = DYNAMIC_CONTOURS;
+      fld.render_mode = DYNAMIC_CONTOURS;
     }
 
     if (strstr(cfield[8],"comp") != NULL) {
-      gd.mrec[i]->composite_mode = TRUE;
+      fld.composite_mode = TRUE;
     }
 
     if (strstr(cfield[8],"autoscale") != NULL) {
-      gd.mrec[i]->auto_scale = TRUE;
+      fld.auto_scale = TRUE;
     }
 
-    gd.mrec[i]->currently_displayed = atoi(cfield[9]);
-
+    fld.currently_displayed = atoi(cfield[9]);
+    
     if(gd.run_once_and_exit) {
-      gd.mrec[i]->auto_render = 1;
+      fld.auto_render = 1;
     } else {
-      gd.mrec[i]->auto_render = atoi(cfield[10]);
+      fld.auto_render = atoi(cfield[10]);
     }
 
-    gd.mrec[i]->last_elev = (char *)NULL;
-    gd.mrec[i]->elev_size = 0;
+    // gd.mrec[ii]->last_elev = (char *)NULL;
+    // gd.mrec[ii]->elev_size = 0;
 
-    gd.mrec[i]->plane = 0;
-    gd.mrec[i]->h_data_valid = 0;
-    gd.mrec[i]->v_data_valid = 0;
-    gd.mrec[i]->h_last_scale  = -1.0;
-    gd.mrec[i]->h_last_bias  = -1.0;
-    gd.mrec[i]->h_last_missing  = -1.0;
-    gd.mrec[i]->h_last_bad  = -1.0;
-    gd.mrec[i]->h_last_transform  = -1;
-    gd.mrec[i]->v_last_scale  = -1.0;
-    gd.mrec[i]->v_last_bias  = -1.0;
-    gd.mrec[i]->v_last_missing  = -1.0;
-    gd.mrec[i]->v_last_bad  = -1.0;
-    gd.mrec[i]->v_last_transform  = -1;
-    gd.mrec[i]->h_fhdr.proj_origin_lat  = 0.0;
-    gd.mrec[i]->h_fhdr.proj_origin_lon  = 0.0;
-    gd.mrec[i]->time_list.num_alloc_entries = 0;
-    gd.mrec[i]->time_list.num_entries = 0;
+    // gd.mrec[ii]->plane = 0;
+    // gd.mrec[ii]->h_data_valid = 0;
+    // gd.mrec[ii]->v_data_valid = 0;
+    // gd.mrec[ii]->h_last_scale  = -1.0;
+    // gd.mrec[ii]->h_last_bias  = -1.0;
+    // gd.mrec[ii]->h_last_missing  = -1.0;
+    // gd.mrec[ii]->h_last_bad  = -1.0;
+    // gd.mrec[ii]->h_last_transform  = -1;
+    // gd.mrec[ii]->v_last_scale  = -1.0;
+    // gd.mrec[ii]->v_last_bias  = -1.0;
+    // gd.mrec[ii]->v_last_missing  = -1.0;
+    // gd.mrec[ii]->v_last_bad  = -1.0;
+    // gd.mrec[ii]->v_last_transform  = -1;
+    // gd.mrec[ii]->h_fhdr.proj_origin_lat  = 0.0;
+    // gd.mrec[ii]->h_fhdr.proj_origin_lon  = 0.0;
+    // gd.mrec[ii]->time_list.num_alloc_entries = 0;
+    // gd.mrec[ii]->time_list.num_entries = 0;
 
-    STRcopy(gd.mrec[i]->units_label_cols,"KM",LABEL_LENGTH);
-    STRcopy(gd.mrec[i]->units_label_rows,"KM",LABEL_LENGTH);
-    STRcopy(gd.mrec[i]->units_label_sects,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ii]->units_label_cols,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ii]->units_label_rows,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ii]->units_label_sects,"KM",LABEL_LENGTH);
 
-    // instantiate classes
-    gd.mrec[i]->h_mdvx = new DsMdvxThreaded;
-    gd.mrec[i]->v_mdvx = new DsMdvxThreaded;
-    gd.mrec[i]->h_mdvx_int16 = new MdvxField;
-    gd.mrec[i]->v_mdvx_int16 = new MdvxField;
-    gd.mrec[i]->proj = new MdvxProj;
+    // // instantiate classes
+    // gd.mrec[ii]->h_mdvx = new DsMdvxThreaded;
+    // gd.mrec[ii]->v_mdvx = new DsMdvxThreaded;
+    // gd.mrec[ii]->h_mdvx_int16 = new MdvxField;
+    // gd.mrec[ii]->v_mdvx_int16 = new MdvxField;
+    // gd.mrec[ii]->proj = new MdvxProj;
 
   }
   /* Make sure the first field is always on */
   gd.mrec[0]->currently_displayed = 1;
     
   /* free up temp storage for substrings */
-  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+  for(int i = 0; i < NUM_PARSE_FIELDS; i++) {
     free(cfield[i]);
   }
 
@@ -2101,15 +2134,15 @@ int LegacyParams::_initDataFields(const char *param_buf,
 
   cerr << "cccccccccccccccccccccc fields_n: " << gParams.fields_n << endl;
   cerr << "dddddddddddddddddddddd fields ptr: " << gParams._fields << endl;
-  for(i = 0; i < gd.num_datafields; i++) {
+  for(int i = 0; i < gd.num_datafields; i++) {
 
     met_record_t &record = *(gd.mrec[i]);
     Params::field_t *field = gParams._fields + i;
 
     cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
 
-    TDRP_str_replace(&field->button_label, record.button_name);
-    TDRP_str_replace(&field->legend_label, record.legend_name);
+    TDRP_str_replace(&field->button_name, record.button_name);
+    TDRP_str_replace(&field->legend_name, record.legend_name);
     TDRP_str_replace(&field->url, record.url);
     TDRP_str_replace(&field->field_name, record.field_label);
     TDRP_str_replace(&field->color_map, record.color_file);
@@ -2127,8 +2160,8 @@ int LegacyParams::_initDataFields(const char *param_buf,
   cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
   for (int ii = 0; ii < gParams.fields_n; ii++) {
     Params::field_t &fld = gParams._fields[ii];
-    cerr << "  button label: " << fld.button_label << endl;
-    cerr << "  legend label: " << fld.legend_label << endl;
+    cerr << "  button name: " << fld.button_name << endl;
+    cerr << "  legend name: " << fld.legend_name << endl;
     cerr << "  contour_low: " << fld.contour_low << endl;
   }
   cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
@@ -2358,7 +2391,7 @@ int LegacyParams::_initWindFields(const char *param_buf,
       gd.layers.wind[i].wind_w->time_list.num_entries = 0;
       
       STRcopy(gd.layers.wind[i].wind_w->legend_name,cfield[0],NAME_LENGTH);
-      sprintf(gd.layers.wind[i].wind_w->button_name,"%s_W ",cfield[0]);
+      snprintf(gd.layers.wind[i].wind_w->button_name, NAME_LENGTH - 1, "%s_W ",cfield[0]);
       STRcopy(gd.layers.wind[i].wind_w->url,cfield[1],URL_LENGTH);
       
       if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */

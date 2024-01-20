@@ -1005,7 +1005,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fields");
     tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("/nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  cart: Rectangle/polygon fills of gridded data./n  cont: false color filled contours./n  lcont: line contours./n  dcont: dynamic contours, auto switching between cart and cont./n         uses dynamic_contour_treshold.");
+    tt->help = tdrpStrDup("/nbutton_name: appears on the GUI. /nlegend_name: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  cart: Rectangle/polygon fills of gridded data./n  cont: false color filled contours./n  lcont: line contours./n  dcont: dynamic contours, auto switching between cart and cont./n         uses dynamic_contour_treshold.");
     tt->array_offset = (char *) &_fields - &_start_;
     tt->array_n_offset = (char *) &fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1017,15 +1017,15 @@
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("button_label");
+      tt->struct_def.fields[0].fname = tdrpStrDup("button_name");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_fields->button_label - (char *) _fields;
+        (char *) &_fields->button_name - (char *) _fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("legend_label");
+      tt->struct_def.fields[1].fname = tdrpStrDup("legend_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_fields->legend_label - (char *) _fields;
+        (char *) &_fields->legend_name - (char *) _fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
       tt->struct_def.fields[2].fname = tdrpStrDup("url");
       tt->struct_def.fields[2].ptype = STRING_TYPE;

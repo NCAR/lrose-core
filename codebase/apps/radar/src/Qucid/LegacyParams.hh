@@ -18,7 +18,7 @@
 // ** if any, may be used to endorse or promote products derived from        
 // ** this software without specific prior written permission.               
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** OR IMPLIED WARRANTIES, INLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////
@@ -75,6 +75,78 @@ private:
   int _paramsBufLen;
   char *_paramsBuf; // Pointer to the parameter data
 
+  // field details
+  
+  typedef enum {
+    POLYGONS,
+    FILLED_CONTOURS,
+    DYNAMIC_CONTOURS,
+    LINE_CONTOURS
+  } RenderMode;
+
+  class Field {
+  public:
+    Field() {
+      is_valid = false;
+      text_line = NULL;
+      contour_low = 0;
+      contour_high = 100;
+      contour_interval = 5;
+      render_mode = POLYGONS;
+      display_in_menu = true;
+      background_render = false;
+      composite_mode = false;
+      auto_scale = false;
+      auto_render = false;
+      currently_displayed = false;
+    }
+    ~Field() {
+      delete[] text_line;
+    }
+    Field& operator=(const Field &rhs) {
+      if (&rhs == this) {
+        return *this;
+      }
+      is_valid = rhs.is_valid;
+      text_line = strdup(rhs.text_line);
+      button_name = rhs.button_name;
+      legend_name = rhs.legend_name;
+      url = rhs.url;
+      field_name = rhs.field_name;
+      color_map = rhs.color_map;
+      field_units = rhs.field_units;
+      contour_low = rhs.contour_low;
+      contour_high = rhs.contour_high;
+      contour_interval = rhs.contour_interval;
+      render_mode = rhs.render_mode;
+      display_in_menu = rhs.display_in_menu;
+      background_render = rhs.background_render;
+      composite_mode = rhs.composite_mode;
+      auto_scale = rhs.auto_scale;
+      auto_render = rhs.auto_render;
+      currently_displayed = rhs.currently_displayed;
+      return *this;
+    }
+    bool is_valid;
+    char *text_line;
+    string button_name;
+    string legend_name;
+    string url;
+    string field_name;
+    string color_map;
+    string field_units;
+    double contour_low;
+    double contour_high;
+    double contour_interval;
+    RenderMode render_mode;
+    bool display_in_menu;
+    bool background_render;
+    bool composite_mode;
+    bool auto_scale;
+    bool auto_render;
+    bool currently_displayed;
+  };
+  
   // read in from param file
   // returns 0 on success, -1 on failure
   
