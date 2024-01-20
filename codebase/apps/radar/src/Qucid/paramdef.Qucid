@@ -2768,6 +2768,12 @@ paramdef boolean {
   p_help = "Turns on all wind layers.";
 } all_winds_on;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Activate wind rendering.";
+  p_help = "TO DO - check how this works.";
+} wind_mode;
+
 paramdef int {
   p_default = 33;
   p_descr = "Wind barb shaft length (pixels).";
@@ -2927,6 +2933,12 @@ paramdef string {
   p_help = "";
 } latest_client_mark_color;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute click posn in coords relative to display origin.";
+  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
+} click_posn_rel_to_origin;
+
 commentdef {
   p_header = "Fonts.";
   p_text = "TO-DO - fix this.";
@@ -3034,111 +3046,138 @@ paramdef boolean {
 
 paramdef string {
   p_default = "Qucid";
-  p_descr = "";
+  p_descr = "Label in top bar of main window.";
   p_help = "";
 } horiz_frame_label;
 
 paramdef string {
   p_default = "NO DATA FOUND (in this area at the selected time)";
-  p_descr = "";
+  p_descr = "Message to display when no data is found.";
   p_help = "";
 } no_data_message;
 
 paramdef string {
   p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_descr = "System NO-Data Status/Info File.";
+  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
 } status_info_file;
 
+commentdef {
+  p_header = "HELP";
+  p_text = "";
+}
+
 paramdef string {
-  p_default = "";
-  p_descr = "";
+  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
+  p_descr = "Main command to run to get help.";
   p_help = "";
 } help_command;
 
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "cidd_help::canvas";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} canvas_help;
+
+paramdef string {
+  p_default = "cidd_help:frame_message";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} frame_message_help;
+
+commentdef {
+  p_header = "BOOKMARKS";
+  p_text = "";
+}
+
+paramdef string {
+  p_default = "/opt/google/chrome/chrome %U";
+  p_descr = "This command is run whenever a BOOKMARK_MENU button is pressed.";
+  p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
 } bookmark_command;
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
+  p_descr = "Number of bookmarks in the Menu";
   p_help = "";
 } num_bookmarks;
 
+commentdef {
+  p_header = "RENDERING";
+  p_text = "";
+}
+
 paramdef double {
   p_default = 0.8;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets the relative intensity of images, relative to the overlays.";
+  p_help = "Set between 0.2 and 1.0.";
 } image_inten;
 
 paramdef int {
   p_default = 32;
-  p_descr = "";
+  p_descr = "The number of selectable intensity levels in the slider control.";
   p_help = "";
 } inten_levels;
 
 paramdef double {
   p_default = 1;
-  p_descr = "";
+  p_descr = "Sets the relative intensity of data grid colors, relative to the overlays.";
   p_help = "";
 } data_inten;
 
 paramdef int {
   p_default = 120000;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets the threshold in drawable grid points where image rendering is done by a filling method on the client, rather than by rectangles on the Xserver.";
+  p_help = "Set this high if the X server is fast or the comm link to the server is slow. Set this low if the X server is slow. Typical values range from 10,000 to 100,000  Used for 'cart' style rendering.";
 } image_fill_threshold;
 
 paramdef int {
   p_default = 160000;
-  p_descr = "";
-  p_help = "";
+  p_descr = "This sets the threshold in grid cells when the the display will render a grid as contours or as filled rectangles.";
+  p_help = "Grids containing less than the threshold cells will be rendered as filled contours. Used for 'dcont' style rendering";
 } dynamic_contour_threshold;
 
 paramdef int {
-  p_default = 63500;
-  p_descr = "";
-  p_help = "";
+  p_default = 61500;
+  p_descr = "Key for coordinate in shared memory.";
+  p_help = "Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.";
 } coord_key;
+
+paramdef int {
+  p_default = 61600;
+  p_descr = "Key for titan clicks in shared memory.";
+  p_help = "Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.";
+} titan_key;
+
+commentdef {
+  p_header = "RENDERING PRODUCTS";
+  p_text = "";
+}
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Render all of the products in the overlay menu.";
   p_help = "";
 } products_on;
 
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "Line width for rendering products.";
   p_help = "";
 } product_line_width;
 
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "Default font size for products.";
   p_help = "";
 } product_font_size;
 
 paramdef double {
   p_default = 300;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Product scaling constant.";
+  p_help = "Set this constant to determine at what zoom icons and will have a scale factor of 1.0. Default = 300. Function = log10(Constant /km_across_screen) + 1.0; Set to less than 0 to disable icon scaling
+";
 } scale_constant;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "";
-  p_help = "";
-} wind_mode;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "";
-  p_help = "";
-} click_posn_rel_to_origin;
 
 commentdef {
   p_header = "</MAIN>";

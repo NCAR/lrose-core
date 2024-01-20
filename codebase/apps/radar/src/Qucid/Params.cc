@@ -5943,6 +5943,18 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'wind_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("wind_mode");
+    tt->descr = tdrpStrDup("Activate wind rendering.");
+    tt->help = tdrpStrDup("TO DO - check how this works.");
+    tt->val_offset = (char *) &wind_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'barb_shaft_len'
     // ctype is 'int'
     
@@ -6258,6 +6270,18 @@
     tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
+    // Parameter 'click_posn_rel_to_origin'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("click_posn_rel_to_origin");
+    tt->descr = tdrpStrDup("Compute click posn in coords relative to display origin.");
+    tt->help = tdrpStrDup("If FALSE, click posn is computed in absolute coords for the projection in use.");
+    tt->val_offset = (char *) &click_posn_rel_to_origin - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 50'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -6471,7 +6495,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("horiz_frame_label");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Label in top bar of main window.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_frame_label - &_start_;
     tt->single_val.s = tdrpStrDup("Qucid");
@@ -6483,7 +6507,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("no_data_message");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Message to display when no data is found.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &no_data_message - &_start_;
     tt->single_val.s = tdrpStrDup("NO DATA FOUND (in this area at the selected time)");
@@ -6495,10 +6519,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("status_info_file");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("System NO-Data Status/Info File.");
+    tt->help = tdrpStrDup("Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.");
     tt->val_offset = (char *) &status_info_file - &_start_;
     tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 53'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 53");
+    tt->comment_hdr = tdrpStrDup("HELP");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'help_command'
@@ -6507,10 +6540,43 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("help_command");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Main command to run to get help.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &help_command - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("chrome http://front.eol.ucar.edu/displayParams/CIDD'");
+    tt++;
+    
+    // Parameter 'canvas_help'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("canvas_help");
+    tt->descr = tdrpStrDup("Help text links.");
+    tt->help = tdrpStrDup("These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.");
+    tt->val_offset = (char *) &canvas_help - &_start_;
+    tt->single_val.s = tdrpStrDup("cidd_help::canvas");
+    tt++;
+    
+    // Parameter 'frame_message_help'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("frame_message_help");
+    tt->descr = tdrpStrDup("Help text links.");
+    tt->help = tdrpStrDup("These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.");
+    tt->val_offset = (char *) &frame_message_help - &_start_;
+    tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
+    tt++;
+    
+    // Parameter 'Comment 54'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 54");
+    tt->comment_hdr = tdrpStrDup("BOOKMARKS");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'bookmark_command'
@@ -6519,10 +6585,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("bookmark_command");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This command is run whenever a BOOKMARK_MENU button is pressed.");
+    tt->help = tdrpStrDup("The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.");
     tt->val_offset = (char *) &bookmark_command - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("/opt/google/chrome/chrome %U");
     tt++;
     
     // Parameter 'num_bookmarks'
@@ -6531,10 +6597,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("num_bookmarks");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Number of bookmarks in the Menu");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &num_bookmarks - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 55'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 55");
+    tt->comment_hdr = tdrpStrDup("RENDERING");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'image_inten'
@@ -6543,8 +6618,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("image_inten");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the relative intensity of images, relative to the overlays.");
+    tt->help = tdrpStrDup("Set between 0.2 and 1.0.");
     tt->val_offset = (char *) &image_inten - &_start_;
     tt->single_val.d = 0.8;
     tt++;
@@ -6555,7 +6630,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("inten_levels");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The number of selectable intensity levels in the slider control.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &inten_levels - &_start_;
     tt->single_val.i = 32;
@@ -6567,7 +6642,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("data_inten");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the relative intensity of data grid colors, relative to the overlays.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &data_inten - &_start_;
     tt->single_val.d = 1;
@@ -6579,8 +6654,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("image_fill_threshold");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the threshold in drawable grid points where image rendering is done by a filling method on the client, rather than by rectangles on the Xserver.");
+    tt->help = tdrpStrDup("Set this high if the X server is fast or the comm link to the server is slow. Set this low if the X server is slow. Typical values range from 10,000 to 100,000  Used for 'cart' style rendering.");
     tt->val_offset = (char *) &image_fill_threshold - &_start_;
     tt->single_val.i = 120000;
     tt++;
@@ -6591,8 +6666,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("dynamic_contour_threshold");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This sets the threshold in grid cells when the the display will render a grid as contours or as filled rectangles.");
+    tt->help = tdrpStrDup("Grids containing less than the threshold cells will be rendered as filled contours. Used for 'dcont' style rendering");
     tt->val_offset = (char *) &dynamic_contour_threshold - &_start_;
     tt->single_val.i = 160000;
     tt++;
@@ -6603,10 +6678,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("coord_key");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Key for coordinate in shared memory.");
+    tt->help = tdrpStrDup("Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.");
     tt->val_offset = (char *) &coord_key - &_start_;
-    tt->single_val.i = 63500;
+    tt->single_val.i = 61500;
+    tt++;
+    
+    // Parameter 'titan_key'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("titan_key");
+    tt->descr = tdrpStrDup("Key for titan clicks in shared memory.");
+    tt->help = tdrpStrDup("Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.");
+    tt->val_offset = (char *) &titan_key - &_start_;
+    tt->single_val.i = 61600;
+    tt++;
+    
+    // Parameter 'Comment 56'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 56");
+    tt->comment_hdr = tdrpStrDup("RENDERING PRODUCTS");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'products_on'
@@ -6615,7 +6711,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("products_on");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Render all of the products in the overlay menu.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &products_on - &_start_;
     tt->single_val.b = pTRUE;
@@ -6627,7 +6723,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("product_line_width");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Line width for rendering products.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &product_line_width - &_start_;
     tt->single_val.i = 1;
@@ -6639,7 +6735,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("product_font_size");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Default font size for products.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &product_font_size - &_start_;
     tt->single_val.i = 1;
@@ -6651,41 +6747,17 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("scale_constant");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Product scaling constant.");
+    tt->help = tdrpStrDup("Set this constant to determine at what zoom icons and will have a scale factor of 1.0. Default = 300. Function = log10(Constant /km_across_screen) + 1.0; Set to less than 0 to disable icon scaling");
     tt->val_offset = (char *) &scale_constant - &_start_;
     tt->single_val.d = 300;
     tt++;
     
-    // Parameter 'wind_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wind_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'click_posn_rel_to_origin'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("click_posn_rel_to_origin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &click_posn_rel_to_origin - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 53'
+    // Parameter 'Comment 57'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 53");
+    tt->param_name = tdrpStrDup("Comment 57");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

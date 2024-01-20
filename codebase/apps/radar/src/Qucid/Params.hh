@@ -1264,6 +1264,8 @@ public:
 
   tdrp_bool_t all_winds_on;
 
+  tdrp_bool_t wind_mode;
+
   int barb_shaft_len;
 
   int ideal_x_vectors;
@@ -1312,6 +1314,8 @@ public:
 
   char* latest_client_mark_color;
 
+  tdrp_bool_t click_posn_rel_to_origin;
+
   int num_fonts;
 
   int font_display_mode;
@@ -1350,6 +1354,10 @@ public:
 
   char* help_command;
 
+  char* canvas_help;
+
+  char* frame_message_help;
+
   char* bookmark_command;
 
   int num_bookmarks;
@@ -1366,6 +1374,8 @@ public:
 
   int coord_key;
 
+  int titan_key;
+
   tdrp_bool_t products_on;
 
   int product_line_width;
@@ -1374,10 +1384,6 @@ public:
 
   double scale_constant;
 
-  tdrp_bool_t wind_mode;
-
-  tdrp_bool_t click_posn_rel_to_origin;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1385,7 +1391,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[469];
+  mutable TDRPtable _table[476];
 
   const char *_className;
 
