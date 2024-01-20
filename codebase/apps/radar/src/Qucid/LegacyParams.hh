@@ -109,8 +109,8 @@ private:
       }
       is_valid = rhs.is_valid;
       text_line = strdup(rhs.text_line);
-      button_name = rhs.button_name;
-      legend_name = rhs.legend_name;
+      button_label = rhs.button_label;
+      legend_label = rhs.legend_label;
       url = rhs.url;
       field_name = rhs.field_name;
       color_map = rhs.color_map;
@@ -129,8 +129,8 @@ private:
     }
     bool is_valid;
     char *text_line;
-    string button_name;
-    string legend_name;
+    string button_label;
+    string legend_label;
     string url;
     string field_name;
     string color_map;

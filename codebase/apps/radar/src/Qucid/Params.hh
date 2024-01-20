@@ -203,8 +203,8 @@ public:
   } show_status_t;
 
   typedef struct {
-    char* button_name;
-    char* legend_name;
+    char* button_label;
+    char* legend_label;
     char* url;
     char* field_name;
     char* color_map;
@@ -1002,7 +1002,7 @@ public:
 
   tdrp_bool_t add_frame_time_to_filename;
 
-  tdrp_bool_t add_button_name_to_filename;
+  tdrp_bool_t add_button_label_to_filename;
 
   tdrp_bool_t add_frame_num_to_filename;
 

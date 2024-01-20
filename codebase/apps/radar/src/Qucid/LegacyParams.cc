@@ -1930,15 +1930,15 @@ int LegacyParams::_initDataFields(const char *param_buf,
   total_len = 0;
   start_ptr = param_buf;
 
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-  cerr << "fields_n: " << gParams.fields_n << endl;
-  for (int ii = 0; ii < gParams.fields_n; ii++) {
-    Params::field_t &fld = gParams._fields[ii];
-    cerr << "  button name: " << fld.button_name << endl;
-    cerr << "  legend name: " << fld.legend_name << endl;
-    cerr << "  contour_low: " << fld.contour_low << endl;
-  }
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  // cerr << "fields_n: " << gParams.fields_n << endl;
+  // for (int ii = 0; ii < gParams.fields_n; ii++) {
+  //   Params::field_t &fld = gParams._fields[ii];
+  //   cerr << "  button name: " << fld.button_name << endl;
+  //   cerr << "  legend name: " << fld.legend_name << endl;
+  //   cerr << "  contour_low: " << fld.contour_low << endl;
+  // }
+  // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
 
   // read all the lines in the data information buffer
 
@@ -1970,7 +1970,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
 
       /* Do Environment variable substitution */
       // usubstitute_env(gd.data_info[gd.num_datafields], len+128);
-      usubstitute_env(fld.text_line, len+10000);
+      usubstitute_env(fld.text_line, len + 10000);
       gd.num_datafields++;
 
       flds.push_back(fld);
@@ -1986,16 +1986,17 @@ int LegacyParams::_initDataFields(const char *param_buf,
     total_len += len + 1;   // Count characters processed 
     start_ptr = end_ptr +1; // Skip past the newline
     line_no++;
-  }
 
-  if(flds.size() < 1) {
+  }
+  
+  if (flds.size() < 1) {
     fprintf(stderr,"CIDD requires at least one valid gridded data field to be defined\n");
     return -1;
   }
 
   /* get temp space for substrings */
-  for(int i = 0; i < NUM_PARSE_FIELDS; i++) {
-    cfield[i] = (char *)  calloc(PARSE_FIELD_SIZE, 1);
+  for(int ii = 0; ii < NUM_PARSE_FIELDS; ii++) {
+    cfield[ii] = (char *)  calloc(PARSE_FIELD_SIZE, 1);
   }
 
   /* scan through each of the data information lines */
@@ -2009,14 +2010,14 @@ int LegacyParams::_initDataFields(const char *param_buf,
     /* separate into substrings */
 
     STRparse(fld.text_line, cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
-    fld.legend_name = cfield[0];
-    fld.button_name = cfield[1];
+    fld.legend_label = cfield[0];
+    fld.button_label = cfield[1];
 
     if(gd.html_mode == 0) {
       /* Replace Underscores with spaces in names */
-      for(int jj = (int) fld.button_name.size() - 1 ; jj >= 0; jj--) {
-        if(gd.replace_underscores && fld.button_name[jj] == '_') fld.button_name[jj] = ' ';
-        if(gd.replace_underscores && fld.legend_name[jj] == '_') fld.legend_name[jj] = ' ';
+      for(int jj = (int) fld.button_label.size() - 1 ; jj >= 0; jj--) {
+        if(gd.replace_underscores && fld.button_label[jj] == '_') fld.button_label[jj] = ' ';
+        if(gd.replace_underscores && fld.legend_label[jj] == '_') fld.legend_label[jj] = ' ';
       }
     }
 
@@ -2141,8 +2142,8 @@ int LegacyParams::_initDataFields(const char *param_buf,
 
     cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
 
-    TDRP_str_replace(&field->button_name, record.button_name);
-    TDRP_str_replace(&field->legend_name, record.legend_name);
+    TDRP_str_replace(&field->button_label, record.button_name);
+    TDRP_str_replace(&field->legend_label, record.legend_name);
     TDRP_str_replace(&field->url, record.url);
     TDRP_str_replace(&field->field_name, record.field_label);
     TDRP_str_replace(&field->color_map, record.color_file);
@@ -2160,8 +2161,8 @@ int LegacyParams::_initDataFields(const char *param_buf,
   cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
   for (int ii = 0; ii < gParams.fields_n; ii++) {
     Params::field_t &fld = gParams._fields[ii];
-    cerr << "  button name: " << fld.button_name << endl;
-    cerr << "  legend name: " << fld.legend_name << endl;
+    cerr << "  button name: " << fld.button_label << endl;
+    cerr << "  legend name: " << fld.legend_label << endl;
     cerr << "  contour_low: " << fld.contour_low << endl;
   }
   cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
