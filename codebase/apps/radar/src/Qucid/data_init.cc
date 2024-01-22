@@ -34,7 +34,8 @@
 #define PARSE_FIELD_SIZE    1024
 #define INPUT_LINE_LEN      2048
 
-void init_data_links(const char *param_buf, long param_buf_len, long line_no)
+void init_data_links(const char *param_buf, long param_buf_len, long line_no,
+                     Params &tdrpParams)
 {
     int  i,j;
     int  len,total_len;
@@ -45,6 +46,17 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no)
     gd.num_datafields = 0;
     total_len = 0;
     start_ptr = param_buf;
+
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    cerr << "fields_n: " << tdrpParams.fields_n << endl;
+    for (int ii = 0; ii < tdrpParams.fields_n; ii++) {
+      Params::field_t &fld = tdrpParams._fields[ii];
+      cerr << "  button label: " << fld.button_label << endl;
+      cerr << "  legend label: " << fld.legend_label << endl;
+      cerr << "  contour_low: " << fld.contour_low << endl;
+    }
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    
 
     // read all the lines in the data information buffer
     while((end_ptr = strchr(start_ptr,'\n')) != NULL && (total_len < param_buf_len)) {
@@ -150,11 +162,11 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no)
 
         gd.mrec[i]->currently_displayed = atoi(cfield[9]);
 
-		if(gd.run_once_and_exit) {
-		  gd.mrec[i]->auto_render = 1;
-	    } else {
-		  gd.mrec[i]->auto_render = atoi(cfield[10]);
-		}
+        if(gd.run_once_and_exit) {
+          gd.mrec[i]->auto_render = 1;
+        } else {
+          gd.mrec[i]->auto_render = atoi(cfield[10]);
+        }
 
         gd.mrec[i]->last_elev = (char *)NULL;
         gd.mrec[i]->elev_size = 0;
@@ -191,9 +203,52 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no)
     }
     /* Make sure the first field is always on */
     gd.mrec[0]->currently_displayed = 1;
-
+    
     /* free up temp storage for substrings */
     for(i = 0; i < NUM_PARSE_FIELDS; i++) {
         free(cfield[i]);
     }
+
+    // set the tdrp params for the fields
+
+    cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
+    cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << tdrpParams.fields_n << endl;
+    
+    tdrpParams.arrayRealloc("fields", gd.num_datafields);
+
+    cerr << "cccccccccccccccccccccc fields_n: " << tdrpParams.fields_n << endl;
+    cerr << "dddddddddddddddddddddd fields ptr: " << tdrpParams._fields << endl;
+    for(i = 0; i < gd.num_datafields; i++) {
+
+      met_record_t &record = *(gd.mrec[i]);
+      Params::field_t *field = tdrpParams._fields + i;
+
+      cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
+
+      TDRP_str_replace(&field->button_label, record.button_name);
+      TDRP_str_replace(&field->legend_label, record.legend_name);
+      TDRP_str_replace(&field->url, record.url);
+      TDRP_str_replace(&field->field_name, record.field_label);
+      TDRP_str_replace(&field->color_map, record.color_file);
+      TDRP_str_replace(&field->units, record.field_units);
+      field->contour_low = record.cont_low;
+      field->contour_low = -9999;
+      field->contour_high = record.cont_high;
+      field->contour_interval = record.cont_interv;
+      field->render_mode = (Params::render_mode_t) record.render_method;
+      field->display_in_menu = (tdrp_bool_t) record.currently_displayed;
+      field->background_render = (tdrp_bool_t) record.auto_render;
+
+    }
+
+    cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+    for (int ii = 0; ii < tdrpParams.fields_n; ii++) {
+      Params::field_t &fld = tdrpParams._fields[ii];
+      cerr << "  button label: " << fld.button_label << endl;
+      cerr << "  legend label: " << fld.legend_label << endl;
+      cerr << "  contour_low: " << fld.contour_low << endl;
+    }
+    cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+    
+
 }

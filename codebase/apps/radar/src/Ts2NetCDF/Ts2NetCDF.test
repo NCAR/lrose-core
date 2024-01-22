@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Ts2NetCDF
+ * TDRP params for Ts2NetCDF
  **********************************************************************/
 
 //======================================================================
@@ -64,10 +64,17 @@ instance = "test";
 //
 // Input mode - files or time series API.
 //
-// If TS_FMQ_INPUT, the application will read the time series from a 
-//   file message queue and process the pulses as they come in. If 
-//   TS_FILE_INPUT, the application will process all the files specified 
+// TS_FILE_INPUT: the application will process all the files specified 
 //   on the command line.
+//
+// TS_ARCHIVE_INPUT: reads data files from input_dir, between start_time 
+//   and end_time.
+//
+// TS_FMQ_INPUT: realtime, the application will read the time series 
+//   from a file message queue and process the pulses as they come in.
+//
+// TS_TCP_INPUT: realtime, the application will read the time series 
+//   from a TCP socket as they come in.
 //
 //
 // Type: enum
@@ -75,9 +82,23 @@ instance = "test";
 //     TS_FILE_INPUT
 //     TS_FMQ_INPUT
 //     TS_TCP_INPUT
+//     TS_ARCHIVE_INPUT
 //
 
 input_mode = TS_FILE_INPUT;
+
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+//
+// This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE 
+//   modes, the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/sleet3/rsfdata/projects/spicule/hcr/time_series/wband/save";
 
 ///////////// input_fmq_name //////////////////////////
 //
@@ -228,7 +249,7 @@ output_dir = "/tmp/nc";
 // Type: boolean
 //
 
-preserve_file_name = TRUE;
+preserve_file_name = FALSE;
 
 ///////////// save_one_file_per_input_file ////////////
 //
@@ -243,6 +264,20 @@ preserve_file_name = TRUE;
 //
 
 save_one_file_per_input_file = TRUE;
+
+///////////// save_file_when_processing_details_change 
+//
+// If true, save to output file when processing details change.
+//
+// Only applies to TS_FILE_INPUT mode, in which the input files are 
+//   specified on the command line. Write an output file if the scan or 
+//   processing details change.
+//
+//
+// Type: boolean
+//
+
+save_file_when_processing_details_change = FALSE;
 
 ///////////// save_scans_in_sectors ///////////////////
 //
@@ -281,7 +316,7 @@ max_sector_size = 360;
 // Type: int
 //
 
-max_pulses_per_file = 50000;
+max_pulses_per_file = 250000;
 
 ///////////// specify_n_gates_save ////////////////////
 //
@@ -309,6 +344,24 @@ specify_n_gates_save = FALSE;
 
 n_gates_save = 1000;
 
+///////////// pad_n_gates_to_max //////////////////////
+//
+// Option to pad all rays out to the maximum number of gates in the 
+//   file.
+//
+// If true, we read through the file to determine the maximum number of 
+//   gates in the file. Then, if the number of gates varies from ray to 
+//   ray, the shorter rays are padded out to the maximum number of gates 
+//   found. Also, the number of gates per ray is stored out as a netCDF 
+//   variable nGatesRay. This option is not compatible with 
+//   'specify_n_gates_save'.
+//
+//
+// Type: boolean
+//
+
+pad_n_gates_to_max = FALSE;
+
 ///////////// one_file_only ///////////////////////////
 //
 // If true, write one file only and then quit.
@@ -318,4 +371,15 @@ n_gates_save = 1000;
 //
 
 one_file_only = FALSE;
+
+///////////// save_georeference_variables /////////////
+//
+// If true, georeference variables for moving platforms, if available, 
+//   will be added to the output files.
+//
+//
+// Type: boolean
+//
+
+save_georeference_variables = TRUE;
 

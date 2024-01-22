@@ -318,11 +318,15 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 {
 
 
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
   if (e->button() == Qt::RightButton) {
-
+    
     //-------
-
-    QPointF pos(e->pos());
 
     _mousePressX = pos.x();
     _mousePressY = pos.y();
@@ -335,10 +339,8 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
   } else {
 
 
-    _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+    _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
-
-    QPointF pos(e->pos());
 
     _mousePressX = pos.x();
     _mousePressY = pos.y();
@@ -355,27 +357,14 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 
 void CartWidget::mouseMoveEvent(QMouseEvent * e)
 {
-  // int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
-  // int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
-
-  // if (_manager._boundaryEditorDialog->isVisible()) {
-
-  //   BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
-    
-  //   if (tool == BoundaryToolType::polygon && 
-  //       BoundaryPointEditor::Instance()->isAClosedPolygon() && 
-  //       BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY)) {
-  //     BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
-  //   } else if (tool == BoundaryToolType::brush) {
-  //     BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
-  //   }
-  //   update();
-  //   return;
-  // }
 
   // Zooming with the mouse
 
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
   QPointF pos(e->pos());
+#endif
 
   int x = pos.x();
   int y = pos.y();
@@ -413,11 +402,15 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 void CartWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
   _pointClicked = false;
 
   if (e->button() == Qt::RightButton) {
-
-    QPointF pos(e->pos());
 
     _mousePressX = pos.x();
     _mousePressY = pos.y();
@@ -431,8 +424,6 @@ void CartWidget::mouseReleaseEvent(QMouseEvent *e)
     // If the mouse hasn't moved much, assume we are clicking rather than
     // zooming
 
-    QPointF pos(e->pos());
-  
     _mouseReleaseX = pos.x();
     _mouseReleaseY = pos.y();
 

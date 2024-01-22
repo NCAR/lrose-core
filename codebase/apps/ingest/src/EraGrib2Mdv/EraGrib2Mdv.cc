@@ -22,10 +22,10 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////////////////
-//  EraNc2Mdv top-level application class
+//  EraGrib2Mdv top-level application class
 //
 // Handles params, arguments and instantiation.
-// ReadNcFiles does the actual conversion.
+// ReadGribFiles does the actual conversion.
 //
 // Jason Craig
 //////////////////////////////////////////////////////////////////////////
@@ -36,19 +36,19 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 
-#include "EraNc2Mdv.hh"
-#include "ReadNcFiles.hh"
+#include "EraGrib2Mdv.hh"
+#include "ReadGribFiles.hh"
 using namespace std;
 
 // Global instance variable
-EraNc2Mdv *EraNc2Mdv::_instance = (EraNc2Mdv *)NULL;
+EraGrib2Mdv *EraGrib2Mdv::_instance = (EraGrib2Mdv *)NULL;
 
 //
 // Constructor
-EraNc2Mdv::EraNc2Mdv(int argc, char **argv) {
+EraGrib2Mdv::EraGrib2Mdv(int argc, char **argv) {
 
   // Make sure the singleton wasn't already created.
-  assert(_instance == (EraNc2Mdv *)NULL);
+  assert(_instance == (EraGrib2Mdv *)NULL);
 
   // Set the singleton instance pointer
   _instance = this;
@@ -96,7 +96,7 @@ EraNc2Mdv::EraNc2Mdv(int argc, char **argv) {
     return;
   }
 
-  _grib2Mdv = new ReadNcFiles(*_params);
+  _grib2Mdv = new ReadGribFiles(*_params);
  
   // initialize process registration
   PMU_auto_init(_progName, _params->instance,
@@ -106,7 +106,7 @@ EraNc2Mdv::EraNc2Mdv(int argc, char **argv) {
 
 //
 // Destructor
-EraNc2Mdv::~EraNc2Mdv() 
+EraGrib2Mdv::~EraGrib2Mdv() 
 {
    //
    // Unregister with process mapper
@@ -121,31 +121,31 @@ EraNc2Mdv::~EraNc2Mdv()
   // Free included strings
   STRfree(_progName);
 
-  if (_grib2Mdv != (ReadNcFiles *)NULL)
+  if (_grib2Mdv != (ReadGribFiles *)NULL)
     delete _grib2Mdv;
 }
 
 //
 // Inst() - Retrieve the singleton instance of this class.
-EraNc2Mdv *EraNc2Mdv::Inst(int argc, char **argv)
+EraGrib2Mdv *EraGrib2Mdv::Inst(int argc, char **argv)
 {
-  if (_instance == (EraNc2Mdv *)NULL)
-    new EraNc2Mdv(argc, argv);
+  if (_instance == (EraGrib2Mdv *)NULL)
+    new EraGrib2Mdv(argc, argv);
 
   return(_instance);
 }
 
-EraNc2Mdv *EraNc2Mdv::Inst()
+EraGrib2Mdv *EraGrib2Mdv::Inst()
 {
-  assert(_instance != (EraNc2Mdv *)NULL);
+  assert(_instance != (EraGrib2Mdv *)NULL);
   return(_instance);
 }
 
-int EraNc2Mdv::run()
+int EraGrib2Mdv::run()
 {
 
   //
-  // Initialize and run the ReadNcFiles object
+  // Initialize and run the ReadGribFiles object
   //
   if( _args->_nFiles > 0 ) {
     if( _grib2Mdv->init (_args->_nFiles, _args->_fileList, _args->_printVarList, 

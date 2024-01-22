@@ -782,6 +782,10 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.overrideAltitude(_params.radar_altitude_meters / 1000.0);
   }
 
+  if (_params.override_height_agl) {
+    vol.overrideSensorHtAglM(_params.radar_height_agl_meters);
+  }
+
   // override radar name and site name if requested
   
   if (_params.override_instrument_name) {
@@ -1435,6 +1439,14 @@ void RadxConvert::_setGlobalAttr(RadxVol &vol)
 {
 
   vol.setDriver("RadxConvert(NCAR)");
+
+  if (strlen(_params.convention_override) > 0) {
+    vol.setConvention(_params.convention_override);
+  }
+
+  if (strlen(_params.subconvention_override) > 0) {
+    vol.setSubConventions(_params.subconvention_override);
+  }
 
   if (strlen(_params.version_override) > 0) {
     vol.setVersion(_params.version_override);

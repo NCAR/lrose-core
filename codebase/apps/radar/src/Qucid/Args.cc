@@ -43,7 +43,7 @@ Args::Args (const string &prog_name)
 
 {
   _progName = prog_name;
-
+  _usingLegacyParams = false;
 }
 
 
@@ -68,6 +68,7 @@ int Args::parse (const int argc, const char **argv)
 
   int iret = 0;
   TDRP_init_override(&override);
+  gd.app_instance = "test";
 
   // process the legacy args
   
@@ -155,10 +156,12 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "instance = \"%s\";", argv[++i]);
+        const char *instance = argv[++i];
+        sprintf(tmp_str, "instance = \"%s\";", instance);
         TDRP_add_override(&override, tmp_str);
         sprintf(tmp_str, "register_with_procmap = TRUE;");
         TDRP_add_override(&override, tmp_str);
+        gd.app_instance = strdup(instance);
       } else {
 	iret = -1;
       }
@@ -314,6 +317,84 @@ int Args::parse (const int argc, const char **argv)
     
 }
 
+//////////////////////////////////////////////////////
+// get the legacy params file from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getLegacyParamsPath(const int argc, const char **argv,
+                              string &legacyPath)
+{
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-p")) {
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        legacyPath = optarg;
+        return 0;
+      }
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+//////////////////////////////////////////////////////
+// get the tdrp params path from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getTdrpParamsPath(const int argc, const char **argv,
+                            string &tdrpPath)
+{
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-params")) {
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        tdrpPath = optarg;
+        return 0;
+      }
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+
+//////////////////////////////////////////////////////
+// get the print mode from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getTdrpPrintMode(const int argc, const char **argv,
+                           tdrp_print_mode_t &printMode)
+{
+  printMode = NO_PRINT;
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-print_params")) {
+      if (ii < argc - 1) {
+        const char *mode = argv[++ii];
+	if (!strcmp(mode, "short")) {
+	  printMode = PRINT_SHORT;
+	} else if (!strcmp(mode, "norm")) {
+	  printMode = PRINT_NORM;
+	} else if (!strcmp(mode, "long")) {
+	  printMode = PRINT_LONG;
+	} else if (!strcmp(mode, "verbose")) {
+	  printMode = PRINT_VERBOSE;
+	} else {
+	  printMode = PRINT_NORM;
+        }
+      } else {
+        printMode = NO_PRINT;
+      }
+      return 0;
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+
+//////////////////////////////////////////////////////
+// usage
+
 void Args::_usage(ostream &out)
 
 {
@@ -396,7 +477,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
   } else {
     gd.app_name = ++app_ptr;
   }
-  gd.app_instance = "test";
 
   // Look for the quiet mode flag first.
   for(int ii=1; ii < argc; ii++) {
@@ -412,10 +492,12 @@ int Args::_processLegacyArgs(int argc, const char **argv)
   for (int ii =  1; ii < argc; ii++) {
     
     if (!strcmp(argv[ii], "-p")) {
-      
+
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
         gd.db_name = strdup(optarg);
+        _usingLegacyParams = true;
+        _legacyParamsPath = gd.db_name; 
       } else {
 	iret = -1;
       }
@@ -443,7 +525,9 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
         gd.http_proxy_url = strdup(optarg);
-        if(!gd.quiet_mode) printf("Loading Parameters via Proxy: %s\n",gd.http_proxy_url);
+        if(!gd.quiet_mode) {
+          printf("Loading Parameters via Proxy: %s\n",gd.http_proxy_url);
+        }
       } else {
 	iret = -1;
       }
@@ -463,16 +547,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
         }
         if(!gd.quiet_mode) printf("CIDD Found %d heights starting at: %g\n",
                                   gd.num_render_heights,gd.h_win.cur_ht);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[ii], "-instance")) {
-      
-      if (ii < argc - 1) {
-        const char *optarg = argv[++ii];
-        gd.app_instance = strdup(optarg);
-        if(!gd.quiet_mode) printf("CIDD Instance: %s\n",optarg);
       } else {
 	iret = -1;
       }

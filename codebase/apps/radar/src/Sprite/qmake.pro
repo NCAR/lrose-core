@@ -1,5 +1,5 @@
 # packages needed
-#  libqt5
+#  libqt6
 
 TEMPLATE = app
 TARGET = Sprite

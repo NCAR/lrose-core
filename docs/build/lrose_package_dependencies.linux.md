@@ -75,7 +75,7 @@ This requires upgrading the compiler toolchain.
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
@@ -85,10 +85,10 @@ This requires upgrading the compiler toolchain.
   # create link for qtmake
 
   cd /usr/bin;
-  ln -s qmake-qt5 qmake;
+  ln -s qmake-qt6 qmake;
 ```
 
-## Manually install packages for CENTOS 8 and RHEL 8
+## Manually install packages for RHEL 8, ALMA LINUX 8, ROCKY 8
 
 ```
   dnf install -y epel-release ; \
@@ -107,7 +107,7 @@ This requires upgrading the compiler toolchain.
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel \
-    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
+    qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtcharts-devel \
     hdf5-devel netcdf-devel \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
     xorg-x11-xauth xorg-x11-apps \
@@ -118,40 +118,33 @@ This requires upgrading the compiler toolchain.
   # create link for qtmake
 
   cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
+  ln -s qmake-qt6 qmake;
 ```
 
-## Manually install packages for CENTOS STREAM (latest)
+## Manually install packages for RHEL 9, ALMA LINUX 9, ROCKY 9
 
 ```
-  dnf install -y epel-release ; \
-  dnf install -y 'dnf-command(config-manager)' ; \
-  dnf config-manager --set-enabled powertools ; \
-  dnf install -y python2 python3 ; \
-  dnf install -y python2-devel platform-python-devel ; \
-  dnf install -y --allowerasing \
-    tcsh wget git tk-devel perl-Env \
-    emacs rsync mlocate \
+  dnf install -y epel-release; \
+  dnf install -y 'dnf-command(config-manager)'; \
+  dnf install -y \
+    tcsh wget git \
+    emacs rsync python mlocate \
+    python-devel platform-python-devel \
     m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
-    libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
-    eigen3-devel armadillo-devel \
+    gcc gcc-c++ gcc-gfortran glibc-devel ; \
+  dnf install -y --allowerasing \
+    libX11-devel libXext-devel libcurl-devel \
+    libpng-devel libtiff-devel zlib-devel libzip \
     expat-devel libcurl-devel openmpi-devel \
-    flex-devel fftw3-devel \
-    bzip2-devel \
-    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
+    flex fftw3-devel; \
+  dnf install -y --allowerasing \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
-    gnuplot ImageMagick-devel ImageMagick-c++-devel \
-    xorg-x11-xauth xorg-x11-apps \
+    xorg-x11-xauth \
     rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
-  alternatives --set python /usr/bin/python3
-
-  # create link for qtmake
-
+    rpm-devel rpmdevtools ; \
   cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
+  ln -s qmake-qt6 qmake;
 ```
 
 Also, if you are doing development, download tkdiff from:
@@ -181,7 +174,7 @@ and install in
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
@@ -190,7 +183,7 @@ and install in
   # create link for qtmake
 
   cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
+  ln -s qmake-qt6 qmake;
 ```
 
 ## Manually install packages on Debian and Ubuntu
@@ -212,9 +205,9 @@ and install in
   # create link for qmake
 
   cd /usr/bin; \
-  /bin/rm -f qmake qmake-qt5; \
-  ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
-  ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+  /bin/rm -f qmake qmake-qt6; \
+  ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake; \
+  ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake-qt6
 ```
 
 ## Manually install packages on SUSE-based
@@ -234,7 +227,7 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
     libexpat-devel libcurl-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
-    libqt5-qtbase-devel libqt5-qtdeclarative-devel qt5-qtcharts-devel \
+    libqt6-qtbase-devel libqt6-qtdeclarative-devel qt6-qtcharts-devel \
     eigen3-devel \
     hdf5-devel netcdf-devel \
     armadillo-devel openmpi-devel \
@@ -244,37 +237,7 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
   # create link for qtmake
 
   cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
-```
-
-## Manually install packages for ORACLE LINUX
-
-```
-  dnf install -y oracle-epel-release-el8; \
-  dnf install -y 'dnf-command(config-manager)' ; \
-  dnf install -y python3 ; \
-  dnf install -y python2-devel platform-python-devel ; \
-  dnf install -y \
-    tcsh wget git tk-devel perl-Env \
-    emacs rsync python2 python3 mlocate \
-    m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
-    libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
-    expat-devel libcurl-devel openmpi-devel \
-    flex fftw3-devel \
-    bzip2-devel \
-    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
-    gnuplot ImageMagick-devel ImageMagick-c++-devel \
-    xorg-x11-xauth \
-    rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools; \
-  alternatives --set python /usr/bin/python3
-
-  # create link for qtmake
-
-  cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
+  ln -s qmake-qt6 qmake;
 ```
 
 ## CIDD build - 32-bit packages required

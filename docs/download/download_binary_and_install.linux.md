@@ -18,10 +18,10 @@ Recommended distributions are:
   * Centos (based on RedHat)
   * Fedora (based on RedHat)
 
-For the Qt apps (e.g. HawkEye) to run, make sure Qt5 is installed:
+For the Qt apps (e.g. HawkEye) to run, make sure Qt6 is installed:
 
 ```
-  yum install -y qt5-qtbase-devel qt5-qtdeclarative-devel
+  yum install -y qt6-qtbase-devel qt6-qtdeclarative-devel
 ```
 
 <a name="download"/>

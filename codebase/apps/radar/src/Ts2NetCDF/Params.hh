@@ -77,7 +77,8 @@ public:
   typedef enum {
     TS_FILE_INPUT = 0,
     TS_FMQ_INPUT = 1,
-    TS_TCP_INPUT = 2
+    TS_TCP_INPUT = 2,
+    TS_ARCHIVE_INPUT = 3
   } input_mode_t;
 
   ///////////////////////////
@@ -382,6 +383,8 @@ public:
 
   input_mode_t input_mode;
 
+  char* input_dir;
+
   char* input_fmq_name;
 
   tdrp_bool_t seek_to_end_of_input;
@@ -422,6 +425,8 @@ public:
 
   tdrp_bool_t one_file_only;
 
+  tdrp_bool_t save_georeference_variables;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -429,7 +434,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

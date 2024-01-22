@@ -249,7 +249,15 @@ public:
                    bool use_ldata_info = TRUE,
                    IwrfDebug_t debug = IWRF_DEBUG_OFF);
   
-  // ARCHIVE mode - specify list of files to be read
+  // ARCHIVE mode, read files from input_dir
+  // between start time and end time.
+  
+  IwrfTsReaderFile(time_t start_time,
+                   time_t end_time,
+                   const char *input_dir,
+                   IwrfDebug_t debug = IWRF_DEBUG_OFF);
+  
+  // FILELIST mode - specify list of files to be read
   
   IwrfTsReaderFile(const vector<string> &fileList,
                    IwrfDebug_t debug = IWRF_DEBUG_OFF);

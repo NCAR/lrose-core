@@ -2,25 +2,24 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: EraNc2Mdv
+# app name: Era5Nc2Mdv
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/ingest/src/EraNc2Mdv
+# dir: lrose-core/codebase/apps/ingest/src/Era5Nc2Mdv
 ###############################################################
 
-project (EraNc2Mdv)
+project (Era5Nc2Mdv)
 
 # source files
 
 set (SRCS
       Params.cc
       Args.cc
-      ReadNcFiles.cc
+      Era5File.cc
+      Era5Nc2Mdv.cc
       HtInterp.cc
-      OutputFile.cc
-      EraNc2Mdv.cc
-      main.cc
+      Main.cc
     )
 
 # include directories
@@ -134,7 +133,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (EraNc2Mdv ${SRCS})
+add_executable (Era5Nc2Mdv ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

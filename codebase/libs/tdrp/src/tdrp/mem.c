@@ -617,11 +617,11 @@ static void realloc_1D_array(TDRPtable *tt, void *params,
   /*
    * realloc the array in the user struct
    */
-  
+
   array_p = (void **) ((char *) params + tt->array_offset);
   *array_p = (void *) tdrpRealloc(*array_p,
 				  new_array_n * tt->array_elem_size);
-  *((void **) ((char *) params + tt->val_offset))= *array_p;
+  *((void **) ((char *) params + tt->array_offset))= *array_p;
   
   /*
    * realloc space in table
@@ -648,7 +648,7 @@ static void realloc_1D_array(TDRPtable *tt, void *params,
     
   } /* if (new_array_n > tt->array_n) */
 
-#ifdef NOTNAYMORE
+#ifdef NOTANYMORE
   
   /*
    * if array increased in size, copy last entry to all locations
@@ -751,7 +751,7 @@ static void realloc_struct_array(TDRPtable *tt, void *params,
   array_p = (void **) ((char *) params + tt->array_offset);
   *array_p = (void *) tdrpRealloc(*array_p,
 				  new_array_n * tt->array_elem_size);
-  *((void **) ((char *) params + tt->val_offset))= *array_p;
+  *((void **) ((char *) params + tt->array_offset))= *array_p;
 
   /*
    * realloc in table

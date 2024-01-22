@@ -133,6 +133,17 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-input_dir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "input_dir = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_mode = TS_ARCHIVE_INPUT;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } else if (!strcmp(argv[i], "-fmq")) {
       
       if (i < argc - 1) {
@@ -215,6 +226,36 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        char *timeArg = argv[++i];
+	startTime.set(timeArg);
+	if (!startTime.isValid()) {
+	  iret = -1;
+	} else {
+	  sprintf(tmp_str, "input_mode = TS_ARCHIVE_INPUT;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        char *timeArg = argv[++i];
+	endTime.set(timeArg);
+	if (!endTime.isValid())	{
+	  iret = -1;
+	} else {
+	  sprintf(tmp_str, "input_mode = TS_ARCHIVE_INPUT;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+    
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
@@ -258,11 +299,14 @@ void Args::_usage(string &prog_name, ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] sets end time\n"
+      << "          sets input_mode to TS_ARCHIVE_INPUT\n"
       << "       [ -f files ] specify input tsarchive file list.\n"
       << "         Sets input_mode to TS_FILE_INPUT.\n"
       << "       [ -fmq ? ] name of input fmq.\n"
       << "         Sets input_mode to TS_FMQ_INPUT.\n"
       << "       [ -from_start ] read from start of FMQ\n"
+      << "       [ -input_dir ?] sets input_dir for TS_ARCHIVE_INPUT mode\n"
       << "       [ -instance ?] instance for registering with procmap\n"
       << "       [ -max_pulses ? ] limit number of pulses per file)\n"
       << "       [ -n_gates_save ? ] only save out rays\n"
@@ -271,13 +315,15 @@ void Args::_usage(string &prog_name, ostream &out)
       << "       [ -outdir ? ] specify output directory.\n"
       << "       [ -pad_ngates_to_max] option to pad the number of gates out\n"
       << "         to the max number of gates in the file.\n"
-     << "         Not compatible with n_gates_save\n"
+      << "         Not compatible with n_gates_save\n"
       << "       [ -preserve_fname ] use the same file name on output\n"
       << "         A '.nc' extension will be appended to the file name\n"
       << "       [ -rvp8_legacy ] RVP8 data is in legacy packing\n"
       << "       [ -second ] save data from second geom found.\n"
       << "         By default, first geom is saved.\n"
       << "       [ -sectors ? ] save files in sectors of given width (deg)\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] sets start time\n"
+      << "          sets input_mode to TS_ARCHIVE_INPUT\n"
       << "       [ -tcp_host ? ] specify host for tcp server\n"
       << "         Sets input_mode to TS_TCP_INPUT.\n"
       << "       [ -tcp_port ? ] specify port for tcp server\n"

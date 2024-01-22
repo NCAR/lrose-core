@@ -190,6 +190,12 @@ paramdef boolean {
   p_descr = "Test boolean flags.";
 } flags[6];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Modify selected parameters and print.";
+  p_help = "Modify selected parameters in memory, and then print params. These can then be compared with the standard set.";
+} modify_and_print;
+
 //////////////////////////////////////////////////////////
 
 commentdef {

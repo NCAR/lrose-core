@@ -462,7 +462,7 @@ void DsMdvxMsg::_copyReadRemap32to64(const read_remap_32_t &remap32,
   remap64.dy = remap32.dy;
   remap64.origin_lat = remap32.origin_lat;
   remap64.origin_lon = remap32.origin_lon;
-  for (int ii = 0; ii < MDV_MAX_PROJ_PARAMS; ii++) {
+  for (int ii = 0; ii < MDV32_MAX_PROJ_PARAMS; ii++) {
     remap64.proj_params[ii] = remap32.proj_params[ii];
   }
 
@@ -484,7 +484,7 @@ void DsMdvxMsg::_copyReadRemap64to32(const read_remap_64_t &remap64,
   remap32.dy = remap64.dy;
   remap32.origin_lat = remap64.origin_lat;
   remap32.origin_lon = remap64.origin_lon;
-  for (int ii = 0; ii < MDV_MAX_PROJ_PARAMS; ii++) {
+  for (int ii = 0; ii < MDV32_MAX_PROJ_PARAMS; ii++) {
     remap32.proj_params[ii] = remap64.proj_params[ii];
   }
 

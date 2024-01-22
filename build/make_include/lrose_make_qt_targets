@@ -28,8 +28,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_cf_recursive_targets
 # QT meta object compiler
 #
 
-QT_EXEC_PATH=$(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --variable=exec_prefix Qt6Core)
-QT_INCLUDES = $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Qml)
+QT_EXEC_PATH=$(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --variable=exec_prefix Qt5Core)
+QT_INCLUDES = $(shell PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Qml)
 QT_INCLUDE = $(subst -I,,$(QT_INCLUDES))
 moc: $(MOC_SRCS)
 	$(QT_EXEC_PATH)/bin/qmake -o Makefile.qmake "INCLUDEPATH=$(QT_INCLUDE)"

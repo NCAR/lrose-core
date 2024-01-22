@@ -30,6 +30,7 @@
 
 #include "cidd_windows.h"
 #include "cidd_overlays.h"
+#include "Params.hh"
 
 #ifndef CIDD_COORDS
 extern void get_bounding_box(double &min_lat, double &max_lat,
@@ -87,7 +88,7 @@ extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, 
 #endif
 
 #ifndef CIDD_INIT
-extern void init_data_space();
+extern void init_data_space(Params &tdrpParams);
 #endif
 
 #ifndef CIDD_MAIN
@@ -139,7 +140,8 @@ extern void cancel_pending_request();
 #endif
 
 #ifndef DATA_INIT
-extern void init_data_links(const char *param_buf, long param_buf_len, long line_no);
+extern void init_data_links(const char *param_buf, long param_buf_len, long line_no,
+                            Params &tdrpParams);
 #endif
 
 #ifndef DATA_IO
@@ -426,6 +428,9 @@ extern void init_over_data_links(const char *param_buf, long param_buf_len, long
 extern int load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
                            Overlay_t **over, int  max_overlays);
 int load_overlay_data(Overlay_t **over, int  num_overlays);
+extern void load_rap_map(Overlay_t *ov, const char *map_file_subdir);
+extern void load_shape_map(Overlay_t *ov, const char    *map_file_subdir);
+
 #endif
 
 #ifndef PROCESS_ARGS

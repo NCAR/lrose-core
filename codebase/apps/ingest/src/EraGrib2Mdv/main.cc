@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////////////
-// EraNc2Mdv top-level application class
+////////////////////////////////////////////////////////////////////
+// Main entry point for EraGrib2Mdv application
 //
 // Converts Grib2 files into MDV format
 // Tested GRIB2 Models:
@@ -33,97 +33,52 @@
 //
 // -Jason Craig-  Jun 2006
 ////////////////////////////////////////////////////////////////////
-#ifndef _GRIB2_TO_MDV_HH
-#define _GRIB2_TO_MDV_HH
 
-#include <string>
-#include <tdrp/tdrp.h>
-#include <toolsa/str.h>
-#include <toolsa/Path.hh>
+#include <cstdlib>
+#include <signal.h>
+#include <toolsa/port.h>
 
-#include "Params.hh"
+#include "EraGrib2Mdv.hh"
 #include "Args.hh"
 using namespace std;
 
-//
-// Defines for success and failure returns
-//
-#define RI_FAILURE -1
-#define RI_SUCCESS 0
+static void dieGracefully( int signal );
 
-//
-// Forward class declarations
-//
-class ReadNcFiles;
-
-class EraNc2Mdv {
- public:
-
-  // instance -- create the Singleton
-  static EraNc2Mdv *Inst(int argc, char **argv);
-  static EraNc2Mdv *Inst();
-
-   ~EraNc2Mdv();
-   
-   //
-   // Initialization
-   //
-   int init( int argc, char**argv );
+// Global program object
+EraGrib2Mdv *Prog = (EraGrib2Mdv *)NULL;
 
 
-   // Flag indicating whether the program status is currently okay.
+//*********************************************************************
+int main( int argc, char **argv )
+{
 
-   bool okay;
+   // Create program object by requesting a instance
+   Prog = EraGrib2Mdv::Inst(argc, argv);
+   if (!Prog->okay)
+     return(-1);
 
    //
-   // Execution
+   // Trap signals for a clean exit
    //
-   int run();
-   
- private:
+   PORTsignal( SIGINT,  dieGracefully );
+   PORTsignal( SIGTERM, dieGracefully );
+   PORTsignal( SIGQUIT, dieGracefully );
+   PORTsignal( SIGKILL, dieGracefully );
 
-   // 
-   // Initialization
-   //
-   Path _program;
-   
-   // Constructor -- private because this is a singleton object
-   EraNc2Mdv(int argc, char **argv);
+   Prog->run();
 
-   void _usage();
-   int _processArgs( int argc, char **argv,
-		     tdrp_override_t& override ,
-		     int* nFiles, char*** fileList );
-   
-   //
-   // Singleton instance pointer
-   //
-   static EraNc2Mdv *_instance;  // singleton instance
+   delete Prog;
 
-   //
-   // Parameter processing
-   //
-   char   *_paramsPath;
-   int _processParams( int nFiles, char** fileList );
-
-   //
-   // Processing
-   //
-   string _inputFileSuffix;
-   ReadNcFiles *_grib2Mdv;
-
-   // Program parameters.
-
-   char *_progName;
-   Args *_args;
-   Params *_params;
-
-   int _nfiles;
-   char *_flist;
-
-};
-
-#endif
+   return (0);
+}
 
 
+void dieGracefully( int signal )
+{
+  // Delete the program object.
 
+  //if (Prog != (EraGrib2Mdv *)NULL)
+  //delete Prog;
+
+  exit( signal );
+}

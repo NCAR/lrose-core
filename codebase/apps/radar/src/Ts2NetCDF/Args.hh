@@ -37,6 +37,7 @@
 #include <vector>
 #include <iostream>
 #include <tdrp/tdrp.h>
+#include <toolsa/DateTime.hh>
 using namespace std;
 
 class Args {
@@ -59,6 +60,7 @@ public:
 
   tdrp_override_t override;
   vector<string> inputFileList;
+  DateTime startTime, endTime;
 
 protected:
   

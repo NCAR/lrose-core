@@ -69,6 +69,11 @@ Args::Args (int argc, char **argv, char *prog_name)
       sprintf(tmp_str, "debug = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-modify")) {
+      
+      sprintf(tmp_str, "modify_and_print = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } // if
     
   } // i
@@ -96,7 +101,8 @@ void Args::_usage(char *prog_name, ostream &out)
       << "options:\n"
       << "       [ -h ] produce this list.\n"
       << "       [ -debug ] print debug messages\n"
-      <<  "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -modify ] modify selected params and print\n"
+      << "       [ -verbose ] print verbose debug messages\n"
       << endl;
 
   Params::usage(out);

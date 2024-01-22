@@ -1,0 +1,331 @@
+/**********************************************************************
+ * TDRP params for ./Era5Nc2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator, 
+//   and converts to MDV CF-NetCDF format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// NORM - minimal debug level. VERBOSE - verbose messaged. EXTRA - extra 
+//   verbose messages.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// ARCHIVE - set start and end time. FILELIST - specify files on command 
+//   line. Each ERA5 NetCDF file contains a single field and a single 
+//   level, and a number of times. When given a specified file path, we 
+//   search for all files with the same time interval, assemble all of the 
+//   levels and fields, and write out one output file per input time.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time in ARCHIVE mode.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+start_time = "2023 06 01 00 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time in ARCHIVE mode.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+end_time = "2023 07 01 00 00 00";
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data - ARCHIVE mode.
+//
+// We search this dir for all files between the start and end times.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/ERA5/levelFiles";
+
+//======================================================================
+//
+// CONVERT TEMP TO C.
+//
+//======================================================================
+ 
+///////////// convert_temperature_to_celcius //////////
+//
+// The temperature is read in degrees Kelvin. This option allows us to 
+//   convert to degrees C.
+//
+//
+// Type: boolean
+//
+
+convert_temperature_to_celcius = TRUE;
+
+///////////// temperature_field_name //////////////////
+//
+// NetCDF variable name of temperature field in input data.
+//
+// This is the field to be converted to C.
+//
+//
+// Type: string
+//
+
+temperature_field_name = "T";
+
+//======================================================================
+//
+// INTERP TO HEIGHT.
+//
+//======================================================================
+ 
+///////////// interp_to_height_levels /////////////////
+//
+// Option to interpolate from pressure levels to height levels.
+//
+// This requires that the geopotential height field exists in the input 
+//   data. This normally has the field name 'Z'.
+//
+//
+// Type: boolean
+//
+
+interp_to_height_levels = TRUE;
+
+///////////// geopotential_field_name /////////////////
+//
+// NetCDF variable name of geopotential height in input data.
+//
+// We use this field to provide heights for interpolation.
+//
+//
+// Type: string
+//
+
+geopotential_field_name = "Z";
+
+///////////// height_levels ///////////////////////////
+//
+// Array of output height levels for intpolation (km).
+//
+// The various data fields are interpolated onto these height levels.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+height_levels = {
+ 0,
+ 1,
+ 2,
+ 3,
+ 4,
+ 5,
+ 6,
+ 7,
+ 8,
+ 9,
+ 10,
+ 11,
+ 12,
+ 13,
+ 14,
+ 15,
+ 16,
+ 17,
+ 18,
+ 19,
+ 20
+};
+
+///////////// compute_heights_from_pressure_levels ////
+//
+// Option to compute the output heights from the input pressure levels 
+//   in the model.
+//
+// If FALSE, we will interpolate onto the height_levels specified below. 
+//   If TRUE, the height levels will be computed from the standard 
+//   atmosphere.
+//
+//
+// Type: boolean
+//
+
+compute_heights_from_pressure_levels = FALSE;
+
+///////////// min_height_from_pressure_levels /////////
+//
+// Minimum height when computing from pressure levels (km).
+//
+// Any heights below this are removed when converting from pressure 
+//   levels.
+//
+//
+// Type: double
+//
+
+min_height_from_pressure_levels = 0;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+//
+// The assembled ERA5 data is output to this dir in MDV format.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/ERA5/mdv";
+
+//======================================================================
+//
+// SPECIFY OUTPUT FIELD NAMES AND UNITS.
+//
+//======================================================================
+ 
+///////////// rename_output_fields ////////////////////
+//
+// Option to rename the fields, and set the units, before writing.
+//
+//
+// Type: boolean
+//
+
+rename_output_fields = TRUE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+//
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. The standard name is set to the MDV long name. 
+//   If the long name or standard name are empty, the existing names are 
+//   used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string output_long_name;
+//      string output_units;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "D",
+    output_field_name = "div",
+    output_long_name = "divergence_of_wind",
+    output_units = "1/s"
+  }
+  ,
+  {
+    input_field_name = "Q",
+    output_field_name = "spec_hum",
+    output_long_name = "specific_humidity",
+    output_units = "kg/kg"
+  }
+  ,
+  {
+    input_field_name = "R",
+    output_field_name = "RH",
+    output_long_name = "relative_humidity",
+    output_units = "%"
+  }
+  ,
+  {
+    input_field_name = "T",
+    output_field_name = "temp",
+    output_long_name = "air_temperature",
+    output_units = "K"
+  }
+  ,
+  {
+    input_field_name = "U",
+    output_field_name = "U",
+    output_long_name = "wind_east_component",
+    output_units = "m/s"
+  }
+  ,
+  {
+    input_field_name = "V",
+    output_field_name = "V",
+    output_long_name = "wind_north_component",
+    output_units = "m/s"
+  }
+  ,
+  {
+    input_field_name = "W",
+    output_field_name = "W",
+    output_long_name = "vertical_velocity",
+    output_units = "m/s"
+  }
+};
+

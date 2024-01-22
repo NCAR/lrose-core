@@ -557,29 +557,37 @@ int NcfRadxFile::_addGlobalAttributes()
   }
 
   // Add required CF-1.5 global attributes
-  
-  _conventions = CfConvention;
-  _subconventions = BaseConvention;
-  _subconventions += " ";
-  _subconventions += INSTRUMENT_PARAMETERS;
-  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-    _subconventions += " ";
-    _subconventions += RADAR_PARAMETERS;
-    if (_writeVol->getRcalibs().size() > 0) {
-      _subconventions += " ";
-      _subconventions += RADAR_CALIBRATION;
-    }
+
+  if (_writeVol->getConvention().size() > 0) {
+    _conventions = _writeVol->getConvention();
   } else {
-    _subconventions += " ";
-    _subconventions += LIDAR_PARAMETERS;
+    _conventions = CfConvention;
   }
-  if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
+  if (_writeVol->getSubConventions().size() > 0) {
+    _subconventions = _writeVol->getSubConventions();
+  } else {
+    _subconventions = BaseConvention;
     _subconventions += " ";
-    _subconventions += PLATFORM_VELOCITY;
-  }
-  if (_writeVol->getCfactors() != NULL) {
-    _subconventions += " ";
-    _subconventions += GEOMETRY_CORRECTION;
+    _subconventions += INSTRUMENT_PARAMETERS;
+    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+      _subconventions += " ";
+      _subconventions += RADAR_PARAMETERS;
+      if (_writeVol->getRcalibs().size() > 0) {
+        _subconventions += " ";
+        _subconventions += RADAR_CALIBRATION;
+      }
+    } else {
+      _subconventions += " ";
+      _subconventions += LIDAR_PARAMETERS;
+    }
+    if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
+      _subconventions += " ";
+      _subconventions += PLATFORM_VELOCITY;
+    }
+    if (_writeVol->getCfactors() != NULL) {
+      _subconventions += " ";
+      _subconventions += GEOMETRY_CORRECTION;
+    }
   }
 
   if (_file.addGlobAttr(CONVENTIONS, _conventions)) {
@@ -972,9 +980,10 @@ int NcfRadxFile::_addCoordinateVariables()
   }
 
   iret |= _file.addAttr(_rangeVar, LONG_NAME, RANGE_LONG);
-  iret |= _file.addAttr(_rangeVar, LONG_NAME,
-                        "Range from instrument to center of gate");
+  iret |= _file.addAttr(_rangeVar, STANDARD_NAME,
+                        "projection_range_coordinate");
   iret |= _file.addAttr(_rangeVar, UNITS, METERS);
+  iret |= _file.addAttr(_rangeVar, AXIS, "radial_range_coordinate");
   iret |= _file.addAttr(_rangeVar, SPACING_IS_CONSTANT, "true");
   iret |= _file.addAttr(_rangeVar, METERS_TO_CENTER_OF_FIRST_GATE,
                         (float) _writeVol->getStartRangeKm() * 1000.0);
@@ -3685,7 +3694,11 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   } // switch
 
   iret |= _file.addAttr(var, GRID_MAPPING, GRID_MAPPING);
-  iret |= _file.addAttr(var, COORDINATES, "time range");
+  if (_georefsActive) {
+    iret |= _file.addAttr(var, COORDINATES, "elevation azimuth range heading roll pitch rotation tilt");
+  } else {
+    iret |= _file.addAttr(var, COORDINATES, "elevation azimuth range");
+  }
 
   // set compression
   

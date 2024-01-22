@@ -308,9 +308,16 @@ void
 }
 
 void
+  DateTime::setToNever()
+{
+  set(NEVER);
+}
+
+void
   DateTime::set(time_t when)
 {
   _uTime = when; 
+  _subSec = 0;
   setLeadDeltaTime(NULL);
 }
 

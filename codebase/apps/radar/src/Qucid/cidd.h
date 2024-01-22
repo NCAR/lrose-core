@@ -108,6 +108,7 @@
 #include <Fmq/RemoteUIQueue.hh>
 
 // TDRP Parameter Classes
+#include "Params.hh"
 #include "Csyprod_P.hh"
 #include "Cdraw_P.hh"
 #include "Cgui_P.hh"
@@ -621,6 +622,7 @@ struct    Global_data {
  
 #ifdef CIDD_MAIN
 struct    Global_data gd;
+Params gParams;
 // Attr_attribute  INSTANCE;
 // Attr_attribute  MENU_KEY;
 int INSTANCE;
@@ -631,6 +633,7 @@ int MENU_KEY;
 
 #ifndef    CIDD_MAIN
 extern    struct    Global_data    gd;
+extern Params gParams;
 // extern Attr_attribute  INSTANCE;
 // extern Attr_attribute  MENU_KEY;
 extern int INSTANCE;

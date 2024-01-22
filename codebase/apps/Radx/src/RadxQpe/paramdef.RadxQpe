@@ -43,8 +43,26 @@ paramdef double {
 } min_valid_precip_rate;
 
 commentdef {
-  p_header = "INPUT DATA";
+  p_header = "CONSTRAIN BY ELEVATION ANGLE";
 }
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Constrain valid data to be between elevation limits.";
+  p_help = "If TRUE, will only use sweeps with elevation angles between the limits.";
+} constrain_by_elevation_angle;
+
+paramdef double {
+  p_descr = "Minimum elevation angle in input data (deg).";
+  p_help = "Constrain the elevation of data used to be at or above this elevation angle.";
+  p_default = 0.0;
+} min_elevation_deg;
+
+paramdef double {
+  p_descr = "Maximum elevation angle in input data (deg).";
+  p_help = "Constrain the elevation of data used to be at or below this elevation angle.";
+  p_default = 90.0;
+} max_elevation_deg;
 
 commentdef {
   p_header = "OPERATIONS MODE";

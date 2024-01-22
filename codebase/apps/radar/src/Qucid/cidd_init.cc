@@ -35,14 +35,15 @@
 #include "cidd.h"
 #include <algorithm>
 
-#define NUM_PARSE_FIELDS    64
-#define PARSE_FIELD_SIZE    1024
-#define INPUT_LINE_LEN      512
+// #define NUM_PARSE_FIELDS    64
+// #define PARSE_FIELD_SIZE    1024
+// #define INPUT_LINE_LEN      512
+
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
 
-void init_data_space()
+void init_data_space(Params &tdrpParams)
 {
 
   int i,j,pid;
@@ -1086,7 +1087,10 @@ void init_data_space()
     exit(-1);
   }
   // establish and initialize sources of data 
-  init_data_links(param_text, param_text_len, param_text_line_no);
+  init_data_links(param_text, param_text_len, param_text_line_no, tdrpParams);
+  return;
+
+  // copy legacy params to tdrp
 
   // Load the Wind Data Field  parameters
   param_text_line_no = 0;

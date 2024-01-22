@@ -65,6 +65,7 @@ HDRS = \
 	DisplayField.hh \
 	DisplayManager.hh \
 	HorizWidget.hh \
+	LegacyParams.hh \
 	Product.hh \
 	ProductMgr.hh \
 	Qucid.hh \
@@ -110,6 +111,7 @@ NORM_SRCS = \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
 	DisplayField.cc \
+	LegacyParams.cc \
 	Main.cc \
 	Product.cc \
 	ProductMgr.cc \

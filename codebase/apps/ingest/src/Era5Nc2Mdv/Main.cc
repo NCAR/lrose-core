@@ -21,64 +21,75 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////
-// Main entry point for EraNc2Mdv application
+///////////////////////////////////////////////////////////////
 //
-// Converts Grib2 files into MDV format
-// Tested GRIB2 Models:
-//    gfs004    (gfs half degree resolution)  
-//    dgex218   (Downscaled Gfs with Eta Extensions, 10km resolution)
-//    eta218    (Eta/Nam 10km resolution)
-//    NDFD      (National Digital Forecast Database CONUS operational fields)
+// main for Era5Nc2Mdv
 //
-// -Jason Craig-  Jun 2006
-////////////////////////////////////////////////////////////////////
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// October 2023
+//
+///////////////////////////////////////////////////////////////
+//
+// Era5Nc2Mdv ingests ERA5 data and converts to MDV format.
+// The ERA5 files are in NetCDF, created using NCAR/CISL software
+// that sub-sections a part of the global data set.
+//
+////////////////////////////////////////////////////////////////
 
-#include <cstdlib>
-#include <signal.h>
+#include "Era5Nc2Mdv.hh"
 #include <toolsa/port.h>
-
-#include "EraNc2Mdv.hh"
-#include "Args.hh"
+#include <toolsa/str.h>
+#include <signal.h>
 using namespace std;
 
-static void dieGracefully( int signal );
+// file scope
 
-// Global program object
-EraNc2Mdv *Prog = (EraNc2Mdv *)NULL;
+static void tidy_and_exit (int sig);
+static Era5Nc2Mdv *Prog;
 
+// main
 
-//*********************************************************************
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
+  // set signal handling
 
-   // Create program object by requesting a instance
-   Prog = EraNc2Mdv::Inst(argc, argv);
-   if (!Prog->okay)
-     return(-1);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGQUIT, tidy_and_exit);
+  PORTsignal(SIGKILL, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-   //
-   // Trap signals for a clean exit
-   //
-   PORTsignal( SIGINT,  dieGracefully );
-   PORTsignal( SIGTERM, dieGracefully );
-   PORTsignal( SIGQUIT, dieGracefully );
-   PORTsignal( SIGKILL, dieGracefully );
+  // create program object
 
-   Prog->run();
+  Prog = new Era5Nc2Mdv(argc, argv);
+  if (!Prog->isOK) {
+    return -1;
+  }
 
-   delete Prog;
+  // run it
 
-   return (0);
+  int iret = 0;
+
+  if (Prog->Run()) {
+    iret = -1;
+  }
+
+  // clean up
+  
+  tidy_and_exit(iret);
+  return iret;
+}
+
+// tidy up on exit
+
+static void tidy_and_exit (int sig)
+  
+{
+  delete Prog;
+  exit(sig);
 }
 
 
-void dieGracefully( int signal )
-{
-  // Delete the program object.
 
-  //if (Prog != (EraNc2Mdv *)NULL)
-  //delete Prog;
-
-  exit( signal );
-}

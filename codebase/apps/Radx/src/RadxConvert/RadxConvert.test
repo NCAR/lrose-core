@@ -179,6 +179,19 @@ file_quiescence = 5;
 
 search_ext = "";
 
+///////////// search_substr ///////////////////////////
+//
+// File name sub-string.
+//
+// If set, only files with names containing this sub-string will be 
+//   processed.
+//
+//
+// Type: string
+//
+
+search_substr = "";
+
 ///////////// gematronik_realtime_mode ////////////////
 //
 // Set to TRUE if we are watching for Gematronik XML volumes.
@@ -774,18 +787,6 @@ radar_latitude_deg = -999;
 
 radar_longitude_deg = -999;
 
-///////////// radar_altitude_meters ///////////////////
-//
-// Radar altitude (meters).
-//
-// See override_radar_location.
-//
-//
-// Type: double
-//
-
-radar_altitude_meters = -999;
-
 ///////////// change_radar_latitude_sign //////////////
 //
 // Option to negate the latitude.
@@ -799,6 +800,42 @@ radar_altitude_meters = -999;
 //
 
 change_radar_latitude_sign = FALSE;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+///////////// override_height_agl /////////////////////
+//
+// Option to override the radar height above the ground (m).
+//
+// If true, the height_agl will be set to radar_height_agl in meters.
+//
+//
+// Type: boolean
+//
+
+override_height_agl = true;
+
+///////////// radar_height_agl_meters /////////////////
+//
+// Radar height AGL (meters).
+//
+// See override_height_agl.
+//
+//
+// Type: double
+//
+
+radar_height_agl_meters = 11.1;
 
 ///////////// apply_georeference_corrections //////////
 //
@@ -817,7 +854,7 @@ change_radar_latitude_sign = FALSE;
 // Type: boolean
 //
 
-apply_georeference_corrections = TRUE;
+apply_georeference_corrections = FALSE;
 
 ///////////// read_georeference_corrections ///////////
 //
@@ -833,7 +870,7 @@ apply_georeference_corrections = TRUE;
 // Type: boolean
 //
 
-read_georeference_corrections = TRUE;
+read_georeference_corrections = FALSE;
 
 ///////////// georeference_corrections_path ///////////
 //
@@ -866,7 +903,7 @@ read_georeference_corrections = TRUE;
 // Type: string
 //
 
-georeference_corrections_path = "$(HOME)/data/georeference_corrections/cfac.fore";
+georeference_corrections_path = "/data/georeference_corrections/cfac.fore";
 
 //======================================================================
 //
@@ -1155,6 +1192,58 @@ antenna_gain_db_v = 45.1;
 
 //======================================================================
 //
+// OPTION TO SET NYQUIST VELOCITY FOR SPECIFIED FIELDS.
+//
+//======================================================================
+ 
+///////////// set_nyquist_velocity ////////////////////
+//
+// Option to override the nyquist velocity for selected fields.
+//
+// Each ray has a nyquist value that may be set. Plus the folding 
+//   velocity can be set on each of multiple fields. If more than 1 
+//   nyquist is specified - i.e. on different fields - the nyquist from 
+//   the first field will be applied to the ray as a whole. So make sure 
+//   the first field is the primary velocity field.
+//
+//
+// Type: boolean
+//
+
+set_nyquist_velocity = FALSE;
+
+///////////// nyquist_fields //////////////////////////
+//
+// Fields on which nyquist should be set.
+//
+// Set the folding velocity for the specified fields. If more than 1 
+//   field is specified, the first nyquist value in the list will be used 
+//   for the ray as a whole.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      double nyquist_mps;
+//   }
+//
+// 1D array - variable length.
+//
+
+nyquist_fields = {
+  {
+    field_name = "VEL",
+    nyquist_mps = 25
+  }
+  ,
+  {
+    field_name = "VEL_F",
+    nyquist_mps = 25
+  }
+};
+
+//======================================================================
+//
 // OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE 
 //   SWEEP FIXED ANGLE.
 //
@@ -1232,6 +1321,22 @@ optimize_surveillance_transitions = FALSE;
 //
 
 optimized_transitions_max_elev_error = 0.25;
+
+///////////// combine_rhi /////////////////////////////
+//
+// Option to keep the azimuth constant in RHI scans.
+//
+// Default is false. If true, and the azimuth switches by 180 degree 
+//   when the elevation passes 90 degrees, this option combines the ray 
+//   azimuth into one consistent value. The ray elevation will also 
+//   continue to increase from 90 degrees to 180 degrees. Only one RHI 
+//   scan per file is allowed with this option. .
+//
+//
+// Type: boolean
+//
+
+combine_rhi = FALSE;
 
 ///////////// override_sweep_mode /////////////////////
 //
@@ -1375,6 +1480,32 @@ sort_rays_by_time_decreasing = FALSE;
 //
 //======================================================================
  
+///////////// convention_override /////////////////////
+//
+// Option to override the CfRadial convention in the file.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the convention attribute.
+//
+//
+// Type: string
+//
+
+convention_override = "";
+
+///////////// subconvention_override //////////////////
+//
+// Option to override the subconvention in the file.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the subconvention attribute.
+//
+//
+// Type: string
+//
+
+subconvention_override = "";
+
 ///////////// version_override ////////////////////////
 //
 // Option to override the version global attribute.
@@ -1829,6 +1960,69 @@ fields_to_be_censored = {
  "LDR"
 };
 
+///////////// censor_test_pulse_ring //////////////////
+//
+// Censor non-missing data within the test pulse ring.
+//
+// If TRUE, non-missing data within the ring will be censored, provided 
+//   there is no adjacent data in the margins.
+//
+//
+// Type: boolean
+//
+
+censor_test_pulse_ring = FALSE;
+
+///////////// test_pulse_min_range_km /////////////////
+//
+// Minimum range of the test pulse to be censored (km).
+//
+// Only non-missing data within the ring will be censored.
+//
+//
+// Type: double
+//
+
+test_pulse_min_range_km = 238;
+
+///////////// test_pulse_max_range_km /////////////////
+//
+// Minimum range of the test pulse to be censored (km).
+//
+// Only non-missing data within the ring will be censored.
+//
+//
+// Type: double
+//
+
+test_pulse_max_range_km = 239.5;
+
+///////////// test_pulse_margin_km ////////////////////
+//
+// Range margin around test pulse (km).
+//
+// The test pulse is only censored if the margins have only missing data 
+//   values.
+//
+//
+// Type: double
+//
+
+test_pulse_margin_km = 2.5;
+
+///////////// test_pulse_field_name ///////////////////
+//
+// Field used to check for data in or around the test pulse.
+//
+// We use this field to decide if there is non-missing data that needs 
+//   censoring within the test pulse.
+//
+//
+// Type: string
+//
+
+test_pulse_field_name = "DBZ";
+
 //======================================================================
 //
 // OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
@@ -1863,6 +2057,8 @@ apply_linear_transforms = FALSE;
 //      string input_field_name;
 //      double transform_scale;
 //      double transform_offset;
+//      boolean field_folds;
+//      double folding_value;
 //   }
 //
 // 1D array - variable length.
@@ -1872,13 +2068,17 @@ transform_fields = {
   {
     input_field_name = "DBZ",
     transform_scale = 1,
-    transform_offset = 0
+    transform_offset = 0,
+    field_folds = FALSE,
+    folding_value = 0
   }
   ,
   {
     input_field_name = "VEL",
     transform_scale = 1,
-    transform_offset = 0
+    transform_offset = 0,
+    field_folds = TRUE,
+    folding_value = 25
   }
 };
 

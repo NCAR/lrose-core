@@ -25,8 +25,10 @@
 /***********************
  * TDRP private includes
  *
- * Programmers should use information in this file in their
- * programs. The file <tdrp/tdrp.h> describes the official API.
+ * Programmers should NOT use information in this file in their
+ * programs.
+ *
+ * The file <tdrp/tdrp.h> describes the public API.
  *
  */
 

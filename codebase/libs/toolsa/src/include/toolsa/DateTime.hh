@@ -74,6 +74,8 @@ public:
 
   void setToNow(); // sets to subsec precision, using getTimeOfDay()
 
+  void setToNever(); // sets to invalid
+
   void set(time_t when);
  
   void set(time_t when, double subSec);

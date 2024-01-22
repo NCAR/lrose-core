@@ -1,0 +1,240 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Era5Nc2Mdv
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Oct 2023
+ * 
+ * Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator,
+ * and converts to MDV CF-NetCDF format.
+ */
+
+commentdef
+{
+  p_header = "Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator, and converts to MDV CF-NetCDF format.";
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Debugging and process control.
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE,
+  DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "NORM - minimal debug level. VERBOSE - verbose messaged. EXTRA - extra verbose messages.";
+  p_default = DEBUG_OFF;
+} debug;
+
+/////////////////////////////////////////////////////////////////////////
+// Mode of operation
+
+commentdef
+{
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+typedef enum
+{
+  ARCHIVE,
+  FILELIST
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_descr = "Operation mode";
+  p_help = "ARCHIVE - set start and end time. FILELIST - specify files on command line. Each ERA5 NetCDF file contains a single field and a single level, and a number of times. When given a specified file path, we search for all files with the same time interval, assemble all of the levels and fields, and write out one output file per input time.";
+  p_default = ARCHIVE;
+} mode;
+
+paramdef string {
+  p_default = "2023 06 01 00 00 00";
+  p_descr = "Set the start time in ARCHIVE mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2023 07 01 00 00 00";
+  p_descr = "Set the end time in ARCHIVE mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
+
+/////////////////////////////////////////////////////////////////////////
+// Input location
+// Applies to ARCHIVE mode
+
+commentdef
+{
+  p_header = "INPUT DATA.";
+}
+
+paramdef string
+{
+  p_descr = "Directory for input data - ARCHIVE mode.";
+  p_help = "We search this dir for all files between the start and end times.";
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
+} input_dir;
+
+/////////////////////////////////////////////////////////////////////////
+// Convert temperature to C
+
+commentdef
+{
+  p_header = "CONVERT TEMP TO C.";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "The temperature is read in degrees Kelvin. This option allows us to convert to degrees C.";
+} convert_temperature_to_celcius;
+
+paramdef string
+{
+  p_descr = "NetCDF variable name of temperature field in input data.";
+  p_help = "This is the field to be converted to C.";
+  p_default = "T";
+} temperature_field_name;
+
+
+/////////////////////////////////////////////////////////////////////////
+// Interpolate to height levels
+
+commentdef
+{
+  p_header = "INTERP TO HEIGHT.";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to interpolate from pressure levels to height levels.";
+  p_help = "This requires that the geopotential height field exists in the input data. This normally has the field name 'Z'.";
+} interp_to_height_levels;
+
+paramdef string
+{
+  p_descr = "NetCDF variable name of geopotential height in input data.";
+  p_help = "We use this field to provide heights for interpolation.";
+  p_default = "Z";
+} geopotential_field_name;
+
+paramdef double
+{
+  p_default = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+  p_descr = "Array of output height levels for intpolation (km).";
+  p_help = "The various data fields are interpolated onto these height levels.";
+} height_levels[];
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to compute the output heights from the input pressure levels in the model.";
+  p_help = "If FALSE, we will interpolate onto the height_levels specified below. If TRUE, the height levels will be computed from the standard atmosphere.";
+} compute_heights_from_pressure_levels;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum height when computing from pressure levels (km).";
+  p_help = "Any heights below this are removed when converting from pressure levels.";
+} min_height_from_pressure_levels;
+
+/////////////////////////////////////////////////////////////////////////
+// Output data
+
+commentdef
+{
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string
+{
+  p_descr = "Output directory.";
+  p_help = "The assembled ERA5 data is output to this dir in MDV format.";
+  p_default = "/tmp/ERA5";
+} output_dir;
+
+/////////////////////////////////////////////////////////////////////////
+// Rename fields
+
+commentdef {
+  p_header = "SPECIFY OUTPUT FIELD NAMES AND UNITS";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to rename the fields, and set the units, before writing.";
+} rename_output_fields;
+
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string output_long_name; 
+  string output_units;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "D",
+      "divergence",
+      "divergence_of_wind",
+      "1/s"
+    }
+    ,
+    { "Q",
+      "specific_humidity",
+      "specific_humidity",
+      "kg/kg"
+    }
+    ,
+    { "T",
+      "temperature",
+      "air_temperature",
+      "K"
+    }
+    ,
+    { "W",
+      "w",
+      "vertical_velocity",
+      "m/s"
+    }
+  };
+  p_descr = "Output field details.";
+  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.";
+} output_fields[];
+

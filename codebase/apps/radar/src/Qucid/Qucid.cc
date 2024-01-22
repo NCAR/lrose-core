@@ -39,6 +39,7 @@
 #include "Qucid.hh"
 #include "CartManager.hh"
 #include "DisplayField.hh"
+#include "LegacyParams.hh"
 #include <qtplot/ColorMap.hh>
 #include "Params.hh"
 #include "Reader.hh"
@@ -75,9 +76,37 @@ Qucid::Qucid(int argc, char **argv) :
 
   _progName = strdup("Qucid");
 
-  // clear out legacy CIDD structs
-
+  // initialize legacy CIDD structs
+  
   _initGlobals();
+
+  // initialize signal handling
+  
+  init_signal_handlers();  
+
+  // check for legacy params file
+
+  
+  string legacyParamsPath;
+  if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
+    gd.db_name = strdup(legacyParamsPath.c_str());
+    cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
+    cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
+    string tdrpParamsPath("/tmp/CIDD.tdrp");
+    LegacyParams lParams;
+    lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
+    // init_data_space(_params);
+    cerr << "fffffffffffff fields ptr: " << _params._fields << endl;
+    cerr << "fffffffffffff nfields: " << _params.fields_n << endl;
+    // tdrp_print_mode_t printMode;
+    // if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
+    //   if (printMode != NO_PRINT) {
+    //     _params.sync();
+    //     _params.print(stdout, printMode);
+    //     exit(0);
+    //   }
+    // }
+  }
   
   // get command line args
   
@@ -89,17 +118,17 @@ Qucid::Qucid(int argc, char **argv) :
   }
   
   // load TDRP params from command line
-  
+
   char *paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
-			   _args.override.list,
-			   &paramsPath)) {
+                           _args.override.list,
+                           &paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters." << endl;
     OK = false;
     return;
   }
-
+  
   if (_params.fields_n < 1) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  0 fields specified" << endl;
@@ -107,20 +136,13 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
-
+  
   // initialize globals, get/set defaults, establish data sources etc.
   
-  init_data_space();
-  
-  // check for any filtered fields
-
-  _haveFilteredFields = false;
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-    if (strlen(_params._fields[ifield].filtered_name) > 0) {
-      _haveFilteredFields = true;
-    }
+  if (_args.usingLegacyParams()) {
+    init_data_space(_params);
   }
-
+  
   // set params on alloc checker
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -230,7 +252,7 @@ int Qucid::Run(QApplication &app)
   if (_params.display_mode == Params::POLAR_DISPLAY) {
 
     _cartManager = new CartManager(_params, _reader,
-                                   _displayFields, _haveFilteredFields);
+                                   _displayFields, false);
     
     if (_args.inputFileList.size() > 0) {
       _cartManager->setArchiveFileList(_args.inputFileList);
@@ -390,16 +412,16 @@ int Qucid::_setupDisplayFields()
 
     // check we have a valid label
     
-    if (strlen(pfld.label) == 0) {
+    if (strlen(pfld.legend_label) == 0) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
-      cerr << "  Empty field label, ifield: " << ifield << endl;
+      cerr << "  Empty field legend_label, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
       continue;
     }
     
     // check we have a raw field name
     
-    if (strlen(pfld.raw_name) == 0) {
+    if (strlen(pfld.field_name) == 0) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
       cerr << "  Empty raw field name, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
@@ -412,23 +434,23 @@ int Qucid::_setupDisplayFields()
     colorMapPath += PATH_DELIM;
     colorMapPath += pfld.color_map;
     ColorMap map;
-    map.setName(pfld.label);
+    map.setName(pfld.legend_label);
     map.setUnits(pfld.units);
-    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+    // TODO: the logic here is a little weird ... the legend_label and units have been set, but are we throwing them away?
 
     bool noColorMap = false;
 
     if (map.readMap(colorMapPath)) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-      cerr << "  Looking for default color map for field " << pfld.label << endl; 
+      cerr << "  Looking for default color map for field " << pfld.legend_label << endl; 
 
       try {
-        // check here for smart color scale; look up by field name/label and
+        // check here for smart color scale; look up by field name/legend_label and
         // see if the name is a usual parameter for a known color map
         SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-        cerr << "  found default color map for " <<  pfld.label  << endl;
+        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.legend_label);
+        cerr << "  found default color map for " <<  pfld.legend_label  << endl;
         // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
         map = colorMap;
         // HERE: What is missing from the ColorMap object??? 
@@ -445,8 +467,8 @@ int Qucid::_setupDisplayFields()
     // unfiltered field
 
     DisplayField *field =
-      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
-                       pfld.shortcut, map, ifield, false);
+      new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, 
+                       "a", map, ifield, false);
     if (noColorMap)
       field->setNoColorMap();
 
@@ -454,10 +476,10 @@ int Qucid::_setupDisplayFields()
 
     // filtered field
 
-    if (strlen(pfld.filtered_name) > 0) {
-      string filtLabel = string(pfld.label) + "-filt";
+    if (strlen(pfld.field_name) > 0) {
+      string filtField_Label = string(pfld.legend_label) + "-filt";
       DisplayField *filt =
-        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+        new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, "a", 
                          map, ifield, true);
       _displayFields.push_back(filt);
     }

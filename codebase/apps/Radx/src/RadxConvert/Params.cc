@@ -1319,6 +1319,18 @@
     tt->single_val.d = -999;
     tt++;
     
+    // Parameter 'change_radar_latitude_sign'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("change_radar_latitude_sign");
+    tt->descr = tdrpStrDup("Option to negate the latitude.");
+    tt->help = tdrpStrDup("Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.");
+    tt->val_offset = (char *) &change_radar_latitude_sign - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'radar_altitude_meters'
     // ctype is 'double'
     
@@ -1331,16 +1343,28 @@
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'change_radar_latitude_sign'
+    // Parameter 'override_height_agl'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("change_radar_latitude_sign");
-    tt->descr = tdrpStrDup("Option to negate the latitude.");
-    tt->help = tdrpStrDup("Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.");
-    tt->val_offset = (char *) &change_radar_latitude_sign - &_start_;
+    tt->param_name = tdrpStrDup("override_height_agl");
+    tt->descr = tdrpStrDup("Option to override the radar height above the ground (m).");
+    tt->help = tdrpStrDup("If true, the height_agl will be set to radar_height_agl in meters.");
+    tt->val_offset = (char *) &override_height_agl - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'radar_height_agl_meters'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_height_agl_meters");
+    tt->descr = tdrpStrDup("Radar height AGL (meters).");
+    tt->help = tdrpStrDup("See override_height_agl.");
+    tt->val_offset = (char *) &radar_height_agl_meters - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'apply_georeference_corrections'
@@ -1963,6 +1987,30 @@
     tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'convention_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("convention_override");
+    tt->descr = tdrpStrDup("Option to override the CfRadial convention in the file.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the convention attribute.");
+    tt->val_offset = (char *) &convention_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'subconvention_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("subconvention_override");
+    tt->descr = tdrpStrDup("Option to override the subconvention in the file.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the subconvention attribute.");
+    tt->val_offset = (char *) &subconvention_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'version_override'

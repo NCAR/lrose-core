@@ -311,7 +311,7 @@ public:
     fl32 dy;
     fl32 origin_lat;
     fl32 origin_lon;
-    fl32 proj_params[MDV_MAX_PROJ_PARAMS];
+    fl32 proj_params[MDV32_MAX_PROJ_PARAMS];
     fl32 spare_fl32[6];
   } read_remap_32_t;
 

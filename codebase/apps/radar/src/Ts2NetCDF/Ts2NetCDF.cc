@@ -36,6 +36,7 @@
 
 #include "Ts2NetCDF.hh"
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
 #include <fstream>
 #include <cerrno>
@@ -80,6 +81,7 @@ Ts2NetCDF::Ts2NetCDF(int argc, char **argv)
   _procPrev.prf_mode = -1;
 
   MEM_zero(_calibPrev);
+  _nGeorefChecks = 0;
 
   // set programe name
   
@@ -137,6 +139,11 @@ Ts2NetCDF::Ts2NetCDF(int argc, char **argv)
     _pulseReader = new IwrfTsReaderTcp(_params.tcp_server_host,
                                        _params.tcp_server_port,
 				       iwrfDebug);
+  } else if (_params.input_mode == Params::TS_ARCHIVE_INPUT) {
+    _pulseReader = new IwrfTsReaderFile(_args.startTime.utime(),
+                                        _args.endTime.utime(),
+                                        _params.input_dir,
+                                        iwrfDebug);
   } else {
     _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
   }
@@ -286,7 +293,10 @@ int Ts2NetCDF::Run ()
       }
     }
 
-    if (_elArrayHc.size() < 1) {
+    if (_elArrayHc.size() < 1 &&
+        _elArrayVc.size() < 1 &&
+        _elArrayHx.size() < 1 &&
+        _elArrayVx.size() < 1) {
       readyToWrite = false;
     }
     
@@ -573,6 +583,23 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 
 {
 
+  const IwrfTsInfo &opsInfo = _pulseReader->getOpsInfo();
+  if (_params.save_georeference_variables) {
+    if (opsInfo.isPlatformGeorefActive()) {
+      _georefs.push_back(opsInfo.getPlatformGeoref());
+    } else if (opsInfo.isPlatformGeoref1Active()) {
+      _georefs.push_back(opsInfo.getPlatformGeoref1());
+    } else {
+      // waiting for georefs
+      _nGeorefChecks++;
+      if ((_nGeorefChecks % 10000) == 0) {
+        cerr << "WARNING - no georefs found yet" << endl;
+        cerr << "Consider setting save_georeference_variables to false" << endl;
+      }
+      return 0;
+    }
+  }
+
   // convert to floats
   
   _nPulsesRead++;
@@ -596,8 +623,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
     _startEl = _el;
     _startAz = _az;
     _scanMode = pulse.getScanMode();
-    _xmitRcvMode = (iwrf_xmit_rcv_mode)
-      _pulseReader->getOpsInfo().get_proc_xmit_rcv_mode();
+    _xmitRcvMode = (iwrf_xmit_rcv_mode) opsInfo.get_proc_xmit_rcv_mode();
   }
 
   // set number of gates to be saved out
@@ -644,11 +670,46 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
         }
       }
     } else {
-      if (_savePulseData(pulse)) {
-        return -1;
+      if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+        if (_savePulseDataSimHV(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
+        if (_savePulseDataSimHV(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_H_ONLY_FIXED_HV) {
+        if (_savePulseDataHXmit(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_V_ONLY_FIXED_HV) {
+        if (_savePulseDataVXmit(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SINGLE_POL) {
+        if (_savePulseDataSinglePol(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SINGLE_POL_V) {
+        if (_savePulseDataSinglePolV(pulse)) {
+          return -1;
+        }
+      } else {
+        if (_savePulseData(pulse)) {
+          return -1;
+        }
       }
     }
     
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
+           << _pulseTime << " "
+           << _prt << " "
+           << _el << " "
+           << _az << " "
+           << _nGates << endl;
+    }
+
   } else {
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -704,9 +765,9 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 }
 
 /////////////////////////////
-// save pulse data
+// save pulse data - sim HV
 
-int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
+int Ts2NetCDF::_savePulseDataSimHV(IwrfTsPulse &pulse)
 
 {
 
@@ -723,6 +784,18 @@ int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
   _modCodeArrayHc.push_back(_phaseDiff);
   _txPhaseArrayHc.push_back(_txPhaseDeg);
   _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _timeArrayVc.push_back(_pulseTime);
+  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVc.push_back(_prt);
+  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
+  _elArrayVc.push_back(_el);
+  _azArrayVc.push_back(_az);
+  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
+  _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
+  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
 
   _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
   _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
@@ -786,15 +859,204 @@ int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
 
   } // if (chan1 != NULL)
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
+  return 0;
+
+}
+    
+/////////////////////////////////////////////////////
+// save pulse data - H transmit, fixed HV
+
+int Ts2NetCDF::_savePulseDataHXmit(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _timeArrayVx.push_back(_pulseTime);
+  _dtimeArrayVx.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVx.push_back(_prt);
+  _pulseWidthArrayVx.push_back(pulse.getPulseWidthUs());
+  _elArrayVx.push_back(_el);
+  _azArrayVx.push_back(_az);
+  _fixedAngleArrayVx.push_back(pulse.getFixedAngle());
+  _modCodeArrayVx.push_back(_phaseDiff);
+  _txPhaseArrayVx.push_back(_txPhaseDeg);
+  _transitionFlagArrayVx.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVx.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVx.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
   }
 
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHc++;
+    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVx++;
+    _iBufVx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVx++;
+      _iBufVx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHc++;
+      _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
+  return 0;
+
+}
+    
+/////////////////////////////////////////////////////
+// save pulse data - V transmit, fixed HV
+
+int Ts2NetCDF::_savePulseDataVXmit(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHx.push_back(_pulseTime);
+  _dtimeArrayHx.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHx.push_back(_prt);
+  _pulseWidthArrayHx.push_back(pulse.getPulseWidthUs());
+  _elArrayHx.push_back(_el);
+  _azArrayHx.push_back(_az);
+  _fixedAngleArrayHx.push_back(pulse.getFixedAngle());
+  _modCodeArrayHx.push_back(_phaseDiff);
+  _txPhaseArrayHx.push_back(_txPhaseDeg);
+  _transitionFlagArrayHx.push_back(pulse.antennaTransition());
+
+  _timeArrayVc.push_back(_pulseTime);
+  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVc.push_back(_prt);
+  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
+  _elArrayVc.push_back(_el);
+  _azArrayVc.push_back(_az);
+  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
+  _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
+  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHx.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHx.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHx++;
+    _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVc++;
+    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVc++;
+      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHx++;
+      _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
   return 0;
 
 }
@@ -821,10 +1083,22 @@ int Ts2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
   _txPhaseArrayHc.push_back(_txPhaseDeg);
   _transitionFlagArrayHc.push_back(pulse.antennaTransition());
 
+  _timeArrayVx.push_back(_pulseTime);
+  _dtimeArrayVx.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVx.push_back(_prt);
+  _pulseWidthArrayVx.push_back(pulse.getPulseWidthUs());
+  _elArrayVx.push_back(_el);
+  _azArrayVx.push_back(_az);
+  _fixedAngleArrayVx.push_back(pulse.getFixedAngle());
+  _modCodeArrayVx.push_back(_phaseDiff);
+  _txPhaseArrayVx.push_back(_txPhaseDeg);
+  _transitionFlagArrayVx.push_back(pulse.antennaTransition());
+
   _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
-  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstMagArrayVx.push_back(pulse.get_burst_mag(1));
   _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
-  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+  _burstArgArrayVx.push_back(pulse.get_burst_arg(1));
   
   const fl32 *chan0 = pulse.getIq0();
   float *ivals0 = (float *) _iBuf0.getPtr();
@@ -880,15 +1154,6 @@ int Ts2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
     _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using H pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
-  }
-
   return 0;
 
 }
@@ -903,6 +1168,20 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
   
   _nGatesRay.push_back(_nGates);
 
+  _timeArrayHx.push_back(_pulseTime);
+  _dtimeArrayHx.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHx.push_back(_prt);
+  _pulseWidthArrayHx.push_back(pulse.getPulseWidthUs());
+  _elArrayHx.push_back(_el);
+  _azArrayHx.push_back(_az);
+  _fixedAngleArrayHx.push_back(pulse.getFixedAngle());
+  _modCodeArrayHx.push_back(_phaseDiff);
+  _txPhaseArrayHx.push_back(_txPhaseDeg);
+  _transitionFlagArrayHx.push_back(pulse.antennaTransition());
+  _burstMagArrayHx.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHx.push_back(pulse.get_burst_arg(1));
+
   _timeArrayVc.push_back(_pulseTime);
   _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
                           + pulse.getNanoSecs() * 1.0e-9);
@@ -914,7 +1193,6 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
   _modCodeArrayVc.push_back(_phaseDiff);
   _txPhaseArrayVc.push_back(_txPhaseDeg);
   _transitionFlagArrayVc.push_back(pulse.antennaTransition());
-
   _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
   _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
   
@@ -991,15 +1269,213 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
     }
   }
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using V pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseDataSinglePol(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
   }
 
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  _nPulsesHc++;
+  _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseDataSinglePolV(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayVc.push_back(_pulseTime);
+  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVc.push_back(_prt);
+  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
+  _elArrayVc.push_back(_el);
+  _azArrayVc.push_back(_az);
+  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
+  _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
+  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  _nPulsesVc++;
+  _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _timeArrayVc.push_back(_pulseTime);
+  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVc.push_back(_prt);
+  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
+  _elArrayVc.push_back(_el);
+  _azArrayVc.push_back(_az);
+  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
+  _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
+  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHc++;
+    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVc++;
+    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVc++;
+      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHc++;
+      _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
   return 0;
 
 }
@@ -1039,7 +1515,6 @@ void Ts2NetCDF::_reset()
 
   _timeArrayHc.clear();
   _dtimeArrayHc.clear();
-
   _elArrayHc.clear();
   _azArrayHc.clear();
   _fixedAngleArrayHc.clear();
@@ -1064,6 +1539,34 @@ void Ts2NetCDF::_reset()
   _burstMagArrayVc.clear();
   _burstArgArrayVc.clear();
 
+  _timeArrayHx.clear();
+  _dtimeArrayHx.clear();
+  _elArrayHx.clear();
+  _azArrayHx.clear();
+  _fixedAngleArrayHx.clear();
+  _prtArrayHx.clear();
+  _pulseWidthArrayHx.clear();
+  _modCodeArrayHx.clear();
+  _txPhaseArrayHx.clear();
+  _transitionFlagArrayHx.clear();
+  _burstMagArrayHx.clear();
+  _burstArgArrayHx.clear();
+
+  _timeArrayVx.clear();
+  _dtimeArrayVx.clear();
+  _elArrayVx.clear();
+  _azArrayVx.clear();
+  _fixedAngleArrayVx.clear();
+  _prtArrayVx.clear();
+  _pulseWidthArrayVx.clear();
+  _modCodeArrayVx.clear();
+  _txPhaseArrayVx.clear();
+  _transitionFlagArrayVx.clear();
+  _burstMagArrayVx.clear();
+  _burstArgArrayVx.clear();
+
+  _georefs.clear();
+
 }
 
 ////////////////////////////////////////
@@ -1082,13 +1585,21 @@ int Ts2NetCDF::_writeFile()
   }
 
   // compute number of times active
-  
-  _nTimes = _elArrayHc.size();
-  if (_elArrayVc.size() > 0) {
-    if (_elArrayVc.size() < _nTimes) {
-      _nTimes = _elArrayVc.size();
-    }
+
+  vector<size_t> nTimesArray;
+  if (_elArrayHc.size() > 0) {
+    nTimesArray.push_back(_elArrayHc.size());
   }
+  if (_elArrayVc.size() > 0) {
+    nTimesArray.push_back(_elArrayVc.size());
+  }
+  if (_elArrayHx.size() > 0) {
+    nTimesArray.push_back(_elArrayHx.size());
+  }
+  if (_elArrayVx.size() > 0) {
+    nTimesArray.push_back(_elArrayVx.size());
+  }
+  _nTimes = *std::min_element(nTimesArray.begin(), nTimesArray.end());
 
   // write out tmp file
 
@@ -1175,24 +1686,16 @@ int Ts2NetCDF::_writeFileTmp()
     return -1;
   }
 
-  if (_alternatingMode) {
-    
-    // alternating mode
-    
-    if (_writeTimeDimVarsAlt(file, timeDim)) {
-      cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
-      return -1;
-    }
-
-  } else {
-    
-    if (_writeTimeDimVars(file, timeDim)) {
-      cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
-      return -1;
-    }
-
+  if (_writeTimeDimVars(file, timeDim)) {
+    cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
+    return -1;
   }
 
+  if (_writeGeorefVars(file, timeDim)) {
+    cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
+    return -1;
+  }
+  
   if (_nPulsesHc > 0) {
     if (_writeIqVars(file, timeDim, gatesDim, "IHc", "QHc",
                      (float *) _iBufHc.getPtr(),
@@ -1579,21 +2082,74 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
-  
-  NcxxVar timeVarHc;
-  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
-              "time_offset", "time_offset_from_base_time", timeUnitsStr)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    cerr << "  Cannot create time var" << endl;
-    return -1;
+
+  if (_dtimeArrayHc.size() > 0) {
+    NcxxVar timeVarHc;
+    if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
+                "time_offset_hc", "time_offset_from_base_time", timeUnitsStr)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      cerr << "  Cannot create time var" << endl;
+      return -1;
+    }
+    timeVarHc.addScalarAttr("_FillValue", -9999.0);
+    TaArray<double> times_;
+    double *times = times_.alloc(_nTimes);
+    for (size_t jj = 0; jj < _nTimes; jj++) {
+      times[jj] = _dtimeArrayHc[jj];
+    }
+    timeVarHc.putVal(times);
   }
-  timeVarHc.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> times_;
-  double *times = times_.alloc(_nTimes);
-  for (size_t jj = 0; jj < _nTimes; jj++) {
-    times[jj] = _dtimeArrayHc[jj];
+
+  if (_dtimeArrayVc.size() > 0) {
+    NcxxVar timeVarVc;
+    if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
+                "time_offset_vc", "time_offset_from_base_time", timeUnitsStr)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      cerr << "  Cannot create time var" << endl;
+      return -1;
+    }
+    timeVarVc.addScalarAttr("_FillValue", -9999.0);
+    TaArray<double> times_;
+    double *times = times_.alloc(_nTimes);
+    for (size_t jj = 0; jj < _nTimes; jj++) {
+      times[jj] = _dtimeArrayVc[jj];
+    }
+    timeVarVc.putVal(times);
   }
-  timeVarHc.putVal(times);
+
+  if (_dtimeArrayHx.size() > 0) {
+    NcxxVar timeVarHx;
+    if (_addVar(file, timeVarHx, ncxxDouble, timeDim,
+                "time_offset_hx", "time_offset_from_base_time", timeUnitsStr)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      cerr << "  Cannot create time var" << endl;
+      return -1;
+    }
+    timeVarHx.addScalarAttr("_FillValue", -9999.0);
+    TaArray<double> times_;
+    double *times = times_.alloc(_nTimes);
+    for (size_t jj = 0; jj < _nTimes; jj++) {
+      times[jj] = _dtimeArrayHx[jj];
+    }
+    timeVarHx.putVal(times);
+  }
+
+  if (_dtimeArrayVx.size() > 0) {
+    NcxxVar timeVarVx;
+    if (_addVar(file, timeVarVx, ncxxDouble, timeDim,
+                "time_offset_vx", "time_offset_from_base_time", timeUnitsStr)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      cerr << "  Cannot create time var" << endl;
+      return -1;
+    }
+    timeVarVx.addScalarAttr("_FillValue", -9999.0);
+    TaArray<double> times_;
+    double *times = times_.alloc(_nTimes);
+    for (size_t jj = 0; jj < _nTimes; jj++) {
+      times[jj] = _dtimeArrayVx[jj];
+    }
+    timeVarVx.putVal(times);
+  }
 
   // ngates per ray
 
@@ -1608,117 +2164,407 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   // Elevation variable
 
-  if (_writeVar(file, timeDim,
-                "elevation", "elevation_angle", "degrees",
-                _elArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_elArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "elevation_hc", "elevation_angle", "degrees",
+                  _elArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_elArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "elevation_vc", "elevation_angle", "degrees",
+                  _elArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_elArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "elevation_hx", "elevation_angle", "degrees",
+                  _elArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_elArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "elevation_vx", "elevation_angle", "degrees",
+                  _elArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
   // Azimuth variable
+
+  if (_azArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "azimuth_hc", "azimuth_angle", "degrees",
+                  _azArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
   
-  if (_writeVar(file, timeDim,
-                "azimuth", "azimuth_angle", "degrees",
-                _azArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_azArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "azimuth_vc", "azimuth_angle", "degrees",
+                  _azArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_azArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "azimuth_hx", "azimuth_angle", "degrees",
+                  _azArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_azArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "azimuth_vx", "azimuth_angle", "degrees",
+                  _azArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
   // Fixed angle variable
+
+  if (_fixedAngleArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "fixed_angle_hc", "fixed_scan_angle", "degrees",
+                  _fixedAngleArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
   
-  if (_writeVar(file, timeDim,
-                "fixed_angle", "fixed_scan_angle", "degrees",
-                _fixedAngleArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_fixedAngleArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "fixed_angle_vc", "fixed_scan_angle", "degrees",
+                  _fixedAngleArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_fixedAngleArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "fixed_angle_hx", "fixed_scan_angle", "degrees",
+                  _fixedAngleArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_fixedAngleArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "fixed_angle_vx", "fixed_scan_angle", "degrees",
+                  _fixedAngleArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  // Antenna transition variable
+
+  if (_transitionFlagArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "antenna_transition_hc", "antenna_is_in_transition", "",
+                  _transitionFlagArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_transitionFlagArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "antenna_transition_vc", "antenna_is_in_transition", "",
+                  _transitionFlagArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_transitionFlagArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "antenna_transition_hx", "antenna_is_in_transition", "",
+                  _transitionFlagArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_transitionFlagArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "antenna_transition_vx", "antenna_is_in_transition", "",
+                  _transitionFlagArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  // PRT variable
+
+  if (_prtArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "prt_hc", "pulse_repetition_time", "seconds",
+                  _prtArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_prtArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "prt_vc", "pulse_repetition_time", "seconds",
+                  _prtArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_prtArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "prt_hx", "pulse_repetition_time", "seconds",
+                  _prtArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_prtArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "prt_vx", "pulse_repetition_time", "seconds",
+                  _prtArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  // Pulse width variable
+
+  if (_pulseWidthArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "pulse_width_hc", "pulse_width", "micro_seconds",
+                  _pulseWidthArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_pulseWidthArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "pulse_width_vc", "pulse_width", "micro_seconds",
+                  _pulseWidthArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_pulseWidthArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "pulse_width_hx", "pulse_width", "micro_seconds",
+                  _pulseWidthArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_pulseWidthArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "pulse_width_vx", "pulse_width", "micro_seconds",
+                  _pulseWidthArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
   // modulation code variable
 
-  if (_writeVar(file, timeDim,
-                "mod_code", "modulation_code", "degrees",
-                _modCodeArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_modCodeArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "mod_code_hc", "modulation_code", "degrees",
+                  _modCodeArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  if (_writeVar(file, timeDim,
-                "tx_phase_deg", "transmit_phase", "degrees",
-                _txPhaseArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_modCodeArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "mod_code_vc", "modulation_code", "degrees",
+                  _modCodeArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  // PRT variable
-  
-  if (_writeVar(file, timeDim,
-                "prt", "pulse_repetition_time", "seconds",
-                _prtArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_modCodeArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "mod_code_hx", "modulation_code", "degrees",
+                  _modCodeArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  // Pulse width variable
+  if (_modCodeArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "mod_code_vx", "modulation_code", "degrees",
+                  _modCodeArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+
+  // tx phase
   
-  if (_writeVar(file, timeDim,
-                "pulse_width", "pulse_width", "micro_seconds",
-                _pulseWidthArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_txPhaseArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "tx_phase_deg_hc", "transmit_phase", "degrees",
+                  _txPhaseArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  // Antenna transition variable
+  if (_txPhaseArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "tx_phase_deg_vc", "transmit_phase", "degrees",
+                  _txPhaseArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
   
-  if (_writeVar(file, timeDim,
-                "antenna_transition", "antenna_is_in_transition", "",
-                _transitionFlagArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_txPhaseArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "tx_phase_deg_hx", "transmit_phase", "degrees",
+                  _txPhaseArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_txPhaseArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "tx_phase_deg_vx", "transmit_phase", "degrees",
+                  _txPhaseArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
   // write burst data
-  
-  if (_writeVar(file, timeDim,
-                "burst_mag_hc", "burst_magnitude_H_copolar", "",
-                _burstMagArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+
+  if (_burstMagArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_mag_hc", "burst_magnitude", "",
+                  _burstMagArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  if (_writeVar(file, timeDim,
-                "burst_mag_vc", "burst_magnitude_V_copolar", "",
-                _burstMagArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_burstMagArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_mag_vc", "burst_magnitude", "",
+                  _burstMagArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_hc", "burst_phase_H_copolar", "degrees",
-                _burstArgArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_burstMagArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_mag_hx", "burst_magnitude", "",
+                  _burstMagArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_vc", "burst_phase_V_copolar", "degrees",
-                _burstArgArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  if (_burstMagArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_mag_vx", "burst_magnitude", "",
+                  _burstMagArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+
+  if (_burstArgArrayHc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_arg_hc", "burst_phase", "degrees",
+                  _burstArgArrayHc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_burstArgArrayVc.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_arg_vc", "burst_phase", "degrees",
+                  _burstArgArrayVc)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+    
+  if (_burstArgArrayHx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_arg_hx", "burst_phase", "degrees",
+                  _burstArgArrayHx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
+  }
+  
+  if (_burstArgArrayVx.size() > 0) {
+    if (_writeVar(file, timeDim,
+                  "burst_arg_vx", "burst_phase", "degrees",
+                  _burstArgArrayVx)) {
+      cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+      return -1;
+    }
   }
   
   return 0;
 
 }
 
-////////////////////////////////////////////////////////
-// write out time variables in alternating dual pol mode
+////////////////////////////////////////
+// write out georef variables
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
-                                    NcxxDim &timeDim)
+int Ts2NetCDF::_writeGeorefVars(NcxxFile &file,
+                                NcxxDim &timeDim)
   
 {
 
+  // check we have data
+  
+  if (_georefs.size() < 1) {
+    return 0;
+  }
+  if (_georefs.size() != _nTimes) {
+    cerr << "ERROR - _writeGeorefVars()" << endl;
+    cerr << "  nTimes: " << _nTimes << endl;
+    cerr << "  nGeorefs: " << _georefs.size() << endl;
+    cerr << "  These should be the same" << endl;
+  }
+  
   // Time variable - secs since start of file
 
   char timeUnitsStr[256];
@@ -1726,194 +2572,305 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
-  
-  // h copolar times
 
-  NcxxVar timeVarHc;
-  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
-              "time_offset_hc", "time_offset_from_base_time_hc", 
-              timeUnitsStr)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    cerr << "  Cannot create time_offset_hc var" << endl;
+  NcxxVar timeVarGeoref;
+  if (_addVar(file, timeVarGeoref, ncxxDouble, timeDim,
+              "time_offset_georef", "time_offset_from_base_time", timeUnitsStr)) {
+    cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+    cerr << "  Cannot create time var" << endl;
     return -1;
   }
-  timeVarHc.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> timesHc_;
-  double *timesHc = timesHc_.alloc(_nTimes);
-  for (size_t jj = 0; jj < _nTimes; jj++) {
-    timesHc[jj] = _dtimeArrayHc[jj];
+  timeVarGeoref.addScalarAttr("_FillValue", -9999.0);
+  TaArray<double> times_;
+  double *times = times_.alloc(_georefs.size());
+  for (size_t ii = 0; ii < _georefs.size(); ii++) {
+    times[ii] = (double) ((_georefs[ii].packet.time_secs_utc - _startTime) +
+                          _georefs[ii].packet.time_nano_secs / 1.0e9);
   }
-  timeVarHc.putVal(timesHc);
+  timeVarGeoref.putVal(times);
 
-  // v copolar times
+  // variables
   
-  NcxxVar timeVarVc;
-  if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
-              "time_offset_vc", "time_offset_from_base_time_vc", 
-              timeUnitsStr)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    cerr << "  Cannot create time_offset_vc var" << endl;
-    return -1;
-  }
-  timeVarVc.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> timesVc_;
-  double *timesVc = timesVc_.alloc(_nTimes);
-  for (size_t jj = 0; jj < _nTimes; jj++) {
-    timesVc[jj] = _dtimeArrayVc[jj];
-  }
-  timeVarVc.putVal(timesVc);
-
-  // Elevation variable
-
-  if (_writeVar(file, timeDim,
-                "elevation_hc", "elevation_angle_h_copolar", "degrees",
-                _elArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "elevation_vc", "elevation_angle_v_copolar", "degrees",
-                _elArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  // Azimuth variable
-  
-  if (_writeVar(file, timeDim,
-                "azimuth_hc", "azimuth_angle_h_copolar", "degrees",
-                _azArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "azimuth_vc", "azimuth_angle_v_copolar", "degrees",
-                _azArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  // Fixed angle variable
-  
-  if (_writeVar(file, timeDim,
-                "fixed_angle_hc", "fixed_scan_angle_h_copolar", "degrees",
-                _fixedAngleArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "fixed_angle_vc", "fixed_scan_angle_v_copolar", "degrees",
-                _fixedAngleArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  // modulation code variable
-
-  if (_writeVar(file, timeDim,
-                "mod_code_hc", "modulation_code_h_copolar", "degrees",
-                _modCodeArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "mod_code_vc", "modulation_code_v_copolar", "degrees",
-                _modCodeArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  // longitude
+  {
+    vector<double> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].longitude);
+    }
+    if (_writeVar(file, timeDim,
+                  "longitude", "longitude", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
 
-  if (_writeVar(file, timeDim,
-                "tx_phase_deg_hc", "transmit_phase_h_copolar", "degrees",
-                _txPhaseArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  if (_writeVar(file, timeDim,
-                "tx_phase_deg_vc", "transmit_phase_v_copolar", "degrees",
-                _txPhaseArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  
-  // PRT variable
-  
-  if (_writeVar(file, timeDim,
-                "prt_hc", "pulse_repetition_time_h_copolar", "seconds",
-                _prtArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "prt_vc", "pulse_repetition_time_v_copolar", "seconds",
-                _prtArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  // Pulse width variable
-  
-  if (_writeVar(file, timeDim,
-                "pulse_width_hc", "pulse_width_h_copolar", "micro_seconds",
-                _pulseWidthArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "pulse_width_vc", "pulse_width_v_copolar", "micro_seconds",
-                _pulseWidthArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  
-  // Antenna transition variable
-  
-  if (_writeVar(file, timeDim,
-                "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
-                _transitionFlagArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  // latitude
+  {
+    vector<double> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].latitude);
+    }
+    if (_writeVar(file, timeDim,
+                  "latitude", "latitude", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
 
-  if (_writeVar(file, timeDim,
-                "antenna_transition_vc", "antenna_is_in_transition_v_copolar", "",
-                _transitionFlagArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+  // altitude MSL
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].altitude_msl_km * 1000.0);
+    }
+    if (_writeVar(file, timeDim,
+                  "altitude", "altitude", "meters",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
-  
-  // write burst data
-  
-  if (_writeVar(file, timeDim,
-                "burst_mag_hc", "burst_magnitude_H_copolar", "",
-                _burstMagArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+
+  // altitude AGL
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].altitude_agl_km * 1000.0);
+    }
+    if (_writeVar(file, timeDim,
+                  "altitude_agl", "altitude_agl", "meters",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
-  
-  if (_writeVar(file, timeDim,
-                "burst_mag_vc", "burst_magnitude_V_copolar", "",
-                _burstMagArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+
+  // ew vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ew_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "eastward_velocity", "platform_eastward_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
-  
-  if (_writeVar(file, timeDim,
-                "burst_arg_hc", "burst_phase_H_copolar", "degrees",
-                _burstArgArrayHc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+
+  // ns vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ns_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "northward_velocity", "platform_northward_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
-  
-  if (_writeVar(file, timeDim,
-                "burst_arg_vc", "burst_phase_V_copolar", "",
-                _burstArgArrayVc)) {
-    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
+
+  // vert vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].vert_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "vertical_velocity", "platform_vertical_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
   }
-  
+
+  // heading
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].heading_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "heading", "platform_heading_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // roll
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].roll_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "roll", "platform_roll_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // pitch
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].pitch_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "pitch", "platform_pitch_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // drift
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].drift_angle_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "drift", "platform_drift_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // track
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].track_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "track", "platform_track_over_the_ground", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // rotation
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].rotation_angle_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "rotation", "ray_rotation_angle_relative_to_platform", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // tilt
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].tilt_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "tilt", "ray_tilt_angle_relative_to_platform", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ew wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ew_horiz_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "eastward_horiz_wind", "platform_eastward_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ns wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ns_horiz_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "northward_horiz_wind", "platform_northward_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // vert wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].vert_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "vertical_wind", "platform_vertical_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // heading rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].heading_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "heading_rate", "platform_heading_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // pitch rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].pitch_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "pitch_rate", "platform_pitch_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // roll rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].roll_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "roll_rate", "platform_roll_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
   return 0;
 
 }
@@ -2208,33 +3165,54 @@ int Ts2NetCDF::_addVar(NcxxFile &file,
 }
 
 ////////////////////////////////////////
+// add and write double var
+// Returns 0 on success, -1 on failure
+
+int Ts2NetCDF::_writeVar(NcxxFile &file,
+                         NcxxDim &vdim,
+                         const string &name,
+                         const string &standardName,
+                         const string &units,
+                         const vector<double> &vals)
+  
+{
+  
+  NcxxVar var;
+  if (_addVar(file, var, ncxxDouble, vdim,
+              name, standardName, units)) {
+    cerr << "ERROR - Ts2NetCDF::_addDoubleVar" << endl;
+    cerr << "  Cannot create var, name: " << name << endl;
+    return -1;
+  }
+  var.addScalarAttr("_FillValue", -9999.0);
+  var.putVal(vals.data());
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
 // add and write float var
 // Returns 0 on success, -1 on failure
 
 int Ts2NetCDF::_writeVar(NcxxFile &file,
-                         NcxxDim &timeDim,
+                         NcxxDim &vdim,
                          const string &name,
                          const string &standardName,
                          const string &units,
-                         const vector<float> vals)
+                         const vector<float> &vals)
   
 {
   
-  TaArray<float> floats_;
-  float *floats = floats_.alloc(timeDim.getSize());
-  
   NcxxVar var;
-  if (_addVar(file, var, ncxxFloat, timeDim,
+  if (_addVar(file, var, ncxxFloat, vdim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addFloatVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
   var.addScalarAttr("_FillValue", -9999.0f);
-  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
-    floats[jj] = vals[jj];
-  }
-  var.putVal(floats);
+  var.putVal(vals.data());
   
   return 0;
 
@@ -2245,29 +3223,23 @@ int Ts2NetCDF::_writeVar(NcxxFile &file,
 // Returns 0 on success, -1 on failure
 
 int Ts2NetCDF::_writeVar(NcxxFile &file,
-                         NcxxDim &timeDim,
+                         NcxxDim &vdim,
                          const string &name,
                          const string &standardName,
                          const string &units,
-                         const vector<int> vals)
+                         const vector<int> &vals)
   
 {
   
-  TaArray<int> ints_;
-  int *ints = ints_.alloc(timeDim.getSize());
-  
   NcxxVar var;
-  if (_addVar(file, var, ncxxInt, timeDim,
+  if (_addVar(file, var, ncxxInt, vdim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addIntVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
   var.addScalarAttr("_FillValue", -9999);
-  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
-    ints[jj] = vals[jj];
-  }
-  var.putVal(ints);
+  var.putVal(vals.data());
   
   return 0;
 

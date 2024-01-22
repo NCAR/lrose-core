@@ -146,23 +146,43 @@ private:
 
   vector<double> _timeArrayHc, _dtimeArrayHc;
   vector<float> _elArrayHc, _azArrayHc, _fixedAngleArrayHc;
+  vector<int> _transitionFlagArrayHc;
   vector<float> _prtArrayHc;
   vector<float> _pulseWidthArrayHc;
   vector<float> _modCodeArrayHc;
-  vector<int> _transitionFlagArrayHc;
+  vector<float> _txPhaseArrayHc;
   vector<float> _burstMagArrayHc;
   vector<float> _burstArgArrayHc;
-  vector<float> _txPhaseArrayHc;
 
   vector<double> _timeArrayVc, _dtimeArrayVc;
   vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
+  vector<int> _transitionFlagArrayVc;
   vector<float> _prtArrayVc;
   vector<float> _pulseWidthArrayVc;
   vector<float> _modCodeArrayVc;
-  vector<int> _transitionFlagArrayVc;
+  vector<float> _txPhaseArrayVc;
   vector<float> _burstMagArrayVc;
   vector<float> _burstArgArrayVc;
-  vector<float> _txPhaseArrayVc;
+
+  vector<double> _timeArrayHx, _dtimeArrayHx;
+  vector<float> _elArrayHx, _azArrayHx, _fixedAngleArrayHx;
+  vector<int> _transitionFlagArrayHx;
+  vector<float> _prtArrayHx;
+  vector<float> _pulseWidthArrayHx;
+  vector<float> _modCodeArrayHx;
+  vector<float> _txPhaseArrayHx;
+  vector<float> _burstMagArrayHx;
+  vector<float> _burstArgArrayHx;
+
+  vector<double> _timeArrayVx, _dtimeArrayVx;
+  vector<float> _elArrayVx, _azArrayVx, _fixedAngleArrayVx;
+  vector<int> _transitionFlagArrayVx;
+  vector<float> _prtArrayVx;
+  vector<float> _pulseWidthArrayVx;
+  vector<float> _modCodeArrayVx;
+  vector<float> _txPhaseArrayVx;
+  vector<float> _burstMagArrayVx;
+  vector<float> _burstArgArrayVx;
 
   // IQ data
 
@@ -178,6 +198,11 @@ private:
   MemBuf _iBufHx, _qBufHx;
   MemBuf _iBufVx, _qBufVx;
 
+  // georeference data
+
+  vector<iwrf_platform_georef_t> _georefs;
+  size_t _nGeorefChecks;
+
   // output file
 
   string _outputName;
@@ -192,21 +217,25 @@ private:
   bool _checkInfoChanged(const IwrfTsPulse &pulse);
   bool _checkReadyToWrite(const IwrfTsPulse &pulse);
   int _handlePulse(IwrfTsPulse &pulse);
-  int _savePulseData(IwrfTsPulse &pulse);
+  int _savePulseDataSimHV(IwrfTsPulse &pulse);
+  int _savePulseDataHXmit(IwrfTsPulse &pulse);
+  int _savePulseDataVXmit(IwrfTsPulse &pulse);
   int _savePulseDataAltH(IwrfTsPulse &pulse);
   int _savePulseDataAltV(IwrfTsPulse &pulse);
+  int _savePulseDataSinglePol(IwrfTsPulse &pulse);
+  int _savePulseDataSinglePolV(IwrfTsPulse &pulse);
+  int _savePulseData(IwrfTsPulse &pulse);
   void _reset();
 
   int _writeFile();
   int _writeFileTmp();
   int _computeOutputFilePaths();
 
-
   void _addGlobAtt(NcxxFile &out);
   
   int _writeBaseTimeVars(NcxxFile &file);
   int _writeTimeDimVars(NcxxFile &file, NcxxDim &timeDim);
-  int _writeTimeDimVarsAlt(NcxxFile &file, NcxxDim &timeDim);
+  int _writeGeorefVars(NcxxFile &file, NcxxDim &georefDim);
   int _writeRangeVar(NcxxFile &file, NcxxDim &rangeDim);
     
   int _addAttr(NcxxVar &var,
@@ -246,18 +275,25 @@ private:
               const string &units = "");
 
   int _writeVar(NcxxFile &file,
-                NcxxDim &timeDim,
+                NcxxDim &vdim,
                 const string &name,
                 const string &standardName,
                 const string &units,
-                const vector<float> vals);
+                const vector<double> &vals);
   
   int _writeVar(NcxxFile &file,
-                NcxxDim &timeDim,
+                NcxxDim &vDim,
                 const string &name,
                 const string &standardName,
                 const string &units,
-                const vector<int> vals);
+                const vector<float> &vals);
+  
+  int _writeVar(NcxxFile &file,
+                NcxxDim &vDim,
+                const string &name,
+                const string &standardName,
+                const string &units,
+                const vector<int> &vals);
   
   int _writeIqVars(NcxxFile &file,
                    NcxxDim &timeDim,

@@ -25,8 +25,7 @@
 //
 // Utility class for manipulating date/time
 //
-// Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
-// January 1999
+// Based on toolsa DateTime class
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -164,6 +163,27 @@ void RadxTime::clear()
 
 {
   _init();
+}
+
+/////////////////////////////
+/// Set to current time
+
+void RadxTime::setToNow()
+
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  _uTime = tv.tv_sec;
+  _subSec = tv.tv_usec / 1.0e6;
+}
+
+/////////////////////////////
+/// Set invalid
+
+void RadxTime::setToNever()
+
+{
+  set(NEVER);
 }
 
 ///////////////////////////////////

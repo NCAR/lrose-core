@@ -61,29 +61,29 @@
 #include <grib2/Template5.2.hh>
 #include <grib2/Template5.3.hh>
 
-#include "ReadNcFiles.hh"
-#include "EraNc2Mdv.hh"
+#include "ReadGribFiles.hh"
+#include "EraGrib2Mdv.hh"
 using namespace std;
 
 //
 // Constants
 //
-const int    ReadNcFiles::MAX_NPTS = 6000000;
-const double ReadNcFiles::M_TO_KM = 0.001;
-const double ReadNcFiles::M_TO_FT = 3.2808399;
-const double ReadNcFiles::M_TO_KFT = .00328; 
-const double ReadNcFiles::M_TO_MI = 0.000621371192;
-const double ReadNcFiles::M_TO_100FT = .0328;
-const double ReadNcFiles::MPS_TO_KNOTS = 1.94;
-const double ReadNcFiles::PASCALS_TO_MBARS = 0.01;
-const double ReadNcFiles::KELVIN_TO_CELCIUS = -273.15;
-const double ReadNcFiles::KG_TO_G = 1000.0;
-const double ReadNcFiles::PERCENT_TO_FRAC = 0.01;
-const double ReadNcFiles::PASCAL_TO_HECTOPASCAL = 0.01;
-const double ReadNcFiles::MM_S_TO_MM_HR = 3600.0;
+const int    ReadGribFiles::MAX_NPTS = 6000000;
+const double ReadGribFiles::M_TO_KM = 0.001;
+const double ReadGribFiles::M_TO_FT = 3.2808399;
+const double ReadGribFiles::M_TO_KFT = .00328; 
+const double ReadGribFiles::M_TO_MI = 0.000621371192;
+const double ReadGribFiles::M_TO_100FT = .0328;
+const double ReadGribFiles::MPS_TO_KNOTS = 1.94;
+const double ReadGribFiles::PASCALS_TO_MBARS = 0.01;
+const double ReadGribFiles::KELVIN_TO_CELCIUS = -273.15;
+const double ReadGribFiles::KG_TO_G = 1000.0;
+const double ReadGribFiles::PERCENT_TO_FRAC = 0.01;
+const double ReadGribFiles::PASCAL_TO_HECTOPASCAL = 0.01;
+const double ReadGribFiles::MM_S_TO_MM_HR = 3600.0;
 
 
-ReadNcFiles::ReadNcFiles (Params &params)
+ReadGribFiles::ReadGribFiles (Params &params)
 {
   _paramsPtr = &params;
   _dataTrigger = NULL;
@@ -95,7 +95,7 @@ ReadNcFiles::ReadNcFiles (Params &params)
   memset( (void *) &_vlevelHeader, (int) 0, sizeof(Mdvx::vlevel_header_t) );
 }
 
-ReadNcFiles::~ReadNcFiles()
+ReadGribFiles::~ReadGribFiles()
 {
   _gribFields.erase(_gribFields.begin(), _gribFields.end() );
   delete _dataTrigger;
@@ -105,7 +105,7 @@ ReadNcFiles::~ReadNcFiles()
     delete _Grib2File;
 }
 
-int ReadNcFiles::init(int nFiles, char** fileList, bool printVarList, 
+int ReadGribFiles::init(int nFiles, char** fileList, bool printVarList, 
 		   bool printsummary , bool printsections)
 {
 
@@ -217,7 +217,7 @@ int ReadNcFiles::init(int nFiles, char** fileList, bool printVarList,
    
 }
 
-int ReadNcFiles::getData()
+int ReadGribFiles::getData()
 {
    string filePath;
    Grib2::Grib2Record::print_sections_t printSec;
@@ -590,7 +590,7 @@ int ReadNcFiles::getData()
    return(RI_SUCCESS);
 }
 
-int ReadNcFiles::_mdvInit() 
+int ReadGribFiles::_mdvInit() 
 {
 
   _outputFile = new OutputFile( _paramsPtr );
@@ -600,7 +600,7 @@ int ReadNcFiles::_mdvInit()
 
 //
 // Takes the list of _outputFields and writes them out to Mdv
-int ReadNcFiles::_writeMdvFile(time_t generateTime, long int forecastTime)
+int ReadGribFiles::_writeMdvFile(time_t generateTime, long int forecastTime)
 {
 
   if( (generateTime < 0) || (forecastTime < 0)) {
@@ -623,7 +623,7 @@ int ReadNcFiles::_writeMdvFile(time_t generateTime, long int forecastTime)
 
 //
 // Returns the Mdv level appropriate to a Grib level
-int ReadNcFiles::_convertGribLevel2MDVLevel(const string &GribLevel)
+int ReadGribFiles::_convertGribLevel2MDVLevel(const string &GribLevel)
 {
   const char *GribLevelCStr = GribLevel.c_str();
   // GRIB2 Code Table 4.5 
@@ -688,7 +688,7 @@ int ReadNcFiles::_convertGribLevel2MDVLevel(const string &GribLevel)
 
 //
 // Creates/sets the Field Header from the current _GribRecord pointer
-int ReadNcFiles::_createFieldHdr ()
+int ReadGribFiles::_createFieldHdr ()
 {
 
   _reOrderNS_2_SN = false;
@@ -912,7 +912,7 @@ int ReadNcFiles::_createFieldHdr ()
 
 //
 // Sorts a list of Grib2Records by level
-void ReadNcFiles::_sortByLevel(vector<Grib2::Grib2Record::Grib2Sections_t>::iterator begin, 
+void ReadGribFiles::_sortByLevel(vector<Grib2::Grib2Record::Grib2Sections_t>::iterator begin, 
 			    vector<Grib2::Grib2Record::Grib2Sections_t>::iterator end)
 {
   bool reverse = false;
@@ -944,7 +944,7 @@ void ReadNcFiles::_sortByLevel(vector<Grib2::Grib2Record::Grib2Sections_t>::iter
 // For GFS data this means  that the data starts in the 
 // lower left hand corner instead of the upper left hand 
 // corner. 
-void ReadNcFiles::_reOrderNS2SN (fl32 *data, int numX, int numY)
+void ReadGribFiles::_reOrderNS2SN (fl32 *data, int numX, int numY)
 {
   int j = 0;
   MemBuf *gribData = new MemBuf();
@@ -967,7 +967,7 @@ void ReadNcFiles::_reOrderNS2SN (fl32 *data, int numX, int numY)
 // Reorders rows that scan in the opposite direction
 // to rows that scan in the same direction.
 // Grid size remains the same.
-void ReadNcFiles::_reOrderAdjacentRows (fl32 *data, int numX, int numY)
+void ReadGribFiles::_reOrderAdjacentRows (fl32 *data, int numX, int numY)
 {
   MemBuf *gribData = new MemBuf();
 
@@ -991,7 +991,7 @@ void ReadNcFiles::_reOrderAdjacentRows (fl32 *data, int numX, int numY)
 // Selects the Mdv field name. Uses the abbreviated name from the Grib2 product table along
 // with the abbreviated level name to form a unique name for this field.
 // If there is an mdv field name specfied in the parameter file it is used instead.
-void ReadNcFiles::_setFieldNames(int paramsIndex)
+void ReadGribFiles::_setFieldNames(int paramsIndex)
 {
   char defaultName[100];
   STRncopy(defaultName, _GribRecord->summary->name.c_str(), 100);
@@ -1017,7 +1017,7 @@ void ReadNcFiles::_setFieldNames(int paramsIndex)
 //
 // Applies limits on range of values in _data, specified by the upper_range_limit 
 // and lower_range_limit values from the parameter file. 
-void ReadNcFiles::_limitDataRange(int paramsIndex, fl32 *dataPtr)
+void ReadGribFiles::_limitDataRange(int paramsIndex, fl32 *dataPtr)
 {
   if(paramsIndex < 0 || paramsIndex >= _paramsPtr->output_fields_n)
     return;
@@ -1060,7 +1060,7 @@ void ReadNcFiles::_limitDataRange(int paramsIndex, fl32 *dataPtr)
 //
 // Performs simple unit conversions on the vertical level
 //
-void ReadNcFiles::_convertVerticalUnits(int paramsIndex)
+void ReadGribFiles::_convertVerticalUnits(int paramsIndex)
 {
   // Set to User defined value if set in parameter file
   if(strlen(_paramsPtr->override_vlevels) > 0 &&
@@ -1095,7 +1095,7 @@ void ReadNcFiles::_convertVerticalUnits(int paramsIndex)
 //
 // Performs simple unit conversions, which are prescribed in the parameter file
 //
-void ReadNcFiles::_convertUnits(int paramsIndex, fl32 *dataPtr)
+void ReadGribFiles::_convertUnits(int paramsIndex, fl32 *dataPtr)
 {
 
   float scaleFactor = 1.0;
@@ -1216,7 +1216,7 @@ float inline getInd(double out, double in1, double in2)
 }
 
 
-void ReadNcFiles::_replaceAdditionalBadMissing(fl32 *data, Mdvx::field_header_t fhdr,
+void ReadGribFiles::_replaceAdditionalBadMissing(fl32 *data, Mdvx::field_header_t fhdr,
                                             bool use_bad_value, fl32 bad_value,
                                             bool use_missing_value, fl32 missing_value)
 {
@@ -1231,7 +1231,7 @@ void ReadNcFiles::_replaceAdditionalBadMissing(fl32 *data, Mdvx::field_header_t 
 }
 
 
-fl32 *ReadNcFiles::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
+fl32 *ReadGribFiles::_reMapReducedOrGaussian(fl32 *data, Mdvx::field_header_t fhdr)
 {
 
   fl32 *lats;

@@ -475,8 +475,14 @@ void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) 
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _mousePressX = e->position().x();
-  _mousePressY = e->position().y();
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  _mousePressX = pos.x();
+  _mousePressY = pos.y();
 
   mapPixelToWorld(_mousePressX, _mousePressY, &_worldPressX, &_worldPressY);
 
@@ -484,8 +490,8 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
       _rubberBand->hide();
       _boundaryTrackMouseMove = true;
   } else {
-      _rubberBand->setGeometry(QRect(e->pos(), QSize()));
-      _rubberBand->show();
+    _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
+    _rubberBand->show();
   }
 }
 
@@ -499,7 +505,13 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
   double worldX;
   double worldY;
 
-  mapPixelToWorld(e->pos().x(), e->pos().y(), &worldX, &worldY);
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  mapPixelToWorld(pos.x(), pos.y(), &worldX, &worldY);
   
   if (_boundaryTrackMouseMove) {
     _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
@@ -510,8 +522,8 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
    
   // Zooming with the mouse
 
-  int x = e->position().x();
-  int y = e->position().y();
+  int x = pos.x();
+  int y = pos.y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
@@ -551,8 +563,14 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   QRect rgeom = _rubberBand->geometry();
   QPointF clickPos(e->pos());
   
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+  
+  _mouseReleaseX = pos.x();
+  _mouseReleaseY = pos.y();
 
   mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
   // get click location in world coords
@@ -620,8 +638,14 @@ void PolarWidget::mouseDoubleClickEvent(QMouseEvent *e)
 
   QPointF clickPos(e->pos());
   
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  _mouseReleaseX = pos.x();
+  _mouseReleaseY = pos.y();
 
   mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
   cerr << "translate to (mouse)" << _mouseReleaseX << ", " << _mouseReleaseY << endl;
