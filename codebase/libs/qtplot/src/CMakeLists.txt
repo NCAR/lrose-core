@@ -11,20 +11,53 @@
 
 project (libqtplot)
 
-# QT6
+# Finding Qt
 
+find_package (Qt6 COMPONENTS Core REQUIRED)
+if (NOT Qt6_FOUND)
+  find_package (Qt5 COMPONENTS Core REQUIRED)
+endif()
+if (Qt5_FOUND)
+  message(STATUS "Found Qt5: ${Qt5_VERSION}")
+elseif (Qt6_FOUND)
+    message(STATUS "Found Qt6: ${Qt6_VERSION}")
+else ()
+  message(FATAL_ERROR, "Qt not found.")
+endif(Qt5_FOUND)
+if(APPLE)
+  if (Qt5_FOUND)
+    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
+  elseif (Qt6_FOUND)
+    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
+  endif(Qt5_FOUND)
+endif(APPLE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
-find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+if (Qt5_FOUND)
+#  QT5
 
-pkg_search_module(Qt6Core REQUIRED)
-pkg_search_module(Qt6Gui REQUIRED)
-pkg_search_module(Qt6Widgets REQUIRED)
-pkg_search_module(Qt6Network REQUIRED)
-pkg_search_module(Qt6Qml REQUIRED)
+  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
 
+  pkg_search_module(Qt5Core REQUIRED)
+  pkg_search_module(Qt5Gui REQUIRED)
+  pkg_search_module(Qt5Widgets REQUIRED)
+  pkg_search_module(Qt5Network REQUIRED)
+  pkg_search_module(Qt5Qml REQUIRED)
+
+else()
+#  QT6
+
+  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+
+  pkg_search_module(Qt6Core REQUIRED)
+  pkg_search_module(Qt6Gui REQUIRED)
+  pkg_search_module(Qt6Widgets REQUIRED)
+  pkg_search_module(Qt6Network REQUIRED)
+  pkg_search_module(Qt6Qml REQUIRED)
+
+endif(Qt5_FOUND)
 # include directories
 
 include_directories (./include)
