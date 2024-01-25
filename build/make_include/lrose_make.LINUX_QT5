@@ -192,26 +192,32 @@ NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 NETCDF_INCLUDES=$(NETCDF4_INCS)
 NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 
-# QT
+# QT5
 
-ifeq ($(UNAME), x86_64)
-    ... do some things to build unistd_32.h
-    endif
-
-PKG_CONFIG_PATH = /usr/share/pkgconfig,/usr/local/opt/qt/lib/pkgconfig
-ifeq ($(HOST_OS), LINUX_QT5)
-  QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
-  #QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui )
-  QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
-  QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
-else
-  QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
-  #QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui )
-  QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
-  QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
-endif
-
+PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
+QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
+QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
 QT_CPPC_CFLAGS = -fPIC -std=c++17
+QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
+
+#PKG_CONFIG_PATH = /usr/share/pkgconfig,/usr/local/opt/qt/lib/pkgconfig
+#ifeq ($(HOST_OS), LINUX_QT5)
+#  QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
+#  QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
+#  QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
+#else
+#  QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+#  QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+#  QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
+#endif
+
+# QT6
+
+#PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
+#QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+#QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+#QT_CPPC_CFLAGS = -fPIC -std=c++17
+#QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
 
 
 # do not have jasper lib
