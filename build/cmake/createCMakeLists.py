@@ -910,58 +910,7 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList, needQt):
     fo.write("\n")
     
     if (needQt):
-
-        fo.write('# Finding Qt\n')
-        fo.write('\n')
-        fo.write('find_package (Qt6 COMPONENTS Core REQUIRED)\n')
-        fo.write('if (NOT Qt6_FOUND)\n')
-        fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
-        fo.write('endif()\n')
-        fo.write('if (Qt5_FOUND)\n')
-        fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
-        fo.write('elseif (Qt6_FOUND)\n')
-        fo.write('    message(STATUS "Found Qt6: ${Qt6_VERSION}")\n')
-        fo.write('else ()\n')
-        fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
-        fo.write('endif(Qt5_FOUND)\n')
-
-        fo.write('if(APPLE)\n')
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-        fo.write('  endif(Qt5_FOUND)\n')
-        fo.write('endif(APPLE)\n')
-
-        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
-        fo.write("set (CMAKE_AUTOMOC ON)\n")
-        fo.write("set (CMAKE_AUTORCC ON)\n")
-        fo.write("set (CMAKE_AUTOUIC ON)\n")
-
-        fo.write('if (Qt5_FOUND)\n')
-        fo.write("#  QT5\n")
-        fo.write("\n")
-        fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
-        fo.write("\n")
-        fo.write("  pkg_search_module(Qt5Core REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt5Gui REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt5Widgets REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt5Network REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt5Qml REQUIRED)\n")
-        fo.write("\n")
-        fo.write('else()\n')
-        fo.write("#  QT6\n")
-        fo.write("\n")
-        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
-        fo.write("\n")
-        fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt6Gui REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt6Widgets REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt6Network REQUIRED)\n")
-        fo.write("  pkg_search_module(Qt6Qml REQUIRED)\n")
-        fo.write("\n")
-        fo.write('endif(Qt5_FOUND)\n')
-        
+        addFindQt(fo)
 
     fo.write("# include directories\n")
     fo.write("\n")
@@ -989,12 +938,7 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList, needQt):
     fo.write("\n")
 
     if (needQt):
-        fo.write("include_directories(${Qt6Core_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Gui_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Widgets_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Network_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Qml_INCLUDE_DIRS})\n")
-        fo.write("\n")
+        addQtIncludes(fo)
 
     fo.write("# source files\n")
     fo.write("\n")
@@ -1411,21 +1355,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
 
     if (needQt):
-        fo.write("# QT6\n")
-        fo.write("\n")
-        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
-        fo.write("set (CMAKE_AUTOMOC ON)\n")
-        fo.write("set (CMAKE_AUTORCC ON)\n")
-        fo.write("set (CMAKE_AUTOUIC ON)\n")
-        fo.write("find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
-        fo.write("\n")
-
-        fo.write("pkg_search_module(Qt6Core REQUIRED)\n")
-        fo.write("pkg_search_module(Qt6Gui REQUIRED)\n")
-        fo.write("pkg_search_module(Qt6Widgets REQUIRED)\n")
-        fo.write("pkg_search_module(Qt6Network REQUIRED)\n")
-        fo.write("pkg_search_module(Qt6Qml REQUIRED)\n")
-        fo.write("\n")
+        addFindQt(fo)
 
     fo.write("# include directories\n")
     fo.write("\n")
@@ -1452,12 +1382,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
 
     if (needQt):
-        fo.write("include_directories(${Qt6Core_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Gui_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Widgets_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Network_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt6Qml_INCLUDE_DIRS})\n")
-        fo.write("\n")
+        addQtIncludes(fo)
 
     fo.write("# link directories\n")
     fo.write("\n")
@@ -1494,11 +1419,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("link_libraries (%s)\n" % lib)
 
     if (needQt):
-        fo.write("link_libraries (${Qt6Core_LIBRARIES})\n")
-        fo.write("link_libraries (${Qt6Gui_LIBRARIES})\n")
-        fo.write("link_libraries (${Qt6Widgets_LIBRARIES})\n")
-        fo.write("link_libraries (${Qt6Network_LIBRARIES})\n")
-        fo.write("link_libraries (${Qt6Qml_LIBRARIES})\n")
+        addQtLinks(fo)
     fo.write("\n")
 
     fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
@@ -1525,6 +1446,98 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.close
     return
     
+
+########################################################################
+# add code to find qt package
+
+def addFindQt(fo):
+
+    fo.write('#Finding Qt\n')
+    fo.write('find_package (Qt6 COMPONENTS Core)\n')
+    fo.write('if (NOT Qt6_FOUND)\n')
+    fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
+    fo.write('endif()\n')
+    fo.write('if (Qt5_FOUND)\n')
+    fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
+    fo.write('elseif (Qt6_FOUND)\n')
+    fo.write('    message(STATUS "Found Qt6: ${Qt6_VERSION}")\n')
+    fo.write('else ()\n')
+    fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
+    fo.write('endif(Qt5_FOUND)\n')
+    
+    fo.write('if(APPLE)\n')
+    fo.write('  if (Qt5_FOUND)\n')
+    fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+    fo.write('  elseif (Qt6_FOUND)\n')
+    fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+    fo.write('  endif(Qt5_FOUND)\n')
+    fo.write('endif(APPLE)\n')
+    
+    fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
+    fo.write("set (CMAKE_AUTOMOC ON)\n")
+    fo.write("set (CMAKE_AUTORCC ON)\n")
+    fo.write("set (CMAKE_AUTOUIC ON)\n")
+    
+    fo.write('if (Qt5_FOUND)\n')
+    fo.write("#QT5\n")
+    fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write("  pkg_search_module(Qt5Core REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt5Gui REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt5Widgets REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt5Network REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt5Qml REQUIRED)\n")
+    fo.write('else()\n')
+    fo.write("#QT6\n")
+    fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt6Gui REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt6Widgets REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt6Network REQUIRED)\n")
+    fo.write("  pkg_search_module(Qt6Qml REQUIRED)\n")
+    fo.write('endif(Qt5_FOUND)\n')
+    fo.write("\n")
+        
+########################################################################
+# add code to include qt libs
+
+def addQtIncludes(fo):
+
+    fo.write('#Including Qt\n')
+    fo.write('if (Qt5_FOUND)\n')
+    fo.write("include_directories(${Qt5Core_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt5Gui_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt5Widgets_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt5Network_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt5Qml_INCLUDE_DIRS})\n")
+    fo.write('else()\n')
+    fo.write("include_directories(${Qt6Core_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt6Gui_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt6Widgets_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt6Network_INCLUDE_DIRS})\n")
+    fo.write("include_directories(${Qt6Qml_INCLUDE_DIRS})\n")
+    fo.write('endif(Qt5_FOUND)\n')
+    fo.write("\n")
+
+########################################################################
+# add code to link qt libs
+
+def addQtLinks(fo):
+
+    fo.write('#Linking Qt\n')
+    fo.write('if (Qt5_FOUND)\n')
+    fo.write("  link_libraries (${Qt5Core_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt5Gui_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt5Widgets_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt5Network_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt5Qml_LIBRARIES})\n")
+    fo.write('else()\n')
+    fo.write("  link_libraries (${Qt6Core_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt6Gui_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt6Widgets_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt6Network_LIBRARIES})\n")
+    fo.write("  link_libraries (${Qt6Qml_LIBRARIES})\n")
+    fo.write('endif(Qt5_FOUND)\n')
+    fo.write("\n")
 
 #===========================================================================
 #

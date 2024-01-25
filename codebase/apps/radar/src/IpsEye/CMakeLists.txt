@@ -64,19 +64,46 @@ set (SRCS
       TimeScaleWidget.cc
     )
 
-# QT6
-
+#Finding Qt
+find_package (Qt6 COMPONENTS Core)
+if (NOT Qt6_FOUND)
+  find_package (Qt5 COMPONENTS Core REQUIRED)
+endif()
+if (Qt5_FOUND)
+  message(STATUS "Found Qt5: ${Qt5_VERSION}")
+elseif (Qt6_FOUND)
+    message(STATUS "Found Qt6: ${Qt6_VERSION}")
+else ()
+  message(FATAL_ERROR, "Qt not found.")
+endif(Qt5_FOUND)
+if(APPLE)
+  if (Qt5_FOUND)
+    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
+  elseif (Qt6_FOUND)
+    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
+  endif(Qt5_FOUND)
+endif(APPLE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
-find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-
-pkg_search_module(Qt6Core REQUIRED)
-pkg_search_module(Qt6Gui REQUIRED)
-pkg_search_module(Qt6Widgets REQUIRED)
-pkg_search_module(Qt6Network REQUIRED)
-pkg_search_module(Qt6Qml REQUIRED)
+if (Qt5_FOUND)
+#QT5
+  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  pkg_search_module(Qt5Core REQUIRED)
+  pkg_search_module(Qt5Gui REQUIRED)
+  pkg_search_module(Qt5Widgets REQUIRED)
+  pkg_search_module(Qt5Network REQUIRED)
+  pkg_search_module(Qt5Qml REQUIRED)
+else()
+#QT6
+  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  pkg_search_module(Qt6Core REQUIRED)
+  pkg_search_module(Qt6Gui REQUIRED)
+  pkg_search_module(Qt6Widgets REQUIRED)
+  pkg_search_module(Qt6Network REQUIRED)
+  pkg_search_module(Qt6Qml REQUIRED)
+endif(Qt5_FOUND)
 
 # include directories
 
@@ -128,11 +155,20 @@ if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
 
+#Including Qt
+if (Qt5_FOUND)
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Network_INCLUDE_DIRS})
+include_directories(${Qt5Qml_INCLUDE_DIRS})
+else()
 include_directories(${Qt6Core_INCLUDE_DIRS})
 include_directories(${Qt6Gui_INCLUDE_DIRS})
 include_directories(${Qt6Widgets_INCLUDE_DIRS})
 include_directories(${Qt6Network_INCLUDE_DIRS})
 include_directories(${Qt6Qml_INCLUDE_DIRS})
+endif(Qt5_FOUND)
 
 # link directories
 
@@ -187,11 +223,21 @@ link_libraries (fftw3)
 link_libraries (bz2)
 link_libraries (z)
 link_libraries (pthread)
-link_libraries (${Qt6Core_LIBRARIES})
-link_libraries (${Qt6Gui_LIBRARIES})
-link_libraries (${Qt6Widgets_LIBRARIES})
-link_libraries (${Qt6Network_LIBRARIES})
-link_libraries (${Qt6Qml_LIBRARIES})
+#Linking Qt
+if (Qt5_FOUND)
+  link_libraries (${Qt5Core_LIBRARIES})
+  link_libraries (${Qt5Gui_LIBRARIES})
+  link_libraries (${Qt5Widgets_LIBRARIES})
+  link_libraries (${Qt5Network_LIBRARIES})
+  link_libraries (${Qt5Qml_LIBRARIES})
+else()
+  link_libraries (${Qt6Core_LIBRARIES})
+  link_libraries (${Qt6Gui_LIBRARIES})
+  link_libraries (${Qt6Widgets_LIBRARIES})
+  link_libraries (${Qt6Network_LIBRARIES})
+  link_libraries (${Qt6Qml_LIBRARIES})
+endif(Qt5_FOUND)
+
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file

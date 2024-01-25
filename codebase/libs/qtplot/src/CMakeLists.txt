@@ -11,9 +11,8 @@
 
 project (libqtplot)
 
-# Finding Qt
-
-find_package (Qt6 COMPONENTS Core REQUIRED)
+#Finding Qt
+find_package (Qt6 COMPONENTS Core)
 if (NOT Qt6_FOUND)
   find_package (Qt5 COMPONENTS Core REQUIRED)
 endif()
@@ -36,28 +35,23 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
 if (Qt5_FOUND)
-#  QT5
-
+#QT5
   find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-
   pkg_search_module(Qt5Core REQUIRED)
   pkg_search_module(Qt5Gui REQUIRED)
   pkg_search_module(Qt5Widgets REQUIRED)
   pkg_search_module(Qt5Network REQUIRED)
   pkg_search_module(Qt5Qml REQUIRED)
-
 else()
-#  QT6
-
+#QT6
   find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-
   pkg_search_module(Qt6Core REQUIRED)
   pkg_search_module(Qt6Gui REQUIRED)
   pkg_search_module(Qt6Widgets REQUIRED)
   pkg_search_module(Qt6Network REQUIRED)
   pkg_search_module(Qt6Qml REQUIRED)
-
 endif(Qt5_FOUND)
+
 # include directories
 
 include_directories (./include)
@@ -109,11 +103,20 @@ if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
 
+#Including Qt
+if (Qt5_FOUND)
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Network_INCLUDE_DIRS})
+include_directories(${Qt5Qml_INCLUDE_DIRS})
+else()
 include_directories(${Qt6Core_INCLUDE_DIRS})
 include_directories(${Qt6Gui_INCLUDE_DIRS})
 include_directories(${Qt6Widgets_INCLUDE_DIRS})
 include_directories(${Qt6Network_INCLUDE_DIRS})
 include_directories(${Qt6Qml_INCLUDE_DIRS})
+endif(Qt5_FOUND)
 
 # source files
 
