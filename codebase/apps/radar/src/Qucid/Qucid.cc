@@ -86,13 +86,13 @@ Qucid::Qucid(int argc, char **argv) :
 
   // check for legacy params file
 
-  
   string legacyParamsPath;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     gd.db_name = strdup(legacyParamsPath.c_str());
     cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
     cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
-    string tdrpParamsPath("/tmp/CIDD.tdrp");
+    char tdrpParamsPath[2048];
+    snprintf(tdrpParamsPath, 2047, "/tmp/Qucid.%s.%d.tdrp", legacyParamsPath.c_str(), getpid());
     LegacyParams lParams;
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     // init_data_space(_params);
@@ -103,7 +103,7 @@ Qucid::Qucid(int argc, char **argv) :
     //   if (printMode != NO_PRINT) {
     //     _params.sync();
     //     _params.print(stdout, printMode);
-    //     exit(0);
+    exit(0);
     //   }
     // }
   }

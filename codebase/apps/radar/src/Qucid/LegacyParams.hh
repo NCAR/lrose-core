@@ -76,6 +76,8 @@ private:
   int _paramsBufLen;
   char *_paramsBuf; // Pointer to the parameter data
 
+  FILE *_tdrpFile;
+
   // field details
   
   typedef enum {
@@ -168,7 +170,7 @@ private:
   int _getInt(const char *param_name, int default_val);
   bool _getBoolean(const char *param_name, int default_val);
   long _getLong(const char *param_name, long default_val);
-  const char *_getString(const char *param_name, const char *default_val);
+  const string _getString(const char *param_name, const char *default_val);
   
   const char *_findTagText(const char *input_buf,
                            const char * tag,
