@@ -230,7 +230,7 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
       TDRP_str_replace(&field->url, record.url);
       TDRP_str_replace(&field->field_name, record.field_label);
       TDRP_str_replace(&field->color_map, record.color_file);
-      TDRP_str_replace(&field->units, record.field_units);
+      TDRP_str_replace(&field->field_units, record.field_units);
       field->contour_low = record.cont_low;
       field->contour_low = -9999;
       field->contour_high = record.cont_high;

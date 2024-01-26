@@ -217,13 +217,17 @@ typedef struct {
   string url;
   string field_name;
   string color_map;
-  string units;
+  string field_units;
   double contour_low;
   double contour_high;
   double contour_interval;
   render_mode_t render_mode;
   boolean display_in_menu;
   boolean background_render;
+  boolean composite_mode;
+  boolean auto_scale;
+  boolean auto_render;
+  boolean currently_displayed;
 } field_t;
 
 paramdef struct field_t {
@@ -234,13 +238,17 @@ paramdef struct field_t {
       url = "mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur",
       field_name = "DBZ_F",
       color_map = "dbz.colors",
-      units = "dBZ",
+      field_units = "dBZ",
       contour_low = -5,
       contour_high = 80,
       contour_interval = 5,
       render_mode = POLYGONS,
       display_in_menu = true,
-      background_render = false
+      background_render = false,
+      composite_mode = false,
+      auto_scale = false,
+      auto_render = false,
+      currently_displayed = false
     }
     ,
     {
@@ -249,13 +257,17 @@ paramdef struct field_t {
       url = "mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur",
       field_name = "VEL_F",
       color_map = "vel.colors",
-      units = "m/s",
+      field_units = "m/s",
       contour_low = -5,
       contour_high = 80,
       contour_interval = 5,
       render_mode = POLYGONS,
       display_in_menu = true,
-      background_render = false
+      background_render = false,
+      composite_mode = false,
+      auto_scale = false,
+      auto_render = false,
+      currently_displayed = false
     }
   };
   p_descr = "Fields to be displayed.";
@@ -270,11 +282,18 @@ paramdef struct field_t {
     "/ncontour_high: contour rendering upper limit. "
     "/ncontour_interval: contour rendering interval. "
     "/nrender_mode:"
-    "/n  cart: Rectangle/polygon fills of gridded data."
-    "/n  cont: false color filled contours."
-    "/n  lcont: line contours."
-    "/n  dcont: dynamic contours, auto switching between cart and cont."
-    "/n         uses dynamic_contour_treshold.";
+    "/n  POLYGONS: Rectangle/polygon fills of gridded data."
+    "/n  FILLED_CONTOURS: false color filled contours."
+    "/n  LINE_CONTOURS: line contours."
+    "/n  DYNAMIC_CONTOURS: auto switching between cart and cont."
+    "/n         uses dynamic_contour_treshold."
+    "/ndisplay_in_menu: display this field in the menu."
+    "/nbackground_render: render this field automatically in the background."
+    "/ncomposite_mode: display max over height."
+    "/nauto_scale: scale automatically."
+    "/nauto_render: render automatically."
+    "/ncurrently_displayed: displayed at startup."
+    "/n";
 } fields[];
 
 paramdef double {

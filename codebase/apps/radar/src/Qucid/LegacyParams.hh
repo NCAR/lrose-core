@@ -104,14 +104,17 @@ private:
       currently_displayed = false;
     }
     ~Field() {
-      delete[] text_line;
+      if (text_line != NULL) {
+        delete[] text_line;
+      }
     }
     Field& operator=(const Field &rhs) {
       if (&rhs == this) {
         return *this;
       }
       is_valid = rhs.is_valid;
-      text_line = strdup(rhs.text_line);
+      text_line = new char[strlen(rhs.text_line) + 1];
+      memcpy(text_line, rhs.text_line, strlen(rhs.text_line) + 1);
       button_label = rhs.button_label;
       legend_label = rhs.legend_label;
       url = rhs.url;

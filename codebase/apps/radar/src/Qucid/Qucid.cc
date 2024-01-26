@@ -435,7 +435,7 @@ int Qucid::_setupDisplayFields()
     colorMapPath += pfld.color_map;
     ColorMap map;
     map.setName(pfld.legend_label);
-    map.setUnits(pfld.units);
+    map.setUnits(pfld.field_units);
     // TODO: the logic here is a little weird ... the legend_label and units have been set, but are we throwing them away?
 
     bool noColorMap = false;
@@ -467,7 +467,7 @@ int Qucid::_setupDisplayFields()
     // unfiltered field
 
     DisplayField *field =
-      new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, 
+      new DisplayField(pfld.legend_label, pfld.field_name, pfld.field_units, 
                        "a", map, ifield, false);
     if (noColorMap)
       field->setNoColorMap();
@@ -479,7 +479,7 @@ int Qucid::_setupDisplayFields()
     if (strlen(pfld.field_name) > 0) {
       string filtField_Label = string(pfld.legend_label) + "-filt";
       DisplayField *filt =
-        new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, "a", 
+        new DisplayField(pfld.legend_label, pfld.field_name, pfld.field_units, "a", 
                          map, ifield, true);
       _displayFields.push_back(filt);
     }

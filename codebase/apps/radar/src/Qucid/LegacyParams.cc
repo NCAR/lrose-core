@@ -124,6 +124,28 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   fprintf(_tdrpFile, "//\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
+  // get field params
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <GRIDS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  param_text = find_tag_text(_paramsBuf,"GRIDS",
+                             &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Couldn't Find GRIDS Section\n");
+    return -1;
+  }
+  // establish and initialize sources of data 
+  if (_initDataFields(param_text, param_text_len, param_text_line_no)) {
+    return -1;
+  }
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </GRIDS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
   // Load the Main parameters
 
   param_text_line_no = 0;
@@ -135,9 +157,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
     return -1;
   }
-    
+
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// <MAIN>\n");
+  fprintf(_tdrpFile, "// <MAIN_PARAMS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
   _getBoolean("cidd.debug_flag", 0);
@@ -548,9 +570,19 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   
   gd.drawing_mode = 0;
 
-  // products
+  /* Establish the native projection type */
+  
+  _getString("cidd.projection_type", "CARTESIAN");
+
+  _getBoolean("cidd.wind_mode", 0);
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </MAIN_PARAMS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
 #ifdef JUNK
+
+  // products
 
   gd.prod.products_on = gd.products_on;
   gd.prod.prod_line_width = gd.product_line_width;
@@ -601,10 +633,6 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   }
 
 #endif
-
-  /* Establish the native projection type */
-  
-  _getString("cidd.projection_type", "CARTESIAN");
 
 #ifdef JUNK
   // movies
@@ -727,25 +755,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   }
 #endif
   
-  _getBoolean("cidd.wind_mode", 0);
-
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// </MAIN>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-
 #ifdef JUNK
-
-  param_text = find_tag_text(_paramsBuf,"GRIDS",
-                             &param_text_len, &param_text_line_no);
-  
-  if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Couldn't Find GRIDS Section\n");
-    return -1;
-  }
-  // establish and initialize sources of data 
-  if (_initDataFields(param_text, param_text_len, param_text_line_no)) {
-    return -1;
-  }
 
   // copy legacy params to tdrp
 
@@ -2025,12 +2035,12 @@ int LegacyParams::_initDataFields(const char *param_buf,
   }
 
   /* scan through each of the data information lines */
-  for(size_t ii = 0; ii < flds.size(); ii++) {
+  for(size_t ifield = 0; ifield < flds.size(); ifield++) {
 
-    Field &fld = flds[ii];
+    Field &fld = flds[ifield];
     
     /* get space for data info */
-    // gd.mrec[ii] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
+    // gd.mrec[ifield] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
 
     /* separate into substrings */
 
@@ -2074,7 +2084,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
     fld.contour_high = atof(cfield[6]);
     fld.contour_interval = atof(cfield[7]);
 
-    // gd.mrec[ii]->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    // gd.mrec[ifield]->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
 
     if (strncasecmp(cfield[8],"rad",3) == 0) {
       fld.render_mode = POLYGONS;
@@ -2110,48 +2120,89 @@ int LegacyParams::_initDataFields(const char *param_buf,
       fld.auto_render = atoi(cfield[10]);
     }
 
-    // gd.mrec[ii]->last_elev = (char *)NULL;
-    // gd.mrec[ii]->elev_size = 0;
+    // gd.mrec[ifield]->last_elev = (char *)NULL;
+    // gd.mrec[ifield]->elev_size = 0;
 
-    // gd.mrec[ii]->plane = 0;
-    // gd.mrec[ii]->h_data_valid = 0;
-    // gd.mrec[ii]->v_data_valid = 0;
-    // gd.mrec[ii]->h_last_scale  = -1.0;
-    // gd.mrec[ii]->h_last_bias  = -1.0;
-    // gd.mrec[ii]->h_last_missing  = -1.0;
-    // gd.mrec[ii]->h_last_bad  = -1.0;
-    // gd.mrec[ii]->h_last_transform  = -1;
-    // gd.mrec[ii]->v_last_scale  = -1.0;
-    // gd.mrec[ii]->v_last_bias  = -1.0;
-    // gd.mrec[ii]->v_last_missing  = -1.0;
-    // gd.mrec[ii]->v_last_bad  = -1.0;
-    // gd.mrec[ii]->v_last_transform  = -1;
-    // gd.mrec[ii]->h_fhdr.proj_origin_lat  = 0.0;
-    // gd.mrec[ii]->h_fhdr.proj_origin_lon  = 0.0;
-    // gd.mrec[ii]->time_list.num_alloc_entries = 0;
-    // gd.mrec[ii]->time_list.num_entries = 0;
+    // gd.mrec[ifield]->plane = 0;
+    // gd.mrec[ifield]->h_data_valid = 0;
+    // gd.mrec[ifield]->v_data_valid = 0;
+    // gd.mrec[ifield]->h_last_scale  = -1.0;
+    // gd.mrec[ifield]->h_last_bias  = -1.0;
+    // gd.mrec[ifield]->h_last_missing  = -1.0;
+    // gd.mrec[ifield]->h_last_bad  = -1.0;
+    // gd.mrec[ifield]->h_last_transform  = -1;
+    // gd.mrec[ifield]->v_last_scale  = -1.0;
+    // gd.mrec[ifield]->v_last_bias  = -1.0;
+    // gd.mrec[ifield]->v_last_missing  = -1.0;
+    // gd.mrec[ifield]->v_last_bad  = -1.0;
+    // gd.mrec[ifield]->v_last_transform  = -1;
+    // gd.mrec[ifield]->h_fhdr.proj_origin_lat  = 0.0;
+    // gd.mrec[ifield]->h_fhdr.proj_origin_lon  = 0.0;
+    // gd.mrec[ifield]->time_list.num_alloc_entries = 0;
+    // gd.mrec[ifield]->time_list.num_entries = 0;
 
-    // STRcopy(gd.mrec[ii]->units_label_cols,"KM",LABEL_LENGTH);
-    // STRcopy(gd.mrec[ii]->units_label_rows,"KM",LABEL_LENGTH);
-    // STRcopy(gd.mrec[ii]->units_label_sects,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ifield]->units_label_cols,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ifield]->units_label_rows,"KM",LABEL_LENGTH);
+    // STRcopy(gd.mrec[ifield]->units_label_sects,"KM",LABEL_LENGTH);
 
     // // instantiate classes
-    // gd.mrec[ii]->h_mdvx = new DsMdvxThreaded;
-    // gd.mrec[ii]->v_mdvx = new DsMdvxThreaded;
-    // gd.mrec[ii]->h_mdvx_int16 = new MdvxField;
-    // gd.mrec[ii]->v_mdvx_int16 = new MdvxField;
-    // gd.mrec[ii]->proj = new MdvxProj;
+    // gd.mrec[ifield]->h_mdvx = new DsMdvxThreaded;
+    // gd.mrec[ifield]->v_mdvx = new DsMdvxThreaded;
+    // gd.mrec[ifield]->h_mdvx_int16 = new MdvxField;
+    // gd.mrec[ifield]->v_mdvx_int16 = new MdvxField;
+    // gd.mrec[ifield]->proj = new MdvxProj;
 
-  }
+  } // ifield
+  
   /* Make sure the first field is always on */
-  gd.mrec[0]->currently_displayed = 1;
+  // gd.mrec[0]->currently_displayed = 1;
     
   /* free up temp storage for substrings */
   for(int i = 0; i < NUM_PARSE_FIELDS; i++) {
     free(cfield[i]);
   }
 
-  // set the tdrp params for the fields
+  /* write to tdrp params file */
+
+  fprintf(_tdrpFile, "fields = {\n");
+  for(size_t ifield = 0; ifield < flds.size(); ifield++) {
+    Field &fld = flds[ifield];
+    fprintf(_tdrpFile, "{\n");
+    fprintf(_tdrpFile, "  button_label = \"%s\",\n", fld.button_label.c_str());
+    fprintf(_tdrpFile, "  legend_label = \"%s\",\n", fld.legend_label.c_str());
+    fprintf(_tdrpFile, "  url_label = \"%s\",\n", fld.url.c_str());
+    fprintf(_tdrpFile, "  field_name = \"%s\",\n", fld.field_name.c_str());
+    fprintf(_tdrpFile, "  color_map = \"%s\",\n", fld.color_map.c_str());
+    fprintf(_tdrpFile, "  field_units = \"%s\",\n", fld.field_units.c_str());
+    fprintf(_tdrpFile, "  contour_low = %lg,\n", fld.contour_low);
+    fprintf(_tdrpFile, "  contour_high = %lg,\n", fld.contour_high);
+    fprintf(_tdrpFile, "  contour_interval = %lg,\n", fld.contour_interval);
+    switch (fld.render_mode) {
+      case POLYGONS:
+        fprintf(_tdrpFile, "  render_mode = POLYGONS,\n");
+        break;
+      case FILLED_CONTOURS:
+        fprintf(_tdrpFile, "  render_mode = FILLED_CONTOURS,\n");
+        break;
+      case DYNAMIC_CONTOURS:
+        fprintf(_tdrpFile, "  render_mode = DYNAMIC_CONTOURS,\n");
+        break;
+      case LINE_CONTOURS:
+        fprintf(_tdrpFile, "  render_mode = LINE_CONTOURS,\n");
+        break;
+    }
+    fprintf(_tdrpFile, "  display_in_menu = %s,\n", (fld.display_in_menu?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  background_render = %s,\n", (fld.background_render?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  composite_mode = %s,\n", (fld.composite_mode?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  auto_scale = %s,\n", (fld.auto_scale?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  auto_render = %s,\n", (fld.auto_render?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  currently_displayed = %s\n", (fld.currently_displayed?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "}\n");
+    if (ifield < flds.size() - 1) {
+      fprintf(_tdrpFile, ",\n");
+    }
+  } // ifield
+  fprintf(_tdrpFile, "};\n");
 
   cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
   cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << gParams.fields_n << endl;
@@ -2172,7 +2223,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
     TDRP_str_replace(&field->url, record.url);
     TDRP_str_replace(&field->field_name, record.field_label);
     TDRP_str_replace(&field->color_map, record.color_file);
-    TDRP_str_replace(&field->units, record.field_units);
+    TDRP_str_replace(&field->field_units, record.field_units);
     field->contour_low = record.cont_low;
     field->contour_low = -9999;
     field->contour_high = record.cont_high;

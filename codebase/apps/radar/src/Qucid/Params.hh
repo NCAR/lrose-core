@@ -208,13 +208,17 @@ public:
     char* url;
     char* field_name;
     char* color_map;
-    char* units;
+    char* field_units;
     double contour_low;
     double contour_high;
     double contour_interval;
     render_mode_t render_mode;
     tdrp_bool_t display_in_menu;
     tdrp_bool_t background_render;
+    tdrp_bool_t composite_mode;
+    tdrp_bool_t auto_scale;
+    tdrp_bool_t auto_render;
+    tdrp_bool_t currently_displayed;
   } field_t;
 
   typedef struct {

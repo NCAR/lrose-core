@@ -1005,7 +1005,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fields");
     tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("/nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  cart: Rectangle/polygon fills of gridded data./n  cont: false color filled contours./n  lcont: line contours./n  dcont: dynamic contours, auto switching between cart and cont./n         uses dynamic_contour_treshold.");
+    tt->help = tdrpStrDup("/nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  POLYGONS: Rectangle/polygon fills of gridded data./n  FILLED_CONTOURS: false color filled contours./n  LINE_CONTOURS: line contours./n  DYNAMIC_CONTOURS: auto switching between cart and cont./n         uses dynamic_contour_treshold./ndisplay_in_menu: display this field in the menu./nbackground_render: render this field automatically in the background./ncomposite_mode: display max over height./nauto_scale: scale automatically./nauto_render: render automatically./ncurrently_displayed: displayed at startup./n");
     tt->array_offset = (char *) &_fields - &_start_;
     tt->array_n_offset = (char *) &fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1013,7 +1013,7 @@
     tt->array_elem_size = sizeof(field_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("field_t");
-    tt->struct_def.nfields = 12;
+    tt->struct_def.nfields = 16;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1042,10 +1042,10 @@
       tt->struct_def.fields[4].rel_offset = 
         (char *) &_fields->color_map - (char *) _fields;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[5].fname = tdrpStrDup("units");
+      tt->struct_def.fields[5].fname = tdrpStrDup("field_units");
       tt->struct_def.fields[5].ptype = STRING_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_fields->units - (char *) _fields;
+        (char *) &_fields->field_units - (char *) _fields;
       tt->struct_def.fields[6].ftype = tdrpStrDup("double");
       tt->struct_def.fields[6].fname = tdrpStrDup("contour_low");
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
@@ -1088,7 +1088,27 @@
       tt->struct_def.fields[11].ptype = BOOL_TYPE;
       tt->struct_def.fields[11].rel_offset = 
         (char *) &_fields->background_render - (char *) _fields;
-    tt->n_struct_vals = 24;
+      tt->struct_def.fields[12].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[12].fname = tdrpStrDup("composite_mode");
+      tt->struct_def.fields[12].ptype = BOOL_TYPE;
+      tt->struct_def.fields[12].rel_offset = 
+        (char *) &_fields->composite_mode - (char *) _fields;
+      tt->struct_def.fields[13].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[13].fname = tdrpStrDup("auto_scale");
+      tt->struct_def.fields[13].ptype = BOOL_TYPE;
+      tt->struct_def.fields[13].rel_offset = 
+        (char *) &_fields->auto_scale - (char *) _fields;
+      tt->struct_def.fields[14].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[14].fname = tdrpStrDup("auto_render");
+      tt->struct_def.fields[14].ptype = BOOL_TYPE;
+      tt->struct_def.fields[14].rel_offset = 
+        (char *) &_fields->auto_render - (char *) _fields;
+      tt->struct_def.fields[15].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[15].fname = tdrpStrDup("currently_displayed");
+      tt->struct_def.fields[15].ptype = BOOL_TYPE;
+      tt->struct_def.fields[15].rel_offset = 
+        (char *) &_fields->currently_displayed - (char *) _fields;
+    tt->n_struct_vals = 32;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ_F");
@@ -1103,18 +1123,26 @@
       tt->struct_vals[9].e = POLYGONS;
       tt->struct_vals[10].b = pTRUE;
       tt->struct_vals[11].b = pFALSE;
-      tt->struct_vals[12].s = tdrpStrDup("VEL_F");
-      tt->struct_vals[13].s = tdrpStrDup("VEL_F");
-      tt->struct_vals[14].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur");
-      tt->struct_vals[15].s = tdrpStrDup("VEL_F");
-      tt->struct_vals[16].s = tdrpStrDup("vel.colors");
-      tt->struct_vals[17].s = tdrpStrDup("m/s");
-      tt->struct_vals[18].d = -5;
-      tt->struct_vals[19].d = 80;
-      tt->struct_vals[20].d = 5;
-      tt->struct_vals[21].e = POLYGONS;
-      tt->struct_vals[22].b = pTRUE;
-      tt->struct_vals[23].b = pFALSE;
+      tt->struct_vals[12].b = pFALSE;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].b = pFALSE;
+      tt->struct_vals[15].b = pFALSE;
+      tt->struct_vals[16].s = tdrpStrDup("VEL_F");
+      tt->struct_vals[17].s = tdrpStrDup("VEL_F");
+      tt->struct_vals[18].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur");
+      tt->struct_vals[19].s = tdrpStrDup("VEL_F");
+      tt->struct_vals[20].s = tdrpStrDup("vel.colors");
+      tt->struct_vals[21].s = tdrpStrDup("m/s");
+      tt->struct_vals[22].d = -5;
+      tt->struct_vals[23].d = 80;
+      tt->struct_vals[24].d = 5;
+      tt->struct_vals[25].e = POLYGONS;
+      tt->struct_vals[26].b = pTRUE;
+      tt->struct_vals[27].b = pFALSE;
+      tt->struct_vals[28].b = pFALSE;
+      tt->struct_vals[29].b = pFALSE;
+      tt->struct_vals[30].b = pFALSE;
+      tt->struct_vals[31].b = pFALSE;
     tt++;
     
     // Parameter 'background_render_mins'
