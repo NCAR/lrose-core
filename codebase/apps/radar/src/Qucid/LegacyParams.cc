@@ -481,7 +481,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   _getBoolean("cidd.label_contours",1);
   _getLong("cidd.contour_line_width", 1);
-  _getBoolean("cidd.smooth_contours", 0);
+  _getLong("cidd.smooth_contours", 0);
   _getBoolean("cidd.use_alt_contours", 0);
   _getBoolean("cidd.add_noise", 0);
   _getDouble("cidd.special_contour_value", 0.0);
@@ -2000,12 +2000,12 @@ int LegacyParams::_initDataFields(const char *param_buf,
 
       // create space for text line
 
-      fld.text_line = new char[len + 10000];
-      STRcopy(fld.text_line, start_ptr, len);
+      fld.text_line.resize(10000);
+      STRcopy((char *) fld.text_line.c_str(), start_ptr, len);
 
       /* Do Environment variable substitution */
       // usubstitute_env(gd.data_info[gd.num_datafields], len+128);
-      usubstitute_env(fld.text_line, len + 10000);
+      usubstitute_env((char *) fld.text_line.c_str(), len + 10000);
       gd.num_datafields++;
 
       flds.push_back(fld);
@@ -2044,7 +2044,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
 
     /* separate into substrings */
 
-    STRparse(fld.text_line, cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
+    STRparse(fld.text_line.c_str(), cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
     fld.legend_label = cfield[0];
     fld.button_label = cfield[1];
 
@@ -2112,7 +2112,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
       fld.auto_scale = TRUE;
     }
 
-    fld.currently_displayed = atoi(cfield[9]);
+    fld.display_in_menu = atoi(cfield[9]);
     
     if(gd.run_once_and_exit) {
       fld.auto_render = 1;
@@ -2170,7 +2170,7 @@ int LegacyParams::_initDataFields(const char *param_buf,
     fprintf(_tdrpFile, "{\n");
     fprintf(_tdrpFile, "  button_label = \"%s\",\n", fld.button_label.c_str());
     fprintf(_tdrpFile, "  legend_label = \"%s\",\n", fld.legend_label.c_str());
-    fprintf(_tdrpFile, "  url_label = \"%s\",\n", fld.url.c_str());
+    fprintf(_tdrpFile, "  url = \"%s\",\n", fld.url.c_str());
     fprintf(_tdrpFile, "  field_name = \"%s\",\n", fld.field_name.c_str());
     fprintf(_tdrpFile, "  color_map = \"%s\",\n", fld.color_map.c_str());
     fprintf(_tdrpFile, "  field_units = \"%s\",\n", fld.field_units.c_str());
@@ -2195,53 +2195,13 @@ int LegacyParams::_initDataFields(const char *param_buf,
     fprintf(_tdrpFile, "  background_render = %s,\n", (fld.background_render?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "  composite_mode = %s,\n", (fld.composite_mode?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "  auto_scale = %s,\n", (fld.auto_scale?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  auto_render = %s,\n", (fld.auto_render?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  currently_displayed = %s\n", (fld.currently_displayed?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  auto_render = %s\n", (fld.auto_render?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "}\n");
     if (ifield < flds.size() - 1) {
       fprintf(_tdrpFile, ",\n");
     }
   } // ifield
   fprintf(_tdrpFile, "};\n");
-
-  cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
-  cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << gParams.fields_n << endl;
-    
-  gParams.arrayRealloc("fields", gd.num_datafields);
-
-  cerr << "cccccccccccccccccccccc fields_n: " << gParams.fields_n << endl;
-  cerr << "dddddddddddddddddddddd fields ptr: " << gParams._fields << endl;
-  for(int i = 0; i < gd.num_datafields; i++) {
-
-    met_record_t &record = *(gd.mrec[i]);
-    Params::field_t *field = gParams._fields + i;
-
-    cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
-
-    TDRP_str_replace(&field->button_label, record.button_name);
-    TDRP_str_replace(&field->legend_label, record.legend_name);
-    TDRP_str_replace(&field->url, record.url);
-    TDRP_str_replace(&field->field_name, record.field_label);
-    TDRP_str_replace(&field->color_map, record.color_file);
-    TDRP_str_replace(&field->field_units, record.field_units);
-    field->contour_low = record.cont_low;
-    field->contour_low = -9999;
-    field->contour_high = record.cont_high;
-    field->contour_interval = record.cont_interv;
-    field->render_mode = (Params::render_mode_t) record.render_method;
-    field->display_in_menu = (tdrp_bool_t) record.currently_displayed;
-    field->background_render = (tdrp_bool_t) record.auto_render;
-
-  }
-
-  cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
-  for (int ii = 0; ii < gParams.fields_n; ii++) {
-    Params::field_t &fld = gParams._fields[ii];
-    cerr << "  button name: " << fld.button_label << endl;
-    cerr << "  legend name: " << fld.legend_label << endl;
-    cerr << "  contour_low: " << fld.contour_low << endl;
-  }
-  cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
 
   return 0;
 

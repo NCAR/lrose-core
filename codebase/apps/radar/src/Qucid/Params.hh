@@ -218,7 +218,6 @@ public:
     tdrp_bool_t composite_mode;
     tdrp_bool_t auto_scale;
     tdrp_bool_t auto_render;
-    tdrp_bool_t currently_displayed;
   } field_t;
 
   typedef struct {
@@ -1006,7 +1005,7 @@ public:
 
   tdrp_bool_t add_frame_time_to_filename;
 
-  tdrp_bool_t add_button_label_to_filename;
+  tdrp_bool_t add_button_name_to_filename;
 
   tdrp_bool_t add_frame_num_to_filename;
 

@@ -227,7 +227,6 @@ typedef struct {
   boolean composite_mode;
   boolean auto_scale;
   boolean auto_render;
-  boolean currently_displayed;
 } field_t;
 
 paramdef struct field_t {
@@ -247,8 +246,7 @@ paramdef struct field_t {
       background_render = false,
       composite_mode = false,
       auto_scale = false,
-      auto_render = false,
-      currently_displayed = false
+      auto_render = false
     }
     ,
     {
@@ -266,8 +264,7 @@ paramdef struct field_t {
       background_render = false,
       composite_mode = false,
       auto_scale = false,
-      auto_render = false,
-      currently_displayed = false
+      auto_render = false
     }
   };
   p_descr = "Fields to be displayed.";
@@ -292,7 +289,6 @@ paramdef struct field_t {
     "/ncomposite_mode: display max over height."
     "/nauto_scale: scale automatically."
     "/nauto_render: render automatically."
-    "/ncurrently_displayed: displayed at startup."
     "/n";
 } fields[];
 
@@ -1940,7 +1936,7 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Adds GUI button label to the output file name.";
   p_help = "";
-} add_button_label_to_filename;
+} add_button_name_to_filename;
 
 paramdef boolean {
   p_default = FALSE;

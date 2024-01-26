@@ -87,25 +87,14 @@ Qucid::Qucid(int argc, char **argv) :
   // check for legacy params file
 
   string legacyParamsPath;
+  char tdrpParamsPath[5000];
+  bool usingLegacyParams = false;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     gd.db_name = strdup(legacyParamsPath.c_str());
-    cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
-    cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
-    char tdrpParamsPath[2048];
-    snprintf(tdrpParamsPath, 2047, "/tmp/Qucid.%s.%d.tdrp", legacyParamsPath.c_str(), getpid());
+    snprintf(tdrpParamsPath, 4999, "/tmp/Qucid.%s.%d.tdrp", legacyParamsPath.c_str(), getpid());
     LegacyParams lParams;
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
-    // init_data_space(_params);
-    cerr << "fffffffffffff fields ptr: " << _params._fields << endl;
-    cerr << "fffffffffffff nfields: " << _params.fields_n << endl;
-    // tdrp_print_mode_t printMode;
-    // if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
-    //   if (printMode != NO_PRINT) {
-    //     _params.sync();
-    //     _params.print(stdout, printMode);
-    exit(0);
-    //   }
-    // }
+    usingLegacyParams = true;
   }
   
   // get command line args
@@ -120,13 +109,24 @@ Qucid::Qucid(int argc, char **argv) :
   // load TDRP params from command line
 
   char *paramsPath = (char *) "unknown";
-  if (_params.loadFromArgs(argc, argv,
-                           _args.override.list,
-                           &paramsPath)) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "Problem with TDRP parameters." << endl;
-    OK = false;
-    return;
+  if (usingLegacyParams) {
+    if (_params.loadApplyArgs(tdrpParamsPath,
+                              argc, argv,
+                              _args.override.list)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Problem with TDRP parameters." << endl;
+      OK = false;
+      return;
+    }
+  } else {
+    if (_params.loadFromArgs(argc, argv,
+                             _args.override.list,
+                             &paramsPath)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Problem with TDRP parameters." << endl;
+      OK = false;
+      return;
+    }
   }
   
   if (_params.fields_n < 1) {
@@ -136,6 +136,8 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
+
+  exit(0);
   
   // initialize globals, get/set defaults, establish data sources etc.
   

@@ -91,7 +91,6 @@ private:
   public:
     Field() {
       is_valid = false;
-      text_line = NULL;
       contour_low = 0;
       contour_high = 100;
       contour_interval = 5;
@@ -101,20 +100,15 @@ private:
       composite_mode = false;
       auto_scale = false;
       auto_render = false;
-      currently_displayed = false;
     }
     ~Field() {
-      if (text_line != NULL) {
-        delete[] text_line;
-      }
     }
     Field& operator=(const Field &rhs) {
       if (&rhs == this) {
         return *this;
       }
       is_valid = rhs.is_valid;
-      text_line = new char[strlen(rhs.text_line) + 1];
-      memcpy(text_line, rhs.text_line, strlen(rhs.text_line) + 1);
+      text_line = rhs.text_line;
       button_label = rhs.button_label;
       legend_label = rhs.legend_label;
       url = rhs.url;
@@ -130,11 +124,10 @@ private:
       composite_mode = rhs.composite_mode;
       auto_scale = rhs.auto_scale;
       auto_render = rhs.auto_render;
-      currently_displayed = rhs.currently_displayed;
       return *this;
     }
     bool is_valid;
-    char *text_line;
+    string text_line;
     string button_label;
     string legend_label;
     string url;
@@ -150,7 +143,6 @@ private:
     bool composite_mode;
     bool auto_scale;
     bool auto_render;
-    bool currently_displayed;
   };
   
   // read in from param file
