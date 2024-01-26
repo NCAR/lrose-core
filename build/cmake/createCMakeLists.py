@@ -553,9 +553,9 @@ def writeCMakeListsTop(dir):
 
     fo.write('# Finding Qt\n')
     fo.write('\n')
-    fo.write('find_package (Qt6 COMPONENTS Core REQUIRED)\n')
+    fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
-    fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
+    fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
     fo.write('endif()\n')
     fo.write('if (Qt5_FOUND)\n')
     fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
@@ -1453,7 +1453,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 def addFindQt(fo):
 
     fo.write('#Finding Qt\n')
-    fo.write('find_package (Qt6 COMPONENTS Core)\n')
+    fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
     fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
     fo.write('endif()\n')

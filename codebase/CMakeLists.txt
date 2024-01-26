@@ -43,9 +43,9 @@ find_package(PkgConfig REQUIRED)
 
 # Finding Qt
 
-find_package (Qt6 COMPONENTS Core REQUIRED)
+find_package (Qt6 COMPONENTS Core QUIET)
 if (NOT Qt6_FOUND)
-  find_package (Qt5 COMPONENTS Core REQUIRED)
+  find_package (Qt5 COMPONENTS Core QUIET)
 endif()
 if (Qt5_FOUND)
   message(STATUS "Found Qt5: ${Qt5_VERSION}")

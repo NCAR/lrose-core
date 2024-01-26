@@ -34,7 +34,7 @@ set (SRCS
     )
 
 #Finding Qt
-find_package (Qt6 COMPONENTS Core)
+find_package (Qt6 COMPONENTS Core QUIET)
 if (NOT Qt6_FOUND)
   find_package (Qt5 COMPONENTS Core REQUIRED)
 endif()
