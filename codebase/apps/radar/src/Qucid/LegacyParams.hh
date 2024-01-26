@@ -31,6 +31,7 @@
 //
 /////////////////////////////////////////////////////////////
 
+#include <cstring>
 #include <string>
 #include <vector>
 #include "cidd_params.h"
