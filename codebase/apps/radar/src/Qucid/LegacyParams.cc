@@ -132,7 +132,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // read in GUI config
   
   if (_readGuiConfig() == 0) {
-    _guiConfig.print(stdout);
+    // _guiConfig.print(stdout);
   }
   
   // read in gridded fields

@@ -53,10 +53,10 @@
 //
 
 field_list = {
-  { "WIDE area products", "WIDE_" },
-  { "SPOL QC",  "SPOLQC_" },
-  { "SPOL field",  "SPOL_" },
-  { "NEXRAD radial moments", "NEXR_" }
+  { "WIDE", "WIDE_" },
+  { "SPOL-QC",  "SPOLQC_" },
+  { "SPOL-field",  "SPOL_" },
+  { "NEXRAD", "NEXR_" }
 };
 
 </GUI_CONFIG>
