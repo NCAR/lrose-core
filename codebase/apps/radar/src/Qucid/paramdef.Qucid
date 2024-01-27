@@ -331,7 +331,7 @@ typedef struct {
   int line_width;
   wind_render_mode_t render_mode;
   string color;
-  boolean display_in_menu;
+  boolean on_at_startup;
 } wind_t;
 
 paramdef struct wind_t {
@@ -347,7 +347,7 @@ paramdef struct wind_t {
       line_width = 1,
       render_mode = ARROW,
       color = "white",
-      display_in_menu = true
+      on_at_startup = true
     }
     ,
     {
@@ -361,7 +361,7 @@ paramdef struct wind_t {
       line_width = 1,
       render_mode = ARROW,
       color = "yellow",
-      display_in_menu = true
+      on_at_startup = true
     }
   };
   p_descr = "Winds to be displayed.";

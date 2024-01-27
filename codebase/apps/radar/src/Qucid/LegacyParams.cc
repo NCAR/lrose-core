@@ -615,8 +615,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     strncpy(gd.layers.cont[i-1].color_name,"white",NAME_LENGTH);
 
     /* Replace Underscores with spaces in field names */
-    for(j=strlen(cfield[0])-1 ; j >= 0; j--) {
-      if(_replaceUnderscores && cfield[0][j] == '_') cfield[0][j] = ' ';
+    if (_replaceUnderscores) {
+      for(j=strlen(cfield[0])-1 ; j >= 0; j--) {
+        if(cfield[0][j] == '_') cfield[0][j] = ' ';
+      }
     }
     for(j=0;j < gd.num_datafields; j++) {
       if(strcmp(gd.mrec[j]->button_name,cfield[0]) == 0) {
@@ -646,8 +648,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     num_fields = STRparse(field_str, cfield, NAME_LENGTH, 3, NAME_LENGTH); 
 
     /* Replace Underscores with spaces in field names */
-    for(j=strlen(cfield[0])-1 ; j >= 0; j--) {
-      if(_replaceUnderscores && field_str[j] == '_') cfield[0][j] = ' ';
+    if (_replaceUnderscores) {
+      for(j=strlen(cfield[0])-1 ; j >= 0; j--) {
+        if(field_str[j] == '_') cfield[0][j] = ' ';
+      }
     }
     for(j=0; j <  gd.num_datafields; j++) {
       if(strcmp(gd.mrec[j]->button_name,cfield[0]) == 0) {  
@@ -1589,24 +1593,22 @@ int LegacyParams::_readGrids()
     
     Field &fld = flds[ifield];
     
-    /* get space for data info */
-    // gd.mrec[ifield] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
-
     /* separate into substrings */
 
-    STRparse(fld.text_line.c_str(), cfield, INPUT_LINE_LEN, MAX_PARSE_FIELDS, MAX_PARSE_SIZE);
+    STRparse(fld.text_line.c_str(), cfield,
+             INPUT_LINE_LEN, MAX_PARSE_FIELDS, MAX_PARSE_SIZE);
     fld.legend_label = cfield[0];
     fld.button_label = cfield[1];
 
-    /* Replace Underscores with spaces in names */
+    /* Replace spaces with underscores in labels */
     for(int jj = (int) fld.button_label.size() - 1 ; jj >= 0; jj--) {
-      if (_replaceUnderscores && fld.button_label[jj] == '_') {
-        fld.button_label[jj] = ' ';
+      if (fld.button_label[jj] == ' ') {
+        fld.button_label[jj] = '_';
       }
     }
     for(int jj = (int) fld.legend_label.size() - 1 ; jj >= 0; jj--) {
-      if(_replaceUnderscores && fld.legend_label[jj] == '_') {
-        fld.legend_label[jj] = ' ';
+      if (fld.legend_label[jj] == ' ') {
+        fld.legend_label[jj] = '_';
       }
     }
 
@@ -1672,6 +1674,8 @@ int LegacyParams::_readGrids()
       fld.auto_render = atoi(cfield[10]);
     }
 
+    fld.is_valid = true;
+    
   } // ifield
   
   /* free up temp storage for substrings */
@@ -1683,6 +1687,9 @@ int LegacyParams::_readGrids()
 
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     Field &fld = flds[ifield];
+    if (!fld.is_valid) {
+      continue;
+    }
     for (int ii = 0; ii < _guiConfig.field_list_n; ii++) {
       string groupName = _guiConfig._field_list[ii].id_label;
       for (size_t ii = 0; ii < groupName.size(); ii++) {
@@ -1704,44 +1711,47 @@ int LegacyParams::_readGrids()
   fprintf(_tdrpFile, "fields = {\n");
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     Field &fld = flds[ifield];
-    fprintf(_tdrpFile, "{\n");
-    fprintf(_tdrpFile, "  group_name = \"%s\",\n", fld.group_name.c_str());
-    fprintf(_tdrpFile, "  button_label = \"%s\",\n", fld.button_label.c_str());
-    fprintf(_tdrpFile, "  legend_label = \"%s\",\n", fld.legend_label.c_str());
-    fprintf(_tdrpFile, "  url = \"%s\",\n", fld.url.c_str());
-    fprintf(_tdrpFile, "  field_name = \"%s\",\n", fld.field_name.c_str());
-    fprintf(_tdrpFile, "  color_map = \"%s\",\n", fld.color_map.c_str());
-    fprintf(_tdrpFile, "  field_units = \"%s\",\n", fld.field_units.c_str());
-    fprintf(_tdrpFile, "  contour_low = %lg,\n", fld.contour_low);
-    fprintf(_tdrpFile, "  contour_high = %lg,\n", fld.contour_high);
-    fprintf(_tdrpFile, "  contour_interval = %lg,\n", fld.contour_interval);
+    if (!fld.is_valid) {
+      continue;
+    }
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    group_name = \"%s\",\n", fld.group_name.c_str());
+    fprintf(_tdrpFile, "    button_label = \"%s\",\n", fld.button_label.c_str());
+    fprintf(_tdrpFile, "    legend_label = \"%s\",\n", fld.legend_label.c_str());
+    fprintf(_tdrpFile, "    url = \"%s\",\n", fld.url.c_str());
+    fprintf(_tdrpFile, "    field_name = \"%s\",\n", fld.field_name.c_str());
+    fprintf(_tdrpFile, "    color_map = \"%s\",\n", fld.color_map.c_str());
+    fprintf(_tdrpFile, "    field_units = \"%s\",\n", fld.field_units.c_str());
+    fprintf(_tdrpFile, "    contour_low = %lg,\n", fld.contour_low);
+    fprintf(_tdrpFile, "    contour_high = %lg,\n", fld.contour_high);
+    fprintf(_tdrpFile, "    contour_interval = %lg,\n", fld.contour_interval);
     switch (fld.render_mode) {
       case POLYGONS:
-        fprintf(_tdrpFile, "  render_mode = POLYGONS,\n");
+        fprintf(_tdrpFile, "    render_mode = POLYGONS,\n");
         break;
       case FILLED_CONTOURS:
-        fprintf(_tdrpFile, "  render_mode = FILLED_CONTOURS,\n");
+        fprintf(_tdrpFile, "    render_mode = FILLED_CONTOURS,\n");
         break;
       case DYNAMIC_CONTOURS:
-        fprintf(_tdrpFile, "  render_mode = DYNAMIC_CONTOURS,\n");
+        fprintf(_tdrpFile, "    render_mode = DYNAMIC_CONTOURS,\n");
         break;
       case LINE_CONTOURS:
-        fprintf(_tdrpFile, "  render_mode = LINE_CONTOURS,\n");
+        fprintf(_tdrpFile, "    render_mode = LINE_CONTOURS,\n");
         break;
     }
-    fprintf(_tdrpFile, "  display_in_menu = %s,\n",
+    fprintf(_tdrpFile, "    display_in_menu = %s,\n",
             (fld.display_in_menu?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  background_render = %s,\n",
+    fprintf(_tdrpFile, "    background_render = %s,\n",
             (fld.background_render?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  composite_mode = %s,\n",
+    fprintf(_tdrpFile, "    composite_mode = %s,\n",
             (fld.composite_mode?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  auto_scale = %s,\n",
+    fprintf(_tdrpFile, "    auto_scale = %s,\n",
             (fld.auto_scale?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  auto_render = %s\n",
+    fprintf(_tdrpFile, "    auto_render = %s\n",
             (fld.auto_render?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "}\n");
+    fprintf(_tdrpFile, "  }\n");
     if (ifield < flds.size() - 1) {
-      fprintf(_tdrpFile, ",\n");
+      fprintf(_tdrpFile, "  ,\n");
     }
   } // ifield
   fprintf(_tdrpFile, "};\n");
@@ -1800,26 +1810,30 @@ int LegacyParams::_readWinds()
   
   while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
         (total_len < param_text_len)) {
-    
+  
     // Skip over blank, short or commented lines
     int len = (end_ptr - start_ptr) + 1; 
-    if( len <= 15 || *start_ptr == '#') {
-      continue;
+    
+    if( len > 15 && *start_ptr != '#') {
+    
+      int num_fields =
+        STRparse(start_ptr, cfield, len, MAX_PARSE_FIELDS, MAX_PARSE_SIZE); 
+      
+      if(*start_ptr != '#' && num_fields >= 7) {
+        Wind wind;
+        // create space for text line
+        wind.text_line.resize(len + 10000);
+        STRcopy((char *) wind.text_line.c_str(), start_ptr, len);
+        /* Do Environment variable substitution */
+        usubstitute_env((char *) wind.text_line.c_str(), len + 10000);
+        winds.push_back(wind);
+      }
+
     }
-    
-    int num_fields =
-      STRparse(start_ptr, cfield, len, MAX_PARSE_FIELDS, MAX_PARSE_SIZE); 
-    
-    if(*start_ptr != '#' && num_fields >= 7) {
-      Wind wind;
-      // create space for text line
-      wind.text_line.resize(len + 10000);
-      STRcopy((char *) wind.text_line.c_str(), start_ptr, len);
-      /* Do Environment variable substitution */
-      usubstitute_env((char *) wind.text_line.c_str(), len + 10000);
-      winds.push_back(wind);
-    }
-    
+
+    start_ptr = end_ptr +1; // Skip past the newline
+    total_len += len  +1;
+      
   } // while
 
   // parse the winds params from the text lines
@@ -1862,11 +1876,10 @@ int LegacyParams::_readWinds()
       cerr << "WARNING - bad wind params: " << wind.text_line << endl;
       wind.is_valid = false;
     } else {
-      wind.url = toks[0];
-      wind.line_width = atoi(toks[1].c_str());
+      wind.line_width = atoi(toks[0].c_str());
       if (wind.line_width < 0) {
         // negative line width, inactive
-        wind.display_in_menu = false;
+        wind.on_at_startup = false;
         wind.line_width *= -1;
       }
       if (wind.line_width > 10) {
@@ -1884,17 +1897,19 @@ int LegacyParams::_readWinds()
       wind.color = "white";
     }
     
-    /* Replace Underscores with spaces in names */
+    /* Replace spaces with underscores in labels */
     for(int jj = (int) wind.button_label.size() - 1 ; jj >= 0; jj--) {
-      if (_replaceUnderscores && wind.button_label[jj] == '_') {
-        wind.button_label[jj] = ' ';
+      if (wind.button_label[jj] == ' ') {
+        wind.button_label[jj] = '_';
       }
     }
     for(int jj = (int) wind.legend_label.size() - 1 ; jj >= 0; jj--) {
-      if(_replaceUnderscores && wind.legend_label[jj] == '_') {
-        wind.legend_label[jj] = ' ';
+      if(wind.legend_label[jj] == ' ') {
+        wind.legend_label[jj] = '_';
       }
     }
+
+    wind.is_valid = true;
     
   } // ii
   
@@ -1913,50 +1928,50 @@ int LegacyParams::_readWinds()
     if (!wind.is_valid) {
       continue;
     }
-    fprintf(_tdrpFile, "{\n");
-    fprintf(_tdrpFile, "  button_label = \"%s\",\n", wind.button_label.c_str());
-    fprintf(_tdrpFile, "  legend_label = \"%s\",\n", wind.legend_label.c_str());
-    fprintf(_tdrpFile, "  url = \"%s\",\n", wind.url.c_str());
-    fprintf(_tdrpFile, "  u_field_name = \"%s\",\n", wind.u_field_name.c_str());
-    fprintf(_tdrpFile, "  v_field_name = \"%s\",\n", wind.v_field_name.c_str());
-    fprintf(_tdrpFile, "  w_field_name = \"%s\",\n", wind.w_field_name.c_str());
-    fprintf(_tdrpFile, "  units = \"%s\",\n", wind.units.c_str());
-    fprintf(_tdrpFile, "  line_width = %d,\n", wind.line_width);
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    button_label = \"%s\",\n", wind.button_label.c_str());
+    fprintf(_tdrpFile, "    legend_label = \"%s\",\n", wind.legend_label.c_str());
+    fprintf(_tdrpFile, "    url = \"%s\",\n", wind.url.c_str());
+    fprintf(_tdrpFile, "    u_field_name = \"%s\",\n", wind.u_field_name.c_str());
+    fprintf(_tdrpFile, "    v_field_name = \"%s\",\n", wind.v_field_name.c_str());
+    fprintf(_tdrpFile, "    w_field_name = \"%s\",\n", wind.w_field_name.c_str());
+    fprintf(_tdrpFile, "    units = \"%s\",\n", wind.units.c_str());
+    fprintf(_tdrpFile, "    line_width = %d,\n", wind.line_width);
     switch (wind.render_mode) {
       case ARROW:
-        fprintf(_tdrpFile, "  render_mode = ARROW,\n");
+        fprintf(_tdrpFile, "    render_mode = ARROW,\n");
         break;
       case VECTOR:
-        fprintf(_tdrpFile, "  render_mode = VECTOR,\n");
+        fprintf(_tdrpFile, "    render_mode = VECTOR,\n");
         break;
       case BARB:
-        fprintf(_tdrpFile, "  render_mode = BARB,\n");
+        fprintf(_tdrpFile, "    render_mode = BARB,\n");
         break;
       case LABELEDBARB:
-        fprintf(_tdrpFile, "  render_mode = LABELEDBARB,\n");
+        fprintf(_tdrpFile, "    render_mode = LABELEDBARB,\n");
         break;
       case TUFT:
-        fprintf(_tdrpFile, "  render_mode = TUFT,\n");
+        fprintf(_tdrpFile, "    render_mode = TUFT,\n");
         break;
       case TICKVECTOR:
-        fprintf(_tdrpFile, "  render_mode = TICKVECTOR,\n");
+        fprintf(_tdrpFile, "    render_mode = TICKVECTOR,\n");
         break;
       case METBARB:
-        fprintf(_tdrpFile, "  render_mode = METBARB,\n");
+        fprintf(_tdrpFile, "    render_mode = METBARB,\n");
         break;
       case BARB_SH:
-        fprintf(_tdrpFile, "  render_mode = BARB_SH,\n");
+        fprintf(_tdrpFile, "    render_mode = BARB_SH,\n");
         break;
       case LABELEDBARB_SH:
-        fprintf(_tdrpFile, "  render_mode = LABELEDBARB_SH,\n");
+        fprintf(_tdrpFile, "    render_mode = LABELEDBARB_SH,\n");
         break;
     }
-    fprintf(_tdrpFile, "  color = \"%s\",\n", wind.color.c_str());
-    fprintf(_tdrpFile, "  display_in_menu = %s,\n",
-            (wind.display_in_menu?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "}\n");
+    fprintf(_tdrpFile, "    color = \"%s\",\n", wind.color.c_str());
+    fprintf(_tdrpFile, "    on_at_startup = %s\n",
+            (wind.on_at_startup?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  }\n");
     if (ifield < winds.size() - 1) {
-      fprintf(_tdrpFile, ",\n");
+      fprintf(_tdrpFile, "  ,\n");
     }
   } // ifield
   fprintf(_tdrpFile, "};\n");

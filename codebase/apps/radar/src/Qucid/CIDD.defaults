@@ -271,6 +271,10 @@ NEXR_========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moment
 # Legend_label  URL U V W_fieldnames units  Style [Color]
 #----------------------------------------------------------------------------
 TREC    mdvp:://tundra::dia/mdv/ctrec/ftg&  U V None  m/s  0      yellow
+GFS-3D    mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago?use_http=true& UGRD  VGRD  None m/s -1 darkgreen
+WRF-3D    mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/illinois?use_http=true&  U     V     None m/s 1  blue
+Surf      mdvp:://front.eol.ucar.edu:8080:relampago/mdv/surf_interp?use_http=true&   Uwind Vwind None m/s -1 orange
+
 
 </WINDS>
 
@@ -1195,7 +1199,7 @@ cidd.rotate_fine_adjust:  0.5
 cidd.disable_pick_mode: 0
 
 # Underscores in Field names and legends are replaced by spaces if set 
-cidd.replace_underscores: 1
+cidd.replace_underscores: 0
 
 # Close CIDD's pop ups When the main window is closed. Turn this off (0) if you
 # don't want CIDD to close its pop ups when switching between virtual desktops

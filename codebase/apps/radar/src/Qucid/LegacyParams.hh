@@ -179,7 +179,7 @@ private:
       is_valid = false;
       line_width = 1;
       render_mode = ARROW;
-      display_in_menu = true;
+      on_at_startup = true;
       color = "white";
     }
     ~Wind() {
@@ -196,7 +196,7 @@ private:
     int line_width;
     WindRenderMode render_mode;
     string color;
-    bool display_in_menu;
+    bool on_at_startup;
   };
 
   // params read in from main

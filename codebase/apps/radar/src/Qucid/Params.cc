@@ -1263,10 +1263,10 @@
       tt->struct_def.fields[9].rel_offset = 
         (char *) &_winds->color - (char *) _winds;
       tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[10].fname = tdrpStrDup("display_in_menu");
+      tt->struct_def.fields[10].fname = tdrpStrDup("on_at_startup");
       tt->struct_def.fields[10].ptype = BOOL_TYPE;
       tt->struct_def.fields[10].rel_offset = 
-        (char *) &_winds->display_in_menu - (char *) _winds;
+        (char *) &_winds->on_at_startup - (char *) _winds;
     tt->n_struct_vals = 22;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

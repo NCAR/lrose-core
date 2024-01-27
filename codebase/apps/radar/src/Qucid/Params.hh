@@ -244,7 +244,7 @@ public:
     int line_width;
     wind_render_mode_t render_mode;
     char* color;
-    tdrp_bool_t display_in_menu;
+    tdrp_bool_t on_at_startup;
   } wind_t;
 
   typedef struct {
