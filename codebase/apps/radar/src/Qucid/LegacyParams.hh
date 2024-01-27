@@ -92,7 +92,7 @@ private:
     FILLED_CONTOURS,
     DYNAMIC_CONTOURS,
     LINE_CONTOURS
-  } RenderMode;
+  } GridRenderMode;
 
   class Field {
   public:
@@ -147,12 +147,59 @@ private:
     double contour_low;
     double contour_high;
     double contour_interval;
-    RenderMode render_mode;
+    GridRenderMode render_mode;
     bool display_in_menu;
     bool background_render;
     bool composite_mode;
     bool auto_scale;
     bool auto_render;
+  };
+  
+  // wind details
+  
+  typedef enum {
+    ARROW,
+    VECTOR,
+    BARB,
+    LABELEDBARB,
+    TUFT,
+    TICKVECTOR,
+    METBARB,
+    BARB_S,
+    LABELED_BARB
+  } WindRenderMode;
+
+  string _windMarkerType;
+  WindRenderMode _defaultWindRenderMode;
+
+  class Wind {
+  public:
+    Wind() {
+      group_name = "main";
+      is_valid = false;
+      contour_low = 0;
+      contour_high = 100;
+      contour_interval = 5;
+      render_mode = POLYGONS;
+      display_in_menu = true;
+      background_render = false;
+      composite_mode = false;
+      auto_scale = false;
+      auto_render = false;
+    }
+    ~Wind() {
+    }
+    bool is_valid;
+    string text_line;
+    string label;
+    string url;
+    string u_field_name;
+    string v_field_name;
+    string w_field_name;
+    string wind_units;
+    int line_width;
+    WindRenderMode render_mode;
+    string color;
   };
   
   // read in from param file

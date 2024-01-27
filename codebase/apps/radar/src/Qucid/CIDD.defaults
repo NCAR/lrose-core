@@ -270,7 +270,7 @@ NEXR_========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moment
 #
 # Legend_label  URL U V W_fieldnames units  Style [Color]
 #----------------------------------------------------------------------------
-TREC    mdvp:://tundra::dia/mdv/ctrec/ftg&  #1 #2 None  m/s  0      yellow
+TREC    mdvp:://tundra::dia/mdv/ctrec/ftg&  U V None  m/s  0      yellow
 
 </WINDS>
 

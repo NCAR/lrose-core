@@ -170,16 +170,13 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // Set into Archive Mode at the indicated time.
 
   _getString("cidd.demo_time", "");
-
   _getLong("cidd.temporal_rounding", 300);
-  
   _getString("cidd.climo_mode", "regular");
 
   /* Toggle for displaying the analog clock */
   _getLong("cidd.max_time_list_span", 365);
 
   // movies
-  
   _getLong("cidd.starting_movie_frames", 12);
   _getDouble("cidd.time_interval",10.0);
   _getDouble("cidd.frame_span", 10.0);
@@ -187,44 +184,41 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getDouble("cidd.past_interval", 0.0);
   _getDouble("cidd.movie_magnify_factor",1.0);
   _getBoolean("cidd.check_data_times", 0);
+  _getString("cidd.movieframe_time_format", "%H%M");
+  _getLong("cidd.movieframe_time_mode", 0);
 
   // clipping for rendering
   _getBoolean("cidd.check_clipping", 0);
   
+  // data retrieval
   _getDouble("cidd.stretch_factor", 1.5);
   _getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
   _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
   _getLong("cidd.update_interval", UPDATE_INTERVAL);
-
   _getString("cidd.datamap_host", "");
   _getLong("cidd.data_timeout_secs", 10);
   _getLong("cidd.simple_command_timeout_secs",30);
   _getLong("cidd.complex_command_timeout_secs",180);
-  
+
+  // movies
   _getBoolean("cidd.movie_on", 0);
   _getLong("cidd.movie_delay",3000);
   _getLong("cidd.movie_speed_msec", 75);
   _getBoolean("cidd.reset_frames", 0);
 
+  // model data
   _getLong("cidd.model_run_list_hours",24);
 
   // How many idle seconds can elapse before resetting the display
   _getLong("cidd.idle_reset_seconds",0);
 
+  // image generation in html mode
   _getBoolean("cidd.html_mode", 0);
   _getBoolean("cidd.run_once_and_exit",0);
-
   _getBoolean("cidd.transparent_images", 0);
-  
-  // Image dir - for output images
   _getString("cidd.image_dir", "/tmp/image_dir");
-  
   _getBoolean("cidd.save_images_to_day_subdir", 0);
-  
-  // Set up our default image type.
-  // force png for now
   _getString("cidd.image_ext", "png");
-
   _getString("cidd.image_horiz_prefix", "CP");
   _getString("cidd.image_vert_prefix", "CV");
   _getString("cidd.image_name_separator", "_");
@@ -232,38 +226,24 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // output image file names
   
   _getBoolean("cidd.add_height_to_filename",0);
-     
   _getBoolean("cidd.add_frame_time_to_filename",1);
-     
   _getBoolean("cidd.add_button_name_to_filename",0);
-
   _getBoolean("cidd.add_frame_num_to_filename",1);
-
   _getBoolean("cidd.add_gen_time_to_filename",0);
-  
   _getBoolean("cidd.add_valid_time_to_filename",0);
-     
   _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
   _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
   _getString("cidd.horiz_image_command", "");
-  
   _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
   _getString("cidd.vert_image_fname", "cidd_vert_view.png");
   _getString("cidd.vert_image_command", "");
-  
   _getBoolean("cidd.output_geo_xml", 0);
   _getBoolean("cidd.use_latlon_in_geo_xml", 0);
-
-  _getString("cidd.movieframe_time_format", "%H%M");
-
-  _getLong("cidd.movieframe_time_mode", 0);
 
   // script to run after generating image
   
   _getString("cidd.image_convert_script", "convert_image.csh");
-  
   _getString("cidd.print_script", "");
-
   _getString("cidd.series_convert_script", "make_anim.csh");
 
   // data compression from server
@@ -271,82 +251,78 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getBoolean("cidd.request_compressed_data",0);
   _getBoolean("cidd.request_gzip_vol_compression",0);
 
-  /* Establish the projection type */
-
-  _getString("cidd.projection_type", "CARTESIAN");
-
   // projections
-  
+  _getString("cidd.projection_type", "CARTESIAN");
   _getDouble("cidd.lambert_lat1",20.0);
   _getDouble("cidd.lambert_lat2",60.0);
   _getDouble("cidd.tangent_lat",90.0);
   _getDouble("cidd.tangent_lon",0.0);
   _getDouble("cidd.central_scale",1.0);
-
   _getDouble("cidd.north_angle",0.0);
   _getBoolean("cidd.use_cosine", 1); // legacy
   _getLong("cidd.use_cosine_correction", 1);
-
   _getDouble("cidd.scale_units_per_km",1.0);
   _getString("cidd.scale_units_label", "km");
-  
+
+  // data retrieval
   _getBoolean("cidd.always_get_full_domain", 0);
   _getBoolean("cidd.do_not_clip_on_mdv_request", 0);
   _getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
      
-  // zoom
+  // zooms
   
   _getDouble("cidd.min_zoom_threshold", 5.0);
-
   _getDouble("cidd.aspect_ratio", 1.0);
 
   /* Toggle for enabling a status report window */
   _getBoolean("cidd.enable_status_window", 0);
-
   _getBoolean("cidd.report_clicks_in_status_window", 0);
   _getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
   _getDouble("cidd.magnetic_variation_deg", 0);
   
   /* Toggle for enabling a Save Image Panel */
-  // WARNING - ALLOWS USERS SHELL ACCESS
   _getBoolean("cidd.enable_save_image_panel", 0);
-  
+
+  // domain limits
   _getDouble("cidd.domain_limit_min_x",-10000);
   _getDouble("cidd.domain_limit_max_x",10000);
   _getDouble("cidd.domain_limit_min_y",-10000);
   _getDouble("cidd.domain_limit_max_y",10000);
   
   // origin latitude and longitude
-  
   _getDouble("cidd.origin_latitude", 0.0);
   _getDouble("cidd.origin_longitude", 0.0);
 
   // click location on reset
-  
   _getDouble("cidd.reset_click_latitude", gd.origin_latitude);
   _getDouble("cidd.reset_click_longitude", gd.origin_longitude);
 
+  // startup pages
   _getLong("cidd.planview_start_page", 1); // subtract 1
   _getLong("cidd.xsect_start_page", 1); // subtract 1
-  
+
+  // zooms
   _getLong("cidd.num_zoom_levels",1);
   _getLong("cidd.start_zoom_level",1);
   _getBoolean("cidd.zoom_limits_in_latlon",0);
   _getLong("cidd.num_cache_zooms",1);
 
+  // vert axis
   _getDouble("cidd.min_ht", 0.0);
   _getDouble("cidd.max_ht", 30.0);
   _getDouble("cidd.start_ht", 0.0);
 
+  // maps
   _getString("cidd.map_file_subdir", "maps");
   _getDouble("cidd.locator_margin_km", 50.0);
   _getString("cidd.station_loc_url", "");
 
+  // server access
   _getString("cidd.remote_ui_url", "");
-
   _getString("cidd.http_tunnel_url", "");
   _getString("cidd.http_proxy_url", "");
-  
+
+  // colors
   _getString("cidd.foreground_color", "White");
   _getString("cidd.background_color", "Black");
   _getString("cidd.margin_color", "Black");
@@ -363,7 +339,6 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getString("cidd.now_time_color", "red");
 
   // need multiple time ticks - i.e. array
-  
   _getString("cidd.time_tick_color", "yellow");
   _getString("cidd.latest_click_mark_color", "red");
   _getString( "cidd.latest_client_mark_color", "yellow");
@@ -374,16 +349,15 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   /* Toggle for displaying data access and rendering messages */
   _getBoolean("cidd.show_data_messages", 1);
 
+  // mode for writing latlon values
   _getLong("cidd.latlon_mode",0);
 
+  // time labels
   _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
-
   _getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
-
   _getString("cidd.frame_range_time_format", "%H:%M");
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
-
   _getBoolean("cidd.layer_legends_on", 1);
   _getBoolean("cidd.cont_legends_on", 1);
   _getBoolean("cidd.wind_legends_on", 1);
@@ -395,90 +369,75 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getBoolean("cidd.display_ref_lines", 1);
 
   // margins
-  
   _getLong("cidd.top_margin_render_style", 1);
-  
   _getLong("cidd.bot_margin_render_style", 1);
   
-  // h_win_proc
-  
+  // main window (horiz view)
   _getLong("cidd.horiz_default_y_pos",0);
   _getLong("cidd.horiz_default_x_pos",0);
-
   _getLong("cidd.horiz_default_height", 600);
   _getLong("cidd.horiz_default_width", 800);
-
   _getLong("cidd.horiz_min_height", 400);
   _getLong("cidd.horiz_min_width", 600);
-
   _getLong("cidd.horiz_top_margin", 20);
   _getLong("cidd.horiz_bot_margin", 20);
   _getLong("cidd.horiz_left_margin", 20);
   _getLong("cidd.horiz_right_margin", 80);
-  
   _getLong("cidd.horiz_legends_start_x", 0);
   _getLong("cidd.horiz_legends_start_y", 0);
   _getLong("cidd.horiz_legends_delta_y", 0);
   
-  // h_win_proc
+  // vertical section
   
   _getLong("cidd.vert_default_x_pos", 0);
   _getLong("cidd.vert_default_y_pos", 0);
-  
   _getLong("cidd.vert_default_height", 400);
   _getLong("cidd.vert_default_width", 600);
-
   _getLong("cidd.vert_min_height", 400);
   _getLong("cidd.vert_min_width", 600);
-  
   _getLong("cidd.vert_top_margin", 20);
   _getLong("cidd.vert_bot_margin", 20);
   _getLong("cidd.vert_left_margin", 20);
   _getLong("cidd.vert_right_margin", 80);
-  
   _getLong("cidd.vert_legends_start_x", 0);
   _getLong("cidd.vert_legends_start_y", 0);
   _getLong("cidd.vert_legends_delta_y", 0);
 
   // range rings
-  
+  _getBoolean("cidd.range_rings", 0);
+  _getLong("cidd.range_ring_x_space", 50);
+  _getLong("cidd.range_ring_y_space", 15);
+  _getBoolean("cidd.range_ring_labels", 1);
   _getDouble("cidd.range_ring_spacing", -1.0);
   _getDouble("cidd.max_ring_range", 1000.0);
-  
-  // Toggle for displaying range rings at the data's origin - Useful for mobile units.
   _getBoolean("cidd.range_ring_follows_data", 0);
   _getBoolean("cidd.range_ring_for_radar_only", 0);
 
   // Toggle for shifting the display origin - Useful for mobile units.
   _getBoolean("cidd.domain_follows_data", 0);
 
-  _getBoolean("cidd.range_rings", 0);
-  _getLong("cidd.range_ring_x_space", 50);
-  _getLong("cidd.range_ring_y_space", 15);
-  _getBoolean("cidd.range_ring_labels", 1);
-  
+  // azimuth lines
   _getDouble("cidd.azmith_interval", 30.0);
   _getDouble("cidd.azmith_radius", 200.0);
   _getBoolean("cidd.azmith_lines", 0);
-  
-  _getBoolean("cidd.all_winds_on", 1);
 
-  // Load Wind Rendering preferences.
+  // winds
+  _getBoolean("cidd.wind_mode", 0);
+  _getBoolean("cidd.all_winds_on", 1);
   _getLong("cidd.barb_shaft_len", 33);
   _getLong("cidd.ideal_x_vectors", 20);
   _getLong("cidd.ideal_y_vectors", 20);
   _getLong("cidd.wind_head_size", 5);
   _getDouble("cidd.wind_head_angle", 45.0);
-  
   _getLong("cidd.wind_scaler", 3);
   _getDouble("cidd.wind_time_scale_interval", 10.0);
-
-  _getString("cidd.wind_marker_type", "arrow");
+  _windMarkerType = _getString("cidd.wind_marker_type", "arrow");
   _getDouble("cidd.wind_w_scale_factor", 10.0);
   _getDouble("cidd.wind_units_scale_factor", 1.0);
   _getDouble("cidd.wind_reference_speed", 10.0);
   _getString("cidd.wind_units_label", "m/sec");
 
+  // contours
   _getBoolean("cidd.label_contours",1);
   _getLong("cidd.contour_line_width", 1);
   _getLong("cidd.smooth_contours", 0);
@@ -486,26 +445,22 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getBoolean("cidd.add_noise", 0);
   _getDouble("cidd.special_contour_value", 0.0);
 
+  // bad and missing values
   _getBoolean("cidd.map_bad_to_min_value", 0);
   _getBoolean("cidd.map_missing_to_min_value", 0);
 
   // main field on top?
-  
-  // gd.draw_main_on_top = (_getBoolean("cidd.draw_main_on_top", 0) & 1);
   _getBoolean("cidd.draw_main_on_top", 0);
 
   // latest click location
-  
   _getBoolean("cidd.mark_latest_click_location", 0);
-
   _getLong("cidd.latest_click_mark_size", 11);
   _getBoolean("cidd.click_posn_rel_to_origin", 0);
 
-
+  // fonts
   _getLong("cidd.num_fonts", 1);
   _getLong("cidd.font_display_mode",1);
 
-  
   /* Toggle for displaying the analog clock */
   _getBoolean("cidd.show_clock", 0);
 
@@ -516,65 +471,48 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   _getBoolean("cidd.use_local_timestamps", 0);
   
   // field menu - number of columns
-  
   _getLong("cidd.num_field_menu_cols",0);
   
-  
+  // display modes
   _getBoolean("cidd.wsddm_mode", 0);
   _getBoolean("cidd.one_click_rhi", 0);
 
   // canvas events
-
   _getDouble("cidd.rotate_coarse_adjust",6.0);
   _getDouble("cidd.rotate_medium_adjust",2.0);
   _getDouble("cidd.rotate_fine_adjust", 0.5);
-
   _getBoolean("cidd.disable_pick_mode", 1);
   _getBoolean("cidd.replace_underscores", 1);
   _getBoolean("cidd.close_popups", 0);
   _getBoolean("cidd.clip_overlay_fields", 0);
-  
+
+  // labels
   _getString("cidd.horiz_frame_label", "Qucid");
-
   _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
-  
   _getString("cidd.status_info_file", "");
-
   _getString("cidd.help_command", "");
 
   // Bookmarks for a menu of URLS - Index starts at 1
   _getString("cidd.bookmark_command", "");
   _getLong("cidd.num_bookmarks", 0);
-  
+
+  // image intensity
   _getDouble("cidd.image_inten", 0.8);
   _getLong("cidd.inten_levels", 32);
   _getDouble("cidd.data_inten", 1.0);
 
+  // fill and contour thresholds
   _getLong("cidd.image_fill_threshold", 120000);
-
   _getLong("cidd.dynamic_contour_threshold", 160000);
 
   // shmem
-  
   _getLong("cidd.coord_key", 63500);
 
+  // products
   _getBoolean("cidd.products_on", 1);
   _getLong("cidd.product_line_width", 1);
   _getLong("cidd.product_font_size", 1);
-
-  // symprods
-  
   _getDouble("cidd.scale_constant", 300.0);
-
-  // drawing
-  
-  gd.drawing_mode = 0;
-
-  /* Establish the native projection type */
-  
-  _getString("cidd.projection_type", "CARTESIAN");
-
-  _getBoolean("cidd.wind_mode", 0);
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </MAIN_PARAMS>\n");
@@ -755,10 +693,6 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   }
 #endif
   
-#ifdef JUNK
-
-  // copy legacy params to tdrp
-
   // Load the Wind Data Field  parameters
   param_text_line_no = 0;
   param_text_len = 0;
@@ -770,11 +704,13 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     if(gd.debug)fprintf(stderr,"Couldn't Find WINDS Section\n");
   } else {
     /* Establish and initialize connections to wind fields */
-    if (_initWindFields(param_text, param_text_len, param_text_line_no)) {
+    if (_readWinds(param_text, param_text_len, param_text_line_no)) {
       return -1;
     }
   }
     
+#ifdef JUNK
+
   if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
 
   // Instantiate and load the SYMPROD TDRP Parameter section
@@ -1989,7 +1925,7 @@ int LegacyParams::_readGrids()
                  &param_text_len, &param_text_line_no);
   
   if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr, "ERROR - LegacyParams::_readDataFields\n");
+    fprintf(stderr, "ERROR - LegacyParams::_readGrids\n");
     fprintf(stderr, "  No GRIDS section in param file\n");
     return -1;
   }
@@ -2006,7 +1942,6 @@ int LegacyParams::_readGrids()
   // read all the lines in the data information buffer
 
   vector<Field> flds;
-  
   while((end_ptr = strchr(start_ptr,'\n')) != NULL && (total_len < param_text_len)) {
 
     // Skip over blank, short or commented lines
@@ -2017,7 +1952,7 @@ int LegacyParams::_readGrids()
       param_text_line_no++;
       continue;
     }
-
+    
     if(gd.num_datafields < MAX_DATA_FIELDS -1) {
 
       Field fld;
@@ -2222,23 +2157,35 @@ int LegacyParams::_readGrids()
 
 }
 /************************************************************************
- * INIT_WIND_DATA_LINKS:  Scan cidd_wind_data.info file and setup link to
- *         data source for the wind fields.
- *
+ * Read in wind fields
  */
 
-int LegacyParams::_initWindFields(const char *param_buf,
-                                  long param_buf_len,
-                                  long line_no)
+int LegacyParams::_readWinds()
   
 {
-  int    i;
-  int    len,total_len;
-  int    num_sets;    /* number of sets of wind data */
-  int    num_fields;
-  const char   *start_ptr;
-  const char   *end_ptr;
-  char   *cfield[MAX_PARSE_FIELDS];
+
+  // read the GUI_CONFIG parameters
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"WINDS",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr, "WARNING - LegacyParams::_readWinds\n");
+    fprintf(stderr, "  No WINDS section in param file\n");
+    return -1;
+  }
+  
+  string paramText(param_text, param_text_len);
+  
+  int i;
+  int len,total_len;
+  int num_sets;    /* number of sets of wind data */
+  int num_fields;
+  const char *start_ptr = paramText.c_str();
+  const char *end_ptr;
+  char *cfield[MAX_PARSE_FIELDS];
   
   // initialize pointers to NULL
   
