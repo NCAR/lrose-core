@@ -34,6 +34,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "Cgui_P.hh"
 #include "cidd_params.h"
 using namespace std;
 
@@ -64,6 +65,11 @@ public:
 
 private:
 
+  static const int MAX_PARSE_FIELDS = 32;
+  static const int MAX_PARSE_SIZE = 1024;
+  static const int INPUT_LINE_LEN = 10000;
+  static const int TAG_BUF_LEN = 1024;
+
   typedef struct {
     string name;
     string entry;
@@ -75,6 +81,7 @@ private:
 
   int _paramsBufLen;
   char *_paramsBuf; // Pointer to the parameter data
+  Cgui_P _guiConfig;
 
   FILE *_tdrpFile;
 
@@ -90,6 +97,7 @@ private:
   class Field {
   public:
     Field() {
+      group_name = "main";
       is_valid = false;
       contour_low = 0;
       contour_high = 100;
@@ -109,6 +117,7 @@ private:
       }
       is_valid = rhs.is_valid;
       text_line = rhs.text_line;
+      group_name = rhs.group_name;
       button_label = rhs.button_label;
       legend_label = rhs.legend_label;
       url = rhs.url;
@@ -128,6 +137,7 @@ private:
     }
     bool is_valid;
     string text_line;
+    string group_name;
     string button_label;
     string legend_label;
     string url;
@@ -186,9 +196,9 @@ private:
   
   int _loadKeyValPairs(const string &fname);
   
-  int _initDataFields(const char *param_buf,
-                      long param_buf_len,
-                      long line_no);
+  int _readGuiConfig();
+  
+  int _readGrids();
   
   int _initWindFields(const char *param_buf,
                       long param_buf_len,
