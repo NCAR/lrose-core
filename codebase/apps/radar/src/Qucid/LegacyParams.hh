@@ -34,6 +34,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "Cdraw_P.hh"
 #include "Cgui_P.hh"
 #include "cidd_params.h"
 using namespace std;
@@ -69,6 +70,7 @@ private:
   static const int MAX_PARSE_SIZE = 1024;
   static const int INPUT_LINE_LEN = 10000;
   static const int TAG_BUF_LEN = 1024;
+  // static const int URL_MIN_SIZE = 8;
 
   typedef struct {
     string name;
@@ -77,12 +79,14 @@ private:
   
   vector<param_list_t> _plist;
 
-  bool _printTdrp;
-
+  // params buffer
+  
+  char *_paramsBuf;
   int _paramsBufLen;
-  char *_paramsBuf; // Pointer to the parameter data
-  Cgui_P _guiConfig;
 
+  // tdrp
+
+  bool _printTdrp;
   FILE *_tdrpFile;
 
   // field details
@@ -165,42 +169,49 @@ private:
     TUFT,
     TICKVECTOR,
     METBARB,
-    BARB_S,
-    LABELED_BARB
+    BARB_SH,
+    LABELEDBARB_SH
   } WindRenderMode;
-
-  string _windMarkerType;
-  WindRenderMode _defaultWindRenderMode;
 
   class Wind {
   public:
     Wind() {
-      group_name = "main";
       is_valid = false;
-      contour_low = 0;
-      contour_high = 100;
-      contour_interval = 5;
-      render_mode = POLYGONS;
+      line_width = 1;
+      render_mode = ARROW;
       display_in_menu = true;
-      background_render = false;
-      composite_mode = false;
-      auto_scale = false;
-      auto_render = false;
+      color = "white";
     }
     ~Wind() {
     }
     bool is_valid;
     string text_line;
-    string label;
+    string button_label;
+    string legend_label;
     string url;
     string u_field_name;
     string v_field_name;
     string w_field_name;
-    string wind_units;
+    string units;
     int line_width;
     WindRenderMode render_mode;
     string color;
+    bool display_in_menu;
   };
+
+  // params read in from main
+
+  bool _debug;
+  bool _debug1;
+  bool _debug2;
+  string _windMarkerType;
+  WindRenderMode _defaultWindRenderMode;
+  Cgui_P _guiConfig;
+  bool _replaceUnderscores;
+  string _httpProxyUrl;
+  bool _runOnceAndExit;
+  double _originLatitude;
+  double _originLongitude;
   
   // read in from param file
   // returns 0 on success, -1 on failure
@@ -244,13 +255,12 @@ private:
   int _loadKeyValPairs(const string &fname);
   
   int _readGuiConfig();
-  
   int _readGrids();
+  int _readWinds();
+  int _readMainParams();
   
-  int _initWindFields(const char *param_buf,
-                      long param_buf_len,
-                      long line_no);
-  
+  WindRenderMode _getWindRenderMode(const char* markerStr);
+
   int _initDrawExportLinks();
   
   int _loadOverlayInfo(const char *param_buf, long param_buf_len,
@@ -262,6 +272,80 @@ private:
   int _initOverlays(const char *param_buf,
                     long param_buf_len,
                     long line_no);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // GET_DEFAULT_PARAMS : Get a string representing the default parameters
+  //                      for this TDRP parameter object
+  // 
+
+  template <class T>
+    std::string _getDefaultTdrpParams(const std::string &section_name, T *params)
+  {
+    // Load the temporary parameters since we don't seem to have them
+    // loaded yet
+
+    params->loadDefaults(false);
+  
+    // Open a temporary file to hold the parameters.  Write the parameters
+    // to that file and close it.
+
+    const std::string tmp_filename = ".params";
+  
+    FILE *tmp_file;
+
+    if ((tmp_file = fopen(tmp_filename.c_str(), "w")) == 0)
+    {
+      fprintf(stderr,
+              "Error opening temporary file for writing TDRP parameters\n");
+      exit(-1);
+    }
+  
+    params->print(tmp_file);
+    fclose(tmp_file);
+  
+    // Now read the file back into a string
+
+    struct stat tmp_file_stat;
+  
+    if (stat(tmp_filename.c_str(), &tmp_file_stat) != 0)
+    {
+      fprintf(stderr,
+              "Error stating temporary file for writing TDRP parameters\n");
+      exit(-1);
+    }
+  
+    char *tmp_buffer = new char[tmp_file_stat.st_size + 1];
+
+    if ((tmp_file = fopen(tmp_filename.c_str(), "r")) == 0)
+    {
+      fprintf(stderr,
+              "Error opening temporary file for reading TDRP parameters\n");
+      exit(-1);
+    }
+  
+    if (fread(tmp_buffer, sizeof(char), tmp_file_stat.st_size, tmp_file) !=
+        (size_t)tmp_file_stat.st_size)
+    {
+      delete [] tmp_buffer;
+      fprintf(stderr,
+              "Error reading TDRP parameters from temporary file\n");
+      exit(-1);
+    }
+  
+    fclose(tmp_file);
+    unlink(tmp_filename.c_str());
+  
+    // Set the return string
+
+    tmp_buffer[tmp_file_stat.st_size] = '\0';
+
+    std::string return_string = "<" + section_name + ">\n";
+    return_string += tmp_buffer;
+    return_string += "</" + section_name + ">\n\n";
+  
+    delete [] tmp_buffer;
+  
+    return return_string;
+  }
+
 };
-  
-  

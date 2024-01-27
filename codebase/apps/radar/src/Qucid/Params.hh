@@ -86,7 +86,19 @@ public:
     FILLED_CONTOURS = 1,
     DYNAMIC_CONTOURS = 2,
     LINE_CONTOURS = 3
-  } render_mode_t;
+  } grid_render_mode_t;
+
+  typedef enum {
+    ARROW = 0,
+    VECTOR = 1,
+    BARB = 2,
+    LABELEDBARB = 3,
+    TUFT = 4,
+    TICKVECTOR = 5,
+    METBARB = 6,
+    BARB_SH = 7,
+    LABELEDBARB_SH = 8
+  } wind_render_mode_t;
 
   typedef enum {
     POLAR_DISPLAY = 0,
@@ -213,13 +225,27 @@ public:
     double contour_low;
     double contour_high;
     double contour_interval;
-    render_mode_t render_mode;
+    grid_render_mode_t render_mode;
     tdrp_bool_t display_in_menu;
     tdrp_bool_t background_render;
     tdrp_bool_t composite_mode;
     tdrp_bool_t auto_scale;
     tdrp_bool_t auto_render;
   } field_t;
+
+  typedef struct {
+    char* button_label;
+    char* legend_label;
+    char* url;
+    char* u_field_name;
+    char* v_field_name;
+    char* w_field_name;
+    char* units;
+    int line_width;
+    wind_render_mode_t render_mode;
+    char* color;
+    tdrp_bool_t display_in_menu;
+  } wind_t;
 
   typedef struct {
     char* id_label;
@@ -555,6 +581,8 @@ public:
 
   char* instance;
 
+  char* color_scale_dir;
+
   input_mode_t input_mode;
 
   char* input_fmq_url;
@@ -577,10 +605,11 @@ public:
 
   show_status_t show_status_in_gui;
 
-  char* color_scale_dir;
-
   field_t *_fields;
   int fields_n;
+
+  wind_t *_winds;
+  int winds_n;
 
   double background_render_mins;
 
@@ -1395,7 +1424,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[478];
+  mutable TDRPtable _table[481];
 
   const char *_className;
 

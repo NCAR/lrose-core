@@ -235,7 +235,7 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
       field->contour_low = -9999;
       field->contour_high = record.cont_high;
       field->contour_interval = record.cont_interv;
-      field->render_mode = (Params::render_mode_t) record.render_method;
+      field->render_mode = (Params::grid_render_mode_t) record.render_method;
       field->display_in_menu = (tdrp_bool_t) record.currently_displayed;
       field->background_render = (tdrp_bool_t) record.auto_render;
 

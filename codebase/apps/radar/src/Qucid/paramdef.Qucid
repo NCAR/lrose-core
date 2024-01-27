@@ -46,6 +46,16 @@ paramdef string {
 } instance;
 
 commentdef {
+  p_header = "RESOURCES";
+}
+
+paramdef string {
+  p_default = "$(HOME)/git/lrose-displays/color_scales";
+  p_descr = "Directory for color scales";
+  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
+} color_scale_dir;
+
+commentdef {
   p_header = "REALTIME DATA INPUT";
 }
 
@@ -195,16 +205,6 @@ paramdef struct show_status_t {
 } show_status_in_gui;
 
 commentdef {
-  p_header = "FIELDS TO BE DISPLAYED";
-}
-
-paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/color_scales";
-  p_descr = "Directory for color scales";
-  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
-} color_scale_dir;
-
-commentdef {
   p_header = "<GRIDS>";
 }
 
@@ -213,7 +213,7 @@ typedef enum {
   FILLED_CONTOURS,
   DYNAMIC_CONTOURS,
   LINE_CONTOURS
-} render_mode_t;
+} grid_render_mode_t;
 
 typedef struct {
   string group_name;
@@ -226,7 +226,7 @@ typedef struct {
   double contour_low;
   double contour_high;
   double contour_interval;
-  render_mode_t render_mode;
+  grid_render_mode_t render_mode;
   boolean display_in_menu;
   boolean background_render;
   boolean composite_mode;
@@ -302,6 +302,98 @@ paramdef struct field_t {
 
 commentdef {
   p_header = "</GRIDS>";
+}
+
+commentdef {
+  p_header = "<WINDS>";
+}
+
+typedef enum {
+  ARROW,
+  VECTOR,
+  BARB,
+  LABELEDBARB,
+  TUFT,
+  TICKVECTOR,
+  METBARB,
+  BARB_SH,
+  LABELEDBARB_SH
+} wind_render_mode_t;
+
+typedef struct {
+  string button_label;
+  string legend_label;
+  string url;
+  string u_field_name;
+  string v_field_name;
+  string w_field_name;
+  string units;
+  int line_width;
+  wind_render_mode_t render_mode;
+  string color;
+  boolean display_in_menu;
+} wind_t;
+
+paramdef struct wind_t {
+  p_default = {
+    {
+      button_label = "GFS",
+      legend_label = "GFS",
+      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago",
+      u_field_name = "U",
+      v_field_name = "V",
+      w_field_name = "W",
+      units = "m/s",
+      line_width = 1,
+      render_mode = ARROW,
+      color = "white",
+      display_in_menu = true
+    }
+    ,
+    {
+      button_label = "WRF",
+      legend_label = "WRF",
+      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/relampago",
+      u_field_name = "U",
+      v_field_name = "V",
+      w_field_name = "W",
+      units = "m/s",
+      line_width = 1,
+      render_mode = ARROW,
+      color = "yellow",
+      display_in_menu = true
+    }
+  };
+  p_descr = "Winds to be displayed.";
+  p_help =
+    "button_label: appears on the GUI. "
+    "\nlegend_label: appears in the plot. "
+    "\nurl: location of data or data server. Form is 'protocol://host:port/dir/'"
+    "\nu_field_name: U component field name. "
+    "\nv_field_name: V component field name. "
+    "\nw_field_name: W component field name. Set to 'none' if no W vectors."
+    "\nunits: wind speed units. "
+    "\nline_width: line width to be used for wind vectors. "
+    "\nrender_mode:"
+    "\n  ARROW: centered on data point."
+    "\n  VECTOR: vertex at data point."
+    "\n  BARB: N hemisphere."
+    "\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere."
+    "\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector."
+    "\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes."
+    "\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold."
+    "\n  BARB_SH: S Hemisphere."
+    "\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp."
+    "\n"
+    "\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units." 
+    "\n"
+    "\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs"
+    "\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section"
+    "\n";
+} winds[];
+
+commentdef {
+  p_header = "</WINDS>";
 }
 
 paramdef double {
