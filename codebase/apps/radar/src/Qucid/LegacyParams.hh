@@ -290,16 +290,6 @@ private:
 
   int _initDrawExportLinks();
   
-  int _loadOverlayInfo(const char *param_buf, long param_buf_len,
-                       long line_no,
-                       int  max_overlays);
-  
-  int _loadOverlayData(int  num_overlays);
-  
-  int _initOverlays(const char *param_buf,
-                    long param_buf_len,
-                    long line_no);
-
   /////////////////////////////////////////////////////////////////////////////
   // GET_DEFAULT_PARAMS : Get a string representing the default parameters
   //                      for this TDRP parameter object
