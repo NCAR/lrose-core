@@ -396,6 +396,62 @@ commentdef {
   p_header = "</WINDS>";
 }
 
+commentdef {
+  p_header = "<MAPS>";
+}
+
+typedef struct {
+  string map_code;
+  string control_label;
+  string map_file_name;
+  int line_width;
+  double detail_thresh_min;
+  double detail_thresh_max;
+  string color;
+  boolean on_at_startup;
+} map_t;
+
+paramdef struct map_t {
+  p_default = {
+    {
+      map_code = "US_Highways",
+      control_label = "US_Highways",
+      map_file_name = "conus_ushwys.map",
+      line_width = 1,
+      detail_thresh_min = 0,
+      detail_thresh_max = 1000,
+      color = "grey",
+      on_at_startup = TRUE
+    }
+    ,
+    {
+      map_code = "Interstates",
+      control_label = "Interstates",
+      map_file_name = "conus_interstates.map",
+      line_width = 1,
+      detail_thresh_min = 0,
+      detail_thresh_max = 10000,
+      color = "white",
+      on_at_startup = TRUE
+    }
+  };
+  p_descr = "Map overlays to be displayed.";
+  p_help =
+    "map_code: name of the map, appears on the GUI. "
+    "\ncontrol_label: appears in the plot. "
+    "\nmap_file_name: name of map file in maps directory"
+    "\nline_width: line width to be used for map vectors. "
+    "\ndetail_thresh_min: min detail threshold for displaying map. Detail thresholds are computed as units of km across the image. "
+    "\ndetail_thresh_max: max detail threshold for displaying map. Detail thresholds are computed as units of km across the image. "
+    "\ncolor: X color name."
+    "\non_at_startup: display overlay when app starts up."
+    "\n";
+} maps[];
+
+commentdef {
+  p_header = "</MAPS>";
+}
+
 paramdef double {
   p_default = 2.0;
   p_descr = "Background rendering time period in minutes.";

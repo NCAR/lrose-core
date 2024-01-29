@@ -89,7 +89,7 @@ private:
   bool _printTdrp;
   FILE *_tdrpFile;
 
-  // field details
+  // fields
   
   typedef enum {
     POLYGONS,
@@ -159,7 +159,7 @@ private:
     bool auto_render;
   };
   
-  // wind details
+  // winds
   
   typedef enum {
     ARROW,
@@ -195,6 +195,33 @@ private:
     string units;
     int line_width;
     WindRenderMode render_mode;
+    string color;
+    bool on_at_startup;
+  };
+
+  // maps
+  // detail thresholds are in km across image
+  
+  class MapOverlay {
+  public:
+    MapOverlay() {
+      is_valid = false;
+      line_width = 1;
+      color = "white";
+      detail_thresh_min = 0.0;
+      detail_thresh_max = 10000.0;
+      on_at_startup = true;
+    }
+    ~MapOverlay() {
+    }
+    bool is_valid;
+    string text_line;
+    string map_code;
+    string control_label;
+    string map_file_name;
+    int line_width;
+    double detail_thresh_min;
+    double detail_thresh_max;
     string color;
     bool on_at_startup;
   };
@@ -254,12 +281,12 @@ private:
   
   int _loadKeyValPairs(const string &fname);
   
+  int _readMainParams();
   int _readGuiConfig();
   int _readGrids();
   int _readWinds();
-  int _readMainParams();
-  
   WindRenderMode _getWindRenderMode(const char* markerStr);
+  int _readMaps();
 
   int _initDrawExportLinks();
   

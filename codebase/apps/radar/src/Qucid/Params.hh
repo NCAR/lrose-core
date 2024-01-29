@@ -248,6 +248,17 @@ public:
   } wind_t;
 
   typedef struct {
+    char* map_code;
+    char* control_label;
+    char* map_file_name;
+    int line_width;
+    double detail_thresh_min;
+    double detail_thresh_max;
+    char* color;
+    tdrp_bool_t on_at_startup;
+  } map_t;
+
+  typedef struct {
     char* id_label;
     char* grid_list;
   } gui_field_set_t;
@@ -610,6 +621,9 @@ public:
 
   wind_t *_winds;
   int winds_n;
+
+  map_t *_maps;
+  int maps_n;
 
   double background_render_mins;
 
@@ -1424,7 +1438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[481];
+  mutable TDRPtable _table[484];
 
   const char *_className;
 

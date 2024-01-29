@@ -147,6 +147,12 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
     
+  // read in maps
+  
+  if (_readMaps()) {
+    return -1;
+  }
+    
 #ifdef JUNK
 
   if(gd.num_bookmarks > 0) {
@@ -1473,6 +1479,393 @@ int LegacyParams::_loadKeyValPairs(const string &fname)
   
 }
 
+/************************************************************************
+ * Read in main params
+ */
+
+int LegacyParams::_readMainParams()
+  
+{
+
+  // Load the Main parameters
+  
+  long param_text_len = 0;
+  long param_text_line_no = 0;
+  const char *param_text = _findTagText(_paramsBuf,
+                                        "MAIN_PARAMS",
+                                        &param_text_len,
+                                        &param_text_line_no);
+    
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr, "ERROR - LegacyParams::_readMainParams\n");
+    fprintf(stderr, "  Could not find MAIN_PARAMS SECTION\n");
+    return -1;
+  }
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <MAIN_PARAMS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  _debug = _getBoolean("cidd.debug_flag", 0);
+  _debug1 = _getBoolean("cidd.debug1_flag", 0);
+  _debug2 = _getBoolean("cidd.debug2_flag", 0);
+
+  // IF demo_time is set in the params
+  // Set into Archive Mode at the indicated time.
+
+  _getString("cidd.demo_time", "");
+  _getLong("cidd.temporal_rounding", 300);
+  _getString("cidd.climo_mode", "regular");
+
+  /* Toggle for displaying the analog clock */
+  _getLong("cidd.max_time_list_span", 365);
+
+  // movies
+  _getLong("cidd.starting_movie_frames", 12);
+  _getDouble("cidd.time_interval",10.0);
+  _getDouble("cidd.frame_span", 10.0);
+  _getDouble("cidd.forecast_interval", 2.0);
+  _getDouble("cidd.past_interval", 0.0);
+  _getDouble("cidd.movie_magnify_factor",1.0);
+  _getBoolean("cidd.check_data_times", 0);
+  _getString("cidd.movieframe_time_format", "%H%M");
+  _getLong("cidd.movieframe_time_mode", 0);
+
+  // clipping for rendering
+  _getBoolean("cidd.check_clipping", 0);
+  
+  // data retrieval
+  _getDouble("cidd.stretch_factor", 1.5);
+  _getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
+  _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
+  _getLong("cidd.update_interval", UPDATE_INTERVAL);
+  _getString("cidd.datamap_host", "");
+  _getLong("cidd.data_timeout_secs", 10);
+  _getLong("cidd.simple_command_timeout_secs",30);
+  _getLong("cidd.complex_command_timeout_secs",180);
+
+  // movies
+  _getBoolean("cidd.movie_on", 0);
+  _getLong("cidd.movie_delay",3000);
+  _getLong("cidd.movie_speed_msec", 75);
+  _getBoolean("cidd.reset_frames", 0);
+
+  // model data
+  _getLong("cidd.model_run_list_hours",24);
+
+  // How many idle seconds can elapse before resetting the display
+  _getLong("cidd.idle_reset_seconds",0);
+
+  // image generation in html mode
+  _getBoolean("cidd.html_mode", 0);
+  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
+  _getBoolean("cidd.transparent_images", 0);
+  _getString("cidd.image_dir", "/tmp/image_dir");
+  _getBoolean("cidd.save_images_to_day_subdir", 0);
+  _getString("cidd.image_ext", "png");
+  _getString("cidd.image_horiz_prefix", "CP");
+  _getString("cidd.image_vert_prefix", "CV");
+  _getString("cidd.image_name_separator", "_");
+
+  // output image file names
+  
+  _getBoolean("cidd.add_height_to_filename",0);
+  _getBoolean("cidd.add_frame_time_to_filename",1);
+  _getBoolean("cidd.add_button_name_to_filename",0);
+  _getBoolean("cidd.add_frame_num_to_filename",1);
+  _getBoolean("cidd.add_gen_time_to_filename",0);
+  _getBoolean("cidd.add_valid_time_to_filename",0);
+  _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
+  _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
+  _getString("cidd.horiz_image_command", "");
+  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
+  _getString("cidd.vert_image_fname", "cidd_vert_view.png");
+  _getString("cidd.vert_image_command", "");
+  _getBoolean("cidd.output_geo_xml", 0);
+  _getBoolean("cidd.use_latlon_in_geo_xml", 0);
+
+  // script to run after generating image
+  
+  _getString("cidd.image_convert_script", "convert_image.csh");
+  _getString("cidd.print_script", "");
+  _getString("cidd.series_convert_script", "make_anim.csh");
+
+  // data compression from server
+  
+  _getBoolean("cidd.request_compressed_data",0);
+  _getBoolean("cidd.request_gzip_vol_compression",0);
+
+  // projections
+  _getString("cidd.projection_type", "CARTESIAN");
+  _getDouble("cidd.lambert_lat1",20.0);
+  _getDouble("cidd.lambert_lat2",60.0);
+  _getDouble("cidd.tangent_lat",90.0);
+  _getDouble("cidd.tangent_lon",0.0);
+  _getDouble("cidd.central_scale",1.0);
+  _getDouble("cidd.north_angle",0.0);
+  _getBoolean("cidd.use_cosine", 1); // legacy
+  _getLong("cidd.use_cosine_correction", 1);
+  _getDouble("cidd.scale_units_per_km",1.0);
+  _getString("cidd.scale_units_label", "km");
+
+  // data retrieval
+  _getBoolean("cidd.always_get_full_domain", 0);
+  _getBoolean("cidd.do_not_clip_on_mdv_request", 0);
+  _getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
+     
+  // zooms
+  
+  _getDouble("cidd.min_zoom_threshold", 5.0);
+  _getDouble("cidd.aspect_ratio", 1.0);
+
+  /* Toggle for enabling a status report window */
+  _getBoolean("cidd.enable_status_window", 0);
+  _getBoolean("cidd.report_clicks_in_status_window", 0);
+  _getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
+  _getDouble("cidd.magnetic_variation_deg", 0);
+  
+  /* Toggle for enabling a Save Image Panel */
+  _getBoolean("cidd.enable_save_image_panel", 0);
+
+  // domain limits
+  _getDouble("cidd.domain_limit_min_x",-10000);
+  _getDouble("cidd.domain_limit_max_x",10000);
+  _getDouble("cidd.domain_limit_min_y",-10000);
+  _getDouble("cidd.domain_limit_max_y",10000);
+  
+  // origin latitude and longitude
+  _originLatitude = _getDouble("cidd.origin_latitude", 0.0);
+  _originLongitude = _getDouble("cidd.origin_longitude", 0.0);
+
+  // click location on reset
+  _getDouble("cidd.reset_click_latitude", _originLatitude);
+  _getDouble("cidd.reset_click_longitude", _originLongitude);
+
+  // startup pages
+  _getLong("cidd.planview_start_page", 1); // subtract 1
+  _getLong("cidd.xsect_start_page", 1); // subtract 1
+
+  // zooms
+  _getLong("cidd.num_zoom_levels",1);
+  _getLong("cidd.start_zoom_level",1);
+  _getBoolean("cidd.zoom_limits_in_latlon",0);
+  _getLong("cidd.num_cache_zooms",1);
+
+  // vert axis
+  _getDouble("cidd.min_ht", 0.0);
+  _getDouble("cidd.max_ht", 30.0);
+  _getDouble("cidd.start_ht", 0.0);
+
+  // maps
+  _getString("cidd.map_file_subdir", "maps");
+  _getDouble("cidd.locator_margin_km", 50.0);
+  _getString("cidd.station_loc_url", "");
+
+  // server access
+  _getString("cidd.remote_ui_url", "");
+  _getString("cidd.http_tunnel_url", "");
+  _httpProxyUrl = _getString("cidd.http_proxy_url", "");
+
+  // colors
+  _getString("cidd.foreground_color", "White");
+  _getString("cidd.background_color", "Black");
+  _getString("cidd.margin_color", "Black");
+  _getString("cidd.out_of_range_color", "transparent");
+  _getString("cidd.route_path_color", "yellow");
+  _getString("cidd.time_axis_color", "cyan");
+  _getString("cidd.time_frame_color", "yellow");
+  _getString("cidd.height_axis_color", "cyan");
+  _getString("cidd.height_indicator_color", "red");
+  _getString("cidd.range_ring_color", "grey");
+  _getString("cidd.missing_data_color","transparent");
+  _getString("cidd.bad_data_color","transparent");
+  _getString("cidd.epoch_indicator_color", "yellow");
+  _getString("cidd.now_time_color", "red");
+
+  // need multiple time ticks - i.e. array
+  _getString("cidd.time_tick_color", "yellow");
+  _getString("cidd.latest_click_mark_color", "red");
+  _getString( "cidd.latest_client_mark_color", "yellow");
+  
+  /* Toggle for displaying the height Selector in Right Margin */
+  _getBoolean("cidd.show_height_sel", 1);
+
+  /* Toggle for displaying data access and rendering messages */
+  _getBoolean("cidd.show_data_messages", 1);
+
+  // mode for writing latlon values
+  _getLong("cidd.latlon_mode",0);
+
+  // time labels
+  _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
+  _getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
+  _getString("cidd.frame_range_time_format", "%H:%M");
+
+  // Get the on/off state of the extra legend plotting - Force to either 0 or 1
+  _getBoolean("cidd.layer_legends_on", 1);
+  _getBoolean("cidd.cont_legends_on", 1);
+  _getBoolean("cidd.wind_legends_on", 1);
+
+  /* Toggle for displaying data labels */
+  _getBoolean("cidd.display_labels", 1);
+
+  /* Toggle for displaying the analog clock */
+  _getBoolean("cidd.display_ref_lines", 1);
+
+  // margins
+  _getLong("cidd.top_margin_render_style", 1);
+  _getLong("cidd.bot_margin_render_style", 1);
+  
+  // main window (horiz view)
+  _getLong("cidd.horiz_default_y_pos",0);
+  _getLong("cidd.horiz_default_x_pos",0);
+  _getLong("cidd.horiz_default_height", 600);
+  _getLong("cidd.horiz_default_width", 800);
+  _getLong("cidd.horiz_min_height", 400);
+  _getLong("cidd.horiz_min_width", 600);
+  _getLong("cidd.horiz_top_margin", 20);
+  _getLong("cidd.horiz_bot_margin", 20);
+  _getLong("cidd.horiz_left_margin", 20);
+  _getLong("cidd.horiz_right_margin", 80);
+  _getLong("cidd.horiz_legends_start_x", 0);
+  _getLong("cidd.horiz_legends_start_y", 0);
+  _getLong("cidd.horiz_legends_delta_y", 0);
+  
+  // vertical section
+  
+  _getLong("cidd.vert_default_x_pos", 0);
+  _getLong("cidd.vert_default_y_pos", 0);
+  _getLong("cidd.vert_default_height", 400);
+  _getLong("cidd.vert_default_width", 600);
+  _getLong("cidd.vert_min_height", 400);
+  _getLong("cidd.vert_min_width", 600);
+  _getLong("cidd.vert_top_margin", 20);
+  _getLong("cidd.vert_bot_margin", 20);
+  _getLong("cidd.vert_left_margin", 20);
+  _getLong("cidd.vert_right_margin", 80);
+  _getLong("cidd.vert_legends_start_x", 0);
+  _getLong("cidd.vert_legends_start_y", 0);
+  _getLong("cidd.vert_legends_delta_y", 0);
+
+  // range rings
+  _getBoolean("cidd.range_rings", 0);
+  _getLong("cidd.range_ring_x_space", 50);
+  _getLong("cidd.range_ring_y_space", 15);
+  _getBoolean("cidd.range_ring_labels", 1);
+  _getDouble("cidd.range_ring_spacing", -1.0);
+  _getDouble("cidd.max_ring_range", 1000.0);
+  _getBoolean("cidd.range_ring_follows_data", 0);
+  _getBoolean("cidd.range_ring_for_radar_only", 0);
+
+  // Toggle for shifting the display origin - Useful for mobile units.
+  _getBoolean("cidd.domain_follows_data", 0);
+
+  // azimuth lines
+  _getDouble("cidd.azmith_interval", 30.0);
+  _getDouble("cidd.azmith_radius", 200.0);
+  _getBoolean("cidd.azmith_lines", 0);
+
+  // winds
+  _getBoolean("cidd.wind_mode", 0);
+  _getBoolean("cidd.all_winds_on", 1);
+  _getLong("cidd.barb_shaft_len", 33);
+  _getLong("cidd.ideal_x_vectors", 20);
+  _getLong("cidd.ideal_y_vectors", 20);
+  _getLong("cidd.wind_head_size", 5);
+  _getDouble("cidd.wind_head_angle", 45.0);
+  _getLong("cidd.wind_scaler", 3);
+  _getDouble("cidd.wind_time_scale_interval", 10.0);
+  _windMarkerType = _getString("cidd.wind_marker_type", "arrow");
+  _getDouble("cidd.wind_w_scale_factor", 10.0);
+  _getDouble("cidd.wind_units_scale_factor", 1.0);
+  _getDouble("cidd.wind_reference_speed", 10.0);
+  _getString("cidd.wind_units_label", "m/sec");
+
+  // contours
+  _getBoolean("cidd.label_contours",1);
+  _getLong("cidd.contour_line_width", 1);
+  _getLong("cidd.smooth_contours", 0);
+  _getBoolean("cidd.use_alt_contours", 0);
+  _getBoolean("cidd.add_noise", 0);
+  _getDouble("cidd.special_contour_value", 0.0);
+
+  // bad and missing values
+  _getBoolean("cidd.map_bad_to_min_value", 0);
+  _getBoolean("cidd.map_missing_to_min_value", 0);
+
+  // main field on top?
+  _getBoolean("cidd.draw_main_on_top", 0);
+
+  // latest click location
+  _getBoolean("cidd.mark_latest_click_location", 0);
+  _getLong("cidd.latest_click_mark_size", 11);
+  _getBoolean("cidd.click_posn_rel_to_origin", 0);
+
+  // fonts
+  _getLong("cidd.num_fonts", 1);
+  _getLong("cidd.font_display_mode",1);
+
+  /* Toggle for displaying the analog clock */
+  _getBoolean("cidd.show_clock", 0);
+
+  /* Set the time to display on the analog clock */
+  _getBoolean("cidd.draw_clock_local", 0);
+  
+  /* Use local times for Product timestamps and user input widgets. */
+  _getBoolean("cidd.use_local_timestamps", 0);
+  
+  // field menu - number of columns
+  _getLong("cidd.num_field_menu_cols",0);
+  
+  // display modes
+  _getBoolean("cidd.wsddm_mode", 0);
+  _getBoolean("cidd.one_click_rhi", 0);
+
+  // canvas events
+  _getDouble("cidd.rotate_coarse_adjust",6.0);
+  _getDouble("cidd.rotate_medium_adjust",2.0);
+  _getDouble("cidd.rotate_fine_adjust", 0.5);
+  _getBoolean("cidd.disable_pick_mode", 1);
+  _replaceUnderscores = _getBoolean("cidd.replace_underscores", 1);
+  _getBoolean("cidd.close_popups", 0);
+  _getBoolean("cidd.clip_overlay_fields", 0);
+
+  // labels
+  _getString("cidd.horiz_frame_label", "Qucid");
+  _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
+  _getString("cidd.status_info_file", "");
+  _getString("cidd.help_command", "");
+
+  // Bookmarks for a menu of URLS - Index starts at 1
+  _getString("cidd.bookmark_command", "");
+  _getLong("cidd.num_bookmarks", 0);
+
+  // image intensity
+  _getDouble("cidd.image_inten", 0.8);
+  _getLong("cidd.inten_levels", 32);
+  _getDouble("cidd.data_inten", 1.0);
+
+  // fill and contour thresholds
+  _getLong("cidd.image_fill_threshold", 120000);
+  _getLong("cidd.dynamic_contour_threshold", 160000);
+
+  // shmem
+  _getLong("cidd.coord_key", 63500);
+
+  // products
+  _getBoolean("cidd.products_on", 1);
+  _getLong("cidd.product_line_width", 1);
+  _getLong("cidd.product_font_size", 1);
+  _getDouble("cidd.scale_constant", 300.0);
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </MAIN_PARAMS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  return 0;
+
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // initialize the group names
 
@@ -2021,390 +2414,164 @@ LegacyParams::WindRenderMode
 }
   
 /************************************************************************
- * Read in main params
+ * Read in map fields
  */
 
-int LegacyParams::_readMainParams()
+int LegacyParams::_readMaps()
   
 {
 
-  // Load the Main parameters
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <MAPS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
-  long param_text_len = 0;
-  long param_text_line_no = 0;
-  const char *param_text = _findTagText(_paramsBuf,
-                                        "MAIN_PARAMS",
-                                        &param_text_len,
-                                        &param_text_line_no);
-    
+  // read the MAPS params buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"MAPS",
+                 &param_text_len, &param_text_line_no);
+  
   if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr, "ERROR - LegacyParams::_readMainParams\n");
-    fprintf(stderr, "  Could not find MAIN_PARAMS SECTION\n");
+    fprintf(stderr, "WARNING - LegacyParams::_readMaps\n");
+    fprintf(stderr, "  No MAPS section in param file\n");
     return -1;
   }
+  string paramText(param_text, param_text_len);
   
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// <MAIN_PARAMS>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-
-  _debug = _getBoolean("cidd.debug_flag", 0);
-  _debug1 = _getBoolean("cidd.debug1_flag", 0);
-  _debug2 = _getBoolean("cidd.debug2_flag", 0);
-
-  // IF demo_time is set in the params
-  // Set into Archive Mode at the indicated time.
-
-  _getString("cidd.demo_time", "");
-  _getLong("cidd.temporal_rounding", 300);
-  _getString("cidd.climo_mode", "regular");
-
-  /* Toggle for displaying the analog clock */
-  _getLong("cidd.max_time_list_span", 365);
-
-  // movies
-  _getLong("cidd.starting_movie_frames", 12);
-  _getDouble("cidd.time_interval",10.0);
-  _getDouble("cidd.frame_span", 10.0);
-  _getDouble("cidd.forecast_interval", 2.0);
-  _getDouble("cidd.past_interval", 0.0);
-  _getDouble("cidd.movie_magnify_factor",1.0);
-  _getBoolean("cidd.check_data_times", 0);
-  _getString("cidd.movieframe_time_format", "%H%M");
-  _getLong("cidd.movieframe_time_mode", 0);
-
-  // clipping for rendering
-  _getBoolean("cidd.check_clipping", 0);
+  // alloc cfield array
   
-  // data retrieval
-  _getDouble("cidd.stretch_factor", 1.5);
-  _getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
-  _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
-  _getLong("cidd.update_interval", UPDATE_INTERVAL);
-  _getString("cidd.datamap_host", "");
-  _getLong("cidd.data_timeout_secs", 10);
-  _getLong("cidd.simple_command_timeout_secs",30);
-  _getLong("cidd.complex_command_timeout_secs",180);
-
-  // movies
-  _getBoolean("cidd.movie_on", 0);
-  _getLong("cidd.movie_delay",3000);
-  _getLong("cidd.movie_speed_msec", 75);
-  _getBoolean("cidd.reset_frames", 0);
-
-  // model data
-  _getLong("cidd.model_run_list_hours",24);
-
-  // How many idle seconds can elapse before resetting the display
-  _getLong("cidd.idle_reset_seconds",0);
-
-  // image generation in html mode
-  _getBoolean("cidd.html_mode", 0);
-  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
-  _getBoolean("cidd.transparent_images", 0);
-  _getString("cidd.image_dir", "/tmp/image_dir");
-  _getBoolean("cidd.save_images_to_day_subdir", 0);
-  _getString("cidd.image_ext", "png");
-  _getString("cidd.image_horiz_prefix", "CP");
-  _getString("cidd.image_vert_prefix", "CV");
-  _getString("cidd.image_name_separator", "_");
-
-  // output image file names
+  char *cfield[MAX_PARSE_FIELDS];
+  for(int i = 0; i < MAX_PARSE_FIELDS; i++) {
+    cfield[i] =(char *) calloc(MAX_PARSE_SIZE, 1);
+  }
   
-  _getBoolean("cidd.add_height_to_filename",0);
-  _getBoolean("cidd.add_frame_time_to_filename",1);
-  _getBoolean("cidd.add_button_name_to_filename",0);
-  _getBoolean("cidd.add_frame_num_to_filename",1);
-  _getBoolean("cidd.add_gen_time_to_filename",0);
-  _getBoolean("cidd.add_valid_time_to_filename",0);
-  _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
-  _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  _getString("cidd.horiz_image_command", "");
-  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
-  _getString("cidd.vert_image_fname", "cidd_vert_view.png");
-  _getString("cidd.vert_image_command", "");
-  _getBoolean("cidd.output_geo_xml", 0);
-  _getBoolean("cidd.use_latlon_in_geo_xml", 0);
-
-  // script to run after generating image
+  // read the params lines, create maps vector
   
-  _getString("cidd.image_convert_script", "convert_image.csh");
-  _getString("cidd.print_script", "");
-  _getString("cidd.series_convert_script", "make_anim.csh");
-
-  // data compression from server
+  int total_len = 0;
+  const char *start_ptr = paramText.c_str();
+  const char *end_ptr;
+  vector<MapOverlay> overlays;
   
-  _getBoolean("cidd.request_compressed_data",0);
-  _getBoolean("cidd.request_gzip_vol_compression",0);
-
-  // projections
-  _getString("cidd.projection_type", "CARTESIAN");
-  _getDouble("cidd.lambert_lat1",20.0);
-  _getDouble("cidd.lambert_lat2",60.0);
-  _getDouble("cidd.tangent_lat",90.0);
-  _getDouble("cidd.tangent_lon",0.0);
-  _getDouble("cidd.central_scale",1.0);
-  _getDouble("cidd.north_angle",0.0);
-  _getBoolean("cidd.use_cosine", 1); // legacy
-  _getLong("cidd.use_cosine_correction", 1);
-  _getDouble("cidd.scale_units_per_km",1.0);
-  _getString("cidd.scale_units_label", "km");
-
-  // data retrieval
-  _getBoolean("cidd.always_get_full_domain", 0);
-  _getBoolean("cidd.do_not_clip_on_mdv_request", 0);
-  _getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
-     
-  // zooms
+  while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
+        (total_len < param_text_len)) {
   
-  _getDouble("cidd.min_zoom_threshold", 5.0);
-  _getDouble("cidd.aspect_ratio", 1.0);
+    // Skip over blank, short or commented lines
+    int len = (end_ptr - start_ptr) + 1; 
+    
+    if(len > 20 && *start_ptr != '#') {
+      
+      int num_fields =
+        STRparse(start_ptr, cfield, len, MAX_PARSE_FIELDS, MAX_PARSE_SIZE); 
+      
+      if(*start_ptr != '#' && num_fields >= 7) {
+        MapOverlay overlay;
+        // create space for text line
+        overlay.text_line.resize(len + 10000);
+        STRcopy((char *) overlay.text_line.c_str(), start_ptr, len);
+        /* Do Environment variable substitution */
+        usubstitute_env((char *) overlay.text_line.c_str(), len + 10000);
+        overlays.push_back(overlay);
+      }
 
-  /* Toggle for enabling a status report window */
-  _getBoolean("cidd.enable_status_window", 0);
-  _getBoolean("cidd.report_clicks_in_status_window", 0);
-  _getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
-  _getDouble("cidd.magnetic_variation_deg", 0);
+    }
+
+    start_ptr = end_ptr +1; // Skip past the newline
+    total_len += len  +1;
+      
+  } // while
+
+  // parse the maps params from the text lines
   
-  /* Toggle for enabling a Save Image Panel */
-  _getBoolean("cidd.enable_save_image_panel", 0);
+  for(size_t ii = 0; ii < overlays.size(); ii++) {
 
-  // domain limits
-  _getDouble("cidd.domain_limit_min_x",-10000);
-  _getDouble("cidd.domain_limit_max_x",10000);
-  _getDouble("cidd.domain_limit_min_y",-10000);
-  _getDouble("cidd.domain_limit_max_y",10000);
+    MapOverlay &overlay = overlays[ii];
+    int num_fields = STRparse(overlay.text_line.c_str(), cfield,
+                              INPUT_LINE_LEN,
+                              MAX_PARSE_FIELDS, MAX_PARSE_SIZE);
+    if(num_fields < 7) {
+      fprintf(stderr,
+              "Error in map field line. Too few parameters: %s",
+              overlay.text_line.c_str());
+    }
+    
+    // labels
+    
+    overlay.map_code = cfield[0];
+    overlay.control_label = cfield[1];
+
+    // file name
+    
+    overlay.map_file_name = cfield[2];
+
+    // line width
+    
+    overlay.line_width = atoi(cfield[3]);
+    if (overlay.line_width < 0) {
+      // negative line width, inactive
+      overlay.on_at_startup = false;
+      overlay.line_width *= -1;
+    }
+    if (overlay.line_width > 10) {
+      // sanity check
+      overlay.line_width = 1;
+    }
+
+    // detail thresholds
+    
+    overlay.detail_thresh_min = atof(cfield[4]);
+    overlay.detail_thresh_max = atof(cfield[5]);
+
+    // color - can be space delimited, so add all remaining tokens
+
+    overlay.color = cfield[6];
+    for(int jj = 7; jj < num_fields; jj++) {
+      overlay.color = overlay.color + " ";
+      overlay.color = cfield[jj];
+    }
+
+    overlay.is_valid = true;
+    
+  } // ii
   
-  // origin latitude and longitude
-  _originLatitude = _getDouble("cidd.origin_latitude", 0.0);
-  _originLongitude = _getDouble("cidd.origin_longitude", 0.0);
-
-  // click location on reset
-  _getDouble("cidd.reset_click_latitude", _originLatitude);
-  _getDouble("cidd.reset_click_longitude", _originLongitude);
-
-  // startup pages
-  _getLong("cidd.planview_start_page", 1); // subtract 1
-  _getLong("cidd.xsect_start_page", 1); // subtract 1
-
-  // zooms
-  _getLong("cidd.num_zoom_levels",1);
-  _getLong("cidd.start_zoom_level",1);
-  _getBoolean("cidd.zoom_limits_in_latlon",0);
-  _getLong("cidd.num_cache_zooms",1);
-
-  // vert axis
-  _getDouble("cidd.min_ht", 0.0);
-  _getDouble("cidd.max_ht", 30.0);
-  _getDouble("cidd.start_ht", 0.0);
-
-  // maps
-  _getString("cidd.map_file_subdir", "maps");
-  _getDouble("cidd.locator_margin_km", 50.0);
-  _getString("cidd.station_loc_url", "");
-
-  // server access
-  _getString("cidd.remote_ui_url", "");
-  _getString("cidd.http_tunnel_url", "");
-  _httpProxyUrl = _getString("cidd.http_proxy_url", "");
-
-  // colors
-  _getString("cidd.foreground_color", "White");
-  _getString("cidd.background_color", "Black");
-  _getString("cidd.margin_color", "Black");
-  _getString("cidd.out_of_range_color", "transparent");
-  _getString("cidd.route_path_color", "yellow");
-  _getString("cidd.time_axis_color", "cyan");
-  _getString("cidd.time_frame_color", "yellow");
-  _getString("cidd.height_axis_color", "cyan");
-  _getString("cidd.height_indicator_color", "red");
-  _getString("cidd.range_ring_color", "grey");
-  _getString("cidd.missing_data_color","transparent");
-  _getString("cidd.bad_data_color","transparent");
-  _getString("cidd.epoch_indicator_color", "yellow");
-  _getString("cidd.now_time_color", "red");
-
-  // need multiple time ticks - i.e. array
-  _getString("cidd.time_tick_color", "yellow");
-  _getString("cidd.latest_click_mark_color", "red");
-  _getString( "cidd.latest_client_mark_color", "yellow");
+  /* free temp space */
+  for(size_t i = 0; i < MAX_PARSE_FIELDS; i++) {
+    if (cfield[i] != NULL) {
+      free(cfield[i]);
+    }
+  }
   
-  /* Toggle for displaying the height Selector in Right Margin */
-  _getBoolean("cidd.show_height_sel", 1);
+  /* write to tdrp params file */
 
-  /* Toggle for displaying data access and rendering messages */
-  _getBoolean("cidd.show_data_messages", 1);
-
-  // mode for writing latlon values
-  _getLong("cidd.latlon_mode",0);
-
-  // time labels
-  _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
-  _getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
-  _getString("cidd.frame_range_time_format", "%H:%M");
-
-  // Get the on/off state of the extra legend plotting - Force to either 0 or 1
-  _getBoolean("cidd.layer_legends_on", 1);
-  _getBoolean("cidd.cont_legends_on", 1);
-  _getBoolean("cidd.wind_legends_on", 1);
-
-  /* Toggle for displaying data labels */
-  _getBoolean("cidd.display_labels", 1);
-
-  /* Toggle for displaying the analog clock */
-  _getBoolean("cidd.display_ref_lines", 1);
-
-  // margins
-  _getLong("cidd.top_margin_render_style", 1);
-  _getLong("cidd.bot_margin_render_style", 1);
-  
-  // main window (horiz view)
-  _getLong("cidd.horiz_default_y_pos",0);
-  _getLong("cidd.horiz_default_x_pos",0);
-  _getLong("cidd.horiz_default_height", 600);
-  _getLong("cidd.horiz_default_width", 800);
-  _getLong("cidd.horiz_min_height", 400);
-  _getLong("cidd.horiz_min_width", 600);
-  _getLong("cidd.horiz_top_margin", 20);
-  _getLong("cidd.horiz_bot_margin", 20);
-  _getLong("cidd.horiz_left_margin", 20);
-  _getLong("cidd.horiz_right_margin", 80);
-  _getLong("cidd.horiz_legends_start_x", 0);
-  _getLong("cidd.horiz_legends_start_y", 0);
-  _getLong("cidd.horiz_legends_delta_y", 0);
-  
-  // vertical section
-  
-  _getLong("cidd.vert_default_x_pos", 0);
-  _getLong("cidd.vert_default_y_pos", 0);
-  _getLong("cidd.vert_default_height", 400);
-  _getLong("cidd.vert_default_width", 600);
-  _getLong("cidd.vert_min_height", 400);
-  _getLong("cidd.vert_min_width", 600);
-  _getLong("cidd.vert_top_margin", 20);
-  _getLong("cidd.vert_bot_margin", 20);
-  _getLong("cidd.vert_left_margin", 20);
-  _getLong("cidd.vert_right_margin", 80);
-  _getLong("cidd.vert_legends_start_x", 0);
-  _getLong("cidd.vert_legends_start_y", 0);
-  _getLong("cidd.vert_legends_delta_y", 0);
-
-  // range rings
-  _getBoolean("cidd.range_rings", 0);
-  _getLong("cidd.range_ring_x_space", 50);
-  _getLong("cidd.range_ring_y_space", 15);
-  _getBoolean("cidd.range_ring_labels", 1);
-  _getDouble("cidd.range_ring_spacing", -1.0);
-  _getDouble("cidd.max_ring_range", 1000.0);
-  _getBoolean("cidd.range_ring_follows_data", 0);
-  _getBoolean("cidd.range_ring_for_radar_only", 0);
-
-  // Toggle for shifting the display origin - Useful for mobile units.
-  _getBoolean("cidd.domain_follows_data", 0);
-
-  // azimuth lines
-  _getDouble("cidd.azmith_interval", 30.0);
-  _getDouble("cidd.azmith_radius", 200.0);
-  _getBoolean("cidd.azmith_lines", 0);
-
-  // winds
-  _getBoolean("cidd.wind_mode", 0);
-  _getBoolean("cidd.all_winds_on", 1);
-  _getLong("cidd.barb_shaft_len", 33);
-  _getLong("cidd.ideal_x_vectors", 20);
-  _getLong("cidd.ideal_y_vectors", 20);
-  _getLong("cidd.wind_head_size", 5);
-  _getDouble("cidd.wind_head_angle", 45.0);
-  _getLong("cidd.wind_scaler", 3);
-  _getDouble("cidd.wind_time_scale_interval", 10.0);
-  _windMarkerType = _getString("cidd.wind_marker_type", "arrow");
-  _getDouble("cidd.wind_w_scale_factor", 10.0);
-  _getDouble("cidd.wind_units_scale_factor", 1.0);
-  _getDouble("cidd.wind_reference_speed", 10.0);
-  _getString("cidd.wind_units_label", "m/sec");
-
-  // contours
-  _getBoolean("cidd.label_contours",1);
-  _getLong("cidd.contour_line_width", 1);
-  _getLong("cidd.smooth_contours", 0);
-  _getBoolean("cidd.use_alt_contours", 0);
-  _getBoolean("cidd.add_noise", 0);
-  _getDouble("cidd.special_contour_value", 0.0);
-
-  // bad and missing values
-  _getBoolean("cidd.map_bad_to_min_value", 0);
-  _getBoolean("cidd.map_missing_to_min_value", 0);
-
-  // main field on top?
-  _getBoolean("cidd.draw_main_on_top", 0);
-
-  // latest click location
-  _getBoolean("cidd.mark_latest_click_location", 0);
-  _getLong("cidd.latest_click_mark_size", 11);
-  _getBoolean("cidd.click_posn_rel_to_origin", 0);
-
-  // fonts
-  _getLong("cidd.num_fonts", 1);
-  _getLong("cidd.font_display_mode",1);
-
-  /* Toggle for displaying the analog clock */
-  _getBoolean("cidd.show_clock", 0);
-
-  /* Set the time to display on the analog clock */
-  _getBoolean("cidd.draw_clock_local", 0);
-  
-  /* Use local times for Product timestamps and user input widgets. */
-  _getBoolean("cidd.use_local_timestamps", 0);
-  
-  // field menu - number of columns
-  _getLong("cidd.num_field_menu_cols",0);
-  
-  // display modes
-  _getBoolean("cidd.wsddm_mode", 0);
-  _getBoolean("cidd.one_click_rhi", 0);
-
-  // canvas events
-  _getDouble("cidd.rotate_coarse_adjust",6.0);
-  _getDouble("cidd.rotate_medium_adjust",2.0);
-  _getDouble("cidd.rotate_fine_adjust", 0.5);
-  _getBoolean("cidd.disable_pick_mode", 1);
-  _replaceUnderscores = _getBoolean("cidd.replace_underscores", 1);
-  _getBoolean("cidd.close_popups", 0);
-  _getBoolean("cidd.clip_overlay_fields", 0);
-
-  // labels
-  _getString("cidd.horiz_frame_label", "Qucid");
-  _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
-  _getString("cidd.status_info_file", "");
-  _getString("cidd.help_command", "");
-
-  // Bookmarks for a menu of URLS - Index starts at 1
-  _getString("cidd.bookmark_command", "");
-  _getLong("cidd.num_bookmarks", 0);
-
-  // image intensity
-  _getDouble("cidd.image_inten", 0.8);
-  _getLong("cidd.inten_levels", 32);
-  _getDouble("cidd.data_inten", 1.0);
-
-  // fill and contour thresholds
-  _getLong("cidd.image_fill_threshold", 120000);
-  _getLong("cidd.dynamic_contour_threshold", 160000);
-
-  // shmem
-  _getLong("cidd.coord_key", 63500);
-
-  // products
-  _getBoolean("cidd.products_on", 1);
-  _getLong("cidd.product_line_width", 1);
-  _getLong("cidd.product_font_size", 1);
-  _getDouble("cidd.scale_constant", 300.0);
+  fprintf(_tdrpFile, "maps = {\n");
+  for(size_t ifield = 0; ifield < overlays.size(); ifield++) {
+    MapOverlay &overlay = overlays[ifield];
+    if (!overlay.is_valid) {
+      continue;
+    }
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    map_code = \"%s\",\n", overlay.map_code.c_str());
+    fprintf(_tdrpFile, "    control_label = \"%s\",\n", overlay.control_label.c_str());
+    fprintf(_tdrpFile, "    map_file_name = \"%s\",\n", overlay.map_file_name.c_str());
+    fprintf(_tdrpFile, "    line_width = %d,\n", overlay.line_width);
+    fprintf(_tdrpFile, "    detail_thresh_min = %lg,\n", overlay.detail_thresh_min);
+    fprintf(_tdrpFile, "    detail_thresh_max = %lg,\n", overlay.detail_thresh_max);
+    fprintf(_tdrpFile, "    color = \"%s\",\n", overlay.color.c_str());
+    fprintf(_tdrpFile, "    on_at_startup = %s\n",
+            (overlay.on_at_startup?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  }\n");
+    if (ifield < overlays.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // ifield
+  fprintf(_tdrpFile, "};\n");
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// </MAIN_PARAMS>\n");
+  fprintf(_tdrpFile, "// </MAPS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
   return 0;
-
+  
 }
 
 /************************************************************************
