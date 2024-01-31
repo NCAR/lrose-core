@@ -1899,9 +1899,9 @@ commentdef {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Apply the RHOHV test after filtering based on CMD.";
-  p_help = "This allows us to identify areas of weak clutter contamination that CMD missed.";
-} apply_rhohv_test_after_cmd;
+  p_descr = "Apply the RHOHV test in CMD.";
+  p_help = "This allows us to identify areas of weak clutter contamination that CMD missed. Only applies to dual-pol radars for which RHOHV is available.";
+} apply_rhohv_test_in_cmd;
 
 paramdef double {
   p_default = 0.5;
@@ -1920,6 +1920,16 @@ paramdef double {
   p_descr = "The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.";
   p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";
 } rhohv_improvement_factor_threshold;
+
+paramdef struct interest_map_point_t {
+  p_default = {{3.5, 0.0}, {4.5, 1.0}};
+  p_descr = "Interest mapping for the rhohv test.";
+} rhohv_test_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of phidp.";
+} rhohv_test_interest_weight;
 
 commentdef {
   p_header = "SPECTRAL CMD";

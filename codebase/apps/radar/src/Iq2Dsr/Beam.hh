@@ -270,6 +270,7 @@ private:
   bool _isAlternating;
   iwrf_xmit_rcv_mode_t _xmitRcvMode;
   bool _dualPol;
+  bool _applyRhohvTest;
   bool _switchingReceiver;
 
   // prt and pulse width

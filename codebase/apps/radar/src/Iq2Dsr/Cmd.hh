@@ -75,7 +75,7 @@ public:
   
   // compute CMD
   
-  void compute(int nGates, bool useDualPol);
+  void compute(int nGates, bool useDualPol, bool useRhohvTest);
 
 protected:
   
@@ -100,6 +100,7 @@ private:
   InterestMap *_cpaInterestMap;
   InterestMap *_zdrSdevInterestMap;
   InterestMap *_phidpSdevInterestMap;
+  InterestMap *_rhohvTestInterestMap;
 
   // phidp computations
 
@@ -128,7 +129,6 @@ private:
   vector<PhidpState> _phidpStates;
   bool _phidpFoldsAt90;
   double _phidpFoldVal, _phidpFoldRange;
-
 
   // private functions
   

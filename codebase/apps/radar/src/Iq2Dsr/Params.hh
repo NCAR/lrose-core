@@ -1262,13 +1262,18 @@ public:
 
   double phidp_sdev_interest_weight;
 
-  tdrp_bool_t apply_rhohv_test_after_cmd;
+  tdrp_bool_t apply_rhohv_test_in_cmd;
 
   double rhohv_test_min_rhohv;
 
   double rhohv_test_max_rhohv;
 
   double rhohv_improvement_factor_threshold;
+
+  interest_map_point_t *_rhohv_test_interest_map;
+  int rhohv_test_interest_map_n;
+
+  double rhohv_test_interest_weight;
 
   tdrp_bool_t run_spectral_cmd;
 
@@ -1386,7 +1391,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[320];
+  mutable TDRPtable _table[322];
 
   const char *_className;
 

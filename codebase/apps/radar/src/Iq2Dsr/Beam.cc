@@ -383,6 +383,17 @@ void Beam::_prepareForComputeMoments()
     _dualPol = true;
   }
 
+  if (_params.apply_rhohv_test_in_cmd) {
+    if (_xmitRcvMode == IWRF_SINGLE_POL ||
+        _xmitRcvMode == IWRF_SINGLE_POL_V) {
+      _dualPol = false;
+    } else {
+      _dualPol = true;
+    }
+  } else {
+    _applyRhohvTest = false;
+  }
+
   _switchingReceiver = _mmgr.isSwitchingReceiver();
 
   // range geometry
@@ -2270,7 +2281,7 @@ void Beam::_filterDpAltHvCoCross()
     
     // initialize rhohv test
 
-    if (_params.apply_rhohv_test_after_cmd) {
+    if (_params.apply_rhohv_test_in_cmd) {
       fields.test2 = 0;
       // fields.test3 = 0;
     }
@@ -2281,7 +2292,7 @@ void Beam::_filterDpAltHvCoCross()
 
       // should we apply the RHOHV improvement test?
 
-      if (!_params.apply_rhohv_test_after_cmd) {
+      if (!_params.apply_rhohv_test_in_cmd) {
         continue;
       }
 
@@ -2408,7 +2419,7 @@ void Beam::_filterDpAltHvCoCross()
     
     fields.clut = _computeClutPower(fields, fieldsF);
     
-    if (_params.apply_rhohv_test_after_cmd) {
+    if (_params.apply_rhohv_test_in_cmd) {
 
       // compute rhohv improvement
       double factorUnfilt = 1.0 - fields.rhohv;
@@ -6056,7 +6067,7 @@ void Beam::_performClutterFiltering()
   // compute CMD
 
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol);
+  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
 
   _fixAltClutVelocity();
 
@@ -6092,7 +6103,7 @@ void Beam::_performClutterFilteringSz()
   // compute CMD
   
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol);
+  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
@@ -6113,7 +6124,7 @@ void Beam::_performClutterFilteringSz()
       
   // compute CMD
   
-  _cmd->compute(_nGates, _dualPol);
+  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields

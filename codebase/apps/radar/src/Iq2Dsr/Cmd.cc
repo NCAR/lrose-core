@@ -63,6 +63,7 @@ Cmd::Cmd(const string &prog_name,
   _cpaInterestMap = NULL;
   _zdrSdevInterestMap = NULL;
   _phidpSdevInterestMap = NULL;
+  _rhohvTestInterestMap = NULL;
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
@@ -96,6 +97,10 @@ Cmd::~Cmd()
 
   if (_phidpSdevInterestMap != NULL) {
     delete _phidpSdevInterestMap;
+  }
+  
+  if (_rhohvTestInterestMap != NULL) {
+    delete _rhohvTestInterestMap;
   }
   
 }
@@ -180,6 +185,20 @@ int Cmd::_createInterestMaps(const Params &params)
       new InterestMap("phidp sdev", pts, params.phidp_sdev_interest_weight);
   } // if (_phidpSdevInterestMap ...
   
+  // rhohv test
+
+  if (_rhohvTestInterestMap == NULL) {
+    vector<InterestMap::ImPoint> pts;
+    if (_convertInterestMapToVector("rhohv test",
+				    params._rhohv_test_interest_map,
+				    params.rhohv_test_interest_map_n,
+				    pts)) {
+      return -1;
+    }
+    _rhohvTestInterestMap =
+      new InterestMap("rhohv test", pts, params.rhohv_test_interest_weight);
+  } // if (_rhohvTestInterestMap ...
+  
   return 0;
   
 }
@@ -187,7 +206,7 @@ int Cmd::_createInterestMaps(const Params &params)
 /////////////////////////////////////////////////
 // compute CMD
 
-void Cmd::compute(int nGates, bool useDualPol)
+void Cmd::compute(int nGates, bool useDualPol, bool useRhohvTest)
   
 {
 
@@ -213,6 +232,14 @@ void Cmd::compute(int nGates, bool useDualPol)
       _computePhidpSdevNew(nGates);
     }
     
+    if (useRhohvTest) {
+      
+      if (_params.rhohv_test_interest_weight > 0) {
+        // _computeRhohvTest(nGates);
+      }
+      
+    } // if (dualPol ...
+  
   } // if (dualPol ...
   
   // compute cmd clutter field
