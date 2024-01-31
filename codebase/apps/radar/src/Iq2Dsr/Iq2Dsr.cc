@@ -262,9 +262,9 @@ Iq2Dsr::~Iq2Dsr()
 
   // free memory
   
-  if (_beamReader) {
-    delete _beamReader;
-  }
+  // if (_beamReader) {
+  //   delete _beamReader;
+  // }
   
   for (size_t ii = 0; ii < _momentsMgrArray.size(); ii++) {
     delete _momentsMgrArray[ii];
