@@ -384,11 +384,13 @@ void Beam::_prepareForComputeMoments()
   }
 
   if (_params.apply_rhohv_test_in_cmd) {
-    if (_xmitRcvMode == IWRF_SINGLE_POL ||
-        _xmitRcvMode == IWRF_SINGLE_POL_V) {
-      _dualPol = false;
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+        _xmitRcvMode == IWRF_ALT_HV_FIXED_HV ||
+        _xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
+        _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
+      _applyRhohvTest = true;
     } else {
-      _dualPol = true;
+      _applyRhohvTest = false;
     }
   } else {
     _applyRhohvTest = false;
@@ -2281,7 +2283,7 @@ void Beam::_filterDpAltHvCoCross()
     
     // initialize rhohv test
 
-    if (_params.apply_rhohv_test_in_cmd) {
+    if (_applyRhohvTest) {
       fields.test2 = 0;
       // fields.test3 = 0;
     }
@@ -2292,7 +2294,7 @@ void Beam::_filterDpAltHvCoCross()
 
       // should we apply the RHOHV improvement test?
 
-      if (!_params.apply_rhohv_test_in_cmd) {
+      if (!_applyRhohvTest) {
         continue;
       }
 
@@ -2419,7 +2421,7 @@ void Beam::_filterDpAltHvCoCross()
     
     fields.clut = _computeClutPower(fields, fieldsF);
     
-    if (_params.apply_rhohv_test_in_cmd) {
+    if (_applyRhohvTest) {
 
       // compute rhohv improvement
       double factorUnfilt = 1.0 - fields.rhohv;
@@ -6067,7 +6069,7 @@ void Beam::_performClutterFiltering()
   // compute CMD
 
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
+  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
 
   _fixAltClutVelocity();
 
@@ -6103,7 +6105,7 @@ void Beam::_performClutterFilteringSz()
   // compute CMD
   
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
+  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
@@ -6124,7 +6126,7 @@ void Beam::_performClutterFilteringSz()
       
   // compute CMD
   
-  _cmd->compute(_nGates, _dualPol, _params.apply_rhohv_test_in_cmd);
+  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
