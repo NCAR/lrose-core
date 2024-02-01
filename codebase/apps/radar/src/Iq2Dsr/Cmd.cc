@@ -41,6 +41,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/sincos.h>
 #include <radar/KdpFilt.hh>
+#include <radar/RadarMoments.hh>
 #include "Cmd.hh"
 #include "cmd_gap_filter.c"
 #include "cmd_speckle_filter.c"
@@ -67,6 +68,8 @@ Cmd::Cmd(const string &prog_name,
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
+  
+  _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
   
   _createInterestMaps(_params);
   
@@ -206,7 +209,8 @@ int Cmd::_createInterestMaps(const Params &params)
 /////////////////////////////////////////////////
 // compute CMD
 
-void Cmd::compute(int nGates, bool useDualPol, bool useRhohvTest)
+void Cmd::compute(int nGates, const RadarMoments *mom,
+                  bool useDualPol, bool useRhohvTest)
   
 {
 
@@ -235,7 +239,7 @@ void Cmd::compute(int nGates, bool useDualPol, bool useRhohvTest)
     if (useRhohvTest) {
       
       if (_params.rhohv_test_interest_weight > 0) {
-        // _computeRhohvTest(nGates);
+        _computeRhohvTest(mom, nGates);
       }
       
     } // if (dualPol ...
@@ -918,6 +922,72 @@ void Cmd::_computePhidpFoldingRange(int nGates)
       }
     }
   }
+
+}
+
+/////////////////////////////////////////////////
+// compute RHOHV test from unwindowed IQ data
+
+void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
+  
+{
+
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    GateData *gate = _gateData[igate];
+    RadarComplex_t *iqhc = gate->iqhcOrig;
+    RadarComplex_t *iqvc = gate->iqvcOrig;
+    
+    if (_xmitRcvMode != IWRF_ALT_HV_CO_CROSS &&
+        _xmitRcvMode != IWRF_ALT_HV_FIXED_HV &&
+        _xmitRcvMode != IWRF_SIM_HV_FIXED_HV &&
+        _xmitRcvMode != IWRF_SIM_HV_SWITCHED_HV) {
+      // cannot compute it
+      gate->flds->rhohv_test = -1.0;
+      continue;
+    }
+
+    // compute rhohv from unfiltered time series
+
+    double rhohvUnfilt = -1.0;
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+        _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+      rhohvUnfilt = mom->rhohvAltHvCoCross(iqhc, iqvc);
+    } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
+               _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
+      rhohvUnfilt = mom->rhohvDpSimHv(iqhc, iqvc);
+    }
+    if (rhohvUnfilt < _params.rhohv_test_min_rhohv ||
+        rhohvUnfilt > _params.rhohv_test_max_rhohv) {
+      // out of limits
+      gate->flds->rhohv_test = -1.0;
+      continue;
+    }
+
+    // apply regression filter to time series
+
+    // compute rhohv from filtered time series
+
+    double rhohvFilt = -1.0;
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+        _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+      rhohvFilt = mom->rhohvAltHvCoCross(iqhc, iqvc);
+    } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
+               _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
+      rhohvFilt = mom->rhohvDpSimHv(iqhc, iqvc);
+    }
+
+    // compute rhohv improvement
+
+    double factorUnfilt = 1.0 - rhohvUnfilt;
+    double factorFilt = 1.0 - rhohvFilt;
+    if (factorFilt < 0.001) {
+      factorFilt = 0.001;
+    }
+    double rhohvImprov = factorUnfilt / factorFilt;
+    gate->flds->rhohv_test = rhohvImprov;
+    
+  } // igate
 
 }
 

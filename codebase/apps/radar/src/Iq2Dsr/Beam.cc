@@ -219,6 +219,7 @@ void Beam::init(const MomentsMgr &mmgr,
     }
   }
   _xmitRcvMode = xmitRcvMode;
+  _cmd->setXmitRcvMode(_xmitRcvMode);
   _endOfSweepFlag = endOfSweepFlag;
   _endOfVolFlag = endOfVolFlag;
   _atmosAtten = &atmosAtten;
@@ -383,17 +384,16 @@ void Beam::_prepareForComputeMoments()
     _dualPol = true;
   }
 
+  // can we use rhohv test in CMD?
+  
+  _applyRhohvTest = false;
   if (_params.apply_rhohv_test_in_cmd) {
     if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
         _xmitRcvMode == IWRF_ALT_HV_FIXED_HV ||
         _xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
         _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
       _applyRhohvTest = true;
-    } else {
-      _applyRhohvTest = false;
     }
-  } else {
-    _applyRhohvTest = false;
   }
 
   _switchingReceiver = _mmgr.isSwitchingReceiver();
@@ -6069,7 +6069,7 @@ void Beam::_performClutterFiltering()
   // compute CMD
 
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
+  _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
 
   _fixAltClutVelocity();
 
@@ -6105,7 +6105,7 @@ void Beam::_performClutterFilteringSz()
   // compute CMD
   
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
+  _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
@@ -6126,7 +6126,7 @@ void Beam::_performClutterFilteringSz()
       
   // compute CMD
   
-  _cmd->compute(_nGates, _dualPol, _applyRhohvTest);
+  _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
