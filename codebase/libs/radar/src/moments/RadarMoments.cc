@@ -1949,6 +1949,63 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
 }
 
 ///////////////////////////////////////////////////////////
+// DP_ALT_HV_CO_CROSS - compute rhohv
+
+double RadarMoments::rhohvAltHvCoCross(RadarComplex_t *iqhc,
+                                       RadarComplex_t *iqvc) const
+  
+{
+
+  // compute covariances
+  
+  double lag0_hc = RadarComplex::meanPower(iqhc, _nSamplesHalf - 1);
+  double lag0_vc = RadarComplex::meanPower(iqvc, _nSamplesHalf - 1);
+  
+  // compute lag1 co-polar correlation V to H
+  
+  RadarComplex_t lag1_vchc =
+    RadarComplex::meanConjugateProduct(iqvc, iqhc, _nSamplesHalf - 1);
+  
+  // compute lag1 co-polar correlation H to V
+  
+  RadarComplex_t lag1_hcvc =
+    RadarComplex::meanConjugateProduct(iqhc + 1, iqvc, _nSamplesHalf - 1);
+
+  // lag-2 correlations for HH and VV
+  
+  RadarComplex_t lag2_hc =
+    RadarComplex::meanConjugateProduct(iqhc + 1, iqhc, _nSamplesHalf - 1);
+  
+  RadarComplex_t lag2_vc =
+    RadarComplex::meanConjugateProduct(iqvc + 1, iqvc, _nSamplesHalf - 1);
+  
+  // lag 1 magnitude
+  
+  double mag_lag1_vchc = RadarComplex::mag(lag1_vchc);
+  double mag_lag1_hcvc = RadarComplex::mag(lag1_hcvc);
+  
+  // compute lag-2 rho
+  
+  double mean_lag0 = (lag0_hc + lag0_vc) / 2.0;
+  RadarComplex_t sumR2 = RadarComplex::complexSum(lag2_hc, lag2_vc);
+  double meanMagR2 = RadarComplex::mag(sumR2) / 2.0;
+  double rho2 = meanMagR2 / mean_lag0;
+    
+  // compute lag-1 rhohv
+  
+  double rhohv1 =
+    (mag_lag1_vchc + mag_lag1_hcvc) / (2.0 * sqrt(lag0_hc * lag0_vc));
+    
+  // lag-0 rhohv is rhohv1 corrected by rho2
+    
+  double rhohv0 = rhohv1 / pow(rho2, 0.25);
+  double rhohv = _constrain(rhohv0, 0.0, 1.0);
+
+  return rhohv;
+  
+}
+  
+///////////////////////////////////////////////////////////
 // DP_SIM_HV
 // Dual pol, transmit simultaneous, receive fixed channels 
 // IQ passed in
@@ -2266,6 +2323,32 @@ void RadarMoments::computeMomDpSimHv(double lag0_hc,
 
 }
 
+///////////////////////////////////////////////////////////
+// DP_ALT_HV_CO_CROSS - compute rhohv
+
+double RadarMoments::rhohvDpSimHv(RadarComplex_t *iqhc,
+                                  RadarComplex_t *iqvc) const
+  
+{
+
+  // compute covariances
+  
+  double lag0_hc = RadarComplex::meanPower(iqhc, _nSamples - 1);
+  double lag0_vc = RadarComplex::meanPower(iqvc, _nSamples - 1);
+
+  RadarComplex_t Rvvhh0 =
+    RadarComplex::meanConjugateProduct(iqvc, iqhc, _nSamples - 1);
+
+  // computre rho-hv, not noise corrected
+  
+  double Rvvhh0Mag = RadarComplex::mag(Rvvhh0);
+  double rhohv = Rvvhh0Mag / sqrt(lag0_hc * lag0_vc);
+  rhohv = _constrain(rhohv, 0.0, 1.0);
+  
+  return rhohv;
+  
+}
+  
 ///////////////////////////////////////////////////////////
 // Dual pol, transmit H, receive co/cross
 // IQ passed in
@@ -5441,13 +5524,13 @@ void RadarMoments::initStagPrt(double prtShort,
 
   // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-  cerr << "11111 _prtShort: " <<  _prtShort << endl;
-  cerr << "11111 _prtLong: " <<  _prtLong << endl;
-  cerr << "11111 _nyquistPrtShort: " <<  _nyquistPrtShort << endl;
-  cerr << "11111 _nyquistPrtLong: " <<  _nyquistPrtLong << endl;
-  cerr << "11111 _nyquist: " <<  _nyquist << endl;
-  cerr << "11111 _staggeredM: " <<  _staggeredM << endl;
-  cerr << "11111 _staggeredN: " <<  _staggeredN << endl;
+  cerr << "--->> _prtShort: " <<  _prtShort << endl;
+  cerr << "--->> _prtLong: " <<  _prtLong << endl;
+  cerr << "--->> _nyquistPrtShort: " <<  _nyquistPrtShort << endl;
+  cerr << "--->> _nyquistPrtLong: " <<  _nyquistPrtLong << endl;
+  cerr << "--->> _nyquist: " <<  _nyquist << endl;
+  cerr << "--->> _staggeredM: " <<  _staggeredM << endl;
+  cerr << "--->> _staggeredN: " <<  _staggeredN << endl;
 #endif
   
   // compute range correction table

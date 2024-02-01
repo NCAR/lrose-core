@@ -157,6 +157,7 @@ public:
 
   double rhohv; // noise corrected
   double rhohv_nnc; // no noise correction
+  double rhohv_test; // used in cmd
   double phidp0; // uncorrected phidp
   double phidp;
   double phidp_cond; // phidp conditioned for kdp

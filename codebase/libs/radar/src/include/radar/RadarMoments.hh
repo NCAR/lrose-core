@@ -500,6 +500,11 @@ public:
                                 int gateNum,
                                 MomentsFields &fields);
   
+  // DP_ALT_HV_CO_CROSS - compute rhohv not noise corrected
+  
+  double rhohvAltHvCoCross(RadarComplex_t *iqhc,
+                           RadarComplex_t *iqvc) const;
+  
   // DP_SIM_HV
   // Dual pol, transmit simultaneous
   // IQ passed in
@@ -525,6 +530,11 @@ public:
                          RadarComplex_t lag3_vc,
                          int gateNum,
                          MomentsFields &fields);
+  
+  // DP_SIM_HV - compute rhohv not noise corrected
+  
+  double rhohvDpSimHv(RadarComplex_t *iqhc,
+                      RadarComplex_t *iqvc) const;
   
   // DP_H_ONLY
   // Dual pol, transmit H only, receive H and V

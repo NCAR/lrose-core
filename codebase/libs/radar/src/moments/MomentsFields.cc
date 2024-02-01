@@ -150,6 +150,7 @@ void MomentsFields::init()
 
   rhohv = missingDouble;
   rhohv_nnc = missingDouble;
+  rhohv_test = missingDouble;
   phidp0 = missingDouble;
   phidp = missingDouble;
   phidp_cond = missingDouble;
@@ -501,6 +502,7 @@ void MomentsFields::initToZero()
 
   rhohv = 0.0;
   rhohv_nnc = 0.0;
+  rhohv_test = 0.0;
   phidp0 = 0.0;
   phidp = 0.0;
   phidp_cond = 0.0;
