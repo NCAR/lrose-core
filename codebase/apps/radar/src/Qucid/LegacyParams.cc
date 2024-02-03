@@ -1011,9 +1011,12 @@ const char *LegacyParams::_get(const char *search_name) const
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-double LegacyParams::_getDouble(const char *name, double default_val)
+double LegacyParams::_getDouble(const char *name,
+                                double default_val,
+                                bool writeToTdrpFile,
+                                string nameOverride)
 {
-
+  
   if (_printTdrp) {
     cout << endl;
     cout << "paramdef double {" << endl;
@@ -1033,7 +1036,13 @@ double LegacyParams::_getDouble(const char *name, double default_val)
     }
   }
 
-  fprintf(_tdrpFile, "%s = %lg;\n", _removeCiddStr(name), dval);
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = %lg;\n", nameOverride.c_str(), dval);
+    } else {
+      fprintf(_tdrpFile, "%s = %lg;\n", _removeCiddStr(name), dval);
+    }
+  }
 
   return dval;
 
@@ -1044,7 +1053,10 @@ double LegacyParams::_getDouble(const char *name, double default_val)
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-float LegacyParams::_getFloat(const char *name, float default_val)
+float LegacyParams::_getFloat(const char *name,
+                              float default_val,
+                              bool writeToTdrpFile,
+                              string nameOverride)
 {
 
   if (_printTdrp) {
@@ -1066,34 +1078,27 @@ float LegacyParams::_getFloat(const char *name, float default_val)
     }
   }
   
-  fprintf(_tdrpFile, "%s = %g;\n", _removeCiddStr(name), fval);
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = %g;\n", nameOverride.c_str(), fval);
+    } else {
+      fprintf(_tdrpFile, "%s = %g;\n", _removeCiddStr(name), fval);
+    }
+  }
 
   return fval;
 
 }
-
-//////////////////////////////////////////////////////////////
-// remove cidd. from start of parameter name
-
-const char *LegacyParams::_removeCiddStr(const char *name) const
-
-{
-
-  if (strncmp(name, "cidd.", 5) == 0) {
-    return (name + 5);
-  } else {
-    return name;
-  }
-  
-}
-
 
 ///////////////////////////////////////////////////////////////
 // returns the value of a boolean parameter
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-bool LegacyParams::_getBoolean(const char *name, int default_val)
+bool LegacyParams::_getBoolean(const char *name,
+                               int default_val,
+                               bool writeToTdrpFile,
+                               string nameOverride)
 
 {
 
@@ -1120,8 +1125,14 @@ bool LegacyParams::_getBoolean(const char *name, int default_val)
     }
   }
 
-  fprintf(_tdrpFile, "%s = %s;\n", _removeCiddStr(name), (bval?"TRUE":"FALSE"));
-  
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = %s;\n", nameOverride.c_str(), (bval?"TRUE":"FALSE"));
+    } else {
+      fprintf(_tdrpFile, "%s = %s;\n", _removeCiddStr(name), (bval?"TRUE":"FALSE"));
+    }
+  }
+
   return bval;
 
 }
@@ -1131,7 +1142,10 @@ bool LegacyParams::_getBoolean(const char *name, int default_val)
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-int LegacyParams::_getInt(const char *name, int default_val)
+int LegacyParams::_getInt(const char *name,
+                          int default_val,
+                          bool writeToTdrpFile,
+                          string nameOverride)
 
 {
 
@@ -1154,7 +1168,13 @@ int LegacyParams::_getInt(const char *name, int default_val)
     }
   }
   
-  fprintf(_tdrpFile, "%s = %d;\n", _removeCiddStr(name), ival);
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = %d;\n", nameOverride.c_str(), ival);
+    } else {
+      fprintf(_tdrpFile, "%s = %d;\n", _removeCiddStr(name), ival);
+    }
+  }
 
   return ival;
 
@@ -1165,7 +1185,10 @@ int LegacyParams::_getInt(const char *name, int default_val)
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-long LegacyParams::_getLong(const char *name, long default_val)
+long LegacyParams::_getLong(const char *name,
+                            long default_val,
+                            bool writeToTdrpFile,
+                            string nameOverride)
 
 {
 
@@ -1188,7 +1211,13 @@ long LegacyParams::_getLong(const char *name, long default_val)
     }
   }
   
-  fprintf(_tdrpFile, "%s = %ld;\n", _removeCiddStr(name), lval);
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = %ld;\n", nameOverride.c_str(), lval);
+    } else {
+      fprintf(_tdrpFile, "%s = %ld;\n", _removeCiddStr(name), lval);
+    }
+  }
 
   return lval;
 
@@ -1199,7 +1228,10 @@ long LegacyParams::_getLong(const char *name, long default_val)
 // If it cannot find the parameter, returns the default
 ///////////////////////////////////////////////////////////////
 
-const string LegacyParams::_getString(const char *name, const char *default_val)
+const string LegacyParams::_getString(const char *name,
+                                      const char *default_val,
+                                      bool writeToTdrpFile,
+                                      string nameOverride)
   
 {
 
@@ -1219,7 +1251,13 @@ const string LegacyParams::_getString(const char *name, const char *default_val)
     sval = entryStr;
   }
 
-  fprintf(_tdrpFile, "%s = \"%s\";\n", _removeCiddStr(name), sval.c_str());
+  if (writeToTdrpFile) {
+    if (nameOverride.size() > 0) {
+      fprintf(_tdrpFile, "%s = \"%s\";\n", nameOverride.c_str(), sval.c_str());
+    } else {
+      fprintf(_tdrpFile, "%s = \"%s\";\n", _removeCiddStr(name), sval.c_str());
+    }
+  }
 
   return sval;
   
@@ -1290,6 +1328,22 @@ const char *LegacyParams::_findTagText(const char *input_buf,
   *text_line_no = start_line_no;
   return start_ptr;
 }
+
+//////////////////////////////////////////////////////////////
+// remove cidd. from start of parameter name
+
+const char *LegacyParams::_removeCiddStr(const char *name) const
+
+{
+
+  if (strncmp(name, "cidd.", 5) == 0) {
+    return (name + 5);
+  } else {
+    return name;
+  }
+  
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // LOAD_DB_DATA_DEFAULT : Allocate and load the parameter data base using the
@@ -1646,11 +1700,62 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.xsect_start_page", 1); // subtract 1
 
   // zooms
-  _getLong("cidd.num_zoom_levels",1);
+
   _getLong("cidd.start_zoom_level",1);
   _getBoolean("cidd.zoom_limits_in_latlon",0);
   _getLong("cidd.num_cache_zooms",1);
+  _numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
 
+  vector<ZoomLevel> zooms;
+  
+  for(int ii = 0; ii < _numZoomLevels; ii++) {
+    
+    ZoomLevel zoom;
+
+    char str_buf[1024];
+    char defaultLabel[1024];
+    int defaultSize = 100 * (ii + 1);
+    
+    snprintf(str_buf, 1023, "cidd.level%d_label", ii + 1);
+    snprintf(defaultLabel, 1023, "%dkm", defaultSize);
+    zoom.label = _getString(str_buf, defaultLabel, false);
+    
+    snprintf(str_buf, 1023, "cidd.level%d_min_xkm", ii + 1);
+    zoom.min_x = _getDouble(str_buf, defaultSize * -1.0, false);
+    
+    snprintf(str_buf, 1023, "cidd.level%d_min_ykm", ii + 1);
+    zoom.min_y = _getDouble(str_buf, defaultSize * -1.0, false);
+    
+    snprintf(str_buf, 1023, "cidd.level%d_max_xkm", ii + 1);
+    zoom.max_x = _getDouble(str_buf, defaultSize * -1.0, false);
+    
+    snprintf(str_buf, 1023, "cidd.level%d_max_ykm", ii + 1);
+    zoom.max_y = _getDouble(str_buf, defaultSize * -1.0, false);
+
+    zooms.push_back(zoom);
+    
+  } // i
+
+
+  fprintf(_tdrpFile, "// <ZOOMS>\n");
+
+  fprintf(_tdrpFile, "zoom_levels = {\n");
+  for(size_t izoom = 0; izoom < zooms.size(); izoom++) {
+    ZoomLevel &zoom = zooms[izoom];
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    label = \"%s\",\n", zoom.label.c_str());
+    fprintf(_tdrpFile, "    min_x = %lg,\n", zoom.min_x);
+    fprintf(_tdrpFile, "    min_y = %lg,\n", zoom.min_y);
+    fprintf(_tdrpFile, "    max_x = %lg,\n", zoom.max_x);
+    fprintf(_tdrpFile, "    max_y = %lg\n", zoom.max_y);
+    fprintf(_tdrpFile, "  }\n");
+    if (izoom < zooms.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // izoom
+  fprintf(_tdrpFile, "};\n");
+  fprintf(_tdrpFile, "// </ZOOMS>\n");
+  
   // vert axis
   _getDouble("cidd.min_ht", 0.0);
   _getDouble("cidd.max_ht", 30.0);
@@ -1761,9 +1866,9 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.domain_follows_data", 0);
 
   // azimuth lines
-  _getDouble("cidd.azmith_interval", 30.0);
-  _getDouble("cidd.azmith_radius", 200.0);
-  _getBoolean("cidd.azmith_lines", 0);
+  _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_interval");
+  _getDouble("cidd.azmith_radius", 200.0, true, "azimuth_radius");
+  _getBoolean("cidd.azmith_lines", 0, true, "azimuth_lines");
 
   // winds
   _getBoolean("cidd.wind_mode", 0);

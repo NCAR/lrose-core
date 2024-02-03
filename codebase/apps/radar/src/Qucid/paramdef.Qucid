@@ -2402,11 +2402,10 @@ paramdef int {
   p_help = "For the vertical (cross section) view.";
 } xsect_start_page;
 
-paramdef int {
-  p_default = 1;
-  p_descr = "The number of zoom levels.";
-  p_help = "";
-} num_zoom_levels;
+commentdef {
+  p_header = "Zoom views.";
+  p_text = "These are the pre-defined zoom levels.";
+}
 
 paramdef int {
   p_default = 1;
@@ -2425,6 +2424,56 @@ paramdef int {
   p_descr = "The number of Cached images for zooms.";
   p_help = "";
 } num_cache_zooms;
+
+// paramdef int {
+//   p_default = 1;
+//   p_descr = "The number of zoom levels.";
+//   p_help = "";
+// } num_zoom_levels;
+
+typedef struct {
+  string label;
+  double min_x;
+  double min_y;
+  double max_x;
+  double max_y;
+} zoom_level_t;
+
+paramdef struct zoom_level_t {
+  p_default = {
+    {
+      label = "100km",
+      min_x = -100,
+      min_y = -100,
+      max_x = 100,
+      max_y = 100
+    }
+    ,
+    {
+      label = "200km",
+      min_x = -200,
+      min_y = -200,
+      max_x = 200,
+      max_y = 200
+    }
+    ,
+    {
+      label = "300km",
+      min_x = -300,
+      min_y = -300,
+      max_x = 300,
+      max_y = 300
+    }
+  };
+  p_descr = "Pre-defined zoom levels.";
+  p_help =
+    "/nlabel: label in GUI for selecting zoom level. "
+    "/nmin_x: X value of SW corner."
+    "/nmin_y: Y value of SW corner."
+    "/nmax_x: X value of NE corner."
+    "/nmax_y: Y value of NE corner."
+    "/n";
+} zoom_levels[];
 
 commentdef {
   p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
@@ -2918,19 +2967,19 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Draw azimuth lines for a radar location.";
   p_help = "These complement range rings, to provide guidance on azimuths for radar gates.";
-} azmith_lines;
+} azimuth_lines;
 
 paramdef double {
   p_default = 30;
   p_descr = "Interval for azimuth lines.";
   p_help = "If azimuth lines are on.";
-} azmith_interval;
+} azimuth_interval;
 
 paramdef double {
   p_default = 200;
   p_descr = "Max radius for azimuth lines.";
   p_help = "If azimuth lines are on.";
-} azmith_radius;
+} azimuth_radius;
 
 commentdef {
   p_header = "Plotting wind vectors.";

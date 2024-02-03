@@ -290,6 +290,14 @@ public:
     char* waypt_locs;
   } image_vsection_spec_t;
 
+  typedef struct {
+    char* label;
+    double min_x;
+    double min_y;
+    double max_x;
+    double max_y;
+  } zoom_level_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -1149,13 +1157,14 @@ public:
 
   int xsect_start_page;
 
-  int num_zoom_levels;
-
   int start_zoom_level;
 
   tdrp_bool_t zoom_limits_in_latlon;
 
   int num_cache_zooms;
+
+  zoom_level_t *_zoom_levels;
+  int zoom_levels_n;
 
   double min_ht;
 
@@ -1303,11 +1312,11 @@ public:
 
   tdrp_bool_t range_ring_labels;
 
-  tdrp_bool_t azmith_lines;
+  tdrp_bool_t azimuth_lines;
 
-  double azmith_interval;
+  double azimuth_interval;
 
-  double azmith_radius;
+  double azimuth_radius;
 
   tdrp_bool_t all_winds_on;
 
@@ -1438,7 +1447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[484];
+  mutable TDRPtable _table[485];
 
   const char *_className;
 

@@ -226,6 +226,27 @@ private:
     bool on_at_startup;
   };
 
+  // zooms
+  // detail thresholds are in km across image
+  
+  class ZoomLevel {
+  public:
+    ZoomLevel() {
+      label = "";
+      min_x = -200.0;
+      min_y = -200.0;
+      max_x = -200.0;
+      max_y = -200.0;
+    }
+    ~ZoomLevel() {
+    }
+    string label;
+    double min_x;
+    double min_y;
+    double max_x;
+    double max_y;
+  };
+
   // params read in from main
 
   bool _debug;
@@ -239,6 +260,7 @@ private:
   bool _runOnceAndExit;
   double _originLatitude;
   double _originLongitude;
+  int _numZoomLevels;
   
   // read in from param file
   // returns 0 on success, -1 on failure
@@ -255,12 +277,36 @@ private:
   // get param values of various types
   
   const char *_get(const char *search_name) const;
-  double _getDouble(const char *param_name, double default_val);
-  float _getFloat(const char *param_name, float default_val);
-  int _getInt(const char *param_name, int default_val);
-  bool _getBoolean(const char *param_name, int default_val);
-  long _getLong(const char *param_name, long default_val);
-  const string _getString(const char *param_name, const char *default_val);
+
+  double _getDouble(const char *param_name,
+                    double default_val,
+                    bool writeToTdrpFile = true,
+                    string nameOverride = "");
+
+  float _getFloat(const char *param_name,
+                  float default_val,
+                  bool writeToTdrpFile = true,
+                  string nameOverride = "");
+
+  int _getInt(const char *param_name,
+              int default_val,
+              bool writeToTdrpFile = true,
+              string nameOverride = "");
+
+  bool _getBoolean(const char *param_name,
+                   int default_val,
+                   bool writeToTdrpFile = true,
+                   string nameOverride = "");
+
+  long _getLong(const char *param_name,
+                long default_val,
+                bool writeToTdrpFile = true,
+                string nameOverride = "");
+
+  const string _getString(const char *param_name,
+                          const char *default_val,
+                          bool writeToTdrpFile = true,
+                          string nameOverride = "");
   
   const char *_findTagText(const char *input_buf,
                            const char * tag,
