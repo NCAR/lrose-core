@@ -1736,7 +1736,6 @@ int LegacyParams::_readMainParams()
     
   } // i
 
-
   fprintf(_tdrpFile, "// <ZOOMS>\n");
 
   fprintf(_tdrpFile, "zoom_levels = {\n");
@@ -1898,6 +1897,54 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.map_bad_to_min_value", 0);
   _getBoolean("cidd.map_missing_to_min_value", 0);
 
+  // overlay fields
+  
+  vector<LayerField> layers;
+  
+  for(int ii = 0; ii < 5; ii++) {
+    
+    char str_buf[1024];
+    
+    snprintf(str_buf, 1023, "cidd.layer%d_field", ii + 1);
+    string val = _getString(str_buf, "not_found", false);
+
+    LayerField layer;
+    layer.field_name = val;
+    layer.on_at_startup = true;
+    
+    if (val.find("not_found") == 0) {
+      continue;
+    }
+    
+    vector<string> toks;
+    TaStr::tokenize(val, " ", toks);
+    if (toks.size() > 1) {
+      layer.field_name = toks[0];
+      if (toks[1].find("off") != string::npos) {
+        layer.on_at_startup = false;
+      }
+    }
+
+    layers.push_back(layer);
+    
+  } // i
+  
+  fprintf(_tdrpFile, "// <LAYERS>\n");
+
+  fprintf(_tdrpFile, "layer_fields = {\n");
+  for(size_t ilayer = 0; ilayer < layers.size(); ilayer++) {
+    LayerField &layer = layers[ilayer];
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    field_name = \"%s\",\n", layer.field_name.c_str());
+    fprintf(_tdrpFile, "    on_at_startup = %s\n", (layer.on_at_startup?"true":"false"));
+    fprintf(_tdrpFile, "  }\n");
+    if (ilayer < layers.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // izoom
+  fprintf(_tdrpFile, "};\n");
+  fprintf(_tdrpFile, "// </LAYERS>\n");
+  
   // main field on top?
   _getBoolean("cidd.draw_main_on_top", 0);
 

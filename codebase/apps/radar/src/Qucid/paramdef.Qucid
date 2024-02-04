@@ -3124,6 +3124,50 @@ paramdef boolean {
 } map_missing_to_min_value;
 
 commentdef {
+  p_header = "Overlain fields as layers.";
+  p_text = "Layers are rendered in order. i.e. last layer will be on top.";
+}
+
+typedef struct {
+  string field_name;
+  boolean on_at_startup;
+} layer_field_t;
+
+paramdef struct layer_field_t {
+  p_default = {
+    {
+      field_name = "KCYS-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KPUX-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KGJX-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KGLD-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KLNX-DBZ",
+      on_at_startup = false
+    }
+  };
+  p_descr = "Field for layers as overlays.";
+  p_help =
+    "/nfield_name: name of field in GRIDS list. "
+    "/non_at_startup: field on when app starts."
+    "/n";
+} layer_fields[];
+
+commentdef {
   p_header = "Overall rendering order.";
   p_text = "";
 }

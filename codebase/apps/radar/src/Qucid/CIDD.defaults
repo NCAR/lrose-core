@@ -1115,7 +1115,7 @@ cidd.map_missing_to_min_value: 0
 #
 # Uncomment the following lines to set up fields on startup that will
 # appear as overlaid fields. Layers are on by default unless the
-optional 'off' string appears last. 
+# optional 'off' string appears last. 
 cidd.layer5_field:  KCYS-DBZ 
 cidd.layer4_field:  KPUX-DBZ
 cidd.layer3_field:  KGJX-DBZ

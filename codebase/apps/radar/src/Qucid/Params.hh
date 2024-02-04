@@ -298,6 +298,11 @@ public:
     double max_y;
   } zoom_level_t;
 
+  typedef struct {
+    char* field_name;
+    tdrp_bool_t on_at_startup;
+  } layer_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -1362,6 +1367,9 @@ public:
 
   tdrp_bool_t map_missing_to_min_value;
 
+  layer_field_t *_layer_fields;
+  int layer_fields_n;
+
   tdrp_bool_t draw_main_on_top;
 
   tdrp_bool_t mark_latest_click_location;
@@ -1447,7 +1455,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[485];
+  mutable TDRPtable _table[487];
 
   const char *_className;
 

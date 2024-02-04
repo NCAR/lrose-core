@@ -247,6 +247,21 @@ private:
     double max_y;
   };
 
+  // layer fields
+  // fields that are overlays
+  
+  class LayerField {
+  public:
+    LayerField() {
+      field_name = "";
+      on_at_startup = false;
+    }
+    ~LayerField() {
+    }
+    string field_name;
+    bool on_at_startup;
+  };
+
   // params read in from main
 
   bool _debug;

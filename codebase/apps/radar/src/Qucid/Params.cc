@@ -6552,6 +6552,58 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 55");
+    tt->comment_hdr = tdrpStrDup("Overlain fields as layers.");
+    tt->comment_text = tdrpStrDup("Layers are rendered in order. i.e. last layer will be on top.");
+    tt++;
+    
+    // Parameter 'layer_fields'
+    // ctype is '_layer_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("layer_fields");
+    tt->descr = tdrpStrDup("Field for layers as overlays.");
+    tt->help = tdrpStrDup("/nfield_name: name of field in GRIDS list. /non_at_startup: field on when app starts./n");
+    tt->array_offset = (char *) &_layer_fields - &_start_;
+    tt->array_n_offset = (char *) &layer_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(layer_field_t);
+    tt->array_n = 5;
+    tt->struct_def.name = tdrpStrDup("layer_field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_layer_fields->field_name - (char *) _layer_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("on_at_startup");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_layer_fields->on_at_startup - (char *) _layer_fields;
+    tt->n_struct_vals = 10;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("KCYS-DBZ");
+      tt->struct_vals[1].b = pFALSE;
+      tt->struct_vals[2].s = tdrpStrDup("KPUX-DBZ");
+      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[4].s = tdrpStrDup("KGJX-DBZ");
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].s = tdrpStrDup("KGLD-DBZ");
+      tt->struct_vals[7].b = pFALSE;
+      tt->struct_vals[8].s = tdrpStrDup("KLNX-DBZ");
+      tt->struct_vals[9].b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 56'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 56");
     tt->comment_hdr = tdrpStrDup("Overall rendering order.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6568,11 +6620,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 56'
+    // Parameter 'Comment 57'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 56");
+    tt->param_name = tdrpStrDup("Comment 57");
     tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
     tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
     tt++;
@@ -6625,11 +6677,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 57'
+    // Parameter 'Comment 58'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 57");
+    tt->param_name = tdrpStrDup("Comment 58");
     tt->comment_hdr = tdrpStrDup("Fonts.");
     tt->comment_text = tdrpStrDup("TO-DO - fix this.");
     tt++;
@@ -6658,11 +6710,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 58'
+    // Parameter 'Comment 59'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 58");
+    tt->param_name = tdrpStrDup("Comment 59");
     tt->comment_hdr = tdrpStrDup("Analog clock.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6703,11 +6755,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 59'
+    // Parameter 'Comment 60'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 59");
+    tt->param_name = tdrpStrDup("Comment 60");
     tt->comment_hdr = tdrpStrDup("GUI.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6868,11 +6920,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 60'
+    // Parameter 'Comment 61'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 60");
+    tt->param_name = tdrpStrDup("Comment 61");
     tt->comment_hdr = tdrpStrDup("HELP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6913,11 +6965,11 @@
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 61'
+    // Parameter 'Comment 62'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 61");
+    tt->param_name = tdrpStrDup("Comment 62");
     tt->comment_hdr = tdrpStrDup("BOOKMARKS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6946,11 +6998,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 62'
+    // Parameter 'Comment 63'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 62");
+    tt->param_name = tdrpStrDup("Comment 63");
     tt->comment_hdr = tdrpStrDup("RENDERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7039,11 +7091,11 @@
     tt->single_val.i = 61600;
     tt++;
     
-    // Parameter 'Comment 63'
+    // Parameter 'Comment 64'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 63");
+    tt->param_name = tdrpStrDup("Comment 64");
     tt->comment_hdr = tdrpStrDup("RENDERING PRODUCTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7096,11 +7148,11 @@
     tt->single_val.d = 300;
     tt++;
     
-    // Parameter 'Comment 64'
+    // Parameter 'Comment 65'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 64");
+    tt->param_name = tdrpStrDup("Comment 65");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
