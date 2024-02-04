@@ -559,8 +559,68 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Qucid is an integrating display for weather data products.");
-    tt->comment_text = tdrpStrDup("This is a C++ application using the QT GUI toolkit. It is based on the legacy CIDD app.");
+    tt->comment_hdr = tdrpStrDup("TIME_CONTROL_GUI");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'epoch_indicator_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("epoch_indicator_color");
+    tt->descr = tdrpStrDup("Time Control (Movie) Pop-up Colors.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &epoch_indicator_color - &_start_;
+    tt->single_val.s = tdrpStrDup("orange");
+    tt++;
+    
+    // Parameter 'now_time_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("now_time_color");
+    tt->descr = tdrpStrDup("Color of current time tick.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &now_time_color - &_start_;
+    tt->single_val.s = tdrpStrDup("red");
+    tt++;
+    
+    // Parameter 'time_tick_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("time_tick_color");
+    tt->descr = tdrpStrDup("Color of time ticks - main grid.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &time_tick_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'time_tick_colors'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("time_tick_colors");
+    tt->descr = tdrpStrDup("List of colors for time ticks for symbolic products.");
+    tt->help = tdrpStrDup("The time ticks are drawn in order, from top down, in the time control GUI.");
+    tt->array_offset = (char *) &_time_tick_colors - &_start_;
+    tt->array_n_offset = (char *) &time_tick_colors_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 6;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("cyan");
+      tt->array_vals[1].s = tdrpStrDup("yellow");
+      tt->array_vals[2].s = tdrpStrDup("magenta");
+      tt->array_vals[3].s = tdrpStrDup("green");
+      tt->array_vals[4].s = tdrpStrDup("red");
+      tt->array_vals[5].s = tdrpStrDup("blue");
     tt++;
     
     // Parameter 'Comment 1'
@@ -568,6 +628,1060 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("Mode flags.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'show_height_sel'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("show_height_sel");
+    tt->descr = tdrpStrDup("Show the height selector in the right margin.");
+    tt->help = tdrpStrDup("oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.");
+    tt->val_offset = (char *) &show_height_sel - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'show_data_messages'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("show_data_messages");
+    tt->descr = tdrpStrDup("Show data status messages at top of image.");
+    tt->help = tdrpStrDup("There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.");
+    tt->val_offset = (char *) &show_data_messages - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'latlon_mode'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("latlon_mode");
+    tt->descr = tdrpStrDup("Sets the format for output of Lat, Lon's.");
+    tt->help = tdrpStrDup("0= Decimal Degrees, 1 = deg min' sec'.");
+    tt->val_offset = (char *) &latlon_mode - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'label_time_format'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("label_time_format");
+    tt->descr = tdrpStrDup("Set the format for the time strings.");
+    tt->help = tdrpStrDup("See 'man strftime' for format options. Can add additional text as part of the Time string.");
+    tt->val_offset = (char *) &label_time_format - &_start_;
+    tt->single_val.s = tdrpStrDup("%m/%d/%y %H:%M:%S");
+    tt++;
+    
+    // Parameter 'moviestart_time_format'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("moviestart_time_format");
+    tt->descr = tdrpStrDup("Set the format for the time string in the movie start time text field of the movie pop-up window.");
+    tt->help = tdrpStrDup("This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.");
+    tt->val_offset = (char *) &moviestart_time_format - &_start_;
+    tt->single_val.s = tdrpStrDup("%H:%M %m/%d/%Y");
+    tt++;
+    
+    // Parameter 'frame_range_time_format'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("frame_range_time_format");
+    tt->descr = tdrpStrDup("Set the format for the time strings in the frame range text fields.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &frame_range_time_format - &_start_;
+    tt->single_val.s = tdrpStrDup("%H:%M");
+    tt++;
+    
+    // Parameter 'layer_legends_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("layer_legends_on");
+    tt->descr = tdrpStrDup("Plot a Legend for each Grid overlay.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &layer_legends_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'cont_legends_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("cont_legends_on");
+    tt->descr = tdrpStrDup("Plot a Legend for each Contour overlay.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cont_legends_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'wind_legends_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("wind_legends_on");
+    tt->descr = tdrpStrDup("Plot a Legend for each Wind overlay.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_legends_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'display_labels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("display_labels");
+    tt->descr = tdrpStrDup("Switch to turn off all data labels on the display.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &display_labels - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'display_ref_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("display_ref_lines");
+    tt->descr = tdrpStrDup("Switch to turn on/off Height, Route and Wind Scale reference lines.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &display_ref_lines - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("Window sizes.");
+    tt->comment_text = tdrpStrDup("Window width and height is specified in pixels.");
+    tt++;
+    
+    // Parameter 'horiz_default_x_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_x_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &horiz_default_x_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_default_y_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_y_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &horiz_default_y_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_default_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_width");
+    tt->descr = tdrpStrDup("Default width of main window (pixels).");
+    tt->help = tdrpStrDup("Height of main window at startup.");
+    tt->val_offset = (char *) &horiz_default_width - &_start_;
+    tt->single_val.i = 800;
+    tt++;
+    
+    // Parameter 'horiz_default_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_height");
+    tt->descr = tdrpStrDup("Default height of main window (pixels).");
+    tt->help = tdrpStrDup("Width of main window at startup.");
+    tt->val_offset = (char *) &horiz_default_height - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'horiz_min_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_min_width");
+    tt->descr = tdrpStrDup("Minimum width of main window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
+    tt->val_offset = (char *) &horiz_min_width - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'horiz_min_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_min_height");
+    tt->descr = tdrpStrDup("Minimum height of main window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
+    tt->val_offset = (char *) &horiz_min_height - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
+    // Parameter 'vert_default_x_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_x_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &vert_default_x_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_default_y_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_y_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &vert_default_y_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_default_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_width");
+    tt->descr = tdrpStrDup("Default width of vert section window (pixels).");
+    tt->help = tdrpStrDup("Height of vert section window at startup.");
+    tt->val_offset = (char *) &vert_default_width - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
+    // Parameter 'vert_default_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_height");
+    tt->descr = tdrpStrDup("Default height of vert section window (pixels).");
+    tt->help = tdrpStrDup("Width of vert section window at startup.");
+    tt->val_offset = (char *) &vert_default_height - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'vert_min_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_min_width");
+    tt->descr = tdrpStrDup("Minimum width of vert section window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
+    tt->val_offset = (char *) &vert_min_width - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'vert_min_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_min_height");
+    tt->descr = tdrpStrDup("Minimum height of vert section window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
+    tt->val_offset = (char *) &vert_min_height - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("Margin details.");
+    tt->comment_text = tdrpStrDup("Margins are specified in pixels.");
+    tt++;
+    
+    // Parameter 'top_margin_render_style'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("top_margin_render_style");
+    tt->descr = tdrpStrDup("TOP Margin styles.");
+    tt->help = tdrpStrDup(" 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label");
+    tt->val_offset = (char *) &top_margin_render_style - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'bot_margin_render_style'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("bot_margin_render_style");
+    tt->descr = tdrpStrDup("Bottom Margin Styles.");
+    tt->help = tdrpStrDup("1 - Distance Scale. 2 - Time Scale.");
+    tt->val_offset = (char *) &bot_margin_render_style - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'horiz_top_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin (pixels).");
+    tt->help = tdrpStrDup("Size of top margin for main window.");
+    tt->val_offset = (char *) &horiz_top_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'horiz_bot_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_bot_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
+    tt->help = tdrpStrDup("Size of bottom margin for main window.");
+    tt->val_offset = (char *) &horiz_bot_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'horiz_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin (pixels).");
+    tt->help = tdrpStrDup("Size of left margin for main window.");
+    tt->val_offset = (char *) &horiz_left_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'horiz_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin (pixels).");
+    tt->help = tdrpStrDup("Size of right margin for main window.");
+    tt->val_offset = (char *) &horiz_right_margin - &_start_;
+    tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'vert_top_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin (pixels).");
+    tt->help = tdrpStrDup("Size of top margin for vert section window.");
+    tt->val_offset = (char *) &vert_top_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'vert_bot_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_bot_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
+    tt->help = tdrpStrDup("Size of bottom margin for vert section window.");
+    tt->val_offset = (char *) &vert_bot_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'vert_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin (pixels).");
+    tt->help = tdrpStrDup("Size of left margin for vert section window.");
+    tt->val_offset = (char *) &vert_left_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'vert_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin (pixels).");
+    tt->help = tdrpStrDup("Size of right margin for vert section window.");
+    tt->val_offset = (char *) &vert_right_margin - &_start_;
+    tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
+    tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.");
+    tt++;
+    
+    // Parameter 'horiz_legends_start_x'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_start_x");
+    tt->descr = tdrpStrDup("Horizontal window legends start x position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &horiz_legends_start_x - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_legends_start_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_start_y");
+    tt->descr = tdrpStrDup("Horizontal window legends start y position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &horiz_legends_start_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_legends_delta_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_delta_y");
+    tt->descr = tdrpStrDup("Horizontal window legends spacing (pixels).");
+    tt->help = tdrpStrDup("This is the line spacing between the legends.");
+    tt->val_offset = (char *) &horiz_legends_delta_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_legends_start_x'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_legends_start_x");
+    tt->descr = tdrpStrDup("Vertical window legends start x position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &vert_legends_start_x - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_legends_start_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_legends_start_y");
+    tt->descr = tdrpStrDup("Vertical window legends start y position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &vert_legends_start_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_legends_delta_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_legends_delta_y");
+    tt->descr = tdrpStrDup("Vertical window legends spacing (pixels).");
+    tt->help = tdrpStrDup("This is the line spacing between the legends.");
+    tt->val_offset = (char *) &vert_legends_delta_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("Draw range rings and azimuth lines.");
+    tt->comment_text = tdrpStrDup("These apply to radars only.");
+    tt++;
+    
+    // Parameter 'range_rings'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_rings");
+    tt->descr = tdrpStrDup("Turn range rings on/off.");
+    tt->help = tdrpStrDup("TRUE means on - i.r. plot range rings.");
+    tt->val_offset = (char *) &range_rings - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_ring_spacing'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_spacing");
+    tt->descr = tdrpStrDup("Spacing between range rings (km).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &range_ring_spacing - &_start_;
+    tt->single_val.d = 50;
+    tt++;
+    
+    // Parameter 'max_ring_range'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_ring_range");
+    tt->descr = tdrpStrDup("Maximum range ring (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &max_ring_range - &_start_;
+    tt->single_val.d = 500;
+    tt++;
+    
+    // Parameter 'range_ring_follows_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_follows_data");
+    tt->descr = tdrpStrDup("Plot range rings relative to radar location.");
+    tt->help = tdrpStrDup("We get the location from the data. If FALSE, rings are relative to plot origin.");
+    tt->val_offset = (char *) &range_ring_follows_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_ring_for_radar_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_for_radar_only");
+    tt->descr = tdrpStrDup("Only plot range rings for radar data sets.");
+    tt->help = tdrpStrDup("TRUE turns off rings for non-radar data sets.");
+    tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'domain_follows_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("domain_follows_data");
+    tt->descr = tdrpStrDup("Plot domain moves with origin of the data set.");
+    tt->help = tdrpStrDup("Shift the domain limits if the data origin shifts.");
+    tt->val_offset = (char *) &domain_follows_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_ring_x_space'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_x_space");
+    tt->descr = tdrpStrDup("Spacing in x for range ring labels (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &range_ring_x_space - &_start_;
+    tt->single_val.i = 50;
+    tt++;
+    
+    // Parameter 'range_ring_y_space'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_y_space");
+    tt->descr = tdrpStrDup("Spacing in y for range ring labels (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &range_ring_y_space - &_start_;
+    tt->single_val.i = 15;
+    tt++;
+    
+    // Parameter 'range_ring_labels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_labels");
+    tt->descr = tdrpStrDup("Plot range ring labels.");
+    tt->help = tdrpStrDup("Label the range for each ring.");
+    tt->val_offset = (char *) &range_ring_labels - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'azimuth_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("azimuth_lines");
+    tt->descr = tdrpStrDup("Draw azimuth lines for a radar location.");
+    tt->help = tdrpStrDup("These complement range rings, to provide guidance on azimuths for radar gates.");
+    tt->val_offset = (char *) &azimuth_lines - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'azimuth_interval'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("azimuth_interval");
+    tt->descr = tdrpStrDup("Interval for azimuth lines.");
+    tt->help = tdrpStrDup("If azimuth lines are on.");
+    tt->val_offset = (char *) &azimuth_interval - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'azimuth_radius'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("azimuth_radius");
+    tt->descr = tdrpStrDup("Max radius for azimuth lines.");
+    tt->help = tdrpStrDup("If azimuth lines are on.");
+    tt->val_offset = (char *) &azimuth_radius - &_start_;
+    tt->single_val.d = 200;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("Plotting wind vectors.");
+    tt->comment_text = tdrpStrDup("See also the wind layers section.");
+    tt++;
+    
+    // Parameter 'all_winds_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("all_winds_on");
+    tt->descr = tdrpStrDup("Plot all wind layers.");
+    tt->help = tdrpStrDup("Turns on all wind layers.");
+    tt->val_offset = (char *) &all_winds_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'wind_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("wind_mode");
+    tt->descr = tdrpStrDup("Activate wind rendering.");
+    tt->help = tdrpStrDup("TO DO - check how this works.");
+    tt->val_offset = (char *) &wind_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'barb_shaft_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("barb_shaft_len");
+    tt->descr = tdrpStrDup("Wind barb shaft length (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &barb_shaft_len - &_start_;
+    tt->single_val.i = 33;
+    tt++;
+    
+    // Parameter 'ideal_x_vectors'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ideal_x_vectors");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the x dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in x accordingly.");
+    tt->val_offset = (char *) &ideal_x_vectors - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'ideal_y_vectors'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ideal_y_vectors");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the y dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in y accordingly.");
+    tt->val_offset = (char *) &ideal_y_vectors - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'wind_head_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_head_size");
+    tt->descr = tdrpStrDup("Minimum arrow head size for wind vectors (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_head_size - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'wind_head_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_head_angle");
+    tt->descr = tdrpStrDup("Angle of arrow head for wind vectors (deg).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_head_angle - &_start_;
+    tt->single_val.d = 45;
+    tt++;
+    
+    // Parameter 'wind_scaler'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_scaler");
+    tt->descr = tdrpStrDup("The display will space the wind vectors in x accordingly.");
+    tt->help = tdrpStrDup("Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.");
+    tt->val_offset = (char *) &wind_scaler - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'wind_time_scale_interval'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_time_scale_interval");
+    tt->descr = tdrpStrDup("inutes between steps on the wind scaling slider.");
+    tt->help = tdrpStrDup("Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity");
+    tt->val_offset = (char *) &wind_time_scale_interval - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_marker_type'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wind_marker_type");
+    tt->descr = tdrpStrDup("Wind vector rendering style.");
+    tt->help = tdrpStrDup("'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
+    tt->val_offset = (char *) &wind_marker_type - &_start_;
+    tt->single_val.s = tdrpStrDup("arrow");
+    tt++;
+    
+    // Parameter 'wind_w_scale_factor'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_w_scale_factor");
+    tt->descr = tdrpStrDup("Scale the vertical velocity by this factor, relative to the U/V. ");
+    tt->help = tdrpStrDup("W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.");
+    tt->val_offset = (char *) &wind_w_scale_factor - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_units_scale_factor'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_units_scale_factor");
+    tt->descr = tdrpStrDup("Value to convert from the your reference speed units to m/sec. ");
+    tt->help = tdrpStrDup("i.e. wind_units_scale_factor =  m/sec / chosen units.");
+    tt->val_offset = (char *) &wind_units_scale_factor - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'wind_reference_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_reference_speed");
+    tt->descr = tdrpStrDup("Sets the length of the wind vector reference legend.");
+    tt->help = tdrpStrDup("The legend shows a symbos representing a wind speed of this value.");
+    tt->val_offset = (char *) &wind_reference_speed - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_units_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wind_units_label");
+    tt->descr = tdrpStrDup("Select the label to be printed next to the reference bar.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_units_label - &_start_;
+    tt->single_val.s = tdrpStrDup("m/sec");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("Plotting contours in data fields.");
+    tt->comment_text = tdrpStrDup("In the data layers section you can select contour plotting.");
+    tt++;
+    
+    // Parameter 'label_contours'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("label_contours");
+    tt->descr = tdrpStrDup("Set to TRUE to have numeric labels on line contours.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &label_contours - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'contour_line_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("contour_line_width");
+    tt->descr = tdrpStrDup("Width of contour lines.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &contour_line_width - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'smooth_contours'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("smooth_contours");
+    tt->descr = tdrpStrDup("Apply smoothing to data grids before contouring.");
+    tt->help = tdrpStrDup("0 = Off, 1 = single pass, 2 = double pass.");
+    tt->val_offset = (char *) &smooth_contours - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'use_alt_contours'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_alt_contours");
+    tt->descr = tdrpStrDup("Use Alternate (Mdvx) Contouring Routines.");
+    tt->help = tdrpStrDup("Slower - Nicer labeling - Less smooth. Warning - Does not work correctly when data and display origins are different. Works fine in lat/lon projections");
+    tt->val_offset = (char *) &use_alt_contours - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'add_noise'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_noise");
+    tt->descr = tdrpStrDup("Add 1 part in 250 Noise to help smooth contours.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &add_noise - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'special_contour_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("special_contour_value");
+    tt->descr = tdrpStrDup("Specify special contour value.");
+    tt->help = tdrpStrDup("Contours at this value will have a wider line.");
+    tt->val_offset = (char *) &special_contour_value - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'map_bad_to_min_value'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("map_bad_to_min_value");
+    tt->descr = tdrpStrDup("Contour the bad value, by setting bad cells to have min value in data.");
+    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the bad and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want bad contoured, set this to TRUE.");
+    tt->val_offset = (char *) &map_bad_to_min_value - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'map_missing_to_min_value'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("map_missing_to_min_value");
+    tt->descr = tdrpStrDup("Contour the missing value, by setting missing cells to have min value in data.");
+    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the missing and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want missing contoured, set this to TRUE.");
+    tt->val_offset = (char *) &map_missing_to_min_value - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("Overlain fields as layers.");
+    tt->comment_text = tdrpStrDup("Layers are rendered in order. i.e. last layer will be on top.");
+    tt++;
+    
+    // Parameter 'layer_fields'
+    // ctype is '_layer_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("layer_fields");
+    tt->descr = tdrpStrDup("Field for layers as overlays.");
+    tt->help = tdrpStrDup("/nfield_name: name of field in GRIDS list. /non_at_startup: field on when app starts./n");
+    tt->array_offset = (char *) &_layer_fields - &_start_;
+    tt->array_n_offset = (char *) &layer_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(layer_field_t);
+    tt->array_n = 5;
+    tt->struct_def.name = tdrpStrDup("layer_field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_layer_fields->field_name - (char *) _layer_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("on_at_startup");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_layer_fields->on_at_startup - (char *) _layer_fields;
+    tt->n_struct_vals = 10;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("KCYS-DBZ");
+      tt->struct_vals[1].b = pFALSE;
+      tt->struct_vals[2].s = tdrpStrDup("KPUX-DBZ");
+      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[4].s = tdrpStrDup("KGJX-DBZ");
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].s = tdrpStrDup("KGLD-DBZ");
+      tt->struct_vals[7].b = pFALSE;
+      tt->struct_vals[8].s = tdrpStrDup("KLNX-DBZ");
+      tt->struct_vals[9].b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("Overall rendering order.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'draw_main_on_top'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("draw_main_on_top");
+    tt->descr = tdrpStrDup("TRUE: render main field first, then layers.");
+    tt->help = tdrpStrDup("FALSE: render main field on top of layers.");
+    tt->val_offset = (char *) &draw_main_on_top - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
+    tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
+    tt++;
+    
+    // Parameter 'mark_latest_click_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("mark_latest_click_location");
+    tt->descr = tdrpStrDup("Option to mark latest click location from client app.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &mark_latest_click_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'latest_click_mark_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("latest_click_mark_size");
+    tt->descr = tdrpStrDup("Size of marker at latest click location (pixels).");
+    tt->help = tdrpStrDup("Location clicked in client app.");
+    tt->val_offset = (char *) &latest_click_mark_size - &_start_;
+    tt->single_val.i = 11;
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("Qucid is an integrating display for weather data products.");
+    tt->comment_text = tdrpStrDup("This is a C++ application using the QT GUI toolkit. It is based on the legacy CIDD app.");
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("DEBUGGING AND PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -632,11 +1746,11 @@
     tt->single_val.s = tdrpStrDup("test");
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("RESOURCES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -653,11 +1767,11 @@
     tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales");
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("REALTIME DATA INPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -746,11 +1860,11 @@
     tt->single_val.i = 400;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("ARCHIVE MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -803,11 +1917,11 @@
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("STATUS TO BE SHOWN IN GUI");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -998,11 +2112,11 @@
       tt->struct_vals[27].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("<GRIDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1154,20 +2268,20 @@
       tt->struct_vals[31].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("</GRIDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("<WINDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1294,20 +2408,20 @@
       tt->struct_vals[21].b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("</WINDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("<MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1391,11 +2505,11 @@
       tt->struct_vals[15].b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("</MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1426,11 +2540,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("SET MAX RANGE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1459,11 +2573,11 @@
     tt->single_val.d = 225;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("DISPLAY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1488,11 +2602,11 @@
     tt->single_val.e = POLAR_DISPLAY;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("NAMES AND LABELS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1557,11 +2671,11 @@
     tt->single_val.s = tdrpStrDup("MARSHALL");
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1722,11 +2836,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("HORIZ MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1847,11 +2961,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("VERT MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2144,11 +3258,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("BSCAN TIME LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2193,11 +3307,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("BSCAN REALTIME CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2238,11 +3352,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("BSCAN RANGE AND ALTITUDE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2353,11 +3467,11 @@
     tt->single_val.e = RANGE_AXIS_ALTITUDE;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("BSCAN ANGLE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2434,11 +3548,11 @@
     tt->single_val.d = 91;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("BSCAN CENSOR DATA BELOW SURFACE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2503,11 +3617,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 34'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 34");
     tt->comment_hdr = tdrpStrDup("BSCAN MARGINS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2596,11 +3710,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 35'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 35");
     tt->comment_hdr = tdrpStrDup("BSCAN TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2725,11 +3839,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 36'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 36");
     tt->comment_hdr = tdrpStrDup("DISTANCE SCALE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2758,11 +3872,11 @@
     tt->single_val.i = 50;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 37'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 37");
     tt->comment_hdr = tdrpStrDup("BSCAN LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2839,11 +3953,11 @@
     tt->single_val.e = LEGEND_TOP_RIGHT;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 38'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("BSCAN DWELL CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2898,11 +4012,11 @@
     tt->single_val.e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 39'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 39");
     tt->comment_hdr = tdrpStrDup("SAVING IMAGES TO FILE");
     tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\nThe following parameters control the output directory, and the construction of the file name");
     tt++;
@@ -3051,11 +4165,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 40'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 40");
     tt->comment_hdr = tdrpStrDup("OPTION TO CREATE IMAGES AUTOMATICALLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3187,11 +4301,11 @@
       tt->array_vals[2].i = 2;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 41'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 41");
     tt->comment_hdr = tdrpStrDup("SIMULATION MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3244,11 +4358,11 @@
     tt->single_val.d = 0.15;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 42'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 42");
     tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
     tt->comment_text = tdrpStrDup("Writing the click point location to an FMQ in XML format.");
     tt++;
@@ -3265,11 +4379,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 43'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 43");
     tt->comment_hdr = tdrpStrDup("CIDD GUI Configuration Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3307,11 +4421,11 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 44'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 44");
     tt->comment_hdr = tdrpStrDup("Draw/Export Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3531,11 +4645,11 @@
       tt->struct_vals[9].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 45'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("Terrain Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3745,11 +4859,11 @@
       tt->struct_vals[2].s = tdrpStrDup("(0, 0) (0, 150)");
     tt++;
     
-    // Parameter 'Comment 35'
+    // Parameter 'Comment 46'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 35");
+    tt->param_name = tdrpStrDup("Comment 46");
     tt->comment_hdr = tdrpStrDup("Route Winds Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4021,11 +5135,11 @@
       tt->array_vals[6].s = tdrpStrDup("B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 ");
     tt++;
     
-    // Parameter 'Comment 36'
+    // Parameter 'Comment 47'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 36");
+    tt->param_name = tdrpStrDup("Comment 47");
     tt->comment_hdr = tdrpStrDup("<MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4114,11 +5228,11 @@
     tt->single_val.i = 365;
     tt++;
     
-    // Parameter 'Comment 37'
+    // Parameter 'Comment 48'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 37");
+    tt->param_name = tdrpStrDup("Comment 48");
     tt->comment_hdr = tdrpStrDup("Movie loops");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4387,11 +5501,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 38'
+    // Parameter 'Comment 49'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 38");
+    tt->param_name = tdrpStrDup("Comment 49");
     tt->comment_hdr = tdrpStrDup("Image generation");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4504,11 +5618,11 @@
     tt->single_val.s = tdrpStrDup("_");
     tt++;
     
-    // Parameter 'Comment 39'
+    // Parameter 'Comment 50'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 39");
+    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("The HTML MODE Output file name is built from parts.");
     tt->comment_text = tdrpStrDup("Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_label + zoom_level + [button_label] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'");
     tt++;
@@ -4585,11 +5699,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 40'
+    // Parameter 'Comment 51'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 40");
+    tt->param_name = tdrpStrDup("Comment 51");
     tt->comment_hdr = tdrpStrDup("Separate Horizontal and Vertical Image save resources.");
     tt->comment_text = tdrpStrDup("NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.");
     tt++;
@@ -5026,11 +6140,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 41'
+    // Parameter 'Comment 52'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 41");
+    tt->param_name = tdrpStrDup("Comment 52");
     tt->comment_hdr = tdrpStrDup("The Outer most domain.");
     tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
     tt++;
@@ -5155,11 +6269,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 42'
+    // Parameter 'Comment 53'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 42");
+    tt->param_name = tdrpStrDup("Comment 53");
     tt->comment_hdr = tdrpStrDup("Zoom views.");
     tt->comment_text = tdrpStrDup("These are the pre-defined zoom levels.");
     tt++;
@@ -5263,11 +6377,11 @@
       tt->struct_vals[14].d = 300;
     tt++;
     
-    // Parameter 'Comment 43'
+    // Parameter 'Comment 54'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 43");
+    tt->param_name = tdrpStrDup("Comment 54");
     tt->comment_hdr = tdrpStrDup("Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.");
     tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
     tt++;
@@ -5308,11 +6422,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 44'
+    // Parameter 'Comment 55'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 44");
+    tt->param_name = tdrpStrDup("Comment 55");
     tt->comment_hdr = tdrpStrDup("Finding the resources for maps/overlays, surface stations.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5365,11 +6479,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
     tt++;
     
-    // Parameter 'Comment 45'
+    // Parameter 'Comment 56'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 45");
+    tt->param_name = tdrpStrDup("Comment 56");
     tt->comment_hdr = tdrpStrDup("Server access.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5398,20 +6512,20 @@
     tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
     tt++;
     
-    // Parameter 'Comment 46'
+    // Parameter 'Comment 57'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 46");
+    tt->param_name = tdrpStrDup("Comment 57");
     tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
     tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
     tt++;
     
-    // Parameter 'Comment 47'
+    // Parameter 'Comment 58'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 47");
+    tt->param_name = tdrpStrDup("Comment 58");
     tt->comment_hdr = tdrpStrDup("Setting colors.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5560,42 +6674,6 @@
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
     
-    // Parameter 'epoch_indicator_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("epoch_indicator_color");
-    tt->descr = tdrpStrDup("Time Control (Movie) Pop-up Colors.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &epoch_indicator_color - &_start_;
-    tt->single_val.s = tdrpStrDup("orange");
-    tt++;
-    
-    // Parameter 'now_time_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("now_time_color");
-    tt->descr = tdrpStrDup("Color of current time tick.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &now_time_color - &_start_;
-    tt->single_val.s = tdrpStrDup("red");
-    tt++;
-    
-    // Parameter 'time_tick_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("time_tick_color");
-    tt->descr = tdrpStrDup("Color of time ticks.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &time_tick_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
-    tt++;
-    
     // Parameter 'latest_click_mark_color'
     // ctype is 'char*'
     
@@ -5606,1051 +6684,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &latest_click_mark_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
-    tt++;
-    
-    // Parameter 'Comment 48'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 48");
-    tt->comment_hdr = tdrpStrDup("Mode flags.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'show_height_sel'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("show_height_sel");
-    tt->descr = tdrpStrDup("Show the height selector in the right margin.");
-    tt->help = tdrpStrDup("oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.");
-    tt->val_offset = (char *) &show_height_sel - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'show_data_messages'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("show_data_messages");
-    tt->descr = tdrpStrDup("Show data status messages at top of image.");
-    tt->help = tdrpStrDup("There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.");
-    tt->val_offset = (char *) &show_data_messages - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'latlon_mode'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("latlon_mode");
-    tt->descr = tdrpStrDup("Sets the format for output of Lat, Lon's.");
-    tt->help = tdrpStrDup("0= Decimal Degrees, 1 = deg min' sec'.");
-    tt->val_offset = (char *) &latlon_mode - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'label_time_format'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("label_time_format");
-    tt->descr = tdrpStrDup("Set the format for the time strings.");
-    tt->help = tdrpStrDup("See 'man strftime' for format options. Can add additional text as part of the Time string.");
-    tt->val_offset = (char *) &label_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%m/%d/%y %H:%M:%S");
-    tt++;
-    
-    // Parameter 'moviestart_time_format'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("moviestart_time_format");
-    tt->descr = tdrpStrDup("Set the format for the time string in the movie start time text field of the movie pop-up window.");
-    tt->help = tdrpStrDup("This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.");
-    tt->val_offset = (char *) &moviestart_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%H:%M %m/%d/%Y");
-    tt++;
-    
-    // Parameter 'frame_range_time_format'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("frame_range_time_format");
-    tt->descr = tdrpStrDup("Set the format for the time strings in the frame range text fields.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &frame_range_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%H:%M");
-    tt++;
-    
-    // Parameter 'layer_legends_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("layer_legends_on");
-    tt->descr = tdrpStrDup("Plot a Legend for each Grid overlay.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &layer_legends_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'cont_legends_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("cont_legends_on");
-    tt->descr = tdrpStrDup("Plot a Legend for each Contour overlay.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &cont_legends_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'wind_legends_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wind_legends_on");
-    tt->descr = tdrpStrDup("Plot a Legend for each Wind overlay.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_legends_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'display_labels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("display_labels");
-    tt->descr = tdrpStrDup("Switch to turn off all data labels on the display.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &display_labels - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'display_ref_lines'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("display_ref_lines");
-    tt->descr = tdrpStrDup("Switch to turn on/off Height, Route and Wind Scale reference lines.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &display_ref_lines - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 49'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 49");
-    tt->comment_hdr = tdrpStrDup("Window sizes.");
-    tt->comment_text = tdrpStrDup("Window width and height is specified in pixels.");
-    tt++;
-    
-    // Parameter 'horiz_default_x_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_x_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
-    tt->val_offset = (char *) &horiz_default_x_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_default_y_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_y_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
-    tt->val_offset = (char *) &horiz_default_y_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_default_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_width");
-    tt->descr = tdrpStrDup("Default width of main window (pixels).");
-    tt->help = tdrpStrDup("Height of main window at startup.");
-    tt->val_offset = (char *) &horiz_default_width - &_start_;
-    tt->single_val.i = 800;
-    tt++;
-    
-    // Parameter 'horiz_default_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_height");
-    tt->descr = tdrpStrDup("Default height of main window (pixels).");
-    tt->help = tdrpStrDup("Width of main window at startup.");
-    tt->val_offset = (char *) &horiz_default_height - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'horiz_min_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_min_width");
-    tt->descr = tdrpStrDup("Minimum width of main window (pixels).");
-    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
-    tt->val_offset = (char *) &horiz_min_width - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'horiz_min_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_min_height");
-    tt->descr = tdrpStrDup("Minimum height of main window (pixels).");
-    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
-    tt->val_offset = (char *) &horiz_min_height - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'vert_default_x_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_x_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
-    tt->val_offset = (char *) &vert_default_x_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_default_y_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_y_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
-    tt->val_offset = (char *) &vert_default_y_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_default_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_width");
-    tt->descr = tdrpStrDup("Default width of vert section window (pixels).");
-    tt->help = tdrpStrDup("Height of vert section window at startup.");
-    tt->val_offset = (char *) &vert_default_width - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'vert_default_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_height");
-    tt->descr = tdrpStrDup("Default height of vert section window (pixels).");
-    tt->help = tdrpStrDup("Width of vert section window at startup.");
-    tt->val_offset = (char *) &vert_default_height - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'vert_min_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_min_width");
-    tt->descr = tdrpStrDup("Minimum width of vert section window (pixels).");
-    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
-    tt->val_offset = (char *) &vert_min_width - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'vert_min_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_min_height");
-    tt->descr = tdrpStrDup("Minimum height of vert section window (pixels).");
-    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
-    tt->val_offset = (char *) &vert_min_height - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'Comment 50'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 50");
-    tt->comment_hdr = tdrpStrDup("Margin details.");
-    tt->comment_text = tdrpStrDup("Margins are specified in pixels.");
-    tt++;
-    
-    // Parameter 'top_margin_render_style'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("top_margin_render_style");
-    tt->descr = tdrpStrDup("TOP Margin styles.");
-    tt->help = tdrpStrDup(" 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label");
-    tt->val_offset = (char *) &top_margin_render_style - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'bot_margin_render_style'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("bot_margin_render_style");
-    tt->descr = tdrpStrDup("Bottom Margin Styles.");
-    tt->help = tdrpStrDup("1 - Distance Scale. 2 - Time Scale.");
-    tt->val_offset = (char *) &bot_margin_render_style - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'horiz_top_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin (pixels).");
-    tt->help = tdrpStrDup("Size of top margin for main window.");
-    tt->val_offset = (char *) &horiz_top_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'horiz_bot_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_bot_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
-    tt->help = tdrpStrDup("Size of bottom margin for main window.");
-    tt->val_offset = (char *) &horiz_bot_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'horiz_left_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin (pixels).");
-    tt->help = tdrpStrDup("Size of left margin for main window.");
-    tt->val_offset = (char *) &horiz_left_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'horiz_right_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin (pixels).");
-    tt->help = tdrpStrDup("Size of right margin for main window.");
-    tt->val_offset = (char *) &horiz_right_margin - &_start_;
-    tt->single_val.i = 80;
-    tt++;
-    
-    // Parameter 'vert_top_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin (pixels).");
-    tt->help = tdrpStrDup("Size of top margin for vert section window.");
-    tt->val_offset = (char *) &vert_top_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'vert_bot_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_bot_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
-    tt->help = tdrpStrDup("Size of bottom margin for vert section window.");
-    tt->val_offset = (char *) &vert_bot_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'vert_left_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin (pixels).");
-    tt->help = tdrpStrDup("Size of left margin for vert section window.");
-    tt->val_offset = (char *) &vert_left_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'vert_right_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin (pixels).");
-    tt->help = tdrpStrDup("Size of right margin for vert section window.");
-    tt->val_offset = (char *) &vert_right_margin - &_start_;
-    tt->single_val.i = 80;
-    tt++;
-    
-    // Parameter 'Comment 51'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 51");
-    tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
-    tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.");
-    tt++;
-    
-    // Parameter 'horiz_legends_start_x'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_start_x");
-    tt->descr = tdrpStrDup("Horizontal window legends start x position (pixels).");
-    tt->help = tdrpStrDup("Relative to top left of window.");
-    tt->val_offset = (char *) &horiz_legends_start_x - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_legends_start_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_start_y");
-    tt->descr = tdrpStrDup("Horizontal window legends start y position (pixels).");
-    tt->help = tdrpStrDup("Relative to top left of window.");
-    tt->val_offset = (char *) &horiz_legends_start_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_legends_delta_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_delta_y");
-    tt->descr = tdrpStrDup("Horizontal window legends spacing (pixels).");
-    tt->help = tdrpStrDup("This is the line spacing between the legends.");
-    tt->val_offset = (char *) &horiz_legends_delta_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_legends_start_x'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_legends_start_x");
-    tt->descr = tdrpStrDup("Vertical window legends start x position (pixels).");
-    tt->help = tdrpStrDup("Relative to top left of window.");
-    tt->val_offset = (char *) &vert_legends_start_x - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_legends_start_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_legends_start_y");
-    tt->descr = tdrpStrDup("Vertical window legends start y position (pixels).");
-    tt->help = tdrpStrDup("Relative to top left of window.");
-    tt->val_offset = (char *) &vert_legends_start_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_legends_delta_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_legends_delta_y");
-    tt->descr = tdrpStrDup("Vertical window legends spacing (pixels).");
-    tt->help = tdrpStrDup("This is the line spacing between the legends.");
-    tt->val_offset = (char *) &vert_legends_delta_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'Comment 52'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 52");
-    tt->comment_hdr = tdrpStrDup("Draw range rings and azimuth lines.");
-    tt->comment_text = tdrpStrDup("These apply to radars only.");
-    tt++;
-    
-    // Parameter 'range_rings'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_rings");
-    tt->descr = tdrpStrDup("Turn range rings on/off.");
-    tt->help = tdrpStrDup("TRUE means on - i.r. plot range rings.");
-    tt->val_offset = (char *) &range_rings - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_ring_spacing'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_spacing");
-    tt->descr = tdrpStrDup("Spacing between range rings (km).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_spacing - &_start_;
-    tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'max_ring_range'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_ring_range");
-    tt->descr = tdrpStrDup("Maximum range ring (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &max_ring_range - &_start_;
-    tt->single_val.d = 500;
-    tt++;
-    
-    // Parameter 'range_ring_follows_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_follows_data");
-    tt->descr = tdrpStrDup("Plot range rings relative to radar location.");
-    tt->help = tdrpStrDup("We get the location from the data. If FALSE, rings are relative to plot origin.");
-    tt->val_offset = (char *) &range_ring_follows_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_ring_for_radar_only'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_for_radar_only");
-    tt->descr = tdrpStrDup("Only plot range rings for radar data sets.");
-    tt->help = tdrpStrDup("TRUE turns off rings for non-radar data sets.");
-    tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'domain_follows_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("domain_follows_data");
-    tt->descr = tdrpStrDup("Plot domain moves with origin of the data set.");
-    tt->help = tdrpStrDup("Shift the domain limits if the data origin shifts.");
-    tt->val_offset = (char *) &domain_follows_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_ring_x_space'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_x_space");
-    tt->descr = tdrpStrDup("Spacing in x for range ring labels (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_x_space - &_start_;
-    tt->single_val.i = 50;
-    tt++;
-    
-    // Parameter 'range_ring_y_space'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_y_space");
-    tt->descr = tdrpStrDup("Spacing in y for range ring labels (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_y_space - &_start_;
-    tt->single_val.i = 15;
-    tt++;
-    
-    // Parameter 'range_ring_labels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_labels");
-    tt->descr = tdrpStrDup("Plot range ring labels.");
-    tt->help = tdrpStrDup("Label the range for each ring.");
-    tt->val_offset = (char *) &range_ring_labels - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'azimuth_lines'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_lines");
-    tt->descr = tdrpStrDup("Draw azimuth lines for a radar location.");
-    tt->help = tdrpStrDup("These complement range rings, to provide guidance on azimuths for radar gates.");
-    tt->val_offset = (char *) &azimuth_lines - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_interval'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_interval");
-    tt->descr = tdrpStrDup("Interval for azimuth lines.");
-    tt->help = tdrpStrDup("If azimuth lines are on.");
-    tt->val_offset = (char *) &azimuth_interval - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'azimuth_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_radius");
-    tt->descr = tdrpStrDup("Max radius for azimuth lines.");
-    tt->help = tdrpStrDup("If azimuth lines are on.");
-    tt->val_offset = (char *) &azimuth_radius - &_start_;
-    tt->single_val.d = 200;
-    tt++;
-    
-    // Parameter 'Comment 53'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 53");
-    tt->comment_hdr = tdrpStrDup("Plotting wind vectors.");
-    tt->comment_text = tdrpStrDup("See also the wind layers section.");
-    tt++;
-    
-    // Parameter 'all_winds_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("all_winds_on");
-    tt->descr = tdrpStrDup("Plot all wind layers.");
-    tt->help = tdrpStrDup("Turns on all wind layers.");
-    tt->val_offset = (char *) &all_winds_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'wind_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wind_mode");
-    tt->descr = tdrpStrDup("Activate wind rendering.");
-    tt->help = tdrpStrDup("TO DO - check how this works.");
-    tt->val_offset = (char *) &wind_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'barb_shaft_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("barb_shaft_len");
-    tt->descr = tdrpStrDup("Wind barb shaft length (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &barb_shaft_len - &_start_;
-    tt->single_val.i = 33;
-    tt++;
-    
-    // Parameter 'ideal_x_vectors'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ideal_x_vectors");
-    tt->descr = tdrpStrDup("Ideal number of vectors in the x dimension.");
-    tt->help = tdrpStrDup("The display will space the wind vectors in x accordingly.");
-    tt->val_offset = (char *) &ideal_x_vectors - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'ideal_y_vectors'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ideal_y_vectors");
-    tt->descr = tdrpStrDup("Ideal number of vectors in the y dimension.");
-    tt->help = tdrpStrDup("The display will space the wind vectors in y accordingly.");
-    tt->val_offset = (char *) &ideal_y_vectors - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'wind_head_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wind_head_size");
-    tt->descr = tdrpStrDup("Minimum arrow head size for wind vectors (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_head_size - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'wind_head_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_head_angle");
-    tt->descr = tdrpStrDup("Angle of arrow head for wind vectors (deg).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_head_angle - &_start_;
-    tt->single_val.d = 45;
-    tt++;
-    
-    // Parameter 'wind_scaler'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wind_scaler");
-    tt->descr = tdrpStrDup("The display will space the wind vectors in x accordingly.");
-    tt->help = tdrpStrDup("Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.");
-    tt->val_offset = (char *) &wind_scaler - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'wind_time_scale_interval'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_time_scale_interval");
-    tt->descr = tdrpStrDup("inutes between steps on the wind scaling slider.");
-    tt->help = tdrpStrDup("Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity");
-    tt->val_offset = (char *) &wind_time_scale_interval - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_marker_type'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wind_marker_type");
-    tt->descr = tdrpStrDup("Wind vector rendering style.");
-    tt->help = tdrpStrDup("'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
-    tt->val_offset = (char *) &wind_marker_type - &_start_;
-    tt->single_val.s = tdrpStrDup("arrow");
-    tt++;
-    
-    // Parameter 'wind_w_scale_factor'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_w_scale_factor");
-    tt->descr = tdrpStrDup("Scale the vertical velocity by this factor, relative to the U/V. ");
-    tt->help = tdrpStrDup("W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.");
-    tt->val_offset = (char *) &wind_w_scale_factor - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_units_scale_factor'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_units_scale_factor");
-    tt->descr = tdrpStrDup("Value to convert from the your reference speed units to m/sec. ");
-    tt->help = tdrpStrDup("i.e. wind_units_scale_factor =  m/sec / chosen units.");
-    tt->val_offset = (char *) &wind_units_scale_factor - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'wind_reference_speed'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_reference_speed");
-    tt->descr = tdrpStrDup("Sets the length of the wind vector reference legend.");
-    tt->help = tdrpStrDup("The legend shows a symbos representing a wind speed of this value.");
-    tt->val_offset = (char *) &wind_reference_speed - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_units_label'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wind_units_label");
-    tt->descr = tdrpStrDup("Select the label to be printed next to the reference bar.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_units_label - &_start_;
-    tt->single_val.s = tdrpStrDup("m/sec");
-    tt++;
-    
-    // Parameter 'Comment 54'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 54");
-    tt->comment_hdr = tdrpStrDup("Plotting contours in data fields.");
-    tt->comment_text = tdrpStrDup("In the data layers section you can select contour plotting.");
-    tt++;
-    
-    // Parameter 'label_contours'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("label_contours");
-    tt->descr = tdrpStrDup("Set to TRUE to have numeric labels on line contours.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &label_contours - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'contour_line_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("contour_line_width");
-    tt->descr = tdrpStrDup("Width of contour lines.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &contour_line_width - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'smooth_contours'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("smooth_contours");
-    tt->descr = tdrpStrDup("Apply smoothing to data grids before contouring.");
-    tt->help = tdrpStrDup("0 = Off, 1 = single pass, 2 = double pass.");
-    tt->val_offset = (char *) &smooth_contours - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'use_alt_contours'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_alt_contours");
-    tt->descr = tdrpStrDup("Use Alternate (Mdvx) Contouring Routines.");
-    tt->help = tdrpStrDup("Slower - Nicer labeling - Less smooth. Warning - Does not work correctly when data and display origins are different. Works fine in lat/lon projections");
-    tt->val_offset = (char *) &use_alt_contours - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'add_noise'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_noise");
-    tt->descr = tdrpStrDup("Add 1 part in 250 Noise to help smooth contours.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_noise - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'special_contour_value'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("special_contour_value");
-    tt->descr = tdrpStrDup("Specify special contour value.");
-    tt->help = tdrpStrDup("Contours at this value will have a wider line.");
-    tt->val_offset = (char *) &special_contour_value - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'map_bad_to_min_value'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("map_bad_to_min_value");
-    tt->descr = tdrpStrDup("Contour the bad value, by setting bad cells to have min value in data.");
-    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the bad and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want bad contoured, set this to TRUE.");
-    tt->val_offset = (char *) &map_bad_to_min_value - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'map_missing_to_min_value'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("map_missing_to_min_value");
-    tt->descr = tdrpStrDup("Contour the missing value, by setting missing cells to have min value in data.");
-    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the missing and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want missing contoured, set this to TRUE.");
-    tt->val_offset = (char *) &map_missing_to_min_value - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 55'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 55");
-    tt->comment_hdr = tdrpStrDup("Overlain fields as layers.");
-    tt->comment_text = tdrpStrDup("Layers are rendered in order. i.e. last layer will be on top.");
-    tt++;
-    
-    // Parameter 'layer_fields'
-    // ctype is '_layer_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("layer_fields");
-    tt->descr = tdrpStrDup("Field for layers as overlays.");
-    tt->help = tdrpStrDup("/nfield_name: name of field in GRIDS list. /non_at_startup: field on when app starts./n");
-    tt->array_offset = (char *) &_layer_fields - &_start_;
-    tt->array_n_offset = (char *) &layer_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(layer_field_t);
-    tt->array_n = 5;
-    tt->struct_def.name = tdrpStrDup("layer_field_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_layer_fields->field_name - (char *) _layer_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[1].fname = tdrpStrDup("on_at_startup");
-      tt->struct_def.fields[1].ptype = BOOL_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_layer_fields->on_at_startup - (char *) _layer_fields;
-    tt->n_struct_vals = 10;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("KCYS-DBZ");
-      tt->struct_vals[1].b = pFALSE;
-      tt->struct_vals[2].s = tdrpStrDup("KPUX-DBZ");
-      tt->struct_vals[3].b = pFALSE;
-      tt->struct_vals[4].s = tdrpStrDup("KGJX-DBZ");
-      tt->struct_vals[5].b = pFALSE;
-      tt->struct_vals[6].s = tdrpStrDup("KGLD-DBZ");
-      tt->struct_vals[7].b = pFALSE;
-      tt->struct_vals[8].s = tdrpStrDup("KLNX-DBZ");
-      tt->struct_vals[9].b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 56'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 56");
-    tt->comment_hdr = tdrpStrDup("Overall rendering order.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'draw_main_on_top'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("draw_main_on_top");
-    tt->descr = tdrpStrDup("TRUE: render main field first, then layers.");
-    tt->help = tdrpStrDup("FALSE: render main field on top of layers.");
-    tt->val_offset = (char *) &draw_main_on_top - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 57'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 57");
-    tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
-    tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
-    tt++;
-    
-    // Parameter 'mark_latest_click_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("mark_latest_click_location");
-    tt->descr = tdrpStrDup("Option to mark latest click location from client app.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &mark_latest_click_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'latest_click_mark_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("latest_click_mark_size");
-    tt->descr = tdrpStrDup("Size of marker at latest click location (pixels).");
-    tt->help = tdrpStrDup("Location clicked in client app.");
-    tt->val_offset = (char *) &latest_click_mark_size - &_start_;
-    tt->single_val.i = 11;
     tt++;
     
     // Parameter 'latest_client_mark_color'
@@ -6677,11 +6710,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 58'
+    // Parameter 'Comment 59'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 58");
+    tt->param_name = tdrpStrDup("Comment 59");
     tt->comment_hdr = tdrpStrDup("<FONTS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6717,20 +6750,20 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 59'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 59");
-    tt->comment_hdr = tdrpStrDup("</FONTS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'Comment 60'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 60");
+    tt->comment_hdr = tdrpStrDup("</FONTS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 61'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 61");
     tt->comment_hdr = tdrpStrDup("Analog clock.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6771,11 +6804,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 61'
+    // Parameter 'Comment 62'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 61");
+    tt->param_name = tdrpStrDup("Comment 62");
     tt->comment_hdr = tdrpStrDup("GUI.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6936,11 +6969,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 62'
+    // Parameter 'Comment 63'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 62");
+    tt->param_name = tdrpStrDup("Comment 63");
     tt->comment_hdr = tdrpStrDup("HELP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6981,11 +7014,11 @@
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 63'
+    // Parameter 'Comment 64'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 63");
+    tt->param_name = tdrpStrDup("Comment 64");
     tt->comment_hdr = tdrpStrDup("BOOKMARKS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7014,11 +7047,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 64'
+    // Parameter 'Comment 65'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 64");
+    tt->param_name = tdrpStrDup("Comment 65");
     tt->comment_hdr = tdrpStrDup("RENDERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7107,11 +7140,11 @@
     tt->single_val.i = 61600;
     tt++;
     
-    // Parameter 'Comment 65'
+    // Parameter 'Comment 66'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 65");
+    tt->param_name = tdrpStrDup("Comment 66");
     tt->comment_hdr = tdrpStrDup("RENDERING PRODUCTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7164,11 +7197,11 @@
     tt->single_val.d = 300;
     tt++;
     
-    // Parameter 'Comment 66'
+    // Parameter 'Comment 67'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 66");
+    tt->param_name = tdrpStrDup("Comment 67");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

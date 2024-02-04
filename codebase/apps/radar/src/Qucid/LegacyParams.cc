@@ -1757,13 +1757,41 @@ int LegacyParams::_readMainParams()
   _getString("cidd.range_ring_color", "grey");
   _getString("cidd.missing_data_color","transparent");
   _getString("cidd.bad_data_color","transparent");
+
+  _getString("cidd.latest_click_mark_color", "red");
+  _getString("cidd.latest_client_mark_color", "yellow");
+
+  // time control GUI - colors
+  
+  fprintf(_tdrpFile, "// <TIME_CONTROL_GUI>\n");
+  
   _getString("cidd.epoch_indicator_color", "yellow");
   _getString("cidd.now_time_color", "red");
-
-  // need multiple time ticks - i.e. array
   _getString("cidd.time_tick_color", "yellow");
-  _getString("cidd.latest_click_mark_color", "red");
-  _getString( "cidd.latest_client_mark_color", "yellow");
+  
+  vector<string> time_tick_colors;
+  for(int ii = 0; ii < 9; ii++) {
+    char str_buf[1024];
+    snprintf(str_buf, 1023, "cidd.time_tick_color%d", ii + 1);
+    string color = _getString(str_buf, "none", false);
+    if (color.find("none") == string::npos) {
+      time_tick_colors.push_back(color);
+    }
+  } // ii
+  
+  fprintf(_tdrpFile, "time_tick_colors = {\n");
+  for(size_t ii = 0; ii < time_tick_colors.size(); ii++) {
+    string &color = time_tick_colors[ii];
+    fprintf(_tdrpFile, "  \"%s\"", color.c_str());
+    if (ii < time_tick_colors.size() - 1) {
+      fprintf(_tdrpFile, ",\n");
+    } else {
+      fprintf(_tdrpFile, "\n");
+    }
+  } // itime_tick_color
+  fprintf(_tdrpFile, "};\n");
+
+  fprintf(_tdrpFile, "// </TIME_CONTROL_GUI>\n");
   
   /* Toggle for displaying the height Selector in Right Margin */
   _getBoolean("cidd.show_height_sel", 1);
@@ -1939,8 +1967,10 @@ int LegacyParams::_readMainParams()
   for(int ii = 0; ii < _numFonts; ii++) {
     char str_buf[1024];
     snprintf(str_buf, 1023, "cidd.font%d", ii + 1);
-    string font = _getString(str_buf, "8x13", false);
-    fonts.push_back(font);
+    string font = _getString(str_buf, "none", false);
+    if (font.find("none") == string::npos) {
+      fonts.push_back(font);
+    }
   } // ii
 
   fprintf(_tdrpFile, "fonts = {\n");
