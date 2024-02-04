@@ -6682,20 +6682,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 58");
-    tt->comment_hdr = tdrpStrDup("Fonts.");
-    tt->comment_text = tdrpStrDup("TO-DO - fix this.");
+    tt->comment_hdr = tdrpStrDup("<FONTS>");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'num_fonts'
-    // ctype is 'int'
+    // Parameter 'fonts'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_fonts");
-    tt->descr = tdrpStrDup("Number of fonts of increasing size.");
-    tt->help = tdrpStrDup("The display picks the appropriate font size in tight location - e.g. axis labels,");
-    tt->val_offset = (char *) &num_fonts - &_start_;
-    tt->single_val.i = 1;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("fonts");
+    tt->descr = tdrpStrDup("List of fonts in order of increasing size.");
+    tt->help = tdrpStrDup("The optimum font size will be used in regions of the plot that have limited space.");
+    tt->array_offset = (char *) &_fonts - &_start_;
+    tt->array_n_offset = (char *) &fonts_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("fixed");
     tt++;
     
     // Parameter 'font_display_mode'
@@ -6715,6 +6722,15 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 59");
+    tt->comment_hdr = tdrpStrDup("</FONTS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 60'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 60");
     tt->comment_hdr = tdrpStrDup("Analog clock.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6755,11 +6771,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 60'
+    // Parameter 'Comment 61'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 60");
+    tt->param_name = tdrpStrDup("Comment 61");
     tt->comment_hdr = tdrpStrDup("GUI.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6920,11 +6936,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 61'
+    // Parameter 'Comment 62'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 61");
+    tt->param_name = tdrpStrDup("Comment 62");
     tt->comment_hdr = tdrpStrDup("HELP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6965,11 +6981,11 @@
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 62'
+    // Parameter 'Comment 63'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 62");
+    tt->param_name = tdrpStrDup("Comment 63");
     tt->comment_hdr = tdrpStrDup("BOOKMARKS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6998,11 +7014,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 63'
+    // Parameter 'Comment 64'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 63");
+    tt->param_name = tdrpStrDup("Comment 64");
     tt->comment_hdr = tdrpStrDup("RENDERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7091,11 +7107,11 @@
     tt->single_val.i = 61600;
     tt++;
     
-    // Parameter 'Comment 64'
+    // Parameter 'Comment 65'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 64");
+    tt->param_name = tdrpStrDup("Comment 65");
     tt->comment_hdr = tdrpStrDup("RENDERING PRODUCTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7148,11 +7164,11 @@
     tt->single_val.d = 300;
     tt++;
     
-    // Parameter 'Comment 65'
+    // Parameter 'Comment 66'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 65");
+    tt->param_name = tdrpStrDup("Comment 66");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

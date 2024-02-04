@@ -1142,7 +1142,7 @@ cidd.latest_client_mark_size: 11
 # highest font number that will fit in a given screen space.
 # Pick a nice spectrum of font sizes, with all of them readable.
 # CIDD currently accepts up to 16 different fonts
-cidd.num_fonts: 8
+cidd.num_fonts: 10
 #
 cidd.font1: 6x9
 cidd.font2: -*-courier-medium-r-normal-*-10-*-*-*-*-*-*-*

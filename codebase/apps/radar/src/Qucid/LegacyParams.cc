@@ -204,28 +204,6 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
 #ifdef JUNK
 
-  // zooms
-
-  for(i=0; i < gd.h_win.num_zoom_levels; i++) {
-    
-    sprintf(str_buf, "cidd.level%d_min_xkm", i+1);
-    double minx = _getDouble(str_buf,-200.0/(i+1));
-
-    sprintf(str_buf, "cidd.level%d_min_ykm", i+1);
-    double miny = _getDouble(str_buf,-200.0/(i+1));
-
-    sprintf(str_buf, "cidd.level%d_max_xkm", i+1);
-    double maxx = _getDouble(str_buf,200.0/(i+1));
-
-    sprintf(str_buf, "cidd.level%d_max_ykm", i+1);
-    double maxy = _getDouble(str_buf,200.0/(i+1));
-    
-  } // i
-  
-#endif
-
-#ifdef JUNK
-
   // menu bar
 
   // Establish what each Menu Bar Cell Does.
@@ -1667,11 +1645,6 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.do_not_clip_on_mdv_request", 0);
   _getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
      
-  // zooms
-  
-  _getDouble("cidd.min_zoom_threshold", 5.0);
-  _getDouble("cidd.aspect_ratio", 1.0);
-
   /* Toggle for enabling a status report window */
   _getBoolean("cidd.enable_status_window", 0);
   _getBoolean("cidd.report_clicks_in_status_window", 0);
@@ -1701,9 +1674,12 @@ int LegacyParams::_readMainParams()
 
   // zooms
 
+  fprintf(_tdrpFile, "// <ZOOMS>\n");
+
   _getLong("cidd.start_zoom_level",1);
   _getBoolean("cidd.zoom_limits_in_latlon",0);
   _getLong("cidd.num_cache_zooms",1);
+  _getDouble("cidd.min_zoom_threshold", 5.0);
   _numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
 
   vector<ZoomLevel> zooms;
@@ -1735,8 +1711,6 @@ int LegacyParams::_readMainParams()
     zooms.push_back(zoom);
     
   } // i
-
-  fprintf(_tdrpFile, "// <ZOOMS>\n");
 
   fprintf(_tdrpFile, "zoom_levels = {\n");
   for(size_t izoom = 0; izoom < zooms.size(); izoom++) {
@@ -1834,7 +1808,8 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.horiz_legends_start_x", 0);
   _getLong("cidd.horiz_legends_start_y", 0);
   _getLong("cidd.horiz_legends_delta_y", 0);
-  
+  _getDouble("cidd.aspect_ratio", 1.0);
+
   // vertical section
   
   _getLong("cidd.vert_default_x_pos", 0);
@@ -1954,9 +1929,33 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.click_posn_rel_to_origin", 0);
 
   // fonts
-  _getLong("cidd.num_fonts", 1);
-  _getLong("cidd.font_display_mode",1);
 
+  fprintf(_tdrpFile, "// <FONTS>\n");
+
+  _numFonts = _getLong("cidd.num_fonts", 1, false);
+  _getLong("cidd.font_display_mode",1);
+  
+  vector<string> fonts;
+  for(int ii = 0; ii < _numFonts; ii++) {
+    char str_buf[1024];
+    snprintf(str_buf, 1023, "cidd.font%d", ii + 1);
+    string font = _getString(str_buf, "8x13", false);
+    fonts.push_back(font);
+  } // ii
+
+  fprintf(_tdrpFile, "fonts = {\n");
+  for(size_t ifont = 0; ifont < fonts.size(); ifont++) {
+    string &font = fonts[ifont];
+    fprintf(_tdrpFile, "  \"%s\"", font.c_str());
+    if (ifont < fonts.size() - 1) {
+      fprintf(_tdrpFile, ",\n");
+    } else {
+      fprintf(_tdrpFile, "\n");
+    }
+  } // ifont
+  fprintf(_tdrpFile, "};\n");
+  fprintf(_tdrpFile, "// </FONTS>\n");
+  
   /* Toggle for displaying the analog clock */
   _getBoolean("cidd.show_clock", 0);
 

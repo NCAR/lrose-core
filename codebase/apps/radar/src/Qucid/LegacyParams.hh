@@ -276,6 +276,7 @@ private:
   double _originLatitude;
   double _originLongitude;
   int _numZoomLevels;
+  int _numFonts;
   
   // read in from param file
   // returns 0 on success, -1 on failure

@@ -3208,21 +3208,24 @@ paramdef boolean {
 } click_posn_rel_to_origin;
 
 commentdef {
-  p_header = "Fonts.";
-  p_text = "TO-DO - fix this.";
+  p_header = "<FONTS>";
 }
 
-paramdef int {
-  p_default = 1;
-  p_descr = "Number of fonts of increasing size.";
-  p_help = "The display picks the appropriate font size in tight location - e.g. axis labels,";
-} num_fonts;
+paramdef string {
+  p_default = { "fixed" };
+  p_descr = "List of fonts in order of increasing size.";
+  p_help = "The optimum font size will be used in regions of the plot that have limited space.";
+} fonts[];
 
 paramdef int {
   p_default = 1;
   p_descr = "1 - Clears background behind label text. 0 - Does not clear.";
   p_help = "Using 1 can maket the text stand out better, but some data is overwritten.";
 } font_display_mode;
+
+commentdef {
+  p_header = "</FONTS>";
+}
 
 commentdef {
   p_header = "Analog clock.";

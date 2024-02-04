@@ -1380,7 +1380,8 @@ public:
 
   tdrp_bool_t click_posn_rel_to_origin;
 
-  int num_fonts;
+  char* *_fonts;
+  int fonts_n;
 
   int font_display_mode;
 
@@ -1455,7 +1456,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[487];
+  mutable TDRPtable _table[488];
 
   const char *_className;
 
