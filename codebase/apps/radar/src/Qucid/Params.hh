@@ -309,6 +309,11 @@ public:
     double max_y;
   } zoom_level_t;
 
+  typedef struct {
+    char* label;
+    char* url;
+  } bookmark_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -1437,7 +1442,8 @@ public:
 
   char* bookmark_command;
 
-  int num_bookmarks;
+  bookmark_t *_bookmarks;
+  int bookmarks_n;
 
   double image_inten;
 

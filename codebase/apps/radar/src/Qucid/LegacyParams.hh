@@ -279,6 +279,20 @@ private:
     bool on_at_startup;
   };
 
+  // bookmarks
+  
+  class Bookmark {
+  public:
+    Bookmark() {
+      label = "";
+      url = "";
+    }
+    ~Bookmark() {
+    }
+    string label;
+    string url;
+  };
+
   // params read in from main
 
   bool _debug;
@@ -294,6 +308,7 @@ private:
   double _originLongitude;
   int _numZoomLevels;
   int _numFonts;
+  int _numBookmarks;
   
   // read in from param file
   // returns 0 on success, -1 on failure

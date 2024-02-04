@@ -3406,11 +3406,32 @@ paramdef string {
   p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
 } bookmark_command;
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Number of bookmarks in the Menu";
-  p_help = "";
-} num_bookmarks;
+// paramdef int {
+//   p_default = 0;
+//   p_descr = "Number of bookmarks in the Menu";
+//   p_help = "";
+// } num_bookmarks;
+
+typedef struct {
+  string label;
+  string url;
+} bookmark_t;
+
+paramdef struct bookmark_t {
+  p_default = {
+    {
+      label = "ROC",
+      url = "http://mars/aoaws/doc/roc_mds.html"
+    }
+    ,
+    {
+      label = "ADDS",
+      url = "http://adds.awc-kc.noaa.gov/"
+    }
+  };
+  p_descr = "Bookmarks for specific topics.";
+  p_help = "Drive the browser to the given url when the button is clicked.";
+} bookmarks[];
 
 commentdef {
   p_header = "RENDERING";

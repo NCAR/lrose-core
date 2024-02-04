@@ -2088,10 +2088,50 @@ int LegacyParams::_readMainParams()
   _getString("cidd.status_info_file", "");
   _getString("cidd.help_command", "");
 
+  ////////////////////////////////////////////////////////
   // Bookmarks for a menu of URLS - Index starts at 1
+  
+  fprintf(_tdrpFile, "// <BOOKMARKS>\n");
+  
   _getString("cidd.bookmark_command", "");
-  _getLong("cidd.num_bookmarks", 0);
+  _numBookmarks = _getLong("cidd.num_bookmarks", 0, false);
 
+  // read bookmark labels and urls
+  
+  vector<Bookmark> bookmarks;
+  for(int ii = 0; ii < _numBookmarks; ii++) {
+    Bookmark bookmark;
+    char str_buf[1024];
+    snprintf(str_buf, 1023, "cidd.bookmark_label%d", ii + 1);
+    bookmark.label = _getString(str_buf, "not_found", false);
+    if (bookmark.label.find("not_found") == 0) {
+      continue;
+    }
+    snprintf(str_buf, 1023, "cidd.bookmark%d", ii + 1);
+    bookmark.url = _getString(str_buf, "not_found", false);
+    if (bookmark.url.find("not_found") == 0) {
+      continue;
+    }
+    bookmarks.push_back(bookmark);
+  } // i
+
+  // write to TDRP
+  
+  fprintf(_tdrpFile, "bookmarks = {\n");
+  for(size_t ii = 0; ii < bookmarks.size(); ii++) {
+    Bookmark &bookmark = bookmarks[ii];
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    label = \"%s\",\n", bookmark.label.c_str());
+    fprintf(_tdrpFile, "    url = \"%s\"\n", bookmark.url.c_str());
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < bookmarks.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // izoom
+  fprintf(_tdrpFile, "};\n");
+  
+  fprintf(_tdrpFile, "// </BOOKMARKS>\n");
+  
   // image intensity
   _getDouble("cidd.image_inten", 0.8);
   _getLong("cidd.inten_levels", 32);
