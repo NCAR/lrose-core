@@ -293,6 +293,20 @@ private:
     string url;
   };
 
+  // product font size adjustment
+  
+  class ProdAdjustment {
+  public:
+    ProdAdjustment() {
+      threshold = 1.0;
+      font_index_adj = 0;
+    }
+    ~ProdAdjustment() {
+    }
+    double threshold;
+    int font_index_adj;
+  };
+
   // params read in from main
 
   bool _debug;

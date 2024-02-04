@@ -7249,7 +7249,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("product_font_size");
     tt->descr = tdrpStrDup("Default font size for products.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("Starting size of fonts for symbolic products - from the fonts array.");
     tt->val_offset = (char *) &product_font_size - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -7264,6 +7264,45 @@
     tt->help = tdrpStrDup("Set this constant to determine at what zoom icons and will have a scale factor of 1.0. Default = 300. Function = log10(Constant /km_across_screen) + 1.0; Set to less than 0 to disable icon scaling");
     tt->val_offset = (char *) &scale_constant - &_start_;
     tt->single_val.d = 300;
+    tt++;
+    
+    // Parameter 'poduct_adjustments'
+    // ctype is '_product_adjustment_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("poduct_adjustments");
+    tt->descr = tdrpStrDup("Thresholds and adjustment for font sizes for products.");
+    tt->help = tdrpStrDup("The adjustment increases or decreases the font index. This index is used to choose the font from the fonts[] array. The thresholds are computed as units of km across the image.");
+    tt->array_offset = (char *) &_poduct_adjustments - &_start_;
+    tt->array_n_offset = (char *) &poduct_adjustments_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(product_adjustment_t);
+    tt->array_n = 3;
+    tt->struct_def.name = tdrpStrDup("product_adjustment_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("threshold");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_poduct_adjustments->threshold - (char *) _poduct_adjustments;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("font_index_adj");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_poduct_adjustments->font_index_adj - (char *) _poduct_adjustments;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 50;
+      tt->struct_vals[1].i = 3;
+      tt->struct_vals[2].d = 200;
+      tt->struct_vals[3].i = 2;
+      tt->struct_vals[4].d = 400;
+      tt->struct_vals[5].i = 1;
     tt++;
     
     // Parameter 'Comment 67'

@@ -1383,10 +1383,10 @@ cidd.frame_message_help:       cidd_help:frame_message
 
 cidd.help_command:   /opt/google/chrome/chrome http://www.rap.ucar.edu/CIDD'
 
-#
 # This command is run whenever a BOOKMARK_MENU button is pressed.
 # The characters; %U are replaced with the url text from the
-# parameters; cidd.bookmarkN below.
+# parameters
+# cidd.bookmarkN below.
 cidd.bookmark_command:  /opt/google/chrome/chrome %U
 
 # Number of bookmarks in the Menu
@@ -1437,14 +1437,14 @@ cidd.product_font_size: 4
 # default/selected font size. This is used to change the size of the fonts
 # automatically as the users zooms in and out. Threshold values are in km across the
 # viewing domain
-cidd.product_detail_threshold1: 50.0
-cidd.product_detail_adjustment1: +3
+cidd.product_detail_threshold1: 51.0
+cidd.product_detail_adjustment1: +6
 #
-cidd.product_detail_threshold2: 200.0
-cidd.product_detail_adjustment2: +2
+cidd.product_detail_threshold2: 201.0
+cidd.product_detail_adjustment2: +5
 #
-cidd.product_detail_threshold3: 400.0
-cidd.product_detail_adjustment3: +1
+cidd.product_detail_threshold3: 401.0
+cidd.product_detail_adjustment3: +4
 
 # Product Scaling Constant. - Set this constant to determine
 # at what zoom icons and will have a scale factor of 1.0

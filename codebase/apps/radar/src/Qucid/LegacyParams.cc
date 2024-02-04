@@ -2140,15 +2140,55 @@ int LegacyParams::_readMainParams()
   // fill and contour thresholds
   _getLong("cidd.image_fill_threshold", 120000);
   _getLong("cidd.dynamic_contour_threshold", 160000);
-
+  
   // shmem
   _getLong("cidd.coord_key", 63500);
 
+  ///////////////////////////////////////////////////////
   // products
+  
+  fprintf(_tdrpFile, "// <PRODUCTS>\n");
+
   _getBoolean("cidd.products_on", 1);
   _getLong("cidd.product_line_width", 1);
   _getLong("cidd.product_font_size", 1);
   _getDouble("cidd.scale_constant", 300.0);
+  
+  vector<ProdAdjustment> adjs;
+  for(int ii = 0; ii < 20; ii++) {
+    char str_buf[1024];
+    snprintf(str_buf, 1023, "cidd.product_detail_threshold%d", ii + 1);
+    double thresh = _getDouble(str_buf, -9999, false);
+    if (thresh < -9998) {
+      continue;
+    }
+    snprintf(str_buf, 1023, "cidd.product_detail_adjustment%d", ii + 1);
+    int indexAdj = _getInt(str_buf, -9999, false);
+    if (indexAdj < -9998) {
+      continue;
+    }
+    ProdAdjustment adj;
+    adj.threshold = thresh;
+    adj.font_index_adj = indexAdj;
+    adjs.push_back(adj);
+  } // i
+
+  // write to TDRP
+  
+  fprintf(_tdrpFile, "poduct_adjustments = {\n");
+  for(size_t ii = 0; ii < adjs.size(); ii++) {
+    ProdAdjustment &adj = adjs[ii];
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    threshold = %lg,\n", adj.threshold);
+    fprintf(_tdrpFile, "    font_index_adj = %d\n", adj.font_index_adj);
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < adjs.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // izoom
+  fprintf(_tdrpFile, "};\n");
+  
+  fprintf(_tdrpFile, "// </PRODUCTS>\n");
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </MAIN_PARAMS>\n");

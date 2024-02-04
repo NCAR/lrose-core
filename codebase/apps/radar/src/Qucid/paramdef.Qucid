@@ -3406,12 +3406,6 @@ paramdef string {
   p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
 } bookmark_command;
 
-// paramdef int {
-//   p_default = 0;
-//   p_descr = "Number of bookmarks in the Menu";
-//   p_help = "";
-// } num_bookmarks;
-
 typedef struct {
   string label;
   string url;
@@ -3500,15 +3494,40 @@ paramdef int {
 paramdef int {
   p_default = 1;
   p_descr = "Default font size for products.";
-  p_help = "";
+  p_help = "Starting size of fonts for symbolic products - from the fonts array.";
 } product_font_size;
 
 paramdef double {
   p_default = 300;
   p_descr = "Product scaling constant.";
-  p_help = "Set this constant to determine at what zoom icons and will have a scale factor of 1.0. Default = 300. Function = log10(Constant /km_across_screen) + 1.0; Set to less than 0 to disable icon scaling
-";
+  p_help = "Set this constant to determine at what zoom icons and will have a scale factor of 1.0. Default = 300. Function = log10(Constant /km_across_screen) + 1.0; Set to less than 0 to disable icon scaling";
 } scale_constant;
+
+typedef struct {
+  double threshold;
+  int font_index_adj;
+} product_adjustment_t;
+
+paramdef struct product_adjustment_t {
+  p_default = {
+    {
+      threshold = 50.0,
+      font_index_adj = 3
+    }
+    ,
+    {
+      threshold = 200.0,
+      font_index_adj = 2
+    }
+    ,
+    {
+      threshold = 400.0,
+      font_index_adj = 1
+    }
+  };
+  p_descr = "Thresholds and adjustment for font sizes for products.";
+  p_help = "The adjustment increases or decreases the font index. This index is used to choose the font from the fonts[] array. The thresholds are computed as units of km across the image.";
+} poduct_adjustments[];
 
 commentdef {
   p_header = "</MAIN>";

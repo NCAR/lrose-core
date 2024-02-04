@@ -314,6 +314,11 @@ public:
     char* url;
   } bookmark_t;
 
+  typedef struct {
+    double threshold;
+    int font_index_adj;
+  } product_adjustment_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -1467,6 +1472,9 @@ public:
 
   double scale_constant;
 
+  product_adjustment_t *_poduct_adjustments;
+  int poduct_adjustments_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1474,7 +1482,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[491];
+  mutable TDRPtable _table[492];
 
   const char *_className;
 
