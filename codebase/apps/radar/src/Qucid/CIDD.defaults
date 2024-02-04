@@ -1075,9 +1075,6 @@ cidd.wind_units_label:  km/hr
 # not be activated on startup.
 cidd.contour1_field: FzLevel red off
 cidd.contour2_field: SURF_T white
-cidd.contour3_field: SURF_T white
-cidd.contour4_field: SURF_T white
-cidd.contour5_field: SURF_T white
 # 
 # Set to 1 to have numeric labels on line contours, 0 = off
 cidd.label_contours:   0           

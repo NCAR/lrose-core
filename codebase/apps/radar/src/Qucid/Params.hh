@@ -185,6 +185,12 @@ public:
 
   typedef struct {
     char* field_name;
+    char* color;
+    tdrp_bool_t on_at_startup;
+  } contour_field_t;
+
+  typedef struct {
+    char* field_name;
     tdrp_bool_t on_at_startup;
   } layer_field_t;
 
@@ -735,6 +741,9 @@ public:
   double wind_reference_speed;
 
   char* wind_units_label;
+
+  contour_field_t *_contour_fields;
+  int contour_fields_n;
 
   tdrp_bool_t label_contours;
 
@@ -1459,7 +1468,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[490];
+  mutable TDRPtable _table[491];
 
   const char *_className;
 

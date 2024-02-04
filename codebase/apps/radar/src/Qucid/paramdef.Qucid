@@ -452,6 +452,34 @@ commentdef {
   p_text = "In the data layers section you can select contour plotting.";
 }
 
+typedef struct {
+  string field_name;
+  string color;
+  boolean on_at_startup;
+} contour_field_t;
+
+paramdef struct contour_field_t {
+  p_default = {
+    {
+      field_name = "FzLevel",
+      color = "red",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "SURF_T",
+      color = "white",
+      on_at_startup = true
+    }
+  };
+  p_descr = "Fields to be contoured.";
+  p_help =
+    "/nfield_name: name of field in GRIDS list. "
+    "/ncolor: color for contour lines. "
+    "/non_at_startup: field on when app starts."
+    "/n";
+} contour_fields[];
+
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Set to TRUE to have numeric labels on line contours.";

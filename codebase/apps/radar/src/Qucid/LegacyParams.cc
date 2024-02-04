@@ -1888,6 +1888,69 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.wind_reference_speed", 10.0);
   _getString("cidd.wind_units_label", "m/sec");
 
+  // bad and missing values
+  _getBoolean("cidd.map_bad_to_min_value", 0);
+  _getBoolean("cidd.map_missing_to_min_value", 0);
+
+  ////////////////////////////////////////////////////////
+  // fields to be contoured
+  
+  fprintf(_tdrpFile, "// <CONTOURS>\n");
+
+  vector<ContourField> contours;
+  
+  for(int ii = 0; ii < 20; ii++) {
+    
+    // get entry
+    
+    char str_buf[1024];
+    snprintf(str_buf, 1023, "cidd.contour%d_field", ii + 1);
+    string val = _getString(str_buf, "not_found", false);
+    if (val.find("not_found") == 0) {
+      continue;
+    }
+    
+    // tokenize based on spaces, min of 2 tokens
+    
+    vector<string> toks;
+    TaStr::tokenize(val, " ", toks);
+    if (toks.size() < 2) {
+      continue;
+    }
+    
+    ContourField contour;
+    contour.field_name = toks[0];
+    contour.color = toks[1];
+    contour.on_at_startup = true;
+
+    // check third token for "off"
+    
+    if (toks.size() > 2) {
+      if (toks[2].find("off") != string::npos) {
+        contour.on_at_startup = false;
+      }
+    }
+    
+    contours.push_back(contour);
+    
+  } // i
+
+  // write to TDRP
+  
+  fprintf(_tdrpFile, "contour_fields = {\n");
+  for(size_t ii = 0; ii < contours.size(); ii++) {
+    ContourField &contour = contours[ii];
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    field_name = \"%s\",\n", contour.field_name.c_str());
+    fprintf(_tdrpFile, "    color = \"%s\",\n", contour.color.c_str());
+    fprintf(_tdrpFile, "    on_at_startup = %s\n", (contour.on_at_startup?"true":"false"));
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < contours.size() - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // izoom
+  fprintf(_tdrpFile, "};\n");
+
   // contours
   _getBoolean("cidd.label_contours",1);
   _getLong("cidd.contour_line_width", 1);
@@ -1896,44 +1959,52 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.add_noise", 0);
   _getDouble("cidd.special_contour_value", 0.0);
 
-  // bad and missing values
-  _getBoolean("cidd.map_bad_to_min_value", 0);
-  _getBoolean("cidd.map_missing_to_min_value", 0);
-
-  // overlay fields
+  fprintf(_tdrpFile, "// </CONTOURS>\n");
   
+  ////////////////////////////////////////////////////////
+  // layer overlay fields
+  
+  fprintf(_tdrpFile, "// <LAYERS>\n");
+
   vector<LayerField> layers;
   
-  for(int ii = 0; ii < 5; ii++) {
+  for(int ii = 0; ii < 20; ii++) {
+
+    // get entry
     
     char str_buf[1024];
-    
     snprintf(str_buf, 1023, "cidd.layer%d_field", ii + 1);
     string val = _getString(str_buf, "not_found", false);
-
-    LayerField layer;
-    layer.field_name = val;
-    layer.on_at_startup = true;
-    
     if (val.find("not_found") == 0) {
       continue;
     }
+
+    // tokenize on spaces, should be at least 1 token (the field name)
     
     vector<string> toks;
     TaStr::tokenize(val, " ", toks);
+    if (toks.size() < 1) {
+      continue;
+    }
+    
+    LayerField layer;
+    layer.field_name = toks[0];
+    layer.on_at_startup = true;
+
+    // check for "off" indicating that it is not on at startup
+    
     if (toks.size() > 1) {
-      layer.field_name = toks[0];
       if (toks[1].find("off") != string::npos) {
         layer.on_at_startup = false;
       }
     }
-
+    
     layers.push_back(layer);
     
   } // i
-  
-  fprintf(_tdrpFile, "// <LAYERS>\n");
 
+  // write to TDRP
+  
   fprintf(_tdrpFile, "layer_fields = {\n");
   for(size_t ilayer = 0; ilayer < layers.size(); ilayer++) {
     LayerField &layer = layers[ilayer];

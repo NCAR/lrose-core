@@ -247,6 +247,23 @@ private:
     double max_y;
   };
 
+  // contour fields
+  // fields to be rendered as contours
+  
+  class ContourField {
+  public:
+    ContourField() {
+      field_name = "";
+      color = "white";
+      on_at_startup = false;
+    }
+    ~ContourField() {
+    }
+    string field_name;
+    string color;
+    bool on_at_startup;
+  };
+
   // layer fields
   // fields that are overlays
   

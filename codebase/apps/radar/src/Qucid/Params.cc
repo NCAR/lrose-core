@@ -1466,6 +1466,50 @@
     tt->comment_text = tdrpStrDup("In the data layers section you can select contour plotting.");
     tt++;
     
+    // Parameter 'contour_fields'
+    // ctype is '_contour_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("contour_fields");
+    tt->descr = tdrpStrDup("Fields to be contoured.");
+    tt->help = tdrpStrDup("/nfield_name: name of field in GRIDS list. /ncolor: color for contour lines. /non_at_startup: field on when app starts./n");
+    tt->array_offset = (char *) &_contour_fields - &_start_;
+    tt->array_n_offset = (char *) &contour_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(contour_field_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("contour_field_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_contour_fields->field_name - (char *) _contour_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("color");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_contour_fields->color - (char *) _contour_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[2].fname = tdrpStrDup("on_at_startup");
+      tt->struct_def.fields[2].ptype = BOOL_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_contour_fields->on_at_startup - (char *) _contour_fields;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("FzLevel");
+      tt->struct_vals[1].s = tdrpStrDup("red");
+      tt->struct_vals[2].b = pFALSE;
+      tt->struct_vals[3].s = tdrpStrDup("SURF_T");
+      tt->struct_vals[4].s = tdrpStrDup("white");
+      tt->struct_vals[5].b = pTRUE;
+    tt++;
+    
     // Parameter 'label_contours'
     // ctype is 'tdrp_bool_t'
     
