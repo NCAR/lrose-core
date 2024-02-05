@@ -1,6 +1,962 @@
 /**********************************************************************
- * TDRP params for ./Qucid
+ * TDRP params for Qucid
  **********************************************************************/
+
+//======================================================================
+//
+// TIME_CONTROL_GUI.
+//
+//======================================================================
+ 
+///////////// epoch_indicator_color ///////////////////
+//
+// Time Control (Movie) Pop-up Colors.
+//
+// Type: string
+//
+
+epoch_indicator_color = "orange";
+
+///////////// now_time_color //////////////////////////
+//
+// Color of current time tick.
+//
+// Type: string
+//
+
+now_time_color = "red";
+
+///////////// time_tick_color /////////////////////////
+//
+// Color of time ticks - main grid.
+//
+// Type: string
+//
+
+time_tick_color = "yellow";
+
+///////////// time_tick_colors ////////////////////////
+//
+// List of colors for time ticks for symbolic products.
+// The time ticks are drawn in order, from top down, in the time control 
+//   GUI.
+//
+// Type: string
+// 1D array - variable length.
+//
+
+time_tick_colors = { "cyan", "yellow", "magenta", "green", "red", "blue" };
+
+//======================================================================
+//
+// Mode flags.
+//
+//======================================================================
+ 
+///////////// show_height_sel /////////////////////////
+//
+// Show the height selector in the right margin.
+// oggle for displaying the height Selector in Right Margin. Note Right 
+//   Margin should be at least 50 pixels wide.
+//
+// Type: boolean
+//
+
+show_height_sel = TRUE;
+
+///////////// show_data_messages //////////////////////
+//
+// Show data status messages at top of image.
+// There will be one line of status for each field in the stack. This is 
+//   probably not necessary in situations where all data is small and 
+//   local.
+//
+// Type: boolean
+//
+
+show_data_messages = TRUE;
+
+///////////// latlon_mode /////////////////////////////
+//
+// Sets the format for output of Lat, Lon's.
+// 0= Decimal Degrees, 1 = deg min' sec'.
+//
+// Type: int
+//
+
+latlon_mode = 0;
+
+///////////// label_time_format ///////////////////////
+//
+// Set the format for the time strings.
+// See 'man strftime' for format options. Can add additional text as 
+//   part of the Time string.
+//
+// Type: string
+//
+
+label_time_format = "%m/%d/%Y %H:%M";
+
+///////////// moviestart_time_format //////////////////
+//
+// Set the format for the time string in the movie start time text field 
+//   of the movie pop-up window.
+// This is set separately from the general time string because you 
+//   generally don't want any extra text and want to display things in an 
+//   order that allows for easier entry.
+//
+// Type: string
+//
+
+moviestart_time_format = "%H:%M_%m/%d/%Y";
+
+///////////// frame_range_time_format /////////////////
+//
+// Set the format for the time strings in the frame range text fields.
+//
+// Type: string
+//
+
+frame_range_time_format = "%H:%M:%S";
+
+///////////// layer_legends_on ////////////////////////
+//
+// Plot a Legend for each Grid overlay.
+//
+// Type: boolean
+//
+
+layer_legends_on = TRUE;
+
+///////////// cont_legends_on /////////////////////////
+//
+// Plot a Legend for each Contour overlay.
+//
+// Type: boolean
+//
+
+cont_legends_on = TRUE;
+
+///////////// wind_legends_on /////////////////////////
+//
+// Plot a Legend for each Wind overlay.
+//
+// Type: boolean
+//
+
+wind_legends_on = TRUE;
+
+///////////// display_labels //////////////////////////
+//
+// Switch to turn off all data labels on the display.
+//
+// Type: boolean
+//
+
+display_labels = TRUE;
+
+///////////// display_ref_lines ///////////////////////
+//
+// Switch to turn on/off Height, Route and Wind Scale reference lines.
+//
+// Type: boolean
+//
+
+display_ref_lines = TRUE;
+
+//======================================================================
+//
+// Window sizes.
+//
+// Window width and height is specified in pixels.
+//
+//======================================================================
+ 
+///////////// horiz_default_x_pos /////////////////////
+//
+// Startup position of main window, relative to top-left of screen 
+//   (pixels).
+// The main display window will start at this location.
+//
+// Type: int
+//
+
+horiz_default_x_pos = 0;
+
+///////////// horiz_default_y_pos /////////////////////
+//
+// Startup position of main window, relative to top-left of screen 
+//   (pixels).
+// The main display window will start at this location.
+//
+// Type: int
+//
+
+horiz_default_y_pos = 0;
+
+///////////// horiz_default_width /////////////////////
+//
+// Default width of main window (pixels).
+// Height of main window at startup.
+//
+// Type: int
+//
+
+horiz_default_width = 800;
+
+///////////// horiz_default_height ////////////////////
+//
+// Default height of main window (pixels).
+// Width of main window at startup.
+//
+// Type: int
+//
+
+horiz_default_height = 800;
+
+///////////// horiz_min_width /////////////////////////
+//
+// Minimum width of main window (pixels).
+// The user cannot shrink the main window smaller than this.
+//
+// Type: int
+//
+
+horiz_min_width = 400;
+
+///////////// horiz_min_height ////////////////////////
+//
+// Minimum height of main window (pixels).
+// The user cannot shrink the main window smaller than this.
+//
+// Type: int
+//
+
+horiz_min_height = 400;
+
+///////////// vert_default_x_pos //////////////////////
+//
+// Startup position of main window, relative to top-left of screen 
+//   (pixels).
+// The main display window will start at this location.
+//
+// Type: int
+//
+
+vert_default_x_pos = 0;
+
+///////////// vert_default_y_pos //////////////////////
+//
+// Startup position of main window, relative to top-left of screen 
+//   (pixels).
+// The main display window will start at this location.
+//
+// Type: int
+//
+
+vert_default_y_pos = 0;
+
+///////////// vert_default_width //////////////////////
+//
+// Default width of vert section window (pixels).
+// Height of vert section window at startup.
+//
+// Type: int
+//
+
+vert_default_width = 600;
+
+///////////// vert_default_height /////////////////////
+//
+// Default height of vert section window (pixels).
+// Width of vert section window at startup.
+//
+// Type: int
+//
+
+vert_default_height = 440;
+
+///////////// vert_min_width //////////////////////////
+//
+// Minimum width of vert section window (pixels).
+// The user cannot shrink the vert section window smaller than this.
+//
+// Type: int
+//
+
+vert_min_width = 120;
+
+///////////// vert_min_height /////////////////////////
+//
+// Minimum height of vert section window (pixels).
+// The user cannot shrink the vert section window smaller than this.
+//
+// Type: int
+//
+
+vert_min_height = 120;
+
+//======================================================================
+//
+// Margin details.
+//
+// Margins are specified in pixels.
+//
+//======================================================================
+ 
+///////////// top_margin_render_style /////////////////
+//
+// TOP Margin styles.
+//  1 (Default): Places a distance scale in the top Margin. 2: Place a 
+//   Frame number and Time - Used often for HTML output. 3: None -  Used 
+//   often to place the Data label.
+//
+// Type: int
+//
+
+top_margin_render_style = 1;
+
+///////////// bot_margin_render_style /////////////////
+//
+// Bottom Margin Styles.
+// 1 - Distance Scale. 2 - Time Scale.
+//
+// Type: int
+//
+
+bot_margin_render_style = 2;
+
+///////////// horiz_top_margin ////////////////////////
+//
+// Height of top margin (pixels).
+// Size of top margin for main window.
+//
+// Type: int
+//
+
+horiz_top_margin = 20;
+
+///////////// horiz_bot_margin ////////////////////////
+//
+// Height of bottom margin (pixels).
+// Size of bottom margin for main window.
+//
+// Type: int
+//
+
+horiz_bot_margin = 20;
+
+///////////// horiz_left_margin ///////////////////////
+//
+// Width of left margin (pixels).
+// Size of left margin for main window.
+//
+// Type: int
+//
+
+horiz_left_margin = 20;
+
+///////////// horiz_right_margin //////////////////////
+//
+// Width of right margin (pixels).
+// Size of right margin for main window.
+//
+// Type: int
+//
+
+horiz_right_margin = 60;
+
+///////////// vert_top_margin /////////////////////////
+//
+// Height of top margin (pixels).
+// Size of top margin for vert section window.
+//
+// Type: int
+//
+
+vert_top_margin = 20;
+
+///////////// vert_bot_margin /////////////////////////
+//
+// Height of bottom margin (pixels).
+// Size of bottom margin for vert section window.
+//
+// Type: int
+//
+
+vert_bot_margin = 20;
+
+///////////// vert_left_margin ////////////////////////
+//
+// Width of left margin (pixels).
+// Size of left margin for vert section window.
+//
+// Type: int
+//
+
+vert_left_margin = 20;
+
+///////////// vert_right_margin ///////////////////////
+//
+// Width of right margin (pixels).
+// Size of right margin for vert section window.
+//
+// Type: int
+//
+
+vert_right_margin = 30;
+
+//======================================================================
+//
+// Legends displayed within the plot window.
+//
+// A legend can be displayed for each data layer. Explicitly set the 
+//   Label start coords, and delta Y. If left unset, legends start 
+//   relative to the top and left margins.
+//
+//======================================================================
+ 
+///////////// horiz_legends_start_x ///////////////////
+//
+// Horizontal window legends start x position (pixels).
+// Relative to top left of window.
+//
+// Type: int
+//
+
+horiz_legends_start_x = 30;
+
+///////////// horiz_legends_start_y ///////////////////
+//
+// Horizontal window legends start y position (pixels).
+// Relative to top left of window.
+//
+// Type: int
+//
+
+horiz_legends_start_y = 30;
+
+///////////// horiz_legends_delta_y ///////////////////
+//
+// Horizontal window legends spacing (pixels).
+// This is the line spacing between the legends.
+//
+// Type: int
+//
+
+horiz_legends_delta_y = 30;
+
+///////////// vert_legends_start_x ////////////////////
+//
+// Vertical window legends start x position (pixels).
+// Relative to top left of window.
+//
+// Type: int
+//
+
+vert_legends_start_x = 0;
+
+///////////// vert_legends_start_y ////////////////////
+//
+// Vertical window legends start y position (pixels).
+// Relative to top left of window.
+//
+// Type: int
+//
+
+vert_legends_start_y = 0;
+
+///////////// vert_legends_delta_y ////////////////////
+//
+// Vertical window legends spacing (pixels).
+// This is the line spacing between the legends.
+//
+// Type: int
+//
+
+vert_legends_delta_y = 0;
+
+//======================================================================
+//
+// Draw range rings and azimuth lines.
+//
+// These apply to radars only.
+//
+//======================================================================
+ 
+///////////// range_rings /////////////////////////////
+//
+// Turn range rings on/off.
+// TRUE means on - i.r. plot range rings.
+//
+// Type: boolean
+//
+
+range_rings = FALSE;
+
+///////////// range_ring_spacing //////////////////////
+//
+// Spacing between range rings (km).
+//
+// Type: double
+//
+
+range_ring_spacing = 50;
+
+///////////// max_ring_range //////////////////////////
+//
+// Maximum range ring (km).
+//
+// Type: double
+//
+
+max_ring_range = 1000;
+
+///////////// range_ring_follows_data /////////////////
+//
+// Plot range rings relative to radar location.
+// We get the location from the data. If FALSE, rings are relative to 
+//   plot origin.
+//
+// Type: boolean
+//
+
+range_ring_follows_data = FALSE;
+
+///////////// range_ring_for_radar_only ///////////////
+//
+// Only plot range rings for radar data sets.
+// TRUE turns off rings for non-radar data sets.
+//
+// Type: boolean
+//
+
+range_ring_for_radar_only = TRUE;
+
+///////////// domain_follows_data /////////////////////
+//
+// Plot domain moves with origin of the data set.
+// Shift the domain limits if the data origin shifts.
+//
+// Type: boolean
+//
+
+domain_follows_data = FALSE;
+
+///////////// range_ring_x_space //////////////////////
+//
+// Spacing in x for range ring labels (pixels).
+//
+// Type: int
+//
+
+range_ring_x_space = 40;
+
+///////////// range_ring_y_space //////////////////////
+//
+// Spacing in y for range ring labels (pixels).
+//
+// Type: int
+//
+
+range_ring_y_space = 13;
+
+///////////// range_ring_labels ///////////////////////
+//
+// Plot range ring labels.
+// Label the range for each ring.
+//
+// Type: boolean
+//
+
+range_ring_labels = TRUE;
+
+///////////// azimuth_lines ///////////////////////////
+//
+// Draw azimuth lines for a radar location.
+// These complement range rings, to provide guidance on azimuths for 
+//   radar gates.
+//
+// Type: boolean
+//
+
+azimuth_lines = FALSE;
+
+///////////// azimuth_interval ////////////////////////
+//
+// Interval for azimuth lines.
+// If azimuth lines are on.
+//
+// Type: double
+//
+
+azimuth_interval = 30;
+
+///////////// azimuth_radius //////////////////////////
+//
+// Max radius for azimuth lines.
+// If azimuth lines are on.
+//
+// Type: double
+//
+
+azimuth_radius = 200;
+
+//======================================================================
+//
+// Plotting wind vectors.
+//
+// See also the wind layers section.
+//
+//======================================================================
+ 
+///////////// all_winds_on ////////////////////////////
+//
+// Plot all wind layers.
+// Turns on all wind layers.
+//
+// Type: boolean
+//
+
+all_winds_on = TRUE;
+
+///////////// wind_mode ///////////////////////////////
+//
+// Activate wind rendering.
+// TO DO - check how this works.
+//
+// Type: boolean
+//
+
+wind_mode = FALSE;
+
+///////////// barb_shaft_len //////////////////////////
+//
+// Wind barb shaft length (pixels).
+//
+// Type: int
+//
+
+barb_shaft_len = 30;
+
+///////////// ideal_x_vectors /////////////////////////
+//
+// Ideal number of vectors in the x dimension.
+// The display will space the wind vectors in x accordingly.
+//
+// Type: int
+//
+
+ideal_x_vectors = 20;
+
+///////////// ideal_y_vectors /////////////////////////
+//
+// Ideal number of vectors in the y dimension.
+// The display will space the wind vectors in y accordingly.
+//
+// Type: int
+//
+
+ideal_y_vectors = 20;
+
+///////////// wind_head_size //////////////////////////
+//
+// Minimum arrow head size for wind vectors (pixels).
+//
+// Type: int
+//
+
+wind_head_size = 5;
+
+///////////// wind_head_angle /////////////////////////
+//
+// Angle of arrow head for wind vectors (deg).
+//
+// Type: double
+//
+
+wind_head_angle = 30;
+
+///////////// wind_scaler /////////////////////////////
+//
+// The display will space the wind vectors in x accordingly.
+// Vectors will be drawn to show wind_scaler * wind_time_scale_interval 
+//   minutes of motion.
+//
+// Type: int
+//
+
+wind_scaler = 3;
+
+///////////// wind_time_scale_interval ////////////////
+//
+// inutes between steps on the wind scaling slider.
+// Wind vector length = wind_scaler * wind_time_scale_interval *  wind 
+//   velocity.
+//
+// Type: double
+//
+
+wind_time_scale_interval = 10;
+
+///////////// wind_marker_type ////////////////////////
+//
+// Wind vector rendering style.
+// 'arrow': centered at data point.
+// 'vector': Vertex at data point.
+// 'barb': N Hemisp.
+// 'labeledbarb': labeled to nearest 10 degrees at the center - N. 
+//   Hemisp.
+// 'tuft': like a piece of yarn - the least obtrusive - like a headless 
+//   vector.
+// 'tickvector': Cross ticks at wind_time_scale_interval minutes.
+// 'metbarb': Calcs latitude - works for both hemispheres and adds a 
+//   label of the 10's digit off the end of the barb, ala winds aloft 
+//   charts.
+// 'barb_sh': S Hemisphere.
+// 'labeledbarb': labeled to nearest 10 degrees at the center - N. 
+//   Hemisp.
+//
+// NOTE: When using arrow,vector,tuft,tickvector,  the data must be in 
+//   m/sec for the scaling to work correctly. For barbs the units are 
+//   arbitrary, but the flag units on the barbs will reflect the data's 
+//   native units.
+//
+// Type: string
+//
+
+wind_marker_type = "arrow";
+
+///////////// wind_w_scale_factor /////////////////////
+//
+// Scale the vertical velocity by this factor, relative to the U/V. .
+// W tends to be small compared to U/V. Scaling it up makes the 
+//   rendering more meaningful.
+//
+// Type: double
+//
+
+wind_w_scale_factor = 10;
+
+///////////// wind_units_scale_factor /////////////////
+//
+// Value to convert from the your reference speed units to m/sec. .
+// i.e. wind_units_scale_factor =  m/sec / chosen units.
+//
+// Type: double
+//
+
+wind_units_scale_factor = 1;
+
+///////////// wind_reference_speed ////////////////////
+//
+// Sets the length of the wind vector reference legend.
+// The legend shows a symbos representing a wind speed of this value.
+//
+// Type: double
+//
+
+wind_reference_speed = 30;
+
+///////////// wind_units_label ////////////////////////
+//
+// Select the label to be printed next to the reference bar.
+//
+// Type: string
+//
+
+wind_units_label = "km/hr";
+
+//======================================================================
+//
+// Plotting contours in data fields.
+//
+// In the data layers section you can select contour plotting.
+//
+//======================================================================
+ 
+///////////// contour_fields //////////////////////////
+//
+// Fields to be contoured.
+// /nfield_name: name of field in GRIDS list. /ncolor: color for contour 
+//   lines. /non_at_startup: field on when app starts./n.
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      string color;
+//      boolean on_at_startup;
+//   }
+//
+// 1D array - variable length.
+//
+
+contour_fields = {
+  { "FzLevel", "red", FALSE},
+  { "SURF_T", "white", TRUE}
+};
+
+///////////// label_contours //////////////////////////
+//
+// Set to TRUE to have numeric labels on line contours.
+//
+// Type: boolean
+//
+
+label_contours = FALSE;
+
+///////////// contour_line_width //////////////////////
+//
+// Width of contour lines.
+//
+// Type: int
+//
+
+contour_line_width = 1;
+
+///////////// smooth_contours /////////////////////////
+//
+// Apply smoothing to data grids before contouring.
+// 0 = Off, 1 = single pass, 2 = double pass.
+//
+// Type: int
+//
+
+smooth_contours = 0;
+
+///////////// use_alt_contours ////////////////////////
+//
+// Use Alternate (Mdvx) Contouring Routines.
+// Slower - Nicer labeling - Less smooth. Warning - Does not work 
+//   correctly when data and display origins are different. Works fine in 
+//   lat/lon projections.
+//
+// Type: boolean
+//
+
+use_alt_contours = FALSE;
+
+///////////// add_noise ///////////////////////////////
+//
+// Add 1 part in 250 Noise to help smooth contours.
+//
+// Type: boolean
+//
+
+add_noise = FALSE;
+
+///////////// special_contour_value ///////////////////
+//
+// Specify special contour value.
+// Contours at this value will have a wider line.
+//
+// Type: double
+//
+
+special_contour_value = 0.25;
+
+///////////// map_bad_to_min_value ////////////////////
+//
+// Contour the bad value, by setting bad cells to have min value in 
+//   data.
+// Sometimes, for CONTOURING it is useful to make the assumption that 
+//   the bad and/or missing values should be considered at the minimum of 
+//   the dynamic range of the data. i.e. if you want bad contoured, set 
+//   this to TRUE.
+//
+// Type: boolean
+//
+
+map_bad_to_min_value = FALSE;
+
+///////////// map_missing_to_min_value ////////////////
+//
+// Contour the missing value, by setting missing cells to have min value 
+//   in data.
+// Sometimes, for CONTOURING it is useful to make the assumption that 
+//   the missing and/or missing values should be considered at the minimum 
+//   of the dynamic range of the data. i.e. if you want missing contoured, 
+//   set this to TRUE.
+//
+// Type: boolean
+//
+
+map_missing_to_min_value = FALSE;
+
+//======================================================================
+//
+// Overlain fields as layers.
+//
+// Layers are rendered in order. i.e. last layer will be on top.
+//
+//======================================================================
+ 
+///////////// layer_fields ////////////////////////////
+//
+// Field for layers as overlays.
+// /nfield_name: name of field in GRIDS list. /non_at_startup: field on 
+//   when app starts./n.
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      boolean on_at_startup;
+//   }
+//
+// 1D array - variable length.
+//
+
+layer_fields = {
+  { "KLNX-DBZ", FALSE},
+  { "KGLD-DBZ", FALSE},
+  { "KGJX-DBZ", TRUE},
+  { "KPUX-DBZ", TRUE},
+  { "KCYS-DBZ", TRUE}
+};
+
+//======================================================================
+//
+// Overall rendering order.
+//
+//======================================================================
+ 
+///////////// draw_main_on_top ////////////////////////
+//
+// TRUE: render main field first, then layers.
+// FALSE: render main field on top of layers.
+//
+// Type: boolean
+//
+
+draw_main_on_top = FALSE;
+
+//======================================================================
+//
+// Marking click location from separate app.
+//
+// CIDD can cooperate with a secondary app, receiving click details via 
+//   shared memo.
+//
+//======================================================================
+ 
+///////////// mark_latest_click_location //////////////
+//
+// Option to mark latest click location from client app.
+//
+// Type: boolean
+//
+
+mark_latest_click_location = FALSE;
+
+///////////// latest_click_mark_size //////////////////
+//
+// Size of marker at latest click location (pixels).
+// Location clicked in client app.
+//
+// Type: int
+//
+
+latest_click_mark_size = 11;
 
 //======================================================================
 //
@@ -64,6 +1020,27 @@ register_with_procmap = FALSE;
 //
 
 instance = "test";
+
+//======================================================================
+//
+// RESOURCES.
+//
+//======================================================================
+ 
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+// Type: string
+//
+
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 //======================================================================
 //
@@ -241,27 +1218,6 @@ show_status_in_gui = { TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TR
 
 //======================================================================
 //
-// FIELDS TO BE DISPLAYED.
-//
-//======================================================================
- 
-///////////// color_scale_dir /////////////////////////
-//
-// Directory for color scales.
-// You can set this in 2 ways:
-//
-// (a) Set to the absolute path
-//
-// (b)Set as a path relative to the location of the application binary 
-//   executable.
-//
-// Type: string
-//
-
-color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
-
-//======================================================================
-//
 // <GRIDS>.
 //
 //======================================================================
@@ -269,23 +1225,25 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 ///////////// fields //////////////////////////////////
 //
 // Fields to be displayed.
-// /nbutton_label: appears on the GUI. /nlegend_label: appears in the 
-//   plot. /nurl: location of data or data server. /nfield_name: name in 
-//   the file. /ncolor_map: name of color map in color_scale_dir. /nunits: 
-//   units to appear on the display. /ncontour_low: contour rendering 
-//   lower limit. /ncontour_high: contour rendering upper limit. 
-//   /ncontour_interval: contour rendering interval. /nrender_mode:/n  
-//   POLYGONS: Rectangle/polygon fills of gridded data./n  
-//   FILLED_CONTOURS: false color filled contours./n  LINE_CONTOURS: line 
-//   contours./n  DYNAMIC_CONTOURS: auto switching between cart and 
-//   cont./n         uses dynamic_contour_treshold./ndisplay_in_menu: 
-//   display this field in the menu./nbackground_render: render this field 
-//   automatically in the background./ncomposite_mode: display max over 
-//   height./nauto_scale: scale automatically./nauto_render: render 
-//   automatically./n.
+// /ngroup_name: we organize the fields into groups. If all are the same 
+//   we use a single group. /nbutton_label: appears on the GUI. 
+//   /nlegend_label: appears in the plot. /nurl: location of data or data 
+//   server. /nfield_name: name in the file. /ncolor_map: name of color 
+//   map in color_scale_dir. /nunits: units to appear on the display. 
+//   /ncontour_low: contour rendering lower limit. /ncontour_high: contour 
+//   rendering upper limit. /ncontour_interval: contour rendering 
+//   interval. /nrender_mode:/n  POLYGONS: Rectangle/polygon fills of 
+//   gridded data./n  FILLED_CONTOURS: false color filled contours./n  
+//   LINE_CONTOURS: line contours./n  DYNAMIC_CONTOURS: auto switching 
+//   between cart and cont./n         uses 
+//   dynamic_contour_treshold./ndisplay_in_menu: display this field in the 
+//   menu./nbackground_render: render this field automatically in the 
+//   background./ncomposite_mode: display max over height./nauto_scale: 
+//   scale automatically./nauto_render: render automatically./n.
 //
 // Type: struct
 //   typedef struct {
+//      string group_name;
 //      string button_label;
 //      string legend_label;
 //      string url;
@@ -295,7 +1253,7 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 //      double contour_low;
 //      double contour_high;
 //      double contour_interval;
-//      render_mode_t render_mode;
+//      grid_render_mode_t render_mode;
 //        Options:
 //          POLYGONS
 //          FILLED_CONTOURS
@@ -312,90 +1270,238 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 //
 
 fields = {
-  { "MRMS_DBZ_COMP_2D", "WIDE_MRMS_DBZ_COMP_2D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, TRUE, FALSE, FALSE},
-  { "MRMS_DBZ_COMP_3D", "WIDE_MRMS_DBZ_COMP_3D", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "MRMS_DBZ_3D", "WIDE_MRMS_DBZ_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_DBZ_COMP_2D", "WIDE_NCAR_DBZ_COMP_2D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_comp?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, TRUE, FALSE, FALSE},
-  { "NCAR_DBZ_COMP_3D", "WIDE_NCAR_DBZ_COMP_3D", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_DBZ_3D", "WIDE_NCAR_DBZ_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_ZDR_COMP", "WIDE_NCAR_ZDR_COMP", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_ZDR_3D", "WIDE_NCAR_ZDR_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_WIDTH_COMP", "WIDE_NCAR_WIDTH_COMP", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_WIDTH_3D", "WIDE_NCAR_WIDTH_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "NCAR_RANGE_3D", "WIDE_NCAR_RANGE_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "range", "range_250.colors", "km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SURF_Temp", "WIDE_Temp", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "Temp", "temp.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SURF_DewPt", "WIDE_DewPt", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "DewPoint", "temp.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SURF_Conv", "WIDE_Conv", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "Convergence", "conv.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "Terrain", "WIDE_Terrain", "mdvp::terrain//front.eol.ucar.edu:8080:pecan/mdv/terrain?use_http=true", "Elevation", "terrain_pecan.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "RUC-temp", "WIDE_RUC-temp", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "TMP", "temp.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "RUC-RH", "WIDE_RUC-RH", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "RH", "rh.colors", "%", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "RUC-Wspd", "WIDE_RUC-Wspd", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "speed", "wind_speed.colors", "m/s", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SAT_Vis", "WIDE_Vis", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_1km?use_http=true", "gvar_ch1", "sat_cloud.colors", "albedo", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SAT_IR2", "WIDE_IR2", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch2", "sat_tempC_toga.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SAT_IR3", "WIDE_IR3", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch3", "sat_tempC_2.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SAT_IR4", "WIDE_IR4", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch4", "sat_tempC_2.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SAT_WV", "WIDE_WV", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch6", "wv_uwC.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_DBZ_F", "SPOLQC_DBZ_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "DBZ_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_DBZM_F", "SPOLQC_DBZM_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "DBZM_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_VEL_F", "SPOLQC_VEL_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "VEL_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_VEL_HV_F", "SPOLQC_VEL_HV_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "VEL_HV_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_WIDTH_F", "SPOLQC_WIDTH_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "WIDTH_F", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_NCP_F", "SPOLQC_NCP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "NCP_F", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_ZDR_F", "SPOLQC_ZDR_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "ZDR_F", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_ZDRM_F", "SPOLQC_ZDRM_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "ZDRM_F", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_LDRH_F", "SPOLQC_LDRH_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "LDRH_F", "ldr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_LDRV_F", "SPOLQC_LDRV_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "LDRV_F", "ldr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_PHIDP_F", "SPOLQC_PHIDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "PHIDP_F", "phidp_alt.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_PHIDP2_F", "SPOLQC_PHIDP2_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "PHIDP_F", "phidp_pecan_rhi.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOLQC_KDP_F", "SPOLQC_KDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "KDP_F", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_DBZ_F", "SPOL_DBZ_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_DBZ", "SPOL_DBZ", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_DBZ_BRAGG_F", "SPOL_DBZ_BRAGG_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/bragg/sur?use_http=true", "DBZ_F", "dbz_bragg.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_DBZ_BRAGG", "SPOL_DBZ_BRAGG", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ", "dbz_bragg.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_VEL_F", "SPOL_VEL_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_VEL", "SPOL_VEL", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_VELALT_F", "SPOL_VELALT_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_ALT_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_VELALT", "SPOL_VELALT", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_ALT", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_NCP", "SPOL_NCP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "NCP", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_NCP_F", "SPOL_NCP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "NCP_F", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_KDP_F", "SPOL_KDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "KDP_F", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "SPOL_KDP", "SPOL_KDP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "KDP", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_DBZ", "NEXR_KAMA_DBZ", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_VEL", "NEXR_KAMA_VEL", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "VEL", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_WIDTH", "NEXR_KAMA_WIDTH", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_ZDR", "NEXR_KAMA_ZDR", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_PHIDP", "NEXR_KAMA_PHIDP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "PHIDP", "phidp.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "KAMA_RHOHV", "NEXR_KAMA_RHOHV", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "RHOHV", "rhohv.colors", "-", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "========", "NEXR_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer/moments?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE}
+  { "WIDE", "MRMS_DBZ_COMP_2D", "WIDE_MRMS_DBZ_COMP_2D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, TRUE, FALSE, FALSE},
+  { "WIDE", "MRMS_DBZ_COMP_3D", "WIDE_MRMS_DBZ_COMP_3D", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "MRMS_DBZ_3D", "WIDE_MRMS_DBZ_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, POLYGONS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_DBZ_COMP_2D", "WIDE_NCAR_DBZ_COMP_2D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_comp?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, TRUE, FALSE, FALSE},
+  { "WIDE", "NCAR_DBZ_COMP_3D", "WIDE_NCAR_DBZ_COMP_3D", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_DBZ_3D", "WIDE_NCAR_DBZ_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_ZDR_COMP", "WIDE_NCAR_ZDR_COMP", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_ZDR_3D", "WIDE_NCAR_ZDR_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_WIDTH_COMP", "WIDE_NCAR_WIDTH_COMP", "mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_WIDTH_3D", "WIDE_NCAR_WIDTH_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "NCAR_RANGE_3D", "WIDE_NCAR_RANGE_3D", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/3D_mosaic?use_http=true", "range", "range_250.colors", "km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SURF_Temp", "WIDE_Temp", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "Temp", "temp.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SURF_DewPt", "WIDE_DewPt", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "DewPoint", "temp.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SURF_Conv", "WIDE_Conv", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true", "Convergence", "conv.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "Terrain", "WIDE_Terrain", "mdvp::terrain//front.eol.ucar.edu:8080:pecan/mdv/terrain?use_http=true", "Elevation", "terrain_pecan.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_=====", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "RUC-temp", "WIDE_RUC-temp", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "TMP", "temp.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "RUC-RH", "WIDE_RUC-RH", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "RH", "rh.colors", "%", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "RUC-Wspd", "WIDE_RUC-Wspd", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true", "speed", "wind_speed.colors", "m/s", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "=========", "WIDE_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SAT_Vis", "WIDE_Vis", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_1km?use_http=true", "gvar_ch1", "sat_cloud.colors", "albedo", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SAT_IR2", "WIDE_IR2", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch2", "sat_tempC_toga.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SAT_IR3", "WIDE_IR3", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch3", "sat_tempC_2.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SAT_IR4", "WIDE_IR4", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch4", "sat_tempC_2.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "SAT_WV", "WIDE_WV", "mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true", "gvar_ch6", "wv_uwC.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "WIDE", "========", "WIDE_====", "mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_DBZ_F", "SPOLQC_DBZ_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "DBZ_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_DBZM_F", "SPOLQC_DBZM_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "DBZM_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_VEL_F", "SPOLQC_VEL_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "VEL_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_VEL_HV_F", "SPOLQC_VEL_HV_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "VEL_HV_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_WIDTH_F", "SPOLQC_WIDTH_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "WIDTH_F", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_NCP_F", "SPOLQC_NCP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "NCP_F", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_ZDR_F", "SPOLQC_ZDR_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "ZDR_F", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_ZDRM_F", "SPOLQC_ZDRM_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "ZDRM_F", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_LDRH_F", "SPOLQC_LDRH_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "LDRH_F", "ldr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_LDRV_F", "SPOLQC_LDRV_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "LDRV_F", "ldr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_PHIDP_F", "SPOLQC_PHIDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "PHIDP_F", "phidp_alt.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_PHIDP2_F", "SPOLQC_PHIDP2_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "PHIDP_F", "phidp_pecan_rhi.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "SPOLQC_KDP_F", "SPOLQC_KDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/qc_moments/sband/sur?use_http=true", "KDP_F", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-QC", "==SPOLQC==", "SPOLQC_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_DBZ_F", "SPOL_DBZ_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_DBZ", "SPOL_DBZ", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_DBZ_BRAGG_F", "SPOL_DBZ_BRAGG_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/bragg/sur?use_http=true", "DBZ_F", "dbz_bragg.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_DBZ_BRAGG", "SPOL_DBZ_BRAGG", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "DBZ", "dbz_bragg.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_VEL_F", "SPOL_VEL_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_VEL", "SPOL_VEL", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_VELALT_F", "SPOL_VELALT_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_ALT_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_VELALT", "SPOL_VELALT", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "VEL_ALT", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_NCP", "SPOL_NCP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "NCP", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_NCP_F", "SPOL_NCP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "NCP_F", "ncp.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_KDP_F", "SPOL_KDP_F", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "KDP_F", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "SPOL_KDP", "SPOL_KDP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true", "KDP", "kdp_sband.colors", "deg/km", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "SPOL-field", "==SPOL==", "SPOL_========", "mdvp::static//localhost::/spacer?", "None", "none.colors", "m", 0, 0, 0, DYNAMIC_CONTOURS, FALSE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_DBZ", "NEXR_KAMA_DBZ", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "DBZ", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_VEL", "NEXR_KAMA_VEL", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "VEL", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_WIDTH", "NEXR_KAMA_WIDTH", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "WIDTH", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_ZDR", "NEXR_KAMA_ZDR", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "ZDR", "zdr.colors", "dB", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_PHIDP", "NEXR_KAMA_PHIDP", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "PHIDP", "phidp.colors", "deg", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "KAMA_RHOHV", "NEXR_KAMA_RHOHV", "mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/kama/moments?use_http=true", "RHOHV", "rhohv.colors", "-", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "NEXRAD", "========", "NEXR_========", "mdvp::static//front.eol.ucar.edu:8080:/spacer/moments?use_http=true", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE}
 };
 
 //======================================================================
 //
 // </GRIDS>.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// <WINDS>.
+//
+//======================================================================
+ 
+///////////// winds ///////////////////////////////////
+//
+// Winds to be displayed.
+// button_label: appears on the GUI. 
+// legend_label: appears in the plot. 
+// url: location of data or data server. Form is 
+//   'protocol://host:port/dir/'
+// u_field_name: U component field name. 
+// v_field_name: V component field name. 
+// w_field_name: W component field name. Set to 'none' if no W vectors.
+// units: wind speed units. 
+// line_width: line width to be used for wind vectors. 
+// render_mode:
+//   ARROW: centered on data point.
+//   VECTOR: vertex at data point.
+//   BARB: N hemisphere.
+//   LABELEDBARB: labeled to nearest 10 degrees at the center - 
+//   N.Hemisphere.
+//   TUFT: like a piece of yarn - the least obtrusive - like a headless 
+//   vector.
+//   TICKVECTOR: Cross ticks at wind_time_scale_interval minutes.
+//   METBARB: Calcs latitude. Works for both hemispheres and adds a 
+//   label of the 10's digit off the end of the barb, ala winds aloft 
+//   charts auto switching between cart and cont. Uses 
+//   dynamic_contour_treshold.
+//   BARB_SH: S Hemisphere.
+//   LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. 
+//   Hemisp.
+//
+// NOTE: When using arrow,vector,tuft,tickvector, the data must be in 
+//   m/sec for the scaling to work correctly. For the others (Barbs), the 
+//   units are arbitrary, but the flag units on the barbs will reflect the 
+//   data's native units.
+//
+// Example: '-2,metbarb' --> width 2, off to start, using winds aloft 
+//   chart barbs
+// Example: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: 
+//   defined in main section.
+//
+// Type: struct
+//   typedef struct {
+//      string button_label;
+//      string legend_label;
+//      string url;
+//      string u_field_name;
+//      string v_field_name;
+//      string w_field_name;
+//      string units;
+//      int line_width;
+//      wind_render_mode_t render_mode;
+//        Options:
+//          ARROW
+//          VECTOR
+//          BARB
+//          LABELEDBARB
+//          TUFT
+//          TICKVECTOR
+//          METBARB
+//          BARB_SH
+//          LABELEDBARB_SH
+//      string color;
+//      boolean on_at_startup;
+//   }
+//
+// 1D array - variable length.
+//
+
+winds = {
+  { "TREC", "TREC", "mdvp:://tundra::dia/mdv/ctrec/ftg", "U", "V", "None", "m/s", 0, ARROW, "yellow", TRUE},
+  { "GFS-3D", "GFS-3D", "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago?use_http=true", "UGRD", "VGRD", "None", "m/s", 1, ARROW, "darkgreen", FALSE},
+  { "WRF-3D", "WRF-3D", "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/illinois?use_http=true", "U", "V", "None", "m/s", 1, ARROW, "blue", TRUE},
+  { "Surf", "Surf", "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/surf_interp?use_http=true", "Uwind", "Vwind", "None", "m/s", 1, ARROW, "orange", FALSE}
+};
+
+//======================================================================
+//
+// </WINDS>.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// <MAPS>.
+//
+//======================================================================
+ 
+///////////// maps ////////////////////////////////////
+//
+// Map overlays to be displayed.
+// map_code: name of the map, appears on the GUI. 
+// control_label: appears in the plot. 
+// map_file_name: name of map file in maps directory
+// line_width: line width to be used for map vectors. 
+// detail_thresh_min: min detail threshold for displaying map. Detail 
+//   thresholds are computed as units of km across the image. 
+// detail_thresh_max: max detail threshold for displaying map. Detail 
+//   thresholds are computed as units of km across the image. 
+// color: X color name.
+// on_at_startup: display overlay when app starts up.
+//
+// Type: struct
+//   typedef struct {
+//      string map_code;
+//      string control_label;
+//      string map_file_name;
+//      int line_width;
+//      double detail_thresh_min;
+//      double detail_thresh_max;
+//      string color;
+//      boolean on_at_startup;
+//   }
+//
+// 1D array - variable length.
+//
+
+maps = {
+  { "US_Highways", "US_Highways", "conus_ushwys.map", 1, 0, 1000, "grey", TRUE},
+  { "Interstates", "Interstates", "conus_interstates.map", 1, 0, 10000, "white", TRUE},
+  { "Interstates", "Interstates", "conus_interstatelabels.map", 1, 400, 3000, "white", TRUE},
+  { "Interstates", "Interstates", "conus_interstatelabels_high.map", 1, 0, 400, "white", TRUE},
+  { "DIA_RUNW", "DIA_runways", "DIA_runways.map", 1, 0, 10000, "yellow", TRUE},
+  { "DIA_TAXI", "DIA_taxiways", "DIA_taxiways.map", 1, 0, 10000, "gold", TRUE},
+  { "DIA_CONC", "DIA_concourse", "DIA_concourses.map", 1, 0, 10000, "orange", TRUE},
+  { "Colo_Aviation", "Colo_Aviation", "Colo_aviation.map", 1, 0, 1000, "cyan", TRUE},
+  { "Colo_Towns", "Colo_Towns", "Colo_towns.map", 1, 0, 1000, "blue", TRUE},
+  { "Colo_roadmap_A", "Colo_roadmap_A", "Colo_roadmap_A.map", 0, 0, 1000, "grey", TRUE},
+  { "Colo_counties", "Colo_counties", "Colo_counties.map", 0, 0, 1000, "yellow", TRUE},
+  { "UDFCD_mesonet", "UDFCD_mesonet", "Colo_UDFCD_meso.map", 0, 0, 100, "white", TRUE},
+  { "UDFCD_mesonet_ul", "UDFCD_mesonet_ul", "Colo_UDFCD_meso_unlab.map", 0, 0, 100, "orange", TRUE},
+  { "RADARS", "NWS_RADARS", "radars.map", 0, 0, 10000, "red", TRUE},
+  { "US_NEXRADS", "US_NEXRADS", "US_nexrad.map", 1, 0, 10000, "red", TRUE},
+  { "COUNTIES", "US_Counties", "us_counties.map", 1, 0, 1000, "blue", TRUE},
+  { "STATES", "State_Borders", "usa.map", 1, 0, 10000, "green", TRUE},
+  { "SAO_MOUNTAIN", "SAO_MOUNTAIN", "mountain_sao.map", 0, 0, 10000, "yellow", TRUE}
+};
+
+//======================================================================
+//
+// </MAPS>.
 //
 //======================================================================
  
@@ -1938,6 +3044,12 @@ dexport_info = {
   { "Boundry-b", "/tmp/cidd.fmq", 60, 0, "B"}
 };
 
+//======================================================================
+//
+// <SYMPRODS>.
+//
+//======================================================================
+ 
 ///////////// symprod_debug ///////////////////////////
 //
 // Debug option.
@@ -1961,7 +3073,7 @@ symprod_debug = SYMPROD_DEBUG_OFF;
 // Type: boolean
 //
 
-symprod_short_requests = FALSE;
+symprod_short_requests = TRUE;
 
 ///////////// symprod_gzip_requests ///////////////////
 //
@@ -2074,9 +3186,27 @@ symprod_gzip_requests = FALSE;
 //
 
 symprod_prod_info = {
-  { "RHI-ticks", "spdbp:Rhi2Symprod://localhost::spdb/rhi", 0, RENDER_ALL_VALID, FALSE, 20, 10, 0.4, FALSE, FALSE}
+  { "RHI-spol", "spdbp:Rhi2Symprod:ticks//front.eol.ucar.edu:8080:pecan/spdb/spol/rhi/sband?use_http=true", 0, RENDER_ALL_VALID, TRUE, 20, 10, 0.4, FALSE, FALSE},
+  { "METARS-simple", "spdbp:Metar2Symprod:simple//front.eol.ucar.edu:8080:pecan/spdb/metar?use_http=true", 0, RENDER_LATEST_IN_FRAME, FALSE, 90, 0, 0, FALSE, FALSE},
+  { "METARS-full", "spdbp:Metar2Symprod:labels//front.eol.ucar.edu:8080:pecan/spdb/metar?use_http=true", 0, RENDER_LATEST_IN_FRAME, FALSE, 90, 0, 0, FALSE, FALSE},
+  { "MADIS-simple", "spdbp:Metar2Symprod:simple//front.eol.ucar.edu:8080:pecan/spdb/madis?use_http=true", 0, RENDER_LATEST_IN_FRAME, FALSE, 90, 0, 0, FALSE, FALSE},
+  { "MADIS-full", "spdbp:Metar2Symprod:labels//front.eol.ucar.edu:8080:pecan/spdb/madis?use_http=true", 0, RENDER_LATEST_IN_FRAME, FALSE, 90, 0, 0, FALSE, FALSE},
+  { "NLDN-15", "spdbp:Ltg2Symprod://front.eol.ucar.edu:8080:pecan/spdb/ltg/nldn?use_http=true", 0, RENDER_ALL_BEFORE_DATA_TIME, FALSE, 15, 0, 0, FALSE, FALSE},
+  { "AcPosn 10-min", "spdbp:AcTrack2Symprod:10_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true", 0, RENDER_FIRST_BEFORE_FRAME_TIME, FALSE, 15, 15, 0.4, FALSE, FALSE},
+  { "AcPosn 20-min", "spdbp:AcTrack2Symprod:20_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true", 0, RENDER_FIRST_BEFORE_FRAME_TIME, FALSE, 15, 15, 0.4, FALSE, FALSE},
+  { "AcPosn 30-min", "spdbp:AcTrack2Symprod:30_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true", 0, RENDER_FIRST_BEFORE_FRAME_TIME, FALSE, 15, 15, 0.4, FALSE, FALSE},
+  { "MobilePosn", "spdbp:AcTrack2Symprod:mobile//front.eol.ucar.edu:8080:pecan/spdb/mobile_posn?use_http=true", 0, RENDER_ALL_BEFORE_DATA_TIME, FALSE, 60, 60, 0.4, FALSE, FALSE},
+  { "titan-forecast 60-min", "spdbp:Tstorms2Symprod:60min//front.eol.ucar.edu:8080:pecan/spdb/tstorms/mrms_conv?use_http=true", 0, RENDER_LATEST_IN_FRAME, FALSE, 20, 0, 0, FALSE, FALSE},
+  { "precip_front_range", "spdbp:Metar2Symprod://front.eol.ucar.edu:8080:pecan/spdb/precip/front_range?use_http=true", 0, RENDER_ALL_VALID, FALSE, 300, 300, 0, FALSE, FALSE},
+  { "precip_ncdc", "spdbp:Metar2Symprod://front.eol.ucar.edu:8080:pecan/spdb/precip/ncdc?use_http=true", 0, RENDER_ALL_VALID, FALSE, 300, 300, 0, FALSE, FALSE}
 };
 
+//======================================================================
+//
+// </SYMPRODS>.
+//
+//======================================================================
+ 
 //======================================================================
 //
 // Terrain Parameters.
@@ -2184,6 +3314,12 @@ earth_color1 = "sienna";
 
 earth_color2 = "red4";
 
+//======================================================================
+//
+// CIDD's TDRP parameters for image generation.
+//
+//======================================================================
+ 
 ///////////// image_debug /////////////////////////////
 //
 // Debug option.
@@ -3440,15 +4576,14 @@ planview_start_page = 1;
 
 xsect_start_page = 1;
 
-///////////// num_zoom_levels /////////////////////////
+//======================================================================
 //
-// The number of zoom levels.
+// Zoom views.
 //
-// Type: int
+// These are the pre-defined zoom levels.
 //
-
-num_zoom_levels = 5;
-
+//======================================================================
+ 
 ///////////// start_zoom_level ////////////////////////
 //
 // Zoom level on which to start.
@@ -3475,6 +4610,33 @@ zoom_limits_in_latlon = FALSE;
 //
 
 num_cache_zooms = 4;
+
+///////////// zoom_levels /////////////////////////////
+//
+// Pre-defined zoom levels.
+// /nlabel: label in GUI for selecting zoom level. /nmin_x: X value of 
+//   SW corner./nmin_y: Y value of SW corner./nmax_x: X value of NE 
+//   corner./nmax_y: Y value of NE corner./n.
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      double min_x;
+//      double min_y;
+//      double max_x;
+//      double max_y;
+//   }
+//
+// 1D array - variable length.
+//
+
+zoom_levels = {
+  { "FULL DOMAIN", -1100, -1700, 2200, 2000},
+  { "FTG AREA", -155, -140, 125, 140},
+  { "AIRPORT", -60, -60, 50, 50},
+  { "ERN PLAINS", -100, -400, 550, 250},
+  { "WRN KS", 0, -400, 600, 150}
+};
 
 //======================================================================
 //
@@ -3740,33 +4902,6 @@ missing_data_color = "grey20";
 
 bad_data_color = "grey20";
 
-///////////// epoch_indicator_color ///////////////////
-//
-// Time Control (Movie) Pop-up Colors.
-//
-// Type: string
-//
-
-epoch_indicator_color = "orange";
-
-///////////// now_time_color //////////////////////////
-//
-// Color of current time tick.
-//
-// Type: string
-//
-
-now_time_color = "red";
-
-///////////// time_tick_color /////////////////////////
-//
-// Color of time ticks.
-//
-// Type: string
-//
-
-time_tick_color = "yellow";
-
 ///////////// latest_click_mark_color /////////////////
 //
 // Color of mark showing latest click location.
@@ -3775,865 +4910,6 @@ time_tick_color = "yellow";
 //
 
 latest_click_mark_color = "red";
-
-//======================================================================
-//
-// Mode flags.
-//
-//======================================================================
- 
-///////////// show_height_sel /////////////////////////
-//
-// Show the height selector in the right margin.
-// oggle for displaying the height Selector in Right Margin. Note Right 
-//   Margin should be at least 50 pixels wide.
-//
-// Type: boolean
-//
-
-show_height_sel = TRUE;
-
-///////////// show_data_messages //////////////////////
-//
-// Show data status messages at top of image.
-// There will be one line of status for each field in the stack. This is 
-//   probably not necessary in situations where all data is small and 
-//   local.
-//
-// Type: boolean
-//
-
-show_data_messages = TRUE;
-
-///////////// latlon_mode /////////////////////////////
-//
-// Sets the format for output of Lat, Lon's.
-// 0= Decimal Degrees, 1 = deg min' sec'.
-//
-// Type: int
-//
-
-latlon_mode = 0;
-
-///////////// label_time_format ///////////////////////
-//
-// Set the format for the time strings.
-// See 'man strftime' for format options. Can add additional text as 
-//   part of the Time string.
-//
-// Type: string
-//
-
-label_time_format = "%m/%d/%Y %H:%M";
-
-///////////// moviestart_time_format //////////////////
-//
-// Set the format for the time string in the movie start time text field 
-//   of the movie pop-up window.
-// This is set separately from the general time string because you 
-//   generally don't want any extra text and want to display things in an 
-//   order that allows for easier entry.
-//
-// Type: string
-//
-
-moviestart_time_format = "%H:%M_%m/%d/%Y";
-
-///////////// frame_range_time_format /////////////////
-//
-// Set the format for the time strings in the frame range text fields.
-//
-// Type: string
-//
-
-frame_range_time_format = "%H:%M:%S";
-
-///////////// layer_legends_on ////////////////////////
-//
-// Plot a Legend for each Grid overlay.
-//
-// Type: boolean
-//
-
-layer_legends_on = TRUE;
-
-///////////// cont_legends_on /////////////////////////
-//
-// Plot a Legend for each Contour overlay.
-//
-// Type: boolean
-//
-
-cont_legends_on = TRUE;
-
-///////////// wind_legends_on /////////////////////////
-//
-// Plot a Legend for each Wind overlay.
-//
-// Type: boolean
-//
-
-wind_legends_on = TRUE;
-
-///////////// display_labels //////////////////////////
-//
-// Switch to turn off all data labels on the display.
-//
-// Type: boolean
-//
-
-display_labels = TRUE;
-
-///////////// display_ref_lines ///////////////////////
-//
-// Switch to turn on/off Height, Route and Wind Scale reference lines.
-//
-// Type: boolean
-//
-
-display_ref_lines = TRUE;
-
-//======================================================================
-//
-// Window sizes.
-//
-// Window width and height is specified in pixels.
-//
-//======================================================================
- 
-///////////// horiz_default_x_pos /////////////////////
-//
-// Startup position of main window, relative to top-left of screen 
-//   (pixels).
-// The main display window will start at this location.
-//
-// Type: int
-//
-
-horiz_default_x_pos = 0;
-
-///////////// horiz_default_y_pos /////////////////////
-//
-// Startup position of main window, relative to top-left of screen 
-//   (pixels).
-// The main display window will start at this location.
-//
-// Type: int
-//
-
-horiz_default_y_pos = 0;
-
-///////////// horiz_default_width /////////////////////
-//
-// Default width of main window (pixels).
-// Height of main window at startup.
-//
-// Type: int
-//
-
-horiz_default_width = 800;
-
-///////////// horiz_default_height ////////////////////
-//
-// Default height of main window (pixels).
-// Width of main window at startup.
-//
-// Type: int
-//
-
-horiz_default_height = 800;
-
-///////////// horiz_min_width /////////////////////////
-//
-// Minimum width of main window (pixels).
-// The user cannot shrink the main window smaller than this.
-//
-// Type: int
-//
-
-horiz_min_width = 400;
-
-///////////// horiz_min_height ////////////////////////
-//
-// Minimum height of main window (pixels).
-// The user cannot shrink the main window smaller than this.
-//
-// Type: int
-//
-
-horiz_min_height = 400;
-
-///////////// vert_default_x_pos //////////////////////
-//
-// Startup position of main window, relative to top-left of screen 
-//   (pixels).
-// The main display window will start at this location.
-//
-// Type: int
-//
-
-vert_default_x_pos = 0;
-
-///////////// vert_default_y_pos //////////////////////
-//
-// Startup position of main window, relative to top-left of screen 
-//   (pixels).
-// The main display window will start at this location.
-//
-// Type: int
-//
-
-vert_default_y_pos = 0;
-
-///////////// vert_default_width //////////////////////
-//
-// Default width of vert section window (pixels).
-// Height of vert section window at startup.
-//
-// Type: int
-//
-
-vert_default_width = 600;
-
-///////////// vert_default_height /////////////////////
-//
-// Default height of vert section window (pixels).
-// Width of vert section window at startup.
-//
-// Type: int
-//
-
-vert_default_height = 440;
-
-///////////// vert_min_width //////////////////////////
-//
-// Minimum width of vert section window (pixels).
-// The user cannot shrink the vert section window smaller than this.
-//
-// Type: int
-//
-
-vert_min_width = 120;
-
-///////////// vert_min_height /////////////////////////
-//
-// Minimum height of vert section window (pixels).
-// The user cannot shrink the vert section window smaller than this.
-//
-// Type: int
-//
-
-vert_min_height = 120;
-
-//======================================================================
-//
-// Margin details.
-//
-// Margins are specified in pixels.
-//
-//======================================================================
- 
-///////////// top_margin_render_style /////////////////
-//
-// TOP Margin styles.
-//  1 (Default): Places a distance scale in the top Margin. 2: Place a 
-//   Frame number and Time - Used often for HTML output. 3: None -  Used 
-//   often to place the Data label.
-//
-// Type: int
-//
-
-top_margin_render_style = 1;
-
-///////////// bot_margin_render_style /////////////////
-//
-// Bottom Margin Styles.
-// 1 - Distance Scale. 2 - Time Scale.
-//
-// Type: int
-//
-
-bot_margin_render_style = 2;
-
-///////////// horiz_top_margin ////////////////////////
-//
-// Height of top margin (pixels).
-// Size of top margin for main window.
-//
-// Type: int
-//
-
-horiz_top_margin = 20;
-
-///////////// horiz_bot_margin ////////////////////////
-//
-// Height of bottom margin (pixels).
-// Size of bottom margin for main window.
-//
-// Type: int
-//
-
-horiz_bot_margin = 20;
-
-///////////// horiz_left_margin ///////////////////////
-//
-// Width of left margin (pixels).
-// Size of left margin for main window.
-//
-// Type: int
-//
-
-horiz_left_margin = 20;
-
-///////////// horiz_right_margin //////////////////////
-//
-// Width of right margin (pixels).
-// Size of right margin for main window.
-//
-// Type: int
-//
-
-horiz_right_margin = 60;
-
-///////////// vert_top_margin /////////////////////////
-//
-// Height of top margin (pixels).
-// Size of top margin for vert section window.
-//
-// Type: int
-//
-
-vert_top_margin = 20;
-
-///////////// vert_bot_margin /////////////////////////
-//
-// Height of bottom margin (pixels).
-// Size of bottom margin for vert section window.
-//
-// Type: int
-//
-
-vert_bot_margin = 20;
-
-///////////// vert_left_margin ////////////////////////
-//
-// Width of left margin (pixels).
-// Size of left margin for vert section window.
-//
-// Type: int
-//
-
-vert_left_margin = 20;
-
-///////////// vert_right_margin ///////////////////////
-//
-// Width of right margin (pixels).
-// Size of right margin for vert section window.
-//
-// Type: int
-//
-
-vert_right_margin = 30;
-
-//======================================================================
-//
-// Legends displayed within the plot window.
-//
-// A legend can be displayed for each data layer. Explicitly set the 
-//   Label start coords, and delta Y. If left unset, legends start 
-//   relative to the top and left margins.
-//
-//======================================================================
- 
-///////////// horiz_legends_start_x ///////////////////
-//
-// Horizontal window legends start x position (pixels).
-// Relative to top left of window.
-//
-// Type: int
-//
-
-horiz_legends_start_x = 30;
-
-///////////// horiz_legends_start_y ///////////////////
-//
-// Horizontal window legends start y position (pixels).
-// Relative to top left of window.
-//
-// Type: int
-//
-
-horiz_legends_start_y = 30;
-
-///////////// horiz_legends_delta_y ///////////////////
-//
-// Horizontal window legends spacing (pixels).
-// This is the line spacing between the legends.
-//
-// Type: int
-//
-
-horiz_legends_delta_y = 30;
-
-///////////// vert_legends_start_x ////////////////////
-//
-// Vertical window legends start x position (pixels).
-// Relative to top left of window.
-//
-// Type: int
-//
-
-vert_legends_start_x = 0;
-
-///////////// vert_legends_start_y ////////////////////
-//
-// Vertical window legends start y position (pixels).
-// Relative to top left of window.
-//
-// Type: int
-//
-
-vert_legends_start_y = 0;
-
-///////////// vert_legends_delta_y ////////////////////
-//
-// Vertical window legends spacing (pixels).
-// This is the line spacing between the legends.
-//
-// Type: int
-//
-
-vert_legends_delta_y = 0;
-
-//======================================================================
-//
-// Draw range rings and azimuth lines.
-//
-// These apply to radars only.
-//
-//======================================================================
- 
-///////////// range_rings /////////////////////////////
-//
-// Turn range rings on/off.
-// TRUE means on - i.r. plot range rings.
-//
-// Type: boolean
-//
-
-range_rings = FALSE;
-
-///////////// range_ring_spacing //////////////////////
-//
-// Spacing between range rings (km).
-//
-// Type: double
-//
-
-range_ring_spacing = 50;
-
-///////////// max_ring_range //////////////////////////
-//
-// Maximum range ring (km).
-//
-// Type: double
-//
-
-max_ring_range = 1000;
-
-///////////// range_ring_follows_data /////////////////
-//
-// Plot range rings relative to radar location.
-// We get the location from the data. If FALSE, rings are relative to 
-//   plot origin.
-//
-// Type: boolean
-//
-
-range_ring_follows_data = FALSE;
-
-///////////// range_ring_for_radar_only ///////////////
-//
-// Only plot range rings for radar data sets.
-// TRUE turns off rings for non-radar data sets.
-//
-// Type: boolean
-//
-
-range_ring_for_radar_only = TRUE;
-
-///////////// domain_follows_data /////////////////////
-//
-// Plot domain moves with origin of the data set.
-// Shift the domain limits if the data origin shifts.
-//
-// Type: boolean
-//
-
-domain_follows_data = FALSE;
-
-///////////// range_ring_x_space //////////////////////
-//
-// Spacing in x for range ring labels (pixels).
-//
-// Type: int
-//
-
-range_ring_x_space = 40;
-
-///////////// range_ring_y_space //////////////////////
-//
-// Spacing in y for range ring labels (pixels).
-//
-// Type: int
-//
-
-range_ring_y_space = 13;
-
-///////////// range_ring_labels ///////////////////////
-//
-// Plot range ring labels.
-// Label the range for each ring.
-//
-// Type: boolean
-//
-
-range_ring_labels = TRUE;
-
-///////////// azmith_lines ////////////////////////////
-//
-// Draw azimuth lines for a radar location.
-// These complement range rings, to provide guidance on azimuths for 
-//   radar gates.
-//
-// Type: boolean
-//
-
-azmith_lines = FALSE;
-
-///////////// azmith_interval /////////////////////////
-//
-// Interval for azimuth lines.
-// If azimuth lines are on.
-//
-// Type: double
-//
-
-azmith_interval = 30;
-
-///////////// azmith_radius ///////////////////////////
-//
-// Max radius for azimuth lines.
-// If azimuth lines are on.
-//
-// Type: double
-//
-
-azmith_radius = 200;
-
-//======================================================================
-//
-// Plotting wind vectors.
-//
-// See also the wind layers section.
-//
-//======================================================================
- 
-///////////// all_winds_on ////////////////////////////
-//
-// Plot all wind layers.
-// Turns on all wind layers.
-//
-// Type: boolean
-//
-
-all_winds_on = TRUE;
-
-///////////// wind_mode ///////////////////////////////
-//
-// Activate wind rendering.
-// TO DO - check how this works.
-//
-// Type: boolean
-//
-
-wind_mode = FALSE;
-
-///////////// barb_shaft_len //////////////////////////
-//
-// Wind barb shaft length (pixels).
-//
-// Type: int
-//
-
-barb_shaft_len = 30;
-
-///////////// ideal_x_vectors /////////////////////////
-//
-// Ideal number of vectors in the x dimension.
-// The display will space the wind vectors in x accordingly.
-//
-// Type: int
-//
-
-ideal_x_vectors = 20;
-
-///////////// ideal_y_vectors /////////////////////////
-//
-// Ideal number of vectors in the y dimension.
-// The display will space the wind vectors in y accordingly.
-//
-// Type: int
-//
-
-ideal_y_vectors = 20;
-
-///////////// wind_head_size //////////////////////////
-//
-// Minimum arrow head size for wind vectors (pixels).
-//
-// Type: int
-//
-
-wind_head_size = 5;
-
-///////////// wind_head_angle /////////////////////////
-//
-// Angle of arrow head for wind vectors (deg).
-//
-// Type: double
-//
-
-wind_head_angle = 30;
-
-///////////// wind_scaler /////////////////////////////
-//
-// The display will space the wind vectors in x accordingly.
-// Vectors will be drawn to show wind_scaler * wind_time_scale_interval 
-//   minutes of motion.
-//
-// Type: int
-//
-
-wind_scaler = 3;
-
-///////////// wind_time_scale_interval ////////////////
-//
-// inutes between steps on the wind scaling slider.
-// Wind vector length = wind_scaler * wind_time_scale_interval *  wind 
-//   velocity.
-//
-// Type: double
-//
-
-wind_time_scale_interval = 10;
-
-///////////// wind_marker_type ////////////////////////
-//
-// Wind vector rendering style.
-// 'arrow': centered at data point.
-// 'vector': Vertex at data point.
-// 'barb': N Hemisp.
-// 'labeledbarb': labeled to nearest 10 degrees at the center - N. 
-//   Hemisp.
-// 'tuft': like a piece of yarn - the least obtrusive - like a headless 
-//   vector.
-// 'tickvector': Cross ticks at wind_time_scale_interval minutes.
-// 'metbarb': Calcs latitude - works for both hemispheres and adds a 
-//   label of the 10's digit off the end of the barb, ala winds aloft 
-//   charts.
-// 'barb_sh': S Hemisphere.
-// 'labeledbarb': labeled to nearest 10 degrees at the center - N. 
-//   Hemisp.
-//
-// NOTE: When using arrow,vector,tuft,tickvector,  the data must be in 
-//   m/sec for the scaling to work correctly. For barbs the units are 
-//   arbitrary, but the flag units on the barbs will reflect the data's 
-//   native units.
-//
-// Type: string
-//
-
-wind_marker_type = "arrow";
-
-///////////// wind_w_scale_factor /////////////////////
-//
-// Scale the vertical velocity by this factor, relative to the U/V. .
-// W tends to be small compared to U/V. Scaling it up makes the 
-//   rendering more meaningful.
-//
-// Type: double
-//
-
-wind_w_scale_factor = 10;
-
-///////////// wind_units_scale_factor /////////////////
-//
-// Value to convert from the your reference speed units to m/sec. .
-// i.e. wind_units_scale_factor =  m/sec / chosen units.
-//
-// Type: double
-//
-
-wind_units_scale_factor = 1;
-
-///////////// wind_reference_speed ////////////////////
-//
-// Sets the length of the wind vector reference legend.
-// The legend shows a symbos representing a wind speed of this value.
-//
-// Type: double
-//
-
-wind_reference_speed = 30;
-
-///////////// wind_units_label ////////////////////////
-//
-// Select the label to be printed next to the reference bar.
-//
-// Type: string
-//
-
-wind_units_label = "km/hr";
-
-//======================================================================
-//
-// Plotting contours in data fields.
-//
-// In the data layers section you can select contour plotting.
-//
-//======================================================================
- 
-///////////// label_contours //////////////////////////
-//
-// Set to TRUE to have numeric labels on line contours.
-//
-// Type: boolean
-//
-
-label_contours = FALSE;
-
-///////////// contour_line_width //////////////////////
-//
-// Width of contour lines.
-//
-// Type: int
-//
-
-contour_line_width = 1;
-
-///////////// smooth_contours /////////////////////////
-//
-// Apply smoothing to data grids before contouring.
-// 0 = Off, 1 = single pass, 2 = double pass.
-//
-// Type: int
-//
-
-smooth_contours = 0;
-
-///////////// use_alt_contours ////////////////////////
-//
-// Use Alternate (Mdvx) Contouring Routines.
-// Slower - Nicer labeling - Less smooth. Warning - Does not work 
-//   correctly when data and display origins are different. Works fine in 
-//   lat/lon projections.
-//
-// Type: boolean
-//
-
-use_alt_contours = FALSE;
-
-///////////// add_noise ///////////////////////////////
-//
-// Add 1 part in 250 Noise to help smooth contours.
-//
-// Type: boolean
-//
-
-add_noise = FALSE;
-
-///////////// special_contour_value ///////////////////
-//
-// Specify special contour value.
-// Contours at this value will have a wider line.
-//
-// Type: double
-//
-
-special_contour_value = 0.25;
-
-///////////// map_bad_to_min_value ////////////////////
-//
-// Contour the bad value, by setting bad cells to have min value in 
-//   data.
-// Sometimes, for CONTOURING it is useful to make the assumption that 
-//   the bad and/or missing values should be considered at the minimum of 
-//   the dynamic range of the data. i.e. if you want bad contoured, set 
-//   this to TRUE.
-//
-// Type: boolean
-//
-
-map_bad_to_min_value = FALSE;
-
-///////////// map_missing_to_min_value ////////////////
-//
-// Contour the missing value, by setting missing cells to have min value 
-//   in data.
-// Sometimes, for CONTOURING it is useful to make the assumption that 
-//   the missing and/or missing values should be considered at the minimum 
-//   of the dynamic range of the data. i.e. if you want missing contoured, 
-//   set this to TRUE.
-//
-// Type: boolean
-//
-
-map_missing_to_min_value = FALSE;
-
-//======================================================================
-//
-// Overall rendering order.
-//
-//======================================================================
- 
-///////////// draw_main_on_top ////////////////////////
-//
-// TRUE: render main field first, then layers.
-// FALSE: render main field on top of layers.
-//
-// Type: boolean
-//
-
-draw_main_on_top = FALSE;
-
-//======================================================================
-//
-// Marking click location from separate app.
-//
-// CIDD can cooperate with a secondary app, receiving click details via 
-//   shared memo.
-//
-//======================================================================
- 
-///////////// mark_latest_click_location //////////////
-//
-// Option to mark latest click location from client app.
-//
-// Type: boolean
-//
-
-mark_latest_click_location = FALSE;
-
-///////////// latest_click_mark_size //////////////////
-//
-// Size of marker at latest click location (pixels).
-// Location clicked in client app.
-//
-// Type: int
-//
-
-latest_click_mark_size = 11;
 
 ///////////// latest_client_mark_color ////////////////
 //
@@ -4657,22 +4933,21 @@ click_posn_rel_to_origin = FALSE;
 
 //======================================================================
 //
-// Fonts.
-//
-// TO-DO - fix this.
+// <FONTS>.
 //
 //======================================================================
  
-///////////// num_fonts ///////////////////////////////
+///////////// fonts ///////////////////////////////////
 //
-// Number of fonts of increasing size.
-// The display picks the appropriate font size in tight location - e.g. 
-//   axis labels,.
+// List of fonts in order of increasing size.
+// The optimum font size will be used in regions of the plot that have 
+//   limited space.
 //
-// Type: int
+// Type: string
+// 1D array - variable length.
 //
 
-num_fonts = 8;
+fonts = { "6x9", "-*-courier-medium-r-normal-*-10-*-*-*-*-*-*-*", "-*-courier-medium-r-normal-*-12-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-12-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-14-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-15-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-16-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-18-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-24-*-*-*-*-*-*-*", "-*-courier-bold-r-normal-*-30-*-*-*-*-*-*-*" };
 
 ///////////// font_display_mode ///////////////////////
 //
@@ -4685,6 +4960,12 @@ num_fonts = 8;
 
 font_display_mode = 0;
 
+//======================================================================
+//
+// </FONTS>.
+//
+//======================================================================
+ 
 //======================================================================
 //
 // Analog clock.
@@ -4809,7 +5090,7 @@ disable_pick_mode = FALSE;
 // Type: boolean
 //
 
-replace_underscores = TRUE;
+replace_underscores = FALSE;
 
 ///////////// close_popups ////////////////////////////
 //
@@ -4926,14 +5207,26 @@ frame_message_help = "cidd_help:frame_message";
 
 bookmark_command = "/opt/google/chrome/chrome %U";
 
-///////////// num_bookmarks ///////////////////////////
+///////////// bookmarks ///////////////////////////////
 //
-// Number of bookmarks in the Menu.
+// Bookmarks for specific topics.
+// Drive the browser to the given url when the button is clicked.
 //
-// Type: int
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string url;
+//   }
+//
+// 1D array - variable length.
 //
 
-num_bookmarks = 4;
+bookmarks = {
+  { "ROC", "http://mars/aoaws/doc/roc_mds.html"},
+  { "RAP Weather", "http://www.rap.ucar.edu/weather/"},
+  { "ADDS", "http://adds.awc-kc.noaa.gov/"},
+  { "ADDS-Cessna", "http://cessna/"}
+};
 
 //======================================================================
 //
@@ -5045,6 +5338,7 @@ product_line_width = 1;
 ///////////// product_font_size ///////////////////////
 //
 // Default font size for products.
+// Starting size of fonts for symbolic products - from the fonts array.
 //
 // Type: int
 //
@@ -5062,6 +5356,28 @@ product_font_size = 4;
 //
 
 scale_constant = 300;
+
+///////////// product_adjustments /////////////////////
+//
+// Thresholds and adjustment for font sizes for products.
+// The adjustment increases or decreases the font index. This index is 
+//   used to choose the font from the fonts[] array. The thresholds are 
+//   computed as units of km across the image.
+//
+// Type: struct
+//   typedef struct {
+//      double threshold;
+//      int font_index_adj;
+//   }
+//
+// 1D array - variable length.
+//
+
+product_adjustments = {
+  { 51, 6},
+  { 201, 5},
+  { 401, 4}
+};
 
 //======================================================================
 //

@@ -1,605 +1,3 @@
-commentdef {
-  p_header = "TIME_CONTROL_GUI";
-  p_text = "";
-}
-
-paramdef string {
-  p_default = "orange";
-  p_descr = "Time Control (Movie) Pop-up Colors.";
-  p_help = "";
-} epoch_indicator_color;
-
-paramdef string {
-  p_default = "red";
-  p_descr = "Color of current time tick.";
-  p_help = "";
-} now_time_color;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of time ticks - main grid.";
-  p_help = "";
-} time_tick_color;
-
-paramdef string {
-  p_default = { "cyan", "yellow", "magenta", "green", "red", "blue" };
-  p_descr = "List of colors for time ticks for symbolic products.";
-  p_help = "The time ticks are drawn in order, from top down, in the time control GUI.";
-} time_tick_colors[];
-
-commentdef {
-  p_header = "Mode flags.";
-  p_text = "";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Show the height selector in the right margin.";
-  p_help = "oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.";
-} show_height_sel;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Show data status messages at top of image.";
-  p_help = "There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.";
-} show_data_messages;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Sets the format for output of Lat, Lon's.";
-  p_help = "0= Decimal Degrees, 1 = deg min' sec'.";
-} latlon_mode;
-
-paramdef string {
-  p_default = "%m/%d/%y %H:%M:%S";
-  p_descr = "Set the format for the time strings.";
-  p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
-} label_time_format;
-
-paramdef string {
-  p_default = "%H:%M %m/%d/%Y";
-  p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
-  p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
-} moviestart_time_format;
-
-paramdef string {
-  p_default = "%H:%M";
-  p_descr = "Set the format for the time strings in the frame range text fields.";
-  p_help = "";
-} frame_range_time_format;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot a Legend for each Grid overlay.";
-  p_help = "";
-} layer_legends_on;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot a Legend for each Contour overlay.";
-  p_help = "";
-} cont_legends_on;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot a Legend for each Wind overlay.";
-  p_help = "";
-} wind_legends_on;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Switch to turn off all data labels on the display.";
-  p_help = "";
-} display_labels;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Switch to turn on/off Height, Route and Wind Scale reference lines.";
-  p_help = "";
-} display_ref_lines;
-
-commentdef {
-  p_header = "Window sizes.";
-  p_text = "Window width and height is specified in pixels.";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} horiz_default_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} horiz_default_y_pos;
-
-paramdef int {
-  p_default = 800;
-  p_descr = "Default width of main window (pixels).";
-  p_help = "Height of main window at startup.";
-} horiz_default_width;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Default height of main window (pixels).";
-  p_help = "Width of main window at startup.";
-} horiz_default_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_min_height;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} vert_default_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} vert_default_y_pos;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Default width of vert section window (pixels).";
-  p_help = "Height of vert section window at startup.";
-} vert_default_width;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Default height of vert section window (pixels).";
-  p_help = "Width of vert section window at startup.";
-} vert_default_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of vert section window (pixels).";
-  p_help = "The user cannot shrink the vert section window smaller than this.";
-} vert_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of vert section window (pixels).";
-  p_help = "The user cannot shrink the vert section window smaller than this.";
-} vert_min_height;
-
-commentdef {
-  p_header = "Margin details.";
-  p_text = "Margins are specified in pixels.";
-}
-
-paramdef int {
-  p_default = 1;
-  p_descr = "TOP Margin styles.";
-  p_help = " 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label";
-} top_margin_render_style;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Bottom Margin Styles.";
-  p_help = "1 - Distance Scale. 2 - Time Scale.";
-} bot_margin_render_style;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin (pixels).";
-  p_help = "Size of top margin for main window.";
-} horiz_top_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin (pixels).";
-  p_help = "Size of bottom margin for main window.";
-} horiz_bot_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin (pixels).";
-  p_help = "Size of left margin for main window.";
-} horiz_left_margin;
-
-paramdef int {
-  p_default = 80;
-  p_descr = "Width of right margin (pixels).";
-  p_help = "Size of right margin for main window.";
-} horiz_right_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin (pixels).";
-  p_help = "Size of top margin for vert section window.";
-} vert_top_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin (pixels).";
-  p_help = "Size of bottom margin for vert section window.";
-} vert_bot_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin (pixels).";
-  p_help = "Size of left margin for vert section window.";
-} vert_left_margin;
-
-paramdef int {
-  p_default = 80;
-  p_descr = "Width of right margin (pixels).";
-  p_help = "Size of right margin for vert section window.";
-} vert_right_margin;
-
-commentdef {
-  p_header = "Legends displayed within the plot window.";
-  p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends start x position (pixels).";
-  p_help = "Relative to top left of window.";
-} horiz_legends_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends start y position (pixels).";
-  p_help = "Relative to top left of window.";
-} horiz_legends_start_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends spacing (pixels).";
-  p_help = "This is the line spacing between the legends.";
-} horiz_legends_delta_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends start x position (pixels).";
-  p_help = "Relative to top left of window.";
-} vert_legends_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends start y position (pixels).";
-  p_help = "Relative to top left of window.";
-} vert_legends_start_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends spacing (pixels).";
-  p_help = "This is the line spacing between the legends.";
-} vert_legends_delta_y;
-
-commentdef {
-  p_header = "Draw range rings and azimuth lines.";
-  p_text = "These apply to radars only.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Turn range rings on/off.";
-  p_help = "TRUE means on - i.r. plot range rings.";
-} range_rings;
-
-paramdef double {
-  p_default = 50;
-  p_descr = "Spacing between range rings (km).";
-  p_help = "";
-} range_ring_spacing;
-
-paramdef double {
-  p_default = 500;
-  p_descr = "Maximum range ring (km)";
-  p_help = "";
-} max_ring_range;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Plot range rings relative to radar location.";
-  p_help = "We get the location from the data. If FALSE, rings are relative to plot origin.";
-} range_ring_follows_data;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Only plot range rings for radar data sets.";
-  p_help = "TRUE turns off rings for non-radar data sets.";
-} range_ring_for_radar_only;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Plot domain moves with origin of the data set.";
-  p_help = "Shift the domain limits if the data origin shifts.";
-} domain_follows_data;
-
-paramdef int {
-  p_default = 50;
-  p_descr = "Spacing in x for range ring labels (pixels).";
-  p_help = "";
-} range_ring_x_space;
-
-paramdef int {
-  p_default = 15;
-  p_descr = "Spacing in y for range ring labels (pixels).";
-  p_help = "";
-} range_ring_y_space;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot range ring labels.";
-  p_help = "Label the range for each ring.";
-} range_ring_labels;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Draw azimuth lines for a radar location.";
-  p_help = "These complement range rings, to provide guidance on azimuths for radar gates.";
-} azimuth_lines;
-
-paramdef double {
-  p_default = 30;
-  p_descr = "Interval for azimuth lines.";
-  p_help = "If azimuth lines are on.";
-} azimuth_interval;
-
-paramdef double {
-  p_default = 200;
-  p_descr = "Max radius for azimuth lines.";
-  p_help = "If azimuth lines are on.";
-} azimuth_radius;
-
-commentdef {
-  p_header = "Plotting wind vectors.";
-  p_text = "See also the wind layers section.";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot all wind layers.";
-  p_help = "Turns on all wind layers.";
-} all_winds_on;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Activate wind rendering.";
-  p_help = "TO DO - check how this works.";
-} wind_mode;
-
-paramdef int {
-  p_default = 33;
-  p_descr = "Wind barb shaft length (pixels).";
-  p_help = "";
-} barb_shaft_len;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Ideal number of vectors in the x dimension.";
-  p_help = "The display will space the wind vectors in x accordingly.";
-} ideal_x_vectors;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Ideal number of vectors in the y dimension.";
-  p_help = "The display will space the wind vectors in y accordingly.";
-} ideal_y_vectors;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Minimum arrow head size for wind vectors (pixels).";
-  p_help = "";
-} wind_head_size;
-
-paramdef double {
-  p_default = 45;
-  p_descr = "Angle of arrow head for wind vectors (deg).";
-  p_help = "";
-} wind_head_angle;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "The display will space the wind vectors in x accordingly.";
-  p_help = "Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.";
-} wind_scaler;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "inutes between steps on the wind scaling slider.";
-  p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
-} wind_time_scale_interval;
-
-paramdef string {
-  p_default = "arrow";
-  p_descr = "Wind vector rendering style.";
-  p_help = "'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.";
-} wind_marker_type;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";
-  p_help = "W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.";
-} wind_w_scale_factor;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Value to convert from the your reference speed units to m/sec. ";
-  p_help = "i.e. wind_units_scale_factor =  m/sec / chosen units.";
-} wind_units_scale_factor;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "Sets the length of the wind vector reference legend.";
-  p_help = "The legend shows a symbos representing a wind speed of this value.";
-} wind_reference_speed;
-
-paramdef string {
-  p_default = "m/sec";
-  p_descr = "Select the label to be printed next to the reference bar.";
-  p_help = "";
-} wind_units_label;
-
-commentdef {
-  p_header = "Plotting contours in data fields.";
-  p_text = "In the data layers section you can select contour plotting.";
-}
-
-typedef struct {
-  string field_name;
-  string color;
-  boolean on_at_startup;
-} contour_field_t;
-
-paramdef struct contour_field_t {
-  p_default = {
-    {
-      field_name = "FzLevel",
-      color = "red",
-      on_at_startup = false
-    }
-    ,
-    {
-      field_name = "SURF_T",
-      color = "white",
-      on_at_startup = true
-    }
-  };
-  p_descr = "Fields to be contoured.";
-  p_help =
-    "/nfield_name: name of field in GRIDS list. "
-    "/ncolor: color for contour lines. "
-    "/non_at_startup: field on when app starts."
-    "/n";
-} contour_fields[];
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Set to TRUE to have numeric labels on line contours.";
-  p_help = "";
-} label_contours;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Width of contour lines.";
-  p_help = "";
-} contour_line_width;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Apply smoothing to data grids before contouring.";
-  p_help = "0 = Off, 1 = single pass, 2 = double pass.";
-} smooth_contours;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Use Alternate (Mdvx) Contouring Routines.";
-  p_help = "Slower - Nicer labeling - Less smooth. Warning - Does not work correctly when data and display origins are different. Works fine in lat/lon projections";
-} use_alt_contours;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Add 1 part in 250 Noise to help smooth contours.";
-  p_help = "";
-} add_noise;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Specify special contour value.";
-  p_help = "Contours at this value will have a wider line.";
-} special_contour_value;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Contour the bad value, by setting bad cells to have min value in data.";
-  p_help = "Sometimes, for CONTOURING it is useful to make the assumption that the bad and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want bad contoured, set this to TRUE.";
-} map_bad_to_min_value;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Contour the missing value, by setting missing cells to have min value in data.";
-  p_help = "Sometimes, for CONTOURING it is useful to make the assumption that the missing and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want missing contoured, set this to TRUE.";
-} map_missing_to_min_value;
-
-commentdef {
-  p_header = "Overlain fields as layers.";
-  p_text = "Layers are rendered in order. i.e. last layer will be on top.";
-}
-
-typedef struct {
-  string field_name;
-  boolean on_at_startup;
-} layer_field_t;
-
-paramdef struct layer_field_t {
-  p_default = {
-    {
-      field_name = "KCYS-DBZ",
-      on_at_startup = false
-    }
-    ,
-    {
-      field_name = "KPUX-DBZ",
-      on_at_startup = false
-    }
-    ,
-    {
-      field_name = "KGJX-DBZ",
-      on_at_startup = false
-    }
-    ,
-    {
-      field_name = "KGLD-DBZ",
-      on_at_startup = false
-    }
-    ,
-    {
-      field_name = "KLNX-DBZ",
-      on_at_startup = false
-    }
-  };
-  p_descr = "Field for layers as overlays.";
-  p_help =
-    "/nfield_name: name of field in GRIDS list. "
-    "/non_at_startup: field on when app starts."
-    "/n";
-} layer_fields[];
-
-commentdef {
-  p_header = "Overall rendering order.";
-  p_text = "";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "TRUE: render main field first, then layers.";
-  p_help = "FALSE: render main field on top of layers.";
-} draw_main_on_top;
-
-commentdef {
-  p_header = "Marking click location from separate app.";
-  p_text = "CIDD can cooperate with a secondary app, receiving click details via shared memo";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to mark latest click location from client app.";
-  p_help = "";
-} mark_latest_click_location;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Size of marker at latest click location (pixels).";
-  p_help = "Location clicked in client app.";
-} latest_click_mark_size;
-
 /*********************************************************
  * parameter definitions for Qucid
  *
@@ -1977,13 +1375,10 @@ paramdef struct dexport_t {
 } dexport_info[];
 
 /////////////////////////////////////////////////////////////////////////
-// paramdef.CIDD_syprods
-//
-// This file contains the TDRP parameter definitions for CIDD
-//
+// <SYMPRODS>
 
-ccommentdef {
-  p_header = "CIDD's TDRP parameters for product rendering.";
+commentdef {
+  p_header = "<SYMPRODS>.";
 }
 
 typedef enum {
@@ -2108,6 +1503,10 @@ paramdef struct symprod_prod_info_t {
 
 } symprod_prod_info[];
 
+commentdef {
+  p_header = "</SYMPRODS>.";
+}
+
 //////////////////////////////////////////////////////////
 // paramdef.Cidd_terrain: Parameter definitions for
 // Terrain Data
@@ -2188,7 +1587,7 @@ paramdef string {
 // This file contains the TDRP parameter definitions for handling some
 // of the CIDD image generation options.
 
-ccommentdef {
+commentdef {
   p_header = "CIDD's TDRP parameters for image generation.";
 }
 
@@ -3245,6 +2644,608 @@ paramdef boolean {
   p_descr = "Compute click posn in coords relative to display origin.";
   p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
 } click_posn_rel_to_origin;
+
+commentdef {
+  p_header = "TIME_CONTROL_GUI";
+  p_text = "";
+}
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Time Control (Movie) Pop-up Colors.";
+  p_help = "";
+} epoch_indicator_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of current time tick.";
+  p_help = "";
+} now_time_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of time ticks - main grid.";
+  p_help = "";
+} time_tick_color;
+
+paramdef string {
+  p_default = { "cyan", "yellow", "magenta", "green", "red", "blue" };
+  p_descr = "List of colors for time ticks for symbolic products.";
+  p_help = "The time ticks are drawn in order, from top down, in the time control GUI.";
+} time_tick_colors[];
+
+commentdef {
+  p_header = "Mode flags.";
+  p_text = "";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Show the height selector in the right margin.";
+  p_help = "oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.";
+} show_height_sel;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Show data status messages at top of image.";
+  p_help = "There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.";
+} show_data_messages;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Sets the format for output of Lat, Lon's.";
+  p_help = "0= Decimal Degrees, 1 = deg min' sec'.";
+} latlon_mode;
+
+paramdef string {
+  p_default = "%m/%d/%y %H:%M:%S";
+  p_descr = "Set the format for the time strings.";
+  p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
+} label_time_format;
+
+paramdef string {
+  p_default = "%H:%M %m/%d/%Y";
+  p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
+  p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
+} moviestart_time_format;
+
+paramdef string {
+  p_default = "%H:%M";
+  p_descr = "Set the format for the time strings in the frame range text fields.";
+  p_help = "";
+} frame_range_time_format;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot a Legend for each Grid overlay.";
+  p_help = "";
+} layer_legends_on;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot a Legend for each Contour overlay.";
+  p_help = "";
+} cont_legends_on;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot a Legend for each Wind overlay.";
+  p_help = "";
+} wind_legends_on;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Switch to turn off all data labels on the display.";
+  p_help = "";
+} display_labels;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Switch to turn on/off Height, Route and Wind Scale reference lines.";
+  p_help = "";
+} display_ref_lines;
+
+commentdef {
+  p_header = "Window sizes.";
+  p_text = "Window width and height is specified in pixels.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} horiz_default_x_pos;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} horiz_default_y_pos;
+
+paramdef int {
+  p_default = 800;
+  p_descr = "Default width of main window (pixels).";
+  p_help = "Height of main window at startup.";
+} horiz_default_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Default height of main window (pixels).";
+  p_help = "Width of main window at startup.";
+} horiz_default_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_min_height;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} vert_default_x_pos;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} vert_default_y_pos;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Default width of vert section window (pixels).";
+  p_help = "Height of vert section window at startup.";
+} vert_default_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Default height of vert section window (pixels).";
+  p_help = "Width of vert section window at startup.";
+} vert_default_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of vert section window (pixels).";
+  p_help = "The user cannot shrink the vert section window smaller than this.";
+} vert_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of vert section window (pixels).";
+  p_help = "The user cannot shrink the vert section window smaller than this.";
+} vert_min_height;
+
+commentdef {
+  p_header = "Margin details.";
+  p_text = "Margins are specified in pixels.";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "TOP Margin styles.";
+  p_help = " 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label";
+} top_margin_render_style;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Bottom Margin Styles.";
+  p_help = "1 - Distance Scale. 2 - Time Scale.";
+} bot_margin_render_style;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin (pixels).";
+  p_help = "Size of top margin for main window.";
+} horiz_top_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin (pixels).";
+  p_help = "Size of bottom margin for main window.";
+} horiz_bot_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of left margin (pixels).";
+  p_help = "Size of left margin for main window.";
+} horiz_left_margin;
+
+paramdef int {
+  p_default = 80;
+  p_descr = "Width of right margin (pixels).";
+  p_help = "Size of right margin for main window.";
+} horiz_right_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin (pixels).";
+  p_help = "Size of top margin for vert section window.";
+} vert_top_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin (pixels).";
+  p_help = "Size of bottom margin for vert section window.";
+} vert_bot_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of left margin (pixels).";
+  p_help = "Size of left margin for vert section window.";
+} vert_left_margin;
+
+paramdef int {
+  p_default = 80;
+  p_descr = "Width of right margin (pixels).";
+  p_help = "Size of right margin for vert section window.";
+} vert_right_margin;
+
+commentdef {
+  p_header = "Legends displayed within the plot window.";
+  p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Horizontal window legends start x position (pixels).";
+  p_help = "Relative to top left of window.";
+} horiz_legends_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Horizontal window legends start y position (pixels).";
+  p_help = "Relative to top left of window.";
+} horiz_legends_start_y;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Horizontal window legends spacing (pixels).";
+  p_help = "This is the line spacing between the legends.";
+} horiz_legends_delta_y;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Vertical window legends start x position (pixels).";
+  p_help = "Relative to top left of window.";
+} vert_legends_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Vertical window legends start y position (pixels).";
+  p_help = "Relative to top left of window.";
+} vert_legends_start_y;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Vertical window legends spacing (pixels).";
+  p_help = "This is the line spacing between the legends.";
+} vert_legends_delta_y;
+
+commentdef {
+  p_header = "Draw range rings and azimuth lines.";
+  p_text = "These apply to radars only.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Turn range rings on/off.";
+  p_help = "TRUE means on - i.r. plot range rings.";
+} range_rings;
+
+paramdef double {
+  p_default = 50;
+  p_descr = "Spacing between range rings (km).";
+  p_help = "";
+} range_ring_spacing;
+
+paramdef double {
+  p_default = 500;
+  p_descr = "Maximum range ring (km)";
+  p_help = "";
+} max_ring_range;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot range rings relative to radar location.";
+  p_help = "We get the location from the data. If FALSE, rings are relative to plot origin.";
+} range_ring_follows_data;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Only plot range rings for radar data sets.";
+  p_help = "TRUE turns off rings for non-radar data sets.";
+} range_ring_for_radar_only;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot domain moves with origin of the data set.";
+  p_help = "Shift the domain limits if the data origin shifts.";
+} domain_follows_data;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Spacing in x for range ring labels (pixels).";
+  p_help = "";
+} range_ring_x_space;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Spacing in y for range ring labels (pixels).";
+  p_help = "";
+} range_ring_y_space;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot range ring labels.";
+  p_help = "Label the range for each ring.";
+} range_ring_labels;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Draw azimuth lines for a radar location.";
+  p_help = "These complement range rings, to provide guidance on azimuths for radar gates.";
+} azimuth_lines;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Interval for azimuth lines.";
+  p_help = "If azimuth lines are on.";
+} azimuth_interval;
+
+paramdef double {
+  p_default = 200;
+  p_descr = "Max radius for azimuth lines.";
+  p_help = "If azimuth lines are on.";
+} azimuth_radius;
+
+commentdef {
+  p_header = "Plotting wind vectors.";
+  p_text = "See also the wind layers section.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot all wind layers.";
+  p_help = "Turns on all wind layers.";
+} all_winds_on;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Activate wind rendering.";
+  p_help = "TO DO - check how this works.";
+} wind_mode;
+
+paramdef int {
+  p_default = 33;
+  p_descr = "Wind barb shaft length (pixels).";
+  p_help = "";
+} barb_shaft_len;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Ideal number of vectors in the x dimension.";
+  p_help = "The display will space the wind vectors in x accordingly.";
+} ideal_x_vectors;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Ideal number of vectors in the y dimension.";
+  p_help = "The display will space the wind vectors in y accordingly.";
+} ideal_y_vectors;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Minimum arrow head size for wind vectors (pixels).";
+  p_help = "";
+} wind_head_size;
+
+paramdef double {
+  p_default = 45;
+  p_descr = "Angle of arrow head for wind vectors (deg).";
+  p_help = "";
+} wind_head_angle;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "The display will space the wind vectors in x accordingly.";
+  p_help = "Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.";
+} wind_scaler;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "inutes between steps on the wind scaling slider.";
+  p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
+} wind_time_scale_interval;
+
+paramdef string {
+  p_default = "arrow";
+  p_descr = "Wind vector rendering style.";
+  p_help = "'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.";
+} wind_marker_type;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";
+  p_help = "W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.";
+} wind_w_scale_factor;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Value to convert from the your reference speed units to m/sec. ";
+  p_help = "i.e. wind_units_scale_factor =  m/sec / chosen units.";
+} wind_units_scale_factor;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Sets the length of the wind vector reference legend.";
+  p_help = "The legend shows a symbos representing a wind speed of this value.";
+} wind_reference_speed;
+
+paramdef string {
+  p_default = "m/sec";
+  p_descr = "Select the label to be printed next to the reference bar.";
+  p_help = "";
+} wind_units_label;
+
+commentdef {
+  p_header = "Plotting contours in data fields.";
+  p_text = "In the data layers section you can select contour plotting.";
+}
+
+typedef struct {
+  string field_name;
+  string color;
+  boolean on_at_startup;
+} contour_field_t;
+
+paramdef struct contour_field_t {
+  p_default = {
+    {
+      field_name = "FzLevel",
+      color = "red",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "SURF_T",
+      color = "white",
+      on_at_startup = true
+    }
+  };
+  p_descr = "Fields to be contoured.";
+  p_help =
+    "/nfield_name: name of field in GRIDS list. "
+    "/ncolor: color for contour lines. "
+    "/non_at_startup: field on when app starts."
+    "/n";
+} contour_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Set to TRUE to have numeric labels on line contours.";
+  p_help = "";
+} label_contours;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of contour lines.";
+  p_help = "";
+} contour_line_width;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Apply smoothing to data grids before contouring.";
+  p_help = "0 = Off, 1 = single pass, 2 = double pass.";
+} smooth_contours;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use Alternate (Mdvx) Contouring Routines.";
+  p_help = "Slower - Nicer labeling - Less smooth. Warning - Does not work correctly when data and display origins are different. Works fine in lat/lon projections";
+} use_alt_contours;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Add 1 part in 250 Noise to help smooth contours.";
+  p_help = "";
+} add_noise;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Specify special contour value.";
+  p_help = "Contours at this value will have a wider line.";
+} special_contour_value;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Contour the bad value, by setting bad cells to have min value in data.";
+  p_help = "Sometimes, for CONTOURING it is useful to make the assumption that the bad and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want bad contoured, set this to TRUE.";
+} map_bad_to_min_value;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Contour the missing value, by setting missing cells to have min value in data.";
+  p_help = "Sometimes, for CONTOURING it is useful to make the assumption that the missing and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want missing contoured, set this to TRUE.";
+} map_missing_to_min_value;
+
+commentdef {
+  p_header = "Overlain fields as layers.";
+  p_text = "Layers are rendered in order. i.e. last layer will be on top.";
+}
+
+typedef struct {
+  string field_name;
+  boolean on_at_startup;
+} layer_field_t;
+
+paramdef struct layer_field_t {
+  p_default = {
+    {
+      field_name = "KCYS-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KPUX-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KGJX-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KGLD-DBZ",
+      on_at_startup = false
+    }
+    ,
+    {
+      field_name = "KLNX-DBZ",
+      on_at_startup = false
+    }
+  };
+  p_descr = "Field for layers as overlays.";
+  p_help =
+    "/nfield_name: name of field in GRIDS list. "
+    "/non_at_startup: field on when app starts."
+    "/n";
+} layer_fields[];
+
+commentdef {
+  p_header = "Overall rendering order.";
+  p_text = "";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "TRUE: render main field first, then layers.";
+  p_help = "FALSE: render main field on top of layers.";
+} draw_main_on_top;
+
+commentdef {
+  p_header = "Marking click location from separate app.";
+  p_text = "CIDD can cooperate with a secondary app, receiving click details via shared memo";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to mark latest click location from client app.";
+  p_help = "";
+} mark_latest_click_location;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Size of marker at latest click location (pixels).";
+  p_help = "Location clicked in client app.";
+} latest_click_mark_size;
 
 commentdef {
   p_header = "<FONTS>";

@@ -184,17 +184,6 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* field_name;
-    char* color;
-    tdrp_bool_t on_at_startup;
-  } contour_field_t;
-
-  typedef struct {
-    char* field_name;
-    tdrp_bool_t on_at_startup;
-  } layer_field_t;
-
-  typedef struct {
     tdrp_bool_t azimuth;
     tdrp_bool_t elevation;
     tdrp_bool_t fixed_angle;
@@ -308,6 +297,17 @@ public:
     double max_x;
     double max_y;
   } zoom_level_t;
+
+  typedef struct {
+    char* field_name;
+    char* color;
+    tdrp_bool_t on_at_startup;
+  } contour_field_t;
+
+  typedef struct {
+    char* field_name;
+    tdrp_bool_t on_at_startup;
+  } layer_field_t;
 
   typedef struct {
     char* label;
@@ -612,173 +612,6 @@ public:
   char _start_; // start of data region
                 // needed for zeroing out data
                 // and computing offsets
-
-  char* epoch_indicator_color;
-
-  char* now_time_color;
-
-  char* time_tick_color;
-
-  char* *_time_tick_colors;
-  int time_tick_colors_n;
-
-  tdrp_bool_t show_height_sel;
-
-  tdrp_bool_t show_data_messages;
-
-  int latlon_mode;
-
-  char* label_time_format;
-
-  char* moviestart_time_format;
-
-  char* frame_range_time_format;
-
-  tdrp_bool_t layer_legends_on;
-
-  tdrp_bool_t cont_legends_on;
-
-  tdrp_bool_t wind_legends_on;
-
-  tdrp_bool_t display_labels;
-
-  tdrp_bool_t display_ref_lines;
-
-  int horiz_default_x_pos;
-
-  int horiz_default_y_pos;
-
-  int horiz_default_width;
-
-  int horiz_default_height;
-
-  int horiz_min_width;
-
-  int horiz_min_height;
-
-  int vert_default_x_pos;
-
-  int vert_default_y_pos;
-
-  int vert_default_width;
-
-  int vert_default_height;
-
-  int vert_min_width;
-
-  int vert_min_height;
-
-  int top_margin_render_style;
-
-  int bot_margin_render_style;
-
-  int horiz_top_margin;
-
-  int horiz_bot_margin;
-
-  int horiz_left_margin;
-
-  int horiz_right_margin;
-
-  int vert_top_margin;
-
-  int vert_bot_margin;
-
-  int vert_left_margin;
-
-  int vert_right_margin;
-
-  int horiz_legends_start_x;
-
-  int horiz_legends_start_y;
-
-  int horiz_legends_delta_y;
-
-  int vert_legends_start_x;
-
-  int vert_legends_start_y;
-
-  int vert_legends_delta_y;
-
-  tdrp_bool_t range_rings;
-
-  double range_ring_spacing;
-
-  double max_ring_range;
-
-  tdrp_bool_t range_ring_follows_data;
-
-  tdrp_bool_t range_ring_for_radar_only;
-
-  tdrp_bool_t domain_follows_data;
-
-  int range_ring_x_space;
-
-  int range_ring_y_space;
-
-  tdrp_bool_t range_ring_labels;
-
-  tdrp_bool_t azimuth_lines;
-
-  double azimuth_interval;
-
-  double azimuth_radius;
-
-  tdrp_bool_t all_winds_on;
-
-  tdrp_bool_t wind_mode;
-
-  int barb_shaft_len;
-
-  int ideal_x_vectors;
-
-  int ideal_y_vectors;
-
-  int wind_head_size;
-
-  double wind_head_angle;
-
-  int wind_scaler;
-
-  double wind_time_scale_interval;
-
-  char* wind_marker_type;
-
-  double wind_w_scale_factor;
-
-  double wind_units_scale_factor;
-
-  double wind_reference_speed;
-
-  char* wind_units_label;
-
-  contour_field_t *_contour_fields;
-  int contour_fields_n;
-
-  tdrp_bool_t label_contours;
-
-  int contour_line_width;
-
-  int smooth_contours;
-
-  tdrp_bool_t use_alt_contours;
-
-  tdrp_bool_t add_noise;
-
-  double special_contour_value;
-
-  tdrp_bool_t map_bad_to_min_value;
-
-  tdrp_bool_t map_missing_to_min_value;
-
-  layer_field_t *_layer_fields;
-  int layer_fields_n;
-
-  tdrp_bool_t draw_main_on_top;
-
-  tdrp_bool_t mark_latest_click_location;
-
-  int latest_click_mark_size;
 
   debug_t debug;
 
@@ -1402,6 +1235,173 @@ public:
 
   tdrp_bool_t click_posn_rel_to_origin;
 
+  char* epoch_indicator_color;
+
+  char* now_time_color;
+
+  char* time_tick_color;
+
+  char* *_time_tick_colors;
+  int time_tick_colors_n;
+
+  tdrp_bool_t show_height_sel;
+
+  tdrp_bool_t show_data_messages;
+
+  int latlon_mode;
+
+  char* label_time_format;
+
+  char* moviestart_time_format;
+
+  char* frame_range_time_format;
+
+  tdrp_bool_t layer_legends_on;
+
+  tdrp_bool_t cont_legends_on;
+
+  tdrp_bool_t wind_legends_on;
+
+  tdrp_bool_t display_labels;
+
+  tdrp_bool_t display_ref_lines;
+
+  int horiz_default_x_pos;
+
+  int horiz_default_y_pos;
+
+  int horiz_default_width;
+
+  int horiz_default_height;
+
+  int horiz_min_width;
+
+  int horiz_min_height;
+
+  int vert_default_x_pos;
+
+  int vert_default_y_pos;
+
+  int vert_default_width;
+
+  int vert_default_height;
+
+  int vert_min_width;
+
+  int vert_min_height;
+
+  int top_margin_render_style;
+
+  int bot_margin_render_style;
+
+  int horiz_top_margin;
+
+  int horiz_bot_margin;
+
+  int horiz_left_margin;
+
+  int horiz_right_margin;
+
+  int vert_top_margin;
+
+  int vert_bot_margin;
+
+  int vert_left_margin;
+
+  int vert_right_margin;
+
+  int horiz_legends_start_x;
+
+  int horiz_legends_start_y;
+
+  int horiz_legends_delta_y;
+
+  int vert_legends_start_x;
+
+  int vert_legends_start_y;
+
+  int vert_legends_delta_y;
+
+  tdrp_bool_t range_rings;
+
+  double range_ring_spacing;
+
+  double max_ring_range;
+
+  tdrp_bool_t range_ring_follows_data;
+
+  tdrp_bool_t range_ring_for_radar_only;
+
+  tdrp_bool_t domain_follows_data;
+
+  int range_ring_x_space;
+
+  int range_ring_y_space;
+
+  tdrp_bool_t range_ring_labels;
+
+  tdrp_bool_t azimuth_lines;
+
+  double azimuth_interval;
+
+  double azimuth_radius;
+
+  tdrp_bool_t all_winds_on;
+
+  tdrp_bool_t wind_mode;
+
+  int barb_shaft_len;
+
+  int ideal_x_vectors;
+
+  int ideal_y_vectors;
+
+  int wind_head_size;
+
+  double wind_head_angle;
+
+  int wind_scaler;
+
+  double wind_time_scale_interval;
+
+  char* wind_marker_type;
+
+  double wind_w_scale_factor;
+
+  double wind_units_scale_factor;
+
+  double wind_reference_speed;
+
+  char* wind_units_label;
+
+  contour_field_t *_contour_fields;
+  int contour_fields_n;
+
+  tdrp_bool_t label_contours;
+
+  int contour_line_width;
+
+  int smooth_contours;
+
+  tdrp_bool_t use_alt_contours;
+
+  tdrp_bool_t add_noise;
+
+  double special_contour_value;
+
+  tdrp_bool_t map_bad_to_min_value;
+
+  tdrp_bool_t map_missing_to_min_value;
+
+  layer_field_t *_layer_fields;
+  int layer_fields_n;
+
+  tdrp_bool_t draw_main_on_top;
+
+  tdrp_bool_t mark_latest_click_location;
+
+  int latest_click_mark_size;
+
   char* *_fonts;
   int fonts_n;
 
@@ -1482,7 +1482,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[492];
+  mutable TDRPtable _table[495];
 
   const char *_className;
 
