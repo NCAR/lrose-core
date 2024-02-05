@@ -1320,30 +1320,6 @@ paramdef string {
 } click_point_fmq_url;
 
 //////////////////////////////////////////////////////////
-// paramdef.Cidd_gui: Parameter definitions for gui configuration
-
-commentdef {
-  p_header = "CIDD GUI Configuration Parameters";
-};
-
-typedef struct {
-  char* id_label;
-  char* grid_list;
-} gui_field_set_t;
-
-paramdef struct gui_field_set_t {
-  p_descr = " Groups Grids into Sets";
-  p_help = " Each Entry needs:\n"
-  "ID_Label  List\n"
-  "\tList - Space Delimited list of grid legend names match strings.\n"
-  "\tIf a group is \"ON\", then any grid whose legend label contains any "
-  " of the match strings in the group list becomes active.\n"
-   "\n";
-  p_default = {
-  };
-} gui_field_list[];
-
-//////////////////////////////////////////////////////////
 // paramdef.Cidd_Draw: Parameter definitions for Human Drawn
 // Products
 

@@ -260,11 +260,6 @@ public:
 
   typedef struct {
     char* id_label;
-    char* grid_list;
-  } gui_field_set_t;
-
-  typedef struct {
-    char* id_label;
     char* url;
     double valid_minutes;
     int default_id_no;
@@ -917,9 +912,6 @@ public:
 
   char* click_point_fmq_url;
 
-  gui_field_set_t *_gui_field_list;
-  int gui_field_list_n;
-
   dexport_t *_dexport_info;
   int dexport_info_n;
 
@@ -1482,7 +1474,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[495];
+  mutable TDRPtable _table[493];
 
   const char *_className;
 
