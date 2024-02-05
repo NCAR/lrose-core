@@ -1568,10 +1568,6 @@ vsection_spec = {
 </IMAGE_GENERATION>
 
 <SYMPRODS>
-/**********************************************************************
- * TDRP params for Csyprod_P
- **********************************************************************/
-
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
@@ -1579,9 +1575,8 @@ vsection_spec = {
 //
 // Type: enum
 // Options:
-//     DEBUG_OFF
-//     DEBUG_NORM
-//     DEBUG_VERBOSE
+//   DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+//
 //
 
 debug = DEBUG_OFF;
@@ -1589,129 +1584,222 @@ debug = DEBUG_OFF;
 ///////////// short_requests //////////////////////////
 //
 // Gather Data Frame by Frame, Otherwise by loop span.
-// Gathers Products valid for the current frame only - Speeds up 
-//   gathering of large data sets, like METAR data.
-//
+// Gathers Products valid for the current frame only.
 // Type: boolean
 //
-
-short_requests = FALSE;
-
-///////////// gzip_requests ///////////////////////////
-//
-// Request data using GZIP compression.
-// If true, symprod data will be GZIP compressed by the server.
-//
-// Type: boolean
-//
-
-gzip_requests = FALSE;
+   
+short_requests = TRUE;
 
 ///////////// prod_info ///////////////////////////////
 //
-// Product Source and Rendering Information Array.
+// Product Source and Rendering Information Array
 // The fields in the structure are as follows:
-//
-//   menu_label: label to be used for the product in menu.
+//   menu_label: Label to be used for the product in menu.
 //
 //   url: for retrieving the data.
-//     example: 
-//   spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2
 //
-//   data_type: used when querying the SPDB data server
-//     (set to 0 to retrieve all data).
+//   data_type: data type used when querying the SPDB data server
+//     (set to 0 to retrieve all data regardless of type).
+//
+//   url: URL for the data. -
+//     example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2
 //
 //   render_type: Select how temporal clipping is done:
-//     RENDER_ALL: Do no temporal clipping.
-//     RENDER_ALL_VALID: Render all Valid in frame
-//     RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame
-//     RENDER_LATEST_IN_FRAME: Render the latest product of like 
-//   data_types (ID)  in the frame.
-//     RENDER_LATEST_IN_LOOP:  Render the latest product of like 
-//   data_types (ID)  valid in the movie loop.
-//     RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of 
-//   like data_types (ID) before the end of frame time
-//     RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of 
-//   like data_types (ID  before the data time in each frame.
-//     RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product 
-//   after the data time in each frame.
-//     RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before 
-//   the data time in each frame.
-//     RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after 
-//   the data time in each frame.
-//     RENDER_GET_VALID:      Render all valid products returned with a 
-//   GetValid Spdb call.
-//     RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not 
-//   expired at the frame time
-//
-// Note: all comparisons are less than or equal or greater than or equal
+//      RENDER_ALL: Do no temporal clipping.
+//      RENDER_ALL_VALID: Render all Valid in frame
+//      RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame
+//      RENDER_LATEST_IN_FRAME: Render the latest product in the frame.
+//      RENDER_LATEST_IN_LOOP:  Render the latest product valid in the movie loop
+//      RENDER_FIRST_BEFORE_DATA_TIME: Render the latest product before the data time in each frame.
+//      RENDER_FIRST_AFTER_DATA_TIME:Render the earliest product after the data time in each frame.
+//      RENDER_ALL_BEFORE_DATA_TIME: Render all valid products before the data time in each frame.
+//      RENDER_ALL_AFTER_DATA_TIME:  Render all valid products after the data time in each frame.
+//        Note: all comparisions are less than or equal or greater than or equal  
 //
 //   on_by_default: True or False
 //
-//   minutes_allow_before: Stretch the frame time this many minutes - 
-//   prior
-//   minutes_allow_after: Stretch the frame time this many minutes - 
-//   after
+//   minutes_allow_before: Stretch the frame time this many minutes - prior
+//   minutes_allow_after: Stretch the frame time this many minutes - after
+//        When using data time modes, these allowances effectively widen
+//        The temporal limits.
 //
-//   text_off_threshold: Threshold where text disappears. Use the 
-//   function:
-//       log10(scaling_constant/km_distance_across_screen ) + 1.0
-//       Use 0.0 to disable the off feature. (always displayed)
-//
-//   request_data_on_zoom: Flag indicating whether to request new data 
-//   for
-//       this product whenever the user changes the zoom.  Normally, 
-//   this
-//       should be set to false for efficiency reasons.  If the products
-//       to be rendered would change with a zoom change then this should 
-//   be
-//       set to true.
-//
-//   request_data_on_vert_change: Flag indicating whether to request new 
-//   data
-//       for this product whenever the user changes the currently 
-//   displayed
-//       vertical level.  Normally, this should be set to false for 
-//   efficiency
-//       reasons.  If the products to be rendered would change with a 
-//   zoom
-//       change then this should be set to true.
-//
-// Type: struct
-//   typedef struct {
-//      string menu_label;
-//      string url;
-//      int data_type;
-//      render_type_t render_type;
-//        Options:
-//          RENDER_ALL
-//          RENDER_ALL_VALID
-//          RENDER_VALID_IN_LAST_FRAME
-//          RENDER_LATEST_IN_FRAME
-//          RENDER_LATEST_IN_LOOP
-//          RENDER_FIRST_BEFORE_FRAME_TIME
-//          RENDER_FIRST_BEFORE_DATA_TIME
-//          RENDER_FIRST_AFTER_DATA_TIME
-//          RENDER_ALL_BEFORE_DATA_TIME
-//          RENDER_ALL_AFTER_DATA_TIME
-//          RENDER_GET_VALID
-//          RENDER_GET_VALID_AT_FRAME_TIME
-//      boolean on_by_default;
-//      double minutes_allow_before;
-//      double minutes_allow_after;
-//      double text_off_threshold;
-//      boolean request_data_on_zoom;
-//      boolean request_data_on_vert_change;
-//   }
-//
-// 1D array - variable length.
-//
+//  text_off_threshold: Threshold where text disappears. Usees the function:
+//         log10(scale_constant /km_distance_across_screen ) + 1.0
+//         Use 0 to disable the off feature. (always displayed)
+//         Note: scale_constant set in MAIN_PARAM section.      
 
 prod_info = {
-  { "RHI-ticks", "spdbp:Rhi2Symprod://localhost::spdb/rhi", 0, RENDER_ALL_VALID, FALSE, 20, 10, 0.4, FALSE, FALSE}
+  {
+    menu_label = "RHI-spol",
+    url = "spdbp:Rhi2Symprod:ticks//front.eol.ucar.edu:8080:pecan/spdb/spol/rhi/sband?use_http=true",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = TRUE,
+    minutes_allow_before = 20,
+    minutes_allow_after = 10,
+    text_off_threshold = 0.4,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "METARS-simple",
+    url = "spdbp:Metar2Symprod:simple//front.eol.ucar.edu:8080:pecan/spdb/metar?use_http=true",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "METARS-full",
+    url = "spdbp:Metar2Symprod:labels//front.eol.ucar.edu:8080:pecan/spdb/metar?use_http=true",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "MADIS-simple",
+    url = "spdbp:Metar2Symprod:simple//front.eol.ucar.edu:8080:pecan/spdb/madis?use_http=true",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "MADIS-full",
+    url = "spdbp:Metar2Symprod:labels//front.eol.ucar.edu:8080:pecan/spdb/madis?use_http=true",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "NLDN-15" ,
+    url = "spdbp:Ltg2Symprod://front.eol.ucar.edu:8080:pecan/spdb/ltg/nldn?use_http=true",
+    data_type = 0,
+    render_type = RENDER_ALL_BEFORE_DATA_TIME,
+    on_by_default = FALSE,
+    minutes_allow_before = 15.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    FALSE,
+    FALSE
+  }
+  ,                        
+  {
+    menu_label = "AcPosn 10-min",
+    url = "spdbp:AcTrack2Symprod:10_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true",
+    data_type = 0,
+    render_type = RENDER_FIRST_BEFORE_FRAME_TIME,
+    on_by_default = FALSE,
+    minutes_allow_before = 15.0,
+    minutes_allow_after = 15.0,
+    text_off_threshold = 0.4,
+    FALSE,
+    FALSE
+  }
+  ,                        
+  {
+    menu_label = "AcPosn 20-min",
+    url = "spdbp:AcTrack2Symprod:20_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true",
+    data_type = 0,
+    render_type = RENDER_FIRST_BEFORE_FRAME_TIME,
+    on_by_default = FALSE,
+    minutes_allow_before = 15.0,
+    minutes_allow_after = 15.0,
+    text_off_threshold = 0.4,
+    FALSE,
+    FALSE
+  }
+  ,                        
+  {
+    menu_label = "AcPosn 30-min",
+    url = "spdbp:AcTrack2Symprod:30_min//front.eol.ucar.edu:8080:pecan/spdb/ac_posn?use_http=true",
+    data_type = 0,
+    render_type = RENDER_FIRST_BEFORE_FRAME_TIME,
+    on_by_default = FALSE,
+    minutes_allow_before = 15.0,
+    minutes_allow_after = 15.0,
+    text_off_threshold = 0.4,
+    FALSE,
+    FALSE
+  }
+  ,                        
+  {
+    menu_label = "MobilePosn",
+    url = "spdbp:AcTrack2Symprod:mobile//front.eol.ucar.edu:8080:pecan/spdb/mobile_posn?use_http=true",
+    data_type = 0,
+    render_type = RENDER_ALL_BEFORE_DATA_TIME,
+    on_by_default = FALSE,
+    minutes_allow_before = 60.0,
+    minutes_allow_after = 60.0,
+    text_off_threshold = 0.4,
+    FALSE,
+    FALSE
+  }
+  ,
+  {
+    menu_label = "titan-forecast 60-min",
+    url = "spdbp:Tstorms2Symprod:60min//front.eol.ucar.edu:8080:pecan/spdb/tstorms/mrms_conv?use_http=true",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = FALSE,
+    minutes_allow_before = 20.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0,
+    FALSE,
+    FALSE
+  }
+  ,
+  {
+    menu_label = "precip_front_range",
+    url = "spdbp:Metar2Symprod://front.eol.ucar.edu:8080:pecan/spdb/precip/front_range?use_http=true",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 300.0,
+    minutes_allow_after = 300.0,
+    text_off_threshold = 0,
+    FALSE,
+    FALSE
+  }
+  ,
+  {
+    menu_label = "precip_ncdc",
+    url = "spdbp:Metar2Symprod://front.eol.ucar.edu:8080:pecan/spdb/precip/ncdc?use_http=true",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 300.0,
+    minutes_allow_after = 300.0,
+    text_off_threshold = 0,
+    FALSE,
+    FALSE
+  }
 };
 
-</SYMPRODS>
+</SYMPRODS> 
 
 <TERRAIN>
 /**********************************************************************

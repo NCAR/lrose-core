@@ -77,7 +77,6 @@ private:
   // basic
 
   string _progName;
-  Params _params;
   Args _args;
 
   // reading data in

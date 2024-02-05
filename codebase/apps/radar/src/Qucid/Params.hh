@@ -1472,8 +1472,8 @@ public:
 
   double scale_constant;
 
-  product_adjustment_t *_poduct_adjustments;
-  int poduct_adjustments_n;
+  product_adjustment_t *_product_adjustments;
+  int product_adjustments_n;
 
   char _end_; // end of data region
               // needed for zeroing out data

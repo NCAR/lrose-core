@@ -395,6 +395,7 @@ private:
   int _readWinds();
   WindRenderMode _getWindRenderMode(const char* markerStr);
   int _readMaps();
+  int _readSymprods();
 
   int _initDrawExportLinks();
   

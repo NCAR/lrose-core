@@ -153,6 +153,12 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
     
+  // read in symprods from old tdrp section, write to main params
+  
+  if (_readSymprods()) {
+    return -1;
+  }
+    
 #ifdef JUNK
 
   if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
@@ -1860,7 +1866,7 @@ int LegacyParams::_readMainParams()
 
   // write to TDRP
   
-  fprintf(_tdrpFile, "poduct_adjustments = {\n");
+  fprintf(_tdrpFile, "product_adjustments = {\n");
   for(size_t ii = 0; ii < adjs.size(); ii++) {
     ProdAdjustment &adj = adjs[ii];
     fprintf(_tdrpFile, "  {\n");
@@ -2587,6 +2593,140 @@ int LegacyParams::_readMaps()
   fprintf(_tdrpFile, "// </MAPS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
+  return 0;
+  
+}
+
+/************************************************************************
+ * Read in symprods
+ */
+
+int LegacyParams::_readSymprods()
+  
+{
+
+  // Instantiate the symprods params object, which will load the defaults
+  
+  Csyprod_P symprod;
+
+  // read in SYMPRODS buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"SYMPRODS",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No SYMPRODS Section in params\n");
+    fprintf(stderr,"  will use the defaults\n");
+  } else {
+    // Set the symprod object from the buffer
+    if(symprod.loadFromBuf("SYMPRODS TDRP Section",
+                           NULL,param_text,
+                           param_text_len,
+                           param_text_line_no,
+                           TRUE, FALSE) < 0) {
+      fprintf(stderr,"Problems with the <SYMPRODS> parameters in legacy paramsfile.\n");
+      fprintf(stderr,"Please fix.\n");
+      return -1;
+    }
+  }
+
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <SYMPRODS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  switch (symprod.debug) {
+    case Csyprod_P::DEBUG_OFF:
+      fprintf(_tdrpFile, "symprod_debug = SYMPROD_DEBUG_OFF;\n");
+      break;
+    case Csyprod_P::DEBUG_NORM:
+      fprintf(_tdrpFile, "symprod_debug = SYMPROD_DEBUG_NORM;\n");
+      break;
+    case Csyprod_P::DEBUG_VERBOSE:
+      fprintf(_tdrpFile, "symprod_debug = SYMPROD_DEBUG_VERBOSE;\n");
+      break;
+  }
+
+  fprintf(_tdrpFile, "symprod_short_requests = %s;\n",
+          (symprod.short_requests?"TRUE":"FALSE"));
+    
+  fprintf(_tdrpFile, "symprod_gzip_requests = %s;\n",
+          (symprod.gzip_requests?"TRUE":"FALSE"));
+
+  fprintf(_tdrpFile, "symprod_prod_info = {\n");
+  
+  for (int ii = 0; ii < symprod.prod_info_n; ii++) {
+    
+    Csyprod_P::prod_info_t &info = symprod._prod_info[ii];
+    
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    menu_label = \"%s\",\n", info.menu_label);
+    fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
+    fprintf(_tdrpFile, "    data_type = %d,\n", info.data_type);
+    switch (info.render_type) {
+      case Csyprod_P::RENDER_ALL:
+        fprintf(_tdrpFile, "    render_type = RENDER_ALL,\n");
+        break;
+      case Csyprod_P::RENDER_ALL_VALID:
+        fprintf(_tdrpFile, "    render_type = RENDER_ALL_VALID,\n");
+        break;
+      case Csyprod_P::RENDER_VALID_IN_LAST_FRAME:
+        fprintf(_tdrpFile, "    render_type = RENDER_VALID_IN_LAST_FRAME,\n");
+        break;
+      case Csyprod_P::RENDER_LATEST_IN_FRAME:
+        fprintf(_tdrpFile, "    render_type = RENDER_LATEST_IN_FRAME,\n");
+        break;
+      case Csyprod_P::RENDER_LATEST_IN_LOOP:
+        fprintf(_tdrpFile, "    render_type = RENDER_LATEST_IN_LOOP,\n");
+        break;
+      case Csyprod_P::RENDER_FIRST_BEFORE_FRAME_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_BEFORE_FRAME_TIME,\n");
+        break;
+      case Csyprod_P::RENDER_FIRST_BEFORE_DATA_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_BEFORE_DATA_TIME,\n");
+        break;
+      case Csyprod_P::RENDER_FIRST_AFTER_DATA_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_AFTER_DATA_TIME,\n");
+        break;
+      case Csyprod_P::RENDER_ALL_BEFORE_DATA_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_ALL_BEFORE_DATA_TIME,\n");
+        break;
+      case Csyprod_P::RENDER_ALL_AFTER_DATA_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_ALL_AFTER_DATA_TIME,\n");
+        break;
+      case Csyprod_P::RENDER_GET_VALID:
+        fprintf(_tdrpFile, "    render_type = RENDER_GET_VALID,\n");
+        break;
+      case Csyprod_P::RENDER_GET_VALID_AT_FRAME_TIME:
+        fprintf(_tdrpFile, "    render_type = RENDER_GET_VALID_AT_FRAME_TIME,\n");
+        break;
+    }
+    fprintf(_tdrpFile, "    on_by_default = %s,\n",
+            (info.on_by_default?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "    minutes_allow_before = %lg,\n",
+            info.minutes_allow_before);
+    fprintf(_tdrpFile, "    minutes_allow_after = %lg,\n",
+            info.minutes_allow_after);
+    fprintf(_tdrpFile, "    text_off_threshold = %lg,\n",
+            info.text_off_threshold);
+    fprintf(_tdrpFile, "    request_data_on_zoom = %s,\n",
+            (info.request_data_on_zoom?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "    request_data_on_vert_change = %s\n",
+            (info.request_data_on_vert_change?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < symprod.prod_info_n - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // ii
+  fprintf(_tdrpFile, "};\n");
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </SYMPRODS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
   return 0;
   
 }

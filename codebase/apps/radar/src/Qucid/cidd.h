@@ -622,7 +622,7 @@ struct    Global_data {
  
 #ifdef CIDD_MAIN
 struct    Global_data gd;
-Params gParams;
+Params _params;
 // Attr_attribute  INSTANCE;
 // Attr_attribute  MENU_KEY;
 int INSTANCE;
@@ -633,7 +633,7 @@ int MENU_KEY;
 
 #ifndef    CIDD_MAIN
 extern    struct    Global_data    gd;
-extern Params gParams;
+extern Params _params;
 // extern Attr_attribute  INSTANCE;
 // extern Attr_attribute  MENU_KEY;
 extern int INSTANCE;

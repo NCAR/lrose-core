@@ -3527,7 +3527,7 @@ paramdef struct product_adjustment_t {
   };
   p_descr = "Thresholds and adjustment for font sizes for products.";
   p_help = "The adjustment increases or decreases the font index. This index is used to choose the font from the fonts[] array. The thresholds are computed as units of km across the image.";
-} poduct_adjustments[];
+} product_adjustments[];
 
 commentdef {
   p_header = "</MAIN>";
