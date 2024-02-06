@@ -3274,49 +3274,49 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'dexport_info'
-    // ctype is '_dexport_t'
+    // Parameter 'draw_export_info'
+    // ctype is '_draw_export_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("dexport_info");
+    tt->param_name = tdrpStrDup("draw_export_info");
     tt->descr = tdrpStrDup("Human Drawn Products for Export Parameters.");
     tt->help = tdrpStrDup(" Each Entry needs:\nID_Label FMQ_URL Valid_Minutes Default_ID_no    ID_LABEL - This is used to designate Product types\n    FMQ_URL: example: fmqp:://host::dir/file \n   Valid_Minutes: How many minutes the product is valid by default\n   Default_ID_no: Default Data Type (Enumerated ID)\n   Default_label: Test to place into Label field by default\n\n");
-    tt->array_offset = (char *) &_dexport_info - &_start_;
-    tt->array_n_offset = (char *) &dexport_info_n - &_start_;
+    tt->array_offset = (char *) &_draw_export_info - &_start_;
+    tt->array_n_offset = (char *) &draw_export_info_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(dexport_t);
+    tt->array_elem_size = sizeof(draw_export_t);
     tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("dexport_t");
+    tt->struct_def.name = tdrpStrDup("draw_export_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("char*");
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
       tt->struct_def.fields[0].fname = tdrpStrDup("id_label");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_dexport_info->id_label - (char *) _dexport_info;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("char*");
+        (char *) &_draw_export_info->id_label - (char *) _draw_export_info;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("url");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_dexport_info->url - (char *) _dexport_info;
+        (char *) &_draw_export_info->url - (char *) _draw_export_info;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("valid_minutes");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_dexport_info->valid_minutes - (char *) _dexport_info;
+        (char *) &_draw_export_info->valid_minutes - (char *) _draw_export_info;
       tt->struct_def.fields[3].ftype = tdrpStrDup("int");
       tt->struct_def.fields[3].fname = tdrpStrDup("default_id_no");
       tt->struct_def.fields[3].ptype = INT_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_dexport_info->default_id_no - (char *) _dexport_info;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("char*");
+        (char *) &_draw_export_info->default_id_no - (char *) _draw_export_info;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
       tt->struct_def.fields[4].fname = tdrpStrDup("default_label");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_dexport_info->default_label - (char *) _dexport_info;
+        (char *) &_draw_export_info->default_label - (char *) _draw_export_info;
     tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

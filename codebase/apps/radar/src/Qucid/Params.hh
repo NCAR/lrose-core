@@ -264,7 +264,7 @@ public:
     double valid_minutes;
     int default_id_no;
     char* default_label;
-  } dexport_t;
+  } draw_export_t;
 
   typedef struct {
     char* menu_label;
@@ -912,8 +912,8 @@ public:
 
   char* click_point_fmq_url;
 
-  dexport_t *_dexport_info;
-  int dexport_info_n;
+  draw_export_t *_draw_export_info;
+  int draw_export_info_n;
 
   symprod_debug_t symprod_debug;
 

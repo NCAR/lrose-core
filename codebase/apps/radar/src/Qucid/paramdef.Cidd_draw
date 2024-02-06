@@ -30,11 +30,11 @@ commentdef {
 };
 
 typedef struct {
-  char* id_label;
-  char* url;
+  string id_label;
+  string url;
   double valid_minutes;
   int default_id_no;
-  char* default_label;
+  string default_label;
 } dexport_t;
 
 paramdef struct dexport_t {

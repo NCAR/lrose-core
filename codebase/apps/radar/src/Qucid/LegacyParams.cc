@@ -171,6 +171,12 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
     
+  // read in draw export from old tdrp section, write to main params
+  
+  if (_readDrawExportTdrp()) {
+    return -1;
+  }
+    
 #ifdef JUNK
 
   // Instantiate and load the TERRAIN TDRP Parameter 
@@ -2904,6 +2910,75 @@ int LegacyParams::_readRouteWindsTdrp()
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </ROUTE_VSECTIONS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  return 0;
+  
+}
+
+/************************************************************************
+ * Read in draw export params
+ */
+
+int LegacyParams::_readDrawExportTdrp()
+  
+{
+
+  // Instantiate the draw params object, which will load the defaults
+  
+  Cdraw_P draw;
+
+  // read in DRAW buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"DRAW_EXPORT",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No DRAW_EXPORT Section in params\n");
+    fprintf(stderr,"  will use the defaults\n");
+  } else {
+    // Set the symprod object from the buffer
+    if(draw.loadFromBuf("DRAW_EXPORT TDRP Section",
+                        NULL,param_text,
+                        param_text_len,
+                        param_text_line_no,
+                        TRUE, FALSE) < 0) {
+      fprintf(stderr,"Problems with <DRAW_EXPORT> params in legacy params file.\n");
+      fprintf(stderr,"Please fix.\n");
+      return -1;
+    }
+  }
+
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <DRAW_EXPORT>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  fprintf(_tdrpFile, "draw_export_info = {\n");
+  
+  for (int ii = 0; ii < draw.dexport_info_n; ii++) {
+    
+    Cdraw_P::dexport_t &info = draw._dexport_info[ii];
+    
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    id_label = \"%s\",\n", info.id_label);
+    fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
+    fprintf(_tdrpFile, "    valid_minutes = %lg,\n", info.valid_minutes);
+    fprintf(_tdrpFile, "    default_id_no = %d,\n",
+            info.default_id_no);
+    fprintf(_tdrpFile, "    default_label = \"%s\"\n", info.default_label);
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < draw.dexport_info_n - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // ii
+  fprintf(_tdrpFile, "};\n");
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </DRAW_EXPORT>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
   return 0;

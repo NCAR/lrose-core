@@ -398,7 +398,7 @@ private:
   int _readSymprodsTdrp();
   int _readTerrainTdrp();
   int _readRouteWindsTdrp();
-  int _readDrawTdrp();
+  int _readDrawExportTdrp();
   int _readImagesTdrp();
 
   int _initDrawExportLinks();

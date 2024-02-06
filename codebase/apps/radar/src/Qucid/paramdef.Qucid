@@ -1328,14 +1328,14 @@ commentdef {
 };
 
 typedef struct {
-  char* id_label;
-  char* url;
+  string id_label;
+  string url;
   double valid_minutes;
   int default_id_no;
-  char* default_label;
-} dexport_t;
+  string default_label;
+} draw_export_t;
 
-paramdef struct dexport_t {
+paramdef struct draw_export_t {
   p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
                 {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
   p_descr = "Human Drawn Products for Export Parameters.";
@@ -1348,7 +1348,7 @@ paramdef struct dexport_t {
    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
    "   Default_label: Test to place into Label field by default\n"
    "\n";
-} dexport_info[];
+} draw_export_info[];
 
 /////////////////////////////////////////////////////////////////////////
 // <SYMPRODS>
