@@ -3576,15 +3576,15 @@
     tt->single_val.s = tdrpStrDup("terrain.colors");
     tt++;
     
-    // Parameter 'land_use_render_method'
+    // Parameter 'landuse_render_method'
     // ctype is '_terrain_render_type_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("land_use_render_method");
+    tt->param_name = tdrpStrDup("landuse_render_method");
     tt->descr = tdrpStrDup("Land Use rendering style");
     tt->help = tdrpStrDup("Use Contours only for continious data like elevation");
-    tt->val_offset = (char *) &land_use_render_method - &_start_;
+    tt->val_offset = (char *) &landuse_render_method - &_start_;
     tt->enum_def.name = tdrpStrDup("terrain_render_type_t");
     tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
@@ -3610,27 +3610,27 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'earth_color1'
+    // Parameter 'terrain_earth_color1'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("earth_color1");
+    tt->param_name = tdrpStrDup("terrain_earth_color1");
     tt->descr = tdrpStrDup("Earth's skin color");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &earth_color1 - &_start_;
+    tt->val_offset = (char *) &terrain_earth_color1 - &_start_;
     tt->single_val.s = tdrpStrDup("sienna");
     tt++;
     
-    // Parameter 'earth_color2'
+    // Parameter 'terrain_earth_color2'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("earth_color2");
+    tt->param_name = tdrpStrDup("terrain_earth_color2");
     tt->descr = tdrpStrDup("Earth's core color");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &earth_color2 - &_start_;
+    tt->val_offset = (char *) &terrain_earth_color2 - &_start_;
     tt->single_val.s = tdrpStrDup("red4");
     tt++;
     

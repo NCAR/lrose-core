@@ -1833,7 +1833,7 @@ id_label = "Terrain";
 // Type: string
 //
 
-terrain_url = "";
+terrain_url = "mdvp::static//front.eol.ucar.edu::mdv/terrain&Elevation?use_http=true";
 
 ///////////// height_scaler ///////////////////////////
 //

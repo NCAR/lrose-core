@@ -153,37 +153,19 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
     
-  // read in symprods from old tdrp section, write to main params
+  // read in symprods params from old tdrp section, write to main params
   
   if (_readSymprods()) {
     return -1;
   }
     
-#ifdef JUNK
-
-  if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
-
-  // Instantiate and load the SYMPROD TDRP Parameter section
-  gd.syprod_P = new Csyprod_P();
-
-  param_text_line_no = 0;
-  param_text_len = 0;
-  param_text = _findTagText(_paramsBuf,"SYMPRODS",
-                             &param_text_len, &param_text_line_no); 
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
-  } else {
-    /* Establish and initialize params */
-
-    if(gd.syprod_P->loadFromBuf("SYMPRODS TDRP Section",
-                                NULL,param_text,
-                                param_text_len,
-                                param_text_line_no,
-                                TRUE,gd.debug2) < 0) {
-      fprintf(stderr,"Please fix the <SYMPRODS> parameter section\n");
-      return -1;
-    }
+  // read in terrain from old tdrp section, write to main params
+  
+  if (_readTerrain()) {
+    return -1;
   }
+    
+#ifdef JUNK
 
   // Instantiate and load the TERRAIN TDRP Parameter 
   gd.layers.earth._P = new Cterrain_P();
@@ -2725,6 +2707,80 @@ int LegacyParams::_readSymprods()
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </SYMPRODS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  return 0;
+  
+}
+
+/************************************************************************
+ * Read in terrain params
+ */
+
+int LegacyParams::_readTerrain()
+  
+{
+
+  // Instantiate the terrain params object, which will load the defaults
+  
+  Cterrain_P terrain;
+  
+  // read in SYMPRODS buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf, "TERRAIN",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No TERRAIN Section in params\n");
+    fprintf(stderr,"  will use the defaults\n");
+  } else {
+    // Set the terrain object from the buffer
+    if(terrain.loadFromBuf("TERRAIN TDRP Section",
+                           NULL,param_text,
+                           param_text_len,
+                           param_text_line_no,
+                           TRUE, FALSE) < 0) {
+      fprintf(stderr,"Problems with the <TERRAIN> parameters in legacy paramsfile.\n");
+      fprintf(stderr,"Please fix.\n");
+      return -1;
+    }
+  }
+  
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <TERRAIN>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  fprintf(_tdrpFile, "terrain_id_label = \"%s\";\n", terrain.id_label);
+  fprintf(_tdrpFile, "terrain_url = \"%s\";\n", terrain.terrain_url);
+  fprintf(_tdrpFile, "terrain_height_scaler = %lg;\n", terrain.height_scaler);
+  fprintf(_tdrpFile, "landuse_url = \"%s\";\n", terrain.landuse_url);
+  fprintf(_tdrpFile, "landuse_colorscale = \"%s\";\n", terrain.landuse_colorscale);
+  
+  switch (terrain.land_use_render_method) {
+    case Cterrain_P::RENDER_FILLED_CONT:
+      fprintf(_tdrpFile,
+              "landuse_render_method = TERRAIN_RENDER_FILLED_CONT;\n");
+      break;
+    case Cterrain_P::RENDER_RECTANGLES:
+      fprintf(_tdrpFile,
+              "landuse_render_method = TERRAIN_RENDER_RECTANGLES;\n");
+      break;
+    case Cterrain_P::RENDER_DYNAMIC_CONTOURS:
+      fprintf(_tdrpFile,
+              "landuse_render_method = TERRAIN_RENDER_DYNAMIC_CONTOURS;\n");
+      break;
+  }
+
+  fprintf(_tdrpFile, "terrain_earth_color1 = \"%s\";\n", terrain.earth_color1);
+  fprintf(_tdrpFile, "terrain_earth_color2 = \"%s\";\n", terrain.earth_color2);
+  
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </TERRAIN>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
   return 0;

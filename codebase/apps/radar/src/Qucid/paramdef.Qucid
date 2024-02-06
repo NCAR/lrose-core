@@ -1540,7 +1540,7 @@ paramdef enum terrain_render_type_t {
   p_default = TERRAIN_RENDER_RECTANGLES;
   p_descr = "Land Use rendering style";
   p_help = "Use Contours only for continious data like elevation";
-} land_use_render_method;
+} landuse_render_method;
 
 paramdef boolean {
   p_default = false;
@@ -1550,12 +1550,12 @@ paramdef boolean {
 paramdef string {
   p_default = "sienna";
   p_descr = "Earth's skin color";
-} earth_color1;
+} terrain_earth_color1;
 
 paramdef string {
   p_default = "red4";
   p_descr = "Earth's core color";
-} earth_color2;
+} terrain_earth_color2;
 
 /////////////////////////////////////////////////////////////////////////
 // paramdef.CIDD_images

@@ -934,13 +934,13 @@ public:
 
   char* landuse_colorscale;
 
-  terrain_render_type_t land_use_render_method;
+  terrain_render_type_t landuse_render_method;
 
   tdrp_bool_t landuse_active;
 
-  char* earth_color1;
+  char* terrain_earth_color1;
 
-  char* earth_color2;
+  char* terrain_earth_color2;
 
   image_debug_t image_debug;
 
