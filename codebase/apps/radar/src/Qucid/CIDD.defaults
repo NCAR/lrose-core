@@ -1966,7 +1966,7 @@ add_waypoints_labels = 1;
 // Type: int
 //
 
-add_wind_text = 1;
+add_wind_text = 0;
 
 ///////////// label_style /////////////////////////////
 //

@@ -1626,7 +1626,7 @@ paramdef struct image_vsection_spec_t {
 // Predefined route wind, etc support
 
 commentdef {
-  p_header = "Route Winds Parameters";
+  p_header = "ROUTE VSECTIONS";
 };
 
 typedef enum {
@@ -1657,13 +1657,14 @@ paramdef int {
 } route_add_wind_text;
 
 typedef enum {
-  REGULAR_INTERVALS, EQUAL_DIVISIONS
+  ROUTE_REGULAR_INTERVALS, ROUTE_EQUAL_DIVISIONS
 } route_label_style_t; 
 
 paramdef enum route_label_style_t
 {
-    p_default = REGULAR_INTERVALS;
-    p_help = "Set to REGULAR_INTERVALS or EQUAL_DIVISIONS";
+  p_default = ROUTE_REGULAR_INTERVALS;
+  p_descr = "How to space the labels along the route.";
+  p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
 } route_label_style;
 
 paramdef double {
@@ -1678,7 +1679,7 @@ paramdef int {
   p_max = 100;
   p_descr = "number of route wind labels to plot along the route.";
   p_help = "Typically this should be set between 5 and 20";
-} route_num_route_labels; 
+} route_num_labels; 
 
 paramdef int {
   p_default = 3;
@@ -1716,7 +1717,7 @@ paramdef double {
 paramdef double {
   p_default = 0.75;
   p_descr = "Value at which the turbulence is considered High";
-} route_turb_hi_thresh;
+} route_turb_high_thresh;
 
 paramdef string {
   p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
@@ -1736,7 +1737,7 @@ paramdef double {
 paramdef double {
   p_default = 0.75;
   p_descr = "Value at which the icing is considered Heavy";
-} route_icing_hi_thresh;
+} route_icing_high_thresh;
 
 paramdef string {
   p_default = {

@@ -390,13 +390,16 @@ private:
   int _loadKeyValPairs(const string &fname);
   
   int _readMainParams();
-  int _readGuiConfig();
+  int _readGuiConfigTdrp();
   int _readGrids();
   int _readWinds();
   WindRenderMode _getWindRenderMode(const char* markerStr);
   int _readMaps();
-  int _readSymprods();
-  int _readTerrain();
+  int _readSymprodsTdrp();
+  int _readTerrainTdrp();
+  int _readRouteWindsTdrp();
+  int _readDrawTdrp();
+  int _readImagesTdrp();
 
   int _initDrawExportLinks();
   

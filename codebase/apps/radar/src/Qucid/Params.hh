@@ -177,8 +177,8 @@ public:
   } route_debug_t;
 
   typedef enum {
-    REGULAR_INTERVALS = 0,
-    EQUAL_DIVISIONS = 1
+    ROUTE_REGULAR_INTERVALS = 0,
+    ROUTE_EQUAL_DIVISIONS = 1
   } route_label_style_t;
 
   // struct typedefs
@@ -963,7 +963,7 @@ public:
 
   double route_label_interval;
 
-  int route_num_route_labels;
+  int route_num_labels;
 
   int route_track_line_width;
 
@@ -977,7 +977,7 @@ public:
 
   double route_turb_mod_thresh;
 
-  double route_turb_hi_thresh;
+  double route_turb_high_thresh;
 
   char* route_icing_url;
 
@@ -985,7 +985,7 @@ public:
 
   double route_icing_mod_thresh;
 
-  double route_icing_hi_thresh;
+  double route_icing_high_thresh;
 
   char* *_route_paths;
   int route_paths_n;

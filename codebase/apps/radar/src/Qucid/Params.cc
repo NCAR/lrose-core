@@ -3735,7 +3735,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 37");
-    tt->comment_hdr = tdrpStrDup("Route Winds Parameters");
+    tt->comment_hdr = tdrpStrDup("ROUTE VSECTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3803,18 +3803,18 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("route_label_style");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("Set to REGULAR_INTERVALS or EQUAL_DIVISIONS");
+    tt->descr = tdrpStrDup("How to space the labels along the route.");
+    tt->help = tdrpStrDup("REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.");
     tt->val_offset = (char *) &route_label_style - &_start_;
     tt->enum_def.name = tdrpStrDup("route_label_style_t");
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("REGULAR_INTERVALS");
-      tt->enum_def.fields[0].val = REGULAR_INTERVALS;
-      tt->enum_def.fields[1].name = tdrpStrDup("EQUAL_DIVISIONS");
-      tt->enum_def.fields[1].val = EQUAL_DIVISIONS;
-    tt->single_val.e = REGULAR_INTERVALS;
+      tt->enum_def.fields[0].name = tdrpStrDup("ROUTE_REGULAR_INTERVALS");
+      tt->enum_def.fields[0].val = ROUTE_REGULAR_INTERVALS;
+      tt->enum_def.fields[1].name = tdrpStrDup("ROUTE_EQUAL_DIVISIONS");
+      tt->enum_def.fields[1].val = ROUTE_EQUAL_DIVISIONS;
+    tt->single_val.e = ROUTE_REGULAR_INTERVALS;
     tt++;
     
     // Parameter 'route_label_interval'
@@ -3829,15 +3829,15 @@
     tt->single_val.d = 55.6;
     tt++;
     
-    // Parameter 'route_num_route_labels'
+    // Parameter 'route_num_labels'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_num_route_labels");
+    tt->param_name = tdrpStrDup("route_num_labels");
     tt->descr = tdrpStrDup("number of route wind labels to plot along the route.");
     tt->help = tdrpStrDup("Typically this should be set between 5 and 20");
-    tt->val_offset = (char *) &route_num_route_labels - &_start_;
+    tt->val_offset = (char *) &route_num_labels - &_start_;
     tt->has_min = TRUE;
     tt->has_max = TRUE;
     tt->min_val.i = 2;
@@ -3921,15 +3921,15 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'route_turb_hi_thresh'
+    // Parameter 'route_turb_high_thresh'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_turb_hi_thresh");
+    tt->param_name = tdrpStrDup("route_turb_high_thresh");
     tt->descr = tdrpStrDup("Value at which the turbulence is considered High");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_turb_hi_thresh - &_start_;
+    tt->val_offset = (char *) &route_turb_high_thresh - &_start_;
     tt->single_val.d = 0.75;
     tt++;
     
@@ -3969,15 +3969,15 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'route_icing_hi_thresh'
+    // Parameter 'route_icing_high_thresh'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_icing_hi_thresh");
+    tt->param_name = tdrpStrDup("route_icing_high_thresh");
     tt->descr = tdrpStrDup("Value at which the icing is considered Heavy");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_icing_hi_thresh - &_start_;
+    tt->val_offset = (char *) &route_icing_high_thresh - &_start_;
     tt->single_val.d = 0.75;
     tt++;
     

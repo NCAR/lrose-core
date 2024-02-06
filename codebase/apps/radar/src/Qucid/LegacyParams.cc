@@ -131,7 +131,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   // read in GUI config
   
-  if (_readGuiConfig() == 0) {
+  if (_readGuiConfigTdrp() == 0) {
     // _guiConfig.print(stdout);
   }
   
@@ -155,13 +155,19 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     
   // read in symprods params from old tdrp section, write to main params
   
-  if (_readSymprods()) {
+  if (_readSymprodsTdrp()) {
     return -1;
   }
     
   // read in terrain from old tdrp section, write to main params
   
-  if (_readTerrain()) {
+  if (_readTerrainTdrp()) {
+    return -1;
+  }
+    
+  // read in route winds from old tdrp section, write to main params
+  
+  if (_readRouteWindsTdrp()) {
     return -1;
   }
     
@@ -1874,7 +1880,7 @@ int LegacyParams::_readMainParams()
 /////////////////////////////////////////////////////////////////////////////
 // initialize the group names
 
-int LegacyParams::_readGuiConfig()
+int LegacyParams::_readGuiConfigTdrp()
 {
   
   // read the GUI_CONFIG parameters
@@ -2583,7 +2589,7 @@ int LegacyParams::_readMaps()
  * Read in symprods
  */
 
-int LegacyParams::_readSymprods()
+int LegacyParams::_readSymprodsTdrp()
   
 {
 
@@ -2608,7 +2614,7 @@ int LegacyParams::_readSymprods()
                            param_text_len,
                            param_text_line_no,
                            TRUE, FALSE) < 0) {
-      fprintf(stderr,"Problems with the <SYMPRODS> parameters in legacy paramsfile.\n");
+      fprintf(stderr,"Problems with <SYMPRODS> params in legacy params file.\n");
       fprintf(stderr,"Please fix.\n");
       return -1;
     }
@@ -2717,7 +2723,7 @@ int LegacyParams::_readSymprods()
  * Read in terrain params
  */
 
-int LegacyParams::_readTerrain()
+int LegacyParams::_readTerrainTdrp()
   
 {
 
@@ -2742,7 +2748,7 @@ int LegacyParams::_readTerrain()
                            param_text_len,
                            param_text_line_no,
                            TRUE, FALSE) < 0) {
-      fprintf(stderr,"Problems with the <TERRAIN> parameters in legacy paramsfile.\n");
+      fprintf(stderr,"Problems with <TERRAIN> params in legacy params file.\n");
       fprintf(stderr,"Please fix.\n");
       return -1;
     }
@@ -2781,6 +2787,123 @@ int LegacyParams::_readTerrain()
   
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </TERRAIN>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  return 0;
+  
+}
+
+/************************************************************************
+ * Read in route winds params
+ */
+
+int LegacyParams::_readRouteWindsTdrp()
+  
+{
+
+  // Instantiate the route winds params object
+  
+  Croutes_P routes;
+  
+  // read in buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf, "ROUTE_WINDS",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No ROUTE_WINDS Section in params\n");
+    fprintf(stderr,"  will use the defaults\n");
+  } else {
+    // Set the routes object from the buffer
+    if(routes.loadFromBuf("ROUTE WINDS TDRP Section",
+                          NULL,param_text,
+                          param_text_len,
+                          param_text_line_no,
+                          TRUE, FALSE) < 0) {
+      fprintf(stderr,
+              "Problems with <ROUTE_WINDS> params in legacy params file.\n");
+      fprintf(stderr,"Please fix.\n");
+      return -1;
+    }
+  }
+  
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <ROUTE_VSECTIONS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  switch (routes.debug) {
+    case Croutes_P::DEBUG_OFF:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_OFF;\n");
+      break;
+    case Croutes_P::DEBUG_NORM:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_NORM;\n");
+      break;
+    case Croutes_P::DEBUG_VERBOSE:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_VERBOSE;\n");
+      break;
+  }
+  
+  fprintf(_tdrpFile, "route_font_height = %d;\n",
+          routes.font_height);
+  fprintf(_tdrpFile, "route_add_waypoints_labels = %d;\n",
+          routes.add_waypoints_labels);
+  fprintf(_tdrpFile, "route_add_wind_text = %d;\n",
+          routes.add_wind_text);
+  
+  switch (routes.label_style) {
+    case Croutes_P::REGULAR_INTERVALS:
+      fprintf(_tdrpFile,
+              "route_label_style = ROUTE_REGULAR_INTERVALS;\n");
+      break;
+    case Croutes_P::EQUAL_DIVISIONS:
+      fprintf(_tdrpFile,
+              "route_label_style = ROUTE_EQUAL_DIVISIONS;\n");
+      break;
+  }
+  
+  fprintf(_tdrpFile, "route_label_interval = %lg;\n",
+          routes.label_interval);
+  fprintf(_tdrpFile, "route_num_labels = %d;\n",
+          routes.num_route_labels);
+  fprintf(_tdrpFile, "route_track_line_width = %d;\n",
+          routes.route_track_line_width);
+
+  fprintf(_tdrpFile, "route_u_url = \"%s\";\n", routes.u_url);
+  fprintf(_tdrpFile, "route_v_url = \"%s\";\n", routes.v_url);
+
+  fprintf(_tdrpFile, "route_turb_url = \"%s\";\n", routes.turb_url);
+  fprintf(_tdrpFile, "route_turb_low_thresh = %lg;\n",
+          routes.turb_low_thresh);
+  fprintf(_tdrpFile, "route_turb_mod_thresh = %lg;\n",
+          routes.turb_mod_thresh);
+  fprintf(_tdrpFile, "route_turb_high_thresh = %lg;\n",
+          routes.turb_hi_thresh);
+
+  fprintf(_tdrpFile, "route_icing_url = \"%s\";\n", routes.icing_url);
+  fprintf(_tdrpFile, "route_icing_low_thresh = %lg;\n",
+          routes.icing_low_thresh);
+  fprintf(_tdrpFile, "route_icing_mod_thresh = %lg;\n",
+          routes.icing_mod_thresh);
+  fprintf(_tdrpFile, "route_icing_high_thresh = %lg;\n",
+          routes.icing_hi_thresh);
+  
+  fprintf(_tdrpFile, "route_paths = {\n");
+  for (int ii = 0; ii < routes.route_paths_n; ii++) {
+    fprintf(_tdrpFile, "  \"%s\"", routes._route_paths[ii]);
+    if (ii == routes.route_paths_n - 1) {
+      fprintf(_tdrpFile, "\n");
+    } else {
+      fprintf(_tdrpFile, ",\n");
+    }
+  }
+  fprintf(_tdrpFile, "};\n");
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </ROUTE_VSECTIONS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
   return 0;
