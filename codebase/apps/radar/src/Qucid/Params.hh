@@ -944,7 +944,7 @@ public:
 
   image_debug_t image_debug;
 
-  tdrp_bool_t generate_vsection_images;
+  tdrp_bool_t image_generate_vsection;
 
   tdrp_bool_t image_vsection_waypts_in_latlon;
 

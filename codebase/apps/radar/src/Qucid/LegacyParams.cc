@@ -37,6 +37,7 @@
 #include "Croutes_P.hh"
 #include "Csyprod_P.hh"
 #include "Cterrain_P.hh"
+#include "Cdraw_P.hh"
 #include <cerrno>
 #include <iostream>
 #include <cstdio>
@@ -174,6 +175,12 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // read in draw export from old tdrp section, write to main params
   
   if (_readDrawExportTdrp()) {
+    return -1;
+  }
+    
+  // read in image generation from old tdrp section, write to main params
+  
+  if (_readImageGenTdrp()) {
     return -1;
   }
     
@@ -2986,60 +2993,85 @@ int LegacyParams::_readDrawExportTdrp()
 }
 
 /************************************************************************
- * INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
- *  for drawn and exported points 
- *
+ * Read in image generation params
  */
 
-int LegacyParams::_initDrawExportLinks()
+int LegacyParams::_readImageGenTdrp()
+  
 {
 
-#ifdef JUNK
-
-  int  i,len;
+  // Instantiate the image gen object, which will load the defaults
   
-  gd.draw.num_draw_products = gd.draw_P->dexport_info_n;
+  Cimages_P images;
   
-  if((gd.draw.dexport =(draw_export_info_t*)
-      calloc(gd.draw.num_draw_products,sizeof(draw_export_info_t))) == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",gd.draw.num_draw_products);
-    perror("CIDD");
-    return -1;
-  }
-
+  // read in image gen buffer
   
-  // Allocate space for control struct and record starting values for each product.
-  for(i=0; i < gd.draw.num_draw_products;  i++) {
-    
-    // Product ID  
-    len = strlen(gd.draw_P->_dexport_info[i].id_label) +1;
-    gd.draw.dexport[i].product_id_label = (char *)  calloc(1,len);
-    STRcopy(gd.draw.dexport[i].product_id_label,gd.draw_P->_dexport_info[i].id_label,len);
-    
-    // Allocate space for product_label_text (annotations) and set to nulls
-    gd.draw.dexport[i].product_label_text =  (char *) calloc(1,TITLE_LENGTH);
-    
-    strncpy(gd.draw.dexport[i].product_label_text, gd.draw_P->_dexport_info[i].default_label,TITLE_LENGTH-1);
-    
-    // FMQ URL 
-    len = strlen(gd.draw_P->_dexport_info[i].url) +1;
-    if(len > NAME_LENGTH) {
-      fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
-              gd.draw_P->_dexport_info[i].url,URL_LENGTH);
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"IMAGE_GENERATION",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No IMAGE_GENERATION Section in params\n");
+    fprintf(stderr,"  will use the defaults\n");
+  } else {
+    // Set the symprod object from the buffer
+    if(images.loadFromBuf("IMAGE_GENERATION TDRP Section",
+                          NULL,param_text,
+                          param_text_len,
+                          param_text_line_no,
+                          TRUE, FALSE) < 0) {
+      fprintf(stderr,
+              "Problems with <IMAGE_GENERATION> params in legacy params file.\n");
+      fprintf(stderr,"Please fix.\n");
       return -1;
     }
-    gd.draw.dexport[i].product_fmq_url =  (char *) calloc(1,URL_LENGTH);
-    STRcopy(gd.draw.dexport[i].product_fmq_url,gd.draw_P->_dexport_info[i].url,URL_LENGTH);
-    
-    // Get the Default valid time  
-    gd.draw.dexport[i].default_valid_minutes = gd.draw_P->_dexport_info[i].valid_minutes;
-    
-    // Get the Default ID   
-    gd.draw.dexport[i].default_serial_no = gd.draw_P->_dexport_info[i].default_id_no;
   }
-
-#endif
-
+  
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <IMAGE_GENERATION>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  switch (images.debug) {
+    case Cimages_P::DEBUG_OFF:
+      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_OFF;\n");
+      break;
+    case Cimages_P::DEBUG_NORM:
+      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_NORM;\n");
+      break;
+    case Cimages_P::DEBUG_VERBOSE:
+      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_VERBOSE;\n");
+      break;
+  }
+  
+  fprintf(_tdrpFile, "image_generate_vsection = %s;\n",
+          (images.generate_vsection_images?"TRUE":"FALSE"));
+  fprintf(_tdrpFile, "image_vsection_waypts_in_latlon = %s;\n",
+          (images.vsection_waypts_in_latlon?"TRUE":"FALSE"));
+  
+  fprintf(_tdrpFile, "image_vsection_spec = {\n");
+  
+  for (int ii = 0; ii < images.vsection_spec_n; ii++) {
+    
+    Cimages_P::vsection_spec_t &spec = images._vsection_spec[ii];
+    
+    fprintf(_tdrpFile, "  {\n");
+    fprintf(_tdrpFile, "    vsection_label = \"%s\",\n", spec.vsection_label);
+    fprintf(_tdrpFile, "    n_waypts = %d,\n", spec.n_waypts);
+    fprintf(_tdrpFile, "    waypt_locs = \"%s\",\n", spec.waypt_locs);
+    fprintf(_tdrpFile, "  }\n");
+    if (ii < images.vsection_spec_n - 1) {
+      fprintf(_tdrpFile, "  ,\n");
+    }
+  } // ii
+  fprintf(_tdrpFile, "};\n");
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </IMAGE_GENERATION>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
   return 0;
   
 }

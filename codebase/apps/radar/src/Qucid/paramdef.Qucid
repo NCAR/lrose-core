@@ -1324,7 +1324,7 @@ paramdef string {
 // Products
 
 commentdef {
-  p_header = "Draw/Export Parameters";
+  p_header = "DRAW_EXPORT Parameters";
 };
 
 typedef struct {
@@ -1564,7 +1564,7 @@ paramdef string {
 // of the CIDD image generation options.
 
 commentdef {
-  p_header = "CIDD's TDRP parameters for image generation.";
+  p_header = "IMAGE_GENERATION";
 }
 
 typedef enum {
@@ -1582,7 +1582,7 @@ paramdef boolean {
   p_descr = "Generate images for specified vertical sections.";
   p_help = "If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
   p_default = FALSE;
-} generate_vsection_images;
+} image_generate_vsection;
 
 paramdef boolean { 
   p_descr = "The specified waypts are in latlon degree units.";

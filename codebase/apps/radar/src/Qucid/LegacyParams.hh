@@ -34,7 +34,6 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include "Cdraw_P.hh"
 #include "Cgui_P.hh"
 #include "cidd_params.h"
 using namespace std;
@@ -399,10 +398,8 @@ private:
   int _readTerrainTdrp();
   int _readRouteWindsTdrp();
   int _readDrawExportTdrp();
-  int _readImagesTdrp();
+  int _readImageGenTdrp();
 
-  int _initDrawExportLinks();
-  
   /////////////////////////////////////////////////////////////////////////////
   // GET_DEFAULT_PARAMS : Get a string representing the default parameters
   //                      for this TDRP parameter object

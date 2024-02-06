@@ -3270,7 +3270,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 32");
-    tt->comment_hdr = tdrpStrDup("Draw/Export Parameters");
+    tt->comment_hdr = tdrpStrDup("DRAW_EXPORT Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3639,7 +3639,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 36");
-    tt->comment_hdr = tdrpStrDup("CIDD's TDRP parameters for image generation.");
+    tt->comment_hdr = tdrpStrDup("IMAGE_GENERATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3665,15 +3665,15 @@
     tt->single_val.e = IMAGE_DEBUG_OFF;
     tt++;
     
-    // Parameter 'generate_vsection_images'
+    // Parameter 'image_generate_vsection'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("generate_vsection_images");
+    tt->param_name = tdrpStrDup("image_generate_vsection");
     tt->descr = tdrpStrDup("Generate images for specified vertical sections.");
     tt->help = tdrpStrDup("If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.");
-    tt->val_offset = (char *) &generate_vsection_images - &_start_;
+    tt->val_offset = (char *) &image_generate_vsection - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

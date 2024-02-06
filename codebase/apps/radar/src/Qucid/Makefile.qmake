@@ -1925,7 +1925,6 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		DisplayField.hh \
 		LegacyParams.hh \
-		Cdraw_P.hh \
 		Cgui_P.hh \
 		cidd_params.h \
 		Reader.hh \
@@ -2029,6 +2028,7 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
 		Csyprod_P.hh \
+		Cdraw_P.hh \
 		Cimages_P.hh \
 		Uparams.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
