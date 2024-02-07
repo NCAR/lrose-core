@@ -1993,7 +1993,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
             bool ok;
             int val = QInputDialog::getInt
               (this,
-               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               tr("QInputDialog::getInt()"), tr("Set regression order (-1 for auto):"),
                _waterfalls[id]->getRegrOrder(),
                -1, 100, 1, &ok);
             _waterfalls[id]->setRegrOrder(val);
@@ -2442,7 +2442,7 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
             bool ok;
             int val = QInputDialog::getInt
               (this,
-               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               tr("QInputDialog::getInt()"), tr("Set regression order (-1 for auto):"),
                _iqPlots[id]->getRegrOrder(),
                -1, 100, 1, &ok);
             _iqPlots[id]->setRegrOrder(val);
