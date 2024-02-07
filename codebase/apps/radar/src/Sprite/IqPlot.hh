@@ -201,6 +201,7 @@ protected:
   double _clutModelWidthMps;
   int _regrOrder;
   int _regrOrderInUse;
+  double _cnrDbInUse;
   double _regrClutWidthFactor;
   double _regrCnrExponent;
   RadarMoments::notch_interp_method_t _regrNotchInterpMethod;

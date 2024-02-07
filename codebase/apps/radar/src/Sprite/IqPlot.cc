@@ -78,6 +78,7 @@ IqPlot::IqPlot(QWidget* parent,
   _clutModelWidthMps = 0.75;
   _regrOrder = _params.regression_filter_specified_polynomial_order;
   _regrOrderInUse = _regrOrder;
+  _cnrDbInUse = 0.0;
   _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
   _regrCnrExponent = _params.regression_filter_cnr_exponent;
   _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
@@ -427,6 +428,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   }
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
+    legendsLeft.push_back(text);
+    snprintf(text, 1024, "CNR (dB): %lg", _cnrDbInUse);
     legendsLeft.push_back(text);
   }
   if (_plotClutModel) {
@@ -1621,6 +1624,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
   double *powerFilt = powerFilt_.alloc(_nSamples);
 
   _regrOrderInUse = 0;
+  _cnrDbInUse = 0.0;
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
@@ -1679,6 +1683,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
                                   spectralNoise,
                                   spectralSnr);
     _regrOrderInUse = regrF.getPolyOrder();
+    _cnrDbInUse = regrF.getCnrDb();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
     RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);

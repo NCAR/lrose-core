@@ -175,6 +175,7 @@ public:
   inline size_t getNSamples() const { return _nSamples; }
   inline bool getOrderAuto() const { return _orderAuto; }
   inline size_t getPolyOrder() const { return _polyOrder; }
+  inline double getCnrDb() const { return _cnrDb; }
   
   inline bool isStaggered() const { return _isStaggered; }
   inline int getStaggeredM() const { return _staggeredM; }
@@ -214,7 +215,7 @@ private:
 
   bool _orderAuto;     // compute the order from the clutter to signal ratio
   size_t _polyOrder;   // polynomial order
-
+  double _cnrDb;       // clutter to noise ratio in dB
 
   double _clutterWidthFactor; // ss factor to allow us to increase order
   double _cnrExponent; // allows us to tune the width

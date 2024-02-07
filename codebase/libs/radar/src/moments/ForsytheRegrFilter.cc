@@ -128,6 +128,7 @@ void ForsytheRegrFilter::_init()
   _nSamples = 0;
   _orderAuto = true;
   _polyOrder = 5;
+  _cnrDb = -9999.0;
   
   _isStaggered = false;
   _staggeredM = 0;
@@ -377,7 +378,8 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
 #endif
   
     _polyOrder = order;
-
+    _cnrDb = cnr3Db;
+  
   }
 
   // find the entry in the forsythe array, if possible
