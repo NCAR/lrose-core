@@ -129,7 +129,26 @@ public:
                       double wavelengthM);
   
   // Perform regression filtering on I,Q data
+  // for specified order.
+  //
+  // Inputs:
+  //   rawIq: raw I,Q data
+  //   order: polynomial order
+  //
+  // Outputs:
+  //   filteredIq: filtered I,Q data
+  //
+  // Side effect:
+  //   polyfitIq is computed
+  //   retrieve with getPolyfitIq()
+  
+  void apply(const RadarComplex_t *rawIq,
+             int polyOrder,
+             RadarComplex_t *filteredIq);
+  
+  // Perform regression filtering on I,Q data
   // Note: assumes set() methods have been applied
+  //       computes order as required
   //
   // Inputs:
   //   rawIq: raw I,Q data

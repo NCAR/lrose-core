@@ -308,6 +308,7 @@ void ForsytheRegrFilter::setupStaggered(size_t nSamples,
 /////////////////////////////////////////////////////
 // Perform regression filtering on I,Q data
 // Note: assumes set() methods have been applied
+//       computes order as required
 //
 // Inputs:
 //   rawIq: raw I,Q data
@@ -329,7 +330,7 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
                                RadarComplex_t *filteredIq)
   
 {
-
+  
   assert(_nSamples != 0);
   assert(_setupDone);
 
@@ -382,6 +383,85 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
   
   }
 
+  // find the entry in the forsythe array, if possible
+  
+  ForsytheFit *fit = &_forsythe;
+  
+  if (_polyOrder < ORDER_ARRAY_MAX &&
+      _nSamples < NSAMPLES_ARRAY_MAX) {
+
+    // re-use objects
+    // check for existing entry in array of fit objects
+    
+    fit = _forsytheArray[_polyOrder][_nSamples];
+    if (fit == NULL) {
+      // create new object for (order, nsamples)
+      fit = new ForsytheFit;
+      fit->prepareForFit(_polyOrder, _xxVals);
+      _forsytheArray[_polyOrder][_nSamples] = fit;
+    }
+    
+  } else {
+
+    // use single object
+
+    fit->prepareForFit(_polyOrder, _xxVals);
+    
+  }
+
+  // perform the fit on I and Q and
+  // compute the estimated I/Q polynomial values
+  // load residuals into filtered Iq
+  
+  fit->performFit(rawI);
+  vector<double> iSmoothed = fit->getYEstVector();
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
+    _polyfitIqVals[ii].re = iSmoothed[ii];
+  }
+  
+  fit->performFit(rawQ);
+  vector<double> qSmoothed = fit->getYEstVector();
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
+    _polyfitIqVals[ii].im = qSmoothed[ii];
+  }
+
+}
+
+/////////////////////////////////////////////////////
+// Perform regression filtering on I,Q data
+// for specified order.
+//
+// Inputs:
+//   rawIq: raw I,Q data
+//   order: polynomial order
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+//
+// Side effect:
+//   polyfitIq is computed
+//   retrieve with getPolyfitIq()
+
+void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
+                               int polyOrder,
+                               RadarComplex_t *filteredIq)
+  
+{
+
+  assert(_nSamples != 0);
+  assert(_setupDone);
+  _polyOrder = polyOrder;
+  
+  // copy IQ data
+
+  vector<double> rawI, rawQ;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    rawI.push_back(rawIq[ii].re);
+    rawQ.push_back(rawIq[ii].im);
+  }
+  
   // find the entry in the forsythe array, if possible
   
   ForsytheFit *fit = &_forsythe;

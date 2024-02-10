@@ -118,8 +118,6 @@ public:
 
   // initialize staggered PRT mode based on OpsInfo
 
-  bool getIsStagPrt() const { return _isStagPrt; }
-  
   void initStagPrt(double prtShort,
                    double prtLong,
                    int staggeredM,
@@ -1279,12 +1277,30 @@ public:
   
   double getBaseDbz1km(channel_t channel) const;
 
-  // unambiguous range
+  // range geometry
   
+  double getStartRangeKm() const { return _startRangeKm; }
+  double getGateSpacingKm() const { return _gateSpacingKm; }
   double getUnambigRangeKm() const { return _unambigRangeKm; }
 
-  // get nyquist after object has been initialized/used
+  // wavelength
 
+  double getWavelengthMeters() const { return _wavelengthMeters; }
+  
+  // prt
+  
+  double getPrt() const { return _prt; }
+
+  // get staggered configuration
+  
+  bool getIsStagPrt() const { return _isStagPrt; }
+  double getPrtShort() const { return _prtShort; }
+  double getPrtLong() const { return _prtLong; }
+  int getStaggeredM() const { return _staggeredM; }
+  int getStaggeredN() const { return _staggeredN; }
+  
+  // get nyquist after object has been initialized/used
+  
   double getNyquist() const { return _nyquist; }
   double getNyquistPrtShort() const { return _nyquistPrtShort; }
   double getNyquistPrtLong() const { return _nyquistPrtLong; }
@@ -1297,7 +1313,7 @@ public:
   double getRegrCsrDb() const { return _regrCsrDb; }
   double getRegrInterpRatioDb() const { return _regrInterpRatioDb; }
   size_t getRegrPolyOrder() const { return _regrPolyOrder; }
-  
+
   // De-trend a time series in preparation
   // for windowing and FFT.
   //
