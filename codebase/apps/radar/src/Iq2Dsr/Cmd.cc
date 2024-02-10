@@ -37,6 +37,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <cassert>
 #include <toolsa/TaArray.hh>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/sincos.h>
@@ -341,14 +342,12 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
 
   if (_params.apply_cmd_speckle_filter) {
     _applySpeckleFilter(nGates);
-    // _applySpeckleFilterCVersion(nGates);
   }
   
   // then fill in the gaps
   
   if (_params.apply_cmd_gap_filter) {
     _applyGapFilter(nGates);
-    // _applyGapFilterCVersion(nGates);
   }
 
   // now apply NEXRAD SPIKE filter
@@ -932,11 +931,34 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
   
 {
 
+  if (nGates < 1) {
+    return;
+  }
+  int nSamples = _gateData[0]->_nSamples;
+  int nSamplesHalf = _gateData[0]->_nSamplesHalf;
+  
+  // initialize regression filter
+
+  if (mom->getIsStagPrt()) {
+    _regr.setup(nSamplesHalf, false, 5, 1.0, 0.6667, mom->getWavelengthMeters());
+  } else {
+    _regr.setup(nSamples, false, 5, 1.0, 0.6667, mom->getWavelengthMeters());
+  }
+  
   for (int igate = 0; igate < nGates; igate++) {
+
+    // make copy of IQ for this gate
     
     GateData *gate = _gateData[igate];
-    RadarComplex_t *iqhc = gate->iqhcOrig;
-    RadarComplex_t *iqvc = gate->iqvcOrig;
+    vector<RadarComplex_t> iqhc, iqvc;
+    iqhc.resize(nSamples);
+    iqvc.resize(nSamples);
+    const RadarComplex_t *iqhcOrig = gate->iqhcOrig;
+    const RadarComplex_t *iqvcOrig = gate->iqvcOrig;
+    for (int ii = 0; ii < nSamples; ii++) {
+      iqhc[ii] = iqhcOrig[ii];
+      iqvc[ii] = iqvcOrig[ii];
+    }
     
     if (_xmitRcvMode != IWRF_ALT_HV_CO_CROSS &&
         _xmitRcvMode != IWRF_ALT_HV_FIXED_HV &&
@@ -952,10 +974,10 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     double rhohvUnfilt = -1.0;
     if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
         _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-      rhohvUnfilt = mom->rhohvAltHvCoCross(iqhc, iqvc);
+      rhohvUnfilt = mom->rhohvAltHvCoCross(iqhc.data(), iqvc.data());
     } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
                _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
-      rhohvUnfilt = mom->rhohvDpSimHv(iqhc, iqvc);
+      rhohvUnfilt = mom->rhohvDpSimHv(iqhc.data(), iqvc.data());
     }
     if (rhohvUnfilt < _params.rhohv_test_min_rhohv ||
         rhohvUnfilt > _params.rhohv_test_max_rhohv) {
@@ -966,15 +988,27 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
 
     // apply regression filter to time series
 
+    vector<RadarComplex_t> filthc, filtvc;
+    filthc.resize(nSamples);
+    filtvc.resize(nSamples);
+
+    if (mom->getIsStagPrt()) {
+      _applyRegrFiltStag(iqhc, filthc);
+      _applyRegrFiltStag(iqvc, filtvc);
+    } else {
+      _applyRegrFiltFixed(iqhc, filthc);
+      _applyRegrFiltFixed(iqvc, filtvc);
+    }
+
     // compute rhohv from filtered time series
 
     double rhohvFilt = -1.0;
     if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
         _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-      rhohvFilt = mom->rhohvAltHvCoCross(iqhc, iqvc);
+      rhohvFilt = mom->rhohvAltHvCoCross(filthc.data(), filtvc.data());
     } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
                _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
-      rhohvFilt = mom->rhohvDpSimHv(iqhc, iqvc);
+      rhohvFilt = mom->rhohvDpSimHv(filthc.data(), filtvc.data());
     }
 
     // compute rhohv improvement
@@ -988,6 +1022,61 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     gate->flds->rhohv_test = rhohvImprov;
     
   } // igate
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// Apply regression filter to IQ array.
+// The array is filtered in-place.
+
+void Cmd::_applyRegrFiltFixed(const vector<RadarComplex_t> &iq,
+                              vector<RadarComplex_t> &filt)
+{
+
+  assert(iq.size() == filt.size());
+  assert(iq.size() == _regr.getNSamples());
+  
+  // apply filter
+  
+  _regr.apply(iq.data(), 5, filt.data());
+  
+}
+
+void Cmd::_applyRegrFiltStag(const vector<RadarComplex_t> &iq,
+                             vector<RadarComplex_t> &filt)
+{
+
+  assert(iq.size() == filt.size());
+  assert(iq.size() == _regr.getNSamples() * 2);
+  
+  int nSamples = iq.size();
+  int nSamplesHalf = nSamples / 2;
+
+  // split the IQ data into 2 array, long-prt and short-prt
+  
+  vector<RadarComplex_t> iqShort, iqLong;
+  iqShort.resize(nSamplesHalf);
+  iqLong.resize(nSamplesHalf);
+  for (int jj = 0; jj < nSamplesHalf; jj++) {
+    iqShort[jj] = iq[jj * 2];
+    iqLong[jj] = iq[jj * 2 + 1];
+  }
+
+  // filter short and long separately
+  
+  vector<RadarComplex_t> filtShort, filtLong;
+  filtShort.resize(nSamplesHalf);
+  filtLong.resize(nSamplesHalf);
+  
+  _regr.apply(iqShort.data(), 5, filtShort.data());
+  _regr.apply(iqLong.data(), 5, filtLong.data());
+
+  // copy results to filt array
+  
+  for (int jj = 0; jj < nSamplesHalf; jj++) {
+    filt[jj * 2] = filtShort[jj];
+    filt[jj * 2 + 1] = filtLong[jj];
+  }
 
 }
 

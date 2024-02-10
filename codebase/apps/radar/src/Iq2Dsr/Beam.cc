@@ -219,7 +219,6 @@ void Beam::init(const MomentsMgr &mmgr,
     }
   }
   _xmitRcvMode = xmitRcvMode;
-  _cmd->setXmitRcvMode(_xmitRcvMode);
   _endOfSweepFlag = endOfSweepFlag;
   _endOfVolFlag = endOfVolFlag;
   _atmosAtten = &atmosAtten;
@@ -6069,7 +6068,12 @@ void Beam::_performClutterFiltering()
   // compute CMD
 
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
+  _cmd->setXmitRcvMode(_xmitRcvMode);
+  if (_isStagPrt) {
+    _cmd->compute(_nGates, _momStagPrt, _dualPol, _applyRhohvTest);
+  } else {
+    _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
+  }
 
   _fixAltClutVelocity();
 
@@ -6105,6 +6109,7 @@ void Beam::_performClutterFilteringSz()
   // compute CMD
   
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  _cmd->setXmitRcvMode(_xmitRcvMode);
   _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);
   _fixAltClutVelocity();
 

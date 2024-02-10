@@ -41,6 +41,8 @@
 #include "Params.hh"
 #include <radar/InterestMap.hh>
 #include <radar/GateData.hh>
+#include <radar/ForsytheRegrFilter.hh>
+
 using namespace std;
 
 ////////////////////////
@@ -136,6 +138,10 @@ private:
   bool _phidpFoldsAt90;
   double _phidpFoldVal, _phidpFoldRange;
 
+  // regression filter for rhohv test
+  
+  ForsytheRegrFilter _regr;
+  
   // private functions
   
   int _createInterestMaps(const Params &params);
@@ -148,6 +154,10 @@ private:
   void _computePhidpSdevNew(int nGates);
   void _computePhidpFoldingRange(int nGates);
   void _computeRhohvTest(const RadarMoments *mom, int nGates);
+  void _applyRegrFiltFixed(const vector<RadarComplex_t> &iq,
+                           vector<RadarComplex_t> &filt);
+  void _applyRegrFiltStag(const vector<RadarComplex_t> &iq,
+                          vector<RadarComplex_t> &filt);
   int _convertInterestMapToVector(const string &label,
                                   const Params::interest_map_point_t *map,
                                   int nPoints,
