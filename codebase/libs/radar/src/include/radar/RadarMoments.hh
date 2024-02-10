@@ -56,6 +56,8 @@ using namespace std;
 
 class RadarMoments {
   
+friend class Cmd;
+
 public:
 
   // receiver channel identification
@@ -116,6 +118,8 @@ public:
 
   // initialize staggered PRT mode based on OpsInfo
 
+  bool getIsStagPrt() const { return _isStagPrt; }
+  
   void initStagPrt(double prtShort,
                    double prtLong,
                    int staggeredM,
@@ -1261,23 +1265,23 @@ public:
 
   // get the calibrated noise power given the channel
   
-  double getCalNoisePower(channel_t channel);
+  double getCalNoisePower(channel_t channel) const;
 
   // get the estimated noise power given the channel
   
-  double getEstNoisePower(channel_t channel);
+  double getEstNoisePower(channel_t channel) const;
 
   // get the receiver gain given the channel
   
-  double getReceiverGain(channel_t channel);
+  double getReceiverGain(channel_t channel) const;
 
   // get the base dbz at 1km given the channel
   
-  double getBaseDbz1km(channel_t channel);
+  double getBaseDbz1km(channel_t channel) const;
 
   // unambiguous range
   
-  double getUnambigRangeKm() { return _unambigRangeKm; }
+  double getUnambigRangeKm() const { return _unambigRangeKm; }
 
   // get nyquist after object has been initialized/used
 
@@ -1488,6 +1492,7 @@ private:
 
   // staggered PRT
 
+  bool _isStagPrt;
   double _prtShort;
   double _prtLong;
   int _staggeredM;

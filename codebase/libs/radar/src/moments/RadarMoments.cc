@@ -174,7 +174,8 @@ void RadarMoments::_init()
   _prt = 0.001;
   _nyquist = 25;
   _unambigRangeKm = _missing;
- 
+
+  _isStagPrt = false;
   _prtShort = 0.005;
   _prtLong = 0.0075;
   _staggeredM = 2;
@@ -5500,6 +5501,7 @@ void RadarMoments::initStagPrt(double prtShort,
   
 {
 
+  _isStagPrt = true;
   _wavelengthMeters = wavelengthMeters;
 
   // staggered PRT
@@ -7170,7 +7172,7 @@ double RadarMoments::computeTss(const RadarComplex_t *iqWindowed,
 /////////////////////////////////////////////////////
 // get the calibrated noise power given the channel
 
-double RadarMoments::getCalNoisePower(channel_t channel)
+double RadarMoments::getCalNoisePower(channel_t channel) const
   
 {
 
@@ -7196,7 +7198,7 @@ double RadarMoments::getCalNoisePower(channel_t channel)
 /////////////////////////////////////////////////////
 // get the estimated noise power given the channel
 
-double RadarMoments::getEstNoisePower(channel_t channel)
+double RadarMoments::getEstNoisePower(channel_t channel) const
   
 {
 
@@ -7222,7 +7224,7 @@ double RadarMoments::getEstNoisePower(channel_t channel)
 //////////////////////////////////////////
 // get the receiver gain given the channel
 
-double RadarMoments::getReceiverGain(channel_t channel)
+double RadarMoments::getReceiverGain(channel_t channel) const
   
 {
 
@@ -7248,7 +7250,7 @@ double RadarMoments::getReceiverGain(channel_t channel)
 /////////////////////////////////////////////
 // get the base dbz at 1km given the channel
 
-double RadarMoments::getBaseDbz1km(channel_t channel)
+double RadarMoments::getBaseDbz1km(channel_t channel) const
   
 {
 
@@ -7274,7 +7276,8 @@ double RadarMoments::getBaseDbz1km(channel_t channel)
 /////////////////////////////////////////////
 // compute percentile power value in spectrum
 
-double RadarMoments::computePowerPercentile(int nSamples, double *powerSpec,
+double RadarMoments::computePowerPercentile(int nSamples,
+                                            double *powerSpec,
                                             double percentile)
 
 {
