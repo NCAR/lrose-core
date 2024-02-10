@@ -35,10 +35,10 @@ MODULE_TYPE=progcpp
 
 TARGET_FILE = cartsim2mdv
 
-LOC_INCLUDES = -I.. $(SYS_X_INCLUDES) 
+LOC_INCLUDES = -I..
 LOC_CFLAGS = 
 LOC_CPPC_CFLAGS =
-LOC_LDFLAGS = $(SYS_X_LDFLAGS) 
+LOC_LDFLAGS =
 
 LOC_LIBS = \
 	-lsim -lrsbutil -lsim -lmdv \

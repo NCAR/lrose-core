@@ -34,10 +34,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 MODULE_TYPE=program
 
 TARGET_FILE = uf2mdv
-LOC_INCLUDES = -I. $(SYS_X_INCLUDES) 
+LOC_INCLUDES = -I.
 LOC_CFLAGS = -Wmissing-prototypes -Wmissing-declarations -Wstrict-prototypes
 LOC_CPPC_CFLAGS =
-LOC_LDFLAGS = $(SYS_X_LDFLAGS) 
+LOC_LDFLAGS =
 
 LOC_LIBS = \
 	-lcidd -lsim -lrsbutil -lsim \

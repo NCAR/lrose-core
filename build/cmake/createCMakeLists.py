@@ -30,6 +30,10 @@ def main():
     nOther = 0
     nTotal = 0
 
+    global globalNeedX11, globalNeedQt
+    globalNeedX11 = False
+    globalNeedQt = False
+
     # We will be executing some sibling scripts. Get our path so that
     # the sibling scripts from the same path can be executed explicitly.
     global thisScriptDir
@@ -141,15 +145,6 @@ def main():
 
     os.chdir(codebaseDir)
 
-    # write the top level CMakeLists.txt file
-
-    if (options.debug):
-        print("=============================================", file=sys.stderr)
-        print("Writing to top-level codebase dir: ",
-              codebaseDir, file=sys.stderr)
-    writeCMakeListsTop(codebaseDir)
-    nOther = nOther + 1
-    
     # get list of libs
     
     if (options.debug):
@@ -172,6 +167,17 @@ def main():
 
     searchDirRecurse(appsDir, lroseLibList)
 
+    # write the top level CMakeLists.txt file
+
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("Writing to top-level codebase dir: ",
+              codebaseDir, file=sys.stderr)
+    writeCMakeListsTop(codebaseDir)
+    nOther = nOther + 1
+
+    # debug print
+    
     nTotal = nRecurse + nLibs + nApps + nOther
     if (options.debug):
         print("=============================================", file=sys.stderr)
@@ -181,7 +187,7 @@ def main():
         print("==>>   nApps   : ", nApps, file=sys.stderr)
         print("==>>   nOther  : ", nOther, file=sys.stderr)
         print("==>>   nTotal  : ", nTotal, file=sys.stderr)
-        
+    
     # sanity check: we could not use Cray and Fujitsu compilers at the same time
     assert not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True..."
         
@@ -551,31 +557,34 @@ def writeCMakeListsTop(dir):
     fo.write('find_package(PkgConfig REQUIRED)\n')
     fo.write('\n')
 
-    fo.write('# Finding Qt\n')
-    fo.write('\n')
-    fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
-    fo.write('if (NOT Qt6_FOUND)\n')
-    fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
-    fo.write('endif()\n')
-    fo.write('if (Qt5_FOUND)\n')
-    fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
-    fo.write('elseif (Qt6_FOUND)\n')
-    fo.write('    message(STATUS "Found Qt6: ${Qt6_VERSION}")\n')
-    fo.write('else ()\n')
-    fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
-    fo.write('endif(Qt5_FOUND)\n')
-    fo.write('if(APPLE)\n')
-    fo.write('  if (Qt5_FOUND)\n')
-    fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-    fo.write('  elseif (Qt6_FOUND)\n')
-    fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-    fo.write('  endif(Qt5_FOUND)\n')
-    fo.write('endif(APPLE)\n')
+    if (globalNeedX11):
+        fo.write('find_package (X11)\n')
+        fo.write("if (DEFINED X11_X11_LIB)\n")
+        fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
+        fo.write("endif()\n")
 
-    fo.write('find_package (X11)\n')
-    fo.write("if (DEFINED X11_X11_LIB)\n")
-    fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
-    fo.write("endif()\n")
+    if (globalNeedQt):
+        fo.write('# Finding Qt\n')
+        fo.write('\n')
+        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
+        fo.write('if (NOT Qt6_FOUND)\n')
+        fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
+        fo.write('endif()\n')
+        fo.write('if (Qt5_FOUND)\n')
+        fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
+        fo.write('elseif (Qt6_FOUND)\n')
+        fo.write('    message(STATUS "Found Qt6: ${Qt6_VERSION}")\n')
+        fo.write('else ()\n')
+        fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
+        fo.write('endif(Qt5_FOUND)\n')
+        fo.write('if(APPLE)\n')
+        fo.write('  if (Qt5_FOUND)\n')
+        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+        fo.write('  elseif (Qt6_FOUND)\n')
+        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+        fo.write('  endif(Qt5_FOUND)\n')
+        fo.write('endif(APPLE)\n')
+
     fo.write('find_package (HDF5)\n')
     fo.write('# find_package (NETCDF)\n')
     fo.write('# find_package (LROSE)\n')
@@ -770,13 +779,18 @@ def createCMakeListsLib(libDir, lroseLibList):
             print("  compileFile: %s" % (compileFile), file=sys.stderr)
         print("-----------------------------------------", file=sys.stderr)
 
-    # check if we need Qt support
+    # check if we need X11 and/or Qt support
 
     needQt = False
+    needX11 = False
     for subDirMakefilePath in subDirMakefilePaths:
         if (checkMakefileForQt(subDirMakefilePath)):
             needQt = True
-            
+            globalNeedQt = True
+        if (checkMakefileForX11(subDirMakefilePath)):
+            needX11 = True
+            globalNeedX11 = True
+
     # determine the lib list to use
 
     libListInUse = lroseLibList
@@ -785,7 +799,9 @@ def createCMakeListsLib(libDir, lroseLibList):
 
     # write out CMakeLists.txt
 
-    writeCMakeListsLib(libName, libSrcDir, libListInUse, libCompileFileList, needQt)
+    writeCMakeListsLib(libName, libSrcDir,
+                       libListInUse, libCompileFileList,
+                       needQt, needX11)
 
 ########################################################################
 # parse the LROSE Makefile to get the lib name
@@ -883,7 +899,9 @@ def getLibSrcNamesByType(makefileLines, srcType):
 ########################################################################
 # Write out CMakeLists.txt
 
-def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList, needQt):
+def writeCMakeListsLib(libName, libSrcDir,
+                       libList, compileFileList,
+                       needQt, needX11):
 
     cmakePath = os.path.join(libSrcDir, 'CMakeLists.txt')
 
@@ -920,9 +938,10 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList, needQt):
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-    fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
-    fo.write("endif()\n")
+    if (needX11 or needQt):
+        fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
+        fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+        fo.write("endif()\n")
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
     fo.write("endif()\n")
@@ -1037,6 +1056,11 @@ def createCMakeListsApp(appDir, libList):
 
     needQt = checkMakefileForQt(makefilePath)
     needX11 = checkMakefileForX11(makefilePath)
+
+    if (needQt):
+        globalNeedQt = True
+    if (needX11):
+        globalNeedX11 = True
     
     # determine the lib list to use
 
@@ -1313,6 +1337,8 @@ def checkMakefileForX11(makefilePath):
     for line in makefileLines:
         if (line.find("X11") >= 0):
             return True
+        if (line.find("SYS_X") >= 0):
+            return True
 
     return False
     
@@ -1364,9 +1390,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-    fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
-    fo.write("endif()\n")
+    if (needX11 or needQt):
+        fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
+        fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+        fo.write("endif()\n")
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
     fo.write("endif()\n")

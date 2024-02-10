@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-LOC_INCLUDES = -I../include $(SYS_X_INCLUDES)
+LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_CPPFLAGS =
 
