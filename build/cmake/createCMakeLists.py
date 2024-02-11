@@ -557,7 +557,7 @@ def writeCMakeListsTop(dir):
     fo.write('find_package(PkgConfig REQUIRED)\n')
     fo.write('\n')
 
-    if (globalNeedX11):
+    if (globalNeedX11 or globalNeedQt):
         fo.write('find_package (X11)\n')
         fo.write("if (DEFINED X11_X11_LIB)\n")
         fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
@@ -600,8 +600,9 @@ def writeCMakeListsTop(dir):
     fo.write("if (NOT IS_DIRECTORY HDF5_C_INCLUDE_DIR)\n")
     fo.write("  set (HDF5_C_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)\n")
     fo.write("endif()\n")
-    fo.write('message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")\n')
-    fo.write('message("X11_LIB_DIR: ${X11_LIB_DIR}")\n')
+    if (globalNeedX11 or globalNeedQt):
+        fo.write('message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")\n')
+        fo.write('message("X11_LIB_DIR: ${X11_LIB_DIR}")\n')
     fo.write('message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")\n')
     fo.write('message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")\n')
     fo.write('\n')
@@ -1416,9 +1417,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
-    fo.write("if (DEFINED X11_LIB_DIR)\n")
-    fo.write("  link_directories (${X11_LIB_DIR})\n")
-    fo.write("endif()\n")
+    if (needX11 or needQt):
+        fo.write("if (DEFINED X11_LIB_DIR)\n")
+        fo.write("  link_directories (${X11_LIB_DIR})\n")
+        fo.write("endif()\n")
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
     fo.write("endif()\n")
