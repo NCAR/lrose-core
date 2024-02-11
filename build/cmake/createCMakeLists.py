@@ -782,6 +782,7 @@ def createCMakeListsLib(libDir, lroseLibList):
 
     # check if we need X11 and/or Qt support
 
+    global globalNeedX11, globalNeedQt
     needQt = False
     needX11 = False
     for subDirMakefilePath in subDirMakefilePaths:
@@ -1055,6 +1056,7 @@ def createCMakeListsApp(appDir, libList):
                 
     # check if we need Qt support
 
+    global globalNeedX11, globalNeedQt
     needQt = checkMakefileForQt(makefilePath)
     needX11 = checkMakefileForX11(makefilePath)
 

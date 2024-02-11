@@ -28,9 +28,6 @@ set (SRCS
 
 include_directories (../../../../libs/tdrp/src/include)
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
-if (DEFINED X11_X11_INCLUDE_PATH)
-  include_directories (${X11_X11_INCLUDE_PATH})
-endif()
 if (DEFINED netCDF_INSTALL_PREFIX)
   include_directories (${netCDF_INSTALL_PREFIX}/include)
 endif()
@@ -47,9 +44,6 @@ endif()
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-if (DEFINED X11_LIB_DIR)
-  link_directories (${X11_LIB_DIR})
-endif()
 if (DEFINED netCDF_INSTALL_PREFIX)
   link_directories (${netCDF_INSTALL_PREFIX}/lib)
 endif()
