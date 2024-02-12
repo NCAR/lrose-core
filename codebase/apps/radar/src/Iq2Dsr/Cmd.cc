@@ -965,7 +965,7 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
         _xmitRcvMode != IWRF_SIM_HV_FIXED_HV &&
         _xmitRcvMode != IWRF_SIM_HV_SWITCHED_HV) {
       // cannot compute it
-      gate->flds->rhohv_test = -1.0;
+      gate->flds->rhohv_test_improv = -1.0;
       continue;
     }
 
@@ -982,7 +982,7 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     if (rhohvUnfilt < _params.rhohv_test_min_rhohv ||
         rhohvUnfilt > _params.rhohv_test_max_rhohv) {
       // out of limits
-      gate->flds->rhohv_test = -1.0;
+      gate->flds->rhohv_test_improv = -1.0;
       continue;
     }
 
@@ -1019,7 +1019,9 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
       factorFilt = 0.001;
     }
     double rhohvImprov = factorUnfilt / factorFilt;
-    gate->flds->rhohv_test = rhohvImprov;
+    gate->flds->rhohv_test_unfilt = rhohvUnfilt;
+    gate->flds->rhohv_test_filt = rhohvFilt;
+    gate->flds->rhohv_test_improv = rhohvImprov;
     
   } // igate
 

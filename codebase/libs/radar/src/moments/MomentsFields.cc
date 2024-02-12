@@ -150,7 +150,6 @@ void MomentsFields::init()
 
   rhohv = missingDouble;
   rhohv_nnc = missingDouble;
-  rhohv_test = missingDouble;
   phidp0 = missingDouble;
   phidp = missingDouble;
   phidp_cond = missingDouble;
@@ -198,6 +197,10 @@ void MomentsFields::init()
   
   cmd = missingDouble;
   cmd_flag = missingDouble;
+  
+  rhohv_test_unfilt = missingDouble;
+  rhohv_test_filt = missingDouble;
+  rhohv_test_improv = missingDouble;
   
   tdbz_interest = missingDouble;
   spin_interest = missingDouble;
@@ -502,7 +505,6 @@ void MomentsFields::initToZero()
 
   rhohv = 0.0;
   rhohv_nnc = 0.0;
-  rhohv_test = 0.0;
   phidp0 = 0.0;
   phidp = 0.0;
   phidp_cond = 0.0;
@@ -550,6 +552,10 @@ void MomentsFields::initToZero()
   
   cmd = 0.0;
   cmd_flag = 0.0;
+  
+  rhohv_test_unfilt = 0.0;
+  rhohv_test_filt = 0.0;
+  rhohv_test_improv = 0.0;
   
   tdbz_interest = 0.0;
   spin_interest = 0.0;

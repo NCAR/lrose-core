@@ -157,7 +157,6 @@ public:
 
   double rhohv; // noise corrected
   double rhohv_nnc; // no noise correction
-  double rhohv_test; // used in cmd
   double phidp0; // uncorrected phidp
   double phidp;
   double phidp_cond; // phidp conditioned for kdp
@@ -192,7 +191,7 @@ public:
   double cpd;    // cumulative phase difference
   double tclut;  // max of tpt and cpd
   double ozsnr;  // SNR away from 0 DC
-  
+
   double tdbz;
   double spin;
   double max_tdbz_spin;
@@ -205,6 +204,10 @@ public:
   
   double cmd;
   double cmd_flag;
+  
+  double rhohv_test_unfilt;
+  double rhohv_test_filt;
+  double rhohv_test_improv;
   
   double tdbz_interest;
   double spin_interest;

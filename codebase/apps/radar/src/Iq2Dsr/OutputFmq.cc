@@ -1716,6 +1716,12 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.cmd - start);
     case Params::CMD_FLAG:
       return (&_flds.cmd_flag - start);
+    case Params::RHOHV_TEST_UNFILT:
+      return (&_flds.rhohv_test_unfilt - start);
+    case Params::RHOHV_TEST_FILT:
+      return (&_flds.rhohv_test_filt - start);
+    case Params::RHOHV_TEST_IMPROV:
+      return (&_flds.rhohv_test_improv - start);
     case Params::TDBZ_INTEREST:
       return (&_flds.tdbz_interest - start);
     case Params::SPIN_INTEREST:
