@@ -173,7 +173,7 @@ Beam::Beam(const string &progName,
 
 void Beam::init(const MomentsMgr &mmgr,
                 int nSamples,
-                int nSamplesEffective,
+                int nSamplesRect,
                 int nGates,
                 int nGatesPrtLong,
                 bool beamIsIndexed,
@@ -197,7 +197,7 @@ void Beam::init(const MomentsMgr &mmgr,
 
   _mmgr = mmgr;
   _nSamples = nSamples;
-  _nSamplesEffective = nSamplesEffective;
+  _nSamplesRect = nSamplesRect;
   _nGates = nGates;
   _nGatesPrtShort = nGates;
   _nGatesPrtLong = nGatesPrtLong;
@@ -2280,30 +2280,10 @@ void Beam::_filterDpAltHvCoCross()
     MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = _momFieldsF[igate];
     
-    // initialize rhohv test
-
-    if (_applyRhohvTest) {
-      fields.test2 = 0;
-      // fields.test3 = 0;
-    }
-    
     // check if CMD identified clutter at this gate
     
     if (!fields.cmd_flag) {
-
-      // should we apply the RHOHV improvement test?
-
-      if (!_applyRhohvTest) {
-        continue;
-      }
-
-      // are we within the RHOHV limits for the test?
-
-      if (fields.rhohv < _params.rhohv_test_min_rhohv ||
-          fields.rhohv > _params.rhohv_test_max_rhohv) {
-        continue;
-      }
-
+      continue;
     }
     
     // filter the HC time series, save the filter ratio
@@ -2420,42 +2400,10 @@ void Beam::_filterDpAltHvCoCross()
     
     fields.clut = _computeClutPower(fields, fieldsF);
     
-    if (_applyRhohvTest) {
-
-      // compute rhohv improvement
-      double factorUnfilt = 1.0 - fields.rhohv;
-      double factorFilt = 1.0 - fieldsF.rhohv;
-      if (factorFilt < 0.001) {
-        factorFilt = 0.001;
-      }
-      double rhohvImprov = factorUnfilt / factorFilt;
-      fields.test2 = rhohvImprov;
-
-      if (!fields.cmd_flag) {
-        // CMD did not indicate clutter
-        // check if RHOHV improvement indicates clutter
-        if (rhohvImprov >= _params.rhohv_improvement_factor_threshold) {
-          // yes, so use filtered data for dual pol fields
-          // fields.test3 = 1;
-          MomentsFields filt = fieldsF;
-          fieldsF = fields;
-          fieldsF.zdrm = filt.zdrm;
-          fieldsF.zdr = filt.zdr;
-          fieldsF.ldr = filt.ldr;
-          fieldsF.rhohv = filt.rhohv;
-          fieldsF.phidp = filt.phidp;
-        } else {
-          // no clutter, so revert to unfiltered data
-          fieldsF = fields;
-        }
-      } // if (!fields.cmd_flag)
-
-    } // if (_params.apply_rhohv_test_after_cmd)
-
   } // igate
   
   // compute the alternating velocity
-
+  
   _altVel.computeVelAlt(_nGates, _momFieldsF, _nyquist);
 
   // copy back to gate data
@@ -6067,6 +6015,8 @@ void Beam::_performClutterFiltering()
 
   // compute CMD
 
+  _cmd->setNSamples(_nSamples);
+  _cmd->setNSamplesRect(_nSamplesRect);
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
   _cmd->setXmitRcvMode(_xmitRcvMode);
   if (_isStagPrt) {
@@ -6108,6 +6058,8 @@ void Beam::_performClutterFilteringSz()
   
   // compute CMD
   
+  _cmd->setNSamples(_nSamples);
+  _cmd->setNSamplesRect(_nSamplesRect);
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
   _cmd->setXmitRcvMode(_xmitRcvMode);
   _cmd->compute(_nGates, _mom, _dualPol, _applyRhohvTest);

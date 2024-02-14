@@ -74,6 +74,9 @@ Cmd::Cmd(const string &prog_name,
   
   _createInterestMaps(_params);
   
+  _nSamples = 0;
+  _nSamplesRect = 0;
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -228,23 +231,15 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
   // dual pol fields
   
   if (useDualPol) {
-    
     if (_params.zdr_sdev_interest_weight > 0) {
       _computeZdrSdev(nGates);
     }
-    
     if (_params.phidp_sdev_interest_weight > 0) {
       _computePhidpSdevNew(nGates);
     }
-    
     if (useRhohvTest) {
-      
-      if (_params.rhohv_test_interest_weight > 0) {
-        _computeRhohvTest(mom, nGates);
-      }
-      
-    } // if (dualPol ...
-  
+      _computeRhohvTest(mom, nGates);
+    }
   } // if (dualPol ...
   
   // compute cmd clutter field
@@ -333,6 +328,10 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
     }
     
     if (flds->cmd >= checkThreshold) {
+      flds->cmd_flag = 1;
+    }
+
+    if (flds->rhohv_test_improv >= _params.rhohv_improvement_factor_threshold) {
       flds->cmd_flag = 1;
     }
 
@@ -935,27 +934,39 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     return;
   }
   int nSamples = _gateData[0]->_nSamples;
-  int nSamplesHalf = _gateData[0]->_nSamplesHalf;
+  if (_nSamples > nSamples) {
+    cerr << "ERROR - Cmd::_computeRhohvTest" << endl;
+    cerr << "  Number of samples exceeds alloc: " << nSamples << endl;
+    cerr << "  Number of samples now: " << _nSamples << endl;
+    return;
+  }
+
+  // for the regression filter we need to use data with rectangular window
+
+  int nSamplesRegr = _nSamplesRect;
+  if (mom->getIsStagPrt()) {
+    nSamplesRegr = _nSamplesRect / 2;
+  }
+  int iqOffset = 0;
+  if (_nSamples != _nSamplesRect) {
+    iqOffset = (_nSamples - _nSamplesRect) / 2;
+  }
   
   // initialize regression filter
 
-  if (mom->getIsStagPrt()) {
-    _regr.setup(nSamplesHalf, false, 5, 1.0, 0.6667, mom->getWavelengthMeters());
-  } else {
-    _regr.setup(nSamples, false, 5, 1.0, 0.6667, mom->getWavelengthMeters());
-  }
+  _regr.setup(nSamplesRegr, false, 5, 1.0, 0.6667, mom->getWavelengthMeters());
   
   for (int igate = 0; igate < nGates; igate++) {
-
-    // make copy of IQ for this gate
+    
+    // make copy of IQ for this gate, unwindowed
     
     GateData *gate = _gateData[igate];
     vector<RadarComplex_t> iqhc, iqvc;
-    iqhc.resize(nSamples);
-    iqvc.resize(nSamples);
-    const RadarComplex_t *iqhcOrig = gate->iqhcOrig;
-    const RadarComplex_t *iqvcOrig = gate->iqvcOrig;
-    for (int ii = 0; ii < nSamples; ii++) {
+    iqhc.resize(_nSamplesRect);
+    iqvc.resize(_nSamplesRect);
+    const RadarComplex_t *iqhcOrig = gate->iqhcOrig + iqOffset;
+    const RadarComplex_t *iqvcOrig = gate->iqvcOrig + iqOffset;
+    for (int ii = 0; ii < _nSamplesRect; ii++) {
       iqhc[ii] = iqhcOrig[ii];
       iqvc[ii] = iqvcOrig[ii];
     }
@@ -974,23 +985,17 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     double rhohvUnfilt = -1.0;
     if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
         _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-      rhohvUnfilt = mom->rhohvAltHvCoCross(iqhc.data(), iqvc.data());
+      rhohvUnfilt = mom->rhohvAltHvCoCross(_nSamplesRect, iqhc.data(), iqvc.data());
     } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
                _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
-      rhohvUnfilt = mom->rhohvDpSimHv(iqhc.data(), iqvc.data());
-    }
-    if (rhohvUnfilt < _params.rhohv_test_min_rhohv ||
-        rhohvUnfilt > _params.rhohv_test_max_rhohv) {
-      // out of limits
-      gate->flds->rhohv_test_improv = -1.0;
-      continue;
+      rhohvUnfilt = mom->rhohvDpSimHv(_nSamplesRect, iqhc.data(), iqvc.data());
     }
 
     // apply regression filter to time series
 
     vector<RadarComplex_t> filthc, filtvc;
-    filthc.resize(nSamples);
-    filtvc.resize(nSamples);
+    filthc.resize(_nSamplesRect);
+    filtvc.resize(_nSamplesRect);
 
     if (mom->getIsStagPrt()) {
       _applyRegrFiltStag(iqhc, filthc);
@@ -1005,10 +1010,10 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
     double rhohvFilt = -1.0;
     if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
         _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-      rhohvFilt = mom->rhohvAltHvCoCross(filthc.data(), filtvc.data());
+      rhohvFilt = mom->rhohvAltHvCoCross(_nSamplesRect, filthc.data(), filtvc.data());
     } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV ||
                _xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
-      rhohvFilt = mom->rhohvDpSimHv(filthc.data(), filtvc.data());
+      rhohvFilt = mom->rhohvDpSimHv(_nSamplesRect, filthc.data(), filtvc.data());
     }
 
     // compute rhohv improvement

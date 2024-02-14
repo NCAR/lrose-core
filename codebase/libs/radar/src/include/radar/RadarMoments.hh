@@ -504,7 +504,8 @@ public:
   
   // DP_ALT_HV_CO_CROSS - compute rhohv not noise corrected
   
-  double rhohvAltHvCoCross(RadarComplex_t *iqhc,
+  double rhohvAltHvCoCross(int nSamplesHalf,
+                           RadarComplex_t *iqhc,
                            RadarComplex_t *iqvc) const;
   
   // DP_SIM_HV
@@ -535,7 +536,8 @@ public:
   
   // DP_SIM_HV - compute rhohv not noise corrected
   
-  double rhohvDpSimHv(RadarComplex_t *iqhc,
+  double rhohvDpSimHv(int nSamples,
+                      RadarComplex_t *iqhc,
                       RadarComplex_t *iqvc) const;
   
   // DP_H_ONLY

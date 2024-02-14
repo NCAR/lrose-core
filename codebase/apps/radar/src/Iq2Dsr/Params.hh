@@ -1267,10 +1267,6 @@ public:
 
   tdrp_bool_t apply_rhohv_test_in_cmd;
 
-  double rhohv_test_min_rhohv;
-
-  double rhohv_test_max_rhohv;
-
   double rhohv_improvement_factor_threshold;
 
   interest_map_point_t *_rhohv_test_interest_map;
@@ -1394,7 +1390,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[322];
+  mutable TDRPtable _table[320];
 
   const char *_className;
 

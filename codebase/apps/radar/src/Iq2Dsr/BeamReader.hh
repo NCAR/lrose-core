@@ -307,7 +307,7 @@ private:
 
   int _computeMinNGates();
   int _computeNSamplesIndexed();
-  int _computeNSamplesEffective(int nSamples);
+  int _computeNSamplesRect(int nSamples);
 
   void _checkIsAlternating();
   void _checkAlternatingStartsOnH();

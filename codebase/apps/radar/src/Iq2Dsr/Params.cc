@@ -4506,30 +4506,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'rhohv_test_min_rhohv'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhohv_test_min_rhohv");
-    tt->descr = tdrpStrDup("Min RHOHV for application of the RHOHV test.");
-    tt->help = tdrpStrDup("If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.");
-    tt->val_offset = (char *) &rhohv_test_min_rhohv - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'rhohv_test_max_rhohv'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhohv_test_max_rhohv");
-    tt->descr = tdrpStrDup("Max RHOHV for application of the RHOHV test.");
-    tt->help = tdrpStrDup("If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.");
-    tt->val_offset = (char *) &rhohv_test_max_rhohv - &_start_;
-    tt->single_val.d = 0.98;
-    tt++;
-    
     // Parameter 'rhohv_improvement_factor_threshold'
     // ctype is 'double'
     

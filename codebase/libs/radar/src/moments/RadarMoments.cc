@@ -1952,33 +1952,34 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
 ///////////////////////////////////////////////////////////
 // DP_ALT_HV_CO_CROSS - compute rhohv
 
-double RadarMoments::rhohvAltHvCoCross(RadarComplex_t *iqhc,
+double RadarMoments::rhohvAltHvCoCross(int nSamplesHalf,
+                                       RadarComplex_t *iqhc,
                                        RadarComplex_t *iqvc) const
   
 {
 
   // compute covariances
   
-  double lag0_hc = RadarComplex::meanPower(iqhc, _nSamplesHalf - 1);
-  double lag0_vc = RadarComplex::meanPower(iqvc, _nSamplesHalf - 1);
+  double lag0_hc = RadarComplex::meanPower(iqhc, nSamplesHalf - 1);
+  double lag0_vc = RadarComplex::meanPower(iqvc, nSamplesHalf - 1);
   
   // compute lag1 co-polar correlation V to H
   
   RadarComplex_t lag1_vchc =
-    RadarComplex::meanConjugateProduct(iqvc, iqhc, _nSamplesHalf - 1);
+    RadarComplex::meanConjugateProduct(iqvc, iqhc, nSamplesHalf - 1);
   
   // compute lag1 co-polar correlation H to V
   
   RadarComplex_t lag1_hcvc =
-    RadarComplex::meanConjugateProduct(iqhc + 1, iqvc, _nSamplesHalf - 1);
+    RadarComplex::meanConjugateProduct(iqhc + 1, iqvc, nSamplesHalf - 1);
 
   // lag-2 correlations for HH and VV
   
   RadarComplex_t lag2_hc =
-    RadarComplex::meanConjugateProduct(iqhc + 1, iqhc, _nSamplesHalf - 1);
+    RadarComplex::meanConjugateProduct(iqhc + 1, iqhc, nSamplesHalf - 1);
   
   RadarComplex_t lag2_vc =
-    RadarComplex::meanConjugateProduct(iqvc + 1, iqvc, _nSamplesHalf - 1);
+    RadarComplex::meanConjugateProduct(iqvc + 1, iqvc, nSamplesHalf - 1);
   
   // lag 1 magnitude
   
@@ -2327,18 +2328,19 @@ void RadarMoments::computeMomDpSimHv(double lag0_hc,
 ///////////////////////////////////////////////////////////
 // DP_ALT_HV_CO_CROSS - compute rhohv
 
-double RadarMoments::rhohvDpSimHv(RadarComplex_t *iqhc,
+double RadarMoments::rhohvDpSimHv(int nSamples,
+                                  RadarComplex_t *iqhc,
                                   RadarComplex_t *iqvc) const
   
 {
 
   // compute covariances
   
-  double lag0_hc = RadarComplex::meanPower(iqhc, _nSamples - 1);
-  double lag0_vc = RadarComplex::meanPower(iqvc, _nSamples - 1);
+  double lag0_hc = RadarComplex::meanPower(iqhc, nSamples - 1);
+  double lag0_vc = RadarComplex::meanPower(iqvc, nSamples - 1);
 
   RadarComplex_t Rvvhh0 =
-    RadarComplex::meanConjugateProduct(iqvc, iqhc, _nSamples - 1);
+    RadarComplex::meanConjugateProduct(iqvc, iqhc, nSamples - 1);
 
   // computre rho-hv, not noise corrected
   

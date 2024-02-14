@@ -78,6 +78,16 @@ public:
   // beams are constructed.
  
   int createInterestMaps(const Params &params);
+
+  // set number of samples in dwell
+
+  void setNSamples(int val) { _nSamples = val; }
+  
+  // set the number of samples assuming a rectangular window
+  // this will be fewer than nSamples if the window in use
+  // is not rectangular
+  
+  void setNSamplesRect(int val) { _nSamplesRect = val; }
   
   // compute CMD
   
@@ -141,6 +151,11 @@ private:
   // regression filter for rhohv test
   
   ForsytheRegrFilter _regr;
+
+  // number of samples
+  
+  int _nSamples;
+  int _nSamplesRect;
   
   // private functions
   

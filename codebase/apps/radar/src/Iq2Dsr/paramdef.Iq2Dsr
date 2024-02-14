@@ -1904,18 +1904,6 @@ paramdef boolean {
 } apply_rhohv_test_in_cmd;
 
 paramdef double {
-  p_default = 0.5;
-  p_descr = "Min RHOHV for application of the RHOHV test.";
-  p_help = "If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.";
-} rhohv_test_min_rhohv;
-
-paramdef double {
-  p_default = 0.98;
-  p_descr = "Max RHOHV for application of the RHOHV test.";
-  p_help = "If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.";
-} rhohv_test_max_rhohv;
-
-paramdef double {
   p_default = 4.0;
   p_descr = "The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.";
   p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";

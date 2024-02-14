@@ -430,9 +430,9 @@ Beam *BeamReader::getNextBeam()
   }
   pthread_mutex_unlock(&_beamRecyclePoolMutex);
 
-  // compute effective nsamples 
+  // compute effective nsamples for rectangular window
 
-  int nSamplesEffective = _computeNSamplesEffective(_nSamples);
+  int nSamplesRect = _computeNSamplesRect(_nSamples);
 
   // check for end of vol and sweep
 
@@ -442,7 +442,7 @@ Beam *BeamReader::getNextBeam()
 
   beam->init(*_momentsMgr,
              _nSamples,
-             nSamplesEffective,
+             nSamplesRect,
              _nGates,
              _nGatesPrtLong,
              _indexTheBeams,
@@ -470,11 +470,11 @@ Beam *BeamReader::getNextBeam()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, 
-            "==>> New beam, el: mid, start, end, rate, az: mid, start, end, rate, nSamp, nEff: "
+            "==>> New beam, el: mid, start, end, rate, az: mid, start, end, rate, nSamp, nRect: "
             "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %6.2f %6.2f %4d %4d\n",
             _el, startEl, endEl, _beamElRate,
             _az, startAz, endAz, _beamAzRate,
-            _nSamples, nSamplesEffective);
+            _nSamples, nSamplesRect);
     if (_scanType == Beam::SCAN_TYPE_PPI) {
       cerr << "  scanType, xmitRcvMode: PPI, "
            << iwrf_xmit_rcv_mode_to_str(xmitRcvMode) << endl;
@@ -2220,7 +2220,7 @@ int BeamReader::_computeMinNGates()
       
 ////////////////////////////////////////////////////////////////
 // compute nSamples, the number of samples in the beam dwell
-// Sets _nSamples and _nSamplesEffective
+// Sets _nSamples and _nSamplesRect
 
 int BeamReader::_computeNSamplesIndexed()
   
@@ -2272,25 +2272,25 @@ int BeamReader::_computeNSamplesIndexed()
 
   // compute nSamples from rate and dwell size
 
-  int nSamplesEffective = (int) ((_meanPrf * _beamAngleDeg / antennaRate) + 0.5);
+  int nSamplesRect = (int) ((_meanPrf * _beamAngleDeg / antennaRate) + 0.5);
 
   // sanity check
   
-  if (nSamplesEffective < _params.min_n_samples) {
-    nSamplesEffective = _params.min_n_samples;
-  } else if (nSamplesEffective > _params.max_n_samples) {
-    nSamplesEffective = _params.max_n_samples;
+  if (nSamplesRect < _params.min_n_samples) {
+    nSamplesRect = _params.min_n_samples;
+  } else if (nSamplesRect > _params.max_n_samples) {
+    nSamplesRect = _params.max_n_samples;
   }
   
   // adjust for the window
   
-  int nSamples = nSamplesEffective;
+  int nSamples = nSamplesRect;
   if (_momentsMgr->getWindowType() == Params::WINDOW_VONHANN) {
-    nSamples = (int) (nSamplesEffective * _windowFactorVonhann + 0.5);
+    nSamples = (int) (nSamplesRect * _windowFactorVonhann + 0.5);
   } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN) {
-    nSamples = (int) (nSamplesEffective * _windowFactorBlackman + 0.5);
+    nSamples = (int) (nSamplesRect * _windowFactorBlackman + 0.5);
   } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
-    nSamples = (int) (nSamplesEffective * _windowFactorBlackmanNuttall + 0.5);
+    nSamples = (int) (nSamplesRect * _windowFactorBlackmanNuttall + 0.5);
   }
 
   // adjust nSamples to queue size if needed
@@ -2310,12 +2310,12 @@ int BeamReader::_computeNSamplesIndexed()
     DateTime ptime(psecs);
     ptime.setSubSec(pnanosecs * 1.0e-9);
     cerr << "-->> el, az, antennaRate, nPossiblyOdd, "
-         << "_nSamples, _nSamplesEffective, time: "
+         << "nSamples, nSamplesRect, time: "
          << pulse->getEl() << ", "
          << pulse->getAz() << ", "
          << antennaRate << ", "
          << nSamples << ", "
-         << nSamplesEffective << ", "
+         << nSamplesRect << ", "
          << ptime.getStr() << endl;
   }
 
@@ -2327,7 +2327,7 @@ int BeamReader::_computeNSamplesIndexed()
 // compute nSamples adjusted for the window - i.e. what
 // nSamples would be for a rectangular window
 
-int BeamReader::_computeNSamplesEffective(int nSamples)
+int BeamReader::_computeNSamplesRect(int nSamples)
   
 {
   
@@ -2337,20 +2337,29 @@ int BeamReader::_computeNSamplesEffective(int nSamples)
     return _nSamplesSz;
   }
 
-  // adjust for the window
-
-  int nSamplesEffective = nSamples;
-  if (_momentsMgr->getWindowType() == Params::WINDOW_VONHANN) {
-    nSamplesEffective = (int) ((double) nSamples / _windowFactorVonhann + 0.5);
-  } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN) {
-    nSamplesEffective = (int) ((double) nSamples / _windowFactorBlackman + 0.5);
-  } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
-    nSamplesEffective = (int) ((double) nSamples / _windowFactorBlackmanNuttall + 0.5);
+  if (_momentsMgr->getWindowType() == Params::WINDOW_RECT) {
+    return nSamples;
   }
 
-  return nSamplesEffective;
+  // adjust for the window
+  
+  int nSamplesRect = nSamples;
+  if (_momentsMgr->getWindowType() == Params::WINDOW_VONHANN) {
+    nSamplesRect = (int) ((double) nSamples / _windowFactorVonhann + 0.5);
+  } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN) {
+    nSamplesRect = (int) ((double) nSamples / _windowFactorBlackman + 0.5);
+  } else if (_momentsMgr->getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
+    nSamplesRect = (int) ((double) nSamples / _windowFactorBlackmanNuttall + 0.5);
+  }
+  
+  // ensure even number of samples, rounding up
+  
+  nSamplesRect = ((nSamplesRect + 1) / 2) * 2;
+  
+  return nSamplesRect;
 
 }
+
 ///////////////////////////////////////////      
 // check if we have alternating h/v pulses
 // 
