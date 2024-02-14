@@ -65,7 +65,6 @@ Cmd::Cmd(const string &prog_name,
   _cpaInterestMap = NULL;
   _zdrSdevInterestMap = NULL;
   _phidpSdevInterestMap = NULL;
-  _rhohvTestInterestMap = NULL;
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
@@ -106,10 +105,6 @@ Cmd::~Cmd()
     delete _phidpSdevInterestMap;
   }
   
-  if (_rhohvTestInterestMap != NULL) {
-    delete _rhohvTestInterestMap;
-  }
-  
 }
 
 /////////////////////////////////////////////////////////
@@ -125,7 +120,7 @@ int Cmd::_createInterestMaps(const Params &params)
 
   if (_tdbzInterestMap == NULL) {
     vector<InterestMap::ImPoint> pts;
-    if (_convertInterestMapToVector("Tdbz",
+    if (_convertInterestMapToVector("tdbz",
 				    params._tdbz_interest_map,
 				    params.tdbz_interest_map_n,
 				    pts)) {
@@ -139,7 +134,7 @@ int Cmd::_createInterestMaps(const Params &params)
   
   if (_spinInterestMap == NULL) {
     vector<InterestMap::ImPoint> pts;
-    if (_convertInterestMapToVector("Spin",
+    if (_convertInterestMapToVector("spin",
 				    params._spin_interest_map,
 				    params.spin_interest_map_n,
 				    pts)) {
@@ -168,7 +163,7 @@ int Cmd::_createInterestMaps(const Params &params)
 
   if (_zdrSdevInterestMap == NULL) {
     vector<InterestMap::ImPoint> pts;
-    if (_convertInterestMapToVector("zdr sdev",
+    if (_convertInterestMapToVector("zdr_sdev",
 				    params._zdr_sdev_interest_map,
 				    params.zdr_sdev_interest_map_n,
 				    pts)) {
@@ -182,7 +177,7 @@ int Cmd::_createInterestMaps(const Params &params)
 
   if (_phidpSdevInterestMap == NULL) {
     vector<InterestMap::ImPoint> pts;
-    if (_convertInterestMapToVector("phidp sdev",
+    if (_convertInterestMapToVector("phidp_sdev",
 				    params._phidp_sdev_interest_map,
 				    params.phidp_sdev_interest_map_n,
 				    pts)) {
@@ -191,20 +186,6 @@ int Cmd::_createInterestMaps(const Params &params)
     _phidpSdevInterestMap =
       new InterestMap("phidp sdev", pts, params.phidp_sdev_interest_weight);
   } // if (_phidpSdevInterestMap ...
-  
-  // rhohv test
-
-  if (_rhohvTestInterestMap == NULL) {
-    vector<InterestMap::ImPoint> pts;
-    if (_convertInterestMapToVector("rhohv test",
-				    params._rhohv_test_interest_map,
-				    params.rhohv_test_interest_map_n,
-				    pts)) {
-      return -1;
-    }
-    _rhohvTestInterestMap =
-      new InterestMap("rhohv test", pts, params.rhohv_test_interest_weight);
-  } // if (_rhohvTestInterestMap ...
   
   return 0;
   
@@ -330,11 +311,13 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
     if (flds->cmd >= checkThreshold) {
       flds->cmd_flag = 1;
     }
-
-    if (flds->rhohv_test_improv >= _params.rhohv_improvement_factor_threshold) {
-      flds->cmd_flag = 1;
+    
+    if (_params.apply_rhohv_test_in_cmd) {
+      if (flds->rhohv_test_improv >= _params.rhohv_improvement_factor_threshold) {
+        flds->cmd_flag = 1;
+      }
     }
-
+    
   } // igate
 
   // first remove speckle

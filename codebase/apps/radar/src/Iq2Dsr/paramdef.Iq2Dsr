@@ -1909,16 +1909,6 @@ paramdef double {
   p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";
 } rhohv_improvement_factor_threshold;
 
-paramdef struct interest_map_point_t {
-  p_default = {{3.5, 0.0}, {4.5, 1.0}};
-  p_descr = "Interest mapping for the rhohv test.";
-} rhohv_test_interest_map[];
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Weight for standard deviation of phidp.";
-} rhohv_test_interest_weight;
-
 commentdef {
   p_header = "SPECTRAL CMD";
   p_text = "You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.";

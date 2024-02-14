@@ -4518,55 +4518,6 @@
     tt->single_val.d = 4;
     tt++;
     
-    // Parameter 'rhohv_test_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rhohv_test_interest_map");
-    tt->descr = tdrpStrDup("Interest mapping for the rhohv test.");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_rhohv_test_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rhohv_test_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rhohv_test_interest_map->value - (char *) _rhohv_test_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rhohv_test_interest_map->interest - (char *) _rhohv_test_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 3.5;
-      tt->struct_vals[1].d = 0;
-      tt->struct_vals[2].d = 4.5;
-      tt->struct_vals[3].d = 1;
-    tt++;
-    
-    // Parameter 'rhohv_test_interest_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhohv_test_interest_weight");
-    tt->descr = tdrpStrDup("Weight for standard deviation of phidp.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhohv_test_interest_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));

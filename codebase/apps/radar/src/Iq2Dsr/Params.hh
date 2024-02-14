@@ -1269,11 +1269,6 @@ public:
 
   double rhohv_improvement_factor_threshold;
 
-  interest_map_point_t *_rhohv_test_interest_map;
-  int rhohv_test_interest_map_n;
-
-  double rhohv_test_interest_weight;
-
   tdrp_bool_t run_spectral_cmd;
 
   clutter_filter_type_t spec_cmd_clutter_filter_type;
@@ -1390,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[320];
+  mutable TDRPtable _table[318];
 
   const char *_className;
 

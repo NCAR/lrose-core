@@ -118,7 +118,6 @@ private:
   InterestMap *_cpaInterestMap;
   InterestMap *_zdrSdevInterestMap;
   InterestMap *_phidpSdevInterestMap;
-  InterestMap *_rhohvTestInterestMap;
 
   // phidp computations
 
