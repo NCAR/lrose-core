@@ -1400,27 +1400,6 @@ public:
                                MomentsFields &fields);
 
 
-  // compute ripple from mitch switch
-  //
-  // The Mitch switch presents a different face to the transmit pulse
-  // every alternate H and V pulse. This can lead to a difference in
-  // power or phase for each alternate pulse, which in turn can lead
-  // to spikes in the spectrum at 0.25 of the main PRF (or 0.5 of the
-  // H PRF).
-  
-  void computeMitchSwitchRipple(RadarComplex_t *iqhc,
-                                RadarComplex_t *iqvc,
-                                RadarComplex_t *iqhx,
-                                RadarComplex_t *iqvx,
-                                RadarComplex_t &rippleHc,
-                                RadarComplex_t &rippleVc,
-                                RadarComplex_t &rippleHx,
-                                RadarComplex_t &rippleVx,
-                                double &snrHc,
-                                double &snrVc,
-                                double &snrHx,
-                                double &snrVx);
-
 protected:
 private:
   
@@ -1714,12 +1693,7 @@ private:
     return xx;
   }
 
-};
-
-#endif
-
-#ifdef NOTNOW
-
+  // deprecated
   // Applies previously computed filter ratios, in the spectral
   // domain, to a time series
   //
@@ -1732,85 +1706,14 @@ private:
   //    iqFiltered: filtered time series
   //    iqNotched: if not NULL, notched time series
   
-  void applyFilterRatio(int nSamples,
-                        const RadarFft &fft,
-                        const RadarComplex_t *iq,
-                        RadarComplex_t *iqFiltered,
-                        RadarComplex_t *iqNotched);
+  void _applyFilterRatio(int nSamples,
+                         const RadarFft &fft,
+                         const RadarComplex_t *iq,
+                         const double *specRatio,
+                         RadarComplex_t *iqFiltered,
+                         RadarComplex_t *iqNotched);
   
-  // apply polynomial regression clutter filter to IQ time series
-  //
-  // NOTE: IQ data should not be windowed.
-  //
-  // Inputs:
-  //   nSamples
-  //   fftHalf: fft object for short and long half time series, length nSamples/2
-  //   regr: object to be used for polynomial computations
-  //   iqOrig: unfiltered time series, not windowed
-  //   channel: which channel - used to determine calibrated noise
-  //
-  //  Outputs:
-  //    iqFiltered: filtered time series
-  //    filterRatio: ratio of raw to unfiltered power, before applying correction
-  //    spectralNoise: spectral noise estimated from the spectrum
-  //    spectralSnr: ratio of spectral noise to noise power
-  //
-  //  Memory allocation by calling routine:
-  //    regr - initialized to size nSamples
-  //    iqOrig[nSamples]
-  //    iqFiltered[nSamples]
-  
-  void applyRegrFilterStagPrt(int nSamples,
-                              double prtSecsShort,
-                              double prtSecsLong,
-                              const RadarFft &fftHalf,
-                              ForsytheRegrFilter &regr,
-                              const RadarComplex_t *iqOrig,
-                              double calNoise,
-                              bool interpAcrossNotch,
-                              RadarComplex_t *iqFiltered,
-                              double &filterRatio,
-                              double &spectralNoise,
-                              double &spectralSnr);
-  
-  // apply polynomial regression clutter filter to IQ time series
-  //
-  // NOTE: IQ data should not be windowed.
-  //
-  // Inputs:
-  //   nSamples
-  //   nExpanded = length of expanded time series with inserted 0's
-  //             = (nSamples / 2) * (m + n)
-  //   fftExp: object to be used for FFT computations
-  //   regr: object to be used for polynomial computations
-  //   iqOrig: unfiltered time series, not windowed
-  //   channel: which channel - used to determine calibrated noise
-  //
-  //  Outputs:
-  //    iqFiltered: filtered time series
-  //    filterRatio: ratio of raw to unfiltered power,
-  //                 before applying correction
-  //    spectralNoise: spectral noise estimated from the spectrum
-  //    spectralSnr: ratio of spectral noise to noise power
-  //
-  //  Memory allocation by calling routine:
-  //    fftExp - initialized to size nExpanded
-  //    regr - initialized to size nSamples
-  //    iqOrig[nSamples]
-  //    iqFiltered[nSamples]
+};
 
-  void applyRegrFilterStagPrt(int nSamples,
-                              int nExpanded,
-                              double prtSecsShort,
-                              double prtSecsLong,
-                              const RadarFft &fftExp,
-                              ForsytheRegrFilter &regr,
-                              const RadarComplex_t *iqOrig,
-                              double calNoise,
-                              bool interpAcrossNotch,
-                              RadarComplex_t *iqFiltered,
-                              double &filterRatio,
-                              double &spectralNoise,
-                              double &spectralSnr);
 #endif
-  
+
