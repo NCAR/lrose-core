@@ -71,7 +71,6 @@ class QSlider;
 class QWidget;
 
 class DisplayField;
-class Reader;
 
 class DisplayManager : public QMainWindow {
   
@@ -82,7 +81,6 @@ public:
   // constructor
   
   DisplayManager(const Params &params,
-                 Reader *reader,
                  const vector<DisplayField *> &fields,
                  bool haveFilteredFields);
   
@@ -138,11 +136,6 @@ signals:
 protected:
   
   const Params &_params;
-  
-  // reading data in
-  
-  Reader *_reader;
-  bool _initialRay;
   
   // instrument platform details 
 

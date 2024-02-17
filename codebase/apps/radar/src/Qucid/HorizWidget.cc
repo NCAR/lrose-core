@@ -59,7 +59,7 @@ HorizWidget::HorizWidget(QWidget* parent,
 
   // initialoze world view
 
-  configureRange(_params.max_range_km);
+  // configureRange(_params.max_range_km);
 
   setGrids(_params.horiz_grids_on_at_startup);
   setRings(_params.horiz_range_rings_on_at_startup);

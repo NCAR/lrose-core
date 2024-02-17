@@ -48,7 +48,6 @@
 
 class QApplication;
 class DisplayField;
-class Reader;
 class CartManager;
 
 class Qucid {
@@ -79,10 +78,6 @@ private:
   string _progName;
   Args _args;
 
-  // reading data in
-
-  Reader *_reader;
-
   // data fields
 
   vector<DisplayField *> _displayFields;
@@ -96,8 +91,6 @@ private:
   int _setupXDisplay(int argc, char **argv);
   void _initGlobals();
   int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
 
 };
 

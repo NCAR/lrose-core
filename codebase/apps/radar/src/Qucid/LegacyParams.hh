@@ -56,7 +56,7 @@ public:
 
   // set to print TDRP version of parameter
 
-  void setPrintTdrp(bool val) { _printTdrp = val; }
+  void setPrintParamdef(bool val) { _printParamdef = val; }
     
   //  translate legacy to TDRP
   
@@ -85,7 +85,7 @@ private:
 
   // tdrp
 
-  bool _printTdrp;
+  bool _printParamdef;
   FILE *_tdrpFile;
 
   // fields

@@ -75,7 +75,6 @@ class DisplayField;
 class HorizWidget;
 class VertWidget;
 class VertWindow;
-class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
@@ -93,9 +92,8 @@ public:
   // constructor
   
   CartManager(const Params &params,
-               Reader *reader,
-               const vector<DisplayField *> &fields,
-               bool haveFilteredFields);
+              const vector<DisplayField *> &fields,
+              bool haveFilteredFields);
   
   // destructor
   

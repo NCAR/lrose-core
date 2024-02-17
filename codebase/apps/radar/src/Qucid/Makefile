@@ -69,7 +69,6 @@ HDRS = \
 	Product.hh \
 	ProductMgr.hh \
 	Qucid.hh \
-	Reader.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
@@ -116,7 +115,6 @@ NORM_SRCS = \
 	Product.cc \
 	ProductMgr.cc \
 	Qucid.cc \
-	Reader.cc \
 	RenderContext.cc \
 	ScaledLabel.cc \
 	SiiPalette.cc \

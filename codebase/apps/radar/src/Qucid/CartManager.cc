@@ -38,9 +38,6 @@
 #include "VertWidget.hh"
 #include "VertWindow.hh"
 #include "Params.hh"
-#include "Reader.hh"
-// #include "AllocCheck.hh"
-// #include "BoundaryPointEditor.hh"
 
 #include <string>
 #include <cmath>
@@ -109,10 +106,9 @@ CartManager* CartManager::Instance()
 // Constructor
 
 CartManager::CartManager(const Params &params,
-                           Reader *reader,
-                           const vector<DisplayField *> &fields,
-                           bool haveFilteredFields) :
-        DisplayManager(params, reader, fields, haveFilteredFields),
+                         const vector<DisplayField *> &fields,
+                         bool haveFilteredFields) :
+        DisplayManager(params, fields, haveFilteredFields),
         // _sweepManager(params),
         _vertWindowDisplayed(false)
 {
@@ -913,57 +909,13 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
   _horiz->setArchiveMode(false);
   _vert->setArchiveMode(false);
 
-  // do nothing if freeze is on
-
-  if (_frozen) {
-    return;
-  }
-
-  if (event->timerId() == _beamTimerId && !_frozen) {
-
-    // get all available beams
-
-    while (true) {
-
-      // get the next ray from the reader queue
-      // responsibility for this ray memory passes to
-      // this (the master) thread
-
-      RadxRay *ray = _reader->getNextRay(_platform);
-      if (ray == NULL) {
-        break; // no pending rays
-      }
-
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "  Got a ray, time, el, az, nGates: "
-             << DateTime::strm(ray->getTimeSecs()) << ", "
-             << ray->getElevationDeg() << ", "
-             << ray->getAzimuthDeg() << ", "
-             << ray->getNGates() << endl;
-      }
-
-      // update the status panel
-      
-      _updateStatusPanel(ray);
-      
-      // draw the beam
-      
-      if (_params.images_creation_mode != 
-          Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-        _handleRay(_platform, ray);
-      }
-    
-    } // while
-
-  }
-    
 }
 
 ///////////////////////////////////////
 // set input file list for archive mode
 
 void CartManager::setArchiveFileList(const vector<string> &list,
-                                      bool fromCommandLine /* = true */)
+                                     bool fromCommandLine /* = true */)
 {
 
   if (fromCommandLine && list.size() > 0) {
@@ -1036,25 +988,6 @@ void CartManager::setArchiveFileList(const vector<string> &list,
 int CartManager::loadArchiveFileList()
 
 {
-  RadxTimeList timeList;
-  timeList.setDir(_params.archive_data_url);
-  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
-  timeList.compile();
-  _urlOK = true;
-
-  if (timeList.getPathList().size() < 1) {
-    cerr << "ERROR - CartManager::loadArchiveFileList() for dir:" << _params.archive_data_url << endl;
-    cerr << "  Cannot load file list for url: " 
-         << _params.archive_data_url << endl;
-    cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
-    cerr << "  End time: " << _archiveEndTime.getStr() << endl;
-    _urlOK = false;
-    return -1;
-
-  }
-
-  setArchiveFileList(timeList.getPathList(), false);
-  
   return 0;
 
 }
@@ -1230,30 +1163,6 @@ void CartManager::_plotArchiveData()
     cerr << "  volume start time: " << _plotStartTime.asString() << endl;
   }
 
-  // initialize plotting
-
-  _initialRay = true;
-
-  // handle the rays
-  
-  const vector<RadxRay *> &rays = _vol.getRays();
-  if (rays.size() < 1) {
-    cerr << "ERROR - _plotArchiveData" << endl;
-    cerr << "  No rays found" << endl;
-    return;
-  }
-
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  if (sweeps.size() < 1) {
-    cerr << "ERROR - _plotArchiveData" << endl;
-    cerr << "  No sweeps found" << endl;
-    return;
-  }
-
-  // clear the canvas
-
-  _clear();
-
   // handle the rays
 
   // const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
@@ -1304,11 +1213,9 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
   _nGates = ray->getNGates();
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  if (!_params.set_max_range && (maxRange > _maxRangeKm)) {
-    _maxRangeKm = maxRange;
-    _horiz->configureRange(_maxRangeKm);
-    _vert->configureRange(_maxRangeKm);
-  }
+  _maxRangeKm = maxRange;
+  _horiz->configureRange(_maxRangeKm);
+  _vert->configureRange(_maxRangeKm);
 
   // create 2D field data vector
 
@@ -1696,7 +1603,6 @@ void CartManager::_freeze()
     _frozen = true;
     _freezeAct->setText("Unfreeze");
     _freezeAct->setStatusTip(tr("Click to unfreeze display, or hit ESC"));
-    _initialRay = true;
   }
 }
 
@@ -2739,7 +2645,7 @@ void CartManager::_setRealtime(bool enabled)
 void CartManager::_activateRealtimeRendering()
 {
   _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
+  _maxRangeKm = 1000;
   _clear();
   if (_horiz) {
     _horiz->activateRealtimeRendering();

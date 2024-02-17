@@ -42,7 +42,6 @@
 #include "LegacyParams.hh"
 #include <qtplot/ColorMap.hh>
 #include "Params.hh"
-#include "Reader.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
 #include <toolsa/Path.hh>
@@ -69,8 +68,6 @@ Qucid::Qucid(int argc, char **argv) :
 
   OK = true;
   _cartManager = NULL;
-  // _bscanManager = NULL;
-  _reader = NULL;
 
   // set programe name
 
@@ -172,11 +169,6 @@ Qucid::Qucid(int argc, char **argv) :
 
   // create reader
 
-  if (_setupReader()) {
-    OK = false;
-    return;
-  }
-
   /* Ref: https://bugs.launchpad.net/ubuntu/+source/xview/+bug/1059988
    * Xview libs Segfault if RLIMIT_NOFILE > 3232
    */
@@ -218,10 +210,6 @@ Qucid::~Qucid()
   //   delete _bscanManager;
   // }
 
-  if (_reader) {
-    delete _reader;
-  }
-
   for (size_t ii = 0; ii < _displayFields.size(); ii++) {
     delete _displayFields[ii];
   }
@@ -248,39 +236,9 @@ int Qucid::Run(QApplication &app)
   
   gd.finished_init = 1;
      
-  // start the reader thread
-
-  _reader->signalRunToStart();
-  
   if (_params.display_mode == Params::POLAR_DISPLAY) {
 
-    _cartManager = new CartManager(_params, _reader,
-                                   _displayFields, false);
-    
-    if (_args.inputFileList.size() > 0) {
-      _cartManager->setArchiveFileList(_args.inputFileList);
-      // override archive data url from input file
-      string url = _getArchiveUrl(_args.inputFileList[0]);
-      TDRP_str_replace(&_params.archive_data_url, url.c_str());
-    } else if (_params.begin_in_archive_mode) {
-      if (_cartManager->loadArchiveFileList()) {
-        
-        string errMsg = "WARNING\n";
-        errMsg.append("<p>Qucid cannot find archive data files. </p>");
-        errMsg.append("<p> Choose a file to open or change the time limits. </p>");
-        //errMsg.append(" in startup location. </p>");
-        //errMsg.append(_params.archive_data_url);
-        //errMsg.append(")</p>");
-        //errMsg.append("<p> Click OK to continue to use Qucid.</p>");
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-
-        // return -1;
-      }
-    }
-
+    _cartManager = new CartManager(_params, _displayFields, false);
     return _cartManager->run(app);
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
@@ -329,50 +287,6 @@ int Qucid::_setupXDisplay(int argc, char **argv)
    */
   
   // XSetErrorHandler(xerror_handler);
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// set up reader thread
-// returns 0 on success, -1 on failure
-  
-int Qucid::_setupReader()
-{
-  
-  switch (_params.input_mode) {
-    
-    case Params::DSR_FMQ_INPUT:
-    case Params::IWRF_FMQ_INPUT:
-    case Params::IWRF_TCP_INPUT: {
-      IwrfReader *iwrfReader = new IwrfReader(_params);
-      _reader = iwrfReader;
-      break;
-    }
-      
-    case Params::SIMULATED_INPUT:
-    default: {
-      
-      SimReader *simReader = new SimReader(_params);
-      _reader = simReader;
-      
-      vector<SimReader::Field> simFields;
-      for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-        SimReader::Field simField;
-        simField.name = _displayFields[ii]->getName();
-        simField.units = _displayFields[ii]->getUnits();
-        simField.minVal = _displayFields[ii]->getColorMap().rangeMin();
-        simField.maxVal = _displayFields[ii]->getColorMap().rangeMax();
-        simFields.push_back(simField);
-      }
-      simReader->setFields(simFields);
-
-      _params.begin_in_archive_mode = pFALSE;
-
-    }
-
-  } // switch
 
   return 0;
 
@@ -499,47 +413,6 @@ int Qucid::_setupDisplayFields()
 
 }
 
-
-///////////////////////////////////////////////////
-// get the archive url
-
-string Qucid::_getArchiveUrl(const string &filePath)
-  
-{
-
-  // find first digit in path - if no digits, return now
-  
-  const char *start = NULL;
-  for (size_t ii = 0; ii < filePath.size(); ii++) {
-    if (isdigit(filePath[ii])) {
-      start = filePath.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) {
-    return "";
-  }
-
-  const char *end = start + strlen(start);
-
-  // get day dir
-  
-  int year, month, day;
-  while (start < end - 6) {
-    if (sscanf(start, "%4d%2d%2d/", &year, &month, &day) == 3) {
-      int urlLen = start - filePath.c_str() - 1;
-      string url(filePath.substr(0, urlLen));
-      if (_params.debug) {
-        cerr << "===>> Setting archive url to: " << url << endl;
-      }
-      return url;
-    }
-    start++;
-  }
-
-  return "";
-
-}
 
 ///////////////////////////////////////////////////
 // get the archive url

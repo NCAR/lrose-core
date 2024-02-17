@@ -29,9 +29,21 @@ paramdef enum debug_t {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Print out checks on ray memory allocation.";
-  p_help = "If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.";
-} check_ray_alloc;
+  p_descr = "Basic debug flag.";
+  p_help = "General informational messages - Initialization messages.";
+} debug_flag;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "More verbose debug flag.";
+  p_help = "Data flow related messages.";
+} debug1_flag;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Verbose diagnostics.";
+  p_help = "Developer debugging information.";
+} debug2_flag;
 
 paramdef boolean {
   p_default = FALSE;
@@ -44,61 +56,6 @@ paramdef string {
   p_descr = "Process instance";
   p_help = "Used for registration with procmap.";
 } instance;
-
-commentdef {
-  p_header = "RESOURCES";
-}
-
-paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/color_scales";
-  p_descr = "Directory for color scales";
-  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
-} color_scale_dir;
-
-commentdef {
-  p_header = "REALTIME DATA INPUT";
-}
-
-typedef enum {
-  IWRF_FMQ_INPUT, 
-  IWRF_TCP_INPUT, 
-  SIMULATED_INPUT, 
-  DSR_FMQ_INPUT // deprecated
-} input_mode_t;
-
-paramdef enum input_mode_t {
-  p_default = IWRF_FMQ_INPUT;
-  p_descr = "Method for reading the input data";
-  p_help = "\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.";
-} input_mode;
-
-paramdef string {
-  p_default = "/tmp/fmq/test";
-  p_descr = "DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from an FMQ";
-  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
-} input_fmq_url;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to seek to the start of the input FMQ.";
-  p_help = "If TRUE, the program will seek to the start of the fmq and read the entire contents at startup. If FALSE, it will read only new data as it arrives.";
-} seek_to_start_of_fmq;
-
-paramdef string {
-  p_default = "localhost";
-  p_descr = "IWRF_TCP_INPUT: name of host running IWRF moments server.";
-} input_tcp_host;
-
-paramdef int {
-  p_default = 11000;
-  p_descr = "IWRF_TCP_INPUT: port for IWRF moments server.";
-} input_tcp_port;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Size of the internal queue used to store beams.";
-  p_help = "The reader runs in a separate thread, and stored the beams in a queue. The main thread then grabs the available beams from the queue as they become available.";
-} beam_queue_size;
 
 commentdef {
   p_header = "ARCHIVE MODE";
@@ -121,88 +78,6 @@ paramdef double {
   p_descr = "Time span in ARCHIVE mode (secs).";
   p_help = "Archive end time = archive_start_time + archive_time_span.";
 } archive_time_span_secs;
-
-paramdef string {
-  p_default = ".";
-  p_descr = "URL for archive data files.";
-  p_help = "This should point to a CfRadial moments data set.";
-} archive_data_url;
-
-commentdef {
-  p_header = "STATUS TO BE SHOWN IN GUI";
-}
-
-typedef struct {
-
-  boolean azimuth;
-  boolean elevation;
-  boolean fixed_angle;
-  boolean volume_number;
-  boolean sweep_number;
-  boolean n_samples;
-  boolean n_gates;
-  boolean gate_length;
-  boolean pulse_width;
-  boolean prf_mode;
-  boolean prf;
-  boolean nyquist;
-  boolean max_range;
-  boolean unambiguous_range;
-  boolean measured_power_h;
-  boolean measured_power_v;
-  boolean scan_name;
-  boolean scan_mode;
-  boolean polarization_mode;
-  boolean latitude;
-  boolean longitude;
-  boolean altitude;
-  boolean altitude_rate;
-  boolean sun_elevation;
-  boolean sun_azimuth;
-  boolean speed;
-  boolean heading;
-  boolean track;
-
-} show_status_t;
-
-paramdef struct show_status_t {
-
-  p_default = {
-    azimuth = true,
-    elevation = true,
-    fixed_angle = true,
-    volume_number = false,
-    sweep_number = true,
-    n_samples = true,
-    n_gates = true,
-    gate_length = true,
-    pulse_width = true,
-    prf_mode = true,
-    prf = true,
-    nyquist = true,
-    max_range = true,
-    unambiguous_range = true,
-    measured_power_h = false,
-    measured_power_v = false,
-    scan_name = false,
-    scan_mode = true,
-    polarization_mode = true,
-    latitude = true,
-    longitude = true,
-    altitude = true,
-    altitude_rate = false,
-    sun_elevation = true,
-    sun_azimuth = true,
-    speed = false,
-    heading = false,
-    track = false
-  };
-
-  p_descr = "Indicate which status items to show in GUI.";
-
-  p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
-
-} show_status_in_gui;
 
 commentdef {
   p_header = "<GRIDS>";
@@ -452,34 +327,176 @@ commentdef {
   p_header = "</MAPS>";
 }
 
-paramdef double {
-  p_default = 2.0;
-  p_descr = "Background rendering time period in minutes.";
-  p_help = "Any field which is viewed will continue to be rendered in the "
-           "background for this number of minutes.";
-  p_min = 0.0;
-} background_render_mins;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to use field label in the display title.";
-  p_help = "If TRUE, the label will be used in the title. If FALSE, the raw_name or filtered name will be used.";
-} use_field_label_in_title;
-
 commentdef {
-  p_header = "SET MAX RANGE";
+  p_header = "<PROJECTION>";
 }
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set the max range to be used for plotting.";
-  p_help = "If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.";
-} set_max_range;
+paramdef string {
+  p_default = "CARTESIAN";
+  p_descr = "Sets the projection for the plan view.";
+  p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
+} projection_type_str;
 
 paramdef double {
-  p_default = 225.0;
-  p_descr = "Max range for the display (km).";
-} max_range_km;
+  p_default = 20;
+  p_descr = "Standard latitude 1.";
+  p_help = "For LAMBERT projection. Ignored otherwise.";
+} lambert_lat1;
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Standard latitude 2.";
+  p_help = "For LAMBERT projection. Ignored otherwise.";
+} lambert_lat2;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Tangent latitude.";
+  p_help = "For POLAR_STEREO, set to 90. For OBLIQUE_STEREO, set to 60.";
+} tangent_lat;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Tangent longitude.";
+  p_help = "Applies to POLAR_STEREO and OBLIQUE_STEREO.";
+} tangent_lon;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Central scale factor.";
+  p_help = "Applies to STEREO projections.";
+} central_scale;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Amount grids are rotated clockwise to true north";
+  p_help = "Applies to CARTESIAN (FLAT) projection.";
+} north_angle;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
+  p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
+} use_cosine;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "See use_cosine.";
+  p_help = "";
+} use_cosine_correction;
+
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_FLAT;
+  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} projection_type;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} proj_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} proj_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} proj_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} proj_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} proj_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} proj_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} proj_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} proj_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} proj_persp_radius;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false northing correction.";
+  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
+} proj_false_northing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false easting correction.";
+  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
+} proj_false_easting;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
+  p_help = "If true, set proj_offset_origin_latitude and proj_offset_origin_longitude.";
+} proj_set_offset_origin;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Latitude of offset origin.";
+  p_help = "See proj_set_offset_origin.";
+} proj_offset_origin_latitude;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Longitude of offset origin.";
+  p_help = "See proj_set_offset_origin.";
+} proj_offset_origin_longitude;
 
 commentdef {
   p_header = "DISPLAY TYPE";
@@ -1817,24 +1834,6 @@ commentdef {
   p_header = "<MAIN>";
 }
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Basic debug flag.";
-  p_help = "General informational messages - Initialization messages.";
-} debug_flag;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "More verbose debug flag.";
-  p_help = "Data flow related messages.";
-} debug1_flag;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Verbose diagnostics.";
-  p_help = "Developer debugging information.";
-} debug2_flag;
-
 paramdef string {
   p_default = "20:00 5/25/2000";
   p_descr = "Startup time for the display data.";
@@ -2189,60 +2188,6 @@ paramdef boolean {
   p_help = "See 'request_compressed_data'.";
 } request_gzip_vol_compression;
 
-paramdef string {
-  p_default = "CARTESIAN";
-  p_descr = "Sets the projection for the plan view.";
-  p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
-} projection_type;
-
-paramdef double {
-  p_default = 20;
-  p_descr = "Standard latitude 1.";
-  p_help = "For LAMBERT projection. Ignored otherwise.";
-} lambert_lat1;
-
-paramdef double {
-  p_default = 60;
-  p_descr = "Standard latitude 2.";
-  p_help = "For LAMBERT projection. Ignored otherwise.";
-} lambert_lat2;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Tangent latitude.";
-  p_help = "For POLAR_STEREO, set to 90. For OBLIQUE_STEREO, set to 60.";
-} tangent_lat;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Tangent longitude.";
-  p_help = "Applies to POLAR_STEREO and OBLIQUE_STEREO.";
-} tangent_lon;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Central scale factor.";
-  p_help = "Applies to STEREO projections.";
-} central_scale;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Amount grids are rotated clockwise to true north";
-  p_help = "Applies to CARTESIAN (FLAT) projection.";
-} north_angle;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
-  p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
-} use_cosine;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "See use_cosine.";
-  p_help = "";
-} use_cosine_correction;
-
 paramdef double {
   p_default = 0.5395932;
   p_descr = "Set the scale factor and label for Range rings and Distance scales.";
@@ -2475,6 +2420,17 @@ paramdef double {
   p_descr = "Starting height of horizontal view.";
   p_help = "";
 } start_ht;
+
+commentdef {
+  p_header = "Finding the maps.";
+  p_text = "";
+}
+
+paramdef string {
+  p_default = "$(HOME)/git/lrose-displays/color_scales";
+  p_descr = "Directory for color scales";
+  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
+} color_scale_dir;
 
 commentdef {
   p_header = "Finding the resources for maps/overlays, surface stations.";
@@ -3510,4 +3466,80 @@ paramdef struct product_adjustment_t {
 commentdef {
   p_header = "</MAIN>";
 }
+
+commentdef {
+  p_header = "STATUS TO BE SHOWN IN GUI";
+}
+
+typedef struct {
+
+  boolean azimuth;
+  boolean elevation;
+  boolean fixed_angle;
+  boolean volume_number;
+  boolean sweep_number;
+  boolean n_samples;
+  boolean n_gates;
+  boolean gate_length;
+  boolean pulse_width;
+  boolean prf_mode;
+  boolean prf;
+  boolean nyquist;
+  boolean max_range;
+  boolean unambiguous_range;
+  boolean measured_power_h;
+  boolean measured_power_v;
+  boolean scan_name;
+  boolean scan_mode;
+  boolean polarization_mode;
+  boolean latitude;
+  boolean longitude;
+  boolean altitude;
+  boolean altitude_rate;
+  boolean sun_elevation;
+  boolean sun_azimuth;
+  boolean speed;
+  boolean heading;
+  boolean track;
+
+} show_status_t;
+
+paramdef struct show_status_t {
+
+  p_default = {
+    azimuth = true,
+    elevation = true,
+    fixed_angle = true,
+    volume_number = false,
+    sweep_number = true,
+    n_samples = true,
+    n_gates = true,
+    gate_length = true,
+    pulse_width = true,
+    prf_mode = true,
+    prf = true,
+    nyquist = true,
+    max_range = true,
+    unambiguous_range = true,
+    measured_power_h = false,
+    measured_power_v = false,
+    scan_name = false,
+    scan_mode = true,
+    polarization_mode = true,
+    latitude = true,
+    longitude = true,
+    altitude = true,
+    altitude_rate = false,
+    sun_elevation = true,
+    sun_azimuth = true,
+    speed = false,
+    heading = false,
+    track = false
+  };
+
+  p_descr = "Indicate which status items to show in GUI.";
+
+  p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
+
+} show_status_in_gui;
 

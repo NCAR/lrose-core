@@ -55,7 +55,7 @@ public:
   // parse command line
   // Returns 0 on success, -1 on failure
 
-  int parse (const int argc, const char **argv);
+  int parse(const int argc, const char **argv);
 
   // get the legacy params file from the command line
   // returns 0 on success, -1 on failure
@@ -75,11 +75,12 @@ public:
   int getTdrpPrintMode(const int argc, const char **argv,
                        tdrp_print_mode_t &printMode);
 
-  // public data
+  // kay-value pairs for overriding TDRP params
 
   tdrp_override_t override;
-  vector<string> inputFileList;
 
+  // get methods
+  
   bool usingLegacyParams() const { return _usingLegacyParams; }
   string legacyParamsPath() const { return _legacyParamsPath; }
 

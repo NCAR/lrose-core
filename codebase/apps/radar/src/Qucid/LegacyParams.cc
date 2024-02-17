@@ -52,7 +52,7 @@
 
 LegacyParams::LegacyParams()
 {
-  _printTdrp = false;
+  _printParamdef = false;
   _paramsBuf = NULL;
   _paramsBufLen = 0;
   _tdrpFile = NULL;
@@ -490,7 +490,7 @@ double LegacyParams::_getDouble(const char *name,
                                 string nameOverride)
 {
   
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef double {" << endl;
     cout << "  p_default = " << default_val << ";" << endl;
@@ -532,7 +532,7 @@ float LegacyParams::_getFloat(const char *name,
                               string nameOverride)
 {
 
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef double {" << endl;
     cout << "  p_default = " << default_val << ";" << endl;
@@ -575,7 +575,7 @@ bool LegacyParams::_getBoolean(const char *name,
 
 {
 
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef boolean {" << endl;
     if (default_val == 0) {
@@ -622,7 +622,7 @@ int LegacyParams::_getInt(const char *name,
 
 {
 
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef int {" << endl;
     cout << "  p_default = " << default_val << ";" << endl;
@@ -665,7 +665,7 @@ long LegacyParams::_getLong(const char *name,
 
 {
 
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef int {" << endl;
     cout << "  p_default = " << default_val << ";" << endl;
@@ -708,7 +708,7 @@ const string LegacyParams::_getString(const char *name,
   
 {
 
-  if (_printTdrp) {
+  if (_printParamdef) {
     cout << endl;
     cout << "paramdef string {" << endl;
     cout << "  p_default = \"" << default_val << "\";" << endl;
@@ -1124,12 +1124,12 @@ int LegacyParams::_readMainParams()
 
   // projections
   _getString("cidd.projection_type", "CARTESIAN");
-  _getDouble("cidd.lambert_lat1",20.0);
-  _getDouble("cidd.lambert_lat2",60.0);
-  _getDouble("cidd.tangent_lat",90.0);
-  _getDouble("cidd.tangent_lon",0.0);
-  _getDouble("cidd.central_scale",1.0);
-  _getDouble("cidd.north_angle",0.0);
+  _getDouble("cidd.lambert_lat1", 20.0, true, "proj_lat1");
+  _getDouble("cidd.lambert_lat2", 60.0, true, "proj_lat2");
+  _getDouble("cidd.tangent_lat", 90.0, true, "proj_tangent_lat");
+  _getDouble("cidd.tangent_lon", 0.0, true, "proj_tangent_lon");
+  _getDouble("cidd.central_scale", 1.0, true, "proj_central_scale");
+  _getDouble("cidd.north_angle", 0.0);
   _getBoolean("cidd.use_cosine", 1); // legacy
   _getLong("cidd.use_cosine_correction", 1);
   _getDouble("cidd.scale_units_per_km",1.0);

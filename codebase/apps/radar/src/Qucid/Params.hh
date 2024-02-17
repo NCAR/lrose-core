@@ -75,13 +75,6 @@ public:
   } debug_t;
 
   typedef enum {
-    IWRF_FMQ_INPUT = 0,
-    IWRF_TCP_INPUT = 1,
-    SIMULATED_INPUT = 2,
-    DSR_FMQ_INPUT = 3
-  } input_mode_t;
-
-  typedef enum {
     POLYGONS = 0,
     FILLED_CONTOURS = 1,
     DYNAMIC_CONTOURS = 2,
@@ -99,6 +92,19 @@ public:
     BARB_SH = 7,
     LABELEDBARB_SH = 8
   } wind_render_mode_t;
+
+  typedef enum {
+    PROJ_LATLON = 0,
+    PROJ_LAMBERT_CONF = 3,
+    PROJ_MERCATOR = 4,
+    PROJ_POLAR_STEREO = 5,
+    PROJ_FLAT = 8,
+    PROJ_OBLIQUE_STEREO = 12,
+    PROJ_TRANS_MERCATOR = 15,
+    PROJ_ALBERS = 16,
+    PROJ_LAMBERT_AZIM = 17,
+    PROJ_VERT_PERSP = 18
+  } projection_t;
 
   typedef enum {
     POLAR_DISPLAY = 0,
@@ -182,37 +188,6 @@ public:
   } route_label_style_t;
 
   // struct typedefs
-
-  typedef struct {
-    tdrp_bool_t azimuth;
-    tdrp_bool_t elevation;
-    tdrp_bool_t fixed_angle;
-    tdrp_bool_t volume_number;
-    tdrp_bool_t sweep_number;
-    tdrp_bool_t n_samples;
-    tdrp_bool_t n_gates;
-    tdrp_bool_t gate_length;
-    tdrp_bool_t pulse_width;
-    tdrp_bool_t prf_mode;
-    tdrp_bool_t prf;
-    tdrp_bool_t nyquist;
-    tdrp_bool_t max_range;
-    tdrp_bool_t unambiguous_range;
-    tdrp_bool_t measured_power_h;
-    tdrp_bool_t measured_power_v;
-    tdrp_bool_t scan_name;
-    tdrp_bool_t scan_mode;
-    tdrp_bool_t polarization_mode;
-    tdrp_bool_t latitude;
-    tdrp_bool_t longitude;
-    tdrp_bool_t altitude;
-    tdrp_bool_t altitude_rate;
-    tdrp_bool_t sun_elevation;
-    tdrp_bool_t sun_azimuth;
-    tdrp_bool_t speed;
-    tdrp_bool_t heading;
-    tdrp_bool_t track;
-  } show_status_t;
 
   typedef struct {
     char* group_name;
@@ -313,6 +288,37 @@ public:
     double threshold;
     int font_index_adj;
   } product_adjustment_t;
+
+  typedef struct {
+    tdrp_bool_t azimuth;
+    tdrp_bool_t elevation;
+    tdrp_bool_t fixed_angle;
+    tdrp_bool_t volume_number;
+    tdrp_bool_t sweep_number;
+    tdrp_bool_t n_samples;
+    tdrp_bool_t n_gates;
+    tdrp_bool_t gate_length;
+    tdrp_bool_t pulse_width;
+    tdrp_bool_t prf_mode;
+    tdrp_bool_t prf;
+    tdrp_bool_t nyquist;
+    tdrp_bool_t max_range;
+    tdrp_bool_t unambiguous_range;
+    tdrp_bool_t measured_power_h;
+    tdrp_bool_t measured_power_v;
+    tdrp_bool_t scan_name;
+    tdrp_bool_t scan_mode;
+    tdrp_bool_t polarization_mode;
+    tdrp_bool_t latitude;
+    tdrp_bool_t longitude;
+    tdrp_bool_t altitude;
+    tdrp_bool_t altitude_rate;
+    tdrp_bool_t sun_elevation;
+    tdrp_bool_t sun_azimuth;
+    tdrp_bool_t speed;
+    tdrp_bool_t heading;
+    tdrp_bool_t track;
+  } show_status_t;
 
   ///////////////////////////
   // Member functions
@@ -610,35 +616,21 @@ public:
 
   debug_t debug;
 
-  tdrp_bool_t check_ray_alloc;
+  tdrp_bool_t debug_flag;
+
+  tdrp_bool_t debug1_flag;
+
+  tdrp_bool_t debug2_flag;
 
   tdrp_bool_t register_with_procmap;
 
   char* instance;
-
-  char* color_scale_dir;
-
-  input_mode_t input_mode;
-
-  char* input_fmq_url;
-
-  tdrp_bool_t seek_to_start_of_fmq;
-
-  char* input_tcp_host;
-
-  int input_tcp_port;
-
-  int beam_queue_size;
 
   tdrp_bool_t begin_in_archive_mode;
 
   char* archive_start_time;
 
   double archive_time_span_secs;
-
-  char* archive_data_url;
-
-  show_status_t show_status_in_gui;
 
   field_t *_fields;
   int fields_n;
@@ -649,13 +641,53 @@ public:
   map_t *_maps;
   int maps_n;
 
-  double background_render_mins;
+  char* projection_type_str;
 
-  tdrp_bool_t use_field_label_in_title;
+  double lambert_lat1;
 
-  tdrp_bool_t set_max_range;
+  double lambert_lat2;
 
-  double max_range_km;
+  double tangent_lat;
+
+  double tangent_lon;
+
+  double central_scale;
+
+  double north_angle;
+
+  tdrp_bool_t use_cosine;
+
+  int use_cosine_correction;
+
+  projection_t projection_type;
+
+  double proj_origin_lat;
+
+  double proj_origin_lon;
+
+  double proj_lat1;
+
+  double proj_lat2;
+
+  double proj_central_scale;
+
+  double proj_tangent_lat;
+
+  double proj_tangent_lon;
+
+  tdrp_bool_t proj_pole_is_north;
+
+  double proj_persp_radius;
+
+  double proj_false_northing;
+
+  double proj_false_easting;
+
+  tdrp_bool_t proj_set_offset_origin;
+
+  double proj_offset_origin_latitude;
+
+  double proj_offset_origin_longitude;
 
   display_mode_t display_mode;
 
@@ -990,12 +1022,6 @@ public:
   char* *_route_paths;
   int route_paths_n;
 
-  tdrp_bool_t debug_flag;
-
-  tdrp_bool_t debug1_flag;
-
-  tdrp_bool_t debug2_flag;
-
   char* demo_time;
 
   int temporal_rounding;
@@ -1108,24 +1134,6 @@ public:
 
   tdrp_bool_t request_gzip_vol_compression;
 
-  char* projection_type;
-
-  double lambert_lat1;
-
-  double lambert_lat2;
-
-  double tangent_lat;
-
-  double tangent_lon;
-
-  double central_scale;
-
-  double north_angle;
-
-  tdrp_bool_t use_cosine;
-
-  int use_cosine_correction;
-
   double scale_units_per_km;
 
   char* scale_units_label;
@@ -1184,6 +1192,8 @@ public:
   double max_ht;
 
   double start_ht;
+
+  char* color_scale_dir;
 
   char* map_file_subdir;
 
@@ -1467,6 +1477,8 @@ public:
   product_adjustment_t *_product_adjustments;
   int product_adjustments_n;
 
+  show_status_t show_status_in_gui;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1474,7 +1486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[493];
+  mutable TDRPtable _table[495];
 
   const char *_className;
 

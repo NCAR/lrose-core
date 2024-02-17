@@ -63,7 +63,7 @@ VertWidget::VertWidget(QWidget* parent,
   _maxHeightKm = _params.vert_max_height_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
-  configureRange(_params.max_range_km);
+  // configureRange(_params.max_range_km);
 
   // set up ray locators
 

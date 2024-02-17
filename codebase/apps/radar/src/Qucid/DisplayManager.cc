@@ -40,7 +40,6 @@
 #include "DisplayField.hh"
 #include <qtplot/ColorMap.hh>
 #include "Params.hh"
-#include "Reader.hh"
 
 #include <string>
 #include <cmath>
@@ -85,13 +84,10 @@ int DisplayManager::_timerEventCount = 0;
 // Constructor
 
 DisplayManager::DisplayManager(const Params &params,
-                               Reader *reader,
                                const vector<DisplayField *> &fields,
                                bool haveFilteredFields) :
         QMainWindow(NULL),
         _params(params),
-        _reader(reader),
-        _initialRay(true),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields)
         

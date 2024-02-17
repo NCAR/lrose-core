@@ -106,48 +106,10 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-check_ray_alloc")) {
-      
-      sprintf(tmp_str, "check_ray_alloc = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-sim_mode")) {
-      
-      sprintf(tmp_str, "input_mode = SIMULATED_INPUT;");
-      TDRP_add_override(&override, tmp_str);
-      
-      sprintf(tmp_str, "begin_in_archive_mode = FALSE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-fmq_mode")) {
-      
-      sprintf(tmp_str, "input_mode = DSR_FMQ_INPUT;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-color_scales")) {
       
       if (i < argc - 1) {
         sprintf(tmp_str, "color_scale_dir = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-fmq_url")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "input_fmq_url = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-max_range")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "max_range_km = %s;", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "set_max_range = TRUE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -165,39 +127,6 @@ int Args::parse (const int argc, const char **argv)
       } else {
 	iret = -1;
       }
-      
-    } else if (!strcmp(argv[i], "-tcp_mode")) {
-      
-      sprintf(tmp_str, "input_mode = IWRF_TCP_INPUT;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-tcp_host")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "input_tcp_host = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-tcp_port")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "input_tcp_port = %s;", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-bscan")) {
-      
-      sprintf(tmp_str, "display_mode = BSCAN_DISPLAY;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-polar")) {
-      
-      sprintf(tmp_str, "display_mode = POLAR_DISPLAY;");
-      TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-start_x")) {
       
@@ -271,40 +200,6 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
-    } else if (!strcmp(argv[i], "-archive_url")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "archive_data_url = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-f")) {
-      
-      if (i < argc - 1) {
-	// load up file list vector. Break at next arg which
-	// start with -
-	for (int j = i + 1; j < argc; j++) {
-	  if (argv[j][0] == '-') {
-	    break;
-	  } else {
-	    inputFileList.push_back(argv[j]);
-	  }
-	}
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
-      if (inputFileList.size() < 1) {
-        cerr << "ERROR - with -f you must specify files to be read" << endl;
-        iret = -1;
-      }
-
     } // if
     
   } // i
@@ -403,14 +298,8 @@ void Args::_usage(ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_url ?] URL for data in archive mode\n"
-      << "       [ -bscan ] run in BSCAN mode\n"
-      << "       [ -check_ray_alloc ]\n"
-      << "         print out checks on number of ray allocation and frees\n"
       << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
-      << "       [ -f ? ?] list of files to process in archive mode\n"
-      << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
-      << "       [ -fmq_url ?] set input fmq URL\n"
       << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set end time for image generation mode\n"
       << "       [ -image_interval ?]\n"
@@ -418,17 +307,11 @@ void Args::_usage(ostream &out)
       << "       [ -images_start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for image generation mode\n"
       << "       [ -instance ?] set instance for procmap\n"
-      << "       [ -max_range ?] set max range in km\n"
-      << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
       << "       [ -realtime] start in realtime mode\n"
-      << "       [ -sim_mode] SIMULATED_INPUT mode\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for archive mode\n"
       << "       [ -start_x ? ] start x location of main window\n"
       << "       [ -start_y ? ] start y location of main window\n"
-      << "       [ -tcp_mode] IWRF_TCP_INPUT mode\n"
-      << "       [ -tcp_host ?] set TCP server host\n"
-      << "       [ -tcp_port ?] set TCP server port\n"
       << "       [ -time_span ?]\n"
       << "            set time span (secs)\n"
       << "            applies to bscan time width\n"
@@ -444,13 +327,14 @@ void Args::_usage(ostream &out)
       << "       [ -vvv ? ] legacy CIDD verbose level\n"
       << "       [ -proxy_url ?] use this proxy server for data requests\n"
       << "                       in the param file, and in HTML Mode will automatically\n"
-      << "       [ -start_height ?,?,?...] starts up at the first height, overiding the setting\n"
+      << "       [ -h ?,?,?...] starts up at the first height, overiding the setting\n"
       << "                       in the param file, and in HTML Mode will automatically\n"
       << "                       render each height in the list\n"
-      << "       [ -start_time ?] starts up in archive mode at this time\n"
-      << "                        YYYYMMDDHHMM(SS - seconds optional\n"
-      << "                        -t minus3600 starts in archive mode with the first frame 1 hour ago\n"
-      << "                        ie. use -t minusX to start X seconds ago in archive mode\n"
+      << "       [ -t ?] starts up in archive mode at this time\n"
+      << "               YYYYMMDDHHMM(SS - seconds optional)\n"
+      << "               -t minus3600 starts in archive mode with the\n"
+      << "                  first frame 1 hour ago\n"
+      << "               i.e. use -t minusX to start X seconds ago\n"
       << endl;
 
   Params::usage(out);
