@@ -52,14 +52,14 @@ void render_xsect_top_layers(Drawable xid, int page)
     static const char* units_label = NULL;  
 
     if(units_scale_factor == 0.0) { // first time 
-      units_scale_factor = gd.wind_units_scale_factor;
+      units_scale_factor = _params.wind_units_scale_factor;
     }
     if (units_label == NULL) {
-      units_label = gd.wind_units_label;
+      units_label = _params.wind_units_label;
     }
 
     /* Render cross reference line showing the altitude of the plan view */
-    if (gd.display_ref_lines && gd.mrec[page]->h_fhdr.proj_type != Mdvx::PROJ_POLAR_RADAR) {
+    if (_params.display_ref_lines && gd.mrec[page]->h_fhdr.proj_type != Mdvx::PROJ_POLAR_RADAR) {
         km_ht = gd.h_win.cur_ht; 
 
 	x_dproj = gd.h_win.route.total_length; 

@@ -130,7 +130,7 @@ void set_domain_zoom(double zoom_min_x, double zoom_min_y,
   gd.prod_mgr->reset_product_valid_flags_zoom();
 
   set_redraw_flags(1,0);
-  if(!gd.always_get_full_domain) {
+  if(!_params.always_get_full_domain) {
     reset_time_list_valid_flags();
     reset_data_valid_flags(1,0);
     reset_terrain_valid_flags(1,0);
@@ -153,7 +153,7 @@ void bookmark_proc(Panel_item item, int value, Event *event)
     char *ptr,*ptr2;
 
 
-    strncpy(cmd_buf,gd.bookmark_command,CMD_BUF_LEN);
+    strncpy(cmd_buf,_params.bookmark_command,CMD_BUF_LEN);
 
     if((ptr = strstr(cmd_buf,"%U")) == NULL) return;
 
@@ -176,7 +176,7 @@ void bookmark_proc(Panel_item item, int value, Event *event)
     sprintf(msg,"Sending Browser to %s",gd.bookmark[value].url);
     gui_label_h_frame(msg,1);
 
-    safe_system(cmd_buf,gd.simple_command_timeout_secs);
+    safe_system(cmd_buf,_params.simple_command_timeout_secs);
 
     // Pop back up the Menu bar button
     gd.menu_bar.last_callback_value &= ~gd.menu_bar.show_bookmark_menu_bit;

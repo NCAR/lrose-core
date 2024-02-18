@@ -62,7 +62,7 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
   render_method = (render_method_t) mr->render_method;
   num_points = mr->h_fhdr.nx * mr->h_fhdr.ny;
   if(render_method == DYNAMIC_CONTOURS) {
-    if(num_points < gd.dynamic_contour_threshold) {
+    if(num_points < _params.dynamic_contour_threshold) {
       render_method = FILLED_CONTOURS;
     } else {
       render_method = POLYGONS;
@@ -117,7 +117,7 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
   ht = (int) (r_ht + 1.0); 
   wd = (int) (r_wd + 1.0);
 
-  if (gd.clip_overlay_fields) {
+  if (_params.clip_overlay_fields) {
       
     if(gd.debug2) printf("Drawing Rectangle Fill Overlay image field: %s\n",
                          mr->field_label);
@@ -157,9 +157,9 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
         for(j=0;j< mr->h_fhdr.nx; j++) {
           if(MdvGetA(*uptr) != 0) {
             pixel = best_map.base_pixel + 
-              ((ui32) (0.5 + ((gd.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
-              ((ui32) (0.5 + ((gd.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
-              ((ui32) (0.5 + ((gd.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
+              ((ui32) (0.5 + ((_params.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
+              ((ui32) (0.5 + ((_params.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
+              ((ui32) (0.5 + ((_params.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
 
             XSetForeground(gd.dpy,gd.def_gc, pixel);
             XFillRectangle(gd.dpy,xid,gd.def_gc, x_start[j],y_start[i],wd,ht);
@@ -184,14 +184,14 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
       }
     }
 
-  } else { // if (gd.clip_overlay_fields) ..
+  } else { // if (_params.clip_overlay_fields) ..
 	 
     // Handle case where contours really don't apply (vertical sides)
     if(mr->h_fhdr.min_value == mr->h_fhdr.max_value ) render_method = POLYGONS;
     switch (render_method) {
 
       case POLYGONS:
-        if(( PseudoColor == psc ) && !gd.draw_main_on_top && mr->num_display_pts > gd.image_fill_threshold) {
+        if(( PseudoColor == psc ) && !_params.draw_main_on_top && mr->num_display_pts > _params.image_fill_threshold) {
           draw_filled_image(xid,x_start,y_start,mr);
         } else {
           if(gd.debug2) printf("Drawing Rectangle Fill image, field: %s \n",
@@ -210,7 +210,7 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
             XStandardColormap best_map;
             if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
               // try to fix the problem
-              safe_system("xstdcmap -best",gd.simple_command_timeout_secs);
+              safe_system("xstdcmap -best",_params.simple_command_timeout_secs);
               if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
                 fprintf(stderr,"Failed XGetStandardColormap!\n");
                 fprintf(stderr,"Can't Render RGB images - Try Running X Server in 24 bit mode\n");
@@ -229,9 +229,9 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
               for(j=0;j< mr->h_fhdr.nx; j++) {
                 if(MdvGetA(*uptr) != 0) {
                   pixel = best_map.base_pixel + 
-                    ((ui32) (0.5 + ((gd.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
-                    ((ui32) (0.5 + ((gd.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
-                    ((ui32) (0.5 + ((gd.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
+                    ((ui32) (0.5 + ((_params.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
+                    ((ui32) (0.5 + ((_params.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
+                    ((ui32) (0.5 + ((_params.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
                      
                   XSetForeground(gd.dpy,gd.def_gc, pixel);
                   XFillRectangle(gd.dpy,xid,gd.def_gc, x_start[j],y_start[i],wd,ht);
@@ -290,7 +290,7 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
         
     } // switch (render_method)
 
-  } // if (gd.clip_overlay_fields) ..
+  } // if (_params.clip_overlay_fields) ..
   
   return CIDD_SUCCESS;
   

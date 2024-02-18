@@ -110,11 +110,11 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
         STRcopy(gd.mrec[i]->legend_name,cfield[0],NAME_LENGTH);
         STRcopy(gd.mrec[i]->button_name,cfield[1],NAME_LENGTH);
 
-	if(gd.html_mode == 0) {
+	if(_params.html_mode == 0) {
           /* Replace Underscores with spaces in names */
           for(j=strlen(gd.mrec[i]->button_name)-1 ; j >= 0; j--) {
-            if(gd.replace_underscores && gd.mrec[i]->button_name[j] == '_') gd.mrec[i]->button_name[j] = ' ';
-            if(gd.replace_underscores && gd.mrec[i]->legend_name[j] == '_') gd.mrec[i]->legend_name[j] = ' ';
+            if(_params.replace_underscores && gd.mrec[i]->button_name[j] == '_') gd.mrec[i]->button_name[j] = ' ';
+            if(_params.replace_underscores && gd.mrec[i]->legend_name[j] == '_') gd.mrec[i]->legend_name[j] = ' ';
           }
 	}
         STRcopy(gd.mrec[i]->url,cfield[2],URL_LENGTH);
@@ -162,7 +162,7 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
 
         gd.mrec[i]->currently_displayed = atoi(cfield[9]);
 
-        if(gd.run_once_and_exit) {
+        if(_params.run_once_and_exit) {
           gd.mrec[i]->auto_render = 1;
         } else {
           gd.mrec[i]->auto_render = atoi(cfield[10]);

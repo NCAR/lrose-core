@@ -64,8 +64,8 @@ int draw_hwin_left_margin( Drawable xid)
 	    u_label = "deg";
 	    unit_per_km = 1.0;
     } else{
-          unit_per_km = gd.scale_units_per_km;
-	  u_label = gd.scale_units_label;
+          unit_per_km = _params.scale_units_per_km;
+	  u_label = _params.scale_units_label;
     }
 
     /* calc dimensions of drawable area */
@@ -101,7 +101,7 @@ int draw_hwin_left_margin( Drawable xid)
     sprintf(label,"%s",u_label);
     font = choose_font(label,tick_xstart,gd.h_win.margin.left,&xmid,&ymid);
     XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
-    if(gd.html_mode) {  // Draw label at the bottom
+    if(_params.html_mode) {  // Draw label at the bottom
         XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,gd.h_win.win_dim.height - (4*ymid),label,strlen(label));
     } else { // Draw it at the top
         XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,(4*ymid),label,strlen(label));

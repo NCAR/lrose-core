@@ -62,7 +62,7 @@ int draw_hwin_top_margin( Drawable xid)
                  gd.h_win.can_dim.width,
                  gd.h_win.margin.top);
 
-    switch(gd.top_margin_render_style) {
+    switch(_params.top_margin_render_style) {
       default:
       case 1:   // Do nothing - Fall through to distance scale code.
       break;
@@ -80,7 +80,7 @@ int draw_hwin_top_margin( Drawable xid)
     if(gd.display_projection == Mdvx::PROJ_LATLON) {
 	    unit_per_km = 1.0;
     } else{
-          unit_per_km = gd.scale_units_per_km;
+          unit_per_km = _params.scale_units_per_km;
     }
 
     /* calc dimensions of drawable area */

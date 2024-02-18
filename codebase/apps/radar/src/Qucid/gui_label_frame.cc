@@ -116,10 +116,10 @@ void update_ticker(time_t cur_time)
     if(gd.run_unmapped) {
                 // xv_set(gd.h_win_horiz_bw->horiz_bw,XV_SHOW,FALSE,NULL);
     } else {
-	   sprintf(fmt_string,"Current Time: %s",gd.label_time_format);
+	   sprintf(fmt_string,"Current Time: %s",_params.label_time_format);
 
        struct tm res;
-	   if(gd.use_local_timestamps)  {
+	   if(_params.use_local_timestamps)  {
           loc_tm = localtime_r(&cur_time,&res);
 	   } else {
           loc_tm = gmtime_r(&cur_time,&res);
@@ -146,18 +146,20 @@ void update_ticker(time_t cur_time)
                        /* Get the first line of the file */
                        fgets(gd.status.stat_msg,TITLE_LENGTH,sfile);
                        fclose(sfile);
-                       gd.no_data_message = gd.status.stat_msg;
+                       _params.no_data_message = gd.status.stat_msg;
                        gd.status.last_accessed = s.st_mtime;
 		       gd.status.is_dynamic = 1;
                  }
               }
           } else {  // Status file disappeared
+#ifdef NOTNOW
 	     // Replace the No Data Message with the original
 	     if(gd.status.is_dynamic) {
-		 gd.no_data_message = gd.uparams->getString(
+		 _params.no_data_message = gd.uparams->getString(
 		     "cidd.no_data_message",
 		     "NO DATA FOUND (in this area at the selected time)");
 	     }
+#endif
 	  }
      }
 }  

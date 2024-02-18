@@ -132,7 +132,7 @@ void remote_set_h_page(char *name)
   char *ptr = name;
   
   while(len) {
-     if(gd.replace_underscores && *ptr == '_') *ptr = ' ';
+     if(_params.replace_underscores && *ptr == '_') *ptr = ' ';
      ptr++;
      len--;
   }
@@ -225,7 +225,7 @@ void remote_set_v_page(char *name)
   char *ptr = name;
   
   while(len) {
-     if(gd.replace_underscores && *ptr == '_') *ptr = ' ';
+     if(_params.replace_underscores && *ptr == '_') *ptr = ' ';
      ptr++;
      len--;
   }
@@ -282,7 +282,7 @@ void remote_set_domain(double x1, double y1, double x2, double y2)
     }
 
     /* Force the domain into the aspect ratio */
-    dy *= gd.aspect_ratio;
+    dy *= _params.aspect_ratio;
     if(dx > dy)  {
         gd.h_win.zmax_y[index] += (dx - dy) /2.0;
 	gd.h_win.zmin_y[index] -= (dx - dy) /2.0;
@@ -316,7 +316,7 @@ void remote_set_domain(double x1, double y1, double x2, double y2)
     gd.h_win.cmax_y = gd.h_win.zmax_y[index];
 
     set_redraw_flags(1,0);  
-    if(!gd.always_get_full_domain) {
+    if(!_params.always_get_full_domain) {
       reset_time_list_valid_flags();
       reset_data_valid_flags(1,0);
       reset_terrain_valid_flags(1,0);
@@ -469,9 +469,9 @@ void remote_set_height(double height)
 void remote_set_reference_lines(char *val_str) 
 {
    if(strncasecmp(val_str,"on",2) == 0) {
-       gd.display_ref_lines = 1;
+       _params.display_ref_lines = pTRUE;
    } else {
-       gd.display_ref_lines = 0;
+       _params.display_ref_lines = pFALSE;
    }
   set_redraw_flags(1,0);
 }
@@ -681,7 +681,7 @@ char *parse_remote_commands(char *buf)
 	if(strcmp(cfield[0],"SET_H_IMAGE_SIZE") == 0) {
 		int h = atoi(cfield[1]);
 		int w = atoi(cfield[2]);
-		gd.aspect_ratio = (double) w / (double) h;
+		_params.aspect_ratio = (double) w / (double) h;
 		// int cp_ht = h < gd.h_win.min_height ? 0 : xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
 		if( h != last_im_ht || w != last_im_wd) {
                   // xv_set(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT, h + cp_ht + 2 , NULL);

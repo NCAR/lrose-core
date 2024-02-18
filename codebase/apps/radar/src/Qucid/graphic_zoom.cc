@@ -179,7 +179,7 @@ static void _do_zoom()
   }
 
   /* Force the domain into the aspect ratio */
-  dy *= gd.aspect_ratio;
+  dy *= _params.aspect_ratio;
 
   /* use largest dimension */
   if(dx > dy)
@@ -231,7 +231,7 @@ static void _do_zoom()
   // xv_set(gd.zoom_pu->domain_st, PANEL_VALUE, index, NULL);
 
   set_redraw_flags(1,0);
-  if(!gd.always_get_full_domain) {
+  if(!_params.always_get_full_domain) {
     reset_time_list_valid_flags();
     reset_data_valid_flags(1,0);
     reset_terrain_valid_flags(1,0);
@@ -308,7 +308,7 @@ void do_zoom_pan()
   // xv_set(gd.zoom_pu->domain_st, PANEL_VALUE, index, NULL);
 
   set_redraw_flags(1,0);
-  if(!gd.always_get_full_domain) {
+  if(!_params.always_get_full_domain) {
     reset_time_list_valid_flags();
     reset_data_valid_flags(1,0);
     reset_terrain_valid_flags(1,0);

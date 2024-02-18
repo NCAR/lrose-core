@@ -134,7 +134,7 @@ void check_for_io()
 				mr->h_mdvx->getThreadRetVal(),
 				mr->h_mdvx->getErrStr().c_str());
 		    }
-		    if(gd.show_data_messages) gui_label_h_frame("No Data Received",-1);
+		    if(_params.show_data_messages) gui_label_h_frame("No Data Received",-1);
 		    add_message_to_status_win("Aborted Read",1);
 		    add_message_to_status_win((char *) mr->h_mdvx->getErrStr().c_str(),0);
 
@@ -215,7 +215,7 @@ void check_for_io()
 		  mr->proj->setConditionLon2Origin(true);
 
 		  // Implemented for MOBILE RADARS - 
-                  if(gd.domain_follows_data && mr == gd.mrec[gd.h_win.page] ) { // Only for the primary field
+                  if(_params.domain_follows_data && mr == gd.mrec[gd.h_win.page] ) { // Only for the primary field
                     double dx,locx;
                     double dy,locy;
                     int index = gd.h_win.zoom_level;
@@ -366,7 +366,7 @@ void check_for_io()
 		  gd.io_info.outstanding_request = 0;
 		  gd.io_info.request_type = 0;
 
-		  if(gd.show_data_messages) gui_label_h_frame("Done",-1);
+		  if(_params.show_data_messages) gui_label_h_frame("Done",-1);
 		   else set_busy_state(0);
 	      } else { // Display a progress message
 		  comp = mr->h_mdvx->getPercentReadComplete();
@@ -398,7 +398,7 @@ void check_for_io()
 				mr->legend_name,comp);
 		    }
 		  }
-		  if(gd.show_data_messages) gui_label_h_frame(label,1);
+		  if(_params.show_data_messages) gui_label_h_frame(label,1);
 	      }
 	  break;
 
@@ -425,7 +425,7 @@ void check_for_io()
 				mr->v_mdvx->getThreadRetVal(),
 				mr->v_mdvx->getErrStr().c_str());
 		    }
-		    if(gd.show_data_messages) gui_label_h_frame("No Cross Section Data Received - Aborting",-1);
+		    if(_params.show_data_messages) gui_label_h_frame("No Cross Section Data Received - Aborting",-1);
 		    add_message_to_status_win("No Cross Section Data Received",0);
 		    add_message_to_status_win((char *) mr->v_mdvx->getErrStr().c_str(),1);
 
@@ -528,7 +528,7 @@ void check_for_io()
 		  gd.io_info.outstanding_request = 0;
 		  gd.io_info.request_type = 0;
 
-		  if(gd.show_data_messages) gui_label_h_frame("Done",-1);
+		  if(_params.show_data_messages) gui_label_h_frame("Done",-1);
 		      else set_busy_state(0);
 
 	      } else {
@@ -561,7 +561,7 @@ void check_for_io()
 				mr->legend_name,comp);
 		    }
 	      }
-	     if(gd.show_data_messages) gui_label_h_frame(label,1);
+	     if(_params.show_data_messages) gui_label_h_frame(label,1);
 	 }
          break; // end of case VERT_REQUEST
 
@@ -584,7 +584,7 @@ void check_for_io()
 		    }
 		    add_message_to_status_win("TIMELIST_REQUEST error",1);
 		    add_message_to_status_win((char *) mr->h_mdvx->getErrStr().c_str(),0);
-		    if(!gd.show_data_messages)set_busy_state(0);
+		    if(!_params.show_data_messages)set_busy_state(0);
 
                     return;   
                 }
@@ -617,7 +617,7 @@ void check_for_io()
 	     gd.io_info.outstanding_request = 0;
 	     gd.io_info.request_type = 0;
 	     gd.io_info.mode = 0;
-	     if(gd.show_data_messages) gui_label_h_frame("Done",-1);
+	     if(_params.show_data_messages) gui_label_h_frame("Done",-1);
 	      else set_busy_state(0);
 
 	   } else {   // Still waiting for the request thread to complete
@@ -625,7 +625,7 @@ void check_for_io()
 			    mr->legend_name,
 			    (gd.io_info.expire_time - time(0)));
 	     }
-	    if(gd.show_data_messages) gui_label_h_frame(label,1);
+	    if(_params.show_data_messages) gui_label_h_frame(label,1);
 	     
 	 break;  // end of case  TIMELIST_REQUEST
        }
@@ -668,7 +668,7 @@ void check_for_io()
 				spdb->getThreadRetVal(),
 				spdb->getErrStr().c_str());
 		    }
-		    if(gd.show_data_messages) gui_label_h_frame("Error Reading SYMPROD Data - Aborting",-1);
+		    if(_params.show_data_messages) gui_label_h_frame("Error Reading SYMPROD Data - Aborting",-1);
 		    add_message_to_status_win("Error Reading SYMPROD Data",0);
 		    add_message_to_status_win((char *) spdb->getErrStr().c_str(),1);
 
@@ -685,7 +685,7 @@ void check_for_io()
 		  gd.io_info.outstanding_request = 0;
 		  gd.io_info.request_type = 0;
 		  gd.io_info.mode = 0;
-	          if(gd.show_data_messages) gui_label_h_frame("Done",-1);
+	          if(_params.show_data_messages) gui_label_h_frame("Done",-1);
 		   else set_busy_state(0);
 
 	      } else {
@@ -721,7 +721,7 @@ void check_for_io()
 				     gd.io_info.prod->_prodInfo.menu_label, comp);
 		    }
 		  }
-		  if(gd.show_data_messages) gui_label_h_frame(label,1);
+		  if(_params.show_data_messages) gui_label_h_frame(label,1);
 
 	      }
            break;

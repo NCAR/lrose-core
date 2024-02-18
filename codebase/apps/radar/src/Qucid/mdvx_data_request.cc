@@ -61,13 +61,13 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
     url[ptr - mr->url] = '\0'; // Null terminate
 
     // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
-    if(strlen(gd.http_tunnel_url) > URL_MIN_SIZE) { 
+    if(strlen(_params.http_tunnel_url) > URL_MIN_SIZE) { 
       // If using the a proxy - Add the a proxy_url to the Url as a name=value pair
       // Note this must be used in conjunction with a tunnel_url.
-      if((strlen(gd.http_proxy_url)) > URL_MIN_SIZE) {
-         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",gd.http_tunnel_url,gd.http_proxy_url);
+      if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
+         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
       } else {
-         sprintf(tmp_str,"?tunnel_url=%s",gd.http_tunnel_url);
+         sprintf(tmp_str,"?tunnel_url=%s",_params.http_tunnel_url);
       }
       
       // Append the arguments to the end of the Url string
@@ -121,7 +121,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
         mr->h_mdvx->addReadField(fieldname);
      }
 
-     switch(gd.gather_data_mode ) {
+     switch(_params.gather_data_mode ) {
       case CLOSEST_TO_FRAME_CENTER :
   	gd.data_request_time = (time_t) start_time + ((end_time  - start_time)/2);
 	if(gd.model_run_time != 0 && mr->h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
@@ -184,21 +184,21 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
 					gd.h_win.cur_ht + mr->alt_offset);
      }
      
-     if(gd.always_get_full_domain == 0) {
+     if(_params.always_get_full_domain == 0) {
        get_bounding_box(min_lat,max_lat,min_lon,max_lon); 
-       if (!gd.do_not_clip_on_mdv_request) {
+       if (!_params.do_not_clip_on_mdv_request) {
          mr->h_mdvx->setReadHorizLimits(min_lat,min_lon,max_lat,max_lon);
        }
      } else {
-       if (!gd.do_not_clip_on_mdv_request) {
+       if (!_params.do_not_clip_on_mdv_request) {
          mr->h_mdvx->setReadHorizLimits(-90.0, gd.h_win.origin_lon - 179.9999,
 					90.0, gd.h_win.origin_lon + 179.9999);
        }
      }
 
      // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
-     if (!gd.do_not_decimate_on_mdv_request) {
-       if(gd.aspect_ratio > 1.0) {
+     if (!_params.do_not_decimate_on_mdv_request) {
+       if(_params.aspect_ratio > 1.0) {
          mr->h_mdvx->setReadDecimate( gd.h_win.img_dim.width *  gd.h_win.img_dim.width);
        } else {
          mr->h_mdvx->setReadDecimate( gd.h_win.img_dim.height *  gd.h_win.img_dim.height);
@@ -208,8 +208,8 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
 
     mr->h_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
     mr->h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
-    if(gd.request_compressed_data) {
-      if(gd.request_gzip_vol_compression) {
+    if(_params.request_compressed_data) {
+      if(_params.request_gzip_vol_compression) {
         mr->h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
 	  } else {
         mr->h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
@@ -221,7 +221,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
 
     gd.io_info.mode = DSMDVX_DATA;
     gd.io_info.request_type = HORIZ_REQUEST;    /* Horizontal data access */
-    gd.io_info.expire_time = time(0) + gd.data_timeout_secs;
+    gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
     gd.io_info.busy_status = 0;
     gd.io_info.page = page;
     gd.io_info.outstanding_request = 1;
@@ -266,13 +266,13 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
      url[ptr - mr->url] = '\0'; // Null terminate
 
     // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
-    if(strlen(gd.http_tunnel_url) > URL_MIN_SIZE) { 
+    if(strlen(_params.http_tunnel_url) > URL_MIN_SIZE) { 
       // If using the a proxy - Add the a proxy_url to the Url as a name=value pair
       // Note this must be used in conjunction with a tunnel_url.
-      if((strlen(gd.http_proxy_url)) > URL_MIN_SIZE) {
-         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",gd.http_tunnel_url,gd.http_proxy_url);
+      if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
+         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
       } else {
-         sprintf(tmp_str,"?tunnel_url=%s",gd.http_tunnel_url);
+         sprintf(tmp_str,"?tunnel_url=%s",_params.http_tunnel_url);
       }
       
       // Append the arguments to the end of the Url string
@@ -319,7 +319,7 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
      end_time += (int) (mr->time_offset * 60);
 
 
-     switch(gd.gather_data_mode ) {
+     switch(_params.gather_data_mode ) {
       case CLOSEST_TO_FRAME_CENTER :
 	if(gd.model_run_time != 0 && mr->v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
             mr->v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -361,8 +361,8 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
     mr->v_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
     mr->v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
 
-    if(gd.request_compressed_data) {
-      if(gd.request_gzip_vol_compression) {
+    if(_params.request_compressed_data) {
+      if(_params.request_gzip_vol_compression) {
         mr->v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
 	  } else {
         mr->v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
@@ -393,7 +393,7 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
 // 	    -99.9, lat1, lon1, lat2, lon2);
 
     gd.io_info.mode = DSMDVX_DATA;
-    gd.io_info.expire_time = time(0) + gd.data_timeout_secs;
+    gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
     gd.io_info.busy_status = 0;
     gd.io_info.page = page;
     gd.io_info.request_type = VERT_REQUEST;    /* a vertical data access */
@@ -435,13 +435,13 @@ int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, 
     url[ptr - mr->url] = '\0'; // Null terminate
 
     // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
-    if(strlen(gd.http_tunnel_url) > URL_MIN_SIZE) { 
+    if(strlen(_params.http_tunnel_url) > URL_MIN_SIZE) { 
       // If using the a proxy - Add the a proxy_url to the Url as a name=value pair
       // Note this must be used in conjunction with a tunnel_url.
-      if((strlen(gd.http_proxy_url)) > URL_MIN_SIZE) {
-         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",gd.http_tunnel_url,gd.http_proxy_url);
+      if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
+         sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
       } else {
-         sprintf(tmp_str,"?tunnel_url=%s",gd.http_tunnel_url);
+         sprintf(tmp_str,"?tunnel_url=%s",_params.http_tunnel_url);
       }
       
       // Append the arguments to the end of the Url string
@@ -479,7 +479,7 @@ int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, 
      }
      if(gd.debug1) fprintf(stderr, "Gathering Time List for %s\n",mr->url);
      sprintf(label, "Requesting time list for %s data",mr->legend_name);
-     if(gd.show_data_messages) {
+     if(_params.show_data_messages) {
 	 gui_label_h_frame(label,1);
      } else {
        // set_busy_state(1);
@@ -491,14 +491,14 @@ int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, 
      get_bounding_box(min_lat,max_lat,min_lon,max_lon);
 
      // Set up the DsMdvx request object
-     if (!gd.do_not_clip_on_mdv_request) {
+     if (!_params.do_not_clip_on_mdv_request) {
        mr->h_mdvx->setReadHorizLimits(min_lat,min_lon,max_lat,max_lon);
      }
 
      // Gather time list
       gd.io_info.mode = DSMDVX_DATA;
       gd.io_info.request_type = TIMELIST_REQUEST;    /* List of data times */
-      gd.io_info.expire_time = time(0) + gd.data_timeout_secs;
+      gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
       gd.io_info.busy_status = 0;
       gd.io_info.page = page;
       gd.io_info.outstanding_request = 1;
@@ -511,7 +511,7 @@ int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, 
  	     -99.9, min_lat, min_lon, max_lat, max_lon);
 
       // Limit List requests to given maximum number of days 
-      if((gd.epoch_end - gd.epoch_start) < (gd.max_time_list_span * 1440  * 60)) {
+      if((gd.epoch_end - gd.epoch_start) < (_params.max_time_list_span * 1440  * 60)) {
         if (mr->h_mdvx->compileTimeList()) {
 	 cout << "ERROR -CIDD:  setTimeListModeValid" << endl;
 	 cout << mr->h_mdvx->getErrStr();

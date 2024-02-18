@@ -103,10 +103,10 @@ Notify_value base_win_destroy( Notify_client client, Destroy_status status)
 	    }
 
             if(gd.debug) fprintf(stderr,"De-Registering from Procmap\n");
-            if(!gd.run_once_and_exit)  PMU_auto_unregister();
+            if(!_params.run_once_and_exit)  PMU_auto_unregister();
 
             if(!gd.quiet_mode) fprintf(stderr,"\nStandard Clean Exit from Cidd\n\n");
-	    if(!gd.run_once_and_exit)  PMU_unregister(gd.app_name, gd.app_instance);
+	    if(!_params.run_once_and_exit)  PMU_unregister(gd.app_name, gd.app_instance);
             return notify_next_destroy_func(client,status);
         break;
  

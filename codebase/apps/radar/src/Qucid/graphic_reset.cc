@@ -275,7 +275,7 @@ void set_redraw_flags(int h_flag,int v_flag)
 void next_cache_image()
 {
       gd.h_win.cur_cache_im++;
-      if(gd.h_win.cur_cache_im >= gd.num_cache_zooms) gd.h_win.cur_cache_im = 0;
+      if(gd.h_win.cur_cache_im >= _params.num_cache_zooms) gd.h_win.cur_cache_im = 0;
       // xv_set(gd.h_win_horiz_bw->im_cache_st,PANEL_VALUE,gd.h_win.cur_cache_im,NULL);
 }
 
@@ -285,6 +285,6 @@ void next_cache_image()
 void prev_cache_image()
 {
       gd.h_win.cur_cache_im--;
-      if(gd.h_win.cur_cache_im   < 0 ) gd.h_win.cur_cache_im = gd.num_cache_zooms -1 ;
+      if(gd.h_win.cur_cache_im   < 0 ) gd.h_win.cur_cache_im = _params.num_cache_zooms -1 ;
       // xv_set(gd.h_win_horiz_bw->im_cache_st,PANEL_VALUE,gd.h_win.cur_cache_im,NULL);
 }

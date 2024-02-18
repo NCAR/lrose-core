@@ -52,7 +52,7 @@ int render_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_t
   out_of_date = 0;
   stretch_secs =  (int) (60.0 * mr->time_allowance);
 
-  if(gd.check_data_times) {
+  if(_params.check_data_times) {
     if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
     if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
   }
@@ -77,9 +77,9 @@ int render_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_t
          strncasecmp(mr->button_name,"Empty",5)) {
         /* display "Data Not Available" message */
         if(out_of_date) {
-          sprintf(message,"%s - Data too Old", gd.no_data_message);
+          sprintf(message,"%s - Data too Old", _params.no_data_message);
         } else {
-          STRcopy(message, gd.no_data_message,MESSAGE_LEN);
+          STRcopy(message, _params.no_data_message,MESSAGE_LEN);
         }
 
         font = choose_font(message, gd.h_win.img_dim.width, gd.h_win.img_dim.height, &xmid, &ymid);
@@ -94,7 +94,7 @@ int render_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_t
                   gd.io_info.mr->url );
         }
         
-	if(gd.show_clock) {
+	if(_params.show_clock) {
           /* draw a clock */
           ht = (int) (gd.h_win.can_dim.height * 0.05);
           startx = gd.h_win.can_dim.width - gd.h_win.margin.right - ht - 5;

@@ -341,8 +341,8 @@ struct    Global_data {
   int    model_run_list_hours; // Gather all model run times within this number of
   // hours from the end of the movie loop
   // WIND Vector & barb preferences.
-  int ideal_x_vects;
-  int ideal_y_vects;
+  int ideal_x_vectors;
+  int ideal_y_vectors;
   int wind_head_size;     // Vectors
   double wind_head_angle;     // Wind barb head angle.
   int barb_shaft_len;     // Wind barbs
@@ -590,8 +590,8 @@ struct    Global_data {
 
   // page_pu_proc
 
-  int ideal_x_vectors;
-  int ideal_y_vectors;
+  // int ideal_x_vectors;
+  // int ideal_y_vectors;
   double azimuth_interval;
   double azimuth_radius;
   int latest_click_mark_size;

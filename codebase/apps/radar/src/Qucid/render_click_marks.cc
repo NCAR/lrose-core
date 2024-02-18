@@ -42,7 +42,7 @@ void render_click_marks()
   bool plotClick = false;
   bool plotClient = false;
 
-  if (gd.mark_latest_click_location) {
+  if (_params.mark_latest_click_location) {
     if (gd.coord_expt->pointer_x != 0 ||
         gd.coord_expt->pointer_y != 0) {
       plotClick = true;
@@ -82,7 +82,7 @@ void render_click_marks()
     double lon = gd.coord_expt->pointer_lon;
     double lat = gd.coord_expt->pointer_lat;
     gd.proj.latlon2xy(lat, lon, xx, yy);
-    int size = gd.latest_click_mark_size;
+    int size = _params.latest_click_mark_size;
     _draw_mark(gd.h_win.vis_xid, xx, yy, gd.legends.latest_click_mark_color, size);
   }
 
@@ -93,7 +93,7 @@ void render_click_marks()
     double lon = gd.coord_expt->client_lon;
     double lat = gd.coord_expt->client_lat;
     gd.proj.latlon2xy(lat, lon, xx, yy);
-    int size = gd.latest_click_mark_size;
+    int size = _params.latest_click_mark_size;
     _draw_mark(gd.h_win.vis_xid, xx, yy, gd.legends.latest_client_mark_color, size);
   }
   

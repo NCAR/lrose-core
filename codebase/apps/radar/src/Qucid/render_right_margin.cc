@@ -68,7 +68,7 @@ int draw_hwin_right_margin( Drawable xid, int  page)
         /* Use half the left margin minus 1/2 a top margin width */
         ht = (gd.h_win.can_dim.height - (gd.h_win.margin.top * 2) - gd.h_win.margin.bot) / 2;
         wd = gd.h_win.margin.right;
-	if(gd.show_height_sel) wd /= 2;
+	if(_params.show_height_sel) wd /= 2;
     
         if(strncasecmp(mr->color_file,"none",4) != 0) {
           draw_colorbar(gd.dpy,xid,gd.legends.foreground_color->gc,x_start,y_start,wd,ht,
@@ -113,7 +113,7 @@ int draw_hwin_right_margin( Drawable xid, int  page)
         y_start =  gd.h_win.margin.top;
         ht = gd.h_win.can_dim.height - gd.h_win.margin.top - gd.h_win.margin.bot;
         wd = gd.h_win.margin.right;
-	if(gd.show_height_sel) wd /= 2;
+	if(_params.show_height_sel) wd /= 2;
     
         if(strncasecmp(mr->color_file,"none",4) != 0) {
             draw_colorbar(gd.dpy,xid,gd.legends.foreground_color->gc,
@@ -130,7 +130,7 @@ int draw_hwin_right_margin( Drawable xid, int  page)
 	}
     }
 
-    if(gd.show_height_sel) {
+    if(_params.show_height_sel) {
 	x_start = gd.h_win.can_dim.width - (gd.h_win.margin.right/2) - 1;
 	y_start =  gd.h_win.margin.top;
 	ht = gd.h_win.can_dim.height - gd.h_win.margin.top -

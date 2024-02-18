@@ -194,12 +194,12 @@ void draw_vwin_top_margin(Drawable xid, int page)
     if(mr->v_data != NULL) {
       struct tm *gmt;
       struct tm res;
-      if(gd.use_local_timestamps) {
+      if(_params.use_local_timestamps) {
           gmt = localtime_r((time_t *)&(mr->v_date.unix_time),&res);
       } else {
           gmt = gmtime_r((time_t *)&(mr->v_date.unix_time),&res);
       }
-      strftime(timestr,64,gd.label_time_format,gmt);
+      strftime(timestr,64,_params.label_time_format,gmt);
       if( gd.mrec[page]->v_fhdr.proj_type == Mdvx::PROJ_RHI_RADAR) {
 	if (gd.mrec[page]->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_AZ) {
 	  sprintf(label," %s  RHI: %g deg  -  %s" ,
@@ -246,8 +246,8 @@ void draw_vwin_bot_margin(Drawable xid, int page)
     double unit_per_km;
     const char *u_label;
 
-    unit_per_km = gd.scale_units_per_km;
-    u_label = gd.scale_units_label;
+    unit_per_km = _params.scale_units_per_km;
+    u_label = _params.scale_units_label;
 
     if(gd.v_win.margin.bot == 0) return;
     // mr = gd.mrec[page];    /* get pointer to data record */

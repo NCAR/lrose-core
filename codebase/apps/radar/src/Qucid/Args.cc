@@ -350,7 +350,7 @@ int Args::_processLegacyArgs(int argc, const char **argv)
   UTIMstruct temp_utime;
 
   gd.db_name = strdup("");    /* Set the default data base name */
-  gd.http_proxy_url = "";
+  TDRP_str_replace(&_params.http_proxy_url, "");
 
   gd.argv = (char **) argv;
   gd.argc = argc;
@@ -408,9 +408,9 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
-        gd.http_proxy_url = strdup(optarg);
+        _params.http_proxy_url = strdup(optarg);
         if(!gd.quiet_mode) {
-          printf("Loading Parameters via Proxy: %s\n",gd.http_proxy_url);
+          printf("Loading Parameters via Proxy: %s\n",_params.http_proxy_url);
         }
       } else {
 	iret = -1;
@@ -442,7 +442,7 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       
     } else if (!strcmp(argv[ii], "-vert")) {
       
-      gd.use_cosine_correction = 0;
+      _params.use_cosine_correction = pFALSE;
       if(!gd.quiet_mode) printf("CIDD will run in VERT pointing mode\n");
       
     } else if (!strcmp(argv[ii], "-start_time")) {

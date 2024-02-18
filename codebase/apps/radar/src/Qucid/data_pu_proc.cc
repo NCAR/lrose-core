@@ -125,7 +125,7 @@ set_group_proc(Panel_item item, const char *string, Xv_opaque client_data, Panel
 	 while (ptr != NULL) {
 	     // Compare labels after Underscores are replaced with Spaces if this feature is enabled .
              ptr2 = ptr;  // use a copy of the pointer for replacement purposes
-	     while(gd.replace_underscores && (ptr2 = strchr(ptr2,'_'))!= NULL) *ptr2 = ' ';
+	     while(_params.replace_underscores && (ptr2 = strchr(ptr2,'_'))!= NULL) *ptr2 = ' ';
              if(strstr(gd.mrec[i]->legend_name,ptr) != NULL) {
 	     // If so... add it to the menu.
 	     gd.mrec[i]->currently_displayed = TRUE;

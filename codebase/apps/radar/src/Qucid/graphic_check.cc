@@ -53,7 +53,7 @@ void check_for_invalid_images(int index)
 
     h_image = gd.h_win.page + 1;
     v_image = gd.v_win.page + 1;
-    if(!gd.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
+    if(!_params.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
 
     /* look through the rest of the images  */
     for (i=0; i < gd.num_datafields-1; i++) {    
@@ -125,7 +125,7 @@ void check_for_invalid_images(int index)
     //  happening
 
     // In html mode, cycle through all zooms and heights
-    if(none_found && gd.html_mode && gd.io_info.outstanding_request == 0) {
+    if(none_found && _params.html_mode && gd.io_info.outstanding_request == 0) {
 
 	/* If more zoom levels to render */
 	if(gd.h_win.zoom_level < (gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
@@ -151,7 +151,7 @@ void check_for_invalid_images(int index)
 	   reset_terrain_valid_flags(1,0);
                
 	 // No more heights and no more zooms to render
-	 } else if(gd.run_once_and_exit) {
+	 } else if(_params.run_once_and_exit) {
 	     if(!gd.quiet_mode)  fprintf(stderr,"Exiting\n");
 	     // xv_destroy(gd.h_win_horiz_bw->horiz_bw);
 	     exit(-1);

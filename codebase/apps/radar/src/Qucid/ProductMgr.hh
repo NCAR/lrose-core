@@ -117,7 +117,7 @@ public:
   
 protected:
   
-  const Csyprod_P &_params;    // Product TDRParameters
+  const Csyprod_P &_sparams;    // Product TDRParameters
 
   RenderContext &_context; // Drawing context for window 
 

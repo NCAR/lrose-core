@@ -80,7 +80,7 @@ int render_polar_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
     // compute the projection coordinates along the left edge of 0 degree beam
     // Note this is line is 0.0 degrees - 1/2 of the beam width
 
-    if(gd.use_cosine_correction) {
+    if(_params.use_cosine_correction) {
       cos_elev = cos(mr->vert[mr->plane].cent * RAD_PER_DEG);
     } else {
       cos_elev = 1.0;

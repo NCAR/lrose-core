@@ -334,7 +334,7 @@ static void respond_to_select(Event *event)
       gd.h_win.route.num_segments = 0;
       gd.route_in_progress = 0;
       r_state = 0;
-      if(gd.drawing_mode == DRAW_FMQ_MODE) {
+      if(_params.drawing_mode == DRAW_FMQ_MODE) {
 	gui_label_h_frame("Draw Mode Canceled", 1);
 	add_message_to_status_win("Draw Mode Canceled",0);
       } else {
@@ -380,7 +380,7 @@ static void respond_to_select(Event *event)
 
     /* Nicely format the lat lons */
 
-    switch(gd.latlon_mode) {
+    switch(_params.latlon_mode) {
       default:
       case 0:  /* Decimal Degrees */
 	if (lat > 90.0) {
@@ -461,7 +461,7 @@ static void respond_to_select(Event *event)
 	if(gd.station_loc != NULL) {
 	  strncat(singleLineText," : ",256);
 	  strncat(singleLineText,
-		  gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str(),
+		  gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str(),
 		  256);
 	}
 
@@ -471,7 +471,7 @@ static void respond_to_select(Event *event)
 
 	// status window
 	
-	if (gd.report_clicks_in_status_window) {
+	if (_params.report_clicks_in_status_window) {
 	  sprintf(multiLineText,
 		  "=====================================\n"
 		  "===== Clicked outside data grid =====\n"
@@ -484,14 +484,14 @@ static void respond_to_select(Event *event)
 		  constrain_az(az_moved), dist_moved,
 		  x_dproj, y_dproj);
 	  add_report_to_status_win(multiLineText);
-	  if (gd.report_clicks_in_degM_and_nm) {
+	  if (_params.report_clicks_in_degM_and_nm) {
 	    sprintf(multiLineText,
 		    "===== Click point loc in degM/nm =====\n"
 		    "  From origin: %.1f degM, %.1f nm\n"
 		    "  From previous: %.1f degM, %.1f nm\n",
-		    constrain_az(az_from_origin - gd.magnetic_variation_deg),
+		    constrain_az(az_from_origin - _params.magnetic_variation_deg),
 		    dist_from_origin / KM_PER_NM,
-		    constrain_az(az_moved - gd.magnetic_variation_deg),
+		    constrain_az(az_moved - _params.magnetic_variation_deg),
 		    dist_moved / KM_PER_NM);
 	    add_report_to_status_win(multiLineText);
 	  }
@@ -518,7 +518,7 @@ static void respond_to_select(Event *event)
 		      xy_string,
 		      x_gd, y_gd);
 	      
-	      if (gd.report_clicks_in_status_window) {
+	      if (_params.report_clicks_in_status_window) {
 		sprintf(multiLineText,
 			"=======================================\n"
 			"===== Data missing at click point =====\n"
@@ -565,7 +565,7 @@ static void respond_to_select(Event *event)
 		      xy_string,
 		      x_gd, y_gd);
 
-	      if (gd.report_clicks_in_status_window) {
+	      if (_params.report_clicks_in_status_window) {
 		sprintf(multiLineText,
 			"======================================\n"
 			"====== Data found at click point =====\n"
@@ -590,14 +590,14 @@ static void respond_to_select(Event *event)
 	      
 	    }
 
-	    if (gd.report_clicks_in_degM_and_nm) {
+	    if (_params.report_clicks_in_degM_and_nm) {
 	      sprintf(multiLineText,
 		      "===== Click point loc in degM/nm =====\n"
 		      "  From origin: %.1f degM, %.1f nm\n"
 		      "  From previous: %.1f degM, %.1f nm\n",
-		      constrain_az(az_from_origin - gd.magnetic_variation_deg),
+		      constrain_az(az_from_origin - _params.magnetic_variation_deg),
 		      dist_from_origin / KM_PER_NM,
-		      constrain_az(az_moved - gd.magnetic_variation_deg),
+		      constrain_az(az_moved - _params.magnetic_variation_deg),
 		      dist_moved / KM_PER_NM);
 	      add_report_to_status_win(multiLineText);
 	    }
@@ -606,7 +606,7 @@ static void respond_to_select(Event *event)
 	    if(gd.station_loc != NULL) {
 	      strncat(singleLineText," : ",256);
 	      strncat(singleLineText,
-		      gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str(),
+		      gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str(),
 		      256);
 	    }
 	    gui_label_h_frame(singleLineText,-3);
@@ -681,7 +681,7 @@ static void respond_to_adjust(Event *event)
 	
 	gd.save_im_win = PLAN_VIEW;
 	update_save_panel();
-	if(gd.enable_save_image_panel)
+	if(_params.enable_save_image_panel)
 	  // xv_set(gd.save_pu->save_im_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
       }
       gd.pan_in_progress = 0;
@@ -713,7 +713,7 @@ static void respond_to_menu(Event *event)
 	gd.h_win.route.total_length = 0;
 	r_state = 1; // Initial Press
 	gd.route_in_progress = 1;
-	if(gd.drawing_mode == DRAW_FMQ_MODE) {
+	if(_params.drawing_mode == DRAW_FMQ_MODE) {
 	  gui_label_h_frame("Draw Mode", 1);
 	  add_message_to_status_win("Draw Mode",0);
 	} else {
@@ -766,7 +766,7 @@ static void respond_to_menu(Event *event)
 	    gd.h_win.route.num_segments++;
 	    // fprintf(stderr,"Num Segments: %d\n",gd.h_win.route.num_segments);
 	  }
-	  if( gd.one_click_rhi == 0 ) {
+	  if( _params.one_click_rhi == 0 ) {
 	    sprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
 		    gd.h_win.route.num_segments);
 	    gui_label_h_frame(text, 1);
@@ -833,7 +833,7 @@ static void respond_to_menu(Event *event)
 	    gd.proj.xy2latlon(gd.h_win.route.x_world[gd.h_win.route.num_segments-1],
 			      gd.h_win.route.y_world[gd.h_win.route.num_segments-1],
 			      lat,lon); 
-	    txt_ptr = gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str();
+	    txt_ptr = gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str();
 	    if(strlen(txt_ptr) ==0)  {
 	      sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
 	    } else {
@@ -844,7 +844,7 @@ static void respond_to_menu(Event *event)
 	    gd.proj.xy2latlon(gd.h_win.route.x_world[gd.h_win.route.num_segments],
 			      gd.h_win.route.y_world[gd.h_win.route.num_segments],
 			      lat,lon); 
-	    txt_ptr = gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str();
+	    txt_ptr = gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str();
 	    if(strlen(txt_ptr) ==0)  {
 	      sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
 	    } else {
@@ -862,7 +862,7 @@ static void respond_to_menu(Event *event)
 	       gd.h_win.route.num_segments+1,
 	       gd.h_win.route.navaid_id[gd.h_win.route.num_segments]);
 	  */
-	  if(gd.drawing_mode != DRAW_FMQ_MODE && gd.one_click_rhi != 0 ) {
+	  if(_params.drawing_mode != DRAW_FMQ_MODE && _params.one_click_rhi != 0 ) {
 	    setup_route_area(1);
 	    strncpy(gd.h_win.route.route_label,"Custom",7);
 
@@ -905,7 +905,7 @@ static void respond_to_menu(Event *event)
 
 
       case 4: // OK - ALL DONE 
-	if(gd.drawing_mode == DRAW_FMQ_MODE) {
+	if(_params.drawing_mode == DRAW_FMQ_MODE) {
 	  show_draw_panel(1);
 	} else {
 	  setup_route_area(1);

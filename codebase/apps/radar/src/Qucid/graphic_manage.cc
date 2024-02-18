@@ -65,7 +65,7 @@ void manage_h_pixmaps(int  mode)  /* 1= create, 2 = replace, 3 = destroy */
 
         }
         /* create last stage pixmaps */
-	for(i=0; i < gd.num_cache_zooms; i++) {
+	for(i=0; i < _params.num_cache_zooms; i++) {
             if(gd.h_win.can_xid[i]) XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
             gd.h_win.can_xid[i] = XCreatePixmap(gd.dpy,
                                 gd.h_win.vis_xid,
@@ -123,7 +123,7 @@ void manage_h_pixmaps(int  mode)  /* 1= create, 2 = replace, 3 = destroy */
                 gd.h_win.page_xid[i] = 0;
             }
         }
-	for(i=0; i < gd.num_cache_zooms; i++) {
+	for(i=0; i < _params.num_cache_zooms; i++) {
           if(gd.h_win.can_xid[i]) {
             XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
             gd.h_win.can_xid[i] = 0;
@@ -171,7 +171,7 @@ void manage_v_pixmaps( int mode)   /* 1= create, 2 = replace, 3 = destroy */
             }
 
             /* Create last stage Pixmaps */
-	    for(i=0; i < gd.num_cache_zooms; i++) {
+	    for(i=0; i < _params.num_cache_zooms; i++) {
               gd.v_win.can_xid[i] =  XCreatePixmap(gd.dpy,
                         gd.v_win.vis_xid,
                         gd.v_win.can_dim.width,
@@ -226,7 +226,7 @@ void manage_v_pixmaps( int mode)   /* 1= create, 2 = replace, 3 = destroy */
                     gd.v_win.page_xid[i] = 0;
                 }
             }
-	    for(i=0; i < gd.num_cache_zooms; i++) {
+	    for(i=0; i < _params.num_cache_zooms; i++) {
               if(gd.v_win.can_xid[i]) {
                 XFreePixmap(gd.dpy,gd.v_win.can_xid[i]);
                 gd.v_win.can_xid[i] = 0;

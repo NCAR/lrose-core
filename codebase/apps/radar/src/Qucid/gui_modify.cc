@@ -100,34 +100,34 @@ void modify_gui_objects()
     }
 
     /* determine margin and other window assoc sizes for HORIZ window */
-    gd.h_win.margin.top = gd.horiz_top_margin;
-    gd.h_win.margin.bot = gd.horiz_bot_margin;
-    gd.h_win.margin.left = gd.horiz_left_margin;
-    gd.h_win.margin.right = gd.horiz_right_margin;
+    gd.h_win.margin.top = _params.horiz_top_margin;
+    gd.h_win.margin.bot = _params.horiz_bot_margin;
+    gd.h_win.margin.left = _params.horiz_left_margin;
+    gd.h_win.margin.right = _params.horiz_right_margin;
 
-    if (gd.horiz_legends_start_x == 0) {
+    if (_params.horiz_legends_start_x == 0) {
       gd.h_win.legends_start_x = gd.h_win.margin.left + 5;
     } else {
-      gd.h_win.legends_start_x = gd.horiz_legends_start_x;
+      gd.h_win.legends_start_x = _params.horiz_legends_start_x;
     }
     
-    if (gd.horiz_legends_start_y == 0) {
+    if (_params.horiz_legends_start_y == 0) {
       gd.h_win.legends_start_y = gd.h_win.margin.top * 2;
     } else {
-      gd.h_win.legends_start_y = gd.horiz_legends_start_y;
+      gd.h_win.legends_start_y = _params.horiz_legends_start_y;
     }
 
-    if (gd.horiz_legends_delta_y == 0) {
+    if (_params.horiz_legends_delta_y == 0) {
       gd.h_win.legends_delta_y = gd.h_win.margin.top;
     } else {
-      gd.h_win.legends_delta_y = gd.horiz_legends_delta_y;
+      gd.h_win.legends_delta_y = _params.horiz_legends_delta_y;
     }
 
-    gd.h_win.min_height = gd.horiz_min_height;
-    gd.h_win.min_width = gd.horiz_min_width;
+    gd.h_win.min_height = _params.horiz_min_height;
+    gd.h_win.min_width = _params.horiz_min_width;
     gd.h_win.active = 1;
 
-    fname = gd.status_info_file; 
+    fname = _params.status_info_file; 
     if(strlen(fname) < 2) {
       gd.status.status_fname = NULL;
     } else {
@@ -135,10 +135,10 @@ void modify_gui_objects()
     }
 
     // xv_set(gd.h_win_horiz_bw->horiz_bw,
-    //     XV_X, gd.horiz_default_x_pos,
-    //     XV_Y, gd.horiz_default_y_pos,
-    //     XV_HEIGHT, gd.horiz_default_height,
-    //     XV_LABEL, gd.frame_label,
+    //     XV_X, _params.horiz_default_x_pos,
+    //     XV_Y, _params.horiz_default_y_pos,
+    //     XV_HEIGHT, _params.horiz_default_height,
+    //     XV_LABEL, _params.frame_label,
     //     FRAME_ICON, xv_create(XV_NULL, ICON, 
     //                           ICON_IMAGE,image1,
     //                           ICON_HEIGHT, 1,
@@ -165,11 +165,11 @@ void modify_gui_objects()
     update_ticker(time(0));
 
     // Set the Jiffy Image Cache Widget labels
-    // for(i=0; i < gd.num_cache_zooms; i++) {
+    // for(i=0; i < _params.num_cache_zooms; i++) {
     //   xv_set(gd.h_win_horiz_bw->im_cache_st,PANEL_CHOICE_STRING,i," ",NULL);
     // }
      
-    // if(gd.num_cache_zooms > 1) {  // Have a visible Image Cache Widget
+    // if(_params.num_cache_zooms > 1) {  // Have a visible Image Cache Widget
     //     xv_set(gd.h_win_horiz_bw->cur_time_msg,
     //        XV_X,
     //          (xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) -
@@ -197,7 +197,7 @@ void modify_gui_objects()
     // xv_set(gd.movie_pu->movie_type_st, PANEL_VALUE,gd.movie.mode, NULL);
 
     // Hide the opuput loop button if we have no series save command defined
-    if(gd.series_convert_script == NULL) {
+    if(_params.series_convert_script == NULL) {
       // xv_set(gd.movie_pu->save_loop_bt, XV_SHOW,FALSE, NULL);
     } 
 
@@ -242,7 +242,7 @@ void modify_gui_objects()
 
 
     /* Set the labels on the Bookmark choice_panel  */
-    for(i=0; i < gd.num_bookmarks; i++) {
+    for(i=0; i < _params.bookmarks_n; i++) {
         // xv_set(gd.bookmk_pu->bookmk_st,PANEL_CHOICE_STRING,i,gd.bookmark[i].label,NULL);
     }
     // Size the panel appropriately
@@ -413,31 +413,31 @@ void modify_gui_objects()
 
 
     /* determine margin and other window assoc sizes for VERT window */
-    gd.v_win.margin.top = gd.vert_top_margin;
-    gd.v_win.margin.bot =  gd.vert_bot_margin;
-    gd.v_win.margin.left = gd.vert_left_margin;
-    gd.v_win.margin.right = gd.vert_right_margin;
+    gd.v_win.margin.top = _params.vert_top_margin;
+    gd.v_win.margin.bot =  _params.vert_bot_margin;
+    gd.v_win.margin.left = _params.vert_left_margin;
+    gd.v_win.margin.right = _params.vert_right_margin;
 
-    if (gd.vert_legends_start_x == 0) {
+    if (_params.vert_legends_start_x == 0) {
       gd.v_win.legends_start_x = gd.v_win.margin.left + 5;
     } else {
-      gd.v_win.legends_start_x = gd.vert_legends_start_x;
+      gd.v_win.legends_start_x = _params.vert_legends_start_x;
     }
     
-    if (gd.vert_legends_start_y == 0) {
+    if (_params.vert_legends_start_y == 0) {
       gd.v_win.legends_start_y = gd.v_win.margin.top * 2;
     } else {
-      gd.v_win.legends_start_y = gd.vert_legends_start_y;
+      gd.v_win.legends_start_y = _params.vert_legends_start_y;
     }
 
-    if (gd.vert_legends_delta_y == 0) {
+    if (_params.vert_legends_delta_y == 0) {
       gd.v_win.legends_delta_y = gd.v_win.margin.top;
     } else {
-      gd.v_win.legends_delta_y = gd.vert_legends_delta_y;
+      gd.v_win.legends_delta_y = _params.vert_legends_delta_y;
     }
 
-    gd.v_win.min_height = gd.vert_min_height;
-    gd.v_win.min_width = gd.vert_min_width;
+    gd.v_win.min_height = _params.vert_min_height;
+    gd.v_win.min_width = _params.vert_min_width;
     if(gd.v_win.min_width < 280) {
       // Don't let hidden XView widgets obsure others 
       fprintf(stderr,"Warning: Minimum X-Section width minimum of 280 being enforced.\n");
@@ -451,8 +451,8 @@ void modify_gui_objects()
     // xv_set(gd.v_win_v_win_pu->ht_top_tx,PANEL_VALUE,string,NULL);
     
     // xv_set(gd.v_win_v_win_pu->v_win_pu,
-    //        WIN_HEIGHT, gd.vert_default_height,
-    //        WIN_WIDTH,  gd.vert_default_width,
+    //        WIN_HEIGHT, _params.vert_default_height,
+    //        WIN_WIDTH,  _params.vert_default_width,
     //        FRAME_SHOW_HEADER,    TRUE,
     //        XV_SHOW,    FALSE,
     //        NULL);
@@ -544,13 +544,13 @@ void modify_gui_objects()
     //     NULL);
 
     // xv_set(gd.page_pu->prod_font_sl,
-    //     PANEL_MAX_VALUE,    gd.num_fonts -1 ,
+    //     PANEL_MAX_VALUE,    _params.num_fonts -1 ,
     //     PANEL_VALUE,gd.prod.prod_font_num,
     //     NULL);
 
     // xv_set(gd.page_pu->dim_sl,
-    //     PANEL_MAX_VALUE,    gd.inten_levels,
-    //     PANEL_VALUE,(int)(gd.inten_levels * gd.data_inten),
+    //     PANEL_MAX_VALUE,    _params.inten_levels,
+    //     PANEL_VALUE,(int)(_params.inten_levels * _params.data_inten),
     //     PANEL_NOTIFY_LEVEL,PANEL_DONE,
     //     NULL);
 
@@ -781,8 +781,8 @@ void init_field_menus()
         }
     }
 #ifdef NOTNOW
-    ncols = (gd.num_field_menu_cols <=0 ) ? (int)(gd.num_menu_fields / 30.0) + 1
-                                         : gd.num_field_menu_cols;
+    ncols = (_params.num_field_menu_cols <=0 ) ? (int)(gd.num_menu_fields / 30.0) + 1
+                                         : _params.num_field_menu_cols;
 #endif
 
     if(gd.gui_P->field_list_n > 1 ) {
@@ -837,14 +837,14 @@ const char * frame_time_msg(int index)
     if(mr == NULL) return NULL;
 
     // IN HTML_MODE or remote ui mode, use an abbreviated label
-    if(gd.html_mode || gd.remote_ui) {
+    if(_params.html_mode || gd.remote_ui) {
         if(mr->h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
-             if(gd.use_local_timestamps) {
+             if(_params.use_local_timestamps) {
                  gmt = localtime_r((time_t *)&(mr->h_mhdr.time_gen),&res); 
 			 } else {
                  gmt = gmtime_r((time_t *)&(mr->h_mhdr.time_gen),&res);
              }
-             strftime(label3,64,gd.label_time_format,gmt);
+             strftime(label3,64,_params.label_time_format,gmt);
              sprintf(label,"FORECAST Run: %s",label3);                                    
 	} else {
 	    label[0] = '\0';  // No label
@@ -853,8 +853,8 @@ const char * frame_time_msg(int index)
     // Use Full label
     } else {
          /* Frame Begin label */
-         if(gd.use_local_timestamps) {
-			 switch (gd.gather_data_mode) {
+         if(_params.use_local_timestamps) {
+			 switch (_params.gather_data_mode) {
 				 case CLOSEST_TO_FRAME_CENTER:
                      gmt = localtime_r(&gd.movie.frame[index].time_mid,&res);
 				 break;
@@ -868,7 +868,7 @@ const char * frame_time_msg(int index)
 			 gmt_s = localtime_r(&gd.movie.frame[index].time_start,&res_s);
              gmt_e = localtime_r(&gd.movie.frame[index].time_end,&res_e);
          } else {
-			 switch (gd.gather_data_mode) {
+			 switch (_params.gather_data_mode) {
 				 case CLOSEST_TO_FRAME_CENTER:
                      gmt = gmtime_r(&gd.movie.frame[index].time_mid,&res);
 				 break;
@@ -883,19 +883,19 @@ const char * frame_time_msg(int index)
              gmt_e = gmtime_r(&gd.movie.frame[index].time_end,&res_e);
          }
          sprintf(label1,"Frame %d:", gd.movie.cur_frame + 1);
-         strftime(label2,64,gd.label_time_format,gmt);
-	 sprintf(str_fmt, "   (%s to", gd.frame_range_time_format);
+         strftime(label2,64,_params.label_time_format,gmt);
+	 sprintf(str_fmt, "   (%s to", _params.frame_range_time_format);
          strftime(label3, 64, str_fmt, gmt_s);
-	 sprintf(str_fmt, "%s)", gd.frame_range_time_format);
+	 sprintf(str_fmt, "%s)", _params.frame_range_time_format);
          strftime(label4, 64, str_fmt, gmt_e);
 
          if(mr->h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST && gd.model_run_time != 0 ) {
-             if(gd.use_local_timestamps) {
+             if(_params.use_local_timestamps) {
 	             gmt = localtime_r(&gd.model_run_time,&res);
              } else {
 	             gmt = gmtime_r(&gd.model_run_time,&res);
              }
-             strftime(label3,64,gd.label_time_format,gmt);
+             strftime(label3,64,_params.label_time_format,gmt);
              sprintf(label,"%s %s Run: %s",label1,label2,label3);                                    
          } else {
              sprintf(label,"%s %s %s %s",label1,label2,label3,label4);                                    

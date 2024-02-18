@@ -65,9 +65,9 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
     
   if(gd.series_save_active) {
     // Create simplified file name and bail out.
-    sprintf(nbuf,"%s%03d.%s",prefix,gd.movie.cur_frame,gd.image_ext);
+    sprintf(nbuf,"%s%03d.%s",prefix,gd.movie.cur_frame,_params.image_ext);
     // replace any spaces in the file name with underscores - .
-    while(gd.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL) {
+    while(_params.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL) {
       *ptr = '_';
     }
     return nbuf;
@@ -75,7 +75,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
 
   // get separator
 
-  const char *sep = gd.image_name_separator;
+  const char *sep = _params.image_name_separator;
 
   // prefix - required
 
@@ -83,7 +83,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
 
   // Optionally add a frame number 
 
-  if(gd.add_frame_num_to_filename) {
+  if(_params.add_frame_num_to_filename) {
     sprintf(tbuf,"%03d", gd.movie.cur_frame);
     strncat(nbuf,tbuf,2048);
   }
@@ -95,7 +95,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
 
   // optionally add button name
 
-  if(gd.add_button_name_to_filename) {
+  if(_params.add_button_name_to_filename) {
     strncat(nbuf,sep,2048);
     strncat(nbuf,mr->button_name,2048);
   }
@@ -109,25 +109,25 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
   strncat(nbuf,zbuf,2048);
     
   // add height if requested
-  if(gd.add_height_to_filename) {
+  if(_params.add_height_to_filename) {
     sprintf(tbuf, "%s%g", sep, gd.h_win.cur_ht);
     strncat(nbuf,tbuf,2048);
   }
 
   // Optionally add a frame time
-  if(gd.add_frame_time_to_filename) {
-    switch (gd.movieframe_time_mode)  {
+  if(_params.add_frame_time_to_filename) {
+    switch (_params.movieframe_time_mode)  {
       default:
       case 0:
-	strftime(tbuf,1024,gd.movieframe_time_format,
+	strftime(tbuf,1024,_params.movieframe_time_format,
 		 gmtime_r(&(gd.movie.frame[gd.movie.cur_frame].time_end),&res));
 	break;
       case 1:
-	strftime(tbuf,1024,gd.movieframe_time_format,
+	strftime(tbuf,1024,_params.movieframe_time_format,
 		 gmtime_r(&(gd.movie.frame[gd.movie.cur_frame].time_mid),&res));
 	break;
       case 2:
-	strftime(tbuf,1024,gd.movieframe_time_format,
+	strftime(tbuf,1024,_params.movieframe_time_format,
 		 gmtime_r(&(gd.movie.frame[gd.movie.cur_frame].time_start),&res));
 	break;
     }
@@ -136,28 +136,28 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
   }
 
   // Optionally add a generation time - (for model data)
-  if(gd.add_gen_time_to_filename) {
+  if(_params.add_gen_time_to_filename) {
     strncat(nbuf,sep,2048);
     t = (time_t)mr->h_mhdr.time_gen;
-    strftime(tbuf,1024,gd.movieframe_time_format, gmtime_r(&t,&res));
+    strftime(tbuf,1024,_params.movieframe_time_format, gmtime_r(&t,&res));
     strncat(nbuf,tbuf,2048);
 
   }
 
   // Optionally add a data valid time
-  if(gd.add_valid_time_to_filename) {
+  if(_params.add_valid_time_to_filename) {
     strncat(nbuf,sep,2048);
     t = (time_t)mr->h_mhdr.time_centroid;
-    strftime(tbuf,1024,gd.movieframe_time_format, gmtime_r(&t,&res));
+    strftime(tbuf,1024,_params.movieframe_time_format, gmtime_r(&t,&res));
     strncat(nbuf,tbuf,2048);
   }
 
   // Add the final extension
   strncat(nbuf, ".", 2047);
-  strncat(nbuf,gd.image_ext,2047);
+  strncat(nbuf,_params.image_ext,2047);
 
   // replace any spaces in the file name with underscores - .
-  while(gd.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL)  *ptr = '_';
+  while(_params.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL)  *ptr = '_';
 
   return nbuf;
 }
@@ -177,8 +177,8 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
 
   // day dir?
 
-  STRncopy(dir, gd.image_dir, MAX_PATH_LEN);
-  if (gd.save_images_to_day_subdir) {
+  STRncopy(dir, _params.image_dir, MAX_PATH_LEN);
+  if (_params.save_images_to_day_subdir) {
     // start with day subdir
     char daydir[MAX_PATH_LEN];
     DateTime centroidTime((time_t)gd.mrec[page]->h_mhdr.time_centroid);
@@ -196,22 +196,22 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     case PLAN_VIEW:  /* The horizontal window */
       if(gd.generate_filename) {
         STRcopy(gd.h_win.image_fname,
-                gen_image_fname(gd.image_horiz_prefix,gd.mrec[page]),
+                gen_image_fname(_params.image_horiz_prefix,gd.mrec[page]),
                 MAX_PATH_LEN);
-        if(strstr(gd.h_win.image_fname,gd.image_ext) == NULL) { 
+        if(strstr(gd.h_win.image_fname,_params.image_ext) == NULL) { 
           strncat(gd.h_win.image_fname,".",MAX_PATH_LEN-1);
-          strncat(gd.h_win.image_fname,gd.image_ext,MAX_PATH_LEN-1);
+          strncat(gd.h_win.image_fname,_params.image_ext,MAX_PATH_LEN-1);
         }
 
         gd.generate_filename = 0;
       }
       fname = gd.h_win.image_fname;
       if(print_flag) {
-        if (gd.print_script == NULL){
+        if (_params.print_script == NULL){
           fprintf(stderr,"WARNING : cidd.print_script not set, using \"ls\"\n");
           sprintf(cmd,"%s","ls");
         } else {
-          sprintf(cmd,"%s",gd.print_script);
+          sprintf(cmd,"%s",_params.print_script);
         }
       } else {
         if(gd.series_save_active) {
@@ -223,7 +223,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
-      if(gd.output_geo_xml) dump_image_xml(dir, fname);
+      if(_params.output_geo_xml) dump_image_xml(dir, fname);
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       sprintf(pathname,"%s/%s",dir,fname);
@@ -235,17 +235,17 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     case XSECT_VIEW:  /* The vertical cross section  window */
       if(gd.generate_filename) {
         strncpy(gd.v_win.image_fname,
-                gen_image_fname(gd.image_vert_prefix,gd.mrec[page]), MAX_PATH_LEN - 2);
-        if(strstr(gd.v_win.image_fname,gd.image_ext) == NULL) { 
+                gen_image_fname(_params.image_vert_prefix,gd.mrec[page]), MAX_PATH_LEN - 2);
+        if(strstr(gd.v_win.image_fname,_params.image_ext) == NULL) { 
           strncat(gd.v_win.image_fname,".",MAX_PATH_LEN-1);
-          strncat(gd.v_win.image_fname,gd.image_ext,MAX_PATH_LEN-1);
+          strncat(gd.v_win.image_fname,_params.image_ext,MAX_PATH_LEN-1);
         }
 
         gd.generate_filename = 0;
       }
       fname = gd.v_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",gd.print_script);
+        sprintf(cmd,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
@@ -264,7 +264,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     case BOTH_VIEWS:  /* The Both windows */
       fname = gd.h_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",gd.print_script);
+        sprintf(cmd,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
@@ -274,12 +274,12 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       }
       xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
-      if(gd.output_geo_xml) dump_image_xml(dir, fname);
+      if(_params.output_geo_xml) dump_image_xml(dir, fname);
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       fname = gd.v_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",gd.print_script);
+        sprintf(cmd,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
@@ -347,7 +347,7 @@ static void dump_image_xml(const char *dir, const char *fname)
   north += dy * gd.h_win.margin.top;
   south -= dy * gd.h_win.margin.bot;
     
-  if (gd.use_latlon_in_geo_xml)
+  if (_params.use_latlon_in_geo_xml)
   {
     double south_lat, north_lat;
     double east_lon, west_lon;
@@ -563,7 +563,7 @@ static void dump_png(Drawable xid,
                    (blue << bits_per_rbg * 2) |
                    (green << bits_per_rbg) | 
                    red);
-      if (gd.transparent_images && pixel == bgPixval) {
+      if (_params.transparent_images && pixel == bgPixval) {
         rgba = 0;
       }
       memcpy(row_pointers[iy] + ix * pixel_size, &rgba, pixel_size);
@@ -592,15 +592,15 @@ static void dump_png(Drawable xid,
     fprintf(stderr, "Wrote image file: %s\n", pathname);
   }
   
-  DsLdataInfo LDI(gd.image_dir); // Set up a LdataInfo File
+  DsLdataInfo LDI(_params.image_dir); // Set up a LdataInfo File
 
   string relPath;
-  Path::stripDir(gd.image_dir, pathname, relPath);
+  Path::stripDir(_params.image_dir, pathname, relPath);
   
   if(gd.debug) LDI.setDebug();
   LDI.setLatestTime((time_t)gd.mrec[page]->h_mhdr.time_centroid);
   LDI.setWriter(gd.app_name);
-  LDI.setDataFileExt(gd.image_ext);
+  LDI.setDataFileExt(_params.image_ext);
   LDI.setDataType("png");
   LDI.setUserInfo1("CIDD Output Image");
   LDI.setRelDataPath(relPath);
@@ -613,7 +613,7 @@ static void dump_png(Drawable xid,
   if(strlen(cmd) > 3) {
     char cmdbuf[MAX_PATH_LEN*2];
     sprintf(cmdbuf,"%s %s",cmd,pathname);
-    safe_system(cmdbuf,gd.simple_command_timeout_secs);
+    safe_system(cmdbuf,_params.simple_command_timeout_secs);
   }
 
 }

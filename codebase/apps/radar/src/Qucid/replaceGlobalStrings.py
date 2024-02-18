@@ -150,7 +150,7 @@ def createReplaceDict():
 
     replaceDict["gd.mark_latest_click_location"] = "_params.mark_latest_click_location"
 
-    replaceDict["gd.drawing_mode"] = "_params.drawing_mode"
+    # replaceDict["gd.drawing_mode"] = "_params.drawing_mode"
 
     replaceDict["gd.products_on"] = "_params.products_on"
     replaceDict["gd.product_line_width"] = "_params.product_line_width"

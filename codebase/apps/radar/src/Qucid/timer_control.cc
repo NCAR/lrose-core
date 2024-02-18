@@ -190,7 +190,7 @@ void check_for_data_updates(time_t tm)
   char *start_ptr, *end_ptr;
   char dir_buf[MAX_PATH_LEN];
 
-  if( strlen(gd.datamap_host) < 2 || dmap.reqAllInfo(gd.datamap_host) != 0) {
+  if( strlen(_params.datamap_host) < 2 || dmap.reqAllInfo(_params.datamap_host) != 0) {
 
     // Force a reload of the data
     reset_data_valid_flags(1,1);
@@ -409,7 +409,7 @@ void timer_func( Notify_client   client, int which)
 
   /* Update the current time ticker if necessary */
   if(cur_tm.tv_sec > last_tick) {
-    if(!gd.run_once_and_exit) {
+    if(!_params.run_once_and_exit) {
       char buf[128];
       sprintf(buf,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
               (int) (cur_tm.tv_sec - gd.last_event_time),
@@ -425,7 +425,7 @@ void timer_func( Notify_client   client, int which)
     }
     update_ticker(cur_tm.tv_sec);
     last_tick = cur_tm.tv_sec;
-    if(gd.last_event_time < (last_tick - gd.idle_reset_seconds)) {
+    if(gd.last_event_time < (last_tick - _params.idle_reset_seconds)) {
       reset_display();
     }
   }
@@ -477,8 +477,8 @@ void timer_func( Notify_client   client, int which)
           char cmd[4096];
           gd.series_save_active = 0;
           gd.movie.movie_on = 0;
-          if(gd.series_convert_script !=NULL) {
-            STRncopy(cmd,gd.series_convert_script,4096);
+          if(_params.series_convert_script !=NULL) {
+            STRncopy(cmd,_params.series_convert_script,4096);
             for(int ii= gd.movie.start_frame; ii <= gd.movie.end_frame; ii++) {
               STRconcat(cmd," ",4096);
               STRconcat(cmd,gd.movie.frame[ii].fname,4096);
@@ -486,11 +486,11 @@ void timer_func( Notify_client   client, int which)
             printf("Running: %s\n",cmd);
           }
           set_busy_state(1);
-          safe_system(cmd,gd.complex_command_timeout_secs);
+          safe_system(cmd,_params.complex_command_timeout_secs);
 
           if(gd.v_win.active) {
-            if(gd.series_convert_script !=NULL) {
-              STRncopy(cmd,gd.series_convert_script,4096);
+            if(_params.series_convert_script !=NULL) {
+              STRncopy(cmd,_params.series_convert_script,4096);
               for(int ii= gd.movie.start_frame; ii <= gd.movie.end_frame; ii++) {
                 STRconcat(cmd," ",4096);
                 STRconcat(cmd,gd.movie.frame[ii].vfname,4096);
@@ -498,7 +498,7 @@ void timer_func( Notify_client   client, int which)
               printf("Running: %s\n",cmd);
             }
             set_busy_state(1);
-            safe_system(cmd,gd.complex_command_timeout_secs);
+            safe_system(cmd,_params.complex_command_timeout_secs);
           }
 
           set_busy_state(0);
@@ -823,7 +823,7 @@ void timer_func( Notify_client   client, int which)
     if (gd.pan_in_progress) redraw_pan_line();
     if (gd.route_in_progress) redraw_route_line(&gd.h_win);
 
-    if(!gd.run_once_and_exit) PMU_auto_register("Rendering Products (OK)");
+    if(!_params.run_once_and_exit) PMU_auto_register("Rendering Products (OK)");
 
     if (gd.debug2)
       fprintf(stderr,
@@ -991,8 +991,8 @@ void start_timer()
   struct itimerval timer;
   
   if(redraw_interv == 0) {
-    redraw_interv = gd.redraw_interval;
-    update_interv = gd.update_interval;
+    redraw_interv = _params.redraw_interval;
+    update_interv = _params.update_interval;
   }
 
   /* set up interval timer interval */

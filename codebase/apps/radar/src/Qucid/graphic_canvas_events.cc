@@ -139,7 +139,7 @@ Notify_value can_event_proc(Window win, Event *event,
   // Big Hack for Backward Compatibility - If the Route button is not
   // used - Revert to using the Right mouse for X-Sections
   //  - Not supported - Users are advised to upgrade.
-  if(gd.menu_bar.set_route_mode_bit == 0 && gd.wsddm_mode == 0 ) {
+  if(gd.menu_bar.set_route_mode_bit == 0 && _params.wsddm_mode == 0 ) {
     can_event_proc_bkwd( win, event, arg, type);
     return notify_next_event_func(win, (Notify_event) event, arg, type);
   }
@@ -152,7 +152,7 @@ Notify_value can_event_proc(Window win, Event *event,
   // Expose popup products 
   SymprodRenderObj *ob;
   static SymprodRenderObj *last_ob;
-  if(!gd.disable_pick_mode && event_id(event) == LOC_MOVE ) {
+  if(!_params.disable_pick_mode && event_id(event) == LOC_MOVE ) {
 
     // Find the cursor location
     xpos = event_x(event);
@@ -308,7 +308,7 @@ Notify_value can_event_proc(Window win, Event *event,
     return notify_next_event_func(win, (Notify_event) event, arg, type);
   }
 
-  if(!gd.disable_pick_mode && event_action(event) == ACTION_SELECT && gd.drawing_mode == PICK_PROD_MODE ) {
+  if(!_params.disable_pick_mode && event_action(event) == ACTION_SELECT && _params.drawing_mode == PICK_PROD_MODE ) {
     if(event_is_down(event)) {  // Initiate the pick 
 
       b_startx = event_x(event);  // record the starting location
@@ -385,7 +385,7 @@ Notify_value can_event_proc(Window win, Event *event,
   }
 
   /* Left button up or down in Default mode  */
-  if(event_action(event) == ACTION_SELECT && gd.drawing_mode == NO_DRAW_MODE ) {
+  if(event_action(event) == ACTION_SELECT && _params.drawing_mode == NO_DRAW_MODE ) {
     if(event_is_down(event)) {  // Initiate the Zooming state.
       gd.zoom_in_progress = 1;
       b_startx = event_x(event);  // record the starting location
@@ -409,14 +409,14 @@ Notify_value can_event_proc(Window win, Event *event,
       last_lat = lat;
       last_lon = lon;
 
-      dist *= gd.scale_units_per_km;
-      sprintf(dist_string,"%.2f %s/",dist,gd.scale_units_label);
+      dist *= _params.scale_units_per_km;
+      sprintf(dist_string,"%.2f %s/",dist,_params.scale_units_label);
 
       if(theta < 0.0) theta += 360;
       sprintf(dir_string,"%.0f deg",theta);
 
       /* Nicely format the lat lons */
-      switch(gd.latlon_mode) {
+      switch(_params.latlon_mode) {
         default:
         case 0:  /* Decimal Degrees */
           if (lat > 90.0) {
@@ -490,7 +490,7 @@ Notify_value can_event_proc(Window win, Event *event,
           if(gd.station_loc != NULL) {
             strncat(text," : ",256);
             strncat(text,
-                    gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str(),
+                    gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str(),
                     256);
           }
 
@@ -546,7 +546,7 @@ Notify_value can_event_proc(Window win, Event *event,
               if(gd.station_loc != NULL) {
                 strncat(text," : ",256);
                 strncat(text,
-                        gd.station_loc->FindClosest(lat,lon,gd.locator_margin_km).c_str(),
+                        gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str(),
                         256);
               }
               gui_label_h_frame(text,-3);
@@ -576,7 +576,7 @@ Notify_value can_event_proc(Window win, Event *event,
   //
 
   if(event_action(event) == ACTION_MENU &&
-     (gd.drawing_mode == DRAW_FMQ_MODE || gd.drawing_mode == DRAW_ROUTE_MODE)) {
+     (_params.drawing_mode == DRAW_FMQ_MODE || _params.drawing_mode == DRAW_ROUTE_MODE)) {
     if(gd.route_in_progress && event_is_up(event)) {
       if(gd.h_win.route.num_segments > 1) {
         XDrawLine(gd.dpy,gd.hcan_xid,gd.ol_gc,r_startx,r_starty,r_lastx,r_lasty);
@@ -602,7 +602,7 @@ Notify_value can_event_proc(Window win, Event *event,
         gd.h_win.route.num_segments = 0;
         gd.route_in_progress = 0;
         r_state = 0;
-        if(gd.drawing_mode == DRAW_FMQ_MODE) {
+        if(_params.drawing_mode == DRAW_FMQ_MODE) {
           gui_label_h_frame("Draw Mode Canceled", 1);
           add_message_to_status_win("Draw Mode Canceled",0);
         } else {
@@ -651,7 +651,7 @@ Notify_value can_event_proc(Window win, Event *event,
 
           gd.save_im_win = PLAN_VIEW;
           update_save_panel();
-          if(gd.enable_save_image_panel)
+          if(_params.enable_save_image_panel)
             // xv_set(gd.save_pu->save_im_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
         }
         gd.pan_in_progress = 0;
@@ -660,7 +660,7 @@ Notify_value can_event_proc(Window win, Event *event,
   }
      
   /* Left up or down (In drawing_mode or route mode   */
-  if ((gd.drawing_mode == DRAW_ROUTE_MODE || gd.drawing_mode == DRAW_FMQ_MODE) && 
+  if ((_params.drawing_mode == DRAW_ROUTE_MODE || _params.drawing_mode == DRAW_FMQ_MODE) && 
       event_action(event) == ACTION_SELECT ) {
     if(event_is_down(event)) {
       switch(r_state) {
@@ -678,7 +678,7 @@ Notify_value can_event_proc(Window win, Event *event,
           gd.v_win.cmax_y = gd.v_win.max_ht;
           r_state = 1; // Initial Press
           gd.route_in_progress = 1;
-          if(gd.drawing_mode == DRAW_FMQ_MODE) {
+          if(_params.drawing_mode == DRAW_FMQ_MODE) {
             gui_label_h_frame("Draw Mode", 1);
             add_message_to_status_win("Draw Mode",0);
           } else {
@@ -731,7 +731,7 @@ Notify_value can_event_proc(Window win, Event *event,
               gd.h_win.route.num_segments++;
               // fprintf(stderr,"Num Segments: %d\n",gd.h_win.route.num_segments);
             }
-            if( gd.one_click_rhi == 0 ) {
+            if( _params.one_click_rhi == 0 ) {
               sprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
                       gd.h_win.route.num_segments);
               gui_label_h_frame(text, 1);
@@ -798,7 +798,7 @@ Notify_value can_event_proc(Window win, Event *event,
               // Next to last point
               txt_ptr = gd.station_loc->FindClosest(gd.h_win.route.lat[gd.h_win.route.num_segments-1],
                                                     gd.h_win.route.lon[gd.h_win.route.num_segments-1],
-                                                    gd.locator_margin_km).c_str();
+                                                    _params.locator_margin_km).c_str();
 				
               if(strlen(txt_ptr) ==0)  {
                 sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
@@ -809,7 +809,7 @@ Notify_value can_event_proc(Window win, Event *event,
               //  last point
               txt_ptr = gd.station_loc->FindClosest(gd.h_win.route.lat[gd.h_win.route.num_segments],
                                                     gd.h_win.route.lon[gd.h_win.route.num_segments],
-                                                    gd.locator_margin_km).c_str();
+                                                    _params.locator_margin_km).c_str();
 				
               if(strlen(txt_ptr) ==0)  {
                 sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
@@ -828,7 +828,7 @@ Notify_value can_event_proc(Window win, Event *event,
                  gd.h_win.route.num_segments+1,
                  gd.h_win.route.navaid_id[gd.h_win.route.num_segments]);
             */
-            if(gd.drawing_mode == NO_DRAW_MODE && gd.one_click_rhi != 0 ) {
+            if(_params.drawing_mode == NO_DRAW_MODE && _params.one_click_rhi != 0 ) {
               setup_route_area(1);
               gui_label_h_frame("Cross Section Mode:  Drag Mouse Button to Start- Click to extend", 1);
               add_message_to_status_win("Drag Mouse Button to Start- Click to extend",0);
@@ -874,7 +874,7 @@ Notify_value can_event_proc(Window win, Event *event,
 
 
         case 4: // OK - ALL DONE 
-          if(gd.drawing_mode == DRAW_FMQ_MODE) {
+          if(_params.drawing_mode == DRAW_FMQ_MODE) {
             show_draw_panel(1);
           } else {
             setup_route_area(1);
@@ -904,13 +904,13 @@ Notify_value can_event_proc(Window win, Event *event,
   /* Mouse is moved while any button is down - LOC DRAG */
   if (event_action(event) == LOC_DRAG ) {
     if(event_left_is_down(event)) { //  Zoom,  Route or Draw Mode
-      if(gd.drawing_mode == NO_DRAW_MODE)    /* Zoom stretching */ {
+      if(_params.drawing_mode == NO_DRAW_MODE)    /* Zoom stretching */ {
         redraw_zoom_box();    /* Erase the last line */
         b_lastx = event_x(event);
         b_lasty = event_y(event);
         redraw_zoom_box();    /* Erase the last line */
 
-      } else if(!gd.disable_pick_mode && gd.drawing_mode == PICK_PROD_MODE )  { // Pick mode
+      } else if(!_params.disable_pick_mode && _params.drawing_mode == PICK_PROD_MODE )  { // Pick mode
         //
         // Redraw the picked product - Erases it.
         if(!gd.io_info.busy_status) gd.prod_mgr->draw_pick_obj();
@@ -926,7 +926,7 @@ Notify_value can_event_proc(Window win, Event *event,
 
 
         // Route or Draw Mode.
-      } else if(gd.drawing_mode == DRAW_FMQ_MODE || gd.drawing_mode == DRAW_ROUTE_MODE)  {
+      } else if(_params.drawing_mode == DRAW_FMQ_MODE || _params.drawing_mode == DRAW_ROUTE_MODE)  {
         switch(r_state) {
           default:
           case 1:

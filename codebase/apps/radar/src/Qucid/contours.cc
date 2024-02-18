@@ -176,7 +176,7 @@ void RenderLineContours(Drawable xid, contour_info_t *crec,
 
   int font_index = gd.uparams->getLong("contour_font_num", 6);
   if(font_index <0) font_index = 0;
-  if(font_index >= gd.num_fonts) font_index = gd.num_fonts -1;
+  if(font_index >= _params.fonts_n) font_index = _params.fonts_n -1;
   XFontStruct *font = gd.fontst[font_index];
   
   // set up the domain for rendering

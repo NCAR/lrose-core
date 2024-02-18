@@ -44,7 +44,7 @@ void init_symprods()
 
     gd.prod_mgr = new ProductMgr(*gd.syprod_P,*gd.r_context, (gd.debug1 | gd.debug2));
 
-    gd.r_context->set_scale_constant(gd.scale_constant);
+    gd.r_context->set_scale_constant(_params.scale_constant);
 
     get_bounding_box(min_lat,max_lat,min_lon,max_lon);
     gd.r_context->set_clip_limits(min_lat, min_lon, max_lat, max_lon);

@@ -72,7 +72,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
     if(event_is_down(event)) {
       gd.save_im_win = XSECT_VIEW;
       update_save_panel();
-      if(gd.enable_save_image_panel)
+      if(_params.enable_save_image_panel)
         // xv_set(gd.save_pu->save_im_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
     }
   }

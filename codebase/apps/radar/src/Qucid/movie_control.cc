@@ -43,7 +43,7 @@ int time_for_a_new_frame()
 
 	// No forward shifting allowed in run_once and exit mode
 	// Delay while shifting products 
-	if( gd.run_once_and_exit || gd.r_context->offset_x != 0 ||  gd.r_context->offset_y != 0) {
+	if( _params.run_once_and_exit || gd.r_context->offset_x != 0 ||  gd.r_context->offset_y != 0) {
 		 return 0;
 	}
 
@@ -188,7 +188,7 @@ void rotate_movie_frames()
     }
 
     /* restarts the sequence of rendering each field at each zoom state */
-    if(gd.html_mode) {
+    if(_params.html_mode) {
       // set_domain_proc(gd.zoom_pu->domain_st,0,NULL); /* reset domain to 1st area */
     }
 
@@ -303,7 +303,7 @@ void parse_string_into_time( const char *string, UTIMstruct *tms)
     }
 
 	// Compensate for the user entering Local time
-	if(gd.use_local_timestamps) {
+	if(_params.use_local_timestamps) {
 	    now = (int) (UTIMdate_to_unix(tms) -  tdiff);
 	    UTIMunix_to_date(now,tms);
 	}

@@ -41,22 +41,24 @@
 
 void load_fonts( Display *dpy)
 {
-    int i;
+#ifdef NOTNOW
+
+  int i;
     char    p_name[256];
     const char    *f_name;
 
-    gd.num_fonts = gd.uparams->getLong( "cidd.num_fonts", 1);
+    // _params.num_fonts = gd.uparams->getLong( "cidd.num_fonts", 1);
 
-    if(gd.num_fonts > MAX_FONTS) {
-	gd.num_fonts = MAX_FONTS;
+    if(_params.num_fonts > MAX_FONTS) {
+	_params.num_fonts = MAX_FONTS;
 	fprintf(stderr,"Cidd: Warning. Too Many Fonts. Limited to %d Fonts\n",MAX_FONTS);
     }
 
     // Make sure specified font for Winds, Contours and Products are within range.
     if(gd.prod.prod_font_num < 0) gd.prod.prod_font_num = 0;
-    if(gd.prod.prod_font_num >= gd.num_fonts) gd.prod.prod_font_num = gd.num_fonts -1;
+    if(gd.prod.prod_font_num >= _params.num_fonts) gd.prod.prod_font_num = _params.num_fonts -1;
 
-    for(i=0;i < gd.num_fonts; i++) {
+    for(i=0;i < _params.num_fonts; i++) {
         sprintf(p_name,"cidd.font%d",i+1);
         f_name = gd.uparams->getString(
                               p_name, "fixed");
@@ -69,7 +71,8 @@ void load_fonts( Display *dpy)
             gd.fontst[i]  = (XFontStruct *) XLoadQueryFont(dpy,"fixed");
             gd.ciddfont[i]  = gd.fontst[i]->fid;
         }
-    }    
+    }
+#endif
 
 }
 
@@ -81,6 +84,7 @@ void load_fonts( Display *dpy)
 Font choose_font( const char *string, int x_size, int y_size,
                   int *xmid, int *ymid) /* RETURNS number of pixels from origin to Mid point*/
 {
+#ifdef NOTNOW
     int i;
     int len,direct,ascent,descent;
     XCharStruct overall;
@@ -89,7 +93,7 @@ Font choose_font( const char *string, int x_size, int y_size,
     overall.descent = 0;
  
     len = strlen(string);
-    for(i = gd.num_fonts -1; i >= 0; i-- ) {
+    for(i = _params.num_fonts -1; i >= 0; i-- ) {
         XTextExtents(gd.fontst[i],string,len,&direct,&ascent,&descent,&overall);                                 
         if(overall.width < x_size && (overall.ascent + overall.descent) < y_size) {
             *xmid = -(overall.width / 2);
@@ -99,5 +103,6 @@ Font choose_font( const char *string, int x_size, int y_size,
     }
     *xmid = -(overall.width / 2);
     *ymid = overall.ascent - ((overall.ascent + overall.descent) /2);
+#endif
     return gd.ciddfont[0];  /* go with smallest as last resort */
 }

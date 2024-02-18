@@ -76,10 +76,10 @@ const char * field_label( met_record_t *mr)
     static char label[2048];
 
     /* Convert to a string */
-    if(gd.use_local_timestamps) {
-      strftime(tlabel,256,gd.label_time_format,localtime_r(&mr->h_date.unix_time,&tms));
+    if(_params.use_local_timestamps) {
+      strftime(tlabel,256,_params.label_time_format,localtime_r(&mr->h_date.unix_time,&tms));
     } else {
-      strftime(tlabel,256,gd.label_time_format,gmtime_r(&mr->h_date.unix_time,&tms));
+      strftime(tlabel,256,_params.label_time_format,gmtime_r(&mr->h_date.unix_time,&tms));
     }
 
     // now = time(NULL);
@@ -198,7 +198,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
   mr = gd.mrec[page];    /* get pointer to main gridded field record */
   stretch_secs =  (int) (60.0 * mr->time_allowance);
   out_of_date = 0;
-  if(gd.check_data_times) {
+  if(_params.check_data_times) {
       if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
       if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
   }
@@ -207,18 +207,18 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
   /* If data appears to be valid - use its time for a clock */
   if(mr->h_data != NULL && !out_of_date) { 
     /* draw a clock */
-    if (gd.show_clock) {
+    if (_params.show_clock) {
       x_start = gd.h_win.can_dim.width - gd.h_win.margin.right - ht - 5;
       y_start = gd.h_win.legends_start_y + ht + 5;
       XUDRdraw_clock(gd.dpy,xid, gd.legends.foreground_color->gc,
 		     x_start, y_start, ht, mr->h_date.unix_time,
-		     gd.draw_clock_local);
+		     _params.draw_clock_local);
     }
     
   }
 
   // Bail out completely if configured not to display labels
-  if(gd.display_labels == 0) return CIDD_SUCCESS;
+  if(_params.display_labels == 0) return CIDD_SUCCESS;
      
   x_start = gd.h_win.legends_start_x;
   y_start = gd.h_win.legends_start_y;
@@ -233,7 +233,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
     char fmt_str[2048];
 
     now = time(0);
-    if(gd.use_local_timestamps) {
+    if(_params.use_local_timestamps) {
       gmt = localtime_r(&now,&res);
     } else {
       gmt = gmtime_r(&now,&res);
@@ -246,11 +246,11 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
     } else {
       sprintf(fmt_str,"%s Not Available at ",mr->legend_name);
     }
-    strncat(fmt_str,gd.label_time_format,128);
+    strncat(fmt_str,_params.label_time_format,128);
     if (gd.movie.mode == REALTIME_MODE) {
       strftime(label,LABEL_LEN,fmt_str,gmt);
     } else {
-      if(gd.use_local_timestamps) {
+      if(_params.use_local_timestamps) {
         gmt = localtime_r(&gd.data_request_time,&res);
       } else {
         gmt = gmtime_r(&gd.data_request_time,&res);
@@ -262,7 +262,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
   font = choose_font(label,wd,ht,&xmid,&ymid);
   XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
 
-  if(gd.font_display_mode == 0)
+  if(_params.font_display_mode == 0)
     XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,y_start + ymid,label,strlen(label));
   else
     XDrawImageString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,y_start + ymid,label,strlen(label));
@@ -274,7 +274,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
    for(i=0 ; i < NUM_GRID_LAYERS; i++) {   /* Add a label for each active overlay field */
      if(gd.layers.overlay_field_on[i]) {   /* Add a label for the overlay field */
 	mr = gd.mrec[gd.layers.overlay_field[i]]; 
-	if(gd.check_data_times) {
+	if(_params.check_data_times) {
 	  if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
 	  if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
 	}
@@ -285,7 +285,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
           font = choose_font(label,wd,ht,&xmid,&ymid);
           XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
 
-	  if(gd.font_display_mode == 0)
+	  if(_params.font_display_mode == 0)
             XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,y_start + ymid,label,strlen(label));
 	  else
             XDrawImageString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,y_start + ymid,label,strlen(label));
@@ -301,7 +301,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
    for(i=0; i < NUM_CONT_LAYERS; i++) {
     if(gd.layers.cont[i].active) {     /* Add a label for the contour field */
 	mr = gd.mrec[gd.layers.cont[i].field];
-	if(gd.check_data_times) {
+	if(_params.check_data_times) {
 	   if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
 	   if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
 	}
@@ -311,7 +311,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
 	  strncat(label,field_label(mr),LABEL_LEN);
           font = choose_font(label,wd,ht,&xmid,&ymid);
           XSetFont(gd.dpy,gd.layers.cont[i].color->gc,font);
-	  if(gd.font_display_mode == 0)
+	  if(_params.font_display_mode == 0)
             XDrawString(gd.dpy,xid,gd.layers.cont[i].color->gc, x_start,y_start + ymid,label,strlen(label));
 	  else 
             XDrawImageString(gd.dpy,xid,gd.layers.cont[i].color->gc, x_start,y_start + ymid,label,strlen(label));
@@ -329,7 +329,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
             mr = gd.layers.wind[i].wind_u;
             out_of_date = 0;
             stretch_secs =  (int) (60.0 * mr->time_allowance);
-	    if(gd.check_data_times) {
+	    if(_params.check_data_times) {
                if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
                if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
 	    }
@@ -352,7 +352,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
          font = choose_font(label,wd,ht,&xmid,&ymid);
          XSetFont(gd.dpy,gd.layers.wind[i].color->gc,font);
 
-	if(gd.font_display_mode == 0)
+	if(_params.font_display_mode == 0)
            XDrawString(gd.dpy,xid,gd.layers.wind[i].color->gc, x_start,y_start + ymid,label,strlen(label));
 	else 
            XDrawImageString(gd.dpy,xid,gd.layers.wind[i].color->gc, x_start,y_start + ymid,label,strlen(label));

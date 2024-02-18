@@ -429,7 +429,7 @@ void render_map_overlays(Drawable  xid)
                     }
                 }
 
-		if(gd.font_display_mode == 0)
+		if(_params.font_display_mode == 0)
                    XDrawString(gd.dpy,xid,ov->color->gc,
                         (int)(ic->text_x + x1),
                         (int)(ic->text_y + y1),
@@ -529,7 +529,7 @@ static void draw_label_centered(Drawable xid, GC gc,
   int xoffset =  -(overall.width) / 2;
   int yoffset =  - overall.descent;
   
-  if(gd.font_display_mode == 0) {
+  if(_params.font_display_mode == 0) {
     XDrawString(gd.dpy, xid, gc,
 		xx + xoffset, yy + yoffset,
 		label, strlen(label));

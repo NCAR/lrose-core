@@ -109,20 +109,20 @@ void reset_display()
    static int xsect_start_page = 0;
    static double start_height = -1.0;
 
-   if(gd.run_once_and_exit) return;  // Do not reset things in batch mode
+   if(_params.run_once_and_exit) return;  // Do not reset things in batch mode
 
    // Set this static first time through
    if(start_height < 0.0) {
        if( gd.num_render_heights == 0 ) {
-         start_height = gd.start_ht;
+         start_height = _params.start_ht;
        } else {
          start_height = gd.height_array[0];
        }
-       planview_start_page = gd.planview_start_page;
+       planview_start_page = _params.planview_start_page;
        if(planview_start_page >= gd.num_datafields ||
           planview_start_page < 0) planview_start_page = 0;
        
-       xsect_start_page = gd.xsect_start_page;
+       xsect_start_page = _params.xsect_start_page;
        if(xsect_start_page >= gd.num_datafields ||
           xsect_start_page < 0) xsect_start_page = 0;
 

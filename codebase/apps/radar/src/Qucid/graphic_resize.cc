@@ -104,7 +104,7 @@ Notify_value h_win_events( Frame frame, Event *event, Notify_arg arg, Notify_eve
 
             /* Set the base frame's width */
             width =  (u_int) (((height  - cp_height - gd.h_win.margin.top -
-                gd.h_win.margin.bot) * gd.aspect_ratio)  +
+                gd.h_win.margin.bot) * _params.aspect_ratio)  +
                 gd.h_win.margin.left + gd.h_win.margin.right);
 
             // xv_set(frame,
@@ -119,7 +119,7 @@ Notify_value h_win_events( Frame frame, Event *event, Notify_arg arg, Notify_eve
             //        XV_WIDTH, width,
             //        NULL);
 
-	    if(gd.num_cache_zooms > 1) {  // Have a visible Image Cache Widget 
+	    if(_params.num_cache_zooms > 1) {  // Have a visible Image Cache Widget 
 
 		// Time message goes to the left of the cache widget
                 // xv_set(gd.h_win_horiz_bw->cur_time_msg,XV_X,
@@ -191,7 +191,7 @@ Notify_value h_win_events( Frame frame, Event *event, Notify_arg arg, Notify_eve
     case ACTION_CLOSE :
         // gd.h_win.win_dim.closed = xv_get(frame,FRAME_CLOSED);
 
-	if(gd.close_popups) {
+	if(_params.close_popups) {
 	  close_all_popups();
 
 	  // Set the main menu bar cells to the correct state

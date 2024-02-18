@@ -70,7 +70,7 @@ void render_products( Drawable xid, time_t start_time, time_t end_time)
            }
         }
         if(font_index <0) font_index = 0;
-        if(font_index >= gd.num_fonts) font_index = gd.num_fonts -1;
+        if(font_index >= _params.fonts_n) font_index = _params.fonts_n -1;
 
 
 	gd.r_context->reset_fgbg(); // Reset the color "memory"

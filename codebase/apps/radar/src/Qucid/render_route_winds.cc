@@ -66,10 +66,10 @@ void render_route_winds( Drawable xid)
     static const char* units_label = NULL;
 
     if(units_scale_factor == 0.0) { // first time
-      units_scale_factor = gd.wind_units_scale_factor;
+      units_scale_factor = _params.wind_units_scale_factor;
     }
     if (units_label == NULL) {
-      units_label = gd.wind_units_label;
+      units_label = _params.wind_units_label;
     }
 
     if(gd.h_win.route.num_segments <=0) return;

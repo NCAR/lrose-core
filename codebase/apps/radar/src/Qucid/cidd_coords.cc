@@ -56,7 +56,7 @@ void get_bounding_box(double &min_lat, double &max_lat, double &min_lon, double 
   }
   gd.proj.setConditionLon2Ref(true, meanLon);
   
-    if(gd.always_get_full_domain) {
+    if(_params.always_get_full_domain) {
             gd.proj.xy2latlon(gd.h_win.min_x,gd.h_win.min_y,min_lat,min_lon);
             gd.proj.xy2latlon(gd.h_win.max_x,gd.h_win.max_y,max_lat,max_lon);
      } else {
@@ -278,7 +278,7 @@ void pixel_to_grid( met_record_t *mr, margin_t *margin, int pix_x, int pix_y,
     int *grid_y)    /* RETURN */
 {
 
-    if((!gd.use_cosine_correction) && 
+    if((!_params.use_cosine_correction) && 
        (mr->proj->getProjType() == Mdvx::PROJ_POLAR_RADAR)) {
       // for radar projection without cosine correction, we need
       // a special method

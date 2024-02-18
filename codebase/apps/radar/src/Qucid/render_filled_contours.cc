@@ -363,7 +363,7 @@ void draw_filled_contours_d( Drawable xid,  met_record_t *mr)
 
        // Map to Screen
        disp_proj_to_pixel(&(gd.h_win.margin),x_km,y_km,&(bedge[i].x2),&(bedge[i].y2));
-	   if(gd.check_clipping) {
+	   if(_params.check_clipping) {
    		if(bedge[i].x2 < minx) clip_flag = 1; 
    		if(bedge[i].x2 > maxx) clip_flag = 1;
    		if(bedge[i].y2 < miny) clip_flag = 1;
@@ -386,7 +386,7 @@ void draw_filled_contours_d( Drawable xid,  met_record_t *mr)
 
            // Map to Screen 
            disp_proj_to_pixel(&(gd.h_win.margin),x_km,y_km,&(bedge[i].x2),&(bedge[i].y2));
-	       if(gd.check_clipping) {
+	       if(_params.check_clipping) {
 	        clip_flag = 0;
    		    if(bedge[i].x2 < minx) clip_flag = 1; 
    		    if(bedge[i].x2 > maxx) clip_flag = 1;

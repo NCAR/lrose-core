@@ -94,7 +94,7 @@ int   load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
 
         /* strip underscores out of control label */
         for(i = strlen(over[num_overlays]->control_label)-1;i >0 ; i--) {
-          if (gd.replace_underscores && over[num_overlays]->control_label[i] == '_') 
+          if (_params.replace_underscores && over[num_overlays]->control_label[i] == '_') 
             over[num_overlays]->control_label[i] = ' ';
         }
 
@@ -121,7 +121,7 @@ int load_overlay_data(Overlay_t **over, int  num_overlays)
 {
   int i;
   Overlay_t    *ov;    /* pointer to the current overlay structure */
-  const char *map_file_subdir = gd.map_file_subdir;
+  const char *map_file_subdir = _params.map_file_subdir;
 
   /* Read in each overlay file */
   for(i=0; i < num_overlays; i++) {
@@ -185,13 +185,13 @@ void  load_rap_map(Overlay_t *ov, const char    *map_file_subdir)
 
     // Check if it's a HTTP URL
     if(strncasecmp(name_buf,"http:",5) == 0) {
-      if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat =  HTTPgetURL_via_proxy(gd.http_proxy_url,
-                                         name_buf,gd.data_timeout_secs * 1000,
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat =  HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                         name_buf,_params.data_timeout_secs * 1000,
                                          &map_buf, &map_len);
       } else {
         ret_stat =  HTTPgetURL(name_buf,
-                               gd.data_timeout_secs * 1000,
+                               _params.data_timeout_secs * 1000,
                                &map_buf, &map_len);
       }
       if(ret_stat <=0 ) {
@@ -638,13 +638,13 @@ void   load_shape_map(Overlay_t *ov, const char    *map_file_subdir)
 
       // Download  SHP Part of shapefile
       sprintf(name_buf,"%s/%s.shp",str_ptr,name_base);
-      if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat = HTTPgetURL_via_proxy(gd.http_proxy_url,
-                                        name_buf,gd.data_timeout_secs * 1000,
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                        name_buf,_params.data_timeout_secs * 1000,
                                         &map_buf, &map_len);
       } else {
         ret_stat =  HTTPgetURL(name_buf,
-                               gd.data_timeout_secs * 1000,
+                               _params.data_timeout_secs * 1000,
                                &map_buf, &map_len);
       }
       if(ret_stat > 0 && map_len > 0 ) { // Succeeded
@@ -669,14 +669,14 @@ void   load_shape_map(Overlay_t *ov, const char    *map_file_subdir)
 
       // Download  SHX Part of shapefile
       sprintf(name_buf,"%s/%s.shx",str_ptr,name_base);
-      if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat = HTTPgetURL_via_proxy(gd.http_proxy_url,
-                                        name_buf,gd.data_timeout_secs * 1000,
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                        name_buf,_params.data_timeout_secs * 1000,
                                         &map_buf, &map_len);
 
       } else {
         ret_stat =  HTTPgetURL(name_buf,
-                               gd.data_timeout_secs * 1000,
+                               _params.data_timeout_secs * 1000,
                                &map_buf, &map_len);
       }
       if(ret_stat > 0  && map_len > 0) { // Succeeded

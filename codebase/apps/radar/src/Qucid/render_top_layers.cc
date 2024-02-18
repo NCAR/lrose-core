@@ -44,7 +44,7 @@ int render_top_layers( Drawable xid)
      
     render_map_overlays(xid);
 
-    if( gd.display_ref_lines &&   gd.v_win.active) { /* render the ROUTE cross reference line */
+    if( _params.display_ref_lines &&   gd.v_win.active) { /* render the ROUTE cross reference line */
       render_route_winds(xid);
     }
 

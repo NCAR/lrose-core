@@ -183,7 +183,7 @@ draw_ok_proc(Panel_item item, Event *event)
 				gd.h_win.route.lat,gd.h_win.route.lon);
 
 
-	switch(gd.drawing_mode) {
+	switch(_params.drawing_mode) {
 		case  DRAW_FMQ_MODE:
 		  redraw_route_line(&gd.h_win); // clears the line
 	      // reset the instruction label 

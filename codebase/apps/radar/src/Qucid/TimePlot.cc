@@ -670,34 +670,34 @@ void TimePlot::draw_time_axis()
     } else if(pixels_per_sec < 0.003) {
         text_period = 43200; // 12 hours
         tick_period = text_period / 12;
-        fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
+        fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
         fmt_str0z = " 0Z %m/%d";
     } else if(pixels_per_sec < 0.006) {
         text_period = 14400; // 4 hours
         tick_period = text_period / 4;
-        fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
+        fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
         fmt_str0z = " %m/%d";
     } else if(pixels_per_sec < 0.015) {
         text_period = 7200; // 2 hours
         tick_period = text_period / 4;
-        fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
+        fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
         fmt_str0z = " 0Z %m/%d";
     } else if(pixels_per_sec < 0.05) {
         text_period = 3600; // 1 hours
         tick_period = text_period / 4;
-        fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
-        fmt_str0z =   (gd.use_local_timestamps)? " %H %m/%d": " %HZ %m/%d";
+        fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
+        fmt_str0z =   (_params.use_local_timestamps)? " %H %m/%d": " %HZ %m/%d";
         fmt_str0z = " %HZ %m/%d";
     } else if(pixels_per_sec < 0.15) {
         text_period = 1800; //  30 min
         tick_period = text_period / 6;
-        fmt_str =   (gd.use_local_timestamps)? " %H:%M": " %H:%MZ";
-        fmt_str0z =   (gd.use_local_timestamps)? " %H %b %d": " %HZ %b %d";
+        fmt_str =   (_params.use_local_timestamps)? " %H:%M": " %H:%MZ";
+        fmt_str0z =   (_params.use_local_timestamps)? " %H %b %d": " %HZ %b %d";
     } else {
         text_period = 900; // 15 min 
         tick_period = text_period / 3;
-        fmt_str =   (gd.use_local_timestamps)? " %H:%M": " %H:%MZ";
-        fmt_str0z =   (gd.use_local_timestamps)? " %H %b %d": " %HZ %b %d";
+        fmt_str =   (_params.use_local_timestamps)? " %H:%M": " %H:%MZ";
+        fmt_str0z =   (_params.use_local_timestamps)? " %H %b %d": " %HZ %b %d";
     }
 
     //printf("Pixels_per_sec: %f  text_period: %d tick_period: %d\n",
@@ -717,7 +717,7 @@ void TimePlot::draw_time_axis()
                XDrawLine(display,can_xid,axis_color.gc,x1,y1,x1,y1-3); // Draw a tick
 
 	    if((value % 86400) == 0) { /* Plot a 0 Z label */
-               if(gd.use_local_timestamps) {
+               if(_params.use_local_timestamps) {
                    strftime(string_buf,128,fmt_str0z,localtime(&(value)));
                } else {
                    strftime(string_buf,128,fmt_str0z,gmtime(&(value)));
@@ -728,7 +728,7 @@ void TimePlot::draw_time_axis()
 	} else {
                XDrawLine(display,can_xid,axis_color.gc,x1,y1,x1,y1-3); // Draw a tick
 
-               if(gd.use_local_timestamps) {
+               if(_params.use_local_timestamps) {
                    strftime(string_buf,128,fmt_str,localtime(&(value)));
                } else {
                    strftime(string_buf,128,fmt_str,gmtime(&(value)));

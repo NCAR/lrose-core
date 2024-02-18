@@ -41,16 +41,16 @@ int save_h_movie_frame( int index, Drawable xid, int page)
 {
     if(gd.debug1) {
         fprintf(stderr,"\nSaving  horiz movie_frame %d\n",index);
-        if( gd.image_dir != NULL) {
+        if( _params.image_dir != NULL) {
 	        fprintf(stderr,"DIR: %s html_mode: %d series_save_active: %d\n",
-		       gd.image_dir,gd.html_mode,gd.series_save_active);
+		       _params.image_dir,_params.html_mode,gd.series_save_active);
 	    } else {
 	        fprintf(stderr,"DIR: NULL html_mode: %d series_save_active: %d\n",
-		       gd.html_mode,gd.series_save_active);
+		       _params.html_mode,gd.series_save_active);
 	    }
     }
     /* Save the image for HTML or Series save inclusion */
-    if(gd.image_dir != NULL && (gd.html_mode || gd.series_save_active)) {
+    if(_params.image_dir != NULL && (_params.html_mode || gd.series_save_active)) {
 
         set_busy_state(1);
 	    /*
@@ -120,7 +120,7 @@ int save_v_movie_frame( int index, Drawable xid)
     } 
 
     /* Save the image for HTML or Series save inclusion */
-    if(gd.image_dir != NULL && gd.series_save_active != 0 ) {
+    if(_params.image_dir != NULL && gd.series_save_active != 0 ) {
 
         set_busy_state(1);
 

@@ -46,7 +46,7 @@ void process_args(int argc, char *argv[])
     int err_flag =0;
 
     gd.db_name = strdup("");    /* Set the default data base name */
-    gd.http_proxy_url = "";
+    TDRP_str_replace(&_params.http_proxy_url, "");
 
     gd.argv = argv;
     gd.argc = argc;
@@ -107,7 +107,7 @@ void process_args(int argc, char *argv[])
             break;
  
             case 'x' :    
-		gd.http_proxy_url = optarg;
+		_params.http_proxy_url = optarg;
                 if(!gd.quiet_mode) printf("Loading Parameters via Proxy: %s\n",optarg);
             break;
  
@@ -143,7 +143,7 @@ void process_args(int argc, char *argv[])
             break;
  
             case 'V' :    
-		gd.use_cosine_correction = 0;
+		_params.use_cosine_correction = pFALSE;
                 if(!gd.quiet_mode) printf("CIDD will run in VERT pointing mode\n");
             break;
  

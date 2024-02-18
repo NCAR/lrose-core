@@ -54,7 +54,7 @@ int main(int  argc, char **argv)
 
     ZERO_STRUCT (&gd);
 
-    gd.use_cosine_correction = -1;
+    _params.use_cosine_correction = -1;
 
     process_args(argc,argv);    /* process command line arguments */
 

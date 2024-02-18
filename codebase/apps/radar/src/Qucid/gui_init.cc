@@ -44,7 +44,7 @@ void init_xview(int *argc_ptr, char    *argv[])
     // gd.h_win_horiz_bw = h_win_horiz_bw_objects_initialize(NULL, 0);    
 	
     // Set frame label as soon as possible - Make persistant for 10 seconds
-    gui_label_h_frame(gd.frame_label,-10);
+    // gui_label_h_frame(_params.frame_label,-10);
     
     // gd.dpy = (Display *) xv_get(gd.h_win_horiz_bw->horiz_bw, XV_DISPLAY);
 

@@ -210,8 +210,8 @@ void load_db_data_http(const string &fname, char* &db_buf, int &db_len)
   
   // Allow 5 seconds to retrieve the data 
 
-  if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
-    ret_stat = HTTPgetURL_via_proxy(gd.http_proxy_url, fname.c_str(), 5000,
+  if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+    ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url, fname.c_str(), 5000,
 				    &db_buf, &db_len);
   } else {
     ret_stat = HTTPgetURL(fname.c_str(), 5000, &db_buf, &db_len);
@@ -232,8 +232,8 @@ void load_db_data_http(const string &fname, char* &db_buf, int &db_len)
     fprintf(stderr,
 	    "The most common problem is usually missing  the :// part \n");
     fprintf(stderr,"or a misspelled/incorrect host, directory or filename\n");
-    if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE)
-      fprintf(stderr,"Also Check Proxy URL:%s\n",gd.http_proxy_url);
+    if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE)
+      fprintf(stderr,"Also Check Proxy URL:%s\n",_params.http_proxy_url);
     exit(-1);
   }
 	

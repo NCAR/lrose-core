@@ -54,7 +54,7 @@ void update_movie_popup()
  
   /* Update the Current Frame Begin Time text */
   sprintf(fmt_text,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
-  if(gd.use_local_timestamps) {
+  if(_params.use_local_timestamps) {
     strftime (text,64,fmt_text,localtime_r(&gd.movie.frame[index].time_mid,&tms));
   } else {
     strftime (text,64,fmt_text,gmtime_r(&gd.movie.frame[index].time_mid,&tms));
@@ -62,11 +62,11 @@ void update_movie_popup()
   // xv_set(gd.movie_pu->fr_begin_msg,PANEL_LABEL_STRING,text,NULL);
   
   // Update the movie time start text
-  if(gd.use_local_timestamps) {
-    strftime (text, 64, gd.moviestart_time_format,
+  if(_params.use_local_timestamps) {
+    strftime (text, 64, _params.moviestart_time_format,
               localtime_r(&gd.movie.start_time,&tms));
   } else {
-    strftime (text, 64, gd.moviestart_time_format,
+    strftime (text, 64, _params.moviestart_time_format,
               gmtime_r(&gd.movie.start_time,&tms));
   }
   // xv_set(gd.movie_pu->start_time_tx,PANEL_VALUE,text,NULL);
@@ -175,7 +175,7 @@ void movie_start( u_int value)
     // xv_set(gd.movie_pu->start_st, PANEL_VALUE,0, NULL);
 
     // Limited Mode always stops on the end frame
-    if(gd.movie.cur_frame < 0 || gd.wsddm_mode ) gd.movie.cur_frame = gd.movie.num_frames -1;
+    if(gd.movie.cur_frame < 0 || _params.wsddm_mode ) gd.movie.cur_frame = gd.movie.num_frames -1;
     if(gd.mrec[gd.h_win.page]->auto_render) {
       xid = gd.h_win.page_xid[gd.h_win.page];
     } else {

@@ -45,7 +45,7 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
 
     if(xid == 0) return CIDD_FAILURE;
 
-    if(!gd.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
+    if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
     if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
     // compute distance across the image for setting font sizes, etc.
@@ -72,21 +72,21 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
     if(gd.time_plot) gd.time_plot->clear_grid_tlist();
     if(gd.time_plot) gd.time_plot->clear_prod_tlist();
 
-    if(gd.show_data_messages) gui_label_h_frame("Rendering",-1);
+    if(_params.show_data_messages) gui_label_h_frame("Rendering",-1);
 
     // RENDER the LAND_USE field first
     if(gd.layers.earth.landuse_active) {
 	render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
     }
 
-    if(!gd.draw_main_on_top) {
+    if(!_params.draw_main_on_top) {
 	if(mr->render_method == LINE_CONTOURS) {
 	    cont.min = mr->cont_low;
 	    cont.max = mr->cont_high;
 	    cont.interval = mr->cont_interv;
 	    cont.active = 1;
 	    cont.field = page;
-	    cont.labels_on = gd.label_contours;
+	    cont.labels_on = _params.label_contours;
 	    cont.color = gd.legends.foreground_color;
 	    cont.vcm = &mr->h_vcm;
 	    if (gd.layers.use_alt_contours) {
@@ -112,14 +112,14 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
 	}
     }
 
-    if(gd.draw_main_on_top) {
+    if(_params.draw_main_on_top) {
 	if(mr->render_method == LINE_CONTOURS) {
 	    cont.min = mr->cont_low;
 	    cont.max = mr->cont_high;
 	    cont.interval = mr->cont_interv;
 	    cont.active = 1;
 	    cont.field = page;
-	    cont.labels_on = gd.label_contours;
+	    cont.labels_on = _params.label_contours;
 	    cont.color = gd.legends.foreground_color;
 	    cont.vcm = &mr->h_vcm;
 	    if (gd.layers.use_alt_contours) {

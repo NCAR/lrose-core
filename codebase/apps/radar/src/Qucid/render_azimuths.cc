@@ -59,7 +59,7 @@ void draw_cap_azimuth_lines(Drawable xid)
 
   double lon1 = gd.h_win.origin_lon;
   double lat1 = gd.h_win.origin_lat;
-  if(gd.range_ring_follows_data) {
+  if(_params.range_ring_follows_data) {
     // Place at Data's origin
     lon1 = gd.mrec[gd.h_win.page]->h_fhdr.proj_origin_lon;
     lat1 = gd.mrec[gd.h_win.page]->h_fhdr.proj_origin_lat;

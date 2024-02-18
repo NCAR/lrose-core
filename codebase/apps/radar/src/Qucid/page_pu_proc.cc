@@ -295,12 +295,12 @@ void dim_im_proc(Panel_item item, int value, Event *event)
     XColor    c_defs[MAX_COLORS];
     item = 0; event = NULL;
 
-    gd.data_inten = (double) value / gd.inten_levels;
-    gd.image_inten = gd.data_inten;
+    _params.data_inten = (double) value / _params.inten_levels;
+    _params.image_inten = _params.data_inten;
 
     if ( PseudoColor == xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
       for(i=0; i < gd.num_colors; i++) {
-        mult = (i < gd.num_draw_colors)? 1.0 : gd.data_inten;
+        mult = (i < gd.num_draw_colors)? 1.0 : _params.data_inten;
         c_defs[i].red = (u_short) (gd.color[i].r * mult);
         c_defs[i].green = (u_short) (gd.color[i].g * mult);
         c_defs[i].blue = (u_short) (gd.color[i].b * mult);
@@ -700,7 +700,7 @@ void layer_mode_proc(Panel_item item, int value, Event *event)
 {
     // Use the unused parameters
     item = 0;  event = NULL;
-     gd.draw_main_on_top = value;
+     _params.draw_main_on_top = value;
      set_redraw_flags(1,0);
 }
 
@@ -779,10 +779,10 @@ topo_onoff_proc(Panel_item item, int value, Event *event)
 void
 set_wind_density_proc(Panel_item item, int value, Event *event)
 {
-  int x_vects = gd.ideal_x_vectors;
-  int y_vects = gd.ideal_y_vectors;
-  gd.ideal_x_vects = value * x_vects;
-  gd.ideal_y_vects = value * y_vects;
+  int x_vects = _params.ideal_x_vectors;
+  int y_vects = _params.ideal_y_vectors;
+  _params.ideal_x_vects = value * x_vects;
+  _params.ideal_y_vects = value * y_vects;
   set_redraw_flags(1,1);
 }
  

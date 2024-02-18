@@ -65,15 +65,15 @@ void draw_cap_range_rings( Drawable xid)
     double unit_per_km;
     const char *u_label;
 
-    unit_per_km = gd.scale_units_per_km;
-	u_label = gd.scale_units_label;
+    unit_per_km = _params.scale_units_per_km;
+	u_label = _params.scale_units_label;
 
     if(ring_spacing == 0.0) {
-      x_space = gd.range_ring_x_space;
-      y_space = gd.range_ring_y_space;
-      ring_spacing = gd.range_ring_spacing;
-      max_ring_range = gd.max_ring_range;
-      render_labels = gd.range_ring_labels;
+      x_space = _params.range_ring_x_space;
+      y_space = _params.range_ring_y_space;
+      ring_spacing = _params.range_ring_spacing;
+      max_ring_range = _params.max_ring_range;
+      render_labels = _params.range_ring_labels;
     }
 
     if(ring_spacing > 0.0) {
@@ -87,7 +87,7 @@ void draw_cap_range_rings( Drawable xid)
     }
 
 
-    if(gd.range_ring_follows_data) {
+    if(_params.range_ring_follows_data) {
           origin_lat = gd.mrec[gd.h_win.page]->h_fhdr.proj_origin_lat;
           origin_lon = gd.mrec[gd.h_win.page]->h_fhdr.proj_origin_lon;
 
@@ -97,12 +97,12 @@ void draw_cap_range_rings( Drawable xid)
     }
 
     /* Don't render the range rings if the origin is at 0.0 lat and 0.0 lon. */
-    if (gd.range_ring_follows_data && (
+    if (_params.range_ring_follows_data && (
 	 (origin_lat == 0.0 && origin_lon == 0.0 ) ||
 	 (origin_lat == -90.0 && origin_lon == -180.0)
 	)) return;
     
-    if(gd.range_ring_for_radar_only) {
+    if(_params.range_ring_for_radar_only) {
       bool renderRings = false;
       Mdvx::projection_type_t projType =
         (Mdvx::projection_type_t) gd.mrec[gd.h_win.page]->h_fhdr.proj_type;
@@ -208,7 +208,7 @@ void draw_cap_range_rings( Drawable xid)
         XSetFont(gd.dpy,gd.legends.range_ring_color->gc,font);
 
         if (render_labels) {
-          if(gd.font_display_mode == 0) {
+          if(_params.font_display_mode == 0) {
             XDrawString(gd.dpy,xid,gd.legends.range_ring_color->gc,
                         (int)(x_lab + xmid),
                         (int)(y_lab + ymid),

@@ -111,11 +111,11 @@ int    get_color_mapping(const char *color_file_subdir,
 
 	  // Check if its an HTTP URL
 	  if(strncasecmp(buf,"http:",5) == 0) {
-            if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
-	      ret_stat = HTTPgetURL_via_proxy(gd.http_proxy_url,buf,
-                            gd.data_timeout_secs * 1000, &cs_buf, &cs_len);
+            if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+	      ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,buf,
+                            _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
             } else {
-	      ret_stat =  HTTPgetURL(buf,gd.data_timeout_secs * 1000, &cs_buf, &cs_len);
+	      ret_stat =  HTTPgetURL(buf,_params.data_timeout_secs * 1000, &cs_buf, &cs_len);
             }
 
 	    if(ret_stat <= 0) {
@@ -302,7 +302,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 
    color_name =
      gd.uparams->getString( "cidd.out_of_range_color", "transparent");
-   if(!strstr(color_name,"transparent") && !gd.transparent_images) {
+   if(!strstr(color_name,"transparent") && !_params.transparent_images) {
        STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
        gd.legends.out_of_range_color = &(gd.color[gd.num_colors]);
        gd.num_colors++;
@@ -388,7 +388,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 
    // Add missing_data_color 
    color_name = gd.uparams->getString("cidd.missing_data_color","transparent");
-   if(!strstr(color_name,"transparent") && !gd.transparent_images) {
+   if(!strstr(color_name,"transparent") && !_params.transparent_images) {
         STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
         gd.layers.missing_data_color = &(gd.color[gd.num_colors]);
         gd.num_colors++;
@@ -398,7 +398,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 
    // Add bad_data_colo 
    color_name = gd.uparams->getString("cidd.bad_data_color","transparent");
-   if(!strstr(color_name,"transparent") && !gd.transparent_images) {
+   if(!strstr(color_name,"transparent") && !_params.transparent_images) {
         STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
         gd.layers.bad_data_color = &(gd.color[gd.num_colors]);
         gd.num_colors++;
@@ -616,7 +616,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 
     /* Put the correct color into its color cell (or get the closest cell) and create a GC for it */
     for(i=0; i< gd.num_colors; i++) {
-        mult = (i < gd.num_draw_colors)? 1.0 : gd.data_inten;
+        mult = (i < gd.num_draw_colors)? 1.0 : _params.data_inten;
 
         XParseColor(dpy,cmap,gd.color[i].name,&rgb_def);
 

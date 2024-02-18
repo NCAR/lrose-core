@@ -78,7 +78,7 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
                  gd.h_win.can_dim.width, gd.h_win.margin.bot);
     
 
-    switch(gd.bot_margin_render_style) {
+    switch(_params.bot_margin_render_style) {
       case 1:
          return draw_alternate_hwin_bot_margin(xid);
       break;
@@ -122,26 +122,26 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
       label_seconds = 1800; 
       tick_seconds = 900; 
       fmt_str = " %H:%M";
-      fmt_str0z =   (gd.use_local_timestamps)? " 0 %m/%d": " 0Z %m/%d";
+      fmt_str0z =   (_params.use_local_timestamps)? " 0 %m/%d": " 0Z %m/%d";
     } else  if (time_range <= 21600) { // 6 hours
       label_seconds = 3600; 
       tick_seconds = 900; 
-	  fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
-      fmt_str0z =   (gd.use_local_timestamps)? " 0 ": " 0Z %m/%d";
+	  fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
+      fmt_str0z =   (_params.use_local_timestamps)? " 0 ": " 0Z %m/%d";
     } else  if (time_range <= 43200) { // 12 hours
       label_seconds = 7200; 
       tick_seconds = 1800; 
-	  fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
-      fmt_str0z =   (gd.use_local_timestamps)? " 0 ": " 0Z %m/%d";
+	  fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
+      fmt_str0z =   (_params.use_local_timestamps)? " 0 ": " 0Z %m/%d";
     } else  if (time_range <= 86400) { // 24 hours
       label_seconds = 14400; 
       tick_seconds = 3600;
-	  fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
+	  fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
       fmt_str0z = "%m/%d";
     } else  if (time_range <= 172800) { // 48 Hours
       label_seconds = 28800; 
       tick_seconds = 7200; 
-	  fmt_str =   (gd.use_local_timestamps)? " %H": " %HZ";
+	  fmt_str =   (_params.use_local_timestamps)? " %H": " %HZ";
       fmt_str0z = "%m/%d"; 
     } else  if (time_range <= 345600) { // 4 Days 
       label_seconds = 43200; 
@@ -206,7 +206,7 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
 	  XDrawLine(gd.dpy,xid,gd.legends.time_axis_color->gc,x1,y_end - label_height ,x1,y_end);
 	  //XFillRectangle(gd.dpy,xid,gd.legends.time_axis_color->gc,x1-1,y_end -5 ,x1+2,y_end + 1);
 	  if((value %  86400) == 0) {  // A 0 Z tickmark
-         if(gd.use_local_timestamps) {
+         if(_params.use_local_timestamps) {
 	      strftime(string_buf,128,fmt_str0z,localtime_r(&(value),&res));
          } else {
 	      strftime(string_buf,128,fmt_str0z,gmtime_r(&(value),&res));
@@ -217,7 +217,7 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
 			   x1 + xmid, y_start + (2 * ymid) + 2,string_buf,
 			   strlen(string_buf));
 	  } else {
-         if(gd.use_local_timestamps) {
+         if(_params.use_local_timestamps) {
 	      strftime(string_buf,128,fmt_str,localtime_r(&(value),&res));
          } else {
 	      strftime(string_buf,128,fmt_str,gmtime_r(&(value),&res));
@@ -259,7 +259,7 @@ int draw_alternate_hwin_bot_margin( Drawable xid)
     if(gd.display_projection == Mdvx::PROJ_LATLON) {
 	units_per_km = 1.0;
     } else {
-	units_per_km = gd.scale_units_per_km;
+	units_per_km = _params.scale_units_per_km;
     }
 
     /* calc dimensions of drawable area */

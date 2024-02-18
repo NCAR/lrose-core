@@ -400,11 +400,11 @@ void cancel_pending_request()
     }
 
     gd.io_info.outstanding_request = 0;
-    gd.io_info.expire_time = time(0) + gd.data_timeout_secs;
+    gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
 
    if(gd.debug1) fprintf(stderr,"Timeout during data service access - giving up\n");
-   if(!gd.run_once_and_exit)  PMU_auto_register("Server Request Timeout");
-   if(gd.show_data_messages) gui_label_h_frame("Data Service Request Timed Out!... Retrying... ",-1);
+   if(!_params.run_once_and_exit)  PMU_auto_register("Server Request Timeout");
+   if(_params.show_data_messages) gui_label_h_frame("Data Service Request Timed Out!... Retrying... ",-1);
    add_message_to_status_win("Data Service Request Timed Out!... Retrying... ",1);
    set_busy_state(0);
 

@@ -46,7 +46,7 @@ void add_message_to_status_win(const char *mess, int display_flag)
 	num_lines = 0;
     }
 
-    if(gd.enable_status_window ) {
+    if(_params.enable_status_window ) {
       if(gd.menu_bar.show_status_win_bit == 0 && display_flag) {
         // xv_set(gd.status_pu->status_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
       }

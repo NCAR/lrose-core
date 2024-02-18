@@ -68,6 +68,6 @@ void render_horiz_margins(Drawable xid, int page,
 
   draw_hwin_interior_labels(xid, page, start_time, end_time);
 
-  if(gd.show_data_messages) gui_label_h_frame(gd.frame_label, -1);
+  if(_params.show_data_messages) gui_label_h_frame(gd.frame_label, -1);
 }
 

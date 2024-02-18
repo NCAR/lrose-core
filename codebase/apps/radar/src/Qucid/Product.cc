@@ -309,13 +309,13 @@ int Product::getData(const time_t data_start_time,
   STRcopy(spdbp_url,_prodInfo.url,1024);
 
   // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
-  if(strlen(gd.http_tunnel_url) > URL_MIN_SIZE) { 
+  if(strlen(_params.http_tunnel_url) > URL_MIN_SIZE) { 
     // If using the a proxy - Add the a proxy_url to the Url as a name=value pair 
     // Note this must be used in conjunction with a tunnel_url.
-    if((strlen(gd.http_proxy_url)) > URL_MIN_SIZE) {
-      sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",gd.http_tunnel_url,gd.http_proxy_url);
+    if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
+      sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
     } else {
-      sprintf(tmp_str,"?tunnel_url=%s",gd.http_tunnel_url);
+      sprintf(tmp_str,"?tunnel_url=%s",_params.http_tunnel_url);
     }
 
     // Append the arguments to the end of the Url string

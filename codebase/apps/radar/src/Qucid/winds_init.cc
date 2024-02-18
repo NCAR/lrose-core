@@ -85,7 +85,7 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
       }
 
       // Set up global barb preferences
-      const char *type_ptr = gd.wind_marker_type;
+      const char *type_ptr = _params.wind_marker_type;
 
       if(strncasecmp(type_ptr, "tuft", 4) == 0)  default_marker_type = TUFT;
       if(strncasecmp(type_ptr, "barb", 4) == 0)  default_marker_type = BARB;
@@ -155,10 +155,10 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
         STRcopy(gd.layers.wind[i].wind_u->button_name,cfield[0],NAME_LENGTH);
         STRcopy(gd.layers.wind[i].wind_u->url,cfield[1],URL_LENGTH);
 
-	    if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+	    if(_params.html_mode == 0) { /* Replace Underscores with spaces in names */
           for(int j=strlen(gd.layers.wind[i].wind_u->button_name)-1 ; j >= 0; j--) {
-            if(gd.replace_underscores && gd.layers.wind[i].wind_u->button_name[j] == '_') gd.layers.wind[i].wind_u->button_name[j] = ' ';
-            if(gd.replace_underscores && gd.layers.wind[i].wind_u->legend_name[j] == '_') gd.layers.wind[i].wind_u->legend_name[j] = ' ';
+            if(_params.replace_underscores && gd.layers.wind[i].wind_u->button_name[j] == '_') gd.layers.wind[i].wind_u->button_name[j] = ' ';
+            if(_params.replace_underscores && gd.layers.wind[i].wind_u->legend_name[j] == '_') gd.layers.wind[i].wind_u->legend_name[j] = ' ';
           }
 	    }
 
@@ -218,10 +218,10 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
         STRcopy(gd.layers.wind[i].wind_v->url,cfield[1],URL_LENGTH);
 
 
-	    if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+	    if(_params.html_mode == 0) { /* Replace Underscores with spaces in names */
           for(int j=strlen(gd.layers.wind[i].wind_v->button_name)-1 ; j >= 0; j--) {
-            if(gd.replace_underscores && gd.layers.wind[i].wind_v->button_name[j] == '_') gd.layers.wind[i].wind_v->button_name[j] = ' ';
-            if(gd.replace_underscores && gd.layers.wind[i].wind_v->legend_name[j] == '_') gd.layers.wind[i].wind_v->legend_name[j] = ' ';
+            if(_params.replace_underscores && gd.layers.wind[i].wind_v->button_name[j] == '_') gd.layers.wind[i].wind_v->button_name[j] = ' ';
+            if(_params.replace_underscores && gd.layers.wind[i].wind_v->legend_name[j] == '_') gd.layers.wind[i].wind_v->legend_name[j] = ' ';
           }
 	    }
 	// Append the field name
@@ -256,9 +256,9 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
             sprintf(gd.layers.wind[i].wind_w->button_name,"%s_W ",cfield[0]);
             STRcopy(gd.layers.wind[i].wind_w->url,cfield[1],URL_LENGTH);
 
-	        if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+	        if(_params.html_mode == 0) { /* Replace Underscores with spaces in names */
               for(int j=strlen(gd.layers.wind[i].wind_w->button_name)-1 ; j >= 0; j--) {
-                if(gd.replace_underscores && gd.layers.wind[i].wind_w->button_name[j] == '_') gd.layers.wind[i].wind_w->button_name[j] = ' ';
+                if(_params.replace_underscores && gd.layers.wind[i].wind_w->button_name[j] == '_') gd.layers.wind[i].wind_w->button_name[j] = ' ';
                 if(gd.layers.wind[i].wind_w->legend_name[j] == '_') gd.layers.wind[i].wind_w->legend_name[j] = ' ';
               }
 	    }
@@ -282,9 +282,9 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
             gd.layers.wind[i].wind_w =  (met_record_t *) NULL;
         }
 
-	gd.layers.wind[i].units_scale_factor = gd.wind_units_scale_factor;
-	gd.layers.wind[i].reference_speed = gd.wind_reference_speed;
-	gd.layers.wind[i].units_label = gd.wind_units_label;
+	gd.layers.wind[i].units_scale_factor = _params.wind_units_scale_factor;
+	gd.layers.wind[i].reference_speed = _params.wind_reference_speed;
+	gd.layers.wind[i].units_label = _params.wind_units_label;
 
     }
 

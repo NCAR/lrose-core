@@ -65,16 +65,16 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
     stretch_secs =  (int) (60.0 * mr->time_allowance);
     out_of_date = 0;
 
-    if(gd.check_data_times) {                         
+    if(_params.check_data_times) {                         
         if(mr->v_date.unix_time < start_time - stretch_secs) out_of_date = 1;
         if(mr->v_date.unix_time > end_time + stretch_secs) out_of_date = 1;  
     } 
      
     if(ptr == NULL || out_of_date) {    /* If no data - Draw warning message */
         if(out_of_date) {
-          sprintf(message,"%s - Data too Old",gd.no_data_message);
+          sprintf(message,"%s - Data too Old",_params.no_data_message);
         } else {
-          STRcopy(message, gd.no_data_message,MESSAGE_LEN);
+          STRcopy(message, _params.no_data_message,MESSAGE_LEN);
         }
         font = choose_font(message,gd.v_win.img_dim.width,gd.v_win.img_dim.height,&xmid,&ymid);
         XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);

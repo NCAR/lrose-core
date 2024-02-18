@@ -44,7 +44,7 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
 
     if(xid == 0) return CIDD_FAILURE;
 
-    if(gd.show_data_messages) {
+    if(_params.show_data_messages) {
        gui_label_h_frame("Rendering",-1);
     } else {
        set_busy_state(1);
@@ -55,14 +55,14 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
     XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
         0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
 
-    if(!gd.draw_main_on_top) { 
+    if(!_params.draw_main_on_top) { 
         if(gd.mrec[page]->render_method == LINE_CONTOURS) {
             cont.min = gd.mrec[page]->cont_low;
             cont.max = gd.mrec[page]->cont_high;
             cont.interval = gd.mrec[page]->cont_interv;
             cont.active = 1;
 	    cont.field = page;
-            cont.labels_on = gd.label_contours;
+            cont.labels_on = _params.label_contours;
             cont.color = gd.legends.foreground_color;
 	    cont.vcm = &gd.mrec[page]->v_vcm;
 	    if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
@@ -84,14 +84,14 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
         }
     } 
 
-    if(gd.draw_main_on_top) { 
+    if(_params.draw_main_on_top) { 
         if(gd.mrec[page]->render_method == LINE_CONTOURS) {
             cont.min = gd.mrec[page]->cont_low;
             cont.max = gd.mrec[page]->cont_high;
             cont.interval = gd.mrec[page]->cont_interv;
             cont.active = 1;
 	    cont.field = page;
-            cont.labels_on = gd.label_contours;
+            cont.labels_on = _params.label_contours;
             cont.color = gd.legends.foreground_color;
 	    cont.vcm = &gd.mrec[page]->v_vcm;
  	    if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
@@ -162,7 +162,7 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
     XDrawRectangle(gd.dpy,xid,gd.legends.foreground_color->gc,x1,y1,wd,ht);
  
 
-    if(gd.show_data_messages) {
+    if(_params.show_data_messages) {
 	gui_label_h_frame(gd.frame_label,-1);
     } else {
 	set_busy_state(0); 

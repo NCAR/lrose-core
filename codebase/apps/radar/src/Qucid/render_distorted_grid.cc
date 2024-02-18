@@ -74,7 +74,7 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
     render_method = mr->render_method; 
     num_points = mr->h_fhdr.nx * mr->h_fhdr.ny;
     if(render_method == DYNAMIC_CONTOURS) {
-	if(num_points < gd.dynamic_contour_threshold) {
+	if(num_points < _params.dynamic_contour_threshold) {
 	    render_method = FILLED_CONTOURS;
 	} else {
 	    render_method = POLYGONS;
@@ -91,7 +91,7 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
       
       if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
         // try to fix the problem
-        // safe_system("xstdcmap -best",gd.simple_command_timeout_secs);
+        // safe_system("xstdcmap -best",_params.simple_command_timeout_secs);
         // if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
         // fprintf(stderr,"Can't Render RGB images - Try Running X Server in 24 bit mode\n");
         // fprintf(stderr,"Run 'xstdcmap -best -verbose' to see the problem\n"); 
@@ -112,7 +112,7 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
       }
     }
 
-    if(gd.clip_overlay_fields) render_method = POLYGONS; 
+    if(_params.clip_overlay_fields) render_method = POLYGONS; 
 
     if( render_method  == FILLED_CONTOURS) {
 
@@ -174,9 +174,9 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
                 if(mr->h_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
 		  if( MdvGetA(*uptr) != 0) {
                     pixel = best_map.base_pixel +
-                      ((ui32) (0.5 + ((gd.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
-                      ((ui32) (0.5 + ((gd.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
-                      ((ui32) (0.5 + ((gd.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
+                      ((ui32) (0.5 + ((_params.image_inten * MdvGetR(*uptr) / 255.0) * best_map.red_max)) * best_map.red_mult) +
+                      ((ui32) (0.5 + ((_params.image_inten * MdvGetG(*uptr) / 255.0) * best_map.green_max)) * best_map.green_mult) +
+                      ((ui32) (0.5 + ((_params.image_inten * MdvGetB(*uptr) / 255.0) * best_map.blue_max)) * best_map.blue_mult);
 
                    XSetForeground(gd.dpy,gd.def_gc, pixel);
 	           XFillPolygon(gd.dpy, xid, gd.def_gc, trap, 4, Convex, CoordModeOrigin);
@@ -187,7 +187,7 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
 		  if(mr->h_vcm.val_gc[*ptr] != NULL) { 
 			int render_flag = 1;
             // Check to make sure all points are on the canvas within a 100 pixel buffer.
-		    if(gd.check_clipping) {	
+		    if(_params.check_clipping) {	
 			  int minx = -CLIP_BUFFER;
 			  int miny = -CLIP_BUFFER;
 			  int maxx = gd.h_win.can_dim.width + CLIP_BUFFER;
