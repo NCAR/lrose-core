@@ -1080,7 +1080,7 @@ paramdef double {
   p_default = 6.0;
   p_descr = "Sets the allowable time error for data to appear in movie frames.";
   p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
-} stretch_factor;
+} time_search_stretch_factor;
 
 paramdef int {
   p_default = 0;

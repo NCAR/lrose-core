@@ -494,7 +494,7 @@ void init_data_space(Params &tdrpParams)
   gd.movie_delay = gd.uparams->getLong("cidd.movie_delay",3000);
   gd.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
   gd.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
-  gd.stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
+  gd.time_search_stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
   gd.climo_mode = gd.uparams->getString("cidd.climo_mode", "regular");
   gd.temporal_rounding = gd.uparams->getLong("cidd.temporal_rounding", 300);
   gd.movie_speed_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
@@ -511,7 +511,7 @@ void init_data_space(Params &tdrpParams)
   gd.movie.delay = gd.movie_delay;
   gd.movie.forecast_interval = gd.forecast_interval;
   gd.movie.past_interval = gd.past_interval;
-  gd.movie.mr_stretch_factor = gd.stretch_factor;
+  gd.movie.mr_stretch_factor = gd.time_search_stretch_factor;
   gd.movie.round_to_seconds = gd.temporal_rounding;
   gd.movie.display_time_msec = gd.movie_speed_msec;
 

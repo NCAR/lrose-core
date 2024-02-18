@@ -789,7 +789,7 @@ public:
 
   tdrp_bool_t check_clipping;
 
-  double stretch_factor;
+  double time_search_stretch_factor;
 
   int gather_data_mode;
 

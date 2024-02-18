@@ -1062,7 +1062,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.check_clipping", 0);
   
   // data retrieval
-  _getDouble("cidd.stretch_factor", 1.5);
+  _getDouble("cidd.stretch_factor", 1.5, true, "time_search_stretch_factor");
   _getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
   _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
   _getLong("cidd.update_interval", UPDATE_INTERVAL);

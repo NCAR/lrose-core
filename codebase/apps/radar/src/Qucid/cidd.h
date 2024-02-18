@@ -427,7 +427,7 @@ struct    Global_data {
   double movie_delay;
   double forecast_interval;
   double past_interval;
-  double stretch_factor;
+  double time_search_stretch_factor;
   const char *climo_mode;
   int temporal_rounding;
   int movie_speed_msec;

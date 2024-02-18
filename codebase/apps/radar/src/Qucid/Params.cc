@@ -2342,15 +2342,15 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'stretch_factor'
+    // Parameter 'time_search_stretch_factor'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("stretch_factor");
+    tt->param_name = tdrpStrDup("time_search_stretch_factor");
     tt->descr = tdrpStrDup("Sets the allowable time error for data to appear in movie frames.");
     tt->help = tdrpStrDup("(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.");
-    tt->val_offset = (char *) &stretch_factor - &_start_;
+    tt->val_offset = (char *) &time_search_stretch_factor - &_start_;
     tt->single_val.d = 6;
     tt++;
     

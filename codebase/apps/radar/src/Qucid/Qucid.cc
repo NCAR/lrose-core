@@ -635,7 +635,7 @@ void Qucid::_initGlobals()
   gd.movie_delay = 0;
   gd.forecast_interval = 0;
   gd.past_interval = 0;
-  gd.stretch_factor = 0;
+  gd.time_search_stretch_factor = 0;
   gd.climo_mode = NULL;
   gd.temporal_rounding = 0;
   gd.movie_speed_msec = 0;
