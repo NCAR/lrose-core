@@ -202,154 +202,154 @@ struct    Global_data {
   // DISPLAY PREFERENCE VARIABLES
   int    argc;
   int    display_projection;// Which projection CIDD Uses for display  - Enum
-  int    always_get_full_domain; // 1 = Data request full domain always
-  int    do_not_clip_on_mdv_request;
-  int    do_not_decimate_on_mdv_request;
-  int    enable_status_window;   // 1 = Status window enabled.
+  // int    always_get_full_domain; // 1 = Data request full domain always
+  // int    do_not_clip_on_mdv_request;
+  // int    do_not_decimate_on_mdv_request;
+  // int    enable_status_window;   // 1 = Status window enabled.
   int    wsddm_mode;   // 1 =  End User/WSDDM  mode - 
   int    quiet_mode;   // 1 =  Do not output normal startup and shutdown messages
   int    report_mode;   // 1 =  Do continious data value reporting
-  int    close_popups;   // Close popups also when main window is closed.
-  int    one_click_rhi;  // 1 =  Disallow Multiple segment Routes - First button release ends route.
+  // int    close_popups;   // Close popups also when main window is closed.
+  // int    one_click_rhi;  // 1 =  Disallow Multiple segment Routes - First button release ends route.
 
-  int    click_posn_rel_to_origin; // report posn relative to origin 
-  int    report_clicks_in_status_window; // report click details in status window
-  int    report_clicks_in_degM_and_nm; /* also report click locations in degM and nautical
-                                        * miles, suitable for aviation ops */
-  double magnetic_variation_deg; // magnetic variation in degrees
-  int    display_labels; // 1 == On (default)
-  int    display_ref_lines; // 1 == On (default) - Display Route and height lines
-  int	   show_clock;     // 1 =  Diplays an analogue clock
-  int	   show_data_messages;// 1 =  Diplays data access and Rendering messages in top panel
-  int    draw_clock_local; // 0 = UTC, 1 = Local time  on analogue clock
-  int    use_local_timestamps; // 0 = UTC time  1 = Local times 
+  // int    click_posn_rel_to_origin; // report posn relative to origin 
+  // int    report_clicks_in_status_window; // report click details in status window
+  // int    report_clicks_in_degM_and_nm; /* also report click locations in degM and nautical
+  // * miles, suitable for aviation ops */
+  // double magnetic_variation_deg; // magnetic variation in degrees
+  // int    display_labels; // 1 == On (default)
+  // int    display_ref_lines; // 1 == On (default) - Display Route and height lines
+  // int	   show_clock;     // 1 =  Diplays an analogue clock
+  // int	   show_data_messages;// 1 =  Diplays data access and Rendering messages in top panel
+  // int    draw_clock_local; // 0 = UTC, 1 = Local time  on analogue clock
+  // int    use_local_timestamps; // 0 = UTC time  1 = Local times 
   int	   run_unmapped;   // 1 runs unmapped
-  int    html_mode;      // 1 = CIDD is in HTML Generator mode 
-  int    transparent_images; /* 0 = images have normal background
-                              * 1 = images have transparent background */
-  int    range_ring_follows_data; // 0 = fixed rings, 1 = Plots at the data origin
-  int    range_ring_for_radar_only; /* 1 = only show rings for radar data
-                                     * 0 = show for all data types */
-  int    domain_follows_data; // 1 = Domain shifts so data is always at the center
-  int    show_height_sel;// 1 = Show Vertical Height selector in Right Margin
-  int    use_cosine_correction; // use cosine correction for computing range in polar data
-  int    latlon_mode;    // 0 = Report decimal degrees, 1 = deg,min,sec  
-  int    num_zoom_levels; // number of zoom levels available
-  int    start_zoom_level; // starting zoom level - 1-based
-  int    zoom_limits_in_latlon; // 1 = set zoom limits in lat/lon degrees instead of km
+  // int    html_mode;      // 1 = CIDD is in HTML Generator mode 
+  // int    transparent_images; /* 0 = images have normal background
+  //                             * 1 = images have transparent background */
+  // int    range_ring_follows_data; // 0 = fixed rings, 1 = Plots at the data origin
+  // int    range_ring_for_radar_only; /* 1 = only show rings for radar data
+  //                                    * 0 = show for all data types */
+  // int    domain_follows_data; // 1 = Domain shifts so data is always at the center
+  // int    show_height_sel;// 1 = Show Vertical Height selector in Right Margin
+  // int    use_cosine_correction; // use cosine correction for computing range in polar data
+  // int    latlon_mode;    // 0 = Report decimal degrees, 1 = deg,min,sec  
+  // int    num_zoom_levels; // number of zoom levels available
+  // int    start_zoom_level; // starting zoom level - 1-based
+  // int    zoom_limits_in_latlon; // 1 = set zoom limits in lat/lon degrees instead of km
 
-  int horiz_top_margin;
-  int horiz_bot_margin;
-  int horiz_left_margin;
-  int horiz_right_margin;
+  // int horiz_top_margin;
+  // int horiz_bot_margin;
+  // int horiz_left_margin;
+  // int horiz_right_margin;
   
-  int vert_top_margin;
-  int vert_bot_margin;
-  int vert_left_margin;
-  int vert_right_margin;
+  // int vert_top_margin;
+  // int vert_bot_margin;
+  // int vert_left_margin;
+  // int vert_right_margin;
 
-  int horiz_legends_start_x;
-  int horiz_legends_start_y;
-  int horiz_legends_delta_y;
+  // int horiz_legends_start_x;
+  // int horiz_legends_start_y;
+  // int horiz_legends_delta_y;
 
-  int vert_legends_start_x;
-  int vert_legends_start_y;
-  int vert_legends_delta_y;
+  // int vert_legends_start_x;
+  // int vert_legends_start_y;
+  // int vert_legends_delta_y;
 
-  int horiz_min_height;
-  int horiz_min_width;
-  int horiz_default_height;
-  int horiz_default_width;
+  // int horiz_min_height;
+  // int horiz_min_width;
+  // int horiz_default_height;
+  // int horiz_default_width;
   
-  int vert_min_height;
-  int vert_min_width;
-  int vert_default_height;
-  int vert_default_width;
+  // int vert_min_height;
+  // int vert_min_width;
+  // int vert_default_height;
+  // int vert_default_width;
   
-  double domain_limit_min_x;
-  double domain_limit_max_x;
-  double domain_limit_min_y;
-  double domain_limit_max_y;
+  // double domain_limit_min_x;
+  // double domain_limit_max_x;
+  // double domain_limit_min_y;
+  // double domain_limit_max_y;
   
-  double min_ht;
-  double max_ht;
-  double start_ht;
-  int planview_start_page;
-  int xsect_start_page;
+  // double min_ht;
+  // double max_ht;
+  // double start_ht;
+  // int planview_start_page;
+  // int xsect_start_page;
   
-  int    label_contours; // 0 = No numeric Labels, 1 = Add numeric value labels
-  int    top_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc, 3 = None.
-  int    bot_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc
+  // int    label_contours; // 0 = No numeric Labels, 1 = Add numeric value labels
+  // int    top_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc, 3 = None.
+  // int    bot_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc
   int    drawing_mode;   // Flag for Internal drawing mode - FMQ output
   // 0 = not in drawing mode (initial value) 
   // != 0  Disable - zoom/pan, reporting 
 
-  int layer_legends_on;     // Control variables for plotting legend/Titles
-  int cont_legends_on;
-  int wind_legends_on;
-  int contour_line_width;
-  int smooth_contours;     // Apply smoothing before contouring ;  0-2 are valid values 
-  int use_alt_contours;    // 1 =  Use the Alternate Contouring routines 
-  int add_noise;           // Add 1 part in 250 of noise to contours 1 == true
-  double special_contour_value;      // which value to draw wider 
-  int map_bad_to_min_value; // 1 == true
-  int map_missing_to_min_value; // 1 == true
+  // int layer_legends_on;     // Control variables for plotting legend/Titles
+  // int cont_legends_on;
+  // int wind_legends_on;
+  // int contour_line_width;
+  // int smooth_contours;     // Apply smoothing before contouring ;  0-2 are valid values 
+  // int use_alt_contours;    // 1 =  Use the Alternate Contouring routines 
+  // int add_noise;           // Add 1 part in 250 of noise to contours 1 == true
+  // double special_contour_value;      // which value to draw wider 
+  // int map_bad_to_min_value; // 1 == true
+  // int map_missing_to_min_value; // 1 == true
 
-  int products_on;
-  int product_line_width;
-  int product_font_size;
+  // int products_on;
+  // int product_line_width;
+  // int product_font_size;
   double product_detail_threshold[NUM_PRODUCT_DETAIL_THRESHOLDS];
   int product_detail_adjustment[NUM_PRODUCT_DETAIL_THRESHOLDS];
   
-  int draw_main_on_top;  //  1 = Draw the main grid over all the other layers. 
-  int mark_latest_click_location; // place a mark at latest click location
+  // int draw_main_on_top;  //  1 = Draw the main grid over all the other layers. 
+  // int mark_latest_click_location; // place a mark at latest click location
   int mark_latest_client_location; // place a mark at latest click location from client
-  int check_data_times;  //  1 =  Reject data that is not valid 
-  int check_clipping;    //  1 = Check for data that renders off the screen.
-  int run_once_and_exit; //  1 =  Plot all HTML Output and exit
-  int request_compressed_data;  //  1 =  Ask for data to be compressed during xfer
-  int request_gzip_vol_compression;  //  1 =  Ask for data to be compressed Using GZIP_VOL
-  int add_height_to_filename;   // 1 = Add the height to html mode filenames
-  int add_frame_time_to_filename; // 1 = Add the frame time to html mode filenames
-  int add_gen_time_to_filename; // 1 = Add the model gen time to html mode filenames
-  int add_valid_time_to_filename; // 1 = Add the data valid  time to html mode filenames
-  int add_frame_num_to_filename; // 1 = Add the Frame Number  time to html mode filenames
-  int add_button_name_to_filename; /* 1 = Add the button_name (second string in GRIDS 
-                                    * section of config file) to html mode filenames.
-                                    * It immediately follows the legend_name, which
-                                    * is also obtained from the config file. */
-  int save_images_to_day_subdir; /* 1 = save images to subdirs of image_dir,
-                                  * using yyyymmdd format */
-  int simple_command_timeout_secs; // Timeout for simple commands
-  int complex_command_timeout_secs; // Timeout for simple commands
+  // int check_data_times;  //  1 =  Reject data that is not valid 
+  // int check_clipping;    //  1 = Check for data that renders off the screen.
+  // int run_once_and_exit; //  1 =  Plot all HTML Output and exit
+  // int request_compressed_data;  //  1 =  Ask for data to be compressed during xfer
+  // int request_gzip_vol_compression;  //  1 =  Ask for data to be compressed Using GZIP_VOL
+  // int add_height_to_filename;   // 1 = Add the height to html mode filenames
+  // int add_frame_time_to_filename; // 1 = Add the frame time to html mode filenames
+  // int add_gen_time_to_filename; // 1 = Add the model gen time to html mode filenames
+  // int add_valid_time_to_filename; // 1 = Add the data valid  time to html mode filenames
+  // int add_frame_num_to_filename; // 1 = Add the Frame Number  time to html mode filenames
+  // int add_button_name_to_filename; /* 1 = Add the button_name (second string in GRIDS 
+  //                                   * section of config file) to html mode filenames.
+  //                                   * It immediately follows the legend_name, which
+  //                                   * is also obtained from the config file. */
+  // int save_images_to_day_subdir; /* 1 = save images to subdirs of image_dir,
+  //                                 * using yyyymmdd format */
+  // int simple_command_timeout_secs; // Timeout for simple commands
+  // int complex_command_timeout_secs; // Timeout for simple commands
 
-  int font_display_mode; // 1 = Use ImageString, 0 = Plain. 
+  // int font_display_mode; // 1 = Use ImageString, 0 = Plain. 
   int forecast_mode;     // 1 = Apply forecast interval
-  int gather_data_mode;  // 0 = Use Mid point of movie frame for requests, 1 = End 
-  int enable_save_image_panel; // 1 = Middle Click will bring up save image panel
-  int disable_pick_mode;  // Don't allow product pick when set
-  int clip_overlay_fields; // If set = Overlaid fields will use filled polygons 
-  int output_geo_xml;       // If set = Output an additional XML file with images
-  int use_latlon_in_geo_xml;       // If set = Use lat/lon to describe the geo location rather than projection coordinates
-  int replace_underscores;  // If set = Replace Underscores in legends and labels with spaces.
+  // int gather_data_mode;  // 0 = Use Mid point of movie frame for requests, 1 = End 
+  // int enable_save_image_panel; // 1 = Middle Click will bring up save image panel
+  // int disable_pick_mode;  // Don't allow product pick when set
+  // int clip_overlay_fields; // If set = Overlaid fields will use filled polygons 
+  // int output_geo_xml;       // If set = Output an additional XML file with images
+  // int use_latlon_in_geo_xml;       // If set = Use lat/lon to describe the geo location rather than projection coordinates
+  // int replace_underscores;  // If set = Replace Underscores in legends and labels with spaces.
 
   int    data_format; // format of received data:  CART_DATA_FORMAT  
-  int    image_fill_threshold; // threshold (grid points)  for image fills 
-  int    dynamic_contour_threshold; // threshold for dynamic contours fills 
-  int    inten_levels;    // number of color dimming intensity levels
-  int    idle_reset_seconds;   // number of idle seconds before automatically resetting
-  int    model_run_list_hours; // Gather all model run times within this number of
+  // int    image_fill_threshold; // threshold (grid points)  for image fills 
+  // int    dynamic_contour_threshold; // threshold for dynamic contours fills 
+  // int    inten_levels;    // number of color dimming intensity levels
+  // int    idle_reset_seconds;   // number of idle seconds before automatically resetting
+  // int    model_run_list_hours; // Gather all model run times within this number of
   // hours from the end of the movie loop
   // WIND Vector & barb preferences.
-  int ideal_x_vectors;
-  int ideal_y_vectors;
-  int wind_head_size;     // Vectors
-  double wind_head_angle;     // Wind barb head angle.
-  int barb_shaft_len;     // Wind barbs
-  int all_winds_on;
-  int wind_mode;
-  double wind_time_scale_interval;
-  int wind_scaler;
+  // int ideal_x_vectors;
+  // int ideal_y_vectors;
+  // int wind_head_size;     // Vectors
+  // double wind_head_angle;     // Wind barb head angle.
+  // int barb_shaft_len;     // Wind barbs
+  // int all_winds_on;
+  // int wind_mode;
+  // double wind_time_scale_interval;
+  // int wind_scaler;
 
   // Run-time counters and indicies
   int    num_colors;       // Total colors allocated 
@@ -392,29 +392,29 @@ struct    Global_data {
   // 0: use the end time for file name
   // 1: use the mid time for file name
 
-  double image_inten;    // Image color intensity 
-  double data_inten;     // Data Cell color intensity 
+  // double image_inten;    // Image color intensity 
+  // double data_inten;     // Data Cell color intensity 
   double aspect_correction; // Aspect ratio correction for LAT-LON mode 
-  double aspect_ratio;  // Aspect ratio for domains - Width/Height 
-  double scale_units_per_km; // For scaling distance to things other than km.
-  double locator_margin_km;  // Max dist between requested point and station 
+  // double aspect_ratio;  // Aspect ratio for domains - Width/Height 
+  // double scale_units_per_km; // For scaling distance to things other than km.
+  // double locator_margin_km;  // Max dist between requested point and station 
   double height_array[MAX_SECTS];  // Heights to render in HTML MODE
 
-  double origin_latitude;
-  double origin_longitude;
-  double reset_click_latitude;
-  double reset_click_longitude;
+  // double origin_latitude;
+  // double origin_longitude;
+  // double reset_click_latitude;
+  // double reset_click_longitude;
 
   // projections
   
   const char *projection_type;
   double proj_param[8];    // Projection parameters - Like Mdv
-  double north_angle;      // radar cart
-  double lambert_lat1;     // lambert
-  double lambert_lat2;     // lambert
-  double tangent_lat;      // stereographic
-  double tangent_lon;      // stereographic
-  double central_scale;    // stereographic
+  // double north_angle;      // radar cart
+  // double lambert_lat1;     // lambert
+  // double lambert_lat2;     // lambert
+  // double tangent_lat;      // stereographic
+  // double tangent_lon;      // stereographic
+  // double central_scale;    // stereographic
 
   // movies
   
