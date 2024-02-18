@@ -337,54 +337,6 @@ paramdef string {
   p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
 } projection_type_str;
 
-paramdef double {
-  p_default = 20;
-  p_descr = "Standard latitude 1.";
-  p_help = "For LAMBERT projection. Ignored otherwise.";
-} lambert_lat1;
-
-paramdef double {
-  p_default = 60;
-  p_descr = "Standard latitude 2.";
-  p_help = "For LAMBERT projection. Ignored otherwise.";
-} lambert_lat2;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Tangent latitude.";
-  p_help = "For POLAR_STEREO, set to 90. For OBLIQUE_STEREO, set to 60.";
-} tangent_lat;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Tangent longitude.";
-  p_help = "Applies to POLAR_STEREO and OBLIQUE_STEREO.";
-} tangent_lon;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Central scale factor.";
-  p_help = "Applies to STEREO projections.";
-} central_scale;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Amount grids are rotated clockwise to true north";
-  p_help = "Applies to CARTESIAN (FLAT) projection.";
-} north_angle;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
-  p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
-} use_cosine;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "See use_cosine.";
-  p_help = "";
-} use_cosine_correction;
-
 typedef enum {
   PROJ_LATLON = 0,
   PROJ_LAMBERT_CONF = 3,
@@ -400,7 +352,7 @@ typedef enum {
 
 paramdef enum projection_t {
   p_default = PROJ_FLAT;
-  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_descr = "Projection for mapping in x,y. See projection param below.";
   p_help =
   "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
   "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
@@ -416,43 +368,49 @@ paramdef enum projection_t {
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped grid origin latitude.";
+  p_descr = "Projection grid origin latitude.";
   p_help = "This applies to all projections except LATLON.";
 } proj_origin_lat;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped grid origin longitude.";
+  p_descr = "Projection grid origin longitude.";
   p_help = "This applies to all projections except LATLON.";
 } proj_origin_lon;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped grid reference latitude 1.";
+  p_descr = "Amount grids are rotated clockwise to true north.";
+  p_help = "This applies to only to PROJ_FLAT projection.";
+} proj_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid reference latitude 1.";
   p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
 } proj_lat1;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped grid reference latitude 2.";
+  p_descr = "Projection grid reference latitude 2.";
   p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
 } proj_lat2;
 
 paramdef double {
   p_default = 1.0;
-  p_descr = "Central scale for remapped projections.";
+  p_descr = "Central scale for projection.";
   p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
 } proj_central_scale;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped tangent latitude (deg).";
+  p_descr = "Projection tangent latitude (deg).";
   p_help = "This applies to OBLIQUE_STEREO only.";
 } proj_tangent_lat;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped tangent longitude (deg).";
+  p_descr = "Projection tangent longitude (deg).";
   p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
 } proj_tangent_lon;
 
@@ -470,13 +428,13 @@ paramdef double {
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped false northing correction.";
+  p_descr = "Projection false northing correction.";
   p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
 } proj_false_northing;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Remapped false easting correction.";
+  p_descr = "Projection false easting correction.";
   p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
 } proj_false_easting;
 
@@ -498,807 +456,15 @@ paramdef double {
   p_help = "See proj_set_offset_origin.";
 } proj_offset_origin_longitude;
 
-commentdef {
-  p_header = "DISPLAY TYPE";
-}
-
-typedef enum
-{
-  POLAR_DISPLAY,
-  BSCAN_DISPLAY
-} display_mode_t;
-
-paramdef enum display_mode_t
-{
-  p_descr = "Main display mode.";
-  p_help =
-  "\tPOLAR_DISPLAY - normal HORIZ and VERT display. "
-  "\tBSCAN_DISPLAY - BSCAN mode.\n";
-  p_default = POLAR_DISPLAY;
-} display_mode;
-
-commentdef {
-  p_header = "NAMES AND LABELS";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override radar name in the data.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Radar name if overridden.";
-} radar_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to display the site name in the left panel.";
-} display_site_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override site name in the data.";
-} override_site_name;
-
-paramdef string {
-  p_default = "MARSHALL";
-  p_descr = "Site name if overridden.";
-} site_name;
-
-commentdef {
-  p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
-}
-
-paramdef int {
-  p_default = 1100;
-  p_descr = "Startup width of main window (pixels).";
-} main_window_width;
-
-paramdef int {
-  p_default = 635;
-  p_descr = "Startup height of main window (pixels).";
-} main_window_height;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup X for main window (pixels).";
-} main_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for main window (pixels).";
-} main_window_start_y;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale (pixels).";
-} color_scale_width;
-
-paramdef int {
-  p_default = 12;
-  p_descr = "Basic font size for labels (pixels).";
-  p_help = "Some of the labels are scaled relative to this size.";
-} label_font_size;
-
-paramdef string {
-  p_default = "black";
-  p_descr = "Color of main display background.";
-} background_color2;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of text annotation in main display.";
-} text_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of grids and range rings.";
-} grid_and_range_ring_color;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} range_ring_label_font_size;
-
-paramdef string {
-  p_default = "cyan";
-  p_descr = "Color of cross at click point.";
-} click_cross_color;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Size of cross at click point (pixels).";
-  p_help = "Size of cross drawn at click point, to select data.";
-} click_cross_size;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Line width for click cross.";
-} click_cross_line_width;
-
-commentdef {
-  p_header = "HORIZ MODE DISPLAY";
-}
-
-typedef enum
-{
-  HORIZ_FULL,
-  HORIZ_AIRBORNE
-} horiz_display_type_t;
-
-paramdef enum horiz_display_type_t
-{
-  p_descr = "Type of display to use for the HORIZ window.";
-  p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
-           "This is the default.\n"
-           "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
-           "This display shows just the 180 degrees of radar pointing forward "
-           "from the nose of the plane.\n";
-  p_default = HORIZ_FULL;
-} horiz_display_type;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of HORIZ window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-} horiz_aspect_ratio;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set HORIZ grids overlay on at startup.";
-} horiz_grids_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ range rings overlay on at startup.";
-} horiz_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
-} horiz_azimuth_lines_on_at_startup;
-
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the HORIZ plot window";
-  p_help = "This include time, field name and elevation angle.";
-} horiz_main_legend_pos;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} horiz_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'horiz_override_rendering_beam_width'";
-} horiz_rendering_beam_width;
-
-commentdef {
-  p_header = "VERT MODE DISPLAY";
-}
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup width of VERT window (pixels).";
-} vert_window_width;
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup height of VERT window (pixels).";
-} vert_window_height;
-
-paramdef int {
-  p_default = 1100;
-  p_descr = "Startup X for VERT window (pixels).";
-} vert_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for VERT window (pixels).";
-} vert_window_start_y;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin in VERT mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} vert_top_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin in VERT mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} vert_bottom_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} vert_left_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of right margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} vert_right_margin2;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} vert_label_font_size;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Length of ticks on axes (pixels).";
-} vert_axis_tick_len;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Ideal number of ticks on axes.";
-} vert_n_ticks_ideal;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} vert_text_margin;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Flag indicating to display full 180 degrees in VERT window. "
-            "If set to false, the VERT window will just display 90 degrees "
-            "of the VERT.";
-} vert_display_180_degrees;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of VERT window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
-} vert_aspect_ratio;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Max height of data in VERT window (km).";
-  p_descr = "This can be adjusted interactively.";
-} vert_max_height_km;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale for VERT window (pixels).";
-} vert_color_scale_width;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set VERT grids overlay on at startup.";
-} vert_grids_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set VERT range rings overlay on at startup.";
-} vert_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set VERT elevation lines overlay on at startup.";
-} vert_elevation_lines_on_at_startup;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the VERT plot window";
-  p_help = "This include time, field name and elevation angle.";
-} vert_main_legend_pos;
-
-paramdef int {
-  p_default = 360;
-  p_descr = "Size of the queue for VERT beams.";
-  p_help = "After the queue reaches this size, older beams are discarded.";
-} vert_beam_queue_size;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} vert_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'vert_override_rendering_beam_width'";
-} vert_rendering_beam_width;
-
-commentdef {
-  p_header = "BSCAN TIME LIMITS";
-}
-
-paramdef double {
-  p_default = 60;
-  p_descr = "Number of seconds in BSCAN display.";
-  p_help = "In REALTIME mode, when we reach the right-hand side of the display, the existing plot will be moved left to make room for more data.";
-} bscan_time_span_secs;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to truncate the plot start time to even seconds.";
-  p_help = "If true, we truncate the start time to the previous second.";
-} bscan_truncate_start_time;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Precision of subseconds in time labels.";
-  p_help = "Number of decimals of precision in time labels. Set to 0 for times in integer seconds.";
-  p_min = 0;
-  p_max = 9;
-} bscan_subsec_precision;
-
-commentdef {
-  p_header = "BSCAN REALTIME CONTROLS";
-}
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "What fraction of the existing data to save when moving the plot to the left.";
-  p_help = "When we reach the right-hand side of the display, we need to move the plot to the left. This is the fraction of the plot that is saved after the move has taken place.";
-} bscan_realtime_fraction_saved;
-
-paramdef double {
-  p_default = 0.01;
-  p_descr = "Min time between incoming beams (secs).";
-  p_help = "If beams arrive too fast, we discard some so that the time between the beams is at least this long.";
-} bscan_min_secs_between_reading_beams;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Min time between rendering (secs).";
-  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU and/or GPU.";
-} bscan_min_secs_between_rendering_beams;
-
-commentdef {
-  p_header = "BSCAN RANGE AND ALTITUDE LIMITS";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Specify the min and max range when in range mode.";
-  p_help = "If false, we will use the start range and max range in the data.";
-} bscan_specify_range_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Min range to be plotted (km).";
-  p_help = "Used if 'bscan_specify_range_limits' is true.";
-} bscan_min_range_km;
-
-paramdef double {
-  p_default = 25;
-  p_descr = "Max range to be plotted (km).";
-  p_help = "Used if 'bscan_specify_range_limits' is true.";
-} bscan_max_range_km;
-
-paramdef double {
-  p_default = -0.5;
-  p_descr = "Min altitude plotted (km).";
-} bscan_min_altitude_km;
-
-paramdef double {
-  p_default = 25;
-  p_descr = "Max altitude plotted (km).";
-} bscan_max_altitude_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Use feet for altitude units?";
-  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
-} bscan_altitude_in_feet;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Use feet for range units?";
-  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
-} bscan_range_in_feet;
-
-typedef enum {
-  RANGE_AXIS_UP, RANGE_AXIS_DOWN, RANGE_AXIS_ALTITUDE
-} range_axis_mode_t;
-
-paramdef enum range_axis_mode_t {
-  p_default = RANGE_AXIS_ALTITUDE;
-  p_descr = "Options for plotting range in the vertical scale.";
-  p_help = "RANGE_AXIS_UP - instrument is at the bottom, range plotted positively upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the altitude of the gates in earth coordinates.";
-} bscan_range_axis_mode;
-
-commentdef {
-  p_header = "BSCAN ANGLE LIMITS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Specify the min and max elevation angle.";
-  p_help = "If true, only beams within the specified limits will be plotted.";
-} bscan_specify_elevation_limits;
-
-paramdef double {
-  p_default = 89;
-  p_descr = "Min elevation angle to be plotted (deg).";
-  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
-} bscan_min_elevation_deg;
-
-paramdef double {
-  p_default = 91;
-  p_descr = "Max elevation angle to be plotted (deg).";
-  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
-} bscan_max_elevation_deg;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Specify the min and max azimuth angle.";
-  p_help = "If true, only beams within the specified limits will be plotted.";
-} bscan_specify_azimuth_limits;
-
-paramdef double {
-  p_default = 89;
-  p_descr = "Min azimuth angle to be plotted (deg).";
-  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
-} bscan_min_azimuth_deg;
-
-paramdef double {
-  p_default = 91;
-  p_descr = "Max azimuth angle to be plotted (deg).";
-  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
-} bscan_max_azimuth_deg;
-
-commentdef {
-  p_header = "BSCAN CENSOR DATA BELOW SURFACE";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to censor data below the measured surface";
-  p_descr = "If true, and we can identify the surface echo, suppress data below the surface.";
-} bscan_censor_data_below_surface;
-
-paramdef string {
-  p_default = "DBZ";
-  p_descr = "Name of field used to identify the surface from the data.";
-  p_help = "The surface will be identified at the gate with the maximum value in this field.";
-} bscan_surface_field;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Minumum range to the surface (km).";
-  p_help = "We will search for the surface echo in the gates beyound this range.";
-} bscan_min_range_to_surface_km;
-
-paramdef double {
-  p_default = 0.2;
-  p_descr = "Margin of data plotted beyond the surface (km).";
-  p_help = "We will censor the data beyond the surface gate, plus this range margin.";
-} bscan_surface_range_margin_km;
-
-paramdef double {
-  p_default = 5;
-  p_descr = "Maximum value of the surface field, below the measured surface.";
-  p_help = "After finding the range to the surface, we inspect the surface_field values below the surface. If we find values that exceed this parameter, we conclude that the surface cannot be reliably found.";
-} bscan_max_field_val_below_surface;
-
-commentdef {
-  p_header = "BSCAN MARGINS";
-}
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Height of top margin in BSCAN mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} bscan_top_margin;
-
-paramdef int {
-  p_default = 45;
-  p_descr = "Height of bottom margin in BSCAN mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} bscan_bottom_margin;
-
-paramdef int {
-  p_default = 50;
-  p_descr = "Width of left margin in BSCAN mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} bscan_left_margin;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of right margin in BSCAN mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} bscan_right_margin;
-
-paramdef int {
-  p_default = 6;
-  p_descr = "Length of ticks on axes (pixels).";
-} bscan_axis_tick_len;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Ideal number of ticks on axes.";
-} bscan_n_ticks_ideal;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} bscan_text_margin;
-
-commentdef {
-  p_header = "BSCAN TITLES, LABELS AND AXES";
-}
-
-paramdef int {
-  p_default = 12;
-  p_descr = "Font size of center title (pixels).";
-} bscan_title_font_size;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Font size of axis labels in bscan (pixels).";
-} bscan_axis_label_font_size;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size of axis values (pixels).";
-} bscan_axis_values_font_size;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of axes in bscan.";
-} bscan_axes_color;
-
-paramdef string {
-  p_default = "gray";
-  p_descr = "Color of grid lines on bscan.";
-} bscan_grid_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of labels in bscan.";
-} bscan_labels_color;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines across plot at regular time intervals.";
-} bscan_draw_time_grid_lines;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines across plot at regular range intervals.";
-} bscan_draw_range_grid_lines;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw a line for the instrument location.";
-  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
-} bscan_draw_instrument_height_line;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of instrument height line in ALTITUDE plot.";
-} bscan_instrument_height_color;
-
-commentdef {
-  p_header = "DISTANCE SCALE";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to plot distance as well as time on the time axis.";
-  p_help = "If true, extra tick marks will show the distance in km along the time axis, in addition to the time.";
-} bscan_add_distance_to_time_axis;
-
-paramdef int {
-  p_default = 50;
-  p_descr = "Number of segments to be used for computing distance.";
-  p_help = "We divide the rays into this number of segments and then compute the distance travelled during each segment using the change in lat/lon position. We keep the number of segments reasonably small to avoid unnecessary CPU usage.";
-} bscan_n_segments_for_computing_distance;
-
-commentdef {
-  p_header = "BSCAN LEGENDS";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to plot the starting lat/lon position as a legend.";
-  p_help = "This helps in geolocating the data from a mobile system.";
-} bscan_plot_starting_latlon_as_legend;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'bscan_plot_starting_latlon_as_legend'.";
-} bscan_starting_latlon_legend_pos;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to plot the mean track and speed in a legend.";
-  p_help = "This helps in geolocating the data from a mobile system.";
-} bscan_plot_mean_track_and_speed_as_legend;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_RIGHT;
-  p_descr = "Position of track/speed legend in plot";
-  p_help = "The mean track and speed will be plotted as a legend in the location specified. See 'bscan_plot_track_and_speed_as_legend'.";
-} bscan_mean_track_and_speed_legend_pos;
-
-commentdef {
-  p_header = "BSCAN DWELL CONTROLS";
-}
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "Compute dwell from image size and time range.";
-  p_help = "If TRUE, we compute the optimal dwell so that there will be approximately 1 dwell for each pixel in the resulting image. If FALSE, the dwell is specified below.";;
-} bscan_archive_dwell_auto;
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Specified dwell time for archive mode (secs).";
-} bscan_archive_dwell_secs;
-
-typedef enum {
-  DWELL_STATS_MEAN = 0,
-  DWELL_STATS_MEDIAN = 1,
-  DWELL_STATS_MAXIMUM = 2,
-  DWELL_STATS_MINIMUM = 3,
-  DWELL_STATS_MIDDLE = 4
-} bscan_dwell_stats_t;
-
-paramdef enum bscan_dwell_stats_t {
-  p_default = DWELL_STATS_MIDDLE;
-  p_descr = "Method for computing stats on the dwell.";
-  p_help = "Applies to READ_RAYS_IN_INTERVAL mode. MIDDLE refers to the middle ray in the dwell sequence.";
-} bscan_dwell_stats;
+  p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
+  p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
+} use_cosine_correction;
 
 commentdef {
-  p_header = "SAVING IMAGES TO FILE";
-  p_text =
-    "In creating files for the field catalog, the file name is of the form:\n\n"
-    "\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\n"
-    "The following parameters control the output directory, and the construction of the file name";
+  p_header = "</PROJECTION>";
 }
-
-paramdef string {
-  p_default = "/tmp/images/Qucid";
-  p_descr = "Output directory for images generated by this app.";
-} images_output_dir;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to create a subdirectory for each day.";
-  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
-} images_write_to_day_dir;
-
-paramdef string {
-  p_default = "radar";
-  p_descr = "Set the category string.";
-  p_help = "If empty, no category will be included.";
-} images_file_name_category;
-
-paramdef string {
-  p_default = "NSF_NCAR_GV_HCR";
-  p_descr = "Set the platform string.";
-  p_help = "If empty, no platform will be included.";
-} images_file_name_platform;
-
-paramdef string {
-  p_default = "png";
-  p_descr = "Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.";
-  p_help = "An extension is always required";
-} images_file_name_extension;
-
-paramdef string {
-  p_default = ".";
-  p_descr = "Set the delimiter between the parts of the file name.";
-  p_help = "NOTE: before the extension the delimited is always a period: '.'.";
-} images_file_name_delimiter;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
-  p_help = "If FALSE, the time part will be omitted.";
-} images_include_time_part_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
-  p_help = "If FALSE, the SS will be excluuded from the time part.";
-} images_include_seconds_in_time_part;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Normally the file name includes the field label (product type).";
-  p_help = "If FALSE, the field label will be omitted.";
-} images_include_field_label_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the scan type in the image file name.";
-  p_help = "If TRUE, the scan type will be added to the image file name.";
-} images_include_scan_type_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the scan Id in the image file name.";
-  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to write latest_data_info files when an image is created.";
-  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
-} images_write_latest_data_info;
-
-commentdef {
-  p_header = "OPTION TO CREATE IMAGES AUTOMATICALLY";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to create images automatically.";
-  p_descr = "If true, images will either be created on a schedule, or the images will be created for a single time and the app will then exit.";
-} images_auto_create;
-
-typedef enum {
-  CREATE_IMAGES_THEN_EXIT,
-  CREATE_IMAGES_ON_REALTIME_SCHEDULE,
-  CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
-} images_creation_mode_t;
-
-paramdef enum images_creation_mode_t {
-  p_default = CREATE_IMAGES_THEN_EXIT;
-  p_descr = "Mode for controlling auto image creation.";
-  p_help = "\n\nCREATE_IMAGES_FROM_GUI: create images interactively using the GUI.\n\nCREATE_IMAGES_THEN_EXIT: for the specified start time and time span, create an output image for every field in the fields array, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.";
-} images_creation_mode;
-
-paramdef int {
-  p_default = 300;
-  p_descr = "Interval at which images are created on schedule (secs).";
-  p_help = "The application waits until the interval has passed, plus any specified delay, and then creates the images.";
-} images_schedule_interval_secs;
-
-paramdef int {
-  p_default = 60;
-  p_descr = "Delay between scheduled time and image creation (secs).";
-  p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
-} images_schedule_delay_secs;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "Start time for image generation in archive mode.";
-  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
-} images_archive_start_time;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "End time for image generation in archive mode.";
-  p_help = "Image generation is terminated when the search time exceeds this end time.";
-  p_help = "Only applicable for image generation.";
-} images_archive_end_time;
-
-paramdef int {
-  p_default = 300;
-  p_descr = "Time between scans in archive mode (secs).";
-  p_help = "Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.";
-} images_scan_interval_secs;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to specify the sweep indexes for the image generation.";
-  p_help = "If TRUE, only the specified sweeps will be processed.";
-} images_set_sweep_index_list;
-
-paramdef int {
-  p_default = { 0, 1, 2 };
-  p_descr = "List of valid sweep indexes for image generation.";
-  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
-} images_sweep_index_list[];
 
 commentdef {
   p_header = "SIMULATION MODE";
@@ -3468,6 +2634,157 @@ commentdef {
 }
 
 commentdef {
+  p_header = "<CREATING_IMAGES>";
+  p_text =
+    "In creating files for the field catalog, the file name is of the form:\n\n"
+    "\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\n"
+    "The following parameters control the output directory, and the construction of the file name";
+}
+
+paramdef string {
+  p_default = "/tmp/images/Qucid";
+  p_descr = "Output directory for images generated by this app.";
+} images_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create a subdirectory for each day.";
+  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
+} images_write_to_day_dir;
+
+paramdef string {
+  p_default = "radar";
+  p_descr = "Set the category string.";
+  p_help = "If empty, no category will be included.";
+} images_file_name_category;
+
+paramdef string {
+  p_default = "NSF_NCAR_GV_HCR";
+  p_descr = "Set the platform string.";
+  p_help = "If empty, no platform will be included.";
+} images_file_name_platform;
+
+paramdef string {
+  p_default = "png";
+  p_descr = "Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.";
+  p_help = "An extension is always required";
+} images_file_name_extension;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Set the delimiter between the parts of the file name.";
+  p_help = "NOTE: before the extension the delimited is always a period: '.'.";
+} images_file_name_delimiter;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the time part will be omitted.";
+} images_include_time_part_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the SS will be excluuded from the time part.";
+} images_include_seconds_in_time_part;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes the field label (product type).";
+  p_help = "If FALSE, the field label will be omitted.";
+} images_include_field_label_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan type in the image file name.";
+  p_help = "If TRUE, the scan type will be added to the image file name.";
+} images_include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the image file name.";
+  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write latest_data_info files when an image is created.";
+  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
+} images_write_latest_data_info;
+
+commentdef {
+  p_header = "OPTION TO CREATE IMAGES AUTOMATICALLY";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create images automatically.";
+  p_descr = "If true, images will either be created on a schedule, or the images will be created for a single time and the app will then exit.";
+} images_auto_create;
+
+typedef enum {
+  CREATE_IMAGES_THEN_EXIT,
+  CREATE_IMAGES_ON_REALTIME_SCHEDULE,
+  CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
+} images_creation_mode_t;
+
+paramdef enum images_creation_mode_t {
+  p_default = CREATE_IMAGES_THEN_EXIT;
+  p_descr = "Mode for controlling auto image creation.";
+  p_help = "\n\nCREATE_IMAGES_FROM_GUI: create images interactively using the GUI.\n\nCREATE_IMAGES_THEN_EXIT: for the specified start time and time span, create an output image for every field in the fields array, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.";
+} images_creation_mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval at which images are created on schedule (secs).";
+  p_help = "The application waits until the interval has passed, plus any specified delay, and then creates the images.";
+} images_schedule_interval_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Delay between scheduled time and image creation (secs).";
+  p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
+} images_schedule_delay_secs;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for image generation in archive mode.";
+  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
+} images_archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for image generation in archive mode.";
+  p_help = "Image generation is terminated when the search time exceeds this end time.";
+  p_help = "Only applicable for image generation.";
+} images_archive_end_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.";
+} images_scan_interval_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the sweep indexes for the image generation.";
+  p_help = "If TRUE, only the specified sweeps will be processed.";
+} images_set_sweep_index_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep indexes for image generation.";
+  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
+} images_sweep_index_list[];
+
+commentdef {
+  p_header = "</CREATING_IMAGES>";
+}
+
+commentdef {
+  p_header = "<HAWKEYE_SPECIFIC_DETAILS>";
+}
+
+commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }
 
@@ -3542,4 +2859,663 @@ paramdef struct show_status_t {
   p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
 
 } show_status_in_gui;
+
+typedef enum
+{
+  POLAR_DISPLAY,
+  BSCAN_DISPLAY
+} display_mode_t;
+
+paramdef enum display_mode_t
+{
+  p_descr = "Main display mode.";
+  p_help =
+  "\tPOLAR_DISPLAY - normal HORIZ and VERT display. "
+  "\tBSCAN_DISPLAY - BSCAN mode.\n";
+  p_default = POLAR_DISPLAY;
+} display_mode;
+
+commentdef {
+  p_header = "NAMES AND LABELS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar name in the data.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Radar name if overridden.";
+} radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to display the site name in the left panel.";
+} display_site_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override site name in the data.";
+} override_site_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site name if overridden.";
+} site_name;
+
+commentdef {
+  p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
+}
+
+paramdef int {
+  p_default = 1100;
+  p_descr = "Startup width of main window (pixels).";
+} main_window_width;
+
+paramdef int {
+  p_default = 635;
+  p_descr = "Startup height of main window (pixels).";
+} main_window_height;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main window (pixels).";
+} main_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main window (pixels).";
+} main_window_start_y;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} color_scale_width;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} label_font_size;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} background_color2;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of text annotation in main display.";
+} text_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of grids and range rings.";
+} grid_and_range_ring_color;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} range_ring_label_font_size;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of cross at click point.";
+} click_cross_color;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Size of cross at click point (pixels).";
+  p_help = "Size of cross drawn at click point, to select data.";
+} click_cross_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line width for click cross.";
+} click_cross_line_width;
+
+commentdef {
+  p_header = "HORIZ MODE DISPLAY";
+}
+
+typedef enum
+{
+  HORIZ_FULL,
+  HORIZ_AIRBORNE
+} horiz_display_type_t;
+
+paramdef enum horiz_display_type_t
+{
+  p_descr = "Type of display to use for the HORIZ window.";
+  p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
+           "This is the default.\n"
+           "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
+           "This display shows just the 180 degrees of radar pointing forward "
+           "from the nose of the plane.\n";
+  p_default = HORIZ_FULL;
+} horiz_display_type;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Aspect ratio (width/height) of HORIZ window.";
+  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
+} horiz_aspect_ratio;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set HORIZ grids overlay on at startup.";
+} horiz_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set HORIZ range rings overlay on at startup.";
+} horiz_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
+} horiz_azimuth_lines_on_at_startup;
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the HORIZ plot window";
+  p_help = "This include time, field name and elevation angle.";
+} horiz_main_legend_pos;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} horiz_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'horiz_override_rendering_beam_width'";
+} horiz_rendering_beam_width;
+
+commentdef {
+  p_header = "VERT MODE DISPLAY";
+}
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup width of VERT window (pixels).";
+} vert_window_width;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup height of VERT window (pixels).";
+} vert_window_height;
+
+paramdef int {
+  p_default = 1100;
+  p_descr = "Startup X for VERT window (pixels).";
+} vert_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for VERT window (pixels).";
+} vert_window_start_y;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin in VERT mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} vert_top_margin2;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin in VERT mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} vert_bottom_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of left margin in VERT mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} vert_left_margin2;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of right margin in VERT mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} vert_right_margin2;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} vert_label_font_size;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Length of ticks on axes (pixels).";
+} vert_axis_tick_len;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Ideal number of ticks on axes.";
+} vert_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} vert_text_margin;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Flag indicating to display full 180 degrees in VERT window. "
+            "If set to false, the VERT window will just display 90 degrees "
+            "of the VERT.";
+} vert_display_180_degrees;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Aspect ratio (width/height) of VERT window.";
+  p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
+} vert_aspect_ratio;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height of data in VERT window (km).";
+  p_descr = "This can be adjusted interactively.";
+} vert_max_height_km;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale for VERT window (pixels).";
+} vert_color_scale_width;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set VERT grids overlay on at startup.";
+} vert_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set VERT range rings overlay on at startup.";
+} vert_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set VERT elevation lines overlay on at startup.";
+} vert_elevation_lines_on_at_startup;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the VERT plot window";
+  p_help = "This include time, field name and elevation angle.";
+} vert_main_legend_pos;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Size of the queue for VERT beams.";
+  p_help = "After the queue reaches this size, older beams are discarded.";
+} vert_beam_queue_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} vert_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'vert_override_rendering_beam_width'";
+} vert_rendering_beam_width;
+
+commentdef {
+  p_header = "BSCAN TIME LIMITS";
+}
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Number of seconds in BSCAN display.";
+  p_help = "In REALTIME mode, when we reach the right-hand side of the display, the existing plot will be moved left to make room for more data.";
+} bscan_time_span_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to truncate the plot start time to even seconds.";
+  p_help = "If true, we truncate the start time to the previous second.";
+} bscan_truncate_start_time;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Precision of subseconds in time labels.";
+  p_help = "Number of decimals of precision in time labels. Set to 0 for times in integer seconds.";
+  p_min = 0;
+  p_max = 9;
+} bscan_subsec_precision;
+
+commentdef {
+  p_header = "BSCAN REALTIME CONTROLS";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "What fraction of the existing data to save when moving the plot to the left.";
+  p_help = "When we reach the right-hand side of the display, we need to move the plot to the left. This is the fraction of the plot that is saved after the move has taken place.";
+} bscan_realtime_fraction_saved;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Min time between incoming beams (secs).";
+  p_help = "If beams arrive too fast, we discard some so that the time between the beams is at least this long.";
+} bscan_min_secs_between_reading_beams;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min time between rendering (secs).";
+  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU and/or GPU.";
+} bscan_min_secs_between_rendering_beams;
+
+commentdef {
+  p_header = "BSCAN RANGE AND ALTITUDE LIMITS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Specify the min and max range when in range mode.";
+  p_help = "If false, we will use the start range and max range in the data.";
+} bscan_specify_range_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Min range to be plotted (km).";
+  p_help = "Used if 'bscan_specify_range_limits' is true.";
+} bscan_min_range_km;
+
+paramdef double {
+  p_default = 25;
+  p_descr = "Max range to be plotted (km).";
+  p_help = "Used if 'bscan_specify_range_limits' is true.";
+} bscan_max_range_km;
+
+paramdef double {
+  p_default = -0.5;
+  p_descr = "Min altitude plotted (km).";
+} bscan_min_altitude_km;
+
+paramdef double {
+  p_default = 25;
+  p_descr = "Max altitude plotted (km).";
+} bscan_max_altitude_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Use feet for altitude units?";
+  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
+} bscan_altitude_in_feet;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Use feet for range units?";
+  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
+} bscan_range_in_feet;
+
+typedef enum {
+  RANGE_AXIS_UP, RANGE_AXIS_DOWN, RANGE_AXIS_ALTITUDE
+} range_axis_mode_t;
+
+paramdef enum range_axis_mode_t {
+  p_default = RANGE_AXIS_ALTITUDE;
+  p_descr = "Options for plotting range in the vertical scale.";
+  p_help = "RANGE_AXIS_UP - instrument is at the bottom, range plotted positively upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the altitude of the gates in earth coordinates.";
+} bscan_range_axis_mode;
+
+commentdef {
+  p_header = "BSCAN ANGLE LIMITS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the min and max elevation angle.";
+  p_help = "If true, only beams within the specified limits will be plotted.";
+} bscan_specify_elevation_limits;
+
+paramdef double {
+  p_default = 89;
+  p_descr = "Min elevation angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
+} bscan_min_elevation_deg;
+
+paramdef double {
+  p_default = 91;
+  p_descr = "Max elevation angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
+} bscan_max_elevation_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the min and max azimuth angle.";
+  p_help = "If true, only beams within the specified limits will be plotted.";
+} bscan_specify_azimuth_limits;
+
+paramdef double {
+  p_default = 89;
+  p_descr = "Min azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_min_azimuth_deg;
+
+paramdef double {
+  p_default = 91;
+  p_descr = "Max azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_max_azimuth_deg;
+
+commentdef {
+  p_header = "BSCAN CENSOR DATA BELOW SURFACE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to censor data below the measured surface";
+  p_descr = "If true, and we can identify the surface echo, suppress data below the surface.";
+} bscan_censor_data_below_surface;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of field used to identify the surface from the data.";
+  p_help = "The surface will be identified at the gate with the maximum value in this field.";
+} bscan_surface_field;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minumum range to the surface (km).";
+  p_help = "We will search for the surface echo in the gates beyound this range.";
+} bscan_min_range_to_surface_km;
+
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Margin of data plotted beyond the surface (km).";
+  p_help = "We will censor the data beyond the surface gate, plus this range margin.";
+} bscan_surface_range_margin_km;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum value of the surface field, below the measured surface.";
+  p_help = "After finding the range to the surface, we inspect the surface_field values below the surface. If we find values that exceed this parameter, we conclude that the surface cannot be reliably found.";
+} bscan_max_field_val_below_surface;
+
+commentdef {
+  p_header = "BSCAN MARGINS";
+}
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Height of top margin in BSCAN mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} bscan_top_margin;
+
+paramdef int {
+  p_default = 45;
+  p_descr = "Height of bottom margin in BSCAN mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} bscan_bottom_margin;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Width of left margin in BSCAN mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} bscan_left_margin;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of right margin in BSCAN mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} bscan_right_margin;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Length of ticks on axes (pixels).";
+} bscan_axis_tick_len;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Ideal number of ticks on axes.";
+} bscan_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} bscan_text_margin;
+
+commentdef {
+  p_header = "BSCAN TITLES, LABELS AND AXES";
+}
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} bscan_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in bscan (pixels).";
+} bscan_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis values (pixels).";
+} bscan_axis_values_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes in bscan.";
+} bscan_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on bscan.";
+} bscan_grid_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of labels in bscan.";
+} bscan_labels_color;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular time intervals.";
+} bscan_draw_time_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular range intervals.";
+} bscan_draw_range_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw a line for the instrument location.";
+  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
+} bscan_draw_instrument_height_line;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of instrument height line in ALTITUDE plot.";
+} bscan_instrument_height_color;
+
+commentdef {
+  p_header = "DISTANCE SCALE";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot distance as well as time on the time axis.";
+  p_help = "If true, extra tick marks will show the distance in km along the time axis, in addition to the time.";
+} bscan_add_distance_to_time_axis;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Number of segments to be used for computing distance.";
+  p_help = "We divide the rays into this number of segments and then compute the distance travelled during each segment using the change in lat/lon position. We keep the number of segments reasonably small to avoid unnecessary CPU usage.";
+} bscan_n_segments_for_computing_distance;
+
+commentdef {
+  p_header = "BSCAN LEGENDS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} bscan_plot_starting_latlon_as_legend;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'bscan_plot_starting_latlon_as_legend'.";
+} bscan_starting_latlon_legend_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the mean track and speed in a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} bscan_plot_mean_track_and_speed_as_legend;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_RIGHT;
+  p_descr = "Position of track/speed legend in plot";
+  p_help = "The mean track and speed will be plotted as a legend in the location specified. See 'bscan_plot_track_and_speed_as_legend'.";
+} bscan_mean_track_and_speed_legend_pos;
+
+commentdef {
+  p_header = "BSCAN DWELL CONTROLS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Compute dwell from image size and time range.";
+  p_help = "If TRUE, we compute the optimal dwell so that there will be approximately 1 dwell for each pixel in the resulting image. If FALSE, the dwell is specified below.";;
+} bscan_archive_dwell_auto;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Specified dwell time for archive mode (secs).";
+} bscan_archive_dwell_secs;
+
+typedef enum {
+  DWELL_STATS_MEAN = 0,
+  DWELL_STATS_MEDIAN = 1,
+  DWELL_STATS_MAXIMUM = 2,
+  DWELL_STATS_MINIMUM = 3,
+  DWELL_STATS_MIDDLE = 4
+} bscan_dwell_stats_t;
+
+paramdef enum bscan_dwell_stats_t {
+  p_default = DWELL_STATS_MIDDLE;
+  p_descr = "Method for computing stats on the dwell.";
+  p_help = "Applies to READ_RAYS_IN_INTERVAL mode. MIDDLE refers to the middle ray in the dwell sequence.";
+} bscan_dwell_stats;
+
+commentdef {
+  p_header = "</HAWKEYE_SPECIFIC_DETAILS>";
+}
 

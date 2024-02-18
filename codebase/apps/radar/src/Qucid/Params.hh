@@ -107,43 +107,6 @@ public:
   } projection_t;
 
   typedef enum {
-    POLAR_DISPLAY = 0,
-    BSCAN_DISPLAY = 1
-  } display_mode_t;
-
-  typedef enum {
-    HORIZ_FULL = 0,
-    HORIZ_AIRBORNE = 1
-  } horiz_display_type_t;
-
-  typedef enum {
-    LEGEND_TOP_LEFT = 0,
-    LEGEND_TOP_RIGHT = 1,
-    LEGEND_BOTTOM_LEFT = 2,
-    LEGEND_BOTTOM_RIGHT = 3
-  } legend_pos_t;
-
-  typedef enum {
-    RANGE_AXIS_UP = 0,
-    RANGE_AXIS_DOWN = 1,
-    RANGE_AXIS_ALTITUDE = 2
-  } range_axis_mode_t;
-
-  typedef enum {
-    DWELL_STATS_MEAN = 0,
-    DWELL_STATS_MEDIAN = 1,
-    DWELL_STATS_MAXIMUM = 2,
-    DWELL_STATS_MINIMUM = 3,
-    DWELL_STATS_MIDDLE = 4
-  } bscan_dwell_stats_t;
-
-  typedef enum {
-    CREATE_IMAGES_THEN_EXIT = 0,
-    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
-    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
-  } images_creation_mode_t;
-
-  typedef enum {
     SYMPROD_DEBUG_OFF = 0,
     SYMPROD_DEBUG_NORM = 1,
     SYMPROD_DEBUG_VERBOSE = 2
@@ -186,6 +149,43 @@ public:
     ROUTE_REGULAR_INTERVALS = 0,
     ROUTE_EQUAL_DIVISIONS = 1
   } route_label_style_t;
+
+  typedef enum {
+    CREATE_IMAGES_THEN_EXIT = 0,
+    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
+    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
+  } images_creation_mode_t;
+
+  typedef enum {
+    POLAR_DISPLAY = 0,
+    BSCAN_DISPLAY = 1
+  } display_mode_t;
+
+  typedef enum {
+    HORIZ_FULL = 0,
+    HORIZ_AIRBORNE = 1
+  } horiz_display_type_t;
+
+  typedef enum {
+    LEGEND_TOP_LEFT = 0,
+    LEGEND_TOP_RIGHT = 1,
+    LEGEND_BOTTOM_LEFT = 2,
+    LEGEND_BOTTOM_RIGHT = 3
+  } legend_pos_t;
+
+  typedef enum {
+    RANGE_AXIS_UP = 0,
+    RANGE_AXIS_DOWN = 1,
+    RANGE_AXIS_ALTITUDE = 2
+  } range_axis_mode_t;
+
+  typedef enum {
+    DWELL_STATS_MEAN = 0,
+    DWELL_STATS_MEDIAN = 1,
+    DWELL_STATS_MAXIMUM = 2,
+    DWELL_STATS_MINIMUM = 3,
+    DWELL_STATS_MIDDLE = 4
+  } bscan_dwell_stats_t;
 
   // struct typedefs
 
@@ -643,27 +643,13 @@ public:
 
   char* projection_type_str;
 
-  double lambert_lat1;
-
-  double lambert_lat2;
-
-  double tangent_lat;
-
-  double tangent_lon;
-
-  double central_scale;
-
-  double north_angle;
-
-  tdrp_bool_t use_cosine;
-
-  int use_cosine_correction;
-
   projection_t projection_type;
 
   double proj_origin_lat;
 
   double proj_origin_lon;
+
+  double proj_rotation;
 
   double proj_lat1;
 
@@ -689,250 +675,7 @@ public:
 
   double proj_offset_origin_longitude;
 
-  display_mode_t display_mode;
-
-  tdrp_bool_t override_radar_name;
-
-  char* radar_name;
-
-  tdrp_bool_t display_site_name;
-
-  tdrp_bool_t override_site_name;
-
-  char* site_name;
-
-  int main_window_width;
-
-  int main_window_height;
-
-  int main_window_start_x;
-
-  int main_window_start_y;
-
-  int color_scale_width;
-
-  int label_font_size;
-
-  char* background_color2;
-
-  char* text_color;
-
-  char* grid_and_range_ring_color;
-
-  int range_ring_label_font_size;
-
-  char* click_cross_color;
-
-  int click_cross_size;
-
-  int click_cross_line_width;
-
-  horiz_display_type_t horiz_display_type;
-
-  double horiz_aspect_ratio;
-
-  tdrp_bool_t horiz_grids_on_at_startup;
-
-  tdrp_bool_t horiz_range_rings_on_at_startup;
-
-  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
-
-  legend_pos_t horiz_main_legend_pos;
-
-  tdrp_bool_t horiz_override_rendering_beam_width;
-
-  double horiz_rendering_beam_width;
-
-  int vert_window_width;
-
-  int vert_window_height;
-
-  int vert_window_start_x;
-
-  int vert_window_start_y;
-
-  int vert_top_margin2;
-
-  int vert_bottom_margin;
-
-  int vert_left_margin2;
-
-  int vert_right_margin2;
-
-  int vert_label_font_size;
-
-  int vert_axis_tick_len;
-
-  int vert_n_ticks_ideal;
-
-  int vert_text_margin;
-
-  tdrp_bool_t vert_display_180_degrees;
-
-  double vert_aspect_ratio;
-
-  double vert_max_height_km;
-
-  int vert_color_scale_width;
-
-  tdrp_bool_t vert_grids_on_at_startup;
-
-  tdrp_bool_t vert_range_rings_on_at_startup;
-
-  tdrp_bool_t vert_elevation_lines_on_at_startup;
-
-  legend_pos_t vert_main_legend_pos;
-
-  int vert_beam_queue_size;
-
-  tdrp_bool_t vert_override_rendering_beam_width;
-
-  double vert_rendering_beam_width;
-
-  double bscan_time_span_secs;
-
-  tdrp_bool_t bscan_truncate_start_time;
-
-  int bscan_subsec_precision;
-
-  double bscan_realtime_fraction_saved;
-
-  double bscan_min_secs_between_reading_beams;
-
-  double bscan_min_secs_between_rendering_beams;
-
-  tdrp_bool_t bscan_specify_range_limits;
-
-  double bscan_min_range_km;
-
-  double bscan_max_range_km;
-
-  double bscan_min_altitude_km;
-
-  double bscan_max_altitude_km;
-
-  tdrp_bool_t bscan_altitude_in_feet;
-
-  tdrp_bool_t bscan_range_in_feet;
-
-  range_axis_mode_t bscan_range_axis_mode;
-
-  tdrp_bool_t bscan_specify_elevation_limits;
-
-  double bscan_min_elevation_deg;
-
-  double bscan_max_elevation_deg;
-
-  tdrp_bool_t bscan_specify_azimuth_limits;
-
-  double bscan_min_azimuth_deg;
-
-  double bscan_max_azimuth_deg;
-
-  tdrp_bool_t bscan_censor_data_below_surface;
-
-  char* bscan_surface_field;
-
-  double bscan_min_range_to_surface_km;
-
-  double bscan_surface_range_margin_km;
-
-  double bscan_max_field_val_below_surface;
-
-  int bscan_top_margin;
-
-  int bscan_bottom_margin;
-
-  int bscan_left_margin;
-
-  int bscan_right_margin;
-
-  int bscan_axis_tick_len;
-
-  int bscan_n_ticks_ideal;
-
-  int bscan_text_margin;
-
-  int bscan_title_font_size;
-
-  int bscan_axis_label_font_size;
-
-  int bscan_axis_values_font_size;
-
-  char* bscan_axes_color;
-
-  char* bscan_grid_color;
-
-  char* bscan_labels_color;
-
-  tdrp_bool_t bscan_draw_time_grid_lines;
-
-  tdrp_bool_t bscan_draw_range_grid_lines;
-
-  tdrp_bool_t bscan_draw_instrument_height_line;
-
-  char* bscan_instrument_height_color;
-
-  tdrp_bool_t bscan_add_distance_to_time_axis;
-
-  int bscan_n_segments_for_computing_distance;
-
-  tdrp_bool_t bscan_plot_starting_latlon_as_legend;
-
-  legend_pos_t bscan_starting_latlon_legend_pos;
-
-  tdrp_bool_t bscan_plot_mean_track_and_speed_as_legend;
-
-  legend_pos_t bscan_mean_track_and_speed_legend_pos;
-
-  tdrp_bool_t bscan_archive_dwell_auto;
-
-  double bscan_archive_dwell_secs;
-
-  bscan_dwell_stats_t bscan_dwell_stats;
-
-  char* images_output_dir;
-
-  tdrp_bool_t images_write_to_day_dir;
-
-  char* images_file_name_category;
-
-  char* images_file_name_platform;
-
-  char* images_file_name_extension;
-
-  char* images_file_name_delimiter;
-
-  tdrp_bool_t images_include_time_part_in_file_name;
-
-  tdrp_bool_t images_include_seconds_in_time_part;
-
-  tdrp_bool_t images_include_field_label_in_file_name;
-
-  tdrp_bool_t images_include_scan_type_in_file_name;
-
-  tdrp_bool_t images_include_scan_id_in_file_name;
-
-  tdrp_bool_t images_write_latest_data_info;
-
-  tdrp_bool_t images_auto_create;
-
-  images_creation_mode_t images_creation_mode;
-
-  int images_schedule_interval_secs;
-
-  int images_schedule_delay_secs;
-
-  char* images_archive_start_time;
-
-  char* images_archive_end_time;
-
-  int images_scan_interval_secs;
-
-  tdrp_bool_t images_set_sweep_index_list;
-
-  int *_images_sweep_index_list;
-  int images_sweep_index_list_n;
+  tdrp_bool_t use_cosine_correction;
 
   int sim_sleep_msecs;
 
@@ -1477,7 +1220,252 @@ public:
   product_adjustment_t *_product_adjustments;
   int product_adjustments_n;
 
+  char* images_output_dir;
+
+  tdrp_bool_t images_write_to_day_dir;
+
+  char* images_file_name_category;
+
+  char* images_file_name_platform;
+
+  char* images_file_name_extension;
+
+  char* images_file_name_delimiter;
+
+  tdrp_bool_t images_include_time_part_in_file_name;
+
+  tdrp_bool_t images_include_seconds_in_time_part;
+
+  tdrp_bool_t images_include_field_label_in_file_name;
+
+  tdrp_bool_t images_include_scan_type_in_file_name;
+
+  tdrp_bool_t images_include_scan_id_in_file_name;
+
+  tdrp_bool_t images_write_latest_data_info;
+
+  tdrp_bool_t images_auto_create;
+
+  images_creation_mode_t images_creation_mode;
+
+  int images_schedule_interval_secs;
+
+  int images_schedule_delay_secs;
+
+  char* images_archive_start_time;
+
+  char* images_archive_end_time;
+
+  int images_scan_interval_secs;
+
+  tdrp_bool_t images_set_sweep_index_list;
+
+  int *_images_sweep_index_list;
+  int images_sweep_index_list_n;
+
   show_status_t show_status_in_gui;
+
+  display_mode_t display_mode;
+
+  tdrp_bool_t override_radar_name;
+
+  char* radar_name;
+
+  tdrp_bool_t display_site_name;
+
+  tdrp_bool_t override_site_name;
+
+  char* site_name;
+
+  int main_window_width;
+
+  int main_window_height;
+
+  int main_window_start_x;
+
+  int main_window_start_y;
+
+  int color_scale_width;
+
+  int label_font_size;
+
+  char* background_color2;
+
+  char* text_color;
+
+  char* grid_and_range_ring_color;
+
+  int range_ring_label_font_size;
+
+  char* click_cross_color;
+
+  int click_cross_size;
+
+  int click_cross_line_width;
+
+  horiz_display_type_t horiz_display_type;
+
+  double horiz_aspect_ratio;
+
+  tdrp_bool_t horiz_grids_on_at_startup;
+
+  tdrp_bool_t horiz_range_rings_on_at_startup;
+
+  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
+
+  legend_pos_t horiz_main_legend_pos;
+
+  tdrp_bool_t horiz_override_rendering_beam_width;
+
+  double horiz_rendering_beam_width;
+
+  int vert_window_width;
+
+  int vert_window_height;
+
+  int vert_window_start_x;
+
+  int vert_window_start_y;
+
+  int vert_top_margin2;
+
+  int vert_bottom_margin;
+
+  int vert_left_margin2;
+
+  int vert_right_margin2;
+
+  int vert_label_font_size;
+
+  int vert_axis_tick_len;
+
+  int vert_n_ticks_ideal;
+
+  int vert_text_margin;
+
+  tdrp_bool_t vert_display_180_degrees;
+
+  double vert_aspect_ratio;
+
+  double vert_max_height_km;
+
+  int vert_color_scale_width;
+
+  tdrp_bool_t vert_grids_on_at_startup;
+
+  tdrp_bool_t vert_range_rings_on_at_startup;
+
+  tdrp_bool_t vert_elevation_lines_on_at_startup;
+
+  legend_pos_t vert_main_legend_pos;
+
+  int vert_beam_queue_size;
+
+  tdrp_bool_t vert_override_rendering_beam_width;
+
+  double vert_rendering_beam_width;
+
+  double bscan_time_span_secs;
+
+  tdrp_bool_t bscan_truncate_start_time;
+
+  int bscan_subsec_precision;
+
+  double bscan_realtime_fraction_saved;
+
+  double bscan_min_secs_between_reading_beams;
+
+  double bscan_min_secs_between_rendering_beams;
+
+  tdrp_bool_t bscan_specify_range_limits;
+
+  double bscan_min_range_km;
+
+  double bscan_max_range_km;
+
+  double bscan_min_altitude_km;
+
+  double bscan_max_altitude_km;
+
+  tdrp_bool_t bscan_altitude_in_feet;
+
+  tdrp_bool_t bscan_range_in_feet;
+
+  range_axis_mode_t bscan_range_axis_mode;
+
+  tdrp_bool_t bscan_specify_elevation_limits;
+
+  double bscan_min_elevation_deg;
+
+  double bscan_max_elevation_deg;
+
+  tdrp_bool_t bscan_specify_azimuth_limits;
+
+  double bscan_min_azimuth_deg;
+
+  double bscan_max_azimuth_deg;
+
+  tdrp_bool_t bscan_censor_data_below_surface;
+
+  char* bscan_surface_field;
+
+  double bscan_min_range_to_surface_km;
+
+  double bscan_surface_range_margin_km;
+
+  double bscan_max_field_val_below_surface;
+
+  int bscan_top_margin;
+
+  int bscan_bottom_margin;
+
+  int bscan_left_margin;
+
+  int bscan_right_margin;
+
+  int bscan_axis_tick_len;
+
+  int bscan_n_ticks_ideal;
+
+  int bscan_text_margin;
+
+  int bscan_title_font_size;
+
+  int bscan_axis_label_font_size;
+
+  int bscan_axis_values_font_size;
+
+  char* bscan_axes_color;
+
+  char* bscan_grid_color;
+
+  char* bscan_labels_color;
+
+  tdrp_bool_t bscan_draw_time_grid_lines;
+
+  tdrp_bool_t bscan_draw_range_grid_lines;
+
+  tdrp_bool_t bscan_draw_instrument_height_line;
+
+  char* bscan_instrument_height_color;
+
+  tdrp_bool_t bscan_add_distance_to_time_axis;
+
+  int bscan_n_segments_for_computing_distance;
+
+  tdrp_bool_t bscan_plot_starting_latlon_as_legend;
+
+  legend_pos_t bscan_starting_latlon_legend_pos;
+
+  tdrp_bool_t bscan_plot_mean_track_and_speed_as_legend;
+
+  legend_pos_t bscan_mean_track_and_speed_legend_pos;
+
+  tdrp_bool_t bscan_archive_dwell_auto;
+
+  double bscan_archive_dwell_secs;
+
+  bscan_dwell_stats_t bscan_dwell_stats;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -1486,7 +1474,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[495];
+  mutable TDRPtable _table[492];
 
   const char *_className;
 

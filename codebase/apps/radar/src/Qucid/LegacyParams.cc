@@ -1129,10 +1129,10 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.tangent_lat", 90.0, true, "proj_tangent_lat");
   _getDouble("cidd.tangent_lon", 0.0, true, "proj_tangent_lon");
   _getDouble("cidd.central_scale", 1.0, true, "proj_central_scale");
-  _getDouble("cidd.north_angle", 0.0);
-  _getBoolean("cidd.use_cosine", 1); // legacy
-  _getLong("cidd.use_cosine_correction", 1);
-  _getDouble("cidd.scale_units_per_km",1.0);
+  _getDouble("cidd.north_angle", 0.0, true, "proj_rotation");
+  _getBoolean("cidd.use_cosine", 1, true, "use_cosine_correction"); // legacy
+  _getBoolean("cidd.use_cosine_correction", 1);
+  _getDouble("cidd.scale_units_per_km", 1.0);
   _getString("cidd.scale_units_label", "km");
 
   // data retrieval
