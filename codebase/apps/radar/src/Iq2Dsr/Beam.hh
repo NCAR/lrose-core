@@ -463,6 +463,10 @@ private:
   void _filterDpVOnlyFixedPrt();
   void _filterDpVOnlyStagPrt();
 
+  void _conditionDpFiltFields(MomentsFields &fields,
+                              MomentsFields &fieldsF,
+                              MomentsFields &fieldsN);
+  
   int _specCmdInit();
   void _filtSpecCmdSimHv();
   

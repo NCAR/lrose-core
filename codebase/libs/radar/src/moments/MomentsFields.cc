@@ -201,6 +201,7 @@ void MomentsFields::init()
   rhohv_test_unfilt = missingDouble;
   rhohv_test_filt = missingDouble;
   rhohv_test_improv = missingDouble;
+  rhohv_test_flag = missingDouble;
   
   tdbz_interest = missingDouble;
   spin_interest = missingDouble;
@@ -556,6 +557,7 @@ void MomentsFields::initToZero()
   rhohv_test_unfilt = 0.0;
   rhohv_test_filt = 0.0;
   rhohv_test_improv = 0.0;
+  rhohv_test_flag = 0.0;
   
   tdbz_interest = 0.0;
   spin_interest = 0.0;

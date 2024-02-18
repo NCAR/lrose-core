@@ -291,7 +291,6 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
     }
 
     flds->cmd = sumInterest / sumWeights;
-    flds->cmd_flag = 0;
     
     double checkThreshold = cmdThreshold;
 
@@ -308,13 +307,18 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
       }
     }
     
+    flds->cmd_flag = 0;
     if (flds->cmd >= checkThreshold) {
       flds->cmd_flag = 1;
     }
     
+    flds->rhohv_test_flag = 0;
     if (_params.apply_rhohv_test_in_cmd) {
-      if (flds->rhohv_test_improv >= _params.rhohv_improvement_factor_threshold) {
-        flds->cmd_flag = 1;
+      if (flds->rhohv_test_improv >= _params.rhohv_improv_thresh_for_power ||
+          flds->rhohv_test_improv >= _params.rhohv_improv_thresh_for_vel ||
+          flds->rhohv_test_improv >= _params.rhohv_improv_thresh_for_phase ||
+          flds->rhohv_test_improv >= _params.rhohv_improv_thresh_for_rho) {
+        flds->rhohv_test_flag = 1;
       }
     }
     
@@ -1028,7 +1032,7 @@ void Cmd::_applyRegrFiltFixed(const vector<RadarComplex_t> &iq,
   
   // apply filter
   
-  _regr.apply(iq.data(), 5, filt.data());
+  _regr.apply(iq.data(), 3, filt.data());
   
 }
 
@@ -1058,8 +1062,8 @@ void Cmd::_applyRegrFiltStag(const vector<RadarComplex_t> &iq,
   filtShort.resize(nSamplesHalf);
   filtLong.resize(nSamplesHalf);
   
-  _regr.apply(iqShort.data(), 5, filtShort.data());
-  _regr.apply(iqLong.data(), 5, filtLong.data());
+  _regr.apply(iqShort.data(), 3, filtShort.data());
+  _regr.apply(iqLong.data(), 3, filtLong.data());
 
   // copy results to filt array
   
@@ -1514,7 +1518,7 @@ void Cmd::_applyNexradSpikeFilter(int nGates)
   // loop through gates
 
   for (int ii = 2; ii < nGates - 3; ii++) {
-
+    
     MomentsFields *fldMinus2F = _gateData[ii - 2]->fldsF;
     MomentsFields *fldMinus1F = _gateData[ii - 1]->fldsF;
     MomentsFields *fldF = _gateData[ii]->fldsF;

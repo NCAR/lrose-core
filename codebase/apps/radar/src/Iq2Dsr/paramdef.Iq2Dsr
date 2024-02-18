@@ -1893,21 +1893,39 @@ paramdef double {
 } phidp_sdev_interest_weight;
 
 commentdef {
-  p_header = "RHOHV TEST to AUGMENT CMD";
-  p_text = "If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low clutter-to-noise ratio.";
+  p_header = "RHOHV TEST to AUGMENT CMD.";
+  p_text = "If clutter is present along with weather, RHOHV should increase after application of the clutter filter. The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0. We use different improvement thresholds to decide whether the filtered spectrum should be used for power or phase related fields.";
 };
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Apply the RHOHV test in CMD.";
-  p_help = "This allows us to identify areas of weak clutter contamination that CMD missed. Only applies to dual-pol radars for which RHOHV is available.";
+  p_help = "This allows us to identify areas of clutter contamination that CMD missed. Only applies to dual-pol radars for which RHOHV is available.";
 } apply_rhohv_test_in_cmd;
 
 paramdef double {
   p_default = 4.0;
-  p_descr = "The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.";
-  p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";
-} rhohv_improvement_factor_threshold;
+  p_descr = "RHOHV improvment factor threshold for power-based fields.";
+  p_help = "If the improvement exceeds this threshold, we use the filtered spectrum for power-based fields.";
+} rhohv_improv_thresh_for_power;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "RHOHV improvment factor threshold for velocity fields.";
+  p_help = "If the improvement exceeds this threshold, we use the filtered spectrum for velocity-related fields.";
+} rhohv_improv_thresh_for_vel;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "RHOHV improvment factor threshold for phase-related fields.";
+  p_help = "If the improvement exceeds this threshold, we use the filtered spectrum for phase-related fields, e.g. phidp.";
+} rhohv_improv_thresh_for_phase;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "RHOHV improvment factor threshold for correlation-related fields.";
+  p_help = "If the improvement exceeds this threshold, we use the filtered spectrum for correlation-related fields, e.g. rhohv.";
+} rhohv_improv_thresh_for_rho;
 
 commentdef {
   p_header = "SPECTRAL CMD";
@@ -2244,6 +2262,7 @@ typedef enum {
   RHOHV_TEST_UNFILT,
   RHOHV_TEST_FILT,
   RHOHV_TEST_IMPROV,
+  RHOHV_TEST_FLAG,
 
   TDBZ_INTEREST,
   SPIN_INTEREST,

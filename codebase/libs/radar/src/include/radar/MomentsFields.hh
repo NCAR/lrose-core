@@ -208,6 +208,7 @@ public:
   double rhohv_test_unfilt;
   double rhohv_test_filt;
   double rhohv_test_improv;
+  double rhohv_test_flag;
   
   double tdbz_interest;
   double spin_interest;

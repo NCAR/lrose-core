@@ -2282,7 +2282,7 @@ void Beam::_filterDpAltHvCoCross()
     
     // check if CMD identified clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && !fields.rhohv_test_flag) {
       continue;
     }
     
@@ -2362,40 +2362,10 @@ void Beam::_filterDpAltHvCoCross()
                                    fieldsN.lag2_hc, fieldsN.lag2_vc,
                                    igate, fieldsN);
 
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
+
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldrhm = fieldsN.ldrhm;
-    fieldsF.ldrh = fieldsN.ldrh;
-    fieldsF.ldrvm = fieldsN.ldrvm;
-    fieldsF.ldrv = fieldsN.ldrv;
-    fieldsF.ldr_diff = fieldsN.ldr_diff;
-    fieldsF.ldr_mean = fieldsN.ldr_mean;
-    
-    fieldsF.phidp = fieldsN.phidp;
-    fieldsF.phidp0 = fieldsN.phidp0;
-    fieldsF.phidp_cond = fieldsN.phidp_cond;
-    fieldsF.phidp_filt = fieldsN.phidp_filt;
-
-    fieldsF.rhohv = fieldsN.rhohv;
-    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    fieldsF.rho_vchx = fieldsN.rho_vchx;
-    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
-    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
-    fieldsF.rho_phidp = fieldsN.rho_phidp;
-
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
-
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2441,7 +2411,7 @@ void Beam::_filterDpAltHvCoOnly()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && !fields.rhohv_test_flag) {
       continue;
     }
       
@@ -2504,31 +2474,10 @@ void Beam::_filterDpAltHvCoOnly()
                                   igate, fieldsN);
     
     
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.phidp = fieldsN.phidp;
-    fieldsF.phidp0 = fieldsN.phidp0;
-    fieldsF.phidp_cond = fieldsN.phidp_cond;
-    fieldsF.phidp_filt = fieldsN.phidp_filt;
-
-    fieldsF.rhohv = fieldsN.rhohv;
-    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    fieldsF.rho_vchx = fieldsN.rho_vchx;
-    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
-    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
-    fieldsF.rho_phidp = fieldsN.rho_phidp;
-
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
-
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
+    
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2564,7 +2513,7 @@ void Beam::_filterDpSimHvFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && !fields.rhohv_test_flag) {
       continue;
     }
       
@@ -2616,31 +2565,10 @@ void Beam::_filterDpSimHvFixedPrt()
                             fieldsN.lag2_vc, fieldsN.lag3_hc, fieldsN.lag3_vc,
                             igate, fieldsN);
 
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.phidp = fieldsN.phidp;
-    fieldsF.phidp0 = fieldsN.phidp0;
-    fieldsF.phidp_cond = fieldsN.phidp_cond;
-    fieldsF.phidp_filt = fieldsN.phidp_filt;
-
-    fieldsF.rhohv = fieldsN.rhohv;
-    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    fieldsF.rho_vchx = fieldsN.rho_vchx;
-    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
-    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
-    fieldsF.rho_phidp = fieldsN.rho_phidp;
-
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
-
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
+    
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2706,7 +2634,7 @@ void Beam::_filterDpSimHvStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && !fields.rhohv_test_flag) {
       continue;
     }
       
@@ -2764,31 +2692,10 @@ void Beam::_filterDpSimHvStagPrt()
                                 gate->iqvcPrtLongNotched,
                                 igate, true, fieldsN);
 
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.phidp = fieldsN.phidp;
-    fieldsF.phidp0 = fieldsN.phidp0;
-    fieldsF.phidp_cond = fieldsN.phidp_cond;
-    fieldsF.phidp_filt = fieldsN.phidp_filt;
-
-    fieldsF.rhohv = fieldsN.rhohv;
-    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    fieldsF.rho_vchx = fieldsN.rho_vchx;
-    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
-    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
-    fieldsF.rho_phidp = fieldsN.rho_phidp;
-
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
-
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
+    
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2872,28 +2779,10 @@ void Beam::_filterDpHOnlyFixedPrt()
                             fieldsN.lag1_hc, fieldsN.lag2_hc,
                             fieldsN.lag3_hc, igate, fieldsN);
 
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldrhm = fieldsN.ldrhm;
-    fieldsF.ldrh = fieldsN.ldrh;
-    fieldsF.ldrvm = fieldsN.ldrvm;
-    fieldsF.ldrv = fieldsN.ldrv;
-    fieldsF.ldr_diff = fieldsN.ldr_diff;
-    fieldsF.ldr_mean = fieldsN.ldr_mean;
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
     
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
-
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2980,28 +2869,10 @@ void Beam::_filterDpHOnlyStagPrt()
                                 gate->iqvxPrtLongNotched,
                                 igate, true, fieldsN);
     
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldrhm = fieldsN.ldrhm;
-    fieldsF.ldrh = fieldsN.ldrh;
-    fieldsF.ldrvm = fieldsN.ldrvm;
-    fieldsF.ldrv = fieldsN.ldrv;
-    fieldsF.ldr_diff = fieldsN.ldr_diff;
-    fieldsF.ldr_mean = fieldsN.ldr_mean;
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
     
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
-
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -3080,28 +2951,10 @@ void Beam::_filterDpVOnlyFixedPrt()
                             fieldsN.lag1_vc, fieldsN.lag2_vc,
                             fieldsN.lag3_vc, igate, fieldsN);
 
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldrhm = fieldsN.ldrhm;
-    fieldsF.ldrh = fieldsN.ldrh;
-    fieldsF.ldrvm = fieldsN.ldrvm;
-    fieldsF.ldrv = fieldsN.ldrv;
-    fieldsF.ldr_diff = fieldsN.ldr_diff;
-    fieldsF.ldr_mean = fieldsN.ldr_mean;
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
     
-    // regression filter internals
-
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
-
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -3189,26 +3042,175 @@ void Beam::_filterDpVOnlyStagPrt()
                                 gate->iqhxPrtLongNotched,
                                 igate, true, fieldsN);
     
-    // copy dual-pol notched moments to the filtered moments
+    // condition the filtered fields
     
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.zdrm = fieldsN.zdrm;
-    fieldsF.zdr_bias = fieldsN.zdr_bias;
-
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldr = fieldsN.ldr;
-    fieldsF.ldrhm = fieldsN.ldrhm;
-    fieldsF.ldrh = fieldsN.ldrh;
-    fieldsF.ldrvm = fieldsN.ldrvm;
-    fieldsF.ldrv = fieldsN.ldrv;
-    fieldsF.ldr_diff = fieldsN.ldr_diff;
-    fieldsF.ldr_mean = fieldsN.ldr_mean;
+    _conditionDpFiltFields(fields, fieldsF, fieldsN);
     
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
 
   } // igate
+
+}
+
+//////////////////////////////////////
+// condition dual pol filtered fields
+// based on notched moments and rhohv test
+  
+void Beam::_conditionDpFiltFields(MomentsFields &flds,
+                                  MomentsFields &fldsF,
+                                  MomentsFields &fldsN)
+  
+{
+  
+  // use notched moments for filtered dual pol fields
+  
+  fldsF.zdr = fldsN.zdr;
+  fldsF.zdrm = fldsN.zdrm;
+  fldsF.zdr_bias = fldsN.zdr_bias;
+  
+  fldsF.phidp = fldsN.phidp;
+  fldsF.phidp0 = fldsN.phidp0;
+  fldsF.phidp_cond = fldsN.phidp_cond;
+  fldsF.phidp_filt = fldsN.phidp_filt;
+  
+  fldsF.rhohv = fldsN.rhohv;
+  fldsF.rhohv_nnc = fldsN.rhohv_nnc;
+  fldsF.rho_vchx = fldsN.rho_vchx;
+  fldsF.rho_hcvx = fldsN.rho_hcvx;
+  fldsF.rho_vxhx = fldsN.rho_vxhx;
+  fldsF.rho_phidp = fldsN.rho_phidp;
+
+  // condition filtered flds based on rhohv test
+
+  if (flds.cmd_flag) {
+    return;
+  }
+  if (!_params.apply_rhohv_test_in_cmd) {
+    return;
+  }
+  if (!flds.rhohv_test_flag) {
+    return;
+  }
+
+  // set filtered power fields based on rhohv test improv
+  
+  if (flds.rhohv_test_improv < _params.rhohv_improv_thresh_for_power) {
+    
+    fldsF.dbz = flds.dbz;
+    fldsF.dbz_no_atmos_atten = flds.dbz_no_atmos_atten;
+    fldsF.dbzhc = flds.dbzhc;
+    fldsF.dbzhx = flds.dbzhx;
+    fldsF.dbzvc = flds.dbzvc;
+    fldsF.dbzvx = flds.dbzvx;
+
+    fldsF.snr = flds.snr;
+    fldsF.snrhc = flds.snrhc;
+    fldsF.snrhx = flds.snrhx;
+    fldsF.snrvc = flds.snrvc;
+    fldsF.snrvx = flds.snrvx;
+    
+    fldsF.dbm = flds.dbm;
+    fldsF.dbmhc = flds.dbmhc;
+    fldsF.dbmhx = flds.dbmhx;
+    fldsF.dbmvc = flds.dbmvc;
+    fldsF.dbmvx = flds.dbmvx;
+    
+    fldsF.dbmhc_ns = flds.dbmhc_ns;
+    fldsF.dbmhx_ns = flds.dbmhx_ns;
+    fldsF.dbmvc_ns = flds.dbmvc_ns;
+    fldsF.dbmvx_ns = flds.dbmvx_ns;
+    
+    fldsF.zdrm = flds.zdrm;
+    fldsF.zdr = flds.zdr;
+    fldsF.zdr_bias = flds.zdr_bias;
+    
+    fldsF.ldr = flds.ldr;
+    fldsF.ldrhm = flds.ldrhm;
+    fldsF.ldrh = flds.ldrh;
+    fldsF.ldrvm = flds.ldrvm;
+    fldsF.ldrv = flds.ldrv;
+    fldsF.ldr_diff = flds.ldr_diff;
+    fldsF.ldr_mean = flds.ldr_mean;
+    
+  } // if (flds.rhohv_test_improv < _params.rhohv_improv_thresh_for_power)
+
+  // set filtered vel fields based on rhohv test improv
+  
+  if (flds.rhohv_test_improv < _params.rhohv_improv_thresh_for_vel) {
+    
+    fldsF.vel = flds.vel;
+    fldsF.vel_alt = flds.vel_alt;
+    fldsF.vel_hv = flds.vel_hv;
+    fldsF.vel_h_only = flds.vel_h_only;
+    fldsF.vel_v_only = flds.vel_v_only;
+    fldsF.vel_alt_fold_interval = flds.vel_alt_fold_interval;
+    fldsF.vel_alt_fold_confidence = flds.vel_alt_fold_confidence;
+    fldsF.vel_corr_vert = flds.vel_corr_vert;
+    fldsF.vel_corr_motion = flds.vel_corr_motion;
+
+    fldsF.vel_prt_short = flds.vel_prt_short;
+    fldsF.vel_prt_long = flds.vel_prt_long;
+    fldsF.vel_diff = flds.vel_diff;
+    fldsF.vel_unfold_interval = flds.vel_unfold_interval;
+
+    fldsF.width = flds.width;
+    fldsF.width_r0r1 = flds.width_r0r1;
+    fldsF.width_r1r2 = flds.width_r1r2;
+    fldsF.width_r1r3 = flds.width_r1r3;
+    fldsF.width_ppls = flds.width_ppls;
+    fldsF.width_h_only = flds.width_h_only;
+    fldsF.width_v_only = flds.width_v_only;
+    fldsF.width_prt_long = flds.width_prt_long;
+    fldsF.width_prt_short = flds.width_prt_short;
+    fldsF.width_corr_motion = flds.width_corr_motion;
+    
+    fldsF.ncp = flds.ncp;
+    fldsF.ncp_h_only = flds.ncp_h_only;
+    fldsF.ncp_v_only = flds.ncp_v_only;
+    fldsF.ncp_h_minus_v = flds.ncp_h_minus_v;
+    
+    fldsF.ncp_trip1 = flds.ncp_trip1;
+    fldsF.ncp_trip2 = flds.ncp_trip2;
+    fldsF.ncp_trip3 = flds.ncp_trip3;
+    fldsF.ncp_trip4 = flds.ncp_trip4;
+    
+    fldsF.ncp_prt_long = flds.ncp_prt_long;
+    fldsF.ncp_prt_short = flds.ncp_prt_short;
+    fldsF.ncp_trip_flag = flds.ncp_trip_flag;
+
+  }
+    
+  // set filtered phase fields based on rhohv test improv
+  
+  if (flds.rhohv_test_improv < _params.rhohv_improv_thresh_for_phase) {
+    
+    fldsF.phidp0 = flds.phidp0;
+    fldsF.phidp = flds.phidp;
+    fldsF.phidp_cond = flds.phidp_cond;
+    fldsF.phidp_filt = flds.phidp_filt;
+    fldsF.phidp_sdev_4kdp = flds.phidp_sdev_4kdp;
+    fldsF.phidp_jitter_4kdp = flds.phidp_jitter_4kdp;
+    fldsF.zdr_sdev_4kdp = flds.zdr_sdev_4kdp;
+    fldsF.kdp = flds.kdp;
+    fldsF.psob = flds.psob;
+    fldsF.kdp_hb = flds.kdp_hb;
+
+  }
+
+  // set filtered correlation fields based on rhohv test improv
+  
+  if (flds.rhohv_test_improv < _params.rhohv_improv_thresh_for_rho) {
+    
+    fldsF.rhohv = flds.rhohv;
+    fldsF.rhohv_nnc = flds.rhohv_nnc;
+    fldsF.rho_vchx = flds.rho_vchx;
+    fldsF.rho_hcvx = flds.rho_hcvx;
+    fldsF.rho_vxhx = flds.rho_vxhx;
+    fldsF.rho_phidp = flds.rho_phidp;
+
+  }
 
 }
 
