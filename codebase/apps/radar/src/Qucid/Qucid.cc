@@ -726,7 +726,7 @@ void Qucid::_initGlobals()
 
   // _params.contour_font_num = 0;
   // _params.n_ideal_contour_labels = 0;
-
+  
   // _params.rotate_coarse_adjust = 0.0;
   // _params.rotate_medium_adjust = 0.0;
   // _params.rotate_fine_adjust = 0.0;

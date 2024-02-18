@@ -70,12 +70,12 @@ void init_data_space(Params &tdrpParams)
 
   // create uparams object, read params into it from buffer
 
-  gd.uparams = new Uparams();
-  if (gd.uparams->read(gd.db_data, gd.db_data_len, "cidd")) {
-    fprintf(stderr,"init_data_space: could not read params buffer\n");
-    exit(-1);
-  }
-  gd.uparams->setPrintTdrp(true);
+  // gd.uparams = new Uparams();
+  // if (gd.uparams->read(gd.db_data, gd.db_data_len, "cidd")) {
+  //   fprintf(stderr,"init_data_space: could not read params buffer\n");
+  //   exit(-1);
+  // }
+  // gd.uparams->setPrintTdrp(true);
 
   // Load the Main parameters
 
