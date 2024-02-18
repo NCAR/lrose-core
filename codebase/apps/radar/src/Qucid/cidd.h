@@ -418,19 +418,19 @@ struct    Global_data {
 
   // movies
   
-  int movie_on;
-  double movie_magnify_factor;
-  double time_interval;
-  double frame_span;
-  int starting_movie_frames;
-  int reset_frames;
-  double movie_delay;
-  double forecast_interval;
-  double past_interval;
-  double time_search_stretch_factor;
-  const char *climo_mode;
-  int temporal_rounding;
-  int movie_speed_msec;
+  // int movie_on;
+  // double movie_magnify_factor;
+  // double time_interval;
+  // double frame_span;
+  // int starting_movie_frames;
+  // int reset_frames;
+  // double movie_delay;
+  // double forecast_interval;
+  // double past_interval;
+  // double time_search_stretch_factor;
+  // const char *climo_mode;
+  // int temporal_rounding;
+  // int movie_speed_msec;
 
   // start time etc
 
@@ -442,44 +442,44 @@ struct    Global_data {
   const char *db_data;           // Pointer to the parameter data
   const char *db_name;           // The  parameter database filename 
   const char *frame_label;       // The default string to show on the frame 
-  const char *no_data_message;   // The default message to display on no data conditions 
-  const char *help_command;      // the command used to spawn A Help Viewer
-  const char *bookmark_command;  // the command used to spawn URL Sender 
+  // const char *no_data_message;   // The default message to display on no data conditions 
+  // const char *help_command;      // the command used to spawn A Help Viewer
+  // const char *bookmark_command;  // the command used to spawn URL Sender 
   const char *app_name;          // Application name 
   const char *app_instance;      // Application Instance 
-  const char *scale_units_label; // Units label to use for distance scales
+  // const char *scale_units_label; // Units label to use for distance scales
 
-  const char *image_dir;           // The place to store images
-  const char *horiz_image_dir;     // The place to store horiz images
-  const char *vert_image_dir;      // The place to store vert images
-  const char *horiz_image_fname;   // File name for horiz images
-  const char *vert_image_fname;    // File name for vert images
-  const char *horiz_image_command; // Convert command for horiz images
-  const char *vert_image_command;  // Convert command for vert images
+  // const char *image_dir;           // The place to store images
+  // const char *horiz_image_dir;     // The place to store horiz images
+  // const char *vert_image_dir;      // The place to store vert images
+  // const char *horiz_image_fname;   // File name for horiz images
+  // const char *vert_image_fname;    // File name for vert images
+  // const char *horiz_image_command; // Convert command for horiz images
+  // const char *vert_image_command;  // Convert command for vert images
   
-  const char *image_convert_script; // Cidd Calls this script with the image name as the argument  
-  const char *series_convert_script; // Cidd Calls this script with all image names as arguments 
+  // const char *image_convert_script; // Cidd Calls this script with the image name as the argument  
+  // const char *series_convert_script; // Cidd Calls this script with all image names as arguments 
 
-  const char *image_ext; // Image output extension - only png is legal
-  const char *image_horiz_prefix;   // Prefix for plan-view images
-  const char *image_vert_prefix;   // Prefix for vert-section images
-  const char *image_name_separator; // Char used to separate parts of the image file name. Defaults to '_'.
+  // const char *image_ext; // Image output extension - only png is legal
+  // const char *image_horiz_prefix;   // Prefix for plan-view images
+  // const char *image_vert_prefix;   // Prefix for vert-section images
+  // const char *image_name_separator; // Char used to separate parts of the image file name. Defaults to '_'.
 
-  const char *print_script; // Cidd Calls this script with the image name as the argument  
+  // const char *print_script; // Cidd Calls this script with the image name as the argument  
   
-  const char *http_tunnel_url;   // The url of a DsServer tunnel
-  const char *http_proxy_url;    // The url of a http proxy server
-  const char *station_loc_url;   // The url of a station locator file
-  const char *remote_ui_url;     // The url of a Remote User Interface/Command FMQ
-  const char *datamap_host;      // The Host to query for data mapper information.
+  // const char *http_tunnel_url;   // The url of a DsServer tunnel
+  // const char *http_proxy_url;    // The url of a http proxy server
+  // const char *station_loc_url;   // The url of a station locator file
+  // const char *remote_ui_url;     // The url of a Remote User Interface/Command FMQ
+  // const char *datamap_host;      // The Host to query for data mapper information.
 
-  const char *label_time_format;  // strftime() format string for top label formatting
+  // const char *label_time_format;  // strftime() format string for top label formatting
 
-  const char *moviestart_time_format;   // strftime() format string for the movie start time text field
+  // const char *moviestart_time_format;   // strftime() format string for the movie start time text field
   
-  const char *frame_range_time_format;   // strftime() format string for the frame time range text fields
+  // const char *frame_range_time_format;   // strftime() format string for the frame time range text fields
   
-  const char *movieframe_time_format;  // strftime() format string for naming movie frame xwd files
+  // const char *movieframe_time_format;  // strftime() format string for naming movie frame xwd files
   // Files are named cidd_fieldname_zoomlevel_time.xwd
   char *data_info[MAX_DATA_FIELDS]; // information about each field  
 
@@ -545,7 +545,7 @@ struct    Global_data {
   RemoteUIQueue *remote_ui;   // REmote User Interface/Command class
 
 
-  // TDRP CLASSES
+  // LEGACY TDRP CLASSES
   Csyprod_P *syprod_P;  // Symbolic Products
   Cdraw_P *draw_P;      // Draw Params
   Cgui_P *gui_P;        // GUI Config Params
@@ -556,67 +556,67 @@ struct    Global_data {
 
   // contours
 
-  int contour_font_num;
-  int n_ideal_contour_labels;
+  // int contour_font_num;
+  // int n_ideal_contour_labels;
 
   // canvas events
 
-  double rotate_coarse_adjust;
-  double rotate_medium_adjust;
-  double rotate_fine_adjust;
+  // double rotate_coarse_adjust;
+  // double rotate_medium_adjust;
+  // double rotate_fine_adjust;
 
   // zoom
 
-  double min_zoom_threshold;
+  // // double min_zoom_threshold;
 
-  // shmem
+  // // shmem
 
   int coord_key;
 
   // gui
   
-  const char *status_info_file;
+  // const char *status_info_file;
 
   // positions
 
-  int horiz_default_x_pos;
-  int horiz_default_y_pos;
-  int vert_default_x_pos;
-  int vert_default_y_pos;
+  // int horiz_default_x_pos;
+  // int horiz_default_y_pos;
+  // int vert_default_x_pos;
+  // int vert_default_y_pos;
   
   // overlays
 
-  const char *map_file_subdir;
+  // const char *map_file_subdir;
 
   // page_pu_proc
 
   // int ideal_x_vectors;
   // int ideal_y_vectors;
-  double azimuth_interval;
-  double azimuth_radius;
-  int latest_click_mark_size;
-  int range_ring_x_space;
-  int range_ring_y_space;
-  double range_ring_spacing;
-  double max_ring_range;
-  int range_ring_labels;
-  double wind_units_scale_factor;
-  const char *wind_units_label;
-  double wind_w_scale_factor;
+  // double azimuth_interval;
+  // double azimuth_radius;
+  // int latest_click_mark_size;
+  // int range_ring_x_space;
+  // int range_ring_y_space;
+  // double range_ring_spacing;
+  // double max_ring_range;
+  // int range_ring_labels;
+  // double wind_units_scale_factor;
+  // const char *wind_units_label;
+  // double wind_w_scale_factor;
 
   // symprods
 
-  double scale_constant;
+  // double scale_constant;
   
   // timer control
 
-  int redraw_interval;
-  int update_interval;
+  // int redraw_interval;
+  // int update_interval;
 
   // winds init
   
-  const char *wind_marker_type;
-  double wind_reference_speed;
+  // const char *wind_marker_type;
+  // double wind_reference_speed;
 
 };
  

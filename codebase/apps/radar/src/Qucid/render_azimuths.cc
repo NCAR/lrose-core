@@ -49,12 +49,12 @@ void draw_cap_azimuth_lines(Drawable xid)
   static double range = 0.0;
   
   if(az_interval == 0.0) {
-    az_interval = gd.azimuth_interval;
+    az_interval = _params.azimuth_interval;
     az_interval = fabs(az_interval);
   }
   
   if(range == 0.0) {
-    range = gd.azimuth_radius;
+    range = _params.azimuth_radius;
   }
 
   double lon1 = gd.h_win.origin_lon;

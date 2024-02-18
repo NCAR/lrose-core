@@ -653,8 +653,8 @@ void Qucid::_initGlobals()
   // _params.scale_units_label = NULL; 
 
   // _params.image_dir = NULL;     
-  gd.horiz_image_dir = NULL;     
-  gd.vert_image_dir = NULL;     
+  // gd.horiz_image_dir = NULL;     
+  // gd.vert_image_dir = NULL;     
   // _params.horiz_image_fname = NULL;     
   // _params.vert_image_fname = NULL;     
   // _params.horiz_image_command = NULL;     
@@ -747,8 +747,8 @@ void Qucid::_initGlobals()
   // _params.ideal_x_vectors = 0;
   // _params.ideal_y_vectors = 0;
 
-  gd.azimuth_interval = 0;
-  gd.azimuth_radius = 0;
+  // gd.azimuth_interval = 0;
+  // gd.azimuth_radius = 0;
 
   // _params.latest_click_mark_size = 0;
   // _params.range_ring_x_space = 0;
