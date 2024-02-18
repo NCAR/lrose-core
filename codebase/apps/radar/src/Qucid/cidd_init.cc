@@ -48,7 +48,7 @@ void init_data_space(Params &tdrpParams)
 
   int i,j,pid;
   int num_fields;
-  int err_flag;
+  // int err_flag;
   long param_text_len;
   long param_text_line_no;
   const char *param_text;
@@ -57,7 +57,7 @@ void init_data_space(Params &tdrpParams)
   char str_buf[128];   /* Space to build resource strings */
   char *cfield[3];     /* Space to collect sub strings */
   double delta_x,delta_y;
-  double lat1 = 0, lat2 = 0;
+  // double lat1 = 0, lat2 = 0;
 
   UTIMstruct    temp_utime;
 
@@ -114,165 +114,148 @@ void init_data_space(Params &tdrpParams)
 
 
   // How many idle seconds can elapse before resetting the display
-  gd.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
-
-  gd.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
-
-  gd.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
-
-  gd.close_popups =   gd.uparams->getLong("cidd.close_popups", 0);
-  gd.disable_pick_mode =   gd.uparams->getLong("cidd.disable_pick_mode", 1);
-  gd.clip_overlay_fields =   gd.uparams->getLong("cidd.clip_overlay_fields", 0);
-  gd.output_geo_xml =   gd.uparams->getLong("cidd.output_geo_xml", 0);
-  gd.use_latlon_in_geo_xml =   gd.uparams->getLong("cidd.use_latlon_in_geo_xml", 0);
-  gd.replace_underscores =   gd.uparams->getLong("cidd.replace_underscores", 1);
+  // _params.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
+  // _params.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
+  // _params.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
+  // _params.close_popups =   gd.uparams->getLong("cidd.close_popups", 0);
+  // _params.disable_pick_mode =   gd.uparams->getLong("cidd.disable_pick_mode", 1);
+  // _params.clip_overlay_fields =   gd.uparams->getLong("cidd.clip_overlay_fields", 0);
+  // _params.output_geo_xml =   gd.uparams->getLong("cidd.output_geo_xml", 0);
+  // _params.use_latlon_in_geo_xml =   gd.uparams->getLong("cidd.use_latlon_in_geo_xml", 0);
+  // _params.replace_underscores =   gd.uparams->getLong("cidd.replace_underscores", 1);
   
   // Image dir - for output images
   
-  gd.image_dir = gd.uparams->getString("cidd.image_dir", "/tmp/image_dir");
-  if (strlen(gd.uparams->getString("cidd.html_image_dir", "")) > 0) {
-    // backwards compatibility
-    gd.image_dir = gd.uparams->getString("cidd.html_image_dir", "/tmp/image_dir");
-  }
+  // _params.image_dir = gd.uparams->getString("cidd.image_dir", "/tmp/image_dir");
+  // if (strlen(gd.uparams->getString("cidd.html_image_dir", "")) > 0) {
+  //   // backwards compatibility
+  //   _params.image_dir = gd.uparams->getString("cidd.html_image_dir", "/tmp/image_dir");
+  // }
 
-  gd.html_mode = gd.uparams->getLong("cidd.html_mode", 0);
+  // _params.html_mode = gd.uparams->getLong("cidd.html_mode", 0);
   
-  gd.run_once_and_exit = gd.uparams->getLong("cidd.run_once_and_exit",0);
-  if(gd.run_once_and_exit) gd.html_mode = 1; 
+  // _params.run_once_and_exit = gd.uparams->getLong("cidd.run_once_and_exit",0);
+  if(_params.run_once_and_exit) _params.html_mode = pTRUE;
 
-  if (gd.html_mode) {
+  if (_params.html_mode) {
     gd.h_win.zoom_level = 0;
   }
   
-  gd.transparent_images = gd.uparams->getLong("cidd.transparent_images", 0);
+  // _params.transparent_images = gd.uparams->getLong("cidd.transparent_images", 0);
   
-  gd.save_images_to_day_subdir =
-    gd.uparams->getLong("cidd.save_images_to_day_subdir", 0);
+  // _params.save_images_to_day_subdir = gd.uparams->getLong("cidd.save_images_to_day_subdir", 0);
   
-  gd.horiz_image_fname =
-    gd.uparams->getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  gd.horiz_image_command =
-    gd.uparams->getString("cidd.horiz_image_command", "");
+  // _params.horiz_image_fname = gd.uparams->getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
+  // _params.horiz_image_command = gd.uparams->getString("cidd.horiz_image_command", "");
   
-  gd.vert_image_fname =
-    gd.uparams->getString("cidd.vert_image_fname", "cidd_vert_view.png");
-  gd.vert_image_command =
-    gd.uparams->getString("cidd.vert_image_command", "");
+  // _params.vert_image_fname = gd.uparams->getString("cidd.vert_image_fname", "cidd_vert_view.png");
+  // _params.vert_image_command = gd.uparams->getString("cidd.vert_image_command", "");
   
   // Set up our default image type.
   // force png for now
 
-  gd.image_ext = gd.uparams->getString("cidd.image_ext", "png");
-  gd.image_ext = "png";
+  // _params.image_ext = gd.uparams->getString("cidd.image_ext", "png");
+  // _params.image_ext = "png";
   
-  gd.image_horiz_prefix = gd.uparams->getString("cidd.image_horiz_prefix", "CP");
-  gd.image_vert_prefix = gd.uparams->getString("cidd.image_vert_prefix", "CV");
-  gd.image_name_separator = gd.uparams->getString("cidd.image_name_separator", "_");
+  // _params.image_horiz_prefix = gd.uparams->getString("cidd.image_horiz_prefix", "CP");
+  // _params.image_vert_prefix = gd.uparams->getString("cidd.image_vert_prefix", "CV");
+  // _params.image_name_separator = gd.uparams->getString("cidd.image_name_separator", "_");
   
   // copy to structs
   
-  STRcopy(gd.h_win.image_dir, gd.image_dir, MAX_PATH_LEN);
-  STRcopy(gd.v_win.image_dir, gd.image_dir, MAX_PATH_LEN);
+  STRcopy(gd.h_win.image_dir, _params.image_dir, MAX_PATH_LEN);
+  STRcopy(gd.v_win.image_dir, _params.image_dir, MAX_PATH_LEN);
 
   
-  STRcopy(gd.h_win.image_fname, gd.horiz_image_fname, MAX_PATH_LEN);
-  STRcopy(gd.h_win.image_command, gd.horiz_image_command, MAX_PATH_LEN);
+  STRcopy(gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
+  STRcopy(gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
 
-  STRcopy(gd.v_win.image_fname, gd.vert_image_fname, MAX_PATH_LEN);
-  STRcopy(gd.v_win.image_command, gd.vert_image_command, MAX_PATH_LEN);
+  STRcopy(gd.v_win.image_fname, _params.vert_image_fname, MAX_PATH_LEN);
+  STRcopy(gd.v_win.image_command, _params.vert_image_command, MAX_PATH_LEN);
 
   // script to run after generating image
   
-  gd.image_convert_script =
-    gd.uparams->getString("cidd.image_convert_script", "convert_image.csh");
-  
-  gd.series_convert_script =
-    gd.uparams->getString("cidd.series_convert_script", "make_anim.csh");
+  // _params.image_convert_script = gd.uparams->getString("cidd.image_convert_script", "convert_image.csh");
+  // _params.series_convert_script = gd.uparams->getString("cidd.series_convert_script", "make_anim.csh");
 
   // If individual horiz and vert scripts have not been set
   // use the General one.
   
   if(strlen(gd.v_win.image_command) < 3) {
-    STRcopy(gd.v_win.image_command,gd.image_convert_script,MAX_PATH_LEN);
+    STRcopy(gd.v_win.image_command,_params.image_convert_script,MAX_PATH_LEN);
   }
 
   if(strlen(gd.h_win.image_command) < 3) {
-    STRcopy(gd.h_win.image_command,gd.image_convert_script,MAX_PATH_LEN);
+    STRcopy(gd.h_win.image_command,_params.image_convert_script,MAX_PATH_LEN);
   }
 
-  if(gd.idle_reset_seconds <= 0 || gd.html_mode == 1) {
-    gd.idle_reset_seconds = 259200000; // 3000 days.
+  if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
+    _params.idle_reset_seconds = 259200000; // 3000 days.
   }
 
-  gd.complex_command_timeout_secs =  gd.uparams->getLong("cidd.complex_command_timeout_secs",180);
-  resource = gd.uparams->getString("cidd.print_script", "");
-  if(strlen(resource) > 1) {
-    gd.print_script = resource;
-  }
+  // _params.complex_command_timeout_secs =  gd.uparams->getLong("cidd.complex_command_timeout_secs",180);
+  // resource = gd.uparams->getString("cidd.print_script", "");
+  // if(strlen(resource) > 1) {
+  //   _params.print_script = resource;
+  // }
 
-  gd.simple_command_timeout_secs =  gd.uparams->getLong("cidd.simple_command_timeout_secs",30);
+  // _params.simple_command_timeout_secs =  gd.uparams->getLong("cidd.simple_command_timeout_secs",30);
 
-  gd.label_time_format = gd.uparams->getString(
-	  "cidd.label_time_format", "%m/%d/%y %H:%M:%S");
+  // _params.label_time_format = gd.uparams->getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
 
-  gd.moviestart_time_format = gd.uparams->getString(
-	  "cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
+  // _params.moviestart_time_format = gd.uparams->getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
 
-  gd.frame_range_time_format = gd.uparams->getString(
-	  "cidd.frame_range_time_format", "%H:%M");
+  // _params.frame_range_time_format = gd.uparams->getString("cidd.frame_range_time_format", "%H:%M");
 
-  gd.movieframe_time_format = gd.uparams->getString(
-	  "cidd.movieframe_time_format", "%H%M");
+  // _params.movieframe_time_format = gd.uparams->getString("cidd.movieframe_time_format", "%H%M");
 
-  gd.movieframe_time_mode = gd.uparams->getLong(
-          "cidd.movieframe_time_mode", 0);
+  // _params.movieframe_time_mode = gd.uparams->getLong("cidd.movieframe_time_mode", 0);
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
 
-  gd.layer_legends_on = (gd.uparams->getLong("cidd.layer_legends_on", 1) & 1);
-  gd.cont_legends_on = (gd.uparams->getLong("cidd.cont_legends_on", 1) & 1);
-  gd.wind_legends_on = (gd.uparams->getLong("cidd.wind_legends_on", 1) & 1);
-  gd.contour_line_width = gd.uparams->getLong("cidd.contour_line_width", 1);
-  gd.smooth_contours = gd.uparams->getLong("cidd.smooth_contours", 0);
-  gd.use_alt_contours = gd.uparams->getLong("cidd.use_alt_contours", 0);
-  gd.add_noise = gd.uparams->getLong("cidd.add_noise", 0);
-  gd.special_contour_value = gd.uparams->getDouble("cidd.special_contour_value", 0.0);
-  gd.map_bad_to_min_value =  gd.uparams->getLong("cidd.map_bad_to_min_value", 0);
-  gd.map_missing_to_min_value =  gd.uparams->getLong("cidd.map_missing_to_min_value", 0);
+  // _params.layer_legends_on = (gd.uparams->getLong("cidd.layer_legends_on", 1) & 1);
+  // _params.cont_legends_on = (gd.uparams->getLong("cidd.cont_legends_on", 1) & 1);
+  // _params.wind_legends_on = (gd.uparams->getLong("cidd.wind_legends_on", 1) & 1);
+  // _params.contour_line_width = gd.uparams->getLong("cidd.contour_line_width", 1);
+  // _params.smooth_contours = gd.uparams->getLong("cidd.smooth_contours", 0);
+  // _params.use_alt_contours = gd.uparams->getLong("cidd.use_alt_contours", 0);
+  // _params.add_noise = gd.uparams->getLong("cidd.add_noise", 0);
+  // _params.special_contour_value = gd.uparams->getDouble("cidd.special_contour_value", 0.0);
+  // _params.map_bad_to_min_value =  gd.uparams->getLong("cidd.map_bad_to_min_value", 0);
+  // _params.map_missing_to_min_value =  gd.uparams->getLong("cidd.map_missing_to_min_value", 0);
 
-  gd.layers.layer_legends_on = gd.layer_legends_on;
-  gd.layers.cont_legends_on = gd.cont_legends_on;
-  gd.layers.wind_legends_on = gd.wind_legends_on;
-  gd.layers.contour_line_width = gd.contour_line_width;
-  gd.layers.smooth_contours = gd.smooth_contours;
-  gd.layers.use_alt_contours = gd.use_alt_contours;
-  gd.layers.add_noise = gd.add_noise;
-  gd.layers.special_contour_value = gd.special_contour_value;
-  gd.layers.map_bad_to_min_value = gd.map_bad_to_min_value;
-  gd.layers.map_missing_to_min_value = gd.map_missing_to_min_value;
+  gd.layers.layer_legends_on = _params.layer_legends_on;
+  gd.layers.cont_legends_on = _params.cont_legends_on;
+  gd.layers.wind_legends_on = _params.wind_legends_on;
+  gd.layers.contour_line_width = _params.contour_line_width;
+  gd.layers.smooth_contours = _params.smooth_contours;
+  gd.layers.use_alt_contours = _params.use_alt_contours;
+  gd.layers.add_noise = _params.add_noise;
+  gd.layers.special_contour_value = _params.special_contour_value;
+  gd.layers.map_bad_to_min_value = _params.map_bad_to_min_value;
+  gd.layers.map_missing_to_min_value = _params.map_missing_to_min_value;
 
   // main field on top?
   
-  gd.draw_main_on_top = (gd.uparams->getLong("cidd.draw_main_on_top", 0) & 1);
+  // _params.draw_main_on_top = (gd.uparams->getLong("cidd.draw_main_on_top", 0) & 1);
 
   // latest click location
   
-  gd.mark_latest_click_location =
-    gd.uparams->getLong("cidd.mark_latest_click_location", 0);
+  // _params.mark_latest_click_location = gd.uparams->getLong("cidd.mark_latest_click_location", 0);
 
   // drawing
   
-  gd.drawing_mode = 0;
+  // _params.drawing_mode = 0;
 
   // products
   
-  gd.products_on = gd.uparams->getLong("cidd.products_on", 1);
-  gd.product_line_width = gd.uparams->getLong("cidd.product_line_width", 1);
-  gd.product_font_size = gd.uparams->getLong("cidd.product_font_size", 1);
+  // _params.products_on = gd.uparams->getLong("cidd.products_on", 1);
+  // _params.product_line_width = gd.uparams->getLong("cidd.product_line_width", 1);
+  // _params.product_font_size = gd.uparams->getLong("cidd.product_font_size", 1);
   
-  gd.prod.products_on = gd.products_on;
-  gd.prod.prod_line_width = gd.product_line_width;
-  gd.prod.prod_font_num = gd.product_font_size;
+  gd.prod.products_on = _params.products_on;
+  gd.prod.prod_line_width = _params.product_line_width;
+  gd.prod.prod_font_num = _params.product_font_size;
   
   for(i=0; i < NUM_PRODUCT_DETAIL_THRESHOLDS; i++) {
 
@@ -287,40 +270,41 @@ void init_data_space(Params &tdrpParams)
   }
 	
 
-  gd.always_get_full_domain = gd.uparams->getLong("cidd.always_get_full_domain", 0);
-  gd.do_not_clip_on_mdv_request = gd.uparams->getLong("cidd.do_not_clip_on_mdv_request", 0);
-  gd.do_not_decimate_on_mdv_request = gd.uparams->getLong("cidd.do_not_decimate_on_mdv_request", 0);
+  // _params.always_get_full_domain = gd.uparams->getLong("cidd.always_get_full_domain", 0);
+  // _params.do_not_clip_on_mdv_request = gd.uparams->getLong("cidd.do_not_clip_on_mdv_request", 0);
+  // _params.do_not_decimate_on_mdv_request = gd.uparams->getLong("cidd.do_not_decimate_on_mdv_request", 0);
      
   // Toggle for displaying range rings at the data's origin - Useful for mobile units.
-  gd.range_ring_follows_data = gd.uparams->getLong("cidd.range_ring_follows_data", 0);
-  gd.range_ring_for_radar_only = gd.uparams->getLong("cidd.range_ring_for_radar_only", 0);
+  // _params.range_ring_follows_data = gd.uparams->getLong("cidd.range_ring_follows_data", 0);
+  // _params.range_ring_for_radar_only = gd.uparams->getLong("cidd.range_ring_for_radar_only", 0);
 
   // Toggle for shifting the display origin - Useful for mobile units.
-  gd.domain_follows_data = gd.uparams->getLong("cidd.domain_follows_data", 0);
+  // _params.domain_follows_data = gd.uparams->getLong("cidd.domain_follows_data", 0);
 
   // if domain follows data, do not clip or decimate
 
-  if (gd.domain_follows_data) {
-    gd.always_get_full_domain = 1;
-    gd.do_not_clip_on_mdv_request = 1;
-    gd.do_not_decimate_on_mdv_request = 1;
+  if (_params.domain_follows_data) {
+    _params.always_get_full_domain = pTRUE;
+    _params.do_not_clip_on_mdv_request = pTRUE;
+    _params.do_not_decimate_on_mdv_request = pTRUE;
   }
 
-  gd.help_command = gd.uparams->getString("cidd.help_command", "");
-  gd.http_tunnel_url = gd.uparams->getString("cidd.http_tunnel_url", "");
-  gd.datamap_host = gd.uparams->getString("cidd.datamap_host", "");
-  gd.http_proxy_url = gd.uparams->getString("cidd.http_proxy_url", "");
+  // _params.help_command = gd.uparams->getString("cidd.help_command", "");
+  // _params.http_tunnel_url = gd.uparams->getString("cidd.http_tunnel_url", "");
+  // _params.datamap_host = gd.uparams->getString("cidd.datamap_host", "");
+  // _params.http_proxy_url = gd.uparams->getString("cidd.http_proxy_url", "");
 
   // Bookmarks for a menu of URLS - Index starts at 1
-  gd.bookmark_command = gd.uparams->getString("cidd.bookmark_command", "");
-  gd.num_bookmarks = gd.uparams->getLong("cidd.num_bookmarks", 0);
+  // _params.bookmark_command = gd.uparams->getString("cidd.bookmark_command", "");
+  // _params.num_bookmarks = gd.uparams->getLong("cidd.num_bookmarks", 0);
 
-  if(gd.num_bookmarks > 0) {
-    gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),gd.num_bookmarks);
+#ifdef JUNK
+  if(_params.num_bookmarks > 0) {
+    gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),_params.num_bookmarks);
   }
-
+  
   err_flag = 0;
-  for(i=0; i < gd.num_bookmarks; i++) {
+  for(i=0; i < _params.num_bookmarks; i++) {
     sprintf(str_buf,"cidd.bookmark%d",i+1);
     gd.bookmark[i].url = gd.uparams->getString(str_buf,"");
 
@@ -342,71 +326,71 @@ void init_data_space(Params &tdrpParams)
     fprintf(stderr,"Correct the cidd.bookmark section of the parameter file\n");
     exit(-1);
   }
+#endif
 
   // origin latitude and longitude
   
-  gd.origin_latitude = gd.uparams->getDouble("cidd.origin_latitude", 0.0);
-  gd.origin_longitude = gd.uparams->getDouble("cidd.origin_longitude", 0.0);
+  // _params.origin_latitude = gd.uparams->getDouble("cidd.origin_latitude", 0.0);
+  // _params.origin_longitude = gd.uparams->getDouble("cidd.origin_longitude", 0.0);
 
-  gd.h_win.origin_lat = gd.origin_latitude;
-  gd.h_win.origin_lon = gd.origin_longitude;
+  gd.h_win.origin_lat = _params.origin_latitude;
+  gd.h_win.origin_lon = _params.origin_longitude;
 
   // click location on reset
   
-  gd.reset_click_latitude =
-    gd.uparams->getDouble("cidd.reset_click_latitude", gd.origin_latitude);
-  gd.reset_click_longitude =
-    gd.uparams->getDouble("cidd.reset_click_longitude", gd.origin_longitude);
+  // _params.reset_click_latitude = gd.uparams->getDouble("cidd.reset_click_latitude", _params.origin_latitude);
+  // _params.reset_click_longitude = gd.uparams->getDouble("cidd.reset_click_longitude", _params.origin_longitude);
 
-  gd.h_win.reset_click_lat = gd.reset_click_latitude;
-  gd.h_win.reset_click_lon = gd.reset_click_longitude;
+  gd.h_win.reset_click_lat = _params.reset_click_latitude;
+  gd.h_win.reset_click_lon = _params.reset_click_longitude;
 
   // projections
   
-  gd.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
-  gd.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
-  gd.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
-  gd.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
-  gd.tangent_lat = gd.uparams->getDouble("cidd.tangent_lat",90.0);
-  gd.tangent_lon = gd.uparams->getDouble("cidd.tangent_lon",0.0);
-  gd.central_scale = gd.uparams->getDouble("cidd.central_scale",1.0);
+  // _params.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
+  // _params.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
+  // _params.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
+  // _params.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
+  // _params.tangent_lat = gd.uparams->getDouble("cidd.tangent_lat",90.0);
+  // _params.tangent_lon = gd.uparams->getDouble("cidd.tangent_lon",0.0);
+  // _params.central_scale = gd.uparams->getDouble("cidd.central_scale",1.0);
+  
+  gd.proj_param[0] = _params.proj_rotation; // flat projection is default
 
-  gd.proj_param[0] = gd.north_angle; // flat projection is default
+  // _params.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio", 1.0);
+  // if (_params.aspect_ratio <= 0.0 && gd.debug) {
+  //   cerr << "WARNING - Using first domain to set aspect ratio: " << endl;
+  // }
 
-  gd.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio", 1.0);
-  if (gd.aspect_ratio <= 0.0 && gd.debug) {
-    cerr << "WARNING - Using first domain to set aspect ratio: " << endl;
-  }
-
-  gd.scale_units_per_km = gd.uparams->getDouble("cidd.scale_units_per_km",1.0);
-  gd.scale_units_label = gd.uparams->getString("cidd.scale_units_label", "km");
+  // _params.scale_units_per_km = gd.uparams->getDouble("cidd.scale_units_per_km",1.0);
+  // _params.scale_units_label = gd.uparams->getString("cidd.scale_units_label", "km");
   
   /* Establish the native projection type */
 
-  gd.projection_type = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
+  //_params.projection_type = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
 
-  if (strncasecmp(gd.projection_type,"CARTESIAN",9) == 0) {
+#ifdef JUNK
+  if (strncasecmp(_params.projection_type,"CARTESIAN",9) == 0) {
 
     gd.display_projection = Mdvx::PROJ_FLAT;
     if(gd.debug) {
       printf("Cartesian Projection - Origin at: %g, %g\n", 
-             gd.origin_latitude,gd.origin_longitude);
+             _params.origin_latitude,_params.origin_longitude);
     }
-    gd.proj.initFlat(gd.origin_latitude,gd.origin_longitude,gd.north_angle);
+    gd.proj.initFlat(_params.origin_latitude,_params.origin_longitude,_params.north_angle);
 
-  } else if (strncasecmp(gd.projection_type,"LAT_LON",7) == 0) {
+  } else if (strncasecmp(_params.projection_type,"LAT_LON",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LATLON;
     if(gd.debug) {
       printf("LATLON/ Cylindrical Projection - Origin at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude);
+             _params.origin_latitude,_params.origin_longitude);
     }
 
-  } else if (strncasecmp(gd.projection_type,"LAMBERT",7) == 0) {
+  } else if (strncasecmp(_params.projection_type,"LAMBERT",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
-    gd.proj_param[0] = gd.lambert_lat1;
-    gd.proj_param[1] = gd.lambert_lat2;
+    gd.proj_param[0] = _params.lambert_lat1;
+    gd.proj_param[1] = _params.lambert_lat2;
     if(lat1 == -90.0 || lat2 == -90.0) {
       fprintf(stderr,
               "Must set cidd.lambert_lat1 and cidd.lambert_lat2 parameters for LAMBERT projections\n");
@@ -414,60 +398,62 @@ void init_data_space(Params &tdrpParams)
     }
     if(gd.debug) {
       printf("LAMBERT Projection - Origin at: %g, %g Parallels at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.lambert_lat1, gd.lambert_lat2);
-      gd.proj.initLambertConf(gd.origin_latitude,gd.origin_longitude,
-                              gd.lambert_lat1, gd.lambert_lat2);
+             _params.origin_latitude,_params.origin_longitude,
+             _params.lambert_lat1, _params.lambert_lat2);
+      gd.proj.initLambertConf(_params.origin_latitude,_params.origin_longitude,
+                              _params.lambert_lat1, _params.lambert_lat2);
     }
 
-  } else if (strncasecmp(gd.projection_type,"STEREOGRAPHIC",13) == 0) {
+  } else if (strncasecmp(_params.projection_type,"STEREOGRAPHIC",13) == 0) {
 
     gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
-    gd.proj_param[0] = gd.tangent_lat;
-    gd.proj_param[1] = gd.tangent_lon;
-    gd.proj_param[2] = gd.central_scale;
+    gd.proj_param[0] = _params.tangent_lat;
+    gd.proj_param[1] = _params.tangent_lon;
+    gd.proj_param[2] = _params.central_scale;
     if(gd.debug) {
       printf("Oblique Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.tangent_lat,gd.tangent_lon);
+             _params.origin_latitude,_params.origin_longitude,
+             _params.tangent_lat,_params.tangent_lon);
     }
-    gd.proj.initStereographic(gd.tangent_lat, gd.tangent_lon, gd.central_scale);
-    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
+    gd.proj.initStereographic(_params.tangent_lat, _params.tangent_lon, _params.central_scale);
+    gd.proj.setOffsetOrigin(_params.origin_latitude,_params.origin_longitude);
 
-  } else if (strncasecmp(gd.projection_type,"POLAR_STEREO",12) == 0) {
+  } else if (strncasecmp(_params.projection_type,"POLAR_STEREO",12) == 0) {
 
     gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
-    gd.proj_param[0] = gd.tangent_lat;
-    gd.proj_param[1] = gd.tangent_lon;
-    gd.proj_param[2] = gd.central_scale;
+    gd.proj_param[0] = _params.tangent_lat;
+    gd.proj_param[1] = _params.tangent_lon;
+    gd.proj_param[2] = _params.central_scale;
     if(gd.debug) {
       printf("Polar Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.tangent_lat,gd.tangent_lon);
+             _params.origin_latitude,_params.origin_longitude,
+             _params.tangent_lat,_params.tangent_lon);
     }
     gd.proj.initPolarStereo
-      (gd.tangent_lon,
-       (Mdvx::pole_type_t) (gd.tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
-       gd.central_scale);
-    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
+      (_params.tangent_lon,
+       (Mdvx::pole_type_t) (_params.tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
+       _params.central_scale);
+    gd.proj.setOffsetOrigin(_params.origin_latitude,_params.origin_longitude);
 
-  } else if (strncasecmp(gd.projection_type,"MERCATOR",8) == 0) {
+  } else if (strncasecmp(_params.projection_type,"MERCATOR",8) == 0) {
 
     gd.display_projection = Mdvx::PROJ_MERCATOR;
     if(gd.debug) {
       printf("MERCATOR Projection - Origin at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude);
+             _params.origin_latitude,_params.origin_longitude);
     }
-    gd.proj.initMercator(gd.origin_latitude,gd.origin_longitude);
+    gd.proj.initMercator(_params.origin_latitude,_params.origin_longitude);
 
   } else {
 
-    fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", gd.projection_type);
+    fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", _params.projection_type);
     fprintf(stderr," Current valid types are: CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, MERCATOR\n");
     exit(-1);
 
   }
 
+#endif
+  
   gd.h_win.last_page = -1;
   gd.v_win.last_page = -1;
 
@@ -477,43 +463,42 @@ void init_data_space(Params &tdrpParams)
   for(i=0; i < MAX_FRAMES; i++) {
     sprintf(gd.movie.frame[i].fname,
             "%s/cidd_im%d_%d.",
-            gd.image_dir, pid, i);
+            _params.image_dir, pid, i);
     gd.movie.frame[i].h_xid = 0;
     gd.movie.frame[i].v_xid = 0;
     gd.movie.frame[i].redraw_horiz = 1;
     gd.movie.frame[i].redraw_vert = 1;
   }
 
-  gd.movie_on = gd.uparams->getLong("cidd.movie_on", 0);
-  gd.movie_magnify_factor = gd.uparams->getDouble("cidd.movie_magnify_factor",1.0);
-  gd.time_interval = gd.uparams->getDouble("cidd.time_interval",10.0);
-  gd.frame_span = gd.uparams->getDouble("cidd.frame_span", gd.time_interval);
-  gd.starting_movie_frames =
-    gd.uparams->getLong("cidd.starting_movie_frames", 12);
-  gd.reset_frames = gd.uparams->getLong("cidd.reset_frames", 0);
-  gd.movie_delay = gd.uparams->getLong("cidd.movie_delay",3000);
-  gd.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
-  gd.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
-  gd.time_search_stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
-  gd.climo_mode = gd.uparams->getString("cidd.climo_mode", "regular");
-  gd.temporal_rounding = gd.uparams->getLong("cidd.temporal_rounding", 300);
-  gd.movie_speed_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
+  // _params.movie_on = gd.uparams->getLong("cidd.movie_on", 0);
+  // _params.movie_magnify_factor = gd.uparams->getDouble("cidd.movie_magnify_factor",1.0);
+  // _params.time_interval = gd.uparams->getDouble("cidd.time_interval",10.0);
+  // _params.frame_span = gd.uparams->getDouble("cidd.frame_span", _params.time_interval);
+  // _params.starting_movie_frames = gd.uparams->getLong("cidd.starting_movie_frames", 12);
+  // _params.reset_frames = gd.uparams->getLong("cidd.reset_frames", 0);
+  // _params.movie_delay = gd.uparams->getLong("cidd.movie_delay",3000);
+  // _params.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
+  // _params.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
+  // _params.time_search_stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
+  // _params.climo_mode = gd.uparams->getString("cidd.climo_mode", "regular");
+  // _params.temporal_rounding = gd.uparams->getLong("cidd.temporal_rounding", 300);
+  // _params.movie_speed_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
 
   // copy movie info to other globals
 
-  gd.movie.movie_on = gd.movie_on;
-  if(gd.html_mode) gd.movie.movie_on = 0;
-  gd.movie.magnify_factor = gd.movie_magnify_factor;
-  gd.movie.time_interval = gd.time_interval;
-  gd.movie.frame_span = gd.frame_span;
-  gd.movie.num_frames = gd.starting_movie_frames;
-  gd.movie.reset_frames = gd.reset_frames;
-  gd.movie.delay = gd.movie_delay;
-  gd.movie.forecast_interval = gd.forecast_interval;
-  gd.movie.past_interval = gd.past_interval;
-  gd.movie.mr_stretch_factor = gd.time_search_stretch_factor;
-  gd.movie.round_to_seconds = gd.temporal_rounding;
-  gd.movie.display_time_msec = gd.movie_speed_msec;
+  gd.movie.movie_on = _params.movie_on;
+  if(_params.html_mode) gd.movie.movie_on = 0;
+  gd.movie.magnify_factor = _params.movie_magnify_factor;
+  gd.movie.time_interval = _params.time_interval;
+  gd.movie.frame_span = _params.frame_span;
+  gd.movie.num_frames = _params.starting_movie_frames;
+  gd.movie.reset_frames = _params.reset_frames;
+  gd.movie.delay = _params.movie_delay;
+  gd.movie.forecast_interval = _params.forecast_interval;
+  gd.movie.past_interval = _params.past_interval;
+  gd.movie.mr_stretch_factor = _params.time_search_stretch_factor;
+  gd.movie.round_to_seconds = _params.temporal_rounding;
+  gd.movie.display_time_msec = _params.movie_speed_msec;
 
   gd.movie.start_frame = 0;
   gd.movie.sweep_on = 0;
@@ -523,63 +508,62 @@ void init_data_space(Params &tdrpParams)
   gd.movie.last_frame = gd.movie.cur_frame;
 
   gd.movie.climo_mode = REGULAR_INTERVAL;
-  if(strncmp(gd.climo_mode,"daily", 5) == 0) gd.movie.climo_mode = DAILY_INTERVAL;
-  if(strncmp(gd.climo_mode,"yearly",6) == 0) gd.movie.climo_mode = YEARLY_INTERVAL;
+  if(strncmp(_params.climo_mode,"daily", 5) == 0) gd.movie.climo_mode = DAILY_INTERVAL;
+  if(strncmp(_params.climo_mode,"yearly",6) == 0) gd.movie.climo_mode = YEARLY_INTERVAL;
 
   // clipping for rendering
-  gd.check_clipping = gd.uparams->getLong("cidd.check_clipping", 0);
+  // _params.check_clipping = gd.uparams->getLong("cidd.check_clipping", 0);
   
   /* Toggle for displaying the analog clock */
-  gd.max_time_list_span = gd.uparams->getLong("cidd.max_time_list_span", 365);
+  // _params.max_time_list_span = gd.uparams->getLong("cidd.max_time_list_span", 365);
 
   /* Toggle for displaying the analog clock */
-  gd.show_clock = gd.uparams->getLong("cidd.show_clock", 0);
+  // _params.show_clock = gd.uparams->getLong("cidd.show_clock", 0);
 
   /* Toggle for displaying data access and rendering messages */
-  gd.show_data_messages = gd.uparams->getLong("cidd.show_data_messages", 1);
+  // _params.show_data_messages = gd.uparams->getLong("cidd.show_data_messages", 1);
 
   /* Toggle for displaying data labels */
-  gd.display_labels = gd.uparams->getLong("cidd.display_labels", 1);
+  // _params.display_labels = gd.uparams->getLong("cidd.display_labels", 1);
 
   /* Toggle for displaying the analog clock */
-  gd.display_ref_lines = gd.uparams->getLong("cidd.display_ref_lines", 1);
+  // _params.display_ref_lines = gd.uparams->getLong("cidd.display_ref_lines", 1);
 
   /* Toggle for enabling a status report window */
-  gd.enable_status_window = gd.uparams->getLong("cidd.enable_status_window", 0);
+  // _params.enable_status_window = gd.uparams->getLong("cidd.enable_status_window", 0);
 
   /* Toggle for enabling a Save Image Panel */
   // WARNING - ALLOWS USERS SHELL ACCESS
-  gd.enable_save_image_panel =
-    gd.uparams->getLong("cidd.enable_save_image_panel", 0);
+  // _params.enable_save_image_panel = gd.uparams->getLong("cidd.enable_save_image_panel", 0);
   
   /* Set the time to display on the analog clock */
-  gd.draw_clock_local = gd.uparams->getLong("cidd.draw_clock_local", 0);
+  // _params.draw_clock_local = gd.uparams->getLong("cidd.draw_clock_local", 0);
   
   /* Use local times for Product timestamps and user input widgets. */
-  gd.use_local_timestamps = gd.uparams->getLong("cidd.use_local_timestamps", 0);
+  // _params.use_local_timestamps = gd.uparams->getLong("cidd.use_local_timestamps", 0);
   
   /* Toggle for displaying the height Selector in Right Margin */
-  gd.show_height_sel = gd.uparams->getLong("cidd.show_height_sel", 1);
+  // _params.show_height_sel = gd.uparams->getLong("cidd.show_height_sel", 1);
 
   /* Use cosine correction for computing range in polar data */
-  if (gd.use_cosine_correction < 0) {
+#ifdef JUNK
+  if (_params.use_cosine_correction < 0) {
     // not set on command line
     int use_cosine = gd.uparams->getLong("cidd.use_cosine", 1); // legacy
-    gd.use_cosine_correction =
+    _params.use_cosine_correction =
       gd.uparams->getLong("cidd.use_cosine_correction", use_cosine);
   }
+#endif
 
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
 
-  gd.demo_time = gd.uparams->getString("cidd.demo_time", "");
-  
-  gd.gather_data_mode = gd.uparams->getLong("cidd.gather_data_mode",
-                                            CLOSEST_TO_FRAME_CENTER);
+  // _params.demo_time = gd.uparams->getString("cidd.demo_time", "");
+  // _params.gather_data_mode = gd.uparams->getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
   
   /* If demo time param is not set and command line option hasn't set archive mode */
 
-  if(strlen(gd.demo_time) < 8 &&
+  if(strlen(_params.demo_time) < 8 &&
      (gd.movie.mode != ARCHIVE_MODE) ) { /* REALTIME MODE */
     gd.movie.mode = REALTIME_MODE;
     gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
@@ -602,7 +586,7 @@ void init_data_space(Params &tdrpParams)
       gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
       gd.coord_expt->time_seq_num++;
 
-      parse_string_into_time(gd.demo_time,&temp_utime);
+      parse_string_into_time(_params.demo_time,&temp_utime);
       UTIMdate_to_unix(&temp_utime);
       /* set the first index's time  based on indicated time */
       gd.movie.start_time = temp_utime.unix_time;
@@ -612,7 +596,7 @@ void init_data_space(Params &tdrpParams)
     /* Adjust the start time downward to the nearest round interval seconds */
     gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
 
-    if(gd.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
+    if(_params.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
       // Offset movie frame by 1/2 frame interval so that interest time
       // lies on frame mid point
       gd.movie.start_time -=  (time_t) (gd.movie.time_interval * 30.0);
@@ -629,86 +613,73 @@ void init_data_space(Params &tdrpParams)
 
   reset_time_points(); // reset movie
 
-  gd.image_fill_threshold =
+  _params.image_fill_threshold =
     gd.uparams->getLong("cidd.image_fill_threshold", 120000);
 
-  gd.dynamic_contour_threshold =
+  _params.dynamic_contour_threshold =
     gd.uparams->getLong("cidd.dynamic_contour_threshold", 160000);
 
-  gd.image_inten = gd.uparams->getDouble("cidd.image_inten", 0.8);
-  gd.inten_levels = gd.uparams->getLong("cidd.inten_levels", 32);
-  gd.data_inten = gd.uparams->getDouble("cidd.data_inten", 1.0);
+  _params.image_inten = gd.uparams->getDouble("cidd.image_inten", 0.8);
+  _params.inten_levels = gd.uparams->getLong("cidd.inten_levels", 32);
+  _params.data_inten = gd.uparams->getDouble("cidd.data_inten", 1.0);
 
-  gd.data_timeout_secs = gd.uparams->getLong("cidd.data_timeout_secs", 10);
+  _params.data_timeout_secs = gd.uparams->getLong("cidd.data_timeout_secs", 10);
 
   // data compression from server
   
-  gd.request_compressed_data =
-    gd.uparams->getLong("cidd.request_compressed_data",0);
-  gd.request_gzip_vol_compression =
-    gd.uparams->getLong("cidd.request_gzip_vol_compression",0);
+  // _params.request_compressed_data = gd.uparams->getLong("cidd.request_compressed_data",0);
+  // _params.request_gzip_vol_compression = gd.uparams->getLong("cidd.request_gzip_vol_compression",0);
 
   // output image file names
   
-  gd.add_frame_num_to_filename =
-    gd.uparams->getLong("cidd.add_frame_num_to_filename",1);
-
-  gd.add_button_name_to_filename =
-    gd.uparams->getLong("cidd.add_button_name_to_filename",0);
-
-  gd.add_height_to_filename =
-    gd.uparams->getLong("cidd.add_height_to_filename",0);
-     
-  gd.add_frame_time_to_filename =
-    gd.uparams->getLong("cidd.add_frame_time_to_filename",1);
-     
-  gd.add_gen_time_to_filename =
-    gd.uparams->getLong("cidd.add_gen_time_to_filename",0);
-     
-  gd.add_valid_time_to_filename =
-    gd.uparams->getLong("cidd.add_valid_time_to_filename",0);
-     
-  gd.font_display_mode =
-    gd.uparams->getLong("cidd.font_display_mode",1);
-
-  gd.label_contours = gd.uparams->getLong("cidd.label_contours",1);
+  // _params.add_frame_num_to_filename = gd.uparams->getLong("cidd.add_frame_num_to_filename",1);
+  // _params.add_button_name_to_filename = gd.uparams->getLong("cidd.add_button_name_to_filename",0);
+  // _params.add_height_to_filename = gd.uparams->getLong("cidd.add_height_to_filename",0);
+  // _params.add_frame_time_to_filename = gd.uparams->getLong("cidd.add_frame_time_to_filename",1);
+  // _params.add_gen_time_to_filename = gd.uparams->getLong("cidd.add_gen_time_to_filename",0);
+  // _params.add_valid_time_to_filename = gd.uparams->getLong("cidd.add_valid_time_to_filename",0);
+  // _params.font_display_mode = gd.uparams->getLong("cidd.font_display_mode",1);
+  // _params.label_contours = gd.uparams->getLong("cidd.label_contours",1);
 
   // margins
   
-  gd.top_margin_render_style =
-    gd.uparams->getLong("cidd.top_margin_render_style", 1);
+  // _params.top_margin_render_style = gd.uparams->getLong("cidd.top_margin_render_style", 1);
 
-  if(gd.html_mode || gd.movie.num_frames < 3 ) {
-    gd.bot_margin_render_style =
-      gd.uparams->getLong("cidd.bot_margin_render_style", 1);
+#ifdef JUNK
+  if(_params.html_mode || gd.movie.num_frames < 3 ) {
+    _params.bot_margin_render_style = gd.uparams->getLong("cidd.bot_margin_render_style", 1);
   } else {
-    gd.bot_margin_render_style =
-      gd.uparams->getLong("cidd.bot_margin_render_style", 2);
+    _params.bot_margin_render_style = gd.uparams->getLong("cidd.bot_margin_render_style", 2);
   }
+#endif
 
   // field menu - number of columns
   
-  gd.num_field_menu_cols = gd.uparams->getLong("cidd.num_field_menu_cols",0);
+  // _params.num_field_menu_cols = gd.uparams->getLong("cidd.num_field_menu_cols",0);
 
   // caching zooms to go back to
-  
-  gd.num_cache_zooms = gd.uparams->getLong("cidd.num_cache_zooms",1);
-  if(gd.num_cache_zooms > MAX_CACHE_PIXMAPS) {
-    gd.num_cache_zooms = MAX_CACHE_PIXMAPS;
-  }
-  if(gd.num_cache_zooms < 1) {
-    gd.num_cache_zooms = 1 ;
-  }
 
-  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
-  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
+#ifdef JUNK
+  _params.num_cache_zooms = gd.uparams->getLong("cidd.num_cache_zooms",1);
+  if(_params.num_cache_zooms > MAX_CACHE_PIXMAPS) {
+    _params.num_cache_zooms = MAX_CACHE_PIXMAPS;
+  }
+  if(_params.num_cache_zooms < 1) {
+    _params.num_cache_zooms = 1 ;
+  }
+#endif
   
-  gd.num_zoom_levels =  gd.uparams->getLong("cidd.num_zoom_levels",1);
-  gd.start_zoom_level =  gd.uparams->getLong("cidd.start_zoom_level",1);
+  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),_params.num_cache_zooms);
+  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),_params.num_cache_zooms);
+  
+  // _params.num_zoom_levels =  gd.uparams->getLong("cidd.num_zoom_levels",1);
+  // _params.start_zoom_level =  gd.uparams->getLong("cidd.start_zoom_level",1);
 
-  if(gd.html_mode ==0) {
-    gd.h_win.zoom_level = gd.start_zoom_level;
-    gd.h_win.num_zoom_levels = gd.num_zoom_levels;
+#ifdef JUNK
+  
+  if(_params.html_mode ==0) {
+    gd.h_win.zoom_level = _params.start_zoom_level;
+    gd.h_win.num_zoom_levels = _params.num_zoom_levels;
     if(gd.h_win.zoom_level < 0) gd.h_win.zoom_level = 0;
     if(gd.h_win.zoom_level > gd.h_win.num_zoom_levels) {
       gd.h_win.zoom_level = gd.h_win.num_zoom_levels -1;
@@ -725,37 +696,38 @@ void init_data_space(Params &tdrpParams)
   gd.h_win.zmax_y =
     (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
 
-  gd.zoom_limits_in_latlon =  gd.uparams->getLong("cidd.zoom_limits_in_latlon",0);
+#endif
 
-  gd.domain_limit_min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-10000);
-  gd.domain_limit_max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",10000);
-  gd.domain_limit_min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-10000);
-  gd.domain_limit_max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",10000);
+  // _params.zoom_limits_in_latlon =  gd.uparams->getLong("cidd.zoom_limits_in_latlon",0);
+  // _params.domain_limit_min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-10000);
+  // _params.domain_limit_max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",10000);
+  // _params.domain_limit_min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-10000);
+  // _params.domain_limit_max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",10000);
   
   if (gd.display_projection == Mdvx::PROJ_LATLON) {
-    gd.h_win.min_x = max(gd.domain_limit_min_x, -360.0);
-    gd.h_win.max_x = min(gd.domain_limit_max_x, 360.0);
-    gd.h_win.min_y = max(gd.domain_limit_min_y, -90.0);
-    gd.h_win.max_y = min(gd.domain_limit_max_y, 90.0);
+    gd.h_win.min_x = max(_params.domain_limit_min_x, -360.0);
+    gd.h_win.max_x = min(_params.domain_limit_max_x, 360.0);
+    gd.h_win.min_y = max(_params.domain_limit_min_y, -90.0);
+    gd.h_win.max_y = min(_params.domain_limit_max_y, 90.0);
   } else {
-    gd.h_win.min_x = gd.domain_limit_min_x;
-    gd.h_win.max_x = gd.domain_limit_max_x;
-    gd.h_win.min_y = gd.domain_limit_min_y;
-    gd.h_win.max_y = gd.domain_limit_max_y;
+    gd.h_win.min_x = _params.domain_limit_min_x;
+    gd.h_win.max_x = _params.domain_limit_max_x;
+    gd.h_win.min_y = _params.domain_limit_min_y;
+    gd.h_win.max_y = _params.domain_limit_max_y;
   }
   
-  gd.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
-  gd.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
-  gd.start_ht = gd.uparams->getDouble("cidd.start_ht", 0.0);
-  gd.planview_start_page = gd.uparams->getLong("cidd.planview_start_page", 1) -1;
-  gd.xsect_start_page = gd.uparams->getLong("cidd.xsect_start_page", 1) -1;
+  _params.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
+  _params.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
+  _params.start_ht = gd.uparams->getDouble("cidd.start_ht", 0.0);
+  _params.planview_start_page = gd.uparams->getLong("cidd.planview_start_page", 1) -1;
+  _params.xsect_start_page = gd.uparams->getLong("cidd.xsect_start_page", 1) -1;
 
-  gd.h_win.min_ht = gd.min_ht;
-  gd.h_win.max_ht = gd.max_ht;
+  gd.h_win.min_ht = _params.min_ht;
+  gd.h_win.max_ht = _params.max_ht;
 
   // Otherwise set in the command line arguments
   if(gd.num_render_heights == 0) {
-    gd.h_win.cur_ht = gd.start_ht;
+    gd.h_win.cur_ht = _params.start_ht;
   }
 
   // Fix out of order limits.
@@ -818,7 +790,7 @@ void init_data_space(Params &tdrpParams)
 
     // convert from latlon if needed
 
-    if (gd.zoom_limits_in_latlon) {
+    if (_params.zoom_limits_in_latlon) {
 
       double minLon = minx;
       double maxLon = maxx;
@@ -871,7 +843,7 @@ void init_data_space(Params &tdrpParams)
       gd.h_win.zmin_y[i] =  gd.h_win.max_y - delta_y;
     }
 
-    if(gd.aspect_ratio <= 0.0) gd.aspect_ratio = fabs(delta_x/delta_y);
+    if(_params.aspect_ratio <= 0.0) _params.aspect_ratio = fabs(delta_x/delta_y);
 
     gd.aspect_correction =
       cos(((gd.h_win.zmax_y[i] + gd.h_win.zmin_y[i])/2.0) * DEG_TO_RAD);
@@ -884,7 +856,7 @@ void init_data_space(Params &tdrpParams)
         break;
     }
 
-    delta_x /= gd.aspect_ratio;
+    delta_x /= _params.aspect_ratio;
 
     if(delta_x > delta_y) {
       gd.h_win.zmax_y[i] += ((delta_x - delta_y) /2.0) ;
@@ -1030,8 +1002,8 @@ void init_data_space(Params &tdrpParams)
   gd.v_win.zmin_y = (double *)  calloc(sizeof(double), 1);
   gd.v_win.zmax_y = (double *)  calloc(sizeof(double), 1);
 
-  gd.v_win.origin_lat = gd.origin_latitude;
-  gd.v_win.origin_lon = gd.origin_longitude;
+  gd.v_win.origin_lat = _params.origin_latitude;
+  gd.v_win.origin_lon = _params.origin_longitude;
   gd.v_win.min_x = gd.h_win.min_x;
   gd.v_win.max_x = gd.h_win.max_x;
   gd.v_win.min_y = gd.h_win.min_y;
@@ -1047,26 +1019,27 @@ void init_data_space(Params &tdrpParams)
   gd.v_win.cmax_y = gd.h_win.route.y_world[1];
 
   // Load Wind Rendering preferences.
-  gd.ideal_x_vects = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
-  gd.ideal_y_vects = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
-  gd.wind_head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
-  gd.wind_head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
-  gd.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 33);
+  // _params.ideal_x_vects = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
+  // _params.ideal_y_vects = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
+  // _params.wind_head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
+  // _params.wind_head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
+  // _params.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 33);
   
   /* Initialize Extra features data */
-  gd.all_winds_on = gd.uparams->getLong("cidd.all_winds_on", 1);
-  gd.layers.wind_vectors = gd.all_winds_on;
+  // _params.all_winds_on = gd.uparams->getLong("cidd.all_winds_on", 1);
+
+  gd.layers.wind_vectors = _params.all_winds_on;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
   
-  gd.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
-  gd.layers.wind_mode = gd.wind_mode;
+  // _params.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
+  gd.layers.wind_mode = _params.wind_mode;
   
-  gd.wind_time_scale_interval =
+  _params.wind_time_scale_interval =
     gd.uparams->getDouble("cidd.wind_time_scale_interval", 10.0);
-  gd.layers.wind_time_scale_interval = gd.wind_time_scale_interval;
+  gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
 
-  gd.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
-  gd.layers.wind_scaler = gd.wind_scaler;
+  _params.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
+  gd.layers.wind_scaler = _params.wind_scaler;
 
   gd.legends.range = gd.uparams->getLong("cidd.range_rings", 0) ? RANGE_BIT : 0;
   int plot_azimuths = gd.uparams->getLong("cidd.azmith_lines", 0);
@@ -1100,19 +1073,21 @@ void init_data_space(Params &tdrpParams)
 
   // winds init
   
-  gd.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
-  gd.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
-  gd.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
-  gd.wind_w_scale_factor = gd.uparams->getDouble("cidd.wind_w_scale_factor", 10.0);
-  gd.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
+  // _params.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
+  // _params.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
+  // _params.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
+  // _params.wind_w_scale_factor = gd.uparams->getDouble("cidd.wind_w_scale_factor", 10.0);
+  // _params.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
 
+#ifdef JUNK
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug)fprintf(stderr,"Couldn't Find WINDS Section\n");
   } else {
     /* Establish and initialize connections to wind fields */
     init_wind_data_links(param_text, param_text_len, param_text_line_no);
   }
-    
+#endif
+  
   if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
 
   // Instantiate and load the SYMPROD TDRP Parameter section
@@ -1342,16 +1317,18 @@ void init_data_space(Params &tdrpParams)
 
   // overlays
 
-  gd.map_file_subdir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
+  // _params.map_file_subdir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
   init_over_data_links(param_text, param_text_len, param_text_line_no);
   
   // Instantiate the Station locator classes and params.
-  gd.locator_margin_km = gd.uparams->getDouble("cidd.locator_margin_km", 50.0);
-  gd.station_loc_url = gd.uparams->getString("cidd.station_loc_url", "");
+  // _params.locator_margin_km = gd.uparams->getDouble("cidd.locator_margin_km", 50.0);
+  // _params.station_loc_url = gd.uparams->getString("cidd.station_loc_url", "");
 
-  if(strlen(gd.station_loc_url) > 1) {
+#ifdef JUNK
+  
+  if(strlen(_params.station_loc_url) > 1) {
     if(gd.debug || gd.debug1) {
-      fprintf(stderr,"Loading Station data from %s ...",gd.station_loc_url);
+      fprintf(stderr,"Loading Station data from %s ...",_params.station_loc_url);
     }
     gd.station_loc =  new StationLoc();
     if(gd.station_loc == NULL) {
@@ -1359,8 +1336,8 @@ void init_data_space(Params &tdrpParams)
       exit(-1);
     }
 
-    if(gd.station_loc->ReadData(gd.station_loc_url) < 0) {
-      fprintf(stderr,"CIDD: Can't load Station Data from %s\n",gd.station_loc_url);
+    if(gd.station_loc->ReadData(_params.station_loc_url) < 0) {
+      fprintf(stderr,"CIDD: Can't load Station Data from %s\n",_params.station_loc_url);
       exit(-1);
     }
     // gd.station_loc->PrintAll();  // DEBUG
@@ -1370,19 +1347,21 @@ void init_data_space(Params &tdrpParams)
     }
   }
 
-  gd.remote_ui_url = gd.uparams->getString("cidd.remote_ui_url", "");
-  if(strlen(gd.remote_ui_url) > 1) {
+#endif
+
+  // _params.remote_ui_url = gd.uparams->getString("cidd.remote_ui_url", "");
+  if(strlen(_params.remote_ui_url) > 1) {
 
     gd.remote_ui = new RemoteUIQueue();
 
     // Create the FMW with 4096 slots - Total size 1M
     bool compression = false;
-    if (gd.remote_ui->initReadWrite( gd.remote_ui_url,
+    if (gd.remote_ui->initReadWrite( _params.remote_ui_url,
                                      (char *) "CIDD",
                                      (bool) gd.debug2,
                                      DsFmq::END, compression,
                                      4096, 4096*256 ) != 0 ) { 
-      fprintf(stderr,"Problems initialising Remote Command Fmq: %s - aborting\n",gd.remote_ui_url);
+      fprintf(stderr,"Problems initialising Remote Command Fmq: %s - aborting\n",_params.remote_ui_url);
     }
   }
 
@@ -1391,7 +1370,7 @@ void init_data_space(Params &tdrpParams)
     gd.layers.cont[i].min = gd.mrec[0]->cont_low;
     gd.layers.cont[i].max = gd.mrec[0]->cont_high;
     gd.layers.cont[i].interval = gd.mrec[0]->cont_interv;
-    gd.layers.cont[i].labels_on  = gd.label_contours;
+    gd.layers.cont[i].labels_on  = _params.label_contours;
   }
   for(i=0; i < NUM_GRID_LAYERS; i++) { gd.layers.overlay_field[i] = 0; }
 
@@ -1420,10 +1399,10 @@ void init_data_space(Params &tdrpParams)
 
     strncpy(gd.layers.cont[i-1].color_name,"white",NAME_LENGTH);
 
-    if(gd.html_mode == 0) {
+    if(_params.html_mode == 0) {
       /* Replace Underscores with spaces in field names */
       for(j=strlen(cfield[0])-1 ; j >= 0; j--) 
-        if(gd.replace_underscores && cfield[0][j] == '_') cfield[0][j] = ' ';
+        if(_params.replace_underscores && cfield[0][j] == '_') cfield[0][j] = ' ';
     }
     for(j=0;j < gd.num_datafields; j++) {
       if(strcmp(gd.mrec[j]->button_name,cfield[0]) == 0) {
@@ -1452,10 +1431,10 @@ void init_data_space(Params &tdrpParams)
 
     num_fields = STRparse(field_str, cfield, NAME_LENGTH, 3, NAME_LENGTH); 
 
-    if(gd.html_mode == 0) {
+    if(_params.html_mode == 0) {
       /* Replace Underscores with spaces in field names */
       for(j=strlen(cfield[0])-1 ; j >= 0; j--) 
-        if(gd.replace_underscores && field_str[j] == '_') cfield[0][j] = ' ';
+        if(_params.replace_underscores && field_str[j] == '_') cfield[0][j] = ' ';
     }
     for(j=0; j <  gd.num_datafields; j++) {
       if(strcmp(gd.mrec[j]->button_name,cfield[0]) == 0) {  
@@ -1476,20 +1455,20 @@ void init_data_space(Params &tdrpParams)
 
   // fonts
 
-  gd.num_fonts = gd.uparams->getLong("cidd.num_fonts", 1);
+  // _params.num_fonts = gd.uparams->getLong("cidd.num_fonts", 1);
   
-  if(gd.num_fonts > MAX_FONTS) {
-    gd.num_fonts = MAX_FONTS;
+#ifdef NOTNOW
+  
+  if(_params.num_fonts > MAX_FONTS) {
+    _params.num_fonts = MAX_FONTS;
     fprintf(stderr,"Cidd: Warning. Too Many Fonts. Limited to %d Fonts\n",MAX_FONTS);
   }
 
-#ifdef NOTNOW
-  
   // Make sure specified font for Winds, Contours and Products are within range.
   if(gd.prod.prod_font_num < 0) gd.prod.prod_font_num = 0;
-  if(gd.prod.prod_font_num >= gd.num_fonts) gd.prod.prod_font_num = gd.num_fonts -1;
+  if(gd.prod.prod_font_num >= _params.num_fonts) gd.prod.prod_font_num = _params.num_fonts -1;
   
-  for(i=0;i < gd.num_fonts; i++) {
+  for(i=0;i < _params.num_fonts; i++) {
     sprintf(p_name,"cidd.font%d",i+1);
     f_name = gd.uparams->getString(
             p_name, "fixed");
@@ -1508,120 +1487,106 @@ void init_data_space(Params &tdrpParams)
 
   // contours
 
-  gd.contour_font_num = gd.uparams->getLong("contour_font_num", 6);
-  gd.n_ideal_contour_labels = gd.uparams->getLong("n_ideal_contour_labels", 5);
+  // _params.contour_font_num = gd.uparams->getLong("contour_font_num", 6);
+  // _params.n_ideal_contour_labels = gd.uparams->getLong("n_ideal_contour_labels", 5);
 
   // canvas events
 
-  gd.rotate_coarse_adjust = gd.uparams->getDouble("cidd.rotate_coarse_adjust",6.0);
-  gd.rotate_medium_adjust = gd.uparams->getDouble("cidd.rotate_medium_adjust",2.0);
-  gd.rotate_fine_adjust = gd.uparams->getDouble("cidd.rotate_fine_adjust", 0.5);
+  // _params.rotate_coarse_adjust = gd.uparams->getDouble("cidd.rotate_coarse_adjust",6.0);
+  // _params.rotate_medium_adjust = gd.uparams->getDouble("cidd.rotate_medium_adjust",2.0);
+  // _params.rotate_fine_adjust = gd.uparams->getDouble("cidd.rotate_fine_adjust", 0.5);
 
   // zoom
   
-  gd.min_zoom_threshold = gd.uparams->getDouble("cidd.min_zoom_threshold", 5.0);
+  // _params.min_zoom_threshold = gd.uparams->getDouble("cidd.min_zoom_threshold", 5.0);
 
   // gui
 
-  gd.no_data_message = gd.uparams->getString
-    ("cidd.no_data_message",
-     "NO DATA FOUND (in this area at the selected time)");
+  // _params.no_data_message = gd.uparams->getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
+  // _params.horiz_top_margin =  gd.uparams->getLong("cidd.horiz_top_margin", 20);
+  // _params.horiz_bot_margin =  gd.uparams->getLong("cidd.horiz_bot_margin", 20);
+  // _params.horiz_left_margin = gd.uparams->getLong("cidd.horiz_left_margin", 20);
+  // _params.horiz_right_margin = gd.uparams->getLong("cidd.horiz_right_margin", 80);
   
-  gd.horiz_top_margin =  gd.uparams->getLong("cidd.horiz_top_margin", 20);
-  gd.horiz_bot_margin =  gd.uparams->getLong("cidd.horiz_bot_margin", 20);
-  gd.horiz_left_margin = gd.uparams->getLong("cidd.horiz_left_margin", 20);
-  gd.horiz_right_margin = gd.uparams->getLong("cidd.horiz_right_margin", 80);
+  // _params.vert_top_margin =  gd.uparams->getLong("cidd.vert_top_margin", 20);
+  // _params.vert_bot_margin =  gd.uparams->getLong("cidd.vert_bot_margin", 20);
+  // _params.vert_left_margin = gd.uparams->getLong("cidd.vert_left_margin", 20);
+  // _params.vert_right_margin = gd.uparams->getLong("cidd.vert_right_margin", 80);
   
-  gd.vert_top_margin =  gd.uparams->getLong("cidd.vert_top_margin", 20);
-  gd.vert_bot_margin =  gd.uparams->getLong("cidd.vert_bot_margin", 20);
-  gd.vert_left_margin = gd.uparams->getLong("cidd.vert_left_margin", 20);
-  gd.vert_right_margin = gd.uparams->getLong("cidd.vert_right_margin", 80);
+  // _params.horiz_legends_start_x = gd.uparams->getLong("cidd.horiz_legends_start_x", 0);
+  // _params.horiz_legends_start_y = gd.uparams->getLong("cidd.horiz_legends_start_y", 0);
+  // _params.horiz_legends_delta_y = gd.uparams->getLong("cidd.horiz_legends_delta_y", 0);
   
-  gd.horiz_legends_start_x =
-    gd.uparams->getLong("cidd.horiz_legends_start_x", 0);
-  gd.horiz_legends_start_y =
-    gd.uparams->getLong("cidd.horiz_legends_start_y", 0);
-  gd.horiz_legends_delta_y =
-    gd.uparams->getLong("cidd.horiz_legends_delta_y", 0);
+  // _params.vert_legends_start_x = gd.uparams->getLong("cidd.vert_legends_start_x", 0);
+  // _params.vert_legends_start_y = gd.uparams->getLong("cidd.vert_legends_start_y", 0);
+  // _params.vert_legends_delta_y = gd.uparams->getLong("cidd.vert_legends_delta_y", 0);
   
-  gd.vert_legends_start_x =
-    gd.uparams->getLong("cidd.vert_legends_start_x", 0);
-  gd.vert_legends_start_y =
-    gd.uparams->getLong("cidd.vert_legends_start_y", 0);
-  gd.vert_legends_delta_y =
-    gd.uparams->getLong("cidd.vert_legends_delta_y", 0);
-  
-  gd.horiz_min_height = gd.uparams->getLong("cidd.horiz_min_height", 400);
-  gd.horiz_min_width = gd.uparams->getLong("cidd.horiz_min_width", 600);
-  gd.horiz_default_height = gd.uparams->getLong("cidd.horiz_default_height", 600);
-  gd.horiz_default_width = gd.uparams->getLong("cidd.horiz_default_width", 800);
+  // _params.horiz_min_height = gd.uparams->getLong("cidd.horiz_min_height", 400);
+  // _params.horiz_min_width = gd.uparams->getLong("cidd.horiz_min_width", 600);
+  // _params.horiz_default_height = gd.uparams->getLong("cidd.horiz_default_height", 600);
+  // _params.horiz_default_width = gd.uparams->getLong("cidd.horiz_default_width", 800);
 
-  gd.vert_min_height = gd.uparams->getLong("cidd.vert_min_height", 400);
-  gd.vert_min_width = gd.uparams->getLong("cidd.vert_min_width", 600);
-  gd.vert_default_height = gd.uparams->getLong("cidd.vert_default_height", 400);
-  gd.vert_default_width = gd.uparams->getLong("cidd.vert_default_width", 600);
+  // _params.vert_min_height = gd.uparams->getLong("cidd.vert_min_height", 400);
+  // _params.vert_min_width = gd.uparams->getLong("cidd.vert_min_width", 600);
+  // _params.vert_default_height = gd.uparams->getLong("cidd.vert_default_height", 400);
+  // _params.vert_default_width = gd.uparams->getLong("cidd.vert_default_width", 600);
 
-  gd.wsddm_mode  = gd.uparams->getLong("cidd.wsddm_mode", 0);
-  gd.one_click_rhi  = gd.uparams->getLong("cidd.one_click_rhi", 0);
-  gd.click_posn_rel_to_origin  = gd.uparams->getLong("cidd.click_posn_rel_to_origin", 0);
-  gd.report_clicks_in_status_window = gd.uparams->getLong("cidd.report_clicks_in_status_window", 0);
-  gd.report_clicks_in_degM_and_nm = gd.uparams->getLong("cidd.report_clicks_in_degM_and_nm", 0);
-  gd.magnetic_variation_deg = gd.uparams->getLong("cidd.magnetic_variation_deg", 0);
-  gd.check_data_times = gd.uparams->getLong("cidd.check_data_times", 0);
+  // _params.wsddm_mode  = gd.uparams->getLong("cidd.wsddm_mode", 0);
+  // _params.one_click_rhi  = gd.uparams->getLong("cidd.one_click_rhi", 0);
+  // _params.click_posn_rel_to_origin  = gd.uparams->getLong("cidd.click_posn_rel_to_origin", 0);
+  // _params.report_clicks_in_status_window = gd.uparams->getLong("cidd.report_clicks_in_status_window", 0);
+  // _params.report_clicks_in_degM_and_nm = gd.uparams->getLong("cidd.report_clicks_in_degM_and_nm", 0);
+  // _params.magnetic_variation_deg = gd.uparams->getLong("cidd.magnetic_variation_deg", 0);
+  // _params.check_data_times = gd.uparams->getLong("cidd.check_data_times", 0);
 
-  gd.frame_label = gd.uparams->getString("cidd.horiz_frame_label", "Qucid");
-  
-  gd.status_info_file = gd.uparams->getString("cidd.status_info_file", "");
+  // _params.frame_label = gd.uparams->getString("cidd.horiz_frame_label", "Qucid");
+  // _params.status_info_file = gd.uparams->getString("cidd.status_info_file", "");
 
   // h_win_proc
   
-  gd.horiz_default_y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-  gd.horiz_default_x_pos = gd.uparams->getLong("cidd.horiz_default_x_pos",0);
+  // _params.horiz_default_y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+  // _params.horiz_default_x_pos = gd.uparams->getLong("cidd.horiz_default_x_pos",0);
 
-  gd.vert_default_x_pos = gd.uparams->getLong("cidd.vert_default_x_pos", 0);
-  gd.vert_default_y_pos = gd.uparams->getLong("cidd.vert_default_y_pos", 0);
+  // _params.vert_default_x_pos = gd.uparams->getLong("cidd.vert_default_x_pos", 0);
+  // _params.vert_default_y_pos = gd.uparams->getLong("cidd.vert_default_y_pos", 0);
   
   // page_pu_proc
 
-  gd.ideal_x_vectors = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
-  gd.ideal_y_vectors = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
-  gd.azimuth_interval = gd.uparams->getDouble("cidd.azmith_interval",
-                                              30.0);
-  gd.azimuth_interval = gd.uparams->getDouble("cidd.azimuth_interval",
-                                              gd.azimuth_interval);
-  gd.azimuth_radius = gd.uparams->getDouble("cidd.azmith_radius",
-                                             200.0);
-  gd.azimuth_radius = gd.uparams->getDouble("cidd.azimuth_radius",
-                                             gd.azimuth_radius);
-  gd.latest_click_mark_size = gd.uparams->getLong("cidd.latest_click_mark_size", 11);
-  gd.range_ring_x_space = gd.uparams->getLong("cidd.range_ring_x_space", 50);
-  gd.range_ring_y_space = gd.uparams->getLong("cidd.range_ring_y_space", 15);
-  gd.range_ring_spacing = gd.uparams->getDouble("cidd.range_ring_spacing", -1.0);
-  gd.max_ring_range = gd.uparams->getDouble("cidd.max_ring_range", 1000.0);
-  gd.range_ring_labels = gd.uparams->getLong("cidd.range_ring_labels", 1);
-
+#ifdef JUNK
+  _params.ideal_x_vectors = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
+  _params.ideal_y_vectors = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
+  gd.azimuth_interval = gd.uparams->getDouble("cidd.azmith_interval", 30.0);
+  gd.azimuth_interval = gd.uparams->getDouble("cidd.azimuth_interval", gd.azimuth_interval);
+  gd.azimuth_radius = gd.uparams->getDouble("cidd.azmith_radius", 200.0);
+  gd.azimuth_radius = gd.uparams->getDouble("cidd.azimuth_radius", gd.azimuth_radius);
+  _params.latest_click_mark_size = gd.uparams->getLong("cidd.latest_click_mark_size", 11);
+  _params.range_ring_x_space = gd.uparams->getLong("cidd.range_ring_x_space", 50);
+  _params.range_ring_y_space = gd.uparams->getLong("cidd.range_ring_y_space", 15);
+  _params.range_ring_spacing = gd.uparams->getDouble("cidd.range_ring_spacing", -1.0);
+  _params.max_ring_range = gd.uparams->getDouble("cidd.max_ring_range", 1000.0);
+  _params.range_ring_labels = gd.uparams->getLong("cidd.range_ring_labels", 1);
+#endif
+  
   // symprods
   
-  gd.scale_constant = gd.uparams->getDouble("cidd.scale_constant", 300.0);
+  // _params.scale_constant = gd.uparams->getDouble("cidd.scale_constant", 300.0);
 
   // timer control
 
-  gd.redraw_interval =
-    gd.uparams->getLong("cidd.redraw_interval", REDRAW_INTERVAL);
-  gd.update_interval =
-    gd.uparams->getLong("cidd.update_interval", UPDATE_INTERVAL);
+  // _params.redraw_interval = gd.uparams->getLong("cidd.redraw_interval", REDRAW_INTERVAL);
+  // _params.update_interval = gd.uparams->getLong("cidd.update_interval", UPDATE_INTERVAL);
 
   gd.uparams->setPrintTdrp(false);
 
   // initialize procmap
   
-  if(!gd.run_once_and_exit) {
+  if(!_params.run_once_and_exit) {
     PMU_auto_init(gd.app_name, gd.app_instance, PROCMAP_REGISTER_INTERVAL);
   }
 
   // initialize shared memory
   
-  if(!gd.run_once_and_exit) {
+  if(!_params.run_once_and_exit) {
     PMU_auto_register("Initializing SHMEM");
   }
     
