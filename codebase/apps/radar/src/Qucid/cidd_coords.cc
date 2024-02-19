@@ -278,7 +278,7 @@ void pixel_to_grid( met_record_t *mr, margin_t *margin, int pix_x, int pix_y,
     int *grid_y)    /* RETURN */
 {
 
-    if((!_params.use_cosine_correction) && 
+  if((!gd.use_cosine_correction) && 
        (mr->proj->getProjType() == Mdvx::PROJ_POLAR_RADAR)) {
       // for radar projection without cosine correction, we need
       // a special method

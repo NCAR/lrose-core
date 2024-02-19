@@ -442,7 +442,7 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       
     } else if (!strcmp(argv[ii], "-vert")) {
       
-      _params.use_cosine_correction = pFALSE;
+      gd.use_cosine_correction = 1;
       if(!gd.quiet_mode) printf("CIDD will run in VERT pointing mode\n");
       
     } else if (!strcmp(argv[ii], "-start_time")) {

@@ -232,7 +232,7 @@ struct    Global_data {
   //                                    * 0 = show for all data types */
   // int    domain_follows_data; // 1 = Domain shifts so data is always at the center
   // int    show_height_sel;// 1 = Show Vertical Height selector in Right Margin
-  // int    use_cosine_correction; // use cosine correction for computing range in polar data
+  int    use_cosine_correction; // use cosine correction for computing range in polar data
   // int    latlon_mode;    // 0 = Report decimal degrees, 1 = deg,min,sec  
   // int    num_zoom_levels; // number of zoom levels available
   // int    start_zoom_level; // starting zoom level - 1-based

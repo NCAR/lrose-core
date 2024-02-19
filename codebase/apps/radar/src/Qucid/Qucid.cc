@@ -456,8 +456,8 @@ void Qucid::_initGlobals()
   // _params.range_ring_for_radar_only = 0;
   // _params.domain_follows_data = 0; 
   // _params.show_height_sel = 0;
-
-  // _params.use_cosine_correction = -1; 
+  
+  gd.use_cosine_correction = -1;
   // _params.latlon_mode = 0;    
   // _params.zoom_limits_in_latlon = 0; 
 

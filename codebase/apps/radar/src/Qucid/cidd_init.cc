@@ -307,24 +307,12 @@ void init_data_space()
     gd.movie.frame[i].redraw_vert = 1;
   }
 
-  // _params.movie_on = gd.uparams->getLong("cidd.movie_on", 0);
-  // _params.movie_magnify_factor = gd.uparams->getDouble("cidd.movie_magnify_factor",1.0);
-  // _params.time_interval = gd.uparams->getDouble("cidd.time_interval",10.0);
-  // _params.frame_span = gd.uparams->getDouble("cidd.frame_span", _params.time_interval);
-  // _params.starting_movie_frames = gd.uparams->getLong("cidd.starting_movie_frames", 12);
-  // _params.reset_frames = gd.uparams->getLong("cidd.reset_frames", 0);
-  // _params.movie_delay = gd.uparams->getLong("cidd.movie_delay",3000);
-  // _params.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
-  // _params.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
-  // _params.time_search_stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
-  // _params.climo_mode = gd.uparams->getString("cidd.climo_mode", "regular");
-  // _params.temporal_rounding = gd.uparams->getLong("cidd.temporal_rounding", 300);
-  // _params.movie_speed_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
-
   // copy movie info to other globals
 
   gd.movie.movie_on = _params.movie_on;
-  if(_params.html_mode) gd.movie.movie_on = 0;
+  if(_params.html_mode) {
+    gd.movie.movie_on = 0;
+  }
   gd.movie.magnify_factor = _params.movie_magnify_factor;
   gd.movie.time_interval = _params.time_interval;
   gd.movie.frame_span = _params.frame_span;
@@ -344,53 +332,22 @@ void init_data_space()
   gd.movie.cur_frame = gd.movie.num_frames -1;
   gd.movie.last_frame = gd.movie.cur_frame;
 
+  // climatology mode for movies
+  
   gd.movie.climo_mode = REGULAR_INTERVAL;
-  if(strncmp(_params.climo_mode,"daily", 5) == 0) gd.movie.climo_mode = DAILY_INTERVAL;
-  if(strncmp(_params.climo_mode,"yearly",6) == 0) gd.movie.climo_mode = YEARLY_INTERVAL;
-
-  // clipping for rendering
-  // _params.check_clipping = gd.uparams->getLong("cidd.check_clipping", 0);
-  
-  /* Toggle for displaying the analog clock */
-  // _params.max_time_list_span = gd.uparams->getLong("cidd.max_time_list_span", 365);
-
-  /* Toggle for displaying the analog clock */
-  // _params.show_clock = gd.uparams->getLong("cidd.show_clock", 0);
-
-  /* Toggle for displaying data access and rendering messages */
-  // _params.show_data_messages = gd.uparams->getLong("cidd.show_data_messages", 1);
-
-  /* Toggle for displaying data labels */
-  // _params.display_labels = gd.uparams->getLong("cidd.display_labels", 1);
-
-  /* Toggle for displaying the analog clock */
-  // _params.display_ref_lines = gd.uparams->getLong("cidd.display_ref_lines", 1);
-
-  /* Toggle for enabling a status report window */
-  // _params.enable_status_window = gd.uparams->getLong("cidd.enable_status_window", 0);
-
-  /* Toggle for enabling a Save Image Panel */
-  // WARNING - ALLOWS USERS SHELL ACCESS
-  // _params.enable_save_image_panel = gd.uparams->getLong("cidd.enable_save_image_panel", 0);
-  
-  /* Set the time to display on the analog clock */
-  // _params.draw_clock_local = gd.uparams->getLong("cidd.draw_clock_local", 0);
-  
-  /* Use local times for Product timestamps and user input widgets. */
-  // _params.use_local_timestamps = gd.uparams->getLong("cidd.use_local_timestamps", 0);
-  
-  /* Toggle for displaying the height Selector in Right Margin */
-  // _params.show_height_sel = gd.uparams->getLong("cidd.show_height_sel", 1);
+  if(strncmp(_params.climo_mode, "daily", 5) == 0) {
+    gd.movie.climo_mode = DAILY_INTERVAL;
+  }
+  if(strncmp(_params.climo_mode, "yearly",6) == 0) {
+    gd.movie.climo_mode = YEARLY_INTERVAL;
+  }
 
   /* Use cosine correction for computing range in polar data */
-#ifdef JUNK
-  if (_params.use_cosine_correction < 0) {
+
+  if (gd.use_cosine_correction < 0) {
     // not set on command line
-    int use_cosine = gd.uparams->getLong("cidd.use_cosine", 1); // legacy
-    _params.use_cosine_correction =
-      gd.uparams->getLong("cidd.use_cosine_correction", use_cosine);
+    gd.use_cosine_correction = _params.use_cosine_correction;
   }
-#endif
 
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
