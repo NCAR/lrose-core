@@ -876,8 +876,8 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
 // 
 
 int LegacyParams::_loadKeyValPairsFile(const string &fname,
-                                  char* &db_buf,
-                                  int &db_len)
+                                       char* &db_buf,
+                                       int &db_len)
 {
 
   FILE *infile;

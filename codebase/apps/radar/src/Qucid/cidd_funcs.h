@@ -88,7 +88,7 @@ extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, 
 #endif
 
 #ifndef CIDD_INIT
-extern void init_data_space(Params &tdrpParams);
+extern void init_data_space();
 #endif
 
 #ifndef CIDD_MAIN
@@ -96,7 +96,8 @@ extern int main(int  argc, char **argv);
 #endif
 
 #ifndef CIDD_PARAMS
-const char *find_tag_text(const char *input_buf, const char * tag, long *text_len, long *text_line_no);
+const char *find_tag_text(const char *input_buf, const char * tag,
+                          long *text_len, long *text_line_no);
 void load_db_data( const string &fname);
 #endif 
 
@@ -140,8 +141,7 @@ extern void cancel_pending_request();
 #endif
 
 #ifndef DATA_INIT
-extern void init_data_links(const char *param_buf, long param_buf_len, long line_no,
-                            Params &tdrpParams);
+extern void init_data_links(const char *param_buf, long param_buf_len, long line_no);
 #endif
 
 #ifndef DATA_IO

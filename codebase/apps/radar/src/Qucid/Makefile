@@ -93,7 +93,6 @@ HDRS = \
 	cidd_macros.h \
 	cidd_movies.h \
 	cidd_overlays.h \
-	cidd_params.h \
 	cidd_products.h \
 	cidd_structs.h \
 	cidd_windows.h \

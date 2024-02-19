@@ -43,7 +43,7 @@
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
 
-void init_data_space(Params &tdrpParams)
+void init_data_space()
 {
 
   int i,j,pid;
@@ -66,7 +66,7 @@ void init_data_space(Params &tdrpParams)
 
   // load up the params buffer from file or http
 
-  load_db_data(gd.db_name);  // Retrieve the parameter text file
+  // load_db_data(gd.db_name);  // Retrieve the parameter text file
 
   // create uparams object, read params into it from buffer
 
@@ -79,15 +79,15 @@ void init_data_space(Params &tdrpParams)
 
   // Load the Main parameters
 
-  param_text_line_no = 0;
-  param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"MAIN_PARAMS",
-                             &param_text_len, &param_text_line_no);
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // param_text = find_tag_text(gd.db_data,"MAIN_PARAMS",
+  //                            &param_text_len, &param_text_line_no);
     
-  if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
-    exit(-1);
-  }
+  // if(param_text == NULL || param_text_len <=0 ) {
+  //   fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
+  //   exit(-1);
+  // }
     
   // set_X_parameter_database(param_text); /* load the main parameter database*/
   
@@ -96,13 +96,17 @@ void init_data_space(Params &tdrpParams)
             CIDD_VERSION, CIDD_UCOPYRIGHT);
   }
 
-  gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
-  gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
-  gd.debug2 |= gd.uparams->getLong("cidd.debug2_flag", 0);
+  // gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
+  // gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
+  // gd.debug2 |= gd.uparams->getLong("cidd.debug2_flag", 0);
+
+  gd.debug |= _params.debug;
+  gd.debug1 |= _params.debug1_flag;
+  gd.debug2 |= _params.debug2_flag;
 
   // shmem
   
-  gd.coord_key = gd.uparams->getLong("cidd.coord_key", 63500);
+  gd.coord_key = _params.coord_key;
   if((gd.coord_expt =
       (coord_export_t *) ushm_create(gd.coord_key,
                                      sizeof(coord_export_t),
@@ -111,7 +115,6 @@ void init_data_space(Params &tdrpParams)
     exit(-1);
   }
   memset(gd.coord_expt, 0, sizeof(coord_export_t));
-
 
   // How many idle seconds can elapse before resetting the display
   // _params.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
@@ -1052,15 +1055,15 @@ void init_data_space(Params &tdrpParams)
   // Load the GRID / DATA FIELD parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"GRIDS",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"GRIDS",
+  //                            &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Couldn't Find GRIDS Section\n");
     exit(-1);
   }
   // establish and initialize sources of data 
-  init_data_links(param_text, param_text_len, param_text_line_no, tdrpParams);
+  init_data_links(param_text, param_text_len, param_text_line_no);
   return;
 
   // copy legacy params to tdrp
@@ -1068,8 +1071,8 @@ void init_data_space(Params &tdrpParams)
   // Load the Wind Data Field  parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"WINDS",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"WINDS",
+  //                            &param_text_len, &param_text_line_no);
 
   // winds init
   
@@ -1095,8 +1098,8 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"SYMPRODS",
-                             &param_text_len, &param_text_line_no); 
+  // param_text = find_tag_text(gd.db_data,"SYMPRODS",
+  //                            &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
   } else {
@@ -1117,8 +1120,8 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"TERRAIN",
-                             &param_text_len, &param_text_line_no); 
+  // param_text = find_tag_text(gd.db_data,"TERRAIN",
+  //                            &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No TERRAIN Section in params\n");
   } else {
@@ -1203,8 +1206,8 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
-                             &param_text_len, &param_text_line_no); 
+  // param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
+  //                            &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No ROUTE_WINDS Section in params\n");
     gd.layers.route_wind.has_params = 0;
@@ -1231,8 +1234,8 @@ void init_data_space(Params &tdrpParams)
   // Load the GUI_CONFIG parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
+  //                            &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
   } else {
@@ -1252,8 +1255,8 @@ void init_data_space(Params &tdrpParams)
   // Load the IMAGES_CONFIG parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
+  //                            &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
   } else {
@@ -1273,8 +1276,8 @@ void init_data_space(Params &tdrpParams)
   // Load the Draw_Export parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
+  //                            &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No DRAW_EXPORT Section in params\n");
@@ -1307,8 +1310,8 @@ void init_data_space(Params &tdrpParams)
   // Load the Map Overlay parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"MAPS",
-                             &param_text_len, &param_text_line_no);
+  // param_text = find_tag_text(gd.db_data,"MAPS",
+  //                            &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Could'nt Find MAPS SECTION\n");
