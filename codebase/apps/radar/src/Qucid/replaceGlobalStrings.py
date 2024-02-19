@@ -86,6 +86,19 @@ def createReplaceDict():
     global replaceDict
     replaceDict = {}
 
+    replaceDict["gd.syprod_P->debug"] = "_params.symprod_debug"
+    replaceDict["gd.syprod_P->short_requests"] = "_params.symprod_short_requests"
+    replaceDict["gd.syprod_P->gzip_requests"] = "_params.symprod_gzip_requests"
+    replaceDict["gd.syprod_P->prod_info"] = "_params.symprod_prod_info"
+
+########################################################################
+# set up replace dictionary
+
+def createReplaceDict_v0():
+
+    global replaceDict
+    replaceDict = {}
+
     replaceDict["gd.idle_reset_seconds"] = "_params.idle_reset_seconds"
     
     replaceDict["gd.model_run_list_hours"] = "_params.model_run_list_hours"
