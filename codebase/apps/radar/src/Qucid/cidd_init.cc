@@ -821,26 +821,26 @@ void init_data_space()
   _initWinds();
   
   // Instantiate and load the SYMPROD TDRP Parameter section
-  gd.syprod_P = new Csyprod_P();
+  // gd.syprod_P = new Csyprod_P();
 
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"SYMPRODS",
-  //                            &param_text_len, &param_text_line_no); 
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
-  } else {
-    /* Establish and initialize params */
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // // param_text = find_tag_text(gd.db_data,"SYMPRODS",
+  // //                            &param_text_len, &param_text_line_no); 
+  // if(param_text == NULL || param_text_len <=0 ) {
+  //   if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
+  // } else {
+  //   /* Establish and initialize params */
 
-    if(gd.syprod_P->loadFromBuf("SYMPRODS TDRP Section",
-                                NULL,param_text,
-                                param_text_len,
-                                param_text_line_no,
-                                TRUE,gd.debug2) < 0) {
-      fprintf(stderr,"Please fix the <SYMPRODS> parameter section\n");
-      exit(-1);
-    }
-  }
+  //   if(gd.syprod_P->loadFromBuf("SYMPRODS TDRP Section",
+  //                               NULL,param_text,
+  //                               param_text_len,
+  //                               param_text_line_no,
+  //                               TRUE,gd.debug2) < 0) {
+  //     fprintf(stderr,"Please fix the <SYMPRODS> parameter section\n");
+  //     exit(-1);
+  //   }
+  // }
 
   // Instantiate and load the TERRAIN TDRP Parameter 
   gd.layers.earth._P = new Cterrain_P();

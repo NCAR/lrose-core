@@ -86,10 +86,11 @@ def createReplaceDict():
     global replaceDict
     replaceDict = {}
 
-    replaceDict["gd.syprod_P->debug"] = "_params.symprod_debug"
-    replaceDict["gd.syprod_P->short_requests"] = "_params.symprod_short_requests"
-    replaceDict["gd.syprod_P->gzip_requests"] = "_params.symprod_gzip_requests"
-    replaceDict["gd.syprod_P->prod_info"] = "_params.symprod_prod_info"
+#    replaceDict["gd.syprod_P->debug"] = "_params.symprod_debug"
+#    replaceDict["gd.syprod_P->short_requests"] = "_params.symprod_short_requests"
+#    replaceDict["gd.syprod_P->gzip_requests"] = "_params.symprod_gzip_requests"
+#    replaceDict["gd.syprod_P->prod_info"] = "_params.symprod_prod_info"
+    replaceDict["gd.syprod_P->_prod_info"] = "_params._symprod_prod_info"
 
 ########################################################################
 # set up replace dictionary

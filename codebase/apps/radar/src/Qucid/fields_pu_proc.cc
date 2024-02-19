@@ -171,9 +171,9 @@ prod_mu_gen_proc(Menu menu, Menu_generate op)
             }
 
             /* Build the wind menu */
-            for(i=0; i < gd.syprod_P->prod_info_n; i++) {
+            for(i=0; i < _params.symprod_prod_info_n; i++) {
               mi = xv_create(0,MENUITEM,
-                MENU_STRING, gd.syprod_P->_prod_info[i].menu_label,
+                MENU_STRING, _params._symprod_prod_info[i].menu_label,
                 MENU_NOTIFY_PROC,    config_prod_proc,
                 XV_KEY_DATA,    MENU_KEY, i,
                 NULL);
@@ -326,7 +326,7 @@ fields_pu_fields_pu_w_config_color_msg_event_callback(Panel_item item, Event *ev
 Panel_setting
 prod_url_proc(Panel_item item, Event *event)
 {
-   gd.syprod_P->_prod_info[prod_config_field].url =  (char *) xv_get(item, PANEL_VALUE);
+   _params._symprod_prod_info[prod_config_field].url =  (char *) xv_get(item, PANEL_VALUE);
 
    gd.prod_mgr->set_product_data_valid(prod_config_field,0);
    set_redraw_flags(1,0);
@@ -343,7 +343,7 @@ allow_after_proc(Panel_item item, Event *event)
 
     char *	value = (char *) xv_get(item, PANEL_VALUE);
 	
-    gd.syprod_P->_prod_info[prod_config_field].minutes_allow_after = atof(value);
+    _params._symprod_prod_info[prod_config_field].minutes_allow_after = atof(value);
 	
     gd.prod_mgr->set_product_data_valid(prod_config_field,0);
 
@@ -362,9 +362,9 @@ prod_data_type_proc(Panel_item item, Event *event)
     int data_type;
 
     if(sscanf(value,"%d",&data_type) != 1) {
-       gd.syprod_P->_prod_info[prod_config_field].data_type  = Spdb::hash4CharsToInt32(value);
+       _params._symprod_prod_info[prod_config_field].data_type  = Spdb::hash4CharsToInt32(value);
     } else {
-	gd.syprod_P->_prod_info[prod_config_field].data_type = data_type;
+	_params._symprod_prod_info[prod_config_field].data_type = data_type;
     }
 	
     gd.prod_mgr->set_product_data_valid(prod_config_field,0);
@@ -382,7 +382,7 @@ allow_before_proc(Panel_item item, Event *event)
 {
     char *	value = (char *) xv_get(item, PANEL_VALUE);
 
-    gd.syprod_P->_prod_info[prod_config_field].minutes_allow_before = atof(value);
+    _params._symprod_prod_info[prod_config_field].minutes_allow_before = atof(value);
 	
     set_redraw_flags(1,0);
 
@@ -395,7 +395,7 @@ allow_before_proc(Panel_item item, Event *event)
 void
 prod_render_type_proc(Panel_item item, int value, Event *event)
 {
-    gd.syprod_P->_prod_info[prod_config_field].render_type = (Csyprod_P::render_type_t) value;
+    _params._symprod_prod_info[prod_config_field].render_type = (Csyprod_P::render_type_t) value;
     set_redraw_flags(1,0);
 }
 
@@ -407,7 +407,7 @@ test_thresh_proc(Panel_item item, Event *event)
 {
     char *	value = (char *) xv_get(item, PANEL_VALUE);
 
-    gd.syprod_P->_prod_info[prod_config_field].text_off_threshold = atof(value);
+    _params._symprod_prod_info[prod_config_field].text_off_threshold = atof(value);
 	
     set_redraw_flags(1,0);
 
@@ -625,7 +625,7 @@ void update_prod_config_gui()
 {
     char str[128];
 	 
-    if(gd.syprod_P == NULL || gd.syprod_P->prod_info_n <= 0) {
+    // if(gd.syprod_P == NULL || _params.symprod_prod_info_n <= 0) {
         // xv_set(gd.fields_pu->prod_config_msg1,PANEL_INACTIVE,TRUE,NULL);
         // xv_set(gd.fields_pu->p_config_sel_bt,PANEL_INACTIVE,TRUE,NULL);
         // xv_set(gd.fields_pu->prod_config_msg2,PANEL_INACTIVE,TRUE,NULL);
@@ -637,25 +637,25 @@ void update_prod_config_gui()
         // xv_set(gd.fields_pu->render_type_st,PANEL_INACTIVE,TRUE,NULL);
         // xv_set(gd.fields_pu->text_thresh_tx,PANEL_INACTIVE,TRUE,NULL);
 
-	return;
-    }
+    //     return;
+    // }
 
-    // xv_set(gd.fields_pu->prod_config_msg2,PANEL_LABEL_STRING,gd.syprod_P->_prod_info[prod_config_field].menu_label,NULL);
+    // xv_set(gd.fields_pu->prod_config_msg2,PANEL_LABEL_STRING,_params._symprod_prod_info[prod_config_field].menu_label,NULL);
 
-    // xv_set(gd.fields_pu->p_config_url_tx,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].url,NULL);
+    // xv_set(gd.fields_pu->p_config_url_tx,PANEL_VALUE,_params._symprod_prod_info[prod_config_field].url,NULL);
 
-    sprintf(str,"%d",gd.syprod_P->_prod_info[prod_config_field].data_type);
+    sprintf(str,"%d",_params._symprod_prod_info[prod_config_field].data_type);
     // // xv_set(gd.fields_pu->p_config_type_tx,PANEL_VALUE,str,NULL);
 
-    // sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].minutes_allow_before);
+    // sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_before);
     // xv_set(gd.fields_pu->allow_before_tx,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].minutes_allow_after);
+    sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_after);
     // xv_set(gd.fields_pu->allow_after_tx,PANEL_VALUE,str,NULL);
 
-    // xv_set(gd.fields_pu->render_type_st,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].render_type,NULL);
+    // xv_set(gd.fields_pu->render_type_st,PANEL_VALUE,_params._symprod_prod_info[prod_config_field].render_type,NULL);
 
-    sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].text_off_threshold);
+    sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].text_off_threshold);
     // xv_set(gd.fields_pu->text_thresh_tx,PANEL_VALUE,str,NULL);
 
 }

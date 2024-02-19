@@ -193,8 +193,8 @@ void remote_new_spdb_avail(const char *name)
 	int i;
 	int need_redraw = 0;
 
-    for(i=0; i < gd.syprod_P->prod_info_n; i++) {
-      if (strncmp(gd.syprod_P->_prod_info[i].menu_label,name,MAX_CLIENT_EVENT_ARG) == 0) {
+    for(i=0; i < _params.symprod_prod_info_n; i++) {
+      if (strncmp(_params._symprod_prod_info[i].menu_label,name,MAX_CLIENT_EVENT_ARG) == 0) {
           // Invalidate the data
           gd.prod_mgr->set_product_data_valid(i,0);
           if(gd.prod_mgr->get_product_active(i)) need_redraw = 1;
@@ -435,7 +435,7 @@ void remote_set_maps_on(char *name)
 
 void remote_set_symprods_off()
 {
-  for(int i = 0; i <  gd.syprod_P->prod_info_n; i++) {
+  for(int i = 0; i <  _params.symprod_prod_info_n; i++) {
       gd.prod_mgr->set_product_active(i,FALSE);
   }
   set_redraw_flags(1,0);
@@ -446,8 +446,8 @@ void remote_set_symprods_off()
 
 void remote_set_symprods_on(char *name)
 {
-  for(int i = 0; i <  gd.syprod_P->prod_info_n; i++)  {
-      if(strncmp(name,gd.syprod_P->_prod_info[i].menu_label,PARSE_FIELD_SIZE) == 0) {
+  for(int i = 0; i <  _params.symprod_prod_info_n; i++)  {
+      if(strncmp(name,_params._symprod_prod_info[i].menu_label,PARSE_FIELD_SIZE) == 0) {
           gd.prod_mgr->set_product_active(i,TRUE);
 	  return;
       }

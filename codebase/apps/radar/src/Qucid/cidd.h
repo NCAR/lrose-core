@@ -546,7 +546,7 @@ struct    Global_data {
 
 
   // LEGACY TDRP CLASSES
-  Csyprod_P *syprod_P;  // Symbolic Products
+  // Csyprod_P *syprod_P;  // Symbolic Products
   Cdraw_P *draw_P;      // Draw Params
   Cgui_P *gui_P;        // GUI Config Params
   Cimages_P *images_P;  // image generation params

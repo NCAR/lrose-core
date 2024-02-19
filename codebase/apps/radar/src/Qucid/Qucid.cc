@@ -718,11 +718,11 @@ void Qucid::_initGlobals()
   gd.r_context = NULL;    
   gd.station_loc = NULL;    
   gd.remote_ui = NULL;   
-  gd.syprod_P = NULL;  
-  gd.draw_P = NULL;      
-  gd.gui_P = NULL;        
-  gd.images_P = NULL;  
-  gd.uparams = NULL;
+  // gd.syprod_P = NULL;  
+  // gd.draw_P = NULL;      
+  // gd.gui_P = NULL;        
+  // gd.images_P = NULL;  
+  // gd.uparams = NULL;
 
   // _params.contour_font_num = 0;
   // _params.n_ideal_contour_labels = 0;

@@ -564,18 +564,18 @@ paramdef boolean {
 } symprod_gzip_requests;
 
 typedef enum {
-  RENDER_ALL,             // Do no temporal clipping
-  RENDER_ALL_VALID,       // Render all Valid in frame
-  RENDER_VALID_IN_LAST_FRAME,   // Render all Valid in the last movie frame 
-  RENDER_LATEST_IN_FRAME, // Render the latest product of like data_types (ID) valid in the frame.
-  RENDER_LATEST_IN_LOOP,  // Render the latest product of like data_types (ID) valid in the movie loop.
-  RENDER_FIRST_BEFORE_FRAME_TIME,// Render the latest product before the end of frame time
-  RENDER_FIRST_BEFORE_DATA_TIME,// Render the latest product before the data time in each frame 
-  RENDER_FIRST_AFTER_DATA_TIME, // Render the earliest product after the data time in each frame 
-  RENDER_ALL_BEFORE_DATA_TIME,  // Render all valid products before the data time in each frame 
-  RENDER_ALL_AFTER_DATA_TIME,   // Render all valid products after the data time in each frame 
-  RENDER_GET_VALID, // Render only those returned with an SPDB GetValid() call
-  RENDER_GET_VALID_AT_FRAME_TIME // Render products which have not expired at the frame time
+  SYMPROD_RENDER_ALL,             // Do no temporal clipping
+  SYMPROD_RENDER_ALL_VALID,       // Render all Valid in frame
+  SYMPROD_RENDER_VALID_IN_LAST_FRAME,   // Render all Valid in the last movie frame 
+  SYMPROD_RENDER_LATEST_IN_FRAME, // Render the latest product of like data_types (ID) valid in the frame.
+  SYMPROD_RENDER_LATEST_IN_LOOP,  // Render the latest product of like data_types (ID) valid in the movie loop.
+  SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME,// Render the latest product before the end of frame time
+  SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME,// Render the latest product before the data time in each frame 
+  SYMPROD_RENDER_FIRST_AFTER_DATA_TIME, // Render the earliest product after the data time in each frame 
+  SYMPROD_RENDER_ALL_BEFORE_DATA_TIME,  // Render all valid products before the data time in each frame 
+  SYMPROD_RENDER_ALL_AFTER_DATA_TIME,   // Render all valid products after the data time in each frame 
+  SYMPROD_RENDER_GET_VALID, // Render only those returned with an SPDB GetValid() call
+  SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME // Render products which have not expired at the frame time
 } symprod_render_type_t;
 
 typedef struct {
@@ -607,18 +607,18 @@ paramdef struct symprod_prod_info_t {
     "    (set to 0 to retrieve all data).\n"
     "\n"
     "  render_type: Select how temporal clipping is done:\n"
-    "    RENDER_ALL: Do no temporal clipping.\n"
-    "    RENDER_ALL_VALID: Render all Valid in frame\n"
-    "    RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
-    "    RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
-    "    RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
-    "    RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
-    "    RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
-    "    RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
-    "    RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
-    "    RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
-    "    RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
-    "    RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
+    "    SYMPROD_RENDER_ALL: Do no temporal clipping.\n"
+    "    SYMPROD_RENDER_ALL_VALID: Render all Valid in frame\n"
+    "    SYMPROD_RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
+    "    SYMPROD_RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
+    "    SYMPROD_RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
+    "    SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
+    "    SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
+    "    SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
+    "    SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
+    "    SYMPROD_RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
+    "    SYMPROD_RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
+    "    SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
     "\n"
     "Note: all comparisons are less than or equal or greater than or equal\n"
     "\n"
@@ -649,7 +649,7 @@ paramdef struct symprod_prod_info_t {
       menu_label = "RHI-ticks",
       url = "spdbp:Rhi2Symprod://localhost::spdb/rhi",
       data_type = 0,
-      render_type = RENDER_ALL_VALID,
+      render_type = SYMPROD_RENDER_ALL_VALID,
       on_by_default = FALSE,
       minutes_allow_before = 20.0,
       minutes_allow_after = 10.0,

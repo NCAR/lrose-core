@@ -35,9 +35,10 @@
 //////////////////////////////////////////
 // default constructor
 
-Product::Product(int debug, Csyprod_P::prod_info_t &prodInfo) :
-    _prodInfo(prodInfo), _debug(debug)
-  
+Product::Product(int debug,
+                 Params::symprod_prod_info_t &prodInfo) :
+        _prodInfo(prodInfo), _debug(debug)
+        
   
 {
   _data_valid = 0;
@@ -111,14 +112,14 @@ void Product::draw(RenderContext &context)
 
 	 switch(_prodInfo.render_type) {
 
-	   case Csyprod_P::RENDER_ALL:
-	   case Csyprod_P::RENDER_GET_VALID:
-	   case Csyprod_P::RENDER_GET_VALID_AT_FRAME_TIME:
-	   case Csyprod_P::RENDER_FIRST_BEFORE_FRAME_TIME:
+	   case Params::SYMPROD_RENDER_ALL:
+	   case Params::SYMPROD_RENDER_GET_VALID:
+	   case Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:
+	   case Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:
 	       _symprods[index]->draw(context);  // Render the product
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_VALID: // Valid in the given time frame
+	   case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
              if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
 	        props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
 	           _symprods[index]->draw(context);  // Render the product
@@ -126,7 +127,7 @@ void Product::draw(RenderContext &context)
 	     }
 	   break;
 
-	   case Csyprod_P::RENDER_VALID_IN_LAST_FRAME:
+	   case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
              if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
 	        props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
 	        (_prodInfo.minutes_allow_before * 60)) {
@@ -136,7 +137,7 @@ void Product::draw(RenderContext &context)
 	     }
 	   break;
 
-	   case Csyprod_P::RENDER_LATEST_IN_FRAME:
+	   case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -162,7 +163,7 @@ void Product::draw(RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_LATEST_IN_LOOP:
+	   case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
 	     already_done = false;
 
 	     // search through the object list 
@@ -188,7 +189,7 @@ void Product::draw(RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_FIRST_AFTER_DATA_TIME:
+	   case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -214,7 +215,7 @@ void Product::draw(RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_FIRST_BEFORE_DATA_TIME:
+	   case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -240,7 +241,7 @@ void Product::draw(RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_BEFORE_DATA_TIME:
+	   case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
 
 	      // If it's valid, render it.
               if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
@@ -250,7 +251,7 @@ void Product::draw(RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_AFTER_DATA_TIME:
+	   case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
 
 	      // If it's valid, render it.
               if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
@@ -372,7 +373,7 @@ int Product::getData(const time_t data_start_time,
   _spdb.clearHorizLimits();
   _spdb.clearVertLimits();
   _spdb.setUniqueOff();
-  if(gd.syprod_P->gzip_requests) {
+  if(_params.symprod_gzip_requests) {
     _spdb.setDataCompressForTransfer(Spdb::COMPRESSION_GZIP);
   }
 
@@ -387,7 +388,7 @@ int Product::getData(const time_t data_start_time,
 		      gd.mrec[gd.h_win.page]->vert[vlevel_num].max);
 
   int iret;
-  if (_prodInfo.render_type == Csyprod_P::RENDER_GET_VALID) {
+  if (_prodInfo.render_type == Params::SYMPROD_RENDER_GET_VALID) {
     time_t dataTime = context.data_time;
     if (_debug) {
       cerr << "Getting symprod data valid at time: " << utimstr(dataTime) << endl;
@@ -395,7 +396,7 @@ int Product::getData(const time_t data_start_time,
     iret = _spdb.getValid(spdbp_url, dataTime, 
 			  _prodInfo.data_type);
 
-  } else if (gd.syprod_P->short_requests && _prodInfo.render_type == Csyprod_P::RENDER_FIRST_BEFORE_FRAME_TIME) {
+  } else if (_params.symprod_short_requests && _prodInfo.render_type == Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME) {
     
     time_t frameTime = context.frame_end;
     int margin = (int) (_prodInfo.minutes_allow_before * 60);
@@ -404,7 +405,7 @@ int Product::getData(const time_t data_start_time,
     }
     iret = _spdb.getFirstBefore(spdbp_url, frameTime, margin, _prodInfo.data_type);
 
-  } else if (gd.syprod_P->short_requests && _prodInfo.render_type == Csyprod_P::RENDER_GET_VALID_AT_FRAME_TIME) {
+  } else if (_params.symprod_short_requests && _prodInfo.render_type == Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME) {
 
     int fwdSecs = (int) (_prodInfo.minutes_allow_after * 60);
     time_t validTime = context.frame_end + fwdSecs;
@@ -416,7 +417,7 @@ int Product::getData(const time_t data_start_time,
     }
     iret = _spdb.getValid(spdbp_url, validTime, _prodInfo.data_type);
 
-  } else if ( gd.syprod_P->short_requests && _prodInfo.render_type == Csyprod_P::RENDER_LATEST_IN_FRAME) {
+  } else if ( _params.symprod_short_requests && _prodInfo.render_type == Params::SYMPROD_RENDER_LATEST_IN_FRAME) {
 
      _spdb.setUniqueLatest();
     iret = _spdb.getInterval(spdbp_url,
@@ -573,12 +574,12 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 
 	 switch(_prodInfo.render_type) {
 
-	   case Csyprod_P::RENDER_ALL:
-	   case Csyprod_P::RENDER_GET_VALID:
+	   case Params::SYMPROD_RENDER_ALL:
+	   case Params::SYMPROD_RENDER_GET_VALID:
 	       dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_VALID: // Valid in the given time frame
+	   case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
              if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
 	        props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
 	           dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
@@ -586,7 +587,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     }
 	   break;
 
-	   case Csyprod_P::RENDER_VALID_IN_LAST_FRAME:
+	   case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
              if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
 	        props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
 	        (_prodInfo.minutes_allow_before * 60)) {
@@ -596,7 +597,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     }
 	   break;
 
-	   case Csyprod_P::RENDER_LATEST_IN_FRAME:
+	   case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -622,7 +623,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_LATEST_IN_LOOP:
+	   case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
 	     already_done = false;
 
 	     // search through the object list 
@@ -648,7 +649,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_FIRST_BEFORE_DATA_TIME:
+	   case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -674,7 +675,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_FIRST_AFTER_DATA_TIME:
+	   case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
 	     already_done = false;
 
 	     // search through the object list 
@@ -700,7 +701,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_BEFORE_DATA_TIME:
+	   case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
 
 	      // If it's valid, render it.
               if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
@@ -710,7 +711,7 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
 	     } 
 	   break;
 
-	   case Csyprod_P::RENDER_ALL_AFTER_DATA_TIME:
+	   case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
 
 	      // If it's valid, render it.
               if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&

@@ -178,7 +178,7 @@ int gather_hwin_data( int page, time_t start_time, time_t end_time)
 
   // Native SYMPROD DATA Gather
   if(gd.prod.products_on) {
-    if(gd.syprod_P->short_requests) { 
+    if(_params.symprod_short_requests) { 
         return gd.prod_mgr->getData(start_time, end_time);
     } else {
         return gd.prod_mgr->getData(gd.epoch_start, gd.epoch_end);

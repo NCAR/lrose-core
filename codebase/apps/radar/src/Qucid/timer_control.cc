@@ -656,7 +656,7 @@ void timer_func( Notify_client   client, int which)
   if (gd.movie.last_frame != gd.movie.cur_frame && gd.movie.cur_frame >= 0) {
     reset_data_valid_flags(1,1);
 
-    if(gd.syprod_P->short_requests) {
+    if(_params.symprod_short_requests) {
       // All product data must be reloaded - Set all to invalid
       gd.prod_mgr->reset_product_valid_flags();
     }

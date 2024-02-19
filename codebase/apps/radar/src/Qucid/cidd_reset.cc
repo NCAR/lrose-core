@@ -243,21 +243,21 @@ void reset_display()
    // if(gd.num_map_overlays <= 32) if(! gd.run_unmapped) xv_set(gd.over_pu->over_pu_st, PANEL_VALUE,value,NULL);
 
    // Restore the Product starting on/off state.
-   if(gd.syprod_P->prod_info_n <= 32) { 
+   if(_params.symprod_prod_info_n <= 32) { 
        value = 0;
-       for ( i = 0; i < gd.syprod_P->prod_info_n ; i++) {
-	   if(gd.syprod_P->_prod_info[i].on_by_default == TRUE) value |= 1 <<i;
-           gd.prod_mgr->set_product_active(i,(int) gd.syprod_P->_prod_info[i].on_by_default); 
+       for ( i = 0; i < _params.symprod_prod_info_n ; i++) {
+	   if(_params._symprod_prod_info[i].on_by_default == TRUE) value |= 1 <<i;
+           gd.prod_mgr->set_product_active(i,(int) _params._symprod_prod_info[i].on_by_default); 
        }
        // if(! gd.run_unmapped) xv_set(gd.prod_pu->prod_st, PANEL_VALUE, value,NULL);
     } else {
-       for ( i = 0; i < gd.syprod_P->prod_info_n ; i++) { 
-	   if( gd.syprod_P->_prod_info[i].on_by_default == TRUE) {
+       for ( i = 0; i < _params.symprod_prod_info_n ; i++) { 
+	   if( _params._symprod_prod_info[i].on_by_default == TRUE) {
 	       // if(! gd.run_unmapped) xv_set(gd.prod_pu->prod_lst,PANEL_LIST_SELECT, i, TRUE,NULL);
 	    } else {
 	       // if(! gd.run_unmapped) xv_set(gd.prod_pu->prod_lst,PANEL_LIST_SELECT, i, FALSE,NULL);
 	    }
-	    gd.prod_mgr->set_product_active(i,(int) gd.syprod_P->_prod_info[i].on_by_default);
+	    gd.prod_mgr->set_product_active(i,(int) _params._symprod_prod_info[i].on_by_default);
 	}
     }
 

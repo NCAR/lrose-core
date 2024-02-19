@@ -52,7 +52,7 @@ public:
 
   // default constructor
   
-  Product(int debug, Csyprod_P::prod_info_t &prodInfo);
+  Product(int debug, Params::symprod_prod_info_t &prodInfo);
   
   // destructor
   
@@ -97,7 +97,7 @@ public:
 
   SymprodRenderObj * get_closest_symprod_obj() {return closest_symprod_obj; }
 
-  Csyprod_P::prod_info_t &_prodInfo;
+  Params::symprod_prod_info_t &_prodInfo;
 
   // List of Object props
 
@@ -114,7 +114,7 @@ protected:
   SymprodRenderObj *closest_symprod_obj;
 
   double closest_dist;
-
+  
   DsSpdbThreaded _spdbTimes;
   vector<time_t> _times;
   time_t _prev_epoch_start;

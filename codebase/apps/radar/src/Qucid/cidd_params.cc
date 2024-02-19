@@ -107,26 +107,26 @@ void load_db_data_default(char* &db_buf, int &db_len)
   // static strings while the TDRP portions are loaded from the default
   // parameters
 
-  gd.gui_P = new Cgui_P;
-  gd.syprod_P = new Csyprod_P;
-  gd.draw_P = new Cdraw_P;
-  gd.images_P = new Cimages_P;
-  gd.layers.earth._P = new Cterrain_P;
-  gd.layers.route_wind._P = new Croutes_P;
+  Cgui_P gui_P;
+  Csyprod_P syprod_P;
+  Cdraw_P draw_P;
+  Cimages_P images_P;
+  Cterrain_P terrain_P;
+  Croutes_P routes_P;
   
   string params_text = ParamsTextMasterHeader;
-  params_text += get_default_tdrp_params("GUI_CONFIG", gd.gui_P);
+  params_text += get_default_tdrp_params("GUI_CONFIG", &gui_P);
   params_text += ParamsTextGrids;
   params_text += ParamsTextWinds;
   params_text += ParamsTextMaps;
   params_text += ParamsTextMainParams;
-  params_text += get_default_tdrp_params("DRAW_EXPORT", gd.draw_P);
-  params_text += get_default_tdrp_params("IMAGE_GENERATION", gd.images_P);
-  params_text += get_default_tdrp_params("SYMPRODS", gd.syprod_P);
+  params_text += get_default_tdrp_params("DRAW_EXPORT", &draw_P);
+  params_text += get_default_tdrp_params("IMAGE_GENERATION", &images_P);
+  params_text += get_default_tdrp_params("SYMPRODS", &syprod_P);
   params_text += get_default_tdrp_params("TERRAIN",
-					 gd.layers.earth._P);
+					 &terrain_P);
   params_text += get_default_tdrp_params("ROUTE_WINDS",
-					 gd.layers.route_wind._P);
+					 &routes_P);
   
 
   // Allocate space for the buffer copy

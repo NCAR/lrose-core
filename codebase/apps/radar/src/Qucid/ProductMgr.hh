@@ -36,7 +36,6 @@
 #include "cidd.h"
 #include <dsserver/DmapAccess.hh>
 
-#include "Csyprod_P.hh"
 #include "RenderContext.hh"
 #include "Product.hh"
 #include "SymprodRenderObj.hh"
@@ -53,7 +52,7 @@ public:
 
   // default constructor
   
-  ProductMgr(const Csyprod_P &params, RenderContext &context, int debug = 0);
+  ProductMgr(RenderContext &context, int debug = 0);
   
   // destructor
   
@@ -117,10 +116,8 @@ public:
   
 protected:
   
-  const Csyprod_P &_sparams;    // Product TDRParameters
-
   RenderContext &_context; // Drawing context for window 
-
+  
   vector<Product *> _products;
 
   SymprodRenderObj *_active_Rob;

@@ -38,17 +38,16 @@
 //////////////////////////////////////////
 // default constructor
 
-ProductMgr::ProductMgr(const Csyprod_P &params, RenderContext &context, int debug)
-  : _sparams(params), _context(context)
-  
+ProductMgr::ProductMgr(RenderContext &context, int debug) : _context(context)
+          
 {
   _active_Rob = NULL;
 
-  for (int i = 0; i < _sparams.prod_info_n; i++) {
+  for (int i = 0; i < _params.symprod_prod_info_n; i++) {
     
-    Product *product = new Product( debug, _sparams._prod_info[i]);
-
-    if (_sparams.debug != Csyprod_P::DEBUG_OFF ) {
+    Product *product = new Product(debug, _params._symprod_prod_info[i]);
+    
+    if (_params.symprod_debug != Params::SYMPROD_DEBUG_OFF ) {
       product->setDebug(true);
     } else {
       product->setDebug(false);
@@ -102,13 +101,13 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
       if(gd.debug1) _products[i]->setThreadingOff();
 
       char label[128];
-      sprintf(label,"Requesting %s Product Data",_sparams._prod_info[i].menu_label);
+      sprintf(label,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
 
       if(_params.show_data_messages) gui_label_h_frame(label,-1);
 
       if (_products[i]->getData(
-          (time_t) (start_time - (_sparams._prod_info[i].minutes_allow_before * 60)),
-          (time_t) (end_time + (_sparams._prod_info[i].minutes_allow_after * 60)),
+          (time_t) (start_time - (_params._symprod_prod_info[i].minutes_allow_before * 60)),
+          (time_t) (end_time + (_params._symprod_prod_info[i].minutes_allow_after * 60)),
 	  _context)) {
 
           _products[i]->_data_valid = 1;
@@ -342,9 +341,9 @@ void ProductMgr::check_product_validity(time_t tm,  DmapAccess &dmap)
       if( _products[i]->_active) {
 
 	   // pull out dir from url
-           char * start_ptr = strrchr(_sparams._prod_info[i].url,':');
+           char * start_ptr = strrchr(_params._symprod_prod_info[i].url,':');
 	   if(start_ptr == NULL) { // Must be a local file/dir based URL
-	       start_ptr = _sparams._prod_info[i].url;
+	       start_ptr = _params._symprod_prod_info[i].url;
 	   } else {
 	       start_ptr++;  // Move up one character
 	   }

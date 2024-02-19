@@ -2520,40 +2520,40 @@ int LegacyParams::_readSymprodsTdrp()
     fprintf(_tdrpFile, "    data_type = %d,\n", info.data_type);
     switch (info.render_type) {
       case Csyprod_P::RENDER_ALL:
-        fprintf(_tdrpFile, "    render_type = RENDER_ALL,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_ALL,\n");
         break;
       case Csyprod_P::RENDER_ALL_VALID:
-        fprintf(_tdrpFile, "    render_type = RENDER_ALL_VALID,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_ALL_VALID,\n");
         break;
       case Csyprod_P::RENDER_VALID_IN_LAST_FRAME:
-        fprintf(_tdrpFile, "    render_type = RENDER_VALID_IN_LAST_FRAME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_VALID_IN_LAST_FRAME,\n");
         break;
       case Csyprod_P::RENDER_LATEST_IN_FRAME:
-        fprintf(_tdrpFile, "    render_type = RENDER_LATEST_IN_FRAME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_LATEST_IN_FRAME,\n");
         break;
       case Csyprod_P::RENDER_LATEST_IN_LOOP:
-        fprintf(_tdrpFile, "    render_type = RENDER_LATEST_IN_LOOP,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_LATEST_IN_LOOP,\n");
         break;
       case Csyprod_P::RENDER_FIRST_BEFORE_FRAME_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_BEFORE_FRAME_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME,\n");
         break;
       case Csyprod_P::RENDER_FIRST_BEFORE_DATA_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_BEFORE_DATA_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME,\n");
         break;
       case Csyprod_P::RENDER_FIRST_AFTER_DATA_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_FIRST_AFTER_DATA_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_FIRST_AFTER_DATA_TIME,\n");
         break;
       case Csyprod_P::RENDER_ALL_BEFORE_DATA_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_ALL_BEFORE_DATA_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_ALL_BEFORE_DATA_TIME,\n");
         break;
       case Csyprod_P::RENDER_ALL_AFTER_DATA_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_ALL_AFTER_DATA_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_ALL_AFTER_DATA_TIME,\n");
         break;
       case Csyprod_P::RENDER_GET_VALID:
-        fprintf(_tdrpFile, "    render_type = RENDER_GET_VALID,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_GET_VALID,\n");
         break;
       case Csyprod_P::RENDER_GET_VALID_AT_FRAME_TIME:
-        fprintf(_tdrpFile, "    render_type = RENDER_GET_VALID_AT_FRAME_TIME,\n");
+        fprintf(_tdrpFile, "    render_type = SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME,\n");
         break;
     }
     fprintf(_tdrpFile, "    on_by_default = %s,\n",
