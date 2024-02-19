@@ -460,6 +460,7 @@ paramdef boolean {
   p_default = TRUE;
   p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
   p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
+
 } use_cosine_correction;
 
 commentdef {
