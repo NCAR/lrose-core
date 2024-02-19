@@ -335,7 +335,7 @@ paramdef string {
   p_default = "CARTESIAN";
   p_descr = "Sets the projection for the plan view.";
   p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
-} projection_type_str;
+} proj_type_str;
 
 typedef enum {
   PROJ_LATLON = 0,
@@ -364,7 +364,7 @@ paramdef enum projection_t {
   "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
   "\tPROJ_ALBERS: Albers Equal Area Conic\n"
   "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
-} projection_type;
+} proj_type;
 
 paramdef double {
   p_default = 0.0;
@@ -2500,12 +2500,6 @@ commentdef {
   p_text = "";
 }
 
-paramdef string {
-  p_default = "/opt/google/chrome/chrome %U";
-  p_descr = "This command is run whenever a BOOKMARK_MENU button is pressed.";
-  p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
-} bookmark_command;
-
 typedef struct {
   string label;
   string url;
@@ -2526,6 +2520,12 @@ paramdef struct bookmark_t {
   p_descr = "Bookmarks for specific topics.";
   p_help = "Drive the browser to the given url when the button is clicked.";
 } bookmarks[];
+
+paramdef string {
+  p_default = "/opt/google/chrome/chrome %U";
+  p_descr = "This command is run whenever a BOOKMARK_MENU button is pressed.";
+  p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
+} bookmark_command;
 
 commentdef {
   p_header = "RENDERING";
@@ -2627,7 +2627,7 @@ paramdef struct product_adjustment_t {
   };
   p_descr = "Thresholds and adjustment for font sizes for products.";
   p_help = "The adjustment increases or decreases the font index. This index is used to choose the font from the fonts[] array. The thresholds are computed as units of km across the image.";
-} product_adjustments[];
+} product_adjustments[3];
 
 commentdef {
   p_header = "</MAIN>";

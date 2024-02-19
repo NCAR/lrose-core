@@ -1112,27 +1112,27 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'projection_type_str'
+    // Parameter 'proj_type_str'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("projection_type_str");
+    tt->param_name = tdrpStrDup("proj_type_str");
     tt->descr = tdrpStrDup("Sets the projection for the plan view.");
     tt->help = tdrpStrDup("Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.");
-    tt->val_offset = (char *) &projection_type_str - &_start_;
+    tt->val_offset = (char *) &proj_type_str - &_start_;
     tt->single_val.s = tdrpStrDup("CARTESIAN");
     tt++;
     
-    // Parameter 'projection_type'
+    // Parameter 'proj_type'
     // ctype is '_projection_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("projection_type");
+    tt->param_name = tdrpStrDup("proj_type");
     tt->descr = tdrpStrDup("Projection for mapping in x,y. See projection param below.");
     tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
-    tt->val_offset = (char *) &projection_type - &_start_;
+    tt->val_offset = (char *) &proj_type - &_start_;
     tt->enum_def.name = tdrpStrDup("projection_t");
     tt->enum_def.nfields = 10;
     tt->enum_def.fields = (enum_field_t *)
@@ -5103,18 +5103,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'bookmark_command'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("bookmark_command");
-    tt->descr = tdrpStrDup("This command is run whenever a BOOKMARK_MENU button is pressed.");
-    tt->help = tdrpStrDup("The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.");
-    tt->val_offset = (char *) &bookmark_command - &_start_;
-    tt->single_val.s = tdrpStrDup("/opt/google/chrome/chrome %U");
-    tt++;
-    
     // Parameter 'bookmarks'
     // ctype is '_bookmark_t'
     
@@ -5150,6 +5138,18 @@
       tt->struct_vals[1].s = tdrpStrDup("http://mars/aoaws/doc/roc_mds.html");
       tt->struct_vals[2].s = tdrpStrDup("ADDS");
       tt->struct_vals[3].s = tdrpStrDup("http://adds.awc-kc.noaa.gov/");
+    tt++;
+    
+    // Parameter 'bookmark_command'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("bookmark_command");
+    tt->descr = tdrpStrDup("This command is run whenever a BOOKMARK_MENU button is pressed.");
+    tt->help = tdrpStrDup("The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.");
+    tt->val_offset = (char *) &bookmark_command - &_start_;
+    tt->single_val.s = tdrpStrDup("/opt/google/chrome/chrome %U");
     tt++;
     
     // Parameter 'Comment 49'
@@ -5313,7 +5313,7 @@
     tt->array_offset = (char *) &_product_adjustments - &_start_;
     tt->array_n_offset = (char *) &product_adjustments_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
+    tt->array_len_fixed = TRUE;
     tt->array_elem_size = sizeof(product_adjustment_t);
     tt->array_n = 3;
     tt->struct_def.name = tdrpStrDup("product_adjustment_t");

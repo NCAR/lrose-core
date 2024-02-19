@@ -1123,7 +1123,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.request_gzip_vol_compression",0);
 
   // projections
-  _getString("cidd.projection_type", "CARTESIAN");
+  _getString("cidd.projection_type", "CARTESIAN", true, "proj_type_str");
   _getDouble("cidd.lambert_lat1", 20.0, true, "proj_lat1");
   _getDouble("cidd.lambert_lat2", 60.0, true, "proj_lat2");
   _getDouble("cidd.tangent_lat", 90.0, true, "proj_tangent_lat");

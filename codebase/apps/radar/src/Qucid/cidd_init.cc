@@ -48,7 +48,6 @@ void init_data_space()
 
   int i,j,pid;
   int num_fields;
-  // int err_flag;
   long param_text_len;
   long param_text_line_no;
   const char *param_text;
@@ -57,45 +56,13 @@ void init_data_space()
   char str_buf[128];   /* Space to build resource strings */
   char *cfield[3];     /* Space to collect sub strings */
   double delta_x,delta_y;
-  // double lat1 = 0, lat2 = 0;
+  UTIMstruct temp_utime;
 
-  UTIMstruct    temp_utime;
-
-  // INSTANCE = xv_unique_key(); /* get keys for retrieving data */
-  // MENU_KEY = xv_unique_key();
-
-  // load up the params buffer from file or http
-
-  // load_db_data(gd.db_name);  // Retrieve the parameter text file
-
-  // create uparams object, read params into it from buffer
-
-  // gd.uparams = new Uparams();
-  // if (gd.uparams->read(gd.db_data, gd.db_data_len, "cidd")) {
-  //   fprintf(stderr,"init_data_space: could not read params buffer\n");
-  //   exit(-1);
-  // }
-  // gd.uparams->setPrintTdrp(true);
-
-  // Load the Main parameters
-
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"MAIN_PARAMS",
-  //                            &param_text_len, &param_text_line_no);
-    
-  // if(param_text == NULL || param_text_len <=0 ) {
-  //   fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
-  //   exit(-1);
-  // }
-    
-  // set_X_parameter_database(param_text); /* load the main parameter database*/
-  
   if(!gd.quiet_mode) {
-    fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n",
-            CIDD_VERSION, CIDD_UCOPYRIGHT);
+    fprintf(stderr,"Qucid: Version %s\n", CIDD_VERSION);
+    fprintf(stderr,"copyright %s\n\n", CIDD_UCOPYRIGHT);
   }
-
+  
   // gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
   // gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
   // gd.debug2 |= gd.uparams->getLong("cidd.debug2_flag", 0);
@@ -103,68 +70,26 @@ void init_data_space()
   gd.debug |= _params.debug;
   gd.debug1 |= _params.debug1_flag;
   gd.debug2 |= _params.debug2_flag;
-
-  // shmem
+  
+  // open shmem segment for interprocess comms
   
   gd.coord_key = _params.coord_key;
-  if((gd.coord_expt =
-      (coord_export_t *) ushm_create(gd.coord_key,
-                                     sizeof(coord_export_t),
-                                     0666)) == NULL) {
-    fprintf(stderr, "Couldn't create shared memory segment for aux process communications\n");
+  if((gd.coord_expt = (coord_export_t *) ushm_create(gd.coord_key,
+                                                     sizeof(coord_export_t),
+                                                     0666)) == NULL) {
+    fprintf(stderr, "Could not create shared mem for interprocess comms\n");
     exit(-1);
   }
   memset(gd.coord_expt, 0, sizeof(coord_export_t));
 
-  // How many idle seconds can elapse before resetting the display
-  // _params.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
-  // _params.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
-  // _params.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
-  // _params.close_popups =   gd.uparams->getLong("cidd.close_popups", 0);
-  // _params.disable_pick_mode =   gd.uparams->getLong("cidd.disable_pick_mode", 1);
-  // _params.clip_overlay_fields =   gd.uparams->getLong("cidd.clip_overlay_fields", 0);
-  // _params.output_geo_xml =   gd.uparams->getLong("cidd.output_geo_xml", 0);
-  // _params.use_latlon_in_geo_xml =   gd.uparams->getLong("cidd.use_latlon_in_geo_xml", 0);
-  // _params.replace_underscores =   gd.uparams->getLong("cidd.replace_underscores", 1);
+  // html mode
   
-  // Image dir - for output images
-  
-  // _params.image_dir = gd.uparams->getString("cidd.image_dir", "/tmp/image_dir");
-  // if (strlen(gd.uparams->getString("cidd.html_image_dir", "")) > 0) {
-  //   // backwards compatibility
-  //   _params.image_dir = gd.uparams->getString("cidd.html_image_dir", "/tmp/image_dir");
-  // }
-
-  // _params.html_mode = gd.uparams->getLong("cidd.html_mode", 0);
-  
-  // _params.run_once_and_exit = gd.uparams->getLong("cidd.run_once_and_exit",0);
   if(_params.run_once_and_exit) _params.html_mode = pTRUE;
-
   if (_params.html_mode) {
     gd.h_win.zoom_level = 0;
   }
   
-  // _params.transparent_images = gd.uparams->getLong("cidd.transparent_images", 0);
-  
-  // _params.save_images_to_day_subdir = gd.uparams->getLong("cidd.save_images_to_day_subdir", 0);
-  
-  // _params.horiz_image_fname = gd.uparams->getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  // _params.horiz_image_command = gd.uparams->getString("cidd.horiz_image_command", "");
-  
-  // _params.vert_image_fname = gd.uparams->getString("cidd.vert_image_fname", "cidd_vert_view.png");
-  // _params.vert_image_command = gd.uparams->getString("cidd.vert_image_command", "");
-  
-  // Set up our default image type.
-  // force png for now
-
-  // _params.image_ext = gd.uparams->getString("cidd.image_ext", "png");
-  // _params.image_ext = "png";
-  
-  // _params.image_horiz_prefix = gd.uparams->getString("cidd.image_horiz_prefix", "CP");
-  // _params.image_vert_prefix = gd.uparams->getString("cidd.image_vert_prefix", "CV");
-  // _params.image_name_separator = gd.uparams->getString("cidd.image_name_separator", "_");
-  
-  // copy to structs
+  // image generation
   
   STRcopy(gd.h_win.image_dir, _params.image_dir, MAX_PATH_LEN);
   STRcopy(gd.v_win.image_dir, _params.image_dir, MAX_PATH_LEN);
@@ -176,57 +101,23 @@ void init_data_space()
   STRcopy(gd.v_win.image_fname, _params.vert_image_fname, MAX_PATH_LEN);
   STRcopy(gd.v_win.image_command, _params.vert_image_command, MAX_PATH_LEN);
 
-  // script to run after generating image
-  
-  // _params.image_convert_script = gd.uparams->getString("cidd.image_convert_script", "convert_image.csh");
-  // _params.series_convert_script = gd.uparams->getString("cidd.series_convert_script", "make_anim.csh");
-
   // If individual horiz and vert scripts have not been set
-  // use the General one.
+  // use the general one.
+  
+  if(strlen(gd.h_win.image_command) < 3) {
+    STRcopy(gd.h_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
+  }
   
   if(strlen(gd.v_win.image_command) < 3) {
-    STRcopy(gd.v_win.image_command,_params.image_convert_script,MAX_PATH_LEN);
-  }
-
-  if(strlen(gd.h_win.image_command) < 3) {
-    STRcopy(gd.h_win.image_command,_params.image_convert_script,MAX_PATH_LEN);
+    STRcopy(gd.v_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
   }
 
   if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
-    _params.idle_reset_seconds = 259200000; // 3000 days.
+    _params.idle_reset_seconds = 1000000000; // a very long time
   }
 
-  // _params.complex_command_timeout_secs =  gd.uparams->getLong("cidd.complex_command_timeout_secs",180);
-  // resource = gd.uparams->getString("cidd.print_script", "");
-  // if(strlen(resource) > 1) {
-  //   _params.print_script = resource;
-  // }
-
-  // _params.simple_command_timeout_secs =  gd.uparams->getLong("cidd.simple_command_timeout_secs",30);
-
-  // _params.label_time_format = gd.uparams->getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
-
-  // _params.moviestart_time_format = gd.uparams->getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
-
-  // _params.frame_range_time_format = gd.uparams->getString("cidd.frame_range_time_format", "%H:%M");
-
-  // _params.movieframe_time_format = gd.uparams->getString("cidd.movieframe_time_format", "%H%M");
-
-  // _params.movieframe_time_mode = gd.uparams->getLong("cidd.movieframe_time_mode", 0);
-
-  // Get the on/off state of the extra legend plotting - Force to either 0 or 1
-
-  // _params.layer_legends_on = (gd.uparams->getLong("cidd.layer_legends_on", 1) & 1);
-  // _params.cont_legends_on = (gd.uparams->getLong("cidd.cont_legends_on", 1) & 1);
-  // _params.wind_legends_on = (gd.uparams->getLong("cidd.wind_legends_on", 1) & 1);
-  // _params.contour_line_width = gd.uparams->getLong("cidd.contour_line_width", 1);
-  // _params.smooth_contours = gd.uparams->getLong("cidd.smooth_contours", 0);
-  // _params.use_alt_contours = gd.uparams->getLong("cidd.use_alt_contours", 0);
-  // _params.add_noise = gd.uparams->getLong("cidd.add_noise", 0);
-  // _params.special_contour_value = gd.uparams->getDouble("cidd.special_contour_value", 0.0);
-  // _params.map_bad_to_min_value =  gd.uparams->getLong("cidd.map_bad_to_min_value", 0);
-  // _params.map_missing_to_min_value =  gd.uparams->getLong("cidd.map_missing_to_min_value", 0);
-
+  // layers
+  
   gd.layers.layer_legends_on = _params.layer_legends_on;
   gd.layers.cont_legends_on = _params.cont_legends_on;
   gd.layers.wind_legends_on = _params.wind_legends_on;
@@ -238,126 +129,50 @@ void init_data_space()
   gd.layers.map_bad_to_min_value = _params.map_bad_to_min_value;
   gd.layers.map_missing_to_min_value = _params.map_missing_to_min_value;
 
-  // main field on top?
-  
-  // _params.draw_main_on_top = (gd.uparams->getLong("cidd.draw_main_on_top", 0) & 1);
-
-  // latest click location
-  
-  // _params.mark_latest_click_location = gd.uparams->getLong("cidd.mark_latest_click_location", 0);
-
-  // drawing
-  
-  // _params.drawing_mode = 0;
-
   // products
-  
-  // _params.products_on = gd.uparams->getLong("cidd.products_on", 1);
-  // _params.product_line_width = gd.uparams->getLong("cidd.product_line_width", 1);
-  // _params.product_font_size = gd.uparams->getLong("cidd.product_font_size", 1);
   
   gd.prod.products_on = _params.products_on;
   gd.prod.prod_line_width = _params.product_line_width;
   gd.prod.prod_font_num = _params.product_font_size;
   
-  for(i=0; i < NUM_PRODUCT_DETAIL_THRESHOLDS; i++) {
+  for(int ii = 0; i < _params.product_adjustments_n; ii++) {
+    gd.prod.detail[ii].threshold =
+      _params._product_adjustments[ii].threshold;
+    gd.prod.detail[ii].adjustment =
+      _params._product_adjustments[ii].font_index_adj;
+  } // ii
 
-    sprintf(str_buf,"cidd.product_detail_threshold%d",i+1);
-    gd.product_detail_threshold[i] = gd.uparams->getDouble(str_buf,0.0);
-    gd.prod.detail[i].threshold = gd.product_detail_threshold[i];
-    
-    sprintf(str_buf,"cidd.product_detail_adjustment%d",i+1);
-    gd.product_detail_adjustment[i] = gd.uparams->getLong(str_buf,0);
-    gd.prod.detail[i].adjustment = gd.product_detail_adjustment[i];
-
-  }
-	
-
-  // _params.always_get_full_domain = gd.uparams->getLong("cidd.always_get_full_domain", 0);
-  // _params.do_not_clip_on_mdv_request = gd.uparams->getLong("cidd.do_not_clip_on_mdv_request", 0);
-  // _params.do_not_decimate_on_mdv_request = gd.uparams->getLong("cidd.do_not_decimate_on_mdv_request", 0);
-     
-  // Toggle for displaying range rings at the data's origin - Useful for mobile units.
-  // _params.range_ring_follows_data = gd.uparams->getLong("cidd.range_ring_follows_data", 0);
-  // _params.range_ring_for_radar_only = gd.uparams->getLong("cidd.range_ring_for_radar_only", 0);
-
-  // Toggle for shifting the display origin - Useful for mobile units.
-  // _params.domain_follows_data = gd.uparams->getLong("cidd.domain_follows_data", 0);
 
   // if domain follows data, do not clip or decimate
-
+  
   if (_params.domain_follows_data) {
     _params.always_get_full_domain = pTRUE;
     _params.do_not_clip_on_mdv_request = pTRUE;
     _params.do_not_decimate_on_mdv_request = pTRUE;
   }
 
-  // _params.help_command = gd.uparams->getString("cidd.help_command", "");
-  // _params.http_tunnel_url = gd.uparams->getString("cidd.http_tunnel_url", "");
-  // _params.datamap_host = gd.uparams->getString("cidd.datamap_host", "");
-  // _params.http_proxy_url = gd.uparams->getString("cidd.http_proxy_url", "");
-
   // Bookmarks for a menu of URLS - Index starts at 1
-  // _params.bookmark_command = gd.uparams->getString("cidd.bookmark_command", "");
-  // _params.num_bookmarks = gd.uparams->getLong("cidd.num_bookmarks", 0);
-
-#ifdef JUNK
-  if(_params.num_bookmarks > 0) {
-    gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),_params.num_bookmarks);
-  }
   
-  err_flag = 0;
-  for(i=0; i < _params.num_bookmarks; i++) {
-    sprintf(str_buf,"cidd.bookmark%d",i+1);
-    gd.bookmark[i].url = gd.uparams->getString(str_buf,"");
-
-    if(strlen(gd.bookmark[i].url) < 4) {
-      fprintf(stderr,"Error: Parameter %s undefined\n",str_buf);
-      err_flag++;
-    }
-
-    sprintf(str_buf,"cidd.bookmark_label%d",i+1);
-    gd.bookmark[i].label = gd.uparams->getString(str_buf,"");
-
-    if(strlen(gd.bookmark[i].label) < 1) {
-      fprintf(stderr,"Error: Parameter %s undefined\n",str_buf);
-      err_flag++;
-    }
-
+  if(_params.bookmarks_n > 0) {
+    gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),_params.bookmarks_n);
   }
-  if(err_flag) {
-    fprintf(stderr,"Correct the cidd.bookmark section of the parameter file\n");
-    exit(-1);
+  for(int ii = 0; ii < _params.bookmarks_n; ii++) {
+    gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
+    gd.bookmark[ii].label = strdup(_params._bookmarks[ii].label);
   }
-#endif
 
   // origin latitude and longitude
   
-  // _params.origin_latitude = gd.uparams->getDouble("cidd.origin_latitude", 0.0);
-  // _params.origin_longitude = gd.uparams->getDouble("cidd.origin_longitude", 0.0);
-
   gd.h_win.origin_lat = _params.origin_latitude;
   gd.h_win.origin_lon = _params.origin_longitude;
 
   // click location on reset
   
-  // _params.reset_click_latitude = gd.uparams->getDouble("cidd.reset_click_latitude", _params.origin_latitude);
-  // _params.reset_click_longitude = gd.uparams->getDouble("cidd.reset_click_longitude", _params.origin_longitude);
-
   gd.h_win.reset_click_lat = _params.reset_click_latitude;
   gd.h_win.reset_click_lon = _params.reset_click_longitude;
 
-  // projections
+  // projection
   
-  // _params.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
-  // _params.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
-  // _params.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
-  // _params.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
-  // _params.tangent_lat = gd.uparams->getDouble("cidd.tangent_lat",90.0);
-  // _params.tangent_lon = gd.uparams->getDouble("cidd.tangent_lon",0.0);
-  // _params.central_scale = gd.uparams->getDouble("cidd.central_scale",1.0);
-  
-  gd.proj_param[0] = _params.proj_rotation; // flat projection is default
 
   // _params.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio", 1.0);
   // if (_params.aspect_ratio <= 0.0 && gd.debug) {
@@ -370,92 +185,111 @@ void init_data_space()
   /* Establish the native projection type */
 
   //_params.projection_type = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
+  
+  if (strncasecmp(_params.proj_type_str, "CARTESIAN", 9) == 0) {
 
-#ifdef JUNK
-  if (strncasecmp(_params.projection_type,"CARTESIAN",9) == 0) {
-
+    _params.proj_type = Params::PROJ_FLAT;
     gd.display_projection = Mdvx::PROJ_FLAT;
+    gd.proj_param[0] = _params.proj_rotation; // rotation rel to TN
+    gd.proj.initFlat(_params.origin_latitude,
+                     _params.origin_longitude,
+                     _params.proj_rotation);
     if(gd.debug) {
-      printf("Cartesian Projection - Origin at: %g, %g\n", 
+      printf("Cartesian Projection\n");
+      printf("Origin at: %g, %g\n", 
              _params.origin_latitude,_params.origin_longitude);
     }
-    gd.proj.initFlat(_params.origin_latitude,_params.origin_longitude,_params.north_angle);
+    
+  } else if (strncasecmp(_params.proj_type_str, "LAT_LON", 7) == 0) {
 
-  } else if (strncasecmp(_params.projection_type,"LAT_LON",7) == 0) {
-
+    _params.proj_type = Params::PROJ_LATLON;
     gd.display_projection = Mdvx::PROJ_LATLON;
+    gd.proj.initLatlon(_params.origin_longitude);
     if(gd.debug) {
-      printf("LATLON/ Cylindrical Projection - Origin at: %g, %g\n",
-             _params.origin_latitude,_params.origin_longitude);
+      printf("LATLON/Cylindrical Projection\n");
+      printf("Origin at: %g, %g\n",
+             _params.origin_latitude, _params.origin_longitude);
     }
+    
+  } else if (strncasecmp(_params.proj_type_str, "LAMBERT", 7) == 0) {
 
-  } else if (strncasecmp(_params.projection_type,"LAMBERT",7) == 0) {
-
+    _params.proj_type = Params::PROJ_LAMBERT_CONF;
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
-    gd.proj_param[0] = _params.lambert_lat1;
-    gd.proj_param[1] = _params.lambert_lat2;
-    if(lat1 == -90.0 || lat2 == -90.0) {
-      fprintf(stderr,
-              "Must set cidd.lambert_lat1 and cidd.lambert_lat2 parameters for LAMBERT projections\n");
-      exit(-1);
-    }
+    gd.proj_param[0] = _params.proj_lat1;
+    gd.proj_param[1] = _params.proj_lat2;
+    gd.proj.initLambertConf(_params.origin_latitude,
+                            _params.origin_longitude,
+                            _params.proj_lat1,
+                            _params.proj_lat2);
     if(gd.debug) {
-      printf("LAMBERT Projection - Origin at: %g, %g Parallels at: %g, %g\n",
-             _params.origin_latitude,_params.origin_longitude,
-             _params.lambert_lat1, _params.lambert_lat2);
-      gd.proj.initLambertConf(_params.origin_latitude,_params.origin_longitude,
-                              _params.lambert_lat1, _params.lambert_lat2);
+      printf("LAMBERT Projection\n");
+      printf("Origin at: %g, %g\n",
+             _params.origin_latitude, _params.origin_longitude);
+      printf("Parallels at: %g, %g\n",
+             _params.proj_lat1, _params.proj_lat2);
     }
+    
+  } else if (strncasecmp(_params.proj_type_str, "STEREOGRAPHIC", 13) == 0) {
 
-  } else if (strncasecmp(_params.projection_type,"STEREOGRAPHIC",13) == 0) {
-
+    _params.proj_type = Params::PROJ_OBLIQUE_STEREO;
     gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
-    gd.proj_param[0] = _params.tangent_lat;
-    gd.proj_param[1] = _params.tangent_lon;
-    gd.proj_param[2] = _params.central_scale;
+    gd.proj_param[0] = _params.proj_tangent_lat;
+    gd.proj_param[1] = _params.proj_tangent_lon;
+    gd.proj_param[2] = _params.proj_central_scale;
+    gd.proj.initStereographic(_params.proj_tangent_lat,
+                              _params.proj_tangent_lon,
+                              _params.proj_central_scale);
+    gd.proj.setOffsetOrigin(_params.origin_latitude,
+                            _params.origin_longitude);
     if(gd.debug) {
-      printf("Oblique Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             _params.origin_latitude,_params.origin_longitude,
-             _params.tangent_lat,_params.tangent_lon);
-    }
-    gd.proj.initStereographic(_params.tangent_lat, _params.tangent_lon, _params.central_scale);
-    gd.proj.setOffsetOrigin(_params.origin_latitude,_params.origin_longitude);
-
-  } else if (strncasecmp(_params.projection_type,"POLAR_STEREO",12) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
-    gd.proj_param[0] = _params.tangent_lat;
-    gd.proj_param[1] = _params.tangent_lon;
-    gd.proj_param[2] = _params.central_scale;
-    if(gd.debug) {
-      printf("Polar Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             _params.origin_latitude,_params.origin_longitude,
-             _params.tangent_lat,_params.tangent_lon);
-    }
-    gd.proj.initPolarStereo
-      (_params.tangent_lon,
-       (Mdvx::pole_type_t) (_params.tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
-       _params.central_scale);
-    gd.proj.setOffsetOrigin(_params.origin_latitude,_params.origin_longitude);
-
-  } else if (strncasecmp(_params.projection_type,"MERCATOR",8) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_MERCATOR;
-    if(gd.debug) {
-      printf("MERCATOR Projection - Origin at: %g, %g\n",
+      printf("Oblique Stereographic Projection\n");
+      printf("Origin at: %g, %g\n",
              _params.origin_latitude,_params.origin_longitude);
+      printf("Tangent at: %g, %g\n",
+             _params.proj_tangent_lat, _params.proj_tangent_lon);
     }
-    gd.proj.initMercator(_params.origin_latitude,_params.origin_longitude);
+    
+  } else if (strncasecmp(_params.proj_type_str, "POLAR_STEREO", 12) == 0) {
+    
+    _params.proj_type = Params::PROJ_POLAR_STEREO;
+    gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
+    gd.proj_param[0] = _params.proj_tangent_lat;
+    gd.proj_param[1] = _params.proj_tangent_lon;
+    gd.proj_param[2] = _params.proj_central_scale;
+    gd.proj.initPolarStereo
+      (_params.proj_tangent_lon,
+       (Mdvx::pole_type_t) (_params.proj_tangent_lat < 0.0 ?
+                            Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
+       _params.proj_central_scale);
+    gd.proj.setOffsetOrigin(_params.origin_latitude, _params.origin_longitude);
+    if(gd.debug) {
+      printf("Polar Stereographic Projection\n");
+      printf("Origin at: %g, %g\n",
+             _params.origin_latitude, _params.origin_longitude);
+      printf("Tangent at: %g, %g\n",
+             _params.proj_tangent_lat, _params.proj_tangent_lon);
+    }
 
+  } else if (strncasecmp(_params.proj_type_str,"MERCATOR",8) == 0) {
+    
+    _params.proj_type = Params::PROJ_MERCATOR;
+    gd.display_projection = Mdvx::PROJ_MERCATOR;
+    gd.proj.initMercator(_params.origin_latitude,_params.origin_longitude);
+    if(gd.debug) {
+      printf("MERCATOR Projection\n");
+      printf("Origin at: %g, %g\n",
+             _params.origin_latitude, _params.origin_longitude);
+    }
+      
   } else {
 
-    fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", _params.projection_type);
-    fprintf(stderr," Current valid types are: CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, MERCATOR\n");
+    fprintf(stderr,"Unknown projection type: cidd.proj_type_str = %s !\n",
+            _params.proj_type_str);
+    fprintf(stderr,"Current valid types are:\n");
+    fprintf(stderr,"CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, POLAR_STEREO, MERCATOR\n");
     exit(-1);
 
   }
-
-#endif
   
   gd.h_win.last_page = -1;
   gd.v_win.last_page = -1;

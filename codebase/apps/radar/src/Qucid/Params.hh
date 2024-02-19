@@ -641,9 +641,9 @@ public:
   map_t *_maps;
   int maps_n;
 
-  char* projection_type_str;
+  char* proj_type_str;
 
-  projection_t projection_type;
+  projection_t proj_type;
 
   double proj_origin_lat;
 
@@ -1190,10 +1190,10 @@ public:
 
   char* frame_message_help;
 
-  char* bookmark_command;
-
   bookmark_t *_bookmarks;
   int bookmarks_n;
+
+  char* bookmark_command;
 
   double image_inten;
 

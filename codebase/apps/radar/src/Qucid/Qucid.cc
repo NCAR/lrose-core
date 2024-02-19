@@ -135,13 +135,13 @@ Qucid::Qucid(int argc, char **argv) :
     return;
   }
 
-  exit(0);
-  
   // initialize globals, get/set defaults, establish data sources etc.
   
   if (_args.usingLegacyParams()) {
     init_data_space();
   }
+  
+  exit(0);
   
   // set params on alloc checker
 
