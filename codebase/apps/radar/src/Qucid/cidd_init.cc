@@ -34,12 +34,13 @@
 #define CIDD_INIT    1
 #include "cidd.h"
 #include <algorithm>
-static void _init_grids();
 
-// #define NUM_PARSE_FIELDS    64
-// #define PARSE_FIELD_SIZE    1024
-// #define INPUT_LINE_LEN      512
-
+static void _initGrids();
+static void _initWinds();
+static void _initWindComponent(met_record_t *wrec,
+                               const Params::wind_t &windp,
+                               bool isU, bool isV, bool isW);
+  
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
@@ -62,14 +63,26 @@ void init_data_space()
     fprintf(stderr,"Qucid: Version %s\n", CIDD_VERSION);
     fprintf(stderr,"copyright %s\n\n", CIDD_UCOPYRIGHT);
   }
-  
-  // gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
-  // gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
-  // gd.debug2 |= gd.uparams->getLong("cidd.debug2_flag", 0);
 
-  gd.debug |= _params.debug;
-  gd.debug1 |= _params.debug1_flag;
-  gd.debug2 |= _params.debug2_flag;
+  // debugging level
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    gd.debug = 1;
+    gd.debug1 = 1;
+    gd.debug2 = 1;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    gd.debug = 1;
+    gd.debug1 = 1;
+    gd.debug2 = 0;
+  } else if (_params.debug >= Params::DEBUG_NORM) {
+    gd.debug = 1;
+    gd.debug1 = 0;
+    gd.debug2 = 0;
+  } else {
+    gd.debug = 0;
+    gd.debug1 = 0;
+    gd.debug2 = 0;
+  }
   
   // open shmem segment for interprocess comms
   
@@ -81,7 +94,7 @@ void init_data_space()
     exit(-1);
   }
   memset(gd.coord_expt, 0, sizeof(coord_export_t));
-
+  
   // html mode
   
   if(_params.run_once_and_exit) _params.html_mode = pTRUE;
@@ -93,7 +106,6 @@ void init_data_space()
   
   STRcopy(gd.h_win.image_dir, _params.image_dir, MAX_PATH_LEN);
   STRcopy(gd.v_win.image_dir, _params.image_dir, MAX_PATH_LEN);
-
   
   STRcopy(gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
   STRcopy(gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
@@ -113,7 +125,7 @@ void init_data_space()
   }
 
   if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
-    _params.idle_reset_seconds = 1000000000; // a very long time
+    _params.idle_reset_seconds = 1000000000; // a very long time - 30+ years
   }
 
   // layers
@@ -141,7 +153,6 @@ void init_data_space()
     gd.prod.detail[ii].adjustment =
       _params._product_adjustments[ii].font_index_adj;
   } // ii
-
 
   // if domain follows data, do not clip or decimate
   
@@ -173,47 +184,31 @@ void init_data_space()
 
   // projection
   
-
-  // _params.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio", 1.0);
-  // if (_params.aspect_ratio <= 0.0 && gd.debug) {
-  //   cerr << "WARNING - Using first domain to set aspect ratio: " << endl;
-  // }
-
-  // _params.scale_units_per_km = gd.uparams->getDouble("cidd.scale_units_per_km",1.0);
-  // _params.scale_units_label = gd.uparams->getString("cidd.scale_units_label", "km");
-  
-  /* Establish the native projection type */
-
-  //_params.projection_type = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
-  
-  if (strncasecmp(_params.proj_type_str, "CARTESIAN", 9) == 0) {
-
-    _params.proj_type = Params::PROJ_FLAT;
+  if (_params.proj_type == Params::PROJ_FLAT) {
+    
     gd.display_projection = Mdvx::PROJ_FLAT;
     gd.proj_param[0] = _params.proj_rotation; // rotation rel to TN
     gd.proj.initFlat(_params.origin_latitude,
                      _params.origin_longitude,
                      _params.proj_rotation);
     if(gd.debug) {
-      printf("Cartesian Projection\n");
-      printf("Origin at: %g, %g\n", 
-             _params.origin_latitude,_params.origin_longitude);
+      fprintf(stderr, "Cartesian projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n", 
+              _params.origin_latitude,_params.origin_longitude);
     }
     
-  } else if (strncasecmp(_params.proj_type_str, "LAT_LON", 7) == 0) {
+  } else if (_params.proj_type == Params::PROJ_LATLON) {
 
-    _params.proj_type = Params::PROJ_LATLON;
     gd.display_projection = Mdvx::PROJ_LATLON;
     gd.proj.initLatlon(_params.origin_longitude);
     if(gd.debug) {
-      printf("LATLON/Cylindrical Projection\n");
-      printf("Origin at: %g, %g\n",
-             _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "LATLON/Cylindrical projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
     }
     
-  } else if (strncasecmp(_params.proj_type_str, "LAMBERT", 7) == 0) {
-
-    _params.proj_type = Params::PROJ_LAMBERT_CONF;
+  } else if (_params.proj_type == Params::PROJ_LAMBERT_CONF) {
+    
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
     gd.proj_param[0] = _params.proj_lat1;
     gd.proj_param[1] = _params.proj_lat2;
@@ -222,16 +217,15 @@ void init_data_space()
                             _params.proj_lat1,
                             _params.proj_lat2);
     if(gd.debug) {
-      printf("LAMBERT Projection\n");
-      printf("Origin at: %g, %g\n",
-             _params.origin_latitude, _params.origin_longitude);
-      printf("Parallels at: %g, %g\n",
-             _params.proj_lat1, _params.proj_lat2);
+      fprintf(stderr, "LAMBERT projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "Parallels at: %g, %g\n",
+              _params.proj_lat1, _params.proj_lat2);
     }
     
-  } else if (strncasecmp(_params.proj_type_str, "STEREOGRAPHIC", 13) == 0) {
+  } else if (_params.proj_type == Params::PROJ_OBLIQUE_STEREO) {
 
-    _params.proj_type = Params::PROJ_OBLIQUE_STEREO;
     gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
     gd.proj_param[0] = _params.proj_tangent_lat;
     gd.proj_param[1] = _params.proj_tangent_lon;
@@ -242,16 +236,15 @@ void init_data_space()
     gd.proj.setOffsetOrigin(_params.origin_latitude,
                             _params.origin_longitude);
     if(gd.debug) {
-      printf("Oblique Stereographic Projection\n");
-      printf("Origin at: %g, %g\n",
-             _params.origin_latitude,_params.origin_longitude);
-      printf("Tangent at: %g, %g\n",
-             _params.proj_tangent_lat, _params.proj_tangent_lon);
+      fprintf(stderr, "Oblique Stereographic projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude,_params.origin_longitude);
+      fprintf(stderr, "Tangent at: %g, %g\n",
+              _params.proj_tangent_lat, _params.proj_tangent_lon);
     }
     
-  } else if (strncasecmp(_params.proj_type_str, "POLAR_STEREO", 12) == 0) {
+  } else if (_params.proj_type == Params::PROJ_POLAR_STEREO) {
     
-    _params.proj_type = Params::PROJ_POLAR_STEREO;
     gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
     gd.proj_param[0] = _params.proj_tangent_lat;
     gd.proj_param[1] = _params.proj_tangent_lon;
@@ -263,37 +256,72 @@ void init_data_space()
        _params.proj_central_scale);
     gd.proj.setOffsetOrigin(_params.origin_latitude, _params.origin_longitude);
     if(gd.debug) {
-      printf("Polar Stereographic Projection\n");
-      printf("Origin at: %g, %g\n",
-             _params.origin_latitude, _params.origin_longitude);
-      printf("Tangent at: %g, %g\n",
-             _params.proj_tangent_lat, _params.proj_tangent_lon);
+      fprintf(stderr, "Polar Stereographic projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "Tangent at: %g, %g\n",
+              _params.proj_tangent_lat, _params.proj_tangent_lon);
+      fprintf(stderr, "Central scale: %g\n",
+              _params.proj_central_scale);
     }
 
-  } else if (strncasecmp(_params.proj_type_str,"MERCATOR",8) == 0) {
+  } else if (_params.proj_type == Params::PROJ_MERCATOR) {
     
-    _params.proj_type = Params::PROJ_MERCATOR;
     gd.display_projection = Mdvx::PROJ_MERCATOR;
     gd.proj.initMercator(_params.origin_latitude,_params.origin_longitude);
     if(gd.debug) {
-      printf("MERCATOR Projection\n");
-      printf("Origin at: %g, %g\n",
-             _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "MERCATOR projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
     }
       
-  } else {
-
-    fprintf(stderr,"Unknown projection type: cidd.proj_type_str = %s !\n",
-            _params.proj_type_str);
-    fprintf(stderr,"Current valid types are:\n");
-    fprintf(stderr,"CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, POLAR_STEREO, MERCATOR\n");
-    exit(-1);
-
+  } else if (_params.proj_type == Params::PROJ_TRANS_MERCATOR) {
+    
+    gd.display_projection = Mdvx::PROJ_TRANS_MERCATOR;
+    gd.proj_param[0] = _params.proj_central_scale;
+    gd.proj.initTransMercator(_params.origin_latitude,
+                              _params.origin_longitude,
+                              _params.proj_central_scale);
+    if(gd.debug) {
+      fprintf(stderr, "TRANS_MERCATOR projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "Central scale: %g\n",
+              _params.proj_central_scale);
+    }
+      
+  } else if (_params.proj_type == Params::PROJ_ALBERS) {
+    
+    gd.display_projection = Mdvx::PROJ_ALBERS;
+    gd.proj_param[0] = _params.proj_lat1;
+    gd.proj_param[1] = _params.proj_lat2;
+    gd.proj.initAlbers(_params.origin_latitude,
+                       _params.origin_longitude,
+                       _params.proj_lat1,
+                       _params.proj_lat2);
+    if(gd.debug) {
+      fprintf(stderr, "ALBERS projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
+      fprintf(stderr, "Parallels at: %g, %g\n",
+              _params.proj_lat1, _params.proj_lat2);
+    }
+    
+  } else if (_params.proj_type == Params::PROJ_LAMBERT_AZIM) {
+    
+    gd.display_projection = Mdvx::PROJ_LAMBERT_AZIM;
+    gd.proj.initLambertAzim(_params.origin_latitude,_params.origin_longitude);
+    if(gd.debug) {
+      fprintf(stderr, "LAMBERT_AZIM projection\n");
+      fprintf(stderr, "Origin at: %g, %g\n",
+              _params.origin_latitude, _params.origin_longitude);
+    }
+      
   }
   
   gd.h_win.last_page = -1;
   gd.v_win.last_page = -1;
-
+  
   // movies
 
   int pid = getpid();
@@ -308,7 +336,7 @@ void init_data_space()
   }
 
   // copy movie info to other globals
-
+  
   gd.movie.movie_on = _params.movie_on;
   if(_params.html_mode) {
     gd.movie.movie_on = 0;
@@ -342,7 +370,8 @@ void init_data_space()
     gd.movie.climo_mode = YEARLY_INTERVAL;
   }
 
-  /* Use cosine correction for computing range in polar data */
+  // Use cosine correction for computing range in polar data
+  // check if set by Args
 
   if (gd.use_cosine_correction < 0) {
     // not set on command line
@@ -351,8 +380,7 @@ void init_data_space()
   
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
-
-  /* If demo time param is not set and command line option hasn't set archive mode */
+  // If demo time param is not set and command line option hasn't set archive mode
 
   if(strlen(_params.demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE)) {
     
@@ -372,7 +400,7 @@ void init_data_space()
     
     UTIMunix_to_date(gd.movie.start_time,&temp_utime);
     gd.movie.demo_mode = 0;
-
+    
   } else {
 
     /* ARCHIVE MODE */
@@ -389,7 +417,6 @@ void init_data_space()
       gd.movie.start_time = temp_utime.unix_time;
       
     }
-
     gd.movie.demo_mode = 1;
 	 
     /* Adjust the start time downward to the nearest round interval seconds */
@@ -404,7 +431,7 @@ void init_data_space()
 
     gd.movie.demo_time = gd.movie.start_time;
     UTIMunix_to_date(gd.movie.start_time,&temp_utime);
-
+    
     gd.h_win.movie_page = gd.h_win.page;
     gd.v_win.movie_page = gd.v_win.page;
     gd.movie.cur_frame = 0;
@@ -412,39 +439,6 @@ void init_data_space()
   } // if(strlen(_params.demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE))
 
   reset_time_points(); // reset movie
-
-  // _params.image_fill_threshold =
-  //   gd.uparams->getLong("cidd.image_fill_threshold", 120000);
-
-  // _params.dynamic_contour_threshold =
-  //   gd.uparams->getLong("cidd.dynamic_contour_threshold", 160000);
-
-  // _params.image_inten = gd.uparams->getDouble("cidd.image_inten", 0.8);
-  // _params.inten_levels = gd.uparams->getLong("cidd.inten_levels", 32);
-  // _params.data_inten = gd.uparams->getDouble("cidd.data_inten", 1.0);
-
-  // _params.data_timeout_secs = gd.uparams->getLong("cidd.data_timeout_secs", 10);
-
-  // data compression from server
-  
-  // _params.request_compressed_data = gd.uparams->getLong("cidd.request_compressed_data",0);
-  // _params.request_gzip_vol_compression = gd.uparams->getLong("cidd.request_gzip_vol_compression",0);
-
-  // output image file names
-  
-  // _params.add_frame_num_to_filename = gd.uparams->getLong("cidd.add_frame_num_to_filename",1);
-  // _params.add_button_name_to_filename = gd.uparams->getLong("cidd.add_button_name_to_filename",0);
-  // _params.add_height_to_filename = gd.uparams->getLong("cidd.add_height_to_filename",0);
-  // _params.add_frame_time_to_filename = gd.uparams->getLong("cidd.add_frame_time_to_filename",1);
-  // _params.add_gen_time_to_filename = gd.uparams->getLong("cidd.add_gen_time_to_filename",0);
-  // _params.add_valid_time_to_filename = gd.uparams->getLong("cidd.add_valid_time_to_filename",0);
-  // _params.font_display_mode = gd.uparams->getLong("cidd.font_display_mode",1);
-  // _params.label_contours = gd.uparams->getLong("cidd.label_contours",1);
-
-  // margins
-  
-  // _params.top_margin_render_style = gd.uparams->getLong("cidd.top_margin_render_style", 1);
-
 
 #ifdef CHECK_LATER
   if(_params.html_mode || gd.movie.num_frames < 3 ) {
@@ -463,8 +457,8 @@ void init_data_space()
     _params.num_cache_zooms = 1 ;
   }
   
-  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),_params.num_cache_zooms);
-  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),_params.num_cache_zooms);
+  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
+  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
   
   // zooms
   
@@ -487,12 +481,6 @@ void init_data_space()
   gd.h_win.zmax_y =
     (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
 
-  // _params.zoom_limits_in_latlon =  gd.uparams->getLong("cidd.zoom_limits_in_latlon",0);
-  // _params.domain_limit_min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-10000);
-  // _params.domain_limit_max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",10000);
-  // _params.domain_limit_min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-10000);
-  // _params.domain_limit_max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",10000);
-  
   if (gd.display_projection == Mdvx::PROJ_LATLON) {
     gd.h_win.min_x = max(_params.domain_limit_min_x, -360.0);
     gd.h_win.max_x = min(_params.domain_limit_max_x, 360.0);
@@ -504,13 +492,9 @@ void init_data_space()
     gd.h_win.min_y = _params.domain_limit_min_y;
     gd.h_win.max_y = _params.domain_limit_max_y;
   }
-  
-  // _params.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
-  // _params.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
-  // _params.start_ht = gd.uparams->getDouble("cidd.start_ht", 0.0);
-  // _params.planview_start_page = gd.uparams->getLong("cidd.planview_start_page", 1) -1;
-  // _params.xsect_start_page = gd.uparams->getLong("cidd.xsect_start_page", 1) -1;
 
+  // heights
+  
   gd.h_win.min_ht = _params.min_ht;
   gd.h_win.max_ht = _params.max_ht;
 
@@ -520,7 +504,8 @@ void init_data_space()
     gd.h_win.cur_ht = _params.start_ht;
   }
   
-  // Fix out of order limits.
+  // Fix limits as needed
+
   if(gd.h_win.min_x > gd.h_win.max_x) {
     double tmp = gd.h_win.min_x;
     gd.h_win.min_x = gd.h_win.max_x;
@@ -532,11 +517,11 @@ void init_data_space()
     gd.h_win.min_y = gd.h_win.max_y;
     gd.h_win.max_y = tmp;
   }
-    
+  
   // Sanitize Full earth domain limits.
-
+  
   if (gd.display_projection == Mdvx::PROJ_LATLON) {
-      
+    
     if(gd.h_win.min_x == gd.h_win.max_x) {
       gd.h_win.min_x = gd.h_win.min_x - 180.0;
       gd.h_win.max_x = gd.h_win.max_x + 180.0;
@@ -553,6 +538,7 @@ void init_data_space()
     }
     double originLon = (gd.h_win.min_x + gd.h_win.max_x) / 2.0;
     gd.proj.initLatlon(originLon);
+
   }
     
   if(gd.debug) {
@@ -561,10 +547,12 @@ void init_data_space()
             gd.h_win.min_x,gd.h_win.max_x,
             gd.h_win.min_y,gd.h_win.max_y );
   }
-    
+  
   double max_delta_x = gd.h_win.max_x - gd.h_win.min_x;
   double max_delta_y = gd.h_win.max_y - gd.h_win.min_y;
 
+  // zooms
+  
   for(int izoom = 0; izoom < gd.h_win.num_zoom_levels; izoom++) {
     
     double minx = _params._zoom_levels[izoom].min_x;
@@ -603,10 +591,15 @@ void init_data_space()
     delta_x = gd.h_win.zmax_x[izoom] - gd.h_win.zmin_x[izoom];
     delta_y = gd.h_win.zmax_y[izoom] - gd.h_win.zmin_y[izoom];
 
-    if(delta_x > max_delta_x) delta_x = max_delta_x;
-    if(delta_y > max_delta_y) delta_y = max_delta_y;
+    if (delta_x > max_delta_x) {
+      delta_x = max_delta_x;
+    }
+    if (delta_y > max_delta_y) {
+      delta_y = max_delta_y;
+    }
 
     // trap bogus values
+
     if(gd.h_win.zmin_x[izoom] < gd.h_win.min_x) {
       gd.h_win.zmin_x[izoom] = gd.h_win.min_x;
       gd.h_win.zmax_x[izoom] =  gd.h_win.min_x + delta_x;
@@ -627,19 +620,19 @@ void init_data_space()
       gd.h_win.zmin_y[izoom] =  gd.h_win.max_y - delta_y;
     }
 
-    if(_params.aspect_ratio <= 0.0) _params.aspect_ratio = fabs(delta_x/delta_y);
-
+    if(_params.aspect_ratio <= 0.0) {
+      _params.aspect_ratio = fabs(delta_x/delta_y);
+    }
+    
     gd.aspect_correction =
       cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * DEG_TO_RAD);
 
     /* Make sure domains are consistant with the window aspect ratio */
-    switch(gd.display_projection) {
-      case Mdvx::PROJ_LATLON:
-        /* forshorten the Y coords to make things look better */
-        delta_y /= gd.aspect_correction;
-        break;
-    }
 
+    if (gd.display_projection == Mdvx::PROJ_LATLON) {
+      /* forshorten the Y coords to make things look better */
+      delta_y /= gd.aspect_correction;
+    }
     delta_x /= _params.aspect_ratio;
 
     if(delta_x > delta_y) {
@@ -649,16 +642,18 @@ void init_data_space()
       gd.h_win.zmax_x[izoom] += ((delta_y - delta_x) /2.0) ;
       gd.h_win.zmin_x[izoom] -= ((delta_y - delta_x) /2.0) ;
     }
-
+    
     if(gd.debug) {
       printf(" ZOOM: %d --  X: %g,%g   Y: %g,%g,  Delta: %g,%g\n", izoom,
              gd.h_win.zmin_x[izoom],gd.h_win.zmax_x[izoom],
              gd.h_win.zmin_y[izoom],gd.h_win.zmax_y[izoom],
              delta_x,delta_y);
     }
-
+    
   } // izoom
 
+  // init current zoom
+  
   gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
   gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
   gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
@@ -675,7 +670,7 @@ void init_data_space()
   gd.h_win.route.num_segments = 1;
   gd.h_win.route.x_world[0] = (gd.h_win.cmin_x + gd.h_win.cmax_x) / 2;
   gd.h_win.route.x_world[1] = gd.h_win.route.x_world[0];
-
+  
   gd.h_win.route.y_world[0] =
     gd.h_win.cmin_y + ((gd.h_win.cmax_y - gd.h_win.cmin_y) / 4);
   gd.h_win.route.y_world[1] =
@@ -688,25 +683,22 @@ void init_data_space()
   gd.h_win.route.total_length = gd.h_win.route.seg_length[0];
 
   /* Automatically define the Custom Zoom levels */
+
   for(int ii = 0; ii <= NUM_CUSTOM_ZOOMS; ii++) {
     gd.h_win.zmin_x[gd.h_win.num_zoom_levels] = gd.h_win.zmin_x[0] + 
       ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
-
     gd.h_win.zmax_x[gd.h_win.num_zoom_levels] = gd.h_win.zmax_x[0] - 
       ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
-
     gd.h_win.zmin_y[gd.h_win.num_zoom_levels] = gd.h_win.zmin_y[0] + 
       ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
-
     gd.h_win.zmax_y[gd.h_win.num_zoom_levels] = gd.h_win.zmax_y[0] - 
       ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
-
     gd.h_win.num_zoom_levels++;
   }
 
+  // legacy CIDD menu bar - deprecated
+  
   ZERO_STRUCT(&gd.menu_bar);
-
-  // Establish what each Menu Bar Cell Does.
   gd.menu_bar.num_menu_bar_cells = gd.uparams->getLong("cidd.num_menu_bar_cells",0);
   if(gd.menu_bar.num_menu_bar_cells > 0) {
     for(int ii = 1; ii <= gd.menu_bar.num_menu_bar_cells; ii++) {
@@ -786,6 +778,8 @@ void init_data_space()
     exit(-1);
   } 
 
+  // vertical section
+  
   gd.v_win.zmin_x = (double *) calloc(sizeof(double), 1);
   gd.v_win.zmax_x = (double *) calloc(sizeof(double), 1);
   gd.v_win.zmin_y = (double *) calloc(sizeof(double), 1);
@@ -801,63 +795,31 @@ void init_data_space()
   gd.v_win.max_ht = gd.h_win.max_ht;
 
   // Set Vertical window route  params
+
   gd.v_win.cmin_x = gd.h_win.route.x_world[0];
   gd.v_win.cmin_y = gd.h_win.route.y_world[0];
   gd.v_win.cmax_x = gd.h_win.route.x_world[1];
   gd.v_win.cmax_y = gd.h_win.route.y_world[1];
 
-  // Wind Rendering
-
-  // _params.ideal_x_vects = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
-  // _params.ideal_y_vects = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
-  // _params.wind_head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
-  // _params.wind_head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
-  // _params.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 33);
+  // Load the GRIDDED DATA FIELD parameters
   
-  /* Initialize Extra features data */
-  // _params.all_winds_on = gd.uparams->getLong("cidd.all_winds_on", 1);
+  _initGrids();
+  
+  // Wind Rendering
 
   gd.layers.wind_vectors = _params.all_winds_on;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
-  
-  // _params.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
   gd.layers.wind_mode = _params.wind_mode;
-  
-  // _params.wind_time_scale_interval =
-  //   gd.uparams->getDouble("cidd.wind_time_scale_interval", 10.0);
   gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
-
-  // _params.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
   gd.layers.wind_scaler = _params.wind_scaler;
-
   gd.legends.range = _params.range_rings;
   int plot_azimuths = _params.azimuth_lines;
   gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
 
-  // Load the GRID / DATA FIELD parameters
-  // establish and initialize sources of data 
-
-  _init_grids();
+  // initialize wind data
   
-  // winds init
+  _initWinds();
   
-  // _params.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
-  // _params.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
-  // _params.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
-  // _params.wind_w_scale_factor = gd.uparams->getDouble("cidd.wind_w_scale_factor", 10.0);
-  // _params.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
-
-#ifdef JUNK
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug)fprintf(stderr,"Couldn't Find WINDS Section\n");
-  } else {
-    /* Establish and initialize connections to wind fields */
-    init_wind_data_links(param_text, param_text_len, param_text_line_no);
-  }
-#endif
-  
-  if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
-
   // Instantiate and load the SYMPROD TDRP Parameter section
   gd.syprod_P = new Csyprod_P();
 
@@ -1373,7 +1335,7 @@ void init_data_space()
 //////////////////////////////////
 // initialize the gridded fields
 
-static void _init_grids()
+static void _initGrids()
 {
 
   gd.num_datafields = _params.fields_n;
@@ -1489,5 +1451,163 @@ static void _init_grids()
   
   /* Make sure the first field is always on */
   gd.mrec[0]->currently_displayed = 1;
+
+}
+
+//////////////////////////////////
+// initialize the wind grids
+
+static void _initWinds()
+{
+
+  int default_marker_type = ARROWS;
+  if (_params.winds_n == 0) {
+    return;
+  }
+  if((gd.layers.wind =
+      (wind_data_t*) calloc(_params.winds_n, sizeof(wind_data_t))) == NULL) {
+    fprintf(stderr,"Unable to allocate space for %d wind sets\n", _params.winds_n);
+    exit(-1);
+  }
+  gd.layers.num_wind_sets = _params.winds_n;
+  if(gd.layers.num_wind_sets == 0) {
+    gd.layers.wind_vectors = 0;
+  }
+  
+  for(int ii = 0; ii < gd.layers.num_wind_sets; ii++) {
+    
+    wind_data_t &lwind = gd.layers.wind[ii];
+    const Params::wind_t &windp = _params._winds[ii];
+    
+    // marker type
+    lwind.marker_type = default_marker_type;
+    switch (windp.marker_type) {
+      case Params::WIND_VECTOR:
+        lwind.marker_type = VECTOR;
+        break;
+      case Params::WIND_BARB:
+        lwind.marker_type = BARB;
+        break;
+      case Params::WIND_LABELEDBARB:
+        lwind.marker_type = LABELEDBARB;
+        break;
+      case Params::WIND_TUFT:
+        lwind.marker_type = TUFT;
+        break;
+      case Params::WIND_TICKVECTOR:
+        lwind.marker_type = TICKVECTOR;
+        break;
+      case Params::WIND_METBARB:
+        lwind.marker_type = METBARB;
+        break;
+      case Params::WIND_BARB_SH:
+        lwind.marker_type = BARB_SH;
+        break;
+      case Params::WIND_LABELEDBARB_SH:
+        lwind.marker_type = LABELEDBARB_SH;
+        break;
+      case Params::WIND_ARROW:
+      default:
+        lwind.marker_type = ARROWS;
+        break;
+    }
+    STRcopy(lwind.color_name, windp.color, NAME_LENGTH);
+    lwind.active = windp.on_at_startup;
+    lwind.line_width = windp.line_width;
+    // Sanity check
+    if(lwind.line_width == 0 || lwind.line_width > 10) {
+      lwind.line_width = 1;
+    }
+
+    // initialize the components
+
+    lwind.wind_u = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    _initWindComponent(lwind.wind_u, windp, true, false, false);
+
+    lwind.wind_v = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    _initWindComponent(lwind.wind_v, windp, false, true, false);
+
+    if(strncasecmp(windp.w_field_name, "None", 4) != 0) {
+      lwind.wind_w = (met_record_t *) calloc(sizeof(met_record_t), 1);
+      _initWindComponent(lwind.wind_w, windp, false, false, true);
+    } else {
+      lwind.wind_w = NULL;
+    }
+
+    lwind.units_scale_factor = _params.wind_units_scale_factor;
+    lwind.reference_speed = _params.wind_reference_speed;
+    lwind.units_label = _params.wind_units_label;
+
+  }
+
+}
+
+//////////////////////////////////
+// initialize wind component
+
+static void _initWindComponent(met_record_t *wrec,
+                               const Params::wind_t &windp,
+                               bool isU, bool isV, bool isW)
+  
+{
+  
+  wrec->h_data_valid = 0;
+  wrec->v_data_valid = 0;
+  wrec->h_vcm.nentries = 0;
+  wrec->v_vcm.nentries = 0;
+  wrec->h_fhdr.scale = -1.0;
+  wrec->h_last_scale = 0.0;
+  wrec->time_list.num_alloc_entries = 0;
+  wrec->time_list.num_entries = 0;
+  
+  STRcopy(wrec->legend_name, windp.legend_label, NAME_LENGTH);
+  if (isW) {
+    sprintf(wrec->button_name, "%s_W ", windp.button_label);
+  } else {
+    STRcopy(wrec->button_name, windp.button_label, NAME_LENGTH);
+  }
+  STRcopy(wrec->url, windp.url, URL_LENGTH);
+  
+  /* Replace Underscores with spaces in names */
+  if(_params.html_mode == 0 && _params.replace_underscores) {
+    for(int jj = strlen(wrec->button_name) - 1; jj >= 0; jj--) {
+      if(wrec->button_name[jj] == '_') {
+        wrec->button_name[jj] = ' ';
+      }
+      if(wrec->legend_name[jj] == '_') {
+        wrec->legend_name[jj] = ' ';
+      }
+    } // jj
+  }
+  
+  // Append the field name
+
+  if (isU) {
+    strcat(wrec->url, windp.u_field_name);
+  } else if (isV) {
+    strcat(wrec->url, windp.v_field_name);
+  } else {
+    strcat(wrec->url, windp.w_field_name);
+  }
+  
+  // units
+  
+  STRcopy(wrec->field_units, windp.units, LABEL_LENGTH);
+  wrec->currently_displayed = 1;
+  
+  wrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+  wrec->h_fhdr.proj_origin_lon = 0.0;
+  wrec->h_fhdr.proj_origin_lat = 0.0;
+  
+  // instantiate classes for data retrieval
+  
+  wrec->h_mdvx = new DsMdvxThreaded;
+  wrec->v_mdvx = new DsMdvxThreaded;
+  wrec->h_mdvx_int16 = new MdvxField;
+  wrec->v_mdvx_int16 = new MdvxField;
+
+  // projection
+  
+  wrec->proj = new MdvxProj;
 
 }

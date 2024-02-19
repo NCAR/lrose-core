@@ -882,7 +882,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("winds");
     tt->descr = tdrpStrDup("Winds to be displayed.");
-    tt->help = tdrpStrDup("button_label: appears on the GUI. \nlegend_label: appears in the plot. \nurl: location of data or data server. Form is 'protocol://host:port/dir/'\nu_field_name: U component field name. \nv_field_name: V component field name. \nw_field_name: W component field name. Set to 'none' if no W vectors.\nunits: wind speed units. \nline_width: line width to be used for wind vectors. \nrender_mode:\n  ARROW: centered on data point.\n  VECTOR: vertex at data point.\n  BARB: N hemisphere.\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere.\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector.\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes.\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold.\n  BARB_SH: S Hemisphere.\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units.\n\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section\n");
+    tt->help = tdrpStrDup("button_label: appears on the GUI. \nlegend_label: appears in the plot. \nurl: location of data or data server. Form is 'protocol://host:port/dir/'\nu_field_name: U component field name. \nv_field_name: V component field name. \nw_field_name: W component field name. Set to 'none' if no W vectors.\nunits: wind speed units. \nline_width: line width to be used for wind vectors. \nmarker_type:\n  ARROW: centered on data point.\n  VECTOR: vertex at data point.\n  BARB: N hemisphere.\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere.\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector.\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes.\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold.\n  BARB_SH: S Hemisphere.\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units.\n\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section\n");
     tt->array_offset = (char *) &_winds - &_start_;
     tt->array_n_offset = (char *) &winds_n - &_start_;
     tt->is_array = TRUE;
@@ -933,33 +933,33 @@
       tt->struct_def.fields[7].ptype = INT_TYPE;
       tt->struct_def.fields[7].rel_offset = 
         (char *) &_winds->line_width - (char *) _winds;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("wind_render_mode_t");
-      tt->struct_def.fields[8].fname = tdrpStrDup("render_mode");
+      tt->struct_def.fields[8].ftype = tdrpStrDup("wind_marker_t");
+      tt->struct_def.fields[8].fname = tdrpStrDup("marker_type");
       tt->struct_def.fields[8].ptype = ENUM_TYPE;
       tt->struct_def.fields[8].rel_offset = 
-        (char *) &_winds->render_mode - (char *) _winds;
-        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("wind_render_mode_t");
+        (char *) &_winds->marker_type - (char *) _winds;
+        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("wind_marker_t");
         tt->struct_def.fields[8].enum_def.nfields = 9;
         tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("ARROW");
-        tt->struct_def.fields[8].enum_def.fields[0].val = ARROW;
-        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("VECTOR");
-        tt->struct_def.fields[8].enum_def.fields[1].val = VECTOR;
-        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("BARB");
-        tt->struct_def.fields[8].enum_def.fields[2].val = BARB;
-        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("LABELEDBARB");
-        tt->struct_def.fields[8].enum_def.fields[3].val = LABELEDBARB;
-        tt->struct_def.fields[8].enum_def.fields[4].name = tdrpStrDup("TUFT");
-        tt->struct_def.fields[8].enum_def.fields[4].val = TUFT;
-        tt->struct_def.fields[8].enum_def.fields[5].name = tdrpStrDup("TICKVECTOR");
-        tt->struct_def.fields[8].enum_def.fields[5].val = TICKVECTOR;
-        tt->struct_def.fields[8].enum_def.fields[6].name = tdrpStrDup("METBARB");
-        tt->struct_def.fields[8].enum_def.fields[6].val = METBARB;
-        tt->struct_def.fields[8].enum_def.fields[7].name = tdrpStrDup("BARB_SH");
-        tt->struct_def.fields[8].enum_def.fields[7].val = BARB_SH;
-        tt->struct_def.fields[8].enum_def.fields[8].name = tdrpStrDup("LABELEDBARB_SH");
-        tt->struct_def.fields[8].enum_def.fields[8].val = LABELEDBARB_SH;
+        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
+        tt->struct_def.fields[8].enum_def.fields[0].val = WIND_ARROW;
+        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
+        tt->struct_def.fields[8].enum_def.fields[1].val = WIND_VECTOR;
+        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
+        tt->struct_def.fields[8].enum_def.fields[2].val = WIND_BARB;
+        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
+        tt->struct_def.fields[8].enum_def.fields[3].val = WIND_LABELEDBARB;
+        tt->struct_def.fields[8].enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
+        tt->struct_def.fields[8].enum_def.fields[4].val = WIND_TUFT;
+        tt->struct_def.fields[8].enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
+        tt->struct_def.fields[8].enum_def.fields[5].val = WIND_TICKVECTOR;
+        tt->struct_def.fields[8].enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
+        tt->struct_def.fields[8].enum_def.fields[6].val = WIND_METBARB;
+        tt->struct_def.fields[8].enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
+        tt->struct_def.fields[8].enum_def.fields[7].val = WIND_BARB_SH;
+        tt->struct_def.fields[8].enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
+        tt->struct_def.fields[8].enum_def.fields[8].val = WIND_LABELEDBARB_SH;
       tt->struct_def.fields[9].ftype = tdrpStrDup("string");
       tt->struct_def.fields[9].fname = tdrpStrDup("color");
       tt->struct_def.fields[9].ptype = STRING_TYPE;
@@ -981,7 +981,7 @@
       tt->struct_vals[5].s = tdrpStrDup("W");
       tt->struct_vals[6].s = tdrpStrDup("m/s");
       tt->struct_vals[7].i = 1;
-      tt->struct_vals[8].e = ARROW;
+      tt->struct_vals[8].e = WIND_ARROW;
       tt->struct_vals[9].s = tdrpStrDup("white");
       tt->struct_vals[10].b = pTRUE;
       tt->struct_vals[11].s = tdrpStrDup("WRF");
@@ -992,7 +992,7 @@
       tt->struct_vals[16].s = tdrpStrDup("W");
       tt->struct_vals[17].s = tdrpStrDup("m/s");
       tt->struct_vals[18].i = 1;
-      tt->struct_vals[19].e = ARROW;
+      tt->struct_vals[19].e = WIND_ARROW;
       tt->struct_vals[20].s = tdrpStrDup("yellow");
       tt->struct_vals[21].b = pTRUE;
     tt++;
@@ -1112,18 +1112,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'proj_type_str'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("proj_type_str");
-    tt->descr = tdrpStrDup("Sets the projection for the plan view.");
-    tt->help = tdrpStrDup("Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.");
-    tt->val_offset = (char *) &proj_type_str - &_start_;
-    tt->single_val.s = tdrpStrDup("CARTESIAN");
-    tt++;
-    
     // Parameter 'proj_type'
     // ctype is '_projection_t'
     
@@ -1131,10 +1119,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("proj_type");
     tt->descr = tdrpStrDup("Projection for mapping in x,y. See projection param below.");
-    tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
+    tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n");
     tt->val_offset = (char *) &proj_type - &_start_;
     tt->enum_def.name = tdrpStrDup("projection_t");
-    tt->enum_def.nfields = 10;
+    tt->enum_def.nfields = 9;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("PROJ_LATLON");
@@ -1155,8 +1143,6 @@
       tt->enum_def.fields[7].val = PROJ_ALBERS;
       tt->enum_def.fields[8].name = tdrpStrDup("PROJ_LAMBERT_AZIM");
       tt->enum_def.fields[8].val = PROJ_LAMBERT_AZIM;
-      tt->enum_def.fields[9].name = tdrpStrDup("PROJ_VERT_PERSP");
-      tt->enum_def.fields[9].val = PROJ_VERT_PERSP;
     tt->single_val.e = PROJ_FLAT;
     tt++;
     
@@ -4476,15 +4462,37 @@
     tt++;
     
     // Parameter 'wind_marker_type'
-    // ctype is 'char*'
+    // ctype is '_wind_marker_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
+    tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("wind_marker_type");
-    tt->descr = tdrpStrDup("Wind vector rendering style.");
-    tt->help = tdrpStrDup("'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
+    tt->descr = tdrpStrDup("Wind marker rendering style.");
+    tt->help = tdrpStrDup("See WIND section for details on rendering style.");
     tt->val_offset = (char *) &wind_marker_type - &_start_;
-    tt->single_val.s = tdrpStrDup("arrow");
+    tt->enum_def.name = tdrpStrDup("wind_marker_t");
+    tt->enum_def.nfields = 9;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
+      tt->enum_def.fields[0].val = WIND_ARROW;
+      tt->enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
+      tt->enum_def.fields[1].val = WIND_VECTOR;
+      tt->enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
+      tt->enum_def.fields[2].val = WIND_BARB;
+      tt->enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
+      tt->enum_def.fields[3].val = WIND_LABELEDBARB;
+      tt->enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
+      tt->enum_def.fields[4].val = WIND_TUFT;
+      tt->enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
+      tt->enum_def.fields[5].val = WIND_TICKVECTOR;
+      tt->enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
+      tt->enum_def.fields[6].val = WIND_METBARB;
+      tt->enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
+      tt->enum_def.fields[7].val = WIND_BARB_SH;
+      tt->enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
+      tt->enum_def.fields[8].val = WIND_LABELEDBARB_SH;
+    tt->single_val.e = WIND_ARROW;
     tt++;
     
     // Parameter 'wind_w_scale_factor'

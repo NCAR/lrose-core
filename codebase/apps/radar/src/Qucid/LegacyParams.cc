@@ -1037,6 +1037,16 @@ int LegacyParams::_readMainParams()
   _debug1 = _getBoolean("cidd.debug1_flag", 0);
   _debug2 = _getBoolean("cidd.debug2_flag", 0);
 
+  if (_debug2) {
+    fprintf(_tdrpFile, "debug = DEBUG_EXTRA;\n");
+  } else if (_debug1) {
+    fprintf(_tdrpFile, "debug = DEBUG_VERBOSE;\n");
+  } else if (_debug) {
+    fprintf(_tdrpFile, "debug = DEBUG_NORM;\n");
+  } else {
+    fprintf(_tdrpFile, "debug = DEBUG_OFF;\n");
+  }
+  
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
 
@@ -1123,7 +1133,22 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.request_gzip_vol_compression",0);
 
   // projections
-  _getString("cidd.projection_type", "CARTESIAN", true, "proj_type_str");
+  string projTypeStr =
+    _getString("cidd.projection_type", "CARTESIAN", false, "proj_type_str");
+  if (projTypeStr == "CARTESIAN") {
+    fprintf(_tdrpFile, "proj_type = PROJ_FLAT;\n");
+  } else if (projTypeStr == "LAT_LON") {
+    fprintf(_tdrpFile, "proj_type = PROJ_LATLON;\n");
+  } else if (projTypeStr == "LAMBERT") {
+    fprintf(_tdrpFile, "proj_type = PROJ_LAMBERT_CONF;\n");
+  } else if (projTypeStr == "STEREOGRAPHIC") {
+    fprintf(_tdrpFile, "proj_type = PROJ_OBLIQUE_STEREO;\n");
+  } else if (projTypeStr == "POLAR_STEREO") {
+    fprintf(_tdrpFile, "proj_type = PROJ_POLAR_STEREO;\n");
+  } else if (projTypeStr == "MERCATOR") {
+    fprintf(_tdrpFile, "proj_type = PROJ_MERCATOR;\n");
+  }
+    
   _getDouble("cidd.lambert_lat1", 20.0, true, "proj_lat1");
   _getDouble("cidd.lambert_lat2", 60.0, true, "proj_lat2");
   _getDouble("cidd.tangent_lat", 90.0, true, "proj_tangent_lat");
@@ -1377,7 +1402,30 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.wind_head_angle", 45.0);
   _getLong("cidd.wind_scaler", 3);
   _getDouble("cidd.wind_time_scale_interval", 10.0);
-  _windMarkerType = _getString("cidd.wind_marker_type", "arrow");
+
+  _windMarkerType = _getString("cidd.wind_marker_type", "arrow", false);
+  if (_windMarkerType == "arrow") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
+  } else if (_windMarkerType == "vector") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_VECTOR;\n");
+  } else if (_windMarkerType == "barb") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_BARB;\n");
+  } else if (_windMarkerType == "labeledbarb") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB;\n");
+  } else if (_windMarkerType == "tuft") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_TUFT;\n");
+  } else if (_windMarkerType == "tickvector") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_TICKVECTOR;\n");
+  } else if (_windMarkerType == "metbarb") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_METBARB;\n");
+  } else if (_windMarkerType == "barb_sh") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_BARB_SH;\n");
+  } else if (_windMarkerType == "labeledbarb_sh") {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB_SH;\n");
+  } else {
+    fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
+  }
+    
   _getDouble("cidd.wind_w_scale_factor", 10.0);
   _getDouble("cidd.wind_units_scale_factor", 1.0);
   _getDouble("cidd.wind_reference_speed", 10.0);
@@ -2159,31 +2207,31 @@ int LegacyParams::_readWinds()
     fprintf(_tdrpFile, "    line_width = %d,\n", wind.line_width);
     switch (wind.render_mode) {
       case ARROW:
-        fprintf(_tdrpFile, "    render_mode = ARROW,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_ARROW,\n");
         break;
       case VECTOR:
-        fprintf(_tdrpFile, "    render_mode = VECTOR,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_VECTOR,\n");
         break;
       case BARB:
-        fprintf(_tdrpFile, "    render_mode = BARB,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_BARB,\n");
         break;
       case LABELEDBARB:
-        fprintf(_tdrpFile, "    render_mode = LABELEDBARB,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_LABELEDBARB,\n");
         break;
       case TUFT:
-        fprintf(_tdrpFile, "    render_mode = TUFT,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_TUFT,\n");
         break;
       case TICKVECTOR:
-        fprintf(_tdrpFile, "    render_mode = TICKVECTOR,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_TICKVECTOR,\n");
         break;
       case METBARB:
-        fprintf(_tdrpFile, "    render_mode = METBARB,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_METBARB,\n");
         break;
       case BARB_SH:
-        fprintf(_tdrpFile, "    render_mode = BARB_SH,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_BARB_SH,\n");
         break;
       case LABELEDBARB_SH:
-        fprintf(_tdrpFile, "    render_mode = LABELEDBARB_SH,\n");
+        fprintf(_tdrpFile, "    marker_type = WIND_LABELEDBARB_SH,\n");
         break;
     }
     fprintf(_tdrpFile, "    color = \"%s\",\n", wind.color.c_str());

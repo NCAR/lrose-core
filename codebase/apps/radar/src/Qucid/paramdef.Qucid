@@ -184,16 +184,16 @@ commentdef {
 }
 
 typedef enum {
-  ARROW,
-  VECTOR,
-  BARB,
-  LABELEDBARB,
-  TUFT,
-  TICKVECTOR,
-  METBARB,
-  BARB_SH,
-  LABELEDBARB_SH
-} wind_render_mode_t;
+  WIND_ARROW,
+  WIND_VECTOR,
+  WIND_BARB,
+  WIND_LABELEDBARB,
+  WIND_TUFT,
+  WIND_TICKVECTOR,
+  WIND_METBARB,
+  WIND_BARB_SH,
+  WIND_LABELEDBARB_SH
+} wind_marker_t;
 
 typedef struct {
   string button_label;
@@ -204,7 +204,7 @@ typedef struct {
   string w_field_name;
   string units;
   int line_width;
-  wind_render_mode_t render_mode;
+  wind_marker_t marker_type;
   string color;
   boolean on_at_startup;
 } wind_t;
@@ -220,7 +220,7 @@ paramdef struct wind_t {
       w_field_name = "W",
       units = "m/s",
       line_width = 1,
-      render_mode = ARROW,
+      marker_type = WIND_ARROW,
       color = "white",
       on_at_startup = true
     }
@@ -234,7 +234,7 @@ paramdef struct wind_t {
       w_field_name = "W",
       units = "m/s",
       line_width = 1,
-      render_mode = ARROW,
+      marker_type = WIND_ARROW,
       color = "yellow",
       on_at_startup = true
     }
@@ -249,7 +249,7 @@ paramdef struct wind_t {
     "\nw_field_name: W component field name. Set to 'none' if no W vectors."
     "\nunits: wind speed units. "
     "\nline_width: line width to be used for wind vectors. "
-    "\nrender_mode:"
+    "\nmarker_type:"
     "\n  ARROW: centered on data point."
     "\n  VECTOR: vertex at data point."
     "\n  BARB: N hemisphere."
@@ -331,11 +331,11 @@ commentdef {
   p_header = "<PROJECTION>";
 }
 
-paramdef string {
-  p_default = "CARTESIAN";
-  p_descr = "Sets the projection for the plan view.";
-  p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
-} proj_type_str;
+// paramdef string {
+//   p_default = "CARTESIAN";
+//   p_descr = "Sets the projection for the plan view.";
+//   p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
+// } proj_type_str;
 
 typedef enum {
   PROJ_LATLON = 0,
@@ -346,8 +346,7 @@ typedef enum {
   PROJ_OBLIQUE_STEREO = 12,
   PROJ_TRANS_MERCATOR = 15,
   PROJ_ALBERS = 16,
-  PROJ_LAMBERT_AZIM = 17,
-  PROJ_VERT_PERSP = 18
+  PROJ_LAMBERT_AZIM = 17
 } projection_t;
 
 paramdef enum projection_t {
@@ -362,8 +361,7 @@ paramdef enum projection_t {
   "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
   "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
   "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
-  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
-  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n";
 } proj_type;
 
 paramdef double {
@@ -474,7 +472,7 @@ commentdef {
 paramdef int {
   p_default = 10;
   p_descr = "Number of milliseconds to sleep between beams in simulated input "
-            "mode.";
+    "mode.";
 } sim_sleep_msecs;
 
 paramdef int {
@@ -524,14 +522,14 @@ paramdef struct draw_export_t {
                 {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
   p_descr = "Human Drawn Products for Export Parameters.";
   p_help = 
-  " Each Entry needs:\n"
-  "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
-  "    ID_LABEL - This is used to designate Product types\n"
-  "    FMQ_URL: example: fmqp:://host::dir/file \n"
-   "   Valid_Minutes: How many minutes the product is valid by default\n"
-   "   Default_ID_no: Default Data Type (Enumerated ID)\n"
-   "   Default_label: Test to place into Label field by default\n"
-   "\n";
+    " Each Entry needs:\n"
+    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
+    "    ID_LABEL - This is used to designate Product types\n"
+    "    FMQ_URL: example: fmqp:://host::dir/file \n"
+    "   Valid_Minutes: How many minutes the product is valid by default\n"
+    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
+    "   Default_label: Test to place into Label field by default\n"
+    "\n";
 } draw_export_info[];
 
 /////////////////////////////////////////////////////////////////////////
@@ -546,16 +544,16 @@ typedef enum {
 } symprod_debug_t;
 
 paramdef enum symprod_debug_t
-{
-  p_default = SYMPROD_DEBUG_OFF;
-  p_help = "Debug option.\n"
-           "If set, debug messages will be printed appropriately.\n";
-} symprod_debug;
+  {
+    p_default = SYMPROD_DEBUG_OFF;
+    p_help = "Debug option.\n"
+    "If set, debug messages will be printed appropriately.\n";
+  } symprod_debug;
 
 paramdef boolean { 
   p_descr = "Gather Data Frame by Frame, Otherwise by loop span";
   p_help = "Gathers Products valid for the current frame only - Speeds up"
-           " gathering of large data sets, like METAR data" ;
+  " gathering of large data sets, like METAR data" ;
   p_default = FALSE;
 } symprod_short_requests;
 
@@ -598,53 +596,53 @@ paramdef struct symprod_prod_info_t {
   p_descr = "Product Source and Rendering Information Array";
   
   p_help =
-  "The fields in the structure are as follows:\n"
-  "\n"
-  "  menu_label: label to be used for the product in menu.\n"
-  "\n"
-  "  url: for retrieving the data.\n"
-  "    example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2\n"
-  "\n"
-  "  data_type: used when querying the SPDB data server\n"
-  "    (set to 0 to retrieve all data).\n"
-  "\n"
-  "  render_type: Select how temporal clipping is done:\n"
-  "    RENDER_ALL: Do no temporal clipping.\n"
-  "    RENDER_ALL_VALID: Render all Valid in frame\n"
-  "    RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
-  "    RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
-  "    RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
-  "    RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
-  "    RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
-  "    RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
-  "    RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
-  "    RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
-  "    RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
-  "    RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
-  "\n"
-  "Note: all comparisons are less than or equal or greater than or equal\n"
-  "\n"
-  "  on_by_default: True or False\n"
-  "\n"
-  "  minutes_allow_before: Stretch the frame time this many minutes - prior\n"
-  "  minutes_allow_after: Stretch the frame time this many minutes - after\n"
-  "\n"
-  "  text_off_threshold: Threshold where text disappears. Use the function:\n"
-  "      log10(scaling_constant/km_distance_across_screen ) + 1.0\n"
-  "      Use 0.0 to disable the off feature. (always displayed)\n"
-  "\n"
-  "  request_data_on_zoom: Flag indicating whether to request new data for\n"
-  "      this product whenever the user changes the zoom.  Normally, this\n"
-  "      should be set to false for efficiency reasons.  If the products\n"
-  "      to be rendered would change with a zoom change then this should be\n"
-  "      set to true.\n"
-  "\n"
-  "  request_data_on_vert_change: Flag indicating whether to request new data\n"
-  "      for this product whenever the user changes the currently displayed\n"
-  "      vertical level.  Normally, this should be set to false for efficiency\n"
-  "      reasons.  If the products to be rendered would change with a zoom\n"
-  "      change then this should be set to true.\n"
-  "\n";
+    "The fields in the structure are as follows:\n"
+    "\n"
+    "  menu_label: label to be used for the product in menu.\n"
+    "\n"
+    "  url: for retrieving the data.\n"
+    "    example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2\n"
+    "\n"
+    "  data_type: used when querying the SPDB data server\n"
+    "    (set to 0 to retrieve all data).\n"
+    "\n"
+    "  render_type: Select how temporal clipping is done:\n"
+    "    RENDER_ALL: Do no temporal clipping.\n"
+    "    RENDER_ALL_VALID: Render all Valid in frame\n"
+    "    RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
+    "    RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
+    "    RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
+    "    RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
+    "    RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
+    "    RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
+    "    RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
+    "    RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
+    "    RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
+    "    RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
+    "\n"
+    "Note: all comparisons are less than or equal or greater than or equal\n"
+    "\n"
+    "  on_by_default: True or False\n"
+    "\n"
+    "  minutes_allow_before: Stretch the frame time this many minutes - prior\n"
+    "  minutes_allow_after: Stretch the frame time this many minutes - after\n"
+    "\n"
+    "  text_off_threshold: Threshold where text disappears. Use the function:\n"
+    "      log10(scaling_constant/km_distance_across_screen ) + 1.0\n"
+    "      Use 0.0 to disable the off feature. (always displayed)\n"
+    "\n"
+    "  request_data_on_zoom: Flag indicating whether to request new data for\n"
+    "      this product whenever the user changes the zoom.  Normally, this\n"
+    "      should be set to false for efficiency reasons.  If the products\n"
+    "      to be rendered would change with a zoom change then this should be\n"
+    "      set to true.\n"
+    "\n"
+    "  request_data_on_vert_change: Flag indicating whether to request new data\n"
+    "      for this product whenever the user changes the currently displayed\n"
+    "      vertical level.  Normally, this should be set to false for efficiency\n"
+    "      reasons.  If the products to be rendered would change with a zoom\n"
+    "      change then this should be set to true.\n"
+    "\n";
   
   p_default = {
     {
@@ -685,39 +683,39 @@ paramdef string {
   p_default = "";
   p_descr = "Used to located gridded terrain data";
   p_help = "Terrain_URL \n"
-    " Note example URL:\n"
-    "  mdvp::static//venus::mdv/terrain&Elevation\n"
-    " Field name follows the Ampersand. Use #N for field number override "
-    "  Use caret: ^ as a substitute for spaces in field names";
-    "\n";
+  " Note example URL:\n"
+  "  mdvp::static//venus::mdv/terrain&Elevation\n"
+  " Field name follows the Ampersand. Use #N for field number override "
+  "  Use caret: ^ as a substitute for spaces in field names";
+  "\n";
 } terrain_url;
 
 paramdef double {
   p_default = 0.03280834;
   p_descr = "Conversion from terrain units to local coords";
   p_help = "Choose a scaler which converts plane height values\n"
-           "Default is Hecto-feet (FL) per meter";
+    "Default is Hecto-feet (FL) per meter";
 } terrain_height_scaler;
 
 paramdef string {
   p_default = "mdvp:://tempest:0:topo/relief/mdv&RGBA";
   p_descr = "Used to located gridded land use data";
   p_help = "Land Use URL \n"
-    " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
-    " Field name follows the Ampersand. Use #N for field number override "
-    "  Use caret: ^ as a substitute for spaces in field names";
-    "\n";
+  " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
+  " Field name follows the Ampersand. Use #N for field number override "
+  "  Use caret: ^ as a substitute for spaces in field names";
+  "\n";
 } landuse_url;
 
 paramdef string {
   p_default = "terrain.colors";
   p_descr = "Color lookup table for Land use";
   p_help = "Land Use colorscale file name\n"
-    " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
+  " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
 } landuse_colorscale;
 
 typedef enum {
-   TERRAIN_RENDER_FILLED_CONT = 1, TERRAIN_RENDER_RECTANGLES, TERRAIN_RENDER_DYNAMIC_CONTOURS
+  TERRAIN_RENDER_FILLED_CONT = 1, TERRAIN_RENDER_RECTANGLES, TERRAIN_RENDER_DYNAMIC_CONTOURS
 } terrain_render_type_t;
 
 paramdef enum terrain_render_type_t {
@@ -756,11 +754,11 @@ typedef enum {
 } image_debug_t;
 
 paramdef enum image_debug_t
-{
-  p_default = IMAGE_DEBUG_OFF;
-  p_help = "Debug option.\n"
-           "If set, debug messages will be printed appropriately.\n";
-} image_debug;
+  {
+    p_default = IMAGE_DEBUG_OFF;
+    p_help = "Debug option.\n"
+    "If set, debug messages will be printed appropriately.\n";
+  } image_debug;
 
 paramdef boolean { 
   p_descr = "Generate images for specified vertical sections.";
@@ -785,15 +783,15 @@ paramdef struct image_vsection_spec_t {
   p_descr = "Vertical section information array";
   
   p_help =
-  "The fields in the structure are as follows:\n"
-  "\n"
-  "  vsection_label: label to be used for the specified vertical section.\n"
-  "\n"
-  "  n_waypts: number of waypts for specifying the vert section.\n"
-  "            Normally this is 2 - for a single vertical section segment.\n"
-  "\n"
-  "  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n"
-  "\n";
+    "The fields in the structure are as follows:\n"
+    "\n"
+    "  vsection_label: label to be used for the specified vertical section.\n"
+    "\n"
+    "  n_waypts: number of waypts for specifying the vert section.\n"
+    "            Normally this is 2 - for a single vertical section segment.\n"
+    "\n"
+    "  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n"
+    "\n";
   
   p_default = {
     {
@@ -818,10 +816,10 @@ typedef enum {
 } route_debug_t;
 
 paramdef enum route_debug_t
-{
-  p_default = ROUTE_DEBUG_OFF;
-  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
-} route_debug; 
+  {
+    p_default = ROUTE_DEBUG_OFF;
+    p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
+  } route_debug; 
 
 paramdef int {
   p_default = 13;
@@ -845,16 +843,16 @@ typedef enum {
 } route_label_style_t; 
 
 paramdef enum route_label_style_t
-{
-  p_default = ROUTE_REGULAR_INTERVALS;
-  p_descr = "How to space the labels along the route.";
-  p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
-} route_label_style;
+  {
+    p_default = ROUTE_REGULAR_INTERVALS;
+    p_descr = "How to space the labels along the route.";
+    p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
+  } route_label_style;
 
 paramdef double {
-    p_default = 55.6;
-    p_help =  "Used if label_style is set to REGULAR_INTERVALS";
-    p_descr = "Distance in km between winds labels";
+  p_default = 55.6;
+  p_help =  "Used if label_style is set to REGULAR_INTERVALS";
+  p_descr = "Distance in km between winds labels";
 } route_label_interval;
 
 paramdef int {
@@ -925,76 +923,76 @@ paramdef double {
 
 paramdef string {
   p_default = {
-  "A-1 8 "
-  "BULAN 27.0917 124.0000 "
-  "OSTAR 26.3317 123.0000 "
-  "SHARK 25.8333 122.3583 "
-  "ANNNA 25.5717 122.0217 "
-  "APU 25.1767 121.5233 "
-  "HLG 24.6400 120.7833 "
-  "MKG 23.5583 119.6283 "
-  "ELATO 22.3333 117.5000 ",
+    "A-1 8 "
+    "BULAN 27.0917 124.0000 "
+    "OSTAR 26.3317 123.0000 "
+    "SHARK 25.8333 122.3583 "
+    "ANNNA 25.5717 122.0217 "
+    "APU 25.1767 121.5233 "
+    "HLG 24.6400 120.7833 "
+    "MKG 23.5583 119.6283 "
+    "ELATO 22.3333 117.5000 ",
 
-  "M-750 12 "
-  "MOLKA 26.6583 124.0000 "
-  "MORSU 25.9100 123.0000 "
-  "LEKOS 25.5100 122.4717 "
-  "ROBIN 25.4200 122.2083 "
-  "NOKAS 25.1317 121.9917 "
-  "SANAS 24.8967 121.6917 "
-  "PILOX 24.4150 121.0250 "
-  "ANLOT 23.9417 120.5233 "
-  "TOROX 23.3533 119.9083 "
-  "RENOT 22.5683 118.5117 "
-  "DADON 22.2767 118.0033 "
-  "ENVAR 21.9917 117.5000 ",
+    "M-750 12 "
+    "MOLKA 26.6583 124.0000 "
+    "MORSU 25.9100 123.0000 "
+    "LEKOS 25.5100 122.4717 "
+    "ROBIN 25.4200 122.2083 "
+    "NOKAS 25.1317 121.9917 "
+    "SANAS 24.8967 121.6917 "
+    "PILOX 24.4150 121.0250 "
+    "ANLOT 23.9417 120.5233 "
+    "TOROX 23.3533 119.9083 "
+    "RENOT 22.5683 118.5117 "
+    "DADON 22.2767 118.0033 "
+    "ENVAR 21.9917 117.5000 ",
 
-  "G-581 7 "
-  "IGURU 23.9500 124.0000 "
-  "TULTO 23.3233 123.0000 "
-  "HCN 21.9283 120.8433 "
-  "PARPA 22.0150 120.1683 "
-  "CYRUS 22.2167 118.5317 "
-  "DADON 22.2767 118.0033 "
-  "ELATO 22.3333 117.5000 ",
+    "G-581 7 "
+    "IGURU 23.9500 124.0000 "
+    "TULTO 23.3233 123.0000 "
+    "HCN 21.9283 120.8433 "
+    "PARPA 22.0150 120.1683 "
+    "CYRUS 22.2167 118.5317 "
+    "DADON 22.2767 118.0033 "
+    "ELATO 22.3333 117.5000 ",
 
-  "B-591 9 "
-  "APU 25.1767 121.5233 "
-  "SANAS 24.8967 121.6917 "
-  "TINHO 24.3533 122.0283 "
-  "TITUS 23.8283 121.8517 "
-  "TACLE 22.9933 121.5867 "
-  "GID 22.6733 121.4867 "
-  "TUNNY 22.3600 121.2150 "
-  "HCN 21.9283 120.8433 "
-  "DOREX 21.0000 120.7833 ",
+    "B-591 9 "
+    "APU 25.1767 121.5233 "
+    "SANAS 24.8967 121.6917 "
+    "TINHO 24.3533 122.0283 "
+    "TITUS 23.8283 121.8517 "
+    "TACLE 22.9933 121.5867 "
+    "GID 22.6733 121.4867 "
+    "TUNNY 22.3600 121.2150 "
+    "HCN 21.9283 120.8433 "
+    "DOREX 21.0000 120.7833 ",
 
-  "R-583 5 "
-  "BORDO 26.0167 124.0000 "
-  "KIKIT 25.8817 123.5917 "
-  "PABSO 25.6517 122.8750 "
-  "LEKOS 25.5100 122.4717 "
-  "APU 25.1767 121.5233 ",
+    "R-583 5 "
+    "BORDO 26.0167 124.0000 "
+    "KIKIT 25.8817 123.5917 "
+    "PABSO 25.6517 122.8750 "
+    "LEKOS 25.5100 122.4717 "
+    "APU 25.1767 121.5233 ",
 
-  "G-86 3 "
-  "HCN 21.9283 120.8433 "
-  "ANDRE 21.7783 120.1683 "
-  "KAPLI 21.1667 117.5000 ",
+    "G-86 3 "
+    "HCN 21.9283 120.8433 "
+    "ANDRE 21.7783 120.1683 "
+    "KAPLI 21.1667 117.5000 ",
 
-  "B-576 3 "
-  "SALMI 28.3150 124.0000 "
-  "BERBA 27.0783 123.0000 "
-  "APU 25.1767 121.5233 "
+    "B-576 3 "
+    "SALMI 28.3150 124.0000 "
+    "BERBA 27.0783 123.0000 "
+    "APU 25.1767 121.5233 "
   };
-   p_descr = " Route path strings - Format of each string is"
-      "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
-   p_help = "ROUTE_LABEL will be used in the menu, \n"
-      "NPoints = Number of way points in route \n"
-      "  Followed by NPoint triplets of the following:\n"
-      "ID_string -> usually a Airport or VOR \n"
-      "Lat Lon :  decimal degrees\n";
-      "\n";
-      "Note: Make sure white space separates the fields!\n";
+  p_descr = " Route path strings - Format of each string is"
+  "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
+  p_help = "ROUTE_LABEL will be used in the menu, \n"
+  "NPoints = Number of way points in route \n"
+  "  Followed by NPoint triplets of the following:\n"
+  "ID_string -> usually a Airport or VOR \n"
+  "Lat Lon :  decimal degrees\n";
+  "\n";
+  "Note: Make sure white space separates the fields!\n";
 } route_paths[];
 
 commentdef {
@@ -2164,10 +2162,10 @@ paramdef double {
   p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
 } wind_time_scale_interval;
 
-paramdef string {
-  p_default = "arrow";
-  p_descr = "Wind vector rendering style.";
-  p_help = "'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.";
+paramdef enum wind_marker_t {
+  p_default = WIND_ARROW;
+  p_descr = "Wind marker rendering style.";
+  p_help = "See WIND section for details on rendering style.";
 } wind_marker_type;
 
 paramdef double {

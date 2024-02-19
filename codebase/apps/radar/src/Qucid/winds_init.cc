@@ -85,7 +85,7 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
       }
 
       // Set up global barb preferences
-      const char *type_ptr = _params.wind_marker_type;
+      const char *type_ptr = gd.wind_marker_type;
 
       if(strncasecmp(type_ptr, "tuft", 4) == 0)  default_marker_type = TUFT;
       if(strncasecmp(type_ptr, "barb", 4) == 0)  default_marker_type = BARB;

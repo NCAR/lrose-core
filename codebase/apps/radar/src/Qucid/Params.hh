@@ -82,16 +82,16 @@ public:
   } grid_render_mode_t;
 
   typedef enum {
-    ARROW = 0,
-    VECTOR = 1,
-    BARB = 2,
-    LABELEDBARB = 3,
-    TUFT = 4,
-    TICKVECTOR = 5,
-    METBARB = 6,
-    BARB_SH = 7,
-    LABELEDBARB_SH = 8
-  } wind_render_mode_t;
+    WIND_ARROW = 0,
+    WIND_VECTOR = 1,
+    WIND_BARB = 2,
+    WIND_LABELEDBARB = 3,
+    WIND_TUFT = 4,
+    WIND_TICKVECTOR = 5,
+    WIND_METBARB = 6,
+    WIND_BARB_SH = 7,
+    WIND_LABELEDBARB_SH = 8
+  } wind_marker_t;
 
   typedef enum {
     PROJ_LATLON = 0,
@@ -102,8 +102,7 @@ public:
     PROJ_OBLIQUE_STEREO = 12,
     PROJ_TRANS_MERCATOR = 15,
     PROJ_ALBERS = 16,
-    PROJ_LAMBERT_AZIM = 17,
-    PROJ_VERT_PERSP = 18
+    PROJ_LAMBERT_AZIM = 17
   } projection_t;
 
   typedef enum {
@@ -217,7 +216,7 @@ public:
     char* w_field_name;
     char* units;
     int line_width;
-    wind_render_mode_t render_mode;
+    wind_marker_t marker_type;
     char* color;
     tdrp_bool_t on_at_startup;
   } wind_t;
@@ -640,8 +639,6 @@ public:
 
   map_t *_maps;
   int maps_n;
-
-  char* proj_type_str;
 
   projection_t proj_type;
 
@@ -1109,7 +1106,7 @@ public:
 
   double wind_time_scale_interval;
 
-  char* wind_marker_type;
+  wind_marker_t wind_marker_type;
 
   double wind_w_scale_factor;
 
@@ -1474,7 +1471,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[492];
+  mutable TDRPtable _table[491];
 
   const char *_className;
 

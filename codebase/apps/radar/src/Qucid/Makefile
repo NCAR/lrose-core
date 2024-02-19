@@ -134,7 +134,6 @@ NORM_SRCS = \
 	colorscales.cc \
 	contours.cc \
 	data_gather.cc \
-	data_init.cc \
 	data_io.cc \
 	data_pu_proc.cc \
 	draw_export_init.cc \
@@ -206,7 +205,6 @@ NORM_SRCS = \
 	symprod_init.cc \
 	timer_control.cc \
 	v_win_proc.cc \
-	winds_init.cc \
 	xview_file_access.cc \
 	zoom_pu_proc.cc
 
