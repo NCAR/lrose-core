@@ -109,10 +109,10 @@
 
 // TDRP Parameter Classes
 #include "Params.hh"
-#include "Csyprod_P.hh"
-#include "Cdraw_P.hh"
-#include "Cgui_P.hh"
-#include "Cimages_P.hh"
+// #include "Csyprod_P.hh"
+// #include "Cdraw_P.hh"
+// #include "Cgui_P.hh"
+// #include "Cimages_P.hh"
 
 // parameters
 
@@ -547,12 +547,13 @@ struct    Global_data {
 
   // LEGACY TDRP CLASSES
   // Csyprod_P *syprod_P;  // Symbolic Products
-  Cdraw_P *draw_P;      // Draw Params
-  Cgui_P *gui_P;        // GUI Config Params
-  Cimages_P *images_P;  // image generation params
+
+  // Cdraw_P *draw_P;      // Draw Params
+  // Cgui_P *gui_P;        // GUI Config Params
+  // Cimages_P *images_P;  // image generation params
 
   // parameter object
-  Uparams *uparams;
+  // Uparams *uparams;
 
   // contours
 

@@ -40,6 +40,7 @@ static void _initWinds();
 static void _initWindComponent(met_record_t *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW);
+static void _initDrawExport();
   
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -696,6 +697,8 @@ void init_data_space()
     gd.h_win.num_zoom_levels++;
   }
 
+#ifdef NOT_ANY_MORE
+  
   // legacy CIDD menu bar - deprecated
   
   ZERO_STRUCT(&gd.menu_bar);
@@ -776,7 +779,9 @@ void init_data_space()
   } else {
     fprintf(stderr,"Menu Bar cells must be defined in this version\n");
     exit(-1);
-  } 
+  }
+
+#endif
 
   // vertical section
   
@@ -822,7 +827,7 @@ void init_data_space()
 
   // initialize terrain
   
-  if(strlen(_params.terrain_url) >0) {
+  if (strlen(_params.terrain_url) > 0) {
     
     gd.layers.earth.terrain_active = 1;
     gd.layers.earth.terr = (met_record_t *) calloc(sizeof(met_record_t), 1);
@@ -849,7 +854,7 @@ void init_data_space()
 
   }
   
-  if(strlen(_params.landuse_url) >0) {
+  if (strlen(_params.landuse_url) > 0) {
 
     gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
     gd.layers.earth.land_use = (met_record_t *) calloc(sizeof(met_record_t), 1);
@@ -860,13 +865,13 @@ void init_data_space()
     
     gd.layers.earth.land_use->time_allowance = 5270400; // 10 years
     STRcopy(gd.layers.earth.land_use->color_file,
-            _params.landuse_colorscale,NAME_LENGTH);
+            _params.landuse_colorscale, NAME_LENGTH);
     STRcopy(gd.layers.earth.land_use->button_name,
-            _params.terrain_id_label, NAME_LENGTH);
+            _params.terrain_id_label,  NAME_LENGTH);
     STRcopy(gd.layers.earth.land_use->legend_name,
             _params.terrain_id_label, NAME_LENGTH);
     STRcopy(gd.layers.earth.land_use->url,
-            _params.landuse_url,URL_LENGTH);
+            _params.landuse_url, URL_LENGTH);
     
     gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
     gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
@@ -919,72 +924,72 @@ void init_data_space()
   }
 
   // Instantiate the GUI Config TDRP 
-  gd.gui_P = new Cgui_P();
+  // gd.gui_P = new Cgui_P();
 
   // Load the GUI_CONFIG parameters
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
-  //                            &param_text_len, &param_text_line_no);
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // // param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
+  // //                            &param_text_len, &param_text_line_no);
 
-  if(param_text == NULL || param_text_len <=0 ) {
-  } else {
-    if(gd.gui_P->loadFromBuf("GUI_CONFIG TDRP Section",
-                             NULL,param_text,
-                             param_text_len,
-                             param_text_line_no,
-                             TRUE,gd.debug2)  < 0) { 
-      fprintf(stderr,"Please fix the <GUI_CONFIG> parameter section\n");
-      exit(-1);
-    }
-  }
+  // if(param_text == NULL || param_text_len <=0 ) {
+  // } else {
+  //   if(gd.gui_P->loadFromBuf("GUI_CONFIG TDRP Section",
+  //                            NULL,param_text,
+  //                            param_text_len,
+  //                            param_text_line_no,
+  //                            TRUE,gd.debug2)  < 0) { 
+  //     fprintf(stderr,"Please fix the <GUI_CONFIG> parameter section\n");
+  //     exit(-1);
+  //   }
+  // }
 
   // Instantiate the IMAGES Config TDRP 
-  gd.images_P = new Cimages_P();
+  // gd.images_P = new Cimages_P();
 
-  // Load the IMAGES_CONFIG parameters
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
-  //                            &param_text_len, &param_text_line_no);
+  // // Load the IMAGES_CONFIG parameters
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // // param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
+  // //                            &param_text_len, &param_text_line_no);
 
-  if(param_text == NULL || param_text_len <=0 ) {
-  } else {
-    if(gd.images_P->loadFromBuf("IMAGE_GENERATION TDRP Section",
-                                NULL,param_text,
-                                param_text_len,
-                                param_text_line_no,
-                                TRUE,gd.debug2)  < 0) { 
-      fprintf(stderr,"Please fix the <IMAGE_GENERATION> parameter section\n");
-      exit(-1);
-    }
-  }
+  // if(param_text == NULL || param_text_len <=0 ) {
+  // } else {
+  //   if(gd.images_P->loadFromBuf("IMAGE_GENERATION TDRP Section",
+  //                               NULL,param_text,
+  //                               param_text_len,
+  //                               param_text_line_no,
+  //                               TRUE,gd.debug2)  < 0) { 
+  //     fprintf(stderr,"Please fix the <IMAGE_GENERATION> parameter section\n");
+  //     exit(-1);
+  //   }
+  // }
 
   // Instantiate the Draw TDRP 
-  gd.draw_P = new Cdraw_P();
+  // gd.draw_P = new Cdraw_P();
 
-  // Load the Draw_Export parameters
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
-  //                            &param_text_len, &param_text_line_no);
+  // // Load the Draw_Export parameters
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // // param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
+  // //                            &param_text_len, &param_text_line_no);
 
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug) fprintf(stderr," Warning: No DRAW_EXPORT Section in params\n");
-    gd.draw.num_draw_products = 0;
-  } else {
-    if(gd.draw_P->loadFromBuf("DRAW EXPORT TDRP Section",
-			      NULL,param_text,
-			      param_text_len,
-			      param_text_line_no,
-			      TRUE,gd.debug2)  < 0) { 
-      fprintf(stderr,"Please fix the <DRAW_EXPORT> parameter section\n");
-      exit(-1);
-    }
+  // if(param_text == NULL || param_text_len <=0 ) {
+  //   if(gd.debug) fprintf(stderr," Warning: No DRAW_EXPORT Section in params\n");
+  //   gd.draw.num_draw_products = 0;
+  // } else {
+  //   if(gd.draw_P->loadFromBuf("DRAW EXPORT TDRP Section",
+  //       		      NULL,param_text,
+  //       		      param_text_len,
+  //       		      param_text_line_no,
+  //       		      TRUE,gd.debug2)  < 0) { 
+  //     fprintf(stderr,"Please fix the <DRAW_EXPORT> parameter section\n");
+  //     exit(-1);
+  //   }
 
     /* Establish and initialize Draw-Export params */
     init_draw_export_links();
-  }
+  // }
     
   if(gd.draw.num_draw_products == 0 && gd.menu_bar.set_draw_mode_bit >0) {
     fprintf(stderr,
@@ -1277,7 +1282,7 @@ void init_data_space()
   // _params.redraw_interval = gd.uparams->getLong("cidd.redraw_interval", REDRAW_INTERVAL);
   // _params.update_interval = gd.uparams->getLong("cidd.update_interval", UPDATE_INTERVAL);
 
-  gd.uparams->setPrintTdrp(false);
+  // gd.uparams->setPrintTdrp(false);
 
   // initialize procmap
   
@@ -1574,3 +1579,55 @@ static void _initWindComponent(met_record_t *wrec,
   wrec->proj = new MdvxProj;
 
 }
+
+////////////////////////////////////////////////////////////////
+// INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
+//  for drawn and exported points 
+
+static void _initDrawExport()
+{
+
+  gd.draw.num_draw_products = _params.draw_export_info_n;
+  gd.draw.dexport = (draw_export_info_t *)
+    calloc(gd.draw.num_draw_products, sizeof(draw_export_info_t));
+  if (gd.draw.dexport == NULL) {
+    fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
+            gd.draw.num_draw_products);
+    perror("Qucid");
+    exit(-1);
+  }
+  
+  for(int ii = 0; ii < _params.draw_export_info_n;  ii++) {
+
+    Params::draw_export_t &dinfo = _params._draw_export_info[ii];
+    draw_export_info_t &dexp = gd.draw.dexport[ii];
+
+    // Product ID label
+    int len = strlen(dinfo.id_label) + 1;
+    dexp.product_id_label = (char *) calloc(1, len);
+    STRcopy(dexp.product_id_label, dinfo.id_label, len);
+    
+    // product_label_text
+    dexp.product_label_text = (char *) calloc(1,TITLE_LENGTH);
+    STRcopy(dexp.product_label_text, dinfo.default_label, TITLE_LENGTH);
+    
+    // FMQ URL 
+    len = strlen(dinfo.url) + 1;
+    if(len > NAME_LENGTH) {
+      fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
+              dinfo.url,URL_LENGTH);
+      exit(-1);
+    }
+    dexp.product_fmq_url = (char *) calloc(1, URL_LENGTH);
+    STRcopy(dexp.product_fmq_url, dinfo.url, URL_LENGTH);
+    
+    // Get the Default valid time  
+    dexp.default_valid_minutes = dinfo.valid_minutes;
+    
+    // Get the Default ID   
+    dexp.default_serial_no = dinfo.default_id_no;
+    
+  } // ii
+
+}
+
