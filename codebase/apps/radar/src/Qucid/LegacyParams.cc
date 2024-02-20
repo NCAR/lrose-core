@@ -2926,3 +2926,37 @@ int LegacyParams::_readImageGenTdrp()
   return 0;
   
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// print the legacy params default
+
+void LegacyParams::printLegacyDefaults(ostream &out)
+{
+
+  // Generate the full params string.  The non-TDRP portions are kept in
+  // static strings while the TDRP portions are loaded from the default
+  // parameters
+
+  Cgui_P gui_P;
+  Csyprod_P syprod_P;
+  Cdraw_P draw_P;
+  Cimages_P images_P;
+  Cterrain_P terrain_P;
+  Croutes_P routes_P;
+  
+  string params_text = ParamsTextMasterHeader;
+  params_text += _getDefaultTdrpParams("GUI_CONFIG", &gui_P);
+  params_text += ParamsTextGrids;
+  params_text += ParamsTextWinds;
+  params_text += ParamsTextMaps;
+  params_text += ParamsTextMainParams;
+  params_text += _getDefaultTdrpParams("DRAW_EXPORT", &draw_P);
+  params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
+  params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
+  params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
+  params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
+
+  out << params_text << endl;
+
+}
+

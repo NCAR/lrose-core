@@ -28,7 +28,6 @@
 #ifndef CIDD_LAYERS_H
 #define CIDD_LAYERS_H
 
-#include "Cterrain_P.hh" // TDRP Definitions
 #include "Croutes_P.hh"
 #include "cidd_winds.h"
 #include "cidd_contours.h"
@@ -42,8 +41,6 @@ typedef struct  {
 
     Color_gc_t *color1;  // skin color
     Color_gc_t *color2;  // core color
-
-    Cterrain_P *_P; // TDRP PARAMS - See paramdef.Cidd_terrain
 
 } earth_data_t;
 

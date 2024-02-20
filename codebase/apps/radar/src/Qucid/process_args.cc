@@ -45,7 +45,7 @@ void process_args(int argc, char *argv[])
     UTIMstruct     temp_utime;
     int err_flag =0;
 
-    gd.db_name = strdup("");    /* Set the default data base name */
+    // gd.db_name = strdup("");    /* Set the default data base name */
     TDRP_str_replace(&_params.http_proxy_url, "");
 
     gd.argv = argv;
@@ -84,10 +84,10 @@ void process_args(int argc, char *argv[])
                 // } else {
                 // Check for -print_params
                 if(strstr(dir_buf,"rint_params") == NULL) {
-                  gd.db_name = strdup(optarg);
+                  // gd.db_name = strdup(optarg);
                 } else {  // Output the master param file
                   load_db_data("");
-                  fputs(gd.db_data,stdout);
+                  // fputs(gd.db_data,stdout);
                   exit(0);
                 }
                 // }

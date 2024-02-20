@@ -31,6 +31,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "LegacyParams.hh"
 #include "cidd.h"
 #include <cstring>
 #include <cstdlib>
@@ -349,7 +350,7 @@ int Args::_processLegacyArgs(int argc, const char **argv)
   const char *token;
   UTIMstruct temp_utime;
 
-  gd.db_name = strdup("");    /* Set the default data base name */
+  // gd.db_name = strdup("");    /* Set the default data base name */
   TDRP_str_replace(&_params.http_proxy_url, "");
 
   gd.argv = (char **) argv;
@@ -379,17 +380,17 @@ int Args::_processLegacyArgs(int argc, const char **argv)
 
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
-        gd.db_name = strdup(optarg);
+        // gd.db_name = strdup(optarg);
         _usingLegacyParams = true;
-        _legacyParamsPath = gd.db_name; 
+        _legacyParamsPath = strdup(optarg); 
       } else {
 	iret = -1;
       }
 
     } else if (!strcmp(argv[ii], "-print_legacy_params")) {
-      
-      load_db_data("");
-      fputs(gd.db_data,stdout);
+
+      LegacyParams lparams;
+      lparams.printLegacyDefaults(cout);
       exit(0);
 
     } else if (!strcmp(argv[ii], "-vvv")) {

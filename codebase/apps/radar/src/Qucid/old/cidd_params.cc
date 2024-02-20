@@ -29,6 +29,7 @@
 #define CIDD_PARAMS
 #include "cidd.h"
 #include "cidd_params.h"
+#include "Cterrain_P.hh"
 
 /////////////////////////////////////////////////////////////////////////////
 // FIND_TAG_TEXT Search a null terminated string for the text between tags
@@ -39,7 +40,10 @@
 // line number of the tagged text
 
 #define TAG_BUF_LEN 256
-const char *find_tag_text(const char *input_buf, const char * tag, long *text_len, long *text_line_no)
+const char *find_tag_text(const char *input_buf,
+                          const char * tag,
+                          long *text_len,
+                          long *text_line_no)
 {
     int start_line_no;
     const char *start_ptr;
@@ -101,7 +105,7 @@ const char *find_tag_text(const char *input_buf, const char * tag, long *text_le
 //                        members
 // 
 
-void load_db_data_default(char* &db_buf, int &db_len)
+static void load_db_data_default(char* &db_buf, int &db_len)
 {
   // Generate the full params string.  The non-TDRP portions are kept in
   // static strings while the TDRP portions are loaded from the default
@@ -123,11 +127,11 @@ void load_db_data_default(char* &db_buf, int &db_len)
   params_text += get_default_tdrp_params("DRAW_EXPORT", &draw_P);
   params_text += get_default_tdrp_params("IMAGE_GENERATION", &images_P);
   params_text += get_default_tdrp_params("SYMPRODS", &syprod_P);
-  params_text += get_default_tdrp_params("TERRAIN",
-					 &terrain_P);
-  params_text += get_default_tdrp_params("ROUTE_WINDS",
-					 &routes_P);
-  
+  params_text += get_default_tdrp_params("TERRAIN", &terrain_P);
+  params_text += get_default_tdrp_params("ROUTE_WINDS", &routes_P);
+
+  cout << params_text << endl;
+  exit(0);
 
   // Allocate space for the buffer copy
 
@@ -143,6 +147,7 @@ void load_db_data_default(char* &db_buf, int &db_len)
 
   memcpy(db_buf, params_text.c_str(), db_len - 1);
   db_buf[db_len-1] = '\0';
+
 }
 
 
@@ -151,7 +156,7 @@ void load_db_data_default(char* &db_buf, int &db_len)
 //                     and set Global Struct members
 // 
 
-void load_db_data_file(const string &fname, char* &db_buf, int &db_len)
+static void load_db_data_file(const string &fname, char* &db_buf, int &db_len)
 {
     FILE *infile;
 
@@ -204,7 +209,7 @@ void load_db_data_file(const string &fname, char* &db_buf, int &db_len)
 //                     server and set Global Struct members
 // 
 
-void load_db_data_http(const string &fname, char* &db_buf, int &db_len)
+static void load_db_data_http(const string &fname, char* &db_buf, int &db_len)
 {
   int ret_stat;
   
@@ -261,6 +266,8 @@ void load_db_data(const string &fname)
       load_db_data_file(fname, db_buf, db_len);
     }
 
-    gd.db_data = db_buf;
-    gd.db_data_len = db_len;
+    fputs(db_buf,stdout);
+
+    // gd.db_data = db_buf;
+    // gd.db_data_len = db_len;
 }

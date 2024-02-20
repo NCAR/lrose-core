@@ -23,7 +23,7 @@
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 
 /************************************************************************
- * params.hh
+ * cidd_params.hh
  *
  * Text for print_params
  *
@@ -1382,80 +1382,4 @@ static const std::string ParamsTextMainParams =
 "\n"
 "</MAIN_PARAMS>\n"
 "\n";
-
-/////////////////////////////////////////////////////////////////////////////
-// GET_DEFAULT_PARAMS : Get a string representing the default parameters
-//                      for this TDRP parameter object
-// 
-
-template <class T>
-  std::string get_default_tdrp_params(const std::string &section_name, T *params)
-{
-  // Load the temporary parameters since we don't seem to have them
-  // loaded yet
-
-  params->loadDefaults(false);
-  
-  // Open a temporary file to hold the parameters.  Write the parameters
-  // to that file and close it.
-
-  const std::string tmp_filename = ".params";
-  
-  FILE *tmp_file;
-
-  if ((tmp_file = fopen(tmp_filename.c_str(), "w")) == 0)
-  {
-    fprintf(stderr,
-	    "Error opening temporary file for writing TDRP parameters\n");
-    exit(-1);
-  }
-  
-  params->print(tmp_file);
-  fclose(tmp_file);
-  
-  // Now read the file back into a string
-
-  struct stat tmp_file_stat;
-  
-  if (stat(tmp_filename.c_str(), &tmp_file_stat) != 0)
-  {
-    fprintf(stderr,
-	    "Error stating temporary file for writing TDRP parameters\n");
-    exit(-1);
-  }
-  
-  char *tmp_buffer = new char[tmp_file_stat.st_size + 1];
-
-  if ((tmp_file = fopen(tmp_filename.c_str(), "r")) == 0)
-  {
-    fprintf(stderr,
-	    "Error opening temporary file for reading TDRP parameters\n");
-    exit(-1);
-  }
-  
-  if (fread(tmp_buffer, sizeof(char), tmp_file_stat.st_size, tmp_file) !=
-      (size_t)tmp_file_stat.st_size)
-  {
-    delete [] tmp_buffer;
-    fprintf(stderr,
-	    "Error reading TDRP parameters from temporary file\n");
-    exit(-1);
-  }
-  
-  fclose(tmp_file);
-  unlink(tmp_filename.c_str());
-  
-  // Set the return string
-
-  tmp_buffer[tmp_file_stat.st_size] = '\0';
-
-  std::string return_string = "<" + section_name + ">\n";
-  return_string += tmp_buffer;
-  return_string += "</" + section_name + ">\n\n";
-  
-  delete [] tmp_buffer;
-  
-  return return_string;
-}
-
 

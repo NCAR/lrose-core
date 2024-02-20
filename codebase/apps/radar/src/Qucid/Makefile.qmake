@@ -1064,6 +1064,9 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		Params.hh \
+		LegacyParams.hh \
+		Cgui_P.hh \
+		cidd_params.h \
 		cidd.h \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/dataport/port_types.h \
@@ -1156,7 +1159,6 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/didss/ds_message.h \
 		Csyprod_P.hh \
 		Cdraw_P.hh \
-		Cgui_P.hh \
 		Cimages_P.hh \
 		Uparams.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
@@ -1184,7 +1186,6 @@ Args.o: Args.cc Args.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -1659,7 +1660,6 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -1803,7 +1803,6 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -1977,7 +1976,6 @@ Qucid.o: Qucid.cc Qucid.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -2190,7 +2188,6 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -2339,7 +2336,6 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -2481,7 +2477,6 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -2754,7 +2749,6 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -2897,7 +2891,6 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3040,7 +3033,6 @@ cidd_init.o: cidd_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3058,148 +3050,7 @@ cidd_init.o: cidd_init.cc cidd.h \
 		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_init.o cidd_init.cc
 
-cidd_params.o: cidd_params.cc cidd.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/dataport/bigend.h \
-		$(HOME)/lrose/include/dataport/swap.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/globals.h \
-		$(HOME)/lrose/include/toolsa/str.h \
-		$(HOME)/lrose/include/toolsa/ansi.h \
-		$(HOME)/lrose/include/toolsa/pmu.h \
-		$(HOME)/lrose/include/toolsa/procmap.h \
-		$(HOME)/lrose/include/toolsa/http.h \
-		$(HOME)/lrose/include/toolsa/HttpURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/pjg.h \
-		$(HOME)/lrose/include/toolsa/pjg_types.h \
-		$(HOME)/lrose/include/toolsa/pjg_flat.h \
-		$(HOME)/lrose/include/toolsa/sockutil.h \
-		$(HOME)/lrose/include/toolsa/servmap.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
-		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/TaFile.hh \
-		$(HOME)/lrose/include/toolsa/file_io.h \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_constants.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_read.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_write.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_timelist.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_print.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_BE.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_xml.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_ncf.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_vsect.hh \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/Mdv/MdvxField.hh \
-		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
-		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
-		$(HOME)/lrose/include/euclid/PjgMath.hh \
-		$(HOME)/lrose/include/euclid/Pjg.hh \
-		$(HOME)/lrose/include/euclid/PjgTypes.hh \
-		$(HOME)/lrose/include/euclid/sincos.h \
-		$(HOME)/lrose/include/euclid/PjgAzimEquidistMath.hh \
-		$(HOME)/lrose/include/euclid/PjgPolarRadarMath.hh \
-		$(HOME)/lrose/include/euclid/PjgAlbersMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLambertAzimMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLambertConfMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLatlonMath.hh \
-		$(HOME)/lrose/include/euclid/PjgPolarStereoMath.hh \
-		$(HOME)/lrose/include/euclid/PjgObliqueStereoMath.hh \
-		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
-		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
-		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
-		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
-		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		Params.hh \
-		$(HOME)/lrose/include/tdrp/tdrp.h \
-		$(HOME)/lrose/include/tdrp/tdrp_p.h \
-		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
-		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
-		Csyprod_P.hh \
-		Cdraw_P.hh \
-		Cgui_P.hh \
-		Cimages_P.hh \
-		Uparams.hh \
-		$(HOME)/lrose/include/rapformats/coord_export.h \
-		cidd_macros.h \
-		cidd_structs.h \
-		cidd_colorscales.h \
-		cidd_field_data.h \
-		cidd_data_io.h \
-		Product.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdbThreaded.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdb.hh \
-		$(HOME)/lrose/include/Spdb/Spdb.hh \
-		$(HOME)/lrose/include/Spdb/Product_defines.hh \
-		$(HOME)/lrose/include/Spdb/Spdb_typedefs.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdbMsg.hh \
-		SymprodRender.hh \
-		$(HOME)/lrose/include/Spdb/Symprod.hh \
-		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
-		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
-		cidd_winds.h \
-		cidd_contours.h \
-		cidd_movies.h \
-		cidd_overlays.h \
-		cidd_products.h \
-		cidd_layers.h \
-		Cterrain_P.hh \
-		Croutes_P.hh \
-		cidd_windows.h \
-		cidd_legend.h \
-		cidd_funcs.h \
-		ProductMgr.hh \
-		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
-		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
-		SymprodRenderObj.hh \
-		$(HOME)/lrose/include/Spdb/SymprodObj.hh \
-		$(HOME)/lrose/include/rapformats/station_reports.h \
-		$(HOME)/lrose/include/rapformats/metar_decode.h \
-		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
-		cidd_params.h
+cidd_params.o: cidd_params.cc 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_params.o cidd_params.cc
 
 cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
@@ -3327,7 +3178,6 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3470,7 +3320,6 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3613,7 +3462,6 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3756,7 +3604,6 @@ colorscales.o: colorscales.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -3899,7 +3746,6 @@ contours.o: contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4043,7 +3889,6 @@ data_gather.o: data_gather.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4186,7 +4031,6 @@ data_init.o: data_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4329,7 +4173,6 @@ data_io.o: data_io.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4472,7 +4315,6 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4615,7 +4457,6 @@ draw_export_init.o: draw_export_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4758,7 +4599,6 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -4902,7 +4742,6 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5045,7 +4884,6 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5188,7 +5026,6 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5331,7 +5168,6 @@ graphic_check.o: graphic_check.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5474,7 +5310,6 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5617,7 +5452,6 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5760,7 +5594,6 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -5908,7 +5741,6 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6051,7 +5883,6 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6194,7 +6025,6 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6337,7 +6167,6 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6480,7 +6309,6 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6623,7 +6451,6 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6766,7 +6593,6 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -6909,7 +6735,6 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7052,7 +6877,6 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7195,7 +7019,6 @@ gui_init.o: gui_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7338,7 +7161,6 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7481,7 +7303,6 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7626,7 +7447,6 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7769,7 +7589,6 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -7912,7 +7731,6 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8055,7 +7873,6 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8198,7 +8015,6 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8341,7 +8157,6 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8484,7 +8299,6 @@ overlay_init.o: overlay_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8628,7 +8442,6 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8771,7 +8584,6 @@ process_args.o: process_args.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -8914,7 +8726,6 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9057,7 +8868,6 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9200,7 +9010,6 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9343,7 +9152,6 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9486,7 +9294,6 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9629,7 +9436,6 @@ render_control.o: render_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9772,7 +9578,6 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -9915,7 +9720,6 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10058,7 +9862,6 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10201,7 +10004,6 @@ render_grids.o: render_grids.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10344,7 +10146,6 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10487,7 +10288,6 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10630,7 +10430,6 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10773,7 +10572,6 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -10916,7 +10714,6 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11059,7 +10856,6 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11202,7 +10998,6 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11345,7 +11140,6 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11488,7 +11282,6 @@ render_products.o: render_products.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11631,7 +11424,6 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11774,7 +11566,6 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -11917,7 +11708,6 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12060,7 +11850,6 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12203,7 +11992,6 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12346,7 +12134,6 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12489,7 +12276,6 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12632,7 +12418,6 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12775,7 +12560,6 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -12918,7 +12702,6 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13061,7 +12844,6 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13204,7 +12986,6 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13347,7 +13128,6 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13490,7 +13270,6 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13633,7 +13412,6 @@ route_winds_init.o: route_winds_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13776,7 +13554,6 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -13919,7 +13696,6 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14063,7 +13839,6 @@ symprod_init.o: symprod_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14206,7 +13981,6 @@ timer_control.o: timer_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14350,7 +14124,6 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14493,7 +14266,6 @@ winds_init.o: winds_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14636,7 +14408,6 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
@@ -14779,7 +14550,6 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
-		Cterrain_P.hh \
 		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \

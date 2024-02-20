@@ -415,6 +415,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     }
 
     /* Add Contour colors */
+
     for(i=0; i <   NUM_CONT_LAYERS; i++) {
 	 STRcopy(gd.color[gd.num_colors].name,
 	     gd.layers.cont[i].color_name,NAME_LENGTH);
@@ -423,13 +424,14 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     }
 
     // Add the TERRAIN Colors
+
     STRcopy(gd.color[gd.num_colors].name,
-	    gd.layers.earth._P->earth_color1,NAME_LENGTH);
+	    _params.terrain_earth_color1, NAME_LENGTH);
     gd.layers.earth.color1 = &gd.color[gd.num_colors];
     gd.num_colors++;
 
     STRcopy(gd.color[gd.num_colors].name,
-	    gd.layers.earth._P->earth_color2,NAME_LENGTH);
+	    _params.terrain_earth_color2, NAME_LENGTH);
     gd.layers.earth.color2 = &gd.color[gd.num_colors];
     gd.num_colors++;
 

@@ -127,7 +127,6 @@ NORM_SRCS = \
 	cidd_coords.cc \
 	cidd_font.cc \
 	cidd_init.cc \
-	cidd_params.cc \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
 	cidd_signals.cc \
@@ -165,7 +164,6 @@ NORM_SRCS = \
 	movie_pu_proc.cc \
 	overlay_init.cc \
 	page_pu_proc.cc \
-	process_args.cc \
 	render_azimuths.cc \
 	render_bottom_margin.cc \
 	render_cart_grid.cc \

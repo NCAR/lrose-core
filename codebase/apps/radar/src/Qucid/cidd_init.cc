@@ -819,115 +819,78 @@ void init_data_space()
   // initialize wind data
   
   _initWinds();
+
+  // initialize terrain
   
-  // Instantiate and load the SYMPROD TDRP Parameter section
-  // gd.syprod_P = new Csyprod_P();
-
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // // param_text = find_tag_text(gd.db_data,"SYMPRODS",
-  // //                            &param_text_len, &param_text_line_no); 
-  // if(param_text == NULL || param_text_len <=0 ) {
-  //   if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
-  // } else {
-  //   /* Establish and initialize params */
-
-  //   if(gd.syprod_P->loadFromBuf("SYMPRODS TDRP Section",
-  //                               NULL,param_text,
-  //                               param_text_len,
-  //                               param_text_line_no,
-  //                               TRUE,gd.debug2) < 0) {
-  //     fprintf(stderr,"Please fix the <SYMPRODS> parameter section\n");
-  //     exit(-1);
-  //   }
-  // }
-
-  // Instantiate and load the TERRAIN TDRP Parameter 
-  gd.layers.earth._P = new Cterrain_P();
-
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"TERRAIN",
-  //                            &param_text_len, &param_text_line_no); 
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug) fprintf(stderr," Warning: No TERRAIN Section in params\n");
-  } else {
-    if(gd.layers.earth._P->loadFromBuf("TERRAIN TDRP Section",
-                                       NULL,param_text,
-                                       param_text_len,
-                                       param_text_line_no,
-                                       TRUE,gd.debug2) < 0) {
-      fprintf(stderr,"Please fix the <TERRAIN> parameter section\n");
+  if(strlen(_params.terrain_url) >0) {
+    
+    gd.layers.earth.terrain_active = 1;
+    gd.layers.earth.terr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(gd.layers.earth.terr == NULL) {
+      fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
     }
-    if(strlen(gd.layers.earth._P->terrain_url) >0) {
-      gd.layers.earth.terrain_active = 1;
-      gd.layers.earth.terr = (met_record_t *) calloc(sizeof(met_record_t), 1);
-
-      if(gd.layers.earth.terr == NULL) {
-        fprintf(stderr,"Cannot allocate space for terrain data\n");
-        exit(-1);
-      }
-      gd.layers.earth.terr->time_allowance = 5270400; // 10 years
-      STRcopy(gd.layers.earth.terr->color_file,
-              gd.layers.earth._P->landuse_colorscale,NAME_LENGTH);
-      STRcopy(gd.layers.earth.terr->button_name,
-              gd.layers.earth._P->id_label,NAME_LENGTH);
-      STRcopy(gd.layers.earth.terr->legend_name,
-              gd.layers.earth._P->id_label,NAME_LENGTH);
-      STRcopy(gd.layers.earth.terr->url,
-              gd.layers.earth._P->terrain_url,URL_LENGTH);
-
-      gd.layers.earth.terr->h_mdvx = new DsMdvxThreaded;
-      gd.layers.earth.terr->v_mdvx = new DsMdvxThreaded;
-      gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
-      gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
-      gd.layers.earth.terr->proj =  new MdvxProj;
-    }
-
-    if(strlen(gd.layers.earth._P->landuse_url) >0) {
-      gd.layers.earth.landuse_active = (gd.layers.earth._P->landuse_active == true)? 1: 0;
-      gd.layers.earth.land_use = (met_record_t *) calloc(sizeof(met_record_t), 1);
-
-      if(gd.layers.earth.land_use == NULL) {
-        fprintf(stderr,"Cannot allocate space for land_use data\n");
-        exit(-1);
-      }
-      gd.layers.earth.land_use->time_allowance = 5270400; // 10 years
-      STRcopy(gd.layers.earth.land_use->color_file,
-              gd.layers.earth._P->landuse_colorscale,NAME_LENGTH);
-      STRcopy(gd.layers.earth.land_use->button_name,
-              gd.layers.earth._P->id_label,NAME_LENGTH);
-      STRcopy(gd.layers.earth.land_use->legend_name,
-              gd.layers.earth._P->id_label,NAME_LENGTH);
-      STRcopy(gd.layers.earth.land_use->url,
-              gd.layers.earth._P->landuse_url,URL_LENGTH);
-
-      gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
-      gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
-      gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
-      gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
-      gd.layers.earth.land_use->proj =  new MdvxProj;
-
-      switch(gd.layers.earth._P->land_use_render_method) {
-        default:
-        case Cterrain_P::RENDER_RECTANGLES:
-          gd.layers.earth.land_use->render_method = POLYGONS;
-          break;
-
-        case Cterrain_P::RENDER_FILLED_CONT:
-          gd.layers.earth.land_use->render_method = FILLED_CONTOURS;
-          break;
-
-        case Cterrain_P::RENDER_DYNAMIC_CONTOURS:
-          gd.layers.earth.land_use->render_method = DYNAMIC_CONTOURS;
-          break;
-      }
-
-    }
+    
+    gd.layers.earth.terr->time_allowance = 5270400; // 10 years
+    STRcopy(gd.layers.earth.terr->color_file,
+            _params.landuse_colorscale,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->button_name,
+            _params.terrain_id_label,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->legend_name,
+            _params.terrain_id_label,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->url,
+            _params.terrain_url,URL_LENGTH);
+    
+    gd.layers.earth.terr->h_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.terr->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
+    gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
+    gd.layers.earth.terr->proj =  new MdvxProj;
 
   }
+  
+  if(strlen(_params.landuse_url) >0) {
 
+    gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
+    gd.layers.earth.land_use = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(gd.layers.earth.land_use == NULL) {
+      fprintf(stderr,"Cannot allocate space for land_use data\n");
+      exit(-1);
+    }
+    
+    gd.layers.earth.land_use->time_allowance = 5270400; // 10 years
+    STRcopy(gd.layers.earth.land_use->color_file,
+            _params.landuse_colorscale,NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->button_name,
+            _params.terrain_id_label, NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->legend_name,
+            _params.terrain_id_label, NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->url,
+            _params.landuse_url,URL_LENGTH);
+    
+    gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
+    gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
+    gd.layers.earth.land_use->proj =  new MdvxProj;
+    
+    switch(_params.landuse_render_method) {
+      default:
+      case Params::TERRAIN_RENDER_RECTANGLES:
+        gd.layers.earth.land_use->render_method = POLYGONS;
+        break;
+        
+      case Params::TERRAIN_RENDER_FILLED_CONT:
+        gd.layers.earth.land_use->render_method = FILLED_CONTOURS;
+        break;
+        
+      case Params::TERRAIN_RENDER_DYNAMIC_CONTOURS:
+        gd.layers.earth.land_use->render_method = DYNAMIC_CONTOURS;
+        break;
+    }
+    
+  }
+  
   // Instantiate and load the ROUTE_WINDS TDRP Parameter 
   gd.layers.route_wind._P = new Croutes_P();
 

@@ -681,7 +681,7 @@ paramdef string {
 
 paramdef string {
   p_default = "";
-  p_descr = "Used to located gridded terrain data";
+  p_descr = "Used to located gridded terrain data. Set to empty string for no terrain.";
   p_help = "Terrain_URL \n"
   " Note example URL:\n"
   "  mdvp::static//venus::mdv/terrain&Elevation\n"

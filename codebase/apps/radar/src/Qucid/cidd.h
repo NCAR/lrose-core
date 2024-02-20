@@ -385,7 +385,7 @@ struct    Global_data {
   int    series_save_active; // When 1 - In series save mode.
 
   int    num_field_labels;  // Current number of labels spaces occupied by field data labels 
-  int    db_data_len;       // Length of the data base 
+  // int    db_data_len;       // Length of the data base 
   int    field_index[MAX_DATA_FIELDS];   // menu item to field number lookup table 
   int movieframe_time_mode;  // mode for determining output file name
 
@@ -439,8 +439,8 @@ struct    Global_data {
   // Files, names, Commands and other text parameters
   char **argv;             // Command line arguments
   const char *orig_wd;           // Original working directory
-  const char *db_data;           // Pointer to the parameter data
-  const char *db_name;           // The  parameter database filename 
+  // const char *db_data;           // Pointer to the parameter data
+  // const char *db_name;           // The  parameter database filename 
   const char *frame_label;       // The default string to show on the frame 
   // const char *no_data_message;   // The default message to display on no data conditions 
   // const char *help_command;      // the command used to spawn A Help Viewer

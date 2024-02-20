@@ -1694,7 +1694,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("terrain_url");
-    tt->descr = tdrpStrDup("Used to located gridded terrain data");
+    tt->descr = tdrpStrDup("Used to located gridded terrain data. Set to empty string for no terrain.");
     tt->help = tdrpStrDup("Terrain_URL \n Note example URL:\n  mdvp::static//venus::mdv/terrain&Elevation\n Field name follows the Ampersand. Use #N for field number override   Use caret: ^ as a substitute for spaces in field names");
     tt->val_offset = (char *) &terrain_url - &_start_;
     tt->single_val.s = tdrpStrDup("");

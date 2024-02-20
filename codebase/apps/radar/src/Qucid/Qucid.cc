@@ -87,7 +87,7 @@ Qucid::Qucid(int argc, char **argv) :
   char tdrpParamsPath[5000];
   bool usingLegacyParams = false;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
-    gd.db_name = strdup(legacyParamsPath.c_str());
+    // gd.db_name = strdup(legacyParamsPath.c_str());
     snprintf(tdrpParamsPath, 4999,
              "/tmp/Qucid.%s.%d.tdrp", legacyParamsPath.c_str(), getpid());
     LegacyParams lParams;
@@ -599,7 +599,7 @@ void Qucid::_initGlobals()
   gd.series_save_active = 0; 
 
   gd.num_field_labels = 0;  
-  gd.db_data_len = 0;       
+  // gd.db_data_len = 0;       
   MEM_zero(gd.field_index);
   // _params.movieframe_time_mode = 0;  
                                
@@ -642,8 +642,8 @@ void Qucid::_initGlobals()
   
   gd.argv = NULL;             
   gd.orig_wd = NULL;           
-  gd.db_data = NULL;           
-  gd.db_name = NULL;           
+  // gd.db_data = NULL;           
+  // gd.db_name = NULL;           
   // _params.frame_label = NULL;       
   // _params.no_data_message = NULL;   
   // _params.help_command = NULL;      

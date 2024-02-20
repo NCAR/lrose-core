@@ -57,7 +57,7 @@ void render_h_terrain( Drawable xid, int page)
     met_record_t *mr = gd.layers.earth.terr;
 
     // Convert altitude into the Grid's vertical units
-    altitude = gd.mrec[page]->vert[gd.mrec[page]->plane].min / gd.layers.earth._P->height_scaler;;
+    altitude = gd.mrec[page]->vert[gd.mrec[page]->plane].min / _params.terrain_height_scaler;;
 
     //fprintf(stderr, "Terrain Masking above %g\n",altitude);
     // If the projections match - Can use fast Rectangle rendering.
@@ -149,19 +149,21 @@ void render_v_terrain( Drawable xid )
     met_record_t *mr = gd.layers.earth.terr;
 
     if(first_time) {
-	XSetLineAttributes(gd.dpy, gd.layers.earth.color1->gc, 3, LineSolid, CapButt, JoinMiter); 
-	XSetLineAttributes(gd.dpy, gd.layers.earth.color2->gc, 3, LineSolid, CapButt, JoinMiter);
-	first_time = 0;
+      XSetLineAttributes(gd.dpy, gd.layers.earth.color1->gc, 3,
+                         LineSolid, CapButt, JoinMiter); 
+      XSetLineAttributes(gd.dpy, gd.layers.earth.color2->gc, 3,
+                         LineSolid, CapButt, JoinMiter);
+      first_time = 0;
     }
 
-    if(xid == 0) return ;
+    if(xid == 0) return;
 
     // Convert altitude into the Grid's vertical units 
-    scaler  = gd.layers.earth._P->height_scaler;
+    scaler  = _params.terrain_height_scaler;
 
     ptr =  (unsigned short *) mr->v_data;
-    if(ptr == NULL ) return ;
-
+    if(ptr == NULL ) return;
+    
     miss = (unsigned short) mr->v_fhdr.missing_data_value; 
     bad = (unsigned short) mr->v_fhdr.bad_data_value; 
 

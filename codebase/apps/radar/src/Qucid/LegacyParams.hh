@@ -63,6 +63,10 @@ public:
   int translateToTdrp(const string &legacyParamsPath,
                       const string &tdrpParamsPath);
 
+  // print the defaults for legacy params
+  
+  void printLegacyDefaults(ostream &out);
+  
 private:
 
   static const int MAX_PARSE_FIELDS = 32;
