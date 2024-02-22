@@ -197,7 +197,6 @@ NORM_SRCS = \
 	render_xsect_products.cc \
 	render_xsect_top_layers.cc \
 	render_xsect_winds.cc \
-	route_winds_init.cc \
 	shmem_init.cc \
 	status_pu_proc.cc \
 	symprod_init.cc \

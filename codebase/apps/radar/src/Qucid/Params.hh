@@ -723,6 +723,8 @@ public:
   image_vsection_spec_t *_image_vsection_spec;
   int image_vsection_spec_n;
 
+  tdrp_bool_t route_winds_active;
+
   route_debug_t route_debug;
 
   int route_font_height;
@@ -1471,7 +1473,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[491];
+  mutable TDRPtable _table[492];
 
   const char *_className;
 

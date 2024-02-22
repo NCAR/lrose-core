@@ -2678,7 +2678,7 @@ int LegacyParams::_readRouteWindsTdrp()
   
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Warning: No ROUTE_WINDS Section in params\n");
-    fprintf(stderr,"  will use the defaults\n");
+    fprintf(_tdrpFile, "route_winds_active = FALSE;\n");
   } else {
     // Set the routes object from the buffer
     if(routes.loadFromBuf("ROUTE WINDS TDRP Section",
@@ -2698,6 +2698,8 @@ int LegacyParams::_readRouteWindsTdrp()
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// <ROUTE_VSECTIONS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  fprintf(_tdrpFile, "route_winds_active = TRUE;\n");
   
   switch (routes.debug) {
     case Croutes_P::DEBUG_OFF:

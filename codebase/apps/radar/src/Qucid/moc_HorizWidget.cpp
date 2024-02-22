@@ -1,53 +1,83 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'HorizWidget.hh'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.9)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "HorizWidget.hh"
-#include <QtCore/qbytearray.h>
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
+
+#if __has_include(<QtCore/qtmochelpers.h>)
+#include <QtCore/qtmochelpers.h>
+#else
+QT_BEGIN_MOC_NAMESPACE
+#endif
+
+
+#include <memory>
+
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'HorizWidget.hh' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.15.9. It"
+#elif Q_MOC_OUTPUT_REVISION != 68
+#error "This file was generated using the moc from 6.5.2. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
-QT_BEGIN_MOC_NAMESPACE
+#ifndef Q_CONSTINIT
+#define Q_CONSTINIT
+#endif
+
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_HorizWidget_t {
-    QByteArrayData data[5];
-    char stringdata0[64];
-};
-#define QT_MOC_LITERAL(idx, ofs, len) \
-    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_HorizWidget_t, stringdata0) + ofs \
-        - idx * sizeof(QByteArrayData)) \
-    )
-static const qt_meta_stringdata_HorizWidget_t qt_meta_stringdata_HorizWidget = {
-    {
-QT_MOC_LITERAL(0, 0, 11), // "HorizWidget"
-QT_MOC_LITERAL(1, 12, 5), // "clear"
-QT_MOC_LITERAL(2, 18, 0), // ""
-QT_MOC_LITERAL(3, 19, 17), // "contextMenuEditor"
-QT_MOC_LITERAL(4, 37, 26) // "contextMenuParameterColors"
+QT_WARNING_DISABLE_GCC("-Wuseless-cast")
+namespace {
 
+#ifdef QT_MOC_HAS_STRINGDATA
+struct qt_meta_stringdata_CLASSHorizWidgetENDCLASS_t {};
+static constexpr auto qt_meta_stringdata_CLASSHorizWidgetENDCLASS = QtMocHelpers::stringData(
+    "HorizWidget",
+    "clear",
+    "",
+    "contextMenuEditor",
+    "contextMenuParameterColors"
+);
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSHorizWidgetENDCLASS_t {
+    uint offsetsAndSizes[10];
+    char stringdata0[12];
+    char stringdata1[6];
+    char stringdata2[1];
+    char stringdata3[18];
+    char stringdata4[27];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSHorizWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSHorizWidgetENDCLASS_t qt_meta_stringdata_CLASSHorizWidgetENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 11),  // "HorizWidget"
+        QT_MOC_LITERAL(12, 5),  // "clear"
+        QT_MOC_LITERAL(18, 0),  // ""
+        QT_MOC_LITERAL(19, 17),  // "contextMenuEditor"
+        QT_MOC_LITERAL(37, 26)   // "contextMenuParameterColors"
     },
-    "HorizWidget\0clear\0\0contextMenuEditor\0"
+    "HorizWidget",
+    "clear",
+    "",
+    "contextMenuEditor",
     "contextMenuParameterColors"
 };
 #undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
 
-static const uint qt_meta_data_HorizWidget[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSHorizWidgetENDCLASS[] = {
 
  // content:
-       8,       // revision
+      11,       // revision
        0,       // classname
        0,    0, // classinfo
        3,   14, // methods
@@ -57,10 +87,10 @@ static const uint qt_meta_data_HorizWidget[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: name, argc, parameters, tag, flags
-       1,    0,   29,    2, 0x0a /* Public */,
-       3,    0,   30,    2, 0x0a /* Public */,
-       4,    0,   31,    2, 0x0a /* Public */,
+ // slots: name, argc, parameters, tag, flags, initial metatype offsets
+       1,    0,   32,    2, 0x0a,    1 /* Public */,
+       3,    0,   33,    2, 0x0a,    2 /* Public */,
+       4,    0,   34,    2, 0x0a,    3 /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -69,6 +99,25 @@ static const uint qt_meta_data_HorizWidget[] = {
 
        0        // eod
 };
+
+Q_CONSTINIT const QMetaObject HorizWidget::staticMetaObject = { {
+    QMetaObject::SuperData::link<CartWidget::staticMetaObject>(),
+    qt_meta_stringdata_CLASSHorizWidgetENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSHorizWidgetENDCLASS,
+    qt_static_metacall,
+    nullptr,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSHorizWidgetENDCLASS_t,
+        // Q_OBJECT / Q_GADGET
+        QtPrivate::TypeAndForceComplete<HorizWidget, std::true_type>,
+        // method 'clear'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'contextMenuEditor'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'contextMenuParameterColors'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>
+    >,
+    nullptr
+} };
 
 void HorizWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
@@ -85,16 +134,6 @@ void HorizWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     (void)_a;
 }
 
-QT_INIT_METAOBJECT const QMetaObject HorizWidget::staticMetaObject = { {
-    QMetaObject::SuperData::link<CartWidget::staticMetaObject>(),
-    qt_meta_stringdata_HorizWidget.data,
-    qt_meta_data_HorizWidget,
-    qt_static_metacall,
-    nullptr,
-    nullptr
-} };
-
-
 const QMetaObject *HorizWidget::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
@@ -103,7 +142,7 @@ const QMetaObject *HorizWidget::metaObject() const
 void *HorizWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_HorizWidget.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSHorizWidgetENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return CartWidget::qt_metacast(_clname);
 }
@@ -119,10 +158,9 @@ int HorizWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 3)
-            *reinterpret_cast<int*>(_a[0]) = -1;
+            *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 3;
     }
     return _id;
 }
 QT_WARNING_POP
-QT_END_MOC_NAMESPACE

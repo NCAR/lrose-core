@@ -553,7 +553,7 @@ struct    Global_data {
   // Cimages_P *images_P;  // image generation params
 
   // parameter object
-  // Uparams *uparams;
+  Uparams *uparams;
 
   // contours
 

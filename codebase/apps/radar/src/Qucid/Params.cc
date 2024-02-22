@@ -1899,6 +1899,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'route_winds_active'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("route_winds_active");
+    tt->descr = tdrpStrDup("Activates route winds vert section.");
+    tt->help = tdrpStrDup("If FALSE, no route winds functionality is available.");
+    tt->val_offset = (char *) &route_winds_active - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'route_debug'
     // ctype is '_route_debug_t'
     

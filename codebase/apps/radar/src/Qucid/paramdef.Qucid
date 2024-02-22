@@ -811,15 +811,20 @@ commentdef {
   p_header = "ROUTE VSECTIONS";
 };
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Activates route winds vert section.";
+  p_help = "If FALSE, no route winds functionality is available.";
+} route_winds_active;
+
 typedef enum {
   ROUTE_DEBUG_OFF, ROUTE_DEBUG_NORM, ROUTE_DEBUG_VERBOSE
 } route_debug_t;
 
-paramdef enum route_debug_t
-  {
-    p_default = ROUTE_DEBUG_OFF;
-    p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
-  } route_debug; 
+paramdef enum route_debug_t {
+  p_default = ROUTE_DEBUG_OFF;
+  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
+} route_debug; 
 
 paramdef int {
   p_default = 13;
@@ -842,12 +847,11 @@ typedef enum {
   ROUTE_REGULAR_INTERVALS, ROUTE_EQUAL_DIVISIONS
 } route_label_style_t; 
 
-paramdef enum route_label_style_t
-  {
-    p_default = ROUTE_REGULAR_INTERVALS;
-    p_descr = "How to space the labels along the route.";
-    p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
-  } route_label_style;
+paramdef enum route_label_style_t {
+  p_default = ROUTE_REGULAR_INTERVALS;
+  p_descr = "How to space the labels along the route.";
+  p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
+} route_label_style;
 
 paramdef double {
   p_default = 55.6;

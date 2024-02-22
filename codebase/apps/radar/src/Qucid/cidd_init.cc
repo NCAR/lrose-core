@@ -41,6 +41,7 @@ static void _initWindComponent(met_record_t *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW);
 static void _initDrawExport();
+static void _initRouteWinds();
   
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -53,7 +54,6 @@ void init_data_space()
   long param_text_len;
   long param_text_line_no;
   const char *param_text;
-  const char *resource;
   const char *field_str;
   char str_buf[128];   /* Space to build resource strings */
   char *cfield[3];     /* Space to collect sub strings */
@@ -699,6 +699,8 @@ void init_data_space()
 
 #ifdef NOT_ANY_MORE
   
+  const char *resource;
+
   // legacy CIDD menu bar - deprecated
   
   ZERO_STRUCT(&gd.menu_bar);
@@ -895,33 +897,33 @@ void init_data_space()
     }
     
   }
+
+  // initialize route winds
+
+  _initRouteWinds();
   
-  // Instantiate and load the ROUTE_WINDS TDRP Parameter 
-  gd.layers.route_wind._P = new Croutes_P();
+  // gd.layers.route_wind._P = new Croutes_P();
 
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
-  //                            &param_text_len, &param_text_line_no); 
-  if(param_text == NULL || param_text_len <=0 ) {
-    if(gd.debug) fprintf(stderr," Warning: No ROUTE_WINDS Section in params\n");
-    gd.layers.route_wind.has_params = 0;
-  } else {
-    if(gd.layers.route_wind._P->loadFromBuf("ROUTE_WINDS TDRP Section",
-                                            NULL,param_text,
-                                            param_text_len,
-                                            param_text_line_no,
-                                            TRUE,gd.debug2) < 0) {
-      fprintf(stderr,"Please fix the <ROUTE_WINDS> parameter section\n");
-      exit(-1);
-    }
+  // param_text_line_no = 0;
+  // param_text_len = 0;
+  // // param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
+  // //                            &param_text_len, &param_text_line_no); 
+  // if(param_text == NULL || param_text_len <=0 ) {
+  //   if(gd.debug) fprintf(stderr," Warning: No ROUTE_WINDS Section in params\n");
+  // } else {
+  //   if(gd.layers.route_wind._P->loadFromBuf("ROUTE_WINDS TDRP Section",
+  //                                           NULL,param_text,
+  //                                           param_text_len,
+  //                                           param_text_line_no,
+  //                                           TRUE,gd.debug2) < 0) {
+  //     fprintf(stderr,"Please fix the <ROUTE_WINDS> parameter section\n");
+  //     exit(-1);
+  //   }
 
-    gd.layers.route_wind.has_params = 1;
-    route_winds_init();
+  //   gd.layers.route_wind.has_params = 1;
+  //   route_winds_init();
 
-    // Use the first route as the default.
-    memcpy(&gd.h_win.route,gd.layers.route_wind.route,sizeof(route_track_t)); 
-  }
+  // }
 
   // Instantiate the GUI Config TDRP 
   // gd.gui_P = new Cgui_P();
@@ -965,32 +967,10 @@ void init_data_space()
   //   }
   // }
 
-  // Instantiate the Draw TDRP 
-  // gd.draw_P = new Cdraw_P();
+  // Establish and initialize Draw-Export params 
 
-  // // Load the Draw_Export parameters
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // // param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
-  // //                            &param_text_len, &param_text_line_no);
+  _initDrawExport();
 
-  // if(param_text == NULL || param_text_len <=0 ) {
-  //   if(gd.debug) fprintf(stderr," Warning: No DRAW_EXPORT Section in params\n");
-  //   gd.draw.num_draw_products = 0;
-  // } else {
-  //   if(gd.draw_P->loadFromBuf("DRAW EXPORT TDRP Section",
-  //       		      NULL,param_text,
-  //       		      param_text_len,
-  //       		      param_text_line_no,
-  //       		      TRUE,gd.debug2)  < 0) { 
-  //     fprintf(stderr,"Please fix the <DRAW_EXPORT> parameter section\n");
-  //     exit(-1);
-  //   }
-
-    /* Establish and initialize Draw-Export params */
-    init_draw_export_links();
-  // }
-    
   if(gd.draw.num_draw_products == 0 && gd.menu_bar.set_draw_mode_bit >0) {
     fprintf(stderr,
 	    "Fatal Error: DRAW Button Enabled, without any DRAW_EXPORT Products defined\n"); 
@@ -1000,7 +980,6 @@ void init_data_space()
 	    "Section of the parameter file \n"); 
     exit(-1);
   }
-
 
   // Load the Map Overlay parameters
   param_text_line_no = 0;
@@ -1628,6 +1607,260 @@ static void _initDrawExport()
     dexp.default_serial_no = dinfo.default_id_no;
     
   } // ii
+
+}
+
+////////////////////////////////////////////////////////////////
+// Initialize route winds
+
+#define NUM_PARSE_FIELDS (MAX_ROUTE_SEGMENTS +2) * 3
+#define PARSE_FIELD_SIZE 1024
+
+static void _initRouteWinds()
+{
+
+  // U WINDS Met Record
+
+  if(strlen(_params.route_u_url) > 1) {
+
+    met_record_t *mr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(mr == NULL) {
+      fprintf(stderr,"Unable to allocate space for Route U Wind\n");
+      perror("cidd_init::_initRouteWinds");
+      exit(-1);
+    }
+    gd.layers.route_wind.u_wind = mr;
+    mr->h_data_valid = 0;
+    mr->v_data_valid = 0;
+    mr->v_vcm.nentries = 0;
+    mr->h_vcm.nentries = 0;
+    mr->h_fhdr.scale = -1.0;
+    mr->h_last_scale = 0.0;
+    STRcopy(mr->legend_name, "ROUTE_U_WIND", NAME_LENGTH);
+    STRcopy(mr->button_name, "ROUTE_U_WIND", NAME_LENGTH);
+    STRcopy(mr->url, _params.route_u_url, URL_LENGTH);
+
+    STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
+    mr->currently_displayed = 1;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->h_fhdr.proj_origin_lon = 0.0;
+    mr->h_fhdr.proj_origin_lat = 0.0;
+
+    // instantiate DsMdvxThreaded class
+    mr->v_mdvx = new DsMdvxThreaded;
+    mr->v_mdvx_int16 = new MdvxField;
+
+  } // U WINDS
+
+  // V WINDS Met Record
+  
+  if(strlen(_params.route_v_url) > 1) {
+    
+    met_record_t *mr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(mr == NULL) {
+      fprintf(stderr,"Unable to allocate space for Route V Wind\n");
+      perror("cidd_init::_initRouteWinds");
+      exit(-1);
+    }
+    gd.layers.route_wind.v_wind = mr;
+    mr->h_data_valid = 0;
+    mr->v_data_valid = 0;
+    mr->v_vcm.nentries = 0;
+    mr->h_vcm.nentries = 0;
+    mr->h_fhdr.scale = -1.0;
+    mr->h_last_scale = 0.0;
+    STRcopy(mr->legend_name, "ROUTE_V_WIND", NAME_LENGTH);
+    STRcopy(mr->button_name, "ROUTE_V_WIND", NAME_LENGTH);
+    STRcopy(mr->url, _params.route_v_url, URL_LENGTH);
+    
+    STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
+    mr->currently_displayed = 1;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->h_fhdr.proj_origin_lon = 0.0;
+    mr->h_fhdr.proj_origin_lat = 0.0;
+    
+    // instantiate DsMdvxThreaded class
+    mr->v_mdvx = new DsMdvxThreaded;
+    mr->v_mdvx_int16 = new MdvxField;
+
+  } // V WINDS
+
+  // TURB Met Record
+
+  if(strlen(_params.route_turb_url) > 1) {
+
+    met_record_t *mr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(mr == NULL) {
+      fprintf(stderr,"Unable to allocate space for Route TURB\n");
+      perror("cidd_init::_initRouteWinds");
+      exit(-1);
+    }
+    gd.layers.route_wind.turb = mr;
+    mr->h_data_valid = 0;
+    mr->v_data_valid = 0;
+    mr->v_vcm.nentries = 0;
+    mr->h_vcm.nentries = 0;
+    mr->h_fhdr.scale = -1.0;
+    mr->h_last_scale = 0.0;
+    STRcopy(mr->legend_name, "ROUTE_TURB", NAME_LENGTH);
+    STRcopy(mr->button_name, "ROUTE_TURB", NAME_LENGTH);
+    STRcopy(mr->url, _params.route_turb_url, URL_LENGTH);
+    
+    STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
+    mr->currently_displayed = 1;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->h_fhdr.proj_origin_lon = 0.0;
+    mr->h_fhdr.proj_origin_lat = 0.0;
+
+    // instantiate DsMdvxThreaded class
+    mr->v_mdvx = new DsMdvxThreaded;
+    mr->v_mdvx_int16 = new MdvxField;
+    
+  } // TURB
+
+  // ICING met Record
+  
+  if(strlen(_params.route_icing_url) > 1) {
+
+    met_record_t *mr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(mr == NULL) {
+      fprintf(stderr,"Unable to allocate space for Route ICING\n");
+      perror("cidd_init::_initRouteWinds");
+      exit(-1);
+    }
+    gd.layers.route_wind.icing = mr;
+    mr->h_data_valid = 0;
+    mr->v_data_valid = 0;
+    mr->v_vcm.nentries = 0;
+    mr->h_vcm.nentries = 0;
+    mr->h_fhdr.scale = -1.0;
+    mr->h_last_scale = 0.0;
+    STRcopy(mr->legend_name, "ROUTE_ICING", NAME_LENGTH);
+    STRcopy(mr->button_name, "ROUTE_ICING", NAME_LENGTH);
+    STRcopy(mr->url, _params.route_icing_url, URL_LENGTH);
+
+    STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
+    mr->currently_displayed = 1;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->h_fhdr.proj_origin_lon = 0.0;
+    mr->h_fhdr.proj_origin_lat = 0.0;
+
+    // instantiate DsMdvxThreaded class
+    mr->v_mdvx = new DsMdvxThreaded;
+    mr->v_mdvx_int16 = new MdvxField;
+
+  } // ICING
+
+  // How many are route are defined in the file
+  gd.layers.route_wind.num_predef_routes = _params.route_paths_n;
+
+  // Allocate space for num_predef_routes + 1 for the custom/user defined route
+
+  if((gd.layers.route_wind.route =(route_track_t *) 
+      calloc(gd.layers.route_wind.num_predef_routes + 1, sizeof(route_track_t))) == NULL) {
+    fprintf(stderr,"Unable to allocate space for %d Routes\n",
+            gd.layers.route_wind.num_predef_routes + 1);
+    perror("CIDD route_winds_init");
+    exit(-1);
+  }
+  
+  char *cfield[NUM_PARSE_FIELDS];
+  for(int ii = 0; ii < NUM_PARSE_FIELDS; ii++) {
+    cfield[ii] =(char *) calloc(PARSE_FIELD_SIZE, 1);
+  }
+  
+  for(int ii = 0; ii < gd.layers.route_wind.num_predef_routes; ii++) {
+    
+    int num_fields = STRparse(_params._route_paths[ii], cfield,
+                              strlen(_params._route_paths[ii]),
+                              NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
+    if(num_fields == NUM_PARSE_FIELDS) {
+      fprintf(stderr,"Warning: Route path: %s\n Too long. Only %d segments allowed \n",
+              _params._route_paths[ii], MAX_ROUTE_SEGMENTS);
+    }
+    
+    // Collect Label
+    strncpy(gd.layers.route_wind.route[ii].route_label, cfield[0], 62);
+    
+    // Collect the number of points  & segments 
+    gd.layers.route_wind.route[ii].num_segments = atoi(cfield[1]) -1;
+    if(_params.route_debug) {
+      fprintf(stderr,"\nRoute: %s - %d segments\n",
+              gd.layers.route_wind.route[ii].route_label,
+              gd.layers.route_wind.route[ii].num_segments);
+    }
+
+    // Sanity check
+    if(gd.layers.route_wind.route[ii].num_segments <= 0 || 
+       gd.layers.route_wind.route[ii].num_segments >  MAX_ROUTE_SEGMENTS) {
+      fprintf(stderr,"Warning: Route path: %s\n Error Only 1-%d segments allowed \n",
+              _params._route_paths[ii], MAX_ROUTE_SEGMENTS);
+      continue;
+    }
+    
+    int index = 2; // The first triplet.
+    // Pick up each triplet
+    for(int kk = 0; kk <= gd.layers.route_wind.route[ii].num_segments; kk++, index+=3 ) {
+
+      strncpy(gd.layers.route_wind.route[ii].navaid_id[kk], cfield[index], 16);
+      gd.layers.route_wind.route[ii].y_world[kk] = atof(cfield[index +1]);
+      gd.layers.route_wind.route[ii].x_world[kk] = atof(cfield[index +2]);
+
+      switch (gd.display_projection) {
+        case  Mdvx::PROJ_LATLON:
+          normalize_longitude(gd.h_win.min_x, gd.h_win.max_x,
+                              &gd.layers.route_wind.route[ii].x_world[kk]);
+          break;
+
+        default :
+          normalize_longitude(-180.0, 180.0,
+                              &gd.layers.route_wind.route[ii].x_world[kk]);
+          break;
+
+      } 
+
+      gd.proj.latlon2xy(gd.layers.route_wind.route[ii].y_world[kk],
+                        gd.layers.route_wind.route[ii].x_world[kk],
+                        gd.layers.route_wind.route[ii].x_world[kk],
+                        gd.layers.route_wind.route[ii].y_world[kk]);
+
+      if(_params.route_debug) {
+        fprintf(stderr,"%s:  %g,    %g\n",
+                gd.layers.route_wind.route[ii].navaid_id[kk],
+                gd.layers.route_wind.route[ii].x_world[kk],
+                gd.layers.route_wind.route[ii].y_world[kk]);
+      }
+    }
+    
+    // Compute the segment lengths
+    gd.layers.route_wind.route[ii].total_length = 0.0;
+    for(int kk = 0; kk < gd.layers.route_wind.route[ii].num_segments; kk++) {
+      gd.layers.route_wind.route[ii].seg_length[kk] = 
+        disp_proj_dist(gd.layers.route_wind.route[ii].x_world[kk],
+                       gd.layers.route_wind.route[ii].y_world[kk],
+                       gd.layers.route_wind.route[ii].x_world[kk+1],
+                       gd.layers.route_wind.route[ii].y_world[kk+1]);
+      gd.layers.route_wind.route[ii].total_length += gd.layers.route_wind.route[ii].seg_length[kk];
+    }
+    
+  } // ii
+
+  // Copy the initial route definition into the space reserved for the Custom route
+  memcpy(gd.layers.route_wind.route + gd.layers.route_wind.num_predef_routes,
+         &gd.h_win.route,sizeof(route_track_t));
+
+  /* free temp space */
+  for(int ii = 0; ii < NUM_PARSE_FIELDS; ii++) {
+    free(cfield[ii]);
+  }
+  
+  if (_params.route_winds_active) {
+    gd.layers.route_wind.has_params = 1;
+    // Use the first route as the default.
+    memcpy(&gd.h_win.route, gd.layers.route_wind.route, sizeof(route_track_t)); 
+  } else {
+    gd.layers.route_wind.has_params = 0;
+  }
 
 }
 
