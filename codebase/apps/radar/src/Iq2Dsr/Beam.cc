@@ -1999,10 +1999,12 @@ void Beam::_filterSpH()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
 
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+      fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+      fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    }
     
     // compute filtered moments for this gate
     
@@ -2436,10 +2438,12 @@ void Beam::_filterDpAltHvCoOnly()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+      fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+      fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    }
 
     // filter the Vc channel using the same notch as Hc
     
@@ -2547,6 +2551,15 @@ void Beam::_filterDpSimHvFixedPrt()
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
                              true);
       
+    // save regession filter details
+    
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+      fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+      fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    }
+    
     // compute filtered moments for this gate
     
     _mom->computeCovarDpSimHv(gate->iqhcF, gate->iqvcF, fieldsF);
@@ -2625,7 +2638,7 @@ void Beam::_filterDpSimHvStagPrt()
   
   double calibNoiseHc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HC);
   double calibNoiseVc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_VC);
-  
+
   for (int igate = 0; igate < _nGatesPrtLong; igate++) {
       
     GateData *gate = _gateData[igate];
@@ -2671,6 +2684,15 @@ void Beam::_filterDpSimHvStagPrt()
                                       gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
                                       filterRatioVc, spectralNoiseVc, spectralSnrVc, true);
 
+    // save regession filter details
+    
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+      fields.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
+      fields.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
+      fieldsF.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
+      fieldsF.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
+    }
+    
     // compute filtered moments for this gate
     
     _momStagPrt->dpSimHvStagPrt(gate->iqhc,
@@ -2746,10 +2768,12 @@ void Beam::_filterDpHOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+      fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+      fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
+      fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    }
     
     // apply the filter to the Vx channel
 
