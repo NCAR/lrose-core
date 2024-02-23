@@ -89,6 +89,7 @@ extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, 
 
 #ifndef CIDD_INIT
 extern void init_data_space();
+extern void init_globals();
 #endif
 
 #ifndef CIDD_MAIN
@@ -120,10 +121,6 @@ extern void init_signal_handlers();
 #endif
 
 #ifndef COLORSCALES
-extern int combine_color_maps( Display    *dpy, Colormap    cmap);
-extern int get_color_mapping(const char *color_file_subdir,
-                      const char *fname,         /* file name */
-                      Val_color_t *cval[]); /* RETURN -  pointer to array of structs */
 extern void setup_colorscales(Display *dpy);
 extern void setup_color_mapping(Valcolormap_t *vcm,
 				double scale, double bias, int transform_type,

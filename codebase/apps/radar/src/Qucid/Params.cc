@@ -3366,15 +3366,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'color_scale_dir'
+    // Parameter 'color_scales_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("color_scale_dir");
+    tt->param_name = tdrpStrDup("color_scales_url");
     tt->descr = tdrpStrDup("Directory for color scales");
     tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
-    tt->val_offset = (char *) &color_scale_dir - &_start_;
+    tt->val_offset = (char *) &color_scales_url - &_start_;
     tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales");
     tt++;
     
@@ -3387,16 +3387,16 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'map_file_subdir'
+    // Parameter 'maps_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("map_file_subdir");
-    tt->descr = tdrpStrDup("Directory for maps/overlays.");
+    tt->param_name = tdrpStrDup("maps_url");
+    tt->descr = tdrpStrDup("Directory for map overlays.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &map_file_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(HOME)/maps");
+    tt->val_offset = (char *) &maps_url - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/maps");
     tt++;
     
     // Parameter 'locator_margin_km'

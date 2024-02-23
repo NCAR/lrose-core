@@ -941,9 +941,9 @@ public:
 
   double start_ht;
 
-  char* color_scale_dir;
+  char* color_scales_url;
 
-  char* map_file_subdir;
+  char* maps_url;
 
   double locator_margin_km;
 

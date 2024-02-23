@@ -1613,7 +1613,7 @@ paramdef string {
   p_default = "$(HOME)/git/lrose-displays/color_scales";
   p_descr = "Directory for color scales";
   p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
-} color_scale_dir;
+} color_scales_url;
 
 commentdef {
   p_header = "Finding the resources for maps/overlays, surface stations.";
@@ -1621,10 +1621,10 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "$(HOME)/maps";
-  p_descr = "Directory for maps/overlays.";
+  p_default = "$(HOME)/git/lrose-displays/maps";
+  p_descr = "Directory for map overlays.";
   p_help = "";
-} map_file_subdir;
+} maps_url;
 
 paramdef double {
   p_default = 50;

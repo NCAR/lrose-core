@@ -46,8 +46,8 @@ static void _initDrawExport();
 static void _initMaps();
 static void _initRouteWinds();
 
-static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir);
-static void _loadShapeMap(Overlay_t *ov, const char    *map_file_subdir);
+static void _loadRapMap(Overlay_t *ov, const char *maps_url);
+static void _loadShapeMap(Overlay_t *ov, const char    *maps_url);
 
 static void _initZooms();
 static void _initContours();
@@ -1372,7 +1372,7 @@ static void _initRouteWinds()
  * LOAD_RAP_MAP - load map in RAP format
  */
 
-static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir)
+static void _loadRapMap(Overlay_t *ov, const char *maps_url)
 {
 
   int    i,j;
@@ -1394,13 +1394,13 @@ static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir)
   for(i=0; i < 32; i++)  cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
 
   // Add . to list to start.
-  strncpy(dirname,".,",1024);
-  strncat(dirname,map_file_subdir,1024);
+  strncpy(dirname, ".,", 1024);
+  strncat(dirname, maps_url, 1024);
 
   str_ptr = strtok(dirname,","); // Prime strtok
 
-  do{  // Try each comma delimited subdir
-
+  do {  // Try each comma delimited subdir
+    
     while(*str_ptr == ' ') str_ptr++; //skip any leading space
     sprintf(name_buf,"%s/%s",str_ptr,ov->map_file_name);
 
@@ -1437,7 +1437,7 @@ static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir)
 
         // Read
         if((map_len = fread(map_buf,1,sbuf.st_size,mapfile)) != sbuf.st_size) {
-          fprintf(stderr,"Problems Reading %s\n",name_buf);
+          fprintf(stderr,"Problems reading RAP map: %s\n", name_buf);
           exit(-1);
         }
         map_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
@@ -1812,7 +1812,7 @@ static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir)
  * LOAD_SHAPE_OVERLAY_DATA: This version reads Shape files
  */
 
-static void _loadShapeMap(Overlay_t *ov, const char *map_file_subdir)
+static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 {
   int    i,j;
   int    index,found,is_http;
@@ -1835,7 +1835,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *map_file_subdir)
 
   // Add . to list of dirs to search  to start.
   strncpy(dirname,".,",2048);
-  strncat(dirname,map_file_subdir,2048);
+  strncat(dirname,maps_url,2048);
 
 
   found = 0;
@@ -2162,30 +2162,42 @@ void _initMaps()
     
     Params::map_t &omap = _params._maps[ii];
     string mapFileName = omap.map_file_name;
-    Overlay_t *ov = gd.over[ii];
+    gd.over[ii] = (Overlay_t *) calloc(1,sizeof(Overlay_t));
+    Overlay_t *over = gd.over[ii];
+    memset(over, 0, sizeof(Overlay_t));
     
-    ov->num_polylines = 0;
-    ov->num_labels = 0;
-    ov->num_icons = 0;
+    STRcopy(over->map_code, omap.map_code, LABEL_LENGTH);
+    STRcopy(over->control_label, omap.control_label, LABEL_LENGTH);
+    STRcopy(over->map_file_name, omap.map_file_name, NAME_LENGTH);
+    over->default_on_state = omap.on_at_startup;
+    over->line_width = omap.line_width;
+    if(over->line_width <=0) {
+      over->line_width = 1;
+    }
+    over->detail_thresh_min = omap.detail_thresh_min;
+    over->detail_thresh_max = omap.detail_thresh_max;
+    over->active = over->default_on_state;
     
+    STRcopy(over->color_name, omap.color, NAME_LENGTH);
+
     if (mapFileName.find(".shp") != string::npos &&
         mapFileName.find(".shx") != string::npos) {
       
-      _loadShapeMap(ov, _params.map_file_subdir);
+      _loadShapeMap(over, _params.maps_url);
 
     } else {  // Assume RAP Map Format 
       
-      _loadRapMap(ov, _params.map_file_subdir);
+      _loadRapMap(over, _params.maps_url);
 
     }
     
     if(gd.debug) {
       printf("Overlay file %s contains %ld polylines, %ld icon_defns, %ld icons, %ld labels\n",
-             ov->map_file_name,
-             ov->num_polylines,
-             ov->num_icondefs,
-             ov->num_icons,
-             ov->num_labels);
+             over->map_file_name,
+             over->num_polylines,
+             over->num_icondefs,
+             over->num_icons,
+             over->num_labels);
     }
     
   } // ii
@@ -2440,6 +2452,111 @@ static void _initOverlayFields()
       }
     } // jj
   } // ii
+
+}
+
+///////////////////////////////////////////////////
+// get the archive url
+
+void init_globals()
+  
+{
+
+  gd.hcan_xid = 0;
+  gd.vcan_xid = 0;
+    
+  gd.debug = 0;
+  gd.debug1 = 0;
+  gd.debug2 = 0;
+    
+  gd.argc = 0;
+  gd.display_projection = 0;
+  gd.quiet_mode = 0;   
+  gd.report_mode = 0;   
+  gd.run_unmapped = 0;   
+  gd.use_cosine_correction = -1;
+  MEM_zero(gd.product_detail_threshold);
+  MEM_zero(gd.product_detail_adjustment);
+
+  gd.mark_latest_client_location = 0; 
+  gd.forecast_mode = 0;     
+  gd.data_format = 0; 
+
+  gd.num_colors = 0;       
+  gd.num_draw_colors = 0;  
+  gd.map_overlay_color_index_start = 0;
+  gd.last_event_time = 0;  
+  gd.epoch_start = 0;      
+  gd.epoch_end  = 0;       
+  gd.model_run_time = 0;  
+  gd.data_request_time = 0; 
+  gd.finished_init = 0;    
+
+  gd.num_datafields = 0;   
+  gd.num_menu_fields = 0;  
+  gd.num_map_overlays = 0; 
+  gd.num_render_heights = 0;
+  gd.cur_render_height = 0; 
+  gd.cur_field_set = 0;     
+  gd.save_im_win = 0;       
+  gd.image_needs_saved = 0; 
+  gd.generate_filename = 0; 
+
+  gd.pan_in_progress = 0;    
+  gd.zoom_in_progress = 0;   
+  gd.route_in_progress = 0;  
+  gd.data_status_changed = 0;
+  gd.series_save_active = 0; 
+
+  gd.num_field_labels = 0;  
+  MEM_zero(gd.field_index);
+  gd.aspect_correction = 0; 
+  MEM_zero(gd.height_array);
+  MEM_zero(gd.proj_param);
+
+  gd.argv = NULL;             
+  gd.orig_wd = NULL;           
+  gd.app_name = NULL;          
+  gd.app_instance = NULL;      
+
+  MEM_zero(gd.data_info);
+
+  MEM_zero(gd.gen_time_list);
+
+  MEM_zero(gd.h_win);
+  MEM_zero(gd.v_win);
+
+  gd.def_gc = 0;
+  gd.ol_gc = 0;
+  gd.clear_ol_gc = 0;
+  gd.dpyName = NULL;
+  gd.dpy = NULL;
+
+  MEM_zero(gd.color);
+  MEM_zero(gd.null_color);
+
+  MEM_zero(gd.ciddfont);
+  MEM_zero(gd.fontst);
+    
+  MEM_zero(gd.prod);
+  MEM_zero(gd.over);
+  MEM_zero(gd.mrec);
+  MEM_zero(gd.layers);
+  MEM_zero(gd.legends);
+  gd.bookmark = NULL;
+  MEM_zero(gd.movie);
+  MEM_zero(gd.io_info);
+  MEM_zero(gd.status);
+  MEM_zero(gd.draw);
+
+  gd.coord_expt = NULL;
+  gd.prod_mgr = NULL;
+  gd.time_plot = NULL;         
+  gd.r_context = NULL;    
+  gd.station_loc = NULL;    
+  gd.remote_ui = NULL;   
+
+  gd.coord_key = 0;
 
 }
 

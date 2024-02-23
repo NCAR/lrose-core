@@ -52,11 +52,15 @@ static CvalMap cvalMap;
  *        Returns number of entries found, -1 on error
  */
 
-int    get_color_mapping(const char *color_file_subdir,
-        const char *fname,         /* file name */
-        Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
+static int _get_color_mapping(const char *color_file_subdir,
+                              const char *fname,         /* file name */
+                              Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
 {
-    FILE   *cfile;
+
+  cerr << "aaaaaaaaaaaa color_file_subdir: " << color_file_subdir << endl;
+  cerr << "aaaaaaaaaaaa fname: " << fname << endl;
+
+  FILE   *cfile;
     struct stat sbuf;
     char   *cs_buf;
     char   buf[2048];
@@ -154,7 +158,7 @@ int    get_color_mapping(const char *color_file_subdir,
 
 	// Read
 	if((cs_len = fread(cs_buf,1,sbuf.st_size,cfile)) != sbuf.st_size) {
-	   fprintf(stderr,"Problems Reading %s\n",buf);
+	   fprintf(stderr,"Problems Reading color map: %s\n",buf);
 	   return -1;
 	}
 	cs_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
@@ -257,7 +261,7 @@ int    get_color_mapping(const char *color_file_subdir,
  * for overlay drawing.  Fills in the global color array: gd.color[] 
  */
 
-int combine_color_maps( Display    *dpy, Colormap    cmap)
+static int _combine_color_maps(Display *dpy, Colormap cmap)
 {
     int    i,j,k;
     int    status;
@@ -276,7 +280,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     XGCValues gcvalues;    
 
 
-    color_file_subdir = _params.color_scale_dir;
+    color_file_subdir = _params.color_scales_url;
      
 
     gd.num_colors = 0;
@@ -451,7 +455,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     /* Now go through each data field color scale file and pick out unique colors */
     int iret = 0;
     for(i=0; i < gd.num_datafields ; i++) {        /* each color map file */
-      nentries = get_color_mapping(color_file_subdir,gd.mrec[i]->color_file,gd.mrec[i]->h_vcm.vc);
+      nentries = _get_color_mapping(color_file_subdir,gd.mrec[i]->color_file,gd.mrec[i]->h_vcm.vc);
       if (nentries < 0) {
         fprintf(stderr, "ERROR - setup_colorscales\n");
         fprintf(stderr, "  field_label: %s\n", gd.mrec[i]->field_label);
@@ -537,7 +541,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     
     if( gd.layers.earth.landuse_active) {
       // LOAD up the color scale for the Lands Use field
-      nentries = get_color_mapping(color_file_subdir,
+      nentries = _get_color_mapping(color_file_subdir,
                                    gd.layers.earth.land_use->color_file,
                                    gd.layers.earth.land_use->h_vcm.vc);
       gd.layers.earth.land_use->h_vcm.nentries = nentries;
@@ -705,13 +709,13 @@ void setup_colorscales(Display *dpy)
     status = 0;
 
     gd.cmap = DefaultColormap(dpy,DefaultScreen(dpy));
-    status = combine_color_maps(dpy,gd.cmap);
+    status = _combine_color_maps(dpy,gd.cmap);
     if(status < 0) {
         fprintf(stderr,"Warning: Cannot allocate enough colors from standard colormap\n");
         fprintf(stderr,"Creating one - Other windows may be affected\n");
         visual = DefaultVisual(gd.dpy,0);
         gd.cmap = XCreateColormap(gd.dpy,RootWindow(gd.dpy,0),visual,AllocNone);
-        status = combine_color_maps(dpy,gd.cmap);
+        status = _combine_color_maps(dpy,gd.cmap);
         if(status < 0) {
             fprintf(stderr,"Error allocating colors from new colormap - \n");
             exit(-1);

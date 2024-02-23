@@ -896,10 +896,11 @@ int LegacyParams::_loadKeyValPairsFile(const string &fname,
   }
   
   // Read into tmp buf
-  db_len = fread(tmpBuf,1,tmpLen,infile);
+  db_len = fread(tmpBuf, 1, tmpLen, infile);
   if(db_len <= 0) {
     perror(fname.c_str());
-    fprintf(stderr,"Problems Reading %s\n",fname.c_str());
+    fprintf(stderr,"ERROR - LegacyParams::_loadKeyValsPairsFile\n");
+    fprintf(stderr,"  Params file name: %s\n", fname.c_str());
     return -1;
   }
   
@@ -1255,16 +1256,22 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.start_ht", 0.0);
 
   // maps
-  _getString("cidd.map_file_subdir", "maps");
+
+  _getString("cidd.map_file_subdir", "$(HOME)/git/lrose-displays/maps",
+             true, "maps_url");
   _getDouble("cidd.locator_margin_km", 50.0);
   _getString("cidd.station_loc_url", "");
 
   // server access
+
   _getString("cidd.remote_ui_url", "");
   _getString("cidd.http_tunnel_url", "");
   _httpProxyUrl = _getString("cidd.http_proxy_url", "");
 
   // colors
+  
+  _getString("cidd.color_file_subdir", "$(HOME)/git/lrose-displays/color_scales",
+             true, "color_scales_url");
   _getString("cidd.foreground_color", "White");
   _getString("cidd.background_color", "Black");
   _getString("cidd.margin_color", "Black");

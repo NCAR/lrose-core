@@ -73,13 +73,14 @@ Qucid::Qucid(int argc, char **argv) :
 
   // initialize legacy CIDD structs
   
-  _initGlobals();
+  init_globals();
 
   // initialize signal handling
   
   init_signal_handlers();  
 
   // check for legacy params file
+  // if found create a temporary tdrp file based on the legacy file
 
   string legacyParamsPath;
   char tdrpParamsPath[5000];
@@ -92,7 +93,7 @@ Qucid::Qucid(int argc, char **argv) :
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     usingLegacyParams = true;
   }
-  
+
   // get command line args
   
   if (_args.parse(argc, (const char **) argv)) {
@@ -134,34 +135,35 @@ Qucid::Qucid(int argc, char **argv) :
   }
 
   // initialize globals, get/set defaults, establish data sources etc.
-  
-  if (_args.usingLegacyParams()) {
-    init_data_space();
-  }
+
+
+  init_data_space();
+
+  exit(0);
   
   // set params on alloc checker
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    LOG_STREAM_INIT(true, true, true, true);
-  } else if (_params.debug) {
-    LOG_STREAM_INIT(true, false, true, true);
-  } else {
-    LOG_STREAM_INIT(false, false, false, false);
-    LOG_STREAM_TO_CERR();
-  }
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //   LOG_STREAM_INIT(true, true, true, true);
+  // } else if (_params.debug) {
+  //   LOG_STREAM_INIT(true, false, true, true);
+  // } else {
+  //   LOG_STREAM_INIT(false, false, false, false);
+  //   LOG_STREAM_TO_CERR();
+  // }
 
   // print color scales if debugging
-  if (_params.debug) {
-    SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-    sd.PrintColorScales();
-  } 
+  // if (_params.debug) {
+  //   SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+  //   sd.PrintColorScales();
+  // } 
 
   // set up display fields
 
-  if (_setupDisplayFields()) {
-    OK = false;
-    return;
-  }
+  // if (_setupDisplayFields()) {
+  //   OK = false;
+  //   return;
+  // }
 
   // create reader
 
@@ -219,7 +221,9 @@ Qucid::~Qucid()
 int Qucid::Run(QApplication &app)
 {
 
-  setup_colorscales(gd.dpy);    /* Establish color table & mappings  */
+  /* Establish color table & mappings  */
+
+  setup_colorscales(gd.dpy);
   
   // Instantiate Symbolic products
   init_symprods();
@@ -295,15 +299,15 @@ int Qucid::_setupDisplayFields()
 
   // check for color map location
   
-  string colorMapDir = _params.color_scale_dir;
-  Path mapDir(_params.color_scale_dir);
+  string colorMapDir = _params.color_scales_url;
+  Path mapDir(colorMapDir);
   if (!mapDir.dirExists()) {
-    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
+    colorMapDir = Path::getPathRelToExec(_params.color_scales_url);
     mapDir.setPath(colorMapDir);
     if (!mapDir.dirExists()) {
       cerr << "ERROR - Qucid" << endl;
       cerr << "  Cannot find color scale directory" << endl;
-      cerr << "  Primary is: " << _params.color_scale_dir << endl;
+      cerr << "  Primary is: " << _params.color_scales_url << endl;
       cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
       return -1;
     }
@@ -406,123 +410,4 @@ int Qucid::_setupDisplayFields()
 
 }
 
-
-///////////////////////////////////////////////////
-// get the archive url
-
-void Qucid::_initGlobals()
-  
-{
-
-  gd.hcan_xid = 0;
-  gd.vcan_xid = 0;
-    
-  gd.debug = 0;
-  gd.debug1 = 0;
-  gd.debug2 = 0;
-    
-  gd.argc = 0;
-  gd.display_projection = 0;
-  gd.quiet_mode = 0;   
-  gd.report_mode = 0;   
-  gd.run_unmapped = 0;   
-  gd.use_cosine_correction = -1;
-  MEM_zero(gd.product_detail_threshold);
-  MEM_zero(gd.product_detail_adjustment);
-
-  gd.mark_latest_client_location = 0; 
-  gd.forecast_mode = 0;     
-  gd.data_format = 0; 
-
-  gd.num_colors = 0;       
-  gd.num_draw_colors = 0;  
-  gd.map_overlay_color_index_start = 0;
-  gd.last_event_time = 0;  
-  gd.epoch_start = 0;      
-  gd.epoch_end  = 0;       
-  gd.model_run_time = 0;  
-  gd.data_request_time = 0; 
-  gd.finished_init = 0;    
-
-  gd.num_datafields = 0;   
-  gd.num_menu_fields = 0;  
-  // _params.num_field_menu_cols = 0; 
-  gd.num_map_overlays = 0; 
-  // _params.num_bookmarks = 0;    
-  gd.num_render_heights = 0;
-  // _params.num_cache_zooms = 0;   
-  gd.cur_render_height = 0; 
-  gd.cur_field_set = 0;     
-  gd.save_im_win = 0;       
-  gd.image_needs_saved = 0; 
-  gd.generate_filename = 0; 
-  // _params.max_time_list_span = 0; 
-
-  gd.pan_in_progress = 0;    
-  gd.zoom_in_progress = 0;   
-  gd.route_in_progress = 0;  
-  // _params.data_timeout_secs = 0;  
-  gd.data_status_changed = 0;
-  gd.series_save_active = 0; 
-
-  gd.num_field_labels = 0;  
-  // gd.db_data_len = 0;       
-  MEM_zero(gd.field_index);
-  // _params.movieframe_time_mode = 0;  
-                               
-  // _params.image_inten = 0;    
-  // _params.data_inten = 0;     
-  gd.aspect_correction = 0; 
-  // _params.aspect_ratio = 0;  
-  // _params.scale_units_per_km = 0; 
-  // _params.locator_margin_km = 0;  
-  MEM_zero(gd.height_array);
-  MEM_zero(gd.proj_param);
-
-  gd.argv = NULL;             
-  gd.orig_wd = NULL;           
-  gd.app_name = NULL;          
-  gd.app_instance = NULL;      
-
-  MEM_zero(gd.data_info);
-
-  MEM_zero(gd.gen_time_list);
-
-  MEM_zero(gd.h_win);
-  MEM_zero(gd.v_win);
-
-  gd.def_gc = 0;
-  gd.ol_gc = 0;
-  gd.clear_ol_gc = 0;
-  gd.dpyName = NULL;
-  gd.dpy = NULL;
-  MEM_zero(gd.color);
-  MEM_zero(gd.null_color);
-
-  // FONTS
-  // _params.fonts_n = 0;
-  MEM_zero(gd.ciddfont);
-  MEM_zero(gd.fontst);
-    
-  MEM_zero(gd.prod);
-  MEM_zero(gd.over);
-  MEM_zero(gd.mrec);
-  MEM_zero(gd.layers);
-  MEM_zero(gd.legends);
-  gd.bookmark = NULL;
-  MEM_zero(gd.movie);
-  MEM_zero(gd.io_info);
-  MEM_zero(gd.status);
-  MEM_zero(gd.draw);
-
-  gd.coord_expt = NULL;
-  gd.prod_mgr = NULL;
-  gd.time_plot = NULL;         
-  gd.r_context = NULL;    
-  gd.station_loc = NULL;    
-  gd.remote_ui = NULL;   
-
-  gd.coord_key = 0;
-
-}
 
