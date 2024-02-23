@@ -139,8 +139,6 @@ Qucid::Qucid(int argc, char **argv) :
     init_data_space();
   }
   
-  exit(0);
-  
   // set params on alloc checker
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -184,7 +182,7 @@ Qucid::Qucid(int argc, char **argv) :
   }
   
   // init process mapper registration
-
+  
   if (_params.register_with_procmap) {
     PMU_auto_init((char *) _progName.c_str(),
                   _params.instance,
