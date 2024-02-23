@@ -367,18 +367,18 @@ void set_route_mode( u_int value)
     }
 
 	// Make sure the Pick Button is up.
-	if(gd.menu_bar.set_pick_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// if(gd.menu_bar.set_pick_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 	
-	// Make sure the Draw Button is up.
-	if(gd.menu_bar.set_draw_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// // Make sure the Draw Button is up.
+	// if(gd.menu_bar.set_draw_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 }
 
 /*************************************************************************
@@ -412,18 +412,18 @@ void set_pick_export_mode( u_int value)
     }
 
 	// Make sure the Route Button is up.
-	if(gd.menu_bar.set_route_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// if(gd.menu_bar.set_route_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 	
-	// Make sure the Draw Button is up.
-	if(gd.menu_bar.set_draw_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// // Make sure the Draw Button is up.
+	// if(gd.menu_bar.set_draw_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 }
 
 /*************************************************************************
@@ -458,18 +458,18 @@ void set_draw_export_mode( u_int value)
     }
 
 	// Make sure the Route Button is up.
-	if(gd.menu_bar.set_route_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// if(gd.menu_bar.set_route_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 	
-	// Make sure the Pick Button is up.
-	if(gd.menu_bar.set_pick_mode_bit != 0) {
-	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
-	  // xv_set(gd.h_win_horiz_bw->main_st,
-	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	}
+	// // Make sure the Pick Button is up.
+	// if(gd.menu_bar.set_pick_mode_bit != 0) {
+	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
+	//   // xv_set(gd.h_win_horiz_bw->main_st,
+	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	// }
 }
 
 
@@ -1236,7 +1236,6 @@ void symprods_onoff( u_int value)
  */
 void startup_printing( u_int value)
 {
-    u_int p_value;
 
     gd.save_im_win = 0;
 
@@ -1248,9 +1247,9 @@ void startup_printing( u_int value)
     }
     dump_cidd_image(gd.save_im_win,0,1,gd.h_win.page);
 
-    p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.print_button_bit);
-
-    gd.menu_bar.last_callback_value = p_value;
+    // u_int p_value;
+    // p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.print_button_bit);
+    // gd.menu_bar.last_callback_value = p_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
 
@@ -1261,7 +1260,6 @@ void startup_printing( u_int value)
 void startup_snapshot( u_int value)
 {
     char cmd[1024];
-    u_int p_value;
 
     sprintf(cmd,"%s %ld %d %d > /dev/null 2>&1 &\n",SNAPSHOT_CMD,
      gd.h_win.can_xid[gd.h_win.cur_cache_im],
@@ -1270,8 +1268,9 @@ void startup_snapshot( u_int value)
     fprintf(stderr,"Executing: %s",cmd);
     system(cmd);
 
-    p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.snapshot_bit);
-    gd.menu_bar.last_callback_value = p_value;
+    // u_int p_value;
+    // p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.snapshot_bit);
+    // gd.menu_bar.last_callback_value = p_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
 
@@ -1281,7 +1280,6 @@ void startup_snapshot( u_int value)
  */
 void startup_help( u_int value)
 {
-    u_int p_value;
     char buf[BUFFER_SIZE];
 
     if(value) {
@@ -1295,9 +1293,9 @@ void startup_help( u_int value)
        }
     }
 
-    p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.help_button_bit);
-
-    gd.menu_bar.last_callback_value = p_value;
+    // u_int p_value;
+    // p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.help_button_bit);
+    // gd.menu_bar.last_callback_value = p_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
 

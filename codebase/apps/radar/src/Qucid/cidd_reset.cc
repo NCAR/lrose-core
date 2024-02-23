@@ -60,11 +60,11 @@ void invalidate_all_data()
 void close_all_popups()
 {
   // Restore the Menu bar - in prep of all popups being closed 
-   gd.menu_bar.last_callback_value &= (gd.menu_bar.winds_onoff_bit |
-                                       gd.menu_bar.symprods_onoff_bit |
-                                       gd.menu_bar.landuse_onoff_bit |
-                                       gd.menu_bar.report_mode_bit |
-                                       gd.menu_bar.loop_onoff_bit);
+   // gd.menu_bar.last_callback_value &= (gd.menu_bar.winds_onoff_bit |
+   //                                     gd.menu_bar.symprods_onoff_bit |
+   //                                     gd.menu_bar.landuse_onoff_bit |
+   //                                     gd.menu_bar.report_mode_bit |
+   //                                     gd.menu_bar.loop_onoff_bit);
 
    // xv_set(gd.h_win_horiz_bw->main_st,
    //          PANEL_VALUE, gd.menu_bar.last_callback_value,
@@ -165,8 +165,8 @@ void reset_display()
      
      gd.movie.movie_on = 0;
      // movie button needs to be released
-     gd.menu_bar.last_callback_value = gd.menu_bar.last_callback_value &
-				       ~(gd.menu_bar.loop_onoff_bit);
+     // gd.menu_bar.last_callback_value = gd.menu_bar.last_callback_value &
+     //    			       ~(gd.menu_bar.loop_onoff_bit);
    }
 
    // Restore the movie loop
@@ -195,17 +195,17 @@ void reset_display()
 
    gd.report_mode = 0;  // Turn off report mode.
    // Release menu bar button
-   gd.menu_bar.last_callback_value = gd.menu_bar.last_callback_value &
-				       ~(gd.menu_bar.report_mode_bit);
+   // gd.menu_bar.last_callback_value = gd.menu_bar.last_callback_value &
+   //      			       ~(gd.menu_bar.report_mode_bit);
 
 
    // Restore initial state of winds on-off button
    gd.layers.wind_vectors = gd.layers.init_state_wind_vectors;
    if(gd.layers.wind_vectors) {
-	 gd.menu_bar.last_callback_value |= gd.menu_bar.winds_onoff_bit;
+	 // gd.menu_bar.last_callback_value |= gd.menu_bar.winds_onoff_bit;
    } else {
-	 gd.menu_bar.last_callback_value =gd.menu_bar.last_callback_value 
-	  & ~(gd.menu_bar.winds_onoff_bit);
+	 // gd.menu_bar.last_callback_value =gd.menu_bar.last_callback_value 
+	 //  & ~(gd.menu_bar.winds_onoff_bit);
    }
 
    if(! gd.run_unmapped) update_movie_popup();

@@ -700,7 +700,7 @@ void Qucid::_initGlobals()
   MEM_zero(gd.mrec);
   MEM_zero(gd.layers);
   MEM_zero(gd.legends);
-  MEM_zero(gd.menu_bar);
+  // MEM_zero(gd.menu_bar);
   gd.bookmark = NULL;
   MEM_zero(gd.movie);
   MEM_zero(gd.io_info);

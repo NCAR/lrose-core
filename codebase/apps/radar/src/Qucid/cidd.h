@@ -520,7 +520,7 @@ struct    Global_data {
 
   legend_t    legends;       // Control variables for Legends
 
-  menu_bar_t  menu_bar;      // Control variables for the Main Menu bar
+  // menu_bar_t  menu_bar;      // Control variables for the Main Menu bar
 
   bookmark_t *bookmark;      // Array of bookmarks 
 

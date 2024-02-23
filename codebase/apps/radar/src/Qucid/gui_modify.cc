@@ -152,15 +152,15 @@ void modify_gui_objects()
 
     // xv_set(gd.h_win_horiz_bw->cp,PANEL_ITEM_X_GAP,2,NULL);
     // Setup the Main Menu Bar Cell Labels
-    for(i=1; i <= gd.menu_bar.num_menu_bar_cells; i++) {
+//     for(i=1; i <= gd.menu_bar.num_menu_bar_cells; i++) {
 
-        sprintf(string,"cidd.menu_bar_label%d",i);
-#ifdef NOTNOW
-        resource = gd.uparams->getString(string,"Not Defined");
-#endif
+//         sprintf(string,"cidd.menu_bar_label%d",i);
+// #ifdef NOTNOW
+//         resource = gd.uparams->getString(string,"Not Defined");
+// #endif
 
-        // xv_set(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,i-1,resource,NULL);
-    }
+//         // xv_set(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,i-1,resource,NULL);
+//     }
    
     update_ticker(time(0));
 
@@ -204,41 +204,41 @@ void modify_gui_objects()
     // xv_set(gd.h_win_horiz_bw->movie_frame_msg, XV_SHOW,TRUE, NULL);
 
    // Turn on the Winds ON/OFF Button.
-   if(gd.layers.wind_vectors > 0 &&  gd.menu_bar.winds_onoff_bit > 0) {
-       // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
-       value |= gd.menu_bar.winds_onoff_bit;
-       // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
-       gd.menu_bar.last_callback_value = value;
-   }
+   // if(gd.layers.wind_vectors > 0 &&  gd.menu_bar.winds_onoff_bit > 0) {
+   //     // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
+   //     value |= gd.menu_bar.winds_onoff_bit;
+   //     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
+   //     gd.menu_bar.last_callback_value = value;
+   // }
 
    // Turn on the Land Use ON/OFF Button.
-   if(gd.layers.earth.landuse_active > 0 &&  gd.menu_bar.landuse_onoff_bit > 0) {
-       // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
-       value |= gd.menu_bar.landuse_onoff_bit;
-       // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
-       gd.menu_bar.last_callback_value = value;
-   }
+   // if(gd.layers.earth.landuse_active > 0 &&  gd.menu_bar.landuse_onoff_bit > 0) {
+   //     // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
+   //     value |= gd.menu_bar.landuse_onoff_bit;
+   //     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
+   //     gd.menu_bar.last_callback_value = value;
+   // }
 
    // Turn on the SYMPRODS ON/OFF Button.
-   if(gd.prod.products_on > 0 &&  gd.menu_bar.symprods_onoff_bit > 0) {
-       // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
-       value |= gd.menu_bar.symprods_onoff_bit;
-       // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
-       gd.menu_bar.last_callback_value = value;
-   }
+   // if(gd.prod.products_on > 0 &&  gd.menu_bar.symprods_onoff_bit > 0) {
+   //     // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
+   //     value |= gd.menu_bar.symprods_onoff_bit;
+   //     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
+   //     gd.menu_bar.last_callback_value = value;
+   // }
    // Turn on the Loop ON/OFF Button.
-    if(gd.movie.movie_on) {
-        if(gd.menu_bar.loop_onoff_bit > 0) {
-	   // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
-	   value |= gd.menu_bar.loop_onoff_bit;
-	   // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
-           gd.menu_bar.last_callback_value = value;
-        }
+    // if(gd.movie.movie_on) {
+    //     if(gd.menu_bar.loop_onoff_bit > 0) {
+    //        // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE,NULL);
+    //        value |= gd.menu_bar.loop_onoff_bit;
+    //        // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
+    //        gd.menu_bar.last_callback_value = value;
+    //     }
 
-        // xv_set(gd.movie_pu->start_st, PANEL_VALUE,1, NULL);
-    } else {
-        // xv_set(gd.movie_pu->start_st, PANEL_VALUE,0, NULL);
-    }
+    //     // xv_set(gd.movie_pu->start_st, PANEL_VALUE,1, NULL);
+    // } else {
+    //     // xv_set(gd.movie_pu->start_st, PANEL_VALUE,0, NULL);
+    // }
 
 
     /* Set the labels on the Bookmark choice_panel  */

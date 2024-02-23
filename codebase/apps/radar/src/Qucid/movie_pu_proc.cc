@@ -136,14 +136,13 @@ void movie_start( u_int value)
 {
   int    i;
   int    sl_value;
-  int    new_value;
   Drawable    xid;
 
 
   if(value) {    /* Start command */
     // Make sure the main loop on/off button is correct
-    new_value = gd.menu_bar.last_callback_value | gd.menu_bar.loop_onoff_bit;
-    gd.menu_bar.last_callback_value = new_value;
+    // int new_value = gd.menu_bar.last_callback_value | gd.menu_bar.loop_onoff_bit;
+    // gd.menu_bar.last_callback_value = new_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE, new_value, NULL);
 
     // Make sure the Movie popup's value is correct
@@ -167,8 +166,8 @@ void movie_start( u_int value)
 
   } else {    /* Stop command */
     // Make sure the main loop on/off button is correct
-    new_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.loop_onoff_bit);
-    gd.menu_bar.last_callback_value = new_value;
+    // int new_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.loop_onoff_bit);
+    // gd.menu_bar.last_callback_value = new_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE, new_value, NULL);
 
     // Make sure the Movie popup's value is correct

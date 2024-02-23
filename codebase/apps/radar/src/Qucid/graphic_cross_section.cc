@@ -50,27 +50,27 @@ extern int    r_startx,r_starty;    /* ROUTE start point */
 
 void setup_route_area(int clear_flag )
 {
-    int value = 0;
 
-	if(clear_flag) {
-      gd.v_win.cmin_x = 0.0;
-      gd.v_win.cmax_x = gd.h_win.route.total_length;
-      gd.v_win.cmin_y = gd.v_win.min_ht;
-      gd.v_win.cmax_y = gd.v_win.max_ht;
-	}
-
-    // Turn on Cross section bit
-    // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE);
-    value |= gd.menu_bar.show_xsect_panel_bit;
-    // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
-    gd.menu_bar.last_callback_value = value;
-
-    show_xsect_panel((u_int)1);
-     
-    gd.v_win.active = 1;
-    set_redraw_flags(1,1);
-    reset_data_valid_flags(0,1);
-    reset_terrain_valid_flags(0,1);
+  if(clear_flag) {
+    gd.v_win.cmin_x = 0.0;
+    gd.v_win.cmax_x = gd.h_win.route.total_length;
+    gd.v_win.cmin_y = gd.v_win.min_ht;
+    gd.v_win.cmax_y = gd.v_win.max_ht;
+  }
+  
+  // int value = 0;
+  // Turn on Cross section bit
+  // value = xv_get(gd.h_win_horiz_bw->main_st,PANEL_VALUE);
+  //     value |= gd.menu_bar.show_xsect_panel_bit;
+  // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
+  // gd.menu_bar.last_callback_value = value;
+  
+  show_xsect_panel((u_int)1);
+  
+  gd.v_win.active = 1;
+  set_redraw_flags(1,1);
+  reset_data_valid_flags(0,1);
+  reset_terrain_valid_flags(0,1);
 }
  
 /*************************************************************************

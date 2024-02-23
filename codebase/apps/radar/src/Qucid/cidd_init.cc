@@ -2522,91 +2522,91 @@ void _initMaps()
   
 }
 
-#ifdef NOT_ANY_MORE
+// #ifdef NOT_ANY_MORE
   
-  const char *resource;
+//   const char *resource;
 
-  // legacy CIDD menu bar - deprecated
+//   // legacy CIDD menu bar - deprecated
   
-  ZERO_STRUCT(&gd.menu_bar);
-  gd.menu_bar.num_menu_bar_cells = gd.uparams->getLong("cidd.num_menu_bar_cells",0);
-  if(gd.menu_bar.num_menu_bar_cells > 0) {
-    for(int ii = 1; ii <= gd.menu_bar.num_menu_bar_cells; ii++) {
-      sprintf(str_buf,"cidd.menu_bar_funct%d",ii);
-      resource = gd.uparams->getString(str_buf,"Not Defined");
-      if(strcmp("LOOP_ONOFF",resource) == 0) {
-        gd.menu_bar.loop_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("WINDS_ONOFF",resource) == 0) {
-        gd.menu_bar.winds_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_FORECAST_MENU",resource) == 0) {
-        gd.menu_bar.show_forecast_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_PAST_MENU",resource) == 0) {
-        gd.menu_bar.show_past_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_GENTIME_MENU",resource) == 0) {
-        gd.menu_bar.show_gen_time_win_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SYMPRODS_ONOFF",resource) == 0) {
-        gd.menu_bar.symprods_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("PRINT_BUTTON",resource) == 0) {
-        gd.menu_bar.print_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("HELP_BUTTON",resource) == 0) {
-        gd.menu_bar.help_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("CLONE_CIDD",resource) == 0) {
-        gd.menu_bar.clone_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("EXIT_BUTTON",resource) == 0) {
-        gd.menu_bar.exit_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_VIEW_MENU",resource) == 0) {
-        gd.menu_bar.show_view_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_PRODUCT_MENU",resource) == 0) {
-        gd.menu_bar.show_prod_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_MAP_MENU",resource) == 0) {
-        gd.menu_bar.show_map_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_BOOKMARK_MENU",resource) == 0) {
-        gd.menu_bar.show_bookmark_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_STATUS_PANEL",resource) == 0) {
-        gd.menu_bar.show_status_win_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_TIME_PANEL",resource) == 0) {
-        gd.menu_bar.show_time_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_DPD_MENU",resource) == 0) {
-        gd.menu_bar.show_dpd_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_DPD_PANEL",resource) == 0) {
-        gd.menu_bar.show_dpd_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_DRAW_MODE",resource) == 0) {
-        gd.menu_bar.set_draw_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_PICK_MODE",resource) == 0) {
-        gd.menu_bar.set_pick_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_ROUTE_MODE",resource) == 0) {
-        gd.menu_bar.set_route_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_XSECT_PANEL",resource) == 0) {
-        gd.menu_bar.show_xsect_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_GRID_PANEL",resource) == 0) {
-        gd.menu_bar.show_grid_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("RELOAD",resource) == 0) {
-        gd.menu_bar.reload_bit = 1 << (ii - 1) ;
-      } else if( strcmp("RESET",resource) == 0) {
-        gd.menu_bar.reset_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_TO_NOW",resource) == 0) {
-        gd.menu_bar.set_to_now_bit = 1 << (ii - 1) ;
-      } else if( strcmp("CLOSE_POPUPS",resource) == 0) {
-        gd.menu_bar.close_popups_bit = 1 << (ii - 1) ;
-      } else if( strcmp("REPORT_MODE_ONOFF",resource) == 0) {
-        gd.menu_bar.report_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("LANDUSE_ONOFF",resource) == 0) {
-        gd.menu_bar.landuse_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_CMD_MENU",resource) == 0) {
-        gd.menu_bar.show_cmd_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SNAP_IMAGE",resource) == 0) {
-        gd.menu_bar.snapshot_bit = 1 << (ii - 1) ;
-      } else if( strcmp("ZOOM_BACK",resource) == 0) {
-        gd.menu_bar.zoom_back_bit = 1 << (ii - 1) ;
-      } else {
-        fprintf(stderr,"Unrecognized Menu Bar Cell Function %d: %s\n",ii,resource);
-        exit(-1);
-      }
-    }
-  } else {
-    fprintf(stderr,"Menu Bar cells must be defined in this version\n");
-    exit(-1);
-  }
+//   ZERO_STRUCT(&gd.menu_bar);
+//   gd.menu_bar.num_menu_bar_cells = gd.uparams->getLong("cidd.num_menu_bar_cells",0);
+//   if(gd.menu_bar.num_menu_bar_cells > 0) {
+//     for(int ii = 1; ii <= gd.menu_bar.num_menu_bar_cells; ii++) {
+//       sprintf(str_buf,"cidd.menu_bar_funct%d",ii);
+//       resource = gd.uparams->getString(str_buf,"Not Defined");
+//       if(strcmp("LOOP_ONOFF",resource) == 0) {
+//         gd.menu_bar.loop_onoff_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("WINDS_ONOFF",resource) == 0) {
+//         gd.menu_bar.winds_onoff_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_FORECAST_MENU",resource) == 0) {
+//         gd.menu_bar.show_forecast_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_PAST_MENU",resource) == 0) {
+//         gd.menu_bar.show_past_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_GENTIME_MENU",resource) == 0) {
+//         gd.menu_bar.show_gen_time_win_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SYMPRODS_ONOFF",resource) == 0) {
+//         gd.menu_bar.symprods_onoff_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("PRINT_BUTTON",resource) == 0) {
+//         gd.menu_bar.print_button_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("HELP_BUTTON",resource) == 0) {
+//         gd.menu_bar.help_button_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("CLONE_CIDD",resource) == 0) {
+//         gd.menu_bar.clone_button_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("EXIT_BUTTON",resource) == 0) {
+//         gd.menu_bar.exit_button_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_VIEW_MENU",resource) == 0) {
+//         gd.menu_bar.show_view_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_PRODUCT_MENU",resource) == 0) {
+//         gd.menu_bar.show_prod_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_MAP_MENU",resource) == 0) {
+//         gd.menu_bar.show_map_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_BOOKMARK_MENU",resource) == 0) {
+//         gd.menu_bar.show_bookmark_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_STATUS_PANEL",resource) == 0) {
+//         gd.menu_bar.show_status_win_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_TIME_PANEL",resource) == 0) {
+//         gd.menu_bar.show_time_panel_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_DPD_MENU",resource) == 0) {
+//         gd.menu_bar.show_dpd_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_DPD_PANEL",resource) == 0) {
+//         gd.menu_bar.show_dpd_panel_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SET_DRAW_MODE",resource) == 0) {
+//         gd.menu_bar.set_draw_mode_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SET_PICK_MODE",resource) == 0) {
+//         gd.menu_bar.set_pick_mode_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SET_ROUTE_MODE",resource) == 0) {
+//         gd.menu_bar.set_route_mode_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_XSECT_PANEL",resource) == 0) {
+//         gd.menu_bar.show_xsect_panel_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_GRID_PANEL",resource) == 0) {
+//         gd.menu_bar.show_grid_panel_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("RELOAD",resource) == 0) {
+//         gd.menu_bar.reload_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("RESET",resource) == 0) {
+//         gd.menu_bar.reset_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SET_TO_NOW",resource) == 0) {
+//         gd.menu_bar.set_to_now_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("CLOSE_POPUPS",resource) == 0) {
+//         gd.menu_bar.close_popups_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("REPORT_MODE_ONOFF",resource) == 0) {
+//         gd.menu_bar.report_mode_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("LANDUSE_ONOFF",resource) == 0) {
+//         gd.menu_bar.landuse_onoff_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SHOW_CMD_MENU",resource) == 0) {
+//         gd.menu_bar.show_cmd_menu_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("SNAP_IMAGE",resource) == 0) {
+//         gd.menu_bar.snapshot_bit = 1 << (ii - 1) ;
+//       } else if( strcmp("ZOOM_BACK",resource) == 0) {
+//         gd.menu_bar.zoom_back_bit = 1 << (ii - 1) ;
+//       } else {
+//         fprintf(stderr,"Unrecognized Menu Bar Cell Function %d: %s\n",ii,resource);
+//         exit(-1);
+//       }
+//     }
+//   } else {
+//     fprintf(stderr,"Menu Bar cells must be defined in this version\n");
+//     exit(-1);
+//   }
 
-#endif
+// #endif
 
