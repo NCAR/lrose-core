@@ -3096,7 +3096,8 @@ cidd_init.o: cidd_init.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
 		TimePlot.hh \
-		TimeList.hh
+		TimeList.hh \
+		$(HOME)/lrose/include/shapelib/shapefil.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_init.o cidd_init.cc
 
 cidd_params.o: cidd_params.cc 

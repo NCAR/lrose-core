@@ -135,7 +135,6 @@ NORM_SRCS = \
 	data_gather.cc \
 	data_io.cc \
 	data_pu_proc.cc \
-	draw_export_init.cc \
 	draw_pu_proc.cc \
 	fields_pu_proc.cc \
 	graphic_canvas_events.cc \
@@ -153,7 +152,6 @@ NORM_SRCS = \
 	graphic_xsect_resize.cc \
 	graphic_zoom.cc \
 	gui_destroy.cc \
-	gui_init.cc \
 	gui_label_frame.cc \
 	gui_modify.cc \
 	h_win_proc.cc \
@@ -162,7 +160,6 @@ NORM_SRCS = \
 	movie_frame_retrieve.cc \
 	movie_frame_save.cc \
 	movie_pu_proc.cc \
-	overlay_init.cc \
 	page_pu_proc.cc \
 	render_azimuths.cc \
 	render_bottom_margin.cc \

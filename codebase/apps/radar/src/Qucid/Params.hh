@@ -684,6 +684,8 @@ public:
 
   char* click_point_fmq_url;
 
+  tdrp_bool_t draw_export_active;
+
   draw_export_t *_draw_export_info;
   int draw_export_info_n;
 
@@ -695,6 +697,8 @@ public:
 
   symprod_prod_info_t *_symprod_prod_info;
   int symprod_prod_info_n;
+
+  tdrp_bool_t terrain_active;
 
   char* terrain_id_label;
 
@@ -713,6 +717,8 @@ public:
   char* terrain_earth_color1;
 
   char* terrain_earth_color2;
+
+  tdrp_bool_t image_generation_active;
 
   image_debug_t image_debug;
 
@@ -1473,7 +1479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[492];
+  mutable TDRPtable _table[495];
 
   const char *_className;
 

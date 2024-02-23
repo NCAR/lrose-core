@@ -2301,145 +2301,155 @@ int LegacyParams::_readMaps()
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   
   // read the MAPS params buffer
-  
+
+  bool maps_active = true;
   long param_text_len = 0, param_text_line_no = 0;
   const char *param_text =
     _findTagText(_paramsBuf,"MAPS",
                  &param_text_len, &param_text_line_no);
-  
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr, "WARNING - LegacyParams::_readMaps\n");
     fprintf(stderr, "  No MAPS section in param file\n");
-    return -1;
+    maps_active = false;
   }
   string paramText(param_text, param_text_len);
-  
-  // alloc cfield array
-  
-  char *cfield[MAX_PARSE_FIELDS];
-  for(int i = 0; i < MAX_PARSE_FIELDS; i++) {
-    cfield[i] =(char *) calloc(MAX_PARSE_SIZE, 1);
-  }
-  
-  // read the params lines, create maps vector
-  
-  int total_len = 0;
-  const char *start_ptr = paramText.c_str();
-  const char *end_ptr;
-  vector<MapOverlay> overlays;
-  
-  while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
-        (total_len < param_text_len)) {
-  
-    // Skip over blank, short or commented lines
-    int len = (end_ptr - start_ptr) + 1; 
+
+  if (maps_active) {
     
-    if(len > 20 && *start_ptr != '#') {
+    // alloc cfield array
+    
+    char *cfield[MAX_PARSE_FIELDS];
+    for(int i = 0; i < MAX_PARSE_FIELDS; i++) {
+      cfield[i] =(char *) calloc(MAX_PARSE_SIZE, 1);
+    }
+    
+    // read the params lines, create maps vector
+    
+    int total_len = 0;
+    const char *start_ptr = paramText.c_str();
+    const char *end_ptr;
+    vector<MapOverlay> overlays;
+    
+    while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
+          (total_len < param_text_len)) {
       
-      int num_fields =
-        STRparse(start_ptr, cfield, len, MAX_PARSE_FIELDS, MAX_PARSE_SIZE); 
+      // Skip over blank, short or commented lines
+      int len = (end_ptr - start_ptr) + 1; 
       
-      if(*start_ptr != '#' && num_fields >= 7) {
-        MapOverlay overlay;
-        // create space for text line
-        overlay.text_line.resize(len + 10000);
-        STRcopy((char *) overlay.text_line.c_str(), start_ptr, len);
-        /* Do Environment variable substitution */
-        usubstitute_env((char *) overlay.text_line.c_str(), len + 10000);
-        overlays.push_back(overlay);
+      if(len > 20 && *start_ptr != '#') {
+        
+        int num_fields =
+          STRparse(start_ptr, cfield, len, MAX_PARSE_FIELDS, MAX_PARSE_SIZE); 
+        
+        if(*start_ptr != '#' && num_fields >= 7) {
+          MapOverlay overlay;
+          // create space for text line
+          overlay.text_line.resize(len + 10000);
+          STRcopy((char *) overlay.text_line.c_str(), start_ptr, len);
+          /* Do Environment variable substitution */
+          usubstitute_env((char *) overlay.text_line.c_str(), len + 10000);
+          overlays.push_back(overlay);
+        }
+        
       }
-
-    }
-
-    start_ptr = end_ptr +1; // Skip past the newline
-    total_len += len  +1;
       
-  } // while
-
-  // parse the maps params from the text lines
-  
-  for(size_t ii = 0; ii < overlays.size(); ii++) {
-
-    MapOverlay &overlay = overlays[ii];
-    int num_fields = STRparse(overlay.text_line.c_str(), cfield,
-                              INPUT_LINE_LEN,
-                              MAX_PARSE_FIELDS, MAX_PARSE_SIZE);
-    if(num_fields < 7) {
-      fprintf(stderr,
-              "Error in map field line. Too few parameters: %s",
-              overlay.text_line.c_str());
+      start_ptr = end_ptr +1; // Skip past the newline
+      total_len += len  +1;
+      
+    } // while
+    
+    // parse the maps params from the text lines
+    
+    for(size_t ii = 0; ii < overlays.size(); ii++) {
+      
+      MapOverlay &overlay = overlays[ii];
+      int num_fields = STRparse(overlay.text_line.c_str(), cfield,
+                                INPUT_LINE_LEN,
+                                MAX_PARSE_FIELDS, MAX_PARSE_SIZE);
+      if(num_fields < 7) {
+        fprintf(stderr,
+                "Error in map field line. Too few parameters: %s",
+                overlay.text_line.c_str());
+      }
+      
+      // labels
+      
+      overlay.map_code = cfield[0];
+      overlay.control_label = cfield[1];
+      
+      // file name
+      
+      overlay.map_file_name = cfield[2];
+      
+      // line width
+      
+      overlay.line_width = atoi(cfield[3]);
+      if (overlay.line_width < 0) {
+        // negative line width, inactive
+        overlay.on_at_startup = false;
+        overlay.line_width *= -1;
+      }
+      if (overlay.line_width > 10) {
+        // sanity check
+        overlay.line_width = 1;
+      }
+      
+      // detail thresholds
+      
+      overlay.detail_thresh_min = atof(cfield[4]);
+      overlay.detail_thresh_max = atof(cfield[5]);
+      
+      // color - can be space delimited, so add all remaining tokens
+      
+      overlay.color = cfield[6];
+      for(int jj = 7; jj < num_fields; jj++) {
+        overlay.color = overlay.color + " ";
+        overlay.color = cfield[jj];
+      }
+      
+      overlay.is_valid = true;
+      
+    } // ii
+    
+    /* free temp space */
+    for(size_t i = 0; i < MAX_PARSE_FIELDS; i++) {
+      if (cfield[i] != NULL) {
+        free(cfield[i]);
+      }
     }
     
-    // labels
+    /* write to tdrp params file */
     
-    overlay.map_code = cfield[0];
-    overlay.control_label = cfield[1];
+    fprintf(_tdrpFile, "maps = {\n");
+    for(size_t ifield = 0; ifield < overlays.size(); ifield++) {
+      MapOverlay &overlay = overlays[ifield];
+      if (!overlay.is_valid) {
+        continue;
+      }
+      fprintf(_tdrpFile, "  {\n");
+      fprintf(_tdrpFile, "    map_code = \"%s\",\n", overlay.map_code.c_str());
+      fprintf(_tdrpFile, "    control_label = \"%s\",\n", overlay.control_label.c_str());
+      fprintf(_tdrpFile, "    map_file_name = \"%s\",\n", overlay.map_file_name.c_str());
+      fprintf(_tdrpFile, "    line_width = %d,\n", overlay.line_width);
+      fprintf(_tdrpFile, "    detail_thresh_min = %lg,\n", overlay.detail_thresh_min);
+      fprintf(_tdrpFile, "    detail_thresh_max = %lg,\n", overlay.detail_thresh_max);
+      fprintf(_tdrpFile, "    color = \"%s\",\n", overlay.color.c_str());
+      fprintf(_tdrpFile, "    on_at_startup = %s\n",
+              (overlay.on_at_startup?"TRUE":"FALSE"));
+      fprintf(_tdrpFile, "  }\n");
+      if (ifield < overlays.size() - 1) {
+        fprintf(_tdrpFile, "  ,\n");
+      }
+    } // ifield
+    fprintf(_tdrpFile, "};\n");
 
-    // file name
+  } else {
+
+    // no maps
+
+    fprintf(_tdrpFile, "maps = {};\n");
     
-    overlay.map_file_name = cfield[2];
-
-    // line width
-    
-    overlay.line_width = atoi(cfield[3]);
-    if (overlay.line_width < 0) {
-      // negative line width, inactive
-      overlay.on_at_startup = false;
-      overlay.line_width *= -1;
-    }
-    if (overlay.line_width > 10) {
-      // sanity check
-      overlay.line_width = 1;
-    }
-
-    // detail thresholds
-    
-    overlay.detail_thresh_min = atof(cfield[4]);
-    overlay.detail_thresh_max = atof(cfield[5]);
-
-    // color - can be space delimited, so add all remaining tokens
-
-    overlay.color = cfield[6];
-    for(int jj = 7; jj < num_fields; jj++) {
-      overlay.color = overlay.color + " ";
-      overlay.color = cfield[jj];
-    }
-
-    overlay.is_valid = true;
-    
-  } // ii
-  
-  /* free temp space */
-  for(size_t i = 0; i < MAX_PARSE_FIELDS; i++) {
-    if (cfield[i] != NULL) {
-      free(cfield[i]);
-    }
   }
-  
-  /* write to tdrp params file */
-
-  fprintf(_tdrpFile, "maps = {\n");
-  for(size_t ifield = 0; ifield < overlays.size(); ifield++) {
-    MapOverlay &overlay = overlays[ifield];
-    if (!overlay.is_valid) {
-      continue;
-    }
-    fprintf(_tdrpFile, "  {\n");
-    fprintf(_tdrpFile, "    map_code = \"%s\",\n", overlay.map_code.c_str());
-    fprintf(_tdrpFile, "    control_label = \"%s\",\n", overlay.control_label.c_str());
-    fprintf(_tdrpFile, "    map_file_name = \"%s\",\n", overlay.map_file_name.c_str());
-    fprintf(_tdrpFile, "    line_width = %d,\n", overlay.line_width);
-    fprintf(_tdrpFile, "    detail_thresh_min = %lg,\n", overlay.detail_thresh_min);
-    fprintf(_tdrpFile, "    detail_thresh_max = %lg,\n", overlay.detail_thresh_max);
-    fprintf(_tdrpFile, "    color = \"%s\",\n", overlay.color.c_str());
-    fprintf(_tdrpFile, "    on_at_startup = %s\n",
-            (overlay.on_at_startup?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "  }\n");
-    if (ifield < overlays.size() - 1) {
-      fprintf(_tdrpFile, "  ,\n");
-    }
-  } // ifield
-  fprintf(_tdrpFile, "};\n");
 
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </MAPS>\n");
@@ -2601,10 +2611,10 @@ int LegacyParams::_readTerrainTdrp()
   const char *param_text =
     _findTagText(_paramsBuf, "TERRAIN",
                  &param_text_len, &param_text_line_no);
-  
+
+  bool terrain_active = true;
   if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Warning: No TERRAIN Section in params\n");
-    fprintf(stderr,"  will use the defaults\n");
+    terrain_active = false;
   } else {
     // Set the terrain object from the buffer
     if(terrain.loadFromBuf("TERRAIN TDRP Section",
@@ -2612,9 +2622,9 @@ int LegacyParams::_readTerrainTdrp()
                            param_text_len,
                            param_text_line_no,
                            TRUE, FALSE) < 0) {
-      fprintf(stderr,"Problems with <TERRAIN> params in legacy params file.\n");
-      fprintf(stderr,"Please fix.\n");
-      return -1;
+      fprintf(stderr, "Problems with <TERRAIN> params in legacy params file.\n");
+      fprintf(stderr, "Ignoring terrain params.\n");
+      terrain_active = false;
     }
   }
   
@@ -2624,29 +2634,43 @@ int LegacyParams::_readTerrainTdrp()
   fprintf(_tdrpFile, "// <TERRAIN>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
-  fprintf(_tdrpFile, "terrain_id_label = \"%s\";\n", terrain.id_label);
-  fprintf(_tdrpFile, "terrain_url = \"%s\";\n", terrain.terrain_url);
-  fprintf(_tdrpFile, "terrain_height_scaler = %lg;\n", terrain.height_scaler);
-  fprintf(_tdrpFile, "landuse_url = \"%s\";\n", terrain.landuse_url);
-  fprintf(_tdrpFile, "landuse_colorscale = \"%s\";\n", terrain.landuse_colorscale);
-  
-  switch (terrain.land_use_render_method) {
-    case Cterrain_P::RENDER_FILLED_CONT:
-      fprintf(_tdrpFile,
-              "landuse_render_method = TERRAIN_RENDER_FILLED_CONT;\n");
-      break;
-    case Cterrain_P::RENDER_RECTANGLES:
-      fprintf(_tdrpFile,
-              "landuse_render_method = TERRAIN_RENDER_RECTANGLES;\n");
-      break;
-    case Cterrain_P::RENDER_DYNAMIC_CONTOURS:
-      fprintf(_tdrpFile,
-              "landuse_render_method = TERRAIN_RENDER_DYNAMIC_CONTOURS;\n");
-      break;
-  }
+  if (terrain_active) {
+    
+    fprintf(_tdrpFile, "terrain_active = TRUE;\n");
+    fprintf(_tdrpFile, "terrain_id_label = \"%s\";\n", terrain.id_label);
+    fprintf(_tdrpFile, "terrain_url = \"%s\";\n", terrain.terrain_url);
+    fprintf(_tdrpFile, "terrain_height_scaler = %lg;\n", terrain.height_scaler);
+    fprintf(_tdrpFile, "landuse_url = \"%s\";\n", terrain.landuse_url);
+    fprintf(_tdrpFile, "landuse_colorscale = \"%s\";\n", terrain.landuse_colorscale);
+    if (strlen(terrain.landuse_url) > 0) {
+      fprintf(_tdrpFile, "landuse_active = TRUE;\n");
+    } else {
+      fprintf(_tdrpFile, "landuse_active = FALSE;\n");
+    }
+    
+    switch (terrain.land_use_render_method) {
+      case Cterrain_P::RENDER_FILLED_CONT:
+        fprintf(_tdrpFile,
+                "landuse_render_method = TERRAIN_RENDER_FILLED_CONT;\n");
+        break;
+      case Cterrain_P::RENDER_RECTANGLES:
+        fprintf(_tdrpFile,
+                "landuse_render_method = TERRAIN_RENDER_RECTANGLES;\n");
+        break;
+      case Cterrain_P::RENDER_DYNAMIC_CONTOURS:
+        fprintf(_tdrpFile,
+                "landuse_render_method = TERRAIN_RENDER_DYNAMIC_CONTOURS;\n");
+        break;
+    }
+    
+    fprintf(_tdrpFile, "terrain_earth_color1 = \"%s\";\n", terrain.earth_color1);
+    fprintf(_tdrpFile, "terrain_earth_color2 = \"%s\";\n", terrain.earth_color2);
 
-  fprintf(_tdrpFile, "terrain_earth_color1 = \"%s\";\n", terrain.earth_color1);
-  fprintf(_tdrpFile, "terrain_earth_color2 = \"%s\";\n", terrain.earth_color2);
+  } else {
+
+    fprintf(_tdrpFile, "terrain_active = FALSE;\n");
+
+  }
   
   
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
@@ -2789,7 +2813,8 @@ int LegacyParams::_readDrawExportTdrp()
   Cdraw_P draw;
 
   // read in DRAW buffer
-  
+
+  bool draw_export_active = true;
   long param_text_len = 0, param_text_line_no = 0;
   const char *param_text =
     _findTagText(_paramsBuf,"DRAW_EXPORT",
@@ -2797,7 +2822,8 @@ int LegacyParams::_readDrawExportTdrp()
   
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Warning: No DRAW_EXPORT Section in params\n");
-    fprintf(stderr,"  will use the defaults\n");
+    fprintf(stderr,"Will be disabled\n");
+    draw_export_active = false;
   } else {
     // Set the symprod object from the buffer
     if(draw.loadFromBuf("DRAW_EXPORT TDRP Section",
@@ -2807,7 +2833,8 @@ int LegacyParams::_readDrawExportTdrp()
                         TRUE, FALSE) < 0) {
       fprintf(stderr,"Problems with <DRAW_EXPORT> params in legacy params file.\n");
       fprintf(stderr,"Please fix.\n");
-      return -1;
+      fprintf(stderr,"Will be disabled\n");
+      draw_export_active = false;
     }
   }
 
@@ -2817,25 +2844,35 @@ int LegacyParams::_readDrawExportTdrp()
   fprintf(_tdrpFile, "// <DRAW_EXPORT>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
-  fprintf(_tdrpFile, "draw_export_info = {\n");
-  
-  for (int ii = 0; ii < draw.dexport_info_n; ii++) {
+  if (draw_export_active) {
     
-    Cdraw_P::dexport_t &info = draw._dexport_info[ii];
+    fprintf(_tdrpFile, "draw_export_active = TRUE;\n");
+
+    fprintf(_tdrpFile, "draw_export_info = {\n");
     
-    fprintf(_tdrpFile, "  {\n");
-    fprintf(_tdrpFile, "    id_label = \"%s\",\n", info.id_label);
-    fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
-    fprintf(_tdrpFile, "    valid_minutes = %lg,\n", info.valid_minutes);
-    fprintf(_tdrpFile, "    default_id_no = %d,\n",
-            info.default_id_no);
-    fprintf(_tdrpFile, "    default_label = \"%s\"\n", info.default_label);
-    fprintf(_tdrpFile, "  }\n");
-    if (ii < draw.dexport_info_n - 1) {
-      fprintf(_tdrpFile, "  ,\n");
-    }
-  } // ii
-  fprintf(_tdrpFile, "};\n");
+    for (int ii = 0; ii < draw.dexport_info_n; ii++) {
+      
+      Cdraw_P::dexport_t &info = draw._dexport_info[ii];
+      
+      fprintf(_tdrpFile, "  {\n");
+      fprintf(_tdrpFile, "    id_label = \"%s\",\n", info.id_label);
+      fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
+      fprintf(_tdrpFile, "    valid_minutes = %lg,\n", info.valid_minutes);
+      fprintf(_tdrpFile, "    default_id_no = %d,\n",
+              info.default_id_no);
+      fprintf(_tdrpFile, "    default_label = \"%s\"\n", info.default_label);
+      fprintf(_tdrpFile, "  }\n");
+      if (ii < draw.dexport_info_n - 1) {
+        fprintf(_tdrpFile, "  ,\n");
+      }
+    } // ii
+    fprintf(_tdrpFile, "};\n");
+
+  } else {
+
+    fprintf(_tdrpFile, "draw_export_active = FALSE;\n");
+
+  }
   
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </DRAW_EXPORT>\n");
@@ -2858,7 +2895,8 @@ int LegacyParams::_readImageGenTdrp()
   Cimages_P images;
   
   // read in image gen buffer
-  
+
+  bool image_gen_active = true;
   long param_text_len = 0, param_text_line_no = 0;
   const char *param_text =
     _findTagText(_paramsBuf,"IMAGE_GENERATION",
@@ -2866,7 +2904,8 @@ int LegacyParams::_readImageGenTdrp()
   
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Warning: No IMAGE_GENERATION Section in params\n");
-    fprintf(stderr,"  will use the defaults\n");
+    fprintf(stderr,"  will be ignored\n");
+    image_gen_active = false;
   } else {
     // Set the symprod object from the buffer
     if(images.loadFromBuf("IMAGE_GENERATION TDRP Section",
@@ -2876,50 +2915,58 @@ int LegacyParams::_readImageGenTdrp()
                           TRUE, FALSE) < 0) {
       fprintf(stderr,
               "Problems with <IMAGE_GENERATION> params in legacy params file.\n");
-      fprintf(stderr,"Please fix.\n");
-      return -1;
+      image_gen_active = false;
     }
   }
   
   // write it out to tdrp file, changing param names as appropriate
-  
+
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// <IMAGE_GENERATION>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  
-  switch (images.debug) {
-    case Cimages_P::DEBUG_OFF:
-      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_OFF;\n");
-      break;
-    case Cimages_P::DEBUG_NORM:
-      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_NORM;\n");
-      break;
-    case Cimages_P::DEBUG_VERBOSE:
-      fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_VERBOSE;\n");
-      break;
-  }
-  
-  fprintf(_tdrpFile, "image_generate_vsection = %s;\n",
-          (images.generate_vsection_images?"TRUE":"FALSE"));
-  fprintf(_tdrpFile, "image_vsection_waypts_in_latlon = %s;\n",
-          (images.vsection_waypts_in_latlon?"TRUE":"FALSE"));
-  
-  fprintf(_tdrpFile, "image_vsection_spec = {\n");
-  
-  for (int ii = 0; ii < images.vsection_spec_n; ii++) {
     
-    Cimages_P::vsection_spec_t &spec = images._vsection_spec[ii];
+  if (image_gen_active) {
     
-    fprintf(_tdrpFile, "  {\n");
-    fprintf(_tdrpFile, "    vsection_label = \"%s\",\n", spec.vsection_label);
-    fprintf(_tdrpFile, "    n_waypts = %d,\n", spec.n_waypts);
-    fprintf(_tdrpFile, "    waypt_locs = \"%s\",\n", spec.waypt_locs);
-    fprintf(_tdrpFile, "  }\n");
-    if (ii < images.vsection_spec_n - 1) {
-      fprintf(_tdrpFile, "  ,\n");
+    fprintf(_tdrpFile, "terrain_active = TRUE;\n");
+    switch (images.debug) {
+      case Cimages_P::DEBUG_OFF:
+        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_OFF;\n");
+        break;
+      case Cimages_P::DEBUG_NORM:
+        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_NORM;\n");
+        break;
+      case Cimages_P::DEBUG_VERBOSE:
+        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_VERBOSE;\n");
+        break;
     }
-  } // ii
-  fprintf(_tdrpFile, "};\n");
+    
+    fprintf(_tdrpFile, "image_generate_vsection = %s;\n",
+            (images.generate_vsection_images?"TRUE":"FALSE"));
+    fprintf(_tdrpFile, "image_vsection_waypts_in_latlon = %s;\n",
+            (images.vsection_waypts_in_latlon?"TRUE":"FALSE"));
+    
+    fprintf(_tdrpFile, "image_vsection_spec = {\n");
+    
+    for (int ii = 0; ii < images.vsection_spec_n; ii++) {
+      
+      Cimages_P::vsection_spec_t &spec = images._vsection_spec[ii];
+      
+      fprintf(_tdrpFile, "  {\n");
+      fprintf(_tdrpFile, "    vsection_label = \"%s\",\n", spec.vsection_label);
+      fprintf(_tdrpFile, "    n_waypts = %d,\n", spec.n_waypts);
+      fprintf(_tdrpFile, "    waypt_locs = \"%s\",\n", spec.waypt_locs);
+      fprintf(_tdrpFile, "  }\n");
+      if (ii < images.vsection_spec_n - 1) {
+        fprintf(_tdrpFile, "  ,\n");
+      }
+    } // ii
+    fprintf(_tdrpFile, "};\n");
+
+  } else {
+
+    fprintf(_tdrpFile, "terrain_active = FALSE;\n");
+
+  }
   
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
   fprintf(_tdrpFile, "// </IMAGE_GENERATION>\n");

@@ -78,8 +78,8 @@ void render_route_winds( Drawable xid)
 
     // Set GC to draw 4 pixel wide, Solid lines
     XSetLineAttributes(gd.dpy,gd.legends.route_path_color->gc,
-		 gd.layers.route_wind._P->route_track_line_width,
-		 LineSolid,CapButt,JoinRound);
+                       _params.route_track_line_width,
+                       LineSolid,CapButt,JoinRound);
 
 
    // Draw route segments.
@@ -88,10 +88,10 @@ void render_route_winds( Drawable xid)
 		rseg[i].pixel,rseg[i].num_points,CoordModeOrigin);
    }
 
-   if(gd.layers.route_wind._P->add_waypoints_labels) {
+   if(_params.route_add_waypoints_labels) {
      // Label Each way point with the NAVAID ID 
      for(i=0; i <= gd.h_win.route.num_segments; i++) {
-	 font = choose_font(gd.h_win.route.navaid_id[i],150,gd.layers.route_wind._P->font_height,&xmid,&ymid);
+	 font = choose_font(gd.h_win.route.navaid_id[i],150,_params.route_font_height,&xmid,&ymid);
 	 XSetFont(gd.dpy,gd.legends.route_path_color->gc,font);
 	 XDrawImageString(gd.dpy,xid,gd.legends.route_path_color->gc,
 	     gd.h_win.route.x_pos[i] + (xmid/2) ,
@@ -133,15 +133,15 @@ void render_route_winds( Drawable xid)
       // xv_set (gd.v_win_v_win_pu->hazard_msg,XV_X,xv_get(gd.v_win_v_win_pu->route_msg,XV_WIDTH)+5,NULL);
 
       // Compute and display average winds along the route
-      if(gd.layers.route_wind._P->add_wind_text) {
-       switch(gd.layers.route_wind._P->label_style) {
+      if(_params.route_add_wind_text) {
+       switch(_params.route_label_style) {
 	 case Croutes_P::REGULAR_INTERVALS:
-	    loop_count = (int) (gd.h_win.route.total_length / gd.layers.route_wind._P->label_interval);
+	    loop_count = (int) (gd.h_win.route.total_length / _params.route_label_interval);
 	    for(i=0; i < loop_count; i++) {
 	       // Compute the average for the interval
                ave_winds(gd.layers.route_wind.u_wind,gd.layers.route_wind.v_wind, 
-	          i * gd.layers.route_wind._P->label_interval,
-		  (i +1) * gd.layers.route_wind._P->label_interval,
+	          i * _params.route_label_interval,
+		  (i +1) * _params.route_label_interval,
 		  &dir,&spd);
 
 	       // scale to the desired units and round
@@ -157,11 +157,11 @@ void render_route_winds( Drawable xid)
 	       idir -= idir % 5;
 
                sprintf(wind_label,"%03d/%.2d",idir,ispd);
-	       font = choose_font(wind_label,100,gd.layers.route_wind._P->font_height,&xmid,&ymid);
+	       font = choose_font(wind_label,100,_params.route_font_height,&xmid,&ymid);
 	       XSetFont(gd.dpy,gd.legends.route_path_color->gc,font);
 
 	       // Compute which Xpoint in the route line is over the center of the segment
-	       index =(int) (((i + .5) * gd.layers.route_wind._P->label_interval/
+	       index =(int) (((i + .5) * _params.route_label_interval/
 			     gd.h_win.route.total_length) * num_route_points);
 
 	        XDrawImageString(gd.dpy,xid,gd.legends.route_path_color->gc,
@@ -173,7 +173,7 @@ void render_route_winds( Drawable xid)
 	 break;
 
 	 case Croutes_P::EQUAL_DIVISIONS:
-	    loop_count =  gd.layers.route_wind._P->num_route_labels;
+             loop_count =  _params.route_num_labels;
 	    for(i=0; i < loop_count; i++) {
 	       // Compute the average for the interval
                ave_winds(gd.layers.route_wind.u_wind,gd.layers.route_wind.v_wind, 
@@ -198,7 +198,7 @@ void render_route_winds( Drawable xid)
 	       XSetFont(gd.dpy,gd.legends.route_path_color->gc,font);
 
 	       // Compute which Xpoint in the route line is over the center of the segment
-	       index =(int) ((i + 0.5)/(double) gd.layers.route_wind._P->num_route_labels *  num_route_points);
+	       index =(int) ((i + 0.5)/(double) _params.route_num_labels *  num_route_points);
 
 	        XDrawImageString(gd.dpy,xid,gd.legends.route_path_color->gc,
 	              pixel[index].x  + (xmid/2) ,
@@ -219,17 +219,17 @@ void render_route_winds( Drawable xid)
 	   double pk_turb = peak_turb(gd.layers.route_wind.turb,
 	                              0.0, gd.h_win.route.total_length);
 
-	   if(pk_turb >= gd.layers.route_wind._P->turb_low_thresh &&
-	      pk_turb < gd.layers.route_wind._P->turb_mod_thresh) {
+	   if(pk_turb >= _params.route_turb_low_thresh &&
+	      pk_turb < _params.route_turb_mod_thresh) {
 	     strncat(hazard_label,"! MOD CAT",128);
 	   }
 
-	   if(pk_turb >= gd.layers.route_wind._P->turb_mod_thresh &&
-	      pk_turb < gd.layers.route_wind._P->turb_hi_thresh) {
+	   if(pk_turb >= _params.route_turb_mod_thresh &&
+	      pk_turb < _params.route_turb_high_thresh) {
 	     strncat(hazard_label,"! HIGH CAT",128);
 	   }
 
-	   if(pk_turb >= gd.layers.route_wind._P->turb_hi_thresh) {
+	   if(pk_turb >= _params.route_turb_high_thresh) {
 	     strncat(hazard_label,"! VHIGH CAT",128);
 	   }
 	}
@@ -242,17 +242,17 @@ void render_route_winds( Drawable xid)
 	   double pk_icing = peak_icing(gd.layers.route_wind.icing,
 	                              0.0, gd.h_win.route.total_length);
 
-	   if(pk_icing >= gd.layers.route_wind._P->icing_low_thresh &&
-	      pk_icing < gd.layers.route_wind._P->icing_mod_thresh) {
+	   if(pk_icing >= _params.route_icing_low_thresh &&
+	      pk_icing < _params.route_icing_mod_thresh) {
 	     strncat(hazard_label,"! LGT ICE",128);
 	   }
 
-	   if(pk_icing >= gd.layers.route_wind._P->icing_mod_thresh &&
-	      pk_icing < gd.layers.route_wind._P->icing_hi_thresh) {
+	   if(pk_icing >= _params.route_icing_mod_thresh &&
+	      pk_icing < _params.route_icing_high_thresh) {
 	     strncat(hazard_label,"! MOD ICE",128);
 	   }
 
-	   if(pk_icing >= gd.layers.route_wind._P->icing_hi_thresh) {
+	   if(pk_icing >= _params.route_icing_high_thresh) {
 	     strncat(hazard_label,"! HVY ICE",128);
 	   }
 	}

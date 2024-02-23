@@ -933,6 +933,7 @@ void   load_shape_map(Overlay_t *ov, const char    *map_file_subdir)
 void init_over_data_links(const char *param_buf, long param_buf_len, long line_no)
   
 {
+
   gd.num_map_overlays = load_overlay_info(param_buf,param_buf_len,line_no,gd.over,MAX_OVERLAYS);
   
   if(load_overlay_data(gd.over,gd.num_map_overlays) != CIDD_SUCCESS) {

@@ -33,6 +33,7 @@
 
 #define CIDD_INIT    1
 #include "cidd.h"
+#include <shapelib/shapefil.h>
 #include <algorithm>
 
 static void _initGrids();
@@ -40,9 +41,14 @@ static void _initWinds();
 static void _initWindComponent(met_record_t *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW);
+static void _initTerrain();
 static void _initDrawExport();
+static void _initMaps();
 static void _initRouteWinds();
-  
+
+static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir);
+static void _loadShapeMap(Overlay_t *ov, const char    *map_file_subdir);
+
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
@@ -51,9 +57,6 @@ void init_data_space()
 {
 
   int num_fields;
-  long param_text_len;
-  long param_text_line_no;
-  const char *param_text;
   const char *field_str;
   char str_buf[128];   /* Space to build resource strings */
   char *cfield[3];     /* Space to collect sub strings */
@@ -126,7 +129,7 @@ void init_data_space()
   }
 
   if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
-    _params.idle_reset_seconds = 1000000000; // a very long time - 30+ years
+    _params.idle_reset_seconds = 1000000000; // 30+ years
   }
 
   // layers
@@ -697,94 +700,6 @@ void init_data_space()
     gd.h_win.num_zoom_levels++;
   }
 
-#ifdef NOT_ANY_MORE
-  
-  const char *resource;
-
-  // legacy CIDD menu bar - deprecated
-  
-  ZERO_STRUCT(&gd.menu_bar);
-  gd.menu_bar.num_menu_bar_cells = gd.uparams->getLong("cidd.num_menu_bar_cells",0);
-  if(gd.menu_bar.num_menu_bar_cells > 0) {
-    for(int ii = 1; ii <= gd.menu_bar.num_menu_bar_cells; ii++) {
-      sprintf(str_buf,"cidd.menu_bar_funct%d",ii);
-      resource = gd.uparams->getString(str_buf,"Not Defined");
-      if(strcmp("LOOP_ONOFF",resource) == 0) {
-        gd.menu_bar.loop_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("WINDS_ONOFF",resource) == 0) {
-        gd.menu_bar.winds_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_FORECAST_MENU",resource) == 0) {
-        gd.menu_bar.show_forecast_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_PAST_MENU",resource) == 0) {
-        gd.menu_bar.show_past_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_GENTIME_MENU",resource) == 0) {
-        gd.menu_bar.show_gen_time_win_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SYMPRODS_ONOFF",resource) == 0) {
-        gd.menu_bar.symprods_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("PRINT_BUTTON",resource) == 0) {
-        gd.menu_bar.print_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("HELP_BUTTON",resource) == 0) {
-        gd.menu_bar.help_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("CLONE_CIDD",resource) == 0) {
-        gd.menu_bar.clone_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("EXIT_BUTTON",resource) == 0) {
-        gd.menu_bar.exit_button_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_VIEW_MENU",resource) == 0) {
-        gd.menu_bar.show_view_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_PRODUCT_MENU",resource) == 0) {
-        gd.menu_bar.show_prod_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_MAP_MENU",resource) == 0) {
-        gd.menu_bar.show_map_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_BOOKMARK_MENU",resource) == 0) {
-        gd.menu_bar.show_bookmark_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_STATUS_PANEL",resource) == 0) {
-        gd.menu_bar.show_status_win_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_TIME_PANEL",resource) == 0) {
-        gd.menu_bar.show_time_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_DPD_MENU",resource) == 0) {
-        gd.menu_bar.show_dpd_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_DPD_PANEL",resource) == 0) {
-        gd.menu_bar.show_dpd_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_DRAW_MODE",resource) == 0) {
-        gd.menu_bar.set_draw_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_PICK_MODE",resource) == 0) {
-        gd.menu_bar.set_pick_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_ROUTE_MODE",resource) == 0) {
-        gd.menu_bar.set_route_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_XSECT_PANEL",resource) == 0) {
-        gd.menu_bar.show_xsect_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_GRID_PANEL",resource) == 0) {
-        gd.menu_bar.show_grid_panel_bit = 1 << (ii - 1) ;
-      } else if( strcmp("RELOAD",resource) == 0) {
-        gd.menu_bar.reload_bit = 1 << (ii - 1) ;
-      } else if( strcmp("RESET",resource) == 0) {
-        gd.menu_bar.reset_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SET_TO_NOW",resource) == 0) {
-        gd.menu_bar.set_to_now_bit = 1 << (ii - 1) ;
-      } else if( strcmp("CLOSE_POPUPS",resource) == 0) {
-        gd.menu_bar.close_popups_bit = 1 << (ii - 1) ;
-      } else if( strcmp("REPORT_MODE_ONOFF",resource) == 0) {
-        gd.menu_bar.report_mode_bit = 1 << (ii - 1) ;
-      } else if( strcmp("LANDUSE_ONOFF",resource) == 0) {
-        gd.menu_bar.landuse_onoff_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SHOW_CMD_MENU",resource) == 0) {
-        gd.menu_bar.show_cmd_menu_bit = 1 << (ii - 1) ;
-      } else if( strcmp("SNAP_IMAGE",resource) == 0) {
-        gd.menu_bar.snapshot_bit = 1 << (ii - 1) ;
-      } else if( strcmp("ZOOM_BACK",resource) == 0) {
-        gd.menu_bar.zoom_back_bit = 1 << (ii - 1) ;
-      } else {
-        fprintf(stderr,"Unrecognized Menu Bar Cell Function %d: %s\n",ii,resource);
-        exit(-1);
-      }
-    }
-  } else {
-    fprintf(stderr,"Menu Bar cells must be defined in this version\n");
-    exit(-1);
-  }
-
-#endif
-
   // vertical section
   
   gd.v_win.zmin_x = (double *) calloc(sizeof(double), 1);
@@ -828,204 +743,44 @@ void init_data_space()
   _initWinds();
 
   // initialize terrain
+
+  _initTerrain();
   
-  if (strlen(_params.terrain_url) > 0) {
-    
-    gd.layers.earth.terrain_active = 1;
-    gd.layers.earth.terr = (met_record_t *) calloc(sizeof(met_record_t), 1);
-    if(gd.layers.earth.terr == NULL) {
-      fprintf(stderr,"Cannot allocate space for terrain data\n");
-      exit(-1);
-    }
-    
-    gd.layers.earth.terr->time_allowance = 5270400; // 10 years
-    STRcopy(gd.layers.earth.terr->color_file,
-            _params.landuse_colorscale,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->button_name,
-            _params.terrain_id_label,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->legend_name,
-            _params.terrain_id_label,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->url,
-            _params.terrain_url,URL_LENGTH);
-    
-    gd.layers.earth.terr->h_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.terr->v_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
-    gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
-    gd.layers.earth.terr->proj =  new MdvxProj;
-
-  }
-  
-  if (strlen(_params.landuse_url) > 0) {
-
-    gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
-    gd.layers.earth.land_use = (met_record_t *) calloc(sizeof(met_record_t), 1);
-    if(gd.layers.earth.land_use == NULL) {
-      fprintf(stderr,"Cannot allocate space for land_use data\n");
-      exit(-1);
-    }
-    
-    gd.layers.earth.land_use->time_allowance = 5270400; // 10 years
-    STRcopy(gd.layers.earth.land_use->color_file,
-            _params.landuse_colorscale, NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->button_name,
-            _params.terrain_id_label,  NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->legend_name,
-            _params.terrain_id_label, NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->url,
-            _params.landuse_url, URL_LENGTH);
-    
-    gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
-    gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
-    gd.layers.earth.land_use->proj =  new MdvxProj;
-    
-    switch(_params.landuse_render_method) {
-      default:
-      case Params::TERRAIN_RENDER_RECTANGLES:
-        gd.layers.earth.land_use->render_method = POLYGONS;
-        break;
-        
-      case Params::TERRAIN_RENDER_FILLED_CONT:
-        gd.layers.earth.land_use->render_method = FILLED_CONTOURS;
-        break;
-        
-      case Params::TERRAIN_RENDER_DYNAMIC_CONTOURS:
-        gd.layers.earth.land_use->render_method = DYNAMIC_CONTOURS;
-        break;
-    }
-    
-  }
-
   // initialize route winds
-
+  
   _initRouteWinds();
   
-  // gd.layers.route_wind._P = new Croutes_P();
-
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // // param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
-  // //                            &param_text_len, &param_text_line_no); 
-  // if(param_text == NULL || param_text_len <=0 ) {
-  //   if(gd.debug) fprintf(stderr," Warning: No ROUTE_WINDS Section in params\n");
-  // } else {
-  //   if(gd.layers.route_wind._P->loadFromBuf("ROUTE_WINDS TDRP Section",
-  //                                           NULL,param_text,
-  //                                           param_text_len,
-  //                                           param_text_line_no,
-  //                                           TRUE,gd.debug2) < 0) {
-  //     fprintf(stderr,"Please fix the <ROUTE_WINDS> parameter section\n");
-  //     exit(-1);
-  //   }
-
-  //   gd.layers.route_wind.has_params = 1;
-  //   route_winds_init();
-
-  // }
-
-  // Instantiate the GUI Config TDRP 
-  // gd.gui_P = new Cgui_P();
-
-  // Load the GUI_CONFIG parameters
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // // param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
-  // //                            &param_text_len, &param_text_line_no);
-
-  // if(param_text == NULL || param_text_len <=0 ) {
-  // } else {
-  //   if(gd.gui_P->loadFromBuf("GUI_CONFIG TDRP Section",
-  //                            NULL,param_text,
-  //                            param_text_len,
-  //                            param_text_line_no,
-  //                            TRUE,gd.debug2)  < 0) { 
-  //     fprintf(stderr,"Please fix the <GUI_CONFIG> parameter section\n");
-  //     exit(-1);
-  //   }
-  // }
-
-  // Instantiate the IMAGES Config TDRP 
-  // gd.images_P = new Cimages_P();
-
-  // // Load the IMAGES_CONFIG parameters
-  // param_text_line_no = 0;
-  // param_text_len = 0;
-  // // param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
-  // //                            &param_text_len, &param_text_line_no);
-
-  // if(param_text == NULL || param_text_len <=0 ) {
-  // } else {
-  //   if(gd.images_P->loadFromBuf("IMAGE_GENERATION TDRP Section",
-  //                               NULL,param_text,
-  //                               param_text_len,
-  //                               param_text_line_no,
-  //                               TRUE,gd.debug2)  < 0) { 
-  //     fprintf(stderr,"Please fix the <IMAGE_GENERATION> parameter section\n");
-  //     exit(-1);
-  //   }
-  // }
-
   // Establish and initialize Draw-Export params 
 
   _initDrawExport();
 
-  if(gd.draw.num_draw_products == 0 && gd.menu_bar.set_draw_mode_bit >0) {
-    fprintf(stderr,
-	    "Fatal Error: DRAW Button Enabled, without any DRAW_EXPORT Products defined\n"); 
-    fprintf(stderr,
-	    "Either remove SET_DRAW_MODE button or define products in DRAW_EXPORT \n"); 
-    fprintf(stderr,
-	    "Section of the parameter file \n"); 
-    exit(-1);
-  }
+  // initialize the map overlays
 
-  // Load the Map Overlay parameters
-  param_text_line_no = 0;
-  param_text_len = 0;
-  // param_text = find_tag_text(gd.db_data,"MAPS",
-  //                            &param_text_len, &param_text_line_no);
-
-  if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Could'nt Find MAPS SECTION\n");
-    exit(-1);
-  }
-
-  // overlays
-
-  // _params.map_file_subdir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
-  init_over_data_links(param_text, param_text_len, param_text_line_no);
+  _initMaps();
   
   // Instantiate the Station locator classes and params.
-  // _params.locator_margin_km = gd.uparams->getDouble("cidd.locator_margin_km", 50.0);
-  // _params.station_loc_url = gd.uparams->getString("cidd.station_loc_url", "");
 
-#ifdef JUNK
-  
   if(strlen(_params.station_loc_url) > 1) {
+    
     if(gd.debug || gd.debug1) {
       fprintf(stderr,"Loading Station data from %s ...",_params.station_loc_url);
     }
     gd.station_loc =  new StationLoc();
     if(gd.station_loc == NULL) {
-      fprintf(stderr,"CIDD: Fatal Alloc constructing new StationLoc()\n");
+      fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
       exit(-1);
     }
-
+    
     if(gd.station_loc->ReadData(_params.station_loc_url) < 0) {
       fprintf(stderr,"CIDD: Can't load Station Data from %s\n",_params.station_loc_url);
       exit(-1);
     }
-    // gd.station_loc->PrintAll();  // DEBUG
-
-    if(gd.debug || gd.debug1) {
-      fprintf(stderr,"Done\n");
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      gd.station_loc->PrintAll();
     }
+
   }
-
-#endif
-
+  
   // _params.remote_ui_url = gd.uparams->getString("cidd.remote_ui_url", "");
   if(strlen(_params.remote_ui_url) > 1) {
 
@@ -1560,6 +1315,83 @@ static void _initWindComponent(met_record_t *wrec,
 }
 
 ////////////////////////////////////////////////////////////////
+// initialize terrain
+
+static void _initTerrain()
+{
+
+  if (strlen(_params.terrain_url) > 0) {
+    
+    gd.layers.earth.terrain_active = 1;
+    gd.layers.earth.terr = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(gd.layers.earth.terr == NULL) {
+      fprintf(stderr,"Cannot allocate space for terrain data\n");
+      exit(-1);
+    }
+    
+    gd.layers.earth.terr->time_allowance = 1000000000; // 30+ years
+    STRcopy(gd.layers.earth.terr->color_file,
+            _params.landuse_colorscale,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->button_name,
+            _params.terrain_id_label,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->legend_name,
+            _params.terrain_id_label,NAME_LENGTH);
+    STRcopy(gd.layers.earth.terr->url,
+            _params.terrain_url,URL_LENGTH);
+    
+    gd.layers.earth.terr->h_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.terr->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
+    gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
+    gd.layers.earth.terr->proj =  new MdvxProj;
+
+  }
+  
+  if (strlen(_params.landuse_url) > 0) {
+
+    gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
+    gd.layers.earth.land_use = (met_record_t *) calloc(sizeof(met_record_t), 1);
+    if(gd.layers.earth.land_use == NULL) {
+      fprintf(stderr,"Cannot allocate space for land_use data\n");
+      exit(-1);
+    }
+    
+    gd.layers.earth.land_use->time_allowance = 1000000000; // 30+ years
+    STRcopy(gd.layers.earth.land_use->color_file,
+            _params.landuse_colorscale, NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->button_name,
+            _params.terrain_id_label,  NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->legend_name,
+            _params.terrain_id_label, NAME_LENGTH);
+    STRcopy(gd.layers.earth.land_use->url,
+            _params.landuse_url, URL_LENGTH);
+    
+    gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
+    gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
+    gd.layers.earth.land_use->proj =  new MdvxProj;
+    
+    switch(_params.landuse_render_method) {
+      default:
+      case Params::TERRAIN_RENDER_RECTANGLES:
+        gd.layers.earth.land_use->render_method = POLYGONS;
+        break;
+        
+      case Params::TERRAIN_RENDER_FILLED_CONT:
+        gd.layers.earth.land_use->render_method = FILLED_CONTOURS;
+        break;
+        
+      case Params::TERRAIN_RENDER_DYNAMIC_CONTOURS:
+        gd.layers.earth.land_use->render_method = DYNAMIC_CONTOURS;
+        break;
+    }
+    
+  }
+
+}
+
+////////////////////////////////////////////////////////////////
 // INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
 //  for drawn and exported points 
 
@@ -1577,7 +1409,7 @@ static void _initDrawExport()
   }
   
   for(int ii = 0; ii < _params.draw_export_info_n;  ii++) {
-
+    
     Params::draw_export_t &dinfo = _params._draw_export_info[ii];
     draw_export_info_t &dexp = gd.draw.dexport[ii];
 
@@ -1863,4 +1695,918 @@ static void _initRouteWinds()
   }
 
 }
+
+/************************************************************************
+ * LOAD_RAP_MAP - load map in RAP format
+ */
+
+static void _loadRapMap(Overlay_t *ov, const char *map_file_subdir)
+{
+
+  int    i,j;
+  int    index,found;
+  int    len,point;
+  int    num_points;        
+  int    num_fields;  /* number of fields (tokens) found in input line */
+  int    map_len;
+  int    ret_stat;
+  char   *str_ptr;
+  char   *map_buf;         // Buffer to hold map file
+  char    name_buf[2048];  /* Buffer for input lines */
+  char    dirname[2048];   /* Buffer for directories to search */
+  FILE    *mapfile;
+  char    *cfield[32];
+  struct stat sbuf;
+  char *lasts;
+
+  for(i=0; i < 32; i++)  cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
+
+  // Add . to list to start.
+  strncpy(dirname,".,",1024);
+  strncat(dirname,map_file_subdir,1024);
+
+  str_ptr = strtok(dirname,","); // Prime strtok
+
+  do{  // Try each comma delimited subdir
+
+    while(*str_ptr == ' ') str_ptr++; //skip any leading space
+    sprintf(name_buf,"%s/%s",str_ptr,ov->map_file_name);
+
+    // Check if it's a HTTP URL
+    if(strncasecmp(name_buf,"http:",5) == 0) {
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat =  HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                         name_buf,_params.data_timeout_secs * 1000,
+                                         &map_buf, &map_len);
+      } else {
+        ret_stat =  HTTPgetURL(name_buf,
+                               _params.data_timeout_secs * 1000,
+                               &map_buf, &map_len);
+      }
+      if(ret_stat <=0 ) {
+        map_len = 0;
+        map_buf = NULL;
+      }
+      if(gd.debug) fprintf(stderr,"Map: %s: Len: %d\n",name_buf,map_len);
+    } else {
+      if(stat(name_buf,&sbuf) < 0) { // Stat to find the file's size
+        map_len = 0;
+        map_buf = NULL;
+      }
+      if((mapfile = fopen(name_buf,"r")) == NULL) {
+        map_len = 0;
+        map_buf = NULL;
+      } else {
+        if((map_buf = (char *)  calloc(sbuf.st_size + 1 ,1)) == NULL) {
+          fprintf(stderr,"Problems allocating %ld bytes for map file\n",
+                  (long) sbuf.st_size);
+          exit(-1);
+        }
+
+        // Read
+        if((map_len = fread(map_buf,1,sbuf.st_size,mapfile)) != sbuf.st_size) {
+          fprintf(stderr,"Problems Reading %s\n",name_buf);
+          exit(-1);
+        }
+        map_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
+        fclose(mapfile);
+      }
+    }
+  } while ((str_ptr = strtok(NULL,",")) != NULL && map_len == 0 );
+
+  if(map_len == 0 || map_buf == NULL) {
+    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name);
+    for(i=0; i < 32; i++)  free(cfield[i]);
+    return;
+  }
+
+  // Prime strtok_r;
+  str_ptr = strtok_r(map_buf,"\n",&lasts);
+
+  while (str_ptr != NULL) {        /* read all lines in buffer */
+    if(*str_ptr != '#') {
+
+      if(strncasecmp(str_ptr,"MAP_NAME",8) == 0) {    /* Currently Ignore */
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"TRANSFORM",9) == 0) {    /* Currently Ignore */
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"PROJECTION",10) == 0) {    /* Currently Ignore */
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"ICONDEF",7) == 0) {        /* describes an icon's coordinates in pixels */
+        index = ov->num_icondefs;
+        if(index >= ov->num_alloc_icondefs) {
+          if(ov->num_alloc_icondefs == 0) { /* start with space for 2 */
+            ov->geo_icondef = (Geo_feat_icondef_t **)
+              calloc(2,sizeof(Geo_feat_icondef_t *));
+            ov->num_alloc_icondefs = 2;
+          } else { /* Double the space */
+            ov->num_alloc_icondefs *= 2;
+            ov->geo_icondef = (Geo_feat_icondef_t **) 
+              realloc(ov->geo_icondef, ov->num_alloc_icondefs * sizeof(Geo_feat_icondef_t *)); 
+          }
+        }
+        if(ov->geo_icondef == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon definition pointer array!\n");
+          exit(-1);
+        }
+
+        if(STRparse(str_ptr,cfield,256,32,64) != 3) {
+          fprintf(stderr,"Error in ICONDEF line: %s\n",str_ptr);
+          exit(-1);
+        }
+        /* get space for the icon definition */
+        ov->geo_icondef[index] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
+        ZERO_STRUCT(ov->geo_icondef[index]);
+
+        if(ov->geo_icondef[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
+          exit(-1);
+        }
+        STRcopy(ov->geo_icondef[index]->name,cfield[1],NAME_LENGTH);
+        num_points = atoi(cfield[2]);
+
+        /* Get space for points in the icon */
+        ov->geo_icondef[index]->x = (short *) calloc(1,num_points * sizeof(short));
+        ov->geo_icondef[index]->y = (short *) calloc(1,num_points * sizeof(short));
+
+        if(ov->geo_icondef[index]->x == NULL || ov->geo_icondef[index]->y == NULL) {
+          fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
+                  ov->map_file_name,num_points);
+          exit(-1);
+        }
+
+        /* Read in all of the points */
+        for(j=0,point = 0; j < num_points; j++) {
+
+          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+
+          if(str_ptr != NULL && STRparse(str_ptr,cfield,256,32,64) == 2) {
+            ov->geo_icondef[index]->x[point] = atoi(cfield[0]);
+            ov->geo_icondef[index]->y[point] = atoi(cfield[1]);
+            point++;
+          }
+        }
+        ov->geo_icondef[index]->num_points = point;
+        ov->num_icondefs++;
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"ICON ",5) == 0) {    
+        index = ov->num_icons;
+        if(index >= ov->num_alloc_icons) {
+          if(ov->num_alloc_icons == 0) { /* start with space for 2 */
+            ov->geo_icon = (Geo_feat_icon_t **)
+              calloc(2,sizeof(Geo_feat_icon_t *));
+            ov->num_alloc_icons = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_icons *= 2;
+            ov->geo_icon = (Geo_feat_icon_t **) 
+              realloc(ov->geo_icon, ov->num_alloc_icons * sizeof(Geo_feat_icon_t *)); 
+          }
+        }
+        if(ov->geo_icon == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon pointer array!\n");
+          exit(-1);
+        }
+
+        /* get space for the Icon */
+        ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
+        ZERO_STRUCT(ov->geo_icon[index]);
+
+        if(ov->geo_icon[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
+          exit(-1);
+        }
+
+        if((num_fields = STRparse(str_ptr,cfield,256,32,64)) < 6) {
+          fprintf(stderr,"Error in ICON line: %s\n",str_ptr);
+          exit(-1);
+        }
+
+        /* find the definition for the line segments that make up the icon */
+        ov->geo_icon[index]->icon = NULL;
+        found = 0;
+        for(j=0; j < ov->num_icondefs && found == 0; j++) {
+          if(strcmp(ov->geo_icondef[j]->name,cfield[1]) == 0) {
+            ov->geo_icon[index]->icon = ov->geo_icondef[j];
+            found = 1;
+          }
+        }
+
+        if(found == 0) {    
+          fprintf(stderr,"No Icon definition: %s found in file %s!\n",cfield[1],ov->map_file_name);
+          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          continue;
+        }
+
+        /* record its position */
+        ov->geo_icon[index]->lat = atof(cfield[2]);
+        ov->geo_icon[index]->lon = atof(cfield[3]);
+        ov->geo_icon[index]->text_x = atoi(cfield[4]);
+        ov->geo_icon[index]->text_y = atoi(cfield[5]);
+
+        /* gather up remaining text fields */
+        ov->geo_icon[index]->label[0] = '\0';
+        len = 2;
+        for(j = 6; j < num_fields && len < LABEL_LENGTH; j++ ) {
+          strncat(ov->geo_icon[index]->label,cfield[j],LABEL_LENGTH - len);
+          len = strlen(ov->geo_icon[index]->label) +1;
+
+          // Separate multiple text label fiedds with spaces.
+          if( j < num_fields -1) {
+            strncat(ov->geo_icon[index]->label," ",LABEL_LENGTH - len);
+            len = strlen(ov->geo_icon[index]->label) +1;
+          }
+        }
+        {
+          int labellen = strlen(ov->geo_icon[index]->label);
+          if (labellen > 1) {
+            if (ov->geo_icon[index]->label[labellen-1] == ' ') {
+              ov->geo_icon[index]->label[labellen-1] = '\0';
+            }
+          }
+        }
+
+        ov->num_icons++;
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"POLYLINE",8) == 0) {    
+        index = ov->num_polylines;
+        if(index >= ov->num_alloc_polylines) {
+          if(ov->num_alloc_polylines == 0) { /* start with space for 2 */
+            ov->geo_polyline = (Geo_feat_polyline_t **)
+              calloc(2,sizeof(Geo_feat_polyline_t *));
+            ov->num_alloc_polylines = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_polylines *= 2;
+            ov->geo_polyline = (Geo_feat_polyline_t **) 
+              realloc(ov->geo_polyline, ov->num_alloc_polylines * sizeof(Geo_feat_polyline_t *)); 
+          }
+        }
+        if(ov->geo_polyline == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Polyline pointer array!\n");
+          exit(-1);
+        }
+
+        if((STRparse(str_ptr,cfield,256,32,64)) != 3) {
+          fprintf(stderr,"Error in POLYLINE line: %s\n",str_ptr);
+          exit(-1);
+        }
+        /* get space for the Polyline definition */
+        ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
+        ZERO_STRUCT(ov->geo_polyline[index]);
+
+        if(ov->geo_polyline[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
+          exit(-1);
+        }
+        STRcopy(ov->geo_polyline[index]->label,cfield[1],LABEL_LENGTH);
+        num_points = atoi(cfield[2]);
+        if(num_points <=0 ) {
+          fprintf(stderr,"Warning!: Bad POLYLINE Definition. File: %s, Line: %s\n",name_buf,str_ptr);
+          fprintf(stderr,"        : Format should be:    POLYLINE Label #points\n");
+          fprintf(stderr,"        : Skipping \n");
+          str_ptr = strtok_r(NULL,"\n",&lasts); // move to next line
+          continue;
+        }
+
+        /* Get space for points in the polyline */
+        ov->geo_polyline[index]->lat = (double *) calloc(1,num_points * sizeof(double));
+        ov->geo_polyline[index]->lon = (double *) calloc(1,num_points * sizeof(double));
+        ov->geo_polyline[index]->local_x = (double *) calloc(1,num_points * sizeof(double));
+        ov->geo_polyline[index]->local_y = (double *) calloc(1,num_points * sizeof(double));
+
+        if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
+          fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
+                  ov->map_file_name,num_points);
+          exit(-1);
+        }
+
+        /* Read in all of the points */
+        for(j=0,point = 0; j < num_points; j++) {
+          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          if(str_ptr != NULL && STRparse(str_ptr,cfield,256,32,64) >= 2) {
+            ov->geo_polyline[index]->lat[point] = atof(cfield[0]);
+            ov->geo_polyline[index]->lon[point] = atof(cfield[1]);
+            point++;
+          }
+        }
+        ov->geo_polyline[index]->num_points = point;
+        ov->num_polylines++;
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+      if(strncasecmp(str_ptr,"LABEL",5) == 0) {    
+        index = ov->num_labels;
+        if(index >= ov->num_alloc_labels) {
+          if(ov->num_alloc_labels == 0) { /* start with space for 2 */
+            ov->geo_label = (Geo_feat_label_t **)
+              calloc(2,sizeof(Geo_feat_label_t *));
+            ov->num_alloc_labels = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_labels *=2;
+            ov->geo_label = (Geo_feat_label_t **) 
+              realloc(ov->geo_label, ov->num_alloc_labels * sizeof(Geo_feat_label_t *)); 
+          }
+        }
+        if(ov->geo_label == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Label pointer array!\n");
+          exit(-1);
+        }
+
+        ov->num_labels++;
+                     
+        /* get space for the Label definition */
+        ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
+        ZERO_STRUCT(ov->geo_label[index]);
+
+        if(ov->geo_label[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Label definition!\n");
+          exit(-1);
+        }
+
+        if((num_fields = STRparse(str_ptr,cfield,256,32,64)) < 8) {
+          fprintf(stderr,"Too few fields in LABEL line: %s\n",str_ptr);
+          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          continue;
+        } 
+        ov->geo_label[index]->min_lat = atof(cfield[1]);
+        ov->geo_label[index]->min_lon = atof(cfield[2]);
+        ov->geo_label[index]->max_lat = atof(cfield[3]);
+        ov->geo_label[index]->max_lon = atof(cfield[4]);
+        ov->geo_label[index]->rotation = atof(cfield[5]);
+        ov->geo_label[index]->attach_lat = atof(cfield[6]);
+        ov->geo_label[index]->attach_lon = atof(cfield[7]);
+
+        ov->geo_label[index]->string[0] = '\0';
+        len = 2;
+        for(j = 8; j < num_fields && len < NAME_LENGTH; j++) {
+          strncat(ov->geo_label[index]->string,cfield[j],NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->string) +1;
+          if(j < num_fields -1)
+            strncat(ov->geo_label[index]->string," ",NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->string) +1;
+        }
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+
+      if(strncasecmp(str_ptr,"SIMPLELABEL",11) == 0) {    
+        index = ov->num_labels;
+        if(index >= ov->num_alloc_labels) {
+          if(ov->num_alloc_labels == 0) { /* start with space for 2 */
+            ov->geo_label = (Geo_feat_label_t **)
+              calloc(2,sizeof(Geo_feat_label_t *));
+            ov->num_alloc_labels = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_labels *=2;
+            ov->geo_label = (Geo_feat_label_t **) 
+              realloc(ov->geo_label, ov->num_alloc_labels * sizeof(Geo_feat_label_t *)); 
+          }
+        }
+        if(ov->geo_label == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Label pointer array!\n");
+          exit(-1);
+        }
+        ov->num_labels++;
+
+        /* get space for the Label definition */
+        ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
+        ZERO_STRUCT(ov->geo_label[index]);
+
+        if(ov->geo_label[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Label definition!\n");
+          exit(-1);
+        }
+
+        if((num_fields = STRparse(str_ptr,cfield,256,32,64)) < 4) {
+          fprintf(stderr,"Too few fields in SIMPLELABEL line: %s\n",str_ptr);
+          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          continue;
+        } 
+        ov->geo_label[index]->min_lat = atof(cfield[1]);
+        ov->geo_label[index]->min_lon = atof(cfield[2]);
+        ov->geo_label[index]->max_lat = atof(cfield[1]);
+        ov->geo_label[index]->max_lon = atof(cfield[2]);
+        ov->geo_label[index]->rotation = 0;
+        ov->geo_label[index]->attach_lat = atof(cfield[1]);
+        ov->geo_label[index]->attach_lon = atof(cfield[2]);
+
+        ov->geo_label[index]->string[0] = '\0';
+        len = 2;
+        for(j = 3; j < num_fields && len < NAME_LENGTH; j++) {
+          strncat(ov->geo_label[index]->string,cfield[j],NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->string) +1;
+          if(j < num_fields -1)
+            strncat(ov->geo_label[index]->string," ",NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->string) +1;
+        }
+        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        continue;
+      }
+
+    } 
+
+    // Nothing matches
+    str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+
+  }  // End of while additional lines exist in buffer
+
+  if(map_buf!= NULL) {
+    free(map_buf);
+    map_buf = NULL;
+  }
+
+  for(i=0; i < 32; i++)  free(cfield[i]);         /* free space for sub strings */
+  return;
+
+}
+
+/************************************************************************
+ * LOAD_SHAPE_OVERLAY_DATA: This version reads Shape files
+ */
+
+static void _loadShapeMap(Overlay_t *ov, const char *map_file_subdir)
+{
+  int    i,j;
+  int    index,found,is_http;
+  int    point;
+  int    num_points;        
+  int    ret_stat;
+  char   *str_ptr;
+  char    name_base[1024];  /* Buffer for input names */
+  char    dirname[4096];   /* Buffer for directories to search */
+  char    name_buf[2048];  /* Buffer for input names */
+  char    name_buf2[2048]; /* Buffer for input names */
+  char    *map_buf;
+  int     map_len;
+
+  SHPHandle SH;
+  SHPObject *SO;
+  FILE    *map_file;
+
+  int pid = getpid();
+
+  // Add . to list of dirs to search  to start.
+  strncpy(dirname,".,",2048);
+  strncat(dirname,map_file_subdir,2048);
+
+
+  found = 0;
+  is_http = 0;
+
+  // Search each subdir
+  str_ptr = strtok(dirname,","); // Prime strtok
+  do{  //  Search 
+
+    while(*str_ptr == ' ') str_ptr++; //skip any leading space
+
+    sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name);
+
+    // Check if it's a HTTP URL
+    if(strncasecmp(name_buf,"http:",5) == 0) {
+
+      // Extract name base
+      strncpy(name_base,ov->map_file_name,1023);
+      char *ptr = strrchr(name_base,'.');
+      if(ptr != NULL) *ptr = '\0';
+
+      // Download  SHP Part of shapefile
+      sprintf(name_buf,"%s/%s.shp",str_ptr,name_base);
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                        name_buf,_params.data_timeout_secs * 1000,
+                                        &map_buf, &map_len);
+      } else {
+        ret_stat =  HTTPgetURL(name_buf,
+                               _params.data_timeout_secs * 1000,
+                               &map_buf, &map_len);
+      }
+      if(ret_stat > 0 && map_len > 0 ) { // Succeeded
+        is_http = 1;
+
+        if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
+
+        sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+        if((map_file = fopen(name_buf2,"w")) == NULL) {
+          fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
+          perror("CIDD ");
+          exit(-1);
+        }
+        if(fwrite(map_buf,map_len,1,map_file) != 1) {
+          fprintf(stderr,"Problems Writing to %s \n",name_buf2);
+          perror("CIDD ");
+          exit(-1);
+        }
+        fclose(map_file);
+        if(map_buf != NULL) free(map_buf);
+      }
+
+      // Download  SHX Part of shapefile
+      sprintf(name_buf,"%s/%s.shx",str_ptr,name_base);
+      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
+                                        name_buf,_params.data_timeout_secs * 1000,
+                                        &map_buf, &map_len);
+
+      } else {
+        ret_stat =  HTTPgetURL(name_buf,
+                               _params.data_timeout_secs * 1000,
+                               &map_buf, &map_len);
+      }
+      if(ret_stat > 0  && map_len > 0) { // Succeeded
+
+        if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
+
+        sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+        if((map_file = fopen(name_buf2,"w")) == NULL) {
+          fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
+          perror("CIDD ");
+          exit(-1);
+        }
+        if(fwrite(map_buf,map_len,1,map_file) != 1) {
+          fprintf(stderr,"Problems Writing to %s \n",name_buf2);
+          perror("CIDD ");
+          exit(-1);
+        }
+        fclose(map_file);
+        if(map_buf != NULL) free(map_buf);
+      }
+
+      sprintf(name_buf,"/tmp/%d_%s",pid,name_base);
+      if((SH = SHPOpen(name_buf,"rb")) != NULL) {
+        found = 1;
+      } else {
+        fprintf(stderr,"Problems with SHPOpen on %s \n",name_buf);
+      }
+
+    } else {  // Looks like a regular file
+
+      sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name);
+      if((SH = SHPOpen(name_buf,"rb")) != NULL) {
+        found = 1;
+      }
+    }
+
+  } while ((str_ptr = strtok(NULL,",")) != NULL && found == 0 );
+
+  if( found == 0) {
+    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name);
+    if(is_http) {  // Unlink temporary files
+      sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+      unlink(name_buf2);
+      sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+      unlink(name_buf2);
+    }
+		
+    return;
+  }
+
+
+  // Shape File is Found and Open
+
+  int n_objects;
+  int shape_type;
+  int part_num;
+
+  SHPGetInfo(SH, &n_objects, &shape_type, NULL, NULL);
+
+  if(gd.debug) {
+    fprintf(stderr,"Found %d objects, type %d  in %s\n",n_objects, shape_type, ov->map_file_name);
+  }
+
+  for(i=0; i < n_objects; i++ ) {  // Loop through each object
+
+    SO = SHPReadObject(SH,i);    // Load the shape object
+
+    switch(SO->nSHPType) {
+
+      case SHPT_POLYGON:  // Polyline
+      case SHPT_ARC:
+      case SHPT_ARCM:
+      case SHPT_ARCZ:
+        index = ov->num_polylines;
+        if(index >= ov->num_alloc_polylines) {
+          if(ov->num_alloc_polylines == 0) { /* start with space for 2 */
+            ov->geo_polyline = (Geo_feat_polyline_t **)
+              calloc(2,sizeof(Geo_feat_polyline_t *));
+            ov->num_alloc_polylines = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_polylines *= 2;
+            ov->geo_polyline = (Geo_feat_polyline_t **) 
+              realloc(ov->geo_polyline, ov->num_alloc_polylines * sizeof(Geo_feat_polyline_t *)); 
+          }
+        }
+        if(ov->geo_polyline == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Polyline pointer array!\n");
+          exit(-1);
+        }
+
+        /* get space for the Polyline definition */
+        ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
+        ZERO_STRUCT(ov->geo_polyline[index]);
+        if(ov->geo_polyline[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
+          exit(-1);
+        }
+
+        STRcopy(ov->geo_polyline[index]->label,"Shape",LABEL_LENGTH);
+
+        /* Get space for points in the polyline */
+        ov->geo_polyline[index]->lat = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->lon = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->local_x = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->local_y = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+
+        if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
+          fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
+                  ov->map_file_name,SO->nVertices);
+          exit(-1);
+        }
+
+        /* Read in all of the points */
+        part_num = 1;
+        for(j=0,point = 0; j < SO->nVertices; j++) {
+          ov->geo_polyline[index]->lat[point] = SO->padfY[j];
+          ov->geo_polyline[index]->lon[point] = SO->padfX[j];
+          if(j+1 == SO->panPartStart[part_num]) {     // Insert a pen up in the data stream.
+            point++;
+            ov->geo_polyline[index]->lat[point] = -1000.0;
+            ov->geo_polyline[index]->lon[point] = -1000.0;
+            part_num++;
+          }
+          point++;
+        }
+        ov->geo_polyline[index]->num_points = point;
+        ov->num_polylines++;
+
+        break;
+
+      case SHPT_POINT :  // Icon Instance
+      case SHPT_POINTZ:
+      case SHPT_POINTM:
+        if(ov->num_icondefs == 0) {  // No Icon definition yet.
+          if(ov->num_alloc_icondefs == 0) { /* start with space for 2 */
+            ov->geo_icondef = (Geo_feat_icondef_t **) calloc(1,sizeof(Geo_feat_icondef_t *));
+            ov->num_icondefs = 1;
+            ov->num_alloc_icondefs = 1;
+          }
+                
+          if(ov->geo_icondef == NULL) {
+            fprintf(stderr,"Unable to allocate memory for Icon definition pointer array!\n");
+            exit(-1);
+          }
+
+          /* get space for the icon definition */
+          ov->geo_icondef[0] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
+          ZERO_STRUCT(ov->geo_icondef[0]);
+
+          if(ov->geo_icondef[0] == NULL) {
+            fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
+            exit(-1);
+          }
+          num_points = 6;  // A Predefined Box.
+
+          /* Get space for points in the icon */
+          ov->geo_icondef[0]->x = (short *) calloc(1,num_points * sizeof(short));
+          ov->geo_icondef[0]->y = (short *) calloc(1,num_points * sizeof(short));
+
+          if(ov->geo_icondef[0]->x == NULL || ov->geo_icondef[0]->y == NULL) {
+            fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
+                    ov->map_file_name,num_points);
+            exit(-1);
+          }
+
+          // Set all of the points - Draws a Small Box
+          ov->geo_icondef[0]->x[0] = -1;
+          ov->geo_icondef[0]->y[0] = -1;
+
+          ov->geo_icondef[0]->x[1] = 1;
+          ov->geo_icondef[0]->y[1] = -1;
+
+          ov->geo_icondef[0]->x[2] = 1;
+          ov->geo_icondef[0]->y[2] = 1;
+
+          ov->geo_icondef[0]->x[3] = -1;
+          ov->geo_icondef[0]->y[3] = 1;
+
+          ov->geo_icondef[0]->x[4] = -1;
+          ov->geo_icondef[0]->y[4] = -1;
+
+          ov->geo_icondef[0]->x[5] = 32767;
+          ov->geo_icondef[0]->y[5] = 32767;
+
+          ov->geo_icondef[0]->num_points = num_points;
+        }
+
+        index = ov->num_icons;
+        if(index >= ov->num_alloc_icons) {
+          if(ov->num_alloc_icons == 0) { /* start with space for 2 */
+            ov->geo_icon = (Geo_feat_icon_t **) calloc(2,sizeof(Geo_feat_icon_t *));
+            ov->num_alloc_icons = 2;
+          } else {  /* Double the space */
+            ov->num_alloc_icons *= 2;
+            ov->geo_icon = (Geo_feat_icon_t **) 
+              realloc(ov->geo_icon, ov->num_alloc_icons * sizeof(Geo_feat_icon_t *)); 
+          }
+        }
+        if(ov->geo_icon == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon pointer array!\n");
+          exit(-1);
+        }
+
+        /* get space for the Icon */
+        ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
+        ZERO_STRUCT(ov->geo_icon[index]);
+
+        if(ov->geo_icon[index] == NULL) {
+          fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
+          exit(-1);
+        }
+
+        // The definition for the Icon is fixed 
+        ov->geo_icon[index]->icon = ov->geo_icondef[0];
+
+        /* record its position */
+        ov->geo_icon[index]->lat = SO->padfY[0];
+        ov->geo_icon[index]->lon = SO->padfX[0];
+
+        ov->num_icons++;
+        break;
+
+      default:
+      case SHPT_NULL:
+      case SHPT_MULTIPOINT:
+      case SHPT_POLYGONZ:
+      case SHPT_MULTIPOINTZ:
+      case SHPT_POLYGONM:
+      case SHPT_MULTIPOINTM:
+      case SHPT_MULTIPATCH:
+        if(gd.debug) {
+          fprintf(stderr,"Encountered Unsupported Shape type %d\n",SO->nSHPType);
+        }
+        break;
+    }
+
+    if(SO != NULL) SHPDestroyObject(SO);
+  }  // End of each object
+
+  if(is_http) {  // Unlink temporary files
+    sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+    unlink(name_buf2);
+    sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+    unlink(name_buf2);
+	
+  }
+
+}
+
+/************************************************************************
+ * INIT_OVER_DATA_LINKS:  Scan cidd_overlays.info file and setup
+ *
+ */ 
+
+void _initMaps()
+  
+{
+  
+  gd.num_map_overlays = _params.maps_n;
+  
+  for (int ii = 0; ii < _params.maps_n; ii++) {
+    
+    Params::map_t &omap = _params._maps[ii];
+    string mapFileName = omap.map_file_name;
+    Overlay_t *ov = gd.over[ii];
+    
+    ov->num_polylines = 0;
+    ov->num_labels = 0;
+    ov->num_icons = 0;
+    
+    if (mapFileName.find(".shp") != string::npos &&
+        mapFileName.find(".shx") != string::npos) {
+      
+      _loadShapeMap(ov, _params.map_file_subdir);
+
+    } else {  // Assume RAP Map Format 
+      
+      _loadRapMap(ov, _params.map_file_subdir);
+
+    }
+    
+    if(gd.debug) {
+      printf("Overlay file %s contains %ld polylines, %ld icon_defns, %ld icons, %ld labels\n",
+             ov->map_file_name,
+             ov->num_polylines,
+             ov->num_icondefs,
+             ov->num_icons,
+             ov->num_labels);
+    }
+    
+  } // ii
+  
+  calc_local_over_coords();
+  
+}
+
+#ifdef NOT_ANY_MORE
+  
+  const char *resource;
+
+  // legacy CIDD menu bar - deprecated
+  
+  ZERO_STRUCT(&gd.menu_bar);
+  gd.menu_bar.num_menu_bar_cells = gd.uparams->getLong("cidd.num_menu_bar_cells",0);
+  if(gd.menu_bar.num_menu_bar_cells > 0) {
+    for(int ii = 1; ii <= gd.menu_bar.num_menu_bar_cells; ii++) {
+      sprintf(str_buf,"cidd.menu_bar_funct%d",ii);
+      resource = gd.uparams->getString(str_buf,"Not Defined");
+      if(strcmp("LOOP_ONOFF",resource) == 0) {
+        gd.menu_bar.loop_onoff_bit = 1 << (ii - 1) ;
+      } else if( strcmp("WINDS_ONOFF",resource) == 0) {
+        gd.menu_bar.winds_onoff_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_FORECAST_MENU",resource) == 0) {
+        gd.menu_bar.show_forecast_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_PAST_MENU",resource) == 0) {
+        gd.menu_bar.show_past_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_GENTIME_MENU",resource) == 0) {
+        gd.menu_bar.show_gen_time_win_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SYMPRODS_ONOFF",resource) == 0) {
+        gd.menu_bar.symprods_onoff_bit = 1 << (ii - 1) ;
+      } else if( strcmp("PRINT_BUTTON",resource) == 0) {
+        gd.menu_bar.print_button_bit = 1 << (ii - 1) ;
+      } else if( strcmp("HELP_BUTTON",resource) == 0) {
+        gd.menu_bar.help_button_bit = 1 << (ii - 1) ;
+      } else if( strcmp("CLONE_CIDD",resource) == 0) {
+        gd.menu_bar.clone_button_bit = 1 << (ii - 1) ;
+      } else if( strcmp("EXIT_BUTTON",resource) == 0) {
+        gd.menu_bar.exit_button_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_VIEW_MENU",resource) == 0) {
+        gd.menu_bar.show_view_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_PRODUCT_MENU",resource) == 0) {
+        gd.menu_bar.show_prod_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_MAP_MENU",resource) == 0) {
+        gd.menu_bar.show_map_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_BOOKMARK_MENU",resource) == 0) {
+        gd.menu_bar.show_bookmark_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_STATUS_PANEL",resource) == 0) {
+        gd.menu_bar.show_status_win_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_TIME_PANEL",resource) == 0) {
+        gd.menu_bar.show_time_panel_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_DPD_MENU",resource) == 0) {
+        gd.menu_bar.show_dpd_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_DPD_PANEL",resource) == 0) {
+        gd.menu_bar.show_dpd_panel_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SET_DRAW_MODE",resource) == 0) {
+        gd.menu_bar.set_draw_mode_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SET_PICK_MODE",resource) == 0) {
+        gd.menu_bar.set_pick_mode_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SET_ROUTE_MODE",resource) == 0) {
+        gd.menu_bar.set_route_mode_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_XSECT_PANEL",resource) == 0) {
+        gd.menu_bar.show_xsect_panel_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_GRID_PANEL",resource) == 0) {
+        gd.menu_bar.show_grid_panel_bit = 1 << (ii - 1) ;
+      } else if( strcmp("RELOAD",resource) == 0) {
+        gd.menu_bar.reload_bit = 1 << (ii - 1) ;
+      } else if( strcmp("RESET",resource) == 0) {
+        gd.menu_bar.reset_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SET_TO_NOW",resource) == 0) {
+        gd.menu_bar.set_to_now_bit = 1 << (ii - 1) ;
+      } else if( strcmp("CLOSE_POPUPS",resource) == 0) {
+        gd.menu_bar.close_popups_bit = 1 << (ii - 1) ;
+      } else if( strcmp("REPORT_MODE_ONOFF",resource) == 0) {
+        gd.menu_bar.report_mode_bit = 1 << (ii - 1) ;
+      } else if( strcmp("LANDUSE_ONOFF",resource) == 0) {
+        gd.menu_bar.landuse_onoff_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SHOW_CMD_MENU",resource) == 0) {
+        gd.menu_bar.show_cmd_menu_bit = 1 << (ii - 1) ;
+      } else if( strcmp("SNAP_IMAGE",resource) == 0) {
+        gd.menu_bar.snapshot_bit = 1 << (ii - 1) ;
+      } else if( strcmp("ZOOM_BACK",resource) == 0) {
+        gd.menu_bar.zoom_back_bit = 1 << (ii - 1) ;
+      } else {
+        fprintf(stderr,"Unrecognized Menu Bar Cell Function %d: %s\n",ii,resource);
+        exit(-1);
+      }
+    }
+  } else {
+    fprintf(stderr,"Menu Bar cells must be defined in this version\n");
+    exit(-1);
+  }
+
+#endif
 

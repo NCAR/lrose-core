@@ -109,17 +109,17 @@ void render_xsect_top_layers(Drawable xid, int page)
            double pk_turb = peak_turb(gd.layers.route_wind.turb,
                                       0.0, gd.h_win.route.total_length);
 
-           if(pk_turb >= gd.layers.route_wind._P->turb_low_thresh &&
-              pk_turb < gd.layers.route_wind._P->turb_mod_thresh) {
+           if(pk_turb >= _params.route_turb_low_thresh &&
+              pk_turb < _params.route_turb_mod_thresh) {
              strncat(hazard_label," ! MOD CAT",128);
            }
 
-           if(pk_turb >= gd.layers.route_wind._P->turb_mod_thresh &&
-              pk_turb < gd.layers.route_wind._P->turb_hi_thresh) {
+           if(pk_turb >= _params.route_turb_mod_thresh &&
+              pk_turb < _params.route_turb_high_thresh) {
              strncat(hazard_label," ! HIGH CAT",128);
            }
 
-           if(pk_turb >= gd.layers.route_wind._P->turb_hi_thresh) {
+           if(pk_turb >= _params.route_turb_high_thresh) {
              strncat(hazard_label," ! VHIGH CAT",128);
            }
         }
@@ -132,17 +132,17 @@ void render_xsect_top_layers(Drawable xid, int page)
            double pk_icing = peak_icing(gd.layers.route_wind.icing,
                                       0.0, gd.h_win.route.total_length);
 
-           if(pk_icing >= gd.layers.route_wind._P->icing_low_thresh &&
-              pk_icing < gd.layers.route_wind._P->icing_mod_thresh) {
+           if(pk_icing >= _params.route_icing_low_thresh &&
+              pk_icing < _params.route_icing_mod_thresh) {
              strncat(hazard_label," ! LGT ICE",128);
            }
 
-           if(pk_icing >= gd.layers.route_wind._P->icing_mod_thresh &&
-              pk_icing < gd.layers.route_wind._P->icing_hi_thresh) {
+           if(pk_icing >= _params.route_icing_mod_thresh &&
+              pk_icing < _params.route_icing_high_thresh) {
              strncat(hazard_label," ! MOD ICE",128);
            }
 
-           if(pk_icing >= gd.layers.route_wind._P->icing_hi_thresh) {
+           if(pk_icing >= _params.route_icing_high_thresh) {
              strncat(hazard_label," ! HVY ICE",128);
            }
         }

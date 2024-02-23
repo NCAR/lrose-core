@@ -509,6 +509,11 @@ commentdef {
   p_header = "DRAW_EXPORT Parameters";
 };
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is drawing for export active?";
+} draw_export_active;
+
 typedef struct {
   string id_label;
   string url;
@@ -674,6 +679,11 @@ commentdef {
   p_comment = "Note: Terrain Fields must be on the same projection as the Display";
 };
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is the terrain section active?";
+} terrain_active;
+
 paramdef string {
   p_default = "Terrain";
   p_descr = "Label used for legends";
@@ -749,16 +759,20 @@ commentdef {
   p_header = "IMAGE_GENERATION";
 }
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is the image generation section active?";
+} image_generation_active;
+
 typedef enum {
   IMAGE_DEBUG_OFF, IMAGE_DEBUG_NORM, IMAGE_DEBUG_VERBOSE
 } image_debug_t;
 
-paramdef enum image_debug_t
-  {
-    p_default = IMAGE_DEBUG_OFF;
-    p_help = "Debug option.\n"
-    "If set, debug messages will be printed appropriately.\n";
-  } image_debug;
+paramdef enum image_debug_t {
+  p_default = IMAGE_DEBUG_OFF;
+  p_help = "Debug option.\n"
+  "If set, debug messages will be printed appropriately.\n";
+} image_debug;
 
 paramdef boolean { 
   p_descr = "Generate images for specified vertical sections.";

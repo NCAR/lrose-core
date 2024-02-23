@@ -475,8 +475,8 @@ void modify_gui_objects()
     if(gd.layers.route_wind.has_params) {
 	// Set the initial state of the route winds label controls
 	int pval = 0;
-	if( gd.layers.route_wind._P->add_waypoints_labels) pval |= 1;
-	if( gd.layers.route_wind._P->add_wind_text) pval |= 2;
+	if( _params.route_add_waypoints_labels) pval |= 1;
+	if( _params.route_add_wind_text) pval |= 2;
 	// xv_set(gd.v_win_v_win_pu->route_labels_st,PANEL_VALUE,pval,NULL);
     } else {
 	// xv_set(gd.v_win_v_win_pu->route_labels_st,XV_SHOW,FALSE,NULL);
@@ -503,26 +503,26 @@ void modify_gui_objects()
 
     }
 
-    if(gd.gui_P->field_list_n > 1) { 
-	for(i=0; i < gd.gui_P->field_list_n ; i++) {
-            // xv_set(gd.data_pu->group_list,
-	    //     	PANEL_LIST_INSERT, i,
-	    //     	PANEL_LIST_STRING, i, gd.gui_P->_field_list[i].id_label,
-	    //     	PANEL_LIST_CLIENT_DATA, i, i,
-	    //     	NULL);
-	}
-	// xv_set(gd.data_pu->group_list,XV_SHOW,TRUE,XV_X,0, XV_Y,0,NULL);
-	// xv_set(gd.data_pu->group_list,PANEL_LIST_SELECT,0,TRUE,NULL);
-    } else {
-	// xv_set(gd.data_pu->group_list,XV_SHOW,FALSE,XV_X,0, XV_Y,0,NULL);
-    }
+    // if(gd.gui_P->field_list_n > 1) { 
+    //     for(i=0; i < gd.gui_P->field_list_n ; i++) {
+    //         // xv_set(gd.data_pu->group_list,
+    //         //     	PANEL_LIST_INSERT, i,
+    //         //     	PANEL_LIST_STRING, i, gd.gui_P->_field_list[i].id_label,
+    //         //     	PANEL_LIST_CLIENT_DATA, i, i,
+    //         //     	NULL);
+    //     }
+    //     // xv_set(gd.data_pu->group_list,XV_SHOW,TRUE,XV_X,0, XV_Y,0,NULL);
+    //     // xv_set(gd.data_pu->group_list,PANEL_LIST_SELECT,0,TRUE,NULL);
+    // } else {
+    //     // xv_set(gd.data_pu->group_list,XV_SHOW,FALSE,XV_X,0, XV_Y,0,NULL);
+    // }
 
-    /* Build all of the field menu's and choice panels. */
-    if(gd.gui_P->field_list_n > 1 ) {
-      // set_group_proc(0,(char *) NULL, (Xv_opaque) NULL, (Panel_list_op) 0,(Event *) NULL, 0);
-    }else {
-      init_field_menus();
-    }
+    // /* Build all of the field menu's and choice panels. */
+    // if(gd.gui_P->field_list_n > 1 ) {
+    //   // set_group_proc(0,(char *) NULL, (Xv_opaque) NULL, (Panel_list_op) 0,(Event *) NULL, 0);
+    // }else {
+    //   init_field_menus();
+    // }
 
     /* make sure there is at least one field in the choice lists */
     if (render_line <= 0) {
@@ -785,29 +785,29 @@ void init_field_menus()
                                          : _params.num_field_menu_cols;
 #endif
 
-    if(gd.gui_P->field_list_n > 1 ) {
-        // xv_set(gd.data_pu->data_st,XV_X,0,
-	//        XV_Y, xv_get(gd.data_pu->group_list,XV_HEIGHT) + 4,
-	//        PANEL_CHOICE_NCOLS,ncols,NULL);
+//     if(gd.gui_P->field_list_n > 1 ) {
+//         // xv_set(gd.data_pu->data_st,XV_X,0,
+// 	//        XV_Y, xv_get(gd.data_pu->group_list,XV_HEIGHT) + 4,
+// 	//        PANEL_CHOICE_NCOLS,ncols,NULL);
 
-        // int x1 = xv_get(gd.data_pu->group_list,XV_WIDTH);
-        // int x2 = xv_get(gd.data_pu->data_st,XV_WIDTH);
-#ifdef NOTNOW
-      int x1 = 0;
-      int x2 = 0;
-      x = x1 > x2 ? x1 : x2;
-#endif
+//         // int x1 = xv_get(gd.data_pu->group_list,XV_WIDTH);
+//         // int x2 = xv_get(gd.data_pu->data_st,XV_WIDTH);
+// #ifdef NOTNOW
+//       int x1 = 0;
+//       int x2 = 0;
+//       x = x1 > x2 ? x1 : x2;
+// #endif
 
-        // y = xv_get(gd.data_pu->data_st,XV_HEIGHT) +  xv_get(gd.data_pu->group_list,XV_HEIGHT) + 4;
-        // xv_set(gd.data_pu->data_st,PANEL_LIST_WIDTH,x,NULL);
+//         // y = xv_get(gd.data_pu->data_st,XV_HEIGHT) +  xv_get(gd.data_pu->group_list,XV_HEIGHT) + 4;
+//         // xv_set(gd.data_pu->data_st,PANEL_LIST_WIDTH,x,NULL);
 
 
-    } else {
-        // xv_set(gd.data_pu->data_st,XV_X,0,XV_Y,0,PANEL_CHOICE_NCOLS,ncols,NULL);
-        // x = xv_get(gd.data_pu->data_st,XV_WIDTH);
-        // y = xv_get(gd.data_pu->data_st,XV_HEIGHT);
-	//     xv_set(gd.data_pu->group_list,XV_Y,y,NULL);
-    }
+//     } else {
+//         // xv_set(gd.data_pu->data_st,XV_X,0,XV_Y,0,PANEL_CHOICE_NCOLS,ncols,NULL);
+//         // x = xv_get(gd.data_pu->data_st,XV_WIDTH);
+//         // y = xv_get(gd.data_pu->data_st,XV_HEIGHT);
+// 	//     xv_set(gd.data_pu->group_list,XV_Y,y,NULL);
+//     }
 
     // xv_set(gd.data_pu->data_pu,XV_HEIGHT,y,XV_WIDTH,x,NULL);
 

@@ -1434,6 +1434,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'draw_export_active'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("draw_export_active");
+    tt->descr = tdrpStrDup("Is drawing for export active?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &draw_export_active - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'draw_export_info'
     // ctype is '_draw_export_t'
     
@@ -1676,6 +1688,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'terrain_active'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("terrain_active");
+    tt->descr = tdrpStrDup("Is the terrain section active?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &terrain_active - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'terrain_id_label'
     // ctype is 'char*'
     
@@ -1801,6 +1825,18 @@
     tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("IMAGE_GENERATION");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'image_generation_active'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("image_generation_active");
+    tt->descr = tdrpStrDup("Is the image generation section active?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &image_generation_active - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'image_debug'
