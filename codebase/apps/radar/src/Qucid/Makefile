@@ -77,7 +77,6 @@ HDRS = \
 	SymprodRenderObj.hh \
 	TimeList.hh \
 	TimePlot.hh \
-	Uparams.hh \
 	VertWidget.hh \
 	VertWindow.hh \
 	WorldPlot.hh \
@@ -122,7 +121,6 @@ NORM_SRCS = \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	TimePlot.cc \
-	Uparams.cc \
 	WorldPlot.cc \
 	cidd_coords.cc \
 	cidd_font.cc \

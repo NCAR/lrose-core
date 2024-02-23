@@ -109,19 +109,6 @@
 
 // TDRP Parameter Classes
 #include "Params.hh"
-// #include "Csyprod_P.hh"
-// #include "Cdraw_P.hh"
-// #include "Cgui_P.hh"
-// #include "Cimages_P.hh"
-
-// parameters
-
-#include "Uparams.hh"
-
-// Someone deines this under Solaris
-#ifdef _P
-#undef _P
-#endif
 
 // GUI  - Devguide Generated .h files 
 // #include "h_win_ui.h"       // CIDD Object Definitions for horizontal view 
@@ -545,32 +532,7 @@ struct    Global_data {
   RemoteUIQueue *remote_ui;   // REmote User Interface/Command class
 
 
-  // LEGACY TDRP CLASSES
-  // Csyprod_P *syprod_P;  // Symbolic Products
-
-  // Cdraw_P *draw_P;      // Draw Params
-  // Cgui_P *gui_P;        // GUI Config Params
-  // Cimages_P *images_P;  // image generation params
-
-  // parameter object
-  // Uparams *uparams;
-
-  // contours
-
-  // int contour_font_num;
-  // int n_ideal_contour_labels;
-
-  // canvas events
-
-  // double rotate_coarse_adjust;
-  // double rotate_medium_adjust;
-  // double rotate_fine_adjust;
-
-  // zoom
-
-  // // double min_zoom_threshold;
-
-  // // shmem
+  // shmem
 
   int coord_key;
 
