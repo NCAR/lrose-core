@@ -423,142 +423,16 @@ void Qucid::_initGlobals()
     
   gd.argc = 0;
   gd.display_projection = 0;
-  // _params.always_get_full_domain = 0; 
-  // _params.do_not_clip_on_mdv_request = 0;
-  // _params.do_not_decimate_on_mdv_request = 0;
-  // _params.enable_status_window = 0;   
-  // _params.wsddm_mode = 0;   
   gd.quiet_mode = 0;   
   gd.report_mode = 0;   
-  // _params.close_popups = 0;   
-  // _params.one_click_rhi = 0;  
-  // _params.click_posn_rel_to_origin = 0; 
-  // _params.report_clicks_in_status_window = 0; 
-  // _params.report_clicks_in_degM_and_nm = 0;
-  // _params.magnetic_variation_deg = 0; 
-  // _params.display_labels = 0; 
-  // _params.display_ref_lines = 0; 
-  // _params.show_clock = 0;     
-  // _params.show_data_messages = 0;
-  // _params.draw_clock_local = 0; 
-  // _params.use_local_timestamps = 0; 
   gd.run_unmapped = 0;   
-  // _params.html_mode = 0;      
-  // _params.transparent_images = 0;
-  // _params.range_ring_follows_data = 0; 
-  // _params.range_ring_for_radar_only = 0;
-  // _params.domain_follows_data = 0; 
-  // _params.show_height_sel = 0;
-  
   gd.use_cosine_correction = -1;
-  // _params.latlon_mode = 0;    
-  // _params.zoom_limits_in_latlon = 0; 
-
-  // _params.horiz_top_margin = 0;
-  // _params.horiz_bot_margin = 0;
-  // _params.horiz_left_margin = 0;
-  // _params.horiz_right_margin = 0;
-  
-  // _params.vert_top_margin = 0;
-  // _params.vert_bot_margin = 0;
-  // _params.vert_left_margin = 0;
-  // _params.vert_right_margin = 0;
-  
-  // _params.horiz_min_height = 0;
-  // _params.horiz_min_width = 0;
-  // _params.horiz_default_height = 0;
-  // _params.horiz_default_width = 0;
-  
-  // _params.vert_min_height = 0;
-  // _params.vert_min_width = 0;
-  // _params.vert_default_height = 0;
-  // _params.vert_default_width = 0;
-  
-  // _params.horiz_legends_start_x = 0;
-  // _params.horiz_legends_start_y = 0;
-  // _params.horiz_legends_delta_y = 0;
-
-  // _params.vert_legends_start_x = 0;
-  // _params.vert_legends_start_y = 0;
-  // _params.vert_legends_delta_y = 0;
-
-  // _params.domain_limit_min_x = 0;
-  // _params.domain_limit_max_x = 0;
-  // _params.domain_limit_min_y = 0;
-  // _params.domain_limit_max_y = 0;
-  
-  // _params.min_ht = 0;
-  // _params.max_ht = 0;
-  // _params.start_ht = 0;
-  // _params.planview_start_page = 0;
-  // _params.xsect_start_page = 0;
-  
-  // _params.label_contours = 0; 
-  // _params.top_margin_render_style = 0; 
-  // _params.bot_margin_render_style = 0; 
-  // _params.drawing_mode = 0;   
-
-  // _params.layer_legends_on = 0;  // Control variables for plotting legend/Titles
-  // _params.cont_legends_on = 0;
-  // _params.wind_legends_on = 0;
-  // _params.contour_line_width = 0;
-  // _params.smooth_contours = 0;  // Apply smoothing before contouring  = 0;  0-2 are valid values 
-  // _params.use_alt_contours = 0; // 1 =  Use the Alternate Contouring routines 
-  // _params.add_noise = 0;        // Add 1 part in 250 of noise to contours 1 == true
-  // _params.special_contour_value = 0;    // which value to draw wider 
-  // _params.map_bad_to_min_value = 0;     // 1 == true
-  // _params.map_missing_to_min_value = 0; // 1 == true
-
-  // _params.products_on = 0;
-  // _params.product_line_width = 0;
-  // _params.product_font_size = 0;
   MEM_zero(gd.product_detail_threshold);
   MEM_zero(gd.product_detail_adjustment);
 
-  // _params.draw_main_on_top = 0;  
-  // _params.mark_latest_click_location = 0; 
   gd.mark_latest_client_location = 0; 
-  // _params.check_data_times = 0;  
-  // _params.check_clipping = 0;    
-  // _params.run_once_and_exit = 0; 
-  // _params.request_compressed_data = 0;  
-  // _params.request_gzip_vol_compression = 0;  
-  // _params.add_height_to_filename = 0;   
-  // _params.add_frame_time_to_filename = 0; 
-  // _params.add_gen_time_to_filename = 0; 
-  // _params.add_valid_time_to_filename = 0; 
-  // _params.add_frame_num_to_filename = 0; 
-  // _params.add_button_name_to_filename = 0;
-  // _params.save_images_to_day_subdir = 0;
-  // _params.simple_command_timeout_secs = 0; 
-  // _params.complex_command_timeout_secs = 0; 
-
-  // _params.font_display_mode = 0; 
   gd.forecast_mode = 0;     
-  // _params.gather_data_mode = 0;  
-  // _params.enable_save_image_panel = 0; 
-  // _params.disable_pick_mode = 0;  
-  // _params.clip_overlay_fields = 0; 
-  // _params.output_geo_xml = 0;       
-  // _params.use_latlon_in_geo_xml = 0;       
-  // _params.replace_underscores = 0;  
-
   gd.data_format = 0; 
-  // _params.image_fill_threshold = 0; 
-  // _params.dynamic_contour_threshold = 0; 
-  // _params.inten_levels = 0;    
-  // _params.idle_reset_seconds = 0;   
-  // _params.model_run_list_hours = 0; 
-				                 
-  // _params.ideal_x_vects = 0;
-  // _params.ideal_y_vects = 0;
-  // _params.wind_head_size = 0;     
-  // _params.wind_head_angle = 0;     
-  // _params.barb_shaft_len = 0;
-  // _params.all_winds_on = 0;
-  // _params.wind_mode = 0;
-  // _params.wind_time_scale_interval = 0;
-  // _params.wind_scaler = 0;
 
   gd.num_colors = 0;       
   gd.num_draw_colors = 0;  
@@ -605,74 +479,11 @@ void Qucid::_initGlobals()
   MEM_zero(gd.height_array);
   MEM_zero(gd.proj_param);
 
-  // _params.origin_latitude = 0.0;
-  // _params.origin_longitude = 0.0;
-
-  // _params.reset_click_latitude = 0.0;
-  // _params.reset_click_longitude = 0.0;
-
-  // _params.projection_type = NULL;
-  // _params.north_angle = 0.0;      // radar cart
-  // _params.lambert_lat1 = 0.0;     // lambert
-  // _params.lambert_lat2 = 0.0;     // lambert
-  // _params.tangent_lat = 0.0;      // stereographic
-  // _params.tangent_lon = 0.0;      // stereographic
-  // _params.central_scale = 0.0;    // stereographic
-
-  // _params.movie_on = 0;
-  // _params.movie_magnify_factor = 0;
-  // _params.time_interval = 0;
-  // _params.frame_span = 0;
-  // _params.starting_movie_frames = 0;
-  // _params.reset_frames = 0;
-  // _params.movie_delay = 0;
-  // _params.forecast_interval = 0;
-  // _params.past_interval = 0;
-  // _params.time_search_stretch_factor = 0;
-  // _params.climo_mode = NULL;
-  // _params.temporal_rounding = 0;
-  // _params.movie_speed_msec = 0;
-  
   gd.argv = NULL;             
   gd.orig_wd = NULL;           
-  // gd.db_data = NULL;           
-  // gd.db_name = NULL;           
-  // _params.frame_label = NULL;       
-  // _params.no_data_message = NULL;   
-  // _params.help_command = NULL;      
-  // _params.bookmark_command = NULL;  
   gd.app_name = NULL;          
   gd.app_instance = NULL;      
-  // _params.scale_units_label = NULL; 
 
-  // _params.image_dir = NULL;     
-  // gd.horiz_image_dir = NULL;     
-  // gd.vert_image_dir = NULL;     
-  // _params.horiz_image_fname = NULL;     
-  // _params.vert_image_fname = NULL;     
-  // _params.horiz_image_command = NULL;     
-  // _params.vert_image_command = NULL;     
-
-  // _params.image_ext = NULL;     
-  // _params.image_convert_script = NULL; 
-  // _params.series_convert_script = NULL; 
-
-  // _params.image_horiz_prefix = NULL;   
-  // _params.image_vert_prefix = NULL;   
-  // _params.image_name_separator = NULL; 
-
-  // _params.print_script = NULL;          
-
-  // _params.http_tunnel_url = NULL;   
-  // _params.http_proxy_url = NULL;    
-  // _params.station_loc_url = NULL;   
-  // _params.remote_ui_url = NULL;     
-  // _params.datamap_host = NULL;      
-
-  // _params.label_time_format = NULL;  
-  // _params.moviestart_time_format = NULL;   
-  // _params.frame_range_time_format = NULL;   
-  // _params.movieframe_time_format = NULL;  
   MEM_zero(gd.data_info);
 
   MEM_zero(gd.gen_time_list);
@@ -698,7 +509,6 @@ void Qucid::_initGlobals()
   MEM_zero(gd.mrec);
   MEM_zero(gd.layers);
   MEM_zero(gd.legends);
-  // MEM_zero(gd.menu_bar);
   gd.bookmark = NULL;
   MEM_zero(gd.movie);
   MEM_zero(gd.io_info);
@@ -711,55 +521,8 @@ void Qucid::_initGlobals()
   gd.r_context = NULL;    
   gd.station_loc = NULL;    
   gd.remote_ui = NULL;   
-  // gd.syprod_P = NULL;  
-  // gd.draw_P = NULL;      
-  // gd.gui_P = NULL;        
-  // gd.images_P = NULL;  
-  // gd.uparams = NULL;
-
-  // _params.contour_font_num = 0;
-  // _params.n_ideal_contour_labels = 0;
-  
-  // _params.rotate_coarse_adjust = 0.0;
-  // _params.rotate_medium_adjust = 0.0;
-  // _params.rotate_fine_adjust = 0.0;
-  
-  // _params.min_zoom_threshold = 0.0;
 
   gd.coord_key = 0;
-
-  // _params.status_info_file = NULL;
-
-  // _params.horiz_default_x_pos = 0;
-  // _params.horiz_default_y_pos = 0;
-  // _params.vert_default_x_pos = 0;
-  // _params.vert_default_y_pos = 0;
-
-  // _params.map_file_subdir = NULL;
-
-  // _params.ideal_x_vectors = 0;
-  // _params.ideal_y_vectors = 0;
-
-  // gd.azimuth_interval = 0;
-  // gd.azimuth_radius = 0;
-
-  // _params.latest_click_mark_size = 0;
-  // _params.range_ring_x_space = 0;
-  // _params.range_ring_y_space = 0;
-  // _params.range_ring_spacing = 0;
-  // _params.max_ring_range = 0;
-  // _params.range_ring_labels = 0;
-  // _params.wind_units_scale_factor = 0;
-  // _params.wind_units_label = NULL;
-  // _params.wind_w_scale_factor = 0;
-
-  // _params.scale_constant = 0.0;
-    
-  // _params.redraw_interval = 0;
-  // _params.update_interval = 0;
-    
-  // _params.wind_marker_type = NULL;
-  // _params.wind_reference_speed = 0.0;
 
 }
 

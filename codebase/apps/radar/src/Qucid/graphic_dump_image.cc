@@ -103,7 +103,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
   // zoom label
 
   sprintf(zbuf,"cidd.level%d_label",gd.h_win.zoom_level+1);
-  strncpy(zbuf,gd.uparams->getString(zbuf ,"Z"),1024);
+  strncpy(zbuf,_params._zoom_levels[gd.h_win.zoom_level].label,1024);
 
   strncat(nbuf,sep,2048);
   strncat(nbuf,zbuf,2048);

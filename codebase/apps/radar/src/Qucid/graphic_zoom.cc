@@ -72,7 +72,7 @@ void do_vert_zoom()
   static double min_zoom_threshold = 0.0;
  
   if(min_zoom_threshold == 0.0) {
-    min_zoom_threshold = gd.uparams->getDouble( "cidd.min_zoom_threshold", 5.0);
+    min_zoom_threshold = _params.min_zoom_threshold;
   }
   /* Only do additional zooming if request is at least min_zoom_threshold on one side */
   if((fabs(km_x2 - km_x1) > min_zoom_threshold) ||
@@ -129,7 +129,7 @@ static void _do_zoom()
   static double min_zoom_threshold = 0.0;
  
   if(min_zoom_threshold == 0.0) {
-    min_zoom_threshold = gd.uparams->getDouble( "cidd.min_zoom_threshold", 5.0);
+    min_zoom_threshold = _params.min_zoom_threshold;
     if(gd.display_projection == Mdvx::PROJ_LATLON) {
       min_zoom_threshold /= KM_PER_DEG_AT_EQ;
     }

@@ -174,7 +174,8 @@ void RenderLineContours(Drawable xid, contour_info_t *crec,
 
   // Pick a font size based on the detail thresholds and domain
 
-  int font_index = gd.uparams->getLong("contour_font_num", 6);
+  // int font_index = gd.uparams->getLong("contour_font_num", 6);
+  int font_index = 0;
   if(font_index <0) font_index = 0;
   if(font_index >= _params.fonts_n) font_index = _params.fonts_n -1;
   XFontStruct *font = gd.fontst[font_index];
@@ -425,7 +426,8 @@ static void draw_labels_for_line(const gframe_t *gframe,
 {
 
 
-  int n_ideal_labels = gd.uparams->getLong("n_ideal_contour_labels", 5);
+  // int n_ideal_labels = _params.n_ideal_contour_labels;
+  int n_ideal_labels = 6;
   double mean_dim = ((gframe->w_xmax - gframe->w_xmin) +
 		     (gframe->w_ymax - gframe->w_ymin)) * 0.5;
   double label_spacing = mean_dim / n_ideal_labels;

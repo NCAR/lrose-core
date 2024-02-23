@@ -276,7 +276,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     XGCValues gcvalues;    
 
 
-    color_file_subdir = gd.uparams->getString( "cidd.color_file_subdir", "colorscales");
+    color_file_subdir = _params.color_scale_dir;
      
 
     gd.num_colors = 0;
@@ -284,64 +284,63 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 
    /* Start with colors for Background, Foreground */
    /* NOTE: IT is Assumed later that color 0 is the background! */
-   color_name = gd.uparams->getString( "cidd.background_color", "Black");
+   color_name = _params.background_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.background_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Use Background color as the default for the Margins
-   color_name = gd.uparams->getString( "cidd.margin_color", color_name);
+   color_name = _params.margin_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.margin_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
-   color_name = gd.uparams->getString( "cidd.foreground_color", "White");
+   color_name = _params.foreground_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.foreground_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
-   color_name =
-     gd.uparams->getString( "cidd.out_of_range_color", "transparent");
+   color_name = _params.out_of_range_color;
    if(!strstr(color_name,"transparent") && !_params.transparent_images) {
-       STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
-       gd.legends.out_of_range_color = &(gd.color[gd.num_colors]);
-       gd.num_colors++;
-    } else { // Is rendered as transparent
-       gd.legends.out_of_range_color = &gd.null_color;
-    }
+     STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
+     gd.legends.out_of_range_color = &(gd.color[gd.num_colors]);
+     gd.num_colors++;
+   } else { // Is rendered as transparent
+     gd.legends.out_of_range_color = &gd.null_color;
+   }
 
    // Add Range ring & azmiuth overlay color
-   color_name = gd.uparams->getString( "cidd.range_ring_color", "grey");
+   color_name = _params.range_ring_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.range_ring_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add flight route path - Cross section reference line color
-   color_name = gd.uparams->getString( "cidd.route_path_color", "yellow");
+   color_name = _params.route_path_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.route_path_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add Time Axis color
-   color_name = gd.uparams->getString( "cidd.time_axis_color", "cyan");
+   color_name = _params.time_axis_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.time_axis_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add Movie frame limit indicator color
-   color_name = gd.uparams->getString( "cidd.time_frame_color", "yellow");
+   color_name = _params.time_frame_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.time_frame_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add epoch indicator color
-   color_name = gd.uparams->getString( "cidd.epoch_indicator_color", "yellow");
+   color_name = _params.epoch_indicator_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.epoch_indicator_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add Color of the Now Line
-   color_name = gd.uparams->getString( "cidd.now_time_color", "red");
+   color_name = _params.now_time_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.now_time_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
@@ -349,32 +348,32 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
    // Add  colors for time ticks
    for(i=0; i < NUM_TICK_COLORS; i++) {  
        sprintf(str_buf,"cidd.time_tick_color%d",i+1);
-       color_name = gd.uparams->getString(str_buf,"yellow");
+       color_name = _params._time_tick_colors[i];
        STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
        gd.legends.time_tick_color[i] = &(gd.color[gd.num_colors]);
        gd.num_colors++;
     }
 
    // Add Height selector axis and text color
-   color_name = gd.uparams->getString( "cidd.height_axis_color", "cyan");
+   color_name = _params.height_axis_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.height_axis_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add Current Height Indicator color
-   color_name = gd.uparams->getString( "cidd.height_indicator_color", "red");
+   color_name = _params.height_indicator_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.height_indicator_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add color for mark for latest click location
-   color_name = gd.uparams->getString( "cidd.latest_click_mark_color", "red");
+   color_name = _params.latest_click_mark_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.latest_click_mark_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
 
    // Add color for mark for latest client location
-   color_name = gd.uparams->getString( "cidd.latest_client_mark_color", "yellow");
+   color_name = _params.latest_client_mark_color;
    STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
    gd.legends.latest_client_mark_color = &(gd.color[gd.num_colors]);
    gd.num_colors++;
@@ -387,44 +386,44 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
    }
 
    // Add missing_data_color 
-   color_name = gd.uparams->getString("cidd.missing_data_color","transparent");
+   color_name = _params.missing_data_color;
    if(!strstr(color_name,"transparent") && !_params.transparent_images) {
-        STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
-        gd.layers.missing_data_color = &(gd.color[gd.num_colors]);
-        gd.num_colors++;
+     STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
+     gd.layers.missing_data_color = &(gd.color[gd.num_colors]);
+     gd.num_colors++;
    } else {// Is rendered as transparent
-	gd.layers.missing_data_color = &gd.null_color;
+     gd.layers.missing_data_color = &gd.null_color;
    }
 
    // Add bad_data_colo 
-   color_name = gd.uparams->getString("cidd.bad_data_color","transparent");
+   color_name = _params.bad_data_color;
    if(!strstr(color_name,"transparent") && !_params.transparent_images) {
-        STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
-        gd.layers.bad_data_color = &(gd.color[gd.num_colors]);
-        gd.num_colors++;
+     STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
+     gd.layers.bad_data_color = &(gd.color[gd.num_colors]);
+     gd.num_colors++;
    } else { // Is rendered as transparent
-	gd.layers.bad_data_color = &gd.null_color;
+     gd.layers.bad_data_color = &gd.null_color;
    }
-
-    /* Add Winds colors */
+   
+   /* Add Winds colors */
     for(i=0; i <   gd.layers.num_wind_sets; i++) {
-	 STRcopy(gd.color[gd.num_colors].name,
-	     gd.layers.wind[i].color_name,NAME_LENGTH);
-	 gd.layers.wind[i].color = &gd.color[gd.num_colors];
-	 gd.num_colors++;
+      STRcopy(gd.color[gd.num_colors].name,
+              gd.layers.wind[i].color_name,NAME_LENGTH);
+      gd.layers.wind[i].color = &gd.color[gd.num_colors];
+      gd.num_colors++;
     }
 
     /* Add Contour colors */
-
+    
     for(i=0; i <   NUM_CONT_LAYERS; i++) {
-	 STRcopy(gd.color[gd.num_colors].name,
-	     gd.layers.cont[i].color_name,NAME_LENGTH);
-	 gd.layers.cont[i].color = &gd.color[gd.num_colors];
-	 gd.num_colors++;
+      STRcopy(gd.color[gd.num_colors].name,
+              gd.layers.cont[i].color_name,NAME_LENGTH);
+      gd.layers.cont[i].color = &gd.color[gd.num_colors];
+      gd.num_colors++;
     }
 
     // Add the TERRAIN Colors
-
+    
     STRcopy(gd.color[gd.num_colors].name,
 	    _params.terrain_earth_color1, NAME_LENGTH);
     gd.layers.earth.color1 = &gd.color[gd.num_colors];
@@ -434,133 +433,79 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
 	    _params.terrain_earth_color2, NAME_LENGTH);
     gd.layers.earth.color2 = &gd.color[gd.num_colors];
     gd.num_colors++;
-
+    
     /* Record where the map_overlay colors start */
     gd.map_overlay_color_index_start = gd.num_colors;
-
+    
     /* Now go through each overlay and add their colors to lists */
     for(i=0; i < gd.num_map_overlays ; i++) {        /* each color map file */
-        STRcopy(gd.color[gd.num_colors].name,gd.over[i]->color_name,NAME_LENGTH);
-	gd.over[i]->color =  &gd.color[gd.num_colors];
-        gd.num_colors++;
-	
+      STRcopy(gd.color[gd.num_colors].name,gd.over[i]->color_name,NAME_LENGTH);
+      gd.over[i]->color =  &gd.color[gd.num_colors];
+      gd.num_colors++;
+      
     }
-
+    
     /* Record the total number of non- colorscale colors */
     gd.num_draw_colors = gd.num_colors;
-
+    
     /* Now go through each data field color scale file and pick out unique colors */
     int iret = 0;
     for(i=0; i < gd.num_datafields ; i++) {        /* each color map file */
-        nentries = get_color_mapping(color_file_subdir,gd.mrec[i]->color_file,gd.mrec[i]->h_vcm.vc);
-        if (nentries < 0) {
-          fprintf(stderr, "ERROR - setup_colorscales\n");
-          fprintf(stderr, "  field_label: %s\n", gd.mrec[i]->field_label);
-          fprintf(stderr, "  url: %s\n", gd.mrec[i]->url);
-          fprintf(stderr, "  color_file: %s\n", gd.mrec[i]->color_file);
-          exit (1);
-        }
-
-        if(gd.debug) {
-          fprintf(stderr, "DEBUG - setup_colorscales - got color scale\n");
-          fprintf(stderr, "  field_label: %s\n", gd.mrec[i]->field_label);
-          fprintf(stderr, "  url: %s\n", gd.mrec[i]->url);
-          fprintf(stderr, "  color_file: %s\n", gd.mrec[i]->color_file);
-        }
-
-        gd.mrec[i]->h_vcm.nentries = nentries;
-        gd.mrec[i]->v_vcm.nentries = nentries;
-        memcpy(gd.mrec[i]->v_vcm.vc, gd.mrec[i]->h_vcm.vc,
-	       sizeof(gd.mrec[i]->v_vcm.vc));
-
-		if(gd.debug) {
-			XColor  rgb_def;
-			fprintf(stderr,"Colorfile: %s\n", gd.mrec[i]->color_file);
-			fprintf(stderr,"Min     Max       R   G   B\n");
-			fprintf(stderr,"-----------------------------\n\n");
-			for (int indx = 0; indx < nentries; indx++ ) {
-			  XParseColor(gd.dpy,gd.cmap,gd.mrec[i]->h_vcm.vc[indx]->cname,&rgb_def);
+      nentries = get_color_mapping(color_file_subdir,gd.mrec[i]->color_file,gd.mrec[i]->h_vcm.vc);
+      if (nentries < 0) {
+        fprintf(stderr, "ERROR - setup_colorscales\n");
+        fprintf(stderr, "  field_label: %s\n", gd.mrec[i]->field_label);
+        fprintf(stderr, "  url: %s\n", gd.mrec[i]->url);
+        fprintf(stderr, "  color_file: %s\n", gd.mrec[i]->color_file);
+        exit (1);
+      }
+      
+      if(gd.debug) {
+        fprintf(stderr, "DEBUG - setup_colorscales - got color scale\n");
+        fprintf(stderr, "  field_label: %s\n", gd.mrec[i]->field_label);
+        fprintf(stderr, "  url: %s\n", gd.mrec[i]->url);
+        fprintf(stderr, "  color_file: %s\n", gd.mrec[i]->color_file);
+      }
+      
+      gd.mrec[i]->h_vcm.nentries = nentries;
+      gd.mrec[i]->v_vcm.nentries = nentries;
+      memcpy(gd.mrec[i]->v_vcm.vc, gd.mrec[i]->h_vcm.vc,
+             sizeof(gd.mrec[i]->v_vcm.vc));
+      
+      if(gd.debug) {
+        XColor  rgb_def;
+        fprintf(stderr,"Colorfile: %s\n", gd.mrec[i]->color_file);
+        fprintf(stderr,"Min     Max       R   G   B\n");
+        fprintf(stderr,"-----------------------------\n\n");
+        for (int indx = 0; indx < nentries; indx++ ) {
+          XParseColor(gd.dpy,gd.cmap,gd.mrec[i]->h_vcm.vc[indx]->cname,&rgb_def);
 #ifdef GTK_DISPLAY
-				fprintf(stderr,"color%.2d = %.3d;%.3d;%.3d\n",
-						indx,
-						rgb_def.red / 257,
-						rgb_def.green / 257,
-						rgb_def.blue / 257);
+          fprintf(stderr,"color%.2d = %.3d;%.3d;%.3d\n",
+                  indx,
+                  rgb_def.red / 257,
+                  rgb_def.green / 257,
+                  rgb_def.blue / 257);
 #else
- 				fprintf(stderr,"%6g\t%6g\t%3d %3d %3d\n",
- 						gd.mrec[i]->h_vcm.vc[indx]->min,
- 						gd.mrec[i]->h_vcm.vc[indx]->max,
- 						rgb_def.red / 257,
- 						rgb_def.green / 257,
- 						rgb_def.blue / 257);
+          fprintf(stderr,"%6g\t%6g\t%3d %3d %3d\n",
+                  gd.mrec[i]->h_vcm.vc[indx]->min,
+                  gd.mrec[i]->h_vcm.vc[indx]->max,
+                  rgb_def.red / 257,
+                  rgb_def.green / 257,
+                  rgb_def.blue / 257);
 #endif
-			}
-			fprintf(stderr,"-----------------------------\n");
-		}
-
-	/* Set overlay and colorscale thresholds to current min,max of defined colorscale */
-	gd.mrec[i]->overlay_min = gd.mrec[i]->h_vcm.vc[0]->min;
-	gd.mrec[i]->overlay_max = gd.mrec[i]->h_vcm.vc[gd.mrec[i]->h_vcm.nentries-1]->max;
-	gd.mrec[i]->cscale_min = gd.mrec[i]->h_vcm.vc[0]->min;
-	gd.mrec[i]->cscale_delta = (gd.mrec[i]->h_vcm.vc[gd.mrec[i]->h_vcm.nentries-1]->max - gd.mrec[i]->cscale_min) / gd.mrec[i]->h_vcm.nentries;
-
-        if(gd.debug)
-            fprintf(stderr,"Loaded color file %s - %d entries\n",gd.mrec[i]->color_file,nentries);
-
-        if(nentries <=0 )  {
-            return -1; 
         }
-        for(j=0; j < nentries; j++) {        /* each entry in color map */
-            found = 0;
-            /* look through current list of colors (excluding draw colors)  */
-            for(k=gd.num_draw_colors; k < gd.num_colors; k++ ) {
-                if(strcmp(gd.mrec[i]->h_vcm.vc[j]->cname,gd.color[k].name) == 0) {    /* is the same */
-                    found = 1;    
-                } 
-            }
-            if((found == 0) && (gd.num_colors < MAX_COLORS)) {
-                STRcopy(gd.color[gd.num_colors++].name,gd.mrec[i]->h_vcm.vc[j]->cname,NAME_LENGTH);
-            }
-
-	    if(gd.num_colors >= MAX_COLORS) {  
-		 fprintf(stderr,"Too many unique colors defined in colormaps. Please use a more limited\n");
-		 fprintf(stderr,"set of colors in your colorscales. MAX_COLORS currently compiled in (set) is: %d\n",MAX_COLORS);
-		 fprintf(stderr,"Turn on debug parameter (-v1)  to see a report on the number of colors in each scale.\n");
-		 exit(-3);
-	    }
-
-        }
-	if(gd.debug) fprintf(stderr,"Total Unique colors used so far: %d\n",gd.num_colors);
-    } // i
-    if (iret < 0) {
-      exit (1);
-    }
-
-    if( gd.layers.earth.landuse_active) {
-      // LOAD up the color scale for the Lands Use field
-      nentries = get_color_mapping(color_file_subdir,
-				 gd.layers.earth.land_use->color_file,
-				 gd.layers.earth.land_use->h_vcm.vc);
-      gd.layers.earth.land_use->h_vcm.nentries = nentries;
-      gd.layers.earth.land_use->v_vcm.nentries = nentries;
-      memcpy(gd.layers.earth.land_use->v_vcm.vc,
-	     gd.layers.earth.land_use->h_vcm.vc,
-	     sizeof(gd.layers.earth.land_use->v_vcm.vc));
-
-      /* Set overlay and colorscale thresholds to currnet min,max of defined colorscale */
-      gd.layers.earth.land_use->overlay_min = gd.layers.earth.land_use->h_vcm.vc[0]->min;
-      gd.layers.earth.land_use->overlay_max =
-        gd.layers.earth.land_use->h_vcm.vc[gd.layers.earth.land_use->h_vcm.nentries-1]->max;
-
-      gd.layers.earth.land_use->cscale_min = gd.layers.earth.land_use->h_vcm.vc[0]->min;
-      gd.layers.earth.land_use->cscale_delta = 
-        (gd.layers.earth.land_use->h_vcm.vc[gd.layers.earth.land_use->h_vcm.nentries-1]->max - 
-         gd.layers.earth.land_use->cscale_min) / gd.layers.earth.land_use->h_vcm.nentries;
-
+        fprintf(stderr,"-----------------------------\n");
+      }
+      
+      /* Set overlay and colorscale thresholds to current min,max of defined colorscale */
+      gd.mrec[i]->overlay_min = gd.mrec[i]->h_vcm.vc[0]->min;
+      gd.mrec[i]->overlay_max = gd.mrec[i]->h_vcm.vc[gd.mrec[i]->h_vcm.nentries-1]->max;
+      gd.mrec[i]->cscale_min = gd.mrec[i]->h_vcm.vc[0]->min;
+      gd.mrec[i]->cscale_delta = (gd.mrec[i]->h_vcm.vc[gd.mrec[i]->h_vcm.nentries-1]->max - gd.mrec[i]->cscale_min) / gd.mrec[i]->h_vcm.nentries;
+      
       if(gd.debug)
-        fprintf(stderr,"Loaded color file %s - %d entries\n",
-            gd.layers.earth.land_use->color_file,nentries);
-
+        fprintf(stderr,"Loaded color file %s - %d entries\n",gd.mrec[i]->color_file,nentries);
+      
       if(nentries <=0 )  {
         return -1; 
       }
@@ -568,126 +513,180 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
         found = 0;
         /* look through current list of colors (excluding draw colors)  */
         for(k=gd.num_draw_colors; k < gd.num_colors; k++ ) {
-            if(strcmp(gd.layers.earth.land_use->h_vcm.vc[j]->cname,
-		gd.color[k].name) == 0) {    /* is the same */
-                found = 1;    
-            } 
+          if(strcmp(gd.mrec[i]->h_vcm.vc[j]->cname,gd.color[k].name) == 0) {    /* is the same */
+            found = 1;    
+          } 
         }
         if((found == 0) && (gd.num_colors < MAX_COLORS)) {
-            STRcopy(gd.color[gd.num_colors++].name,
-		gd.layers.earth.land_use->h_vcm.vc[j]->cname,NAME_LENGTH);
+          STRcopy(gd.color[gd.num_colors++].name,gd.mrec[i]->h_vcm.vc[j]->cname,NAME_LENGTH);
         }
-
+        
         if(gd.num_colors >= MAX_COLORS) {  
-         fprintf(stderr,"Too many unique colors defined in colormaps. Please use a more limited\n");
-	 fprintf(stderr,"set of colors in your colorscales. MAX_COLORS currently set to : %d\n",MAX_COLORS);
-	 fprintf(stderr,"Turn on debug parameter to see a report on the number of colors in each scale.\n");
-	 exit(-3);
+          fprintf(stderr,"Too many unique colors defined in colormaps. Please use a more limited\n");
+          fprintf(stderr,"set of colors in your colorscales. MAX_COLORS currently compiled in (set) is: %d\n",MAX_COLORS);
+          fprintf(stderr,"Turn on debug parameter (-v1)  to see a report on the number of colors in each scale.\n");
+          exit(-3);
+        }
+        
+      }
+      if(gd.debug) fprintf(stderr,"Total Unique colors used so far: %d\n",gd.num_colors);
+    } // i
+    if (iret < 0) {
+      exit (1);
+    }
+    
+    if( gd.layers.earth.landuse_active) {
+      // LOAD up the color scale for the Lands Use field
+      nentries = get_color_mapping(color_file_subdir,
+                                   gd.layers.earth.land_use->color_file,
+                                   gd.layers.earth.land_use->h_vcm.vc);
+      gd.layers.earth.land_use->h_vcm.nentries = nentries;
+      gd.layers.earth.land_use->v_vcm.nentries = nentries;
+      memcpy(gd.layers.earth.land_use->v_vcm.vc,
+	     gd.layers.earth.land_use->h_vcm.vc,
+	     sizeof(gd.layers.earth.land_use->v_vcm.vc));
+      
+      /* Set overlay and colorscale thresholds to currnet min,max of defined colorscale */
+      gd.layers.earth.land_use->overlay_min = gd.layers.earth.land_use->h_vcm.vc[0]->min;
+      gd.layers.earth.land_use->overlay_max =
+        gd.layers.earth.land_use->h_vcm.vc[gd.layers.earth.land_use->h_vcm.nentries-1]->max;
+      
+      gd.layers.earth.land_use->cscale_min = gd.layers.earth.land_use->h_vcm.vc[0]->min;
+      gd.layers.earth.land_use->cscale_delta = 
+        (gd.layers.earth.land_use->h_vcm.vc[gd.layers.earth.land_use->h_vcm.nentries-1]->max - 
+         gd.layers.earth.land_use->cscale_min) / gd.layers.earth.land_use->h_vcm.nentries;
+      
+      if(gd.debug)
+        fprintf(stderr,"Loaded color file %s - %d entries\n",
+                gd.layers.earth.land_use->color_file,nentries);
+      
+      if(nentries <=0 )  {
+        return -1; 
+      }
+      for(j=0; j < nentries; j++) {        /* each entry in color map */
+        found = 0;
+        /* look through current list of colors (excluding draw colors)  */
+        for(k=gd.num_draw_colors; k < gd.num_colors; k++ ) {
+          if(strcmp(gd.layers.earth.land_use->h_vcm.vc[j]->cname,
+                    gd.color[k].name) == 0) {    /* is the same */
+            found = 1;    
+          } 
+        }
+        if((found == 0) && (gd.num_colors < MAX_COLORS)) {
+          STRcopy(gd.color[gd.num_colors++].name,
+                  gd.layers.earth.land_use->h_vcm.vc[j]->cname,NAME_LENGTH);
+        }
+        
+        if(gd.num_colors >= MAX_COLORS) {  
+          fprintf(stderr,"Too many unique colors defined in colormaps. Please use a more limited\n");
+          fprintf(stderr,"set of colors in your colorscales. MAX_COLORS currently set to : %d\n",MAX_COLORS);
+          fprintf(stderr,"Turn on debug parameter to see a report on the number of colors in each scale.\n");
+          exit(-3);
 	}
-
+        
       }
     }
     if(gd.debug) fprintf(stderr,"Total Unique colors used so far: %d\n",gd.num_colors);
-
+    
     // switch(v_class = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
     switch(v_class = PseudoColor) {
-	 default:
-		fprintf(stderr,"Visual Class %d of Display not supported - Sorry \n",v_class);
-		return -1;
-	 break;
-
-	 case PseudoColor:
-           /* Allocate the color cells needed -  Can Modify colors */
-           status = XAllocColorCells(dpy, cmap, False,&mask, 0, pix_vals, gd.num_colors);
-          if(!gd.quiet_mode) fprintf(stderr,"Detected 8 Bit display - Allocating %d colors\n",gd.num_colors);
-          if(status == 0) {
-            //   cerr << "HHHHHHHHHHHHHHHHHHHh" << endl;
-            //   return -1;
+      default:
+        fprintf(stderr,"Visual Class %d of Display not supported - Sorry \n",v_class);
+        return -1;
+        break;
+        
+      case PseudoColor:
+        /* Allocate the color cells needed -  Can Modify colors */
+        status = XAllocColorCells(dpy, cmap, False,&mask, 0, pix_vals, gd.num_colors);
+        if(!gd.quiet_mode) fprintf(stderr,"Detected 8 Bit display - Allocating %d colors\n",gd.num_colors);
+        if(status == 0) {
+          //   cerr << "HHHHHHHHHHHHHHHHHHHh" << endl;
+          //   return -1;
           }
-	 break;
-
-	 case TrueColor: /* Colors are read only */
-	 case DirectColor: /* Colors are read only */
-             if(!gd.quiet_mode) fprintf(stderr,"Detected TrueColor display\n");
-	 break;
+        break;
+        
+      case TrueColor: /* Colors are read only */
+      case DirectColor: /* Colors are read only */
+        if(!gd.quiet_mode) fprintf(stderr,"Detected TrueColor display\n");
+        break;
     }
-
+    
     /* Get the Pixel value for the background */
     XParseColor(dpy,cmap,gd.legends.background_color->name,&rgb_def);
     gcvalues.background = rgb_def.pixel;
-
+    
     /* Put the correct color into its color cell (or get the closest cell) and create a GC for it */
     for(i=0; i< gd.num_colors; i++) {
-        mult = (i < gd.num_draw_colors)? 1.0 : _params.data_inten;
-
-        XParseColor(dpy,cmap,gd.color[i].name,&rgb_def);
-
-        gd.color[i].r = rgb_def.red;    /* save the color values & pixel */
-        gd.color[i].g = rgb_def.green;
-        gd.color[i].b = rgb_def.blue;
-
-        rgb_def.red = (short unsigned int) (gd.color[i].r * mult);    /* Start with the default intensity */
-        rgb_def.green = (short unsigned int) (gd.color[i].g * mult);
-        rgb_def.blue = (short unsigned int) (gd.color[i].b * mult);
-        rgb_def.flags = DoRed | DoGreen | DoBlue;
-
-        // if ( PseudoColor == xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
-        if ( PseudoColor == 0 ) {
-            gd.color[i].pixval = pix_vals[i];
-            rgb_def.pixel = pix_vals[i];
-	    XStoreColor(dpy,cmap,&rgb_def);
-            gcvalues.foreground =  pix_vals[i];    
-            gcvalues.background =  pix_vals[0];    
-	} else {
-	    XAllocColor(dpy,cmap,&rgb_def);
-	    gd.color[i].pixval = rgb_def.pixel;
-            gcvalues.foreground =  gd.color[i].pixval;
-            gcvalues.background =  gd.color[0].pixval;
-	}
-
-        gd.color[i].gc = XCreateGC(gd.dpy,gd.hcan_xid,(GCForeground | GCBackground),&gcvalues);
-
+      mult = (i < gd.num_draw_colors)? 1.0 : _params.data_inten;
+      
+      XParseColor(dpy,cmap,gd.color[i].name,&rgb_def);
+      
+      gd.color[i].r = rgb_def.red;    /* save the color values & pixel */
+      gd.color[i].g = rgb_def.green;
+      gd.color[i].b = rgb_def.blue;
+      
+      rgb_def.red = (short unsigned int) (gd.color[i].r * mult);    /* Start with the default intensity */
+      rgb_def.green = (short unsigned int) (gd.color[i].g * mult);
+      rgb_def.blue = (short unsigned int) (gd.color[i].b * mult);
+      rgb_def.flags = DoRed | DoGreen | DoBlue;
+      
+      // if ( PseudoColor == xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
+      if ( PseudoColor == 0 ) {
+        gd.color[i].pixval = pix_vals[i];
+        rgb_def.pixel = pix_vals[i];
+        XStoreColor(dpy,cmap,&rgb_def);
+        gcvalues.foreground =  pix_vals[i];    
+        gcvalues.background =  pix_vals[0];    
+      } else {
+        XAllocColor(dpy,cmap,&rgb_def);
+        gd.color[i].pixval = rgb_def.pixel;
+        gcvalues.foreground =  gd.color[i].pixval;
+        gcvalues.background =  gd.color[0].pixval;
+      }
+      
+      gd.color[i].gc = XCreateGC(gd.dpy,gd.hcan_xid,(GCForeground | GCBackground),&gcvalues);
+      
     }
-
+    
     /* Set Up Rubber Band - "Overlay" gc */
     switch(v_class) {
       case TrueColor: /* Colors are read only */
       case DirectColor: /* Colors are read only */
         XAllocNamedColor(dpy,cmap,OVERLAY_COLOR,&rgb_def,&rgb_exact);
-
+        
     	/* Set up  GC's to use when drawing in the overlay plane - */
     	gcvalues.foreground =  rgb_def.pixel; 
     	gcvalues.background =  gd.color[0].pixval; 
-
+        
     	gd.ol_gc = XCreateGC(gd.dpy,gd.hcan_xid,GCForeground,&gcvalues);
         XSetFunction(gd.dpy, gd.ol_gc, GXxor); /*  */
-
-
+        
+        
     	gcvalues.foreground =  rgb_def.pixel; 
     	gd.clear_ol_gc = XCreateGC(gd.dpy,gd.hcan_xid,GCForeground,&gcvalues);
         XSetFunction(gd.dpy, gd.clear_ol_gc, GXxor); /*  */
-      break;
- 
+        break;
+        
       case PseudoColor: 
-         /* Can use Xor GC for rubberband lines */
-         gd.ol_gc = XCreateGC(gd.dpy, DefaultRootWindow(gd.dpy), 0, 0);/* */
-         XSetForeground(gd.dpy, gd.ol_gc, 5L); /*  */
-         XSetFunction(gd.dpy, gd.ol_gc, GXxor); /*  */
-         XSetLineAttributes(gd.dpy, gd.ol_gc, 1, LineSolid, CapButt, JoinMiter); /*  */
-      break;
+        /* Can use Xor GC for rubberband lines */
+        gd.ol_gc = XCreateGC(gd.dpy, DefaultRootWindow(gd.dpy), 0, 0);/* */
+        XSetForeground(gd.dpy, gd.ol_gc, 5L); /*  */
+        XSetFunction(gd.dpy, gd.ol_gc, GXxor); /*  */
+        XSetLineAttributes(gd.dpy, gd.ol_gc, 1, LineSolid, CapButt, JoinMiter); /*  */
+        break;
     }
-
+    
     /* Copy the X color cell values into the overlay data structs */
     for(i=0,j = gd.map_overlay_color_index_start; i < gd.num_map_overlays; i++,j++) { 
-	gd.over[i]->pixval = gd.color[j].pixval; 
+      gd.over[i]->pixval = gd.color[j].pixval; 
     }
-
+    
     // Copy the background pixval into the missing and bad for filled images
     if(gd.layers.missing_data_color->gc == NULL) 
-	gd.layers.missing_data_color->pixval = gd.legends.background_color->pixval;
+      gd.layers.missing_data_color->pixval = gd.legends.background_color->pixval;
     if(gd.layers.bad_data_color->gc == NULL) 
-	gd.layers.bad_data_color->pixval = gd.legends.background_color->pixval;
-
+      gd.layers.bad_data_color->pixval = gd.legends.background_color->pixval;
+    
     return 0;
 }
 

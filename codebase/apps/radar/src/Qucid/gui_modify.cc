@@ -326,8 +326,9 @@ void modify_gui_objects()
     /* Set the labels on the Zoom choice_panel " */
     for(i=0; i < gd.h_win.num_zoom_levels-NUM_CUSTOM_ZOOMS -1; i++) {
         sprintf(panel_choice_string,"%d",i+1);
-        sprintf(string,"cidd.level%d_label",i+1);
-        sprintf(panel_choice_string,"%s",gd.uparams->getString(string , panel_choice_string));
+        // sprintf(string,"cidd.level%d_label",i+1);
+        // sprintf(panel_choice_string,"%s",gd.uparams->getString(string , panel_choice_string));
+        strncpy(panel_choice_string, _params._zoom_levels[i].label, 255);
         // xv_set(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,i,panel_choice_string,NULL);
     }
 
