@@ -158,22 +158,11 @@ Qucid::Qucid(int argc, char **argv) :
 
   // set up display fields
 
-  // if (_setupDisplayFields()) {
-  //   OK = false;
-  //   return;
-  // }
+  if (_setupDisplayFields()) {
+    OK = false;
+    return;
+  }
 
-  // create reader
-
-  /* Ref: https://bugs.launchpad.net/ubuntu/+source/xview/+bug/1059988
-   * Xview libs Segfault if RLIMIT_NOFILE > 3232
-   */
-  // struct rlimit rlim;
-  // getrlimit(RLIMIT_NOFILE, &rlim);
-  // if (rlim.rlim_cur >  3200) 
-  //   rlim.rlim_cur = 3200;
-  // setrlimit(RLIMIT_NOFILE, &rlim);
-  
   // get the display
   
   if (_setupXDisplay(argc, argv)) {
@@ -226,13 +215,12 @@ int Qucid::Run(QApplication &app)
   // Instantiate Symbolic products
   init_symprods();
 
-  return 0;
-  
-  /* make changes to xview objects not available from DevGuide */
-  modify_gui_objects();
+  /* make changes to objects for gui */
+
+  // modify_gui_objects();
   
   gd.finished_init = 1;
-     
+
   if (_params.display_mode == Params::POLAR_DISPLAY) {
 
     _cartManager = new CartManager(_params, _displayFields, false);
