@@ -57,9 +57,6 @@ static int _get_color_mapping(const char *color_file_subdir,
                               Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
 {
 
-  cerr << "aaaaaaaaaaaa color_file_subdir: " << color_file_subdir << endl;
-  cerr << "aaaaaaaaaaaa fname: " << fname << endl;
-
   FILE   *cfile;
     struct stat sbuf;
     char   *cs_buf;

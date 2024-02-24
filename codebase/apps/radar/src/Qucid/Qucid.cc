@@ -139,8 +139,6 @@ Qucid::Qucid(int argc, char **argv) :
 
   init_data_space();
 
-  exit(0);
-  
   // set params on alloc checker
 
   // if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -170,14 +168,14 @@ Qucid::Qucid(int argc, char **argv) :
   /* Ref: https://bugs.launchpad.net/ubuntu/+source/xview/+bug/1059988
    * Xview libs Segfault if RLIMIT_NOFILE > 3232
    */
-  struct rlimit rlim;
-  getrlimit(RLIMIT_NOFILE, &rlim);
-  if (rlim.rlim_cur >  3200) 
-    rlim.rlim_cur = 3200;
-  setrlimit(RLIMIT_NOFILE, &rlim);
-
+  // struct rlimit rlim;
+  // getrlimit(RLIMIT_NOFILE, &rlim);
+  // if (rlim.rlim_cur >  3200) 
+  //   rlim.rlim_cur = 3200;
+  // setrlimit(RLIMIT_NOFILE, &rlim);
+  
   // get the display
-
+  
   if (_setupXDisplay(argc, argv)) {
     cerr << "Cannot set up X display" << endl;
     OK = false;
@@ -227,6 +225,8 @@ int Qucid::Run(QApplication &app)
   
   // Instantiate Symbolic products
   init_symprods();
+
+  return 0;
   
   /* make changes to xview objects not available from DevGuide */
   modify_gui_objects();
