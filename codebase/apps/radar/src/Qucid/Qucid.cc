@@ -40,12 +40,10 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "LegacyParams.hh"
-#include <qtplot/ColorMap.hh>
-#include "Params.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
 #include <toolsa/Path.hh>
-#include <toolsa/LogStream.hh>
+#include <qtplot/ColorMap.hh>
 
 #include <string>
 #include <iostream>
@@ -139,17 +137,6 @@ Qucid::Qucid(int argc, char **argv) :
 
   init_data_space();
 
-  // set params on alloc checker
-
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   LOG_STREAM_INIT(true, true, true, true);
-  // } else if (_params.debug) {
-  //   LOG_STREAM_INIT(true, false, true, true);
-  // } else {
-  //   LOG_STREAM_INIT(false, false, false, false);
-  //   LOG_STREAM_TO_CERR();
-  // }
-
   // print color scales if debugging
   // if (_params.debug) {
   //   SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
@@ -198,7 +185,6 @@ Qucid::~Qucid()
     delete _displayFields[ii];
   }
   _displayFields.clear();
-  // logger.closeFile();
 
 }
 
@@ -213,29 +199,20 @@ int Qucid::Run(QApplication &app)
   setup_colorscales(gd.dpy);
   
   // Instantiate Symbolic products
+
   init_symprods();
 
   /* make changes to objects for gui */
-
+  
   // modify_gui_objects();
   
   gd.finished_init = 1;
 
-  if (_params.display_mode == Params::POLAR_DISPLAY) {
-
-    _cartManager = new CartManager(_params, _displayFields, false);
-    return _cartManager->run(app);
-
-  } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
-
-    // _bscanManager = new BscanManager(_params, _reader, 
-    //                                  _displayFields, _haveFilteredFields);
-    // return _bscanManager->run(app);
-
-  }
+  // create cartesian display
   
-  return -1;
-
+  _cartManager = new CartManager(_params, _displayFields, false);
+  return _cartManager->run(app);
+  
 }
 
 //////////////////////////////////////////////////
@@ -267,12 +244,6 @@ int Qucid::_setupXDisplay(int argc, char **argv)
     return -1;
   }
   
-  /*
-   * register x error handler
-   */
-  
-  // XSetErrorHandler(xerror_handler);
-
   return 0;
 
 }

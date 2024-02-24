@@ -5908,26 +5908,6 @@
       tt->struct_vals[27].b = pFALSE;
     tt++;
     
-    // Parameter 'display_mode'
-    // ctype is '_display_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("display_mode");
-    tt->descr = tdrpStrDup("Main display mode.");
-    tt->help = tdrpStrDup("\tPOLAR_DISPLAY - normal HORIZ and VERT display. \tBSCAN_DISPLAY - BSCAN mode.\n");
-    tt->val_offset = (char *) &display_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("display_mode_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("POLAR_DISPLAY");
-      tt->enum_def.fields[0].val = POLAR_DISPLAY;
-      tt->enum_def.fields[1].name = tdrpStrDup("BSCAN_DISPLAY");
-      tt->enum_def.fields[1].val = BSCAN_DISPLAY;
-    tt->single_val.e = POLAR_DISPLAY;
-    tt++;
-    
     // Parameter 'Comment 57'
     
     memset(tt, 0, sizeof(TDRPtable));

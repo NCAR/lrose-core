@@ -44,7 +44,6 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <euclid/SunPosn.hh>
 
 class QApplication;
 class DisplayField;

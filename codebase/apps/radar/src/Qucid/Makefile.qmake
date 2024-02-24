@@ -1331,7 +1331,6 @@ CartManager.o: CartManager.cc CartManager.hh \
 		WorldPlot.hh \
 		VertWidget.hh \
 		VertWindow.hh \
-		$(HOME)/lrose/include/Ncxx/H5x.hh \
 		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/pmu.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
@@ -1360,7 +1359,8 @@ CartManager.o: CartManager.cc CartManager.hh \
 		$(HOME)/lrose/include/Ncxx/Nc3File.hh \
 		$(HOME)/lrose/include/Ncxx/Nc3Values.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
-		$(HOME)/lrose/include/Radx/RadxPath.hh
+		$(HOME)/lrose/include/Radx/RadxPath.hh \
+		$(HOME)/lrose/include/Ncxx/H5x.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CartManager.o CartManager.cc
 
 CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
@@ -1594,7 +1594,6 @@ Main.o: Main.cc Qucid.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		Params.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/toolsa/LogStream.hh \
@@ -1892,10 +1891,10 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		Params.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		CartManager.hh \
 		DisplayManager.hh \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		$(HOME)/lrose/include/Radx/RadxRay.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
@@ -1943,9 +1942,6 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/Path.hh \
-		$(HOME)/lrose/include/toolsa/LogStream.hh \
-		$(HOME)/lrose/include/toolsa/copyright.h \
-		$(HOME)/lrose/include/toolsa/LogFile.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \

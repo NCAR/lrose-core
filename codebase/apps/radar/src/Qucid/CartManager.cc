@@ -28,7 +28,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartManager manages polar rendering - HORIZs and RHIs
+// CartManager manages cartesian rendering - plan view
 //
 ///////////////////////////////////////////////////////////////
 
@@ -42,7 +42,6 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-#include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
@@ -92,6 +91,7 @@
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxPath.hh>
+#include <Ncxx/H5x.hh>
 
 using namespace std;
 using namespace H5x;
@@ -119,8 +119,6 @@ CartManager::CartManager(const Params &params,
   _firstTime = true;
   _urlOK = true;
 
-  // setWindowIcon(QIcon("HawkEyePolarIcon.icns"));
-  
   _prevAz = -9999.0;
   _prevEl = -9999.0;
   _startAz = -9999.0;

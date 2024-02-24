@@ -2877,21 +2877,6 @@ paramdef struct show_status_t {
 
 } show_status_in_gui;
 
-typedef enum
-{
-  POLAR_DISPLAY,
-  BSCAN_DISPLAY
-} display_mode_t;
-
-paramdef enum display_mode_t
-{
-  p_descr = "Main display mode.";
-  p_help =
-  "\tPOLAR_DISPLAY - normal HORIZ and VERT display. "
-  "\tBSCAN_DISPLAY - BSCAN mode.\n";
-  p_default = POLAR_DISPLAY;
-} display_mode;
-
 commentdef {
   p_header = "NAMES AND LABELS";
 }

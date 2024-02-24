@@ -156,11 +156,6 @@ public:
   } images_creation_mode_t;
 
   typedef enum {
-    POLAR_DISPLAY = 0,
-    BSCAN_DISPLAY = 1
-  } display_mode_t;
-
-  typedef enum {
     HORIZ_FULL = 0,
     HORIZ_AIRBORNE = 1
   } horiz_display_type_t;
@@ -1270,8 +1265,6 @@ public:
 
   show_status_t show_status_in_gui;
 
-  display_mode_t display_mode;
-
   tdrp_bool_t override_radar_name;
 
   char* radar_name;
@@ -1479,7 +1472,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[495];
+  mutable TDRPtable _table[494];
 
   const char *_className;
 
