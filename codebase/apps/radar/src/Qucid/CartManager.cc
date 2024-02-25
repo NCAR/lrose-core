@@ -1984,6 +1984,11 @@ void CartManager::_createFieldMenu()
   _fieldTable->resizeColumnsToContents();
   _fieldTable->resizeRowsToContents();
   _fieldTable->showNormal();
+
+  // connect click to cell set color
+  
+  connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
+	  _fieldTable, SLOT(setCurrentCell(const int, const int)));
   
 }
 
