@@ -2074,6 +2074,45 @@ void CartManager::_createFieldMenu()
 
 }
 
+/////////////////////////////////////
+// show the field menu
+
+void CartManager::_showFieldMenu()
+{
+
+  if (_fieldMenu) {
+    if (_fieldMenu->isVisible()) {
+      _fieldMenu->setVisible(false);
+    } else {
+      _fieldMenu->setVisible(true);
+      _fieldMenu->raise();
+      _placeFieldMenu();
+    }
+  }
+
+}
+
+/////////////////////////////////////
+// place the field menu
+
+void CartManager::_placeFieldMenu()
+{
+  if (_fieldMenu) {
+    if (!_fieldMenuPlaced) {
+      int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
+      int topFrameHeight =
+        _fieldMenu->frameGeometry().height() - _fieldMenu->height();
+      QPoint pos;
+      pos.setX(x() + (frameGeometry().width()));
+      pos.setY(y());
+      _fieldMenu->move(pos);
+      if (topFrameWidth != 0 || topFrameHeight != 0) {
+        _fieldMenuPlaced = true;
+      }
+    }
+  }
+}
+
 //////////////////////////////////////////////
 // create the time panel
 
@@ -2230,45 +2269,6 @@ void CartManager::_createTimeControl()
   connect(_timeSlider, SIGNAL(sliderPressed()),
           this, SLOT(_timeSliderPressed()));
 
-}
-
-/////////////////////////////////////
-// show the field menu
-
-void CartManager::_showFieldMenu()
-{
-
-  if (_fieldMenu) {
-    if (_fieldMenu->isVisible()) {
-      _fieldMenu->setVisible(false);
-    } else {
-      _fieldMenu->setVisible(true);
-      _fieldMenu->raise();
-      _placeFieldMenu();
-    }
-  }
-
-}
-
-/////////////////////////////////////
-// place the field menu
-
-void CartManager::_placeFieldMenu()
-{
-  if (_fieldMenu) {
-    if (!_fieldMenuPlaced) {
-      int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
-      int topFrameHeight =
-        _fieldMenu->frameGeometry().height() - _fieldMenu->height();
-      QPoint pos;
-      pos.setX(x() + (frameGeometry().width()));
-      pos.setY(y());
-      _fieldMenu->move(pos);
-      if (topFrameWidth != 0 || topFrameHeight != 0) {
-        _fieldMenuPlaced = true;
-      }
-    }
-  }
 }
 
 /////////////////////////////////////
