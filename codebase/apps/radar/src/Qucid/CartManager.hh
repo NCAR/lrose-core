@@ -70,6 +70,7 @@ class QGridLayout;
 class QDateTime;
 class QDateTimeEdit;
 class QFileDialog;
+class QTableWidget;
 
 class DisplayField;
 class HorizWidget;
@@ -251,7 +252,10 @@ private:
   // field menu
   
   QDialog *_fieldMenu;
+  QTableWidget *_fieldTable;
   bool _fieldMenuPlaced;
+  QFrame *_fieldMenuPanel;
+  QVBoxLayout *_fieldMenuLayout;
 
   // time controller settings dialog
   

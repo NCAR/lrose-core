@@ -77,6 +77,7 @@
 #include <QAction>
 #include <QTimer>
 #include <QDesktopServices>
+#include <QTableWidget>
 
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -1921,157 +1922,53 @@ void CartManager::_locationClicked(double xkm, double ykm,
 
 void CartManager::_createFieldMenu()
 {
+
+  // top-level
   
   _fieldMenu = new QDialog(this);
   _fieldMenu->setWindowTitle("Select active field");
   QPoint pos(0,0);
   _fieldMenu->move(pos);
 
-  QBoxLayout *timeControlLayout =
+  // layout
+  
+  QBoxLayout *fieldMenuLayout =
     new QBoxLayout(QBoxLayout::TopToBottom, _fieldMenu);
-  timeControlLayout->setSpacing(0);
+  fieldMenuLayout->setSpacing(0);
+  
+  // panel
+  
+  _fieldMenuPanel = new QFrame(_fieldMenu);
+  fieldMenuLayout->addWidget(_fieldMenuPanel, Qt::AlignCenter);
+  _fieldMenuLayout = new QVBoxLayout;
+  _fieldMenuPanel->setLayout(_fieldMenuLayout);
 
-  // create time panel
+  // table
   
-  _timePanel = new QFrame(_fieldMenu);
-  timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
-  _timeLayout = new QVBoxLayout;
-  _timePanel->setLayout(_timeLayout);
+  _fieldTable = new QTableWidget(_fieldMenu);
+  _fieldMenuLayout->addWidget(_fieldTable);
 
-  QFrame *timeUpper = new QFrame(_timePanel);
-  QHBoxLayout *timeUpperLayout = new QHBoxLayout;
-  timeUpperLayout->setSpacing(10);
-  timeUpper->setLayout(timeUpperLayout);
+  int ncols = _params.num_field_menu_cols;
+  int nfields = _params.fields_n;
+  int nrows = (int) ((double) (nfields - 1) / ncols) + 1;
   
-  QFrame *timeLower = new QFrame(_timePanel);
-  QHBoxLayout *timeLowerLayout = new QHBoxLayout;
-  timeLowerLayout->setSpacing(10);
-  timeLower->setLayout(timeLowerLayout);
-
-  _timeLayout->addWidget(timeUpper);
-  _timeLayout->addWidget(timeLower);
+  cerr << "111111111111 ncols, nrows: " << ncols << ", " << nrows << endl;
   
-  // create slider
+  _fieldTable->setRowCount(nrows);
+  _fieldTable->setColumnCount(ncols);
+  // _fieldMenu->setHorizontalHeaderLabels("Fields");
   
-  _timeSlider = new QSlider(Qt::Horizontal);
-  _timeSlider->setFocusPolicy(Qt::StrongFocus);
-  _timeSlider->setTickPosition(QSlider::TicksBothSides);
-  _timeSlider->setTickInterval(1);
-  _timeSlider->setTracking(true);
-  _timeSlider->setSingleStep(1);
-  _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(400);
-  _timeSlider->setToolTip("Drag to change time selection");
+  for (int icol = 0; icol < ncols; icol++) {
+    for (int irow = 0; irow < nrows; irow++) {
+      int fieldNum = irow * ncols + icol;
+      if (fieldNum < _params.fields_n) {
+        _fieldTable->setItem(irow, icol, new QTableWidgetItem(_params._fields[fieldNum].button_label));
+      } else {
+        _fieldTable->setItem(irow, icol, new QTableWidgetItem("====="));
+      }
+    } // irow
+  } // icol
   
-  // active time
-  
-  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
-  _selectedTimeLabel = new QPushButton(_timePanel);
-  _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
-  QPalette pal = _selectedTimeLabel->palette();
-  pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
-  _selectedTimeLabel->setPalette(pal);
-  _selectedTimeLabel->setToolTip("This is the selected data time");
-
-  // time editing
-
-  _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate startDate(_archiveStartTime.getYear(), 
-                  _archiveStartTime.getMonth(),
-                  _archiveStartTime.getDay());
-  QTime startTime(_archiveStartTime.getHour(),
-                  _archiveStartTime.getMin(),
-                  _archiveStartTime.getSec());
-  QDateTime startDateTime(startDate, startTime);
-  _archiveStartTimeEdit->setDateTime(startDateTime);
-  connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
-  _archiveStartTimeEdit->setToolTip("Start time of archive period");
-  
-  _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate endDate(_archiveEndTime.getYear(), 
-                 _archiveEndTime.getMonth(),
-                 _archiveEndTime.getDay());
-  QTime endTime(_archiveEndTime.getHour(),
-                 _archiveEndTime.getMin(),
-                 _archiveEndTime.getSec());
-  QDateTime endDateTime(endDate, endTime);
-  _archiveEndTimeEdit->setDateTime(endDateTime);
-  connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
-  _archiveEndTimeEdit->setToolTip("End time of archive period");
-  
-  // fwd and back buttons
-
-  _back1 = new QPushButton(timeLower);
-  _back1->setText("<");
-  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
-  _back1->setToolTip("Go back by 1 file");
-  
-  _fwd1 = new QPushButton(timeLower);
-  _fwd1->setText(">");
-  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
-  _fwd1->setToolTip("Go forward by 1 file");
-    
-  _backPeriod = new QPushButton(timeLower);
-  _backPeriod->setText("<<");
-  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
-  _backPeriod->setToolTip("Go back by the archive time period");
-  
-  _fwdPeriod = new QPushButton(timeLower);
-  _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
-  _fwdPeriod->setToolTip("Go forward by the archive time period");
-
-  // accept cancel buttons
-
-  QPushButton *acceptButton = new QPushButton(timeUpper);
-  acceptButton->setText("Accept");
-  QPalette acceptPalette = acceptButton->palette();
-  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
-  acceptButton->setPalette(acceptPalette);
-  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
-  acceptButton->setToolTip("Accept the selected start and end times");
-
-  QPushButton *cancelButton = new QPushButton(timeUpper);
-  cancelButton->setText("Cancel");
-  QPalette cancelPalette = cancelButton->palette();
-  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
-  cancelButton->setPalette(cancelPalette);
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
-  cancelButton->setToolTip("Cancel the selected start and end times");
-    
-  // add time widgets to layout
-  
-  int stretch = 0;
-  timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
-  timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
-  
-  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
-
-  // connect slots for time slider
-  
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-          this, SLOT(_timeSliderActionTriggered(int)));
-  
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderValueChanged(int)));
-  
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
-
-  connect(_timeSlider, SIGNAL(sliderPressed()),
-          this, SLOT(_timeSliderPressed()));
-
 }
 
 /////////////////////////////////////

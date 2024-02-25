@@ -1172,7 +1172,7 @@ cidd.use_local_timestamps: 0
 # Set this parameter to force the field menu pop-up to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 1
+cidd.num_field_menu_cols: 4
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.
