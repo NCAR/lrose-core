@@ -1962,9 +1962,11 @@ void CartManager::_createFieldMenu()
     for (int irow = 0; irow < nrows; irow++) {
       int fieldNum = irow * ncols + icol;
       if (fieldNum < _params.fields_n) {
-        _fieldTable->setItem(irow, icol, new QTableWidgetItem(_params._fields[fieldNum].button_label));
+        _fieldTable->setItem(irow, icol,
+                             new QTableWidgetItem(_params._fields[fieldNum].button_label));
       } else {
-        _fieldTable->setItem(irow, icol, new QTableWidgetItem("====="));
+        _fieldTable->setItem(irow, icol,
+                             new QTableWidgetItem(""));
       }
     } // irow
   } // icol
