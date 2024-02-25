@@ -326,6 +326,7 @@ private:
   int _numZoomLevels;
   int _numFonts;
   int _numBookmarks;
+  int _numMenuCols;
   
   // read in from param file
   // returns 0 on success, -1 on failure

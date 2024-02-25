@@ -251,11 +251,9 @@ void CartManager::timerEvent(QTimerEvent *event)
                                                  _fieldTable->currentColumn());
       
       if (item->text().toStdString().size() == 0) {
-        cerr << "Empty field selected, changing back to previous" << endl;
         _fieldTable->setCurrentCell(_fieldTableCurrentRow,
                                     _fieldTableCurrentColumn);
       } else {
-        cerr << "Changing field to: " << item->text().toStdString() << endl;
         _fieldTableCurrentColumn = _fieldTable->currentColumn();
         _fieldTableCurrentRow = _fieldTable->currentRow();
       }

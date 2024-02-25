@@ -1617,7 +1617,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.use_local_timestamps", 0);
   
   // field menu - number of columns
-  _getLong("cidd.num_field_menu_cols",0);
+  _numMenuCols = _getLong("cidd.num_field_menu_cols", 1);
   
   // display modes
   _getBoolean("cidd.wsddm_mode", 0);
@@ -1968,17 +1968,21 @@ int LegacyParams::_readGrids()
 
   // set group name from gui config as appropriate
 
+  vector<Field> validFlds;
+
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     Field &fld = flds[ifield];
     if (!fld.is_valid) {
       continue;
     }
+    
     // is this a filler line?
     if (fld.button_label.find("====") != string::npos ||
         fld.legend_label.find("====") != string::npos ||
         fld.field_name.find("None") != string::npos ||
         fld.color_map.find("none.") != string::npos) {
       fld.group_name = "";
+      validFlds.push_back(fld);
       continue;
     }
     
@@ -1996,17 +2000,43 @@ int LegacyParams::_readGrids()
         fld.group_name = groupName;
       }
     }
+    validFlds.push_back(fld);
   }
+  
+  // delet menu lines with no valid fields
 
+  vector<Field> finalFlds;
+  int nMenuRows = (int) ((validFlds.size() - 1) / _numMenuCols) + 1;
+  for (int irow = 0; irow < nMenuRows; irow++) {
+    // get fields for this row
+    vector<Field> goodFlds, emptyFlds;
+    for (int icol = 0; icol < _numMenuCols; icol++) {
+      int fieldNum = irow * _numMenuCols + icol;
+      if (fieldNum < (int) validFlds.size()) {
+        if (validFlds[fieldNum].group_name.size() != 0) {
+          goodFlds.push_back(validFlds[fieldNum]);
+        } else {
+          emptyFlds.push_back(validFlds[fieldNum]);
+        }
+      }
+    } // icol
+    if (goodFlds.size() > 0) {
+      for (size_t ii = 0; ii < goodFlds.size(); ii++) {
+        finalFlds.push_back(goodFlds[ii]);
+      }
+      for (size_t ii = 0; ii < emptyFlds.size(); ii++) {
+        finalFlds.push_back(emptyFlds[ii]);
+      }
+    }
+  } // irow
+
+  
   /* write to tdrp params file */
-
+  
   fprintf(_tdrpFile, "fields = {\n");
   int count = 0;
-  for(size_t ifield = 0; ifield < flds.size(); ifield++) {
-    Field &fld = flds[ifield];
-    if (!fld.is_valid) {
-      continue;
-    }
+  for(size_t ifield = 0; ifield < finalFlds.size(); ifield++) {
+    Field &fld = finalFlds[ifield];
     if (count > 0) {
       fprintf(_tdrpFile, "  ,\n");
     }
