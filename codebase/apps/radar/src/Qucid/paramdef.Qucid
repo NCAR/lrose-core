@@ -151,7 +151,7 @@ paramdef struct field_t {
   };
   p_descr = "Fields to be displayed.";
   p_help =
-    "/ngroup_name: we organize the fields into groups. If all are the same we use a single group. "
+    "/ngroup_name: we organize the fields into groups. If all are the same we use a single group. Set the group name to empty if this is just a filler field to organize the field list in the gui."
     "/nbutton_label: appears on the GUI. "
     "/nlegend_label: appears in the plot. "
     "/nurl: location of data or data server. "

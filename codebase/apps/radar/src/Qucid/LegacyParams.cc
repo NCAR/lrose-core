@@ -1821,7 +1821,7 @@ int LegacyParams::_readGrids()
       param_text_line_no++;
       continue;
     }
-    
+
     if(flds.size() < MAX_DATA_FIELDS - 1) {
       
       Field fld;
@@ -1867,6 +1867,14 @@ int LegacyParams::_readGrids()
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     
     Field &fld = flds[ifield];
+    
+    // tokenize and check we have at least 11 fields
+    vector<string> ltoks;
+    TaStr::tokenize(fld.text_line, " ", ltoks);
+    if (ltoks.size() < 11) {
+      fld.is_valid = false;
+      continue;
+    }
     
     /* separate into substrings */
 
@@ -1958,13 +1966,22 @@ int LegacyParams::_readGrids()
     free(cfield[i]);
   }
 
-  // set group name from gui config as appopriate
+  // set group name from gui config as appropriate
 
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     Field &fld = flds[ifield];
     if (!fld.is_valid) {
       continue;
     }
+    // is this a filler line?
+    if (fld.button_label.find("====") != string::npos ||
+        fld.legend_label.find("====") != string::npos ||
+        fld.field_name.find("None") != string::npos ||
+        fld.color_map.find("none.") != string::npos) {
+      fld.group_name = "";
+      continue;
+    }
+    
     for (int ii = 0; ii < _guiConfig.field_list_n; ii++) {
       string groupName = _guiConfig._field_list[ii].id_label;
       for (size_t ii = 0; ii < groupName.size(); ii++) {
@@ -1984,10 +2001,14 @@ int LegacyParams::_readGrids()
   /* write to tdrp params file */
 
   fprintf(_tdrpFile, "fields = {\n");
+  int count = 0;
   for(size_t ifield = 0; ifield < flds.size(); ifield++) {
     Field &fld = flds[ifield];
     if (!fld.is_valid) {
       continue;
+    }
+    if (count > 0) {
+      fprintf(_tdrpFile, "  ,\n");
     }
     fprintf(_tdrpFile, "  {\n");
     fprintf(_tdrpFile, "    group_name = \"%s\",\n", fld.group_name.c_str());
@@ -2025,9 +2046,7 @@ int LegacyParams::_readGrids()
     fprintf(_tdrpFile, "    auto_render = %s\n",
             (fld.auto_render?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "  }\n");
-    if (ifield < flds.size() - 1) {
-      fprintf(_tdrpFile, "  ,\n");
-    }
+    count++;
   } // ifield
   fprintf(_tdrpFile, "};\n");
 
