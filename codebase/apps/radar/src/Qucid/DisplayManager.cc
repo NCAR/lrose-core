@@ -93,7 +93,7 @@ DisplayManager::DisplayManager(const Params &params,
         
 {
 
-  _beamTimerId = 0;
+  _mainTimerId = 0;
   _frozen = false;
   _fieldNum = 0;
   _prevFieldNum = -1;

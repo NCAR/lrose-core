@@ -153,6 +153,7 @@ CartManager::CartManager(const Params &params,
   _timeControl = NULL;
   _timeLayout = NULL;
   _timeSlider = NULL;
+  _fieldMenuPlaced = false;
   _timeControlPlaced = false;
 
   _setArchiveMode(_params.begin_in_archive_mode);
@@ -200,17 +201,13 @@ CartManager::~CartManager()
 int CartManager::run(QApplication &app)
 {
 
-  if (_params.debug) {
-    cerr << "Running in POLAR mode" << endl;
-  }
-
   // make window visible
 
   show();
   
   // set timer running
   
-  _beamTimerId = startTimer(2);
+  _mainTimerId = startTimer(2);
   
   return app.exec();
 
@@ -281,7 +278,7 @@ void CartManager::timerEvent(QTimerEvent *event)
 
   // handle event
   
-  if (event->timerId() == _beamTimerId) {
+  if (event->timerId() == _mainTimerId) {
     
     if (_archiveMode) {
       if (_archiveRetrievalPending) {
@@ -543,6 +540,10 @@ void CartManager::_setupWindows()
    _createSweepPanel();
    mainLayout->addWidget(_sweepPanel);
 
+  // field menu
+
+  _createFieldMenu();
+
   // time panel
 
   _createTimeControl();
@@ -596,6 +597,13 @@ void CartManager::_setSweepPanelVisibility()
 
 void CartManager::_createActions()
 {
+
+  // show field menu
+  _showFieldMenuAct = new QAction(tr("Fields"), this);
+  _showFieldMenuAct->setStatusTip(tr("Show field menu"));
+  connect(_showFieldMenuAct, SIGNAL(triggered()),
+          this, SLOT(_showFieldMenu()));
+  
   // freeze display
   _freezeAct = new QAction(tr("Freeze"), this);
   _freezeAct->setShortcut(tr("Esc"));
@@ -736,6 +744,8 @@ void CartManager::_createMenus()
   _fileMenu->addAction(_saveFileAct);
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
+
+  menuBar()->addAction(_showFieldMenuAct);
 
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
   _timeMenu->addAction(_showTimeControlAct);
@@ -1907,6 +1917,164 @@ void CartManager::_locationClicked(double xkm, double ykm,
 }
 
 //////////////////////////////////////////////
+// create the field menu
+
+void CartManager::_createFieldMenu()
+{
+  
+  _fieldMenu = new QDialog(this);
+  _fieldMenu->setWindowTitle("Select active field");
+  QPoint pos(0,0);
+  _fieldMenu->move(pos);
+
+  QBoxLayout *timeControlLayout =
+    new QBoxLayout(QBoxLayout::TopToBottom, _fieldMenu);
+  timeControlLayout->setSpacing(0);
+
+  // create time panel
+  
+  _timePanel = new QFrame(_fieldMenu);
+  timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
+  _timeLayout = new QVBoxLayout;
+  _timePanel->setLayout(_timeLayout);
+
+  QFrame *timeUpper = new QFrame(_timePanel);
+  QHBoxLayout *timeUpperLayout = new QHBoxLayout;
+  timeUpperLayout->setSpacing(10);
+  timeUpper->setLayout(timeUpperLayout);
+  
+  QFrame *timeLower = new QFrame(_timePanel);
+  QHBoxLayout *timeLowerLayout = new QHBoxLayout;
+  timeLowerLayout->setSpacing(10);
+  timeLower->setLayout(timeLowerLayout);
+
+  _timeLayout->addWidget(timeUpper);
+  _timeLayout->addWidget(timeLower);
+  
+  // create slider
+  
+  _timeSlider = new QSlider(Qt::Horizontal);
+  _timeSlider->setFocusPolicy(Qt::StrongFocus);
+  _timeSlider->setTickPosition(QSlider::TicksBothSides);
+  _timeSlider->setTickInterval(1);
+  _timeSlider->setTracking(true);
+  _timeSlider->setSingleStep(1);
+  _timeSlider->setPageStep(0);
+  _timeSlider->setFixedWidth(400);
+  _timeSlider->setToolTip("Drag to change time selection");
+  
+  // active time
+  
+  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
+  _selectedTimeLabel = new QPushButton(_timePanel);
+  _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
+  QPalette pal = _selectedTimeLabel->palette();
+  pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
+  _selectedTimeLabel->setPalette(pal);
+  _selectedTimeLabel->setToolTip("This is the selected data time");
+
+  // time editing
+
+  _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
+  _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+  QDate startDate(_archiveStartTime.getYear(), 
+                  _archiveStartTime.getMonth(),
+                  _archiveStartTime.getDay());
+  QTime startTime(_archiveStartTime.getHour(),
+                  _archiveStartTime.getMin(),
+                  _archiveStartTime.getSec());
+  QDateTime startDateTime(startDate, startTime);
+  _archiveStartTimeEdit->setDateTime(startDateTime);
+  connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
+          this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
+  _archiveStartTimeEdit->setToolTip("Start time of archive period");
+  
+  _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
+  _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+  QDate endDate(_archiveEndTime.getYear(), 
+                 _archiveEndTime.getMonth(),
+                 _archiveEndTime.getDay());
+  QTime endTime(_archiveEndTime.getHour(),
+                 _archiveEndTime.getMin(),
+                 _archiveEndTime.getSec());
+  QDateTime endDateTime(endDate, endTime);
+  _archiveEndTimeEdit->setDateTime(endDateTime);
+  connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
+          this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
+  _archiveEndTimeEdit->setToolTip("End time of archive period");
+  
+  // fwd and back buttons
+
+  _back1 = new QPushButton(timeLower);
+  _back1->setText("<");
+  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
+  _back1->setToolTip("Go back by 1 file");
+  
+  _fwd1 = new QPushButton(timeLower);
+  _fwd1->setText(">");
+  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
+  _fwd1->setToolTip("Go forward by 1 file");
+    
+  _backPeriod = new QPushButton(timeLower);
+  _backPeriod->setText("<<");
+  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
+  _backPeriod->setToolTip("Go back by the archive time period");
+  
+  _fwdPeriod = new QPushButton(timeLower);
+  _fwdPeriod->setText(">>");
+  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
+  _fwdPeriod->setToolTip("Go forward by the archive time period");
+
+  // accept cancel buttons
+
+  QPushButton *acceptButton = new QPushButton(timeUpper);
+  acceptButton->setText("Accept");
+  QPalette acceptPalette = acceptButton->palette();
+  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
+  acceptButton->setPalette(acceptPalette);
+  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
+  acceptButton->setToolTip("Accept the selected start and end times");
+
+  QPushButton *cancelButton = new QPushButton(timeUpper);
+  cancelButton->setText("Cancel");
+  QPalette cancelPalette = cancelButton->palette();
+  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
+  cancelButton->setPalette(cancelPalette);
+  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
+  cancelButton->setToolTip("Cancel the selected start and end times");
+    
+  // add time widgets to layout
+  
+  int stretch = 0;
+  timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
+  timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
+  timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
+  
+  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
+  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
+
+  // connect slots for time slider
+  
+  connect(_timeSlider, SIGNAL(actionTriggered(int)),
+          this, SLOT(_timeSliderActionTriggered(int)));
+  
+  connect(_timeSlider, SIGNAL(valueChanged(int)),
+          this, SLOT(_timeSliderValueChanged(int)));
+  
+  connect(_timeSlider, SIGNAL(sliderReleased()),
+          this, SLOT(_timeSliderReleased()));
+
+  connect(_timeSlider, SIGNAL(sliderPressed()),
+          this, SLOT(_timeSliderPressed()));
+
+}
+
+//////////////////////////////////////////////
 // create the time panel
 
 void CartManager::_createTimeControl()
@@ -2062,6 +2230,45 @@ void CartManager::_createTimeControl()
   connect(_timeSlider, SIGNAL(sliderPressed()),
           this, SLOT(_timeSliderPressed()));
 
+}
+
+/////////////////////////////////////
+// show the field menu
+
+void CartManager::_showFieldMenu()
+{
+
+  if (_fieldMenu) {
+    if (_fieldMenu->isVisible()) {
+      _fieldMenu->setVisible(false);
+    } else {
+      _fieldMenu->setVisible(true);
+      _fieldMenu->raise();
+      _placeFieldMenu();
+    }
+  }
+
+}
+
+/////////////////////////////////////
+// place the field menu
+
+void CartManager::_placeFieldMenu()
+{
+  if (_fieldMenu) {
+    if (!_fieldMenuPlaced) {
+      int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
+      int topFrameHeight =
+        _fieldMenu->frameGeometry().height() - _fieldMenu->height();
+      QPoint pos;
+      pos.setX(x() + (frameGeometry().width()));
+      pos.setY(y());
+      _fieldMenu->move(pos);
+      if (topFrameWidth != 0 || topFrameHeight != 0) {
+        _fieldMenuPlaced = true;
+      }
+    }
+  }
 }
 
 /////////////////////////////////////

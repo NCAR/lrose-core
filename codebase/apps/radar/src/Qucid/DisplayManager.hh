@@ -145,7 +145,7 @@ protected:
   // beam reading timer
 
   static int _timerEventCount;
-  int _beamTimerId;
+  int _mainTimerId;
   bool _frozen;
 
   // data fields

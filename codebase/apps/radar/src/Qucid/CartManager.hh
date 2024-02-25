@@ -205,6 +205,7 @@ private:
 
   // actions
 
+  QAction *_showFieldMenuAct;
   QAction *_realtimeAct;
   QAction *_showTimeControlAct;
   QAction *_ringsAct;
@@ -246,6 +247,11 @@ private:
   QListWidget *_boundaryEditorList;
   QLabel *_boundaryEditorInfoLabel;
   bool forceHide = true;
+
+  // field menu
+  
+  QDialog *_fieldMenu;
+  bool _fieldMenuPlaced;
 
   // time controller settings dialog
   
@@ -333,7 +339,11 @@ private:
   void _setGuiFromSelectedTime();
   void _setSweepPanelVisibility();
 
-  // time slider
+  // field menu
+
+  void _createFieldMenu();
+
+  // time controller
 
   void _createTimeControl();
 
@@ -390,6 +400,11 @@ private slots:
   void _goFwdPeriod();
 
   void _setArchiveRetrievalPending();
+
+  // field menu
+
+  void _showFieldMenu();
+  void _placeFieldMenu();
 
   // time controller
 
