@@ -1978,6 +1978,12 @@ void CartManager::_createFieldMenu()
   
   _fieldTable->verticalHeader()->setVisible(false);
   _fieldTable->horizontalHeader()->setVisible(false);
+
+  // set the column widths, for the strings they contain
+
+  _fieldTable->resizeColumnsToContents();
+  _fieldTable->resizeRowsToContents();
+  _fieldTable->showNormal();
   
 }
 
