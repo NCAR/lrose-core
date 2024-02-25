@@ -256,7 +256,9 @@ private:
   bool _fieldMenuPlaced;
   QFrame *_fieldMenuPanel;
   QVBoxLayout *_fieldMenuLayout;
-
+  int _fieldTableCurrentColumn;
+  int _fieldTableCurrentRow;
+  
   // time controller settings dialog
   
   QDialog *_timeControl;

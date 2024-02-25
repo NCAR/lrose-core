@@ -152,10 +152,17 @@ CartManager::CartManager(const Params &params,
   _backPeriod = NULL;
   _fwdPeriod = NULL;
 
+  _fieldMenu = NULL;
+  _fieldTable = NULL;
+  _fieldMenuPlaced = false;
+  _fieldMenuPanel = NULL;
+  _fieldMenuLayout = NULL;
+  _fieldTableCurrentColumn = -1;
+  _fieldTableCurrentRow = -1;
+
   _timeControl = NULL;
   _timeLayout = NULL;
   _timeSlider = NULL;
-  _fieldMenuPlaced = false;
   _timeControlPlaced = false;
 
   _setArchiveMode(_params.begin_in_archive_mode);
@@ -232,7 +239,31 @@ void CartManager::timerEvent(QTimerEvent *event)
   // register with procmap
 
   PMU_auto_register("timerEvent");
-  
+
+  // field change?
+
+  if (_fieldTable != NULL) {
+
+    if (_fieldTableCurrentRow != _fieldTable->currentRow() ||
+        _fieldTableCurrentColumn != _fieldTable->currentColumn()) {
+      
+      QTableWidgetItem *item = _fieldTable->item(_fieldTable->currentRow(),
+                                                 _fieldTable->currentColumn());
+      
+      if (item->text().toStdString().size() == 0) {
+        cerr << "Empty field selected, changing back to previous" << endl;
+        _fieldTable->setCurrentCell(_fieldTableCurrentRow,
+                                    _fieldTableCurrentColumn);
+      } else {
+        cerr << "Changing field to: " << item->text().toStdString() << endl;
+        _fieldTableCurrentColumn = _fieldTable->currentColumn();
+        _fieldTableCurrentRow = _fieldTable->currentRow();
+      }
+      
+    }
+    
+  }
+
   // Handle widget stuff that can't be done at initial setup.  For some reason
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
@@ -1957,8 +1988,9 @@ void CartManager::_createFieldMenu()
   _fieldTable->setColumnCount(ncols);
   // _fieldMenu->setHorizontalHeaderLabels("Fields");
   
-  for (int icol = 0; icol < ncols; icol++) {
-    for (int irow = 0; irow < nrows; irow++) {
+  for (int irow = 0; irow < nrows; irow++) {
+    // is this row active?
+    for (int icol = 0; icol < ncols; icol++) {
       int fieldNum = irow * ncols + icol;
       if (fieldNum < _params.fields_n) {
         if (strlen(_params._fields[fieldNum].group_name) == 0) {
@@ -1973,8 +2005,8 @@ void CartManager::_createFieldMenu()
         _fieldTable->setItem(irow, icol,
                              new QTableWidgetItem(""));
       }
-    } // irow
-  } // icol
+    } // icol
+  } // irow
   
   _fieldTable->verticalHeader()->setVisible(false);
   _fieldTable->horizontalHeader()->setVisible(false);
@@ -1983,8 +2015,13 @@ void CartManager::_createFieldMenu()
 
   _fieldTable->resizeColumnsToContents();
   _fieldTable->resizeRowsToContents();
-  _fieldTable->showNormal();
+  _fieldTable->adjustSize();
+  _fieldTable->setAlternatingRowColors(true);
 
+  // initialize
+
+  _fieldTable->setCurrentCell(0, 0);
+  
   // connect click to cell set color
   
   connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
