@@ -78,6 +78,7 @@
 #include <QTimer>
 #include <QDesktopServices>
 #include <QTableWidget>
+#include <QHeaderView>
 
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -1952,8 +1953,6 @@ void CartManager::_createFieldMenu()
   int nfields = _params.fields_n;
   int nrows = (int) ((double) (nfields - 1) / ncols) + 1;
   
-  cerr << "111111111111 ncols, nrows: " << ncols << ", " << nrows << endl;
-  
   _fieldTable->setRowCount(nrows);
   _fieldTable->setColumnCount(ncols);
   // _fieldMenu->setHorizontalHeaderLabels("Fields");
@@ -1970,6 +1969,9 @@ void CartManager::_createFieldMenu()
       }
     } // irow
   } // icol
+  
+  _fieldTable->verticalHeader()->setVisible(false);
+  _fieldTable->horizontalHeader()->setVisible(false);
   
 }
 
