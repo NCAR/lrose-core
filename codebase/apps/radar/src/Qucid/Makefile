@@ -64,6 +64,7 @@ HDRS = \
 	Cterrain_P.hh \
 	DisplayField.hh \
 	DisplayManager.hh \
+	FieldTableItem.hh \
 	HorizWidget.hh \
 	LegacyParams.hh \
 	Product.hh \
@@ -108,6 +109,7 @@ NORM_SRCS = \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
 	DisplayField.cc \
+	FieldTableItem.cc \
 	LegacyParams.cc \
 	Main.cc \
 	Product.cc \

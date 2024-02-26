@@ -34,6 +34,7 @@
 
 #include "CartManager.hh"
 #include "DisplayField.hh"
+#include "FieldTableItem.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
@@ -247,8 +248,9 @@ void CartManager::timerEvent(QTimerEvent *event)
     if (_fieldTableCurrentRow != _fieldTable->currentRow() ||
         _fieldTableCurrentColumn != _fieldTable->currentColumn()) {
       
-      QTableWidgetItem *item = _fieldTable->item(_fieldTable->currentRow(),
-                                                 _fieldTable->currentColumn());
+      const FieldTableItem *item =
+        (const FieldTableItem *) _fieldTable->item(_fieldTable->currentRow(),
+                                             _fieldTable->currentColumn());
       
       if (item->text().toStdString().size() == 0) {
         _fieldTable->setCurrentCell(_fieldTableCurrentRow,
@@ -256,6 +258,11 @@ void CartManager::timerEvent(QTimerEvent *event)
       } else {
         _fieldTableCurrentColumn = _fieldTable->currentColumn();
         _fieldTableCurrentRow = _fieldTable->currentRow();
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          const Params::field_t *fparams = item->getFieldParams();
+          cerr << "Changing to field: " << fparams->button_label << endl;
+          cerr << "              url: " << fparams->url << endl;
+        }
       }
       
     }
@@ -1984,25 +1991,20 @@ void CartManager::_createFieldMenu()
   
   _fieldTable->setRowCount(nrows);
   _fieldTable->setColumnCount(ncols);
-  // _fieldMenu->setHorizontalHeaderLabels("Fields");
   
   for (int irow = 0; irow < nrows; irow++) {
     // is this row active?
     for (int icol = 0; icol < ncols; icol++) {
       int fieldNum = irow * ncols + icol;
+      FieldTableItem *item = new FieldTableItem("");
       if (fieldNum < _params.fields_n) {
-        if (strlen(_params._fields[fieldNum].group_name) == 0) {
-          _fieldTable->setItem
-            (irow, icol, new QTableWidgetItem(""));
-        } else {
-          _fieldTable->setItem
-            (irow, icol,
-             new QTableWidgetItem(_params._fields[fieldNum].button_label));
+        if (strlen(_params._fields[fieldNum].group_name) > 0) {
+          item->setText(_params._fields[fieldNum].button_label);
         }
-      } else {
-        _fieldTable->setItem(irow, icol,
-                             new QTableWidgetItem(""));
       }
+      item->setFieldParams(&_params._fields[fieldNum]);
+      _fieldTable->setItem(irow, icol, item);
+      
     } // icol
   } // irow
   
@@ -2022,8 +2024,8 @@ void CartManager::_createFieldMenu()
   
   // connect click to cell set color
   
-  connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
-	  _fieldTable, SLOT(setCurrentCell(const int, const int)));
+  // connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
+  //         _fieldTable, SLOT(setCurrentCell(const int, const int)));
   
 }
 

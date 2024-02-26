@@ -1325,6 +1325,7 @@ CartManager.o: CartManager.cc CartManager.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		DisplayField.hh \
+		FieldTableItem.hh \
 		HorizWidget.hh \
 		CartWidget.hh \
 		ScaledLabel.hh \
