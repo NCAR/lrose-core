@@ -1955,6 +1955,30 @@ void CartManager::_locationClicked(double xkm, double ykm,
 }
 
 //////////////////////////////////////////////
+// get size of table widget
+
+QSize CartManager::_getTableWidgetSize(QTableWidget *t,
+                                       bool includeVertHeader,
+                                       bool includeHorizHeader)
+{
+  int w = 4;
+  if (includeVertHeader) {
+    w += t->verticalHeader()->width();
+  }
+  for (int i = 0; i < t->columnCount(); i++) {
+    w += t->columnWidth(i);
+  }
+  int h = 4;
+  if (includeHorizHeader) {
+    h += t->horizontalHeader()->height();
+  }
+  for (int i = 0; i < t->rowCount(); i++) {
+    h += t->rowHeight(i);
+  }
+  return QSize(w, h);
+}
+
+//////////////////////////////////////////////
 // create the field menu
 
 void CartManager::_createFieldMenu()
@@ -2022,8 +2046,11 @@ void CartManager::_createFieldMenu()
   // initialize
 
   _fieldTable->setCurrentCell(0, 0);
+
+  // set the size
   
-  // connect click to cell set color
+  _fieldTable->setMaximumSize(_getTableWidgetSize(_fieldTable, false, false));
+  _fieldTable->setMinimumSize(_fieldTable->maximumSize());
   
   // connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
   //         _fieldTable, SLOT(setCurrentCell(const int, const int)));

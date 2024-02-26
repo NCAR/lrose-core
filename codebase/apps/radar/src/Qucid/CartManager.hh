@@ -347,6 +347,9 @@ private:
 
   // field menu
 
+  QSize _getTableWidgetSize(QTableWidget *t,
+                            bool includeVertHeader,
+                            bool includeHorizHeader);
   void _createFieldMenu();
   
   // time controller
