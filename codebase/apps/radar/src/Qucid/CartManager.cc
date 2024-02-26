@@ -2017,7 +2017,8 @@ void CartManager::_createFieldMenu()
   _fieldTable->resizeRowsToContents();
   _fieldTable->adjustSize();
   _fieldTable->setAlternatingRowColors(true);
-
+  _fieldTable->setSelectionMode(QAbstractItemView::SingleSelection);
+  
   // initialize
 
   _fieldTable->setCurrentCell(0, 0);
