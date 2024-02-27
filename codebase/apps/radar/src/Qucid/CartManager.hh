@@ -78,6 +78,7 @@ class VertWidget;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
+class MapMenuAction;
 
 class CartManager : public DisplayManager {
   
@@ -201,12 +202,14 @@ private:
 
   QMenu *_fileMenu;
   QMenu *_timeMenu;
+  QMenu *_mapsMenu;
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions
 
   QAction *_showFieldMenuAct;
+  vector<MapMenuAction *> _mapMenuActions;
   QAction *_realtimeAct;
   QAction *_showTimeControlAct;
   QAction *_ringsAct;
@@ -218,6 +221,7 @@ private:
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
+
 
   // archive mode
   
@@ -311,6 +315,8 @@ private:
   void _setupWindows();
   void _createActions();
   void _createMenus();
+  void _populateMapsMenu();
+  void _populateOverlaysMenu();
 
   // data retrieval
 
@@ -389,6 +395,7 @@ private slots:
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
+  void _mapMenuItemClicked(bool enabled, int mapIndex);
 
   // modes
   

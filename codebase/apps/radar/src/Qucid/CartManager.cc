@@ -32,14 +32,6 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "CartManager.hh"
-#include "DisplayField.hh"
-#include "FieldTableItem.hh"
-#include "HorizWidget.hh"
-#include "VertWidget.hh"
-#include "VertWindow.hh"
-#include "Params.hh"
-
 #include <string>
 #include <cmath>
 #include <iostream>
@@ -95,6 +87,18 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
+
+#include "CartManager.hh"
+#include "DisplayField.hh"
+#include "FieldTableItem.hh"
+#include "MapMenuAction.hh"
+#include "HorizWidget.hh"
+#include "VertWidget.hh"
+#include "VertWindow.hh"
+
+// cidd.h must be included AFTER qt includes because of #define None in X11/X.h
+
+#include "cidd.h"
 
 using namespace std;
 using namespace H5x;
@@ -758,7 +762,7 @@ void CartManager::_createActions()
   _aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(_aboutAct, SIGNAL(triggered()), this, SLOT(_about()));
 
-  _aboutQtAct = new QAction(tr("About &Qt"), this);
+   _aboutQtAct = new QAction(tr("About &Qt"), this);
   _aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
   connect(_aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
@@ -776,6 +780,8 @@ void CartManager::_createActions()
 void CartManager::_createMenus()
 {
 
+  // file menu
+  
   _fileMenu = menuBar()->addMenu(tr("&File"));
   _fileMenu->addSeparator();
   _fileMenu->addAction(_openFileAct);
@@ -783,20 +789,29 @@ void CartManager::_createMenus()
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
+  // field menu
+  
   menuBar()->addAction(_showFieldMenuAct);
+  
+  // add maps menu
+  
+  _mapsMenu = menuBar()->addMenu(tr("&Maps"));
+  _populateMapsMenu();
 
+   // time selector
+  
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
   _timeMenu->addAction(_showTimeControlAct);
   _timeMenu->addSeparator();
   _timeMenu->addAction(_realtimeAct);
 
+  // add overlay menu
+  
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
-  _overlaysMenu->addAction(_ringsAct);
-  _overlaysMenu->addAction(_gridsAct);
-  _overlaysMenu->addAction(_azLinesAct);
-  _overlaysMenu->addSeparator();
-  _overlaysMenu->addAction(_showVertAct);
+  _populateOverlaysMenu();
 
+  // misc actions
+  
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
   // menuBar()->addAction(_showBoundaryEditorAct);
@@ -807,6 +822,59 @@ void CartManager::_createMenus()
   _helpMenu->addAction(_howtoAct);
   _helpMenu->addAction(_aboutAct);
   _helpMenu->addAction(_aboutQtAct);
+
+}
+
+/////////////////////////////////////////////////////////////
+// populate maps menu
+
+void CartManager::_populateMapsMenu()
+{
+
+  // loop through map entries
+  
+  for (int imap = 0; imap < _params.maps_n; imap++) {
+
+    Params::map_t &mparams = _params._maps[imap];
+
+    // create action for this entry
+    
+    MapMenuAction *act = new MapMenuAction;
+    act->setMapParams(&mparams);
+    act->setMapIndex(imap);
+    act->setText(mparams.map_code);
+    act->setStatusTip(tr("Turn map layer on/off"));
+    act->setCheckable(true);
+    act->setChecked(mparams.on_at_startup);
+    connect(act, SIGNAL(toggled(bool)),
+            this, SLOT(_mapMenuItemClicked(bool, imap)));
+
+    // add to actions vector for maps
+    
+    _mapMenuActions.push_back(act);
+
+    // add to maps menu
+
+    _mapsMenu->addAction(act);
+
+  } // imap
+  
+  _mapsMenu->addSeparator();
+  _mapsMenu->addAction(_showVertAct);
+
+}
+
+/////////////////////////////////////////////////////////////
+// populate overlays menu
+
+void CartManager::_populateOverlaysMenu()
+{
+
+  _overlaysMenu->addAction(_ringsAct);
+  _overlaysMenu->addAction(_gridsAct);
+  _overlaysMenu->addAction(_azLinesAct);
+  _overlaysMenu->addSeparator();
+  _overlaysMenu->addAction(_showVertAct);
 
 }
 
@@ -1954,6 +2022,21 @@ void CartManager::_locationClicked(double xkm, double ykm,
   
 }
 
+////////////////////////////////////////////////////////////////////////
+// map menu item clicked
+
+void CartManager::_mapMenuItemClicked(bool enabled, int mapIndex)
+  
+{
+
+  // if (_params.debug) {
+    cerr << "*** _mapMenuItemClicked, enabled: "
+         << enabled << ", mapIndex: " << mapIndex << endl;
+  // }
+
+}
+  
+  
 //////////////////////////////////////////////
 // get size of table widget
 

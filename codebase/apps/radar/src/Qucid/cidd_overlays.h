@@ -24,110 +24,124 @@
 #ifndef CIDD_OVERLAYS_H
 #define CIDD_OVERLAYS_H
 /**********************************************************************
- * CIDD_OVERLAYS.H:  Data structure defns for CIDD
+ * CIDD_OVERLAYS.H: Data structure defns for CIDD
  */
 
-struct geo_feat_label { /* geographic feature coordinates & label */
-        double  min_lat;        /* latitude, longitude bounding box for text */
-        double  min_lon;
-        double  max_lat;
-        double  max_lon;
+/* geographic feature coordinates & label */
 
-        double  attach_lat;
-        double  attach_lon;     /* latitude, longitude of the object associated with the label */
-        double  local_x;
-        double  local_y;
-        double  rotation;       /* 0 = left to right, 90 = bottom to top, etc */
+struct geo_feat_label {
 
-        char    string[NAME_LENGTH];    /* String to display */
+  double min_lat; /* latitude, longitude bounding box for text */
+  double min_lon;
+  double max_lat;
+  double max_lon;
+
+  double attach_lat;
+  double attach_lon; /* latitude, longitude of the object associated with the label */
+  double local_x;
+  double local_y;
+  double rotation; /* 0 = left to right, 90 = bottom to top, etc */
+
+  char string[NAME_LENGTH]; /* String to display */
+
 };
 typedef struct geo_feat_label Geo_feat_label_t;
 
-struct geo_feat_icon {  /* geographic feature Icon & label */
-        double  lat;
-        double  lon;
-        double  local_x;
-        double  local_y;
+/* geographic feature Icon & label */
 
-        short   text_x;
-        short   text_y;
-        char    label[LABEL_LENGTH];    /* Label to display */
+struct geo_feat_icon {
 
-        struct geo_feat_icondef *icon;
+  double lat;
+  double lon;
+  double local_x;
+  double local_y;
+
+  short text_x;
+  short text_y;
+  char label[LABEL_LENGTH]; /* Label to display */
+
+  struct geo_feat_icondef *icon;
+
 };
 typedef struct geo_feat_icon Geo_feat_icon_t;
 
-struct geo_feat_icondef {       /* geographic feature Icon & label */
-        int     num_points;
-        short   *x;
-        short   *y;
+/* geographic feature Icon & label */
 
-        char    name[NAME_LENGTH];
+struct geo_feat_icondef {
+  int num_points;
+  short *x;
+  short *y;
+  char name[NAME_LENGTH];
 };
 typedef struct geo_feat_icondef Geo_feat_icondef_t;
 
+/* geographic feature lines */
 
-struct geo_feat_polyline {      /* geographic feature lines */
-        int     num_points;
+struct geo_feat_polyline {
 
-	double min_x;  /* Local coords bounding box */
-	double max_x;
-	double min_y;
-	double max_y;
+  int num_points;
 
-        double  *lat;
-        double  *lon;
-        double  *local_x;
-        double  *local_y;
+  double min_x; /* Local coords bounding box */
+  double max_x;
+  double min_y;
+  double max_y;
 
-        char    label[LABEL_LENGTH];    /* Label of polyline */
+  double *lat;
+  double *lon;
+  double *local_x;
+  double *local_y;
+  
+  char label[LABEL_LENGTH]; /* Label of polyline */
+
 };
 typedef struct geo_feat_polyline Geo_feat_polyline_t;
 
-struct overlay { /*  Overlay data */
-        long     active;             /* Current on/off state; 1 = active */
-        long     default_on_state;   /* If set to 1, This overlay should appear by default */
+// main overlay struct
 
-        long     num_labels;         /* number of associated text strings in map overlay */
-        long     num_icons;          /* number of icons in map overlay */
-        long     num_icondefs;       /*  number of icons in map overlay */
-        long     num_polylines;      /* number of polylines in map overlay */
+struct overlay { /* Overlay data */
+  long active; /* Current on/off state; 1 = active */
+  long default_on_state; /* If set to 1, This overlay should appear by default */
 
-        long     num_alloc_labels;     /* number of allocated pointers for labels*/
-        long     num_alloc_icons;      /* number of allocated pointers for number of icons */
-        long     num_alloc_icondefs;   /*  number of allocated pointers for number of icons */
-        long     num_alloc_polylines;  /* number of allocated pointers for number of polylines */
+  long num_labels; /* number of associated text strings in map overlay */
+  long num_icons; /* number of icons in map overlay */
+  long num_icondefs; /* number of icons in map overlay */
+  long num_polylines; /* number of polylines in map overlay */
 
-        long     pixval;  /* X color cell value to use to draw in the proper color */
-        long     line_width;  /* How wide to draw the line */
+  long num_alloc_labels; /* number of allocated pointers for labels*/
+  long num_alloc_icons; /* number of allocated pointers for number of icons */
+  long num_alloc_icondefs; /* number of allocated pointers for number of icons */
+  long num_alloc_polylines; /* number of allocated pointers for number of polylines */
 
-        double  detail_thresh_min;  /* Overlays are visible when distance (km) across */
-        double  detail_thresh_max;  /* across the screen is between min and max */
+  long pixval; /* X color cell value to use to draw in the proper color */
+  long line_width; /* How wide to draw the line */
 
-        Geo_feat_label_t     **geo_label;
-        Geo_feat_icon_t      **geo_icon;
-        Geo_feat_icondef_t   **geo_icondef;
-        Geo_feat_polyline_t  **geo_polyline;
+  double detail_thresh_min; /* Overlays are visible when distance (km) across */
+  double detail_thresh_max; /* across the screen is between min and max */
 
-        char map_file_name[NAME_LENGTH];        /* Name of map file to read */
-        char control_label[LABEL_LENGTH];       /* The overlay's GUI label */
-        char map_name[NAME_LENGTH];             /* Long ID */
-        char map_code[LABEL_LENGTH];            /* SHORT NAME */
-        char color_name[NAME_LENGTH];           /* Current Color */
+  Geo_feat_label_t **geo_label;
+  Geo_feat_icon_t **geo_icon;
+  Geo_feat_icondef_t **geo_icondef;
+  Geo_feat_polyline_t **geo_polyline;
 
-        Color_gc_t *color;
+  char map_file_name[NAME_LENGTH]; /* Name of map file to read */
+  char control_label[LABEL_LENGTH]; /* The overlay's GUI label */
+  char map_name[NAME_LENGTH]; /* Long ID */
+  char map_code[LABEL_LENGTH]; /* SHORT NAME */
+  char color_name[NAME_LENGTH]; /* Current Color */
+
+  Color_gc_t *color;
 };
 typedef struct overlay Overlay_t; 
 
-typedef struct    {    /* geographic feature coordinates & label */
-    double    lat;
-    double    lon;    /* latitude, longitude */
-    char    label[LABEL_LENGTH];    /* String to label coordinate with */
-    int        lab_pos;    /* 1 = rt, 2 = top 3 = left, 4 = bot */
+typedef struct { /* geographic feature coordinates & label */
+  double lat;
+  double lon; /* latitude, longitude */
+  char label[LABEL_LENGTH]; /* String to label coordinate with */
+  int lab_pos; /* 1 = rt, 2 = top 3 = left, 4 = bot */
 }geo_feat_coor_t;
 
-typedef struct    {    /* Arbitrary geographic coordinate */
-    double    x,y;
+typedef struct { /* Arbitrary geographic coordinate */
+  double x,y;
 }geo_coord_t;
-             
+ 
 #endif

@@ -67,6 +67,7 @@ HDRS = \
 	FieldTableItem.hh \
 	HorizWidget.hh \
 	LegacyParams.hh \
+	MapMenuAction.hh \
 	Product.hh \
 	ProductMgr.hh \
 	Qucid.hh \
@@ -207,6 +208,7 @@ MOC_SRCS = \
 	CartWidget.cc \
 	DisplayManager.cc \
 	HorizWidget.cc \
+	MapMenuAction.cc \
 	VertWidget.cc \
 	VertWindow.cc
 
@@ -215,6 +217,7 @@ MOC_OUTPUT = \
 	moc_CartWidget.cpp \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
+	moc_MapMenuAction.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp
 

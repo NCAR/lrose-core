@@ -50,6 +50,7 @@
 #include <X11/Xlib.h>       // X11 
 #include <X11/Xutil.h>       
 #include <X11/Xresource.h>       
+
 // #include <xview/xview.h>    // XView 
 // #include <xview/canvas.h>
 // #include <xview/cms.h>
@@ -157,7 +158,7 @@
 //************* GLOBAL DATA DECLERATIONS *************************************/
  
 
-struct    Global_data {
+typedef struct {
   // GUI OBJECTS
   // h_win_horiz_bw_objects  *h_win_horiz_bw; // Handles to Plan view widgets
   Drawable    hcan_xid;    
@@ -581,10 +582,10 @@ struct    Global_data {
   // const char *wind_marker_type;
   // double wind_reference_speed;
 
-};
+} Global_data;
  
 #ifdef CIDD_MAIN
-struct    Global_data gd;
+Global_data gd;
 Params _params;
 // Attr_attribute  INSTANCE;
 // Attr_attribute  MENU_KEY;
@@ -594,8 +595,8 @@ int MENU_KEY;
     
 //************************ External reference to global data structure *******/
 
-#ifndef    CIDD_MAIN
-extern    struct    Global_data    gd;
+#ifndef CIDD_MAIN
+extern Global_data gd;
 extern Params _params;
 // extern Attr_attribute  INSTANCE;
 // extern Attr_attribute  MENU_KEY;
