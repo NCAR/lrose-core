@@ -121,13 +121,21 @@
 #define DAILY_INTERVAL 1        /* Climo mode */
 #define YEARLY_INTERVAL 2       /* Climo mode */
 
-#define DEG_RAD 57.29577951    /* degrees per radian */
+#ifndef DEG_TO_RAD
+#define DEG_TO_RAD 0.017453292519943295 // degrees to radians conversion
+#endif
+
+#define DEG_RAD 57.29577951308232  // degrees per radian
+
+#define RADIAN90  1.5707963267948966 // radian value for 90 degrees 
+#define RADIAN180 3.1415926535897930 // radian value for 180 degrees 
+#define RADIAN270 4.7123889803846900 // radian value for 270 degrees 
 
 #ifndef KM_PER_DEG_AT_EQ
 #define KM_PER_DEG_AT_EQ 111.198487
 #endif
 
-#define PSEUDO_RADIUS 8533.0  
+#define PSEUDO_RADIUS 8533.0 // 4/3 earth radius
 
 /* Methods of rendering Gridded false colored data */
 
@@ -140,8 +148,15 @@ typedef enum
   } render_method_t;
  
 /*    OR's flag with 1 if cliped and "returns" a value >= l && <= u */
+
 #define CLIP(x,l,u,flag) (x < l) ? flag|=1,l: ((x > u)? flag|=1,u:x) 
+
+#ifndef ABS
+#define ABS(a) (a)>=0 ? (a) : -(a)
+#endif
+
 #define ABSDIFF(a,b) (((a) < (b))? (b)-(a): (a)-(b))
-#define ZERO_STRUCT(p)      memset((void *)(p),0,sizeof (*(p)))
+
+#define ZERO_STRUCT(p) memset((void *)(p),0,sizeof (*(p)))
 
 #endif

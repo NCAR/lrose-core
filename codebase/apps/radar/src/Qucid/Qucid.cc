@@ -50,7 +50,7 @@
 #include <QApplication>
 #include <QErrorMessage>
 
-#define CIDD_MAIN 1 /* This is the main module */
+#define THIS_IS_MAIN 1 /* This is the main module */
 #include "cidd.h"
 
 using namespace std;
