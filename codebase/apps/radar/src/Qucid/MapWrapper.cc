@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// MapMenuAction.cc
+// MapWrapper.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -35,13 +35,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MapMenuAction.hh"
+#include "MapWrapper.hh"
 #include "cidd.h"
 
 // Constructor
 
-MapMenuAction::MapMenuAction(QObject *parent) :
-        QAction(parent),
+MapWrapper::MapWrapper(QObject *parent) :
         _mapParams(NULL)
 {
   
@@ -50,7 +49,7 @@ MapMenuAction::MapMenuAction(QObject *parent) :
 
 // destructor
 
-MapMenuAction::~MapMenuAction()
+MapWrapper::~MapWrapper()
 
 {
 
@@ -59,7 +58,7 @@ MapMenuAction::~MapMenuAction()
 ///////////////////////////////////////////////
 // override toggled event
 
-void MapMenuAction::toggled2(bool checked)
+void MapWrapper::toggled2(bool checked)
 {
   // if (_params.debug >= Params::DEBUG_VERBOSE) {
   cerr << "TTTTTTTTTTTT CartManager toggled, checked: " << checked << endl;
@@ -67,8 +66,8 @@ void MapMenuAction::toggled2(bool checked)
   emit mapStatusToggled(checked, _mapIndex);
 }
 
-void MapMenuAction::mapStatusToggled(bool checked,
-                                     int mapIndex)
+void MapWrapper::mapStatusToggled(bool checked,
+                                  int mapIndex)
 {
   cerr << "QQQQQQQ mapStatusToggled, checked, mapIndex: " << checked << ", " << mapIndex << endl;
 }

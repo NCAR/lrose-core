@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
-// MapMenuAction.cc
+/////////////////////////////////////////////////////////////
+// MapWrapper.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,45 +30,72 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Widget in the field menu.
-// Based on QTableWidgetItem
+// Action for each entry in the map menu.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MapMenuAction.hh"
-#include "cidd.h"
+#ifndef MapWrapper_HH
+#define MapWrapper_HH
 
-// Constructor
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
 
-MapMenuAction::MapMenuAction(QObject *parent) :
-        QAction(parent),
-        _mapParams(NULL)
-{
+#include <string>
+#include <vector>
+#include <QObject>
+#include <QAction>
+#include "Params.hh"
+
+using namespace std;
+
+class DLL_EXPORT MapWrapper : public QObject {
   
+  Q_OBJECT
 
-}
+ public:
+  
+  // constructor
+  
+  MapWrapper(QObject *parent = nullptr);
+  
+  // destructor
+  
+  virtual ~MapWrapper();
+  
+  // set
+  
+  void setMapParams(Params::map_t *val) { _mapParams = val; }
+  void setMapIndex(int val) { _mapIndex = val; }
+  void setAction(QAction *val) { _act = val; }
 
-// destructor
+  // get
+  
+  const Params::map_t *getMapParams() const { return _mapParams; }
+  int getMapIndex() const { return _mapIndex; }
+  QAction *getAction() { return _act; }
 
-MapMenuAction::~MapMenuAction()
+ protected:
+  
+  Params::map_t *_mapParams;
+  int _mapIndex;
+  QAction *_act;               
 
-{
+ public slots:
 
-}
+  void toggled2(bool checked); // override QAction class
 
-///////////////////////////////////////////////
-// override toggled event
+  void mapStatusToggled(bool checked, int mapIndex);
 
-void MapMenuAction::toggled2(bool checked)
-{
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  cerr << "TTTTTTTTTTTT CartManager toggled, checked: " << checked << endl;
-  // }
-  emit mapStatusToggled(checked, _mapIndex);
-}
+};
 
-void MapMenuAction::mapStatusToggled(bool checked,
-                                     int mapIndex)
-{
-  cerr << "QQQQQQQ mapStatusToggled, checked, mapIndex: " << checked << ", " << mapIndex << endl;
-}
+#endif
+

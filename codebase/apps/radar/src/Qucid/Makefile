@@ -68,6 +68,7 @@ HDRS = \
 	HorizWidget.hh \
 	LegacyParams.hh \
 	MapMenuAction.hh \
+	MapWrapper.hh \
 	Product.hh \
 	ProductMgr.hh \
 	Qucid.hh \
@@ -209,6 +210,7 @@ MOC_SRCS = \
 	DisplayManager.cc \
 	HorizWidget.cc \
 	MapMenuAction.cc \
+	MapWrapper.cc \
 	VertWidget.cc \
 	VertWindow.cc
 
@@ -218,6 +220,7 @@ MOC_OUTPUT = \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuAction.cpp \
+	moc_MapWrapper.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp
 

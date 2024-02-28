@@ -92,6 +92,7 @@
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
 #include "MapMenuAction.hh"
+#include "MapWrapper.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
@@ -838,22 +839,24 @@ void CartManager::_populateMapsMenu()
     Params::map_t &mparams = _params._maps[imap];
 
     // create action for this entry
-    
-    MapMenuAction *act = new MapMenuAction;
-    act->setMapParams(&mparams);
-    act->setMapIndex(imap);
+
+    MapWrapper *wrapper = new MapWrapper;
+    wrapper->setMapParams(&mparams);
+    wrapper->setMapIndex(imap);
+    QAction *act = new MapMenuAction;
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
-    connect(act, SIGNAL(mapStatusToggled(bool, int)),
-            this, SLOT(_mapMenuItemClicked2(bool, int)));
-    connect(act, SIGNAL(toggled(bool)),
-            this, SLOT(_mapMenuItemClicked(bool)));
+    wrapper->setAction(act);
+    // connect(act, SIGNAL(mapStatusToggled(bool, int)),
+    //         this, SLOT(_mapMenuItemClicked2(bool, int)));
+    connect(act, &QAction::toggled,
+            wrapper, &MapWrapper::toggled2);
     
     // add to actions vector for maps
     
-    _mapMenuActions.push_back(act);
+    // _mapMenuActions.push_back(act);
 
     // add to maps menu
 
