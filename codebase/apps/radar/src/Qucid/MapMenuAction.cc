@@ -64,7 +64,7 @@ void MapMenuAction::toggled(bool checked)
   // if (_params.debug >= Params::DEBUG_VERBOSE) {
   cerr << "TTTTTTTTTTTT CartManager toggled, checked: " << checked << endl;
   // }
-  // emit mapStatusToggled(checked, _mapIndex);
+  emit mapStatusToggled(checked, _mapIndex);
 }
 
 void MapMenuAction::mapStatusToggled(bool checked,

@@ -846,8 +846,8 @@ void CartManager::_populateMapsMenu()
     act->setStatusTip(tr("Turn map layer on/off"));
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
-    connect(act, SIGNAL(toggled(bool)),
-            this, SLOT(_mapMenuItemClicked(bool, int)));
+    connect(act, SIGNAL(mapStatusToggled(bool, int)),
+            this, SLOT(_mapMenuItemClicked2(bool, int)));
     connect(act, SIGNAL(toggled(bool)),
             this, SLOT(_mapMenuItemClicked(bool)));
     
