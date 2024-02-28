@@ -70,9 +70,10 @@ static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers
     "_vertLocationClicked",
     "_locationClicked",
     "ray",
-    "_mapMenuItemClicked",
+    "_mapMenuItemClicked2",
     "enabled",
     "mapIndex",
+    "_mapMenuItemClicked",
     "_setRealtime",
     "_setArchiveStartTime",
     "RadxTime",
@@ -113,7 +114,7 @@ static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {
-    uint offsetsAndSizes[144];
+    uint offsetsAndSizes[146];
     char stringdata0[12];
     char stringdata1[25];
     char stringdata2[1];
@@ -146,46 +147,47 @@ struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {
     char stringdata29[21];
     char stringdata30[17];
     char stringdata31[4];
-    char stringdata32[20];
+    char stringdata32[21];
     char stringdata33[8];
     char stringdata34[9];
-    char stringdata35[13];
-    char stringdata36[21];
-    char stringdata37[9];
-    char stringdata38[6];
-    char stringdata39[19];
-    char stringdata40[28];
-    char stringdata41[4];
-    char stringdata42[26];
-    char stringdata43[16];
+    char stringdata35[20];
+    char stringdata36[13];
+    char stringdata37[21];
+    char stringdata38[9];
+    char stringdata39[6];
+    char stringdata40[19];
+    char stringdata41[28];
+    char stringdata42[4];
+    char stringdata43[26];
     char stringdata44[16];
-    char stringdata45[9];
-    char stringdata46[8];
-    char stringdata47[14];
-    char stringdata48[13];
-    char stringdata49[28];
-    char stringdata50[15];
-    char stringdata51[16];
-    char stringdata52[17];
-    char stringdata53[18];
-    char stringdata54[27];
-    char stringdata55[7];
-    char stringdata56[24];
-    char stringdata57[20];
-    char stringdata58[19];
-    char stringdata59[32];
-    char stringdata60[31];
-    char stringdata61[17];
-    char stringdata62[12];
-    char stringdata63[26];
-    char stringdata64[25];
-    char stringdata65[27];
-    char stringdata66[18];
-    char stringdata67[25];
-    char stringdata68[26];
-    char stringdata69[23];
-    char stringdata70[16];
-    char stringdata71[4];
+    char stringdata45[16];
+    char stringdata46[9];
+    char stringdata47[8];
+    char stringdata48[14];
+    char stringdata49[13];
+    char stringdata50[28];
+    char stringdata51[15];
+    char stringdata52[16];
+    char stringdata53[17];
+    char stringdata54[18];
+    char stringdata55[27];
+    char stringdata56[7];
+    char stringdata57[24];
+    char stringdata58[20];
+    char stringdata59[19];
+    char stringdata60[32];
+    char stringdata61[31];
+    char stringdata62[17];
+    char stringdata63[12];
+    char stringdata64[26];
+    char stringdata65[25];
+    char stringdata66[27];
+    char stringdata67[18];
+    char stringdata68[25];
+    char stringdata69[26];
+    char stringdata70[23];
+    char stringdata71[16];
+    char stringdata72[4];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSCartManagerENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -223,46 +225,47 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSCartManagerENDCLASS_t qt_meta_s
         QT_MOC_LITERAL(362, 20),  // "_vertLocationClicked"
         QT_MOC_LITERAL(383, 16),  // "_locationClicked"
         QT_MOC_LITERAL(400, 3),  // "ray"
-        QT_MOC_LITERAL(404, 19),  // "_mapMenuItemClicked"
-        QT_MOC_LITERAL(424, 7),  // "enabled"
-        QT_MOC_LITERAL(432, 8),  // "mapIndex"
-        QT_MOC_LITERAL(441, 12),  // "_setRealtime"
-        QT_MOC_LITERAL(454, 20),  // "_setArchiveStartTime"
-        QT_MOC_LITERAL(475, 8),  // "RadxTime"
-        QT_MOC_LITERAL(484, 5),  // "rtime"
-        QT_MOC_LITERAL(490, 18),  // "_setArchiveEndTime"
-        QT_MOC_LITERAL(509, 27),  // "_setArchiveStartTimeFromGui"
-        QT_MOC_LITERAL(537, 3),  // "qdt"
-        QT_MOC_LITERAL(541, 25),  // "_setArchiveEndTimeFromGui"
-        QT_MOC_LITERAL(567, 15),  // "_acceptGuiTimes"
-        QT_MOC_LITERAL(583, 15),  // "_cancelGuiTimes"
-        QT_MOC_LITERAL(599, 8),  // "_goBack1"
-        QT_MOC_LITERAL(608, 7),  // "_goFwd1"
-        QT_MOC_LITERAL(616, 13),  // "_goBackPeriod"
-        QT_MOC_LITERAL(630, 12),  // "_goFwdPeriod"
-        QT_MOC_LITERAL(643, 27),  // "_setArchiveRetrievalPending"
-        QT_MOC_LITERAL(671, 14),  // "_showFieldMenu"
-        QT_MOC_LITERAL(686, 15),  // "_placeFieldMenu"
-        QT_MOC_LITERAL(702, 16),  // "_showTimeControl"
-        QT_MOC_LITERAL(719, 17),  // "_placeTimeControl"
-        QT_MOC_LITERAL(737, 26),  // "_timeSliderActionTriggered"
-        QT_MOC_LITERAL(764, 6),  // "action"
-        QT_MOC_LITERAL(771, 23),  // "_timeSliderValueChanged"
-        QT_MOC_LITERAL(795, 19),  // "_timeSliderReleased"
-        QT_MOC_LITERAL(815, 18),  // "_timeSliderPressed"
-        QT_MOC_LITERAL(834, 31),  // "_circleRadiusSliderValueChanged"
-        QT_MOC_LITERAL(866, 30),  // "_brushRadiusSliderValueChanged"
-        QT_MOC_LITERAL(897, 16),  // "_saveImageToFile"
-        QT_MOC_LITERAL(914, 11),  // "interactive"
-        QT_MOC_LITERAL(926, 25),  // "_createRealtimeImageFiles"
-        QT_MOC_LITERAL(952, 24),  // "_createArchiveImageFiles"
-        QT_MOC_LITERAL(977, 26),  // "_createImageFilesAllSweeps"
-        QT_MOC_LITERAL(1004, 17),  // "_createImageFiles"
-        QT_MOC_LITERAL(1022, 24),  // "_createFileChooserDialog"
-        QT_MOC_LITERAL(1047, 25),  // "_refreshFileChooserDialog"
-        QT_MOC_LITERAL(1073, 22),  // "_showFileChooserDialog"
-        QT_MOC_LITERAL(1096, 15),  // "ShowContextMenu"
-        QT_MOC_LITERAL(1112, 3)   // "pos"
+        QT_MOC_LITERAL(404, 20),  // "_mapMenuItemClicked2"
+        QT_MOC_LITERAL(425, 7),  // "enabled"
+        QT_MOC_LITERAL(433, 8),  // "mapIndex"
+        QT_MOC_LITERAL(442, 19),  // "_mapMenuItemClicked"
+        QT_MOC_LITERAL(462, 12),  // "_setRealtime"
+        QT_MOC_LITERAL(475, 20),  // "_setArchiveStartTime"
+        QT_MOC_LITERAL(496, 8),  // "RadxTime"
+        QT_MOC_LITERAL(505, 5),  // "rtime"
+        QT_MOC_LITERAL(511, 18),  // "_setArchiveEndTime"
+        QT_MOC_LITERAL(530, 27),  // "_setArchiveStartTimeFromGui"
+        QT_MOC_LITERAL(558, 3),  // "qdt"
+        QT_MOC_LITERAL(562, 25),  // "_setArchiveEndTimeFromGui"
+        QT_MOC_LITERAL(588, 15),  // "_acceptGuiTimes"
+        QT_MOC_LITERAL(604, 15),  // "_cancelGuiTimes"
+        QT_MOC_LITERAL(620, 8),  // "_goBack1"
+        QT_MOC_LITERAL(629, 7),  // "_goFwd1"
+        QT_MOC_LITERAL(637, 13),  // "_goBackPeriod"
+        QT_MOC_LITERAL(651, 12),  // "_goFwdPeriod"
+        QT_MOC_LITERAL(664, 27),  // "_setArchiveRetrievalPending"
+        QT_MOC_LITERAL(692, 14),  // "_showFieldMenu"
+        QT_MOC_LITERAL(707, 15),  // "_placeFieldMenu"
+        QT_MOC_LITERAL(723, 16),  // "_showTimeControl"
+        QT_MOC_LITERAL(740, 17),  // "_placeTimeControl"
+        QT_MOC_LITERAL(758, 26),  // "_timeSliderActionTriggered"
+        QT_MOC_LITERAL(785, 6),  // "action"
+        QT_MOC_LITERAL(792, 23),  // "_timeSliderValueChanged"
+        QT_MOC_LITERAL(816, 19),  // "_timeSliderReleased"
+        QT_MOC_LITERAL(836, 18),  // "_timeSliderPressed"
+        QT_MOC_LITERAL(855, 31),  // "_circleRadiusSliderValueChanged"
+        QT_MOC_LITERAL(887, 30),  // "_brushRadiusSliderValueChanged"
+        QT_MOC_LITERAL(918, 16),  // "_saveImageToFile"
+        QT_MOC_LITERAL(935, 11),  // "interactive"
+        QT_MOC_LITERAL(947, 25),  // "_createRealtimeImageFiles"
+        QT_MOC_LITERAL(973, 24),  // "_createArchiveImageFiles"
+        QT_MOC_LITERAL(998, 26),  // "_createImageFilesAllSweeps"
+        QT_MOC_LITERAL(1025, 17),  // "_createImageFiles"
+        QT_MOC_LITERAL(1043, 24),  // "_createFileChooserDialog"
+        QT_MOC_LITERAL(1068, 25),  // "_refreshFileChooserDialog"
+        QT_MOC_LITERAL(1094, 22),  // "_showFileChooserDialog"
+        QT_MOC_LITERAL(1117, 15),  // "ShowContextMenu"
+        QT_MOC_LITERAL(1133, 3)   // "pos"
     },
     "CartManager",
     "colorMapRedefineReceived",
@@ -296,9 +299,10 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSCartManagerENDCLASS_t qt_meta_s
     "_vertLocationClicked",
     "_locationClicked",
     "ray",
-    "_mapMenuItemClicked",
+    "_mapMenuItemClicked2",
     "enabled",
     "mapIndex",
+    "_mapMenuItemClicked",
     "_setRealtime",
     "_setArchiveStartTime",
     "RadxTime",
@@ -347,7 +351,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-      48,   14, // methods
+      49,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -355,54 +359,55 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    6,  302,    2, 0x0a,    1 /* Public */,
-      11,    0,  315,    2, 0x0a,    8 /* Public */,
-      12,    0,  316,    2, 0x08,    9 /* Private */,
-      13,    0,  317,    2, 0x08,   10 /* Private */,
-      14,    0,  318,    2, 0x08,   11 /* Private */,
-      15,    2,  319,    2, 0x08,   12 /* Private */,
-      15,    1,  324,    2, 0x28,   15 /* Private | MethodCloned */,
-      18,    0,  327,    2, 0x08,   17 /* Private */,
-      19,    0,  328,    2, 0x08,   18 /* Private */,
-      20,    0,  329,    2, 0x08,   19 /* Private */,
-      21,    1,  330,    2, 0x08,   20 /* Private */,
-      23,    1,  333,    2, 0x08,   22 /* Private */,
-      24,    3,  336,    2, 0x08,   24 /* Private */,
-      29,    3,  343,    2, 0x08,   28 /* Private */,
-      30,    3,  350,    2, 0x08,   32 /* Private */,
-      32,    2,  357,    2, 0x08,   36 /* Private */,
-      35,    1,  362,    2, 0x08,   39 /* Private */,
-      36,    1,  365,    2, 0x08,   41 /* Private */,
-      39,    1,  368,    2, 0x08,   43 /* Private */,
-      40,    1,  371,    2, 0x08,   45 /* Private */,
-      42,    1,  374,    2, 0x08,   47 /* Private */,
-      43,    0,  377,    2, 0x08,   49 /* Private */,
-      44,    0,  378,    2, 0x08,   50 /* Private */,
-      45,    0,  379,    2, 0x08,   51 /* Private */,
-      46,    0,  380,    2, 0x08,   52 /* Private */,
-      47,    0,  381,    2, 0x08,   53 /* Private */,
-      48,    0,  382,    2, 0x08,   54 /* Private */,
-      49,    0,  383,    2, 0x08,   55 /* Private */,
-      50,    0,  384,    2, 0x08,   56 /* Private */,
-      51,    0,  385,    2, 0x08,   57 /* Private */,
-      52,    0,  386,    2, 0x08,   58 /* Private */,
-      53,    0,  387,    2, 0x08,   59 /* Private */,
-      54,    1,  388,    2, 0x08,   60 /* Private */,
-      56,    1,  391,    2, 0x08,   62 /* Private */,
-      57,    0,  394,    2, 0x08,   64 /* Private */,
-      58,    0,  395,    2, 0x08,   65 /* Private */,
-      59,    1,  396,    2, 0x08,   66 /* Private */,
-      60,    1,  399,    2, 0x08,   68 /* Private */,
-      61,    1,  402,    2, 0x08,   70 /* Private */,
-      61,    0,  405,    2, 0x28,   72 /* Private | MethodCloned */,
-      63,    0,  406,    2, 0x08,   73 /* Private */,
-      64,    0,  407,    2, 0x08,   74 /* Private */,
-      65,    0,  408,    2, 0x08,   75 /* Private */,
-      66,    0,  409,    2, 0x08,   76 /* Private */,
-      67,    0,  410,    2, 0x08,   77 /* Private */,
-      68,    0,  411,    2, 0x08,   78 /* Private */,
-      69,    0,  412,    2, 0x08,   79 /* Private */,
-      70,    1,  413,    2, 0x08,   80 /* Private */,
+       1,    6,  308,    2, 0x0a,    1 /* Public */,
+      11,    0,  321,    2, 0x0a,    8 /* Public */,
+      12,    0,  322,    2, 0x08,    9 /* Private */,
+      13,    0,  323,    2, 0x08,   10 /* Private */,
+      14,    0,  324,    2, 0x08,   11 /* Private */,
+      15,    2,  325,    2, 0x08,   12 /* Private */,
+      15,    1,  330,    2, 0x28,   15 /* Private | MethodCloned */,
+      18,    0,  333,    2, 0x08,   17 /* Private */,
+      19,    0,  334,    2, 0x08,   18 /* Private */,
+      20,    0,  335,    2, 0x08,   19 /* Private */,
+      21,    1,  336,    2, 0x08,   20 /* Private */,
+      23,    1,  339,    2, 0x08,   22 /* Private */,
+      24,    3,  342,    2, 0x08,   24 /* Private */,
+      29,    3,  349,    2, 0x08,   28 /* Private */,
+      30,    3,  356,    2, 0x08,   32 /* Private */,
+      32,    2,  363,    2, 0x08,   36 /* Private */,
+      35,    1,  368,    2, 0x08,   39 /* Private */,
+      36,    1,  371,    2, 0x08,   41 /* Private */,
+      37,    1,  374,    2, 0x08,   43 /* Private */,
+      40,    1,  377,    2, 0x08,   45 /* Private */,
+      41,    1,  380,    2, 0x08,   47 /* Private */,
+      43,    1,  383,    2, 0x08,   49 /* Private */,
+      44,    0,  386,    2, 0x08,   51 /* Private */,
+      45,    0,  387,    2, 0x08,   52 /* Private */,
+      46,    0,  388,    2, 0x08,   53 /* Private */,
+      47,    0,  389,    2, 0x08,   54 /* Private */,
+      48,    0,  390,    2, 0x08,   55 /* Private */,
+      49,    0,  391,    2, 0x08,   56 /* Private */,
+      50,    0,  392,    2, 0x08,   57 /* Private */,
+      51,    0,  393,    2, 0x08,   58 /* Private */,
+      52,    0,  394,    2, 0x08,   59 /* Private */,
+      53,    0,  395,    2, 0x08,   60 /* Private */,
+      54,    0,  396,    2, 0x08,   61 /* Private */,
+      55,    1,  397,    2, 0x08,   62 /* Private */,
+      57,    1,  400,    2, 0x08,   64 /* Private */,
+      58,    0,  403,    2, 0x08,   66 /* Private */,
+      59,    0,  404,    2, 0x08,   67 /* Private */,
+      60,    1,  405,    2, 0x08,   68 /* Private */,
+      61,    1,  408,    2, 0x08,   70 /* Private */,
+      62,    1,  411,    2, 0x08,   72 /* Private */,
+      62,    0,  414,    2, 0x28,   74 /* Private | MethodCloned */,
+      64,    0,  415,    2, 0x08,   75 /* Private */,
+      65,    0,  416,    2, 0x08,   76 /* Private */,
+      66,    0,  417,    2, 0x08,   77 /* Private */,
+      67,    0,  418,    2, 0x08,   78 /* Private */,
+      68,    0,  419,    2, 0x08,   79 /* Private */,
+      69,    0,  420,    2, 0x08,   80 /* Private */,
+      70,    0,  421,    2, 0x08,   81 /* Private */,
+      71,    1,  422,    2, 0x08,   82 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3, 0x80000000 | 5, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor,    4,    6,    7,    8,    9,   10,
@@ -422,10 +427,11 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
     QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 27,   25,   26,   31,
     QMetaType::Void, QMetaType::Bool, QMetaType::Int,   33,   34,
     QMetaType::Void, QMetaType::Bool,   33,
-    QMetaType::Void, 0x80000000 | 37,   38,
-    QMetaType::Void, 0x80000000 | 37,   38,
-    QMetaType::Void, QMetaType::QDateTime,   41,
-    QMetaType::Void, QMetaType::QDateTime,   41,
+    QMetaType::Void, QMetaType::Bool,   33,
+    QMetaType::Void, 0x80000000 | 38,   39,
+    QMetaType::Void, 0x80000000 | 38,   39,
+    QMetaType::Void, QMetaType::QDateTime,   42,
+    QMetaType::Void, QMetaType::QDateTime,   42,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -437,13 +443,13 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   55,
+    QMetaType::Void, QMetaType::Int,   56,
     QMetaType::Void, QMetaType::Int,   22,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   22,
     QMetaType::Void, QMetaType::Int,   22,
-    QMetaType::Void, QMetaType::Bool,   62,
+    QMetaType::Void, QMetaType::Bool,   63,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -452,7 +458,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QPoint,   71,
+    QMetaType::Void, QMetaType::QPoint,   72,
 
        0        // eod
 };
@@ -516,10 +522,13 @@ Q_CONSTINIT const QMetaObject CartManager::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<double, std::false_type>,
         QtPrivate::TypeAndForceComplete<double, std::false_type>,
         QtPrivate::TypeAndForceComplete<const RadxRay *, std::false_type>,
-        // method '_mapMenuItemClicked'
+        // method '_mapMenuItemClicked2'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<bool, std::false_type>,
         QtPrivate::TypeAndForceComplete<int, std::false_type>,
+        // method '_mapMenuItemClicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
         // method '_setRealtime'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<bool, std::false_type>,
@@ -620,39 +629,40 @@ void CartManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 12: _t->_horizLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
         case 13: _t->_vertLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
         case 14: _t->_locationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
-        case 15: _t->_mapMenuItemClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2]))); break;
-        case 16: _t->_setRealtime((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 17: _t->_setArchiveStartTime((*reinterpret_cast< std::add_pointer_t<RadxTime>>(_a[1]))); break;
-        case 18: _t->_setArchiveEndTime((*reinterpret_cast< std::add_pointer_t<RadxTime>>(_a[1]))); break;
-        case 19: _t->_setArchiveStartTimeFromGui((*reinterpret_cast< std::add_pointer_t<QDateTime>>(_a[1]))); break;
-        case 20: _t->_setArchiveEndTimeFromGui((*reinterpret_cast< std::add_pointer_t<QDateTime>>(_a[1]))); break;
-        case 21: _t->_acceptGuiTimes(); break;
-        case 22: _t->_cancelGuiTimes(); break;
-        case 23: _t->_goBack1(); break;
-        case 24: _t->_goFwd1(); break;
-        case 25: _t->_goBackPeriod(); break;
-        case 26: _t->_goFwdPeriod(); break;
-        case 27: _t->_setArchiveRetrievalPending(); break;
-        case 28: _t->_showFieldMenu(); break;
-        case 29: _t->_placeFieldMenu(); break;
-        case 30: _t->_showTimeControl(); break;
-        case 31: _t->_placeTimeControl(); break;
-        case 32: _t->_timeSliderActionTriggered((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 33: _t->_timeSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 34: _t->_timeSliderReleased(); break;
-        case 35: _t->_timeSliderPressed(); break;
-        case 36: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 37: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 38: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 39: _t->_saveImageToFile(); break;
-        case 40: _t->_createRealtimeImageFiles(); break;
-        case 41: _t->_createArchiveImageFiles(); break;
-        case 42: _t->_createImageFilesAllSweeps(); break;
-        case 43: _t->_createImageFiles(); break;
-        case 44: _t->_createFileChooserDialog(); break;
-        case 45: _t->_refreshFileChooserDialog(); break;
-        case 46: _t->_showFileChooserDialog(); break;
-        case 47: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
+        case 15: _t->_mapMenuItemClicked2((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2]))); break;
+        case 16: _t->_mapMenuItemClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 17: _t->_setRealtime((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 18: _t->_setArchiveStartTime((*reinterpret_cast< std::add_pointer_t<RadxTime>>(_a[1]))); break;
+        case 19: _t->_setArchiveEndTime((*reinterpret_cast< std::add_pointer_t<RadxTime>>(_a[1]))); break;
+        case 20: _t->_setArchiveStartTimeFromGui((*reinterpret_cast< std::add_pointer_t<QDateTime>>(_a[1]))); break;
+        case 21: _t->_setArchiveEndTimeFromGui((*reinterpret_cast< std::add_pointer_t<QDateTime>>(_a[1]))); break;
+        case 22: _t->_acceptGuiTimes(); break;
+        case 23: _t->_cancelGuiTimes(); break;
+        case 24: _t->_goBack1(); break;
+        case 25: _t->_goFwd1(); break;
+        case 26: _t->_goBackPeriod(); break;
+        case 27: _t->_goFwdPeriod(); break;
+        case 28: _t->_setArchiveRetrievalPending(); break;
+        case 29: _t->_showFieldMenu(); break;
+        case 30: _t->_placeFieldMenu(); break;
+        case 31: _t->_showTimeControl(); break;
+        case 32: _t->_placeTimeControl(); break;
+        case 33: _t->_timeSliderActionTriggered((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 34: _t->_timeSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 35: _t->_timeSliderReleased(); break;
+        case 36: _t->_timeSliderPressed(); break;
+        case 37: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 38: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 39: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 40: _t->_saveImageToFile(); break;
+        case 41: _t->_createRealtimeImageFiles(); break;
+        case 42: _t->_createArchiveImageFiles(); break;
+        case 43: _t->_createImageFilesAllSweeps(); break;
+        case 44: _t->_createImageFiles(); break;
+        case 45: _t->_createFileChooserDialog(); break;
+        case 46: _t->_refreshFileChooserDialog(); break;
+        case 47: _t->_showFileChooserDialog(); break;
+        case 48: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
         default: ;
         }
     }
@@ -677,13 +687,13 @@ int CartManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 48)
+        if (_id < 49)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 48;
+        _id -= 49;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 48)
+        if (_id < 49)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 48;
+        _id -= 49;
     }
     return _id;
 }

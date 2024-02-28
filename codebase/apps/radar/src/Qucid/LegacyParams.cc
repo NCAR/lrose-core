@@ -2440,7 +2440,10 @@ int LegacyParams::_readMaps()
       // line width
       
       overlay.line_width = atoi(cfield[3]);
-      if (overlay.line_width < 0) {
+      if (overlay.line_width == 0) {
+        overlay.on_at_startup = false;
+        overlay.line_width = 1;
+      } else if (overlay.line_width < 0) {
         // negative line width, inactive
         overlay.on_at_startup = false;
         overlay.line_width *= -1;

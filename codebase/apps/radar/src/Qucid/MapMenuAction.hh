@@ -85,6 +85,12 @@ class DLL_EXPORT MapMenuAction : public QAction {
   Params::map_t *_mapParams;
   int _mapIndex;
 
+public slots:
+
+  virtual void toggled(bool checked); // override QAction class
+
+  void mapStatusToggled(bool checked, int mapIndex);
+
 };
 
 #endif

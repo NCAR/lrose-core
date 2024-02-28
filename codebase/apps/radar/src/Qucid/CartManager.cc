@@ -847,8 +847,10 @@ void CartManager::_populateMapsMenu()
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
     connect(act, SIGNAL(toggled(bool)),
-            this, SLOT(_mapMenuItemClicked(bool, imap)));
-
+            this, SLOT(_mapMenuItemClicked(bool, int)));
+    connect(act, SIGNAL(toggled(bool)),
+            this, SLOT(_mapMenuItemClicked(bool)));
+    
     // add to actions vector for maps
     
     _mapMenuActions.push_back(act);
@@ -1847,6 +1849,8 @@ void CartManager::_horizLocationClicked(double xkm, double ykm,
 
 {
 
+  cerr << "1111111111 horizLocationClicked, xkm, km: " << xkm << ", " << ykm << endl;
+  
 #ifdef NOTNOW
   
   // find the relevant ray
@@ -2025,17 +2029,24 @@ void CartManager::_locationClicked(double xkm, double ykm,
 ////////////////////////////////////////////////////////////////////////
 // map menu item clicked
 
-void CartManager::_mapMenuItemClicked(bool enabled, int mapIndex)
+void CartManager::_mapMenuItemClicked(bool enabled)
   
 {
 
+  cerr << "MMMMMMMMMMMMMMMMMMMMMMMm enabled: " << enabled << endl;
+  
   // if (_params.debug) {
-    cerr << "*** _mapMenuItemClicked, enabled: "
-         << enabled << ", mapIndex: " << mapIndex << endl;
+    // cerr << "*** _mapMenuItemClicked, enabled: "
+    //      << enabled << ", mapIndex: " << mapIndex << endl;
   // }
 
 }
-  
+
+void CartManager::_mapMenuItemClicked2(bool enabled, int mapIndex)
+{
+  cerr << "2222222222222222222 enabled, mapIndex: " << enabled << ", " << mapIndex << endl;
+}
+
   
 //////////////////////////////////////////////
 // get size of table widget
@@ -3244,7 +3255,11 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
 
 void CartManager::_saveImageToFile(bool interactive)
 {
-	  // create image
+
+  cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
+  return;
+  
+  // create image
   QPixmap pixmap;
   if (_vertMode)
     pixmap = _vert->grab();

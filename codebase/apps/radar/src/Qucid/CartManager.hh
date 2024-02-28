@@ -395,7 +395,8 @@ private slots:
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
-  void _mapMenuItemClicked(bool enabled, int mapIndex);
+  void _mapMenuItemClicked2(bool enabled, int mapIndex);
+  void _mapMenuItemClicked(bool enabled);
 
   // modes
   
