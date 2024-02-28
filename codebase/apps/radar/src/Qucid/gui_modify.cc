@@ -361,9 +361,9 @@ void modify_gui_objects()
       for(i=0; i < gd.num_map_overlays && i < 32; i++) {
 	    used = 0;
 		for( j=0; j < i; j++) {
-			if((strncmp(gd.over[j]->control_label, gd.over[i]->control_label, LABEL_LENGTH)) == 0) {
-				used = 1;
-			}
+                  if(gd.over[j]->control_label == gd.over[i]->control_label) {
+                    used = 1;
+                  }
 		}
 			
 		if(!used) { // Dont use duplicate labels.
@@ -386,9 +386,9 @@ void modify_gui_objects()
 	for(i=0; i < gd.num_map_overlays; i++) {
 	    used = 0;
 		for( j=0; j < i; j++) {
-			if((strncmp(gd.over[j]->control_label, gd.over[i]->control_label, LABEL_LENGTH)) == 0) {
-				used = 1;
-			}
+                  if(gd.over[j]->control_label == gd.over[i]->control_label) {
+                    used = 1;
+                  }
 		}
 		if(!used) {  //  Don't use duplicate labels.
 	      // xv_set(gd.over_pu->over_lst,
@@ -618,7 +618,9 @@ void modify_gui_objects()
     /* Fill in Geographic Overlay Scrolling List */
     if(gd.debug) printf("%d Overlays sets found\n",gd.num_map_overlays);
     for(i=0; i < gd.num_map_overlays; i++) {
-        sprintf(string,"%s  %s",gd.over[i]->control_label, gd.over[i]->color_name);
+      sprintf(string,"%s  %s",
+              gd.over[i]->control_label.c_str(),
+              gd.over[i]->color_name.c_str());
         // xv_set(gd.page_pu->overlay_list,
         //     PANEL_LIST_STRING, i, string,
         //     PANEL_LIST_CLIENT_DATA, i,i,

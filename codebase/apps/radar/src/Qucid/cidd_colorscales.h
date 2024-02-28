@@ -28,34 +28,33 @@
 #ifndef CIDD_COLORSCALES_H
 #define CIDD_COLORSCALES_H
 
+typedef struct {   /* data value to color mappings */
+  double min,max;  /* data Range to map onto color */
+  long pixval;     /* X value to use to draw in this color */
+  GC gc;           /* A GC for this color */
+  char cname[NAME_LENGTH];   /* color name    */
+  char label[LABEL_LENGTH];  /* label to use (use min value if empty) */
+} Val_color_t;
 
-typedef struct    {    /* data value to color mappings */
-    double    min,max;    /* data Range to map onto color */
-    long    pixval;    /* X value to use to draw in this color */
-    GC      gc;        /* A GC for this color */
-    char    cname[NAME_LENGTH];    /* color name    */
-    char    label[LABEL_LENGTH];    /* label to use (use min value if empty) */
-}Val_color_t;
-
-typedef    struct    {
-    int    nentries;
-    long    val_pix[MAX_COLOR_CELLS];    /* Pixel values to draw in */
-    GC      val_gc[MAX_COLOR_CELLS];    /* GCs for each value */
-    Val_color_t *vc[MAX_COLOR_CELLS];
+typedef struct {
+  int nentries;
+  long val_pix[MAX_COLOR_CELLS]; /* Pixel values to draw in */
+  GC val_gc[MAX_COLOR_CELLS];    /* GCs for each value */
+  Val_color_t *vc[MAX_COLOR_CELLS];
 } Valcolormap_t;
  
 typedef struct {
-    char    name[NAME_LENGTH];
-    long    pixval;
-    GC gc;
-    unsigned short    r,g,b;    /* Full intensity color values for this color */
+  char name[NAME_LENGTH];
+  long pixval;
+  GC gc;
+  unsigned short r,g,b; /* Full intensity color values for this color */
 } Color_gc_t;
 
 typedef struct { 
-    unsigned long   handle;     /* handle to Xview object */
-    Color_gc_t *cgcp; /* Color Cell info */
-    long  cval;       /* pointer to color value data */
-    int   c_num;      /* color cell number in our allocated arrary */
+  unsigned long handle; /* handle to Xview object */
+  Color_gc_t *cgcp;     /* Color Cell info */
+  long cval; /* pointer to color value data */
+  int c_num; /* color cell number in our allocated arrary */
 } Color_change_t;
 
 #endif

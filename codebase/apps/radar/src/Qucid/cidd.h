@@ -40,6 +40,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
+#include <vector>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>       
@@ -221,15 +222,11 @@ public:
   // Symbolic products - features
   
   prod_info_t prod;
-  ProductMgr  *prod_mgr;       // Products Manager
-
-  // map overlays
-  
-  Overlay_t  *over[MAX_OVERLAYS];
+  ProductMgr *prod_mgr;       // Products Manager
 
   // gridded data records
   
-  met_record_t  *mrec[MAX_DATA_FIELDS];
+  met_record_t *mrec[MAX_DATA_FIELDS];
 
   // Control variables for layers features
   
@@ -239,6 +236,10 @@ public:
   
   legend_t legends;
   
+  // map overlays
+  
+  vector<Overlay_t *> over;
+
   // Time scale plotter class for movie panel
 
   TimePlot *time_plot;

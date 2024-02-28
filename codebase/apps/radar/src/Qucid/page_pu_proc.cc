@@ -90,8 +90,8 @@ void set_color( char *cname, void* c_data)
       // if(ptr->handle == gd.page_pu->map_set_color_bt) {
 
             sprintf(string,"%s  %s",
-	       gd.over[gd.layers.cur_map_overlay]->control_label,
-	       gd.over[gd.layers.cur_map_overlay]->color->name);
+                    gd.over[gd.layers.cur_map_overlay]->control_label.c_str(),
+                    gd.over[gd.layers.cur_map_overlay]->color->name);
             // xv_set(gd.page_pu->overlay_list,
 	    //     PANEL_LIST_STRING, gd.layers.cur_map_overlay, string, NULL);
 

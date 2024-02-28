@@ -133,7 +133,7 @@ void calc_local_over_coords()
 
       for(i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
         ov =  gd.over[i];
-	if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label);
+	if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label.c_str());
 	 
         /* Convert all labels   */
         for(j=0; j < ov->num_labels; j++) { 
@@ -219,7 +219,7 @@ void calc_local_over_coords()
 
     for(i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
         ov =  gd.over[i];
-	if(gd.debug)  printf("Converting Overlay %s ",ov->control_label);
+	if(gd.debug)  printf("Converting Overlay %s ",ov->control_label.c_str());
 	 
         for(j=0; j < ov->num_labels; j++) {        /* Convert all labels   */
 	  clip_flag = 0;
@@ -393,7 +393,7 @@ void render_map_overlays(Drawable  xid)
                 disp_proj_to_pixel(&(gd.h_win.margin),ov->geo_label[j]->local_x,ov->geo_label[j]->local_y,&x1,&y1);
 		draw_label_centered(xid, ov->color->gc,
 				    x1, y1,
-				    ov->geo_label[j]->string);
+				    ov->geo_label[j]->display_string);
             }
 
             for(j=0; j < ov->num_icons; j++) {        /* Draw all Iconic Objects */

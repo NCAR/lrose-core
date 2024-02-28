@@ -440,7 +440,7 @@ static int _combine_color_maps(Display *dpy, Colormap cmap)
     
     /* Now go through each overlay and add their colors to lists */
     for(i=0; i < gd.num_map_overlays ; i++) {        /* each color map file */
-      STRcopy(gd.color[gd.num_colors].name,gd.over[i]->color_name,NAME_LENGTH);
+      STRcopy(gd.color[gd.num_colors].name, gd.over[i]->color_name.c_str(), NAME_LENGTH);
       gd.over[i]->color =  &gd.color[gd.num_colors];
       gd.num_colors++;
       

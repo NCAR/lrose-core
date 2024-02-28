@@ -21,16 +21,21 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+
 #ifndef CIDD_OVERLAYS_H
 #define CIDD_OVERLAYS_H
+
 /**********************************************************************
  * CIDD_OVERLAYS.H: Data structure defns for CIDD
  */
 
+#include "Params.hh"
+#include <string>
+
 /* geographic feature coordinates & label */
 
 struct geo_feat_label {
-
+  
   double min_lat; /* latitude, longitude bounding box for text */
   double min_lon;
   double max_lat;
@@ -42,9 +47,10 @@ struct geo_feat_label {
   double local_y;
   double rotation; /* 0 = left to right, 90 = bottom to top, etc */
 
-  char string[NAME_LENGTH]; /* String to display */
+  char display_string[NAME_LENGTH]; /* String to display */
 
 };
+
 typedef struct geo_feat_label Geo_feat_label_t;
 
 /* geographic feature Icon & label */
@@ -68,10 +74,12 @@ typedef struct geo_feat_icon Geo_feat_icon_t;
 /* geographic feature Icon & label */
 
 struct geo_feat_icondef {
+
   int num_points;
   short *x;
   short *y;
   char name[NAME_LENGTH];
+
 };
 typedef struct geo_feat_icondef Geo_feat_icondef_t;
 
@@ -96,9 +104,30 @@ struct geo_feat_polyline {
 };
 typedef struct geo_feat_polyline Geo_feat_polyline_t;
 
+/* geographic feature coordinates & label */
+
+typedef struct {
+  
+  double lat;
+  double lon; /* latitude, longitude */
+  char label[LABEL_LENGTH]; /* String to label coordinate with */
+  int lab_pos; /* 1 = rt, 2 = top 3 = left, 4 = bot */
+
+} geo_feat_coor_t;
+
+/* Arbitrary geographic coordinate */
+typedef struct {
+
+  double x,y;
+
+} geo_coord_t;
+ 
 // main overlay struct
 
-struct overlay { /* Overlay data */
+class Overlay_t { /* Overlay data */
+
+public:
+  
   long active; /* Current on/off state; 1 = active */
   long default_on_state; /* If set to 1, This overlay should appear by default */
 
@@ -123,25 +152,16 @@ struct overlay { /* Overlay data */
   Geo_feat_icondef_t **geo_icondef;
   Geo_feat_polyline_t **geo_polyline;
 
-  char map_file_name[NAME_LENGTH]; /* Name of map file to read */
-  char control_label[LABEL_LENGTH]; /* The overlay's GUI label */
-  char map_name[NAME_LENGTH]; /* Long ID */
-  char map_code[LABEL_LENGTH]; /* SHORT NAME */
-  char color_name[NAME_LENGTH]; /* Current Color */
+  string map_file_name; /* Name of map file to read */
+  string control_label; /* The overlay's GUI label */
+  string map_name; /* Long ID */
+  string map_code; /* SHORT NAME */
+  string color_name; /* Current Color */
 
   Color_gc_t *color;
+
+  Params::map_t *mapParams;
+
 };
-typedef struct overlay Overlay_t; 
 
-typedef struct { /* geographic feature coordinates & label */
-  double lat;
-  double lon; /* latitude, longitude */
-  char label[LABEL_LENGTH]; /* String to label coordinate with */
-  int lab_pos; /* 1 = rt, 2 = top 3 = left, 4 = bot */
-}geo_feat_coor_t;
-
-typedef struct { /* Arbitrary geographic coordinate */
-  double x,y;
-}geo_coord_t;
- 
 #endif

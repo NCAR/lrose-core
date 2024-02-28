@@ -1402,7 +1402,7 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
   do {  // Try each comma delimited subdir
     
     while(*str_ptr == ' ') str_ptr++; //skip any leading space
-    sprintf(name_buf,"%s/%s",str_ptr,ov->map_file_name);
+    snprintf(name_buf, 2047, "%s/%s", str_ptr, ov->map_file_name.c_str());
 
     // Check if it's a HTTP URL
     if(strncasecmp(name_buf,"http:",5) == 0) {
@@ -1447,7 +1447,7 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
   } while ((str_ptr = strtok(NULL,",")) != NULL && map_len == 0 );
 
   if(map_len == 0 || map_buf == NULL) {
-    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name);
+    fprintf(stderr,"Warning!: Unable to load map file: %s\n", ov->map_file_name.c_str());
     for(i=0; i < 32; i++)  free(cfield[i]);
     return;
   }
@@ -1512,7 +1512,7 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
 
         if(ov->geo_icondef[index]->x == NULL || ov->geo_icondef[index]->y == NULL) {
           fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
-                  ov->map_file_name,num_points);
+                  ov->map_file_name.c_str(),num_points);
           exit(-1);
         }
 
@@ -1576,7 +1576,7 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
         }
 
         if(found == 0) {    
-          fprintf(stderr,"No Icon definition: %s found in file %s!\n",cfield[1],ov->map_file_name);
+          fprintf(stderr,"No Icon definition: %s found in file %s!\n",cfield[1],ov->map_file_name.c_str());
           str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
           continue;
         }
@@ -1662,7 +1662,7 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
-                  ov->map_file_name,num_points);
+                  ov->map_file_name.c_str(),num_points);
           exit(-1);
         }
 
@@ -1723,14 +1723,14 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
         ov->geo_label[index]->attach_lat = atof(cfield[6]);
         ov->geo_label[index]->attach_lon = atof(cfield[7]);
 
-        ov->geo_label[index]->string[0] = '\0';
+        ov->geo_label[index]->display_string[0] = '\0';
         len = 2;
         for(j = 8; j < num_fields && len < NAME_LENGTH; j++) {
-          strncat(ov->geo_label[index]->string,cfield[j],NAME_LENGTH - len);
-          len = strlen(ov->geo_label[index]->string) +1;
+          strncat(ov->geo_label[index]->display_string,cfield[j],NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->display_string) +1;
           if(j < num_fields -1)
-            strncat(ov->geo_label[index]->string," ",NAME_LENGTH - len);
-          len = strlen(ov->geo_label[index]->string) +1;
+            strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->display_string) +1;
         }
         str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
         continue;
@@ -1778,14 +1778,14 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
         ov->geo_label[index]->attach_lat = atof(cfield[1]);
         ov->geo_label[index]->attach_lon = atof(cfield[2]);
 
-        ov->geo_label[index]->string[0] = '\0';
+        ov->geo_label[index]->display_string[0] = '\0';
         len = 2;
         for(j = 3; j < num_fields && len < NAME_LENGTH; j++) {
-          strncat(ov->geo_label[index]->string,cfield[j],NAME_LENGTH - len);
-          len = strlen(ov->geo_label[index]->string) +1;
+          strncat(ov->geo_label[index]->display_string,cfield[j],NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->display_string) +1;
           if(j < num_fields -1)
-            strncat(ov->geo_label[index]->string," ",NAME_LENGTH - len);
-          len = strlen(ov->geo_label[index]->string) +1;
+            strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
+          len = strlen(ov->geo_label[index]->display_string) +1;
         }
         str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
         continue;
@@ -1847,13 +1847,13 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
     while(*str_ptr == ' ') str_ptr++; //skip any leading space
 
-    sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name);
+    sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name.c_str());
 
     // Check if it's a HTTP URL
     if(strncasecmp(name_buf,"http:",5) == 0) {
 
       // Extract name base
-      strncpy(name_base,ov->map_file_name,1023);
+      strncpy(name_base,ov->map_file_name.c_str(),1023);
       char *ptr = strrchr(name_base,'.');
       if(ptr != NULL) *ptr = '\0';
 
@@ -1928,7 +1928,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
     } else {  // Looks like a regular file
 
-      sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name);
+      sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name.c_str());
       if((SH = SHPOpen(name_buf,"rb")) != NULL) {
         found = 1;
       }
@@ -1937,7 +1937,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
   } while ((str_ptr = strtok(NULL,",")) != NULL && found == 0 );
 
   if( found == 0) {
-    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name);
+    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name.c_str());
     if(is_http) {  // Unlink temporary files
       sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
       unlink(name_buf2);
@@ -1958,7 +1958,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
   SHPGetInfo(SH, &n_objects, &shape_type, NULL, NULL);
 
   if(gd.debug) {
-    fprintf(stderr,"Found %d objects, type %d  in %s\n",n_objects, shape_type, ov->map_file_name);
+    fprintf(stderr,"Found %d objects, type %d  in %s\n",n_objects, shape_type, ov->map_file_name.c_str());
   }
 
   for(i=0; i < n_objects; i++ ) {  // Loop through each object
@@ -2006,7 +2006,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
-                  ov->map_file_name,SO->nVertices);
+                  ov->map_file_name.c_str(),SO->nVertices);
           exit(-1);
         }
 
@@ -2059,7 +2059,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
           if(ov->geo_icondef[0]->x == NULL || ov->geo_icondef[0]->y == NULL) {
             fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
-                    ov->map_file_name,num_points);
+                    ov->map_file_name.c_str(),num_points);
             exit(-1);
           }
 
@@ -2153,7 +2153,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
  */ 
 
 void _initMaps()
-  
+
 {
   
   gd.num_map_overlays = _params.maps_n;
@@ -2162,13 +2162,14 @@ void _initMaps()
     
     Params::map_t &omap = _params._maps[ii];
     string mapFileName = omap.map_file_name;
-    gd.over[ii] = (Overlay_t *) calloc(1,sizeof(Overlay_t));
-    Overlay_t *over = gd.over[ii];
-    memset(over, 0, sizeof(Overlay_t));
+    Overlay_t *over = (Overlay_t *) calloc(1, sizeof(Overlay_t));
+    gd.over.push_back(over);
+
+    over->mapParams = &omap;
     
-    STRcopy(over->map_code, omap.map_code, LABEL_LENGTH);
-    STRcopy(over->control_label, omap.control_label, LABEL_LENGTH);
-    STRcopy(over->map_file_name, omap.map_file_name, NAME_LENGTH);
+    over->map_code = omap.map_code;
+    over->control_label = omap.control_label;
+    over->map_file_name = mapFileName;
     over->default_on_state = omap.on_at_startup;
     over->line_width = omap.line_width;
     if(over->line_width <=0) {
@@ -2178,7 +2179,7 @@ void _initMaps()
     over->detail_thresh_max = omap.detail_thresh_max;
     over->active = over->default_on_state;
     
-    STRcopy(over->color_name, omap.color, NAME_LENGTH);
+    over->color_name = omap.color;
 
     if (mapFileName.find(".shp") != string::npos &&
         mapFileName.find(".shx") != string::npos) {
@@ -2193,7 +2194,7 @@ void _initMaps()
     
     if(gd.debug) {
       printf("Overlay file %s contains %ld polylines, %ld icon_defns, %ld icons, %ld labels\n",
-             over->map_file_name,
+             over->map_file_name.c_str(),
              over->num_polylines,
              over->num_icondefs,
              over->num_icons,
@@ -2539,7 +2540,7 @@ void init_globals()
   MEM_zero(gd.fontst);
     
   MEM_zero(gd.prod);
-  MEM_zero(gd.over);
+  // MEM_zero(gd.over);
   MEM_zero(gd.mrec);
   MEM_zero(gd.layers);
   MEM_zero(gd.legends);
