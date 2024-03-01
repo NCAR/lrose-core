@@ -275,6 +275,12 @@ commentdef {
   p_header = "<MAPS>";
 }
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Enable maps at start.";
+  p_help = "If FALSE, maps will not be emabled at startup.";
+} maps_enabled_at_startup;
+
 typedef struct {
   string map_code;
   string control_label;

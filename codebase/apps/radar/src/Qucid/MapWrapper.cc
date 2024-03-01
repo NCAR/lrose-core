@@ -41,10 +41,14 @@
 // Constructor
 
 MapWrapper::MapWrapper(QObject *parent) :
-        _mapParams(NULL)
+        _mapParams(NULL),
+        _overlay(NULL),
+        _mapIndex(-1),
+        _act(NULL)
+        
 {
   
-
+  
 }
 
 // destructor
@@ -56,18 +60,16 @@ MapWrapper::~MapWrapper()
 }
 
 ///////////////////////////////////////////////
-// override toggled event
+// Connect to map menu button
 
-void MapWrapper::toggled2(bool checked)
+void MapWrapper::toggled(bool checked)
 {
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  cerr << "TTTTTTTTTTTT CartManager toggled, checked: " << checked << endl;
-  // }
-  emit mapStatusToggled(checked, _mapIndex);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> MapWrapper toggled, is_on? " << checked << endl;
+    cerr << "  mapIndex: " << _mapIndex << endl;
+    cerr << "  map_code: " << _mapParams->map_code << endl;
+    cerr << "  control_label: " << _mapParams->control_label << endl;
+    cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
+  }
 }
 
-void MapWrapper::mapStatusToggled(bool checked,
-                                  int mapIndex)
-{
-  cerr << "QQQQQQQ mapStatusToggled, checked, mapIndex: " << checked << ", " << mapIndex << endl;
-}

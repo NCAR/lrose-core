@@ -91,7 +91,6 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
-#include "MapMenuAction.hh"
 #include "MapWrapper.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
@@ -763,7 +762,7 @@ void CartManager::_createActions()
   _aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(_aboutAct, SIGNAL(triggered()), this, SLOT(_about()));
 
-   _aboutQtAct = new QAction(tr("About &Qt"), this);
+  _aboutQtAct = new QAction(tr("About &Qt"), this);
   _aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
   connect(_aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
@@ -832,7 +831,20 @@ void CartManager::_createMenus()
 void CartManager::_populateMapsMenu()
 {
 
-  // loop through map entries
+  // maps enabled
+
+  _mapsEnabled = _params.maps_enabled_at_startup;
+  _mapsEnabledAct = new QAction(tr("Maps enabled"), this);
+  _mapsEnabledAct->setStatusTip(tr("Enable / disable all maps"));
+  _mapsEnabledAct->setCheckable(true);
+  _mapsEnabledAct->setChecked(_mapsEnabled);
+  connect(_mapsEnabledAct, &QAction::toggled,
+	  this, &CartManager::_setMapsEnabled);
+
+  _mapsMenu->addAction(_mapsEnabledAct);
+  _mapsMenu->addSeparator();
+  
+    // loop through map entries
   
   for (int imap = 0; imap < _params.maps_n; imap++) {
 
@@ -843,20 +855,20 @@ void CartManager::_populateMapsMenu()
     MapWrapper *wrapper = new MapWrapper;
     wrapper->setMapParams(&mparams);
     wrapper->setMapIndex(imap);
-    QAction *act = new MapMenuAction;
+    wrapper->setOverlay(gd.over[imap]);
+    QAction *act = new QAction;
+    wrapper->setAction(act);
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
     wrapper->setAction(act);
-    // connect(act, SIGNAL(mapStatusToggled(bool, int)),
-    //         this, SLOT(_mapMenuItemClicked2(bool, int)));
     connect(act, &QAction::toggled,
-            wrapper, &MapWrapper::toggled2);
+            wrapper, &MapWrapper::toggled);
     
-    // add to actions vector for maps
+    // add wrapper for map selection
     
-    // _mapMenuActions.push_back(act);
+    _mapWrappers.push_back(wrapper);
 
     // add to maps menu
 
@@ -864,9 +876,16 @@ void CartManager::_populateMapsMenu()
 
   } // imap
   
-  _mapsMenu->addSeparator();
-  _mapsMenu->addAction(_showVertAct);
+}
 
+  // maps
+
+void CartManager::_setMapsEnabled(bool enable)
+{
+  _mapsEnabled = enable;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
+  }
 }
 
 /////////////////////////////////////////////////////////////
@@ -1458,8 +1477,8 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 // store ray location
 
 void CartManager::_storeRayLoc(const RadxRay *ray, 
-                                const double az,
-                                const double beam_width)
+                               const double az,
+                               const double beam_width)
 {
 
 #ifdef NOTNOW

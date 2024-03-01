@@ -78,7 +78,7 @@ class VertWidget;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
-class MapMenuAction;
+class MapWrapper;
 
 class CartManager : public DisplayManager {
   
@@ -198,18 +198,17 @@ private:
   RadxTime _plotEndTime;
   RadxTime _prevRayTime;
   
-  // menus
+  // top-level menus
 
   QMenu *_fileMenu;
   QMenu *_timeMenu;
-  QMenu *_mapsMenu;
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions
 
   QAction *_showFieldMenuAct;
-  vector<MapMenuAction *> _mapMenuActions;
+  vector<MapWrapper *> _mapWrappers;
   QAction *_realtimeAct;
   QAction *_showTimeControlAct;
   QAction *_ringsAct;
@@ -221,7 +220,6 @@ private:
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
-
 
   // archive mode
   
@@ -262,6 +260,12 @@ private:
   QVBoxLayout *_fieldMenuLayout;
   int _fieldTableCurrentColumn;
   int _fieldTableCurrentRow;
+
+  // maps
+
+  QMenu *_mapsMenu;
+  QAction *_mapsEnabledAct;
+  bool _mapsEnabled;
   
   // time controller settings dialog
   
@@ -417,11 +421,15 @@ private slots:
   void _goFwdPeriod();
 
   void _setArchiveRetrievalPending();
-
+  
   // field menu
-
+  
   void _showFieldMenu();
   void _placeFieldMenu();
+
+  // maps
+
+  void _setMapsEnabled(bool enable);
 
   // time controller
 

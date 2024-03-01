@@ -80,9 +80,11 @@ public:
    * @return Returns the name of the new color table on success, "" on failure.
    */
 
+#ifdef NOTNOW
   std::string absorbTable(const char *filename);
   
   bool dumpTables(FILE *stream) const;
+#endif
   
   // void putAsciiColorTable(const char *name, const char *table);
   void putAsciiColorTable(string name, vector<string> table);

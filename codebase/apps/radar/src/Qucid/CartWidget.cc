@@ -481,6 +481,7 @@ void CartWidget::mouseReleaseEvent(QMouseEvent *e)
   }
 }
 
+#ifdef NOTNOW
 /**************   testing ******/
 
 void CartWidget::smartBrush(int xPixel, int yPixel) 
@@ -498,6 +499,7 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
   _drawOverlays(painter);
 
 }
+#endif
 
 /*************************************************************************
  * paintEvent()

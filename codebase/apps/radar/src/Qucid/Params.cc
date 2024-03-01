@@ -1015,6 +1015,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'maps_enabled_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("maps_enabled_at_startup");
+    tt->descr = tdrpStrDup("Enable maps at start.");
+    tt->help = tdrpStrDup("If FALSE, maps will not be emabled at startup.");
+    tt->val_offset = (char *) &maps_enabled_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'maps'
     // ctype is '_map_t'
     

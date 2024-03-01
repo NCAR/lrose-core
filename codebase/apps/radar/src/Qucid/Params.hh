@@ -632,6 +632,8 @@ public:
   wind_t *_winds;
   int winds_n;
 
+  tdrp_bool_t maps_enabled_at_startup;
+
   map_t *_maps;
   int maps_n;
 
@@ -1472,7 +1474,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[494];
+  mutable TDRPtable _table[495];
 
   const char *_className;
 

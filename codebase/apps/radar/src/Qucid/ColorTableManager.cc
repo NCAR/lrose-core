@@ -54,6 +54,8 @@ ColorTableManager *ColorTableManager::getInstance()
 }
 
 
+#ifdef NOTNOW
+
 /*********************************************************************
  * absorbTable()
  */
@@ -61,7 +63,9 @@ ColorTableManager *ColorTableManager::getInstance()
 
 std::string ColorTableManager::absorbTable(const char *filename)
 {
+
   // Open the file
+
   /*
   FILE *stream;
   if ((stream = fopen(filename, "r")) == 0)
@@ -183,7 +187,9 @@ bool ColorTableManager::dumpTables(FILE *stream) const
  */
   return true;
 }
- 
+
+#endif
+
 /*********************************************************************
  * getAsciiColorTable()
  */
