@@ -270,11 +270,7 @@ void Spdb::addPutChunk(int data_type,
   }
 
   if (tag != NULL) {
-    int nn = strlen(tag);
-    if (nn > TAG_LEN - 1) {
-      nn = TAG_LEN - 1;
-    }
-    strncpy(aux.tag, tag, nn);
+    STRncopy(aux.tag, tag, TAG_LEN);
   }
 
   // add to buffers

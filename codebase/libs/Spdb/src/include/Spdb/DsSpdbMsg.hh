@@ -602,17 +602,17 @@ public:
   int getDataType2() const { return _info.data_type2; }
   bool getGetRefsOnly() const { return _info.get_refs_only; }
   bool getRespectZeroTypes() const { return _info.respect_zero_types; }
-  string getProdLabel(const string &label) const { return _info.prod_label; }
+  string getProdLabel() const { return _info.prod_label; }
 
   // info 2 fields
 
   Spdb::lead_time_storage_t getLeadTimeStorage() const {
     return (Spdb::lead_time_storage_t) _info2.lead_time_storage;
   }
-  bool getSheckWriteTimeOnGet(bool state) const {
+  bool getCheckWriteTimeOnGet() const {
     return _info2.check_write_time_on_get;
   }
-  time_t getLatestValidWriteTime(time_t time) const {
+  time_t getLatestValidWriteTime() const {
     return _info2.latest_valid_write_time;
   }
   Spdb::compression_t getDataBufCompression() const {
