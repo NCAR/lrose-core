@@ -88,7 +88,8 @@ class DLL_EXPORT MapWrapper : public QObject {
   QAction *getAction() { return _act; }
 
  protected:
-  
+
+  QObject *_parent;
   Params::map_t *_mapParams;
   Overlay_t *_overlay;
   int _mapIndex;

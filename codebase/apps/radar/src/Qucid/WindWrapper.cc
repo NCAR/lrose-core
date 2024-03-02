@@ -41,6 +41,7 @@
 // Constructor
 
 WindWrapper::WindWrapper(QObject *parent) :
+        _parent(parent),
         _windParams(NULL),
         _windData(NULL),
         _windIndex(-1),

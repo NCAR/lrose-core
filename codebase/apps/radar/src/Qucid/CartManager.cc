@@ -799,10 +799,10 @@ void CartManager::_createMenus()
   _mapsMenu = menuBar()->addMenu(tr("&Maps"));
   _populateMapsMenu();
 
-  // add maps menu
+  // add winds menu
   
-  _mapsMenu = menuBar()->addMenu(tr("&Maps"));
-  _populateMapsMenu();
+  _windsMenu = menuBar()->addMenu(tr("&Winds"));
+  _populateWindsMenu();
 
    // time selector
   
@@ -859,16 +859,15 @@ void CartManager::_populateWindsMenu()
     // create action for this entry
 
     WindWrapper *wrapper = new WindWrapper;
+    QAction *act = new QAction;
     wrapper->setWindParams(&wparams);
     wrapper->setWindIndex(iwind);
     wrapper->setWindData(&gd.layers.wind[iwind]);
-    QAction *act = new QAction;
     wrapper->setAction(act);
     act->setText(wparams.button_label);
     act->setStatusTip(tr("Turn wind layer on/off"));
     act->setCheckable(true);
     act->setChecked(wparams.on_at_startup);
-    wrapper->setAction(act);
     connect(act, &QAction::toggled,
             wrapper, &WindWrapper::toggled);
     
@@ -923,23 +922,22 @@ void CartManager::_populateMapsMenu()
     // create action for this entry
 
     MapWrapper *wrapper = new MapWrapper;
+    QAction *act = new QAction;
     wrapper->setMapParams(&mparams);
     wrapper->setMapIndex(imap);
     wrapper->setOverlay(gd.over[imap]);
-    QAction *act = new QAction;
     wrapper->setAction(act);
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
-    wrapper->setAction(act);
     connect(act, &QAction::toggled,
             wrapper, &MapWrapper::toggled);
     
     // add wrapper for map selection
     
     _mapWrappers.push_back(wrapper);
-
+    
     // add to maps menu
 
     _mapsMenu->addAction(act);

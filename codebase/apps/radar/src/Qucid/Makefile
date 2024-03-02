@@ -125,7 +125,6 @@ NORM_SRCS = \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	TimePlot.cc \
-	WindWrapper.cc \
 	WorldPlot.cc \
 	cidd_coords.cc \
 	cidd_font.cc \

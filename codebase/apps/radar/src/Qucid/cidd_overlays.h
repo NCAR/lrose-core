@@ -127,6 +127,29 @@ typedef struct {
 class Overlay_t { /* Overlay data */
 
 public:
+
+  Overlay_t() {
+    active = 0;
+    default_on_state = 0;
+    num_labels = 0;
+    num_icons = 0;
+    num_icondefs = 0;
+    num_polylines = 0;
+    num_alloc_labels = 0;
+    num_alloc_icons = 0;
+    num_alloc_icondefs = 0;
+    num_alloc_polylines = 0;
+    pixval = 0;
+    line_width = 0;
+    detail_thresh_min = 0;
+    detail_thresh_max = 0;
+    geo_label = NULL;
+    geo_icon = NULL;
+    geo_icondef = NULL;
+    geo_polyline = NULL;
+    color = NULL;
+    mapParams = NULL;
+  }
   
   long active; /* Current on/off state; 1 = active */
   long default_on_state; /* If set to 1, This overlay should appear by default */

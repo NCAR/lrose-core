@@ -88,7 +88,8 @@ class DLL_EXPORT WindWrapper : public QObject {
   QAction *getAction() { return _act; }
 
  protected:
-  
+
+  QObject *_parent;
   Params::wind_t *_windParams;
   wind_data_t *_windData;
   int _windIndex;

@@ -49,6 +49,22 @@
 class wind_data_t {
 
 public:
+
+  wind_data_t() {
+    active = 0;
+    scale = 0;
+    marker_type = 0;      
+    line_width = 0;
+    units_scale_factor = 0;
+    reference_speed = 0;
+    wind_u = NULL;
+    wind_v = NULL;
+    wind_w = NULL;
+    data_info = NULL;
+    MEM_zero(color_name);
+    units_label = NULL;
+    color = NULL;
+  }
   
   int active;       /* if True - draw wind features (vectors) */
   int scale;

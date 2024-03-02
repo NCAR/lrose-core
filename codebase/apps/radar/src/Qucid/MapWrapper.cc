@@ -41,6 +41,7 @@
 // Constructor
 
 MapWrapper::MapWrapper(QObject *parent) :
+        _parent(parent),
         _mapParams(NULL),
         _overlay(NULL),
         _mapIndex(-1),
