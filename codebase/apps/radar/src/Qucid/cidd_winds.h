@@ -31,6 +31,7 @@
  */
 
 /* Wind Vectors */
+
 #define WIND_MODE_ON     0   /* Wind vectors on in each frame */
 #define WIND_MODE_LAST   1   /* Wind vectors on only in the last frame */
 #define WIND_MODE_STILL  2   /* Wind vectors on only in the last framef movie is off */
@@ -45,24 +46,28 @@
 #define BARB_SH 8          // S. Hemisphere Simple Barb
 #define LABELEDBARB_SH 9   // S. Hemisphere Labeled Barb
 
+class wind_data_t {
 
-typedef struct  {
-    int active;       /* if True - draw wind features (vectors) */
-    int scale;
-    int marker_type;      
-    int line_width;
-    double units_scale_factor;
-    double reference_speed;
-    met_record_t    *wind_u;
-    met_record_t    *wind_v;
-    met_record_t    *wind_w;
+public:
+  
+  int active;       /* if True - draw wind features (vectors) */
+  int scale;
+  int marker_type;      
+  int line_width;
 
-    char *data_info;   /* Data source info string */
-    char color_name[NAME_LENGTH];  /* Color name*/
-    const char *units_label;             /* Color name*/
+  double units_scale_factor;
+  double reference_speed;
 
-    Color_gc_t *color;
+  met_record_t *wind_u;
+  met_record_t *wind_v;
+  met_record_t *wind_w;
+  
+  char *data_info; /* Data source info string */
+  char color_name[NAME_LENGTH];  /* Color name*/
+  const char *units_label;  /* Color name*/
+  
+  Color_gc_t *color;
 
-} wind_data_t;
+};
 
 #endif

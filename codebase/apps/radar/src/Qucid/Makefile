@@ -81,6 +81,7 @@ HDRS = \
 	TimePlot.hh \
 	VertWidget.hh \
 	VertWindow.hh \
+	WindWrapper.hh \
 	WorldPlot.hh \
 	cidd.h \
 	cidd_colorscales.h \
@@ -124,6 +125,7 @@ NORM_SRCS = \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	TimePlot.cc \
+	WindWrapper.cc \
 	WorldPlot.cc \
 	cidd_coords.cc \
 	cidd_font.cc \
@@ -210,7 +212,8 @@ MOC_SRCS = \
 	HorizWidget.cc \
 	MapWrapper.cc \
 	VertWidget.cc \
-	VertWindow.cc
+	VertWindow.cc \
+	WindWrapper.cc
 
 MOC_OUTPUT = \
 	moc_CartManager.cpp \
@@ -219,7 +222,8 @@ MOC_OUTPUT = \
 	moc_HorizWidget.cpp \
 	moc_MapWrapper.cpp \
 	moc_VertWidget.cpp \
-	moc_VertWindow.cpp
+	moc_VertWindow.cpp \
+	moc_WindWrapper.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

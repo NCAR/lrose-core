@@ -629,6 +629,8 @@ public:
   field_t *_fields;
   int fields_n;
 
+  tdrp_bool_t winds_enabled_at_startup;
+
   wind_t *_winds;
   int winds_n;
 
@@ -1474,7 +1476,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[495];
+  mutable TDRPtable _table[496];
 
   const char *_className;
 

@@ -875,6 +875,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'winds_enabled_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("winds_enabled_at_startup");
+    tt->descr = tdrpStrDup("Enable winds at start.");
+    tt->help = tdrpStrDup("If FALSE, winds will not be emabled at startup. You will have to turn them on via the winds menu.");
+    tt->val_offset = (char *) &winds_enabled_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'winds'
     // ctype is '_wind_t'
     
@@ -1022,7 +1034,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("maps_enabled_at_startup");
     tt->descr = tdrpStrDup("Enable maps at start.");
-    tt->help = tdrpStrDup("If FALSE, maps will not be emabled at startup.");
+    tt->help = tdrpStrDup("If FALSE, maps will not be emabled at startup. You will have to turn them on via the maps menu.");
     tt->val_offset = (char *) &maps_enabled_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;

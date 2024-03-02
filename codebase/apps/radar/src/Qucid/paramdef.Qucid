@@ -183,6 +183,12 @@ commentdef {
   p_header = "<WINDS>";
 }
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Enable winds at start.";
+  p_help = "If FALSE, winds will not be emabled at startup. You will have to turn them on via the winds menu.";
+} winds_enabled_at_startup;
+
 typedef enum {
   WIND_ARROW,
   WIND_VECTOR,
@@ -278,7 +284,7 @@ commentdef {
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Enable maps at start.";
-  p_help = "If FALSE, maps will not be emabled at startup.";
+  p_help = "If FALSE, maps will not be emabled at startup. You will have to turn them on via the maps menu.";
 } maps_enabled_at_startup;
 
 typedef struct {

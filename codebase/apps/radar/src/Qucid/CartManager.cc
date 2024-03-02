@@ -91,6 +91,7 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
+#include "WindWrapper.hh"
 #include "MapWrapper.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
@@ -798,6 +799,11 @@ void CartManager::_createMenus()
   _mapsMenu = menuBar()->addMenu(tr("&Maps"));
   _populateMapsMenu();
 
+  // add maps menu
+  
+  _mapsMenu = menuBar()->addMenu(tr("&Maps"));
+  _populateMapsMenu();
+
    // time selector
   
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
@@ -826,6 +832,70 @@ void CartManager::_createMenus()
 }
 
 /////////////////////////////////////////////////////////////
+// populate winds menu
+
+void CartManager::_populateWindsMenu()
+{
+
+  // winds enabled
+
+  _windsEnabled = _params.winds_enabled_at_startup;
+  _windsEnabledAct = new QAction(tr("Winds enabled"), this);
+  _windsEnabledAct->setStatusTip(tr("Enable / disable all winds"));
+  _windsEnabledAct->setCheckable(true);
+  _windsEnabledAct->setChecked(_windsEnabled);
+  connect(_windsEnabledAct, &QAction::toggled,
+	  this, &CartManager::_setWindsEnabled);
+
+  _windsMenu->addAction(_windsEnabledAct);
+  _windsMenu->addSeparator();
+  
+  // loop through wind entries
+  
+  for (int iwind = 0; iwind < _params.winds_n; iwind++) {
+
+    Params::wind_t &wparams = _params._winds[iwind];
+
+    // create action for this entry
+
+    WindWrapper *wrapper = new WindWrapper;
+    wrapper->setWindParams(&wparams);
+    wrapper->setWindIndex(iwind);
+    wrapper->setWindData(&gd.layers.wind[iwind]);
+    QAction *act = new QAction;
+    wrapper->setAction(act);
+    act->setText(wparams.button_label);
+    act->setStatusTip(tr("Turn wind layer on/off"));
+    act->setCheckable(true);
+    act->setChecked(wparams.on_at_startup);
+    wrapper->setAction(act);
+    connect(act, &QAction::toggled,
+            wrapper, &WindWrapper::toggled);
+    
+    // add wrapper for wind selection
+    
+    _windWrappers.push_back(wrapper);
+
+    // add to winds menu
+
+    _windsMenu->addAction(act);
+
+  } // iwind
+  
+}
+
+////////////////////////////////////////////////////////////
+// enable winds
+
+void CartManager::_setWindsEnabled(bool enable)
+{
+  _windsEnabled = enable;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> winds enabled? " << (_windsEnabled?"Y":"N") << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
 // populate maps menu
 
 void CartManager::_populateMapsMenu()
@@ -844,7 +914,7 @@ void CartManager::_populateMapsMenu()
   _mapsMenu->addAction(_mapsEnabledAct);
   _mapsMenu->addSeparator();
   
-    // loop through map entries
+  // loop through map entries
   
   for (int imap = 0; imap < _params.maps_n; imap++) {
 
@@ -878,7 +948,8 @@ void CartManager::_populateMapsMenu()
   
 }
 
-  // maps
+////////////////////////////////////////////////////////////
+// enable maps
 
 void CartManager::_setMapsEnabled(bool enable)
 {
@@ -2048,28 +2119,6 @@ void CartManager::_locationClicked(double xkm, double ykm,
   
 }
 
-////////////////////////////////////////////////////////////////////////
-// map menu item clicked
-
-void CartManager::_mapMenuItemClicked(bool enabled)
-  
-{
-
-  cerr << "MMMMMMMMMMMMMMMMMMMMMMMm enabled: " << enabled << endl;
-  
-  // if (_params.debug) {
-    // cerr << "*** _mapMenuItemClicked, enabled: "
-    //      << enabled << ", mapIndex: " << mapIndex << endl;
-  // }
-
-}
-
-void CartManager::_mapMenuItemClicked2(bool enabled, int mapIndex)
-{
-  cerr << "2222222222222222222 enabled, mapIndex: " << enabled << ", " << mapIndex << endl;
-}
-
-  
 //////////////////////////////////////////////
 // get size of table widget
 

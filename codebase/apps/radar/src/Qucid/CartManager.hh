@@ -78,6 +78,7 @@ class VertWidget;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
+class WindWrapper;
 class MapWrapper;
 
 class CartManager : public DisplayManager {
@@ -208,7 +209,6 @@ private:
   // actions
 
   QAction *_showFieldMenuAct;
-  vector<MapWrapper *> _mapWrappers;
   QAction *_realtimeAct;
   QAction *_showTimeControlAct;
   QAction *_ringsAct;
@@ -261,11 +261,19 @@ private:
   int _fieldTableCurrentColumn;
   int _fieldTableCurrentRow;
 
+  // winds
+
+  QMenu *_windsMenu;
+  QAction *_windsEnabledAct;
+  bool _windsEnabled;
+  vector<WindWrapper *> _windWrappers;
+  
   // maps
 
   QMenu *_mapsMenu;
   QAction *_mapsEnabledAct;
   bool _mapsEnabled;
+  vector<MapWrapper *> _mapWrappers;
   
   // time controller settings dialog
   
@@ -319,6 +327,7 @@ private:
   void _setupWindows();
   void _createActions();
   void _createMenus();
+  void _populateWindsMenu();
   void _populateMapsMenu();
   void _populateOverlaysMenu();
 
@@ -399,8 +408,6 @@ private slots:
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
-  void _mapMenuItemClicked2(bool enabled, int mapIndex);
-  void _mapMenuItemClicked(bool enabled);
 
   // modes
   
@@ -426,6 +433,10 @@ private slots:
   
   void _showFieldMenu();
   void _placeFieldMenu();
+
+  // winds
+
+  void _setWindsEnabled(bool enable);
 
   // maps
 

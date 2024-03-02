@@ -227,7 +227,7 @@ public:
   // gridded data records
   
   met_record_t *mrec[MAX_DATA_FIELDS];
-
+  
   // Control variables for layers features
   
   layers_t layers;

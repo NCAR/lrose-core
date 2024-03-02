@@ -834,15 +834,13 @@ static void _initGrids()
 static void _initWinds()
 {
 
+
   int default_marker_type = ARROWS;
+
   if (_params.winds_n == 0) {
     return;
   }
-  if((gd.layers.wind =
-      (wind_data_t*) calloc(_params.winds_n, sizeof(wind_data_t))) == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d wind sets\n", _params.winds_n);
-    exit(-1);
-  }
+
   gd.layers.num_wind_sets = _params.winds_n;
   if(gd.layers.num_wind_sets == 0) {
     gd.layers.wind_vectors = 0;
@@ -850,8 +848,10 @@ static void _initWinds()
   
   for(int ii = 0; ii < gd.layers.num_wind_sets; ii++) {
     
-    wind_data_t &lwind = gd.layers.wind[ii];
     const Params::wind_t &windp = _params._winds[ii];
+    wind_data_t wind;
+    gd.layers.wind.push_back(wind);
+    wind_data_t &lwind = gd.layers.wind[ii];
     
     // marker type
     lwind.marker_type = default_marker_type;
@@ -2152,7 +2152,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
  *
  */ 
 
-void _initMaps()
+static void _initMaps()
 
 {
   
@@ -2162,7 +2162,7 @@ void _initMaps()
     
     Params::map_t &omap = _params._maps[ii];
     string mapFileName = omap.map_file_name;
-    Overlay_t *over = (Overlay_t *) calloc(1, sizeof(Overlay_t));
+    Overlay_t *over = new Overlay_t;
     gd.over.push_back(over);
 
     over->mapParams = &omap;
@@ -2542,7 +2542,7 @@ void init_globals()
   MEM_zero(gd.prod);
   // MEM_zero(gd.over);
   MEM_zero(gd.mrec);
-  MEM_zero(gd.layers);
+  // MEM_zero(gd.layers);
   MEM_zero(gd.legends);
   gd.bookmark = NULL;
   MEM_zero(gd.movie);
