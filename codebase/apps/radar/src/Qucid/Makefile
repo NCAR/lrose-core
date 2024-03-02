@@ -70,6 +70,7 @@ HDRS = \
 	MapWrapper.hh \
 	Product.hh \
 	ProductMgr.hh \
+	ProdWrapper.hh \
 	Qucid.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
@@ -210,6 +211,7 @@ MOC_SRCS = \
 	DisplayManager.cc \
 	HorizWidget.cc \
 	MapWrapper.cc \
+	ProdWrapper.cc \
 	VertWidget.cc \
 	VertWindow.cc \
 	WindWrapper.cc
@@ -220,6 +222,7 @@ MOC_OUTPUT = \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapWrapper.cpp \
+	moc_ProdWrapper.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp \
 	moc_WindWrapper.cpp

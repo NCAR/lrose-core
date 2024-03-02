@@ -1537,6 +1537,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'symprods_enabled_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("symprods_enabled_at_startup");
+    tt->descr = tdrpStrDup("Enable symprods at start.");
+    tt->help = tdrpStrDup("If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.");
+    tt->val_offset = (char *) &symprods_enabled_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'symprod_debug'
     // ctype is '_symprod_debug_t'
     

@@ -688,6 +688,8 @@ public:
   draw_export_t *_draw_export_info;
   int draw_export_info_n;
 
+  tdrp_bool_t symprods_enabled_at_startup;
+
   symprod_debug_t symprod_debug;
 
   tdrp_bool_t symprod_short_requests;
@@ -1476,7 +1478,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[496];
+  mutable TDRPtable _table[497];
 
   const char *_className;
 

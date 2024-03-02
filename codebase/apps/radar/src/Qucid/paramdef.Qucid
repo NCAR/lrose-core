@@ -556,16 +556,21 @@ commentdef {
   p_header = "<SYMPRODS>.";
 }
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Enable symprods at start.";
+  p_help = "If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.";
+} symprods_enabled_at_startup;
+
 typedef enum {
   SYMPROD_DEBUG_OFF, SYMPROD_DEBUG_NORM, SYMPROD_DEBUG_VERBOSE
 } symprod_debug_t;
 
-paramdef enum symprod_debug_t
-  {
-    p_default = SYMPROD_DEBUG_OFF;
-    p_help = "Debug option.\n"
-    "If set, debug messages will be printed appropriately.\n";
-  } symprod_debug;
+paramdef enum symprod_debug_t {
+  p_default = SYMPROD_DEBUG_OFF;
+  p_help = "Debug option.\n"
+  "If set, debug messages will be printed appropriately.\n";
+} symprod_debug;
 
 paramdef boolean { 
   p_descr = "Gather Data Frame by Frame, Otherwise by loop span";

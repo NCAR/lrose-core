@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
-// MapWrapper.cc
+/////////////////////////////////////////////////////////////
+// ProdWrapper.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,47 +30,73 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Wraps a map object, and provides the toggled() method
-// for responding to menu selection.
+// Action for each entry in the prod menu.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MapWrapper.hh"
-#include "cidd.h"
+#ifndef ProdWrapper_HH
+#define ProdWrapper_HH
 
-// Constructor
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
 
-MapWrapper::MapWrapper(QObject *parent) :
-        _parent(parent),
-        _mapParams(NULL),
-        _overlay(NULL),
-        _mapIndex(-1),
-        _act(NULL)
-        
-{
+#include <string>
+#include <vector>
+#include <QObject>
+#include <QAction>
+#include "Params.hh"
+
+using namespace std;
+
+class Overlay_t;
+
+class DLL_EXPORT ProdWrapper : public QObject {
   
+  Q_OBJECT
+
+ public:
   
-}
+  // constructor
+  
+  ProdWrapper(QObject *parent = nullptr);
+  
+  // destructor
+  
+  virtual ~ProdWrapper();
+  
+  // set
+  
+  void setProdParams(Params::symprod_prod_info_t *val) { _prodParams = val; }
+  void setProdIndex(int val) { _prodIndex = val; }
+  void setAction(QAction *val) { _act = val; }
 
-// destructor
+  // get
+  
+  const Params::symprod_prod_info_t *getProdParams() const { return _prodParams; }
+  int getProdIndex() const { return _prodIndex; }
+  QAction *getAction() { return _act; }
 
-MapWrapper::~MapWrapper()
+ protected:
 
-{
+  QObject *_parent;
+  Params::symprod_prod_info_t *_prodParams;
+  int _prodIndex;
+  QAction *_act;               
 
-}
+ public slots:
 
-///////////////////////////////////////////////
-// Connect to map menu button
+  void toggled(bool checked); // connected to menu button
 
-void MapWrapper::toggled(bool checked)
-{
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> MapWrapper toggled, is_on? " << checked << endl;
-    cerr << "  mapIndex: " << _mapIndex << endl;
-    cerr << "  map_code: " << _mapParams->map_code << endl;
-    cerr << "  control_label: " << _mapParams->control_label << endl;
-    cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
-  }
-}
+};
+
+#endif
 

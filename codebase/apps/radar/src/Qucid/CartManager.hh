@@ -80,6 +80,7 @@ class RadxPlatform;
 class TimeScaleWidget;
 class WindWrapper;
 class MapWrapper;
+class ProdWrapper;
 
 class CartManager : public DisplayManager {
   
@@ -261,6 +262,13 @@ private:
   int _fieldTableCurrentColumn;
   int _fieldTableCurrentRow;
 
+  // maps
+
+  QMenu *_mapsMenu;
+  QAction *_mapsEnabledAct;
+  bool _mapsEnabled;
+  vector<MapWrapper *> _mapWrappers;
+  
   // winds
 
   QMenu *_windsMenu;
@@ -268,12 +276,12 @@ private:
   bool _windsEnabled;
   vector<WindWrapper *> _windWrappers;
   
-  // maps
+  // prods
 
-  QMenu *_mapsMenu;
-  QAction *_mapsEnabledAct;
-  bool _mapsEnabled;
-  vector<MapWrapper *> _mapWrappers;
+  QMenu *_productsMenu;
+  QAction *_productsEnabledAct;
+  bool _productsEnabled;
+  vector<ProdWrapper *> _productWrappers;
   
   // time controller settings dialog
   
@@ -327,8 +335,9 @@ private:
   void _setupWindows();
   void _createActions();
   void _createMenus();
-  void _populateWindsMenu();
   void _populateMapsMenu();
+  void _populateWindsMenu();
+  void _populateProductsMenu();
   void _populateOverlaysMenu();
 
   // data retrieval
@@ -434,13 +443,17 @@ private slots:
   void _showFieldMenu();
   void _placeFieldMenu();
 
-  // winds
-
-  void _setWindsEnabled(bool enable);
-
   // maps
 
   void _setMapsEnabled(bool enable);
+
+  // products
+
+  void _setProductsEnabled(bool enable);
+
+  // winds
+
+  void _setWindsEnabled(bool enable);
 
   // time controller
 

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// MapWrapper.cc
+// ProdWrapper.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,21 +30,20 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Wraps a map object, and provides the toggled() method
+// Wraps a product object, and provides the toggled() method
 // for responding to menu selection.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MapWrapper.hh"
+#include "ProdWrapper.hh"
 #include "cidd.h"
 
 // Constructor
 
-MapWrapper::MapWrapper(QObject *parent) :
+ProdWrapper::ProdWrapper(QObject *parent) :
         _parent(parent),
-        _mapParams(NULL),
-        _overlay(NULL),
-        _mapIndex(-1),
+        _prodParams(NULL),
+        _prodIndex(-1),
         _act(NULL)
         
 {
@@ -54,23 +53,22 @@ MapWrapper::MapWrapper(QObject *parent) :
 
 // destructor
 
-MapWrapper::~MapWrapper()
+ProdWrapper::~ProdWrapper()
 
 {
 
 }
 
 ///////////////////////////////////////////////
-// Connect to map menu button
+// Connect to prod menu button
 
-void MapWrapper::toggled(bool checked)
+void ProdWrapper::toggled(bool checked)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> MapWrapper toggled, is_on? " << checked << endl;
-    cerr << "  mapIndex: " << _mapIndex << endl;
-    cerr << "  map_code: " << _mapParams->map_code << endl;
-    cerr << "  control_label: " << _mapParams->control_label << endl;
-    cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
+    cerr << "==>> ProdWrapper toggled, is_on? " << checked << endl;
+    cerr << "  prodIndex: " << _prodIndex << endl;
+    cerr << "  menu_label: " << _prodParams->menu_label << endl;
+    cerr << "  url: " << _prodParams->url << endl;
   }
 }
 

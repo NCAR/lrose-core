@@ -91,8 +91,9 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
-#include "WindWrapper.hh"
 #include "MapWrapper.hh"
+#include "WindWrapper.hh"
+#include "ProdWrapper.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
@@ -804,6 +805,11 @@ void CartManager::_createMenus()
   _windsMenu = menuBar()->addMenu(tr("&Winds"));
   _populateWindsMenu();
 
+  // add products menu
+  
+  _productsMenu = menuBar()->addMenu(tr("&Products"));
+  _populateProductsMenu();
+
    // time selector
   
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
@@ -829,6 +835,69 @@ void CartManager::_createMenus()
   _helpMenu->addAction(_aboutAct);
   _helpMenu->addAction(_aboutQtAct);
 
+}
+
+/////////////////////////////////////////////////////////////
+// populate maps menu
+
+void CartManager::_populateMapsMenu()
+{
+
+  // maps enabled
+
+  _mapsEnabled = _params.maps_enabled_at_startup;
+  _mapsEnabledAct = new QAction(tr("Maps enabled"), this);
+  _mapsEnabledAct->setStatusTip(tr("Enable / disable all maps"));
+  _mapsEnabledAct->setCheckable(true);
+  _mapsEnabledAct->setChecked(_mapsEnabled);
+  connect(_mapsEnabledAct, &QAction::toggled,
+	  this, &CartManager::_setMapsEnabled);
+
+  _mapsMenu->addAction(_mapsEnabledAct);
+  _mapsMenu->addSeparator();
+  
+  // loop through map entries
+  
+  for (int imap = 0; imap < _params.maps_n; imap++) {
+
+    Params::map_t &mparams = _params._maps[imap];
+
+    // create action for this entry
+
+    MapWrapper *wrapper = new MapWrapper;
+    QAction *act = new QAction;
+    wrapper->setMapParams(&mparams);
+    wrapper->setMapIndex(imap);
+    wrapper->setOverlay(gd.over[imap]);
+    wrapper->setAction(act);
+    act->setText(mparams.map_code);
+    act->setStatusTip(tr("Turn map layer on/off"));
+    act->setCheckable(true);
+    act->setChecked(mparams.on_at_startup);
+    connect(act, &QAction::toggled,
+            wrapper, &MapWrapper::toggled);
+    
+    // add wrapper for map selection
+    
+    _mapWrappers.push_back(wrapper);
+    
+    // add to maps menu
+
+    _mapsMenu->addAction(act);
+
+  } // imap
+  
+}
+
+////////////////////////////////////////////////////////////
+// enable maps
+
+void CartManager::_setMapsEnabled(bool enable)
+{
+  _mapsEnabled = enable;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
+  }
 }
 
 /////////////////////////////////////////////////////////////
@@ -895,65 +964,64 @@ void CartManager::_setWindsEnabled(bool enable)
 }
 
 /////////////////////////////////////////////////////////////
-// populate maps menu
+// populate products menu
 
-void CartManager::_populateMapsMenu()
+void CartManager::_populateProductsMenu()
 {
 
-  // maps enabled
+  // products enabled
 
-  _mapsEnabled = _params.maps_enabled_at_startup;
-  _mapsEnabledAct = new QAction(tr("Maps enabled"), this);
-  _mapsEnabledAct->setStatusTip(tr("Enable / disable all maps"));
-  _mapsEnabledAct->setCheckable(true);
-  _mapsEnabledAct->setChecked(_mapsEnabled);
-  connect(_mapsEnabledAct, &QAction::toggled,
-	  this, &CartManager::_setMapsEnabled);
+  _productsEnabled = _params.symprods_enabled_at_startup;
+  _productsEnabledAct = new QAction(tr("Products enabled"), this);
+  _productsEnabledAct->setStatusTip(tr("Enable / disable all products"));
+  _productsEnabledAct->setCheckable(true);
+  _productsEnabledAct->setChecked(_productsEnabled);
+  connect(_productsEnabledAct, &QAction::toggled,
+	  this, &CartManager::_setProductsEnabled);
 
-  _mapsMenu->addAction(_mapsEnabledAct);
-  _mapsMenu->addSeparator();
+  _productsMenu->addAction(_productsEnabledAct);
+  _productsMenu->addSeparator();
   
-  // loop through map entries
+  // loop through wind entries
   
-  for (int imap = 0; imap < _params.maps_n; imap++) {
-
-    Params::map_t &mparams = _params._maps[imap];
-
+  for (int iprod = 0; iprod < _params.symprod_prod_info_n; iprod++) {
+    
+    Params::symprod_prod_info_t &prodParams = _params._symprod_prod_info[iprod];
+    
     // create action for this entry
 
-    MapWrapper *wrapper = new MapWrapper;
+    ProdWrapper *wrapper = new ProdWrapper;
     QAction *act = new QAction;
-    wrapper->setMapParams(&mparams);
-    wrapper->setMapIndex(imap);
-    wrapper->setOverlay(gd.over[imap]);
+    wrapper->setProdParams(&prodParams);
+    wrapper->setProdIndex(iprod);
     wrapper->setAction(act);
-    act->setText(mparams.map_code);
-    act->setStatusTip(tr("Turn map layer on/off"));
+    act->setText(prodParams.menu_label);
+    act->setStatusTip(tr("Turn product on/off"));
     act->setCheckable(true);
-    act->setChecked(mparams.on_at_startup);
+    act->setChecked(prodParams.on_by_default);
     connect(act, &QAction::toggled,
-            wrapper, &MapWrapper::toggled);
+            wrapper, &ProdWrapper::toggled);
     
-    // add wrapper for map selection
+    // add wrapper for wind selection
     
-    _mapWrappers.push_back(wrapper);
-    
-    // add to maps menu
+    _productWrappers.push_back(wrapper);
 
-    _mapsMenu->addAction(act);
+    // add to products menu
 
-  } // imap
+    _productsMenu->addAction(act);
+
+  } // iprod
   
 }
 
 ////////////////////////////////////////////////////////////
-// enable maps
+// enable products
 
-void CartManager::_setMapsEnabled(bool enable)
+void CartManager::_setProductsEnabled(bool enable)
 {
-  _mapsEnabled = enable;
+  _productsEnabled = enable;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
+    cerr << "==>> products enabled? " << (_productsEnabled?"Y":"N") << endl;
   }
 }
 

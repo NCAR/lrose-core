@@ -70,6 +70,7 @@ SOURCES       = Args.cc \
 		Params.cc \
 		Product.cc \
 		ProductMgr.cc \
+		ProdWrapper.cc \
 		Qucid.cc \
 		Reader.cc \
 		RenderContext.cc \
@@ -175,6 +176,7 @@ SOURCES       = Args.cc \
 		moc_DisplayManager.cpp \
 		moc_HorizWidget.cpp \
 		moc_MapWrapper.cpp \
+		moc_ProdWrapper.cpp \
 		moc_VertWidget.cpp \
 		moc_VertWindow.cpp \
 		moc_WindWrapper.cpp
@@ -196,6 +198,7 @@ OBJECTS       = Args.o \
 		Params.o \
 		Product.o \
 		ProductMgr.o \
+		ProdWrapper.o \
 		Qucid.o \
 		Reader.o \
 		RenderContext.o \
@@ -302,6 +305,7 @@ OBJECTS       = Args.o \
 		moc_DisplayManager.o \
 		moc_HorizWidget.o \
 		moc_MapWrapper.o \
+		moc_ProdWrapper.o \
 		moc_VertWidget.o \
 		moc_VertWindow.o \
 		moc_WindWrapper.o
@@ -444,6 +448,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Params.hh \
 		Product.hh \
 		ProductMgr.hh \
+		ProdWrapper.hh \
 		Qucid.hh \
 		Reader.hh \
 		RenderContext.hh \
@@ -491,6 +496,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Params.cc \
 		Product.cc \
 		ProductMgr.cc \
+		ProdWrapper.cc \
 		Qucid.cc \
 		Reader.cc \
 		RenderContext.cc \
@@ -875,8 +881,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Args.hh CartManager.hh CartWidget.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh DisplayManager.hh HorizWidget.hh MapWrapper.hh Params.hh Product.hh ProductMgr.hh Qucid.hh Reader.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeList.hh TimePlot.hh Uparams.hh Uparams.hh VertWidget.hh VertWindow.hh WindWrapper.hh WorldPlot.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_field_data.h cidd_funcs.h cidd_layers.h cidd_macros.h cidd_movies.h cidd_overlays.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
-	$(COPY_FILE) --parents Args.cc CartManager.cc CartWidget.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DisplayField.cc DisplayManager.cc HorizWidget.cc MapWrapper.cc Main.cc Params.cc Product.cc ProductMgr.cc Qucid.cc Reader.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeList.cc TimePlot.cc Uparams.cc VertWidget.cc VertWindow.cc WindWrapper.cc WorldPlot.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_params.cc cidd_remote_commands.cc cidd_reset.cc cidd_signals.cc colorscales.cc contours.cc data_gather.cc data_init.cc data_io.cc data_pu_proc.cc draw_export_init.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_check.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_init.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc mdvx_data_request.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc overlay_init.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_control.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_grids.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc route_winds_init.cc shmem_init.cc status_pu_proc.cc symprod_init.cc timer_control.cc v_win_proc.cc winds_init.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
+	$(COPY_FILE) --parents Args.hh CartManager.hh CartWidget.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh DisplayManager.hh HorizWidget.hh MapWrapper.hh Params.hh Product.hh ProductMgr.hh ProdWrapper.hh Qucid.hh Reader.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeList.hh TimePlot.hh Uparams.hh Uparams.hh VertWidget.hh VertWindow.hh WindWrapper.hh WorldPlot.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_field_data.h cidd_funcs.h cidd_layers.h cidd_macros.h cidd_movies.h cidd_overlays.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
+	$(COPY_FILE) --parents Args.cc CartManager.cc CartWidget.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DisplayField.cc DisplayManager.cc HorizWidget.cc MapWrapper.cc Main.cc Params.cc Product.cc ProductMgr.cc ProdWrapper.cc Qucid.cc Reader.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeList.cc TimePlot.cc Uparams.cc VertWidget.cc VertWindow.cc WindWrapper.cc WorldPlot.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_params.cc cidd_remote_commands.cc cidd_reset.cc cidd_signals.cc colorscales.cc contours.cc data_gather.cc data_init.cc data_io.cc data_pu_proc.cc draw_export_init.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_check.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_init.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc mdvx_data_request.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc overlay_init.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_control.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_grids.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc route_winds_init.cc shmem_init.cc status_pu_proc.cc symprod_init.cc timer_control.cc v_win_proc.cc winds_init.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -919,9 +925,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -dM -E -o moc_predefs.h /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_CartManager.cpp moc_CartWidget.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapWrapper.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindWrapper.cpp
+compiler_moc_header_make_all: moc_CartManager.cpp moc_CartWidget.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapWrapper.cpp moc_ProdWrapper.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindWrapper.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_CartManager.cpp moc_CartWidget.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapWrapper.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindWrapper.cpp
+	-$(DEL_FILE) moc_CartManager.cpp moc_CartWidget.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapWrapper.cpp moc_ProdWrapper.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindWrapper.cpp
 moc_CartManager.cpp: CartManager.hh \
 		Args.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -1083,6 +1089,16 @@ moc_MapWrapper.cpp: MapWrapper.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include MapWrapper.hh -o moc_MapWrapper.cpp
+
+moc_ProdWrapper.cpp: ProdWrapper.hh \
+		Params.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		moc_predefs.h \
+		/usr/lib64/qt6/libexec/moc
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdWrapper.hh -o moc_ProdWrapper.cpp
 
 moc_VertWidget.cpp: VertWidget.hh \
 		CartWidget.hh \
@@ -1388,8 +1404,9 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		DisplayField.hh \
 		FieldTableItem.hh \
-		WindWrapper.hh \
 		MapWrapper.hh \
+		WindWrapper.hh \
+		ProdWrapper.hh \
 		HorizWidget.hh \
 		CartWidget.hh \
 		ScaledLabel.hh \
@@ -2156,6 +2173,145 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ProductMgr.o ProductMgr.cc
+
+ProdWrapper.o: ProdWrapper.cc ProdWrapper.hh \
+		Params.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		cidd.h \
+		$(HOME)/lrose/include/dataport/port_types.h \
+		$(HOME)/lrose/include/dataport/bigend.h \
+		$(HOME)/lrose/include/dataport/swap.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/toolsa/globals.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
+		$(HOME)/lrose/include/toolsa/str.h \
+		$(HOME)/lrose/include/toolsa/ansi.h \
+		$(HOME)/lrose/include/toolsa/pmu.h \
+		$(HOME)/lrose/include/toolsa/procmap.h \
+		$(HOME)/lrose/include/toolsa/http.h \
+		$(HOME)/lrose/include/toolsa/HttpURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
+		$(HOME)/lrose/include/toolsa/pjg.h \
+		$(HOME)/lrose/include/toolsa/pjg_types.h \
+		$(HOME)/lrose/include/toolsa/pjg_flat.h \
+		$(HOME)/lrose/include/toolsa/sockutil.h \
+		$(HOME)/lrose/include/toolsa/servmap.h \
+		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/umisc.h \
+		$(HOME)/lrose/include/toolsa/port.h \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
+		$(HOME)/lrose/include/toolsa/ushmem.h \
+		$(HOME)/lrose/include/toolsa/uusleep.h \
+		$(HOME)/lrose/include/toolsa/ucopyright.h \
+		$(HOME)/lrose/include/toolsa/xdru.h \
+		$(HOME)/lrose/include/rapplot/xrs.h \
+		$(HOME)/lrose/include/Spdb/StationLoc.hh \
+		$(HOME)/lrose/include/rapplot/xutils.h \
+		$(HOME)/lrose/include/rapplot/xudr.h \
+		$(HOME)/lrose/include/rapplot/rascon.h \
+		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx.hh \
+		$(HOME)/lrose/include/toolsa/DateTime.hh \
+		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/TaFile.hh \
+		$(HOME)/lrose/include/toolsa/file_io.h \
+		$(HOME)/lrose/include/toolsa/heartbeat.h \
+		$(HOME)/lrose/include/toolsa/MemBuf.hh \
+		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_constants.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_read.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_write.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_timelist.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_print.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_BE.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_xml.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_ncf.hh \
+		$(HOME)/lrose/include/Mdv/Mdvx_vsect.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
+		$(HOME)/lrose/include/Mdv/MdvxField.hh \
+		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
+		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
+		$(HOME)/lrose/include/euclid/PjgMath.hh \
+		$(HOME)/lrose/include/euclid/Pjg.hh \
+		$(HOME)/lrose/include/euclid/PjgTypes.hh \
+		$(HOME)/lrose/include/euclid/sincos.h \
+		$(HOME)/lrose/include/euclid/PjgAzimEquidistMath.hh \
+		$(HOME)/lrose/include/euclid/PjgPolarRadarMath.hh \
+		$(HOME)/lrose/include/euclid/PjgAlbersMath.hh \
+		$(HOME)/lrose/include/euclid/PjgLambertAzimMath.hh \
+		$(HOME)/lrose/include/euclid/PjgLambertConfMath.hh \
+		$(HOME)/lrose/include/euclid/PjgLatlonMath.hh \
+		$(HOME)/lrose/include/euclid/PjgPolarStereoMath.hh \
+		$(HOME)/lrose/include/euclid/PjgObliqueStereoMath.hh \
+		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
+		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
+		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
+		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/toolsa/compress.h \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
+		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
+		$(HOME)/lrose/include/didss/DsMessage.hh \
+		$(HOME)/lrose/include/didss/ds_message.h \
+		$(HOME)/lrose/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		$(HOME)/lrose/include/Spdb/DsSpdbThreaded.hh \
+		$(HOME)/lrose/include/Spdb/DsSpdb.hh \
+		$(HOME)/lrose/include/Spdb/Spdb.hh \
+		$(HOME)/lrose/include/Spdb/Product_defines.hh \
+		$(HOME)/lrose/include/Spdb/Spdb_typedefs.hh \
+		$(HOME)/lrose/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		$(HOME)/lrose/include/Spdb/Symprod.hh \
+		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		$(HOME)/lrose/include/rapplot/gplot.h \
+		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
+		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		$(HOME)/lrose/include/Spdb/SymprodObj.hh \
+		$(HOME)/lrose/include/rapformats/station_reports.h \
+		$(HOME)/lrose/include/rapformats/metar_decode.h \
+		$(HOME)/lrose/include/rapformats/metar.h \
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ProdWrapper.o ProdWrapper.cc
 
 Qucid.o: Qucid.cc Qucid.hh \
 		Args.hh \
@@ -13885,6 +14041,9 @@ moc_HorizWidget.o: moc_HorizWidget.cpp
 
 moc_MapWrapper.o: moc_MapWrapper.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_MapWrapper.o moc_MapWrapper.cpp
+
+moc_ProdWrapper.o: moc_ProdWrapper.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_ProdWrapper.o moc_ProdWrapper.cpp
 
 moc_VertWidget.o: moc_VertWidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_VertWidget.o moc_VertWidget.cpp
