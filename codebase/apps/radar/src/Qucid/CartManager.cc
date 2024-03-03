@@ -91,9 +91,9 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
-#include "MapWrapper.hh"
-#include "WindWrapper.hh"
-#include "ProdWrapper.hh"
+#include "MapMenuItem.hh"
+#include "WindMenuItem.hh"
+#include "ProdMenuItem.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
@@ -864,7 +864,7 @@ void CartManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapWrapper *wrapper = new MapWrapper;
+    MapMenuItem *wrapper = new MapMenuItem;
     QAction *act = new QAction;
     wrapper->setMapParams(&mparams);
     wrapper->setMapIndex(imap);
@@ -875,11 +875,11 @@ void CartManager::_populateMapsMenu()
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
     connect(act, &QAction::toggled,
-            wrapper, &MapWrapper::toggled);
+            wrapper, &MapMenuItem::toggled);
     
     // add wrapper for map selection
     
-    _mapWrappers.push_back(wrapper);
+    _mapMenuItems.push_back(wrapper);
     
     // add to maps menu
 
@@ -927,7 +927,7 @@ void CartManager::_populateWindsMenu()
 
     // create action for this entry
 
-    WindWrapper *wrapper = new WindWrapper;
+    WindMenuItem *wrapper = new WindMenuItem;
     QAction *act = new QAction;
     wrapper->setWindParams(&wparams);
     wrapper->setWindIndex(iwind);
@@ -938,11 +938,11 @@ void CartManager::_populateWindsMenu()
     act->setCheckable(true);
     act->setChecked(wparams.on_at_startup);
     connect(act, &QAction::toggled,
-            wrapper, &WindWrapper::toggled);
+            wrapper, &WindMenuItem::toggled);
     
     // add wrapper for wind selection
     
-    _windWrappers.push_back(wrapper);
+    _windMenuItems.push_back(wrapper);
 
     // add to winds menu
 
@@ -990,7 +990,7 @@ void CartManager::_populateProductsMenu()
     
     // create action for this entry
 
-    ProdWrapper *wrapper = new ProdWrapper;
+    ProdMenuItem *wrapper = new ProdMenuItem;
     QAction *act = new QAction;
     wrapper->setProdParams(&prodParams);
     wrapper->setProdIndex(iprod);
@@ -1000,11 +1000,11 @@ void CartManager::_populateProductsMenu()
     act->setCheckable(true);
     act->setChecked(prodParams.on_by_default);
     connect(act, &QAction::toggled,
-            wrapper, &ProdWrapper::toggled);
+            wrapper, &ProdMenuItem::toggled);
     
     // add wrapper for wind selection
     
-    _productWrappers.push_back(wrapper);
+    _productMenuItems.push_back(wrapper);
 
     // add to products menu
 

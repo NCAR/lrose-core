@@ -67,10 +67,10 @@ HDRS = \
 	FieldTableItem.hh \
 	HorizWidget.hh \
 	LegacyParams.hh \
-	MapWrapper.hh \
+	MapMenuItem.hh \
 	Product.hh \
 	ProductMgr.hh \
-	ProdWrapper.hh \
+	ProdMenuItem.hh \
 	Qucid.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
@@ -82,7 +82,7 @@ HDRS = \
 	TimePlot.hh \
 	VertWidget.hh \
 	VertWindow.hh \
-	WindWrapper.hh \
+	WindMenuItem.hh \
 	WorldPlot.hh \
 	cidd.h \
 	cidd_colorscales.h \
@@ -210,22 +210,22 @@ MOC_SRCS = \
 	CartWidget.cc \
 	DisplayManager.cc \
 	HorizWidget.cc \
-	MapWrapper.cc \
-	ProdWrapper.cc \
+	MapMenuItem.cc \
+	ProdMenuItem.cc \
 	VertWidget.cc \
 	VertWindow.cc \
-	WindWrapper.cc
+	WindMenuItem.cc
 
 MOC_OUTPUT = \
 	moc_CartManager.cpp \
 	moc_CartWidget.cpp \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
-	moc_MapWrapper.cpp \
-	moc_ProdWrapper.cpp \
+	moc_MapMenuItem.cpp \
+	moc_ProdMenuItem.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp \
-	moc_WindWrapper.cpp
+	moc_WindMenuItem.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

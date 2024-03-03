@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// ProdWrapper.cc
+// ProdMenuItem.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -35,12 +35,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "ProdWrapper.hh"
+#include "ProdMenuItem.hh"
 #include "cidd.h"
 
 // Constructor
 
-ProdWrapper::ProdWrapper(QObject *parent) :
+ProdMenuItem::ProdMenuItem(QObject *parent) :
         _parent(parent),
         _prodParams(NULL),
         _prodIndex(-1),
@@ -53,7 +53,7 @@ ProdWrapper::ProdWrapper(QObject *parent) :
 
 // destructor
 
-ProdWrapper::~ProdWrapper()
+ProdMenuItem::~ProdMenuItem()
 
 {
 
@@ -62,10 +62,10 @@ ProdWrapper::~ProdWrapper()
 ///////////////////////////////////////////////
 // Connect to prod menu button
 
-void ProdWrapper::toggled(bool checked)
+void ProdMenuItem::toggled(bool checked)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> ProdWrapper toggled, is_on? " << checked << endl;
+    cerr << "==>> ProdMenuItem toggled, is_on? " << checked << endl;
     cerr << "  prodIndex: " << _prodIndex << endl;
     cerr << "  menu_label: " << _prodParams->menu_label << endl;
     cerr << "  url: " << _prodParams->url << endl;

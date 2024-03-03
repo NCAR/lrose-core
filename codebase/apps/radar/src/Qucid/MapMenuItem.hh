@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// WindWrapper.hh
+// MapMenuItem.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,12 +30,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Action for each entry in the wind menu.
+// Action for each entry in the map menu.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef WindWrapper_HH
-#define WindWrapper_HH
+#ifndef MapMenuItem_HH
+#define MapMenuItem_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -57,9 +57,9 @@
 
 using namespace std;
 
-class wind_data_t;
+class Overlay_t;
 
-class DLL_EXPORT WindWrapper : public QObject {
+class DLL_EXPORT MapMenuItem : public QObject {
   
   Q_OBJECT
 
@@ -67,32 +67,32 @@ class DLL_EXPORT WindWrapper : public QObject {
   
   // constructor
   
-  WindWrapper(QObject *parent = nullptr);
+  MapMenuItem(QObject *parent = nullptr);
   
   // destructor
   
-  virtual ~WindWrapper();
+  virtual ~MapMenuItem();
   
   // set
   
-  void setWindParams(Params::wind_t *val) { _windParams = val; }
-  void setWindData(wind_data_t *val) { _windData = val; }
-  void setWindIndex(int val) { _windIndex = val; }
+  void setMapParams(Params::map_t *val) { _mapParams = val; }
+  void setOverlay(Overlay_t *val) { _overlay = val; }
+  void setMapIndex(int val) { _mapIndex = val; }
   void setAction(QAction *val) { _act = val; }
 
   // get
   
-  const Params::wind_t *getWindParams() const { return _windParams; }
-  wind_data_t *getWindData() const { return _windData; }
-  int getWindIndex() const { return _windIndex; }
+  const Params::map_t *getMapParams() const { return _mapParams; }
+  Overlay_t *getOverlay() const { return _overlay; }
+  int getMapIndex() const { return _mapIndex; }
   QAction *getAction() { return _act; }
 
  protected:
 
   QObject *_parent;
-  Params::wind_t *_windParams;
-  wind_data_t *_windData;
-  int _windIndex;
+  Params::map_t *_mapParams;
+  Overlay_t *_overlay;
+  int _mapIndex;
   QAction *_act;               
 
  public slots:

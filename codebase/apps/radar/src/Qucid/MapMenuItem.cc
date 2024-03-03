@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// MapWrapper.hh
+///////////////////////////////////////////////////////////////
+// MapMenuItem.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,76 +30,47 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Action for each entry in the map menu.
+// Wraps a map object, and provides the toggled() method
+// for responding to menu selection.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef MapWrapper_HH
-#define MapWrapper_HH
+#include "MapMenuItem.hh"
+#include "cidd.h"
 
-#ifndef DLL_EXPORT
-#ifdef WIN32
-#ifdef QT_PLUGIN
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __declspec(dllimport)
-#endif
-#else
-#define DLL_EXPORT
-#endif
-#endif
+// Constructor
 
-#include <string>
-#include <vector>
-#include <QObject>
-#include <QAction>
-#include "Params.hh"
-
-using namespace std;
-
-class Overlay_t;
-
-class DLL_EXPORT MapWrapper : public QObject {
+MapMenuItem::MapMenuItem(QObject *parent) :
+        _parent(parent),
+        _mapParams(NULL),
+        _overlay(NULL),
+        _mapIndex(-1),
+        _act(NULL)
+        
+{
   
-  Q_OBJECT
-
- public:
   
-  // constructor
-  
-  MapWrapper(QObject *parent = nullptr);
-  
-  // destructor
-  
-  virtual ~MapWrapper();
-  
-  // set
-  
-  void setMapParams(Params::map_t *val) { _mapParams = val; }
-  void setOverlay(Overlay_t *val) { _overlay = val; }
-  void setMapIndex(int val) { _mapIndex = val; }
-  void setAction(QAction *val) { _act = val; }
+}
 
-  // get
-  
-  const Params::map_t *getMapParams() const { return _mapParams; }
-  Overlay_t *getOverlay() const { return _overlay; }
-  int getMapIndex() const { return _mapIndex; }
-  QAction *getAction() { return _act; }
+// destructor
 
- protected:
+MapMenuItem::~MapMenuItem()
 
-  QObject *_parent;
-  Params::map_t *_mapParams;
-  Overlay_t *_overlay;
-  int _mapIndex;
-  QAction *_act;               
+{
 
- public slots:
+}
 
-  void toggled(bool checked); // connected to menu button
+///////////////////////////////////////////////
+// Connect to map menu button
 
-};
-
-#endif
+void MapMenuItem::toggled(bool checked)
+{
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> MapMenuItem toggled, is_on? " << checked << endl;
+    cerr << "  mapIndex: " << _mapIndex << endl;
+    cerr << "  map_code: " << _mapParams->map_code << endl;
+    cerr << "  control_label: " << _mapParams->control_label << endl;
+    cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
+  }
+}
 

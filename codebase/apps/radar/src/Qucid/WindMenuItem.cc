@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// WindWrapper.cc
+// WindMenuItem.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -35,12 +35,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "WindWrapper.hh"
+#include "WindMenuItem.hh"
 #include "cidd.h"
 
 // Constructor
 
-WindWrapper::WindWrapper(QObject *parent) :
+WindMenuItem::WindMenuItem(QObject *parent) :
         _parent(parent),
         _windParams(NULL),
         _windData(NULL),
@@ -54,7 +54,7 @@ WindWrapper::WindWrapper(QObject *parent) :
 
 // destructor
 
-WindWrapper::~WindWrapper()
+WindMenuItem::~WindMenuItem()
 
 {
 
@@ -63,10 +63,10 @@ WindWrapper::~WindWrapper()
 ///////////////////////////////////////////////
 // Connect to wind menu button
 
-void WindWrapper::toggled(bool checked)
+void WindMenuItem::toggled(bool checked)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> WindWrapper toggled, is_on? " << checked << endl;
+    cerr << "==>> WindMenuItem toggled, is_on? " << checked << endl;
     cerr << "  windIndex: " << _windIndex << endl;
     cerr << "  button_label: " << _windParams->button_label << endl;
     cerr << "  url: " << _windParams->url << endl;

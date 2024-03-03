@@ -78,9 +78,9 @@ class VertWidget;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
-class WindWrapper;
-class MapWrapper;
-class ProdWrapper;
+class WindMenuItem;
+class MapMenuItem;
+class ProdMenuItem;
 
 class CartManager : public DisplayManager {
   
@@ -267,21 +267,21 @@ private:
   QMenu *_mapsMenu;
   QAction *_mapsEnabledAct;
   bool _mapsEnabled;
-  vector<MapWrapper *> _mapWrappers;
+  vector<MapMenuItem *> _mapMenuItems;
   
   // winds
 
   QMenu *_windsMenu;
   QAction *_windsEnabledAct;
   bool _windsEnabled;
-  vector<WindWrapper *> _windWrappers;
+  vector<WindMenuItem *> _windMenuItems;
   
   // prods
 
   QMenu *_productsMenu;
   QAction *_productsEnabledAct;
   bool _productsEnabled;
-  vector<ProdWrapper *> _productWrappers;
+  vector<ProdMenuItem *> _productMenuItems;
   
   // time controller settings dialog
   

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ProdWrapper.hh
+// ProdMenuItem.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -34,8 +34,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ProdWrapper_HH
-#define ProdWrapper_HH
+#ifndef ProdMenuItem_HH
+#define ProdMenuItem_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -59,7 +59,7 @@ using namespace std;
 
 class Overlay_t;
 
-class DLL_EXPORT ProdWrapper : public QObject {
+class DLL_EXPORT ProdMenuItem : public QObject {
   
   Q_OBJECT
 
@@ -67,11 +67,11 @@ class DLL_EXPORT ProdWrapper : public QObject {
   
   // constructor
   
-  ProdWrapper(QObject *parent = nullptr);
+  ProdMenuItem(QObject *parent = nullptr);
   
   // destructor
   
-  virtual ~ProdWrapper();
+  virtual ~ProdMenuItem();
   
   // set
   
