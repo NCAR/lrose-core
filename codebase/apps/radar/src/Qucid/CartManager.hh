@@ -287,9 +287,8 @@ private:
   // zooms
 
   QMenu *_zoomsMenu;
-  QButtonGroup *_zoomButtonGroup;
-  // vector<QRadioButton *> _zoomButtons;
   QAction *_zoomsEnabledAct;
+  QActionGroup *_zoomsActionGroup;
   bool _zoomsEnabled;
   vector<ZoomMenuItem *> _zoomMenuItems;
   

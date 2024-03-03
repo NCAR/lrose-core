@@ -1036,66 +1036,57 @@ void CartManager::_setWindsEnabled(bool enable)
 
 /////////////////////////////////////////////////////////////
 // populate zooms menu
+// this is exclusive - only 1 item selected at a time
 
 void CartManager::_populateZoomsMenu()
 {
 
-  _zoomButtonGroup = new QButtonGroup;
+  _zoomsActionGroup = new QActionGroup(_zoomsMenu);
+  _zoomsActionGroup->setExclusive(true);
   
   // loop through zoom entries
   
   for (int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
-
+    
     Params::zoom_level_t &zparams = _params._zoom_levels[izoom];
     
-    // create button for this entry
+    // create item for this entry
     
     ZoomMenuItem *item = new ZoomMenuItem;
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
+
+    // create action for the item
     
-    QWidgetAction *act = new QWidgetAction(_zoomsMenu);
+    QAction *act = new QAction;
     item->setAction(act);
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));
     act->setCheckable(true);
-    act->setChecked(izoom == 0);
-
-    // QFrame *buttonFrame = new QFrame(_zoomsMenu);
-    // buttonFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-
-    QRadioButton *rbutton = new QRadioButton(tr(zparams.label));
-    // rbutton->setParent(buttonFrame);
-    rbutton->setToolTip(tr(zparams.label));
     if (izoom == _params.start_zoom_level - 1) {
-      rbutton->setChecked(true);
+      act->setChecked(true);
     }
-    _zoomButtonGroup->addButton(rbutton, izoom);
     
-    act->setDefaultWidget(rbutton);
-    // act->setDefaultWidget(buttonFrame);
-    // connect(act, &QAction::toggled,
-    //         item, &ZoomMenuItem::toggled);
-    connect(rbutton, &QRadioButton::toggled,
+    // add to exclusive group
+    
+    _zoomsActionGroup->addAction(act);
+
+    // connect
+    
+    connect(act, &QAction::toggled,
             item, &ZoomMenuItem::toggled);
-            
+    
     // add item for zoom selection
     
     _zoomMenuItems.push_back(item);
 
     // add to zooms menu
-
+    
     _zoomsMenu->addAction(act);
-
+    
   } // izoom
   
 }
-
-// QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
-
-// QRadioButton *radio1 = new QRadioButton(tr("&Radio button 1"));
-// QRadioButton *radio2 = new QRadioButton(tr("R&adio button 2"));
-// QRadioButton *radio3 = new QRadioButton(tr("Ra&dio button 3"));
 
 /////////////////////////////////////////////////////////////
 // populate overlays menu
