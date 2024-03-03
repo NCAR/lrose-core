@@ -68,6 +68,7 @@
 #include <QToolBar>
 #include <QIcon>
 #include <QAction>
+#include <QWidgetAction>
 #include <QTimer>
 #include <QDesktopServices>
 #include <QTableWidget>
@@ -1039,27 +1040,45 @@ void CartManager::_setWindsEnabled(bool enable)
 void CartManager::_populateZoomsMenu()
 {
 
+  _zoomButtonGroup = new QButtonGroup;
+  
   // loop through zoom entries
   
   for (int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
 
     Params::zoom_level_t &zparams = _params._zoom_levels[izoom];
-
-    // create action for this entry
-
+    
+    // create button for this entry
+    
     ZoomMenuItem *item = new ZoomMenuItem;
-    QAction *act = new QAction;
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
-    // item->setZoomData(&gd.layers.zoom[izoom]);
+    
+    QWidgetAction *act = new QWidgetAction(_zoomsMenu);
     item->setAction(act);
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));
     act->setCheckable(true);
     act->setChecked(izoom == 0);
-    connect(act, &QAction::toggled,
-            item, &ZoomMenuItem::toggled);
+
+    // QFrame *buttonFrame = new QFrame(_zoomsMenu);
+    // buttonFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+
+    QRadioButton *rbutton = new QRadioButton(tr(zparams.label));
+    // rbutton->setParent(buttonFrame);
+    rbutton->setToolTip(tr(zparams.label));
+    if (izoom == _params.start_zoom_level - 1) {
+      rbutton->setChecked(true);
+    }
+    _zoomButtonGroup->addButton(rbutton, izoom);
     
+    act->setDefaultWidget(rbutton);
+    // act->setDefaultWidget(buttonFrame);
+    // connect(act, &QAction::toggled,
+    //         item, &ZoomMenuItem::toggled);
+    connect(rbutton, &QRadioButton::toggled,
+            item, &ZoomMenuItem::toggled);
+            
     // add item for zoom selection
     
     _zoomMenuItems.push_back(item);
@@ -1071,6 +1090,12 @@ void CartManager::_populateZoomsMenu()
   } // izoom
   
 }
+
+// QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
+
+// QRadioButton *radio1 = new QRadioButton(tr("&Radio button 1"));
+// QRadioButton *radio2 = new QRadioButton(tr("R&adio button 2"));
+// QRadioButton *radio3 = new QRadioButton(tr("Ra&dio button 3"));
 
 /////////////////////////////////////////////////////////////
 // populate overlays menu
