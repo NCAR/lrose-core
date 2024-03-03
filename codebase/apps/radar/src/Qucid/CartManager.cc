@@ -934,8 +934,10 @@ void CartManager::_populateProductsMenu()
     // create action for this entry
 
     ProdMenuItem *item = new ProdMenuItem;
+    const Product *product = gd.prod_mgr->getProduct(iprod);
     QAction *act = new QAction;
     item->setProdParams(&prodParams);
+    item->setProduct(product);
     item->setProdIndex(iprod);
     item->setAction(act);
     act->setText(prodParams.menu_label);

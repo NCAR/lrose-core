@@ -65,11 +65,25 @@ WindMenuItem::~WindMenuItem()
 
 void WindMenuItem::toggled(bool checked)
 {
+
+  // set activity depending on checked
+  
+  if (_windIndex < (int) gd.layers.wind.size()) {
+    if (checked) {
+      gd.layers.wind[_windIndex].active = 1;
+    } else {
+      gd.layers.wind[_windIndex].active = 0;
+    }
+    _windParams->on_at_startup = (tdrp_bool_t) checked;
+  }
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> WindMenuItem toggled, is_on? " << checked << endl;
     cerr << "  windIndex: " << _windIndex << endl;
     cerr << "  button_label: " << _windParams->button_label << endl;
     cerr << "  url: " << _windParams->url << endl;
+    cerr << "  active: " << gd.layers.wind[_windIndex].active << endl;
   }
+
 }
 

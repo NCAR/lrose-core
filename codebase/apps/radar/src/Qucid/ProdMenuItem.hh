@@ -54,6 +54,7 @@
 #include <QObject>
 #include <QAction>
 #include "Params.hh"
+class Product;
 
 using namespace std;
 
@@ -76,12 +77,14 @@ class DLL_EXPORT ProdMenuItem : public QObject {
   // set
   
   void setProdParams(Params::symprod_prod_info_t *val) { _prodParams = val; }
+  void setProduct(const Product *val) { _product = val; }
   void setProdIndex(int val) { _prodIndex = val; }
   void setAction(QAction *val) { _act = val; }
 
   // get
   
   const Params::symprod_prod_info_t *getProdParams() const { return _prodParams; }
+  const Product *getProduct() const { return _product; }
   int getProdIndex() const { return _prodIndex; }
   QAction *getAction() { return _act; }
 
@@ -89,6 +92,7 @@ class DLL_EXPORT ProdMenuItem : public QObject {
 
   QObject *_parent;
   Params::symprod_prod_info_t *_prodParams;
+  const Product *_product;
   int _prodIndex;
   QAction *_act;               
 

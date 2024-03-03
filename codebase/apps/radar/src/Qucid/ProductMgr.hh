@@ -114,6 +114,16 @@ public:
 
   void fill_export_fields(vector<world_pt_t> &wpt, string &label);
   
+  const vector<Product *> getProducts() const { return _products; }
+
+  const Product *getProduct(int index) const {
+    if (index < (int) _products.size()) {
+      return _products[index];
+    } else {
+      return NULL;
+    }
+  }
+
 protected:
   
   RenderContext &_context; // Drawing context for window 

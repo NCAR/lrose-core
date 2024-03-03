@@ -65,12 +65,21 @@ MapMenuItem::~MapMenuItem()
 
 void MapMenuItem::toggled(bool checked)
 {
+  // set activity depending on checked
+  
+  if (_mapIndex < (int) gd.over.size()) {
+    gd.over[_mapIndex]->active = checked;
+    _mapParams->on_at_startup = (tdrp_bool_t) checked;
+  }
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> MapMenuItem toggled, is_on? " << checked << endl;
     cerr << "  mapIndex: " << _mapIndex << endl;
     cerr << "  map_code: " << _mapParams->map_code << endl;
     cerr << "  control_label: " << _mapParams->control_label << endl;
     cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
+    cerr << "  active: " << gd.over[_mapIndex]->active << endl;
   }
+
 }
 
