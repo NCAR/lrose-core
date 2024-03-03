@@ -92,8 +92,9 @@
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
 #include "MapMenuItem.hh"
-#include "WindMenuItem.hh"
 #include "ProdMenuItem.hh"
+#include "WindMenuItem.hh"
+#include "ZoomMenuItem.hh"
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
@@ -800,15 +801,20 @@ void CartManager::_createMenus()
   _mapsMenu = menuBar()->addMenu(tr("&Maps"));
   _populateMapsMenu();
 
+  // add products menu
+  
+  _productsMenu = menuBar()->addMenu(tr("&Products"));
+  _populateProductsMenu();
+
   // add winds menu
   
   _windsMenu = menuBar()->addMenu(tr("&Winds"));
   _populateWindsMenu();
 
-  // add products menu
+  // add zooms menu
   
-  _productsMenu = menuBar()->addMenu(tr("&Products"));
-  _populateProductsMenu();
+  _zoomsMenu = menuBar()->addMenu(tr("&Zooms"));
+  _populateZoomsMenu();
 
    // time selector
   
@@ -864,22 +870,22 @@ void CartManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapMenuItem *wrapper = new MapMenuItem;
+    MapMenuItem *item = new MapMenuItem;
     QAction *act = new QAction;
-    wrapper->setMapParams(&mparams);
-    wrapper->setMapIndex(imap);
-    wrapper->setOverlay(gd.over[imap]);
-    wrapper->setAction(act);
+    item->setMapParams(&mparams);
+    item->setMapIndex(imap);
+    item->setOverlay(gd.over[imap]);
+    item->setAction(act);
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));
     act->setCheckable(true);
     act->setChecked(mparams.on_at_startup);
     connect(act, &QAction::toggled,
-            wrapper, &MapMenuItem::toggled);
+            item, &MapMenuItem::toggled);
     
-    // add wrapper for map selection
+    // add item for map selection
     
-    _mapMenuItems.push_back(wrapper);
+    _mapMenuItems.push_back(item);
     
     // add to maps menu
 
@@ -897,69 +903,6 @@ void CartManager::_setMapsEnabled(bool enable)
   _mapsEnabled = enable;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
-  }
-}
-
-/////////////////////////////////////////////////////////////
-// populate winds menu
-
-void CartManager::_populateWindsMenu()
-{
-
-  // winds enabled
-
-  _windsEnabled = _params.winds_enabled_at_startup;
-  _windsEnabledAct = new QAction(tr("Winds enabled"), this);
-  _windsEnabledAct->setStatusTip(tr("Enable / disable all winds"));
-  _windsEnabledAct->setCheckable(true);
-  _windsEnabledAct->setChecked(_windsEnabled);
-  connect(_windsEnabledAct, &QAction::toggled,
-	  this, &CartManager::_setWindsEnabled);
-
-  _windsMenu->addAction(_windsEnabledAct);
-  _windsMenu->addSeparator();
-  
-  // loop through wind entries
-  
-  for (int iwind = 0; iwind < _params.winds_n; iwind++) {
-
-    Params::wind_t &wparams = _params._winds[iwind];
-
-    // create action for this entry
-
-    WindMenuItem *wrapper = new WindMenuItem;
-    QAction *act = new QAction;
-    wrapper->setWindParams(&wparams);
-    wrapper->setWindIndex(iwind);
-    wrapper->setWindData(&gd.layers.wind[iwind]);
-    wrapper->setAction(act);
-    act->setText(wparams.button_label);
-    act->setStatusTip(tr("Turn wind layer on/off"));
-    act->setCheckable(true);
-    act->setChecked(wparams.on_at_startup);
-    connect(act, &QAction::toggled,
-            wrapper, &WindMenuItem::toggled);
-    
-    // add wrapper for wind selection
-    
-    _windMenuItems.push_back(wrapper);
-
-    // add to winds menu
-
-    _windsMenu->addAction(act);
-
-  } // iwind
-  
-}
-
-////////////////////////////////////////////////////////////
-// enable winds
-
-void CartManager::_setWindsEnabled(bool enable)
-{
-  _windsEnabled = enable;
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> winds enabled? " << (_windsEnabled?"Y":"N") << endl;
   }
 }
 
@@ -990,21 +933,21 @@ void CartManager::_populateProductsMenu()
     
     // create action for this entry
 
-    ProdMenuItem *wrapper = new ProdMenuItem;
+    ProdMenuItem *item = new ProdMenuItem;
     QAction *act = new QAction;
-    wrapper->setProdParams(&prodParams);
-    wrapper->setProdIndex(iprod);
-    wrapper->setAction(act);
+    item->setProdParams(&prodParams);
+    item->setProdIndex(iprod);
+    item->setAction(act);
     act->setText(prodParams.menu_label);
     act->setStatusTip(tr("Turn product on/off"));
     act->setCheckable(true);
     act->setChecked(prodParams.on_by_default);
     connect(act, &QAction::toggled,
-            wrapper, &ProdMenuItem::toggled);
+            item, &ProdMenuItem::toggled);
     
-    // add wrapper for wind selection
+    // add item for wind selection
     
-    _productMenuItems.push_back(wrapper);
+    _productMenuItems.push_back(item);
 
     // add to products menu
 
@@ -1023,6 +966,108 @@ void CartManager::_setProductsEnabled(bool enable)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> products enabled? " << (_productsEnabled?"Y":"N") << endl;
   }
+}
+
+/////////////////////////////////////////////////////////////
+// populate winds menu
+
+void CartManager::_populateWindsMenu()
+{
+
+  // winds enabled
+
+  _windsEnabled = _params.winds_enabled_at_startup;
+  _windsEnabledAct = new QAction(tr("Winds enabled"), this);
+  _windsEnabledAct->setStatusTip(tr("Enable / disable all winds"));
+  _windsEnabledAct->setCheckable(true);
+  _windsEnabledAct->setChecked(_windsEnabled);
+  connect(_windsEnabledAct, &QAction::toggled,
+	  this, &CartManager::_setWindsEnabled);
+
+  _windsMenu->addAction(_windsEnabledAct);
+  _windsMenu->addSeparator();
+  
+  // loop through wind entries
+  
+  for (int iwind = 0; iwind < _params.winds_n; iwind++) {
+
+    Params::wind_t &wparams = _params._winds[iwind];
+
+    // create action for this entry
+
+    WindMenuItem *item = new WindMenuItem;
+    QAction *act = new QAction;
+    item->setWindParams(&wparams);
+    item->setWindIndex(iwind);
+    item->setWindData(&gd.layers.wind[iwind]);
+    item->setAction(act);
+    act->setText(wparams.button_label);
+    act->setStatusTip(tr("Turn wind layer on/off"));
+    act->setCheckable(true);
+    act->setChecked(wparams.on_at_startup);
+    connect(act, &QAction::toggled,
+            item, &WindMenuItem::toggled);
+    
+    // add item for wind selection
+    
+    _windMenuItems.push_back(item);
+
+    // add to winds menu
+
+    _windsMenu->addAction(act);
+
+  } // iwind
+  
+}
+
+////////////////////////////////////////////////////////////
+// enable winds
+
+void CartManager::_setWindsEnabled(bool enable)
+{
+  _windsEnabled = enable;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> winds enabled? " << (_windsEnabled?"Y":"N") << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// populate zooms menu
+
+void CartManager::_populateZoomsMenu()
+{
+
+  // loop through zoom entries
+  
+  for (int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
+
+    Params::zoom_level_t &zparams = _params._zoom_levels[izoom];
+
+    // create action for this entry
+
+    ZoomMenuItem *item = new ZoomMenuItem;
+    QAction *act = new QAction;
+    item->setZoomParams(&zparams);
+    item->setZoomIndex(izoom);
+    // item->setZoomData(&gd.layers.zoom[izoom]);
+    item->setAction(act);
+    act->setText(zparams.label);
+    act->setStatusTip(tr("Select predefined zoom"));
+    act->setCheckable(true);
+    act->setChecked(izoom == 0);
+    connect(act, &QAction::toggled,
+            item, &ZoomMenuItem::toggled);
+    
+    // add item for zoom selection
+    
+    _zoomMenuItems.push_back(item);
+
+    // add to zooms menu
+
+    _zoomsMenu->addAction(act);
+
+  } // izoom
+  
 }
 
 /////////////////////////////////////////////////////////////

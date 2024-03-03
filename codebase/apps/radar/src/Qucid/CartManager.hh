@@ -78,9 +78,10 @@ class VertWidget;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
-class WindMenuItem;
 class MapMenuItem;
 class ProdMenuItem;
+class WindMenuItem;
+class ZoomMenuItem;
 
 class CartManager : public DisplayManager {
   
@@ -283,6 +284,13 @@ private:
   bool _productsEnabled;
   vector<ProdMenuItem *> _productMenuItems;
   
+  // zooms
+
+  QMenu *_zoomsMenu;
+  QAction *_zoomsEnabledAct;
+  bool _zoomsEnabled;
+  vector<ZoomMenuItem *> _zoomMenuItems;
+  
   // time controller settings dialog
   
   QDialog *_timeControl;
@@ -336,9 +344,10 @@ private:
   void _createActions();
   void _createMenus();
   void _populateMapsMenu();
-  void _populateWindsMenu();
   void _populateProductsMenu();
   void _populateOverlaysMenu();
+  void _populateWindsMenu();
+  void _populateZoomsMenu();
 
   // data retrieval
 

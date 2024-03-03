@@ -84,6 +84,7 @@ HDRS = \
 	VertWindow.hh \
 	WindMenuItem.hh \
 	WorldPlot.hh \
+	ZoomMenuItem.hh \
 	cidd.h \
 	cidd_colorscales.h \
 	cidd_contours.h \
@@ -214,7 +215,8 @@ MOC_SRCS = \
 	ProdMenuItem.cc \
 	VertWidget.cc \
 	VertWindow.cc \
-	WindMenuItem.cc
+	WindMenuItem.cc \
+	ZoomMenuItem.cc
 
 MOC_OUTPUT = \
 	moc_CartManager.cpp \
@@ -225,7 +227,8 @@ MOC_OUTPUT = \
 	moc_ProdMenuItem.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp \
-	moc_WindMenuItem.cpp
+	moc_WindMenuItem.cpp \
+	moc_ZoomMenuItem.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)
