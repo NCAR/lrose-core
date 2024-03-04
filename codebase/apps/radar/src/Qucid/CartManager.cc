@@ -2401,13 +2401,16 @@ void CartManager::_createTimeControl()
 {
   
   _timeControl = new QDialog(this);
-  _timeControl->setWindowTitle("Time controller");
+  _timeControl->setWindowTitle("Time and movie controller");
   QPoint pos(0,0);
   _timeControl->move(pos);
 
-  QBoxLayout *timeControlLayout =
-    new QBoxLayout(QBoxLayout::TopToBottom, _timeControl);
+  // QBoxLayout *timeControlLayout =
+  //   new QBoxLayout(QBoxLayout::TopToBottom, _timeControl);
+  QVBoxLayout *timeControlLayout = new QVBoxLayout(_timeControl);
   timeControlLayout->setSpacing(0);
+  timeControlLayout->setContentsMargins(0, 0, 0, 0);
+  // timeControlLayout->insertStretch(-1, 1);
 
   // create time panel
   
@@ -2415,16 +2418,21 @@ void CartManager::_createTimeControl()
   timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
   _timeLayout = new QVBoxLayout;
   _timePanel->setLayout(_timeLayout);
+  // _timeLayout->insertStretch(-1, 1);
 
   QFrame *timeUpper = new QFrame(_timePanel);
   QHBoxLayout *timeUpperLayout = new QHBoxLayout;
-  timeUpperLayout->setSpacing(10);
+  timeUpperLayout->setSpacing(0);
+  timeUpperLayout->setContentsMargins(0, 0, 0, 0);
   timeUpper->setLayout(timeUpperLayout);
+  // timeUpperLayout->insertStretch(0, 1);
   
   QFrame *timeLower = new QFrame(_timePanel);
   QHBoxLayout *timeLowerLayout = new QHBoxLayout;
-  timeLowerLayout->setSpacing(10);
+  timeLowerLayout->setSpacing(0);
+  timeLowerLayout->setContentsMargins(0, 0, 0, 0);
   timeLower->setLayout(timeLowerLayout);
+  // timeLowerLayout->insertStretch(0, 1);
 
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
