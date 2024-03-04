@@ -3954,7 +3954,7 @@
     tt->descr = tdrpStrDup("Default width of main window (pixels).");
     tt->help = tdrpStrDup("Height of main window at startup.");
     tt->val_offset = (char *) &horiz_default_width - &_start_;
-    tt->single_val.i = 800;
+    tt->single_val.i = 1000;
     tt++;
     
     // Parameter 'horiz_default_height'
@@ -3966,7 +3966,7 @@
     tt->descr = tdrpStrDup("Default height of main window (pixels).");
     tt->help = tdrpStrDup("Width of main window at startup.");
     tt->val_offset = (char *) &horiz_default_height - &_start_;
-    tt->single_val.i = 600;
+    tt->single_val.i = 1000;
     tt++;
     
     // Parameter 'horiz_min_width'

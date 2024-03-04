@@ -1896,13 +1896,13 @@ paramdef int {
 } horiz_default_y_pos;
 
 paramdef int {
-  p_default = 800;
+  p_default = 1000;
   p_descr = "Default width of main window (pixels).";
   p_help = "Height of main window at startup.";
 } horiz_default_width;
 
 paramdef int {
-  p_default = 600;
+  p_default = 1000;
   p_descr = "Default height of main window (pixels).";
   p_help = "Width of main window at startup.";
 } horiz_default_height;

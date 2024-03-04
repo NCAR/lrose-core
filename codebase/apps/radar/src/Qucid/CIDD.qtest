@@ -964,7 +964,7 @@ cidd.horiz_legends_delta_y:  30
 # WINDOW SIZE PARAMS
 #
 #  The starting window size
-cidd.horiz_default_height:    1000
+cidd.horiz_default_height:    850
 #
 # Note that the control panel with the menu bar will hide itself if the window is
 # sized smaller than the cidd.horiz_min_height. This is useful if you want no

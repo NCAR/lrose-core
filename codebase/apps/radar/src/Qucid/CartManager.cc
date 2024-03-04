@@ -577,14 +577,14 @@ void CartManager::_setupWindows()
 
   // add widgets
 
-  mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_fieldPanel);
+  // mainLayout->addWidget(_statusPanel);
+  // mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_horizFrame);
 
   // sweep panel
 
-   _createSweepPanel();
-   mainLayout->addWidget(_sweepPanel);
+   // _createSweepPanel();
+   // mainLayout->addWidget(_sweepPanel);
 
   // field menu
 
@@ -603,7 +603,8 @@ void CartManager::_setupWindows()
 
   _setTitleBar(_params.radar_name);
   setMinimumSize(400, 300);
-  resize(_params.main_window_width, _params.main_window_height);
+  // resize(_params.main_window_width, _params.main_window_height);
+  resize(_params.horiz_default_width, _params.horiz_default_height);
   
   // set location on screen
 
