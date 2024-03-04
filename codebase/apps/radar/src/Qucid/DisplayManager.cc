@@ -1249,14 +1249,16 @@ void DisplayManager::_howto()
 
 void DisplayManager::_about()
 {
+
   //QMessageBox::about(this, tr("About Menu"),
-		     //tr("HawkEye is an engineering display for beam-by-beam radar data. "));
+  //tr("Qucid is an integrating Cartesian display for weather data."));
+
   string text;
   
-  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
-  text += "Get help with HawkEye ...  \n ";
+  text += "Qucid is an integrating Cartesian display for weather data.\n\n";
+  text += "Get help with Qucid ...  \n ";
   text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
-  text += "\nHawkEye Version ... \n ";  
+  text += "\nQucid version ... \n ";  
   text += "\nCopyright UCAR (c) 1990 - 2019  ";
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
   text += "\nNational Center for Atmospheric Research (NCAR)   ";  

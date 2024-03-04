@@ -2815,7 +2815,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<HAWKEYE_SPECIFIC_DETAILS>";
+  p_header = "<QUCID_SPECIFIC_DETAILS>";
 }
 
 commentdef {
@@ -3535,6 +3535,6 @@ paramdef enum bscan_dwell_stats_t {
 } bscan_dwell_stats;
 
 commentdef {
-  p_header = "</HAWKEYE_SPECIFIC_DETAILS>";
+  p_header = "</QUCID_SPECIFIC_DETAILS>";
 }
 

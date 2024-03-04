@@ -5745,7 +5745,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 55");
-    tt->comment_hdr = tdrpStrDup("<HAWKEYE_SPECIFIC_DETAILS>");
+    tt->comment_hdr = tdrpStrDup("<QUCID_SPECIFIC_DETAILS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -7359,7 +7359,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 71");
-    tt->comment_hdr = tdrpStrDup("</HAWKEYE_SPECIFIC_DETAILS>");
+    tt->comment_hdr = tdrpStrDup("</QUCID_SPECIFIC_DETAILS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

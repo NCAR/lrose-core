@@ -513,7 +513,7 @@ void CartManager::_moveUpDown()
 
 void CartManager::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "HAWK_EYE -- " + radarName;
+  string windowTitle = _params.horiz_frame_label;
   setWindowTitle(tr(windowTitle.c_str()));
 }
   
@@ -3504,7 +3504,7 @@ void CartManager::_saveImageToFile(bool interactive)
       ldataInfo.setDebug();
     }
     ldataInfo.setLatestTime(_plotStartTime.utime());
-    ldataInfo.setWriter("HawkEye");
+    ldataInfo.setWriter("Qucid");
     ldataInfo.setDataFileExt(_params.images_file_name_extension);
     ldataInfo.setDataType(_params.images_file_name_extension);
     ldataInfo.setRelDataPath(relPath);
