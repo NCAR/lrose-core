@@ -2471,6 +2471,7 @@ void CartManager::_createTimeControl()
                   _archiveStartTime.getSec());
   QDateTime startDateTime(startDate, startTime);
   _archiveStartTimeEdit->setDateTime(startDateTime);
+  _archiveStartTimeEdit->setCalendarPopup(true);
   connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
   _archiveStartTimeEdit->setToolTip("Start time of archive period");
@@ -2485,6 +2486,7 @@ void CartManager::_createTimeControl()
                  _archiveEndTime.getSec());
   QDateTime endDateTime(endDate, endTime);
   _archiveEndTimeEdit->setDateTime(endDateTime);
+  _archiveEndTimeEdit->setCalendarPopup(true);
   connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
   _archiveEndTimeEdit->setToolTip("End time of archive period");
