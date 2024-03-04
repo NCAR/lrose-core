@@ -658,7 +658,7 @@ void CartManager::_createActions()
   connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
   
   // show user click in dialog
-  _showClickAct = new QAction(tr("Show Click"), this);
+  _showClickAct = new QAction(tr("Values"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
   connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
 
@@ -690,8 +690,8 @@ void CartManager::_createActions()
           this, SLOT(_setRealtime(bool)));
   
   // unzoom display
-  _unzoomAct = new QAction(tr("Unzoom"), this);
-  _unzoomAct->setStatusTip(tr("Unzoom to original view"));
+  _unzoomAct = new QAction(tr("Back"), this);
+  _unzoomAct->setStatusTip(tr("Unzoom to previous view"));
   _unzoomAct->setEnabled(false);
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
 
@@ -759,11 +759,11 @@ void CartManager::_createActions()
 
   // howto and about
   
-  _howtoAct = new QAction(tr("&Howto"), this);
+  _howtoAct = new QAction(tr("Howto"), this);
   _howtoAct->setStatusTip(tr("Show the application's Howto box"));
   connect(_howtoAct, SIGNAL(triggered()), this, SLOT(_howto()));
 
-  _aboutAct = new QAction(tr("&About"), this);
+  _aboutAct = new QAction(tr("About"), this);
   _aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(_aboutAct, SIGNAL(triggered()), this, SLOT(_about()));
 
@@ -787,7 +787,7 @@ void CartManager::_createMenus()
 
   // file menu
   
-  _fileMenu = menuBar()->addMenu(tr("&File"));
+  _fileMenu = menuBar()->addMenu(tr("File"));
   _fileMenu->addSeparator();
   _fileMenu->addAction(_openFileAct);
   _fileMenu->addAction(_saveFileAct);
@@ -800,34 +800,35 @@ void CartManager::_createMenus()
   
   // add maps menu
   
-  _mapsMenu = menuBar()->addMenu(tr("&Maps"));
+  _mapsMenu = menuBar()->addMenu(tr("Maps"));
   _populateMapsMenu();
 
   // add products menu
   
-  _productsMenu = menuBar()->addMenu(tr("&Products"));
+  _productsMenu = menuBar()->addMenu(tr("Products"));
   _populateProductsMenu();
 
   // add winds menu
   
-  _windsMenu = menuBar()->addMenu(tr("&Winds"));
+  _windsMenu = menuBar()->addMenu(tr("Winds"));
   _populateWindsMenu();
 
   // add zooms menu
   
-  _zoomsMenu = menuBar()->addMenu(tr("&Zooms"));
+  _zoomsMenu = menuBar()->addMenu(tr("Zooms"));
   _populateZoomsMenu();
-
+  menuBar()->addAction(_unzoomAct);
+  
    // time selector
   
-  _timeMenu = menuBar()->addMenu(tr("&Time-control"));
+  _timeMenu = menuBar()->addMenu(tr("Movie"));
   _timeMenu->addAction(_showTimeControlAct);
   _timeMenu->addSeparator();
   _timeMenu->addAction(_realtimeAct);
 
   // add overlay menu
   
-  _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
+  _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
   _populateOverlaysMenu();
 
   // misc actions
@@ -835,10 +836,9 @@ void CartManager::_createMenus()
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
   // menuBar()->addAction(_showBoundaryEditorAct);
-  menuBar()->addAction(_unzoomAct);
   menuBar()->addAction(_clearAct);
 
-  _helpMenu = menuBar()->addMenu(tr("&Help"));
+  _helpMenu = menuBar()->addMenu(tr("Help"));
   _helpMenu->addAction(_howtoAct);
   _helpMenu->addAction(_aboutAct);
   _helpMenu->addAction(_aboutQtAct);
