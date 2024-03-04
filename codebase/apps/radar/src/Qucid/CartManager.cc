@@ -682,6 +682,7 @@ void CartManager::_createActions()
   //         SLOT(show()));
   
   // realtime mode
+
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
   _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
   _realtimeAct->setCheckable(true);
@@ -690,15 +691,17 @@ void CartManager::_createActions()
           this, SLOT(_setRealtime(bool)));
   
   // unzoom display
+  
   _unzoomAct = new QAction(tr("Back"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to previous view"));
   _unzoomAct->setEnabled(false);
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
 
-  // refresh display
-  _refreshAct = new QAction(tr("Refresh"), this);
-  _refreshAct->setStatusTip(tr("Refresh plot"));
-  connect(_refreshAct, SIGNAL(triggered()), this, SLOT(_refresh()));
+  // reload data
+  
+  _reloadAct = new QAction(tr("Reload"), this);
+  _reloadAct->setStatusTip(tr("Reload data"));
+  connect(_reloadAct, SIGNAL(triggered()), this, SLOT(_reload()));
 
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
@@ -836,7 +839,7 @@ void CartManager::_createMenus()
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
   // menuBar()->addAction(_showBoundaryEditorAct);
-  menuBar()->addAction(_clearAct);
+  menuBar()->addAction(_reloadAct);
 
   _helpMenu = menuBar()->addMenu(tr("Help"));
   _helpMenu->addAction(_howtoAct);
@@ -1207,7 +1210,7 @@ void CartManager::_changeSweep(bool value) {
       _vert->setStartOfSweep(true);
       _moveUpDown();
 
-      // refreshBoundaries();
+      // reloadBoundaries();
       return;
     }
   } // ii

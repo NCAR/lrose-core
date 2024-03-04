@@ -163,7 +163,7 @@ protected:
   QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_unzoomAct;
-  QAction *_refreshAct;
+  QAction *_reloadAct;
   QAction *_showClickAct;
   QAction *_showBoundaryEditorAct;
   QAction *_howtoAct;
