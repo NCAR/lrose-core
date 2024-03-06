@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="/qt/qml/draganddrop">/Users/brenda/work/qt-examples/draganddrop/draganddrop/build/draganddrop</file>
+
+  </qresource>
+</RCC>

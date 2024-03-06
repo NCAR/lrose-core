@@ -1,0 +1,19 @@
+GridView dynamic drag and drop.
+
+From here: ~/Qt/Examples/Qt-6.6.0/quick/draganddrop
+
+
+  919  /opt/homebrew/bin/qmake draganddrop.pro
+  920  cd ..
+  921  ls
+  922  cp -r ~/Qt/Examples/Qt-6.6.0/quick/shared .
+  923  ls
+  924  cd draganddrop/
+  925  /opt/homebrew/bin/qmake draganddrop.pro
+  926  ls -lrt
+  927  make
+  928  ls -lrt
+  929  ls -R draganddrop.app
+  930  ./draganddrop.app/Contents/MacOS/draganddrop 
+
+Also need the quick/shared files.

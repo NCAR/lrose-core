@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="/qt/qml/draganddrop/">
+    <file alias="draganddrop.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/draganddrop.qml</file>
+    <file alias="tiles/DragTile.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/tiles/DragTile.qml</file>
+    <file alias="tiles/DropTile.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/tiles/DropTile.qml</file>
+    <file alias="tiles/tiles.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/tiles/tiles.qml</file>
+    <file alias="views/Icon.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/views/Icon.qml</file>
+    <file alias="views/gridview.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/views/gridview.qml</file>
+    <file alias="external/externaldraganddrop.qml">/Users/brenda/work/qt-examples/draganddrop/draganddrop/external/externaldraganddrop.qml</file>
+  </qresource>
+</RCC>
+
