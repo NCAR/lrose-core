@@ -1086,16 +1086,16 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line,
 
       RadxTime rtime;
       rtime.set(year, month, day, hours, minutes, seconds, 0.0);
-      if (1) {
+      if (_verbose) {
         cerr.precision(10);
         cerr << "Ray time: " << hours << ":" << minutes 
           << ":" << seconds << "  " << subseconds << endl;  
       }
-      cout << "ray time = " << rtime.getStrn() << endl;
+      if (_verbose) cout << "ray time = " << rtime.getStrn() << endl;
       ray->setTime(rtime.utime(), subseconds);
       //double reconstituted = hours + minutes/minutesInHour + seconds/(60*60) + subseconds/1.0e3;
       double diff = timeInHours - reconstituted;
-      if (1) {
+      if (_verbose) {
         cerr << "Ray time reconstituted: " << reconstituted << " vs. original "
          << timeInHours << " diff = " << diff << endl;
       }
@@ -1202,7 +1202,7 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay,
   while (!feof(_file)) { // } && (nRays < nRaysInFile)) {
     // get data columns array
     if (fgets(line, 65536, _file) != NULL) {
-      cerr << "reading ray " << nRays << endl;
+      if (_verbose) cerr << "reading ray " << nRays << endl;
       ray = new RadxRay();
       ray->setNGates(nGatesPerRay);
       _readRayQualifiers(ray, line, year, month, day);
