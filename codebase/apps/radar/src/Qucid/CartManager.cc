@@ -152,16 +152,6 @@ CartManager::CartManager(const Params &params,
   _sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
 
-  // _archiveStartTimeEdit = NULL;
-  // _archiveEndTimeEdit = NULL;
-
-  // _selectedTimeLabel = NULL;
-  
-  // _back1 = NULL;
-  // _fwd1 = NULL;
-  // _backPeriod = NULL;
-  // _fwdPeriod = NULL;
-
   _fieldMenu = NULL;
   _fieldTable = NULL;
   _fieldMenuPlaced = false;
@@ -171,8 +161,6 @@ CartManager::CartManager(const Params &params,
   _fieldTableCurrentRow = -1;
 
   _timeControl = NULL;
-  // _timeLayout = NULL;
-  // _timeSlider = NULL;
   _timeControlPlaced = false;
   
   _setArchiveMode(_params.begin_in_archive_mode);
@@ -601,7 +589,7 @@ void CartManager::_setupWindows()
   // title bar
 
   _setTitleBar(_params.radar_name);
-  setMinimumSize(400, 300);
+  setMinimumSize(400, 400);
   // resize(_params.main_window_width, _params.main_window_height);
   resize(_params.horiz_default_width, _params.horiz_default_height);
   
@@ -1198,7 +1186,8 @@ void CartManager::_changeSweep(bool value) {
     return;
   }
 
-  for (size_t sweepIndex = 0; sweepIndex < _sweepRButtons->size(); sweepIndex++) {
+  for (size_t sweepIndex = 0; sweepIndex < _sweepRButtons->size();
+       sweepIndex++) {
     if (_sweepRButtons->at(sweepIndex)->isChecked()) {
       if (_params.debug) {
         cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
@@ -1402,7 +1391,8 @@ int CartManager::_getArchiveData()
     
     if(_params.debug) {
       cerr << "  reading data file path: " << inputPath << endl;
-      cerr << "  archive file index: " << _timeControl->getArchiveScanIndex() << endl;
+      cerr << "  archive file index: "
+           << _timeControl->getArchiveScanIndex() << endl;
     }
     
     if (file.readFromPath(inputPath, _vol)) {
@@ -1451,17 +1441,6 @@ int CartManager::_getArchiveData()
   
   // _sweepManager.set(_vol);
 
-  // if (_params.debug) {
-  //   cerr << "----------------------------------------------------" << endl;
-  //   cerr << "perform archive retrieval" << endl;
-  //   cerr << "  read file: " << _vol.getPathInUse() << endl;
-  //   cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-  //   cerr << "  guiIndex, fixedAngle: " 
-  //        << _sweepManager.getGuiIndex() << ", "
-  //        << _sweepManager.getSelectedAngle() << endl;
-  //   cerr << "----------------------------------------------------" << endl;
-  // }
-  
    _platform = _vol.getPlatform();
    
   return 0;

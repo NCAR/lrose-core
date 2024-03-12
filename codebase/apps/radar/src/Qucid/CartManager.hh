@@ -414,23 +414,9 @@ private slots:
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
 
-  // modes
+  // realtime/archive mode
   
   void _setRealtime(bool enabled);
-
-  // archive mode
-  
-  // void _setArchiveStartTime(const RadxTime &rtime);
-  // void _setArchiveEndTime(const RadxTime &rtime);
-  // void _setArchiveStartTimeFromGui(const QDateTime &qdt);
-  // void _setArchiveEndTimeFromGui(const QDateTime &qdt);
-  // void _acceptGuiTimes();
-  // void _cancelGuiTimes();
-
-  // void _goBack1();
-  // void _goFwd1();
-  // void _goBackPeriod();
-  // void _goFwdPeriod();
 
   // field menu
   
@@ -454,14 +440,7 @@ private slots:
   void _showTimeControl();
   void _placeTimeControl();
 
-  // time slider
-
-  // void _timeSliderActionTriggered(int action);
-  // void _timeSliderValueChanged(int value);
-  // void _timeSliderReleased();
-  // void _timeSliderPressed();
-  
-  //circle radius slider for BoundaryPointEditor
+  // circle radius slider for BoundaryPointEditor
   void _circleRadiusSliderValueChanged(int value);
   void _brushRadiusSliderValueChanged(int value);
 
