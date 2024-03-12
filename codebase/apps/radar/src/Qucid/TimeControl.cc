@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <QFrame>
+#include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <Radx/NcfRadxFile.hh>
@@ -122,10 +123,22 @@ void TimeControl::_populate()
   _selectedTimeLabel->setToolTip("This is the selected data time");
 
   // time editing
-
+  
   _archiveScanIndex = 0;
 
+  // start time
+  
   _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
+  QFrame *startTimeFrame = new QFrame(timeUpper);
+  QVBoxLayout *startTimeFrameLayout = new QVBoxLayout;
+  startTimeFrameLayout->setSpacing(0);
+  startTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
+  startTimeFrame->setLayout(startTimeFrameLayout);
+  QLabel *startLabel = new QLabel(startTimeFrame);
+  startLabel->setText("Movie start time");
+  startTimeFrameLayout->addWidget(startLabel, 0, Qt::AlignTop);
+  startTimeFrameLayout->addWidget(_archiveStartTimeEdit, 0, Qt::AlignBottom);
+  
   _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   QDate startDate(_archiveStartTime.getYear(), 
                   _archiveStartTime.getMonth(),
@@ -138,9 +151,21 @@ void TimeControl::_populate()
   _archiveStartTimeEdit->setCalendarPopup(true);
   connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
-  _archiveStartTimeEdit->setToolTip("Start time of archive period");
+  _archiveStartTimeEdit->setToolTip("Start time of movie interval");
+
+  // end time
   
   _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
+  QFrame *endTimeFrame = new QFrame(timeUpper);
+  QVBoxLayout *endTimeFrameLayout = new QVBoxLayout;
+  endTimeFrameLayout->setSpacing(0);
+  endTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
+  endTimeFrame->setLayout(endTimeFrameLayout);
+  QLabel *endLabel = new QLabel(endTimeFrame);
+  endLabel->setText("Movie end time");
+  endTimeFrameLayout->addWidget(endLabel, 0, Qt::AlignTop);
+  endTimeFrameLayout->addWidget(_archiveEndTimeEdit, 0, Qt::AlignBottom);
+
   _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   QDate endDate(_archiveEndTime.getYear(), 
                 _archiveEndTime.getMonth(),
@@ -153,7 +178,7 @@ void TimeControl::_populate()
   _archiveEndTimeEdit->setCalendarPopup(true);
   connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
-  _archiveEndTimeEdit->setToolTip("End time of archive period");
+  _archiveEndTimeEdit->setToolTip("End time of movie interval");
   
   // fwd and back buttons
 
@@ -199,9 +224,11 @@ void TimeControl::_populate()
   
   int stretch = 0;
   timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
+  // timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
+  // timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
+  timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
   
   timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
