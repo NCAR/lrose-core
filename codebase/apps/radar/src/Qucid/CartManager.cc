@@ -92,13 +92,14 @@
 #include "CartManager.hh"
 #include "DisplayField.hh"
 #include "FieldTableItem.hh"
+#include "HorizWidget.hh"
 #include "MapMenuItem.hh"
 #include "ProdMenuItem.hh"
-#include "WindMenuItem.hh"
-#include "ZoomMenuItem.hh"
-#include "HorizWidget.hh"
+#include "TimeControl.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
+#include "WindMenuItem.hh"
+#include "ZoomMenuItem.hh"
 
 // cidd.h must be included AFTER qt includes because of #define None in X11/X.h
 
@@ -151,15 +152,15 @@ CartManager::CartManager(const Params &params,
   _sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
 
-  _archiveStartTimeEdit = NULL;
-  _archiveEndTimeEdit = NULL;
+  // _archiveStartTimeEdit = NULL;
+  // _archiveEndTimeEdit = NULL;
 
-  _selectedTimeLabel = NULL;
+  // _selectedTimeLabel = NULL;
   
-  _back1 = NULL;
-  _fwd1 = NULL;
-  _backPeriod = NULL;
-  _fwdPeriod = NULL;
+  // _back1 = NULL;
+  // _fwd1 = NULL;
+  // _backPeriod = NULL;
+  // _fwdPeriod = NULL;
 
   _fieldMenu = NULL;
   _fieldTable = NULL;
@@ -170,14 +171,11 @@ CartManager::CartManager(const Params &params,
   _fieldTableCurrentRow = -1;
 
   _timeControl = NULL;
-  _timeLayout = NULL;
-  _timeSlider = NULL;
+  // _timeLayout = NULL;
+  // _timeSlider = NULL;
   _timeControlPlaced = false;
-
+  
   _setArchiveMode(_params.begin_in_archive_mode);
-  _archiveStartTime.set(_params.archive_start_time);
-  _archiveEndTime = _archiveStartTime + _params.archive_time_span_secs;
-  _archiveScanIndex = 0;
 
   _imagesArchiveStartTime.set(_params.images_archive_start_time);
   _imagesArchiveEndTime.set(_params.images_archive_end_time);
@@ -460,7 +458,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     }
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
-    _goBack1();
+    _timeControl->goBack1();
+    setArchiveRetrievalPending();
 
   } else if (key == Qt::Key_Right) {
 
@@ -469,7 +468,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     }
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
-    _goFwd1();
+    _timeControl->goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
@@ -1270,28 +1269,27 @@ void CartManager::setArchiveFileList(const vector<string> &list,
     startTimeSecs =  (startTimeSecs / 300) * 300;
     time_t endTimeSecs = endTime.utime();
     endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-    _archiveStartTime.set(startTimeSecs);
-    _archiveEndTime.set(endTimeSecs);
-    _archiveScanIndex = 0;
+    _timeControl->setArchiveStartTime(startTimeSecs);
+    _timeControl->setArchiveEndTime(endTimeSecs);
+    _timeControl->setArchiveScanIndex(0);
   }
 
   _archiveFileList = list;
-  _setArchiveRetrievalPending();
+  setArchiveRetrievalPending();
 
-  if (_archiveScanIndex < 0) {
-    _archiveScanIndex = 0;
-  } else if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
-    _archiveScanIndex = _archiveFileList.size() - 1;
+  if (_timeControl->getArchiveScanIndex() < 0) {
+    _timeControl->setArchiveScanIndex(0);
+  } else if (_timeControl->getArchiveScanIndex() > (int) _archiveFileList.size() - 1) {
+    _timeControl->setArchiveScanIndex(_archiveFileList.size() - 1);
   }
 
-  if (_timeSlider) {
-    _timeSlider->setMinimum(0);
-    if (_archiveFileList.size() <= 1)
-      _timeSlider->setMaximum(1);
-    else
-      _timeSlider->setMaximum(_archiveFileList.size() - 1);
-    _timeSlider->setSliderPosition(_archiveScanIndex);
+  _timeControl->setTimeSliderMinimum(0);
+  if (_archiveFileList.size() <= 1) {
+    _timeControl->setTimeSliderMaximum(1);
+  } else {
+    _timeControl->setTimeSliderMaximum(_archiveFileList.size() - 1);
   }
+  _timeControl->setTimeSliderPosition(_timeControl->getArchiveScanIndex());
 
   // check if the paths include a day dir
 
@@ -1307,19 +1305,13 @@ void CartManager::setArchiveFileList(const vector<string> &list,
   }
 
   if (_archiveFilesHaveDayDir) {
-    _archiveStartTimeEdit->setEnabled(true);
-    _archiveEndTimeEdit->setEnabled(true);
-    _backPeriod->setEnabled(true);
-    _fwdPeriod->setEnabled(true);
+    _timeControl->setArchiveEnabled(true);
   } else {
-    _archiveStartTimeEdit->setEnabled(false);
-    _archiveEndTimeEdit->setEnabled(false);
-    _backPeriod->setEnabled(false);
-    _fwdPeriod->setEnabled(false);
+    _timeControl->setArchiveEnabled(true);
   }
 
-  _setGuiFromArchiveStartTime();
-  _setGuiFromArchiveEndTime();
+  _timeControl->setGuiFromArchiveStartTime();
+  _timeControl->setGuiFromArchiveEndTime();
 
 }
   
@@ -1403,14 +1395,14 @@ int CartManager::_getArchiveData()
   _vol.clear();
   _setupVolRead(file);
   
-  if (_archiveScanIndex >= 0 &&
-      _archiveScanIndex < (int) _archiveFileList.size()) {
+  if (_timeControl->getArchiveScanIndex() >= 0 &&
+      _timeControl->getArchiveScanIndex() < (int) _archiveFileList.size()) {
     
-    string inputPath = _archiveFileList[_archiveScanIndex];
+    string inputPath = _archiveFileList[_timeControl->getArchiveScanIndex()];
     
     if(_params.debug) {
       cerr << "  reading data file path: " << inputPath << endl;
-      cerr << "  archive file index: " << _archiveScanIndex << endl;
+      cerr << "  archive file index: " << _timeControl->getArchiveScanIndex() << endl;
     }
     
     if (file.readFromPath(inputPath, _vol)) {
@@ -1444,8 +1436,8 @@ int CartManager::_getArchiveData()
            _plotStartTime.getMin(),
            _plotStartTime.getSec());
 
-  _selectedTimeLabel->setText(text);
-
+  _timeControl->setSelectedTimeLabel(text);
+  
   // adjust angles for elevation surveillance if needed
 
   _vol.setAnglesForElevSurveillance();
@@ -2400,165 +2392,13 @@ void CartManager::_placeFieldMenu()
 void CartManager::_createTimeControl()
 {
   
-  _timeControl = new QDialog(this);
-  _timeControl->setWindowTitle("Time and movie controller");
-  QPoint pos(0,0);
-  _timeControl->move(pos);
+  _timeControl = new TimeControl(this, _params);
 
-  // QBoxLayout *timeControlLayout =
-  //   new QBoxLayout(QBoxLayout::TopToBottom, _timeControl);
-  QVBoxLayout *timeControlLayout = new QVBoxLayout(_timeControl);
-  timeControlLayout->setSpacing(0);
-  timeControlLayout->setContentsMargins(0, 0, 0, 0);
-  // timeControlLayout->insertStretch(-1, 1);
+  _timeControl->setArchiveStartTime(_params.archive_start_time);
+  _timeControl->setArchiveEndTime
+    (_timeControl->getArchiveStartTime() + _params.archive_time_span_secs);
+  _timeControl->setArchiveScanIndex(0);
 
-  // create time panel
-  
-  _timePanel = new QFrame(_timeControl);
-  timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
-  _timeLayout = new QVBoxLayout;
-  _timePanel->setLayout(_timeLayout);
-  // _timeLayout->insertStretch(-1, 1);
-
-  QFrame *timeUpper = new QFrame(_timePanel);
-  QHBoxLayout *timeUpperLayout = new QHBoxLayout;
-  timeUpperLayout->setSpacing(0);
-  timeUpperLayout->setContentsMargins(0, 0, 0, 0);
-  timeUpper->setLayout(timeUpperLayout);
-  // timeUpperLayout->insertStretch(0, 1);
-  
-  QFrame *timeLower = new QFrame(_timePanel);
-  QHBoxLayout *timeLowerLayout = new QHBoxLayout;
-  timeLowerLayout->setSpacing(0);
-  timeLowerLayout->setContentsMargins(0, 0, 0, 0);
-  timeLower->setLayout(timeLowerLayout);
-  // timeLowerLayout->insertStretch(0, 1);
-
-  _timeLayout->addWidget(timeUpper);
-  _timeLayout->addWidget(timeLower);
-  
-  // create slider
-  
-  _timeSlider = new QSlider(Qt::Horizontal);
-  _timeSlider->setFocusPolicy(Qt::StrongFocus);
-  _timeSlider->setTickPosition(QSlider::TicksBothSides);
-  _timeSlider->setTickInterval(1);
-  _timeSlider->setTracking(true);
-  _timeSlider->setSingleStep(1);
-  _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(400);
-  _timeSlider->setToolTip("Drag to change time selection");
-  
-  // active time
-  
-  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
-  _selectedTimeLabel = new QPushButton(_timePanel);
-  _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
-  QPalette pal = _selectedTimeLabel->palette();
-  pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
-  _selectedTimeLabel->setPalette(pal);
-  _selectedTimeLabel->setToolTip("This is the selected data time");
-
-  // time editing
-
-  _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate startDate(_archiveStartTime.getYear(), 
-                  _archiveStartTime.getMonth(),
-                  _archiveStartTime.getDay());
-  QTime startTime(_archiveStartTime.getHour(),
-                  _archiveStartTime.getMin(),
-                  _archiveStartTime.getSec());
-  QDateTime startDateTime(startDate, startTime);
-  _archiveStartTimeEdit->setDateTime(startDateTime);
-  _archiveStartTimeEdit->setCalendarPopup(true);
-  connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
-  _archiveStartTimeEdit->setToolTip("Start time of archive period");
-  
-  _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate endDate(_archiveEndTime.getYear(), 
-                 _archiveEndTime.getMonth(),
-                 _archiveEndTime.getDay());
-  QTime endTime(_archiveEndTime.getHour(),
-                 _archiveEndTime.getMin(),
-                 _archiveEndTime.getSec());
-  QDateTime endDateTime(endDate, endTime);
-  _archiveEndTimeEdit->setDateTime(endDateTime);
-  _archiveEndTimeEdit->setCalendarPopup(true);
-  connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
-  _archiveEndTimeEdit->setToolTip("End time of archive period");
-  
-  // fwd and back buttons
-
-  _back1 = new QPushButton(timeLower);
-  _back1->setText("<");
-  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
-  _back1->setToolTip("Go back by 1 file");
-  
-  _fwd1 = new QPushButton(timeLower);
-  _fwd1->setText(">");
-  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
-  _fwd1->setToolTip("Go forward by 1 file");
-    
-  _backPeriod = new QPushButton(timeLower);
-  _backPeriod->setText("<<");
-  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
-  _backPeriod->setToolTip("Go back by the archive time period");
-  
-  _fwdPeriod = new QPushButton(timeLower);
-  _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
-  _fwdPeriod->setToolTip("Go forward by the archive time period");
-
-  // accept cancel buttons
-
-  QPushButton *acceptButton = new QPushButton(timeUpper);
-  acceptButton->setText("Accept");
-  QPalette acceptPalette = acceptButton->palette();
-  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
-  acceptButton->setPalette(acceptPalette);
-  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
-  acceptButton->setToolTip("Accept the selected start and end times");
-
-  QPushButton *cancelButton = new QPushButton(timeUpper);
-  cancelButton->setText("Cancel");
-  QPalette cancelPalette = cancelButton->palette();
-  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
-  cancelButton->setPalette(cancelPalette);
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
-  cancelButton->setToolTip("Cancel the selected start and end times");
-    
-  // add time widgets to layout
-  
-  int stretch = 0;
-  timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
-  timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
-  
-  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
-
-  // connect slots for time slider
-  
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-          this, SLOT(_timeSliderActionTriggered(int)));
-  
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderValueChanged(int)));
-  
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
-
-  connect(_timeSlider, SIGNAL(sliderPressed()),
-          this, SLOT(_timeSliderPressed()));
 
 }
 
@@ -2617,6 +2457,8 @@ void CartManager::_brushRadiusSliderValueChanged(int value)
   // BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
 
+#ifdef JUNK
+
 ///////////////////////////////////////////////////////////////////////////////
 // print time slider actions for debugging
 
@@ -2650,7 +2492,8 @@ void CartManager::_timeSliderActionTriggered(int action) {
       default: 
         cerr << "unknown action in _timeSliderActionTriggered" << endl;
     }
-    cerr << "timeSliderActionTriggered, value: " << _timeSlider->value() << endl;
+    cerr << "timeSliderActionTriggered, value: "
+         << _timeControl->getTimeSlider()->value() << endl;
   }
 } 
 
@@ -2687,9 +2530,9 @@ void CartManager::_timeSliderReleased()
   _selectedTime = pathTime;
   _setGuiFromSelectedTime();
   // request data
-  if (_archiveScanIndex != value) {
+  if (_timeControl->getArchiveScanIndex() != value) {
     _archiveScanIndex = value;
-    _setArchiveRetrievalPending();
+    setArchiveRetrievalPending();
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
@@ -2703,6 +2546,8 @@ void CartManager::_timeSliderPressed()
     cerr << "Time slider released, value: " << value << endl;
   }
 }
+
+#endif
 
 // sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
 void CartManager::setBoundaryDir()
@@ -2724,7 +2569,7 @@ void CartManager::setBoundaryDir()
 void CartManager::_openFile()
 {
   // seed with files for the day currently in view, generate like this: *yyyymmdd*
-  string pattern = _archiveStartTime.getDateStrPlain();
+  string pattern = _timeControl->getArchiveStartTime().getDateStrPlain();
   QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
@@ -2770,7 +2615,7 @@ void CartManager::_openFile()
       setBoundaryDir();
 
       // trying this ... to get the data from the file selected
-      _setArchiveRetrievalPending();
+      setArchiveRetrievalPending();
       vector<string> list;
       list.push_back(openFilePath);
       setArchiveFileList(list, false);
@@ -2788,12 +2633,12 @@ void CartManager::_openFile()
 
     // now update the time controller window
     QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-    _setArchiveStartTimeFromGui(epoch);
+    _timeControl->setArchiveStartTime(epoch);
     QDateTime now = QDateTime::currentDateTime();
-    _setArchiveEndTimeFromGui(now);
+    _timeControl->setArchiveEndTime(now);
 
-    _archiveStartTime = _guiStartTime;
-    _archiveEndTime = _guiEndTime;
+    _timeControl->setArchiveStartTimeFromGui();
+    _timeControl->setArchiveEndTimeFromGui();
     QFileInfo fileInfo(filePath);
     string absolutePath = fileInfo.absolutePath().toStdString();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -2803,7 +2648,8 @@ void CartManager::_openFile()
     
     RadxTimeList timeList;
     timeList.setDir(absolutePath);
-    timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+    timeList.setModeInterval(_timeControl->getArchiveStartTime(),
+                             _timeControl->getArchiveEndTime());
     if (timeList.compile()) {
       cerr << "ERROR - CartManager::openFile()" << endl;
       cerr << "  " << timeList.getErrStr() << endl;
@@ -2836,10 +2682,10 @@ void CartManager::_openFile()
         cerr << "last time " << lastTime << endl;
       }
       // convert RadxTime to QDateTime
-      _archiveStartTime = firstTime;
-      _archiveEndTime = lastTime;
-      _setGuiFromArchiveStartTime();
-      _setGuiFromArchiveEndTime();
+      _timeControl->setArchiveStartTime(firstTime);
+      _timeControl->setArchiveEndTime(lastTime);
+      _timeControl->setGuiFromArchiveStartTime();
+      _timeControl->setGuiFromArchiveEndTime();
 
       _horiz->showOpeningFileMsg(false);
     } // end else pathList is not empty
@@ -2910,178 +2756,9 @@ void CartManager::_showFileChooserDialog()
 }
 
 ////////////////////////////////////////////////////////
-// set times from gui widgets
-
-void CartManager::_setArchiveStartTimeFromGui(const QDateTime &qdt)
-{
-  QDate date = qdt.date();
-  QTime time = qdt.time();
-  _guiStartTime.set(date.year(), date.month(), date.day(),
-                    time.hour(), time.minute(), time.second());
-}
-
-void CartManager::_setArchiveEndTimeFromGui(const QDateTime &qdt)
-{
-  QDate date = qdt.date();
-  QTime time = qdt.time();
-  _guiEndTime.set(date.year(), date.month(), date.day(),
-                  time.hour(), time.minute(), time.second());
-}
-
-void CartManager::_acceptGuiTimes()
-{
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
-  loadArchiveFileList();
-}
-
-void CartManager::_cancelGuiTimes()
-{
-  _setGuiFromArchiveStartTime();
-  _setGuiFromArchiveEndTime();
-}
-
-////////////////////////////////////////////////////////
-// set gui widget from archive start time
-
-void CartManager::_setGuiFromArchiveStartTime()
-{
-  if (!_archiveStartTimeEdit) {
-    return;
-  }
-  QDate date(_archiveStartTime.getYear(), 
-             _archiveStartTime.getMonth(),
-             _archiveStartTime.getDay());
-  QTime time(_archiveStartTime.getHour(),
-             _archiveStartTime.getMin(),
-             _archiveStartTime.getSec());
-  QDateTime datetime(date, time);
-  _archiveStartTimeEdit->setDateTime(datetime);
-  _guiStartTime = _archiveStartTime;
-}
-
-////////////////////////////////////////////////////////
-// set gui widget from archive end time
-
-void CartManager::_setGuiFromArchiveEndTime()
-{
-  if (!_archiveEndTimeEdit) {
-    return;
-  }
-  QDate date(_archiveEndTime.getYear(), 
-             _archiveEndTime.getMonth(),
-             _archiveEndTime.getDay());
-  QTime time(_archiveEndTime.getHour(),
-             _archiveEndTime.getMin(),
-             _archiveEndTime.getSec());
-  QDateTime datetime(date, time);
-  _archiveEndTimeEdit->setDateTime(datetime);
-  _guiEndTime = _archiveEndTime;
-}
-
-////////////////////////////////////////////////////////
-// set gui selected time label
-
-void CartManager::_setGuiFromSelectedTime()
-{
-  char text[128];
-  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           _selectedTime.getYear(),
-           _selectedTime.getMonth(),
-           _selectedTime.getDay(),
-           _selectedTime.getHour(),
-           _selectedTime.getMin(),
-           _selectedTime.getSec());
-  _selectedTimeLabel->setText(text);
-}
-
-////////////////////////////////////////////////////////
-// set archive start time
-
-void CartManager::_setArchiveStartTime(const RadxTime &rtime)
-
-{
-  _archiveStartTime = rtime;
-  if (!_archiveStartTime.isValid()) {
-    _archiveStartTime.set(RadxTime::NOW);
-  }
-  _setGuiFromArchiveStartTime();
-}
-
-////////////////////////////////////////////////////////
-// set archive end time
-
-void CartManager::_setArchiveEndTime(const RadxTime &rtime)
-
-{
-  _archiveEndTime = rtime;
-  if (!_archiveEndTime.isValid()) {
-    _archiveEndTime.set(RadxTime::NOW);
-  }
-  _setGuiFromArchiveEndTime();
-}
-
-////////////////////////////////////////////////////////
-// change start time
-
-void CartManager::_goBack1()
-{
-  if (_archiveScanIndex > 0) {
-    _archiveScanIndex -= 1;
-    _setArchiveRetrievalPending();
-  } else {
-    if (_params.debug) {
-      cerr << "At start of data, cannot go back" << endl;
-    }
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
-}
-
-void CartManager::_goBackPeriod()
-{
-
-  int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
-  _archiveStartTime -= archiveSpanSecs;
-  _archiveEndTime -= archiveSpanSecs;
-  loadArchiveFileList();
-  if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
-    _archiveScanIndex = (int) _archiveFileList.size() - 1;
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
-
-}
-
-void CartManager::_goFwd1()
-{
-  if (_archiveScanIndex < (int) _archiveFileList.size() - 1) {
-    _archiveScanIndex += 1;
-    _setArchiveRetrievalPending();
-  } else {
-    if (_params.debug) {
-      cerr << "At end of data, cannot go forward" << endl;
-    }
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
-}
-
-void CartManager::_goFwdPeriod()
-{
-
-  int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
-  _archiveStartTime += archiveSpanSecs;
-  _archiveEndTime += archiveSpanSecs;
-  loadArchiveFileList();
-  if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
-    _archiveScanIndex = (int) _archiveFileList.size() - 1;
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
-
-}
-
-////////////////////////////////////////////////////////
 // set for pending archive retrieval
 
-void CartManager::_setArchiveRetrievalPending()
+void CartManager::setArchiveRetrievalPending()
 {
   _archiveRetrievalPending = true;
 }
@@ -3194,8 +2871,9 @@ void CartManager::_createRealtimeImageFiles()
 
     // create images
 
-    _archiveEndTime = _imagesScheduledTime - delay;
-    _archiveStartTime = _archiveEndTime - _imagesScanIntervalSecs;
+    _timeControl->setArchiveEndTime(_imagesScheduledTime - delay);
+    _timeControl->setArchiveStartTime
+      (_timeControl->getArchiveEndTime() - _imagesScanIntervalSecs);
     _createImageFilesAllSweeps();
 
     // set next scheduled time
@@ -3234,9 +2912,10 @@ void CartManager::_createArchiveImageFiles()
       
       // using archive time to drive image generation
       
-      while (_archiveStartTime <= _imagesArchiveEndTime) {
+      while (_timeControl->getArchiveStartTime() <= _imagesArchiveEndTime) {
         _createImageFilesAllSweeps();
-        _archiveStartTime += _imagesScanIntervalSecs;
+        _timeControl->setArchiveStartTime(_timeControl->getArchiveStartTime() +
+                                          _imagesScanIntervalSecs);
       }
       
     }
@@ -3248,8 +2927,9 @@ void CartManager::_createArchiveImageFiles()
          stime <= _imagesArchiveEndTime;
          stime += _params.images_schedule_interval_secs) {
       
-      _archiveStartTime = stime;
-      _archiveEndTime = _archiveStartTime + _imagesScanIntervalSecs;
+      _timeControl->setArchiveStartTime(stime);
+      _timeControl->setArchiveEndTime(_timeControl->getArchiveStartTime() +
+                                      _imagesScanIntervalSecs);
       
       _createImageFilesAllSweeps();
       

@@ -213,6 +213,7 @@ MOC_SRCS = \
 	HorizWidget.cc \
 	MapMenuItem.cc \
 	ProdMenuItem.cc \
+	TimeControl.cc \
 	VertWidget.cc \
 	VertWindow.cc \
 	WindMenuItem.cc \
@@ -225,6 +226,7 @@ MOC_OUTPUT = \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
 	moc_ProdMenuItem.cpp \
+	moc_TimeControl.cpp \
 	moc_VertWidget.cpp \
 	moc_VertWindow.cpp \
 	moc_WindMenuItem.cpp \

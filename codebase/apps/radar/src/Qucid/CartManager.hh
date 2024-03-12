@@ -48,6 +48,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
+
 // #include "RayLoc.hh"
 // #include "ContextEditingView.hh"
 // #include "BoundaryPointEditor.hh"
@@ -82,6 +83,7 @@ class MapMenuItem;
 class ProdMenuItem;
 class WindMenuItem;
 class ZoomMenuItem;
+class TimeControl;
 
 class CartManager : public DisplayManager {
   
@@ -126,12 +128,19 @@ public:
 
   void setArchiveFileList(const vector<string> &list,
                           bool fromCommandLine = true);
+
+  const vector<string> &getArchiveFileList() const {
+    return _archiveFileList;
+  }
+  size_t getArchiveFileListSize() const {
+    return _archiveFileList.size();
+  }
   
   // load archive file list by searching for files
   // returns 0 on success, -1 on failure
   
   int loadArchiveFileList();
-
+  void setArchiveRetrievalPending();
 
   //  const RadxVol getDataVolume();
 
@@ -228,21 +237,6 @@ private:
   bool _archiveMode;
   bool _archiveRetrievalPending;
 
-  QDateTimeEdit *_archiveStartTimeEdit;
-  RadxTime _guiStartTime;
-  RadxTime _archiveStartTime;
-  
-  QDateTimeEdit *_archiveEndTimeEdit;
-  RadxTime _guiEndTime;
-  RadxTime _archiveEndTime;
-
-  QPushButton *_selectedTimeLabel;
-  RadxTime _selectedTime;
-
-  QPushButton *_back1;
-  QPushButton *_fwd1;
-  QPushButton *_backPeriod;
-  QPushButton *_fwdPeriod;
   QPushButton *_boundaryEditorClearBtn;
   QPushButton *_boundaryEditorHelpBtn;
   QPushButton *_boundaryEditorSaveBtn;
@@ -294,20 +288,15 @@ private:
   
   // time controller settings dialog
   
-  QDialog *_timeControl;
+  TimeControl *_timeControl;
   bool _timeControlPlaced;
 
   int _nArchiveScans;
   vector<string> _archiveFileList;
-  int _archiveScanIndex;
   bool _archiveFilesHaveDayDir;
+  
+  // sliders
 
-  // time slider
-
-  QFrame *_timePanel;
-  QVBoxLayout *_timeLayout;
-
-  QSlider *_timeSlider;
   QSlider *_circleRadiusSlider;
   QSlider *_brushRadiusSlider;
 
@@ -378,9 +367,6 @@ private:
 
   // archive mode
 
-  void _setGuiFromArchiveStartTime();
-  void _setGuiFromArchiveEndTime();
-  void _setGuiFromSelectedTime();
   void _setSweepPanelVisibility();
 
   // field menu
@@ -434,20 +420,18 @@ private slots:
 
   // archive mode
   
-  void _setArchiveStartTime(const RadxTime &rtime);
-  void _setArchiveEndTime(const RadxTime &rtime);
-  void _setArchiveStartTimeFromGui(const QDateTime &qdt);
-  void _setArchiveEndTimeFromGui(const QDateTime &qdt);
-  void _acceptGuiTimes();
-  void _cancelGuiTimes();
+  // void _setArchiveStartTime(const RadxTime &rtime);
+  // void _setArchiveEndTime(const RadxTime &rtime);
+  // void _setArchiveStartTimeFromGui(const QDateTime &qdt);
+  // void _setArchiveEndTimeFromGui(const QDateTime &qdt);
+  // void _acceptGuiTimes();
+  // void _cancelGuiTimes();
 
-  void _goBack1();
-  void _goFwd1();
-  void _goBackPeriod();
-  void _goFwdPeriod();
+  // void _goBack1();
+  // void _goFwd1();
+  // void _goBackPeriod();
+  // void _goFwdPeriod();
 
-  void _setArchiveRetrievalPending();
-  
   // field menu
   
   void _showFieldMenu();
@@ -472,10 +456,10 @@ private slots:
 
   // time slider
 
-  void _timeSliderActionTriggered(int action);
-  void _timeSliderValueChanged(int value);
-  void _timeSliderReleased();
-  void _timeSliderPressed();
+  // void _timeSliderActionTriggered(int action);
+  // void _timeSliderValueChanged(int value);
+  // void _timeSliderReleased();
+  // void _timeSliderPressed();
   
   //circle radius slider for BoundaryPointEditor
   void _circleRadiusSliderValueChanged(int value);
