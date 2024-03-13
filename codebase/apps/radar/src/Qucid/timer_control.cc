@@ -745,10 +745,8 @@ void timer_func( Notify_client   client, int which)
 
       int npts_found = 0;
       for (size_t jj = 0; jj < toks.size(); jj++) {
-        cerr << "1111111111111111 tok: " << toks[jj] << endl;
         double xx, yy;
         if (sscanf(toks[jj].c_str(), "%lg, %lg", &xx, &yy) == 2) {
-          cerr << "  222222222 xx, yy: " << xx << ", " << yy << endl;
           gd.h_win.route.x_world[jj] = xx;
           gd.h_win.route.y_world[jj] = yy;
           npts_found++;
@@ -756,7 +754,6 @@ void timer_func( Notify_client   client, int which)
       }
 
       if (npts_found == vsect.n_waypts && npts_found > 1) {
-        cerr << "333333333333333 npts_found: " << npts_found << endl;
         gd.h_win.route.total_length = 0.0;
         gd.h_win.route.num_segments = npts_found - 1;
         for (int iseg = 0; iseg < gd.h_win.route.num_segments; iseg++) {
@@ -764,7 +761,6 @@ void timer_func( Notify_client   client, int which)
             disp_proj_dist(gd.h_win.route.x_world[iseg],gd.h_win.route.y_world[iseg],
                            gd.h_win.route.x_world[iseg+1],gd.h_win.route.y_world[iseg+1]);
           gd.h_win.route.total_length += gd.h_win.route.seg_length[iseg];
-          cerr << "  33333333333333 seg_length: " << gd.h_win.route.seg_length[iseg] << endl;
         }
       }
       
@@ -802,8 +798,11 @@ void timer_func( Notify_client   client, int which)
   /***** Selected Field or movie frame has changed - Copy background image onto visible canvas *****/
   if (h_copy_flag || (gd.h_win.cur_cache_im != gd.h_win.last_cache_im)) {
 
-    if (gd.debug2) fprintf(stderr,"\nCopying Horiz grid image - field %d, index %d xid: %ld to xid: %ld\n",
-                           gd.h_win.page,index,h_xid,gd.h_win.can_xid[gd.h_win.cur_cache_im]);
+    if (gd.debug2) {
+      fprintf(stderr,
+              "\nCopying Horiz grid image - "
+              "field %d, index %d xid: %ld to xid: %ld\n",
+              gd.h_win.page,index,h_xid,gd.h_win.can_xid[gd.h_win.cur_cache_im]);
 
     if(gd.h_win.cur_cache_im == gd.h_win.last_cache_im) {
       XCopyArea(gd.dpy,h_xid,
@@ -825,10 +824,13 @@ void timer_func( Notify_client   client, int which)
 
     if(!_params.run_once_and_exit) PMU_auto_register("Rendering Products (OK)");
 
-    if (gd.debug2)
+    if (gd.debug2) {
       fprintf(stderr,
-              "\nTimer: Displaying Horiz final image - field %d, index %d xid: %ld to xid: %ld\n",
-              gd.h_win.page,index,gd.h_win.can_xid[gd.h_win.cur_cache_im],gd.h_win.vis_xid);
+              "\nTimer: Displaying Horiz final image - "
+              "field %d, index %d xid: %ld to xid: %ld\n",
+              gd.h_win.page,index,
+              gd.h_win.can_xid[gd.h_win.cur_cache_im],
+              gd.h_win.vis_xid);
 
     /* Now copy last stage pixmap to visible pixmap */
     XCopyArea(gd.dpy,gd.h_win.can_xid[gd.h_win.cur_cache_im],

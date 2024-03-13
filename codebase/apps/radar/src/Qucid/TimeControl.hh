@@ -140,6 +140,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   int getArchiveScanIndex() const { return _archiveScanIndex; }
   QSlider *getTimeSlider() { return _timeSlider; }
   
+  // populate the gui
+
+  void populateGui();
+  
  protected:
 
   CartManager *_parent;
@@ -167,10 +171,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   RadxTime _selectedTime;
   int _archiveScanIndex;
 
-  // populate the time controller
-
-  void _populate();
-  
  public slots:
 
   // void toggled(bool checked); // connected to menu button

@@ -53,7 +53,6 @@ TimeControl::TimeControl(CartManager *parent,
         _params(params)
         
 {
-  _populate();
 }
 
 // destructor
@@ -65,9 +64,9 @@ TimeControl::~TimeControl()
 }
 
 //////////////////////////////////////////////
-// populate the time panel
+// populate the time panel gui
 
-void TimeControl::_populate()
+void TimeControl::populateGui()
 {
   
   setWindowTitle("Time and movie controller");
@@ -282,6 +281,7 @@ void TimeControl::acceptGuiTimes()
 
 void TimeControl::cancelGuiTimes()
 {
+  cerr << "CCCCCCCCCCCCCCCCCCCC" << endl;
   setGuiFromArchiveStartTime();
   setGuiFromArchiveEndTime();
 }
@@ -300,6 +300,13 @@ void TimeControl::setGuiFromArchiveStartTime()
   QTime time(_archiveStartTime.getHour(),
              _archiveStartTime.getMin(),
              _archiveStartTime.getSec());
+  cerr << "4444444444 y m d h m s: "
+       << _archiveStartTime.getYear() << " "
+       << _archiveStartTime.getMonth() << " "
+       << _archiveStartTime.getDay() << " "
+       << _archiveStartTime.getHour() << " "
+       << _archiveStartTime.getMin() << " "
+       << _archiveStartTime.getSec() << endl;
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
   _guiStartTime = _archiveStartTime;
@@ -329,6 +336,9 @@ void TimeControl::setGuiFromArchiveEndTime()
 
 void TimeControl::setGuiFromSelectedTime()
 {
+  if (!_selectedTimeLabel) {
+    return;
+  }
   char text[128];
   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
            _selectedTime.getYear(),
@@ -350,6 +360,7 @@ void TimeControl::setArchiveStartTime(const RadxTime &rtime)
   if (!_archiveStartTime.isValid()) {
     _archiveStartTime.set(RadxTime::NOW);
   }
+  cerr << "zzzzzzzzzzzzzzzzzzz" << endl;
   setGuiFromArchiveStartTime();
 }
 

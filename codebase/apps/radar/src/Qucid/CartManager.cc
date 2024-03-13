@@ -1299,6 +1299,7 @@ void CartManager::setArchiveFileList(const vector<string> &list,
     _timeControl->setArchiveEnabled(true);
   }
 
+  cerr << "xxxxxxxxxxxxxxxxxxxxxx" << endl;
   _timeControl->setGuiFromArchiveStartTime();
   _timeControl->setGuiFromArchiveEndTime();
 
@@ -2379,6 +2380,8 @@ void CartManager::_createTimeControl()
     (_timeControl->getArchiveStartTime() + _params.archive_time_span_secs);
   _timeControl->setArchiveScanIndex(0);
 
+  _timeControl->populateGui();
+
 }
 
 /////////////////////////////////////
@@ -2612,10 +2615,12 @@ void CartManager::_openFile()
 
     // now update the time controller window
     QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+    cerr << "5555555555555" << endl;
     _timeControl->setArchiveStartTime(epoch);
     QDateTime now = QDateTime::currentDateTime();
     _timeControl->setArchiveEndTime(now);
 
+    cerr << "6666666666666666" << endl;
     _timeControl->setArchiveStartTimeFromGui();
     _timeControl->setArchiveEndTimeFromGui();
     QFileInfo fileInfo(filePath);
@@ -2663,6 +2668,7 @@ void CartManager::_openFile()
       // convert RadxTime to QDateTime
       _timeControl->setArchiveStartTime(firstTime);
       _timeControl->setArchiveEndTime(lastTime);
+      cerr << "yyyyyyyyyyyyyyyyy" << endl;
       _timeControl->setGuiFromArchiveStartTime();
       _timeControl->setGuiFromArchiveEndTime();
 
