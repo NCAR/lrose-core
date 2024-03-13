@@ -1048,32 +1048,33 @@ int LegacyParams::_readMainParams()
     fprintf(_tdrpFile, "debug = DEBUG_OFF;\n");
   }
   
-  // IF demo_time is set in the params
-  // Set into Archive Mode at the indicated time.
-  // Use local times for Product timestamps and user input widgets.
-  _useLocalTimestamps = _getBoolean("cidd.use_local_timestamps", 0);
+  // IF demo_time is set in the params, set to start in archive mode
+  
   string demoTimeStr = _getString("cidd.demo_time", "", false);
-  if (demoTimeStr.size() > 10) {
+  if (demoTimeStr.size() >= 12) {
     DateTime dtime;
     _parseStringIntoTime(demoTimeStr, dtime);
-    fprintf(_tdrpFile, "begin_in_archive_mode = TRUE;\n");
+    fprintf(_tdrpFile, "start_mode = MODE_ARCHIVE;\n");
     fprintf(_tdrpFile, "archive_start_time = \"%.4d %.2d %.2d %.2d %.2d %.2d\";\n",
             dtime.getYear(), dtime.getMonth(), dtime.getDay(),
             dtime.getHour(), dtime.getMin(), dtime.getSec());
+  } else {
+    fprintf(_tdrpFile, "start_mode = MODE_REALTIME;\n");
   }
-    
+  _getLong("cidd.starting_movie_frames", 12, true, "n_movie_frames");
+  double frameDurationMins = _getDouble("cidd.time_interval", 10.0, false);
+  fprintf(_tdrpFile, "frame_duration_secs = %g;\n", frameDurationMins * 60.0);
+  
   _getLong("cidd.temporal_rounding", 300);
   _getString("cidd.climo_mode", "regular");
-
-  /* Toggle for displaying the analog clock */
-  _getLong("cidd.max_time_list_span", 365);
+  
+  /* movies */
+  _getLong("cidd.max_time_list_span", 365, true, "climo_max_time_span_days");
+  _getDouble("cidd.frame_span", 10.0, true, "climo_frame_span_mins");
 
   // movies
-  _getLong("cidd.starting_movie_frames", 12);
-  _getDouble("cidd.time_interval",10.0);
-  _getDouble("cidd.frame_span", 10.0);
-  _getDouble("cidd.forecast_interval", 2.0);
-  _getDouble("cidd.past_interval", 0.0);
+  _getDouble("cidd.forecast_interval", 2.0, true, "forecast_interval_hours");
+  _getDouble("cidd.past_interval", 0.0, true, "past_interval_hours");
   _getDouble("cidd.movie_magnify_factor",1.0);
   _getBoolean("cidd.check_data_times", 0);
   _getString("cidd.movieframe_time_format", "%H%M");
@@ -3083,11 +3084,6 @@ void LegacyParams::printLegacyDefaults(ostream &out)
 void LegacyParams::_parseStringIntoTime(const string &timeStr, DateTime &dtime)
 {
 
-  // Establish the time difference between local and UTC
-
-  time_t now = time(0);
-  double tdiff = difftime(mktime(localtime(&now)), mktime(gmtime(&now)));
-  
   double field[16];
   int num_fields = STRparse_double(timeStr.c_str(), field, 40, 16);
   int year = 0, month = 0, day= 0, hour = 0, min = 0, sec = 0;
@@ -3139,12 +3135,5 @@ void LegacyParams::_parseStringIntoTime(const string &timeStr, DateTime &dtime)
   }
 
   dtime.set(year, month, day, hour, min, sec);
-
-  // Compensate for the user entering Local time
-  if(_useLocalTimestamps) {
-    time_t utime = dtime.utime();
-    utime -= tdiff;
-    dtime.set(utime);
-  }
 
 }

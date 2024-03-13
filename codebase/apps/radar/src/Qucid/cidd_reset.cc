@@ -189,7 +189,7 @@ void reset_display()
   gd.movie.active = 0;  // Indicate movie control panel is not open
 
   if(gd.movie.magnify_mode) {
-    gd.movie.time_interval /= gd.movie.magnify_factor;
+    gd.movie.time_interval_mins /= gd.movie.magnify_factor;
     gd.movie.magnify_mode = 0;  // Indicate movie 
   }
 

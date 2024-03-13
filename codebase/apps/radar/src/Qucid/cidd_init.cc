@@ -35,6 +35,7 @@
 #include "cidd.h"
 #include <shapelib/shapefil.h>
 #include <algorithm>
+#include <toolsa/DateTime.hh>
 
 static void _initGrids();
 static void _initWinds();
@@ -351,13 +352,13 @@ void init_data_space()
     gd.movie.movie_on = 0;
   }
   gd.movie.magnify_factor = _params.movie_magnify_factor;
-  gd.movie.time_interval = _params.time_interval;
-  gd.movie.frame_span = _params.frame_span;
-  gd.movie.num_frames = _params.starting_movie_frames;
+  gd.movie.time_interval_mins = _params.frame_duration_secs / 60.0;
+  gd.movie.frame_span = _params.climo_frame_span_mins;
+  gd.movie.num_frames = _params.n_movie_frames;
   gd.movie.reset_frames = _params.reset_frames;
   gd.movie.delay = _params.movie_delay;
-  gd.movie.forecast_interval = _params.forecast_interval;
-  gd.movie.past_interval = _params.past_interval;
+  gd.movie.forecast_interval = _params.forecast_interval_hours;
+  gd.movie.past_interval = _params.past_interval_hours;
   gd.movie.mr_stretch_factor = _params.time_search_stretch_factor;
   gd.movie.round_to_seconds = _params.temporal_rounding;
   gd.movie.display_time_msec = _params.movie_speed_msec;
@@ -391,7 +392,7 @@ void init_data_space()
   // Set into Archive Mode at the indicated time.
   // If demo time param is not set and command line option hasn't set archive mode
 
-  if(strlen(_params.demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE)) {
+  if(_params.start_mode == Params::MODE_REALTIME) {
     
     /* REALTIME MODE */
 
@@ -403,7 +404,7 @@ void init_data_space()
     /* set the first index's time based on current time  */
     time_t clock = time(0);    /* get current time */
     gd.movie.start_time =
-      (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval * 60.0));
+      (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval_mins * 60.0));
     gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
     gd.movie.demo_time = 0; // Indicated REAL-TIME is Native
     
@@ -420,10 +421,9 @@ void init_data_space()
       gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
       gd.coord_expt->time_seq_num++;
       
-      parse_string_into_time(_params.demo_time,&temp_utime);
-      UTIMdate_to_unix(&temp_utime);
-      /* set the first index's time  based on indicated time */
-      gd.movie.start_time = temp_utime.unix_time;
+      DateTime startTime;
+      startTime.set(_params.archive_start_time);
+      gd.movie.start_time = startTime.utime();
       
     }
     gd.movie.demo_mode = 1;
@@ -435,7 +435,7 @@ void init_data_space()
     if(_params.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
       // Offset movie frame by 1/2 frame interval so that interest time
       // lies on frame mid point
-      gd.movie.start_time -=  (time_t) (gd.movie.time_interval * 30.0);
+      gd.movie.start_time -=  (time_t) (gd.movie.time_interval_mins * 30.0);
     }
 
     gd.movie.demo_time = gd.movie.start_time;
@@ -757,7 +757,7 @@ static void _initGrids()
     mrec->cont_high = fld.contour_high;
     mrec->cont_interv = fld.contour_interval;
 
-    mrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
 
     if (fld.render_mode == Params::POLYGONS) {
       mrec->render_method = POLYGONS;
@@ -969,7 +969,7 @@ static void _initWindComponent(met_record_t *wrec,
   STRcopy(wrec->field_units, windp.units, LABEL_LENGTH);
   wrec->currently_displayed = 1;
   
-  wrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+  wrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
   wrec->h_fhdr.proj_origin_lon = 0.0;
   wrec->h_fhdr.proj_origin_lat = 0.0;
   
@@ -1146,7 +1146,7 @@ static void _initRouteWinds()
 
     STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
     mr->currently_displayed = 1;
-    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
@@ -1179,7 +1179,7 @@ static void _initRouteWinds()
     
     STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
     mr->currently_displayed = 1;
-    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
     
@@ -1212,7 +1212,7 @@ static void _initRouteWinds()
     
     STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
     mr->currently_displayed = 1;
-    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
@@ -1245,7 +1245,7 @@ static void _initRouteWinds()
 
     STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
     mr->currently_displayed = 1;
-    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 

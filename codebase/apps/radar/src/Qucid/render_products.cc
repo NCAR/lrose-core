@@ -45,8 +45,8 @@ void render_products( Drawable xid, time_t start_time, time_t end_time)
     tm = time(0);
 
     /* allow overlays to be active through at least one time interval */
-    if((start_time < tm) && (tm - start_time) < (gd.movie.time_interval * 60.0)) {
-        start_time = (time_t)(tm - (gd.movie.time_interval * 60.0));
+    if((start_time < tm) && (tm - start_time) < (gd.movie.time_interval_mins * 60.0)) {
+        start_time = (time_t)(tm - (gd.movie.time_interval_mins * 60.0));
     }
 
     // Render Native SYMPRODS Objects

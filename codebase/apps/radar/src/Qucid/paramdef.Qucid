@@ -1013,38 +1013,51 @@ commentdef {
 }
 
 commentdef {
-  p_header = "ARCHIVE MODE";
+  p_header = "STARTUP MODE and TIME parameters";
+  p_text = "Start up in REALTIME or ARCHIVE mode.";
 }
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to begin in archive mode.";
-  p_help = "If TRUE, the app will start in archive mode. If the start time is not set, the start time will be set to NOW. Otherwise, the app will start in realtime mode.";
-} begin_in_archive_mode;
+typedef enum {
+  MODE_ARCHIVE, MODE_REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = MODE_ARCHIVE;
+  p_descr = "Operating mode at start.";
+  p_help = "In ARCHIVE mode, the movie start time will be set to archive_start_time. In REALTIME mode the movie end time will be set to NOW, and the movie start time will be computed relative to the end time.";
+} start_mode;
 
 paramdef string {
-  p_default = "1970 01 01 00 00 00";
+  p_default = "2022 05 26 01 00 00";
   p_descr = "Start time for archive mode.";
-  p_help = "In archive mode, data retrieval starts at this time.";
+  p_help = "This is the start of the movie time interval.";
 } archive_start_time;
 
-paramdef double {
-  p_default = 3600;
-  p_descr = "Time span in ARCHIVE mode (secs).";
-  p_help = "Archive end time = archive_start_time + archive_time_span.";
-} archive_time_span_secs;
+commentdef {
+  p_header = "Movie loops";
+}
 
-paramdef string {
-  p_default = "20:00 5/25/2000";
-  p_descr = "Startup time for the display data.";
-  p_help = "If set, start up cidd in archival mode. Starting at the indicated time. Enter HH:MM MM/DD/YY format time string. System will startup using field 0, requesting data closest to the demo time. The movie frame will be centered on the time after applying temporal rounding.";
-} demo_time;
+paramdef int {
+  p_default = 12;
+  p_descr = "The number of frames in the movie at startup.";
+  p_help = "The movie duration is the number of frames multiplied by the frame duration.";
+} n_movie_frames;
+
+paramdef double {
+  p_default = 300;
+  p_descr = "Duration of each movie time frame (in minutes).";
+  p_help = "The data for each frame is requested for the center of the frame.";
+} frame_duration_secs;
 
 paramdef int {
   p_default = 300;
   p_descr = "Set times to the nearest value divisible by the number of seconds.";
   p_help = "";
 } temporal_rounding;
+
+commentdef {
+  p_header = "Climatology";
+}
 
 paramdef string {
   p_default = "regular";
@@ -1056,41 +1069,25 @@ paramdef int {
   p_default = 365;
   p_descr = "Maximum number of days over which to request time lists.";
   p_help = "If the epoch exceeds this number of days, then no time list requests will be made. Time lists requests spanning many years can take too long.";
-} max_time_list_span;
-
-commentdef {
-  p_header = "Movie loops";
-}
-
-paramdef int {
-  p_default = 12;
-  p_descr = "This determines how many movie frames are in the loop at startup.";
-  p_help = "Setting this high will cause the X server to hog memory.";
-} starting_movie_frames;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "Minutes per movie frame on startup.";
-  p_help = "The display will automatically update every this interval, throwing away its oldest movie frame and creating and drawing a new one.";
-} time_interval;
+} climo_max_time_span_days;
 
 paramdef double {
   p_default = 10;
   p_descr = "Span in minutes a frame covers in Climo mode.";
   p_help = "The time_interval will be either '1 day' or '1 year'";
-} frame_span;
+} climo_frame_span_mins;
 
 paramdef double {
   p_default = 24;
   p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
   p_help = "See SHOW_FORECAST_MENU menu bar button";
-} forecast_interval;
+} forecast_interval_hours;
 
 paramdef double {
   p_default = 0;
   p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
   p_help = "See SHOW_PAST_MENU menu bar button.";
-} past_interval;
+} past_interval_hours;
 
 paramdef double {
   p_default = 1;

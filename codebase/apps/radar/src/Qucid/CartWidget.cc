@@ -88,7 +88,7 @@ CartWidget::CartWidget(QWidget* parent,
 
   // mode
 
-  _archiveMode = _params.begin_in_archive_mode;
+  _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
 
   // Set up the background color
 

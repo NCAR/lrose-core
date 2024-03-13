@@ -129,7 +129,7 @@ class DLL_EXPORT HorizWidget : public CartWidget
   const RadxTime &getPlotStartTime() { return _plotStartTime; }
   const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
-  void ShowContextMenu(const QPoint &pos, RadxVol *vol);
+  void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
 
   QLabel *_openingFileInfoLabel;
   void showOpeningFileMsg(bool isVisible);

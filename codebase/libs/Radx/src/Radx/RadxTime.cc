@@ -1307,7 +1307,7 @@ void RadxTime::tokenizeString(const string strWhen,
   const char *sPtr = strWhen.c_str();
   
   // skip over any leading non-digits
-
+  
   while (*sPtr != '\0' && !isdigit(*sPtr)) {
     sPtr++;
   }

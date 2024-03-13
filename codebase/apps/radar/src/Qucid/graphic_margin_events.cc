@@ -125,7 +125,7 @@ void bot_margin_event(Event *event)
 	    // fprintf(stderr,"Time = %s\n",ctime(&click_time));
 
 	    frame = (int) ((click_time - gd.movie.start_time) /
-			  (gd.movie.time_interval * 60.0) + 1.5);
+			  (gd.movie.time_interval_mins * 60.0) + 1.5);
             
 	    if(frame < 0) frame = 0;
 	    if(frame > gd.movie.num_frames) frame = gd.movie.num_frames;

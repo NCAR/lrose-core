@@ -57,7 +57,7 @@ typedef struct {
     int    delay;                /* Number of frame ticks to delay at end of loop */
     int    round_to_seconds;    /* The number of seconds to round data times to */
     double    magnify_factor;   /* Amount to magnify time scales when switching into forecast mode */
-    double    time_interval;    /* in minutes */
+    double    time_interval_mins;   /* in minutes */
     double    mr_stretch_factor;    /* Factor to mult time_interval by for most recent data */
 
     time_t    start_time;           /* Time of the first frame */

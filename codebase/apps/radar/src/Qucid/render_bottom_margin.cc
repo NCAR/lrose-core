@@ -96,7 +96,7 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
 
     // determine time span of movie loop.
     min = gd.movie.start_time;
-    time_range = (int) (gd.movie.time_interval * 60 * gd.movie.num_frames);
+    time_range = (int) (gd.movie.time_interval_mins * 60 * gd.movie.num_frames);
     max = (time_t)(min + time_range );
 
     secs_pixel = (max - min) / (x_end - x_start);

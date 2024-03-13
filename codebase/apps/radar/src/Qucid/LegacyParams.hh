@@ -316,7 +316,6 @@ private:
   bool _debug;
   bool _debug1;
   bool _debug2;
-  bool _useLocalTimestamps;
   string _windMarkerType;
   WindRenderMode _defaultWindRenderMode;
   Cgui_P _guiConfig;

@@ -94,7 +94,7 @@ void handle_client_event()
       gd.movie.end_frame = gd.movie.num_frames -1;
       clock = time(0);
       gd.movie.start_time = clock - (time_t) ((gd.movie.num_frames -1) *
-                                              gd.movie.time_interval * 60.0);
+                                              gd.movie.time_interval_mins * 60.0);
       gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
       gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
       gd.coord_expt->time_seq_num++;
@@ -852,7 +852,7 @@ void timer_func( Notify_client   client, int which)
 			      (time_t) gd.epoch_end,
 			      (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
 			      (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
-			      (time_t)((gd.movie.time_interval * 60.0) + 0.5),
+			      (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
 			      gd.movie.num_frames); 
 
       if(gd.movie.active) gd.time_plot->Draw();

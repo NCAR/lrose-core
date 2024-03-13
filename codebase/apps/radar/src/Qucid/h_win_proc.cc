@@ -1472,7 +1472,7 @@ void main_st_proc(Panel_item item, u_int value, Event *event)
 
 	 // Reset time to now.
 	 gd.movie.start_time =  clock - (time_t) ((gd.movie.num_frames -1) *
-			       gd.movie.time_interval * 60.0);
+			       gd.movie.time_interval_mins * 60.0);
 
 	 // Round time
 	 gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
@@ -1481,7 +1481,7 @@ void main_st_proc(Panel_item item, u_int value, Event *event)
 
      //  restore movie frame interval back to original value if in magnify mode.
      if(gd.movie.magnify_mode != 0 ) {
-	   gd.movie.time_interval /= gd.movie.magnify_factor;
+	   gd.movie.time_interval_mins /= gd.movie.magnify_factor;
 	   gd.movie.magnify_mode = 0;
      }
 

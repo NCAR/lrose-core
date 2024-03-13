@@ -100,7 +100,7 @@ void reset_time_allowances()
 {
     int    i;
 
-	double allow = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+	double allow = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
 
     for(i=0; i < gd.num_datafields; i++) {
                  gd.mrec[i]->time_allowance = allow;

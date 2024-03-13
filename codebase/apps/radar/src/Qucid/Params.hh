@@ -150,6 +150,11 @@ public:
   } route_label_style_t;
 
   typedef enum {
+    MODE_ARCHIVE = 0,
+    MODE_REALTIME = 1
+  } mode_t;
+
+  typedef enum {
     CREATE_IMAGES_THEN_EXIT = 0,
     CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
@@ -765,29 +770,25 @@ public:
   char* *_route_paths;
   int route_paths_n;
 
-  tdrp_bool_t begin_in_archive_mode;
+  mode_t start_mode;
 
   char* archive_start_time;
 
-  double archive_time_span_secs;
+  int n_movie_frames;
 
-  char* demo_time;
+  double frame_duration_secs;
 
   int temporal_rounding;
 
   char* climo_mode;
 
-  int max_time_list_span;
+  int climo_max_time_span_days;
 
-  int starting_movie_frames;
+  double climo_frame_span_mins;
 
-  double time_interval;
+  double forecast_interval_hours;
 
-  double frame_span;
-
-  double forecast_interval;
-
-  double past_interval;
+  double past_interval_hours;
 
   double movie_magnify_factor;
 
@@ -1478,7 +1479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[497];
+  mutable TDRPtable _table[496];
 
   const char *_className;
 

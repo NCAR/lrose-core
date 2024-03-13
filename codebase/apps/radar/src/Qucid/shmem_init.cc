@@ -45,11 +45,11 @@ void init_shared()
   gd.coord_expt->selection_usec = 0;
   
   gd.epoch_start = (time_t)
-    (gd.movie.start_time - (gd.movie.time_interval * 30.0));   
+    (gd.movie.start_time - (gd.movie.time_interval_mins * 30.0));   
   gd.epoch_end = (time_t)
     (gd.movie.start_time +
-     (gd.movie.num_frames * gd.movie.time_interval * 60.0) -
-     (gd.movie.time_interval * 30.0)); 
+     (gd.movie.num_frames * gd.movie.time_interval_mins * 60.0) -
+     (gd.movie.time_interval_mins * 30.0)); 
 
   gd.coord_expt->epoch_start = gd.epoch_start;
   gd.coord_expt->epoch_end = gd.epoch_end;

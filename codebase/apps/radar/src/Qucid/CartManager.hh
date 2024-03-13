@@ -126,21 +126,21 @@ public:
 
   // input file list for archive mode
 
-  void setArchiveFileList(const vector<string> &list,
-                          bool fromCommandLine = true);
+  // void setArchiveFileList(const vector<string> &list,
+  //                         bool fromCommandLine = true);
 
-  const vector<string> &getArchiveFileList() const {
-    return _archiveFileList;
-  }
-  size_t getArchiveFileListSize() const {
-    return _archiveFileList.size();
-  }
+  // const vector<string> &getArchiveFileList() const {
+  //   return _archiveFileList;
+  // }
+  // size_t getArchiveFileListSize() const {
+  //   return _archiveFileList.size();
+  // }
   
   // load archive file list by searching for files
   // returns 0 on success, -1 on failure
   
-  int loadArchiveFileList();
-  void setArchiveRetrievalPending();
+  // int loadArchiveFileList();
+  // void setArchiveRetrievalPending();
 
   //  const RadxVol getDataVolume();
 
@@ -158,57 +158,56 @@ signals:
 private:
 
   static CartManager* m_pInstance;
-  string _openFilePath;
+  // // string _openFilePath;
   string _boundaryDir;
   void setBoundaryDir();
-  string getBoundaryFilePath(string boundaryFileName);
+  // string getBoundaryFilePath(string boundaryFileName);
 
-  bool _firstTime;
-  bool _urlOK;
+  // // bool _firstTime;
+  // // bool _urlOK;
 
-  // beam geometry
+  // // beam geometry
   
-  int _nGates;
-  double _maxRangeKm;
+  // // int _nGates;
+  // // double _maxRangeKm;
 
-  // ray locations
+  // // ray locations
 
-  // vector<RayLoc> _rayLoc;
+  // // vector<RayLoc> _rayLoc;
 
-  // input data
+  // // input data
   
-  RadxTime _readerRayTime;
-  RadxVol _vol;
+  // // RadxTime _readerRayTime;
+  // // RadxVol _vol;
 
-  // sweeps
+  // // sweeps
 
-  // SweepManager _sweepManager;
-  QVBoxLayout *_sweepVBoxLayout;
-  QGroupBox *_sweepPanel;
-  vector<QRadioButton *> *_sweepRButtons;
+  // // SweepManager _sweepManager;
+  // QVBoxLayout *_sweepVBoxLayout;
+  // QGroupBox *_sweepPanel;
+  // vector<QRadioButton *> *_sweepRButtons;
 
-  // windows
+  // horizontal view windows
 
   QFrame *_horizFrame;
   HorizWidget *_horiz;
+  
+  // vertical view windows
 
   VertWindow *_vertWindow;
   VertWidget *_vert;
   bool _vertWindowDisplayed;
   bool _vertMode;
   
-  // azimuths for current ray
-
-  double _prevAz;
-  double _prevEl;
-  double _startAz;
-  double _endAz;
-
-  // times for rays
+  // times for data
 
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
-  RadxTime _prevRayTime;
+
+  // archive mode
+  
+  bool _archiveMode; // false for realtime mode
+  RadxTime _archiveStartTime;// start time for archive mode
   
   // top-level menus
 
@@ -226,26 +225,11 @@ private:
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showVertAct;
-  
   QAction *_timeControllerAct;
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
 
-  // archive mode
-  
-  bool _archiveMode;
-  bool _archiveRetrievalPending;
-
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorHelpBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QPushButton *_boundaryEditorPolygonBtn;
-  QPushButton *_boundaryEditorCircleBtn;
-  QPushButton *_boundaryEditorBrushBtn;
-  QListWidget *_boundaryEditorList;
-  QLabel *_boundaryEditorInfoLabel;
-  bool forceHide = true;
 
   // field menu
   
@@ -294,32 +278,40 @@ private:
   int _nArchiveScans;
   vector<string> _archiveFileList;
   bool _archiveFilesHaveDayDir;
-  
-  // sliders
-
-  QSlider *_circleRadiusSlider;
-  QSlider *_brushRadiusSlider;
-
   RadxTime _archiveIntermediateTime;
-
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
-  RadxTime _imagesArchiveStartTime;
-  RadxTime _imagesArchiveEndTime;
-  int _imagesScanIntervalSecs;
 
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
+  RadxTime _imagesArchiveStartTime;
+  RadxTime _imagesArchiveEndTime;
+  int _imagesScanIntervalSecs;
+
+  // polygon 
+
+  QPushButton *_boundaryEditorClearBtn;
+  QPushButton *_boundaryEditorHelpBtn;
+  QPushButton *_boundaryEditorSaveBtn;
+  QPushButton *_boundaryEditorPolygonBtn;
+  QPushButton *_boundaryEditorCircleBtn;
+  QPushButton *_boundaryEditorBrushBtn;
+  QListWidget *_boundaryEditorList;
+  QLabel *_boundaryEditorInfoLabel;
+  bool forceHide = true;
+
+  QSlider *_circleRadiusSlider;
+  QSlider *_brushRadiusSlider;
 
   //////////////////////////////
   // private methods
 
   // open File 
 
-  void _openFile();
-  void _saveFile();
+  // void _openFile();
+  // void _saveFile();
   void _moveUpDown();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
@@ -367,7 +359,7 @@ private:
 
   // archive mode
 
-  void _setSweepPanelVisibility();
+  // void _setSweepPanelVisibility();
 
   // field menu
 
@@ -399,11 +391,11 @@ private slots:
 
   // sweeps
 
-  void _createSweepPanel();
-  void _createSweepRadioButtons();
-  void _clearSweepRadioButtons();
-  void _changeSweep(bool value);
-  void _changeSweepRadioButton(int value);
+  // void _createSweepPanel();
+  // void _createSweepRadioButtons();
+  // void _clearSweepRadioButtons();
+  // void _changeSweep(bool value);
+  // void _changeSweepRadioButton(int value);
 
   // local
 
@@ -449,14 +441,14 @@ private slots:
   void _saveImageToFile(bool interactive = true);
   void _createRealtimeImageFiles();
   void _createArchiveImageFiles();
-  void _createImageFilesAllSweeps();
+  void _createImageFilesAllLevels();
   void _createImageFiles();
 
   // open file 
 
-  void _createFileChooserDialog();
-  void _refreshFileChooserDialog();
-  void _showFileChooserDialog();
+  // void _createFileChooserDialog();
+  // void _refreshFileChooserDialog();
+  // void _showFileChooserDialog();
   
   // context editing (SOLO)
   void ShowContextMenu(const QPoint &pos);

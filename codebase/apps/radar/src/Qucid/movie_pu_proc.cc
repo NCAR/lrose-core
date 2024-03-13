@@ -79,7 +79,7 @@ void update_movie_popup()
   /* update the time_interval  text */
   switch(gd.movie.climo_mode) {
     case REGULAR_INTERVAL:
-      sprintf(text,"%.2f",gd.movie.time_interval);
+      sprintf(text,"%.2f",gd.movie.time_interval_mins);
       // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
       // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
       break;
@@ -120,7 +120,7 @@ void update_movie_popup()
                             (time_t) gd.epoch_end,
                             (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
                             (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
-                            (time_t)((gd.movie.time_interval * 60.0) + 0.5),
+                            (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
                             gd.movie.num_frames);
     gd.time_plot->Draw(); 
   }
@@ -260,7 +260,7 @@ void movie_type_proc(Panel_item item, int value, Event *event)
       clock = time(0);
             
       gd.movie.start_time = clock - (time_t) ((gd.movie.num_frames -1) *
-                                              gd.movie.time_interval * 60.0);
+                                              gd.movie.time_interval_mins * 60.0);
       gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
       gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
       gd.coord_expt->time_seq_num++;
@@ -378,7 +378,7 @@ void set_display_time(time_t utime)
   if(utime == gd.movie.start_time) return;
 
   /* if starting time moves more than 2 volume intervals, assume we want archive mode */
-  if(abs(last_time - utime) > (2 * gd.movie.time_interval * 60)) {
+  if(abs(last_time - utime) > (2 * gd.movie.time_interval_mins * 60)) {
     gd.movie.mode = ARCHIVE_MODE;
     gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
     gd.coord_expt->time_seq_num++;
@@ -529,7 +529,7 @@ void set_end_frame(int num_frames)
     memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
 
     // Start point changes
-    gd.movie.start_time -= (time_t) ((gd.movie.time_interval * 60.0) *
+    gd.movie.start_time -= (time_t) ((gd.movie.time_interval_mins * 60.0) *
                                      (gd.movie.num_frames - old_frames));
 
     reset_time_points();
@@ -633,11 +633,11 @@ Panel_setting time_interv_proc(Panel_item item, Event *event)
 
   switch(gd.movie.climo_mode) {
     case REGULAR_INTERVAL:
-      gd.movie.time_interval = atof(value);
+      gd.movie.time_interval_mins = atof(value);
 
       if(gd.movie.mode == REALTIME_MODE) {
         utime = time(0);
-        gd.movie.start_time = (time_t) ((utime - (gd.movie.time_interval * 60 * gd.movie.num_frames)));
+        gd.movie.start_time = (time_t) ((utime - (gd.movie.time_interval_mins * 60 * gd.movie.num_frames)));
       }
       break;
 
@@ -647,7 +647,7 @@ Panel_setting time_interv_proc(Panel_item item, Event *event)
         gd.movie.cur_frame = 0;
 
       }
-      gd.movie.time_interval = 1440.0;
+      gd.movie.time_interval_mins = 1440.0;
       break;
 
     case YEARLY_INTERVAL:
@@ -655,7 +655,7 @@ Panel_setting time_interv_proc(Panel_item item, Event *event)
         gd.movie.start_time = gd.movie.frame[gd.movie.cur_frame].time_start;
         gd.movie.cur_frame = 0;
       }
-      gd.movie.time_interval = 525600.0;
+      gd.movie.time_interval_mins = 525600.0;
       break;
 
   }
@@ -692,7 +692,7 @@ Panel_setting set_fcast_period_proc(Panel_item item, Event *event)
       clock = time(0);
       if(gd.forecast_mode) clock += (time_t) (gd.movie.forecast_interval * 60.0);
             
-      last_time = (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval * 60.0));
+      last_time = (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval_mins * 60.0));
       last_time -= (last_time % gd.movie.round_to_seconds);
 
       gd.movie.start_time = last_time;

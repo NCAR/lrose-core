@@ -511,7 +511,8 @@ int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, 
  	     -99.9, min_lat, min_lon, max_lat, max_lon);
 
       // Limit List requests to given maximum number of days 
-      if((gd.epoch_end - gd.epoch_start) < (_params.max_time_list_span * 1440  * 60)) {
+      if((gd.epoch_end - gd.epoch_start) <
+         (_params.climo_max_time_span_days * 1440  * 60)) {
         if (mr->h_mdvx->compileTimeList()) {
 	 cout << "ERROR -CIDD:  setTimeListModeValid" << endl;
 	 cout << mr->h_mdvx->getErrStr();

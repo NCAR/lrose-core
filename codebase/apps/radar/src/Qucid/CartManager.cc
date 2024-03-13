@@ -112,7 +112,7 @@ CartManager* CartManager::m_pInstance = NULL;
 
 CartManager* CartManager::Instance()
 {
-   return m_pInstance;
+  return m_pInstance;
 }
 
 // Constructor
@@ -124,24 +124,22 @@ CartManager::CartManager(const Params &params,
         // _sweepManager(params),
         _vertWindowDisplayed(false)
 {
-	m_pInstance = this;
+
+  m_pInstance = this;
 
   // initialize
 
-  _firstTime = true;
-  _urlOK = true;
+  // _firstTime = true;
+  // _urlOK = true;
 
-  _prevAz = -9999.0;
-  _prevEl = -9999.0;
-  _startAz = -9999.0;
-  _endAz = -9999.0;
-  _vertMode = false;
+  // _prevAz = -9999.0;
+  // _prevEl = -9999.0;
+  // _startAz = -9999.0;
+  // _endAz = -9999.0;
+  // _vertMode = false;
 
-  _nGates = 1000;
-  _maxRangeKm = 1.0;
-  
-  _archiveMode = false;
-  _archiveRetrievalPending = false;
+  // _nGates = 1000;
+  // _maxRangeKm = 1.0;
   
   _horizFrame = NULL;
   _horiz = NULL;
@@ -149,8 +147,8 @@ CartManager::CartManager(const Params &params,
   _vertWindow = NULL;
   _vert = NULL;
 
-  _sweepVBoxLayout = NULL;
-  _sweepPanel = NULL;
+  // _sweepVBoxLayout = NULL;
+  // _sweepPanel = NULL;
 
   _fieldMenu = NULL;
   _fieldTable = NULL;
@@ -163,8 +161,11 @@ CartManager::CartManager(const Params &params,
   _timeControl = NULL;
   _timeControlPlaced = false;
   
-  _setArchiveMode(_params.begin_in_archive_mode);
-
+  _setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
+  _archiveStartTime.set(_params.archive_start_time);
+  cerr << "TTTTTTTTTTTT archiveStartTime: " << _archiveStartTime.asString() << endl;
+  
+  
   _imagesArchiveStartTime.set(_params.images_archive_start_time);
   _imagesArchiveEndTime.set(_params.images_archive_end_time);
   _imagesScanIntervalSecs = _params.images_scan_interval_secs;
@@ -244,7 +245,7 @@ void CartManager::timerEvent(QTimerEvent *event)
       
       const FieldTableItem *item =
         (const FieldTableItem *) _fieldTable->item(_fieldTable->currentRow(),
-                                             _fieldTable->currentColumn());
+                                                   _fieldTable->currentColumn());
       
       if (item->text().toStdString().size() == 0) {
         _fieldTable->setCurrentCell(_fieldTableCurrentRow,
@@ -284,11 +285,11 @@ void CartManager::timerEvent(QTimerEvent *event)
     }
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
-    if ((_archiveMode) && (_urlOK)) {
-      _archiveRetrievalPending = true;
-    }
+    // if ((_archiveMode) && (_urlOK)) {
+    //   _archiveRetrievalPending = true;
+    // }
 
-  } // if (_firstTimerEvent)
+  } // if (_timerEventCount)
 
   _timerEventCount++;
 
@@ -302,8 +303,8 @@ void CartManager::timerEvent(QTimerEvent *event)
       }
       if (_horiz) {
         _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
-                            _clickPointFmq.getElevation(),
-                            _clickPointFmq.getRangeKm());
+                              _clickPointFmq.getElevation(),
+                              _clickPointFmq.getRangeKm());
       }
     }
   }
@@ -312,14 +313,14 @@ void CartManager::timerEvent(QTimerEvent *event)
   
   if (event->timerId() == _mainTimerId) {
     
-    if (_archiveMode) {
-      if (_archiveRetrievalPending) {
-        _handleArchiveData(/*event*/);
-        _archiveRetrievalPending = false;
-      }
-    } else {
-      _handleRealtimeData(event);
-    }
+    // if (_archiveMode) {
+    //   if (_archiveRetrievalPending) {
+    //     _handleArchiveData(/*event*/);
+    //     _archiveRetrievalPending = false;
+    //   }
+    // } else {
+    //   _handleRealtimeData(event);
+    // }
 
   }
 
@@ -447,8 +448,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
     _timeControl->goBack1();
-    setArchiveRetrievalPending();
-
+    // setArchiveRetrievalPending();
+    
   } else if (key == Qt::Key_Right) {
 
     if (_params.debug) {
@@ -491,7 +492,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
 void CartManager::_moveUpDown() 
 {
   this->setCursor(Qt::WaitCursor);
-  _plotArchiveData();
+  // _plotArchiveData();
   this->setCursor(Qt::ArrowCursor);
 }
 
@@ -570,8 +571,8 @@ void CartManager::_setupWindows()
 
   // sweep panel
 
-   // _createSweepPanel();
-   // mainLayout->addWidget(_sweepPanel);
+  // _createSweepPanel();
+  // mainLayout->addWidget(_sweepPanel);
 
   // field menu
 
@@ -608,23 +609,23 @@ void CartManager::_setupWindows()
   if (_archiveMode) {
     _showTimeControl();
   }
-  _setSweepPanelVisibility();
+  // _setSweepPanelVisibility();
 
 }
 
 //////////////////////////////
 // add/remove  sweep panel (archive mode only)
 
-void CartManager::_setSweepPanelVisibility()
-{
-  if (_sweepPanel != NULL) {
-    if (_archiveMode) {
-      _sweepPanel->setVisible(true);
-    } else {
-      _sweepPanel->setVisible(false);
-    }
-  }
-}
+// void CartManager::_setSweepPanelVisibility()
+// {
+//   if (_sweepPanel != NULL) {
+//     if (_archiveMode) {
+//       _sweepPanel->setVisible(true);
+//     } else {
+//       _sweepPanel->setVisible(false);
+//     }
+//   }
+// }
 
 //////////////////////////////
 // create actions for menus
@@ -673,7 +674,7 @@ void CartManager::_createActions()
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
   _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
   _realtimeAct->setCheckable(true);
-  _realtimeAct->setChecked(!_params.begin_in_archive_mode);
+  _realtimeAct->setChecked(_params.start_mode == Params::MODE_REALTIME);
   connect(_realtimeAct, SIGNAL(triggered(bool)),
           this, SLOT(_setRealtime(bool)));
   
@@ -809,7 +810,7 @@ void CartManager::_createMenus()
   _populateZoomsMenu();
   menuBar()->addAction(_unzoomAct);
   
-   // time selector
+  // time selector
   
   _timeMenu = menuBar()->addMenu(tr("Movie"));
   _timeMenu->addAction(_showTimeControlAct);
@@ -1097,113 +1098,113 @@ void CartManager::_populateOverlaysMenu()
 // create the sweep panel
 // buttons will be filled in by createSweepRadioButtons()
 
-void CartManager::_createSweepPanel()
-{
+// void CartManager::_createSweepPanel()
+// {
   
-  _sweepPanel = new QGroupBox("Sweeps", _main);
-  _sweepVBoxLayout = new QVBoxLayout;
-  _sweepPanel->setLayout(_sweepVBoxLayout);
-  _sweepPanel->setAlignment(Qt::AlignHCenter);
+//   _sweepPanel = new QGroupBox("Sweeps", _main);
+//   _sweepVBoxLayout = new QVBoxLayout;
+//   _sweepPanel->setLayout(_sweepVBoxLayout);
+//   _sweepPanel->setAlignment(Qt::AlignHCenter);
 
-  _sweepRButtons = new vector<QRadioButton *>();
+//   _sweepRButtons = new vector<QRadioButton *>();
 
 
-}
+// }
 
 /////////////////////////////////////////////////////////////////////
 // create radio buttons
 // this requires that _sweepManager is up to date with sweep info
 
-void CartManager::_createSweepRadioButtons() 
-{
+// void CartManager::_createSweepRadioButtons() 
+// {
 
-  // fonts
+//   // fonts
   
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont fontm2 = dummy.font();
-  int fsize = _params.label_font_size;
-  int fsizem2 = _params.label_font_size - 2;
-  font.setPixelSize(fsize);
-  fontm2.setPixelSize(fsizem2);
+//   QLabel dummy;
+//   QFont font = dummy.font();
+//   QFont fontm2 = dummy.font();
+//   int fsize = _params.label_font_size;
+//   int fsizem2 = _params.label_font_size - 2;
+//   font.setPixelSize(fsize);
+//   fontm2.setPixelSize(fsizem2);
 
-  // radar and site name
+// radar and site name
   
-  // char buf[256];
-  // _sweepRButtons = new vector<QRadioButton *>();
+// char buf[256];
+// _sweepRButtons = new vector<QRadioButton *>();
 
-  // for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
+// for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
 
-  //   std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
-  //   QRadioButton *radio1 = new QRadioButton(buf); 
-  //   radio1->setFont(fontm2);
+//   std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
+//   QRadioButton *radio1 = new QRadioButton(buf); 
+//   radio1->setFont(fontm2);
     
-  //   if (ielev == _sweepManager.getGuiIndex()) {
-  //     radio1->setChecked(true);
-  //   }
+//   if (ielev == _sweepManager.getGuiIndex()) {
+//     radio1->setChecked(true);
+//   }
     
-  //   _sweepRButtons->push_back(radio1);
-  //   _sweepVBoxLayout->addWidget(radio1);
+//   _sweepRButtons->push_back(radio1);
+//   _sweepVBoxLayout->addWidget(radio1);
     
-  //   // connect slot for sweep change
+//   // connect slot for sweep change
 
-  //   connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
+//   connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
 
-  // }
+// }
 
-}
+// // }
 
-/////////////////////////////////////////////////////////////////////
-// create sweep panel of radio buttons
+// /////////////////////////////////////////////////////////////////////
+// // create sweep panel of radio buttons
 
-void CartManager::_clearSweepRadioButtons() 
-{
+// void CartManager::_clearSweepRadioButtons() 
+// {
 
-  QLayoutItem* child;
-  if (_sweepVBoxLayout != NULL) {
-    while (_sweepVBoxLayout->count() !=0) {
-      child = _sweepVBoxLayout->takeAt(0);
-      if (child->widget() !=0) {
-        delete child->widget();
-      }
-      delete child;
-    }
-  }
+//   QLayoutItem* child;
+//   if (_sweepVBoxLayout != NULL) {
+//     while (_sweepVBoxLayout->count() !=0) {
+//       child = _sweepVBoxLayout->takeAt(0);
+//       if (child->widget() !=0) {
+//         delete child->widget();
+//       }
+//       delete child;
+//     }
+//   }
  
-}
+// }
 
 ///////////////////////////////////////////////////////////////
 // change sweep
 
-void CartManager::_changeSweep(bool value) {
+// void CartManager::_changeSweep(bool value) {
 
-  if (_params.debug) {
-    cerr << "From CartManager: the sweep was changed ";
-    cerr << endl;
-  }
+//   if (_params.debug) {
+//     cerr << "From CartManager: the sweep was changed ";
+//     cerr << endl;
+//   }
 
-  if (!value) {
-    return;
-  }
+//   if (!value) {
+//     return;
+//   }
 
-  for (size_t sweepIndex = 0; sweepIndex < _sweepRButtons->size();
-       sweepIndex++) {
-    if (_sweepRButtons->at(sweepIndex)->isChecked()) {
-      if (_params.debug) {
-        cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
-        cerr << "  moving to sweep index " << sweepIndex << endl;
-      }
-      // _sweepManager.setGuiIndex(sweepIndex);
-      _horiz->setStartOfSweep(true);
-      _vert->setStartOfSweep(true);
-      _moveUpDown();
+//   for (size_t sweepIndex = 0; sweepIndex < _sweepRButtons->size();
+//        sweepIndex++) {
+//     if (_sweepRButtons->at(sweepIndex)->isChecked()) {
+//       if (_params.debug) {
+//         cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
+//         cerr << "  moving to sweep index " << sweepIndex << endl;
+//       }
+//       // _sweepManager.setGuiIndex(sweepIndex);
+//       _horiz->setStartOfSweep(true);
+//       _vert->setStartOfSweep(true);
+//       _moveUpDown();
 
-      // reloadBoundaries();
-      return;
-    }
-  } // ii
+//       // reloadBoundaries();
+//       return;
+//     }
+//   } // ii
 
-}
+// }
 
 ///////////////////////////////////////////////////////////////
 // change sweep
@@ -1214,20 +1215,20 @@ void CartManager::_changeSweep(bool value) {
 // value = +1 move forward
 // value = -1 move backward in sweeps
 
-void CartManager::_changeSweepRadioButton(int increment)
+// void CartManager::_changeSweepRadioButton(int increment)
 
-{
+// {
   
-  if (_params.debug) {
-    cerr << "-->> changing sweep index by increment: " << increment << endl;
-  }
+//   if (_params.debug) {
+//     cerr << "-->> changing sweep index by increment: " << increment << endl;
+//   }
   
-  if (increment != 0) {
-    // _sweepManager.changeSelectedIndex(increment);
-    // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
-  }
+//   if (increment != 0) {
+//     // _sweepManager.changeSelectedIndex(increment);
+//     // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
+//   }
 
-}
+// }
 
 /////////////////////////////
 // get data in realtime mode
@@ -1244,79 +1245,79 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
 ///////////////////////////////////////
 // set input file list for archive mode
 
-void CartManager::setArchiveFileList(const vector<string> &list,
-                                     bool fromCommandLine /* = true */)
-{
+// void CartManager::setArchiveFileList(const vector<string> &list,
+//                                      bool fromCommandLine /* = true */)
+// {
 
-  if (fromCommandLine && list.size() > 0) {
-    // determine start and end time from file list
-    RadxTime startTime, endTime;
-    NcfRadxFile::getTimeFromPath(list[0], startTime);
-    NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
-    // round to nearest five minutes
-    time_t startTimeSecs = startTime.utime();
-    startTimeSecs =  (startTimeSecs / 300) * 300;
-    time_t endTimeSecs = endTime.utime();
-    endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-    _timeControl->setArchiveStartTime(startTimeSecs);
-    _timeControl->setArchiveEndTime(endTimeSecs);
-    _timeControl->setArchiveScanIndex(0);
-  }
+//   if (fromCommandLine && list.size() > 0) {
+//     // determine start and end time from file list
+//     RadxTime startTime, endTime;
+//     NcfRadxFile::getTimeFromPath(list[0], startTime);
+//     NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
+//     // round to nearest five minutes
+//     time_t startTimeSecs = startTime.utime();
+//     startTimeSecs =  (startTimeSecs / 300) * 300;
+//     time_t endTimeSecs = endTime.utime();
+//     endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
+//     _timeControl->setArchiveStartTime(startTimeSecs);
+//     _timeControl->setArchiveEndTime(endTimeSecs);
+//     _timeControl->setArchiveScanIndex(0);
+//   }
 
-  _archiveFileList = list;
-  setArchiveRetrievalPending();
+//   _archiveFileList = list;
+//   setArchiveRetrievalPending();
 
-  if (_timeControl->getArchiveScanIndex() < 0) {
-    _timeControl->setArchiveScanIndex(0);
-  } else if (_timeControl->getArchiveScanIndex() > (int) _archiveFileList.size() - 1) {
-    _timeControl->setArchiveScanIndex(_archiveFileList.size() - 1);
-  }
+//   if (_timeControl->getArchiveScanIndex() < 0) {
+//     _timeControl->setArchiveScanIndex(0);
+//   } else if (_timeControl->getArchiveScanIndex() > (int) _archiveFileList.size() - 1) {
+//     _timeControl->setArchiveScanIndex(_archiveFileList.size() - 1);
+//   }
 
-  _timeControl->setTimeSliderMinimum(0);
-  if (_archiveFileList.size() <= 1) {
-    _timeControl->setTimeSliderMaximum(1);
-  } else {
-    _timeControl->setTimeSliderMaximum(_archiveFileList.size() - 1);
-  }
-  _timeControl->setTimeSliderPosition(_timeControl->getArchiveScanIndex());
+//   _timeControl->setTimeSliderMinimum(0);
+//   if (_archiveFileList.size() <= 1) {
+//     _timeControl->setTimeSliderMaximum(1);
+//   } else {
+//     _timeControl->setTimeSliderMaximum(_archiveFileList.size() - 1);
+//   }
+//   _timeControl->setTimeSliderPosition(_timeControl->getArchiveScanIndex());
 
-  // check if the paths include a day dir
+//   // check if the paths include a day dir
 
-  _archiveFilesHaveDayDir = false;
-  if (list.size() > 0) {
-    RadxPath path0(list[0]);
-    RadxPath parentPath(path0.getDirectory());
-    string parentDir = parentPath.getFile();
-    int year, month, day;
-    if (sscanf(parentDir.c_str(), "%4d%2d%2d", &year, &month, &day) == 3) {
-      _archiveFilesHaveDayDir = true;
-    }
-  }
+//   _archiveFilesHaveDayDir = false;
+//   if (list.size() > 0) {
+//     RadxPath path0(list[0]);
+//     RadxPath parentPath(path0.getDirectory());
+//     string parentDir = parentPath.getFile();
+//     int year, month, day;
+//     if (sscanf(parentDir.c_str(), "%4d%2d%2d", &year, &month, &day) == 3) {
+//       _archiveFilesHaveDayDir = true;
+//     }
+//   }
 
-  if (_archiveFilesHaveDayDir) {
-    _timeControl->setArchiveEnabled(true);
-  } else {
-    _timeControl->setArchiveEnabled(true);
-  }
+//   if (_archiveFilesHaveDayDir) {
+//     _timeControl->setArchiveEnabled(true);
+//   } else {
+//     _timeControl->setArchiveEnabled(true);
+//   }
 
-  cerr << "xxxxxxxxxxxxxxxxxxxxxx" << endl;
-  _timeControl->setGuiFromArchiveStartTime();
-  _timeControl->setGuiFromArchiveEndTime();
+//   cerr << "xxxxxxxxxxxxxxxxxxxxxx" << endl;
+//   _timeControl->setGuiFromArchiveStartTime();
+//   _timeControl->setGuiFromArchiveEndTime();
 
-}
+// }
   
-///////////////////////////////////////////////
-// get archive file list by searching for files
-// returns 0 on success, -1 on failure
+// ///////////////////////////////////////////////
+// // get archive file list by searching for files
+// // returns 0 on success, -1 on failure
 
-int CartManager::loadArchiveFileList()
+// int CartManager::loadArchiveFileList()
 
-{
-  return 0;
+// {
+//   return 0;
 
-}
+// }
 
-///////////////////////////////////////
+//////////////////////////////////////
 // handle data in archive mode
 
 void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
@@ -1327,47 +1328,47 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
     cerr << "handling archive data ..." << endl;
   }
 
-  _horiz->setArchiveMode(true);
-  _horiz->setStartOfSweep(true);
+//   _horiz->setArchiveMode(true);
+//   _horiz->setStartOfSweep(true);
 
-  _vert->setArchiveMode(true);
-  _vert->setStartOfSweep(true);
+//   _vert->setArchiveMode(true);
+//   _vert->setStartOfSweep(true);
 
-  // set cursor to wait cursor
+//   // set cursor to wait cursor
 
-  this->setCursor(Qt::WaitCursor);
-  _timeControl->setCursor(Qt::WaitCursor);
+//   this->setCursor(Qt::WaitCursor);
+//   _timeControl->setCursor(Qt::WaitCursor);
   
-  // get data
-  try {
-    _getArchiveData();
-  } catch (FileIException &ex) {
-    this->setCursor(Qt::ArrowCursor);
-    _timeControl->setCursor(Qt::ArrowCursor);
-    return;
-  }
-  _activateArchiveRendering();
+//   // get data
+//   try {
+//     _getArchiveData();
+//   } catch (FileIException &ex) {
+//     this->setCursor(Qt::ArrowCursor);
+//     _timeControl->setCursor(Qt::ArrowCursor);
+//     return;
+//   }
+//   _activateArchiveRendering();
 
-  // set up sweep GUI
+//   // set up sweep GUI
 
-  _clearSweepRadioButtons();
-  _createSweepRadioButtons();
+//   _clearSweepRadioButtons();
+//   _createSweepRadioButtons();
   
-  if (_vol.checkIsRhi()) {
-    _vertMode = true;
-  } else {
-    _vertMode = false;
-  }
+//   if (_vol.checkIsRhi()) {
+//     _vertMode = true;
+//   } else {
+//     _vertMode = false;
+//   }
 
-  // plot the data
+//   // plot the data
   
-  _plotArchiveData();
-  this->setCursor(Qt::ArrowCursor);
-  _timeControl->setCursor(Qt::ArrowCursor);
+//   _plotArchiveData();
+//   this->setCursor(Qt::ArrowCursor);
+//   _timeControl->setCursor(Qt::ArrowCursor);
 
-  if (_firstTime) {
-    _firstTime = false;
-  }
+  // if (_firstTime) {
+  //   _firstTime = false;
+  // }
   
 }
 
@@ -1375,534 +1376,534 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
-int CartManager::_getArchiveData()
+// int CartManager::_getArchiveData()
 
-{
+// {
 
-  // set up file object for reading
+//   // set up file object for reading
   
-  RadxFile file;
-  _vol.clear();
-  _setupVolRead(file);
+//   RadxFile file;
+//   _vol.clear();
+//   _setupVolRead(file);
   
-  if (_timeControl->getArchiveScanIndex() >= 0 &&
-      _timeControl->getArchiveScanIndex() < (int) _archiveFileList.size()) {
+//   if (_timeControl->getArchiveScanIndex() >= 0 &&
+//       _timeControl->getArchiveScanIndex() < (int) _archiveFileList.size()) {
     
-    string inputPath = _archiveFileList[_timeControl->getArchiveScanIndex()];
+//     string inputPath = _archiveFileList[_timeControl->getArchiveScanIndex()];
     
-    if(_params.debug) {
-      cerr << "  reading data file path: " << inputPath << endl;
-      cerr << "  archive file index: "
-           << _timeControl->getArchiveScanIndex() << endl;
-    }
+//     if(_params.debug) {
+//       cerr << "  reading data file path: " << inputPath << endl;
+//       cerr << "  archive file index: "
+//            << _timeControl->getArchiveScanIndex() << endl;
+//     }
     
-    if (file.readFromPath(inputPath, _vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "CartManager::_getArchiveData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + inputPath + "\n";
-      cerr << errMsg;
-      if (!_params.images_auto_create)  {
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-      }
-      return -1;
-    } 
+//     if (file.readFromPath(inputPath, _vol)) {
+//       string errMsg = "ERROR - Cannot retrieve archive data\n";
+//       errMsg += "CartManager::_getArchiveData\n";
+//       errMsg += file.getErrStr() + "\n";
+//       errMsg += "  path: " + inputPath + "\n";
+//       cerr << errMsg;
+//       if (!_params.images_auto_create)  {
+//         QErrorMessage errorDialog;
+//         errorDialog.setMinimumSize(400, 250);
+//         errorDialog.showMessage(errMsg.c_str());
+//         errorDialog.exec();
+//       }
+//       return -1;
+//     } 
 
-  }
+//   }
 
-  // set plot times
+//   // set plot times
   
-  _plotStartTime = _vol.getStartTimeSecs();
-  _plotEndTime = _vol.getEndTimeSecs();
+//   _plotStartTime = _vol.getStartTimeSecs();
+//   _plotEndTime = _vol.getEndTimeSecs();
 
-  char text[128];
-  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           _plotStartTime.getYear(),
-           _plotStartTime.getMonth(),
-           _plotStartTime.getDay(),
-           _plotStartTime.getHour(),
-           _plotStartTime.getMin(),
-           _plotStartTime.getSec());
+//   char text[128];
+//   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+//            _plotStartTime.getYear(),
+//            _plotStartTime.getMonth(),
+//            _plotStartTime.getDay(),
+//            _plotStartTime.getHour(),
+//            _plotStartTime.getMin(),
+//            _plotStartTime.getSec());
 
-  _timeControl->setSelectedTimeLabel(text);
+//   _timeControl->setSelectedTimeLabel(text);
   
-  // adjust angles for elevation surveillance if needed
+//   // adjust angles for elevation surveillance if needed
 
-  _vol.setAnglesForElevSurveillance();
+//   _vol.setAnglesForElevSurveillance();
 
-  // compute the fixed angles from the rays
-  // so that we reflect reality
+//   // compute the fixed angles from the rays
+//   // so that we reflect reality
   
-  _vol.computeFixedAnglesFromRays();
+//   _vol.computeFixedAnglesFromRays();
 
-  // load the sweep manager
+//   // load the sweep manager
   
-  // _sweepManager.set(_vol);
+//   // _sweepManager.set(_vol);
 
-   _platform = _vol.getPlatform();
+//    _platform = _vol.getPlatform();
    
-  return 0;
+//   return 0;
 
-}
+// }
 
 
 /////////////////////////////
 // apply new, edited  data in archive mode
 // the volume has been updated 
 
-void CartManager::_applyDataEdits()
-{
+// void CartManager::_applyDataEdits()
+// {
 
-  if (_params.debug) {
-    std::ofstream outfile("/tmp/voldebug_CartManager_applyDataEdits.txt");
-    _vol.printWithFieldData(outfile);  
-    outfile << "_vol = " << &_vol << endl;
-  }
+//   if (_params.debug) {
+//     std::ofstream outfile("/tmp/voldebug_CartManager_applyDataEdits.txt");
+//     _vol.printWithFieldData(outfile);  
+//     outfile << "_vol = " << &_vol << endl;
+//   }
 
-  _plotArchiveData();
-}
+//   _plotArchiveData();
+// }
 
 /////////////////////////////
 // plot data in archive mode
 
-void CartManager::_plotArchiveData()
+// void CartManager::_plotArchiveData()
 
-{
+// {
 
-  if(_params.debug) {
-    cerr << "Plotting archive data" << endl;
-    cerr << "  volume start time: " << _plotStartTime.asString() << endl;
-  }
+//   if(_params.debug) {
+//     cerr << "Plotting archive data" << endl;
+//     cerr << "  volume start time: " << _plotStartTime.asString() << endl;
+//   }
 
-  // handle the rays
+// handle the rays
 
-  // const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-  // for (size_t ii = gsweep.radx->getStartRayIndex();
-  //      ii <= gsweep.radx->getEndRayIndex(); ii++) {
-  //   RadxRay *ray = rays[ii];
-  //   _handleRay(_platform, ray);
-  //   if (ii == 0) {
-  //     _updateStatusPanel(ray);
-  //   }
-  // }
+// const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
+// for (size_t ii = gsweep.radx->getStartRayIndex();
+//      ii <= gsweep.radx->getEndRayIndex(); ii++) {
+//   RadxRay *ray = rays[ii];
+//   _handleRay(_platform, ray);
+//   if (ii == 0) {
+//     _updateStatusPanel(ray);
+//   }
+// }
   
-}
+// }
 
 //////////////////////////////////////////////////
 // set up read
 
-void CartManager::_setupVolRead(RadxFile &file)
-{
+// void CartManager::_setupVolRead(RadxFile &file)
+// {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setDebug(true);
-    file.setVerbose(true);
-  }
+//   if (_params.debug >= Params::DEBUG_VERBOSE) {
+//     file.setDebug(true);
+//   }
+//   if (_params.debug >= Params::DEBUG_EXTRA) {
+//     file.setDebug(true);
+//     file.setVerbose(true);
+//   }
 
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    const DisplayField *field = _fields[ifield];
-    file.addReadField(field->getName());
-  }
+//   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+//     const DisplayField *field = _fields[ifield];
+//     file.addReadField(field->getName());
+//   }
 
-}
+// }
 
 //////////////////////////////////////////////////////////////
 // handle an incoming ray
 
-void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
+// void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
-{
+// {
 
-  if (ray->getNGates() < 1) {
-    return;
-  }
+//   if (ray->getNGates() < 1) {
+//     return;
+//   }
 
-  // do we need to reconfigure the HORIZ?
+//   // do we need to reconfigure the HORIZ?
 
-  _nGates = ray->getNGates();
-  double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  _maxRangeKm = maxRange;
-  _horiz->configureRange(_maxRangeKm);
-  _vert->configureRange(_maxRangeKm);
+//   _nGates = ray->getNGates();
+//   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
+//   _maxRangeKm = maxRange;
+//   _horiz->configureRange(_maxRangeKm);
+//   _vert->configureRange(_maxRangeKm);
 
-  // create 2D field data vector
+//   // create 2D field data vector
 
-  vector< vector<double> > fieldData;
-  fieldData.resize(_fields.size());
+//   vector< vector<double> > fieldData;
+//   fieldData.resize(_fields.size());
   
-  // fill data vector
+//   // fill data vector
 
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+//   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
 
-    vector<double> &data = fieldData[ifield];
-    data.resize(_nGates);
-    RadxField *rfld = ray->getField(_fields[ifield]->getName());
+//     vector<double> &data = fieldData[ifield];
+//     data.resize(_nGates);
+//     RadxField *rfld = ray->getField(_fields[ifield]->getName());
 
-    // at this point, we know the data values for the field AND the color map                                                                        
-    bool haveColorMap = _fields[ifield]->haveColorMap();
-    Radx::fl32 min = FLT_MAX;;
-    Radx::fl32 max = FLT_MIN;
+//     // at this point, we know the data values for the field AND the color map                                                                        
+//     bool haveColorMap = _fields[ifield]->haveColorMap();
+//     Radx::fl32 min = FLT_MAX;;
+//     Radx::fl32 max = FLT_MIN;
 
-    if (rfld == NULL) {
-      // fill with missing
-      for (int igate = 0; igate < _nGates; igate++) {
-        data[igate] = -9999.0;
-      }
-    } else {
-      rfld->convertToFl32();
-      const Radx::fl32 *fdata = rfld->getDataFl32();
-      const Radx::fl32 missingVal = rfld->getMissingFl32();
-      // we can only look at the data available, so only go to nGates
-      for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
-        Radx::fl32 val = *fdata;
-        if (fabs(val - missingVal) < 0.0001) {
-          data[igate] = -9999.0;
-        } else {
-          data[igate] = val;
-          if (!haveColorMap) {
-            // keep track of min and max data values
-	    // just display something.  The color scale can be edited as needed, later.
-	    bool newMinOrMax = false;
-            if (val < min) {
-              min = *fdata;
-	      newMinOrMax = true;
-	    }
-            if (val > max) {
-	      max = *fdata;
-	      newMinOrMax = true;
-	    }
-	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
-	      printf("field index %zu, gate %d \t", ifield, igate);
-	      printf("new min, max of data %g, %g\t", min,  max);
-	      printf("missing value %g\t", missingVal);
-	      printf("current value %g\n", val);
-	    }
-          }
-        } // end else not missing value
-      } // end for each gate
+//     if (rfld == NULL) {
+//       // fill with missing
+//       for (int igate = 0; igate < _nGates; igate++) {
+//         data[igate] = -9999.0;
+//       }
+//     } else {
+//       rfld->convertToFl32();
+//       const Radx::fl32 *fdata = rfld->getDataFl32();
+//       const Radx::fl32 missingVal = rfld->getMissingFl32();
+//       // we can only look at the data available, so only go to nGates
+//       for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
+//         Radx::fl32 val = *fdata;
+//         if (fabs(val - missingVal) < 0.0001) {
+//           data[igate] = -9999.0;
+//         } else {
+//           data[igate] = val;
+//           if (!haveColorMap) {
+//             // keep track of min and max data values
+// 	    // just display something.  The color scale can be edited as needed, later.
+// 	    bool newMinOrMax = false;
+//             if (val < min) {
+//               min = *fdata;
+// 	      newMinOrMax = true;
+// 	    }
+//             if (val > max) {
+// 	      max = *fdata;
+// 	      newMinOrMax = true;
+// 	    }
+// 	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+// 	      printf("field index %zu, gate %d \t", ifield, igate);
+// 	      printf("new min, max of data %g, %g\t", min,  max);
+// 	      printf("missing value %g\t", missingVal);
+// 	      printf("current value %g\n", val);
+// 	    }
+//           }
+//         } // end else not missing value
+//       } // end for each gate
       
-      if (!haveColorMap) {                              
-        _fields[ifield]->setColorMapRange(min, max);
-        _fields[ifield]->changeColorMap(); // just change bounds on existing map
-      } // end do not have color map
+//       if (!haveColorMap) {                              
+//         _fields[ifield]->setColorMapRange(min, max);
+//         _fields[ifield]->changeColorMap(); // just change bounds on existing map
+//       } // end do not have color map
 
-    } // end else vector not NULL
-  } // end for each field
+//     } // end else vector not NULL
+//   } // end for each field
 
-  // Store the ray location (which also sets _startAz and _endAz), then
-  // draw beam on the HORIZ or VERT, as appropriate
+//   // Store the ray location (which also sets _startAz and _endAz), then
+//   // draw beam on the HORIZ or VERT, as appropriate
 
-  if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
+//   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
+//       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
-    _vertMode = true;
+//     _vertMode = true;
 
-    // If this is the first VERT beam we've encountered, automatically open
-    // the VERT window.  After this, opening and closing the window will be
-    // left to the user.
+//     // If this is the first VERT beam we've encountered, automatically open
+//     // the VERT window.  After this, opening and closing the window will be
+//     // left to the user.
 
-    if (!_vertWindowDisplayed) {
-      _vertWindow->show();
-      _vertWindow->resize();
-      _vertWindowDisplayed = true;
-    }
+//     if (!_vertWindowDisplayed) {
+//       _vertWindow->show();
+//       _vertWindow->resize();
+//       _vertWindowDisplayed = true;
+//     }
 
-    // Add the beam to the display
+//     // Add the beam to the display
 
-    _vert->addBeam(ray, fieldData, _fields);
-    _vertWindow->setAzimuth(ray->getAzimuthDeg());
-    _vertWindow->setElevation(ray->getElevationDeg());
+//     _vert->addBeam(ray, fieldData, _fields);
+//     _vertWindow->setAzimuth(ray->getAzimuthDeg());
+//     _vertWindow->setElevation(ray->getElevationDeg());
     
-  } else {
+//   } else {
 
-    _vertMode = false;
+//     _vertMode = false;
 
-    // check for elevation surveillance sweep mode
-    // in this case, set azimuth to rotation if georef is available
+//     // check for elevation surveillance sweep mode
+//     // in this case, set azimuth to rotation if georef is available
 
-    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-      ray->setAnglesForElevSurveillance();
-    }
+//     if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+//       ray->setAnglesForElevSurveillance();
+//     }
 
-    // Store the ray location using the azimuth angle and the HORIZ location
-    // table
+//     // Store the ray location using the azimuth angle and the HORIZ location
+//     // table
 
-    double az = ray->getAzimuthDeg();
-    _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH());
+//     double az = ray->getAzimuthDeg();
+//     _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH());
 
-    // Save the angle information for the next iteration
+//     // Save the angle information for the next iteration
 
-    _prevAz = az;
-    _prevEl = -9999.0;
+//     _prevAz = az;
+//     _prevEl = -9999.0;
 
-    // Add the beam to the display
+//     // Add the beam to the display
 
-    _horiz->addBeam(ray, _startAz, _endAz, fieldData, _fields);
+//     _horiz->addBeam(ray, _startAz, _endAz, fieldData, _fields);
 
-  }
+//   }
   
-}
+// }
 
 ///////////////////////////////////////////////////////////
 // store ray location
 
-void CartManager::_storeRayLoc(const RadxRay *ray, 
-                               const double az,
-                               const double beam_width)
-{
+// void CartManager::_storeRayLoc(const RadxRay *ray, 
+//                                const double az,
+//                                const double beam_width)
+// {
 
-#ifdef NOTNOW
+// #ifdef NOTNOW
   
-  LOG(DEBUG_VERBOSE) << "az = " << az << " beam_width = " << beam_width;
+//   LOG(DEBUG_VERBOSE) << "az = " << az << " beam_width = " << beam_width;
 
-  // Determine the extent of this ray
+//   // Determine the extent of this ray
 
-  if (_params.horiz_override_rendering_beam_width) {
-    double half_angle = _params.horiz_rendering_beam_width / 2.0;
-    _startAz = az - half_angle - 0.1;
-    _endAz = az + half_angle + 0.1;
-  } else if (ray->getIsIndexed()) {
-    double half_angle = ray->getAngleResDeg() / 2.0;
-    _startAz = az - half_angle - 0.1;
-    _endAz = az + half_angle + 0.1;
-  } else {
-    double beam_width_min = beam_width;
-    if (beam_width_min < 0) 
-      beam_width_min = 10.0;
+//   if (_params.horiz_override_rendering_beam_width) {
+//     double half_angle = _params.horiz_rendering_beam_width / 2.0;
+//     _startAz = az - half_angle - 0.1;
+//     _endAz = az + half_angle + 0.1;
+//   } else if (ray->getIsIndexed()) {
+//     double half_angle = ray->getAngleResDeg() / 2.0;
+//     _startAz = az - half_angle - 0.1;
+//     _endAz = az + half_angle + 0.1;
+//   } else {
+//     double beam_width_min = beam_width;
+//     if (beam_width_min < 0) 
+//       beam_width_min = 10.0;
 
-    double max_half_angle = beam_width_min / 2.0;
-    double prev_offset = max_half_angle;
-    if (_prevAz > 0.0) { // >= 0.0) {
-      double az_diff = az - _prevAz;
-      if (az_diff < 0.0)
-	az_diff += 360.0;
-      double half_az_diff = az_diff / 2.0;
+//     double max_half_angle = beam_width_min / 2.0;
+//     double prev_offset = max_half_angle;
+//     if (_prevAz > 0.0) { // >= 0.0) {
+//       double az_diff = az - _prevAz;
+//       if (az_diff < 0.0)
+// 	az_diff += 360.0;
+//       double half_az_diff = az_diff / 2.0;
 	
-      if (prev_offset > half_az_diff)
-	prev_offset = half_az_diff;
-    }
-    _startAz = az - prev_offset - 0.1;
-    _endAz = az + max_half_angle + 0.1;
-  }
+//       if (prev_offset > half_az_diff)
+// 	prev_offset = half_az_diff;
+//     }
+//     _startAz = az - prev_offset - 0.1;
+//     _endAz = az + max_half_angle + 0.1;
+//   }
     
-  // store
-  // HERE !!! fix up negative values here or in clearRayOverlap??
-  if (_startAz < 0) _startAz += 360.0;
-  if (_endAz < 0) _endAz += 360.0;
-  if (_startAz >= 360) _startAz -= 360.0;
-  if (_endAz >= 360) _endAz -= 360.0;
+//   // store
+//   // HERE !!! fix up negative values here or in clearRayOverlap??
+//   if (_startAz < 0) _startAz += 360.0;
+//   if (_endAz < 0) _endAz += 360.0;
+//   if (_startAz >= 360) _startAz -= 360.0;
+//   if (_endAz >= 360) _endAz -= 360.0;
     
-  LOG(DEBUG_VERBOSE) << " startAz = " << _startAz << " endAz = " << _endAz;
+//   LOG(DEBUG_VERBOSE) << " startAz = " << _startAz << " endAz = " << _endAz;
 
-  // compute start and end indices, using modulus to keep with array bounds
+//   // compute start and end indices, using modulus to keep with array bounds
 
-  int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
+//   int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
+//   int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
 
-  // Clear out any rays in the locations list that are overlapped by the
-  // new ray
+//   // Clear out any rays in the locations list that are overlapped by the
+//   // new ray
     
-  if (startIndex > endIndex) {
+//   if (startIndex > endIndex) {
 
-    // area crosses the 360; 0 boundary; must break into two sections
+//     // area crosses the 360; 0 boundary; must break into two sections
 
-    // first from start index to 360
+//     // first from start index to 360
     
-    _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
+//     _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
 
-    for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = startIndex;
-      _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
-    }
+//     for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
+//       _rayLoc[ii].ray = ray;
+//       _rayLoc[ii].active = true;
+//       _rayLoc[ii].startIndex = startIndex;
+//       _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
+//     }
 
-    // then from 0 to end index
+//     // then from 0 to end index
     
-    _clearRayOverlap(0, endIndex);
+//     _clearRayOverlap(0, endIndex);
 
-    // Set the locations associated with this ray
+//     // Set the locations associated with this ray
     
-    for (int ii = 0; ii <= endIndex; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = 0;
-      _rayLoc[ii].endIndex = endIndex;
-    }
+//     for (int ii = 0; ii <= endIndex; ii++) {
+//       _rayLoc[ii].ray = ray;
+//       _rayLoc[ii].active = true;
+//       _rayLoc[ii].startIndex = 0;
+//       _rayLoc[ii].endIndex = endIndex;
+//     }
 
-  } else { // if (startIndex > endIndex) 
+//   } else { // if (startIndex > endIndex) 
 
-    _clearRayOverlap(startIndex, endIndex);
+//     _clearRayOverlap(startIndex, endIndex);
     
-    // Set the locations associated with this ray
+//     // Set the locations associated with this ray
 
-    for (int ii = startIndex; ii <= endIndex; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = startIndex;
-      _rayLoc[ii].endIndex = endIndex;
-    }
+//     for (int ii = startIndex; ii <= endIndex; ii++) {
+//       _rayLoc[ii].ray = ray;
+//       _rayLoc[ii].active = true;
+//       _rayLoc[ii].startIndex = startIndex;
+//       _rayLoc[ii].endIndex = endIndex;
+//     }
 
-  } // if (startIndex > endIndex)
+//   } // if (startIndex > endIndex)
 
-#endif
+// #endif
 
-}
+// }
 
  
 ///////////////////////////////////////////////////////////
 // clear any locations that are overlapped by the given ray
 
-void CartManager::_clearRayOverlap(const int start_index, const int end_index)
-{
+// void CartManager::_clearRayOverlap(const int start_index, const int end_index)
+// {
 
-#ifdef NOTNOW
+// #ifdef NOTNOW
   
-  LOG(DEBUG_VERBOSE) << "enter" << " start_index=" << start_index <<
-    " end_index = " << end_index;
+//   LOG(DEBUG_VERBOSE) << "enter" << " start_index=" << start_index <<
+//     " end_index = " << end_index;
 
-  if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
-    cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
-    return;
-  }
-  if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
-    cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
-    return;
-  }
+//   if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
+//     cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
+//     return;
+//   }
+//   if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
+//     cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
+//     return;
+//   }
 
-  // Loop through the ray locations, clearing out old information
+//   // Loop through the ray locations, clearing out old information
 
-  int i = start_index;
+//   int i = start_index;
   
-  while (i <= end_index) {
+//   while (i <= end_index) {
 
-    RayLoc &loc = _rayLoc[i];
+//     RayLoc &loc = _rayLoc[i];
     
-    // If this location isn't active, we can skip it
+//     // If this location isn't active, we can skip it
 
-    if (!loc.active) {
-      // LOG(DEBUG_VERBOSE) << "loc NOT active";
-      ++i;
-      continue;
-    }
+//     if (!loc.active) {
+//       // LOG(DEBUG_VERBOSE) << "loc NOT active";
+//       ++i;
+//       continue;
+//     }
     
-    int loc_start_index = loc.startIndex;
-    int loc_end_index = loc.endIndex;
+//     int loc_start_index = loc.startIndex;
+//     int loc_end_index = loc.endIndex;
 
-    if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
-      cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
-      ++i;
-      continue;
-    }
-    if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
-      cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
-      ++i;
-      continue;
-    }
+//     if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
+//       cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
+//       ++i;
+//       continue;
+//     }
+//     if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
+//       cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
+//       ++i;
+//       continue;
+//     }
 
-    if (loc_end_index < i) {
-      cout << " OH NO! We are HERE" << endl;
-      ++i;
-      continue;
-    }
-    // If we get here, this location is active.  We now have 4 possible
-    // situations:
+//     if (loc_end_index < i) {
+//       cout << " OH NO! We are HERE" << endl;
+//       ++i;
+//       continue;
+//     }
+//     // If we get here, this location is active.  We now have 4 possible
+//     // situations:
 
-    if (loc.startIndex < start_index && loc.endIndex <= end_index) {
+//     if (loc.startIndex < start_index && loc.endIndex <= end_index) {
 
-      // The overlap area covers the end of the current beam.  Reduce the
-      // current beam down to just cover the area before the overlap area.
-      LOG(DEBUG_VERBOSE) << "Case 1a:";
-      LOG(DEBUG_VERBOSE) << " i = " << i;
-      LOG(DEBUG_VERBOSE) << "clearing from start_index=" << start_index <<
-	  " to loc_end_index=" << loc_end_index;
+//       // The overlap area covers the end of the current beam.  Reduce the
+//       // current beam down to just cover the area before the overlap area.
+//       LOG(DEBUG_VERBOSE) << "Case 1a:";
+//       LOG(DEBUG_VERBOSE) << " i = " << i;
+//       LOG(DEBUG_VERBOSE) << "clearing from start_index=" << start_index <<
+// 	  " to loc_end_index=" << loc_end_index;
       
-      for (int j = start_index; j <= loc_end_index; ++j) {
+//       for (int j = start_index; j <= loc_end_index; ++j) {
 
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
+// 	_rayLoc[j].ray = NULL;
+// 	_rayLoc[j].active = false;
 
-      }
+//       }
 
-      // Update the end indices for the remaining locations in the current
-      // beam
-      LOG(DEBUG_VERBOSE) << "Case 1b:";
-      LOG(DEBUG_VERBOSE) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
-	  " to start_index=" << start_index;
+//       // Update the end indices for the remaining locations in the current
+//       // beam
+//       LOG(DEBUG_VERBOSE) << "Case 1b:";
+//       LOG(DEBUG_VERBOSE) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
+// 	  " to start_index=" << start_index;
       
-      for (int j = loc_start_index; j < start_index; ++j)
-	_rayLoc[j].endIndex = start_index - 1;
+//       for (int j = loc_start_index; j < start_index; ++j)
+// 	_rayLoc[j].endIndex = start_index - 1;
 
-    } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
+//     } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
       
-      // The current beam is bigger than the overlap area.  This should never
-      // happen, so go ahead and just clear out the locations for the current
-      // beam.
-      LOG(DEBUG_VERBOSE) << "Case 2:";
-      LOG(DEBUG_VERBOSE) << " i = " << i;
-      LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
+//       // The current beam is bigger than the overlap area.  This should never
+//       // happen, so go ahead and just clear out the locations for the current
+//       // beam.
+//       LOG(DEBUG_VERBOSE) << "Case 2:";
+//       LOG(DEBUG_VERBOSE) << " i = " << i;
+//       LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
+// 	  " to loc_end_index=" << loc_end_index;
       
-      for (int j = loc_start_index; j <= loc_end_index; ++j) {
-        _rayLoc[j].clear();
-      }
+//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
+//         _rayLoc[j].clear();
+//       }
 
-    } else if (loc.endIndex > end_index) {
+//     } else if (loc.endIndex > end_index) {
       
-      // The overlap area covers the beginning of the current beam.  Reduce the
-      // current beam down to just cover the area after the overlap area.
+//       // The overlap area covers the beginning of the current beam.  Reduce the
+//       // current beam down to just cover the area after the overlap area.
 
-	LOG(DEBUG_VERBOSE) << "Case 3a:";
-	LOG(DEBUG_VERBOSE) << " i = " << i;
-	LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to end_index=" << end_index;
+// 	LOG(DEBUG_VERBOSE) << "Case 3a:";
+// 	LOG(DEBUG_VERBOSE) << " i = " << i;
+// 	LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
+// 	  " to end_index=" << end_index;
 
-      for (int j = loc_start_index; j <= end_index; ++j) {
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
-      }
+//       for (int j = loc_start_index; j <= end_index; ++j) {
+// 	_rayLoc[j].ray = NULL;
+// 	_rayLoc[j].active = false;
+//       }
 
-      // Update the start indices for the remaining locations in the current
-      // beam
+//       // Update the start indices for the remaining locations in the current
+//       // beam
 
-      LOG(DEBUG_VERBOSE) << "Case 3b:";
-      LOG(DEBUG_VERBOSE) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
-	  " to loc_end_index=" << loc_end_index;
+//       LOG(DEBUG_VERBOSE) << "Case 3b:";
+//       LOG(DEBUG_VERBOSE) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
+// 	  " to loc_end_index=" << loc_end_index;
       
-      for (int j = end_index + 1; j <= loc_end_index; ++j) {
-	_rayLoc[j].startIndex = end_index + 1;
-      }
+//       for (int j = end_index + 1; j <= loc_end_index; ++j) {
+// 	_rayLoc[j].startIndex = end_index + 1;
+//       }
 
-    } else {
+//     } else {
       
-      // The current beam is completely covered by the overlap area.  Clear
-      // out all of the locations for the current beam.
-      LOG(DEBUG_VERBOSE) << "Case 4:";
-      LOG(DEBUG_VERBOSE) << " i = " << i;
-      LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
+//       // The current beam is completely covered by the overlap area.  Clear
+//       // out all of the locations for the current beam.
+//       LOG(DEBUG_VERBOSE) << "Case 4:";
+//       LOG(DEBUG_VERBOSE) << " i = " << i;
+//       LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
+// 	  " to loc_end_index=" << loc_end_index;
       
-      for (int j = loc_start_index; j <= loc_end_index; ++j) {
-        _rayLoc[j].clear();
-      }
+//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
+//         _rayLoc[j].clear();
+//       }
 
-    }
+//     }
     
-    i = loc_end_index + 1;
+//     i = loc_end_index + 1;
 
-  } /* endwhile - i */
+//   } /* endwhile - i */
   
-  LOG(DEBUG_VERBOSE) << "exit ";
+//   LOG(DEBUG_VERBOSE) << "exit ";
 
-#endif
+// #endif
   
-}
+// }
 
 ////////////////////////////////////////////
 // freeze / unfreeze
@@ -1988,10 +1989,10 @@ void CartManager::_changeField(int fieldId, bool guiMode)
 
 // TODO: need to add the background changed, etc. 
 void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-					    QColor gridColor,
-					    QColor emphasisColor,
-					    QColor annotationColor,
-					    QColor backgroundColor) {
+                                           QColor gridColor,
+                                           QColor emphasisColor,
+                                           QColor annotationColor,
+                                           QColor backgroundColor) {
 
   LOG(DEBUG_VERBOSE) << "enter";
 
@@ -2031,7 +2032,7 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 
   LOG(DEBUG_VERBOSE) << "enter";
 
-  _applyDataEdits(); // radarDataVolume);
+  // _applyDataEdits(); // radarDataVolume);
 
   LOG(DEBUG_VERBOSE) << "exit";
 
@@ -2043,7 +2044,7 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 // respond to a change in click location on the HORIZ
 
 void CartManager::_horizLocationClicked(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
+                                        const RadxRay *closestRay)
 
 {
 
@@ -2104,7 +2105,7 @@ void CartManager::_vertLocationClicked(double xkm, double ykm,
 // respond to a change in click location on one of the windows
 
 void CartManager::_locationClicked(double xkm, double ykm,
-                                    const RadxRay *ray)
+                                   const RadxRay *ray)
   
 {
 
@@ -2377,8 +2378,9 @@ void CartManager::_createTimeControl()
   cerr << "22222222222222 start time: " << _params.archive_start_time << endl;
   _timeControl->setArchiveStartTime(_params.archive_start_time);
   _timeControl->setArchiveEndTime
-    (_timeControl->getArchiveStartTime() + _params.archive_time_span_secs);
-  _timeControl->setArchiveScanIndex(0);
+    (_timeControl->getArchiveStartTime() +
+     _params.n_movie_frames * _params.frame_duration_secs);
+  _timeControl->setFrameIndex(0);
 
   _timeControl->populateGui();
 
@@ -2548,134 +2550,134 @@ void CartManager::setBoundaryDir()
 //
 // This allows the user to choose an archive file to open
 
-void CartManager::_openFile()
-{
-  // seed with files for the day currently in view, generate like this: *yyyymmdd*
-  string pattern = _timeControl->getArchiveStartTime().getDateStrPlain();
-  QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
-  finalPattern.append(pattern.c_str());
-  finalPattern.append("*)");
+// void CartManager::_openFile()
+// {
+//   // seed with files for the day currently in view, generate like this: *yyyymmdd*
+//   string pattern = _timeControl->getArchiveStartTime().getDateStrPlain();
+//   QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
+//   finalPattern.append(pattern.c_str());
+//   finalPattern.append("*)");
   
-  QString inputPath = QDir::currentPath();
-  // get the path of the current file, if available
-  if (_archiveFileList.size() > 0) {
-    QDir temp(_archiveFileList[0].c_str());
-    inputPath = temp.absolutePath();
-  }
+//   QString inputPath = QDir::currentPath();
+//   // get the path of the current file, if available
+//   if (_archiveFileList.size() > 0) {
+//     QDir temp(_archiveFileList[0].c_str());
+//     inputPath = temp.absolutePath();
+//   }
   
-  //since we are opening a new radar file, close any boundaries currently being displayed
-  // BoundaryPointEditor::Instance()->clear();
-  // if (_boundaryEditorDialog) {
-  //   clearBoundaryEditorClick();
-  //   _boundaryEditorDialog->setVisible(false);
-  // }
+//   //since we are opening a new radar file, close any boundaries currently being displayed
+//   // BoundaryPointEditor::Instance()->clear();
+//   // if (_boundaryEditorDialog) {
+//   //   clearBoundaryEditorClick();
+//   //   _boundaryEditorDialog->setVisible(false);
+//   // }
 
-  if (_horiz){
-    _horiz->showOpeningFileMsg(true);
-  }
+//   if (_horiz){
+//     _horiz->showOpeningFileMsg(true);
+//   }
   
-  QString filePath =
-    QFileDialog::getOpenFileName(this,
-                                 "Open Document",
-                                 inputPath, finalPattern);
-  //QDir::currentPath(),
-  //"All files (*.*)");
+//   QString filePath =
+//     QFileDialog::getOpenFileName(this,
+//                                  "Open Document",
+//                                  inputPath, finalPattern);
+//   //QDir::currentPath(),
+//   //"All files (*.*)");
 
-   //wait 10ms so the QFileDialog has time to close before proceeding...
-  QTimer::singleShot(10, [=]()
-  {
-    if( !filePath.isNull() )
-    {
-      QByteArray qb = filePath.toUtf8();
-      const char *openFilePath = qb.constData();
-      _openFilePath = openFilePath;
+//   //wait 10ms so the QFileDialog has time to close before proceeding...
+//   QTimer::singleShot(10, [=]()
+//   {
+//     if( !filePath.isNull() )
+//     {
+//       QByteArray qb = filePath.toUtf8();
+//       const char *openFilePath = qb.constData();
+//       _openFilePath = openFilePath;
 
-      cout << "_openFilePath=" << _openFilePath << endl;
+//       cout << "_openFilePath=" << _openFilePath << endl;
 
-      //use _openFilePath to determine the new directory
-      // into which boundaries will be read/written
-      setBoundaryDir();
+//       //use _openFilePath to determine the new directory
+//       // into which boundaries will be read/written
+//       setBoundaryDir();
 
-      // trying this ... to get the data from the file selected
-      setArchiveRetrievalPending();
-      vector<string> list;
-      list.push_back(openFilePath);
-      setArchiveFileList(list, false);
+//       // trying this ... to get the data from the file selected
+//       setArchiveRetrievalPending();
+//       vector<string> list;
+//       list.push_back(openFilePath);
+//       setArchiveFileList(list, false);
 
 
-      try {
-        _getArchiveData();
-      } catch (FileIException &ex) {
-        _horiz->showOpeningFileMsg(false);
-        this->setCursor(Qt::ArrowCursor);
-        // _timeControl->setCursor(Qt::ArrowCursor);
-        return;
-      }
-    }
+//       try {
+//         _getArchiveData();
+//       } catch (FileIException &ex) {
+//         _horiz->showOpeningFileMsg(false);
+//         this->setCursor(Qt::ArrowCursor);
+//         // _timeControl->setCursor(Qt::ArrowCursor);
+//         return;
+//       }
+//     }
 
-    // now update the time controller window
-    QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-    cerr << "5555555555555" << endl;
-    _timeControl->setArchiveStartTime(epoch);
-    QDateTime now = QDateTime::currentDateTime();
-    _timeControl->setArchiveEndTime(now);
+//     // now update the time controller window
+//     QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+//     cerr << "5555555555555" << endl;
+//     _timeControl->setArchiveStartTime(epoch);
+//     QDateTime now = QDateTime::currentDateTime();
+//     _timeControl->setArchiveEndTime(now);
 
-    cerr << "6666666666666666" << endl;
-    _timeControl->setArchiveStartTimeFromGui();
-    _timeControl->setArchiveEndTimeFromGui();
-    QFileInfo fileInfo(filePath);
-    string absolutePath = fileInfo.absolutePath().toStdString();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "changing to path " << absolutePath << endl;
-    }
-    //  loadArchiveFileList(dir.absolutePath());
+//     cerr << "6666666666666666" << endl;
+//     _timeControl->setArchiveStartTimeFromGui();
+//     _timeControl->setArchiveEndTimeFromGui();
+//     QFileInfo fileInfo(filePath);
+//     string absolutePath = fileInfo.absolutePath().toStdString();
+//     if (_params.debug >= Params::DEBUG_VERBOSE) {
+//       cerr << "changing to path " << absolutePath << endl;
+//     }
+//     //  loadArchiveFileList(dir.absolutePath());
     
-    RadxTimeList timeList;
-    timeList.setDir(absolutePath);
-    timeList.setModeInterval(_timeControl->getArchiveStartTime(),
-                             _timeControl->getArchiveEndTime());
-    if (timeList.compile()) {
-      cerr << "ERROR - CartManager::openFile()" << endl;
-      cerr << "  " << timeList.getErrStr() << endl;
-    }
+//     RadxTimeList timeList;
+//     timeList.setDir(absolutePath);
+//     timeList.setModeInterval(_timeControl->getArchiveStartTime(),
+//                              _timeControl->getArchiveEndTime());
+//     if (timeList.compile()) {
+//       cerr << "ERROR - CartManager::openFile()" << endl;
+//       cerr << "  " << timeList.getErrStr() << endl;
+//     }
 
-    vector<string> pathList = timeList.getPathList();
-    if (pathList.size() <= 0) {
-      cerr << "ERROR - CartManager::openFile()" << endl;
-      cerr << "  pathList is empty" << endl;
-      cerr << "  " << timeList.getErrStr() << endl;
-    } else {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "pathList is NOT empty" << endl;
-        for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-         cerr << *i << endl;
-        }
-        cerr << endl;
-      }
+//     vector<string> pathList = timeList.getPathList();
+//     if (pathList.size() <= 0) {
+//       cerr << "ERROR - CartManager::openFile()" << endl;
+//       cerr << "  pathList is empty" << endl;
+//       cerr << "  " << timeList.getErrStr() << endl;
+//     } else {
+//       if (_params.debug >= Params::DEBUG_VERBOSE) {
+//         cerr << "pathList is NOT empty" << endl;
+//         for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
+//           cerr << *i << endl;
+//         }
+//         cerr << endl;
+//       }
 
-      setArchiveFileList(pathList, false);
+//       setArchiveFileList(pathList, false);
 
-      // now fetch the first time and last time from the directory
-      // and set these values in the time controller display
+//       // now fetch the first time and last time from the directory
+//       // and set these values in the time controller display
 
-      RadxTime firstTime;
-      RadxTime lastTime;
-      timeList.getFirstAndLastTime(firstTime, lastTime);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "first time " << firstTime << endl;
-        cerr << "last time " << lastTime << endl;
-      }
-      // convert RadxTime to QDateTime
-      _timeControl->setArchiveStartTime(firstTime);
-      _timeControl->setArchiveEndTime(lastTime);
-      cerr << "yyyyyyyyyyyyyyyyy" << endl;
-      _timeControl->setGuiFromArchiveStartTime();
-      _timeControl->setGuiFromArchiveEndTime();
+//       RadxTime firstTime;
+//       RadxTime lastTime;
+//       timeList.getFirstAndLastTime(firstTime, lastTime);
+//       if (_params.debug >= Params::DEBUG_VERBOSE) {
+//         cerr << "first time " << firstTime << endl;
+//         cerr << "last time " << lastTime << endl;
+//       }
+//       // convert RadxTime to QDateTime
+//       _timeControl->setArchiveStartTime(firstTime);
+//       _timeControl->setArchiveEndTime(lastTime);
+//       cerr << "yyyyyyyyyyyyyyyyy" << endl;
+//       _timeControl->setGuiFromArchiveStartTime();
+//       _timeControl->setGuiFromArchiveEndTime();
 
-      _horiz->showOpeningFileMsg(false);
-    } // end else pathList is not empty
-  });
-}
+//       _horiz->showOpeningFileMsg(false);
+//     } // end else pathList is not empty
+//   });
+// }
 
 
 
@@ -2685,68 +2687,68 @@ void CartManager::_openFile()
 // This allows the user to choose the name of a
 // file in which to save Volume data
 
-void CartManager::_saveFile()
-{
+// void CartManager::_saveFile()
+// {
   
-  QString finalPattern = "All files (*.nc)";
+//   QString finalPattern = "All files (*.nc)";
 
-  QString inputPath = QDir::currentPath();
-  // get the path of the current file, if available 
-  if (_archiveFileList.size() > 0) {
-    QDir temp(_archiveFileList[0].c_str());
-    inputPath = temp.absolutePath();
-  } 
+//   QString inputPath = QDir::currentPath();
+//   // get the path of the current file, if available 
+//   if (_archiveFileList.size() > 0) {
+//     QDir temp(_archiveFileList[0].c_str());
+//     inputPath = temp.absolutePath();
+//   } 
 
-  QString filename =  QFileDialog::getSaveFileName(
-          this,
-          "Save Radar Volume",
-          inputPath, finalPattern);
+//   QString filename =  QFileDialog::getSaveFileName(
+//           this,
+//           "Save Radar Volume",
+//           inputPath, finalPattern);
  
-  if( !filename.isNull() )
-  {
-    QByteArray qb = filename.toUtf8();
-    const char *name = qb.constData();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      LOG(DEBUG_VERBOSE) << "selected file path : " << name;
-    }
+//   if( !filename.isNull() )
+//   {
+//     QByteArray qb = filename.toUtf8();
+//     const char *name = qb.constData();
+//     if (_params.debug >= Params::DEBUG_VERBOSE) {
+//       LOG(DEBUG_VERBOSE) << "selected file path : " << name;
+//     }
 
-    // TODO: hold it! the save message should
-    // go to the Model (Data) level because
-    // we'll be using Radx utilities.
-    // 
-    RadxFile outFile;
-    try {
-      LOG(DEBUG_VERBOSE) << "writing to file " << name;
-      outFile.writeToPath(_vol, name);
-    } catch (FileIException &ex) {
-      this->setCursor(Qt::ArrowCursor);
-      return;
-    }
-  }
-}
+//     // TODO: hold it! the save message should
+//     // go to the Model (Data) level because
+//     // we'll be using Radx utilities.
+//     // 
+//     RadxFile outFile;
+//     try {
+//       LOG(DEBUG_VERBOSE) << "writing to file " << name;
+//       outFile.writeToPath(_vol, name);
+//     } catch (FileIException &ex) {
+//       this->setCursor(Qt::ArrowCursor);
+//       return;
+//     }
+//   }
+// }
 
-void CartManager::_createFileChooserDialog()
-{
-  _refreshFileChooserDialog();
-}
+// void CartManager::_createFileChooserDialog()
+// {
+//   _refreshFileChooserDialog();
+// }
 
-void CartManager::_refreshFileChooserDialog()
-{
+// void CartManager::_refreshFileChooserDialog()
+// {
 
-}
+// }
 
-void CartManager::_showFileChooserDialog()
-{
+// void CartManager::_showFileChooserDialog()
+// {
 
-}
+// }
 
 ////////////////////////////////////////////////////////
 // set for pending archive retrieval
 
-void CartManager::setArchiveRetrievalPending()
-{
-  _archiveRetrievalPending = true;
-}
+// void CartManager::setArchiveRetrievalPending()
+// {
+//   _archiveRetrievalPending = true;
+// }
 
 /////////////////////////////////////
 // clear display widgets
@@ -2767,7 +2769,7 @@ void CartManager::_clear()
 void CartManager::_setArchiveMode(bool state)
 {
   _archiveMode = state;
-  _setSweepPanelVisibility();
+  // _setSweepPanelVisibility();
 
   if (_horiz) {
     _horiz->setArchiveMode(state);
@@ -2791,7 +2793,7 @@ void CartManager::_setRealtime(bool enabled)
     if (!_archiveMode) {
       _setArchiveMode(true);
       _activateArchiveRendering();
-      loadArchiveFileList();
+      // loadArchiveFileList();
     }
   }
 }
@@ -2802,8 +2804,8 @@ void CartManager::_setRealtime(bool enabled)
 
 void CartManager::_activateRealtimeRendering()
 {
-  _nGates = 1000;
-  _maxRangeKm = 1000;
+  // _nGates = 1000;
+  // _maxRangeKm = 1000;
   _clear();
   if (_horiz) {
     _horiz->activateRealtimeRendering();
@@ -2833,44 +2835,44 @@ void CartManager::_activateArchiveRendering()
 void CartManager::_createRealtimeImageFiles()
 {
 
-  int interval = _params.images_schedule_interval_secs;
-  int delay = _params.images_schedule_delay_secs;
-  time_t latestRayTime = _readerRayTime.utime();
+  // int interval = _params.images_schedule_interval_secs;
+  // int delay = _params.images_schedule_delay_secs;
+  // time_t latestRayTime = _readerRayTime.utime();
   
   // initialize the schedule if required
 
   if (_imagesScheduledTime.utime() == 0) {
-    if (latestRayTime == 0) {
-      // no data yet
-      return;
-    }
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: " 
-           << _imagesScheduledTime.asString() << endl;
-    }
+    // if (latestRayTime == 0) {
+    //   // no data yet
+    //   return;
+    // }
+    // time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
+    // _imagesScheduledTime.set(nextUtime + delay);
+    // if (_params.debug) {
+    //   cerr << "Next scheduled time for images: " 
+    //        << _imagesScheduledTime.asString() << endl;
+    // }
   }
   
-  if (_readerRayTime > _imagesScheduledTime) {
-
-    // create images
-
-    _timeControl->setArchiveEndTime(_imagesScheduledTime - delay);
-    _timeControl->setArchiveStartTime
-      (_timeControl->getArchiveEndTime() - _imagesScanIntervalSecs);
-    _createImageFilesAllSweeps();
-
-    // set next scheduled time
+  // if (_readerRayTime > _imagesScheduledTime) {
     
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: "
-           << _imagesScheduledTime.asString() << endl;
-    }
+  //   // create images
 
-  }
+  //   _timeControl->setArchiveEndTime(_imagesScheduledTime - delay);
+  //   _timeControl->setArchiveStartTime
+  //     (_timeControl->getArchiveEndTime() - _imagesScanIntervalSecs);
+  //   _createImageFilesAllSweeps();
+
+  //   // set next scheduled time
+    
+  //   time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
+  //   _imagesScheduledTime.set(nextUtime + delay);
+  //   if (_params.debug) {
+  //     cerr << "Next scheduled time for images: "
+  //          << _imagesScheduledTime.asString() << endl;
+  //   }
+
+  // }
 
 }
 
@@ -2888,7 +2890,7 @@ void CartManager::_createArchiveImageFiles()
       // using input file list to drive image generation
 
       while (_archiveFileList.size() > 0) {
-        _createImageFilesAllSweeps();
+        _createImageFilesAllLevels();
         _archiveFileList.erase(_archiveFileList.begin(), 
                                _archiveFileList.begin() + 1);
       }
@@ -2898,7 +2900,7 @@ void CartManager::_createArchiveImageFiles()
       // using archive time to drive image generation
       
       while (_timeControl->getArchiveStartTime() <= _imagesArchiveEndTime) {
-        _createImageFilesAllSweeps();
+        _createImageFilesAllLevels();
         _timeControl->setArchiveStartTime(_timeControl->getArchiveStartTime() +
                                           _imagesScanIntervalSecs);
       }
@@ -2916,7 +2918,7 @@ void CartManager::_createArchiveImageFiles()
       _timeControl->setArchiveEndTime(_timeControl->getArchiveStartTime() +
                                       _imagesScanIntervalSecs);
       
-      _createImageFilesAllSweeps();
+      _createImageFilesAllLevels();
       
     } // stime
     
@@ -2925,29 +2927,29 @@ void CartManager::_createArchiveImageFiles()
 }
 
 /////////////////////////////////////////////////////
-// creating one image per field, for each sweep
+// creating one image per field, for each level
 
-void CartManager::_createImageFilesAllSweeps()
+void CartManager::_createImageFilesAllLevels()
 {
   
-  if (_params.images_set_sweep_index_list) {
+  // if (_params.images_set_sweep_index_list) {
     
-    for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
-      int index = _params._images_sweep_index_list[ii];
-      if (index >= 0 && index < (int) _vol.getNSweeps()) {
-        // _sweepManager.setFileIndex(index);
-        _createImageFiles();
-      }
-    }
+  //   for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
+  //     int index = _params._images_sweep_index_list[ii];
+  //     if (index >= 0 && index < (int) _vol.getNSweeps()) {
+  //       // _sweepManager.setFileIndex(index);
+  //       _createImageFiles();
+  //     }
+  //   }
     
-  } else {
+  // } else {
     
-    for (size_t index = 0; index < _vol.getNSweeps(); index++) {
-      // _sweepManager.setFileIndex(index);
-      _createImageFiles();
-    }
+  //   for (size_t index = 0; index < _vol.getNSweeps(); index++) {
+  //     // _sweepManager.setFileIndex(index);
+  //     _createImageFiles();
+  //   }
     
-  }
+  // }
 
 }
 
@@ -3015,116 +3017,116 @@ void CartManager::_createImageFiles()
 
 string CartManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
-	  // set times from plots
-	  if (_vertMode) {
-	    _plotStartTime = _vert->getPlotStartTime();
-	    _plotEndTime = _vert->getPlotEndTime();
-	  } else {
-	    _plotStartTime = _horiz->getPlotStartTime();
-	    _plotEndTime = _horiz->getPlotEndTime();
-	  }
+  // set times from plots
+  if (_vertMode) {
+    _plotStartTime = _vert->getPlotStartTime();
+    _plotEndTime = _vert->getPlotEndTime();
+  } else {
+    _plotStartTime = _horiz->getPlotStartTime();
+    _plotEndTime = _horiz->getPlotEndTime();
+  }
 
-	  // compute output dir
-		outputDir = _params.images_output_dir;
-		char dayStr[1024];
-		if (_params.images_write_to_day_dir)
-		{
-			sprintf(dayStr, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
-			outputDir += PATH_DELIM;
-			outputDir += dayStr;
-		}
+  // compute output dir
+  outputDir = _params.images_output_dir;
+  char dayStr[1024];
+  if (_params.images_write_to_day_dir)
+  {
+    sprintf(dayStr, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
+    outputDir += PATH_DELIM;
+    outputDir += dayStr;
+  }
 
-	  // make sure output dir exists
+  // make sure output dir exists
 
-	  if (ta_makedir_recurse(outputDir.c_str())) {
-	    string errmsg("Cannot create output dir: " + outputDir);
-	    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
-	    cerr << "  " << errmsg << endl;
-	    if (interactive) {
-	        QMessageBox::critical(this, "Error", errmsg.c_str());
-	    }
-	    return(NULL);
-	  }
+  if (ta_makedir_recurse(outputDir.c_str())) {
+    string errmsg("Cannot create output dir: " + outputDir);
+    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
+    cerr << "  " << errmsg << endl;
+    if (interactive) {
+      QMessageBox::critical(this, "Error", errmsg.c_str());
+    }
+    return(NULL);
+  }
 
-	  // compute file name
+  // compute file name
 
-	  string fileName;
+  string fileName;
 
-	  // category
+  // category
 
-	  if (strlen(_params.images_file_name_category) > 0) {
-	    fileName += _params.images_file_name_category;
-	  }
+  if (strlen(_params.images_file_name_category) > 0) {
+    fileName += _params.images_file_name_category;
+  }
 
-	  // platform
+  // platform
 
-	  if (strlen(_params.images_file_name_platform) > 0) {
-	    fileName += _params.images_file_name_delimiter;
-	    fileName += _params.images_file_name_platform;
-	  }
+  if (strlen(_params.images_file_name_platform) > 0) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += _params.images_file_name_platform;
+  }
 
-	  // time
+  // time
 
-	  if (_params.images_include_time_part_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
-	    char timeStr[1024];
-	    if (_params.images_include_seconds_in_time_part) {
-	      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
-	              _plotStartTime.getYear(),
-	              _plotStartTime.getMonth(),
-	              _plotStartTime.getDay(),
-	              _plotStartTime.getHour(),
-	              _plotStartTime.getMin(),
-	              _plotStartTime.getSec());
-	    } else {
-	      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
-	              _plotStartTime.getYear(),
-	              _plotStartTime.getMonth(),
-	              _plotStartTime.getDay(),
-	              _plotStartTime.getHour(),
-	              _plotStartTime.getMin());
-	    }
-	    fileName += timeStr;
-	  }
+  if (_params.images_include_time_part_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    char timeStr[1024];
+    if (_params.images_include_seconds_in_time_part) {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin(),
+              _plotStartTime.getSec());
+    } else {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin());
+    }
+    fileName += timeStr;
+  }
 
-	  // field label
+  // field label
 
-	  if (_params.images_include_field_label_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
-	    fileName += getSelectedFieldLabel();
-	  }
+  if (_params.images_include_field_label_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += getSelectedFieldLabel();
+  }
     
-    // scan Id
+  // scan Id
 
-    if (_params.images_include_scan_id_in_file_name) {
-      fileName += _params.images_file_name_delimiter;
-      fileName += std::to_string(_vol.getScanId());
-    }
+  // if (_params.images_include_scan_id_in_file_name) {
+  //   fileName += _params.images_file_name_delimiter;
+  //   fileName += std::to_string(_vol.getScanId());
+  // }
 
-    // scan type
+  // scan type
 
-    if (_params.images_include_scan_type_in_file_name) {
-      fileName += _params.images_file_name_delimiter;
-      string scanType = "SUR";
-      if (_vol.getSweeps().size() > 0) {
-        Radx::SweepMode_t predomSweepMode = _vol.getPredomSweepMode();
-        scanType = Radx::sweepModeToShortStr(predomSweepMode);
-      }
-      fileName += scanType;
-    }
+  // if (_params.images_include_scan_type_in_file_name) {
+  //   fileName += _params.images_file_name_delimiter;
+  //   string scanType = "SUR";
+  //   if (_vol.getSweeps().size() > 0) {
+  //     Radx::SweepMode_t predomSweepMode = _vol.getPredomSweepMode();
+  //     scanType = Radx::sweepModeToShortStr(predomSweepMode);
+  //   }
+  //   fileName += scanType;
+  // }
 
-	  // extension
+  // extension
 
-	  fileName += ".";
-	  fileName += fileExt;
+  fileName += ".";
+  fileName += fileExt;
 
-	  // compute output path
+  // compute output path
 
-	  string outputPath(outputDir);
-	  outputPath += PATH_DELIM;
-	  outputPath += fileName;
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += fileName;
 
-	  return(outputPath);
+  return(outputPath);
 }
 
 /////////////////////////////////////////////////////
@@ -3155,14 +3157,14 @@ void CartManager::_saveImageToFile(bool interactive)
     cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
-        QMessageBox::critical(this, "Error", errmsg.c_str());
+      QMessageBox::critical(this, "Error", errmsg.c_str());
     }
     return;
   }
 
   if (interactive) {
-      string infoMsg("Saved image to file " + outputPath);
-      QMessageBox::information(this, "Image Saved", infoMsg.c_str());
+    string infoMsg("Saved image to file " + outputPath);
+    QMessageBox::information(this, "Image Saved", infoMsg.c_str());
   }
 
   if (_params.debug) {
@@ -3200,7 +3202,7 @@ void CartManager::_saveImageToFile(bool interactive)
 
 
 void CartManager::ShowContextMenu(const QPoint &pos) {
-  _horiz->ShowContextMenu(pos, &_vol);
+  _horiz->ShowContextMenu(pos /*, &_vol*/);
 }
 
 
@@ -3233,41 +3235,41 @@ void CartManager::_howto()
 // Creates the boundary editor dialog and associated event slots
 void CartManager::createBoundaryEditorDialog()
 {
-	_boundaryEditorDialog = new QDialog(this);
-	_boundaryEditorDialog->setMaximumHeight(368);
-	_boundaryEditorDialog->setWindowTitle("Boundary Editor");
+  _boundaryEditorDialog = new QDialog(this);
+  _boundaryEditorDialog->setMaximumHeight(368);
+  _boundaryEditorDialog->setWindowTitle("Boundary Editor");
 
-	Qt::Alignment alignCenter(Qt::AlignCenter);
-	// Qt::Alignment alignRight(Qt::AlignRight);
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  // Qt::Alignment alignRight(Qt::AlignRight);
 
-	_boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
-	_boundaryEditorDialogLayout->setVerticalSpacing(4);
+  _boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
+  _boundaryEditorDialogLayout->setVerticalSpacing(4);
 
-	int row = 0;
-	_boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
+  int row = 0;
+  _boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
-	QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
-	_boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
+  QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
+  _boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorPolygonBtn->setMaximumWidth(130);
-	_boundaryEditorPolygonBtn->setText(" Polygon");
-	_boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
-	_boundaryEditorPolygonBtn->setCheckable(TRUE);
-	_boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
+  _boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorPolygonBtn->setMaximumWidth(130);
+  _boundaryEditorPolygonBtn->setText(" Polygon");
+  _boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
+  _boundaryEditorPolygonBtn->setCheckable(TRUE);
+  _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
   connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()), this, SLOT(polygonBtnBoundaryEditorClick()));
 
-	_boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorCircleBtn->setMaximumWidth(130);
-	_boundaryEditorCircleBtn->setText(" Circle  ");
-	_boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
-	_boundaryEditorCircleBtn->setCheckable(TRUE);
-	_boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
+  _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorCircleBtn->setMaximumWidth(130);
+  _boundaryEditorCircleBtn->setText(" Circle  ");
+  _boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
+  _boundaryEditorCircleBtn->setCheckable(TRUE);
+  _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
   connect(_boundaryEditorCircleBtn, SIGNAL(clicked()), this, SLOT(circleBtnBoundaryEditorClick()));
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
@@ -3284,13 +3286,13 @@ void CartManager::createBoundaryEditorDialog()
   _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
   connect(_circleRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_circleRadiusSliderValueChanged(int)));
 
-	_boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorBrushBtn->setMaximumWidth(130);
-	_boundaryEditorBrushBtn->setText(" Brush ");
-	_boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-	_boundaryEditorBrushBtn->setCheckable(TRUE);
-	_boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
+  _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorBrushBtn->setMaximumWidth(130);
+  _boundaryEditorBrushBtn->setText(" Brush ");
+  _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
+  _boundaryEditorBrushBtn->setCheckable(TRUE);
+  _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
   connect(_boundaryEditorBrushBtn, SIGNAL(clicked()), this, SLOT(brushBtnBoundaryEditorClick()));
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
@@ -3308,44 +3310,44 @@ void CartManager::createBoundaryEditorDialog()
   connect(_brushRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_brushRadiusSliderValueChanged(int)));
 
   _boundaryEditorBrushBtn->setChecked(TRUE);
-	_boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorList = new QListWidget(_boundaryEditorDialog);
-	QListWidgetItem *newItem5 = new QListWidgetItem;
-	newItem5->setText("Boundary5 <none>");
-	_boundaryEditorList->insertItem(0, newItem5);
-	QListWidgetItem *newItem4 = new QListWidgetItem;
-	newItem4->setText("Boundary4 <none>");
-	_boundaryEditorList->insertItem(0, newItem4);
-	QListWidgetItem *newItem3 = new QListWidgetItem;
-	newItem3->setText("Boundary3 <none>");
-	_boundaryEditorList->insertItem(0, newItem3);
-	QListWidgetItem *newItem2 = new QListWidgetItem;
-	newItem2->setText("Boundary2 <none>");
-	_boundaryEditorList->insertItem(0, newItem2);
-	QListWidgetItem *newItem1 = new QListWidgetItem;
-	newItem1->setText("Boundary1");
-	_boundaryEditorList->insertItem(0, newItem1);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
+  _boundaryEditorList = new QListWidget(_boundaryEditorDialog);
+  QListWidgetItem *newItem5 = new QListWidgetItem;
+  newItem5->setText("Boundary5 <none>");
+  _boundaryEditorList->insertItem(0, newItem5);
+  QListWidgetItem *newItem4 = new QListWidgetItem;
+  newItem4->setText("Boundary4 <none>");
+  _boundaryEditorList->insertItem(0, newItem4);
+  QListWidgetItem *newItem3 = new QListWidgetItem;
+  newItem3->setText("Boundary3 <none>");
+  _boundaryEditorList->insertItem(0, newItem3);
+  QListWidgetItem *newItem2 = new QListWidgetItem;
+  newItem2->setText("Boundary2 <none>");
+  _boundaryEditorList->insertItem(0, newItem2);
+  QListWidgetItem *newItem1 = new QListWidgetItem;
+  newItem1->setText("Boundary1");
+  _boundaryEditorList->insertItem(0, newItem1);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
   connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
 
-	// horizontal layout contains the "Clear", "Help", and "Save" buttons
-	QHBoxLayout *hLayout = new QHBoxLayout;
-	_boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
+  // horizontal layout contains the "Clear", "Help", and "Save" buttons
+  QHBoxLayout *hLayout = new QHBoxLayout;
+  _boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
 
-	_boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorClearBtn->setText("Clear");
-	hLayout->addWidget(_boundaryEditorClearBtn);
+  _boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorClearBtn->setText("Clear");
+  hLayout->addWidget(_boundaryEditorClearBtn);
   connect(_boundaryEditorClearBtn, SIGNAL(clicked()), this, SLOT(clearBoundaryEditorClick()));
 
-	_boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorHelpBtn->setText("Help");
-	hLayout->addWidget(_boundaryEditorHelpBtn);
+  _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorHelpBtn->setText("Help");
+  hLayout->addWidget(_boundaryEditorHelpBtn);
   connect(_boundaryEditorHelpBtn, SIGNAL(clicked()), this, SLOT(helpBoundaryEditorClick()));
 
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorSaveBtn->setText("Save");
-	hLayout->addWidget(_boundaryEditorSaveBtn);
+  _boundaryEditorSaveBtn->setText("Save");
+  hLayout->addWidget(_boundaryEditorSaveBtn);
 }
 #endif
 

@@ -1387,10 +1387,10 @@ void HorizWidget::contextMenuEditor()
   LOG(DEBUG_VERBOSE) << "exit";
 }
 
-void HorizWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
+void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
 {
 
-  _vol = vol;
+  // _vol = vol;
 
   QMenu contextMenu("Context menu", this);
   

@@ -490,7 +490,7 @@ void remote_set_time(char *time_str)
    }
 
    // Decide what mode we need to be in.
-   if(tm > (now - gd.movie.time_interval * 60.0)) {
+   if(tm > (now - gd.movie.time_interval_mins * 60.0)) {
       gd.movie.mode = REALTIME_MODE;
 	  gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
 	  gd.coord_expt->time_seq_num++;
@@ -501,22 +501,22 @@ void remote_set_time(char *time_str)
    }
 
   // Adjust time allowances  if asking for forecast data
-  if(tm > now + (gd.movie.time_interval * 60.0)) { 
+  if(tm > now + (gd.movie.time_interval_mins * 60.0)) { 
       if(gd.movie.magnify_mode == 0 ) {
-	  gd.movie.time_interval *= gd.movie.magnify_factor;
+	  gd.movie.time_interval_mins *= gd.movie.magnify_factor;
 	  gd.movie.magnify_mode = 1;
       }
   } else {
       if(gd.movie.magnify_mode != 0 ) {
-	  gd.movie.time_interval /= gd.movie.magnify_factor;
+	  gd.movie.time_interval_mins /= gd.movie.magnify_factor;
 	  gd.movie.magnify_mode = 0;
       }
   }
 
-   start_time = tm - (time_t) ((gd.movie.num_frames -1) * gd.movie.time_interval * 60.0);
+   start_time = tm - (time_t) ((gd.movie.num_frames -1) * gd.movie.time_interval_mins * 60.0);
 
    // If more than a half interval's distance from the current setup - shift the movie time
-   if(abs(start_time - gd.movie.start_time) > gd.movie.time_interval * 30.0) {
+   if(abs(start_time - gd.movie.start_time) > gd.movie.time_interval_mins * 30.0) {
        gd.movie.start_time = start_time;
        gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
 

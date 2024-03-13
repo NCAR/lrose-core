@@ -49,7 +49,7 @@ int time_for_a_new_frame()
 
     if(gd.forecast_mode) c_time += (time_t) (gd.movie.forecast_interval * 60.0);
 
-    if(c_time > (gd.movie.start_time + (gd.movie.num_frames  * gd.movie.time_interval * 60))) {
+    if(c_time > (gd.movie.start_time + (gd.movie.num_frames  * gd.movie.time_interval_mins * 60))) {
         return 1;
     }
     
@@ -73,7 +73,7 @@ void reset_time_points()
     case REGULAR_INTERVAL:
       for (i = 0; i < gd.movie.num_frames; i++)
       {
-	double time_interval_secs = gd.movie.time_interval * 60.0;
+	double time_interval_secs = gd.movie.time_interval_mins * 60.0;
 	
 	gd.movie.frame[i].time_start =
 	  (time_t)(gd.movie.start_time + (i * time_interval_secs) + 0.5);
@@ -153,7 +153,7 @@ void rotate_movie_frames()
     movie_frame_t tmp_frame;
 
     /* increment start time */
-    gd.movie.start_time += (time_t)  (gd.movie.time_interval * 60);
+    gd.movie.start_time += (time_t)  (gd.movie.time_interval_mins * 60);
 
     /* Copy the first frame data  */
     memcpy(&tmp_frame,&gd.movie.frame[0],sizeof(movie_frame_t));

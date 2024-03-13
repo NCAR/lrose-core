@@ -253,7 +253,7 @@ void TimePlot::Event_handler(long x_pixel, long y_pixel, long event_id, long but
 			target_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
 
                         // Place start time on a nice even interval
-			gd.movie.start_time = target_time - (target_time % (int)(gd.movie.time_interval * 60));
+			gd.movie.start_time = target_time - (target_time % (int)(gd.movie.time_interval_mins * 60));
 
 			// handle flip of beginning and end
 			if(gd.movie.start_time > epoch_end) {

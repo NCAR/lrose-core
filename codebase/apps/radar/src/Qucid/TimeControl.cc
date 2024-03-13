@@ -123,7 +123,7 @@ void TimeControl::populateGui()
 
   // time editing
   
-  _archiveScanIndex = 0;
+  _frameIndex = 0;
 
   // start time editor
   
@@ -276,7 +276,7 @@ void TimeControl::acceptGuiTimes()
 {
   _archiveStartTime = _guiStartTime;
   _archiveEndTime = _guiEndTime;
-  _parent->loadArchiveFileList();
+  // _parent->loadArchiveFileList();
 }
 
 void TimeControl::cancelGuiTimes()
@@ -383,15 +383,15 @@ void TimeControl::setArchiveEndTime(const RadxTime &rtime)
 
 void TimeControl::goBack1()
 {
-  if (_archiveScanIndex > 0) {
-    _archiveScanIndex -= 1;
-    _parent->setArchiveRetrievalPending();
+  if (_frameIndex > 0) {
+    _frameIndex -= 1;
+    // _parent->setArchiveRetrievalPending();
   } else {
     if (_params.debug) {
       cerr << "At start of data, cannot go back" << endl;
     }
   }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
+  _timeSlider->setSliderPosition(_frameIndex);
 }
 
 void TimeControl::goBackPeriod()
@@ -399,36 +399,36 @@ void TimeControl::goBackPeriod()
   int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
   _archiveStartTime -= archiveSpanSecs;
   _archiveEndTime -= archiveSpanSecs;
-  _parent->loadArchiveFileList();
-  if (_archiveScanIndex > (int) _parent->getArchiveFileListSize() - 1) {
-    _archiveScanIndex = (int) _parent->getArchiveFileListSize() - 1;
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
+  // _parent->loadArchiveFileList();
+  // if (_frameIndex > (int) _parent->getArchiveFileListSize() - 1) {
+  //   _frameIndex = (int) _parent->getArchiveFileListSize() - 1;
+  // }
+  _timeSlider->setSliderPosition(_frameIndex);
 }
 
 void TimeControl::goFwd1()
 {
-  if (_archiveScanIndex < (int) _parent->getArchiveFileListSize() - 1) {
-    _archiveScanIndex += 1;
-    _parent->setArchiveRetrievalPending();
-  } else {
-    if (_params.debug) {
-      cerr << "At end of data, cannot go forward" << endl;
-    }
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
+  // if (_frameIndex < (int) _parent->getArchiveFileListSize() - 1) {
+  //   _frameIndex += 1;
+  //   _parent->setArchiveRetrievalPending();
+  // } else {
+  //   if (_params.debug) {
+  //     cerr << "At end of data, cannot go forward" << endl;
+  //   }
+  // }
+  _timeSlider->setSliderPosition(_frameIndex);
 }
 
 void TimeControl::goFwdPeriod()
 {
-  int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
-  _archiveStartTime += archiveSpanSecs;
-  _archiveEndTime += archiveSpanSecs;
-  _parent->loadArchiveFileList();
-  if (_archiveScanIndex > (int) _parent->getArchiveFileListSize() - 1) {
-    _archiveScanIndex = (int) _parent->getArchiveFileListSize() - 1;
-  }
-  _timeSlider->setSliderPosition(_archiveScanIndex);
+  // int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
+  // _archiveStartTime += archiveSpanSecs;
+  // _archiveEndTime += archiveSpanSecs;
+  // _parent->loadArchiveFileList();
+  // if (_frameIndex > (int) _parent->getArchiveFileListSize() - 1) {
+  //   _frameIndex = (int) _parent->getArchiveFileListSize() - 1;
+  // }
+  _timeSlider->setSliderPosition(_frameIndex);
 }
 
 void TimeControl::_timeSliderActionTriggered(int action) {
@@ -468,14 +468,14 @@ void TimeControl::_timeSliderActionTriggered(int action) {
 
 void TimeControl::_timeSliderValueChanged(int value) 
 {
-  if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
-    return;
-  }
+  // if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
+  //   return;
+  // }
   // get path for this value
-  string path = _parent->getArchiveFileList()[value];
-  // get time for this path
+  // string path = _parent->getArchiveFileList()[value];
+  // // get time for this path
   RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
+  // NcfRadxFile::getTimeFromPath(path, pathTime);
   // set selected time
   _selectedTime = pathTime;
   setGuiFromSelectedTime();
@@ -487,21 +487,21 @@ void TimeControl::_timeSliderValueChanged(int value)
 void TimeControl::_timeSliderReleased() 
 {
   int value = _timeSlider->value();
-  if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
-    return;
-  }
+  // if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
+  //   return;
+  // }
   // get path for this value
-  string path = _parent->getArchiveFileList()[value];
+  // string path = _parent->getArchiveFileList()[value];
   // get time for this path
   RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
+  // NcfRadxFile::getTimeFromPath(path, pathTime);
   // set selected time
   _selectedTime = pathTime;
   setGuiFromSelectedTime();
   // request data
-  if (_archiveScanIndex != value) {
-    _archiveScanIndex = value;
-    _parent->setArchiveRetrievalPending();
+  if (_frameIndex != value) {
+    _frameIndex = value;
+    // _parent->setArchiveRetrievalPending();
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;

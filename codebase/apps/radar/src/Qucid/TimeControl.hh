@@ -115,7 +115,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setGuiFromArchiveEndTime();
   void setGuiFromSelectedTime();
 
-  void setArchiveScanIndex(int val) { _archiveScanIndex = val; }
+  void setFrameIndex(int val) { _frameIndex = val; }
 
   void setSelectedTimeLabel(const string &text) {
     _selectedTimeLabel->setText(text.c_str());
@@ -137,7 +137,7 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   const RadxTime &getArchiveStartTime() const { return _archiveStartTime; }
   const RadxTime &getArchiveEndTime() const { return _archiveEndTime; }
-  int getArchiveScanIndex() const { return _archiveScanIndex; }
+  int getFrameIndex() const { return _frameIndex; }
   QSlider *getTimeSlider() { return _timeSlider; }
   
   // populate the gui
@@ -151,29 +151,32 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QFrame *_timePanel;
   QVBoxLayout *_timeLayout;
-  QSlider *_timeSlider;
 
+  QDateTimeEdit *_archiveStartTimeEdit;
+  QDateTimeEdit *_archiveEndTimeEdit;
+
+  QSlider *_timeSlider;
   QPushButton *_back1;
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
   
-  QDateTimeEdit *_archiveStartTimeEdit;
-  QDateTimeEdit *_archiveEndTimeEdit;
+  RadxTime _selectedTime;
+  QPushButton *_selectedTimeLabel;
 
   RadxTime _guiStartTime;
-  RadxTime _archiveStartTime;
-  
   RadxTime _guiEndTime;
-  RadxTime _archiveEndTime;
 
-  QPushButton *_selectedTimeLabel;
-  RadxTime _selectedTime;
-  int _archiveScanIndex;
+  RadxTime _archiveStartTime;
+
+  int _nFrames;
+  int _frameIndex;
+  double _frameSpeed;
+  
+  RadxTime _archiveEndTime;
+  
 
  public slots:
-
-  // void toggled(bool checked); // connected to menu button
 
   // move in time
   
