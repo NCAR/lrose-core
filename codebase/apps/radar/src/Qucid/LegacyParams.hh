@@ -36,6 +36,7 @@
 #include <vector>
 #include "Cgui_P.hh"
 #include "cidd_params.h"
+class DateTime;
 using namespace std;
 
 class LegacyParams {
@@ -315,6 +316,7 @@ private:
   bool _debug;
   bool _debug1;
   bool _debug2;
+  bool _useLocalTimestamps;
   string _windMarkerType;
   WindRenderMode _defaultWindRenderMode;
   Cgui_P _guiConfig;
@@ -404,6 +406,7 @@ private:
   int _readRouteWindsTdrp();
   int _readDrawExportTdrp();
   int _readImageGenTdrp();
+  void _parseStringIntoTime(const string &timeStr, DateTime &dtime);
 
   /////////////////////////////////////////////////////////////////////////////
   // GET_DEFAULT_PARAMS : Get a string representing the default parameters

@@ -1050,8 +1050,18 @@ int LegacyParams::_readMainParams()
   
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
-
-  _getString("cidd.demo_time", "");
+  // Use local times for Product timestamps and user input widgets.
+  _useLocalTimestamps = _getBoolean("cidd.use_local_timestamps", 0);
+  string demoTimeStr = _getString("cidd.demo_time", "", false);
+  if (demoTimeStr.size() > 10) {
+    DateTime dtime;
+    _parseStringIntoTime(demoTimeStr, dtime);
+    fprintf(_tdrpFile, "begin_in_archive_mode = TRUE;\n");
+    fprintf(_tdrpFile, "archive_start_time = \"%.4d %.2d %.2d %.2d %.2d %.2d\";\n",
+            dtime.getYear(), dtime.getMonth(), dtime.getDay(),
+            dtime.getHour(), dtime.getMin(), dtime.getSec());
+  }
+    
   _getLong("cidd.temporal_rounding", 300);
   _getString("cidd.climo_mode", "regular");
 
@@ -1613,9 +1623,6 @@ int LegacyParams::_readMainParams()
 
   /* Set the time to display on the analog clock */
   _getBoolean("cidd.draw_clock_local", 0);
-  
-  /* Use local times for Product timestamps and user input widgets. */
-  _getBoolean("cidd.use_local_timestamps", 0);
   
   // field menu - number of columns
   _numMenuCols = _getLong("cidd.num_field_menu_cols", 1);
@@ -3069,3 +3076,75 @@ void LegacyParams::printLegacyDefaults(ostream &out)
 
 }
 
+/*************************************************************************
+ * PARSE_STRING_INTO_TIME:   Parse string to and time structure
+ *
+ */
+void LegacyParams::_parseStringIntoTime(const string &timeStr, DateTime &dtime)
+{
+
+  // Establish the time difference between local and UTC
+
+  time_t now = time(0);
+  double tdiff = difftime(mktime(localtime(&now)), mktime(gmtime(&now)));
+  
+  double field[16];
+  int num_fields = STRparse_double(timeStr.c_str(), field, 40, 16);
+  int year = 0, month = 0, day= 0, hour = 0, min = 0, sec = 0;
+  
+  switch(num_fields) {
+    
+    case 6:     /* hour:min:sec month/day/Year */
+      
+      hour = (int)(field[0]) % 24;
+      min = (int)(field[1]) % 60;
+      sec = (int)(field[2]) % 60;
+      month = (int)(field[3]) % 13;
+      day = (int)(field[4]) % 32;
+      
+      if(field[5] < 50 ) field[5] += 2000;
+      if(field[5] < 1900) field[5] += 1900;
+      year = (int)(field[5]);
+      break;
+      
+    case 5:     /* hour:min month/day/year */
+      
+      hour = (int)(field[0]) % 24;
+      min = (int)(field[1]) % 60;
+      sec = 0;
+      
+      month = (int)(field[2]) % 13;
+      day = (int)(field[3]) % 32;
+      if(field[4] < 50 ) field[4] += 2000;
+      if(field[4] < 1900) field[4] += 1900;
+      year = (int)(field[4]);
+      break;
+      
+    case 4:     /* hour:min month day */
+      
+      hour = (int)(field[0]) % 24;
+      min = (int)(field[1]) % 60;
+      month = (int)(field[2]) % 13;
+      day = (int)(field[3]) % 32;
+      break;
+      
+    case 2:     /* min:sec */
+      min = (int)(field[0]) % 60;
+      sec = (int)(field[1]) % 60;
+      break;
+      
+    case 1:     /* min */
+      min = (int)(field[0]) % 60;
+      break;
+  }
+
+  dtime.set(year, month, day, hour, min, sec);
+
+  // Compensate for the user entering Local time
+  if(_useLocalTimestamps) {
+    time_t utime = dtime.utime();
+    utime -= tdiff;
+    dtime.set(utime);
+  }
+
+}

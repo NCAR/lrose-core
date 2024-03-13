@@ -126,7 +126,7 @@ void TimeControl::_populate()
   
   _archiveScanIndex = 0;
 
-  // start time
+  // start time editor
   
   _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
   QFrame *startTimeFrame = new QFrame(timeUpper);
@@ -149,11 +149,11 @@ void TimeControl::_populate()
   QDateTime startDateTime(startDate, startTime);
   _archiveStartTimeEdit->setDateTime(startDateTime);
   _archiveStartTimeEdit->setCalendarPopup(true);
-  connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
+  connect(_archiveStartTimeEdit, &QDateTimeEdit::dateTimeChanged,
+          this, &TimeControl::setArchiveStartTimeFromGui);
   _archiveStartTimeEdit->setToolTip("Start time of movie interval");
 
-  // end time
+  // end time editor
   
   _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
   QFrame *endTimeFrame = new QFrame(timeUpper);
@@ -176,30 +176,30 @@ void TimeControl::_populate()
   QDateTime endDateTime(endDate, endTime);
   _archiveEndTimeEdit->setDateTime(endDateTime);
   _archiveEndTimeEdit->setCalendarPopup(true);
-  connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
+  connect(_archiveEndTimeEdit, &QDateTimeEdit::dateTimeChanged, 
+          this, &TimeControl::setArchiveEndTimeFromGui);
   _archiveEndTimeEdit->setToolTip("End time of movie interval");
   
   // fwd and back buttons
 
   _back1 = new QPushButton(timeLower);
   _back1->setText("<");
-  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
+  connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 file");
   
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
-  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
+  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
   _fwd1->setToolTip("Go forward by 1 file");
     
   _backPeriod = new QPushButton(timeLower);
   _backPeriod->setText("<<");
-  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
+  connect(_backPeriod, &QPushButton::clicked, this, &TimeControl::goBackPeriod);
   _backPeriod->setToolTip("Go back by the archive time period");
   
   _fwdPeriod = new QPushButton(timeLower);
   _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
+  connect(_fwdPeriod, &QPushButton::clicked, this, &TimeControl::goFwdPeriod);
   _fwdPeriod->setToolTip("Go forward by the archive time period");
 
   // accept cancel buttons
@@ -209,7 +209,7 @@ void TimeControl::_populate()
   QPalette acceptPalette = acceptButton->palette();
   acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
   acceptButton->setPalette(acceptPalette);
-  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
+  connect(acceptButton, &QPushButton::clicked, this, &TimeControl::acceptGuiTimes);
   acceptButton->setToolTip("Accept the selected start and end times");
 
   QPushButton *cancelButton = new QPushButton(timeUpper);
@@ -217,7 +217,7 @@ void TimeControl::_populate()
   QPalette cancelPalette = cancelButton->palette();
   cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
   cancelButton->setPalette(cancelPalette);
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
+  connect(cancelButton, &QPushButton::clicked, this, &TimeControl::cancelGuiTimes);
   cancelButton->setToolTip("Cancel the selected start and end times");
     
   // add time widgets to layout
@@ -225,9 +225,7 @@ void TimeControl::_populate()
   int stretch = 0;
   timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
-  // timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
-  // timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
   
@@ -239,17 +237,17 @@ void TimeControl::_populate()
 
   // connect slots for time slider
   
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-          this, SLOT(_timeSliderActionTriggered(int)));
+  connect(_timeSlider, &QSlider::actionTriggered,
+          this, &TimeControl::_timeSliderActionTriggered);
   
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderValueChanged(int)));
+  connect(_timeSlider, &QSlider::valueChanged,
+          this, &TimeControl::_timeSliderValueChanged);
   
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
+  connect(_timeSlider, &QSlider::sliderReleased,
+          this, &TimeControl::_timeSliderReleased);
   
-  connect(_timeSlider, SIGNAL(sliderPressed()),
-          this, SLOT(_timeSliderPressed()));
+  connect(_timeSlider, &QSlider::sliderPressed,
+          this, &TimeControl::_timeSliderPressed);
   
 }
 
@@ -262,6 +260,9 @@ void TimeControl::setArchiveStartTime(const QDateTime &qdt)
   QTime time = qdt.time();
   _guiStartTime.set(date.year(), date.month(), date.day(),
                     time.hour(), time.minute(), time.second());
+  fprintf(stderr, "111111111 start: %d %d %d %d %d %d\n",
+          date.year(), date.month(), date.day(),
+          time.hour(), time.minute(), time.second());
 }
 
 void TimeControl::setArchiveEndTime(const QDateTime &qdt)

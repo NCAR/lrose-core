@@ -661,51 +661,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("ARCHIVE MODE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'begin_in_archive_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("begin_in_archive_mode");
-    tt->descr = tdrpStrDup("Option to begin in archive mode.");
-    tt->help = tdrpStrDup("If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.");
-    tt->val_offset = (char *) &begin_in_archive_mode - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'archive_start_time'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("archive_start_time");
-    tt->descr = tdrpStrDup("Start time for archive mode.");
-    tt->help = tdrpStrDup("In archive mode, data retrieval starts at this time.");
-    tt->val_offset = (char *) &archive_start_time - &_start_;
-    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
-    tt++;
-    
-    // Parameter 'archive_time_span_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("archive_time_span_secs");
-    tt->descr = tdrpStrDup("Time span in ARCHIVE mode (secs).");
-    tt->help = tdrpStrDup("Archive end time = archive_start_time + archive_time_span.");
-    tt->val_offset = (char *) &archive_time_span_secs - &_start_;
-    tt->single_val.d = 3600;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("<GRIDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -857,20 +812,20 @@
       tt->struct_vals[31].b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("</GRIDS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("</GRIDS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("<WINDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1009,20 +964,20 @@
       tt->struct_vals[21].b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("</WINDS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("</WINDS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("<MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1118,20 +1073,20 @@
       tt->struct_vals[15].b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("</MAPS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("</MAPS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("<PROJECTION>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1362,20 +1317,20 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("</PROJECTION>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("</PROJECTION>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SIMULATION MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1428,11 +1383,11 @@
     tt->single_val.d = 0.15;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
     tt->comment_text = tdrpStrDup("Writing the click point location to an FMQ in XML format.");
     tt++;
@@ -1449,11 +1404,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("DRAW_EXPORT Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1528,11 +1483,11 @@
       tt->struct_vals[9].s = tdrpStrDup("B");
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("<SYMPRODS>.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1706,20 +1661,20 @@
       tt->struct_vals[9].b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 14'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("</SYMPRODS>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
-    tt->comment_hdr = tdrpStrDup("</SYMPRODS>.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 16'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("Terrain Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1854,11 +1809,11 @@
     tt->single_val.s = tdrpStrDup("red4");
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("IMAGE_GENERATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1962,11 +1917,11 @@
       tt->struct_vals[2].s = tdrpStrDup("(0, 0) (0, 150)");
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("ROUTE VSECTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2250,13 +2205,58 @@
       tt->array_vals[6].s = tdrpStrDup("B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 ");
     tt++;
     
+    // Parameter 'Comment 18'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 18");
+    tt->comment_hdr = tdrpStrDup("<MAIN>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 19");
-    tt->comment_hdr = tdrpStrDup("<MAIN>");
+    tt->comment_hdr = tdrpStrDup("ARCHIVE MODE");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'begin_in_archive_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("begin_in_archive_mode");
+    tt->descr = tdrpStrDup("Option to begin in archive mode.");
+    tt->help = tdrpStrDup("If TRUE, the app will start in archive mode. If the start time is not set, the start time will be set to NOW. Otherwise, the app will start in realtime mode.");
+    tt->val_offset = (char *) &begin_in_archive_mode - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'archive_start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("archive_start_time");
+    tt->descr = tdrpStrDup("Start time for archive mode.");
+    tt->help = tdrpStrDup("In archive mode, data retrieval starts at this time.");
+    tt->val_offset = (char *) &archive_start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'archive_time_span_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("archive_time_span_secs");
+    tt->descr = tdrpStrDup("Time span in ARCHIVE mode (secs).");
+    tt->help = tdrpStrDup("Archive end time = archive_start_time + archive_time_span.");
+    tt->val_offset = (char *) &archive_time_span_secs - &_start_;
+    tt->single_val.d = 3600;
     tt++;
     
     // Parameter 'demo_time'

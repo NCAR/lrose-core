@@ -58,28 +58,6 @@ paramdef string {
 } instance;
 
 commentdef {
-  p_header = "ARCHIVE MODE";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to begin in archive mode.";
-  p_help = "If TRUE, the app will start up and read data from the archive_data_url, at the specified start time. If the start time is not set, the start time will be set to NOW.";
-} begin_in_archive_mode;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "Start time for archive mode.";
-  p_help = "In archive mode, data retrieval starts at this time.";
-} archive_start_time;
-
-paramdef double {
-  p_default = 3600;
-  p_descr = "Time span in ARCHIVE mode (secs).";
-  p_help = "Archive end time = archive_start_time + archive_time_span.";
-} archive_time_span_secs;
-
-commentdef {
   p_header = "<GRIDS>";
 }
 
@@ -1033,6 +1011,28 @@ paramdef string {
 commentdef {
   p_header = "<MAIN>";
 }
+
+commentdef {
+  p_header = "ARCHIVE MODE";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to begin in archive mode.";
+  p_help = "If TRUE, the app will start in archive mode. If the start time is not set, the start time will be set to NOW. Otherwise, the app will start in realtime mode.";
+} begin_in_archive_mode;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for archive mode.";
+  p_help = "In archive mode, data retrieval starts at this time.";
+} archive_start_time;
+
+paramdef double {
+  p_default = 3600;
+  p_descr = "Time span in ARCHIVE mode (secs).";
+  p_help = "Archive end time = archive_start_time + archive_time_span.";
+} archive_time_span_secs;
 
 paramdef string {
   p_default = "20:00 5/25/2000";

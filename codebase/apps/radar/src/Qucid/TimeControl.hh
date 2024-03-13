@@ -85,9 +85,15 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // set
 
-  void setArchiveStartTime(string timeStr) { _archiveStartTime.set(timeStr); }
-  void setArchiveEndTime(string timeStr) { _archiveEndTime.set(timeStr); }
-
+  void setArchiveStartTime(string timeStr) {
+    _archiveStartTime.set(timeStr);
+    setGuiFromArchiveStartTime();
+  }
+  void setArchiveEndTime(string timeStr) {
+    _archiveEndTime.set(timeStr);
+    setGuiFromArchiveEndTime();
+  }
+  
   void setArchiveStartTime(time_t val) { _archiveStartTime.set(val); }
   void setArchiveEndTime(time_t val) { _archiveEndTime.set(val); }
 
@@ -127,13 +133,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   void acceptGuiTimes();
   void cancelGuiTimes();
   
-  // move in time
-  
-  void goBack1();
-  void goBackPeriod();
-  void goFwd1();
-  void goFwdPeriod();
-
   // get
 
   const RadxTime &getArchiveStartTime() const { return _archiveStartTime; }
@@ -175,6 +174,13 @@ class DLL_EXPORT TimeControl : public QDialog {
  public slots:
 
   // void toggled(bool checked); // connected to menu button
+
+  // move in time
+  
+  void goBack1();
+  void goBackPeriod();
+  void goFwd1();
+  void goFwdPeriod();
 
   // time slider
   

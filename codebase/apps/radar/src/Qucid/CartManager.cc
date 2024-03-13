@@ -526,15 +526,15 @@ void CartManager::_setupWindows()
 
   // configure the HORIZ
 
-  _horiz = new HorizWidget(_horizFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+  _horiz = new HorizWidget(_horizFrame, *this, _params,
+                           _platform, _fields, _haveFilteredFields);
 
-  connect(this, SIGNAL(frameResized(const int, const int)),
-	  _horiz, SLOT(resize(const int, const int)));
+  connect(this, &CartManager::frameResized, _horiz, &HorizWidget::resize);
   
   // Create the VERT window
 
   _vertWindow = new VertWindow(this, _params, _platform,
-                             _fields, _haveFilteredFields);
+                               _fields, _haveFilteredFields);
   _vertWindow->setRadarName(_params.radar_name);
 
   // set pointer to the vertWidget
@@ -542,11 +542,11 @@ void CartManager::_setupWindows()
   _vert = _vertWindow->getWidget();
   
   // connect slots for location
-
-  connect(_horiz, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_horizLocationClicked(double, double, const RadxRay*)));
-  connect(_vert, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_vertLocationClicked(double, double, const RadxRay*)));
+  
+  connect(_horiz, &HorizWidget::locationClicked,
+          this, &CartManager::_horizLocationClicked);
+  connect(_vert, &VertWidget::locationClicked,
+          this, &CartManager::_vertLocationClicked);
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
@@ -688,7 +688,7 @@ void CartManager::_createActions()
   
   _reloadAct = new QAction(tr("Reload"), this);
   _reloadAct->setStatusTip(tr("Reload data"));
-  connect(_reloadAct, SIGNAL(triggered()), this, SLOT(_reload()));
+  connect(_reloadAct, &QAction::triggered, this, &CartManager::_refresh);
 
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
@@ -2373,11 +2373,11 @@ void CartManager::_createTimeControl()
   
   _timeControl = new TimeControl(this, _params);
 
+  cerr << "22222222222222 start time: " << _params.archive_start_time << endl;
   _timeControl->setArchiveStartTime(_params.archive_start_time);
   _timeControl->setArchiveEndTime
     (_timeControl->getArchiveStartTime() + _params.archive_time_span_secs);
   _timeControl->setArchiveScanIndex(0);
-
 
 }
 

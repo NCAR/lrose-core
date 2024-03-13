@@ -620,12 +620,6 @@ public:
 
   char* instance;
 
-  tdrp_bool_t begin_in_archive_mode;
-
-  char* archive_start_time;
-
-  double archive_time_span_secs;
-
   field_t *_fields;
   int fields_n;
 
@@ -770,6 +764,12 @@ public:
 
   char* *_route_paths;
   int route_paths_n;
+
+  tdrp_bool_t begin_in_archive_mode;
+
+  char* archive_start_time;
+
+  double archive_time_span_secs;
 
   char* demo_time;
 
