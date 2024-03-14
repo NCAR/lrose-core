@@ -85,34 +85,22 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // set
 
-  void setArchiveStartTime(string timeStr) {
-    _archiveStartTime.set(timeStr);
-    setGuiFromArchiveStartTime();
-  }
-  void setArchiveEndTime(string timeStr) {
-    _archiveEndTime.set(timeStr);
-    setGuiFromArchiveEndTime();
-  }
-  
-  void setArchiveStartTime(time_t val) { _archiveStartTime.set(val); }
-  void setArchiveEndTime(time_t val) { _archiveEndTime.set(val); }
-
-  void setArchiveStartTime(const RadxTime &rtime);
-  void setArchiveEndTime(const RadxTime &rtime);
+  void setStartTime(const RadxTime &rtime);
+  void setEndTime(const RadxTime &rtime);
 
   void setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
   void setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
   void setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
 
-  void setArchiveEnabled(bool val) {
-    _archiveStartTimeEdit->setEnabled(val);
-    _archiveEndTimeEdit->setEnabled(val);
+  void setEnabled(bool val) {
+    _startTimeEdit->setEnabled(val);
+    _endTimeEdit->setEnabled(val);
     _backPeriod->setEnabled(val);
     _fwdPeriod->setEnabled(val);
   }
 
-  void setGuiFromArchiveStartTime();
-  void setGuiFromArchiveEndTime();
+  void setGuiFromStartTime();
+  void setGuiFromEndTime();
   void setGuiFromSelectedTime();
 
   void setFrameIndex(int val) { _frameIndex = val; }
@@ -121,24 +109,28 @@ class DLL_EXPORT TimeControl : public QDialog {
     _selectedTimeLabel->setText(text.c_str());
   }
   
-  void setArchiveStartTimeFromGui() {
-    setArchiveStartTime(_guiStartTime);
+  void setStartTimeFromGui() {
+    setStartTime(_guiStartTime);
   }
-  void setArchiveEndTimeFromGui() {
-    setArchiveEndTime(_guiEndTime);
+  void setEndTimeFromGui() {
+    setEndTime(_guiEndTime);
   }
 
-  void setArchiveStartTime(const QDateTime &qdt);
-  void setArchiveEndTime(const QDateTime &qdt);
   void acceptGuiTimes();
   void cancelGuiTimes();
   
   // get
-
-  const RadxTime &getArchiveStartTime() const { return _archiveStartTime; }
-  const RadxTime &getArchiveEndTime() const { return _archiveEndTime; }
+  
+  const RadxTime &getStartTime() const { return _startTime; }
+  const RadxTime &getEndTime() const { return _endTime; }
+  int getNFrames() const { return _nFrames; }
   int getFrameIndex() const { return _frameIndex; }
-  QSlider *getTimeSlider() { return _timeSlider; }
+  double getFrameDwellMsecs() const { return _frameDwellMsecs; }
+
+  // convert between Qt and Radx date/time objects
+
+  static QDateTime getQDateTime(const RadxTime &rtime);
+  static RadxTime getRadxTime(const QDateTime &qtime);
   
   // populate the gui
 
@@ -151,9 +143,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QFrame *_timePanel;
   QVBoxLayout *_timeLayout;
-
-  QDateTimeEdit *_archiveStartTimeEdit;
-  QDateTimeEdit *_archiveEndTimeEdit;
+  
+  QDateTimeEdit *_startTimeEdit;
+  QDateTimeEdit *_endTimeEdit;
 
   QSlider *_timeSlider;
   QPushButton *_back1;
@@ -166,16 +158,16 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
-
-  RadxTime _archiveStartTime;
-
+  
+  RadxTime _startTime;
+  RadxTime _endTime;
+  
   int _nFrames;
   int _frameIndex;
-  double _frameSpeed;
-  
-  RadxTime _archiveEndTime;
-  
-
+  double _frameDurationSecs;
+  double _frameDwellMsecs;
+  double _loopDelayMsecs;
+                         
  public slots:
 
   // move in time

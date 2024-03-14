@@ -356,12 +356,12 @@ void init_data_space()
   gd.movie.frame_span = _params.climo_frame_span_mins;
   gd.movie.num_frames = _params.n_movie_frames;
   gd.movie.reset_frames = _params.reset_frames;
-  gd.movie.delay = _params.movie_delay;
+  gd.movie.delay = _params.loop_delay_msecs;
   gd.movie.forecast_interval = _params.forecast_interval_hours;
   gd.movie.past_interval = _params.past_interval_hours;
   gd.movie.mr_stretch_factor = _params.time_search_stretch_factor;
   gd.movie.round_to_seconds = _params.temporal_rounding;
-  gd.movie.display_time_msec = _params.movie_speed_msec;
+  gd.movie.display_time_msec = _params.movie_dwell_msecs;
 
   gd.movie.start_frame = 0;
   gd.movie.sweep_on = 0;

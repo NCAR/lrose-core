@@ -2300,6 +2300,78 @@
     tt->single_val.i = 300;
     tt++;
     
+    // Parameter 'movie_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("movie_on");
+    tt->descr = tdrpStrDup("Determine whether to start with movie looping on.");
+    tt->help = tdrpStrDup("Set to TRUE to start up in movie-on mode, FALSE = off");
+    tt->val_offset = (char *) &movie_on - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'loop_delay_msecs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("loop_delay_msecs");
+    tt->descr = tdrpStrDup("Set the delay at the end of the movie loop in (msec).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &loop_delay_msecs - &_start_;
+    tt->single_val.i = 3000;
+    tt++;
+    
+    // Parameter 'movie_dwell_msecs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("movie_dwell_msecs");
+    tt->descr = tdrpStrDup("Set the dwell of the movie loop (msec dwell per frame).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &movie_dwell_msecs - &_start_;
+    tt->single_val.i = 75;
+    tt++;
+    
+    // Parameter 'movie_min_dwell_msecs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("movie_min_dwell_msecs");
+    tt->descr = tdrpStrDup("Minimum dwell of the movie loop (msec per frame).");
+    tt->help = tdrpStrDup("This yields the fastest movie rate.");
+    tt->val_offset = (char *) &movie_min_dwell_msecs - &_start_;
+    tt->single_val.i = 30;
+    tt++;
+    
+    // Parameter 'movie_max_dwell_msecs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("movie_max_dwell_msecs");
+    tt->descr = tdrpStrDup("Maximum dwell of the movie loop (msec per frame).");
+    tt->help = tdrpStrDup("This yields the slowest movie rate.");
+    tt->val_offset = (char *) &movie_max_dwell_msecs - &_start_;
+    tt->single_val.i = 500;
+    tt++;
+    
+    // Parameter 'reset_frames'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reset_frames");
+    tt->descr = tdrpStrDup("Forces reload of all data every time the movie frames rotate one old frame out and generate a new frame.");
+    tt->help = tdrpStrDup("If TRUE, this will slow down data gathering for movie rendering.");
+    tt->val_offset = (char *) &reset_frames - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2499,54 +2571,6 @@
     tt->help = tdrpStrDup("Used when spawning animation building script.");
     tt->val_offset = (char *) &complex_command_timeout_secs - &_start_;
     tt->single_val.i = 180;
-    tt++;
-    
-    // Parameter 'movie_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("movie_on");
-    tt->descr = tdrpStrDup("Determine whether to start with movie looping on.");
-    tt->help = tdrpStrDup("Set to TRUE to start up in movie-on mode, FALSE = off");
-    tt->val_offset = (char *) &movie_on - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'movie_delay'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("movie_delay");
-    tt->descr = tdrpStrDup("Set the delay at the end of the movie loop in (msec).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &movie_delay - &_start_;
-    tt->single_val.i = 3000;
-    tt++;
-    
-    // Parameter 'movie_speed_msec'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("movie_speed_msec");
-    tt->descr = tdrpStrDup("Set the speed of the movie loop (msec per frame).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &movie_speed_msec - &_start_;
-    tt->single_val.i = 75;
-    tt++;
-    
-    // Parameter 'reset_frames'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("reset_frames");
-    tt->descr = tdrpStrDup("Forces reload of all data every time the movie frames rotate one old frame out and generate a new frame.");
-    tt->help = tdrpStrDup("If TRUE, this will slow down data gathering for movie rendering.");
-    tt->val_offset = (char *) &reset_frames - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'model_run_list_hours'

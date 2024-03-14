@@ -286,8 +286,8 @@ private:
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
-  RadxTime _imagesArchiveStartTime;
-  RadxTime _imagesArchiveEndTime;
+  RadxTime _imagesStartTime;
+  RadxTime _imagesEndTime;
   int _imagesScanIntervalSecs;
 
   // polygon 

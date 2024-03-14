@@ -163,11 +163,9 @@ CartManager::CartManager(const Params &params,
   
   _setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
   _archiveStartTime.set(_params.archive_start_time);
-  cerr << "TTTTTTTTTTTT archiveStartTime: " << _archiveStartTime.asString() << endl;
-  
-  
-  _imagesArchiveStartTime.set(_params.images_archive_start_time);
-  _imagesArchiveEndTime.set(_params.images_archive_end_time);
+
+  _imagesStartTime.set(_params.images_archive_start_time);
+  _imagesEndTime.set(_params.images_archive_end_time);
   _imagesScanIntervalSecs = _params.images_scan_interval_secs;
 
   // set up ray locators
@@ -2374,11 +2372,10 @@ void CartManager::_createTimeControl()
 {
   
   _timeControl = new TimeControl(this, _params);
-
-  cerr << "22222222222222 start time: " << _params.archive_start_time << endl;
-  _timeControl->setArchiveStartTime(_params.archive_start_time);
-  _timeControl->setArchiveEndTime
-    (_timeControl->getArchiveStartTime() +
+  
+  _timeControl->setStartTime(_archiveStartTime);
+  _timeControl->setEndTime
+    (_timeControl->getStartTime() +
      _params.n_movie_frames * _params.frame_duration_secs);
   _timeControl->setFrameIndex(0);
 
@@ -2899,10 +2896,10 @@ void CartManager::_createArchiveImageFiles()
       
       // using archive time to drive image generation
       
-      while (_timeControl->getArchiveStartTime() <= _imagesArchiveEndTime) {
+      while (_timeControl->getStartTime() <= _imagesEndTime) {
         _createImageFilesAllLevels();
-        _timeControl->setArchiveStartTime(_timeControl->getArchiveStartTime() +
-                                          _imagesScanIntervalSecs);
+        _timeControl->setStartTime(_timeControl->getStartTime() +
+                                   _imagesScanIntervalSecs);
       }
       
     }
@@ -2910,13 +2907,13 @@ void CartManager::_createArchiveImageFiles()
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
     
-    for (RadxTime stime = _imagesArchiveStartTime;
-         stime <= _imagesArchiveEndTime;
+    for (RadxTime stime = _imagesStartTime;
+         stime <= _imagesEndTime;
          stime += _params.images_schedule_interval_secs) {
       
-      _timeControl->setArchiveStartTime(stime);
-      _timeControl->setArchiveEndTime(_timeControl->getArchiveStartTime() +
-                                      _imagesScanIntervalSecs);
+      _timeControl->setStartTime(stime);
+      _timeControl->setEndTime(_timeControl->getStartTime() +
+                               _imagesScanIntervalSecs);
       
       _createImageFilesAllLevels();
       

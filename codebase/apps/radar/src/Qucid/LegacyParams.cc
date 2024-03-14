@@ -1095,8 +1095,8 @@ int LegacyParams::_readMainParams()
 
   // movies
   _getBoolean("cidd.movie_on", 0);
-  _getLong("cidd.movie_delay",3000);
-  _getLong("cidd.movie_speed_msec", 75);
+  _getLong("cidd.movie_delay", 3000, true, "loop_delay_msecs");
+  _getLong("cidd.movie_speed_msec", 75, true, "movie_dwell_msecs");
   _getBoolean("cidd.reset_frames", 0);
 
   // model data

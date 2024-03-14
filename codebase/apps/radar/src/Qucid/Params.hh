@@ -780,6 +780,18 @@ public:
 
   int temporal_rounding;
 
+  tdrp_bool_t movie_on;
+
+  int loop_delay_msecs;
+
+  int movie_dwell_msecs;
+
+  int movie_min_dwell_msecs;
+
+  int movie_max_dwell_msecs;
+
+  tdrp_bool_t reset_frames;
+
   char* climo_mode;
 
   int climo_max_time_span_days;
@@ -811,14 +823,6 @@ public:
   int simple_command_timeout_secs;
 
   int complex_command_timeout_secs;
-
-  tdrp_bool_t movie_on;
-
-  int movie_delay;
-
-  int movie_speed_msec;
-
-  tdrp_bool_t reset_frames;
 
   int model_run_list_hours;
 
@@ -1479,7 +1483,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[496];
+  mutable TDRPtable _table[498];
 
   const char *_className;
 

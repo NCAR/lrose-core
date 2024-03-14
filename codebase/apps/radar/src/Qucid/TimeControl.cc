@@ -53,6 +53,20 @@ TimeControl::TimeControl(CartManager *parent,
         _params(params)
         
 {
+
+  _nFrames = _params.n_movie_frames;
+  _frameDurationSecs = _params.frame_duration_secs;
+  _frameIndex = 0;
+  _frameDwellMsecs = _params.movie_dwell_msecs;
+  _loopDelayMsecs = _params.loop_delay_msecs;
+  _startTime.set(_params.archive_start_time);
+  _endTime = _startTime + _nFrames * _frameDurationSecs;
+  _guiStartTime = _startTime;
+  _guiEndTime = _endTime;
+  _selectedTime = _startTime;
+
+  populateGui();
+  
 }
 
 // destructor
@@ -69,7 +83,7 @@ TimeControl::~TimeControl()
 void TimeControl::populateGui()
 {
   
-  setWindowTitle("Time and movie controller");
+  setWindowTitle("Time and movie loop controller");
   QPoint pos(0,0);
   move(pos);
 
@@ -108,26 +122,25 @@ void TimeControl::populateGui()
   _timeSlider->setTracking(true);
   _timeSlider->setSingleStep(1);
   _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(400);
-  _timeSlider->setToolTip("Drag to change time selection");
+  _timeSlider->setFixedWidth(200);
+  _timeSlider->setToolTip("Drag to change time frame");
+
+  _timeSlider->setMinimum(0);
+  _timeSlider->setMaximum(_nFrames - 1);
   
   // active time
   
-  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
   _selectedTimeLabel = new QPushButton(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
   QPalette pal = _selectedTimeLabel->palette();
   pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
   _selectedTimeLabel->setPalette(pal);
   _selectedTimeLabel->setToolTip("This is the selected data time");
-
-  // time editing
-  
-  _frameIndex = 0;
+  setGuiFromSelectedTime();
 
   // start time editor
   
-  _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
+  _startTimeEdit = new QDateTimeEdit(timeUpper);
   QFrame *startTimeFrame = new QFrame(timeUpper);
   QVBoxLayout *startTimeFrameLayout = new QVBoxLayout;
   startTimeFrameLayout->setSpacing(0);
@@ -136,25 +149,17 @@ void TimeControl::populateGui()
   QLabel *startLabel = new QLabel(startTimeFrame);
   startLabel->setText("Movie start time");
   startTimeFrameLayout->addWidget(startLabel, 0, Qt::AlignTop);
-  startTimeFrameLayout->addWidget(_archiveStartTimeEdit, 0, Qt::AlignBottom);
+  startTimeFrameLayout->addWidget(_startTimeEdit, 0, Qt::AlignBottom);
+  _startTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+  _startTimeEdit->setCalendarPopup(true);
+  connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
+          this, &TimeControl::setStartTimeFromGui);
+  _startTimeEdit->setToolTip("Start time of movie interval");
+  setGuiFromStartTime();
   
-  _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate startDate(_archiveStartTime.getYear(), 
-                  _archiveStartTime.getMonth(),
-                  _archiveStartTime.getDay());
-  QTime startTime(_archiveStartTime.getHour(),
-                  _archiveStartTime.getMin(),
-                  _archiveStartTime.getSec());
-  QDateTime startDateTime(startDate, startTime);
-  _archiveStartTimeEdit->setDateTime(startDateTime);
-  _archiveStartTimeEdit->setCalendarPopup(true);
-  connect(_archiveStartTimeEdit, &QDateTimeEdit::dateTimeChanged,
-          this, &TimeControl::setArchiveStartTimeFromGui);
-  _archiveStartTimeEdit->setToolTip("Start time of movie interval");
-
   // end time editor
   
-  _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
+  _endTimeEdit = new QDateTimeEdit(timeUpper);
   QFrame *endTimeFrame = new QFrame(timeUpper);
   QVBoxLayout *endTimeFrameLayout = new QVBoxLayout;
   endTimeFrameLayout->setSpacing(0);
@@ -163,43 +168,35 @@ void TimeControl::populateGui()
   QLabel *endLabel = new QLabel(endTimeFrame);
   endLabel->setText("Movie end time");
   endTimeFrameLayout->addWidget(endLabel, 0, Qt::AlignTop);
-  endTimeFrameLayout->addWidget(_archiveEndTimeEdit, 0, Qt::AlignBottom);
+  endTimeFrameLayout->addWidget(_endTimeEdit, 0, Qt::AlignBottom);
+  _endTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+  _endTimeEdit->setCalendarPopup(true);
+  connect(_endTimeEdit, &QDateTimeEdit::dateTimeChanged, 
+          this, &TimeControl::setEndTimeFromGui);
+  _endTimeEdit->setToolTip("End time of movie interval");
+  setGuiFromEndTime();
 
-  _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate endDate(_archiveEndTime.getYear(), 
-                _archiveEndTime.getMonth(),
-                _archiveEndTime.getDay());
-  QTime endTime(_archiveEndTime.getHour(),
-                _archiveEndTime.getMin(),
-                _archiveEndTime.getSec());
-  QDateTime endDateTime(endDate, endTime);
-  _archiveEndTimeEdit->setDateTime(endDateTime);
-  _archiveEndTimeEdit->setCalendarPopup(true);
-  connect(_archiveEndTimeEdit, &QDateTimeEdit::dateTimeChanged, 
-          this, &TimeControl::setArchiveEndTimeFromGui);
-  _archiveEndTimeEdit->setToolTip("End time of movie interval");
-  
   // fwd and back buttons
 
   _back1 = new QPushButton(timeLower);
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
-  _back1->setToolTip("Go back by 1 file");
+  _back1->setToolTip("Go back by 1 frame");
   
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
-  _fwd1->setToolTip("Go forward by 1 file");
+  _fwd1->setToolTip("Go forward by 1 frame");
     
   _backPeriod = new QPushButton(timeLower);
   _backPeriod->setText("<<");
   connect(_backPeriod, &QPushButton::clicked, this, &TimeControl::goBackPeriod);
-  _backPeriod->setToolTip("Go back by the archive time period");
+  _backPeriod->setToolTip("Go back by the loop period");
   
   _fwdPeriod = new QPushButton(timeLower);
   _fwdPeriod->setText(">>");
   connect(_fwdPeriod, &QPushButton::clicked, this, &TimeControl::goFwdPeriod);
-  _fwdPeriod->setToolTip("Go forward by the archive time period");
+  _fwdPeriod->setToolTip("Go forward by the loop period");
 
   // accept cancel buttons
 
@@ -209,15 +206,15 @@ void TimeControl::populateGui()
   acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
   acceptButton->setPalette(acceptPalette);
   connect(acceptButton, &QPushButton::clicked, this, &TimeControl::acceptGuiTimes);
-  acceptButton->setToolTip("Accept the selected start and end times");
-
+  acceptButton->setToolTip("Accept the selection");
+  
   QPushButton *cancelButton = new QPushButton(timeUpper);
   cancelButton->setText("Cancel");
   QPalette cancelPalette = cancelButton->palette();
   cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
   cancelButton->setPalette(cancelPalette);
   connect(cancelButton, &QPushButton::clicked, this, &TimeControl::cancelGuiTimes);
-  cancelButton->setToolTip("Cancel the selected start and end times");
+  cancelButton->setToolTip("Cancel the selection");
     
   // add time widgets to layout
   
@@ -234,7 +231,7 @@ void TimeControl::populateGui()
   timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
 
-  // connect slots for time slider
+  // connect signals and slots
   
   connect(_timeSlider, &QSlider::actionTriggered,
           this, &TimeControl::_timeSliderActionTriggered);
@@ -250,85 +247,44 @@ void TimeControl::populateGui()
   
 }
 
-////////////////////////////////////////////////////////
-// set times from gui widgets
-
-void TimeControl::setArchiveStartTime(const QDateTime &qdt)
-{
-  QDate date = qdt.date();
-  QTime time = qdt.time();
-  _guiStartTime.set(date.year(), date.month(), date.day(),
-                    time.hour(), time.minute(), time.second());
-  fprintf(stderr, "111111111 start: %d %d %d %d %d %d\n",
-          date.year(), date.month(), date.day(),
-          time.hour(), time.minute(), time.second());
-}
-
-void TimeControl::setArchiveEndTime(const QDateTime &qdt)
-{
-  QDate date = qdt.date();
-  QTime time = qdt.time();
-  _guiEndTime.set(date.year(), date.month(), date.day(),
-                  time.hour(), time.minute(), time.second());
-}
-
 void TimeControl::acceptGuiTimes()
 {
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
+  _startTime = _guiStartTime;
+  _endTime = _guiEndTime;
   // _parent->loadArchiveFileList();
 }
 
 void TimeControl::cancelGuiTimes()
 {
   cerr << "CCCCCCCCCCCCCCCCCCCC" << endl;
-  setGuiFromArchiveStartTime();
-  setGuiFromArchiveEndTime();
+  setGuiFromStartTime();
+  setGuiFromEndTime();
 }
 
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 
-void TimeControl::setGuiFromArchiveStartTime()
+void TimeControl::setGuiFromStartTime()
 {
-  if (!_archiveStartTimeEdit) {
+  if (!_startTimeEdit) {
     return;
   }
-  QDate date(_archiveStartTime.getYear(), 
-             _archiveStartTime.getMonth(),
-             _archiveStartTime.getDay());
-  QTime time(_archiveStartTime.getHour(),
-             _archiveStartTime.getMin(),
-             _archiveStartTime.getSec());
-  cerr << "4444444444 y m d h m s: "
-       << _archiveStartTime.getYear() << " "
-       << _archiveStartTime.getMonth() << " "
-       << _archiveStartTime.getDay() << " "
-       << _archiveStartTime.getHour() << " "
-       << _archiveStartTime.getMin() << " "
-       << _archiveStartTime.getSec() << endl;
-  QDateTime datetime(date, time);
-  _archiveStartTimeEdit->setDateTime(datetime);
-  _guiStartTime = _archiveStartTime;
+  QDateTime qtime = getQDateTime(_startTime);
+  _startTimeEdit->setDateTime(qtime);
+  _guiStartTime = _startTime;
 }
 
 ////////////////////////////////////////////////////////
 // set gui widget from archive end time
 
-void TimeControl::setGuiFromArchiveEndTime()
+void TimeControl::setGuiFromEndTime()
 {
-  if (!_archiveEndTimeEdit) {
+  if (!_endTimeEdit) {
     return;
   }
-  QDate date(_archiveEndTime.getYear(), 
-             _archiveEndTime.getMonth(),
-             _archiveEndTime.getDay());
-  QTime time(_archiveEndTime.getHour(),
-             _archiveEndTime.getMin(),
-             _archiveEndTime.getSec());
-  QDateTime datetime(date, time);
-  _archiveEndTimeEdit->setDateTime(datetime);
-  _guiEndTime = _archiveEndTime;
+  QDateTime qtime = getQDateTime(_endTime);
+  _endTimeEdit->setDateTime(qtime);
+  _guiEndTime = _endTime;
 }
 
 ////////////////////////////////////////////////////////
@@ -353,28 +309,27 @@ void TimeControl::setGuiFromSelectedTime()
 ////////////////////////////////////////////////////////
 // set archive start time
 
-void TimeControl::setArchiveStartTime(const RadxTime &rtime)
+void TimeControl::setStartTime(const RadxTime &rtime)
 
 {
-  _archiveStartTime = rtime;
-  if (!_archiveStartTime.isValid()) {
-    _archiveStartTime.set(RadxTime::NOW);
+  _startTime = rtime;
+  if (!_startTime.isValid()) {
+    _startTime.set(RadxTime::NOW);
   }
-  cerr << "zzzzzzzzzzzzzzzzzzz" << endl;
-  setGuiFromArchiveStartTime();
+  setGuiFromStartTime();
 }
 
 ////////////////////////////////////////////////////////
 // set archive end time
 
-void TimeControl::setArchiveEndTime(const RadxTime &rtime)
+void TimeControl::setEndTime(const RadxTime &rtime)
 
 {
-  _archiveEndTime = rtime;
-  if (!_archiveEndTime.isValid()) {
-    _archiveEndTime.set(RadxTime::NOW);
+  _endTime = rtime;
+  if (!_endTime.isValid()) {
+    _endTime.set(RadxTime::NOW);
   }
-  setGuiFromArchiveEndTime();
+  setGuiFromEndTime();
 }
 
 ////////////////////////////////////////////////////////
@@ -383,52 +338,48 @@ void TimeControl::setArchiveEndTime(const RadxTime &rtime)
 
 void TimeControl::goBack1()
 {
-  if (_frameIndex > 0) {
-    _frameIndex -= 1;
-    // _parent->setArchiveRetrievalPending();
+  if (_frameIndex <= 0) {
+    _frameIndex = 0;
   } else {
-    if (_params.debug) {
-      cerr << "At start of data, cannot go back" << endl;
-    }
+    _frameIndex -= 1;
   }
   _timeSlider->setSliderPosition(_frameIndex);
+  _selectedTime = _startTime + _frameIndex + _frameDurationSecs;
+  setGuiFromSelectedTime();
 }
 
 void TimeControl::goBackPeriod()
 {
-  int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
-  _archiveStartTime -= archiveSpanSecs;
-  _archiveEndTime -= archiveSpanSecs;
-  // _parent->loadArchiveFileList();
-  // if (_frameIndex > (int) _parent->getArchiveFileListSize() - 1) {
-  //   _frameIndex = (int) _parent->getArchiveFileListSize() - 1;
-  // }
-  _timeSlider->setSliderPosition(_frameIndex);
+  int archiveSpanSecs = _endTime - _startTime;
+  _startTime -= archiveSpanSecs;
+  _endTime -= archiveSpanSecs;
+  _selectedTime -= archiveSpanSecs;
+  setGuiFromStartTime();
+  setGuiFromEndTime();
+  setGuiFromSelectedTime();
 }
 
 void TimeControl::goFwd1()
 {
-  // if (_frameIndex < (int) _parent->getArchiveFileListSize() - 1) {
-  //   _frameIndex += 1;
-  //   _parent->setArchiveRetrievalPending();
-  // } else {
-  //   if (_params.debug) {
-  //     cerr << "At end of data, cannot go forward" << endl;
-  //   }
-  // }
+  if (_frameIndex < _nFrames - 1) {
+    _frameIndex += 1;
+  } else {
+    _frameIndex = _nFrames - 1;
+  }
   _timeSlider->setSliderPosition(_frameIndex);
+  _selectedTime = _startTime + _frameIndex + _frameDurationSecs;
+  setGuiFromSelectedTime();
 }
 
 void TimeControl::goFwdPeriod()
 {
-  // int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
-  // _archiveStartTime += archiveSpanSecs;
-  // _archiveEndTime += archiveSpanSecs;
-  // _parent->loadArchiveFileList();
-  // if (_frameIndex > (int) _parent->getArchiveFileListSize() - 1) {
-  //   _frameIndex = (int) _parent->getArchiveFileListSize() - 1;
-  // }
-  _timeSlider->setSliderPosition(_frameIndex);
+  int archiveSpanSecs = _endTime - _startTime;
+  _startTime += archiveSpanSecs;
+  _endTime += archiveSpanSecs;
+  _selectedTime += archiveSpanSecs;
+  setGuiFromStartTime();
+  setGuiFromEndTime();
+  setGuiFromSelectedTime();
 }
 
 void TimeControl::_timeSliderActionTriggered(int action) {
@@ -514,5 +465,31 @@ void TimeControl::_timeSliderPressed()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
   }
+}
+
+////////////////////////////////////////////////////////
+// convert between Qt and Radx date/time objects
+
+QDateTime TimeControl::getQDateTime(const RadxTime &rtime)
+{
+  QDate date(rtime.getYear(), 
+             rtime.getMonth(),
+             rtime.getDay());
+  QTime time(rtime.getHour(),
+             rtime.getMin(),
+             rtime.getSec());
+  QDateTime qtime(date, time);
+  return qtime;
+}
+
+RadxTime TimeControl::getRadxTime(const QDateTime &qtime)
+{
+  RadxTime rtime(qtime.date().year(),
+                 qtime.date().month(),
+                 qtime.date().day(),
+                 qtime.time().hour(),
+                 qtime.time().minute(),
+                 qtime.time().second());
+  return rtime;
 }
 
