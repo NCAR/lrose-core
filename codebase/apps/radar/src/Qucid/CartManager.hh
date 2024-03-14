@@ -453,6 +453,8 @@ private slots:
   // context editing (SOLO)
   void ShowContextMenu(const QPoint &pos);
 
+  // void _createBoundaryEditorDialog();
+  
 };
 
 #endif

@@ -374,7 +374,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
 {
 
   // get key pressed
-
+  
   Qt::KeyboardModifiers mods = e->modifiers();
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
@@ -385,7 +385,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
   }
   
   // for '.', swap with previous field
-
+  
   if (keychar == '.') {
     QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
     button->click();
@@ -446,7 +446,6 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
     _timeControl->goBack1();
-    // setArchiveRetrievalPending();
     
   } else if (key == Qt::Key_Right) {
 
@@ -550,8 +549,8 @@ void CartManager::_setupWindows()
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
-  connect(_horiz, SIGNAL(customContextMenuRequested(const QPoint &)),
-	  this, SLOT(ShowContextMenu(const QPoint &)));
+  connect(_horiz, &CartWidget::customContextMenuRequested,
+	  this, &CartManager::ShowContextMenu);
 
   // create status panel
 
@@ -634,38 +633,36 @@ void CartManager::_createActions()
   // show field menu
   _showFieldMenuAct = new QAction(tr("Fields"), this);
   _showFieldMenuAct->setStatusTip(tr("Show field menu"));
-  connect(_showFieldMenuAct, SIGNAL(triggered()),
-          this, SLOT(_showFieldMenu()));
+  connect(_showFieldMenuAct, &QAction::triggered,
+          this, &CartManager::_showFieldMenu);
   
   // freeze display
   _freezeAct = new QAction(tr("Freeze"), this);
   _freezeAct->setShortcut(tr("Esc"));
   _freezeAct->setStatusTip(tr("Freeze display"));
-  connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
+  connect(_freezeAct, &QAction::triggered, this, &CartManager::_freeze);
   
   // show user click in dialog
   _showClickAct = new QAction(tr("Values"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
-  connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
+  connect(_showClickAct, &QAction::triggered, this, &CartManager::_showClick);
 
   // show boundary editor dialog
   // _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
   // _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
-  // connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(showBoundaryEditor()));
+  // connect(_showBoundaryEditorAct, &QAction::triggered, this, &CartManager::showBoundaryEditor);
   
   // set time controller settings
   _timeControllerAct = new QAction(tr("Time-Config"), this);
   _timeControllerAct->setStatusTip(tr("Show time control window"));
-  connect(_timeControllerAct, SIGNAL(triggered()), this,
-          SLOT(_showTimeControl()));
+  connect(_timeControllerAct, &QAction::triggered, this,
+          &CartManager::_showTimeControl);
 
   // show time control window
   _showTimeControlAct = new QAction(tr("Show time control window"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
-  connect(_showTimeControlAct, SIGNAL(triggered()),
-          this, SLOT(_showTimeControl()));
-  // connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
-  //         SLOT(show()));
+  connect(_showTimeControlAct, &QAction::triggered,
+          this, &CartManager::_showTimeControl);
   
   // realtime mode
 
@@ -673,15 +670,15 @@ void CartManager::_createActions()
   _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
   _realtimeAct->setCheckable(true);
   _realtimeAct->setChecked(_params.start_mode == Params::MODE_REALTIME);
-  connect(_realtimeAct, SIGNAL(triggered(bool)),
-          this, SLOT(_setRealtime(bool)));
+  connect(_realtimeAct, &QAction::triggered,
+          this, &CartManager::_setRealtime);
   
   // unzoom display
   
   _unzoomAct = new QAction(tr("Back"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to previous view"));
   _unzoomAct->setEnabled(false);
-  connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
+  connect(_unzoomAct, &QAction::triggered, this, &CartManager::_unzoom);
 
   // reload data
   
@@ -692,26 +689,26 @@ void CartManager::_createActions()
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _horiz, SLOT(clear()));
-  connect(_clearAct, SIGNAL(triggered()), _vert, SLOT(clear()));
+  connect(_clearAct, &QAction::triggered, _horiz, &HorizWidget::clear);
+  connect(_clearAct, &QAction::triggered, _vert, &VertWidget::clear);
 
   // exit app
   _exitAct = new QAction(tr("E&xit"), this);
   _exitAct->setShortcut(tr("Ctrl+Q"));
   _exitAct->setStatusTip(tr("Exit the application"));
-  connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
+  connect(_exitAct, &QAction::triggered, this, &CartManager::close);
 
   // file chooser for Open
   _openFileAct = new QAction(tr("O&pen"), this);
   _openFileAct->setShortcut(tr("Ctrl+F"));
   _openFileAct->setStatusTip(tr("Open File"));
-  connect(_openFileAct, SIGNAL(triggered()), this, SLOT(_openFile()));
+  connect(_openFileAct, &QAction::triggered, this, &CartManager::_openFile);
 
   // file chooser for Save
   _saveFileAct = new QAction(tr("S&ave"), this);
   //_saveFileAct->setShortcut(tr("Ctrl+S"));
   _saveFileAct->setStatusTip(tr("Save File"));
-  connect(_saveFileAct, SIGNAL(triggered()), this, SLOT(_saveFile()));
+  connect(_saveFileAct, &QAction::triggered, this, &CartManager::_saveFile);
 
   // show range rings
 
@@ -719,8 +716,7 @@ void CartManager::_createActions()
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
   _ringsAct->setChecked(_params.horiz_range_rings_on_at_startup);
-  connect(_ringsAct, SIGNAL(triggered(bool)),
-	  _horiz, SLOT(setRings(bool)));
+  connect(_ringsAct, &QAction::triggered, _horiz, &HorizWidget::setRings);
 
   // show grids
 
@@ -728,43 +724,41 @@ void CartManager::_createActions()
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
   _gridsAct->setChecked(_params.horiz_grids_on_at_startup);
-  connect(_gridsAct, SIGNAL(triggered(bool)),
-	  _horiz, SLOT(setGrids(bool)));
+  connect(_gridsAct, &QAction::triggered, _horiz, &HorizWidget::setGrids);
 
   // show azimuth lines
-
+  
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.horiz_azimuth_lines_on_at_startup);
-  connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  _horiz, SLOT(setAngleLines(bool)));
+  connect(_azLinesAct, &QAction::triggered, _horiz, &HorizWidget::setAngleLines);
 
   // show VERT window
 
   _showVertAct = new QAction(tr("Show VERT Window"), this);
   _showVertAct->setStatusTip(tr("Show the VERT Window"));
-  connect(_showVertAct, SIGNAL(triggered()), _vertWindow, SLOT(show()));
+  connect(_showVertAct, &QAction::triggered, _vertWindow, &VertWidget::show);
 
   // howto and about
   
   _howtoAct = new QAction(tr("Howto"), this);
   _howtoAct->setStatusTip(tr("Show the application's Howto box"));
-  connect(_howtoAct, SIGNAL(triggered()), this, SLOT(_howto()));
+  connect(_howtoAct, &QAction::triggered, this, &CartManager::_howto);
 
   _aboutAct = new QAction(tr("About"), this);
   _aboutAct->setStatusTip(tr("Show the application's About box"));
-  connect(_aboutAct, SIGNAL(triggered()), this, SLOT(_about()));
+  connect(_aboutAct, &QAction::triggered, this, &CartManager::_about);
 
   _aboutQtAct = new QAction(tr("About &Qt"), this);
   _aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-  connect(_aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+  connect(_aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 
   // save image
   
   _saveImageAct = new QAction(tr("Save-Image"), this);
   _saveImageAct->setStatusTip(tr("Save image to png file"));
-  connect(_saveImageAct, SIGNAL(triggered()), this, SLOT(_saveImageToFile()));
+  connect(_saveImageAct, &QAction::triggered, this, &CartManager::_saveImageToFile);
 
 }
 
@@ -2424,6 +2418,7 @@ void CartManager::_placeTimeControl()
 }
 
 // BoundaryEditor circle (radius) slider has changed value
+
 void CartManager::_circleRadiusSliderValueChanged(int value)
 {
   //returns true if existing circle was resized with this new radius
@@ -2433,104 +2428,15 @@ void CartManager::_circleRadiusSliderValueChanged(int value)
 }
 
 // BoundaryEditor brush (size) slider has changed value
+
 void CartManager::_brushRadiusSliderValueChanged(int value)
 {
   // BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
 
-#ifdef JUNK
+// set the directory (_boundaryDir) into which boundary
+// files will be read/written for current radar file (_openFilePath)
 
-///////////////////////////////////////////////////////////////////////////////
-// print time slider actions for debugging
-
-void CartManager::_timeSliderActionTriggered(int action) {
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    switch (action) {
-      case QAbstractSlider::SliderNoAction:
-        cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
-        break;
-      case QAbstractSlider::SliderSingleStepAdd: 
-        cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
-        break; 
-      case QAbstractSlider::SliderSingleStepSub:	
-        cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
-        break;
-      case QAbstractSlider::SliderPageStepAdd:
-        cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderPageStepSub:
-        cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderToMinimum:
-        cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderToMaximum:
-        cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderMove:
-        cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
-        break;
-      default: 
-        cerr << "unknown action in _timeSliderActionTriggered" << endl;
-    }
-    cerr << "timeSliderActionTriggered, value: "
-         << _timeControl->getTimeSlider()->value() << endl;
-  }
-} 
-
-void CartManager::_timeSliderValueChanged(int value) 
-{
-  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
-    return;
-  }
-  // get path for this value
-  string path = _archiveFileList[value];
-  // get time for this path
-  RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
-  _setGuiFromSelectedTime();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider changed, value: " << value << endl;
-  }
-}
-
-void CartManager::_timeSliderReleased() 
-{
-  int value = _timeSlider->value();
-  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
-    return;
-  }
-  // get path for this value
-  string path = _archiveFileList[value];
-  // get time for this path
-  RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
-  _setGuiFromSelectedTime();
-  // request data
-  if (_timeControl->getArchiveScanIndex() != value) {
-    _archiveScanIndex = value;
-    setArchiveRetrievalPending();
-  }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
-  }
-}
-
-void CartManager::_timeSliderPressed() 
-{
-  int value = _timeSlider->value();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
-  }
-}
-
-#endif
-
-// sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
 void CartManager::setBoundaryDir()
 {
   // if (!_openFilePath.empty()) {
@@ -2541,211 +2447,6 @@ void CartManager::setBoundaryDir()
   //   _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
   // }
 }
-
-////////////////////////////////////////////////////
-// create the file chooser dialog
-//
-// This allows the user to choose an archive file to open
-
-// void CartManager::_openFile()
-// {
-//   // seed with files for the day currently in view, generate like this: *yyyymmdd*
-//   string pattern = _timeControl->getArchiveStartTime().getDateStrPlain();
-//   QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
-//   finalPattern.append(pattern.c_str());
-//   finalPattern.append("*)");
-  
-//   QString inputPath = QDir::currentPath();
-//   // get the path of the current file, if available
-//   if (_archiveFileList.size() > 0) {
-//     QDir temp(_archiveFileList[0].c_str());
-//     inputPath = temp.absolutePath();
-//   }
-  
-//   //since we are opening a new radar file, close any boundaries currently being displayed
-//   // BoundaryPointEditor::Instance()->clear();
-//   // if (_boundaryEditorDialog) {
-//   //   clearBoundaryEditorClick();
-//   //   _boundaryEditorDialog->setVisible(false);
-//   // }
-
-//   if (_horiz){
-//     _horiz->showOpeningFileMsg(true);
-//   }
-  
-//   QString filePath =
-//     QFileDialog::getOpenFileName(this,
-//                                  "Open Document",
-//                                  inputPath, finalPattern);
-//   //QDir::currentPath(),
-//   //"All files (*.*)");
-
-//   //wait 10ms so the QFileDialog has time to close before proceeding...
-//   QTimer::singleShot(10, [=]()
-//   {
-//     if( !filePath.isNull() )
-//     {
-//       QByteArray qb = filePath.toUtf8();
-//       const char *openFilePath = qb.constData();
-//       _openFilePath = openFilePath;
-
-//       cout << "_openFilePath=" << _openFilePath << endl;
-
-//       //use _openFilePath to determine the new directory
-//       // into which boundaries will be read/written
-//       setBoundaryDir();
-
-//       // trying this ... to get the data from the file selected
-//       setArchiveRetrievalPending();
-//       vector<string> list;
-//       list.push_back(openFilePath);
-//       setArchiveFileList(list, false);
-
-
-//       try {
-//         _getArchiveData();
-//       } catch (FileIException &ex) {
-//         _horiz->showOpeningFileMsg(false);
-//         this->setCursor(Qt::ArrowCursor);
-//         // _timeControl->setCursor(Qt::ArrowCursor);
-//         return;
-//       }
-//     }
-
-//     // now update the time controller window
-//     QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-//     cerr << "5555555555555" << endl;
-//     _timeControl->setArchiveStartTime(epoch);
-//     QDateTime now = QDateTime::currentDateTime();
-//     _timeControl->setArchiveEndTime(now);
-
-//     cerr << "6666666666666666" << endl;
-//     _timeControl->setArchiveStartTimeFromGui();
-//     _timeControl->setArchiveEndTimeFromGui();
-//     QFileInfo fileInfo(filePath);
-//     string absolutePath = fileInfo.absolutePath().toStdString();
-//     if (_params.debug >= Params::DEBUG_VERBOSE) {
-//       cerr << "changing to path " << absolutePath << endl;
-//     }
-//     //  loadArchiveFileList(dir.absolutePath());
-    
-//     RadxTimeList timeList;
-//     timeList.setDir(absolutePath);
-//     timeList.setModeInterval(_timeControl->getArchiveStartTime(),
-//                              _timeControl->getArchiveEndTime());
-//     if (timeList.compile()) {
-//       cerr << "ERROR - CartManager::openFile()" << endl;
-//       cerr << "  " << timeList.getErrStr() << endl;
-//     }
-
-//     vector<string> pathList = timeList.getPathList();
-//     if (pathList.size() <= 0) {
-//       cerr << "ERROR - CartManager::openFile()" << endl;
-//       cerr << "  pathList is empty" << endl;
-//       cerr << "  " << timeList.getErrStr() << endl;
-//     } else {
-//       if (_params.debug >= Params::DEBUG_VERBOSE) {
-//         cerr << "pathList is NOT empty" << endl;
-//         for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-//           cerr << *i << endl;
-//         }
-//         cerr << endl;
-//       }
-
-//       setArchiveFileList(pathList, false);
-
-//       // now fetch the first time and last time from the directory
-//       // and set these values in the time controller display
-
-//       RadxTime firstTime;
-//       RadxTime lastTime;
-//       timeList.getFirstAndLastTime(firstTime, lastTime);
-//       if (_params.debug >= Params::DEBUG_VERBOSE) {
-//         cerr << "first time " << firstTime << endl;
-//         cerr << "last time " << lastTime << endl;
-//       }
-//       // convert RadxTime to QDateTime
-//       _timeControl->setArchiveStartTime(firstTime);
-//       _timeControl->setArchiveEndTime(lastTime);
-//       cerr << "yyyyyyyyyyyyyyyyy" << endl;
-//       _timeControl->setGuiFromArchiveStartTime();
-//       _timeControl->setGuiFromArchiveEndTime();
-
-//       _horiz->showOpeningFileMsg(false);
-//     } // end else pathList is not empty
-//   });
-// }
-
-
-
-////////////////////////////////////////////////////
-// create the file chooser dialog
-//
-// This allows the user to choose the name of a
-// file in which to save Volume data
-
-// void CartManager::_saveFile()
-// {
-  
-//   QString finalPattern = "All files (*.nc)";
-
-//   QString inputPath = QDir::currentPath();
-//   // get the path of the current file, if available 
-//   if (_archiveFileList.size() > 0) {
-//     QDir temp(_archiveFileList[0].c_str());
-//     inputPath = temp.absolutePath();
-//   } 
-
-//   QString filename =  QFileDialog::getSaveFileName(
-//           this,
-//           "Save Radar Volume",
-//           inputPath, finalPattern);
- 
-//   if( !filename.isNull() )
-//   {
-//     QByteArray qb = filename.toUtf8();
-//     const char *name = qb.constData();
-//     if (_params.debug >= Params::DEBUG_VERBOSE) {
-//       LOG(DEBUG_VERBOSE) << "selected file path : " << name;
-//     }
-
-//     // TODO: hold it! the save message should
-//     // go to the Model (Data) level because
-//     // we'll be using Radx utilities.
-//     // 
-//     RadxFile outFile;
-//     try {
-//       LOG(DEBUG_VERBOSE) << "writing to file " << name;
-//       outFile.writeToPath(_vol, name);
-//     } catch (FileIException &ex) {
-//       this->setCursor(Qt::ArrowCursor);
-//       return;
-//     }
-//   }
-// }
-
-// void CartManager::_createFileChooserDialog()
-// {
-//   _refreshFileChooserDialog();
-// }
-
-// void CartManager::_refreshFileChooserDialog()
-// {
-
-// }
-
-// void CartManager::_showFileChooserDialog()
-// {
-
-// }
-
-////////////////////////////////////////////////////////
-// set for pending archive retrieval
-
-// void CartManager::setArchiveRetrievalPending()
-// {
-//   _archiveRetrievalPending = true;
-// }
 
 /////////////////////////////////////
 // clear display widgets
@@ -3230,7 +2931,7 @@ void CartManager::_howto()
 
 #ifdef NOTNOW
 // Creates the boundary editor dialog and associated event slots
-void CartManager::createBoundaryEditorDialog()
+void CartManager::_createBoundaryEditorDialog()
 {
   _boundaryEditorDialog = new QDialog(this);
   _boundaryEditorDialog->setMaximumHeight(368);
@@ -3245,7 +2946,7 @@ void CartManager::createBoundaryEditorDialog()
   int row = 0;
   _boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
-
+  
   _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
   QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
@@ -3258,7 +2959,8 @@ void CartManager::createBoundaryEditorDialog()
   _boundaryEditorPolygonBtn->setCheckable(TRUE);
   _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
-  connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()), this, SLOT(polygonBtnBoundaryEditorClick()));
+  connect(_boundaryEditorPolygonBtn, &QPushButton::clicked,
+          this, &CartManager::polygonBtnBoundaryEditorClick);
 
   _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorCircleBtn->setMaximumWidth(130);
@@ -3267,7 +2969,7 @@ void CartManager::createBoundaryEditorDialog()
   _boundaryEditorCircleBtn->setCheckable(TRUE);
   _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
-  connect(_boundaryEditorCircleBtn, SIGNAL(clicked()), this, SLOT(circleBtnBoundaryEditorClick()));
+connect(_boundaryEditorCircleBtn, &QPushButton::clicked, this, &CartManager::circleBtnBoundaryEditorClick()));
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
   _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -3281,16 +2983,16 @@ void CartManager::createBoundaryEditorDialog()
   _circleRadiusSlider->setMinimum(8);
   _circleRadiusSlider->setMaximum(200);
   _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
-  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_circleRadiusSliderValueChanged(int)));
+  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)), this, &CartManager::_circleRadiusSliderValueChanged(int)));
 
   _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorBrushBtn->setMaximumWidth(130);
   _boundaryEditorBrushBtn->setText(" Brush ");
   _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-  _boundaryEditorBrushBtn->setCheckable(TRUE);
+_boundaryEditorBrushBtn->setCheckable(TRUE);
   _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
-  connect(_boundaryEditorBrushBtn, SIGNAL(clicked()), this, SLOT(brushBtnBoundaryEditorClick()));
+  connect(_boundaryEditorBrushBtn, &QPushButton::clicked, this, &CartManager::brushBtnBoundaryEditorClick()));
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
   _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -3304,7 +3006,7 @@ void CartManager::createBoundaryEditorDialog()
   _brushRadiusSlider->setMinimum(12);
   _brushRadiusSlider->setMaximum(75);
   _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
-  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_brushRadiusSliderValueChanged(int)));
+  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)), this, &CartManager::_brushRadiusSliderValueChanged(int)));
 
   _boundaryEditorBrushBtn->setChecked(TRUE);
   _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
@@ -3326,7 +3028,7 @@ void CartManager::createBoundaryEditorDialog()
   newItem1->setText("Boundary1");
   _boundaryEditorList->insertItem(0, newItem1);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
+  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, &CartManager::onBoundaryEditorListItemClicked(QListWidgetItem*)));
 
   // horizontal layout contains the "Clear", "Help", and "Save" buttons
   QHBoxLayout *hLayout = new QHBoxLayout;
@@ -3335,12 +3037,12 @@ void CartManager::createBoundaryEditorDialog()
   _boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorClearBtn->setText("Clear");
   hLayout->addWidget(_boundaryEditorClearBtn);
-  connect(_boundaryEditorClearBtn, SIGNAL(clicked()), this, SLOT(clearBoundaryEditorClick()));
+  connect(_boundaryEditorClearBtn, &QPushButton::clicked, this, &CartManager::clearBoundaryEditorClick()));
 
   _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorHelpBtn->setText("Help");
   hLayout->addWidget(_boundaryEditorHelpBtn);
-  connect(_boundaryEditorHelpBtn, SIGNAL(clicked()), this, SLOT(helpBoundaryEditorClick()));
+  connect(_boundaryEditorHelpBtn, &QPushButton::clicked, this, &CartManager::helpBoundaryEditorClick()));
 
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorSaveBtn->setText("Save");

@@ -124,7 +124,6 @@ void TimeControl::populateGui()
   _timeSlider->setPageStep(0);
   _timeSlider->setFixedWidth(200);
   _timeSlider->setToolTip("Drag to change time frame");
-
   _timeSlider->setMinimum(0);
   _timeSlider->setMaximum(_nFrames - 1);
   
@@ -419,16 +418,11 @@ void TimeControl::_timeSliderActionTriggered(int action) {
 
 void TimeControl::_timeSliderValueChanged(int value) 
 {
-  // if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
-  //   return;
-  // }
-  // get path for this value
-  // string path = _parent->getArchiveFileList()[value];
-  // // get time for this path
-  RadxTime pathTime;
-  // NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
+  if (value < 0 || value > _nFrames - 1) {
+    return;
+  }
+  _frameIndex = value;
+  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
   setGuiFromSelectedTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
@@ -438,22 +432,15 @@ void TimeControl::_timeSliderValueChanged(int value)
 void TimeControl::_timeSliderReleased() 
 {
   int value = _timeSlider->value();
-  // if (value < 0 || value > (int) _parent->getArchiveFileListSize() - 1) {
-  //   return;
-  // }
-  // get path for this value
-  // string path = _parent->getArchiveFileList()[value];
-  // get time for this path
-  RadxTime pathTime;
-  // NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
-  setGuiFromSelectedTime();
-  // request data
-  if (_frameIndex != value) {
-    _frameIndex = value;
-    // _parent->setArchiveRetrievalPending();
+  if (value < 0 || value > _nFrames - 1) {
+    return;
   }
+  if (value == _frameIndex) {
+    return;
+  }
+  _frameIndex = value;
+  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
+  setGuiFromSelectedTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
   }
