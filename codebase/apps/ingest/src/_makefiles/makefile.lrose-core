@@ -22,7 +22,8 @@ SUB_DIRS = \
 	CwbObs2Spdb \
 	CwbSfc2Mdv \
 	EolMobileKml2Spdb \
-	EraNc2Mdv \
+	EraGrib2Mdv \
+	Era5Nc2Mdv \
 	GemVolXml2Dsr \
 	Gini2Mdv \
 	GoesRGLM2Spdb \
