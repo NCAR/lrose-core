@@ -3928,12 +3928,8 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
 
   string scanId;
   if (_writeScanIdInFileName) {
-    //if (vol.getScanId().size() > 0) {
-    //  if (strcasestr(vol.getScanId().c_str(), "default") == NULL) {
         scanId += "_";
         scanId += to_string(vol.getScanId());
-    //  }
-    //}
   }
 
   string scanName;
@@ -3949,7 +3945,7 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
   int volNum = vol.getVolumeNumber();
   char volNumStr[1024];
   if (_writeVolNumInFileName && volNum >= 0) {
-    sprintf(volNumStr, "_v%d", volNum);
+    snprintf(volNumStr, 1024, "_v%d", volNum);
   } else {
     volNumStr[0] = '\0'; // NULL str
   }
@@ -3960,6 +3956,14 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
       rangeResolution.append("_");
       rangeResolution.append(vol.getRangeResolution());
     }
+  }
+
+  char fixedAngleStr[1024];
+  if (_writeFixedAngleInFileName) {
+    double meanFixedAngle = vol.computeMeanFixedAngleFromRays();
+    snprintf(fixedAngleStr, 1024, "_%.2f", meanFixedAngle);
+  } else {
+    fixedAngleStr[0] = '\0'; // NULL str
   }
 
   string prefix = "cfrad.";
@@ -3997,23 +4001,24 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
       endSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s%s%s.nc",
-            prefix.c_str(),
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            dateTimeConnector,
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startSubsecsStr,
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            dateTimeConnector,
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
-            rangeResolution.c_str(), suffix.c_str());
+    snprintf(fileName, BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s%s%s%s%s%s.nc",
+             prefix.c_str(),
+             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+             dateTimeConnector,
+             startTime.getHour(), startTime.getMin(), startTime.getSec(),
+             startSubsecsStr,
+             endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+             dateTimeConnector,
+             endTime.getHour(), endTime.getMin(), endTime.getSec(),
+             endSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str(), scanId.c_str(), scanType.c_str(),
+             fixedAngleStr,
+             rangeResolution.c_str(), suffix.c_str());
     break;
   case FILENAME_WITH_START_TIME_ONLY:
     if (_writeSubsecsInFileName) {
@@ -4022,18 +4027,20 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
       startSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s%s%s.nc",
-            prefix.c_str(),
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            dateTimeConnector,
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
-            rangeResolution.c_str(), suffix.c_str());
+    snprintf(fileName, BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s%s%s%s%s%s.nc",
+             prefix.c_str(),
+             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+             dateTimeConnector,
+             startTime.getHour(), startTime.getMin(), startTime.getSec(),
+             startSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str(), scanId.c_str(), scanType.c_str(),  
+             rangeResolution.c_str(),
+             fixedAngleStr,
+             suffix.c_str());
     break;
   case FILENAME_WITH_END_TIME_ONLY:
     if (_writeSubsecsInFileName) {
@@ -4042,18 +4049,21 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
       endSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s%s%s.nc",
-            prefix.c_str(),
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            dateTimeConnector,
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
-            rangeResolution.c_str(), suffix.c_str());
+    snprintf(fileName,
+             BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s%s%s%s%s%s.nc",
+             prefix.c_str(),
+             endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+             dateTimeConnector,
+             endTime.getHour(), endTime.getMin(), endTime.getSec(),
+             endSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str(), scanId.c_str(), scanType.c_str(),  
+             rangeResolution.c_str(),
+             fixedAngleStr,
+             suffix.c_str());
     break;
   default:
     char fileSubsecsStr[64];
@@ -4063,17 +4073,19 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
       fileSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s%s.nc",
-            prefix.c_str(),
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            dateTimeConnector,
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-            fileSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanId.c_str(), scanType.c_str(), suffix.c_str());
+    snprintf(fileName, BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s%s%s%s%s.nc",
+             prefix.c_str(),
+             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+             dateTimeConnector,
+             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+             fileSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str(), scanId.c_str(), scanType.c_str(),
+             fixedAngleStr,
+             suffix.c_str());
   }
 
   // make sure the file name is valid - i.e. no / or whitespace

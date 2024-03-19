@@ -366,6 +366,13 @@ public:
     _writeVolNumInFileName = val; 
   }
 
+  /// Add mean fixed angle to output file name
+  /// Default is false
+  
+  void setWriteFixedAngleInFileName(bool val) {
+    _writeFixedAngleInFileName = val; 
+  }
+
   /// Use hyphen instead of underscore in datetime part of filename
   /// Default is false
   
@@ -965,6 +972,7 @@ protected:
   bool _writeScanNameInFileName; ///< include scan name in file name
   bool _writeRangeResolutionInFileName; ///< include range resoluition in file name
   bool _writeVolNumInFileName; ///< include volume number in file name
+  bool _writeFixedAngleInFileName; ///< include mean fixed angle in file name
   bool _writeHyphenInDateTime; ///< use a hyphen instead of underscore in datetime part of file names
   bool _writeIndividualSweeps; ///< write individual sweeps, if applicable
   bool _writeCompressed; ///< write out compressed? CfRadial only

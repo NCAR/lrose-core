@@ -926,12 +926,14 @@ void Dsr2Radx::_setupWrite()
   if (strlen(_params.output_filename_prefix) > 0) {
     _outFile->setWriteFileNamePrefix(_params.output_filename_prefix);
   }
+  
   _outFile->setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
   _outFile->setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
   _outFile->setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   _outFile->setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
   _outFile->setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
   _outFile->setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
+  _outFile->setWriteFixedAngleInFileName(_params.include_mean_fixed_angle_in_file_name);
   _outFile->setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
 }

@@ -466,6 +466,8 @@ void RadxFile::clearWrite()
   _writeScanNameInFileName = false;
   _writeRangeResolutionInFileName = false;
   _writeVolNumInFileName = false;
+  _writeFixedAngleInFileName = false;
+  _writeFixedAngleInFileName = false;
   _writeHyphenInDateTime = false; 
   _writeNativeByteOrder = false;
   _writeForceNgatesVary = false;
@@ -493,6 +495,7 @@ void RadxFile::copyWriteDirectives(const RadxFile &other)
   _writeScanNameInFileName = other._writeScanNameInFileName; 
   _writeRangeResolutionInFileName = other._writeRangeResolutionInFileName; 
   _writeVolNumInFileName = other._writeVolNumInFileName; 
+  _writeFixedAngleInFileName = other._writeFixedAngleInFileName;
   _writeHyphenInDateTime = other._writeHyphenInDateTime; 
   _writeCompressed = other._writeCompressed;
   _compressionLevel = other._compressionLevel;

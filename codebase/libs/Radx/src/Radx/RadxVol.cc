@@ -4020,6 +4020,57 @@ void RadxVol::computeFixedAnglesFromRays(bool force /* = true */,
 
 }
 
+//////////////////////////////////////////////////////////  
+/// Compute mean fixed angle for the volume from the rays.
+
+double RadxVol::computeMeanFixedAngleFromRays() const
+
+{
+  
+  // load sweep info if needed
+  
+  if (getNRays() < 1) {
+    return Radx::missingMetaDouble;
+  }
+  
+  // sweep mode
+  
+  bool isRhi = checkIsRhi();
+  
+  // loop through rays
+
+  double sumx = 0.0;
+  double sumy = 0.0;
+  double count = 0.0;
+  
+  for (size_t iray = 0; iray < getNRays(); iray++) {
+    
+    // sum up (x,y) coords of measured angles
+      
+    const RadxRay *ray = _rays[iray];
+    
+    double fixedAngle = 0.0;
+    if (isRhi) {
+      fixedAngle = ray->getAzimuthDeg();
+    } else {
+      fixedAngle = ray->getElevationDeg();
+    }
+    
+    double sinVal, cosVal;
+    Radx::sincos(fixedAngle * Radx::DegToRad, sinVal, cosVal);
+    sumy += sinVal;
+    sumx += cosVal;
+    count++;
+    
+  } // iray
+  
+  // compute mean angle
+
+  double meanFixedAngleDeg = atan2(sumy, sumx) * Radx::RadToDeg;
+  return meanFixedAngleDeg;
+  
+}
+
 ///////////////////////////////////////////////////////////////
 /// Compute sweep scan rates from ray data - in deg/sec.
 ///

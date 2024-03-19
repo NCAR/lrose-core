@@ -2497,6 +2497,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'include_mean_fixed_angle_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_mean_fixed_angle_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the mean fixed angle of the volume in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the mean fixed angle is included in the file name, preceded by '_v'.");
+    tt->val_offset = (char *) &include_mean_fixed_angle_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'use_hyphen_in_file_name_datetime_part'
     // ctype is 'tdrp_bool_t'
     

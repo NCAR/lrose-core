@@ -711,6 +711,8 @@ public:
 
   tdrp_bool_t include_vol_num_in_file_name;
 
+  tdrp_bool_t include_mean_fixed_angle_in_file_name;
+
   tdrp_bool_t use_hyphen_in_file_name_datetime_part;
 
   tdrp_bool_t write_master_ldata_info;
@@ -768,7 +770,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[177];
 
   const char *_className;
 

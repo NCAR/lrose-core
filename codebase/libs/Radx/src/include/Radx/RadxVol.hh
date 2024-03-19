@@ -716,7 +716,11 @@ public:
   void computeFixedAnglesFromRays(bool force = true, 
                                   bool useMean = true);
 
-  /// Compute sweep scan rates from ray data - in deg/sec.
+  /// Compute mean fixed angle for the volume from the rays.
+  
+  double computeMeanFixedAngleFromRays() const;
+
+/// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.
   /// Sets the measureScanRate on the sweeps.
