@@ -260,6 +260,8 @@ Iq2Dsr::~Iq2Dsr()
 
   PMU_auto_unregister();
 
+  return;
+
   // free memory
   
   // if (_beamReader) {
@@ -871,10 +873,11 @@ int Iq2Dsr::_writeRemainingBeamsOnExit()
   int iret = 0;
   int startRetrievePos = _threadPoolRetrievePos;
   int endRetrievePos = (startRetrievePos - 1) % _threadPoolSize;
-  
+
   int retrievePos = startRetrievePos;
+  int count = 0;
   while (retrievePos != endRetrievePos) {
-    
+
     // get thread pointer
     
     ComputeThread *thread = _threadPool[retrievePos];
@@ -924,6 +927,15 @@ int Iq2Dsr::_writeRemainingBeamsOnExit()
       
     } // if (beam != NULL)
 
+    count++;
+    if (count > 2 * _threadPoolSize) {
+      cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      break;
+    }
+    
   } // while (_threadPoolRetrievePos != endRetrievePos) {
 
   return iret;
