@@ -680,6 +680,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("DIGITAL ELEVATION MAP FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'srtm30_dem_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("srtm30_dem_dir");
+    tt->descr = tdrpStrDup("Directory for digital elevation files.");
+    tt->help = tdrpStrDup("This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.");
+    tt->val_offset = (char *) &srtm30_dem_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/dem");
+    tt++;
+    
+    // Parameter 'water_layer_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("water_layer_dir");
+    tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
+    tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
+    tt->val_offset = (char *) &water_layer_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/water");
+    tt++;
+    
+    // Parameter 'check_adjacent_grid_cells'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_adjacent_grid_cells");
+    tt->descr = tdrpStrDup("Option to check terrain and water in adjacent grid cells.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &check_adjacent_grid_cells - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'search_margin_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("search_margin_km");
+    tt->descr = tdrpStrDup("Margin width in checking for adjacent grid points (km).");
+    tt->help = tdrpStrDup("We search around the selected point by this distance.");
+    tt->val_offset = (char *) &search_margin_km - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -768,11 +825,11 @@
     tt->single_val.d = 18;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COMPUTING REFLECTIVITY TEXTURE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -813,11 +870,11 @@
     tt->single_val.d = 0.67;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY");
     tt->comment_text = tdrpStrDup("Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.");
     tt++;
@@ -846,11 +903,11 @@
     tt->single_val.d = 30;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY");
     tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
     tt++;
@@ -879,11 +936,11 @@
     tt->single_val.d = 0.4;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED ECHO TYPE USING CLUMPING AND TEMPERATURE");
     tt->comment_text = tdrpStrDup("We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.");
     tt++;
@@ -948,11 +1005,11 @@
     tt->single_val.d = 2;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("SPECIFYING VERTICAL LEVELS FOR ADVANCED ECHO TYPE - TEMPERATURE or HEIGHT?");
     tt->comment_text = tdrpStrDup("We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.");
     tt++;
@@ -1061,11 +1118,11 @@
     tt->single_val.d = 9;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED CATEGORY FROM CLUMP PROPERTIES");
     tt->comment_text = tdrpStrDup("Based on the temp or height criteria above, we compute the deep, mid and shallow convective fractions within each sub-clump. We also determine whether there is stratiform echo below the clump. The following parameters are then used to determine the deep, elevated, mid or shallow echo types for the convection. If a determination is not clear, the overall category is set to mixed.");
     tt++;
@@ -1130,11 +1187,11 @@
     tt->single_val.d = 0.9;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

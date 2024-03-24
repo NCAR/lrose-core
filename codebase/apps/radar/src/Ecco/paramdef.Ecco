@@ -64,6 +64,34 @@ paramdef string {
 } dbz_field_name;
 
 commentdef {
+  p_header = "DIGITAL ELEVATION MAP FILES";
+}
+
+paramdef string {
+  p_default = "/tmp/dem";
+  p_descr = "Directory for digital elevation files.";
+  p_help = "This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.";
+} srtm30_dem_dir;
+
+paramdef string {
+  p_default = "/tmp/water";
+  p_descr = "Directory for water layer data in netCDF format.";
+  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
+} water_layer_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check terrain and water in adjacent grid cells.";
+  p_descr = "If true, we check the terraom and water not only at the requested grid point, but also in the surrounding grid points. The reported height is the max height in the search area. Water is reported if it exists anywhere in the seach area. See 'search_margin_km'.";
+} check_adjacent_grid_cells;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin width in checking for adjacent grid points (km).";
+  p_help = "We search around the selected point by this distance.";
+} search_margin_km;
+
+commentdef {
   p_header = "ALGORITHM PARAMETERS";
 }
 

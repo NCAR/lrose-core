@@ -391,6 +391,14 @@ public:
 
   char* dbz_field_name;
 
+  char* srtm30_dem_dir;
+
+  char* water_layer_dir;
+
+  tdrp_bool_t check_adjacent_grid_cells;
+
+  double search_margin_km;
+
   double min_valid_height;
 
   double max_valid_height;
@@ -486,7 +494,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[62];
+  mutable TDRPtable _table[67];
 
   const char *_className;
 
