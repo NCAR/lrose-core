@@ -203,7 +203,7 @@ int TerrainHt::_getHt(double lat, double lon,
   _latestLat = lat;
   _latestLon = lon;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Got ht request: lat, lon: " << lat << ", " << lon << endl;
     cerr << "Got ht request: htM, isWater: " << terrainHtM << ", " << isWater << endl;
   }

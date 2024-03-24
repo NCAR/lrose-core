@@ -114,7 +114,7 @@ void SquareDegree::freeHtAndWaterArrays()
     ufree2((void **) _htArray);
     _htArray = NULL;
     
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "Freed up ht data, lat, lon: "
            << _centerLat << ", " << _centerLon << endl;
     }
@@ -126,7 +126,7 @@ void SquareDegree::freeHtAndWaterArrays()
     ufree2((void **) _waterArray);
     _waterArray = NULL;
     
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "Freed up water data, lat, lon: "
            << _centerLat << ", " << _centerLon << endl;
     }
@@ -257,7 +257,7 @@ int SquareDegree::_readFromFile()
     return -1;
   }
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "SquareDegree, lat, lon: " << _centerLat << ", " << _centerLon << endl;
     cerr << "  Reading in DEM file; " << _demFilePath << endl;
   }
@@ -328,7 +328,7 @@ int SquareDegree::_readWaterFile(size_t ulOffset)
 
   // open file
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "  Reading in WATER file; " << _waterFilePath << endl;
   }
 
