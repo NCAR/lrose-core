@@ -409,7 +409,7 @@ int Ecco::_addTerrainHtField()
              << yy << ", "
              << lat << ", "
              << lon << ", "
-             << ht << endl;
+             << terrainHtM << endl;
       }
       
     } // ix
