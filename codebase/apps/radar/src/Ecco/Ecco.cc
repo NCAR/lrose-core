@@ -402,6 +402,15 @@ int Ecco::_addTerrainHtField()
       } else {
         ht[ii] = 0.0;
       }
+
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "xx, yy, lat, lon, ht: "
+             << xx << ", "
+             << yy << ", "
+             << lat << ", "
+             << lon << ", "
+             << ht << endl;
+      }
       
     } // ix
   } // iy
