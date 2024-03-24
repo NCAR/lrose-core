@@ -391,6 +391,8 @@ public:
 
   char* dbz_field_name;
 
+  tdrp_bool_t use_terrain_ht_data;
+
   char* srtm30_dem_dir;
 
   char* water_layer_dir;
@@ -494,7 +496,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[67];
+  mutable TDRPtable _table[68];
 
   const char *_className;
 

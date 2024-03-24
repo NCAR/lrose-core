@@ -680,8 +680,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("DIGITAL ELEVATION MAP FILES");
+    tt->comment_hdr = tdrpStrDup("USING DIGITAL ELEVATION MAPS FOR TERRAIN HEIGHT");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'use_terrain_ht_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_terrain_ht_data");
+    tt->descr = tdrpStrDup("Option to use terrain ht data when setting vertical categories.");
+    tt->help = tdrpStrDup("If true, we read in terrain height data from the SRTM30 data set. Separating tropospheric regions based on temperature has one disadvantage at high latitudes in that the melting level can intersect with the ground, which eliminates the lower tropospheric region. To avoid that problem, we do not allow the separation boundary between the low and the mid region to fall below 2 km above the ground, and the separation boundary between the mid and the high region to fall below 4 km above ground. This way, we always retain all three regions. The altitudes of 2 and 4 km were chosen following those established by the WMO (Cohn, 2017).");
+    tt->val_offset = (char *) &use_terrain_ht_data - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'srtm30_dem_dir'
@@ -693,7 +705,7 @@
     tt->descr = tdrpStrDup("Directory for digital elevation files.");
     tt->help = tdrpStrDup("This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.");
     tt->val_offset = (char *) &srtm30_dem_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/dem");
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/DEM/uncompressed");
     tt++;
     
     // Parameter 'water_layer_dir'
@@ -705,7 +717,7 @@
     tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
     tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
     tt->val_offset = (char *) &water_layer_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/water");
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
     tt++;
     
     // Parameter 'check_adjacent_grid_cells'

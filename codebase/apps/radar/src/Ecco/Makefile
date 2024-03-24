@@ -53,14 +53,16 @@ HDRS = \
 	$(PARAMS_HH) \
 	Ecco.hh \
 	Args.hh \
-	SquareDegree.hh
+	SquareDegree.hh \
+	TerrainHt.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Ecco.cc \
 	Args.cc \
 	Main.cc \
-	SquareDegree.cc
+	SquareDegree.cc \
+	TerrainHt.cc
 
 #
 # tdrp macros

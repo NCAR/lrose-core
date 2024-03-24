@@ -46,6 +46,7 @@
 #include <radar/ConvStratFinder.hh>
 #include "Args.hh"
 #include "Params.hh"
+class TerrainHt;
 using namespace std;
 
 ////////////////////////
@@ -85,12 +86,15 @@ private:
   DsMdvx _inMdvx, _outMdvx;
   DsMdvx _tempMdvx;
   ConvStratFinder _finder;
-
+  
   MdvxField *_tempField;
   MdvxField _shallowHtField;
   MdvxField _deepHtField;
 
+  TerrainHt *_terrainHt;
+
   int _doRead();
+  int _addTerrainHtField();
   void _addFields();
   int _readTempProfile(time_t dbzTime,
                        const MdvxField *dbzField);

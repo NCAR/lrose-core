@@ -40,6 +40,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include "Ecco.hh"
+#include "TerrainHt.hh"
 using namespace std;
 
 const fl32 Ecco::_missing = -9999.0;
@@ -52,7 +53,7 @@ Ecco::Ecco(int argc, char **argv)
 
   isOK = true;
   _tempField = NULL;
-
+  
   // set programe name
 
   _progName = "Ecco";
@@ -114,6 +115,13 @@ Ecco::Ecco(int argc, char **argv)
     }
   }
 
+  // initialize terrain ht object
+
+  _terrainHt = NULL;
+  if (_params.use_terrain_ht_data) {
+    _terrainHt = new TerrainHt(_params);
+  }
+
   // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -168,6 +176,10 @@ Ecco::~Ecco()
   // unregister process
 
   PMU_auto_unregister();
+
+  if (_terrainHt) {
+    delete _terrainHt;
+  }
 
 }
 
@@ -311,10 +323,95 @@ int Ecco::_doRead()
     cerr << _input.getErrStr() << endl;
     return -1;
   }
+
+  if (_params.use_terrain_ht_data) {
+    if (_addTerrainHtField()) {
+      cerr << "WARNING - Ecco::_doRead" << endl;
+      cerr << "  Cannot read in terrain height data." << endl;
+    }
+  }
   
   if (_params.debug) {
     cerr << "Read in file: " << _inMdvx.getPathInUse() << endl;
   }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// add terrain ht field to input mdv object
+
+int Ecco::_addTerrainHtField()
+  
+{
+
+  // get geometry from DBZ field
+  
+  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+
+  // create terrain ht field - this is 2D
+  
+  Mdvx::field_header_t fhdrTerrain = dbzField->getFieldHeader();
+  fhdrTerrain.nz = 1;
+  fhdrTerrain.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdrTerrain.nx * fhdrTerrain.ny * sizeof(fl32);
+  fhdrTerrain.volume_size = planeSize32;
+  fhdrTerrain.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdrTerrain.data_element_nbytes = 4;
+  fhdrTerrain.missing_data_value = _missing;
+  fhdrTerrain.bad_data_value = _missing;
+  fhdrTerrain.scale = 1.0;
+  fhdrTerrain.bias = 0.0;
+
+  Mdvx::vlevel_header_t vhdr2d;
+  MEM_zero(vhdr2d);
+  vhdr2d.level[0] = 0;
+  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  MdvxField::setFieldName("TerrainHt", fhdrTerrain);
+  MdvxField::setFieldNameLong("Terrain height MSL", fhdrTerrain);
+  MdvxField::setUnits("m", fhdrTerrain);
+  MdvxField *terrainHtField =
+    new MdvxField(fhdrTerrain, vhdr2d, NULL, false, false, false);
+
+  // create projection object
+
+  MdvxProj proj(fhdrTerrain);
+  
+  // load up height data
+  
+  float *ht = new float[fhdrTerrain.nx * fhdrTerrain.ny];
+  
+  int ii = 0;
+  double yy = fhdrTerrain.grid_miny;
+  for (int iy = 0; iy < fhdrTerrain.ny; iy++, yy += fhdrTerrain.grid_dy) {
+    double xx = fhdrTerrain.grid_minx;
+    for (int ix = 0; ix < fhdrTerrain.nx; ix++, xx += fhdrTerrain.grid_dx, ii++) {
+      
+      // get lat/lon
+      double lat, lon;
+      proj.xy2latlon(xx, yy, lat, lon);
+
+      // get height
+
+      double terrainHtM = 0.0;
+      bool isWater = true;
+      if (_terrainHt->getHt(lat, lon, terrainHtM, isWater) == 0) {
+        ht[ii] = terrainHtM;
+      } else {
+        ht[ii] = 0.0;
+      }
+      
+    } // ix
+  } // iy
+
+  terrainHtField->setVolData(ht, planeSize32, Mdvx::ENCODING_FLOAT32);
+  delete[] ht;
+
+  // add field to input object
+  
+  _inMdvx.addField(terrainHtField);
 
   return 0;
 
