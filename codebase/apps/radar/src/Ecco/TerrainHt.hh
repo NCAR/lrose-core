@@ -22,106 +22,77 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Ecco.hh
+// TerrainHt.hh
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// MAY 2014
+// March 2023
 //
-////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 //
-// Ecco finds stratiform regions in a Cartesian radar volume
-//
-/////////////////////////////////////////////////////////////////////
+// TerrainHt reads requests from a client, providing a
+// lat/lon position. It returns the terrain height, and whether
+// the location is water or not.
+// 
+////////////////////////////////////////////////////////////////
 
-#ifndef Ecco_H
-#define Ecco_H
+#ifndef TerrainHt_H
+#define TerrainHt_H
 
 #include <string>
-#include <Mdv/DsMdvxInput.hh>
-#include <Mdv/MdvxField.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxChunk.hh>
-#include <toolsa/TaArray.hh>
-#include <radar/ConvStratFinder.hh>
+#include <vector>
+#include <cstdio>
+
 #include "Args.hh"
 #include "Params.hh"
-class TerrainHt;
+
+class SquareDegree;
+
 using namespace std;
 
 ////////////////////////
 // This class
 
-class Ecco {
+class TerrainHt {
   
 public:
 
   // constructor
-
-  Ecco (int argc, char **argv);
+  
+  TerrainHt (const Params &params);
 
   // destructor
   
-  ~Ecco();
+  ~TerrainHt();
 
-  // run 
-
-  int Run();
-
-  // data members
-
-  bool isOK;
-
+  // get terrain ht and water flag for a point
+  // returns 0 on success, -1 on failure
+  // sets terrainHtM and isWater args
+  
+  int getHt(double lat, double lon,
+            double &terrainHtM, bool &isWater);
+  
 protected:
   
 private:
 
-  static const fl32 _missing;
+  const static int nLat = 180;
+  const static int nLon = 360;
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  DsMdvxInput _input;
-  DsMdvx _inMdvx, _outMdvx;
-  DsMdvx _tempMdvx;
-  ConvStratFinder _finder;
+  const Params &_params;
+
+  SquareDegree ***_tiles;
   
-  MdvxField *_tempField;
-  MdvxField _shallowHtField;
-  MdvxField _deepHtField;
+  double _latestLat;
+  double _latestLon;
+  
+  int _getHt(double lat, double lon,
+             double &terrainHtM, bool &isWater);
 
-  TerrainHt *_terrainHt;
-
-  int _doRead();
-  int _addTerrainHtField();
-  void _addFields();
-  int _readTempProfile(time_t dbzTime,
-                       const MdvxField *dbzField);
-  void _computeHts(double tempC,
-                   MdvxField &htField,
-                   const string &fieldName,
-                   const string &longName,
-                   const string &units);
-  int _doWrite();
-
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const fl32 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
-
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const ui08 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
-
-  void _addClumpingDebugFields();
+  void _updateCache();
+  int _readForCache(double lat, double lon);
+  void _freeTileMemory();
 
 };
 

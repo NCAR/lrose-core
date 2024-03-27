@@ -22,106 +22,110 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Ecco.hh
+// SquareDegree.hh
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// MAY 2014
+// June 2014
 //
-////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 //
-// Ecco finds stratiform regions in a Cartesian radar volume
-//
-/////////////////////////////////////////////////////////////////////
+// SquareDegree handles the terrain information for a single
+// 1 deg x 1 deg segment of the global grid.
+// 
+////////////////////////////////////////////////////////////////
 
-#ifndef Ecco_H
-#define Ecco_H
+#ifndef SquareDegree_HH
+#define SquareDegree_HH
 
 #include <string>
-#include <Mdv/DsMdvxInput.hh>
-#include <Mdv/MdvxField.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxChunk.hh>
-#include <toolsa/TaArray.hh>
-#include <radar/ConvStratFinder.hh>
-#include "Args.hh"
 #include "Params.hh"
-class TerrainHt;
+#include <toolsa/TaThread.hh>
+#include <toolsa/os_config.h>
+#include <dataport/port_types.h>
+#include <Ncxx/Nc3File.hh>
+
 using namespace std;
 
 ////////////////////////
 // This class
 
-class Ecco {
+class SquareDegree {
   
 public:
 
   // constructor
-
-  Ecco (int argc, char **argv);
-
+  
+  SquareDegree(const Params &params,
+               double centerLat,
+               double centerLon);
+  
   // destructor
   
-  ~Ecco();
+  ~SquareDegree();
 
-  // run 
+  // get terrain ht and water flag for a point
+  // returns 0 on success, -1 on failure
+  // sets terrainHtM and isWater args
+  
+  int getHt(double lat, double lon,
+            double &terrainHtM, bool &isWater);
 
-  int Run();
+  // read file to update cache
+  // returns 0 on success, -1 on failure
+  
+  int readForCache();
 
-  // data members
+  // free arrays
+  
+  void freeHtAndWaterArrays();
 
-  bool isOK;
+  // get latest access time
+
+  time_t getLatestAccessTime() const { return _latestAccessTime; }
+
+  // constants
+
+  static const int PtsPerDeg = 120;
+  static const double GridRes;
 
 protected:
   
 private:
 
-  static const fl32 _missing;
-
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  DsMdvxInput _input;
-  DsMdvx _inMdvx, _outMdvx;
-  DsMdvx _tempMdvx;
-  ConvStratFinder _finder;
+  TaThread::SafeMutex _localMutex;
+  static TaThread::SafeMutex *_globalMutex;
   
-  MdvxField *_tempField;
-  MdvxField _shallowHtField;
-  MdvxField _deepHtField;
+  Params _params;
+  time_t _latestAccessTime;
+  
+  double _centerLat;
+  double _centerLon;
+  int _ulLatDeg, _ulLonDeg;
+  
+  char _demFilePath[MAX_PATH_LEN];
+  char _waterFilePath[MAX_PATH_LEN];
+  
+  int _fileNx, _fileNy;
+  double _dx, _dy;
+  int _fileUlLatDeg, _fileUlLonDeg;
 
-  TerrainHt *_terrainHt;
+  fl32 **_htArray;
+  ui08 **_waterArray;
+  bool _waterAvail;
 
-  int _doRead();
-  int _addTerrainHtField();
-  void _addFields();
-  int _readTempProfile(time_t dbzTime,
-                       const MdvxField *dbzField);
-  void _computeHts(double tempC,
-                   MdvxField &htField,
-                   const string &fieldName,
-                   const string &longName,
-                   const string &units);
-  int _doWrite();
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
+  string _ncPathInUse;
 
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const fl32 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
+  int _readFromFile();
+  int _readWaterFile(size_t ulOffset);
+  int _findFiles();
 
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const ui08 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
-
-  void _addClumpingDebugFields();
+  int _openNc3File(const string &path);
+  void _closeNc3File();
+  int _readNc3Dim(const string &name, Nc3Dim* &dim);
 
 };
 
