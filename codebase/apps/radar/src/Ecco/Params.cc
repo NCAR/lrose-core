@@ -1136,7 +1136,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("\n  The partition field has the following values:\n    CATEGORY_MISSING = 0\n    CATEGORY_STRATIFORM_LOW = 14\n    CATEGORY_STRATIFORM = 15\n    CATEGORY_STRATIFORM_MID = 16\n    CATEGORY_STRATIFORM_HIGH = 18\n    CATEGORY_MIXED = 25\n    CATEGORY_CONVECTIVE_ELEVATED = 32\n    CATEGORY_CONVECTIVE_SHALLOW = 34\n    CATEGORY_CONVECTIVE = 35\n    CATEGORY_CONVECTIVE_MID = 36\n    CATEGORY_CONVECTIVE_DEEP = 38");
     tt++;
     
     // Parameter 'output_url'
