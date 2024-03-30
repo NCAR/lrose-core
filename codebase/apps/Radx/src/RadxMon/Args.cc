@@ -328,7 +328,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [-start] Seek to start of FMQ\n"
       << "     If not set, reading begins at the end of the FMQ.\n"
       << "  [-summary] scrolling summary\n"
-      << "  [--summary_header_interval ?] header print interval (lines)\n"
+      << "  [-summary_header_interval ?] header print interval (lines)\n"
       << "     in summary mode\n"
       << "  [-output_tcp_port ?] specify port for data output\n"
       << "     Port on which to listen for clients.\n"
