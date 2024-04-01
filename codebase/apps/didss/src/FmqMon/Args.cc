@@ -124,17 +124,17 @@ void Args::_usage(string &prog_name, ostream &out)
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
-      << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      << "       [ -int ? ] specify monitor interval (secs)\n"
-      << "       [ -mode ? ] specify output mode: SUMMARY, FULL, ASCII_PRINT\n"
-      << "          SUMMARY: nmessages and data rate\n"
-      << "          FULL: info on each message\n"
-      << "          ASCII_PRINT: assumes messages are ASCII, prints messages\n"
-      << "       [-start] Seek to start of FMQ\n"
-      << "          If not set, reading begins at the end of the FMQ.\n"
-      << "       [ -url/-fmq ? ] specify URL of fmq to watch\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "  [ --, -h, -help, -man ] produce this list.\n"
+      << "  [ -debug ] print debug messages\n"
+      << "  [ -int ? ] specify monitor interval (secs)\n"
+      << "  [ -mode ? ] specify output mode: SUMMARY, FULL, ASCII_PRINT\n"
+      << "    SUMMARY: nmessages and data rate\n"
+      << "    FULL: info on each message\n"
+      << "    ASCII_PRINT: assumes messages are ASCII, prints messages\n"
+      << "  [-start] Seek to start of FMQ\n"
+      << "    If not set, reading begins at the end of the FMQ.\n"
+      << "  [ -url/-fmq ? ] specify URL of fmq to watch\n"
+      << "  [ -verbose ] print verbose debug messages\n"
       << endl;
   
   Params::usage(out);
