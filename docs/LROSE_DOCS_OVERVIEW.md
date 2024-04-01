@@ -38,7 +38,9 @@ See the full TDRP docs at:
 
 ## LROSE applications and data system
 
-## Software funcionality overview - lrose-core
+## Software funcionality overview
+
+These docs are in [https://github.com/NCAR/lrose-docs](https://github.com/NCAR/lrose-docs).
 
 | Name | link to github webpage |
 |------|------------------------|
