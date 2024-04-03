@@ -708,18 +708,6 @@
     tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/DEM/uncompressed");
     tt++;
     
-    // Parameter 'water_layer_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("water_layer_dir");
-    tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
-    tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
-    tt->val_offset = (char *) &water_layer_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
-    tt++;
-    
     // Parameter 'check_adjacent_grid_cells'
     // ctype is 'tdrp_bool_t'
     
@@ -742,6 +730,30 @@
     tt->help = tdrpStrDup("We search around the selected point by this distance.");
     tt->val_offset = (char *) &search_margin_km - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'add_water_layer'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_water_layer");
+    tt->descr = tdrpStrDup("Add water layer data to output file.");
+    tt->help = tdrpStrDup("If true, we read in the water layer for each grid location. This is a 1 or 0. It is 0 for land and 1 for water.");
+    tt->val_offset = (char *) &add_water_layer - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'water_layer_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("water_layer_dir");
+    tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
+    tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
+    tt->val_offset = (char *) &water_layer_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
     tt++;
     
     // Parameter 'Comment 4'

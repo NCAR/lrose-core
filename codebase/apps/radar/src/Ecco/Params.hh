@@ -395,11 +395,13 @@ public:
 
   char* srtm30_dem_dir;
 
-  char* water_layer_dir;
-
   tdrp_bool_t check_adjacent_grid_cells;
 
   double search_margin_km;
+
+  tdrp_bool_t add_water_layer;
+
+  char* water_layer_dir;
 
   double min_valid_height;
 
@@ -496,7 +498,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[68];
+  mutable TDRPtable _table[69];
 
   const char *_className;
 

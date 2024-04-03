@@ -79,12 +79,6 @@ paramdef string {
   p_help = "This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.";
 } srtm30_dem_dir;
 
-paramdef string {
-  p_default = "$(HOME)/data/terrain/WATER";
-  p_descr = "Directory for water layer data in netCDF format.";
-  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
-} water_layer_dir;
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to check terrain and water in adjacent grid cells.";
@@ -96,6 +90,18 @@ paramdef double {
   p_descr = "Margin width in checking for adjacent grid points (km).";
   p_help = "We search around the selected point by this distance.";
 } search_margin_km;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Add water layer data to output file.";
+  p_help = "If true, we read in the water layer for each grid location. This is a 1 or 0. It is 0 for land and 1 for water.";
+} add_water_layer;
+
+paramdef string {
+  p_default = "$(HOME)/data/terrain/WATER";
+  p_descr = "Directory for water layer data in netCDF format.";
+  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
+} water_layer_dir;
 
 commentdef {
   p_header = "ALGORITHM PARAMETERS";
