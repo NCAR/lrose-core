@@ -756,6 +756,30 @@
     tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
     tt++;
     
+    // Parameter 'min_ht_km_agl_for_mid'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_mid");
+    tt->descr = tdrpStrDup("Minimum height above ground for mid-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_mid - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'min_ht_km_agl_for_deep'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_deep");
+    tt->descr = tdrpStrDup("Minimum height above ground for deep-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_deep - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -403,6 +403,10 @@ public:
 
   char* water_layer_dir;
 
+  double min_ht_km_agl_for_mid;
+
+  double min_ht_km_agl_for_deep;
+
   double min_valid_height;
 
   double max_valid_height;
@@ -498,7 +502,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[69];
+  mutable TDRPtable _table[71];
 
   const char *_className;
 

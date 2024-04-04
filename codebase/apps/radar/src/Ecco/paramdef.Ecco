@@ -103,6 +103,18 @@ paramdef string {
   p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
 } water_layer_dir;
 
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum height above ground for mid-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_mid;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum height above ground for deep-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_deep;
+
 commentdef {
   p_header = "ALGORITHM PARAMETERS";
 }

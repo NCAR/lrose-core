@@ -132,6 +132,8 @@ Ecco::Ecco(int argc, char **argv)
   _finder.setUseMultipleThreads(_params.use_multiple_threads);
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
+  _finder.setMinHtKmAglForMid(_params.min_ht_km_agl_for_mid);
+  _finder.setMinHtKmAglForDeep(_params.min_ht_km_agl_for_deep);
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setBaseDbz(_params.base_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
@@ -260,6 +262,15 @@ int Ecco::Run()
       }
     }
 
+    // set terrain height if available
+
+    MdvxField *htField = _inMdvx.getField("TerrainHt");
+    if (htField != NULL) {
+      const fl32 *ht = (const fl32*) htField->getVol();
+      fl32 missingHt = htField->getFieldHeader().missing_data_value;
+      _finder.setTerrainHtField(ht, missingHt);
+    }
+    
     // compute the convective/stratiform partition
 
     const fl32 *dbz = (const fl32*) dbzField->getVol();
