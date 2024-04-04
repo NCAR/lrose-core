@@ -110,7 +110,7 @@ paramdef double {
 } min_ht_km_agl_for_mid;
 
 paramdef double {
-  p_default = 2.0;
+  p_default = 4.0;
   p_descr = "Minimum height above ground for deep-level clouds (km).";
   p_help = "Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.";
 } min_ht_km_agl_for_deep;

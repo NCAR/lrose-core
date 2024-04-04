@@ -777,7 +777,7 @@
     tt->descr = tdrpStrDup("Minimum height above ground for deep-level clouds (km).");
     tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.");
     tt->val_offset = (char *) &min_ht_km_agl_for_deep - &_start_;
-    tt->single_val.d = 2;
+    tt->single_val.d = 4;
     tt++;
     
     // Parameter 'Comment 4'
