@@ -92,6 +92,8 @@ private:
   MdvxField _deepHtField;
 
   TerrainHt *_terrainHt;
+  MdvxProj _dbzProj;
+  MdvxField *_terrainHtField, *_waterField;
 
   int _doRead();
   int _addTerrainHtField();

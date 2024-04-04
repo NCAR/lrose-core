@@ -121,6 +121,8 @@ Ecco::Ecco(int argc, char **argv)
   if (_params.use_terrain_ht_data) {
     _terrainHt = new TerrainHt(_params);
   }
+  _terrainHtField = NULL;
+  _waterField = NULL;
 
   // set up ConvStratFinder object
 
@@ -365,6 +367,21 @@ int Ecco::_addTerrainHtField()
   // create projection object
 
   MdvxProj proj(fhdrDbz);
+
+  // check if this was previously computed and the grid is unchanged
+  
+  if (proj == _dbzProj &&
+      _terrainHtField != NULL &&
+      _waterField != NULL) {
+    // copy previous fields
+    MdvxField *terrainHtField = new MdvxField(*_terrainHtField);
+    _inMdvx.addField(terrainHtField);
+    MdvxField *waterField = new MdvxField(*_waterField);
+    _inMdvx.addField(waterField);
+    return 0;
+  }
+  // save proj
+  _dbzProj = proj;
   
   // load up height and water data
   
@@ -429,12 +446,13 @@ int Ecco::_addTerrainHtField()
   MdvxField::setFieldName("TerrainHt", fhdrTerrain);
   MdvxField::setFieldNameLong("Terrain height MSL", fhdrTerrain);
   MdvxField::setUnits("m", fhdrTerrain);
-  MdvxField *terrainHtField =
+  _terrainHtField =
     new MdvxField(fhdrTerrain, vhdrTerrain, ht, false, false, false);
   delete[] ht;
 
   // add ht field to input object
   
+  MdvxField *terrainHtField = new MdvxField(*_terrainHtField);
   _inMdvx.addField(terrainHtField);
   
   // return now if no water layer to be added
@@ -466,11 +484,12 @@ int Ecco::_addTerrainHtField()
   MdvxField::setFieldName("WaterFlag", fhdrWater);
   MdvxField::setFieldNameLong("Water, flag 1=water, 0=land, 2=missing", fhdrWater);
   MdvxField::setUnits("", fhdrWater);
-  MdvxField *waterField = new MdvxField(fhdrWater, vhdrWater, water, false, false, false);
+  _waterField = new MdvxField(fhdrWater, vhdrWater, water, false, false, false);
   delete[] water;
   
   // add water field to input object
   
+  MdvxField *waterField = new MdvxField(*_waterField);
   _inMdvx.addField(waterField);
 
   return 0;
