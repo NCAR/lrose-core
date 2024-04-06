@@ -18,6 +18,8 @@ set (SRCS
       Ecco.cc
       Args.cc
       Main.cc
+      SquareDegree.cc
+      TerrainHt.cc
     )
 
 # include directories
