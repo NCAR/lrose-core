@@ -391,7 +391,7 @@ def createQtMocFiles(appDir):
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
-    shellCmd("qmake-qt6 -o Makefile.qmake");
+    shellCmd("qmake-qt5 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
