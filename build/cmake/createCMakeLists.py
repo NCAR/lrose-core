@@ -511,7 +511,7 @@ def writeCMakeListsTop(dir):
     fo.write('#\n')
     fo.write("###############################################################\n")
     fo.write('\n')
-    fo.write('cmake_minimum_required(VERSION 3.0)\n')
+    fo.write('cmake_minimum_required(VERSION 3.7)\n')
     fo.write('\n')
     fo.write('project (lrose-core)\n')
     fo.write('\n')
