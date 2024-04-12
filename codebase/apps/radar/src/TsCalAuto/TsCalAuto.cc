@@ -1328,12 +1328,29 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
   double delta = powerDbm - _params.siggen_max_power;
 
   if (_params.use_manual_siggen_control) {
-    cerr << "Set siggen power  to " << powerDbm  << " (dBm), delta: " << delta << " (dB)" << endl;
-    fprintf(stdout, "Manual control - hit return when ready ...");
-    if (fgets(input,1023,stdin) == NULL) {
-      cerr << "ERROR - _setSiggenPowerSet - getting user keystroke" << endl;
+    
+    if (_params.prompt_user_with_attenuation) {
+
+      double atten = _params.variable_attenuation_start_value - delta;
+      
+      cout << "Set attenuator to " << atten
+           << " (dB), delta: " << delta
+           << " (dB), hit return when ready" << endl;
+      
+    } else {
+      
+      cout << "Set siggen power to " << powerDbm
+           << " (dBm), delta: " << delta
+           << " (dB), hit return when ready" << endl;
+      
     }
+
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenPower - getting user keystroke" << endl;
+    }
+
   } else {
+
     char buf[1024];
     if (_params.debug) {
       cerr << "======================================================" << endl;
@@ -1341,6 +1358,7 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
     }
     sprintf(buf,"POW %gDBM\n",powerDbm);  // Build SCPI command
     _sendSiggenCmd(buf,input,1024);
+
   }
 
 }

@@ -419,6 +419,10 @@ public:
 
   tdrp_bool_t use_manual_siggen_control;
 
+  tdrp_bool_t prompt_user_with_attenuation;
+
+  double variable_attenuation_start_value;
+
   tdrp_bool_t suspend_test_pulse;
 
   char* TestPulse_pid_file;
@@ -494,7 +498,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[68];
+  mutable TDRPtable _table[70];
 
   const char *_className;
 

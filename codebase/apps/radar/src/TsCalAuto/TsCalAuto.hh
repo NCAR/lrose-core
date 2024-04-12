@@ -104,7 +104,7 @@ private:
   double _wavelengthCm, _wavelengthM;
 
   double _prevFreq;
-
+  
   int _testPulsePid;
   
   // results

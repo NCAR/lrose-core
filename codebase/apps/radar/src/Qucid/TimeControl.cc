@@ -255,7 +255,6 @@ void TimeControl::acceptGuiTimes()
 
 void TimeControl::cancelGuiTimes()
 {
-  cerr << "CCCCCCCCCCCCCCCCCCCC" << endl;
   setGuiFromStartTime();
   setGuiFromEndTime();
 }
@@ -343,7 +342,8 @@ void TimeControl::goBack1()
     _frameIndex -= 1;
   }
   _timeSlider->setSliderPosition(_frameIndex);
-  _selectedTime = _startTime + _frameIndex + _frameDurationSecs;
+  _selectedTime = _startTime + (_frameIndex * _frameDurationSecs);
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaa "  << _selectedTime.asString(0) << endl;
   setGuiFromSelectedTime();
 }
 
@@ -353,6 +353,7 @@ void TimeControl::goBackPeriod()
   _startTime -= archiveSpanSecs;
   _endTime -= archiveSpanSecs;
   _selectedTime -= archiveSpanSecs;
+  cerr << "fffffffffffffff " << _selectedTime.asString(0) << endl;
   setGuiFromStartTime();
   setGuiFromEndTime();
   setGuiFromSelectedTime();
@@ -366,7 +367,8 @@ void TimeControl::goFwd1()
     _frameIndex = _nFrames - 1;
   }
   _timeSlider->setSliderPosition(_frameIndex);
-  _selectedTime = _startTime + _frameIndex + _frameDurationSecs;
+  _selectedTime = _startTime + (_frameIndex * _frameDurationSecs);
+  cerr << "bbbbbbbbbbbbbbbbbbb " << _selectedTime.asString(0) << endl;
   setGuiFromSelectedTime();
 }
 
@@ -376,6 +378,7 @@ void TimeControl::goFwdPeriod()
   _startTime += archiveSpanSecs;
   _endTime += archiveSpanSecs;
   _selectedTime += archiveSpanSecs;
+  cerr << "eeeeeeeeeeeeeeee " << _selectedTime.asString(0) << endl;
   setGuiFromStartTime();
   setGuiFromEndTime();
   setGuiFromSelectedTime();
@@ -423,6 +426,7 @@ void TimeControl::_timeSliderValueChanged(int value)
   }
   _frameIndex = value;
   _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
+  cerr << "ccccccccccccccccccccc: " << _selectedTime.asString(0) << endl;
   setGuiFromSelectedTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
@@ -440,6 +444,7 @@ void TimeControl::_timeSliderReleased()
   }
   _frameIndex = value;
   _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
+  cerr << "dddddddddddddddddddddd " << _selectedTime.asString(0) << endl;
   setGuiFromSelectedTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
