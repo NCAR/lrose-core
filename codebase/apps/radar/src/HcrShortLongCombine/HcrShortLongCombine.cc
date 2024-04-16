@@ -697,6 +697,7 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
   } // ii
   
   rayCombined->addField(velUnfold);
+  rayCombined->setNyquistMps(rayCombined->getNyquistMps() * _LL);
 
 }
 
