@@ -109,12 +109,8 @@ class DLL_EXPORT TimeControl : public QDialog {
     _selectedTimeLabel->setText(text.c_str());
   }
   
-  void setStartTimeFromGui() {
-    setStartTime(_guiStartTime);
-  }
-  void setEndTimeFromGui() {
-    setEndTime(_guiEndTime);
-  }
+  void setStartTimeFromEdit(const QDateTime &val);
+  void setEndTimeFromEdit(const QDateTime &val);
 
   void acceptGuiTimes();
   void cancelGuiTimes();
@@ -146,6 +142,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QDateTimeEdit *_startTimeEdit;
   QDateTimeEdit *_endTimeEdit;
+  QPushButton *_selectedTimeLabel;
 
   QSlider *_timeSlider;
   QPushButton *_back1;
@@ -153,15 +150,19 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
   
-  RadxTime _selectedTime;
-  QPushButton *_selectedTimeLabel;
 
+  // gui times before 'accept'
+  
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
+  RadxTime _guiSelectedTime;
+
+  // times after 'accept'
   
   RadxTime _startTime;
   RadxTime _endTime;
-  
+  RadxTime _selectedTime;
+
   int _nFrames;
   int _frameIndex;
   double _frameDurationSecs;

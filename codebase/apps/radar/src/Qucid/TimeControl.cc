@@ -152,7 +152,7 @@ void TimeControl::populateGui()
   _startTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   _startTimeEdit->setCalendarPopup(true);
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
-          this, &TimeControl::setStartTimeFromGui);
+          this, &TimeControl::setStartTimeFromEdit);
   _startTimeEdit->setToolTip("Start time of movie interval");
   setGuiFromStartTime();
   
@@ -171,7 +171,7 @@ void TimeControl::populateGui()
   _endTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   _endTimeEdit->setCalendarPopup(true);
   connect(_endTimeEdit, &QDateTimeEdit::dateTimeChanged, 
-          this, &TimeControl::setEndTimeFromGui);
+          this, &TimeControl::setEndTimeFromEdit);
   _endTimeEdit->setToolTip("End time of movie interval");
   setGuiFromEndTime();
 
@@ -246,6 +246,23 @@ void TimeControl::populateGui()
   
 }
 
+void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
+  QDate dd = val.date();
+  QTime tt = val.time();
+  _guiStartTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
+  cerr << "SSSSSSSS _guiStartTime: " << _guiStartTime.asString(0) << endl;
+  // setStartTime(_guiStartTime);
+}
+
+void TimeControl::setEndTimeFromEdit(const QDateTime &val) {
+  QDate dd = val.date();
+  QTime tt = val.time();
+  _guiEndTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
+  cerr << "EEEEEEEE _guiEndTime: " << _guiEndTime.asString(0) << endl;
+  // setStartTime(_guiStartTime);
+  // setEndTime(_guiEndTime);
+}
+
 void TimeControl::acceptGuiTimes()
 {
   _startTime = _guiStartTime;
@@ -314,6 +331,7 @@ void TimeControl::setStartTime(const RadxTime &rtime)
   if (!_startTime.isValid()) {
     _startTime.set(RadxTime::NOW);
   }
+  cerr << "ssssssssssssssssssss" << endl;
   setGuiFromStartTime();
 }
 
@@ -343,6 +361,7 @@ void TimeControl::goBack1()
   }
   _timeSlider->setSliderPosition(_frameIndex);
   _selectedTime = _startTime + (_frameIndex * _frameDurationSecs);
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaa "  << _selectedTime.asString(0) << endl;
   cerr << "aaaaaaaaaaaaaaaaaaaaaaaa "  << _selectedTime.asString(0) << endl;
   setGuiFromSelectedTime();
 }
