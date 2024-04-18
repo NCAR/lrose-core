@@ -99,10 +99,14 @@ class DLL_EXPORT TimeControl : public QDialog {
     _fwdPeriod->setEnabled(val);
   }
 
-  void setGuiFromStartTime();
-  void setGuiFromEndTime();
-  void setGuiFromSelectedTime();
+  void setGuiStartTime(const RadxTime &val);
+  void setGuiEndTime(const RadxTime &val);
+  void setGuiSelectedTime(const RadxTime &val);
+  void setGuiFromTimes();
 
+  void acceptGuiTimes();
+  void cancelGuiTimes();
+  
   void setFrameIndex(int val) { _frameIndex = val; }
 
   void setSelectedTimeLabel(const string &text) {
@@ -112,14 +116,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setStartTimeFromEdit(const QDateTime &val);
   void setEndTimeFromEdit(const QDateTime &val);
 
-  void acceptGuiTimes();
-  void cancelGuiTimes();
-  
   // get
   
   const RadxTime &getStartTime() const { return _startTime; }
   const RadxTime &getEndTime() const { return _endTime; }
-  int getNFrames() const { return _nFrames; }
+  int getNFramesMovie() const { return _nFramesMovie; }
+  double getMovieDurationSecs() const { return _movieDurationSecs; }
   int getFrameIndex() const { return _frameIndex; }
   double getFrameDwellMsecs() const { return _frameDwellMsecs; }
 
@@ -163,9 +165,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   RadxTime _endTime;
   RadxTime _selectedTime;
 
-  int _nFrames;
+  int _nFramesMovie;
   int _frameIndex;
   double _frameDurationSecs;
+  double _movieDurationSecs;
   double _frameDwellMsecs;
   double _loopDelayMsecs;
                          

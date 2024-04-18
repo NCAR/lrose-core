@@ -54,17 +54,22 @@ TimeControl::TimeControl(CartManager *parent,
         
 {
 
-  _nFrames = _params.n_movie_frames;
+  _nFramesMovie = _params.n_movie_frames;
   _frameDurationSecs = _params.frame_duration_secs;
+  _movieDurationSecs = _nFramesMovie * _frameDurationSecs;
   _frameIndex = 0;
+
   _frameDwellMsecs = _params.movie_dwell_msecs;
   _loopDelayMsecs = _params.loop_delay_msecs;
+
   _startTime.set(_params.archive_start_time);
-  _endTime = _startTime + _nFrames * _frameDurationSecs;
-  _guiStartTime = _startTime;
-  _guiEndTime = _endTime;
+  _endTime = _startTime + _movieDurationSecs;
   _selectedTime = _startTime;
 
+  _guiStartTime = _startTime;
+  _guiEndTime = _endTime;
+  _guiSelectedTime = _selectedTime;
+  
   populateGui();
   
 }
@@ -125,7 +130,7 @@ void TimeControl::populateGui()
   _timeSlider->setFixedWidth(200);
   _timeSlider->setToolTip("Drag to change time frame");
   _timeSlider->setMinimum(0);
-  _timeSlider->setMaximum(_nFrames - 1);
+  _timeSlider->setMaximum(_nFramesMovie - 1);
   
   // active time
   
@@ -135,7 +140,7 @@ void TimeControl::populateGui()
   pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
   _selectedTimeLabel->setPalette(pal);
   _selectedTimeLabel->setToolTip("This is the selected data time");
-  setGuiFromSelectedTime();
+  setGuiSelectedTime(_guiSelectedTime);
 
   // start time editor
   
@@ -154,7 +159,7 @@ void TimeControl::populateGui()
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
           this, &TimeControl::setStartTimeFromEdit);
   _startTimeEdit->setToolTip("Start time of movie interval");
-  setGuiFromStartTime();
+  setGuiStartTime(_guiStartTime);
   
   // end time editor
   
@@ -173,7 +178,7 @@ void TimeControl::populateGui()
   connect(_endTimeEdit, &QDateTimeEdit::dateTimeChanged, 
           this, &TimeControl::setEndTimeFromEdit);
   _endTimeEdit->setToolTip("End time of movie interval");
-  setGuiFromEndTime();
+  setGuiEndTime(_guiEndTime);
 
   // fwd and back buttons
 
@@ -214,7 +219,7 @@ void TimeControl::populateGui()
   cancelButton->setPalette(cancelPalette);
   connect(cancelButton, &QPushButton::clicked, this, &TimeControl::cancelGuiTimes);
   cancelButton->setToolTip("Cancel the selection");
-    
+
   // add time widgets to layout
   
   int stretch = 0;
@@ -250,75 +255,90 @@ void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
   QDate dd = val.date();
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
-  cerr << "SSSSSSSS _guiStartTime: " << _guiStartTime.asString(0) << endl;
-  // setStartTime(_guiStartTime);
+  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::setEndTimeFromEdit(const QDateTime &val) {
   QDate dd = val.date();
   QTime tt = val.time();
   _guiEndTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
-  cerr << "EEEEEEEE _guiEndTime: " << _guiEndTime.asString(0) << endl;
-  // setStartTime(_guiStartTime);
-  // setEndTime(_guiEndTime);
+  _guiStartTime = _guiEndTime - _movieDurationSecs;
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::acceptGuiTimes()
 {
   _startTime = _guiStartTime;
   _endTime = _guiEndTime;
-  // _parent->loadArchiveFileList();
+  _selectedTime = _guiSelectedTime;
+  setGuiFromTimes();
+  cerr << "AAAAAAAAAAAAAAAAAAAAAAAA" << endl;
 }
 
 void TimeControl::cancelGuiTimes()
 {
-  setGuiFromStartTime();
-  setGuiFromEndTime();
+  _guiStartTime = _startTime;
+  _guiEndTime = _endTime;
+  _guiSelectedTime = _selectedTime;
+  setGuiFromTimes();
+  cerr << "CCCCCCCCCCCCCCCCCCC" << endl;
 }
 
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 
-void TimeControl::setGuiFromStartTime()
+void TimeControl::setGuiStartTime(const RadxTime &val)
 {
   if (!_startTimeEdit) {
     return;
   }
-  QDateTime qtime = getQDateTime(_startTime);
+  QDateTime qtime = getQDateTime(val);
   _startTimeEdit->setDateTime(qtime);
-  _guiStartTime = _startTime;
 }
 
 ////////////////////////////////////////////////////////
 // set gui widget from archive end time
 
-void TimeControl::setGuiFromEndTime()
+void TimeControl::setGuiEndTime(const RadxTime &val)
 {
   if (!_endTimeEdit) {
     return;
   }
-  QDateTime qtime = getQDateTime(_endTime);
+  QDateTime qtime = getQDateTime(val);
   _endTimeEdit->setDateTime(qtime);
-  _guiEndTime = _endTime;
 }
 
 ////////////////////////////////////////////////////////
 // set gui selected time label
 
-void TimeControl::setGuiFromSelectedTime()
+void TimeControl::setGuiSelectedTime(const RadxTime &val)
 {
   if (!_selectedTimeLabel) {
     return;
   }
   char text[128];
   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           _selectedTime.getYear(),
-           _selectedTime.getMonth(),
-           _selectedTime.getDay(),
-           _selectedTime.getHour(),
-           _selectedTime.getMin(),
-           _selectedTime.getSec());
+           val.getYear(),
+           val.getMonth(),
+           val.getDay(),
+           val.getHour(),
+           val.getMin(),
+           val.getSec());
   _selectedTimeLabel->setText(text);
+}
+
+////////////////////////////////////////////////////////
+// set gui from gui times
+
+void TimeControl::setGuiFromTimes()
+
+{
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -327,12 +347,20 @@ void TimeControl::setGuiFromSelectedTime()
 void TimeControl::setStartTime(const RadxTime &rtime)
 
 {
+
   _startTime = rtime;
   if (!_startTime.isValid()) {
     _startTime.set(RadxTime::NOW);
   }
-  cerr << "ssssssssssssssssssss" << endl;
-  setGuiFromStartTime();
+  _endTime = _startTime + _movieDurationSecs;
+  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
+
+  _guiStartTime = _startTime;
+  _guiEndTime = _endTime;
+  _guiSelectedTime = _selectedTime;
+
+  setGuiFromTimes();
+
 }
 
 ////////////////////////////////////////////////////////
@@ -341,11 +369,20 @@ void TimeControl::setStartTime(const RadxTime &rtime)
 void TimeControl::setEndTime(const RadxTime &rtime)
 
 {
+
   _endTime = rtime;
   if (!_endTime.isValid()) {
     _endTime.set(RadxTime::NOW);
   }
-  setGuiFromEndTime();
+  _startTime = _endTime - _movieDurationSecs;
+  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
+
+  _guiStartTime = _startTime;
+  _guiEndTime = _endTime;
+  _guiSelectedTime = _selectedTime;
+
+  setGuiFromTimes();
+  
 }
 
 ////////////////////////////////////////////////////////
@@ -360,47 +397,38 @@ void TimeControl::goBack1()
     _frameIndex -= 1;
   }
   _timeSlider->setSliderPosition(_frameIndex);
-  _selectedTime = _startTime + (_frameIndex * _frameDurationSecs);
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaa "  << _selectedTime.asString(0) << endl;
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaa "  << _selectedTime.asString(0) << endl;
-  setGuiFromSelectedTime();
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::goBackPeriod()
 {
   int archiveSpanSecs = _endTime - _startTime;
-  _startTime -= archiveSpanSecs;
-  _endTime -= archiveSpanSecs;
-  _selectedTime -= archiveSpanSecs;
-  cerr << "fffffffffffffff " << _selectedTime.asString(0) << endl;
-  setGuiFromStartTime();
-  setGuiFromEndTime();
-  setGuiFromSelectedTime();
+  _guiStartTime -= archiveSpanSecs;
+  _guiEndTime -= archiveSpanSecs;
+  _guiSelectedTime -= archiveSpanSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::goFwd1()
 {
-  if (_frameIndex < _nFrames - 1) {
+  if (_frameIndex < _nFramesMovie - 1) {
     _frameIndex += 1;
   } else {
-    _frameIndex = _nFrames - 1;
+    _frameIndex = _nFramesMovie - 1;
   }
   _timeSlider->setSliderPosition(_frameIndex);
-  _selectedTime = _startTime + (_frameIndex * _frameDurationSecs);
-  cerr << "bbbbbbbbbbbbbbbbbbb " << _selectedTime.asString(0) << endl;
-  setGuiFromSelectedTime();
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::goFwdPeriod()
 {
   int archiveSpanSecs = _endTime - _startTime;
-  _startTime += archiveSpanSecs;
-  _endTime += archiveSpanSecs;
-  _selectedTime += archiveSpanSecs;
-  cerr << "eeeeeeeeeeeeeeee " << _selectedTime.asString(0) << endl;
-  setGuiFromStartTime();
-  setGuiFromEndTime();
-  setGuiFromSelectedTime();
+  _guiStartTime += archiveSpanSecs;
+  _guiEndTime += archiveSpanSecs;
+  _guiSelectedTime += archiveSpanSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::_timeSliderActionTriggered(int action) {
@@ -440,34 +468,32 @@ void TimeControl::_timeSliderActionTriggered(int action) {
 
 void TimeControl::_timeSliderValueChanged(int value) 
 {
-  if (value < 0 || value > _nFrames - 1) {
+  if (value < 0 || value > _nFramesMovie - 1) {
     return;
   }
-  _frameIndex = value;
-  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
-  cerr << "ccccccccccccccccccccc: " << _selectedTime.asString(0) << endl;
-  setGuiFromSelectedTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
   }
+  _frameIndex = value;
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::_timeSliderReleased() 
 {
   int value = _timeSlider->value();
-  if (value < 0 || value > _nFrames - 1) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Time slider released, value: " << value << endl;
+  }
+  if (value < 0 || value > _nFramesMovie - 1) {
     return;
   }
   if (value == _frameIndex) {
     return;
   }
   _frameIndex = value;
-  _selectedTime = _startTime + _frameIndex * _frameDurationSecs;
-  cerr << "dddddddddddddddddddddd " << _selectedTime.asString(0) << endl;
-  setGuiFromSelectedTime();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
-  }
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiFromTimes();
 }
 
 void TimeControl::_timeSliderPressed() 

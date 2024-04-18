@@ -2373,8 +2373,6 @@ void CartManager::_createTimeControl()
      _params.n_movie_frames * _params.frame_duration_secs);
   _timeControl->setFrameIndex(0);
 
-  _timeControl->populateGui();
-
 }
 
 /////////////////////////////////////
