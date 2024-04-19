@@ -74,10 +74,12 @@ public:
 		      FMQ_SEEK_LAST,
 		      FMQ_SEEK_BACK };
 
-  static const int Q_MAGIC_STAT = 88008801;
-  static const int Q_MAGIC_BUF = 88008802;
-  static const int Q_MAX_ID = 1000000000;
-  static const int Q_NBYTES_EXTRA = 12;
+  // begin 64-bit implementation
+
+  static const int Q_MAGIC_STAT_64 = 88008801;
+  static const int Q_MAGIC_BUF_64 = 88008802;
+  static const int Q_MAX_ID_64 = 1000000000;
+  static const int Q_NBYTES_EXTRA_64 = 12;
 
   // FMQ status struct
   
@@ -92,14 +94,14 @@ public:
 			     oldest message in the queue */
     
     si32 nslots;          /* number of message slots */
-    si32 buf_size;        /* size of buffer */
+    si64 buf_size;        /* size of buffer */
     
-    si32 begin_insert;    /* offset to start of insert free region */
-    si32 end_insert;      /* offset to end of insert free region */
-    si32 begin_append;    /* offset to start of append free region */
+    si64 begin_insert;    /* offset to start of insert free region */
+    si64 end_insert;      /* offset to end of insert free region */
+    si64 begin_append;    /* offset to start of append free region */
     si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
     
-    si32 time_written;    /* time at which the status struct was last
+    si64 time_written;    /* time at which the status struct was last
 			   * written to file */
     
     /* NOTE - blocking write only supported for 1 reader */
@@ -108,7 +110,7 @@ public:
     si32 last_id_read;    /* used for blocking write operation */
     si32 checksum;
     
-  } q_stat_t;
+  } q_stat_64_t;
   
   // FMQ slot struct
   
@@ -123,6 +125,72 @@ public:
     
     si32 active;          /* active flag, 1 or 0 */
     si32 id;              /* message id 0 to FMQ_MAX_ID */
+    si64 time;            /* Unix time at which the message is written */
+    si64 msg_len;         /* message len in bytes */
+    si64 stored_len;      /* message len + extra 12 bytes (FMQ_NBYTES_EXTRA)
+			   * for magic-cookie and slot num fields,
+			   * plus padding out to even 4 bytes */
+    si64 offset;          /* message offset in buffer */
+    si32 type;            /* message type - user-defined */
+    si32 subtype;         /* message subtype - user-defined */
+    si32 compress;        /* compress mode - TRUE or FALSE */
+    si32 checksum;
+    
+  } q_slot_64_t;
+
+  // end 64-bit implementation
+
+  // begin 32-bit implementation
+
+  static const int Q_MAGIC_STAT_32 = 88008801;
+  static const int Q_MAGIC_BUF_32 = 88008802;
+  static const int Q_MAX_ID_32 = 1000000000;
+  static const int Q_NBYTES_EXTRA_32 = 12;
+
+  // FMQ status struct
+
+  typedef struct {
+
+    si32 magic_cookie;    /* magic cookie for file type */
+
+    si32 youngest_id;     /* message id of last message written */
+    si32 youngest_slot;   /* num of slot which contains the
+			   * youngest message in the queue */
+    si32 oldest_slot;     /* num of slot which contains the
+			     oldest message in the queue */
+
+    si32 nslots;          /* number of message slots */
+    si32 buf_size;        /* size of buffer */
+
+    si32 begin_insert;    /* offset to start of insert free region */
+    si32 end_insert;      /* offset to end of insert free region */
+    si32 begin_append;    /* offset to start of append free region */
+    si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
+
+    si32 time_written;    /* time at which the status struct was last
+			   * written to file */
+
+    /* NOTE - blocking write only supported for 1 reader */
+
+    si32 blocking_write;  /* flag to indicate blocking write */
+    si32 last_id_read;    /* used for blocking write operation */
+    si32 checksum;
+
+  } q_stat_32_t;
+
+  // FMQ slot struct
+
+  //   Messages are stored in the buffer as follows:
+  //        si32         si32                             si32
+  //   --------------------------------------------------------
+  //   | magic cookie |  slot_num  | -- message -- | pad |  id  |
+  //   --------------------------------------------------------
+  //   Pad is for 4-byte alignment.
+
+  typedef struct {
+
+    si32 active;          /* active flag, 1 or 0 */
+    si32 id;              /* message id 0 to FMQ_MAX_ID */
     si32 time;            /* Unix time at which the message is written */
     si32 msg_len;         /* message len in bytes */
     si32 stored_len;      /* message len + extra 12 bytes (FMQ_NBYTES_EXTRA)
@@ -133,9 +201,21 @@ public:
     si32 subtype;         /* message subtype - user-defined */
     si32 compress;        /* compress mode - TRUE or FALSE */
     si32 checksum;
-    
-  } q_slot_t;
-  
+
+  } q_slot_32_t;
+
+    // end 32-bit implementation
+
+
+  // default implementation is 64-bit
+  static const int Q_MAGIC_STAT = Q_MAGIC_STAT_64;
+  static const int Q_MAGIC_BUF = Q_MAGIC_BUF_64;
+  static const int Q_MAX_ID = Q_MAX_ID_64;
+  static const int Q_NBYTES_EXTRA = Q_NBYTES_EXTRA_64;
+  typedef q_stat_64_t q_stat_t;
+  typedef q_slot_64_t q_slot_t;
+
+
   // constructor
   // note: you must call one of the init() functions
   // before the object is ready to be used.
