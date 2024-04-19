@@ -210,7 +210,9 @@ void TimeControl::populateGui()
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 frame");
-  
+  // _back1->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+  // _back1->setMinimumWidth(_back1->minimumWidth());
+  // _back1->setContentsMargins(0,0,0,0);
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
