@@ -2598,28 +2598,6 @@ void Beam::_filterDpSimHvFixedPrt()
       fields.test0 = 0.0;
     }
 
-#ifdef JUNK
-
-    fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
-
-    if (fields.spectral_snr >= 25.0 &&
-        fields.cmd >= 0.5 &&
-        fieldsF.dbz > -99) {
-      double rangeKm = _startRangeKm + igate * _gateSpacingKm;
-      double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
-      double snrLinear = pow(10.0, snrF / 10.0);
-      double pwrLinear = (snrLinear + 1.0) * calibNoiseHc;
-      double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
-      double specPwrLinear = (specSnrLinear + 1.0) * calibNoiseHc * 2.0;
-      double pwrCorrLinear = pwrLinear - specPwrLinear;
-      if (pwrCorrLinear > calibNoiseHc) {
-        fields.test4 = fieldsF.dbz - fields.spectral_snr;
-      }
-    } else {
-      fields.test4 = fieldsF.dbz;
-    }
-#endif
-    
   } // igate
 
   if (_params.run_spectral_cmd) {
@@ -3087,7 +3065,7 @@ void Beam::_conditionDpFiltFields(MomentsFields &flds,
                                   MomentsFields &fldsN)
   
 {
-  
+
   // use notched moments for filtered dual pol fields
   
   fldsF.zdr = fldsN.zdr;
@@ -3116,6 +3094,30 @@ void Beam::_conditionDpFiltFields(MomentsFields &flds,
   }
   if (!flds.rhohv_test_flag) {
     return;
+  }
+  
+  if (flds.rhohv_test_improv >= _params.rhohv_improv_thresh_for_power) {
+    flds.test6 = 1;
+  } else {
+    flds.test6 = 0;
+  }
+  
+  if (flds.rhohv_test_improv >= _params.rhohv_improv_thresh_for_vel) {
+    flds.test7 = 1;
+  } else {
+    flds.test7 = 0;
+  }
+  
+  if (flds.rhohv_test_improv >= _params.rhohv_improv_thresh_for_phase) {
+    flds.test8 = 1;
+  } else {
+    flds.test8 = 0;
+  }
+  
+  if (flds.rhohv_test_improv >= _params.rhohv_improv_thresh_for_rho) {
+    flds.test9 = 1;
+  } else {
+    flds.test9 = 0;
   }
 
   // set filtered power fields based on rhohv test improv
@@ -6056,9 +6058,6 @@ void Beam::_performClutterFiltering()
   // copy the unfiltered fields to the filtered fields
   
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields.test6 = _gateData[igate]->fields.zdr;
-    _gateData[igate]->fields.test7 = _gateData[igate]->fields.phidp;
-    _gateData[igate]->fields.test8 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   
