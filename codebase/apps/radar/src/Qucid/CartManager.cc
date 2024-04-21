@@ -2366,12 +2366,7 @@ void CartManager::_createTimeControl()
 {
   
   _timeControl = new TimeControl(this, _params);
-  
   _timeControl->setStartTime(_archiveStartTime);
-  _timeControl->setEndTime
-    (_timeControl->getStartTime() +
-     _params.n_movie_frames * _params.frame_duration_secs);
-  _timeControl->setFrameIndex(0);
 
 }
 

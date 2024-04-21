@@ -71,7 +71,10 @@ TimeControl::TimeControl(CartManager *parent,
   _guiSelectedTime = _selectedTime;
   
   populateGui();
-  
+
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+
 }
 
 // destructor
@@ -151,7 +154,6 @@ void TimeControl::populateGui()
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
           this, &TimeControl::setStartTimeFromEdit);
   _startTimeEdit->setToolTip("Start time of movie interval");
-  setGuiStartTime(_guiStartTime);
 
   startTimeFrameLayout->addWidget(startLabel, 0, Qt::AlignTop);
   startTimeFrameLayout->addWidget(_startTimeEdit, 0, Qt::AlignBottom);
@@ -175,7 +177,6 @@ void TimeControl::populateGui()
   connect(_endTimeEdit, &QDateTimeEdit::dateTimeChanged, 
           this, &TimeControl::setEndTimeFromEdit);
   _endTimeEdit->setToolTip("End time of movie interval");
-  setGuiEndTime(_guiEndTime);
 
   endTimeFrameLayout->addWidget(endLabel, 0, Qt::AlignTop);
   endTimeFrameLayout->addWidget(_endTimeEdit, 0, Qt::AlignBottom);
@@ -210,9 +211,6 @@ void TimeControl::populateGui()
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 frame");
-  // _back1->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-  // _back1->setMinimumWidth(_back1->minimumWidth());
-  // _back1->setContentsMargins(0,0,0,0);
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
@@ -283,7 +281,8 @@ void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
   _guiStartTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
-  setGuiFromTimes();
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 void TimeControl::setEndTimeFromEdit(const QDateTime &val) {
@@ -292,7 +291,8 @@ void TimeControl::setEndTimeFromEdit(const QDateTime &val) {
   _guiEndTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
   _guiStartTime = _guiEndTime - _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
-  setGuiFromTimes();
+  setGuiStartTime(_guiStartTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 void TimeControl::acceptGuiTimes()

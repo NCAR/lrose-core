@@ -147,10 +147,13 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_selectedTimeLabel;
 
   QSlider *_timeSlider;
+
   QPushButton *_back1;
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
+  QPushButton *_backFar;
+  QPushButton *_fwdFar;
   
 
   // gui times before 'accept'
