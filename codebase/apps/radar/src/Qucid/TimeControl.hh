@@ -95,8 +95,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setEnabled(bool val) {
     _startTimeEdit->setEnabled(val);
     _endTimeEdit->setEnabled(val);
-    _backPeriod->setEnabled(val);
-    _fwdPeriod->setEnabled(val);
+    _backDuration->setEnabled(val);
+    _fwdDuration->setEnabled(val);
+    _backMult->setEnabled(val);
+    _fwdMult->setEnabled(val);
   }
 
   void setGuiStartTime(const RadxTime &val);
@@ -150,10 +152,10 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   QPushButton *_back1;
   QPushButton *_fwd1;
-  QPushButton *_backPeriod;
-  QPushButton *_fwdPeriod;
-  QPushButton *_backFar;
-  QPushButton *_fwdFar;
+  QPushButton *_backDuration;
+  QPushButton *_fwdDuration;
+  QPushButton *_backMult;
+  QPushButton *_fwdMult;
   
 
   // gui times before 'accept'
@@ -180,9 +182,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   // move in time
   
   void goBack1();
-  void goBackPeriod();
+  void goBackDuration();
+  void goBackMult();
+
   void goFwd1();
-  void goFwdPeriod();
+  void goFwdDuration();
+  void goFwdMult();
 
   // time slider
   

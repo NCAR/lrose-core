@@ -211,20 +211,31 @@ void TimeControl::populateGui()
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 frame");
+
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
   _fwd1->setToolTip("Go forward by 1 frame");
     
-  _backPeriod = new QPushButton(timeLower);
-  _backPeriod->setText("<<");
-  connect(_backPeriod, &QPushButton::clicked, this, &TimeControl::goBackPeriod);
-  _backPeriod->setToolTip("Go back by the loop period");
+  _backDuration = new QPushButton(timeLower);
+  _backDuration->setText("<<");
+  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::goBackDuration);
+  _backDuration->setToolTip("Go back by 1 movie duration");
   
-  _fwdPeriod = new QPushButton(timeLower);
-  _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, &QPushButton::clicked, this, &TimeControl::goFwdPeriod);
-  _fwdPeriod->setToolTip("Go forward by the loop period");
+  _fwdDuration = new QPushButton(timeLower);
+  _fwdDuration->setText(">>");
+  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::goFwdDuration);
+  _fwdDuration->setToolTip("Go forward by 1 movie duration");
+
+  _backMult = new QPushButton(timeLower);
+  _backMult->setText("<<<");
+  connect(_backMult, &QPushButton::clicked, this, &TimeControl::goBackMult);
+  _backMult->setToolTip("Go back by 5 movie durations");
+  
+  _fwdMult = new QPushButton(timeLower);
+  _fwdMult->setText(">>>");
+  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::goFwdMult);
+  _fwdMult->setToolTip("Go forward by 5 movie durations");
 
   // accept cancel buttons
 
@@ -253,11 +264,13 @@ void TimeControl::populateGui()
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
   
-  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignLeft);
 
   // connect signals and slots
   
@@ -425,12 +438,21 @@ void TimeControl::goBack1()
   acceptGuiTimes();
 }
 
-void TimeControl::goBackPeriod()
+void TimeControl::goBackDuration()
 {
-  int archiveSpanSecs = _endTime - _startTime;
-  _guiStartTime -= archiveSpanSecs;
-  _guiEndTime -= archiveSpanSecs;
-  _guiSelectedTime -= archiveSpanSecs;
+  int deltaSecs = _endTime - _startTime;
+  _guiStartTime -= deltaSecs;
+  _guiEndTime -= deltaSecs;
+  _guiSelectedTime -= deltaSecs;
+  acceptGuiTimes();
+}
+
+void TimeControl::goBackMult()
+{
+  int deltaSecs = (_endTime - _startTime) * 5;
+  _guiStartTime -= deltaSecs;
+  _guiEndTime -= deltaSecs;
+  _guiSelectedTime -= deltaSecs;
   acceptGuiTimes();
 }
 
@@ -446,12 +468,21 @@ void TimeControl::goFwd1()
   acceptGuiTimes();
 }
 
-void TimeControl::goFwdPeriod()
+void TimeControl::goFwdDuration()
 {
-  int archiveSpanSecs = _endTime - _startTime;
-  _guiStartTime += archiveSpanSecs;
-  _guiEndTime += archiveSpanSecs;
-  _guiSelectedTime += archiveSpanSecs;
+  int deltaSecs = _endTime - _startTime;
+  _guiStartTime += deltaSecs;
+  _guiEndTime += deltaSecs;
+  _guiSelectedTime += deltaSecs;
+  acceptGuiTimes();
+}
+
+void TimeControl::goFwdMult()
+{
+  int deltaSecs = (_endTime - _startTime) * 5;
+  _guiStartTime += deltaSecs;
+  _guiEndTime += deltaSecs;
+  _guiSelectedTime += deltaSecs;
   acceptGuiTimes();
 }
 
