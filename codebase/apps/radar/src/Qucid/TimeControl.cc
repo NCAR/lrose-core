@@ -39,6 +39,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QSpinBox>
 #include <Radx/NcfRadxFile.hh>
 #include "TimeControl.hh"
 #include "CartManager.hh"
@@ -48,7 +49,7 @@
 
 TimeControl::TimeControl(CartManager *parent,
                          const Params &params) :
-        QDialog((QDialog *) parent),
+        QDialog(parent),
         _parent(parent),
         _params(params)
         
@@ -237,9 +238,29 @@ void TimeControl::populateGui()
   connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::goFwdMult);
   _fwdMult->setToolTip("Go forward by 5 movie durations");
 
+  // nframes and frame interval
+
+  QFrame *nFramesFrame = new QFrame(timeUpper);
+  QVBoxLayout *nFramesFrameLayout = new QVBoxLayout;
+  nFramesFrameLayout->setSpacing(0);
+  nFramesFrameLayout->setContentsMargins(0, 0, 0, 0);
+  nFramesFrame->setLayout(nFramesFrameLayout);
+  
+  QSpinBox *nFramesSelector = new QSpinBox(nFramesFrame);
+  nFramesSelector->setMinimum(1);
+  nFramesSelector->setValue(_nFramesMovie);
+  connect(nFramesSelector, &QSpinBox::valueChanged,
+          this, &TimeControl::_timeSliderSetNFrames);
+
   // accept cancel buttons
 
-  QPushButton *acceptButton = new QPushButton(timeUpper);
+  QFrame *acceptCancelFrame = new QFrame(timeUpper);
+  QVBoxLayout *acceptCancelFrameLayout = new QVBoxLayout;
+  acceptCancelFrameLayout->setSpacing(0);
+  acceptCancelFrameLayout->setContentsMargins(0, 0, 0, 0);
+  acceptCancelFrame->setLayout(acceptCancelFrameLayout);
+  
+  QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
   acceptButton->setText("Accept");
   QPalette acceptPalette = acceptButton->palette();
   acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
@@ -247,7 +268,7 @@ void TimeControl::populateGui()
   connect(acceptButton, &QPushButton::clicked, this, &TimeControl::acceptGuiTimes);
   acceptButton->setToolTip("Accept the selection");
   
-  QPushButton *cancelButton = new QPushButton(timeUpper);
+  QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
   cancelButton->setText("Cancel");
   QPalette cancelPalette = cancelButton->palette();
   cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
@@ -255,19 +276,23 @@ void TimeControl::populateGui()
   connect(cancelButton, &QPushButton::clicked, this, &TimeControl::cancelGuiTimes);
   cancelButton->setToolTip("Cancel the selection");
 
-  // add time widgets to layout
+  acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
+  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignBottom);
+  
+  // add widgets to layouts
   
   int stretch = 0;
-  timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignLeft);
-  timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
+  // timeUpperLayout->addWidget(nFramesFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignLeft);
   
   timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
+  timeLowerLayout->addWidget(nFramesSelector, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignLeft);
@@ -557,6 +582,12 @@ void TimeControl::_timeSliderPressed()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
   }
+}
+
+void TimeControl::_timeSliderSetNFrames(int val) 
+{
+  _nFramesMovie = val;
+  _timeSlider->setMaximum(_nFramesMovie - 1);
 }
 
 ////////////////////////////////////////////////////////

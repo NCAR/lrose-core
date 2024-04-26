@@ -51,11 +51,13 @@ static constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers
     "_timeSliderValueChanged",
     "value",
     "_timeSliderReleased",
-    "_timeSliderPressed"
+    "_timeSliderPressed",
+    "_timeSliderSetNFrames",
+    "val"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {
-    uint offsetsAndSizes[28];
+    uint offsetsAndSizes[32];
     char stringdata0[12];
     char stringdata1[8];
     char stringdata2[1];
@@ -70,6 +72,8 @@ struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {
     char stringdata11[6];
     char stringdata12[20];
     char stringdata13[19];
+    char stringdata14[22];
+    char stringdata15[4];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSTimeControlENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -88,7 +92,9 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSTimeControlENDCLASS_t qt_meta_s
         QT_MOC_LITERAL(112, 23),  // "_timeSliderValueChanged"
         QT_MOC_LITERAL(136, 5),  // "value"
         QT_MOC_LITERAL(142, 19),  // "_timeSliderReleased"
-        QT_MOC_LITERAL(162, 18)   // "_timeSliderPressed"
+        QT_MOC_LITERAL(162, 18),  // "_timeSliderPressed"
+        QT_MOC_LITERAL(181, 21),  // "_timeSliderSetNFrames"
+        QT_MOC_LITERAL(203, 3)   // "val"
     },
     "TimeControl",
     "goBack1",
@@ -103,7 +109,9 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSTimeControlENDCLASS_t qt_meta_s
     "_timeSliderValueChanged",
     "value",
     "_timeSliderReleased",
-    "_timeSliderPressed"
+    "_timeSliderPressed",
+    "_timeSliderSetNFrames",
+    "val"
 };
 #undef QT_MOC_LITERAL
 #endif // !QT_MOC_HAS_STRING_DATA
@@ -115,7 +123,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -123,16 +131,17 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   74,    2, 0x0a,    1 /* Public */,
-       3,    0,   75,    2, 0x0a,    2 /* Public */,
-       4,    0,   76,    2, 0x0a,    3 /* Public */,
-       5,    0,   77,    2, 0x0a,    4 /* Public */,
-       6,    0,   78,    2, 0x0a,    5 /* Public */,
-       7,    0,   79,    2, 0x0a,    6 /* Public */,
-       8,    1,   80,    2, 0x0a,    7 /* Public */,
-      10,    1,   83,    2, 0x0a,    9 /* Public */,
-      12,    0,   86,    2, 0x0a,   11 /* Public */,
-      13,    0,   87,    2, 0x0a,   12 /* Public */,
+       1,    0,   80,    2, 0x0a,    1 /* Public */,
+       3,    0,   81,    2, 0x0a,    2 /* Public */,
+       4,    0,   82,    2, 0x0a,    3 /* Public */,
+       5,    0,   83,    2, 0x0a,    4 /* Public */,
+       6,    0,   84,    2, 0x0a,    5 /* Public */,
+       7,    0,   85,    2, 0x0a,    6 /* Public */,
+       8,    1,   86,    2, 0x0a,    7 /* Public */,
+      10,    1,   89,    2, 0x0a,    9 /* Public */,
+      12,    0,   92,    2, 0x0a,   11 /* Public */,
+      13,    0,   93,    2, 0x0a,   12 /* Public */,
+      14,    1,   94,    2, 0x0a,   13 /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -145,6 +154,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
     QMetaType::Void, QMetaType::Int,   11,
     QMetaType::Void,
     QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   15,
 
        0        // eod
 };
@@ -179,7 +189,10 @@ Q_CONSTINIT const QMetaObject TimeControl::staticMetaObject = { {
         // method '_timeSliderReleased'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_timeSliderPressed'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_timeSliderSetNFrames'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>
     >,
     nullptr
 } };
@@ -200,6 +213,7 @@ void TimeControl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 7: _t->_timeSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 8: _t->_timeSliderReleased(); break;
         case 9: _t->_timeSliderPressed(); break;
+        case 10: _t->_timeSliderSetNFrames((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         default: ;
         }
     }
@@ -224,13 +238,13 @@ int TimeControl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 11;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 11)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 10;
+        _id -= 11;
     }
     return _id;
 }

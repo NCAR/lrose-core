@@ -195,6 +195,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _timeSliderValueChanged(int value);
   void _timeSliderReleased();
   void _timeSliderPressed();
+  void _timeSliderSetNFrames(int val);
 
 };
 
