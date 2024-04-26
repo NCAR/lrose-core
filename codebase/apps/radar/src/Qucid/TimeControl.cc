@@ -588,6 +588,14 @@ void TimeControl::_timeSliderSetNFrames(int val)
 {
   _nFramesMovie = val;
   _timeSlider->setMaximum(_nFramesMovie - 1);
+  _movieDurationSecs = (_nFramesMovie - 1) * _frameDurationSecs;
+  if (_frameIndex >= _nFramesMovie) {
+    _frameIndex = _nFramesMovie - 1;
+  }
+  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameDurationSecs;
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
