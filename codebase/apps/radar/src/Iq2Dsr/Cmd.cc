@@ -1011,9 +1011,14 @@ void Cmd::_computeRhohvTest(const RadarMoments *mom, int nGates)
       factorFilt = 0.001;
     }
     double rhohvImprov = factorUnfilt / factorFilt;
+    
     gate->flds->rhohv_test_unfilt = rhohvUnfilt;
     gate->flds->rhohv_test_filt = rhohvFilt;
-    gate->flds->rhohv_test_improv = rhohvImprov;
+    if (rhohvUnfilt > 0.98 || rhohvFilt < 0.5) {
+      gate->flds->rhohv_test_improv = 0.0;
+    } else {
+      gate->flds->rhohv_test_improv = rhohvImprov;
+    }
     
   } // igate
 
