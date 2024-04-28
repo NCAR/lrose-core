@@ -1045,9 +1045,9 @@ paramdef int {
 
 paramdef double {
   p_default = 300;
-  p_descr = "Duration of each movie time frame (in minutes).";
+  p_descr = "Interval between movie time frames (secs).";
   p_help = "The data for each frame is requested for the center of the frame.";
-} frame_duration_secs;
+} frame_interval_secs;
 
 paramdef int {
   p_default = 300;

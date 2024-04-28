@@ -352,7 +352,7 @@ void init_data_space()
     gd.movie.movie_on = 0;
   }
   gd.movie.magnify_factor = _params.movie_magnify_factor;
-  gd.movie.time_interval_mins = _params.frame_duration_secs / 60.0;
+  gd.movie.time_interval_mins = _params.frame_interval_secs / 60.0;
   gd.movie.frame_span = _params.climo_frame_span_mins;
   gd.movie.num_frames = _params.n_movie_frames;
   gd.movie.reset_frames = _params.reset_frames;

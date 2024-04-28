@@ -1062,8 +1062,9 @@ int LegacyParams::_readMainParams()
     fprintf(_tdrpFile, "start_mode = MODE_REALTIME;\n");
   }
   _getLong("cidd.starting_movie_frames", 12, true, "n_movie_frames");
-  double frameDurationMins = _getDouble("cidd.time_interval", 10.0, false);
-  fprintf(_tdrpFile, "frame_duration_secs = %g;\n", frameDurationMins * 60.0);
+
+  double frameIntervalMins = _getDouble("cidd.time_interval", 10.0, false);
+  fprintf(_tdrpFile, "frame_interval_secs = %g;\n", frameIntervalMins * 60.0);
   
   _getLong("cidd.temporal_rounding", 300);
   _getString("cidd.climo_mode", "regular");

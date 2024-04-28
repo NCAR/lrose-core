@@ -2276,15 +2276,15 @@
     tt->single_val.i = 12;
     tt++;
     
-    // Parameter 'frame_duration_secs'
+    // Parameter 'frame_interval_secs'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("frame_duration_secs");
-    tt->descr = tdrpStrDup("Duration of each movie time frame (in minutes).");
+    tt->param_name = tdrpStrDup("frame_interval_secs");
+    tt->descr = tdrpStrDup("Interval between movie time frames (secs).");
     tt->help = tdrpStrDup("The data for each frame is requested for the center of the frame.");
-    tt->val_offset = (char *) &frame_duration_secs - &_start_;
+    tt->val_offset = (char *) &frame_interval_secs - &_start_;
     tt->single_val.d = 300;
     tt++;
     

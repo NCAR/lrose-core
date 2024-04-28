@@ -776,7 +776,7 @@ public:
 
   int n_movie_frames;
 
-  double frame_duration_secs;
+  double frame_interval_secs;
 
   int temporal_rounding;
 

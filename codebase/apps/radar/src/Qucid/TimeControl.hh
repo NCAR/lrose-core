@@ -55,6 +55,7 @@
 #include <QWidget>
 #include <QDialog>
 #include <QSlider>
+#include <QLabel>
 #include <QDateTimeEdit>
 #include <QPushButton>
 
@@ -94,7 +95,8 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   void setEnabled(bool val) {
     _startTimeEdit->setEnabled(val);
-    _endTimeEdit->setEnabled(val);
+    _back1->setEnabled(val);
+    _fwd1->setEnabled(val);
     _backDuration->setEnabled(val);
     _fwdDuration->setEnabled(val);
     _backMult->setEnabled(val);
@@ -116,7 +118,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   }
   
   void setStartTimeFromEdit(const QDateTime &val);
-  void setEndTimeFromEdit(const QDateTime &val);
 
   // get
   
@@ -145,8 +146,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   QVBoxLayout *_timeLayout;
   
   QDateTimeEdit *_startTimeEdit;
-  QDateTimeEdit *_endTimeEdit;
-  QPushButton *_selectedTimeLabel;
+  QLabel *_endTimeLabel;
+  QLabel *_selectedTimeLabel;
 
   QSlider *_timeSlider;
 
@@ -157,12 +158,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_backMult;
   QPushButton *_fwdMult;
   
-
   // gui times before 'accept'
   
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
   RadxTime _guiSelectedTime;
+
   // times after 'accept'
   
   RadxTime _startTime;
@@ -171,7 +172,7 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   int _nFramesMovie;
   int _frameIndex;
-  double _frameDurationSecs;
+  double _frameIntervalSecs;
   double _movieDurationSecs;
   double _frameDwellMsecs;
   double _loopDelayMsecs;
@@ -195,6 +196,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _timeSliderReleased();
   void _timeSliderPressed();
   void _timeSliderSetNFrames(int val);
+  void _setFrameIntervalSecs(double val);
 
 };
 
