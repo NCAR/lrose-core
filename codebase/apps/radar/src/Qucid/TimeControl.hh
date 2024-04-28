@@ -163,7 +163,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
   RadxTime _guiSelectedTime;
-
   // times after 'accept'
   
   RadxTime _startTime;

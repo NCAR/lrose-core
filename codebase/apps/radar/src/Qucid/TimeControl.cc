@@ -208,35 +208,49 @@ void TimeControl::populateGui()
 
   // fwd and back buttons
 
+  QString buttonStyle("border: 2px solid gray; "
+                      "padding: 2px 4px 2px 4px; "
+                      "background-color: seagreen;");
+  
   _back1 = new QPushButton(timeLower);
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 frame");
+  _back1->setStyleSheet(buttonStyle);
 
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
   _fwd1->setToolTip("Go forward by 1 frame");
+  _fwd1->setStyleSheet("border: 2px solid gray;");  // Thin border
+  _fwd1->setStyleSheet(buttonStyle);
     
   _backDuration = new QPushButton(timeLower);
   _backDuration->setText("<<");
   connect(_backDuration, &QPushButton::clicked, this, &TimeControl::goBackDuration);
   _backDuration->setToolTip("Go back by 1 movie duration");
+  _backDuration->setStyleSheet("border: 2px solid gray;");  // Thin border
+  _backDuration->setStyleSheet(buttonStyle);
   
   _fwdDuration = new QPushButton(timeLower);
   _fwdDuration->setText(">>");
   connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::goFwdDuration);
   _fwdDuration->setToolTip("Go forward by 1 movie duration");
+  _fwdDuration->setStyleSheet("border: 2px solid gray;");  // Thin border
+  _fwdDuration->setStyleSheet(buttonStyle);
 
   _backMult = new QPushButton(timeLower);
   _backMult->setText("<<<");
   connect(_backMult, &QPushButton::clicked, this, &TimeControl::goBackMult);
-  _backMult->setToolTip("Go back by 5 movie durations");
+  _backMult->setToolTip("Go back by 6 movie durations");
+  _backMult->setStyleSheet(buttonStyle);
   
   _fwdMult = new QPushButton(timeLower);
   _fwdMult->setText(">>>");
   connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::goFwdMult);
-  _fwdMult->setToolTip("Go forward by 5 movie durations");
+  _fwdMult->setToolTip("Go forward by 6 movie durations");
+  _fwdMult->setStyleSheet("border: 2px solid gray;");  // Thin border
+  _fwdMult->setStyleSheet(buttonStyle);
 
   // nframes and frame interval
 
@@ -288,14 +302,14 @@ void TimeControl::populateGui()
   // timeUpperLayout->addWidget(nFramesFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignLeft);
   
-  timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(nFramesSelector, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignRight);
 
   // connect signals and slots
   
@@ -474,7 +488,7 @@ void TimeControl::goBackDuration()
 
 void TimeControl::goBackMult()
 {
-  int deltaSecs = (_endTime - _startTime) * 5;
+  int deltaSecs = (_endTime - _startTime) * 6;
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
@@ -504,7 +518,7 @@ void TimeControl::goFwdDuration()
 
 void TimeControl::goFwdMult()
 {
-  int deltaSecs = (_endTime - _startTime) * 5;
+  int deltaSecs = (_endTime - _startTime) * 6;
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
