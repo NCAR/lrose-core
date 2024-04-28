@@ -2288,6 +2288,18 @@
     tt->single_val.d = 300;
     tt++;
     
+    // Parameter 'max_frame_interval_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_frame_interval_secs");
+    tt->descr = tdrpStrDup("Max interval between movie time frames (secs).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &max_frame_interval_secs - &_start_;
+    tt->single_val.d = 3600;
+    tt++;
+    
     // Parameter 'temporal_rounding'
     // ctype is 'int'
     

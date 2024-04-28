@@ -1049,6 +1049,11 @@ paramdef double {
   p_help = "The data for each frame is requested for the center of the frame.";
 } frame_interval_secs;
 
+paramdef double {
+  p_default = 3600.0;
+  p_descr = "Max interval between movie time frames (secs).";
+} max_frame_interval_secs;
+
 paramdef int {
   p_default = 300;
   p_descr = "Set times to the nearest value divisible by the number of seconds.";

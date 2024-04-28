@@ -778,6 +778,8 @@ public:
 
   double frame_interval_secs;
 
+  double max_frame_interval_secs;
+
   int temporal_rounding;
 
   tdrp_bool_t movie_on;
@@ -1483,7 +1485,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[498];
+  mutable TDRPtable _table[499];
 
   const char *_className;
 

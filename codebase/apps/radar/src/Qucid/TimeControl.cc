@@ -95,7 +95,7 @@ void TimeControl::populateGui()
   setWindowTitle("Time and movie loop controller");
   QPoint pos(0,0);
   move(pos);
-
+  
   QVBoxLayout *timeControlLayout = new QVBoxLayout(this);
   timeControlLayout->setSpacing(0);
   timeControlLayout->setContentsMargins(0, 0, 0, 0);
@@ -152,14 +152,14 @@ void TimeControl::populateGui()
   QLabel *startTitle = new QLabel(startTimeFrame);
   startTitle->setText("Movie start time");
   startTitle->setAlignment(Qt::AlignHCenter);
-
+  
   _startTimeEdit = new QDateTimeEdit(timeUpper);
   _startTimeEdit->setDisplayFormat("yyyy/mm/dd hh:mm:ss");
   _startTimeEdit->setCalendarPopup(true);
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
           this, &TimeControl::setStartTimeFromEdit);
-  _startTimeEdit->setToolTip("Start time of movie interval");
-
+  _startTimeEdit->setToolTip("Start time of movie");
+  
   // startTimeFrameLayout->addWidget(startTitle, 0, Qt::AlignTop);
   // startTimeFrameLayout->addWidget(_startTimeEdit, 0, Qt::AlignTop);
   startTimeFrameLayout->addWidget(startTitle);
@@ -180,10 +180,8 @@ void TimeControl::populateGui()
 
   _endTimeLabel = new QLabel(_timePanel);
   _endTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
-  _endTimeLabel->setToolTip("This is the selected data time");
+  _endTimeLabel->setToolTip("End time of movie");
   
-  // selectedTimeFrameLayout->addWidget(selectedTitle, 0, Qt::AlignTop);
-  // selectedTimeFrameLayout->addWidget(_selectedTimeLabel, 0, Qt::AlignTop);
   endTimeFrameLayout->addWidget(endTitle);
   endTimeFrameLayout->addWidget(_endTimeLabel);
 
@@ -208,11 +206,9 @@ void TimeControl::populateGui()
   _selectedTimeLabel->setToolTip("This is the selected data time");
   setGuiSelectedTime(_guiSelectedTime);
   
-  // selectedTimeFrameLayout->addWidget(selectedTitle, 0, Qt::AlignTop);
-  // selectedTimeFrameLayout->addWidget(_selectedTimeLabel, 0, Qt::AlignTop);
   selectedTimeFrameLayout->addWidget(selectedTitle);
   selectedTimeFrameLayout->addWidget(_selectedTimeLabel);
-
+  
   // fwd and back buttons
 
   QString buttonStyle("border: 2px solid gray; "
@@ -270,7 +266,7 @@ void TimeControl::populateGui()
 
   QDoubleSpinBox *frameIntervalSelector = new QDoubleSpinBox(timeLower);
   frameIntervalSelector->setMinimum(1.0);
-  frameIntervalSelector->setMaximum(1.0e9);
+  frameIntervalSelector->setMaximum(_params.max_frame_interval_secs);
   frameIntervalSelector->setDecimals(0);
   frameIntervalSelector->setPrefix("Frame interval (secs): ");
   frameIntervalSelector->setValue(_frameIntervalSecs);
@@ -308,7 +304,6 @@ void TimeControl::populateGui()
   
   int stretch = 0;
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
-  // timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignLeft);
@@ -342,7 +337,8 @@ void TimeControl::populateGui()
 void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
   QDate dd = val.date();
   QTime tt = val.time();
-  _guiStartTime.set(dd.year(), dd.month(), dd.day(), tt.hour(), tt.minute(), tt.second());
+  _guiStartTime.set(dd.year(), dd.month(), dd.day(),
+                    tt.hour(), tt.minute(), tt.second());
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _frameIndex * _frameIntervalSecs;
   setGuiEndTime(_guiEndTime);
@@ -425,20 +421,16 @@ void TimeControl::setGuiFromTimes()
 void TimeControl::setStartTime(const RadxTime &rtime)
 
 {
-
   _startTime = rtime;
   if (!_startTime.isValid()) {
     _startTime.set(RadxTime::NOW);
   }
   _endTime = _startTime + _movieDurationSecs;
   _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
-
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
-
   setGuiFromTimes();
-
 }
 
 ////////////////////////////////////////////////////////
@@ -447,20 +439,16 @@ void TimeControl::setStartTime(const RadxTime &rtime)
 void TimeControl::setEndTime(const RadxTime &rtime)
 
 {
-
   _endTime = rtime;
   if (!_endTime.isValid()) {
     _endTime.set(RadxTime::NOW);
   }
   _startTime = _endTime - _movieDurationSecs;
   _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
-
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
-
   setGuiFromTimes();
-  
 }
 
 ////////////////////////////////////////////////////////
@@ -618,8 +606,10 @@ void TimeControl::_setFrameIntervalSecs(double val)
 {
   _frameIntervalSecs = val;
   _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
-  _endTime = _startTime + _movieDurationSecs;
-  setEndTime(_endTime);
+  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiSelectedTime = _guiStartTime + _frameIndex * _frameIntervalSecs;
+  setGuiSelectedTime(_guiSelectedTime);
+  setEndTime(_guiEndTime);
 }
 
 ////////////////////////////////////////////////////////
