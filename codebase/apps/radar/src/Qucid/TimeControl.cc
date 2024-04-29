@@ -54,6 +54,22 @@ TimeControl::TimeControl(CartManager *parent,
         
 {
 
+  _timePanel = NULL;
+  _timeLayout = NULL;
+  _startTimeEdit = NULL;
+  _endTimeLabel = NULL;
+  _selectedTimeLabel = NULL;
+  _timeSlider = NULL;
+  _back1 = NULL;
+  _fwd1 = NULL;
+  _backDuration = NULL;
+  _fwdDuration = NULL;
+  _backMult = NULL;
+  _fwdMult = NULL;
+  _nFramesSelector = NULL;
+  _frameIntervalSelector = NULL;
+  _realtimeSelector = NULL;
+  
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
   _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
@@ -72,6 +88,8 @@ TimeControl::TimeControl(CartManager *parent,
   
   _frameDwellMsecs = _params.movie_dwell_msecs;
   _loopDelayMsecs = _params.loop_delay_msecs;
+
+  _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   
   populateGui();
 
@@ -201,9 +219,6 @@ void TimeControl::populateGui()
 
   _selectedTimeLabel = new QLabel(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
-  // QPalette pal = _selectedTimeLabel->palette();
-  // pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
-  // _selectedTimeLabel->setPalette(pal);
   _selectedTimeLabel->setToolTip("This is the selected data time");
   setGuiSelectedTime(_guiSelectedTime);
   
@@ -322,11 +337,41 @@ void TimeControl::populateGui()
 
   startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
   startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignBottom);
+
+  // realtime?
+
+  QFrame *realtimeFrame = new QFrame(timeUpper);
+  QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
+  realtimeFrameLayout->setSpacing(0);
+  realtimeFrameLayout->setContentsMargins(0, 0, 0, 0);
+  realtimeFrame->setLayout(realtimeFrameLayout);
+
+  QLabel *realtimeTitle = new QLabel(realtimeFrame);
+  realtimeTitle->setText("Realtime?");
+  realtimeTitle->setAlignment(Qt::AlignHCenter);
+
+  _realtimeSelector = new QCheckBox(realtimeFrame);
+  _realtimeSelector->setChecked(_isRealtime);
+
+  realtimeFrameLayout->addWidget(realtimeTitle, 0,
+                                 Qt::AlignTop | Qt::AlignCenter);
+  realtimeFrameLayout->addWidget(_realtimeSelector, 0,
+                                 Qt::AlignBottom | Qt::AlignCenter);
+  
+#if QT_VERSION >= 0x067000
+  connect(_realtimeSelector, &QCheckBox::checkStateChanged, this,
+          &TimeControl::_setRealtime);
+#else
+  connect(_realtimeSelector, &QCheckBox::stateChanged, this,
+          &TimeControl::_setRealtime);
+#endif
   
   // add widgets to layouts
   
   int stretch = 0;
   timeUpperLayout->addWidget(startStopFrame, stretch, Qt::AlignLeft);
+  timeUpperLayout->addWidget(realtimeFrame, stretch,
+                             Qt::AlignLeft | Qt::AlignTop);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignCenter);
@@ -674,6 +719,31 @@ void TimeControl::_setFrameIntervalSecs(double val)
   setEndTime(_guiEndTime);
   setGuiSelectedTime(_guiSelectedTime);
 }
+
+#if QT_VERSION >= 0x067000
+void TimeControl::_setRealtime(Qt::CheckState val)
+{
+  if (val == Qt::Checked) {
+    _isRealtime = true;
+    cerr << "Realtime mode" << endl;
+  } else {
+    _isRealtime = false;
+    cerr << "Archive mode" << endl;
+  }
+}
+#else
+void TimeControl::_setRealtime(int val)
+{
+  if (val == 0) {
+    _isRealtime = false;
+    cerr << "Archive mode" << endl;
+  } else {
+    _isRealtime = true;
+    cerr << "Realtime mode" << endl;
+  }
+}
+#endif
+
 
 ////////////////////////////////////////////////////////
 // convert between Qt and Radx date/time objects

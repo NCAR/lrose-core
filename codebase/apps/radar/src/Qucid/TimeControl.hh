@@ -59,6 +59,7 @@
 #include <QDateTimeEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QCheckBox>
 
 class QFrame;
 class QHBoxLayout;
@@ -166,6 +167,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   QSpinBox *_nFramesSelector;
   QDoubleSpinBox *_frameIntervalSelector;
 
+  QCheckBox *_realtimeSelector;
+
   // gui selections before 'accept'
   
   RadxTime _guiStartTime;
@@ -189,6 +192,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _movieDurationSecs;
   double _frameDwellMsecs;
   double _loopDelayMsecs;
+  bool _isRealtime;
                          
  public slots:
 
@@ -210,6 +214,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _timeSliderPressed();
   void _timeSliderSetNFrames(int val);
   void _setFrameIntervalSecs(double val);
+
+#if QT_VERSION >= 0x067000
+  void _setRealtime(Qt::CheckState val);
+#else
+  void _setRealtime(int val);
+#endif
 
 };
 
