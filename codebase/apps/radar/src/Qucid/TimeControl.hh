@@ -58,6 +58,7 @@
 #include <QLabel>
 #include <QDateTimeEdit>
 #include <QPushButton>
+#include <QSpinBox>
 
 class QFrame;
 class QHBoxLayout;
@@ -106,10 +107,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setGuiStartTime(const RadxTime &val);
   void setGuiEndTime(const RadxTime &val);
   void setGuiSelectedTime(const RadxTime &val);
-  void setGuiFromTimes();
+  void setGuiFromSelections();
 
-  void acceptGuiTimes();
-  void cancelGuiTimes();
+  void acceptGuiSelections();
+  void cancelGuiSelections();
   
   void setFrameIndex(int val) { _frameIndex = val; }
 
@@ -158,21 +159,29 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_backMult;
   QPushButton *_fwdMult;
   
-  // gui times before 'accept'
+  QSpinBox *_nFramesSelector;
+  QDoubleSpinBox *_frameIntervalSelector;
+
+  // gui selections before 'accept'
   
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
   RadxTime _guiSelectedTime;
+  int _guiNFramesMovie;
+  double _guiFrameIntervalSecs;
+  int _guiFrameIndex;
 
-  // times after 'accept'
+  // selections after 'accept'
   
   RadxTime _startTime;
   RadxTime _endTime;
   RadxTime _selectedTime;
-
   int _nFramesMovie;
-  int _frameIndex;
   double _frameIntervalSecs;
+  int _frameIndex;
+
+  // other selections
+  
   double _movieDurationSecs;
   double _frameDwellMsecs;
   double _loopDelayMsecs;
