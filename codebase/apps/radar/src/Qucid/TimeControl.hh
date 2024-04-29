@@ -85,15 +85,24 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   virtual ~TimeControl();
 
+  // actions
+
+  void acceptGuiSelections();
+  void cancelGuiSelections();
+  
+  void startMovie();
+  void stopMovie();
+  
   // set
 
+  void setStartTimeFromEdit(const QDateTime &val);
   void setStartTime(const RadxTime &rtime);
   void setEndTime(const RadxTime &rtime);
 
   void setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
   void setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
   void setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
-
+  
   void setEnabled(bool val) {
     _startTimeEdit->setEnabled(val);
     _back1->setEnabled(val);
@@ -109,17 +118,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setGuiSelectedTime(const RadxTime &val);
   void setGuiFromSelections();
 
-  void acceptGuiSelections();
-  void cancelGuiSelections();
-  
   void setFrameIndex(int val) { _frameIndex = val; }
 
   void setSelectedTimeLabel(const string &text) {
     _selectedTimeLabel->setText(text.c_str());
   }
   
-  void setStartTimeFromEdit(const QDateTime &val);
-
   // get
   
   const RadxTime &getStartTime() const { return _startTime; }

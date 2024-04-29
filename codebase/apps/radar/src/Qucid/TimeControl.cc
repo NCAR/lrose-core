@@ -279,34 +279,58 @@ void TimeControl::populateGui()
   
   QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
   acceptButton->setText("Accept");
-  QPalette acceptPalette = acceptButton->palette();
-  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
-  acceptButton->setPalette(acceptPalette);
   connect(acceptButton, &QPushButton::clicked, this,
           &TimeControl::acceptGuiSelections);
   acceptButton->setToolTip("Accept the selection");
-  acceptButton->setStyleSheet("background-color: darkgreen;");
+  acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                              "background-color: darkgreen;");
   
   QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
   cancelButton->setText("Cancel");
-  QPalette cancelPalette = cancelButton->palette();
-  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
-  cancelButton->setPalette(cancelPalette);
   connect(cancelButton, &QPushButton::clicked, this,
           &TimeControl::cancelGuiSelections);
   cancelButton->setToolTip("Cancel the selection");
-  cancelButton->setStyleSheet("background-color: darkred;");
+  cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                              "background-color: darkred;");
 
   acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
   acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignBottom);
   
+  // start stop buttons
+
+  QFrame *startStopFrame = new QFrame(timeUpper);
+  QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
+  startStopFrameLayout->setSpacing(0);
+  startStopFrameLayout->setContentsMargins(0, 0, 0, 0);
+  startStopFrame->setLayout(startStopFrameLayout);
+  
+  QPushButton *startButton = new QPushButton(startStopFrame);
+  startButton->setText("Start");
+  connect(startButton, &QPushButton::clicked, this,
+          &TimeControl::startMovie);
+  startButton->setToolTip("Start the movie");
+  startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                             "background-color: darkgreen;");
+  
+  QPushButton *stopButton = new QPushButton(startStopFrame);
+  stopButton->setText("Stop");
+  connect(stopButton, &QPushButton::clicked, this,
+          &TimeControl::stopMovie);
+  stopButton->setToolTip("Stop the movie");
+  stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                            "background-color: darkred;");
+
+  startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
+  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignBottom);
+  
   // add widgets to layouts
   
   int stretch = 0;
-  timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(startStopFrame, stretch, Qt::AlignLeft);
+  timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignLeft);
+  timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignRight);
   
   timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
@@ -334,16 +358,9 @@ void TimeControl::populateGui()
   
 }
 
-void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
-  QDate dd = val.date();
-  QTime tt = val.time();
-  _guiStartTime.set(dd.year(), dd.month(), dd.day(),
-                    tt.hour(), tt.minute(), tt.second());
-  _guiEndTime = _guiStartTime + _movieDurationSecs;
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
-}
+/////////////////////////////////////////////////////////////////////
+// accept or cancel gui selections
+// data retrieval does not change until the selections are accepted
 
 void TimeControl::acceptGuiSelections()
 {
@@ -368,6 +385,33 @@ void TimeControl::cancelGuiSelections()
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
   setGuiFromSelections();
+}
+
+////////////////////////////////////////////////////////
+// start/stop the movie
+
+void TimeControl::startMovie()
+{
+  cerr << "Start the movie" << endl;
+}
+
+void TimeControl::stopMovie()
+{
+  cerr << "Stop the movie" << endl;
+}
+
+/////////////////////////////////////////////////////////////////////
+// grab the start time from the editor widget
+
+void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
+  QDate dd = val.date();
+  QTime tt = val.time();
+  _guiStartTime.set(dd.year(), dd.month(), dd.day(),
+                    tt.hour(), tt.minute(), tt.second());
+  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
