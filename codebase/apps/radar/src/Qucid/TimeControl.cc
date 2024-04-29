@@ -284,8 +284,13 @@ void TimeControl::populateGui()
   _nFramesSelector->setMinimum(1);
   _nFramesSelector->setPrefix("N frames: ");
   _nFramesSelector->setValue(_nFramesMovie);
+#if QT_VERSION >= 0x067000
   connect(_nFramesSelector, &QSpinBox::valueChanged,
           this, &TimeControl::_timeSliderSetNFrames);
+#else
+  connect(_nFramesSelector, SIGNAL(valueChanged(int)),
+          this, SLOT(_timeSliderSetNFrames(int)));
+#endif
 
   _frameIntervalSelector = new QDoubleSpinBox(timeLower);
   _frameIntervalSelector->setMinimum(1.0);
@@ -293,8 +298,13 @@ void TimeControl::populateGui()
   _frameIntervalSelector->setDecimals(0);
   _frameIntervalSelector->setPrefix("Frame interval (secs): ");
   _frameIntervalSelector->setValue(_frameIntervalSecs);
+#if QT_VERSION >= 0x067000
   connect(_frameIntervalSelector, &QDoubleSpinBox::valueChanged,
           this, &TimeControl::_setFrameIntervalSecs);
+#else
+  connect(_frameIntervalSelector, SIGNAL(valueChanged(double)),
+          this, SLOT(_setFrameIntervalSecs(double)));
+#endif
 
   // accept cancel buttons
 
