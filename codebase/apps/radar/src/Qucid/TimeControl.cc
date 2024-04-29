@@ -69,6 +69,7 @@ TimeControl::TimeControl(CartManager *parent,
   _nFramesSelector = NULL;
   _frameIntervalSelector = NULL;
   _realtimeSelector = NULL;
+  _sweepSelector = NULL;
   
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
@@ -90,6 +91,7 @@ TimeControl::TimeControl(CartManager *parent,
   _loopDelayMsecs = _params.loop_delay_msecs;
 
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
+  _isSweep = false;
   
   populateGui();
 
@@ -169,6 +171,9 @@ void TimeControl::populateGui()
   startTimeFrameLayout->setSpacing(0);
   startTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   startTimeFrame->setLayout(startTimeFrameLayout);
+  startTimeFrame->setStyleSheet("border: 1px solid black; "
+                                "padding: 2px 2px 2px 2px; "
+                                "background-color: lightgray;");
 
   QLabel *startTitle = new QLabel(startTimeFrame);
   startTitle->setText("Movie start time");
@@ -192,6 +197,9 @@ void TimeControl::populateGui()
   endTimeFrameLayout->setSpacing(0);
   endTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   endTimeFrame->setLayout(endTimeFrameLayout);
+  endTimeFrame->setStyleSheet("border: 1px solid black; "
+                              "padding: 2px 2px 2px 2px; "
+                              "background-color: lightgray;");
 
   QLabel *endTitle = new QLabel(endTimeFrame);
   endTitle->setText("Movie end time");
@@ -212,6 +220,10 @@ void TimeControl::populateGui()
   selectedTimeFrameLayout->setSpacing(0);
   selectedTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   selectedTimeFrame->setLayout(selectedTimeFrameLayout);
+  selectedTimeFrame->setLineWidth(1);
+  selectedTimeFrame->setStyleSheet("border: 1px solid black; "
+                                   "padding: 2px 2px 2px 2px; "
+                                   "background-color: lightgray;");
 
   QLabel *selectedTitle = new QLabel(selectedTimeFrame);
   selectedTitle->setText("Selected time");
@@ -309,7 +321,7 @@ void TimeControl::populateGui()
                               "background-color: darkred;");
 
   acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
-  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignBottom);
+  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
   
   // start stop buttons
 
@@ -336,7 +348,7 @@ void TimeControl::populateGui()
                             "background-color: darkred;");
 
   startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
-  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignBottom);
+  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
 
   // realtime?
 
@@ -366,15 +378,45 @@ void TimeControl::populateGui()
           &TimeControl::_setRealtime);
 #endif
   
+  // sweep?
+
+  QFrame *sweepFrame = new QFrame(timeUpper);
+  QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
+  sweepFrameLayout->setSpacing(0);
+  sweepFrameLayout->setContentsMargins(0, 0, 0, 0);
+  sweepFrame->setLayout(sweepFrameLayout);
+
+  QLabel *sweepTitle = new QLabel(sweepFrame);
+  sweepTitle->setText("Sweep?");
+  sweepTitle->setAlignment(Qt::AlignHCenter);
+
+  _sweepSelector = new QCheckBox(sweepFrame);
+  _sweepSelector->setChecked(_isSweep);
+  
+  sweepFrameLayout->addWidget(sweepTitle, 0,
+                              Qt::AlignTop | Qt::AlignCenter);
+  sweepFrameLayout->addWidget(_sweepSelector, 0,
+                              Qt::AlignBottom | Qt::AlignCenter);
+  
+#if QT_VERSION >= 0x067000
+  connect(_sweepSelector, &QCheckBox::checkStateChanged, this,
+          &TimeControl::_setSweep);
+#else
+  connect(_sweepSelector, &QCheckBox::stateChanged, this,
+          &TimeControl::_setSweep);
+#endif
+  
   // add widgets to layouts
   
   int stretch = 0;
   timeUpperLayout->addWidget(startStopFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(realtimeFrame, stretch,
                              Qt::AlignLeft | Qt::AlignTop);
-  timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignLeft);
-  timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignCenter);
+  timeUpperLayout->addWidget(sweepFrame, stretch,
+                             Qt::AlignLeft | Qt::AlignTop);
+  timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignRight);
   
   timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
@@ -720,6 +762,8 @@ void TimeControl::_setFrameIntervalSecs(double val)
   setGuiSelectedTime(_guiSelectedTime);
 }
 
+// realtime mode?
+
 #if QT_VERSION >= 0x067000
 void TimeControl::_setRealtime(Qt::CheckState val)
 {
@@ -740,6 +784,32 @@ void TimeControl::_setRealtime(int val)
   } else {
     _isRealtime = true;
     cerr << "Realtime mode" << endl;
+  }
+}
+#endif
+
+// sweep mode?
+
+#if QT_VERSION >= 0x067000
+void TimeControl::_setSweep(Qt::CheckState val)
+{
+  if (val == Qt::Checked) {
+    _isSweep = true;
+    cerr << "Sweep mode" << endl;
+  } else {
+    _isSweep = false;
+    cerr << "Not sweep mode" << endl;
+  }
+}
+#else
+void TimeControl::_setSweep(int val)
+{
+  if (val == 0) {
+    _isSweep = false;
+    cerr << "Not sweep mode" << endl;
+  } else {
+    _isSweep = true;
+    cerr << "Sweep mode" << endl;
   }
 }
 #endif

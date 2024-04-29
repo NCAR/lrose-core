@@ -168,6 +168,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   QDoubleSpinBox *_frameIntervalSelector;
 
   QCheckBox *_realtimeSelector;
+  QCheckBox *_sweepSelector;
 
   // gui selections before 'accept'
   
@@ -193,7 +194,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _frameDwellMsecs;
   double _loopDelayMsecs;
   bool _isRealtime;
-                         
+  bool _isSweep;
+                  
  public slots:
 
   // move in time
@@ -217,8 +219,10 @@ class DLL_EXPORT TimeControl : public QDialog {
 
 #if QT_VERSION >= 0x067000
   void _setRealtime(Qt::CheckState val);
+  void _setSweep(Qt::CheckState val);
 #else
   void _setRealtime(int val);
+  void _setSweep(int val);
 #endif
 
 };
