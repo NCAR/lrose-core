@@ -70,6 +70,7 @@ TimeControl::TimeControl(CartManager *parent,
   _frameIntervalSelector = NULL;
   _realtimeSelector = NULL;
   _sweepSelector = NULL;
+  _loopDwellSelector = NULL;
   
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
@@ -87,7 +88,7 @@ TimeControl::TimeControl(CartManager *parent,
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
   
-  _frameDwellMsecs = _params.movie_dwell_msecs;
+  _loopDwellMsecs = _params.movie_dwell_msecs;
   _loopDelayMsecs = _params.loop_delay_msecs;
 
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
@@ -142,9 +143,9 @@ void TimeControl::populateGui()
   
   QFrame *timeLower = new QFrame(_timePanel);
   QHBoxLayout *timeLowerLayout = new QHBoxLayout;
+  timeLower->setLayout(timeLowerLayout);
   timeLowerLayout->setSpacing(0);
   timeLowerLayout->setContentsMargins(0, 0, 0, 0);
-  timeLower->setLayout(timeLowerLayout);
   
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
@@ -167,10 +168,9 @@ void TimeControl::populateGui()
   
   QFrame *startTimeFrame = new QFrame(timeUpper);
   QVBoxLayout *startTimeFrameLayout = new QVBoxLayout;
-
+  startTimeFrame->setLayout(startTimeFrameLayout);
   startTimeFrameLayout->setSpacing(0);
   startTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
-  startTimeFrame->setLayout(startTimeFrameLayout);
   startTimeFrame->setStyleSheet("border: 1px solid black; "
                                 "padding: 2px 2px 2px 2px; "
                                 "background-color: lightgray;");
@@ -189,14 +189,13 @@ void TimeControl::populateGui()
   startTimeFrameLayout->addWidget(startTitle, 0, Qt::AlignTop);
   startTimeFrameLayout->addWidget(_startTimeEdit, 0, Qt::AlignTop);
   
-  // end time editor
+  // end time label
 
   QFrame *endTimeFrame = new QFrame(_timePanel);
   QVBoxLayout *endTimeFrameLayout = new QVBoxLayout;
-  
+  endTimeFrame->setLayout(endTimeFrameLayout);
   endTimeFrameLayout->setSpacing(0);
   endTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
-  endTimeFrame->setLayout(endTimeFrameLayout);
   endTimeFrame->setStyleSheet("border: 1px solid black; "
                               "padding: 2px 2px 2px 2px; "
                               "background-color: lightgray;");
@@ -212,14 +211,13 @@ void TimeControl::populateGui()
   endTimeFrameLayout->addWidget(endTitle, 0, Qt::AlignTop);
   endTimeFrameLayout->addWidget(_endTimeLabel, 0, Qt::AlignTop);
 
-  // selected time
+  // selected time label
   
   QFrame *selectedTimeFrame = new QFrame(_timePanel);
   QVBoxLayout *selectedTimeFrameLayout = new QVBoxLayout;
-  
+  selectedTimeFrame->setLayout(selectedTimeFrameLayout);
   selectedTimeFrameLayout->setSpacing(0);
   selectedTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
-  selectedTimeFrame->setLayout(selectedTimeFrameLayout);
   selectedTimeFrame->setLineWidth(1);
   selectedTimeFrame->setStyleSheet("border: 1px solid black; "
                                    "padding: 2px 2px 2px 2px; "
@@ -282,6 +280,7 @@ void TimeControl::populateGui()
 
   _nFramesSelector = new QSpinBox(timeLower);
   _nFramesSelector->setMinimum(1);
+  _nFramesSelector->setMaximum(999);
   _nFramesSelector->setPrefix("N frames: ");
   _nFramesSelector->setValue(_nFramesMovie);
 #if QT_VERSION >= 0x067000
@@ -310,9 +309,9 @@ void TimeControl::populateGui()
 
   QFrame *acceptCancelFrame = new QFrame(timeUpper);
   QVBoxLayout *acceptCancelFrameLayout = new QVBoxLayout;
+  acceptCancelFrame->setLayout(acceptCancelFrameLayout);
   acceptCancelFrameLayout->setSpacing(0);
   acceptCancelFrameLayout->setContentsMargins(0, 0, 0, 0);
-  acceptCancelFrame->setLayout(acceptCancelFrameLayout);
   
   QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
   acceptButton->setText("Accept");
@@ -337,9 +336,9 @@ void TimeControl::populateGui()
 
   QFrame *startStopFrame = new QFrame(timeUpper);
   QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
+  startStopFrame->setLayout(startStopFrameLayout);
   startStopFrameLayout->setSpacing(0);
   startStopFrameLayout->setContentsMargins(0, 0, 0, 0);
-  startStopFrame->setLayout(startStopFrameLayout);
   
   QPushButton *startButton = new QPushButton(startStopFrame);
   startButton->setText("Start");
@@ -364,9 +363,11 @@ void TimeControl::populateGui()
 
   QFrame *realtimeFrame = new QFrame(timeUpper);
   QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
-  realtimeFrameLayout->setSpacing(0);
-  realtimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   realtimeFrame->setLayout(realtimeFrameLayout);
+  realtimeFrameLayout->setSpacing(2);
+  realtimeFrameLayout->setContentsMargins(2, 2, 2, 2);
+  // realtimeFrame->setLineWidth(1);
+  // realtimeFrame->setFrameStyle(QFrame::Box);
 
   QLabel *realtimeTitle = new QLabel(realtimeFrame);
   realtimeTitle->setText("Realtime?");
@@ -392,9 +393,11 @@ void TimeControl::populateGui()
 
   QFrame *sweepFrame = new QFrame(timeUpper);
   QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
-  sweepFrameLayout->setSpacing(0);
-  sweepFrameLayout->setContentsMargins(0, 0, 0, 0);
   sweepFrame->setLayout(sweepFrameLayout);
+  sweepFrameLayout->setSpacing(2);
+  sweepFrameLayout->setContentsMargins(2, 2, 2, 2);
+  // sweepFrame->setLineWidth(1);
+  // sweepFrame->setFrameStyle(QFrame::Box);
 
   QLabel *sweepTitle = new QLabel(sweepFrame);
   sweepTitle->setText("Sweep?");
@@ -416,6 +419,38 @@ void TimeControl::populateGui()
           &TimeControl::_setSweep);
 #endif
   
+  // loop dwell (msecs)
+  
+  QFrame *loopDwellFrame = new QFrame(timeUpper);
+  QVBoxLayout *loopDwellFrameLayout = new QVBoxLayout;
+  loopDwellFrameLayout->setSpacing(2);
+  loopDwellFrameLayout->setContentsMargins(2, 2, 2, 2);
+  loopDwellFrame->setLayout(loopDwellFrameLayout);
+  loopDwellFrame->setLineWidth(1);
+  loopDwellFrame->setFrameStyle(QFrame::Box);
+  // loopDwellFrame->setStyleSheet("border: 1px solid black; "
+  //                               "padding: 2px 2px 2px 2px; "
+  //                               "background-color: lightgray;");
+  
+  QLabel *loopDwellTitle = new QLabel(loopDwellFrame);
+  loopDwellTitle->setText("Dwell (msecs)");
+  loopDwellTitle->setAlignment(Qt::AlignHCenter);
+
+  _loopDwellSelector = new QSpinBox(loopDwellFrame);
+  _loopDwellSelector->setMinimum(_params.movie_min_dwell_msecs);
+  _loopDwellSelector->setMaximum(9999);
+  _loopDwellSelector->setValue(_loopDwellMsecs);
+#if QT_VERSION >= 0x067000
+  connect(_loopDwellSelector, &QSpinBox::valueChanged,
+          this, &TimeControl::_setLoopDwellMsecs);
+#else
+  connect(_loopDwellSelector, SIGNAL(valueChanged(int)),
+          this, SLOT(_setLoopDwellMsecs(int)));
+#endif
+  
+  loopDwellFrameLayout->addWidget(loopDwellTitle, 0, Qt::AlignTop);
+  loopDwellFrameLayout->addWidget(_loopDwellSelector, 0, Qt::AlignTop);
+  
   // add widgets to layouts
   
   int stretch = 0;
@@ -424,6 +459,7 @@ void TimeControl::populateGui()
                              Qt::AlignLeft | Qt::AlignTop);
   timeUpperLayout->addWidget(sweepFrame, stretch,
                              Qt::AlignLeft | Qt::AlignTop);
+  timeUpperLayout->addWidget(loopDwellFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignRight);
@@ -824,6 +860,12 @@ void TimeControl::_setSweep(int val)
 }
 #endif
 
+// loop dwell
+
+void TimeControl::_setLoopDwellMsecs(int val) 
+{
+  _loopDwellMsecs = val;
+}
 
 ////////////////////////////////////////////////////////
 // convert between Qt and Radx date/time objects

@@ -132,7 +132,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   int getNFramesMovie() const { return _nFramesMovie; }
   double getMovieDurationSecs() const { return _movieDurationSecs; }
   int getFrameIndex() const { return _frameIndex; }
-  double getFrameDwellMsecs() const { return _frameDwellMsecs; }
+  double getLoopDwellMsecs() const { return _loopDwellMsecs; }
 
   // convert between Qt and Radx date/time objects
 
@@ -170,6 +170,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   QCheckBox *_realtimeSelector;
   QCheckBox *_sweepSelector;
 
+  QSpinBox *_loopDwellSelector;
+  
   // gui selections before 'accept'
   
   RadxTime _guiStartTime;
@@ -191,8 +193,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   // other selections
   
   double _movieDurationSecs;
-  double _frameDwellMsecs;
-  double _loopDelayMsecs;
+  int _loopDwellMsecs;
+  int _loopDelayMsecs;
   bool _isRealtime;
   bool _isSweep;
                   
@@ -224,6 +226,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setRealtime(int val);
   void _setSweep(int val);
 #endif
+
+  void _setLoopDwellMsecs(int val);
 
 };
 

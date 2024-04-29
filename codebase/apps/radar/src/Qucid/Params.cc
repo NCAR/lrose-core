@@ -2345,6 +2345,10 @@
     tt->descr = tdrpStrDup("Set the dwell of the movie loop (msec dwell per frame).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &movie_dwell_msecs - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.i = 30;
+    tt->max_val.i = 9999;
     tt->single_val.i = 75;
     tt++;
     

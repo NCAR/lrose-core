@@ -1,51 +1,78 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'ZoomMenuItem.hh'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.3)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "ZoomMenuItem.hh"
-#include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
+
+#if __has_include(<QtCore/qtmochelpers.h>)
+#include <QtCore/qtmochelpers.h>
+#else
+QT_BEGIN_MOC_NAMESPACE
+#endif
+
+
+#include <memory>
+
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'ZoomMenuItem.hh' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.15.3. It"
+#elif Q_MOC_OUTPUT_REVISION != 68
+#error "This file was generated using the moc from 6.5.2. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
-QT_BEGIN_MOC_NAMESPACE
+#ifndef Q_CONSTINIT
+#define Q_CONSTINIT
+#endif
+
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_ZoomMenuItem_t {
-    QByteArrayData data[4];
-    char stringdata0[30];
-};
-#define QT_MOC_LITERAL(idx, ofs, len) \
-    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_ZoomMenuItem_t, stringdata0) + ofs \
-        - idx * sizeof(QByteArrayData)) \
-    )
-static const qt_meta_stringdata_ZoomMenuItem_t qt_meta_stringdata_ZoomMenuItem = {
-    {
-QT_MOC_LITERAL(0, 0, 12), // "ZoomMenuItem"
-QT_MOC_LITERAL(1, 13, 7), // "toggled"
-QT_MOC_LITERAL(2, 21, 0), // ""
-QT_MOC_LITERAL(3, 22, 7) // "checked"
+QT_WARNING_DISABLE_GCC("-Wuseless-cast")
+namespace {
 
+#ifdef QT_MOC_HAS_STRINGDATA
+struct qt_meta_stringdata_CLASSZoomMenuItemENDCLASS_t {};
+static constexpr auto qt_meta_stringdata_CLASSZoomMenuItemENDCLASS = QtMocHelpers::stringData(
+    "ZoomMenuItem",
+    "toggled",
+    "",
+    "checked"
+);
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSZoomMenuItemENDCLASS_t {
+    uint offsetsAndSizes[8];
+    char stringdata0[13];
+    char stringdata1[8];
+    char stringdata2[1];
+    char stringdata3[8];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSZoomMenuItemENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSZoomMenuItemENDCLASS_t qt_meta_stringdata_CLASSZoomMenuItemENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 12),  // "ZoomMenuItem"
+        QT_MOC_LITERAL(13, 7),  // "toggled"
+        QT_MOC_LITERAL(21, 0),  // ""
+        QT_MOC_LITERAL(22, 7)   // "checked"
     },
-    "ZoomMenuItem\0toggled\0\0checked"
+    "ZoomMenuItem",
+    "toggled",
+    "",
+    "checked"
 };
 #undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
 
-static const uint qt_meta_data_ZoomMenuItem[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSZoomMenuItemENDCLASS[] = {
 
  // content:
-       8,       // revision
+      11,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -55,8 +82,8 @@ static const uint qt_meta_data_ZoomMenuItem[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: name, argc, parameters, tag, flags
-       1,    1,   19,    2, 0x0a /* Public */,
+ // slots: name, argc, parameters, tag, flags, initial metatype offsets
+       1,    1,   20,    2, 0x0a,    1 /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Bool,    3,
@@ -64,27 +91,33 @@ static const uint qt_meta_data_ZoomMenuItem[] = {
        0        // eod
 };
 
+Q_CONSTINIT const QMetaObject ZoomMenuItem::staticMetaObject = { {
+    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
+    qt_meta_stringdata_CLASSZoomMenuItemENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSZoomMenuItemENDCLASS,
+    qt_static_metacall,
+    nullptr,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSZoomMenuItemENDCLASS_t,
+        // Q_OBJECT / Q_GADGET
+        QtPrivate::TypeAndForceComplete<ZoomMenuItem, std::true_type>,
+        // method 'toggled'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>
+    >,
+    nullptr
+} };
+
 void ZoomMenuItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         auto *_t = static_cast<ZoomMenuItem *>(_o);
         (void)_t;
         switch (_id) {
-        case 0: _t->toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 0: _t->toggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
         default: ;
         }
     }
 }
-
-QT_INIT_METAOBJECT const QMetaObject ZoomMenuItem::staticMetaObject = { {
-    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
-    qt_meta_stringdata_ZoomMenuItem.data,
-    qt_meta_data_ZoomMenuItem,
-    qt_static_metacall,
-    nullptr,
-    nullptr
-} };
-
 
 const QMetaObject *ZoomMenuItem::metaObject() const
 {
@@ -94,7 +127,7 @@ const QMetaObject *ZoomMenuItem::metaObject() const
 void *ZoomMenuItem::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ZoomMenuItem.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSZoomMenuItemENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return QObject::qt_metacast(_clname);
 }
@@ -110,10 +143,9 @@ int ZoomMenuItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 1;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 1)
-            *reinterpret_cast<int*>(_a[0]) = -1;
+            *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
         _id -= 1;
     }
     return _id;
 }
 QT_WARNING_POP
-QT_END_MOC_NAMESPACE

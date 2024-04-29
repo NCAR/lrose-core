@@ -1074,6 +1074,8 @@ paramdef int {
 
 paramdef int {
   p_default = 75;
+  p_min = 30;
+  p_max = 9999;
   p_descr = "Set the dwell of the movie loop (msec dwell per frame).";
   p_help = "";
 } movie_dwell_msecs;
