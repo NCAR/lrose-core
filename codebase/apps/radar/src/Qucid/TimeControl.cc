@@ -224,7 +224,7 @@ void TimeControl::populateGui()
   
   // fwd and back buttons
 
-  QString buttonStyle("padding: 2px 4px 2px 4px; "
+  QString buttonStyle("padding: 2px 6px 2px 6px; "
                       "background-color: seagreen;");
   
   QFrame *backButtonFrame = new QFrame(timeLower);
