@@ -296,7 +296,7 @@ void TimeControl::populateGui()
   _frameIntervalSelector->setMinimum(1.0);
   _frameIntervalSelector->setMaximum(_params.max_frame_interval_secs);
   _frameIntervalSelector->setDecimals(0);
-  _frameIntervalSelector->setPrefix("Frame interval (secs): ");
+  _frameIntervalSelector->setPrefix("Interval (secs): ");
   _frameIntervalSelector->setValue(_frameIntervalSecs);
 #if QT_VERSION >= 0x067000
   connect(_frameIntervalSelector, &QDoubleSpinBox::valueChanged,
