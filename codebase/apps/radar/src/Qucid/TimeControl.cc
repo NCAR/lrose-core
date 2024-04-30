@@ -241,41 +241,57 @@ void TimeControl::populateGui()
   QString buttonStyle("padding: 2px 4px 2px 4px; "
                       "background-color: seagreen;");
   
-  _back1 = new QPushButton(timeLower);
+  QFrame *backButtonFrame = new QFrame(timeLower);
+  QHBoxLayout *backButtonFrameLayout = new QHBoxLayout;
+  backButtonFrame->setLayout(backButtonFrameLayout);
+  
+  _back1 = new QPushButton(backButtonFrame);
   _back1->setText("<");
   connect(_back1, &QPushButton::clicked, this, &TimeControl::_goBack1);
   _back1->setToolTip("Go back by 1 frame");
   _back1->setStyleSheet(buttonStyle);
 
-  _fwd1 = new QPushButton(timeLower);
-  _fwd1->setText(">");
-  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::_goFwd1);
-  _fwd1->setToolTip("Go forward by 1 frame");
-  _fwd1->setStyleSheet(buttonStyle);
-    
-  _backDuration = new QPushButton(timeLower);
+  _backDuration = new QPushButton(backButtonFrame);
   _backDuration->setText("<<");
   connect(_backDuration, &QPushButton::clicked, this, &TimeControl::_goBackDuration);
   _backDuration->setToolTip("Go back by 1 movie duration");
   _backDuration->setStyleSheet(buttonStyle);
   
-  _fwdDuration = new QPushButton(timeLower);
-  _fwdDuration->setText(">>");
-  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_goFwdDuration);
-  _fwdDuration->setToolTip("Go forward by 1 movie duration");
-  _fwdDuration->setStyleSheet(buttonStyle);
-
-  _backMult = new QPushButton(timeLower);
+  _backMult = new QPushButton(backButtonFrame);
   _backMult->setText("<<<");
   connect(_backMult, &QPushButton::clicked, this, &TimeControl::_goBackMult);
   _backMult->setToolTip("Go back by 6 movie durations");
   _backMult->setStyleSheet(buttonStyle);
   
-  _fwdMult = new QPushButton(timeLower);
+  backButtonFrameLayout->addWidget(_backMult, 0, Qt::AlignLeft);
+  backButtonFrameLayout->addWidget(_backDuration, 0, Qt::AlignLeft);
+  backButtonFrameLayout->addWidget(_back1, 0, Qt::AlignLeft);
+
+  QFrame *fwdButtonFrame = new QFrame(timeLower);
+  QHBoxLayout *fwdButtonFrameLayout = new QHBoxLayout;
+  fwdButtonFrame->setLayout(fwdButtonFrameLayout);
+  
+  _fwd1 = new QPushButton(fwdButtonFrame);
+  _fwd1->setText(">");
+  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::_goFwd1);
+  _fwd1->setToolTip("Go forward by 1 frame");
+  _fwd1->setStyleSheet(buttonStyle);
+    
+  _fwdDuration = new QPushButton(fwdButtonFrame);
+  _fwdDuration->setText(">>");
+  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_goFwdDuration);
+  _fwdDuration->setToolTip("Go forward by 1 movie duration");
+  _fwdDuration->setStyleSheet(buttonStyle);
+
+  _fwdMult = new QPushButton(fwdButtonFrame);
   _fwdMult->setText(">>>");
   connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::_goFwdMult);
   _fwdMult->setToolTip("Go forward by 6 movie durations");
   _fwdMult->setStyleSheet(buttonStyle);
+
+  fwdButtonFrameLayout->addWidget(_fwd1, 0, Qt::AlignRight);
+  fwdButtonFrameLayout->addWidget(_fwdDuration, 0, Qt::AlignRight);
+  fwdButtonFrameLayout->addWidget(_fwdMult, 0, Qt::AlignRight);
 
   // nframes and frame interval
 
@@ -284,6 +300,7 @@ void TimeControl::populateGui()
   _nFramesSelector->setMaximum(999);
   _nFramesSelector->setPrefix("N frames: ");
   _nFramesSelector->setValue(_nFramesMovie);
+  _nFramesSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_nFramesSelector, &QSpinBox::valueChanged,
           this, &TimeControl::_timeSliderSetNFrames);
@@ -298,6 +315,7 @@ void TimeControl::populateGui()
   _frameIntervalSelector->setDecimals(0);
   _frameIntervalSelector->setPrefix("Interval (secs): ");
   _frameIntervalSelector->setValue(_frameIntervalSecs);
+  _frameIntervalSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_frameIntervalSelector, &QDoubleSpinBox::valueChanged,
           this, &TimeControl::_setFrameIntervalSecs);
@@ -311,8 +329,8 @@ void TimeControl::populateGui()
   QFrame *acceptCancelFrame = new QFrame(timeUpper);
   QVBoxLayout *acceptCancelFrameLayout = new QVBoxLayout;
   acceptCancelFrame->setLayout(acceptCancelFrameLayout);
-  acceptCancelFrameLayout->setSpacing(0);
-  acceptCancelFrameLayout->setContentsMargins(0, 0, 0, 0);
+  acceptCancelFrameLayout->setSpacing(5);
+  acceptCancelFrameLayout->setContentsMargins(5, 5, 5, 5);
   
   QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
   acceptButton->setText("Accept");
@@ -320,7 +338,7 @@ void TimeControl::populateGui()
           &TimeControl::_acceptGuiSelections);
   acceptButton->setToolTip("Accept the selection");
   acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: darkgreen;");
+                              "background-color: seagreen;");
   
   QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
   cancelButton->setText("Cancel");
@@ -328,7 +346,7 @@ void TimeControl::populateGui()
           &TimeControl::_cancelGuiSelections);
   cancelButton->setToolTip("Cancel the selection");
   cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: darkred;");
+                              "background-color: red;");
 
   acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
   acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
@@ -347,7 +365,7 @@ void TimeControl::populateGui()
           &TimeControl::_startMovie);
   startButton->setToolTip("Start the movie");
   startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                             "background-color: darkgreen;");
+                             "background-color: seagreen;");
   
   QPushButton *stopButton = new QPushButton(startStopFrame);
   stopButton->setText("Stop");
@@ -355,19 +373,19 @@ void TimeControl::populateGui()
           &TimeControl::_stopMovie);
   stopButton->setToolTip("Stop the movie");
   stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                            "background-color: darkred;");
+                            "background-color: red;");
 
-  QPushButton *outputButton = new QPushButton(startStopFrame);
+  QPushButton *outputButton = new QPushButton(timeLower);
   outputButton->setText("Output Loop");
   connect(outputButton, &QPushButton::clicked, this,
           &TimeControl::_outputMovieLoop);
   outputButton->setToolTip("Output movie loop to file");
   outputButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: cyan;");
+                              "background-color: white;");
   
   startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
   startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
-  startStopFrameLayout->addWidget(outputButton, 0, Qt::AlignTop);
+  // startStopFrameLayout->addWidget(outputButton, 0, Qt::AlignTop);
 
   // realtime?
 
@@ -502,18 +520,21 @@ void TimeControl::populateGui()
   timeUpperLayout->addWidget(loopDelayFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignRight);
   
-  timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_nFramesSelector, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_frameIntervalSelector, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(outputButton, 0, Qt::AlignLeft);
+  timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
+  // timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
+  // timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
+  // timeLowerLayout->addWidget(_back1, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_nFramesSelector, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_frameIntervalSelector, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
+  // timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignRight);
+  // timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignRight);
+  // timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignRight);
 
   // connect signals and slots
   
