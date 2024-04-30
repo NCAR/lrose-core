@@ -2333,7 +2333,7 @@
     tt->descr = tdrpStrDup("Set the delay at the end of the movie loop in (msec).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &loop_delay_msecs - &_start_;
-    tt->single_val.i = 3000;
+    tt->single_val.i = 2000;
     tt++;
     
     // Parameter 'movie_dwell_msecs'

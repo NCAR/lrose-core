@@ -171,6 +171,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   QCheckBox *_sweepSelector;
 
   QSpinBox *_loopDwellSelector;
+  QSpinBox *_loopDelaySelector;
   
   // gui selections before 'accept'
   
@@ -228,6 +229,7 @@ class DLL_EXPORT TimeControl : public QDialog {
 #endif
 
   void _setLoopDwellMsecs(int val);
+  void _setLoopDelayMsecs(int val);
 
 };
 

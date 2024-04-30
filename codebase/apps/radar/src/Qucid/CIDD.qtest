@@ -455,7 +455,7 @@ cidd.complex_command_timeout_secs: 180
 cidd.movie_on: 0
 
 # Set the delay at the end of the movie loop in msec 
-cidd.movie_delay: 3000
+cidd.movie_delay: 2000
 
 # Set the speed of the movie loop. - (msec per frame)
 cidd.movie_speed_msec: 75

@@ -71,6 +71,7 @@ TimeControl::TimeControl(CartManager *parent,
   _realtimeSelector = NULL;
   _sweepSelector = NULL;
   _loopDwellSelector = NULL;
+  _loopDelaySelector = NULL;
   
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
@@ -365,7 +366,7 @@ void TimeControl::populateGui()
   QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
   realtimeFrame->setLayout(realtimeFrameLayout);
   realtimeFrameLayout->setSpacing(2);
-  realtimeFrameLayout->setContentsMargins(2, 2, 2, 2);
+  realtimeFrameLayout->setContentsMargins(5, 2, 5, 2);
   // realtimeFrame->setLineWidth(1);
   // realtimeFrame->setFrameStyle(QFrame::Box);
 
@@ -395,7 +396,7 @@ void TimeControl::populateGui()
   QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
   sweepFrame->setLayout(sweepFrameLayout);
   sweepFrameLayout->setSpacing(2);
-  sweepFrameLayout->setContentsMargins(2, 2, 2, 2);
+  sweepFrameLayout->setContentsMargins(5, 2, 5, 2);
   // sweepFrame->setLineWidth(1);
   // sweepFrame->setFrameStyle(QFrame::Box);
 
@@ -424,10 +425,10 @@ void TimeControl::populateGui()
   QFrame *loopDwellFrame = new QFrame(timeUpper);
   QVBoxLayout *loopDwellFrameLayout = new QVBoxLayout;
   loopDwellFrameLayout->setSpacing(2);
-  loopDwellFrameLayout->setContentsMargins(2, 2, 2, 2);
+  loopDwellFrameLayout->setContentsMargins(5, 2, 5, 2);
   loopDwellFrame->setLayout(loopDwellFrameLayout);
-  loopDwellFrame->setLineWidth(1);
-  loopDwellFrame->setFrameStyle(QFrame::Box);
+  // loopDwellFrame->setLineWidth(1);
+  // loopDwellFrame->setFrameStyle(QFrame::Box);
   // loopDwellFrame->setStyleSheet("border: 1px solid black; "
   //                               "padding: 2px 2px 2px 2px; "
   //                               "background-color: lightgray;");
@@ -438,7 +439,7 @@ void TimeControl::populateGui()
 
   _loopDwellSelector = new QSpinBox(loopDwellFrame);
   _loopDwellSelector->setMinimum(_params.movie_min_dwell_msecs);
-  _loopDwellSelector->setMaximum(9999);
+  _loopDwellSelector->setMaximum(_params.movie_max_dwell_msecs);
   _loopDwellSelector->setValue(_loopDwellMsecs);
 #if QT_VERSION >= 0x067000
   connect(_loopDwellSelector, &QSpinBox::valueChanged,
@@ -451,6 +452,35 @@ void TimeControl::populateGui()
   loopDwellFrameLayout->addWidget(loopDwellTitle, 0, Qt::AlignTop);
   loopDwellFrameLayout->addWidget(_loopDwellSelector, 0, Qt::AlignTop);
   
+  // loop delay (msecs)
+  
+  QFrame *loopDelayFrame = new QFrame(timeUpper);
+  QVBoxLayout *loopDelayFrameLayout = new QVBoxLayout;
+  loopDelayFrameLayout->setSpacing(2);
+  loopDelayFrameLayout->setContentsMargins(5, 2, 5, 2);
+  loopDelayFrame->setLayout(loopDelayFrameLayout);
+  // loopDelayFrame->setLineWidth(1);
+  // loopDelayFrame->setFrameStyle(QFrame::Box);
+  
+  QLabel *loopDelayTitle = new QLabel(loopDelayFrame);
+  loopDelayTitle->setText("Delay (msecs)");
+  loopDelayTitle->setAlignment(Qt::AlignHCenter);
+
+  _loopDelaySelector = new QSpinBox(loopDelayFrame);
+  _loopDelaySelector->setMinimum(0);
+  _loopDelaySelector->setMaximum(9999);
+  _loopDelaySelector->setValue(_loopDelayMsecs);
+#if QT_VERSION >= 0x067000
+  connect(_loopDelaySelector, &QSpinBox::valueChanged,
+          this, &TimeControl::_setLoopDelayMsecs);
+#else
+  connect(_loopDelaySelector, SIGNAL(valueChanged(int)),
+          this, SLOT(_setLoopDelayMsecs(int)));
+#endif
+  
+  loopDelayFrameLayout->addWidget(loopDelayTitle, 0, Qt::AlignTop);
+  loopDelayFrameLayout->addWidget(_loopDelaySelector, 0, Qt::AlignTop);
+  
   // add widgets to layouts
   
   int stretch = 0;
@@ -460,6 +490,7 @@ void TimeControl::populateGui()
   timeUpperLayout->addWidget(sweepFrame, stretch,
                              Qt::AlignLeft | Qt::AlignTop);
   timeUpperLayout->addWidget(loopDwellFrame, stretch, Qt::AlignRight);
+  timeUpperLayout->addWidget(loopDelayFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(startTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(endTimeFrame, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignRight);
@@ -860,11 +891,19 @@ void TimeControl::_setSweep(int val)
 }
 #endif
 
-// loop dwell
+////////////////////////////////////////////////
+// loop dwell and delay
 
 void TimeControl::_setLoopDwellMsecs(int val) 
 {
   _loopDwellMsecs = val;
+  cerr << "_loopDwellMsecs: " << _loopDwellMsecs << endl;
+}
+
+void TimeControl::_setLoopDelayMsecs(int val) 
+{
+  _loopDelayMsecs = val;
+  cerr << "_loopDelayMsecs: " << _loopDelayMsecs << endl;
 }
 
 ////////////////////////////////////////////////////////

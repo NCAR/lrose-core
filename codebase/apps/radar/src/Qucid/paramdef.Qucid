@@ -1067,7 +1067,7 @@ paramdef boolean {
 } movie_on;
 
 paramdef int {
-  p_default = 3000;
+  p_default = 2000;
   p_descr = "Set the delay at the end of the movie loop in (msec).";
   p_help = "";
 } loop_delay_msecs;
