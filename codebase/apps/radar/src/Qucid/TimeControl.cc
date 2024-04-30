@@ -159,12 +159,12 @@ void TimeControl::populateGui()
   startTimeFrameLayout->setSpacing(0);
   startTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   startTimeFrame->setStyleSheet("border: 1px solid black; "
-                                "padding: 2px 2px 2px 2px; "
-                                "background-color: lightgray;");
+                                "padding: 2px 2px 2px 2px; ");
 
   QLabel *startTitle = new QLabel(startTimeFrame);
   startTitle->setText("Movie start time");
   startTitle->setAlignment(Qt::AlignHCenter);
+  startTitle->setStyleSheet("background-color: lightgray;");
   
   _startTimeEdit = new QDateTimeEdit(timeUpper);
   _startTimeEdit->setDisplayFormat("yyyy/mm/dd hh:mm:ss");
@@ -184,12 +184,12 @@ void TimeControl::populateGui()
   endTimeFrameLayout->setSpacing(0);
   endTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   endTimeFrame->setStyleSheet("border: 1px solid black; "
-                              "padding: 2px 2px 2px 2px; "
-                              "background-color: lightgray;");
+                              "padding: 2px 2px 2px 2px; ");
 
   QLabel *endTitle = new QLabel(endTimeFrame);
   endTitle->setText("Movie end time");
   endTitle->setAlignment(Qt::AlignHCenter);
+  endTitle->setStyleSheet("background-color: lightgray;");
 
   _endTimeLabel = new QLabel(_timePanel);
   _endTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
@@ -207,12 +207,12 @@ void TimeControl::populateGui()
   selectedTimeFrameLayout->setContentsMargins(0, 0, 0, 0);
   selectedTimeFrame->setLineWidth(1);
   selectedTimeFrame->setStyleSheet("border: 1px solid black; "
-                                   "padding: 2px 2px 2px 2px; "
-                                   "background-color: lightgray;");
+                                   "padding: 2px 2px 2px 2px; ");
 
   QLabel *selectedTitle = new QLabel(selectedTimeFrame);
   selectedTitle->setText("Selected time");
   selectedTitle->setAlignment(Qt::AlignHCenter);
+  selectedTitle->setStyleSheet("background-color: lightgray;");
 
   _selectedTimeLabel = new QLabel(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
@@ -364,8 +364,8 @@ void TimeControl::populateGui()
   QFrame *startStopFrame = new QFrame(timeUpper);
   QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
   startStopFrame->setLayout(startStopFrameLayout);
-  startStopFrameLayout->setSpacing(0);
-  startStopFrameLayout->setContentsMargins(0, 0, 0, 0);
+  startStopFrameLayout->setSpacing(5);
+  startStopFrameLayout->setContentsMargins(5, 5, 5, 5);
   
   QPushButton *startButton = new QPushButton(startStopFrame);
   startButton->setText("Start");
@@ -389,11 +389,10 @@ void TimeControl::populateGui()
           &TimeControl::_outputMovieLoop);
   outputButton->setToolTip("Output movie loop to file");
   outputButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: white;");
+                              "background-color: seagreen;");
   
   startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
   startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
-  // startStopFrameLayout->addWidget(outputButton, 0, Qt::AlignTop);
 
   // realtime?
 
@@ -430,8 +429,6 @@ void TimeControl::populateGui()
   sweepFrame->setLayout(sweepFrameLayout);
   sweepFrameLayout->setSpacing(5);
   sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
-  // sweepFrame->setLineWidth(1);
-  // sweepFrame->setFrameStyle(QFrame::Box);
 
   QLabel *sweepTitle = new QLabel(sweepFrame);
   sweepTitle->setText("Sweep?");
