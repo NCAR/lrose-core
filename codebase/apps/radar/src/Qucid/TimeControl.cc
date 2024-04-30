@@ -243,37 +243,37 @@ void TimeControl::populateGui()
   
   _back1 = new QPushButton(timeLower);
   _back1->setText("<");
-  connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
+  connect(_back1, &QPushButton::clicked, this, &TimeControl::_goBack1);
   _back1->setToolTip("Go back by 1 frame");
   _back1->setStyleSheet(buttonStyle);
 
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
-  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
+  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::_goFwd1);
   _fwd1->setToolTip("Go forward by 1 frame");
   _fwd1->setStyleSheet(buttonStyle);
     
   _backDuration = new QPushButton(timeLower);
   _backDuration->setText("<<");
-  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::goBackDuration);
+  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::_goBackDuration);
   _backDuration->setToolTip("Go back by 1 movie duration");
   _backDuration->setStyleSheet(buttonStyle);
   
   _fwdDuration = new QPushButton(timeLower);
   _fwdDuration->setText(">>");
-  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::goFwdDuration);
+  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_goFwdDuration);
   _fwdDuration->setToolTip("Go forward by 1 movie duration");
   _fwdDuration->setStyleSheet(buttonStyle);
 
   _backMult = new QPushButton(timeLower);
   _backMult->setText("<<<");
-  connect(_backMult, &QPushButton::clicked, this, &TimeControl::goBackMult);
+  connect(_backMult, &QPushButton::clicked, this, &TimeControl::_goBackMult);
   _backMult->setToolTip("Go back by 6 movie durations");
   _backMult->setStyleSheet(buttonStyle);
   
   _fwdMult = new QPushButton(timeLower);
   _fwdMult->setText(">>>");
-  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::goFwdMult);
+  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::_goFwdMult);
   _fwdMult->setToolTip("Go forward by 6 movie durations");
   _fwdMult->setStyleSheet(buttonStyle);
 
@@ -317,7 +317,7 @@ void TimeControl::populateGui()
   QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
   acceptButton->setText("Accept");
   connect(acceptButton, &QPushButton::clicked, this,
-          &TimeControl::acceptGuiSelections);
+          &TimeControl::_acceptGuiSelections);
   acceptButton->setToolTip("Accept the selection");
   acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                               "background-color: darkgreen;");
@@ -325,7 +325,7 @@ void TimeControl::populateGui()
   QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
   cancelButton->setText("Cancel");
   connect(cancelButton, &QPushButton::clicked, this,
-          &TimeControl::cancelGuiSelections);
+          &TimeControl::_cancelGuiSelections);
   cancelButton->setToolTip("Cancel the selection");
   cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                               "background-color: darkred;");
@@ -333,8 +333,8 @@ void TimeControl::populateGui()
   acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
   acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
   
-  // start stop buttons
-
+  // start/stop/output buttons
+  
   QFrame *startStopFrame = new QFrame(timeUpper);
   QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
   startStopFrame->setLayout(startStopFrameLayout);
@@ -344,7 +344,7 @@ void TimeControl::populateGui()
   QPushButton *startButton = new QPushButton(startStopFrame);
   startButton->setText("Start");
   connect(startButton, &QPushButton::clicked, this,
-          &TimeControl::startMovie);
+          &TimeControl::_startMovie);
   startButton->setToolTip("Start the movie");
   startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                              "background-color: darkgreen;");
@@ -352,13 +352,22 @@ void TimeControl::populateGui()
   QPushButton *stopButton = new QPushButton(startStopFrame);
   stopButton->setText("Stop");
   connect(stopButton, &QPushButton::clicked, this,
-          &TimeControl::stopMovie);
+          &TimeControl::_stopMovie);
   stopButton->setToolTip("Stop the movie");
   stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                             "background-color: darkred;");
 
+  QPushButton *outputButton = new QPushButton(startStopFrame);
+  outputButton->setText("Output Loop");
+  connect(outputButton, &QPushButton::clicked, this,
+          &TimeControl::_outputMovieLoop);
+  outputButton->setToolTip("Output movie loop to file");
+  outputButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                              "background-color: cyan;");
+  
   startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
   startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
+  startStopFrameLayout->addWidget(outputButton, 0, Qt::AlignTop);
 
   // realtime?
 
@@ -526,7 +535,7 @@ void TimeControl::populateGui()
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted
 
-void TimeControl::acceptGuiSelections()
+void TimeControl::_acceptGuiSelections()
 {
   _startTime = _guiStartTime;
   _endTime = _guiEndTime;
@@ -540,7 +549,7 @@ void TimeControl::acceptGuiSelections()
   setGuiFromSelections();
 }
 
-void TimeControl::cancelGuiSelections()
+void TimeControl::_cancelGuiSelections()
 {
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
@@ -554,14 +563,19 @@ void TimeControl::cancelGuiSelections()
 ////////////////////////////////////////////////////////
 // start/stop the movie
 
-void TimeControl::startMovie()
+void TimeControl::_startMovie()
 {
   cerr << "Start the movie" << endl;
 }
 
-void TimeControl::stopMovie()
+void TimeControl::_stopMovie()
 {
   cerr << "Stop the movie" << endl;
+}
+
+void TimeControl::_outputMovieLoop()
+{
+  cerr << "Output movie loop" << endl;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -682,7 +696,7 @@ void TimeControl::setEndTime(const RadxTime &rtime)
 // change start time
 // return true if retrieval is pending, false otherwise
 
-void TimeControl::goBack1()
+void TimeControl::_goBack1()
 {
   if (_guiFrameIndex <= 0) {
     _guiFrameIndex = 0;
@@ -691,28 +705,28 @@ void TimeControl::goBack1()
   }
   _timeSlider->setSliderPosition(_guiFrameIndex);
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
-void TimeControl::goBackDuration()
+void TimeControl::_goBackDuration()
 {
   int deltaSecs = _endTime - _startTime;
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
-void TimeControl::goBackMult()
+void TimeControl::_goBackMult()
 {
   int deltaSecs = (_endTime - _startTime) * 6;
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
-void TimeControl::goFwd1()
+void TimeControl::_goFwd1()
 {
   if (_guiFrameIndex < _nFramesMovie - 1) {
     _guiFrameIndex += 1;
@@ -721,25 +735,25 @@ void TimeControl::goFwd1()
   }
   _timeSlider->setSliderPosition(_guiFrameIndex);
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
-void TimeControl::goFwdDuration()
+void TimeControl::_goFwdDuration()
 {
   int deltaSecs = _endTime - _startTime;
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
-void TimeControl::goFwdMult()
+void TimeControl::_goFwdMult()
 {
   int deltaSecs = (_endTime - _startTime) * 6;
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
 void TimeControl::_timeSliderActionTriggered(int action) {
@@ -787,7 +801,7 @@ void TimeControl::_timeSliderValueChanged(int value)
   }
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -804,7 +818,7 @@ void TimeControl::_timeSliderReleased()
   }
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  acceptGuiSelections();
+  _acceptGuiSelections();
 }
 
 void TimeControl::_timeSliderPressed() 

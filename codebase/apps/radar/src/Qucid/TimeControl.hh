@@ -86,14 +86,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   virtual ~TimeControl();
 
-  // actions
-
-  void acceptGuiSelections();
-  void cancelGuiSelections();
-  
-  void startMovie();
-  void stopMovie();
-  
   // set
 
   void setStartTimeFromEdit(const QDateTime &val);
@@ -201,15 +193,24 @@ class DLL_EXPORT TimeControl : public QDialog {
                   
  public slots:
 
+  // actions
+
+  void _acceptGuiSelections();
+  void _cancelGuiSelections();
+  
+  void _startMovie();
+  void _stopMovie();
+  void _outputMovieLoop();
+  
   // move in time
   
-  void goBack1();
-  void goBackDuration();
-  void goBackMult();
+  void _goBack1();
+  void _goBackDuration();
+  void _goBackMult();
 
-  void goFwd1();
-  void goFwdDuration();
-  void goFwdMult();
+  void _goFwd1();
+  void _goFwdDuration();
+  void _goFwdMult();
 
   // time slider
   

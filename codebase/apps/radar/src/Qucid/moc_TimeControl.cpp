@@ -40,13 +40,18 @@ namespace {
 struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {};
 static constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers::stringData(
     "TimeControl",
-    "goBack1",
+    "_acceptGuiSelections",
     "",
-    "goBackDuration",
-    "goBackMult",
-    "goFwd1",
-    "goFwdDuration",
-    "goFwdMult",
+    "_cancelGuiSelections",
+    "_startMovie",
+    "_stopMovie",
+    "_outputMovieLoop",
+    "_goBack1",
+    "_goBackDuration",
+    "_goBackMult",
+    "_goFwd1",
+    "_goFwdDuration",
+    "_goFwdMult",
     "_timeSliderActionTriggered",
     "action",
     "_timeSliderValueChanged",
@@ -63,63 +68,78 @@ static constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {
-    uint offsetsAndSizes[42];
+    uint offsetsAndSizes[52];
     char stringdata0[12];
-    char stringdata1[8];
+    char stringdata1[21];
     char stringdata2[1];
-    char stringdata3[15];
-    char stringdata4[11];
-    char stringdata5[7];
-    char stringdata6[14];
-    char stringdata7[10];
-    char stringdata8[27];
-    char stringdata9[7];
-    char stringdata10[24];
-    char stringdata11[6];
-    char stringdata12[20];
-    char stringdata13[19];
-    char stringdata14[22];
-    char stringdata15[4];
-    char stringdata16[22];
-    char stringdata17[13];
-    char stringdata18[10];
-    char stringdata19[19];
-    char stringdata20[19];
+    char stringdata3[21];
+    char stringdata4[12];
+    char stringdata5[11];
+    char stringdata6[17];
+    char stringdata7[9];
+    char stringdata8[16];
+    char stringdata9[12];
+    char stringdata10[8];
+    char stringdata11[15];
+    char stringdata12[11];
+    char stringdata13[27];
+    char stringdata14[7];
+    char stringdata15[24];
+    char stringdata16[6];
+    char stringdata17[20];
+    char stringdata18[19];
+    char stringdata19[22];
+    char stringdata20[4];
+    char stringdata21[22];
+    char stringdata22[13];
+    char stringdata23[10];
+    char stringdata24[19];
+    char stringdata25[19];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSTimeControlENDCLASS_t::offsetsAndSizes) + ofs), len 
 Q_CONSTINIT static const qt_meta_stringdata_CLASSTimeControlENDCLASS_t qt_meta_stringdata_CLASSTimeControlENDCLASS = {
     {
         QT_MOC_LITERAL(0, 11),  // "TimeControl"
-        QT_MOC_LITERAL(12, 7),  // "goBack1"
-        QT_MOC_LITERAL(20, 0),  // ""
-        QT_MOC_LITERAL(21, 14),  // "goBackDuration"
-        QT_MOC_LITERAL(36, 10),  // "goBackMult"
-        QT_MOC_LITERAL(47, 6),  // "goFwd1"
-        QT_MOC_LITERAL(54, 13),  // "goFwdDuration"
-        QT_MOC_LITERAL(68, 9),  // "goFwdMult"
-        QT_MOC_LITERAL(78, 26),  // "_timeSliderActionTriggered"
-        QT_MOC_LITERAL(105, 6),  // "action"
-        QT_MOC_LITERAL(112, 23),  // "_timeSliderValueChanged"
-        QT_MOC_LITERAL(136, 5),  // "value"
-        QT_MOC_LITERAL(142, 19),  // "_timeSliderReleased"
-        QT_MOC_LITERAL(162, 18),  // "_timeSliderPressed"
-        QT_MOC_LITERAL(181, 21),  // "_timeSliderSetNFrames"
-        QT_MOC_LITERAL(203, 3),  // "val"
-        QT_MOC_LITERAL(207, 21),  // "_setFrameIntervalSecs"
-        QT_MOC_LITERAL(229, 12),  // "_setRealtime"
-        QT_MOC_LITERAL(242, 9),  // "_setSweep"
-        QT_MOC_LITERAL(252, 18),  // "_setLoopDwellMsecs"
-        QT_MOC_LITERAL(271, 18)   // "_setLoopDelayMsecs"
+        QT_MOC_LITERAL(12, 20),  // "_acceptGuiSelections"
+        QT_MOC_LITERAL(33, 0),  // ""
+        QT_MOC_LITERAL(34, 20),  // "_cancelGuiSelections"
+        QT_MOC_LITERAL(55, 11),  // "_startMovie"
+        QT_MOC_LITERAL(67, 10),  // "_stopMovie"
+        QT_MOC_LITERAL(78, 16),  // "_outputMovieLoop"
+        QT_MOC_LITERAL(95, 8),  // "_goBack1"
+        QT_MOC_LITERAL(104, 15),  // "_goBackDuration"
+        QT_MOC_LITERAL(120, 11),  // "_goBackMult"
+        QT_MOC_LITERAL(132, 7),  // "_goFwd1"
+        QT_MOC_LITERAL(140, 14),  // "_goFwdDuration"
+        QT_MOC_LITERAL(155, 10),  // "_goFwdMult"
+        QT_MOC_LITERAL(166, 26),  // "_timeSliderActionTriggered"
+        QT_MOC_LITERAL(193, 6),  // "action"
+        QT_MOC_LITERAL(200, 23),  // "_timeSliderValueChanged"
+        QT_MOC_LITERAL(224, 5),  // "value"
+        QT_MOC_LITERAL(230, 19),  // "_timeSliderReleased"
+        QT_MOC_LITERAL(250, 18),  // "_timeSliderPressed"
+        QT_MOC_LITERAL(269, 21),  // "_timeSliderSetNFrames"
+        QT_MOC_LITERAL(291, 3),  // "val"
+        QT_MOC_LITERAL(295, 21),  // "_setFrameIntervalSecs"
+        QT_MOC_LITERAL(317, 12),  // "_setRealtime"
+        QT_MOC_LITERAL(330, 9),  // "_setSweep"
+        QT_MOC_LITERAL(340, 18),  // "_setLoopDwellMsecs"
+        QT_MOC_LITERAL(359, 18)   // "_setLoopDelayMsecs"
     },
     "TimeControl",
-    "goBack1",
+    "_acceptGuiSelections",
     "",
-    "goBackDuration",
-    "goBackMult",
-    "goFwd1",
-    "goFwdDuration",
-    "goFwdMult",
+    "_cancelGuiSelections",
+    "_startMovie",
+    "_stopMovie",
+    "_outputMovieLoop",
+    "_goBack1",
+    "_goBackDuration",
+    "_goBackMult",
+    "_goFwd1",
+    "_goFwdDuration",
+    "_goFwdMult",
     "_timeSliderActionTriggered",
     "action",
     "_timeSliderValueChanged",
@@ -144,7 +164,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-      16,   14, // methods
+      21,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -152,22 +172,27 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,  110,    2, 0x0a,    1 /* Public */,
-       3,    0,  111,    2, 0x0a,    2 /* Public */,
-       4,    0,  112,    2, 0x0a,    3 /* Public */,
-       5,    0,  113,    2, 0x0a,    4 /* Public */,
-       6,    0,  114,    2, 0x0a,    5 /* Public */,
-       7,    0,  115,    2, 0x0a,    6 /* Public */,
-       8,    1,  116,    2, 0x0a,    7 /* Public */,
-      10,    1,  119,    2, 0x0a,    9 /* Public */,
-      12,    0,  122,    2, 0x0a,   11 /* Public */,
-      13,    0,  123,    2, 0x0a,   12 /* Public */,
-      14,    1,  124,    2, 0x0a,   13 /* Public */,
-      16,    1,  127,    2, 0x0a,   15 /* Public */,
-      17,    1,  130,    2, 0x0a,   17 /* Public */,
-      18,    1,  133,    2, 0x0a,   19 /* Public */,
-      19,    1,  136,    2, 0x0a,   21 /* Public */,
-      20,    1,  139,    2, 0x0a,   23 /* Public */,
+       1,    0,  140,    2, 0x0a,    1 /* Public */,
+       3,    0,  141,    2, 0x0a,    2 /* Public */,
+       4,    0,  142,    2, 0x0a,    3 /* Public */,
+       5,    0,  143,    2, 0x0a,    4 /* Public */,
+       6,    0,  144,    2, 0x0a,    5 /* Public */,
+       7,    0,  145,    2, 0x0a,    6 /* Public */,
+       8,    0,  146,    2, 0x0a,    7 /* Public */,
+       9,    0,  147,    2, 0x0a,    8 /* Public */,
+      10,    0,  148,    2, 0x0a,    9 /* Public */,
+      11,    0,  149,    2, 0x0a,   10 /* Public */,
+      12,    0,  150,    2, 0x0a,   11 /* Public */,
+      13,    1,  151,    2, 0x0a,   12 /* Public */,
+      15,    1,  154,    2, 0x0a,   14 /* Public */,
+      17,    0,  157,    2, 0x0a,   16 /* Public */,
+      18,    0,  158,    2, 0x0a,   17 /* Public */,
+      19,    1,  159,    2, 0x0a,   18 /* Public */,
+      21,    1,  162,    2, 0x0a,   20 /* Public */,
+      22,    1,  165,    2, 0x0a,   22 /* Public */,
+      23,    1,  168,    2, 0x0a,   24 /* Public */,
+      24,    1,  171,    2, 0x0a,   26 /* Public */,
+      25,    1,  174,    2, 0x0a,   28 /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -176,16 +201,21 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,    9,
-    QMetaType::Void, QMetaType::Int,   11,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   15,
-    QMetaType::Void, QMetaType::Double,   15,
-    QMetaType::Void, QMetaType::Int,   15,
-    QMetaType::Void, QMetaType::Int,   15,
-    QMetaType::Void, QMetaType::Int,   15,
-    QMetaType::Void, QMetaType::Int,   15,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   14,
+    QMetaType::Void, QMetaType::Int,   16,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   20,
+    QMetaType::Void, QMetaType::Double,   20,
+    QMetaType::Void, QMetaType::Int,   20,
+    QMetaType::Void, QMetaType::Int,   20,
+    QMetaType::Void, QMetaType::Int,   20,
+    QMetaType::Void, QMetaType::Int,   20,
 
        0        // eod
 };
@@ -199,17 +229,27 @@ Q_CONSTINIT const QMetaObject TimeControl::staticMetaObject = { {
     qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSTimeControlENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<TimeControl, std::true_type>,
-        // method 'goBack1'
+        // method '_acceptGuiSelections'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'goBackDuration'
+        // method '_cancelGuiSelections'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'goBackMult'
+        // method '_startMovie'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'goFwd1'
+        // method '_stopMovie'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'goFwdDuration'
+        // method '_outputMovieLoop'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'goFwdMult'
+        // method '_goBack1'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_goBackDuration'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_goBackMult'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_goFwd1'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_goFwdDuration'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method '_goFwdMult'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_timeSliderActionTriggered'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
@@ -249,22 +289,27 @@ void TimeControl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         auto *_t = static_cast<TimeControl *>(_o);
         (void)_t;
         switch (_id) {
-        case 0: _t->goBack1(); break;
-        case 1: _t->goBackDuration(); break;
-        case 2: _t->goBackMult(); break;
-        case 3: _t->goFwd1(); break;
-        case 4: _t->goFwdDuration(); break;
-        case 5: _t->goFwdMult(); break;
-        case 6: _t->_timeSliderActionTriggered((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 7: _t->_timeSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 8: _t->_timeSliderReleased(); break;
-        case 9: _t->_timeSliderPressed(); break;
-        case 10: _t->_timeSliderSetNFrames((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 11: _t->_setFrameIntervalSecs((*reinterpret_cast< std::add_pointer_t<double>>(_a[1]))); break;
-        case 12: _t->_setRealtime((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 13: _t->_setSweep((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 14: _t->_setLoopDwellMsecs((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 15: _t->_setLoopDelayMsecs((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 0: _t->_acceptGuiSelections(); break;
+        case 1: _t->_cancelGuiSelections(); break;
+        case 2: _t->_startMovie(); break;
+        case 3: _t->_stopMovie(); break;
+        case 4: _t->_outputMovieLoop(); break;
+        case 5: _t->_goBack1(); break;
+        case 6: _t->_goBackDuration(); break;
+        case 7: _t->_goBackMult(); break;
+        case 8: _t->_goFwd1(); break;
+        case 9: _t->_goFwdDuration(); break;
+        case 10: _t->_goFwdMult(); break;
+        case 11: _t->_timeSliderActionTriggered((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 12: _t->_timeSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 13: _t->_timeSliderReleased(); break;
+        case 14: _t->_timeSliderPressed(); break;
+        case 15: _t->_timeSliderSetNFrames((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 16: _t->_setFrameIntervalSecs((*reinterpret_cast< std::add_pointer_t<double>>(_a[1]))); break;
+        case 17: _t->_setRealtime((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 18: _t->_setSweep((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 19: _t->_setLoopDwellMsecs((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 20: _t->_setLoopDelayMsecs((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         default: ;
         }
     }
@@ -289,13 +334,13 @@ int TimeControl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 21)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 21;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 16)
+        if (_id < 21)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 16;
+        _id -= 21;
     }
     return _id;
 }

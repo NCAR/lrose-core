@@ -445,7 +445,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     }
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
-    _timeControl->goBack1();
+    _timeControl->_goBack1();
     
   } else if (key == Qt::Key_Right) {
 
@@ -454,7 +454,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     }
     _horiz->setStartOfSweep(true);
     _vert->setStartOfSweep(true);
-    _timeControl->goFwd1();
+    _timeControl->_goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
