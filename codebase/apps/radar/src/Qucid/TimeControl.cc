@@ -402,8 +402,6 @@ void TimeControl::populateGui()
   realtimeFrame->setLayout(realtimeFrameLayout);
   realtimeFrameLayout->setSpacing(5);
   realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
-  // realtimeFrame->setLineWidth(1);
-  // realtimeFrame->setFrameStyle(QFrame::Box);
 
   QLabel *realtimeTitle = new QLabel(realtimeFrame);
   realtimeTitle->setText("Realtime?");
@@ -526,17 +524,8 @@ void TimeControl::populateGui()
   
   timeLowerLayout->addWidget(outputButton, 0, Qt::AlignLeft);
   timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
-  // timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
-  // timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
-  // timeLowerLayout->addWidget(_back1, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
-  // timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignRight);
-  // timeLowerLayout->addWidget(_nFramesSelector, stretch, Qt::AlignRight);
-  // timeLowerLayout->addWidget(_frameIntervalSelector, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
-  // timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignRight);
-  // timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignRight);
-  // timeLowerLayout->addWidget(_fwdMult, stretch, Qt::AlignRight);
 
   // connect signals and slots
   
@@ -584,7 +573,7 @@ void TimeControl::_cancelGuiSelections()
 }
 
 ////////////////////////////////////////////////////////
-// start/stop the movie
+// start/stop the movie, output movie loop to file
 
 void TimeControl::_startMovie()
 {
@@ -659,7 +648,7 @@ void TimeControl::setGuiSelectedTime(const RadxTime &val)
 }
 
 ////////////////////////////////////////////////////////
-// set gui from gui times
+// set gui from selections
 
 void TimeControl::setGuiFromSelections()
 
@@ -680,7 +669,7 @@ void TimeControl::setGuiFromSelections()
 }
 
 ////////////////////////////////////////////////////////
-// set archive start time
+// set movie start time
 
 void TimeControl::setStartTime(const RadxTime &rtime)
 
@@ -698,7 +687,7 @@ void TimeControl::setStartTime(const RadxTime &rtime)
 }
 
 ////////////////////////////////////////////////////////
-// set archive end time
+// set movie end time
 
 void TimeControl::setEndTime(const RadxTime &rtime)
 
@@ -716,8 +705,9 @@ void TimeControl::setEndTime(const RadxTime &rtime)
 }
 
 ////////////////////////////////////////////////////////
-// change start time
-// return true if retrieval is pending, false otherwise
+// go back or fwd
+
+// go back by 1 frame
 
 void TimeControl::_goBack1()
 {
@@ -731,6 +721,8 @@ void TimeControl::_goBack1()
   _acceptGuiSelections();
 }
 
+// go back by movie duration
+
 void TimeControl::_goBackDuration()
 {
   int deltaSecs = _endTime - _startTime;
@@ -740,6 +732,8 @@ void TimeControl::_goBackDuration()
   _acceptGuiSelections();
 }
 
+// go back by movie duration * 6
+
 void TimeControl::_goBackMult()
 {
   int deltaSecs = (_endTime - _startTime) * 6;
@@ -748,6 +742,8 @@ void TimeControl::_goBackMult()
   _guiSelectedTime -= deltaSecs;
   _acceptGuiSelections();
 }
+
+// go fwd by 1 frame
 
 void TimeControl::_goFwd1()
 {
@@ -761,6 +757,8 @@ void TimeControl::_goFwd1()
   _acceptGuiSelections();
 }
 
+// go fwd by movie duration
+
 void TimeControl::_goFwdDuration()
 {
   int deltaSecs = _endTime - _startTime;
@@ -770,6 +768,8 @@ void TimeControl::_goFwdDuration()
   _acceptGuiSelections();
 }
 
+// go fwd by movie duration * 6
+
 void TimeControl::_goFwdMult()
 {
   int deltaSecs = (_endTime - _startTime) * 6;
@@ -778,6 +778,8 @@ void TimeControl::_goFwdMult()
   _guiSelectedTime += deltaSecs;
   _acceptGuiSelections();
 }
+
+// trap time slider trigger - no action for now
 
 void TimeControl::_timeSliderActionTriggered(int action) {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -813,6 +815,8 @@ void TimeControl::_timeSliderActionTriggered(int action) {
          << _timeSlider->value() << endl;
   }
 } 
+
+// trap change in slider position
 
 void TimeControl::_timeSliderValueChanged(int value) 
 {
@@ -852,6 +856,8 @@ void TimeControl::_timeSliderPressed()
   }
 }
 
+// set number of slider frames
+
 void TimeControl::_timeSliderSetNFrames(int val) 
 {
   _guiNFramesMovie = val;
@@ -865,6 +871,8 @@ void TimeControl::_timeSliderSetNFrames(int val)
   setGuiEndTime(_guiEndTime);
   setGuiSelectedTime(_guiSelectedTime);
 }
+
+// set frame interval
 
 void TimeControl::_setFrameIntervalSecs(double val) 
 {
