@@ -151,20 +151,6 @@ void TimeControl::populateGui()
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
   
-  // create slider
-  
-  _timeSlider = new QSlider(Qt::Horizontal);
-  _timeSlider->setFocusPolicy(Qt::StrongFocus);
-  _timeSlider->setTickPosition(QSlider::TicksBothSides);
-  _timeSlider->setTickInterval(1);
-  _timeSlider->setTracking(true);
-  _timeSlider->setSingleStep(1);
-  _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(250);
-  _timeSlider->setToolTip("Drag to change time frame");
-  _timeSlider->setMinimum(0);
-  _timeSlider->setMaximum(_nFramesMovie - 1);
-  
   // start time editor
   
   QFrame *startTimeFrame = new QFrame(timeUpper);
@@ -293,9 +279,27 @@ void TimeControl::populateGui()
   fwdButtonFrameLayout->addWidget(_fwdDuration, 0, Qt::AlignRight);
   fwdButtonFrameLayout->addWidget(_fwdMult, 0, Qt::AlignRight);
 
+  // time slider
+  
+  QFrame *timeSliderFrame = new QFrame(timeLower);
+  QHBoxLayout *timeSliderFrameLayout = new QHBoxLayout;
+  timeSliderFrame->setLayout(timeSliderFrameLayout);
+  
+  _timeSlider = new QSlider(Qt::Horizontal);
+  _timeSlider->setFocusPolicy(Qt::StrongFocus);
+  _timeSlider->setTickPosition(QSlider::TicksBothSides);
+  _timeSlider->setTickInterval(1);
+  _timeSlider->setTracking(true);
+  _timeSlider->setSingleStep(1);
+  _timeSlider->setPageStep(0);
+  _timeSlider->setFixedWidth(250);
+  _timeSlider->setToolTip("Drag to change time frame");
+  _timeSlider->setMinimum(0);
+  _timeSlider->setMaximum(_nFramesMovie - 1);
+  
   // nframes and frame interval
 
-  _nFramesSelector = new QSpinBox(timeLower);
+  _nFramesSelector = new QSpinBox(timeSliderFrame);
   _nFramesSelector->setMinimum(1);
   _nFramesSelector->setMaximum(999);
   _nFramesSelector->setPrefix("N frames: ");
@@ -309,7 +313,7 @@ void TimeControl::populateGui()
           this, SLOT(_timeSliderSetNFrames(int)));
 #endif
 
-  _frameIntervalSelector = new QDoubleSpinBox(timeLower);
+  _frameIntervalSelector = new QDoubleSpinBox(timeSliderFrame);
   _frameIntervalSelector->setMinimum(1.0);
   _frameIntervalSelector->setMaximum(_params.max_frame_interval_secs);
   _frameIntervalSelector->setDecimals(0);
@@ -323,6 +327,10 @@ void TimeControl::populateGui()
   connect(_frameIntervalSelector, SIGNAL(valueChanged(double)),
           this, SLOT(_setFrameIntervalSecs(double)));
 #endif
+
+  timeSliderFrameLayout->addWidget(_nFramesSelector, 0, Qt::AlignLeft);
+  timeSliderFrameLayout->addWidget(_timeSlider, 0, Qt::AlignCenter);
+  timeSliderFrameLayout->addWidget(_frameIntervalSelector, 0, Qt::AlignRight);
 
   // accept cancel buttons
 
@@ -392,8 +400,8 @@ void TimeControl::populateGui()
   QFrame *realtimeFrame = new QFrame(timeUpper);
   QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
   realtimeFrame->setLayout(realtimeFrameLayout);
-  realtimeFrameLayout->setSpacing(2);
-  realtimeFrameLayout->setContentsMargins(5, 2, 5, 2);
+  realtimeFrameLayout->setSpacing(5);
+  realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
   // realtimeFrame->setLineWidth(1);
   // realtimeFrame->setFrameStyle(QFrame::Box);
 
@@ -422,8 +430,8 @@ void TimeControl::populateGui()
   QFrame *sweepFrame = new QFrame(timeUpper);
   QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
   sweepFrame->setLayout(sweepFrameLayout);
-  sweepFrameLayout->setSpacing(2);
-  sweepFrameLayout->setContentsMargins(5, 2, 5, 2);
+  sweepFrameLayout->setSpacing(5);
+  sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
   // sweepFrame->setLineWidth(1);
   // sweepFrame->setFrameStyle(QFrame::Box);
 
@@ -454,11 +462,6 @@ void TimeControl::populateGui()
   loopDwellFrameLayout->setSpacing(2);
   loopDwellFrameLayout->setContentsMargins(5, 2, 5, 2);
   loopDwellFrame->setLayout(loopDwellFrameLayout);
-  // loopDwellFrame->setLineWidth(1);
-  // loopDwellFrame->setFrameStyle(QFrame::Box);
-  // loopDwellFrame->setStyleSheet("border: 1px solid black; "
-  //                               "padding: 2px 2px 2px 2px; "
-  //                               "background-color: lightgray;");
   
   QLabel *loopDwellTitle = new QLabel(loopDwellFrame);
   loopDwellTitle->setText("Dwell (msecs)");
@@ -486,8 +489,6 @@ void TimeControl::populateGui()
   loopDelayFrameLayout->setSpacing(2);
   loopDelayFrameLayout->setContentsMargins(5, 2, 5, 2);
   loopDelayFrame->setLayout(loopDelayFrameLayout);
-  // loopDelayFrame->setLineWidth(1);
-  // loopDelayFrame->setFrameStyle(QFrame::Box);
   
   QLabel *loopDelayTitle = new QLabel(loopDelayFrame);
   loopDelayTitle->setText("Delay (msecs)");
@@ -528,9 +529,10 @@ void TimeControl::populateGui()
   // timeLowerLayout->addWidget(_backMult, stretch, Qt::AlignLeft);
   // timeLowerLayout->addWidget(_backDuration, stretch, Qt::AlignLeft);
   // timeLowerLayout->addWidget(_back1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_nFramesSelector, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_frameIntervalSelector, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
+  // timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignRight);
+  // timeLowerLayout->addWidget(_nFramesSelector, stretch, Qt::AlignRight);
+  // timeLowerLayout->addWidget(_frameIntervalSelector, stretch, Qt::AlignRight);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
   // timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignRight);
   // timeLowerLayout->addWidget(_fwdDuration, stretch, Qt::AlignRight);
