@@ -131,7 +131,8 @@ void TimeControl::populateGui()
   timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
   _timeLayout = new QVBoxLayout;
   _timePanel->setLayout(_timeLayout);
-
+  _timePanel->setStyleSheet("font: bold 10px;");
+  
   // upper section
   
   QFrame *timeUpper = new QFrame(_timePanel);
@@ -292,7 +293,7 @@ void TimeControl::populateGui()
   _timeSlider->setTracking(true);
   _timeSlider->setSingleStep(1);
   _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(250);
+  _timeSlider->setFixedWidth(200);
   _timeSlider->setToolTip("Drag to change time frame");
   _timeSlider->setMinimum(0);
   _timeSlider->setMaximum(_nFramesMovie - 1);
