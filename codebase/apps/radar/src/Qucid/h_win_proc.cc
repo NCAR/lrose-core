@@ -32,9 +32,8 @@
 
 #include "cidd.h"
 
-void show_xsect_panel( u_int value); // forward decleration
-
 #ifdef NOTNOW
+
 /*************************************************************************
  * Notify callback function for `im_cache_st'.
  */
@@ -53,10 +52,11 @@ void set_height_label()
 #ifdef NOTNOW
    const char *label = NULL;
    label = height_label();
-#endif
    // xv_set(gd.h_win_horiz_bw->cur_ht_msg, PANEL_LABEL_STRING, label, NULL);
+#endif
 }
 
+#ifdef NOTNOW2
 /*************************************************************************
  * SHOW_CMD_MENU
  */
@@ -193,7 +193,7 @@ void show_dpd_menu(u_int value)
         //        NULL);
    }
 }
- 
+
 /*************************************************************************
  * SHOW_VIEW_MENU
  */
@@ -265,7 +265,6 @@ void show_view_menu(u_int value)
 }
  
 
-
 /*************************************************************************
  * SHOW_DPD_PANEL
  */
@@ -335,6 +334,8 @@ void show_dpd_panel( u_int value)
         //        NULL);
   }
 }
+
+#endif
 
 /*************************************************************************
  * SET_ROUTE_MODE: Enable the Flight/ Cross Section mode - CIDD uses left
@@ -410,20 +411,20 @@ void set_pick_export_mode( u_int value)
 	memcpy(&gd.h_win.route,&rt,sizeof(route_track_t));
 
     }
-
-	// Make sure the Route Button is up.
-	// if(gd.menu_bar.set_route_mode_bit != 0) {
-	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	//   // xv_set(gd.h_win_horiz_bw->main_st,
-	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	// }
-	
-	// // Make sure the Draw Button is up.
-	// if(gd.menu_bar.set_draw_mode_bit != 0) {
-	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
-	//   // xv_set(gd.h_win_horiz_bw->main_st,
-	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	// }
+    
+    // Make sure the Route Button is up.
+    // if(gd.menu_bar.set_route_mode_bit != 0) {
+    //   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
+    //   // xv_set(gd.h_win_horiz_bw->main_st,
+    //   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+    // }
+    
+    // // Make sure the Draw Button is up.
+    // if(gd.menu_bar.set_draw_mode_bit != 0) {
+    //   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
+    //   // xv_set(gd.h_win_horiz_bw->main_st,
+    //   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+    // }
 }
 
 /*************************************************************************
@@ -457,22 +458,23 @@ void set_draw_export_mode( u_int value)
 
     }
 
-	// Make sure the Route Button is up.
-	// if(gd.menu_bar.set_route_mode_bit != 0) {
-	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	//   // xv_set(gd.h_win_horiz_bw->main_st,
-	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	// }
-	
-	// // Make sure the Pick Button is up.
-	// if(gd.menu_bar.set_pick_mode_bit != 0) {
-	//   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
-	//   // xv_set(gd.h_win_horiz_bw->main_st,
-	//   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
-	// }
+    // Make sure the Route Button is up.
+    // if(gd.menu_bar.set_route_mode_bit != 0) {
+    //   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
+    //   // xv_set(gd.h_win_horiz_bw->main_st,
+    //   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+    // }
+    
+    // // Make sure the Pick Button is up.
+    // if(gd.menu_bar.set_pick_mode_bit != 0) {
+    //   gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
+    //   // xv_set(gd.h_win_horiz_bw->main_st,
+    //   //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+    // }
 }
 
 
+#ifdef NOTNOW2
 /*************************************************************************
  * SHOW_DRAW_PANEL
  */
@@ -907,6 +909,8 @@ void show_bookmk_menu( u_int value)
       }
 }
 
+#endif
+
 /*************************************************************************
  * SHOW_XSECT_PANEL
  */
@@ -991,6 +995,8 @@ void show_xsect_panel( u_int value)
     }
     set_redraw_flags(1,1);
 }
+
+#ifdef NOTNOW2
 
 /*************************************************************************
  * SHOW_TIME_PANEL
@@ -1167,6 +1173,8 @@ void show_grid_panel( u_int value)
          //       NULL);
     }
 }
+
+#endif
 
 /*************************************************************************
  * This toggles on or off the automatic report mode 
