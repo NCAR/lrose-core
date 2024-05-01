@@ -132,25 +132,25 @@ void TimeControl::populateGui()
   _timeLayout = new QVBoxLayout;
   _timePanel->setLayout(_timeLayout);
   _timePanel->setStyleSheet("font: bold 10px;"
-                            "padding: 1px 1px 1px 1px;");
+                            /* "padding: 1px 1px 1px 1px;" */);
   
   // upper section
   
   QFrame *timeUpper = new QFrame(_timePanel);
   QHBoxLayout *timeUpperLayout = new QHBoxLayout;
-  timeUpperLayout->setSpacing(0);
+  timeUpperLayout->setSpacing(3);
   timeUpperLayout->setContentsMargins(0, 0, 0, 0);
   timeUpper->setLayout(timeUpperLayout);
-  timeUpper->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
+  // timeUpper->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
 
   // lower section
   
   QFrame *timeLower = new QFrame(_timePanel);
   QHBoxLayout *timeLowerLayout = new QHBoxLayout;
   timeLower->setLayout(timeLowerLayout);
-  timeLowerLayout->setSpacing(0);
+  timeLowerLayout->setSpacing(3);
   timeLowerLayout->setContentsMargins(0, 0, 0, 0);
-  timeLower->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
+  // timeLower->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
   
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
@@ -191,6 +191,7 @@ void TimeControl::populateGui()
   QFrame *realtimeFrame = new QFrame(timeUpper);
   QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
   realtimeFrame->setLayout(realtimeFrameLayout);
+  realtimeFrame->setStyleSheet("background-color: lightgray;");
   realtimeFrameLayout->setSpacing(5);
   realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
   
@@ -222,6 +223,7 @@ void TimeControl::populateGui()
   sweepFrame->setLayout(sweepFrameLayout);
   sweepFrameLayout->setSpacing(5);
   sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
+  sweepFrame->setStyleSheet("background-color: lightgray;");
 
   QLabel *sweepTitle = new QLabel(sweepFrame);
   sweepTitle->setText("Sweep?");
@@ -404,28 +406,29 @@ void TimeControl::populateGui()
   QFrame *outputLoopFrame = new QFrame(timeUpper);
   QVBoxLayout *outputLoopFrameLayout = new QVBoxLayout;
   outputLoopFrame->setLayout(outputLoopFrameLayout);
-  outputLoopFrameLayout->setSpacing(0);
-  outputLoopFrameLayout->setContentsMargins(0, 0, 0, 0);
-
+  outputLoopFrameLayout->setSpacing(2);
+  outputLoopFrameLayout->setContentsMargins(2, 2, 2, 2);
+  
   QPushButton *outputButton = new QPushButton(timeLower);
   outputButton->setText("Output Loop");
   connect(outputButton, &QPushButton::clicked, this,
           &TimeControl::_outputMovieLoop);
   outputButton->setToolTip("Output movie loop to file");
-  outputButton->setStyleSheet("padding: 0px 0px 0px 0px; "
+  outputButton->setStyleSheet("padding: 3px 6px 3px 6px; "
                               "background-color: seagreen;");
-
+  
   outputLoopFrameLayout->addWidget(outputButton, 0, Qt::AlignLeft);
   
   // fwd and back buttons
   
-  QString buttonStyle("padding: 2px 2px 2px 2px; "
+  QString buttonStyle("padding: 3px 6px 3px 6px; "
                       "background-color: seagreen;");
   
   QFrame *backButtonFrame = new QFrame(timeLower);
-  backButtonFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *backButtonFrameLayout = new QHBoxLayout;
   backButtonFrame->setLayout(backButtonFrameLayout);
+  backButtonFrameLayout->setSpacing(3);
+  backButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
   
   _back1 = new QPushButton(backButtonFrame);
   _back1->setText("<");
@@ -450,9 +453,10 @@ void TimeControl::populateGui()
   backButtonFrameLayout->addWidget(_back1, 0, Qt::AlignLeft);
 
   QFrame *fwdButtonFrame = new QFrame(timeLower);
-  fwdButtonFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *fwdButtonFrameLayout = new QHBoxLayout;
   fwdButtonFrame->setLayout(fwdButtonFrameLayout);
+  fwdButtonFrameLayout->setSpacing(3);
+  fwdButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
   
   _fwd1 = new QPushButton(fwdButtonFrame);
   _fwd1->setText(">");
@@ -479,11 +483,11 @@ void TimeControl::populateGui()
   // time slider
   
   QFrame *timeSliderFrame = new QFrame(timeLower);
-  timeSliderFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *timeSliderFrameLayout = new QHBoxLayout;
+  timeSliderFrameLayout->setSpacing(2);
+  timeSliderFrameLayout->setContentsMargins(2, 2, 2, 2);
   timeSliderFrame->setLayout(timeSliderFrameLayout);
-  timeSliderFrame->setStyleSheet("border: 1px solid black; "
-                                 "padding: 0px 0px 0px 0px; ");
+  // timeSliderFrame->setStyleSheet("border: 1px solid black; ");
   
   _timeSlider = new QSlider(Qt::Horizontal);
   _timeSlider->setFocusPolicy(Qt::StrongFocus);
@@ -528,6 +532,20 @@ void TimeControl::populateGui()
           this, SLOT(_setFrameIntervalSecs(double)));
 #endif
 
+  // connect signals and slots
+  
+  connect(_timeSlider, &QSlider::actionTriggered,
+          this, &TimeControl::_timeSliderActionTriggered);
+  
+  connect(_timeSlider, &QSlider::valueChanged,
+          this, &TimeControl::_timeSliderValueChanged);
+  
+  connect(_timeSlider, &QSlider::sliderReleased,
+          this, &TimeControl::_timeSliderReleased);
+  
+  connect(_timeSlider, &QSlider::sliderPressed,
+          this, &TimeControl::_timeSliderPressed);
+  
   timeSliderFrameLayout->addWidget(_nFramesSelector, 0, Qt::AlignLeft);
   timeSliderFrameLayout->addWidget(_timeSlider, 0, Qt::AlignCenter);
   timeSliderFrameLayout->addWidget(_frameIntervalSelector, 0, Qt::AlignRight);
@@ -551,20 +569,6 @@ void TimeControl::populateGui()
   timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
-
-  // connect signals and slots
-  
-  connect(_timeSlider, &QSlider::actionTriggered,
-          this, &TimeControl::_timeSliderActionTriggered);
-  
-  connect(_timeSlider, &QSlider::valueChanged,
-          this, &TimeControl::_timeSliderValueChanged);
-  
-  connect(_timeSlider, &QSlider::sliderReleased,
-          this, &TimeControl::_timeSliderReleased);
-  
-  connect(_timeSlider, &QSlider::sliderPressed,
-          this, &TimeControl::_timeSliderPressed);
   
 }
 
