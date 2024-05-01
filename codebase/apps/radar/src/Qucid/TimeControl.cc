@@ -131,7 +131,8 @@ void TimeControl::populateGui()
   timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
   _timeLayout = new QVBoxLayout;
   _timePanel->setLayout(_timeLayout);
-  _timePanel->setStyleSheet("font: bold 10px;");
+  _timePanel->setStyleSheet("font: bold 10px;"
+                            "padding: 1px 1px 1px 1px;");
   
   // upper section
   
@@ -140,6 +141,7 @@ void TimeControl::populateGui()
   timeUpperLayout->setSpacing(0);
   timeUpperLayout->setContentsMargins(0, 0, 0, 0);
   timeUpper->setLayout(timeUpperLayout);
+  timeUpper->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
 
   // lower section
   
@@ -148,9 +150,152 @@ void TimeControl::populateGui()
   timeLower->setLayout(timeLowerLayout);
   timeLowerLayout->setSpacing(0);
   timeLowerLayout->setContentsMargins(0, 0, 0, 0);
+  timeLower->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
   
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
+  
+  //////////////////////////////////////////////////////////////////////
+  // upper panel contents
+  //////////////////////////////////////////////////////////////////////
+
+  // start/stop buttons
+  
+  QFrame *startStopFrame = new QFrame(timeUpper);
+  QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
+  startStopFrame->setLayout(startStopFrameLayout);
+  startStopFrameLayout->setSpacing(2);
+  startStopFrameLayout->setContentsMargins(2, 2, 2, 2);
+  
+  QPushButton *startButton = new QPushButton(startStopFrame);
+  startButton->setText("Start");
+  connect(startButton, &QPushButton::clicked, this,
+          &TimeControl::_startMovie);
+  startButton->setToolTip("Start the movie");
+  startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                             "background-color: seagreen;");
+  
+  QPushButton *stopButton = new QPushButton(startStopFrame);
+  stopButton->setText("Stop");
+  connect(stopButton, &QPushButton::clicked, this,
+          &TimeControl::_stopMovie);
+  stopButton->setToolTip("Stop the movie");
+  stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                            "background-color: red;");
+
+  startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
+  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
+
+  // realtime?
+
+  QFrame *realtimeFrame = new QFrame(timeUpper);
+  QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
+  realtimeFrame->setLayout(realtimeFrameLayout);
+  realtimeFrameLayout->setSpacing(5);
+  realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
+  
+  QLabel *realtimeTitle = new QLabel(realtimeFrame);
+  realtimeTitle->setText("Realtime?");
+  realtimeTitle->setAlignment(Qt::AlignHCenter);
+
+  _realtimeSelector = new QCheckBox(realtimeFrame);
+  _realtimeSelector->setChecked(_isRealtime);
+  _parent->setArchiveMode(!_isRealtime);
+
+  realtimeFrameLayout->addWidget(realtimeTitle, 0,
+                                 Qt::AlignTop | Qt::AlignCenter);
+  realtimeFrameLayout->addWidget(_realtimeSelector, 0,
+                                 Qt::AlignBottom | Qt::AlignCenter);
+  
+#if QT_VERSION >= 0x067000
+  connect(_realtimeSelector, &QCheckBox::checkStateChanged, this,
+          &TimeControl::_setRealtime);
+#else
+  connect(_realtimeSelector, &QCheckBox::stateChanged, this,
+          &TimeControl::_setRealtime);
+#endif
+  
+  // sweep?
+
+  QFrame *sweepFrame = new QFrame(timeUpper);
+  QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
+  sweepFrame->setLayout(sweepFrameLayout);
+  sweepFrameLayout->setSpacing(5);
+  sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
+
+  QLabel *sweepTitle = new QLabel(sweepFrame);
+  sweepTitle->setText("Sweep?");
+  sweepTitle->setAlignment(Qt::AlignHCenter);
+
+  _sweepSelector = new QCheckBox(sweepFrame);
+  _sweepSelector->setChecked(_isSweep);
+  
+  sweepFrameLayout->addWidget(sweepTitle, 0,
+                              Qt::AlignTop | Qt::AlignCenter);
+  sweepFrameLayout->addWidget(_sweepSelector, 0,
+                              Qt::AlignBottom | Qt::AlignCenter);
+  
+#if QT_VERSION >= 0x067000
+  connect(_sweepSelector, &QCheckBox::checkStateChanged, this,
+          &TimeControl::_setSweep);
+#else
+  connect(_sweepSelector, &QCheckBox::stateChanged, this,
+          &TimeControl::_setSweep);
+#endif
+  
+  // loop dwell (msecs)
+  
+  QFrame *loopDwellFrame = new QFrame(timeUpper);
+  QVBoxLayout *loopDwellFrameLayout = new QVBoxLayout;
+  loopDwellFrameLayout->setSpacing(2);
+  loopDwellFrameLayout->setContentsMargins(2, 2, 2, 2);
+  loopDwellFrame->setLayout(loopDwellFrameLayout);
+  
+  QLabel *loopDwellTitle = new QLabel(loopDwellFrame);
+  loopDwellTitle->setText("Dwell (msecs)");
+  loopDwellTitle->setAlignment(Qt::AlignHCenter);
+
+  _loopDwellSelector = new QSpinBox(loopDwellFrame);
+  _loopDwellSelector->setMinimum(_params.movie_min_dwell_msecs);
+  _loopDwellSelector->setMaximum(_params.movie_max_dwell_msecs);
+  _loopDwellSelector->setValue(_loopDwellMsecs);
+#if QT_VERSION >= 0x067000
+  connect(_loopDwellSelector, &QSpinBox::valueChanged,
+          this, &TimeControl::_setLoopDwellMsecs);
+#else
+  connect(_loopDwellSelector, SIGNAL(valueChanged(int)),
+          this, SLOT(_setLoopDwellMsecs(int)));
+#endif
+  
+  loopDwellFrameLayout->addWidget(loopDwellTitle, 0, Qt::AlignTop);
+  loopDwellFrameLayout->addWidget(_loopDwellSelector, 0, Qt::AlignTop);
+  
+  // loop delay (msecs)
+  
+  QFrame *loopDelayFrame = new QFrame(timeUpper);
+  QVBoxLayout *loopDelayFrameLayout = new QVBoxLayout;
+  loopDelayFrameLayout->setSpacing(2);
+  loopDelayFrameLayout->setContentsMargins(2, 2, 2, 2);
+  loopDelayFrame->setLayout(loopDelayFrameLayout);
+  
+  QLabel *loopDelayTitle = new QLabel(loopDelayFrame);
+  loopDelayTitle->setText("Delay (msecs)");
+  loopDelayTitle->setAlignment(Qt::AlignHCenter);
+
+  _loopDelaySelector = new QSpinBox(loopDelayFrame);
+  _loopDelaySelector->setMinimum(0);
+  _loopDelaySelector->setMaximum(9999);
+  _loopDelaySelector->setValue(_loopDelayMsecs);
+#if QT_VERSION >= 0x067000
+  connect(_loopDelaySelector, &QSpinBox::valueChanged,
+          this, &TimeControl::_setLoopDelayMsecs);
+#else
+  connect(_loopDelaySelector, SIGNAL(valueChanged(int)),
+          this, SLOT(_setLoopDelayMsecs(int)));
+#endif
+  
+  loopDelayFrameLayout->addWidget(loopDelayTitle, 0, Qt::AlignTop);
+  loopDelayFrameLayout->addWidget(_loopDelaySelector, 0, Qt::AlignTop);
   
   // start time editor
   
@@ -223,12 +368,62 @@ void TimeControl::populateGui()
   selectedTimeFrameLayout->addWidget(selectedTitle, 0, Qt::AlignTop);
   selectedTimeFrameLayout->addWidget(_selectedTimeLabel, 0, Qt::AlignTop);
   
-  // fwd and back buttons
+  // accept/cancel buttons
 
-  QString buttonStyle("padding: 2px 6px 2px 6px; "
+  QFrame *acceptCancelFrame = new QFrame(timeUpper);
+  QVBoxLayout *acceptCancelFrameLayout = new QVBoxLayout;
+  acceptCancelFrame->setLayout(acceptCancelFrameLayout);
+  acceptCancelFrameLayout->setSpacing(2);
+  acceptCancelFrameLayout->setContentsMargins(2, 2, 2, 2);
+  
+  QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
+  acceptButton->setText("Accept");
+  connect(acceptButton, &QPushButton::clicked, this,
+          &TimeControl::_acceptGuiSelections);
+  acceptButton->setToolTip("Accept the selection");
+  acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                              "background-color: seagreen;");
+  
+  QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
+  cancelButton->setText("Cancel");
+  connect(cancelButton, &QPushButton::clicked, this,
+          &TimeControl::_cancelGuiSelections);
+  cancelButton->setToolTip("Cancel the selection");
+  cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                              "background-color: red;");
+
+  acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
+  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
+
+  //////////////////////////////////////////////////////////////////////
+  // lower panel contents
+  //////////////////////////////////////////////////////////////////////
+
+  // output loop button
+  
+  QFrame *outputLoopFrame = new QFrame(timeUpper);
+  QVBoxLayout *outputLoopFrameLayout = new QVBoxLayout;
+  outputLoopFrame->setLayout(outputLoopFrameLayout);
+  outputLoopFrameLayout->setSpacing(0);
+  outputLoopFrameLayout->setContentsMargins(0, 0, 0, 0);
+
+  QPushButton *outputButton = new QPushButton(timeLower);
+  outputButton->setText("Output Loop");
+  connect(outputButton, &QPushButton::clicked, this,
+          &TimeControl::_outputMovieLoop);
+  outputButton->setToolTip("Output movie loop to file");
+  outputButton->setStyleSheet("padding: 0px 0px 0px 0px; "
+                              "background-color: seagreen;");
+
+  outputLoopFrameLayout->addWidget(outputButton, 0, Qt::AlignLeft);
+  
+  // fwd and back buttons
+  
+  QString buttonStyle("padding: 2px 2px 2px 2px; "
                       "background-color: seagreen;");
   
   QFrame *backButtonFrame = new QFrame(timeLower);
+  backButtonFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *backButtonFrameLayout = new QHBoxLayout;
   backButtonFrame->setLayout(backButtonFrameLayout);
   
@@ -255,6 +450,7 @@ void TimeControl::populateGui()
   backButtonFrameLayout->addWidget(_back1, 0, Qt::AlignLeft);
 
   QFrame *fwdButtonFrame = new QFrame(timeLower);
+  fwdButtonFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *fwdButtonFrameLayout = new QHBoxLayout;
   fwdButtonFrame->setLayout(fwdButtonFrameLayout);
   
@@ -283,8 +479,11 @@ void TimeControl::populateGui()
   // time slider
   
   QFrame *timeSliderFrame = new QFrame(timeLower);
+  timeSliderFrame->setContentsMargins(0, 0, 0, 0);
   QHBoxLayout *timeSliderFrameLayout = new QHBoxLayout;
   timeSliderFrame->setLayout(timeSliderFrameLayout);
+  timeSliderFrame->setStyleSheet("border: 1px solid black; "
+                                 "padding: 0px 0px 0px 0px; ");
   
   _timeSlider = new QSlider(Qt::Horizontal);
   _timeSlider->setFocusPolicy(Qt::StrongFocus);
@@ -333,179 +532,6 @@ void TimeControl::populateGui()
   timeSliderFrameLayout->addWidget(_timeSlider, 0, Qt::AlignCenter);
   timeSliderFrameLayout->addWidget(_frameIntervalSelector, 0, Qt::AlignRight);
 
-  // accept cancel buttons
-
-  QFrame *acceptCancelFrame = new QFrame(timeUpper);
-  QVBoxLayout *acceptCancelFrameLayout = new QVBoxLayout;
-  acceptCancelFrame->setLayout(acceptCancelFrameLayout);
-  acceptCancelFrameLayout->setSpacing(5);
-  acceptCancelFrameLayout->setContentsMargins(5, 5, 5, 5);
-  
-  QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
-  acceptButton->setText("Accept");
-  connect(acceptButton, &QPushButton::clicked, this,
-          &TimeControl::_acceptGuiSelections);
-  acceptButton->setToolTip("Accept the selection");
-  acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: seagreen;");
-  
-  QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
-  cancelButton->setText("Cancel");
-  connect(cancelButton, &QPushButton::clicked, this,
-          &TimeControl::_cancelGuiSelections);
-  cancelButton->setToolTip("Cancel the selection");
-  cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: red;");
-
-  acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
-  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
-  
-  // start/stop/output buttons
-  
-  QFrame *startStopFrame = new QFrame(timeUpper);
-  QVBoxLayout *startStopFrameLayout = new QVBoxLayout;
-  startStopFrame->setLayout(startStopFrameLayout);
-  startStopFrameLayout->setSpacing(5);
-  startStopFrameLayout->setContentsMargins(5, 5, 5, 5);
-  
-  QPushButton *startButton = new QPushButton(startStopFrame);
-  startButton->setText("Start");
-  connect(startButton, &QPushButton::clicked, this,
-          &TimeControl::_startMovie);
-  startButton->setToolTip("Start the movie");
-  startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                             "background-color: seagreen;");
-  
-  QPushButton *stopButton = new QPushButton(startStopFrame);
-  stopButton->setText("Stop");
-  connect(stopButton, &QPushButton::clicked, this,
-          &TimeControl::_stopMovie);
-  stopButton->setToolTip("Stop the movie");
-  stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                            "background-color: red;");
-
-  QPushButton *outputButton = new QPushButton(timeLower);
-  outputButton->setText("Output Loop");
-  connect(outputButton, &QPushButton::clicked, this,
-          &TimeControl::_outputMovieLoop);
-  outputButton->setToolTip("Output movie loop to file");
-  outputButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: seagreen;");
-  
-  startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
-  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
-
-  // realtime?
-
-  QFrame *realtimeFrame = new QFrame(timeUpper);
-  QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
-  realtimeFrame->setLayout(realtimeFrameLayout);
-  realtimeFrameLayout->setSpacing(5);
-  realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
-  
-  QLabel *realtimeTitle = new QLabel(realtimeFrame);
-  realtimeTitle->setText("Realtime?");
-  realtimeTitle->setAlignment(Qt::AlignHCenter);
-
-  _realtimeSelector = new QCheckBox(realtimeFrame);
-  _realtimeSelector->setChecked(_isRealtime);
-  _parent->setArchiveMode(!_isRealtime);
-
-  realtimeFrameLayout->addWidget(realtimeTitle, 0,
-                                 Qt::AlignTop | Qt::AlignCenter);
-  realtimeFrameLayout->addWidget(_realtimeSelector, 0,
-                                 Qt::AlignBottom | Qt::AlignCenter);
-  
-#if QT_VERSION >= 0x067000
-  connect(_realtimeSelector, &QCheckBox::checkStateChanged, this,
-          &TimeControl::_setRealtime);
-#else
-  connect(_realtimeSelector, &QCheckBox::stateChanged, this,
-          &TimeControl::_setRealtime);
-#endif
-  
-  // sweep?
-
-  QFrame *sweepFrame = new QFrame(timeUpper);
-  QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
-  sweepFrame->setLayout(sweepFrameLayout);
-  sweepFrameLayout->setSpacing(5);
-  sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
-
-  QLabel *sweepTitle = new QLabel(sweepFrame);
-  sweepTitle->setText("Sweep?");
-  sweepTitle->setAlignment(Qt::AlignHCenter);
-
-  _sweepSelector = new QCheckBox(sweepFrame);
-  _sweepSelector->setChecked(_isSweep);
-  
-  sweepFrameLayout->addWidget(sweepTitle, 0,
-                              Qt::AlignTop | Qt::AlignCenter);
-  sweepFrameLayout->addWidget(_sweepSelector, 0,
-                              Qt::AlignBottom | Qt::AlignCenter);
-  
-#if QT_VERSION >= 0x067000
-  connect(_sweepSelector, &QCheckBox::checkStateChanged, this,
-          &TimeControl::_setSweep);
-#else
-  connect(_sweepSelector, &QCheckBox::stateChanged, this,
-          &TimeControl::_setSweep);
-#endif
-  
-  // loop dwell (msecs)
-  
-  QFrame *loopDwellFrame = new QFrame(timeUpper);
-  QVBoxLayout *loopDwellFrameLayout = new QVBoxLayout;
-  loopDwellFrameLayout->setSpacing(2);
-  loopDwellFrameLayout->setContentsMargins(5, 2, 5, 2);
-  loopDwellFrame->setLayout(loopDwellFrameLayout);
-  
-  QLabel *loopDwellTitle = new QLabel(loopDwellFrame);
-  loopDwellTitle->setText("Dwell (msecs)");
-  loopDwellTitle->setAlignment(Qt::AlignHCenter);
-
-  _loopDwellSelector = new QSpinBox(loopDwellFrame);
-  _loopDwellSelector->setMinimum(_params.movie_min_dwell_msecs);
-  _loopDwellSelector->setMaximum(_params.movie_max_dwell_msecs);
-  _loopDwellSelector->setValue(_loopDwellMsecs);
-#if QT_VERSION >= 0x067000
-  connect(_loopDwellSelector, &QSpinBox::valueChanged,
-          this, &TimeControl::_setLoopDwellMsecs);
-#else
-  connect(_loopDwellSelector, SIGNAL(valueChanged(int)),
-          this, SLOT(_setLoopDwellMsecs(int)));
-#endif
-  
-  loopDwellFrameLayout->addWidget(loopDwellTitle, 0, Qt::AlignTop);
-  loopDwellFrameLayout->addWidget(_loopDwellSelector, 0, Qt::AlignTop);
-  
-  // loop delay (msecs)
-  
-  QFrame *loopDelayFrame = new QFrame(timeUpper);
-  QVBoxLayout *loopDelayFrameLayout = new QVBoxLayout;
-  loopDelayFrameLayout->setSpacing(2);
-  loopDelayFrameLayout->setContentsMargins(5, 2, 5, 2);
-  loopDelayFrame->setLayout(loopDelayFrameLayout);
-  
-  QLabel *loopDelayTitle = new QLabel(loopDelayFrame);
-  loopDelayTitle->setText("Delay (msecs)");
-  loopDelayTitle->setAlignment(Qt::AlignHCenter);
-
-  _loopDelaySelector = new QSpinBox(loopDelayFrame);
-  _loopDelaySelector->setMinimum(0);
-  _loopDelaySelector->setMaximum(9999);
-  _loopDelaySelector->setValue(_loopDelayMsecs);
-#if QT_VERSION >= 0x067000
-  connect(_loopDelaySelector, &QSpinBox::valueChanged,
-          this, &TimeControl::_setLoopDelayMsecs);
-#else
-  connect(_loopDelaySelector, SIGNAL(valueChanged(int)),
-          this, SLOT(_setLoopDelayMsecs(int)));
-#endif
-  
-  loopDelayFrameLayout->addWidget(loopDelayTitle, 0, Qt::AlignTop);
-  loopDelayFrameLayout->addWidget(_loopDelaySelector, 0, Qt::AlignTop);
-  
   // add widgets to layouts
   
   int stretch = 0;
@@ -521,7 +547,7 @@ void TimeControl::populateGui()
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignRight);
   
-  timeLowerLayout->addWidget(outputButton, 0, Qt::AlignLeft);
+  timeLowerLayout->addWidget(outputLoopFrame, 0, Qt::AlignLeft);
   timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
