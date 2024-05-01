@@ -275,7 +275,7 @@ void VertWindow::_createStatusPanel(const int label_font_size)
 
 void VertWindow::setAzimuth(const double azimuth)
 {
-  if (_manager->checkArchiveMode()) {
+  if (_manager->getArchiveMode()) {
     _azValue->setText("-----");
     _azValue->setEnabled(false);
   } else {
@@ -292,7 +292,7 @@ void VertWindow::setAzimuth(const double azimuth)
 
 void VertWindow::setElevation(const double elevation)
 {
-  if (_manager->checkArchiveMode()) {
+  if (_manager->getArchiveMode()) {
     _elevValue->setText("-----");
     _elevValue->setEnabled(false);
   } else {

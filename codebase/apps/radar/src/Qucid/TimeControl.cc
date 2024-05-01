@@ -402,13 +402,14 @@ void TimeControl::populateGui()
   realtimeFrame->setLayout(realtimeFrameLayout);
   realtimeFrameLayout->setSpacing(5);
   realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
-
+  
   QLabel *realtimeTitle = new QLabel(realtimeFrame);
   realtimeTitle->setText("Realtime?");
   realtimeTitle->setAlignment(Qt::AlignHCenter);
 
   _realtimeSelector = new QCheckBox(realtimeFrame);
   _realtimeSelector->setChecked(_isRealtime);
+  _parent->setArchiveMode(!_isRealtime);
 
   realtimeFrameLayout->addWidget(realtimeTitle, 0,
                                  Qt::AlignTop | Qt::AlignCenter);
@@ -894,6 +895,7 @@ void TimeControl::_setRealtime(Qt::CheckState val)
     _isRealtime = false;
     cerr << "Archive mode" << endl;
   }
+  _parent->setArchiveMode(!_isRealtime);
 }
 #else
 void TimeControl::_setRealtime(int val)
@@ -905,6 +907,7 @@ void TimeControl::_setRealtime(int val)
     _isRealtime = true;
     cerr << "Realtime mode" << endl;
   }
+  _parent->setArchiveMode(!_isRealtime);
 }
 #endif
 

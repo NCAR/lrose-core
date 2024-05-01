@@ -64,8 +64,6 @@ static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers
     "_vertLocationClicked",
     "_locationClicked",
     "ray",
-    "_setRealtime",
-    "enabled",
     "_showFieldMenu",
     "_placeFieldMenu",
     "_setMapsEnabled",
@@ -88,7 +86,7 @@ static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {
-    uint offsetsAndSizes[94];
+    uint offsetsAndSizes[90];
     char stringdata0[12];
     char stringdata1[25];
     char stringdata2[1];
@@ -115,27 +113,25 @@ struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {
     char stringdata23[21];
     char stringdata24[17];
     char stringdata25[4];
-    char stringdata26[13];
-    char stringdata27[8];
-    char stringdata28[15];
-    char stringdata29[16];
-    char stringdata30[16];
-    char stringdata31[7];
-    char stringdata32[20];
-    char stringdata33[17];
-    char stringdata34[17];
-    char stringdata35[18];
-    char stringdata36[32];
-    char stringdata37[6];
-    char stringdata38[31];
-    char stringdata39[17];
-    char stringdata40[12];
-    char stringdata41[26];
-    char stringdata42[25];
-    char stringdata43[27];
-    char stringdata44[18];
-    char stringdata45[16];
-    char stringdata46[4];
+    char stringdata26[15];
+    char stringdata27[16];
+    char stringdata28[16];
+    char stringdata29[7];
+    char stringdata30[20];
+    char stringdata31[17];
+    char stringdata32[17];
+    char stringdata33[18];
+    char stringdata34[32];
+    char stringdata35[6];
+    char stringdata36[31];
+    char stringdata37[17];
+    char stringdata38[12];
+    char stringdata39[26];
+    char stringdata40[25];
+    char stringdata41[27];
+    char stringdata42[18];
+    char stringdata43[16];
+    char stringdata44[4];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSCartManagerENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -167,27 +163,25 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSCartManagerENDCLASS_t qt_meta_s
         QT_MOC_LITERAL(252, 20),  // "_vertLocationClicked"
         QT_MOC_LITERAL(273, 16),  // "_locationClicked"
         QT_MOC_LITERAL(290, 3),  // "ray"
-        QT_MOC_LITERAL(294, 12),  // "_setRealtime"
-        QT_MOC_LITERAL(307, 7),  // "enabled"
-        QT_MOC_LITERAL(315, 14),  // "_showFieldMenu"
-        QT_MOC_LITERAL(330, 15),  // "_placeFieldMenu"
-        QT_MOC_LITERAL(346, 15),  // "_setMapsEnabled"
-        QT_MOC_LITERAL(362, 6),  // "enable"
-        QT_MOC_LITERAL(369, 19),  // "_setProductsEnabled"
-        QT_MOC_LITERAL(389, 16),  // "_setWindsEnabled"
-        QT_MOC_LITERAL(406, 16),  // "_showTimeControl"
-        QT_MOC_LITERAL(423, 17),  // "_placeTimeControl"
-        QT_MOC_LITERAL(441, 31),  // "_circleRadiusSliderValueChanged"
-        QT_MOC_LITERAL(473, 5),  // "value"
-        QT_MOC_LITERAL(479, 30),  // "_brushRadiusSliderValueChanged"
-        QT_MOC_LITERAL(510, 16),  // "_saveImageToFile"
-        QT_MOC_LITERAL(527, 11),  // "interactive"
-        QT_MOC_LITERAL(539, 25),  // "_createRealtimeImageFiles"
-        QT_MOC_LITERAL(565, 24),  // "_createArchiveImageFiles"
-        QT_MOC_LITERAL(590, 26),  // "_createImageFilesAllLevels"
-        QT_MOC_LITERAL(617, 17),  // "_createImageFiles"
-        QT_MOC_LITERAL(635, 15),  // "ShowContextMenu"
-        QT_MOC_LITERAL(651, 3)   // "pos"
+        QT_MOC_LITERAL(294, 14),  // "_showFieldMenu"
+        QT_MOC_LITERAL(309, 15),  // "_placeFieldMenu"
+        QT_MOC_LITERAL(325, 15),  // "_setMapsEnabled"
+        QT_MOC_LITERAL(341, 6),  // "enable"
+        QT_MOC_LITERAL(348, 19),  // "_setProductsEnabled"
+        QT_MOC_LITERAL(368, 16),  // "_setWindsEnabled"
+        QT_MOC_LITERAL(385, 16),  // "_showTimeControl"
+        QT_MOC_LITERAL(402, 17),  // "_placeTimeControl"
+        QT_MOC_LITERAL(420, 31),  // "_circleRadiusSliderValueChanged"
+        QT_MOC_LITERAL(452, 5),  // "value"
+        QT_MOC_LITERAL(458, 30),  // "_brushRadiusSliderValueChanged"
+        QT_MOC_LITERAL(489, 16),  // "_saveImageToFile"
+        QT_MOC_LITERAL(506, 11),  // "interactive"
+        QT_MOC_LITERAL(518, 25),  // "_createRealtimeImageFiles"
+        QT_MOC_LITERAL(544, 24),  // "_createArchiveImageFiles"
+        QT_MOC_LITERAL(569, 26),  // "_createImageFilesAllLevels"
+        QT_MOC_LITERAL(596, 17),  // "_createImageFiles"
+        QT_MOC_LITERAL(614, 15),  // "ShowContextMenu"
+        QT_MOC_LITERAL(630, 3)   // "pos"
     },
     "CartManager",
     "colorMapRedefineReceived",
@@ -215,8 +209,6 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSCartManagerENDCLASS_t qt_meta_s
     "_vertLocationClicked",
     "_locationClicked",
     "ray",
-    "_setRealtime",
-    "enabled",
     "_showFieldMenu",
     "_placeFieldMenu",
     "_setMapsEnabled",
@@ -247,7 +239,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-      27,   14, // methods
+      26,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -255,33 +247,32 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    6,  176,    2, 0x0a,    1 /* Public */,
-      11,    0,  189,    2, 0x0a,    8 /* Public */,
-      12,    0,  190,    2, 0x08,    9 /* Private */,
-      13,    0,  191,    2, 0x08,   10 /* Private */,
-      14,    0,  192,    2, 0x08,   11 /* Private */,
-      15,    2,  193,    2, 0x08,   12 /* Private */,
-      15,    1,  198,    2, 0x28,   15 /* Private | MethodCloned */,
-      18,    3,  201,    2, 0x08,   17 /* Private */,
-      23,    3,  208,    2, 0x08,   21 /* Private */,
-      24,    3,  215,    2, 0x08,   25 /* Private */,
-      26,    1,  222,    2, 0x08,   29 /* Private */,
-      28,    0,  225,    2, 0x08,   31 /* Private */,
-      29,    0,  226,    2, 0x08,   32 /* Private */,
-      30,    1,  227,    2, 0x08,   33 /* Private */,
-      32,    1,  230,    2, 0x08,   35 /* Private */,
-      33,    1,  233,    2, 0x08,   37 /* Private */,
-      34,    0,  236,    2, 0x08,   39 /* Private */,
-      35,    0,  237,    2, 0x08,   40 /* Private */,
-      36,    1,  238,    2, 0x08,   41 /* Private */,
-      38,    1,  241,    2, 0x08,   43 /* Private */,
-      39,    1,  244,    2, 0x08,   45 /* Private */,
-      39,    0,  247,    2, 0x28,   47 /* Private | MethodCloned */,
-      41,    0,  248,    2, 0x08,   48 /* Private */,
-      42,    0,  249,    2, 0x08,   49 /* Private */,
-      43,    0,  250,    2, 0x08,   50 /* Private */,
-      44,    0,  251,    2, 0x08,   51 /* Private */,
-      45,    1,  252,    2, 0x08,   52 /* Private */,
+       1,    6,  170,    2, 0x0a,    1 /* Public */,
+      11,    0,  183,    2, 0x0a,    8 /* Public */,
+      12,    0,  184,    2, 0x08,    9 /* Private */,
+      13,    0,  185,    2, 0x08,   10 /* Private */,
+      14,    0,  186,    2, 0x08,   11 /* Private */,
+      15,    2,  187,    2, 0x08,   12 /* Private */,
+      15,    1,  192,    2, 0x28,   15 /* Private | MethodCloned */,
+      18,    3,  195,    2, 0x08,   17 /* Private */,
+      23,    3,  202,    2, 0x08,   21 /* Private */,
+      24,    3,  209,    2, 0x08,   25 /* Private */,
+      26,    0,  216,    2, 0x08,   29 /* Private */,
+      27,    0,  217,    2, 0x08,   30 /* Private */,
+      28,    1,  218,    2, 0x08,   31 /* Private */,
+      30,    1,  221,    2, 0x08,   33 /* Private */,
+      31,    1,  224,    2, 0x08,   35 /* Private */,
+      32,    0,  227,    2, 0x08,   37 /* Private */,
+      33,    0,  228,    2, 0x08,   38 /* Private */,
+      34,    1,  229,    2, 0x08,   39 /* Private */,
+      36,    1,  232,    2, 0x08,   41 /* Private */,
+      37,    1,  235,    2, 0x08,   43 /* Private */,
+      37,    0,  238,    2, 0x28,   45 /* Private | MethodCloned */,
+      39,    0,  239,    2, 0x08,   46 /* Private */,
+      40,    0,  240,    2, 0x08,   47 /* Private */,
+      41,    0,  241,    2, 0x08,   48 /* Private */,
+      42,    0,  242,    2, 0x08,   49 /* Private */,
+      43,    1,  243,    2, 0x08,   50 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3, 0x80000000 | 5, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor,    4,    6,    7,    8,    9,   10,
@@ -294,23 +285,22 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
     QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   22,
     QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   22,
     QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   25,
-    QMetaType::Void, QMetaType::Bool,   27,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,   31,
-    QMetaType::Void, QMetaType::Bool,   31,
-    QMetaType::Void, QMetaType::Bool,   31,
+    QMetaType::Void, QMetaType::Bool,   29,
+    QMetaType::Void, QMetaType::Bool,   29,
+    QMetaType::Void, QMetaType::Bool,   29,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   37,
-    QMetaType::Void, QMetaType::Int,   37,
-    QMetaType::Void, QMetaType::Bool,   40,
-    QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   35,
+    QMetaType::Void, QMetaType::Int,   35,
+    QMetaType::Void, QMetaType::Bool,   38,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QPoint,   46,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QPoint,   44,
 
        0        // eod
 };
@@ -362,9 +352,6 @@ Q_CONSTINIT const QMetaObject CartManager::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<double, std::false_type>,
         QtPrivate::TypeAndForceComplete<double, std::false_type>,
         QtPrivate::TypeAndForceComplete<const RadxRay *, std::false_type>,
-        // method '_setRealtime'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
         // method '_showFieldMenu'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_placeFieldMenu'
@@ -424,23 +411,22 @@ void CartManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 7: _t->_horizLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
         case 8: _t->_vertLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
         case 9: _t->_locationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
-        case 10: _t->_setRealtime((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 11: _t->_showFieldMenu(); break;
-        case 12: _t->_placeFieldMenu(); break;
-        case 13: _t->_setMapsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 14: _t->_setProductsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 15: _t->_setWindsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 16: _t->_showTimeControl(); break;
-        case 17: _t->_placeTimeControl(); break;
-        case 18: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 19: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 20: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 21: _t->_saveImageToFile(); break;
-        case 22: _t->_createRealtimeImageFiles(); break;
-        case 23: _t->_createArchiveImageFiles(); break;
-        case 24: _t->_createImageFilesAllLevels(); break;
-        case 25: _t->_createImageFiles(); break;
-        case 26: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
+        case 10: _t->_showFieldMenu(); break;
+        case 11: _t->_placeFieldMenu(); break;
+        case 12: _t->_setMapsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 13: _t->_setProductsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 14: _t->_setWindsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 15: _t->_showTimeControl(); break;
+        case 16: _t->_placeTimeControl(); break;
+        case 17: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 18: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 19: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 20: _t->_saveImageToFile(); break;
+        case 21: _t->_createRealtimeImageFiles(); break;
+        case 22: _t->_createArchiveImageFiles(); break;
+        case 23: _t->_createImageFilesAllLevels(); break;
+        case 24: _t->_createImageFiles(); break;
+        case 25: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
         default: ;
         }
     }
@@ -465,13 +451,13 @@ int CartManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 27)
+        if (_id < 26)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 27;
+        _id -= 26;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 27)
+        if (_id < 26)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 27;
+        _id -= 26;
     }
     return _id;
 }

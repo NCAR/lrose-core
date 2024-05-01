@@ -161,7 +161,7 @@ CartManager::CartManager(const Params &params,
   _timeControl = NULL;
   _timeControlPlaced = false;
   
-  _setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
+  setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
   _archiveStartTime.set(_params.archive_start_time);
 
   _imagesStartTime.set(_params.images_archive_start_time);
@@ -652,26 +652,11 @@ void CartManager::_createActions()
   // _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
   // connect(_showBoundaryEditorAct, &QAction::triggered, this, &CartManager::showBoundaryEditor);
   
-  // set time controller settings
-  _timeControllerAct = new QAction(tr("Time-Config"), this);
-  _timeControllerAct->setStatusTip(tr("Show time control window"));
-  connect(_timeControllerAct, &QAction::triggered, this,
-          &CartManager::_showTimeControl);
-
   // show time control window
-  _showTimeControlAct = new QAction(tr("Show time control window"), this);
+  _showTimeControlAct = new QAction(tr("Movie"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
   connect(_showTimeControlAct, &QAction::triggered,
           this, &CartManager::_showTimeControl);
-  
-  // realtime mode
-
-  _realtimeAct = new QAction(tr("Set realtime mode"), this);
-  _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
-  _realtimeAct->setCheckable(true);
-  _realtimeAct->setChecked(_params.start_mode == Params::MODE_REALTIME);
-  connect(_realtimeAct, &QAction::triggered,
-          this, &CartManager::_setRealtime);
   
   // unzoom display
   
@@ -804,10 +789,7 @@ void CartManager::_createMenus()
   
   // time selector
   
-  _timeMenu = menuBar()->addMenu(tr("Movie"));
-  _timeMenu->addAction(_showTimeControlAct);
-  _timeMenu->addSeparator();
-  _timeMenu->addAction(_realtimeAct);
+  menuBar()->addAction(_showTimeControlAct);
 
   // add overlay menu
   
@@ -2457,38 +2439,32 @@ void CartManager::_clear()
 /////////////////////////////////////
 // set archive mode
 
-void CartManager::_setArchiveMode(bool state)
+void CartManager::setArchiveMode(bool state)
 {
-  _archiveMode = state;
-  // _setSweepPanelVisibility();
 
+  // _setSweepPanelVisibility();
+  
   if (_horiz) {
     _horiz->setArchiveMode(state);
   }
   if (_vert) {
     _vert->setArchiveMode(state);
   }
-}
 
-////////////////////////////////////////////////////////
-// set modes for retrieving the data
-
-void CartManager::_setRealtime(bool enabled)
-{
-  if (enabled) {
-    if (_archiveMode) {
-      _setArchiveMode(false);
-      _activateRealtimeRendering();
-    }
-  } else {
+  if (state) {
     if (!_archiveMode) {
-      _setArchiveMode(true);
+      _archiveMode = true;
       _activateArchiveRendering();
       // loadArchiveFileList();
     }
+  } else {
+    if (_archiveMode) {
+      _archiveMode = false;
+      _activateRealtimeRendering();
+    }
   }
-}
 
+}
 
 /////////////////////////////////////
 // activate realtime rendering

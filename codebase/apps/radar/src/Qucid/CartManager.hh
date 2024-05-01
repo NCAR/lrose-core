@@ -120,9 +120,10 @@ public:
   virtual void resizeEvent (QResizeEvent * event);
   virtual void keyPressEvent(QKeyEvent* event);
 
-  // check on archive mode
+  // set/get archive mode
   
-  bool checkArchiveMode() const { return _archiveMode; }
+  void setArchiveMode(bool state);
+  bool getArchiveMode() const { return _archiveMode; }
 
   // input file list for archive mode
 
@@ -219,13 +220,11 @@ private:
   // actions
 
   QAction *_showFieldMenuAct;
-  QAction *_realtimeAct;
   QAction *_showTimeControlAct;
   QAction *_ringsAct;
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showVertAct;
-  QAction *_timeControllerAct;
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
@@ -353,7 +352,6 @@ private:
 
   // modes
 
-  void _setArchiveMode(bool state);
   void _activateRealtimeRendering();
   void _activateArchiveRendering();
 
@@ -405,10 +403,6 @@ private slots:
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
-
-  // realtime/archive mode
-  
-  void _setRealtime(bool enabled);
 
   // field menu
   
