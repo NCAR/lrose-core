@@ -191,7 +191,7 @@ void TimeControl::populateGui()
   QFrame *realtimeFrame = new QFrame(timeUpper);
   QVBoxLayout *realtimeFrameLayout = new QVBoxLayout;
   realtimeFrame->setLayout(realtimeFrameLayout);
-  realtimeFrame->setStyleSheet("background-color: lightgray;");
+  // realtimeFrame->setStyleSheet("background-color: lightgray;");
   realtimeFrameLayout->setSpacing(5);
   realtimeFrameLayout->setContentsMargins(5, 5, 5, 5);
   
@@ -223,7 +223,7 @@ void TimeControl::populateGui()
   sweepFrame->setLayout(sweepFrameLayout);
   sweepFrameLayout->setSpacing(5);
   sweepFrameLayout->setContentsMargins(5, 5, 5, 5);
-  sweepFrame->setStyleSheet("background-color: lightgray;");
+  // sweepFrame->setStyleSheet("background-color: lightgray;");
 
   QLabel *sweepTitle = new QLabel(sweepFrame);
   sweepTitle->setText("Sweep?");
