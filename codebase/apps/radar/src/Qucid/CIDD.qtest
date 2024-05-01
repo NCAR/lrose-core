@@ -348,7 +348,8 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  20:30 5/25/2019
+#cidd.demo_time:  20:30 5/25/2019
+cidd.demo_time:  20:30 09/15/2023
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    300

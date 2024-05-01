@@ -168,7 +168,7 @@ void TimeControl::populateGui()
   startTitle->setStyleSheet("background-color: lightgray;");
   
   _startTimeEdit = new QDateTimeEdit(timeUpper);
-  _startTimeEdit->setDisplayFormat("yyyy/mm/dd hh:mm:ss");
+  _startTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   _startTimeEdit->setCalendarPopup(true);
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
           this, &TimeControl::setStartTimeFromEdit);
