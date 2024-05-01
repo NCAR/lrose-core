@@ -266,7 +266,7 @@ public:
 
   // Control variables for Draw-Export feature
 
-  draw_export_t   draw;
+  draw_export_t draw;
 
   // Remote User Interface/Command class
 

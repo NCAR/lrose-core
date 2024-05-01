@@ -325,7 +325,7 @@ void CartManager::timerEvent(QTimerEvent *event)
   // get the time control into the right place
   // we need to let the windows fully draw
 
-  if (_timerEventCount > 10) {
+  if (_timerEventCount == 10) {
     _placeTimeControl();
   }
 
