@@ -232,6 +232,11 @@ void reset_data_valid_flags(int hflag,int vflag)
 
 void set_redraw_flags(int h_flag,int v_flag)
 {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> set_redraw_flags, h_flag, v_flag: " << h_flag << ", " << v_flag << endl;
+  }
+  
     int    i;
     int   hit = 0;
     

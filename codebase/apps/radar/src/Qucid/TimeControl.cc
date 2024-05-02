@@ -674,6 +674,7 @@ void TimeControl::setGuiSelectedTime(const RadxTime &val)
            val.getMin(),
            val.getSec());
   _selectedTimeLabel->setText(text);
+  set_redraw_flags(1, 1);
 }
 
 ////////////////////////////////////////////////////////
@@ -881,7 +882,7 @@ void TimeControl::_timeSliderPressed()
 {
   int value = _timeSlider->value();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
+    cerr << "Time slider pressed, value: " << value << endl;
   }
 }
 
