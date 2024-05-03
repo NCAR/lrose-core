@@ -109,7 +109,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   void setGuiStartTime(const RadxTime &val);
   void setGuiEndTime(const RadxTime &val);
   void setGuiSelectedTime(const RadxTime &val);
-  void setGuiFromSelections();
 
   void setFrameIndex(int val) { _frameIndex = val; }
 
@@ -146,9 +145,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   QDateTimeEdit *_startTimeEdit;
   QLabel *_endTimeLabel;
   QLabel *_selectedTimeLabel;
-
+  
   QSlider *_timeSlider;
-
+  bool _timeSliderInProgress;
+  
   QPushButton *_back1;
   QPushButton *_fwd1;
   QPushButton *_backDuration;
@@ -158,14 +158,14 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QSpinBox *_nFramesSelector;
   QDoubleSpinBox *_frameIntervalSelector;
-
+  
   QCheckBox *_realtimeSelector;
   QCheckBox *_sweepSelector;
-
+  
   QSpinBox *_loopDwellSelector;
   QSpinBox *_loopDelaySelector;
   
-  // gui selections before 'accept'
+  // gui selections before accept
   
   RadxTime _guiStartTime;
   RadxTime _guiEndTime;
@@ -174,7 +174,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _guiFrameIntervalSecs;
   int _guiFrameIndex;
 
-  // selections after 'accept'
+  // selections after accept
   
   RadxTime _startTime;
   RadxTime _endTime;
@@ -190,11 +190,13 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _loopDelayMsecs;
   bool _isRealtime;
   bool _isSweep;
-                  
+
+  void _setRedraw();
+
  public slots:
 
   // actions
-
+  
   void _acceptGuiSelections();
   void _cancelGuiSelections();
   

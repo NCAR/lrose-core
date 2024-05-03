@@ -60,6 +60,7 @@ TimeControl::TimeControl(CartManager *parent,
   _endTimeLabel = NULL;
   _selectedTimeLabel = NULL;
   _timeSlider = NULL;
+  _timeSliderInProgress = false;
   _back1 = NULL;
   _fwd1 = NULL;
   _backDuration = NULL;
@@ -103,12 +104,22 @@ TimeControl::TimeControl(CartManager *parent,
 
 }
 
+////////////////////////////
 // destructor
 
 TimeControl::~TimeControl()
   
 {
 
+}
+
+////////////////////////
+// set flags for redraw
+
+void TimeControl::_setRedraw()
+{
+  cerr << "====>> setRedraw()" << endl;
+  set_redraw_flags(1, 1);
 }
 
 //////////////////////////////////////////////
@@ -587,7 +598,8 @@ void TimeControl::_acceptGuiSelections()
   _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
   _endTime = _startTime + _movieDurationSecs;
   _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
-  setGuiFromSelections();
+  // set redraw flags
+  _setRedraw();
 }
 
 void TimeControl::_cancelGuiSelections()
@@ -598,7 +610,9 @@ void TimeControl::_cancelGuiSelections()
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
-  setGuiFromSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -674,28 +688,6 @@ void TimeControl::setGuiSelectedTime(const RadxTime &val)
            val.getMin(),
            val.getSec());
   _selectedTimeLabel->setText(text);
-  set_redraw_flags(1, 1);
-}
-
-////////////////////////////////////////////////////////
-// set gui from selections
-
-void TimeControl::setGuiFromSelections()
-
-{
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
-  if (_timeSlider) {
-    _timeSlider->setSliderPosition(_guiFrameIndex);
-    _timeSlider->setMaximum(_guiNFramesMovie - 1);
-  }
-  if (_nFramesSelector) {
-    _nFramesSelector->setValue(_guiNFramesMovie);
-  }
-  if (_frameIntervalSelector) {
-    _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
-  }
 }
 
 ////////////////////////////////////////////////////////
@@ -713,7 +705,9 @@ void TimeControl::setStartTime(const RadxTime &rtime)
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
-  setGuiFromSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -731,7 +725,9 @@ void TimeControl::setEndTime(const RadxTime &rtime)
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
-  setGuiFromSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -741,14 +737,24 @@ void TimeControl::setEndTime(const RadxTime &rtime)
 
 void TimeControl::_goBack1()
 {
-  if (_guiFrameIndex <= 0) {
+  // change index
+  if (_guiFrameIndex == 0) {
+    return;
+  } else if (_guiFrameIndex < 0) {
     _guiFrameIndex = 0;
   } else {
     _guiFrameIndex -= 1;
   }
+  // move slider
+  _timeSliderInProgress = true;
   _timeSlider->setSliderPosition(_guiFrameIndex);
+  _timeSliderInProgress = false;
+  // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _acceptGuiSelections();
+  _selectedTime = _guiSelectedTime;
+  setGuiSelectedTime(_guiSelectedTime);
+  // set redraw flags
+  _setRedraw();
 }
 
 // go back by movie duration
@@ -759,7 +765,9 @@ void TimeControl::_goBackDuration()
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  _acceptGuiSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 // go back by movie duration * 6
@@ -770,21 +778,33 @@ void TimeControl::_goBackMult()
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  _acceptGuiSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 // go fwd by 1 frame
 
 void TimeControl::_goFwd1()
 {
-  if (_guiFrameIndex < _nFramesMovie - 1) {
-    _guiFrameIndex += 1;
-  } else {
+  // change index
+  if (_guiFrameIndex == _nFramesMovie - 1) {
+    return;
+  } else if (_guiFrameIndex >= _nFramesMovie) {
     _guiFrameIndex = _nFramesMovie - 1;
+  } else {
+    _guiFrameIndex += 1;
   }
+  // move slider
+  _timeSliderInProgress = true;
   _timeSlider->setSliderPosition(_guiFrameIndex);
+  _timeSliderInProgress = false;
+  // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _acceptGuiSelections();
+  _selectedTime = _guiSelectedTime;
+  setGuiSelectedTime(_guiSelectedTime);
+  // set redraw flags
+  _setRedraw();
 }
 
 // go fwd by movie duration
@@ -795,7 +815,9 @@ void TimeControl::_goFwdDuration()
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  _acceptGuiSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 // go fwd by movie duration * 6
@@ -806,7 +828,9 @@ void TimeControl::_goFwdMult()
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  _acceptGuiSelections();
+  setGuiStartTime(_guiStartTime);
+  setGuiEndTime(_guiEndTime);
+  setGuiSelectedTime(_guiSelectedTime);
 }
 
 // trap time slider trigger - no action for now
@@ -856,9 +880,13 @@ void TimeControl::_timeSliderValueChanged(int value)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
   }
-  _guiFrameIndex = value;
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _acceptGuiSelections();
+  _guiSelectedTime = _guiStartTime + value * _guiFrameIntervalSecs;
+  setGuiSelectedTime(_guiSelectedTime);
+  if (_timeSliderInProgress) {
+    return;
+  }
+  // set redraw flags
+  _setRedraw();
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -873,9 +901,12 @@ void TimeControl::_timeSliderReleased()
   if (value == _guiFrameIndex) {
     return;
   }
+  _timeSliderInProgress = false;
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _acceptGuiSelections();
+  setGuiSelectedTime(_guiSelectedTime);
+  // set redraw flags
+  _setRedraw();
 }
 
 void TimeControl::_timeSliderPressed() 
@@ -884,6 +915,7 @@ void TimeControl::_timeSliderPressed()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider pressed, value: " << value << endl;
   }
+  _timeSliderInProgress = true;
 }
 
 // set number of slider frames
@@ -910,7 +942,7 @@ void TimeControl::_setFrameIntervalSecs(double val)
   _movieDurationSecs = (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setEndTime(_guiEndTime);
+  setGuiEndTime(_guiEndTime);
   setGuiSelectedTime(_guiSelectedTime);
 }
 
