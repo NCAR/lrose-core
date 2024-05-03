@@ -633,7 +633,8 @@ extern void init_symprods();
 #endif
 
 #ifndef TIMER_CONTROL
-// extern void timer_func( Notify_client   client, int which);
+// #include <QTimer>
+// extern void timer_func(QTimerEvent *event);
 extern void start_timer();
 extern void stop_timer();
 #endif

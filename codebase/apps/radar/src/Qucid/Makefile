@@ -201,10 +201,11 @@ NORM_SRCS = \
 	shmem_init.cc \
 	status_pu_proc.cc \
 	symprod_init.cc \
-	timer_control.cc \
 	v_win_proc.cc \
 	xview_file_access.cc \
 	zoom_pu_proc.cc
+
+#	timer_control.cc \
 
 MOC_SRCS = \
 	CartManager.cc \

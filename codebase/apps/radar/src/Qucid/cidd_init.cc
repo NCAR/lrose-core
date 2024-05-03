@@ -2559,5 +2559,8 @@ void init_globals()
 
   gd.coord_key = 0;
 
+  gd.h_copy_flag = 0;
+  gd.v_copy_flag = 0;
+
 }
 

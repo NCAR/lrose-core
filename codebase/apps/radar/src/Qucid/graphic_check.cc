@@ -32,10 +32,6 @@
 #define GRAPHIC_CHECK
 #include "cidd.h"
 
-// in timer_control.cc
-extern int h_copy_flag;
-extern int v_copy_flag; 
- 
 /************************************************************************
  * CHECK_FOR_INVALID_IMAGES: Check for images in which the data 
  * are no longer valid. Look for the "best" invalid  image to 
@@ -87,7 +83,7 @@ void check_for_invalid_images(int index)
                 } else {
                     return;
                 }
-                if (h_image == gd.h_win.last_page && gd.h_win.redraw[h_image] == 0) h_copy_flag = 1;
+                if (h_image == gd.h_win.last_page && gd.h_win.redraw[h_image] == 0) gd.h_copy_flag = 1;
             } 
         }
         h_image++;
@@ -114,7 +110,7 @@ void check_for_invalid_images(int index)
                 } else {
                     return;
                 }
-                if (v_image == gd.v_win.last_page && gd.v_win.redraw[v_image] == 0) v_copy_flag = 1;
+                if (v_image == gd.v_win.last_page && gd.v_win.redraw[v_image] == 0) gd.v_copy_flag = 1;
             }
         }
         

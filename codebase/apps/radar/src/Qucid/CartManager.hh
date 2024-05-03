@@ -304,6 +304,12 @@ private:
   QSlider *_circleRadiusSlider;
   QSlider *_brushRadiusSlider;
 
+  // for timer
+  
+  int redraw_interv;
+  int update_interv;
+  int update_due;
+
   //////////////////////////////
   // private methods
 
@@ -374,6 +380,14 @@ private:
 
   void _howto();
 
+  // for timer
+  
+  void handle_client_event();
+  void check_for_expired_data(time_t tm);
+  void check_for_data_updates(time_t tm);
+  void check_what_needs_rendering(int frame_index);
+  void timer_func(QTimerEvent *event);
+       
 private slots:
 
   //////////////

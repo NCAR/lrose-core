@@ -279,7 +279,12 @@ public:
   // shared memory
 
   int coord_key;
-  coord_export_t *coord_expt; // Pointer to exported coordinates & info  
+  coord_export_t *coord_expt; // Pointer to exported coordinates & info
+
+  // image copy
+
+  int h_copy_flag;
+  int v_copy_flag;
 
 };
 

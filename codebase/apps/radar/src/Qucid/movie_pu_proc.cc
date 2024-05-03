@@ -220,8 +220,10 @@ void movie_start( u_int value)
   if(gd.layers.wind_mode && gd.layers.wind_vectors) {
     gd.movie.frame[gd.movie.cur_frame].redraw_horiz = 1;
   }
-	    
+
+#ifdef NOTNOW2
   start_timer();      /* Xview sometimes "forgets the interval timer" -restart it just in case */
+#endif
 
 }
 
