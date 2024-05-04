@@ -85,8 +85,9 @@ Qucid::Qucid(int argc, char **argv) :
   bool usingLegacyParams = false;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     // gd.db_name = strdup(legacyParamsPath.c_str());
+    Path lpPath(legacyParamsPath);
     snprintf(tdrpParamsPath, 4999,
-             "/tmp/Qucid.%s.%d.tdrp", legacyParamsPath.c_str(), getpid());
+             "/tmp/Qucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
     LegacyParams lParams;
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     usingLegacyParams = true;

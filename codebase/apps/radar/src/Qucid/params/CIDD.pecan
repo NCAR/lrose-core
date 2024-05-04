@@ -109,6 +109,8 @@ field_list = {
 # PECAN
 #
 
+WIDE_MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
+
 #############################
 # WIDE AREA PRODUCTS
 
