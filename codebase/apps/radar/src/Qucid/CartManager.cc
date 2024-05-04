@@ -3372,8 +3372,6 @@ void CartManager::check_what_needs_rendering(int frame_index)
 void CartManager::timer_func(QTimerEvent *event)
 {
 
-  cerr << "11111111111111111111111111" << endl;
-  
   met_record_t *mr;
   int    index,flag = 0;
   int    msec_diff = 0;

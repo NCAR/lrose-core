@@ -791,7 +791,7 @@ cidd.remote_ui_url: /tmp/remoteUI
 #extension (The tunnel - it's similar to a cgi mechanism) must be
 #installed on the http server for this to work.
 #
-cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
+#cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
 #
 # USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain
 # Set this to the url of a http forwarding proxy to pass 
@@ -801,7 +801,7 @@ cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
 # the http_tunnel_url must be enabled
 #
 # This is NCAR's internal HTTP proxy
-cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
+#cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
 #
 # Another view of the possible Service Topologies.
 # 
