@@ -29,7 +29,11 @@
 
 #include "cidd.h"
 
-int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, int page);
+int mdvx_request_time_list(met_record_t *mr,
+                           time_t start_time,
+                           time_t end_time,
+                           int page);
+
 /**********************************************************************
  * REQUEST_HORIZ_DATA_PLANE: Query the server for a data plane
  *
@@ -82,7 +86,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr,
 
   start_time += (int) (mr->time_offset * 60);
   end_time += (int) (mr->time_offset * 60);
-
+  
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
     // Disable threading while in debug mode
@@ -406,16 +410,19 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
  *
  */
 
-int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, int page)
+int mdvx_request_time_list(met_record_t *mr,
+                           time_t start_time,
+                           time_t end_time,
+                           int page)
 {
-  double min_lat,max_lat,min_lon,max_lon;
+  
+  double min_lat, max_lat, min_lon, max_lon;
   char url[2048];
   char tmp_str[1024];
   char fieldname[256];
   char label[1024];
   // char *ptr;
   time_t delta;
-
 
   memset(fieldname,0,128);
   memset(label,0,128);
