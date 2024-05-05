@@ -217,7 +217,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr,
 
   mr->h_mdvx->readVolume();
 
-  // The check_io function (thread) will poll for complettion of the data request.
+  // The check_for_io function (thread) will poll for complettion of the data request.
   // Once the data's in or ithe request times out, this data is marked as valid
   
   return 0;
@@ -454,7 +454,7 @@ int _getTimeList(met_record_t *mr,
 
   return 0;  // return from this request.
   
-  // When the thread is done the check_io function will gather and store the
+  // When the thread is done the check_for_io function will gather and store the
   // timelist info and then set mr->time_list_valid = 1 (true);
   
 }
