@@ -34,52 +34,53 @@
  */
 void set_field(int value)
 {
-    int i;
-	int tmp;
-	static int last_page = 0;
-	static int last_value = 0;
-	static int cur_value = 0;
+  int i;
+  int tmp;
+  static int last_page = 0;
+  static int last_value = 0;
+  static int cur_value = 0;
+  
+  if(value < 0) {
+    tmp = last_page;
+    last_page = gd.h_win.page;
+    gd.h_win.page = tmp;
+    tmp = cur_value;
+    cur_value = last_value;
+    value = last_value;
+    last_value = tmp;
+  } else {
+    last_page = gd.h_win.page;
+    last_value = cur_value;
+    cur_value = value;
+    gd.h_win.page = gd.field_index[value];
+    cerr << "FFFFFFFFFFFF value, new page: " << cur_value << ", " << gd.h_win.page << endl;
+  }
+  
+  for(i=0; i < gd.num_datafields; i++) {
+    if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw[i] = 1;
+  }
+  
+  if(gd.mrec[gd.h_win.page]->auto_render && 
+     gd.h_win.page_xid[gd.h_win.page] != 0 &&
+     gd.h_win.redraw[gd.h_win.page] == 0) {
     
-	if(value < 0) {
-		tmp = last_page;
-		last_page = gd.h_win.page;
-		gd.h_win.page = tmp;
-		tmp = cur_value;
-		cur_value = last_value;
-		value = last_value;
-		last_value = tmp;
-	} else {
-		last_page = gd.h_win.page;
-		last_value = cur_value;
-		cur_value = value;
-        gd.h_win.page = gd.field_index[value];
-	}
-
-    for(i=0; i < gd.num_datafields; i++) {
-        if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw[i] = 1;
-    }
-
-    if(gd.mrec[gd.h_win.page]->auto_render && 
-       gd.h_win.page_xid[gd.h_win.page] != 0 &&
-       gd.h_win.redraw[gd.h_win.page] == 0) {
-       
-	 save_h_movie_frame(gd.movie.cur_frame,
-			    gd.h_win.page_xid[gd.h_win.page],
-			    gd.h_win.page);
-    }
-
-    for(i=0; i < MAX_FRAMES; i++) {
-        gd.movie.frame[i].redraw_horiz = 1;
-    }
-
-    if(gd.movie.movie_on ) {
-      reset_data_valid_flags(1,0);
-    }
-
-   // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
-
-   /* make sure the horiz window's slider has the correct label */
-   set_height_label();
+    save_h_movie_frame(gd.movie.cur_frame,
+                       gd.h_win.page_xid[gd.h_win.page],
+                       gd.h_win.page);
+  }
+  
+  for(i=0; i < MAX_FRAMES; i++) {
+    gd.movie.frame[i].redraw_horiz = 1;
+  }
+  
+  if(gd.movie.movie_on ) {
+    reset_data_valid_flags(1,0);
+  }
+  
+  // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
+  
+  /* make sure the horiz window's slider has the correct label */
+  set_height_label();
 
 }
 
