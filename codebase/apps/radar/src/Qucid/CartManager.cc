@@ -3401,19 +3401,20 @@ void CartManager::cidd_timer_func(QTimerEvent *event)
 {
 
   met_record_t *mr;
-  int    index,flag = 0;
-  int    msec_diff = 0;
-  int    msec_delay = 0;
-  long   tm = 0;
+  int index,flag = 0;
+  int msec_diff = 0;
+  int msec_delay = 0;
+  long tm = 0;
 
-  Pixmap    h_xid = 0;
-  Pixmap    v_xid = 0;
+  Pixmap h_xid = 0;
+  Pixmap v_xid = 0;
 
   // struct itimerval timer;
+
   struct timezone cur_tz;
-  static  struct timeval cur_tm;
-  static  struct timeval last_frame_tm = {0,0};
-  static  struct timeval last_dcheck_tm = {0,0};
+  static struct timeval cur_tm;
+  static struct timeval last_frame_tm = {0,0};
+  static struct timeval last_dcheck_tm = {0,0};
   static time_t last_tick = 0;
   static long client_seq_num = 0;
 
