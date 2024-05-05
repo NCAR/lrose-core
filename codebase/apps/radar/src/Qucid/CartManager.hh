@@ -380,13 +380,17 @@ private:
 
   void _howto();
 
+  void _checkForFieldChange();
+  void _handleFirstTimerEvent();
+  void _readClickPoint();
+    
   // for timer
   
   void handle_client_event();
   void check_for_expired_data(time_t tm);
   void check_for_data_updates(time_t tm);
   void check_what_needs_rendering(int frame_index);
-  void timer_func(QTimerEvent *event);
+  void cidd_timer_func(QTimerEvent *event);
        
 private slots:
 

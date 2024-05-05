@@ -240,96 +240,25 @@ void CartManager::timerEvent(QTimerEvent *event)
 
   PMU_auto_register("timerEvent");
 
+  // check ID
+  
+  if (event->timerId() != _mainTimerId) {
+    return;
+  }
+  
   // field change?
 
-  if (_fieldTable != NULL) {
-
-    if (_fieldTableCurrentRow != _fieldTable->currentRow() ||
-        _fieldTableCurrentColumn != _fieldTable->currentColumn()) {
-      
-      const FieldTableItem *item =
-        (const FieldTableItem *) _fieldTable->item(_fieldTable->currentRow(),
-                                                   _fieldTable->currentColumn());
-      
-      if (item->text().toStdString().size() == 0) {
-        _fieldTable->setCurrentCell(_fieldTableCurrentRow,
-                                    _fieldTableCurrentColumn);
-      } else {
-        _fieldTableCurrentColumn = _fieldTable->currentColumn();
-        _fieldTableCurrentRow = _fieldTable->currentRow();
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          const Params::field_t *fparams = item->getFieldParams();
-          cerr << "Changing to field: " << fparams->button_label << endl;
-          cerr << "              url: " << fparams->url << endl;
-        }
-      }
-      
-    }
-    
-  }
-
+  _checkForFieldChange();
+  
   // Handle widget stuff that can't be done at initial setup.  For some reason
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
 
   if (_timerEventCount == 0) {
-
-    _horiz->resize(_horizFrame->width(), _horizFrame->height());
-    
-    // Set the size of the second column to the size of the largest
-    // label.  This should keep the column from wiggling as the values change.
-    // The default values for the labels must be their maximum size for this
-    // to work.  This is ugly, but it works.
-
-    int maxWidth = 0;
-    for (size_t ii = 0; ii < _valsRight.size(); ii++) {
-      if (maxWidth < _valsRight[ii]->width()) {
-        maxWidth = _valsRight[ii]->width();
-      }
-    }
-    _statusLayout->setColumnMinimumWidth(1, maxWidth);
-  
-    // if ((_archiveMode) && (_urlOK)) {
-    //   _archiveRetrievalPending = true;
-    // }
-
-  } // if (_timerEventCount)
-
+    _handleFirstTimerEvent();
+  }    
   _timerEventCount++;
-
-  // read Sprite update of click point info from FMQ
   
-  bool gotNew = false;
-  if (_readClickPointFmq(gotNew) == 0) {
-    if (gotNew) {
-      if (_params.debug) {
-        cerr << "====>> gotNewClickInfo" << endl;
-      }
-      if (_horiz) {
-        _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
-                              _clickPointFmq.getElevation(),
-                              _clickPointFmq.getRangeKm());
-      }
-    }
-  }
-
-  // handle event
-
-  timer_func(event);
-  
-  if (event->timerId() == _mainTimerId) {
-    
-    // if (_archiveMode) {
-    //   if (_archiveRetrievalPending) {
-    //     _handleArchiveData(/*event*/);
-    //     _archiveRetrievalPending = false;
-    //   }
-    // } else {
-    //   _handleRealtimeData(event);
-    // }
-
-  }
-
   // get the time control into the right place
   // we need to let the windows fully draw
 
@@ -337,8 +266,25 @@ void CartManager::timerEvent(QTimerEvent *event)
     _placeTimeControl();
   }
 
-  // check for image creation
+  // read click point info from FMQ
   
+  _readClickPoint();
+  
+  // handle legacy cidd timer event
+
+  cidd_timer_func(event);
+  
+  // if (_archiveMode) {
+  //   if (_archiveRetrievalPending) {
+  //     _handleArchiveData(/*event*/);
+  //     _archiveRetrievalPending = false;
+  //   }
+  // } else {
+  //   _handleRealtimeData(event);
+  // }
+  
+  // handle image creation
+
   if (_params.images_auto_create) {
     
     // if we are just creating files in archive mode
@@ -362,7 +308,7 @@ void CartManager::timerEvent(QTimerEvent *event)
       return;
     }
     
-  }
+  } // if (_params.images_auto_create)
   
 }
 
@@ -618,7 +564,7 @@ void CartManager::_setupWindows()
 
 }
 
-//////////////////////////////
+//////////////////////////////////////////////////
 // add/remove  sweep panel (archive mode only)
 
 // void CartManager::_setSweepPanelVisibility()
@@ -3037,6 +2983,88 @@ void CartManager::_createBoundaryEditorDialog()
 
 #endif
 
+/////////////////////////////////////////////////////////
+// check for field change
+
+void CartManager::_checkForFieldChange()
+{
+
+  if (_fieldTable == NULL) {
+    return;
+  }
+
+  if (_fieldTableCurrentRow == _fieldTable->currentRow() &&
+      _fieldTableCurrentColumn == _fieldTable->currentColumn()) {
+    // no change
+    return;
+  }
+  
+  const FieldTableItem *item =
+    (const FieldTableItem *) _fieldTable->item(_fieldTable->currentRow(),
+                                               _fieldTable->currentColumn());
+  
+  if (item->text().toStdString().size() == 0) {
+    _fieldTable->setCurrentCell(_fieldTableCurrentRow,
+                                _fieldTableCurrentColumn);
+  } else {
+    _fieldTableCurrentColumn = _fieldTable->currentColumn();
+    _fieldTableCurrentRow = _fieldTable->currentRow();
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      const Params::field_t *fparams = item->getFieldParams();
+      cerr << "Changing to field: " << fparams->button_label << endl;
+      cerr << "              url: " << fparams->url << endl;
+    }
+  }
+  
+}
+
+/////////////////////////////////////////////////////////
+// handle first time event
+
+void CartManager::_handleFirstTimerEvent()
+{
+
+  _horiz->resize(_horizFrame->width(), _horizFrame->height());
+  
+  // Set the size of the second column to the size of the largest
+  // label.  This should keep the column from wiggling as the values change.
+  // The default values for the labels must be their maximum size for this
+  // to work.  This is ugly, but it works.
+  
+  int maxWidth = 0;
+  for (size_t ii = 0; ii < _valsRight.size(); ii++) {
+    if (maxWidth < _valsRight[ii]->width()) {
+      maxWidth = _valsRight[ii]->width();
+    }
+  }
+  _statusLayout->setColumnMinimumWidth(1, maxWidth);
+  
+}
+
+/////////////////////////////////////////////////////////
+// read click point from FMQ - i.e. from another app
+
+void CartManager::_readClickPoint()
+{
+
+  bool gotNew = false;
+
+  if (_readClickPointFmq(gotNew) == 0) {
+    if (gotNew) {
+      if (_params.debug) {
+        cerr << "====>> gotNewClickInfo" << endl;
+      }
+      if (_horiz) {
+        _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
+                              _clickPointFmq.getElevation(),
+                              _clickPointFmq.getRangeKm());
+      }
+    }
+  }
+  
+}
+
+  
 /**********************************************************************
  * HANDLE_CLIENT_EVENT: 
  */
@@ -3369,7 +3397,7 @@ void CartManager::check_what_needs_rendering(int frame_index)
  *
  */
 
-void CartManager::timer_func(QTimerEvent *event)
+void CartManager::cidd_timer_func(QTimerEvent *event)
 {
 
   met_record_t *mr;
