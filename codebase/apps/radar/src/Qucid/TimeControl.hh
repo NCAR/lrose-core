@@ -191,7 +191,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   bool _isRealtime;
   bool _isSweep;
 
-  void _setRedraw();
+  void _acceptSelectedTime();
+  void _changeMovieLimits();
 
  public slots:
 

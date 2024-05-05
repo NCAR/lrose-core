@@ -310,6 +310,12 @@ private:
   int update_interv;
   int update_due;
 
+  struct timeval cur_tm;
+  struct timeval last_frame_tm;
+  struct timeval last_dcheck_tm;
+  time_t last_tick = 0;
+  long client_seq_num = 0;
+  
   //////////////////////////////
   // private methods
 

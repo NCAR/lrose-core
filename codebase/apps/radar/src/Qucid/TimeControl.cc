@@ -113,13 +113,50 @@ TimeControl::~TimeControl()
 
 }
 
-////////////////////////
-// set flags for redraw
+/////////////////////////////////////////
+// set flags for change in selected time
 
-void TimeControl::_setRedraw()
+void TimeControl::_acceptSelectedTime()
 {
-  cerr << "====>> setRedraw()" << endl;
+  cerr << "====>> acceptSelectedTime()" << endl;
+  gd.data_request_time = _selectedTime.utime();
   set_redraw_flags(1, 1);
+}
+
+/////////////////////////////////////////
+// set flags for change in movie limits
+
+void TimeControl::_changeMovieLimits()
+{
+
+  cerr << "====>> changeMovieLimits()" << endl;
+  gd.epoch_start = _startTime.utime();
+  gd.epoch_end = _endTime.utime();
+  gd.data_request_time = _selectedTime.utime();
+  gd.movie.num_frames = _nFramesMovie;
+  gd.movie.start_frame = 0;
+  gd.movie.start_frame = _nFramesMovie - 1;
+  gd.movie.display_time_msec = _loopDwellMsecs;
+  gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
+
+  reset_time_points();
+  invalidate_all_data();
+  set_redraw_flags(1, 1);
+  
+  if (gd.prod_mgr) {
+    gd.prod_mgr->reset_times_valid_flags();
+  }
+  
+  if(gd.time_plot) {
+    gd.time_plot->Set_times(gd.epoch_start,
+                            gd.epoch_end,
+                            gd.movie.frame[gd.movie.cur_frame].time_start,
+                            gd.movie.frame[gd.movie.cur_frame].time_end,
+                            (gd.movie.time_interval_mins * 60.0) + 0.5,
+                            gd.movie.num_frames);
+    gd.time_plot->Draw(); 
+  }
+    
 }
 
 //////////////////////////////////////////////
@@ -516,7 +553,7 @@ void TimeControl::populateGui()
 
   _nFramesSelector = new QSpinBox(timeSliderFrame);
   _nFramesSelector->setMinimum(1);
-  _nFramesSelector->setMaximum(999);
+  _nFramesSelector->setMaximum(MAX_FRAMES);
   _nFramesSelector->setPrefix("N frames: ");
   _nFramesSelector->setValue(_nFramesMovie);
   _nFramesSelector->setContentsMargins(2, 2, 2, 2);
@@ -599,7 +636,7 @@ void TimeControl::_acceptGuiSelections()
   _endTime = _startTime + _movieDurationSecs;
   _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
   // set redraw flags
-  _setRedraw();
+  _changeMovieLimits();
 }
 
 void TimeControl::_cancelGuiSelections()
@@ -754,7 +791,7 @@ void TimeControl::_goBack1()
   _selectedTime = _guiSelectedTime;
   setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
-  _setRedraw();
+  _acceptSelectedTime();
 }
 
 // go back by movie duration
@@ -804,7 +841,7 @@ void TimeControl::_goFwd1()
   _selectedTime = _guiSelectedTime;
   setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
-  _setRedraw();
+  _acceptSelectedTime();
 }
 
 // go fwd by movie duration
@@ -886,7 +923,7 @@ void TimeControl::_timeSliderValueChanged(int value)
     return;
   }
   // set redraw flags
-  _setRedraw();
+  _changeMovieLimits();
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -906,7 +943,7 @@ void TimeControl::_timeSliderReleased()
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
-  _setRedraw();
+  _changeMovieLimits();
 }
 
 void TimeControl::_timeSliderPressed() 

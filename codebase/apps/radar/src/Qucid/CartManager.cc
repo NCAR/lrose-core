@@ -185,6 +185,10 @@ CartManager::CartManager(const Params &params,
   redraw_interv = _params.redraw_interval;
   update_interv = _params.update_interval;
   update_due = 0;
+  last_frame_tm = {0,0};
+  last_dcheck_tm = {0,0};
+  last_tick = 0;
+  client_seq_num = 0;
   
 }
 
@@ -3426,17 +3430,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   Pixmap h_xid = 0;
   Pixmap v_xid = 0;
 
-  // struct itimerval timer;
-
   struct timezone cur_tz;
-  static struct timeval cur_tm;
-  static struct timeval last_frame_tm = {0,0};
-  static struct timeval last_dcheck_tm = {0,0};
-  static time_t last_tick = 0;
-  static long client_seq_num = 0;
-
-  // Use unused parameters
-  extern void check_for_io(); 
 
   if(gd.io_info.outstanding_request) {
     check_for_io();
@@ -3466,11 +3460,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     }
     update_ticker(cur_tm.tv_sec);
     last_tick = cur_tm.tv_sec;
-    // cerr << "88888888888 last_event_time: " << DateTime::strm(gd.last_event_time) << endl;
-    // cerr << "88888888888 last_tick: " << DateTime::strm(last_tick) << endl;
-    // cerr << "88888888888 idle_reset_seconds: " << _params.idle_reset_seconds << endl;
     if(gd.last_event_time < (last_tick - _params.idle_reset_seconds)) {
-      // cerr << "99999999999999999999" << endl;
       reset_display();
       gd.last_event_time = last_tick;
     }
