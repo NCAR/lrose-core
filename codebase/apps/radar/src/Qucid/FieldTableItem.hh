@@ -74,14 +74,17 @@ class DLL_EXPORT FieldTableItem : public QTableWidgetItem {
   // set the TDRP field parameters
   
   void setFieldParams(Params::field_t *val) { _fparams = val; }
-
+  void setFieldIndex(int val) { _index = val; }
+  
   // get the TDRP field parameters
   
   const Params::field_t *getFieldParams() const { return _fparams; }
+  const int getFieldIndex() const { return _index; }
 
  protected:
 
   Params::field_t *_fparams;
+  int _index;
 
 };
 

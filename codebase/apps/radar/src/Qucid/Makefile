@@ -205,8 +205,6 @@ NORM_SRCS = \
 	xview_file_access.cc \
 	zoom_pu_proc.cc
 
-#	timer_control.cc \
-
 MOC_SRCS = \
 	CartManager.cc \
 	CartWidget.cc \

@@ -386,11 +386,11 @@ private:
     
   // for timer
   
-  void handle_client_event();
-  void check_for_expired_data(time_t tm);
-  void check_for_data_updates(time_t tm);
-  void check_what_needs_rendering(int frame_index);
-  void cidd_timer_func(QTimerEvent *event);
+  void _handleClientEvent();
+  void _checkForExpiredData(time_t tm);
+  void _checkForDataUpdates(time_t tm);
+  void _checkWhatNeedsRendering(int frame_index);
+  void _ciddTimerFunc(QTimerEvent *event);
        
 private slots:
 

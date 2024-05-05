@@ -272,7 +272,7 @@ void CartManager::timerEvent(QTimerEvent *event)
   
   // handle legacy cidd timer event
 
-  cidd_timer_func(event);
+  _ciddTimerFunc(event);
   
   // if (_archiveMode) {
   //   if (_archiveRetrievalPending) {
@@ -2223,6 +2223,7 @@ void CartManager::_createFieldMenu()
       if (fieldNum < _params.fields_n) {
         if (strlen(_params._fields[fieldNum].group_name) > 0) {
           item->setText(_params._fields[fieldNum].button_label);
+          item->setFieldIndex(fieldNum);
         }
       }
       item->setFieldParams(&_params._fields[fieldNum]);
@@ -3009,10 +3010,17 @@ void CartManager::_checkForFieldChange()
   } else {
     _fieldTableCurrentColumn = _fieldTable->currentColumn();
     _fieldTableCurrentRow = _fieldTable->currentRow();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    int fieldNum = item->getFieldIndex();
+    gd.h_win.page = fieldNum;
+    gd.v_win.page = fieldNum;
+    if (_params.debug) {
       const Params::field_t *fparams = item->getFieldParams();
       cerr << "Changing to field: " << fparams->button_label << endl;
       cerr << "              url: " << fparams->url << endl;
+      cerr << "         fieldNum: " << fieldNum << endl;
+      cerr << "      field_label: " << gd.mrec[fieldNum]->field_label << endl;
+      cerr << "      button_name: " << gd.mrec[fieldNum]->button_name << endl;
+      cerr << "      legend_name: " << gd.mrec[fieldNum]->legend_name << endl;
     }
   }
   
@@ -3069,19 +3077,19 @@ void CartManager::_readClickPoint()
  * HANDLE_CLIENT_EVENT: 
  */
 
-void CartManager::handle_client_event()
+void CartManager::_handleClientEvent()
 {
 
   time_t clock;
   
   if(gd.debug1) fprintf(stderr,"Found Client Event: %d, Args: %s\n",
 			gd.coord_expt->client_event,gd.coord_expt->client_args);
-
+  
   switch(gd.coord_expt->client_event) {
     case NEW_MDV_AVAIL:
       remote_new_mdv_avail(gd.coord_expt->client_args);
       break;
-
+      
     case NEW_SPDB_AVAIL:
       remote_new_spdb_avail(gd.coord_expt->client_args);
       break;
@@ -3167,7 +3175,7 @@ void CartManager::handle_client_event()
  * the data's expiration time has been exceeded - Mark it invalid if so.
  */
 
-void CartManager::check_for_expired_data(time_t tm)
+void CartManager::_checkForExpiredData(time_t tm)
 {
   int i;
 
@@ -3204,11 +3212,11 @@ void CartManager::check_for_expired_data(time_t tm)
 }
 
 /**********************************************************************
- * CHECK_FOR_DATA_UPDATES: Check all data and determine if 
+ * _CHECKFORDATAUPDATES: Check all data and determine if 
  * new data has arrived - Mark it invalid if so.
  */
 
-void CartManager::check_for_data_updates(time_t tm)
+void CartManager::_checkForDataUpdates(time_t tm)
 {
   DmapAccess dmap;
   int i,j;
@@ -3307,20 +3315,23 @@ void CartManager::check_for_data_updates(time_t tm)
 }
 
 ////////////////////////////////////////////////////////////////// 
-// check_what_needs_rendering:
+// _checkWhatNeedsRendering:
 
-void CartManager::check_what_needs_rendering(int frame_index)
+void CartManager::_checkWhatNeedsRendering(int frame_index)
 {
   int i;
-
-  // If data used to draw plan view is invalid - Indicate plane view image needs rerendering
-  if (gd.mrec[gd.h_win.page]->h_data_valid == 0 || gd.prod_mgr->num_products_invalid() > 0) {
+  
+  // If data used to draw plan view is invalid
+  // Indicate plan view image needs rerendering
+  
+  if (gd.mrec[gd.h_win.page]->h_data_valid == 0 ||
+      gd.prod_mgr->num_products_invalid() > 0) {
     gd.movie.frame[frame_index].redraw_horiz = 1;
     gd.h_win.redraw[gd.h_win.page] = 1;
   }
 
   for ( i=0; i < gd.layers.num_wind_sets; i++ ) {
-    /* Look through wind field data too */
+    // Look through wind field data too
     if (gd.layers.wind[i].active) {
       if (gd.layers.wind[i].wind_u->h_data_valid == 0) {
         gd.movie.frame[frame_index].redraw_horiz = 1;
@@ -3330,14 +3341,16 @@ void CartManager::check_what_needs_rendering(int frame_index)
         gd.movie.frame[frame_index].redraw_horiz = 1;
         gd.h_win.redraw[gd.h_win.page] = 1;
       }
-      if (gd.layers.wind[i].wind_w != NULL && gd.layers.wind[i].wind_w->h_data_valid == 0) {
+      if (gd.layers.wind[i].wind_w != NULL &&
+          gd.layers.wind[i].wind_w->h_data_valid == 0) {
         gd.movie.frame[frame_index].redraw_horiz = 1;
         gd.h_win.redraw[gd.h_win.page] = 1;
       }
     }
   }
 
-  /* Check overlay contours if active */
+  // Check overlay contours if active
+
   for(i= 0; i < NUM_CONT_LAYERS; i++) {
     if(gd.layers.cont[i].active) {
       if(gd.mrec[gd.layers.cont[i].field]->h_data_valid == 0) {
@@ -3347,7 +3360,9 @@ void CartManager::check_what_needs_rendering(int frame_index)
     }
   } 
 
-  // If data used to draw cross section is invalid - Indicate pcross section image needs rerendering
+  // If data used to draw cross section is invalid
+  // Indicate pcross section image needs rerendering
+  
   if (gd.v_win.active ) {
     if(gd.mrec[gd.v_win.page]->v_data_valid == 0)  {
       gd.movie.frame[frame_index].redraw_vert = 1;
@@ -3365,7 +3380,8 @@ void CartManager::check_what_needs_rendering(int frame_index)
           gd.movie.frame[frame_index].redraw_vert = 1;
           gd.v_win.redraw[gd.v_win.page] = 1;
 	}
-	if (gd.layers.wind[i].wind_w != NULL && gd.layers.wind[i].wind_w->v_data_valid == 0) {
+	if (gd.layers.wind[i].wind_w != NULL &&
+            gd.layers.wind[i].wind_w->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
           gd.v_win.redraw[gd.v_win.page] = 1;
 	}
@@ -3397,7 +3413,7 @@ void CartManager::check_what_needs_rendering(int frame_index)
  *
  */
 
-void CartManager::cidd_timer_func(QTimerEvent *event)
+void CartManager::_ciddTimerFunc(QTimerEvent *event)
 {
 
   met_record_t *mr;
@@ -3426,7 +3442,7 @@ void CartManager::cidd_timer_func(QTimerEvent *event)
   }
 
   if(gd.coord_expt->client_event != NO_MESSAGE) {
-    handle_client_event();
+    _handleClientEvent();
   }
 
   gettimeofday(&cur_tm,&cur_tz);
@@ -3626,11 +3642,11 @@ void CartManager::cidd_timer_func(QTimerEvent *event)
 	if (gd.movie.cur_frame == gd.movie.num_frames -1) {
           update_due = tm + update_interv;
 
-          check_for_expired_data(tm);  // Look for old data
+          _checkForExpiredData(tm);  // Look for old data
 
-          check_for_data_updates(tm);  // Look for data that's newly updated
+          _checkForDataUpdates(tm);  // Look for data that's newly updated
 
-          check_what_needs_rendering(index);
+          _checkWhatNeedsRendering(index);
 
           // Auto click to get ancillary displays to update too.
           gd.coord_expt->click_type = CIDD_OTHER_CLICK;
@@ -3977,6 +3993,3 @@ void CartManager::cidd_timer_func(QTimerEvent *event)
   }
 
 }
-
-    
-
