@@ -106,7 +106,6 @@ void check_for_io()
         case HORIZ_REQUEST:
           // Check if our data access thread  is done
           if( mr->h_mdvx->getThreadDone() ) { // Yes
-            cerr << "HHHHHHHHHHHHHH DDDDDDDDDDDDDDDDDDD" << endl;
             // OK - Data is now in.
 
             if(mr->h_mdvx->getThreadRetVal()) { // Error
@@ -405,7 +404,6 @@ void check_for_io()
 
         case VERT_REQUEST:
           if( mr->v_mdvx->getThreadDone() ) { // Yes
-            cerr << "VVVVVVVVVVVVVVVVV DDDDDDDDDDDDDDDDDDD" << endl;
             // OK - Data is now in.
             if(mr->v_mdvx->getThreadRetVal() || mr->v_mdvx->getNFields() < 1) {
 
@@ -570,7 +568,6 @@ void check_for_io()
         case TIMELIST_REQUEST:
           // Check if our data access thread  is done
           if( mr->h_mdvx->getThreadDone() ) { // Yes
-            cerr << "TTTTTTTTTTTTTT DDDDDDDDDDDDDDDDDDD" << endl;
 
             if(mr->h_mdvx->getThreadRetVal()) {  // check the return value
 

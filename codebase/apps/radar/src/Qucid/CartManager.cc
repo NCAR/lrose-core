@@ -3465,8 +3465,13 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     }
     update_ticker(cur_tm.tv_sec);
     last_tick = cur_tm.tv_sec;
+    cerr << "88888888888 last_event_time: " << DateTime::strm(gd.last_event_time) << endl;
+    cerr << "88888888888 last_tick: " << DateTime::strm(last_tick) << endl;
+    cerr << "88888888888 idle_reset_seconds: " << _params.idle_reset_seconds << endl;
     if(gd.last_event_time < (last_tick - _params.idle_reset_seconds)) {
+      cerr << "99999999999999999999" << endl;
       reset_display();
+      gd.last_event_time = last_tick;
     }
   }
 

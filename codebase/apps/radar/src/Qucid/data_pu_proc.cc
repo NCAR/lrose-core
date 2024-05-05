@@ -72,7 +72,9 @@ void set_field(int value)
         gd.movie.frame[i].redraw_horiz = 1;
     }
 
-   if(gd.movie.movie_on ) reset_data_valid_flags(1,0);
+    if(gd.movie.movie_on ) {
+      reset_data_valid_flags(1,0);
+    }
 
    // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
 

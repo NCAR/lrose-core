@@ -63,7 +63,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   if(mr->h_data_valid == 0) {
     if(gd.debug1) {
       fprintf(stderr,
-              "Requesting False Color Field %d data time %s %s\n",
+              "Requesting Data Field %d data time %s %s\n",
               page, utimstr(start_time), utimstr(end_time));
     }
     gd.data_status_changed = 0;
