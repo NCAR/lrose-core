@@ -4084,6 +4084,7 @@ void Beam::_computeVelocityCorrectedForMotion()
   // no good if no georeference available
 
   if (!_georefActive) {
+    _copyVelToCorrectedVel();
     return;
   }
 
@@ -4149,6 +4150,7 @@ void Beam::_computeVelocityCorrectedForMotion()
 
   if (vertCorr == 0.0 && horizCorr == 0.0) {
     // no change needed
+    _copyVelToCorrectedVel();
     return;
   }
 
@@ -4170,6 +4172,24 @@ void Beam::_computeVelocityCorrectedForMotion()
       _gateData[ii]->fieldsF.vel_corr_motion = velFCorr;
     }
     
+  } // ii
+
+}
+
+void Beam::_copyVelToCorrectedVel()
+
+{
+
+  for (int ii = 0; ii < _nGates; ii++) {
+
+    double vel = _gateData[ii]->fields.vel;
+    _gateData[ii]->fields.vel_corr_vert = vel;
+    _gateData[ii]->fields.vel_corr_motion = vel;
+
+    double velF = _gateData[ii]->fieldsF.vel;
+    _gateData[ii]->fieldsF.vel_corr_vert = velF;
+    _gateData[ii]->fieldsF.vel_corr_motion = velF;
+
   } // ii
 
 }
