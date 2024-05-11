@@ -160,6 +160,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     }
     
   } // i
@@ -175,6 +180,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "PidZdrStats reads in Particle ID data from a CfRadial file, and computes the statistics of the ZDR distribution in various PID categories." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

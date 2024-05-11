@@ -559,8 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("");
-    tt->comment_text = tdrpStrDup("RadxDealias reads input radar data from a file, dealiases the velocity data, and writes the results to a file.  The output file contains a new field that contains the unfolded velocity. The unfolded velocity field has the same name with _UNF appended. ");
+    tt->comment_hdr = tdrpStrDup("RadxDealias reads input radar data from a file, dealiases the velocity data, and writes the results to a file.  The output file contains a new field that contains the unfolded velocity. The unfolded velocity field has the same name with _UNF appended. ");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 1'

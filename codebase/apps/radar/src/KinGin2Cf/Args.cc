@@ -370,6 +370,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     }
     
   } // i
@@ -415,6 +420,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "KinGin2Cf reads radar moments from the Kin-San and Gin-San radars in Japan. It converts the data into Radx and writes the data to files, normally in CfRadial format." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

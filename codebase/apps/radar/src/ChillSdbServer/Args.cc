@@ -108,6 +108,11 @@ int Args::parse(int argc, char **argv, const string &prog_name)
 	iret = -1;
       }
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -123,7 +128,11 @@ int Args::parse(int argc, char **argv, const string &prog_name)
 
 void Args::_usage(const string &prog_name, ostream &out)
 {
-  
+
+  out << endl;
+  out << "ChillSdbServer reads data from a DsRadar queue, in NCAR/RAL format, reformats it into CHILL SDB (Standard Data Buffer) format, and serves it out via TCP." << endl;
+  out << endl;
+
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"

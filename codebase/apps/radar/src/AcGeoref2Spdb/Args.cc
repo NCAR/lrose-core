@@ -146,6 +146,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
         iret = -1;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -160,6 +165,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "AcGeoref2Spdb reads aircraft georeference data (posn, attitude, motion etc) from IWRF time series and netcdf files, and writes the data to SPDB." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

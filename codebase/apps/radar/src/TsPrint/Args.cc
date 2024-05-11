@@ -409,6 +409,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -423,6 +428,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "TsPrint reads radar time series data from an FMQ, and prints in various ways." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

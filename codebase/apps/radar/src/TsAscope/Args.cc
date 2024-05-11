@@ -234,6 +234,11 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -249,6 +254,10 @@ int Args::parse (const int argc, const char **argv)
 void Args::_usage(ostream &out)
 
 {
+
+  out << endl;
+  out << "TsAscope is the ascope display for time series data in APAR format." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"

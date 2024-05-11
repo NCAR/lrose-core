@@ -98,6 +98,11 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -114,6 +119,10 @@ void Args::_usage(ostream &out)
 
 {
   
+  out << endl;
+  out << "Change map format from Queensland format to CIDD format" << endl;
+  out << endl;
+
   out << "Change map file from Qweensland to CIDD format" << endl;
   out << "Usage: " << _progName << " < qlandmap > ciddmap\n"
       << "options:\n"

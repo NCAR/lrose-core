@@ -275,6 +275,11 @@ int Args::parse (const int argc, const char **argv)
         iret = -1;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i

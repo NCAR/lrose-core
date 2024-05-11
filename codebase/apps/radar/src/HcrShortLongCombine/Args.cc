@@ -132,6 +132,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if ...
 	
   } // i
@@ -147,6 +152,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

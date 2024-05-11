@@ -174,6 +174,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     }
     
   } // i
@@ -189,6 +194,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "HcrVelCorrect reads in HCR moments, computes the apparent velocity of the ground echo, filters the apparent velocity in time to remove spurious spikes, and then corrects the weather echo velocity using the filtered ground velocity as the correction to be applied." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

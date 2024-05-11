@@ -113,6 +113,11 @@ int Args::parse (const int argc, const char **argv)
 	TDRP_add_override(&override, tmp_str);
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -128,6 +133,10 @@ int Args::parse (const int argc, const char **argv)
 void Args::_usage(ostream &out)
 
 {
+
+  out << endl;
+  out << "StormShapeSim simulates storm shapes and writes these to a Cartesian MDV file. It then resamples the Cartesian file using a prescribed radar scan strategy, and writes the radar-bases simulation to a CfRadial file." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"
