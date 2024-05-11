@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Merges volumes from multiple CfRadial files into a single file");
+    tt->comment_hdr = tdrpStrDup("Merges multiple CfRadial volumes, from different directories and containing different fields, into a single file");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

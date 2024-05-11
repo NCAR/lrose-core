@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Merges volumes from multiple CfRadial files into a single file";
+  p_header = "Merges multiple CfRadial volumes, from different directories and containing different fields, into a single file";
 }
 
 commentdef {
