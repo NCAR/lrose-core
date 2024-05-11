@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Mpd2Radx
+ * TDRP params for Mpd2Radx
  **********************************************************************/
 
 //======================================================================
@@ -21,14 +21,12 @@
 //
 // If set, debug messages will be printed appropriately.
 //
-//
 // Type: enum
 // Options:
 //     DEBUG_OFF
 //     DEBUG_NORM
 //     DEBUG_VERBOSE
 //     DEBUG_EXTRA
-//
 
 debug = DEBUG_OFF;
 
@@ -39,9 +37,7 @@ debug = DEBUG_OFF;
 // This application registers with procmap. This is the instance used 
 //   for registration.
 //
-//
 // Type: string
-//
 
 instance = "test";
 
@@ -57,9 +53,7 @@ instance = "test";
 //
 // Files will be searched for in this directory.
 //
-//
 // Type: string
-//
 
 input_dir = ".";
 
@@ -67,21 +61,16 @@ input_dir = ".";
 //
 // Operating mode.
 //
-// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
 //   mode, it moves through the data between the start and end times set 
 //   on the command line. In FILELIST mode, it moves through the list of 
-//   file names specified on the command line. Paths (in ARCHIVE mode, at 
-//   least) MUST contain a day-directory above the data file -- 
-//   ./data_file.ext will not work as a file path, but 
-//   ./yyyymmdd/data_file.ext will.
-//
+//   file names specified on the command line.
 //
 // Type: enum
 // Options:
 //     REALTIME
 //     ARCHIVE
 //     FILELIST
-//
 
 mode = ARCHIVE;
 
@@ -97,9 +86,7 @@ mode = ARCHIVE;
 //
 // REALTIME mode only. Only data less old than this will be used.
 //
-//
 // Type: int
-//
 
 max_realtime_data_age_secs = 300;
 
@@ -110,9 +97,7 @@ max_realtime_data_age_secs = 300;
 // REALTIME mode only. If TRUE, will watch the latest_data_info file. If 
 //   FALSE, will scan the input directory for new files.
 //
-//
 // Type: boolean
-//
 
 latest_data_info_avail = TRUE;
 
@@ -124,9 +109,7 @@ latest_data_info_avail = TRUE;
 //   max_dir_age will be searched. This may take considerable CPU, so be 
 //   careful in its use. Only applies if latest_data_info_avail is FALSE.
 //
-//
 // Type: boolean
-//
 
 search_recursively = TRUE;
 
@@ -140,9 +123,7 @@ search_recursively = TRUE;
 //   directory only. A depth of 1 will search the level below the top 
 //   directory, etc.
 //
-//
 // Type: int
-//
 
 max_recursion_depth = 5;
 
@@ -158,7 +139,6 @@ max_recursion_depth = 5;
 // Minimum val: 1
 //
 // Type: int
-//
 
 wait_between_checks = 2;
 
@@ -170,9 +150,7 @@ wait_between_checks = 2;
 //   from a remote machine is complete before reading it. Only applies if 
 //   latest_data_info_avail is FALSE.
 //
-//
 // Type: int
-//
 
 file_quiescence = 5;
 
@@ -183,9 +161,7 @@ file_quiescence = 5;
 // REALTIME mode only. If set, only files with this extension will be 
 //   processed.
 //
-//
 // Type: string
-//
 
 search_ext = "";
 
@@ -202,9 +178,7 @@ search_ext = "";
 // This will be used to fill in n_samples. If empty, it will not be 
 //   used.
 //
-//
 // Type: string
-//
 
 n_samples_field_name = "WVOnline_LaserShotCount";
 
@@ -214,9 +188,7 @@ n_samples_field_name = "WVOnline_LaserShotCount";
 //
 // If true, (time)-based fields will be included as qualifier fields.
 //
-//
 // Type: boolean
-//
 
 include_qualifier_fields = TRUE;
 
@@ -230,7 +202,6 @@ include_qualifier_fields = TRUE;
 //   attribute will be omitted. If units are not specified, the units from 
 //   the input file will be used.
 //
-//
 // Type: struct
 //   typedef struct {
 //      string mpd_name;
@@ -240,30 +211,8 @@ include_qualifier_fields = TRUE;
 //   }
 //
 // 1D array - variable length.
-//
 
 qualifier_fields = {
-  {
-    mpd_name = "Surface_Temperature",
-    output_name = "",
-    cf_standard_name = "",
-    units = ""
-  }
-  ,
-  {
-    mpd_name = "Surface_Pressure",
-    output_name = "",
-    cf_standard_name = "",
-    units = ""
-  }
-  ,
-  {
-    mpd_name = "Surface_RelHum",
-    output_name = "",
-    cf_standard_name = "",
-    units = ""
-  }
-  ,
   {
     mpd_name = "HSRLCombined_LaserShotCount",
     output_name = "",
@@ -333,7 +282,6 @@ qualifier_fields = {
 //   output field. If the mask field name is empty no mask will be 
 //   applied.
 //
-//
 // Type: struct
 //   typedef struct {
 //      string mpd_name;
@@ -351,12 +299,11 @@ qualifier_fields = {
 //   }
 //
 // 1D array - variable length.
-//
 
 mpd_fields = {
   {
     mpd_name = "Absolute_Humidity",
-    output_name = "Absolute_Humidity",
+    output_name = "AbsRH",
     cf_standard_name = "absolute_humidity",
     units = "",
     mask_field_name = "Absolute_Humidity_mask",
@@ -365,7 +312,7 @@ mpd_fields = {
   ,
   {
     mpd_name = "Aerosol_Backscatter_Coefficient",
-    output_name = "Aerosol_Backscatter_Coefficient",
+    output_name = "BackscatterCoeff",
     cf_standard_name = "aerosol_backscatter_coefficient",
     units = "",
     mask_field_name = "Aerosol_Backscatter_Coefficient_mask",
@@ -374,7 +321,7 @@ mpd_fields = {
   ,
   {
     mpd_name = "Backscatter_Ratio",
-    output_name = "Backscatter_Ratio",
+    output_name = "BackscatterRatio",
     cf_standard_name = "backscatter_ratio",
     units = "",
     mask_field_name = "Backscatter_Ratio_mask",
@@ -383,7 +330,7 @@ mpd_fields = {
   ,
   {
     mpd_name = "HSRLMolecular_MolecularBackscatter",
-    output_name = "HSRLMolecular_MolecularBackscatter",
+    output_name = "MolBackscatter",
     cf_standard_name = "molecular_backscatter",
     units = "",
     mask_field_name = "",
@@ -404,9 +351,7 @@ mpd_fields = {
 // The model output has been converted into MDV/NetCDF, with temperature 
 //   and pressure fields on constant height vlevels. Vlevel units are km.
 //
-//
 // Type: boolean
-//
 
 read_temp_and_pressure_profile_from_model_files = FALSE;
 
@@ -414,9 +359,7 @@ read_temp_and_pressure_profile_from_model_files = FALSE;
 //
 // Name of temperature field in model data.
 //
-//
 // Type: string
-//
 
 model_temperature_field_name = "TMP";
 
@@ -424,12 +367,10 @@ model_temperature_field_name = "TMP";
 //
 // Units for temperature profile data.
 //
-//
 // Type: enum
 // Options:
 //     DEGREES_CELCIUS
 //     DEGREES_KELVIN
-//
 
 temperature_profile_units = DEGREES_CELCIUS;
 
@@ -437,9 +378,7 @@ temperature_profile_units = DEGREES_CELCIUS;
 //
 // Name of pressure field in model data.
 //
-//
 // Type: string
-//
 
 model_pressure_field_name = "Pressure";
 
@@ -447,12 +386,10 @@ model_pressure_field_name = "Pressure";
 //
 // Units for pressure profile data.
 //
-//
 // Type: enum
 // Options:
 //     PA
 //     HPA
-//
 
 pressure_profile_units = HPA;
 
@@ -462,9 +399,7 @@ pressure_profile_units = HPA;
 //
 // Data is in MDV or CF NetCDF format.
 //
-//
 // Type: string
-//
 
 model_profile_mdv_data_url = "$(DATA_DIR)/mdv/gfs";
 
@@ -475,9 +410,7 @@ model_profile_mdv_data_url = "$(DATA_DIR)/mdv/gfs";
 // If a data file has previously been read, within this search margin, 
 //   then that file is used again.
 //
-//
 // Type: int
-//
 
 model_profile_search_margin_secs = 7200;
 
@@ -491,25 +424,21 @@ model_profile_search_margin_secs = 7200;
 //
 // Instrument name.
 //
-// See override_instrument_name.
-//
+// If not empty, override the instrument name.
 //
 // Type: string
-//
 
-instrument_name = "MPD05";
+instrument_name = "mpd03";
 
 ///////////// site_name ///////////////////////////////
 //
 // Site name.
 //
-// See override_site_name.
-//
+// If not empty, override the site name.
 //
 // Type: string
-//
 
-site_name = "CSU";
+site_name = "";
 
 //======================================================================
 //
@@ -523,11 +452,9 @@ site_name = "CSU";
 //
 // Files will be written to this directory.
 //
-//
 // Type: string
-//
 
-output_dir = "$(HOME)/data/mpd/cfradial/mpd05";
+output_dir = "$(HOME)/data/MPD/cfradial/mpd03";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -538,14 +465,12 @@ output_dir = "$(HOME)/data/mpd/cfradial/mpd05";
 //   include only end time in file name. SPECIFY_FILE_NAME: file of this 
 //   name will be written to output_dir.
 //
-//
 // Type: enum
 // Options:
 //     START_AND_END_TIMES
 //     START_TIME_ONLY
 //     END_TIME_ONLY
 //     SPECIFY_FILE_NAME
-//
 
 output_filename_mode = START_AND_END_TIMES;
 
@@ -555,9 +480,7 @@ output_filename_mode = START_AND_END_TIMES;
 //
 // If empty, the standard prefix will be used.
 //
-//
 // Type: string
-//
 
 output_filename_prefix = "";
 
@@ -569,9 +492,7 @@ output_filename_prefix = "";
 //   instrument name will be included just before the volume number in the 
 //   output file name.
 //
-//
 // Type: boolean
-//
 
 include_instrument_name_in_file_name = TRUE;
 
@@ -583,9 +504,7 @@ include_instrument_name_in_file_name = TRUE;
 //   millisecs of the start and end time will be included in the file 
 //   name.
 //
-//
 // Type: boolean
-//
 
 include_subsecs_in_file_name = TRUE;
 
@@ -596,9 +515,7 @@ include_subsecs_in_file_name = TRUE;
 // Default is false. Only applies to CfRadial files. Normally an 
 //   underscore is used.
 //
-//
 // Type: boolean
-//
 
 use_hyphen_in_file_name_datetime_part = FALSE;
 
@@ -609,9 +526,7 @@ use_hyphen_in_file_name_datetime_part = FALSE;
 // Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
 //   this name will be written to output_dir.
 //
-//
 // Type: string
-//
 
 output_filename = "cfradial.test.nc";
 
@@ -621,9 +536,7 @@ output_filename = "cfradial.test.nc";
 //
 // Path will be output_dir/yyyymmdd/filename.
 //
-//
 // Type: boolean
-//
 
 append_day_dir_to_output_dir = TRUE;
 
@@ -633,9 +546,7 @@ append_day_dir_to_output_dir = TRUE;
 //
 // Path will be output_dir/yyyy/yyyymmdd/filename.
 //
-//
 // Type: boolean
-//
 
 append_year_dir_to_output_dir = FALSE;
 
@@ -646,9 +557,7 @@ append_year_dir_to_output_dir = FALSE;
 // If true, the _latest_data_info files will be written after the 
 //   converted file is written.
 //
-//
 // Type: boolean
-//
 
 write_latest_data_info = FALSE;
 
@@ -667,9 +576,7 @@ write_latest_data_info = FALSE;
 // If empty, no effect. If not empty, this string is used to set the 
 //   title attribute.
 //
-//
 // Type: string
-//
 
 title = "MPD";
 
@@ -680,9 +587,7 @@ title = "MPD";
 // If empty, no effect. If not empty, this string is used to set the 
 //   institution attribute.
 //
-//
 // Type: string
-//
 
 institution = "NCAR/EOL/RSF";
 
@@ -693,9 +598,7 @@ institution = "NCAR/EOL/RSF";
 // If empty, no effect. If not empty, this string is used to set the 
 //   references attribute.
 //
-//
 // Type: string
-//
 
 references = "";
 
@@ -706,9 +609,7 @@ references = "";
 // If empty, the Project global attribute in the file will be used. If 
 //   not empty, this string is used to override the Project attribute.
 //
-//
 // Type: string
-//
 
 source_override = "";
 
@@ -719,9 +620,7 @@ source_override = "";
 // If empty, we will use the history attribute in the file. If not 
 //   empty, this string is used to override the history attribute.
 //
-//
 // Type: string
-//
 
 history_override = "";
 
@@ -732,9 +631,7 @@ history_override = "";
 // If empty, the description global attribute will be used. If not 
 //   empty, this string is used to override the description attribute.
 //
-//
 // Type: string
-//
 
 comment_override = "";
 
@@ -742,9 +639,7 @@ comment_override = "";
 //
 // Set the author global attribute.
 //
-//
 // Type: string
-//
 
 author = "NCAR/EOL/RSF";
 

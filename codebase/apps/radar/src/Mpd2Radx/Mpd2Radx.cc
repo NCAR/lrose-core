@@ -468,7 +468,7 @@ int Mpd2Radx::_processMpdNcFile(const string &readPath)
 
   // finalize the volume before writing
   
-  void finalizeVol(RadxVol &vol);
+  _finalizeVol(vol);
   
   // write the file
   if (_writeVol(vol)) {
