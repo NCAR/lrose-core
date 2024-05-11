@@ -80,6 +80,7 @@
 #include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/TaStr.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
 #include <Radx/RadxFile.hh>
@@ -3685,11 +3686,9 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     }
   }
 
-
-
-
   /******** Handle Frame changes ********/
   if (gd.movie.last_frame != gd.movie.cur_frame && gd.movie.cur_frame >= 0) {
+
     reset_data_valid_flags(1,1);
 
     if(_params.symprod_short_requests) {
@@ -3705,6 +3704,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if(gd.debug2) {
       printf("Moved movie frame, index : %d\n",index);
     }
+
     gd.coord_expt->epoch_start = gd.epoch_start;
     gd.coord_expt->epoch_end = gd.epoch_end;
 
@@ -3756,18 +3756,16 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
   // generate vert section images as required
 
-#ifdef NOTNOW2
+  if (_params.image_generate_vsection) {
 
-  if (gd.images_P->generate_vsection_images) {
-
-    if (gd.images_P->debug) {
+    if (_params.image_debug) {
       cerr << "============>> generating specified vsection images" << endl;
     }
 
-    for (int ii = 0; ii < gd.images_P->vsection_spec_n; ii++) {
+    for (int ii = 0; ii < _params.image_vsection_spec_n; ii++) {
 
-      Cimages_P::vsection_spec_t vsect = gd.images_P->_vsection_spec[ii];
-      if (gd.images_P->debug) {
+      Params::image_vsection_spec_t vsect = _params._image_vsection_spec[ii];
+      if (_params.image_debug) {
         cerr << "=================>> generating vsection ii: " << ii << endl;
         cerr << "    vsection_label: " << vsect.vsection_label << endl;
         cerr << "    n_waypts: " << vsect.n_waypts << endl;
@@ -3811,10 +3809,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
     } // ii
 
-  } // if (gd.images_P->generate_vsection_images)
+  } // if (_params.image_generate_vsection)
 
-#endif
-  
   /* Draw Selected field - Horizontal for this movie frame */
   if (gd.movie.frame[index].redraw_horiz) {
     /* Draw Frame */ 
@@ -3835,7 +3831,10 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   }
 	
 
-  /***** Selected Field or movie frame has changed - Copy background image onto visible canvas *****/
+  /* Selected Field or movie frame has changed
+   * Copy background image onto visible canvas
+   */
+  
   if (gd.h_copy_flag || (gd.h_win.cur_cache_im != gd.h_win.last_cache_im)) {
 
     if (gd.debug2) {

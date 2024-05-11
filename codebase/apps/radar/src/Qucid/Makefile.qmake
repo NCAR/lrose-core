@@ -1371,6 +1371,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/LogStream.hh \
 		$(HOME)/lrose/include/toolsa/copyright.h \
 		$(HOME)/lrose/include/toolsa/LogFile.hh \
+		$(HOME)/lrose/include/toolsa/TaStr.hh \
 		$(HOME)/lrose/include/dsserver/DsLdataInfo.hh \
 		$(HOME)/lrose/include/didss/LdataInfo.hh \
 		$(HOME)/lrose/include/toolsa/umisc.h \

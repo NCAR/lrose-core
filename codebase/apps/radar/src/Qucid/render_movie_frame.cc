@@ -38,39 +38,40 @@
 
 int render_h_movie_frame( int index, Drawable xid)
 {
-    int    c_field;
-    int stat = 0;
 
-    c_field = gd.h_win.page;
-    if(gd.debug2)
-        fprintf(stderr,
-                "Rendering Horizontal movie_frame %d - field: %d, to Xid: %ld\n",
-                index, c_field,xid);
+  int    c_field;
+  int stat = 0;
 
-    switch(gd.movie.mode) {
-        case REALTIME_MODE :
-        case ARCHIVE_MODE :
-            stat = gather_hwin_data(c_field,
-                                    gd.movie.frame[index].time_start,
-                                    gd.movie.frame[index].time_end);
-            if(stat == CIDD_SUCCESS)  {
-                render_horiz_display(xid,c_field,
-                                     gd.movie.frame[index].time_start,
-                                     gd.movie.frame[index].time_end);
-            } else {
-                return stat;
-            }
-        break;
+  c_field = gd.h_win.page;
+  if(gd.debug2)
+    fprintf(stderr,
+            "Rendering Horizontal movie_frame %d - field: %d, to Xid: %ld\n",
+            index, c_field,xid);
+
+  switch(gd.movie.mode) {
+    case REALTIME_MODE :
+    case ARCHIVE_MODE :
+      stat = gather_hwin_data(c_field,
+                              gd.movie.frame[index].time_start,
+                              gd.movie.frame[index].time_end);
+      if(stat == CIDD_SUCCESS)  {
+        render_horiz_display(xid,c_field,
+                             gd.movie.frame[index].time_start,
+                             gd.movie.frame[index].time_end);
+      } else {
+        return stat;
+      }
+      break;
          
-        default:
-            fprintf(stderr,
-                    "Invalid movie mode %d in render_h_movie_frame\n",
-                    gd.movie.mode);
-            break;
-    }
+    default:
+      fprintf(stderr,
+              "Invalid movie mode %d in render_h_movie_frame\n",
+              gd.movie.mode);
+      break;
+  }
 
 
-    return stat;
+  return stat;
 }
 
 /*************************************************************************
@@ -79,22 +80,22 @@ int render_h_movie_frame( int index, Drawable xid)
 
 int render_v_movie_frame( int index, Drawable xid)
 {
-    int    c_field;
-    int    stat = 0;
+  int    c_field;
+  int    stat = 0;
 
-    c_field = gd.v_win.page;
+  c_field = gd.v_win.page;
 
-    if(gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
+  if(gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
 
-    switch(gd.movie.mode) {
-        case REALTIME_MODE:
-        case ARCHIVE_MODE:
-            stat = render_vert_display(xid, c_field,
-                                       gd.movie.frame[index].time_start,
-                                       gd.movie.frame[index].time_end);
-        break;
+  switch(gd.movie.mode) {
+    case REALTIME_MODE:
+    case ARCHIVE_MODE:
+      stat = render_vert_display(xid, c_field,
+                                 gd.movie.frame[index].time_start,
+                                 gd.movie.frame[index].time_end);
+      break;
          
-    }
+  }
 
-    return stat;
+  return stat;
 }
