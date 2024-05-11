@@ -149,6 +149,38 @@ int tdrpIsArgValid(const char *arg)
 }
 
 /*********************************************************
+ * tdrpCheckArgAndWarn()
+ *
+ * prints warning if arg starts with '-', but is not
+ * related to TDRP.
+ */
+
+void tdrpCheckArgAndWarn(const char *arg, FILE *out)
+  
+{
+  
+  // check that arg starts with '-'
+  
+  if (arg[0] != '-') {
+    return;
+  }
+
+  // is this a valid tdrp arg?
+  
+  if (tdrpIsArgValid(arg)) {
+    return;
+  }
+
+  // print warning
+  
+  fprintf(out,
+          "==>> WARNING - invalid command line argument: '%s' <<==\n",
+          arg);
+
+}
+
+
+/*********************************************************
  * tdrpIsArgValidN()
  *
  * returns number of tokens consumed by arg
@@ -1441,7 +1473,7 @@ static int expand_for_single_val(tdrpVal_t *val)
     
     *dollar_bracket = '\0';
     snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX-1);
+    strncpy(work_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
     
   } /* while */
@@ -1474,7 +1506,7 @@ static int expand_token(tdrpToken_t *token)
 
 {
 
-  char work_str[TDRP_LINE_MAX];
+  char work_str[TDRP_LINE_MAX * 2];
   char combo_str[TDRP_LINE_MAX];
   char env_cpy[TDRP_LINE_MAX];
 
@@ -1573,8 +1605,9 @@ static int expand_token(tdrpToken_t *token)
      */
     
     *dollar_bracket = '\0';
-    snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX-1);
+    snprintf(combo_str, TDRP_LINE_MAX * 2,
+             "%s%s%s", pre_str, env_val, post_str);
+    strncpy(work_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
     
   } /* while */

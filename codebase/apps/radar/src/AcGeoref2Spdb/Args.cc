@@ -146,11 +146,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
         iret = -1;
       }
 
-    } else if (argv[i][0] == '-') {
+    } else {
 
-      cerr<< "====>> WARNING - invalid command line argument: '"
-          << argv[i] << "' <<====" << endl;
-
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     } // if
     
   } // i

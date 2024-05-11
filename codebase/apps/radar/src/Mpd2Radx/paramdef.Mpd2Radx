@@ -50,14 +50,7 @@ paramdef enum mode_t {
   p_default = ARCHIVE;
   p_descr = "Operating mode";
   p_help = 
-  "In REALTIME mode, the program waits for a new input file.  "
-  "In ARCHIVE mode, it moves through the data between the start "
-  "and end times set on the command line. "
-  "In FILELIST mode, it moves through the list of file names "
-  "specified on the command line. "
-  "Paths (in ARCHIVE mode, at least) MUST contain a "
-  "day-directory above the data file -- ./data_file.ext will not "
-  "work as a file path, but ./yyyymmdd/data_file.ext will.";
+  "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
 } mode;
 
 commentdef {
@@ -306,15 +299,15 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "";
   p_descr = "Instrument name.";
-  p_help = "See override_instrument_name.";
+  p_help = "If not empty, override the instrument name.";
 } instrument_name;
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "";
   p_descr = "Site name.";
-  p_help = "See override_site_name.";
+  p_help = "If not empty, override the site name.";
 } site_name;
 
 commentdef {
