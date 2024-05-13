@@ -120,6 +120,7 @@ void TimeControl::_acceptSelectedTime()
 {
   cerr << "====>> acceptSelectedTime()" << endl;
   gd.data_request_time = _selectedTime.utime();
+  invalidate_all_data(); // TODO later - check if this is correct
   set_redraw_flags(1, 1);
 }
 
