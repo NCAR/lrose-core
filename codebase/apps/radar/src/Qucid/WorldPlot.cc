@@ -603,6 +603,7 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    cerr << "lllllll xx, yy, legendText: " << xx << ", " << yy << ", " << legend << endl;
     yy += (_textMargin + tRect.height());
   }
 

@@ -62,11 +62,11 @@ const double CartWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double CartWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 CartWidget::CartWidget(QWidget* parent,
-                         const CartManager &manager,
-                         const Params &params,
-                         const RadxPlatform &platform,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                       const CartManager &manager,
+                       const Params &params,
+                       const RadxPlatform &platform,
+                       const vector<DisplayField *> &fields,
+                       bool haveFilteredFields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -74,15 +74,15 @@ CartWidget::CartWidget(QWidget* parent,
         _platform(platform),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields),
-  _selectedField(0),
-  _backgroundBrush(QColor(_params.background_color)),
-  _gridRingsColor(_params.grid_and_range_ring_color),
-  _ringsEnabled(false),
-  _gridsEnabled(false),
-  _angleLinesEnabled(false),
-  _scaledLabel(ScaledLabel::DistanceEng),
-  _rubberBand(0),
-  _ringSpacing(10.0)
+        _selectedField(0),
+        _backgroundBrush(QColor(_params.background_color)),
+        _gridRingsColor(_params.grid_and_range_ring_color),
+        _ringsEnabled(false),
+        _gridsEnabled(false),
+        _angleLinesEnabled(false),
+        _scaledLabel(ScaledLabel::DistanceEng),
+        _rubberBand(0),
+        _ringSpacing(10.0)
 
 {
 

@@ -108,11 +108,11 @@ class DLL_EXPORT CartWidget : public QWidget
    */
 
   CartWidget(QWidget* parent, 
-              const CartManager &manager,
-              const Params &params,
-              const RadxPlatform &platform,
-              const vector<DisplayField *> &fields,
-              bool haveFilteredFields);
+             const CartManager &manager,
+             const Params &params,
+             const RadxPlatform &platform,
+             const vector<DisplayField *> &fields,
+             bool haveFilteredFields);
   
   /**
    * @brief Destructor.
