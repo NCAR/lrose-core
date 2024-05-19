@@ -717,6 +717,10 @@ private:
                           const string &name, const string &units,
                           double scale, double offset,
                           bool isQualifier = false);
+  int _addUi16FieldToRays(Nc3Var* var,
+                          const string &name, const string &units,
+                          double scale, double offset,
+                          bool isQualifier = false);
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           double scale, double offset,
