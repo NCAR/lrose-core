@@ -4732,6 +4732,47 @@ void RadxVol::sortSweepsByFixedAngle()
   
 }
 
+////////////////////////////////////////////////////////////////////////
+// combine sweeps with same fixed angle, reordering the rays accordingly.
+// the sweep fixed angles must agree within the diff
+
+void RadxVol::combineSweepsByFixedAngle(double maxFixedAngleDiff)
+  
+{
+
+  // sanity check
+  
+  if (_sweeps.size() < 2) {
+    return;
+  }
+
+  // sort sweeps by fixed angle
+
+  sortSweepsByFixedAngle();
+
+  // check for consecutive sweeps with same fixed angle
+
+  for (size_t isweep = 0; isweep < _sweeps.size() - 1; isweep++) {
+    RadxSweep *thisSweep = _sweeps[isweep];
+    RadxSweep *nextSweep = _sweeps[isweep + 1];
+    if (fabs(thisSweep->getFixedAngleDeg() -
+             nextSweep->getFixedAngleDeg()) < maxFixedAngleDiff) {
+      // sweep fixed angles are close, use same sweep num
+      int sweepNum = thisSweep->getSweepNumber();
+      for (size_t iray = nextSweep->getStartRayIndex(); 
+           iray <= nextSweep->getEndRayIndex(); iray++) {
+        _rays[iray]->setSweepNumber(sweepNum);
+      } // iray
+    }
+  }
+
+  // load the sweep info from rays
+
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+  
+}
+
 /////////////////////////////////////////////////////////////////
 // Sort rays in each sweep by azimuth
 // Assumes sweep info is already set

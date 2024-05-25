@@ -720,7 +720,7 @@ public:
   
   double computeMeanFixedAngleFromRays() const;
 
-/// Compute sweep scan rates from ray data - in deg/sec.
+  /// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.
   /// Sets the measureScanRate on the sweeps.
@@ -858,6 +858,11 @@ public:
 
   void sortSweepsByFixedAngle();
   
+  // combine sweeps with same fixed angle, reordering the rays accordingly.
+  // the sweep fixed angles must agree within the diff
+  
+  void combineSweepsByFixedAngle(double maxFixedAngleDiff);
+
   /////////////////////////////////////////////////////////////////
   /// Sort rays by number
 
