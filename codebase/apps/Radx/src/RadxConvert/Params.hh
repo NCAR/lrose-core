@@ -706,6 +706,10 @@ public:
 
   tdrp_bool_t sort_sweeps_by_fixed_angle;
 
+  tdrp_bool_t combine_sweeps_by_fixed_angle;
+
+  double combined_sweep_max_fixed_angle_diff;
+
   tdrp_bool_t reverse_sweep_order_in_vol;
 
   tdrp_bool_t sort_rays_by_time;
@@ -876,7 +880,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[202];
+  mutable TDRPtable _table[204];
 
   const char *_className;
 

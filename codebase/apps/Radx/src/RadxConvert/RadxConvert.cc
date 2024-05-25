@@ -927,6 +927,16 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.sortSweepsByFixedAngle();
   }
   
+  // combine sweeps if requested
+
+  if (_params.combine_sweeps_by_fixed_angle) {
+    if (_params.debug) {
+      cerr << "DEBUG - combining sweeps by fixed angle, max diff: "
+           << _params.combined_sweep_max_fixed_angle_diff << endl;
+    }
+    vol.combineSweepsByFixedAngle(_params.combined_sweep_max_fixed_angle_diff);
+  }
+  
   // reorder rays by time if requested
 
   if (_params.sort_rays_by_time) {
@@ -991,7 +1001,7 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     _convertAllFields(vol);
   }
 
-  // reload sweep and/or volumen info from rays
+  // reload sweep and/or volume info from rays
 
   if (_params.reload_sweep_info_from_rays) {
     vol.loadSweepInfoFromRays();

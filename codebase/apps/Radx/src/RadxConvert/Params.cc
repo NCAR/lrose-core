@@ -1935,6 +1935,30 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'combine_sweeps_by_fixed_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("combine_sweeps_by_fixed_angle");
+    tt->descr = tdrpStrDup("Combine sweeps with same fixed angle.");
+    tt->help = tdrpStrDup("Combine sweeps with similar fixed angle into a single sweep.");
+    tt->val_offset = (char *) &combine_sweeps_by_fixed_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'combined_sweep_max_fixed_angle_diff'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("combined_sweep_max_fixed_angle_diff");
+    tt->descr = tdrpStrDup("Max diff in fixed angle for combining sweeps (degrees).");
+    tt->help = tdrpStrDup("We check the fixed angle difference between sweeps and combine them if the difference is less than this.");
+    tt->val_offset = (char *) &combined_sweep_max_fixed_angle_diff - &_start_;
+    tt->single_val.d = 0.05;
+    tt++;
+    
     // Parameter 'reverse_sweep_order_in_vol'
     // ctype is 'tdrp_bool_t'
     

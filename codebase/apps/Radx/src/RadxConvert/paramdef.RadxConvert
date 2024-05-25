@@ -727,6 +727,18 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Combine sweeps with same fixed angle.";
+  p_help = "Combine sweeps with similar fixed angle into a single sweep.";
+} combine_sweeps_by_fixed_angle;
+
+paramdef double {
+  p_default = 0.05;
+  p_descr = "Max diff in fixed angle for combining sweeps (degrees).";
+  p_help = "We check the fixed angle difference between sweeps and combine them if the difference is less than this.";
+} combined_sweep_max_fixed_angle_diff;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Reverse the order of the sweeps in the volume, but preserve ray order in sweeps.";
   p_help = "If TRUE, reverse the order in which the sweeps are stored in the volume. The order of the rays in the sweeps is preserved.";
 } reverse_sweep_order_in_vol;
