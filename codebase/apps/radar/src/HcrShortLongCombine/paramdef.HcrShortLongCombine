@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.";
+  p_header = "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
 }
 
 commentdef {
@@ -99,6 +99,7 @@ paramdef double {
 
 commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";
+  p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
 }
 
 paramdef double {
@@ -155,7 +156,48 @@ paramdef struct stats_method_field_t {
 } stats_method_fields[];
 
 commentdef {
-  p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+  p_header = "FIELD NAMES for combination";
+  p_text = "The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to unfold the velocity field.";
+  p_help = "If false, the short vel will be copied to the unfolded field. The vel_unfolded field will be added to the output data set.";
+} perform_velocity_unfolding;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "This is the name for the velocity field in the input data.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_field_name;
+
+paramdef string {
+  p_default = "_short";
+  p_descr = "This suffix is added to the input fields for short-prt moments.";
+  p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
+} suffix_to_add_for_short_pulse_fields;
+
+paramdef string {
+  p_default = "_long";
+  p_descr = "This suffix is added to the input fields for long-prt moments.";
+  p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
+} suffix_to_add_for_long_pulse_fields;
+
+paramdef string {
+  p_default = "VEL_unfold";
+  p_descr = "Name for the unfolded velocity.";
+  p_help = "This is an output field, computed by unfolding the dual-prt vel fields.";
+} vel_unfolded_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the estimated velocity corrected for vertical platform motion.";
+  p_help = "For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.";
+} correct_velocity_for_platform_vertical_motion;
+
+commentdef {
+  p_header = "OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING";
 }
 
 paramdef boolean {

@@ -109,6 +109,18 @@ private:
   vector<RadxEvent> _eventsShort;
   vector<RadxEvent> _eventsLong;
 
+  double _wavelengthM;
+  double _prtShort;
+  double _prtLong;
+  double _nyquistShort;
+  double _nyquistLong;
+  double _nyquistUnfolded;
+
+  int _stagM;
+  int _stagN;
+  int _LL;
+  int _PP_[32];
+  
   // combining
 
   double _dwellLengthSecs;
@@ -125,6 +137,7 @@ private:
   vector<RadxRay *> _dwellRaysShort;
   vector<RadxRay *> _dwellRaysLong;
 
+  RadxVol _readVol;
   RadxVol _dwellVolShort;
   RadxVol _dwellVolLong;
   RadxField::StatsMethod_t _globalMethod;
@@ -146,6 +159,13 @@ private:
   RadxRay *_combineDwellRays();
   void _clearDwellRays();
   void _unfoldVel(RadxRay *rayCombined);
+  void _computeVelCorrectedForVertMotion(RadxRay *ray,
+                                         RadxField *velShort,
+                                         RadxField *velLong,
+                                         RadxField *velUnfolded);
+
+  double _correctForNyquist(double vel, double nyquist);
+  
   RadxRay *_readRayShort();
   RadxRay *_readRayLong();
   

@@ -50,6 +50,7 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
+#include <toolsa/sincos.h>
 using namespace std;
 
 // Constructor
@@ -64,6 +65,16 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
   _cacheRayShort = NULL;
   _cacheRayLong = NULL;
   _outputFmq = NULL;
+
+  // init staggered prt
+  
+  _wavelengthM = 0.003176;
+  _prtShort = 0.000101376;
+  _prtLong = _prtShort * 1.5;
+  _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
+  _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
+  _stagM = 2;
+  _stagN = 3;
 
   // set programe name
 
@@ -595,7 +606,7 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   vector<RadxField *> fieldsShort = rayCombined->getFields();
   for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
     RadxField *fld = fieldsShort[ifield];
-    string newName = fld->getName() + "_short";
+    string newName = fld->getName() + _params.suffix_to_add_for_short_pulse_fields;
     fld->setName(newName);
   }
 
@@ -604,7 +615,7 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   vector<RadxField *> fieldsLong = rayLong->getFields();
   for (size_t ifield = 0; ifield < fieldsLong.size(); ifield++) {
     RadxField *fld = new RadxField(*fieldsLong[ifield]);
-    string newName = fld->getName() + "_long";
+    string newName = fld->getName() + _params.suffix_to_add_for_long_pulse_fields;
     fld->setName(newName);
     rayCombined->addField(fld);
   }
@@ -632,54 +643,58 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
 
 {
 
-  RadxField *velShort = rayCombined->getField("VEL_short");
-  RadxField *velLong = rayCombined->getField("VEL_long");
+  string velShortName = _params.input_vel_field_name;
+  velShortName += _params.suffix_to_add_for_short_pulse_fields;
+  string velLongName = _params.input_vel_field_name;
+  velLongName += _params.suffix_to_add_for_long_pulse_fields;
 
+  RadxField *velShort = rayCombined->getField(velShortName);
+  RadxField *velLong = rayCombined->getField(velLongName);
+
+  if (velShort == NULL || velLong == NULL) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - HcrShortLongCombine::_unfoldVel()" << endl;
+      cerr << "Cannot find velocity fields to unfold." << endl;
+    }
+    return;
+  }
+  
   velShort->convertToFl32();
   velLong->convertToFl32();
 
   RadxField *velUnfold = new RadxField(*velShort);
-  velUnfold->setName("VEL_unfold");
+  velUnfold->setName(_params.vel_unfolded_field_name);
 
   // compute the unfolded velocity
 
-  int _staggeredM = 2;
-  int _staggeredN = 3;
-  
-  double _nyquistPrtShort = 7.8;
-  double _nyquistPrtLong = 5.2;
-
-    int _LL;
-  int _PP_[32];
-  int *_PP;
-  
-  _LL = (_staggeredM + _staggeredN - 1) / 2;
+  int *PP = _PP_;
+  _LL = (_stagM + _stagN - 1) / 2;
   if (_LL > 5) {
     _LL = 2; // set to 2/3
   }
-  _PP = _PP_ + _LL;
-
+  PP = _PP_ + _LL;
+  
   int cc = 0;
   int pp = 0;
-  _PP[0] = 0;
+  PP[0] = 0;
   for (int ll = 1; ll <= _LL; ll++) {
     if ((ll / 2 * 2) == ll) {
       // even - va1 transition
-      cc -= _staggeredN;
+      cc -= _stagN;
       pp++;
     } else {
       // odd - va2 transition
-      cc += _staggeredM;
+      cc += _stagM;
     }
-    _PP[cc] = pp;
-    _PP[-cc] = -pp;
+    PP[cc] = pp;
+    PP[-cc] = -pp;
   }
-
+  
   size_t nGates = velUnfold->getNPoints();
   Radx::fl32 *dataShort = velShort->getDataFl32();
   Radx::fl32 *dataLong = velLong->getDataFl32();
   Radx::fl32 *dataUnfold = velUnfold->getDataFl32();
-  double nyquistDiff = _nyquistPrtShort - _nyquistPrtLong;
+  double nyquistDiff = _nyquistShort - _nyquistLong;
 
   for (size_t ii = 0; ii < nGates; ii++) {
     
@@ -691,14 +706,173 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
     } else if (ll > _LL) {
       ll = _LL;
     }
-    double unfoldedVel = dataShort[ii] + _PP[ll] * _nyquistPrtShort * 2;
+    double unfoldedVel = dataShort[ii] + PP[ll] * _nyquistShort * 2;
     dataUnfold[ii] = unfoldedVel;
 
   } // ii
+
+  // correct vel for vertical motion
+  
+  _nyquistUnfolded = _nyquistShort * _LL;
+  rayCombined->setNyquistMps(_nyquistUnfolded);
+  _computeVelCorrectedForVertMotion(rayCombined, velShort, velLong, velUnfold);
+
+  // add field to ray
   
   rayCombined->addField(velUnfold);
   rayCombined->setNyquistMps(rayCombined->getNyquistMps() * _LL);
 
+}
+
+///////////////////////////////////////////////////////////
+// compute velocity corrected for platform motion
+//
+// NOTES from Ulrike's Matlab code
+//  
+// % Compute y_t following equation 9 Lee et al (1994)
+// y_subt=-cosd(data.rotation+data.roll).*cosd(data.drift).*cosd(data.tilt).*sind(data.pitch)...
+//     +sind(data.drift).*sind(data.rotation+data.roll).*cosd(data.tilt)...
+//     +cosd(data.pitch).*cosd(data.drift).*sind(data.tilt);
+//
+// % Compute z following equation 9 Lee et al (1994)
+// z=cosd(data.pitch).*cosd(data.tilt).*cosd(data.rotation+data.roll)+sind(data.pitch).*sind(data.tilt);
+//
+// % compute tau_t following equation 11 Lee et al (1994)
+// tau_subt=asind(y_subt);
+//
+// % Compute phi following equation 17 Lee et al (1994)
+// phi=asind(z);
+//
+// % Compute platform motion based on Eq 27 from Lee et al (1994)
+// ground_speed=sqrt(data.eastward_velocity.^2 + data.northward_velocity.^2);
+// % Use this equation when starting from VEL_RAW
+// %vr_platform=-ground_speed.*sin(tau_subt)-vertical_velocity.*sin(phi);
+// % Use this equation when starting from VEL
+// vr_platform=-ground_speed.*sind(tau_subt).*sind(phi);
+//
+// velAngCorr=data.VEL+vr_platform;
+
+void HcrShortLongCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
+                                                            RadxField *velShort,
+                                                            RadxField *velLong,
+                                                            RadxField *velUnfolded)
+  
+{
+
+  // no good if no georeference available
+  
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - _computeVelocityCorrectedForMotion" << endl;
+      cerr << "  No georef information found" << endl;
+      cerr << "  Correction will not be applied" << endl;
+    }
+    return;
+  }
+
+  // pre-compute sin / cosine
+
+  double cosEl, sinEl;
+  ta_sincos(ray->getElevationDeg() * Radx::DegToRad, &sinEl, &cosEl);
+
+  double cosPitch, sinPitch;
+  ta_sincos(georef->getPitch() * Radx::DegToRad, &sinPitch, &cosPitch);
+  
+  double cosRoll, sinRoll;
+  ta_sincos(georef->getRoll() * Radx::DegToRad, &sinRoll, &cosRoll);
+  
+  double cosTilt, sinTilt;
+  ta_sincos(georef->getTilt() * Radx::DegToRad, &sinTilt, &cosTilt);
+  
+  double cosDrift, sinDrift;
+  ta_sincos(georef->getDrift() * Radx::DegToRad, &sinDrift, &cosDrift);
+  
+  double cosRotRoll, sinRotRoll;
+  double rotPlusRoll = georef->getRotation() + georef->getRoll();
+  ta_sincos(rotPlusRoll * Radx::DegToRad, &sinRotRoll, &cosRotRoll);
+
+  // compute the vel correction from horiz platform motion, including drift
+  // Compute y_t following equation 9 Lee et al (1994)
+  
+  double y_subt = ((-cosRotRoll * cosDrift * cosTilt * sinPitch) +
+                   (sinDrift * sinRotRoll * cosTilt) +
+                   (cosPitch * cosDrift * sinTilt));
+
+  // Compute z following equation 9 Lee et al (1994)
+
+  double zz = cosPitch * cosTilt * cosRotRoll + sinPitch * sinTilt;
+  
+  // Compute ground speed based on Eq 27 from Lee et al (1994)
+
+  double ewVel = georef->getEwVelocity();
+  double nsVel = georef->getNsVelocity();
+  double ground_speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+
+  // compute the vert vel correction
+
+  double vertCorr = 0.0;
+  double vertVel = georef->getVertVelocity();
+  if (vertVel > -9990) {
+    vertCorr = vertVel * zz;
+  }
+
+  // compute the horiz vel correction
+
+  double horizCorr = ground_speed * y_subt;
+
+  // check
+  
+  if (vertCorr == 0.0 && horizCorr == 0.0) {
+    // no change needed
+    return;
+  }
+
+  Radx::fl32 missShort = velShort->getMissingFl32();
+  Radx::fl32 missLong = velLong->getMissingFl32();
+  Radx::fl32 missUnfolded = velUnfolded->getMissingFl32();
+  
+  Radx::fl32 *dataShort = velShort->getDataFl32();
+  Radx::fl32 *dataLong = velLong->getDataFl32();
+  Radx::fl32 *dataUnfolded = velUnfolded->getDataFl32();
+  
+  for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+    
+    double valShort = dataShort[ii];
+    if (valShort != missShort) {
+      double shortCorrected = _correctForNyquist(valShort + vertCorr, _nyquistShort);
+      dataShort[ii] = shortCorrected;
+    }
+    
+    double valLong = dataLong[ii];
+    if (valLong != missLong) {
+      double longCorrected = _correctForNyquist(valLong + vertCorr, _nyquistLong);
+      dataLong[ii] = longCorrected;
+    }
+    
+    double valUnfolded = dataUnfolded[ii];
+    if (valUnfolded != missUnfolded) {
+      double unfoldedCorrected = _correctForNyquist(valUnfolded + vertCorr, _nyquistUnfolded);
+      dataUnfolded[ii] = unfoldedCorrected;
+    }
+    
+  } // ii
+
+}
+
+/////////////////////////////////////////////////
+// correct velocity for nyquist
+  
+double HcrShortLongCombine::_correctForNyquist(double vel, double nyquist)
+
+{
+  while (vel > nyquist) {
+    vel -= 2.0 * nyquist;
+  }
+  while (vel < -nyquist) {
+    vel += 2.0 * nyquist;
+  }
+  return vel;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -736,6 +910,13 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   if (_readerShort->getPlatformUpdated()) {
     RadxPlatform platform = _readerShort->getPlatform();
     _platformShort = platform;
+    _wavelengthM = _platformShort.getWavelengthM();
+    if (_wavelengthM < 0) {
+      _wavelengthM = 0.003176;
+    }
+    _prtShort = rayShort->getPrtSec();
+    _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
+    
     // create message
     RadxMsg msg;
     platform.serialize(msg);
@@ -821,6 +1002,30 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   if (_readerLong->getPlatformUpdated()) {
     const RadxPlatform &platform = _readerLong->getPlatform();
     _platformLong = platform;
+    _prtLong = rayLong->getPrtSec();
+    _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
+    double prtRatio = _prtShort / _prtLong;
+    int ratio60 = (int) (prtRatio * 60.0 + 0.5);
+    if (ratio60 == 40) {
+      // 2/3
+      _stagM = 2;
+      _stagN = 3;
+    } else if (ratio60 == 45) {
+      // 3/4
+      _stagM = 3;
+      _stagN = 4;
+    } else if (ratio60 == 48) {
+      // 4/5
+      _stagM = 4;
+      _stagN = 5;
+    } else {
+      // assume 2/3
+      cerr << "WARNING - HcrShortLongCombine::_readRayLong" << endl;
+      cerr << "  No support for prtRatio: " << prtRatio << endl;
+      cerr << "  Assuming 2/3 stagger" << endl;
+      _stagM = 2;
+      _stagN = 3;
+    }
   }
 
   // check for calibration update

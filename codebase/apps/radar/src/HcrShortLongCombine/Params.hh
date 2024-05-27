@@ -459,6 +459,18 @@ public:
   stats_method_field_t *_stats_method_fields;
   int stats_method_fields_n;
 
+  tdrp_bool_t perform_velocity_unfolding;
+
+  char* input_vel_field_name;
+
+  char* suffix_to_add_for_short_pulse_fields;
+
+  char* suffix_to_add_for_long_pulse_fields;
+
+  char* vel_unfolded_field_name;
+
+  tdrp_bool_t correct_velocity_for_platform_vertical_motion;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -520,7 +532,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 

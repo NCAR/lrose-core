@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.");
+    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -748,7 +748,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.");
     tt++;
     
     // Parameter 'dwell_length_secs'
@@ -886,7 +886,88 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
+    tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
+    tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
+    tt++;
+    
+    // Parameter 'perform_velocity_unfolding'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("perform_velocity_unfolding");
+    tt->descr = tdrpStrDup("Option to unfold the velocity field.");
+    tt->help = tdrpStrDup("If false, the short vel will be copied to the unfolded field. The vel_unfolded field will be added to the output data set.");
+    tt->val_offset = (char *) &perform_velocity_unfolding - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'input_vel_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_vel_field_name");
+    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data.");
+    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
+    tt->val_offset = (char *) &input_vel_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL");
+    tt++;
+    
+    // Parameter 'suffix_to_add_for_short_pulse_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("suffix_to_add_for_short_pulse_fields");
+    tt->descr = tdrpStrDup("This suffix is added to the input fields for short-prt moments.");
+    tt->help = tdrpStrDup("For each incoming short-pulse field, we add this suffix to the incoming field name.");
+    tt->val_offset = (char *) &suffix_to_add_for_short_pulse_fields - &_start_;
+    tt->single_val.s = tdrpStrDup("_short");
+    tt++;
+    
+    // Parameter 'suffix_to_add_for_long_pulse_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("suffix_to_add_for_long_pulse_fields");
+    tt->descr = tdrpStrDup("This suffix is added to the input fields for long-prt moments.");
+    tt->help = tdrpStrDup("For each incoming long-pulse field, we add this suffix to the incoming field name.");
+    tt->val_offset = (char *) &suffix_to_add_for_long_pulse_fields - &_start_;
+    tt->single_val.s = tdrpStrDup("_long");
+    tt++;
+    
+    // Parameter 'vel_unfolded_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vel_unfolded_field_name");
+    tt->descr = tdrpStrDup("Name for the unfolded velocity.");
+    tt->help = tdrpStrDup("This is an output field, computed by unfolding the dual-prt vel fields.");
+    tt->val_offset = (char *) &vel_unfolded_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_unfold");
+    tt++;
+    
+    // Parameter 'correct_velocity_for_platform_vertical_motion'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_velocity_for_platform_vertical_motion");
+    tt->descr = tdrpStrDup("Option to correct the estimated velocity corrected for vertical platform motion.");
+    tt->help = tdrpStrDup("For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.");
+    tt->val_offset = (char *) &correct_velocity_for_platform_vertical_motion - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1042,11 +1123,11 @@
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1089,11 +1170,11 @@
     tt->single_val.e = OUTPUT_ENCODING_ASIS;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1286,11 +1367,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
