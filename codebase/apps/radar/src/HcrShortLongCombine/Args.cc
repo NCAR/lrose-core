@@ -82,25 +82,25 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-d") ||
                !strcmp(argv[i], "-debug")) {
       
-      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-v") ||
                !strcmp(argv[i], "-verbose")) {
       
-      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-vv") ||
                !strcmp(argv[i], "-extra")) {
       
-      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "instance = %s;", argv[i+1]);
+	snprintf(tmp_str, BUFSIZ, "instance = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
 	
@@ -111,7 +111,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	if (startTime == RadxTime::NEVER) {
 	  OK = false;
 	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
       } else {
@@ -125,7 +125,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	if (endTime == RadxTime::NEVER) {
 	  OK = false;
 	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
       } else {
