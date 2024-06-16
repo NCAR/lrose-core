@@ -1605,7 +1605,7 @@ static int expand_token(tdrpToken_t *token)
      */
     
     *dollar_bracket = '\0';
-    snprintf(combo_str, TDRP_LINE_MAX * 2,
+    snprintf(combo_str, TDRP_LINE_MAX,
              "%s%s%s", pre_str, env_val, post_str);
     strncpy(work_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
