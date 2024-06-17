@@ -166,6 +166,8 @@ private:
   RadxField::StatsMethod_t
     _getDwellStatsMethod(Params::dwell_stats_method_t method);
 
+  void _setPlatformMetadata(RadxPlatform &platform);
+
 };
 
 #endif

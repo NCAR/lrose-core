@@ -83,8 +83,104 @@ paramdef string {
 } input_dir_long;
 
 commentdef {
-  p_header = "LIMIT RANGE?";
+  p_header = "OVERRIDE PLATFORM TYPE?";
 }
+
+typedef enum {
+  PLATFORM_FIXED = 1,
+  PLATFORM_VEHICLE = 2,
+  PLATFORM_SHIP = 3,
+  PLATFORM_AIRCRAFT_FORE = 5,
+  PLATFORM_AIRCRAFT_AFT = 6,
+  PLATFORM_AIRCRAFT_TAIL = 7,
+  PLATFORM_AIRCRAFT_BELLY = 8,
+  PLATFORM_AIRCRAFT_ROOF = 9,
+  PLATFORM_AIRCRAFT_NOSE = 10,
+  PLATFORM_SATELLITE_ORBIT = 11,
+  PLATFORM_SATELLITE_GEOSTAT = 12
+} platform_type_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
+    "\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n"
+    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
+    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
+    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
+    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
+    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+} override_platform_type;
+
+paramdef enum platform_type_t {
+  p_default = PLATFORM_AIRCRAFT_FORE;
+  p_descr = "Platform type.";
+  p_help = "See override_platform_type.";
+} platform_type;
+
+commentdef {
+  p_header = "OVERRIDE PRIMARY AXIS?";
+}
+
+typedef enum {
+  PRIMARY_AXIS_Z = 0, ///< vertical
+  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+} primary_axis_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPRIMARY_AXIS_Z - vertical\n"
+    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
+    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
+    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
+    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
+    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
+} override_primary_axis;
+
+paramdef enum primary_axis_t {
+  p_default = PRIMARY_AXIS_Y_PRIME;
+  p_descr = "Platform type.";
+  p_help = "See override_primary_axis.";
+} primary_axis;
+
+commentdef {
+  p_header = "OVERRIDE SWEEP MODE?";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the sweep modes in the data.";
+  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
+} override_sweep_mode;
+
+typedef enum {
+  SWEEP_MODE_SECTOR = 1,
+  SWEEP_MODE_RHI = 3,
+  SWEEP_MODE_VERTICAL_POINTING = 4,
+  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+  SWEEP_MODE_SUNSCAN = 11,
+  SWEEP_MODE_POINTING = 12,
+  SWEEP_MODE_SUNSCAN_RHI = 17,
+  SWEEP_MODE_ELECTRONIC_STEERING = 20
+} sweep_mode_t;
+
+paramdef enum sweep_mode_t {
+  p_default = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  p_descr = "Sweep mode for all sweeps.";
+  p_help = "See override_sweep_mode.";
+} sweep_mode;
 
 paramdef boolean {
   p_default = false;
@@ -195,90 +291,6 @@ paramdef boolean {
   p_descr = "Option to correct the estimated velocity corrected for vertical platform motion.";
   p_help = "For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.";
 } correct_velocity_for_platform_vertical_motion;
-
-// commentdef {
-//   p_header = "OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING";
-// }
-
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Set the field names and output encoding";
-//   p_help = "If false, all fields will be used.";
-// } set_output_fields;
-
-// typedef enum {
-//   OUTPUT_ENCODING_ASIS,
-//   OUTPUT_ENCODING_FLOAT32,
-//   OUTPUT_ENCODING_INT32,
-//   OUTPUT_ENCODING_INT16,
-//   OUTPUT_ENCODING_INT08
-// } output_encoding_t;
-
-// typedef enum {
-//   SCALING_DYNAMIC,
-//   SCALING_SPECIFIED
-// } output_scaling_t;
-
-// typedef struct {
-//   string input_field_name; 
-//   string output_field_name; 
-//   string long_name; 
-//   string standard_name; 
-//   string output_units;
-//   output_encoding_t encoding;
-//   output_scaling_t output_scaling;
-//   double output_scale;
-//   double output_offset;
-// } output_field_t;
-
-// paramdef struct output_field_t {
-//   p_default = {
-//     { "DBZ",
-//       "DBZ",
-//       "reflectivity",
-//       "equivalent_reflectivity_factor",
-//       "dBZ",
-//       OUTPUT_ENCODING_ASIS,
-//       SCALING_DYNAMIC, 0.01, 0.0
-//     },
-//     { "VEL", 
-//       "VEL", 
-//       "radial_velocity",
-//       "radial_velocity_of_scatterers_away_from_instrument",
-//       "m/s", 
-//       OUTPUT_ENCODING_ASIS,
-//       SCALING_DYNAMIC, 0.01, 0.0
-//     }
-//   };
-//   p_descr = "Output field details.";
-//   p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
-// } output_fields[];
-
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to exclude fields in the specified list.";
-//   p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
-// } exclude_specified_fields;
-
-// paramdef string {
-//   p_default = { "DBZ", "VEL" };
-//   p_descr = "List of fields to be excluded.";
-//   p_help = "List the names to be excluded";
-// } excluded_fields[];
-
-// commentdef {
-//   p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
-// }
-
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to set output encoding for all fields";
-// } set_output_encoding_for_all_fields;
-
-// paramdef enum output_encoding_t {
-//   p_default = OUTPUT_ENCODING_ASIS;
-//   p_descr = "Output encoding for all fields, if requested.";
-// } output_encoding;
 
 commentdef {
   p_header = "OUTPUT FMQ";

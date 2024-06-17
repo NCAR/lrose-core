@@ -80,6 +80,41 @@ public:
   } mode_t;
 
   typedef enum {
+    PLATFORM_FIXED = 1,
+    PLATFORM_VEHICLE = 2,
+    PLATFORM_SHIP = 3,
+    PLATFORM_AIRCRAFT_FORE = 5,
+    PLATFORM_AIRCRAFT_AFT = 6,
+    PLATFORM_AIRCRAFT_TAIL = 7,
+    PLATFORM_AIRCRAFT_BELLY = 8,
+    PLATFORM_AIRCRAFT_ROOF = 9,
+    PLATFORM_AIRCRAFT_NOSE = 10,
+    PLATFORM_SATELLITE_ORBIT = 11,
+    PLATFORM_SATELLITE_GEOSTAT = 12
+  } platform_type_t;
+
+  typedef enum {
+    PRIMARY_AXIS_Z = 0,
+    PRIMARY_AXIS_Y = 1,
+    PRIMARY_AXIS_X = 2,
+    PRIMARY_AXIS_Z_PRIME = 3,
+    PRIMARY_AXIS_Y_PRIME = 4,
+    PRIMARY_AXIS_X_PRIME = 5
+  } primary_axis_t;
+
+  typedef enum {
+    SWEEP_MODE_SECTOR = 1,
+    SWEEP_MODE_RHI = 3,
+    SWEEP_MODE_VERTICAL_POINTING = 4,
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+    SWEEP_MODE_SUNSCAN = 11,
+    SWEEP_MODE_POINTING = 12,
+    SWEEP_MODE_SUNSCAN_RHI = 17,
+    SWEEP_MODE_ELECTRONIC_STEERING = 20
+  } sweep_mode_t;
+
+  typedef enum {
     DWELL_STATS_MEAN = 0,
     DWELL_STATS_MEDIAN = 1,
     DWELL_STATS_MAXIMUM = 2,
@@ -407,6 +442,18 @@ public:
 
   char* input_dir_long;
 
+  tdrp_bool_t override_platform_type;
+
+  platform_type_t platform_type;
+
+  tdrp_bool_t override_primary_axis;
+
+  primary_axis_t primary_axis;
+
+  tdrp_bool_t override_sweep_mode;
+
+  sweep_mode_t sweep_mode;
+
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -453,7 +500,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[37];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

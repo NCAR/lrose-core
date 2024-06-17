@@ -141,10 +141,130 @@ input_dir_long = "$(HOME)/data/meow/cfradial/moments/100hz_long";
 
 //======================================================================
 //
-// LIMIT RANGE?.
+// OVERRIDE PLATFORM TYPE?.
 //
 //======================================================================
  
+///////////// override_platform_type //////////////////
+//
+// Option to override platform type on read. If true, the file will be 
+//   read in, the platform type will be changed, and then any post-read 
+//   processing will be performed.
+//
+// 	PLATFORM_FIXED  - radar is in a fixed location
+// 	PLATFORM_VEHICLE -  radar is mounted on a land vehicle
+// 	PLATFORM_SHIP - radar is mounted on a ship
+// 	PLATFORM_AIRCRAFT_FORE - forward-looking on aircraft
+// 	PLATFORM_AIRCRAFT_AFT - backward-looking on aircraft
+// 	PLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA
+// 	PLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft
+// 	PLATFORM_AIRCRAFT_ROOF - roof radar on aircraft
+// 	PLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft
+// 	PLATFORM_SATELLITE_ORBIT - orbiting satellite
+// 	PLATFORM_SATELLITE_GEOSTAT - geostationary satellite.
+//
+// Type: boolean
+
+override_platform_type = FALSE;
+
+///////////// platform_type ///////////////////////////
+//
+// Platform type.
+//
+// See override_platform_type.
+//
+// Type: enum
+// Options:
+//     PLATFORM_FIXED
+//     PLATFORM_VEHICLE
+//     PLATFORM_SHIP
+//     PLATFORM_AIRCRAFT_FORE
+//     PLATFORM_AIRCRAFT_AFT
+//     PLATFORM_AIRCRAFT_TAIL
+//     PLATFORM_AIRCRAFT_BELLY
+//     PLATFORM_AIRCRAFT_ROOF
+//     PLATFORM_AIRCRAFT_NOSE
+//     PLATFORM_SATELLITE_ORBIT
+//     PLATFORM_SATELLITE_GEOSTAT
+
+platform_type = PLATFORM_AIRCRAFT_FORE;
+
+//======================================================================
+//
+// OVERRIDE PRIMARY AXIS?.
+//
+//======================================================================
+ 
+///////////// override_primary_axis ///////////////////
+//
+// Option to override primary axis on read. If true, the file will be 
+//   read in, the primary axis will be changed, and then any post-read 
+//   processing will be performed.
+//
+// 	PRIMARY_AXIS_Z - vertical
+// 	PRIMARY_AXIS_Y - longitudinal axis of platform
+// 	PRIMARY_AXIS_X - lateral axis of platform
+// 	PRIMARY_AXIS_Z_PRIME - inverted vertical
+// 	PRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail
+// 	PRIMARY_AXIS_X_PRIME - translated lateral.
+//
+// Type: boolean
+
+override_primary_axis = FALSE;
+
+///////////// primary_axis ////////////////////////////
+//
+// Platform type.
+//
+// See override_primary_axis.
+//
+// Type: enum
+// Options:
+//     PRIMARY_AXIS_Z
+//     PRIMARY_AXIS_Y
+//     PRIMARY_AXIS_X
+//     PRIMARY_AXIS_Z_PRIME
+//     PRIMARY_AXIS_Y_PRIME
+//     PRIMARY_AXIS_X_PRIME
+
+primary_axis = PRIMARY_AXIS_Y_PRIME;
+
+//======================================================================
+//
+// OVERRIDE SWEEP MODE?.
+//
+//======================================================================
+ 
+///////////// override_sweep_mode /////////////////////
+//
+// Option to override the sweep modes in the data.
+//
+// If TRUE, the mode for all sweeps is set to sweep_mode.
+//
+// Type: boolean
+
+override_sweep_mode = TRUE;
+
+///////////// sweep_mode //////////////////////////////
+//
+// Sweep mode for all sweeps.
+//
+// See override_sweep_mode.
+//
+// Type: enum
+// Options:
+//     SWEEP_MODE_SECTOR
+//     SWEEP_MODE_RHI
+//     SWEEP_MODE_VERTICAL_POINTING
+//     SWEEP_MODE_AZIMUTH_SURVEILLANCE
+//     SWEEP_MODE_ELEVATION_SURVEILLANCE
+//     SWEEP_MODE_SUNSCAN
+//     SWEEP_MODE_POINTING
+//     SWEEP_MODE_SUNSCAN_RHI
+//     SWEEP_MODE_ELECTRONIC_STEERING
+
+sweep_mode = SWEEP_MODE_VERTICAL_POINTING;
+
 ///////////// set_max_range ///////////////////////////
 //
 // Option to set the max range for any ray.

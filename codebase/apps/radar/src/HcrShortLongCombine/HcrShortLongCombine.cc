@@ -770,6 +770,12 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   _dwellVolShort.clear();
   _dwellVolLong.clear();
 
+  // set sweep mode if required
+  
+  if (_params.override_sweep_mode) {
+    rayCombined->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
+  }
+  
   // return combined ray
   
   return rayCombined;
@@ -1053,6 +1059,7 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   if (_readerShort->getPlatformUpdated()) {
     RadxPlatform platform = _readerShort->getPlatform();
     _platformShort = platform;
+    _setPlatformMetadata(_platformShort);
     _wavelengthM = _platformShort.getWavelengthM();
     if (_wavelengthM < 0) {
       _wavelengthM = 0.003176;
@@ -1149,6 +1156,7 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   if (_readerLong->getPlatformUpdated()) {
     const RadxPlatform &platform = _readerLong->getPlatform();
     _platformLong = platform;
+    _setPlatformMetadata(_platformLong);
     _prtLong = rayLong->getPrtSec();
     _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
     double prtRatio = _prtShort / _prtLong;
@@ -1246,4 +1254,22 @@ RadxField::StatsMethod_t
   }
 
 }
+
+////////////////////////////////////////////////////////
+// modify platform metadata
+
+void HcrShortLongCombine::_setPlatformMetadata(RadxPlatform &platform)
+  
+{
+
+  if (_params.override_platform_type) {
+    platform.setPlatformType((Radx::PlatformType_t) _params.platform_type);
+  }
+
+  if (_params.override_primary_axis) {
+    platform.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+  }
+
+}
+
 
