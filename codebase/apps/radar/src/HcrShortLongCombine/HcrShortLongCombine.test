@@ -484,7 +484,7 @@ correct_velocity_for_platform_vertical_motion = FALSE;
 //
 // Type: string
 
-output_fmq_url = "fmqp:://localhost::/tmp/fmq/moments/100hz.combined";
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/moments/10hz.combined";
 
 ///////////// output_fmq_compress /////////////////////
 //
