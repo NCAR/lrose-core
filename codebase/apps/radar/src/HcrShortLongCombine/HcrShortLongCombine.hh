@@ -153,7 +153,8 @@ private:
   int _runRealtime();
   int _runArchive();
 
-  int _openFmqs();
+  int _openInputFmqs();
+  int _openOutputFmq();
   int _prepareInputRays();
   int _readNextDwell();
   RadxRay *_combineDwellRays();

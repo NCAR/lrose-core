@@ -189,9 +189,15 @@ int HcrShortLongCombine::Run()
 int HcrShortLongCombine::_runRealtime()
 {
 
+  // Open the output fmq
+
+  if (_openOutputFmq()) {
+    return -1;
+  }
+
   // Instantiate and initialize the input radar queues
 
-  if (_openFmqs()) {
+  if (_openInputFmqs()) {
     return -1;
   }
 
@@ -264,9 +270,9 @@ int HcrShortLongCombine::_runRealtime()
 }
 
 //////////////////////////////////////////////////
-// Open fmqs
+// Open input fmqs
 
-int HcrShortLongCombine::_openFmqs()
+int HcrShortLongCombine::_openInputFmqs()
 {
 
   // Instantiate and initialize the input radar queues
@@ -284,6 +290,35 @@ int HcrShortLongCombine::_openFmqs()
     _readerShort->setDebug(IWRF_DEBUG_NORM);
     _readerLong->setDebug(IWRF_DEBUG_NORM);
   }
+
+  // initialize reader - read one ray
+
+  RadxRay *rayShort = _readRayShort();
+  if (rayShort != NULL) {
+    delete rayShort;
+  }
+  RadxRay *rayLong = _readRayLong();
+  if (rayLong != NULL) {
+    delete rayLong;
+  }
+
+  if (_params.seek_to_end_of_input_fmq) {
+    _readerShort->seekToEnd();
+    _readerLong->seekToEnd();
+  } else {
+    _readerShort->seekToStart();
+    _readerLong->seekToStart();
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Open output fmq
+
+int HcrShortLongCombine::_openOutputFmq()
+{
 
   // create the output FMQ
   
@@ -310,25 +345,6 @@ int HcrShortLongCombine::_openFmqs()
     _outputFmq->setRegisterWithDmap(true, _params.output_fmq_data_mapper_report_interval);
   }
   _outputFmq->setSingleWriter();
-
-  // initialize reader - read one ray
-
-  RadxRay *rayShort = _readRayShort();
-  if (rayShort != NULL) {
-    delete rayShort;
-  }
-  RadxRay *rayLong = _readRayLong();
-  if (rayLong != NULL) {
-    delete rayLong;
-  }
-
-  if (_params.seek_to_end_of_input_fmq) {
-    _readerShort->seekToEnd();
-    _readerLong->seekToEnd();
-  } else {
-    _readerShort->seekToStart();
-    _readerLong->seekToStart();
-  }
 
   return 0;
 
@@ -903,6 +919,9 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   // read next ray
   
   RadxRay *rayShort = _readerShort->readNextRay();
+  if (rayShort == NULL) {
+    return NULL;
+  }
   _nRaysRead++;
   
   // check for platform update
@@ -926,7 +945,8 @@ RadxRay *HcrShortLongCombine::_readRayShort()
       cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
       cerr << "  Cannot write platform to queue" << endl;
     }
-  }
+
+  } // if (_readerShort->getPlatformUpdated())
 
   // check for calibration update
   
@@ -995,6 +1015,9 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   // read next ray
   
   RadxRay *rayLong = _readerLong->readNextRay();
+  if (rayLong == NULL) {
+    return NULL;
+  }
   _nRaysRead++;
 
   // check for platform update
@@ -1073,12 +1096,18 @@ RadxRay *HcrShortLongCombine::_readRayLong()
 int HcrShortLongCombine::_runArchive()
 {
 
+  // Open the output fmq
+
+  if (_openOutputFmq()) {
+    return -1;
+  }
+
   // Instantiate and initialize the input radar queues
 
   if (_openFileReaders()) {
     return -1;
   }
-
+  
   // prepare the input rays at the start of the first output dwell
   
   if (_prepareInputRays()) {
@@ -1157,42 +1186,6 @@ int HcrShortLongCombine::_runArchive()
 
   return 0;
 
-#ifdef JUNK
-  
-  // get the files to be processed
-
-  RadxTimeList tlist;
-  tlist.setDir(_params.input_dir_short);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (tlist.compile()) {
-    cerr << "ERROR - HcrShortLongCombine::_runFilelist()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir_short << endl;
-    cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
-    cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
-    cerr << tlist.getErrStr() << endl;
-    return -1;
-  }
-
-  const vector<string> &paths = tlist.getPathList();
-  if (paths.size() < 1) {
-    cerr << "ERROR - HcrShortLongCombine::_runFilelist()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir_short << endl;
-    return -1;
-  }
-  
-  // loop through the input file list
-  
-  int iret = 0;
-  for (size_t ii = 0; ii < paths.size(); ii++) {
-    if (_processFile(paths[ii])) {
-      iret = -1;
-    }
-  }
-
-  return iret;
-
-#endif
-
 }
 
 //////////////////////////////////////////////////
@@ -1215,7 +1208,7 @@ int HcrShortLongCombine::_openFileReaders()
   
   _readerShort = new IwrfMomReaderFile(_params.input_dir_short, startTime, endTime);
   _readerLong = new IwrfMomReaderFile(_params.input_dir_long, startTime, endTime);
-  
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _readerShort->setDebug(IWRF_DEBUG_NORM);
     _readerLong->setDebug(IWRF_DEBUG_NORM);
@@ -1230,7 +1223,7 @@ int HcrShortLongCombine::_openFileReaders()
     cerr << "  Start time: " << startTime.asString(0) << endl;
     cerr << "  End time: " << endTime.asString(0) << endl;
   }
-
+  
   RadxRay *rayLong = _readRayLong();
   if (rayLong == NULL) {
     cerr << "ERROR - HcrShortLongCombine::_openFileReaders()" << endl;
