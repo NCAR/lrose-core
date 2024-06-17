@@ -88,49 +88,12 @@ public:
     DWELL_STATS_DISCRETE_MODE = 5
   } dwell_stats_method_t;
 
-  typedef enum {
-    OUTPUT_ENCODING_ASIS = 0,
-    OUTPUT_ENCODING_FLOAT32 = 1,
-    OUTPUT_ENCODING_INT32 = 2,
-    OUTPUT_ENCODING_INT16 = 3,
-    OUTPUT_ENCODING_INT08 = 4
-  } output_encoding_t;
-
-  typedef enum {
-    SCALING_DYNAMIC = 0,
-    SCALING_SPECIFIED = 1
-  } output_scaling_t;
-
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_CFRADIAL2 = 1
-  } output_format_t;
-
-  typedef enum {
-    START_AND_END_TIMES = 0,
-    START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2,
-    SPECIFY_FILE_NAME = 3
-  } filename_mode_t;
-
   // struct typedefs
 
   typedef struct {
     char* field_name;
     dwell_stats_method_t stats_method;
   } stats_method_field_t;
-
-  typedef struct {
-    char* input_field_name;
-    char* output_field_name;
-    char* long_name;
-    char* standard_name;
-    char* output_units;
-    output_encoding_t encoding;
-    output_scaling_t output_scaling;
-    double output_scale;
-    double output_offset;
-  } output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -434,15 +397,15 @@ public:
 
   mode_t mode;
 
-  char* input_dir_short;
-
-  char* input_dir_long;
-
   char* input_fmq_url_short;
 
   char* input_fmq_url_long;
 
   tdrp_bool_t seek_to_end_of_input_fmq;
+
+  char* input_dir_short;
+
+  char* input_dir_long;
 
   tdrp_bool_t set_max_range;
 
@@ -471,48 +434,6 @@ public:
 
   tdrp_bool_t correct_velocity_for_platform_vertical_motion;
 
-  tdrp_bool_t set_output_fields;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
-
-  tdrp_bool_t exclude_specified_fields;
-
-  char* *_excluded_fields;
-  int excluded_fields_n;
-
-  tdrp_bool_t set_output_encoding_for_all_fields;
-
-  output_encoding_t output_encoding;
-
-  output_format_t output_format;
-
-  char* output_dir;
-
-  filename_mode_t output_filename_mode;
-
-  char* output_filename_prefix;
-
-  tdrp_bool_t write_output_files_on_time_boundaries;
-
-  int output_file_time_interval_secs;
-
-  tdrp_bool_t include_instrument_name_in_file_name;
-
-  tdrp_bool_t include_subsecs_in_file_name;
-
-  tdrp_bool_t include_scan_type_in_file_name;
-
-  tdrp_bool_t use_hyphen_in_file_name_datetime_part;
-
-  char* output_filename;
-
-  tdrp_bool_t append_day_dir_to_output_dir;
-
-  tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t write_latest_data_info;
-
   char* output_fmq_url;
 
   tdrp_bool_t output_fmq_compress;
@@ -532,7 +453,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[60];
+  mutable TDRPtable _table[37];
 
   const char *_className;
 

@@ -636,7 +636,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.");
+    tt->help = tdrpStrDup("\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 2;
@@ -647,30 +647,6 @@
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[1].val = ARCHIVE;
     tt->single_val.e = REALTIME;
-    tt++;
-    
-    // Parameter 'input_dir_short'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_short");
-    tt->descr = tdrpStrDup("Input directory short.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
-    tt->val_offset = (char *) &input_dir_short - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
-    tt++;
-    
-    // Parameter 'input_dir_long'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_long");
-    tt->descr = tdrpStrDup("Input directory long.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
-    tt->val_offset = (char *) &input_dir_long - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
     // Parameter 'input_fmq_url_short'
@@ -707,6 +683,30 @@
     tt->help = tdrpStrDup("REALTIME mode only. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
     tt->val_offset = (char *) &seek_to_end_of_input_fmq - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'input_dir_short'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir_short");
+    tt->descr = tdrpStrDup("Input directory short.");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
+    tt->val_offset = (char *) &input_dir_short - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
+    tt++;
+    
+    // Parameter 'input_dir_long'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir_long");
+    tt->descr = tdrpStrDup("Input directory long.");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
+    tt->val_offset = (char *) &input_dir_long - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
     // Parameter 'Comment 3'
@@ -967,412 +967,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_output_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_fields");
-    tt->descr = tdrpStrDup("Set the field names and output encoding");
-    tt->help = tdrpStrDup("If false, all fields will be used.");
-    tt->val_offset = (char *) &set_output_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output field details.");
-    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 9;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->input_field_name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->output_field_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->long_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("standard_name");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->standard_name - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("output_units");
-      tt->struct_def.fields[4].ptype = STRING_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->output_units - (char *) _output_fields;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[5].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[5].ptype = ENUM_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[5].enum_def.nfields = 5;
-        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_ASIS");
-        tt->struct_def.fields[5].enum_def.fields[0].val = OUTPUT_ENCODING_ASIS;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-        tt->struct_def.fields[5].enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-        tt->struct_def.fields[5].enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-        tt->struct_def.fields[5].enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
-        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
-        tt->struct_def.fields[5].enum_def.fields[4].val = OUTPUT_ENCODING_INT08;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("output_scaling_t");
-      tt->struct_def.fields[6].fname = tdrpStrDup("output_scaling");
-      tt->struct_def.fields[6].ptype = ENUM_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_output_fields->output_scaling - (char *) _output_fields;
-        tt->struct_def.fields[6].enum_def.name = tdrpStrDup("output_scaling_t");
-        tt->struct_def.fields[6].enum_def.nfields = 2;
-        tt->struct_def.fields[6].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[6].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[6].enum_def.fields[0].name = tdrpStrDup("SCALING_DYNAMIC");
-        tt->struct_def.fields[6].enum_def.fields[0].val = SCALING_DYNAMIC;
-        tt->struct_def.fields[6].enum_def.fields[1].name = tdrpStrDup("SCALING_SPECIFIED");
-        tt->struct_def.fields[6].enum_def.fields[1].val = SCALING_SPECIFIED;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[7].fname = tdrpStrDup("output_scale");
-      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &_output_fields->output_scale - (char *) _output_fields;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[8].fname = tdrpStrDup("output_offset");
-      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_output_fields->output_offset - (char *) _output_fields;
-    tt->n_struct_vals = 18;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ");
-      tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("reflectivity");
-      tt->struct_vals[3].s = tdrpStrDup("equivalent_reflectivity_factor");
-      tt->struct_vals[4].s = tdrpStrDup("dBZ");
-      tt->struct_vals[5].e = OUTPUT_ENCODING_ASIS;
-      tt->struct_vals[6].e = SCALING_DYNAMIC;
-      tt->struct_vals[7].d = 0.01;
-      tt->struct_vals[8].d = 0;
-      tt->struct_vals[9].s = tdrpStrDup("VEL");
-      tt->struct_vals[10].s = tdrpStrDup("VEL");
-      tt->struct_vals[11].s = tdrpStrDup("radial_velocity");
-      tt->struct_vals[12].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
-      tt->struct_vals[13].s = tdrpStrDup("m/s");
-      tt->struct_vals[14].e = OUTPUT_ENCODING_ASIS;
-      tt->struct_vals[15].e = SCALING_DYNAMIC;
-      tt->struct_vals[16].d = 0.01;
-      tt->struct_vals[17].d = 0;
-    tt++;
-    
-    // Parameter 'exclude_specified_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("exclude_specified_fields");
-    tt->descr = tdrpStrDup("Option to exclude fields in the specified list.");
-    tt->help = tdrpStrDup("If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.");
-    tt->val_offset = (char *) &exclude_specified_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'excluded_fields'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("excluded_fields");
-    tt->descr = tdrpStrDup("List of fields to be excluded.");
-    tt->help = tdrpStrDup("List the names to be excluded");
-    tt->array_offset = (char *) &_excluded_fields - &_start_;
-    tt->array_n_offset = (char *) &excluded_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("VEL");
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_output_encoding_for_all_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_encoding_for_all_fields");
-    tt->descr = tdrpStrDup("Option to set output encoding for all fields");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_output_encoding_for_all_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_encoding'
-    // ctype is '_output_encoding_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_encoding");
-    tt->descr = tdrpStrDup("Output encoding for all fields, if requested.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_encoding - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_encoding_t");
-    tt->enum_def.nfields = 5;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_ASIS");
-      tt->enum_def.fields[0].val = OUTPUT_ENCODING_ASIS;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-      tt->enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-      tt->enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-      tt->enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
-      tt->enum_def.fields[4].val = OUTPUT_ENCODING_INT08;
-    tt->single_val.e = OUTPUT_ENCODING_ASIS;
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL2");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_CFRADIAL2;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'output_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Output directory path.");
-    tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
-    tt++;
-    
-    // Parameter 'output_filename_mode'
-    // ctype is '_filename_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_mode");
-    tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.");
-    tt->val_offset = (char *) &output_filename_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
-      tt->enum_def.fields[0].val = START_AND_END_TIMES;
-      tt->enum_def.fields[1].name = tdrpStrDup("START_TIME_ONLY");
-      tt->enum_def.fields[1].val = START_TIME_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
-      tt->enum_def.fields[2].val = END_TIME_ONLY;
-      tt->enum_def.fields[3].name = tdrpStrDup("SPECIFY_FILE_NAME");
-      tt->enum_def.fields[3].val = SPECIFY_FILE_NAME;
-    tt->single_val.e = START_AND_END_TIMES;
-    tt++;
-    
-    // Parameter 'output_filename_prefix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_prefix");
-    tt->descr = tdrpStrDup("Optional prefix for output filename.");
-    tt->help = tdrpStrDup("If empty, the standard prefix will be used.");
-    tt->val_offset = (char *) &output_filename_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'write_output_files_on_time_boundaries'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_output_files_on_time_boundaries");
-    tt->descr = tdrpStrDup("Option to write the output files on time boundaries.");
-    tt->help = tdrpStrDup("See 'output_file_time_interval_secs'.");
-    tt->val_offset = (char *) &write_output_files_on_time_boundaries - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_file_time_interval_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_file_time_interval_secs");
-    tt->descr = tdrpStrDup("Time interval at which files will be written out (secs).");
-    tt->help = tdrpStrDup("See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.");
-    tt->val_offset = (char *) &output_file_time_interval_secs - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'include_instrument_name_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_instrument_name_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the instrument name in the file name.");
-    tt->help = tdrpStrDup("Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.");
-    tt->val_offset = (char *) &include_instrument_name_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'include_subsecs_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_subsecs_in_file_name");
-    tt->descr = tdrpStrDup("Option to include sub-seconds in date-time part of file name.");
-    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.");
-    tt->val_offset = (char *) &include_subsecs_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'include_scan_type_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_scan_type_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the scan type in the file name.");
-    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
-    tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'use_hyphen_in_file_name_datetime_part'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_hyphen_in_file_name_datetime_part");
-    tt->descr = tdrpStrDup("Option to use a hyphen between date and time in filename.");
-    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. Normally an underscore is used.");
-    tt->val_offset = (char *) &use_hyphen_in_file_name_datetime_part - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_filename'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename");
-    tt->descr = tdrpStrDup("Name of output file.");
-    tt->help = tdrpStrDup("Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.");
-    tt->val_offset = (char *) &output_filename - &_start_;
-    tt->single_val.s = tdrpStrDup("cfradial.test.nc");
-    tt++;
-    
-    // Parameter 'append_day_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_day_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the day directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_day_dir_to_output_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'append_year_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_year_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the year directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

@@ -49,20 +49,8 @@ typedef enum {
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.";
+  p_help = "\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.";
 } mode;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
-  p_descr = "Input directory short.";
-  p_help = "ARCHIVE mode only. Directory for short pulse files.";
-} input_dir_short;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
-  p_descr = "Input directory long.";
-  p_help = "ARCHIVE mode only. Directory for long pulse files.";
-} input_dir_long;
 
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_short";
@@ -81,6 +69,18 @@ paramdef boolean {
   p_descr = "Option to seek to the end of the input FMQ.";
   p_help = "REALTIME mode only. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
 } seek_to_end_of_input_fmq;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
+  p_descr = "Input directory short.";
+  p_help = "ARCHIVE mode only. Directory for short pulse files.";
+} input_dir_short;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
+  p_descr = "Input directory long.";
+  p_help = "ARCHIVE mode only. Directory for long pulse files.";
+} input_dir_long;
 
 commentdef {
   p_header = "LIMIT RANGE?";
@@ -196,191 +196,92 @@ paramdef boolean {
   p_help = "For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.";
 } correct_velocity_for_platform_vertical_motion;
 
-commentdef {
-  p_header = "OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING";
-}
+// commentdef {
+//   p_header = "OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING";
+// }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set the field names and output encoding";
-  p_help = "If false, all fields will be used.";
-} set_output_fields;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Set the field names and output encoding";
+//   p_help = "If false, all fields will be used.";
+// } set_output_fields;
 
-typedef enum {
-  OUTPUT_ENCODING_ASIS,
-  OUTPUT_ENCODING_FLOAT32,
-  OUTPUT_ENCODING_INT32,
-  OUTPUT_ENCODING_INT16,
-  OUTPUT_ENCODING_INT08
-} output_encoding_t;
+// typedef enum {
+//   OUTPUT_ENCODING_ASIS,
+//   OUTPUT_ENCODING_FLOAT32,
+//   OUTPUT_ENCODING_INT32,
+//   OUTPUT_ENCODING_INT16,
+//   OUTPUT_ENCODING_INT08
+// } output_encoding_t;
 
-typedef enum {
-  SCALING_DYNAMIC,
-  SCALING_SPECIFIED
-} output_scaling_t;
+// typedef enum {
+//   SCALING_DYNAMIC,
+//   SCALING_SPECIFIED
+// } output_scaling_t;
 
-typedef struct {
-  string input_field_name; 
-  string output_field_name; 
-  string long_name; 
-  string standard_name; 
-  string output_units;
-  output_encoding_t encoding;
-  output_scaling_t output_scaling;
-  double output_scale;
-  double output_offset;
-} output_field_t;
+// typedef struct {
+//   string input_field_name; 
+//   string output_field_name; 
+//   string long_name; 
+//   string standard_name; 
+//   string output_units;
+//   output_encoding_t encoding;
+//   output_scaling_t output_scaling;
+//   double output_scale;
+//   double output_offset;
+// } output_field_t;
 
-paramdef struct output_field_t {
-  p_default = {
-    { "DBZ",
-      "DBZ",
-      "reflectivity",
-      "equivalent_reflectivity_factor",
-      "dBZ",
-      OUTPUT_ENCODING_ASIS,
-      SCALING_DYNAMIC, 0.01, 0.0
-    },
-    { "VEL", 
-      "VEL", 
-      "radial_velocity",
-      "radial_velocity_of_scatterers_away_from_instrument",
-      "m/s", 
-      OUTPUT_ENCODING_ASIS,
-      SCALING_DYNAMIC, 0.01, 0.0
-    }
-  };
-  p_descr = "Output field details.";
-  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
-} output_fields[];
+// paramdef struct output_field_t {
+//   p_default = {
+//     { "DBZ",
+//       "DBZ",
+//       "reflectivity",
+//       "equivalent_reflectivity_factor",
+//       "dBZ",
+//       OUTPUT_ENCODING_ASIS,
+//       SCALING_DYNAMIC, 0.01, 0.0
+//     },
+//     { "VEL", 
+//       "VEL", 
+//       "radial_velocity",
+//       "radial_velocity_of_scatterers_away_from_instrument",
+//       "m/s", 
+//       OUTPUT_ENCODING_ASIS,
+//       SCALING_DYNAMIC, 0.01, 0.0
+//     }
+//   };
+//   p_descr = "Output field details.";
+//   p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
+// } output_fields[];
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to exclude fields in the specified list.";
-  p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
-} exclude_specified_fields;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to exclude fields in the specified list.";
+//   p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
+// } exclude_specified_fields;
 
-paramdef string {
-  p_default = { "DBZ", "VEL" };
-  p_descr = "List of fields to be excluded.";
-  p_help = "List the names to be excluded";
-} excluded_fields[];
+// paramdef string {
+//   p_default = { "DBZ", "VEL" };
+//   p_descr = "List of fields to be excluded.";
+//   p_help = "List the names to be excluded";
+// } excluded_fields[];
 
-commentdef {
-  p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
-}
+// commentdef {
+//   p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
+// }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set output encoding for all fields";
-} set_output_encoding_for_all_fields;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to set output encoding for all fields";
+// } set_output_encoding_for_all_fields;
 
-paramdef enum output_encoding_t {
-  p_default = OUTPUT_ENCODING_ASIS;
-  p_descr = "Output encoding for all fields, if requested.";
-} output_encoding;
-
-commentdef {
-  p_header = "WRITE CFRADIAL FILES";
-}
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_CFRADIAL2
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
-
-paramdef string {
-  p_default = "./output";
-  p_descr = "Output directory path.";
-  p_help = "Files will be written to this directory.";
-} output_dir;
-
-typedef enum {
-  START_AND_END_TIMES,
-  START_TIME_ONLY,
-  END_TIME_ONLY,
-  SPECIFY_FILE_NAME
-} filename_mode_t;
-
-paramdef enum filename_mode_t {
-  p_default = START_AND_END_TIMES;
-  p_descr = "Mode for computing output file name.";
-  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
-} output_filename_mode;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Optional prefix for output filename.";
-  p_help = "If empty, the standard prefix will be used.";
-} output_filename_prefix;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write the output files on time boundaries.";
-  p_help = "See 'output_file_time_interval_secs'.";
-} write_output_files_on_time_boundaries;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Time interval at which files will be written out (secs).";
-  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
-} output_file_time_interval_secs;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the instrument name in the file name.";
-  p_help = "Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
-} include_instrument_name_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include sub-seconds in date-time part of file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
-} include_subsecs_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the scan type in the file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
-} include_scan_type_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use a hyphen between date and time in filename.";
-  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
-} use_hyphen_in_file_name_datetime_part;
-
-paramdef string {
-  p_default = "cfradial.test.nc";
-  p_descr = "Name of output file.";
-  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
-} output_filename;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Add the day directory to the output directory.";
-  p_help = "Path will be output_dir/yyyymmdd/filename.";
-} append_day_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Add the year directory to the output directory.";
-  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
-} append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
+// paramdef enum output_encoding_t {
+//   p_default = OUTPUT_ENCODING_ASIS;
+//   p_descr = "Output encoding for all fields, if requested.";
+// } output_encoding;
 
 commentdef {
-  p_header = "OUTPUT IN FMQ MODE";
+  p_header = "OUTPUT FMQ";
 }
 
 paramdef string {

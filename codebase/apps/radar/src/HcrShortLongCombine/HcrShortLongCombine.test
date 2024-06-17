@@ -71,11 +71,14 @@ instance = "test";
 //
 
 //
-// REALTIME: read data from two moments FMQ, combine the dwells and 
+// REALTIME: we read data from two moments FMQ, combine the dwells and 
 //   write to an output queue. 
 //
-// ARCHIVE: move through the data between the start and end times set on 
-//   the command line.
+// ARCHIVE: we read the moments data from CfRadial files, between the 
+//   start and end times set on the command line.
+//
+// In both REALTIME and ARCHIVE mode, we write the resulting moments to 
+//   an output FMQ.
 //
 // Type: enum
 // Options:
@@ -83,26 +86,6 @@ instance = "test";
 //     ARCHIVE
 
 mode = ARCHIVE;
-
-///////////// input_dir_short /////////////////////////
-//
-// Input directory short.
-//
-// ARCHIVE mode only. Directory for short pulse files.
-//
-// Type: string
-
-input_dir_short = "$(HOME)/data/meow/cfradial/moments/100hz_short";
-
-///////////// input_dir_long //////////////////////////
-//
-// Input directory long.
-//
-// ARCHIVE mode only. Directory for long pulse files.
-//
-// Type: string
-
-input_dir_long = "$(HOME)/data/meow/cfradial/moments/100hz_long";
 
 ///////////// input_fmq_url_short /////////////////////
 //
@@ -135,6 +118,26 @@ input_fmq_url_long = "/tmp/fmq/moments/100hz.longPulse/shmem_20120";
 // Type: boolean
 
 seek_to_end_of_input_fmq = TRUE;
+
+///////////// input_dir_short /////////////////////////
+//
+// Input directory short.
+//
+// ARCHIVE mode only. Directory for short pulse files.
+//
+// Type: string
+
+input_dir_short = "$(HOME)/data/meow/cfradial/moments/100hz_short";
+
+///////////// input_dir_long //////////////////////////
+//
+// Input directory long.
+//
+// ARCHIVE mode only. Directory for long pulse files.
+//
+// Type: string
+
+input_dir_long = "$(HOME)/data/meow/cfradial/moments/100hz_long";
 
 //======================================================================
 //
@@ -349,300 +352,7 @@ correct_velocity_for_platform_vertical_motion = FALSE;
 
 //======================================================================
 //
-// OPTION TO SPECIFY OUTPUT FIELD NAMES AND ENCODING.
-//
-//======================================================================
- 
-///////////// set_output_fields ///////////////////////
-//
-// Set the field names and output encoding.
-//
-// If false, all fields will be used.
-//
-// Type: boolean
-
-set_output_fields = FALSE;
-
-///////////// output_fields ///////////////////////////
-//
-// Output field details.
-//
-// Set the details for the output fields. The output_field_name is the 
-//   ndtCDF variable name. Set the long name to a more descriptive name. 
-//   Set the standard name to the CF standard name for this field. If the 
-//   long name or standard name are empty, the existing names are used. If 
-//   SCALING_SPECIFIED, then the scale and offset is used.
-//
-// Type: struct
-//   typedef struct {
-//      string input_field_name;
-//      string output_field_name;
-//      string long_name;
-//      string standard_name;
-//      string output_units;
-//      output_encoding_t encoding;
-//        Options:
-//          OUTPUT_ENCODING_ASIS
-//          OUTPUT_ENCODING_FLOAT32
-//          OUTPUT_ENCODING_INT32
-//          OUTPUT_ENCODING_INT16
-//          OUTPUT_ENCODING_INT08
-//      output_scaling_t output_scaling;
-//        Options:
-//          SCALING_DYNAMIC
-//          SCALING_SPECIFIED
-//      double output_scale;
-//      double output_offset;
-//   }
-//
-// 1D array - variable length.
-
-output_fields = {
-  {
-    input_field_name = "DBZ",
-    output_field_name = "DBZ",
-    long_name = "reflectivity",
-    standard_name = "equivalent_reflectivity_factor",
-    output_units = "dBZ",
-    encoding = OUTPUT_ENCODING_ASIS,
-    output_scaling = SCALING_DYNAMIC,
-    output_scale = 0.01,
-    output_offset = 0
-  }
-  ,
-  {
-    input_field_name = "VEL",
-    output_field_name = "VEL",
-    long_name = "radial_velocity",
-    standard_name = "radial_velocity_of_scatterers_away_from_instrument",
-    output_units = "m/s",
-    encoding = OUTPUT_ENCODING_ASIS,
-    output_scaling = SCALING_DYNAMIC,
-    output_scale = 0.01,
-    output_offset = 0
-  }
-};
-
-///////////// exclude_specified_fields ////////////////
-//
-// Option to exclude fields in the specified list.
-//
-// If true, the specified fields will be excluded. This may be easier 
-//   than specifiying all of the fields to be included, if that list is 
-//   very long.
-//
-// Type: boolean
-
-exclude_specified_fields = FALSE;
-
-///////////// excluded_fields /////////////////////////
-//
-// List of fields to be excluded.
-//
-// List the names to be excluded.
-//
-// Type: string
-// 1D array - variable length.
-
-excluded_fields = {
- "DBZ",
- "VEL"
-};
-
-//======================================================================
-//
-// OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS.
-//
-//======================================================================
- 
-///////////// set_output_encoding_for_all_fields //////
-//
-// Option to set output encoding for all fields.
-//
-// Type: boolean
-
-set_output_encoding_for_all_fields = FALSE;
-
-///////////// output_encoding /////////////////////////
-//
-// Output encoding for all fields, if requested.
-//
-// Type: enum
-// Options:
-//     OUTPUT_ENCODING_ASIS
-//     OUTPUT_ENCODING_FLOAT32
-//     OUTPUT_ENCODING_INT32
-//     OUTPUT_ENCODING_INT16
-//     OUTPUT_ENCODING_INT08
-
-output_encoding = OUTPUT_ENCODING_ASIS;
-
-//======================================================================
-//
-// WRITE CFRADIAL FILES.
-//
-//======================================================================
- 
-///////////// output_format ///////////////////////////
-//
-// Format for the output files.
-//
-// Type: enum
-// Options:
-//     OUTPUT_FORMAT_CFRADIAL
-//     OUTPUT_FORMAT_CFRADIAL2
-
-output_format = OUTPUT_FORMAT_CFRADIAL;
-
-///////////// output_dir //////////////////////////////
-//
-// Output directory path.
-//
-// Files will be written to this directory.
-//
-// Type: string
-
-output_dir = "$(HOME)/data/meow/cfradial/moments/100hz_combined";
-
-///////////// output_filename_mode ////////////////////
-//
-// Mode for computing output file name.
-//
-// START_AND_END_TIMES: include both start and end times in file name. 
-//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
-//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
-//   name will be written to output_dir.
-//
-// Type: enum
-// Options:
-//     START_AND_END_TIMES
-//     START_TIME_ONLY
-//     END_TIME_ONLY
-//     SPECIFY_FILE_NAME
-
-output_filename_mode = START_AND_END_TIMES;
-
-///////////// output_filename_prefix //////////////////
-//
-// Optional prefix for output filename.
-//
-// If empty, the standard prefix will be used.
-//
-// Type: string
-
-output_filename_prefix = "";
-
-///////////// write_output_files_on_time_boundaries ///
-//
-// Option to write the output files on time boundaries.
-//
-// See 'output_file_time_interval_secs'.
-//
-// Type: boolean
-
-write_output_files_on_time_boundaries = FALSE;
-
-///////////// output_file_time_interval_secs //////////
-//
-// Time interval at which files will be written out (secs).
-//
-// See 'split_output_files_on_time'. To make sense, this interval should 
-//   divide evenly into an hour - i.e. 3600.
-//
-// Type: int
-
-output_file_time_interval_secs = 600;
-
-///////////// include_instrument_name_in_file_name ////
-//
-// Option to include the instrument name in the file name.
-//
-// Only applies to CfRadial files. If true, the instrument name will be 
-//   included just before the volume number in the output file name.
-//
-// Type: boolean
-
-include_instrument_name_in_file_name = TRUE;
-
-///////////// include_subsecs_in_file_name ////////////
-//
-// Option to include sub-seconds in date-time part of file name.
-//
-// Default is true. Only applies to CfRadial files. If true, the 
-//   millisecs of the start and end time will be included in the file 
-//   name.
-//
-// Type: boolean
-
-include_subsecs_in_file_name = TRUE;
-
-///////////// include_scan_type_in_file_name //////////
-//
-// Option to include the scan type in the file name.
-//
-// Default is true. Only applies to CfRadial files. If true, the scan 
-//   type (SUR, SEC, RHI, VER etc) will be included in the file name.
-//
-// Type: boolean
-
-include_scan_type_in_file_name = TRUE;
-
-///////////// use_hyphen_in_file_name_datetime_part ///
-//
-// Option to use a hyphen between date and time in filename.
-//
-// Default is false. Only applies to CfRadial files. Normally an 
-//   underscore is used.
-//
-// Type: boolean
-
-use_hyphen_in_file_name_datetime_part = FALSE;
-
-///////////// output_filename /////////////////////////
-//
-// Name of output file.
-//
-// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
-//   this name will be written to output_dir.
-//
-// Type: string
-
-output_filename = "cfradial.test.nc";
-
-///////////// append_day_dir_to_output_dir ////////////
-//
-// Add the day directory to the output directory.
-//
-// Path will be output_dir/yyyymmdd/filename.
-//
-// Type: boolean
-
-append_day_dir_to_output_dir = TRUE;
-
-///////////// append_year_dir_to_output_dir ///////////
-//
-// Add the year directory to the output directory.
-//
-// Path will be output_dir/yyyy/yyyymmdd/filename.
-//
-// Type: boolean
-
-append_year_dir_to_output_dir = FALSE;
-
-///////////// write_latest_data_info //////////////////
-//
-// Option to write out _latest_data_info files.
-//
-// If true, the _latest_data_info files will be written after the 
-//   converted file is written.
-//
-// Type: boolean
-
-write_latest_data_info = FALSE;
-
-//======================================================================
-//
-// OUTPUT IN FMQ MODE.
+// OUTPUT FMQ.
 //
 //======================================================================
  
