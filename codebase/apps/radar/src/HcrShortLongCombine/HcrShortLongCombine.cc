@@ -192,6 +192,10 @@ int HcrShortLongCombine::_runRealtime()
     return -1;
   }
 
+  if (_params.debug >= Params::DEBUG_NORM) {
+    cerr << "====>> Unfold stagM, stagN: " << _stagM << ", " << _stagN << endl;
+  }
+  
   // prepare the input rays at the start of the first output dwell
   
   if (_prepareInputRays()) {
@@ -287,6 +291,10 @@ int HcrShortLongCombine::_runArchive()
   _nRaysRead = 0;
   _nRaysWritten = 0;
 
+  if (_params.debug >= Params::DEBUG_NORM) {
+    cerr << "====>> Unfold stagM, stagN: " << _stagM << ", " << _stagN << endl;
+  }
+  
   // loop until readers are empty
   
   int iret = 0;
