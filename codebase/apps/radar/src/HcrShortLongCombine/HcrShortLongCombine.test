@@ -502,7 +502,7 @@ output_fmq_compress = FALSE;
 //
 // Type: int
 
-output_fmq_n_slots = 5000;
+output_fmq_n_slots = 100;
 
 ///////////// output_fmq_buf_size /////////////////////
 //
@@ -510,7 +510,7 @@ output_fmq_n_slots = 5000;
 //
 // Type: int
 
-output_fmq_buf_size = 100000000;
+output_fmq_buf_size = 1000000000;
 
 ///////////// output_fmq_write_blocking ///////////////
 //
@@ -527,7 +527,7 @@ output_fmq_buf_size = 100000000;
 //
 // Type: boolean
 
-output_fmq_write_blocking = FALSE;
+output_fmq_write_blocking = TRUE;
 
 ///////////// output_fmq_data_mapper_report_interval //
 //
