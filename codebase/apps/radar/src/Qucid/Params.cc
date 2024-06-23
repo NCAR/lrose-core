@@ -632,6 +632,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'tmp_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("tmp_dir");
+    tt->descr = tdrpStrDup("Directory for storing temporary files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &tmp_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp");
+    tt++;
+    
     // Parameter 'register_with_procmap'
     // ctype is 'tdrp_bool_t'
     

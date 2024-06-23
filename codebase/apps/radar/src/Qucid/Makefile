@@ -44,7 +44,7 @@ LOC_LIBS = \
 	-ldataport -ltdrp -lRadx -lNcxx \
 	-lphysics -lshapelib \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) -lX11 -lXext \
-	-lfftw3 -lpng -lbz2 -lz -lpthread
+	-lfftw3 -lpng -lpthread -lz -lbz2
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 

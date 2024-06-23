@@ -45,6 +45,12 @@ paramdef boolean {
   p_help = "Developer debugging information.";
 } debug2_flag;
 
+paramdef string {
+  p_default = "/tmp";
+  p_descr = "Directory for storing temporary files.";
+  p_help = "";
+} tmp_dir;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to register this process with the process mapper (procmap).";

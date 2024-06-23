@@ -32,10 +32,11 @@
  */
 
 #define CIDD_INIT    1
-#include "cidd.h"
 #include <shapelib/shapefil.h>
 #include <algorithm>
 #include <toolsa/DateTime.hh>
+#include <qtplot/ColorMap.hh>
+#include "cidd.h"
 
 static void _initGrids();
 static void _initWinds();
@@ -53,6 +54,8 @@ static void _loadShapeMap(Overlay_t *ov, const char    *maps_url);
 static void _initZooms();
 static void _initContours();
 static void _initOverlayFields();
+
+static string _getTmpDir();
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -87,6 +90,10 @@ void init_data_space()
     gd.debug1 = 0;
     gd.debug2 = 0;
   }
+
+  // create temporary directory
+
+  gd.tmpDir = _getTmpDir();
   
   // open shmem segment for interprocess comms
   
@@ -336,9 +343,9 @@ void init_data_space()
 
   int pid = getpid();
   for(int ii = 0; ii < MAX_FRAMES; ii++) {
-    sprintf(gd.movie.frame[ii].fname,
-            "%s/cidd_im%d_%d.",
-            _params.image_dir, pid, ii);
+    snprintf(gd.movie.frame[ii].fname, NAME_LENGTH - 1,
+             "%s/cidd_im%d_%d.",
+             _params.image_dir, pid, ii);
     gd.movie.frame[ii].h_xid = 0;
     gd.movie.frame[ii].v_xid = 0;
     gd.movie.frame[ii].redraw_horiz = 1;
@@ -820,6 +827,10 @@ static void _initGrids()
     mrec->h_mdvx_int16 = new MdvxField;
     mrec->v_mdvx_int16 = new MdvxField;
     mrec->proj = new MdvxProj;
+
+    mrec->colorMap = new ColorMap;
+
+    STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
     
   } // ifld
   
@@ -936,7 +947,7 @@ static void _initWindComponent(met_record_t *wrec,
   
   STRcopy(wrec->legend_name, windp.legend_label, NAME_LENGTH);
   if (isW) {
-    sprintf(wrec->button_name, "%s_W ", windp.button_label);
+    snprintf(wrec->button_name, NAME_LENGTH - 1, "%s_W ", windp.button_label);
   } else {
     STRcopy(wrec->button_name, windp.button_label, NAME_LENGTH);
   }
@@ -1847,7 +1858,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
     while(*str_ptr == ' ') str_ptr++; //skip any leading space
 
-    sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name.c_str());
+    snprintf(name_buf,2047,"%s/%s,",str_ptr,ov->map_file_name.c_str());
 
     // Check if it's a HTTP URL
     if(strncasecmp(name_buf,"http:",5) == 0) {
@@ -1858,7 +1869,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
       if(ptr != NULL) *ptr = '\0';
 
       // Download  SHP Part of shapefile
-      sprintf(name_buf,"%s/%s.shp",str_ptr,name_base);
+      snprintf(name_buf,1023,"%s/%s.shp",str_ptr,name_base);
       if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
         ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
                                         name_buf,_params.data_timeout_secs * 1000,
@@ -1873,7 +1884,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
         if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
 
-        sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+        snprintf(name_buf2,1023,"/tmp/%d_%s.shp",pid,name_base);
         if((map_file = fopen(name_buf2,"w")) == NULL) {
           fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
           perror("CIDD ");
@@ -1889,7 +1900,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
       }
 
       // Download  SHX Part of shapefile
-      sprintf(name_buf,"%s/%s.shx",str_ptr,name_base);
+      snprintf(name_buf,2047,"%s/%s.shx",str_ptr,name_base);
       if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
         ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
                                         name_buf,_params.data_timeout_secs * 1000,
@@ -1904,7 +1915,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
         if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
 
-        sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+        snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
         if((map_file = fopen(name_buf2,"w")) == NULL) {
           fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
           perror("CIDD ");
@@ -1919,7 +1930,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
         if(map_buf != NULL) free(map_buf);
       }
 
-      sprintf(name_buf,"/tmp/%d_%s",pid,name_base);
+      snprintf(name_buf,2047,"/tmp/%d_%s",pid,name_base);
       if((SH = SHPOpen(name_buf,"rb")) != NULL) {
         found = 1;
       } else {
@@ -1928,7 +1939,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
     } else {  // Looks like a regular file
 
-      sprintf(name_buf,"%s/%s,",str_ptr,ov->map_file_name.c_str());
+      snprintf(name_buf,2047,"%s/%s,",str_ptr,ov->map_file_name.c_str());
       if((SH = SHPOpen(name_buf,"rb")) != NULL) {
         found = 1;
       }
@@ -1939,9 +1950,9 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
   if( found == 0) {
     fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name.c_str());
     if(is_http) {  // Unlink temporary files
-      sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+      snprintf(name_buf2,2047,"/tmp/%d_%s.shp",pid,name_base);
       unlink(name_buf2);
-      sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+      snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
       unlink(name_buf2);
     }
 		
@@ -2138,9 +2149,9 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
   }  // End of each object
 
   if(is_http) {  // Unlink temporary files
-    sprintf(name_buf2,"/tmp/%d_%s.shp",pid,name_base);
+    snprintf(name_buf2,2047,"/tmp/%d_%s.shp",pid,name_base);
     unlink(name_buf2);
-    sprintf(name_buf2,"/tmp/%d_%s.shx",pid,name_base);
+    snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
     unlink(name_buf2);
 	
   }
@@ -2564,3 +2575,257 @@ void init_globals()
 
 }
 
+/**********************************************************************
+ * GET_COLOR_MAPPING: A routine to read color table files.
+ *        This routine allocates memory for the entries.
+ *        Returns number of entries found, -1 on error
+ */
+
+static int _get_color_mapping(const char *color_file_subdir,
+                              const char *fname,         /* file name */
+                              Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
+{
+
+  FILE   *cfile;
+    struct stat sbuf;
+    char   *cs_buf;
+    char   buf[2048];
+    char   *str_ptr;
+    char   *cfield[NUM_PARSE_FIELDS];
+    int    i,j;
+    int    cs_len;
+    int    ret_stat;
+    int    nstrings;
+    int    nentries;
+    char   *ptr;
+    char   *lptr;
+    char   *lasts;
+    char    dirname[1024];
+    char    name_buf[2048];
+    CvalVector cvalVector;
+
+    // first check our map to see if we have already read this file
+
+    CvapMapIt it = cvalMap.find(fname);
+    if (it != cvalMap.end()) {
+      // colormap file previously read
+      const CvalVector &cvalVec = it->second;
+      for (size_t ii = 0; ii < cvalVec.size(); ii++) {
+        // Get space for this entry
+        cval[ii] = (Val_color_t *) calloc(1, sizeof(Val_color_t));
+        // copy element
+        *cval[ii] = cvalVec[ii];
+      }
+      nentries = cvalVec.size();
+      if(gd.debug) {
+        fprintf(stderr,"Reusing colorscale file: %s\n", fname);
+        fprintf(stderr,"  nentries: %d\n", nentries);
+      }
+      return nentries;
+    }
+    
+    cs_len = 0;
+    cfile = NULL;
+    // Try the local dir first
+    if((cfile = fopen(fname,"r")) == NULL) {
+
+	STRcopy(name_buf,color_file_subdir,2048);
+
+	str_ptr = strtok(name_buf,","); // Prime strtok
+
+	do {  // Check each directory in the comma delimited  list
+
+	  while(*str_ptr == ' ') str_ptr++; //skip any leading spaces
+
+	  sprintf(buf,"%s/%s",str_ptr,fname);
+
+	  // Check if its an HTTP URL
+	  if(strncasecmp(buf,"http:",5) == 0) {
+            if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
+	      ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,buf,
+                            _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
+            } else {
+	      ret_stat =  HTTPgetURL(buf,_params.data_timeout_secs * 1000, &cs_buf, &cs_len);
+            }
+
+	    if(ret_stat <= 0) {
+		cs_len = 0;
+	    } else {
+	      if(gd.debug) fprintf(stderr,"Loading Colorscale %s\n",buf);
+	    }
+
+
+          } else {
+	    // Try to open it in the subdir 
+	    if((cfile = fopen(buf,"r")) == NULL) {
+	      cs_len = 0;
+	    } else {
+	      if(gd.debug) fprintf(stderr,"Opening Colorscale %s\n",buf);
+	    }
+	  }
+        } while (cfile == NULL && (str_ptr = strtok(NULL,",")) != NULL && cs_len == 0 );
+
+    } else {
+	sprintf(buf,"%s",fname);
+    }
+
+    if(cfile !=NULL) {
+       if(stat(buf,&sbuf) < 0) { // Find the file's size
+             fprintf(stderr,"Can't stat %s\n",buf);
+	     return -1;
+	 }
+
+	 // Allocate space for the whole file plus a null
+	 if((cs_buf = (char *)  calloc(sbuf.st_size + 1 ,1)) == NULL) {
+	     fprintf(stderr,"Problems allocating %ld bytes for colorscale file\n",
+		     (long) sbuf.st_size);
+	     return -1;
+	}
+
+	// Read
+	if((cs_len = fread(cs_buf,1,sbuf.st_size,cfile)) != sbuf.st_size) {
+	   fprintf(stderr,"Problems Reading color map: %s\n",buf);
+	   return -1;
+	}
+	cs_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
+        fclose(cfile);
+    }
+
+    if(cs_len <= 0) {
+			errno = 0;
+			if(getcwd(dirname,1024) == NULL) {
+				perror("Dirname");
+			}
+            fprintf(stderr,"Couldn't load %s/%s or %s/%s\n",
+				 dirname,fname,color_file_subdir,fname);
+            fprintf(stderr,"Please install %s and try again\n",fname);
+            return -1;
+    }
+
+    /* Get temp storage for character strings */
+    for(i=0;i < NUM_PARSE_FIELDS; i++) {
+        cfield[i] = (char *)  calloc(1,PARSE_FIELD_SIZE);
+    }
+
+    nentries = 0;
+
+    // Prime strtok;
+    str_ptr = strtok_r(cs_buf,"\n",&lasts);
+
+    /* loop thru buffer looking for valid entries */
+    while ((str_ptr  != NULL) && (nentries < MAX_COLORS)) {    
+        if(*str_ptr != '#') {
+         ptr = strpbrk(str_ptr,"!\n");    /* look for trailing exclamation point */
+	 if(ptr != NULL) {   /* replace trailing exclamation point with null  */
+	     *ptr = '\0';
+             lptr = ptr + 1; /* Set the label pointer */
+             /* replace offensive newline in label with null */
+             ptr = strpbrk(lptr,"\n");
+             if(ptr) *ptr = '\0';
+	 } else {
+	    lptr = NULL;
+	 }
+
+         if((nstrings = STRparse(str_ptr, cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE)) >= 3) {
+            /* Is (hopefully)  a valid entry */
+            /* Get space for this entry */
+            cval[nentries] = (Val_color_t *) calloc(1,sizeof(Val_color_t));
+
+            /* Set the label for this color scale element */
+            if((lptr != NULL) && strlen(lptr) > 0) {
+               STRcopy(cval[nentries]->label,lptr,LABEL_LENGTH);
+            } else {
+              cval[nentries]->label[0] = '\0';
+            }
+
+            cval[nentries]->min = atof(cfield[0]);        /* Extract mapping values */
+            cval[nentries]->max = atof(cfield[1]);    
+
+            cval[nentries]->cname[0] = '\0';
+            for(j=2;j < nstrings; j++) {    /* Some names contain multiple strings so concatenate */
+                strcat(cval[nentries]->cname,cfield[j]);
+                strcat(cval[nentries]->cname," ");    
+            }
+
+            cval[nentries]->cname[strlen(cval[nentries]->cname)-1] = '\0'; /* chop off last space char */
+            cvalVector.push_back(*cval[nentries]);
+            nentries++;
+          }
+        }
+
+	//Move to the next token
+	str_ptr = strtok_r(NULL,"\n",&lasts);
+
+    }
+
+    /* free temp storage for character strings */
+    for (i = 0; i < NUM_PARSE_FIELDS; i++) {
+        free(cfield[i]);
+    }
+
+    if(cs_len >0 ) free(cs_buf);
+
+    if(nentries <= 0) {
+        fprintf(stderr,"No color map entries found in %s",fname);
+        return -1;
+    }
+
+    if(gd.debug) {
+      fprintf(stderr,"Successfully read colorscale file: %s\n", fname);
+      fprintf(stderr,"  nentries: %d\n", nentries);
+    }
+    CvalPair pr(fname, cvalVector);
+    cvalMap.insert(pr);
+
+    return nentries;
+}
+
+// create tmp dir, return it
+
+static string _getTmpDir()
+
+{
+
+  string tmp_path = _params.tmp_dir;
+  tmp_path += "/Qucid_";
+
+  // first get current time in high precision and make a string from it
+  
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  char timeStr[128];
+  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
+  
+  // get PID and make a string from it
+  
+  char pidStr[128];
+  sprintf(pidStr, "%d_", (int) getpid());
+  
+  // concatenate strings into tmp name
+  
+  string computed_name("tmp_");
+  computed_name += timeStr;
+  computed_name += pidStr;
+  computed_name += getBase();
+  computed_name += ".tmp";
+
+  // change all numerals to lower case letters a to j
+  
+  int delta = 'a' - '0';
+  for (size_t ii = 0; ii < computed_name.size(); ii++) {
+    if (isdigit(computed_name[ii])) {
+      computed_name[ii] += delta;
+    }
+  }
+
+  // add to path
+  
+  tmp_path += computed_name;
+
+  // create it
+
+  ta_makedir(tmp_path.c_str());
+  
+  return tmp_path;
+
+}

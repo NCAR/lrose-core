@@ -621,6 +621,8 @@ public:
 
   tdrp_bool_t debug2_flag;
 
+  char* tmp_dir;
+
   tdrp_bool_t register_with_procmap;
 
   char* instance;
@@ -1485,7 +1487,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[499];
+  mutable TDRPtable _table[500];
 
   const char *_className;
 

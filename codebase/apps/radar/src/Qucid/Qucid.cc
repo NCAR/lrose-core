@@ -135,7 +135,6 @@ Qucid::Qucid(int argc, char **argv) :
 
   // initialize globals, get/set defaults, establish data sources etc.
 
-
   init_data_space();
 
   // print color scales if debugging
@@ -155,7 +154,7 @@ Qucid::Qucid(int argc, char **argv) :
   
   if (_setupXDisplay(argc, argv)) {
     cerr << "Cannot set up X display" << endl;
-    OK = false;
+    // OK = false;
   }
   
   // init process mapper registration
@@ -197,7 +196,11 @@ int Qucid::Run(QApplication &app)
 
   /* Establish color table & mappings  */
 
-  setup_colorscales(gd.dpy);
+  cerr << "111111111111111111" << endl;
+  
+  // setup_colorscales(gd.dpy);
+  
+  cerr << "2222222222222222222" << endl;
   
   // Instantiate Symbolic products
 
@@ -210,6 +213,8 @@ int Qucid::Run(QApplication &app)
   gd.finished_init = 1;
 
   // create cartesian display
+  
+  cerr << "3333333333333333333" << endl;
   
   _cartManager = new CartManager(_params, _displayFields, false);
   return _cartManager->run(app);
