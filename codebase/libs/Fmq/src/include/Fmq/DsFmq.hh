@@ -101,7 +101,7 @@ public:
                          bool debug = false,
                          bool compression = false, 
                          size_t numSlots = 1024, 
-                         size_t bufSize = 10000,
+                         long bufSize = 10000,
                          MsgLog *msgLog = NULL);
 
   // initReadWrite()
@@ -120,7 +120,7 @@ public:
                             openPosition position = END,
                             bool compression = false, 
                             size_t numSlots = 1024, 
-                            size_t bufSize = 10000,
+                            long bufSize = 10000,
                             int msecSleep = -1,
                             MsgLog *msgLog = NULL);
 
@@ -202,7 +202,7 @@ public:
                    openPosition position = END,
                    bool compression = false, 
                    size_t numSlots = 1024, 
-                   size_t bufSize = 10000,
+                   long bufSize = 10000,
                    int msecSleep = -1,
                    MsgLog *msgLog = NULL);
 
@@ -367,7 +367,17 @@ protected:
   // buffer up messages for writing
   // this allows for efficiency in write to a server
 
-  class writeData {
+  class writeData64 {
+  public:
+    int type;
+    int subType;
+    si64 msgLen;
+    bool compress;
+    ta_compression_method_t compressMethod;
+    MemBuf buf;
+  };
+
+  class writeData32 {
   public:
     int type;
     int subType;
@@ -376,6 +386,11 @@ protected:
     ta_compression_method_t compressMethod;
     MemBuf buf;
   };
+
+// default implementation is 64-bit
+typedef writeData64 writeData;
+
+
   deque<writeData *> _writeQueue;
 
   int _nMessagesPerWrite;

@@ -81,16 +81,21 @@ GenericQueue::~GenericQueue(void)
  */
 
 int GenericQueue::fireTrigger(const string &says_who,
-			      time_t trigger_time, time_t forecast_time)
+			      si64 trigger_time, si64 forecast_time)
 {
   trigger_t trigger;
 
   // Setup the trigger request
   // Do the necessary byte swapping
 
-  trigger.trigger_time = BE_from_si32((si32)trigger_time);
-  trigger.forecast_time = BE_from_si32((si32)forecast_time);
-  
+  trigger.trigger_time = BE_from_si64((si64)trigger_time);
+  trigger.forecast_time = BE_from_si64((si64)forecast_time);
+
+  // default implementation is 64-bit
+  // TODO: how to handle backward compatibility?
+  // trigger.trigger_time = BE_from_si32((si32)trigger_time);
+  // trigger.forecast_time = BE_from_si32((si32)forecast_time);
+
   STRncopy( trigger.says_who, says_who.c_str(), (int)NAME_LEN );
 
   return writeMsg(TRIGGER_MSG, 0, (void*)(&trigger), sizeof(trigger));
@@ -104,12 +109,11 @@ int GenericQueue::fireTrigger(const string &says_who,
  */
 
 int GenericQueue::nextTrigger(string &says_who,
-			      time_t *trigger_time, time_t *forecast_time)
+			      si64 *trigger_time, si64 *forecast_time)
 {
   bool gotMsg;
   int status;                                            
-  trigger_t trigger;
-   
+
   status = readMsg( &gotMsg, TRIGGER_MSG );
   if (status == -1 || !gotMsg || getMsgLen() == 0)
   {
@@ -120,11 +124,20 @@ int GenericQueue::nextTrigger(string &says_who,
     // Decode the trigger message
     // Do the necessary byte swapping
 
-    trigger = *((trigger_t*)(getMsg()));
+    if (getMsgLen() == sizeof(trigger_64_t)) {
+      trigger_64_t trigger = *((trigger_64_t*)(getMsg()));
+      *trigger_time = (time_t)BE_to_si64(trigger.trigger_time);
+      *forecast_time = (time_t)BE_to_si64(trigger.forecast_time);
+      says_who = trigger.says_who;
+    }
+    else if (getMsgLen() == sizeof(trigger_32_t)) {
+      trigger_32_t trigger = *((trigger_32_t*)(getMsg()));
+      *trigger_time = (time_t)BE_to_si32(trigger.trigger_time);
+      *forecast_time = (time_t)BE_to_si32(trigger.forecast_time);
+      says_who = trigger.says_who;
+    }
 
-    *trigger_time = (time_t)BE_to_si32(trigger.trigger_time);
-    *forecast_time = (time_t)BE_to_si32(trigger.forecast_time);
-    says_who = trigger.says_who;
+
 
     return 0;  
   }

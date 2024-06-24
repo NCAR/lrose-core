@@ -186,10 +186,9 @@ int Fmq2Fmq::_run ()
     if (gotOne) {
 
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << "    Read message, len: " << setw(8) << _inputFmq.getMsgLen()
-	     << ", type: " << setw(8) << _inputFmq.getMsgType()
-	     << ", subtype: " << setw(8) << _inputFmq.getMsgSubtype()
-	     << endl;
+        cerr << "    Read message, len: " << setw(8) << _inputFmq.getMsgLen()
+        << ", type: " << setw(8) << _inputFmq.getMsgType() << ", subtype: " << setw(8)
+        << _inputFmq.getMsgSubtype() << endl;
       }
 
       // add message to write cache

@@ -75,7 +75,30 @@ public:
   // Struct for initializing an fmq via the server
  
   static const int PROC_NAME_LEN = 32;
-  
+
+  typedef struct {
+    si32 debug;
+    si32 compress;
+    si32 openMode;
+    si32 openPosition;
+    si32 numSlots;
+    si64 bufSize;
+    si32 spare[10];
+    char procName[PROC_NAME_LEN];
+  } initInfo_64_t;
+
+  // Struct containing message properties
+
+  typedef struct {
+    si32 msgType;
+    si32 msgSubtype;
+    si64 msgLen; // msg len, compressed len if preCompressed
+    si32 msgPreCompressed; // flag to indicate already compressed
+    si32 msgUncompressedLen; // length before compression
+    si32 msgId;
+    si64 msgTime;
+  } msgInfo_64_t;
+
   typedef struct {
     si32 debug;
     si32 compress;
@@ -85,7 +108,7 @@ public:
     si32 bufSize;
     si32 spare[10];
     char procName[PROC_NAME_LEN];
-  } initInfo_t;
+  } initInfo_32_t;
 
   // Struct containing message properties
 
@@ -97,8 +120,13 @@ public:
     si32 msgUncompressedLen; // length before compression
     si32 msgId;
     ti32 msgTime;
-  } msgInfo_t;
-  
+  } msgInfo_32_t;
+
+
+  // default implementation is 64-bit
+  typedef initInfo_64_t initInfo_t;
+  typedef msgInfo_64_t msgInfo_t;
+
   // constructor
 
   DsFmqMsg();

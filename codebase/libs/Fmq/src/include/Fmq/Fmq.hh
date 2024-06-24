@@ -76,39 +76,47 @@ public:
 
   // begin 64-bit implementation
 
-  static const int Q_MAGIC_STAT_64 = 88008801;
-  static const int Q_MAGIC_BUF_64 = 88008802;
+  static const int Q_MAGIC_STAT_64 = 88008803;
+  static const int Q_MAGIC_BUF_64 = 88008804;
   static const int Q_MAX_ID_64 = 1000000000;
   static const int Q_NBYTES_EXTRA_64 = 12;
+  static const int Q_NUM_LONG_STAT_64 = 5;
+  static const int Q_NUM_INT_STAT_64 = 10;
+  static const int Q_NUM_LONG_SLOT_64 = 5;
+  static const int Q_NUM_INT_SLOT_64 = 5;
+
 
   // FMQ status struct
   
   typedef struct {
-    
+
+    si64 buf_size;        /* size of buffer */
+
+    si64 begin_insert;    /* offset to start of insert free region */
+    si64 end_insert;      /* offset to end of insert free region */
+    si64 begin_append;    /* offset to start of append free region */
+    si64 time_written;    /* time at which the status struct was last
+                           * written to file */
+
     si32 magic_cookie;    /* magic cookie for file type */
     
     si32 youngest_id;     /* message id of last message written */
     si32 youngest_slot;   /* num of slot which contains the
-			   * youngest message in the queue */
+			                     * youngest message in the queue */
     si32 oldest_slot;     /* num of slot which contains the
-			     oldest message in the queue */
+			                     * oldest message in the queue */
     
     si32 nslots;          /* number of message slots */
-    si64 buf_size;        /* size of buffer */
-    
-    si64 begin_insert;    /* offset to start of insert free region */
-    si64 end_insert;      /* offset to end of insert free region */
-    si64 begin_append;    /* offset to start of append free region */
     si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
     
-    si64 time_written;    /* time at which the status struct was last
-			   * written to file */
-    
+
     /* NOTE - blocking write only supported for 1 reader */
     
     si32 blocking_write;  /* flag to indicate blocking write */
     si32 last_id_read;    /* used for blocking write operation */
     si32 checksum;
+
+    si32 pad_si32_1;
     
   } q_stat_64_t;
   
@@ -122,15 +130,15 @@ public:
   //   Pad is for 4-byte alignment.
   
   typedef struct {
-    
-    si32 active;          /* active flag, 1 or 0 */
-    si32 id;              /* message id 0 to FMQ_MAX_ID */
+
     si64 time;            /* Unix time at which the message is written */
     si64 msg_len;         /* message len in bytes */
-    si64 stored_len;      /* message len + extra 12 bytes (FMQ_NBYTES_EXTRA)
-			   * for magic-cookie and slot num fields,
-			   * plus padding out to even 4 bytes */
+    si64 stored_len;      /* message len + extra XX bytes (Q_NBYTES_EXTRA_64)
+			                     * for magic-cookie and slot num fields,
+			                      * plus padding out to even 4 bytes */
     si64 offset;          /* message offset in buffer */
+    si32 active;          /* active flag, 1 or 0 */
+    si32 id;              /* message id 0 to FMQ_MAX_ID */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
     si32 compress;        /* compress mode - TRUE or FALSE */
@@ -155,9 +163,9 @@ public:
 
     si32 youngest_id;     /* message id of last message written */
     si32 youngest_slot;   /* num of slot which contains the
-			   * youngest message in the queue */
+			                     * youngest message in the queue */
     si32 oldest_slot;     /* num of slot which contains the
-			     oldest message in the queue */
+			                     * oldest message in the queue */
 
     si32 nslots;          /* number of message slots */
     si32 buf_size;        /* size of buffer */
@@ -168,7 +176,7 @@ public:
     si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
 
     si32 time_written;    /* time at which the status struct was last
-			   * written to file */
+			                     * written to file */
 
     /* NOTE - blocking write only supported for 1 reader */
 
@@ -193,9 +201,9 @@ public:
     si32 id;              /* message id 0 to FMQ_MAX_ID */
     si32 time;            /* Unix time at which the message is written */
     si32 msg_len;         /* message len in bytes */
-    si32 stored_len;      /* message len + extra 12 bytes (FMQ_NBYTES_EXTRA)
-			   * for magic-cookie and slot num fields,
-			   * plus padding out to even 4 bytes */
+    si32 stored_len;      /* message len + extra 12 bytes (Q_NBYTES_EXTRA_32)
+			                     * for magic-cookie and slot num fields,
+			                     * plus padding out to even 4 bytes */
     si32 offset;          /* message offset in buffer */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
@@ -283,7 +291,7 @@ public:
 			 bool debug = false,
 			 bool compress = false, 
 			 size_t numSlots = 1024, 
-			 size_t bufSize = 10000,
+			 long bufSize = 10000,
 			 MsgLog *msgLog = NULL);
 
   // initReadWrite()
@@ -303,7 +311,7 @@ public:
 			    openPosition position = END,
 			    bool compress = false, 
 			    size_t numSlots = 1024, 
-			    size_t bufSize = 10000,
+			    long bufSize = 10000,
 			    int msecSleep = -1,
 			    MsgLog *msgLog = NULL);
 
@@ -387,7 +395,7 @@ public:
 		   openPosition position = END,
 		   bool compress = false, 
 		   size_t numSlots = 1024, 
-		   size_t bufSize = 10000,
+		   long bufSize = 10000,
 		   int msecSleep = -1,
 		   MsgLog *msgLog = NULL);
 
@@ -505,11 +513,8 @@ public:
   {
     return _fmqPath;
   }
-  inline int getNumSlots() const
-  {
-    return _stat.nslots;
-  }
-  inline int getBufSize() const
+
+  inline long getBufSize() const
   {
     return _stat.buf_size;
   }
@@ -550,7 +555,7 @@ public:
 
   // get the stored length of the message
 
-  inline int getStoredLen() const
+  inline long getStoredLen() const
   {
     return _slot.stored_len;
   }
@@ -565,7 +570,7 @@ public:
   // get the compressed length of the message
   // same as stored length
 
-  inline int getCompressedLen() const
+  inline long getCompressedLen() const
   {
     return _slot.stored_len;
   }
@@ -573,7 +578,7 @@ public:
   // get the message length for the current slot
   // In compressed data, this is the original message len
 
-  inline int getSlotMsgLen() const
+  inline long getSlotMsgLen() const
   {
     return _slot.msg_len;
   }
@@ -657,10 +662,14 @@ public:
   
   // byte swapping
 
-  static void be_from_slot(q_slot_t *slot);
-  static void be_from_stat(q_stat_t *stat);
-  static void be_to_slot(q_slot_t *slot);
-  static void be_to_stat(q_stat_t *stat);
+  static void be_from_slot_32(q_slot_32_t *slot);
+  static void be_from_stat_32(q_stat_32_t *stat);
+  static void be_to_slot_32(q_slot_32_t *slot);
+  static void be_to_stat_32(q_stat_32_t *stat);
+  static void be_from_slot_64(q_slot_64_t *slot);
+  static void be_from_stat_64(q_stat_64_t *stat);
+  static void be_to_slot_64(q_slot_64_t *slot);
+  static void be_to_stat_64(q_stat_64_t *stat);
 
 protected:
 
