@@ -164,7 +164,7 @@ int Tcp2Fmq::_handleInput (Socket &input)
       cerr << "nBytes read: " << input.getNumBytes() << endl;
       
       void *uncompressed_buffer;
-      unsigned int nbytes_uncompressed;
+      unsigned long nbytes_uncompressed;
       
       uncompressed_buffer = ta_decompress((void *) input.getData(),
 					  &nbytes_uncompressed);

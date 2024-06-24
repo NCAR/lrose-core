@@ -147,7 +147,7 @@ int Fmq::initCreate(const char* fmqPath,
 		    bool debug /* = false*/,
 		    bool compress /* = false*/, 
 		    size_t numSlots /* = 1024*/, 
-		    size_t bufSize /* = 10000*/,
+		    long bufSize /* = 10000*/,
 		    MsgLog *msgLog /* = NULL */)
   
 {
@@ -172,7 +172,7 @@ int Fmq::initReadWrite(const char* fmqPath,
 		       openPosition position /* = END*/,
 		       bool compress /* = false*/, 
 		       size_t numSlots /* = 1024*/, 
-		       size_t bufSize /* = 10000*/,
+		       long bufSize /* = 10000*/,
 		       int msecSleep /* = -1*/,
 		       MsgLog *msgLog /* = NULL */)
   
@@ -283,7 +283,7 @@ Fmq::init(const char* fmqPath,
 	  openPosition position, 
 	  bool compress,
 	  size_t numSlots, 
-	  size_t bufSize,
+	  long bufSize,
 	  int msecSleep,
 	  MsgLog *msgLog)
 {
@@ -724,10 +724,10 @@ void Fmq::print_stat(FILE *out) const
   fprintf(out, "  youngest_slot: %d\n", _stat.youngest_slot);
   fprintf(out, "  oldest_slot: %d\n", _stat.oldest_slot);
   fprintf(out, "  nslots: %d\n", _stat.nslots);
-  fprintf(out, "  buf_size: %d\n", _stat.buf_size);
-  fprintf(out, "  begin_insert: %d\n", _stat.begin_insert);
-  fprintf(out, "  end_insert: %d\n", _stat.end_insert);
-  fprintf(out, "  begin_append: %d\n", _stat.begin_append);
+  fprintf(out, "  buf_size: %ld\n", _stat.buf_size);
+  fprintf(out, "  begin_insert: %ld\n", _stat.begin_insert);
+  fprintf(out, "  end_insert: %ld\n", _stat.end_insert);
+  fprintf(out, "  begin_append: %ld\n", _stat.begin_append);
   fprintf(out, "  append_mode: %s\n", BOOL_STR(_stat.append_mode));
   fprintf(out, "  time_written: %s\n", utimstr(_stat.time_written));
   fprintf(out, "  blocking_write: %d\n", _stat.blocking_write);
@@ -954,8 +954,8 @@ int Fmq::_free_oldest_slot()
     fprintf(stderr, "===============================\n");
     fprintf(stderr,
 	    "free_oldest_slot: "
-	    "Offset mismatch: end_insert %d, "
-	    "oldset_slot offset %d\n",
+	    "Offset mismatch: end_insert %ld, "
+	    "oldset_slot offset %ld\n",
 	    _stat.end_insert, oldest_ptr->offset);
     fprintf(stderr, "\n");
     print_stat(stderr);
@@ -1784,7 +1784,7 @@ int Fmq::_read_stat ()
 
     // swap
     
-    be_to_stat(&status);
+    be_to_stat_64(&status);
 
     // copy to handle
 
@@ -1910,7 +1910,7 @@ int Fmq::_read_slot ( int slot_num)
     
     // swap slot byte order
     
-    be_to_slot(slot);
+    be_to_slot_64(slot);
 
     if (slot->checksum == 0) {
       continue;
@@ -2502,7 +2502,7 @@ int Fmq::_write_stat()
   stat = _stat;
   stat.time_written = time(NULL);
   _add_stat_checksum(&stat);
-  be_from_stat(&stat);
+  be_from_stat_64(&stat);
 
   // seek to start of stat file
   
@@ -2559,7 +2559,7 @@ int Fmq::_write_slot ( int slot_num)
   
   slot = _slots[slot_num];
   _add_slot_checksum(&slot);
-  be_from_slot(&slot);
+  be_from_slot_64(&slot);
 
   // seek to slot
 
@@ -3604,8 +3604,8 @@ void Fmq::_print_slot(FILE *out, const char *label, int num) const
 {
   
   fprintf(out,
-	  "%s - %d: active %d, id %d, time %s, msg_len %d, "
-	  "stored_len %d, offset %d, type %d, subtype %d, "
+	  "%s - %d: active %d, id %d, time %s, msg_len %ld, "
+	  "stored_len %ld, offset %ld, type %d, subtype %d, "
           "compress %s, checksum %d\n",
 	  label, num,
 	  _slot.active, 
@@ -3663,9 +3663,9 @@ void Fmq::_basic_print_slot(int slot_num, q_slot_t *slot, FILE *out) const
   fprintf(out, "%d ", slot->active);
   fprintf(out, "%d ", slot->id);
   fprintf(out, "%s ", utimstr(slot->time));
-  fprintf(out, "%d ", slot->msg_len);
-  fprintf(out, "%d ", slot->stored_len);
-  fprintf(out, "%d ", slot->offset);
+  fprintf(out, "%ld ", slot->msg_len);
+  fprintf(out, "%ld ", slot->stored_len);
+  fprintf(out, "%ld ", slot->offset);
   fprintf(out, "%d ", slot->type);
   fprintf(out, "%d ", slot->subtype);
   fprintf(out, "%d ", slot->compress);
@@ -3682,9 +3682,9 @@ void Fmq::_pretty_print_slot(int slot_num, q_slot_t *slot, FILE *out) const
   fprintf(out, "  active: %d \n", slot->active);
   fprintf(out, "  id: %d \n", slot->id);
   fprintf(out, "  time: %s \n", utimstr(slot->time));
-  fprintf(out, "  msg_len: %d \n", slot->msg_len);
-  fprintf(out, "  stored_len: %d \n", slot->stored_len);
-  fprintf(out, "  offset: %d \n", slot->offset);
+  fprintf(out, "  msg_len: %ld \n", slot->msg_len);
+  fprintf(out, "  stored_len: %ld \n", slot->stored_len);
+  fprintf(out, "  offset: %ld \n", slot->offset);
   fprintf(out, "  type: %d \n", slot->type);
   fprintf(out, "  subtype: %d \n", slot->subtype);
   fprintf(out, "  compress: %d \n", slot->compress);
@@ -3804,36 +3804,67 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
 // BE to host for Fmq::_stat
 ///
 
-void Fmq::be_to_stat(q_stat_t *stat)
+void Fmq::be_to_stat_32(q_stat_32_t *stat)
 {
-  BE_to_array_32(stat, sizeof(q_stat_t));
+  BE_to_array_64(stat, sizeof(q_stat_32_t));
 }
+
+
+void Fmq::be_to_stat_64(q_stat_64_t *stat)
+{
+  int n_bytes = BE_to_array_64(stat, Q_NUM_LONG_STAT_64*sizeof(si64));
+
+  BE_to_array_32(stat+n_bytes, Q_NUM_INT_STAT_64*sizeof(si32));
+}
+
 
 ////////////////////////////////////////////////////////////
 // BE from host for Fmq::_stat
 ///
 
-void Fmq::be_from_stat(q_stat_t *stat)
+void Fmq::be_from_stat_32(q_stat_32_t *stat)
 {
-  BE_from_array_32(stat, sizeof(q_stat_t));
+  BE_from_array_32(stat, sizeof(q_stat_32_t));
 }
+
+void Fmq::be_from_stat_64(q_stat_64_t *stat)
+{
+  int n_bytes = BE_from_array_64(stat, Q_NUM_LONG_STAT_64*sizeof(si64));
+
+  BE_from_array_32(stat+n_bytes, Q_NUM_INT_STAT_64*sizeof(si32));
+}
+
 
 ////////////////////////////////////////////////////////////
 // BE to host for Fmq::_slot
 ///
 
-void Fmq::be_to_slot(q_slot_t *slot)
+void Fmq::be_to_slot_32(q_slot_32_t *slot)
 {
-  BE_to_array_32(slot, sizeof(q_slot_t));
+  BE_to_array_32(slot, sizeof(q_slot_32_t));
+}
+
+void Fmq::be_to_slot_64(q_slot_64_t *slot)
+{
+  int n_bytes = BE_to_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
+
+  BE_to_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
 }
 
 ////////////////////////////////////////////////////////////
 // BE from host for Fmq::_slot
 ///
 
-void Fmq::be_from_slot(q_slot_t *slot)
+void Fmq::be_from_slot_32(q_slot_32_t *slot)
 {
-  BE_from_array_32(slot, sizeof(q_slot_t));
+  BE_from_array_32(slot, sizeof(q_slot_32_t));
+}
+
+void Fmq::be_from_slot_64(q_slot_64_t *slot)
+{
+  int n_bytes = BE_from_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
+
+  BE_from_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
 }
 
 ////////////////////////////////////////////////////////////

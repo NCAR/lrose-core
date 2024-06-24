@@ -283,12 +283,13 @@ int FmqDeviceShmem::_set_sizes_from_existing_queue()
   
   Fmq::q_stat_t stat;
   void *statPtr = NULL;
+  // need to do something if the queue is 32-bit
   if ((statPtr = _ushmGet(_statKey, sizeof(Fmq::q_stat_t))) == NULL) {
     return -1;
   }
   memcpy(&stat, statPtr, sizeof(Fmq::q_stat_t));
-  Fmq::be_to_stat(&stat);
-  
+  Fmq::be_to_stat_64(&stat);
+
   // set the sizes
   
   _nbytes[STAT_IDENT] =

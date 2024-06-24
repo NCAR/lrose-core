@@ -92,14 +92,15 @@ public:
   // Public constants //
   //////////////////////
 
-  static const int NAME_LEN = 128;
+  static const int NAME_LEN_32 = 128;
+  static const int NAME_LEN_64 = 512;
 
 
   //////////////////
   // Public types //
   //////////////////
 
-  enum msgType { TRIGGER_MSG = 100000 };
+  enum msgType { TRIGGER_MSG = 10000 };
 
 
   ////////////////////////////////
@@ -128,14 +129,14 @@ public:
   // Returns 0 on success, -1 on error.
 
   int nextTrigger(string &says_who,
-		  time_t *trigger_time, time_t *forecast_time);
+		  si64 *trigger_time, si64 *forecast_time);
 
   // Fire the trigger message.
   //
   // Returns 0 on success, -1 on error.
 
   int fireTrigger(const string &says_who,
-		  time_t trigger_time, time_t forecast_time = -1);
+		  si64 trigger_time, si64 forecast_time = -1);
 
 
 private:
@@ -146,10 +147,21 @@ private:
 
   typedef struct
   {
+    si64  trigger_time;
+    si64  forecast_time;
+    char  says_who[NAME_LEN_64];
+  } trigger_64_t;
+
+  typedef struct
+  {
     si32  trigger_time;
     si32  forecast_time;
-    char  says_who[NAME_LEN];
-  } trigger_t;
+    char  says_who[NAME_LEN_32];
+  } trigger_32_t;
+
+  // default implementation is 64-bit
+  typedef trigger_64_t trigger_t;
+  static const int NAME_LEN = NAME_LEN_64;
 
 };
 

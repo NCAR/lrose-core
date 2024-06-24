@@ -108,7 +108,7 @@ int DsFmq::initCreate(const char* fmqURL,
 		      bool debug /* = false*/,
 		      bool compression /* = false*/, 
 		      size_t numSlots /* = 1024*/, 
-		      size_t bufSize /* = 10000*/,
+		      long bufSize /* = 10000*/,
 		      MsgLog *msgLog /* = NULL */)
   
 {
@@ -133,7 +133,7 @@ int DsFmq::initReadWrite(const char* fmqURL,
 			 openPosition position /* = END*/,
 			 bool compression /* = false*/, 
 			 size_t numSlots /* = 1024*/, 
-			 size_t bufSize /* = 10000*/,
+			 long bufSize /* = 10000*/,
 			 int msecSleep /* = -1*/,
 			 MsgLog *msgLog /* = NULL */)
   
@@ -241,7 +241,7 @@ int DsFmq::init(const char* fmqURL,
 		openPosition position, 
 		bool compress,
 		size_t numSlots, 
-		size_t bufSize,
+		long bufSize,
 		int msecSleep,
 		MsgLog *msgLog)
 
