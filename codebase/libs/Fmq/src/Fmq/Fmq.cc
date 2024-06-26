@@ -1825,8 +1825,6 @@ int Fmq::_read_slots ()
 
 {
 
-  int nbytes;
-
   // seek to start of slots in status file
 
   if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_t))) {
@@ -1839,7 +1837,7 @@ int Fmq::_read_slots ()
 
   _alloc_slots(_stat.nslots);
   
-  nbytes = sizeof(q_slot_t) * _stat.nslots;
+  int nbytes = sizeof(q_slot_t) * _stat.nslots;
   if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
     _print_error("_read_slots", "Cannot read slots");
     return -1;
@@ -1847,7 +1845,13 @@ int Fmq::_read_slots ()
 
   // swap slot byte order
 
-  BE_to_array_32(_slots, _stat.nslots * sizeof(q_slot_t));
+  // 64-bit update
+  cerr << "Fmq::_read_slots # slots: " <<  _stat.nslots << endl;
+  //BE_to_array_32(_slots, _stat.nslots * sizeof(q_slot_t));
+  for(int i = 0; i < _stat.nslots; ++i) {
+    cerr << "Fmq::_read_slots slot: " <<  &(_slots[i]) << endl;
+    //be_to_slot_64(&_slots[i]);
+  }
 
   return 0;
 
@@ -3806,7 +3810,7 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
 
 void Fmq::be_to_stat_32(q_stat_32_t *stat)
 {
-  BE_to_array_64(stat, sizeof(q_stat_32_t));
+  BE_to_array_32(stat, sizeof(q_stat_32_t));
 }
 
 
@@ -3847,7 +3851,6 @@ void Fmq::be_to_slot_32(q_slot_32_t *slot)
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
   int n_bytes = BE_to_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
-
   BE_to_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
 }
 
@@ -3863,7 +3866,6 @@ void Fmq::be_from_slot_32(q_slot_32_t *slot)
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
   int n_bytes = BE_from_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
-
   BE_from_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
 }
 
