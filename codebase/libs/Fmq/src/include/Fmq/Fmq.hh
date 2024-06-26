@@ -82,8 +82,8 @@ public:
   static const int Q_NBYTES_EXTRA_64 = 12;
   static const int Q_NUM_LONG_STAT_64 = 5;
   static const int Q_NUM_INT_STAT_64 = 10;
-  static const int Q_NUM_LONG_SLOT_64 = 5;
-  static const int Q_NUM_INT_SLOT_64 = 5;
+  static const int Q_NUM_LONG_SLOT_64 = 4;
+  static const int Q_NUM_INT_SLOT_64 = 6;
 
 
   // FMQ status struct
@@ -686,7 +686,9 @@ protected:
   openPosition _openPosition;
   bool _compress;
   int _numSlots;
-  int _bufSize;
+  // for 64-bit
+//  int _bufSize;
+  long _bufSize;
   int _msecSleep;
   int _msecBlockingReadTimeout;
 
@@ -730,7 +732,10 @@ protected:
   
   ui08 *_entry;        /* message entry array - includes extra bytes
 			* msg points into this array */
-  int _nEntryAlloc;    /* number of bytes allocated for msg entry */
+
+  // change for 64-bit update
+  // int _nEntryAlloc;    /* number of bytes allocated for msg entry */
+  long _nEntryAlloc;    /* number of bytes allocated for msg entry */
 
   // heartbeat function for procmap registration
 
