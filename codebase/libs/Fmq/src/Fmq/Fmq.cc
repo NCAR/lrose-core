@@ -1850,7 +1850,7 @@ int Fmq::_read_slots ()
   //BE_to_array_32(_slots, _stat.nslots * sizeof(q_slot_t));
   for(int i = 0; i < _stat.nslots; ++i) {
     cerr << "Fmq::_read_slots slot: " <<  &(_slots[i]) << endl;
-    //be_to_slot_64(&_slots[i]);
+    be_to_slot_64(&_slots[i]);
   }
 
   return 0;
