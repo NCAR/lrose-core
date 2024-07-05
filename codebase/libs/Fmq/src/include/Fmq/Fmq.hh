@@ -77,7 +77,6 @@ public:
   // begin 64-bit implementation
 
   static const int Q_MAGIC_STAT_64 = 88008803;
-  static const int Q_MAGIC_BUF_64 = 88008804;
   static const int Q_MAX_ID_64 = 1000000000;
   static const int Q_NBYTES_EXTRA_64 = 12;
   static const int Q_NUM_LONG_STAT_64 = 5;
@@ -90,16 +89,8 @@ public:
   
   typedef struct {
 
-    si64 buf_size;        /* size of buffer */
-
-    si64 begin_insert;    /* offset to start of insert free region */
-    si64 end_insert;      /* offset to end of insert free region */
-    si64 begin_append;    /* offset to start of append free region */
-    si64 time_written;    /* time at which the status struct was last
-                           * written to file */
-
     si32 magic_cookie;    /* magic cookie for file type */
-    
+
     si32 youngest_id;     /* message id of last message written */
     si32 youngest_slot;   /* num of slot which contains the
 			                     * youngest message in the queue */
@@ -117,7 +108,16 @@ public:
     si32 checksum;
 
     si32 pad_si32_1;
-    
+
+    si64 buf_size;        /* size of buffer */
+    si64 begin_insert;    /* offset to start of insert free region */
+    si64 end_insert;      /* offset to end of insert free region */
+    si64 begin_append;    /* offset to start of append free region */
+    si64 time_written;    /* time at which the status struct was last
+                           * written to file */
+
+
+
   } q_stat_64_t;
   
   // FMQ slot struct
@@ -134,8 +134,8 @@ public:
     si64 time;            /* Unix time at which the message is written */
     si64 msg_len;         /* message len in bytes */
     si64 stored_len;      /* message len + extra XX bytes (Q_NBYTES_EXTRA_64)
-			                     * for magic-cookie and slot num fields,
-			                      * plus padding out to even 4 bytes */
+			   * for magic-cookie and slot num fields,
+			   * plus padding out to even 4 bytes */
     si64 offset;          /* message offset in buffer */
     si32 active;          /* active flag, 1 or 0 */
     si32 id;              /* message id 0 to FMQ_MAX_ID */
@@ -151,7 +151,7 @@ public:
   // begin 32-bit implementation
 
   static const int Q_MAGIC_STAT_32 = 88008801;
-  static const int Q_MAGIC_BUF_32 = 88008802;
+  static const int Q_MAGIC_BUF = 88008802;
   static const int Q_MAX_ID_32 = 1000000000;
   static const int Q_NBYTES_EXTRA_32 = 12;
 
@@ -202,8 +202,8 @@ public:
     si32 time;            /* Unix time at which the message is written */
     si32 msg_len;         /* message len in bytes */
     si32 stored_len;      /* message len + extra 12 bytes (Q_NBYTES_EXTRA_32)
-			                     * for magic-cookie and slot num fields,
-			                     * plus padding out to even 4 bytes */
+			   * for magic-cookie and slot num fields,
+			   * plus padding out to even 4 bytes */
     si32 offset;          /* message offset in buffer */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
@@ -217,7 +217,6 @@ public:
 
   // default implementation is 64-bit
   static const int Q_MAGIC_STAT = Q_MAGIC_STAT_64;
-  static const int Q_MAGIC_BUF = Q_MAGIC_BUF_64;
   static const int Q_MAX_ID = Q_MAX_ID_64;
   static const int Q_NBYTES_EXTRA = Q_NBYTES_EXTRA_64;
   typedef q_stat_64_t q_stat_t;
@@ -860,6 +859,8 @@ protected:
   void _add_slot_checksum(q_slot_t *slot);
   int _check_stat_checksum(const q_stat_t *stat);
   int _check_slot_checksum(const q_slot_t *slot);
+  int _get_magic_cookie(int& cookie);
+
 
   // search
   
@@ -869,7 +870,7 @@ protected:
   int _prev_slot(int slot_num);
   int _find_slot_for_id(int search_id, int *slot_p);
   int _slot_in_active_region(int slot_num);
-
+   
   // space used
 
   int _space_avail(int stored_len);

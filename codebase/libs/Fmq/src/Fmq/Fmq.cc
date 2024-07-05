@@ -8,7 +8,7 @@
 // ** the following conditions are met:                                      
 // ** 1) If the software is modified to produce derivative works,            
 // ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
+// ** to confuse it with the version available from UCAR.
 // ** 2) Redistributions of source code must retain the above copyright      
 // ** notice, this list of conditions and the following disclaimer.          
 // ** 3) Redistributions in binary form must reproduce the above copyright   
@@ -908,6 +908,7 @@ int Fmq::_alloc_slots(int nslots)
 
 }
 
+
 ////////////////////////////////////////////////////////////
 // Fmq::_free_slots()
 //
@@ -1766,32 +1767,75 @@ int Fmq::_read_stat ()
 
   for (ii = 0; ii < 5; ii++) {
 
-    // seek to start of status file
-    
-    if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
-      _print_error("_read_stat",
-		   "Cannot seek to start of status buffer");
+    int magic_cookie;
+    if (_get_magic_cookie(magic_cookie)) {
+      _print_error("_read_stat", "Cannot read magic cookie");
       return -1;
     }
 
-    // read in status struct
-    
-    if (_read_device(FmqDevice::STAT_IDENT, &status, sizeof(q_stat_t))) {
-      _print_error("_read_stat",
-		   "Cannot read status struct");
-      return -1;
-    }
+    if (magic_cookie == Q_MAGIC_STAT_64) {
 
-    // swap
-    
-    be_to_stat_64(&status);
+      // read in status struct
+
+      if (_read_device(FmqDevice::STAT_IDENT, &status, sizeof(q_stat_t))) {
+        _print_error("_read_stat",
+                     "Cannot read status struct");
+        return -1;
+      }
+
+      // swap
+
+      be_to_stat_64(&status);
+
+
+    }
+    else if (magic_cookie == Q_MAGIC_STAT_32) {
+
+      q_stat_32_t status_32;
+
+      if (_read_device(FmqDevice::STAT_IDENT, &status_32, sizeof(q_stat_32_t))) {
+        _print_error("_read_stat",
+                     "Cannot read 32-bit status struct");
+        return -1;
+      }
+
+      // swap
+
+      be_to_stat_32(&status_32);
+
+      // copy 32-bit to 64-bit status
+
+      status.magic_cookie = Q_MAGIC_STAT_64;
+      status.youngest_id = status_32.youngest_id;
+      status.youngest_slot = status_32.youngest_slot;
+      status.oldest_slot = status_32.oldest_slot;
+      status.nslots = status_32.nslots;
+      status.append_mode = status_32.append_mode;
+      status.blocking_write = status_32.blocking_write;
+      status.last_id_read = status_32.last_id_read;
+      status.buf_size = status_32.buf_size;
+      status.begin_insert = status_32.begin_insert;
+      status.end_insert = status_32.end_insert;
+      status.begin_append = status_32.begin_append;
+      status.time_written = status_32.time_written;
+
+      // create a new checksum
+      _add_stat_checksum(&status);
+
+    }
+    else {
+      _print_error("_read_stat",
+                   "magic cookie is not valid ");
+      return -1;
+
+    }
 
     // copy to handle
 
     _stat = status;
-    
+
     // checksum check
-    
+
     if (_check_stat_checksum(&status) == 0) {
       return 0;
     }
@@ -1822,38 +1866,107 @@ int Fmq::_read_stat ()
 ///
 
 int Fmq::_read_slots ()
-
 {
 
-  // seek to start of slots in status file
+  int magic_cookie;
+  if (_get_magic_cookie(magic_cookie)) {
+    _print_error("_read_stat", "Cannot read magic cookie");
+    return -1;
+  }
 
-  if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_t))) {
+    // seek start again
+  if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
+    _print_error("_read_stat",
+		 "Cannot seek to start of status buffer");
+    return -1;
+  }
+
+
+  if (magic_cookie == Q_MAGIC_STAT_64) {
+
+    // seek to start of slots in status file
+
+    if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_t))) {
+      _print_error("_read_slots",
+		   "Cannot seek to start of slots in status buffer");
+      return -1;
+    }
+  
+    // read in slots, make sure there are enough slots allocated
+
+    _alloc_slots(_stat.nslots);
+  
+    int nbytes = sizeof(q_slot_t) * _stat.nslots;
+    if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
+      _print_error("_read_slots", "Cannot read slots");
+      return -1;
+    }
+
+    // swap slot byte order
+
+    for(int i = 0; i < _stat.nslots; ++i) {
+      be_to_slot_64(&_slots[i]);
+    }
+
+    return 0;
+
+  }
+  else if (magic_cookie == Q_MAGIC_STAT_32) {
+
+    // seek to start of slots in status file
+
+    if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_32_t))) {
+      _print_error("_read_slots",
+		   "Cannot seek to start of slots in status buffer");
+      return -1;
+    }
+    
+    q_slot_32_t *slots_32 = new q_slot_32_t[_stat.nslots];
+
+    // read in slots, make sure there are enough slots allocated
+
+    int nbytes = sizeof(q_slot_32_t) * _stat.nslots;
+    if (_read_device(FmqDevice::STAT_IDENT, slots_32, nbytes)) {
+      _print_error("_read_slots", "Cannot read slots");
+      return -1;
+      delete [] slots_32;
+    }
+
+    // swap slot byte order
+
+
+    BE_to_array_32(slots_32, _stat.nslots * sizeof(q_slot_32_t));
+
+    // copy 32-bit slots to 64-bit slots
+    
+    _alloc_slots(_stat.nslots);
+
+    for(int i = 0; i < _stat.nslots; ++i) {
+      _slots[i].active = slots_32[i].active;
+      _slots[i].id = slots_32[i].id;
+      _slots[i].time = slots_32[i].time;
+      _slots[i].msg_len = slots_32[i].msg_len;
+      _slots[i].stored_len = slots_32[i].stored_len;
+      _slots[i].offset = slots_32[i].offset;
+      _slots[i].type = slots_32[i].type;
+      _slots[i].subtype = slots_32[i].subtype;
+      _slots[i].compress = slots_32[i].compress;
+      _add_slot_checksum(&_slots[i]);
+    }
+    
+
+    // clean up memory allocated here
+    
+    delete [] slots_32;
+
+    return 0;
+  }
+  else {
     _print_error("_read_slots",
-		 "Cannot seek to start of slots in status buffer");
+		 "magic cookie is not valid ");
     return -1;
+
   }
-  
-  // read in slots, make sure there are enough slots allocated
-
-  _alloc_slots(_stat.nslots);
-  
-  int nbytes = sizeof(q_slot_t) * _stat.nslots;
-  if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
-    _print_error("_read_slots", "Cannot read slots");
-    return -1;
-  }
-
-  // swap slot byte order
-
-  // 64-bit update
-  cerr << "Fmq::_read_slots # slots: " <<  _stat.nslots << endl;
-  //BE_to_array_32(_slots, _stat.nslots * sizeof(q_slot_t));
-  for(int i = 0; i < _stat.nslots; ++i) {
-    cerr << "Fmq::_read_slots slot: " <<  &(_slots[i]) << endl;
-    be_to_slot_64(&_slots[i]);
-  }
-
-  return 0;
 
 }
 
@@ -1870,8 +1983,13 @@ int Fmq::_read_slot ( int slot_num)
 
 {
 
-  int offset, ii;
-  q_slot_t *slot;
+  int offset;
+
+  int magic_cookie;
+  if (_get_magic_cookie(magic_cookie)) {
+    _print_error("_read_stat", "Cannot read magic cookie");
+    return -1;
+  }
 
   // Make sure we have a valid slot number
 
@@ -1885,36 +2003,85 @@ int Fmq::_read_slot ( int slot_num)
   }
   
   _alloc_slots(_stat.nslots);
-  
+  q_slot_t *slot = _slots + slot_num;
+
   // try 5 times to read the slot struct, using the checksum to
   // ensure it is correctly read
 
-  for (ii = 0; ii < 5; ii++) {
-    
-    // seek to given slot
-    
-    offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
-    if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
-      _print_error("_read_slot",
-		   "Cannot seek to slot %d in status file",
-		   slot_num);
-      return -1;
-    }
-    slot = _slots + slot_num;
+  for (int ii = 0; ii < 5; ii++) {
 
-    // read in slot
-    
-    
-    if (_read_device(FmqDevice::STAT_IDENT, slot, sizeof(q_slot_t))) {
-      _print_error("_read_slot",
-		   "Cannot read slot %d in status file",
-		   slot_num);
-      return -1;
+    if (magic_cookie == Q_MAGIC_STAT_64) {
+      // seek to given slot
+
+      offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
+      if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
+        _print_error("_read_slot",
+                     "Cannot seek to slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+
+      // read in slot
+
+      if (_read_device(FmqDevice::STAT_IDENT, slot, sizeof(q_slot_t))) {
+        _print_error("_read_slot",
+                     "Cannot read slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+
+      // swap slot byte order
+
+      be_to_slot_64(slot);
+
     }
-    
-    // swap slot byte order
-    
-    be_to_slot_64(slot);
+    else if (magic_cookie == Q_MAGIC_STAT_32) {
+
+
+      offset = sizeof(q_stat_32_t) + slot_num * sizeof(q_slot_32_t);
+      if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
+        _print_error("_read_slot",
+                     "Cannot seek to slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+
+      q_slot_32_t slot_32;
+      // read in slot
+
+      if (_read_device(FmqDevice::STAT_IDENT, &slot_32, sizeof(q_slot_32_t))) {
+        _print_error("_read_slot",
+                     "Cannot read slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+
+      // swap slot byte order
+
+      be_to_slot_32(&slot_32);
+
+      // copy 32-bit slot to 64-bit slot
+
+      slot->active = slot_32.active;
+      slot->id = slot_32.id;
+      slot->time = slot_32.time;
+      slot->msg_len = slot_32.msg_len;
+      slot->stored_len = slot_32.stored_len;
+      slot->offset = slot_32.offset;
+      slot->type = slot_32.type;
+      slot->subtype = slot_32.subtype;
+      slot->compress = slot_32.compress;
+      _add_slot_checksum(slot);
+
+    }
+    else {
+      _print_error("_read_slot",
+                   "magic cookie is not valid ");
+      return -1;
+
+    }
+
+
 
     if (slot->checksum == 0) {
       continue;
@@ -3315,6 +3482,47 @@ int Fmq::_check_slot_checksum(const q_slot_t *slot)
 }
 
 ////////////////////////////////////////////////////////////
+//  Get the magic cookie
+//
+//  Return value:
+//    0 for success and -1 for failure
+///
+
+int Fmq::_get_magic_cookie ( int& cookie )
+
+{
+  // seek to start of status file
+    
+  if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
+    _print_error("_read_stat", "Cannot seek to start of status buffer");
+    return -1;
+  }
+
+  // read magic cookie to see if the stat struct is 64-bit or 32-bit
+
+  int magic_cookie;
+  if (_read_device(FmqDevice::STAT_IDENT, &magic_cookie, sizeof(int))) {
+    _print_error("_read_stat", "Cannot read magic cookie");
+    return -1;
+  }
+
+  // swap magic cookie
+  magic_cookie = BE_to_si32(magic_cookie);
+
+  // seek start again
+  if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
+    _print_error("_read_stat",
+		 "Cannot seek to start of status buffer");
+    return -1;
+  }
+
+  cookie = magic_cookie;
+  return 0;
+}
+
+
+
+////////////////////////////////////////////////////////////
 // SEARCH
 ////////////////////////////////////////////////////////////
 
@@ -3325,7 +3533,7 @@ int Fmq::_check_slot_checksum(const q_slot_t *slot)
 //
 ///
 
-int Fmq::_prev_slot ( int slot_num)
+int Fmq::_prev_slot ( int slot_num )
 
 {
 
@@ -3816,9 +4024,9 @@ void Fmq::be_to_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_to_array_64(stat, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_to_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
 
-  BE_to_array_32(stat+n_bytes, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_to_array_64(stat+n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -3833,9 +4041,9 @@ void Fmq::be_from_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_from_array_64(stat, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_from_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
 
-  BE_from_array_32(stat+n_bytes, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64(stat+n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
