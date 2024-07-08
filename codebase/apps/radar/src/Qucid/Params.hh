@@ -621,13 +621,17 @@ public:
 
   tdrp_bool_t debug2_flag;
 
+  tdrp_bool_t register_with_procmap;
+
+  char* instance;
+
   char* top_level_cache_dir;
 
   tdrp_bool_t clear_cache;
 
-  tdrp_bool_t register_with_procmap;
+  tdrp_bool_t use_curl_for_downloads;
 
-  char* instance;
+  char* color_scale_urls;
 
   field_t *_fields;
   int fields_n;
@@ -636,6 +640,8 @@ public:
 
   wind_t *_winds;
   int winds_n;
+
+  char* map_urls;
 
   tdrp_bool_t maps_enabled_at_startup;
 
@@ -952,10 +958,6 @@ public:
   double max_ht;
 
   double start_ht;
-
-  char* color_scale_urls;
-
-  char* map_urls;
 
   double locator_margin_km;
 

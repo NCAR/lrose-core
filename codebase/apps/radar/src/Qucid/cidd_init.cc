@@ -2679,210 +2679,74 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     }
   }
 
-  // file is remote, retrieve it using curl
+  // file is remote, retrieve it using curl or http
 
   string remoteUrl = colorscaleUrl;
   remoteUrl += "/";
   remoteUrl += colorscaleName;
 
-  string cmd = "curl -s -o ";
-  cmd += cachePath;
-  cmd += " ";
-  cmd += remoteUrl;
+  if (_params.use_curl_for_downloads) {
+    
+    string cmd = "curl -s -o ";
+    cmd += cachePath;
+    cmd += " ";
+    cmd += remoteUrl;
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Retrieving remote color file, cmd is: " << endl;
+      cerr << "  " << cmd << endl;
+    }
+    
+    int timeoutSecs = _params.data_timeout_secs;
+    if (safe_system(cmd.c_str(), timeoutSecs)) {
+      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "  Cannot get remote color scale, cmd: " << cmd << endl;
+      return -1;
+    }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Retrieving remote color file, cmd is: " << endl;
-    cerr << "  " << cmd << endl;
-  }
+  } else {
 
-  int timeoutSecs = _params.data_timeout_secs;
-  if (safe_system(cmd.c_str(), timeoutSecs)) {
-    cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
-    cerr << "  Cannot get remote color scale, cmd: " << cmd << endl;
-    return -1;
-  }
+    // use http
+    
+    char *cs_buf;
+    int cs_len;
+    int ret_stat =  HTTPgetURL(remoteUrl.c_str(), _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
+    if(ret_stat <= 0) {
+      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "  Cannot get remote color scale, url: " << remoteUrl << endl;
+      return -1;
+    }
 
+    // write buffer to cache file
+
+    FILE *cacheFile = fopen(cachePath.c_str(), "w");
+    if (cacheFile == NULL) {
+      int err = errno;
+      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "  Cannot open cache file for writing: " << cachePath << endl;
+      cerr << "  " << strerror(err) << endl;
+      return -1;
+    }
+    if (fwrite(cs_buf, 1, cs_len, cacheFile) != cs_len) {
+      int err = errno;
+      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "  Cannot write to cache file: " << cachePath << endl;
+      cerr << "  " << strerror(err) << endl;
+      fclose(cacheFile);
+      return -1;
+    }
+    fclose(cacheFile);
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Success - copied color scale file to cache: " << cachePath << endl;
+      cerr << "Source url: " << remoteUrl << endl;
+    }
+
+  } // if (_params.use_curl_for_downloads)
+    
   return 0;
 
 }
-
-#ifdef JUNK
-
-{
-  FILE   *cfile;
-  struct stat sbuf;
-  char   *cs_buf;
-  char   buf[2048];
-  char   *str_ptr;
-  char   *cfield[NUM_PARSE_FIELDS];
-  int    i,j;
-  int    cs_len;
-  int    ret_stat;
-  int    nstrings;
-  int    nentries;
-  char   *ptr;
-  char   *lptr;
-  char   *lasts;
-  char    dirname[1024];
-  char    name_buf[2048];
-  
-  cs_len = 0;
-  cfile = NULL;
-  // Try the local dir first
-  if((cfile = fopen(fname,"r")) == NULL) {
-    
-    STRcopy(name_buf,color_file_subdir,2048);
-    
-    str_ptr = strtok(name_buf,","); // Prime strtok
-    
-    do {  // Check each directory in the comma delimited  list
-      
-      while(*str_ptr == ' ') str_ptr++; //skip any leading spaces
-      
-      snprintf(buf,2048,"%s/%s",str_ptr,fname);
-
-      // Check if its an HTTP URL
-      if(strncasecmp(buf,"http:",5) == 0) {
-        if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
-          ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,buf,
-                                          _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
-        } else {
-          ret_stat =  HTTPgetURL(buf,_params.data_timeout_secs * 1000, &cs_buf, &cs_len);
-        }
-
-        if(ret_stat <= 0) {
-          cs_len = 0;
-        } else {
-          if(gd.debug) fprintf(stderr,"Loading Colorscale %s\n",buf);
-        }
-
-
-      } else {
-        // Try to open it in the subdir 
-        if((cfile = fopen(buf,"r")) == NULL) {
-          cs_len = 0;
-        } else {
-          if(gd.debug) fprintf(stderr,"Opening Colorscale %s\n",buf);
-        }
-      }
-    } while (cfile == NULL && (str_ptr = strtok(NULL,",")) != NULL && cs_len == 0 );
-
-  } else {
-    snprintf(buf,2048,"%s",fname);
-  }
-
-  if(cfile !=NULL) {
-    if(stat(buf,&sbuf) < 0) { // Find the file's size
-      fprintf(stderr,"Can't stat %s\n",buf);
-      return "";
-    }
-
-    // Allocate space for the whole file plus a null
-    if((cs_buf = (char *)  calloc(sbuf.st_size + 1 ,1)) == NULL) {
-      fprintf(stderr,"Problems allocating %ld bytes for colorscale file\n",
-              (long) sbuf.st_size);
-      return "";
-    }
-
-    // Read
-    if((cs_len = fread(cs_buf,1,sbuf.st_size,cfile)) != sbuf.st_size) {
-      fprintf(stderr,"Problems Reading color map: %s\n",buf);
-      return "";
-    }
-    cs_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
-    fclose(cfile);
-  }
-
-  if(cs_len <= 0) {
-    errno = 0;
-    if(getcwd(dirname,1024) == NULL) {
-      perror("Dirname");
-    }
-    fprintf(stderr,"Couldn't load %s/%s or %s/%s\n",
-            dirname,fname,color_file_subdir,fname);
-    fprintf(stderr,"Please install %s and try again\n",fname);
-    return "";
-  }
-
-  /* Get temp storage for character strings */
-  for(i=0;i < NUM_PARSE_FIELDS; i++) {
-    cfield[i] = (char *)  calloc(1,PARSE_FIELD_SIZE);
-  }
-
-  nentries = 0;
-
-  // Prime strtok;
-  str_ptr = strtok_r(cs_buf,"\n",&lasts);
-
-  /* loop thru buffer looking for valid entries */
-  while ((str_ptr  != NULL) && (nentries < MAX_COLORS)) {    
-    if(*str_ptr != '#') {
-      ptr = strpbrk(str_ptr,"!\n");    /* look for trailing exclamation point */
-      if(ptr != NULL) {   /* replace trailing exclamation point with null  */
-        *ptr = '\0';
-        lptr = ptr + 1; /* Set the label pointer */
-        /* replace offensive newline in label with null */
-        ptr = strpbrk(lptr,"\n");
-        if(ptr) *ptr = '\0';
-      } else {
-        lptr = NULL;
-      }
-
-      if((nstrings = STRparse(str_ptr, cfield, 1024, 8, 1024)) >= 3) {
-        /* Is (hopefully)  a valid entry */
-        /* Get space for this entry */
-        cval[nentries] = (Val_color_t *) calloc(1,sizeof(Val_color_t));
-
-        /* Set the label for this color scale element */
-        if((lptr != NULL) && strlen(lptr) > 0) {
-          STRcopy(cval[nentries]->label,lptr,LABEL_LENGTH);
-        } else {
-          cval[nentries]->label[0] = '\0';
-        }
-
-        cval[nentries]->min = atof(cfield[0]);        /* Extract mapping values */
-        cval[nentries]->max = atof(cfield[1]);    
-
-        cval[nentries]->cname[0] = '\0';
-        for(j=2;j < nstrings; j++) {    /* Some names contain multiple strings so concatenate */
-          strcat(cval[nentries]->cname,cfield[j]);
-          strcat(cval[nentries]->cname," ");    
-        }
-
-        cval[nentries]->cname[strlen(cval[nentries]->cname)-1] = '\0'; /* chop off last space char */
-        // cvalVector.push_back(*cval[nentries]);
-        nentries++;
-      }
-    }
-
-    //Move to the next token
-    str_ptr = strtok_r(NULL,"\n",&lasts);
-
-  }
-
-  /* free temp storage for character strings */
-  for (i = 0; i < NUM_PARSE_FIELDS; i++) {
-    free(cfield[i]);
-  }
-
-  if(cs_len >0 ) free(cs_buf);
-
-  if(nentries <= 0) {
-    fprintf(stderr,"No color map entries found in %s",fname);
-    return "";
-  }
-
-  if(gd.debug) {
-    fprintf(stderr,"Successfully read colorscale file: %s\n", fname);
-    fprintf(stderr,"  nentries: %d\n", nentries);
-  }
-  // CvalPair pr(fname, cvalVector);
-  // cvalMap.insert(pr);
-
-  return "";
-}
-
-#endif
 
 /**********************************************************************
  * get path to cached color file.

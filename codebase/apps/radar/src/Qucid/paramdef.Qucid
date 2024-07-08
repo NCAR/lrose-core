@@ -14,7 +14,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "DEBUGGING AND PROCESS CONTROL";
+  p_header = "<DEBUGGING AND PROCESS CONTROL>";
 }
 
 typedef enum {
@@ -45,6 +45,18 @@ paramdef boolean {
   p_help = "Developer debugging information.";
 } debug2_flag;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
 paramdef string {
   p_default = "/tmp/cache";
   p_descr = "Directory for storing temporary files as a cache.";
@@ -59,19 +71,23 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Option to register this process with the process mapper (procmap).";
-  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
-} register_with_procmap;
+  p_descr = "Option to use 'curl' do download remote map and color_scale files.";
+  p_help = "If true, we use the curl app for the downloads. If false, we use http requests generated natively within Qucid.";
+} use_curl_for_downloads;
 
-paramdef string {
-  p_default = "test";
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-} instance;
+commentdef {
+  p_header = "</DEBUGGING AND PROCESS CONTROL>";
+}
 
 commentdef {
   p_header = "<GRIDS>";
 }
+
+paramdef string {
+  p_default = "$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales";
+  p_descr = "URLs for color scales. Use a comma-delimited list to seach in multiple locations.";
+  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
+} color_scale_urls;
 
 typedef enum {
   POLYGONS,
@@ -270,6 +286,12 @@ commentdef {
 commentdef {
   p_header = "<MAPS>";
 }
+
+paramdef string {
+  p_default = "$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps";
+  p_descr = "URLs for maps. Use a comma-delimited list to seach in multiple locations.";
+  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
+} map_urls;
 
 paramdef boolean {
   p_default = TRUE;
@@ -1648,26 +1670,6 @@ paramdef double {
   p_descr = "Starting height of horizontal view.";
   p_help = "";
 } start_ht;
-
-commentdef {
-  p_header = "Finding the color scales.";
-}
-
-paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales";
-  p_descr = "URLs for color scales. Use a comma-delimited list to seach in multiple locations.";
-  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
-} color_scale_urls;
-
-commentdef {
-  p_header = "Finding the maps.";
-}
-
-paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps";
-  p_descr = "URLs for maps. Use a comma-delimited list to seach in multiple locations.";
-  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
-} map_urls;
 
 paramdef double {
   p_default = 50;
