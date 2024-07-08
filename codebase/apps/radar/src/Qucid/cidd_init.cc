@@ -43,7 +43,7 @@
 #include <qtplot/ColorMap.hh>
 #include "cidd.h"
 
-static void _initGrids();
+static int _initGrids();
 static void _initWinds();
 static void _initWindComponent(met_record_t *wrec,
                                const Params::wind_t &windp,
@@ -64,6 +64,9 @@ static int _createCacheDirs();
 static string _cacheDir;
 static string mapsCacheDir;
 static string _colorScalesDirPath;
+
+static int _getColorscaleCachePath(const string &colorscaleName,
+                                   string &cachePath);
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -605,8 +608,11 @@ int init_data_space()
   gd.v_win.cmax_y = gd.h_win.route.y_world[1];
 
   // Load the GRIDDED DATA FIELD parameters
-  
-  _initGrids();
+
+  int iret = 0;
+  if (_initGrids()) {
+    iret = -1;
+  }
   
   // Wind Rendering
 
@@ -721,16 +727,18 @@ int init_data_space()
 
 #endif
 
-  return 0;
+  return iret;
   
 }
 
 //////////////////////////////////
 // initialize the gridded fields
 
-static void _initGrids()
+static int _initGrids()
 {
 
+  int iret = 0;
+  
   gd.num_datafields = _params.fields_n;
   if(gd.num_datafields <=0) {
     fprintf(stderr,"Qucid requires at least one valid gridded data field to be defined\n");
@@ -840,14 +848,22 @@ static void _initGrids()
     mrec->v_mdvx_int16 = new MdvxField;
     mrec->proj = new MdvxProj;
 
-    mrec->colorMap = new ColorMap;
-
+    mrec->colorMap = NULL;
     STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
-    
+    STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
+    string colorscaleCachePath;
+    if (_getColorscaleCachePath(mrec->color_file, colorscaleCachePath)) {
+      iret = -1;
+    }
+    mrec->colorMap = new ColorMap(colorscaleCachePath.c_str(),
+                                  _params.debug >= Params::DEBUG_VERBOSE);
+                                  ;
   } // ifld
   
   /* Make sure the first field is always on */
   gd.mrec[0]->currently_displayed = 1;
+
+  return iret;
 
 }
 
