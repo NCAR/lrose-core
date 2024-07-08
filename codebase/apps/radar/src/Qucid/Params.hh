@@ -953,9 +953,9 @@ public:
 
   double start_ht;
 
-  char* color_scales_url;
+  char* color_scale_urls;
 
-  char* maps_url;
+  char* map_urls;
 
   double locator_margin_km;
 

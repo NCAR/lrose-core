@@ -273,15 +273,15 @@ int Qucid::_setupDisplayFields()
 
   // check for color map location
   
-  string colorMapDir = _params.color_scales_url;
+  string colorMapDir = _params.color_scale_urls;
   Path mapDir(colorMapDir);
   if (!mapDir.dirExists()) {
-    colorMapDir = Path::getPathRelToExec(_params.color_scales_url);
+    colorMapDir = Path::getPathRelToExec(_params.color_scale_urls);
     mapDir.setPath(colorMapDir);
     if (!mapDir.dirExists()) {
       cerr << "ERROR - Qucid" << endl;
       cerr << "  Cannot find color scale directory" << endl;
-      cerr << "  Primary is: " << _params.color_scales_url << endl;
+      cerr << "  Primary is: " << _params.color_scale_urls << endl;
       cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
       return -1;
     }

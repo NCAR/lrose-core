@@ -3459,15 +3459,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'color_scales_url'
+    // Parameter 'color_scale_urls'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("color_scales_url");
+    tt->param_name = tdrpStrDup("color_scale_urls");
     tt->descr = tdrpStrDup("URLs for color scales. Use a comma-delimited list to seach in multiple locations.");
     tt->help = tdrpStrDup("This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.");
-    tt->val_offset = (char *) &color_scales_url - &_start_;
+    tt->val_offset = (char *) &color_scale_urls - &_start_;
     tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales");
     tt++;
     
@@ -3480,15 +3480,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'maps_url'
+    // Parameter 'map_urls'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("maps_url");
+    tt->param_name = tdrpStrDup("map_urls");
     tt->descr = tdrpStrDup("URLs for maps. Use a comma-delimited list to seach in multiple locations.");
     tt->help = tdrpStrDup("This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.");
-    tt->val_offset = (char *) &maps_url - &_start_;
+    tt->val_offset = (char *) &map_urls - &_start_;
     tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps");
     tt++;
     

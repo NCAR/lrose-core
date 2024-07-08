@@ -277,7 +277,7 @@ static int _combine_color_maps(Display *dpy, Colormap cmap)
     XGCValues gcvalues;    
 
 
-    color_file_subdir = _params.color_scales_url;
+    color_file_subdir = _params.color_scale_urls;
      
 
     gd.num_colors = 0;

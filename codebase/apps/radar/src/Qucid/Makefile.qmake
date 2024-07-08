@@ -10093,6 +10093,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_font.o cidd_font.cc
 
 cidd_init.o: cidd_init.cc /usr/local/include/shapelib/shapefil.h \
+		/usr/local/include/toolsa/TaStr.hh \
 		/usr/local/include/toolsa/os_config.h \
 		/usr/local/include/toolsa/file_io.h \
 		/usr/local/include/toolsa/heartbeat.h \

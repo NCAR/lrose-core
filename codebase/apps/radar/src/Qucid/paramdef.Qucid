@@ -1657,7 +1657,7 @@ paramdef string {
   p_default = "$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales";
   p_descr = "URLs for color scales. Use a comma-delimited list to seach in multiple locations.";
   p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
-} color_scales_url;
+} color_scale_urls;
 
 commentdef {
   p_header = "Finding the maps.";
@@ -1667,7 +1667,7 @@ paramdef string {
   p_default = "$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps";
   p_descr = "URLs for maps. Use a comma-delimited list to seach in multiple locations.";
   p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
-} maps_url;
+} map_urls;
 
 paramdef double {
   p_default = 50;

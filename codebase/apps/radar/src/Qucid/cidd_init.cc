@@ -35,6 +35,7 @@
 #include <cerrno>
 #include <shapelib/shapefil.h>
 #include <algorithm>
+#include <toolsa/TaStr.hh>
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <toolsa/umisc.h>
@@ -2206,11 +2207,11 @@ static void _initMaps()
     if (mapFileName.find(".shp") != string::npos &&
         mapFileName.find(".shx") != string::npos) {
       
-      _loadShapeMap(over, _params.maps_url);
+      _loadShapeMap(over, _params.map_urls);
 
     } else {  // Assume RAP Map Format 
       
-      _loadRapMap(over, _params.maps_url);
+      _loadRapMap(over, _params.map_urls);
 
     }
     
@@ -2631,13 +2632,6 @@ static int _createCacheDirs()
 
 }
 
-/**********************************************************************
- * get path to cached color file.
- * We pass in the color scale name.
- * The cached path is filled in.
- * returns 0 on success, -1 on error.
- */
-
 static int _getColorscaleCachePath(const string colorscaleUrl,
                                    const string &colorscaleName,
                                    string &cachePath)
@@ -2890,3 +2884,28 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
 
 #endif
 
+/**********************************************************************
+ * get path to cached color file.
+ * We pass in the color scale name.
+ * The cached path is filled in.
+ * returns 0 on success, -1 on error.
+ */
+
+static int _getColorscaleCachePath(const string &colorscaleName,
+                                   string &cachePath)
+
+{
+
+  // get the color scale url from the parameter file
+
+  vector<string> urlList;
+  TaStr::tokenize(_params.color_scale_urls, ",", urlList);
+  for (size_t ii = 0; ii < urlList.size(); ii++) {
+    if (_getColorscaleCachePath(urlList[ii], colorscaleName, cachePath) == 0) {
+      return 0;
+    }
+  }
+  return -1;
+
+}
+  

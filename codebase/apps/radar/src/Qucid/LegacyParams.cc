@@ -1270,7 +1270,7 @@ int LegacyParams::_readMainParams()
   // maps
 
   _getString("cidd.map_file_subdir", "$(HOME)/git/lrose-displays/maps",
-             true, "maps_url");
+             true, "map_urls");
   _getDouble("cidd.locator_margin_km", 50.0);
   _getString("cidd.station_loc_url", "");
 
@@ -1283,7 +1283,7 @@ int LegacyParams::_readMainParams()
   // colors
   
   _getString("cidd.color_file_subdir", "$(HOME)/git/lrose-displays/color_scales",
-             true, "color_scales_url");
+             true, "color_scale_urls");
   _getString("cidd.foreground_color", "White");
   _getString("cidd.background_color", "Black");
   _getString("cidd.margin_color", "Black");
