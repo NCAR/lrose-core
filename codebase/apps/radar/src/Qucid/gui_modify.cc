@@ -51,7 +51,7 @@ void modify_gui_objects()
     extern void  zoom_mi_proc();
 
     char    str[NAME_LENGTH * 4];
-    char    string[1024];
+    char    str2[1024];
 #ifdef NOTNOW
     const char  *resource;
 #endif
@@ -154,9 +154,9 @@ void modify_gui_objects()
     // Setup the Main Menu Bar Cell Labels
 //     for(i=1; i <= gd.menu_bar.num_menu_bar_cells; i++) {
 
-//         sprintf(string,"cidd.menu_bar_label%d",i);
+//         snprintf(str2,"cidd.menu_bar_label%d",i);
 // #ifdef NOTNOW
-//         resource = gd.uparams->getString(string,"Not Defined");
+//         resource = gd.uparams->getString(str2,"Not Defined");
 // #endif
 
 //         // xv_set(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,i-1,resource,NULL);
@@ -256,11 +256,11 @@ void modify_gui_objects()
     int k;
     int interval = (int) (gd.movie.forecast_interval/ 25.0 + 1.0);
     j = (int) rint(gd.movie.forecast_interval); 
-    sprintf(panel_choice_string,"Now");
+    snprintf(panel_choice_string,256,"Now");
     // xv_set(gd.fcast_pu->fcast_st,PANEL_CHOICE_STRING,0,panel_choice_string,NULL);
     if(j > 0) { 
       for(i=1 * interval, k=1; i <= j; i+= interval, k++) {
-        sprintf(panel_choice_string,"+ %d Hrs",i);
+        snprintf(panel_choice_string,256,"+ %d Hrs",i);
         // xv_set(gd.fcast_pu->fcast_st,PANEL_CHOICE_STRING,k,panel_choice_string,NULL);
       }
     }
@@ -278,11 +278,11 @@ void modify_gui_objects()
     int k;
     int interval = (int) (gd.movie.past_interval/ 25.0 + 1.0);
     j = (int) rint(gd.movie.past_interval); 
-    sprintf(panel_choice_string,"Now");
+    snprintf(panel_choice_string,256,"Now");
     // xv_set(gd.past_pu->past_hr_st,PANEL_CHOICE_STRING,0,panel_choice_string,NULL);
     if(j > 0) { 
       for(i=1 * interval, k=1; i <= j; i+= interval, k++) {
-        sprintf(panel_choice_string,"- %d Hrs",i);
+        snprintf(panel_choice_string,256,"- %d Hrs",i);
         // xv_set(gd.past_pu->past_hr_st,PANEL_CHOICE_STRING,k,panel_choice_string,NULL);
       }
     }
@@ -325,15 +325,15 @@ void modify_gui_objects()
 
     /* Set the labels on the Zoom choice_panel " */
     for(i=0; i < gd.h_win.num_zoom_levels-NUM_CUSTOM_ZOOMS -1; i++) {
-        sprintf(panel_choice_string,"%d",i+1);
-        // sprintf(string,"cidd.level%d_label",i+1);
-        // sprintf(panel_choice_string,"%s",gd.uparams->getString(string , panel_choice_string));
+        snprintf(panel_choice_string,256,"%d",i+1);
+        // snprintf(string,"cidd.level%d_label",i+1);
+        // snprintf(panel_choice_string,256,"%s",gd.uparams->getString(string , panel_choice_string));
         strncpy(panel_choice_string, _params._zoom_levels[i].label, 255);
         // xv_set(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,i,panel_choice_string,NULL);
     }
 
     for(i=gd.h_win.num_zoom_levels-NUM_CUSTOM_ZOOMS-1, j=1; i < gd.h_win.num_zoom_levels-1; i++, j++) {
-        sprintf(panel_choice_string,"Goto %d",j);
+        snprintf(panel_choice_string,256,"Goto %d",j);
         // xv_set(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,
         //       i,panel_choice_string,NULL);
     }
@@ -343,7 +343,7 @@ void modify_gui_objects()
     //        "Current",NULL);
 
     for(i=gd.h_win.num_zoom_levels, j=1; j <= NUM_CUSTOM_ZOOMS ; i++, j++) {
-        sprintf(panel_choice_string,"Save %d",j);
+        snprintf(panel_choice_string,256,"Save %d",j);
         // xv_set(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,
         //       i,panel_choice_string,NULL);
     }
@@ -446,10 +446,10 @@ void modify_gui_objects()
     }
     gd.v_win.active = 0;
 
-    sprintf(string,"%g",gd.v_win.min_ht);
-    // xv_set(gd.v_win_v_win_pu->scale_base_tx,PANEL_VALUE,string,NULL);
-    sprintf(string,"%g",gd.v_win.max_ht);
-    // xv_set(gd.v_win_v_win_pu->ht_top_tx,PANEL_VALUE,string,NULL);
+    snprintf(str2,1024,"%g",gd.v_win.min_ht);
+    // xv_set(gd.v_win_v_win_pu->scale_base_tx,PANEL_VALUE,str2,NULL);
+    snprintf(str2,1024,"%g",gd.v_win.max_ht);
+    // xv_set(gd.v_win_v_win_pu->ht_top_tx,PANEL_VALUE,str2,NULL);
     
     // xv_set(gd.v_win_v_win_pu->v_win_pu,
     //        WIN_HEIGHT, _params.vert_default_height,
@@ -570,9 +570,9 @@ void modify_gui_objects()
 
     /* Fill in WIND Vector scrolling List */
     for (i = 0; i < gd.layers.num_wind_sets; i++ ) {
-        sprintf(str,"%s  %s",
-            gd.layers.wind[i].wind_u->button_name,
-            gd.layers.wind[i].color->name);
+      snprintf(str,NAME_LENGTH*4,"%s  %s",
+               gd.layers.wind[i].wind_u->button_name,
+               gd.layers.wind[i].color->name);
 
         // xv_set(gd.page_pu->wind_on_list,
         //                 PANEL_LIST_STRING, i, str,
@@ -584,7 +584,7 @@ void modify_gui_objects()
     // xv_set(gd.page_pu->wind_sl,
     //        PANEL_VALUE, gd.layers.wind_scaler -1,
     //        NULL);
-    sprintf(str,"%g min",gd.layers.wind_time_scale_interval * gd.layers.wind_scaler);
+    snprintf(str,NAME_LENGTH*4,"%g min",gd.layers.wind_time_scale_interval * gd.layers.wind_scaler);
     // xv_set(gd.page_pu->wind_msg,
     //        PANEL_LABEL_STRING, str,
     //        NULL);
@@ -618,7 +618,7 @@ void modify_gui_objects()
     /* Fill in Geographic Overlay Scrolling List */
     if(gd.debug) printf("%d Overlays sets found\n",gd.num_map_overlays);
     for(i=0; i < gd.num_map_overlays; i++) {
-      sprintf(string,"%s  %s",
+      snprintf(str2,1024,"%s  %s",
               gd.over[i]->control_label.c_str(),
               gd.over[i]->color_name.c_str());
         // xv_set(gd.page_pu->overlay_list,
@@ -750,7 +750,7 @@ void modify_gui_objects()
 
     /* Set the labels on the Draw_export choice item  */
     for(i=0; i < gd.draw.num_draw_products; i++) {
-        sprintf(panel_choice_string,"%s",gd.draw.dexport[i].product_id_label);
+        snprintf(panel_choice_string,256,"%s",gd.draw.dexport[i].product_id_label);
         // xv_set(gd.draw_pu->type_st,PANEL_CHOICE_STRING,i,panel_choice_string,NULL);
     }
     // Set text fields in panel
@@ -848,7 +848,7 @@ const char * frame_time_msg(int index)
                  gmt = gmtime_r((time_t *)&(mr->h_mhdr.time_gen),&res);
              }
              strftime(label3,64,_params.label_time_format,gmt);
-             sprintf(label,"FORECAST Run: %s",label3);                                    
+             snprintf(label,256,"FORECAST Run: %s",label3);                                    
 	} else {
 	    label[0] = '\0';  // No label
 	}
@@ -885,11 +885,11 @@ const char * frame_time_msg(int index)
 			 gmt_s = gmtime_r(&gd.movie.frame[index].time_start,&res_s);
              gmt_e = gmtime_r(&gd.movie.frame[index].time_end,&res_e);
          }
-         sprintf(label1,"Frame %d:", gd.movie.cur_frame + 1);
+         snprintf(label1,32,"Frame %d:", gd.movie.cur_frame + 1);
          strftime(label2,64,_params.label_time_format,gmt);
-	 sprintf(str_fmt, "   (%s to", _params.frame_range_time_format);
+	 snprintf(str_fmt, 64, "   (%s to", _params.frame_range_time_format);
          strftime(label3, 64, str_fmt, gmt_s);
-	 sprintf(str_fmt, "%s)", _params.frame_range_time_format);
+	 snprintf(str_fmt, 64, "%s)", _params.frame_range_time_format);
          strftime(label4, 64, str_fmt, gmt_e);
 
          if(mr->h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST && gd.model_run_time != 0 ) {
@@ -899,9 +899,9 @@ const char * frame_time_msg(int index)
 	             gmt = gmtime_r(&gd.model_run_time,&res);
              }
              strftime(label3,64,_params.label_time_format,gmt);
-             sprintf(label,"%s %s Run: %s",label1,label2,label3);                                    
+             snprintf(label,256,"%s %s Run: %s",label1,label2,label3);                                    
          } else {
-             sprintf(label,"%s %s %s %s",label1,label2,label3,label4);                                    
+           snprintf(label,256,"%s %s %s %s",label1,label2,label3,label4);                                    
          }
     }
 

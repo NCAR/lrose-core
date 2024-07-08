@@ -1269,7 +1269,7 @@ void startup_snapshot( u_int value)
 {
     char cmd[1024];
 
-    sprintf(cmd,"%s %ld %d %d > /dev/null 2>&1 &\n",SNAPSHOT_CMD,
+    snprintf(cmd,1024,"%s %ld %d %d > /dev/null 2>&1 &\n",SNAPSHOT_CMD,
      gd.h_win.can_xid[gd.h_win.cur_cache_im],
      gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 

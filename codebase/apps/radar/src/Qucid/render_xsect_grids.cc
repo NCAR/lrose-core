@@ -72,7 +72,7 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
      
     if(ptr == NULL || out_of_date) {    /* If no data - Draw warning message */
         if(out_of_date) {
-          sprintf(message,"%s - Data too Old",_params.no_data_message);
+          snprintf(message,MESSAGE_LEN,"%s - Data too Old",_params.no_data_message);
         } else {
           STRcopy(message, _params.no_data_message,MESSAGE_LEN);
         }

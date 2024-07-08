@@ -55,13 +55,16 @@ static void _initZooms();
 static void _initContours();
 static void _initOverlayFields();
 
-static string _getTmpDir();
+static int _createTmpDirs();
+static string _tmpDirPath;
+static string _mapsDirPath;
+static string _colorScalesDirPath;
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
 
-void init_data_space()
+int init_data_space()
 {
 
   UTIMstruct temp_utime;
@@ -93,7 +96,11 @@ void init_data_space()
 
   // create temporary directory
 
-  gd.tmpDir = _getTmpDir();
+  if (_createTmpDirs()) {
+    return -1;
+  }
+  
+  gd.tmpDir = _tmpDirPath;
   
   // open shmem segment for interprocess comms
   
@@ -695,7 +702,7 @@ void init_data_space()
   if(gd.prod.prod_font_num >= _params.num_fonts) gd.prod.prod_font_num = _params.num_fonts -1;
   
   for(i=0;i < _params.num_fonts; i++) {
-    sprintf(p_name,"cidd.font%d",i+1);
+    snprintf(p_name,"cidd.font%d",i+1);
     f_name = gd.uparams->getString(
             p_name, "fixed");
     gd.fontst[i] = (XFontStruct *) XLoadQueryFont(dpy,f_name);
@@ -711,6 +718,8 @@ void init_data_space()
 
 #endif
 
+  return 0;
+  
 }
 
 //////////////////////////////////
@@ -2581,48 +2590,48 @@ void init_globals()
  *        Returns number of entries found, -1 on error
  */
 
-static int _get_color_mapping(const char *color_file_subdir,
-                              const char *fname,         /* file name */
-                              Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
+static string _getColorFilePath(const char *color_file_subdir,
+                                const char *fname,         /* file name */
+                                Val_color_t *cval[]) /* RETURN -  pointer to array of structs */
 {
-
+  
   FILE   *cfile;
-    struct stat sbuf;
-    char   *cs_buf;
-    char   buf[2048];
-    char   *str_ptr;
-    char   *cfield[NUM_PARSE_FIELDS];
-    int    i,j;
-    int    cs_len;
-    int    ret_stat;
-    int    nstrings;
-    int    nentries;
-    char   *ptr;
-    char   *lptr;
-    char   *lasts;
-    char    dirname[1024];
-    char    name_buf[2048];
-    CvalVector cvalVector;
-
-    // first check our map to see if we have already read this file
-
-    CvapMapIt it = cvalMap.find(fname);
-    if (it != cvalMap.end()) {
-      // colormap file previously read
-      const CvalVector &cvalVec = it->second;
-      for (size_t ii = 0; ii < cvalVec.size(); ii++) {
-        // Get space for this entry
-        cval[ii] = (Val_color_t *) calloc(1, sizeof(Val_color_t));
-        // copy element
-        *cval[ii] = cvalVec[ii];
-      }
-      nentries = cvalVec.size();
-      if(gd.debug) {
-        fprintf(stderr,"Reusing colorscale file: %s\n", fname);
-        fprintf(stderr,"  nentries: %d\n", nentries);
-      }
-      return nentries;
-    }
+  struct stat sbuf;
+  char   *cs_buf;
+  char   buf[2048];
+  char   *str_ptr;
+  char   *cfield[NUM_PARSE_FIELDS];
+  int    i,j;
+  int    cs_len;
+  int    ret_stat;
+  int    nstrings;
+  int    nentries;
+  char   *ptr;
+  char   *lptr;
+  char   *lasts;
+  char    dirname[1024];
+  char    name_buf[2048];
+  // CvalVector cvalVector;
+  
+  // first check our map to see if we have already read this file
+  
+  // CvapMapIt it = cvalMap.find(fname);
+  // if (it != cvalMap.end()) {
+  //   // colormap file previously read
+  //   const CvalVector &cvalVec = it->second;
+  //     for (size_t ii = 0; ii < cvalVec.size(); ii++) {
+  //       // Get space for this entry
+  //       cval[ii] = (Val_color_t *) calloc(1, sizeof(Val_color_t));
+  //       // copy element
+  //       *cval[ii] = cvalVec[ii];
+  //     }
+  //     nentries = cvalVec.size();
+  //     if(gd.debug) {
+  //       fprintf(stderr,"Reusing colorscale file: %s\n", fname);
+  //       fprintf(stderr,"  nentries: %d\n", nentries);
+  //     }
+  //     return nentries;
+  //   }
     
     cs_len = 0;
     cfile = NULL;
@@ -2637,7 +2646,7 @@ static int _get_color_mapping(const char *color_file_subdir,
 
 	  while(*str_ptr == ' ') str_ptr++; //skip any leading spaces
 
-	  sprintf(buf,"%s/%s",str_ptr,fname);
+	  snprintf(buf,2048,"%s/%s",str_ptr,fname);
 
 	  // Check if its an HTTP URL
 	  if(strncasecmp(buf,"http:",5) == 0) {
@@ -2666,26 +2675,26 @@ static int _get_color_mapping(const char *color_file_subdir,
         } while (cfile == NULL && (str_ptr = strtok(NULL,",")) != NULL && cs_len == 0 );
 
     } else {
-	sprintf(buf,"%s",fname);
+      snprintf(buf,2048,"%s",fname);
     }
 
     if(cfile !=NULL) {
        if(stat(buf,&sbuf) < 0) { // Find the file's size
              fprintf(stderr,"Can't stat %s\n",buf);
-	     return -1;
+	     return "";
 	 }
 
 	 // Allocate space for the whole file plus a null
 	 if((cs_buf = (char *)  calloc(sbuf.st_size + 1 ,1)) == NULL) {
 	     fprintf(stderr,"Problems allocating %ld bytes for colorscale file\n",
 		     (long) sbuf.st_size);
-	     return -1;
+	     return "";
 	}
 
 	// Read
 	if((cs_len = fread(cs_buf,1,sbuf.st_size,cfile)) != sbuf.st_size) {
 	   fprintf(stderr,"Problems Reading color map: %s\n",buf);
-	   return -1;
+	   return "";
 	}
 	cs_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
         fclose(cfile);
@@ -2699,7 +2708,7 @@ static int _get_color_mapping(const char *color_file_subdir,
             fprintf(stderr,"Couldn't load %s/%s or %s/%s\n",
 				 dirname,fname,color_file_subdir,fname);
             fprintf(stderr,"Please install %s and try again\n",fname);
-            return -1;
+            return "";
     }
 
     /* Get temp storage for character strings */
@@ -2726,7 +2735,7 @@ static int _get_color_mapping(const char *color_file_subdir,
 	    lptr = NULL;
 	 }
 
-         if((nstrings = STRparse(str_ptr, cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE)) >= 3) {
+         if((nstrings = STRparse(str_ptr, cfield, 1024, 8, 1024)) >= 3) {
             /* Is (hopefully)  a valid entry */
             /* Get space for this entry */
             cval[nentries] = (Val_color_t *) calloc(1,sizeof(Val_color_t));
@@ -2748,7 +2757,7 @@ static int _get_color_mapping(const char *color_file_subdir,
             }
 
             cval[nentries]->cname[strlen(cval[nentries]->cname)-1] = '\0'; /* chop off last space char */
-            cvalVector.push_back(*cval[nentries]);
+            // cvalVector.push_back(*cval[nentries]);
             nentries++;
           }
         }
@@ -2767,65 +2776,51 @@ static int _get_color_mapping(const char *color_file_subdir,
 
     if(nentries <= 0) {
         fprintf(stderr,"No color map entries found in %s",fname);
-        return -1;
+        return "";
     }
 
     if(gd.debug) {
       fprintf(stderr,"Successfully read colorscale file: %s\n", fname);
       fprintf(stderr,"  nentries: %d\n", nentries);
     }
-    CvalPair pr(fname, cvalVector);
-    cvalMap.insert(pr);
+    // CvalPair pr(fname, cvalVector);
+    // cvalMap.insert(pr);
 
-    return nentries;
+    return "";
 }
 
 // create tmp dir, return it
 
-static string _getTmpDir()
+static int _createTmpDirs()
 
 {
 
-  string tmp_path = _params.tmp_dir;
-  tmp_path += "/Qucid_";
-
-  // first get current time in high precision and make a string from it
-  
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  char timeStr[128];
-  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
-  
-  // get PID and make a string from it
-  
-  char pidStr[128];
-  sprintf(pidStr, "%d_", (int) getpid());
-  
-  // concatenate strings into tmp name
-  
-  string computed_name("tmp_");
-  computed_name += timeStr;
-  computed_name += pidStr;
-  computed_name += getBase();
-  computed_name += ".tmp";
-
-  // change all numerals to lower case letters a to j
-  
-  int delta = 'a' - '0';
-  for (size_t ii = 0; ii < computed_name.size(); ii++) {
-    if (isdigit(computed_name[ii])) {
-      computed_name[ii] += delta;
-    }
-  }
-
-  // add to path
-  
-  tmp_path += computed_name;
+  _tmpDirPath = _params.tmp_dir; // tmp dir
+  _tmpDirPath += "/Qucid/"; // add Qucid
+  _tmpDirPath += _paramsPathUsed.getFile(); // add params file name
 
   // create it
 
-  ta_makedir(tmp_path.c_str());
-  
-  return tmp_path;
+  if (ta_makedir(_tmpDirPath.c_str())) {
+    cerr << "ERROR - Qucid" << endl;
+    cerr << "Cannot make tmp dir: " << _tmpDirPath << endl;
+    return -1;
+  }
+
+  _mapsDirPath = _tmpDirPath + "/maps";
+  if (ta_makedir(_mapsDirPath.c_str())) {
+    cerr << "ERROR - Qucid" << endl;
+    cerr << "Cannot make maps tmp dir: " << _mapsDirPath << endl;
+    return -1;
+  }
+
+  _colorScalesDirPath = _tmpDirPath + "/color_scales";
+  if (ta_makedir(_colorScalesDirPath.c_str())) {
+    cerr << "ERROR - Qucid" << endl;
+    cerr << "Cannot make color scales tmp dir: " << _colorScalesDirPath << endl;
+    return -1;
+  }
+
+  return 0;
 
 }

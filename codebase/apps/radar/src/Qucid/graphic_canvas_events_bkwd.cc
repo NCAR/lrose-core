@@ -243,7 +243,7 @@ static void draw_report_text(Event *event)
     if(value  < 0.0001 && value  > -0.0001) value = 0.0;
 
     char text[256];
-    sprintf(text,"%g",value);
+    snprintf(text,"%g",value);
     len = strlen(text);
     XTextExtents(gd.fontst[gd.prod.prod_font_num],text,len,&direct,&ascent,&descent,&overall);
     XSetFont(gd.dpy,gd.legends.foreground_color->gc,gd.ciddfont[gd.prod.prod_font_num]);
@@ -324,7 +324,7 @@ static void respond_to_select(Event *event)
       r_lastx = r_startx;
       r_lasty = r_starty;
       redraw_route_line(&gd.h_win); // redraws the line
-      sprintf(singleLineText,"%d Segments - Last pointed Deleted",
+      snprintf(singleLineText,"%d Segments - Last pointed Deleted",
 	      gd.h_win.route.num_segments);
       gui_label_h_frame(singleLineText, 1);
       add_message_to_status_win(singleLineText,0);
@@ -363,7 +363,7 @@ static void respond_to_select(Event *event)
     PJGLatLon2RTheta(gd.h_win.origin_lat,gd.h_win.origin_lon,
 		     lat,lon,&dist_from_origin,&az_from_origin);
     PJGLatLon2RTheta(last_lat,last_lon,lat,lon,&dist_moved,&az_moved);
-    sprintf(xy_string, "X,Y: %.2f,%.2fkm  ", x_dproj, y_dproj);
+    snprintf(xy_string, "X,Y: %.2f,%.2fkm  ", x_dproj, y_dproj);
     
     last_lat = lat;
     last_lon = lon;
@@ -375,7 +375,7 @@ static void respond_to_select(Event *event)
       PJGLatLon2RTheta(radarOriginLat,radarOriginLon,lat,lon,&rangeFromRadar,&azFromRadar);
       double zcorr = (rangeFromRadar * rangeFromRadar) / pseudo_diam;
       beamHt = radarOriginAlt + rangeFromRadar * sin(radarElevDeg * DEG_TO_RAD) + zcorr;
-      sprintf(beam_ht_str, "  Beam height: %.3f km, %.0f ft\n", beamHt, (beamHt * 1000.0 / 0.3048));
+      snprintf(beam_ht_str, "  Beam height: %.3f km, %.0f ft\n", beamHt, (beamHt * 1000.0 / 0.3048));
     }
 
     /* Nicely format the lat lons */
@@ -384,13 +384,13 @@ static void respond_to_select(Event *event)
       default:
       case 0:  /* Decimal Degrees */
 	if (lat > 90.0) {
-	  sprintf(lat_string, ">90");
+	  snprintf(lat_string, ">90");
 	} else if (lat < -90.0) {
-	  sprintf(lat_string, "<90");
+	  snprintf(lat_string, "<90");
 	} else {
-	  sprintf(lat_string,"%.4f",lat);
+	  snprintf(lat_string,"%.4f",lat);
 	}
-	sprintf(lon_string,"%.4f",lon);
+	snprintf(lon_string,"%.4f",lon);
 	break;
 
       case 1:   /* Degrees minutes seconds */
@@ -403,18 +403,18 @@ static void respond_to_select(Event *event)
 	  imin = (int) (fmin * 60.0);
 	  fsec = (fmin - (imin / 60.0)) * 3600.0; 
 	  if (lat > 90.0) {
-	    sprintf(lat_string, ">90");
+	    snprintf(lat_string, ">90");
 	  } else if (lat < -90.0) {
-	    sprintf(lat_string, "<90");
+	    snprintf(lat_string, "<90");
 	  } else {
-	    sprintf(lat_string,"%d %d\' %.0f\"",ideg,imin,fsec);
+	    snprintf(lat_string,"%d %d\' %.0f\"",ideg,imin,fsec);
 	  }
 
 	  ideg = (int) lon;
 	  fmin = fabs(lon - ideg); /* extract decimal fraction */
 	  imin = (int) (fmin * 60.0);
 	  fsec = (fmin - (imin / 60.0)) * 3600.0; 
-	  sprintf(lon_string,"%d %d\' %.0f\"",ideg,imin,fsec);
+	  snprintf(lon_string,"%d %d\' %.0f\"",ideg,imin,fsec);
 	}
 	break;
     }
@@ -449,7 +449,7 @@ static void respond_to_select(Event *event)
 
 	// outsize data grid
 	
-	sprintf(singleLineText,
+	snprintf(singleLineText,
 		"%s: Outside grid at "
 		"LAT,LON: %s,%s  Az/dist:%.1fdegT,%.1fkm  %s",
 		_mr->legend_name, 
@@ -472,7 +472,7 @@ static void respond_to_select(Event *event)
 	// status window
 	
 	if (_params.report_clicks_in_status_window) {
-	  sprintf(multiLineText,
+	  snprintf(multiLineText,
 		  "=====================================\n"
 		  "===== Clicked outside data grid =====\n"
 		  "  LAT,LON: %s, %s\n"
@@ -485,7 +485,7 @@ static void respond_to_select(Event *event)
 		  x_dproj, y_dproj);
 	  add_report_to_status_win(multiLineText);
 	  if (_params.report_clicks_in_degM_and_nm) {
-	    sprintf(multiLineText,
+	    snprintf(multiLineText,
 		    "===== Click point loc in degM/nm =====\n"
 		    "  From origin: %.1f degM, %.1f nm\n"
 		    "  From previous: %.1f degM, %.1f nm\n",
@@ -509,7 +509,7 @@ static void respond_to_select(Event *event)
 
 	    if(*ptr == _missingVal || *ptr == _badVal) {
 	      
-	      sprintf(singleLineText,
+	      snprintf(singleLineText,
 		      "%s: Missing at "
 		      "LAT,LON: %s,%s  Az/dist:%.1fdegT,%.1fkm  %sGX,GY: %d,%d",
 		      _mr->legend_name, 
@@ -519,7 +519,7 @@ static void respond_to_select(Event *event)
 		      x_gd, y_gd);
 	      
 	      if (_params.report_clicks_in_status_window) {
-		sprintf(multiLineText,
+		snprintf(multiLineText,
 			"=======================================\n"
 			"===== Data missing at click point =====\n"
 			"  Time: %s\n"
@@ -556,7 +556,7 @@ static void respond_to_select(Event *event)
 		xy_string[0] = '\0';
 	      }
 	      
-	      sprintf(singleLineText,
+	      snprintf(singleLineText,
 		      "%s %g %s  "
 		      "LAT,LON:%s,%s  Az/dist:%.1fdegT,%.1fkm  %sGX,GY: %d,%d",
 		      _mr->legend_name, value, _mr->field_units, 
@@ -566,7 +566,7 @@ static void respond_to_select(Event *event)
 		      x_gd, y_gd);
 
 	      if (_params.report_clicks_in_status_window) {
-		sprintf(multiLineText,
+		snprintf(multiLineText,
 			"======================================\n"
 			"====== Data found at click point =====\n"
 			"  Time: %s\n"
@@ -591,7 +591,7 @@ static void respond_to_select(Event *event)
 	    }
 
 	    if (_params.report_clicks_in_degM_and_nm) {
-	      sprintf(multiLineText,
+	      snprintf(multiLineText,
 		      "===== Click point loc in degM/nm =====\n"
 		      "  From origin: %.1f degM, %.1f nm\n"
 		      "  From previous: %.1f degM, %.1f nm\n",
@@ -767,7 +767,7 @@ static void respond_to_menu(Event *event)
 	    // fprintf(stderr,"Num Segments: %d\n",gd.h_win.route.num_segments);
 	  }
 	  if( _params.one_click_rhi == 0 ) {
-	    sprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
+	    snprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
 		    gd.h_win.route.num_segments);
 	    gui_label_h_frame(text, 1);
 	    add_message_to_status_win(text,0);
@@ -835,7 +835,7 @@ static void respond_to_menu(Event *event)
 			      lat,lon); 
 	    txt_ptr = gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str();
 	    if(strlen(txt_ptr) ==0)  {
-	      sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
+	      snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
 	    } else {
 	      strncpy(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],txt_ptr,16);
 	    }
@@ -846,13 +846,13 @@ static void respond_to_menu(Event *event)
 			      lat,lon); 
 	    txt_ptr = gd.station_loc->FindClosest(lat,lon,_params.locator_margin_km).c_str();
 	    if(strlen(txt_ptr) ==0)  {
-	      sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
+	      snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
 	    } else {
 	      strncpy(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],txt_ptr,16);
 	    }
 	  } else {
-	    sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
-	    sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
+	    snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
+	    snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
 	  }
 
 	  /*   DEBUG

@@ -59,7 +59,7 @@ void load_fonts( Display *dpy)
     if(gd.prod.prod_font_num >= _params.num_fonts) gd.prod.prod_font_num = _params.num_fonts -1;
 
     for(i=0;i < _params.num_fonts; i++) {
-        sprintf(p_name,"cidd.font%d",i+1);
+        snprintf(p_name,"cidd.font%d",i+1);
         f_name = gd.uparams->getString(
                               p_name, "fixed");
         gd.fontst[i] = (XFontStruct *) XLoadQueryFont(dpy,f_name);

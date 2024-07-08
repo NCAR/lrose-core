@@ -251,7 +251,7 @@ Notify_value can_event_proc(Window win, Event *event,
           // Deal with values very close to 0
           if(value  < 0.0001 && value  > -0.0001) value = 0.0;
 
-          sprintf(text,"%g",value);
+          snprintf(text,"%g",value);
           len = strlen(text);
           XTextExtents(gd.fontst[gd.prod.prod_font_num],text,len,&direct,&ascent,&descent,&overall);
           XSetFont(gd.dpy,gd.legends.foreground_color->gc,gd.ciddfont[gd.prod.prod_font_num]);
@@ -410,23 +410,23 @@ Notify_value can_event_proc(Window win, Event *event,
       last_lon = lon;
 
       dist *= _params.scale_units_per_km;
-      sprintf(dist_string,"%.2f %s/",dist,_params.scale_units_label);
+      snprintf(dist_string,"%.2f %s/",dist,_params.scale_units_label);
 
       if(theta < 0.0) theta += 360;
-      sprintf(dir_string,"%.0f deg",theta);
+      snprintf(dir_string,"%.0f deg",theta);
 
       /* Nicely format the lat lons */
       switch(_params.latlon_mode) {
         default:
         case 0:  /* Decimal Degrees */
           if (lat > 90.0) {
-            sprintf(lat_string, ">90");
+            snprintf(lat_string, ">90");
           } else if (lat < -90.0) {
-            sprintf(lat_string, "<90");
+            snprintf(lat_string, "<90");
           } else {
-            sprintf(lat_string,"%.4f",lat);
+            snprintf(lat_string,"%.4f",lat);
           }
-          sprintf(lon_string,"%.4f",lon);
+          snprintf(lon_string,"%.4f",lon);
           break;
 
         case 1:   /* Degrees minutes seconds */
@@ -439,18 +439,18 @@ Notify_value can_event_proc(Window win, Event *event,
             imin = (int) (fmin * 60.0);
             fsec = (fmin - (imin / 60.0)) * 3600.0; 
             if (lat > 90.0) {
-              sprintf(lat_string, ">90");
+              snprintf(lat_string, ">90");
             } else if (lat < -90.0) {
-              sprintf(lat_string, "<90");
+              snprintf(lat_string, "<90");
             } else {
-              sprintf(lat_string,"%d %d\' %.0f\"",ideg,imin,fsec);
+              snprintf(lat_string,"%d %d\' %.0f\"",ideg,imin,fsec);
             }
 
             ideg = (int) lon;
             fmin = fabs(lon - ideg); /* extract decimal fraction */
             imin = (int) (fmin * 60.0);
             fsec = (fmin - (imin / 60.0)) * 3600.0; 
-            sprintf(lon_string,"%d %d\' %.0f\"",ideg,imin,fsec);
+            snprintf(lon_string,"%d %d\' %.0f\"",ideg,imin,fsec);
           }
           break;
       }
@@ -483,7 +483,7 @@ Notify_value can_event_proc(Window win, Event *event,
         x_gd = CLIP(x_gd,0,(mr->h_fhdr.nx -1),out_of_range_flag);
         y_gd = CLIP(y_gd,0,(mr->h_fhdr.ny -1),out_of_range_flag);
         if(out_of_range_flag) {
-          sprintf(text, "X,Y: %.2fkm,%.2fkm  LAT,LON:%s,%s  Outside Data grid",
+          snprintf(text, "X,Y: %.2fkm,%.2fkm  LAT,LON:%s,%s  Outside Data grid",
                   x_dproj, y_dproj,
                   lat_string,lon_string);
           // Add the station location
@@ -506,7 +506,7 @@ Notify_value can_event_proc(Window win, Event *event,
               ptr += (mr->h_fhdr.nx * (y_gd - 0)) + (x_gd - 0);
               if( *ptr == (mr->h_mdvx->getFieldByNum(0))->getFieldHeader().missing_data_value ||
                   *ptr == (mr->h_mdvx->getFieldByNum(0))->getFieldHeader().bad_data_value) {
-                sprintf(text,
+                snprintf(text,
                         "%s: Missing at X,Y: %.2f, %.2f  LAT,LON: %s,%s  Dist: %s%s  GX,GY: %d,%d",
                         mr->legend_name, 
                         x_dproj, y_dproj,
@@ -526,14 +526,14 @@ Notify_value can_event_proc(Window win, Event *event,
                 if(value < 0.0001 && value  > -0.0001) value = 0.0;
 
                 if(gd.display_projection != Mdvx::PROJ_LATLON) {
-                  sprintf(text, "%s %g %s  X,Y:%.2f,%.2f  LAT,LON:%s,%s  Dist: %s%s  GX,GY: %d,%d",
+                  snprintf(text, "%s %g %s  X,Y:%.2f,%.2f  LAT,LON:%s,%s  Dist: %s%s  GX,GY: %d,%d",
                           mr->legend_name,value,mr->field_units, 
                           x_dproj, y_dproj,
                           lat_string,lon_string,
                           dist_string,dir_string,
                           x_gd,y_gd);
                 } else {  // Is a lat lon projection makeing X,Y redundant
-                  sprintf(text, "%s %g %s  LAT,LON:%s,%s  Dist: %s%s  GX,GY: %d,%d",
+                  snprintf(text, "%s %g %s  LAT,LON:%s,%s  Dist: %s%s  GX,GY: %d,%d",
                           mr->legend_name,value,mr->field_units, 
                           lat_string,lon_string,
                           dist_string,dir_string,
@@ -592,7 +592,7 @@ Notify_value can_event_proc(Window win, Event *event,
         r_lastx = r_startx;
         r_lasty = r_starty;
         redraw_route_line(&gd.h_win); // redraws the line
-        sprintf(text,"%d Segments - Last pointed Deleted",
+        snprintf(text,"%d Segments - Last pointed Deleted",
                 gd.h_win.route.num_segments);
         gui_label_h_frame(text, 1);
         add_message_to_status_win(text,0);
@@ -732,7 +732,7 @@ Notify_value can_event_proc(Window win, Event *event,
               // fprintf(stderr,"Num Segments: %d\n",gd.h_win.route.num_segments);
             }
             if( _params.one_click_rhi == 0 ) {
-              sprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
+              snprintf(text,"%d Segments Entered - Click to extend - twice at end to finish",
                       gd.h_win.route.num_segments);
               gui_label_h_frame(text, 1);
               add_message_to_status_win(text,0);
@@ -801,7 +801,7 @@ Notify_value can_event_proc(Window win, Event *event,
                                                     _params.locator_margin_km).c_str();
 				
               if(strlen(txt_ptr) ==0)  {
-                sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
+                snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
               } else {
                 strncpy(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],txt_ptr,16);
               }
@@ -812,13 +812,13 @@ Notify_value can_event_proc(Window win, Event *event,
                                                     _params.locator_margin_km).c_str();
 				
               if(strlen(txt_ptr) ==0)  {
-                sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
+                snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
               } else {
                 strncpy(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],txt_ptr,16);
               }
             } else {
-              sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
-              sprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
+              snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments-1],"%d",gd.h_win.route.num_segments);
+              snprintf(gd.h_win.route.navaid_id[gd.h_win.route.num_segments],"%d",gd.h_win.route.num_segments+1);
             }
 
             /*   DEBUG

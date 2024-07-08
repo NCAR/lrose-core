@@ -1541,7 +1541,7 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
   
   if (station->temp != STATION_NAN) {
 
-    sprintf(text, "%.0f", station->temp);
+    snprintf(text, TEXT_LEN, "%.0f", station->temp);
     len = strlen(text);
     XTextExtents(context.frame.x->font, text, len,
 		 &direct, &ascent, &descent, &overall);
@@ -1631,7 +1631,7 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
   
   text[0] = '\0';
   if(station->dew_point != STATION_NAN) {
-    sprintf(text, "%.0f", station->dew_point);
+    snprintf(text, TEXT_LEN, "%.0f", station->dew_point);
     len = strlen(text);
     XTextExtents(context.frame.x->font ,text, len,
 		 &direct, &ascent, &descent, &overall);
@@ -1696,7 +1696,7 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
 
   if (station->windgust != STATION_NAN && station->windgust > 2.0) {
     
-    sprintf(text,"G%.0f",station->windgust * NMH_PER_MS);
+    snprintf(text,TEXT_LEN,"G%.0f",station->windgust * NMH_PER_MS);
     len = strlen(text);
     XTextExtents(context.frame.x->font, text, len,
 		 &direct, &ascent, &descent, &overall);

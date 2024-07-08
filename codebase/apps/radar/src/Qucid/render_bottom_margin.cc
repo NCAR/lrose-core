@@ -292,24 +292,24 @@ tick_spacing:  1.0));
 	      while (lon_tick > 180.0) lon_tick -= 360.0;
 	      if(range > 7.5) {
 		if(lon_tick < 0.0) {
-                    sprintf(label,"%.0fW",-lon_tick);
+                  snprintf(label,256,"%.0fW",-lon_tick);
 		} else {
-                    sprintf(label,"%.0fE",lon_tick);
+                  snprintf(label,256,"%.0fE",lon_tick);
 		}
 	      } else {
 		if(lon_tick < 0.0) {
-                    sprintf(label,"%.1fW",-lon_tick);
+                  snprintf(label,256,"%.1fW",-lon_tick);
 		} else {
-                    sprintf(label,"%.1fE",lon_tick);
+                  snprintf(label,256,"%.1fE",lon_tick);
 		}
 	      } 
 	    break;
 
 	    default:
 	      if(range > 7.5) {
-                sprintf(label,"%.0f",current_tick);
+                snprintf(label,256,"%.0f",current_tick);
 	      } else {
-                sprintf(label,"%.1f",current_tick);
+                snprintf(label,256,"%.1f",current_tick);
 	      } 
 	    break;
 	   }

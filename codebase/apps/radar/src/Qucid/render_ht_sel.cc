@@ -164,7 +164,7 @@ draw_height_selector(Display *dpy, Drawable xid, GC gc_axis, GC gc_ind,
 
     // Select which font we'll use for Labels - Use Hightest value for 
     // the template.
-    sprintf(label,"%g",mr->vert[mr->ds_fhdr.nz-1].cent);
+    snprintf(label,LABEL_LENGTH,"%g",mr->vert[mr->ds_fhdr.nz-1].cent);
     font = choose_font(label,label_width,label_height,&xmid,&ymid);
     XSetFont(dpy,gc_axis,font);
 
@@ -180,9 +180,9 @@ draw_height_selector(Display *dpy, Drawable xid, GC gc_axis, GC gc_ind,
        // Draw Label
        if(strncasecmp(mr->units_label_sects,"FL",2) == 0 ||
          (strlen(mr->units_label_sects) < 1) ) {
-         sprintf(label,"%03d",(int) (mr->vert[i].cent + 0.5));
+         snprintf(label,LABEL_LENGTH,"%03d",(int) (mr->vert[i].cent + 0.5));
        } else {
-         sprintf(label,"%g",mr->vert[i].cent);
+         snprintf(label,LABEL_LENGTH,"%g",mr->vert[i].cent);
        }
        XDrawString(dpy,xid,gc_axis, x_pos + 2, y_pos +  ymid,
 		   label, strlen(label));

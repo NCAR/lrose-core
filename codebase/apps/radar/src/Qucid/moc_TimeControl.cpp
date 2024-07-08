@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'TimeControl.hh'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,19 +10,16 @@
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
-#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
-#else
-QT_BEGIN_MOC_NAMESPACE
-#endif
-
 
 #include <memory>
 
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'TimeControl.hh' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.5.2. It"
+#error "This file was generated using the moc from 6.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -38,7 +35,7 @@ namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
 struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers::stringData(
+constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers::stringData(
     "TimeControl",
     "_acceptGuiSelections",
     "",
@@ -66,102 +63,15 @@ static constexpr auto qt_meta_stringdata_CLASSTimeControlENDCLASS = QtMocHelpers
     "_setLoopDwellMsecs",
     "_setLoopDelayMsecs"
 );
-#else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSTimeControlENDCLASS_t {
-    uint offsetsAndSizes[52];
-    char stringdata0[12];
-    char stringdata1[21];
-    char stringdata2[1];
-    char stringdata3[21];
-    char stringdata4[12];
-    char stringdata5[11];
-    char stringdata6[17];
-    char stringdata7[9];
-    char stringdata8[16];
-    char stringdata9[12];
-    char stringdata10[8];
-    char stringdata11[15];
-    char stringdata12[11];
-    char stringdata13[27];
-    char stringdata14[7];
-    char stringdata15[24];
-    char stringdata16[6];
-    char stringdata17[20];
-    char stringdata18[19];
-    char stringdata19[22];
-    char stringdata20[4];
-    char stringdata21[22];
-    char stringdata22[13];
-    char stringdata23[10];
-    char stringdata24[19];
-    char stringdata25[19];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSTimeControlENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSTimeControlENDCLASS_t qt_meta_stringdata_CLASSTimeControlENDCLASS = {
-    {
-        QT_MOC_LITERAL(0, 11),  // "TimeControl"
-        QT_MOC_LITERAL(12, 20),  // "_acceptGuiSelections"
-        QT_MOC_LITERAL(33, 0),  // ""
-        QT_MOC_LITERAL(34, 20),  // "_cancelGuiSelections"
-        QT_MOC_LITERAL(55, 11),  // "_startMovie"
-        QT_MOC_LITERAL(67, 10),  // "_stopMovie"
-        QT_MOC_LITERAL(78, 16),  // "_outputMovieLoop"
-        QT_MOC_LITERAL(95, 8),  // "_goBack1"
-        QT_MOC_LITERAL(104, 15),  // "_goBackDuration"
-        QT_MOC_LITERAL(120, 11),  // "_goBackMult"
-        QT_MOC_LITERAL(132, 7),  // "_goFwd1"
-        QT_MOC_LITERAL(140, 14),  // "_goFwdDuration"
-        QT_MOC_LITERAL(155, 10),  // "_goFwdMult"
-        QT_MOC_LITERAL(166, 26),  // "_timeSliderActionTriggered"
-        QT_MOC_LITERAL(193, 6),  // "action"
-        QT_MOC_LITERAL(200, 23),  // "_timeSliderValueChanged"
-        QT_MOC_LITERAL(224, 5),  // "value"
-        QT_MOC_LITERAL(230, 19),  // "_timeSliderReleased"
-        QT_MOC_LITERAL(250, 18),  // "_timeSliderPressed"
-        QT_MOC_LITERAL(269, 21),  // "_timeSliderSetNFrames"
-        QT_MOC_LITERAL(291, 3),  // "val"
-        QT_MOC_LITERAL(295, 21),  // "_setFrameIntervalSecs"
-        QT_MOC_LITERAL(317, 12),  // "_setRealtime"
-        QT_MOC_LITERAL(330, 9),  // "_setSweep"
-        QT_MOC_LITERAL(340, 18),  // "_setLoopDwellMsecs"
-        QT_MOC_LITERAL(359, 18)   // "_setLoopDelayMsecs"
-    },
-    "TimeControl",
-    "_acceptGuiSelections",
-    "",
-    "_cancelGuiSelections",
-    "_startMovie",
-    "_stopMovie",
-    "_outputMovieLoop",
-    "_goBack1",
-    "_goBackDuration",
-    "_goBackMult",
-    "_goFwd1",
-    "_goFwdDuration",
-    "_goFwdMult",
-    "_timeSliderActionTriggered",
-    "action",
-    "_timeSliderValueChanged",
-    "value",
-    "_timeSliderReleased",
-    "_timeSliderPressed",
-    "_timeSliderSetNFrames",
-    "val",
-    "_setFrameIntervalSecs",
-    "_setRealtime",
-    "_setSweep",
-    "_setLoopDwellMsecs",
-    "_setLoopDelayMsecs"
-};
-#undef QT_MOC_LITERAL
-#endif // !QT_MOC_HAS_STRING_DATA
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 } // unnamed namespace
 
 Q_CONSTINIT static const uint qt_meta_data_CLASSTimeControlENDCLASS[] = {
 
  // content:
-      11,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
       21,   14, // methods

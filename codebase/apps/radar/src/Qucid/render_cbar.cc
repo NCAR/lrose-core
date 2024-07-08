@@ -79,7 +79,7 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 	if((len = strlen(vc[i]->label)) > 0) {
 	    if(len > max_label) max_label = len;
 	} else {
-	    sprintf(label,"%.3g",vc[i]->min);
+	    snprintf(label,LABEL_LENGTH,"%.3g",vc[i]->min);
 	    if(strlen(label) > max_label) max_label = strlen(label);
 	}
     }
@@ -110,9 +110,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 		y_pos = bar_ystart  + 1 + (ymid *2);
 		ival =  (int) vc[num_entries-1]->max;   /* convert to an integer */
 	    if(ival == vc[0]->max) {
-			sprintf(label,"%d",ival);
+			snprintf(label,LABEL_LENGTH,"%d",ival);
 		} else {
-			sprintf(label,"%.3g",vc[0]->max);
+			snprintf(label,LABEL_LENGTH,"%.3g",vc[0]->max);
 		}
 		if(strncmp(label,"       ",strlen(label)) != 0)  {
 		    XDrawImageString(dpy,xid,gc, (bar_xstart + (bar_width/2) + xmid), y_pos, label, strlen(label));
@@ -149,9 +149,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 	        }
 	        ival = (int) vc[i]->min;   /* convert to an integer */
 	        if(ival == vc[i]->min) {
-			    sprintf(label,"%d",ival);
+			    snprintf(label,LABEL_LENGTH,"%d",ival);
 		    } else {
-			    sprintf(label,"%.3g",vc[i]->min);
+			    snprintf(label,LABEL_LENGTH,"%.3g",vc[i]->min);
 		    }
 		
 		    if(strncmp(label,"       ",strlen(label)) != 0)  {
@@ -169,9 +169,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 		y_pos = bar_ystart - 1;
 		ival =  (int) vc[num_entries-1]->max;   /* convert to an integer */
 	    if(ival == vc[num_entries-1]->max) {
-			sprintf(label,"%d",ival);
+			snprintf(label,LABEL_LENGTH,"%d",ival);
 		} else {
-			sprintf(label,"%.3g",vc[num_entries-1]->max);
+			snprintf(label,LABEL_LENGTH,"%.3g",vc[num_entries-1]->max);
 		}
 		XDrawImageString(dpy,xid,gc, (bar_xstart + (bar_width/2) + xmid), y_pos, label, strlen(label));
 	  }
@@ -196,9 +196,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 		x_pos = bar_xstart + bar_width - (2*xmid);
 		ival =  (int) vc[0]->min;   /* convert to an integer */
 	    if(ival == vc[0]->min) {
-			sprintf(label,"%d",ival);
+			snprintf(label,LABEL_LENGTH,"%d",ival);
 		} else {
-			sprintf(label,"%.3g",vc[0]->min);
+			snprintf(label,LABEL_LENGTH,"%.3g",vc[0]->min);
 		}
 		XDrawImageString(dpy,xid,gc, x_pos, y_pos, label, strlen(label));
 	  }
@@ -235,9 +235,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 		    }
 			ival =  (int) vc[i]->min;   /* convert to an integer */
 		    if(ival == vc[i]->min) {
-				sprintf(label,"%d",ival);
+				snprintf(label,LABEL_LENGTH,"%d",ival);
 			} else {
-				sprintf(label,"%.3g",vc[i]->min);
+				snprintf(label,LABEL_LENGTH,"%.3g",vc[i]->min);
 		    }
 
 		    y_pos =  (bar_yend  + (bar_height/2) + ymid);
@@ -254,9 +254,9 @@ draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  
 		x_pos = bar_xstart - 1;
 		ival =  (int) vc[num_entries-1]->max;   /* convert to an integer */
 	    if(ival == vc[num_entries-1]->max) {
-			sprintf(label,"%d",ival);
+			snprintf(label,LABEL_LENGTH,"%d",ival);
 		} else {
-			sprintf(label,"%.3g",vc[num_entries-1]->max);
+			snprintf(label,LABEL_LENGTH,"%.3g",vc[num_entries-1]->max);
 		}
 		XDrawImageString(dpy,xid,gc, x_pos, y_pos, label, strlen(label));
 	  }

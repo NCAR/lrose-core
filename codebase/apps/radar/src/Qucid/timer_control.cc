@@ -411,7 +411,7 @@ void timer_func( Notify_client   client, int which)
   if(cur_tm.tv_sec > last_tick) {
     if(!_params.run_once_and_exit) {
       char buf[128];
-      sprintf(buf,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
+      snprintf(buf,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
               (int) (cur_tm.tv_sec - gd.last_event_time),
               gd.io_info.outstanding_request,
               gd.io_info.mode,

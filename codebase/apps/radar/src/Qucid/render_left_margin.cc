@@ -46,7 +46,7 @@ int draw_hwin_left_margin( Drawable xid)
     double    min_val;
     double    tick_spacing;
     double    current_tick;
-    char    label[16];
+    char    label[128];
     Font    font;
      
     double unit_per_km;
@@ -85,9 +85,9 @@ int draw_hwin_left_margin( Drawable xid)
           XDrawLine(gd.dpy,xid,gd.legends.foreground_color->gc,tick_xstart,tick_ystart,tick_xend-1,tick_ystart);
 
 	  if(range > 7.5) {
-            sprintf(label,"%.0f",current_tick);
+            snprintf(label,128,"%.0f",current_tick);
 	  } else {
-	    sprintf(label,"%.1f",current_tick);
+	    snprintf(label,128,"%.1f",current_tick);
 	  }
           font = choose_font(label,tick_xstart,gd.h_win.margin.left,&xmid,&ymid);
           XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
@@ -98,7 +98,7 @@ int draw_hwin_left_margin( Drawable xid)
         current_tick += tick_spacing;
     };
 
-    sprintf(label,"%s",u_label);
+    snprintf(label,128,"%s",u_label);
     font = choose_font(label,tick_xstart,gd.h_win.margin.left,&xmid,&ymid);
     XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
     if(_params.html_mode) {  // Draw label at the bottom

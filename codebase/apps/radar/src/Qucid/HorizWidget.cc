@@ -806,7 +806,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
     // time legend
 
-    sprintf(text, "Start time: %s", _plotStartTime.asString(0).c_str());
+    snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
     
     // radar and site name legend
@@ -829,17 +829,17 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     // field name legend
 
     // string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
-    // sprintf(text, "Field: %s", fieldName.c_str());
+    // snprintf(text, "Field: %s", fieldName.c_str());
     // legends.push_back(text);
 
     // elevation legend
 
-    sprintf(text, "Elevation(deg): %.2f", _meanElev);
+    snprintf(text, 1024, "Elevation(deg): %.2f", _meanElev);
     legends.push_back(text);
 
     // nrays legend
 
-    sprintf(text, "NRays: %g", _nRays);
+    snprintf(text, 1024, "NRays: %g", _nRays);
     legends.push_back(text);
     
     painter.save();

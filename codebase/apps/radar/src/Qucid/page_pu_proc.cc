@@ -48,7 +48,7 @@ void set_color( char *cname, void* c_data)
 {
     XColor  rgb_def;
     Color_change_t *ptr;
-    char string[1024];
+    char string2[1024];
  
  
     ptr = (Color_change_t *) c_data;
@@ -89,7 +89,7 @@ void set_color( char *cname, void* c_data)
     if(page_pu_handle == map_set_color_bt) {
       // if(ptr->handle == gd.page_pu->map_set_color_bt) {
 
-            sprintf(string,"%s  %s",
+      snprintf(string2,1024,"%s  %s",
                     gd.over[gd.layers.cur_map_overlay]->control_label.c_str(),
                     gd.over[gd.layers.cur_map_overlay]->color->name);
             // xv_set(gd.page_pu->overlay_list,
@@ -98,7 +98,7 @@ void set_color( char *cname, void* c_data)
     } else if (page_pu_handle == vect_set_color_bt) {
       // } else if (ptr->handle ==  gd.page_pu->vect_set_color_bt) {
 
-      sprintf(string,"%s  %s",
+      snprintf(string2,1024,"%s  %s",
               gd.layers.wind[gd.layers.cur_wind_overlay].wind_u->button_name,
               gd.layers.wind[gd.layers.cur_wind_overlay].color->name);
       
@@ -160,7 +160,7 @@ void wind_scale_proc(Panel_item item, int value, Event *event)
      
     val =  (value + 1) * gd.layers.wind_time_scale_interval;    /* value is scaled in N
     minute intervals*/
-    sprintf(label,"%g min",val);
+    snprintf(label,"%g min",val);
     xv_set(gd.page_pu->wind_msg,PANEL_LABEL_STRING,label,NULL);
 
 	gd.layers.wind_scaler = value +1;
@@ -607,7 +607,7 @@ void cont_layer_set_proc( Panel_item item, int value, Event *event)
 void update_layered_contour_panel()
 {
   // int        field;
-  char    string[NAME_LENGTH];
+  char    string2[NAME_LENGTH];
 
   // field = gd.layers.cont[gd.layers.cur_contour_layer].field;
 
@@ -626,13 +626,13 @@ void update_layered_contour_panel()
 
   
   /* Reset Contour Limits, interval */
-  sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].min);
+  snprintf(string2,NAME_LENGTH,"%g",gd.layers.cont[gd.layers.cur_contour_layer].min);
   //   xv_set(gd.page_pu->cont_fr_tx,PANEL_VALUE,string,NULL);
      
-  sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].max);
+  snprintf(string2,NAME_LENGTH,"%g",gd.layers.cont[gd.layers.cur_contour_layer].max);
   // xv_set(gd.page_pu->cont_to_tx,PANEL_VALUE,string,NULL);
      
-  sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].interval);
+  snprintf(string2,NAME_LENGTH,"%g",gd.layers.cont[gd.layers.cur_contour_layer].interval);
   // xv_set(gd.page_pu->cont_int_tx,PANEL_VALUE,string,NULL);
 
 }
@@ -664,11 +664,11 @@ void update_layered_field_panel()
 
     /* Display Overlay data thresholds */
     gd.layers.overlay_min[gd.layers.cur_overlay_layer] = gd.mrec[field]->overlay_min;
-    sprintf(string,"%g",gd.layers.overlay_min[gd.layers.cur_overlay_layer]);
+    snprintf(string,256,"%g",gd.layers.overlay_min[gd.layers.cur_overlay_layer]);
     // xv_set(gd.page_pu->ov_fld_min_tx,PANEL_VALUE,string,NULL);
      
     gd.layers.overlay_max[gd.layers.cur_overlay_layer] = gd.mrec[field]->overlay_max;
-    sprintf(string,"%g",gd.layers.overlay_max[gd.layers.cur_overlay_layer]);
+    snprintf(string,256,"%g",gd.layers.overlay_max[gd.layers.cur_overlay_layer]);
     // xv_set(gd.page_pu->ov_fld_max_tx,PANEL_VALUE,string,NULL);
      
     /* Display a field label in the popup */

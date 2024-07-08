@@ -436,7 +436,7 @@ static void draw_labels_for_line(const gframe_t *gframe,
     (label_spacing * (0.25 + (contourIndex % 10) * 0.1));
   
   char label_str[64];
-  sprintf(label_str, "%g", level);
+  snprintf(label_str, 64, "%g", level);
 
   bool plotted = false;
   for (int ii = 0; ii < n_points - 1; ii++) {

@@ -203,7 +203,7 @@ bool SiiPalette::write(FILE *stream) const
   {
     char message[256];
       
-    sprintf(message, "Problem writing palette %s\n",
+    snprintf(message, "Problem writing palette %s\n",
 	    palette_buffer.palette_name);
     sii_message(message);
     return false;

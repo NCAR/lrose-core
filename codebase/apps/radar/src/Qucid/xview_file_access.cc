@@ -53,15 +53,15 @@ FILE* open_check_write(const char *file_name, Frame    owner)
     if(stat(file_name,&filestat)) {
         switch(errno) {
             case ENOTDIR:
-                sprintf(message,"No such directory");
+                snprintf(message,"No such directory");
             break;
 
             case EACCES:
-                sprintf(message,"Sorry, Can not access named directory");
+                snprintf(message,"Sorry, Can not access named directory");
             break;
 
             case ELOOP:
-                sprintf(message,"Too many symbolic links to resolve");
+                snprintf(message,"Too many symbolic links to resolve");
             break;
         }
 
@@ -102,19 +102,19 @@ FILE * open_check_read( char    *file_name, Frame    owner)
     if(stat(file_name,&filestat)) {
         switch(errno) {
             case ENOTDIR:
-                sprintf(message,"No such directory");
+                snprintf(message,"No such directory");
             break;
 
             case EACCES:
-                sprintf(message,"Sorry, Can not access named directory");
+                snprintf(message,"Sorry, Can not access named directory");
             break;
 
             case ELOOP:
-                sprintf(message,"Too many symbolic links to resolve");
+                snprintf(message,"Too many symbolic links to resolve");
             break;
 
             case ENOENT:
-                sprintf(message,"File does not exist");
+                snprintf(message,"File does not exist");
             break;
         }
 
@@ -143,23 +143,23 @@ int chdir_check( char * path, Frame    owner)
         switch(errno) {
             case ENOENT:
             case ENOTDIR:
-                sprintf(message,"No such directory");
+                snprintf(message,"No such directory");
             break;
 
             case EINVAL:
-                sprintf(message,"Illegal character in name");
+                snprintf(message,"Illegal character in name");
             break;
 
             case EACCES:
-                sprintf(message,"Sorry, Access denied for named directory");
+                snprintf(message,"Sorry, Access denied for named directory");
             break;
 
             case ELOOP:
-                sprintf(message,"Too many symbolic links to resolve");
+                snprintf(message,"Too many symbolic links to resolve");
             break;
 
             case EIO:
-                sprintf(message,"I/O error occured, try again");
+                snprintf(message,"I/O error occured, try again");
             break;
         }
 

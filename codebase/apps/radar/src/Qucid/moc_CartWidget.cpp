@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'CartWidget.hh'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,19 +10,16 @@
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
-#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
-#else
-QT_BEGIN_MOC_NAMESPACE
-#endif
-
 
 #include <memory>
 
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'CartWidget.hh' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.5.2. It"
+#error "This file was generated using the moc from 6.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -38,7 +35,7 @@ namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
 struct qt_meta_stringdata_CLASSCartWidgetENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSCartWidgetENDCLASS = QtMocHelpers::stringData(
+constexpr auto qt_meta_stringdata_CLASSCartWidgetENDCLASS = QtMocHelpers::stringData(
     "CartWidget",
     "locationClicked",
     "",
@@ -66,102 +63,15 @@ static constexpr auto qt_meta_stringdata_CLASSCartWidgetENDCLASS = QtMocHelpers:
     "contextMenuExamine",
     "contextMenuDataWidget"
 );
-#else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSCartWidgetENDCLASS_t {
-    uint offsetsAndSizes[52];
-    char stringdata0[11];
-    char stringdata1[16];
-    char stringdata2[1];
-    char stringdata3[4];
-    char stringdata4[4];
-    char stringdata5[15];
-    char stringdata6[11];
-    char stringdata7[13];
-    char stringdata8[7];
-    char stringdata9[10];
-    char stringdata10[15];
-    char stringdata11[13];
-    char stringdata12[11];
-    char stringdata13[7];
-    char stringdata14[6];
-    char stringdata15[7];
-    char stringdata16[9];
-    char stringdata17[8];
-    char stringdata18[9];
-    char stringdata19[14];
-    char stringdata20[18];
-    char stringdata21[27];
-    char stringdata22[16];
-    char stringdata23[18];
-    char stringdata24[19];
-    char stringdata25[22];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSCartWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSCartWidgetENDCLASS_t qt_meta_stringdata_CLASSCartWidgetENDCLASS = {
-    {
-        QT_MOC_LITERAL(0, 10),  // "CartWidget"
-        QT_MOC_LITERAL(11, 15),  // "locationClicked"
-        QT_MOC_LITERAL(27, 0),  // ""
-        QT_MOC_LITERAL(28, 3),  // "xkm"
-        QT_MOC_LITERAL(32, 3),  // "ykm"
-        QT_MOC_LITERAL(36, 14),  // "const RadxRay*"
-        QT_MOC_LITERAL(51, 10),  // "closestRay"
-        QT_MOC_LITERAL(62, 12),  // "displayImage"
-        QT_MOC_LITERAL(75, 6),  // "size_t"
-        QT_MOC_LITERAL(82, 9),  // "field_num"
-        QT_MOC_LITERAL(92, 14),  // "setArchiveMode"
-        QT_MOC_LITERAL(107, 12),  // "archive_mode"
-        QT_MOC_LITERAL(120, 10),  // "unzoomView"
-        QT_MOC_LITERAL(131, 6),  // "resize"
-        QT_MOC_LITERAL(138, 5),  // "width"
-        QT_MOC_LITERAL(144, 6),  // "height"
-        QT_MOC_LITERAL(151, 8),  // "setRings"
-        QT_MOC_LITERAL(160, 7),  // "enabled"
-        QT_MOC_LITERAL(168, 8),  // "setGrids"
-        QT_MOC_LITERAL(177, 13),  // "setAngleLines"
-        QT_MOC_LITERAL(191, 17),  // "contextMenuCancel"
-        QT_MOC_LITERAL(209, 26),  // "contextMenuParameterColors"
-        QT_MOC_LITERAL(236, 15),  // "contextMenuView"
-        QT_MOC_LITERAL(252, 17),  // "contextMenuEditor"
-        QT_MOC_LITERAL(270, 18),  // "contextMenuExamine"
-        QT_MOC_LITERAL(289, 21)   // "contextMenuDataWidget"
-    },
-    "CartWidget",
-    "locationClicked",
-    "",
-    "xkm",
-    "ykm",
-    "const RadxRay*",
-    "closestRay",
-    "displayImage",
-    "size_t",
-    "field_num",
-    "setArchiveMode",
-    "archive_mode",
-    "unzoomView",
-    "resize",
-    "width",
-    "height",
-    "setRings",
-    "enabled",
-    "setGrids",
-    "setAngleLines",
-    "contextMenuCancel",
-    "contextMenuParameterColors",
-    "contextMenuView",
-    "contextMenuEditor",
-    "contextMenuExamine",
-    "contextMenuDataWidget"
-};
-#undef QT_MOC_LITERAL
-#endif // !QT_MOC_HAS_STRING_DATA
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 } // unnamed namespace
 
 Q_CONSTINIT static const uint qt_meta_data_CLASSCartWidgetENDCLASS[] = {
 
  // content:
-      11,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
       14,   14, // methods

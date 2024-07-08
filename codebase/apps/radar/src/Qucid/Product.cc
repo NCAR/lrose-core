@@ -292,7 +292,7 @@ int Product::getData(const time_t data_start_time,
   clearSymprods();
   _chunksNeedProcess = true;
 
-  sprintf(msg,"Gathering %s data",_prodInfo.menu_label);
+  snprintf(msg,128,"Gathering %s data",_prodInfo.menu_label);
   add_message_to_status_win(msg,0);
 
   if (_debug) {
@@ -314,9 +314,9 @@ int Product::getData(const time_t data_start_time,
     // If using the a proxy - Add the a proxy_url to the Url as a name=value pair 
     // Note this must be used in conjunction with a tunnel_url.
     if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
-      sprintf(tmp_str,"?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
+      snprintf(tmp_str,1024, "?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
     } else {
-      sprintf(tmp_str,"?tunnel_url=%s",_params.http_tunnel_url);
+      snprintf(tmp_str,1024, "?tunnel_url=%s",_params.http_tunnel_url);
     }
 
     // Append the arguments to the end of the Url string
@@ -481,7 +481,7 @@ bool Product::processChunks()
 
   t3 = elapsed_time(gd.io_info.request_time,tm2);
 
-  sprintf(msg,
+  snprintf(msg, 128,
           "                                  ->   %d Chunks retrieved in %.3g seconds\n",(int)chunks.size(),t3);
   add_message_to_status_win(msg,0);
 

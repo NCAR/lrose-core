@@ -163,7 +163,7 @@ int render_wind_vectors(Drawable xid, int start_time, int end_time)
 	    XDrawLine(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1-3,x1,y1+3);
 	    XDrawLine(gd.dpy,xid,gd.layers.wind[k].color->gc,x2,y2-3,x2,y2+3);
     
-            sprintf(label,"%g %s",gd.layers.wind[k].reference_speed,gd.layers.wind[k].units_label);
+            snprintf(label,64,"%g %s",gd.layers.wind[k].reference_speed,gd.layers.wind[k].units_label);
             font = choose_font(label,(int) (gd.h_win.can_dim.width /2.0), gd.h_win.margin.top,
                           &xmid,&ymid);
             XSetFont(gd.dpy,gd.layers.wind[k].color->gc,font);

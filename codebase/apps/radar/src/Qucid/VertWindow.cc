@@ -280,7 +280,7 @@ void VertWindow::setAzimuth(const double azimuth)
     _azValue->setEnabled(false);
   } else {
     char text[1024];
-    sprintf(text, "%6.2f", azimuth);
+    snprintf(text, 1024, "%6.2f", azimuth);
     _azValue->setText(text);
     _azValue->setEnabled(true);
   }
@@ -297,7 +297,7 @@ void VertWindow::setElevation(const double elevation)
     _elevValue->setEnabled(false);
   } else {
     char text[1024];
-    sprintf(text, "%6.2f", elevation);
+    snprintf(text, 1024, "%6.2f", elevation);
     _elevValue->setText(text);
     _elevValue->setEnabled(true);
   }

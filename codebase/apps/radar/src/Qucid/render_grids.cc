@@ -77,9 +77,9 @@ int render_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_t
          strncasecmp(mr->button_name,"Empty",5)) {
         /* display "Data Not Available" message */
         if(out_of_date) {
-          sprintf(message,"%s - Data too Old", _params.no_data_message);
+          snprintf(message,MESSAGE_LEN,"%s - Data too Old", _params.no_data_message);
         } else {
-          STRcopy(message, _params.no_data_message,MESSAGE_LEN);
+          STRcopy(message,_params.no_data_message,MESSAGE_LEN);
         }
 
         font = choose_font(message, gd.h_win.img_dim.width, gd.h_win.img_dim.height, &xmid, &ymid);

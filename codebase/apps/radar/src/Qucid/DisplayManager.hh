@@ -276,8 +276,8 @@ protected:
 
   // setting text
 
-  void _setText(char *text, const char *format, int val);
-  void _setText(char *text, const char *format, double val);
+  void _setText(char *text, size_t maxTextLen, const char *format, int val);
+  void _setText(char *text, size_t maxTextLen, const char *format, double val);
   
   // adding vals / labels
 

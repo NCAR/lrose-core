@@ -197,11 +197,11 @@ void draw_cap_range_rings( Drawable xid)
 	XDrawLines(gd.dpy,xid,gd.legends.range_ring_color->gc,xpt,61,CoordModeOrigin);
 
 	if(interval >= 1.0) {
-          sprintf(label,"%.0f %s",cur_rad,u_label);
+          snprintf(label,LABEL_LENGTH,"%.0f %s",cur_rad,u_label);
 	} else if (interval >= 0.1) {
-          sprintf(label,"%.1f %s",cur_rad,u_label);
+          snprintf(label,LABEL_LENGTH,"%.1f %s",cur_rad,u_label);
 	} else {
-          sprintf(label,"%.2f %s",cur_rad,u_label);
+          snprintf(label,LABEL_LENGTH,"%.2f %s",cur_rad,u_label);
 	}
         font = choose_font(label,x_space,y_space,&xmid,&ymid);
         

@@ -163,7 +163,7 @@ void SymprodRender::draw(RenderContext &context)
   char msg2[256];
 
   strftime(msg1,128,"%b %d %H:%M:%S", gmtime((time_t *) &(_prodProps.start_time)));
-  sprintf(msg2,"Product: %s - %d objects, %s",
+  snprintf(msg2,256,"Product: %s - %d objects, %s",
 	      _prodProps.label,
 	      _prodProps.num_objs,
 	      msg1);

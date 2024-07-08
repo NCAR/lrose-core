@@ -88,7 +88,7 @@ extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, 
 #endif
 
 #ifndef CIDD_INIT
-extern void init_data_space();
+extern int init_data_space();
 extern void init_globals();
 #endif
 

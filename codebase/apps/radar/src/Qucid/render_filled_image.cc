@@ -136,7 +136,7 @@ int draw_filled_image( Drawable xid, int x_start[], int y_start[], met_record_t 
         memset((char *)im_data,gd.legends.background_color->pixval,len);
     }
 
-    if(gd.debug2) printf("NUM PIXEL FILLED PTS: %d of %ld\n",
+    if(gd.debug2) printf("NUM PIXEL FILLED PTS: %d of %lld\n",
                          mr->num_display_pts,mr->h_fhdr.nx*mr->h_fhdr.ny);
     
     /**** Now copy to the canvas ****/

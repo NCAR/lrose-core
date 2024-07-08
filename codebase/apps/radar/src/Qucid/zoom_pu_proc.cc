@@ -173,7 +173,7 @@ void bookmark_proc(Panel_item item, int value, Event *event)
 
     if(gd.debug) fprintf(stderr,"Executing: %s\n",cmd_buf);
 
-    sprintf(msg,"Sending Browser to %s",gd.bookmark[value].url);
+    snprintf(msg,"Sending Browser to %s",gd.bookmark[value].url);
     gui_label_h_frame(msg,1);
 
     safe_system(cmd_buf,_params.simple_command_timeout_secs);

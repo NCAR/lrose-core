@@ -92,20 +92,20 @@ const char * field_label( met_record_t *mr)
 	   mr->h_fhdr.vlevel_type == Mdvx::VERT_TYPE_SURFACE ||
 	   mr->h_fhdr.vlevel_type == Mdvx::VERT_TYPE_COMPOSITE ||
 	   mr->ds_fhdr.nz == 1) {  
-	   //sprintf(label,"%s At Surface %s",
-           sprintf(label,"%s: %s",
+	   //snprintf(label,"%s At Surface %s",
+          snprintf(label,2048,"%s: %s",
                 mr->legend_name,
                 tlabel);
 	} else {
 	 // Reverse order of label and value if units are "FL" 
 	 if(strcmp(mr->units_label_sects,"FL") == 0) {
-           sprintf(label,"%s: %s %03.0f %s",
+           snprintf(label,2048,"%s: %s %03.0f %s",
                 mr->legend_name,
                 mr->units_label_sects,
                 mr->vert[mr->plane].cent,
 		tlabel);
 	 }else {
-           sprintf(label,"%s: %g %s %s",
+           snprintf(label,2048,"%s: %g %s %s",
                 mr->legend_name,
                 mr->vert[mr->plane].cent,
                 mr->units_label_sects,
@@ -113,10 +113,10 @@ const char * field_label( met_record_t *mr)
 	  }
         }
       } else { // Use an abbreviated label in Wsddm mode.
-         sprintf(label,"%s %s", mr->legend_name, tlabel);
+         snprintf(label,2048,"%s %s", mr->legend_name, tlabel);
       }
     } else {
-        sprintf(label,"%s: All levels %s",
+        snprintf(label,2048,"%s: All levels %s",
                 mr->legend_name,
                 tlabel);
     }
@@ -159,11 +159,11 @@ const char* height_label()
      break;
 
      case Mdvx::VERT_FLIGHT_LEVEL:
-       sprintf(label,"Flight Level %03d", (int)gd.h_win.cur_ht);
+       snprintf(label,256,"Flight Level %03d", (int)gd.h_win.cur_ht);
      break;
 
      default:
-	 sprintf(label,"%g %s",gd.h_win.cur_ht,
+       snprintf(label,256,"%g %s",gd.h_win.cur_ht,
 		 mr->units_label_sects);
      break;
   }
@@ -244,7 +244,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
     } else if(strncasecmp(mr->legend_name,"Empty",5) == 0 )  {
       strncpy(fmt_str,"Frame time ",128);
     } else {
-      sprintf(fmt_str,"%s Not Available at ",mr->legend_name);
+      snprintf(fmt_str,2048,"%s Not Available at ",mr->legend_name);
     }
     strncat(fmt_str,_params.label_time_format,128);
     if (gd.movie.mode == REALTIME_MODE) {
@@ -280,7 +280,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
 	}
 
 	if(mr->h_data != NULL && !out_of_date) {
-	  sprintf(label,"Layer %d : ",i+1);
+	  snprintf(label,LABEL_LEN * 8,"Layer %d : ",i+1);
 	  strncat(label,field_label(mr),256);
           font = choose_font(label,wd,ht,&xmid,&ymid);
           XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
@@ -307,7 +307,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
 	}
 
 	if(mr->h_data != NULL && !out_of_date) {
-          sprintf(label,"Contour layer %d ",i);
+          snprintf(label,LABEL_LEN * 8,"Contour layer %d ",i);
 	  strncat(label,field_label(mr),LABEL_LEN);
           font = choose_font(label,wd,ht,&xmid,&ymid);
           XSetFont(gd.dpy,gd.layers.cont[i].color->gc,font);
@@ -336,15 +336,15 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
 
             if(gd.layers.wind[i].wind_u->h_data_valid  && gd.layers.wind[i].wind_v->h_data_valid &&
 			        gd.layers.wind[i].wind_u->h_data != NULL && !out_of_date) {
-                sprintf(label,"%s", field_label(gd.layers.wind[i].wind_u));
+              snprintf(label,LABEL_LEN * 8,"%s", field_label(gd.layers.wind[i].wind_u));
             } else {
 	      if(gd.wsddm_mode) { // No error message for missing vectors in wsddm_mode mode.
 		    label[0] = '\0';
 	      } else {
                 if(out_of_date) {
-		    sprintf(label,"%s No Data ",mr->legend_name);
+                  snprintf(label,LABEL_LEN * 8,"%s No Data ",mr->legend_name);
 		} else {
-		    sprintf(label,"%s - Winds Error - U or V missing",mr->legend_name);
+                  snprintf(label,LABEL_LEN * 8,"%s - Winds Error - U or V missing",mr->legend_name);
 	        }
 	      }
             }

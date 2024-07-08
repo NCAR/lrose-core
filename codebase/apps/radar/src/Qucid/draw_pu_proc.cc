@@ -71,14 +71,14 @@ update_draw_export_panel()
 	}
 
 
-	sprintf(string,"%d",de->default_serial_no);
+    snprintf(string,NAME_LENGTH,"%d",de->default_serial_no);
 	// xv_set(gd.draw_pu->serialno_tx,PANEL_VALUE,de->default_serial_no,NULL);
 
-	sprintf(string,"%g",de->default_valid_minutes);
+    snprintf(string,NAME_LENGTH,"%g",de->default_valid_minutes);
 	// xv_set(gd.draw_pu->validtm_tx,PANEL_VALUE,string,NULL);
 
 	UTIMunix_to_date(de->data_time,&temp_utime);
-	sprintf(text,"%ld:%02ld:%02ld %ld/%ld/%ld",
+	snprintf(text,64,"%ld:%02ld:%02ld %ld/%ld/%ld",
 	    temp_utime.hour,
 	    temp_utime.min,
 	    temp_utime.sec,

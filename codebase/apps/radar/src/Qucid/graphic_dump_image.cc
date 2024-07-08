@@ -65,7 +65,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
     
   if(gd.series_save_active) {
     // Create simplified file name and bail out.
-    sprintf(nbuf,"%s%03d.%s",prefix,gd.movie.cur_frame,_params.image_ext);
+    snprintf(nbuf,4096,"%s%03d.%s",prefix,gd.movie.cur_frame,_params.image_ext);
     // replace any spaces in the file name with underscores - .
     while(_params.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL) {
       *ptr = '_';
@@ -84,7 +84,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
   // Optionally add a frame number 
 
   if(_params.add_frame_num_to_filename) {
-    sprintf(tbuf,"%03d", gd.movie.cur_frame);
+    snprintf(tbuf,2048,"%03d", gd.movie.cur_frame);
     strncat(nbuf,tbuf,2048);
   }
 	
@@ -102,7 +102,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
 
   // zoom label
 
-  sprintf(zbuf,"cidd.level%d_label",gd.h_win.zoom_level+1);
+  snprintf(zbuf,2048,"cidd.level%d_label",gd.h_win.zoom_level+1);
   strncpy(zbuf,_params._zoom_levels[gd.h_win.zoom_level].label,1024);
 
   strncat(nbuf,sep,2048);
@@ -110,7 +110,7 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
     
   // add height if requested
   if(_params.add_height_to_filename) {
-    sprintf(tbuf, "%s%g", sep, gd.h_win.cur_ht);
+    snprintf(tbuf, 2048, "%s%g", sep, gd.h_win.cur_ht);
     strncat(nbuf,tbuf,2048);
   }
 
@@ -182,7 +182,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     // start with day subdir
     char daydir[MAX_PATH_LEN];
     DateTime centroidTime((time_t)gd.mrec[page]->h_mhdr.time_centroid);
-    sprintf(daydir,"/%.4d%.2d%.2d",
+    snprintf(daydir,MAX_PATH_LEN,"/%.4d%.2d%.2d",
             centroidTime.getYear(),
             centroidTime.getMonth(),
             centroidTime.getDay());
@@ -209,15 +209,15 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       if(print_flag) {
         if (_params.print_script == NULL){
           fprintf(stderr,"WARNING : cidd.print_script not set, using \"ls\"\n");
-          sprintf(cmd,"%s","ls");
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s","ls");
         } else {
-          sprintf(cmd,"%s",_params.print_script);
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s",_params.print_script);
         }
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
         } else {
-          sprintf(cmd,"%s",gd.h_win.image_command);
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.h_win.image_command);
         }
       }
       xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
@@ -226,7 +226,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       if(_params.output_geo_xml) dump_image_xml(dir, fname);
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
-      sprintf(pathname,"%s/%s",dir,fname);
+      snprintf(pathname,MAX_PATH_LEN * 4,"%s/%s",dir,fname);
       STRcopy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
 
 
@@ -245,17 +245,17 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       }
       fname = gd.v_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",_params.print_script);
+        snprintf(cmd,MAX_PATH_LEN * 2,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
         } else {
-          sprintf(cmd,"%s",gd.v_win.image_command);
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.v_win.image_command);
         }
       }
       xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
-      sprintf(pathname,"%s/%s",dir,fname);
+      snprintf(pathname,MAX_PATH_LEN * 2,"%s/%s",dir,fname);
       STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH - 1);
 
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
@@ -264,12 +264,12 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     case BOTH_VIEWS:  /* The Both windows */
       fname = gd.h_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",_params.print_script);
+        snprintf(cmd,MAX_PATH_LEN * 2,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
         } else {
-          sprintf(cmd,"%s",gd.h_win.image_command);
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.h_win.image_command);
         }
       }
       xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
@@ -279,12 +279,12 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
 
       fname = gd.v_win.image_fname;
       if(print_flag) {
-        sprintf(cmd,"%s",_params.print_script);
+        snprintf(cmd,MAX_PATH_LEN * 2,"%s",_params.print_script);
       } else {
         if(gd.series_save_active) {
           strcpy(cmd,""); // Don't run any command - in series save.
         } else {
-          sprintf(cmd,"%s",gd.v_win.image_command);
+          snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.v_win.image_command);
         }
       }
       xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
@@ -305,7 +305,7 @@ static void dump_image_xml(const char *dir, const char *fname)
 {
   FILE *xfile = NULL;
   char pathname_xml[MAX_PATH_LEN*2];
-  sprintf(pathname_xml,"%s/%s",dir,fname);
+  snprintf(pathname_xml,MAX_PATH_LEN*2,"%s/%s",dir,fname);
 
   // Make sure the output directory exists
   if (ta_makedir_recurse( dir )){
@@ -428,7 +428,7 @@ static void dump_png(Drawable xid,
   }
 
   char pathname[MAX_PATH_LEN];
-  sprintf(pathname,"%s/%s",dir,fname);
+  snprintf(pathname,MAX_PATH_LEN,"%s/%s",dir,fname);
   
   if(strlen(pathname) < 1) {
     fprintf(stderr,"WARNING - copy path not set\n");
@@ -612,7 +612,7 @@ static void dump_png(Drawable xid,
   
   if(strlen(cmd) > 3) {
     char cmdbuf[MAX_PATH_LEN*2];
-    sprintf(cmdbuf,"%s %s",cmd,pathname);
+    snprintf(cmdbuf,MAX_PATH_LEN*2,"%s %s",cmd,pathname);
     safe_system(cmdbuf,_params.simple_command_timeout_secs);
   }
 

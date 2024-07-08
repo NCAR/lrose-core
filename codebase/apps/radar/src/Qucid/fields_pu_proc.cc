@@ -508,30 +508,30 @@ void update_grid_config_gui()
     char str[1024];
 	 
     /* Now set all the panel labels appropriately */
-    sprintf(str,"Label: %s\n",gd.mrec[grid_config_field]->button_name);
+    snprintf(str,1024,"Label: %s\n",gd.mrec[grid_config_field]->button_name);
     // xv_set(gd.fields_pu->f_config_msg2,PANEL_LABEL_STRING,str,NULL);
 
-    sprintf(str,"Colorscale: %s\n",gd.mrec[grid_config_field]->color_file);
+    snprintf(str,1024,"Colorscale: %s\n",gd.mrec[grid_config_field]->color_file);
     // xv_set(gd.fields_pu->f_config_msg3,PANEL_LABEL_STRING,str,NULL);
      
-    sprintf(str,"Units: %s\n",gd.mrec[grid_config_field]->field_units);
+    snprintf(str,1024,"Units: %s\n",gd.mrec[grid_config_field]->field_units);
     // xv_set(gd.fields_pu->f_config_msg4,PANEL_LABEL_STRING,str,NULL);
 
     // xv_set(gd.fields_pu->f_config_tx1,PANEL_VALUE,gd.mrec[grid_config_field]->url,NULL);
 
-    sprintf(str,"%g",gd.mrec[grid_config_field]->alt_offset);
+    snprintf(str,1024,"%g",gd.mrec[grid_config_field]->alt_offset);
     // xv_set(gd.fields_pu->f_config_tx3,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%.2f",gd.mrec[grid_config_field]->time_allowance);
+    snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->time_allowance);
     // xv_set(gd.fields_pu->f_config_tx4,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%.2f",gd.mrec[grid_config_field]->cscale_min);
+    snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->cscale_min);
     // xv_set(gd.fields_pu->f_config_tx7,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%.2f",gd.mrec[grid_config_field]->cscale_delta);
+    snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->cscale_delta);
     // xv_set(gd.fields_pu->f_config_tx8,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%.2f",gd.mrec[grid_config_field]->time_offset);
+    snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->time_offset);
     // xv_set(gd.fields_pu->f_config_tx9,PANEL_VALUE,str,NULL);
 
     // xv_set(gd.fields_pu->ren_meth_st,PANEL_VALUE,gd.mrec[grid_config_field]->render_method & 1,NULL);
@@ -569,7 +569,7 @@ void update_wind_config_gui()
     }
 
     /* Now set all the panel labels appropriately */
-    sprintf(str,"Label: %s\n",gd.layers.wind[wind_config_field].wind_u->button_name);
+    snprintf(str,URL_LENGTH,"Label: %s\n",gd.layers.wind[wind_config_field].wind_u->button_name);
     // xv_set(gd.fields_pu->w_config_msg2,PANEL_LABEL_STRING,str,NULL);
 
     strncpy(str,gd.layers.wind[wind_config_field].wind_u->url,URL_LENGTH);
@@ -601,13 +601,13 @@ void update_wind_config_gui()
         }
     }
 
-    sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->alt_offset);
+    snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->alt_offset);
     // xv_set(gd.fields_pu->wind_alt_tx,PANEL_VALUE,str,NULL);
       
-    sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_offset);
+    snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_offset);
     // xv_set(gd.fields_pu->textfield1,PANEL_VALUE,str,NULL);
       
-    sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_allowance);
+    snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_allowance);
     // xv_set(gd.fields_pu->textfield2,PANEL_VALUE,str,NULL);
       
     // xv_set(gd.fields_pu->w_style_tx,PANEL_VALUE,gd.layers.wind[wind_config_field].marker_type-1,NULL);
@@ -644,18 +644,18 @@ void update_prod_config_gui()
 
     // xv_set(gd.fields_pu->p_config_url_tx,PANEL_VALUE,_params._symprod_prod_info[prod_config_field].url,NULL);
 
-    sprintf(str,"%d",_params._symprod_prod_info[prod_config_field].data_type);
+    snprintf(str,128,"%d",_params._symprod_prod_info[prod_config_field].data_type);
     // // xv_set(gd.fields_pu->p_config_type_tx,PANEL_VALUE,str,NULL);
 
-    // sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_before);
+    // snprintf(str,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_before);
     // xv_set(gd.fields_pu->allow_before_tx,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_after);
+    snprintf(str,128,"%g",_params._symprod_prod_info[prod_config_field].minutes_allow_after);
     // xv_set(gd.fields_pu->allow_after_tx,PANEL_VALUE,str,NULL);
 
     // xv_set(gd.fields_pu->render_type_st,PANEL_VALUE,_params._symprod_prod_info[prod_config_field].render_type,NULL);
 
-    sprintf(str,"%g",_params._symprod_prod_info[prod_config_field].text_off_threshold);
+    snprintf(str,128,"%g",_params._symprod_prod_info[prod_config_field].text_off_threshold);
     // xv_set(gd.fields_pu->text_thresh_tx,PANEL_VALUE,str,NULL);
 
 }

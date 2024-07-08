@@ -83,7 +83,7 @@ void draw_vwin_left_margin( Drawable xid, int page)
     double  min_val;
     double  tick_spacing;
     double  current_tick;
-    char    label[16];
+    char    label[128];
     Font    font;
     met_record_t *mr;       /* pointer to record for convienence */
  
@@ -102,9 +102,9 @@ void draw_vwin_left_margin( Drawable xid, int page)
     // Select which font we'll use for Labels - Use Hightest value for
     // the template.
     if(fabs(range) > 20.0) {
-      sprintf(label,"%.0f",mr->v_vhdr.level[mr->ds_fhdr.nz-1]);
+      snprintf(label,128,"%.0f",mr->v_vhdr.level[mr->ds_fhdr.nz-1]);
     } else {
-      sprintf(label,"%.1f",mr->v_vhdr.level[mr->ds_fhdr.nz-1]);
+      snprintf(label,128,"%.1f",mr->v_vhdr.level[mr->ds_fhdr.nz-1]);
     }
     font = choose_font(label,tick_xstart,label_space,&xmid,&ymid);
     XSetFont(gd.dpy,gd.legends.height_axis_color->gc,font);
@@ -118,11 +118,11 @@ void draw_vwin_left_margin( Drawable xid, int page)
             XDrawLine(gd.dpy,xid,gd.legends.height_axis_color->gc,tick_xstart,tick_ystart,tick_xend-1,tick_ystart);
  
             if(range > 20.0 ) {
-                sprintf(label,"%.0f",current_tick);
+              snprintf(label,128,"%.0f",current_tick);
 			} else if( range > 2.0) {
-                sprintf(label,"%.1f",current_tick);
+              snprintf(label,128,"%.1f",current_tick);
 			} else if( range >.5) {
-                sprintf(label,"%.2f",current_tick);
+              snprintf(label,128,"%.2f",current_tick);
 			}
 
 
@@ -140,16 +140,16 @@ void draw_vwin_left_margin( Drawable xid, int page)
             XDrawLine(gd.dpy,xid,gd.legends.height_axis_color->gc,tick_xstart,tick_ystart,tick_xend-1,tick_ystart);
  
             if(fabs(range) > 20.0 ) {
-                sprintf(label,"%.0f",current_tick);
+              snprintf(label,128,"%.0f",current_tick);
 			} else if( fabs(range) > 2.0) {
-                sprintf(label,"%.1f",current_tick);
+              snprintf(label,128,"%.1f",current_tick);
 			} else if( fabs(range) >.5) {
-                sprintf(label,"%.2f",current_tick);
+              snprintf(label,128,"%.2f",current_tick);
 			}
             if(fabs(range) > 20.0) 
-                sprintf(label,"%.0f",current_tick);
+              snprintf(label,128,"%.0f",current_tick);
 	    else 
-                sprintf(label,"%.1f",current_tick);
+              snprintf(label,128,"%.1f",current_tick);
 
             XDrawString(gd.dpy,xid,gd.legends.height_axis_color->gc,
             x_start,(tick_ystart + ymid),label,strlen(label));
@@ -158,7 +158,7 @@ void draw_vwin_left_margin( Drawable xid, int page)
         };
     }
 
-    sprintf(label,"%s",vlevel_label(&mr->v_fhdr));
+    snprintf(label,128,"%s",vlevel_label(&mr->v_fhdr));
 
     XDrawString(gd.dpy,xid,gd.legends.height_axis_color->gc,
 		x_start + 2, 2 * ymid + 1, label, strlen(label));
@@ -202,18 +202,18 @@ void draw_vwin_top_margin(Drawable xid, int page)
       strftime(timestr,64,_params.label_time_format,gmt);
       if( gd.mrec[page]->v_fhdr.proj_type == Mdvx::PROJ_RHI_RADAR) {
 	if (gd.mrec[page]->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_AZ) {
-	  sprintf(label," %s  RHI: %g deg  -  %s" ,
+	  snprintf(label,TITLE_LENGTH * 10," %s  RHI: %g deg  -  %s" ,
 		  mr->legend_name, mr->v_fhdr.grid_minz,timestr);
 	} else {
-	  sprintf(label," %s  RHI: %g deg  -  %s" ,
+	  snprintf(label,TITLE_LENGTH * 10," %s  RHI: %g deg  -  %s" ,
 		  mr->legend_name, mr->v_fhdr.grid_miny,timestr);
 	}
       } else {
-        sprintf(label,"%s   %s Cross Section %s",
+        snprintf(label,TITLE_LENGTH * 10,"%s   %s Cross Section %s",
 		gd.h_win.route.route_label,mr->legend_name,timestr);      
       }
     } else {
-      sprintf(label,"%s   %s Cross Section - Data Not Available",
+      snprintf(label,TITLE_LENGTH * 10,"%s   %s Cross Section - Data Not Available",
 	gd.h_win.route.route_label,
         mr->legend_name);
     }
@@ -269,9 +269,9 @@ void draw_vwin_bot_margin(Drawable xid, int page)
 			tick_xstart,tick_yend);
  
 	if(range > 7.5) {
-            sprintf(label,"%.0f",current_tick);
+          snprintf(label,16,"%.0f",current_tick);
 	} else {
-            sprintf(label,"%.1f",current_tick);
+          snprintf(label,16,"%.1f",current_tick);
 	}
         font = choose_font(label,label_space,gd.v_win.margin.bot-2,&xmid,&ymid);
         XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);

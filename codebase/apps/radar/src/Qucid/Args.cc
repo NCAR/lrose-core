@@ -92,25 +92,25 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-debug") ||
                !strcmp(argv[i], "-d")) {
       
-      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      snprintf(tmp_str, BUFSIZ,  "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-verbose") ||
                !strcmp(argv[i], "-v")) {
       
-      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      snprintf(tmp_str, BUFSIZ,  "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-extra") ||
                !strcmp(argv[i], "-vv")) {
       
-      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      snprintf(tmp_str, BUFSIZ,  "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-color_scales")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "color_scale_dir = \"%s\";", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "color_scale_dir = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -120,9 +120,9 @@ int Args::parse (const int argc, const char **argv)
       
       if (i < argc - 1) {
         const char *instance = argv[++i];
-        sprintf(tmp_str, "instance = \"%s\";", instance);
+        snprintf(tmp_str, BUFSIZ,  "instance = \"%s\";", instance);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "register_with_procmap = TRUE;");
+        snprintf(tmp_str, BUFSIZ,  "register_with_procmap = TRUE;");
         TDRP_add_override(&override, tmp_str);
         gd.app_instance = strdup(instance);
       } else {
@@ -132,7 +132,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-start_x")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "main_window_start_x = %s;", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "main_window_start_x = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -141,7 +141,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-start_y")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "main_window_start_y = %s;", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "main_window_start_y = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -149,15 +149,15 @@ int Args::parse (const int argc, const char **argv)
       
     } else if (!strcmp(argv[i], "-realtime")) {
       
-      sprintf(tmp_str, "begin_in_archive_mode = FALSE;");
+      snprintf(tmp_str, BUFSIZ,  "begin_in_archive_mode = FALSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-start_time")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "archive_start_time = \"%s\";", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "archive_start_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+        snprintf(tmp_str, BUFSIZ,  "begin_in_archive_mode = TRUE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -166,7 +166,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-images_start_time")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "images_archive_start_time = \"%s\";", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "images_archive_start_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -175,7 +175,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-images_end_time")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "images_archive_end_time = \"%s\";", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "images_archive_end_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -184,7 +184,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-image_interval")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "images_schedule_interval_secs = %s;", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "images_schedule_interval_secs = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -193,9 +193,9 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-time_span")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "bscan_time_span_secs = %s;", argv[++i]);
+        snprintf(tmp_str, BUFSIZ,  "bscan_time_span_secs = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "archive_time_span_secs = %s;", argv[i]);
+        snprintf(tmp_str, BUFSIZ,  "archive_time_span_secs = %s;", argv[i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;

@@ -373,7 +373,7 @@ void check_for_io()
             n_read = mr->h_mdvx->getNbytesReadDone();
 
             if(n_read <= 1) {
-              sprintf(label,"Waiting for %s service  %ld -  secs before timeout",
+              snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
                       mr->legend_name,
                       (gd.io_info.expire_time - time(0)));
             } else {
@@ -382,11 +382,11 @@ void check_for_io()
 
                 bps = (n_read - gd.io_info.last_read) /  elapsed_time(gd.io_info.last_time,tm);
                 if( bps < 512) {
-                  sprintf(label,"READING %s Data  %.0f%% complete  - %.2g bytes/sec",
+                  snprintf(label,256,"READING %s Data  %.0f%% complete  - %.2g bytes/sec",
                           mr->legend_name,
                           comp,bps);
                 } else {
-                  sprintf(label,"READING %s Data  %.0f%% complete  - %.2g Kb/sec",
+                  snprintf(label,256,"READING %s Data  %.0f%% complete  - %.2g Kb/sec",
                           mr->legend_name,
                           comp,bps/1000);
                 }
@@ -394,7 +394,7 @@ void check_for_io()
                 gd.io_info.last_read = n_read;
                 gd.io_info.last_time = tm;
               } else {
-                sprintf(label,"READING %s Data  %.0f%% complete",
+                snprintf(label,256,"READING %s Data  %.0f%% complete",
                         mr->legend_name,comp);
               }
             }
@@ -536,7 +536,7 @@ void check_for_io()
             n_read = mr->v_mdvx->getNbytesReadDone();
 
             if(n_read <= 1) {
-              sprintf(label,"Waiting for %s service  %ld -  secs before timeout",
+              snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
                       mr->legend_name,
                       (gd.io_info.expire_time - time(0)));
             } else {
@@ -545,11 +545,11 @@ void check_for_io()
 
                 bps = (n_read - gd.io_info.last_read) /  elapsed_time(gd.io_info.last_time,tm);
                 if( bps < 512) {
-                  sprintf(label,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
+                  snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
                           mr->legend_name,
                           comp,bps);
                 } else {
-                  sprintf(label,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
+                  snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
                           mr->legend_name,
                           comp,bps/1000);
                 }
@@ -557,7 +557,7 @@ void check_for_io()
                 gd.io_info.last_read = n_read;
                 gd.io_info.last_time = tm;
               } else {
-                sprintf(label,"READING %s Data  %.0f%% complete",
+                snprintf(label,256,"READING %s Data  %.0f%% complete",
                         mr->legend_name,comp);
               }
             }
@@ -621,7 +621,7 @@ void check_for_io()
             else set_busy_state(0);
 
           } else {   // Still waiting for the request thread to complete
-	    sprintf(label,"Waiting for %s Data Index  %ld -  secs before timeout",
+	    snprintf(label,256,"Waiting for %s Data Index  %ld -  secs before timeout",
                     mr->legend_name,
                     (gd.io_info.expire_time - time(0)));
           }
@@ -694,7 +694,7 @@ void check_for_io()
         n_read = spdb->getNbytesDone();
 
         if(n_read <= 1) {
-          sprintf(label,"Waiting for %s service  %ld -  secs before timeout",
+          snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
                   gd.io_info.prod->_prodInfo.menu_label,
                   (gd.io_info.expire_time - time(0)));
         } else {
@@ -704,11 +704,11 @@ void check_for_io()
             bps = (n_read - gd.io_info.last_read) /  elapsed_time(gd.io_info.last_time,tm);
 
             if( bps < 512) {
-              sprintf(label,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
+              snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
                       gd.io_info.prod->_prodInfo.menu_label,
                       comp,bps);
             } else {
-              sprintf(label,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
+              snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
                       gd.io_info.prod->_prodInfo.menu_label,
                       comp,bps/1000);
             }
@@ -717,7 +717,7 @@ void check_for_io()
             gd.io_info.last_time = tm;
             gd.io_info.expire_time++;
           } else {
-            sprintf(label,"Reading %s Data  %.0f%% complete",
+            snprintf(label,256,"Reading %s Data  %.0f%% complete",
                     gd.io_info.prod->_prodInfo.menu_label, comp);
           }
         }

@@ -1253,7 +1253,7 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
     painter.setFont(valuesFont);
 
     char timeLabel[1024];
-    sprintf(timeLabel, "%.2d:%.2d:%.2d",
+    snprintf(timeLabel, 1024, "%.2d:%.2d:%.2d",
             tickTime.getHour(), tickTime.getMin(), tickTime.getSec());
     QRect labelRect(painter.fontMetrics().tightBoundingRect(timeLabel));
     if (((pix + labelRect.width() / 2 + _textMargin) < unitsX) &&
@@ -1355,7 +1355,7 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
     painter.setFont(valuesFont);
     
     char distLabel[1024];
-    sprintf(distLabel, "%gkm", distVal);
+    snprintf(distLabel, 1024, "%gkm", distVal);
     QRect labelRect(painter.fontMetrics().tightBoundingRect(distLabel));
     
     if (fabs(deltaPix) < labelRect.width() + 2) {
@@ -1478,17 +1478,17 @@ string WorldPlot::getAxisLabel(double delta, double val)
   delta = fabs(delta);
   
   if (delta >= 1.0) {
-    sprintf(text, "%.0f", val);
+    snprintf(text, 1024,  "%.0f", val);
   } else if (delta >= 0.1) {
-    sprintf(text, "%.1f", val);
+    snprintf(text, 1024,  "%.1f", val);
   } else if (delta >= 0.01) {
-    sprintf(text, "%.2f", val);
+    snprintf(text, 1024,  "%.2f", val);
   } else if (delta >= 0.001) {
-    sprintf(text, "%.3f", val);
+    snprintf(text, 1024,  "%.3f", val);
   } else if (delta >= 0.0001) {
-    sprintf(text, "%.4f", val);
+    snprintf(text, 1024,  "%.4f", val);
   } else {
-    sprintf(text, "%.5f", val);
+    snprintf(text, 1024,  "%.5f", val);
   }
 
   return text;

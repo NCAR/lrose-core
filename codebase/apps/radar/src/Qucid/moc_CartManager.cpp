@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'CartManager.hh'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -9,19 +9,16 @@
 #include "CartManager.hh"
 #include <QtCore/qmetatype.h>
 
-#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
-#else
-QT_BEGIN_MOC_NAMESPACE
-#endif
-
 
 #include <memory>
 
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'CartManager.hh' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.5.2. It"
+#error "This file was generated using the moc from 6.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -37,7 +34,7 @@ namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
 struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers::stringData(
+constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers::stringData(
     "CartManager",
     "colorMapRedefineReceived",
     "",
@@ -84,159 +81,15 @@ static constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers
     "ShowContextMenu",
     "pos"
 );
-#else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {
-    uint offsetsAndSizes[90];
-    char stringdata0[12];
-    char stringdata1[25];
-    char stringdata2[1];
-    char stringdata3[7];
-    char stringdata4[10];
-    char stringdata5[9];
-    char stringdata6[12];
-    char stringdata7[10];
-    char stringdata8[14];
-    char stringdata9[16];
-    char stringdata10[16];
-    char stringdata11[10];
-    char stringdata12[8];
-    char stringdata13[8];
-    char stringdata14[9];
-    char stringdata15[13];
-    char stringdata16[8];
-    char stringdata17[8];
-    char stringdata18[22];
-    char stringdata19[4];
-    char stringdata20[4];
-    char stringdata21[15];
-    char stringdata22[11];
-    char stringdata23[21];
-    char stringdata24[17];
-    char stringdata25[4];
-    char stringdata26[15];
-    char stringdata27[16];
-    char stringdata28[16];
-    char stringdata29[7];
-    char stringdata30[20];
-    char stringdata31[17];
-    char stringdata32[17];
-    char stringdata33[18];
-    char stringdata34[32];
-    char stringdata35[6];
-    char stringdata36[31];
-    char stringdata37[17];
-    char stringdata38[12];
-    char stringdata39[26];
-    char stringdata40[25];
-    char stringdata41[27];
-    char stringdata42[18];
-    char stringdata43[16];
-    char stringdata44[4];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSCartManagerENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSCartManagerENDCLASS_t qt_meta_stringdata_CLASSCartManagerENDCLASS = {
-    {
-        QT_MOC_LITERAL(0, 11),  // "CartManager"
-        QT_MOC_LITERAL(12, 24),  // "colorMapRedefineReceived"
-        QT_MOC_LITERAL(37, 0),  // ""
-        QT_MOC_LITERAL(38, 6),  // "string"
-        QT_MOC_LITERAL(45, 9),  // "fieldName"
-        QT_MOC_LITERAL(55, 8),  // "ColorMap"
-        QT_MOC_LITERAL(64, 11),  // "newColorMap"
-        QT_MOC_LITERAL(76, 9),  // "gridColor"
-        QT_MOC_LITERAL(86, 13),  // "emphasisColor"
-        QT_MOC_LITERAL(100, 15),  // "annotationColor"
-        QT_MOC_LITERAL(116, 15),  // "backgroundColor"
-        QT_MOC_LITERAL(132, 9),  // "setVolume"
-        QT_MOC_LITERAL(142, 7),  // "_freeze"
-        QT_MOC_LITERAL(150, 7),  // "_unzoom"
-        QT_MOC_LITERAL(158, 8),  // "_refresh"
-        QT_MOC_LITERAL(167, 12),  // "_changeField"
-        QT_MOC_LITERAL(180, 7),  // "fieldId"
-        QT_MOC_LITERAL(188, 7),  // "guiMode"
-        QT_MOC_LITERAL(196, 21),  // "_horizLocationClicked"
-        QT_MOC_LITERAL(218, 3),  // "xkm"
-        QT_MOC_LITERAL(222, 3),  // "ykm"
-        QT_MOC_LITERAL(226, 14),  // "const RadxRay*"
-        QT_MOC_LITERAL(241, 10),  // "closestRay"
-        QT_MOC_LITERAL(252, 20),  // "_vertLocationClicked"
-        QT_MOC_LITERAL(273, 16),  // "_locationClicked"
-        QT_MOC_LITERAL(290, 3),  // "ray"
-        QT_MOC_LITERAL(294, 14),  // "_showFieldMenu"
-        QT_MOC_LITERAL(309, 15),  // "_placeFieldMenu"
-        QT_MOC_LITERAL(325, 15),  // "_setMapsEnabled"
-        QT_MOC_LITERAL(341, 6),  // "enable"
-        QT_MOC_LITERAL(348, 19),  // "_setProductsEnabled"
-        QT_MOC_LITERAL(368, 16),  // "_setWindsEnabled"
-        QT_MOC_LITERAL(385, 16),  // "_showTimeControl"
-        QT_MOC_LITERAL(402, 17),  // "_placeTimeControl"
-        QT_MOC_LITERAL(420, 31),  // "_circleRadiusSliderValueChanged"
-        QT_MOC_LITERAL(452, 5),  // "value"
-        QT_MOC_LITERAL(458, 30),  // "_brushRadiusSliderValueChanged"
-        QT_MOC_LITERAL(489, 16),  // "_saveImageToFile"
-        QT_MOC_LITERAL(506, 11),  // "interactive"
-        QT_MOC_LITERAL(518, 25),  // "_createRealtimeImageFiles"
-        QT_MOC_LITERAL(544, 24),  // "_createArchiveImageFiles"
-        QT_MOC_LITERAL(569, 26),  // "_createImageFilesAllLevels"
-        QT_MOC_LITERAL(596, 17),  // "_createImageFiles"
-        QT_MOC_LITERAL(614, 15),  // "ShowContextMenu"
-        QT_MOC_LITERAL(630, 3)   // "pos"
-    },
-    "CartManager",
-    "colorMapRedefineReceived",
-    "",
-    "string",
-    "fieldName",
-    "ColorMap",
-    "newColorMap",
-    "gridColor",
-    "emphasisColor",
-    "annotationColor",
-    "backgroundColor",
-    "setVolume",
-    "_freeze",
-    "_unzoom",
-    "_refresh",
-    "_changeField",
-    "fieldId",
-    "guiMode",
-    "_horizLocationClicked",
-    "xkm",
-    "ykm",
-    "const RadxRay*",
-    "closestRay",
-    "_vertLocationClicked",
-    "_locationClicked",
-    "ray",
-    "_showFieldMenu",
-    "_placeFieldMenu",
-    "_setMapsEnabled",
-    "enable",
-    "_setProductsEnabled",
-    "_setWindsEnabled",
-    "_showTimeControl",
-    "_placeTimeControl",
-    "_circleRadiusSliderValueChanged",
-    "value",
-    "_brushRadiusSliderValueChanged",
-    "_saveImageToFile",
-    "interactive",
-    "_createRealtimeImageFiles",
-    "_createArchiveImageFiles",
-    "_createImageFilesAllLevels",
-    "_createImageFiles",
-    "ShowContextMenu",
-    "pos"
-};
-#undef QT_MOC_LITERAL
-#endif // !QT_MOC_HAS_STRING_DATA
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 } // unnamed namespace
 
 Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
 
  // content:
-      11,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
       26,   14, // methods

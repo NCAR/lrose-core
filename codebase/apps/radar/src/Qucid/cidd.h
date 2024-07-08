@@ -58,6 +58,7 @@
 #include <toolsa/http.h>    // HTTPgetURL support
 #include <toolsa/HttpURL.hh>// HTTPURL class support
 #include <toolsa/pjg.h>     // Map projection geometry 
+#include <toolsa/Path.hh> 
 #include <toolsa/sockutil.h>
 #include <toolsa/str.h>     // string utilities 
 #include <toolsa/utim.h>    // Unix time conversions 
@@ -293,10 +294,12 @@ public:
 #ifdef THIS_IS_MAIN
 Global_data gd; // global data
 Params _params; // tdrp params
+Path _paramsPathUsed;
 #else
 // External reference to global data structure
 extern Global_data gd; // global data
 extern Params _params; // tdrp params
+extern Path _paramsPathUsed;
 #endif
 
 #endif

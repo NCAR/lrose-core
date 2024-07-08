@@ -445,7 +445,7 @@ int render_vert_wind_vectors( Drawable xid)
 				_params.wind_head_size + (3 * (gd.layers.wind[0].line_width -1)),
 				_params.wind_head_angle * DEG_TO_RAD);
 
-        sprintf(label,"%g %s (W * %g)",speed,gd.layers.wind[0].units_label,w_scale_factor);
+        snprintf(label,64,"%g %s (W * %g)",speed,gd.layers.wind[0].units_label,w_scale_factor);
         font = choose_font(label,((x2 -x1) * 5), gd.v_win.margin.top,&xmid,&ymid);
         XSetFont(gd.dpy,gd.layers.wind[0].color->gc,font);
         if(_params.font_display_mode == 0) 

@@ -103,7 +103,7 @@ Qucid::Qucid(int argc, char **argv) :
   }
   
   // load TDRP params from command line
-  
+
   char *paramsPath = (char *) "unknown";
   if (usingLegacyParams) {
     if (_params.loadApplyArgs(tdrpParamsPath,
@@ -114,6 +114,7 @@ Qucid::Qucid(int argc, char **argv) :
       OK = false;
       return;
     }
+    _paramsPathUsed = tdrpParamsPath;
   } else {
     if (_params.loadFromArgs(argc, argv,
                              _args.override.list,
@@ -123,6 +124,11 @@ Qucid::Qucid(int argc, char **argv) :
       OK = false;
       return;
     }
+    _paramsPathUsed = paramsPath;
+  }
+
+  if (_params.debug) {
+    cerr << "Using params path: " << _paramsPathUsed.getPath() << endl;
   }
   
   if (_params.fields_n < 1) {
@@ -132,10 +138,13 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
+    
+    // initialize globals, get/set defaults, establish data sources etc.
 
-  // initialize globals, get/set defaults, establish data sources etc.
-
-  init_data_space();
+  if (init_data_space()) {
+    OK = false;
+    return;
+  }
 
   // print color scales if debugging
   // if (_params.debug) {

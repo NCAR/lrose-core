@@ -98,7 +98,7 @@ void render_xsect_top_layers(Drawable xid, int page)
        idir = (int) (dir + 2.5);
        idir -= idir % 5;
 
-      sprintf(wind_label,"Avg Wind: %03d/%.2d %s",idir,ispd,units_label);
+       snprintf(wind_label,1024,"Avg Wind: %03d/%.2d %s",idir,ispd,units_label);
 
     }
 

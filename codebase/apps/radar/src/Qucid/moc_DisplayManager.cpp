@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'DisplayManager.hh'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -9,19 +9,16 @@
 #include "DisplayManager.hh"
 #include <QtCore/qmetatype.h>
 
-#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
-#else
-QT_BEGIN_MOC_NAMESPACE
-#endif
-
 
 #include <memory>
 
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'DisplayManager.hh' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.5.2. It"
+#error "This file was generated using the moc from 6.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -37,7 +34,7 @@ namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
 struct qt_meta_stringdata_CLASSDisplayManagerENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSDisplayManagerENDCLASS = QtMocHelpers::stringData(
+constexpr auto qt_meta_stringdata_CLASSDisplayManagerENDCLASS = QtMocHelpers::stringData(
     "DisplayManager",
     "frameResized",
     "",
@@ -62,93 +59,15 @@ static constexpr auto qt_meta_stringdata_CLASSDisplayManagerENDCLASS = QtMocHelp
     "_changeFieldVariable",
     "value"
 );
-#else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSDisplayManagerENDCLASS_t {
-    uint offsetsAndSizes[46];
-    char stringdata0[15];
-    char stringdata1[13];
-    char stringdata2[1];
-    char stringdata3[6];
-    char stringdata4[7];
-    char stringdata5[25];
-    char stringdata6[7];
-    char stringdata7[10];
-    char stringdata8[9];
-    char stringdata9[12];
-    char stringdata10[7];
-    char stringdata11[7];
-    char stringdata12[11];
-    char stringdata13[8];
-    char stringdata14[8];
-    char stringdata15[9];
-    char stringdata16[13];
-    char stringdata17[8];
-    char stringdata18[8];
-    char stringdata19[10];
-    char stringdata20[10];
-    char stringdata21[21];
-    char stringdata22[6];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSDisplayManagerENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSDisplayManagerENDCLASS_t qt_meta_stringdata_CLASSDisplayManagerENDCLASS = {
-    {
-        QT_MOC_LITERAL(0, 14),  // "DisplayManager"
-        QT_MOC_LITERAL(15, 12),  // "frameResized"
-        QT_MOC_LITERAL(28, 0),  // ""
-        QT_MOC_LITERAL(29, 5),  // "width"
-        QT_MOC_LITERAL(35, 6),  // "height"
-        QT_MOC_LITERAL(42, 24),  // "colorMapRedefineReceived"
-        QT_MOC_LITERAL(67, 6),  // "string"
-        QT_MOC_LITERAL(74, 9),  // "fieldName"
-        QT_MOC_LITERAL(84, 8),  // "ColorMap"
-        QT_MOC_LITERAL(93, 11),  // "newColorMap"
-        QT_MOC_LITERAL(105, 6),  // "_howto"
-        QT_MOC_LITERAL(112, 6),  // "_about"
-        QT_MOC_LITERAL(119, 10),  // "_showClick"
-        QT_MOC_LITERAL(130, 7),  // "_freeze"
-        QT_MOC_LITERAL(138, 7),  // "_unzoom"
-        QT_MOC_LITERAL(146, 8),  // "_refresh"
-        QT_MOC_LITERAL(155, 12),  // "_changeField"
-        QT_MOC_LITERAL(168, 7),  // "fieldId"
-        QT_MOC_LITERAL(176, 7),  // "guiMode"
-        QT_MOC_LITERAL(184, 9),  // "_openFile"
-        QT_MOC_LITERAL(194, 9),  // "_saveFile"
-        QT_MOC_LITERAL(204, 20),  // "_changeFieldVariable"
-        QT_MOC_LITERAL(225, 5)   // "value"
-    },
-    "DisplayManager",
-    "frameResized",
-    "",
-    "width",
-    "height",
-    "colorMapRedefineReceived",
-    "string",
-    "fieldName",
-    "ColorMap",
-    "newColorMap",
-    "_howto",
-    "_about",
-    "_showClick",
-    "_freeze",
-    "_unzoom",
-    "_refresh",
-    "_changeField",
-    "fieldId",
-    "guiMode",
-    "_openFile",
-    "_saveFile",
-    "_changeFieldVariable",
-    "value"
-};
-#undef QT_MOC_LITERAL
-#endif // !QT_MOC_HAS_STRING_DATA
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 } // unnamed namespace
 
 Q_CONSTINIT static const uint qt_meta_data_CLASSDisplayManagerENDCLASS[] = {
 
  // content:
-      11,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
       12,   14, // methods

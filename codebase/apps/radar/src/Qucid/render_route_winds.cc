@@ -128,14 +128,14 @@ void render_route_winds( Drawable xid)
        idir = (int) (dir + 2.5);
        idir -= idir % 5;
 
-      sprintf(wind_label,"Avg Wind: %03d/%.2d %s",idir,ispd,units_label);
+       snprintf(wind_label,1024,"Avg Wind: %03d/%.2d %s",idir,ispd,units_label);
       // xv_set (gd.v_win_v_win_pu->route_msg,PANEL_LABEL_STRING,wind_label,NULL);
       // xv_set (gd.v_win_v_win_pu->hazard_msg,XV_X,xv_get(gd.v_win_v_win_pu->route_msg,XV_WIDTH)+5,NULL);
 
       // Compute and display average winds along the route
       if(_params.route_add_wind_text) {
        switch(_params.route_label_style) {
-	 case Croutes_P::REGULAR_INTERVALS:
+	 case Params::ROUTE_REGULAR_INTERVALS:
 	    loop_count = (int) (gd.h_win.route.total_length / _params.route_label_interval);
 	    for(i=0; i < loop_count; i++) {
 	       // Compute the average for the interval
@@ -156,7 +156,7 @@ void render_route_winds( Drawable xid)
 	       idir = (int) (dir + 2.5);
 	       idir -= idir % 5;
 
-               sprintf(wind_label,"%03d/%.2d",idir,ispd);
+               snprintf(wind_label,1024,"%03d/%.2d",idir,ispd);
 	       font = choose_font(wind_label,100,_params.route_font_height,&xmid,&ymid);
 	       XSetFont(gd.dpy,gd.legends.route_path_color->gc,font);
 
@@ -172,7 +172,7 @@ void render_route_winds( Drawable xid)
 	    }
 	 break;
 
-	 case Croutes_P::EQUAL_DIVISIONS:
+	 case Params::ROUTE_EQUAL_DIVISIONS:
              loop_count =  _params.route_num_labels;
 	    for(i=0; i < loop_count; i++) {
 	       // Compute the average for the interval
@@ -193,7 +193,7 @@ void render_route_winds( Drawable xid)
 	       idir = (int) (dir + 2.5);
 	       idir -= idir % 5;
 
-               sprintf(wind_label,"%03d/%.2d",idir,ispd);
+               snprintf(wind_label,1024,"%03d/%.2d",idir,ispd);
 	       font = choose_font(wind_label,60,12,&xmid,&ymid);
 	       XSetFont(gd.dpy,gd.legends.route_path_color->gc,font);
 

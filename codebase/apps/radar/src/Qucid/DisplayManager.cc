@@ -466,7 +466,7 @@ void DisplayManager::_createFieldPanel()
       text[1] = '\0';
       key->setText(text);
       char text2[128];
-      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
+      snprintf(text2, 128, "Hit %s for %s, ALT-%s for filtered",
 	      text, rawField->getName().c_str(), text);
       label->setToolTip(text2);
       key->setToolTip(text2);
@@ -856,86 +856,86 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
   
   DateTime rayTime(ray->getTimeSecs());
-  sprintf(text, "%.4d/%.2d/%.2d",
+  snprintf(text, 1024, "%.4d/%.2d/%.2d",
           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
   _dateVal->setText(text);
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+  snprintf(text, 1024, "%.2d:%.2d:%.2d.%.3d",
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
           ((int) ray->getNanoSecs() / 1000000));
   _timeVal->setText(text);
   
   if (_volNumVal) {
-    _setText(text, "%d", ray->getVolumeNumber());
+    _setText(text, sizeof(text), "%d", ray->getVolumeNumber());
     _volNumVal->setText(text);
   }
   
   if (_sweepNumVal) {
-    _setText(text, "%d", ray->getSweepNumber());
+    _setText(text, sizeof(text), "%d", ray->getSweepNumber());
     _sweepNumVal->setText(text);
   }
   
   if (_fixedAngVal) {  
-    _setText(text, "%6.2f", ray->getFixedAngleDeg());
+    _setText(text, sizeof(text), "%6.2f", ray->getFixedAngleDeg());
     _fixedAngVal->setText(text);
   }
   
   if (_elevVal) {
     if (fabs(ray->getElevationDeg()) < 1000) {
-      _setText(text, "%6.2f", ray->getElevationDeg());
+      _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
       _elevVal->setText(text);
     }
   }
 
   if (_azVal) {
     if (fabs(ray->getAzimuthDeg()) < 1000) {
-      _setText(text, "%6.2f", ray->getAzimuthDeg());
+      _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
       _azVal->setText(text);
     }
   }
   
   if (_nSamplesVal) {
-    _setText(text, "%d", (int) ray->getNSamples());
+    _setText(text, sizeof(text), "%d", (int) ray->getNSamples());
     _nSamplesVal->setText(text);
   }
   
   if (_nGatesVal) {
-    _setText(text, "%d", (int) ray->getNGates());
+    _setText(text, sizeof(text), "%d", (int) ray->getNGates());
     _nGatesVal->setText(text);
   }
   
   if (_gateSpacingVal) {
-    _setText(text, "%.4f", ray->getGateSpacingKm());
+    _setText(text, sizeof(text), "%.4f", ray->getGateSpacingKm());
     _gateSpacingVal->setText(text);
   }
   
   if (_pulseWidthVal) {
-    _setText(text, "%.3f", ray->getPulseWidthUsec());
+    _setText(text, sizeof(text), "%.3f", ray->getPulseWidthUsec());
     _pulseWidthVal->setText(text);
   }
 
   if (_prfVal) {
     if (ray->getPrtMode() == Radx::PRT_MODE_FIXED) {
       if (ray->getPrtSec() <= 0) {
-        _setText(text, "%d", -9999);
+        _setText(text, sizeof(text), "%d", -9999);
       } else {
-        _setText(text, "%d", (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10);
+        _setText(text, sizeof(text), "%d", (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10);
       }
     } else {
       double prtSec = ray->getPrtSec();
       if (prtSec <= 0) {
-        _setText(text, "%d", -9999);
+        _setText(text, sizeof(text), "%d", -9999);
       } else {
         int iprt = (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10;
         double prtRatio = ray->getPrtRatio();
         if (prtRatio > 0.6 && prtRatio < 0.7) {
-          _setText(text, "%d(2/3)", iprt);
+          _setText(text, sizeof(text), "%d(2/3)", iprt);
         } else if (prtRatio < 0.775) {
-          _setText(text, "%d(3/4)", iprt);
+          _setText(text, sizeof(text), "%d(3/4)", iprt);
         } else if (prtRatio < 0.825) {
-          _setText(text, "%d(4/5)", iprt);
+          _setText(text, sizeof(text), "%d(4/5)", iprt);
         } else {
-          _setText(text, "%d", iprt);
+          _setText(text, sizeof(text), "%d", iprt);
         }
       }
     }
@@ -944,7 +944,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
 
   if (_nyquistVal) {
     if (fabs(ray->getNyquistMps()) < 1000) {
-      _setText(text, "%.1f", ray->getNyquistMps());
+      _setText(text, sizeof(text), "%.1f", ray->getNyquistMps());
       _nyquistVal->setText(text);
     }
   }
@@ -952,27 +952,27 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   if (_maxRangeVal) {
     double maxRangeData = ray->getStartRangeKm() +
       ray->getNGates() * ray->getGateSpacingKm();
-    _setText(text, "%.1f", maxRangeData);
+    _setText(text, sizeof(text), "%.1f", maxRangeData);
     _maxRangeVal->setText(text);
   }
 
   if (_unambigRangeVal) {
     if (fabs(ray->getUnambigRangeKm()) < 100000) {
-      _setText(text, "%.1f", ray->getUnambigRangeKm());
+      _setText(text, sizeof(text), "%.1f", ray->getUnambigRangeKm());
       _unambigRangeVal->setText(text);
     }
   }
   
   if (_powerHVal) {
     if (ray->getMeasXmitPowerDbmH() > -9990) {
-      _setText(text, "%.1f", ray->getMeasXmitPowerDbmH());
+      _setText(text, sizeof(text), "%.1f", ray->getMeasXmitPowerDbmH());
       _powerHVal->setText(text);
     }
   }
    
   if (_powerVVal) {
     if (ray->getMeasXmitPowerDbmV() > -9990) {
-      _setText(text, "%.1f", ray->getMeasXmitPowerDbmV());
+      _setText(text, sizeof(text), "%.1f", ray->getMeasXmitPowerDbmV());
       _powerVVal->setText(text);
     }
   }
@@ -1052,22 +1052,22 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
 
     if (_latVal) {
       _radarLat = ray->getGeoreference()->getLatitude();
-      _setText(text, "%.3f", _radarLat);
+      _setText(text, sizeof(text), "%.3f", _radarLat);
       _latVal->setText(text);
     }
      
     if (_lonVal) {
       _radarLon = ray->getGeoreference()->getLongitude();
-      _setText(text, "%.3f", _radarLon);
+      _setText(text, sizeof(text), "%.3f", _radarLon);
       _lonVal->setText(text);
     }
 
     if (_altVal) {
       _radarAltKm = ray->getGeoreference()->getAltitudeKmMsl();
       if (_altitudeInFeet) {
-        _setText(text, "%.3f", _radarAltKm / 0.3048);
+        _setText(text, sizeof(text), "%.3f", _radarAltKm / 0.3048);
       } else {
-        _setText(text, "%.3f", _radarAltKm);
+        _setText(text, sizeof(text), "%.3f", _radarAltKm);
       }
       _altVal->setText(text);
     }
@@ -1089,9 +1089,9 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     }
     
     if (_altitudeInFeet) {
-      _setText(text, "%.1f", _altRateMps / 0.3048);
+      _setText(text, sizeof(text), "%.1f", _altRateMps / 0.3048);
     } else {
-      _setText(text, "%.1f", _altRateMps);
+      _setText(text, sizeof(text), "%.1f", _altRateMps);
     }
     if (_altRateVal) {
       _altRateVal->setText(text);
@@ -1101,14 +1101,14 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
       double ewVel = ray->getGeoreference()->getEwVelocity();
       double nsVel = ray->getGeoreference()->getNsVelocity();
       double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
-      _setText(text, "%.2f", speed);
+      _setText(text, sizeof(text), "%.2f", speed);
       _speedVal->setText(text);
     }
      
     if (_headingVal) {
       double heading = ray->getGeoreference()->getHeading();
       if (heading >= 0 && heading <= 360.0) {
-        _setText(text, "%.2f", heading);
+        _setText(text, sizeof(text), "%.2f", heading);
         _headingVal->setText(text);
       }
     }
@@ -1116,31 +1116,31 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     if (_trackVal) {
       double track = ray->getGeoreference()->getTrack();
       if (track >= 0 && track <= 360.0) {
-        _setText(text, "%.2f", track);
+        _setText(text, sizeof(text), "%.2f", track);
         _trackVal->setText(text);
       }
     }
      
   } else {
     
-    _setText(text, "%.3f", _platform.getLatitudeDeg());
+    _setText(text, sizeof(text), "%.3f", _platform.getLatitudeDeg());
     if (_latVal) {
       _latVal->setText(text);
     }
     
-    _setText(text, "%.3f", _platform.getLongitudeDeg());
+    _setText(text, sizeof(text), "%.3f", _platform.getLongitudeDeg());
     if (_lonVal) {
       _lonVal->setText(text);
     }
     
     if (_altitudeInFeet) {
       if (_platform.getAltitudeKm() > -1.0) {
-        _setText(text, "%.3f", _platform.getAltitudeKm() / 0.3048);
+        _setText(text, sizeof(text), "%.3f", _platform.getAltitudeKm() / 0.3048);
       } else {
-        snprintf(text, 1024, "%s", "missing");
+        snprintf(text, sizeof(text), "%s", "missing");
       }
     } else {
-      _setText(text, "%.3f", _platform.getAltitudeKm());
+      _setText(text, sizeof(text), "%.3f", _platform.getAltitudeKm());
     }
     if (_altVal) {
       _altVal->setText(text);
@@ -1153,11 +1153,11 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   
   double sunEl, sunAz;
   _sunPosn.computePosn(ray->getTimeDouble(), sunEl, sunAz);
-  _setText(text, "%.3f", sunEl);
+  _setText(text, sizeof(text), "%.3f", sunEl);
   if (_sunElVal) {
     _sunElVal->setText(text);
   }
-  _setText(text, "%.3f", sunAz);
+  _setText(text, sizeof(text), "%.3f", sunAz);
   if (_sunAzVal) {
     _sunAzVal->setText(text);
   }
@@ -1168,24 +1168,26 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
 // set text for GUI panels
 
 void DisplayManager::_setText(char *text,
+                              size_t maxTextLen,
                               const char *format,
                               int val)
 {
   if (abs(val) < 9999) {
-    sprintf(text, format, val);
+    snprintf(text, maxTextLen, format, val);
   } else {
-    sprintf(text, format, -9999);
+    snprintf(text, maxTextLen, format, -9999);
   }
 }
 
 void DisplayManager::_setText(char *text,
+                              size_t maxTextLen,
                               const char *format,
                               double val)
 {
   if (fabs(val) < 9999) {
-    sprintf(text, format, val);
+    snprintf(text, maxTextLen, format, val);
   } else {
-    sprintf(text, format, -9999.0);
+    snprintf(text, maxTextLen, format, -9999.0);
   }
 }
 

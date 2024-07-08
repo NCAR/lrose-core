@@ -541,7 +541,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
     
     // time legend
 
-    sprintf(text, "Start time: %s", _plotStartTime.asString(3).c_str());
+    snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(3).c_str());
     legends.push_back(text);
     
     // radar and site name legend
@@ -564,17 +564,17 @@ void VertWidget::_drawOverlays(QPainter &painter)
     // field name legend
 
     // string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
-    // sprintf(text, "Field: %s", fieldName.c_str());
+    // snprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
     
     // azimuth legend
 
-    sprintf(text, "Azimuth(deg): %.2f", _meanAz);
+    snprintf(text, 1024, "Azimuth(deg): %.2f", _meanAz);
     legends.push_back(text);
 
     // nrays legend
 
-    sprintf(text, "NRays: %g", _nRays);
+    snprintf(text, 1024, "NRays: %g", _nRays);
     legends.push_back(text);
     
     painter.save();

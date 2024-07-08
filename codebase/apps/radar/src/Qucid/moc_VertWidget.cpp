@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'VertWidget.hh'
 **
-** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.2)
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,19 +10,16 @@
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
-#if __has_include(<QtCore/qtmochelpers.h>)
 #include <QtCore/qtmochelpers.h>
-#else
-QT_BEGIN_MOC_NAMESPACE
-#endif
-
 
 #include <memory>
 
+
+#include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'VertWidget.hh' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 68
-#error "This file was generated using the moc from 6.5.2. It"
+#error "This file was generated using the moc from 6.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -38,7 +35,7 @@ namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
 struct qt_meta_stringdata_CLASSVertWidgetENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSVertWidgetENDCLASS = QtMocHelpers::stringData(
+constexpr auto qt_meta_stringdata_CLASSVertWidgetENDCLASS = QtMocHelpers::stringData(
     "VertWidget",
     "severalBeamsProcessed",
     "",
@@ -52,60 +49,15 @@ static constexpr auto qt_meta_stringdata_CLASSVertWidgetENDCLASS = QtMocHelpers:
     "QPaintEvent*",
     "event"
 );
-#else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSVertWidgetENDCLASS_t {
-    uint offsetsAndSizes[24];
-    char stringdata0[11];
-    char stringdata1[22];
-    char stringdata2[1];
-    char stringdata3[11];
-    char stringdata4[6];
-    char stringdata5[8];
-    char stringdata6[7];
-    char stringdata7[6];
-    char stringdata8[7];
-    char stringdata9[11];
-    char stringdata10[13];
-    char stringdata11[6];
-};
-#define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSVertWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSVertWidgetENDCLASS_t qt_meta_stringdata_CLASSVertWidgetENDCLASS = {
-    {
-        QT_MOC_LITERAL(0, 10),  // "VertWidget"
-        QT_MOC_LITERAL(11, 21),  // "severalBeamsProcessed"
-        QT_MOC_LITERAL(33, 0),  // ""
-        QT_MOC_LITERAL(34, 10),  // "unzoomView"
-        QT_MOC_LITERAL(45, 5),  // "clear"
-        QT_MOC_LITERAL(51, 7),  // "refresh"
-        QT_MOC_LITERAL(59, 6),  // "resize"
-        QT_MOC_LITERAL(66, 5),  // "width"
-        QT_MOC_LITERAL(72, 6),  // "height"
-        QT_MOC_LITERAL(79, 10),  // "paintEvent"
-        QT_MOC_LITERAL(90, 12),  // "QPaintEvent*"
-        QT_MOC_LITERAL(103, 5)   // "event"
-    },
-    "VertWidget",
-    "severalBeamsProcessed",
-    "",
-    "unzoomView",
-    "clear",
-    "refresh",
-    "resize",
-    "width",
-    "height",
-    "paintEvent",
-    "QPaintEvent*",
-    "event"
-};
-#undef QT_MOC_LITERAL
-#endif // !QT_MOC_HAS_STRING_DATA
+#else  // !QT_MOC_HAS_STRINGDATA
+#error "qtmochelpers.h not found or too old."
+#endif // !QT_MOC_HAS_STRINGDATA
 } // unnamed namespace
 
 Q_CONSTINIT static const uint qt_meta_data_CLASSVertWidgetENDCLASS[] = {
 
  // content:
-      11,       // revision
+      12,       // revision
        0,       // classname
        0,    0, // classinfo
        6,   14, // methods

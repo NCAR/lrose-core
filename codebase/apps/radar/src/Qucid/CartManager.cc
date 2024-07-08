@@ -1909,7 +1909,7 @@ void CartManager::_changeField(int fieldId, bool guiMode)
   _selectedLabelWidget->setText(_selectedLabel.c_str());
   char text[128];
   if (_selectedField->getSelectValue() > -9990) {
-    sprintf(text, "%g %s", 
+    snprintf(text, 128, "%g %s", 
             _selectedField->getSelectValue(),
             _selectedField->getUnits().c_str());
   } else {
@@ -2068,30 +2068,30 @@ void CartManager::_locationClicked(double xkm, double ykm,
 
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
-  sprintf(text, "%.4d/%.2d/%.2d",
+  snprintf(text, 256, "%.4d/%.2d/%.2d",
           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
   _dateClicked->setText(text);
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+  snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
           ((int) (ray->getNanoSecs() / 1000000)));
   _timeClicked->setText(text);
   
-  _setText(text, "%6.2f", ray->getElevationDeg());
+  _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
   _elevClicked->setText(text);
   
-  _setText(text, "%6.2f", ray->getAzimuthDeg());
+  _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
   _azClicked->setText(text);
   
-  _setText(text, "%d", gateNum);
+  _setText(text, sizeof(text), "%d", gateNum);
   _gateNumClicked->setText(text);
   
-  _setText(text, "%6.2f", rangeKm);
+  _setText(text, sizeof(text), "%6.2f", rangeKm);
   _rangeClicked->setText(text);
 
   if (_radarAltKm > -9990) {
     double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
-    _setText(text, "%6.2f (km)", gateHtKm);
+    _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
     _altitudeClicked->setText(text);
   }
   
@@ -2119,9 +2119,9 @@ void CartManager::_locationClicked(double xkm, double ykm,
     if (fieldName == _selectedName) {
       char text[128];
       if (fabs(val) < 10000) {
-        sprintf(text, "%g %s", val, fieldUnits.c_str());
+        snprintf(text, 128, "%g %s", val, fieldUnits.c_str());
       } else {
-        sprintf(text, "%g %s", -9999.0, fieldUnits.c_str());
+        snprintf(text, 128, "%g %s", -9999.0, fieldUnits.c_str());
       }
       _valueLabel->setText(text);
     }
@@ -2136,11 +2136,11 @@ void CartManager::_locationClicked(double xkm, double ykm,
 	_fields[ii]->setSelectValue(val);
         char text[128];
         if (fabs(val) > 10000) {
-          sprintf(text, "----");
+          snprintf(text, 128, "----");
         } else if (fabs(val) > 10) {
-          sprintf(text, "%.2f", val);
+          snprintf(text, 128, "%.2f", val);
         } else {
-          sprintf(text, "%.3f", val);
+          snprintf(text, 128, "%.3f", val);
         }
         _fields[ii]->setDialogText(text);
       }
@@ -2658,7 +2658,7 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
   char dayStr[1024];
   if (_params.images_write_to_day_dir)
   {
-    sprintf(dayStr, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
+    snprintf(dayStr, 1024, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
     outputDir += PATH_DELIM;
     outputDir += dayStr;
   }
@@ -2698,7 +2698,7 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
     fileName += _params.images_file_name_delimiter;
     char timeStr[1024];
     if (_params.images_include_seconds_in_time_part) {
-      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d%.2d",
               _plotStartTime.getYear(),
               _plotStartTime.getMonth(),
               _plotStartTime.getDay(),
@@ -2706,7 +2706,7 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
               _plotStartTime.getMin(),
               _plotStartTime.getSec());
     } else {
-      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d",
               _plotStartTime.getYear(),
               _plotStartTime.getMonth(),
               _plotStartTime.getDay(),
@@ -3447,7 +3447,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   if(cur_tm.tv_sec > last_tick) {
     if(!_params.run_once_and_exit) {
       char buf[128];
-      sprintf(buf,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
+      snprintf(buf,128,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
               (int) (cur_tm.tv_sec - gd.last_event_time),
               gd.io_info.outstanding_request,
               gd.io_info.mode,

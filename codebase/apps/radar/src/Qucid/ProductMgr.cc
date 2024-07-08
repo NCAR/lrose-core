@@ -101,7 +101,7 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
       if(gd.debug1) _products[i]->setThreadingOff();
 
       char label[128];
-      sprintf(label,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
+      snprintf(label,128,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
 
       if(_params.show_data_messages) gui_label_h_frame(label,-1);
 

@@ -108,7 +108,7 @@ static int _get_color_mapping(const char *color_file_subdir,
 
 	  while(*str_ptr == ' ') str_ptr++; //skip any leading spaces
 
-	  sprintf(buf,"%s/%s",str_ptr,fname);
+	  snprintf(buf, 2048,"%s/%s",str_ptr,fname);
 
 	  // Check if its an HTTP URL
 	  if(strncasecmp(buf,"http:",5) == 0) {
@@ -137,7 +137,7 @@ static int _get_color_mapping(const char *color_file_subdir,
         } while (cfile == NULL && (str_ptr = strtok(NULL,",")) != NULL && cs_len == 0 );
 
     } else {
-	sprintf(buf,"%s",fname);
+      snprintf(buf, 2048, "%s",fname);
     }
 
     if(cfile !=NULL) {
@@ -348,7 +348,7 @@ static int _combine_color_maps(Display *dpy, Colormap cmap)
 
    // Add  colors for time ticks
    for(i=0; i < NUM_TICK_COLORS; i++) {  
-       sprintf(str_buf,"cidd.time_tick_color%d",i+1);
+     snprintf(str_buf,128,"cidd.time_tick_color%d",i+1);
        color_name = _params._time_tick_colors[i];
        STRcopy(gd.color[gd.num_colors].name,color_name,NAME_LENGTH);
        gd.legends.time_tick_color[i] = &(gd.color[gd.num_colors]);

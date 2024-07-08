@@ -137,7 +137,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
           y_gd = CLIP(y_gd,0,(mr->v_fhdr.nz -1),out_of_range_flag);
 
           if(out_of_range_flag) {
-            sprintf(text,"V X: %.2fkm   Y: %.2fkm  Is not in this data",x_dproj,ht_km);
+            snprintf(text,"V X: %.2fkm   Y: %.2fkm  Is not in this data",x_dproj,ht_km);
             gui_label_v_frame(text);
 
           } else {
@@ -150,7 +150,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
               uptr += (mr->v_fhdr.nx * y_gd) + x_gd;
               if( *ptr ==  (mr->v_mdvx->getFieldByNum(0))->getFieldHeader().missing_data_value ||
                   *ptr ==  (mr->v_mdvx->getFieldByNum(0))->getFieldHeader().bad_data_value) {
-                sprintf(text,"Bad or Missing data at this location");
+                snprintf(text,"Bad or Missing data at this location");
               } else {
                 if (mr->v_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
                   value = exp((double) *ptr);
@@ -160,7 +160,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
 
                 if(value < 0.0001 && value > -0.0001) value = 0.0; // Deal with values very close to 0  
                 double uval = *uptr * mr->v_fhdr.scale + mr->v_fhdr.bias;
-                sprintf(text,"Value: %.3g UVal: %.3g %s: %.3f km along line, %.3f %s",
+                snprintf(text,"Value: %.3g UVal: %.3g %s: %.3f km along line, %.3f %s",
                         value,uval,mr->legend_name,x_dproj,ht_km,mr->units_label_sects);
               }
               gui_label_v_frame(text);
@@ -244,7 +244,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
         // Deal with values very close to 0
         if(value  < 0.0001 && value  > -0.0001) value = 0.0;
 
-        sprintf(text,"%g",value);
+        snprintf(text,"%g",value);
         len = strlen(text);
         XTextExtents(gd.fontst[gd.prod.prod_font_num],text,len,&direct,&ascent,&descent,&overall);
         XSetFont(gd.dpy,gd.legends.foreground_color->gc,gd.ciddfont[gd.prod.prod_font_num]);

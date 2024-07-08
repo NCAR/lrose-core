@@ -53,7 +53,7 @@ void update_movie_popup()
   }
  
   /* Update the Current Frame Begin Time text */
-  sprintf(fmt_text,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
+  snprintf(fmt_text,128,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
   if(_params.use_local_timestamps) {
     strftime (text,64,fmt_text,localtime_r(&gd.movie.frame[index].time_mid,&tms));
   } else {
@@ -79,7 +79,7 @@ void update_movie_popup()
   /* update the time_interval  text */
   switch(gd.movie.climo_mode) {
     case REGULAR_INTERVAL:
-      sprintf(text,"%.2f",gd.movie.time_interval_mins);
+      snprintf(text,64,"%.2f",gd.movie.time_interval_mins);
       // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
       // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
       break;
@@ -97,7 +97,7 @@ void update_movie_popup()
   }
 
   /* update the forecast period text */
-  sprintf(text,"%.2f",gd.movie.forecast_interval);
+  snprintf(text,64,"%.2f",gd.movie.forecast_interval);
   // xv_set(gd.movie_pu->fcast_per_tx,PANEL_VALUE,text,NULL);
 
   // xv_set(gd.movie_pu->movie_frame_sl,
@@ -107,7 +107,7 @@ void update_movie_popup()
   //        NULL);
 
   /* update the start/end frames text */
-  sprintf(text,"%d",gd.movie.end_frame +1);
+  snprintf(text,64,"%d",gd.movie.end_frame +1);
   // xv_set(gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
 
   if (gd.prod_mgr) {
