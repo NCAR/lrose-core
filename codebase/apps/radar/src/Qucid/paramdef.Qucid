@@ -46,10 +46,16 @@ paramdef boolean {
 } debug2_flag;
 
 paramdef string {
-  p_default = "/tmp";
-  p_descr = "Directory for storing temporary files.";
-  p_help = "";
-} tmp_dir;
+  p_default = "/tmp/cache";
+  p_descr = "Directory for storing temporary files as a cache.";
+  p_help = "The temporary files we cache are for the maps and color scales. Below this top level directory Qucid will create subdirectories as follows:\n\t(maps) 'top_level_cache_dir/Qucid/params_file_name/maps'\n\t(color_scales) 'top_level_cache_dir/Qucid/params_file_name/color_scales'";
+} top_level_cache_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Clear the cached maps and color_scales files.";
+  p_help = "If true, the cached files will be cleared to ensure a new download.";
+} clear_cache;
 
 paramdef boolean {
   p_default = FALSE;
@@ -1644,25 +1650,23 @@ paramdef double {
 } start_ht;
 
 commentdef {
-  p_header = "Finding the maps.";
-  p_text = "";
+  p_header = "Finding the color scales.";
 }
 
 paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/color_scales";
-  p_descr = "Directory for color scales";
-  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
+  p_default = "$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales";
+  p_descr = "URLs for color scales. Use a comma-delimited list to seach in multiple locations.";
+  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
 } color_scales_url;
 
 commentdef {
-  p_header = "Finding the resources for maps/overlays, surface stations.";
-  p_text = "";
+  p_header = "Finding the maps.";
 }
 
 paramdef string {
-  p_default = "$(HOME)/git/lrose-displays/maps";
-  p_descr = "Directory for map overlays.";
-  p_help = "";
+  p_default = "$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps";
+  p_descr = "URLs for maps. Use a comma-delimited list to seach in multiple locations.";
+  p_help = "This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.";
 } maps_url;
 
 paramdef double {

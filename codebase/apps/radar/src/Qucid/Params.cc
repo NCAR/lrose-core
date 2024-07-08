@@ -632,16 +632,28 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'tmp_dir'
+    // Parameter 'top_level_cache_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("tmp_dir");
-    tt->descr = tdrpStrDup("Directory for storing temporary files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &tmp_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp");
+    tt->param_name = tdrpStrDup("top_level_cache_dir");
+    tt->descr = tdrpStrDup("Directory for storing temporary files as a cache.");
+    tt->help = tdrpStrDup("The temporary files we cache are for the maps and color scales. Below this top level directory Qucid will create subdirectories as follows:\n\t(maps) 'top_level_cache_dir/Qucid/params_file_name/maps'\n\t(color_scales) 'top_level_cache_dir/Qucid/params_file_name/color_scales'");
+    tt->val_offset = (char *) &top_level_cache_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/cache");
+    tt++;
+    
+    // Parameter 'clear_cache'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("clear_cache");
+    tt->descr = tdrpStrDup("Clear the cached maps and color_scales files.");
+    tt->help = tdrpStrDup("If true, the cached files will be cleared to ensure a new download.");
+    tt->val_offset = (char *) &clear_cache - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'register_with_procmap'
@@ -3443,7 +3455,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 28");
-    tt->comment_hdr = tdrpStrDup("Finding the maps.");
+    tt->comment_hdr = tdrpStrDup("Finding the color scales.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3453,10 +3465,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("color_scales_url");
-    tt->descr = tdrpStrDup("Directory for color scales");
-    tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
+    tt->descr = tdrpStrDup("URLs for color scales. Use a comma-delimited list to seach in multiple locations.");
+    tt->help = tdrpStrDup("This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.");
     tt->val_offset = (char *) &color_scales_url - &_start_;
-    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales");
+    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales");
     tt++;
     
     // Parameter 'Comment 29'
@@ -3464,7 +3476,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 29");
-    tt->comment_hdr = tdrpStrDup("Finding the resources for maps/overlays, surface stations.");
+    tt->comment_hdr = tdrpStrDup("Finding the maps.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3474,10 +3486,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("maps_url");
-    tt->descr = tdrpStrDup("Directory for map overlays.");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("URLs for maps. Use a comma-delimited list to seach in multiple locations.");
+    tt->help = tdrpStrDup("This can be either (a) a local directory in the file system, or (b) a remote URL using http or https.");
     tt->val_offset = (char *) &maps_url - &_start_;
-    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/maps");
+    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps");
     tt++;
     
     // Parameter 'locator_margin_km'

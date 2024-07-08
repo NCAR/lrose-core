@@ -10093,10 +10093,19 @@ cidd_font.o: cidd_font.cc cidd.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_font.o cidd_font.cc
 
 cidd_init.o: cidd_init.cc /usr/local/include/shapelib/shapefil.h \
+		/usr/local/include/toolsa/os_config.h \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/toolsa/heartbeat.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/udatetime.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/uusleep.h \
+		/usr/local/include/toolsa/ucopyright.h \
 		/usr/local/include/toolsa/DateTime.hh \
 		/usr/local/include/toolsa/DeltaTime.hh \
-		/usr/local/include/toolsa/udatetime.h \
-		/usr/local/include/toolsa/os_config.h \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
 		/usr/local/include/QtGui/qbrush.h \
@@ -10237,8 +10246,6 @@ cidd_init.o: cidd_init.cc /usr/local/include/shapelib/shapefil.h \
 		/usr/local/include/dataport/port_types.h \
 		/usr/local/include/dataport/bigend.h \
 		/usr/local/include/dataport/swap.h \
-		/usr/local/include/toolsa/mem.h \
-		/usr/local/include/toolsa/membuf.h \
 		/usr/local/include/toolsa/globals.h \
 		/usr/local/include/toolsa/str.h \
 		/usr/local/include/toolsa/ansi.h \
@@ -10254,11 +10261,6 @@ cidd_init.o: cidd_init.cc /usr/local/include/shapelib/shapefil.h \
 		/usr/local/include/toolsa/sockutil.h \
 		/usr/local/include/toolsa/servmap.h \
 		/usr/local/include/toolsa/utim.h \
-		/usr/local/include/toolsa/umisc.h \
-		/usr/local/include/toolsa/port.h \
-		/usr/local/include/toolsa/ushmem.h \
-		/usr/local/include/toolsa/uusleep.h \
-		/usr/local/include/toolsa/ucopyright.h \
 		/usr/local/include/toolsa/xdru.h \
 		/usr/local/include/rapplot/xrs.h \
 		/usr/local/include/Spdb/StationLoc.hh \
@@ -10271,8 +10273,6 @@ cidd_init.o: cidd_init.cc /usr/local/include/shapelib/shapefil.h \
 		/usr/local/include/Mdv/DsMdvx.hh \
 		/usr/local/include/Mdv/Mdvx.hh \
 		/usr/local/include/toolsa/TaFile.hh \
-		/usr/local/include/toolsa/file_io.h \
-		/usr/local/include/toolsa/heartbeat.h \
 		/usr/local/include/toolsa/MemBuf.hh \
 		/usr/local/include/Mdv/MdvxTimeList.hh \
 		/usr/local/include/Mdv/Mdvx_enums.hh \

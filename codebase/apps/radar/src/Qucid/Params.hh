@@ -621,7 +621,9 @@ public:
 
   tdrp_bool_t debug2_flag;
 
-  char* tmp_dir;
+  char* top_level_cache_dir;
+
+  tdrp_bool_t clear_cache;
 
   tdrp_bool_t register_with_procmap;
 
@@ -1487,7 +1489,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[500];
+  mutable TDRPtable _table[501];
 
   const char *_className;
 

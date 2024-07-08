@@ -124,7 +124,11 @@ public:
   int debug;        // Normal debugging flag  
   int debug1;       // More verbose debugging  flag 
   int debug2;       // Very verbose debug statements flag 
-  string tmpDir;    // directory for storing temporary files
+
+  string cacheDir;  // directory for storing cached temporary files
+  string mapCacheDir;  // directory for storing cached map files
+  string colorscaleCacheDir;  // directory for storing cached color scale files
+
   int display_projection;// Which projection CIDD Uses for display  - Enum
 
   int wsddm_mode;   // 1 =  End User/WSDDM  mode - 
@@ -299,7 +303,8 @@ Path _paramsPathUsed;
 // External reference to global data structure
 extern Global_data gd; // global data
 extern Params _params; // tdrp params
-extern Path _paramsPathUsed;
+extern
+Path _paramsPathUsed;
 #endif
 
 #endif
