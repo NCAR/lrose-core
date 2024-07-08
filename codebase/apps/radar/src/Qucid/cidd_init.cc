@@ -78,8 +78,8 @@ int init_data_space()
   UTIMstruct temp_utime;
 
   if(!gd.quiet_mode) {
-    fprintf(stderr,"Qucid: Version %s\n", CIDD_VERSION);
-    fprintf(stderr,"copyright %s\n\n", CIDD_UCOPYRIGHT);
+    fprintf(stderr,"Qucid: Version %s\n", QUCID_VERSION);
+    fprintf(stderr,"Copyright: %s\n\n", QUCID_COPYRIGHT);
   }
 
   // debugging level
@@ -2614,32 +2614,32 @@ static int _createCacheDirs()
   gd.cacheDir += PATH_DELIM;
   gd.cacheDir += "Qucid";
   gd.cacheDir += PATH_DELIM;
-  gd.cacheDir += _paramsPathUsed.getFile(); // add params file name
+  gd.cacheDir += _paramsPathRequested.getFile(); // add params file name
 
   // create it
 
-  if (ta_makedir(gd.cacheDir.c_str())) {
+  if (ta_makedir_recurse(gd.cacheDir.c_str())) {
     int err = errno;
     cerr << "ERROR - Qucid" << endl;
-    cerr << "Cannot make tmp dir: " << gd.cacheDir << endl;
+    cerr << "Cannot make cache dir: " << gd.cacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }
 
   gd.mapCacheDir = gd.cacheDir + PATH_DELIM + "maps";
-  if (ta_makedir(gd.mapCacheDir.c_str())) {
+  if (ta_makedir_recurse(gd.mapCacheDir.c_str())) {
     int err = errno;
     cerr << "ERROR - Qucid" << endl;
-    cerr << "Cannot make maps tmp dir: " << gd.mapCacheDir << endl;
+    cerr << "Cannot make maps cache dir: " << gd.mapCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }
 
   gd.colorscaleCacheDir = gd.cacheDir + PATH_DELIM + "color_scales";
-  if (ta_makedir(gd.colorscaleCacheDir.c_str())) {
+  if (ta_makedir_recurse(gd.colorscaleCacheDir.c_str())) {
     int err = errno;
     cerr << "ERROR - Qucid" << endl;
-    cerr << "Cannot make color scales tmp dir: " << gd.colorscaleCacheDir << endl;
+    cerr << "Cannot make color scales cache dir: " << gd.colorscaleCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }

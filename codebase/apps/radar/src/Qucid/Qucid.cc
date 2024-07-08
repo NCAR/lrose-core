@@ -114,6 +114,7 @@ Qucid::Qucid(int argc, char **argv) :
       OK = false;
       return;
     }
+    _paramsPathRequested = legacyParamsPath;
     _paramsPathUsed = tdrpParamsPath;
   } else {
     if (_params.loadFromArgs(argc, argv,
@@ -124,6 +125,7 @@ Qucid::Qucid(int argc, char **argv) :
       OK = false;
       return;
     }
+    _paramsPathRequested = paramsPath;
     _paramsPathUsed = paramsPath;
   }
 

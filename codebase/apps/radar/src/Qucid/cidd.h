@@ -298,13 +298,14 @@ public:
 #ifdef THIS_IS_MAIN
 Global_data gd; // global data
 Params _params; // tdrp params
+Path _paramsPathRequested;
 Path _paramsPathUsed;
 #else
 // External reference to global data structure
 extern Global_data gd; // global data
 extern Params _params; // tdrp params
-extern
-Path _paramsPathUsed;
+extern Path _paramsPathRequested;
+extern Path _paramsPathUsed;
 #endif
 
 #endif
