@@ -39,18 +39,15 @@
 #include <QErrorMessage>
 #include <QRect>
 
+#include "cidd.h"
+
 using namespace std;
 
 
 
 HorizWidget::HorizWidget(QWidget* parent,
-                         const CartManager &manager,
-                         const Params &params,
-                         const RadxPlatform &platform,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
-        CartWidget(parent, manager, params, platform,
-                   fields, haveFilteredFields)
+                         const CartManager &manager) :
+        CartWidget(parent, manager)
         
 {
 
@@ -171,7 +168,7 @@ void HorizWidget::selectVar(const size_t index)
 void HorizWidget::clearVar(const size_t index)
 {
 
-  if (index >= _fields.size()) {
+  if ((int) index >= _params.fields_n) {
     return;
   }
 
@@ -190,15 +187,16 @@ void HorizWidget::clearVar(const size_t index)
 }
 
 
+#ifdef JUNK
 /*************************************************************************
  * addBeam()
  */
 
 void HorizWidget::addBeam(const RadxRay *ray,
-                        const float start_angle,
-                        const float stop_angle,
-                        const std::vector< std::vector< double > > &beam_data,
-                        const std::vector< DisplayField* > &fields)
+                          const float start_angle,
+                          const float stop_angle,
+                          const std::vector< std::vector< double > > &beam_data,
+                          const std::vector< DisplayField* > &fields)
 {
 
   LOG(DEBUG_VERBOSE) << "enter";
@@ -323,7 +321,7 @@ void HorizWidget::addBeam(const RadxRay *ray,
 
   LOG(DEBUG_VERBOSE) << "exit";
 }
-
+#endif
 
 /*************************************************************************
  * configureRange()
@@ -792,13 +790,14 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+  int fieldNum = gd.h_win.page;
+  const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
+  _zoomWorld.drawColorScale(colorMap, painter,
                             _params.label_font_size,
                             _params.text_color);
 
   if (_archiveMode) {
-
+    
     // add legends with time, field name and elevation angle
 
     vector<string> legends;
@@ -811,14 +810,16 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     
     // radar and site name legend
 
-    string radarName(_platform.getInstrumentName());
-    if (_params.override_radar_name) {
-      radarName = _params.radar_name;
-    }
-    string siteName(_platform.getInstrumentName());
-    if (_params.override_site_name) {
-      siteName = _params.site_name;
-    }
+    string radarName("unknown");
+    // string radarName(_platform.getInstrumentName());
+    // if (_params.override_radar_name) {
+    //   radarName = _params.radar_name;
+    // }
+    string siteName("unknown");
+    // string siteName(_platform.getInstrumentName());
+    // if (_params.override_site_name) {
+    //   siteName = _params.site_name;
+    // }
     string radarSiteLabel = radarName;
     if (siteName.size() > 0 && siteName != radarName) {
       radarSiteLabel += "/";
@@ -920,11 +921,11 @@ void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
  * numBeams()
  */
 
-size_t HorizWidget::getNumBeams() const
-{
-  // return _ppiBeams.size();
-  return 0;
-}
+// size_t HorizWidget::getNumBeams() const
+// {
+//   // return _ppiBeams.size();
+//   return 0;
+// }
 
 /*************************************************************************
  * _beamIndex()

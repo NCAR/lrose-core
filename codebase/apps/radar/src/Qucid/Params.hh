@@ -1284,10 +1284,6 @@ public:
 
   show_status_t show_status_in_gui;
 
-  tdrp_bool_t override_radar_name;
-
-  char* radar_name;
-
   tdrp_bool_t display_site_name;
 
   tdrp_bool_t override_site_name;
@@ -1491,7 +1487,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[501];
+  mutable TDRPtable _table[499];
 
   const char *_className;
 

@@ -22,31 +22,26 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#include "CartManager.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
 #include <toolsa/toolsa_macros.h>
-
+#include <Radx/RadxRay.hh>
+#include "cidd.h"
 using namespace std;
 
 VertWidget::VertWidget(QWidget* parent,
-                     const CartManager &manager,
-                     const VertWindow &vertWindow,
-                     const Params &params,
-                     const RadxPlatform &platform,
-                     const vector<DisplayField *> &fields,
-                     bool haveFilteredFields) :
-        CartWidget(parent, manager, params, platform,
-                   fields, haveFilteredFields),
+                       const CartManager &manager,
+                       const VertWindow &vertWindow) :
+        CartWidget(parent, manager),
         _vertWindow(vertWindow),
         _beamsProcessed(0)
-
+        
 {
   
   _prevElev = -9999.0;
   _prevAz = -9999.0;
   _prevTime = 0;
-
+  
   if (_params.vert_display_180_degrees) {
     _aspectRatio = _params.vert_aspect_ratio * 2.0;
   } else {
@@ -100,6 +95,7 @@ VertWidget::~VertWidget()
 }
 
 
+#ifdef JUNK
 /*************************************************************************
  * addBeam()
  */
@@ -178,6 +174,7 @@ void VertWidget::addBeam(const RadxRay *ray,
   // }
 
 }
+#endif
 
 /*************************************************************************
  * configureRange()
@@ -187,7 +184,7 @@ void VertWidget::configureRange(double max_range)
 {
 
   // Save the specified values
-
+  
   _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
@@ -527,8 +524,9 @@ void VertWidget::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+  int fieldNum = gd.h_win.page;
+  const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
+  _zoomWorld.drawColorScale(colorMap, painter,
                             _params.label_font_size,
                             _params.text_color);
   
@@ -546,14 +544,16 @@ void VertWidget::_drawOverlays(QPainter &painter)
     
     // radar and site name legend
 
-    string radarName(_platform.getInstrumentName());
-    if (_params.override_radar_name) {
-      radarName = _params.radar_name;
-    }
-    string siteName(_platform.getInstrumentName());
-    if (_params.override_site_name) {
-      siteName = _params.site_name;
-    }
+    string radarName("unknown");
+    // string radarName(_platform.getInstrumentName());
+    // if (_params.override_radar_name) {
+    //   radarName = _params.radar_name;
+    // }
+    string siteName("unknown");
+    // string siteName(_platform.getInstrumentName());
+    // if (_params.override_site_name) {
+    //   siteName = _params.site_name;
+    // }
     string radarSiteLabel = radarName;
     if (siteName.size() > 0) {
       radarSiteLabel += "/";

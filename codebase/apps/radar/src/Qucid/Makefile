@@ -62,7 +62,6 @@ HDRS = \
 	Croutes_P.hh \
 	Csyprod_P.hh \
 	Cterrain_P.hh \
-	DisplayField.hh \
 	DisplayManager.hh \
 	FieldTableItem.hh \
 	HorizWidget.hh \
@@ -112,7 +111,6 @@ NORM_SRCS = \
 	Croutes_P.cc \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
-	DisplayField.cc \
 	FieldTableItem.cc \
 	LegacyParams.cc \
 	Main.cc \

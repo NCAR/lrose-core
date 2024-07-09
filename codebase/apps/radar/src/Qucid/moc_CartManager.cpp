@@ -36,18 +36,8 @@ namespace {
 struct qt_meta_stringdata_CLASSCartManagerENDCLASS_t {};
 constexpr auto qt_meta_stringdata_CLASSCartManagerENDCLASS = QtMocHelpers::stringData(
     "CartManager",
-    "colorMapRedefineReceived",
-    "",
-    "string",
-    "fieldName",
-    "ColorMap",
-    "newColorMap",
-    "gridColor",
-    "emphasisColor",
-    "annotationColor",
-    "backgroundColor",
-    "setVolume",
     "_freeze",
+    "",
     "_unzoom",
     "_refresh",
     "_changeField",
@@ -92,7 +82,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-      26,   14, // methods
+      24,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -100,60 +90,56 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSCartManagerENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    6,  170,    2, 0x0a,    1 /* Public */,
-      11,    0,  183,    2, 0x0a,    8 /* Public */,
-      12,    0,  184,    2, 0x08,    9 /* Private */,
-      13,    0,  185,    2, 0x08,   10 /* Private */,
-      14,    0,  186,    2, 0x08,   11 /* Private */,
-      15,    2,  187,    2, 0x08,   12 /* Private */,
-      15,    1,  192,    2, 0x28,   15 /* Private | MethodCloned */,
-      18,    3,  195,    2, 0x08,   17 /* Private */,
-      23,    3,  202,    2, 0x08,   21 /* Private */,
-      24,    3,  209,    2, 0x08,   25 /* Private */,
-      26,    0,  216,    2, 0x08,   29 /* Private */,
-      27,    0,  217,    2, 0x08,   30 /* Private */,
-      28,    1,  218,    2, 0x08,   31 /* Private */,
-      30,    1,  221,    2, 0x08,   33 /* Private */,
-      31,    1,  224,    2, 0x08,   35 /* Private */,
-      32,    0,  227,    2, 0x08,   37 /* Private */,
-      33,    0,  228,    2, 0x08,   38 /* Private */,
-      34,    1,  229,    2, 0x08,   39 /* Private */,
-      36,    1,  232,    2, 0x08,   41 /* Private */,
-      37,    1,  235,    2, 0x08,   43 /* Private */,
-      37,    0,  238,    2, 0x28,   45 /* Private | MethodCloned */,
-      39,    0,  239,    2, 0x08,   46 /* Private */,
-      40,    0,  240,    2, 0x08,   47 /* Private */,
-      41,    0,  241,    2, 0x08,   48 /* Private */,
-      42,    0,  242,    2, 0x08,   49 /* Private */,
-      43,    1,  243,    2, 0x08,   50 /* Private */,
+       1,    0,  158,    2, 0x08,    1 /* Private */,
+       3,    0,  159,    2, 0x08,    2 /* Private */,
+       4,    0,  160,    2, 0x08,    3 /* Private */,
+       5,    2,  161,    2, 0x08,    4 /* Private */,
+       5,    1,  166,    2, 0x28,    7 /* Private | MethodCloned */,
+       8,    3,  169,    2, 0x08,    9 /* Private */,
+      13,    3,  176,    2, 0x08,   13 /* Private */,
+      14,    3,  183,    2, 0x08,   17 /* Private */,
+      16,    0,  190,    2, 0x08,   21 /* Private */,
+      17,    0,  191,    2, 0x08,   22 /* Private */,
+      18,    1,  192,    2, 0x08,   23 /* Private */,
+      20,    1,  195,    2, 0x08,   25 /* Private */,
+      21,    1,  198,    2, 0x08,   27 /* Private */,
+      22,    0,  201,    2, 0x08,   29 /* Private */,
+      23,    0,  202,    2, 0x08,   30 /* Private */,
+      24,    1,  203,    2, 0x08,   31 /* Private */,
+      26,    1,  206,    2, 0x08,   33 /* Private */,
+      27,    1,  209,    2, 0x08,   35 /* Private */,
+      27,    0,  212,    2, 0x28,   37 /* Private | MethodCloned */,
+      29,    0,  213,    2, 0x08,   38 /* Private */,
+      30,    0,  214,    2, 0x08,   39 /* Private */,
+      31,    0,  215,    2, 0x08,   40 /* Private */,
+      32,    0,  216,    2, 0x08,   41 /* Private */,
+      33,    1,  217,    2, 0x08,   42 /* Private */,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 5, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor, QMetaType::QColor,    4,    6,    7,    8,    9,   10,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Int, QMetaType::Bool,   16,   17,
-    QMetaType::Void, QMetaType::Int,   16,
-    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   22,
-    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   22,
-    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 21,   19,   20,   25,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,   29,
-    QMetaType::Void, QMetaType::Bool,   29,
-    QMetaType::Void, QMetaType::Bool,   29,
+    QMetaType::Void, QMetaType::Int, QMetaType::Bool,    6,    7,
+    QMetaType::Void, QMetaType::Int,    6,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 11,    9,   10,   12,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 11,    9,   10,   12,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double, 0x80000000 | 11,    9,   10,   15,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   35,
-    QMetaType::Void, QMetaType::Int,   35,
-    QMetaType::Void, QMetaType::Bool,   38,
+    QMetaType::Void, QMetaType::Bool,   19,
+    QMetaType::Void, QMetaType::Bool,   19,
+    QMetaType::Void, QMetaType::Bool,   19,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   25,
+    QMetaType::Void, QMetaType::Int,   25,
+    QMetaType::Void, QMetaType::Bool,   28,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QPoint,   44,
+    QMetaType::Void, QMetaType::QPoint,   34,
 
        0        // eod
 };
@@ -167,16 +153,6 @@ Q_CONSTINIT const QMetaObject CartManager::staticMetaObject = { {
     qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSCartManagerENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<CartManager, std::true_type>,
-        // method 'colorMapRedefineReceived'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<string, std::false_type>,
-        QtPrivate::TypeAndForceComplete<ColorMap, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QColor, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QColor, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QColor, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QColor, std::false_type>,
-        // method 'setVolume'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_freeze'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_unzoom'
@@ -254,32 +230,30 @@ void CartManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         auto *_t = static_cast<CartManager *>(_o);
         (void)_t;
         switch (_id) {
-        case 0: _t->colorMapRedefineReceived((*reinterpret_cast< std::add_pointer_t<string>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<ColorMap>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QColor>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<QColor>>(_a[4])),(*reinterpret_cast< std::add_pointer_t<QColor>>(_a[5])),(*reinterpret_cast< std::add_pointer_t<QColor>>(_a[6]))); break;
-        case 1: _t->setVolume(); break;
-        case 2: _t->_freeze(); break;
-        case 3: _t->_unzoom(); break;
-        case 4: _t->_refresh(); break;
-        case 5: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 6: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 7: _t->_horizLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
-        case 8: _t->_vertLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
-        case 9: _t->_locationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
-        case 10: _t->_showFieldMenu(); break;
-        case 11: _t->_placeFieldMenu(); break;
-        case 12: _t->_setMapsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 13: _t->_setProductsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 14: _t->_setWindsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 15: _t->_showTimeControl(); break;
-        case 16: _t->_placeTimeControl(); break;
-        case 17: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 18: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 19: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 20: _t->_saveImageToFile(); break;
-        case 21: _t->_createRealtimeImageFiles(); break;
-        case 22: _t->_createArchiveImageFiles(); break;
-        case 23: _t->_createImageFilesAllLevels(); break;
-        case 24: _t->_createImageFiles(); break;
-        case 25: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
+        case 0: _t->_freeze(); break;
+        case 1: _t->_unzoom(); break;
+        case 2: _t->_refresh(); break;
+        case 3: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
+        case 4: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 5: _t->_horizLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
+        case 6: _t->_vertLocationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
+        case 7: _t->_locationClicked((*reinterpret_cast< std::add_pointer_t<double>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<double>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<const RadxRay*>>(_a[3]))); break;
+        case 8: _t->_showFieldMenu(); break;
+        case 9: _t->_placeFieldMenu(); break;
+        case 10: _t->_setMapsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 11: _t->_setProductsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 12: _t->_setWindsEnabled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 13: _t->_showTimeControl(); break;
+        case 14: _t->_placeTimeControl(); break;
+        case 15: _t->_circleRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 16: _t->_brushRadiusSliderValueChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 17: _t->_saveImageToFile((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 18: _t->_saveImageToFile(); break;
+        case 19: _t->_createRealtimeImageFiles(); break;
+        case 20: _t->_createArchiveImageFiles(); break;
+        case 21: _t->_createImageFilesAllLevels(); break;
+        case 22: _t->_createImageFiles(); break;
+        case 23: _t->ShowContextMenu((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
         default: ;
         }
     }
@@ -304,13 +278,13 @@ int CartManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 26)
+        if (_id < 24)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 26;
+        _id -= 24;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 26)
+        if (_id < 24)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 26;
+        _id -= 24;
     }
     return _id;
 }

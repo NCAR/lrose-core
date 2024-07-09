@@ -54,6 +54,8 @@
 // #include "SpreadSheetController.hh"
 // #include "BoundaryPointEditor.hh"
 
+#include "cidd.h"
+
 using namespace std;
 
 
@@ -62,18 +64,10 @@ const double CartWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double CartWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 CartWidget::CartWidget(QWidget* parent,
-                       const CartManager &manager,
-                       const Params &params,
-                       const RadxPlatform &platform,
-                       const vector<DisplayField *> &fields,
-                       bool haveFilteredFields) :
+                       const CartManager &manager) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
-        _params(params),
-        _platform(platform),
-        _fields(fields),
-        _haveFilteredFields(haveFilteredFields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),

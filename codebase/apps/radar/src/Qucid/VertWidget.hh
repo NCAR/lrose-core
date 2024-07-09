@@ -28,8 +28,7 @@
 // #include "RayLoc.hh"
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxTime.hh>
-#include <deque>
-class CartManager;
+// #include <deque>
 class VertWindow;
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
@@ -56,12 +55,8 @@ class DLL_EXPORT VertWidget : public CartWidget
    */
 
   VertWidget(QWidget* parent, 
-            const CartManager &manager,
-            const VertWindow &rhiWindow,
-            const Params &params,
-            const RadxPlatform &platform,
-            const vector<DisplayField *> &fields,
-            bool haveFilteredFields);
+             const CartManager &manager,
+             const VertWindow &vertWindow);
 
   /**
    * @brief Destructor.
@@ -88,14 +83,14 @@ class DLL_EXPORT VertWidget : public CartWidget
    * @param[in] maps           Colormaps, one for each field.
    */
 
-  void addBeam(const RadxRay *ray,
-               const std::vector< std::vector< double > > &beam_data,
-               const std::vector< DisplayField* > &fields);
+  // void addBeam(const RadxRay *ray,
+  //              const std::vector< std::vector< double > > &beam_data,
+  //              const std::vector< DisplayField* > &fields);
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
   void setArchiveMode(bool state) { _isArchiveMode = state; }
-  void setStartOfSweep(bool state) { _isStartOfSweep = state; }
+  // void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
   /**
    * @brief Select the field to display.

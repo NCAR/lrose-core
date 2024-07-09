@@ -28,6 +28,7 @@
 
 #include "CartManager.hh"
 #include "VertWindow.hh"
+#include "cidd.h"
 
 using namespace std;
 
@@ -35,17 +36,9 @@ using namespace std;
  * Constructor
  */
 
-VertWindow::VertWindow(CartManager *manager,
-                     const Params &params,
-                     const RadxPlatform &platform,
-                     const vector<DisplayField *> &fields,
-                     bool haveFilteredFields):
+VertWindow::VertWindow(CartManager *manager):
         QMainWindow(manager),
-        _manager(manager),
-        _params(params),
-        _platform(platform),
-        _fields(fields),
-        _haveFilteredFields(haveFilteredFields)
+        _manager(manager)
         
 {
   // Create the main frame which contains everything in this window
@@ -60,8 +53,7 @@ VertWindow::VertWindow(CartManager *manager,
 
   // create VERT widget
   
-  _vertWidget = new VertWidget(_main, *manager, *this,
-                             _params, _platform, _fields, _haveFilteredFields);
+  _vertWidget = new VertWidget(_main, *manager, *this);
   _vertWidget->setGrids(_params.vert_grids_on_at_startup);
   _vertWidget->setRings(_params.vert_range_rings_on_at_startup);
   _vertWidget->setAngleLines(_params.vert_elevation_lines_on_at_startup);
@@ -81,7 +73,7 @@ VertWindow::VertWindow(CartManager *manager,
   
   // Create the status panel
   
-  _createStatusPanel(params.label_font_size);
+  _createStatusPanel(_params.label_font_size);
   
   // Create the main window layout.  We need a layout so the main window can
   // contain multiple widgets.
@@ -100,8 +92,8 @@ VertWindow::VertWindow(CartManager *manager,
 
   setWindowTitle(tr("VERT"));
   setMinimumSize(200, 200);
-  setGeometry(params.vert_window_start_x, params.vert_window_start_y,
-	      params.vert_window_width, params.vert_window_height);
+  setGeometry(_params.vert_window_start_x, _params.vert_window_start_y,
+	      _params.vert_window_width, _params.vert_window_height);
 }
 
 

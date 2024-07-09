@@ -38,7 +38,7 @@
 
 #include "Qucid.hh"
 #include "CartManager.hh"
-#include "DisplayField.hh"
+// #include "DisplayField.hh"
 #include "LegacyParams.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
@@ -156,16 +156,16 @@ Qucid::Qucid(int argc, char **argv) :
 
   // set up display fields
 
-  if (_setupDisplayFields()) {
-    OK = false;
-    return;
-  }
+  // if (_setupDisplayFields()) {
+  //   OK = false;
+  //   return;
+  // }
 
   // get the display
   
   if (_setupXDisplay(argc, argv)) {
     cerr << "Cannot set up X display" << endl;
-    // OK = false;
+    OK = false;
   }
   
   // init process mapper registration
@@ -192,10 +192,10 @@ Qucid::~Qucid()
   //   delete _bscanManager;
   // }
 
-  for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-    delete _displayFields[ii];
-  }
-  _displayFields.clear();
+  // for (size_t ii = 0; ii < _displayFields.size(); ii++) {
+  //   delete _displayFields[ii];
+  // }
+  // _displayFields.clear();
 
 }
 
@@ -207,11 +207,7 @@ int Qucid::Run(QApplication &app)
 
   /* Establish color table & mappings  */
 
-  cerr << "111111111111111111" << endl;
-  
   // setup_colorscales(gd.dpy);
-  
-  cerr << "2222222222222222222" << endl;
   
   // Instantiate Symbolic products
 
@@ -225,9 +221,7 @@ int Qucid::Run(QApplication &app)
 
   // create cartesian display
   
-  cerr << "3333333333333333333" << endl;
-  
-  _cartManager = new CartManager(_params, _displayFields, false);
+  _cartManager = new CartManager;
   return _cartManager->run(app);
   
 }
@@ -264,6 +258,8 @@ int Qucid::_setupXDisplay(int argc, char **argv)
   return 0;
 
 }
+
+#ifdef NOTNOW
 
 //////////////////////////////////////////////////
 // set up field objects, with their color maps
@@ -386,4 +382,4 @@ int Qucid::_setupDisplayFields()
 
 }
 
-
+#endif

@@ -49,13 +49,9 @@ class DLL_EXPORT HorizWidget : public CartWidget
    * @param[in] parent   Parent widget.
    * @param[in] params   TDRP parameters.
    */
-
+  
   HorizWidget(QWidget* parent,
-            const CartManager &manager,
-            const Params &params,
-            const RadxPlatform &platform,
-            const vector<DisplayField *> &fields,
-            bool haveFilteredFields);
+              const CartManager &manager);
 
   /**
    * @brief Destructor.
@@ -82,20 +78,20 @@ class DLL_EXPORT HorizWidget : public CartWidget
    *                             sizes).
    * @param[in] beam_data      Vectors of data, one for each field.
    */
-
-  void addBeam(const RadxRay *ray,
-               const float start_angle, const float stop_angle,
-               const std::vector< std::vector< double > > &beam_data,
-               const std::vector< DisplayField* > &fields);
+  
+  // void addBeam(const RadxRay *ray,
+  //              const float start_angle, const float stop_angle,
+  //              const std::vector< std::vector< double > > &beam_data,
+  //              const std::vector< DisplayField* > &fields);
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
   void setArchiveMode(bool state) { _isArchiveMode = state; }
-  void setStartOfSweep(bool state) { _isStartOfSweep = state; }
+  // void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
   // get the number of beams stored in widget
 
-  size_t getNumBeams() const;
+  // size_t getNumBeams() const;
 
   /**
    * @brief Select the field to display.

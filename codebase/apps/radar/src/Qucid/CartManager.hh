@@ -45,8 +45,8 @@
 #include <string>
 #include <vector>
 
-#include "Args.hh"
-#include "Params.hh"
+// #include "Args.hh"
+// #include "Params.hh"
 #include "DisplayManager.hh"
 
 // #include "RayLoc.hh"
@@ -57,7 +57,6 @@
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
-class QApplication;
 class QActionGroup;
 class QButtonGroup;
 class QRadioButton;
@@ -73,7 +72,7 @@ class QDateTimeEdit;
 class QFileDialog;
 class QTableWidget;
 
-class DisplayField;
+// class DisplayField;
 class HorizWidget;
 class VertWidget;
 class VertWindow;
@@ -98,9 +97,10 @@ public:
 
   // constructor
   
-  CartManager(const Params &params,
-              const vector<DisplayField *> &fields,
-              bool haveFilteredFields);
+  CartManager();
+  // CartManager(const Params &params,
+  //             const vector<DisplayField *> &fields,
+  //             bool haveFilteredFields);
   
   // destructor
   
@@ -147,12 +147,12 @@ public:
 
 public slots:
 
-  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-				QColor gridColor,
-				QColor emphasisColor,
-				QColor annotationColor,
-				QColor backgroundColor);
-  void setVolume(); // const RadxVol &radarDataVolume);
+  // void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
+  //       			QColor gridColor,
+  //       			QColor emphasisColor,
+  //       			QColor annotationColor,
+  //       			QColor backgroundColor);
+  // void setVolume(); // const RadxVol &radarDataVolume);
 
 signals:
 
@@ -228,7 +228,6 @@ private:
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
-
 
   // field menu
   
@@ -328,7 +327,7 @@ private:
 
   // set top bar
 
-  virtual void _setTitleBar(const string &radarName);
+  virtual void _setTitleBar();
   
   // local methods
 

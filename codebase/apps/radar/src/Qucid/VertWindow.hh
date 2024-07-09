@@ -48,7 +48,7 @@
 #include "VertWidget.hh"
 
 class CartManager;
-class DisplayField;
+// class DisplayField;
 
 class DLL_EXPORT VertWindow : public QMainWindow
 {
@@ -67,20 +67,15 @@ public:
    *
    * @param[in] parent   The parent widget.
    */
-
-  VertWindow(CartManager *manager,
-            const Params &params,
-            const RadxPlatform &platform,
-            const vector<DisplayField *> &fields,
-            bool haveFilteredFields);
-            
+  
+  VertWindow(CartManager *manager);
 
   /**
    * @brief Destructor
    */
 
   virtual ~VertWindow();
-
+  
   // get the VERT widget
 
   VertWidget *getWidget() { return _vertWidget; }
@@ -164,19 +159,6 @@ protected:
   // the polar manager that created this window
 
   CartManager *_manager;
-
-  // params
-
-  const Params &_params;
-  
-  // instrument platform details  - platform exists in DisplayManager
-  
-  const RadxPlatform &_platform;
-  
-  // data fields
-            
-  const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
 
   /**
    * @brief The View menu.

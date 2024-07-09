@@ -91,7 +91,7 @@
 #include <Ncxx/H5x.hh>
 
 #include "CartManager.hh"
-#include "DisplayField.hh"
+// #include "DisplayField.hh"
 #include "FieldTableItem.hh"
 #include "HorizWidget.hh"
 #include "MapMenuItem.hh"
@@ -118,10 +118,8 @@ CartManager* CartManager::Instance()
 
 // Constructor
 
-CartManager::CartManager(const Params &params,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
-        DisplayManager(params, fields, haveFilteredFields),
+CartManager::CartManager() :
+        DisplayManager(),
         // _sweepManager(params),
         _vertWindowDisplayed(false)
 {
@@ -357,6 +355,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     _freezeAct->trigger();
     return;
   }
+
+#ifdef JUNK
   
   // check for short-cut keys to fields
 
@@ -394,6 +394,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     }
 
   }
+#endif
 
   // check for up/down in sweeps
 
@@ -402,8 +403,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    _horiz->setStartOfSweep(true);
-    _vert->setStartOfSweep(true);
+    // _horiz->setStartOfSweep(true);
+    // _vert->setStartOfSweep(true);
     _timeControl->_goBack1();
     
   } else if (key == Qt::Key_Right) {
@@ -411,8 +412,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    _horiz->setStartOfSweep(true);
-    _vert->setStartOfSweep(true);
+    // _horiz->setStartOfSweep(true);
+    // _vert->setStartOfSweep(true);
     _timeControl->_goFwd1();
     
   } else if (key == Qt::Key_Up) {
@@ -455,7 +456,7 @@ void CartManager::_moveUpDown()
 //////////////////////////////////////////////////
 // Set radar name in title bar
 
-void CartManager::_setTitleBar(const string &radarName)
+void CartManager::_setTitleBar()
 {
   string windowTitle = _params.horiz_frame_label;
   setWindowTitle(tr(windowTitle.c_str()));
@@ -483,16 +484,15 @@ void CartManager::_setupWindows()
 
   // configure the HORIZ
 
-  _horiz = new HorizWidget(_horizFrame, *this, _params,
-                           _platform, _fields, _haveFilteredFields);
+  _horiz = new HorizWidget(_horizFrame, *this);
 
   connect(this, &CartManager::frameResized, _horiz, &HorizWidget::resize);
   
   // Create the VERT window
 
-  _vertWindow = new VertWindow(this, _params, _platform,
-                               _fields, _haveFilteredFields);
-  _vertWindow->setRadarName(_params.radar_name);
+  _vertWindow = new VertWindow(this);
+  _vertWindow->setRadarName("unknown");
+  // _vertWindow->setRadarName(_params.radar_name);
 
   // set pointer to the vertWidget
 
@@ -513,11 +513,11 @@ void CartManager::_setupWindows()
 
   // create status panel
 
-  _createStatusPanel();
+  // _createStatusPanel();
 
   // create fields panel
   
-  _createFieldPanel();
+  // _createFieldPanel();
 
   // add widgets
 
@@ -545,7 +545,7 @@ void CartManager::_setupWindows()
 
   // title bar
 
-  _setTitleBar(_params.radar_name);
+  _setTitleBar();
   setMinimumSize(400, 400);
   // resize(_params.main_window_width, _params.main_window_height);
   resize(_params.horiz_default_width, _params.horiz_default_height);
@@ -558,7 +558,7 @@ void CartManager::_setupWindows()
   move(pos);
   
   // set up field status dialog
-  _createClickReportDialog();
+  // _createClickReportDialog();
 
   // createBoundaryEditorDialog();
 
@@ -1876,11 +1876,12 @@ void CartManager::_refresh()
 void CartManager::_changeField(int fieldId, bool guiMode)
 
 {
-  _selectedField = _fields[fieldId];
+
+  // _selectedField = _fields[fieldId];
   
   if (_params.debug) {
     cerr << "Changing to field id: " << fieldId << endl;
-    _selectedField->print(cerr);
+    // _selectedField->print(cerr);
   }
 
   // if we click the already-selected field, go back to previous field
@@ -1902,10 +1903,11 @@ void CartManager::_changeField(int fieldId, bool guiMode)
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
-  _selectedName = _selectedField->getName();
-  _selectedLabel = _selectedField->getLabel();
-  _selectedUnits = _selectedField->getUnits();
-  
+  _selectedName = gd.mrec[gd.h_win.page]->h_fhdr.field_name;
+  _selectedLabel = gd.mrec[gd.h_win.page]->h_fhdr.field_name;
+  _selectedUnits = gd.mrec[gd.h_win.page]->h_fhdr.units;
+
+#ifdef NOTYET
   _selectedLabelWidget->setText(_selectedLabel.c_str());
   char text[128];
   if (_selectedField->getSelectValue() > -9990) {
@@ -1916,10 +1918,12 @@ void CartManager::_changeField(int fieldId, bool guiMode)
     text[0] = '\0';
   }
   _valueLabel->setText(text);
+#endif
 
   // refreshBoundaries();
 }
 
+#ifdef NOTYET
 // TODO: need to add the background changed, etc. 
 void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
                                            QColor gridColor,
@@ -1972,6 +1976,7 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 
 
 }
+#endif
 
 ///////////////////////////////////////////////////
 // respond to a change in click location on the HORIZ
@@ -2094,6 +2099,8 @@ void CartManager::_locationClicked(double xkm, double ykm,
     _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
     _altitudeClicked->setText(text);
   }
+
+#ifdef NOTYET
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setSelectValue(-9999.0);
@@ -2152,6 +2159,8 @@ void CartManager::_locationClicked(double xkm, double ykm,
   
   _updateStatusPanel(ray);
 
+#endif
+  
   // write the click location to FMQ
 
   _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
@@ -2594,8 +2603,8 @@ void CartManager::_createImageFiles()
 
   // plot the data
 
-  _horiz->setStartOfSweep(true);
-  _vert->setStartOfSweep(true);
+  // _horiz->setStartOfSweep(true);
+  // _vert->setStartOfSweep(true);
   _handleArchiveData();
 
   // set times from plots
@@ -2614,6 +2623,8 @@ void CartManager::_createImageFiles()
   
   // loop through fields
 
+#ifdef NOTYET
+  
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     
     // select field
@@ -2631,6 +2642,8 @@ void CartManager::_createImageFiles()
     _saveImageToFile(false);
 
   }
+
+#endif
   
   // change field back
 
@@ -3038,7 +3051,9 @@ void CartManager::_checkForFieldChange()
 void CartManager::_handleFirstTimerEvent()
 {
 
+  cerr << "dddddddddddddddddd" << endl;
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
+  cerr << "eeeeeeeeeeeeeeeeeee" << endl;
   
   // Set the size of the second column to the size of the largest
   // label.  This should keep the column from wiggling as the values change.
@@ -3051,7 +3066,9 @@ void CartManager::_handleFirstTimerEvent()
       maxWidth = _valsRight[ii]->width();
     }
   }
-  _statusLayout->setColumnMinimumWidth(1, maxWidth);
+  cerr << "fffffffffffffffffffff _statusLayout: " << _statusLayout << endl;
+  // _statusLayout->setColumnMinimumWidth(1, maxWidth);
+  cerr << "ggggggggggggggggggggg" << endl;
   
 }
 

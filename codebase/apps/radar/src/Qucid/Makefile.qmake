@@ -1637,12 +1637,6 @@ compiler_moc_header_make_all: moc_CartManager.cpp moc_CartWidget.cpp moc_Display
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_CartManager.cpp moc_CartWidget.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapMenuItem.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 moc_CartManager.cpp: CartManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
 		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
@@ -2110,11 +2104,6 @@ moc_CartWidget.cpp: CartWidget.hh \
 		/usr/local/include/Radx/RadxRemap.hh \
 		/usr/local/include/Radx/RadxArray.hh \
 		/usr/local/include/Radx/RadxTime.hh \
-		Params.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
@@ -2127,27 +2116,11 @@ moc_CartWidget.cpp: CartWidget.hh \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h \
 		moc_predefs.h \
 		/usr/local/share/qt/libexec/moc
 	/usr/local/share/qt/libexec/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/local/share/qt/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/local/lib/QtCore.framework/Headers -I/usr/local/lib/QtCore.framework -I/usr/local/share/qt/mkspecs/macx-clang -I/usr/local/include -I/usr/local/lib/QtWidgets.framework/Headers -I/usr/local/lib/QtWidgets.framework -I/usr/local/lib/QtGui.framework/Headers -I/usr/local/lib/QtGui.framework -I/usr/local/include -I/usr/local/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/Users/dixon/lrose/include -I/usr/local/lib/QtQml.framework/Headers -I/usr/local/include/QtQmlIntegration -I/usr/local/lib/QtNetwork.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/usr/local/lib CartWidget.hh -o moc_CartWidget.cpp
 
 moc_DisplayManager.cpp: DisplayManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
 		/usr/local/include/QtGui/qbrush.h \
@@ -2597,11 +2570,6 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		/usr/local/lib/QtCore.framework/Headers/qpoint.h \
 		/usr/local/lib/QtGui.framework/Headers/QTransform \
 		/usr/local/lib/QtGui.framework/Headers/qtransform.h \
-		Params.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
@@ -2614,16 +2582,6 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h \
 		moc_predefs.h \
 		/usr/local/share/qt/libexec/moc
 	/usr/local/share/qt/libexec/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/local/share/qt/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/local/lib/QtCore.framework/Headers -I/usr/local/lib/QtCore.framework -I/usr/local/share/qt/mkspecs/macx-clang -I/usr/local/include -I/usr/local/lib/QtWidgets.framework/Headers -I/usr/local/lib/QtWidgets.framework -I/usr/local/lib/QtGui.framework/Headers -I/usr/local/lib/QtGui.framework -I/usr/local/include -I/usr/local/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/Users/dixon/lrose/include -I/usr/local/lib/QtQml.framework/Headers -I/usr/local/include/QtQmlIntegration -I/usr/local/lib/QtNetwork.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/usr/local/lib HorizWidget.hh -o moc_HorizWidget.cpp
@@ -3358,11 +3316,6 @@ moc_VertWidget.cpp: VertWidget.hh \
 		/usr/local/include/Radx/RadxRemap.hh \
 		/usr/local/include/Radx/RadxArray.hh \
 		/usr/local/include/Radx/RadxTime.hh \
-		Params.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
@@ -3375,16 +3328,6 @@ moc_VertWidget.cpp: VertWidget.hh \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h \
 		/usr/local/include/radar/BeamHeight.hh \
 		/usr/local/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
@@ -3640,11 +3583,6 @@ moc_VertWindow.cpp: VertWindow.hh \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h \
 		/usr/local/include/radar/BeamHeight.hh \
 		/usr/local/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
@@ -4532,12 +4470,6 @@ CartManager.o: CartManager.cc /usr/local/lib/QtGui.framework/Headers/QActionGrou
 		/usr/local/include/H5FDioc.h \
 		/usr/local/include/H5VLpassthru.h \
 		CartManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
 		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
@@ -4559,13 +4491,17 @@ CartManager.o: CartManager.cc /usr/local/lib/QtGui.framework/Headers/QActionGrou
 		/usr/local/include/Fmq/DsFmqMsg.hh \
 		/usr/local/include/radar/BeamHeight.hh \
 		/usr/local/include/toolsa/TaArray2D.hh \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
-		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
 		FieldTableItem.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/QTableWidgetItem \
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
 		HorizWidget.hh \
 		CartWidget.hh \
+		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
+		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QWidget \
 		/usr/local/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/lib/QtGui.framework/Headers/QResizeEvent \
@@ -4967,11 +4903,6 @@ CartWidget.o: CartWidget.cc /usr/local/include/toolsa/toolsa_macros.h \
 		/usr/local/include/Radx/RadxRemap.hh \
 		/usr/local/include/Radx/RadxArray.hh \
 		/usr/local/include/Radx/RadxTime.hh \
-		Params.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
@@ -4982,13 +4913,11 @@ CartWidget.o: CartWidget.cc /usr/local/include/toolsa/toolsa_macros.h \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
+		CartManager.hh \
+		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
 		/usr/local/include/QtGui/QPainter \
-		CartManager.hh \
-		Args.hh \
-		DisplayManager.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/QMainWindow \
 		/usr/local/lib/QtWidgets.framework/Headers/qmainwindow.h \
 		/usr/local/include/QtWidgets/qtabwidget.h \
@@ -5033,7 +4962,131 @@ CartWidget.o: CartWidget.cc /usr/local/include/toolsa/toolsa_macros.h \
 		/usr/local/include/QtWidgets/qslider.h \
 		/usr/local/include/QtWidgets/qabstractslider.h \
 		/usr/local/include/QtWidgets/qtabbar.h \
-		/usr/local/include/QtWidgets/qrubberband.h
+		/usr/local/include/QtWidgets/qrubberband.h \
+		cidd.h \
+		/usr/local/include/X11/Xlib.h \
+		/usr/local/include/X11/X.h \
+		/usr/local/include/X11/Xmd.h \
+		/usr/local/include/X11/Xfuncproto.h \
+		/usr/local/include/X11/Xosdefs.h \
+		/usr/local/include/X11/Xutil.h \
+		/usr/local/include/X11/keysym.h \
+		/usr/local/include/X11/keysymdef.h \
+		/usr/local/include/X11/Xresource.h \
+		/usr/local/include/dataport/bigend.h \
+		/usr/local/include/dataport/swap.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/globals.h \
+		/usr/local/include/toolsa/str.h \
+		/usr/local/include/toolsa/ansi.h \
+		/usr/local/include/toolsa/pmu.h \
+		/usr/local/include/toolsa/procmap.h \
+		/usr/local/include/toolsa/http.h \
+		/usr/local/include/toolsa/HttpURL.hh \
+		/usr/local/include/toolsa/pjg.h \
+		/usr/local/include/toolsa/pjg_types.h \
+		/usr/local/include/toolsa/pjg_flat.h \
+		/usr/local/include/toolsa/Path.hh \
+		/usr/local/include/toolsa/sockutil.h \
+		/usr/local/include/toolsa/servmap.h \
+		/usr/local/include/toolsa/utim.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/ucopyright.h \
+		/usr/local/include/toolsa/xdru.h \
+		/usr/local/include/rapplot/xrs.h \
+		/usr/local/include/Spdb/StationLoc.hh \
+		/usr/local/include/rapplot/xutils.h \
+		/usr/local/include/rapplot/xudr.h \
+		/usr/local/include/rapplot/rascon.h \
+		/usr/local/include/Mdv/Mdvx_typedefs.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_32.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_64.hh \
+		/usr/local/include/Mdv/DsMdvx.hh \
+		/usr/local/include/Mdv/Mdvx.hh \
+		/usr/local/include/toolsa/TaFile.hh \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/Mdv/MdvxTimeList.hh \
+		/usr/local/include/Mdv/Mdvx_enums.hh \
+		/usr/local/include/Mdv/Mdvx_constants.hh \
+		/usr/local/include/Mdv/Mdvx_read.hh \
+		/usr/local/include/Mdv/Mdvx_write.hh \
+		/usr/local/include/Mdv/Mdvx_timelist.hh \
+		/usr/local/include/Mdv/Mdvx_print.hh \
+		/usr/local/include/Mdv/Mdvx_BE.hh \
+		/usr/local/include/Mdv/Mdvx_xml.hh \
+		/usr/local/include/Mdv/Mdvx_ncf.hh \
+		/usr/local/include/Mdv/Mdvx_vsect.hh \
+		/usr/local/include/toolsa/ThreadSocket.hh \
+		/usr/local/include/Mdv/MdvxField.hh \
+		/usr/local/include/Mdv/MdvxVsectLut.hh \
+		/usr/local/include/Mdv/MdvxProj.hh \
+		/usr/local/include/euclid/PjgMath.hh \
+		/usr/local/include/euclid/Pjg.hh \
+		/usr/local/include/euclid/PjgTypes.hh \
+		/usr/local/include/euclid/sincos.h \
+		/usr/local/include/euclid/PjgAzimEquidistMath.hh \
+		/usr/local/include/euclid/PjgPolarRadarMath.hh \
+		/usr/local/include/euclid/PjgAlbersMath.hh \
+		/usr/local/include/euclid/PjgLambertAzimMath.hh \
+		/usr/local/include/euclid/PjgLambertConfMath.hh \
+		/usr/local/include/euclid/PjgLatlonMath.hh \
+		/usr/local/include/euclid/PjgPolarStereoMath.hh \
+		/usr/local/include/euclid/PjgObliqueStereoMath.hh \
+		/usr/local/include/euclid/PjgMercatorMath.hh \
+		/usr/local/include/euclid/PjgTransMercatorMath.hh \
+		/usr/local/include/euclid/PjgVertPerspMath.hh \
+		/usr/local/include/Mdv/MdvxRemapLut.hh \
+		/usr/local/include/Mdv/DsMdvxThreaded.hh \
+		/usr/local/include/Fmq/RemoteUIQueue.hh \
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
+		/usr/local/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/include/Spdb/DsSpdbThreaded.hh \
+		/usr/local/include/Spdb/DsSpdb.hh \
+		/usr/local/include/Spdb/Spdb.hh \
+		/usr/local/include/Spdb/Product_defines.hh \
+		/usr/local/include/Spdb/Spdb_typedefs.hh \
+		/usr/local/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		/usr/local/include/Spdb/Symprod.hh \
+		/usr/local/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		/usr/local/include/rapplot/gplot.h \
+		/usr/local/include/X11/Xatom.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		/usr/local/include/dsserver/DmapAccess.hh \
+		/usr/local/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		/usr/local/include/Spdb/SymprodObj.hh \
+		/usr/local/include/rapformats/station_reports.h \
+		/usr/local/include/rapformats/metar_decode.h \
+		/usr/local/include/rapformats/metar.h \
+		/usr/local/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CartWidget.o CartWidget.cc
 
 Cdraw_P.o: Cdraw_P.cc Cdraw_P.hh \
@@ -5285,12 +5338,6 @@ DisplayField.o: DisplayField.cc DisplayField.hh \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DisplayField.o DisplayField.cc
 
 DisplayManager.o: DisplayManager.cc DisplayManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
 		/usr/local/include/QtGui/qbrush.h \
@@ -5522,14 +5569,6 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		/usr/local/include/toolsa/os_config.h \
 		/usr/local/include/radar/BeamHeight.hh \
 		/usr/local/include/toolsa/TaArray2D.hh \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
-		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
-		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
 		/usr/local/lib/QtGui.framework/Headers/QActionGroup \
 		/usr/local/lib/QtGui.framework/Headers/qactiongroup.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QApplication \
@@ -5551,8 +5590,13 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/qgridlayout.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QGroupBox \
 		/usr/local/lib/QtWidgets.framework/Headers/qgroupbox.h \
+		/usr/local/include/QtWidgets/qframe.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QHBoxLayout \
 		/usr/local/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
+		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/include/QtGui/qpicture.h \
+		/usr/local/include/QtGui/qtextdocument.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QMenu \
 		/usr/local/lib/QtWidgets.framework/Headers/qmenu.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QMenuBar \
@@ -5612,7 +5656,132 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		/usr/local/include/toolsa/LogFile.hh \
 		/usr/local/include/toolsa/TaXml.hh \
 		/usr/local/include/Radx/RadxFile.hh \
-		/usr/local/include/Radx/RadxTimeList.hh
+		/usr/local/include/Radx/RadxTimeList.hh \
+		cidd.h \
+		/usr/local/include/X11/Xlib.h \
+		/usr/local/include/X11/X.h \
+		/usr/local/include/X11/Xmd.h \
+		/usr/local/include/X11/Xfuncproto.h \
+		/usr/local/include/X11/Xosdefs.h \
+		/usr/local/include/X11/Xutil.h \
+		/usr/local/include/X11/keysym.h \
+		/usr/local/include/X11/keysymdef.h \
+		/usr/local/include/X11/Xresource.h \
+		/usr/local/include/dataport/bigend.h \
+		/usr/local/include/dataport/swap.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/globals.h \
+		/usr/local/include/toolsa/str.h \
+		/usr/local/include/toolsa/ansi.h \
+		/usr/local/include/toolsa/pmu.h \
+		/usr/local/include/toolsa/procmap.h \
+		/usr/local/include/toolsa/http.h \
+		/usr/local/include/toolsa/HttpURL.hh \
+		/usr/local/include/toolsa/pjg.h \
+		/usr/local/include/toolsa/pjg_types.h \
+		/usr/local/include/toolsa/pjg_flat.h \
+		/usr/local/include/toolsa/Path.hh \
+		/usr/local/include/toolsa/sockutil.h \
+		/usr/local/include/toolsa/servmap.h \
+		/usr/local/include/toolsa/utim.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/uusleep.h \
+		/usr/local/include/toolsa/ucopyright.h \
+		/usr/local/include/toolsa/xdru.h \
+		/usr/local/include/rapplot/xrs.h \
+		/usr/local/include/Spdb/StationLoc.hh \
+		/usr/local/include/rapplot/xutils.h \
+		/usr/local/include/rapplot/xudr.h \
+		/usr/local/include/rapplot/rascon.h \
+		/usr/local/include/Mdv/Mdvx_typedefs.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_32.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_64.hh \
+		/usr/local/include/Mdv/DsMdvx.hh \
+		/usr/local/include/Mdv/Mdvx.hh \
+		/usr/local/include/toolsa/TaFile.hh \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/Mdv/MdvxTimeList.hh \
+		/usr/local/include/Mdv/Mdvx_enums.hh \
+		/usr/local/include/Mdv/Mdvx_constants.hh \
+		/usr/local/include/Mdv/Mdvx_read.hh \
+		/usr/local/include/Mdv/Mdvx_write.hh \
+		/usr/local/include/Mdv/Mdvx_timelist.hh \
+		/usr/local/include/Mdv/Mdvx_print.hh \
+		/usr/local/include/Mdv/Mdvx_BE.hh \
+		/usr/local/include/Mdv/Mdvx_xml.hh \
+		/usr/local/include/Mdv/Mdvx_ncf.hh \
+		/usr/local/include/Mdv/Mdvx_vsect.hh \
+		/usr/local/include/toolsa/ThreadSocket.hh \
+		/usr/local/include/Mdv/MdvxField.hh \
+		/usr/local/include/Mdv/MdvxVsectLut.hh \
+		/usr/local/include/Mdv/MdvxProj.hh \
+		/usr/local/include/euclid/PjgMath.hh \
+		/usr/local/include/euclid/Pjg.hh \
+		/usr/local/include/euclid/PjgTypes.hh \
+		/usr/local/include/euclid/sincos.h \
+		/usr/local/include/euclid/PjgAzimEquidistMath.hh \
+		/usr/local/include/euclid/PjgPolarRadarMath.hh \
+		/usr/local/include/euclid/PjgAlbersMath.hh \
+		/usr/local/include/euclid/PjgLambertAzimMath.hh \
+		/usr/local/include/euclid/PjgLambertConfMath.hh \
+		/usr/local/include/euclid/PjgLatlonMath.hh \
+		/usr/local/include/euclid/PjgPolarStereoMath.hh \
+		/usr/local/include/euclid/PjgObliqueStereoMath.hh \
+		/usr/local/include/euclid/PjgMercatorMath.hh \
+		/usr/local/include/euclid/PjgTransMercatorMath.hh \
+		/usr/local/include/euclid/PjgVertPerspMath.hh \
+		/usr/local/include/Mdv/MdvxRemapLut.hh \
+		/usr/local/include/Mdv/DsMdvxThreaded.hh \
+		/usr/local/include/Fmq/RemoteUIQueue.hh \
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
+		/usr/local/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/include/Spdb/DsSpdbThreaded.hh \
+		/usr/local/include/Spdb/DsSpdb.hh \
+		/usr/local/include/Spdb/Spdb.hh \
+		/usr/local/include/Spdb/Product_defines.hh \
+		/usr/local/include/Spdb/Spdb_typedefs.hh \
+		/usr/local/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		/usr/local/include/Spdb/Symprod.hh \
+		/usr/local/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		/usr/local/include/rapplot/gplot.h \
+		/usr/local/include/X11/Xatom.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		/usr/local/include/dsserver/DmapAccess.hh \
+		/usr/local/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		/usr/local/include/Spdb/SymprodObj.hh \
+		/usr/local/include/rapformats/station_reports.h \
+		/usr/local/include/rapformats/metar_decode.h \
+		/usr/local/include/rapformats/metar.h \
+		/usr/local/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DisplayManager.o DisplayManager.cc
 
 HorizWidget.o: HorizWidget.cc HorizWidget.hh \
@@ -5829,11 +5998,6 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		/usr/local/lib/QtCore.framework/Headers/qpoint.h \
 		/usr/local/lib/QtGui.framework/Headers/QTransform \
 		/usr/local/lib/QtGui.framework/Headers/qtransform.h \
-		Params.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
@@ -5846,19 +6010,12 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
+		CartManager.hh \
+		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
 		/usr/local/include/QtGui/QPainter \
 		/usr/local/include/QtGui/qpainter.h \
-		CartManager.hh \
-		Args.hh \
-		DisplayManager.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/QMainWindow \
 		/usr/local/lib/QtWidgets.framework/Headers/qmainwindow.h \
 		/usr/local/include/QtWidgets/qtabwidget.h \
@@ -5894,6 +6051,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		/usr/local/include/QtWidgets/qlistview.h \
 		/usr/local/include/QtWidgets/qabstractitemview.h \
 		/usr/local/include/QtWidgets/qabstractscrollarea.h \
+		/usr/local/include/QtWidgets/qframe.h \
 		/usr/local/include/QtCore/qabstractitemmodel.h \
 		/usr/local/include/QtCore/qitemselectionmodel.h \
 		/usr/local/include/QtWidgets/qabstractitemdelegate.h \
@@ -5916,6 +6074,10 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/qmenu.h \
 		/usr/local/lib/QtGui.framework/Headers/QAction \
 		/usr/local/lib/QtGui.framework/Headers/qaction.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
+		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/include/QtGui/qpicture.h \
+		/usr/local/include/QtGui/qtextdocument.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QLayout \
 		/usr/local/lib/QtWidgets.framework/Headers/qlayout.h \
 		/usr/local/include/QtWidgets/qlayoutitem.h \
@@ -5927,7 +6089,132 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		/usr/local/include/QtWidgets/qdialog.h \
 		/usr/local/include/QtWidgets/qdialogbuttonbox.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QErrorMessage \
-		/usr/local/lib/QtWidgets.framework/Headers/qerrormessage.h
+		/usr/local/lib/QtWidgets.framework/Headers/qerrormessage.h \
+		cidd.h \
+		/usr/local/include/X11/Xlib.h \
+		/usr/local/include/X11/X.h \
+		/usr/local/include/X11/Xmd.h \
+		/usr/local/include/X11/Xfuncproto.h \
+		/usr/local/include/X11/Xosdefs.h \
+		/usr/local/include/X11/Xutil.h \
+		/usr/local/include/X11/keysym.h \
+		/usr/local/include/X11/keysymdef.h \
+		/usr/local/include/X11/Xresource.h \
+		/usr/local/include/dataport/bigend.h \
+		/usr/local/include/dataport/swap.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/globals.h \
+		/usr/local/include/toolsa/str.h \
+		/usr/local/include/toolsa/ansi.h \
+		/usr/local/include/toolsa/pmu.h \
+		/usr/local/include/toolsa/procmap.h \
+		/usr/local/include/toolsa/http.h \
+		/usr/local/include/toolsa/HttpURL.hh \
+		/usr/local/include/toolsa/pjg.h \
+		/usr/local/include/toolsa/pjg_types.h \
+		/usr/local/include/toolsa/pjg_flat.h \
+		/usr/local/include/toolsa/Path.hh \
+		/usr/local/include/toolsa/sockutil.h \
+		/usr/local/include/toolsa/servmap.h \
+		/usr/local/include/toolsa/utim.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/uusleep.h \
+		/usr/local/include/toolsa/ucopyright.h \
+		/usr/local/include/toolsa/xdru.h \
+		/usr/local/include/rapplot/xrs.h \
+		/usr/local/include/Spdb/StationLoc.hh \
+		/usr/local/include/rapplot/xutils.h \
+		/usr/local/include/rapplot/xudr.h \
+		/usr/local/include/rapplot/rascon.h \
+		/usr/local/include/Mdv/Mdvx_typedefs.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_32.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_64.hh \
+		/usr/local/include/Mdv/DsMdvx.hh \
+		/usr/local/include/Mdv/Mdvx.hh \
+		/usr/local/include/toolsa/TaFile.hh \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/Mdv/MdvxTimeList.hh \
+		/usr/local/include/Mdv/Mdvx_enums.hh \
+		/usr/local/include/Mdv/Mdvx_constants.hh \
+		/usr/local/include/Mdv/Mdvx_read.hh \
+		/usr/local/include/Mdv/Mdvx_write.hh \
+		/usr/local/include/Mdv/Mdvx_timelist.hh \
+		/usr/local/include/Mdv/Mdvx_print.hh \
+		/usr/local/include/Mdv/Mdvx_BE.hh \
+		/usr/local/include/Mdv/Mdvx_xml.hh \
+		/usr/local/include/Mdv/Mdvx_ncf.hh \
+		/usr/local/include/Mdv/Mdvx_vsect.hh \
+		/usr/local/include/toolsa/ThreadSocket.hh \
+		/usr/local/include/Mdv/MdvxField.hh \
+		/usr/local/include/Mdv/MdvxVsectLut.hh \
+		/usr/local/include/Mdv/MdvxProj.hh \
+		/usr/local/include/euclid/PjgMath.hh \
+		/usr/local/include/euclid/Pjg.hh \
+		/usr/local/include/euclid/PjgTypes.hh \
+		/usr/local/include/euclid/sincos.h \
+		/usr/local/include/euclid/PjgAzimEquidistMath.hh \
+		/usr/local/include/euclid/PjgPolarRadarMath.hh \
+		/usr/local/include/euclid/PjgAlbersMath.hh \
+		/usr/local/include/euclid/PjgLambertAzimMath.hh \
+		/usr/local/include/euclid/PjgLambertConfMath.hh \
+		/usr/local/include/euclid/PjgLatlonMath.hh \
+		/usr/local/include/euclid/PjgPolarStereoMath.hh \
+		/usr/local/include/euclid/PjgObliqueStereoMath.hh \
+		/usr/local/include/euclid/PjgMercatorMath.hh \
+		/usr/local/include/euclid/PjgTransMercatorMath.hh \
+		/usr/local/include/euclid/PjgVertPerspMath.hh \
+		/usr/local/include/Mdv/MdvxRemapLut.hh \
+		/usr/local/include/Mdv/DsMdvxThreaded.hh \
+		/usr/local/include/Fmq/RemoteUIQueue.hh \
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
+		/usr/local/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/include/Spdb/DsSpdbThreaded.hh \
+		/usr/local/include/Spdb/DsSpdb.hh \
+		/usr/local/include/Spdb/Spdb.hh \
+		/usr/local/include/Spdb/Product_defines.hh \
+		/usr/local/include/Spdb/Spdb_typedefs.hh \
+		/usr/local/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		/usr/local/include/Spdb/Symprod.hh \
+		/usr/local/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		/usr/local/include/rapplot/gplot.h \
+		/usr/local/include/X11/Xatom.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		/usr/local/include/dsserver/DmapAccess.hh \
+		/usr/local/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		/usr/local/include/Spdb/SymprodObj.hh \
+		/usr/local/include/rapformats/station_reports.h \
+		/usr/local/include/rapformats/metar_decode.h \
+		/usr/local/include/rapformats/metar.h \
+		/usr/local/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o HorizWidget.o HorizWidget.cc
 
 MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
@@ -7242,13 +7529,6 @@ Qucid.o: Qucid.cc Qucid.hh \
 		/usr/local/include/QtWidgets/qstyle.h \
 		/usr/local/include/QtWidgets/qtabbar.h \
 		/usr/local/include/QtWidgets/qrubberband.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
-		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
-		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
 		LegacyParams.hh \
 		Cgui_P.hh \
 		cidd_params.h \
@@ -8131,7 +8411,6 @@ TimeControl.o: TimeControl.cc /usr/local/lib/QtWidgets.framework/Headers/QFrame 
 		/usr/local/include/tdrp/tdrpbuf.h \
 		/usr/local/include/tdrp/tdrp_obsolete.h \
 		CartManager.hh \
-		Args.hh \
 		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
@@ -8462,17 +8741,11 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 Uparams.o: Uparams.cc 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Uparams.o Uparams.cc
 
-VertWidget.o: VertWidget.cc CartManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
-		DisplayManager.hh \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/qbrush.h \
+VertWidget.o: VertWidget.cc VertWidget.hh \
+		CartWidget.hh \
+		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
+		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
+		/usr/local/include/QtWidgets/qtwidgetsglobal.h \
 		/usr/local/include/QtGui/qtguiglobal.h \
 		/usr/local/include/QtCore/qglobal.h \
 		/usr/local/include/QtCore/qtversionchecks.h \
@@ -8520,23 +8793,29 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/include/QtCore/qversiontagging.h \
 		/usr/local/include/QtGui/qtgui-config.h \
 		/usr/local/include/QtGui/qtguiexports.h \
-		/usr/local/include/QtCore/qlist.h \
-		/usr/local/include/QtCore/qarraydatapointer.h \
-		/usr/local/include/QtCore/qarraydataops.h \
-		/usr/local/include/QtCore/qarraydata.h \
-		/usr/local/include/QtCore/qpair.h \
-		/usr/local/include/QtCore/qcontainertools_impl.h \
-		/usr/local/include/QtCore/qxptype_traits.h \
-		/usr/local/include/QtCore/q20functional.h \
-		/usr/local/include/QtCore/q20memory.h \
+		/usr/local/include/QtWidgets/qtwidgets-config.h \
+		/usr/local/include/QtWidgets/qtwidgetsexports.h \
+		/usr/local/include/QtWidgets/qwidget.h \
+		/usr/local/include/QtGui/qwindowdefs.h \
+		/usr/local/include/QtCore/qobjectdefs.h \
 		/usr/local/include/QtCore/qnamespace.h \
 		/usr/local/include/QtCore/qtmetamacros.h \
-		/usr/local/include/QtCore/qhashfunctions.h \
+		/usr/local/include/QtCore/qobjectdefs_impl.h \
+		/usr/local/include/QtCore/qfunctionaltools_impl.h \
+		/usr/local/include/QtCore/qobject.h \
 		/usr/local/include/QtCore/qstring.h \
 		/usr/local/include/QtCore/qchar.h \
 		/usr/local/include/QtCore/qstringview.h \
 		/usr/local/include/QtCore/qbytearray.h \
 		/usr/local/include/QtCore/qrefcount.h \
+		/usr/local/include/QtCore/qarraydata.h \
+		/usr/local/include/QtCore/qpair.h \
+		/usr/local/include/QtCore/qarraydatapointer.h \
+		/usr/local/include/QtCore/qarraydataops.h \
+		/usr/local/include/QtCore/qcontainertools_impl.h \
+		/usr/local/include/QtCore/qxptype_traits.h \
+		/usr/local/include/QtCore/q20functional.h \
+		/usr/local/include/QtCore/q20memory.h \
 		/usr/local/include/QtCore/qbytearrayalgorithms.h \
 		/usr/local/include/QtCore/qbytearrayview.h \
 		/usr/local/include/QtCore/qstringfwd.h \
@@ -8550,41 +8829,20 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/include/QtCore/qstringbuilder.h \
 		/usr/local/include/QtCore/qstringconverter.h \
 		/usr/local/include/QtCore/qstringconverter_base.h \
+		/usr/local/include/QtCore/qlist.h \
+		/usr/local/include/QtCore/qhashfunctions.h \
 		/usr/local/include/QtCore/qiterator.h \
 		/usr/local/include/QtCore/qbytearraylist.h \
 		/usr/local/include/QtCore/qstringlist.h \
 		/usr/local/include/QtCore/qalgorithms.h \
 		/usr/local/include/QtCore/qstringmatcher.h \
-		/usr/local/include/QtCore/qpoint.h \
-		/usr/local/include/QtCore/q23utility.h \
+		/usr/local/include/QtCore/qcoreevent.h \
 		/usr/local/include/QtCore/qscopedpointer.h \
-		/usr/local/include/QtGui/qcolor.h \
-		/usr/local/include/QtGui/qrgb.h \
-		/usr/local/include/QtGui/qrgba64.h \
-		/usr/local/include/QtGui/qimage.h \
-		/usr/local/include/QtGui/qpaintdevice.h \
-		/usr/local/include/QtGui/qwindowdefs.h \
-		/usr/local/include/QtCore/qobjectdefs.h \
-		/usr/local/include/QtCore/qobjectdefs_impl.h \
-		/usr/local/include/QtCore/qfunctionaltools_impl.h \
-		/usr/local/include/QtCore/qrect.h \
-		/usr/local/include/QtCore/qmargins.h \
-		/usr/local/include/QtCore/qsize.h \
-		/usr/local/include/QtGui/qpixelformat.h \
-		/usr/local/include/QtGui/qtransform.h \
-		/usr/local/include/QtGui/qpolygon.h \
-		/usr/local/include/QtGui/qregion.h \
-		/usr/local/include/QtCore/qdatastream.h \
-		/usr/local/include/QtCore/qiodevicebase.h \
-		/usr/local/include/QtCore/qline.h \
-		/usr/local/include/QtGui/qpixmap.h \
-		/usr/local/include/QtCore/qshareddata.h \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h \
-		/usr/local/include/QtGui/qtextoption.h \
 		/usr/local/include/QtCore/qmetatype.h \
 		/usr/local/include/QtCore/qcompare.h \
 		/usr/local/include/QtCore/qcomparehelpers.h \
+		/usr/local/include/QtCore/qdatastream.h \
+		/usr/local/include/QtCore/qiodevicebase.h \
 		/usr/local/include/QtCore/qfloat16.h \
 		/usr/local/include/QtCore/qmath.h \
 		/usr/local/include/QtCore/qiterable.h \
@@ -8592,24 +8850,28 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/include/QtCore/qcontainerinfo.h \
 		/usr/local/include/QtCore/qtaggedpointer.h \
 		/usr/local/include/QtCore/qscopeguard.h \
-		/usr/local/include/QtGui/qpen.h \
-		/usr/local/include/QtGui/qfontinfo.h \
-		/usr/local/include/QtGui/qfont.h \
-		/usr/local/include/QtCore/qendian.h \
-		/usr/local/include/QtGui/qfontmetrics.h \
-		/usr/local/lib/QtWidgets.framework/Headers/QMainWindow \
-		/usr/local/lib/QtWidgets.framework/Headers/qmainwindow.h \
-		/usr/local/include/QtWidgets/qtwidgetsglobal.h \
-		/usr/local/include/QtWidgets/qtwidgets-config.h \
-		/usr/local/include/QtWidgets/qtwidgetsexports.h \
-		/usr/local/include/QtWidgets/qwidget.h \
-		/usr/local/include/QtCore/qobject.h \
-		/usr/local/include/QtCore/qcoreevent.h \
 		/usr/local/include/QtCore/qobject_impl.h \
 		/usr/local/include/QtCore/qbindingstorage.h \
+		/usr/local/include/QtCore/qmargins.h \
+		/usr/local/include/QtCore/q23utility.h \
 		/usr/local/include/QtGui/qaction.h \
 		/usr/local/include/QtGui/qkeysequence.h \
 		/usr/local/include/QtGui/qicon.h \
+		/usr/local/include/QtCore/qsize.h \
+		/usr/local/include/QtGui/qpixmap.h \
+		/usr/local/include/QtGui/qpaintdevice.h \
+		/usr/local/include/QtCore/qrect.h \
+		/usr/local/include/QtCore/qpoint.h \
+		/usr/local/include/QtGui/qcolor.h \
+		/usr/local/include/QtGui/qrgb.h \
+		/usr/local/include/QtGui/qrgba64.h \
+		/usr/local/include/QtCore/qshareddata.h \
+		/usr/local/include/QtGui/qimage.h \
+		/usr/local/include/QtGui/qpixelformat.h \
+		/usr/local/include/QtGui/qtransform.h \
+		/usr/local/include/QtGui/qpolygon.h \
+		/usr/local/include/QtGui/qregion.h \
+		/usr/local/include/QtCore/qline.h \
 		/usr/local/include/QtCore/qvariant.h \
 		/usr/local/include/QtCore/qdebug.h \
 		/usr/local/include/QtCore/qtextstream.h \
@@ -8622,6 +8884,11 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/include/QtCore/qhash.h \
 		/usr/local/include/QtCore/qvarlengtharray.h \
 		/usr/local/include/QtGui/qpalette.h \
+		/usr/local/include/QtGui/qbrush.h \
+		/usr/local/include/QtGui/qfont.h \
+		/usr/local/include/QtCore/qendian.h \
+		/usr/local/include/QtGui/qfontmetrics.h \
+		/usr/local/include/QtGui/qfontinfo.h \
 		/usr/local/include/QtWidgets/qsizepolicy.h \
 		/usr/local/include/QtGui/qcursor.h \
 		/usr/local/include/QtGui/qbitmap.h \
@@ -8662,67 +8929,6 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/include/QtGui/qinputmethod.h \
 		/usr/local/include/QtCore/qlocale.h \
 		/usr/local/include/QtGui/qguiapplication_platform.h \
-		/usr/local/include/QtWidgets/qtabwidget.h \
-		/usr/local/include/euclid/SunPosn.hh \
-		/usr/local/include/Radx/RadxTime.hh \
-		/usr/local/include/Radx/RadxRay.hh \
-		/usr/local/include/Radx/Radx.hh \
-		/usr/local/include/Radx/RadxRangeGeom.hh \
-		/usr/local/include/Radx/RadxField.hh \
-		/usr/local/include/Radx/RadxPacking.hh \
-		/usr/local/include/Radx/RadxBuf.hh \
-		/usr/local/include/Radx/RadxMsg.hh \
-		/usr/local/include/Radx/RadxRemap.hh \
-		/usr/local/include/Radx/RadxPlatform.hh \
-		/usr/local/include/Radx/RadxVol.hh \
-		/usr/local/include/Radx/RadxArray.hh \
-		/usr/local/include/Radx/RadxGeoref.hh \
-		/usr/local/include/radar/ClickPointFmq.hh \
-		/usr/local/include/Fmq/DsFmq.hh \
-		/usr/local/include/Fmq/Fmq.hh \
-		/usr/local/include/toolsa/compress.h \
-		/usr/local/include/dataport/port_types.h \
-		/usr/local/include/toolsa/MemBuf.hh \
-		/usr/local/include/Fmq/FmqDeviceFile.hh \
-		/usr/local/include/Fmq/FmqDevice.hh \
-		/usr/local/include/toolsa/heartbeat.h \
-		/usr/local/include/Fmq/FmqDeviceShmem.hh \
-		/usr/local/include/Fmq/DsFmqMsg.hh \
-		/usr/local/include/dsserver/DsServerMsg.hh \
-		/usr/local/include/didss/DsMessage.hh \
-		/usr/local/include/didss/ds_message.h \
-		/usr/local/include/didss/DsURL.hh \
-		/usr/local/include/toolsa/URL.hh \
-		/usr/local/include/toolsa/Socket.hh \
-		/usr/local/include/toolsa/SockUtil.hh \
-		/usr/local/include/toolsa/DateTime.hh \
-		/usr/local/include/toolsa/DeltaTime.hh \
-		/usr/local/include/toolsa/udatetime.h \
-		/usr/local/include/toolsa/os_config.h \
-		/usr/local/include/radar/BeamHeight.hh \
-		/usr/local/include/toolsa/TaArray2D.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QListWidgetItem \
-		/usr/local/lib/QtWidgets.framework/Headers/qlistwidget.h \
-		/usr/local/include/QtWidgets/qlistview.h \
-		/usr/local/include/QtWidgets/qabstractitemview.h \
-		/usr/local/include/QtWidgets/qabstractscrollarea.h \
-		/usr/local/include/QtWidgets/qframe.h \
-		/usr/local/include/QtCore/qabstractitemmodel.h \
-		/usr/local/include/QtCore/qitemselectionmodel.h \
-		/usr/local/include/QtWidgets/qabstractitemdelegate.h \
-		/usr/local/include/QtWidgets/qstyleoption.h \
-		/usr/local/include/QtWidgets/qabstractspinbox.h \
-		/usr/local/include/QtGui/qvalidator.h \
-		/usr/local/include/QtCore/qregularexpression.h \
-		/usr/local/include/QtWidgets/qslider.h \
-		/usr/local/include/QtWidgets/qabstractslider.h \
-		/usr/local/include/QtWidgets/qstyle.h \
-		/usr/local/include/QtWidgets/qtabbar.h \
-		/usr/local/include/QtWidgets/qrubberband.h \
-		VertWidget.hh \
-		CartWidget.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
-		/usr/local/lib/QtWidgets.framework/Headers/qdialog.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QWidget \
 		/usr/local/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/lib/QtGui.framework/Headers/QResizeEvent \
@@ -8738,21 +8944,31 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/lib/QtCore.framework/Headers/qpoint.h \
 		/usr/local/lib/QtGui.framework/Headers/QTransform \
 		/usr/local/lib/QtGui.framework/Headers/qtransform.h \
+		/usr/local/include/Radx/RadxPlatform.hh \
+		/usr/local/include/Radx/Radx.hh \
+		/usr/local/include/Radx/RadxVol.hh \
+		/usr/local/include/Radx/RadxField.hh \
+		/usr/local/include/Radx/RadxRangeGeom.hh \
+		/usr/local/include/Radx/RadxPacking.hh \
+		/usr/local/include/Radx/RadxBuf.hh \
+		/usr/local/include/Radx/RadxMsg.hh \
+		/usr/local/include/Radx/RadxRemap.hh \
+		/usr/local/include/Radx/RadxArray.hh \
+		/usr/local/include/Radx/RadxTime.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		/usr/local/lib/QtGui.framework/Headers/QPainter \
 		/usr/local/lib/QtGui.framework/Headers/qpainter.h \
+		/usr/local/include/QtGui/qtextoption.h \
+		/usr/local/include/QtGui/qpen.h \
 		/usr/local/lib/QtCore.framework/Headers/QRect \
 		/usr/local/lib/QtCore.framework/Headers/qrect.h \
 		/usr/local/lib/QtGui.framework/Headers/QColor \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
-		/usr/local/include/QtGui/qpicture.h \
-		/usr/local/include/QtGui/qtextdocument.h \
+		/usr/local/include/radar/BeamHeight.hh \
+		/usr/local/include/toolsa/TaArray2D.hh \
 		VertWindow.hh \
 		/usr/local/lib/QtGui.framework/Headers/QAction \
 		/usr/local/lib/QtGui.framework/Headers/qaction.h \
@@ -8760,10 +8976,165 @@ VertWidget.o: VertWidget.cc CartManager.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/qframe.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QGroupBox \
 		/usr/local/lib/QtWidgets.framework/Headers/qgroupbox.h \
+		/usr/local/include/QtWidgets/qframe.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
+		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h \
+		/usr/local/include/QtGui/qpicture.h \
+		/usr/local/include/QtGui/qtextdocument.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QMainWindow \
+		/usr/local/lib/QtWidgets.framework/Headers/qmainwindow.h \
+		/usr/local/include/QtWidgets/qtabwidget.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QMenuBar \
 		/usr/local/lib/QtWidgets.framework/Headers/qmenubar.h \
 		/usr/local/include/QtWidgets/qmenu.h \
-		/usr/local/include/toolsa/toolsa_macros.h
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
+		/usr/local/include/toolsa/toolsa_macros.h \
+		/usr/local/include/Radx/RadxRay.hh \
+		cidd.h \
+		/usr/local/include/X11/Xlib.h \
+		/usr/local/include/X11/X.h \
+		/usr/local/include/X11/Xmd.h \
+		/usr/local/include/X11/Xfuncproto.h \
+		/usr/local/include/X11/Xosdefs.h \
+		/usr/local/include/X11/Xutil.h \
+		/usr/local/include/X11/keysym.h \
+		/usr/local/include/X11/keysymdef.h \
+		/usr/local/include/X11/Xresource.h \
+		/usr/local/include/dataport/port_types.h \
+		/usr/local/include/dataport/bigend.h \
+		/usr/local/include/dataport/swap.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/globals.h \
+		/usr/local/include/toolsa/os_config.h \
+		/usr/local/include/toolsa/str.h \
+		/usr/local/include/toolsa/ansi.h \
+		/usr/local/include/toolsa/pmu.h \
+		/usr/local/include/toolsa/procmap.h \
+		/usr/local/include/toolsa/http.h \
+		/usr/local/include/toolsa/HttpURL.hh \
+		/usr/local/include/toolsa/URL.hh \
+		/usr/local/include/toolsa/pjg.h \
+		/usr/local/include/toolsa/pjg_types.h \
+		/usr/local/include/toolsa/pjg_flat.h \
+		/usr/local/include/toolsa/Path.hh \
+		/usr/local/include/toolsa/DateTime.hh \
+		/usr/local/include/toolsa/DeltaTime.hh \
+		/usr/local/include/toolsa/udatetime.h \
+		/usr/local/include/toolsa/sockutil.h \
+		/usr/local/include/toolsa/servmap.h \
+		/usr/local/include/toolsa/utim.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/uusleep.h \
+		/usr/local/include/toolsa/ucopyright.h \
+		/usr/local/include/toolsa/xdru.h \
+		/usr/local/include/rapplot/xrs.h \
+		/usr/local/include/Spdb/StationLoc.hh \
+		/usr/local/include/rapplot/xutils.h \
+		/usr/local/include/rapplot/xudr.h \
+		/usr/local/include/rapplot/rascon.h \
+		/usr/local/include/Mdv/Mdvx_typedefs.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_32.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_64.hh \
+		/usr/local/include/Mdv/DsMdvx.hh \
+		/usr/local/include/Mdv/Mdvx.hh \
+		/usr/local/include/toolsa/TaFile.hh \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/toolsa/heartbeat.h \
+		/usr/local/include/toolsa/MemBuf.hh \
+		/usr/local/include/Mdv/MdvxTimeList.hh \
+		/usr/local/include/Mdv/Mdvx_enums.hh \
+		/usr/local/include/Mdv/Mdvx_constants.hh \
+		/usr/local/include/Mdv/Mdvx_read.hh \
+		/usr/local/include/Mdv/Mdvx_write.hh \
+		/usr/local/include/Mdv/Mdvx_timelist.hh \
+		/usr/local/include/Mdv/Mdvx_print.hh \
+		/usr/local/include/Mdv/Mdvx_BE.hh \
+		/usr/local/include/Mdv/Mdvx_xml.hh \
+		/usr/local/include/Mdv/Mdvx_ncf.hh \
+		/usr/local/include/Mdv/Mdvx_vsect.hh \
+		/usr/local/include/didss/DsURL.hh \
+		/usr/local/include/toolsa/ThreadSocket.hh \
+		/usr/local/include/toolsa/Socket.hh \
+		/usr/local/include/toolsa/SockUtil.hh \
+		/usr/local/include/Mdv/MdvxField.hh \
+		/usr/local/include/Mdv/MdvxVsectLut.hh \
+		/usr/local/include/Mdv/MdvxProj.hh \
+		/usr/local/include/euclid/PjgMath.hh \
+		/usr/local/include/euclid/Pjg.hh \
+		/usr/local/include/euclid/PjgTypes.hh \
+		/usr/local/include/euclid/sincos.h \
+		/usr/local/include/euclid/PjgAzimEquidistMath.hh \
+		/usr/local/include/euclid/PjgPolarRadarMath.hh \
+		/usr/local/include/euclid/PjgAlbersMath.hh \
+		/usr/local/include/euclid/PjgLambertAzimMath.hh \
+		/usr/local/include/euclid/PjgLambertConfMath.hh \
+		/usr/local/include/euclid/PjgLatlonMath.hh \
+		/usr/local/include/euclid/PjgPolarStereoMath.hh \
+		/usr/local/include/euclid/PjgObliqueStereoMath.hh \
+		/usr/local/include/euclid/PjgMercatorMath.hh \
+		/usr/local/include/euclid/PjgTransMercatorMath.hh \
+		/usr/local/include/euclid/PjgVertPerspMath.hh \
+		/usr/local/include/Mdv/MdvxRemapLut.hh \
+		/usr/local/include/Mdv/DsMdvxThreaded.hh \
+		/usr/local/include/Fmq/RemoteUIQueue.hh \
+		/usr/local/include/Fmq/DsFmq.hh \
+		/usr/local/include/Fmq/Fmq.hh \
+		/usr/local/include/toolsa/compress.h \
+		/usr/local/include/Fmq/FmqDeviceFile.hh \
+		/usr/local/include/Fmq/FmqDevice.hh \
+		/usr/local/include/Fmq/FmqDeviceShmem.hh \
+		/usr/local/include/Fmq/DsFmqMsg.hh \
+		/usr/local/include/dsserver/DsServerMsg.hh \
+		/usr/local/include/didss/DsMessage.hh \
+		/usr/local/include/didss/ds_message.h \
+		/usr/local/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/include/Spdb/DsSpdbThreaded.hh \
+		/usr/local/include/Spdb/DsSpdb.hh \
+		/usr/local/include/Spdb/Spdb.hh \
+		/usr/local/include/Spdb/Product_defines.hh \
+		/usr/local/include/Spdb/Spdb_typedefs.hh \
+		/usr/local/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		/usr/local/include/Spdb/Symprod.hh \
+		/usr/local/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		/usr/local/include/rapplot/gplot.h \
+		/usr/local/include/X11/Xatom.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		/usr/local/include/dsserver/DmapAccess.hh \
+		/usr/local/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		/usr/local/include/Spdb/SymprodObj.hh \
+		/usr/local/include/rapformats/station_reports.h \
+		/usr/local/include/rapformats/metar_decode.h \
+		/usr/local/include/rapformats/metar.h \
+		/usr/local/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWidget.o VertWidget.cc
 
 VertWindow.o: VertWindow.cc /usr/local/lib/QtWidgets.framework/Headers/QHBoxLayout \
@@ -8962,12 +9333,6 @@ VertWindow.o: VertWindow.cc /usr/local/lib/QtWidgets.framework/Headers/QHBoxLayo
 		/usr/local/include/QtGui/qpicture.h \
 		/usr/local/include/QtGui/qtextdocument.h \
 		CartManager.hh \
-		Args.hh \
-		/usr/local/include/tdrp/tdrp.h \
-		/usr/local/include/tdrp/tdrp_p.h \
-		/usr/local/include/tdrp/tdrpbuf.h \
-		/usr/local/include/tdrp/tdrp_obsolete.h \
-		Params.hh \
 		DisplayManager.hh \
 		/usr/local/include/qtplot/ColorMap.hh \
 		/usr/local/include/QtGui/QBrush \
@@ -9043,6 +9408,11 @@ VertWindow.o: VertWindow.cc /usr/local/lib/QtWidgets.framework/Headers/QHBoxLayo
 		/usr/local/lib/QtWidgets.framework/Headers/QMenuBar \
 		/usr/local/lib/QtWidgets.framework/Headers/qmenubar.h \
 		/usr/local/include/QtWidgets/qmenu.h \
+		Params.hh \
+		/usr/local/include/tdrp/tdrp.h \
+		/usr/local/include/tdrp/tdrp_p.h \
+		/usr/local/include/tdrp/tdrpbuf.h \
+		/usr/local/include/tdrp/tdrp_obsolete.h \
 		VertWidget.hh \
 		CartWidget.hh \
 		/usr/local/lib/QtWidgets.framework/Headers/QDialog \
@@ -9072,7 +9442,127 @@ VertWindow.o: VertWindow.cc /usr/local/lib/QtWidgets.framework/Headers/QHBoxLayo
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		DisplayField.hh
+		cidd.h \
+		/usr/local/include/X11/Xlib.h \
+		/usr/local/include/X11/X.h \
+		/usr/local/include/X11/Xmd.h \
+		/usr/local/include/X11/Xfuncproto.h \
+		/usr/local/include/X11/Xosdefs.h \
+		/usr/local/include/X11/Xutil.h \
+		/usr/local/include/X11/keysym.h \
+		/usr/local/include/X11/keysymdef.h \
+		/usr/local/include/X11/Xresource.h \
+		/usr/local/include/dataport/bigend.h \
+		/usr/local/include/dataport/swap.h \
+		/usr/local/include/toolsa/mem.h \
+		/usr/local/include/toolsa/membuf.h \
+		/usr/local/include/toolsa/globals.h \
+		/usr/local/include/toolsa/str.h \
+		/usr/local/include/toolsa/ansi.h \
+		/usr/local/include/toolsa/pmu.h \
+		/usr/local/include/toolsa/procmap.h \
+		/usr/local/include/toolsa/http.h \
+		/usr/local/include/toolsa/HttpURL.hh \
+		/usr/local/include/toolsa/pjg.h \
+		/usr/local/include/toolsa/pjg_types.h \
+		/usr/local/include/toolsa/pjg_flat.h \
+		/usr/local/include/toolsa/Path.hh \
+		/usr/local/include/toolsa/sockutil.h \
+		/usr/local/include/toolsa/servmap.h \
+		/usr/local/include/toolsa/utim.h \
+		/usr/local/include/toolsa/umisc.h \
+		/usr/local/include/toolsa/port.h \
+		/usr/local/include/toolsa/ushmem.h \
+		/usr/local/include/toolsa/uusleep.h \
+		/usr/local/include/toolsa/ucopyright.h \
+		/usr/local/include/toolsa/xdru.h \
+		/usr/local/include/rapplot/xrs.h \
+		/usr/local/include/Spdb/StationLoc.hh \
+		/usr/local/include/rapplot/xutils.h \
+		/usr/local/include/rapplot/xudr.h \
+		/usr/local/include/rapplot/rascon.h \
+		/usr/local/include/Mdv/Mdvx_typedefs.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_32.hh \
+		/usr/local/include/Mdv/Mdvx_typedefs_64.hh \
+		/usr/local/include/Mdv/DsMdvx.hh \
+		/usr/local/include/Mdv/Mdvx.hh \
+		/usr/local/include/toolsa/TaFile.hh \
+		/usr/local/include/toolsa/file_io.h \
+		/usr/local/include/Mdv/MdvxTimeList.hh \
+		/usr/local/include/Mdv/Mdvx_enums.hh \
+		/usr/local/include/Mdv/Mdvx_constants.hh \
+		/usr/local/include/Mdv/Mdvx_read.hh \
+		/usr/local/include/Mdv/Mdvx_write.hh \
+		/usr/local/include/Mdv/Mdvx_timelist.hh \
+		/usr/local/include/Mdv/Mdvx_print.hh \
+		/usr/local/include/Mdv/Mdvx_BE.hh \
+		/usr/local/include/Mdv/Mdvx_xml.hh \
+		/usr/local/include/Mdv/Mdvx_ncf.hh \
+		/usr/local/include/Mdv/Mdvx_vsect.hh \
+		/usr/local/include/toolsa/ThreadSocket.hh \
+		/usr/local/include/Mdv/MdvxField.hh \
+		/usr/local/include/Mdv/MdvxVsectLut.hh \
+		/usr/local/include/Mdv/MdvxProj.hh \
+		/usr/local/include/euclid/PjgMath.hh \
+		/usr/local/include/euclid/Pjg.hh \
+		/usr/local/include/euclid/PjgTypes.hh \
+		/usr/local/include/euclid/sincos.h \
+		/usr/local/include/euclid/PjgAzimEquidistMath.hh \
+		/usr/local/include/euclid/PjgPolarRadarMath.hh \
+		/usr/local/include/euclid/PjgAlbersMath.hh \
+		/usr/local/include/euclid/PjgLambertAzimMath.hh \
+		/usr/local/include/euclid/PjgLambertConfMath.hh \
+		/usr/local/include/euclid/PjgLatlonMath.hh \
+		/usr/local/include/euclid/PjgPolarStereoMath.hh \
+		/usr/local/include/euclid/PjgObliqueStereoMath.hh \
+		/usr/local/include/euclid/PjgMercatorMath.hh \
+		/usr/local/include/euclid/PjgTransMercatorMath.hh \
+		/usr/local/include/euclid/PjgVertPerspMath.hh \
+		/usr/local/include/Mdv/MdvxRemapLut.hh \
+		/usr/local/include/Mdv/DsMdvxThreaded.hh \
+		/usr/local/include/Fmq/RemoteUIQueue.hh \
+		/usr/local/include/rapformats/coord_export.h \
+		cidd_macros.h \
+		cidd_structs.h \
+		cidd_colorscales.h \
+		cidd_field_data.h \
+		cidd_data_io.h \
+		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/include/Spdb/DsSpdbThreaded.hh \
+		/usr/local/include/Spdb/DsSpdb.hh \
+		/usr/local/include/Spdb/Spdb.hh \
+		/usr/local/include/Spdb/Product_defines.hh \
+		/usr/local/include/Spdb/Spdb_typedefs.hh \
+		/usr/local/include/Spdb/DsSpdbMsg.hh \
+		SymprodRender.hh \
+		/usr/local/include/Spdb/Symprod.hh \
+		/usr/local/include/Spdb/Symprod_typedefs.hh \
+		RenderContext.hh \
+		/usr/local/include/rapplot/gplot.h \
+		/usr/local/include/toolsa/toolsa_macros.h \
+		/usr/local/include/X11/Xatom.h \
+		cidd_winds.h \
+		cidd_contours.h \
+		cidd_movies.h \
+		cidd_overlays.h \
+		cidd_products.h \
+		cidd_layers.h \
+		Croutes_P.hh \
+		cidd_windows.h \
+		cidd_legend.h \
+		cidd_funcs.h \
+		ProductMgr.hh \
+		/usr/local/include/dsserver/DmapAccess.hh \
+		/usr/local/include/dsserver/DmapMessage.hh \
+		SymprodRenderObj.hh \
+		/usr/local/include/Spdb/SymprodObj.hh \
+		/usr/local/include/rapformats/station_reports.h \
+		/usr/local/include/rapformats/metar_decode.h \
+		/usr/local/include/rapformats/metar.h \
+		/usr/local/include/rapformats/nws_oso_local.h \
+		TimePlot.hh \
+		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWindow.o VertWindow.cc
 
 WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \

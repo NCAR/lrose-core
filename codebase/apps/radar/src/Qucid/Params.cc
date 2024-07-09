@@ -6013,30 +6013,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'override_radar_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_name");
-    tt->descr = tdrpStrDup("Option to override radar name in the data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &override_radar_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name");
-    tt->descr = tdrpStrDup("Radar name if overridden.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
-    tt++;
-    
     // Parameter 'display_site_name'
     // ctype is 'tdrp_bool_t'
     

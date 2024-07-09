@@ -2926,15 +2926,15 @@ commentdef {
   p_header = "NAMES AND LABELS";
 }
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override radar name in the data.";
-} override_radar_name;
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Option to override radar name in the data.";
+// } override_radar_name;
 
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Radar name if overridden.";
-} radar_name;
+// paramdef string {
+//   p_default = "SPOL";
+//   p_descr = "Radar name if overridden.";
+// } radar_name;
 
 paramdef boolean {
   p_default = FALSE;

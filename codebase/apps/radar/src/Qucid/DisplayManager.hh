@@ -42,8 +42,8 @@
 #include <string>
 #include <vector>
 
-#include "Args.hh"
-#include "Params.hh"
+// #include "Args.hh"
+// #include "Params.hh"
 #include <qtplot/ColorMap.hh>
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
@@ -70,8 +70,6 @@ class QLineEdit;
 class QSlider;
 class QWidget;
 
-class DisplayField;
-
 class DisplayManager : public QMainWindow {
   
   Q_OBJECT
@@ -80,9 +78,7 @@ public:
 
   // constructor
   
-  DisplayManager(const Params &params,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields);
+  DisplayManager();
   
   // destructor
   
@@ -97,8 +93,8 @@ public:
   const string &getSelectedFieldLabel() const { return _selectedLabel; }
   const string &getSelectedFieldName() const { return _selectedName; }
   const string &getSelectedFieldUnits() const { return _selectedUnits; }
-  const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
-  const vector<DisplayField *> &getDisplayFields() const { return _fields; }
+  // const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
+  // const vector<DisplayField *> &getDisplayFields() const { return _fields; }
 
   // location
 
@@ -114,8 +110,7 @@ public:
 
 public slots:
 
-  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
-
+  // void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
 
 signals:
 
@@ -135,7 +130,7 @@ signals:
   
 protected:
   
-  const Params &_params;
+  // const Params &_params;
   
   // instrument platform details 
 
@@ -150,8 +145,8 @@ protected:
 
   // data fields
 
-  vector<DisplayField *> _fields;
-  bool _haveFilteredFields;
+  // vector<DisplayField *> _fields;
+  // bool _haveFilteredFields;
 
   // windows
 
@@ -235,7 +230,7 @@ protected:
   QLabel *_selectedLabelWidget;
   QButtonGroup *_fieldGroup;
   vector<QRadioButton *> _fieldButtons;
-  DisplayField *_selectedField;
+  // DisplayField *_selectedField;
   string _selectedName;
   string _selectedLabel;
   string _selectedUnits;
@@ -264,14 +259,14 @@ protected:
 
   // set top bar
 
-  virtual void _setTitleBar(const string &radarName) = 0;
+  virtual void _setTitleBar() = 0;
 
   // panels
   
-  void _createStatusPanel();
-  void _createFieldPanel();
-  void _createClickReportDialog();
-  void _updateStatusPanel(const RadxRay *ray);
+  // void _createStatusPanel();
+  // void _createFieldPanel();
+  // void _createClickReportDialog();
+  // void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
 
   // setting text
@@ -281,34 +276,34 @@ protected:
   
   // adding vals / labels
 
-  QLabel *_newLabelRight(const string &text);
+  // QLabel *_newLabelRight(const string &text);
 
-  QLabel *_createStatusVal(const string &leftLabel,
-                           const string &rightLabel,
-                           int row, 
-                           int fontSize,
-                           QLabel **label = NULL);
+  // QLabel *_createStatusVal(const string &leftLabel,
+  //                          const string &rightLabel,
+  //                          int row, 
+  //                          int fontSize,
+  //                          QLabel **label = NULL);
   
-  QLabel *_addLabelRow(QWidget *widget,
-                       QGridLayout *layout,
-                       const string &leftLabel,
-                       const string &rightLabel,
-                       int row,
-                       int fontSize = 0);
+  // QLabel *_addLabelRow(QWidget *widget,
+  //                      QGridLayout *layout,
+  //                      const string &leftLabel,
+  //                      const string &rightLabel,
+  //                      int row,
+  //                      int fontSize = 0);
 
-  QLineEdit *_addInputRow(QWidget *widget,
-                          QVBoxLayout *layout,
-                          const string &leftLabel,
-                          const string &rightContent,
-                          int fontSize = 0,
-                          QLabel **label = NULL);
+  // QLineEdit *_addInputRow(QWidget *widget,
+  //                         QVBoxLayout *layout,
+  //                         const string &leftLabel,
+  //                         const string &rightContent,
+  //                         int fontSize = 0,
+  //                         QLabel **label = NULL);
 
-  QLineEdit *_addInputRow(QWidget *parent,
-                          QVBoxLayout *layout,
-                          const string &leftLabel,
-                          const string &rightContent,
-                          int fontSize = 0,
-                          QFrame **framePtr = NULL);
+  // QLineEdit *_addInputRow(QWidget *parent,
+  //                         QVBoxLayout *layout,
+  //                         const string &leftLabel,
+  //                         const string &rightContent,
+  //                         int fontSize = 0,
+  //                         QFrame **framePtr = NULL);
 
   int _writeClickPointXml2Fmq(const RadxRay *ray,
                               double rangeKm, int gateNum);
@@ -331,7 +326,7 @@ protected slots:
   virtual void _openFile();
   virtual void _saveFile();
 
-  void _changeFieldVariable(bool value);
+  // void _changeFieldVariable(bool value);
 
 };
 

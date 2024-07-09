@@ -46,7 +46,7 @@
 #include "Params.hh"
 
 class QApplication;
-class DisplayField;
+// class DisplayField;
 class CartManager;
 
 class Qucid {
@@ -79,7 +79,7 @@ private:
 
   // data fields
 
-  vector<DisplayField *> _displayFields;
+  // vector<DisplayField *> _displayFields;
 
   // managing the rendering objects
 
@@ -89,7 +89,7 @@ private:
 
   void _initGlobals();
   int _setupXDisplay(int argc, char **argv);
-  int _setupDisplayFields();
+  // int _setupDisplayFields();
 
 };
 

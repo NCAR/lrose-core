@@ -40,11 +40,6 @@ constexpr auto qt_meta_stringdata_CLASSDisplayManagerENDCLASS = QtMocHelpers::st
     "",
     "width",
     "height",
-    "colorMapRedefineReceived",
-    "string",
-    "fieldName",
-    "ColorMap",
-    "newColorMap",
     "_howto",
     "_about",
     "_showClick",
@@ -55,9 +50,7 @@ constexpr auto qt_meta_stringdata_CLASSDisplayManagerENDCLASS = QtMocHelpers::st
     "fieldId",
     "guiMode",
     "_openFile",
-    "_saveFile",
-    "_changeFieldVariable",
-    "value"
+    "_saveFile"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -70,7 +63,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSDisplayManagerENDCLASS[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-      12,   14, // methods
+      10,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -78,36 +71,32 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSDisplayManagerENDCLASS[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    2,   86,    2, 0x06,    1 /* Public */,
+       1,    2,   74,    2, 0x06,    1 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       5,    2,   91,    2, 0x0a,    4 /* Public */,
-      10,    0,   96,    2, 0x09,    7 /* Protected */,
-      11,    0,   97,    2, 0x09,    8 /* Protected */,
-      12,    0,   98,    2, 0x09,    9 /* Protected */,
-      13,    0,   99,    2, 0x09,   10 /* Protected */,
-      14,    0,  100,    2, 0x09,   11 /* Protected */,
-      15,    0,  101,    2, 0x09,   12 /* Protected */,
-      16,    2,  102,    2, 0x09,   13 /* Protected */,
-      19,    0,  107,    2, 0x09,   16 /* Protected */,
-      20,    0,  108,    2, 0x09,   17 /* Protected */,
-      21,    1,  109,    2, 0x09,   18 /* Protected */,
+       5,    0,   79,    2, 0x09,    4 /* Protected */,
+       6,    0,   80,    2, 0x09,    5 /* Protected */,
+       7,    0,   81,    2, 0x09,    6 /* Protected */,
+       8,    0,   82,    2, 0x09,    7 /* Protected */,
+       9,    0,   83,    2, 0x09,    8 /* Protected */,
+      10,    0,   84,    2, 0x09,    9 /* Protected */,
+      11,    2,   85,    2, 0x09,   10 /* Protected */,
+      14,    0,   90,    2, 0x09,   13 /* Protected */,
+      15,    0,   91,    2, 0x09,   14 /* Protected */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int, QMetaType::Int,    3,    4,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 6, 0x80000000 | 8,    7,    9,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int, QMetaType::Bool,   17,   18,
+    QMetaType::Void, QMetaType::Int, QMetaType::Bool,   12,   13,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,   22,
 
        0        // eod
 };
@@ -125,10 +114,6 @@ Q_CONSTINIT const QMetaObject DisplayManager::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<const int, std::false_type>,
         QtPrivate::TypeAndForceComplete<const int, std::false_type>,
-        // method 'colorMapRedefineReceived'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<string, std::false_type>,
-        QtPrivate::TypeAndForceComplete<ColorMap, std::false_type>,
         // method '_howto'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_about'
@@ -148,10 +133,7 @@ Q_CONSTINIT const QMetaObject DisplayManager::staticMetaObject = { {
         // method '_openFile'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method '_saveFile'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method '_changeFieldVariable'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<bool, std::false_type>
+        QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
 } };
@@ -163,17 +145,15 @@ void DisplayManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         (void)_t;
         switch (_id) {
         case 0: _t->frameResized((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2]))); break;
-        case 1: _t->colorMapRedefineReceived((*reinterpret_cast< std::add_pointer_t<string>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<ColorMap>>(_a[2]))); break;
-        case 2: _t->_howto(); break;
-        case 3: _t->_about(); break;
-        case 4: _t->_showClick(); break;
-        case 5: _t->_freeze(); break;
-        case 6: _t->_unzoom(); break;
-        case 7: _t->_refresh(); break;
-        case 8: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 9: _t->_openFile(); break;
-        case 10: _t->_saveFile(); break;
-        case 11: _t->_changeFieldVariable((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 1: _t->_howto(); break;
+        case 2: _t->_about(); break;
+        case 3: _t->_showClick(); break;
+        case 4: _t->_freeze(); break;
+        case 5: _t->_unzoom(); break;
+        case 6: _t->_refresh(); break;
+        case 7: _t->_changeField((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
+        case 8: _t->_openFile(); break;
+        case 9: _t->_saveFile(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -207,13 +187,13 @@ int DisplayManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 10;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 10)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 12;
+        _id -= 10;
     }
     return _id;
 }

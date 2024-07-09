@@ -37,9 +37,9 @@
 ///////////////////////////////////////////////////////////////
 
 #include "DisplayManager.hh"
-#include "DisplayField.hh"
+// #include "DisplayField.hh"
 #include <qtplot/ColorMap.hh>
-#include "Params.hh"
+// #include "Params.hh"
 
 #include <string>
 #include <cmath>
@@ -78,18 +78,20 @@
 #include <toolsa/TaXml.hh>
 #include <Radx/RadxFile.hh>
 
+#include "cidd.h"
+  
 using namespace std;
 int DisplayManager::_timerEventCount = 0;
 
 // Constructor
 
-DisplayManager::DisplayManager(const Params &params,
+DisplayManager::DisplayManager(/* const Params &params,
                                const vector<DisplayField *> &fields,
-                               bool haveFilteredFields) :
-        QMainWindow(NULL),
-        _params(params),
-        _fields(fields),
-        _haveFilteredFields(haveFilteredFields)
+                               bool haveFilteredFields */) :
+        QMainWindow(NULL)
+        // _params(params),
+        // _fields(fields),
+        // _haveFilteredFields(haveFilteredFields)
         
 {
 
@@ -123,6 +125,8 @@ DisplayManager::~DisplayManager()
 {
 
 }
+
+#ifdef NOTNOW
 
 //////////////////////////////////////////////
 // create the status panel
@@ -567,11 +571,15 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
 }
 
 
+#endif
+
 void DisplayManager::_openFile() {
 }
 
 void DisplayManager::_saveFile() {
 }
+
+#ifdef NOTNOW
 
 ///////////////////////////////////////////////////////
 // create the click report dialog
@@ -1163,6 +1171,8 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
 
 }
+
+#endif
 
 ///////////////////////////////////////////
 // set text for GUI panels

@@ -51,13 +51,13 @@
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxVol.hh>
 
-#include "Params.hh"
+// #include "Params.hh"
 // #include "PpiBeam.hh"
 // #include "RhiBeam.hh"
 // #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
-#include "DisplayField.hh"
+// #include "DisplayField.hh"
 
 class CartManager;
 
@@ -108,11 +108,7 @@ class DLL_EXPORT CartWidget : public QWidget
    */
 
   CartWidget(QWidget* parent, 
-             const CartManager &manager,
-             const Params &params,
-             const RadxPlatform &platform,
-             const vector<DisplayField *> &fields,
-             bool haveFilteredFields);
+             const CartManager &manager);
   
   /**
    * @brief Destructor.
@@ -301,16 +297,16 @@ class DLL_EXPORT CartWidget : public QWidget
    * @brief TDRP params.
    */
 
-  const Params &_params;
+  // const Params &_params;
 
   // instrument platform details 
 
-  const RadxPlatform &_platform;
+  // const RadxPlatform &_platform;
   
   // data fields
 
-  const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
+  // const vector<DisplayField *> &_fields;
+  // bool _haveFilteredFields;
 
   /**
    * @brief The renderer for each field.
@@ -441,7 +437,6 @@ class DLL_EXPORT CartWidget : public QWidget
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
   
-
   ///////////////////////
   // Protected methods //
   ///////////////////////
