@@ -856,8 +856,8 @@ static int _initGrids()
       iret = -1;
     }
     mrec->colorMap = new ColorMap(colorscaleCachePath.c_str(),
-                                  _params.debug >= Params::DEBUG_VERBOSE);
-                                  ;
+                                  _params.debug >= Params::DEBUG_EXTRA);
+    
   } // ifld
   
   /* Make sure the first field is always on */
@@ -2726,7 +2726,7 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     
     char *cs_buf;
     int cs_len;
-    int ret_stat =  HTTPgetURL(remoteUrl.c_str(), _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
+    int ret_stat = HTTPgetURL(remoteUrl.c_str(), _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
     if(ret_stat <= 0) {
       cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
       cerr << "  Cannot get remote color scale, url: " << remoteUrl << endl;

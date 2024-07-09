@@ -107,6 +107,11 @@ int Args::parse (const int argc, const char **argv)
       snprintf(tmp_str, BUFSIZ,  "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-clear_cache")) {
+      
+      snprintf(tmp_str, BUFSIZ,  "clear_cache = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-color_scales")) {
       
       if (i < argc - 1) {
@@ -306,6 +311,7 @@ void Args::_usage(ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_url ?] URL for data in archive mode\n"
+      << "       [ -clear_cache ] clear the cache for maps and color scales\n"
       << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
