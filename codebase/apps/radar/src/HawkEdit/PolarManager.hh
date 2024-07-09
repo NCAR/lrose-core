@@ -242,11 +242,10 @@ public slots:
     bool *overwriteAll, bool *discard, bool *cancel);
   void _checkForOverwrite2(string pathFile, bool *overwriteOnce,
     bool *overwriteAll, bool *discard, bool *cancel);  
-  int _mergeDataFiles(string dest_path, string source_path);
+  // int _mergeDataFiles(string dest_path, string source_path);
   void _openFile();
   void _saveFile();
   void _saveCurrentVersionAllFiles();
-  void _goHere(int nFiles, string saveDirName);
   void _howto();   
 
   //void contextMenuParameterColors();
@@ -947,6 +946,9 @@ private slots:
   void inbetweenReadDataFile(vector<string> *selectedFields);
 
   void metaDataChanged();
+
+  void _fileOverwriteWithPrompt(int nFiles, string saveDirName);
+  void _fileOverwriteNoPrompt(int nFiles, string saveDirName);
 
 };
 

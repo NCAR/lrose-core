@@ -422,6 +422,8 @@ string TimeNavModel::getSelectedArchiveFileName() {
 string TimeNavModel::no_yyyymmdd(string s) {
   if ((s.size() > 8) && _archiveFilesHaveDayDir) {
     return s.substr(0, s.size()-8);
+  } else {
+      return s;
   }
 }
 
