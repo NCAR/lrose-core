@@ -2801,7 +2801,7 @@ static int _getColorscaleCachePath(const string &colorscaleName,
   vector<string> urlList;
   TaStr::tokenize(_params.color_scale_urls, ",", urlList);
   for (size_t ii = 0; ii < urlList.size(); ii++) {
-    if (_getResourceCachePath(urlList[ii], gd.colorscaleCacheDir, colorscaleName, cachePath) == 0) {
+    if (_getResourceCachePath(gd.colorscaleCacheDir, urlList[ii], colorscaleName, cachePath) == 0) {
       return 0;
     }
   }
@@ -2838,8 +2838,8 @@ static int _getMapCachePath(const string &mapName,
     string shxFileName = mapPath.getFile() + ".shx";
     
     for (size_t ii = 0; ii < urlList.size(); ii++) {
-      if ((_getResourceCachePath(urlList[ii], gd.mapCacheDir, shpFileName, cachePath) == 0) &&
-          (_getResourceCachePath(urlList[ii], gd.mapCacheDir, shxFileName, cachePathX) == 0)) {
+      if ((_getResourceCachePath(gd.mapCacheDir, urlList[ii], shpFileName, cachePath) == 0) &&
+          (_getResourceCachePath(gd.mapCacheDir, urlList[ii], shxFileName, cachePathX) == 0)) {
         return 0;
       } else {
         cerr << "ERROR - _getMapCachePath" << endl;
@@ -2852,7 +2852,7 @@ static int _getMapCachePath(const string &mapName,
     // RAL style file
     
     for (size_t ii = 0; ii < urlList.size(); ii++) {
-      if (_getResourceCachePath(urlList[ii], gd.mapCacheDir, mapName, cachePath) == 0) {
+      if (_getResourceCachePath(gd.mapCacheDir, urlList[ii], mapName, cachePath) == 0) {
         return 0;
       } else {
         cerr << "ERROR - _getMapCachePath" << endl;
