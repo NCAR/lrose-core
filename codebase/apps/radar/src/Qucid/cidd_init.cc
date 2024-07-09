@@ -61,6 +61,10 @@ static void _initContours();
 static void _initOverlayFields();
 
 static int _createCacheDirs();
+static int _getResourceCachePath(const string &cacheDir,
+                                 const string &resourceUrl,
+                                 const string &resourceName,
+                                 string &cachePath);
 static int _getColorscaleCachePath(const string &colorscaleName,
                                    string &cachePath);
 static int _getMapCachePath(const string &mapName,
@@ -613,7 +617,7 @@ int init_data_space()
     iret = -1;
   }
   
-  // Wind Rendering
+  // initialize wind Rendering
 
   gd.layers.wind_vectors = _params.all_winds_on;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
@@ -624,8 +628,6 @@ int init_data_space()
   int plot_azimuths = _params.azimuth_lines;
   gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
 
-  // initialize wind data
-  
   _initWinds();
 
   // initialize terrain
@@ -658,9 +660,18 @@ int init_data_space()
       fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
       exit(-1);
     }
+
+    // download station location file into cache
+
+    Path locPath(_params.station_loc_url);
+    string stationlocCachePath;
+    if (_getResourceCachePath(gd.stationlocCacheDir, locPath.getDirectory(),
+                              locPath.getFile(), stationlocCachePath) == 0) {
+      fprintf(stderr, "CIDD: Can't find Station Data from %s\n", _params.station_loc_url);
+    }
     
-    if(gd.station_loc->ReadData(_params.station_loc_url) < 0) {
-      fprintf(stderr,"CIDD: Can't load Station Data from %s\n",_params.station_loc_url);
+    if(gd.station_loc->ReadData(stationlocCachePath.c_str()) < 0) {
+      fprintf(stderr, "CIDD: Can't load Station Data from cache path %s\n", stationlocCachePath.c_str());
       exit(-1);
     }
     if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -2654,6 +2665,15 @@ static int _createCacheDirs()
     int err = errno;
     cerr << "ERROR - Qucid" << endl;
     cerr << "Cannot make color scales cache dir: " << gd.colorscaleCacheDir << endl;
+    cerr << "  " << strerror(err) << endl;
+    return -1;
+  }
+
+  gd.stationlocCacheDir = gd.cacheDir + PATH_DELIM + "stationloc";
+  if (ta_makedir_recurse(gd.stationlocCacheDir.c_str())) {
+    int err = errno;
+    cerr << "ERROR - Qucid" << endl;
+    cerr << "Cannot make station locator cache dir: " << gd.stationlocCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }

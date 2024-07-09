@@ -128,6 +128,7 @@ public:
   string cacheDir;  // directory for storing cached temporary files
   string mapCacheDir;  // directory for storing cached map files
   string colorscaleCacheDir;  // directory for storing cached color scale files
+  string stationlocCacheDir;  // directory for storing cached station locator file
 
   int display_projection;// Which projection CIDD Uses for display  - Enum
 
