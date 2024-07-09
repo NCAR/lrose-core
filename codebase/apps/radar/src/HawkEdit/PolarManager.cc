@@ -2407,28 +2407,27 @@ void PolarManager::_checkForOverwrite2(string pathFile, bool *promptBeforeOverwr
 
 }
 
+/*
 // Returns -1 on error, 0 otherwise
 // filecopy_by_name doesnn't work;
 // also, need to merge the files with the original file,
 // since we have only saved a delta ...
 int PolarManager::_mergeDataFiles(string dest_path, string source_path) {
 
-  // use a Radx utility??
   DataModel *dataModel = DataModel::Instance();
   string original_path = "some/path/from/timeNav";
   dataModel->mergeDataFiles(dest_path, source_path, original_path);
 
   return 0;
 }
-
-
+ */
 
 void PolarManager::_saveCurrentVersionAllFiles()
 {
 
   bool cancel = false;
   bool overwriteOnce = false;
-  bool discard = false; 
+  bool discard = false;
 
   //QString finalPattern = "All files (*.nc)";
 
@@ -2471,178 +2470,207 @@ void PolarManager::_saveCurrentVersionAllFiles()
 
     LOG(DEBUG) << "selected folder path : " << saveDirName;
     int nFiles = _timeNavController->getNFiles();
-
+    
     if (overwriteAll) {
-      _goHere(nFiles, saveDirName);
-      return;
+      _fileOverwriteNoPrompt(nFiles, saveDirName);
+    } else {
+      _fileOverwriteWithPrompt(nFiles, saveDirName);
     }
-    // no progress bar, include progress with each prompt
-    // for each file in timeNav ...
-    int i=0;
-    while (i<nFiles && !cancel) {
 
-        try {
-          // the active one in memory (i.e. the selected file)
-          // may have unsaved changes, so treat it differently.
-          if (i == _timeNavController->getSelectedArchiveFileIndex()) {
-            DataModel *dataModel = DataModel::Instance();
-            string currentFile = _timeNavController->getSelectedArchiveFile();
-            string saveFile = _combinePathFile(saveDirName, _fileName(QString(currentFile.c_str())));
-
-            overwriteOnce = false;
-            discard = false;
-            _checkForOverwrite(saveFile, &overwriteOnce,
-                &overwriteAll, &discard, &cancel); 
-              
-            if (overwriteOnce) {
-              //string currentPath = _timeNavController->getSelectedPath();
-              dataModel->writeWithMergeData(saveFile, currentFile);
-            }
-          }  else {
-
-            string versionName = _undoRedoController->getCurrentVersion(i);
-            string realName = _timeNavController->getArchiveFilePath(i);
-            // versionName is something like v1, or v2, etc.
-            // realName is something like cfrad_yyyymmdd...
-            string justTheFileName = _fileName(QString(realName.c_str()));
-            string sourcePathFile;
-            if (versionName.empty()) {
-              // this is the original version; and the name is NOT v1, v2, etc.
-              //versionName = _timeNavController->getArchiveFilePath(i);
-              sourcePathFile = realName;
-              // TODO: just copy the file to the destination
-            } else {
-              sourcePathFile = _combinePathFile(versionName, justTheFileName);
-            }
-            const char *source_path = sourcePathFile.c_str();
-            string savePathFile = _combinePathFile(saveDirName, justTheFileName);
-            const char *dest_path = savePathFile.c_str();            
-
-            cout << "source_path = " << source_path << endl;
-            cout << "dest_path = " << dest_path << endl;
-
-            overwriteOnce = false;
-            discard = false;
-            _checkForOverwrite(savePathFile, &overwriteOnce,
-                &overwriteAll, &discard, &cancel); 
-              
-            if (overwriteOnce) {
-              // use toolsa utility
-              // Returns -1 on error, 0 otherwise
-              // filecopy_by_name doesnn't work;
-              // also, need to merge the files with the original file,
-              // since we have saved a delta ...
-              string originalPath = _timeNavController->getArchiveFilePath(i);
-
-              DataModel *dataModel = DataModel::Instance();
-              int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
-              if (return_val != 0) {
-                stringstream ss;
-                ss << "could not save file: " << dest_path;
-                errorMessage("Error", ss.str());
-              }
-            }
-          }
-        } catch (FileIException &ex) {
-          this->setCursor(Qt::ArrowCursor);
-          return;
-        }
-        i+= 1;
-        
-    } // end while loop each file in timeNav and !cancel
-    //if (!cancel) {
-    //  progress.updateProgress(nFiles, nFiles);
-    //}
   }
 }
 
-
-// no prompting, and use a progress bar ...
-void PolarManager::_goHere(int nFiles, string saveDirName) {
-
-    QProgressDialog progress("Saving files...", "Cancel", 0, nFiles, this);
-    progress.setWindowModality(Qt::WindowModal);
-    progress.setAutoReset(false); 
-    progress.setAutoClose(false);
-    progress.setValue(1);
-    progress.show();
-
-    //progress.exec();
-    
-    // for each file in timeNav ...
-    int i=0;
-    bool cancel = false;
-
-    while (i<nFiles && !cancel) {
+void PolarManager::_fileOverwriteWithPrompt(int nFiles, string saveDirName) {
+  // no progress bar, include progress with each prompt
+  // for each file in timeNav ...
+  DataModel *dataModel = DataModel::Instance();
+  // get the version of this file
+  queue<string> *listOfVersions = new queue<string>;
+  bool overwriteOnce = false;
+  bool overwriteAll = false;
+  bool discard = false;
+  bool cancel = false;
+  
+  int i=0;
+  while (i<nFiles && !cancel) {
+      try {
+        _undoRedoController->getAllPreviousVersions(i, listOfVersions);
         
-        if (progress.wasCanceled()) {
-          cancel = true;
-          break;          
-        }
+        // the active one in memory (i.e. the selected file)
+        // may have unsaved changes, so treat it differently.
+        if (i == _timeNavController->getSelectedArchiveFileIndex()) {
+          string currentFile = _timeNavController->getSelectedArchiveFile();
+          string justFileName = _fileName(QString(currentFile.c_str()));
+          string saveFile = _combinePathFile(saveDirName, justFileName);
 
-        try {
-          // the active one in memory (i.e. the selected file)
-          // may have unsaved changes, so treat it differently.
-          if (i == _timeNavController->getSelectedArchiveFileIndex()) {
-            DataModel *dataModel = DataModel::Instance();
-            string currentFile = _timeNavController->getSelectedArchiveFile();
-            string saveFile = _combinePathFile(saveDirName, _fileName(QString(currentFile.c_str())));
-            dataModel->writeWithMergeData(saveFile, currentFile);
-          }  else {
-
-            string versionName = _undoRedoController->getCurrentVersion(i);
-            string realName = _timeNavController->getArchiveFilePath(i);
-            // versionName is something like v1, or v2, etc.
-            // realName is something like cfrad_yyyymmdd...
-            string justTheFileName = _fileName(QString(realName.c_str()));
-            string sourcePathFile;
-            if (versionName.empty()) {
-              // this is the original version; and the name is NOT v1, v2, etc.
-              //versionName = _timeNavController->getArchiveFilePath(i);
-              sourcePathFile = realName;
-              // TODO: just copy the file to the destination
-            } else {
-              sourcePathFile = _combinePathFile(versionName, justTheFileName);
+          overwriteOnce = false;
+          discard = false;
+          _checkForOverwrite(saveFile, &overwriteOnce,
+              &overwriteAll, &discard, &cancel);
+          if (overwriteOnce) {
+            //dataModel->writeWithMergeData(saveFile, currentFile, listOfVersions);
+            int retval = 
+              dataModel->mergeSelectedFileVersions(saveFile, currentFile,
+                                                   //string originalPath,
+                                                   listOfVersions,
+                                                   justFileName);
+            if (retval != 0) {
+              stringstream ss;
+              ss << "could not save file: " << saveFile;
+              errorMessage("Error", ss.str());
             }
-            const char *source_path = sourcePathFile.c_str();
-            string savePathFile = _combinePathFile(saveDirName, justTheFileName);
-            const char *dest_path = savePathFile.c_str();
+          }
+        }  else {
+          string versionName = _undoRedoController->getCurrentVersion(i);
+          string realName = _timeNavController->getArchiveFilePath(i);
+          // versionName is something like v1, or v2, etc.
+          // realName is something like cfrad_yyyymmdd...
+          string justTheFileName = _fileName(QString(realName.c_str()));
+          string sourcePathFile;
+          if (versionName.empty()) {
+            // this is the original version; and the name is NOT v1, v2, etc.
+            //versionName = _timeNavController->getArchiveFilePath(i);
+            sourcePathFile = realName;
+          } else {
+            sourcePathFile = _combinePathFile(versionName, justTheFileName);
+          }
+          const char *source_path = sourcePathFile.c_str();
+          string savePathFile = _combinePathFile(saveDirName, justTheFileName);
+          const char *dest_path = savePathFile.c_str();
 
-            cout << "source_path = " << source_path << endl;
-            cout << "dest_path = " << dest_path << endl;
+          cout << "source_path = " << source_path << endl;
+          cout << "dest_path = " << dest_path << endl;
 
-            // use toolsa utility
-            // Returns -1 on error, 0 otherwise
-            // filecopy_by_name doesnn't work;
+          overwriteOnce = false;
+          discard = false;
+          _checkForOverwrite(savePathFile, &overwriteOnce,
+              &overwriteAll, &discard, &cancel);
+            
+          if (overwriteOnce) {
             // also, need to merge the files with the original file,
             // since we have saved a delta ...
             string originalPath = _timeNavController->getArchiveFilePath(i);
-
-            DataModel *dataModel = DataModel::Instance();
-            int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
+            int return_val = 
+              dataModel->mergeFileVersions(dest_path, source_path, originalPath,
+                                               listOfVersions, justTheFileName);
             if (return_val != 0) {
               stringstream ss;
               ss << "could not save file: " << dest_path;
               errorMessage("Error", ss.str());
             }
-
           }
-        } catch (FileIException &ex) {
-          this->setCursor(Qt::ArrowCursor);
-          return;
         }
-        i+= 1;
-        progress.setValue(i);
-        stringstream m;
-        m << i+1 << " of " << nFiles;
-        QString QStr = QString::fromStdString(m.str());
-        progress.setLabelText(QStr);
-        QCoreApplication::processEvents();
-    } // end while loop each file in timeNav and !cancel
-    if (cancel) {
-      progress.setLabelText("cancelling ...");
-      QCoreApplication::processEvents();
+      } catch (FileIException &ex) {
+        this->setCursor(Qt::ArrowCursor);
+        return;
+      }
+    i+= 1;
+    while (!listOfVersions->empty()) {
+      listOfVersions->pop();
+    };
+  } // end while loop each file in timeNav and !cancel
+  delete listOfVersions;
+}
+
+
+// no prompting, and use a progress bar ...
+void PolarManager::_fileOverwriteNoPrompt(int nFiles, string saveDirName) {
+
+  QProgressDialog progress("Saving files...", "Cancel", 0, nFiles, this);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.setAutoReset(false);
+  progress.setAutoClose(false);
+  progress.setValue(1);
+  progress.show();
+
+  // for each file in timeNav ...
+  int i=0;
+  bool cancel = false;
+  DataModel *dataModel = DataModel::Instance();
+  queue<string> *listOfVersions = new queue<string>;
+
+  while (i<nFiles && !cancel) {
+    if (progress.wasCanceled()) {
+      cancel = true;
+      break;
     }
+    try {
+      _undoRedoController->getAllPreviousVersions(i, listOfVersions);
+      
+      // the active one in memory (i.e. the selected file)
+      // may have unsaved changes, so treat it differently.
+      if (i == _timeNavController->getSelectedArchiveFileIndex()) {
+        string currentFile = _timeNavController->getSelectedArchiveFile();
+        string justFilename = _fileName(QString(currentFile.c_str()));
+        string saveFile = _combinePathFile(saveDirName, justFilename);
+        //dataModel->writeWithMergeData(saveFile, currentFile);
+        int retval =
+          dataModel->mergeSelectedFileVersions(saveFile, currentFile,
+                                               listOfVersions, justFilename);
+        if (retval != 0) {
+          stringstream ss;
+          ss << "could not save file: " << saveFile;
+          errorMessage("Error", ss.str());
+        }
+      }  else {
+        string versionName = _undoRedoController->getCurrentVersion(i);
+        string realName = _timeNavController->getArchiveFilePath(i);
+        // versionName is something like v1, or v2, etc.
+        // realName is something like cfrad_yyyymmdd...
+        string justTheFileName = _fileName(QString(realName.c_str()));
+        string sourcePathFile;
+        if (versionName.empty()) {
+          // this is the original version; and the name is NOT v1, v2, etc.
+          //versionName = _timeNavController->getArchiveFilePath(i);
+          sourcePathFile = realName;
+        } else {
+          sourcePathFile = _combinePathFile(versionName, justTheFileName);
+        }
+        const char *source_path = sourcePathFile.c_str();
+        string savePathFile = _combinePathFile(saveDirName, justTheFileName);
+        const char *dest_path = savePathFile.c_str();
+
+        cout << "source_path = " << source_path << endl;
+        cout << "dest_path = " << dest_path << endl;
+
+        //  need to merge the files with the original file,
+        // since we have saved a delta ...
+        string originalPath = _timeNavController->getArchiveFilePath(i);
+
+        int return_val = 
+          dataModel->mergeFileVersions(dest_path, source_path,
+                                       originalPath,
+                                       listOfVersions,
+                                       justTheFileName);
+        // dataModel->mergeDataFiles(dest_path, source_path, originalPath);
+        if (return_val != 0) {
+          stringstream ss;
+          ss << "could not save file: " << dest_path;
+          errorMessage("Error", ss.str());
+        }
+      }
+      //listOfVersions->clear();
+      
+    } catch (FileIException &ex) {
+      this->setCursor(Qt::ArrowCursor);
+      //listOfVersions->clear();
+      delete listOfVersions;
+      return;
+    }
+    i+= 1;
+    progress.setValue(i);
+    stringstream m;
+    m << i+1 << " of " << nFiles;
+    QString QStr = QString::fromStdString(m.str());
+    progress.setLabelText(QStr);
+    QCoreApplication::processEvents();
+  } // end while loop each file in timeNav and !cancel
+  
+  if (cancel) {
+    progress.setLabelText("cancelling ...");
+    QCoreApplication::processEvents();
+  }
+  delete listOfVersions;
 }
 
 
@@ -2682,7 +2710,7 @@ void PolarManager::_saveFile()
         LOG(DEBUG) << "selected file path : " << name;
 
       // TODO: hold it! the save message should
-      // go to the Model (Data) level because
+      //  to the Model (Data) level because
       // we'll be using Radx utilities.
       
       try {
@@ -2690,8 +2718,10 @@ void PolarManager::_saveFile()
         string originalSourcePath = 
           _timeNavController->getSelectedArchiveFile();
         DataModel *dataModel = DataModel::Instance();
-        dataModel->writeWithMergeData(name, originalSourcePath);
-        //dataModel->writeData(name);
+        // TODO: finish here
+        //dataModel->mergeSelectedFileVersions(name, originalSourcePath,
+        //                                     listOfVersions,
+        //                                     justFilename);
         _unSavedEdits = false;
       } catch (FileIException &ex) {
         this->setCursor(Qt::ArrowCursor);
