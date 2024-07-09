@@ -51,6 +51,7 @@ static void _initWindComponent(met_record_t *wrec,
 static void _initTerrain();
 static void _initDrawExport();
 static int _initMaps();
+static int _initStationLoc();
 static void _initRouteWinds();
 
 static void _loadRapMap(Overlay_t *ov, const char *maps_url);
@@ -649,35 +650,9 @@ int init_data_space()
   }
   
   // Instantiate the Station locator classes and params.
-  
-  if(strlen(_params.station_loc_url) > 1) {
-    
-    if(gd.debug || gd.debug1) {
-      fprintf(stderr,"Loading Station data from %s ...",_params.station_loc_url);
-    }
-    gd.station_loc =  new StationLoc();
-    if(gd.station_loc == NULL) {
-      fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
-      exit(-1);
-    }
 
-    // download station location file into cache
-
-    Path locPath(_params.station_loc_url);
-    string stationlocCachePath;
-    if (_getResourceCachePath(gd.stationlocCacheDir, locPath.getDirectory(),
-                              locPath.getFile(), stationlocCachePath) == 0) {
-      fprintf(stderr, "CIDD: Can't find Station Data from %s\n", _params.station_loc_url);
-    }
-    
-    if(gd.station_loc->ReadData(stationlocCachePath.c_str()) < 0) {
-      fprintf(stderr, "CIDD: Can't load Station Data from cache path %s\n", stationlocCachePath.c_str());
-      exit(-1);
-    }
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      gd.station_loc->PrintAll();
-    }
-
+  if (_initStationLoc()) {
+    iret = -1;
   }
 
   /////////////////////
@@ -2199,8 +2174,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 }
 
 /************************************************************************
- * INIT_OVER_DATA_LINKS:  Scan cidd_overlays.info file and setup
- *
+ * INIT_MAPS - read in map files
  */ 
 
 static int _initMaps()
@@ -2268,6 +2242,49 @@ static int _initMaps()
   calc_local_over_coords();
 
   return iret;
+  
+}
+
+///////////////////////////////////////////////////////
+// Instantiate the Station locator classes and params.
+  
+static int _initStationLoc()
+
+{
+
+  if (strlen(_params.station_loc_url) < 1) {
+    return 0;
+  }
+    
+  if(gd.debug || gd.debug1) {
+    fprintf(stderr,"Loading Station data from: %s\n", _params.station_loc_url);
+  }
+  gd.station_loc =  new StationLoc();
+  if(gd.station_loc == NULL) {
+    fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
+    exit(-1);
+  }
+
+  // download station location file into cache
+  
+  Path locPath(_params.station_loc_url);
+  string stationlocCachePath;
+  if (_getResourceCachePath(gd.stationlocCacheDir, locPath.getDirectory(),
+                            locPath.getFile(), stationlocCachePath)) {
+    fprintf(stderr, "CIDD: Can't find Station Data from %s\n", _params.station_loc_url);
+    return -1;
+  }
+  
+  if(gd.station_loc->ReadData(stationlocCachePath.c_str()) < 0) {
+    fprintf(stderr, "CIDD: Can't load Station Data from cache path %s\n", stationlocCachePath.c_str());
+    return -1;
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    gd.station_loc->PrintAll();
+  }
+
+  return 0;
   
 }
 
