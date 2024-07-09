@@ -50,7 +50,7 @@ static void _initWindComponent(met_record_t *wrec,
                                bool isU, bool isV, bool isW);
 static void _initTerrain();
 static void _initDrawExport();
-static void _initMaps();
+static int _initMaps();
 static void _initRouteWinds();
 
 static void _loadRapMap(Overlay_t *ov, const char *maps_url);
@@ -61,12 +61,11 @@ static void _initContours();
 static void _initOverlayFields();
 
 static int _createCacheDirs();
-static string _cacheDir;
-static string mapsCacheDir;
-static string _colorScalesDirPath;
-
 static int _getColorscaleCachePath(const string &colorscaleName,
                                    string &cachePath);
+static int _getMapCachePath(const string &mapName,
+                            string &cachePath,
+                            string &cachePathX);
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -643,7 +642,9 @@ int init_data_space()
 
   // initialize the map overlays
 
-  _initMaps();
+  if (_initMaps()) {
+    iret = -1;
+  }
   
   // Instantiate the Station locator classes and params.
   
@@ -2191,10 +2192,11 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
  *
  */ 
 
-static void _initMaps()
+static int _initMaps()
 
 {
-  
+
+  int iret = 0;
   gd.num_map_overlays = _params.maps_n;
   
   for (int ii = 0; ii < _params.maps_n; ii++) {
@@ -2222,11 +2224,21 @@ static void _initMaps()
 
     if (mapFileName.find(".shp") != string::npos &&
         mapFileName.find(".shx") != string::npos) {
-      
+
+      string cachePathShp, cachePathShx;
+      if (_getMapCachePath(mapFileName, cachePathShp, cachePathShx)) {
+        iret = -1;
+      }
+
       _loadShapeMap(over, _params.map_urls);
 
     } else {  // Assume RAP Map Format 
       
+      string cachePath, dummy;
+      if (_getMapCachePath(mapFileName, cachePath, dummy)) {
+        iret = -1;
+      }
+
       _loadRapMap(over, _params.map_urls);
 
     }
@@ -2243,6 +2255,8 @@ static void _initMaps()
   } // ii
   
   calc_local_over_coords();
+
+  return iret;
   
 }
 
@@ -2648,19 +2662,27 @@ static int _createCacheDirs()
 
 }
 
-static int _getColorscaleCachePath(const string colorscaleUrl,
-                                   const string &colorscaleName,
-                                   string &cachePath)
+/**********************************************************************
+ * Get path to cached file.
+ * We pass in the file name.
+ * The cached path is filled in.
+ * Returns 0 on success, -1 on error.
+ */
+
+static int _getResourceCachePath(const string &cacheDir,
+                                 const string &resourceUrl,
+                                 const string &resourceName,
+                                 string &cachePath)
   
 {
 
-  // check if file exists in cache
+  // check if resource file exists in cache
 
-  cachePath = gd.colorscaleCacheDir + PATH_DELIM + colorscaleName;
+  cachePath = cacheDir + PATH_DELIM + resourceName;
   if (!_params.clear_cache) {
     if (ta_stat_is_file(cachePath.c_str())) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Success - found color scale file in cache: " << cachePath << endl;
+        cerr << "Success - found resource file in cache: " << cachePath << endl;
       }
       return 0;
     }
@@ -2669,25 +2691,25 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
   // check if file exists locally? if so copy to the cache
 
   bool fileIsLocal = true;
-  if (colorscaleUrl.find("http") == 0) {
+  if (resourceUrl.find("http") == 0) {
     fileIsLocal = false;
   }
-
+  
   if (fileIsLocal) {
-    string localPath = colorscaleUrl;
+    string localPath = resourceUrl;
     localPath += PATH_DELIM;
-    localPath += colorscaleName;
+    localPath += resourceName;
     if (ta_stat_is_file(localPath.c_str())) {
       // copy to cache
       if (filecopy_by_name(cachePath.c_str(), localPath.c_str()) == 0) {
         if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "Success - copied color scale file to cache: " << cachePath << endl;
+          cerr << "Success - copied local resource file to cache: " << cachePath << endl;
         }
         return 0;
       } else {
         int err = errno;
-        cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
-        cerr << "  Cannot copy local color file: " << localPath << endl;
+        cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
+        cerr << "  Cannot copy local resource file: " << localPath << endl;
         cerr << "    to cache: " << cachePath << endl;
         cerr << "  " << strerror(err) << endl;
         return -1;
@@ -2697,9 +2719,9 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
 
   // file is remote, retrieve it using curl or http
 
-  string remoteUrl = colorscaleUrl;
+  string remoteUrl = resourceUrl;
   remoteUrl += "/";
-  remoteUrl += colorscaleName;
+  remoteUrl += resourceName;
 
   if (_params.use_curl_for_downloads) {
     
@@ -2709,14 +2731,14 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     cmd += remoteUrl;
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Retrieving remote color file, cmd is: " << endl;
+      cerr << "Retrieving remote resource file, cmd is: " << endl;
       cerr << "  " << cmd << endl;
     }
     
     int timeoutSecs = _params.data_timeout_secs;
     if (safe_system(cmd.c_str(), timeoutSecs)) {
-      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
-      cerr << "  Cannot get remote color scale, cmd: " << cmd << endl;
+      cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
+      cerr << "  Cannot get remote resource, cmd: " << cmd << endl;
       return -1;
     }
 
@@ -2728,8 +2750,8 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     int cs_len;
     int ret_stat = HTTPgetURL(remoteUrl.c_str(), _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
     if(ret_stat <= 0) {
-      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
-      cerr << "  Cannot get remote color scale, url: " << remoteUrl << endl;
+      cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
+      cerr << "  Cannot get remote resource, url: " << remoteUrl << endl;
       return -1;
     }
 
@@ -2738,14 +2760,14 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     FILE *cacheFile = fopen(cachePath.c_str(), "w");
     if (cacheFile == NULL) {
       int err = errno;
-      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
       cerr << "  Cannot open cache file for writing: " << cachePath << endl;
       cerr << "  " << strerror(err) << endl;
       return -1;
     }
     if (fwrite(cs_buf, 1, cs_len, cacheFile) != cs_len) {
       int err = errno;
-      cerr << "ERROR - cidd_init::_getColorscaleCachePath" << endl;
+      cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
       cerr << "  Cannot write to cache file: " << cachePath << endl;
       cerr << "  " << strerror(err) << endl;
       fclose(cacheFile);
@@ -2754,7 +2776,7 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
     fclose(cacheFile);
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Success - copied color scale file to cache: " << cachePath << endl;
+      cerr << "Success - copied resource file to cache: " << cachePath << endl;
       cerr << "Source url: " << remoteUrl << endl;
     }
 
@@ -2765,10 +2787,8 @@ static int _getColorscaleCachePath(const string colorscaleUrl,
 }
 
 /**********************************************************************
- * get path to cached color file.
- * We pass in the color scale name.
- * The cached path is filled in.
- * returns 0 on success, -1 on error.
+ * Loop through the color scale URLs, searching for the
+ * requested color scale.
  */
 
 static int _getColorscaleCachePath(const string &colorscaleName,
@@ -2781,10 +2801,67 @@ static int _getColorscaleCachePath(const string &colorscaleName,
   vector<string> urlList;
   TaStr::tokenize(_params.color_scale_urls, ",", urlList);
   for (size_t ii = 0; ii < urlList.size(); ii++) {
-    if (_getColorscaleCachePath(urlList[ii], colorscaleName, cachePath) == 0) {
+    if (_getResourceCachePath(urlList[ii], gd.colorscaleCacheDir, colorscaleName, cachePath) == 0) {
       return 0;
     }
   }
+  return -1;
+
+}
+  
+/**********************************************************************
+ * Loop through the map URLs, searching for the
+ * requested map.
+ */
+
+static int _getMapCachePath(const string &mapName,
+                            string &cachePath,
+                            string &cachePathX)
+
+{
+
+  // get the map url from the parameter file
+
+  vector<string> urlList;
+  TaStr::tokenize(_params.map_urls, ",", urlList);
+
+  // for shape file, we need to download both the .shp and .shx files
+  // for other (RAL-style) files, we just download the map file
+
+  if (mapName.find(".shp") != string::npos ||
+      mapName.find(".shx") != string::npos) {
+
+    // shape file
+
+    Path mapPath(mapName);
+    string shpFileName = mapPath.getFile() + ".shp";
+    string shxFileName = mapPath.getFile() + ".shx";
+    
+    for (size_t ii = 0; ii < urlList.size(); ii++) {
+      if ((_getResourceCachePath(urlList[ii], gd.mapCacheDir, shpFileName, cachePath) == 0) &&
+          (_getResourceCachePath(urlList[ii], gd.mapCacheDir, shxFileName, cachePathX) == 0)) {
+        return 0;
+      } else {
+        cerr << "ERROR - _getMapCachePath" << endl;
+        cerr << "  Cannot load shape mapName: " << mapName << endl;
+      }
+    }
+
+  } else {
+
+    // RAL style file
+    
+    for (size_t ii = 0; ii < urlList.size(); ii++) {
+      if (_getResourceCachePath(urlList[ii], gd.mapCacheDir, mapName, cachePath) == 0) {
+        return 0;
+      } else {
+        cerr << "ERROR - _getMapCachePath" << endl;
+        cerr << "  Cannot load RAL mapName: " << mapName << endl;
+      }
+    }
+
+  }
+  
   return -1;
 
 }
