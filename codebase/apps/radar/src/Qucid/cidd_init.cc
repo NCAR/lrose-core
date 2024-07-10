@@ -54,23 +54,29 @@ static int _initMaps();
 static int _initStationLoc();
 static void _initRouteWinds();
 
-static void _loadRapMap(Overlay_t *ov, const char *maps_url);
-static void _loadShapeMap(Overlay_t *ov, const char    *maps_url);
+static int _loadRapMap(Overlay_t *ov, const string &mapFilePath);
+static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string &shxFilePath);
 
 static void _initZooms();
 static void _initContours();
 static void _initOverlayFields();
 
 static int _createCacheDirs();
+
 static int _getResourceCachePath(const string &cacheDir,
                                  const string &resourceUrl,
                                  const string &resourceName,
                                  string &cachePath);
+
 static int _getColorscaleCachePath(const string &colorscaleName,
                                    string &cachePath);
+
 static int _getMapCachePath(const string &mapName,
                             string &cachePath,
                             string &cachePathX);
+
+static int _readFileIntoBuffer(const string &path,
+                               char* &buf, int &len);
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -557,7 +563,7 @@ int init_data_space()
            gd.h_win.cmin_y,gd.h_win.cmax_y);
   }
 
-  // Define a very simple vertical oriented  route - In current domain
+  // Define a very simple vertical oriented route - In current domain
   
   gd.h_win.route.num_segments = 1;
   gd.h_win.route.x_world[0] = (gd.h_win.cmin_x + gd.h_win.cmax_x) / 2;
@@ -1398,90 +1404,40 @@ static void _initRouteWinds()
  * LOAD_RAP_MAP - load map in RAP format
  */
 
-static void _loadRapMap(Overlay_t *ov, const char *maps_url)
+static int _loadRapMap(Overlay_t *ov, const string &mapFilePath)
 {
 
-  int    i,j;
-  int    index,found;
-  int    len,point;
-  int    num_points;        
-  int    num_fields;  /* number of fields (tokens) found in input line */
-  int    map_len;
-  int    ret_stat;
-  char   *str_ptr;
-  char   *map_buf;         // Buffer to hold map file
-  char    name_buf[2048];  /* Buffer for input lines */
-  char    dirname[2048];   /* Buffer for directories to search */
-  FILE    *mapfile;
-  char    *cfield[32];
-  struct stat sbuf;
+  int i,j;
+  int index,found;
+  int len,point;
+  int num_points;        
+  int num_fields;  /* number of fields (tokens) found in input line */
+  int ret_stat;
+  char name_buf[2048];  /* Buffer for input lines */
   char *lasts;
 
-  for(i=0; i < 32; i++)  cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
+  // read map file into buffer
 
-  // Add . to list to start.
-  strncpy(dirname, ".,", 1024);
-  strncat(dirname, maps_url, 1024);
-
-  str_ptr = strtok(dirname,","); // Prime strtok
-
-  do {  // Try each comma delimited subdir
-    
-    while(*str_ptr == ' ') str_ptr++; //skip any leading space
-    snprintf(name_buf, 2047, "%s/%s", str_ptr, ov->map_file_name.c_str());
-
-    // Check if it's a HTTP URL
-    if(strncasecmp(name_buf,"http:",5) == 0) {
-      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat =  HTTPgetURL_via_proxy(_params.http_proxy_url,
-                                         name_buf,_params.data_timeout_secs * 1000,
-                                         &map_buf, &map_len);
-      } else {
-        ret_stat =  HTTPgetURL(name_buf,
-                               _params.data_timeout_secs * 1000,
-                               &map_buf, &map_len);
-      }
-      if(ret_stat <=0 ) {
-        map_len = 0;
-        map_buf = NULL;
-      }
-      if(gd.debug) fprintf(stderr,"Map: %s: Len: %d\n",name_buf,map_len);
-    } else {
-      if(stat(name_buf,&sbuf) < 0) { // Stat to find the file's size
-        map_len = 0;
-        map_buf = NULL;
-      }
-      if((mapfile = fopen(name_buf,"r")) == NULL) {
-        map_len = 0;
-        map_buf = NULL;
-      } else {
-        if((map_buf = (char *)  calloc(sbuf.st_size + 1 ,1)) == NULL) {
-          fprintf(stderr,"Problems allocating %ld bytes for map file\n",
-                  (long) sbuf.st_size);
-          exit(-1);
-        }
-
-        // Read
-        if((map_len = fread(map_buf,1,sbuf.st_size,mapfile)) != sbuf.st_size) {
-          fprintf(stderr,"Problems reading RAP map: %s\n", name_buf);
-          exit(-1);
-        }
-        map_buf[sbuf.st_size] = '\0'; // Make sure to null terminate
-        fclose(mapfile);
-      }
-    }
-  } while ((str_ptr = strtok(NULL,",")) != NULL && map_len == 0 );
-
-  if(map_len == 0 || map_buf == NULL) {
-    fprintf(stderr,"Warning!: Unable to load map file: %s\n", ov->map_file_name.c_str());
-    for(i=0; i < 32; i++)  free(cfield[i]);
-    return;
+  char *map_buf;
+  int map_len;
+  if (_readFileIntoBuffer(mapFilePath, map_buf, map_len)) {
+    cerr << "ERROR - _loadRapMap, cannot load map file: " << mapFilePath << endl;
+    return -1;
   }
 
+  // alloc space for sub strings
+  
+  char *cfield[32];
+  for(i=0; i < 32; i++) {
+    cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
+  }
+  
   // Prime strtok_r;
-  str_ptr = strtok_r(map_buf,"\n",&lasts);
+
+  char *str_ptr = strtok_r(map_buf, "\n", &lasts);
 
   while (str_ptr != NULL) {        /* read all lines in buffer */
+
     if(*str_ptr != '#') {
 
       if(strncasecmp(str_ptr,"MAP_NAME",8) == 0) {    /* Currently Ignore */
@@ -1830,7 +1786,8 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
   }
 
   for(i=0; i < 32; i++)  free(cfield[i]);         /* free space for sub strings */
-  return;
+
+  return 0;
 
 }
 
@@ -1838,149 +1795,39 @@ static void _loadRapMap(Overlay_t *ov, const char *maps_url)
  * LOAD_SHAPE_OVERLAY_DATA: This version reads Shape files
  */
 
-static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
+static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string &shxFilePath)
 {
-  int    i,j;
-  int    index,found,is_http;
-  int    point;
-  int    num_points;        
-  int    ret_stat;
-  char   *str_ptr;
-  char    name_base[1024];  /* Buffer for input names */
-  char    dirname[4096];   /* Buffer for directories to search */
-  char    name_buf[2048];  /* Buffer for input names */
-  char    name_buf2[2048]; /* Buffer for input names */
-  char    *map_buf;
-  int     map_len;
+
+  // open shape file
 
   SHPHandle SH;
-  SHPObject *SO;
-  FILE    *map_file;
+  if((SH = SHPOpen(shpFilePath.c_str(), "rb")) == NULL) {
+    cerr << "ERROR - _loadShapeMap, cannot open shape file: " << shpFilePath << endl;
+    return -1;
+  }
+
+  int i,j;
+  int index;
+  int point;
+  int num_points;        
+  int ret_stat;
+  char *str_ptr;
+  char name_base[1024];  /* Buffer for input names */
+  char dirname[4096];   /* Buffer for directories to search */
+  char name_buf[2048];  /* Buffer for input names */
+  char name_buf2[2048]; /* Buffer for input names */
+  char *map_buf;
+  int map_len;
+  FILE *map_file;
 
   int pid = getpid();
 
-  // Add . to list of dirs to search  to start.
-  strncpy(dirname,".,",2048);
-  strncat(dirname,maps_url,2048);
-
-
-  found = 0;
-  is_http = 0;
-
-  // Search each subdir
-  str_ptr = strtok(dirname,","); // Prime strtok
-  do{  //  Search 
-
-    while(*str_ptr == ' ') str_ptr++; //skip any leading space
-
-    snprintf(name_buf,2047,"%s/%s,",str_ptr,ov->map_file_name.c_str());
-
-    // Check if it's a HTTP URL
-    if(strncasecmp(name_buf,"http:",5) == 0) {
-
-      // Extract name base
-      strncpy(name_base,ov->map_file_name.c_str(),1023);
-      char *ptr = strrchr(name_base,'.');
-      if(ptr != NULL) *ptr = '\0';
-
-      // Download  SHP Part of shapefile
-      snprintf(name_buf,1023,"%s/%s.shp",str_ptr,name_base);
-      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
-                                        name_buf,_params.data_timeout_secs * 1000,
-                                        &map_buf, &map_len);
-      } else {
-        ret_stat =  HTTPgetURL(name_buf,
-                               _params.data_timeout_secs * 1000,
-                               &map_buf, &map_len);
-      }
-      if(ret_stat > 0 && map_len > 0 ) { // Succeeded
-        is_http = 1;
-
-        if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
-
-        snprintf(name_buf2,1023,"/tmp/%d_%s.shp",pid,name_base);
-        if((map_file = fopen(name_buf2,"w")) == NULL) {
-          fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
-          perror("CIDD ");
-          exit(-1);
-        }
-        if(fwrite(map_buf,map_len,1,map_file) != 1) {
-          fprintf(stderr,"Problems Writing to %s \n",name_buf2);
-          perror("CIDD ");
-          exit(-1);
-        }
-        fclose(map_file);
-        if(map_buf != NULL) free(map_buf);
-      }
-
-      // Download  SHX Part of shapefile
-      snprintf(name_buf,2047,"%s/%s.shx",str_ptr,name_base);
-      if(strlen(_params.http_proxy_url)  > URL_MIN_SIZE) {
-        ret_stat = HTTPgetURL_via_proxy(_params.http_proxy_url,
-                                        name_buf,_params.data_timeout_secs * 1000,
-                                        &map_buf, &map_len);
-
-      } else {
-        ret_stat =  HTTPgetURL(name_buf,
-                               _params.data_timeout_secs * 1000,
-                               &map_buf, &map_len);
-      }
-      if(ret_stat > 0  && map_len > 0) { // Succeeded
-
-        if(gd.debug) fprintf(stderr,"Read Shape File: %s: Len: %d\n",name_buf,map_len);
-
-        snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
-        if((map_file = fopen(name_buf2,"w")) == NULL) {
-          fprintf(stderr,"Problems Opening %s for writing\n",name_buf2);
-          perror("CIDD ");
-          exit(-1);
-        }
-        if(fwrite(map_buf,map_len,1,map_file) != 1) {
-          fprintf(stderr,"Problems Writing to %s \n",name_buf2);
-          perror("CIDD ");
-          exit(-1);
-        }
-        fclose(map_file);
-        if(map_buf != NULL) free(map_buf);
-      }
-
-      snprintf(name_buf,2047,"/tmp/%d_%s",pid,name_base);
-      if((SH = SHPOpen(name_buf,"rb")) != NULL) {
-        found = 1;
-      } else {
-        fprintf(stderr,"Problems with SHPOpen on %s \n",name_buf);
-      }
-
-    } else {  // Looks like a regular file
-
-      snprintf(name_buf,2047,"%s/%s,",str_ptr,ov->map_file_name.c_str());
-      if((SH = SHPOpen(name_buf,"rb")) != NULL) {
-        found = 1;
-      }
-    }
-
-  } while ((str_ptr = strtok(NULL,",")) != NULL && found == 0 );
-
-  if( found == 0) {
-    fprintf(stderr,"Warning!: Unable to load map file: %s\n",ov->map_file_name.c_str());
-    if(is_http) {  // Unlink temporary files
-      snprintf(name_buf2,2047,"/tmp/%d_%s.shp",pid,name_base);
-      unlink(name_buf2);
-      snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
-      unlink(name_buf2);
-    }
-		
-    return;
-  }
-
-
   // Shape File is Found and Open
 
-  int n_objects;
-  int shape_type;
-  int part_num;
-
+  int n_objects = 0;
+  int shape_type = 0;
+  int part_num = 0;
+  
   SHPGetInfo(SH, &n_objects, &shape_type, NULL, NULL);
 
   if(gd.debug) {
@@ -1989,7 +1836,7 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
 
   for(i=0; i < n_objects; i++ ) {  // Loop through each object
 
-    SO = SHPReadObject(SH,i);    // Load the shape object
+    SHPObject *SO = SHPReadObject(SH,i);    // Load the shape object
 
     switch(SO->nSHPType) {
 
@@ -2163,14 +2010,8 @@ static void _loadShapeMap(Overlay_t *ov, const char *maps_url)
     if(SO != NULL) SHPDestroyObject(SO);
   }  // End of each object
 
-  if(is_http) {  // Unlink temporary files
-    snprintf(name_buf2,2047,"/tmp/%d_%s.shp",pid,name_base);
-    unlink(name_buf2);
-    snprintf(name_buf2,2047,"/tmp/%d_%s.shx",pid,name_base);
-    unlink(name_buf2);
-	
-  }
-
+  return 0;
+  
 }
 
 /************************************************************************
@@ -2213,19 +2054,19 @@ static int _initMaps()
       string cachePathShp, cachePathShx;
       if (_getMapCachePath(mapFileName, cachePathShp, cachePathShx)) {
         iret = -1;
+      } else if (_loadShapeMap(over, cachePathShp, cachePathShx)) {
+        iret = -1;
       }
-
-      _loadShapeMap(over, _params.map_urls);
-
+      
     } else {  // Assume RAP Map Format 
       
       string cachePath, dummy;
       if (_getMapCachePath(mapFileName, cachePath, dummy)) {
         iret = -1;
+      } else if (_loadRapMap(over, cachePath)) {
+        iret = -1;
       }
-
-      _loadRapMap(over, _params.map_urls);
-
+      
     }
     
     if(gd.debug) {
@@ -2902,4 +2743,49 @@ static int _getMapCachePath(const string &mapName,
   return -1;
 
 }
+
+////////////////////////////////////////////
+// read file into buffer
+
+static int _readFileIntoBuffer(const string &path,
+                               char* &buf, int &len)
+
+{
   
+  struct stat sbuf;
+  if(stat(path.c_str(), &sbuf) < 0) { // Stat to find the file's size
+    int errNum = errno;
+    cerr << "ERROR - cidd_init::_readFileIntoBuffer, cannot load file: " << path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+  
+  buf = (char *) calloc(sbuf.st_size + 1 ,1);
+  if (!buf) {
+    cerr << "ERROR - cidd_init::_readFileIntoBuffer - out of memory" << endl;
+    return -1;
+  }
+
+  len = sbuf.st_size;
+  FILE *ff = fopen(path.c_str(), "r");
+  if (!ff) {
+    int errNum = errno;
+    cerr << "ERROR - cidd_init::_readFileIntoBuffer, cannot open file: " << path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  if(fread(buf, 1, sbuf.st_size, ff) != sbuf.st_size) {
+    int errNum = errno;
+    cerr << "ERROR - cidd_init::_readFileIntoBuffer, cannot read file: " << path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    fclose(ff);
+    return -1;
+  }
+  
+  fclose(ff);
+
+  return 0;
+
+}
+

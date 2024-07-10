@@ -48,7 +48,6 @@ ZoomMenuItem::ZoomMenuItem(QObject *parent) :
         
 {
   
-  
 }
 
 // destructor
@@ -64,6 +63,7 @@ ZoomMenuItem::~ZoomMenuItem()
 
 void ZoomMenuItem::toggled(bool checked)
 {
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> ZoomMenuItem toggled, is_on? " << checked << endl;
     cerr << "  zoomIndex: " << _zoomIndex << endl;
@@ -73,5 +73,12 @@ void ZoomMenuItem::toggled(bool checked)
     cerr << "  max_x: " << _zoomParams->max_x << endl;
     cerr << "  max_y: " << _zoomParams->max_y << endl;
   }
+
+  gd.h_win.zoom_level = _zoomIndex;
+  gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
+  gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
+  gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
+  gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+
 }
 

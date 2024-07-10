@@ -2025,6 +2025,51 @@ paramdef int {
 } horiz_right_margin;
 
 paramdef int {
+  p_default = 6;
+  p_descr = "Length of ticks on axes (pixels).";
+} horiz_axis_tick_len;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Ideal number of ticks on axes.";
+} horiz_n_ticks_ideal;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} horiz_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in bscan (pixels).";
+} horiz_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of tick values (pixels).";
+} horiz_tick_values_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of legends (pixels).";
+} horiz_legend_font_size;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for title text.";
+} horiz_title_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for axes.";
+} horiz_axes_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for grid (if plotted).";
+} horiz_grid_color;
+
+paramdef int {
   p_default = 20;
   p_descr = "Height of top margin (pixels).";
   p_help = "Size of top margin for vert section window.";
@@ -3026,22 +3071,22 @@ commentdef {
   p_header = "HORIZ MODE DISPLAY";
 }
 
-typedef enum
-{
-  HORIZ_FULL,
-  HORIZ_AIRBORNE
-} horiz_display_type_t;
+// typedef enum
+// {
+//   HORIZ_FULL,
+//   HORIZ_AIRBORNE
+// } horiz_display_type_t;
 
-paramdef enum horiz_display_type_t
-{
-  p_descr = "Type of display to use for the HORIZ window.";
-  p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
-           "This is the default.\n"
-           "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
-           "This display shows just the 180 degrees of radar pointing forward "
-           "from the nose of the plane.\n";
-  p_default = HORIZ_FULL;
-} horiz_display_type;
+// paramdef enum horiz_display_type_t
+// {
+//   p_descr = "Type of display to use for the HORIZ window.";
+//   p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
+//            "This is the default.\n"
+//            "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
+//            "This display shows just the 180 degrees of radar pointing forward "
+//            "from the nose of the plane.\n";
+//   p_default = HORIZ_FULL;
+// } horiz_display_type;
 
 paramdef double {
   p_default = 1.0;

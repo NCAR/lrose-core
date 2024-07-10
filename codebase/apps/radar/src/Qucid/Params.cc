@@ -4206,6 +4206,114 @@
     tt->single_val.i = 80;
     tt++;
     
+    // Parameter 'horiz_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_axis_tick_len - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'horiz_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_n_ticks_ideal - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'horiz_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_title_font_size - &_start_;
+    tt->single_val.i = 12;
+    tt++;
+    
+    // Parameter 'horiz_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in bscan (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_axis_label_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'horiz_tick_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of tick values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_tick_values_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'horiz_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legend_font_size");
+    tt->descr = tdrpStrDup("Font size of legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_legend_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'horiz_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("horiz_title_color");
+    tt->descr = tdrpStrDup("Color for title text.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'horiz_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("horiz_axes_color");
+    tt->descr = tdrpStrDup("Color for axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'horiz_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("horiz_grid_color");
+    tt->descr = tdrpStrDup("Color for grid (if plotted).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
     // Parameter 'vert_top_margin'
     // ctype is 'int'
     
@@ -6221,26 +6329,6 @@
     tt->param_name = tdrpStrDup("Comment 59");
     tt->comment_hdr = tdrpStrDup("HORIZ MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'horiz_display_type'
-    // ctype is '_horiz_display_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("horiz_display_type");
-    tt->descr = tdrpStrDup("Type of display to use for the HORIZ window.");
-    tt->help = tdrpStrDup("\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. This is the default.\n\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. This display shows just the 180 degrees of radar pointing forward from the nose of the plane.\n");
-    tt->val_offset = (char *) &horiz_display_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("horiz_display_type_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("HORIZ_FULL");
-      tt->enum_def.fields[0].val = HORIZ_FULL;
-      tt->enum_def.fields[1].name = tdrpStrDup("HORIZ_AIRBORNE");
-      tt->enum_def.fields[1].val = HORIZ_AIRBORNE;
-    tt->single_val.e = HORIZ_FULL;
     tt++;
     
     // Parameter 'horiz_aspect_ratio'

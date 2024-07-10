@@ -340,35 +340,46 @@ void HorizWidget::configureRange(double max_range)
   
   // set world view
 
-  int leftMargin = 0;
-  int rightMargin = 0;
-  int topMargin = 0;
-  int bottomMargin = 0;
+  int leftMargin = _params.horiz_left_margin;
+  int rightMargin =  _params.horiz_right_margin;
+  int topMargin =  _params.horiz_top_margin;
+  int bottomMargin =  _params.horiz_bot_margin;
   int colorScaleWidth = _params.color_scale_width;
   int axisTickLen = 7;
   int nTicksIdeal = 7;
-  int textMargin = 5;
+  int titleTextMargin = 5;
+  int legendTextMargin = 5;
+  int axisTextMargin = 5;
 
-  if (_params.horiz_display_type == Params::HORIZ_AIRBORNE) {
-
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin,
-                   topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, 0.0,
-                   _maxRangeKm, _maxRangeKm,
-                   axisTickLen, nTicksIdeal, textMargin);
-    
-  } else {
-    
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin,
-                   topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, -_maxRangeKm,
-                   _maxRangeKm, _maxRangeKm,
-                   axisTickLen, nTicksIdeal, textMargin);
-
-  }
+  _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
+  _fullWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
+                            gd.h_win.cmax_x, gd.h_win.cmax_y);
+  
+  _fullWorld.setLeftMargin(leftMargin);
+  _fullWorld.setRightMargin(rightMargin);
+  _fullWorld.setTopMargin(topMargin);
+  _fullWorld.setBottomMargin(bottomMargin);
+  _fullWorld.setTitleTextMargin(titleTextMargin);
+  _fullWorld.setLegendTextMargin(legendTextMargin);
+  _fullWorld.setAxisTextMargin(axisTextMargin);
+  _fullWorld.setColorScaleWidth(colorScaleWidth);
+
+  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
+
+  _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.horiz_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.horiz_legend_font_size);
+
+  _fullWorld.setTitleColor(_params.horiz_title_color);
+  _fullWorld.setAxisLineColor(_params.horiz_axes_color);
+  _fullWorld.setAxisTextColor(_params.horiz_axes_color);
+  _fullWorld.setGridColor(_params.horiz_grid_color);
+
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -491,7 +502,7 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
     _setTransform(_zoomWorld.getTransform());
 
@@ -682,15 +693,14 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     }
     painter.restore();
 
-    _zoomWorld.setSpecifyTicks(true, -maxRingRange, _ringSpacing);
+    _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
+    _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
 
-    _zoomWorld.drawAxisLeft(painter, "km", true, true, true);
-    _zoomWorld.drawAxisRight(painter, "km", true, true, true);
-    _zoomWorld.drawAxisTop(painter, "km", true, true, true);
-    _zoomWorld.drawAxisBottom(painter, "km", true, true, true);
+    _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
+    _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
+    _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
+    _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
     
-    _zoomWorld.setSpecifyTicks(false);
-
   }
   
   // Draw the azimuth lines
@@ -793,8 +803,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter,
-                            _params.label_font_size,
-                            _params.text_color);
+                            _params.label_font_size);
 
   if (_archiveMode) {
     

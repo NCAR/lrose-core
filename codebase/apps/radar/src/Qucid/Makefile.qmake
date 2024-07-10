@@ -9955,16 +9955,18 @@ WorldPlot.o: WorldPlot.cc /usr/local/include/QtCore/QLineF \
 		/usr/local/include/QtCore/qiodevicebase.h \
 		/usr/local/include/QtCore/qshareddata.h \
 		/usr/local/include/toolsa/toolsa_macros.h \
-		WorldPlot.hh \
-		/usr/local/lib/QtGui.framework/Headers/QPainter \
-		/usr/local/lib/QtGui.framework/Headers/qpainter.h \
-		/usr/local/include/QtGui/qpixmap.h \
-		/usr/local/include/QtGui/qpaintdevice.h \
+		/usr/local/include/qtplot/ColorMap.hh \
+		/usr/local/include/QtGui/QBrush \
+		/usr/local/include/QtGui/qbrush.h \
 		/usr/local/include/QtGui/qcolor.h \
 		/usr/local/include/QtGui/qrgb.h \
 		/usr/local/include/QtGui/qrgba64.h \
 		/usr/local/include/QtGui/qimage.h \
+		/usr/local/include/QtGui/qpaintdevice.h \
 		/usr/local/include/QtGui/qpixelformat.h \
+		/usr/local/include/QtGui/qpixmap.h \
+		/usr/local/include/QtGui/QPainter \
+		/usr/local/include/QtGui/qpainter.h \
 		/usr/local/include/QtGui/qtextoption.h \
 		/usr/local/include/QtCore/qmetatype.h \
 		/usr/local/include/QtCore/qcompare.h \
@@ -9977,11 +9979,13 @@ WorldPlot.o: WorldPlot.cc /usr/local/include/QtCore/QLineF \
 		/usr/local/include/QtCore/qtaggedpointer.h \
 		/usr/local/include/QtCore/qscopeguard.h \
 		/usr/local/include/QtGui/qpen.h \
-		/usr/local/include/QtGui/qbrush.h \
 		/usr/local/include/QtGui/qfontinfo.h \
 		/usr/local/include/QtGui/qfont.h \
 		/usr/local/include/QtCore/qendian.h \
 		/usr/local/include/QtGui/qfontmetrics.h \
+		WorldPlot.hh \
+		/usr/local/lib/QtGui.framework/Headers/QPainter \
+		/usr/local/lib/QtGui.framework/Headers/qpainter.h \
 		/usr/local/lib/QtCore.framework/Headers/QRect \
 		/usr/local/lib/QtCore.framework/Headers/qrect.h \
 		/usr/local/lib/QtGui.framework/Headers/QTransform \
@@ -9990,11 +9994,7 @@ WorldPlot.o: WorldPlot.cc /usr/local/include/QtCore/QLineF \
 		/usr/local/lib/QtGui.framework/Headers/qcolor.h \
 		/usr/local/lib/QtGui.framework/Headers/QFont \
 		/usr/local/lib/QtGui.framework/Headers/qfont.h \
-		/usr/local/include/Radx/RadxTime.hh \
-		/usr/local/include/qtplot/ColorMap.hh \
-		/usr/local/include/QtGui/QBrush \
-		/usr/local/include/QtGui/QPainter \
-		/usr/local/include/QtGui/qpainter.h
+		/usr/local/include/Radx/RadxTime.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o WorldPlot.o WorldPlot.cc
 
 ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \

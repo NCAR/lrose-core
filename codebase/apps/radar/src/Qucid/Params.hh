@@ -161,11 +161,6 @@ public:
   } images_creation_mode_t;
 
   typedef enum {
-    HORIZ_FULL = 0,
-    HORIZ_AIRBORNE = 1
-  } horiz_display_type_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -1066,6 +1061,24 @@ public:
 
   int horiz_right_margin;
 
+  int horiz_axis_tick_len;
+
+  int horiz_n_ticks_ideal;
+
+  int horiz_title_font_size;
+
+  int horiz_axis_label_font_size;
+
+  int horiz_tick_values_font_size;
+
+  int horiz_legend_font_size;
+
+  char* horiz_title_color;
+
+  char* horiz_axes_color;
+
+  char* horiz_grid_color;
+
   int vert_top_margin;
 
   int vert_bot_margin;
@@ -1316,8 +1329,6 @@ public:
 
   int click_cross_line_width;
 
-  horiz_display_type_t horiz_display_type;
-
   double horiz_aspect_ratio;
 
   tdrp_bool_t horiz_grids_on_at_startup;
@@ -1487,7 +1498,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[499];
+  mutable TDRPtable _table[507];
 
   const char *_className;
 

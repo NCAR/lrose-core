@@ -452,7 +452,7 @@ void CartWidget::mouseReleaseEvent(QMouseEvent *e)
       _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
       _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-      _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+      _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
       _setTransform(_zoomWorld.getTransform());
 
