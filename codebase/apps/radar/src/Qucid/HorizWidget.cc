@@ -345,11 +345,11 @@ void HorizWidget::configureRange(double max_range)
   int topMargin =  _params.horiz_top_margin;
   int bottomMargin =  _params.horiz_bot_margin;
   int colorScaleWidth = _params.color_scale_width;
-  int axisTickLen = 7;
-  int nTicksIdeal = 7;
-  int titleTextMargin = 5;
-  int legendTextMargin = 5;
-  int axisTextMargin = 5;
+  int axisTickLen = _params.horiz_axis_tick_len;
+  int nTicksIdeal = _params.horiz_n_ticks_ideal;
+  int titleTextMargin = _params.horiz_title_text_margin;
+  int legendTextMargin = _params.horiz_legend_text_margin;
+  int axisTextMargin = _params.horiz_axis_text_margin;
 
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
@@ -802,8 +802,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter,
-                            _params.label_font_size);
+  _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
 
   if (_archiveMode) {
     

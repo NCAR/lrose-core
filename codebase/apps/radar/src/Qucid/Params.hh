@@ -1061,6 +1061,12 @@ public:
 
   int horiz_right_margin;
 
+  int horiz_title_text_margin;
+
+  int horiz_legend_text_margin;
+
+  int horiz_axis_text_margin;
+
   int horiz_axis_tick_len;
 
   int horiz_n_ticks_ideal;
@@ -1086,6 +1092,30 @@ public:
   int vert_left_margin;
 
   int vert_right_margin;
+
+  int vert_title_text_margin;
+
+  int vert_legend_text_margin;
+
+  int vert_axis_text_margin;
+
+  int vert_axis_tick_len;
+
+  int vert_n_ticks_ideal;
+
+  int vert_title_font_size;
+
+  int vert_axis_label_font_size;
+
+  int vert_tick_values_font_size;
+
+  int vert_legend_font_size;
+
+  char* vert_title_color;
+
+  char* vert_axes_color;
+
+  char* vert_grid_color;
 
   int horiz_legends_start_x;
 
@@ -1361,13 +1391,7 @@ public:
 
   int vert_label_font_size;
 
-  int vert_axis_tick_len;
-
-  int vert_n_ticks_ideal;
-
   int vert_text_margin;
-
-  tdrp_bool_t vert_display_180_degrees;
 
   double vert_aspect_ratio;
 
@@ -1498,7 +1522,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[507];
+  mutable TDRPtable _table[519];
 
   const char *_className;
 

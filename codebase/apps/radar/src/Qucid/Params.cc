@@ -4059,8 +4059,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_default_x_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->descr = tdrpStrDup("Startup position of vert window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The vert display window will start at this location.");
     tt->val_offset = (char *) &vert_default_x_pos - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -4071,8 +4071,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_default_y_pos");
-    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
-    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->descr = tdrpStrDup("Startup position of vert window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The vert display window will start at this location.");
     tt->val_offset = (char *) &vert_default_y_pos - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -4165,7 +4165,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_top_margin");
     tt->descr = tdrpStrDup("Height of top margin (pixels).");
-    tt->help = tdrpStrDup("Size of top margin for main window.");
+    tt->help = tdrpStrDup("Size of top margin for horiz window.");
     tt->val_offset = (char *) &horiz_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -4177,7 +4177,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_bot_margin");
     tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
-    tt->help = tdrpStrDup("Size of bottom margin for main window.");
+    tt->help = tdrpStrDup("Size of bottom margin for horiz window.");
     tt->val_offset = (char *) &horiz_bot_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -4189,7 +4189,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_left_margin");
     tt->descr = tdrpStrDup("Width of left margin (pixels).");
-    tt->help = tdrpStrDup("Size of left margin for main window.");
+    tt->help = tdrpStrDup("Size of left margin for horiz window.");
     tt->val_offset = (char *) &horiz_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -4201,9 +4201,45 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_right_margin");
     tt->descr = tdrpStrDup("Width of right margin (pixels).");
-    tt->help = tdrpStrDup("Size of right margin for main window.");
+    tt->help = tdrpStrDup("Size of right margin for horiz window.");
     tt->val_offset = (char *) &horiz_right_margin - &_start_;
     tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'horiz_title_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_title_text_margin");
+    tt->descr = tdrpStrDup("Width of title text margin (pixels).");
+    tt->help = tdrpStrDup("Size of title test margin for horiz window.");
+    tt->val_offset = (char *) &horiz_title_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'horiz_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legend_text_margin");
+    tt->descr = tdrpStrDup("Width of legend text margin (pixels).");
+    tt->help = tdrpStrDup("Size of legend test margin for horiz window.");
+    tt->val_offset = (char *) &horiz_legend_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'horiz_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_axis_text_margin");
+    tt->descr = tdrpStrDup("Width of axis text margin (pixels).");
+    tt->help = tdrpStrDup("Size of axis test margin for horiz window.");
+    tt->val_offset = (char *) &horiz_axis_text_margin - &_start_;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'horiz_axis_tick_len'
@@ -4360,6 +4396,150 @@
     tt->help = tdrpStrDup("Size of right margin for vert section window.");
     tt->val_offset = (char *) &vert_right_margin - &_start_;
     tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'vert_title_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_title_text_margin");
+    tt->descr = tdrpStrDup("Width of title text margin (pixels).");
+    tt->help = tdrpStrDup("Size of title test margin for vert window.");
+    tt->val_offset = (char *) &vert_title_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'vert_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_legend_text_margin");
+    tt->descr = tdrpStrDup("Width of legend text margin (pixels).");
+    tt->help = tdrpStrDup("Size of legend test margin for vert window.");
+    tt->val_offset = (char *) &vert_legend_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'vert_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_axis_text_margin");
+    tt->descr = tdrpStrDup("Width of axis text margin (pixels).");
+    tt->help = tdrpStrDup("Size of axis test margin for vert window.");
+    tt->val_offset = (char *) &vert_axis_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'vert_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_axis_tick_len - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'vert_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_n_ticks_ideal - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'vert_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_title_font_size - &_start_;
+    tt->single_val.i = 12;
+    tt++;
+    
+    // Parameter 'vert_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in bscan (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_axis_label_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'vert_tick_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of tick values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_tick_values_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'vert_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_legend_font_size");
+    tt->descr = tdrpStrDup("Font size of legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_legend_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'vert_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vert_title_color");
+    tt->descr = tdrpStrDup("Color for title text.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'vert_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vert_axes_color");
+    tt->descr = tdrpStrDup("Color for axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'vert_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vert_grid_color");
+    tt->descr = tdrpStrDup("Color for grid (if plotted).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
     // Parameter 'Comment 36'
@@ -6544,30 +6724,6 @@
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'vert_axis_tick_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_axis_tick_len");
-    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_axis_tick_len - &_start_;
-    tt->single_val.i = 7;
-    tt++;
-    
-    // Parameter 'vert_n_ticks_ideal'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_n_ticks_ideal");
-    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_n_ticks_ideal - &_start_;
-    tt->single_val.i = 7;
-    tt++;
-    
     // Parameter 'vert_text_margin'
     // ctype is 'int'
     
@@ -6578,18 +6734,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_text_margin - &_start_;
     tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'vert_display_180_degrees'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_display_180_degrees");
-    tt->descr = tdrpStrDup("Flag indicating to display full 180 degrees in VERT window. If set to false, the VERT window will just display 90 degrees of the VERT.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_display_180_degrees - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'vert_aspect_ratio'

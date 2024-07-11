@@ -42,11 +42,7 @@ VertWidget::VertWidget(QWidget* parent,
   _prevAz = -9999.0;
   _prevTime = 0;
   
-  if (_params.vert_display_180_degrees) {
-    _aspectRatio = _params.vert_aspect_ratio * 2.0;
-  } else {
-    _aspectRatio = _params.vert_aspect_ratio;
-  }
+  _aspectRatio = _params.vert_aspect_ratio;
   _colorScaleWidth = _params.vert_color_scale_width;
 
   setGrids(_params.vert_grids_on_at_startup);
@@ -200,21 +196,38 @@ void VertWidget::configureRange(double max_range)
   int colorScaleWidth = _params.vert_color_scale_width;
   int axisTickLen = _params.vert_axis_tick_len;
   int nTicksIdeal = _params.vert_n_ticks_ideal;
-  int textMargin = _params.vert_text_margin;
+  int titleTextMargin = _params.vert_title_text_margin;
+  int legendTextMargin = _params.vert_legend_text_margin;
+  int axisTextMargin = _params.vert_axis_text_margin;
+  
+  _fullWorld.setWindowGeom(width(), height(), 0, 0);
+  
+  _fullWorld.setWorldLimits(0.0, 0.0,
+                            _maxRangeKm, _maxHeightKm);
+  
+  _fullWorld.setLeftMargin(leftMargin);
+  _fullWorld.setRightMargin(rightMargin);
+  _fullWorld.setTopMargin(topMargin);
+  _fullWorld.setBottomMargin(bottomMargin);
+  _fullWorld.setTitleTextMargin(titleTextMargin);
+  _fullWorld.setLegendTextMargin(legendTextMargin);
+  _fullWorld.setAxisTextMargin(axisTextMargin);
+  _fullWorld.setColorScaleWidth(colorScaleWidth);
 
-  if (_params.vert_display_180_degrees) {
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, 0.0,
-                   _maxRangeKm, _maxHeightKm,
-                   axisTickLen, nTicksIdeal, textMargin);
-  } else {
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   0.0, 0.0,
-                   _maxRangeKm, _maxHeightKm,
-                   axisTickLen, nTicksIdeal, textMargin);
-  }
+  _fullWorld.setXAxisTickLen(_params.vert_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.vert_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.vert_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.vert_n_ticks_ideal);
+
+  _fullWorld.setTitleFontSize(_params.vert_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.vert_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.vert_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.vert_legend_font_size);
+
+  _fullWorld.setTitleColor(_params.vert_title_color);
+  _fullWorld.setAxisLineColor(_params.vert_axes_color);
+  _fullWorld.setAxisTextColor(_params.vert_axes_color);
+  _fullWorld.setGridColor(_params.vert_grid_color);
 
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -284,7 +297,7 @@ void VertWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
     _setTransform(_zoomWorld.getTransform());
 
@@ -415,16 +428,15 @@ void VertWidget::_drawOverlays(QPainter &painter)
   font.setPointSizeF(_params.vert_label_font_size);
   painter.setFont(font);
   
-  _zoomWorld.setSpecifyTicks(true, xMin, _xGridSpacing);
-  _zoomWorld.drawAxisTop(painter, "km", true, true, true);
-  _zoomWorld.drawAxisBottom(painter, "km", true, true, true);
-  
-  _zoomWorld.setSpecifyTicks(true, yMin, _yGridSpacing);
-  _zoomWorld.drawAxisLeft(painter, "km", true, true, true);
-  _zoomWorld.drawAxisRight(painter, "km", true, true, true);
-    
-  _zoomWorld.setSpecifyTicks(false);
+  _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
+  _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
 
+  _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
+  _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
+  
+  _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
+  _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
+    
   // Draw the grid
   
   if (_xGridSpacing > 0.0 && _gridsEnabled)  {
@@ -526,9 +538,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
 
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter,
-                            _params.label_font_size,
-                            _params.text_color);
+  _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
   
   // add legends with time, field name and elevation angle
 

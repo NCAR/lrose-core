@@ -1949,14 +1949,14 @@ paramdef int {
 
 paramdef int {
   p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
+  p_descr = "Startup position of vert window, relative to top-left of screen (pixels).";
+  p_help = "The vert display window will start at this location.";
 } vert_default_x_pos;
 
 paramdef int {
   p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
+  p_descr = "Startup position of vert window, relative to top-left of screen (pixels).";
+  p_help = "The vert display window will start at this location.";
 } vert_default_y_pos;
 
 paramdef int {
@@ -2003,26 +2003,44 @@ paramdef int {
 paramdef int {
   p_default = 20;
   p_descr = "Height of top margin (pixels).";
-  p_help = "Size of top margin for main window.";
+  p_help = "Size of top margin for horiz window.";
 } horiz_top_margin;
 
 paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin (pixels).";
-  p_help = "Size of bottom margin for main window.";
+  p_help = "Size of bottom margin for horiz window.";
 } horiz_bot_margin;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of left margin (pixels).";
-  p_help = "Size of left margin for main window.";
+  p_help = "Size of left margin for horiz window.";
 } horiz_left_margin;
 
 paramdef int {
   p_default = 80;
   p_descr = "Width of right margin (pixels).";
-  p_help = "Size of right margin for main window.";
+  p_help = "Size of right margin for horiz window.";
 } horiz_right_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of title text margin (pixels).";
+  p_help = "Size of title test margin for horiz window.";
+} horiz_title_text_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of legend text margin (pixels).";
+  p_help = "Size of legend test margin for horiz window.";
+} horiz_legend_text_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of axis text margin (pixels).";
+  p_help = "Size of axis test margin for horiz window.";
+} horiz_axis_text_margin;
 
 paramdef int {
   p_default = 6;
@@ -2092,6 +2110,69 @@ paramdef int {
   p_descr = "Width of right margin (pixels).";
   p_help = "Size of right margin for vert section window.";
 } vert_right_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of title text margin (pixels).";
+  p_help = "Size of title test margin for vert window.";
+} vert_title_text_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of legend text margin (pixels).";
+  p_help = "Size of legend test margin for vert window.";
+} vert_legend_text_margin;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Width of axis text margin (pixels).";
+  p_help = "Size of axis test margin for vert window.";
+} vert_axis_text_margin;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Length of ticks on axes (pixels).";
+} vert_axis_tick_len;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Ideal number of ticks on axes.";
+} vert_n_ticks_ideal;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} vert_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in bscan (pixels).";
+} vert_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of tick values (pixels).";
+} vert_tick_values_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of legends (pixels).";
+} vert_legend_font_size;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for title text.";
+} vert_title_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for axes.";
+} vert_axes_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for grid (if plotted).";
+} vert_grid_color;
 
 commentdef {
   p_header = "Legends displayed within the plot window.";
@@ -3185,26 +3266,9 @@ paramdef int {
 } vert_label_font_size;
 
 paramdef int {
-  p_default = 7;
-  p_descr = "Length of ticks on axes (pixels).";
-} vert_axis_tick_len;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Ideal number of ticks on axes.";
-} vert_n_ticks_ideal;
-
-paramdef int {
   p_default = 5;
   p_descr = "Margin around some text (pixels).";
 } vert_text_margin;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Flag indicating to display full 180 degrees in VERT window. "
-            "If set to false, the VERT window will just display 90 degrees "
-            "of the VERT.";
-} vert_display_180_degrees;
 
 paramdef double {
   p_default = 1.0;
