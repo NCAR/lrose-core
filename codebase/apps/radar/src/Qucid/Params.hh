@@ -677,14 +677,6 @@ public:
 
   tdrp_bool_t use_cosine_correction;
 
-  int sim_sleep_msecs;
-
-  int sim_n_gates;
-
-  double sim_start_range_km;
-
-  double sim_gate_spacing_km;
-
   char* click_point_fmq_url;
 
   tdrp_bool_t draw_export_active;
@@ -1522,7 +1514,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[519];
+  mutable TDRPtable _table[514];
 
   const char *_className;
 

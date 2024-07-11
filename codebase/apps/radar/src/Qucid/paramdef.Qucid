@@ -490,31 +490,6 @@ commentdef {
 }
 
 commentdef {
-  p_header = "SIMULATION MODE";
-}
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Number of milliseconds to sleep between beams in simulated input "
-    "mode.";
-} sim_sleep_msecs;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Number of gates in simulated data.";
-} sim_n_gates;
-
-paramdef double {
-  p_default = 0.075;
-  p_descr = "Start range in simulated mode (km).";
-} sim_start_range_km;
-
-paramdef double {
-  p_default = 0.150;
-  p_descr = "Gate spacing in simulated mode (km).";
-} sim_gate_spacing_km;
-
-commentdef {
   p_header = "CLICK POINT DATA MESSAGING";
   p_text = "Writing the click point location to an FMQ in XML format.";
 }
