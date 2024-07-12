@@ -1824,8 +1824,10 @@ int Fmq::_read_stat ()
 
     }
     else {
+
       _print_error("_read_stat",
                    "magic cookie is not valid ");
+      cerr << "magic cookie: " << magic_cookie << endl;
       return -1;
 
     }
@@ -1868,19 +1870,13 @@ int Fmq::_read_stat ()
 int Fmq::_read_slots ()
 {
 
+  // function returns file pointer to 0
+
   int magic_cookie;
   if (_get_magic_cookie(magic_cookie)) {
     _print_error("_read_stat", "Cannot read magic cookie");
     return -1;
   }
-
-    // seek start again
-  if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
-    _print_error("_read_stat",
-		 "Cannot seek to start of status buffer");
-    return -1;
-  }
-
 
   if (magic_cookie == Q_MAGIC_STAT_64) {
 
@@ -1905,7 +1901,7 @@ int Fmq::_read_slots ()
     // swap slot byte order
 
     for(int i = 0; i < _stat.nslots; ++i) {
-      be_to_slot_64(&_slots[i]);
+      be_to_slot_64(&(_slots[i]));
     }
 
     return 0;
@@ -4024,8 +4020,34 @@ void Fmq::be_to_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_to_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
 
+//  si32 magic_cookie
+//
+//  si32 youngest_id
+//  si32 youngest_slot
+//
+//  si32 oldest_slot
+//
+//
+//  si32 nslots;
+//  si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
+//
+//
+//  /* NOTE - blocking write only supported for 1 reader */
+//
+//  si32 blocking_write;  /* flag to indicate blocking write */
+//  si32 last_id_read;    /* used for blocking write operation */
+//  si32 checksum;
+//
+//  si32 pad_si32_1;
+//
+//  si64 buf_size;        /* size of buffer */
+//  si64 begin_insert;    /* offset to start of insert free region */
+//  si64 end_insert;      /* offset to end of insert free region */
+//  si64 begin_append;    /* offset to start of append free region */
+//  si64 time_written;    /* time at which the status struct was last written to file */
+
+  int n_bytes = BE_to_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
   BE_to_array_64(stat+n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
@@ -4058,8 +4080,22 @@ void Fmq::be_to_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_to_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
-  BE_to_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
+
+//  slot->time = BE_to_si64(slot->time);
+//  slot->msg_len = BE_to_si64(slot->msg_len);
+//  slot->stored_len = BE_to_si64(slot->stored_len);
+//  slot->offset = BE_to_si64(slot->offset);
+//  slot->active = BE_to_si32(slot->active);
+//  slot->id = BE_to_si32(slot->id);
+//  slot->type = BE_to_si32(slot->type);
+//  slot->subtype = BE_to_si32(slot->subtype);
+//  slot->compress = BE_to_si32(slot->compress);
+//  slot->checksum = BE_to_si32(slot->checksum);
+//
+
+  int n_bytes = BE_to_array_32(slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64(slot+Q_NUM_INT_SLOT_64*sizeof(si32), Q_NUM_LONG_SLOT_64*sizeof(si64));
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -4073,8 +4109,8 @@ void Fmq::be_from_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_from_array_64(slot, Q_NUM_LONG_SLOT_64*sizeof(si64));
-  BE_from_array_32(slot+n_bytes, Q_NUM_INT_SLOT_64*sizeof(si32));
+  int n_bytes = BE_from_array_32(slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_from_array_64(slot+Q_NUM_INT_SLOT_64*sizeof(si32), Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////

@@ -78,8 +78,7 @@ public:
 
   static const int Q_MAGIC_STAT_64 = 88008803;
   static const int Q_MAX_ID_64 = 1000000000;
-  static const int Q_NBYTES_EXTRA_64 = 12;
-  static const int Q_NUM_LONG_STAT_64 = 5;
+  static const int Q_NUM_LONG_STAT_64 = 6;
   static const int Q_NUM_INT_STAT_64 = 10;
   static const int Q_NUM_LONG_SLOT_64 = 4;
   static const int Q_NUM_INT_SLOT_64 = 6;
@@ -113,37 +112,26 @@ public:
     si64 begin_insert;    /* offset to start of insert free region */
     si64 end_insert;      /* offset to end of insert free region */
     si64 begin_append;    /* offset to start of append free region */
-    si64 time_written;    /* time at which the status struct was last
-                           * written to file */
-
-
-
+    si64 time_written;    /* time at which the status struct was last written to file */
+    si64 pad_si64_1;
   } q_stat_64_t;
-  
-  // FMQ slot struct
-  
-  //   Messages are stored in the buffer as follows:
-  //        si32         si32                             si32
-  //   --------------------------------------------------------
-  //   | magic cookie |  slot_num  | -- message -- | pad |  id  |
-  //   --------------------------------------------------------
-  //   Pad is for 4-byte alignment.
   
   typedef struct {
 
-    si64 time;            /* Unix time at which the message is written */
-    si64 msg_len;         /* message len in bytes */
-    si64 stored_len;      /* message len + extra XX bytes (Q_NBYTES_EXTRA_64)
-			   * for magic-cookie and slot num fields,
-			   * plus padding out to even 4 bytes */
-    si64 offset;          /* message offset in buffer */
     si32 active;          /* active flag, 1 or 0 */
     si32 id;              /* message id 0 to FMQ_MAX_ID */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
     si32 compress;        /* compress mode - TRUE or FALSE */
     si32 checksum;
-    
+
+    si64 time;            /* Unix time at which the message is written */
+    si64 msg_len;         /* message len in bytes */
+    si64 stored_len;      /* message len + extra XX bytes (Q_NBYTES_EXTRA_64)
+			                     * for magic-cookie and slot num fields,
+			                     *  plus padding out to even 4 bytes */
+    si64 offset;          /* message offset in buffer */
+
   } q_slot_64_t;
 
   // end 64-bit implementation
@@ -153,7 +141,6 @@ public:
   static const int Q_MAGIC_STAT_32 = 88008801;
   static const int Q_MAGIC_BUF = 88008802;
   static const int Q_MAX_ID_32 = 1000000000;
-  static const int Q_NBYTES_EXTRA_32 = 12;
 
   // FMQ status struct
 
@@ -186,14 +173,6 @@ public:
 
   } q_stat_32_t;
 
-  // FMQ slot struct
-
-  //   Messages are stored in the buffer as follows:
-  //        si32         si32                             si32
-  //   --------------------------------------------------------
-  //   | magic cookie |  slot_num  | -- message -- | pad |  id  |
-  //   --------------------------------------------------------
-  //   Pad is for 4-byte alignment.
 
   typedef struct {
 
@@ -218,9 +197,18 @@ public:
   // default implementation is 64-bit
   static const int Q_MAGIC_STAT = Q_MAGIC_STAT_64;
   static const int Q_MAX_ID = Q_MAX_ID_64;
-  static const int Q_NBYTES_EXTRA = Q_NBYTES_EXTRA_64;
+  static const int Q_NBYTES_EXTRA = 12;
   typedef q_stat_64_t q_stat_t;
   typedef q_slot_64_t q_slot_t;
+
+  // FMQ slot struct
+
+  //   Messages are stored in the buffer as follows:
+  //        si32         si32                             si32
+  //   --------------------------------------------------------
+  //   | magic cookie |  slot_num  | -- message -- | pad |  id  |
+  //   --------------------------------------------------------
+  //   Pad is for 4-byte alignment.
 
 
   // constructor
@@ -303,16 +291,16 @@ public:
   //
   // Returns 0 on success, -1 on error
   // Messages written to msgLog if non-NULL
- 
-  virtual int initReadWrite(const char* fmqPath, 
-			    const char* procName, 
-			    bool debug = false,
-			    openPosition position = END,
-			    bool compress = false, 
-			    size_t numSlots = 1024, 
-			    long bufSize = 10000,
-			    int msecSleep = -1,
-			    MsgLog *msgLog = NULL);
+
+  virtual int initReadWrite(const char* fmqPath,
+                            const char* procName,
+                            bool debug = false,
+                            openPosition position = END,
+                            bool compress = false,
+                            size_t numSlots = 1024,
+                            long bufSize = 10000,
+                            int msecSleep = -1,
+                            MsgLog *msgLog = NULL);
 
   // initReadOnly()
   // Open for reading, in mode "r".
@@ -324,13 +312,13 @@ public:
   //
   // Returns 0 on success, -1 on error
   // Messages written to msgLog if non-NULL
-  
-  virtual int initReadOnly(const char* fmqPath, 
-			   const char* procName, 
-			   bool debug = false,
-			   openPosition position = END,
-			   int msecSleep = -1,
-			   MsgLog *msgLog = NULL);
+
+  virtual int initReadOnly(const char* fmqPath,
+                           const char* procName,
+                           bool debug = false,
+                           openPosition position = END,
+                           int msecSleep = -1,
+                           MsgLog *msgLog = NULL);
 
   // initReadBlocking()
   // If queue exists, opens for reading, in mode "r".
@@ -353,12 +341,12 @@ public:
   // This subtlety was implemented March 2006. Prior to this, the
   // first entry written to a queue may have been missed. Niles Oien.
 
-  virtual int initReadBlocking(const char* fmqPath, 
-			       const char* procName, 
-			       bool debug = false,
-			       openPosition position = END,
-			       int msecSleep = -1,
-			       MsgLog *msgLog = NULL);
+  virtual int initReadBlocking(const char* fmqPath,
+                               const char* procName,
+                               bool debug = false,
+                               openPosition position = END,
+                               int msecSleep = -1,
+                               MsgLog *msgLog = NULL);
  
   // initReadWriteBlocking()
   // If queue exists, opens for reading, in mode "r+".
@@ -376,27 +364,27 @@ public:
   // See comments above for initReadBlocking() about the setting of
   // the open position - they apply to initReadWriteBlocking as well.
 
-  virtual int initReadWriteBlocking(const char* fmqPath, 
-				    const char* procName, 
-				    bool debug = false,
-				    openPosition position = END,
-				    int msecSleep = -1,
-				    MsgLog *msgLog = NULL);
+  virtual int initReadWriteBlocking(const char* fmqPath,
+                                    const char* procName,
+                                    bool debug = false,
+                                    openPosition position = END,
+                                    int msecSleep = -1,
+                                    MsgLog *msgLog = NULL);
 
   // generic init() - allows full control of the init
   // Returns 0 on success, -1 on error
   // Messages written to msgLog if non-NULL
 
-  virtual int init(const char* fmqPath, 
-		   const char* procName, 
-		   bool debug = false,
-		   openMode mode = READ_WRITE, 
-		   openPosition position = END,
-		   bool compress = false, 
-		   size_t numSlots = 1024, 
-		   long bufSize = 10000,
-		   int msecSleep = -1,
-		   MsgLog *msgLog = NULL);
+  virtual int init(const char* fmqPath,
+                   const char* procName,
+                   bool debug = false,
+                   openMode mode = READ_WRITE,
+                   openPosition position = END,
+                   bool compress = false,
+                   size_t numSlots = 1024,
+                   long bufSize = 10000,
+                   int msecSleep = -1,
+                   MsgLog *msgLog = NULL);
 
   // Setting a timeout for blocking reads
 
@@ -472,19 +460,19 @@ public:
 
   // Writes a message to the fmq
   // Returns 0 on success, -1 on error
-  
+
   virtual int writeMsg(int type,
-		       int subType = 0,
-		       const void *msg = NULL,
-		       int msgLen = 0);
+                       int subType = 0,
+                       const void *msg = NULL,
+                       int msgLen = 0);
   
   // Writing precompressed msg
   // Returns 0 on success, -1 on error
 
-  virtual int writeMsgPreCompressed(int type, int subType, 
-				    const void *msg, int msgLen,
-				    int uncompressedLen);
-  
+  virtual int writeMsgPreCompressed(int type, int subType,
+                                    const void *msg, int msgLen,
+                                    int uncompressedLen);
+
   ///////////////////////////////////////////////////////////
   // get methods
 
@@ -837,8 +825,8 @@ protected:
   int _write_slot(int slot_num);
   
   int _write_msg(void *msg, int msg_len,
-		 int msg_type, int msg_subtype,
-		 int pre_compressed, int uncompressed_len);
+                 int msg_type, int msg_subtype,
+                 int pre_compressed, int uncompressed_len);
   
   int _write_msg_to_slot(int write_slot, int write_id,
 			 void *msg, int msg_len, int stored_len, int offset);
