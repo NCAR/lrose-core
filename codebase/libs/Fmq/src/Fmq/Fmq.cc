@@ -819,7 +819,7 @@ int Fmq::print_debug(const char *fmqPath,
   if (qq._alloc_slots(qq._stat.nslots)) {
     return -1;
   }
-  
+
   if (qq._read_slots()) {
     qq._print_error("fmq_print_debug ",
 		     "Cannot read in slot structs array\n");
@@ -1158,6 +1158,7 @@ int Fmq::_open_rdwr(int nslots, int buf_size)
   if (_read_stat()) {
     return -1;
   }
+
   if (_read_slots()) {
     return -1;
   }
@@ -1208,6 +1209,7 @@ int Fmq::_open_rdonly ()
   if (_read_stat()) {
     return -1;
   }
+
   if (_read_slots()) {
     return -1;
   }
@@ -1251,6 +1253,7 @@ int Fmq::_open_rdwr_nocreate()
   if (_read_stat()) {
     return -1;
   }
+
   if (_read_slots()) {
     return -1;
   }
@@ -1827,7 +1830,6 @@ int Fmq::_read_stat ()
 
       _print_error("_read_stat",
                    "magic cookie is not valid ");
-      cerr << "magic cookie: " << magic_cookie << endl;
       return -1;
 
     }
@@ -2381,7 +2383,7 @@ int Fmq::_read_msg (int slot_num)
       compressed_msg = (void *) (iptr + 2);
       void *umsg = ta_decompress(compressed_msg, &nfull);
       if (umsg == NULL || (int) nfull != slot->msg_len) {
-	_print_error("read_msg",
+        _print_error("read_msg",
 		     "Error on decompression, expected %d bytes, "
 		     "got %d bytes",
 		     (int) slot->msg_len, (int) nfull);
@@ -3073,7 +3075,6 @@ int Fmq::_seek_device(FmqDevice::ident_t id, off_t offset)
 {
   if (_dev == NULL) {
     _print_error("_seek_device", "Device object NULL");
-    cerr << "  Device object NULL" << endl;
     return 0;
   }
   
@@ -3767,7 +3768,7 @@ int Fmq::_fraction_used(double *slot_fraction_p,
   }
 
   // read in slots array
-  
+
   if (_read_slots()) {
     return -1;
   }
@@ -4014,41 +4015,14 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
 
 void Fmq::be_to_stat_32(q_stat_32_t *stat)
 {
-  BE_to_array_32(stat, sizeof(q_stat_32_t));
+  BE_to_array_32((char *) stat, sizeof(q_stat_32_t));
 }
 
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-
-//  si32 magic_cookie
-//
-//  si32 youngest_id
-//  si32 youngest_slot
-//
-//  si32 oldest_slot
-//
-//
-//  si32 nslots;
-//  si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
-//
-//
-//  /* NOTE - blocking write only supported for 1 reader */
-//
-//  si32 blocking_write;  /* flag to indicate blocking write */
-//  si32 last_id_read;    /* used for blocking write operation */
-//  si32 checksum;
-//
-//  si32 pad_si32_1;
-//
-//  si64 buf_size;        /* size of buffer */
-//  si64 begin_insert;    /* offset to start of insert free region */
-//  si64 end_insert;      /* offset to end of insert free region */
-//  si64 begin_append;    /* offset to start of append free region */
-//  si64 time_written;    /* time at which the status struct was last written to file */
-
-  int n_bytes = BE_to_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_to_array_64(stat+n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_to_array_32((char *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_to_array_64(((char *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4058,14 +4032,13 @@ void Fmq::be_to_stat_64(q_stat_64_t *stat)
 
 void Fmq::be_from_stat_32(q_stat_32_t *stat)
 {
-  BE_from_array_32(stat, sizeof(q_stat_32_t));
+  BE_from_array_32((char *) stat, sizeof(q_stat_32_t));
 }
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_from_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
-
-  BE_from_array_64(stat+n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_from_array_32((char *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64(((char *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4075,27 +4048,13 @@ void Fmq::be_from_stat_64(q_stat_64_t *stat)
 
 void Fmq::be_to_slot_32(q_slot_32_t *slot)
 {
-  BE_to_array_32(slot, sizeof(q_slot_32_t));
+  BE_to_array_32((char *) slot, sizeof(q_slot_32_t));
 }
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-
-//  slot->time = BE_to_si64(slot->time);
-//  slot->msg_len = BE_to_si64(slot->msg_len);
-//  slot->stored_len = BE_to_si64(slot->stored_len);
-//  slot->offset = BE_to_si64(slot->offset);
-//  slot->active = BE_to_si32(slot->active);
-//  slot->id = BE_to_si32(slot->id);
-//  slot->type = BE_to_si32(slot->type);
-//  slot->subtype = BE_to_si32(slot->subtype);
-//  slot->compress = BE_to_si32(slot->compress);
-//  slot->checksum = BE_to_si32(slot->checksum);
-//
-
-  int n_bytes = BE_to_array_32(slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_to_array_64(slot+Q_NUM_INT_SLOT_64*sizeof(si32), Q_NUM_LONG_SLOT_64*sizeof(si64));
-
+  int n_bytes = BE_to_array_32((char *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64(((char *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
@@ -4104,13 +4063,13 @@ void Fmq::be_to_slot_64(q_slot_64_t *slot)
 
 void Fmq::be_from_slot_32(q_slot_32_t *slot)
 {
-  BE_from_array_32(slot, sizeof(q_slot_32_t));
+  BE_from_array_32((char *) slot, sizeof(q_slot_32_t));
 }
 
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_from_array_32(slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_from_array_64(slot+Q_NUM_INT_SLOT_64*sizeof(si32), Q_NUM_LONG_SLOT_64*sizeof(si64));
+  int n_bytes = BE_from_array_32((char *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_from_array_64(((char *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
