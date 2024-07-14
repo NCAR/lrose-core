@@ -4015,14 +4015,14 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
 
 void Fmq::be_to_stat_32(q_stat_32_t *stat)
 {
-  BE_to_array_32((char *) stat, sizeof(q_stat_32_t));
+  BE_to_array_32((ui08 *) stat, sizeof(q_stat_32_t));
 }
 
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_to_array_32((char *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_to_array_64(((char *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_to_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_to_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4032,13 +4032,13 @@ void Fmq::be_to_stat_64(q_stat_64_t *stat)
 
 void Fmq::be_from_stat_32(q_stat_32_t *stat)
 {
-  BE_from_array_32((char *) stat, sizeof(q_stat_32_t));
+  BE_from_array_32((ui08 *) stat, sizeof(q_stat_32_t));
 }
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_from_array_32((char *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_from_array_64(((char *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  int n_bytes = BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4048,13 +4048,13 @@ void Fmq::be_from_stat_64(q_stat_64_t *stat)
 
 void Fmq::be_to_slot_32(q_slot_32_t *slot)
 {
-  BE_to_array_32((char *) slot, sizeof(q_slot_32_t));
+  BE_to_array_32((ui08 *) slot, sizeof(q_slot_32_t));
 }
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_to_array_32((char *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_to_array_64(((char *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  int n_bytes = BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
@@ -4063,13 +4063,13 @@ void Fmq::be_to_slot_64(q_slot_64_t *slot)
 
 void Fmq::be_from_slot_32(q_slot_32_t *slot)
 {
-  BE_from_array_32((char *) slot, sizeof(q_slot_32_t));
+  BE_from_array_32((ui08 *) slot, sizeof(q_slot_32_t));
 }
 
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_from_array_32((char *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_from_array_64(((char *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  int n_bytes = BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_from_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
