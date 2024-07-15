@@ -55,6 +55,7 @@ int render_h_movie_frame( int index, Drawable xid)
                               gd.movie.frame[index].time_start,
                               gd.movie.frame[index].time_end);
       if(stat == CIDD_SUCCESS)  {
+        cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
         render_horiz_display(xid,c_field,
                              gd.movie.frame[index].time_start,
                              gd.movie.frame[index].time_end);

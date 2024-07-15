@@ -502,6 +502,8 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 void CartWidget::paintEvent(QPaintEvent *event)
 {
 
+  cerr << "PPPPPPPPPPPPPPPPPPP" << endl;
+  
   QPainter painter(this);
 
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
