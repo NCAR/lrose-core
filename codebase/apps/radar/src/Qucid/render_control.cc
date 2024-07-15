@@ -46,8 +46,6 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
   contour_info_t cont; // contour params 
   met_record_t *mr;
 
-  if(xid == 0) return CIDD_FAILURE;
-
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
   if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
@@ -69,6 +67,7 @@ int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_
 
   /* Clear drawing area */
   cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
+  if(xid == 0) return CIDD_FAILURE;
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
                  0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 

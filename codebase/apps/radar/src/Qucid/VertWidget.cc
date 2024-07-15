@@ -173,15 +173,15 @@ void VertWidget::addBeam(const RadxRay *ray,
 #endif
 
 /*************************************************************************
- * configureRange()
+ * configureWorldCoords()
  */
 
-void VertWidget::configureRange(double max_range)
+void VertWidget::configureWorldCoords(int zoomLevel)
 {
 
   // Save the specified values
   
-  _maxRangeKm = max_range;
+  // _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
 

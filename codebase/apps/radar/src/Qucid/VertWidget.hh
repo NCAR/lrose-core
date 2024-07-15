@@ -65,10 +65,10 @@ class DLL_EXPORT VertWidget : public CartWidget
   virtual ~VertWidget();
 
   /**
-   * @brief Configure for range.
+   * @brief Configure the CartWidget for world coords
    */
 
-  virtual void configureRange(double max_range);
+  virtual void configureWorldCoords(int zoomLevel = 0);
 
   /**
    * @brief Add a new beam to the display. Data for all fields and all

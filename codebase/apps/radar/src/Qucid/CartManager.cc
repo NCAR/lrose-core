@@ -3051,9 +3051,8 @@ void CartManager::_checkForFieldChange()
 void CartManager::_handleFirstTimerEvent()
 {
 
-  cerr << "dddddddddddddddddd" << endl;
+  cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  cerr << "eeeeeeeeeeeeeeeeeee" << endl;
   
   // Set the size of the second column to the size of the largest
   // label.  This should keep the column from wiggling as the values change.
@@ -3066,9 +3065,9 @@ void CartManager::_handleFirstTimerEvent()
       maxWidth = _valsRight[ii]->width();
     }
   }
-  cerr << "fffffffffffffffffffff _statusLayout: " << _statusLayout << endl;
+
   // _statusLayout->setColumnMinimumWidth(1, maxWidth);
-  cerr << "ggggggggggggggggggggg" << endl;
+  cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
   
 }
 

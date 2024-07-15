@@ -117,10 +117,10 @@ class DLL_EXPORT CartWidget : public QWidget
   virtual ~CartWidget();
 
   /**
-   * @brief Configure the CartWidget for range.
+   * @brief Configure the CartWidget for world coords
    */
 
-  virtual void configureRange(double max_range) = 0;
+  virtual void configureWorldCoords(int zoomLevel = 0) = 0;
 
   /**********************************************
    * turn on archive-style rendering - all fields

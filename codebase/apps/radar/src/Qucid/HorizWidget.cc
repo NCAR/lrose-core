@@ -56,7 +56,7 @@ HorizWidget::HorizWidget(QWidget* parent,
 
   // initialoze world view
 
-  // configureRange(_params.max_range_km);
+  configureWorldCoords(0);
 
   setGrids(_params.horiz_grids_on_at_startup);
   setRings(_params.horiz_range_rings_on_at_startup);
@@ -324,15 +324,16 @@ void HorizWidget::addBeam(const RadxRay *ray,
 #endif
 
 /*************************************************************************
- * configureRange()
+ * configureWorldCoords()
  */
 
-void HorizWidget::configureRange(double max_range)
+void HorizWidget::configureWorldCoords(int zoomLevel)
+
 {
 
   // Save the specified values
 
-  _maxRangeKm = max_range;
+  // _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
 
@@ -380,6 +381,10 @@ void HorizWidget::configureRange(double max_range)
   _fullWorld.setAxisTextColor(_params.horiz_axes_color);
   _fullWorld.setGridColor(_params.horiz_grid_color);
 
+  cerr << "FFFFFFFFFFFFFFF Full world" << endl;
+  _fullWorld.print(cerr);
+  cerr << "FFFFFFFFFFFFFFF Full world" << endl;
+  
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -390,7 +395,7 @@ void HorizWidget::configureRange(double max_range)
   // by the system with a call to resize().
 
   _refreshImages();
-  
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -803,6 +808,9 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
+  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  _zoomWorld.print(cerr);
+  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
 
   if (_archiveMode) {
     
