@@ -100,6 +100,26 @@ field_list = {
 # PRECIP
 #
 
+SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo.colors %  -5   80  5  cart   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+WRF-TMP    WRF-TMP    $(HOME)/data/lucid/precip/mdv/wrf&Temp   temp.colors   C   -5   80  5  dcont   1 0
+WRF-RH     WRF-RH     $(HOME)/data/lucid/precip/mdv/wrf&RH     rh.colors   %   -5   80  5  dcont   1 0
+WRF-DBZ-3D WRF-DBZ-3D $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  dcont   1 0
+WRF-DBZ-2D WRF-DBZ-2D $(HOME)/data/lucid/precip/mdv/wrf&dbz_2d dbz.colors  dbz   -5   80  5  dcont   1 0
+
+WRF-WSPD   WRF-WSPD   $(HOME)/data/lucid/precip/mdv/wrf&Wspeed wind_speed.colors m/s   -5   80  5  dcont   1 0
+WRF-CLW    WRF-CLW    $(HOME)/data/lucid/precip/mdv/wrf&clw    mixr.colors kg/kg   -5   80  5  dcont   1 0
+WRF-VIL    WRF-VIL    $(HOME)/data/lucid/precip/mdv/wrf&vil    vil.colors  kg/m2   -5   80  5  dcont   1 0
+========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moments&Elevation       none.colors  m   -5 80 5 cont  1 0
+
+GFS-TMP   GFS-TMP  $(HOME)/data/lucid/precip/mdv/gfs&TMP  temp.colors   C   -5   80  5  dcont   1 0
+GFS-RH    GFS-RH   $(HOME)/data/lucid/precip/mdv/gfs&RH   rh.colors   %   -5   80  5  dcont   1 0
+GFS-PRES  GFS-PRES $(HOME)/data/lucid/precip/mdv/gfs&Pressure pressure_mb.colors   m/s   -5   80  5  dcont   1 0
+========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moments&Elevation       none.colors  m   -5 80 5 cont  1 0
+
 # SPOL MOMENTS
 
 SPOL_DBZ_F   SPOL_DBZ_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
@@ -121,26 +141,6 @@ SPOL_DBMVC_F  SPOL_DBMVC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo.colors %  -5   80  5  cart   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-WRF-TMP    WRF-TMP    $(HOME)/data/lucid/precip/mdv/wrf&Temp   temp.colors   C   -5   80  5  dcont   1 0
-WRF-RH     WRF-RH     $(HOME)/data/lucid/precip/mdv/wrf&RH     rh.colors   %   -5   80  5  dcont   1 0
-WRF-DBZ-3D WRF-DBZ-3D $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  dcont   1 0
-WRF-DBZ-2D WRF-DBZ-2D $(HOME)/data/lucid/precip/mdv/wrf&dbz_2d dbz.colors  dbz   -5   80  5  dcont   1 0
-
-WRF-WSPD   WRF-WSPD   $(HOME)/data/lucid/precip/mdv/wrf&Wspeed wind_speed.colors m/s   -5   80  5  dcont   1 0
-WRF-CLW    WRF-CLW    $(HOME)/data/lucid/precip/mdv/wrf&clw    mixr.colors kg/kg   -5   80  5  dcont   1 0
-WRF-VIL    WRF-VIL    $(HOME)/data/lucid/precip/mdv/wrf&vil    vil.colors  kg/m2   -5   80  5  dcont   1 0
-========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moments&Elevation       none.colors  m   -5 80 5 cont  1 0
-
-GFS-TMP   GFS-TMP  $(HOME)/data/lucid/precip/mdv/gfs&TMP  temp.colors   C   -5   80  5  dcont   1 0
-GFS-RH    GFS-RH   $(HOME)/data/lucid/precip/mdv/gfs&RH   rh.colors   %   -5   80  5  dcont   1 0
-GFS-PRES  GFS-PRES $(HOME)/data/lucid/precip/mdv/gfs&Pressure pressure_mb.colors   m/s   -5   80  5  dcont   1 0
-========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moments&Elevation       none.colors  m   -5 80 5 cont  1 0
 
 </GRIDS>
 
@@ -1276,7 +1276,7 @@ prod_info = {
     url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/spol_rhi",
     data_type = 0,
     render_type = RENDER_ALL,
-    on_by_default = TRUE,
+    on_by_default = FALSE,
     minutes_allow_before = 20,
     minutes_allow_after = 10,
     text_off_threshold = 0.4,
