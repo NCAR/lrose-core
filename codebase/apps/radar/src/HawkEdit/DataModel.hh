@@ -75,6 +75,8 @@ public:
             float azimuth, float sweepAngle, vector<float> *fieldData);
   void SetData(string &fieldName, 
             int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
+  void SetData(RadxVol *vol, string &fieldName,
+            int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
 
   void SetData(string &fieldName, float value);
 
@@ -97,6 +99,7 @@ public:
   RadxTime getStartTimeSecs();
   RadxTime getEndTimeSecs();
 
+  RadxField *fetchDataField(RadxVol *vol, RadxRay *ray, string &fieldName);
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   //const RadxField *fetchDataField(const RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
@@ -105,9 +108,12 @@ public:
   size_t getNRaysSweepIndex(int sweepIndex);
   size_t getFirstRayIndex(int sweepIndex);
   size_t getLastRayIndex(int sweepIndex);  
+  size_t getFirstRayIndex(RadxVol *vol, int sweepIndex);
+  size_t getLastRayIndex(RadxVol *vol, int sweepIndex);
 
 
   vector<RadxRay *> &getRays();
+  vector<RadxRay *> &getRays(RadxVol *vol);
   RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
   float getMissingFl32(string fieldName);
@@ -123,6 +129,9 @@ public:
   int getSweepNumber(int sweepIndex);
   int getSweepIndexFromSweepNumber(int sweepNumber);
   int getSweepIndexFromSweepAngle(float elevation);
+  size_t getSweepIndexInVolume(RadxVol *vol,
+                               float sweepAngle,
+                               int sweepNumber);
   double getSweepAngleFromSweepNumber(int sweepNumber);
 
   const string &getPathInUse();
@@ -194,15 +203,16 @@ public:
                                    queue<string> *listOfVersions,
                                    string justFilename);
 
-  void mergeSweeps(RadxVol *radxVol, string &dataFilePath);
+  void mergeSweeps(RadxVol *radxVol, string &dataFilePath,
+                   vector<bool> *sweepUpdated);
   
   // RadxVol *mergeDataFields(string originalSourcePath);
   void mergeDataFields(RadxVol *radxVol, string originalSourcePath);
-  
+  void mergeDataFields2(RadxVol *radxVol, string originalSourcePath); // May not be used??
+  void overwriteSweepRays(RadxVol *dstVol, int dstSweepIndex, RadxVol *srcVol, RadxSweep *srcSweep); 
   void _mergeWrite(RadxVol *accumulator,
                         queue<string> *listOfVersions,
                         string justFilename,
-                        string originalSourcePath,
                         string outputPath); 
 private:
   
