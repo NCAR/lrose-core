@@ -501,7 +501,12 @@ public:
     return _fmqPath;
   }
 
-  inline long getBufSize() const
+  inline auto getNumSlots() const
+  {
+    return _stat.nslots;
+  }
+
+  inline auto getBufSize() const
   {
     return _stat.buf_size;
   }
