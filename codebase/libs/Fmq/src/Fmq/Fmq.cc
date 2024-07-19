@@ -47,6 +47,7 @@
 using namespace std;
 
 #define BOOL_STR(a) ((a)? "true" : "false")
+#define MSG_STR_LEN 8192
 
 // constructor
    
@@ -3916,7 +3917,7 @@ void Fmq::initErrStr() const
 
   _errStr.clear();
 
-  char errTxt[8192];
+  char errTxt[MSG_STR_LEN];
 
   safe_snprintf(errTxt, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
   _errStr += errTxt;
@@ -3934,7 +3935,7 @@ void Fmq::_print_error(const char *routine, const char *format, ...) const
 {
 
   va_list args;
-  char errTxt[8192];
+  char errTxt[MSG_STR_LEN];
 
   if (routine != NULL) {
     safe_snprintf(errTxt, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
@@ -3990,7 +3991,7 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
   }
 
   va_list args;
-  char infoTxt[8192];
+  char infoTxt[MSG_STR_LEN];
   
   if (format != NULL) {
     va_start (args, format);
