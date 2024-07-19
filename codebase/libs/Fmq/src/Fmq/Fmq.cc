@@ -46,6 +46,7 @@
 using namespace std;
 
 #define BOOL_STR(a) ((a)? "true" : "false")
+#define MSG_STR_LEN 8192
 
 // constructor
    
@@ -3915,9 +3916,9 @@ void Fmq::initErrStr() const
 
   _errStr.clear();
 
-  char errTxt[8192];
+  char errTxt[MSG_STR_LEN];
 
-  sprintf(errTxt, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
+  sprintf(errTxt, MSG_STR_LEN, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
   _errStr += errTxt;
 
 }
@@ -3933,18 +3934,18 @@ void Fmq::_print_error(const char *routine, const char *format, ...) const
 {
 
   va_list args;
-  char errTxt[8192];
+  char errTxt[MSG_STR_LEN];
 
   if (routine != NULL) {
-    sprintf(errTxt, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
+    sprintf(errTxt, MSG_STR_LEN, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
     _errStr += errTxt;
-    sprintf(errTxt, "Fmq path: %s\n", _fmqPath.c_str());
+    sprintf(errTxt, MSG_STR_LEN, "Fmq path: %s\n", _fmqPath.c_str());
     _errStr += errTxt;
   }
 
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (errTxt, format, args);
+    vsprintf (errTxt, MSG_STR_LEN, format, args);
     _errStr += errTxt;
     _errStr += "\n";
     va_end (args);
@@ -3989,11 +3990,11 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
   }
 
   va_list args;
-  char infoTxt[8192];
+  char infoTxt[MSG_STR_LEN];
   
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (infoTxt, format, args);
+    vsprintf (infoTxt, MSG_STR_LEN, format, args);
     va_end (args);
   }
 
