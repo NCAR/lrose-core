@@ -4023,8 +4023,8 @@ void Fmq::be_to_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_to_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_to_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  BE_to_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_to_array_64((ui08 *) &(stat->buf_size) , Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4039,8 +4039,8 @@ void Fmq::be_from_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_from_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64((ui08 *) &(stat->buf_size), Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4055,8 +4055,8 @@ void Fmq::be_to_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_to_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
@@ -4070,8 +4070,8 @@ void Fmq::be_from_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_from_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_from_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
