@@ -3918,7 +3918,7 @@ void Fmq::initErrStr() const
 
   char errTxt[MSG_STR_LEN];
 
-  sprintf(errTxt, MSG_STR_LEN, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
+  snprintf(errTxt, MSG_STR_LEN, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
   _errStr += errTxt;
 
 }
@@ -3937,15 +3937,15 @@ void Fmq::_print_error(const char *routine, const char *format, ...) const
   char errTxt[MSG_STR_LEN];
 
   if (routine != NULL) {
-    sprintf(errTxt, MSG_STR_LEN, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
+    snprintf(errTxt, MSG_STR_LEN, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
     _errStr += errTxt;
-    sprintf(errTxt, MSG_STR_LEN, "Fmq path: %s\n", _fmqPath.c_str());
+    snprintf(errTxt, MSG_STR_LEN, "Fmq path: %s\n", _fmqPath.c_str());
     _errStr += errTxt;
   }
 
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (errTxt, MSG_STR_LEN, format, args);
+    vsnprintf (errTxt, MSG_STR_LEN, format, args);
     _errStr += errTxt;
     _errStr += "\n";
     va_end (args);
@@ -3994,7 +3994,7 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
   
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (infoTxt, MSG_STR_LEN, format, args);
+    vsnprintf (infoTxt, MSG_STR_LEN, format, args);
     va_end (args);
   }
 
@@ -4022,8 +4022,8 @@ void Fmq::be_to_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_to_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_to_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_to_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  BE_to_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_to_array_64((ui08 *) &(stat->buf_size) , Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4038,8 +4038,8 @@ void Fmq::be_from_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  int n_bytes = BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_from_array_64(((ui08 *) stat) + n_bytes, Q_NUM_LONG_STAT_64*sizeof(si64));
+  BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64((ui08 *) &(stat->buf_size), Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4054,8 +4054,8 @@ void Fmq::be_to_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_to_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
@@ -4069,8 +4069,8 @@ void Fmq::be_from_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
-  int n_bytes = BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_from_array_64(((ui08 *) slot) + n_bytes, Q_NUM_LONG_SLOT_64*sizeof(si64));
+  BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_from_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
