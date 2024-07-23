@@ -879,6 +879,10 @@ int GemRadxFile::_loadSweep(size_t sweepNum,
   double deltaTime =
     ((double) endTime - (double) startTime) / (nAngles + 1.0);
 
+  if (sweepField0.getVolNum() > 0) {
+    _volumeNumber = sweepField0.getVolNum();
+  }
+
   // loop through the beams
 
   time_t lastTime = 0;
@@ -1159,12 +1163,38 @@ int GemRadxFile::_loadMetaData(const string &path)
   RadxRcalib *calib = new RadxRcalib;
   calib->setCalibTime(_fileTime.utime());
   calib->setPulseWidthUsec(sweepField0.getPulseWidthUs());
-  calib->setXmitPowerDbmH(10.0 * log10(sweepField0.getXmitPeakPowerKw() * 1.0e6));
-  calib->setXmitPowerDbmV(10.0 * log10(sweepField0.getXmitPeakPowerKw() * 1.0e6));
+  if (sweepField0.getXmitPeakPowerKwH() > 0) {
+    calib->setXmitPowerDbmH(10.0 * log10(sweepField0.getXmitPeakPowerKwH() * 1.0e6));
+  } else if (sweepField0.getXmitPeakPowerKw() > 0) {
+    calib->setXmitPowerDbmH(10.0 * log10(sweepField0.getXmitPeakPowerKw() * 1.0e6));
+  }
+  if (sweepField0.getXmitPeakPowerKwV() > 0) {
+    calib->setXmitPowerDbmV(10.0 * log10(sweepField0.getXmitPeakPowerKwV() * 1.0e6));
+  } else if (sweepField0.getXmitPeakPowerKw() > 0) {
+    calib->setXmitPowerDbmV(10.0 * log10(sweepField0.getXmitPeakPowerKw() * 1.0e6));
+  }
   calib->setRadarConstantH(sweepField0.getRadarConstH());
   calib->setRadarConstantV(sweepField0.getRadarConstV());
   calib->setBaseDbz1kmHc(sweepField0.getNoisePowerDbzH());
   calib->setBaseDbz1kmVc(sweepField0.getNoisePowerDbzV());
+  calib->setNoiseDbmHc(sweepField0.getNoiseDbmH());
+  calib->setNoiseDbmVc(sweepField0.getNoiseDbmV());
+
+  calib->setBeamWidthDegH(sweepField0.getBeamWidthH());
+  calib->setBeamWidthDegV(sweepField0.getBeamWidthV());
+  
+  calib->setAntennaGainDbH(sweepField0.getAntGainH());
+  calib->setAntennaGainDbV(sweepField0.getAntGainV());
+  
+  calib->setTwoWayWaveguideLossDbH(sweepField0.getTxPathLossH());
+  calib->setTwoWayWaveguideLossDbV(sweepField0.getTxPathLossV());
+
+  calib->setPowerMeasLossDbH(sweepField0.getRxPathLossH());
+  calib->setPowerMeasLossDbV(sweepField0.getRxPathLossV());
+
+  calib->setTwoWayRadomeLossDbH(sweepField0.getRadomeLoss());
+  calib->setTwoWayRadomeLossDbV(sweepField0.getRadomeLoss());
+
   _readVol->addCalib(calib);
   
   _readVol->setTargetScanRateDegPerSec(sweepField0.getAntennaSpeed());

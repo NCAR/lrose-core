@@ -65,7 +65,8 @@ public:
 
   // get methods
 
-  time_t getNum() const { return _num; }
+  int getVolNum() const { return _volNum; }
+  int getSweepNum() const { return _sweepNum; }
   time_t getStartTime() const { return _startTime; }
   const string &getFieldName() const { return _fieldName; }
 
@@ -104,10 +105,28 @@ public:
   bool getIsDualPol() const { return (_radarConstH > 0 && _radarConstV > 0); }
 
   double getXmitPeakPowerKw() const { return _xmitPeakPowerKw; }
-  double getIfMhz() const { return _ifMhz; }
+  double getXmitPeakPowerKwH() const { return _xmitPeakPowerKwH; }
+  double getXmitPeakPowerKwV() const { return _xmitPeakPowerKwV; }
 
   double getNoisePowerDbzH() const { return _noisePowerDbzH; }
   double getNoisePowerDbzV() const { return _noisePowerDbzV; }
+
+  double getNoiseDbmH() const { return _noiseDbmH; }
+  double getNoiseDbmV() const { return _noiseDbmV; }
+
+  double getBeamWidthH() const { return _beamWidthH; }
+  double getBeamWidthV() const { return _beamWidthV; }
+
+  double getAntGainH() const { return _antGainH; }
+  double getAntGainV() const { return _antGainV; }
+
+  double getTxPathLossH() const { return _txPathLossH; }
+  double getTxPathLossV() const { return _txPathLossV; }
+  double getRxPathLossH() const { return _rxPathLossH; }
+  double getRxPathLossV() const { return _rxPathLossV; }
+  double getRadomeLoss() const { return _radomeLoss; }
+
+  double getIfMhz() const { return _ifMhz; }
 
   double getMinValue() const { return _minValue; }
   double getMaxValue() const { return _maxValue; }
@@ -132,8 +151,9 @@ private:
   bool _debug;
   bool _verbose;
 
-  int _num;
-
+  int _volNum;
+  int _sweepNum;
+  
   time_t _startTime;
   string _fieldName;
 
@@ -159,12 +179,29 @@ private:
   double _radarConst;
   double _radarConstH;
   double _radarConstV;
-
+  
   double _xmitPeakPowerKw;
-  double _ifMhz;
-
+  double _xmitPeakPowerKwH;
+  double _xmitPeakPowerKwV;
+  
   double _noisePowerDbzH;
   double _noisePowerDbzV;
+  double _noiseDbmH;
+  double _noiseDbmV;
+
+  double _beamWidthH;
+  double _beamWidthV;
+
+  double _antGainH;
+  double _antGainV;
+
+  double _txPathLossH;
+  double _txPathLossV;
+  double _rxPathLossH;
+  double _rxPathLossV;
+  double _radomeLoss;
+
+  double _ifMhz;
 
   double _minValue;
   double _maxValue;
