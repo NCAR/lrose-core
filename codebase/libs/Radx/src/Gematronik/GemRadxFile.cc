@@ -317,6 +317,10 @@ int GemRadxFile::readFromPath(const string &path,
     return -1;
   }
 
+  // add SNR2 fields
+
+  _addSnr2Fields();
+
   // set format as read
 
   _fileFormat = FILE_FORMAT_GEM_XML;
@@ -1109,6 +1113,119 @@ int GemRadxFile::_loadSweep(size_t sweepNum,
     
   return 0;
 
+}
+
+/////////////////////////////////////////////////////////
+// add the SNR2 fields, computed from SNR
+
+int GemRadxFile::_addSnr2Fields()
+  
+{
+
+  int iret = 0;
+  
+  // loop through rays
+  
+  for (size_t iray = 0; iray < _readVol->getRays().size(); iray++) {
+    
+    RadxRay *ray = _readVol->getRays()[iray];
+
+    RadxField *snrFld = ray->getField("SNR");
+    if (snrFld == NULL) {
+      iret = -1;
+      continue;
+    }
+    if (_addSnr2Field(ray, snrFld, "SNR2", true)) {
+      iret = -1;
+    }
+    
+    RadxField *snrvFld = ray->getField("SNRv");
+    if (snrvFld == NULL) {
+      iret = -1;
+      continue;
+    }
+    if (_addSnr2Field(ray, snrvFld, "SNR2v", false)) {
+      iret = -1;
+    }
+    
+    RadxField *snruFld = ray->getField("SNRu");
+    if (snruFld == NULL) {
+      iret = -1;
+      continue;
+    }
+    if (_addSnr2Field(ray, snruFld, "SNR2u", true)) {
+      iret = -1;
+    }
+    
+    RadxField *snrvuFld = ray->getField("SNRvu");
+    if (snrvuFld == NULL) {
+      iret = -1;
+      continue;
+    }
+    if (_addSnr2Field(ray, snrvuFld, "SNR2vu", false)) {
+      iret = -1;
+    }
+    
+  } // iray
+
+  return iret;
+  
+}
+
+int GemRadxFile::_addSnr2Field(RadxRay *ray, RadxField *snrFld,
+                               const string &newName, bool isHoriz)
+  
+{
+
+  // get the calibration
+
+  if (_readVol->getNRcalibs() < 1) {
+    // no cal data, cannot do this
+    return -1;
+  }
+  const RadxRcalib *cal = _readVol->getRcalibs()[0];
+  double noiseDbm = cal->getNoiseDbmHc();
+  if (!isHoriz) {
+    noiseDbm = cal->getNoiseDbmVc();
+  }
+  if (noiseDbm == Radx::missingMetaDouble) {
+    // no noise data, cannot proceed
+    return -1;
+  }
+  double noiseLinear = pow(10.0, noiseDbm / 10.0);
+  
+  // make a copy of the snr field, convert to floats
+
+  RadxField *snr2Fld = new RadxField(*snrFld);
+  snr2Fld->setName(newName);
+  snr2Fld->convertToFl32();
+  Radx::fl32 miss = snr2Fld->getMissingFl32();
+  
+  // loop through the field elements, converting to correct formulation of SNR
+  // this requires subtracting the noise before computing the ratio
+  
+  Radx::fl32 *vals = snr2Fld->getDataFl32();
+  for (size_t igate = 0; igate < snr2Fld->getNPoints(); igate++) {
+
+    Radx::fl32 snrDb = vals[igate];
+    double snrLinear = pow(10.0, snrDb / 10.0);
+    double powerLinear = snrLinear * noiseLinear;
+    double powerNs = powerLinear - noiseLinear;
+    Radx::fl32 snr2 = miss;
+    if (powerNs > 0) {
+      snr2 = 10.0 * log10(powerNs / noiseLinear);
+    }
+    vals[igate] = snr2;
+    
+  } // igate
+
+  // set the field metadata
+
+  snr2Fld->convertToSi16();
+  ray->addField(snr2Fld);
+
+  return 0;
+  
 }
 
 /////////////////////////////////////////////////////////

@@ -213,6 +213,11 @@ private:
   int _loadRays(const string &path);
   int _loadSweep(size_t sweepNum, time_t startTime, time_t endTime, 
                  double antennaSpeed);
+
+  int _addSnr2Fields();
+  int _addSnr2Field(RadxRay *ray, RadxField *snrFld,
+                    const string &newName, bool isHoriz);
+
   int _loadMetaData(const string &path);
   
   void _printFieldData(ostream &out, size_t nGates, const double *data) const;
