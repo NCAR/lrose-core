@@ -1,0 +1,434 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions EccoStats
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// June 2014
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Program name: EccoStats";
+  p_text = "EccoStats finds convective and stratiform regions within a Cartesian radar volume.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In ARCHIVE mode, the app moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use multiple threads for speed.";
+  p_help = "Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.";
+} use_multiple_threads;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "mdv/input";
+  p_descr = "URL for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_url;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "dBZ field name in input MDV files.";
+} dbz_field_name;
+
+commentdef {
+  p_header = "USING DIGITAL ELEVATION MAPS FOR TERRAIN HEIGHT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use terrain ht data when setting vertical categories.";
+  p_help = "If true, we read in terrain height data from the SRTM30 data set. Separating tropospheric regions based on temperature has one disadvantage at high latitudes in that the melting level can intersect with the ground, which eliminates the lower tropospheric region. To avoid that problem, we do not allow the separation boundary between the low and the mid region to fall below 2 km above the ground, and the separation boundary between the mid and the high region to fall below 4 km above ground. This way, we always retain all three regions. The altitudes of 2 and 4 km were chosen following those established by the WMO (Cohn, 2017).";
+} use_terrain_ht_data;
+
+paramdef string {
+  p_default = "$(HOME)/data/terrain/DEM/uncompressed";
+  p_descr = "Directory for digital elevation files.";
+  p_help = "This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.";
+} srtm30_dem_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check terrain and water in adjacent grid cells.";
+  p_descr = "If true, we check the terraom and water not only at the requested grid point, but also in the surrounding grid points. The reported height is the max height in the search area. Water is reported if it exists anywhere in the seach area. See 'search_margin_km'.";
+} check_adjacent_grid_cells;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin width in checking for adjacent grid points (km).";
+  p_help = "We search around the selected point by this distance.";
+} search_margin_km;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Add water layer data to output file.";
+  p_help = "If true, we read in the water layer for each grid location. This is a 1 or 0. It is 0 for land and 1 for water.";
+} add_water_layer;
+
+paramdef string {
+  p_default = "$(HOME)/data/terrain/WATER";
+  p_descr = "Directory for water layer data in netCDF format.";
+  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
+} water_layer_dir;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum height above ground for mid-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_mid;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Minimum height above ground for deep-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_deep;
+
+commentdef {
+  p_header = "ALGORITHM PARAMETERS";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min height used in analysis (km).";	
+  p_help = "Only data at or above this altitude is used.";
+} min_valid_height;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height used in analysis (km).";	
+  p_help = "Only data at or below this altitude is used.";
+} max_valid_height;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
+  p_help = "Reflectivity below this threshold is set to missing.";
+} min_valid_dbz;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Set base DBZ value.";
+  p_help = "Before computing the texture, we subtract the baseDBZ from the measured DBZ. This adjusts the DBZ values into the positive range. For S-, C- and X-band radars, this can be set to 0 dBZ, which is the default. For Ka-band radars this should be around -10 dBZ. For W-band radars -20 dBZ is appropriate.";
+} base_dbz;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Min volume of a convective region (km3).";	
+  p_help = "Regions of smaller volume will be labeled SMALL.";
+} min_valid_volume_for_convective;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Min vertical echo extent of a convective region (km).";	
+  p_help = "The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.";
+} min_vert_extent_for_convective;
+
+paramdef double {
+  p_default = 18;
+  p_descr = "Reflectivity for determing echo tops.";
+  p_help = "Echo tops are defined as the max ht with reflectivity at or above this value.";
+} dbz_for_echo_tops;
+
+commentdef {
+  p_header = "COMPUTING REFLECTIVITY TEXTURE";
+}
+
+paramdef double {
+  p_default = 7.0;
+  p_descr = "Radius for texture analysis (km).";
+  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
+} texture_radius_km;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Minimum fraction of surrounding points for texture computations.";
+  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have valid reflectivity.";
+} min_valid_fraction_for_texture;
+
+paramdef double {
+  p_default = 0.67;
+  p_descr = "Minimum fraction of surrounding points for 2D fit to DBZ.";
+  p_help = "We compute a 2D fit to the reflectivity around a grid point, to remove any systematic gradient. For a valid fit, we require at least this fraction of points around the central point to have valid reflectivity.";
+} min_valid_fraction_for_fit;
+
+commentdef {
+  p_header = "CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY";
+  p_text = "Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower limit for texture.";
+  p_help = "Below this texture the convectivity is set to 0.";
+} texture_limit_low;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Upper limit for texture.";
+  p_help = "Above this texture the convectivity is set to 1. Between the limits convectivity varies linearly with texture.";
+} texture_limit_high;
+
+commentdef {
+  p_header = "SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY";
+  p_text = "If neither is set, we flag the point as MIXED.";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum convectivity for convective at a point.";
+  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
+} min_convectivity_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum convectivity for stratiform at a point.";
+  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
+} max_convectivity_for_stratiform;
+
+commentdef {
+  p_header = "DETERMINING ADVANCED ECHO TYPE USING CLUMPING AND TEMPERATURE";
+  p_text = "We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use dual thresholds to better identify convective clumps.";
+  p_help = "NOTE: this step is performed in 2D. If set, the clumping is performed in two stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. Then, using the parameters below, for each clump a search is performed for sub-clumps within the envelope of the main clump, suing the secondary threshold. If there is only one sub-clump, the original clump is used unchanged. If there are two or more valid sub-clumps, based on the parameters below, these sub-clumps are progrresively grown to where they meet, or to the original clump envelope. The final 3D clumps are computed by breaking the original clump into regions based upon these secondary 2D areas.";
+} clumping_use_dual_thresholds;
+
+paramdef double {
+  p_default = 0.65;
+  p_descr = "Secondary convectivity threshold for clumping.";
+  p_help = "We use the secondary threshold to find sub-clumps within the envelope of each original clump.";
+} clumping_secondary_convectivity;
+
+paramdef double {
+  p_default = 0.33;
+  p_descr = "Min area of all sub-clumps, as a fraction of the original clump area.";
+  p_help = "We sum the areas of the sub-clumps, and compute the fraction relative to the area of the original clump. For the sub-clumps to be valid, the computed fraction must exceed this parameter.";
+} all_subclumps_min_area_fraction;
+
+paramdef double {
+  p_default = 0.02;
+  p_descr = "Min area of each valid sub-clump, as a fraction of the original clump.";
+  p_help = "We compute the area of each sub-clump, and compute the fraction relative to the area of the original clump. For a subclump to be valid, the area fraction must exceed this parameter.";
+} each_subclump_min_area_fraction;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Min area of each valid sub-clump (km2).";
+  p_help = "We compute the area of each sub-clump. For a subclump to be valid, the area must exceed this parameter.";
+} each_subclump_min_area_km2;
+
+commentdef {
+  p_header = "SPECIFYING VERTICAL LEVELS FOR ADVANCED ECHO TYPE - TEMPERATURE or HEIGHT?";
+  p_text = "We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.";
+}
+
+typedef enum {
+  VERT_LEVELS_BY_TEMP,
+  VERT_LEVELS_BY_HT
+} vert_levels_type_t;
+
+paramdef enum vert_levels_type_t {
+  p_default = VERT_LEVELS_BY_HT;
+  p_descr = "How we specify the vertical levels.";
+  p_help = "If temperatures are used, we need to read in the temperature profile from a model.";
+} vert_levels_type;
+
+paramdef string {
+  p_default = "mdv/model";
+  p_descr = "URL for temperature profile data, in MDV/Netcdf-CF format.";
+  p_help = "We read in the model data that is closest in time to the reflectivity data.";
+} temp_profile_url;
+
+paramdef string {
+  p_default = "Temp";
+  p_descr = "Name of temperature field in the model data. This should be in degrees C.";
+} temp_profile_field_name;
+
+paramdef int {
+  p_default = 21600;
+  p_descr = "Search margin for finding the temp profile data (secs).";	
+  p_help = "The temp profile must be within this number of seconds of the dbz data.";
+} temp_profile_search_margin;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Shallow cloud temperature threshold (degC).";	
+  p_help = "Shallow cloud tops are below this temperature. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
+} shallow_threshold_temp;
+
+paramdef double {
+  p_default = -12.0;
+  p_descr = "Deep cloud temperature threshold (degC).";	
+  p_help = "Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
+} deep_threshold_temp;
+
+paramdef double {
+  p_default = 4.5;
+  p_descr = "Shallow cloud height threshold if temperature is not available (km).";	
+  p_help = "Shallow cloud tops are below this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.";
+} shallow_threshold_ht;
+
+paramdef double {
+  p_default = 9.0;
+  p_descr = "Deep cloud height threshold if temperature is not available (km).";	
+  p_help = "Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.";
+} deep_threshold_ht;
+
+commentdef {
+  p_header = "DETERMINING ADVANCED CATEGORY FROM CLUMP PROPERTIES";
+  p_text = "Based on the temp or height criteria above, we compute the deep, mid and shallow convective fractions within each sub-clump. We also determine whether there is stratiform echo below the clump. The following parameters are then used to determine the deep, elevated, mid or shallow echo types for the convection. If a determination is not clear, the overall category is set to mixed.";
+}
+
+paramdef double {
+  p_default = 0.05;
+  p_descr = "The minimun convective fraction in the clump for deep convection.";
+  p_help = "The fraction of deep within the clump must exceed this for an echo type of deep.";
+} min_conv_fraction_for_deep;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "The minimun convective fraction in the clump for shallow convection.";
+  p_help = "The fraction of shallow within the clump must exceed this for an echo type of shallow.";
+} min_conv_fraction_for_shallow;
+
+paramdef double {
+  p_default = 0.05;
+  p_descr = "The maximum shallow convective fraction in the clump for elevated convection.";
+  p_help = "The fraction of shallow within the clump must be less than this for an echo type of elevated.";
+} max_shallow_conv_fraction_for_elevated;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "The maximum deep convective fraction in the clump for elevated convection.";
+  p_help = "The fraction of deep within the clump must be less than this for an echo type of elevated.";
+} max_deep_conv_fraction_for_elevated;
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "The minimun area fraction of stratiform echo below the clump to determine there is stratiform below.";
+  p_help = "For elevated convection, we need to determine if there is stratiform echo below. For a designation of elevated, this is the minimum fraction of the area below the clump that has stratiform echo in the plane immediately below it.";
+} min_strat_fraction_for_strat_below;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+  p_text = "\n"
+    "  The partition field has the following values:\n"
+    "    CATEGORY_MISSING = 0\n"
+    "    CATEGORY_STRATIFORM_LOW = 14\n"
+    "    CATEGORY_STRATIFORM = 15\n"
+    "    CATEGORY_STRATIFORM_MID = 16\n"
+    "    CATEGORY_STRATIFORM_HIGH = 18\n"
+    "    CATEGORY_MIXED = 25\n"
+    "    CATEGORY_CONVECTIVE_ELEVATED = 32\n"
+    "    CATEGORY_CONVECTIVE_SHALLOW = 34\n"
+    "    CATEGORY_CONVECTIVE = 35\n"
+    "    CATEGORY_CONVECTIVE_MID = 36\n"
+    "    CATEGORY_CONVECTIVE_DEEP = 38";
+}
+
+paramdef string {
+  p_default = "mdv/stratiform";
+  p_descr = "Output URL.";
+  p_help = "Output files are written to this URL.";
+} output_url;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out partition fields.";
+  p_help = "This will write out the 3D, 2D and column-max partition.";
+} write_partition;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out texture fields.";
+  p_help = "This will write out the 3D and column-max texture.";
+} write_texture;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out convectivity fields.";
+  p_help = "This will write out the 3D and column-max convectivity.";
+} write_convectivity;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out 3D dbz field.";
+  p_help = "This will be an echo of the input field.";
+} write_3D_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out column maximum dbz field.";
+  p_help = "This is the max reflectivity at any height.";
+} write_col_max_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out convective dbz field.";
+  p_help = "This will write out the 3D convective DBZ field.";
+} write_convective_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out echo, convective and stratiform tops.";
+  p_help = "These are 2D fields.";
+} write_tops;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out 2D field showing fraction active.";
+  p_help = "This the active fraction in the computational circle.";
+} write_fraction_active;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out 2D field showing shallow and deep heights.";
+  p_help = "These are based on model temperature.";
+} write_height_grids;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out 3D temperature field.";
+  p_help = "This comes from a model, remapped onto the reflectivity grid.";
+} write_temperature;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write fields to the output files for debugging the dual threshold clumping.";
+  p_help = "If this is set, the following debug fields are written to the output files: .";
+} write_clumping_debug_fields;
