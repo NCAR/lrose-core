@@ -79,11 +79,6 @@ public:
     FILELIST = 1
   } mode_t;
 
-  typedef enum {
-    VERT_LEVELS_BY_TEMP = 0,
-    VERT_LEVELS_BY_HT = 1
-  } vert_levels_type_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -386,113 +381,9 @@ public:
 
   tdrp_bool_t use_multiple_threads;
 
-  char* input_url;
+  char* input_dir;
 
-  char* dbz_field_name;
-
-  tdrp_bool_t use_terrain_ht_data;
-
-  char* srtm30_dem_dir;
-
-  tdrp_bool_t check_adjacent_grid_cells;
-
-  double search_margin_km;
-
-  tdrp_bool_t add_water_layer;
-
-  char* water_layer_dir;
-
-  double min_ht_km_agl_for_mid;
-
-  double min_ht_km_agl_for_deep;
-
-  double min_valid_height;
-
-  double max_valid_height;
-
-  double min_valid_dbz;
-
-  double base_dbz;
-
-  double min_valid_volume_for_convective;
-
-  double min_vert_extent_for_convective;
-
-  double dbz_for_echo_tops;
-
-  double texture_radius_km;
-
-  double min_valid_fraction_for_texture;
-
-  double min_valid_fraction_for_fit;
-
-  double texture_limit_low;
-
-  double texture_limit_high;
-
-  double min_convectivity_for_convective;
-
-  double max_convectivity_for_stratiform;
-
-  tdrp_bool_t clumping_use_dual_thresholds;
-
-  double clumping_secondary_convectivity;
-
-  double all_subclumps_min_area_fraction;
-
-  double each_subclump_min_area_fraction;
-
-  double each_subclump_min_area_km2;
-
-  vert_levels_type_t vert_levels_type;
-
-  char* temp_profile_url;
-
-  char* temp_profile_field_name;
-
-  int temp_profile_search_margin;
-
-  double shallow_threshold_temp;
-
-  double deep_threshold_temp;
-
-  double shallow_threshold_ht;
-
-  double deep_threshold_ht;
-
-  double min_conv_fraction_for_deep;
-
-  double min_conv_fraction_for_shallow;
-
-  double max_shallow_conv_fraction_for_elevated;
-
-  double max_deep_conv_fraction_for_elevated;
-
-  double min_strat_fraction_for_strat_below;
-
-  char* output_url;
-
-  tdrp_bool_t write_partition;
-
-  tdrp_bool_t write_texture;
-
-  tdrp_bool_t write_convectivity;
-
-  tdrp_bool_t write_3D_dbz;
-
-  tdrp_bool_t write_col_max_dbz;
-
-  tdrp_bool_t write_convective_dbz;
-
-  tdrp_bool_t write_tops;
-
-  tdrp_bool_t write_fraction_active;
-
-  tdrp_bool_t write_height_grids;
-
-  tdrp_bool_t write_temperature;
-
-  tdrp_bool_t write_clumping_debug_fields;
+  char* output_dir;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -501,7 +392,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[71];
+  mutable TDRPtable _table[11];
 
   const char *_className;
 

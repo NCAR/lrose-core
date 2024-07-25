@@ -26,12 +26,12 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// MAY 2014
+// July 2024
 //
 ////////////////////////////////////////////////////////////////////
 //
-// EccoStats finds stratiform/convective regions in a Cartesian
-// radar volume
+// EccoStats computes statistics from the Ecco output files.
+// See the Ecco app for details.
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -97,7 +97,7 @@ EccoStats::EccoStats(int argc, char **argv)
   // initialize the data input object
 
   if (_params.mode == Params::ARCHIVE) {
-    if (_input.setArchive(_params.input_url,
+    if (_input.setArchive(_params.input_dir,
 			  _args.startTime,
 			  _args.endTime)) {
       isOK = false;
@@ -153,19 +153,19 @@ int EccoStats::Run()
 
     // set grid in EccoStatsFinder object
 
-    MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-    if (dbzField == NULL) {
-      cerr << "ERROR - EccoStats::Run()" << endl;
-      cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
-      return -1;
-    }
-    const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
-    const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
-    // bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
-    vector<double> zLevels;
-    for (int iz = 0; iz < fhdr.nz; iz++) {
-      zLevels.push_back(vhdr.level[iz]);
-    }
+    // MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+    // if (dbzField == NULL) {
+    //   cerr << "ERROR - EccoStats::Run()" << endl;
+    //   cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
+    //   return -1;
+    // }
+    // const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
+    // const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
+    // // bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
+    // vector<double> zLevels;
+    // for (int iz = 0; iz < fhdr.nz; iz++) {
+    //   zLevels.push_back(vhdr.level[iz]);
+    // }
     
     // write out
     
@@ -238,7 +238,7 @@ void EccoStats::_addFieldsToOutput()
 
   // initial fields are float32
 
-  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+  MdvxField *dbzField = _inMdvx.getField("Ecco");
   Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
   fhdr2d.nz = 1;
   fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
@@ -484,7 +484,7 @@ int EccoStats::_doWrite()
   // write out
   
   PMU_auto_register("Before write");
-  if(_outMdvx.writeToDir(_params.output_url)) {
+  if(_outMdvx.writeToDir(_params.output_dir)) {
     cerr << "ERROR - EccoStats::Run" << endl;
     cerr << "  Cannot write data set." << endl;
     cerr << _outMdvx.getErrStr() << endl;
