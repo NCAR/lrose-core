@@ -95,6 +95,15 @@ message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 
 function(makeTdrpParams)
 
+# ensure tdrp_gen exists
+
+add_custom_command (
+OUTPUT ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen
+DEPENDS ${CMAKE_SOURCE_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen.c
+COMMAND cd ${CMAKE_BINARY_DIR}/libs/tdrp && make install && cd ${CMAKE_BINARY_DIR}/apps/src/tdrp_gen && make install
+COMMENT "Installing tdrp_gen binary for ${PROJECT_NAME}"
+)
+
 # Add a custom generator for TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
 

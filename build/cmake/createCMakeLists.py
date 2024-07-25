@@ -621,6 +621,15 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
     fo.write('function(makeTdrpParams)\n')
     fo.write('\n')
+    fo.write('# ensure tdrp_gen exists\n')
+    fo.write('\n')
+    fo.write('add_custom_command (\n')
+    fo.write('OUTPUT ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen\n')
+    fo.write('DEPENDS ${CMAKE_SOURCE_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen.c\n')
+    fo.write('COMMAND cd ${CMAKE_BINARY_DIR}/libs/tdrp && make install && cd ${CMAKE_BINARY_DIR}/apps/src/tdrp_gen && make install\n')
+    fo.write('COMMENT "Installing tdrp_gen binary for ${PROJECT_NAME}"\n')
+    fo.write(')\n')
+    fo.write('\n')
     fo.write('# Add a custom generator for TDRP Params.cc and Params.hh files\n')
     fo.write('# from their associated paramdef.<app> file\n')
     fo.write('\n')
@@ -640,7 +649,7 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
     fo.write('endFunction()\n')
     fo.write('\n')
-    
+         
     fo.write('enable_testing()\n')
     fo.write('\n')
 
