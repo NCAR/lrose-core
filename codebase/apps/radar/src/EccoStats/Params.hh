@@ -381,6 +381,14 @@ public:
 
   char* input_dir;
 
+  char* ecco_type_comp_field_name;
+
+  char* convectivity_comp_field_name;
+
+  char* terrain_height_field_name;
+
+  char* water_flag_field_name;
+
   char* output_dir;
 
   char _end_; // end of data region
@@ -390,7 +398,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[10];
+  mutable TDRPtable _table[14];
 
   const char *_className;
 

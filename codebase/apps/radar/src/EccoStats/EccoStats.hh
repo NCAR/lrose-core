@@ -87,6 +87,9 @@ private:
   MdvxProj _dbzProj;
 
   int _doRead();
+  void _allocArrays();
+  int _processFile(int count);
+  
   void _addFieldsToOutput();
 
   int _doWrite();

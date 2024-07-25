@@ -123,6 +123,7 @@ int EccoStats::Run()
   // loop until end of data
   
   _input.reset();
+  int count = 0;
   while (!_input.endOfData()) {
     
     // do the read
@@ -134,6 +135,16 @@ int EccoStats::Run()
       continue;
     }
 
+    // create the arrays on the first pass
+
+    if (count == 0) {
+      _allocArrays();
+    }
+
+    // process the file
+
+    _processFile(count);
+    
     // set grid in EccoStatsFinder object
 
     // MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
@@ -149,23 +160,23 @@ int EccoStats::Run()
     // for (int iz = 0; iz < fhdr.nz; iz++) {
     //   zLevels.push_back(vhdr.level[iz]);
     // }
-    
-    // write out
-    
-    if (_doWrite()) {
-      cerr << "ERROR - EccoStats::Run()" << endl;
-      umsleep(1000);
-      iret = -1;
-      continue;
-    }
+
+    count++;
     
     // clear
     
     _inMdvx.clear();
-    _outMdvx.clear();
     
   } // while
   
+  // write out
+  
+  if (_doWrite()) {
+    cerr << "ERROR - EccoStats::Run()" << endl;
+    umsleep(1000);
+    return -1;
+  }
+    
   return iret;
 
 }
@@ -183,9 +194,16 @@ int EccoStats::_doRead()
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _inMdvx.setDebug(true);
   }
-  // _inMdvx.addReadField(_params.dbz_field_name);
-  // _inMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  // _inMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  _inMdvx.addReadField(_params.ecco_type_comp_field_name);
+  _inMdvx.addReadField(_params.convectivity_comp_field_name);
+  if (strlen(_params.terrain_height_field_name) > 0) {
+    _inMdvx.addReadField(_params.terrain_height_field_name);
+  }
+  if (strlen(_params.water_flag_field_name) > 0) {
+    _inMdvx.addReadField(_params.water_flag_field_name);
+  }
+  _inMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _inMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _inMdvx.printReadRequest(cerr);
@@ -208,6 +226,28 @@ int EccoStats::_doRead()
 
 }
 
+/////////////////////////////////////////////////////////
+// allocate the arrays
+
+void EccoStats::_allocArrays()
+  
+{
+
+
+}
+  
+/////////////////////////////////////////////////////////
+// process the file in _inMdvx
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_processFile(int count)
+  
+{
+
+  return 0;
+
+}
+  
 /////////////////////////////////////////////////////////
 // add fields to the output object
 

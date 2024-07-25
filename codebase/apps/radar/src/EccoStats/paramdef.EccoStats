@@ -52,6 +52,28 @@ paramdef string {
   p_help = "This is used in ARCHIVE mode only. In FILELIST mode, the file paths are specified on the command line.";
 } input_dir;
 
+paramdef string {
+  p_default = "EchoTypeComp";
+  p_descr = "Field name for 2D composite of Ecco type.";
+} ecco_type_comp_field_name;
+
+paramdef string {
+  p_default = "ConvectivityComp";
+  p_descr = "Field name for 2D composite of convectivity.";
+  p_help = "Set to empty if you do not want to copy the terrain height grid to the output files.";
+} convectivity_comp_field_name;
+
+paramdef string {
+  p_default = "TerrainHt";
+  p_descr = "Field name for terrain height.";
+} terrain_height_field_name;
+
+paramdef string {
+  p_default = "WaterFlag";
+  p_descr = "Field name for water flag.";
+  p_help = "Set to empty if you do not want to copy the water flag to the output files.";
+} water_flag_field_name;
+
 commentdef {
   p_header = "DATA OUTPUT";
   p_text = "\n"

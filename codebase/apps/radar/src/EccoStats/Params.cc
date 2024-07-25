@@ -649,6 +649,54 @@
     tt->single_val.s = tdrpStrDup("mdv/ecco");
     tt++;
     
+    // Parameter 'ecco_type_comp_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ecco_type_comp_field_name");
+    tt->descr = tdrpStrDup("Field name for 2D composite of Ecco type.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ecco_type_comp_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("EchoTypeComp");
+    tt++;
+    
+    // Parameter 'convectivity_comp_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("convectivity_comp_field_name");
+    tt->descr = tdrpStrDup("Field name for 2D composite of convectivity.");
+    tt->help = tdrpStrDup("Set to empty if you do not want to copy the terrain height grid to the output files.");
+    tt->val_offset = (char *) &convectivity_comp_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("ConvectivityComp");
+    tt++;
+    
+    // Parameter 'terrain_height_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("terrain_height_field_name");
+    tt->descr = tdrpStrDup("Field name for terrain height.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &terrain_height_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("TerrainHt");
+    tt++;
+    
+    // Parameter 'water_flag_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("water_flag_field_name");
+    tt->descr = tdrpStrDup("Field name for water flag.");
+    tt->help = tdrpStrDup("Set to empty if you do not want to copy the water flag to the output files.");
+    tt->val_offset = (char *) &water_flag_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WaterFlag");
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
