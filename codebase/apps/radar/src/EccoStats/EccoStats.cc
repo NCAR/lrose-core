@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <dataport/bigend.h>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/mem.h>
 #include "EccoStats.hh"
 using namespace std;
 
@@ -101,6 +102,11 @@ EccoStats::EccoStats(int argc, char **argv)
     }
   }
 
+  _eccoTypeField = NULL;
+  _convectivityField = NULL;
+  _terrainHtField = NULL;
+  _waterFlagField = NULL;
+  
 }
 
 // destructor
@@ -109,7 +115,30 @@ EccoStats::~EccoStats()
 
 {
 
+  ufree3((void ***) _stratLowCount);
+  ufree3((void ***) _stratMidCount);
+  ufree3((void ***) _stratHighCount);
+  ufree3((void ***) _mixedCount);
+  ufree3((void ***) _convShallowCount);
+  ufree3((void ***) _convMidCount);
+  ufree3((void ***) _convDeepCount);
+  ufree3((void ***) _convElevCount);
+  
+  ufree3((void ***) _stratLowConv);
+  ufree3((void ***) _stratMidConv);
+  ufree3((void ***) _stratHighConv);
+  ufree3((void ***) _mixedConv);
+  ufree3((void ***) _convShallowConv);
+  ufree3((void ***) _convMidConv);
+  ufree3((void ***) _convDeepConv);
+  ufree3((void ***) _convElevConv);
 
+  ufree2((void **) _terrainHt);
+  ufree2((void **) _waterFlag);
+
+  delete[] _lon;
+  delete[] _hourOfDay;
+  
 }
 
 //////////////////////////////////////////////////
@@ -136,14 +165,29 @@ int EccoStats::Run()
     }
 
     // create the arrays on the first pass
-
+    
+    Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
     if (count == 0) {
+      // first file
+      _nx = fhdr.nx;
+      _ny = fhdr.ny;
+      _nz = 24; // diurnal hour index
       _allocArrays();
+    } else {
+      if (_nx != fhdr.nx || _ny != fhdr.ny) {
+        cerr << "ERROR - grid size has changed" << endl;
+        cerr << "  nx, ny found: " << fhdr.nx << ", " << fhdr.ny << endl;
+        cerr << "  nx, ny should be: " << _nx << ", " << _ny << endl;
+        cerr << "  skipping this file: " << _inMdvx.getPathInUse() << endl;
+        iret = -1;
+        continue;
+      }
     }
+    count++;
 
     // process the file
 
-    _processFile(count);
+    _processInputFile();
     
     // set grid in EccoStatsFinder object
 
@@ -161,10 +205,12 @@ int EccoStats::Run()
     //   zLevels.push_back(vhdr.level[iz]);
     // }
 
-    count++;
-    
     // clear
     
+    if (_params.debug) {
+      cerr << "Done processing file: " << _inMdvx.getPathInUse() << endl;
+    }
+
     _inMdvx.clear();
     
   } // while
@@ -218,8 +264,30 @@ int EccoStats::_doRead()
     return -1;
   }
 
+  _eccoTypeField = _inMdvx.getField(_params.ecco_type_comp_field_name);
+  _convectivityField = _inMdvx.getField(_params.convectivity_comp_field_name);
+  if (strlen(_params.terrain_height_field_name) > 0) {
+    _terrainHtField = _inMdvx.getField(_params.terrain_height_field_name);
+  }
+  if (strlen(_params.water_flag_field_name) > 0) {
+    _waterFlagField = _inMdvx.getField(_params.water_flag_field_name);
+  }
+  if (_eccoTypeField == NULL) {
+    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
+    return -1;
+  }
+  if (_convectivityField == NULL) {
+    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
+    return -1;
+  }
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  _proj.init(fhdr);
+  
   if (_params.debug) {
-    cerr << "Read in file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "Success - read in file: " << _inMdvx.getPathInUse() << endl;
   }
 
   return 0;
@@ -233,14 +301,44 @@ void EccoStats::_allocArrays()
   
 {
 
+  // counts
+  
+  _stratLowCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratMidCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratHighCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _mixedCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convShallowCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convMidCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convDeepCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convElevCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
 
+  // convectivity
+  
+  _stratLowConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratMidConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratHighConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _mixedConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convShallowConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convMidConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convDeepConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convElevConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
+
+  // others
+
+  _terrainHt = (fl32 **) umalloc2(_ny, _nx, sizeof(fl32));
+  _waterFlag = (fl32 **) umalloc2(_ny, _nx, sizeof(fl32));
+
+  _lon = new double[_nx];
+  _hourOfDay = new int[_ny];
+  
 }
   
+
 /////////////////////////////////////////////////////////
 // process the file in _inMdvx
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_processFile(int count)
+int EccoStats::_processInputFile()
   
 {
 

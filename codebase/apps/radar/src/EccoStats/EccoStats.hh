@@ -83,12 +83,26 @@ private:
   Params _params;
   DsMdvxInput _input;
   DsMdvx _inMdvx, _outMdvx;
+
+  MdvxField *_eccoTypeField;
+  MdvxField *_convectivityField;
+  MdvxField *_terrainHtField;
+  MdvxField *_waterFlagField;
   
-  MdvxProj _dbzProj;
+  MdvxProj _proj;
+  int _nx, _ny, _nz;
+
+  fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount, ***_mixedCount;
+  fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
+  fl32 ***_stratLowConv, ***_stratMidConv, ***_stratHighConv, ***_mixedConv;
+  fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
+  fl32 **_terrainHt, **_waterFlag;
+  double *_lon;
+  int *_hourOfDay; // hour of day index
 
   int _doRead();
   void _allocArrays();
-  int _processFile(int count);
+  int _processInputFile();
   
   void _addFieldsToOutput();
 
