@@ -26,12 +26,6 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef string {
-  p_default = "test";
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-} instance;
-
 typedef enum {
   ARCHIVE, FILELIST
 } mode_t;

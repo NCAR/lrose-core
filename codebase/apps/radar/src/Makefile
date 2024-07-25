@@ -26,7 +26,6 @@ SUB_DIRS = \
 	DsrMerge \
 	DualDopplerLobes \
 	Ecco \
-	EccoStats \
 	HawkEye \
 	HawkEdit \
 	HcrTempRxGain \

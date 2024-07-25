@@ -37,7 +37,6 @@
 
 #include <algorithm>
 #include <dataport/bigend.h>
-#include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include "EccoStats.hh"
 using namespace std;
@@ -88,12 +87,6 @@ EccoStats::EccoStats(int argc, char **argv)
     }
   }
   
-  // init process mapper registration
-
-  PMU_auto_init((char *) _progName.c_str(),
-		_params.instance,
-		PROCMAP_REGISTER_INTERVAL);
-  
   // initialize the data input object
 
   if (_params.mode == Params::ARCHIVE) {
@@ -116,9 +109,6 @@ EccoStats::~EccoStats()
 
 {
 
-  // unregister process
-
-  PMU_auto_unregister();
 
 }
 
@@ -130,20 +120,13 @@ int EccoStats::Run()
   
   int iret = 0;
 
-  // register with procmap
-  
-  PMU_auto_register("Run");
-
   // loop until end of data
   
   _input.reset();
   while (!_input.endOfData()) {
     
-    PMU_auto_register("In main loop");
-    
     // do the read
 
-    PMU_auto_register("Before read");
     if (_doRead()) {
       cerr << "ERROR - EccoStats::Run()" << endl;
       umsleep(1000);
@@ -209,8 +192,6 @@ int EccoStats::_doRead()
   }
   
   // read in
-  
-  PMU_auto_register("Before read");
   
   if (_input.readVolumeNext(_inMdvx)) {
     cerr << "ERROR - EccoStats::_doRead" << endl;
@@ -483,7 +464,6 @@ int EccoStats::_doWrite()
   
   // write out
   
-  PMU_auto_register("Before write");
   if(_outMdvx.writeToDir(_params.output_dir)) {
     cerr << "ERROR - EccoStats::Run" << endl;
     cerr << "  Cannot write data set." << endl;

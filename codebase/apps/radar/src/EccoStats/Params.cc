@@ -596,18 +596,6 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Process instance");
-    tt->help = tdrpStrDup("Used for registration with procmap.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
     // Parameter 'mode'
     // ctype is '_mode_t'
     

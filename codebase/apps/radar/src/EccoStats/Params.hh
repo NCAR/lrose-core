@@ -375,8 +375,6 @@ public:
 
   debug_t debug;
 
-  char* instance;
-
   mode_t mode;
 
   tdrp_bool_t use_multiple_threads;
@@ -392,7 +390,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[11];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 
