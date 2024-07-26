@@ -39,6 +39,7 @@
 #include <dataport/bigend.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/mem.h>
+#include <radar/ConvStratFinder.hh>
 #include "EccoStats.hh"
 using namespace std;
 
@@ -102,10 +103,17 @@ EccoStats::EccoStats(int argc, char **argv)
     }
   }
 
+  // init field pointers
+  // these point to memory in MdvxField objects and do not need to be freed
+  
   _eccoTypeField = NULL;
   _convectivityField = NULL;
   _terrainHtField = NULL;
   _waterFlagField = NULL;
+
+  // init arrays
+
+  _initArrays();
   
 }
 
@@ -115,29 +123,9 @@ EccoStats::~EccoStats()
 
 {
 
-  ufree3((void ***) _stratLowCount);
-  ufree3((void ***) _stratMidCount);
-  ufree3((void ***) _stratHighCount);
-  ufree3((void ***) _mixedCount);
-  ufree3((void ***) _convShallowCount);
-  ufree3((void ***) _convMidCount);
-  ufree3((void ***) _convDeepCount);
-  ufree3((void ***) _convElevCount);
-  
-  ufree3((void ***) _stratLowConv);
-  ufree3((void ***) _stratMidConv);
-  ufree3((void ***) _stratHighConv);
-  ufree3((void ***) _mixedConv);
-  ufree3((void ***) _convShallowConv);
-  ufree3((void ***) _convMidConv);
-  ufree3((void ***) _convDeepConv);
-  ufree3((void ***) _convElevConv);
+  // free up arrays
 
-  ufree2((void **) _terrainHt);
-  ufree2((void **) _waterFlag);
-
-  delete[] _lon;
-  delete[] _hourOfDay;
+  _freeArrays();
   
 }
 
@@ -189,22 +177,6 @@ int EccoStats::Run()
 
     _processInputFile();
     
-    // set grid in EccoStatsFinder object
-
-    // MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-    // if (dbzField == NULL) {
-    //   cerr << "ERROR - EccoStats::Run()" << endl;
-    //   cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
-    //   return -1;
-    // }
-    // const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
-    // const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
-    // // bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
-    // vector<double> zLevels;
-    // for (int iz = 0; iz < fhdr.nz; iz++) {
-    //   zLevels.push_back(vhdr.level[iz]);
-    // }
-
     // clear
     
     if (_params.debug) {
@@ -225,6 +197,156 @@ int EccoStats::Run()
     
   return iret;
 
+}
+
+/////////////////////////////////////////////////////////
+// initialize the arrays
+
+void EccoStats::_initArrays()
+  
+{
+
+  // init arrays
+  
+  _stratLowCount = NULL;
+  _stratMidCount = NULL;
+  _stratHighCount = NULL;
+  _mixedCount = NULL;
+  _convShallowCount = NULL;
+  _convMidCount = NULL;
+  _convDeepCount = NULL;
+  _convElevCount = NULL;
+
+  _stratLowConv = NULL;
+  _stratMidConv = NULL;
+  _stratHighConv = NULL;
+  _mixedConv = NULL;
+  _convShallowConv = NULL;
+  _convMidConv = NULL;
+  _convDeepConv = NULL;
+  _convElevConv = NULL;
+
+  _validCount = NULL;
+  _totalCount = NULL;
+  
+  _terrainHt = NULL;
+  _waterFlag = NULL;
+
+  _lat = NULL;
+  _lon = NULL;
+  _hourOfDay = NULL;
+
+}
+
+/////////////////////////////////////////////////////////
+// allocate the arrays
+
+void EccoStats::_allocArrays()
+  
+{
+
+  // counts
+  
+  _stratLowCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratMidCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratHighCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _mixedCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convShallowCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convMidCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convDeepCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convElevCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+
+  // convectivity
+  
+  _stratLowConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratMidConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratHighConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _mixedConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convShallowConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convMidConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convDeepConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convElevConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+
+  _validCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _totalCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  
+  // others
+
+  _lon = (double **) ucalloc2(_ny, _nx, sizeof(double));
+  _lat = (double **) ucalloc2(_ny, _nx, sizeof(double));
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  for (int iy = 0; iy < fhdr.ny; iy++) {
+    for (int ix = 0; ix < fhdr.nx; ix++) {
+      double lat, lon;
+      _proj.xyIndex2latlon(ix, iy, lat, lon);
+      _lat[iy][iy] = lat;
+      _lon[iy][iy] = lon;
+    }
+  }
+
+  _hourOfDay = (int **) ucalloc2(_ny, _nx, sizeof(int));
+
+  if (_terrainHtField != NULL) {
+    _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+    fl32 *terrainHt2D = (fl32 *) _terrainHtField->getVol();
+    size_t offset = 0;
+    for (int iy = 0; iy < fhdr.ny; iy++) {
+      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
+        _terrainHt[iy][ix] = terrainHt2D[offset];
+      }
+    }
+  }
+  
+  if (_waterFlagField != NULL) {
+    _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+    fl32 *waterFlag2D = (fl32 *) _waterFlagField->getVol();
+    size_t offset = 0;
+    for (int iy = 0; iy < fhdr.ny; iy++) {
+      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
+        _waterFlag[iy][ix] = waterFlag2D[offset];
+      }
+    }
+  }
+  
+}
+
+/////////////////////////////////////////////////////////
+// free the arrays
+
+void EccoStats::_freeArrays()
+  
+{
+
+  ufree3((void ***) _stratLowCount);
+  ufree3((void ***) _stratMidCount);
+  ufree3((void ***) _stratHighCount);
+  ufree3((void ***) _mixedCount);
+  ufree3((void ***) _convShallowCount);
+  ufree3((void ***) _convMidCount);
+  ufree3((void ***) _convDeepCount);
+  ufree3((void ***) _convElevCount);
+  
+  ufree3((void ***) _stratLowConv);
+  ufree3((void ***) _stratMidConv);
+  ufree3((void ***) _stratHighConv);
+  ufree3((void ***) _mixedConv);
+  ufree3((void ***) _convShallowConv);
+  ufree3((void ***) _convMidConv);
+  ufree3((void ***) _convDeepConv);
+  ufree3((void ***) _convElevConv);
+
+  ufree3((void ***) _validCount);
+  ufree3((void ***) _totalCount);
+
+  ufree2((void **) _terrainHt);
+  ufree2((void **) _waterFlag);
+
+  ufree2((void **) _lat);
+  ufree2((void **) _lon);
+
+  ufree2((void **) _hourOfDay);
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -283,6 +405,8 @@ int EccoStats::_doRead()
     return -1;
   }
 
+  // set projection, and lat/lon arrays
+  
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   _proj.init(fhdr);
   
@@ -295,53 +419,101 @@ int EccoStats::_doRead()
 }
 
 /////////////////////////////////////////////////////////
-// allocate the arrays
-
-void EccoStats::_allocArrays()
-  
-{
-
-  // counts
-  
-  _stratLowCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratMidCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratHighCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _mixedCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convShallowCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convMidCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convDeepCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convElevCount = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-
-  // convectivity
-  
-  _stratLowConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratMidConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratHighConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _mixedConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convShallowConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convMidConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convDeepConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convElevConv = (fl32 ***) umalloc3(_nz, _ny, _nx, sizeof(fl32));
-
-  // others
-
-  _terrainHt = (fl32 **) umalloc2(_ny, _nx, sizeof(fl32));
-  _waterFlag = (fl32 **) umalloc2(_ny, _nx, sizeof(fl32));
-
-  _lon = new double[_nx];
-  _hourOfDay = new int[_ny];
-  
-}
-  
-
-/////////////////////////////////////////////////////////
 // process the file in _inMdvx
 // Returns 0 on success, -1 on failure.
 
 int EccoStats::_processInputFile()
   
 {
+  
+  // compute hour of day array
+  
+  DateTime fileTime(_inMdvx.getValidTime());
+  
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      double lon = _lon[iy][ix];
+      double lonSecs = lon * 240.0;
+      DateTime lonTime = fileTime + lonSecs;
+      int lonHour = lonTime.getHour();
+      _hourOfDay[iy][ix] = lonHour;
+    } // ix
+  } // iy
 
+  // loop through 2D grid space
+  
+  Mdvx::field_header_t etHdr = _eccoTypeField->getFieldHeader();
+  fl32 etMiss = etHdr.missing_data_value;
+  
+  fl32 *echoType2D = (fl32 *) _eccoTypeField->getVol();
+  fl32 *convectivity2D = (fl32 *) _convectivityField->getVol();
+
+  size_t offset = 0;
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++, offset++) {
+
+      int hour = _hourOfDay[iy][ix];
+      fl32 echoTypeFl32 = echoType2D[offset];
+      
+      if (echoTypeFl32 != etMiss) {
+
+        int echoType = (int) floor(echoTypeFl32 + 0.5);
+        fl32 convectivity = convectivity2D[offset];
+        switch ((ConvStratFinder::category_t) echoType) {
+          case ConvStratFinder::category_t::CATEGORY_STRATIFORM_LOW: {
+            _stratLowCount[hour][iy][ix]++;
+            _stratLowConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_STRATIFORM_MID: {
+            _stratMidCount[hour][iy][ix]++;
+            _stratMidConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_STRATIFORM_HIGH: {
+            _stratHighCount[hour][iy][ix]++;
+            _stratHighConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_MIXED: {
+            _mixedCount[hour][iy][ix]++;
+            _mixedConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_ELEVATED: {
+            _convElevCount[hour][iy][ix]++;
+            _convElevConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_SHALLOW: {
+            _convShallowCount[hour][iy][ix]++;
+            _convShallowConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_MID: {
+            _convMidCount[hour][iy][ix]++;
+            _convMidConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_DEEP: {
+            _convDeepCount[hour][iy][ix]++;
+            _convDeepConv[hour][iy][ix] += convectivity;
+            break;
+          }
+          default: {}
+        }
+
+        _validCount[hour][iy][ix]++;
+
+      } // check for missing
+
+      _totalCount[hour][iy][ix]++;
+
+    } // ix
+  } // iy
+
+  
+  
   return 0;
 
 }

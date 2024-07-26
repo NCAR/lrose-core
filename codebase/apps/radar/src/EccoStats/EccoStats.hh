@@ -96,12 +96,17 @@ private:
   fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
   fl32 ***_stratLowConv, ***_stratMidConv, ***_stratHighConv, ***_mixedConv;
   fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
+  fl32 ***_validCount, ***_totalCount;
   fl32 **_terrainHt, **_waterFlag;
-  double *_lon;
-  int *_hourOfDay; // hour of day index
+  double **_lat, **_lon;
+  int **_hourOfDay; // hour of day index
+
+  void _initArrays();
+  void _allocArrays();
+  void _freeArrays();
 
   int _doRead();
-  void _allocArrays();
+
   int _processInputFile();
   
   void _addFieldsToOutput();
