@@ -113,7 +113,7 @@ EccoStats::EccoStats(int argc, char **argv)
 
   // init arrays
 
-  _initArrays();
+  _initArraysToNull();
   
 }
 
@@ -140,7 +140,7 @@ int EccoStats::Run()
   // loop until end of data
   
   _input.reset();
-  int count = 0;
+  int fileCount = 0;
   while (!_input.endOfData()) {
     
     // do the read
@@ -151,16 +151,17 @@ int EccoStats::Run()
       iret = -1;
       continue;
     }
-
-    // create the arrays on the first pass
+    
+    // if this is the first file, allocate and initialize the arrays
     
     Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-    if (count == 0) {
+    if (fileCount == 0) {
       // first file
       _nx = fhdr.nx;
       _ny = fhdr.ny;
       _nz = 24; // diurnal hour index
       _allocArrays();
+      _initForStats();
     } else {
       if (_nx != fhdr.nx || _ny != fhdr.ny) {
         cerr << "ERROR - grid size has changed" << endl;
@@ -171,21 +172,23 @@ int EccoStats::Run()
         continue;
       }
     }
-    count++;
-
-    // process the file
-
-    _processInputFile();
+    fileCount++;
+    
+    // update the stats, based on the data in the file
+    
+    _updateStatsFromInputFile();
     
     // clear
     
     if (_params.debug) {
-      cerr << "Done processing file: " << _inMdvx.getPathInUse() << endl;
+      cerr << "Done processing input file: " << _inMdvx.getPathInUse() << endl;
     }
 
-    _inMdvx.clear();
-    
   } // while
+
+  // add the fields to the output file
+
+  _addFieldsToOutput();
   
   // write out
   
@@ -202,7 +205,7 @@ int EccoStats::Run()
 /////////////////////////////////////////////////////////
 // initialize the arrays
 
-void EccoStats::_initArrays()
+void EccoStats::_initArraysToNull()
   
 {
 
@@ -270,45 +273,15 @@ void EccoStats::_allocArrays()
   _validCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _totalCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   
-  // others
+  // lat/lon
 
   _lon = (double **) ucalloc2(_ny, _nx, sizeof(double));
   _lat = (double **) ucalloc2(_ny, _nx, sizeof(double));
 
-  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-  for (int iy = 0; iy < fhdr.ny; iy++) {
-    for (int ix = 0; ix < fhdr.nx; ix++) {
-      double lat, lon;
-      _proj.xyIndex2latlon(ix, iy, lat, lon);
-      _lat[iy][iy] = lat;
-      _lon[iy][iy] = lon;
-    }
-  }
-
+  // local hour of day
+  
   _hourOfDay = (int **) ucalloc2(_ny, _nx, sizeof(int));
 
-  if (_terrainHtField != NULL) {
-    _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-    fl32 *terrainHt2D = (fl32 *) _terrainHtField->getVol();
-    size_t offset = 0;
-    for (int iy = 0; iy < fhdr.ny; iy++) {
-      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
-        _terrainHt[iy][ix] = terrainHt2D[offset];
-      }
-    }
-  }
-  
-  if (_waterFlagField != NULL) {
-    _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-    fl32 *waterFlag2D = (fl32 *) _waterFlagField->getVol();
-    size_t offset = 0;
-    for (int iy = 0; iy < fhdr.ny; iy++) {
-      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
-        _waterFlag[iy][ix] = waterFlag2D[offset];
-      }
-    }
-  }
-  
 }
 
 /////////////////////////////////////////////////////////
@@ -350,82 +323,64 @@ void EccoStats::_freeArrays()
 }
 
 /////////////////////////////////////////////////////////
-// perform the read
-//
-// Returns 0 on success, -1 on failure.
+// initialize for stats
 
-int EccoStats::_doRead()
+void EccoStats::_initForStats()
   
 {
-  
-  _inMdvx.clear();
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _inMdvx.setDebug(true);
-  }
-  _inMdvx.addReadField(_params.ecco_type_comp_field_name);
-  _inMdvx.addReadField(_params.convectivity_comp_field_name);
-  if (strlen(_params.terrain_height_field_name) > 0) {
-    _inMdvx.addReadField(_params.terrain_height_field_name);
-  }
-  if (strlen(_params.water_flag_field_name) > 0) {
-    _inMdvx.addReadField(_params.water_flag_field_name);
-  }
-  _inMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  _inMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _inMdvx.printReadRequest(cerr);
-  }
-  
-  // read in
-  
-  if (_input.readVolumeNext(_inMdvx)) {
-    cerr << "ERROR - EccoStats::_doRead" << endl;
-    cerr << "  Cannot read in data." << endl;
-    cerr << _input.getErrStr() << endl;
-    return -1;
-  }
 
-  _eccoTypeField = _inMdvx.getField(_params.ecco_type_comp_field_name);
-  _convectivityField = _inMdvx.getField(_params.convectivity_comp_field_name);
-  if (strlen(_params.terrain_height_field_name) > 0) {
-    _terrainHtField = _inMdvx.getField(_params.terrain_height_field_name);
-  }
-  if (strlen(_params.water_flag_field_name) > 0) {
-    _waterFlagField = _inMdvx.getField(_params.water_flag_field_name);
-  }
-  if (_eccoTypeField == NULL) {
-    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
-    cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
-    return -1;
-  }
-  if (_convectivityField == NULL) {
-    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
-    cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
-    return -1;
-  }
-
-  // set projection, and lat/lon arrays
+  // init lat and lon arrays
   
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-  _proj.init(fhdr);
-  
-  if (_params.debug) {
-    cerr << "Success - read in file: " << _inMdvx.getPathInUse() << endl;
+  for (int iy = 0; iy < fhdr.ny; iy++) {
+    for (int ix = 0; ix < fhdr.nx; ix++) {
+      double lat, lon;
+      _proj.xyIndex2latlon(ix, iy, lat, lon);
+      _lat[iy][iy] = lat;
+      _lon[iy][iy] = lon;
+    }
   }
 
-  return 0;
+  // load terrain height data if available
+  
+  if (_terrainHtField != NULL) {
+    _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+    fl32 *terrainHt2D = (fl32 *) _terrainHtField->getVol();
+    size_t offset = 0;
+    for (int iy = 0; iy < fhdr.ny; iy++) {
+      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
+        _terrainHt[iy][ix] = terrainHt2D[offset];
+      }
+    }
+  }
 
+  // load water flag data if available
+  
+  if (_waterFlagField != NULL) {
+    _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+    fl32 *waterFlag2D = (fl32 *) _waterFlagField->getVol();
+    size_t offset = 0;
+    for (int iy = 0; iy < fhdr.ny; iy++) {
+      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
+        _waterFlag[iy][ix] = waterFlag2D[offset];
+      }
+    }
+  }
+  
+  // initialize the output file object
+  
+  _initOutputFile();
+    
 }
 
 /////////////////////////////////////////////////////////
 // process the file in _inMdvx
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_processInputFile()
+int EccoStats::_updateStatsFromInputFile()
   
 {
-  
+
   // compute hour of day array
   
   DateTime fileTime(_inMdvx.getValidTime());
@@ -512,237 +467,83 @@ int EccoStats::_processInputFile()
     } // ix
   } // iy
 
-  
-  
   return 0;
 
 }
   
 /////////////////////////////////////////////////////////
-// add fields to the output object
-
-void EccoStats::_addFieldsToOutput()
-  
-{
-
-  _outMdvx.clearFields();
-
-  // initial fields are float32
-
-  MdvxField *dbzField = _inMdvx.getField("Ecco");
-  Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
-  fhdr2d.nz = 1;
-  fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  size_t planeSize32 = fhdr2d.nx * fhdr2d.ny * sizeof(fl32);
-  fhdr2d.volume_size = planeSize32;
-  fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr2d.data_element_nbytes = 4;
-  fhdr2d.missing_data_value = _missingFl32;
-  fhdr2d.bad_data_value = _missingFl32;
-  fhdr2d.scale = 1.0;
-  fhdr2d.bias = 0.0;
-  
-  Mdvx::vlevel_header_t vhdr2d;
-  MEM_zero(vhdr2d);
-  vhdr2d.level[0] = 0;
-  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
-
-#ifdef JUNK
-  
-  if (_params.write_texture) {
-    // add 2D max texture field
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getTexture2D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzTextureComp",
-                                 "reflectivity_texture_composite",
-                                 "dBZ"));
-  }
-  
-  if (_params.write_convectivity) {
-    // convectivity max in 2D
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvectivity2D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "ConvectivityComp",
-                                 "likelihood_of_convection_composite",
-                                 ""));
-  }
-
-  if (_params.write_col_max_dbz) {
-    // col max dbz
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getDbzColMax(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzComp",
-                                 "dbz_composite",
-                                 "dBZ"));
-  }
-    
-  if (_params.write_fraction_active) {
-    // load up fraction of texture kernel covered
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getFractionActive(),
-                                 Mdvx::ENCODING_INT16,
-                                 "FractionActive",
-                                 "fraction_of_texture_kernel_active",
-                                 ""));
-  }
-    
-  if (_params.write_tops) {
-    // tops
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "ConvTops",
-                                 "convective_tops",
-                                 "km"));
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getStratTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "StratTops",
-                                 "stratiform_tops",
-                                 "km"));
-    char longName[256];
-    snprintf(longName, 256, "%g_dbz_echo_tops", _params.dbz_for_echo_tops);
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getEchoTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "EchoTops", longName, "km"));
-  }
-  
-  if (_params.write_height_grids &&
-      _params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
-    _shallowHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(new MdvxField(_shallowHtField));
-    _deepHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(new MdvxField(_deepHtField));
-  }
-  
-  if (_params.write_temperature && _tempField != NULL) {
-    MdvxField * tempField = new MdvxField(*_tempField);
-    tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(tempField);
-  }
-
-  // the following 2d fields are unsigned bytes
-  
-  size_t planeSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
-  fhdr2d.volume_size = planeSize08;
-  fhdr2d.encoding_type = Mdvx::ENCODING_INT8;
-  fhdr2d.data_element_nbytes = 1;
-  fhdr2d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-  fhdr2d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-  
-  // echoType field
-  
-  if (_params.write_partition) {
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getEchoType2D(),
-                                 Mdvx::ENCODING_INT8,
-                                 "EchoTypeComp",
-                                 "convective_stratiform_echo_type_composite",
-                                 ""));
-  }
-  
-  // the following 3d fields are floats
-  
-  Mdvx::field_header_t fhdr3d = dbzField->getFieldHeader();
-  Mdvx::vlevel_header_t vhdr3d = dbzField->getVlevelHeader();
-  fhdr3d.missing_data_value = _missingFl32;
-  fhdr3d.bad_data_value = _missingFl32;
-
-  if (_params.write_convective_dbz) {
-    // reflectivity only where convection has been identified
-    MdvxField *convDbz = _makeField(fhdr3d, vhdr3d,
-                                    _finder.getConvectiveDbz(),
-                                    Mdvx::ENCODING_INT16,
-                                    "DbzConv",
-                                    "convective_reflectivity_3D",
-                                    "dBZ");
-    _outMdvx.addField(convDbz);
-  }
-  
-  if (_params.write_texture) {
-    // texture in 3D
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getTexture3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzTexture3D",
-                                 "reflectivity_texture_3D",
-                                 "dBZ"));
-  }
-
-  if (_params.write_convectivity) {
-    // convectivity in 3D
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getConvectivity3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "Convectivity3D",
-                                 "likelihood_of_convection_3D",
-                                 ""));
-  }
-
-  if (_params.write_3D_dbz) {
-    // echo the input DBZ field
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getDbz3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "Dbz3D",
-                                 "reflectivity_3D",
-                                 "dBZ"));
-  }
-  
-  if (_params.write_partition) {
-    // echoType for full volume
-    size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
-    fhdr3d.volume_size = volSize08;
-    fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
-    fhdr3d.data_element_nbytes = 1;
-    fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-    fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getEchoType3D(),
-                                 Mdvx::ENCODING_INT8,
-                                 "EchoType3D",
-                                 "convective_stratiform_echo_type_3D",
-                                 ""));
-  }
-
-  if (_params.write_clumping_debug_fields) {
-    _addClumpingDebugFields();
-  }
-
-  // add ht data if available
-  
-  if (_params.use_terrain_ht_data) {
-    MdvxField *htFieldIn = _inMdvx.getField("TerrainHt");
-    if (htFieldIn != NULL) {
-      MdvxField *htFieldOut = new MdvxField(*htFieldIn);
-      htFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
-      _outMdvx.addField(htFieldOut);
-    }
-    // add water field
-    if (_params.add_water_layer) {
-      MdvxField *waterFieldIn = _inMdvx.getField("WaterFlag");
-      if (waterFieldIn != NULL) {
-        MdvxField *waterFieldOut = new MdvxField(*waterFieldIn);
-        waterFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
-        _outMdvx.addField(waterFieldOut);
-      }
-    }
-  }
-
-#endif
-  
-}
-
-/////////////////////////////////////////////////////////
-// perform the write
+// perform the read
 //
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_doWrite()
+int EccoStats::_doRead()
+  
+{
+  
+  _inMdvx.clear();
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _inMdvx.setDebug(true);
+  }
+  _inMdvx.addReadField(_params.ecco_type_comp_field_name);
+  _inMdvx.addReadField(_params.convectivity_comp_field_name);
+  if (strlen(_params.terrain_height_field_name) > 0) {
+    _inMdvx.addReadField(_params.terrain_height_field_name);
+  }
+  if (strlen(_params.water_flag_field_name) > 0) {
+    _inMdvx.addReadField(_params.water_flag_field_name);
+  }
+  _inMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _inMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _inMdvx.printReadRequest(cerr);
+  }
+  
+  // read in
+  
+  if (_input.readVolumeNext(_inMdvx)) {
+    cerr << "ERROR - EccoStats::_doRead" << endl;
+    cerr << "  Cannot read in data." << endl;
+    cerr << _input.getErrStr() << endl;
+    return -1;
+  }
+
+  _eccoTypeField = _inMdvx.getField(_params.ecco_type_comp_field_name);
+  _convectivityField = _inMdvx.getField(_params.convectivity_comp_field_name);
+  if (strlen(_params.terrain_height_field_name) > 0) {
+    _terrainHtField = _inMdvx.getField(_params.terrain_height_field_name);
+  }
+  if (strlen(_params.water_flag_field_name) > 0) {
+    _waterFlagField = _inMdvx.getField(_params.water_flag_field_name);
+  }
+  if (_eccoTypeField == NULL) {
+    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
+    return -1;
+  }
+  if (_convectivityField == NULL) {
+    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
+    return -1;
+  }
+
+  // set projection, and lat/lon arrays
+  
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  _proj.init(fhdr);
+  
+  if (_params.debug) {
+    cerr << "Success - read in file: " << _inMdvx.getPathInUse() << endl;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// prepare the output file
+
+void EccoStats::_initOutputFile()
   
 {
   
@@ -755,22 +556,146 @@ int EccoStats::_doWrite()
   }
   // _outMdvx.setWriteLdataInfo();
   Mdvx::master_header_t mhdr = _inMdvx.getMasterHeader();
+  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  mhdr.vlevel_included = 1;
   _outMdvx.setMasterHeader(mhdr);
-  string info = _inMdvx.getMasterHeader().data_set_info;
-  info += " : Stratfinder used to identify stratiform regions";
-  _outMdvx.setDataSetInfo(info.c_str());
+  _outMdvx.setValidTime(_args.startTime);
+  _outMdvx.setBeginTime(_args.startTime);
+  _outMdvx.setEndTime(_args.endTime);
+  _outMdvx.setDataSetInfo("Ecco climatology computed from EccoStats app");
   _outMdvx.setMdv2NcfOutput(true, true, true, true);
   
-  // copy any chunks
+}
+
+/////////////////////////////////////////////////////////
+// add fields to the output object
+
+void EccoStats::_addFieldsToOutput()
   
-  // for (size_t i = 0; i < _inMdvx.getNChunks(); i++) {
-  //   MdvxChunk *chunk = new MdvxChunk(*_inMdvx.getChunkByNum(i));
-  //   _outMdvx.addChunk(chunk);
-  // }
+{
+
+  // clear
   
-  // add fields
+  _outMdvx.clearFields();
+
+  // add 3d count fields
+
+  _outMdvx.addField(_make3DField(_stratLowCount,
+                                 "StratLowCount",
+                                 "count_for_stratiform_low",
+                                 "count"));
   
-  _addFieldsToOutput();
+  _outMdvx.addField(_make3DField(_stratMidCount,
+                                 "StratMidCount",
+                                 "count_for_stratiform_mid",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_stratHighCount,
+                                 "StratHighCount",
+                                 "count_for_stratiform_high",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_mixedCount,
+                                 "MixedCount",
+                                 "count_for_mixed",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_convShallowCount,
+                                 "ConvShallowCount",
+                                 "count_for_convective_shallow",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_convMidCount,
+                                 "ConvMidCount",
+                                 "count_for_convective_mid",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_convDeepCount,
+                                 "ConvDeepCount",
+                                 "count_for_convective_deep",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_convElevCount,
+                                 "ConvElevCount",
+                                 "count_for_convective_elevated",
+                                 "count"));
+  
+  // add 3d convectivity fields
+  
+  _outMdvx.addField(_make3DField(_stratLowConv,
+                                 "StratLowConv",
+                                 "convectivity_for_stratiform_low",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_stratMidConv,
+                                 "StratMidConv",
+                                 "convectivity_for_stratiform_mid",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_stratHighConv,
+                                 "StratHighConv",
+                                 "convectivity_for_stratiform_high",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_mixedConv,
+                                 "MixedConv",
+                                 "convectivity_for_mixed",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_convShallowConv,
+                                 "ConvShallowConv",
+                                 "convectivity_for_convective_shallow",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_convMidConv,
+                                 "ConvMidConv",
+                                 "convectivity_for_convective_mid",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_convDeepConv,
+                                 "ConvDeepConv",
+                                 "convectivity_for_convective_deep",
+                                 ""));
+  
+  _outMdvx.addField(_make3DField(_convElevConv,
+                                 "ConvElevConv",
+                                 "convectivity_for_convective_elevated",
+                                 ""));
+  
+  // add 3d summary count fields
+  
+  _outMdvx.addField(_make3DField(_validCount,
+                                 "ValidCount",
+                                 "count_for_valid_obs",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_totalCount,
+                                 "TotalCount",
+                                 "count_for_all_obs",
+                                 "count"));
+
+  // add 2d fields for terrain height and water flag, if available
+
+  if (_terrainHtField) {
+    MdvxField *fld = new MdvxField(*_terrainHtField);
+    _outMdvx.addField(fld);
+  }
+  
+  if (_waterFlagField) {
+    MdvxField *fld = new MdvxField(*_waterFlagField);
+    _outMdvx.addField(fld);
+  }
+  
+}
+
+/////////////////////////////////////////////////////////
+// perform the write
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_doWrite()
+  
+{
   
   // write out
   
@@ -784,8 +709,50 @@ int EccoStats::_doWrite()
   if (_params.debug) {
     cerr << "Wrote file: " << _outMdvx.getPathInUse() << endl;
   }
-
+  
   return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// create a 3d field
+
+MdvxField *EccoStats::_make3DField(fl32 ***data,
+                                   string fieldName,
+                                   string longName,
+                                   string units)
+                                 
+{
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+  fhdr.nz = _nz; // 24 hours in day
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 3;
+  fhdr.grid_dz = 1;
+  fhdr.grid_minz = 0;
+
+  Mdvx::vlevel_header_t vhdr = _eccoTypeField->getVlevelHeader();
+  for (int ii = 0; ii < _nz; ii++) {
+    vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
+    vhdr.level[ii] = ii;
+  }
+
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  newField->setVolData(**data, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  return newField;
 
 }
 

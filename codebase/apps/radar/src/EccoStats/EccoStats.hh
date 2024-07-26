@@ -101,18 +101,23 @@ private:
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
 
-  void _initArrays();
+  void _initArraysToNull();
   void _allocArrays();
   void _freeArrays();
+  void _initForStats();
+
+  int _updateStatsFromInputFile();
 
   int _doRead();
-
-  int _processInputFile();
-  
+  void _initOutputFile();
   void _addFieldsToOutput();
-
   int _doWrite();
-
+  
+  MdvxField *_make3DField(fl32 ***data,
+                          string fieldName,
+                          string longName,
+                          string units);
+                                 
   MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
                         Mdvx::vlevel_header_t &vhdr,
                         const fl32 *data,
