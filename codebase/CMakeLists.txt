@@ -95,31 +95,26 @@ message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 
 function(makeTdrpParams)
 
-# ensure tdrp_gen exists
+  # Add a custom generator for TDRP Params.cc and Params.hh files
+  # from their associated paramdef.<app> file
 
-add_custom_command (
-OUTPUT ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen
-DEPENDS ${CMAKE_SOURCE_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen.c
-COMMAND cd ${CMAKE_BINARY_DIR}/libs/tdrp && make install && cd ${CMAKE_BINARY_DIR}/apps/src/tdrp_gen && make install
-COMMENT "Installing tdrp_gen binary for ${PROJECT_NAME}"
-)
+  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen)
 
-# Add a custom generator for TDRP Params.cc and Params.hh files
-# from their associated paramdef.<app> file
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
 
-set(TDRP_EXECUTABLE ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen)
-#find_program(TDRP_EXECUTABLE NAMES tdrp_gen PATHS ${CMAKE_INSTALL_PREFIX} /usr/local/lrose PATH_SUFFIXES bin)
-
-add_custom_command (
-OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
-DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
-COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ${TDRP_EXECUTABLE}
--c++
--f paramdef.${PROJECT_NAME}
--prog ${PROJECT_NAME}
--add_ncar_copyright
-COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
-)
+    # Run tdrp_gen, explicitly using the one from this build instead of
+    # any version that may be in the user's path.
+    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/libs/tdrp/src &&
+      cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+      ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen
+        -c++
+        -f paramdef.${PROJECT_NAME}
+        -prog ${PROJECT_NAME}
+        -add_ncar_copyright
+    COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
+  )
 
 endFunction()
 
