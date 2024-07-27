@@ -39,11 +39,11 @@
 #define EccoStats_H
 
 #include <string>
-#include <Mdv/DsMdvxInput.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxChunk.hh>
 #include <toolsa/TaArray.hh>
+#include <didss/DsInputPath.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
@@ -81,7 +81,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  DsMdvxInput _input;
+  DsInputPath *_inputPaths;
   DsMdvx _inMdvx, _outMdvx;
 
   MdvxField *_eccoTypeField;
@@ -108,7 +108,7 @@ private:
 
   int _updateStatsFromInputFile();
 
-  int _doRead();
+  int _doRead(const char *path);
   void _initOutputFile();
   void _addFieldsToOutput();
   int _doWrite();

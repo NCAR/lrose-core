@@ -54,6 +54,7 @@ EccoStats::EccoStats(int argc, char **argv)
 {
 
   isOK = true;
+  _inputPaths = NULL;
   
   // set programe name
 
@@ -94,41 +95,19 @@ EccoStats::EccoStats(int argc, char **argv)
   // initialize the data input object
 
   if (_params.mode == Params::ARCHIVE) {
-    if (_input.setArchive(_params.input_dir,
-			  _args.startTime,
-			  _args.endTime)) {
-      isOK = false;
-    }
-  } else if (_params.mode == Params::FILELIST) {
-    if (_input.setFilelist(_args.inputFileList)) {
-      isOK = false;
-    }
+    _inputPaths = new DsInputPath(_progName,
+                                  _params.debug >= Params::DEBUG_EXTRA,
+                                  _params.input_dir,
+                                  _args.startTime,
+                                  _args.endTime);
+  } else {
+    _inputPaths = new DsInputPath(_progName,
+                                  _params.debug >= Params::DEBUG_EXTRA,
+                                  _args.inputFileList);
   }
-
-  DsInputPath dsInput(_progName,
-                      _params.debug >= Params::DEBUG_EXTRA,
-                      _params.input_dir,
-                      _args.startTime,
-                      _args.endTime);
   if (_params.set_month_range) {
-    dsInput.setValidMonthRange(_params.min_month, _params.max_month);
+    _inputPaths->setValidMonthRange(_params.min_month, _params.max_month);
   }
-  char *path = NULL;
-  int count = 0;
-  while ((path = dsInput.next()) != NULL) {
-    cerr << "Path " << count << " is " << path << endl;
-    bool dateOnly;
-    time_t dataTimeSecs;
-    if (DataFileNames::getDataTime(path, dataTimeSecs, dateOnly)) {
-      cerr << "ERROR - cannot get time for file: " << path << endl;
-    } else {
-      DateTime dataTime(dataTimeSecs);
-      cerr << "  data time is: " << DateTime::strm(dataTimeSecs) << endl;
-    }
-    count++;
-  }
-  isOK = false;
-  return;
 
   // init field pointers
   // these point to memory in MdvxField objects and do not need to be freed
@@ -150,6 +129,10 @@ EccoStats::~EccoStats()
 
 {
 
+  if (_inputPaths) {
+    delete _inputPaths;
+  }
+  
   // free up arrays
 
   _freeArrays();
@@ -166,13 +149,14 @@ int EccoStats::Run()
 
   // loop until end of data
   
-  _input.reset();
+  _inputPaths->reset();
   int fileCount = 0;
-  while (!_input.endOfData()) {
+  char *nextPath = NULL;
+  while ((nextPath = _inputPaths->next()) != NULL) {
     
     // do the read
 
-    if (_doRead()) {
+    if (_doRead(nextPath)) {
       cerr << "ERROR - EccoStats::Run()" << endl;
       umsleep(1000);
       iret = -1;
@@ -503,7 +487,7 @@ int EccoStats::_updateStatsFromInputFile()
 //
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_doRead()
+int EccoStats::_doRead(const char *path)
   
 {
   
@@ -525,13 +509,14 @@ int EccoStats::_doRead()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _inMdvx.printReadRequest(cerr);
   }
+  _inMdvx.setReadPath(path);
   
   // read in
   
-  if (_input.readVolumeNext(_inMdvx)) {
+  if (_inMdvx.readVolume()) {
     cerr << "ERROR - EccoStats::_doRead" << endl;
     cerr << "  Cannot read in data." << endl;
-    cerr << _input.getErrStr() << endl;
+    cerr << _inMdvx.getErrStr() << endl;
     return -1;
   }
 
