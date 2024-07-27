@@ -36,12 +36,6 @@ paramdef enum mode_t {
   p_help = "In ARCHIVE mode, the app moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
 } mode;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to use multiple threads for speed.";
-  p_help = "Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.";
-} use_multiple_threads;
-
 commentdef {
   p_header = "DATA INPUT";
 }
@@ -75,6 +69,32 @@ paramdef string {
 } water_flag_field_name;
 
 commentdef {
+  p_header = "CLIMATOLOGY DETAILS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the month for the climatology.";
+  p_help = "Only data files within this month range will be included in the analysis. If min_month exceeds max_month, then the range wraps from 12 back to 1.";
+} set_month_range;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_max = 12;
+  p_descr = "Min month to be analyzed.";
+  p_help = "This is 1-based. January is 1, December is 12.";
+} min_month;
+
+paramdef int {
+  p_default = 1;
+  p_min = 1;
+  p_max = 12;
+  p_descr = "Max month to be analyzed.";
+  p_help = "This is 1-based. January is 1, December is 12.";
+} max_month;
+
+commentdef {
   p_header = "DATA OUTPUT";
   p_text = "\n"
     "  The partition field has the following values:\n"
@@ -96,4 +116,16 @@ paramdef string {
   p_descr = "Output URL.";
   p_help = "Output files are written to this URL.";
 } output_dir;
+
+paramdef string {
+  p_default = "Ecco climatology.";
+  p_descr = "String for file metadata header.";
+  p_help = "Information on the data set";
+} output_data_set_info;
+
+paramdef string {
+  p_default = "Computed by EccoStats app.";
+  p_descr = "String for file metadata header.";
+  p_help = "Source of the data set";
+} output_data_set_source;
 

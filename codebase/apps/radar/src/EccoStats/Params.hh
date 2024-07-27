@@ -377,8 +377,6 @@ public:
 
   mode_t mode;
 
-  tdrp_bool_t use_multiple_threads;
-
   char* input_dir;
 
   char* ecco_type_comp_field_name;
@@ -389,7 +387,17 @@ public:
 
   char* water_flag_field_name;
 
+  tdrp_bool_t set_month_range;
+
+  int min_month;
+
+  int max_month;
+
   char* output_dir;
+
+  char* output_data_set_info;
+
+  char* output_data_set_source;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -398,7 +406,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[14];
+  mutable TDRPtable _table[19];
 
   const char *_className;
 

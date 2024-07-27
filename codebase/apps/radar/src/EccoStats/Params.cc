@@ -616,18 +616,6 @@
     tt->single_val.e = ARCHIVE;
     tt++;
     
-    // Parameter 'use_multiple_threads'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_multiple_threads");
-    tt->descr = tdrpStrDup("Option to use multiple threads for speed.");
-    tt->help = tdrpStrDup("Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.");
-    tt->val_offset = (char *) &use_multiple_threads - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -702,6 +690,59 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("CLIMATOLOGY DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'set_month_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_month_range");
+    tt->descr = tdrpStrDup("Option to specify the month for the climatology.");
+    tt->help = tdrpStrDup("Only data files within this month range will be included in the analysis. If min_month exceeds max_month, then the range wraps from 12 back to 1.");
+    tt->val_offset = (char *) &set_month_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_month'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_month");
+    tt->descr = tdrpStrDup("Min month to be analyzed.");
+    tt->help = tdrpStrDup("This is 1-based. January is 1, December is 12.");
+    tt->val_offset = (char *) &min_month - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.i = 1;
+    tt->max_val.i = 12;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'max_month'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_month");
+    tt->descr = tdrpStrDup("Max month to be analyzed.");
+    tt->help = tdrpStrDup("This is 1-based. January is 1, December is 12.");
+    tt->val_offset = (char *) &max_month - &_start_;
+    tt->has_min = TRUE;
+    tt->has_max = TRUE;
+    tt->min_val.i = 1;
+    tt->max_val.i = 12;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("\n  The partition field has the following values:\n    CATEGORY_MISSING = 0\n    CATEGORY_STRATIFORM_LOW = 14\n    CATEGORY_STRATIFORM = 15\n    CATEGORY_STRATIFORM_MID = 16\n    CATEGORY_STRATIFORM_HIGH = 18\n    CATEGORY_MIXED = 25\n    CATEGORY_CONVECTIVE_ELEVATED = 32\n    CATEGORY_CONVECTIVE_SHALLOW = 34\n    CATEGORY_CONVECTIVE = 35\n    CATEGORY_CONVECTIVE_MID = 36\n    CATEGORY_CONVECTIVE_DEEP = 38");
     tt++;
@@ -716,6 +757,30 @@
     tt->help = tdrpStrDup("Output files are written to this URL.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/eccostats");
+    tt++;
+    
+    // Parameter 'output_data_set_info'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_data_set_info");
+    tt->descr = tdrpStrDup("String for file metadata header.");
+    tt->help = tdrpStrDup("Information on the data set");
+    tt->val_offset = (char *) &output_data_set_info - &_start_;
+    tt->single_val.s = tdrpStrDup("Ecco climatology.");
+    tt++;
+    
+    // Parameter 'output_data_set_source'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_data_set_source");
+    tt->descr = tdrpStrDup("String for file metadata header.");
+    tt->help = tdrpStrDup("Source of the data set");
+    tt->val_offset = (char *) &output_data_set_source - &_start_;
+    tt->single_val.s = tdrpStrDup("Computed by EccoStats app.");
     tt++;
     
     // trailing entry has param_name set to NULL

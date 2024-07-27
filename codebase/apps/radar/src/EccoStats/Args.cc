@@ -128,6 +128,19 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-month_range")) {
+      
+      if (i < argc - 2) {
+        sprintf(tmp_str, "set_month_range = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "min_month = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "max_month = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+	
     } else if (!strcmp(argv[i], "-f")) {
 	
       if (i < argc - 1) {
@@ -169,7 +182,9 @@ void Args::usage(string &prog_name, ostream &out)
       << "         Sets mode to ARCHIVE\n"
       << "       [ -f ? ?] input file list\n"
       << "         Sets mode to FILELIST\n"
-      << "       [ -mode ?] ARCHIVE, REALTIME  or FILELIST\n"
+      << "       [ -month_range ? ?] set integer month range min and max for climo"
+      << "         Jan is 1, Dec is 12.\n"
+      << "         If min is greater than max, the range wraps from 12 back to 1\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "         Sets mode to ARCHIVE\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"

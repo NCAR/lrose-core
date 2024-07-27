@@ -30,7 +30,7 @@
 //     DEBUG_VERBOSE
 //     DEBUG_EXTRA
 
-debug = DEBUG_OFF;
+debug = DEBUG_NORM;
 
 ///////////// mode ////////////////////////////////////
 //
@@ -46,20 +46,6 @@ debug = DEBUG_OFF;
 //     FILELIST
 
 mode = ARCHIVE;
-
-///////////// use_multiple_threads ////////////////////
-//
-// Option to use multiple threads for speed.
-//
-// Computing the texture is the most time consuming step. If this is 
-//   true, then the texture will be computer for each vertical level in a 
-//   separate thread, in parallel. This speeds up the processing. If this 
-//   is false, the threads will be called serially. This is useful for 
-//   debugging.
-//
-// Type: boolean
-
-use_multiple_threads = TRUE;
 
 //======================================================================
 //
@@ -118,6 +104,50 @@ water_flag_field_name = "WaterFlag";
 
 //======================================================================
 //
+// CLIMATOLOGY DETAILS.
+//
+//======================================================================
+ 
+///////////// set_month_range /////////////////////////
+//
+// Option to specify the month for the climatology.
+//
+// Only data files within this month range will be included in the 
+//   analysis. If min_month exceeds max_month, then the range wraps from 
+//   12 back to 1.
+//
+// Type: boolean
+
+set_month_range = FALSE;
+
+///////////// min_month ///////////////////////////////
+//
+// Min month to be analyzed.
+//
+// This is 1-based. January is 1, December is 12.
+//
+// Minimum val: 1
+// Maximum val: 12
+//
+// Type: int
+
+min_month = 1;
+
+///////////// max_month ///////////////////////////////
+//
+// Max month to be analyzed.
+//
+// This is 1-based. January is 1, December is 12.
+//
+// Minimum val: 1
+// Maximum val: 12
+//
+// Type: int
+
+max_month = 1;
+
+//======================================================================
+//
 // DATA OUTPUT.
 //
 
@@ -145,4 +175,24 @@ water_flag_field_name = "WaterFlag";
 // Type: string
 
 output_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats";
+
+///////////// output_data_set_info ////////////////////
+//
+// String for file metadata header.
+//
+// Information on the data set.
+//
+// Type: string
+
+output_data_set_info = "Ecco climatology.";
+
+///////////// output_data_set_source //////////////////
+//
+// String for file metadata header.
+//
+// Source of the data set.
+//
+// Type: string
+
+output_data_set_source = "Computed by EccoStats app.";
 

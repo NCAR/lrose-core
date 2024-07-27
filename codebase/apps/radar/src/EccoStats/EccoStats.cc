@@ -40,6 +40,8 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/mem.h>
 #include <radar/ConvStratFinder.hh>
+#include <didss/DsInputPath.hh>
+#include <didss/DataFileNames.hh>
 #include "EccoStats.hh"
 using namespace std;
 
@@ -102,6 +104,31 @@ EccoStats::EccoStats(int argc, char **argv)
       isOK = false;
     }
   }
+
+  DsInputPath dsInput(_progName,
+                      _params.debug >= Params::DEBUG_EXTRA,
+                      _params.input_dir,
+                      _args.startTime,
+                      _args.endTime);
+  if (_params.set_month_range) {
+    dsInput.setValidMonthRange(_params.min_month, _params.max_month);
+  }
+  char *path = NULL;
+  int count = 0;
+  while ((path = dsInput.next()) != NULL) {
+    cerr << "Path " << count << " is " << path << endl;
+    bool dateOnly;
+    time_t dataTimeSecs;
+    if (DataFileNames::getDataTime(path, dataTimeSecs, dateOnly)) {
+      cerr << "ERROR - cannot get time for file: " << path << endl;
+    } else {
+      DateTime dataTime(dataTimeSecs);
+      cerr << "  data time is: " << DateTime::strm(dataTimeSecs) << endl;
+    }
+    count++;
+  }
+  isOK = false;
+  return;
 
   // init field pointers
   // these point to memory in MdvxField objects and do not need to be freed
@@ -563,7 +590,8 @@ void EccoStats::_initOutputFile()
   _outMdvx.setValidTime(_args.startTime);
   _outMdvx.setBeginTime(_args.startTime);
   _outMdvx.setEndTime(_args.endTime);
-  _outMdvx.setDataSetInfo("Ecco climatology computed from EccoStats app");
+  _outMdvx.setDataSetInfo(_params.output_data_set_info);
+  _outMdvx.setDataSetSource(_params.output_data_set_source);
   _outMdvx.setMdv2NcfOutput(true, true, true, true);
   
 }
@@ -735,6 +763,9 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
   fhdr.data_dimension = 3;
   fhdr.grid_dz = 1;
   fhdr.grid_minz = 0;
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
 
   Mdvx::vlevel_header_t vhdr = _eccoTypeField->getVlevelHeader();
   for (int ii = 0; ii < _nz; ii++) {
@@ -747,8 +778,6 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
   MdvxField::setUnits(units, fhdr);
   MdvxField *newField =
     new MdvxField(fhdr, vhdr, NULL, false, false, false);
-  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(fl32);
   newField->setVolData(**data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
