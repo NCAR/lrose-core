@@ -294,6 +294,18 @@ public:
   void setMaxRecursionDepth(int max_depth);
 
   ///////////////////////////////////////////////////////////
+  // set the valid month range
+  //
+  // Limit the dates to within this month range, inclusively.
+  // If minMonth is less than or equal to maxMonth, then the
+  // range is from the min to the max, inclusively.
+  // If minMonth is greater than maxMonth, then the
+  // range is from the min to 12, and then 1 to the max, inclusively.
+  // i.e. the valid range wraps.
+
+  void setValidMonthRange(int minMonth, int maxMonth);
+
+  ///////////////////////////////////////////////////////////
   // When set, only scan subdirs that look like daily subdirs
   //
   // This only applies to REALTIME mode, when the latest_data_info
@@ -562,6 +574,9 @@ private:
   bool _recurse;
   bool _follow_links;
   bool _debug;
+
+  bool _checkMonth;
+  int _minMonth, _maxMonth;
 
   bool _use_ldata_info;
   bool _latest_file_only;
