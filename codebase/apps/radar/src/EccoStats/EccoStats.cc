@@ -696,6 +696,7 @@ void EccoStats::_initOutputFile()
   _outMdvx.setValidTime(_args.startTime);
   _outMdvx.setBeginTime(_args.startTime);
   _outMdvx.setEndTime(_args.endTime);
+  _outMdvx.setGenTime(_args.startTime);
   _outMdvx.setDataSetInfo(_params.output_data_set_info);
   _outMdvx.setDataSetSource(_params.output_data_set_source);
   _outMdvx.setMdv2NcfOutput(true, true, true, true);
