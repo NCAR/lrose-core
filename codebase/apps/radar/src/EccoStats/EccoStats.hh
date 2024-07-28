@@ -128,22 +128,18 @@ private:
                           string longName,
                           string units);
                                  
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const fl32 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
-
-  MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
-                        Mdvx::vlevel_header_t &vhdr,
-                        const ui08 *data,
-                        Mdvx::encoding_type_t outputEncoding,
-                        string fieldName,
-                        string longName,
-                        string units);
-
+  MdvxField *_computeFrac3DField(fl32 ***data,
+                                 fl32 ***counts,
+                                 string fieldName,
+                                 string longName,
+                                 string units);
+                                 
+  MdvxField *_computeFrac2DField(fl32 ***data,
+                                 fl32 ***counts,
+                                 string fieldName,
+                                 string longName,
+                                 string units);
+                                 
 };
 
 #endif
