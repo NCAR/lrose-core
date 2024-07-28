@@ -110,7 +110,8 @@ private:
   void _freeArrays();
   void _initForStats();
 
-  int _updateStatsFromInputFile();
+  void _loadTerrain();
+  void _updateStatsFromInputFile();
 
   int _doRead(const char *path);
   void _initOutputFile();

@@ -313,7 +313,12 @@ void EccoStats::_allocArrays()
   _validCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _totalCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   
-  // lat/lon
+  // terrain ht
+
+  _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+
+ // lat/lon
 
   _lon = (double **) ucalloc2(_ny, _nx, sizeof(double));
   _lat = (double **) ucalloc2(_ny, _nx, sizeof(double));
@@ -384,69 +389,7 @@ void EccoStats::_initForStats()
 
   // load terrain height data if available
   
-  if (_terrainHtField != NULL) {
-    _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-    fl32 *terrainHt2D = (fl32 *) _terrainHtField->getVol();
-    for (int iy = 0; iy < _ny; iy++) {
-      int jyLow = iy * _agNy;
-      int jyHigh = jyLow + _agNy;
-      if (jyHigh > _inNy) {
-        jyHigh = _inNy;
-      }
-      for (int ix = 0; ix < _nx; ix++) {
-        int jxLow = ix * _agNx;
-        int jxHigh = jxLow + _agNx;
-        if (jxHigh > _inNx) {
-          jxHigh = _inNx;
-        }
-        double sum = 0.0;
-        double count = 0.0;
-        for (int jy = jyLow; jy < jyHigh; jy++) {
-          for (int jx = jxLow; jx < jxHigh; jx++) {
-            int offset = jy + _inNx + jx;
-            sum += terrainHt2D[offset];
-            count++;
-          }
-        }
-        _terrainHt[iy][ix] = sum / count;
-      }
-    }
-  }
-
-  // load water flag data if available
-  
-  if (_waterFlagField != NULL) {
-    _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-    fl32 *waterFlag2D = (fl32 *) _waterFlagField->getVol();
-    for (int iy = 0; iy < _ny; iy++) {
-      int jyLow = iy * _agNy;
-      int jyHigh = jyLow + _agNy;
-      if (jyHigh > _inNy) {
-        jyHigh = _inNy;
-      }
-      for (int ix = 0; ix < _nx; ix++) {
-        int jxLow = ix * _agNx;
-        int jxHigh = jxLow + _agNx;
-        if (jxHigh > _inNx) {
-          jxHigh = _inNx;
-        }
-        double sum = 0.0;
-        double count = 0.0;
-        for (int jy = jyLow; jy < jyHigh; jy++) {
-          for (int jx = jxLow; jx < jxHigh; jx++) {
-            int offset = jy + _inNx + jx;
-            sum += waterFlag2D[offset];
-            count++;
-          }
-        }
-        if (sum / count >= 0.5) {
-          _waterFlag[iy][ix] = 1.0;
-        } else {
-          _waterFlag[iy][ix] = 0.0;
-        }
-      }
-    }
-  }
+  _loadTerrain();
   
   // initialize the output file object
   
@@ -455,10 +398,117 @@ void EccoStats::_initForStats()
 }
 
 /////////////////////////////////////////////////////////
+// load the terrain arrays
+// Returns 0 on success, -1 on failure.
+
+void EccoStats::_loadTerrain()
+  
+{
+
+  // load terrain ht if field is available
+  
+  if (_terrainHtField != NULL) {
+  
+    // loop through 2D grid space
+    
+    Mdvx::field_header_t fhdrHt = _terrainHtField->getFieldHeader();
+    fl32 missHt = fhdrHt.missing_data_value;
+    
+    fl32 *height = (fl32 *) _terrainHtField->getVol();
+    
+    fl32 **count = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
+    fl32 **sum = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
+    
+    // sum up heights within each grid block
+    
+    size_t offset = 0;
+    for (int jy = 0; jy < _inNy; jy++) {
+      for (int jx = 0; jx < _inNx; jx++, offset++) {
+        int iy = jy / _agNy;
+        int ix = jx / _agNx;
+        fl32 ht = height[offset];
+        if (ht != missHt) {
+          sum[iy][ix] += ht;
+          count[iy][ix]++;
+        }
+      } // jx
+    } // jy
+
+    // compute mean
+
+    for (int iy = 0; iy < _ny; iy++) {
+      for (int ix = 0; ix < _nx; ix++) {
+        if (count[iy][ix] > 0) {
+          _terrainHt[iy][ix] = sum[iy][ix] / count[iy][ix];
+        }
+      } // ix
+    } // jy
+
+    // free upp
+
+    ufree2((void **) count);
+    ufree2((void **) sum);
+
+  } // if (_terrainHtField != NULL) 
+    
+  // load water flag if field is available
+  
+  if (_waterFlagField != NULL) {
+  
+    // loop through 2D grid space
+    
+    Mdvx::field_header_t fhdrFlag = _waterFlagField->getFieldHeader();
+    fl32 missFlag = fhdrFlag.missing_data_value;
+    
+    fl32 *waterFlag = (fl32 *) _waterFlagField->getVol();
+    
+    fl32 **count = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
+    fl32 **sum = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
+    
+    // sum up heigflags within each grid block
+    
+    size_t offset = 0;
+    for (int jy = 0; jy < _inNy; jy++) {
+      for (int jx = 0; jx < _inNx; jx++, offset++) {
+        int iy = jy / _agNy;
+        int ix = jx / _agNx;
+        fl32 flag = waterFlag[offset];
+        if (flag != missFlag) {
+          sum[iy][ix] += flag;
+          count[iy][ix]++;
+        }
+      } // jx
+    } // jy
+
+    // compute mean
+    
+    for (int iy = 0; iy < _ny; iy++) {
+      for (int ix = 0; ix < _nx; ix++) {
+        if (count[iy][ix] > 0) {
+          double mean = sum[iy][ix] / count[iy][ix];
+          if (mean >= 0.5) {
+            _waterFlag[iy][ix] = 1.0;
+          } else {
+            _waterFlag[iy][ix] = 0.0;
+          }
+        }
+      } // ix
+    } // jy
+    
+    // free upp
+
+    ufree2((void **) count);
+    ufree2((void **) sum);
+
+  } // if (_waterFlagField != NULL) 
+    
+}
+  
+/////////////////////////////////////////////////////////
 // process the file in _inMdvx
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_updateStatsFromInputFile()
+void EccoStats::_updateStatsFromInputFile()
   
 {
 
@@ -550,8 +600,6 @@ int EccoStats::_updateStatsFromInputFile()
 
     } // ix
   } // iy
-
-  return 0;
 
 }
   

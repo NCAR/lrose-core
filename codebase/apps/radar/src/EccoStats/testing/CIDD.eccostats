@@ -105,6 +105,7 @@ field_list = {
 TotalCount  TotalCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TotalCount number.colors  count -5 80 5 cart 1 0
 ValidCount  ValidCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ValidCount number.colors  count -5 80 5 cart 1 0
 TerrainHt   TerrainHt   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TerrainHt  terrain.colors m -5 80 5 cart 1 0
+WaterFlag   WaterFlag   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&WaterFlag  water_flag.colors m -5 80 5 cart 1 0
 
 DBZ   DBZ  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&DbzComp dbz.colors   dBZ -5 80 5 cart 1 0
 Ecco  Ecco /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&EchoTypeComp conv_strat4.colors dBZ -5 80 5 cart 1 0
