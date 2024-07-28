@@ -146,6 +146,34 @@ min_month = 1;
 
 max_month = 1;
 
+///////////// aggregate_grid_cells ////////////////////
+//
+// Option to aggregate the statistics over a block of grid cells.
+//
+// If true, the grid cell stats will be aggregated over a block of grid 
+//   cells, making the output grid smaller and the number of observations 
+//   larger per output grid cell.
+//
+// Type: boolean
+
+aggregate_grid_cells = TRUE;
+
+///////////// aggregate_ny ////////////////////////////
+//
+// Number of y cells to aggregate.
+//
+// Type: int
+
+aggregate_ny = 10;
+
+///////////// aggregate_nx ////////////////////////////
+//
+// Number of x cells to aggregate.
+//
+// Type: int
+
+aggregate_nx = 10;
+
 //======================================================================
 //
 // DATA OUTPUT.

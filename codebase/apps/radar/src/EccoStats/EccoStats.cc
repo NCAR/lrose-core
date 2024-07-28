@@ -120,6 +120,16 @@ EccoStats::EccoStats(int argc, char **argv)
   // init arrays
 
   _initArraysToNull();
+
+  // init aggregation
+
+  if (_params.aggregate_grid_cells) {
+    _agNx = _params.aggregate_nx;
+    _agNy = _params.aggregate_ny;
+  } else {
+    _agNx = 1;
+    _agNy = 1;
+  }
   
 }
 
@@ -167,21 +177,40 @@ int EccoStats::Run()
     
     Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
     if (fileCount == 0) {
-      // first file
-      _nx = fhdr.nx;
-      _ny = fhdr.ny;
+
+      // first file, initialize grid
+
+      _inNx = fhdr.nx;
+      _inNy = fhdr.ny;
+      
+      _nx = ((fhdr.nx - 1) / _agNx) + 1;
+      _ny = ((fhdr.ny - 1) / _agNy) + 1;
       _nz = 24; // diurnal hour index
+
+      _minx = fhdr.grid_minx + (_agNx - 1) * 0.5 * fhdr.grid_dx;
+      _miny = fhdr.grid_miny + (_agNy - 1) * 0.5 * fhdr.grid_dy;
+      _minz = 0.0;
+
+      _dx = fhdr.grid_dx * _agNx;
+      _dy = fhdr.grid_dy * _agNy;
+      _dz = 1.0;
+
       _allocArrays();
       _initForStats();
+      
     } else {
-      if (_nx != fhdr.nx || _ny != fhdr.ny) {
+
+      // check grid size has not changed
+      
+      if (_inNx != fhdr.nx || _inNy != fhdr.ny) {
         cerr << "ERROR - grid size has changed" << endl;
         cerr << "  nx, ny found: " << fhdr.nx << ", " << fhdr.ny << endl;
-        cerr << "  nx, ny should be: " << _nx << ", " << _ny << endl;
+        cerr << "  nx, ny should be: " << _inNx << ", " << _inNy << endl;
         cerr << "  skipping this file: " << _inMdvx.getPathInUse() << endl;
         iret = -1;
         continue;
       }
+
     }
     fileCount++;
     
@@ -342,13 +371,14 @@ void EccoStats::_initForStats()
 
   // init lat and lon arrays
   
-  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-  for (int iy = 0; iy < fhdr.ny; iy++) {
-    for (int ix = 0; ix < fhdr.nx; ix++) {
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      double xx = _minx + ix * _dx;
+      double yy = _miny + iy * _dy;
       double lat, lon;
-      _proj.xyIndex2latlon(ix, iy, lat, lon);
-      _lat[iy][iy] = lat;
-      _lon[iy][iy] = lon;
+      _proj.xy2latlon(xx, yy, lat, lon);
+      _lat[iy][ix] = lat;
+      _lon[iy][ix] = lon;
     }
   }
 
@@ -357,10 +387,28 @@ void EccoStats::_initForStats()
   if (_terrainHtField != NULL) {
     _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
     fl32 *terrainHt2D = (fl32 *) _terrainHtField->getVol();
-    size_t offset = 0;
-    for (int iy = 0; iy < fhdr.ny; iy++) {
-      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
-        _terrainHt[iy][ix] = terrainHt2D[offset];
+    for (int iy = 0; iy < _ny; iy++) {
+      int jyLow = iy * _agNy;
+      int jyHigh = jyLow + _agNy;
+      if (jyHigh > _inNy) {
+        jyHigh = _inNy;
+      }
+      for (int ix = 0; ix < _nx; ix++) {
+        int jxLow = ix * _agNx;
+        int jxHigh = jxLow + _agNx;
+        if (jxHigh > _inNx) {
+          jxHigh = _inNx;
+        }
+        double sum = 0.0;
+        double count = 0.0;
+        for (int jy = jyLow; jy < jyHigh; jy++) {
+          for (int jx = jxLow; jx < jxHigh; jx++) {
+            int offset = jy + _inNx + jx;
+            sum += terrainHt2D[offset];
+            count++;
+          }
+        }
+        _terrainHt[iy][ix] = sum / count;
       }
     }
   }
@@ -370,10 +418,32 @@ void EccoStats::_initForStats()
   if (_waterFlagField != NULL) {
     _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
     fl32 *waterFlag2D = (fl32 *) _waterFlagField->getVol();
-    size_t offset = 0;
-    for (int iy = 0; iy < fhdr.ny; iy++) {
-      for (int ix = 0; ix < fhdr.nx; ix++, offset++) {
-        _waterFlag[iy][ix] = waterFlag2D[offset];
+    for (int iy = 0; iy < _ny; iy++) {
+      int jyLow = iy * _agNy;
+      int jyHigh = jyLow + _agNy;
+      if (jyHigh > _inNy) {
+        jyHigh = _inNy;
+      }
+      for (int ix = 0; ix < _nx; ix++) {
+        int jxLow = ix * _agNx;
+        int jxHigh = jxLow + _agNx;
+        if (jxHigh > _inNx) {
+          jxHigh = _inNx;
+        }
+        double sum = 0.0;
+        double count = 0.0;
+        for (int jy = jyLow; jy < jyHigh; jy++) {
+          for (int jx = jxLow; jx < jxHigh; jx++) {
+            int offset = jy + _inNx + jx;
+            sum += waterFlag2D[offset];
+            count++;
+          }
+        }
+        if (sum / count >= 0.5) {
+          _waterFlag[iy][ix] = 1.0;
+        } else {
+          _waterFlag[iy][ix] = 0.0;
+        }
       }
     }
   }
@@ -415,14 +485,17 @@ int EccoStats::_updateStatsFromInputFile()
   fl32 *convectivity2D = (fl32 *) _convectivityField->getVol();
 
   size_t offset = 0;
-  for (int iy = 0; iy < _ny; iy++) {
-    for (int ix = 0; ix < _nx; ix++, offset++) {
-
+  for (int jy = 0; jy < _inNy; jy++) {
+    for (int jx = 0; jx < _inNx; jx++, offset++) {
+      
+      int iy = jy / _agNy;
+      int ix = jx / _agNx;
+      
       int hour = _hourOfDay[iy][ix];
       fl32 echoTypeFl32 = echoType2D[offset];
       
       if (echoTypeFl32 != etMiss) {
-
+        
         int echoType = (int) floor(echoTypeFl32 + 0.5);
         fl32 convectivity = convectivity2D[offset];
         switch ((ConvStratFinder::category_t) echoType) {
@@ -691,13 +764,17 @@ void EccoStats::_addFieldsToOutput()
   // add 2d fields for terrain height and water flag, if available
 
   if (_terrainHtField) {
-    MdvxField *fld = new MdvxField(*_terrainHtField);
-    _outMdvx.addField(fld);
+    _outMdvx.addField(_make2DField(_terrainHt,
+                                   _terrainHtField->getFieldName(),
+                                   _terrainHtField->getFieldNameLong(),
+                                   _terrainHtField->getUnits()));
   }
   
   if (_waterFlagField) {
-    MdvxField *fld = new MdvxField(*_waterFlagField);
-    _outMdvx.addField(fld);
+    _outMdvx.addField(_make2DField(_waterFlag,
+                                   _waterFlagField->getFieldName(),
+                                   _waterFlagField->getFieldNameLong(),
+                                   _waterFlagField->getUnits()));
   }
   
 }
@@ -741,13 +818,25 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
   
   fhdr.missing_data_value = _missingFl32;
   fhdr.bad_data_value = _missingFl32;
+
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
   fhdr.nz = _nz; // 24 hours in day
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = _dz;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = _minz;
+
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+
   fhdr.dz_constant = 1;
   fhdr.data_dimension = 3;
-  fhdr.grid_dz = 1;
-  fhdr.grid_minz = 0;
+  
   size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
   size_t volSize = npts * sizeof(fl32);
   fhdr.volume_size = volSize;
@@ -764,6 +853,59 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
   MdvxField *newField =
     new MdvxField(fhdr, vhdr, NULL, false, false, false);
   newField->setVolData(**data, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  return newField;
+
+}
+
+/////////////////////////////////////////////////////////
+// create a 2d field
+
+MdvxField *EccoStats::_make2DField(fl32 **data,
+                                   string fieldName,
+                                   string longName,
+                                   string units)
+                                 
+{
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
+  fhdr.nz = 1;
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = 1.0;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = 0.0;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+
+  Mdvx::vlevel_header_t vhdr = _eccoTypeField->getVlevelHeader();
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
   return newField;

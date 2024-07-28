@@ -393,6 +393,12 @@ public:
 
   int max_month;
 
+  tdrp_bool_t aggregate_grid_cells;
+
+  int aggregate_ny;
+
+  int aggregate_nx;
+
   char* output_dir;
 
   char* output_data_set_info;
@@ -406,7 +412,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[19];
+  mutable TDRPtable _table[22];
 
   const char *_className;
 

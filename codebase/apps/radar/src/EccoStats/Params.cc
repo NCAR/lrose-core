@@ -738,6 +738,42 @@
     tt->single_val.i = 1;
     tt++;
     
+    // Parameter 'aggregate_grid_cells'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("aggregate_grid_cells");
+    tt->descr = tdrpStrDup("Option to aggregate the statistics over a block of grid cells.");
+    tt->help = tdrpStrDup("If true, the grid cell stats will be aggregated over a block of grid cells, making the output grid smaller and the number of observations larger per output grid cell.");
+    tt->val_offset = (char *) &aggregate_grid_cells - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'aggregate_ny'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("aggregate_ny");
+    tt->descr = tdrpStrDup("Number of y cells to aggregate.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &aggregate_ny - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'aggregate_nx'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("aggregate_nx");
+    tt->descr = tdrpStrDup("Number of x cells to aggregate.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &aggregate_nx - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

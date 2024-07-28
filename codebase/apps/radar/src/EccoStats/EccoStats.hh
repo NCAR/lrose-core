@@ -90,7 +90,11 @@ private:
   MdvxField *_waterFlagField;
   
   MdvxProj _proj;
+  int _inNx, _inNy;
   int _nx, _ny, _nz;
+  double _minx, _miny, _minz;
+  double _dx, _dy, _dz;
+  int _agNx, _agNy;
 
   fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount, ***_mixedCount;
   fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
@@ -114,6 +118,11 @@ private:
   int _doWrite();
   
   MdvxField *_make3DField(fl32 ***data,
+                          string fieldName,
+                          string longName,
+                          string units);
+                                 
+  MdvxField *_make2DField(fl32 **data,
                           string fieldName,
                           string longName,
                           string units);

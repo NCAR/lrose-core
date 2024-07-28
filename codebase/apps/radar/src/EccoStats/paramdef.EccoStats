@@ -94,6 +94,22 @@ paramdef int {
   p_help = "This is 1-based. January is 1, December is 12.";
 } max_month;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to aggregate the statistics over a block of grid cells.";
+  p_help = "If true, the grid cell stats will be aggregated over a block of grid cells, making the output grid smaller and the number of observations larger per output grid cell.";
+} aggregate_grid_cells;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of y cells to aggregate.";
+} aggregate_ny;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of x cells to aggregate.";
+} aggregate_nx;
+
 commentdef {
   p_header = "DATA OUTPUT";
   p_text = "\n"
