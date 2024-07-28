@@ -167,8 +167,8 @@ int EccoStats::Run()
     // do the read
 
     if (_doRead(nextPath)) {
+      // failure - skip
       cerr << "ERROR - EccoStats::Run()" << endl;
-      umsleep(1000);
       iret = -1;
       continue;
     }
@@ -234,7 +234,6 @@ int EccoStats::Run()
   
   if (_doWrite()) {
     cerr << "ERROR - EccoStats::Run()" << endl;
-    umsleep(1000);
     return -1;
   }
     
@@ -598,8 +597,8 @@ void EccoStats::_updateStatsFromInputFile()
 
       _totalCount[hour][iy][ix]++;
 
-    } // ix
-  } // iy
+    } // jx
+  } // jy
 
 }
   
@@ -699,6 +698,14 @@ void EccoStats::_initOutputFile()
   _outMdvx.setGenTime(_args.startTime);
   _outMdvx.setDataSetInfo(_params.output_data_set_info);
   _outMdvx.setDataSetSource(_params.output_data_set_source);
+  char name[128];
+  if (_params.min_month == _params.max_month) {
+    snprintf(name, 128, "EccoStats for month %d\n", _params.min_month);
+  } else {
+    snprintf(name, 128, "EccoStats for months %d to %d\n",
+             _params.min_month, _params.max_month);
+  }
+  _outMdvx.setDataSetName(name);
   _outMdvx.setMdv2NcfOutput(true, true, true, true);
   
 }
@@ -714,7 +721,19 @@ void EccoStats::_addFieldsToOutput()
   
   _outMdvx.clearFields();
 
-  // add 3d count fields
+  // add 3d summary count fields
+  
+  _outMdvx.addField(_make3DField(_validCount,
+                                 "ValidCount",
+                                 "count_for_valid_obs",
+                                 "count"));
+  
+  _outMdvx.addField(_make3DField(_totalCount,
+                                 "TotalCount",
+                                 "count_for_all_obs",
+                                 "count"));
+  
+  // add 3d count fields by echo type
 
   _outMdvx.addField(_make3DField(_stratLowCount,
                                  "StratLowCount",
@@ -756,7 +775,7 @@ void EccoStats::_addFieldsToOutput()
                                  "count_for_convective_elevated",
                                  "count"));
   
-  // add 3d convectivity fields
+  // add 3d convectivity fields by echo type
   
   _outMdvx.addField(_make3DField(_stratLowConv,
                                  "StratLowConv",
@@ -797,18 +816,6 @@ void EccoStats::_addFieldsToOutput()
                                  "ConvElevConv",
                                  "convectivity_for_convective_elevated",
                                  ""));
-  
-  // add 3d summary count fields
-  
-  _outMdvx.addField(_make3DField(_validCount,
-                                 "ValidCount",
-                                 "count_for_valid_obs",
-                                 "count"));
-  
-  _outMdvx.addField(_make3DField(_totalCount,
-                                 "TotalCount",
-                                 "count_for_all_obs",
-                                 "count"));
   
   // add 3D valid fractional fields
 
