@@ -180,6 +180,8 @@ int EccoStats::Run()
 
       // first file, initialize grid
 
+      _firstTime = _inMdvx.getValidTime();
+
       _inNx = fhdr.nx;
       _inNy = fhdr.ny;
       
@@ -212,6 +214,7 @@ int EccoStats::Run()
       }
 
     }
+    _lastTime = _inMdvx.getValidTime();
     fileCount++;
     
     // update the stats, based on the data in the file
@@ -692,10 +695,6 @@ void EccoStats::_initOutputFile()
   mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   mhdr.vlevel_included = 1;
   _outMdvx.setMasterHeader(mhdr);
-  _outMdvx.setValidTime(_args.startTime);
-  _outMdvx.setBeginTime(_args.startTime);
-  _outMdvx.setEndTime(_args.endTime);
-  _outMdvx.setGenTime(_args.startTime);
   _outMdvx.setDataSetInfo(_params.output_data_set_info);
   _outMdvx.setDataSetSource(_params.output_data_set_source);
   char name[128];
@@ -1038,7 +1037,14 @@ void EccoStats::_addFieldsToOutput()
 int EccoStats::_doWrite()
   
 {
+
+  // set times
   
+  _outMdvx.setValidTime(_firstTime);
+  _outMdvx.setBeginTime(_firstTime);
+  _outMdvx.setEndTime(_lastTime);
+  _outMdvx.setGenTime(_firstTime);
+
   // write out
   
   if(_outMdvx.writeToDir(_params.output_dir)) {

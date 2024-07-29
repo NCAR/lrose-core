@@ -83,6 +83,7 @@ private:
   Params _params;
   DsInputPath *_inputPaths;
   DsMdvx _inMdvx, _outMdvx;
+  time_t _firstTime, _lastTime;
 
   MdvxField *_eccoTypeField;
   MdvxField *_convectivityField;
