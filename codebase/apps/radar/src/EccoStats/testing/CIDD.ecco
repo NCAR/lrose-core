@@ -109,6 +109,53 @@ Conv  Conv /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Convecti
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+
+Dbz3DMax Dbz3DMax /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D     /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractActive  FractActive  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&FractionActive  fraction.colors - -5 80 5 cart 1 0
+
+DbzText3DMax  DbzText3DMax /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&DbzTexture3D dbz.colors - -5 80 5 cart,comp 1 0
+DbzText3D     DbzText3D     /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&DbzTexture3D dbz.colors - -5 80 5 cart 1 0
+DbzText2D     DbzText2D     /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
+
+Conv3DMax   Conv3DMax  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Convectivity3D convectivity.colors - -5 80 5 cart,comp 1 0
+Conv3D      Conv3D      /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Convectivity3D convectivity.colors - -5 80 5 cart 1 0
+Conv2D      Conv2D      /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
+
+Part3DMax  Part3DMax  mdvp::no_interp//cirrus.eol.ucar.edu:0:/scr/cirrus1/rsfdata/projects/convstrat/mdv/mrmsConus3D/conv_strat&EchoType3D conv_strat4.colors - -5 80 5 cart,comp 1 0
+Part3D     Part3D      mdvp::no_interp//cirrus.eol.ucar.edu:0:/scr/cirrus1/rsfdata/projects/convstrat/mdv/mrmsConus3D/conv_strat&EchoType3D conv_strat4.colors - -5 80 5 cart 1 0
+Part2D     Part2D      mdvp::no_interp//cirrus.eol.ucar.edu:0:/scr/cirrus1/rsfdata/projects/convstrat/mdv/mrmsConus3D/conv_strat&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+
+ShallowHt ShallowHt /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&ShallowHt number.colors km -5 80 5 cart 1 0
+DeepHt    DeepHt    /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&DeepHt    number.colors km -5 80 5 cart 1 0
+Temp      Temp      /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&TMP       temp.colors C -5 80 5 cart 1 0
+
+ConvTops   ConvTops  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&ConvTops     heightkm.colors km -5 80 5 cart 1 0
+StratTops  StratTops /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&StratTops    heightkm.colors km -5 80 5 cart 1 0
+EchoTops   EchoTops  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&EchoTops     heightkm.colors km -5 80 5 cart 1 0
+
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+
+# MRMS mosaic
+
+PART_2D_US   PART_2D_US   mdvp::no_interp//front.eol.ucar.edu:8080:eolbase/mdv/conv_strat/merged2D?use_http=true&EchoTypeComp conv_strat4.colors dBZ -5 80 5 cart 1 0
+DBZ_COMP_US  DBZ_COMP_US  mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/mrms3D/conus?use_http=true&DBZ dbz.colors   dBZ -5 80 5 cart,comp 1 0
+CONV_2D_US   CONV_2D_US   mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/conv_strat/merged2D?use_http=true&Convectivity2D convectivity.colors   dBZ -5 80 5 cart 1 0
+TEXT_2D_US   TEXT_2D_US   mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/conv_strat/merged2D?use_http=true&DbzTexture2D dbz.colors   dBZ -5 80 5 cart 1 0
+SHALLOW_HT   SHALLOW_HT   mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/conv_strat/merged2D?use_http=true&ShallowHt number.colors km -5 80 5 cart 1 0
+DEEP_HT      DEEP_HT      mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/conv_strat/merged2D?use_http=true&DeepHt number.colors km -5 80 5 cart 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+
+RUC_TEMP     RUC_TEMP     mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/ruc?use_http=true&TMP temp.colors C -5 80 5 cart 1 0
+RUC_RH       RUC_RH       mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/ruc?use_http=true&RH  rh.colors   % -5 80 5 cart 1 0
+RUC_VVEL     RUC_VVEL     mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/ruc?use_http=true&TMP vvel.colors m/s -5 80 5 cart 1 0
+SURF_TEMP    SURF_TEMP    mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/surf_interp?use_http=true&Temp     temp.colors m -5 80 5 cont 1 0
+SURF_DEWPT   SURF_DEWPT   mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/surf_interp?use_http=true&DewPoint temp.colors m -5 80 5 cont 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
 GOES16_CH13  GOES16_CH13  mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/goes16_ch13/?use_http=true&GOESR_CH13 sat_tempC.colors C  -5   80  5  cart   1 0
 GOES16_CH15  GOES16_CH15  mdvp:://front.eol.ucar.edu:8080:eolbase/mdv/goes16_ch15/?use_http=true&GOESR_CH15 sat_tempC.colors C  -5   80  5  cart   1 0
@@ -918,7 +965,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 7
+cidd.num_field_menu_cols: 8
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.

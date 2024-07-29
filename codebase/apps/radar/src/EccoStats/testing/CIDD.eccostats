@@ -204,6 +204,11 @@ ValidCount  ValidCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&Val
 TerrainHt   TerrainHt   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TerrainHt  terrain.colors m -5 80 5 cont 1 0
 WaterFlag   WaterFlag   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&WaterFlag  water_flag.colors m -5 80 5 cont 1 0
 
+TotalCountComp  TotalCountComp  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TotalCount number50k.colors  count -5 80 5 cont,comp 1 0
+ValidCountComp  ValidCountComp  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ValidCount number40k.colors  count -5 80 5 cont,comp 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
