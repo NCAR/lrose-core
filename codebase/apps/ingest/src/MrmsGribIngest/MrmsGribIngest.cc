@@ -737,6 +737,12 @@ int MrmsGribIngest::_combineVolume()
 
   _outVol.setMasterHeader(mdvxLayer0.getMasterHeader());
   _outVol.updateMasterHeader();
+
+  // add coverage field if needed
+
+  if (_params.add_coverage_flag) {
+    _addCoverageFlag(_outVol);
+  }
   
   // remap projection
 
@@ -979,3 +985,44 @@ void MrmsGribIngest::_encodeFields(DsMdvx &mdvx)
   } // ifld
 
 }
+
+////////////////////////////////////////////
+// add coverage flag
+
+void MrmsGribIngest::_addCoverageFlag(DsMdvx &mdvx)
+  
+{
+
+  MdvxField *fieldIn = mdvx.getField(_params.name_of_field_encoding_coverage);
+  if (fieldIn == NULL) {
+    cerr << "WARNING - rmsGribIngest::_addCoverageFlag()" << endl;
+    cerr << "  Cannot find input field: "
+         << _params.name_of_field_encoding_coverage << endl;
+    return;
+  }
+  
+  Mdvx::field_header_t fhdrIn = fieldIn->getFieldHeader();
+  fl32 *dataIn = (fl32 *) fieldIn->getVol();
+  fl32 miss = fhdrIn.missing_data_value;
+  cerr << "MMMMMMMMMMMMMMMMMMMMM miss: " << miss << endl;
+  
+  size_t index = 0;
+  for (int iz = 0; iz < fhdrIn.nz; iz++) {
+    for (int iy = 0; iy < fhdrIn.ny; iy++) {
+      for (int ix = 0; ix < fhdrIn.nx; ix++, index++) {
+
+        fl32 val = dataIn[index];
+        if (val == miss) {
+          cerr << "." << endl;
+        } else if (val < -90) {
+          cerr << "#" << val << "#" << endl;
+        }
+        
+      } // ix
+    } // iy
+  } // iz
+
+  cerr << endl;
+  
+}
+

@@ -145,3 +145,48 @@ paramdef string {
   p_help = "Source of the data set";
 } output_data_set_source;
 
+commentdef {
+  p_header = "CREATE COVERAGE FIELD FOR MRMS GRID";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create coverage field field for MRMS data grid.";
+  p_help = "If true, read the MRMS 3D reflectivity MDV files, compute the coverage and write files to a separate directory.";
+} compute_mrms_coverage;
+
+paramdef string {
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv";
+  p_descr = "Directory for MRMS 3D grid of reflectivity.";
+  p_help = "This is in MDV NetCDF format";
+} mrms_mdv_input_dir;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "dBZ field name in MRMS MDV files.";
+} mrms_dbz_field_name;
+
+paramdef string {
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
+  p_descr = "Directory for writing out MRMS coverage files.";
+  p_help = "This is in MDV NetCDF format";
+} mrms_coverage_output_dir;
+
+paramdef string {
+  p_default = "CoverageMitHt";
+  p_descr = "Name of min coverage height field in output files.";
+  p_help = "This is the minimum height of the radar coverage.";
+} coverage_min_ht_field_name;
+
+paramdef string {
+  p_default = "CoverageMaxHt";
+  p_descr = "Name of max coverage height field in output files.";
+  p_help = "This is the maximum height of the radar coverage.";
+} coverage_max_ht_field_name;
+
+paramdef string {
+  p_default = "CoverageHtFrac";
+  p_descr = "Name of coverage height fraction in output files.";
+  p_help = "The height fraction is computed as the fraction of the column, from the terrain height to the top of the Cartesian grid, that is covered by the radar data.";
+} coverage_ht_fraction_field_name;
+

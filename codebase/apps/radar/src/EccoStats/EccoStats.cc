@@ -130,7 +130,7 @@ EccoStats::EccoStats(int argc, char **argv)
     _agNx = 1;
     _agNy = 1;
   }
-  
+
 }
 
 // destructor
@@ -154,6 +154,20 @@ EccoStats::~EccoStats()
 
 int EccoStats::Run()
 {
+
+  if (_params.compute_mrms_coverage) {
+    return _computeCoverage();
+  } else {
+    return _computeEccoStats();
+  }
+  
+}
+
+//////////////////////////////////////////////////
+// Compute ecco stats
+
+int EccoStats::_computeEccoStats()
+{
   
   int iret = 0;
 
@@ -166,9 +180,9 @@ int EccoStats::Run()
     
     // do the read
 
-    if (_doRead(nextPath)) {
+    if (_readEcco(nextPath)) {
       // failure - skip
-      cerr << "ERROR - EccoStats::Run()" << endl;
+      cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
       iret = -1;
       continue;
     }
@@ -236,7 +250,7 @@ int EccoStats::Run()
   // write out
   
   if (_doWrite()) {
-    cerr << "ERROR - EccoStats::Run()" << endl;
+    cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
     return -1;
   }
     
@@ -610,7 +624,7 @@ void EccoStats::_updateStatsFromInputFile()
 //
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_doRead(const char *path)
+int EccoStats::_readEcco(const char *path)
   
 {
   
@@ -637,7 +651,7 @@ int EccoStats::_doRead(const char *path)
   // read in
   
   if (_inMdvx.readVolume()) {
-    cerr << "ERROR - EccoStats::_doRead" << endl;
+    cerr << "ERROR - EccoStats::_readEcco" << endl;
     cerr << "  Cannot read in data." << endl;
     cerr << _inMdvx.getErrStr() << endl;
     return -1;
@@ -652,12 +666,12 @@ int EccoStats::_doRead(const char *path)
     _waterFlagField = _inMdvx.getField(_params.water_flag_field_name);
   }
   if (_eccoTypeField == NULL) {
-    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "ERROR - readEcco(), file: " << _inMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
     return -1;
   }
   if (_convectivityField == NULL) {
-    cerr << "ERROR - doRead(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "ERROR - readEcco(), file: " << _inMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
     return -1;
   }
@@ -1337,6 +1351,181 @@ MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
   // return newly created field
   
   return newField;
+
+}
+
+//////////////////////////////////////////////////
+// Compute coverage
+
+int EccoStats::_computeCoverage()
+{
+  
+  int iret = 0;
+
+  // loop until end of data
+  
+  _inputPaths->reset();
+  int fileCount = 0;
+  char *nextPath = NULL;
+  while ((nextPath = _inputPaths->next()) != NULL) {
+    
+    // read the Ecco data
+    
+    if (_readEcco(nextPath)) {
+      // failure - skip
+      cerr << "ERROR - EccoStats::_computeCoverage()" << endl;
+      iret = -1;
+      continue;
+    }
+    
+    // read the MRMS data, for the same time as the ecco data
+    
+    if (_readMrms()) {
+      // failure - skip
+      cerr << "ERROR - EccoStats::_computeCoverage()" << endl;
+      iret = -1;
+      continue;
+    }
+
+    // compute coverage fields
+
+    if (_computeCoverageFields()) {
+    }
+    
+    // if this is the first file, allocate and initialize the arrays
+    
+    Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+    if (fileCount == 0) {
+
+      // first file, initialize grid
+
+      _firstTime = _inMdvx.getValidTime();
+
+      _inNx = fhdr.nx;
+      _inNy = fhdr.ny;
+      
+      _nx = ((fhdr.nx - 1) / _agNx) + 1;
+      _ny = ((fhdr.ny - 1) / _agNy) + 1;
+      _nz = 24; // diurnal hour index
+
+      _minx = fhdr.grid_minx + (_agNx - 1) * 0.5 * fhdr.grid_dx;
+      _miny = fhdr.grid_miny + (_agNy - 1) * 0.5 * fhdr.grid_dy;
+      _minz = 0.0;
+
+      _dx = fhdr.grid_dx * _agNx;
+      _dy = fhdr.grid_dy * _agNy;
+      _dz = 1.0;
+
+      _allocArrays();
+      _initForStats();
+      
+    } else {
+
+      // check grid size has not changed
+      
+      if (_inNx != fhdr.nx || _inNy != fhdr.ny) {
+        cerr << "ERROR - grid size has changed" << endl;
+        cerr << "  nx, ny found: " << fhdr.nx << ", " << fhdr.ny << endl;
+        cerr << "  nx, ny should be: " << _inNx << ", " << _inNy << endl;
+        cerr << "  skipping this file: " << _inMdvx.getPathInUse() << endl;
+        iret = -1;
+        continue;
+      }
+
+    }
+    _lastTime = _inMdvx.getValidTime();
+    fileCount++;
+    
+    // update the stats, based on the data in the file
+    
+    _updateStatsFromInputFile();
+    
+    // clear
+    
+    if (_params.debug) {
+      cerr << "Done processing input file: " << _inMdvx.getPathInUse() << endl;
+    }
+
+  } // while
+
+  // add the fields to the output file
+
+  _addFieldsToOutput();
+  
+  // write out
+  
+  if (_doWrite()) {
+    cerr << "ERROR - EccoStats::Run()" << endl;
+    return -1;
+  }
+    
+  return iret;
+
+}
+
+/////////////////////////////////////////////////////////
+// read the MRMS grid
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_readMrms()
+  
+{
+  
+  _inMrms.clear();
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _inMrms.setDebug(true);
+  }
+  _inMrms.addReadField(_params.mrms_dbz_field_name);
+  _inMrms.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _inMrms.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _inMrms.printReadRequest(cerr);
+  }
+
+  time_t eccoValidTime = _inMdvx.getValidTime();
+
+  _inMrms.setReadTime(Mdvx::READ_CLOSEST,
+                      _params.mrms_mdv_input_dir,
+                      180, eccoValidTime);
+  
+  // read in
+  
+  if (_inMrms.readVolume()) {
+    cerr << "ERROR - EccoStats::_readMrms" << endl;
+    cerr << "  Cannot read in data." << endl;
+    cerr << _inMrms.getErrStr() << endl;
+    return -1;
+  }
+  if (_params.debug) {
+    cerr << "Read MRMS data file: " << _inMrms.getPathInUse() << endl;
+  }
+
+  // get dbz field
+  
+  _mrmsDbzField = _inMrms.getField(_params.mrms_dbz_field_name);
+  if (_mrmsDbzField == NULL) {
+    cerr << "ERROR - EccoStats::_readMrms" << endl;
+    cerr << "  Cannot find MRMS DBZ field: " << _params.mrms_dbz_field_name << endl;
+    cerr << "  MRMS path: " << _inMrms.getPathInUse() << endl;
+    return -1;
+  }
+
+  // check dimensions
+
+  Mdvx::field_header_t fhdrEcco = _eccoTypeField->getFieldHeader();
+  Mdvx::field_header_t fhdrMrms = _mrmsDbzField->getFieldHeader();
+
+  if (fhdrEcco.ny != fhdrMrms.ny ||
+      fhdrEcco.nx != fhdrMrms.nx) {
+    cerr << "ERROR - EccoStats::_readMrms" << endl;
+    cerr << "  DBZ nx,ny grid does not match Ecco, file: " << _inMrms.getPathInUse() << endl;
+    cerr << "  MRMS nx, ny: " << fhdrMrms.nx << ", " << fhdrMrms.ny << endl;
+    cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
+    return -1;
+  }
+  
+  return 0;
 
 }
 

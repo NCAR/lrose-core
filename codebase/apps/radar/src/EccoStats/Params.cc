@@ -819,6 +819,99 @@
     tt->single_val.s = tdrpStrDup("Computed by EccoStats app.");
     tt++;
     
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("CREATE COVERAGE FIELD FOR MRMS GRID");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'compute_mrms_coverage'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mrms_coverage");
+    tt->descr = tdrpStrDup("Option to create coverage field field for MRMS data grid.");
+    tt->help = tdrpStrDup("If true, read the MRMS 3D reflectivity MDV files, compute the coverage and write files to a separate directory.");
+    tt->val_offset = (char *) &compute_mrms_coverage - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'mrms_mdv_input_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("mrms_mdv_input_dir");
+    tt->descr = tdrpStrDup("Directory for MRMS 3D grid of reflectivity.");
+    tt->help = tdrpStrDup("This is in MDV NetCDF format");
+    tt->val_offset = (char *) &mrms_mdv_input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv");
+    tt++;
+    
+    // Parameter 'mrms_dbz_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("mrms_dbz_field_name");
+    tt->descr = tdrpStrDup("dBZ field name in MRMS MDV files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &mrms_dbz_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'mrms_coverage_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("mrms_coverage_output_dir");
+    tt->descr = tdrpStrDup("Directory for writing out MRMS coverage files.");
+    tt->help = tdrpStrDup("This is in MDV NetCDF format");
+    tt->val_offset = (char *) &mrms_coverage_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage");
+    tt++;
+    
+    // Parameter 'coverage_min_ht_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("coverage_min_ht_field_name");
+    tt->descr = tdrpStrDup("Name of min coverage height field in output files.");
+    tt->help = tdrpStrDup("This is the minimum height of the radar coverage.");
+    tt->val_offset = (char *) &coverage_min_ht_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("CoverageMitHt");
+    tt++;
+    
+    // Parameter 'coverage_max_ht_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("coverage_max_ht_field_name");
+    tt->descr = tdrpStrDup("Name of max coverage height field in output files.");
+    tt->help = tdrpStrDup("This is the maximum height of the radar coverage.");
+    tt->val_offset = (char *) &coverage_max_ht_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("CoverageMaxHt");
+    tt++;
+    
+    // Parameter 'coverage_ht_fraction_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("coverage_ht_fraction_field_name");
+    tt->descr = tdrpStrDup("Name of coverage height fraction in output files.");
+    tt->help = tdrpStrDup("The height fraction is computed as the fraction of the column, from the terrain height to the top of the Cartesian grid, that is covered by the radar data.");
+    tt->val_offset = (char *) &coverage_ht_fraction_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("CoverageHtFrac");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

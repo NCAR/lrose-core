@@ -109,6 +109,7 @@ Conv  Conv /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Convecti
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+DBZmrms   DBZmrms /scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv&DBZ dbz_mrms.colors   dBZ -5 80 5 cart 1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
 Dbz3DMax Dbz3DMax /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0

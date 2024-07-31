@@ -106,6 +106,11 @@ private:
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
 
+  DsMdvx _inMrms, _outCoverage;
+  MdvxField *_mrmsDbzField;
+
+  int _computeEccoStats();
+
   void _initArraysToNull();
   void _allocArrays();
   void _freeArrays();
@@ -114,7 +119,7 @@ private:
   void _loadTerrain();
   void _updateStatsFromInputFile();
 
-  int _doRead(const char *path);
+  int _readEcco(const char *path);
   void _initOutputFile();
   void _addFieldsToOutput();
   int _doWrite();
@@ -140,7 +145,11 @@ private:
                                  string fieldName,
                                  string longName,
                                  string units);
-                                 
+
+  int _computeCoverage();
+  int _readMrms();
+  int _computeCoverageFields();
+  
 };
 
 #endif
