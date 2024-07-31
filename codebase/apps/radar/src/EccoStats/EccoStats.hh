@@ -106,7 +106,7 @@ private:
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
 
-  DsMdvx _inMrms, _outCoverage;
+  DsMdvx _inMrms, _outCov;
   MdvxField *_mrmsDbzField;
 
   int _computeEccoStats();
@@ -147,8 +147,8 @@ private:
                                  string units);
 
   int _computeCoverage();
+  void _addCoverageFields();
   int _readMrms();
-  int _computeCoverageFields();
   
 };
 

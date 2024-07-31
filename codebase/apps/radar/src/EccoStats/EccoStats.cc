@@ -703,7 +703,6 @@ void EccoStats::_initOutputFile()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _outMdvx.setDebug(true);
   }
-  // _outMdvx.setWriteLdataInfo();
   Mdvx::master_header_t mhdr = _inMdvx.getMasterHeader();
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
@@ -1365,7 +1364,6 @@ int EccoStats::_computeCoverage()
   // loop until end of data
   
   _inputPaths->reset();
-  int fileCount = 0;
   char *nextPath = NULL;
   while ((nextPath = _inputPaths->next()) != NULL) {
     
@@ -1387,61 +1385,28 @@ int EccoStats::_computeCoverage()
       continue;
     }
 
-    // compute coverage fields
+    // add coverage fields to output file
+    
+    _addCoverageFields();
 
-    if (_computeCoverageFields()) {
+    // write file
+    
+    // set times
+    
+    _outMdvx.setValidTime(_firstTime);
+    _outMdvx.setBeginTime(_firstTime);
+    _outMdvx.setEndTime(_lastTime);
+    _outMdvx.setGenTime(_firstTime);
+    
+    // write out
+    
+    if(_outMdvx.writeToDir(_params.output_dir)) {
+      cerr << "ERROR - EccoStats::Run" << endl;
+      cerr << "  Cannot write data set." << endl;
+      cerr << _outMdvx.getErrStr() << endl;
+      return -1;
     }
-    
-    // if this is the first file, allocate and initialize the arrays
-    
-    Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-    if (fileCount == 0) {
 
-      // first file, initialize grid
-
-      _firstTime = _inMdvx.getValidTime();
-
-      _inNx = fhdr.nx;
-      _inNy = fhdr.ny;
-      
-      _nx = ((fhdr.nx - 1) / _agNx) + 1;
-      _ny = ((fhdr.ny - 1) / _agNy) + 1;
-      _nz = 24; // diurnal hour index
-
-      _minx = fhdr.grid_minx + (_agNx - 1) * 0.5 * fhdr.grid_dx;
-      _miny = fhdr.grid_miny + (_agNy - 1) * 0.5 * fhdr.grid_dy;
-      _minz = 0.0;
-
-      _dx = fhdr.grid_dx * _agNx;
-      _dy = fhdr.grid_dy * _agNy;
-      _dz = 1.0;
-
-      _allocArrays();
-      _initForStats();
-      
-    } else {
-
-      // check grid size has not changed
-      
-      if (_inNx != fhdr.nx || _inNy != fhdr.ny) {
-        cerr << "ERROR - grid size has changed" << endl;
-        cerr << "  nx, ny found: " << fhdr.nx << ", " << fhdr.ny << endl;
-        cerr << "  nx, ny should be: " << _inNx << ", " << _inNy << endl;
-        cerr << "  skipping this file: " << _inMdvx.getPathInUse() << endl;
-        iret = -1;
-        continue;
-      }
-
-    }
-    _lastTime = _inMdvx.getValidTime();
-    fileCount++;
-    
-    // update the stats, based on the data in the file
-    
-    _updateStatsFromInputFile();
-    
-    // clear
-    
     if (_params.debug) {
       cerr << "Done processing input file: " << _inMdvx.getPathInUse() << endl;
     }
@@ -1461,6 +1426,122 @@ int EccoStats::_computeCoverage()
     
   return iret;
 
+}
+
+//////////////////////////////////////////////////
+// Add coverage field to output data set
+
+void EccoStats::_addCoverageFields()
+{
+
+  // initialize output DsMdvx object
+  // copying master header from input object
+  
+  _outCov.clear();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _outCov.setDebug(true);
+  }
+  Mdvx::master_header_t mhdr = _inMrms.getMasterHeader();
+  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.vlevel_included = 1;
+  _outCov.setMasterHeader(mhdr);
+  _outCov.setDataSetName("Coverage of MRMS radar grid");
+  _outCov.setDataSetInfo("Intended for use with EccoStats");
+  _outCov.setDataSetSource("MRMS reflectivity grid");
+  _outCov.setMdv2NcfOutput(true, true, true, true);
+  
+  // load up coverage min and max heights
+  
+  Mdvx::field_header_t fhdrDbz = _mrmsDbzField->getFieldHeader();
+  Mdvx::vlevel_header_t vhdrDbz = _mrmsDbzField->getVlevelHeader();
+  
+  fl32 **minCovHt = (fl32 **) ucalloc2(fhdrDbz.ny, fhdrDbz.nx, sizeof(fl32));
+  fl32 **maxCovHt = (fl32 **) ucalloc2(fhdrDbz.ny, fhdrDbz.nx, sizeof(fl32));
+  fl32 **covHtFrac = (fl32 **) ucalloc2(fhdrDbz.ny, fhdrDbz.nx, sizeof(fl32));
+
+  fl32 missHt = -9999.0;
+  
+  fl32 *dbzVals = (fl32 *) _mrmsDbzField->getVol();
+
+  size_t nPtsLine = fhdrDbz.nx;
+  size_t nPtsPlane = fhdrDbz.ny * fhdrDbz.nx;
+
+  for (int iy = 0; iy < fhdrDbz.ny; iy++) {
+    for (int ix = 0; ix < fhdrDbz.nx; ix++) {
+      
+      fl32 minHt = missHt;
+      fl32 maxHt = missHt;
+      
+      for (int iz = 0; iz < fhdrDbz.nz; iz++) {
+        
+        size_t offset = iz * nPtsPlane + iy * nPtsLine + ix;
+        fl32 dbz = dbzVals[offset];
+        if (dbz > -100) {
+          // not missing, have coverage
+          if (minHt == missHt) {
+            minHt = vhdrDbz.level[iz];
+          }
+          maxHt = vhdrDbz.level[iz];
+        }
+
+      } // iz
+      
+      minCovHt[iy][ix] = minHt;
+      maxCovHt[iy][ix] = maxHt;
+
+    } // ix
+  } // iy
+
+  // make fields and add to output object
+  
+  _outCov.addField(_make2DField(minCovHt, "CovMinHt",
+                                "Min ht of radar coverage", "km"));
+  
+  _outCov.addField(_make2DField(maxCovHt, "CovMaxHt",
+                                "Max ht of radar coverage", "km"));
+  
+  // load up height fraction
+  
+  if (_terrainHtField != NULL) {
+
+    for (int iy = 0; iy < fhdrDbz.ny; iy++) {
+      for (int ix = 0; ix < fhdrDbz.nx; ix++) {
+        covHtFrac[iy][ix] = missHt;
+      } // ix
+    } // iy
+    
+    Mdvx::field_header_t fhdrTerrain = _terrainHtField->getFieldHeader();
+    if (fhdrTerrain.ny == fhdrDbz.ny && fhdrTerrain.nx == fhdrDbz.nx) {
+      fl32 *terrainHt = (fl32 *) _terrainHtField->getVol();
+      int offset = 0;
+      for (int iy = 0; iy < fhdrDbz.ny; iy++) {
+        for (int ix = 0; ix < fhdrDbz.nx; ix++, offset++) {
+          if (minCovHt[iy][ix] != missHt && maxCovHt[iy][ix] != missHt) {
+            fl32 tht = terrainHt[offset];
+            fl32 maxDepth = maxCovHt[iy][ix] - tht;
+            fl32 depth = maxCovHt[iy][ix] - minCovHt[iy][ix];
+            fl32 fraction = depth / maxDepth;
+            if (fraction > 1.0) {
+              fraction = 1.0;
+            }
+            covHtFrac[iy][ix] = fraction;
+          }
+        } // ix
+      } // iy
+    } // if (fhdrTerrain.ny == fhdrDbz.ny ...
+
+    _outCov.addField(_make2DField(covHtFrac, "CovHtFraction",
+                                  "Coverage fraction in vert column", ""));
+    
+  } // if (_terrainHtField != NULL)
+
+  // free up arrays
+  
+  ufree2((void **) minCovHt);
+  ufree2((void **) maxCovHt);
+  ufree2((void **) covHtFrac);
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -1529,3 +1610,4 @@ int EccoStats::_readMrms()
 
 }
 
+  
