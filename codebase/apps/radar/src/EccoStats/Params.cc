@@ -634,7 +634,7 @@
     tt->descr = tdrpStrDup("Directory for input data.");
     tt->help = tdrpStrDup("This is used in ARCHIVE mode only. In FILELIST mode, the file paths are specified on the command line.");
     tt->val_offset = (char *) &input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/ecco");
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain");
     tt++;
     
     // Parameter 'ecco_type_comp_field_name'
@@ -792,7 +792,7 @@
     tt->descr = tdrpStrDup("Output URL.");
     tt->help = tdrpStrDup("Output files are written to this URL.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/eccostats");
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats");
     tt++;
     
     // Parameter 'output_data_set_info'
@@ -885,7 +885,7 @@
     tt->descr = tdrpStrDup("Name of min coverage height field in output files.");
     tt->help = tdrpStrDup("This is the minimum height of the radar coverage.");
     tt->val_offset = (char *) &coverage_min_ht_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("CoverageMitHt");
+    tt->single_val.s = tdrpStrDup("CoverageMinHt");
     tt++;
     
     // Parameter 'coverage_max_ht_field_name'

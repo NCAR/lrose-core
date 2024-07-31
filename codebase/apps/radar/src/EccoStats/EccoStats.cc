@@ -1388,42 +1388,22 @@ int EccoStats::_computeCoverage()
     // add coverage fields to output file
     
     _addCoverageFields();
-
+    
     // write file
     
-    // set times
-    
-    _outMdvx.setValidTime(_firstTime);
-    _outMdvx.setBeginTime(_firstTime);
-    _outMdvx.setEndTime(_lastTime);
-    _outMdvx.setGenTime(_firstTime);
-    
-    // write out
-    
-    if(_outMdvx.writeToDir(_params.output_dir)) {
+    if(_outCov.writeToDir(_params.mrms_coverage_output_dir)) {
       cerr << "ERROR - EccoStats::Run" << endl;
       cerr << "  Cannot write data set." << endl;
-      cerr << _outMdvx.getErrStr() << endl;
+      cerr << _outCov.getErrStr() << endl;
       return -1;
     }
-
+    
     if (_params.debug) {
-      cerr << "Done processing input file: " << _inMdvx.getPathInUse() << endl;
+      cerr << "Wrote file: " << _outCov.getPathInUse() << endl;
     }
 
   } // while
 
-  // add the fields to the output file
-
-  _addFieldsToOutput();
-  
-  // write out
-  
-  if (_doWrite()) {
-    cerr << "ERROR - EccoStats::Run()" << endl;
-    return -1;
-  }
-    
   return iret;
 
 }
@@ -1460,7 +1440,7 @@ void EccoStats::_addCoverageFields()
   fl32 **maxCovHt = (fl32 **) ucalloc2(fhdrDbz.ny, fhdrDbz.nx, sizeof(fl32));
   fl32 **covHtFrac = (fl32 **) ucalloc2(fhdrDbz.ny, fhdrDbz.nx, sizeof(fl32));
 
-  fl32 missHt = -9999.0;
+  fl32 missHt = _missingFl32;
   
   fl32 *dbzVals = (fl32 *) _mrmsDbzField->getVol();
 
@@ -1495,11 +1475,11 @@ void EccoStats::_addCoverageFields()
 
   // make fields and add to output object
   
-  _outCov.addField(_make2DField(minCovHt, "CovMinHt",
-                                "Min ht of radar coverage", "km"));
+  _outCov.addField(_makeMrms2DField(minCovHt, _params.coverage_min_ht_field_name,
+                                    "Min ht of radar coverage", "km"));
   
-  _outCov.addField(_make2DField(maxCovHt, "CovMaxHt",
-                                "Max ht of radar coverage", "km"));
+  _outCov.addField(_makeMrms2DField(maxCovHt, _params.coverage_max_ht_field_name,
+                                    "Max ht of radar coverage", "km"));
   
   // load up height fraction
   
@@ -1518,7 +1498,7 @@ void EccoStats::_addCoverageFields()
       for (int iy = 0; iy < fhdrDbz.ny; iy++) {
         for (int ix = 0; ix < fhdrDbz.nx; ix++, offset++) {
           if (minCovHt[iy][ix] != missHt && maxCovHt[iy][ix] != missHt) {
-            fl32 tht = terrainHt[offset];
+            fl32 tht = terrainHt[offset] / 1000.0; // km
             fl32 maxDepth = maxCovHt[iy][ix] - tht;
             fl32 depth = maxCovHt[iy][ix] - minCovHt[iy][ix];
             fl32 fraction = depth / maxDepth;
@@ -1531,8 +1511,8 @@ void EccoStats::_addCoverageFields()
       } // iy
     } // if (fhdrTerrain.ny == fhdrDbz.ny ...
 
-    _outCov.addField(_make2DField(covHtFrac, "CovHtFraction",
-                                  "Coverage fraction in vert column", ""));
+    _outCov.addField(_makeMrms2DField(covHtFrac, _params.coverage_ht_fraction_field_name,
+                                      "Coverage fraction in vert column", ""));
     
   } // if (_terrainHtField != NULL)
 
@@ -1609,5 +1589,56 @@ int EccoStats::_readMrms()
   return 0;
 
 }
+
+/////////////////////////////////////////////////////////
+// create a 2d cpverage field
+
+MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
+                                       string fieldName,
+                                       string longName,
+                                       string units)
+                                 
+{
+
+  // create header
+  
+  Mdvx::field_header_t fhdr = _mrmsDbzField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+  
+  fhdr.nz = 1;
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0.0;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+  
+  Mdvx::vlevel_header_t vhdr = _mrmsDbzField->getVlevelHeader();
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  
+  // create field from header and data
+  
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*data, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  return newField;
+
+}
+
 
   

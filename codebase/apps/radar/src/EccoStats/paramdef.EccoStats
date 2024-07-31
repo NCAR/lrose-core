@@ -41,7 +41,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "mdv/ecco";
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain";
   p_descr = "Directory for input data.";
   p_help = "This is used in ARCHIVE mode only. In FILELIST mode, the file paths are specified on the command line.";
 } input_dir;
@@ -128,7 +128,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "mdv/eccostats";
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats";
   p_descr = "Output URL.";
   p_help = "Output files are written to this URL.";
 } output_dir;
@@ -173,7 +173,7 @@ paramdef string {
 } mrms_coverage_output_dir;
 
 paramdef string {
-  p_default = "CoverageMitHt";
+  p_default = "CoverageMinHt";
   p_descr = "Name of min coverage height field in output files.";
   p_help = "This is the minimum height of the radar coverage.";
 } coverage_min_ht_field_name;

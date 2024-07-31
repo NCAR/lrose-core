@@ -150,6 +150,11 @@ private:
   void _addCoverageFields();
   int _readMrms();
   
+  MdvxField *_makeMrms2DField(fl32 **data,
+                              string fieldName,
+                              string longName,
+                              string units);
+                                 
 };
 
 #endif
