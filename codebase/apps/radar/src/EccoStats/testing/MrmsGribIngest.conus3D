@@ -1,0 +1,750 @@
+/**********************************************************************
+ * TDRP params for ./MrmsGribIngest
+ **********************************************************************/
+
+//======================================================================
+//
+// MrmsGribIngest parameters.
+//
+// MrmsGribIngest reads individual height layer files for the MRMS radar 
+//   mosaic, and compiles them into a single MDV file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROGRAM CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Instance.
+//
+// Process instance for registration with process mapper.
+//
+// Type: string
+
+instance = "conus3D";
+
+///////////// procmap_register_interval_secs //////////
+//
+// Interval for procmap registration.
+//
+// Set to a high value if processing takes a long time. This will 
+//   prevent the auto_restarter from killing and restarting the app.
+//
+// Type: int
+
+procmap_register_interval_secs = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode for reading in data.
+//
+// In REALTIME mode, the program waits for a new input file. We can 
+//   either scan an input directory for new files, or monitor the 
+//   latest_data_info. In ARCHIVE mode, the files in the input_dir are 
+//   read for times between te start and end times. In FILELIST mode, the 
+//   list of files to be read are provided on the command line.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+
+mode = FILELIST;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+//
+// Directory which contains input grib2 files. Does not apply to 
+//   FILELIST mode.
+//
+// Type: string
+
+input_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/MergedDbzQC";
+
+///////////// input_extension /////////////////////////
+//
+// Input file name extension.
+//
+// Input file extensions will be checked against this string. Not used 
+//   in FILELIST mode.
+//
+// Type: string
+
+input_extension = "";
+
+///////////// input_substring /////////////////////////
+//
+// Input file substring check.
+//
+// Input files will be checked against this string.  Not used in 
+//   FILELIST mode.
+//
+// Type: string
+
+input_substring = "MergedReflectivityQC";
+
+///////////// latest_data_info_avail //////////////////
+//
+// If TRUE, watch input_dir for change in _latest_data_info. If FALSE, 
+//   scan input_dir for new files.
+//
+// REALTIME mode only.
+//
+// Type: boolean
+
+latest_data_info_avail = TRUE;
+
+///////////// max_realtime_data_age ///////////////////
+//
+// Max age of input data files (sec).
+//
+// REALTIME mode only.
+//
+// Type: int
+
+max_realtime_data_age = 300;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Max recursion depth for directory search.
+//
+// REALTIME mode only. If latest_data_info_avail is FALSE we search for 
+//   incoming files. This is the max directory depth for the recursion.
+//
+// Type: int
+
+max_recursion_depth = 5;
+
+///////////// latest_file_only ////////////////////////
+//
+// If TRUE, only the latest file will be processed.
+//
+// REALTIME mode only.
+//
+// Type: boolean
+
+latest_file_only = TRUE;
+
+///////////// data_check_interval_secs ////////////////
+//
+// How often to check for new data (secs).
+//
+// REALTIME mode only, if latest_data_info_avail = FALSE.
+//
+// Type: int
+
+data_check_interval_secs = 5;
+
+///////////// data_file_quiescence_secs ///////////////
+//
+// How long since the latest file changed (secs).
+//
+// REALTIME mode only. Wait for files to be quiescent before assuming 
+//   they are complete.
+//
+// Type: int
+
+data_file_quiescence_secs = 5;
+
+///////////// ideal_n_ht_levels_for_volume ////////////
+//
+// Ideal number of height levels for a valid volume.
+//
+// A volume is divided into grib2 files, one for each height level. This 
+//   is the expected number of height levels for in a volume. A volume is 
+//   considered complete when the data time changes.
+//
+// Maximum val: 122
+//
+// Type: int
+
+ideal_n_ht_levels_for_volume = 33;
+
+///////////// min_n_ht_levels_for_volume //////////////
+//
+// Minimum number of height levels for a valid volume.
+//
+// A volume is divided into grib2 files, one for each height level. This 
+//   is the minimum number of height levels for a volume to be considered 
+//   valid.
+//
+// Minimum val: 1
+//
+// Type: int
+
+min_n_ht_levels_for_volume = 25;
+
+//======================================================================
+//
+// RENAME FIELDS.
+//
+// Option to change the field names.
+//
+//======================================================================
+ 
+///////////// rename_fields ///////////////////////////
+//
+// If TRUE, fields will be renamed as specified in field_rename array.
+//
+// Type: boolean
+
+rename_fields = TRUE;
+
+///////////// field_rename ////////////////////////////
+//
+// Rename field before writing out.
+//
+// Only those fields that match the specified grib_name will be renamed.
+//
+// Type: struct
+//   typedef struct {
+//      string grib_name;
+//      string output_name;
+//   }
+//
+// 1D array - variable length.
+
+field_rename = {
+  {
+    grib_name = "ConusMergedReflectivityQC",
+    output_name = "DBZ"
+  }
+  ,
+  {
+    grib_name = "MREF",
+    output_name = "DBZ"
+  }
+};
+
+//======================================================================
+//
+// ADD COVERAGE FLAG.
+//
+// Option to add a field indicating the coverage.
+//
+//======================================================================
+ 
+///////////// add_coverage_flag ///////////////////////
+//
+// If TRUE, determine the coverage field using a special value in an 
+//   input field.
+//
+// Type: boolean
+
+add_coverage_flag = TRUE;
+
+///////////// name_of_field_encoding_coverage /////////
+//
+// Name of the input field used to detect coverage.
+//
+// As an example, the radar reflectivity input field may contain a 
+//   special value to indicate valid radar coverage. The input field name 
+//   is specified as that AFTER renaming (see above).
+//
+// Type: string
+
+name_of_field_encoding_coverage = "DBZ";
+
+///////////// input_field_value_for_coverage //////////
+//
+// The value of the field used to indicate coverage.
+//
+// Note: this is separate from the missing_data_value, which indicates 
+//   poor data. The coverage flag indicates that a measurement was taken 
+//   at the grid location.As an example, the reflectivity field may 
+//   contain a special value to indicate coverage. The field name 
+//   specified is after renaming (see above).
+//
+// Type: double
+
+input_field_value_for_coverage = -99;
+
+///////////// name_of_coverage_flag_output_field //////
+//
+// Name of the output coverage flag field.
+//
+// This is added to the output volume.
+//
+// Type: string
+
+name_of_coverage_flag_output_field = "Coverage";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Url for writing mdv files.
+//
+// Type: string
+
+output_url = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv_test";
+
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+// Type: string
+
+data_set_info = "Converted to MDV with MrmsGribIngest.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+// Type: string
+
+data_set_name = "NOAA MRMS 3D NEXRAD radar mosaic.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+// Type: string
+
+data_set_source = "NOAA NEXRAD radars";
+
+///////////// output_encoding /////////////////////////
+//
+// File encoding type, when all fields are written.
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+
+output_encoding = ENCODING_INT16;
+
+///////////// set_output_bounding_box /////////////////
+//
+// If TRUE, we constrain the grid to lie within the specified bounding 
+//   box.
+//
+// The MRMS GRIB data grid is on a lat-lon projection. We can specify a 
+//   lat-lon bounding box, and constrain the output MDV data to within 
+//   that box.
+//
+// Type: boolean
+
+set_output_bounding_box = FALSE;
+
+///////////// output_bounding_box /////////////////////
+//
+// Bounding box for output data grid.
+//
+// See 'set_output_bounding_box'.
+//
+// Type: struct
+//   typedef struct {
+//      double min_lat;
+//      double min_lon;
+//      double max_lat;
+//      double max_lon;
+//   }
+//
+
+output_bounding_box = {
+    min_lat = 22,
+    min_lon = -130,
+    max_lat = 58,
+    max_lon = -62
+};
+
+///////////// min_time_between_output_files_in_secs ///
+//
+// Min time between output files (secs).
+//
+// If data arrives faster than this rate, data sets will be discarded 
+//   until the minimum time has elapsed.
+//
+// Type: int
+
+min_time_between_output_files_in_secs = 300;
+
+//======================================================================
+//
+// CONVERT TO COLUMN-MAX VALUES.
+//
+//======================================================================
+ 
+///////////// convert_to_column_max ///////////////////
+//
+// Option to compute the column max (composite) DBZ product.
+//
+// If true, for each grid point we compute the maximum value in the 
+//   column, before writing the output files.
+//
+// Type: boolean
+
+convert_to_column_max = FALSE;
+
+//======================================================================
+//
+// REMAPPING GRID PROJECTION ON OUTPUT.
+//
+//======================================================================
+ 
+///////////// remap_output_grid ///////////////////////
+//
+// Option to remap output grid in x,y.
+//
+// If true, set the remap parameters below.
+//
+// Type: boolean
+
+remap_output_grid = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y. See projection param below.
+//
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+
+remap_projection = PROJ_FLAT;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+//
+// Units in km, except for LATLON, which is in degrees.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+
+remap_grid = {
+    nx = 1,
+    ny = 1,
+    minx = 0,
+    miny = 0,
+    dx = 1,
+    dy = 1
+};
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+//
+// This applies only to PROJ_FLAT projections.
+//
+// Type: double
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+//
+// This applies to all projections except LATLON.
+//
+// Type: double
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+//
+// This applies to all projections except LATLON.
+//
+// Type: double
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+// Type: double
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+// Type: double
+
+remap_lat2 = 0;
+
+///////////// remap_central_scale /////////////////////
+//
+// Central scale for remapped projections.
+//
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+//
+// Type: double
+
+remap_central_scale = 1;
+
+///////////// remap_tangent_lat ///////////////////////
+//
+// Remapped tangent latitude (deg).
+//
+// This applies to OBLIQUE_STEREO only.
+//
+// Type: double
+
+remap_tangent_lat = 0;
+
+///////////// remap_tangent_lon ///////////////////////
+//
+// Remapped tangent longitude (deg).
+//
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+// Type: double
+
+remap_tangent_lon = 0;
+
+///////////// remap_pole_is_north /////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+//
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+//
+// Type: boolean
+
+remap_pole_is_north = TRUE;
+
+///////////// remap_persp_radius //////////////////////
+//
+// Radius of perspective point (km).
+//
+// This applies to VERT_PERSP.
+//
+// Type: double
+
+remap_persp_radius = 35786;
+
+///////////// remap_false_northing ////////////////////
+//
+// Remapped false northing correction.
+//
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+//
+// Type: double
+
+remap_false_northing = 0;
+
+///////////// remap_false_easting /////////////////////
+//
+// Remapped false easting correction.
+//
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+//
+// Type: double
+
+remap_false_easting = 0;
+
+///////////// remap_set_offset_origin /////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+//
+// If true, set remap_offset_origin_latitude and 
+//   remap_offset_origin_longitude.
+//
+// Type: boolean
+
+remap_set_offset_origin = FALSE;
+
+///////////// remap_offset_origin_latitude ////////////
+//
+// Latitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+// Type: double
+
+remap_offset_origin_latitude = 0;
+
+///////////// remap_offset_origin_longitude ///////////
+//
+// Longitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+// Type: double
+
+remap_offset_origin_longitude = 0;
+
+//======================================================================
+//
+// PRINT OPTIONS.
+//
+//======================================================================
+ 
+///////////// print_summary ///////////////////////////
+//
+// If TRUE print a summary.
+//
+// Type: boolean
+
+print_summary = FALSE;
+
+///////////// print_var_list //////////////////////////
+//
+// If TRUE print a variable list.
+//
+// Type: boolean
+
+print_var_list = FALSE;
+
+///////////// print_sections //////////////////////////
+//
+// If TRUE print the sections.
+//
+// Type: boolean
+
+print_sections = FALSE;
+
+//======================================================================
+//
+// PRINT SECTIONS PARAMETERS.
+//
+// Parameters only used with -printSec or debug > 1
+// . For each grib message prints the sections defined below.
+//
+//======================================================================
+ 
+///////////// print_sec_is ////////////////////////////
+//
+// If TRUE prints the Indicator Section.
+//
+// Type: boolean
+
+print_sec_is = FALSE;
+
+///////////// print_sec_ids ///////////////////////////
+//
+// If TRUE prints the Identification Section.
+//
+// Type: boolean
+
+print_sec_ids = TRUE;
+
+///////////// print_sec_lus ///////////////////////////
+//
+// If TRUE prints the Local Use Section (if present).
+//
+// Type: boolean
+
+print_sec_lus = FALSE;
+
+///////////// print_sec_gds ///////////////////////////
+//
+// If TRUE prints the Grid Definition Section.
+//
+// Type: boolean
+
+print_sec_gds = TRUE;
+
+///////////// print_sec_pds ///////////////////////////
+//
+// If TRUE prints the Product Definition Section.
+//
+// Type: boolean
+
+print_sec_pds = TRUE;
+
+///////////// print_sec_drs ///////////////////////////
+//
+// If TRUE prints the Data Representation Section.
+//
+// Type: boolean
+
+print_sec_drs = FALSE;
+
+///////////// print_sec_bms ///////////////////////////
+//
+// If TRUE prints the Bit-map Section.
+//
+// Type: boolean
+
+print_sec_bms = FALSE;
+
+///////////// print_sec_ds ////////////////////////////
+//
+// If TRUE prints the Data Section.
+//
+// Type: boolean
+
+print_sec_ds = FALSE;
+
