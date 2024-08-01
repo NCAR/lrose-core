@@ -100,8 +100,8 @@ public:
                          const char* procName, 
                          bool debug = false,
                          bool compression = false, 
-                         size_t numSlots = 1024, 
-                         long bufSize = 10000,
+                         int32_t numSlots = 1024,
+                         int64_t bufSize = 10000,
                          MsgLog *msgLog = NULL);
 
   // initReadWrite()
@@ -119,9 +119,9 @@ public:
                             bool debug = false,
                             openPosition position = END,
                             bool compression = false, 
-                            size_t numSlots = 1024, 
-                            long bufSize = 10000,
-                            int msecSleep = -1,
+                            int32_t numSlots = 1024,
+                            int64_t  bufSize = 10000,
+                            int32_t msecSleep = -1,
                             MsgLog *msgLog = NULL);
 
   // initReadOnly()
@@ -138,7 +138,7 @@ public:
                            const char* procName, 
                            bool debug = false,
                            openPosition position = END,
-                           int msecSleep = -1,
+                           int32_t msecSleep = -1,
                            MsgLog *msgLog = NULL);
 
   // initReadBlocking()
@@ -166,7 +166,7 @@ public:
                                const char* procName, 
                                bool debug = false,
                                openPosition position = END,
-                               int msecSleep = -1,
+                               int32_t msecSleep = -1,
                                MsgLog *msgLog = NULL);
 
   // initReadWriteBlocking()
@@ -189,7 +189,7 @@ public:
                                     const char* procName, 
                                     bool debug = false,
                                     openPosition position = END,
-                                    int msecSleep = -1,
+                                    int32_t msecSleep = -1,
                                     MsgLog *msgLog = NULL);
 
   // generic init() - allows full control of the init
@@ -201,9 +201,9 @@ public:
                    openMode mode = READ_WRITE, 
                    openPosition position = END,
                    bool compression = false, 
-                   size_t numSlots = 1024, 
-                   long bufSize = 10000,
-                   int msecSleep = -1,
+                   int32_t numSlots = 1024,
+                   int64_t  bufSize = 10000,
+                   int32_t msecSleep = -1,
                    MsgLog *msgLog = NULL);
 
   // Closing the queue
@@ -260,7 +260,7 @@ public:
   //  Return value:
   //    0 on success, -1 on error.
   
-  virtual int seekToId(int id);
+  virtual int seekToId(int32_t id);
 
   // Read a message from the fmq.
   // If type is specified, reads next message of the given type.
@@ -270,7 +270,7 @@ public:
   // Sets *gotOne if a message was read.
   // Returns 0 on success, -1 on error
 
-  virtual int readMsg(bool *gotOne, int type = -1, int msecs_sleep = -1);
+  virtual int readMsg(bool *gotOne, int32_t type = -1, int32_t msecs_sleep = -1);
 
   // Read a message from the fmq.
   // If type is specified, reads next message of the given type.
@@ -278,12 +278,12 @@ public:
   // procmap if PMU module has been initialized.
   // Returns 0 on success, -1 on error
 
-  virtual int readMsgBlocking(int type = -1);
+  virtual int readMsgBlocking(int32_t type = -1);
 
   // Writes a message to the fmq
   // Returns 0 on success, -1 on error
   
-  virtual int writeMsg(int type, int subType=0, const void *msg=NULL, int msgLen=0);
+  virtual int writeMsg(int32_t type, int32_t subType=0, const void *msg=NULL, int64_t msgLen=0);
 
   ////////////////////////
   // using the write cache
@@ -295,7 +295,7 @@ public:
   // Add a message to the write cache,
   // in preparation for a later write
   
-  void addToWriteCache(int type, int subType, const void *msg, int msgLen);
+  void addToWriteCache(int32_t type, int32_t subType, const void *msg, int64_t msgLen);
 
   // get the number of messages in the write cache
   
@@ -369,9 +369,9 @@ protected:
 
   class writeData64 {
   public:
-    int type;
-    int subType;
-    si64 msgLen;
+    int32_t type;
+    int32_t subType;
+    int64_t msgLen;
     bool compress;
     ta_compression_method_t compressMethod;
     MemBuf buf;
@@ -379,9 +379,9 @@ protected:
 
   class writeData32 {
   public:
-    int type;
-    int subType;
-    int msgLen;
+    int32_t type;
+    int32_t subType;
+    int32_t msgLen;
     bool compress;
     ta_compression_method_t compressMethod;
     MemBuf buf;
@@ -393,7 +393,7 @@ typedef writeData64 writeData;
 
   deque<writeData *> _writeQueue;
 
-  int _nMessagesPerWrite;
+  int32_t _nMessagesPerWrite;
   
 private:
 
@@ -408,7 +408,7 @@ private:
   void _closeClientSocket();
   int _checkClientSocket();
   
-  int _contactServer(void *buffer, const size_t bufLen);
+  int _contactServer(void *buffer, const int64_t bufLen);
   
   void _printDebugLabel(const string &label);
 

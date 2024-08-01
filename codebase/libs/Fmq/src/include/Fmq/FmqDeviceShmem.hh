@@ -50,8 +50,8 @@ public:
   // constructor
   
   FmqDeviceShmem(const string &fmqPath, 
-		 size_t numSlots, 
-		 size_t bufSize,
+		 int32_t numSlots,
+		 int64_t bufSize,
 		 TA_heartbeat_t heartbeatFunc);
 
   // destructor - closes queue
@@ -80,12 +80,12 @@ public:
 
   // read
   
-  virtual int do_read(ident_t id, void *mess, size_t len);
-  virtual int update_last_id_read(int lastIdRead);
+  virtual int64_t do_read(ident_t id, void *mess, int64_t len);
+  virtual int update_last_id_read(int32_t lastIdRead);
   
   // write
 
-  virtual int do_write(ident_t id, const void *mess, size_t len);
+  virtual int64_t do_write(ident_t id, const void *mess, int64_t len);
 
   // checking for existence
   // Returns 0 on success, -1 on failure
@@ -95,11 +95,11 @@ public:
   // Check that the device is the valid size.
   // Returns 0 on success, -1 on failure
   
-  virtual int check_size(ident_t id, size_t expectedSize);
+  virtual int check_size(ident_t id, int64_t expectedSize);
   
   // Get size of device buffer
 
-  virtual int get_size(ident_t id);
+  virtual int64_t get_size(ident_t id);
   
 protected:
 
@@ -107,7 +107,7 @@ private:
 
   // size of stat and buf
 
-  size_t _nbytes[N_IDENT];
+  int64_t _nbytes[N_IDENT];
 
   // shared memory and semaphore keys
 
@@ -136,9 +136,9 @@ private:
 
   int _getShmemKeys();
   
-  void *_ushmCreate(key_t key, size_t size, int permissions);
-  void *_ushmGet(key_t key, size_t size);
-  bool _ushmCheck(key_t key, size_t size);
+  void *_ushmCreate(key_t key, int64_t size, int permissions);
+  void *_ushmGet(key_t key, int64_t size);
+  bool _ushmCheck(key_t key, int64_t size);
   int _ushmNattach(key_t key);
   int _ushmDetach(void *shm_ptr);
   int _ushmRemove(key_t key);

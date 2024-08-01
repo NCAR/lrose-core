@@ -60,22 +60,22 @@ public:
 
   int getDsMsg( DsRadarMsg &dsRadarMsg, int *content, bool *gotOne );
 
-  int          putDsMsg( DsRadarMsg &newRadarInfo, int content=0 );
+  int putDsMsg( DsRadarMsg &newRadarInfo, int content=0 );
   
-  int          getDsBeam( DsRadarMsg &newRadarInfo, int *content=NULL );
-  int          putDsBeam( DsRadarMsg &newRadarInfo, int content=0 );
+  int getDsBeam( DsRadarMsg &newRadarInfo, int *content=NULL );
+  int putDsBeam( DsRadarMsg &newRadarInfo, int content=0 );
   
-  int          putStartOfTilt( int tiltNum, time_t time = -1 );
-  int          putStartOfVolume( int volumeNum, time_t time = -1 );
-  int          putEndOfTilt( int tiltNum, time_t time = -1 );
-  int          putEndOfVolume( int volumeNum, time_t time = -1 );
-  int          putNewScanType( int scanType, time_t time = -1 );
+  int putStartOfTilt( int tiltNum, time_t time = -1 );
+  int putStartOfVolume( int volumeNum, time_t time = -1 );
+  int putEndOfTilt( int tiltNum, time_t time = -1 );
+  int putEndOfVolume( int volumeNum, time_t time = -1 );
+  int putNewScanType( int scanType, time_t time = -1 );
   
-  bool         isStartOfTilt( int tilt = -1, time_t *when = NULL );
-  bool         isStartOfVolume( int volume = -1, time_t *when = NULL );
-  bool         isEndOfTilt( int tilt = -1, time_t *when = NULL );
-  bool         isEndOfVolume( int volume = -1, time_t *when = NULL );
-  bool         isNewScanType( int scanType = -1, time_t *when = NULL );
+  bool isStartOfTilt( int tilt = -1, time_t *when = NULL );
+  bool isStartOfVolume( int volume = -1, time_t *when = NULL );
+  bool isEndOfTilt( int tilt = -1, time_t *when = NULL );
+  bool isEndOfVolume( int volume = -1, time_t *when = NULL );
+  bool isNewScanType( int scanType = -1, time_t *when = NULL );
 
 private:
 

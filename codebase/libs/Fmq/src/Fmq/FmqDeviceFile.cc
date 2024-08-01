@@ -45,8 +45,8 @@
 using namespace std;
 
 FmqDeviceFile::FmqDeviceFile(const string &fmqPath, 
-			     size_t numSlots, 
-			     size_t bufSize,
+			     int32_t numSlots,
+			     int64_t bufSize,
 			     TA_heartbeat_t heartbeatFunc) :
 	FmqDevice(fmqPath, numSlots, bufSize, heartbeatFunc)
   
@@ -271,39 +271,39 @@ int FmqDeviceFile::unlock()
 //
 // Returns nbytes actually read, -1 on error
 
-int FmqDeviceFile::do_read(ident_t id, void *mess, size_t len)
+int64_t FmqDeviceFile::do_read(ident_t id, void *mess, int64_t len)
 {
   return _read(_path[id], _fd[id], mess, len);
 }
 
-int FmqDeviceFile::_read(const string &path, int fd, void *mess, size_t len)
+int64_t FmqDeviceFile::_read(const string &path, int fd, void *mess, int64_t len)
 
 {
   
   clearErrStr();
 
-  long bytes_read;
-  long target_len = len;
+  int64_t bytes_read;
+  int64_t target_len = len;
   char *ptr = (char *) mess;
   int retries = 100;
-  int total = 0;
+  int64_t total = 0;
   int err_count = 0;
   
   while(target_len) {
     errno = 0;
     bytes_read = read(fd, ptr, target_len);
     if(bytes_read <= 0) {
-      if (errno != EINTR) { // system call was not interrupted 
-	err_count++;
+      if (errno != EINTR) { // system call was not interrupted
+        // err_count++;
       }
       if(err_count >= retries) {
-	int errNum = errno;
-	_errStr += "ERROR - FmqDeviceFile::_read\n";
-	TaStr::AddStr(_errStr, "Read error, file: ", path);
-	TaStr::AddInt(_errStr, "  nbytes requested: ", len);
-	TaStr::AddInt(_errStr, "  nbytes read: ", total);
-	_errStr += strerror(errNum);
-	return total;
+        int errNum = errno;
+        _errStr += "ERROR - FmqDeviceFile::_read\n";
+        TaStr::AddStr(_errStr, "Read error, file: ", path);
+        TaStr::AddInt(_errStr, "  nbytes requested: ", len);
+        TaStr::AddInt(_errStr, "  nbytes read: ", total);
+        _errStr += strerror(errNum);
+        return total;
       }
       // Block for 1 millisecond
       uusleep(1000);
@@ -325,19 +325,19 @@ int FmqDeviceFile::_read(const string &path, int fd, void *mess, size_t len)
 //
 // returns number of bytes written, -1 on error
 
-int FmqDeviceFile::do_write(ident_t id, const void *mess, size_t len)
+int64_t FmqDeviceFile::do_write(ident_t id, const void *mess, int64_t len)
 {
   return _write(_path[id], _fd[id], mess, len);
 }
 
-int FmqDeviceFile::_write(const string &path, int fd, const void *mess, size_t len)
+int64_t FmqDeviceFile::_write(const string &path, int fd, const void *mess, int64_t len)
 
 {
 
   clearErrStr();
 
-  int bytes_written;
-  int target_len = len;
+  int64_t bytes_written;
+  int64_t target_len = len;
   char *ptr = (char *) mess;
   int retries = 100;
   int total = 0;
@@ -351,17 +351,17 @@ int FmqDeviceFile::_write(const string &path, int fd, const void *mess, size_t l
     if(bytes_written <= 0) {
       
       if (errno != EINTR) { // system call was not interrupted
-	err_count++;
+        // err_count++;
       }
       
       if(err_count >= retries) {
-	int errNum = errno;
-	_errStr += "ERROR - FmqDeviceFile::_write\n";
-	TaStr::AddStr(_errStr, "Write error, file: ", path);
-	TaStr::AddInt(_errStr, "  nbytes requested: ", len);
-	TaStr::AddInt(_errStr, "  nbytes written: ", total);
-	_errStr += strerror(errNum);
-	return total;
+        int errNum = errno;
+        _errStr += "ERROR - FmqDeviceFile::_write\n";
+        TaStr::AddStr(_errStr, "Write error, file: ", path);
+        TaStr::AddInt(_errStr, "  nbytes requested: ", len);
+        TaStr::AddInt(_errStr, "  nbytes written: ", total);
+        _errStr += strerror(errNum);
+        return total;
       }
 
       // Block for 1 millisecond
@@ -419,7 +419,7 @@ int FmqDeviceFile::check_exists()
 //  Return value:
 //    0 on success, -1 on failure
 
-int FmqDeviceFile::check_size(ident_t id, size_t expectedSize)
+int FmqDeviceFile::check_size(ident_t id, int64_t expectedSize)
 
 {
 
@@ -435,7 +435,7 @@ int FmqDeviceFile::check_size(ident_t id, size_t expectedSize)
     return -1;
   }
   
-  if ((int) file_stat.st_size != (int) expectedSize) {
+  if (file_stat.st_size != expectedSize) {
     _errStr += "ERROR - FmqDeviceFile::check_size\n";
     TaStr::AddStr(_errStr, "File is incorrect size: ", _path[id]);
     TaStr::AddInt(_errStr, "Expected size: ", expectedSize);
@@ -452,7 +452,7 @@ int FmqDeviceFile::check_size(ident_t id, size_t expectedSize)
 //  Return value:
 //    size of buffer
 
-int FmqDeviceFile::get_size(ident_t id)
+int64_t FmqDeviceFile::get_size(ident_t id)
 
 {
 
@@ -468,7 +468,7 @@ int FmqDeviceFile::get_size(ident_t id)
     return -1;
   }
 
-  return (int) file_stat.st_size;
+  return file_stat.st_size;
 
 }
 
@@ -481,7 +481,7 @@ int FmqDeviceFile::get_size(ident_t id)
 //  Return value:
 //    0 on success, -1 on failure.
 
-int FmqDeviceFile::update_last_id_read(int lastIdRead)
+int FmqDeviceFile::update_last_id_read(int32_t lastIdRead)
 
 {
   

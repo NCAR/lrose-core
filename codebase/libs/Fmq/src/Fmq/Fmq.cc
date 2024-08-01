@@ -147,8 +147,8 @@ int Fmq::initCreate(const char* fmqPath,
 		    const char* procName, 
 		    bool debug /* = false*/,
 		    bool compress /* = false*/, 
-		    size_t numSlots /* = 1024*/, 
-		    long bufSize /* = 10000*/,
+		    int32_t numSlots /* = 1024*/,
+		    int64_t bufSize /* = 10000*/,
 		    MsgLog *msgLog /* = NULL */)
   
 {
@@ -172,8 +172,8 @@ int Fmq::initReadWrite(const char* fmqPath,
 		       bool debug /* = false*/,
 		       openPosition position /* = END*/,
 		       bool compress /* = false*/, 
-		       size_t numSlots /* = 1024*/, 
-		       long bufSize /* = 10000*/,
+		       int32_t numSlots /* = 1024*/,
+		       int64_t bufSize /* = 10000*/,
 		       int msecSleep /* = -1*/,
 		       MsgLog *msgLog /* = NULL */)
   
@@ -197,7 +197,7 @@ int Fmq::initReadOnly(const char* fmqPath,
 		      const char* procName, 
 		      bool debug /* = false*/,
 		      openPosition position /* = END*/,
-		      int msecSleep /* = -1*/,
+		      int32_t msecSleep /* = -1*/,
 		      MsgLog *msgLog /* = NULL */)
   
 {
@@ -233,7 +233,7 @@ Fmq::initReadBlocking(const char* fmqPath,
 		      const char* procName, 
 		      bool debug /* = false*/,
 		      openPosition position /* = END*/,
-		      int msecSleep /* = -1*/,
+		      int32_t msecSleep /* = -1*/,
 		      MsgLog *msgLog /* = NULL */)
   
 {
@@ -264,7 +264,7 @@ Fmq::initReadWriteBlocking(const char* fmqPath,
 			   const char* procName, 
 			   bool debug /* = false*/,
 			   openPosition position /* = END*/,
-			   int msecSleep /* = -1*/,
+			   int32_t msecSleep /* = -1*/,
 			   MsgLog *msgLog /* = NULL */)
   
 {
@@ -283,35 +283,31 @@ Fmq::init(const char* fmqPath,
 	  openMode mode, 
 	  openPosition position, 
 	  bool compress,
-	  size_t numSlots, 
-	  long bufSize,
-	  int msecSleep,
+	  int32_t numSlots,
+	  int64_t bufSize,
+	  int32_t msecSleep,
 	  MsgLog *msgLog)
 {
 
-  //
-  // Limit the value of bufSize.
-  //
-  // As of June 2011, using values larger than LONG_MAX-1 for
-  // bufSize is problematic. The problems arise because this value is
-  // represented as being of types size_t, int and (in the _stat
-  // structure) si32. Large values get mangled in type conversion.
-  // The resulting behavior can be *very* hard to debug.
-  //
-  // The long term solution is probably going to be to represent
-  // the value as a consistent type, probably si64 (and possibly
-  // do the same for the number of slots, too). For now, though,
-  // we apply this upper limit.
-  //
-  // Niles Oien working with Mike Dixon, June 2011.
-  //
-  if (bufSize > LONG_MAX-1){
-    cerr << "WARNING : Upper limit of FMQ buffer size exceeded, using "
-         << LONG_MAX-1 << " instead of " << bufSize << endl;
-    bufSize = LONG_MAX-1;
+  initErrStr();
+
+  // check bounds of arguments
+  if ((numSlots < 1) || (numSlots >= INT32_MAX)) {
+    _print_error("init", "number of slots (%d)  outside of valid bounds (0, INT32_MAX)", numSlots);
+    return -1;
   }
 
-  // initialize 
+  if ((bufSize < 1) || (bufSize >= INT64_MAX)) {
+    _print_error("init", "buffer size (%ld)  outside of valid bounds (0, INT64_MAX)", bufSize);
+    return -1;
+  }
+
+  if ((msecSleep < -1) || (msecSleep >= INT32_MAX)) {
+    _print_error("init", "number of milli-seconds (%d) to sleep outside of valid bounds (-1, INT32_MAX)", msecSleep);
+    return -1;
+  }
+
+  // initialize
 
   _fmqPath = fmqPath;
   _progName = procName;
@@ -325,7 +321,6 @@ Fmq::init(const char* fmqPath,
   _msgLog = msgLog;
 
   _init_status(_numSlots, _bufSize);
-  initErrStr();
 
   // create the device for low-level read/write
   
@@ -513,13 +508,13 @@ int Fmq::seek(Fmq::seekPosition position)
 //  Return value:
 //    0 on success, -1 on error.
 
-int Fmq::seekToId(int id)
+int Fmq::seekToId(int32_t id)
 
 {
 
   // get slot of requested ID
 
-  int slot;
+  int32_t slot;
   if (_find_slot_for_id (id, &slot)) {
     _print_error("_seek_to_id",
 		 "Cannot find slot for id: %d", _stat.youngest_id);
@@ -542,7 +537,7 @@ int Fmq::seekToId(int id)
 // Sets *gotOne if a message was read.
 // Returns 0 on success, -1 on error
 
-int Fmq::readMsg(bool *gotOne, int type /*= -1*/, int msecs_sleep /* = -1 */)
+int Fmq::readMsg(bool *gotOne, int32_t type /*= -1*/, int32_t msecs_sleep /* = -1 */)
 
 {
 
@@ -577,7 +572,7 @@ int Fmq::readMsg(bool *gotOne, int type /*= -1*/, int msecs_sleep /* = -1 */)
 // procmap if PMU module has been initialized.
 // Returns 0 on success, -1 on error
 
-int Fmq::readMsgBlocking(int type)
+int Fmq::readMsgBlocking(int32_t type)
 {
 
   initErrStr();
@@ -601,8 +596,8 @@ int Fmq::readMsgBlocking(int type)
 // Writes a message to the fmq
 // Returns 0 on success, -1 on error
   
-int Fmq::writeMsg(int type, int subType, 
-		  const void *msg, int msgLen)
+int Fmq::writeMsg(int32_t type, int32_t subType,
+		  const void *msg, int64_t msgLen)
 {
 
   initErrStr();
@@ -626,9 +621,9 @@ int Fmq::writeMsg(int type, int subType,
 // Writing precompressed msg
 // Returns 0 on success, -1 on error
 
-int Fmq::writeMsgPreCompressed(int type, int subType, 
-			       const void *msg, int msgLen,
-			       int uncompressedLen)
+int Fmq::writeMsgPreCompressed(int32_t type, int32_t subType,
+			       const void *msg, int64_t msgLen,
+			       int64_t uncompressedLen)
 {
 
   initErrStr();
@@ -861,7 +856,7 @@ int Fmq::print_debug(const char *fmqPath,
 // initialize status
 //
 
-void Fmq::_init_status(int nslots, int buf_size)
+void Fmq::_init_status(int32_t nslots, int64_t buf_size)
 
 {
   
@@ -890,7 +885,7 @@ void Fmq::_init_status(int nslots, int buf_size)
 //
 ///
 
-int Fmq::_alloc_slots(int nslots)
+int Fmq::_alloc_slots(int32_t nslots)
      
 {
 
@@ -942,7 +937,7 @@ int Fmq::_free_oldest_slot()
   
 {
 
-  int oldest_slot = _stat.oldest_slot;
+  int32_t oldest_slot = _stat.oldest_slot;
   q_slot_t *oldest_ptr = _slots + oldest_slot;
 
   // update oldest slot
@@ -1009,12 +1004,12 @@ int Fmq::_free_oldest_slot()
 //
 ///
 
-void Fmq::_alloc_entry(int msg_len)
+void Fmq::_alloc_entry(int64_t msg_len)
      
 {
 
-  int nbytes_padded;
-  int nbytes_needed;
+  int64_t nbytes_padded;
+  int64_t nbytes_needed;
 
   // compute padded length, to keep the total length aligned to
   // 32-bit words
@@ -1065,7 +1060,7 @@ void Fmq::_free_entry()
 // called here will register with procmap.
 
 int
-  Fmq::_open(Fmq::openMode mode, size_t numSlots, size_t bufSize)
+  Fmq::_open(Fmq::openMode mode, int32_t numSlots, int64_t bufSize)
 {
   
   int status = 0;
@@ -1105,7 +1100,7 @@ int
 //    0 on success, -1 on failure
 ///
 
-int Fmq::_open_create(int nslots, int buf_size)
+int Fmq::_open_create(int32_t nslots, int64_t buf_size)
      
 {
 
@@ -1138,7 +1133,7 @@ int Fmq::_open_create(int nslots, int buf_size)
 //    0 on success, -1 on failure
 ///
 
-int Fmq::_open_rdwr(int nslots, int buf_size)
+int Fmq::_open_rdwr(int32_t nslots, int64_t buf_size)
      
 {
 
@@ -1434,7 +1429,7 @@ int Fmq::_seek_end ()
 
 {
 
-  int last_slot_read;
+  int32_t last_slot_read;
 
   if (_find_slot_for_id(_stat.youngest_id,
 			&last_slot_read)) {
@@ -1475,7 +1470,7 @@ int Fmq::_seek_last ()
 
 {
   
-  int last_slot_read;
+  int32_t last_slot_read;
 
   if (_find_slot_for_id (_stat.youngest_id,
 			 &last_slot_read)) {
@@ -1566,7 +1561,7 @@ int Fmq::_seek_back ()
 // Returns 0 on success, -1 on failure.
 ///
 
-int Fmq::_read(int *msg_read, int type)
+int Fmq::_read(int32_t*msg_read, int32_t type)
      
 {
 
@@ -1611,7 +1606,7 @@ int Fmq::_read(int *msg_read, int type)
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_read_blocking (int msecs_sleep, int type)
+int Fmq::_read_blocking (int msecs_sleep, int32_t type)
      
 {
 
@@ -1686,7 +1681,7 @@ int Fmq::_read_blocking (int msecs_sleep, int type)
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_read_non_blocking (int *msg_read, int type, int msecs_sleep)
+int Fmq::_read_non_blocking (int32_t*msg_read, int32_t type, int msecs_sleep)
      
 {
 
@@ -1696,7 +1691,7 @@ int Fmq::_read_non_blocking (int *msg_read, int type, int msecs_sleep)
   gettimeofday(&tv, NULL);
   double startTime = tv.tv_sec + (double) tv.tv_usec / 1.0e6;
   double endTime = startTime + msecs_sleep / 1.0e3;
-  int count = 0;
+  int32_t count = 0;
   
   while (true) {
     
@@ -1762,16 +1757,14 @@ int Fmq::_read_stat ()
 
 {
 
-  int ii;
-  
   // try 5 times to read the status struct, using the checksum to
   // ensure it is correctly read
 
   q_stat_t status;
 
-  for (ii = 0; ii < 5; ii++) {
+  for (int ii = 0; ii < 5; ii++) {
 
-    int magic_cookie;
+    int32_t magic_cookie;
     if (_get_magic_cookie(magic_cookie)) {
       _print_error("_read_stat", "Cannot read magic cookie");
       return -1;
@@ -1875,7 +1868,7 @@ int Fmq::_read_slots ()
 
   // function returns file pointer to 0
 
-  int magic_cookie;
+  int32_t magic_cookie;
   if (_get_magic_cookie(magic_cookie)) {
     _print_error("_read_stat", "Cannot read magic cookie");
     return -1;
@@ -1895,7 +1888,7 @@ int Fmq::_read_slots ()
 
     _alloc_slots(_stat.nslots);
   
-    int nbytes = sizeof(q_slot_t) * _stat.nslots;
+    int32_t nbytes = sizeof(q_slot_t) * _stat.nslots;
     if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
       _print_error("_read_slots", "Cannot read slots");
       return -1;
@@ -1903,8 +1896,8 @@ int Fmq::_read_slots ()
 
     // swap slot byte order
 
-    for(int i = 0; i < _stat.nslots; ++i) {
-      be_to_slot_64(&(_slots[i]));
+    for(int32_t ii = 0; ii < _stat.nslots; ++ii) {
+      be_to_slot_64(&(_slots[ii]));
     }
 
     return 0;
@@ -1924,7 +1917,7 @@ int Fmq::_read_slots ()
 
     // read in slots, make sure there are enough slots allocated
 
-    int nbytes = sizeof(q_slot_32_t) * _stat.nslots;
+    int32_t nbytes = sizeof(q_slot_32_t) * _stat.nslots;
     if (_read_device(FmqDevice::STAT_IDENT, slots_32, nbytes)) {
       _print_error("_read_slots", "Cannot read slots");
       return -1;
@@ -1940,7 +1933,7 @@ int Fmq::_read_slots ()
     
     _alloc_slots(_stat.nslots);
 
-    for(int i = 0; i < _stat.nslots; ++i) {
+    for(int32_t i = 0; i < _stat.nslots; ++i) {
       _slots[i].active = slots_32[i].active;
       _slots[i].id = slots_32[i].id;
       _slots[i].time = slots_32[i].time;
@@ -1978,13 +1971,13 @@ int Fmq::_read_slots ()
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_read_slot ( int slot_num)
+int Fmq::_read_slot ( int32_t slot_num)
 
 {
 
-  int offset;
+  int32_t offset;
 
-  int magic_cookie;
+  int32_t magic_cookie;
   if (_get_magic_cookie(magic_cookie)) {
     _print_error("_read_stat", "Cannot read magic cookie");
     return -1;
@@ -2117,15 +2110,11 @@ int Fmq::_read_slot ( int slot_num)
 //  Returns 0 on success, -1 on failure.
 ///
 
-int Fmq::_read_next(int *msg_read)
+int Fmq::_read_next(int32_t *msg_read)
      
 {
-  static int num_calls = 0;
-  
-  int next_slot, slot_read;
+  int32_t next_slot, slot_read;
 
-  num_calls++;
-  
   *msg_read = false;
 
   if (_read_stat()) {
@@ -2172,7 +2161,7 @@ int Fmq::_read_next(int *msg_read)
   // In blocked mode, if we have skipped data tell the user about it.
 
   if (_stat.blocking_write && _slot.id >= 0) {
-    int prev_id = _prev_id(_slot.id);
+    int32_t prev_id = _prev_id(_slot.id);
     if (prev_id != _lastIdRead) {
       fprintf(stderr, "!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!\n"
 	      "Data was skipped even though the fmq is in blocking mode.\n"
@@ -2213,11 +2202,11 @@ int Fmq::_read_next(int *msg_read)
 //
 ///
 
-int Fmq::_read_msg_for_slot( int slot_num)
+int Fmq::_read_msg_for_slot( int32_t slot_num)
 
 {
 
-  int prev_id;
+  int32_t prev_id;
   q_slot_t *slot;
 
   if (_read_slot(slot_num)) {
@@ -2260,12 +2249,12 @@ int Fmq::_read_msg_for_slot( int slot_num)
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_read_msg (int slot_num)
+int Fmq::_read_msg (int32_t slot_num)
 
 {
 
   q_slot_t *slot;
-  int id_posn;
+  int32_t id_posn;
   ui64 nfull;
   si32 magic_cookie;
   si32 slot_num_check;
@@ -2373,7 +2362,7 @@ int Fmq::_read_msg (int slot_num)
     if (_server) {
       // leave data compressed for server to pass on
       _msgBuf.free();
-      int msg_len = slot->stored_len - 2 * sizeof(si32);
+      int32_t msg_len = slot->stored_len - 2 * sizeof(si32);
       if (_add_read_msg(iptr + 2, msg_len)) {
         cerr << "ERROR - _read_msg" << endl;
         return -1;
@@ -2393,7 +2382,7 @@ int Fmq::_read_msg (int slot_num)
 	}
 	return -1;
       }
-      int msg_len = slot->msg_len;
+      int32_t msg_len = slot->msg_len;
       if (_add_read_msg(umsg, msg_len)) {
         cerr << "ERROR - _read_msg" << endl;
         return -1;
@@ -2426,18 +2415,18 @@ int Fmq::_read_msg (int slot_num)
 //  reads from a socket and then loads up the handle.
 //
 
-int Fmq::_load_read_msg(int msg_type,
-			int msg_subtype,
-			int msg_id,
-			time_t msg_time,
+int Fmq::_load_read_msg(int32_t msg_type,
+			int32_t msg_subtype,
+			int32_t msg_id,
+			int64_t msg_time,
 			void *msg,
-			int stored_len,
-			int compressed,
-			int uncompressed_len)
+			int64_t stored_len,
+			int32_t compressed,
+			int64_t uncompressed_len)
      
 {
 
-  ui64 nfull;
+  uint64_t nfull;
 
   _slot.type    = msg_type;
   _slot.subtype = msg_subtype;
@@ -2448,13 +2437,13 @@ int Fmq::_load_read_msg(int msg_type,
 
     void *dmsg = ta_decompress(msg, &nfull);
     
-    if (dmsg == NULL || (int) nfull != uncompressed_len) {
+    if (dmsg == NULL || (int64_t) nfull != uncompressed_len) {
       _print_error("load_read_msg",
-		   "Error on decompression, expected %d bytes, "
-		   "got %d bytes",
-		   (int) uncompressed_len, (int) nfull);
+		   "Error on decompression, expected %ld bytes, "
+		   "got %ld bytes",
+		   (int64_t) uncompressed_len, (int64_t) nfull);
       if (dmsg != NULL) {
-	ta_compress_free(dmsg);
+        ta_compress_free(dmsg);
       }
       return -1;
     }
@@ -2484,7 +2473,7 @@ int Fmq::_load_read_msg(int msg_type,
 //  Return value:
 //    0 on success, -1 on failure
 
-int Fmq::_add_read_msg(void *msg, int msg_size)
+int Fmq::_add_read_msg(void *msg, int64_t msg_size)
 {
   if (msg_size < 0 || msg_size > _bufSize) {
     cerr << "ERROR - Fmq::_add_to_msg" << endl;
@@ -2508,14 +2497,12 @@ int Fmq::_add_read_msg(void *msg, int msg_size)
 //    0 on success, -1 on failure
 ///
 
-int Fmq::_prepare_for_writing(int nslots, int buf_size)
+int Fmq::_prepare_for_writing(int32_t nslots, int64_t buf_size)
      
 
 {
 
   si08 last_byte;
-  int islot;
-  si32 magic_cookie;
 
   // allocate status and slots memory
 
@@ -2543,7 +2530,7 @@ int Fmq::_prepare_for_writing(int nslots, int buf_size)
 
   // write magic cookie
 
-  magic_cookie = BE_from_si32(Q_MAGIC_BUF);
+  int32_t magic_cookie = BE_from_si32(Q_MAGIC_BUF);
   if (_write_device(FmqDevice::BUF_IDENT, &magic_cookie, sizeof(si32))) {
     _print_error("init_files",
 		 "Cannot write magic cookie at start of buf file");
@@ -2569,7 +2556,7 @@ int Fmq::_prepare_for_writing(int nslots, int buf_size)
 
   // write out slots and status
 
-  for (islot = 0; islot < nslots; islot++) {
+  for (int32_t islot = 0; islot < nslots; islot++) {
     if (_write_slot(islot)) {
       _print_error("init_files",
 		   "Cannot write slot struct %d", islot);
@@ -2598,20 +2585,18 @@ int Fmq::_prepare_for_writing(int nslots, int buf_size)
 //    0 on success, -1 on error.
 //
 
-int Fmq::_write(void *msg, int msg_len,
-		int msg_type, int msg_subtype)
+int Fmq::_write(void *msg, int64_t msg_len,
+		int32_t msg_type, int32_t msg_subtype)
   
 {
 
-  int iret;
-  
+
   if (_lock_device() != 0) {
     _print_error("_write", "Error locking for read/write");
     return -1;
   }
   
-  iret = _write_msg(msg, msg_len, msg_type, msg_subtype,
-		    false, msg_len);
+  int iret = _write_msg(msg, msg_len, msg_type, msg_subtype, false, msg_len);
   _unlock_device();
   
   return (iret);
@@ -2629,13 +2614,11 @@ int Fmq::_write(void *msg, int msg_len,
 //    0 on success, -1 on error.
 ///
 
-int Fmq::_write_precompressed(void *msg, int msg_len,
-			      int msg_type, int msg_subtype,
-			      int uncompressed_len)
+int Fmq::_write_precompressed(void *msg, int64_t msg_len,
+			      int32_t msg_type, int32_t msg_subtype,
+			      int64_t uncompressed_len)
   
 {
-
-  int iret;
 
   if (_lock_device() != 0) {
     _print_error("_write_precompressed",
@@ -2643,7 +2626,7 @@ int Fmq::_write_precompressed(void *msg, int msg_len,
     return -1;
   }
   
-  iret = _write_msg(msg, msg_len, msg_type, msg_subtype,
+  int iret = _write_msg(msg, msg_len, msg_type, msg_subtype,
 		    true, uncompressed_len);
   _unlock_device();
   
@@ -2664,12 +2647,10 @@ int Fmq::_write_stat()
 
 {
 
-  q_stat_t stat;
-
   // make local copy of stat struct
   // set byte order to BigEnd
   
-  stat = _stat;
+  q_stat_t stat = _stat;
   stat.time_written = time(NULL);
   _add_stat_checksum(&stat);
   be_from_stat_64(&stat);
@@ -2700,12 +2681,9 @@ int Fmq::_write_stat()
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_write_slot ( int slot_num)
+int Fmq::_write_slot (int32_t slot_num)
 
 {
-
-  int offset;
-  q_slot_t slot;
 
   // Make sure we have a valid slot number
 
@@ -2727,13 +2705,13 @@ int Fmq::_write_slot ( int slot_num)
   // make local copy of slot struct
   // set byte order to BigEnd
   
-  slot = _slots[slot_num];
+  q_slot_t slot = _slots[slot_num];
   _add_slot_checksum(&slot);
   be_from_slot_64(&slot);
 
   // seek to slot
 
-  offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
+  int64_t offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
   if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
     _print_error("_write_slot",
 		 "Cannot seek to slot posn, offset %d.", offset);
@@ -2773,23 +2751,17 @@ int Fmq::_write_slot ( int slot_num)
 //    0 on success, -1 on error.
 ///
 
-int Fmq::_write_msg(void *msg, int msg_len, 
-		    int msg_type, int msg_subtype,
-		    int pre_compressed, int uncompressed_len)
+int Fmq::_write_msg(void *msg, int64_t msg_len,
+		    int32_t msg_type, int32_t msg_subtype,
+		    int64_t pre_compressed, int64_t uncompressed_len)
 
 {
 
-  int stored_len;
-  int write_slot;
-  int write_id;
-  int offset;
-  int nbytes_padded;
-  int iret;
-  int do_compress;
-  ui64 clen;
+  bool do_compress;
+  uint64_t clen;
+  int64_t offset;
   void *cmsg;
-  q_slot_t *slot;
-  
+
   // read in status struct 
   
   if (_read_stat()) {
@@ -2798,14 +2770,14 @@ int Fmq::_write_msg(void *msg, int msg_len,
 
   // compute the slot position for writing
   
-  write_slot = _next_slot (_stat.youngest_slot);
-  write_id = _next_id(_stat.youngest_id);
+  int64_t write_slot = _next_slot (_stat.youngest_slot);
+  int64_t write_id = _next_id(_stat.youngest_id);
   
   // in blocking write operation, wait if we have caught up
   
   if (_blockingWrite) {
   
-    int overwrite_id = write_id - _stat.nslots;
+    int32_t overwrite_id = write_id - _stat.nslots;
     if (overwrite_id < 0) {
       overwrite_id += Q_MAX_ID;
     }
@@ -2814,12 +2786,12 @@ int Fmq::_write_msg(void *msg, int msg_len,
 
       _unlock_device();
       if (_heartbeatFunc != NULL) {
-	_heartbeatFunc("_write - blocked ...");
+        _heartbeatFunc("_write - blocked ...");
       }
       umsleep(200);
       _lock_device();
       if (_read_stat()) {
-	return -1;
+        return -1;
       }
 
     } // while
@@ -2861,8 +2833,8 @@ int Fmq::_write_msg(void *msg, int msg_len,
   // compute padded length, to keep the total length aligned to
   // 32-bit words
   
-  nbytes_padded = (((clen - 1) / sizeof(si32)) + 1) * sizeof(si32);
-  stored_len = nbytes_padded + Q_NBYTES_EXTRA;
+  int64_t nbytes_padded = (((clen - 1) / sizeof(si32)) + 1) * sizeof(si32);
+  int64_t stored_len = nbytes_padded + Q_NBYTES_EXTRA;
   
   // check that message will fit in buffer
   
@@ -2880,7 +2852,7 @@ int Fmq::_write_msg(void *msg, int msg_len,
   // make space for message
 
   while (1) {
-    int avail = _space_avail(stored_len);
+    int64_t avail = _space_avail(stored_len);
     if (avail < 0) {
       return -1;
     }
@@ -2914,7 +2886,7 @@ int Fmq::_write_msg(void *msg, int msg_len,
           offset);
 #endif
   
-  iret = _write_msg_to_slot(write_slot, write_id, cmsg,
+  int iret = _write_msg_to_slot(write_slot, write_id, cmsg,
 			    clen, stored_len, offset);
   if (do_compress) {
     ta_compress_free(cmsg);
@@ -2924,11 +2896,11 @@ int Fmq::_write_msg(void *msg, int msg_len,
   }
   
   // load up slot info and write out
-  
-  slot = _slots + write_slot;
+
+  q_slot_t *slot = _slots + write_slot;
   slot->active = true;
   slot->id = write_id;
-  slot->time = time(NULL);
+  slot->time = (int64_t) time(NULL);
   slot->msg_len = uncompressed_len;
   slot->stored_len = stored_len;
   slot->offset = offset;
@@ -2978,16 +2950,16 @@ int Fmq::_write_msg(void *msg, int msg_len,
 //    0 on success, -1 on failure.
 ///
 
-int Fmq::_write_msg_to_slot(int write_slot, int write_id,
-			    void *msg, int msg_len, int stored_len, int offset)
+int Fmq::_write_msg_to_slot(int32_t write_slot, int32_t write_id,
+			    void *msg, int64_t msg_len, int64_t stored_len, int64_t offset)
      
 {
 
-  int id_posn;
-  si32 *iptr;
-  si32 magic_cookie;
-  si32 slot_num;
-  si32 id;
+  int32_t id_posn;
+  int32_t *iptr;
+  int32_t magic_cookie;
+  int32_t slot_num;
+  int32_t id;
 
   // seek to start of message
   
@@ -3091,13 +3063,13 @@ int Fmq::_seek_device(FmqDevice::ident_t id, off_t offset)
 // read at the device level
 // returns 0 on success, -1 on failure
 
-int Fmq::_read_device(FmqDevice::ident_t id, void *mess, size_t len)
+int Fmq::_read_device(FmqDevice::ident_t id, void *mess, int64_t len)
 {
   if (_dev == NULL) {
     _print_error("_read_device", "Device object NULL");
     return -1;
   }
-  size_t result = _dev->do_read(id, mess, len);
+  int64_t result = _dev->do_read(id, mess, len);
   if (result != len) {
     _print_error("_read_device", _dev->getErrStr().c_str());
     return -1;
@@ -3109,7 +3081,7 @@ int Fmq::_read_device(FmqDevice::ident_t id, void *mess, size_t len)
 // write at the device level
 // returns 0 on success, -1 on failure
 
-int Fmq::_write_device(FmqDevice::ident_t id, const void *mess, size_t len)
+int Fmq::_write_device(FmqDevice::ident_t id, const void *mess, int64_t len)
 {
 
   if (_dev == NULL) {
@@ -3117,7 +3089,7 @@ int Fmq::_write_device(FmqDevice::ident_t id, const void *mess, size_t len)
     return -1;
   }
 
-  size_t result = _dev->do_write(id, mess, len);
+  int64_t result = _dev->do_write(id, mess, len);
   if (result != len) {
     _print_error("_write_device", _dev->getErrStr().c_str());
     return -1;
@@ -3194,9 +3166,9 @@ int Fmq::_check_buffer_sizes()
     return -1;
   }
   
-  int nslots = _stat.nslots;
-  size_t expectedStatSize = sizeof(q_stat_t) + nslots * sizeof(q_slot_t);
-  size_t expectedBufSize = _stat.buf_size;
+  int32_t nslots = _stat.nslots;
+  int32_t expectedStatSize = sizeof(q_stat_t) + nslots * sizeof(q_slot_t);
+  int64_t expectedBufSize = _stat.buf_size;
 
   if (_dev->check_size(FmqDevice::STAT_IDENT, expectedStatSize)) {
     _errStr += _dev->getErrStr();
@@ -3240,9 +3212,7 @@ int Fmq::_check()
 
 {
 
-  int islot;
-  int slot_num;
-  q_slot_t *slot;
+  int32_t slot_num;
 
   // are the buffers the correct size?
 
@@ -3269,8 +3239,8 @@ int Fmq::_check()
     return -1;
   }
 
-  slot = _slots;
-  for (islot = 0; islot < _stat.nslots; islot++, slot++) {
+  q_slot_t *slot = _slots;
+  for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
 
     // Check whether this slot should be active or not.
     
@@ -3405,7 +3375,7 @@ void Fmq::_add_stat_checksum(q_stat_t *stat)
 
 {
 
-  int sum = _compute_stat_checksum(stat);
+  int32_t sum = _compute_stat_checksum(stat);
   stat->checksum = sum;
 
 }
@@ -3418,7 +3388,7 @@ void Fmq::_add_slot_checksum(q_slot_t *slot)
 
 {
 
-  int sum = _compute_slot_checksum(slot);
+  int32_t sum = _compute_slot_checksum(slot);
   slot->checksum = sum;
 
 }
@@ -3434,14 +3404,12 @@ int Fmq::_check_stat_checksum(const q_stat_t *stat)
 
 {
 
-  int sum;
-
   if (stat->checksum == 0) {
     // backward compatibility
     return 0;
   }
 
-  sum = _compute_stat_checksum(stat);
+  int32_t sum = _compute_stat_checksum(stat);
 
   if (sum != stat->checksum) {
     return -1;
@@ -3462,14 +3430,12 @@ int Fmq::_check_slot_checksum(const q_slot_t *slot)
 
 {
 
-  int sum;
-
   if (slot->checksum == 0) {
     // backward compatibility
     return 0;
   }
 
-  sum = _compute_slot_checksum(slot);
+  int32_t sum = _compute_slot_checksum(slot);
 
   if (sum != slot->checksum) {
     return -1;
@@ -3486,7 +3452,7 @@ int Fmq::_check_slot_checksum(const q_slot_t *slot)
 //    0 for success and -1 for failure
 ///
 
-int Fmq::_get_magic_cookie ( int& cookie )
+int Fmq::_get_magic_cookie(int32_t& cookie)
 
 {
   // seek to start of status file
@@ -3498,8 +3464,8 @@ int Fmq::_get_magic_cookie ( int& cookie )
 
   // read magic cookie to see if the stat struct is 64-bit or 32-bit
 
-  int magic_cookie;
-  if (_read_device(FmqDevice::STAT_IDENT, &magic_cookie, sizeof(int))) {
+  int32_t magic_cookie;
+  if (_read_device(FmqDevice::STAT_IDENT, &magic_cookie, sizeof(int32_t))) {
     _print_error("_read_stat", "Cannot read magic cookie");
     return -1;
   }
@@ -3531,7 +3497,7 @@ int Fmq::_get_magic_cookie ( int& cookie )
 //
 ///
 
-int Fmq::_prev_slot ( int slot_num )
+int Fmq::_prev_slot (int32_t slot_num)
 
 {
 
@@ -3550,7 +3516,7 @@ int Fmq::_prev_slot ( int slot_num )
 //
 ///
 
-int Fmq::_next_slot ( int slot_num)
+int Fmq::_next_slot(int32_t slot_num)
 
 {
 
@@ -3569,7 +3535,7 @@ int Fmq::_next_slot ( int slot_num)
 //
 ///
 
-int Fmq::_prev_id (int id)
+int Fmq::_prev_id(int32_t id)
 
 {
   if (id == 0) {
@@ -3586,7 +3552,7 @@ int Fmq::_prev_id (int id)
 //
 ///
 
-int Fmq::_next_id (int id)
+int Fmq::_next_id(int32_t id)
 
 {
 
@@ -3607,12 +3573,9 @@ int Fmq::_next_id (int id)
 //
 ///
 
-int Fmq::_find_slot_for_id(int search_id, int *slot_p)
+int Fmq::_find_slot_for_id(int32_t search_id, int32_t *slot_p)
      
 {
-
-  int islot;
-  q_slot_t *slot;
 
   // special case - search_id is -1, no messages yet.
   // return slot num of -1.
@@ -3626,8 +3589,8 @@ int Fmq::_find_slot_for_id(int search_id, int *slot_p)
     return -1;
   }
 
-  slot = _slots;
-  for (islot = 0; islot < _stat.nslots; islot++, slot++) {
+  q_slot_t *slot = _slots;
+  for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
     
     if (search_id == slot->id) {
       *slot_p = islot;
@@ -3656,7 +3619,7 @@ int Fmq::_find_slot_for_id(int search_id, int *slot_p)
 //   true if YES, false if NO.
 ///
 
-int Fmq::_slot_in_active_region (int slot_num)
+int Fmq::_slot_in_active_region (int32_t slot_num)
 
 {
 
@@ -3670,8 +3633,7 @@ int Fmq::_slot_in_active_region (int slot_num)
 
   if (_stat.youngest_slot >= _stat.oldest_slot) {
     
-    if (slot_num >= _stat.oldest_slot &&
-	slot_num <= _stat.youngest_slot) {
+    if (slot_num >= _stat.oldest_slot && slot_num <= _stat.youngest_slot) {
       return true;
     } else {
       return false;
@@ -3679,8 +3641,7 @@ int Fmq::_slot_in_active_region (int slot_num)
     
   } else {
     
-    if (slot_num >= _stat.oldest_slot ||
-	slot_num <= _stat.youngest_slot) {
+    if (slot_num >= _stat.oldest_slot || slot_num <= _stat.youngest_slot) {
       return true;
     } else {
       return false;
@@ -3707,15 +3668,14 @@ int Fmq::_slot_in_active_region (int slot_num)
 // offsets.
 ///
 
-int Fmq::_space_avail( int stored_len)
+int Fmq::_space_avail( int32_t stored_len)
 
 {
-
-  int space;
+  int64_t space;
 
   if (_stat.append_mode) {
 
-    space = _stat.buf_size - _stat.begin_append;
+    int64_t space = _stat.buf_size - _stat.begin_append;
 
     if (space >= stored_len) {
       return true;
@@ -3732,7 +3692,7 @@ int Fmq::_space_avail( int stored_len)
       return true;
     } else {
       if (_free_oldest_slot()) {
-	return -1;
+        return -1;
       }
       return false;
     }
@@ -3755,14 +3715,7 @@ int Fmq::_fraction_used(double *slot_fraction_p,
 
 {
 
-  int islot;
-  int nslots_active;
-  int nbytes_active;
-  double slot_fraction;
-  double buffer_fraction;
-  q_slot_t *slot;
-
-  // read in status struct 
+  // read in status struct
   
   if (_read_stat()) {
     return -1;
@@ -3776,20 +3729,20 @@ int Fmq::_fraction_used(double *slot_fraction_p,
 
   // count the active slots
 
-  nslots_active = 0;
-  nbytes_active = 0;
-  slot = _slots;
-  for (islot = 0; islot < _stat.nslots; islot++, slot++) {
+  int32_t nslots_active = 0;
+  int32_t nbytes_active = 0;
+  q_slot_t *slot = _slots;
+  for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
     if (slot->active) {
       nslots_active++;
       nbytes_active += slot->stored_len;
     }
   } 
 
-  slot_fraction =
+  double slot_fraction =
     (double) nslots_active / (double) _stat.nslots;
 
-  buffer_fraction =
+  double buffer_fraction =
     (double) nbytes_active / (double) _stat.buf_size;
 
   *slot_fraction_p = slot_fraction;
@@ -3839,8 +3792,7 @@ void Fmq::_print_slots(FILE *out) const
      
 {
   q_slot_t *slot = _slots;
-  int islot;
-  for (islot = 0; islot < _stat.nslots; islot++, slot++) { 
+  for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
     _basic_print_slot(islot, slot, out);
   }
 }
@@ -3849,12 +3801,11 @@ void Fmq::_print_slots(FILE *out) const
 //  Print slots
 ///
 
-void Fmq::_print_active_slots( FILE *out) const
+void Fmq::_print_active_slots(FILE *out) const
      
 {
   q_slot_t *slot = _slots;
-  int islot;
-  for (islot = 0; islot < _stat.nslots; islot++, slot++) { 
+  for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
     if (slot->active) {
       _basic_print_slot(islot, slot, out);
     }
@@ -3865,7 +3816,7 @@ void Fmq::_print_active_slots( FILE *out) const
 //  Print slot
 ///
 
-void Fmq::_basic_print_slot(int slot_num, q_slot_t *slot, FILE *out) const
+void Fmq::_basic_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const
      
 {
 
@@ -3884,7 +3835,7 @@ void Fmq::_basic_print_slot(int slot_num, q_slot_t *slot, FILE *out) const
     
 }
 
-void Fmq::_pretty_print_slot(int slot_num, q_slot_t *slot, FILE *out) const
+void Fmq::_pretty_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const
      
 {
 
@@ -4038,8 +3989,8 @@ void Fmq::be_from_stat_32(q_stat_32_t *stat)
 
 void Fmq::be_from_stat_64(q_stat_64_t *stat)
 {
-  BE_from_array_32((ui08 *) stat, Q_NUM_INT_STAT_64*sizeof(si32));
-  BE_from_array_64((ui08 *) &(stat->buf_size), Q_NUM_LONG_STAT_64*sizeof(si64));
+  BE_from_array_32(stat, Q_NUM_INT_STAT_64*sizeof(si32));
+  BE_from_array_64(&(stat->buf_size), Q_NUM_LONG_STAT_64*sizeof(si64));
 }
 
 
@@ -4054,8 +4005,8 @@ void Fmq::be_to_slot_32(q_slot_32_t *slot)
 
 void Fmq::be_to_slot_64(q_slot_64_t *slot)
 {
-  BE_to_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
-  BE_to_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
+  BE_to_array_32(slot, Q_NUM_INT_SLOT_64*sizeof(si32));
+  BE_to_array_64(&slot->time, Q_NUM_LONG_SLOT_64*sizeof(si64));
 }
 
 ////////////////////////////////////////////////////////////
@@ -4164,30 +4115,28 @@ int Fmq::_recover ()
 
 {
 
-  int islot;
-  int done;
-  int append_mode;
-  int ids_wrap = false;
-  int zero_present;
-  int max_present;
-  int maxId;
+  int32_t done;
+  int32_t append_mode;
+  int32_t ids_wrap = false;
+  int32_t zero_present;
+  int32_t max_present;
+  int32_t maxId;
 
-  int nslots = _stat.nslots;
-  int youngest_id = 0, oldest_id = 0;
-  int youngest_slot_num = 0, oldest_slot_num = 0;
-  int begin_insert = 0, end_insert = 0, begin_append = 0;
+  int32_t nslots = _stat.nslots;
+  int32_t youngest_id = 0, oldest_id = 0;
+  int32_t youngest_slot_num = 0, oldest_slot_num = 0;
+  int64_t begin_insert = 0, end_insert = 0, begin_append = 0;
 
   q_slot_t *slot = NULL;
   
-  _print_info("_recover",
-	      "Recovering Fmq: %s", _fmqPath.c_str());
+  _print_info("_recover", "Recovering Fmq: %s", _fmqPath.c_str());
   
   // do the ID's wrap?
   // They do if both 0 and MAX are present.
 
   zero_present = false;
   max_present = false;
-  for (islot = 0; islot < nslots; islot++, slot++) {
+  for (int32_t islot = 0; islot < nslots; islot++, slot++) {
     if (slot->id == 0) {
       zero_present = true;
     }
@@ -4208,7 +4157,7 @@ int Fmq::_recover ()
   }
   youngest_id = -1;
   slot = _slots;
-  for (islot = 0; islot < nslots; islot++, slot++) {
+  for (int32_t islot = 0; islot < nslots; islot++, slot++) {
     if (slot->active && slot->id > youngest_id && slot->id < maxId) {
       youngest_id = slot->id;
       youngest_slot_num = islot;
@@ -4227,8 +4176,8 @@ int Fmq::_recover ()
   done = false;
 
   while (!done) {
-    int prev_slot_num = _prev_slot(oldest_slot_num);
-    int prev_id = _prev_id(oldest_id);
+    int32_t prev_slot_num = _prev_slot(oldest_slot_num);
+    int32_t prev_id = _prev_id(oldest_id);
     q_slot_t *prev_slot = _slots + prev_slot_num;
     if (prev_slot->id != prev_id) {
       done = true;
@@ -4251,13 +4200,13 @@ int Fmq::_recover ()
   // set all other messages inactive
 
   slot = _slots;
-  for (islot = 0; islot < nslots; islot++, slot++) {
+  for (int32_t islot = 0; islot < nslots; islot++, slot++) {
     if (!_slot_in_active_region(islot) && slot->active) {
       _print_error("_recover",
 		   "Setting slot %d inactive", islot);
       MEM_zero(*slot);
       if (_write_slot(islot)) {
-	return -1;
+        return -1;
       }
     }
   }
@@ -4292,11 +4241,11 @@ int Fmq::_recover ()
   {
     q_slot_t *youngest_slot = _slots + youngest_slot_num;
     q_slot_t *oldest_slot = _slots + oldest_slot_num;
-    int youngest_end = youngest_slot->offset + youngest_slot->stored_len;
+    int64_t youngest_end = youngest_slot->offset + youngest_slot->stored_len;
     slot = _slots;
-    for (islot = 0; islot < nslots; islot++, slot++) {
+    for (int32_t islot = 0; islot < nslots; islot++, slot++) {
       if(slot->active) {
-        int end = slot->offset + slot->stored_len;
+        int64_t end = slot->offset + slot->stored_len;
         if (begin_append > end) {
           begin_append = end;
         }
@@ -4312,10 +4261,10 @@ int Fmq::_recover ()
     end_insert = oldest_slot->offset;
   }
   
-  _print_info(NULL, "--> Original BI, EI, BA, AM: %d, %d, %d, %d",
+  _print_info(NULL, "--> Original BI, EI, BA, AM: %ld, %ld, %ld, %ld",
 	      _stat.begin_insert, _stat.end_insert,
 	      _stat.begin_append, _stat.append_mode);
-  _print_info(NULL, "--> Recovered BI, EI, BA, AM: %d, %d, %d, %d",
+  _print_info(NULL, "--> Recovered BI, EI, BA, AM: %ld, %ld, %ld, %ld",
 	      begin_insert, end_insert, begin_append, append_mode);
 
   _stat.begin_insert = begin_insert;

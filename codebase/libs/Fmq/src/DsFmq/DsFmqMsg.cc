@@ -77,8 +77,8 @@ void DsFmqMsg::assembleRequestInit(const string &url,
 				   Fmq::openMode openMode,
 				   Fmq::openPosition openPosition,
 				   bool compress,
-				   size_t numSlots,
-				   size_t bufSize)
+				   int32_t numSlots,
+				   int64_t bufSize)
 {
 
   clearAll();
@@ -87,19 +87,19 @@ void DsFmqMsg::assembleRequestInit(const string &url,
 
   clearInitInfo();
   STRncopy(_initInfo.procName, procName.c_str(), PROC_NAME_LEN);
-  _initInfo.debug = (si32) debug;
-  _initInfo.openMode = (si32) openMode;
-  _initInfo.openPosition = (si32) openMode;
-  _initInfo.compress = (si32) compress;
-  _initInfo.numSlots = (si32) numSlots;
-  _initInfo.bufSize = (si32) bufSize;
+  _initInfo.debug = debug;
+  _initInfo.openMode = openMode;
+  _initInfo.openPosition = openMode;
+  _initInfo.compress = compress;
+  _initInfo.numSlots = numSlots;
+  _initInfo.bufSize = bufSize;
 
   if (_debug) {
     cerr << "==>> DsFmqMsg::assembleRequestInit" << endl;
     printInitInfo(cerr, "  ", _initInfo);
   }
 
-  BEfromInitInfo();
+  BEfromInitInfo_64();
   addPart(DS_FMQ_INIT_PART, sizeof(initInfo_t), &_initInfo);
   addURL(url);
   assemble();
@@ -162,8 +162,7 @@ void DsFmqMsg::assembleSetSingleWriter()
 ///////////////////////////////////////////////
 // assemble set register with data mapper
    
-void DsFmqMsg::assembleSetRegisterWithDmap(bool doReg,
-					   int regIntervalSecs)
+void DsFmqMsg::assembleSetRegisterWithDmap(bool doReg, int regIntervalSecs)
 {
 
   clearAll();
@@ -203,7 +202,7 @@ void DsFmqMsg::assembleRequestSeek(Fmq::seekPosition pos)
 ///////////////////////////////////////////////
 // assemble request seek-to-id message
    
-void DsFmqMsg::assembleRequestSeekToId(int id)
+void DsFmqMsg::assembleRequestSeekToId(int32_t id)
 {
 
   clearAll();
@@ -222,7 +221,7 @@ void DsFmqMsg::assembleRequestSeekToId(int id)
 ///////////////////////////////////////////////
 // assemble request read message
    
-void DsFmqMsg::assembleRequestRead(int requestedType, int msecsSleep)
+void DsFmqMsg::assembleRequestRead(int32_t requestedType, int32_t msecsSleep)
 {
 
   clearAll();
@@ -277,7 +276,7 @@ void DsFmqMsg::addReadData(const Fmq &fmq)
 
   // add it to the message
   
-  BEfromInfo(&info);
+  BEfromInfo_64(&info);
   addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
   addPart(DS_FMQ_DATA_PART,
 	  fmq.getMsgLen(), fmq.getMsg());
@@ -289,7 +288,7 @@ void DsFmqMsg::addReadData(const Fmq &fmq)
 // Assumes clearAll() was called, and data was
 // added with a series of calls to addReadData()
 
-void DsFmqMsg::assembleReadReply(int msgType, const Fmq &fmq)
+void DsFmqMsg::assembleReadReply(int32_t msgType, const Fmq &fmq)
   
 {
   
@@ -309,8 +308,8 @@ void DsFmqMsg::assembleReadReply(int msgType, const Fmq &fmq)
 // for calling assembleRequestWrite.
 // You need to call clearAll() before the first add.
 
-void DsFmqMsg::addWriteData(int msgType, int msgSubtype, 
-			    const void *msg, int msgLen,
+void DsFmqMsg::addWriteData(int32_t msgType, int32_t msgSubtype,
+			    const void *msg, int64_t msgLen,
 			    bool compress,
 			    ta_compression_method_t cmethod)
 
@@ -336,7 +335,7 @@ void DsFmqMsg::addWriteData(int msgType, int msgSubtype,
     info.msgLen = 0;
     info.msgPreCompressed = false;
     info.msgUncompressedLen = 0;
-    BEfromInfo(&info);
+    BEfromInfo_64(&info);
     addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
 
     // add part with no length
@@ -350,16 +349,16 @@ void DsFmqMsg::addWriteData(int msgType, int msgSubtype,
 
     if (compress) {
       if ((cmsg = ta_compress(cmethod, msg, msgLen, &clen)) == NULL) {
-	cerr << "WARNING - DsFmqMsg::addWriteData" << endl;
-	cerr << "  Compression failed - cannot compress message" << endl;
-	compress = false;
+        cerr << "WARNING - DsFmqMsg::addWriteData" << endl;
+        cerr << "  Compression failed - cannot compress message" << endl;
+        compress = false;
       } else {
-	info.msgPreCompressed = true;
-	info.msgLen = clen;
-	info.msgUncompressedLen = msgLen;
+        info.msgPreCompressed = true;
+        info.msgLen = clen;
+        info.msgUncompressedLen = msgLen;
       }
     }
-    BEfromInfo(&info);
+    BEfromInfo_64(&info);
     addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
     addPart(DS_FMQ_DATA_PART, clen, cmsg);
 
@@ -392,8 +391,8 @@ void DsFmqMsg::assembleRequestWrite()
 ///////////////////////////////////////////////
 // assemble write request for single message
    
-void DsFmqMsg::assembleRequestWrite(int msgType, int msgSubtype, 
-				    const void *msg, int msgLen,
+void DsFmqMsg::assembleRequestWrite(int32_t msgType, int32_t msgSubtype,
+				    const void *msg, int64_t msgLen,
 				    bool compress,
 				    ta_compression_method_t cmethod)
 {
@@ -424,7 +423,7 @@ void DsFmqMsg::assembleRequestClose()
 ///////////////////////////////////////////////
 // assemble reply to successful request
 
-void DsFmqMsg::assembleSuccessReply(int msgType)
+void DsFmqMsg::assembleSuccessReply(int32_t msgType)
 
 {
 
@@ -445,7 +444,7 @@ void DsFmqMsg::assembleSuccessReply(int msgType)
 ///////////////////////////////////////////////
 // assemble error reply
 
-void DsFmqMsg::assembleErrorReply(int msgType,
+void DsFmqMsg::assembleErrorReply(int32_t msgType,
 				  const string &errorStr)
 
 {
@@ -471,9 +470,7 @@ void DsFmqMsg::assembleErrorReply(int msgType,
 // disassemble the message
 // returns 0 on success, -1 on error
 
-int DsFmqMsg::disassemble(const void *msg,
-			  const int msgLen,
-			  Fmq &fmq)
+int DsFmqMsg::disassemble(const void *msg, int64_t msgLen, Fmq &fmq)
   
 {
   
@@ -507,7 +504,7 @@ int DsFmqMsg::disassemble(const void *msg,
     memcpy(&_initInfo,
 	   (initInfo_t *)getPartByType(DS_FMQ_INIT_PART)->getBuf(),
 	   sizeof(initInfo_t));
-    BEtoInitInfo();
+    BEtoInitInfo_64();
     fmq._progName = _initInfo.procName;
     fmq._debug = _initInfo.debug;
     fmq._compress = _initInfo.compress;
@@ -545,7 +542,7 @@ int DsFmqMsg::disassemble(const void *msg,
       DsMsgPart *part = getPartByType(DS_FMQ_INFO_PART, i);
       msgInfo_t info;
       memcpy(&info, (msgInfo_t *)part->getBuf(), sizeof(info));
-      BEtoInfo(&info);
+      BEtoInfo_64(&info);
       _msgInfo.push_back(info);
     }
   }
@@ -572,30 +569,56 @@ void DsFmqMsg::clearInitInfo()
 /////////////////////////////////////////////////////
 // Byte swapping
 
-void DsFmqMsg::BEfromInitInfo()
+void DsFmqMsg::BEfromInitInfo_32()
 {
-  BE_from_array_32(&_initInfo, sizeof(initInfo_t) - PROC_NAME_LEN);
+  BE_from_array_32(&_initInfo, sizeof(initInfo_32_t) - PROC_NAME_LEN);
 }
 
-void DsFmqMsg::BEtoInitInfo()
+void DsFmqMsg::BEtoInitInfo_32()
 {
-  BE_to_array_32(&_initInfo, sizeof(initInfo_t) - PROC_NAME_LEN);
+  BE_to_array_32(&_initInfo, sizeof(initInfo_32_t) - PROC_NAME_LEN);
 }
 
-void DsFmqMsg::BEfromInfo(msgInfo_t *info)
+void DsFmqMsg::BEfromInfo_32(msgInfo_32_t *info)
 {
-  BE_from_array_32(info, sizeof(msgInfo_t));
+  BE_from_array_32(info, sizeof(msgInfo_32_t));
 }
 
-void DsFmqMsg::BEtoInfo(msgInfo_t *info)
+void DsFmqMsg::BEtoInfo_32(msgInfo_32_t *info)
 {
-  BE_to_array_32(info, sizeof(msgInfo_t));
+  BE_to_array_32(info, sizeof(msgInfo_32_t));
 }
+
+void DsFmqMsg::BEfromInitInfo_64()
+{
+  BE_from_array_32(&_initInfo, sizeof(initInfo_64_t) - PROC_NAME_LEN - sizeof(si64));
+  BE_from_array_64(&(_initInfo.bufSize), sizeof(si64));
+}
+
+void DsFmqMsg::BEtoInitInfo_64()
+{
+  BE_to_array_32(&_initInfo, sizeof(initInfo_64_t) - PROC_NAME_LEN - sizeof(si64));
+  BE_to_array_64(&(_initInfo.bufSize), sizeof(si64));
+}
+
+void DsFmqMsg::BEfromInfo_64(msgInfo_64_t *info)
+{
+  BE_from_array_32(info, sizeof(msgInfo_64_t) - 2*sizeof(si64));
+  BE_from_array_32(&(info->msgTime), 2*sizeof(si64));
+}
+
+void DsFmqMsg::BEtoInfo_64(msgInfo_64_t *info)
+{
+  BE_to_array_32(info, sizeof(msgInfo_64_t) - 2*sizeof(si64));
+  BE_to_array_64(&(info->msgTime), 2*sizeof(si64));
+}
+
+
 
 /////////////////////////////////////////////////////
 // String representation
 
-string DsFmqMsg::msgType2Str(int msgType)
+string DsFmqMsg::msgType2Str(int32_t msgType)
 
 {
 

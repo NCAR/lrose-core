@@ -82,9 +82,9 @@ public:
     si32 openMode;
     si32 openPosition;
     si32 numSlots;
-    si64 bufSize;
     si32 spare[10];
     char procName[PROC_NAME_LEN];
+    si64 bufSize;
   } initInfo_64_t;
 
   // Struct containing message properties
@@ -92,11 +92,11 @@ public:
   typedef struct {
     si32 msgType;
     si32 msgSubtype;
-    si64 msgLen; // msg len, compressed len if preCompressed
     si32 msgPreCompressed; // flag to indicate already compressed
     si32 msgUncompressedLen; // length before compression
     si32 msgId;
     si64 msgTime;
+    si64 msgLen; // msg len, compressed len if preCompressed
   } msgInfo_64_t;
 
   typedef struct {
@@ -147,8 +147,8 @@ public:
 			   Fmq::openMode mode, 
 			   Fmq::openPosition position, 
 			   bool compress,
-			   size_t numSlots, 
-			   size_t bufSize);
+			   int32_t numSlots,
+			   int64_t bufSize);
   
   void assembleSetCompressionMethod(ta_compression_method_t method);
 
@@ -181,8 +181,8 @@ public:
   // for calling assembleRequestWrite.
   // You need to call clearAll() before the first add.
 
-  void addWriteData(int msgType, int msgSubtype, 
-		    const void *msg, int msgLen,
+  void addWriteData(int32_t msgType, int32_t msgSubtype,
+		    const void *msg, int64_t msgLen,
 		    bool compress,
 		    ta_compression_method_t cmethod);
   
@@ -194,21 +194,21 @@ public:
 
   // assemble request to write single message
 
-  void assembleRequestWrite(int msgType, int msgSubtype, 
-			    const void *msg, int msgLen,
+  void assembleRequestWrite(int32_t msgType, int32_t msgSubtype,
+			    const void *msg, int64_t msgLen,
 			    bool compress,
 			    ta_compression_method_t cmethod);
   
   void assembleRequestClose();
   
-  void assembleSuccessReply(int msgType);
+  void assembleSuccessReply(int32_t msgType);
   
-  void assembleErrorReply(int msgType,
+  void assembleErrorReply(int32_t msgType,
 			  const string &errorStr);
   
   // disassemble messages
   
-  int disassemble(const void *msg, const int msgLen, Fmq &fmq);
+  int disassemble(const void *msg, int64_t msgLen, Fmq &fmq);
 
   ///////////////////////////////////////////////////////
   // get methods
@@ -225,8 +225,8 @@ public:
 
   // interpreting message types
   
-  static string msgType2Str(int msgType);
-  static string msgPart2Str(int msgPart);
+  static string msgType2Str(int32_t msgType);
+  static string msgPart2Str(int32_t msgPart);
 
   // printing
 
@@ -246,13 +246,18 @@ protected:
 
   // methods
  
-  void BEfromInfo(msgInfo_t *info);
-  void BEtoInfo(msgInfo_t *info);
- 
+  void BEfromInfo_32(msgInfo_32_t *info);
+  void BEtoInfo_32(msgInfo_32_t *info);
+  void BEfromInfo_64(msgInfo_64_t *info);
+  void BEtoInfo_64(msgInfo_64_t *info);
+
   void clearInitInfo();
-  void BEfromInitInfo();
-  void BEtoInitInfo();
- 
+
+  void BEfromInitInfo_32();
+  void BEtoInitInfo_32();
+  void BEfromInitInfo_64();
+  void BEtoInitInfo_64();
+
 };
 
 #endif

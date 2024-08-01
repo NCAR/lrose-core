@@ -32,7 +32,7 @@
 // Jan 2009
 //
 ////////////////////////////////////////////////////////////////////////////////
-                                 
+
 #include <cassert>
 #include <toolsa/MsgLog.hh>
 #include <toolsa/Socket.hh>
@@ -47,7 +47,7 @@ using namespace std;
 const char* DsFmq::FMQ_PROTOCOL = "fmqp";
 
 // constructor
-   
+
 DsFmq::DsFmq() : Fmq()
 {
 
@@ -102,18 +102,18 @@ DsFmq::~DsFmq()
 // Create an FMQ, opening the files in mode "w+". Any existing
 // queue is overwritten.
 // Returns 0 on success, -1 on error
-  
-int DsFmq::initCreate(const char* fmqURL, 
-		      const char* procName, 
-		      bool debug /* = false*/,
-		      bool compression /* = false*/, 
-		      size_t numSlots /* = 1024*/, 
-		      long bufSize /* = 10000*/,
-		      MsgLog *msgLog /* = NULL */)
-  
+
+int DsFmq::initCreate(const char* fmqURL,
+                      const char* procName,
+                      bool debug /* = false*/,
+                      bool compression /* = false*/,
+                      int32_t numSlots /* = 1024*/,
+                      int64_t bufSize /* = 10000*/,
+                      MsgLog *msgLog /* = NULL */)
+
 {
   return (init(fmqURL, procName, debug, CREATE, END,
-	       compression, numSlots, bufSize, -1, msgLog));
+               compression, numSlots, bufSize, -1, msgLog));
 }
 
 /////////////////////////////////////////////////////////////
@@ -126,20 +126,20 @@ int DsFmq::initCreate(const char* fmqURL,
 //  local disk access and 500 msecs for remote access.
 //
 // Returns 0 on success, -1 on error
- 
-int DsFmq::initReadWrite(const char* fmqURL, 
-			 const char* procName, 
-			 bool debug /* = false*/,
-			 openPosition position /* = END*/,
-			 bool compression /* = false*/, 
-			 size_t numSlots /* = 1024*/, 
-			 long bufSize /* = 10000*/,
-			 int msecSleep /* = -1*/,
-			 MsgLog *msgLog /* = NULL */)
-  
+
+int DsFmq::initReadWrite(const char* fmqURL,
+                         const char* procName,
+                         bool debug /* = false*/,
+                         openPosition position /* = END*/,
+                         bool compression /* = false*/,
+                         int32_t numSlots /* = 1024*/,
+                         int64_t bufSize /* = 10000*/,
+                         int32_t msecSleep /* = -1*/,
+                         MsgLog *msgLog /* = NULL */)
+
 {
   return (init(fmqURL, procName, debug, READ_WRITE, position,
-	       compression, numSlots, bufSize, msecSleep, msgLog));
+               compression, numSlots, bufSize, msecSleep, msgLog));
 }
 
 /////////////////////////////////////////////////////////////
@@ -152,17 +152,17 @@ int DsFmq::initReadWrite(const char* fmqURL,
 //  local disk access and 500 msecs for remote access.
 //
 // Returns 0 on success, -1 on error
-  
-int DsFmq::initReadOnly(const char* fmqURL, 
-		      const char* procName, 
-		      bool debug /* = false*/,
-		      openPosition position /* = END*/,
-		      int msecSleep /* = -1*/,
-		      MsgLog *msgLog /* = NULL */)
-  
+
+int DsFmq::initReadOnly(const char* fmqURL,
+                        const char* procName,
+                        bool debug /* = false*/,
+                        openPosition position /* = END*/,
+                        int32_t msecSleep /* = -1*/,
+                        MsgLog *msgLog /* = NULL */)
+
 {
   return (init(fmqURL, procName, debug, READ_ONLY, position,
-	       false, 1024, 10000, msecSleep, msgLog));
+               false, 1024, 10000, msecSleep, msgLog));
 }
 
 /////////////////////////////////////////////////////////////
@@ -188,16 +188,16 @@ int DsFmq::initReadOnly(const char* fmqURL,
 // first entry written to a queue may have been missed. Niles Oien.
 //
 
-int DsFmq::initReadBlocking(const char* fmqURL, 
-			    const char* procName, 
-			    bool debug /* = false*/,
-			    openPosition position /* = END*/,
-			    int msecSleep /* = -1*/,
-			    MsgLog *msgLog /* = NULL */)
-  
+int DsFmq::initReadBlocking(const char* fmqURL,
+                            const char* procName,
+                            bool debug /* = false*/,
+                            openPosition position /* = END*/,
+                            int32_t msecSleep /* = -1*/,
+                            MsgLog *msgLog /* = NULL */)
+
 {
   return (init(fmqURL, procName, debug, BLOCKING_READ_ONLY, position,
-	       false, 1024, 10000, msecSleep, msgLog));
+               false, 1024, 10000, msecSleep, msgLog));
 }
 
 /////////////////////////////////////////////////////////////
@@ -212,22 +212,22 @@ int DsFmq::initReadBlocking(const char* fmqURL,
 //  local disk access and 500 msecs for remote access.
 //
 // Returns 0 on success, -1 on error
- 
+
 //
 // See comments above for initReadBlocking() about the setting of
 // the open position - they apply to initReadWriteBlocking as well.
 //
 
-int DsFmq::initReadWriteBlocking(const char* fmqURL, 
-				 const char* procName, 
-				 bool debug /* = false*/,
-				 openPosition position /* = END*/,
-				 int msecSleep /* = -1*/,
-				 MsgLog *msgLog /* = NULL */)
-  
+int DsFmq::initReadWriteBlocking(const char* fmqURL,
+                                 const char* procName,
+                                 bool debug /* = false*/,
+                                 openPosition position /* = END*/,
+                                 int32_t msecSleep /* = -1*/,
+                                 MsgLog *msgLog /* = NULL */)
+
 {
   return (init(fmqURL, procName, debug, BLOCKING_READ_WRITE, position,
-	       false, 1024, 10000, msecSleep, msgLog));
+               false, 1024, 10000, msecSleep, msgLog));
 }
 
 /////////////////////////////////////////////////////////////
@@ -235,15 +235,15 @@ int DsFmq::initReadWriteBlocking(const char* fmqURL,
 // Returns 0 on success, -1 on error
 
 int DsFmq::init(const char* fmqURL,
-		const char *procName,
-		bool debug,
-		openMode mode, 
-		openPosition position, 
-		bool compress,
-		size_t numSlots, 
-		long bufSize,
-		int msecSleep,
-		MsgLog *msgLog)
+                const char *procName,
+                bool debug,
+                openMode mode,
+                openPosition position,
+                bool compress,
+                int32_t numSlots,
+                int64_t bufSize,
+                int32_t msecSleep,
+                MsgLog *msgLog)
 
 {
 
@@ -260,12 +260,12 @@ int DsFmq::init(const char* fmqURL,
   if (_debug) {
     _socketMsg.setDebug();
   }
-      
+
   // resolve the URL
-  
+
   if (_resolveUrl()) {
     _print_error("DsFmq::init",
-		 "Cannot resolve URL: %s", _urlStr.c_str());
+                 "Cannot resolve URL: %s", _urlStr.c_str());
     return -1;
   }
 
@@ -278,35 +278,35 @@ int DsFmq::init(const char* fmqURL,
   if (!_isServed) {
     // local instance - use Fmq method instead
     return Fmq::init(_fmqPath.c_str(), procName, debug, mode, position,
-		     compress, numSlots, bufSize, msecSleep, msgLog);
+                     compress, numSlots, bufSize, msecSleep, msgLog);
   }
 
   // do the init, depending on open mode
 
   switch(_openMode) {
-    
-    case BLOCKING_READ_ONLY: 
+
+    case BLOCKING_READ_ONLY:
     case BLOCKING_READ_WRITE: {
       while( true ) {
-	if (_doInit() == 0) {
-	  return 0;
-	}
-	if (_heartbeatFunc != NULL ) {
-	  _heartbeatFunc("DsFmq blocking on open");
-	}
-	umsleep(1000);
+        if (_doInit() == 0) {
+          return 0;
+        }
+        if (_heartbeatFunc != NULL ) {
+          _heartbeatFunc("DsFmq blocking on open");
+        }
+        umsleep(1000);
       } // while
       break;
     }
 
     default: {
       if (_doInit() == 0) {
-	return 0;
+        return 0;
       }
     }
 
   }
-   
+
   return -1;
 
 }
@@ -314,10 +314,10 @@ int DsFmq::init(const char* fmqURL,
 ///////////////////////////////////////////////////////////////////
 // Closing the fmq
 // returns 0 on success, -1 on failure
-  
+
 int DsFmq::closeMsgQueue()
 {
-  
+
   if (!_isServed) {
     // local
     Fmq::closeMsgQueue();
@@ -331,12 +331,12 @@ int DsFmq::closeMsgQueue()
 
   if (_socket != NULL) {
     if (_socket->writeMessage(DsFmqMsg::DS_FMQ_MESSAGE,
-			      _socketMsg.assembledMsg(),
-			      _socketMsg.lengthAssembled())) {
+                              _socketMsg.assembledMsg(),
+                              _socketMsg.lengthAssembled())) {
       _print_error("COMM: DsFmq::closeMsgQueue()",
-		   "Failed writing close request to server\n"
-		   "%s\n",
-		   _socket->getErrString().c_str());
+                   "Failed writing close request to server\n"
+                   "%s\n",
+                   _socket->getErrString().c_str());
     }
     _closeClientSocket();
   }
@@ -348,7 +348,7 @@ int DsFmq::closeMsgQueue()
 ///////////////////////////////////////////////////////////////////
 // is queue open?
 // returns true if open, false otherwise
-  
+
 bool DsFmq::isOpen()
 {
 
@@ -356,8 +356,8 @@ bool DsFmq::isOpen()
     // local
     return Fmq::isOpen();
   }
-  
-  return _socket != NULL; 
+
+  return _socket != NULL;
 
 }
 
@@ -366,18 +366,18 @@ bool DsFmq::isOpen()
 // Returns 0 on success, -1 on error
 
 int DsFmq::setCompressionMethod(ta_compression_method_t method)
-{ 
+{
 
   Fmq::setCompressionMethod(method);
   if (!_isServed) {
     // local
     return 0;
   }
-  
+
   _socketMsg.assembleSetCompressionMethod(Fmq::getCompressMethod());
   _printDebugLabel("setCompressionMethod");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -395,7 +395,7 @@ int DsFmq::setCompressionMethod(ta_compression_method_t method)
 // Returns 0 on success, -1 on error
 
 int DsFmq::setBlockingWrite()
-{ 
+{
 
   Fmq::setBlockingWrite();
   if (!_isServed) {
@@ -406,7 +406,7 @@ int DsFmq::setBlockingWrite()
   _socketMsg.assembleSetBlockingWrite();
   _printDebugLabel("setBlockingWrite");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -425,7 +425,7 @@ int DsFmq::setBlockingWrite()
 // Returns 0 on success, -1 on error
 
 int DsFmq::setSingleWriter()
-{ 
+{
 
   Fmq::setSingleWriter();
   if (!_isServed) {
@@ -436,7 +436,7 @@ int DsFmq::setSingleWriter()
   _socketMsg.assembleSetSingleWriter();
   _printDebugLabel("setSingleWriter");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -454,10 +454,10 @@ int DsFmq::setSingleWriter()
 // specify the registration interval in seconds
 
 int DsFmq::setRegisterWithDmap(bool doReg,
-			       int regIntervalSecs)
-  
+                               int regIntervalSecs)
+
 {
-  
+
   Fmq::setRegisterWithDmap(doReg, regIntervalSecs);
   if (!_isServed) {
     // local
@@ -467,7 +467,7 @@ int DsFmq::setRegisterWithDmap(bool doReg,
   _socketMsg.assembleSetRegisterWithDmap(doReg, regIntervalSecs);
   _printDebugLabel("setRegisterWithDmap");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -489,7 +489,7 @@ int DsFmq::setRegisterWithDmap(bool doReg,
 //   SEEK_BACK: go back by 1 entry
 
 int DsFmq::seek(seekPosition pos)
-{ 
+{
 
   if (!_isServed) {
     // local
@@ -499,7 +499,7 @@ int DsFmq::seek(seekPosition pos)
   _socketMsg.assembleRequestSeek(pos);
   _printDebugLabel("seek");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -525,7 +525,7 @@ int DsFmq::seek(seekPosition pos)
 //  Return value:
 //    0 on success, -1 on error.
 
-int DsFmq::seekToId(int id)
+int DsFmq::seekToId(int32_t id)
 
 {
 
@@ -537,7 +537,7 @@ int DsFmq::seekToId(int id)
   _socketMsg.assembleRequestSeekToId(id);
   _printDebugLabel("seekToId");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
 
@@ -559,10 +559,10 @@ int DsFmq::seekToId(int id)
 // Sets *gotOne if a message was read.
 // Returns 0 on success, -1 on error
 
-int DsFmq::readMsg(bool *gotOne, int type /* = -1*/, int msecs_sleep /* = -1*/)
+int DsFmq::readMsg(bool *gotOne, int32_t type /* = -1*/, int32_t msecs_sleep /* = -1*/)
 
-{ 
-  
+{
+
   if (!_isServed) {
     // local
     return Fmq::readMsg(gotOne, type, msecs_sleep);
@@ -572,15 +572,15 @@ int DsFmq::readMsg(bool *gotOne, int type /* = -1*/, int msecs_sleep /* = -1*/)
   *gotOne = false;
 
   // first check if we have a message in the queue
-  
+
   if (_readQueue.size() == 0) {
-    
+
     // out of data, do a new read
-    
+
     _socketMsg.assembleRequestRead(type, msecs_sleep);
     _printDebugLabel("readMsg");
     if (_contactServer(_socketMsg.assembledMsg(),
-		       _socketMsg.lengthAssembled())) {
+                       _socketMsg.lengthAssembled())) {
       return -1;
     }
 
@@ -588,53 +588,53 @@ int DsFmq::readMsg(bool *gotOne, int type /* = -1*/, int msecs_sleep /* = -1*/)
     if (_checkError()) {
       return -1;
     }
-    
+
     // add data to queue, checking message type as applicable
-    
+
     for (int ii = 0; ii < (int) _socketMsg.getMsgInfo().size(); ii++) {
       if (type < 0 || type == _socketMsg.getMsgInfo()[ii].msgType) {
-	readData *rdata = new readData();
-	rdata->info = _socketMsg.getMsgInfo()[ii];
-	rdata->buf.add(_socketMsg.getMsgData()[ii],
-		       rdata->info.msgLen);
-	_readQueue.push_back(rdata);
+        readData *rdata = new readData();
+        rdata->info = _socketMsg.getMsgInfo()[ii];
+        rdata->buf.add(_socketMsg.getMsgData()[ii],
+                       rdata->info.msgLen);
+        _readQueue.push_back(rdata);
       }
     }
 
   } // if (_readQueue.size() == 0)
-  
+
   // check if we have any data
 
   if (_readQueue.size() == 0) {
     // no data available yet
     return 0;
   }
-  
+
   // pop entry from the front of the queue
-  
+
   readData *rdata = _readQueue.front();
   _readQueue.pop_front();
 
   // Load the read message into this object
-  
+
   if (_load_read_msg(rdata->info.msgType,
-		     rdata->info.msgSubtype,
-		     rdata->info.msgId,
-		     rdata->info.msgTime,
-		     rdata->buf.getPtr(),
-		     rdata->info.msgLen,
-		     rdata->info.msgPreCompressed,
-		     rdata->info.msgUncompressedLen)) {
+                     rdata->info.msgSubtype,
+                     rdata->info.msgId,
+                     rdata->info.msgTime,
+                     rdata->buf.getPtr(),
+                     rdata->info.msgLen,
+                     rdata->info.msgPreCompressed,
+                     rdata->info.msgUncompressedLen)) {
     // decompression error
     delete rdata;
     return -1;
   }
-  
+
   *gotOne = true;
   delete rdata;
 
   return 0;
-  
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -644,8 +644,8 @@ int DsFmq::readMsg(bool *gotOne, int type /* = -1*/, int msecs_sleep /* = -1*/)
 // procmap if PMU module has been initialized.
 // Returns 0 on success, -1 on error
 
-int DsFmq::readMsgBlocking(int type)
-{ 
+int DsFmq::readMsgBlocking(int32_t type)
+{
 
   if (!_isServed) {
     // local
@@ -657,7 +657,7 @@ int DsFmq::readMsgBlocking(int type)
   while(true) {
 
     // perform a read
-    
+
     bool gotOne = false;
     if (readMsg(&gotOne, type)) {
       return -1;
@@ -668,7 +668,7 @@ int DsFmq::readMsgBlocking(int type)
 
     // No message of correct type was read
     // sleep for a bit then heartbeat
-    
+
     if (_msecSleep < 0) {
       umsleep(500);
       sleepTotalMsecs += 500;
@@ -676,7 +676,7 @@ int DsFmq::readMsgBlocking(int type)
       umsleep( _msecSleep );
       sleepTotalMsecs += _msecSleep;
     }
-    if (_msecBlockingReadTimeout > 0 && 
+    if (_msecBlockingReadTimeout > 0 &&
         sleepTotalMsecs > _msecBlockingReadTimeout) {
       return -1;
     }
@@ -685,7 +685,7 @@ int DsFmq::readMsgBlocking(int type)
     }
 
   } // while (true)
-  
+
   return 0;
 
 }
@@ -693,9 +693,9 @@ int DsFmq::readMsgBlocking(int type)
 //////////////////////////////////////////////////////
 // Writes a message to the fmq
 // Returns 0 on success, -1 on error
-  
-int DsFmq::writeMsg(int type, int subType, const void *msg, int msgLen)
-{ 
+
+int DsFmq::writeMsg(int32_t type, int32_t subType, const void *msg, int64_t msgLen)
+{
 
   if (!_isServed) {
     // local
@@ -703,17 +703,17 @@ int DsFmq::writeMsg(int type, int subType, const void *msg, int msgLen)
   }
 
   // assemble write message
-  
+
   if (_nMessagesPerWrite < 2) {
 
     // unbuffered - write every message
     _socketMsg.assembleRequestWrite(type, subType, msg, msgLen,
-				    _compress, _compressMethod);
-    
+                                    _compress, _compressMethod);
+
   } else {
 
     // cached write
-    
+
     addToWriteCache(type, subType, msg, msgLen);
     if ((int) _writeQueue.size() < _nMessagesPerWrite) {
       // not enough messages yet
@@ -721,17 +721,17 @@ int DsFmq::writeMsg(int type, int subType, const void *msg, int msgLen)
     }
 
     // assemble the write message from the queue
-    
+
     _socketMsg.clearAll();
     while (_writeQueue.size() > 0) {
       writeData *wdata = _writeQueue.front();
       _socketMsg.addWriteData(wdata->type,
-			      wdata->subType,
-			      wdata->buf.getPtr(),
-			      wdata->buf.getLen(),
-			      wdata->compress,
-			      wdata->compressMethod);
-      
+                              wdata->subType,
+                              wdata->buf.getPtr(),
+                              wdata->buf.getLen(),
+                              wdata->compress,
+                              wdata->compressMethod);
+
       delete wdata;
       _writeQueue.pop_front();
     }
@@ -742,10 +742,10 @@ int DsFmq::writeMsg(int type, int subType, const void *msg, int msgLen)
 
   _printDebugLabel("writeMsg");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
-  
+
   // check for error
   if (_checkError()) {
     return -1;
@@ -766,9 +766,8 @@ void DsFmq::clearWriteCache()
 // Add a message to the write cache,
 // in preparation for a later write
 
-void DsFmq::addToWriteCache(int type, int subType,
-			    const void *msg, int msgLen)
-{ 
+void DsFmq::addToWriteCache(int32_t type, int32_t subType, const void *msg, int64_t msgLen)
+{
 
   writeData *wdata = new writeData();
   wdata->type = type;
@@ -786,10 +785,10 @@ void DsFmq::addToWriteCache(int type, int subType,
 // For remote writes, this is performed in a single action.
 // For local writes, these are written one at a time.
 // Returns 0 on success, -1 on error
-  
+
 int DsFmq::writeTheCache()
-{ 
-  
+{
+
   if (!_isServed) {
     // local
     int iret = 0;
@@ -799,10 +798,10 @@ int DsFmq::writeTheCache()
       }
       writeData *wdata = _writeQueue.front();
       if (Fmq::writeMsg(wdata->type,
-			wdata->subType,
-			wdata->buf.getPtr(),
-			wdata->buf.getLen())) {
-	iret = -1;
+                        wdata->subType,
+                        wdata->buf.getPtr(),
+                        wdata->buf.getLen())) {
+        iret = -1;
       }
       delete wdata;
       _writeQueue.pop_front();
@@ -811,28 +810,28 @@ int DsFmq::writeTheCache()
   }
 
   // assemble the write message from the queue
-  
+
   _socketMsg.clearAll();
   while (_writeQueue.size() > 0) {
     writeData *wdata = _writeQueue.front();
     _socketMsg.addWriteData(wdata->type,
-			    wdata->subType,
-			    wdata->buf.getPtr(),
-			    wdata->buf.getLen(),
-			    wdata->compress,
-			    wdata->compressMethod);
-    
+                            wdata->subType,
+                            wdata->buf.getPtr(),
+                            wdata->buf.getLen(),
+                            wdata->compress,
+                            wdata->compressMethod);
+
     delete wdata;
     _writeQueue.pop_front();
   }
   _socketMsg.assembleRequestWrite();
-  
+
   _printDebugLabel("writeBuffer");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return  -1;
   }
-  
+
   // check for error
   if (_checkError()) {
     return -1;
@@ -852,14 +851,14 @@ int DsFmq::_resolveUrl()
 {
 
   // Check for validity on the url
-  
+
   _url.setURLStr(_urlStr);
   if (!_url.isValid()) {
     _print_error("DsFmq::_resolveUrl",
-		 "Invalid URL specification: %s", _urlStr.c_str());
+                 "Invalid URL specification: %s", _urlStr.c_str());
     return -1;
   }
-  
+
   // Make sure the host name is user-specified
   // since the fmq file cannot be located via the DsLocator/DataMapper.
   // The client must know a priori on what host the fmq is located.
@@ -867,16 +866,16 @@ int DsFmq::_resolveUrl()
   string host = _url.getHost();
   if (host.empty()) {
     _print_error("DsFmq::_resolveUrl",
-		 "Host name must be provided in the URL.");
+                 "Host name must be provided in the URL.");
     return -1;
   }
-  
+
   // Determine if this is a local or remote request - do not
   // contact the server manager at this stage
-  
+
   if (DsLocator.resolve(_url, &_isServed, false) != 0) {
     _print_error("DsFmq::_resolveUrl",
-		 "Cannot resolve URL: %s.", _urlStr.c_str());
+                 "Cannot resolve URL: %s.", _urlStr.c_str());
     return -1;
   }
 
@@ -889,22 +888,22 @@ int DsFmq::_resolveUrl()
 // Returns 0 on success, -1 on error
 
 int DsFmq::_doInit()
-  
+
 {
-  
+
   // Open the socket to the server
-  
+
   if (_openClientSocket()) {
     return -1;
   }
 
   // try doing a with full init - updated server
-  
+
   _socketMsg.assembleRequestInit(_url.getURLStr(), _progName, _debug, _openMode,
-				 _openPosition, _compress, _numSlots, _bufSize);
+                                 _openPosition, _compress, _numSlots, _bufSize);
   _printDebugLabel("_doInit - assembleRequestInit");
   if (_contactServer(_socketMsg.assembledMsg(),
-		     _socketMsg.lengthAssembled())) {
+                     _socketMsg.lengthAssembled())) {
     return -1;
   }
 
@@ -930,19 +929,19 @@ int DsFmq::_openClientSocket()
 {
 
   // close socket if already open
-  
+
   _closeClientSocket();
 
   // set the url from the fmq path, in case the URL has been
   // reset by contacting the server manager
-  
+
   _url.setURLStr(_urlStr);
-  
+
   // resolve the URL
 
   if (_resolveUrl()) {
     _print_error("DsFmq::_openClientSocket",
-		 "Cannot resolve URL: %s", _urlStr.c_str());
+                 "Cannot resolve URL: %s", _urlStr.c_str());
     return -1;
   }
 
@@ -950,24 +949,24 @@ int DsFmq::_openClientSocket()
   // the specified or default port, fine. If not, the server manager
   // will be contacted to start the server.
   // This will resolve the port as required.
-  
+
   if (DsLocator.pingServer(_url)) {
     _print_error("COMM - DsFmq::openClientSocket",
-		 "Cannot ping server, host: %s, port: %d",
-		 _url.getHost().c_str(), _url.getPort());
+                 "Cannot ping server, host: %s, port: %d",
+                 _url.getHost().c_str(), _url.getPort());
     return -1;
   }
-  
+
   // open
 
   _socket = new Socket;
   if (_socket->open(_url.getHost().c_str(), _url.getPort())) {
     _print_error("COMM - DsFmq::openClientSocket",
-		 "Failed to open client socket");
+                 "Failed to open client socket");
     _closeClientSocket();
     return -1;
   }
-  
+
   return 0;
 
 }
@@ -977,7 +976,7 @@ int DsFmq::_openClientSocket()
 
 void DsFmq::_closeClientSocket()
 {
-  
+
   if (_socket != NULL) {
     _socket->close();
     delete _socket;
@@ -989,36 +988,36 @@ void DsFmq::_closeClientSocket()
 /////////////////////////
 // send request to client
 
-int DsFmq::_contactServer(void *buffer, const size_t bufLen)
+int DsFmq::_contactServer(void *buffer, int64_t bufLen)
 {
 
   // Send the client's request
-  
+
   if (_socket->writeMessage(DsFmqMsg::DS_FMQ_MESSAGE, buffer, bufLen)) {
     _print_error("COMM: DsFmq::contactServer()",
-		 "Failed writing request to client socket\n"
-		 "%s\n",
-		 _socket->getErrString().c_str());
+                 "Failed writing request to client socket\n"
+                 "%s\n",
+                 _socket->getErrString().c_str());
     _closeClientSocket();
     return -1;
   }
-  
+
   // Read the server's reply
 
   if (_socket->readMessage()) {
     _print_error("COMM: DsFmq::contactServer()",
-		 "Failed reading reply from client socket\n",
-		 "%s\n",
-		 _socket->getErrString().c_str());
+                 "Failed reading reply from client socket\n",
+                 "%s\n",
+                 _socket->getErrString().c_str());
     _closeClientSocket();
     return -1;
   }
-  
+
   // Disassemble the reply
 
   if (_socketMsg.disassemble(_socket->getData(), _socket->getNumBytes(), *this)) {
     _print_error("COMM: DsFmq::contactServer()",
-		 "Cannot disassemble reply");
+                 "Cannot disassemble reply");
     return -1;
   }
 
@@ -1032,7 +1031,7 @@ int DsFmq::_contactServer(void *buffer, const size_t bufLen)
 int DsFmq::_checkClientSocket()
 
 {
-  
+
   // Make sure the last request did not result in an error state
 
   if (_socket != NULL) {
@@ -1043,21 +1042,21 @@ int DsFmq::_checkClientSocket()
   }
 
   // close the existing socket
-  
+
   _closeClientSocket();
 
   // redo the init - this reopens the socket
 
   if (_doInit()) {
     _print_error("DsFmq::_verifyClientSocket",
-		 "Failed to re-initialize fmq.");
+                 "Failed to re-initialize fmq.");
     return -1;
   }
 
   _print_info("DsFmq::_verifyClientSocket",
-	      "Re-established socket to server at port %d",
-	      _url.getPort());
-  
+              "Re-established socket to server at port %d",
+              _url.getPort());
+
   return 0;
 
 }
@@ -1066,7 +1065,7 @@ int DsFmq::_checkClientSocket()
 // print out details of socket message object
 
 void DsFmq::_printDebugLabel(const string &label)
-  
+
 {
 
   if (_debug) {
@@ -1079,7 +1078,7 @@ void DsFmq::_printDebugLabel(const string &label)
 // clear the read data
 
 void DsFmq::_clearReadQueue()
-  
+
 {
   while (_readQueue.size() > 0) {
     readData *data = _readQueue.front();
@@ -1092,7 +1091,7 @@ void DsFmq::_clearReadQueue()
 // clear the write data
 
 void DsFmq::_clearWriteQueue()
-  
+
 {
   while (_writeQueue.size() > 0) {
     writeData *data = _writeQueue.front();
@@ -1106,7 +1105,7 @@ void DsFmq::_clearWriteQueue()
 // if error, add in error string from client
 
 int DsFmq::_checkError()
-  
+
 {
   if (_socketMsg.getError()) {
     _errStr += _socketMsg.getErrStr();

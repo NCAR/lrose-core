@@ -30,8 +30,7 @@
                                  
 #include <cassert>
 #include <iostream>
-
-#include <dataport/bigend.h>                    
+#include <dataport/bigend.h>
 #include <Fmq/DsRadarQueue.hh>                    
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
@@ -145,7 +144,7 @@ DsRadarQueue::putDsMsg( DsRadarMsg &dsRadarMsg, int content )
   // Encode the radar message into standard bigEndian format
   //
   msg =  dsRadarMsg.assemble( content );
-  int msgLength = dsRadarMsg.lengthAssembled();
+  int64_t msgLength = dsRadarMsg.lengthAssembled();
   
   if (msgLength > 0) {
     if (writeMsg( DS_MESSAGE_TYPE_DSRADAR, 0, msg, msgLength )) {

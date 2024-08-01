@@ -49,8 +49,8 @@
 using namespace std;
 
 FmqDeviceShmem::FmqDeviceShmem(const string &fmqPath,
-			       size_t numSlots, 
-			       size_t bufSize,
+			       int32_t numSlots,
+			       int64_t bufSize,
 			       TA_heartbeat_t heartbeatFunc) :
 	FmqDevice(fmqPath, numSlots, bufSize, heartbeatFunc)
   
@@ -292,8 +292,7 @@ int FmqDeviceShmem::_set_sizes_from_existing_queue()
 
   // set the sizes
   
-  _nbytes[STAT_IDENT] =
-    sizeof(Fmq::q_stat_t) + stat.nslots * sizeof(Fmq::q_slot_t);
+  _nbytes[STAT_IDENT] = sizeof(Fmq::q_stat_t) + stat.nslots * sizeof(Fmq::q_slot_t);
   _nbytes[BUF_IDENT] = stat.buf_size;
   
   // release the segment
@@ -413,13 +412,13 @@ int FmqDeviceShmem::unlock()
 //
 // Returns nbytes actually read, -1 on error
 
-int FmqDeviceShmem::do_read(ident_t id, void *mess, size_t len)
+int64_t FmqDeviceShmem::do_read(ident_t id, void *mess, int64_t len)
 
 {
 
   off_t offset = _offset[id];
   char *start = _ptr[id] + offset;
-  size_t nbytesAvail = _nbytes[id] - offset;
+  int64_t nbytesAvail = _nbytes[id] - offset;
 
   if (nbytesAvail < len) {
     _errStr += "ERROR - FmqDeviceShmem::do_read\n";
@@ -440,13 +439,13 @@ int FmqDeviceShmem::do_read(ident_t id, void *mess, size_t len)
 //
 // returns number of bytes written, -1 on error
 
-int FmqDeviceShmem::do_write(ident_t id, const void *mess, size_t len)
+int64_t FmqDeviceShmem::do_write(ident_t id, const void *mess, int64_t len)
 
 {
 
   off_t offset = _offset[id];
   char *start = _ptr[id] + offset;
-  size_t nbytesAvail = _nbytes[id] - offset;
+  int64_t nbytesAvail = _nbytes[id] - offset;
 
   if (nbytesAvail < len) {
     _errStr += "ERROR - FmqDeviceShmem::do_write\n";
@@ -499,7 +498,7 @@ int FmqDeviceShmem::check_exists()
 //  Return value:
 //    true on 0, -1 on failure
 
-int FmqDeviceShmem::check_size(ident_t id, size_t expectedSize)
+int FmqDeviceShmem::check_size(ident_t id, int64_t expectedSize)
 
 {
 
@@ -518,7 +517,7 @@ int FmqDeviceShmem::check_size(ident_t id, size_t expectedSize)
 ////////////////////////////////////////////////////
 //  Get device buffer size
 
-int FmqDeviceShmem::get_size(ident_t id)
+int64_t FmqDeviceShmem::get_size(ident_t id)
 
 {
   return _nbytes[id];
@@ -572,7 +571,7 @@ const char *FmqDeviceShmem::_getSegName(ident_t id)
 // creates and attaches shared memory
 // returns memory location on success, NULL on error
 
-void *FmqDeviceShmem::_ushmCreate(key_t key, size_t size, int permissions)
+void *FmqDeviceShmem::_ushmCreate(key_t key, int64_t size, int permissions)
 {
 
   // create the shared memory 
@@ -607,7 +606,7 @@ void *FmqDeviceShmem::_ushmCreate(key_t key, size_t size, int permissions)
 // gets and attaches shared memory
 // returns memory location on success, NULL on error
 
-void *FmqDeviceShmem::_ushmGet(key_t key, size_t size)
+void *FmqDeviceShmem::_ushmGet(key_t key, int64_t size)
 {
   
   // get the shared memory 
@@ -638,7 +637,7 @@ void *FmqDeviceShmem::_ushmGet(key_t key, size_t size)
 // Return TRUE if the segment currently exists, and is big enough
 //        FALSE otherwise
 
-bool FmqDeviceShmem::_ushmCheck(key_t key, size_t size)
+bool FmqDeviceShmem::_ushmCheck(key_t key, int64_t size)
 {
 
   int iret = shmget(key, size, 0666);
