@@ -709,15 +709,15 @@
     tt++;
     
     // Parameter 'output_buf_size'
-    // ctype is 'int'
+    // ctype is 'long'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
+    tt->ptype = LONG_TYPE;
     tt->param_name = tdrpStrDup("output_buf_size");
     tt->descr = tdrpStrDup("Size of buffer in output FMQ.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_buf_size - &_start_;
-    tt->single_val.i = 10000000;
+    tt->single_val.l = 10000000;
     tt++;
     
     // Parameter 'data_mapper_reg_interval'

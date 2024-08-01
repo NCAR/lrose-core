@@ -385,7 +385,7 @@ public:
 
   int output_n_slots;
 
-  int output_buf_size;
+  long output_buf_size;
 
   int data_mapper_reg_interval;
 

@@ -80,7 +80,7 @@ paramdef int {
   p_descr = "Number of slots in output FMQ.";
 } output_n_slots;
 
-paramdef int {
+paramdef long {
   p_default = 10000000;
   p_descr = "Size of buffer in output FMQ.";
 } output_buf_size;
