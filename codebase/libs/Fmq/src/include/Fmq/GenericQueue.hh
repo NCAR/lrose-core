@@ -128,15 +128,13 @@ public:
   //
   // Returns 0 on success, -1 on error.
 
-  int nextTrigger(string &says_who,
-		  si64 *trigger_time, si64 *forecast_time);
+  int nextTrigger(string &says_who, int64_t *trigger_time, int64_t *forecast_time);
 
   // Fire the trigger message.
   //
   // Returns 0 on success, -1 on error.
 
-  int fireTrigger(const string &says_who,
-		  si64 trigger_time, si64 forecast_time = -1);
+  int fireTrigger(const string &says_who, int64_t trigger_time, int64_t forecast_time = -1);
 
 
 private:

@@ -50,8 +50,8 @@ public:
   // constructor
   
   FmqDeviceFile(const string &fmqPath, 
-		size_t numSlots, 
-		size_t bufSize,
+		int32_t numSlots,
+		int64_t bufSize,
 		TA_heartbeat_t heartbeatFunc);
 
   // destructor - closes queue
@@ -72,7 +72,6 @@ public:
   // seek
 
   virtual off_t do_seek(ident_t id, off_t offset);
-  off_t _seek(const string &path, int id, off_t offset);
 
   // locking for writes
 
@@ -81,14 +80,12 @@ public:
 
   // read
   
-  virtual int do_read(ident_t id, void *mess, size_t len);
-  int _read(const string &path, int fd, void *mess, size_t len);
-  virtual int update_last_id_read(int lastIdRead);
+  virtual int64_t do_read(ident_t id, void *mess, int64_t len);
+  virtual int update_last_id_read(int32_t lastIdRead);
   
   // write
 
-  virtual int do_write(ident_t id, const void *mess, size_t len);
-  int _write(const string &path, int fd, const void *mess, size_t len);
+  virtual int64_t do_write(ident_t id, const void *mess, int64_t len);
 
   // checking for existence
   // Returns 0 on success, -1 on failure
@@ -98,11 +95,11 @@ public:
   // Check that the device is the valid size.
   // Returns 0 on success, -1 on failure
 
-  virtual int check_size(ident_t id, size_t expectedSize);
+  virtual int check_size(ident_t id, int64_t expectedSize);
   
   // Get size of device buffer
 
-  virtual int get_size(ident_t id);
+  virtual int64_t get_size(ident_t id);
   
 protected:
 
@@ -123,6 +120,11 @@ private:
   int _stat_fd;
   int _buf_fd;
   int _fd[N_IDENT];
+
+  off_t _seek(const string &path, int id, off_t offset);
+  int64_t _read(const string &path, int fd, void *mess, int64_t len);
+  int64_t _write(const string &path, int fd, const void *mess, int64_t len);
+
 
 };
 

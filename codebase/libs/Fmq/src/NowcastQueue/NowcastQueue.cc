@@ -58,8 +58,8 @@ int NowcastQueue::initCreate( const char* fmqURL,
 			      const char* procName, 
 			      bool debug,
 			      bool compression, 
-			      size_t numSlots, 
-			      size_t bufSize,
+			      int32_t numSlots,
+			      int64_t bufSize,
 			      MsgLog *msgLog )
 {
   return initCreate( fmqURL, procName, "", debug,
@@ -73,8 +73,8 @@ int NowcastQueue::initCreate( const char* fmqURL,
 			      const char* procInstance, 
 			      bool debug,
 			      bool compression, 
-			      size_t numSlots, 
-			      size_t bufSize,
+			      int32_t numSlots,
+			      int64_t bufSize,
 			      MsgLog *msgLog )
 {
   _processInfo.setProcessName(procName);
@@ -93,9 +93,9 @@ int NowcastQueue::initReadWrite( const char* fmqURL,
 				 bool debug,
 				 openPosition position,
 				 bool compression, 
-				 size_t numSlots, 
-				 size_t bufSize,
-				 int msecSleep,
+				 int32_t numSlots,
+				 int64_t bufSize,
+				 int32_t msecSleep,
 				 MsgLog *msgLog )
 {
   return initReadWrite( fmqURL, procName, "", debug,
@@ -110,9 +110,9 @@ int NowcastQueue::initReadWrite( const char* fmqURL,
 				 bool debug,
 				 openPosition position,
 				 bool compression, 
-				 size_t numSlots, 
-				 size_t bufSize,
-				 int msecSleep,
+				 int32_t numSlots,
+				 int64_t bufSize,
+				 int32_t msecSleep,
 				 MsgLog *msgLog )
 {
   _processInfo.setProcessName(procName);
@@ -130,7 +130,7 @@ int NowcastQueue::initReadOnly( const char* fmqURL,
 				const char* procName, 
 				bool debug,
 				openPosition position,
-				int msecSleep,
+				int32_t msecSleep,
 				MsgLog *msgLog )
 {
   return initReadOnly( fmqURL, procName, "", debug,
@@ -143,7 +143,7 @@ int NowcastQueue::initReadOnly( const char* fmqURL,
 				const char* procInstance, 
 				bool debug,
 				openPosition position,
-				int msecSleep,
+				int32_t msecSleep,
 				MsgLog *msgLog )
 {
   _processInfo.setProcessName(procName);
@@ -160,7 +160,7 @@ int NowcastQueue::initReadBlocking( const char* fmqURL,
 				    const char* procName, 
 				    bool debug,
 				    openPosition position,
-				    int msecSleep,
+				    int32_t msecSleep,
 				    MsgLog *msgLog )
 {
   return initReadBlocking( fmqURL, procName, "", debug,
@@ -173,7 +173,7 @@ int NowcastQueue::initReadBlocking( const char* fmqURL,
 				    const char* procInstance, 
 				    bool debug,
 				    openPosition position,
-				    int msecSleep,
+				    int32_t msecSleep,
 				    MsgLog *msgLog )
 {
   _processInfo.setProcessName(procName);
@@ -192,9 +192,9 @@ int NowcastQueue::init( const char* fmqURL,
 			openMode mode, 
 			openPosition position,
 			bool compression, 
-			size_t numSlots, 
-			size_t bufSize,
-			int msecSleep,
+			int64_t numSlots,
+			int32_t bufSize,
+			int32_t msecSleep,
 			MsgLog *msgLog )
 {
   return init( fmqURL, procName,  "", debug,
@@ -210,9 +210,9 @@ int NowcastQueue::init( const char* fmqURL,
 			openMode mode, 
 			openPosition position,
 			bool compression, 
-			size_t numSlots, 
-			size_t bufSize,
-			int msecSleep,
+			int64_t numSlots,
+			int32_t bufSize,
+			int32_t msecSleep,
 			MsgLog *msgLog )
 {
   _processInfo.setProcessName(procName);
@@ -670,7 +670,7 @@ void NowcastQueue::_fillMsgBuffer(const string &proc_name,
 void NowcastQueue::_loadProcessInfo(NowcastProcess &process,
 				    const pid_t pid,
 				    const void *msg_buffer,
-				    const int msg_buffer_len)
+				    const int64_t msg_buffer_len)
 {
   char *proc_name = (char *)msg_buffer;
   char *proc_inst = (char *)msg_buffer + strlen(proc_name) + 1;

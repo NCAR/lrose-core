@@ -76,12 +76,12 @@ public:
 
   // begin 64-bit implementation
 
-  static const int Q_MAGIC_STAT_64 = 88008803;
-  static const int Q_MAX_ID_64 = 1000000000;
-  static const int Q_NUM_LONG_STAT_64 = 6;
-  static const int Q_NUM_INT_STAT_64 = 10;
-  static const int Q_NUM_LONG_SLOT_64 = 4;
-  static const int Q_NUM_INT_SLOT_64 = 6;
+  static const int32_t Q_MAGIC_STAT_64 = 88008803;
+  static const int32_t Q_MAX_ID_64 = 1000000000;
+  static const int32_t Q_NUM_LONG_STAT_64 = 5;
+  static const int32_t Q_NUM_INT_STAT_64 = 10;
+  static const int32_t Q_NUM_LONG_SLOT_64 = 4;
+  static const int32_t Q_NUM_INT_SLOT_64 = 6;
 
 
   // FMQ status struct
@@ -113,7 +113,6 @@ public:
     si64 end_insert;      /* offset to end of insert free region */
     si64 begin_append;    /* offset to start of append free region */
     si64 time_written;    /* time at which the status struct was last written to file */
-    si64 pad_si64_1;
   } q_stat_64_t;
   
   typedef struct {
@@ -138,9 +137,9 @@ public:
 
   // begin 32-bit implementation
 
-  static const int Q_MAGIC_STAT_32 = 88008801;
-  static const int Q_MAGIC_BUF = 88008802;
-  static const int Q_MAX_ID_32 = 1000000000;
+  static const int32_t Q_MAGIC_STAT_32 = 88008801;
+  static const int32_t Q_MAGIC_BUF = 88008802;
+  static const int32_t Q_MAX_ID_32 = 1000000000;
 
   // FMQ status struct
 
@@ -181,8 +180,8 @@ public:
     si32 time;            /* Unix time at which the message is written */
     si32 msg_len;         /* message len in bytes */
     si32 stored_len;      /* message len + extra 12 bytes (Q_NBYTES_EXTRA_32)
-			   * for magic-cookie and slot num fields,
-			   * plus padding out to even 4 bytes */
+                           *  for magic-cookie and slot num fields,
+			                     * plus padding out to even 4 bytes */
     si32 offset;          /* message offset in buffer */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
@@ -195,9 +194,9 @@ public:
 
 
   // default implementation is 64-bit
-  static const int Q_MAGIC_STAT = Q_MAGIC_STAT_64;
-  static const int Q_MAX_ID = Q_MAX_ID_64;
-  static const int Q_NBYTES_EXTRA = 12;
+  static const int32_t Q_MAGIC_STAT = Q_MAGIC_STAT_64;
+  static const int32_t Q_MAX_ID = Q_MAX_ID_64;
+  static const int32_t Q_NBYTES_EXTRA = 12;
   typedef q_stat_64_t q_stat_t;
   typedef q_slot_64_t q_slot_t;
 
@@ -273,13 +272,13 @@ public:
   // Returns 0 on success, -1 on error
   // Messages written to msgLog if non-NULL
   
-  virtual int initCreate(const char* fmqPath, 
-			 const char* procName, 
-			 bool debug = false,
-			 bool compress = false, 
-			 size_t numSlots = 1024, 
-			 long bufSize = 10000,
-			 MsgLog *msgLog = NULL);
+  virtual int initCreate(const char* fmqPath,
+                         const char* procName,
+                         bool debug = false,
+                         bool compress = false,
+                         int32_t numSlots = 1024,
+                         int64_t bufSize = 10000,
+                         MsgLog *msgLog = NULL);
 
   // initReadWrite()
   // If FMQ already exists, it is opened in mode "r+".
@@ -297,9 +296,9 @@ public:
                             bool debug = false,
                             openPosition position = END,
                             bool compress = false,
-                            size_t numSlots = 1024,
-                            long bufSize = 10000,
-                            int msecSleep = -1,
+                            int32_t numSlots = 1024,
+                            int64_t bufSize = 10000,
+                            int32_t msecSleep = -1,
                             MsgLog *msgLog = NULL);
 
   // initReadOnly()
@@ -317,7 +316,7 @@ public:
                            const char* procName,
                            bool debug = false,
                            openPosition position = END,
-                           int msecSleep = -1,
+                           int32_t msecSleep = -1,
                            MsgLog *msgLog = NULL);
 
   // initReadBlocking()
@@ -345,7 +344,7 @@ public:
                                const char* procName,
                                bool debug = false,
                                openPosition position = END,
-                               int msecSleep = -1,
+                               int32_t msecSleep = -1,
                                MsgLog *msgLog = NULL);
  
   // initReadWriteBlocking()
@@ -368,7 +367,7 @@ public:
                                     const char* procName,
                                     bool debug = false,
                                     openPosition position = END,
-                                    int msecSleep = -1,
+                                    int32_t msecSleep = -1,
                                     MsgLog *msgLog = NULL);
 
   // generic init() - allows full control of the init
@@ -381,14 +380,14 @@ public:
                    openMode mode = READ_WRITE,
                    openPosition position = END,
                    bool compress = false,
-                   size_t numSlots = 1024,
-                   long bufSize = 10000,
-                   int msecSleep = -1,
+                   int32_t numSlots = 1024,
+                   int64_t bufSize = 10000,
+                   int32_t msecSleep = -1,
                    MsgLog *msgLog = NULL);
 
   // Setting a timeout for blocking reads
 
-  void setBlockingReadTimeout(int msecs) { _msecBlockingReadTimeout = msecs; }
+  void setBlockingReadTimeout(int32_t msecs) { _msecBlockingReadTimeout = msecs; }
  
   // Closing the fmq
   // returns 0 on success, -1 on failure
@@ -415,7 +414,7 @@ public:
   // specify the registration interval in seconds
   
   virtual int setRegisterWithDmap(bool doReg,
-				  int regIntervalSecs);
+                                  int regIntervalSecs);
 
   // Seek to a position in the queue.
   // Options are:
@@ -438,7 +437,7 @@ public:
   //  Return value:
   //    0 on success, -1 on error.
   
-  virtual int seekToId(int id);
+  virtual int seekToId(int32_t id);
 
   // Read a message from the fmq.
   // If type is specified, reads next message of the given type.
@@ -448,7 +447,7 @@ public:
   // Sets *gotOne if a message was read.
   // Returns 0 on success, -1 on error
 
-  virtual int readMsg(bool *gotOne, int type = -1, int msecs_sleep = -1);
+  virtual int readMsg(bool *gotOne, int32_t type = -1, int32_t msecs_sleep = -1);
 
   // Read a message from the fmq.
   // If type is specified, reads next message of the given type.
@@ -456,22 +455,23 @@ public:
   // procmap if PMU module has been initialized.
   // Returns 0 on success, -1 on error
 
-  virtual int readMsgBlocking(int type = -1);
+  virtual int readMsgBlocking(int32_t type = -1);
 
   // Writes a message to the fmq
   // Returns 0 on success, -1 on error
 
-  virtual int writeMsg(int type,
-                       int subType = 0,
+  virtual int writeMsg(int32_t type,
+                       int32_t subType = 0,
                        const void *msg = NULL,
-                       int msgLen = 0);
+                       int64_t msgLen = 0);
   
   // Writing precompressed msg
   // Returns 0 on success, -1 on error
 
-  virtual int writeMsgPreCompressed(int type, int subType,
-                                    const void *msg, int msgLen,
-                                    int uncompressedLen);
+  virtual int writeMsgPreCompressed(int32_t type, int32_t subType,
+                                    const void *msg,
+                                    int64_t msgLen,
+                                    int64_t uncompressedLen);
 
   ///////////////////////////////////////////////////////////
   // get methods
@@ -501,12 +501,12 @@ public:
     return _fmqPath;
   }
 
-  inline auto getNumSlots() const
+  inline int32_t getNumSlots() const
   {
     return _stat.nslots;
   }
 
-  inline auto getBufSize() const
+  inline int64_t getBufSize() const
   {
     return _stat.buf_size;
   }
@@ -526,7 +526,7 @@ public:
   // set and compression is on, since the server will pass the data
   // to the client in compressed form
 
-  inline int getMsgLen() const
+  inline int64_t getMsgLen() const
   {
     return _msgBuf.getLen();
   }
@@ -547,7 +547,7 @@ public:
 
   // get the stored length of the message
 
-  inline long getStoredLen() const
+  inline int64_t getStoredLen() const
   {
     return _slot.stored_len;
   }
@@ -562,7 +562,7 @@ public:
   // get the compressed length of the message
   // same as stored length
 
-  inline long getCompressedLen() const
+  inline int64_t getCompressedLen() const
   {
     return _slot.stored_len;
   }
@@ -570,35 +570,35 @@ public:
   // get the message length for the current slot
   // In compressed data, this is the original message len
 
-  inline long getSlotMsgLen() const
+  inline int64_t getSlotMsgLen() const
   {
     return _slot.msg_len;
   }
 
   // get the message ID
 
-  inline int getMsgId() const
+  inline int32_t getMsgId() const
   { 
     return _slot.id;
   }
 
   // get the message time
   
-  inline time_t getMsgTime() const
+  inline int64_t getMsgTime() const
   { 
     return _slot.time;
   }
 
   // get the message type
 
-  inline int getMsgType() const
+  inline int32_t getMsgType() const
   {
     return _slot.type; 
   }
 
   // get the message sub-type
 
-  inline int getMsgSubtype() const
+  inline int32_t getMsgSubtype() const
   { 
     return _slot.subtype; 
   }
@@ -649,8 +649,8 @@ public:
   //  Returns 0 on success, -1 on failure.
   
   static int print_debug(const char *fmq_path,
-			 const char *prog_name,
-			 FILE *out);
+                         const char *prog_name,
+                         FILE *out);
   
   // byte swapping
 
@@ -677,12 +677,10 @@ protected:
   openMode _openMode;
   openPosition _openPosition;
   bool _compress;
-  int _numSlots;
-  // for 64-bit
-//  int _bufSize;
-  long _bufSize;
-  int _msecSleep;
-  int _msecBlockingReadTimeout;
+  int32_t _numSlots;
+  int64_t _bufSize;
+  int32_t _msecSleep;
+  int32_t _msecBlockingReadTimeout;
 
   // logging
   
@@ -708,26 +706,24 @@ protected:
   
   // counters and flags
   
-  int _lastIdRead;     /* latest id read by FMQ_read() */
-  int _lastSlotRead;   /* latest slot read by FMQ_read() */
+  int32_t _lastIdRead;     /* latest id read by FMQ_read() */
+  int32_t _lastSlotRead;   /* latest slot read by FMQ_read() */
   
-  int _blockingWrite;  /* should the write block if the queue is full? */
-  int _lastSlotWritten;/* used by blocking write */
+  int32_t _blockingWrite;  /* should the write block if the queue is full? */
+  int32_t _lastSlotWritten;/* used by blocking write */
   
-  int _singleWriter;   /* flag to indicate that only a single writer is running
+  int32_t _singleWriter;   /* flag to indicate that only a single writer is running
 			* so that locking is not necessary */
 
   // memory allocation
 
-  int _nslotsAlloc;    /* Number of slots allocated */
+  int32_t _nslotsAlloc;    /* Number of slots allocated */
   q_slot_t *_slots;/* slots array */
   
   ui08 *_entry;        /* message entry array - includes extra bytes
 			* msg points into this array */
 
-  // change for 64-bit update
-  // int _nEntryAlloc;    /* number of bytes allocated for msg entry */
-  long _nEntryAlloc;    /* number of bytes allocated for msg entry */
+  int64_t _nEntryAlloc;    /* number of bytes allocated for msg entry */
 
   // heartbeat function for procmap registration
 
@@ -738,7 +734,7 @@ protected:
   // data mapper registration
   
   bool _registerWithDmap;   // should we register with the data mapper?
-  int _dmapRegIntervalSecs; // how often should we register?
+  int32_t _dmapRegIntervalSecs; // how often should we register?
   time_t _dmapPrevRegTime;  // the time of the previous registration
 
   // errors
@@ -750,26 +746,26 @@ protected:
 
   // initialization
 
-  void _init_status(int nslots, int buf_size);
+  void _init_status(int32_t nslots, int64_t buf_size);
 
   // memory management
 
-  int _alloc_slots(int nslots);
+  int32_t _alloc_slots(int32_t nslots);
   void _free_slots();
-  int _free_oldest_slot();
-  void _alloc_entry(int msg_len);
+  int32_t _free_oldest_slot();
+  void _alloc_entry(int64_t msg_len);
   void _free_entry();
 
   // open
 
-  int _open(openMode mode, size_t numSlots, size_t bufSize);
-  int _open_create(int nslots, int buf_size);
-  int _open_rdwr(int nslots, int buf_size);
-  int _open_rdonly();
-  int _open_rdwr_nocreate();
-  int _open_blocking(int msecs_sleep);
-  int _open_blocking_rdwr(int msecs_sleep);
-  int _open_device(const char *mode);
+  int32_t _open(openMode mode, int32_t numSlots, int64_t buf_size);
+  int32_t _open_create(int32_t nslots, int64_t buf_size);
+  int32_t _open_rdwr(int32_t nslots, int64_t buf_size);
+  int32_t _open_rdonly();
+  int32_t _open_rdwr_nocreate();
+  int32_t _open_blocking(int32_t msecs_sleep);
+  int32_t _open_blocking_rdwr(int32_t msecs_sleep);
+  int32_t _open_device(const char *mode);
 
   // close / clear
 
@@ -792,51 +788,51 @@ protected:
 
   // read
   
-  int _read(int *msg_read, int type);
-  int _read_blocking(int msecs_sleep, int type);
-  int _read_non_blocking (int *msg_read, int type, int msecs_sleep);
+  int _read(int32_t *msg_read, int32_t type);
+  int _read_blocking(int32_t msecs_sleep, int32_t type);
+  int _read_non_blocking (int32_t *msg_read, int32_t type, int32_t msecs_sleep);
   int _read_stat();
   int _read_slots();
-  int _read_slot(int slot_num);
-  int _read_next(int *msg_read);
-  int _read_msg_for_slot(int slot_num);
-  int _read_msg(int slot_num);
+  int _read_slot(int32_t slot_num);
+  int _read_next(int32_t *msg_read);
+  int _read_msg_for_slot(int32_t slot_num);
+  int _read_msg(int32_t slot_num);
 
-  int _load_read_msg(int msg_type,
-		     int msg_subtype,
-		     int msg_id,
-		     time_t msg_time,
-		     void *msg,
-		     int stored_len,
-		     int compressed,
-		     int uncompressed_len);
+  int _load_read_msg(int32_t msg_type,
+                     int32_t msg_subtype,
+                     int32_t msg_id,
+                     int64_t msg_time,
+                     void *msg,
+                     int64_t stored_len,
+                     int32_t compressed,
+                     int64_t uncompressed_len);
   
-  int _read_device(FmqDevice::ident_t id, void *mess, size_t len);
+  int _read_device(FmqDevice::ident_t id, void *mess, int64_t len);
   int _update_last_id_read();
-  int _add_read_msg(void *msg, int msg_size);
+  int _add_read_msg(void *msg, int64_t msg_size);
   
   // write
 
-  int _prepare_for_writing(int nslots, int buf_size);
+  int _prepare_for_writing(int32_t nslots, int64_t buf_size);
 
-  int _write(void *msg, int msg_len,
-	     int msg_type, int msg_subtype);
+  int _write(void *msg, int64_t msg_len, int32_t msg_type, int32_t msg_subtype);
 
-  int _write_precompressed(void *msg, int msg_len,
-			   int msg_type, int msg_subtype,
-			   int uncompressed_len);
+  int _write_precompressed(void *msg, int64_t msg_len,
+                           int32_t msg_type, int32_t msg_subtype,
+                           int64_t uncompressed_len);
   
   int _write_stat();
-  int _write_slot(int slot_num);
+  int _write_slot(int32_t slot_num);
   
-  int _write_msg(void *msg, int msg_len,
-                 int msg_type, int msg_subtype,
-                 int pre_compressed, int uncompressed_len);
+  int _write_msg(void *msg, int64_t msg_len,
+                 int32_t msg_type, int32_t msg_subtype,
+                 int64_t pre_compressed, int64_t uncompressed_len);
   
-  int _write_msg_to_slot(int write_slot, int write_id,
-			 void *msg, int msg_len, int stored_len, int offset);
+  int _write_msg_to_slot(int32_t write_slot, int32_t write_id,
+                         void *msg, int64_t msg_len,
+                         int64_t stored_len, int64_t offset);
   
-  virtual int _write_device(FmqDevice::ident_t id, const void *mess, size_t len);
+  virtual int _write_device(FmqDevice::ident_t id, const void *mess, int64_t len);
 
   // checking and consistency
   
@@ -852,48 +848,48 @@ protected:
   void _add_slot_checksum(q_slot_t *slot);
   int _check_stat_checksum(const q_stat_t *stat);
   int _check_slot_checksum(const q_slot_t *slot);
-  int _get_magic_cookie(int& cookie);
+  int _get_magic_cookie(int32_t& cookie);
 
 
   // search
   
-  int _prev_id(int id);
-  int _next_id(int id);
-  int _next_slot(int slot_num);
-  int _prev_slot(int slot_num);
-  int _find_slot_for_id(int search_id, int *slot_p);
-  int _slot_in_active_region(int slot_num);
+  int32_t _prev_id(int32_t id);
+  int32_t _next_id(int32_t id);
+  int32_t _next_slot(int32_t slot_num);
+  int32_t _prev_slot(int32_t slot_num);
+  int32_t _find_slot_for_id(int32_t search_id, int32_t *slot_p);
+  int _slot_in_active_region(int32_t slot_num);
    
   // space used
 
-  int _space_avail(int stored_len);
+  int _space_avail(int32_t stored_len);
   int _fraction_used(double *slot_fraction_p,
 		     double *buffer_fraction_p);
 
   // printing
 
-  void _print_slot(FILE *out, const char *label, int num) const;
+  void _print_slot(FILE *out, const char *label, int32_t num) const;
   void _print_slots(FILE *out) const;
   void _print_active_slots(FILE *out) const;
-  void _basic_print_slot(int slot_num, q_slot_t *slot, FILE *out) const;
-  void _pretty_print_slot(int slot_num, q_slot_t *slot, FILE *out) const;
+  void _basic_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const;
+  void _pretty_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const;
 
-  // error printing
+  // error print32_ting
 
   void _print_error(const char *routine, const char *format, ...) const;
   void _print_info(const char *routine, const char *format, ...) const;
 
   // data mapper registration
   
-  int _doRegisterWithDmap();
+  int32_t _doRegisterWithDmap();
 
 private:
 
   // recovery from corrupt buffer - not currently used
   // instead we reinitialize the fmq
 
-  int _check_and_recover();
-  int _recover();
+  int32_t _check_and_recover();
+  int32_t _recover();
 
 };
 

@@ -117,8 +117,8 @@ public:
 		   const char* procName, 
 		   bool debug = false,
 		   bool compression = false, 
-		   size_t numSlots = 1024, 
-		   size_t bufSize = 1000000,
+		   int32_t numSlots = 1024,
+		   int64_t bufSize = 1000000,
 		   MsgLog *msgLog = NULL );
 
    int initCreate( const char* fmqURL, 
@@ -126,8 +126,8 @@ public:
 		   const char* procInstance, 
 		   bool debug = false,
 		   bool compression = false, 
-		   size_t numSlots = 1024, 
-		   size_t bufSize = 1000000,
+		   int32_t numSlots = 1024,
+		   int64_t bufSize = 1000000,
 		   MsgLog *msgLog = NULL );
 
    // initReadWrite()
@@ -145,9 +145,9 @@ public:
 		      bool debug = false,
 		      openPosition position = END,
 		      bool compression = false, 
-		      size_t numSlots = 1024, 
-		      size_t bufSize = 1000000,
-		      int msecSleep = -1,
+		      int32_t numSlots = 1024,
+		      int64_t bufSize = 1000000,
+		      int32_t msecSleep = -1,
 		      MsgLog *msgLog = NULL );
 
    int initReadWrite( const char* fmqURL, 
@@ -156,9 +156,9 @@ public:
 		      bool debug = false,
 		      openPosition position = END,
 		      bool compression = false, 
-		      size_t numSlots = 1024, 
-		      size_t bufSize = 1000000,
-		      int msecSleep = -1,
+		      int32_t numSlots = 1024,
+		      int64_t bufSize = 1000000,
+		      int32_t msecSleep = -1,
 		      MsgLog *msgLog = NULL );
 
    // initReadOnly()
@@ -175,7 +175,7 @@ public:
 		     const char* procName, 
 		     bool debug = false,
 		     openPosition position = END,
-		     int msecSleep = -1,
+		     int32_t msecSleep = -1,
 		     MsgLog *msgLog = NULL );
 
    int initReadOnly( const char* fmqURL, 
@@ -183,7 +183,7 @@ public:
 		     const char* procInstance, 
 		     bool debug = false,
 		     openPosition position = END,
-		     int msecSleep = -1,
+		     int32_t msecSleep = -1,
 		     MsgLog *msgLog = NULL );
 
    // initReadBlocking()
@@ -202,7 +202,7 @@ public:
 			 const char* procName, 
 			 bool debug = false,
 			 openPosition position = END,
-			 int msecSleep = -1,
+			 int32_t msecSleep = -1,
 			 MsgLog *msgLog = NULL );
 
    int initReadBlocking( const char* fmqURL, 
@@ -210,7 +210,7 @@ public:
 			 const char* procInstance, 
 			 bool debug = false,
 			 openPosition position = END,
-			 int msecSleep = -1,
+			 int32_t msecSleep = -1,
 			 MsgLog *msgLog = NULL );
 
    // generic init() - allows full control of the init
@@ -222,9 +222,9 @@ public:
 	     openMode mode = READ_WRITE, 
 	     openPosition position = END,
 	     bool compression = false, 
-	     size_t numSlots = 1024, 
-	     size_t bufSize = 1000000,
-	     int msecSleep = -1,
+	     int64_t numSlots = 1024,
+	     int32_t bufSize = 1000000,
+	     int32_t msecSleep = -1,
 	     MsgLog *msgLog = NULL );
 
    int init( const char* fmqURL, 
@@ -234,42 +234,38 @@ public:
 	     openMode mode = READ_WRITE, 
 	     openPosition position = END,
 	     bool compression = false, 
-	     size_t numSlots = 1024, 
-	     size_t bufSize = 1000000,
-	     int msecSleep = -1,
+	     int64_t numSlots = 1024,
+	     int32_t bufSize = 1000000,
+	     int32_t msecSleep = -1,
 	     MsgLog *msgLog = NULL );
 
 
    //
    // FMQ messaging from server application
    //
-   int              requestIdentification();
-   int              requestForecast( time_t issueTime, time_t forecastTime );
-   int              nextIdResponse( NowcastProcess &processInfo, 
-                                    pid_t *processId = NULL );
-   int              nextForecastResponse( NowcastProcess &processName, 
-                                          pid_t *processId = NULL );
-   int              nextTrigger( string &saysWho, time_t *issueTime, 
-                                 size_t *count, time_t *deltaTime );
+   int requestIdentification();
+   int requestForecast( time_t issueTime, time_t forecastTime );
+   int nextIdResponse( NowcastProcess &processInfo, pid_t *processId = NULL );
+   int nextForecastResponse( NowcastProcess &processName, pid_t *processId = NULL );
+   int nextTrigger( string &saysWho, time_t *issueTime, size_t *count, time_t *deltaTime );
 
    //
    // FMQ messaging from client applications
    //
-   int              nextForecastRequest( time_t *issueTime, 
-                                         time_t *forecastTime );
-   int              forecastComplete();
-   int              forecastIncomplete();
-   int              fireTrigger( const string &saysWho, time_t issueTime, 
-                                 size_t count = 1, time_t deltaTime = 0 );
+   int nextForecastRequest( time_t *issueTime, time_t *forecastTime );
+   int forecastComplete();
+   int forecastIncomplete();
+   int fireTrigger( const string &saysWho, time_t issueTime,
+                    size_t count = 1, time_t deltaTime = 0 );
 
    //
    // Explicit forecast request
    //
-   int              setIssueTime( const char *itime );
-   int              setForecastTime( const char *ftime );
+   int setIssueTime( const char *itime );
+   int setForecastTime( const char *ftime );
 
-   time_t           getIssueTime(){ return issueTime; }
-   time_t           getForecastTime(){ return forecastTime; }
+   time_t getIssueTime(){ return issueTime; }
+   time_t getForecastTime(){ return forecastTime; }
 
    static const int nameLen=128;
 
@@ -288,10 +284,8 @@ protected:
   //
   // Load the process information received in a message
   //
-  void _loadProcessInfo(NowcastProcess &process,
-			const pid_t pid,
-			const void *msg_buffer,
-			const int msg_buffer_len);
+  void _loadProcessInfo(NowcastProcess &process, pid_t pid,
+			const void *msg_buffer, int64_t msg_buffer_len);
   
 
 private:
@@ -307,12 +301,12 @@ private:
    //
    // Process management
    //
-   int              getExplicitForecast( time_t *itime, time_t *ftime );
-   int              getQueuedForecast( time_t *itime, time_t *ftime );
+   int getExplicitForecast( time_t *itime, time_t *ftime );
+   int getQueuedForecast( time_t *itime, time_t *ftime );
 
-   int              readForecastRequest( time_t *itime, time_t *ftime );
-   int              writeIdResponse();
-   int              nextResponse(bool *gotMsg, int msgType = -1);
+   int readForecastRequest( time_t *itime, time_t *ftime );
+   int writeIdResponse();
+   int nextResponse(bool *gotMsg, int msgType = -1);
 
    //
    // Triggering

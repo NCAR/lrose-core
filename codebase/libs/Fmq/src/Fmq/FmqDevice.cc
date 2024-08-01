@@ -45,8 +45,8 @@
 using namespace std;
 
 FmqDevice::FmqDevice(const string &fmqPath,
-		     size_t numSlots, 
-		     size_t bufSize,
+		     int32_t numSlots,
+		     int64_t bufSize,
 		     TA_heartbeat_t heartbeat_func) :
 	_fmqPath(fmqPath),
 	_heartbeatFunc(heartbeat_func)

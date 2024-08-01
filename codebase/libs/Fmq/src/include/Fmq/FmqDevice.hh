@@ -56,8 +56,8 @@ public:
   // constructor
   
   FmqDevice(const string &fmqPath,
-	    size_t numSlots, 
-	    size_t bufSize,
+	    int32_t numSlots,
+	    int64_t bufSize,
 	    TA_heartbeat_t heartbeatFunc);
 
   // destructor - closes queue
@@ -86,12 +86,12 @@ public:
 
   // read
   
-  virtual int do_read(ident_t id, void *mess, size_t len) = 0;
-  virtual int update_last_id_read(int lastIdRead) = 0;
+  virtual int64_t do_read(ident_t id, void *mess, int64_t len) = 0;
+  virtual int update_last_id_read(int32_t lastIdRead) = 0;
   
   // write
 
-  virtual int do_write(ident_t id, const void *mess, size_t len) = 0;
+  virtual int64_t do_write(ident_t id, const void *mess, int64_t len) = 0;
 
   // checking for existence
   // Returns 0 on success, -1 on failure
@@ -101,11 +101,11 @@ public:
   // Check that the device buffer is the valid size.
   // Returns 0 on success, -1 on failure
 
-  virtual int check_size(ident_t id, size_t expectedSize) = 0;
+  virtual int check_size(ident_t id, int64_t expectedSize) = 0;
   
   // Get size of device buffer
 
-  virtual int get_size(ident_t id) = 0;
+  virtual int64_t get_size(ident_t id) = 0;
   
   ///////////////////////////////////////////////////////////////////
   // error string is set during open/read/write operations
