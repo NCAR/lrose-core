@@ -105,7 +105,6 @@ FmqTest::~FmqTest()
   // unregister process
 
   PMU_auto_unregister();
-
 }
 
 //////////////////////////////////////////////////
@@ -164,7 +163,7 @@ int FmqTest::Run ()
                         _params.output_compress,
                         _params.output_n_slots,
                         _params.output_buf_size,
-                        -1, _msgLog)) {
+    -1, _msgLog)) {
     cerr << "ERROR - FmqTest::Run" << endl;
     cerr << "  Cannot open output FMQ at url: " << _params.output_fmq_url << endl;
     return -1;
