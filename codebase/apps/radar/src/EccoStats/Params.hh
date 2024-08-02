@@ -407,17 +407,21 @@ public:
 
   tdrp_bool_t compute_mrms_coverage;
 
-  char* mrms_mdv_input_dir;
+  char* mrms_dbz_mdv_dir;
 
   char* mrms_dbz_field_name;
 
-  char* mrms_coverage_output_dir;
+  char* mrms_coverage_dir;
 
   char* coverage_min_ht_field_name;
 
   char* coverage_max_ht_field_name;
 
   char* coverage_ht_fraction_field_name;
+
+  tdrp_bool_t censor_based_on_mrms_coverage;
+
+  double mrms_coverage_min_ht_fraction;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -426,7 +430,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

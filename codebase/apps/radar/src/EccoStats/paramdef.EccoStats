@@ -159,7 +159,7 @@ paramdef string {
   p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv";
   p_descr = "Directory for MRMS 3D grid of reflectivity.";
   p_help = "This is in MDV NetCDF format";
-} mrms_mdv_input_dir;
+} mrms_dbz_mdv_dir;
 
 paramdef string {
   p_default = "DBZ";
@@ -170,7 +170,7 @@ paramdef string {
   p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
   p_descr = "Directory for writing out MRMS coverage files.";
   p_help = "This is in MDV NetCDF format";
-} mrms_coverage_output_dir;
+} mrms_coverage_dir;
 
 paramdef string {
   p_default = "CoverageMinHt";
@@ -189,4 +189,20 @@ paramdef string {
   p_descr = "Name of coverage height fraction in output files.";
   p_help = "The height fraction is computed as the fraction of the column, from the terrain height to the top of the Cartesian grid, that is covered by the radar data.";
 } coverage_ht_fraction_field_name;
+
+commentdef {
+  p_header = "CENSOR BASED ON COVERAGE FIELD";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to censor the analysis based on the radar coverage - see above.";
+  p_help = "If true, for each (x, y) location, we only accumulate the statistics if the coverage height fraction meets the threshold. This helps to remove areas in which there is inadequate coverage to allow for valid results from the Ecco algorithm.";
+} censor_based_on_mrms_coverage;
+
+paramdef double {
+  p_default = 0.8;
+  p_descr = "Minimum fraction of height coverage for stats to be valid.";
+  p_help = "We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.";
+} mrms_coverage_min_ht_fraction;
 

@@ -1391,7 +1391,7 @@ int EccoStats::_computeCoverage()
     
     // write file
     
-    if(_outCov.writeToDir(_params.mrms_coverage_output_dir)) {
+    if(_outCov.writeToDir(_params.mrms_coverage_dir)) {
       cerr << "ERROR - EccoStats::Run" << endl;
       cerr << "  Cannot write data set." << endl;
       cerr << _outCov.getErrStr() << endl;
@@ -1547,7 +1547,7 @@ int EccoStats::_readMrms()
   time_t eccoValidTime = _inMdvx.getValidTime();
 
   _inMrms.setReadTime(Mdvx::READ_CLOSEST,
-                      _params.mrms_mdv_input_dir,
+                      _params.mrms_dbz_mdv_dir,
                       180, eccoValidTime);
   
   // read in
