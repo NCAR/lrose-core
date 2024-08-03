@@ -124,6 +124,10 @@ private:
   void _addFieldsToOutput();
   int _doWrite();
   
+  int _computeCoverage();
+  void _addCoverageFields();
+  int _readMrms();
+  
   MdvxField *_make3DField(fl32 ***data,
                           string fieldName,
                           string longName,
@@ -146,10 +150,6 @@ private:
                                  string longName,
                                  string units);
 
-  int _computeCoverage();
-  void _addCoverageFields();
-  int _readMrms();
-  
   MdvxField *_makeMrms2DField(fl32 **data,
                               string fieldName,
                               string longName,
