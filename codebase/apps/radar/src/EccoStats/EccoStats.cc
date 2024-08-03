@@ -334,7 +334,7 @@ void EccoStats::_allocArrays()
   _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
 
- // lat/lon
+  // lat/lon
 
   _lon = (double **) ucalloc2(_ny, _nx, sizeof(double));
   _lat = (double **) ucalloc2(_ny, _nx, sizeof(double));
@@ -1391,15 +1391,15 @@ int EccoStats::_computeCoverage()
     
     // write file
     
-    if(_outCov.writeToDir(_params.mrms_coverage_dir)) {
+    if(_covMdvx.writeToDir(_params.mrms_coverage_dir)) {
       cerr << "ERROR - EccoStats::Run" << endl;
       cerr << "  Cannot write data set." << endl;
-      cerr << _outCov.getErrStr() << endl;
+      cerr << _covMdvx.getErrStr() << endl;
       return -1;
     }
     
     if (_params.debug) {
-      cerr << "Wrote file: " << _outCov.getPathInUse() << endl;
+      cerr << "Wrote file: " << _covMdvx.getPathInUse() << endl;
     }
 
   } // while
@@ -1417,19 +1417,19 @@ void EccoStats::_addCoverageFields()
   // initialize output DsMdvx object
   // copying master header from input object
   
-  _outCov.clear();
+  _covMdvx.clear();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _outCov.setDebug(true);
+    _covMdvx.setDebug(true);
   }
-  Mdvx::master_header_t mhdr = _inMrms.getMasterHeader();
+  Mdvx::master_header_t mhdr = _mrmsMdvx.getMasterHeader();
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_included = 1;
-  _outCov.setMasterHeader(mhdr);
-  _outCov.setDataSetName("Coverage of MRMS radar grid");
-  _outCov.setDataSetInfo("Intended for use with EccoStats");
-  _outCov.setDataSetSource("MRMS reflectivity grid");
-  _outCov.setMdv2NcfOutput(true, true, true, true);
+  _covMdvx.setMasterHeader(mhdr);
+  _covMdvx.setDataSetName("Coverage of MRMS radar grid");
+  _covMdvx.setDataSetInfo("Intended for use with EccoStats");
+  _covMdvx.setDataSetSource("MRMS reflectivity grid");
+  _covMdvx.setMdv2NcfOutput(true, true, true, true);
   
   // load up coverage min and max heights
   
@@ -1475,11 +1475,11 @@ void EccoStats::_addCoverageFields()
 
   // make fields and add to output object
   
-  _outCov.addField(_makeMrms2DField(minCovHt, _params.coverage_min_ht_field_name,
-                                    "Min ht of radar coverage", "km"));
+  _covMdvx.addField(_makeMrms2DField(minCovHt, _params.coverage_min_ht_field_name,
+                                     "Min ht of radar coverage", "km"));
   
-  _outCov.addField(_makeMrms2DField(maxCovHt, _params.coverage_max_ht_field_name,
-                                    "Max ht of radar coverage", "km"));
+  _covMdvx.addField(_makeMrms2DField(maxCovHt, _params.coverage_max_ht_field_name,
+                                     "Max ht of radar coverage", "km"));
   
   // load up height fraction
   
@@ -1511,8 +1511,8 @@ void EccoStats::_addCoverageFields()
       } // iy
     } // if (fhdrTerrain.ny == fhdrDbz.ny ...
 
-    _outCov.addField(_makeMrms2DField(covHtFrac, _params.coverage_ht_fraction_field_name,
-                                      "Coverage fraction in vert column", ""));
+    _covMdvx.addField(_makeMrms2DField(covHtFrac, _params.coverage_ht_fraction_field_name,
+                                       "Coverage fraction in vert column", ""));
     
   } // if (_terrainHtField != NULL)
 
@@ -1532,43 +1532,43 @@ int EccoStats::_readMrms()
   
 {
   
-  _inMrms.clear();
+  _mrmsMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    _inMrms.setDebug(true);
+    _mrmsMdvx.setDebug(true);
   }
-  _inMrms.addReadField(_params.mrms_dbz_field_name);
-  _inMrms.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  _inMrms.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  _mrmsMdvx.addReadField(_params.mrms_dbz_field_name);
+  _mrmsMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _mrmsMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _inMrms.printReadRequest(cerr);
+    _mrmsMdvx.printReadRequest(cerr);
   }
 
   time_t eccoValidTime = _inMdvx.getValidTime();
 
-  _inMrms.setReadTime(Mdvx::READ_CLOSEST,
-                      _params.mrms_dbz_mdv_dir,
-                      180, eccoValidTime);
+  _mrmsMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                        _params.mrms_dbz_mdv_dir,
+                        180, eccoValidTime);
   
   // read in
   
-  if (_inMrms.readVolume()) {
+  if (_mrmsMdvx.readVolume()) {
     cerr << "ERROR - EccoStats::_readMrms" << endl;
     cerr << "  Cannot read in data." << endl;
-    cerr << _inMrms.getErrStr() << endl;
+    cerr << _mrmsMdvx.getErrStr() << endl;
     return -1;
   }
   if (_params.debug) {
-    cerr << "Read MRMS data file: " << _inMrms.getPathInUse() << endl;
+    cerr << "Read MRMS data file: " << _mrmsMdvx.getPathInUse() << endl;
   }
 
   // get dbz field
   
-  _mrmsDbzField = _inMrms.getField(_params.mrms_dbz_field_name);
+  _mrmsDbzField = _mrmsMdvx.getField(_params.mrms_dbz_field_name);
   if (_mrmsDbzField == NULL) {
     cerr << "ERROR - EccoStats::_readMrms" << endl;
     cerr << "  Cannot find MRMS DBZ field: " << _params.mrms_dbz_field_name << endl;
-    cerr << "  MRMS path: " << _inMrms.getPathInUse() << endl;
+    cerr << "  MRMS path: " << _mrmsMdvx.getPathInUse() << endl;
     return -1;
   }
 
@@ -1580,7 +1580,7 @@ int EccoStats::_readMrms()
   if (fhdrEcco.ny != fhdrMrms.ny ||
       fhdrEcco.nx != fhdrMrms.nx) {
     cerr << "ERROR - EccoStats::_readMrms" << endl;
-    cerr << "  DBZ nx,ny grid does not match Ecco, file: " << _inMrms.getPathInUse() << endl;
+    cerr << "  DBZ nx,ny grid does not match Ecco, file: " << _mrmsMdvx.getPathInUse() << endl;
     cerr << "  MRMS nx, ny: " << fhdrMrms.nx << ", " << fhdrMrms.ny << endl;
     cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
     return -1;
@@ -1639,6 +1639,3 @@ MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
   return newField;
 
 }
-
-
-  

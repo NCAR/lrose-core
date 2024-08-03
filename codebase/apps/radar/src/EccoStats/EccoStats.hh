@@ -106,7 +106,7 @@ private:
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
 
-  DsMdvx _inMrms, _outCov;
+  DsMdvx _mrmsMdvx, _covMdvx;
   MdvxField *_mrmsDbzField;
 
   int _computeEccoStats();
