@@ -411,7 +411,7 @@ public:
 
   char* mrms_dbz_field_name;
 
-  char* mrms_coverage_dir;
+  char* coverage_dir;
 
   char* coverage_min_ht_field_name;
 
@@ -419,9 +419,9 @@ public:
 
   char* coverage_ht_fraction_field_name;
 
-  tdrp_bool_t censor_based_on_mrms_coverage;
+  tdrp_bool_t censor_based_on_radar_coverage;
 
-  double mrms_coverage_min_ht_fraction;
+  double radar_coverage_min_ht_fraction;
 
   char _end_; // end of data region
               // needed for zeroing out data

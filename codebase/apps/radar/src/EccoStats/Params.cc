@@ -864,15 +864,15 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'mrms_coverage_dir'
+    // Parameter 'coverage_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("mrms_coverage_dir");
+    tt->param_name = tdrpStrDup("coverage_dir");
     tt->descr = tdrpStrDup("Directory for writing out MRMS coverage files.");
     tt->help = tdrpStrDup("This is in MDV NetCDF format");
-    tt->val_offset = (char *) &mrms_coverage_dir - &_start_;
+    tt->val_offset = (char *) &coverage_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage");
     tt++;
     
@@ -921,27 +921,27 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'censor_based_on_mrms_coverage'
+    // Parameter 'censor_based_on_radar_coverage'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("censor_based_on_mrms_coverage");
+    tt->param_name = tdrpStrDup("censor_based_on_radar_coverage");
     tt->descr = tdrpStrDup("Option to censor the analysis based on the radar coverage - see above.");
     tt->help = tdrpStrDup("If true, for each (x, y) location, we only accumulate the statistics if the coverage height fraction meets the threshold. This helps to remove areas in which there is inadequate coverage to allow for valid results from the Ecco algorithm.");
-    tt->val_offset = (char *) &censor_based_on_mrms_coverage - &_start_;
+    tt->val_offset = (char *) &censor_based_on_radar_coverage - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'mrms_coverage_min_ht_fraction'
+    // Parameter 'radar_coverage_min_ht_fraction'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("mrms_coverage_min_ht_fraction");
+    tt->param_name = tdrpStrDup("radar_coverage_min_ht_fraction");
     tt->descr = tdrpStrDup("Minimum fraction of height coverage for stats to be valid.");
     tt->help = tdrpStrDup("We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.");
-    tt->val_offset = (char *) &mrms_coverage_min_ht_fraction - &_start_;
+    tt->val_offset = (char *) &radar_coverage_min_ht_fraction - &_start_;
     tt->single_val.d = 0.8;
     tt++;
     

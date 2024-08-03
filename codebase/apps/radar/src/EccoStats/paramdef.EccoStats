@@ -170,7 +170,7 @@ paramdef string {
   p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
   p_descr = "Directory for writing out MRMS coverage files.";
   p_help = "This is in MDV NetCDF format";
-} mrms_coverage_dir;
+} coverage_dir;
 
 paramdef string {
   p_default = "CoverageMinHt";
@@ -198,11 +198,11 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to censor the analysis based on the radar coverage - see above.";
   p_help = "If true, for each (x, y) location, we only accumulate the statistics if the coverage height fraction meets the threshold. This helps to remove areas in which there is inadequate coverage to allow for valid results from the Ecco algorithm.";
-} censor_based_on_mrms_coverage;
+} censor_based_on_radar_coverage;
 
 paramdef double {
   p_default = 0.8;
   p_descr = "Minimum fraction of height coverage for stats to be valid.";
   p_help = "We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.";
-} mrms_coverage_min_ht_fraction;
+} radar_coverage_min_ht_fraction;
 

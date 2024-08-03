@@ -267,7 +267,7 @@ mrms_dbz_field_name = "DBZ";
 //
 // Type: string
 
-mrms_coverage_output_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
+coverage_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
 
 ///////////// coverage_min_ht_field_name //////////////
 //

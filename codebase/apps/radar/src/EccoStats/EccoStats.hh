@@ -81,15 +81,12 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  DsInputPath *_inputPaths;
-  DsMdvx _inMdvx, _outMdvx;
-  time_t _firstTime, _lastTime;
 
-  MdvxField *_eccoTypeField;
-  MdvxField *_convectivityField;
-  MdvxField *_terrainHtField;
-  MdvxField *_waterFlagField;
-  
+  DsInputPath *_eccoPaths;
+  DsMdvx _eccoMdvx, _statsMdvx;
+  DsMdvx _mrmsMdvx, _covMdvx;
+  time_t _firstEccoTime, _lastEccoTime;
+
   MdvxProj _proj;
   int _inNx, _inNy;
   int _nx, _ny, _nz;
@@ -97,17 +94,25 @@ private:
   double _dx, _dy, _dz;
   int _agNx, _agNy;
 
+  MdvxField *_eccoTypeField;
+  MdvxField *_convectivityField;
+  MdvxField *_terrainHtField;
+  MdvxField *_waterFlagField;
+  MdvxField *_mrmsDbzField;
+  MdvxField *_covMinHtField;
+  MdvxField *_covMaxHtField;
+  MdvxField *_covHtFractionField;
+  
   fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount, ***_mixedCount;
   fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
   fl32 ***_stratLowConv, ***_stratMidConv, ***_stratHighConv, ***_mixedConv;
   fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
   fl32 ***_validCount, ***_totalCount;
   fl32 **_terrainHt, **_waterFlag;
+  fl32 **_sumCovMinHt, **_sumCovMaxHt, **_sumCovHtFrac;
+
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
-
-  DsMdvx _mrmsMdvx, _covMdvx;
-  MdvxField *_mrmsDbzField;
 
   int _computeEccoStats();
 
@@ -120,13 +125,14 @@ private:
   void _updateStatsFromInputFile();
 
   int _readEcco(const char *path);
-  void _initOutputFile();
-  void _addFieldsToOutput();
-  int _doWrite();
+  void _initStatsFile();
+  void _addFieldsToStats();
+  int _writeStats();
   
   int _computeCoverage();
   void _addCoverageFields();
   int _readMrms();
+  int _readCoverage();
   
   MdvxField *_make3DField(fl32 ***data,
                           string fieldName,

@@ -54,7 +54,7 @@ EccoStats::EccoStats(int argc, char **argv)
 {
 
   isOK = true;
-  _inputPaths = NULL;
+  _eccoPaths = NULL;
   
   // set programe name
 
@@ -92,21 +92,21 @@ EccoStats::EccoStats(int argc, char **argv)
     }
   }
   
-  // initialize the data input object
+  // initialize the ecco data input object
 
   if (_params.mode == Params::ARCHIVE) {
-    _inputPaths = new DsInputPath(_progName,
+    _eccoPaths = new DsInputPath(_progName,
                                   _params.debug >= Params::DEBUG_EXTRA,
                                   _params.input_dir,
                                   _args.startTime,
                                   _args.endTime);
   } else {
-    _inputPaths = new DsInputPath(_progName,
+    _eccoPaths = new DsInputPath(_progName,
                                   _params.debug >= Params::DEBUG_EXTRA,
                                   _args.inputFileList);
   }
   if (_params.set_month_range) {
-    _inputPaths->setValidMonthRange(_params.min_month, _params.max_month);
+    _eccoPaths->setValidMonthRange(_params.min_month, _params.max_month);
   }
 
   // init field pointers
@@ -116,6 +116,10 @@ EccoStats::EccoStats(int argc, char **argv)
   _convectivityField = NULL;
   _terrainHtField = NULL;
   _waterFlagField = NULL;
+  _mrmsDbzField = NULL;
+  _covMinHtField = NULL;
+  _covMaxHtField = NULL;
+  _covHtFractionField = NULL;
 
   // init arrays
 
@@ -139,8 +143,8 @@ EccoStats::~EccoStats()
 
 {
 
-  if (_inputPaths) {
-    delete _inputPaths;
+  if (_eccoPaths) {
+    delete _eccoPaths;
   }
   
   // free up arrays
@@ -171,12 +175,12 @@ int EccoStats::_computeEccoStats()
   
   int iret = 0;
 
-  // loop until end of data
+  // loop until end of ecco data
   
-  _inputPaths->reset();
+  _eccoPaths->reset();
   int fileCount = 0;
   char *nextPath = NULL;
-  while ((nextPath = _inputPaths->next()) != NULL) {
+  while ((nextPath = _eccoPaths->next()) != NULL) {
     
     // do the read
 
@@ -194,7 +198,7 @@ int EccoStats::_computeEccoStats()
 
       // first file, initialize grid
 
-      _firstTime = _inMdvx.getValidTime();
+      _firstEccoTime = _eccoMdvx.getValidTime();
 
       _inNx = fhdr.nx;
       _inNy = fhdr.ny;
@@ -222,13 +226,13 @@ int EccoStats::_computeEccoStats()
         cerr << "ERROR - grid size has changed" << endl;
         cerr << "  nx, ny found: " << fhdr.nx << ", " << fhdr.ny << endl;
         cerr << "  nx, ny should be: " << _inNx << ", " << _inNy << endl;
-        cerr << "  skipping this file: " << _inMdvx.getPathInUse() << endl;
+        cerr << "  skipping this file: " << _eccoMdvx.getPathInUse() << endl;
         iret = -1;
         continue;
       }
 
     }
-    _lastTime = _inMdvx.getValidTime();
+    _lastEccoTime = _eccoMdvx.getValidTime();
     fileCount++;
     
     // update the stats, based on the data in the file
@@ -238,18 +242,18 @@ int EccoStats::_computeEccoStats()
     // clear
     
     if (_params.debug) {
-      cerr << "Done processing input file: " << _inMdvx.getPathInUse() << endl;
+      cerr << "Done processing input file: " << _eccoMdvx.getPathInUse() << endl;
     }
 
   } // while
 
   // add the fields to the output file
 
-  _addFieldsToOutput();
+  _addFieldsToStats();
   
   // write out
   
-  if (_doWrite()) {
+  if (_writeStats()) {
     cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
     return -1;
   }
@@ -290,6 +294,10 @@ void EccoStats::_initArraysToNull()
   
   _terrainHt = NULL;
   _waterFlag = NULL;
+
+  _sumCovMinHt = NULL;
+  _sumCovMaxHt = NULL;
+  _sumCovHtFrac = NULL;
 
   _lat = NULL;
   _lon = NULL;
@@ -334,6 +342,12 @@ void EccoStats::_allocArrays()
   _terrainHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _waterFlag = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
 
+  // coverage
+  
+  _sumCovMinHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  _sumCovMaxHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  _sumCovHtFrac = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+
   // lat/lon
 
   _lon = (double **) ucalloc2(_ny, _nx, sizeof(double));
@@ -376,6 +390,10 @@ void EccoStats::_freeArrays()
   ufree2((void **) _terrainHt);
   ufree2((void **) _waterFlag);
 
+  ufree2((void **) _sumCovMinHt);
+  ufree2((void **) _sumCovMaxHt);
+  ufree2((void **) _sumCovHtFrac);
+
   ufree2((void **) _lat);
   ufree2((void **) _lon);
 
@@ -409,7 +427,7 @@ void EccoStats::_initForStats()
   
   // initialize the output file object
   
-  _initOutputFile();
+  _initStatsFile();
     
 }
 
@@ -521,7 +539,7 @@ void EccoStats::_loadTerrain()
 }
   
 /////////////////////////////////////////////////////////
-// process the file in _inMdvx
+// process the file in _eccoMdvx
 // Returns 0 on success, -1 on failure.
 
 void EccoStats::_updateStatsFromInputFile()
@@ -530,7 +548,7 @@ void EccoStats::_updateStatsFromInputFile()
 
   // compute hour of day array
   
-  DateTime fileTime(_inMdvx.getValidTime());
+  DateTime fileTime(_eccoMdvx.getValidTime());
   
   for (int iy = 0; iy < _ny; iy++) {
     for (int ix = 0; ix < _nx; ix++) {
@@ -628,50 +646,51 @@ int EccoStats::_readEcco(const char *path)
   
 {
   
-  _inMdvx.clear();
+  _eccoMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    _inMdvx.setDebug(true);
+    _eccoMdvx.setDebug(true);
   }
-  _inMdvx.addReadField(_params.ecco_type_comp_field_name);
-  _inMdvx.addReadField(_params.convectivity_comp_field_name);
+  _eccoMdvx.addReadField(_params.ecco_type_comp_field_name);
+  _eccoMdvx.addReadField(_params.convectivity_comp_field_name);
   if (strlen(_params.terrain_height_field_name) > 0) {
-    _inMdvx.addReadField(_params.terrain_height_field_name);
+    _eccoMdvx.addReadField(_params.terrain_height_field_name);
   }
   if (strlen(_params.water_flag_field_name) > 0) {
-    _inMdvx.addReadField(_params.water_flag_field_name);
+    _eccoMdvx.addReadField(_params.water_flag_field_name);
   }
-  _inMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  _inMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  _eccoMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _eccoMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _inMdvx.printReadRequest(cerr);
+    cerr << "Setting read for ecco data" << endl;
+    _eccoMdvx.printReadRequest(cerr);
   }
-  _inMdvx.setReadPath(path);
+  _eccoMdvx.setReadPath(path);
   
   // read in
   
-  if (_inMdvx.readVolume()) {
+  if (_eccoMdvx.readVolume()) {
     cerr << "ERROR - EccoStats::_readEcco" << endl;
     cerr << "  Cannot read in data." << endl;
-    cerr << _inMdvx.getErrStr() << endl;
+    cerr << _eccoMdvx.getErrStr() << endl;
     return -1;
   }
 
-  _eccoTypeField = _inMdvx.getField(_params.ecco_type_comp_field_name);
-  _convectivityField = _inMdvx.getField(_params.convectivity_comp_field_name);
+  _eccoTypeField = _eccoMdvx.getField(_params.ecco_type_comp_field_name);
+  _convectivityField = _eccoMdvx.getField(_params.convectivity_comp_field_name);
   if (strlen(_params.terrain_height_field_name) > 0) {
-    _terrainHtField = _inMdvx.getField(_params.terrain_height_field_name);
+    _terrainHtField = _eccoMdvx.getField(_params.terrain_height_field_name);
   }
   if (strlen(_params.water_flag_field_name) > 0) {
-    _waterFlagField = _inMdvx.getField(_params.water_flag_field_name);
+    _waterFlagField = _eccoMdvx.getField(_params.water_flag_field_name);
   }
   if (_eccoTypeField == NULL) {
-    cerr << "ERROR - readEcco(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "ERROR - readEcco(), file: " << _eccoMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
     return -1;
   }
   if (_convectivityField == NULL) {
-    cerr << "ERROR - readEcco(), file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "ERROR - readEcco(), file: " << _eccoMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
     return -1;
   }
@@ -682,7 +701,17 @@ int EccoStats::_readEcco(const char *path)
   _proj.init(fhdr);
   
   if (_params.debug) {
-    cerr << "Success - read in file: " << _inMdvx.getPathInUse() << endl;
+    cerr << "Success - read in file: " << _eccoMdvx.getPathInUse() << endl;
+  }
+  
+  // read the coverage data if requested
+
+  if (_params.censor_based_on_radar_coverage) {
+    if (_readCoverage()) {
+      // failure - skip
+      cerr << "ERROR - EccoStats::_readEcco()" << endl;
+      return -1;
+    }
   }
 
   return 0;
@@ -692,24 +721,24 @@ int EccoStats::_readEcco(const char *path)
 /////////////////////////////////////////////////////////
 // prepare the output file
 
-void EccoStats::_initOutputFile()
+void EccoStats::_initStatsFile()
   
 {
   
   // create output DsMdvx object
   // copying master header from input object
   
-  _outMdvx.clear();
+  _statsMdvx.clear();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _outMdvx.setDebug(true);
+    _statsMdvx.setDebug(true);
   }
-  Mdvx::master_header_t mhdr = _inMdvx.getMasterHeader();
+  Mdvx::master_header_t mhdr = _eccoMdvx.getMasterHeader();
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   mhdr.vlevel_included = 1;
-  _outMdvx.setMasterHeader(mhdr);
-  _outMdvx.setDataSetInfo(_params.output_data_set_info);
-  _outMdvx.setDataSetSource(_params.output_data_set_source);
+  _statsMdvx.setMasterHeader(mhdr);
+  _statsMdvx.setDataSetInfo(_params.output_data_set_info);
+  _statsMdvx.setDataSetSource(_params.output_data_set_source);
   char name[128];
   if (_params.min_month == _params.max_month) {
     snprintf(name, 128, "EccoStats for month %d\n", _params.min_month);
@@ -717,211 +746,211 @@ void EccoStats::_initOutputFile()
     snprintf(name, 128, "EccoStats for months %d to %d\n",
              _params.min_month, _params.max_month);
   }
-  _outMdvx.setDataSetName(name);
-  _outMdvx.setMdv2NcfOutput(true, true, true, true);
+  _statsMdvx.setDataSetName(name);
+  _statsMdvx.setMdv2NcfOutput(true, true, true, true);
   
 }
 
 /////////////////////////////////////////////////////////
 // add fields to the output object
 
-void EccoStats::_addFieldsToOutput()
+void EccoStats::_addFieldsToStats()
   
 {
 
   // clear
   
-  _outMdvx.clearFields();
+  _statsMdvx.clearFields();
 
   // add 3d summary count fields
   
-  _outMdvx.addField(_make3DField(_validCount,
+  _statsMdvx.addField(_make3DField(_validCount,
                                  "ValidCount",
                                  "count_for_valid_obs",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_totalCount,
+  _statsMdvx.addField(_make3DField(_totalCount,
                                  "TotalCount",
                                  "count_for_all_obs",
                                  "count"));
   
   // add 3d count fields by echo type
 
-  _outMdvx.addField(_make3DField(_stratLowCount,
+  _statsMdvx.addField(_make3DField(_stratLowCount,
                                  "StratLowCount",
                                  "count_for_stratiform_low",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_stratMidCount,
+  _statsMdvx.addField(_make3DField(_stratMidCount,
                                  "StratMidCount",
                                  "count_for_stratiform_mid",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_stratHighCount,
+  _statsMdvx.addField(_make3DField(_stratHighCount,
                                  "StratHighCount",
                                  "count_for_stratiform_high",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_mixedCount,
+  _statsMdvx.addField(_make3DField(_mixedCount,
                                  "MixedCount",
                                  "count_for_mixed",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_convShallowCount,
+  _statsMdvx.addField(_make3DField(_convShallowCount,
                                  "ConvShallowCount",
                                  "count_for_convective_shallow",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_convMidCount,
+  _statsMdvx.addField(_make3DField(_convMidCount,
                                  "ConvMidCount",
                                  "count_for_convective_mid",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_convDeepCount,
+  _statsMdvx.addField(_make3DField(_convDeepCount,
                                  "ConvDeepCount",
                                  "count_for_convective_deep",
                                  "count"));
   
-  _outMdvx.addField(_make3DField(_convElevCount,
+  _statsMdvx.addField(_make3DField(_convElevCount,
                                  "ConvElevCount",
                                  "count_for_convective_elevated",
                                  "count"));
   
   // add 3d convectivity fields by echo type
   
-  _outMdvx.addField(_make3DField(_stratLowConv,
+  _statsMdvx.addField(_make3DField(_stratLowConv,
                                  "StratLowConv",
                                  "convectivity_for_stratiform_low",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_stratMidConv,
+  _statsMdvx.addField(_make3DField(_stratMidConv,
                                  "StratMidConv",
                                  "convectivity_for_stratiform_mid",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_stratHighConv,
+  _statsMdvx.addField(_make3DField(_stratHighConv,
                                  "StratHighConv",
                                  "convectivity_for_stratiform_high",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_mixedConv,
+  _statsMdvx.addField(_make3DField(_mixedConv,
                                  "MixedConv",
                                  "convectivity_for_mixed",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_convShallowConv,
+  _statsMdvx.addField(_make3DField(_convShallowConv,
                                  "ConvShallowConv",
                                  "convectivity_for_convective_shallow",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_convMidConv,
+  _statsMdvx.addField(_make3DField(_convMidConv,
                                  "ConvMidConv",
                                  "convectivity_for_convective_mid",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_convDeepConv,
+  _statsMdvx.addField(_make3DField(_convDeepConv,
                                  "ConvDeepConv",
                                  "convectivity_for_convective_deep",
                                  ""));
   
-  _outMdvx.addField(_make3DField(_convElevConv,
+  _statsMdvx.addField(_make3DField(_convElevConv,
                                  "ConvElevConv",
                                  "convectivity_for_convective_elevated",
                                  ""));
   
   // add 3D valid fractional fields
 
-  _outMdvx.addField(_computeFrac3DField(_stratLowCount,
+  _statsMdvx.addField(_computeFrac3DField(_stratLowCount,
                                         _validCount,
                                         "StratLowValidFrac3D",
                                         "valid_fraction_for_stratiform_low",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_stratMidCount,
+  _statsMdvx.addField(_computeFrac3DField(_stratMidCount,
                                         _validCount,
                                         "StratMidValidFrac3D",
                                         "valid_fraction_for_stratiform_mid",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_stratHighCount,
+  _statsMdvx.addField(_computeFrac3DField(_stratHighCount,
                                         _validCount,
                                         "StratHighValidFrac3D",
                                         "valid_fraction_for_stratiform_high",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_mixedCount,
+  _statsMdvx.addField(_computeFrac3DField(_mixedCount,
                                         _validCount,
                                         "MixedValidFrac3D",
                                         "valid_fraction_for_mixed",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_convShallowCount,
+  _statsMdvx.addField(_computeFrac3DField(_convShallowCount,
                                         _validCount,
                                         "ConvShallowValidFrac3D",
                                         "valid_fraction_for_convective_shallow",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_convMidCount,
+  _statsMdvx.addField(_computeFrac3DField(_convMidCount,
                                         _validCount,
                                         "ConvMidValidFrac3D",
                                         "valid_fraction_for_convective_mid",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_convDeepCount,
+  _statsMdvx.addField(_computeFrac3DField(_convDeepCount,
                                         _validCount,
                                         "ConvDeepValidFrac3D",
                                         "valid_fraction_for_convective_deep",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_convElevCount,
+  _statsMdvx.addField(_computeFrac3DField(_convElevCount,
                                         _validCount,
                                         "ConvElevValidFrac3D",
                                         "valid_fraction_for_convective_elevated",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac3DField(_stratLowConv,
+  _statsMdvx.addField(_computeFrac3DField(_stratLowConv,
                                         _validCount,
                                         "StratLowConvMean3D",
                                         "mean_convectivity_for_stratiform_low",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_stratMidConv,
+  _statsMdvx.addField(_computeFrac3DField(_stratMidConv,
                                         _validCount,
                                         "StratMidConvMean3D",
                                         "mean_convectivity_for_stratiform_mid",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_stratHighConv,
+  _statsMdvx.addField(_computeFrac3DField(_stratHighConv,
                                         _validCount,
                                         "StratHighConvMean3D",
                                         "mean_convectivity_for_stratiform_high",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_mixedConv,
+  _statsMdvx.addField(_computeFrac3DField(_mixedConv,
                                         _validCount,
                                         "MixedConvMean3D",
                                         "mean_convectivity_for_mixed",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_convShallowConv,
+  _statsMdvx.addField(_computeFrac3DField(_convShallowConv,
                                         _validCount,
                                         "ConvShallowConvMean3D",
                                         "mean_convectivity_for_convective_shallow",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_convMidConv,
+  _statsMdvx.addField(_computeFrac3DField(_convMidConv,
                                         _validCount,
                                         "ConvMidConvMean3D",
                                         "mean_convectivity_for_convective_mid",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_convDeepConv,
+  _statsMdvx.addField(_computeFrac3DField(_convDeepConv,
                                         _validCount,
                                         "ConvDeepConvMean3D",
                                         "mean_convectivity_for_convective_deep",
                                         ""));
   
-  _outMdvx.addField(_computeFrac3DField(_convElevConv,
+  _statsMdvx.addField(_computeFrac3DField(_convElevConv,
                                         _validCount,
                                         "ConvElevConvMean3D",
                                         "mean_convectivity_for_convective_elevated",
@@ -929,97 +958,97 @@ void EccoStats::_addFieldsToOutput()
   
   // add 2D valid fractional fields
 
-  _outMdvx.addField(_computeFrac2DField(_stratLowCount,
+  _statsMdvx.addField(_computeFrac2DField(_stratLowCount,
                                         _validCount,
                                         "StratLowValidFrac2D",
                                         "valid_fraction_for_stratiform_low",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_stratMidCount,
+  _statsMdvx.addField(_computeFrac2DField(_stratMidCount,
                                         _validCount,
                                         "StratMidValidFrac2D",
                                         "valid_fraction_for_stratiform_mid",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_stratHighCount,
+  _statsMdvx.addField(_computeFrac2DField(_stratHighCount,
                                         _validCount,
                                         "StratHighValidFrac2D",
                                         "valid_fraction_for_stratiform_high",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_mixedCount,
+  _statsMdvx.addField(_computeFrac2DField(_mixedCount,
                                         _validCount,
                                         "MixedValidFrac2D",
                                         "valid_fraction_for_mixed",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_convShallowCount,
+  _statsMdvx.addField(_computeFrac2DField(_convShallowCount,
                                         _validCount,
                                         "ConvShallowValidFrac2D",
                                         "valid_fraction_for_convective_shallow",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_convMidCount,
+  _statsMdvx.addField(_computeFrac2DField(_convMidCount,
                                         _validCount,
                                         "ConvMidValidFrac2D",
                                         "valid_fraction_for_convective_mid",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_convDeepCount,
+  _statsMdvx.addField(_computeFrac2DField(_convDeepCount,
                                         _validCount,
                                         "ConvDeepValidFrac2D",
                                         "valid_fraction_for_convective_deep",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_convElevCount,
+  _statsMdvx.addField(_computeFrac2DField(_convElevCount,
                                         _validCount,
                                         "ConvElevValidFrac2D",
                                         "valid_fraction_for_convective_elevated",
                                         "count"));
   
-  _outMdvx.addField(_computeFrac2DField(_stratLowConv,
+  _statsMdvx.addField(_computeFrac2DField(_stratLowConv,
                                         _validCount,
                                         "StratLowConvMean2D",
                                         "mean_convectivity_for_stratiform_low",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_stratMidConv,
+  _statsMdvx.addField(_computeFrac2DField(_stratMidConv,
                                         _validCount,
                                         "StratMidConvMean2D",
                                         "mean_convectivity_for_stratiform_mid",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_stratHighConv,
+  _statsMdvx.addField(_computeFrac2DField(_stratHighConv,
                                         _validCount,
                                         "StratHighConvMean2D",
                                         "mean_convectivity_for_stratiform_high",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_mixedConv,
+  _statsMdvx.addField(_computeFrac2DField(_mixedConv,
                                         _validCount,
                                         "MixedConvMean2D",
                                         "mean_convectivity_for_mixed",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_convShallowConv,
+  _statsMdvx.addField(_computeFrac2DField(_convShallowConv,
                                         _validCount,
                                         "ConvShallowConvMean2D",
                                         "mean_convectivity_for_convective_shallow",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_convMidConv,
+  _statsMdvx.addField(_computeFrac2DField(_convMidConv,
                                         _validCount,
                                         "ConvMidConvMean2D",
                                         "mean_convectivity_for_convective_mid",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_convDeepConv,
+  _statsMdvx.addField(_computeFrac2DField(_convDeepConv,
                                         _validCount,
                                         "ConvDeepConvMean2D",
                                         "mean_convectivity_for_convective_deep",
                                         ""));
   
-  _outMdvx.addField(_computeFrac2DField(_convElevConv,
+  _statsMdvx.addField(_computeFrac2DField(_convElevConv,
                                         _validCount,
                                         "ConvElevConvMean2D",
                                         "mean_convectivity_for_convective_elevated",
@@ -1028,14 +1057,14 @@ void EccoStats::_addFieldsToOutput()
   // add 2d fields for terrain height and water flag, if available
 
   if (_terrainHtField) {
-    _outMdvx.addField(_make2DField(_terrainHt,
+    _statsMdvx.addField(_make2DField(_terrainHt,
                                    _terrainHtField->getFieldName(),
                                    _terrainHtField->getFieldNameLong(),
                                    _terrainHtField->getUnits()));
   }
   
   if (_waterFlagField) {
-    _outMdvx.addField(_make2DField(_waterFlag,
+    _statsMdvx.addField(_make2DField(_waterFlag,
                                    _waterFlagField->getFieldName(),
                                    _waterFlagField->getFieldNameLong(),
                                    _waterFlagField->getUnits()));
@@ -1044,31 +1073,31 @@ void EccoStats::_addFieldsToOutput()
 }
 
 /////////////////////////////////////////////////////////
-// perform the write
+// write stats to file
 // Returns 0 on success, -1 on failure.
 
-int EccoStats::_doWrite()
+int EccoStats::_writeStats()
   
 {
 
   // set times
   
-  _outMdvx.setValidTime(_firstTime);
-  _outMdvx.setBeginTime(_firstTime);
-  _outMdvx.setEndTime(_lastTime);
-  _outMdvx.setGenTime(_firstTime);
+  _statsMdvx.setValidTime(_firstEccoTime);
+  _statsMdvx.setBeginTime(_firstEccoTime);
+  _statsMdvx.setEndTime(_lastEccoTime);
+  _statsMdvx.setGenTime(_firstEccoTime);
 
   // write out
   
-  if(_outMdvx.writeToDir(_params.output_dir)) {
+  if(_statsMdvx.writeToDir(_params.output_dir)) {
     cerr << "ERROR - EccoStats::Run" << endl;
     cerr << "  Cannot write data set." << endl;
-    cerr << _outMdvx.getErrStr() << endl;
+    cerr << _statsMdvx.getErrStr() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "Wrote file: " << _outMdvx.getPathInUse() << endl;
+    cerr << "Wrote stats file: " << _statsMdvx.getPathInUse() << endl;
   }
   
   return 0;
@@ -1083,11 +1112,11 @@ int EccoStats::_computeCoverage()
   
   int iret = 0;
 
-  // loop until end of data
+  // loop until end of ecco data
   
-  _inputPaths->reset();
+  _eccoPaths->reset();
   char *nextPath = NULL;
-  while ((nextPath = _inputPaths->next()) != NULL) {
+  while ((nextPath = _eccoPaths->next()) != NULL) {
     
     // read the Ecco data
     
@@ -1113,7 +1142,7 @@ int EccoStats::_computeCoverage()
     
     // write file
     
-    if(_covMdvx.writeToDir(_params.mrms_coverage_dir)) {
+    if(_covMdvx.writeToDir(_params.coverage_dir)) {
       cerr << "ERROR - EccoStats::Run" << endl;
       cerr << "  Cannot write data set." << endl;
       cerr << _covMdvx.getErrStr() << endl;
@@ -1253,6 +1282,8 @@ void EccoStats::_addCoverageFields()
 int EccoStats::_readMrms()
   
 {
+
+  _mrmsDbzField = NULL;
   
   _mrmsMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -1263,10 +1294,11 @@ int EccoStats::_readMrms()
   _mrmsMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Setting read for mrms data" << endl;
     _mrmsMdvx.printReadRequest(cerr);
   }
 
-  time_t eccoValidTime = _inMdvx.getValidTime();
+  time_t eccoValidTime = _eccoMdvx.getValidTime();
 
   _mrmsMdvx.setReadTime(Mdvx::READ_CLOSEST,
                         _params.mrms_dbz_mdv_dir,
@@ -1304,6 +1336,96 @@ int EccoStats::_readMrms()
     cerr << "ERROR - EccoStats::_readMrms" << endl;
     cerr << "  DBZ nx,ny grid does not match Ecco, file: " << _mrmsMdvx.getPathInUse() << endl;
     cerr << "  MRMS nx, ny: " << fhdrMrms.nx << ", " << fhdrMrms.ny << endl;
+    cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// read the coverage fields
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_readCoverage()
+  
+{
+
+  
+  _covMinHtField = NULL;
+  _covMaxHtField = NULL;
+  _covHtFractionField = NULL;
+
+  _covMdvx.clear();
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _covMdvx.setDebug(true);
+  }
+  _covMdvx.addReadField(_params.coverage_min_ht_field_name);
+  _covMdvx.addReadField(_params.coverage_max_ht_field_name);
+  _covMdvx.addReadField(_params.coverage_ht_fraction_field_name);
+  _covMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  _covMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Setting read for coverage data" << endl;
+    _covMdvx.printReadRequest(cerr);
+  }
+
+  time_t eccoValidTime = _eccoMdvx.getValidTime();
+
+  _covMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                       _params.coverage_dir,
+                       180, eccoValidTime);
+  
+  // read in
+  
+  if (_covMdvx.readVolume()) {
+    cerr << "ERROR - EccoStats::_readCoverage" << endl;
+    cerr << "  Cannot read in data." << endl;
+    cerr << _covMdvx.getErrStr() << endl;
+    return -1;
+  }
+  if (_params.debug) {
+    cerr << "Read coverage data file: " << _covMdvx.getPathInUse() << endl;
+  }
+
+  // get fields
+  
+  _covMinHtField = _covMdvx.getField(_params.coverage_min_ht_field_name);
+  if (_covMinHtField == NULL) {
+    cerr << "WARNING - EccoStats::_readCoverage" << endl;
+    cerr << "  Cannot find coverage min ht field: "
+         << _params.coverage_min_ht_field_name << endl;
+    cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
+  }
+
+  _covMaxHtField = _covMdvx.getField(_params.coverage_max_ht_field_name);
+  if (_covMinHtField == NULL) {
+    cerr << "WARNING - EccoStats::_readCoverage" << endl;
+    cerr << "  Cannot find coverage max ht field: " << _params.coverage_max_ht_field_name << endl;
+    cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
+  }
+
+  _covHtFractionField = _covMdvx.getField(_params.coverage_ht_fraction_field_name);
+  if (_covHtFractionField == NULL) {
+    cerr << "ERROR - EccoStats::_readCoverage" << endl;
+    cerr << "  Cannot find coverage ht fraction field: "
+         << _params.coverage_ht_fraction_field_name << endl;
+    cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
+    return -1;
+  }
+
+  // check dimensions
+
+  Mdvx::field_header_t fhdrEcco = _eccoTypeField->getFieldHeader();
+  Mdvx::field_header_t fhdrCov = _covHtFractionField->getFieldHeader();
+
+  if (fhdrEcco.ny != fhdrCov.ny ||
+      fhdrEcco.nx != fhdrCov.nx) {
+    cerr << "ERROR - EccoStats::_readCoverage" << endl;
+    cerr << "  Coverage nx,ny grid does not match Ecco, file: " << _covMdvx.getPathInUse() << endl;
+    cerr << "  COV nx, ny: " << fhdrCov.nx << ", " << fhdrCov.ny << endl;
     cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
     return -1;
   }
