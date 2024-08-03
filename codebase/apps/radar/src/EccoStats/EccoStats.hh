@@ -102,8 +102,9 @@ private:
   MdvxField *_covMinHtField;
   MdvxField *_covMaxHtField;
   MdvxField *_covHtFractionField;
-  
-  fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount, ***_mixedCount;
+
+  fl32 ***_stratCount, ***_mixedCount, ***_convCount;
+  fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount;
   fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
   fl32 ***_stratLowConv, ***_stratMidConv, ***_stratHighConv, ***_mixedConv;
   fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
@@ -166,6 +167,11 @@ private:
                                 string fieldName,
                                 string longName,
                                 string units);
+  
+  MdvxField *_sumCountsField(fl32 ***counts,
+                             string fieldName,
+                             string longName,
+                             string units);
   
 };
 

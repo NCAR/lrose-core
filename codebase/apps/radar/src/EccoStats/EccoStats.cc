@@ -271,10 +271,14 @@ void EccoStats::_initArraysToNull()
 
   // init arrays
   
+  _stratCount = NULL;
+  _mixedCount = NULL;
+  _convCount = NULL;
+
   _stratLowCount = NULL;
   _stratMidCount = NULL;
   _stratHighCount = NULL;
-  _mixedCount = NULL;
+
   _convShallowCount = NULL;
   _convMidCount = NULL;
   _convDeepCount = NULL;
@@ -315,10 +319,14 @@ void EccoStats::_allocArrays()
 
   // counts
   
+  _stratCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _mixedCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+
   _stratLowCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _stratMidCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _stratHighCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _mixedCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+
   _convShallowCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _convMidCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _convDeepCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
@@ -368,10 +376,14 @@ void EccoStats::_freeArrays()
   
 {
 
+  ufree3((void ***) _stratCount);
+  ufree3((void ***) _mixedCount);
+  ufree3((void ***) _convCount);
+
   ufree3((void ***) _stratLowCount);
   ufree3((void ***) _stratMidCount);
   ufree3((void ***) _stratHighCount);
-  ufree3((void ***) _mixedCount);
+
   ufree3((void ***) _convShallowCount);
   ufree3((void ***) _convMidCount);
   ufree3((void ***) _convDeepCount);
@@ -632,16 +644,19 @@ void EccoStats::_updateStats()
         fl32 convectivity = convectivity2D[offset];
         switch ((ConvStratFinder::category_t) echoType) {
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_LOW: {
+            _stratCount[hour][iy][ix]++;
             _stratLowCount[hour][iy][ix]++;
             _stratLowConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_MID: {
+            _stratCount[hour][iy][ix]++;
             _stratMidCount[hour][iy][ix]++;
             _stratMidConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_HIGH: {
+            _stratCount[hour][iy][ix]++;
             _stratHighCount[hour][iy][ix]++;
             _stratHighConv[hour][iy][ix] += convectivity;
             break;
@@ -652,21 +667,25 @@ void EccoStats::_updateStats()
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_ELEVATED: {
+            _convCount[hour][iy][ix]++;
             _convElevCount[hour][iy][ix]++;
             _convElevConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_SHALLOW: {
+            _convCount[hour][iy][ix]++;
             _convShallowCount[hour][iy][ix]++;
             _convShallowConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_MID: {
+            _convCount[hour][iy][ix]++;
             _convMidCount[hour][iy][ix]++;
             _convMidConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_DEEP: {
+            _convCount[hour][iy][ix]++;
             _convDeepCount[hour][iy][ix]++;
             _convDeepConv[hour][iy][ix] += convectivity;
             break;
@@ -822,8 +841,25 @@ void EccoStats::_addFieldsToStats()
                                    "count_for_all_obs",
                                    "count"));
   
+  // add total counts for all hours
+  
+  _statsMdvx.addField(_sumCountsField(_validCount,
+                                      "ValidCountAllHours",
+                                      "count_for_valid_obs_all_hours",
+                                      "count"));
+  
+  _statsMdvx.addField(_sumCountsField(_totalCount,
+                                      "TotalCountAllHours",
+                                      "count_for_total_obs_all_hours",
+                                      "count"));
+  
   // add 3d count fields by echo type
 
+  _statsMdvx.addField(_make3DField(_stratCount,
+                                   "StratCount",
+                                   "count_for_all_stratiform",
+                                   "count"));
+  
   _statsMdvx.addField(_make3DField(_stratLowCount,
                                    "StratLowCount",
                                    "count_for_stratiform_low",
@@ -842,6 +878,11 @@ void EccoStats::_addFieldsToStats()
   _statsMdvx.addField(_make3DField(_mixedCount,
                                    "MixedCount",
                                    "count_for_mixed",
+                                   "count"));
+  
+  _statsMdvx.addField(_make3DField(_convCount,
+                                   "ConvCount",
+                                   "count_for_all_convective",
                                    "count"));
   
   _statsMdvx.addField(_make3DField(_convShallowCount,
@@ -908,6 +949,12 @@ void EccoStats::_addFieldsToStats()
   
   // add 3D valid fractional fields
 
+  _statsMdvx.addField(_computeFrac3DField(_stratCount,
+                                          _validCount,
+                                          "StratValidFrac3D",
+                                          "valid_fraction_for_all_stratiform",
+                                          ""));
+  
   _statsMdvx.addField(_computeFrac3DField(_stratLowCount,
                                           _validCount,
                                           "StratLowValidFrac3D",
@@ -930,6 +977,12 @@ void EccoStats::_addFieldsToStats()
                                           _validCount,
                                           "MixedValidFrac3D",
                                           "valid_fraction_for_mixed",
+                                          "count"));
+  
+  _statsMdvx.addField(_computeFrac3DField(_convCount,
+                                          _validCount,
+                                          "ConvValidFrac3D",
+                                          "valid_fraction_for_all_convective",
                                           "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_convShallowCount,
@@ -1143,7 +1196,7 @@ void EccoStats::_addFieldsToStats()
                                            "max_ht_of_radar_coverage",
                                            "km"));
   }
-  
+
 }
 
 /////////////////////////////////////////////////////////
@@ -1702,7 +1755,7 @@ MdvxField *EccoStats::_computeFrac3DField(fl32 ***data,
 }
 
 /////////////////////////////////////////////////////////
-// compute a fractional 2d field - summary for column
+// compute a fractional 2d field - summary for all hours
 
 MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
                                           fl32 ***counts,
@@ -1741,11 +1794,10 @@ MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
   size_t volSize = npts * sizeof(fl32);
   fhdr.volume_size = volSize;
 
-  Mdvx::vlevel_header_t vhdr = _eccoTypeField->getVlevelHeader();
-  for (int ii = 0; ii < _nz; ii++) {
-    vhdr.type[ii] = Mdvx::VERT_TYPE_SURFACE;
-    vhdr.level[ii] = ii;
-  }
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
   
   MdvxField::setFieldName(fieldName, fhdr);
   MdvxField::setFieldNameLong(longName, fhdr);
@@ -1904,6 +1956,83 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
   // free up
 
   ufree2((void **) mean);
+
+  // return newly created field
+  
+  return newField;
+
+}
+
+/////////////////////////////////////////////////////////
+// compute 2D sum of counts field for all hours
+
+MdvxField *EccoStats::_sumCountsField(fl32 ***counts,
+                                      string fieldName,
+                                      string longName,
+                                      string units)
+                                 
+{
+
+  // create header
+  
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+  
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
+  fhdr.nz = 1;
+  
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = 1.0;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = 0.0;
+
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+  
+  Mdvx::vlevel_header_t vhdr;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+  
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  
+  // compute total counts for all hours
+
+  fl32 **tot = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      fl32 nn = 0.0;
+      for (int iz = 0; iz < _nz; iz++) {
+        nn += counts[iz][iy][ix];
+      } // iz
+      tot[iy][ix] = nn;
+    } // ix
+  } // iy
+  
+  // create field from header and data
+  
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*tot, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+  
+  // free up
+  
+  ufree2((void **) tot);
 
   // return newly created field
   
