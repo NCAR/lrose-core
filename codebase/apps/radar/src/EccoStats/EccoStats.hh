@@ -109,7 +109,7 @@ private:
   fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
   fl32 ***_validCount, ***_totalCount;
   fl32 **_terrainHt, **_waterFlag;
-  fl32 **_sumCovMinHt, **_sumCovMaxHt, **_sumCovHtFrac;
+  fl32 **_sumCovMinHt, **_sumCovMaxHt, **_sumCovHtFrac, **_countCov;
 
   double **_lat, **_lon;
   int **_hourOfDay; // hour of day index
@@ -122,7 +122,7 @@ private:
   void _initForStats();
 
   void _loadTerrain();
-  void _updateStatsFromInputFile();
+  void _updateStats();
 
   int _readEcco(const char *path);
   void _initStatsFile();
@@ -160,7 +160,13 @@ private:
                               string fieldName,
                               string longName,
                               string units);
-                                 
+  
+  MdvxField *_computeCov2DField(fl32 **sum,
+                                fl32 **counts,
+                                string fieldName,
+                                string longName,
+                                string units);
+  
 };
 
 #endif

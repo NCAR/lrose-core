@@ -96,14 +96,14 @@ EccoStats::EccoStats(int argc, char **argv)
 
   if (_params.mode == Params::ARCHIVE) {
     _eccoPaths = new DsInputPath(_progName,
-                                  _params.debug >= Params::DEBUG_EXTRA,
-                                  _params.input_dir,
-                                  _args.startTime,
-                                  _args.endTime);
+                                 _params.debug >= Params::DEBUG_EXTRA,
+                                 _params.input_dir,
+                                 _args.startTime,
+                                 _args.endTime);
   } else {
     _eccoPaths = new DsInputPath(_progName,
-                                  _params.debug >= Params::DEBUG_EXTRA,
-                                  _args.inputFileList);
+                                 _params.debug >= Params::DEBUG_EXTRA,
+                                 _args.inputFileList);
   }
   if (_params.set_month_range) {
     _eccoPaths->setValidMonthRange(_params.min_month, _params.max_month);
@@ -235,9 +235,9 @@ int EccoStats::_computeEccoStats()
     _lastEccoTime = _eccoMdvx.getValidTime();
     fileCount++;
     
-    // update the stats, based on the data in the file
+    // update the stats, based on the data in the ecco file
     
-    _updateStatsFromInputFile();
+    _updateStats();
     
     // clear
     
@@ -298,6 +298,7 @@ void EccoStats::_initArraysToNull()
   _sumCovMinHt = NULL;
   _sumCovMaxHt = NULL;
   _sumCovHtFrac = NULL;
+  _countCov = NULL;
 
   _lat = NULL;
   _lon = NULL;
@@ -347,6 +348,7 @@ void EccoStats::_allocArrays()
   _sumCovMinHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _sumCovMaxHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _sumCovHtFrac = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  _countCov = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
 
   // lat/lon
 
@@ -393,6 +395,7 @@ void EccoStats::_freeArrays()
   ufree2((void **) _sumCovMinHt);
   ufree2((void **) _sumCovMaxHt);
   ufree2((void **) _sumCovHtFrac);
+  ufree2((void **) _countCov);
 
   ufree2((void **) _lat);
   ufree2((void **) _lon);
@@ -445,9 +448,7 @@ void EccoStats::_loadTerrain()
   
     // loop through 2D grid space
     
-    Mdvx::field_header_t fhdrHt = _terrainHtField->getFieldHeader();
-    fl32 missHt = fhdrHt.missing_data_value;
-    
+    fl32 missHt = _terrainHtField->getFieldHeader().missing_data_value;
     fl32 *height = (fl32 *) _terrainHtField->getVol();
     
     fl32 **count = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
@@ -491,9 +492,7 @@ void EccoStats::_loadTerrain()
   
     // loop through 2D grid space
     
-    Mdvx::field_header_t fhdrFlag = _waterFlagField->getFieldHeader();
-    fl32 missFlag = fhdrFlag.missing_data_value;
-    
+    fl32 missFlag = _waterFlagField->getFieldHeader().missing_data_value;
     fl32 *waterFlag = (fl32 *) _waterFlagField->getVol();
     
     fl32 **count = (fl32 **) ucalloc2(_ny, _nx, sizeof(double));
@@ -542,7 +541,7 @@ void EccoStats::_loadTerrain()
 // process the file in _eccoMdvx
 // Returns 0 on success, -1 on failure.
 
-void EccoStats::_updateStatsFromInputFile()
+void EccoStats::_updateStats()
   
 {
 
@@ -560,14 +559,35 @@ void EccoStats::_updateStatsFromInputFile()
     } // ix
   } // iy
 
-  // loop through 2D grid space
+  // intialize array pointers
   
-  Mdvx::field_header_t etHdr = _eccoTypeField->getFieldHeader();
-  fl32 etMiss = etHdr.missing_data_value;
-  
+  fl32 eccoMiss = _eccoTypeField->getFieldHeader().missing_data_value;
   fl32 *echoType2D = (fl32 *) _eccoTypeField->getVol();
   fl32 *convectivity2D = (fl32 *) _convectivityField->getVol();
 
+  fl32 *covHtFrac2D = NULL;
+  fl32 covHtFracMiss = -9999;
+  if (_covHtFractionField != NULL) {
+    covHtFracMiss = _covHtFractionField->getFieldHeader().missing_data_value;
+    covHtFrac2D = (fl32 *) _covHtFractionField->getVol();
+  }
+  
+  fl32 *covMinHt2D = NULL;
+  fl32 covMinHtMiss = -9999;
+  if (_covMinHtField != NULL) {
+    covMinHtMiss = _covMinHtField->getFieldHeader().missing_data_value;
+    covMinHt2D = (fl32 *) _covMinHtField->getVol();
+  }
+  
+  fl32 *covMaxHt2D = NULL;
+  fl32 covMaxHtMiss = -9999;
+  if (_covMaxHtField != NULL) {
+    covMaxHtMiss = _covMaxHtField->getFieldHeader().missing_data_value;
+    covMaxHt2D = (fl32 *) _covMaxHtField->getVol();
+  }
+  
+  // loop through 2D grid space
+  
   size_t offset = 0;
   for (int jy = 0; jy < _inNy; jy++) {
     for (int jx = 0; jx < _inNx; jx++, offset++) {
@@ -577,8 +597,36 @@ void EccoStats::_updateStatsFromInputFile()
       
       int hour = _hourOfDay[iy][ix];
       fl32 echoTypeFl32 = echoType2D[offset];
+
+      // check for coverage ht fraction if active
       
-      if (echoTypeFl32 != etMiss) {
+      if (covHtFrac2D != NULL) {
+        fl32 covHtFrac = covHtFrac2D[offset];
+        if (covHtFrac != covHtFracMiss) {
+          // min coverage height
+          fl32 covMinHt = covMinHt2D[offset];
+          if (covMinHt != covMinHtMiss) {
+            _sumCovMinHt[iy][ix] += covMinHt;
+          }
+          // max coverage height
+          fl32 covMaxHt = covMaxHt2D[offset];
+          if (covMaxHt != covMaxHtMiss) {
+            _sumCovMaxHt[iy][ix] += covMaxHt;
+          }
+          // ht fraction
+          _sumCovHtFrac[iy][ix] += covHtFrac;
+          _countCov[iy][ix]++;
+          if (covHtFrac < _params.radar_coverage_min_ht_fraction) {
+            // censor because ht fraction too low
+            continue;
+          }
+        } else {
+          // censor because ht fraction missing
+          continue;
+        }
+      } // if (covHtFrac2D != NULL) 
+      
+      if (echoTypeFl32 != eccoMiss) {
         
         int echoType = (int) floor(echoTypeFl32 + 0.5);
         fl32 convectivity = convectivity2D[offset];
@@ -765,309 +813,335 @@ void EccoStats::_addFieldsToStats()
   // add 3d summary count fields
   
   _statsMdvx.addField(_make3DField(_validCount,
-                                 "ValidCount",
-                                 "count_for_valid_obs",
-                                 "count"));
+                                   "ValidCount",
+                                   "count_for_valid_obs",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_totalCount,
-                                 "TotalCount",
-                                 "count_for_all_obs",
-                                 "count"));
+                                   "TotalCount",
+                                   "count_for_all_obs",
+                                   "count"));
   
   // add 3d count fields by echo type
 
   _statsMdvx.addField(_make3DField(_stratLowCount,
-                                 "StratLowCount",
-                                 "count_for_stratiform_low",
-                                 "count"));
+                                   "StratLowCount",
+                                   "count_for_stratiform_low",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_stratMidCount,
-                                 "StratMidCount",
-                                 "count_for_stratiform_mid",
-                                 "count"));
+                                   "StratMidCount",
+                                   "count_for_stratiform_mid",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_stratHighCount,
-                                 "StratHighCount",
-                                 "count_for_stratiform_high",
-                                 "count"));
+                                   "StratHighCount",
+                                   "count_for_stratiform_high",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_mixedCount,
-                                 "MixedCount",
-                                 "count_for_mixed",
-                                 "count"));
+                                   "MixedCount",
+                                   "count_for_mixed",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_convShallowCount,
-                                 "ConvShallowCount",
-                                 "count_for_convective_shallow",
-                                 "count"));
+                                   "ConvShallowCount",
+                                   "count_for_convective_shallow",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_convMidCount,
-                                 "ConvMidCount",
-                                 "count_for_convective_mid",
-                                 "count"));
+                                   "ConvMidCount",
+                                   "count_for_convective_mid",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_convDeepCount,
-                                 "ConvDeepCount",
-                                 "count_for_convective_deep",
-                                 "count"));
+                                   "ConvDeepCount",
+                                   "count_for_convective_deep",
+                                   "count"));
   
   _statsMdvx.addField(_make3DField(_convElevCount,
-                                 "ConvElevCount",
-                                 "count_for_convective_elevated",
-                                 "count"));
+                                   "ConvElevCount",
+                                   "count_for_convective_elevated",
+                                   "count"));
   
   // add 3d convectivity fields by echo type
   
   _statsMdvx.addField(_make3DField(_stratLowConv,
-                                 "StratLowConv",
-                                 "convectivity_for_stratiform_low",
-                                 ""));
+                                   "StratLowConv",
+                                   "convectivity_for_stratiform_low",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_stratMidConv,
-                                 "StratMidConv",
-                                 "convectivity_for_stratiform_mid",
-                                 ""));
+                                   "StratMidConv",
+                                   "convectivity_for_stratiform_mid",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_stratHighConv,
-                                 "StratHighConv",
-                                 "convectivity_for_stratiform_high",
-                                 ""));
+                                   "StratHighConv",
+                                   "convectivity_for_stratiform_high",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_mixedConv,
-                                 "MixedConv",
-                                 "convectivity_for_mixed",
-                                 ""));
+                                   "MixedConv",
+                                   "convectivity_for_mixed",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_convShallowConv,
-                                 "ConvShallowConv",
-                                 "convectivity_for_convective_shallow",
-                                 ""));
+                                   "ConvShallowConv",
+                                   "convectivity_for_convective_shallow",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_convMidConv,
-                                 "ConvMidConv",
-                                 "convectivity_for_convective_mid",
-                                 ""));
+                                   "ConvMidConv",
+                                   "convectivity_for_convective_mid",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_convDeepConv,
-                                 "ConvDeepConv",
-                                 "convectivity_for_convective_deep",
-                                 ""));
+                                   "ConvDeepConv",
+                                   "convectivity_for_convective_deep",
+                                   ""));
   
   _statsMdvx.addField(_make3DField(_convElevConv,
-                                 "ConvElevConv",
-                                 "convectivity_for_convective_elevated",
-                                 ""));
+                                   "ConvElevConv",
+                                   "convectivity_for_convective_elevated",
+                                   ""));
   
   // add 3D valid fractional fields
 
   _statsMdvx.addField(_computeFrac3DField(_stratLowCount,
-                                        _validCount,
-                                        "StratLowValidFrac3D",
-                                        "valid_fraction_for_stratiform_low",
-                                        ""));
+                                          _validCount,
+                                          "StratLowValidFrac3D",
+                                          "valid_fraction_for_stratiform_low",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_stratMidCount,
-                                        _validCount,
-                                        "StratMidValidFrac3D",
-                                        "valid_fraction_for_stratiform_mid",
-                                        "count"));
+                                          _validCount,
+                                          "StratMidValidFrac3D",
+                                          "valid_fraction_for_stratiform_mid",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_stratHighCount,
-                                        _validCount,
-                                        "StratHighValidFrac3D",
-                                        "valid_fraction_for_stratiform_high",
-                                        "count"));
+                                          _validCount,
+                                          "StratHighValidFrac3D",
+                                          "valid_fraction_for_stratiform_high",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_mixedCount,
-                                        _validCount,
-                                        "MixedValidFrac3D",
-                                        "valid_fraction_for_mixed",
-                                        "count"));
+                                          _validCount,
+                                          "MixedValidFrac3D",
+                                          "valid_fraction_for_mixed",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_convShallowCount,
-                                        _validCount,
-                                        "ConvShallowValidFrac3D",
-                                        "valid_fraction_for_convective_shallow",
-                                        "count"));
+                                          _validCount,
+                                          "ConvShallowValidFrac3D",
+                                          "valid_fraction_for_convective_shallow",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_convMidCount,
-                                        _validCount,
-                                        "ConvMidValidFrac3D",
-                                        "valid_fraction_for_convective_mid",
-                                        "count"));
+                                          _validCount,
+                                          "ConvMidValidFrac3D",
+                                          "valid_fraction_for_convective_mid",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_convDeepCount,
-                                        _validCount,
-                                        "ConvDeepValidFrac3D",
-                                        "valid_fraction_for_convective_deep",
-                                        "count"));
+                                          _validCount,
+                                          "ConvDeepValidFrac3D",
+                                          "valid_fraction_for_convective_deep",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_convElevCount,
-                                        _validCount,
-                                        "ConvElevValidFrac3D",
-                                        "valid_fraction_for_convective_elevated",
-                                        "count"));
+                                          _validCount,
+                                          "ConvElevValidFrac3D",
+                                          "valid_fraction_for_convective_elevated",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac3DField(_stratLowConv,
-                                        _validCount,
-                                        "StratLowConvMean3D",
-                                        "mean_convectivity_for_stratiform_low",
-                                        ""));
+                                          _validCount,
+                                          "StratLowConvMean3D",
+                                          "mean_convectivity_for_stratiform_low",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_stratMidConv,
-                                        _validCount,
-                                        "StratMidConvMean3D",
-                                        "mean_convectivity_for_stratiform_mid",
-                                        ""));
+                                          _validCount,
+                                          "StratMidConvMean3D",
+                                          "mean_convectivity_for_stratiform_mid",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_stratHighConv,
-                                        _validCount,
-                                        "StratHighConvMean3D",
-                                        "mean_convectivity_for_stratiform_high",
-                                        ""));
+                                          _validCount,
+                                          "StratHighConvMean3D",
+                                          "mean_convectivity_for_stratiform_high",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_mixedConv,
-                                        _validCount,
-                                        "MixedConvMean3D",
-                                        "mean_convectivity_for_mixed",
-                                        ""));
+                                          _validCount,
+                                          "MixedConvMean3D",
+                                          "mean_convectivity_for_mixed",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_convShallowConv,
-                                        _validCount,
-                                        "ConvShallowConvMean3D",
-                                        "mean_convectivity_for_convective_shallow",
-                                        ""));
+                                          _validCount,
+                                          "ConvShallowConvMean3D",
+                                          "mean_convectivity_for_convective_shallow",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_convMidConv,
-                                        _validCount,
-                                        "ConvMidConvMean3D",
-                                        "mean_convectivity_for_convective_mid",
-                                        ""));
+                                          _validCount,
+                                          "ConvMidConvMean3D",
+                                          "mean_convectivity_for_convective_mid",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_convDeepConv,
-                                        _validCount,
-                                        "ConvDeepConvMean3D",
-                                        "mean_convectivity_for_convective_deep",
-                                        ""));
+                                          _validCount,
+                                          "ConvDeepConvMean3D",
+                                          "mean_convectivity_for_convective_deep",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac3DField(_convElevConv,
-                                        _validCount,
-                                        "ConvElevConvMean3D",
-                                        "mean_convectivity_for_convective_elevated",
-                                        ""));
+                                          _validCount,
+                                          "ConvElevConvMean3D",
+                                          "mean_convectivity_for_convective_elevated",
+                                          ""));
   
   // add 2D valid fractional fields
 
   _statsMdvx.addField(_computeFrac2DField(_stratLowCount,
-                                        _validCount,
-                                        "StratLowValidFrac2D",
-                                        "valid_fraction_for_stratiform_low",
-                                        ""));
+                                          _validCount,
+                                          "StratLowValidFrac2D",
+                                          "valid_fraction_for_stratiform_low",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_stratMidCount,
-                                        _validCount,
-                                        "StratMidValidFrac2D",
-                                        "valid_fraction_for_stratiform_mid",
-                                        "count"));
+                                          _validCount,
+                                          "StratMidValidFrac2D",
+                                          "valid_fraction_for_stratiform_mid",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_stratHighCount,
-                                        _validCount,
-                                        "StratHighValidFrac2D",
-                                        "valid_fraction_for_stratiform_high",
-                                        "count"));
+                                          _validCount,
+                                          "StratHighValidFrac2D",
+                                          "valid_fraction_for_stratiform_high",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_mixedCount,
-                                        _validCount,
-                                        "MixedValidFrac2D",
-                                        "valid_fraction_for_mixed",
-                                        "count"));
+                                          _validCount,
+                                          "MixedValidFrac2D",
+                                          "valid_fraction_for_mixed",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_convShallowCount,
-                                        _validCount,
-                                        "ConvShallowValidFrac2D",
-                                        "valid_fraction_for_convective_shallow",
-                                        "count"));
+                                          _validCount,
+                                          "ConvShallowValidFrac2D",
+                                          "valid_fraction_for_convective_shallow",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_convMidCount,
-                                        _validCount,
-                                        "ConvMidValidFrac2D",
-                                        "valid_fraction_for_convective_mid",
-                                        "count"));
+                                          _validCount,
+                                          "ConvMidValidFrac2D",
+                                          "valid_fraction_for_convective_mid",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_convDeepCount,
-                                        _validCount,
-                                        "ConvDeepValidFrac2D",
-                                        "valid_fraction_for_convective_deep",
-                                        "count"));
+                                          _validCount,
+                                          "ConvDeepValidFrac2D",
+                                          "valid_fraction_for_convective_deep",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_convElevCount,
-                                        _validCount,
-                                        "ConvElevValidFrac2D",
-                                        "valid_fraction_for_convective_elevated",
-                                        "count"));
+                                          _validCount,
+                                          "ConvElevValidFrac2D",
+                                          "valid_fraction_for_convective_elevated",
+                                          "count"));
   
   _statsMdvx.addField(_computeFrac2DField(_stratLowConv,
-                                        _validCount,
-                                        "StratLowConvMean2D",
-                                        "mean_convectivity_for_stratiform_low",
-                                        ""));
+                                          _validCount,
+                                          "StratLowConvMean2D",
+                                          "mean_convectivity_for_stratiform_low",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_stratMidConv,
-                                        _validCount,
-                                        "StratMidConvMean2D",
-                                        "mean_convectivity_for_stratiform_mid",
-                                        ""));
+                                          _validCount,
+                                          "StratMidConvMean2D",
+                                          "mean_convectivity_for_stratiform_mid",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_stratHighConv,
-                                        _validCount,
-                                        "StratHighConvMean2D",
-                                        "mean_convectivity_for_stratiform_high",
-                                        ""));
+                                          _validCount,
+                                          "StratHighConvMean2D",
+                                          "mean_convectivity_for_stratiform_high",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_mixedConv,
-                                        _validCount,
-                                        "MixedConvMean2D",
-                                        "mean_convectivity_for_mixed",
-                                        ""));
+                                          _validCount,
+                                          "MixedConvMean2D",
+                                          "mean_convectivity_for_mixed",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_convShallowConv,
-                                        _validCount,
-                                        "ConvShallowConvMean2D",
-                                        "mean_convectivity_for_convective_shallow",
-                                        ""));
+                                          _validCount,
+                                          "ConvShallowConvMean2D",
+                                          "mean_convectivity_for_convective_shallow",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_convMidConv,
-                                        _validCount,
-                                        "ConvMidConvMean2D",
-                                        "mean_convectivity_for_convective_mid",
-                                        ""));
+                                          _validCount,
+                                          "ConvMidConvMean2D",
+                                          "mean_convectivity_for_convective_mid",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_convDeepConv,
-                                        _validCount,
-                                        "ConvDeepConvMean2D",
-                                        "mean_convectivity_for_convective_deep",
-                                        ""));
+                                          _validCount,
+                                          "ConvDeepConvMean2D",
+                                          "mean_convectivity_for_convective_deep",
+                                          ""));
   
   _statsMdvx.addField(_computeFrac2DField(_convElevConv,
-                                        _validCount,
-                                        "ConvElevConvMean2D",
-                                        "mean_convectivity_for_convective_elevated",
-                                        ""));
+                                          _validCount,
+                                          "ConvElevConvMean2D",
+                                          "mean_convectivity_for_convective_elevated",
+                                          ""));
   
-  // add 2d fields for terrain height and water flag, if available
+  // add 2D fields for terrain height and water flag, if available
 
   if (_terrainHtField) {
     _statsMdvx.addField(_make2DField(_terrainHt,
-                                   _terrainHtField->getFieldName(),
-                                   _terrainHtField->getFieldNameLong(),
-                                   _terrainHtField->getUnits()));
+                                     _terrainHtField->getFieldName(),
+                                     _terrainHtField->getFieldNameLong(),
+                                     _terrainHtField->getUnits()));
   }
   
   if (_waterFlagField) {
     _statsMdvx.addField(_make2DField(_waterFlag,
-                                   _waterFlagField->getFieldName(),
-                                   _waterFlagField->getFieldNameLong(),
-                                   _waterFlagField->getUnits()));
+                                     _waterFlagField->getFieldName(),
+                                     _waterFlagField->getFieldNameLong(),
+                                     _waterFlagField->getUnits()));
+  }
+
+  // add 2D fields for coverage
+
+  if (_covHtFractionField != NULL) {
+    _statsMdvx.addField(_computeCov2DField(_sumCovHtFrac,
+                                           _countCov,
+                                           _params.coverage_ht_fraction_field_name,
+                                           "ht_fraction_of_radar_coverage_in_column",
+                                           ""));
+  }
+  
+  if (_covMinHtField != NULL) {
+    _statsMdvx.addField(_computeCov2DField(_sumCovMinHt,
+                                           _countCov,
+                                           _params.coverage_min_ht_field_name,
+                                           "min_ht_of_radar_coverage",
+                                           "km"));
+  }
+
+  if (_covMaxHtField != NULL) {
+    _statsMdvx.addField(_computeCov2DField(_sumCovMaxHt,
+                                           _countCov,
+                                           _params.coverage_max_ht_field_name,
+                                           "max_ht_of_radar_coverage",
+                                           "km"));
   }
   
 }
@@ -1352,7 +1426,6 @@ int EccoStats::_readCoverage()
   
 {
 
-  
   _covMinHtField = NULL;
   _covMaxHtField = NULL;
   _covHtFractionField = NULL;
@@ -1713,7 +1786,7 @@ MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
 }
 
 /////////////////////////////////////////////////////////
-// create a 2d cpverage field
+// create a 2d coverage field
 
 MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
                                        string fieldName,
@@ -1761,3 +1834,80 @@ MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
   return newField;
 
 }
+
+/////////////////////////////////////////////////////////
+// compute a coverage stats field
+
+MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
+                                         fl32 **counts,
+                                         string fieldName,
+                                         string longName,
+                                         string units)
+  
+{
+  
+  // create header
+  
+  Mdvx::field_header_t fhdr = _covHtFractionField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
+  fhdr.nz = 1;
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = 1.0;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = 0.0;
+
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+
+  Mdvx::vlevel_header_t vhdr = _covHtFractionField->getVlevelHeader();
+  
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+
+  // compute fraction field
+
+  fl32 **mean = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      if (counts[iy][ix] > 0) {
+        mean[iy][ix] = sum[iy][ix] / counts[iy][ix];
+      } else {
+        mean[iy][ix] = _missingFl32;
+      }
+    } // ix
+  } // iy
+
+  // create field from header and data
+  
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*mean, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  // free up
+
+  ufree2((void **) mean);
+
+  // return newly created field
+  
+  return newField;
+
+}
+
