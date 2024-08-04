@@ -319,7 +319,7 @@ coverage_ht_fraction_field_name = "CoverageHtFrac";
 //
 // Type: boolean
 
-censor_based_on_radar_coverage = FALSE;
+censor_based_on_radar_coverage = TRUE;
 
 ///////////// radar_coverage_min_ht_fraction //////////
 //
