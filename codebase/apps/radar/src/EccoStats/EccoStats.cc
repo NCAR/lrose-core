@@ -804,8 +804,8 @@ void EccoStats::_initStatsFile()
   mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   mhdr.vlevel_included = 1;
   _statsMdvx.setMasterHeader(mhdr);
-  _statsMdvx.setDataSetInfo(_params.output_data_set_info);
-  _statsMdvx.setDataSetSource(_params.output_data_set_source);
+  _statsMdvx.setDataSetInfo(_params.stats_data_set_info);
+  _statsMdvx.setDataSetSource(_params.stats_data_set_source);
   char name[128];
   if (_params.min_month == _params.max_month) {
     snprintf(name, 128, "EccoStats for month %d\n", _params.min_month);
@@ -1216,20 +1216,215 @@ int EccoStats::_writeStats()
 
   // write out
   
-  if(_statsMdvx.writeToDir(_params.output_dir)) {
+  if(_statsMdvx.writeToDir(_params.stats_dir)) {
     cerr << "ERROR - EccoStats::Run" << endl;
-    cerr << "  Cannot write data set." << endl;
+    cerr << "  Cannot write data set to dir: " << _params.stats_dir << endl;
     cerr << _statsMdvx.getErrStr() << endl;
     return -1;
   }
-
+  
   if (_params.debug) {
     cerr << "Wrote stats file: " << _statsMdvx.getPathInUse() << endl;
+  }
+
+  if (_params.write_hour_of_day_stats) {
+    for (int ihour = 0; ihour < 24; ihour++) {
+      _writeHourlyStats(ihour);
+    }
   }
   
   return 0;
 
 }
+
+/////////////////////////////////////////////////////////
+// write stats for specified hour to file
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_writeHourlyStats(int hour)
+  
+{
+
+  // initialize hourly file
+  
+  DsMdvx hourlyMdvx;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    hourlyMdvx.setDebug(true);
+  }
+  Mdvx::master_header_t mhdr = _statsMdvx.getMasterHeader();
+  _statsMdvx.setMasterHeader(mhdr);
+  char name[128];
+  if (_params.min_month == _params.max_month) {
+    snprintf(name, 128, "EccoStats for month %d, hour of day %d\n", _params.min_month, hour);
+  } else {
+    snprintf(name, 128, "EccoStats for months %d to %d, hour of day %d\n",
+             _params.min_month, _params.max_month, hour);
+  }
+  hourlyMdvx.setDataSetName(name);
+  hourlyMdvx.setMdv2NcfOutput(true, true, true, true);
+
+  DateTime htime(_statsMdvx.getValidTime());
+  htime.setHour(hour);
+  hourlyMdvx.setValidTime(htime.utime());
+
+  // add fields
+  
+  hourlyMdvx.addField(_makeHourlyField(hour,
+                                       _validCount,
+                                       "ValidCount",
+                                       "count_for_valid_obs",
+                                       "count"));
+  
+  hourlyMdvx.addField(_makeHourlyField(hour,
+                                       _totalCount,
+                                       "TotalCount",
+                                       "count_for_all_obs",
+                                       "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratCount,
+                                              _validCount,
+                                              "StratValidFrac3D",
+                                              "valid_fraction_for_all_stratiform",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratLowCount,
+                                              _validCount,
+                                              "StratLowValidFrac3D",
+                                              "valid_fraction_for_stratiform_low",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratMidCount,
+                                              _validCount,
+                                              "StratMidValidFrac3D",
+                                              "valid_fraction_for_stratiform_mid",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratHighCount,
+                                              _validCount,
+                                              "StratHighValidFrac3D",
+                                              "valid_fraction_for_stratiform_high",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _mixedCount,
+                                              _validCount,
+                                              "MixedValidFrac3D",
+                                              "valid_fraction_for_mixed",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convCount,
+                                              _validCount,
+                                              "ConvValidFrac3D",
+                                              "valid_fraction_for_all_convective",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convShallowCount,
+                                              _validCount,
+                                              "ConvShallowValidFrac3D",
+                                              "valid_fraction_for_convective_shallow",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convMidCount,
+                                              _validCount,
+                                              "ConvMidValidFrac3D",
+                                              "valid_fraction_for_convective_mid",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convDeepCount,
+                                              _validCount,
+                                              "ConvDeepValidFrac3D",
+                                              "valid_fraction_for_convective_deep",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convElevCount,
+                                              _validCount,
+                                              "ConvElevValidFrac3D",
+                                              "valid_fraction_for_convective_elevated",
+                                              "count"));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratLowConv,
+                                              _validCount,
+                                              "StratLowConvMean3D",
+                                              "mean_convectivity_for_stratiform_low",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratMidConv,
+                                              _validCount,
+                                              "StratMidConvMean3D",
+                                              "mean_convectivity_for_stratiform_mid",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _stratHighConv,
+                                              _validCount,
+                                              "StratHighConvMean3D",
+                                              "mean_convectivity_for_stratiform_high",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _mixedConv,
+                                              _validCount,
+                                              "MixedConvMean3D",
+                                              "mean_convectivity_for_mixed",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convShallowConv,
+                                              _validCount,
+                                              "ConvShallowConvMean3D",
+                                              "mean_convectivity_for_convective_shallow",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convMidConv,
+                                              _validCount,
+                                              "ConvMidConvMean3D",
+                                              "mean_convectivity_for_convective_mid",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convDeepConv,
+                                              _validCount,
+                                              "ConvDeepConvMean3D",
+                                              "mean_convectivity_for_convective_deep",
+                                              ""));
+  
+  hourlyMdvx.addField(_computeHourlyFracField(hour,
+                                              _convElevConv,
+                                              _validCount,
+                                              "ConvElevConvMean3D",
+                                              "mean_convectivity_for_convective_elevated",
+                                              ""));
+  
+  
+  // write out
+  
+  if(hourlyMdvx.writeToDir(_params.hour_of_day_stats_dir)) {
+    cerr << "ERROR - EccoStats::Run" << endl;
+    cerr << "  Cannot write hour data set to dir: " << _params.hour_of_day_stats_dir << endl;
+    cerr << hourlyMdvx.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote hourly stats file: " << hourlyMdvx.getPathInUse() << endl;
+  }
+  
+  return 0;
+  
+}
+
 
 //////////////////////////////////////////////////
 // Compute coverage
@@ -2033,6 +2228,148 @@ MdvxField *EccoStats::_sumCountsField(fl32 ***counts,
   // free up
   
   ufree2((void **) tot);
+
+  // return newly created field
+  
+  return newField;
+
+}
+
+
+/////////////////////////////////////////////////////////
+// create an hourly field
+
+MdvxField *EccoStats::_makeHourlyField(int hour,
+                                       fl32 ***data,
+                                       string fieldName,
+                                       string longName,
+                                       string units)
+                                 
+{
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
+  fhdr.nz = 1; // single hour
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = 1.0;
+  
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = 0.0;
+
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+
+  char text[1024];
+  snprintf(text, 1024, "%s_hour_%d", fieldName.c_str(), hour);
+  MdvxField::setFieldName(text, fhdr);
+  snprintf(text, 1024, "%s_hour_%d", longName.c_str(), hour);
+  MdvxField::setFieldNameLong(text, fhdr);
+  MdvxField::setUnits(units, fhdr);
+
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*data[hour], volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  return newField;
+
+}
+
+/////////////////////////////////////////////////////////
+// compute an hourly fractional 3d field
+
+MdvxField *EccoStats::_computeHourlyFracField(int hour,
+                                              fl32 ***data,
+                                              fl32 ***counts,
+                                              string fieldName,
+                                              string longName,
+                                              string units)
+                                 
+{
+
+  // create header
+  
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+  
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+
+  fhdr.nx = _nx; // output grid
+  fhdr.ny = _ny; // output grid
+  fhdr.nz = 1; // single hour
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = 1.0;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = 0.0;
+
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  fhdr.volume_size = volSize;
+
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+  
+  char text[1024];
+  snprintf(text, 1024, "%s_hour_%d", fieldName.c_str(), hour);
+  MdvxField::setFieldName(text, fhdr);
+  snprintf(text, 1024, "%s_hour_%d", longName.c_str(), hour);
+  MdvxField::setFieldNameLong(text, fhdr);
+  MdvxField::setUnits(units, fhdr);
+
+  // compute fraction field
+
+  fl32 **frac = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      fl32 nn = counts[hour][iy][ix];
+      if (nn != 0) {
+        frac[iy][ix] = data[hour][iy][ix] / nn;
+      }
+    } // ix
+  } // iy
+  
+  // create field from header and data
+  
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  newField->setVolData(*frac, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+
+  // free up
+
+  ufree2((void **) frac);
 
   // return newly created field
   

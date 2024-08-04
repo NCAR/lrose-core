@@ -129,6 +129,7 @@ private:
   void _initStatsFile();
   void _addFieldsToStats();
   int _writeStats();
+  int _writeHourlyStats(int hour);
   
   int _computeCoverage();
   void _addCoverageFields();
@@ -173,6 +174,19 @@ private:
                              string longName,
                              string units);
   
+  MdvxField *_makeHourlyField(int hour,
+                              fl32 ***data,
+                              string fieldName,
+                              string longName,
+                              string units);
+                                 
+  MdvxField *_computeHourlyFracField(int hour,
+                                     fl32 ***data,
+                                     fl32 ***counts,
+                                     string fieldName,
+                                     string longName,
+                                     string units);
+                                 
 };
 
 #endif

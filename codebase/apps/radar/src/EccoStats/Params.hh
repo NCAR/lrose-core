@@ -399,11 +399,11 @@ public:
 
   int aggregate_nx;
 
-  char* output_dir;
+  char* stats_dir;
 
-  char* output_data_set_info;
+  char* stats_data_set_info;
 
-  char* output_data_set_source;
+  char* stats_data_set_source;
 
   tdrp_bool_t compute_mrms_coverage;
 
@@ -423,6 +423,10 @@ public:
 
   double radar_coverage_min_ht_fraction;
 
+  tdrp_bool_t write_hour_of_day_stats;
+
+  char* hour_of_day_stats_dir;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -430,7 +434,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[33];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

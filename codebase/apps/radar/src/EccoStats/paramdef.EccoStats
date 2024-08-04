@@ -129,21 +129,21 @@ commentdef {
 
 paramdef string {
   p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats";
-  p_descr = "Output URL.";
-  p_help = "Output files are written to this URL.";
-} output_dir;
+  p_descr = "Stats directory.";
+  p_help = "Stats files are written to this directory.";
+} stats_dir;
 
 paramdef string {
   p_default = "Ecco climatology.";
   p_descr = "String for file metadata header.";
   p_help = "Information on the data set";
-} output_data_set_info;
+} stats_data_set_info;
 
 paramdef string {
   p_default = "Computed by EccoStats app.";
   p_descr = "String for file metadata header.";
   p_help = "Source of the data set";
-} output_data_set_source;
+} stats_data_set_source;
 
 commentdef {
   p_header = "CREATE COVERAGE FIELD FOR MRMS GRID";
@@ -205,4 +205,21 @@ paramdef double {
   p_descr = "Minimum fraction of height coverage for stats to be valid.";
   p_help = "We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.";
 } radar_coverage_min_ht_fraction;
+
+commentdef {
+  p_header = "WRITE HOUR-OF-DAY SUMMARIES TO SEPARATE FILES";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write files, for each hour of the day, to separate time-stamped files.";
+  p_help = "If true, summaries for each hour of the day are written to separate files, from which we can make movie loops.";
+} write_hour_of_day_stats;
+
+paramdef string {
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly";
+  p_descr = "Hour of day stats directory.";
+  p_help = "Hour of dat stats files are written to this directory.";
+} hour_of_day_stats_dir;
+
 

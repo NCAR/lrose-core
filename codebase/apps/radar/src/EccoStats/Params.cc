@@ -783,39 +783,39 @@
     tt->comment_text = tdrpStrDup("\n  The partition field has the following values:\n    CATEGORY_MISSING = 0\n    CATEGORY_STRATIFORM_LOW = 14\n    CATEGORY_STRATIFORM = 15\n    CATEGORY_STRATIFORM_MID = 16\n    CATEGORY_STRATIFORM_HIGH = 18\n    CATEGORY_MIXED = 25\n    CATEGORY_CONVECTIVE_ELEVATED = 32\n    CATEGORY_CONVECTIVE_SHALLOW = 34\n    CATEGORY_CONVECTIVE = 35\n    CATEGORY_CONVECTIVE_MID = 36\n    CATEGORY_CONVECTIVE_DEEP = 38");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'stats_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Output URL.");
-    tt->help = tdrpStrDup("Output files are written to this URL.");
-    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->param_name = tdrpStrDup("stats_dir");
+    tt->descr = tdrpStrDup("Stats directory.");
+    tt->help = tdrpStrDup("Stats files are written to this directory.");
+    tt->val_offset = (char *) &stats_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats");
     tt++;
     
-    // Parameter 'output_data_set_info'
+    // Parameter 'stats_data_set_info'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_data_set_info");
+    tt->param_name = tdrpStrDup("stats_data_set_info");
     tt->descr = tdrpStrDup("String for file metadata header.");
     tt->help = tdrpStrDup("Information on the data set");
-    tt->val_offset = (char *) &output_data_set_info - &_start_;
+    tt->val_offset = (char *) &stats_data_set_info - &_start_;
     tt->single_val.s = tdrpStrDup("Ecco climatology.");
     tt++;
     
-    // Parameter 'output_data_set_source'
+    // Parameter 'stats_data_set_source'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_data_set_source");
+    tt->param_name = tdrpStrDup("stats_data_set_source");
     tt->descr = tdrpStrDup("String for file metadata header.");
     tt->help = tdrpStrDup("Source of the data set");
-    tt->val_offset = (char *) &output_data_set_source - &_start_;
+    tt->val_offset = (char *) &stats_data_set_source - &_start_;
     tt->single_val.s = tdrpStrDup("Computed by EccoStats app.");
     tt++;
     
@@ -943,6 +943,39 @@
     tt->help = tdrpStrDup("We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.");
     tt->val_offset = (char *) &radar_coverage_min_ht_fraction - &_start_;
     tt->single_val.d = 0.8;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("WRITE HOUR-OF-DAY SUMMARIES TO SEPARATE FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_hour_of_day_stats'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_hour_of_day_stats");
+    tt->descr = tdrpStrDup("Option to write files, for each hour of the day, to separate time-stamped files.");
+    tt->help = tdrpStrDup("If true, summaries for each hour of the day are written to separate files, from which we can make movie loops.");
+    tt->val_offset = (char *) &write_hour_of_day_stats - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'hour_of_day_stats_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hour_of_day_stats_dir");
+    tt->descr = tdrpStrDup("Hour of day stats directory.");
+    tt->help = tdrpStrDup("Hour of dat stats files are written to this directory.");
+    tt->val_offset = (char *) &hour_of_day_stats_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly");
     tt++;
     
     // trailing entry has param_name set to NULL
