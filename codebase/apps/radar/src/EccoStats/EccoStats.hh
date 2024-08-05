@@ -99,8 +99,8 @@ private:
   MdvxField *_terrainHtField;
   MdvxField *_waterFlagField;
   MdvxField *_mrmsDbzField;
-  MdvxField *_covMinHtField;
-  MdvxField *_covMaxHtField;
+  // MdvxField *_covMinHtField;
+  // MdvxField *_covMaxHtField;
   MdvxField *_covHtFractionField;
 
   fl32 ***_stratCount;
@@ -135,8 +135,8 @@ private:
   fl32 **_terrainHt;
   fl32 **_waterFlag;
 
-  fl32 **_sumCovMinHt;
-  fl32 **_sumCovMaxHt;
+  // fl32 **_sumCovMinHt;
+  // fl32 **_sumCovMaxHt;
   fl32 **_sumCovHtFrac;
   fl32 **_countCov;
 

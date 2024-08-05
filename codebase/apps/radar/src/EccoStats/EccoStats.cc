@@ -117,8 +117,8 @@ EccoStats::EccoStats(int argc, char **argv)
   _terrainHtField = NULL;
   _waterFlagField = NULL;
   _mrmsDbzField = NULL;
-  _covMinHtField = NULL;
-  _covMaxHtField = NULL;
+  // _covMinHtField = NULL;
+  // _covMaxHtField = NULL;
   _covHtFractionField = NULL;
 
   // init arrays
@@ -303,8 +303,8 @@ void EccoStats::_initArraysToNull()
   _terrainHt = NULL;
   _waterFlag = NULL;
 
-  _sumCovMinHt = NULL;
-  _sumCovMaxHt = NULL;
+  // _sumCovMinHt = NULL;
+  // _sumCovMaxHt = NULL;
   _sumCovHtFrac = NULL;
   _countCov = NULL;
 
@@ -361,8 +361,8 @@ void EccoStats::_allocArrays()
 
   // coverage
   
-  _sumCovMinHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-  _sumCovMaxHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  // _sumCovMinHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
+  // _sumCovMaxHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _sumCovHtFrac = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _countCov = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
 
@@ -416,8 +416,8 @@ void EccoStats::_freeArrays()
   ufree2((void **) _terrainHt);
   ufree2((void **) _waterFlag);
 
-  ufree2((void **) _sumCovMinHt);
-  ufree2((void **) _sumCovMaxHt);
+  // ufree2((void **) _sumCovMinHt);
+  // ufree2((void **) _sumCovMaxHt);
   ufree2((void **) _sumCovHtFrac);
   ufree2((void **) _countCov);
 
@@ -596,19 +596,19 @@ void EccoStats::_updateStats()
     covHtFrac2D = (fl32 *) _covHtFractionField->getVol();
   }
   
-  fl32 *covMinHt2D = NULL;
-  fl32 covMinHtMiss = -9999;
-  if (_covMinHtField != NULL) {
-    covMinHtMiss = _covMinHtField->getFieldHeader().missing_data_value;
-    covMinHt2D = (fl32 *) _covMinHtField->getVol();
-  }
+  // fl32 *covMinHt2D = NULL;
+  // fl32 covMinHtMiss = -9999;
+  // if (_covMinHtField != NULL) {
+  //   covMinHtMiss = _covMinHtField->getFieldHeader().missing_data_value;
+  //   covMinHt2D = (fl32 *) _covMinHtField->getVol();
+  // }
   
-  fl32 *covMaxHt2D = NULL;
-  fl32 covMaxHtMiss = -9999;
-  if (_covMaxHtField != NULL) {
-    covMaxHtMiss = _covMaxHtField->getFieldHeader().missing_data_value;
-    covMaxHt2D = (fl32 *) _covMaxHtField->getVol();
-  }
+  // fl32 *covMaxHt2D = NULL;
+  // fl32 covMaxHtMiss = -9999;
+  // if (_covMaxHtField != NULL) {
+  //   covMaxHtMiss = _covMaxHtField->getFieldHeader().missing_data_value;
+  //   covMaxHt2D = (fl32 *) _covMaxHtField->getVol();
+  // }
   
   // loop through 2D grid space
   
@@ -628,15 +628,15 @@ void EccoStats::_updateStats()
         fl32 covHtFrac = covHtFrac2D[offset];
         if (covHtFrac != covHtFracMiss) {
           // min coverage height
-          fl32 covMinHt = covMinHt2D[offset];
-          if (covMinHt != covMinHtMiss) {
-            _sumCovMinHt[iy][ix] += covMinHt;
-          }
+          // fl32 covMinHt = covMinHt2D[offset];
+          // if (covMinHt != covMinHtMiss) {
+          //   _sumCovMinHt[iy][ix] += covMinHt;
+          // }
           // max coverage height
-          fl32 covMaxHt = covMaxHt2D[offset];
-          if (covMaxHt != covMaxHtMiss) {
-            _sumCovMaxHt[iy][ix] += covMaxHt;
-          }
+          // fl32 covMaxHt = covMaxHt2D[offset];
+          // if (covMaxHt != covMaxHtMiss) {
+          //   _sumCovMaxHt[iy][ix] += covMaxHt;
+          // }
           // ht fraction
           _sumCovHtFrac[iy][ix] += covHtFrac;
           _countCov[iy][ix]++;
@@ -1253,23 +1253,23 @@ void EccoStats::_addFieldsToStats()
                                            _covHtFractionField->getFieldHeader().missing_data_value));
   }
   
-  if (_covMinHtField != NULL) {
-    _statsMdvx.addField(_computeCov2DField(_sumCovMinHt,
-                                           _countCov,
-                                           _params.coverage_min_ht_field_name,
-                                           "min_ht_of_radar_coverage",
-                                           "km",
-                                           _covMinHtField->getFieldHeader().missing_data_value));
-  }
+  // if (_covMinHtField != NULL) {
+  //   _statsMdvx.addField(_computeCov2DField(_sumCovMinHt,
+  //                                          _countCov,
+  //                                          _params.coverage_min_ht_field_name,
+  //                                          "min_ht_of_radar_coverage",
+  //                                          "km",
+  //                                          _covMinHtField->getFieldHeader().missing_data_value));
+  // }
   
-  if (_covMaxHtField != NULL) {
-    _statsMdvx.addField(_computeCov2DField(_sumCovMaxHt,
-                                           _countCov,
-                                           _params.coverage_max_ht_field_name,
-                                           "max_ht_of_radar_coverage",
-                                           "km",
-                                           _covMaxHtField->getFieldHeader().missing_data_value));
-  }
+  // if (_covMaxHtField != NULL) {
+  //   _statsMdvx.addField(_computeCov2DField(_sumCovMaxHt,
+  //                                          _countCov,
+  //                                          _params.coverage_max_ht_field_name,
+  //                                          "max_ht_of_radar_coverage",
+  //                                          "km",
+  //                                          _covMaxHtField->getFieldHeader().missing_data_value));
+  // }
 
 }
 
@@ -1762,16 +1762,16 @@ int EccoStats::_readCoverage()
   
 {
 
-  _covMinHtField = NULL;
-  _covMaxHtField = NULL;
+  // _covMinHtField = NULL;
+  // _covMaxHtField = NULL;
   _covHtFractionField = NULL;
 
   _covMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _covMdvx.setDebug(true);
   }
-  _covMdvx.addReadField(_params.coverage_min_ht_field_name);
-  _covMdvx.addReadField(_params.coverage_max_ht_field_name);
+  // _covMdvx.addReadField(_params.coverage_min_ht_field_name);
+  // _covMdvx.addReadField(_params.coverage_max_ht_field_name);
   _covMdvx.addReadField(_params.coverage_ht_fraction_field_name);
   _covMdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
   _covMdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
@@ -1801,20 +1801,20 @@ int EccoStats::_readCoverage()
 
   // get fields
   
-  _covMinHtField = _covMdvx.getField(_params.coverage_min_ht_field_name);
-  if (_covMinHtField == NULL) {
-    cerr << "WARNING - EccoStats::_readCoverage" << endl;
-    cerr << "  Cannot find coverage min ht field: "
-         << _params.coverage_min_ht_field_name << endl;
-    cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
-  }
+  // _covMinHtField = _covMdvx.getField(_params.coverage_min_ht_field_name);
+  // if (_covMinHtField == NULL) {
+  //   cerr << "WARNING - EccoStats::_readCoverage" << endl;
+  //   cerr << "  Cannot find coverage min ht field: "
+  //        << _params.coverage_min_ht_field_name << endl;
+  //   cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
+  // }
 
-  _covMaxHtField = _covMdvx.getField(_params.coverage_max_ht_field_name);
-  if (_covMinHtField == NULL) {
-    cerr << "WARNING - EccoStats::_readCoverage" << endl;
-    cerr << "  Cannot find coverage max ht field: " << _params.coverage_max_ht_field_name << endl;
-    cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
-  }
+  // _covMaxHtField = _covMdvx.getField(_params.coverage_max_ht_field_name);
+  // if (_covMinHtField == NULL) {
+  //   cerr << "WARNING - EccoStats::_readCoverage" << endl;
+  //   cerr << "  Cannot find coverage max ht field: " << _params.coverage_max_ht_field_name << endl;
+  //   cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
+  // }
 
   _covHtFractionField = _covMdvx.getField(_params.coverage_ht_fraction_field_name);
   if (_covHtFractionField == NULL) {
