@@ -1048,7 +1048,7 @@ void EccoStats::_addFieldsToStats()
   
   _statsMdvx.addField(_computeMean3DField(_convSumConv,
                                           _validCount,
-                                          "ConvSumMeanConvHourly",
+                                          "ConvMeanConvHourly",
                                           "mean_convectivity_for_convective_shallow_hourly",
                                           "", 0.0));
   
@@ -2407,8 +2407,8 @@ MdvxField *EccoStats::_computeHourlyMeanField(int hour,
   
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -2451,6 +2451,8 @@ MdvxField *EccoStats::_computeHourlyMeanField(int hour,
       fl32 nn = counts[hour][iy][ix];
       if (nn != 0) {
         frac[iy][ix] = data[hour][iy][ix] / nn;
+      } else {
+        frac[iy][ix] = missingVal;
       }
     } // ix
   } // iy
