@@ -103,18 +103,48 @@ private:
   MdvxField *_covMaxHtField;
   MdvxField *_covHtFractionField;
 
-  fl32 ***_stratCount, ***_mixedCount, ***_convCount;
-  fl32 ***_stratLowCount, ***_stratMidCount, ***_stratHighCount;
-  fl32 ***_convShallowCount, ***_convMidCount, ***_convDeepCount, ***_convElevCount;
-  fl32 ***_stratLowConv, ***_stratMidConv, ***_stratHighConv, ***_mixedConv;
-  fl32 ***_convShallowConv, ***_convMidConv, ***_convDeepConv, ***_convElevConv;
-  fl32 ***_validCount, ***_totalCount;
-  fl32 **_terrainHt, **_waterFlag;
-  fl32 **_sumCovMinHt, **_sumCovMaxHt, **_sumCovHtFrac, **_countCov;
+  fl32 ***_stratCount;
+  fl32 ***_mixedCount;
+  fl32 ***_convCount;
+  
+  fl32 ***_stratLowCount;
+  fl32 ***_stratMidCount;
+  fl32 ***_stratHighCount;
+  
+  fl32 ***_convShallowCount;
+  fl32 ***_convMidCount;
+  fl32 ***_convDeepCount;
+  fl32 ***_convElevCount;
+  
+  fl32 ***_stratSumConv;
+  fl32 ***_stratLowSumConv;
+  fl32 ***_stratMidSumConv;
+  fl32 ***_stratHighSumConv;
+  
+  fl32 ***_mixedSumConv;
 
-  double **_lat, **_lon;
+  fl32 ***_convSumConv;
+  fl32 ***_convShallowSumConv;
+  fl32 ***_convMidSumConv;
+  fl32 ***_convDeepSumConv;
+  fl32 ***_convElevSumConv;
+  
+  fl32 ***_validCount;
+  fl32 ***_totalCount;
+
+  fl32 **_terrainHt;
+  fl32 **_waterFlag;
+
+  fl32 **_sumCovMinHt;
+  fl32 **_sumCovMaxHt;
+  fl32 **_sumCovHtFrac;
+  fl32 **_countCov;
+
+  double **_lat;
+  double **_lon;
+  
   int **_hourOfDay; // hour of day index
-
+  
   int _computeEccoStats();
 
   void _initArraysToNull();
@@ -139,53 +169,62 @@ private:
   MdvxField *_make3DField(fl32 ***data,
                           string fieldName,
                           string longName,
-                          string units);
+                          string units,
+                          double missingVal = 0.0);
                                  
   MdvxField *_make2DField(fl32 **data,
                           string fieldName,
                           string longName,
-                          string units);
+                          string units,
+                          double missingVal = 0.0);
                                  
-  MdvxField *_computeFrac3DField(fl32 ***data,
+  MdvxField *_computeMean3DField(fl32 ***data,
                                  fl32 ***counts,
                                  string fieldName,
                                  string longName,
-                                 string units);
+                                 string units,
+                                 double missingVal = 0.0);
                                  
-  MdvxField *_computeFrac2DField(fl32 ***data,
+  MdvxField *_computeMean2DField(fl32 ***data,
                                  fl32 ***counts,
                                  string fieldName,
                                  string longName,
-                                 string units);
+                                 string units,
+                                 double missingVal = 0.0);
 
   MdvxField *_makeMrms2DField(fl32 **data,
                               string fieldName,
                               string longName,
-                              string units);
+                              string units,
+                              double missingVal = 0.0);
   
   MdvxField *_computeCov2DField(fl32 **sum,
                                 fl32 **counts,
                                 string fieldName,
                                 string longName,
-                                string units);
+                                string units,
+                                double missingVal = 0.0);
   
-  MdvxField *_sumCountsField(fl32 ***counts,
+  MdvxField *_sumHourlyField(fl32 ***counts,
                              string fieldName,
                              string longName,
-                             string units);
+                             string units,
+                             double missingVal = 0.0);
   
   MdvxField *_makeHourlyField(int hour,
                               fl32 ***data,
                               string fieldName,
                               string longName,
-                              string units);
+                              string units,
+                              double missingVal = 0.0);
                                  
-  MdvxField *_computeHourlyFracField(int hour,
+  MdvxField *_computeHourlyMeanField(int hour,
                                      fl32 ***data,
                                      fl32 ***counts,
                                      string fieldName,
                                      string longName,
-                                     string units);
+                                     string units,
+                                     double missingVal = 0.0);
                                  
 };
 

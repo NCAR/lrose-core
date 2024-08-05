@@ -202,7 +202,7 @@ aggregate_nx = 10;
 //
 // Type: string
 
-stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats.test/summary";
+stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats";
 
 ///////////// stats_data_set_info /////////////////////
 //
@@ -358,6 +358,5 @@ write_hour_of_day_stats = TRUE;
 //
 // Type: string
 
-hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats.test/hourly";
-
+hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly";
 

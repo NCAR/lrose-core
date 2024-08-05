@@ -284,14 +284,18 @@ void EccoStats::_initArraysToNull()
   _convDeepCount = NULL;
   _convElevCount = NULL;
 
-  _stratLowConv = NULL;
-  _stratMidConv = NULL;
-  _stratHighConv = NULL;
-  _mixedConv = NULL;
-  _convShallowConv = NULL;
-  _convMidConv = NULL;
-  _convDeepConv = NULL;
-  _convElevConv = NULL;
+  _stratSumConv = NULL;
+  _stratLowSumConv = NULL;
+  _stratMidSumConv = NULL;
+  _stratHighSumConv = NULL;
+
+  _mixedSumConv = NULL;
+
+  _convSumConv = NULL;
+  _convShallowSumConv = NULL;
+  _convMidSumConv = NULL;
+  _convDeepSumConv = NULL;
+  _convElevSumConv = NULL;
 
   _validCount = NULL;
   _totalCount = NULL;
@@ -334,15 +338,19 @@ void EccoStats::_allocArrays()
 
   // convectivity
   
-  _stratLowConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratMidConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _stratHighConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _mixedConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convShallowConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convMidConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convDeepConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
-  _convElevConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratLowSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratMidSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _stratHighSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
 
+  _mixedSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+
+  _convSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convShallowSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convMidSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convDeepSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  _convElevSumConv = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
+  
   _validCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   _totalCount = (fl32 ***) ucalloc3(_nz, _ny, _nx, sizeof(fl32));
   
@@ -389,14 +397,18 @@ void EccoStats::_freeArrays()
   ufree3((void ***) _convDeepCount);
   ufree3((void ***) _convElevCount);
   
-  ufree3((void ***) _stratLowConv);
-  ufree3((void ***) _stratMidConv);
-  ufree3((void ***) _stratHighConv);
-  ufree3((void ***) _mixedConv);
-  ufree3((void ***) _convShallowConv);
-  ufree3((void ***) _convMidConv);
-  ufree3((void ***) _convDeepConv);
-  ufree3((void ***) _convElevConv);
+  ufree3((void ***) _stratSumConv);
+  ufree3((void ***) _stratLowSumConv);
+  ufree3((void ***) _stratMidSumConv);
+  ufree3((void ***) _stratHighSumConv);
+
+  ufree3((void ***) _mixedSumConv);
+
+  ufree3((void ***) _convSumConv);
+  ufree3((void ***) _convShallowSumConv);
+  ufree3((void ***) _convMidSumConv);
+  ufree3((void ***) _convDeepSumConv);
+  ufree3((void ***) _convElevSumConv);
 
   ufree3((void ***) _validCount);
   ufree3((void ***) _totalCount);
@@ -645,49 +657,56 @@ void EccoStats::_updateStats()
         switch ((ConvStratFinder::category_t) echoType) {
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_LOW: {
             _stratCount[hour][iy][ix]++;
+            _stratSumConv[hour][iy][ix] += convectivity;
             _stratLowCount[hour][iy][ix]++;
-            _stratLowConv[hour][iy][ix] += convectivity;
+            _stratLowSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_MID: {
             _stratCount[hour][iy][ix]++;
+            _stratSumConv[hour][iy][ix] += convectivity;
             _stratMidCount[hour][iy][ix]++;
-            _stratMidConv[hour][iy][ix] += convectivity;
+            _stratMidSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_STRATIFORM_HIGH: {
             _stratCount[hour][iy][ix]++;
+            _stratSumConv[hour][iy][ix] += convectivity;
             _stratHighCount[hour][iy][ix]++;
-            _stratHighConv[hour][iy][ix] += convectivity;
+            _stratHighSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_MIXED: {
             _mixedCount[hour][iy][ix]++;
-            _mixedConv[hour][iy][ix] += convectivity;
+            _mixedSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_ELEVATED: {
             _convCount[hour][iy][ix]++;
+            _convSumConv[hour][iy][ix] += convectivity;
             _convElevCount[hour][iy][ix]++;
-            _convElevConv[hour][iy][ix] += convectivity;
+            _convElevSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_SHALLOW: {
             _convCount[hour][iy][ix]++;
+            _convSumConv[hour][iy][ix] += convectivity;
             _convShallowCount[hour][iy][ix]++;
-            _convShallowConv[hour][iy][ix] += convectivity;
+            _convShallowSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_MID: {
             _convCount[hour][iy][ix]++;
+            _convSumConv[hour][iy][ix] += convectivity;
             _convMidCount[hour][iy][ix]++;
-            _convMidConv[hour][iy][ix] += convectivity;
+            _convMidSumConv[hour][iy][ix] += convectivity;
             break;
           }
           case ConvStratFinder::category_t::CATEGORY_CONVECTIVE_DEEP: {
             _convCount[hour][iy][ix]++;
+            _convSumConv[hour][iy][ix] += convectivity;
             _convDeepCount[hour][iy][ix]++;
-            _convDeepConv[hour][iy][ix] += convectivity;
+            _convDeepSumConv[hour][iy][ix] += convectivity;
             break;
           }
           default: {}
@@ -828,332 +847,382 @@ void EccoStats::_addFieldsToStats()
   // clear
   
   _statsMdvx.clearFields();
+  
+  // add hourly count fields by echo type
+  
+  _statsMdvx.addField(_make3DField(_stratCount,
+                                   "StratCountHourly",
+                                   "count_for_stratiform_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratLowCount,
+                                   "StratLowCountHourly",
+                                   "count_for_stratiform_low_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratMidCount,
+                                   "StratMidCountHourly",
+                                   "count_for_stratiform_mid_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratHighCount,
+                                   "StratHighCountHourly",
+                                   "count_for_stratiform_high_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_mixedCount,
+                                   "MixedCountHourly",
+                                   "count_for_mixed_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convCount,
+                                   "ConvCountHourly",
+                                   "count_for_convective_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convShallowCount,
+                                   "ConvShallowCountHourly",
+                                   "count_for_convective_shallow_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convMidCount,
+                                   "ConvMidCountHourly",
+                                   "count_for_convective_mid_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convDeepCount,
+                                   "ConvDeepCountHourly",
+                                   "count_for_convective_deep_hourly",
+                                   "count", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convElevCount,
+                                   "ConvElevCountHourly",
+                                   "count_for_convective_elevated_hourly",
+                                   "count", 0.0));
+  
+  // add hourly sum convectivity fields by echo type
+  
+  _statsMdvx.addField(_make3DField(_stratSumConv,
+                                   "StratSumConvHourly",
+                                   "sum_convectivity_for_stratiform_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratLowSumConv,
+                                   "StratLowSumConvHourly",
+                                   "sum_convectivity_for_stratiform_low_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratMidSumConv,
+                                   "StratMidSumConvHourly",
+                                   "sum_convectivity_for_stratiform_mid_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_stratHighSumConv,
+                                   "StratHighSumConvHourly",
+                                   "sum_convectivity_for_stratiform_high_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_mixedSumConv,
+                                   "MixedSumConvHourly",
+                                   "sum_convectivity_for_mixed_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convSumConv,
+                                   "ConvSumConvHourly",
+                                   "sum_convectivity_for_convective_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convShallowSumConv,
+                                   "ConvShallowSumConvHourly",
+                                   "sum_convectivity_for_convective_shallow_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convMidSumConv,
+                                   "ConvMidSumConvHourly",
+                                   "sum_convectivity_for_convective_mid_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convDeepSumConv,
+                                   "ConvDeepSumConvHourly",
+                                   "sum_convectivity_for_convective_deep_hourly",
+                                   "", 0.0));
+  
+  _statsMdvx.addField(_make3DField(_convElevSumConv,
+                                   "ConvElevSumConvHourly",
+                                   "sum_convectivity_for_convective_elevated_hourly",
+                                   "", 0.0));
+  
+  // add hourly fractions
+  
+  _statsMdvx.addField(_computeMean3DField(_stratCount,
+                                          _validCount,
+                                          "StratFracHourly",
+                                          "fraction_for_stratiform_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratLowCount,
+                                          _validCount,
+                                          "StratLowFracHourly",
+                                          "fraction_for_stratiform_low_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratMidCount,
+                                          _validCount,
+                                          "StratMidFracHourly",
+                                          "fraction_for_stratiform_mid_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratHighCount,
+                                          _validCount,
+                                          "StratHighFracHourly",
+                                          "fraction_for_stratiform_high_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_mixedCount,
+                                          _validCount,
+                                          "MixedFracHourly",
+                                          "fraction_for_mixed_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convCount,
+                                          _validCount,
+                                          "ConvFracHourly",
+                                          "fraction_for_convective_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convShallowCount,
+                                          _validCount,
+                                          "ConvShallowFracHourly",
+                                          "fraction_for_convective_shallow_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convMidCount,
+                                          _validCount,
+                                          "ConvMidFracHourly",
+                                          "fraction_for_convective_mid_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convDeepCount,
+                                          _validCount,
+                                          "ConvDeepFracHourly",
+                                          "fraction_for_convective_deep_hourly",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convElevCount,
+                                          _validCount,
+                                          "ConvElevFracHourly",
+                                          "fraction_for_convective_elevated_hourly",
+                                          "count", 0.0));
 
+  // add mean convectivity hourly
+  
+  _statsMdvx.addField(_computeMean3DField(_stratSumConv,
+                                          _validCount,
+                                          "StratMeanConvHourly",
+                                          "mean_convectivity_for_stratiform_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratLowSumConv,
+                                          _validCount,
+                                          "StratLowMeanConvHourly",
+                                          "mean_convectivity_for_stratiform_low_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratMidSumConv,
+                                          _validCount,
+                                          "StratMidMeanConvHourly",
+                                          "mean_convectivity_for_stratiform_mid_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_stratHighSumConv,
+                                          _validCount,
+                                          "StratHighMeanConvHourly",
+                                          "mean_convectivity_for_stratiform_high_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_mixedSumConv,
+                                          _validCount,
+                                          "MixedMeanConvHourly",
+                                          "mean_convectivity_for_mixed_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convSumConv,
+                                          _validCount,
+                                          "ConvSumMeanConvHourly",
+                                          "mean_convectivity_for_convective_shallow_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convShallowSumConv,
+                                          _validCount,
+                                          "ConvShallowMeanConvHourly",
+                                          "mean_convectivity_for_convective_shallow_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convMidSumConv,
+                                          _validCount,
+                                          "ConvMidMeanConvHourly",
+                                          "mean_convectivity_for_convective_mid_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convDeepSumConv,
+                                          _validCount,
+                                          "ConvDeepMeanConvHourly",
+                                          "mean_convectivity_for_convective_deep_hourly",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean3DField(_convElevSumConv,
+                                          _validCount,
+                                          "ConvElevMeanConvHourly",
+                                          "mean_convectivity_for_convective_elevated_hourly",
+                                          "", 0.0));
+  
+  // add fraction fields all hours
+  
+  _statsMdvx.addField(_computeMean2DField(_stratCount,
+                                          _validCount,
+                                          "StratFrac",
+                                          "fraction_for_stratiform_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratLowCount,
+                                          _validCount,
+                                          "StratLowFrac",
+                                          "fraction_for_stratiform_low_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratMidCount,
+                                          _validCount,
+                                          "StratMidFrac",
+                                          "fraction_for_stratiform_mid_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratHighCount,
+                                          _validCount,
+                                          "StratHighFrac",
+                                          "fraction_for_stratiform_high_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_mixedCount,
+                                          _validCount,
+                                          "MixedFrac",
+                                          "fraction_for_mixed_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convCount,
+                                          _validCount,
+                                          "ConvFrac",
+                                          "fraction_for_convective_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convShallowCount,
+                                          _validCount,
+                                          "ConvShallowFrac",
+                                          "fraction_for_convective_shallow_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convMidCount,
+                                          _validCount,
+                                          "ConvMidFrac",
+                                          "fraction_for_convective_mid_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convDeepCount,
+                                          _validCount,
+                                          "ConvDeepFrac",
+                                          "fraction_for_convective_deep_all_hours",
+                                          "count", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convElevCount,
+                                          _validCount,
+                                          "ConvElevFrac",
+                                          "fraction_for_convective_elevated_all_hours",
+                                          "count", 0.0));
+
+  // add mean convectivity fields, all hours
+  
+  _statsMdvx.addField(_computeMean2DField(_stratSumConv,
+                                          _validCount,
+                                          "StratMeanConv",
+                                          "mean_convectivity_for_stratiform_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratLowSumConv,
+                                          _validCount,
+                                          "StratLowMeanConv",
+                                          "mean_convectivity_for_stratiform_low_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratMidSumConv,
+                                          _validCount,
+                                          "StratMidMeanConv",
+                                          "mean_convectivity_for_stratiform_mid_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_stratHighSumConv,
+                                          _validCount,
+                                          "StratHighMeanConv",
+                                          "mean_convectivity_for_stratiform_high_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_mixedSumConv,
+                                          _validCount,
+                                          "MixedMeanConv",
+                                          "mean_convectivity_for_mixed_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convSumConv,
+                                          _validCount,
+                                          "ConvMeanConv",
+                                          "mean_convectivity_for_convective_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convShallowSumConv,
+                                          _validCount,
+                                          "ConvShallowMeanConv",
+                                          "mean_convectivity_for_convective_shallow_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convMidSumConv,
+                                          _validCount,
+                                          "ConvMidMeanConv",
+                                          "mean_convectivity_for_convective_mid_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convDeepSumConv,
+                                          _validCount,
+                                          "ConvDeepMeanConv",
+                                          "mean_convectivity_for_convective_deep_all_hours",
+                                          "", 0.0));
+  
+  _statsMdvx.addField(_computeMean2DField(_convElevSumConv,
+                                          _validCount,
+                                          "ConvElevMeanConv",
+                                          "mean_convectivity_for_convective_elevated_all_hours",
+                                          "", 0.0));
+  
   // add 3d summary count fields
   
   _statsMdvx.addField(_make3DField(_validCount,
-                                   "ValidCount",
+                                   "ValidCountHourly",
                                    "count_for_valid_obs",
-                                   "count"));
+                                   "count", 0.0));
   
   _statsMdvx.addField(_make3DField(_totalCount,
-                                   "TotalCount",
+                                   "TotalCountHourly",
                                    "count_for_all_obs",
-                                   "count"));
+                                   "count", 0.0));
   
   // add total counts for all hours
   
-  _statsMdvx.addField(_sumCountsField(_validCount,
-                                      "ValidCountAllHours",
+  _statsMdvx.addField(_sumHourlyField(_validCount,
+                                      "ValidCount",
                                       "count_for_valid_obs_all_hours",
-                                      "count"));
+                                      "count", 0.0));
   
-  _statsMdvx.addField(_sumCountsField(_totalCount,
-                                      "TotalCountAllHours",
+  _statsMdvx.addField(_sumHourlyField(_totalCount,
+                                      "TotalCount",
                                       "count_for_total_obs_all_hours",
-                                      "count"));
-  
-  // add 3d count fields by echo type
-
-  _statsMdvx.addField(_make3DField(_stratCount,
-                                   "StratCount",
-                                   "count_for_all_stratiform",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_stratLowCount,
-                                   "StratLowCount",
-                                   "count_for_stratiform_low",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_stratMidCount,
-                                   "StratMidCount",
-                                   "count_for_stratiform_mid",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_stratHighCount,
-                                   "StratHighCount",
-                                   "count_for_stratiform_high",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_mixedCount,
-                                   "MixedCount",
-                                   "count_for_mixed",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_convCount,
-                                   "ConvCount",
-                                   "count_for_all_convective",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_convShallowCount,
-                                   "ConvShallowCount",
-                                   "count_for_convective_shallow",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_convMidCount,
-                                   "ConvMidCount",
-                                   "count_for_convective_mid",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_convDeepCount,
-                                   "ConvDeepCount",
-                                   "count_for_convective_deep",
-                                   "count"));
-  
-  _statsMdvx.addField(_make3DField(_convElevCount,
-                                   "ConvElevCount",
-                                   "count_for_convective_elevated",
-                                   "count"));
-  
-  // add 3d convectivity fields by echo type
-  
-  _statsMdvx.addField(_make3DField(_stratLowConv,
-                                   "StratLowConv",
-                                   "convectivity_for_stratiform_low",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_stratMidConv,
-                                   "StratMidConv",
-                                   "convectivity_for_stratiform_mid",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_stratHighConv,
-                                   "StratHighConv",
-                                   "convectivity_for_stratiform_high",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_mixedConv,
-                                   "MixedConv",
-                                   "convectivity_for_mixed",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_convShallowConv,
-                                   "ConvShallowConv",
-                                   "convectivity_for_convective_shallow",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_convMidConv,
-                                   "ConvMidConv",
-                                   "convectivity_for_convective_mid",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_convDeepConv,
-                                   "ConvDeepConv",
-                                   "convectivity_for_convective_deep",
-                                   ""));
-  
-  _statsMdvx.addField(_make3DField(_convElevConv,
-                                   "ConvElevConv",
-                                   "convectivity_for_convective_elevated",
-                                   ""));
-  
-  // add 3D valid fractional fields
-
-  _statsMdvx.addField(_computeFrac3DField(_stratCount,
-                                          _validCount,
-                                          "StratValidFrac3D",
-                                          "valid_fraction_for_all_stratiform",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratLowCount,
-                                          _validCount,
-                                          "StratLowValidFrac3D",
-                                          "valid_fraction_for_stratiform_low",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratMidCount,
-                                          _validCount,
-                                          "StratMidValidFrac3D",
-                                          "valid_fraction_for_stratiform_mid",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratHighCount,
-                                          _validCount,
-                                          "StratHighValidFrac3D",
-                                          "valid_fraction_for_stratiform_high",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_mixedCount,
-                                          _validCount,
-                                          "MixedValidFrac3D",
-                                          "valid_fraction_for_mixed",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convCount,
-                                          _validCount,
-                                          "ConvValidFrac3D",
-                                          "valid_fraction_for_all_convective",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convShallowCount,
-                                          _validCount,
-                                          "ConvShallowValidFrac3D",
-                                          "valid_fraction_for_convective_shallow",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convMidCount,
-                                          _validCount,
-                                          "ConvMidValidFrac3D",
-                                          "valid_fraction_for_convective_mid",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convDeepCount,
-                                          _validCount,
-                                          "ConvDeepValidFrac3D",
-                                          "valid_fraction_for_convective_deep",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convElevCount,
-                                          _validCount,
-                                          "ConvElevValidFrac3D",
-                                          "valid_fraction_for_convective_elevated",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratLowConv,
-                                          _validCount,
-                                          "StratLowConvMean3D",
-                                          "mean_convectivity_for_stratiform_low",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratMidConv,
-                                          _validCount,
-                                          "StratMidConvMean3D",
-                                          "mean_convectivity_for_stratiform_mid",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_stratHighConv,
-                                          _validCount,
-                                          "StratHighConvMean3D",
-                                          "mean_convectivity_for_stratiform_high",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_mixedConv,
-                                          _validCount,
-                                          "MixedConvMean3D",
-                                          "mean_convectivity_for_mixed",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convShallowConv,
-                                          _validCount,
-                                          "ConvShallowConvMean3D",
-                                          "mean_convectivity_for_convective_shallow",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convMidConv,
-                                          _validCount,
-                                          "ConvMidConvMean3D",
-                                          "mean_convectivity_for_convective_mid",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convDeepConv,
-                                          _validCount,
-                                          "ConvDeepConvMean3D",
-                                          "mean_convectivity_for_convective_deep",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac3DField(_convElevConv,
-                                          _validCount,
-                                          "ConvElevConvMean3D",
-                                          "mean_convectivity_for_convective_elevated",
-                                          ""));
-  
-  // add 2D valid fractional fields
-
-  _statsMdvx.addField(_computeFrac2DField(_stratLowCount,
-                                          _validCount,
-                                          "StratLowValidFrac2D",
-                                          "valid_fraction_for_stratiform_low",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_stratMidCount,
-                                          _validCount,
-                                          "StratMidValidFrac2D",
-                                          "valid_fraction_for_stratiform_mid",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_stratHighCount,
-                                          _validCount,
-                                          "StratHighValidFrac2D",
-                                          "valid_fraction_for_stratiform_high",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_mixedCount,
-                                          _validCount,
-                                          "MixedValidFrac2D",
-                                          "valid_fraction_for_mixed",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convShallowCount,
-                                          _validCount,
-                                          "ConvShallowValidFrac2D",
-                                          "valid_fraction_for_convective_shallow",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convMidCount,
-                                          _validCount,
-                                          "ConvMidValidFrac2D",
-                                          "valid_fraction_for_convective_mid",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convDeepCount,
-                                          _validCount,
-                                          "ConvDeepValidFrac2D",
-                                          "valid_fraction_for_convective_deep",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convElevCount,
-                                          _validCount,
-                                          "ConvElevValidFrac2D",
-                                          "valid_fraction_for_convective_elevated",
-                                          "count"));
-  
-  _statsMdvx.addField(_computeFrac2DField(_stratLowConv,
-                                          _validCount,
-                                          "StratLowConvMean2D",
-                                          "mean_convectivity_for_stratiform_low",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_stratMidConv,
-                                          _validCount,
-                                          "StratMidConvMean2D",
-                                          "mean_convectivity_for_stratiform_mid",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_stratHighConv,
-                                          _validCount,
-                                          "StratHighConvMean2D",
-                                          "mean_convectivity_for_stratiform_high",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_mixedConv,
-                                          _validCount,
-                                          "MixedConvMean2D",
-                                          "mean_convectivity_for_mixed",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convShallowConv,
-                                          _validCount,
-                                          "ConvShallowConvMean2D",
-                                          "mean_convectivity_for_convective_shallow",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convMidConv,
-                                          _validCount,
-                                          "ConvMidConvMean2D",
-                                          "mean_convectivity_for_convective_mid",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convDeepConv,
-                                          _validCount,
-                                          "ConvDeepConvMean2D",
-                                          "mean_convectivity_for_convective_deep",
-                                          ""));
-  
-  _statsMdvx.addField(_computeFrac2DField(_convElevConv,
-                                          _validCount,
-                                          "ConvElevConvMean2D",
-                                          "mean_convectivity_for_convective_elevated",
-                                          ""));
+                                      "count", 0.0));
   
   // add 2D fields for terrain height and water flag, if available
 
@@ -1161,14 +1230,16 @@ void EccoStats::_addFieldsToStats()
     _statsMdvx.addField(_make2DField(_terrainHt,
                                      _terrainHtField->getFieldName(),
                                      _terrainHtField->getFieldNameLong(),
-                                     _terrainHtField->getUnits()));
+                                     _terrainHtField->getUnits(),
+                                     _terrainHtField->getFieldHeader().missing_data_value));
   }
   
   if (_waterFlagField) {
     _statsMdvx.addField(_make2DField(_waterFlag,
                                      _waterFlagField->getFieldName(),
                                      _waterFlagField->getFieldNameLong(),
-                                     _waterFlagField->getUnits()));
+                                     _waterFlagField->getUnits(),
+                                     _waterFlagField->getFieldHeader().missing_data_value));
   }
 
   // add 2D fields for coverage
@@ -1178,7 +1249,8 @@ void EccoStats::_addFieldsToStats()
                                            _countCov,
                                            _params.coverage_ht_fraction_field_name,
                                            "ht_fraction_of_radar_coverage_in_column",
-                                           ""));
+                                           "",
+                                           _covHtFractionField->getFieldHeader().missing_data_value));
   }
   
   if (_covMinHtField != NULL) {
@@ -1186,15 +1258,17 @@ void EccoStats::_addFieldsToStats()
                                            _countCov,
                                            _params.coverage_min_ht_field_name,
                                            "min_ht_of_radar_coverage",
-                                           "km"));
+                                           "km",
+                                           _covMinHtField->getFieldHeader().missing_data_value));
   }
-
+  
   if (_covMaxHtField != NULL) {
     _statsMdvx.addField(_computeCov2DField(_sumCovMaxHt,
                                            _countCov,
                                            _params.coverage_max_ht_field_name,
                                            "max_ht_of_radar_coverage",
-                                           "km"));
+                                           "km",
+                                           _covMaxHtField->getFieldHeader().missing_data_value));
   }
 
 }
@@ -1271,141 +1345,155 @@ int EccoStats::_writeHourlyStats(int hour)
   
   hourlyMdvx.addField(_makeHourlyField(hour,
                                        _validCount,
-                                       "ValidCount",
-                                       "count_for_valid_obs",
-                                       "count"));
+                                       "ValidCountHourly",
+                                       "count_for_valid_obs_hourly",
+                                       "count", 0.0));
   
   hourlyMdvx.addField(_makeHourlyField(hour,
                                        _totalCount,
-                                       "TotalCount",
-                                       "count_for_all_obs",
-                                       "count"));
+                                       "TotalCountHourly",
+                                       "count_for_all_obs_hourly",
+                                       "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _stratCount,
                                               _validCount,
-                                              "StratValidFrac3D",
-                                              "valid_fraction_for_all_stratiform",
-                                              ""));
+                                              "StratFracHourly",
+                                              "fraction_for_stratiform_all_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _stratLowCount,
                                               _validCount,
-                                              "StratLowValidFrac3D",
-                                              "valid_fraction_for_stratiform_low",
-                                              ""));
+                                              "StratLowFracHourly",
+                                              "fraction_for_stratiform_low_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _stratMidCount,
                                               _validCount,
-                                              "StratMidValidFrac3D",
-                                              "valid_fraction_for_stratiform_mid",
-                                              "count"));
+                                              "StratMidFracHourly",
+                                              "fraction_for_stratiform_mid_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _stratHighCount,
                                               _validCount,
-                                              "StratHighValidFrac3D",
-                                              "valid_fraction_for_stratiform_high",
-                                              "count"));
+                                              "StratHighFracHourly",
+                                              "fraction_for_stratiform_high_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _mixedCount,
                                               _validCount,
-                                              "MixedValidFrac3D",
-                                              "valid_fraction_for_mixed",
-                                              "count"));
+                                              "MixedFracHourly",
+                                              "fraction_for_mixed_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _convCount,
                                               _validCount,
-                                              "ConvValidFrac3D",
-                                              "valid_fraction_for_all_convective",
-                                              "count"));
+                                              "ConvFracHourly",
+                                              "fraction_for_convective_all_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _convShallowCount,
                                               _validCount,
-                                              "ConvShallowValidFrac3D",
-                                              "valid_fraction_for_convective_shallow",
-                                              "count"));
+                                              "ConvShallowFracHourly",
+                                              "fraction_for_convective_shallow_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _convMidCount,
                                               _validCount,
-                                              "ConvMidValidFrac3D",
-                                              "valid_fraction_for_convective_mid",
-                                              "count"));
+                                              "ConvMidFracHourly",
+                                              "fraction_for_convective_mid_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _convDeepCount,
                                               _validCount,
-                                              "ConvDeepValidFrac3D",
-                                              "valid_fraction_for_convective_deep",
-                                              "count"));
+                                              "ConvDeepFracHourly",
+                                              "fraction_for_convective_deep_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
                                               _convElevCount,
                                               _validCount,
-                                              "ConvElevValidFrac3D",
-                                              "valid_fraction_for_convective_elevated",
-                                              "count"));
+                                              "ConvElevFracHourly",
+                                              "fraction_for_convective_elevated_hourly",
+                                              "count", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _stratLowConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _stratSumConv,
                                               _validCount,
-                                              "StratLowConvMean3D",
-                                              "mean_convectivity_for_stratiform_low",
-                                              ""));
+                                              "StratMeanConvHourly",
+                                              "mean_convectivity_for_stratiform_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _stratMidConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _stratLowSumConv,
                                               _validCount,
-                                              "StratMidConvMean3D",
-                                              "mean_convectivity_for_stratiform_mid",
-                                              ""));
+                                              "StratLowMeanConvHourly",
+                                              "mean_convectivity_for_stratiform_low_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _stratHighConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _stratMidSumConv,
                                               _validCount,
-                                              "StratHighConvMean3D",
-                                              "mean_convectivity_for_stratiform_high",
-                                              ""));
+                                              "StratMidMeanConvHourly",
+                                              "mean_convectivity_for_stratiform_mid_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _mixedConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _stratHighSumConv,
                                               _validCount,
-                                              "MixedConvMean3D",
-                                              "mean_convectivity_for_mixed",
-                                              ""));
+                                              "StratHighMeanConvHourly",
+                                              "mean_convectivity_for_stratiform_high_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _convShallowConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _mixedSumConv,
                                               _validCount,
-                                              "ConvShallowConvMean3D",
-                                              "mean_convectivity_for_convective_shallow",
-                                              ""));
+                                              "MixedMeanConvHourly",
+                                              "mean_convectivity_for_mixed_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _convMidConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _convShallowSumConv,
                                               _validCount,
-                                              "ConvMidConvMean3D",
-                                              "mean_convectivity_for_convective_mid",
-                                              ""));
+                                              "ConvShallowMeanConvHourly",
+                                              "mean_convectivity_for_convective_shallow_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _convDeepConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _convSumConv,
                                               _validCount,
-                                              "ConvDeepConvMean3D",
-                                              "mean_convectivity_for_convective_deep",
-                                              ""));
+                                              "ConvMeanConvHourly",
+                                              "mean_convectivity_for_convective_hourly",
+                                              "", 0.0));
   
-  hourlyMdvx.addField(_computeHourlyFracField(hour,
-                                              _convElevConv,
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _convMidSumConv,
                                               _validCount,
-                                              "ConvElevConvMean3D",
-                                              "mean_convectivity_for_convective_elevated",
-                                              ""));
+                                              "ConvMidMeanConvHourly",
+                                              "mean_convectivity_for_convective_mid_hourly",
+                                              "", 0.0));
+  
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _convDeepSumConv,
+                                              _validCount,
+                                              "ConvDeepMeanConvHourly",
+                                              "mean_convectivity_for_convective_deep_hourly",
+                                              "", 0.0));
+  
+  hourlyMdvx.addField(_computeHourlyMeanField(hour,
+                                              _convElevSumConv,
+                                              _validCount,
+                                              "ConvElevMeanConvHourly",
+                                              "mean_convectivity_for_convective_elevated_hourly",
+                                              "", 0.0));
   
   
   // write out
@@ -1549,10 +1637,10 @@ void EccoStats::_addCoverageFields()
   // make fields and add to output object
   
   _covMdvx.addField(_makeMrms2DField(minCovHt, _params.coverage_min_ht_field_name,
-                                     "Min ht of radar coverage", "km"));
+                                     "Min ht of radar coverage", "km", _missingFl32));
   
   _covMdvx.addField(_makeMrms2DField(maxCovHt, _params.coverage_max_ht_field_name,
-                                     "Max ht of radar coverage", "km"));
+                                     "Max ht of radar coverage", "km", _missingFl32));
   
   // load up height fraction
   
@@ -1585,7 +1673,7 @@ void EccoStats::_addCoverageFields()
     } // if (fhdrTerrain.ny == fhdrDbz.ny ...
 
     _covMdvx.addField(_makeMrms2DField(covHtFrac, _params.coverage_ht_fraction_field_name,
-                                       "Coverage fraction in vert column", ""));
+                                       "Coverage fraction in vert column", "", _missingFl32));
     
   } // if (_terrainHtField != NULL)
 
@@ -1761,14 +1849,15 @@ int EccoStats::_readCoverage()
 MdvxField *EccoStats::_make3DField(fl32 ***data,
                                    string fieldName,
                                    string longName,
-                                   string units)
+                                   string units,
+                                   double missingVal)
                                  
 {
 
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -1816,7 +1905,8 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
 MdvxField *EccoStats::_make2DField(fl32 **data,
                                    string fieldName,
                                    string longName,
-                                   string units)
+                                   string units,
+                                   double missingVal)
                                  
 {
 
@@ -1824,8 +1914,8 @@ MdvxField *EccoStats::_make2DField(fl32 **data,
   
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -1871,11 +1961,12 @@ MdvxField *EccoStats::_make2DField(fl32 **data,
 /////////////////////////////////////////////////////////
 // compute a fractional 3d field
 
-MdvxField *EccoStats::_computeFrac3DField(fl32 ***data,
+MdvxField *EccoStats::_computeMean3DField(fl32 ***data,
                                           fl32 ***counts,
                                           string fieldName,
                                           string longName,
-                                          string units)
+                                          string units,
+                                          double missingVal)
                                  
 {
 
@@ -1883,8 +1974,8 @@ MdvxField *EccoStats::_computeFrac3DField(fl32 ***data,
   
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -1952,11 +2043,12 @@ MdvxField *EccoStats::_computeFrac3DField(fl32 ***data,
 /////////////////////////////////////////////////////////
 // compute a fractional 2d field - summary for all hours
 
-MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
+MdvxField *EccoStats::_computeMean2DField(fl32 ***data,
                                           fl32 ***counts,
                                           string fieldName,
                                           string longName,
-                                          string units)
+                                          string units,
+                                          double missingVal)
                                  
 {
 
@@ -1964,8 +2056,8 @@ MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
   
   Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -2038,7 +2130,8 @@ MdvxField *EccoStats::_computeFrac2DField(fl32 ***data,
 MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
                                        string fieldName,
                                        string longName,
-                                       string units)
+                                       string units,
+                                       double missingVal)
                                  
 {
 
@@ -2046,8 +2139,8 @@ MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
   
   Mdvx::field_header_t fhdr = _mrmsDbzField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
   
   fhdr.nz = 1;
   fhdr.grid_dz = 1.0;
@@ -2089,7 +2182,8 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
                                          fl32 **counts,
                                          string fieldName,
                                          string longName,
-                                         string units)
+                                         string units,
+                                         double missingVal)
   
 {
   
@@ -2097,8 +2191,8 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
   
   Mdvx::field_header_t fhdr = _covHtFractionField->getFieldHeader();
   
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
+  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingVal;
 
   fhdr.nx = _nx; // output grid
   fhdr.ny = _ny; // output grid
@@ -2136,7 +2230,7 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
       if (counts[iy][ix] > 0) {
         mean[iy][ix] = sum[iy][ix] / counts[iy][ix];
       } else {
-        mean[iy][ix] = _missingFl32;
+        mean[iy][ix] = missingVal;
       }
     } // ix
   } // iy
@@ -2161,10 +2255,11 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
 /////////////////////////////////////////////////////////
 // compute 2D sum of counts field for all hours
 
-MdvxField *EccoStats::_sumCountsField(fl32 ***counts,
+MdvxField *EccoStats::_sumHourlyField(fl32 ***counts,
                                       string fieldName,
                                       string longName,
-                                      string units)
+                                      string units,
+                                      double missingVal)
                                  
 {
 
@@ -2243,7 +2338,8 @@ MdvxField *EccoStats::_makeHourlyField(int hour,
                                        fl32 ***data,
                                        string fieldName,
                                        string longName,
-                                       string units)
+                                       string units,
+                                       double missingVal)
                                  
 {
 
@@ -2279,9 +2375,8 @@ MdvxField *EccoStats::_makeHourlyField(int hour,
   vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
   vhdr.level[0] = 0;
 
+  MdvxField::setFieldName(fieldName, fhdr);
   char text[1024];
-  snprintf(text, 1024, "%s_hour_%d", fieldName.c_str(), hour);
-  MdvxField::setFieldName(text, fhdr);
   snprintf(text, 1024, "%s_hour_%d", longName.c_str(), hour);
   MdvxField::setFieldNameLong(text, fhdr);
   MdvxField::setUnits(units, fhdr);
@@ -2298,12 +2393,13 @@ MdvxField *EccoStats::_makeHourlyField(int hour,
 /////////////////////////////////////////////////////////
 // compute an hourly fractional 3d field
 
-MdvxField *EccoStats::_computeHourlyFracField(int hour,
+MdvxField *EccoStats::_computeHourlyMeanField(int hour,
                                               fl32 ***data,
                                               fl32 ***counts,
                                               string fieldName,
                                               string longName,
-                                              string units)
+                                              string units,
+                                              double missingVal)
                                  
 {
 
@@ -2341,9 +2437,8 @@ MdvxField *EccoStats::_computeHourlyFracField(int hour,
   vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
   vhdr.level[0] = 0;
   
+  MdvxField::setFieldName(fieldName, fhdr);
   char text[1024];
-  snprintf(text, 1024, "%s_hour_%d", fieldName.c_str(), hour);
-  MdvxField::setFieldName(text, fhdr);
   snprintf(text, 1024, "%s_hour_%d", longName.c_str(), hour);
   MdvxField::setFieldNameLong(text, fhdr);
   MdvxField::setUnits(units, fhdr);
