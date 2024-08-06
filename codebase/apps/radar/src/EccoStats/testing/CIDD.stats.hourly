@@ -1,3 +1,4 @@
+
 #####################################################################################
 #  CIDD.master
 #  Configurable Interactive Data Display Master Params
@@ -97,121 +98,48 @@ field_list = {
 # PECAN
 #
 
-# frac fields Hourly
+# frac fields hourly
 
-StratFracHourly StratFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratFracHourly fraction.colors  count -5 80 5 cont 1 0
-StratLowFracHourly StratLowFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowFracHourly fraction.colors  count -5 80 5 cont 1 0
-StratMidFracHourly StratMidFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidFracHourly fraction.colors  count -5 80 5 cont 1 0
-StratHighFracHourly StratHighFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighFracHourly fraction.colors  count -5 80 5 cont 1 0
-MixedFracHourly MixedFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedFracHourly fraction.colors  count -5 80 5 cont 1 0
+StratFracHourly StratFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratFracHourly fraction.colors  count -5 80 5 cont 1 0
+StratLowFracHourly StratLowFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratLowFracHourly fraction.colors  count -5 80 5 cont 1 0
+StratMidFracHourly StratMidFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratMidFracHourly fraction.colors  count -5 80 5 cont 1 0
+StratHighFracHourly StratHighFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratHighFracHourly fraction.colors  count -5 80 5 cont 1 0
+MixedFracHourly MixedFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&MixedFracHourly fraction.colors  count -5 80 5 cont 1 0
 
-ConvFracHourly ConvFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvFracHourly frac_convective.colors  count -5 80 5 cont 1 0
-ConvShallowFracHourly ConvShallowFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowFracHourly frac_convective.colors  count -5 80 5 cont 1 0
-ConvMidFracHourly ConvMidFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidFracHourly frac_convective.colors  count -5 80 5 cont 1 0
-ConvDeepFracHourly ConvDeepFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepFracHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
-ConvElevFracHourly ConvElevFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevFracHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
-
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-
-# man fields Hourly
-
-StratLowConvMeanHourly StratLowConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-StratMidConvMeanHourly StratMidConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-StratHighConvMeanHourly StratHighConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-MixedConvMeanHourly MixedConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-
-ConvShallowConvMeanHourly ConvShallowConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-ConvMidConvMeanHourly ConvMidConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-ConvDeepConvMeanHourly ConvDeepConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
-ConvElevConvMeanHourly ConvElevConvMeanHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevConvMeanHourly convectivity.colors  - -5 80 5 cont 1 0
+ConvFracHourly ConvFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvFracHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvShallowFracHourly ConvShallowFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvShallowFracHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvMidFracHourly ConvMidFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvMidFracHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvDeepFracHourly ConvDeepFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvDeepFracHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
+ConvElevFracHourly ConvElevFracHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvElevFracHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
 
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-
-# frac fields 
-
-StratLowFrac StratLowFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowFrac fraction.colors  count -5 80 5 cont 1 0
-StratMidFrac StratMidFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidFrac fraction.colors  count -5 80 5 cont 1 0
-StratHighFrac StratHighFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighFrac fraction.colors  count -5 80 5 cont 1 0
-MixedFrac MixedFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedFrac fraction.colors  count -5 80 5 cont 1 0
-
-ConvShallowFrac ConvShallowFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowFrac frac_convective.colors  count -5 80 5 cont 1 0
-ConvMidFrac ConvMidFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidFrac frac_convective.colors  count -5 80 5 cont 1 0
-ConvDeepFrac ConvDeepFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepFrac frac_conv_deep.colors  count -5 80 5 cont 1 0
-ConvElevFrac ConvElevFrac /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevFrac frac_conv_deep.colors  count -5 80 5 cont 1 0
-
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-# mean fields 
+# mean convectivity fields hourly
 
-StratLowConvMean StratLowConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowConvMean convectivity.colors  - -5 80 5 cont 1 0
-StratMidConvMean StratMidConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidConvMean convectivity.colors  - -5 80 5 cont 1 0
-StratHighConvMean StratHighConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighConvMean convectivity.colors  - -5 80 5 cont 1 0
-MixedConvMean MixedConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedConvMean convectivity.colors  - -5 80 5 cont 1 0
+StratMeanConvHourly StratMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratMeanConvHourly fraction.colors  count -5 80 5 cont 1 0
+StratLowMeanConvHourly StratLowMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratLowMeanConvHourly fraction.colors  count -5 80 5 cont 1 0
+StratMidMeanConvHourly StratMidMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratMidMeanConvHourly fraction.colors  count -5 80 5 cont 1 0
+StratHighMeanConvHourly StratHighMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&StratHighMeanConvHourly fraction.colors  count -5 80 5 cont 1 0
+MixedMeanConvHourly MixedMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&MixedMeanConvHourly fraction.colors  count -5 80 5 cont 1 0
 
-ConvShallowConvMean ConvShallowConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowConvMean convectivity.colors  - -5 80 5 cont 1 0
-ConvMidConvMean ConvMidConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidConvMean convectivity.colors  - -5 80 5 cont 1 0
-ConvDeepConvMean ConvDeepConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepConvMean convectivity.colors  - -5 80 5 cont 1 0
-ConvElevConvMean ConvElevConvMean /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevConvMean convectivity.colors  - -5 80 5 cont 1 0
+ConvMeanConvHourly ConvMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvMeanConvHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvShallowMeanConvHourly ConvShallowMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvShallowMeanConvHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvMidMeanConvHourly ConvMidMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvMidMeanConvHourly frac_convective.colors  count -5 80 5 cont 1 0
+ConvDeepMeanConvHourly ConvDeepMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvDeepMeanConvHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
+ConvElevMeanConvHourly ConvElevMeanConvHourly /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ConvElevMeanConvHourly frac_conv_deep.colors  count -5 80 5 cont 1 0
 
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-
-# counts
-
-StratLowCount StratLowCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowCount number.colors  count -5 80 5 cont 1 0
-StratMidCount StratMidCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidCount number.colors  count -5 80 5 cont 1 0
-StratHighCount StratHighCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighCount number.colors  count -5 80 5 cont 1 0
-MixedCount MixedCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedCount number.colors  count -5 80 5 cont 1 0
-
-ConvShallowCount ConvShallowCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowCount number.colors  count -5 80 5 cont 1 0
-ConvMidCount ConvMidCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidCount number.colors  count -5 80 5 cont 1 0
-ConvDeepCount ConvDeepCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepCount number.colors  count -5 80 5 cont 1 0
-ConvElevCount ConvElevCount /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevCount number.colors  count -5 80 5 cont 1 0
-
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-# conv sum
-
-StratLowConvSum StratLowConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratLowConvSum convectivity.colors  - -5 80 5 cont 1 0
-StratMidConvSum StratMidConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratMidConvSum convectivity.colors  - -5 80 5 cont 1 0
-StratHighConvSum StratHighConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&StratHighConvSum convectivity.colors  - -5 80 5 cont 1 0
-MixedConvSum MixedConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&MixedConvSum convectivity.colors  - -5 80 5 cont 1 0
-
-ConvShallowConvSum ConvShallowConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvShallowConvSum convectivity.colors  - -5 80 5 cont 1 0
-ConvMidConvSum ConvMidConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvMidConvSum convectivity.colors  - -5 80 5 cont 1 0
-ConvDeepConvSum ConvDeepConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvDeepConvSum convectivity.colors  - -5 80 5 cont 1 0
-ConvElevConvSum ConvElevConvSum /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ConvElevConvSum convectivity.colors  - -5 80 5 cont 1 0
-
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-
-TotalCount  TotalCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TotalCount number.colors  count -5 80 5 cont 1 0
-ValidCount  ValidCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ValidCount number.colors  count -5 80 5 cont 1 0
-TerrainHt   TerrainHt   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TerrainHt  terrain.colors m -5 80 5 cont 1 0
-WaterFlag   WaterFlag   /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&WaterFlag  water_flag.colors m -5 80 5 cont 1 0
-
-TotalCountComp  TotalCountComp  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&TotalCount number50k.colors  count -5 80 5 cont,comp 1 0
-ValidCountComp  ValidCountComp  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats&ValidCount number40k.colors  count -5 80 5 cont,comp 1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-
-========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+TotalCount  TotalCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&TotalCountHourly number.colors  count -5 80 5 cont 1 0
+ValidCount  ValidCount  /scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov80&ValidCountHourly number.colors  count -5 80 5 cont 1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
@@ -314,7 +242,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  00:00 01/01/2021
+cidd.demo_time:  0:00 01/01/2021
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1
@@ -325,12 +253,12 @@ cidd.movie_frame_dir: /tmp
 
 #  This determines how many movie frames are in the loop to start with
 #  Setting this high will cause the X server to hog memory.
-cidd.starting_movie_frames:  12
+cidd.starting_movie_frames:  24
 
 # minutes per movie frame on startup
 # The display will atomatically update every this interval, throwing away its
 # oldest movie frame and creating and drawing a new one.
-cidd.time_interval:  43200
+cidd.time_interval:  60
 
 # This parameter sets the maximum number of hours in the future a user can select
 # from the quick forecast menu. See SHOW_FORECAST_MENU menu bar button
@@ -1016,7 +944,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 4
+cidd.num_field_menu_cols: 5
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.
