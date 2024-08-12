@@ -509,9 +509,20 @@ void CartWidget::paintEvent(QPaintEvent *event)
 {
 
   cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
+  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  _zoomWorld.print(cerr);
+  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
   
   QPainter painter(this);
-
+  
+  QBrush grayBrush(QColor(50,50,50));
+  // _zoomWorld.fillRectangle(painter, grayBrush,
+  //                          _zoomWorld.getXMinWorld(),
+  //                          _zoomWorld.getYMinWorld(),
+  //                          _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld(),
+  //                          _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld());
+  _zoomWorld.fillCanvas(painter, grayBrush);
+  
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   _drawOverlays(painter);

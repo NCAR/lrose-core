@@ -578,6 +578,23 @@ void WorldPlot::fillRectangle(QPainter &painter,
 
 }
 
+//////////////////////////////////////
+// fill the entire canvas with a color
+
+void WorldPlot::fillCanvas(QPainter &painter,
+                           QBrush &brush) 
+
+{
+  
+  double xx = _xPixOffset;
+  double yy = _yPixOffset;
+  double width = _widthPixels;
+  double height = _heightPixels;
+
+  painter.fillRect(xx, yy, width, height, brush);
+
+}
+
 ///////////////////
 // fill a trapezium
 
@@ -2069,27 +2086,57 @@ void WorldPlot::print(ostream &out)
 
   out << "================= WorldPlot properties ===================" << endl;
 
-  out << "  _widthPixels     : " << _widthPixels << endl;
-  out << "  _heightPixels    : " << _heightPixels << endl;
-  out << "  _xPixOffset      : " << _xPixOffset << endl;
-  out << "  _yPixOffset      : " << _yPixOffset << endl;
-  out << "  _xMinWorld       : " << _xMinWorld << endl;
-  out << "  _xMaxWorld       : " << _xMaxWorld << endl;
-  out << "  _yMinWorld       : " << _yMinWorld << endl;
-  out << "  _yMaxWorld       : " << _yMaxWorld << endl;
-  out << "  _plotWidth       : " << _plotWidth << endl;
-  out << "  _plotHeight      : " << _plotHeight << endl;
-  out << "  _xMinPixel       : " << _xMinPixel << endl;
-  out << "  _yMinPixel       : " << _yMinPixel << endl;
-  out << "  _xMaxPixel       : " << _xMaxPixel << endl;
-  out << "  _yMaxPixel       : " << _yMaxPixel << endl;
-  out << "  _xPixelsPerWorld : " << _xPixelsPerWorld << endl;
-  out << "  _yPixelsPerWorld : " << _yPixelsPerWorld << endl;
-  out << "  _xMinWindow      : " << _xMinWindow << endl;
-  out << "  _xMaxWindow      : " << _xMaxWindow << endl;
-  out << "  _yMinWindow      : " << _yMinWindow << endl;
-  out << "  _yMaxWindow      : " << _yMaxWindow << endl;
+  out << "  _widthPixels        : " << _widthPixels << endl;
+  out << "  _heightPixels       : " << _heightPixels << endl;
+  out << "  _xPixOffset         : " << _xPixOffset << endl;
+  out << "  _yPixOffset         : " << _yPixOffset << endl;
+  out << "  _xMinWorld          : " << _xMinWorld << endl;
+  out << "  _xMaxWorld          : " << _xMaxWorld << endl;
+  out << "  _yMinWorld          : " << _yMinWorld << endl;
+  out << "  _yMaxWorld          : " << _yMaxWorld << endl;
+  out << "  _plotWidth          : " << _plotWidth << endl;
+  out << "  _plotHeight         : " << _plotHeight << endl;
+  out << "  _xMinPixel          : " << _xMinPixel << endl;
+  out << "  _yMinPixel          : " << _yMinPixel << endl;
+  out << "  _xMaxPixel          : " << _xMaxPixel << endl;
+  out << "  _yMaxPixel          : " << _yMaxPixel << endl;
+  out << "  _xPixelsPerWorld    : " << _xPixelsPerWorld << endl;
+  out << "  _yPixelsPerWorld    : " << _yPixelsPerWorld << endl;
+  out << "  _xMinWindow         : " << _xMinWindow << endl;
+  out << "  _xMaxWindow         : " << _xMaxWindow << endl;
+  out << "  _yMinWindow         : " << _yMinWindow << endl;
+  out << "  _yMaxWindow         : " << _yMaxWindow << endl;
 
+  out << "  _leftMargin         : " << _leftMargin << endl;
+  out << "  _rightMargin        : " << _rightMargin << endl;
+  out << "  _topMargin          : " << _topMargin << endl;
+  out << "  _bottomMargin       : " << _bottomMargin << endl;
+  out << "  _titleTextMargin    : " << _titleTextMargin << endl;
+  out << "  _axisTextMargin     : " << _axisTextMargin << endl;
+  out << "  _legendTextMargin   : " << _legendTextMargin << endl;
+  out << "  _colorScaleWidth    : " << _colorScaleWidth << endl;
+  out << "  _xAxisTickLen       : " << _xAxisTickLen << endl;
+  out << "  _xNTicksIdeal       : " << _xNTicksIdeal << endl;
+  out << "  _xSpecifyTicks      : " << _xSpecifyTicks << endl;
+  out << "  _xTickMin           : " << _xTickMin << endl;
+  out << "  _xTickDelta         : " << _xTickDelta << endl;
+  out << "  _yAxisTickLen       : " << _yAxisTickLen << endl;
+  out << "  _yNTicksIdeal       : " << _yNTicksIdeal << endl;
+  out << "  _ySpecifyTicks      : " << _ySpecifyTicks << endl;
+  out << "  _yTickMin           : " << _yTickMin << endl;
+  out << "  _yTickDelta         : " << _yTickDelta << endl;
+  out << "  _xAxisLabelsInside  : " << _xAxisLabelsInside << endl;
+  out << "  _yAxisLabelsInside  : " << _yAxisLabelsInside << endl;
+  out << "  _titleFontSize      : " << _titleFontSize << endl;
+  out << "  _axisLabelFontSize  : " << _axisLabelFontSize << endl;
+  out << "  _tickValuesFontSize : " << _tickValuesFontSize << endl;
+  out << "  _legendFontSize     : " << _legendFontSize << endl;
+  out << "  _titleColor         : " << _titleColor << endl;
+  out << "  _axisLineColor      : " << _axisLineColor << endl;
+  out << "  _axisTextColor      : " << _axisTextColor << endl;
+  out << "  _gridColor          : " << _gridColor << endl;
+  
+  
   out << "==========================================================" << endl;
 
 }

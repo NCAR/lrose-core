@@ -249,8 +249,6 @@ void CartManager::timerEvent(QTimerEvent *event)
     return;
   }
   
-  cerr << "*t*";
-  
   // field change?
 
   _checkForFieldChange();
@@ -322,7 +320,6 @@ void CartManager::timerEvent(QTimerEvent *event)
 
 void CartManager::resizeEvent(QResizeEvent *event)
 {
-  cerr << "r";
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent: " << event << endl;
   }
@@ -333,7 +330,6 @@ void CartManager::resizeEvent(QResizeEvent *event)
 void CartManager::keyPressEvent(QKeyEvent * e)
 {
 
-  cerr << "k";
   // get key pressed
   
   // Qt::KeyboardModifiers mods = e->modifiers();

@@ -286,6 +286,11 @@ public:
                      double x, double y,
                      double w, double h);
 
+  // fill the entire canvas with a color
+  
+  void fillCanvas(QPainter &painter,
+                  QBrush &brush);
+
   // fill a trapezium
   
   void fillTrap(QPainter &painter,
@@ -498,6 +503,37 @@ private:
 
   // margins in pixels
 
+  // world coord limits of data area
+
+  double _xMinWorld;
+  double _xMaxWorld;
+  double _yMinWorld;
+  double _yMaxWorld;
+
+  // size of data area in pixels
+
+  int _plotWidth;
+  int _plotHeight;
+  
+  // pixel coords of data area
+  
+  int _xMinPixel;
+  int _yMinPixel;
+  int _xMaxPixel;
+  int _yMaxPixel;
+
+  // scale in pixels per world coords
+
+  double _xPixelsPerWorld;
+  double _yPixelsPerWorld;
+
+  // world coord limits of the window
+
+  double _xMinWindow;
+  double _xMaxWindow;
+  double _yMinWindow;
+  double _yMaxWindow;
+
   int _leftMargin;
   int _rightMargin;
   int _topMargin;
@@ -539,37 +575,6 @@ private:
   string _axisTextColor;
   string _gridColor;
   
-  // world coord limits of data area
-
-  double _xMinWorld;
-  double _xMaxWorld;
-  double _yMinWorld;
-  double _yMaxWorld;
-
-  // size of data area in pixels
-
-  int _plotWidth;
-  int _plotHeight;
-  
-  // pixel coords of data area
-  
-  int _xMinPixel;
-  int _yMinPixel;
-  int _xMaxPixel;
-  int _yMaxPixel;
-
-  // scale in pixels per world coords
-
-  double _xPixelsPerWorld;
-  double _yPixelsPerWorld;
-
-  // world coord limits of the window
-
-  double _xMinWindow;
-  double _xMaxWindow;
-  double _yMinWindow;
-  double _yMaxWindow;
-
   // axis ticks
 
   vector<double> _topTicks;

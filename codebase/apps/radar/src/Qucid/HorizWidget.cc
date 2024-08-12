@@ -406,8 +406,6 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
 void HorizWidget::timerEvent(QTimerEvent *event)
 {
 
-  cerr << ".ht." << endl;
-  
   bool doUpdate = false;
   // bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
   // if (isBoundaryEditorVisible) {
@@ -501,8 +499,6 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // emit signal
 
-    cerr << "lllllllllllllllllllll" << endl;
-    
     emit locationClicked(x_km, y_km, closestRay);
     
   } else {
@@ -818,9 +814,6 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
-  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
-  // _zoomWorld.print(cerr);
-  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
 
   if (_archiveMode) {
     
