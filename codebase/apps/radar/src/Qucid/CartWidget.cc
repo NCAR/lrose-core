@@ -311,7 +311,8 @@ QPixmap* CartWidget::getPixmap()
 void CartWidget::mousePressEvent(QMouseEvent *e)
 {
 
-
+  cerr << ".MP.";
+  
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
@@ -352,6 +353,8 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 void CartWidget::mouseMoveEvent(QMouseEvent * e)
 {
 
+  cerr << ".MM.";
+  
   // Zooming with the mouse
 
 #if QT_VERSION >= 0x060000
@@ -395,6 +398,8 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 
 void CartWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+
+  cerr << ".MR.";
 
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());

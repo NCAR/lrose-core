@@ -381,9 +381,9 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisTextColor(_params.horiz_axes_color);
   _fullWorld.setGridColor(_params.horiz_grid_color);
 
-  cerr << "FFFFFFFFFFFFFFF Full world" << endl;
-  _fullWorld.print(cerr);
-  cerr << "FFFFFFFFFFFFFFF Full world" << endl;
+  // cerr << "FFFFFFFFFFFFFFF Full world" << endl;
+  // _fullWorld.print(cerr);
+  // cerr << "FFFFFFFFFFFFFFF Full world" << endl;
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
@@ -808,9 +808,9 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
-  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
-  _zoomWorld.print(cerr);
-  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  // _zoomWorld.print(cerr);
+  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
 
   if (_archiveMode) {
     
