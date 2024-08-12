@@ -734,7 +734,7 @@ cidd.horiz_legends_delta_y:  30
 #
 # WINDOW SIZE PARAMS
 #
-cidd.horiz_default_height:    1000
+cidd.horiz_default_height:    600
 cidd.horiz_min_height:        400
 cidd.horiz_min_width:         400
 cidd.horiz_default_x_pos:     0

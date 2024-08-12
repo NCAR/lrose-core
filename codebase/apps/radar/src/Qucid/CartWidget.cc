@@ -246,6 +246,7 @@ void CartWidget::displayImage(const size_t field_num)
   if (field_num != _selectedField) {
     return;
   }
+  cerr << "DISPLAY IMAGE" << endl;
   update();
 }
 
@@ -507,7 +508,7 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 void CartWidget::paintEvent(QPaintEvent *event)
 {
 
-  cerr << "paintEvent" << endl;
+  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
   
   QPainter painter(this);
 

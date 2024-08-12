@@ -624,6 +624,8 @@ void HorizWidget::_setGridSpacing()
 void HorizWidget::_drawOverlays(QPainter &painter)
 {
 
+  cerr << "ddddddddddddddd drawOverlays" << endl;
+  
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
   
@@ -831,6 +833,8 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
     snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
+
+    cerr << "SSSSSSSSSSSSSSSS " << text << endl;
     
     // radar and site name legend
 
