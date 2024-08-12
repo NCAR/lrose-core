@@ -169,7 +169,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
 {
 
   char cmd[MAX_PATH_LEN * 2];
-  char pathname[MAX_PATH_LEN * 4];
+  // char pathname[MAX_PATH_LEN * 4];
   const char *fname;
   char dir[MAX_PATH_LEN * 2];
   Window w = 0;
@@ -226,9 +226,14 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       if(_params.output_geo_xml) dump_image_xml(dir, fname);
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
-      snprintf(pathname,MAX_PATH_LEN * 4,"%s/%s",dir,fname);
-      STRcopy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
-
+      {
+        string path(dir);
+        path += "/";
+        path += fname;
+        STRcopy(gd.movie.frame[gd.movie.cur_frame].fname,path.c_str(),NAME_LENGTH);
+        // snprintf(pathname,MAX_PATH_LEN * 4,"%s/%s",dir,fname);
+        // STRcopy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
+      }
 
       break;
 
@@ -255,8 +260,14 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       }
       xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
-      snprintf(pathname,MAX_PATH_LEN * 2,"%s/%s",dir,fname);
-      STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH - 1);
+      {
+        string path(dir);
+        path += "/";
+        path += fname;
+        // snprintf(pathname,MAX_PATH_LEN * 2,"%s/%s",dir,fname);
+        // STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH - 1);
+        STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,path.c_str(),NAME_LENGTH - 1);
+      }
 
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;

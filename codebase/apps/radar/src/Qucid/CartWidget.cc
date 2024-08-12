@@ -311,7 +311,7 @@ QPixmap* CartWidget::getPixmap()
 void CartWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  cerr << ".MP.";
+  cerr << "cccc mousePressEvent" << endl;
   
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
@@ -353,7 +353,7 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 void CartWidget::mouseMoveEvent(QMouseEvent * e)
 {
 
-  cerr << ".MM.";
+  cerr << "ccccc mouseMoveEvent" << endl;
   
   // Zooming with the mouse
 
@@ -399,7 +399,7 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 void CartWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  cerr << ".MR.";
+  cerr << "ccccc mouseReleaseEvent" << endl;
 
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
@@ -507,7 +507,7 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 void CartWidget::paintEvent(QPaintEvent *event)
 {
 
-  cerr << "PPPPPPPPPPPPPPPPPPP" << endl;
+  cerr << "paintEvent" << endl;
   
   QPainter painter(this);
 

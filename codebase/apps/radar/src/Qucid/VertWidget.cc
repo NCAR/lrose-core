@@ -214,10 +214,10 @@ void VertWidget::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisTextMargin(axisTextMargin);
   _fullWorld.setColorScaleWidth(colorScaleWidth);
 
-  _fullWorld.setXAxisTickLen(_params.vert_axis_tick_len);
-  _fullWorld.setXNTicksIdeal(_params.vert_n_ticks_ideal);
-  _fullWorld.setYAxisTickLen(_params.vert_axis_tick_len);
-  _fullWorld.setYNTicksIdeal(_params.vert_n_ticks_ideal);
+  _fullWorld.setXAxisTickLen(axisTickLen);
+  _fullWorld.setXNTicksIdeal(nTicksIdeal);
+  _fullWorld.setYAxisTickLen(axisTickLen);
+  _fullWorld.setYNTicksIdeal(nTicksIdeal);
 
   _fullWorld.setTitleFontSize(_params.vert_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.vert_axis_label_font_size);

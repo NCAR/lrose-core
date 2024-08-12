@@ -366,10 +366,10 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisTextMargin(axisTextMargin);
   _fullWorld.setColorScaleWidth(colorScaleWidth);
 
-  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
-  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
+  _fullWorld.setXAxisTickLen(axisTickLen);
+  _fullWorld.setXNTicksIdeal(nTicksIdeal);
+  _fullWorld.setYAxisTickLen(axisTickLen);
+  _fullWorld.setYNTicksIdeal(nTicksIdeal);
 
   _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
@@ -405,6 +405,9 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
 
 void HorizWidget::timerEvent(QTimerEvent *event)
 {
+
+  cerr << ".ht." << endl;
+  
   bool doUpdate = false;
   // bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
   // if (isBoundaryEditorVisible) {
@@ -422,10 +425,11 @@ void HorizWidget::timerEvent(QTimerEvent *event)
   //     (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
   //   this->setCursor(Qt::CrossCursor);
   // } else {
-    this->setCursor(Qt::ArrowCursor);
+  this->setCursor(Qt::ArrowCursor);
   // }
   
   if (doUpdate) {  //only update if something has changed
+    cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
     update();
   }
 }
@@ -436,6 +440,8 @@ void HorizWidget::timerEvent(QTimerEvent *event)
  */
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+
+  cerr << "==>> hhhhhh mouseReleaseEvent <<==" << endl;
 
   _pointClicked = false;
 
@@ -495,6 +501,8 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // emit signal
 
+    cerr << "lllllllllllllllllllll" << endl;
+    
     emit locationClicked(x_km, y_km, closestRay);
     
   } else {

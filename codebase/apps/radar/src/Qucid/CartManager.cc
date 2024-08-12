@@ -248,8 +248,8 @@ void CartManager::timerEvent(QTimerEvent *event)
   if (event->timerId() != _mainTimerId) {
     return;
   }
-
-  // cerr << "t";
+  
+  cerr << "*t*";
   
   // field change?
 
@@ -270,7 +270,7 @@ void CartManager::timerEvent(QTimerEvent *event)
   if (_timerEventCount == 10) {
     _placeTimeControl();
   }
-
+  
   // read click point info from FMQ
   
   _readClickPoint();
@@ -291,7 +291,7 @@ void CartManager::timerEvent(QTimerEvent *event)
   // handle image creation
 
   if (_params.images_auto_create) {
-    
+
     // if we are just creating files in archive mode
     // and then exiting, do that now
     

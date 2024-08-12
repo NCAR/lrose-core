@@ -268,8 +268,11 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
             }
           } // if(mr->h_fhdr.encoding_type ...
              
-          if(gd.debug2) printf("NUM POLYGONS: %d of %lld \n",
-                               mr->num_display_pts,mr->h_fhdr.nx*mr->h_fhdr.ny);
+          if(gd.debug2) {
+            printf("NUM POLYGONS: %d of %ld \n",
+                   mr->num_display_pts,
+                   mr->h_fhdr.nx*mr->h_fhdr.ny);
+          }
              
         }
         break;

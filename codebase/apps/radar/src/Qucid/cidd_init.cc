@@ -1412,7 +1412,7 @@ static int _loadRapMap(Overlay_t *ov, const string &mapFilePath)
   int len,point;
   int num_points;        
   int num_fields;  /* number of fields (tokens) found in input line */
-  int ret_stat;
+  // int ret_stat;
   char name_buf[2048];  /* Buffer for input lines */
   char *lasts;
 
@@ -1810,17 +1810,17 @@ static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string 
   int index;
   int point;
   int num_points;        
-  int ret_stat;
-  char *str_ptr;
-  char name_base[1024];  /* Buffer for input names */
-  char dirname[4096];   /* Buffer for directories to search */
-  char name_buf[2048];  /* Buffer for input names */
-  char name_buf2[2048]; /* Buffer for input names */
-  char *map_buf;
-  int map_len;
-  FILE *map_file;
+  // int ret_stat;
+  // char *str_ptr;
+  // char name_base[1024];  /* Buffer for input names */
+  // char dirname[4096];   /* Buffer for directories to search */
+  // char name_buf[2048];  /* Buffer for input names */
+  // char name_buf2[2048]; /* Buffer for input names */
+  // char *map_buf;
+  // int map_len;
+  // FILE *map_file;
 
-  int pid = getpid();
+  // int pid = getpid();
 
   // Shape File is Found and Open
 
@@ -2643,7 +2643,7 @@ static int _getResourceCachePath(const string &cacheDir,
       cerr << "  " << strerror(err) << endl;
       return -1;
     }
-    if (fwrite(cs_buf, 1, cs_len, cacheFile) != cs_len) {
+    if ((int) fwrite(cs_buf, 1, cs_len, cacheFile) != cs_len) {
       int err = errno;
       cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
       cerr << "  Cannot write to cache file: " << cachePath << endl;
@@ -2775,7 +2775,7 @@ static int _readFileIntoBuffer(const string &path,
     return -1;
   }
 
-  if(fread(buf, 1, sbuf.st_size, ff) != sbuf.st_size) {
+  if((ssize_t) fread(buf, 1, sbuf.st_size, ff) != sbuf.st_size) {
     int errNum = errno;
     cerr << "ERROR - cidd_init::_readFileIntoBuffer, cannot read file: " << path << endl;
     cerr << "  " << strerror(errNum) << endl;
