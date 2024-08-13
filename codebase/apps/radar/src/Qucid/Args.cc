@@ -208,6 +208,8 @@ int Args::parse (const int argc, const char **argv)
       
     } else if (!strcmp(argv[i], "-p")) {
 
+    } else if (Params::isArgValid(argv[i])) {
+      
     } else if (argv[i][0] == '-') {
 
       cerr<< "====>> WARNING - invalid command line argument: '"

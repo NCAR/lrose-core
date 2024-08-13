@@ -1069,6 +1069,8 @@ public:
 
   int horiz_tick_values_font_size;
 
+  tdrp_bool_t horiz_tick_values_inside;
+
   int horiz_legend_font_size;
 
   char* horiz_title_color;
@@ -1100,6 +1102,8 @@ public:
   int vert_axis_label_font_size;
 
   int vert_tick_values_font_size;
+
+  tdrp_bool_t vert_tick_values_inside;
 
   int vert_legend_font_size;
 
@@ -1514,7 +1518,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[514];
+  mutable TDRPtable _table[516];
 
   const char *_className;
 

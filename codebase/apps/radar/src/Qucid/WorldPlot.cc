@@ -87,6 +87,7 @@ WorldPlot::WorldPlot()
   _tickValuesFontSize = 7;
   _legendFontSize = 7;
 
+  _backgroundColor = "black";
   _titleColor = "white";
   _axisLineColor = "white";
   _axisTextColor = "white";
@@ -582,6 +583,23 @@ void WorldPlot::fillRectangle(QPainter &painter,
 // fill the entire canvas with a color
 
 void WorldPlot::fillCanvas(QPainter &painter,
+                           const char *colorName) 
+  
+{
+  
+  double xx = _xPixOffset;
+  double yy = _yPixOffset;
+  double width = _widthPixels;
+  double height = _heightPixels;
+
+  QColor color(colorName);
+  QBrush brush(color);
+  
+  painter.fillRect(xx, yy, width, height, brush);
+
+}
+
+void WorldPlot::fillCanvas(QPainter &painter,
                            QBrush &brush) 
 
 {
@@ -590,7 +608,7 @@ void WorldPlot::fillCanvas(QPainter &painter,
   double yy = _yPixOffset;
   double width = _widthPixels;
   double height = _heightPixels;
-
+  
   painter.fillRect(xx, yy, width, height, brush);
 
 }
@@ -808,7 +826,7 @@ void WorldPlot::drawYAxisLabelLeft(QPainter &painter,
   // get bounding rectangle
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(label.c_str()));
-    
+  
   // qreal xx = (qreal) (getXPixCanvas(tRect.height() / 2.0));
   qreal yy = (qreal) ((_yMinPixel + _yMaxPixel + tRect.width()) / 2.0);
 
@@ -819,7 +837,7 @@ void WorldPlot::drawYAxisLabelLeft(QPainter &painter,
   }
 
   QRectF bRect(0, 0, tRect.width() + 2, tRect.height() + 2);
-
+  
   painter.save();
   painter.translate(xx, yy);
   painter.rotate(-90);
@@ -964,18 +982,27 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
   
 {
 
+  painter.save();
+  
+  QColor textColor(_axisTextColor.c_str());
+  QBrush textBrush(textColor);
+  
+  QColor lineColor(_axisLineColor.c_str());
+  
   // axis line
-
+  
   if (doLine) {
+    painter.setPen(lineColor);
     drawLine(painter, _xMinWorld, _yMinWorld, _xMinWorld, _yMaxWorld);
   }
 
   // font
-
+  
   QFont font(painter.font());
   font.setPointSizeF(_axisLabelFontSize);
   painter.setFont(font);
-
+  painter.setPen(textColor);
+  
   // axis units label
 
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
@@ -1009,6 +1036,7 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
     if (doTicks) {
       QLineF qline(_xMinPixel, ypix,
                    _xMinPixel + _yAxisTickLen, ypix);
+      painter.setPen(lineColor);
       painter.drawLine(qline);
     }
 	    
@@ -1048,6 +1076,8 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
 
   } // i
 	
+  painter.restore();
+
 }
 
 //////////////

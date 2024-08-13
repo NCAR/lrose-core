@@ -2042,23 +2042,29 @@ paramdef int {
   p_descr = "Font size of tick values (pixels).";
 } horiz_tick_values_font_size;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Draw tick value labels inside the plot.";
+  p_help = "If FALSE the value labels will be drawn in the margins.";
+} horiz_tick_values_inside;
+
 paramdef int {
   p_default = 8;
   p_descr = "Font size of legends (pixels).";
 } horiz_legend_font_size;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for title text.";
 } horiz_title_color;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for axes.";
 } horiz_axes_color;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for grid (if plotted).";
 } horiz_grid_color;
 
@@ -2129,23 +2135,29 @@ paramdef int {
   p_descr = "Font size of tick values (pixels).";
 } vert_tick_values_font_size;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Draw tick value labels inside the plot.";
+  p_help = "If FALSE the value labels will be drawn in the margins.";
+} vert_tick_values_inside;
+
 paramdef int {
   p_default = 8;
   p_descr = "Font size of legends (pixels).";
 } vert_legend_font_size;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for title text.";
 } vert_title_color;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for axes.";
 } vert_axes_color;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for grid (if plotted).";
 } vert_grid_color;
 
@@ -3093,7 +3105,7 @@ paramdef string {
 } background_color2;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color of text annotation in main display.";
 } text_color;
 

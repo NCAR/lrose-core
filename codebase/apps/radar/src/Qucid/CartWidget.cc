@@ -515,13 +515,27 @@ void CartWidget::paintEvent(QPaintEvent *event)
   
   QPainter painter(this);
   
-  QBrush grayBrush(QColor(50,50,50));
+  // QBrush grayBrush(QColor(50,50,50));
   // _zoomWorld.fillRectangle(painter, grayBrush,
   //                          _zoomWorld.getXMinWorld(),
   //                          _zoomWorld.getYMinWorld(),
   //                          _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld(),
   //                          _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld());
-  _zoomWorld.fillCanvas(painter, grayBrush);
+  cerr << "NBBBBBBBBBBBBB background_color: " << _params.background_color << endl;
+  _zoomWorld.fillCanvas(painter, _params.background_color);
+  string projUnits("km");
+  if (gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
+    projUnits = "deg";
+  }
+  _zoomWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _zoomWorld.setXAxisLabelsInside(_params.horiz_tick_values_inside);
+  _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
+  _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
+  _zoomWorld.setGridColor(_params.horiz_grid_color);
+  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, true);
+  _zoomWorld.drawAxisTop(painter, projUnits, true, true, true, true);
+  _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
+  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, false, false);
   
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 

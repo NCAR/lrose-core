@@ -4245,6 +4245,18 @@
     tt->single_val.i = 8;
     tt++;
     
+    // Parameter 'horiz_tick_values_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("horiz_tick_values_inside");
+    tt->descr = tdrpStrDup("Draw tick value labels inside the plot.");
+    tt->help = tdrpStrDup("If FALSE the value labels will be drawn in the margins.");
+    tt->val_offset = (char *) &horiz_tick_values_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'horiz_legend_font_size'
     // ctype is 'int'
     
@@ -4266,7 +4278,7 @@
     tt->descr = tdrpStrDup("Color for title text.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'horiz_axes_color'
@@ -4278,7 +4290,7 @@
     tt->descr = tdrpStrDup("Color for axes.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_axes_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'horiz_grid_color'
@@ -4290,7 +4302,7 @@
     tt->descr = tdrpStrDup("Color for grid (if plotted).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'vert_top_margin'
@@ -4437,6 +4449,18 @@
     tt->single_val.i = 8;
     tt++;
     
+    // Parameter 'vert_tick_values_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("vert_tick_values_inside");
+    tt->descr = tdrpStrDup("Draw tick value labels inside the plot.");
+    tt->help = tdrpStrDup("If FALSE the value labels will be drawn in the margins.");
+    tt->val_offset = (char *) &vert_tick_values_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'vert_legend_font_size'
     // ctype is 'int'
     
@@ -4458,7 +4482,7 @@
     tt->descr = tdrpStrDup("Color for title text.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'vert_axes_color'
@@ -4470,7 +4494,7 @@
     tt->descr = tdrpStrDup("Color for axes.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_axes_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'vert_grid_color'
@@ -4482,7 +4506,7 @@
     tt->descr = tdrpStrDup("Color for grid (if plotted).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'Comment 35'
@@ -6382,7 +6406,7 @@
     tt->descr = tdrpStrDup("Color of text annotation in main display.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &text_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'grid_and_range_ring_color'
