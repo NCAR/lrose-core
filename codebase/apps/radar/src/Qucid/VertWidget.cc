@@ -888,6 +888,16 @@ void VertWidget::unzoomView()
 }
 
 /*************************************************************************
+ * adjust pixel scale for correct aspect ratio etc
+ */
+void VertWidget::adjustPixelScales()
+{
+
+  cerr << "==>> hhhhhh VertWidget::adjustPixelScales() <<==" << endl;
+
+}
+
+/*************************************************************************
  * resize()
  */
 

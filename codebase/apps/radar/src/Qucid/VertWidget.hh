@@ -105,6 +105,10 @@ class DLL_EXPORT VertWidget : public CartWidget
   const RadxTime &getPlotStartTime() { return _plotStartTime; }
   const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
+  // adjust pixel scale to suit window size etc.
+
+  virtual void adjustPixelScales();
+
 signals:
 
   ////////////////

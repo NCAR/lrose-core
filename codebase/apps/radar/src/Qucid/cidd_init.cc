@@ -850,6 +850,8 @@ static int _initGrids()
     }
     mrec->colorMap = new ColorMap(colorscaleCachePath.c_str(),
                                   _params.debug >= Params::DEBUG_EXTRA);
+    mrec->colorMap->setName(fld.color_map);
+    mrec->colorMap->setUnits(mrec->field_units);
     
   } // ifld
   

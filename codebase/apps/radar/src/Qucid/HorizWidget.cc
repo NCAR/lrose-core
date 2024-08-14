@@ -434,13 +434,14 @@ void HorizWidget::timerEvent(QTimerEvent *event)
 
 
 /*************************************************************************
- * handle the first timer event
+ * adjust pixel scale for correct aspect ratio etc
  */
-void HorizWidget::equalizePixelScales()
+void HorizWidget::adjustPixelScales()
 {
 
-  cerr << "==>> hhhhhh HorizWidget::handleFirstTimerEvent() <<==" << endl;
+  cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
   _zoomWorld.equalizePixelScales();
+
 }
 
 /*************************************************************************
@@ -823,7 +824,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
   int fieldNum = gd.h_win.page;
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
+  _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
   if (_archiveMode) {
     

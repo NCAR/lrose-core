@@ -187,6 +187,10 @@ class DLL_EXPORT CartWidget : public QWidget
     return _aspectRatio;
   }
 
+  // adjust pixel scale to suit window size etc.
+
+  virtual void adjustPixelScales() = 0;
+
   ////////////////
   // Qt signals //
   ////////////////

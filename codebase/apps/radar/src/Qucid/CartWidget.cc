@@ -554,6 +554,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
 void CartWidget::resizeEvent(QResizeEvent * e)
 {
   _resetWorld(width(), height());
+  adjustPixelScales();
   _refreshImages();
   update();
 }
@@ -594,7 +595,6 @@ void CartWidget::_resetWorld(int width, int height)
   _setGridSpacing();
 
 }
-
 
 /*************************************************************************
  * Protected methods

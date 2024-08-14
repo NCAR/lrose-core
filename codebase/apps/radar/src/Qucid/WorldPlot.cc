@@ -2093,17 +2093,28 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
                                int unitsFontSize)
   
 {
+
+  cerr << "CCCCCCCCCCCCCC colorMap name: " << colorMap.getName() << endl;
+  cerr << "CCCCCCCCCCCCCC labelsSetByValue: " << colorMap.labelsSetByValue() << endl;
   
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
   int pltHt = _plotHeight;
-  int width = _colorScaleWidth;
-  int xStart = _xPixOffset + _widthPixels - width;
+  int width = _colorScaleWidth - 2;
+  int xStart = _xPixOffset + _widthPixels - _colorScaleWidth;
   int yStart = _topMargin + _yMaxPixel + unitsFontSize;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
   double patchHt = (double)(pltHt) / nHts;
   int iPatchHt = (int) patchHt;
 
+  // compute y locations of the color patches
+  
+  vector<double> topY;
+  for (size_t ii = 0; ii < cmap.size(); ii++) {
+    double yy = yStart + pltHt - (int) ((ii + 2) * patchHt + (patchHt / 2));
+    topY.push_back(yy);
+  } // ii
+  
   // fill the swatches with the color
   
   painter.save();
@@ -2113,13 +2124,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    double topY = yStart + pltHt - (int) (ii + 2) * patchHt + (patchHt / 2);
-    QRectF r(xStart, topY, width, patchHt);
+    QRectF r(xStart, topY[ii], width, patchHt);
     painter.fillRect(r, color);
     if (ii == 0) {
-      scaleYBot = topY + patchHt;
+      scaleYBot = topY[ii] + patchHt;
     } else if (ii == cmap.size() - 1) {
-      scaleYTop = topY;
+      scaleYTop = topY[ii];
     }
   }
   painter.restore();
@@ -2166,7 +2176,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   if (colorMap.labelsSetByValue()) {
   
     // label values specified in the color scale file
-
+    
     const vector<ColorMap::CmapLabel> &labels = colorMap.getSpecifiedLabels();
     double scaleHeight = scaleYBot - scaleYTop;
     for (size_t ii = 0; ii < labels.size(); ii++) {
@@ -2188,7 +2198,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
       QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
-      int iyy = (int) yy;
+      int iyy = (int) (topY[ii] + patchHt * 0.5);
       bool doText = false;
       if (prevIyy < 0) {
         doText = true;
@@ -2208,30 +2218,26 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     
     const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
     QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
-    int iyy = (int) yy;
-    if ((prevIyy - iyy) > textHt * 2) {
-      painter.drawText(xStart, iyy, width, iPatchHt, 
+    int iyy = (int) (topY[cmap.size()-1] - patchHt * 0.5);
+    painter.drawText(xStart, iyy, width, iPatchHt, 
                        Qt::AlignVCenter | Qt::AlignHCenter, 
-                       label);
-    }
-    yy -= patchHt;
-
+                     label);
   }
 
   // add Units label
-
+  
   string units(colorMap.getUnits());
   if (units.size() > 0) {
     
     QFont ufont(painter.font());
     ufont.setPointSizeF(unitsFontSize);
     painter.setFont(ufont);
-
+    
     QRect tRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
-    int iyy = yStart + _topMargin / 2;
+    int iyy = (int) (topY[cmap.size()-1] - patchHt * 1.0);
     int ixx = _xPixOffset + _widthPixels - width;
     QString qunits(units.c_str());
-    painter.drawText(ixx, iyy, width, tRect.height() + 4, 
+    painter.drawText(ixx, iyy, width, tRect.height() + 6, 
                      Qt::AlignTop | Qt::AlignHCenter, qunits);
 
   }

@@ -3054,7 +3054,7 @@ void CartManager::_handleFirstTimerEvent()
   cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
   cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  _horiz->equalizePixelScales();
+  _horiz->adjustPixelScales();
   
   // Set the size of the second column to the size of the largest
   // label.  This should keep the column from wiggling as the values change.

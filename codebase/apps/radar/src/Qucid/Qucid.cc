@@ -320,17 +320,25 @@ int Qucid::_setupDisplayFields()
     colorMapPath += PATH_DELIM;
     colorMapPath += pfld.color_map;
     ColorMap map;
-    map.setName(pfld.legend_label);
+    // map.setName(pfld.legend_label);
+    map.setName(pfld.color_map);
     map.setUnits(pfld.field_units);
+    cerr << "MMMMMMMMMMMMMMMM colorMap name: " << pfld.color_map << endl;
     // TODO: the logic here is a little weird ... the legend_label and units have been set, but are we throwing them away?
 
     bool noColorMap = false;
 
-    if (map.readMap(colorMapPath)) {
+    if (map.readMap(colorMapPath) == 0) {
+      
+      cerr << "NNNNNNNNNNNNNNNNNNNNNNNN colorMap name: " << pfld.color_map << endl;
+      
+      map.setName(pfld.color_map);
+
+    } else {
+
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;
       cerr << "  Looking for default color map for field " << pfld.legend_label << endl; 
-
       try {
         // check here for smart color scale; look up by field name/legend_label and
         // see if the name is a usual parameter for a known color map
@@ -348,15 +356,17 @@ int Qucid::_setupDisplayFields()
         noColorMap = true; 
         // return -1
       }
-    }
+
+    } // if (map.readMap(colorMapPath)
 
     // unfiltered field
 
     DisplayField *field =
       new DisplayField(pfld.legend_label, pfld.field_name, pfld.field_units, 
                        "a", map, ifield, false);
-    if (noColorMap)
+    if (noColorMap) {
       field->setNoColorMap();
+    }
 
     _displayFields.push_back(field);
 
