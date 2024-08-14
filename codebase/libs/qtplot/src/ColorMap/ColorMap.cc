@@ -191,6 +191,7 @@ ColorMap &ColorMap::_copy(const ColorMap &rhs)
 
     _useLog10Transform = rhs._useLog10Transform;
     _useLog10ForLut = rhs._useLog10ForLut;
+    _saturation = rhs._saturation;
 
     _entries = rhs._entries;
     _transitionVals = rhs._transitionVals;
