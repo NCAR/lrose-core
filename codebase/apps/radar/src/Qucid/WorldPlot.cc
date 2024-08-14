@@ -2013,12 +2013,16 @@ void WorldPlot::_computeTransform()
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
   
+  cerr << "ssssssssssssssss _xMaxPixel, _xMinPixel: " << _xMaxPixel << ", " << _xMinPixel << endl;
+  cerr << "ssssssssssssssss _yMaxPixel, _yMinPixel: " << _yMaxPixel << ", " << _yMinPixel << endl;
+  cerr << "ssssssssssssssss _xMaxWorld, _xMinWorld: " << _xMaxWorld << ", " << _xMinWorld << endl;
+  cerr << "ssssssssssssssss _yMaxWorld, _yMinWorld: " << _yMaxWorld << ", " << _yMinWorld << endl;
   cerr << "ssssssssssssssss _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
 
-  // #define JUNK
+#define JUNK
 #ifdef JUNK
   if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.999)) {
-    if (usign(_yPixelsPerWorld)) {
+    if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
     } else {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld) * -1.0;
@@ -2029,7 +2033,7 @@ void WorldPlot::_computeTransform()
     _yMaxWorld = yMean + yHalf;
     cerr << "YYYYYYYYYYYYYY yMin, yMax: " << _yMinWorld << ", " << _yMaxWorld << endl;
   } else if (fabs(_yPixelsPerWorld) < fabs(_xPixelsPerWorld * 0.999)) {
-    if (usign(_xPixelsPerWorld)) {
+    if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
     } else {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld) * -1.0;

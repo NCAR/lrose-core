@@ -509,9 +509,9 @@ void CartWidget::paintEvent(QPaintEvent *event)
 {
 
   cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
-  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
-  _zoomWorld.print(cerr);
-  cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
+  // _zoomWorld.print(cerr);
+  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
   
   QPainter painter(this);
   

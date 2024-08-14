@@ -3052,6 +3052,7 @@ void CartManager::_handleFirstTimerEvent()
 {
 
   cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
+  cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   
   // Set the size of the second column to the size of the largest
