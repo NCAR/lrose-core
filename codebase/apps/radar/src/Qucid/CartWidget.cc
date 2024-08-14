@@ -553,6 +553,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
 
 void CartWidget::resizeEvent(QResizeEvent * e)
 {
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
   adjustPixelScales();
   _refreshImages();
@@ -567,18 +568,20 @@ void CartWidget::resizeEvent(QResizeEvent * e)
 void CartWidget::resize(const int width, const int height)
 {
 
+  cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
   // Set the geometry based on the aspect ratio that we need for this display.
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.
   
-  int sizeNeeded = (int) ((width - _colorScaleWidth) / _aspectRatio + 0.5);
-  if (height < sizeNeeded) {
-    sizeNeeded = height;
+  int htNeeded = (int) ((width - _colorScaleWidth) / _aspectRatio + 0.5);
+  if (height < htNeeded) {
+    htNeeded = height;
   }
-
-  setGeometry(0, 0, 
-              (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
-              sizeNeeded);
+  int widthNeeded = (int) (htNeeded * _aspectRatio + 0.5) + _colorScaleWidth;
+  cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ htNeeded, widthNeeded: " << htNeeded << ", " << widthNeeded << endl;
+  
+  // setGeometry(0, 0, widthNeeded, htNeeded);
+  setGeometry(0, 0, width, height);
 
 }
 
