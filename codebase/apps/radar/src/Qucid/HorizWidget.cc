@@ -434,6 +434,16 @@ void HorizWidget::timerEvent(QTimerEvent *event)
 
 
 /*************************************************************************
+ * handle the first timer event
+ */
+void HorizWidget::equalizePixelScales()
+{
+
+  cerr << "==>> hhhhhh HorizWidget::handleFirstTimerEvent() <<==" << endl;
+  _zoomWorld.equalizePixelScales();
+}
+
+/*************************************************************************
  * mouseReleaseEvent()
  */
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)

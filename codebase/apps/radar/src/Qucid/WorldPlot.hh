@@ -489,6 +489,10 @@ public:
                       QPainter &painter,
                       int unitsFontSize);
 
+  // equalize X and Y pixel scales
+  
+  void equalizePixelScales();
+  
   // print
 
   void print(ostream &out);

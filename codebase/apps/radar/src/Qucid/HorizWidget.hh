@@ -132,6 +132,10 @@ class DLL_EXPORT HorizWidget : public CartWidget
   QLabel *_openingFileInfoLabel;
   void showOpeningFileMsg(bool isVisible);
 
+  // handle the first timer event - called by CartManager
+
+  void equalizePixelScales();
+
   //////////////
   // Qt slots //
   //////////////

@@ -52,8 +52,8 @@ using namespace std;
 WorldPlot::WorldPlot()
 {
 
-  _widthPixels = 100;
-  _heightPixels = 100;
+  _widthPixels = 1000;
+  _heightPixels = 1000;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -141,6 +141,27 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
 
+  _xMinWorld = rhs._xMinWorld;
+  _xMaxWorld = rhs._xMaxWorld;
+  _yMinWorld = rhs._yMinWorld;
+  _yMaxWorld = rhs._yMaxWorld;
+  
+  _plotWidth = rhs._plotWidth;
+  _plotHeight = rhs._plotHeight;
+
+  _xMinPixel = rhs._xMinPixel;
+  _xMaxPixel = rhs._xMaxPixel;
+  _yMinPixel = rhs._yMinPixel;
+  _yMaxPixel = rhs._yMaxPixel;
+
+  _xPixelsPerWorld = rhs._xPixelsPerWorld;
+  _yPixelsPerWorld = rhs._yPixelsPerWorld;
+  
+  _xMinWindow = rhs._xMinWindow;
+  _xMaxWindow = rhs._xMaxWindow;
+  _yMinWindow = rhs._yMinWindow;
+  _yMaxWindow = rhs._yMaxWindow;
+
   _leftMargin = rhs._leftMargin;
   _rightMargin = rhs._rightMargin;
   _topMargin = rhs._topMargin;
@@ -170,31 +191,12 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _axisLabelFontSize = rhs._axisLabelFontSize;
   _tickValuesFontSize = rhs._tickValuesFontSize;
   _legendFontSize = rhs._legendFontSize;
+
+  _backgroundColor = rhs._backgroundColor;
   _titleColor = rhs._titleColor;
   _axisLineColor = rhs._axisLineColor;
   _axisTextColor = rhs._axisTextColor;
   _gridColor = rhs._gridColor;
-
-  _xMinWorld = rhs._xMinWorld;
-  _xMaxWorld = rhs._xMaxWorld;
-  _yMinWorld = rhs._yMinWorld;
-  _yMaxWorld = rhs._yMaxWorld;
-  
-  _plotWidth = rhs._plotWidth;
-  _plotHeight = rhs._plotHeight;
-
-  _xMinPixel = rhs._xMinPixel;
-  _xMaxPixel = rhs._xMaxPixel;
-  _yMinPixel = rhs._yMinPixel;
-  _yMaxPixel = rhs._yMaxPixel;
-
-  _xPixelsPerWorld = rhs._xPixelsPerWorld;
-  _yPixelsPerWorld = rhs._yPixelsPerWorld;
-  
-  _xMinWindow = rhs._xMinWindow;
-  _xMaxWindow = rhs._xMaxWindow;
-  _yMinWindow = rhs._yMinWindow;
-  _yMaxWindow = rhs._yMaxWindow;
 
   _topTicks = rhs._topTicks;
   _bottomTicks = rhs._bottomTicks;
@@ -2013,15 +2015,39 @@ void WorldPlot::_computeTransform()
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
   
-  cerr << "ssssssssssssssss _xMaxPixel, _xMinPixel: " << _xMaxPixel << ", " << _xMinPixel << endl;
-  cerr << "ssssssssssssssss _yMaxPixel, _yMinPixel: " << _yMaxPixel << ", " << _yMinPixel << endl;
-  cerr << "ssssssssssssssss _xMaxWorld, _xMinWorld: " << _xMaxWorld << ", " << _xMinWorld << endl;
-  cerr << "ssssssssssssssss _yMaxWorld, _yMinWorld: " << _yMaxWorld << ", " << _yMinWorld << endl;
-  cerr << "ssssssssssssssss _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
+  _transform.reset();
+  _transform.translate(_xMinPixel, _yMinPixel);
+  _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
+  _transform.translate(-_xMinWorld, -_yMinWorld);
+    
+  _xMinWindow = getXWorld(_xPixOffset);
+  _yMinWindow = getYWorld(_yPixOffset);
+  _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
+  _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-#define JUNK
-#ifdef JUNK
+}
+
+///////////////////////////////////////
+// equalize the pixel scale for X and Y
+                              
+void WorldPlot::equalizePixelScales() 
+{
+    
+  _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
+  _plotHeight = _heightPixels - _topMargin - _bottomMargin;
+    
+  _xMinPixel = _leftMargin + _xPixOffset;
+  _xMaxPixel = _xMinPixel + _plotWidth - 1;
+  _yMaxPixel = _topMargin + _yPixOffset;
+  _yMinPixel = _yMaxPixel + _plotHeight - 1;
+    
+  _xPixelsPerWorld =
+    (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
+  _yPixelsPerWorld =
+    (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
+  
   if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.999)) {
+    // adjust y pixel scale
     if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
     } else {
@@ -2031,8 +2057,8 @@ void WorldPlot::_computeTransform()
     double yHalf = ((_yMaxPixel - _yMinPixel) / 2.0) / _yPixelsPerWorld;
     _yMinWorld = yMean - yHalf; 
     _yMaxWorld = yMean + yHalf;
-    cerr << "YYYYYYYYYYYYYY yMin, yMax: " << _yMinWorld << ", " << _yMaxWorld << endl;
   } else if (fabs(_yPixelsPerWorld) < fabs(_xPixelsPerWorld * 0.999)) {
+    // adjust x pixel scale
     if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
     } else {
@@ -2042,13 +2068,11 @@ void WorldPlot::_computeTransform()
     double xHalf = ((_xMaxPixel - _xMinPixel) / 2.0) / _xPixelsPerWorld;
     _xMinWorld = xMean - xHalf; 
     _xMaxWorld = xMean + xHalf;
-    cerr << "XXXXXXXXXXXXXX xMin, xMax: " << _xMinWorld << ", " << _xMaxWorld << endl;
-    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  } else {
+    // no change
+    return;
   }
-#endif
   
-  cerr << "rrrrrrrrrrrrrrr _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
-
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
