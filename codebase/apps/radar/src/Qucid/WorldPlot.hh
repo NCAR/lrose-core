@@ -166,8 +166,10 @@ public:
   void setWindowOffsets(int xOffset, int yOffset);
 
   // set the y scale from the x scale - for plotting with aspect ration 1.0
+  // or vice versa
 
   void setYscaleFromXscale();
+  void setXscaleFromYscale();
   
   // get methods
 

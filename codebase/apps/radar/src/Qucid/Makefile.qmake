@@ -3943,7 +3943,8 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		TimeList.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o WindMenuItem.o WindMenuItem.cc
 
-WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
+WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
+		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh
