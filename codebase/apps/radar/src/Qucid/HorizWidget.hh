@@ -25,6 +25,7 @@
 #define HorizWidget_HH
 
 #include <Radx/RadxVol.hh>
+#include <Mdv/MdvxProj.hh>
 #include "CartWidget.hh"
 
 class QLabel;
@@ -171,6 +172,10 @@ class DLL_EXPORT HorizWidget : public CartWidget
   double _sumElev;
   double _nRays;
 
+  // projection
+
+  MdvxProj _proj;
+
   // override mouse release event
   virtual void mouseReleaseEvent(QMouseEvent* event);
 
@@ -237,8 +242,12 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   inline int _beamIndex(const double start_angle, const double stop_angle);
 
+  // initialize the geographic projection
 
-  RadxVol *_vol;
+  void _initProjection();
+  
+  // RadxVol *_vol;
+
 };
 
 

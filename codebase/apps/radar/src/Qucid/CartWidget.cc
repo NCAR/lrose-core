@@ -319,7 +319,7 @@ QPixmap* CartWidget::getPixmap()
 void CartWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  cerr << "cccc mousePressEvent" << endl;
+  // cerr << "cccc mousePressEvent" << endl;
   
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
@@ -361,7 +361,7 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 void CartWidget::mouseMoveEvent(QMouseEvent * e)
 {
 
-  cerr << "ccccc mouseMoveEvent" << endl;
+  // cerr << "ccccc mouseMoveEvent" << endl;
   
   // Zooming with the mouse
 
@@ -426,10 +426,10 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 void CartWidget::paintEvent(QPaintEvent *event)
 {
 
-  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
+  // cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
 
   if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
-    cerr << "ZZZZZZZZZZZZZZZZZZZ new zoom level: " << gd.h_win.zoom_level << endl;
+    // cerr << "ZZZZZZZZZZZZZZZZZZZ new zoom level: " << gd.h_win.zoom_level << endl;
     _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
                               gd.h_win.cmax_x, gd.h_win.cmax_y);
     gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
@@ -448,7 +448,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
   //                          _zoomWorld.getYMinWorld(),
   //                          _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld(),
   //                          _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld());
-  cerr << "NBBBBBBBBBBBBB background_color: " << _params.background_color << endl;
+  // cerr << "NBBBBBBBBBBBBB background_color: " << _params.background_color << endl;
   _zoomWorld.fillCanvas(painter, _params.background_color);
   string projUnits("km");
   if (gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
@@ -480,7 +480,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
 
 void CartWidget::resizeEvent(QResizeEvent * e)
 {
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  // cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
   adjustPixelScales();
   _refreshImages();
@@ -495,7 +495,7 @@ void CartWidget::resizeEvent(QResizeEvent * e)
 void CartWidget::resize(const int width, const int height)
 {
 
-  cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
+  // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
   // Set the geometry based on the aspect ratio that we need for this display.
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.

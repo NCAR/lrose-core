@@ -331,14 +331,6 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
 
 {
 
-  // Save the specified values
-
-  // _maxRangeKm = max_range;
-
-  // Set the ring spacing.  This is dependent on the value of _maxRange.
-
-  _setGridSpacing();
-  
   // set world view
 
   int leftMargin = _params.horiz_left_margin;
@@ -385,6 +377,12 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
   // _fullWorld.print(cerr);
   // cerr << "FFFFFFFFFFFFFFF Full world" << endl;
   
+  // initialize the projection
+
+  _initProjection();
+  
+  // set other members
+  
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -394,7 +392,7 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
 
-  _refreshImages();
+  // _refreshImages();
 
 }
 
@@ -427,7 +425,7 @@ void HorizWidget::timerEvent(QTimerEvent *event)
   // }
   
   if (doUpdate) {  //only update if something has changed
-    cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
+    // cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
     update();
   }
 }
@@ -439,11 +437,9 @@ void HorizWidget::timerEvent(QTimerEvent *event)
 void HorizWidget::adjustPixelScales()
 {
 
-  cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
-  if (_params.proj_type == Params::PROJ_LATLON) {
-    _zoomWorld.setIsLatLon(true);
-  }
-  _zoomWorld.equalizePixelScales();
+  // cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
+  _zoomWorld.setProjection(_proj);
+  _zoomWorld.adjustPixelScales();
   
 }
 
@@ -453,7 +449,7 @@ void HorizWidget::adjustPixelScales()
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
+  // cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
 
   _pointClicked = false;
 
@@ -530,6 +526,7 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
                               _worldReleaseX, _worldReleaseY);
 
+    adjustPixelScales();
     _setTransform(_zoomWorld.getTransform());
 
     _setGridSpacing();
@@ -637,7 +634,7 @@ void HorizWidget::_setGridSpacing()
 void HorizWidget::_drawOverlays(QPainter &painter)
 {
 
-  cerr << "ddddddddddddddd drawOverlays" << endl;
+  // cerr << "ddddddddddddddd drawOverlays" << endl;
   
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
@@ -851,7 +848,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
 
-    cerr << "SSSSSSSSSSSSSSSS " << text << endl;
+    // cerr << "SSSSSSSSSSSSSSSS " << text << endl;
     
     // radar and site name legend
 
@@ -1491,3 +1488,55 @@ void HorizWidget::setClickPoint(double azimuthDeg,
   update();
 
 }
+
+/*************************************************************************
+ * initialize the geographic projection
+ */
+
+void HorizWidget::_initProjection()
+{
+
+  if (_params.proj_type == Params::PROJ_LATLON) {
+    _proj.initLatlon(_params.proj_origin_lon);
+  } else if (_params.proj_type == Params::PROJ_FLAT) {
+    _proj.initFlat(_params.proj_origin_lat,
+                   _params.proj_origin_lon,
+                   _params.proj_rotation);
+  } else if (_params.proj_type == Params::PROJ_LAMBERT_CONF) {
+    _proj.initLambertConf(_params.proj_origin_lat,
+                          _params.proj_origin_lon,
+                          _params.proj_lat1,
+                          _params.proj_lat2);
+  } else if (_params.proj_type == Params::PROJ_POLAR_STEREO) {
+    Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
+    if (!_params.proj_pole_is_north) {
+      poleType = Mdvx::POLE_SOUTH;
+    }
+    _proj.initPolarStereo(_params.proj_tangent_lon,
+                          poleType,
+                          _params.proj_central_scale);
+  } else if (_params.proj_type == Params::PROJ_OBLIQUE_STEREO) {
+    _proj.initObliqueStereo(_params.proj_origin_lat,
+                            _params.proj_origin_lon,
+                            _params.proj_tangent_lat,
+                            _params.proj_tangent_lon,
+                            _params.proj_central_scale);
+  } else if (_params.proj_type == Params::PROJ_MERCATOR) {
+    _proj.initMercator(_params.proj_origin_lat,
+                       _params.proj_origin_lon);
+  } else if (_params.proj_type == Params::PROJ_TRANS_MERCATOR) {
+    _proj.initTransMercator(_params.proj_origin_lat,
+                            _params.proj_origin_lon,
+                            _params.proj_central_scale);
+  } else if (_params.proj_type == Params::PROJ_ALBERS) {
+    _proj.initAlbers(_params.proj_origin_lat,
+                     _params.proj_origin_lon,
+                     _params.proj_lat1,
+                     _params.proj_lat2);
+  } else if (_params.proj_type == Params::PROJ_LAMBERT_AZIM) {
+    _proj.initLambertAzim(_params.proj_origin_lat,
+                          _params.proj_origin_lon);
+  }
+
+}
+

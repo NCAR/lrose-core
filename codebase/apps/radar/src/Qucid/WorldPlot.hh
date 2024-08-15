@@ -48,6 +48,7 @@
 #include <QColor>
 #include <QFont>
 #include <Radx/RadxTime.hh>
+#include <Mdv/MdvxProj.hh>
 class ColorMap;
 
 using namespace std;
@@ -81,7 +82,7 @@ public:
   // set world coord limits for window
   // side effect - recomputes transform
 
-  void setIsLatLon(bool state) { _isLatLon = state; }
+  void setProjection(const MdvxProj &proj) { _proj = proj; }
      
   void setWorldLimits(double xMinWorld,
                       double yMinWorld,
@@ -191,6 +192,8 @@ public:
 
   inline int getColorScaleWidth() const { return _colorScaleWidth; }
 
+  inline const MdvxProj &getProjection() const { return _proj; }
+     
   inline double getXMinWorld() const { return _xMinWorld; }
   inline double getXMaxWorld() const { return _xMaxWorld; }
   inline double getYMinWorld() const { return _yMinWorld; }
@@ -491,9 +494,9 @@ public:
                       QPainter &painter,
                       int unitsFontSize);
 
-  // equalize X and Y pixel scales
+  // adjust X and Y pixel scales to minimize distortion
   
-  void equalizePixelScales();
+  void adjustPixelScales();
   
   // print
 
@@ -513,11 +516,12 @@ private:
   int _xPixOffset;
   int _yPixOffset;
 
-  // margins in pixels
+  // projection if applicable
 
+  MdvxProj _proj;
+  
   // world coord limits of data area
 
-  bool _isLatLon;
   double _xMinWorld;
   double _xMaxWorld;
   double _yMinWorld;
@@ -546,6 +550,8 @@ private:
   double _xMaxWindow;
   double _yMinWindow;
   double _yMaxWindow;
+
+  // margins in pixels
 
   int _leftMargin;
   int _rightMargin;

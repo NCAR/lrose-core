@@ -437,7 +437,7 @@ proj_type = PROJ_LATLON;
 //
 // Type: double
 
-proj_origin_lat = 0;
+proj_origin_lat = 53.0;
 
 ///////////// proj_origin_lon /////////////////////////
 //
@@ -447,7 +447,7 @@ proj_origin_lat = 0;
 //
 // Type: double
 
-proj_origin_lon = 0;
+proj_origin_lon = 121.0;
 
 ///////////// proj_rotation ///////////////////////////
 //

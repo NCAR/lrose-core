@@ -52,14 +52,20 @@ using namespace std;
 WorldPlot::WorldPlot()
 {
 
-  _isLatLon = false;
-  
   _widthPixels = 1000;
   _heightPixels = 1000;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
 
+  _xMinWorld = 0;
+  _xMaxWorld = 1;
+  _yMinWorld = 0;
+  _yMaxWorld = 1;
+
+  _plotWidth = 0;
+  _plotHeight = 0;
+  
   _leftMargin = 0;
   _rightMargin = 0;
   _topMargin = 0;
@@ -69,7 +75,7 @@ WorldPlot::WorldPlot()
   _legendTextMargin = 0;
 
   _colorScaleWidth = 0;
-
+  
   _xAxisTickLen = 7;
   _xNTicksIdeal = 7;
   _xSpecifyTicks = false;
@@ -96,11 +102,6 @@ WorldPlot::WorldPlot()
   _axisTextColor = "white";
   _gridColor = "gray";
   
-  _xMinWorld = 0;
-  _xMaxWorld = 1;
-  _yMinWorld = 0;
-  _yMaxWorld = 1;
-
   _computeTransform();
   
 }
@@ -137,14 +138,14 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   // copy the meta data
 
-  _isLatLon = rhs._isLatLon;
-  
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
 
+  _proj = rhs._proj;
+  
   _xMinWorld = rhs._xMinWorld;
   _xMaxWorld = rhs._xMaxWorld;
   _yMinWorld = rhs._yMinWorld;
@@ -909,8 +910,6 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
               
   qreal xx = (qreal) (_xMinPixel + _yAxisTickLen + _legendTextMargin);
   qreal yy = _yMaxPixel + _xAxisTickLen + tRect.height();
-
-  cerr << "XXXXXXXXXXX xx, yy: " << xx << ", " << yy << endl;
 
   QFont font(painter.font());
   font.setPointSizeF(_legendFontSize);
@@ -2032,9 +2031,9 @@ void WorldPlot::_computeTransform()
 }
 
 ///////////////////////////////////////
-// equalize the pixel scale for X and Y
-                              
-void WorldPlot::equalizePixelScales() 
+// adjust X and Y pixel scales to minimize distortion
+
+void WorldPlot::adjustPixelScales()
 {
     
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
@@ -2049,7 +2048,7 @@ void WorldPlot::equalizePixelScales()
     (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
-  
+
   if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.999)) {
     // adjust y pixel scale
     if (_yPixelsPerWorld > 0) {
@@ -2074,9 +2073,23 @@ void WorldPlot::equalizePixelScales()
     _xMaxWorld = xMean + xHalf;
   } else {
     // no change
-    return;
+    // return;
   }
   
+  // correct for lat/lon aspect distortion
+
+  // cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" << endl;
+  // _proj.print(cerr);
+  // cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" << endl;
+  if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
+    double meanLat = (_yMaxWorld + _yMinWorld) / 2.0;
+    double aspectCorrection = cos(meanLat * DEG_TO_RAD);
+    _yPixelsPerWorld /= aspectCorrection;
+    // cerr << "AAAAAAAAAAAAAAA _yMaxWorld, _yMinWorld: " << _yMaxWorld << ", " << _yMinWorld << endl;
+    // cerr << "AAAAAAAAAAAAAAA meanLat: " << meanLat << endl;
+    // cerr << "AAAAAAAAAAAAAAA aspectCorrection: " << aspectCorrection << endl;
+  }
+
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
@@ -2098,8 +2111,8 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   
 {
 
-  cerr << "CCCCCCCCCCCCCC colorMap name: " << colorMap.getName() << endl;
-  cerr << "CCCCCCCCCCCCCC labelsSetByValue: " << colorMap.labelsSetByValue() << endl;
+  // cerr << "CCCCCCCCCCCCCC colorMap name: " << colorMap.getName() << endl;
+  // cerr << "CCCCCCCCCCCCCC labelsSetByValue: " << colorMap.labelsSetByValue() << endl;
   
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
