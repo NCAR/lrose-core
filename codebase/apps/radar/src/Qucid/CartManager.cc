@@ -230,7 +230,7 @@ int CartManager::run(QApplication &app)
 
 void CartManager::enableZoomButton() const
 {
-  _unzoomAct->setEnabled(true);
+  _zoomBackAct->setEnabled(true);
 }
 
 //////////////////////////////////////////////////////////////
@@ -619,10 +619,10 @@ void CartManager::_createActions()
   
   // unzoom display
   
-  _unzoomAct = new QAction(tr("Back"), this);
-  _unzoomAct->setStatusTip(tr("Unzoom to previous view"));
-  _unzoomAct->setEnabled(false);
-  connect(_unzoomAct, &QAction::triggered, this, &CartManager::_unzoom);
+  _zoomBackAct = new QAction(tr("Back"), this);
+  _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
+  _zoomBackAct->setEnabled(false);
+  connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
 
   // reload data
   
@@ -744,7 +744,7 @@ void CartManager::_createMenus()
   
   _zoomsMenu = menuBar()->addMenu(tr("Zooms"));
   _populateZoomsMenu();
-  menuBar()->addAction(_unzoomAct);
+  menuBar()->addAction(_zoomBackAct);
   
   // time selector
   
@@ -1857,10 +1857,12 @@ void CartManager::_freeze()
 ////////////////////////////////////////////
 // unzoom
 
-void CartManager::_unzoom()
+void CartManager::_zoomBack()
 {
-  _horiz->unzoomView();
-  _unzoomAct->setEnabled(false);
+  _horiz->zoomBackView();
+  if (_horiz->getSavedZooms().size() == 0) {
+    _zoomBackAct->setEnabled(false);
+  }
 }
 
 ////////////////////////////////////////////

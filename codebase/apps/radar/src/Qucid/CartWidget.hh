@@ -188,8 +188,13 @@ class DLL_EXPORT CartWidget : public QWidget
   }
 
   // adjust pixel scale to suit window size etc.
-
+  
   virtual void adjustPixelScales() = 0;
+
+  // get zooms
+  
+  const WorldPlot getZoomWorld() const { return _zoomWorld; }
+  const vector<WorldPlot> getSavedZooms() const { return _savedZooms; }
 
   ////////////////
   // Qt signals //
@@ -221,10 +226,10 @@ class DLL_EXPORT CartWidget : public QWidget
   void setArchiveMode(bool archive_mode);
 
   /**
-   * @brief Unzoom the view.
+   * @brief go back to prev zoom
    */
 
-  void unzoomView();
+  void zoomBackView();
 
   /**
    * @brief Resize the window.
@@ -440,6 +445,7 @@ class DLL_EXPORT CartWidget : public QWidget
   bool _isZoomed;
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
+  vector<WorldPlot> _savedZooms;
   
   ///////////////////////
   // Protected methods //
@@ -499,7 +505,7 @@ class DLL_EXPORT CartWidget : public QWidget
    * @param[in] event    The mouse event.
    */
 
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event) = 0;
 
   /**
    * @brief The method that is called when a repaint event is triggered.

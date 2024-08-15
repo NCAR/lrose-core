@@ -450,7 +450,7 @@ void HorizWidget::adjustPixelScales()
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  cerr << "==>> hhhhhh mouseReleaseEvent <<==" << endl;
+  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
 
   _pointClicked = false;
 
@@ -469,7 +469,7 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
   _mouseReleaseY = pos.y();
 
   // get click location in world coords
-
+  
   if (rgeom.width() <= 20) {
     
     // Emit a signal to indicate that the click location has changed
@@ -522,7 +522,10 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _savedZooms.push_back(_zoomWorld);
+    
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                              _worldReleaseX, _worldReleaseY);
 
     _setTransform(_zoomWorld.getTransform());
 

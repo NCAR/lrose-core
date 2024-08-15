@@ -157,7 +157,7 @@ protected:
   QAction *_exitAct;
   QAction *_freezeAct;
   QAction *_clearAct;
-  QAction *_unzoomAct;
+  QAction *_zoomBackAct;
   QAction *_reloadAct;
   QAction *_showClickAct;
   QAction *_showBoundaryEditorAct;
@@ -320,7 +320,7 @@ protected slots:
   void _about();
   void _showClick();
   virtual void _freeze() = 0;
-  virtual void _unzoom() = 0;
+  virtual void _zoomBack() = 0;
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode) = 0;
   virtual void _openFile();

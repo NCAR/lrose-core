@@ -163,13 +163,20 @@ void CartWidget::setArchiveMode(bool archive_mode)
 }
 
 /*************************************************************************
- * unzoom the view
+ * zoomBack the view
  */
 
-void CartWidget::unzoomView()
+void CartWidget::zoomBackView()
 {
-  _zoomWorld = _fullWorld;
-  _isZoomed = false;
+  if (_savedZooms.size() == 0) {
+    _zoomWorld = _fullWorld;
+  } else {
+    _zoomWorld = _savedZooms[_savedZooms.size()-1];
+    _savedZooms.pop_back();
+  }
+  if (_savedZooms.size() == 0) {
+    _isZoomed = false;
+  }
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
   _refreshImages();
@@ -392,95 +399,6 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 
 }
 
-
-/*************************************************************************
- * mouseReleaseEvent()
- */
-
-void CartWidget::mouseReleaseEvent(QMouseEvent *e)
-{
-
-  cerr << "ccccc mouseReleaseEvent" << endl;
-
-#if QT_VERSION >= 0x060000
-  QPointF pos(e->position());
-#else
-  QPointF pos(e->pos());
-#endif
-
-  _pointClicked = false;
-
-  if (e->button() == Qt::RightButton) {
-
-    _mousePressX = pos.x();
-    _mousePressY = pos.y();
-
-    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
-
-  } else {
-    
-    QRect rgeom = _rubberBand->geometry();
-
-    // If the mouse hasn't moved much, assume we are clicking rather than
-    // zooming
-
-    _mouseReleaseX = pos.x();
-    _mouseReleaseY = pos.y();
-
-    // get click location in world coords
-
-    if (rgeom.width() <= 20) {
-    
-      // Emit a signal to indicate that the click location has changed
-    
-      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-      double x_km = _worldReleaseX;
-      double y_km = _worldReleaseY;
-      _pointClicked = true;
-
-      // get ray closest to click point
-
-      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
-      // emit signal
-
-      emit locationClicked(x_km, y_km, closestRay);
-  
-    } else {
-      
-      // mouse moved more than 20 pixels, so a zoom occurred
-    
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-      _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-      _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
-      _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
-
-      _setTransform(_zoomWorld.getTransform());
-
-      _setGridSpacing();
-
-      // enable unzoom button
-    
-      _manager.enableZoomButton();
-    
-      // Update the window in the renderers
-    
-      _refreshImages();
-
-    }
-    
-    // hide the rubber band
-
-    _rubberBand->hide();
-    update();
-  }
-}
-
 #ifdef NOTNOW
 /**************   testing ******/
 
@@ -515,6 +433,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
     _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
                               gd.h_win.cmax_x, gd.h_win.cmax_y);
     gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
+    _savedZooms.clear();
   }
 
   // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;

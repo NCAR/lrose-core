@@ -406,7 +406,7 @@ private slots:
   // override
 
   virtual void _freeze();
-  virtual void _unzoom();
+  virtual void _zoomBack();
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
 
