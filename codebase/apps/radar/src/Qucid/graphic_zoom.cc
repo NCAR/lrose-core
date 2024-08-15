@@ -179,7 +179,7 @@ static void _do_zoom()
   }
 
   /* Force the domain into the aspect ratio */
-  dy *= _params.aspect_ratio;
+  // dy *= _params.aspect_ratio;
 
   /* use largest dimension */
   if(dx > dy)

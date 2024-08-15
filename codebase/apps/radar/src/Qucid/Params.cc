@@ -3084,18 +3084,6 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("aspect_ratio");
-    tt->descr = tdrpStrDup("Set the aspect ratio of the domain for the display.");
-    tt->help = tdrpStrDup("Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).");
-    tt->val_offset = (char *) &aspect_ratio - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'enable_status_window'
     // ctype is 'tdrp_bool_t'
     
@@ -6478,18 +6466,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'horiz_aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("horiz_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of HORIZ window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_aspect_ratio - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'horiz_grids_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
@@ -6701,18 +6677,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_text_margin - &_start_;
     tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'vert_aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("vert_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of VERT window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_aspect_ratio - &_start_;
-    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'vert_max_height_km'

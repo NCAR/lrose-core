@@ -379,8 +379,10 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
   // Make the rubberband aspect ratio match that
   // of the window
 
-  double dx = fabs(deltaY * _aspectRatio);
-  double dy = fabs(dx / _aspectRatio);
+  // double dx = fabs(deltaY * _aspectRatio);
+  // double dy = fabs(dx / _aspectRatio);
+  double dx = fabs(deltaY);
+  double dy = fabs(dx);
 
   // Preserve the signs
 
@@ -500,11 +502,11 @@ void CartWidget::resize(const int width, const int height)
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.
   
-  int htNeeded = (int) ((width - _colorScaleWidth) / _aspectRatio + 0.5);
+  int htNeeded = (int) ((width - _colorScaleWidth) + 0.5);
   if (height < htNeeded) {
     htNeeded = height;
   }
-  int widthNeeded = (int) (htNeeded * _aspectRatio + 0.5) + _colorScaleWidth;
+  int widthNeeded = (int) (htNeeded + 0.5) + _colorScaleWidth;
   cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ htNeeded, widthNeeded: " << htNeeded << ", " << widthNeeded << endl;
   
   // setGeometry(0, 0, widthNeeded, htNeeded);

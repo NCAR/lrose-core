@@ -182,10 +182,10 @@ class DLL_EXPORT CartWidget : public QWidget
    * @return Returns the aspect ratio of the display.
    */
 
-  double getAspectRatio() const
-  {
-    return _aspectRatio;
-  }
+  // double getAspectRatio() const
+  // {
+  //   return _aspectRatio;
+  // }
 
   // adjust pixel scale to suit window size etc.
   
@@ -421,7 +421,7 @@ class DLL_EXPORT CartWidget : public QWidget
    * @brief The aspect ratio of the display area.
    */
 
-  double _aspectRatio;
+  // double _aspectRatio;
   
   /**
    * @brief The width of the color scale

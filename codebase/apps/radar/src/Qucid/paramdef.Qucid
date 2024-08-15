@@ -1449,11 +1449,11 @@ paramdef double {
   p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
 } min_zoom_threshold;
 
-paramdef double {
-  p_default = 1;
-  p_descr = "Set the aspect ratio of the domain for the display.";
-  p_help = "Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
-} aspect_ratio;
+// paramdef double {
+//   p_default = 1;
+//   p_descr = "Set the aspect ratio of the domain for the display.";
+//   p_help = "Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
+// } aspect_ratio;
 
 paramdef boolean {
   p_default = FALSE;
@@ -3156,11 +3156,11 @@ commentdef {
 //   p_default = HORIZ_FULL;
 // } horiz_display_type;
 
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of HORIZ window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-} horiz_aspect_ratio;
+// paramdef double {
+//   p_default = 1.0;
+//   p_descr = "Aspect ratio (width/height) of HORIZ window.";
+//   p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
+// } horiz_aspect_ratio;
 
 paramdef boolean {
   p_default = false;
@@ -3257,11 +3257,11 @@ paramdef int {
   p_descr = "Margin around some text (pixels).";
 } vert_text_margin;
 
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of VERT window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
-} vert_aspect_ratio;
+// paramdef double {
+//   p_default = 1.0;
+//   p_descr = "Aspect ratio (width/height) of VERT window.";
+//   p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
+// } vert_aspect_ratio;
 
 paramdef double {
   p_default = 25.0;

@@ -42,7 +42,7 @@ VertWidget::VertWidget(QWidget* parent,
   _prevAz = -9999.0;
   _prevTime = 0;
   
-  _aspectRatio = _params.vert_aspect_ratio;
+  // _aspectRatio = _params.vert_aspect_ratio;
   _colorScaleWidth = _params.vert_color_scale_width;
 
   setGrids(_params.vert_grids_on_at_startup);

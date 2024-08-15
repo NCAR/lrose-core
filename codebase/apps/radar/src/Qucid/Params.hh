@@ -899,8 +899,6 @@ public:
 
   double min_zoom_threshold;
 
-  double aspect_ratio;
-
   tdrp_bool_t enable_status_window;
 
   tdrp_bool_t report_clicks_in_status_window;
@@ -1355,8 +1353,6 @@ public:
 
   int click_cross_line_width;
 
-  double horiz_aspect_ratio;
-
   tdrp_bool_t horiz_grids_on_at_startup;
 
   tdrp_bool_t horiz_range_rings_on_at_startup;
@@ -1388,8 +1384,6 @@ public:
   int vert_label_font_size;
 
   int vert_text_margin;
-
-  double vert_aspect_ratio;
 
   double vert_max_height_km;
 
@@ -1518,7 +1512,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[516];
+  mutable TDRPtable _table[513];
 
   const char *_className;
 

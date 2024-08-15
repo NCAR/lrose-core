@@ -51,7 +51,7 @@ HorizWidget::HorizWidget(QWidget* parent,
         
 {
 
-  _aspectRatio = _params.horiz_aspect_ratio;
+  // _aspectRatio = _params.horiz_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
 
   // initialoze world view

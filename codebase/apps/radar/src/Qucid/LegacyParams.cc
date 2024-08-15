@@ -1364,7 +1364,7 @@ int LegacyParams::_readMainParams()
   // main window (horiz view)
   _getLong("cidd.horiz_default_y_pos",0);
   _getLong("cidd.horiz_default_x_pos",0);
-  double aspectRatio = _getDouble("cidd.aspect_ratio", 1.0);
+  double aspectRatio = _getDouble("cidd.aspect_ratio", 1.0, false);
   int ht = _getLong("cidd.horiz_default_height", 800);
   long defaultWidth = (int) (ht * aspectRatio + 0.5);
   _getLong("cidd.horiz_default_width", defaultWidth);

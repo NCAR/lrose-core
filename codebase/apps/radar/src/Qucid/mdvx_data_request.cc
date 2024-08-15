@@ -180,11 +180,11 @@ int mdvx_request_horiz_data_plane(met_record_t *mr,
   
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
   if (!_params.do_not_decimate_on_mdv_request) {
-    if(_params.aspect_ratio > 1.0) {
+    // if(_params.aspect_ratio > 1.0) {
       mr->h_mdvx->setReadDecimate(gd.h_win.img_dim.width * gd.h_win.img_dim.width);
-    } else {
-      mr->h_mdvx->setReadDecimate(gd.h_win.img_dim.height * gd.h_win.img_dim.height);
-    }
+    // } else {
+    //   mr->h_mdvx->setReadDecimate(gd.h_win.img_dim.height * gd.h_win.img_dim.height);
+    // }
   }
      
   mr->h_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);

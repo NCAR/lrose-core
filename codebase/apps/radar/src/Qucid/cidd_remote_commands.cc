@@ -282,7 +282,7 @@ void remote_set_domain(double x1, double y1, double x2, double y2)
     }
 
     /* Force the domain into the aspect ratio */
-    dy *= _params.aspect_ratio;
+    // dy *= _params.aspect_ratio;
     if(dx > dy)  {
         gd.h_win.zmax_y[index] += (dx - dy) /2.0;
 	gd.h_win.zmin_y[index] -= (dx - dy) /2.0;
@@ -681,7 +681,7 @@ char *parse_remote_commands(char *buf)
 	if(strcmp(cfield[0],"SET_H_IMAGE_SIZE") == 0) {
 		int h = atoi(cfield[1]);
 		int w = atoi(cfield[2]);
-		_params.aspect_ratio = (double) w / (double) h;
+		// _params.aspect_ratio = (double) w / (double) h;
 		// int cp_ht = h < gd.h_win.min_height ? 0 : xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
 		if( h != last_im_ht || w != last_im_wd) {
                   // xv_set(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT, h + cp_ht + 2 , NULL);
