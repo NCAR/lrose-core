@@ -2158,6 +2158,7 @@ static void _initZooms()
     }
     gd.h_win.start_zoom_level = gd.h_win.zoom_level;
   }
+  gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
   
   gd.h_win.zmin_x =
     (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);

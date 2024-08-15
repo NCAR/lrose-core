@@ -73,7 +73,8 @@ typedef struct { /* WINDOW Data - for each display window */
  int movie_page; /* The page currently viewed in movie loops */
  int min_height; /* minimum height window is allowed to get to */
  int min_width; /* minimum width window is allowed to get to */
- int zoom_level; /* index to use for zoom boundry coords */
+ int zoom_level; /* index to use for zoom boundary coords */
+ int prev_zoom_level; /* index to use for zoom boundary coords */
  int cur_cache_im; /* index to current XID Cache */
  int last_cache_im; /* index to last XID Cache */
  int num_zoom_levels; /* number of stored zoom levels */

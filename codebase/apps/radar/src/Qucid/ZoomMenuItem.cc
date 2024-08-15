@@ -74,11 +74,16 @@ void ZoomMenuItem::toggled(bool checked)
     cerr << "  max_y: " << _zoomParams->max_y << endl;
   }
 
-  gd.h_win.zoom_level = _zoomIndex;
-  gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
-  gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
-  gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
-  gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+  if (checked) {
+    if (_params.debug >= Params::DEBUG_NORM) {
+      cerr << "==>> Changing to zoom level: " << _zoomParams->label << endl;
+    }
+    gd.h_win.zoom_level = _zoomIndex;
+    gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
+    gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
+    gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
+    gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+  }
 
 }
 

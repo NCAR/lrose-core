@@ -509,6 +509,14 @@ void CartWidget::paintEvent(QPaintEvent *event)
 {
 
   cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
+
+  if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
+    cerr << "ZZZZZZZZZZZZZZZZZZZ new zoom level: " << gd.h_win.zoom_level << endl;
+    _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
+                              gd.h_win.cmax_x, gd.h_win.cmax_y);
+    gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
+  }
+
   // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
   // _zoomWorld.print(cerr);
   // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
