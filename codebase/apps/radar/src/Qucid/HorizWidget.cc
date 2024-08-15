@@ -721,10 +721,17 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
     _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
 
-    _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
-    _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
-    _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
-    _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
+    if (_params.proj_type == Params::PROJ_LATLON) {
+      _zoomWorld.drawAxisLeft(painter, "deg", true, true, true, true);
+      _zoomWorld.drawAxisRight(painter, "deg", true, true, true, true);
+      _zoomWorld.drawAxisTop(painter, "deg", true, true, true, true);
+      _zoomWorld.drawAxisBottom(painter, "deg", true, true, true, true);
+    } else {
+      _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
+      _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
+      _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
+      _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
+    }
     
   }
   
