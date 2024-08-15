@@ -80,7 +80,9 @@ public:
 
   // set world coord limits for window
   // side effect - recomputes transform
-  
+
+  void setIsLatLon(bool state) { _isLatLon = state; }
+     
   void setWorldLimits(double xMinWorld,
                       double yMinWorld,
                       double xMaxWorld,
@@ -515,6 +517,7 @@ private:
 
   // world coord limits of data area
 
+  bool _isLatLon;
   double _xMinWorld;
   double _xMaxWorld;
   double _yMinWorld;

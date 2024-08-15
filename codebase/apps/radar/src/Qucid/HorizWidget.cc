@@ -440,8 +440,11 @@ void HorizWidget::adjustPixelScales()
 {
 
   cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
+  if (_params.proj_type == Params::PROJ_LATLON) {
+    _zoomWorld.setIsLatLon(true);
+  }
   _zoomWorld.equalizePixelScales();
-
+  
 }
 
 /*************************************************************************

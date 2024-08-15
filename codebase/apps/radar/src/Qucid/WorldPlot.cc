@@ -52,6 +52,8 @@ using namespace std;
 WorldPlot::WorldPlot()
 {
 
+  _isLatLon = false;
+  
   _widthPixels = 1000;
   _heightPixels = 1000;
   
@@ -135,6 +137,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   // copy the meta data
 
+  _isLatLon = rhs._isLatLon;
+  
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
   
