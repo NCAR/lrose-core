@@ -193,6 +193,12 @@ color_scale_urls = "/home/mdtest/git/lrose-displays/color_scales,http://front.eo
 // 1D array - variable length.
 
 fields = {
+  { "main", "SAT_VIS", "SAT_VIS", "/home/mdtest/data/lucid/precip/mdv/himawari_ch03", "albedo", "sat_albedo.colors", "%", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "main", "WRF-TMP", "WRF-TMP", "/home/mdtest/data/lucid/precip/mdv/wrf", "Temp", "temp.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
+  { "main", "WRF-RH", "WRF-RH", "/home/mdtest/data/lucid/precip/mdv/wrf", "RH", "rh.colors", "%", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "WRF-DBZ-3D", "WRF-DBZ-3D", "/home/mdtest/data/lucid/precip/mdv/wrf", "dbz_3d", "dbz.colors", "dbz", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "WRF-DBZ-2D", "WRF-DBZ-2D", "/home/mdtest/data/lucid/precip/mdv/wrf", "dbz_2d", "dbz.colors", "dbz", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "WRF-WSPD", "WRF-WSPD", "/home/mdtest/data/lucid/precip/mdv/wrf", "Wspeed", "wind_speed.colors", "m/s", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
@@ -203,12 +209,6 @@ fields = {
   { "main", "GFS-RH", "GFS-RH", "/home/mdtest/data/lucid/precip/mdv/gfs", "RH", "rh.colors", "%", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "GFS-PRES", "GFS-PRES", "/home/mdtest/data/lucid/precip/mdv/gfs", "Pressure", "pressure_mb.colors", "m/s", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer/moments", "Elevation", "none.colors", "m", -5, 80, 5, FILLED_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "main", "SAT_VIS", "SAT_VIS", "/home/mdtest/data/lucid/precip/mdv/himawari_ch03", "albedo", "sat_albedo.colors", "%", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "", "========", "========", "mdvp::static//front.eol.ucar.edu:8080:/spacer", "Elevation", "none.colors", "m", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "main", "WRF-TMP", "WRF-TMP", "/home/mdtest/data/lucid/precip/mdv/wrf", "Temp", "temp.colors", "C", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
-  { "main", "WRF-RH", "WRF-RH", "/home/mdtest/data/lucid/precip/mdv/wrf", "RH", "rh.colors", "%", -5, 80, 5, DYNAMIC_CONTOURS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "SPOL_DBZ_F", "SPOL_DBZ_F", "/home/mdtest/data/lucid/precip/cfradial/spol/sur", "DBZ_F", "dbz.colors", "dBZ", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "SPOL_VEL_F", "SPOL_VEL_F", "/home/mdtest/data/lucid/precip/cfradial/spol/sur", "VEL_F", "vel.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
   { "main", "SPOL_WIDTH_F", "SPOL_WIDTH_F", "/home/mdtest/data/lucid/precip/cfradial/spol/sur", "WIDTH_F", "width.colors", "m/s", -5, 80, 5, POLYGONS, TRUE, FALSE, FALSE, FALSE, FALSE},
@@ -437,7 +437,7 @@ proj_type = PROJ_FLAT;
 //
 // Type: double
 
-proj_origin_lat = 23.0;
+proj_origin_lat = 0;
 
 ///////////// proj_origin_lon /////////////////////////
 //
@@ -447,7 +447,7 @@ proj_origin_lat = 23.0;
 //
 // Type: double
 
-proj_origin_lon = 121.0;
+proj_origin_lon = 0;
 
 ///////////// proj_rotation ///////////////////////////
 //
@@ -1957,21 +1957,6 @@ do_not_decimate_on_mdv_request = FALSE;
 
 min_zoom_threshold = 5;
 
-///////////// aspect_ratio ////////////////////////////
-//
-// Set the aspect ratio of the domain for the display.
-//
-// Cidd will preserve this aspect ratio for all zooms. Ratio is 
-//   Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based 
-//   on the extent of the first domain. Note CIDD now applies a correction 
-//   to LAT_LON projections to expand the Y coords, making them appear to 
-//   be equi-distant in Latitude and Longitude. Based on the cos(average 
-//   latitude of the current view).
-//
-// Type: double
-
-aspect_ratio = 1;
-
 ///////////// enable_status_window ////////////////////
 //
 // Enable the status window.
@@ -2134,30 +2119,6 @@ xsect_start_page = 1;
 //
 //======================================================================
  
-///////////// start_zoom_level ////////////////////////
-//
-// Zoom level on which to start.
-//
-// Type: int
-
-start_zoom_level = 4;
-
-///////////// zoom_limits_in_latlon ///////////////////
-//
-// The units of the zoom limits are in deg lat/lon.
-//
-// Type: boolean
-
-zoom_limits_in_latlon = FALSE;
-
-///////////// num_cache_zooms /////////////////////////
-//
-// The number of Cached images for zooms.
-//
-// Type: int
-
-num_cache_zooms = 0;
-
 ///////////// zoom_levels /////////////////////////////
 //
 // Pre-defined zoom levels.
@@ -2187,6 +2148,33 @@ zoom_levels = {
   { "1000km", -1000, -1000, 1000, 1000},
   { "2000km", -2000, -2000, 2000, 2000}
 };
+
+///////////// start_zoom_label ////////////////////////
+//
+// Label of zoom level on which to start.
+//
+// This specifies which zoom level is to be used when the display 
+//   starts.
+//
+// Type: string
+
+start_zoom_label = "240km";
+
+///////////// zoom_limits_in_latlon ///////////////////
+//
+// The units of the zoom limits are in deg lat/lon.
+//
+// Type: boolean
+
+zoom_limits_in_latlon = FALSE;
+
+///////////// num_cache_zooms /////////////////////////
+//
+// The number of Cached images for zooms.
+//
+// Type: int
+
+num_cache_zooms = 0;
 
 //======================================================================
 //
@@ -2773,7 +2761,7 @@ bot_margin_render_style = 2;
 //
 // Type: int
 
-horiz_top_margin = 25;
+horiz_top_margin = 20;
 
 ///////////// horiz_bot_margin ////////////////////////
 //
@@ -2783,7 +2771,7 @@ horiz_top_margin = 25;
 //
 // Type: int
 
-horiz_bot_margin = 20;
+horiz_bot_margin = 30;
 
 ///////////// horiz_left_margin ///////////////////////
 //
@@ -2824,6 +2812,14 @@ horiz_title_text_margin = 5;
 // Type: int
 
 horiz_legend_text_margin = 5;
+
+///////////// horiz_legend_color //////////////////////
+//
+// Color for legends in horizontal plot.
+//
+// Type: string
+
+horiz_legend_color = "yellow";
 
 ///////////// horiz_axis_text_margin //////////////////
 //
@@ -2915,7 +2911,7 @@ horiz_axes_color = "white";
 //
 // Type: string
 
-horiz_grid_color = "gray";
+horiz_grid_color = "white";
 
 ///////////// vert_top_margin /////////////////////////
 //
@@ -4443,7 +4439,7 @@ background_color2 = "black";
 //
 // Type: string
 
-text_color = "yellow";
+text_color = "white";
 
 ///////////// grid_and_range_ring_color ///////////////
 //
@@ -4493,14 +4489,6 @@ click_cross_line_width = 1;
 //
 //======================================================================
  
-///////////// horiz_aspect_ratio //////////////////////
-//
-// Aspect ratio (width/height) of HORIZ window.
-//
-// Type: double
-
-horiz_aspect_ratio = 1;
-
 ///////////// horiz_grids_on_at_startup ///////////////
 //
 // Set HORIZ grids overlay on at startup.
@@ -4655,14 +4643,6 @@ vert_label_font_size = 8;
 // Type: int
 
 vert_text_margin = 5;
-
-///////////// vert_aspect_ratio ///////////////////////
-//
-// Aspect ratio (width/height) of VERT window.
-//
-// Type: double
-
-vert_aspect_ratio = 1;
 
 ///////////// vert_max_height_km //////////////////////
 //

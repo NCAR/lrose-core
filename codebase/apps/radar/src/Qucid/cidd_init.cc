@@ -57,7 +57,7 @@ static void _initRouteWinds();
 static int _loadRapMap(Overlay_t *ov, const string &mapFilePath);
 static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string &shxFilePath);
 
-static void _initZooms();
+static int _initZooms();
 static void _initContours();
 static void _initOverlayFields();
 
@@ -138,9 +138,7 @@ int init_data_space()
   // html mode
   
   if(_params.run_once_and_exit) _params.html_mode = pTRUE;
-  if (_params.html_mode) {
-    gd.h_win.zoom_level = 0;
-  }
+  gd.h_win.zoom_level = 0;
   
   // image generation
   
@@ -490,7 +488,9 @@ int init_data_space()
   /////////////////////////////////////////////////
   // zooms
   
-  _initZooms();
+  if (_initZooms()) {
+    return -1;
+  }
   
   //////////////////////////////////////////
   // heights
@@ -2134,10 +2134,16 @@ static int _initStationLoc()
 /////////////////////////////////////////////////
 // zooms
 
-static void _initZooms()
+static int _initZooms()
 
 {
   
+  if (_params.zoom_levels_n < 1) {
+    cerr << "ERROR - no zoom levels specified" << endl;
+    cerr << "  This must be corrected in the params file: " << _paramsPathUsed.getPath() << endl;
+    return -1;
+  }
+
   if(_params.num_cache_zooms > MAX_CACHE_PIXMAPS) {
     _params.num_cache_zooms = MAX_CACHE_PIXMAPS;
   }
@@ -2150,14 +2156,21 @@ static void _initZooms()
   
   gd.h_win.num_zoom_levels = _params.zoom_levels_n;
 
-  if(!_params.html_mode) {
-    gd.h_win.zoom_level = _params.start_zoom_level;
-    if(gd.h_win.zoom_level < 0) gd.h_win.zoom_level = 0;
-    if(gd.h_win.zoom_level > gd.h_win.num_zoom_levels) {
-      gd.h_win.zoom_level = gd.h_win.num_zoom_levels -1;
+  gd.h_win.start_zoom_level = 0;
+  if (!_params.html_mode && _params.zoom_levels_n > 0) {
+    bool zoomLabelFound = false;
+    for (int ii = 0; ii < _params.zoom_levels_n; ii++) {
+      if (strcmp(_params._zoom_levels[ii].label, _params.start_zoom_label) == 0) {
+        gd.h_win.start_zoom_level = ii;
+        zoomLabelFound = true;
+      }
+    } // ii
+    if (!zoomLabelFound) {
+      cerr << "WARNING - start zoom label not found: " << _params.start_zoom_label << endl;
+      cerr << "  Using first zoom level instead: " << _params._zoom_levels[0].label << endl;
     }
-    gd.h_win.start_zoom_level = gd.h_win.zoom_level;
-  }
+  } // if (!_params.html_mode)
+  gd.h_win.zoom_level = gd.h_win.start_zoom_level;
   gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
   
   gd.h_win.zmin_x =
@@ -2190,7 +2203,7 @@ static void _initZooms()
     
     // convert from latlon if needed
 
-    if (_params.zoom_limits_in_latlon) {
+    if (_params.zoom_limits_in_latlon && gd.proj.getProjType() != Mdvx::PROJ_LATLON) {
       
       double minLon = minx;
       double maxLon = maxx;
@@ -2282,6 +2295,8 @@ static void _initZooms()
     }
     
   } // izoom
+
+  return 0;
 
 }
 

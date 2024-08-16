@@ -1555,24 +1555,6 @@ commentdef {
   p_text = "These are the pre-defined zoom levels.";
 }
 
-paramdef int {
-  p_default = 1;
-  p_descr = "Zoom level on which to start.";
-  p_help = "";
-} start_zoom_level;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "The units of the zoom limits are in deg lat/lon.";
-  p_help = "";
-} zoom_limits_in_latlon;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "The number of Cached images for zooms.";
-  p_help = "";
-} num_cache_zooms;
-
 // paramdef int {
 //   p_default = 1;
 //   p_descr = "The number of zoom levels.";
@@ -1622,6 +1604,24 @@ paramdef struct zoom_level_t {
     "/nmax_y: Y value of NE corner."
     "/n";
 } zoom_levels[];
+
+paramdef string {
+  p_default = "100km";
+  p_descr = "Label of zoom level on which to start.";
+  p_help = "This specifies which zoom level is to be used when the display starts.";
+} start_zoom_label;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "The units of the zoom limits are in deg lat/lon.";
+  p_help = "";
+} zoom_limits_in_latlon;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "The number of Cached images for zooms.";
+  p_help = "";
+} num_cache_zooms;
 
 commentdef {
   p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
@@ -2010,6 +2010,11 @@ paramdef int {
   p_descr = "Width of legend text margin (pixels).";
   p_help = "Size of legend test margin for horiz window.";
 } horiz_legend_text_margin;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for legends in horizontal plot.";
+} horiz_legend_color;
 
 paramdef int {
   p_default = 5;

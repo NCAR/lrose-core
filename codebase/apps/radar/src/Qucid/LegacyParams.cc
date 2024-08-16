@@ -1209,15 +1209,16 @@ int LegacyParams::_readMainParams()
 
   fprintf(_tdrpFile, "// <ZOOMS>\n");
 
-  _getLong("cidd.start_zoom_level",1);
+  int startZoomLevel = _getLong("cidd.start_zoom_level", 1, false);
   _getBoolean("cidd.zoom_limits_in_latlon",0);
   _getLong("cidd.num_cache_zooms",1);
   _getDouble("cidd.min_zoom_threshold", 5.0);
-  _numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
-
-  vector<ZoomLevel> zooms;
+  int numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
   
-  for(int ii = 0; ii < _numZoomLevels; ii++) {
+  vector<ZoomLevel> zooms;
+  string startZoomLabel;
+  
+  for(int ii = 0; ii < numZoomLevels; ii++) {
     
     ZoomLevel zoom;
 
@@ -1228,6 +1229,9 @@ int LegacyParams::_readMainParams()
     snprintf(str_buf, 1023, "cidd.level%d_label", ii + 1);
     snprintf(defaultLabel, 1023, "%dkm", defaultSize);
     zoom.label = _getString(str_buf, defaultLabel, false);
+    if (ii == 0 || startZoomLevel == (ii + 1)) {
+      startZoomLabel = zoom.label;
+    }
     
     snprintf(str_buf, 1023, "cidd.level%d_min_xkm", ii + 1);
     zoom.min_x = _getDouble(str_buf, defaultSize * -1.0, false);
@@ -1244,7 +1248,9 @@ int LegacyParams::_readMainParams()
     zooms.push_back(zoom);
     
   } // i
-
+  
+  fprintf(_tdrpFile, "start_zoom_label = %s;\n", startZoomLabel.c_str());
+  
   fprintf(_tdrpFile, "zoom_levels = {\n");
   for(size_t izoom = 0; izoom < zooms.size(); izoom++) {
     ZoomLevel &zoom = zooms[izoom];

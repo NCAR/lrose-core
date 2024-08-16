@@ -988,7 +988,7 @@ void CartManager::_populateZoomsMenu()
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));
     act->setCheckable(true);
-    if (izoom == _params.start_zoom_level - 1) {
+    if (izoom == gd.h_win.zoom_level) {
       act->setChecked(true);
     }
     
@@ -3053,8 +3053,8 @@ void CartManager::_checkForFieldChange()
 void CartManager::_handleFirstTimerEvent()
 {
 
-  cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
-  cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
+  // cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
+  // cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   _horiz->adjustPixelScales();
   
@@ -3071,7 +3071,7 @@ void CartManager::_handleFirstTimerEvent()
   }
 
   // _statusLayout->setColumnMinimumWidth(1, maxWidth);
-  cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
+  // cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
   
 }
 

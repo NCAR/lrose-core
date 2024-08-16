@@ -886,7 +886,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     legends.push_back(text);
     
     painter.save();
-    painter.setPen(QColor(_params.text_color)); // Qt::darkMagenta); // Qt::yellow);
+    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 

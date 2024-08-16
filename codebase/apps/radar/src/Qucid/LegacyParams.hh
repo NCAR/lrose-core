@@ -324,7 +324,7 @@ private:
   bool _runOnceAndExit;
   double _originLatitude;
   double _originLongitude;
-  int _numZoomLevels;
+  // int _numZoomLevels;
   int _numFonts;
   int _numBookmarks;
   int _numMenuCols;

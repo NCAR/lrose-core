@@ -3282,42 +3282,6 @@
     tt->comment_text = tdrpStrDup("These are the pre-defined zoom levels.");
     tt++;
     
-    // Parameter 'start_zoom_level'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("start_zoom_level");
-    tt->descr = tdrpStrDup("Zoom level on which to start.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &start_zoom_level - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'zoom_limits_in_latlon'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("zoom_limits_in_latlon");
-    tt->descr = tdrpStrDup("The units of the zoom limits are in deg lat/lon.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &zoom_limits_in_latlon - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'num_cache_zooms'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_cache_zooms");
-    tt->descr = tdrpStrDup("The number of Cached images for zooms.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &num_cache_zooms - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
     // Parameter 'zoom_levels'
     // ctype is '_zoom_level_t'
     
@@ -3379,6 +3343,42 @@
       tt->struct_vals[12].d = -300;
       tt->struct_vals[13].d = 300;
       tt->struct_vals[14].d = 300;
+    tt++;
+    
+    // Parameter 'start_zoom_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_zoom_label");
+    tt->descr = tdrpStrDup("Label of zoom level on which to start.");
+    tt->help = tdrpStrDup("This specifies which zoom level is to be used when the display starts.");
+    tt->val_offset = (char *) &start_zoom_label - &_start_;
+    tt->single_val.s = tdrpStrDup("100km");
+    tt++;
+    
+    // Parameter 'zoom_limits_in_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("zoom_limits_in_latlon");
+    tt->descr = tdrpStrDup("The units of the zoom limits are in deg lat/lon.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &zoom_limits_in_latlon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'num_cache_zooms'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("num_cache_zooms");
+    tt->descr = tdrpStrDup("The number of Cached images for zooms.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &num_cache_zooms - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'Comment 27'
@@ -4159,6 +4159,18 @@
     tt->help = tdrpStrDup("Size of legend test margin for horiz window.");
     tt->val_offset = (char *) &horiz_legend_text_margin - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'horiz_legend_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legend_color");
+    tt->descr = tdrpStrDup("Color for legends in horizontal plot.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &horiz_legend_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
     // Parameter 'horiz_axis_text_margin'

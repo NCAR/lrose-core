@@ -929,14 +929,14 @@ public:
 
   int xsect_start_page;
 
-  int start_zoom_level;
+  zoom_level_t *_zoom_levels;
+  int zoom_levels_n;
+
+  char* start_zoom_label;
 
   tdrp_bool_t zoom_limits_in_latlon;
 
   int num_cache_zooms;
-
-  zoom_level_t *_zoom_levels;
-  int zoom_levels_n;
 
   double min_ht;
 
@@ -1054,6 +1054,8 @@ public:
   int horiz_title_text_margin;
 
   int horiz_legend_text_margin;
+
+  char* horiz_legend_color;
 
   int horiz_axis_text_margin;
 
@@ -1512,7 +1514,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[513];
+  mutable TDRPtable _table[514];
 
   const char *_className;
 
