@@ -1476,7 +1476,7 @@ Args.o: Args.cc Args.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -1667,7 +1667,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -1832,7 +1832,7 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2048,7 +2048,7 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2214,7 +2214,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2354,7 +2354,7 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2514,7 +2514,7 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2654,7 +2654,7 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2793,7 +2793,7 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -2960,7 +2960,7 @@ Qucid.o: Qucid.cc Qucid.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3169,7 +3169,7 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3314,7 +3314,7 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3476,7 +3476,7 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3620,7 +3620,7 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3779,7 +3779,7 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -3943,7 +3943,7 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4083,7 +4083,7 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4270,7 +4270,7 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4409,7 +4409,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4548,7 +4548,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4690,7 +4690,7 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4832,7 +4832,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -4971,7 +4971,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5110,7 +5110,7 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5249,7 +5249,7 @@ colorscales.o: colorscales.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5388,7 +5388,7 @@ contours.o: contours.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5528,7 +5528,7 @@ data_gather.o: data_gather.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5670,7 +5670,7 @@ data_io.o: data_io.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5809,7 +5809,7 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -5951,7 +5951,7 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6091,7 +6091,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6230,7 +6230,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6369,7 +6369,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6508,7 +6508,7 @@ graphic_check.o: graphic_check.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6647,7 +6647,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6786,7 +6786,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -6925,7 +6925,7 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7068,7 +7068,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7207,7 +7207,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7346,7 +7346,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7485,7 +7485,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7624,7 +7624,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7763,7 +7763,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -7902,7 +7902,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8041,7 +8041,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8180,7 +8180,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8322,7 +8322,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8461,7 +8461,7 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8602,7 +8602,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8741,7 +8741,7 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -8880,7 +8880,7 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9019,7 +9019,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9158,7 +9158,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9297,7 +9297,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9439,7 +9439,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9578,7 +9578,7 @@ process_args.o: process_args.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9717,7 +9717,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9856,7 +9856,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -9995,7 +9995,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10134,7 +10134,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10273,7 +10273,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10412,7 +10412,7 @@ render_control.o: render_control.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10551,7 +10551,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10690,7 +10690,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10829,7 +10829,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -10968,7 +10968,7 @@ render_grids.o: render_grids.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11107,7 +11107,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11246,7 +11246,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11385,7 +11385,7 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11524,7 +11524,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11663,7 +11663,7 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11802,7 +11802,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -11941,7 +11941,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12080,7 +12080,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12219,7 +12219,7 @@ render_products.o: render_products.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12358,7 +12358,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12497,7 +12497,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12636,7 +12636,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12775,7 +12775,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -12914,7 +12914,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13053,7 +13053,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13192,7 +13192,7 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13331,7 +13331,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13470,7 +13470,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13609,7 +13609,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13748,7 +13748,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -13887,7 +13887,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14026,7 +14026,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14165,7 +14165,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14307,7 +14307,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14446,7 +14446,7 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14586,7 +14586,7 @@ symprod_init.o: symprod_init.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14725,7 +14725,7 @@ timer_control.o: timer_control.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -14865,7 +14865,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -15007,7 +15007,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \
@@ -15146,7 +15146,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
-		cidd_overlays.h \
+		cidd_maps.h \
 		cidd_products.h \
 		cidd_layers.h \
 		Croutes_P.hh \

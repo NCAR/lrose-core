@@ -217,30 +217,30 @@ void reset_display()
   int total = 0;  // Total unique menu items.
   int used = 0;  // Check for duplicate labels
   for(i=0; i < gd.num_map_overlays; i++) {
-    gd.over[i]->active = gd.over[i]->default_on_state;
+    gd.overlays[i]->active = gd.overlays[i]->default_on_state;
 
     used = 0;
     for(int j=0; j < i; j++) {
-      if(gd.over[j]->control_label == gd.over[i]->control_label) {
+      if(gd.overlays[j]->control_label == gd.overlays[i]->control_label) {
         used = 1;
       }
     }
 
     // If <= 32 - update the choice widget
-    if( gd.num_map_overlays <= 32 && gd.over[i]->active) {
+    if( gd.num_map_overlays <= 32 && gd.overlays[i]->active) {
       value |= 1 <<total ;
     }
 
     // Otherwise update the scrolling list widget
-    if(gd.num_map_overlays > 32 && gd.over[i]->active) {
-      // if(! gd.run_unmapped) xv_set(gd.over_pu->over_lst, PANEL_LIST_SELECT, total, TRUE, NULL);
+    if(gd.num_map_overlays > 32 && gd.overlays[i]->active) {
+      // if(! gd.run_unmapped) xv_set(gd.overlays_pu->over_lst, PANEL_LIST_SELECT, total, TRUE, NULL);
     } else {
-      // if(! gd.run_unmapped) xv_set(gd.over_pu->over_lst, PANEL_LIST_SELECT, total, FALSE, NULL);
+      // if(! gd.run_unmapped) xv_set(gd.overlays_pu->over_lst, PANEL_LIST_SELECT, total, FALSE, NULL);
     }
     if(!used) total++;
   }
   // If <= 32 - update the choice widget
-  // if(gd.num_map_overlays <= 32) if(! gd.run_unmapped) xv_set(gd.over_pu->over_pu_st, PANEL_VALUE,value,NULL);
+  // if(gd.num_map_overlays <= 32) if(! gd.run_unmapped) xv_set(gd.overlays_pu->over_pu_st, PANEL_VALUE,value,NULL);
 
   // Restore the Product starting on/off state.
   if(_params.symprod_prod_info_n <= 32) { 

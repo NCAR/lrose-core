@@ -398,7 +398,7 @@ void remote_set_winds_on(char *name)
 
 void remote_set_maps_off()
 {
-  for(int i = 0; i <  gd.num_map_overlays; i++) gd.over[i]->active = 0;
+  for(int i = 0; i <  gd.num_map_overlays; i++) gd.overlays[i]->active = 0;
   set_redraw_flags(1,0);
 }
 
@@ -413,7 +413,7 @@ void remote_set_maps_on(char *name)
       // label = (char *)xv_get(gd.over_pu->over_pu_st,PANEL_CHOICE_STRING,i);
       if(label != NULL ) {
         if(strncmp(name,label,PARSE_FIELD_SIZE) == 0) {
-	  gd.over[i]->active = 1;
+	  gd.overlays[i]->active = 1;
         }
       }
     }
@@ -422,7 +422,7 @@ void remote_set_maps_on(char *name)
       // label = (char *)xv_get(gd.over_pu->over_lst,PANEL_LIST_STRING,i);
       if(label != NULL ) {
         if(strncmp(name,label,PARSE_FIELD_SIZE) == 0) {
-	  gd.over[i]->active = 1;
+	  gd.overlays[i]->active = 1;
         }
       }
     }

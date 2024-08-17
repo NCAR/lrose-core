@@ -90,8 +90,8 @@ void set_color( char *cname, void* c_data)
       // if(ptr->handle == gd.page_pu->map_set_color_bt) {
 
       snprintf(string2,1024,"%s  %s",
-                    gd.over[gd.layers.cur_map_overlay]->control_label.c_str(),
-                    gd.over[gd.layers.cur_map_overlay]->color->name);
+                    gd.overlays[gd.layers.cur_map_overlay]->control_label.c_str(),
+                    gd.overlays[gd.layers.cur_map_overlay]->color->name);
             // xv_set(gd.page_pu->overlay_list,
 	    //     PANEL_LIST_STRING, gd.layers.cur_map_overlay, string, NULL);
 
@@ -369,10 +369,10 @@ void set_ov_color_proc(Panel_item item, Event *event)
 {
     event = NULL;
     cs.handle = item;
-    cs.cgcp = gd.over[gd.layers.cur_map_overlay]->color;
+    cs.cgcp = gd.overlays[gd.layers.cur_map_overlay]->color;
 
     gcc_activate("Choose Overlay Color","",set_color,(char *)&cs,
-	gd.over[gd.layers.cur_map_overlay]->color->name);
+	gd.overlays[gd.layers.cur_map_overlay]->color->name);
 }
 
 /*************************************************************************
@@ -423,11 +423,11 @@ int over_select_proc(Panel_item item, char *string,
     item = 0; string = NULL; client_data = 0; event = NULL;
     switch(op) {
     case PANEL_LIST_OP_DESELECT:
-            gd.over[row]->active = 0;
+            gd.overlays[row]->active = 0;
             break;
 
     case PANEL_LIST_OP_SELECT:
-            gd.over[row]->active = 1;
+            gd.overlays[row]->active = 1;
             break;
 
     case PANEL_LIST_OP_VALIDATE:

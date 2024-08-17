@@ -29,7 +29,7 @@
 #define CIDD_FUNCS_H
 
 #include "cidd_windows.h"
-#include "cidd_overlays.h"
+#include "cidd_maps.h"
 #include "Params.hh"
 
 #ifndef CIDD_COORDS
@@ -422,11 +422,11 @@ extern void show_gen_time_menu( u_int value);
 #ifndef OVERLAY_INIT
 extern void normalize_longitude(double min_lon, double max_lon, double *normal_lon);
 extern void init_over_data_links(const char *param_buf, long param_buf_len, long line_no);
-extern int load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
-                           Overlay_t **over, int  max_overlays);
-int load_overlay_data(Overlay_t **over, int  num_overlays);
-extern void load_rap_map(Overlay_t *ov, const char *map_file_subdir);
-extern void load_shape_map(Overlay_t *ov, const char    *map_file_subdir);
+extern int load_map_info(const char *param_buf, long param_buf_len, long line_no,
+                         MapOverlay_t **overlays, int  max_overlays);
+int load_map_data(MapOverlay_t **overlays, int  num_overlays);
+extern void load_rap_map(MapOverlay_t *overlay, const char *map_file_subdir);
+extern void load_shape_map(MapOverlay_t *overlay, const char    *map_file_subdir);
 
 #endif
 

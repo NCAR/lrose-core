@@ -54,8 +54,8 @@ static int _initMaps();
 static int _initStationLoc();
 static void _initRouteWinds();
 
-static int _loadRapMap(Overlay_t *ov, const string &mapFilePath);
-static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string &shxFilePath);
+static int _loadRapMap(MapOverlay_t *ov, const string &mapFilePath);
+static int _loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const string &shxFilePath);
 
 static int _initZooms();
 static void _initContours();
@@ -1406,7 +1406,7 @@ static void _initRouteWinds()
  * LOAD_RAP_MAP - load map in RAP format
  */
 
-static int _loadRapMap(Overlay_t *ov, const string &mapFilePath)
+static int _loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 {
 
   int i,j;
@@ -1797,7 +1797,7 @@ static int _loadRapMap(Overlay_t *ov, const string &mapFilePath)
  * LOAD_SHAPE_OVERLAY_DATA: This version reads Shape files
  */
 
-static int _loadShapeMap(Overlay_t *ov, const string &shpFilePath, const string &shxFilePath)
+static int _loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const string &shxFilePath)
 {
 
   // open shape file
@@ -2031,8 +2031,8 @@ static int _initMaps()
     
     Params::map_t &omap = _params._maps[ii];
     string mapFileName = omap.map_file_name;
-    Overlay_t *over = new Overlay_t;
-    gd.over.push_back(over);
+    MapOverlay_t *over = new MapOverlay_t;
+    gd.overlays.push_back(over);
 
     over->mapParams = &omap;
     

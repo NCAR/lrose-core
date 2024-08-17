@@ -440,8 +440,8 @@ static int _combine_color_maps(Display *dpy, Colormap cmap)
     
     /* Now go through each overlay and add their colors to lists */
     for(i=0; i < gd.num_map_overlays ; i++) {        /* each color map file */
-      STRcopy(gd.color[gd.num_colors].name, gd.over[i]->color_name.c_str(), NAME_LENGTH);
-      gd.over[i]->color =  &gd.color[gd.num_colors];
+      STRcopy(gd.color[gd.num_colors].name, gd.overlays[i]->color_name.c_str(), NAME_LENGTH);
+      gd.overlays[i]->color =  &gd.color[gd.num_colors];
       gd.num_colors++;
       
     }
@@ -679,7 +679,7 @@ static int _combine_color_maps(Display *dpy, Colormap cmap)
     
     /* Copy the X color cell values into the overlay data structs */
     for(i=0,j = gd.map_overlay_color_index_start; i < gd.num_map_overlays; i++,j++) { 
-      gd.over[i]->pixval = gd.color[j].pixval; 
+      gd.overlays[i]->pixval = gd.color[j].pixval; 
     }
     
     // Copy the background pixval into the missing and bad for filled images

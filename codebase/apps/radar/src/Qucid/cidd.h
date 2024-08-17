@@ -89,19 +89,19 @@
 #include "cidd_macros.h"    // CIDD specific defines 
 
 // Display's structures
-#include "cidd_structs.h"   // CIDD specific structure definitions 
+#include "cidd_structs.h"    // CIDD specific structure definitions 
 #include "cidd_colorscales.h"// CIDD structs for Colorscales 
-#include "cidd_field_data.h"// CIDD structs for Data IO 
-#include "cidd_data_io.h"   // CIDD structs for Data IO
-#include "cidd_winds.h"     // CIDD structs for Winds Fields
-#include "cidd_contours.h"  // CIDD structs for Contours
-#include "cidd_movies.h"    // CIDD structs for Movie Control popup 
-#include "cidd_overlays.h"  // CIDD structs for Map Overlays 
-#include "cidd_products.h"  // CIDD structs for Symbolic Products 
-#include "cidd_layers.h"    // CIDD structs for Layered products 
-#include "cidd_windows.h"   // CIDD structs for GUI Windows 
-#include "cidd_legend.h"    // CIDD structs for Window Legends 
-#include "cidd_funcs.h"     // CIDD specific function prototype definitions 
+#include "cidd_field_data.h" // CIDD structs for Data IO 
+#include "cidd_data_io.h"    // CIDD structs for Data IO
+#include "cidd_winds.h"      // CIDD structs for Winds Fields
+#include "cidd_contours.h"   // CIDD structs for Contours
+#include "cidd_movies.h"     // CIDD structs for Movie Control popup 
+#include "cidd_maps.h"       // CIDD structs for Map Overlays 
+#include "cidd_products.h"   // CIDD structs for Symbolic Products 
+#include "cidd_layers.h"     // CIDD structs for Layered products 
+#include "cidd_windows.h"    // CIDD structs for GUI Windows 
+#include "cidd_legend.h"     // CIDD structs for Window Legends 
+#include "cidd_funcs.h"      // CIDD specific function prototype definitions 
 
 #include "RenderContext.hh"
 #include "ProductMgr.hh"
@@ -244,7 +244,7 @@ public:
   
   // map overlays
   
-  vector<Overlay_t *> over;
+  vector<MapOverlay_t *> overlays;
 
   // Time scale plotter class for movie panel
 

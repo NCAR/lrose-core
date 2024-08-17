@@ -361,55 +361,55 @@ void modify_gui_objects()
       for(i=0; i < gd.num_map_overlays && i < 32; i++) {
 	    used = 0;
 		for( j=0; j < i; j++) {
-                  if(gd.over[j]->control_label == gd.over[i]->control_label) {
+                  if(gd.overlays[j]->control_label == gd.overlays[i]->control_label) {
                     used = 1;
                   }
 		}
 			
 		if(!used) { // Dont use duplicate labels.
-            // xv_set(gd.over_pu->over_pu_st,PANEL_CHOICE_STRING,total,gd.over[i]->control_label,NULL);
-            if(gd.over[i]->active) value |= 1 <<total;
+            // xv_set(gd.overlays_pu->over_pu_st,PANEL_CHOICE_STRING,total,gd.overlays[i]->control_label,NULL);
+            if(gd.overlays[i]->active) value |= 1 <<total;
 			total++;
 		}
       }
       // Set the correct buttons up/down
-      // xv_set(gd.over_pu->over_pu_st, PANEL_VALUE, value,XV_X,0,XV_Y,0, NULL);
+      // xv_set(gd.overlays_pu->over_pu_st, PANEL_VALUE, value,XV_X,0,XV_Y,0, NULL);
 
       // Hide the scrolling list
-      // xv_set(gd.over_pu->over_lst,XV_SHOW,FALSE,NULL);
+      // xv_set(gd.overlays_pu->over_lst,XV_SHOW,FALSE,NULL);
 
       // Make the window fit the choice item
-      // xv_set(gd.over_pu->over_pu,XV_HEIGHT,xv_get(gd.over_pu->over_pu_st,XV_HEIGHT),NULL);
-      // xv_set(gd.over_pu->over_pu,XV_WIDTH,xv_get(gd.over_pu->over_pu_st,XV_WIDTH),NULL);
+      // xv_set(gd.overlays_pu->over_pu,XV_HEIGHT,xv_get(gd.overlays_pu->over_pu_st,XV_HEIGHT),NULL);
+      // xv_set(gd.overlays_pu->over_pu,XV_WIDTH,xv_get(gd.overlays_pu->over_pu_st,XV_WIDTH),NULL);
 
     } else {     // Use a scrolling list
 	for(i=0; i < gd.num_map_overlays; i++) {
 	    used = 0;
 		for( j=0; j < i; j++) {
-                  if(gd.over[j]->control_label == gd.over[i]->control_label) {
+                  if(gd.overlays[j]->control_label == gd.overlays[i]->control_label) {
                     used = 1;
                   }
 		}
 		if(!used) {  //  Don't use duplicate labels.
-	      // xv_set(gd.over_pu->over_lst,
+	      // xv_set(gd.overlays_pu->over_lst,
 	      //      PANEL_LIST_INSERT, total,
-	      //      PANEL_LIST_STRING, total, gd.over[i]->control_label,
+	      //      PANEL_LIST_STRING, total, gd.overlays[i]->control_label,
 	      //      PANEL_LIST_CLIENT_DATA, total, i,
 	      //      NULL);
-                  // if(gd.over[i]->active) xv_set(gd.over_pu->over_lst, PANEL_LIST_SELECT, total, TRUE, NULL);
+                  // if(gd.overlays[i]->active) xv_set(gd.overlays_pu->over_lst, PANEL_LIST_SELECT, total, TRUE, NULL);
 		  total++;
 		}
 	}
 
 	// Make the scrollbar a reasonable length
-        // // xv_set(gd.over_pu->over_lst,PANEL_LIST_DISPLAY_ROWS,24,NULL);
+        // // xv_set(gd.overlays_pu->over_lst,PANEL_LIST_DISPLAY_ROWS,24,NULL);
 
         // // Hide the choice widget list
-	// xv_set(gd.over_pu->over_pu_st,XV_SHOW,FALSE,NULL);
+	// xv_set(gd.overlays_pu->over_pu_st,XV_SHOW,FALSE,NULL);
 
       // Make the window fit the choice item
-      // xv_set(gd.over_pu->over_pu,XV_HEIGHT,xv_get(gd.over_pu->over_lst,XV_HEIGHT),NULL);
-      // xv_set(gd.over_pu->over_pu,XV_WIDTH,xv_get(gd.over_pu->over_lst,XV_WIDTH),NULL);
+      // xv_set(gd.overlays_pu->over_pu,XV_HEIGHT,xv_get(gd.overlays_pu->over_lst,XV_HEIGHT),NULL);
+      // xv_set(gd.overlays_pu->over_pu,XV_WIDTH,xv_get(gd.overlays_pu->over_lst,XV_WIDTH),NULL);
     }
 
 
@@ -619,12 +619,12 @@ void modify_gui_objects()
     if(gd.debug) printf("%d Overlays sets found\n",gd.num_map_overlays);
     for(i=0; i < gd.num_map_overlays; i++) {
       snprintf(str2,1024,"%s  %s",
-              gd.over[i]->control_label.c_str(),
-              gd.over[i]->color_name.c_str());
+              gd.overlays[i]->control_label.c_str(),
+              gd.overlays[i]->color_name.c_str());
         // xv_set(gd.page_pu->overlay_list,
         //     PANEL_LIST_STRING, i, string,
         //     PANEL_LIST_CLIENT_DATA, i,i,
-        //     PANEL_LIST_SELECT, i, gd.over[i]->active,
+        //     PANEL_LIST_SELECT, i, gd.overlays[i]->active,
         //     NULL);
     }
 
@@ -716,7 +716,7 @@ void modify_gui_objects()
 
 
     /* set overlay selector popup parameters */
-    // xv_set(gd.over_pu->over_pu,
+    // xv_set(gd.overlays_pu->over_pu,
     //        XV_SHOW, FALSE,
     //        FRAME_CMD_PUSHPIN_IN, TRUE,
     //        FRAME_SHOW_HEADER, TRUE,

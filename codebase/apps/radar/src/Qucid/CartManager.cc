@@ -800,7 +800,7 @@ void CartManager::_populateMapsMenu()
     QAction *act = new QAction;
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
-    item->setOverlay(gd.over[imap]);
+    item->setOverlay(gd.overlays[imap]);
     item->setAction(act);
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));

@@ -57,7 +57,7 @@ void calc_local_over_coords()
     double min_lon,max_lon;
     double min_loc_x,max_loc_x;
     double min_loc_y,max_loc_y;
-    Overlay_t    *ov;
+    MapOverlay_t    *ov;
     Geo_feat_polyline_t *poly;
     Geo_feat_icon_t    *ic;
 
@@ -132,7 +132,7 @@ void calc_local_over_coords()
 			  min_lon,min_lat,max_lon,max_lat);
 
       for(i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
-        ov =  gd.over[i];
+        ov =  gd.overlays[i];
 	if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label.c_str());
 	 
         /* Convert all labels   */
@@ -218,7 +218,7 @@ void calc_local_over_coords()
     max_lat = gd.h_win.max_y + LATLON_CLIP_BUFFER;
 
     for(i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
-        ov =  gd.over[i];
+        ov =  gd.overlays[i];
 	if(gd.debug)  printf("Converting Overlay %s ",ov->control_label.c_str());
 	 
         for(j=0; j < ov->num_labels; j++) {        /* Convert all labels   */
@@ -348,7 +348,7 @@ void render_map_overlays(Drawable  xid)
     int    x1,y1;
     unsigned int    npoints;
     double    scale;
-    Overlay_t    *ov;
+    MapOverlay_t    *ov;
     Geo_feat_polyline_t *poly;
     Geo_feat_icon_t    *ic;
     static size_t buf_size = 0;
@@ -382,11 +382,11 @@ void render_map_overlays(Drawable  xid)
 
     for(i=gd.num_map_overlays -1 ; i >= 0; i--) {        /* For Each Overlay */
 
-        if(gd.over[i]->active && (gd.over[i]->detail_thresh_min <= gd.h_win.km_across_screen) && 
-           (gd.over[i]->detail_thresh_max >= gd.h_win.km_across_screen))  {
+        if(gd.overlays[i]->active && (gd.overlays[i]->detail_thresh_min <= gd.h_win.km_across_screen) && 
+           (gd.overlays[i]->detail_thresh_max >= gd.h_win.km_across_screen))  {
 
-           ov =  gd.over[i];
-		XSetLineAttributes(gd.dpy,ov->color->gc, ov->line_width,LineSolid,CapButt,JoinBevel);
+          ov =  gd.overlays[i];
+          XSetLineAttributes(gd.dpy,ov->color->gc, ov->line_width,LineSolid,CapButt,JoinBevel);
 	       XSetFont(gd.dpy,ov->color->gc,gd.ciddfont[gd.prod.prod_font_num]);
             for(j=0; j < ov->num_labels; j++) {        /* Draw all labels - Not Fully Implemented Yet */
 		if(ov->geo_label[j]->local_x <= -32768.0) continue;

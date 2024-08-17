@@ -57,7 +57,7 @@
 
 using namespace std;
 
-class Overlay_t;
+class MapOverlay_t;
 
 class DLL_EXPORT MapMenuItem : public QObject {
   
@@ -76,14 +76,14 @@ class DLL_EXPORT MapMenuItem : public QObject {
   // set
   
   void setMapParams(Params::map_t *val) { _mapParams = val; }
-  void setOverlay(Overlay_t *val) { _overlay = val; }
+  void setOverlay(MapOverlay_t *val) { _overlay = val; }
   void setMapIndex(int val) { _mapIndex = val; }
   void setAction(QAction *val) { _act = val; }
 
   // get
   
   const Params::map_t *getMapParams() const { return _mapParams; }
-  Overlay_t *getOverlay() const { return _overlay; }
+  MapOverlay_t *getOverlay() const { return _overlay; }
   int getMapIndex() const { return _mapIndex; }
   QAction *getAction() { return _act; }
 
@@ -91,7 +91,7 @@ class DLL_EXPORT MapMenuItem : public QObject {
 
   QObject *_parent;
   Params::map_t *_mapParams;
-  Overlay_t *_overlay;
+  MapOverlay_t *_overlay;
   int _mapIndex;
   QAction *_act;               
 

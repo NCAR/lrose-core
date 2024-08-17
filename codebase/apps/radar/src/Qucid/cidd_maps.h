@@ -22,11 +22,11 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 
-#ifndef CIDD_OVERLAYS_H
-#define CIDD_OVERLAYS_H
+#ifndef CIDD_MAPS_H
+#define CIDD_MAPS_H
 
 /**********************************************************************
- * CIDD_OVERLAYS.H: Data structure defns for CIDD
+ * CIDD_MAPS.H: Data structure defns for CIDD
  */
 
 #include "Params.hh"
@@ -122,13 +122,13 @@ typedef struct {
 
 } geo_coord_t;
  
-// main overlay struct
+// main map overlay struct
 
-class Overlay_t { /* Overlay data */
+class MapOverlay_t { /* Overlay data */
 
 public:
 
-  Overlay_t() {
+  MapOverlay_t() {
     active = 0;
     default_on_state = 0;
     num_labels = 0;
@@ -152,7 +152,7 @@ public:
   }
   
   long active; /* Current on/off state; 1 = active */
-  long default_on_state; /* If set to 1, This overlay should appear by default */
+  long default_on_state; /* If set to 1, This map should appear by default */
 
   long num_labels; /* number of associated text strings in map overlay */
   long num_icons; /* number of icons in map overlay */
