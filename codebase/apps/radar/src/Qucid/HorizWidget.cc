@@ -438,7 +438,8 @@ void HorizWidget::adjustPixelScales()
 {
 
   // cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
-  _zoomWorld.setProjection(_proj);
+  // _zoomWorld.setProjection(_proj);
+  _zoomWorld.setProjection(gd.proj);
   _zoomWorld.adjustPixelScales();
   
 }
