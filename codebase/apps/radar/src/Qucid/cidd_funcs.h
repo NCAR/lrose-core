@@ -420,7 +420,7 @@ extern void show_gen_time_menu( u_int value);
 #endif
 
 #ifndef OVERLAY_INIT
-extern void normalize_longitude(double min_lon, double max_lon, double *normal_lon);
+// extern void normalize_longitude(double min_lon, double max_lon, double *normal_lon);
 extern void init_over_data_links(const char *param_buf, long param_buf_len, long line_no);
 extern int load_map_info(const char *param_buf, long param_buf_len, long line_no,
                          MapOverlay_t **overlays, int  max_overlays);

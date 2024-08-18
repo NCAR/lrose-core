@@ -33,9 +33,6 @@
 
 #define XPOINT_BUF_SIZE  1024
 
-void normalize_longitude(double min_lon, double max_lon,
-			 double *normal_lon);
-
 static void draw_label_centered(Drawable xid, GC gc,
 				int xx, int yy,
 				const char *label);
@@ -46,6 +43,9 @@ static void draw_label_centered(Drawable xid, GC gc,
  * CALC_LOCAL_OVER_COORDS: Convert the lat/Lon coords to local X,Y KM coords.
  *
  */
+
+static void normalize_longitude(double min_lon, double max_lon,
+                                double *normal_lon);
 
 void calc_local_over_coords()
 {
@@ -144,11 +144,11 @@ void calc_local_over_coords()
 	      ov->geo_label[j]->min_lon > max_lon) clip_flag = 1;
 
 	  if(clip_flag) {
-	    ov->geo_label[j]->local_x = -32768.0;
+	    ov->geo_label[j]->proj_x = -32768.0;
 	  } else {
 	    /* Current rendering only uses min_lat, min_lon to position text */
 	    gd.proj.latlon2xy( ov->geo_label[j]->min_lat,ov->geo_label[j]->min_lon,
-	          ov->geo_label[j]->local_x,ov->geo_label[j]->local_y);
+	          ov->geo_label[j]->proj_x,ov->geo_label[j]->proj_y);
 	  }
 
         }
@@ -161,9 +161,9 @@ void calc_local_over_coords()
 	  if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
 
 	  if(clip_flag) {
-	    ic->local_x = -32768.0;
+	    ic->proj_x = -32768.0;
 	  } else {
-	    gd.proj.latlon2xy( ic->lat,ic->lon, ic->local_x,ic->local_y);
+	    gd.proj.latlon2xy( ic->lat,ic->lon, ic->proj_x,ic->proj_y);
 	  }
         }
 
@@ -185,20 +185,20 @@ void calc_local_over_coords()
 
                 if(poly->lon[l] > -360.0 && clip_flag == 0 ) {
 		   gd.proj.latlon2xy( poly->lat[l],poly->lon[l],
-		       poly->local_x[l],poly->local_y[l]);
+		       poly->proj_x[l],poly->proj_y[l]);
 
 		   /* printf("LAT,LON: %10.6f, %10.6f   LOCAL XY: %10.6f, %10.6f\n",
-				    poly->lat[l],poly->lon[l], poly->local_x[l],poly->local_y[l]); */
+				    poly->lat[l],poly->lon[l], poly->proj_x[l],poly->proj_y[l]); */
 
 		    /* Gather the bounding box for this polyline in local coords */
-		    if(poly->local_x[l] < min_loc_x) min_loc_x = poly->local_x[l];
-		    if(poly->local_y[l] < min_loc_y) min_loc_y = poly->local_y[l];
-		    if(poly->local_x[l] > max_loc_x) max_loc_x = poly->local_x[l];
-		    if(poly->local_y[l] > max_loc_y) max_loc_y = poly->local_y[l];
+		    if(poly->proj_x[l] < min_loc_x) min_loc_x = poly->proj_x[l];
+		    if(poly->proj_y[l] < min_loc_y) min_loc_y = poly->proj_y[l];
+		    if(poly->proj_x[l] > max_loc_x) max_loc_x = poly->proj_x[l];
+		    if(poly->proj_y[l] > max_loc_y) max_loc_y = poly->proj_y[l];
 
                 } else {
-		    poly->local_x[l] = -32768.0;
-		    poly->local_y[l] = -32768.0;
+		    poly->proj_x[l] = -32768.0;
+		    poly->proj_y[l] = -32768.0;
 		}
             }
 	    /* Set the bounding box */
@@ -233,10 +233,10 @@ void calc_local_over_coords()
 	      ov->geo_label[j]->min_lon > max_lon) clip_flag = 1;
 
 	  if(clip_flag) {
-	    ov->geo_label[j]->local_x = -32768.0;
+	    ov->geo_label[j]->proj_x = -32768.0;
 	  } else {
-	    ov->geo_label[j]->local_x = ov->geo_label[j]->min_lon;
-	    ov->geo_label[j]->local_y = ov->geo_label[j]->min_lat;
+	    ov->geo_label[j]->proj_x = ov->geo_label[j]->min_lon;
+	    ov->geo_label[j]->proj_y = ov->geo_label[j]->min_lat;
 	  }
 
         }
@@ -252,10 +252,10 @@ void calc_local_over_coords()
 	  if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
 
 	  if(clip_flag) {
-	    ic->local_x = -32768.0;
+	    ic->proj_x = -32768.0;
 	  } else {
-	    ic->local_x = ic->lon;
-	    ic->local_y = ic->lat;
+	    ic->proj_x = ic->lon;
+	    ic->proj_y = ic->lat;
 	  }
         }
 
@@ -282,18 +282,18 @@ void calc_local_over_coords()
 
                 if(poly->lon[l] > -360.0 && clip_flag == 0 ) {
 
-		   poly->local_x[l] = poly->lon[l];
-		   poly->local_y[l] = poly->lat[l];
+		   poly->proj_x[l] = poly->lon[l];
+		   poly->proj_y[l] = poly->lat[l];
 
 		    /* Gather the bounding box for this polyline in local coords */
-		    if(poly->local_x[l] < min_loc_x) min_loc_x = poly->local_x[l];
-		    if(poly->local_y[l] < min_loc_y) min_loc_y = poly->local_y[l];
-		    if(poly->local_x[l] > max_loc_x) max_loc_x = poly->local_x[l];
-		    if(poly->local_y[l] > max_loc_y) max_loc_y = poly->local_y[l];
+		    if(poly->proj_x[l] < min_loc_x) min_loc_x = poly->proj_x[l];
+		    if(poly->proj_y[l] < min_loc_y) min_loc_y = poly->proj_y[l];
+		    if(poly->proj_x[l] > max_loc_x) max_loc_x = poly->proj_x[l];
+		    if(poly->proj_y[l] > max_loc_y) max_loc_y = poly->proj_y[l];
 
                 } else {
-		    poly->local_x[l] = -32768.0;
-		    poly->local_y[l] = -32768.0;
+		    poly->proj_x[l] = -32768.0;
+		    poly->proj_y[l] = -32768.0;
 		}
             }
 	    /* Set the bounding box */
@@ -308,15 +308,13 @@ void calc_local_over_coords()
   if(gd.debug)  printf("Done\n");
 }
 
-#endif
-
 /************************************************************************
  * NORMALIZE_LONGITUDE: Normalize the given longitude value to fall within
  *                      min_lon and min_lon + 360.0.
  *
  */
 
-void normalize_longitude(double min_lon, double max_lon, double *normal_lon)
+static void normalize_longitude(double min_lon, double max_lon, double *normal_lon)
 {
 
   if ((*normal_lon < min_lon || *normal_lon > max_lon) &&
@@ -336,6 +334,8 @@ void normalize_longitude(double min_lon, double max_lon, double *normal_lon)
 
 }
 
+
+#endif
 
 /************************************************************************
  * RENDER_OVERLAYS: Render active overlays in the indicated field pixmap
@@ -391,8 +391,8 @@ void render_map_overlays(Drawable  xid)
           XSetLineAttributes(gd.dpy,ov->color->gc, ov->line_width,LineSolid,CapButt,JoinBevel);
 	       XSetFont(gd.dpy,ov->color->gc,gd.ciddfont[gd.prod.prod_font_num]);
             for(j=0; j < ov->num_labels; j++) {        /* Draw all labels - Not Fully Implemented Yet */
-		if(ov->geo_label[j]->local_x <= -32768.0) continue;
-                disp_proj_to_pixel(&(gd.h_win.margin),ov->geo_label[j]->local_x,ov->geo_label[j]->local_y,&x1,&y1);
+		if(ov->geo_label[j]->proj_x <= -32768.0) continue;
+                disp_proj_to_pixel(&(gd.h_win.margin),ov->geo_label[j]->proj_x,ov->geo_label[j]->proj_y,&x1,&y1);
 		draw_label_centered(xid, ov->color->gc,
 				    x1, y1,
 				    ov->geo_label[j]->display_string);
@@ -400,8 +400,8 @@ void render_map_overlays(Drawable  xid)
 
             for(j=0; j < ov->num_icons; j++) {        /* Draw all Iconic Objects */
                 ic = ov->geo_icon[j];
-		if(ic->local_x <= -32768.0) continue;
-                disp_proj_to_pixel(&(gd.h_win.margin),ic->local_x,ic->local_y,&x1,&y1);
+		if(ic->proj_x <= -32768.0) continue;
+                disp_proj_to_pixel(&(gd.h_win.margin),ic->proj_x,ic->proj_y,&x1,&y1);
 
                 npoints = 0;
                 for(l=0; l < ic->icon->num_points; l++) {    /* draw the Icon */
@@ -449,8 +449,8 @@ void render_map_overlays(Drawable  xid)
                 for(l=0; l < poly->num_points; l++) {
 
 		    // If the line is off screen, don't use it.
-                    if(poly->local_x[l] <= -16383.0 || poly->local_x[l] >= 16383.0 ||
-		       poly->local_y[l] <= -16383.0 || poly->local_y[l] >= 16383.0) {
+                    if(poly->proj_x[l] <= -16383.0 || poly->proj_x[l] >= 16383.0 ||
+		       poly->proj_y[l] <= -16383.0 || poly->proj_y[l] >= 16383.0) {
                         for(k=0; k < npoints; k++) {
                             disp_proj_to_pixel(&(gd.h_win.margin),x[k],y[k],&x1,&y1);
 
@@ -466,8 +466,8 @@ void render_map_overlays(Drawable  xid)
                         if(npoints > 0) XDrawLines(gd.dpy,xid,ov->color->gc,bpt,npoints,CoordModeOrigin);
                         npoints = 0;
                     } else {
-                        x[npoints] = poly->local_x[l];
-                        y[npoints] = poly->local_y[l];
+                        x[npoints] = poly->proj_x[l];
+                        y[npoints] = poly->proj_y[l];
                         if(npoints >= buf_size -1 ) {
 			    if((bpt = (XPoint *) realloc(bpt,buf_size *2 * sizeof(XPoint))) == NULL) { 
 				 perror("Realloc Error in render_map_overlays");

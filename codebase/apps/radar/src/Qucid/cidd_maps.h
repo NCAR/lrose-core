@@ -43,8 +43,8 @@ struct geo_feat_label {
 
   double attach_lat;
   double attach_lon; /* latitude, longitude of the object associated with the label */
-  double local_x;
-  double local_y;
+  double proj_x;
+  double proj_y;
   double rotation; /* 0 = left to right, 90 = bottom to top, etc */
 
   char display_string[NAME_LENGTH]; /* String to display */
@@ -59,8 +59,8 @@ struct geo_feat_icon {
 
   double lat;
   double lon;
-  double local_x;
-  double local_y;
+  double proj_x;
+  double proj_y;
 
   short text_x;
   short text_y;
@@ -96,8 +96,8 @@ struct geo_feat_polyline {
 
   double *lat;
   double *lon;
-  double *local_x;
-  double *local_y;
+  double *proj_x;
+  double *proj_y;
   
   char label[LABEL_LENGTH]; /* Label of polyline */
 

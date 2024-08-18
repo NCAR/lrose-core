@@ -51,6 +51,7 @@ static void _initWindComponent(met_record_t *wrec,
 static void _initTerrain();
 static void _initDrawExport();
 static int _initMaps();
+static void _calcMapCoordsLatLon();
 static void _calcMapCoordsProj();
 static int _initStationLoc();
 static void _initRouteWinds();
@@ -78,6 +79,10 @@ static int _getMapCachePath(const string &mapName,
 
 static int _readFileIntoBuffer(const string &path,
                                char* &buf, int &len);
+
+static void _normalizeLongitude(double min_lon,
+                                double max_lon,
+                                double *normal_lon);
 
 /*****************************************************************
  * INIT_DATA_SPACE : Init all globals and set up defaults
@@ -1347,12 +1352,12 @@ static void _initRouteWinds()
 
       switch (gd.display_projection) {
         case  Mdvx::PROJ_LATLON:
-          normalize_longitude(gd.h_win.min_x, gd.h_win.max_x,
+          _normalizeLongitude(gd.h_win.min_x, gd.h_win.max_x,
                               &gd.layers.route_wind.route[ii].x_world[kk]);
           break;
 
         default :
-          normalize_longitude(-180.0, 180.0,
+          _normalizeLongitude(-180.0, 180.0,
                               &gd.layers.route_wind.route[ii].x_world[kk]);
           break;
 
@@ -1642,8 +1647,8 @@ static int _loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         /* Get space for points in the polyline */
         ov->geo_polyline[index]->lat = (double *) calloc(1,num_points * sizeof(double));
         ov->geo_polyline[index]->lon = (double *) calloc(1,num_points * sizeof(double));
-        ov->geo_polyline[index]->local_x = (double *) calloc(1,num_points * sizeof(double));
-        ov->geo_polyline[index]->local_y = (double *) calloc(1,num_points * sizeof(double));
+        ov->geo_polyline[index]->proj_x = (double *) calloc(1,num_points * sizeof(double));
+        ov->geo_polyline[index]->proj_y = (double *) calloc(1,num_points * sizeof(double));
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
@@ -1877,8 +1882,8 @@ static int _loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
         /* Get space for points in the polyline */
         ov->geo_polyline[index]->lat = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
         ov->geo_polyline[index]->lon = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
-        ov->geo_polyline[index]->local_x = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
-        ov->geo_polyline[index]->local_y = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->proj_x = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->proj_y = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
@@ -2085,282 +2090,286 @@ static int _initMaps()
 
   // calculate the map coords for specified projection
   
-  _calcMapCoordsProj();
+  if (gd.display_projection == Mdvx::PROJ_LATLON) {
+    _calcMapCoordsLatLon();
+  } else {
+    _calcMapCoordsProj();
+  }
 
   return iret;
   
 }
 
-/************************************************************************
- * calculate map (x,y) coords for projection
- *
- */
-
 #define KM_CLIP_BUFFER 25.0
 #define LATLON_CLIP_BUFFER 0.4
+
+///////////////////////////////////////////////////////////////////
+// calculate map coords in XY space for the specified projection
 
 static void _calcMapCoordsProj()
 {
 
+  // condition longitudes to be in the same hemisphere as the origin
+  gd.proj.setConditionLon2Origin(true);
+  
+  // Compute the bounding box
+  double max_lon = -360.0;
+  double min_lon = 360.0;
+  double max_lat = -180.0;
+  double min_lat = 180.0;
+  
+  // Check each corner of the projection + 2 center points, top, bottom
+  // Lower left
   double lat,lon;
-  double min_lat,max_lat;
-  double min_lon,max_lon;
-  double min_loc_x,max_loc_x;
-  double min_loc_y,max_loc_y;
-
-  switch(gd.display_projection) {
-
-    default:
-      
-      // condition longitudes to be in the same hemisphere as the origin
-      gd.proj.setConditionLon2Origin(true);
-
-      // Compute the bounding box
-      max_lon = -360.0;
-      min_lon = 360.0;
-      max_lat = -180.0;
-      min_lat = 180.0;
-
-      // Check each corner of the projection + 2 center points, top, bottom
-      // Lower left
-      gd.proj.xy2latlon(gd.h_win.min_x - KM_CLIP_BUFFER ,
-                        gd.h_win.min_y - KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      // Lower midpoint
-      gd.proj.xy2latlon((gd.h_win.min_x +gd.h_win.max_x)/2 - KM_CLIP_BUFFER,
-                        gd.h_win.min_y - KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      // Lower right
-      gd.proj.xy2latlon(gd.h_win.max_x - KM_CLIP_BUFFER,
-                        gd.h_win.min_y - KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      // Upper right
-      gd.proj.xy2latlon(gd.h_win.max_x + KM_CLIP_BUFFER,
-                        gd.h_win.max_y + KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      // Upper midpoint
-      gd.proj.xy2latlon((gd.h_win.min_x + gd.h_win.max_x)/2 - KM_CLIP_BUFFER,
-                        gd.h_win.max_y - KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      // Upper left
-      gd.proj.xy2latlon(gd.h_win.min_x + KM_CLIP_BUFFER,
-                        gd.h_win.max_y + KM_CLIP_BUFFER,lat,lon);
-      if(lon > max_lon) max_lon = lon;
-      if(lon < min_lon) min_lon = lon;
-      if(lat > max_lat) max_lat = lat;
-      if(lat < min_lat) min_lat = lat;
-
-      //  Handle pathalogical cases where edges extend around the world.
-      if(min_lat >= max_lat ||
-         min_lon >= max_lon ||
-         gd.proj.getProjType() == Mdvx::PROJ_POLAR_STEREO ||
-         gd.proj.getProjType() == Mdvx::PROJ_OBLIQUE_STEREO) {
-        min_lon = -360.0;
-        min_lat = -180.0;
-        max_lon = 360.0;
-        max_lat = 180.0;
-      }
-      
-      if(gd.debug) {
-        printf("----> Overlay lon,lat Clip box: %g, %g to  %g, %g\n",
-               min_lon,min_lat,max_lon,max_lat);
-      }
-
-      for(int i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
-        MapOverlay_t *ov =  gd.overlays[i];
-	if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label.c_str());
-	 
-        /* Convert all labels   */
-        for(int j=0; j < ov->num_labels; j++) { 
-	  int clip_flag = 0;
-	  if(ov->geo_label[j]->min_lat < min_lat ||
-             ov->geo_label[j]->min_lat > max_lat) clip_flag = 1;
-	  if(ov->geo_label[j]->min_lon < min_lon ||
-             ov->geo_label[j]->min_lon > max_lon) clip_flag = 1;
-
-	  if(clip_flag) {
-	    ov->geo_label[j]->local_x = -32768.0;
-	  } else {
-	    /* Current rendering only uses min_lat, min_lon to position text */
-	    gd.proj.latlon2xy( ov->geo_label[j]->min_lat,ov->geo_label[j]->min_lon,
-                               ov->geo_label[j]->local_x,ov->geo_label[j]->local_y);
-	  }
-
-        }
-
-        /* Convert all Iconic Objects */
-        for(int j=0; j < ov->num_icons; j++) {
-          Geo_feat_icon_t *ic = ov->geo_icon[j];
-	  int clip_flag = 0;
-	  if(ic->lat < min_lat || ic->lat > max_lat) clip_flag = 1;
-	  if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
-
-	  if(clip_flag) {
-	    ic->local_x = -32768.0;
-	  } else {
-	    gd.proj.latlon2xy( ic->lat,ic->lon, ic->local_x,ic->local_y);
-	  }
-        }
-
-        /* Convert all Poly Line Objects */
-        for(int j=0; j < ov->num_polylines; j++) { 
-          Geo_feat_polyline_t *poly = ov->geo_polyline[j];
-          /* Reset the bounding box limits */
-          min_loc_x = DBL_MAX;
-          max_loc_x = DBL_MIN;
-          min_loc_y = DBL_MAX;
-          max_loc_y = DBL_MIN;
-          // npoints = 0;
-          for(int l=0; l < poly->num_points; l++) {
-            int clip_flag = 0;
-            if(poly->lat[l] < min_lat || poly->lat[l] > max_lat)
-              clip_flag = 1;
-            if(poly->lon[l] < min_lon || poly->lon[l] > max_lon)
-              clip_flag = 1;
-
-            if(poly->lon[l] > -360.0 && clip_flag == 0 ) {
-              gd.proj.latlon2xy( poly->lat[l],poly->lon[l],
-                                 poly->local_x[l],poly->local_y[l]);
-
-              /* printf("LAT,LON: %10.6f, %10.6f   LOCAL XY: %10.6f, %10.6f\n",
-                 poly->lat[l],poly->lon[l], poly->local_x[l],poly->local_y[l]); */
-
-              /* Gather the bounding box for this polyline in local coords */
-              if(poly->local_x[l] < min_loc_x) min_loc_x = poly->local_x[l];
-              if(poly->local_y[l] < min_loc_y) min_loc_y = poly->local_y[l];
-              if(poly->local_x[l] > max_loc_x) max_loc_x = poly->local_x[l];
-              if(poly->local_y[l] > max_loc_y) max_loc_y = poly->local_y[l];
-
-            } else {
-              poly->local_x[l] = -32768.0;
-              poly->local_y[l] = -32768.0;
-            }
-          }
-          /* Set the bounding box */
-          poly->min_x = min_loc_x;
-          poly->min_y = min_loc_y;
-          poly->max_x = max_loc_x;
-          poly->max_y = max_loc_y;
-        }
-      }
-
-      break;
-
-    case Mdvx::PROJ_LATLON:
-      min_lon = gd.h_win.min_x - LATLON_CLIP_BUFFER;
-      min_lat = gd.h_win.min_y - LATLON_CLIP_BUFFER;
-      max_lon = gd.h_win.max_x + LATLON_CLIP_BUFFER;
-      max_lat = gd.h_win.max_y + LATLON_CLIP_BUFFER;
-
-      for(int i=0; i < gd.num_map_overlays; i++) {        /* For Each Overlay */
-        MapOverlay_t *ov =  gd.overlays[i];
-	if(gd.debug)  printf("Converting Overlay %s ",ov->control_label.c_str());
-	 
-        for(int j=0; j < ov->num_labels; j++) {        /* Convert all labels   */
-	  int clip_flag = 0;
-
-	  normalize_longitude(gd.h_win.min_x, gd.h_win.max_x, &ov->geo_label[j]->min_lon);
-	  
-	  if(ov->geo_label[j]->min_lat < min_lat ||
-             ov->geo_label[j]->min_lat > max_lat) clip_flag = 1;
-
-	  if(ov->geo_label[j]->min_lon < min_lon ||
-             ov->geo_label[j]->min_lon > max_lon) clip_flag = 1;
-
-	  if(clip_flag) {
-	    ov->geo_label[j]->local_x = -32768.0;
-	  } else {
-	    ov->geo_label[j]->local_x = ov->geo_label[j]->min_lon;
-	    ov->geo_label[j]->local_y = ov->geo_label[j]->min_lat;
-	  }
-
-        }
-
-        /* Convert all Iconic Objects */
-        for(int j=0; j < ov->num_icons; j++) {
-          Geo_feat_icon_t *ic = ov->geo_icon[j];
-	  int clip_flag = 0;
-
-	  normalize_longitude(gd.h_win.min_x, gd.h_win.max_x, &ic->lon);
-	  
-	  if(ic->lat < min_lat || ic->lat > max_lat) clip_flag = 1;
-	  if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
-
-	  if(clip_flag) {
-	    ic->local_x = -32768.0;
-	  } else {
-	    ic->local_x = ic->lon;
-	    ic->local_y = ic->lat;
-	  }
-        }
-
-        /* Convert all Poly Line Objects */
-        for(int j=0; j < ov->num_polylines; j++) {
-          Geo_feat_polyline_t *poly = ov->geo_polyline[j];
-          // npoints = 0;
-          /* Reset the bounding box limits */
-          min_loc_x = DBL_MAX;
-          max_loc_x = DBL_MIN;
-          min_loc_y = DBL_MAX;
-          max_loc_y = DBL_MIN;
-          for(int l=0; l < poly->num_points; l++) {
-            int clip_flag = 0;
-
-            normalize_longitude(gd.h_win.min_x, gd.h_win.max_x, &poly->lon[l]);
-		
-            if(poly->lat[l] < min_lat || poly->lat[l] > max_lat) clip_flag = 1;
-            if(poly->lon[l] < min_lon || poly->lon[l] > max_lon) clip_flag = 1;
-
-            if (l > 0 && fabs(poly->lon[l] - poly->lon[l-1]) > 330) {
-              clip_flag = 1;
-            }
-
-            if(poly->lon[l] > -360.0 && clip_flag == 0 ) {
-
-              poly->local_x[l] = poly->lon[l];
-              poly->local_y[l] = poly->lat[l];
-
-              /* Gather the bounding box for this polyline in local coords */
-              if(poly->local_x[l] < min_loc_x) min_loc_x = poly->local_x[l];
-              if(poly->local_y[l] < min_loc_y) min_loc_y = poly->local_y[l];
-              if(poly->local_x[l] > max_loc_x) max_loc_x = poly->local_x[l];
-              if(poly->local_y[l] > max_loc_y) max_loc_y = poly->local_y[l];
-
-            } else {
-              poly->local_x[l] = -32768.0;
-              poly->local_y[l] = -32768.0;
-            }
-          }
-          /* Set the bounding box */
-          poly->min_x = min_loc_x;
-          poly->min_y = min_loc_y;
-          poly->max_x = max_loc_x;
-          poly->max_y = max_loc_y;
-        }
-      }
-      break;
+  gd.proj.xy2latlon(gd.h_win.min_x - KM_CLIP_BUFFER ,
+                    gd.h_win.min_y - KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  // Lower midpoint
+  gd.proj.xy2latlon((gd.h_win.min_x +gd.h_win.max_x)/2 - KM_CLIP_BUFFER,
+                    gd.h_win.min_y - KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  // Lower right
+  gd.proj.xy2latlon(gd.h_win.max_x - KM_CLIP_BUFFER,
+                    gd.h_win.min_y - KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  // Upper right
+  gd.proj.xy2latlon(gd.h_win.max_x + KM_CLIP_BUFFER,
+                    gd.h_win.max_y + KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  // Upper midpoint
+  gd.proj.xy2latlon((gd.h_win.min_x + gd.h_win.max_x)/2 - KM_CLIP_BUFFER,
+                    gd.h_win.max_y - KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  // Upper left
+  gd.proj.xy2latlon(gd.h_win.min_x + KM_CLIP_BUFFER,
+                    gd.h_win.max_y + KM_CLIP_BUFFER, lat, lon);
+  if(lon > max_lon) max_lon = lon;
+  if(lon < min_lon) min_lon = lon;
+  if(lat > max_lat) max_lat = lat;
+  if(lat < min_lat) min_lat = lat;
+  
+  //  Handle pathalogical cases where edges extend around the world.
+  if(min_lat >= max_lat ||
+     min_lon >= max_lon ||
+     gd.proj.getProjType() == Mdvx::PROJ_POLAR_STEREO ||
+     gd.proj.getProjType() == Mdvx::PROJ_OBLIQUE_STEREO) {
+    min_lon = -360.0;
+    min_lat = -180.0;
+    max_lon = 360.0;
+    max_lat = 180.0;
   }
-  if(gd.debug)  printf("Done\n");
+  
+  if(gd.debug) {
+    printf("----> Overlay lon,lat Clip box: %g, %g to  %g, %g\n",
+           min_lon,min_lat,max_lon,max_lat);
+  }
+  
+  for(int ii=0; ii < gd.num_map_overlays; ii++) {        /* For Each Overlay */
+    MapOverlay_t *ov =  gd.overlays[ii];
+    if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label.c_str());
+    
+    /* Convert all labels   */
+    for(int jj=0; jj < ov->num_labels; jj++) { 
+      int clip_flag = 0;
+      if(ov->geo_label[jj]->min_lat < min_lat ||
+         ov->geo_label[jj]->min_lat > max_lat) clip_flag = 1;
+      if(ov->geo_label[jj]->min_lon < min_lon ||
+         ov->geo_label[jj]->min_lon > max_lon) clip_flag = 1;
+      
+      if(clip_flag) {
+        ov->geo_label[jj]->proj_x = -32768.0;
+      } else {
+        /* Current rendering only uses min_lat, min_lon to position text */
+        gd.proj.latlon2xy(ov->geo_label[jj]->min_lat, ov->geo_label[jj]->min_lon,
+                          ov->geo_label[jj]->proj_x, ov->geo_label[jj]->proj_y);
+      }
+      
+    }
+    
+    /* Convert all Iconic Objects */
+    for(int jj=0; jj < ov->num_icons; jj++) {
+      Geo_feat_icon_t *ic = ov->geo_icon[jj];
+      int clip_flag = 0;
+      if(ic->lat < min_lat || ic->lat > max_lat) clip_flag = 1;
+      if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
+      
+      if(clip_flag) {
+        ic->proj_x = -32768.0;
+      } else {
+        gd.proj.latlon2xy( ic->lat,ic->lon, ic->proj_x,ic->proj_y);
+      }
+    }
+    
+    /* Convert all Poly Line Objects */
+
+    double min_loc_x, max_loc_x;
+    double min_loc_y, max_loc_y;
+
+    for(int jj=0; jj < ov->num_polylines; jj++) { 
+      Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
+      /* Reset the bounding box limits */
+      min_loc_x = DBL_MAX;
+      max_loc_x = DBL_MIN;
+      min_loc_y = DBL_MAX;
+      max_loc_y = DBL_MIN;
+      // npoints = 0;
+      for(int ll=0; ll < poly->num_points; ll++) {
+        int clip_flag = 0;
+        if(poly->lat[ll] < min_lat || poly->lat[ll] > max_lat)
+          clip_flag = 1;
+        if(poly->lon[ll] < min_lon || poly->lon[ll] > max_lon)
+          clip_flag = 1;
+        
+        if(poly->lon[ll] > -360.0 && clip_flag == 0 ) {
+          gd.proj.latlon2xy(poly->lat[ll], poly->lon[ll],
+                            poly->proj_x[ll], poly->proj_y[ll]);
+          
+          /* printf("LAT,LON: %10.6f, %10.6f   LOCAL XY: %10.6f, %10.6f\n",
+             poly->lat[l],poly->lon[l], poly->proj_x[l],poly->proj_y[l]); */
+          
+          /* Gather the bounding box for this polyline in local coords */
+          if(poly->proj_x[ll] < min_loc_x) min_loc_x = poly->proj_x[ll];
+          if(poly->proj_y[ll] < min_loc_y) min_loc_y = poly->proj_y[ll];
+          if(poly->proj_x[ll] > max_loc_x) max_loc_x = poly->proj_x[ll];
+          if(poly->proj_y[ll] > max_loc_y) max_loc_y = poly->proj_y[ll];
+          
+        } else {
+          poly->proj_x[ll] = -32768.0;
+          poly->proj_y[ll] = -32768.0;
+        }
+      }
+      /* Set the bounding box */
+      poly->min_x = min_loc_x;
+      poly->min_y = min_loc_y;
+      poly->max_x = max_loc_x;
+      poly->max_y = max_loc_y;
+    }
+  }
+
+}
+
+///////////////////////////////////////////////////////////////////
+// calculate map coords in XY space for latlon projection
+
+static void _calcMapCoordsLatLon()
+{
+
+  double min_lon = gd.h_win.min_x - LATLON_CLIP_BUFFER;
+  double min_lat = gd.h_win.min_y - LATLON_CLIP_BUFFER;
+  double max_lon = gd.h_win.max_x + LATLON_CLIP_BUFFER;
+  double max_lat = gd.h_win.max_y + LATLON_CLIP_BUFFER;
+  
+  for(int ii=0; ii < gd.num_map_overlays; ii++) {        /* For Each Overlay */
+    MapOverlay_t *ov =  gd.overlays[ii];
+    if(gd.debug)  printf("Converting Overlay %s ",ov->control_label.c_str());
+    
+    for(int jj=0; jj < ov->num_labels; jj++) {        /* Convert all labels   */
+      int clip_flag = 0;
+      
+      _normalizeLongitude(gd.h_win.min_x, gd.h_win.max_x, &ov->geo_label[jj]->min_lon);
+      
+      if(ov->geo_label[jj]->min_lat < min_lat ||
+         ov->geo_label[jj]->min_lat > max_lat) clip_flag = 1;
+      
+      if(ov->geo_label[jj]->min_lon < min_lon ||
+         ov->geo_label[jj]->min_lon > max_lon) clip_flag = 1;
+      
+      if(clip_flag) {
+        ov->geo_label[jj]->proj_x = -32768.0;
+      } else {
+        ov->geo_label[jj]->proj_x = ov->geo_label[jj]->min_lon;
+        ov->geo_label[jj]->proj_y = ov->geo_label[jj]->min_lat;
+      }
+      
+    }
+    
+    /* Convert all Iconic Objects */
+    for(int jj=0; jj < ov->num_icons; jj++) {
+      Geo_feat_icon_t *ic = ov->geo_icon[jj];
+      int clip_flag = 0;
+      
+      _normalizeLongitude(gd.h_win.min_x, gd.h_win.max_x, &ic->lon);
+      
+      if(ic->lat < min_lat || ic->lat > max_lat) clip_flag = 1;
+      if(ic->lon < min_lon || ic->lon > max_lon) clip_flag = 1;
+      
+      if(clip_flag) {
+        ic->proj_x = -32768.0;
+      } else {
+        ic->proj_x = ic->lon;
+        ic->proj_y = ic->lat;
+      }
+    }
+    
+    /* Convert all Poly Line Objects */
+
+    double min_loc_x, max_loc_x;
+    double min_loc_y, max_loc_y;
+
+    for(int jj=0; jj < ov->num_polylines; jj++) {
+      Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
+      // npoints = 0;
+      /* Reset the bounding box limits */
+      min_loc_x = DBL_MAX;
+      max_loc_x = DBL_MIN;
+      min_loc_y = DBL_MAX;
+      max_loc_y = DBL_MIN;
+      for(int l=0; l < poly->num_points; l++) {
+        int clip_flag = 0;
+        
+        _normalizeLongitude(gd.h_win.min_x, gd.h_win.max_x, &poly->lon[l]);
+	
+        if(poly->lat[l] < min_lat || poly->lat[l] > max_lat) clip_flag = 1;
+        if(poly->lon[l] < min_lon || poly->lon[l] > max_lon) clip_flag = 1;
+        
+        if (l > 0 && fabs(poly->lon[l] - poly->lon[l-1]) > 330) {
+          clip_flag = 1;
+        }
+        
+        if(poly->lon[l] > -360.0 && clip_flag == 0 ) {
+          
+          poly->proj_x[l] = poly->lon[l];
+          poly->proj_y[l] = poly->lat[l];
+          
+          /* Gather the bounding box for this polyline in local coords */
+          if(poly->proj_x[l] < min_loc_x) min_loc_x = poly->proj_x[l];
+          if(poly->proj_y[l] < min_loc_y) min_loc_y = poly->proj_y[l];
+          if(poly->proj_x[l] > max_loc_x) max_loc_x = poly->proj_x[l];
+          if(poly->proj_y[l] > max_loc_y) max_loc_y = poly->proj_y[l];
+          
+        } else {
+          poly->proj_x[l] = -32768.0;
+          poly->proj_y[l] = -32768.0;
+        }
+      }
+      /* Set the bounding box */
+      poly->min_x = min_loc_x;
+      poly->min_y = min_loc_y;
+      poly->max_x = max_loc_x;
+      poly->max_y = max_loc_y;
+    }
+  }
+
 }
 
 ///////////////////////////////////////////////////////
@@ -3079,6 +3088,32 @@ static int _readFileIntoBuffer(const string &path,
   fclose(ff);
 
   return 0;
+
+}
+
+/************************************************************************
+ * NORMALIZE_LONGITUDE: Normalize the given longitude value to fall within
+ *                      min_lon and min_lon + 360.0.
+ *
+ */
+
+static void _normalizeLongitude(double min_lon, double max_lon, double *normal_lon)
+{
+
+  if ((*normal_lon < min_lon || *normal_lon > max_lon) &&
+      (min_lon >= -540.0 && max_lon < 540.0)) {
+    
+    while (*normal_lon < min_lon) {
+      if (max_lon < *normal_lon + 360.0)
+	break;
+      *normal_lon += 360.0;
+    }
+    
+    while (*normal_lon >= min_lon + 360.0) {
+      *normal_lon -= 360.0;
+    }
+
+  }
 
 }
 
