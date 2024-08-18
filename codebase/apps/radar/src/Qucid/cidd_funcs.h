@@ -527,7 +527,7 @@ extern int render_v_movie_frame( int    index, Drawable xid);
 #endif
 
 #ifndef RENDER_OVERLAYS
-extern void calc_local_over_coords();
+// extern void calc_local_over_coords();
 extern void render_map_overlays(Drawable xid);
 #endif
 

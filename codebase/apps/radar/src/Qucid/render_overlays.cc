@@ -31,8 +31,6 @@
 
 #include "cidd.h"
 
-#define KM_CLIP_BUFFER 25.0
-#define LATLON_CLIP_BUFFER 0.4
 #define XPOINT_BUF_SIZE  1024
 
 void normalize_longitude(double min_lon, double max_lon,
@@ -41,6 +39,8 @@ void normalize_longitude(double min_lon, double max_lon,
 static void draw_label_centered(Drawable xid, GC gc,
 				int xx, int yy,
 				const char *label);
+
+#ifdef JUNK
 
 /************************************************************************
  * CALC_LOCAL_OVER_COORDS: Convert the lat/Lon coords to local X,Y KM coords.
@@ -307,6 +307,8 @@ void calc_local_over_coords()
   }
   if(gd.debug)  printf("Done\n");
 }
+
+#endif
 
 /************************************************************************
  * NORMALIZE_LONGITUDE: Normalize the given longitude value to fall within
