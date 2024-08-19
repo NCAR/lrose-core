@@ -21,8 +21,10 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-//****************************************************************************/
-// CIDD.H : Defines & includes for the Cartesian RADAR display program
+//////////////////////////////////////////////////////////////////////////////
+// CIDD.H
+// Defines & includes for the Cartesian RADAR display program
+//////////////////////////////////////////////////////////////////////////////
  
 #ifndef CIDD_H
 #define CIDD_H
@@ -54,19 +56,19 @@
 #include <toolsa/mem.h> 
 #include <toolsa/globals.h> 
 #include <toolsa/str.h>
-#include <toolsa/pmu.h>     // process mapper structures 
-#include <toolsa/http.h>    // HTTPgetURL support
-#include <toolsa/HttpURL.hh>// HTTPURL class support
-#include <toolsa/pjg.h>     // Map projection geometry 
+#include <toolsa/pmu.h>       // process mapper structures 
+#include <toolsa/http.h>      // HTTPgetURL support
+#include <toolsa/HttpURL.hh>  // HTTPURL class support
+#include <toolsa/pjg.h>       // Map projection geometry 
 #include <toolsa/Path.hh> 
 #include <toolsa/sockutil.h>
-#include <toolsa/str.h>     // string utilities 
-#include <toolsa/utim.h>    // Unix time conversions 
+#include <toolsa/str.h>       // string utilities 
+#include <toolsa/utim.h>      // Unix time conversions 
 #include <toolsa/umisc.h>
 #include <toolsa/xdru.h>
 #include <rapplot/xrs.h>
-#include <Spdb/StationLoc.hh>  // Station locator class 
-#include <rapplot/xutils.h> // X Windows related  support functions 
+#include <Spdb/StationLoc.hh> // Station locator class 
+#include <rapplot/xutils.h>   // X Windows related  support functions 
 
 // MDVX support classes
 #include <Mdv/Mdvx_typedefs.hh>

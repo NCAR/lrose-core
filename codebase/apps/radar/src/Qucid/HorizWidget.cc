@@ -38,6 +38,7 @@
 #include <QMessageBox>
 #include <QErrorMessage>
 #include <QRect>
+#include <QPainterPath>
 
 #include "cidd.h"
 
@@ -761,156 +762,128 @@ void HorizWidget::_drawMaps(QPainter &painter)
 {
 
   painter.save();
+
+  // Loop throughs maps
   
-  for(int ii = gd.num_map_overlays - 1; ii >= 0; ii--) {        /* For Each Overlay */
+  for(int ii = gd.num_map_overlays - 1; ii >= 0; ii--) {
     
-    if(gd.overlays[ii]->active &&
-       (gd.overlays[ii]->detail_thresh_min <= gd.h_win.km_across_screen) && 
-       (gd.overlays[ii]->detail_thresh_max >= gd.h_win.km_across_screen))  {
-      
-      MapOverlay_t *ov = gd.overlays[ii];
-
-      // create the pen for this map
-
-      QPen pen;
-      pen.setStyle(Qt::SolidLine);
-      pen.setWidth(ov->line_width);
-      pen.setColor(ov->color_name.c_str());
-      pen.setCapStyle(Qt::RoundCap);
-      pen.setJoinStyle(Qt::RoundJoin);
-      painter.setPen(pen);
-
-      QFont mfont(painter.font());
-      mfont.setPointSizeF(_params.maps_font_size);
-      painter.setFont(mfont);
-      
-      // Draw labels
-      
-      for(int jj = 0; jj < ov->num_labels; jj++) {
-        if(ov->geo_label[jj]->proj_x <= -32768.0) {
-          continue;
-        }
-        _zoomWorld.drawText(painter,
-                            ov->geo_label[jj]->display_string,
-                            ov->geo_label[jj]->proj_x,
-                            ov->geo_label[jj]->proj_y,
-                            Qt::AlignCenter);
-      } // jj
-
-      // draw icons
-      
-      for(int jj=0; jj < ov->num_icons; jj++) {
-
-        Geo_feat_icon_t *ic = ov->geo_icon[jj];
-        if(ic->proj_x <= -32768.0) {
-          continue;
-        }
-
-        int ixx = _zoomWorld.getIxPixel(ic->proj_x);
-        int iyy = _zoomWorld.getIyPixel(ic->proj_y);
-
-        for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {    /* draw the Icon */
-          if ((ic->icon->x[kk] == 32767) ||
-              (ic->icon->x[kk+1] == 32767)) {
-            continue;
-          }
-          double iconScale = 1.0;
-          int ix1 = ixx + (int) (ic->icon->x[kk] * iconScale + 0.5);
-          int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
-          int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
-          int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
-          _zoomWorld.drawPixelLine(painter, ix1, iy1, ix2, iy2);
-        } // kk
-
-        // add icon label
-        
-        painter.save();
-        if(_params.font_display_mode == 0) {
-          painter.setBackgroundMode(Qt::TransparentMode);
-        } else {
-          painter.setBackgroundMode(Qt::OpaqueMode);
-        }
-        double textX = _zoomWorld.getXWorld(ic->text_x + ixx);
-        double textY = _zoomWorld.getYWorld(ic->text_y + iyy);
-        _zoomWorld.drawText(painter, ic->label,
-                            textX, textY,
-                            Qt::AlignHCenter | Qt::AlignVCenter);
-        painter.restore();
-
-      } // jj
-
-      // draw polylines
-      
-      for(int jj = 0; jj < ov->num_polylines; jj++) {
-        
-        Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
-        int npoints = 0;
-        for(int ll = 0; ll < poly->num_points; ll++) {
-
-          // check line is on screen
-
-          if(poly->proj_x[ll] <= -16383.0 || poly->proj_x[ll] >= 16383.0 ||
-             poly->proj_y[ll] <= -16383.0 || poly->proj_y[ll] >= 16383.0) {
-            
-            for(int kk = 0; kk < npoints; kk++) {
-              
-              disp_proj_to_pixel(&(gd.h_win.margin),x[k],y[k],&x1,&y1);
-
-              // If the line is way too long 
-              if(x1 < -32767 || x1 > 32767 || y1  < -32767 || y1 > 32767) {
-                npoints = k;  // abort on this line
-              } else {
-                bpt[k].x = x1;
-                bpt[k].y = y1;
-              }
-
-            }
-            if(npoints > 0) XDrawLines(gd.dpy,xid,ov->color->gc,bpt,npoints,CoordModeOrigin);
-            npoints = 0;
-          } else {
-            x[npoints] = poly->proj_x[l];
-            y[npoints] = poly->proj_y[l];
-            if(npoints >= buf_size -1 ) {
-              if((bpt = (XPoint *) realloc(bpt,buf_size *2 * sizeof(XPoint))) == NULL) { 
-                perror("Realloc Error in render_map_overlays");
-                exit(-1);
-              }
-              if((x = (double *) realloc(x,buf_size *2 * sizeof(double))) == NULL) { 
-                perror("Realloc Error in render_map_overlays");
-                exit(-1);
-              }
-              if((y = (double *) realloc(y,buf_size *2 * sizeof(double))) == NULL) { 
-                perror("Realloc Error in render_map_overlays");
-                exit(-1);
-              }
-              buf_size *= 2;
-            }
-
-            npoints++;
-          }
-        }
-
-        /* Handle Poly lines without pen-up's */ 
-        if(npoints > 0) {
-          for(k=0; k < npoints; k++) {
-            disp_proj_to_pixel(&(gd.h_win.margin),x[k],y[k],&x1,&y1);
-            // If the line is way too long 
-            if(x1 < -32767 || x1 > 32767 || y1  < -32767 || y1 > 32767) {
-              npoints = k;  // abort on this line
-            } else {
-              bpt[k].x = x1;
-              bpt[k].y = y1;
-            }
-
-          }
-
-          XDrawLines(gd.dpy,xid,ov->color->gc,bpt,npoints,CoordModeOrigin);
-          npoints = 0;
-        }
-      }
-
+    if(!gd.overlays[ii]->active ||
+       (gd.overlays[ii]->detail_thresh_min > gd.h_win.km_across_screen) ||
+       (gd.overlays[ii]->detail_thresh_max < gd.h_win.km_across_screen))  {
+      continue;
     }
-  }
+      
+    MapOverlay_t *ov = gd.overlays[ii];
+
+    // create the pen for this map
+    
+    QPen pen;
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(ov->line_width);
+    pen.setColor(ov->color_name.c_str());
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(pen);
+    
+    QFont mfont(painter.font());
+    mfont.setPointSizeF(_params.maps_font_size);
+    painter.setFont(mfont);
+    
+    // Draw labels
+    
+    for(int jj = 0; jj < ov->num_labels; jj++) {
+      if(ov->geo_label[jj]->proj_x <= -32768.0) {
+        continue;
+      }
+      _zoomWorld.drawText(painter,
+                          ov->geo_label[jj]->display_string,
+                          ov->geo_label[jj]->proj_x,
+                          ov->geo_label[jj]->proj_y,
+                          Qt::AlignCenter);
+    } // jj
+    
+    // draw icons
+    
+    for(int jj = 0; jj < ov->num_icons; jj++) {
+      
+      Geo_feat_icon_t *ic = ov->geo_icon[jj];
+      if(ic->proj_x <= -32768.0) {
+        continue;
+      }
+      
+      int ixx = _zoomWorld.getIxPixel(ic->proj_x);
+      int iyy = _zoomWorld.getIyPixel(ic->proj_y);
+
+      // draw the icon
+      
+      for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {
+        if ((ic->icon->x[kk] == 32767) ||
+            (ic->icon->x[kk+1] == 32767)) {
+          continue;
+        }
+        double iconScale = 1.0;
+        int ix1 = ixx + (int) (ic->icon->x[kk] * iconScale + 0.5);
+        int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
+        int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
+        int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
+        _zoomWorld.drawPixelLine(painter, ix1, iy1, ix2, iy2);
+      } // kk
+      
+      // add icon label
+      
+      painter.save();
+      if(_params.font_display_mode == 0) {
+        painter.setBackgroundMode(Qt::TransparentMode);
+      } else {
+        painter.setBackgroundMode(Qt::OpaqueMode);
+      }
+      _zoomWorld.drawTextScreenCoords(painter, ic->label,
+                                      ic->text_x + ixx,
+                                      ic->text_y + iyy,
+                                      Qt::AlignHCenter | Qt::AlignVCenter);
+      painter.restore();
+      
+    } // jj
+
+    // draw polylines
+    
+    for(int jj = 0; jj < ov->num_polylines; jj++) {
+      
+      Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
+      QPainterPath polyPath;
+      bool doMove = true;
+      
+      for(int ll = 0; ll < poly->num_points; ll++) {
+        
+        double proj_x = poly->proj_x[ll];
+        double proj_y = poly->proj_y[ll];
+        
+        bool validPoint = true;
+        if (fabs(proj_x) > 32767 || fabs(proj_y) > 32767) {
+          validPoint = false;
+        }
+
+        if (!validPoint || (ll == 0)) {
+          doMove = true;
+        }
+
+        if (validPoint) {
+          QPointF point = _zoomWorld.getPixelPointF(proj_x, proj_y);
+          if (doMove) {
+            polyPath.moveTo(point);
+            doMove = false;
+          } else {
+            polyPath.lineTo(point);
+          }
+        }
+
+      } // ll
+
+      _zoomWorld.drawPath(painter, polyPath);
+
+    } // jj
+      
+  } // ii
   
   painter.restore();
 

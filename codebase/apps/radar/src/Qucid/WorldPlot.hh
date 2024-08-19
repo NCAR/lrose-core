@@ -229,6 +229,13 @@ public:
     return (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel;
   }
 
+  inline QPointF getPixelPointF(double xWorld, double yWorld) const {
+    qreal xPixel = (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel;
+    qreal yPixel = (yWorld - _yMinWorld) * _yPixelsPerWorld + _yMinPixel;
+    QPointF pt(xPixel, yPixel);
+    return pt;
+  }
+  
   inline int getIxPixel(double xWorld) const {
     return (int) floor(getXPixel(xWorld) + 0.5);
   }
@@ -341,6 +348,8 @@ public:
   //    Qt::TextExpandTabs expands tabs (see below)
   //    Qt::TextShowMnemonic interprets "&x" as x; i.e., underlined.
   //    Qt::TextWordWrap breaks the text to fit the rectangle.
+
+  // add text in world coords
   
   void drawText(QPainter &painter, const string &text,
                 double text_x, double text_y,
@@ -352,6 +361,19 @@ public:
   
   void drawTextCentered(QPainter &painter, const string &text,
                         double text_x, double text_y);
+	
+  // add text in screen coords
+  
+  void drawTextScreenCoords(QPainter &painter, const string &text,
+                            int text_ix, int text_iy,
+                            int flags);
+  
+  void drawRotatedTextScreenCoords(QPainter &painter, const string &text,
+                                   int text_ix, int text_iy,
+                                   int flags, double rotationDeg);
+  
+  void drawTextCenteredScreenCoords(QPainter &painter, const string &text,
+                                    int text_ix, int text_iy);
 	
   // Title
     

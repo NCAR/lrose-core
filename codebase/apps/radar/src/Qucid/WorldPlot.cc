@@ -830,8 +830,8 @@ void WorldPlot::drawRotatedText(QPainter &painter, const string &text,
     
 }
 
-/////////////////////
-// draw centered text
+//////////////////////////////////////
+// draw centered text in world coords
 
 void WorldPlot::drawTextCentered(QPainter &painter, const string &text,
                                  double text_x, double text_y) 
@@ -839,6 +839,61 @@ void WorldPlot::drawTextCentered(QPainter &painter, const string &text,
 {
 
   drawText(painter, text, text_x, text_y, Qt::AlignCenter);
+
+}
+
+// draw text in screen coords
+    
+void WorldPlot::drawTextScreenCoords(QPainter &painter, const string &text,
+                                     int text_ix, int text_iy,
+                                     int flags)
+
+{
+
+  QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
+  QRect bRect(painter.fontMetrics().boundingRect(text_ix, text_iy,
+                                                 tRect.width() + 2,
+                                                 tRect.height() + 2,
+                                                 flags, text.c_str()));
+    
+  painter.drawText(bRect, flags, text.c_str());
+    
+}
+
+/////////////////////////////////////
+// draw rotated text in screen coords
+
+void WorldPlot::drawRotatedTextScreenCoords(QPainter &painter, const string &text,
+                                            int text_ix, int text_iy,
+                                            int flags, double rotationDeg) 
+
+{
+  
+  painter.save();
+  painter.translate(text_ix, text_iy);
+  painter.rotate(rotationDeg);
+  
+  QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
+  QRect bRect(painter.fontMetrics().boundingRect(0, 0,
+                                                 tRect.width() + 2,
+                                                 tRect.height() + 2,
+                                                 flags, text.c_str()));
+    
+  painter.drawText(bRect, flags, text.c_str());
+  
+  painter.restore();
+    
+}
+
+////////////////////////////////////////
+// draw centered text in screen coords
+
+void WorldPlot::drawTextCenteredScreenCoords(QPainter &painter, const string &text,
+                                             int text_ix, int text_iy) 
+
+{
+
+  drawTextScreenCoords(painter, text, text_ix, text_iy, Qt::AlignCenter);
 
 }
 
