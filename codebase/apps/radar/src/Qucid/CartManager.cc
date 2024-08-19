@@ -556,6 +556,7 @@ void CartManager::_setupWindows()
   pos.setX(_params.main_window_start_x);
   pos.setY(_params.main_window_start_y);
   move(pos);
+  show();
   
   // set up field status dialog
   // _createClickReportDialog();

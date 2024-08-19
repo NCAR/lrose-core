@@ -169,7 +169,8 @@ void TimeControl::populateGui()
   setWindowTitle("Time and movie loop controller");
   QPoint pos(0,0);
   move(pos);
-  
+  // show();
+
   QVBoxLayout *timeControlLayout = new QVBoxLayout(this);
   timeControlLayout->setSpacing(0);
   timeControlLayout->setContentsMargins(0, 0, 0, 0);

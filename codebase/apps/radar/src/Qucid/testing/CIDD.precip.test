@@ -736,8 +736,8 @@ cidd.horiz_legends_delta_y:  30
 cidd.horiz_default_height:    800
 cidd.horiz_min_height:        400
 cidd.horiz_min_width:         400
-cidd.horiz_default_x_pos:     0
-cidd.horiz_default_y_pos:     0
+cidd.horiz_default_x_pos:     30
+cidd.horiz_default_y_pos:     30
 
 cidd.horiz_top_margin:        20
 cidd.horiz_bot_margin:        30

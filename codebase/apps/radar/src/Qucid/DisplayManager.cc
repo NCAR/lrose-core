@@ -115,7 +115,11 @@ DisplayManager::DisplayManager(/* const Params &params,
   } else if (_params.debug) {
     _clickPointFmq.setDebug();
   }
-
+  
+  // setAttribute(Qt::WA_X11NetWmWindowTypeDesktop, true);
+  // setAttribute(Qt::WA_Moved, true);
+  // setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+  
 }
 
 // destructor
