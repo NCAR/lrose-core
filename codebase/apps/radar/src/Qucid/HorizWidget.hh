@@ -195,6 +195,9 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   virtual void _drawOverlays(QPainter &painter);
 
+  void _drawMaps(QPainter &painter);
+  void _drawRingsAndAzLines(QPainter &painter);
+  
   /**
    * @brief Determine a ring spacing which will give even distances, and
    *        fit a reasonable number of rings in the display.

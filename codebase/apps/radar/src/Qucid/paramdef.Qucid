@@ -347,6 +347,11 @@ paramdef struct map_t {
     "\n";
 } maps[];
 
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on maps.";
+} maps_font_size;
+
 commentdef {
   p_header = "</MAPS>";
 }

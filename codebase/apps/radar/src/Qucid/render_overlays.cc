@@ -349,7 +349,7 @@ void render_map_overlays(Drawable  xid)
     unsigned int k;
     int    x1,y1;
     unsigned int    npoints;
-    double    scale;
+    double    iconScale;
     MapOverlay_t    *ov;
     Geo_feat_polyline_t *poly;
     Geo_feat_icon_t    *ic;
@@ -375,10 +375,10 @@ void render_map_overlays(Drawable  xid)
     }
 
     // Trial Concept for TAIWAN DEMO - Scale the Icons
-    scale = 1.0;
+    iconScale = 1.0;
     for(i=NUM_PRODUCT_DETAIL_THRESHOLDS -1; i >=0; i--)  {
       if( gd.h_win.km_across_screen <= gd.prod.detail[i].threshold) {
-         scale *= 1.5; // increase by 50%
+         iconScale *= 1.5; // increase by 50%
       }
     }
 
@@ -406,8 +406,8 @@ void render_map_overlays(Drawable  xid)
                 npoints = 0;
                 for(l=0; l < ic->icon->num_points; l++) {    /* draw the Icon */
                     if(ic->icon->x[l] != 32767 ) {
-                        bpt[npoints].x = (short) (ic->icon->x[l] * scale) + (short) x1;
-                        bpt[npoints].y = (short) (ic->icon->y[l] * scale) + (short) y1;
+                        bpt[npoints].x = (short) (ic->icon->x[l] * iconScale) + (short) x1;
+                        bpt[npoints].y = (short) (ic->icon->y[l] * iconScale) + (short) y1;
                         if(npoints >= buf_size -1 ) {
 			    if((bpt = (XPoint *) realloc(bpt,buf_size *2 * sizeof(XPoint))) == NULL) { 
 				 perror("Realloc Error in render_map_overlays");

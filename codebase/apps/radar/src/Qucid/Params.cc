@@ -1142,6 +1142,18 @@
       tt->struct_vals[15].b = pTRUE;
     tt++;
     
+    // Parameter 'maps_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("maps_font_size");
+    tt->descr = tdrpStrDup("Font size for labels on maps.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &maps_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));

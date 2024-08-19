@@ -643,6 +643,8 @@ public:
   map_t *_maps;
   int maps_n;
 
+  int maps_font_size;
+
   projection_t proj_type;
 
   double proj_origin_lat;
@@ -1514,7 +1516,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[514];
+  mutable TDRPtable _table[515];
 
   const char *_className;
 

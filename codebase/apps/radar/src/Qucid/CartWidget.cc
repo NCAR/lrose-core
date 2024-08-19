@@ -461,10 +461,10 @@ void CartWidget::paintEvent(QPaintEvent *event)
   _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
   _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
   _zoomWorld.setGridColor(_params.horiz_grid_color);
-  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, true);
+  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _gridsEnabled);
   _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, true);
+  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
   
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 

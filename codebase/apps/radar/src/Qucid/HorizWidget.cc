@@ -51,7 +51,6 @@ HorizWidget::HorizWidget(QWidget* parent,
         
 {
 
-  // _aspectRatio = _params.horiz_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
 
   // initialoze world view
@@ -425,7 +424,7 @@ void HorizWidget::timerEvent(QTimerEvent *event)
   // }
   
   if (doUpdate) {  //only update if something has changed
-    // cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
+    cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
     update();
   }
 }
@@ -635,138 +634,19 @@ void HorizWidget::_setGridSpacing()
 void HorizWidget::_drawOverlays(QPainter &painter)
 {
 
-  // cerr << "ddddddddddddddd drawOverlays" << endl;
+  // draw the maps
+
+  _drawMaps(painter);
   
-  // Don't try to draw rings if we haven't been configured yet or if the
-  // rings or grids aren't enabled.
-  
-  if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
-    return;
-  }
+  // draw rings and azimith lines for polar data sets
 
-  // save painter state
-
-  painter.save();
-
-  // store font
-  
-  QFont origFont = painter.font();
-  
-  // Draw rings
-
-  if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
-  
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-
-    double ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-      painter.drawEllipse(rect);
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    // Draw the labels
-    
-    QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
-    painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
-    
-    ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-      ringRange += _ringSpacing;
-    }
-
-  } /* endif - draw rings */
-  
-  // Draw the grid
-
-  if (_ringSpacing > 0.0 && _gridsEnabled)  {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
-  
-    double ringRange = _ringSpacing;
-    double maxRingRange = ringRange;
-    while (ringRange <= _maxRangeKm) {
-
-      _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
-      
-      maxRingRange = ringRange;
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
-    _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
-
-    if (_params.proj_type == Params::PROJ_LATLON) {
-      _zoomWorld.drawAxisLeft(painter, "deg", true, true, true, true);
-      _zoomWorld.drawAxisRight(painter, "deg", true, true, true, true);
-      _zoomWorld.drawAxisTop(painter, "deg", true, true, true, true);
-      _zoomWorld.drawAxisBottom(painter, "deg", true, true, true, true);
-    } else {
-      _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
-      _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
-      _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
-      _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
-    }
-    
-  }
-  
-  // Draw the azimuth lines
-
-  if (_angleLinesEnabled) {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setPen(_gridRingsColor);
-  
-    // Draw the lines along the X and Y axes
-
-    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
-    // Draw the lines along the 30 degree lines
-
-    double end_pos1 = SIN_30 * _maxRangeKm;
-    double end_pos2 = COS_30 * _maxRangeKm;
-    
-    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
-
-    painter.restore();
-
-  }
+  _drawRingsAndAzLines(painter);
   
   // click point cross hairs
   
   if (_pointClicked) {
+    
+    painter.save();
 
     int startX = _mouseReleaseX - _params.click_cross_size / 2;
     int endX = _mouseReleaseX + _params.click_cross_size / 2;
@@ -782,54 +662,9 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
 
-    /****** testing ******
-    // do smart brush ...
-  QImage qImage;
-  qImage = *(_fieldRenderers[_selectedField]->getImage());
-  // qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  // qImage.invertPixels();
-  qImage.convertToFormat(QImage::Format_RGB32);
-
-  // get the color of the selected pixel
-  QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
-  // walk to all adjacent pixels of the same color and make them white
-
-  vector<QPoint> pixelsToConsider;
-  vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
-                              QPoint(-1, 0),               QPoint(1, 0),
-                              QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
-
-  pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
-  while (!pixelsToConsider.empty()) {
-    QPoint currentPix = pixelsToConsider.back();
-    pixelsToConsider.pop_back();
-    if (qImage.pixel(currentPix) ==  colorToMatch) {
-      // set currentPix to white
-      qImage.setPixelColor(currentPix, QColor("white"));
-      // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
-      // add the eight adjacent neighbors
-      for (vector<QPoint>::iterator noffset = neighbors.begin(); 
-           noffset != neighbors.end(); ++noffset) {
-        QPoint neighbor;
-        neighbor = currentPix + *noffset; // QPoint(-1,1);
-        if (qImage.valid(neighbor)) {
-          pixelsToConsider.push_back(neighbor);
-        }
-      } // end for neighbors iterator
-    }
+    painter.restore();
+    
   }
-
-  pixelsToConsider.clear();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-    ****** end testing *****/
-
-  }
-
-  // reset painter state
-  
-  painter.restore();
 
   // draw the color scale
 
@@ -837,6 +672,8 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
+  // add the legends
+  
   if (_archiveMode) {
     
     // add legends with time, field name and elevation angle
@@ -915,10 +752,311 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
 }
 
+/*************************************************************************
+ * draw map overlays
+ */
+
+void HorizWidget::_drawMaps(QPainter &painter)
+
+{
+
+  painter.save();
+  
+  for(int ii = gd.num_map_overlays - 1; ii >= 0; ii--) {        /* For Each Overlay */
+    
+    if(gd.overlays[ii]->active &&
+       (gd.overlays[ii]->detail_thresh_min <= gd.h_win.km_across_screen) && 
+       (gd.overlays[ii]->detail_thresh_max >= gd.h_win.km_across_screen))  {
+      
+      MapOverlay_t *ov = gd.overlays[ii];
+
+      // create the pen for this map
+
+      QPen pen;
+      pen.setStyle(Qt::SolidLine);
+      pen.setWidth(ov->line_width);
+      pen.setColor(ov->color_name.c_str());
+      pen.setCapStyle(Qt::RoundCap);
+      pen.setJoinStyle(Qt::RoundJoin);
+      painter.setPen(pen);
+
+      QFont mfont(painter.font());
+      mfont.setPointSizeF(_params.maps_font_size);
+      painter.setFont(mfont);
+      
+      // Draw labels
+      
+      for(int jj = 0; jj < ov->num_labels; jj++) {
+        if(ov->geo_label[jj]->proj_x <= -32768.0) {
+          continue;
+        }
+        _zoomWorld.drawText(painter,
+                            ov->geo_label[jj]->display_string,
+                            ov->geo_label[jj]->proj_x,
+                            ov->geo_label[jj]->proj_y,
+                            Qt::AlignCenter);
+      } // jj
+
+      // draw icons
+      
+      for(int jj=0; jj < ov->num_icons; jj++) {
+
+        Geo_feat_icon_t *ic = ov->geo_icon[jj];
+        if(ic->proj_x <= -32768.0) {
+          continue;
+        }
+
+        int ixx = _zoomWorld.getIxPixel(ic->proj_x);
+        int iyy = _zoomWorld.getIyPixel(ic->proj_y);
+
+        for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {    /* draw the Icon */
+          if ((ic->icon->x[kk] == 32767) ||
+              (ic->icon->x[kk+1] == 32767)) {
+            continue;
+          }
+          double iconScale = 1.0;
+          int ix1 = ixx + (int) (ic->icon->x[kk] * iconScale + 0.5);
+          int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
+          int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
+          int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
+          _zoomWorld.drawPixelLine(painter, ix1, iy1, ix2, iy2);
+        } // kk
+
+        // add icon label
+        
+        painter.save();
+        if(_params.font_display_mode == 0) {
+          painter.setBackgroundMode(Qt::TransparentMode);
+        } else {
+          painter.setBackgroundMode(Qt::OpaqueMode);
+        }
+        double textX = _zoomWorld.getXWorld(ic->text_x + ixx);
+        double textY = _zoomWorld.getYWorld(ic->text_y + iyy);
+        _zoomWorld.drawText(painter, ic->label,
+                            textX, textY,
+                            Qt::AlignHCenter | Qt::AlignVCenter);
+        painter.restore();
+
+      } // jj
+
+      // draw polylines
+      
+      for(int jj = 0; jj < ov->num_polylines; jj++) {
+        
+        Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
+        int npoints = 0;
+        for(int ll = 0; ll < poly->num_points; ll++) {
+
+          // check line is on screen
+
+          if(poly->proj_x[ll] <= -16383.0 || poly->proj_x[ll] >= 16383.0 ||
+             poly->proj_y[ll] <= -16383.0 || poly->proj_y[ll] >= 16383.0) {
+            
+            for(int kk = 0; kk < npoints; kk++) {
+              
+              disp_proj_to_pixel(&(gd.h_win.margin),x[k],y[k],&x1,&y1);
+
+              // If the line is way too long 
+              if(x1 < -32767 || x1 > 32767 || y1  < -32767 || y1 > 32767) {
+                npoints = k;  // abort on this line
+              } else {
+                bpt[k].x = x1;
+                bpt[k].y = y1;
+              }
+
+            }
+            if(npoints > 0) XDrawLines(gd.dpy,xid,ov->color->gc,bpt,npoints,CoordModeOrigin);
+            npoints = 0;
+          } else {
+            x[npoints] = poly->proj_x[l];
+            y[npoints] = poly->proj_y[l];
+            if(npoints >= buf_size -1 ) {
+              if((bpt = (XPoint *) realloc(bpt,buf_size *2 * sizeof(XPoint))) == NULL) { 
+                perror("Realloc Error in render_map_overlays");
+                exit(-1);
+              }
+              if((x = (double *) realloc(x,buf_size *2 * sizeof(double))) == NULL) { 
+                perror("Realloc Error in render_map_overlays");
+                exit(-1);
+              }
+              if((y = (double *) realloc(y,buf_size *2 * sizeof(double))) == NULL) { 
+                perror("Realloc Error in render_map_overlays");
+                exit(-1);
+              }
+              buf_size *= 2;
+            }
+
+            npoints++;
+          }
+        }
+
+        /* Handle Poly lines without pen-up's */ 
+        if(npoints > 0) {
+          for(k=0; k < npoints; k++) {
+            disp_proj_to_pixel(&(gd.h_win.margin),x[k],y[k],&x1,&y1);
+            // If the line is way too long 
+            if(x1 < -32767 || x1 > 32767 || y1  < -32767 || y1 > 32767) {
+              npoints = k;  // abort on this line
+            } else {
+              bpt[k].x = x1;
+              bpt[k].y = y1;
+            }
+
+          }
+
+          XDrawLines(gd.dpy,xid,ov->color->gc,bpt,npoints,CoordModeOrigin);
+          npoints = 0;
+        }
+      }
+
+    }
+  }
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * _drawRingsAndAzLines()
+ *
+ * draw rings for polar type data fields
+ */
+
+void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
+{
+
+  // Don't try to draw rings if we haven't been configured yet or if the
+  // rings or grids aren't enabled.
+  
+  if (!_ringsEnabled && !_angleLinesEnabled) {
+    return;
+  }
+  
+  // save painter state
+
+  painter.save();
+
+  // Draw rings
+
+  if (_ringSpacing > 0.0 && _ringsEnabled) {
+
+    // Set up the painter
+    
+    painter.save();
+    painter.setTransform(_zoomTransform);
+    painter.setPen(_gridRingsColor);
+  
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
+    double ringRange = _ringSpacing;
+    while (ringRange <= _maxRangeKm) {
+      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
+      painter.drawEllipse(rect);
+      ringRange += _ringSpacing;
+    }
+    painter.restore();
+
+    // Draw the labels
+    
+    QFont font = painter.font();
+    font.setPointSizeF(_params.range_ring_label_font_size);
+    painter.setFont(font);
+    // painter.setWindow(0, 0, width(), height());
+    
+    ringRange = _ringSpacing;
+    while (ringRange <= _maxRangeKm) {
+      double labelPos = ringRange * SIN_45;
+      const string &labelStr = _scaledLabel.scale(ringRange);
+      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+      ringRange += _ringSpacing;
+    }
+
+  } /* endif - draw rings */
+
+  // a
+  // // Draw the grid
+  
+  // if (_ringSpacing > 0.0 && _gridsEnabled)  {
+
+  //   // Set up the painter
+    
+  //   painter.save();
+  //   painter.setTransform(_zoomTransform);
+  //   painter.setPen(_gridRingsColor);
+  
+  //   double ringRange = _ringSpacing;
+  //   double maxRingRange = ringRange;
+  //   while (ringRange <= _maxRangeKm) {
+
+  //     _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
+  //     _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
+  //     _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
+  //     _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
+      
+  //     maxRingRange = ringRange;
+  //     ringRange += _ringSpacing;
+  //   }
+  //   painter.restore();
+
+  //   _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
+  //   _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
+
+  //   if (_params.proj_type == Params::PROJ_LATLON) {
+  //     _zoomWorld.drawAxisLeft(painter, "deg", true, true, true, true);
+  //     _zoomWorld.drawAxisRight(painter, "deg", true, true, true, true);
+  //     _zoomWorld.drawAxisTop(painter, "deg", true, true, true, true);
+  //     _zoomWorld.drawAxisBottom(painter, "deg", true, true, true, true);
+  //   } else {
+  //     _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
+  //     _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
+  //     _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
+  //     _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
+  //   }
+    
+  // }
+  
+  // Draw the azimuth lines
+  
+  if (_angleLinesEnabled) {
+    
+    // Set up the painter
+    
+    painter.save();
+    painter.setPen(_gridRingsColor);
+  
+    // Draw the lines along the X and Y axes
+
+    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
+    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
+
+    // Draw the lines along the 30 degree lines
+
+    double end_pos1 = SIN_30 * _maxRangeKm;
+    double end_pos2 = COS_30 * _maxRangeKm;
+    
+    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
+    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
+    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
+    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+    
+    painter.restore();
+
+  }
+
+  painter.restore();
+
+}
+  
 void HorizWidget::showOpeningFileMsg(bool isVisible)
 {
-	_openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
-	_openingFileInfoLabel->setVisible(isVisible);
+  _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
+  _openingFileInfoLabel->setVisible(isVisible);
   update();
 }
 
