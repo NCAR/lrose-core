@@ -879,7 +879,8 @@ void HorizWidget::_drawMaps(QPainter &painter)
 
       } // ll
 
-      _zoomWorld.drawPath(painter, polyPath);
+      painter.drawPath(polyPath);
+      // _zoomWorld.drawPath(painter, polyPath);
 
     } // jj
       

@@ -156,9 +156,8 @@ SPOL_DBMVC_F  SPOL_DBMVC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F
 #------------------------------------------------------------------------------------------
 
 Countries      Countries      world_states.map             1  0.0 1000000.0  white
-Taiwan         Taiwan         taiwan_coast.map             1  0.0 1000000.0  white
-Islands        Islands        taiwan_islands.map           1  0.0 1000000.0  white
-Islands        Islands        taiwan_islands.map           0  0.0 1000000.0  white
+Taiwan         Taiwan         taiwan_coast.map             2  0.0 1000000.0  cyan
+Islands        Islands        taiwan_islands.map           1  0.0 1000000.0  red
 
 </MAPS>
 
