@@ -450,7 +450,7 @@ void HorizWidget::adjustPixelScales()
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  // cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
+  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
 
   _pointClicked = false;
 

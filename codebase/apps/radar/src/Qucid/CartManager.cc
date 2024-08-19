@@ -563,9 +563,9 @@ void CartManager::_setupWindows()
 
   // createBoundaryEditorDialog();
 
-  if (_archiveMode) {
-    _showTimeControl();
-  }
+  // if (_archiveMode) {
+  //   _showTimeControl();
+  // }
   // _setSweepPanelVisibility();
 
 }
@@ -2206,6 +2206,7 @@ void CartManager::_createFieldMenu()
   _fieldMenu->setWindowTitle("Select active field");
   QPoint pos(0,0);
   _fieldMenu->move(pos);
+  // _fieldMenu->show();
 
   // layout
   

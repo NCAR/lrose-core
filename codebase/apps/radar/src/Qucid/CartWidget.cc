@@ -391,6 +391,10 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 
   int moveX = (int) floor(dx + 0.5);
   int moveY = (int) floor(dy + 0.5);
+
+  moveX = deltaX;
+  moveY = deltaY;
+  
   QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
 
   _zoomCornerX = _mousePressX + moveX;
