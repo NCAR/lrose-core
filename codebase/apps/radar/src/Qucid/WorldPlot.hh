@@ -333,6 +333,12 @@ public:
 
   void drawPathClipped(QPainter &painter, QPainterPath &path);
 
+  // draw a general path clipped to within the margins
+  // points in screen coords
+  
+  void drawPathClippedScreenCoords(QPainter &painter,
+                                   QPainterPath &path);
+
   // Text
   //
   // Flags give the justification in Qt, and are or'd from the following:

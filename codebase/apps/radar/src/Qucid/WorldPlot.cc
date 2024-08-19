@@ -766,6 +766,21 @@ void WorldPlot::drawPathClipped(QPainter &painter, QPainterPath &path)
 
 }
 
+////////////////////////////////////////////////////
+// draw a general path clipped to within the margins
+// points in screen coords
+
+void WorldPlot::drawPathClippedScreenCoords(QPainter &painter,
+                                            QPainterPath &path)
+
+{
+
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+  painter.drawPath(path);
+  painter.setClipping(false);
+
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Text
 //
