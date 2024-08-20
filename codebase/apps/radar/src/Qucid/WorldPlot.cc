@@ -1131,7 +1131,7 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
   }
   qreal unitsY = (qreal) (_yMaxPixel + (unitsRect.height() / 2));
   QRectF bRect(unitsX, unitsY, 
-               unitsRect.width() + 2, unitsRect.height() + 2);
+               unitsRect.width() + 2, unitsRect.height() + 5);
   if (doLabels) {
     painter.setPen(textColor);
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
@@ -1183,7 +1183,7 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
     }
     qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
     QRectF bRect2(labelX, labelY,
-                  labelRect.width() + 2, labelRect.height() + 2);
+                  labelRect.width() + 2, labelRect.height() + 5);
     if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
         (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
       if (doLabels) {
@@ -1235,7 +1235,7 @@ void WorldPlot::drawAxisRight(QPainter &painter,
   qreal unitsX = (qreal) (_xMaxPixel + _axisTextMargin);
   qreal unitsY = (qreal) (_yMaxPixel + (unitsRect.height() / 2));
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, unitsRect.height() + 2);
+               unitsRect.width() + 2, unitsRect.height() + 5);
   if (doLabels) {
     painter.setPen(textColor);
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
@@ -1283,7 +1283,7 @@ void WorldPlot::drawAxisRight(QPainter &painter,
     qreal labelX = (qreal) (_xMaxPixel +_axisTextMargin);
     qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
     QRectF bRect2(labelX, labelY,
-                  labelRect.width() + 2, labelRect.height() + 2);
+                  labelRect.width() + 2, labelRect.height() + 5);
 
     if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
         (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
@@ -1340,7 +1340,7 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
     unitsY = (qreal) (_yMinPixel - capRect.height() - 2);
   }
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, capRect.height() + 2);
+               unitsRect.width() + 2, capRect.height() + 5);
   if (doLabels) {
     painter.setPen(textColor);
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
@@ -1392,7 +1392,7 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
       qreal labelX = (qreal) (xpix - labelRect.width() / 2.0);
       qreal labelY = unitsY;
       QRectF bRect2(labelX, labelY,
-                    labelRect.width() + 2, labelRect.height() + 2);
+                    labelRect.width() + 2, labelRect.height() + 5);
       if (doLabels) {
         painter.setPen(textColor);
         painter.drawText(bRect2, Qt::AlignCenter, label.c_str());
@@ -1442,7 +1442,7 @@ void WorldPlot::drawAxisTop(QPainter &painter,
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width() / 2);
   qreal unitsY = (qreal) (_yMaxPixel - (unitsRect.height() + _axisTextMargin) - 2);
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, unitsRect.height() + 2);
+               unitsRect.width() + 2, unitsRect.height() + 5);
   if (doLabels) {
     painter.setPen(textColor);
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
@@ -1492,7 +1492,7 @@ void WorldPlot::drawAxisTop(QPainter &painter,
       qreal labelX = (qreal) (xpix - labelRect.width() / 2.0);
       qreal labelY = unitsY - 2;
       QRectF bRect2(labelX, labelY,
-                    labelRect.width() + 2, labelRect.height() + 2);
+                    labelRect.width() + 2, labelRect.height() + 5);
       if (doLabels) {
         painter.setPen(textColor);
         painter.drawText(bRect2, Qt::AlignCenter, label.c_str());
@@ -1640,12 +1640,12 @@ void WorldPlot::drawRangeAxes(QPainter &painter,
     (qreal) (_xMinPixel - unitsRect.width() - _axisTextMargin);
   qreal unitsY = (qreal) (_yMaxPixel + (unitsRect.height() / 2));
   QRectF bRectLeft(unitsXLeft, unitsY, 
-                   unitsRect.width() + 2, unitsRect.height() + 2);
+                   unitsRect.width() + 2, unitsRect.height() + 5);
   painter.drawText(bRectLeft, Qt::AlignCenter, units.c_str());
 
   qreal unitsXRight = (qreal) (_xMaxPixel + _axisTextMargin);
   QRectF bRectRight(unitsXRight, unitsY,
-                    unitsRect.width() + 2, unitsRect.height() + 2);
+                    unitsRect.width() + 2, unitsRect.height() + 5);
   painter.drawText(bRectRight, Qt::AlignCenter, units.c_str());
 
   // tick marks
@@ -1704,9 +1704,9 @@ void WorldPlot::drawRangeAxes(QPainter &painter,
     qreal labelXRight = (qreal) (_xMaxPixel + _axisTextMargin);
     qreal labelY = (qreal) (pix - (labelRect.height() / 2));
     QRectF bRect2Left(labelXLeft, labelY,
-                      labelRect.width() + 2, labelRect.height() + 2);
+                      labelRect.width() + 2, labelRect.height() + 5);
     QRectF bRect2Right(labelXRight, labelY,
-                       labelRect.width() + 2, labelRect.height() + 2);
+                       labelRect.width() + 2, labelRect.height() + 5);
     if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
         (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
       painter.drawText(bRect2Left, Qt::AlignCenter, label.c_str());
@@ -1803,7 +1803,7 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
     unitsY += (int) (labelHt * 3.0 / 2.0 + 0.5);
   }
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, unitsRect.height() + 2);
+               unitsRect.width() + 2, unitsRect.height() + 5);
   painter.drawText(bRect, Qt::AlignCenter, units.c_str());
 
   // tick marks
@@ -1834,7 +1834,7 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
       qreal labelX = (qreal) (pix - labelRect.width() / 2.0);
       qreal labelY = unitsY;
       QRectF bRect2(labelX, labelY,
-                    labelRect.width() + 2, labelRect.height() + 2);
+                    labelRect.width() + 2, labelRect.height() + 5);
       painter.drawText(bRect2, Qt::AlignCenter, timeLabel);
     }
 
@@ -1871,14 +1871,14 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
   qreal startX = _xMinPixel;
   qreal startY = _yMaxPixel - startRect.height() * 2;
   QRectF startRect2(startX, startY, startRect.width() + 2, 
-                    startRect.height() + 2);
+                    startRect.height() + 5);
   painter.drawText(startRect2, Qt::AlignCenter, startTimeLabel.c_str());
   
   QRect 
     endRect(painter.fontMetrics().tightBoundingRect(endTimeLabel.c_str()));
   qreal endX = _xMaxPixel - endRect.width();
   qreal endY = startY;
-  QRectF endRect2(endX, endY, endRect.width() + 2, endRect.height() + 2);
+  QRectF endRect2(endX, endY, endRect.width() + 2, endRect.height() + 5);
   painter.drawText(endRect2, Qt::AlignCenter, endTimeLabel.c_str());
 
   // restore painter to original state
@@ -1945,7 +1945,7 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
         (qreal) (_yMinPixel + labelRect.height());
 
       QRectF bRect2(labelX, labelY,
-                    labelRect.width() + 2, labelRect.height() + 2);
+                    labelRect.width() + 2, labelRect.height() + 5);
       painter.drawText(bRect2, Qt::AlignCenter, distLabel);
 
       // ticks above bottom axis

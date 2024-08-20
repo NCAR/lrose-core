@@ -838,9 +838,9 @@ void HorizWidget::_drawMaps(QPainter &painter)
         painter.setBackgroundMode(Qt::OpaqueMode);
       }
       _zoomWorld.drawTextScreenCoords(painter, ic->label,
-                                      ic->text_x + ixx,
-                                      ic->text_y + iyy,
-                                      Qt::AlignHCenter | Qt::AlignVCenter);
+                                      ixx + ic->text_x,
+                                      iyy - ic->text_y,
+                                      Qt::AlignLeft | Qt::AlignTop);
       painter.restore();
       
     } // jj

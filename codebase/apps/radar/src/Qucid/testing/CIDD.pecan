@@ -2171,8 +2171,8 @@ cidd.horiz_default_x_pos:     0
 cidd.horiz_default_y_pos:     0
 
 cidd.horiz_top_margin:        30
-cidd.horiz_bot_margin:        20
-cidd.horiz_left_margin:       20
+cidd.horiz_bot_margin:        36
+cidd.horiz_left_margin:       30
 cidd.horiz_right_margin:      20
 
 cidd.vert_min_height:        120
