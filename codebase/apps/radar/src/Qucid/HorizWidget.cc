@@ -39,6 +39,7 @@
 #include <QErrorMessage>
 #include <QRect>
 #include <QPainterPath>
+#include <algorithm>
 
 #include "cidd.h"
 
@@ -815,7 +816,9 @@ void HorizWidget::_drawMaps(QPainter &painter)
       int iyy = _zoomWorld.getIyPixel(ic->proj_y);
 
       // draw the icon
-      
+
+      int minIy = 1.0e6;
+      int maxIy = -1.0e6;
       for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {
         if ((ic->icon->x[kk] == 32767) ||
             (ic->icon->x[kk+1] == 32767)) {
@@ -826,6 +829,10 @@ void HorizWidget::_drawMaps(QPainter &painter)
         int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
         int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
         int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
+        minIy = std::min(minIy, iy1);
+        minIy = std::min(minIy, iy2);
+        maxIy = std::max(maxIy, iy1);
+        maxIy = std::max(maxIy, iy2);
         _zoomWorld.drawPixelLine(painter, ix1, iy1, ix2, iy2);
       } // kk
       
@@ -837,10 +844,25 @@ void HorizWidget::_drawMaps(QPainter &painter)
       } else {
         painter.setBackgroundMode(Qt::OpaqueMode);
       }
-      _zoomWorld.drawTextScreenCoords(painter, ic->label,
-                                      ixx + ic->text_x,
-                                      iyy - ic->text_y,
-                                      Qt::AlignLeft | Qt::AlignTop);
+      // int alignment = Qt::AlignHCenter | Qt::AlignBottom;
+      // if (ic->text_y < 0) {
+      //   alignment = Qt::AlignHCenter | Qt::AlignTop;
+      // }
+      // alignment = Qt::AlignCenter;
+      if (ic->text_y < 0) {
+        _zoomWorld.drawTextScreenCoords(painter, ic->label,
+                                        ixx + ic->text_x,
+                                        maxIy - ic->text_y,
+                                        Qt::AlignCenter);
+      } else {
+        _zoomWorld.drawTextScreenCoords(painter, ic->label,
+                                        ixx + ic->text_x,
+                                        minIy - ic->text_y,
+                                        Qt::AlignCenter);
+      }
+      // cerr << "IIIIIIII text_x, text_y, label: "
+      //      << ic->text_x << ", " << ic->text_y
+      //      << ", " << ic->label << endl;
       painter.restore();
       
     } // jj

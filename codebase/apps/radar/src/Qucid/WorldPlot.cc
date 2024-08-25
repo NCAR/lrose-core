@@ -866,12 +866,20 @@ void WorldPlot::drawTextScreenCoords(QPainter &painter, const string &text,
 {
 
   QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
-  QRect bRect(painter.fontMetrics().boundingRect(text_ix, text_iy,
+  QRect bRect(painter.fontMetrics().boundingRect(text_ix,
+                                                 text_iy,
                                                  tRect.width() + 2,
                                                  tRect.height() + 2,
                                                  flags, text.c_str()));
+  // QRect bRect(painter.fontMetrics().boundingRect(text_ix - tRect.width() / 2,
+  //                                                text_iy - tRect.height() / 2,
+  //                                                tRect.width() + 2,
+  //                                                tRect.height() + 2,
+  //                                                flags, text.c_str()));
     
   painter.drawText(bRect, flags, text.c_str());
+
+  // cerr << "DDDDDDDDDDD x, y, w, h, text: " << bRect.x() << ", " << bRect.y() << ", " << bRect.width() << ", " << bRect.height() << ", " << text << endl;
     
 }
 
