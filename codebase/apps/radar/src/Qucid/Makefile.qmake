@@ -993,6 +993,13 @@ moc_CartManager.cpp: CartManager.hh \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		VlevelManager.hh \
+		Params.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
@@ -1568,12 +1575,13 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		FieldTableItem.hh \
+		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		FieldTableItem.hh \
 		HorizWidget.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
@@ -1769,6 +1777,13 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		VlevelManager.hh \
+		Params.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -1805,11 +1820,6 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
-		Params.hh \
-		$(HOME)/lrose/include/tdrp/tdrp.h \
-		$(HOME)/lrose/include/tdrp/tdrp_p.h \
-		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
-		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
 		cidd_structs.h \
@@ -2146,6 +2156,13 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		VlevelManager.hh \
+		Params.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/LogStream.hh \
 		$(HOME)/lrose/include/toolsa/copyright.h \
@@ -2187,11 +2204,6 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
-		Params.hh \
-		$(HOME)/lrose/include/tdrp/tdrp.h \
-		$(HOME)/lrose/include/tdrp/tdrp_p.h \
-		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
-		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
 		cidd_structs.h \
@@ -2861,6 +2873,8 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		VlevelManager.hh \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		LegacyParams.hh \
 		Cgui_P.hh \
 		cidd_params.h \
@@ -3383,6 +3397,8 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		VlevelManager.hh \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -3840,12 +3856,14 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		VertWindow.hh \
+		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		VertWindow.hh \
 		VertWidget.hh \
 		CartWidget.hh \
 		ScaledLabel.hh \

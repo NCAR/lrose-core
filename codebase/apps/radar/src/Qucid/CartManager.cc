@@ -120,7 +120,7 @@ CartManager* CartManager::Instance()
 
 CartManager::CartManager() :
         DisplayManager(),
-        // _sweepManager(params),
+        _vlevelManager(),
         _vertWindowDisplayed(false)
 {
 
@@ -146,8 +146,8 @@ CartManager::CartManager() :
   _vertWindow = NULL;
   _vert = NULL;
 
-  // _sweepVBoxLayout = NULL;
-  // _sweepPanel = NULL;
+  _vlevelVBoxLayout = NULL;
+  _vlevelPanel = NULL;
 
   _fieldMenu = NULL;
   _fieldTable = NULL;
@@ -396,15 +396,15 @@ void CartManager::keyPressEvent(QKeyEvent * e)
   }
 #endif
 
-  // check for up/down in sweeps
-
+  // check for up/down in vlevels
+  
   if (key == Qt::Key_Left) {
-
+    
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    // _horiz->setStartOfSweep(true);
-    // _vert->setStartOfSweep(true);
+    // _horiz->setStartOfVlevel(true);
+    // _vert->setStartOfVlevel(true);
     _timeControl->_goBack1();
     
   } else if (key == Qt::Key_Right) {
@@ -412,35 +412,31 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    // _horiz->setStartOfSweep(true);
-    // _vert->setStartOfSweep(true);
+    // _horiz->setStartOfVlevel(true);
+    // _vert->setStartOfVlevel(true);
     _timeControl->_goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
-    // if (_sweepManager.getGuiIndex() > 0) {
+    if (_vlevelManager.getGuiIndex() > 0) {
 
-    //   if (_params.debug) {
-    //     cerr << "Clicked up arrow, go up a sweep" << endl;
-    //   }
-    //   _horiz->setStartOfSweep(true);
-    //   _vert->setStartOfSweep(true);
-    //   _changeSweepRadioButton(-1);
+      if (_params.debug) {
+        cerr << "Clicked up arrow, go up a vlevel" << endl;
+      }
+      _changeVlevelRadioButton(-1);
 
-    // }
+    }
 
   } else if (key == Qt::Key_Down) {
 
-    // if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
-
-    //   if (_params.debug) {
-    //     cerr << "Clicked down arrow, go down a sweep" << endl;
-    //   }
-    //   _horiz->setStartOfSweep(true);
-    //   _vert->setStartOfSweep(true);
-    //   _changeSweepRadioButton(+1);
-
-    // }
+    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNVlevels() - 1) {
+      
+      if (_params.debug) {
+        cerr << "Clicked down arrow, go down a vlevel" << endl;
+      }
+      _changeVlevelRadioButton(+1);
+      
+    }
 
   }
 
@@ -525,10 +521,10 @@ void CartManager::_setupWindows()
   // mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_horizFrame);
 
-  // sweep panel
+  // vlevel panel
 
-  // _createSweepPanel();
-  // mainLayout->addWidget(_sweepPanel);
+  _createVlevelPanel();
+  mainLayout->addWidget(_vlevelPanel);
 
   // field menu
 
@@ -566,23 +562,19 @@ void CartManager::_setupWindows()
   // if (_archiveMode) {
   //   _showTimeControl();
   // }
-  // _setSweepPanelVisibility();
+  _setVlevelPanelVisibility();
 
 }
 
 //////////////////////////////////////////////////
-// add/remove  sweep panel (archive mode only)
+// add/remove  vlevel panel (archive mode only)
 
-// void CartManager::_setSweepPanelVisibility()
-// {
-//   if (_sweepPanel != NULL) {
-//     if (_archiveMode) {
-//       _sweepPanel->setVisible(true);
-//     } else {
-//       _sweepPanel->setVisible(false);
-//     }
-//   }
-// }
+void CartManager::_setVlevelPanelVisibility()
+{
+  if (_vlevelPanel != NULL) {
+    _vlevelPanel->setVisible(true);
+  }
+}
 
 //////////////////////////////
 // create actions for menus
@@ -1029,140 +1021,140 @@ void CartManager::_populateOverlaysMenu()
 }
 
 /////////////////////////////////////////////////////////////
-// create the sweep panel
-// buttons will be filled in by createSweepRadioButtons()
+// create the vlevel panel
+// buttons will be filled in by createVlevelRadioButtons()
 
-// void CartManager::_createSweepPanel()
-// {
+void CartManager::_createVlevelPanel()
+{
   
-//   _sweepPanel = new QGroupBox("Sweeps", _main);
-//   _sweepVBoxLayout = new QVBoxLayout;
-//   _sweepPanel->setLayout(_sweepVBoxLayout);
-//   _sweepPanel->setAlignment(Qt::AlignHCenter);
-
-//   _sweepRButtons = new vector<QRadioButton *>();
-
-
-// }
+  _vlevelPanel = new QGroupBox("Vlevels", _main);
+  _vlevelVBoxLayout = new QVBoxLayout;
+  _vlevelPanel->setLayout(_vlevelVBoxLayout);
+  _vlevelPanel->setAlignment(Qt::AlignHCenter);
+  
+  _vlevelRButtons = new vector<QRadioButton *>();
+  
+  
+}
 
 /////////////////////////////////////////////////////////////////////
 // create radio buttons
-// this requires that _sweepManager is up to date with sweep info
+// this requires that _vlevelManager is up to date with vlevel info
 
-// void CartManager::_createSweepRadioButtons() 
-// {
-
-//   // fonts
+void CartManager::_createVlevelRadioButtons() 
+{
   
-//   QLabel dummy;
-//   QFont font = dummy.font();
-//   QFont fontm2 = dummy.font();
-//   int fsize = _params.label_font_size;
-//   int fsizem2 = _params.label_font_size - 2;
-//   font.setPixelSize(fsize);
-//   fontm2.setPixelSize(fsizem2);
-
-// radar and site name
+  // fonts
   
-// char buf[256];
-// _sweepRButtons = new vector<QRadioButton *>();
-
-// for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
-
-//   std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
-//   QRadioButton *radio1 = new QRadioButton(buf); 
-//   radio1->setFont(fontm2);
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont fontm2 = dummy.font();
+  int fsize = _params.label_font_size;
+  int fsizem2 = _params.label_font_size - 2;
+  font.setPixelSize(fsize);
+  fontm2.setPixelSize(fsizem2);
+  
+  // radar and site name
+  
+  char buf[256];
+  _vlevelRButtons = new vector<QRadioButton *>();
+  
+  for (int ielev = 0; ielev < (int) _vlevelManager.getNVlevels(); ielev++) {
     
-//   if (ielev == _sweepManager.getGuiIndex()) {
-//     radio1->setChecked(true);
-//   }
+    std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
+    QRadioButton *radio1 = new QRadioButton(buf); 
+    radio1->setFont(fontm2); 
     
-//   _sweepRButtons->push_back(radio1);
-//   _sweepVBoxLayout->addWidget(radio1);
+    if (ielev == _vlevelManager.getGuiIndex()) {
+      radio1->setChecked(true);
+    }
     
-//   // connect slot for sweep change
+    _vlevelRButtons->push_back(radio1);
+    _vlevelVBoxLayout->addWidget(radio1);
+    
+    // connect slot for vlevel change
+                              
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeVlevel(bool)));
+    
+  }
+  
+}
 
-//   connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
+///////////////////////////////////////////////////////////////////
+// create vlevel panel of radio buttons
 
-// }
+void CartManager::_clearVlevelRadioButtons() 
+{
+  
+  QLayoutItem* child;
+  if (_vlevelVBoxLayout != NULL) {
+    while (_vlevelVBoxLayout->count() !=0) {
+      child = _vlevelVBoxLayout->takeAt(0);
+      if (child->widget() !=0) {
+        delete child->widget();
+      }
+      delete child;
+    }
+  }
+  
+}
 
-// // }
+/////////////////////////////////////////////////////////////
+// change vlevel
 
-// /////////////////////////////////////////////////////////////////////
-// // create sweep panel of radio buttons
-
-// void CartManager::_clearSweepRadioButtons() 
-// {
-
-//   QLayoutItem* child;
-//   if (_sweepVBoxLayout != NULL) {
-//     while (_sweepVBoxLayout->count() !=0) {
-//       child = _sweepVBoxLayout->takeAt(0);
-//       if (child->widget() !=0) {
-//         delete child->widget();
-//       }
-//       delete child;
-//     }
-//   }
- 
-// }
+void CartManager::_changeVlevel(bool value) {
+  
+  if (_params.debug) {
+    cerr << "From CartManager: the vlevel was changed ";
+    cerr << endl;
+  }
+  
+  if (!value) {
+    return;
+  }
+  
+  for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
+       vlevelIndex++) {
+    if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
+      if (_params.debug) {
+        cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
+        cerr << "  moving to vlevel index " << vlevelIndex << endl;
+      }
+      _vlevelManager.setGuiIndex(vlevelIndex);
+      // _horiz->setStartOfVlevel(true);
+      // _vert->setStartOfVlevel(true);
+      _moveUpDown();
+      
+      // reloadBoundaries();
+      return;
+    }
+  }  // ii
+  
+}
 
 ///////////////////////////////////////////////////////////////
-// change sweep
-
-// void CartManager::_changeSweep(bool value) {
-
-//   if (_params.debug) {
-//     cerr << "From CartManager: the sweep was changed ";
-//     cerr << endl;
-//   }
-
-//   if (!value) {
-//     return;
-//   }
-
-//   for (size_t sweepIndex = 0; sweepIndex < _sweepRButtons->size();
-//        sweepIndex++) {
-//     if (_sweepRButtons->at(sweepIndex)->isChecked()) {
-//       if (_params.debug) {
-//         cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
-//         cerr << "  moving to sweep index " << sweepIndex << endl;
-//       }
-//       // _sweepManager.setGuiIndex(sweepIndex);
-//       _horiz->setStartOfSweep(true);
-//       _vert->setStartOfSweep(true);
-//       _moveUpDown();
-
-//       // reloadBoundaries();
-//       return;
-//     }
-//   } // ii
-
-// }
-
-///////////////////////////////////////////////////////////////
-// change sweep
-// only set the sweepIndex in one place;
+// change vlevel
+// only set the vlevelIndex in one place;
 // here, just move the radio button up or down one step
 // when the radio button is changed, a signal is emitted and
-// the slot that receives the signal will increase the sweepIndex
+// the slot that receives the signal will increase the vlevelIndex
 // value = +1 move forward
-// value = -1 move backward in sweeps
+// value = -1 move backward in vlevels
 
-// void CartManager::_changeSweepRadioButton(int increment)
+void CartManager::_changeVlevelRadioButton(int increment)
 
-// {
+{
   
-//   if (_params.debug) {
-//     cerr << "-->> changing sweep index by increment: " << increment << endl;
-//   }
+  if (_params.debug) {
+    cerr << "-->> changing vlevel index by increment: " << increment << endl;
+  }
   
-//   if (increment != 0) {
-//     // _sweepManager.changeSelectedIndex(increment);
-//     // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
-//   }
-
-// }
+  if (increment != 0) {
+    _vlevelManager.changeSelectedIndex(increment);
+    _vlevelRButtons->at(_vlevelManager.getGuiIndex())->setChecked(true);
+  }
+  
+}
 
 /////////////////////////////
 // get data in realtime mode

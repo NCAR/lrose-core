@@ -48,6 +48,7 @@
 // #include "Args.hh"
 // #include "Params.hh"
 #include "DisplayManager.hh"
+#include "VlevelManager.hh"
 
 // #include "RayLoc.hh"
 // #include "ContextEditingView.hh"
@@ -181,12 +182,12 @@ private:
   // // RadxTime _readerRayTime;
   // // RadxVol _vol;
 
-  // // sweeps
+  // vlevels
 
-  // // SweepManager _sweepManager;
-  // QVBoxLayout *_sweepVBoxLayout;
-  // QGroupBox *_sweepPanel;
-  // vector<QRadioButton *> *_sweepRButtons;
+  VlevelManager _vlevelManager;
+  QVBoxLayout *_vlevelVBoxLayout;
+  QGroupBox *_vlevelPanel;
+  vector<QRadioButton *> *_vlevelRButtons;
 
   // horizontal view windows
 
@@ -368,7 +369,7 @@ private:
 
   // archive mode
 
-  // void _setSweepPanelVisibility();
+  void _setVlevelPanelVisibility();
 
   // field menu
 
@@ -410,13 +411,13 @@ private slots:
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
 
-  // sweeps
+  // vlevels
 
-  // void _createSweepPanel();
-  // void _createSweepRadioButtons();
-  // void _clearSweepRadioButtons();
-  // void _changeSweep(bool value);
-  // void _changeSweepRadioButton(int value);
+  void _createVlevelPanel();
+  void _createVlevelRadioButtons();
+  void _clearVlevelRadioButtons();
+  void _changeVlevel(bool value);
+  void _changeVlevelRadioButton(int value);
 
   // local
 

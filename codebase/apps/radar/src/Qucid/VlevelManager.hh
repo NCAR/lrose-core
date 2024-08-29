@@ -55,10 +55,12 @@ public:
   class GuiVlevel {
   public:
     RadxSweep *radx;
+    double level;
     int indexInFile;
     int indexInGui;
     GuiVlevel() {
       radx = NULL;
+      level = 0.0;
       indexInFile = 0;
       indexInGui = 0;
     }
@@ -75,6 +77,10 @@ public:
   // set from volume
 
   void set(const RadxVol &vol);
+  
+  // set from Mdvx data
+
+  void setFromMdvx();
   
   // set the level
   // size effect: sets the selected index
@@ -95,12 +101,19 @@ public:
 
   // get methods
 
-  size_t getNVlevels() const { return _levels.size(); }
-  const vector<GuiVlevel> &getGuiLevels() const { return _levels; }
-  const GuiVlevel getSelectedVlevel() const { return _levels[_guiIndex]; }
+  size_t getNVlevels() const { return _vlevels.size(); }
+  const vector<GuiVlevel> &getGuiLevels() const { return _vlevels; }
+  const GuiVlevel getSelectedVlevel() const { return _vlevels[_guiIndex]; }
+  double getLevel(int index) const {
+    if (index >= (int) _vlevels.size()) {
+      return _vlevels[_vlevels.size()-1].level;
+    } else {
+      return _vlevels[index].level;
+    }
+  }
 
   int getGuiIndex() const { return _guiIndex; }
-  int getFileIndex() const { return _levels[_guiIndex].indexInFile; }
+  int getFileIndex() const { return _vlevels[_guiIndex].indexInFile; }
   int getSelectedLevel() const { return _selectedLevel; }
   bool getReversedInGui() const { return _reversedInGui; }
   
@@ -110,7 +123,7 @@ public:
   
   // vlevels
 
-  vector<GuiVlevel> _levels;
+  vector<GuiVlevel> _vlevels;
   bool _reversedInGui;
 
   // selection
