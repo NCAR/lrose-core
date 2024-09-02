@@ -124,6 +124,9 @@ CartManager::CartManager() :
         _vertWindowDisplayed(false)
 {
 
+  _timerEventCount = 0;
+  _guiSizeInitialized = false;
+
   m_pInstance = this;
 
   // initialize
@@ -3089,8 +3092,8 @@ void CartManager::_handleFirstTimerEvent()
   cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
   cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
 
-  QSize sz = size();
-  resize(sz.width()+1, sz.height()+1);
+  // QSize sz = size();
+  // resize(sz.width()+1, sz.height()+1);
   
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   _horiz->adjustPixelScales();
@@ -3736,8 +3739,11 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
         _vlevelManager.setFromMdvx();
         _createVlevelRadioButtons();
         _horiz->update();
-        resize(width() + 1, height() + 1);
-        resize(width() - 1, height() - 1);
+        if (!_guiSizeInitialized) {
+          resize(width() + 1, height() + 1);
+          resize(width() + 1, height() + 1);
+          _guiSizeInitialized = true;
+        }
       }
     }
   }

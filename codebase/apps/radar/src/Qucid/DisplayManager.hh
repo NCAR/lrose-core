@@ -139,7 +139,6 @@ protected:
   
   // beam reading timer
 
-  static int _timerEventCount;
   int _mainTimerId;
   bool _frozen;
 

@@ -81,7 +81,6 @@
 #include "cidd.h"
   
 using namespace std;
-int DisplayManager::_timerEventCount = 0;
 
 // Constructor
 

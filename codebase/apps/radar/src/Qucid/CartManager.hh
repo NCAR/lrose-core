@@ -159,10 +159,15 @@ signals:
 
 private:
 
+  int _timerEventCount;
+  bool _guiSizeInitialized;
+
   static CartManager* m_pInstance;
   // // string _openFilePath;
+
   string _boundaryDir;
   void setBoundaryDir();
+
   // string getBoundaryFilePath(string boundaryFileName);
 
   // // bool _firstTime;
