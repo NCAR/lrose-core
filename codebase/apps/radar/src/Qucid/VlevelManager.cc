@@ -77,16 +77,43 @@ void VlevelManager::setFromMdvx()
     return;
   }
   met_record_t *mrec = gd.mrec[gd.h_win.page];
-  if (mrec->h_fhdr.nz > MDV64_MAX_VLEVELS) {
+  if (mrec->ds_fhdr.nz > MDV64_MAX_VLEVELS) {
     return;
   }
-  for (int iz = 0; iz < mrec->h_fhdr.nz; iz++) {
+  //  for (int iz = 0; iz < mrec->ds_fhdr.nz; iz++) {
+  for (int iz = mrec->ds_fhdr.nz - 1; iz >= 0; iz--) {
     GuiVlevel glevel;
     glevel.indexInFile = iz;
     glevel.indexInGui = iz;
-    glevel.level = mrec->h_vhdr.level[iz];
+    glevel.level = mrec->ds_vhdr.level[iz];
     _vlevels.push_back(glevel);
   }
+
+  switch(mrec->ds_fhdr.vlevel_type) {
+    case Mdvx::VERT_TYPE_Z:
+    case Mdvx::VERT_TYPE_SIGMA_Z:
+      _units = "km";
+      break;
+    case Mdvx::VERT_TYPE_PRESSURE:
+    case Mdvx::VERT_TYPE_SIGMA_P:
+      _units = "hPa";
+      break;
+    case Mdvx::VERT_TYPE_THETA:
+      _units = "K";
+      break;
+    case Mdvx::VERT_TYPE_ELEV:
+    case Mdvx::VERT_VARIABLE_ELEV:
+    case Mdvx::VERT_TYPE_AZ:
+      _units = "deg";
+      break;
+    case Mdvx::VERT_FLIGHT_LEVEL:
+      _units = "FL";
+      break;
+    default:
+      _units.clear();
+  }
+
+  cerr << "QQQQQQQQQQQQQQQQ _vlevel.size(), units: " << _vlevels.size() << ", " << _units << endl;
   
 }
   
@@ -133,7 +160,7 @@ void VlevelManager::set(const RadxVol &vol)
       jj = sweepsInVol.size() - 1 - ii;
     }
     GuiVlevel glevel;
-    glevel.radx = sweepsInVol[jj];
+    glevel.level = sweepsInVol[jj]->getFixedAngleDeg();
     glevel.indexInFile = jj;
     glevel.indexInGui = ii;
     _vlevels.push_back(glevel);
@@ -149,7 +176,8 @@ void VlevelManager::set(const RadxVol &vol)
 
   // set selected angle
 
-  _selectedLevel = _vlevels[_guiIndex].radx->getFixedAngleDeg();
+  _selectedLevel = _vlevels[_guiIndex].level;
+  _units = "deg";
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     if (_reversedInGui) {
@@ -176,7 +204,7 @@ void VlevelManager::setLevel(double level)
 
   double minDiff = 1.0e99;
   for (size_t ii = 0; ii < _vlevels.size(); ii++) {
-    double level = _vlevels[ii].radx->getFixedAngleDeg();
+    double level = _vlevels[ii].level;
     double diff = fabs(level - _selectedLevel);
     if (diff < minDiff) {
       _guiIndex = ii;
@@ -184,7 +212,7 @@ void VlevelManager::setLevel(double level)
     }
   } // ii
 
-  _selectedLevel = _vlevels[_guiIndex].radx->getFixedAngleDeg();
+  _selectedLevel = _vlevels[_guiIndex].level;
 
 }
 
@@ -200,7 +228,7 @@ void VlevelManager::setGuiIndex(int index)
   } else if (_guiIndex > (int) _vlevels.size() - 1) {
     _guiIndex = _vlevels.size() - 1;
   }
-  _selectedLevel = _vlevels[_guiIndex].radx->getFixedAngleDeg();
+  _selectedLevel = _vlevels[_guiIndex].level;
 
 }
 
@@ -232,7 +260,7 @@ void VlevelManager::changeSelectedIndex(int increment)
   } else if (_guiIndex > (int) _vlevels.size() - 1) {
     _guiIndex = _vlevels.size() - 1;
   }
-  _selectedLevel = _vlevels[_guiIndex].radx->getFixedAngleDeg();
+  _selectedLevel = _vlevels[_guiIndex].level;
 
 }
 
@@ -247,15 +275,15 @@ double VlevelManager::getLevel(ssize_t vlevelIndex /* = -1*/) const
     if (_guiIndex < 0) {
       return 0.0;
     } else {
-      return _vlevels[_guiIndex].radx->getFixedAngleDeg();
+      return _vlevels[_guiIndex].level;
     }
   } 
 
   if (vlevelIndex < (ssize_t) _vlevels.size()) {
-    return _vlevels[vlevelIndex].radx->getFixedAngleDeg();
+    return _vlevels[vlevelIndex].level;
   }
 
-  return _vlevels[_vlevels.size()-1].radx->getFixedAngleDeg();
+  return _vlevels[_vlevels.size()-1].level;
 
 }
 

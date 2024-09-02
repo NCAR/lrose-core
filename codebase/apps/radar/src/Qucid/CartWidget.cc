@@ -432,7 +432,7 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 void CartWidget::paintEvent(QPaintEvent *event)
 {
 
-  // cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
+  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
 
   if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
     // cerr << "ZZZZZZZZZZZZZZZZZZZ new zoom level: " << gd.h_win.zoom_level << endl;

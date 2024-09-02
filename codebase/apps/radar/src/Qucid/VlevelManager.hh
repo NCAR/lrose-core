@@ -54,12 +54,10 @@ public:
 
   class GuiVlevel {
   public:
-    RadxSweep *radx;
     double level;
     int indexInFile;
     int indexInGui;
     GuiVlevel() {
-      radx = NULL;
       level = 0.0;
       indexInFile = 0;
       indexInGui = 0;
@@ -118,6 +116,7 @@ public:
   bool getReversedInGui() const { return _reversedInGui; }
   
   double getLevel(ssize_t vlevelIndex = -1) const;
+  const string &getUnits() const { return _units; }
 
   private:
   
@@ -125,6 +124,7 @@ public:
 
   vector<GuiVlevel> _vlevels;
   bool _reversedInGui;
+  string _units;
 
   // selection
 

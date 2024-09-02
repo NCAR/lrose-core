@@ -1027,7 +1027,7 @@ void CartManager::_populateOverlaysMenu()
 void CartManager::_createVlevelPanel()
 {
   
-  _vlevelPanel = new QGroupBox("Vlevels", _main);
+  _vlevelPanel = new QGroupBox("Z", _main);
   _vlevelVBoxLayout = new QVBoxLayout;
   _vlevelPanel->setLayout(_vlevelVBoxLayout);
   _vlevelPanel->setAlignment(Qt::AlignHCenter);
@@ -1043,6 +1043,10 @@ void CartManager::_createVlevelPanel()
 
 void CartManager::_createVlevelRadioButtons() 
 {
+
+  // clear previous
+  
+  _clearVlevelRadioButtons();
   
   // fonts
   
@@ -1077,7 +1081,15 @@ void CartManager::_createVlevelRadioButtons()
     connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeVlevel(bool)));
     
   }
-  
+
+  QString title("Z");
+  if (_vlevelManager.getUnits().size() > 0) {
+    title += "(";
+    title += _vlevelManager.getUnits();
+    title += ")";
+  }
+  _vlevelPanel->setTitle(title);
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1116,11 +1128,12 @@ void CartManager::_changeVlevel(bool value) {
   for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
        vlevelIndex++) {
     if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
+      _vlevelManager.setGuiIndex(vlevelIndex);
       if (_params.debug) {
         cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
-        cerr << "  moving to vlevel index " << vlevelIndex << endl;
+        cerr << "  moving to vlevel index, value: "
+             << vlevelIndex << ", " << _vlevelManager.getLevel() << endl;
       }
-      _vlevelManager.setGuiIndex(vlevelIndex);
       // _horiz->setStartOfVlevel(true);
       // _vert->setStartOfVlevel(true);
       _moveUpDown();
@@ -3679,13 +3692,20 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
 
   /***** Handle Field changes *****/
+
   if (gd.h_win.page != gd.h_win.last_page) {
+    cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
       if (gd.h_win.redraw[gd.h_win.page] == 0) {
         gd.h_copy_flag = 1;
         gd.h_win.last_page = gd.h_win.page;
+        cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
+        set_redraw_flags(0,1);
+        _vlevelManager.setFromMdvx();
+        _createVlevelRadioButtons();
+        _horiz->update();
       }
     }
   }

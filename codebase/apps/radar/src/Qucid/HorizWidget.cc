@@ -636,6 +636,8 @@ void HorizWidget::_setGridSpacing()
 void HorizWidget::_drawOverlays(QPainter &painter)
 {
 
+  cerr << "oOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
+  
   // draw the maps
 
   _drawMaps(painter);
