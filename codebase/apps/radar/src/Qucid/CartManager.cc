@@ -147,6 +147,7 @@ CartManager::CartManager() :
   _vert = NULL;
 
   _vlevelVBoxLayout = NULL;
+  _vlevelFrame = NULL;
   _vlevelPanel = NULL;
 
   _fieldMenu = NULL;
@@ -261,7 +262,7 @@ void CartManager::timerEvent(QTimerEvent *event)
     _handleFirstTimerEvent();
   }    
   _timerEventCount++;
-  
+
   // get the time control into the right place
   // we need to let the windows fully draw
 
@@ -276,7 +277,22 @@ void CartManager::timerEvent(QTimerEvent *event)
   // handle legacy cidd timer event
 
   _ciddTimerFunc(event);
+
+#ifdef JUNK
+  if (_timerEventCount % 100 == 0) {
+    cerr << "888888888888888 main width, height: " << width() << ", " << height() << endl;
+    cerr << "888888888888888 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
+    cerr << "888888888888888 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  }
   
+  if (_timerEventCount == 650) {
+    resize(width() + 1, height() + 1);
+    resize(width() - 1, height() - 1);
+    cerr << "777777777777778 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
+    cerr << "777777777777778 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  }
+#endif
+
   // if (_archiveMode) {
   //   if (_archiveRetrievalPending) {
   //     _handleArchiveData(/*event*/);
@@ -321,9 +337,11 @@ void CartManager::timerEvent(QTimerEvent *event)
 void CartManager::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "resizeEvent: " << event << endl;
+    cerr << "resizeEvent, width, height: "
+         << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   }
-  emit frameResized(_horizFrame->width(), _horizFrame->height());
+  _horiz->resize(_horizFrame->width(), _horizFrame->height());
+  // emit frameResized(_horizFrame->width(), _horizFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -469,21 +487,21 @@ void CartManager::_setupWindows()
   _main = new QFrame(this);
   QHBoxLayout *mainLayout = new QHBoxLayout;
   _main->setLayout(mainLayout);
-  mainLayout->setSpacing(5);
-  mainLayout->setContentsMargins(3,3,3,3);
+  mainLayout->setSpacing(0);
+  mainLayout->setContentsMargins(2,2,2,2);
   setCentralWidget(_main);
 
   // horiz window
 
   _horizFrame = new QFrame(_main);
+  mainLayout->addWidget(_horizFrame);
   _horizFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _horizFrame->resize(_params.horiz_default_width, _params.horiz_default_height);
 
   // configure the HORIZ
 
   _horiz = new HorizWidget(_horizFrame, *this);
 
-  connect(this, &CartManager::frameResized, _horiz, &HorizWidget::resize);
-  
   // Create the VERT window
 
   _vertWindow = new VertWindow(this);
@@ -519,21 +537,23 @@ void CartManager::_setupWindows()
 
   // mainLayout->addWidget(_statusPanel);
   // mainLayout->addWidget(_fieldPanel);
-  mainLayout->addWidget(_horizFrame);
-
+  
   // vlevel panel
 
-  _createVlevelPanel();
-  mainLayout->addWidget(_vlevelPanel);
+  _createVlevelFrame();
+  cerr << "VVVVVVVVVV vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  
+  mainLayout->addWidget(_vlevelFrame);
+  // _setVlevelPanelVisibility();
 
   // field menu
 
   _createFieldMenu();
-
+  
   // time panel
-
+  
   _createTimeControl();
-
+  
   // fill out menu bar
 
   _createActions();
@@ -544,6 +564,7 @@ void CartManager::_setupWindows()
   _setTitleBar();
   setMinimumSize(400, 400);
   // resize(_params.main_window_width, _params.main_window_height);
+  // connect(this, &CartManager::frameResized, _horiz, &HorizWidget::resize);
   resize(_params.horiz_default_width, _params.horiz_default_height);
   
   // set location on screen
@@ -553,7 +574,7 @@ void CartManager::_setupWindows()
   pos.setY(_params.main_window_start_y);
   move(pos);
   show();
-  
+
   // set up field status dialog
   // _createClickReportDialog();
 
@@ -562,19 +583,19 @@ void CartManager::_setupWindows()
   // if (_archiveMode) {
   //   _showTimeControl();
   // }
-  _setVlevelPanelVisibility();
+  // _setVlevelPanelVisibility();
 
 }
 
 //////////////////////////////////////////////////
 // add/remove  vlevel panel (archive mode only)
 
-void CartManager::_setVlevelPanelVisibility()
-{
-  if (_vlevelPanel != NULL) {
-    _vlevelPanel->setVisible(true);
-  }
-}
+// void CartManager::_setVlevelPanelVisibility()
+// {
+//   if (_vlevelPanel != NULL) {
+//     _vlevelPanel->setVisible(true);
+//   }
+// }
 
 //////////////////////////////
 // create actions for menus
@@ -1024,10 +1045,15 @@ void CartManager::_populateOverlaysMenu()
 // create the vlevel panel
 // buttons will be filled in by createVlevelRadioButtons()
 
-void CartManager::_createVlevelPanel()
+void CartManager::_createVlevelFrame()
 {
   
-  _vlevelPanel = new QGroupBox("Z", _main);
+  _vlevelFrame = new QFrame(_main);
+  QHBoxLayout *frameLayout = new QHBoxLayout;
+  _vlevelFrame->setLayout(frameLayout);
+  
+  _vlevelPanel = new QGroupBox("Z", _vlevelFrame);
+  frameLayout->addWidget(_vlevelPanel);
   _vlevelVBoxLayout = new QVBoxLayout;
   _vlevelPanel->setLayout(_vlevelVBoxLayout);
   _vlevelPanel->setAlignment(Qt::AlignHCenter);
@@ -3060,8 +3086,12 @@ void CartManager::_checkForFieldChange()
 void CartManager::_handleFirstTimerEvent()
 {
 
-  // cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
-  // cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
+  cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
+  cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
+
+  QSize sz = size();
+  resize(sz.width()+1, sz.height()+1);
+  
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   _horiz->adjustPixelScales();
   
@@ -3694,7 +3724,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   /***** Handle Field changes *****/
 
   if (gd.h_win.page != gd.h_win.last_page) {
-    cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
+    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
@@ -3706,6 +3736,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
         _vlevelManager.setFromMdvx();
         _createVlevelRadioButtons();
         _horiz->update();
+        resize(width() + 1, height() + 1);
+        resize(width() - 1, height() - 1);
       }
     }
   }

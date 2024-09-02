@@ -3099,7 +3099,7 @@ paramdef int {
 } main_window_start_y;
 
 paramdef int {
-  p_default = 40;
+  p_default = 60;
   p_descr = "Width of color scale (pixels).";
 } color_scale_width;
 

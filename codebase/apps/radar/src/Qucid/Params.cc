@@ -6382,7 +6382,7 @@
     tt->descr = tdrpStrDup("Width of color scale (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &color_scale_width - &_start_;
-    tt->single_val.i = 40;
+    tt->single_val.i = 60;
     tt++;
     
     // Parameter 'label_font_size'

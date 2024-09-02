@@ -2219,7 +2219,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    QRectF r(xStart, topY[ii], width, patchHt);
+    QRectF r(xStart, topY[ii], width, patchHt+1);
     painter.fillRect(r, color);
     if (ii == 0) {
       scaleYBot = topY[ii] + patchHt;

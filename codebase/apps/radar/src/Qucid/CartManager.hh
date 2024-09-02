@@ -186,6 +186,7 @@ private:
 
   VlevelManager _vlevelManager;
   QVBoxLayout *_vlevelVBoxLayout;
+  QFrame *_vlevelFrame;
   QGroupBox *_vlevelPanel;
   vector<QRadioButton *> *_vlevelRButtons;
 
@@ -369,7 +370,7 @@ private:
 
   // archive mode
 
-  void _setVlevelPanelVisibility();
+  // void _setVlevelPanelVisibility();
 
   // field menu
 
@@ -413,7 +414,7 @@ private slots:
 
   // vlevels
 
-  void _createVlevelPanel();
+  void _createVlevelFrame();
   void _createVlevelRadioButtons();
   void _clearVlevelRadioButtons();
   void _changeVlevel(bool value);

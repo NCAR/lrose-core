@@ -486,7 +486,7 @@ void CartWidget::paintEvent(QPaintEvent *event)
 
 void CartWidget::resizeEvent(QResizeEvent * e)
 {
-  // cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
   adjustPixelScales();
   _refreshImages();
