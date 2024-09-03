@@ -1737,3 +1737,176 @@ void HorizWidget::_renderGrid(QPainter &painter)
   
 }
 
+/*************************************************************************
+ * RENDER_H_MOVIE_FRAME: Render a horizontal display view
+ */
+
+int HorizWidget::renderHMovieFrame( int index, Drawable xid)
+{
+
+  int    c_field;
+  int stat = 0;
+
+  c_field = gd.h_win.page;
+  if(gd.debug2)
+    fprintf(stderr,
+            "Rendering Horizontal movie_frame %d - field: %d, to Xid: %ld\n",
+            index, c_field,xid);
+
+  switch(gd.movie.mode) {
+    case REALTIME_MODE :
+    case ARCHIVE_MODE :
+      stat = gather_hwin_data(c_field,
+                              gd.movie.frame[index].time_start,
+                              gd.movie.frame[index].time_end);
+      if(stat == CIDD_SUCCESS)  {
+        cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
+        render_horiz_display(xid,c_field,
+                             gd.movie.frame[index].time_start,
+                             gd.movie.frame[index].time_end);
+      } else {
+        return stat;
+      }
+      break;
+         
+    default:
+      fprintf(stderr,
+              "Invalid movie mode %d in render_h_movie_frame\n",
+              gd.movie.mode);
+      break;
+  }
+
+
+  return stat;
+}
+
+/************************************************************************
+ * CHECK_FOR_INVALID_IMAGES: Check for images in which the data 
+ * are no longer valid. Look for the "best" invalid  image to 
+ *  render.
+ *
+ */
+
+void HorizWidget::checkForInvalidImages(int index)
+{
+
+  cerr << "CCCCCCCCCCCCCCCCCCCCC index: " << index << endl;
+  
+  int i;
+  int h_image,v_image;
+  int stat;
+  int none_found = 1;
+  Drawable xid;
+  
+  h_image = gd.h_win.page + 1;
+  v_image = gd.v_win.page + 1;
+  if(!_params.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
+  
+  /* look through the rest of the images  */
+  for (i=0; i < gd.num_datafields-1; i++) {    
+    
+    /*
+     * Render horizontal image, if necessary.
+     */
+    
+    if (h_image >= gd.num_datafields) {
+      h_image = 0;
+    }
+    
+    if (gd.mrec[h_image]->currently_displayed && gd.mrec[h_image]->auto_render) {
+      
+      if (gd.h_win.redraw[h_image] || (gd.mrec[h_image]->h_data_valid == 0)) {
+        none_found = 0;
+        stat = gather_hwin_data(h_image,
+                                gd.movie.frame[index].time_start,
+                                gd.movie.frame[index].time_end);
+        if (stat == CIDD_SUCCESS) {
+          if(gd.mrec[h_image]->auto_render) {
+            xid = gd.h_win.page_xid[h_image];
+          } else {
+            xid = gd.h_win.tmp_xid;
+          }
+          render_horiz_display(xid,h_image,
+                               gd.movie.frame[index].time_start,
+                               gd.movie.frame[index].time_end);
+          
+          save_h_movie_frame(index,xid,h_image);
+          
+          gd.h_win.redraw[h_image] = 0;
+        } else {
+          return;
+        }
+        if (h_image == gd.h_win.last_page && gd.h_win.redraw[h_image] == 0) {
+          gd.h_copy_flag = 1;
+        }
+      } // if (gd.h_win.redraw[h_image] ...
+    } // if (gd.mrec[h_image]->currently_displayed ...
+    h_image++;
+
+    /*
+     * Render vertical image, if necessary.
+     */
+
+    if (v_image >= gd.num_datafields) v_image = 0;
+
+    if (gd.mrec[v_image]->currently_displayed && gd.mrec[v_image]->auto_render) {
+      if ((gd.v_win.active) && (gd.v_win.redraw[v_image] || (gd.mrec[v_image]->v_data_valid == 0))) {
+        stat = gather_vwin_data(v_image, gd.movie.frame[index].time_start,
+                                gd.movie.frame[index].time_end);
+        if (stat == CIDD_SUCCESS) {
+          if(gd.mrec[v_image]->auto_render) {
+            xid = gd.v_win.page_xid[v_image];
+          } else {
+            xid = gd.v_win.tmp_xid;
+          }
+          render_vert_display(xid,v_image, gd.movie.frame[index].time_start,
+                              gd.movie.frame[index].time_end);    
+          gd.v_win.redraw[v_image] = 0;
+        } else {
+          return;
+        }
+        if (v_image == gd.v_win.last_page && gd.v_win.redraw[v_image] == 0) gd.v_copy_flag = 1;
+      }
+    }
+        
+    v_image++;
+  }
+
+  // At this point all background images have been rendered. and nothing else is
+  //  happening
+
+  // In html mode, cycle through all zooms and heights
+  if(none_found && _params.html_mode && gd.io_info.outstanding_request == 0) {
+
+    /* If more zoom levels to render */
+    if(gd.h_win.zoom_level < (gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
+
+      /* Set zoom to next level */
+      gd.h_win.zoom_level++;
+      // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+
+      // If more heights to render
+    } else if (gd.cur_render_height < gd.num_render_heights -1) {
+
+      // Set height to next level
+      gd.cur_render_height++;
+      if(gd.debug) fprintf(stderr,"HTML_MODE: Height now: %g\n",gd.h_win.cur_ht);
+      gd.h_win.cur_ht = gd.height_array[gd.cur_render_height];
+
+      // Reset Zoom back to first  level
+      gd.h_win.zoom_level = 0;
+      // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+
+      // Make sure new data gets loaded
+      reset_data_valid_flags(1,0);
+      reset_terrain_valid_flags(1,0);
+               
+      // No more heights and no more zooms to render
+    } else if(_params.run_once_and_exit) {
+      if(!gd.quiet_mode)  fprintf(stderr,"Exiting\n");
+      // xv_destroy(gd.h_win_horiz_bw->horiz_bw);
+      exit(-1);
+    }
+  }
+  return;
+}

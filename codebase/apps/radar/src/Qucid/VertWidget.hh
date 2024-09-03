@@ -24,11 +24,11 @@
 #ifndef VertWidget_HH
 #define VertWidget_HH
 
-#include "CartWidget.hh"
 // #include "RayLoc.hh"
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxTime.hh>
 // #include <deque>
+#include "CartWidget.hh"
 class VertWindow;
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
@@ -108,6 +108,10 @@ class DLL_EXPORT VertWidget : public CartWidget
   // adjust pixel scale to suit window size etc.
 
   virtual void adjustPixelScales();
+
+  // render frame based on movie index
+  
+  int renderVMovieFrame(int index, Drawable xid);
 
 signals:
 

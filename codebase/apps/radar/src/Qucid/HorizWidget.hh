@@ -147,12 +147,20 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   void paintEvent(QPaintEvent *event);
 
+  // check for images that need to be rendered
+  
+  void checkForInvalidImages(int index);
+
+  // render frame based on movie index
+  
+  int renderHMovieFrame(int index, Drawable xid);
+
   //////////////
   // Qt slots //
   //////////////
 
  public slots:
-
+   
   /**
    * @brief Clear the data in the view.
    */
@@ -181,6 +189,7 @@ class DLL_EXPORT HorizWidget : public CartWidget
   double _meanElev;
   double _sumElev;
   double _nRays;
+  // RadxVol *_vol;
 
   // projection
 
@@ -204,6 +213,7 @@ class DLL_EXPORT HorizWidget : public CartWidget
    */
 
   void _renderGrid(QPainter &painter);
+
   void _drawOverlays(QPainter &painter);
 
   void _drawMaps(QPainter &painter);
@@ -260,8 +270,6 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   void _initProjection();
   
-  // RadxVol *_vol;
-
 };
 
 

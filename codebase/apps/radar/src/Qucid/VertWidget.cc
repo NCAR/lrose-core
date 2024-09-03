@@ -971,5 +971,31 @@ void VertWidget::selectVar(const size_t index)
   update();
 }
 
+/*************************************************************************
+ * RENDER_V_MOVIE_FRAME:
+ */
+
+int VertWidget::renderVMovieFrame(int index, Drawable xid)
+{
+  int    c_field;
+  int    stat = 0;
+
+  c_field = gd.v_win.page;
+
+  if(gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
+
+  switch(gd.movie.mode) {
+    case REALTIME_MODE:
+    case ARCHIVE_MODE:
+      stat = render_vert_display(xid, c_field,
+                                 gd.movie.frame[index].time_start,
+                                 gd.movie.frame[index].time_end);
+      break;
+         
+  }
+
+  return stat;
+}
+
 
 

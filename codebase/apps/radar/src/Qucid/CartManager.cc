@@ -3570,7 +3570,10 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gd.movie.frame[index].redraw_horiz != 0) flag = 0;
     if (gd.movie.frame[index].redraw_vert != 0 && gd.v_win.active) flag = 0;
 
-    msec_diff = ((cur_tm.tv_sec - last_frame_tm.tv_sec) * 1000) + ((cur_tm.tv_usec - last_frame_tm.tv_usec) / 1000);
+    msec_diff =
+      ((cur_tm.tv_sec - last_frame_tm.tv_sec) * 1000) +
+      ((cur_tm.tv_usec - last_frame_tm.tv_usec) / 1000);
+
     if (flag && msec_diff > gd.movie.display_time_msec) {
       /* Advance Movie frame */
       gd.movie.cur_frame += gd.movie.sweep_dir;    
@@ -3636,7 +3639,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       }
     }
   }
-	
+
   /* Set up convienient pointer to main met record */
   mr = gd.mrec[gd.h_win.page];
 
@@ -3675,7 +3678,6 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       v_xid = gd.v_win.tmp_xid;
     }
   }
-
 
   /******* Handle Real Time Updating  ********/
   switch (gd.movie.mode) {
@@ -4029,10 +4031,11 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
 
       /***** Handle redrawing background images *****/
+
       msec_diff = ((cur_tm.tv_sec - last_dcheck_tm.tv_sec) * 1000) + ((cur_tm.tv_usec - last_dcheck_tm.tv_usec) / 1000);
 
       if (msec_diff < 0 ||  (msec_diff > redraw_interv  && gd.movie.movie_on == 0)) {
-        check_for_invalid_images(index);
+        _horiz->checkForInvalidImages(index);
 
         /* keep track of how much time will elapse since the last check */
         gettimeofday(&last_dcheck_tm,&cur_tz);

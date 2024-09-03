@@ -143,7 +143,6 @@ NORM_SRCS = \
 	fields_pu_proc.cc \
 	graphic_canvas_events.cc \
 	graphic_canvas_events_bkwd.cc \
-	graphic_check.cc \
 	graphic_compute.cc \
 	graphic_cross_section.cc \
 	graphic_dump_image.cc \
