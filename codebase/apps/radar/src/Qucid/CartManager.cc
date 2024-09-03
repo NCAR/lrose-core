@@ -636,10 +636,10 @@ void CartManager::_createActions()
   
   // unzoom display
   
-  _zoomBackAct = new QAction(tr("Back"), this);
-  _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
-  _zoomBackAct->setEnabled(false);
-  connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
+  // _zoomBackAct = new QAction(tr("Back"), this);
+  // _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
+  // _zoomBackAct->setEnabled(false);
+  // connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
 
   // reload data
   
@@ -761,7 +761,7 @@ void CartManager::_createMenus()
   
   _zoomsMenu = menuBar()->addMenu(tr("Zooms"));
   _populateZoomsMenu();
-  menuBar()->addAction(_zoomBackAct);
+  // menuBar()->addAction(_zoomBackAct);
   
   // time selector
   
@@ -985,6 +985,13 @@ void CartManager::_populateZoomsMenu()
 
   _zoomsActionGroup = new QActionGroup(_zoomsMenu);
   _zoomsActionGroup->setExclusive(true);
+  
+  
+  _zoomBackAct = new QAction(tr("Go back"), this);
+  _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
+  _zoomBackAct->setEnabled(false);
+  connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
+  _zoomsMenu->addAction(_zoomBackAct);
   
   // loop through zoom entries
   
