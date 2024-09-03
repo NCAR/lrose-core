@@ -508,21 +508,11 @@ class DLL_EXPORT CartWidget : public QWidget
   virtual void mouseReleaseEvent(QMouseEvent* event) = 0;
 
   /**
-   * @brief The method that is called when a repaint event is triggered.
-   *
-   * @param[in] event   The repaint event.
-   */
-
-  void paintEvent(QPaintEvent *event);
-
-  /**
    * @brief Handle a resize event. A timer is used to prevent refreshes until
    *        the resize is finished.
    *
    * @brief event   The resize event.
    */
-
-  void smartBrush(int xPixel, int yPixel);
 
   virtual void resizeEvent(QResizeEvent * event);
 
@@ -534,9 +524,13 @@ class DLL_EXPORT CartWidget : public QWidget
 
   void _performRendering();
 
+#ifdef NOTNOW
   // get ray closest to click point
-
+  
   virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
+  
+  void smartBrush(int xPixel, int yPixel);
+#endif
 
  public:
 

@@ -987,7 +987,7 @@ void CartManager::_populateZoomsMenu()
   _zoomsActionGroup->setExclusive(true);
   
   
-  _zoomBackAct = new QAction(tr("Go back"), this);
+  _zoomBackAct = new QAction(tr("Zoom back"), this);
   _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
   _zoomBackAct->setEnabled(false);
   connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);

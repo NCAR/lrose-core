@@ -446,6 +446,57 @@ void HorizWidget::adjustPixelScales()
 }
 
 /*************************************************************************
+ * paintEvent()
+ */
+
+void HorizWidget::paintEvent(QPaintEvent *event)
+{
+
+  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
+
+  if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
+    _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
+                              gd.h_win.cmax_x, gd.h_win.cmax_y);
+    gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
+    _savedZooms.clear();
+  }
+
+  // fill canvas with background color
+  
+  QPainter painter(this);
+  _zoomWorld.fillCanvas(painter, _params.background_color);
+
+  // render data grid
+  
+  _renderGrid(painter);
+
+  // draw axes
+  
+  string projUnits("km");
+  if (gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
+    projUnits = "deg";
+  }
+  _zoomWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _zoomWorld.setXAxisLabelsInside(_params.horiz_tick_values_inside);
+  _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
+  _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
+  _zoomWorld.setGridColor(_params.horiz_grid_color);
+  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _gridsEnabled);
+  _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
+  _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
+  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
+  
+  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+
+  _drawOverlays(painter);
+
+  //if there are no points, this does nothing
+  // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
+
+}
+
+
+/*************************************************************************
  * mouseReleaseEvent()
  */
 void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -636,8 +687,6 @@ void HorizWidget::_setGridSpacing()
 void HorizWidget::_drawOverlays(QPainter &painter)
 {
 
-  cerr << "oOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-  
   // draw the maps
 
   _drawMaps(painter);
@@ -1675,5 +1724,16 @@ void HorizWidget::_initProjection()
                           _params.proj_origin_lon);
   }
 
+}
+
+/*************************************************************************
+ * _renderGrid()
+ */
+
+void HorizWidget::_renderGrid(QPainter &painter)
+{
+
+
+  
 }
 

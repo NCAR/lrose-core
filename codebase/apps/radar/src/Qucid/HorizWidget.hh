@@ -137,6 +137,16 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   virtual void adjustPixelScales();
 
+  // override QWidget methods
+  
+  /**
+   * @brief The method that is called when a repaint event is triggered.
+   *
+   * @param[in] event   The repaint event.
+   */
+
+  void paintEvent(QPaintEvent *event);
+
   //////////////
   // Qt slots //
   //////////////
@@ -193,7 +203,8 @@ class DLL_EXPORT HorizWidget : public CartWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  virtual void _drawOverlays(QPainter &painter);
+  void _renderGrid(QPainter &painter);
+  void _drawOverlays(QPainter &painter);
 
   void _drawMaps(QPainter &painter);
   void _drawRingsAndAzLines(QPainter &painter);

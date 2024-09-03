@@ -426,61 +426,6 @@ void CartWidget::smartBrush(int xPixel, int yPixel)
 #endif
 
 /*************************************************************************
- * paintEvent()
- */
-
-void CartWidget::paintEvent(QPaintEvent *event)
-{
-
-  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
-
-  if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
-    // cerr << "ZZZZZZZZZZZZZZZZZZZ new zoom level: " << gd.h_win.zoom_level << endl;
-    _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
-                              gd.h_win.cmax_x, gd.h_win.cmax_y);
-    gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
-    _savedZooms.clear();
-  }
-
-  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
-  // _zoomWorld.print(cerr);
-  // cerr << "ZZZZZZZZWWWWWWWWWWColorScale" << endl;
-  
-  QPainter painter(this);
-  
-  // QBrush grayBrush(QColor(50,50,50));
-  // _zoomWorld.fillRectangle(painter, grayBrush,
-  //                          _zoomWorld.getXMinWorld(),
-  //                          _zoomWorld.getYMinWorld(),
-  //                          _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld(),
-  //                          _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld());
-  // cerr << "NBBBBBBBBBBBBB background_color: " << _params.background_color << endl;
-  _zoomWorld.fillCanvas(painter, _params.background_color);
-  string projUnits("km");
-  if (gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
-    projUnits = "deg";
-  }
-  _zoomWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
-  _zoomWorld.setXAxisLabelsInside(_params.horiz_tick_values_inside);
-  _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
-  _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
-  _zoomWorld.setGridColor(_params.horiz_grid_color);
-  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _gridsEnabled);
-  _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
-  
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
-  _drawOverlays(painter);
-
-  //if there are no points, this does nothing
-  // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
-
-}
-
-
-/*************************************************************************
  * resizeEvent()
  */
 
