@@ -111,7 +111,7 @@ class DLL_EXPORT VertWidget : public CartWidget
 
   // render frame based on movie index
   
-  int renderVMovieFrame(int index, Drawable xid);
+  int renderVMovieFrame(int index, QPainter &painter);
 
 signals:
 

@@ -4035,7 +4035,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       msec_diff = ((cur_tm.tv_sec - last_dcheck_tm.tv_sec) * 1000) + ((cur_tm.tv_usec - last_dcheck_tm.tv_usec) / 1000);
 
       if (msec_diff < 0 ||  (msec_diff > redraw_interv  && gd.movie.movie_on == 0)) {
-        _horiz->checkForInvalidImages(index);
+        _horiz->checkForInvalidImages(index, _vert);
 
         /* keep track of how much time will elapse since the last check */
         gettimeofday(&last_dcheck_tm,&cur_tz);

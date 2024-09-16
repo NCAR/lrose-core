@@ -1197,6 +1197,9 @@ moc_TimeControl.cpp: TimeControl.hh \
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include TimeControl.hh -o moc_TimeControl.cpp
 
 moc_VertWidget.cpp: VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		CartWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
@@ -1208,7 +1211,6 @@ moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -1251,8 +1253,6 @@ moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
@@ -1264,6 +1264,9 @@ moc_VertWindow.cpp: VertWindow.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		CartWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
@@ -1275,7 +1278,6 @@ moc_VertWindow.cpp: VertWindow.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -1318,8 +1320,6 @@ moc_VertWindow.cpp: VertWindow.hh \
 		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
@@ -3658,6 +3658,9 @@ Uparams.o: Uparams.cc
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Uparams.o Uparams.cc
 
 VertWidget.o: VertWidget.cc VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		CartWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
@@ -3669,7 +3672,6 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -3712,8 +3714,6 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VertWindow.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \

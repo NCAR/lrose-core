@@ -22,6 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "HorizWidget.hh"
+#include "VertWidget.hh"
 #include "CartManager.hh"
 // #include "ParameterColorView.hh"
 // #include "FieldColorController.hh"
@@ -409,9 +410,9 @@ void HorizWidget::timerEvent(QTimerEvent *event)
   // bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
   // if (isBoundaryEditorVisible) {
   //   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-    // user may have zoomed in or out, so update the polygon point boxes
-    // so they are the right size on screen
-    // doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+  // user may have zoomed in or out, so update the polygon point boxes
+  // so they are the right size on screen
+  // doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
   // }
   // bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
 
@@ -613,7 +614,7 @@ const RadxRay *HorizWidget::_getClosestRay(double x_km, double y_km)
   double radarDisplayAz = 90.0 - clickAz;
   if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
   LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-                          << x_km << "," << y_km; 
+             << x_km << "," << y_km; 
   LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
              << x_km << y_km;
 
@@ -1127,8 +1128,8 @@ void HorizWidget::showOpeningFileMsg(bool isVisible)
 // draw text in world coords
 
 void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
-                                int text_x, int text_y,
-                                int flags)
+                                  int text_x, int text_y,
+                                  int flags)
   
 {
 
@@ -1160,7 +1161,7 @@ void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
  */
 
 int HorizWidget::_beamIndex(const double start_angle,
-                          const double stop_angle)
+                            const double stop_angle)
 {
 
   // Find where the center angle of the beam will fall within the beam array
@@ -1463,8 +1464,8 @@ void HorizWidget::contextMenuParameterColors()
   //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
 
   /* TODO: combine with replot
-  connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-  	  this, SLOT(backgroundColor(QColor)));
+     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+     this, SLOT(backgroundColor(QColor)));
   */
 
   fieldColorController->startUp(); 
@@ -1473,10 +1474,10 @@ void HorizWidget::contextMenuParameterColors()
   //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
   //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
   // TODO: move this call to the controller?                                                                
-	  // parameterColorView.exec();
+  // parameterColorView.exec();
 
   //  if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?                                                        
+  // TODO: what are changes?  new displayField(s)?                                                        
   //}
  
   LOG(DEBUG_VERBOSE) << "exit ";
@@ -1486,14 +1487,14 @@ void HorizWidget::contextMenuParameterColors()
 }
 
 /*
-void HorizWidget::sillyReceived() {
+  void HorizWidget::sillyReceived() {
   LOG(DEBUG_VERBOSE) << "enter";
   LOG(DEBUG_VERBOSE) << "exit";
-}
+  }
 */
 /*
-void HorizWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
-{
+  void HorizWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
+  {
   LOG(DEBUG_VERBOSE) << "enter";
   // connect the new color map with the field                                                                    
   // find the fieldName in the list of FieldDisplays                                                             
@@ -1504,28 +1505,28 @@ void HorizWidget::changeToDisplayField(string fieldName)  // , ColorMap newColor
 
   it = _fields.begin();
   while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
+  DisplayField *field = *it;
 
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
+  string name = field->getName();
+  if (name.compare(fieldName) == 0) {
+  found = true;
+  field->replaceColorMap(newColorMap);
+  }
+  fieldId++;
+  it++;
   }
   if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                                           
+  LOG(ERROR) << fieldName;
+  LOG(ERROR) << "ERROR - field not found; no color map change";
+  // TODO: present error message box                                                                           
   } else {
-    // look up the fieldId from the fieldName                                                                    
-    // change the field variable                                                                                 
-    _changeField(fieldId, true);
+  // look up the fieldId from the fieldName                                                                    
+  // change the field variable                                                                                 
+  _changeField(fieldId, true);
   }
   
   LOG(DEBUG_VERBOSE) << "exit";
-}
+  }
 */
 
 
@@ -1644,9 +1645,9 @@ void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
   contextMenu.addAction(&action6);
 
   /*
-  QAction action7("Data Widget", this);
-  connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-  contextMenu.addAction(&action7);
+    QAction action7("Data Widget", this);
+    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+    contextMenu.addAction(&action7);
   */
 
   contextMenu.exec(this->mapToGlobal(pos));
@@ -1658,8 +1659,8 @@ void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
  */
 
 void HorizWidget::setClickPoint(double azimuthDeg,
-                              double elevationDeg,
-                              double rangeKm)
+                                double elevationDeg,
+                                double rangeKm)
 {
 
   double x_km =
@@ -1741,18 +1742,19 @@ void HorizWidget::_renderGrid(QPainter &painter)
  * RENDER_H_MOVIE_FRAME: Render a horizontal display view
  */
 
-int HorizWidget::renderHMovieFrame( int index, Drawable xid)
+int HorizWidget::renderHMovieFrame(int index,
+                                   QPainter &painter)
 {
 
-  int    c_field;
-  int stat = 0;
-
-  c_field = gd.h_win.page;
-  if(gd.debug2)
+  int c_field = gd.h_win.page;
+  if(gd.debug2) {
     fprintf(stderr,
-            "Rendering Horizontal movie_frame %d - field: %d, to Xid: %ld\n",
-            index, c_field,xid);
-
+            "Rendering Horizontal movie_frame %d - field: %d\n",
+            index, c_field);
+  }
+  
+  int stat = 0;
+  
   switch(gd.movie.mode) {
     case REALTIME_MODE :
     case ARCHIVE_MODE :
@@ -1761,9 +1763,9 @@ int HorizWidget::renderHMovieFrame( int index, Drawable xid)
                               gd.movie.frame[index].time_end);
       if(stat == CIDD_SUCCESS)  {
         cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
-        render_horiz_display(xid,c_field,
-                             gd.movie.frame[index].time_start,
-                             gd.movie.frame[index].time_end);
+        _renderHorizDisplay(painter, c_field,
+                            gd.movie.frame[index].time_start,
+                            gd.movie.frame[index].time_end);
       } else {
         return stat;
       }
@@ -1787,7 +1789,7 @@ int HorizWidget::renderHMovieFrame( int index, Drawable xid)
  *
  */
 
-void HorizWidget::checkForInvalidImages(int index)
+void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
 {
 
   cerr << "CCCCCCCCCCCCCCCCCCCCC index: " << index << endl;
@@ -1826,9 +1828,10 @@ void HorizWidget::checkForInvalidImages(int index)
           } else {
             xid = gd.h_win.tmp_xid;
           }
-          render_horiz_display(xid,h_image,
-                               gd.movie.frame[index].time_start,
-                               gd.movie.frame[index].time_end);
+          QPainter painter(this);
+          _renderHorizDisplay(painter, h_image,
+                              gd.movie.frame[index].time_start,
+                              gd.movie.frame[index].time_end);
           
           save_h_movie_frame(index,xid,h_image);
           
@@ -1859,8 +1862,9 @@ void HorizWidget::checkForInvalidImages(int index)
           } else {
             xid = gd.v_win.tmp_xid;
           }
-          render_vert_display(xid,v_image, gd.movie.frame[index].time_start,
-                              gd.movie.frame[index].time_end);    
+          QPainter painter(this);
+          vert->renderVertDisplay(painter, v_image, gd.movie.frame[index].time_start,
+                                  gd.movie.frame[index].time_end);    
           gd.v_win.redraw[v_image] = 0;
         } else {
           return;
@@ -1909,4 +1913,198 @@ void HorizWidget::checkForInvalidImages(int index)
     }
   }
   return;
+}
+
+/**********************************************************************
+ * RENDER_HORIZ_DISPLAY: Render a complete horizontal plane of data a
+ *        and its associated overlays and labels  labels. 
+ */
+
+int HorizWidget::_renderHorizDisplay(QPainter &painter,
+                                     int page,
+                                     time_t start_time,
+                                     time_t end_time)
+{
+
+  int i;
+  met_record_t *mr;
+
+  if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
+  if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
+
+  // compute distance across the image for setting font sizes, etc.
+  switch(gd.display_projection) {
+    default:
+    case Mdvx::PROJ_FLAT :
+    case Mdvx::PROJ_LAMBERT_CONF :
+      /* compute km across the image */
+      gd.h_win.km_across_screen = (gd.h_win.cmax_x - gd.h_win.cmin_x);
+      break;
+
+    case Mdvx::PROJ_LATLON :
+      gd.h_win.km_across_screen = (gd.h_win.cmax_x - gd.h_win.cmin_x) * KM_PER_DEG_AT_EQ;
+      break;
+  }
+
+  mr = gd.mrec[page];
+
+  /* Clear drawing area */
+  cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
+#ifdef HAVE_XID
+  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
+                 0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+#endif
+
+  // Clear time lists
+  if(gd.time_plot) gd.time_plot->clear_grid_tlist();
+  if(gd.time_plot) gd.time_plot->clear_prod_tlist();
+
+  if(_params.show_data_messages) gui_label_h_frame("Rendering",-1);
+
+  // RENDER the LAND_USE field first
+  if(gd.layers.earth.landuse_active) {
+#ifdef HAVE_XID
+    render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
+#endif
+  }
+
+  if(!_params.draw_main_on_top) {
+    contour_info_t cont; // contour params 
+    if(mr->render_method == LINE_CONTOURS) {
+      cont.min = mr->cont_low;
+      cont.max = mr->cont_high;
+      cont.interval = mr->cont_interv;
+      cont.active = 1;
+      cont.field = page;
+      cont.labels_on = _params.label_contours;
+      cont.color = gd.legends.foreground_color;
+      cont.vcm = &mr->h_vcm;
+      if (gd.layers.use_alt_contours) {
+#ifdef HAVE_XID
+        RenderLineContours(xid,&cont);
+#endif
+      } else {
+#ifdef HAVE_XID
+        render_line_contours(xid,&cont);
+#endif
+      }
+    } else {
+#ifdef HAVE_XID
+      render_grid(xid,mr,start_time,end_time,0);
+#endif
+    }
+    if(gd.layers.earth.terrain_active && 
+       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
+       (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1) &&
+       mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_ELEV) {
+#ifdef HAVE_XID
+      render_h_terrain(xid, page);
+#endif
+    }
+  }
+     
+  /* Render each of the gridded_overlay fields */
+  for(i=0; i < NUM_GRID_LAYERS; i++) {
+    if(gd.layers.overlay_field_on[i]) {
+#ifdef HAVE_XID
+      render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
+#endif
+    }
+  }
+
+  if(_params.draw_main_on_top) {
+    contour_info_t cont; // contour params 
+    if(mr->render_method == LINE_CONTOURS) {
+      cont.min = mr->cont_low;
+      cont.max = mr->cont_high;
+      cont.interval = mr->cont_interv;
+      cont.active = 1;
+      cont.field = page;
+      cont.labels_on = _params.label_contours;
+      cont.color = gd.legends.foreground_color;
+      cont.vcm = &mr->h_vcm;
+      if (gd.layers.use_alt_contours) {
+#ifdef HAVE_XID
+        RenderLineContours(xid,&cont);
+#endif
+      } else {
+#ifdef HAVE_XID
+        render_line_contours(xid,&cont);
+#endif
+      }
+    } else {
+#ifdef HAVE_XID
+      render_grid(xid,mr,start_time,end_time,0);
+#endif
+    }
+    if(gd.layers.earth.terrain_active && 
+       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
+       (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
+
+#ifdef HAVE_XID
+      render_h_terrain(xid, page);
+#endif
+    }
+  }
+
+  /* render contours if selected */
+  for(i= 0; i < NUM_CONT_LAYERS; i++) {
+    if(gd.layers.cont[i].active) {
+      if (gd.layers.use_alt_contours) {
+#ifdef HAVE_XID
+        RenderLineContours(xid, &(gd.layers.cont[i]));
+#endif
+      } else {
+#ifdef HAVE_XID
+        render_line_contours(xid, &(gd.layers.cont[i]));
+#endif
+      }
+    }
+  }
+
+  /* render Winds if selected */
+  if(gd.layers.wind_vectors) {
+    switch(gd.layers.wind_mode) {
+      default:
+      case WIND_MODE_ON:  /* winds get rendered in each frame */
+#ifdef HAVE_XID
+        render_wind_vectors(xid,start_time,end_time);
+#endif
+        break;
+        
+      case WIND_MODE_LAST: /* Winds get rendered in last farame only */
+        if(gd.movie.cur_frame == gd.movie.end_frame)
+#ifdef HAVE_XID
+          render_wind_vectors(xid,start_time,end_time);
+#endif
+        break;
+
+      case WIND_MODE_STILL: /* Winds get rendered in the last frame only
+                             * if the movie loop is off
+                             */
+        if(!gd.movie.movie_on && gd.movie.cur_frame == gd.movie.end_frame)
+#ifdef HAVE_XID
+          render_wind_vectors(xid,start_time,end_time);
+#endif
+        break;
+    }
+  }
+
+
+#ifdef HAVE_XID
+  render_top_layers(xid);  // Range rings X section reference etc.
+#endif
+
+  // Native Symprod products.
+#ifdef HAVE_XID
+  render_products(xid,start_time,end_time);
+#endif
+
+#ifdef HAVE_XID
+  render_horiz_margins(xid,page,start_time,end_time);
+#endif
+
+  update_frame_time_msg(gd.movie.cur_frame);
+
+  return CIDD_SUCCESS;    /* avaliable data has been rendered */
 }

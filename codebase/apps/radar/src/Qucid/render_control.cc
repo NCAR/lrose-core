@@ -33,7 +33,7 @@
 #include "cidd.h"
 
 /**********************************************************************
- * RENDER_HORIZ_DISPLAY: Render a complete horizontal plane of data 
+ * RENDER_HORIZ_DISPLAY: Render a complete horizontal plane of data a
  *        and its associated overlays and labels  labels. 
  */
 

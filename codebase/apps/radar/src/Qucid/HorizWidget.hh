@@ -27,6 +27,7 @@
 #include <Radx/RadxVol.hh>
 #include <Mdv/MdvxProj.hh>
 #include "CartWidget.hh"
+class VertWidget;
 
 class QLabel;
 
@@ -149,12 +150,12 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   // check for images that need to be rendered
   
-  void checkForInvalidImages(int index);
+  void checkForInvalidImages(int index, VertWidget *vert);
 
   // render frame based on movie index
   
-  int renderHMovieFrame(int index, Drawable xid);
-
+  int renderHMovieFrame(int index, QPainter &painter);
+  
   //////////////
   // Qt slots //
   //////////////
@@ -269,6 +270,8 @@ class DLL_EXPORT HorizWidget : public CartWidget
   // initialize the geographic projection
 
   void _initProjection();
+  
+  int _renderHorizDisplay(QPainter &painter, int page, time_t start_time, time_t end_time);
   
 };
 
