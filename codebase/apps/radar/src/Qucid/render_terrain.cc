@@ -38,7 +38,7 @@
  *    
  */
 
-void render_h_terrain( Drawable xid, int page)
+void render_h_terrain( QPaintDevice *pdev, int page)
 {
     int    i,j;
     int    ht,wd;               /* Dims of data rectangles  */
@@ -131,7 +131,7 @@ void render_h_terrain( Drawable xid, int page)
  */
 
 
-void render_v_terrain( Drawable xid )
+void render_v_terrain( QPaintDevice *pdev )
 {
     int    i;
     int    num_points;

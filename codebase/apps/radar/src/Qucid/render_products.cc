@@ -32,7 +32,7 @@
  * RENDER__PRODUCTS: Render selected products onto the given pixmap
  */
 
-void render_products( Drawable xid, time_t start_time, time_t end_time)
+void render_products( QPaintDevice *pdev, time_t start_time, time_t end_time)
 {
     int font_index;
     int i;

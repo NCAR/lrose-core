@@ -36,7 +36,7 @@
  * RENDER_H_MOVIE_FRAME: Render a horizontal display view
  */
 
-int render_h_movie_frame( int index, Drawable xid)
+int render_h_movie_frame( int index, QPaintDevice *pdev)
 {
 
   int    c_field;
@@ -79,7 +79,7 @@ int render_h_movie_frame( int index, Drawable xid)
  * RENDER_V_MOVIE_FRAME:
  */
 
-int render_v_movie_frame( int index, Drawable xid)
+int render_v_movie_frame( int index, QPaintDevice *pdev)
 {
   int    c_field;
   int    stat = 0;

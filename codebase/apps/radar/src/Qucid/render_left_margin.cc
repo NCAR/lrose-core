@@ -36,7 +36,7 @@
  * DRAW_LEFT_LABEL: Draw an axis in the left margin & label it
  */
 
-int draw_hwin_left_margin( Drawable xid) 
+int draw_hwin_left_margin( QPaintDevice *pdev) 
 {
     int    x_start;
     int    tick_xstart,tick_xend;

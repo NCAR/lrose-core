@@ -36,7 +36,7 @@
  * RENDER_XSECT_TOP_LAYERS: Render reference lines
  */
 
-void render_xsect_top_layers(Drawable xid, int page)
+void render_xsect_top_layers(QPaintDevice *pdev, int page)
 {
     int x1,y1,x2,y2;
     double   x_dproj,km_ht;

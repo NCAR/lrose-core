@@ -37,7 +37,7 @@
  *  Frame as an image file, after rendering products
  */
 
-int save_h_movie_frame( int index, Drawable xid, int page)
+int save_h_movie_frame( int index, QPaintDevice *pdev, int page)
 {
     if(gd.debug1) {
         fprintf(stderr,"\nSaving  horiz movie_frame %d\n",index);
@@ -100,7 +100,7 @@ int save_h_movie_frame( int index, Drawable xid, int page)
  * SAVE_V_MOVIE_FRAME:
  */
 
-int save_v_movie_frame( int index, Drawable xid)
+int save_v_movie_frame( int index, QPaintDevice *pdev)
 {
     if(gd.debug1) fprintf(stderr,"Saving XSECT movie_frame %d Save_active: %d\n",index,gd.series_save_active);
 

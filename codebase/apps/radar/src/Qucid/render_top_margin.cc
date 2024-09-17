@@ -32,13 +32,13 @@
 
 #include "cidd.h"
 
-int draw_alternate_top_margin( Drawable xid);
+int draw_alternate_top_margin( QPaintDevice *pdev);
 /**********************************************************************
  * DRAW_HWIN_TOP_LABEL: Label the top of the horizontal image with
  *   a distance scale.
  */
 
-int draw_hwin_top_margin( Drawable xid)
+int draw_hwin_top_margin( QPaintDevice *pdev)
 {
     int    tick_xstart;
     int    tick_ystart,tick_yend;
@@ -151,7 +151,7 @@ int draw_hwin_top_margin( Drawable xid)
  *   Frame time and Height Level
  */     
 
-int draw_alternate_top_margin( Drawable xid)
+int draw_alternate_top_margin( QPaintDevice *pdev)
 {
     int    label_width;
     int    label_height;

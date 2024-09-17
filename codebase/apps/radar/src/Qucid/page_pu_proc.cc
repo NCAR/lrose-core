@@ -477,7 +477,7 @@ void prod_font_sel_proc(Panel_item item, int value, Event *event)
 void prod_line_width_proc(Panel_item item, int value, Event *event)
 {
     int i;
-    GC gc;
+    QBrush brush;
     // Use the unused parameters
     item = 0;  event = NULL;
 

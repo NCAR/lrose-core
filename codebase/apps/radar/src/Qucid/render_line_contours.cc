@@ -32,7 +32,7 @@
 
 #include "cidd.h"
 
-void render_line_contours(Drawable xid, contour_info_t *crec)
+void render_line_contours(QPaintDevice *pdev, contour_info_t *crec)
 {
     int    i,j,len;
     int    startx,starty,endx,endy;

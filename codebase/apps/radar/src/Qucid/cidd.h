@@ -48,6 +48,9 @@
 #include <X11/Xutil.h>       
 #include <X11/Xresource.h>       
 
+#include <QPaintDevice>
+#include <QBrush>
+
 // LROSE includes
 
 #include <dataport/port_types.h> 
@@ -120,8 +123,8 @@ public:
   int argc;
   char **argv;
 
-  Drawable hcan_xid;    
-  Drawable vcan_xid;    
+  QPaintDevice *hcan_pdev;    
+  QPaintDevice *vcan_pdev;    
 
   int debug;        // Normal debugging flag  
   int debug1;       // More verbose debugging  flag 
@@ -213,9 +216,10 @@ public:
 
   // Drawing contexts
 
-  GC def_gc;       // default gc for copy & misc X operations  
-  GC ol_gc;        // Gc for drawing in the reference reference overlay color 
-  GC clear_ol_gc;  // Gc for Removing the reference overlay color 
+  QBrush def_brush;       // default brush for copy & misc X operations  
+  QBrush ol_brush;        // Brush for drawing in the reference reference overlay color 
+  QBrush clear_ol_brush;  // Brush for Removing the reference overlay color 
+
   char *dpyName; // display name
   Display *dpy;     // default Display pointer for copy operations 
   Colormap cmap;

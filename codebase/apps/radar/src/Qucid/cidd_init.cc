@@ -2687,8 +2687,8 @@ void init_globals()
   
 {
 
-  gd.hcan_xid = 0;
-  gd.vcan_xid = 0;
+  gd.hcan_pdev = NULL;
+  gd.vcan_pdev = NULL;
     
   gd.debug = 0;
   gd.debug1 = 0;
@@ -2745,21 +2745,21 @@ void init_globals()
   gd.app_instance = NULL;      
 
   MEM_zero(gd.data_info);
-
+  
   MEM_zero(gd.gen_time_list);
 
   MEM_zero(gd.h_win);
   MEM_zero(gd.v_win);
 
-  gd.def_gc = 0;
-  gd.ol_gc = 0;
-  gd.clear_ol_gc = 0;
+  // gd.def_gc = 0;
+  // gd.ol_gc = 0;
+  // gd.clear_ol_gc = 0;
   gd.dpyName = NULL;
   gd.dpy = NULL;
 
-  MEM_zero(gd.color);
-  MEM_zero(gd.null_color);
-
+  // MEM_zero(gd.color);
+  // MEM_zero(gd.null_color);
+  
   MEM_zero(gd.ciddfont);
   MEM_zero(gd.fontst);
     

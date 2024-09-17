@@ -35,7 +35,7 @@
  * RETRIEVE_H_MOVIE_FRAME:
  */
 
-void retrieve_h_movie_frame(int    index, Drawable xid)
+void retrieve_h_movie_frame(int    index, QPaintDevice *pdev)
 {
     if(gd.movie.frame[index].h_xid != 0) {        /* can get from the pixmap */
         if(gd.movie.frame[index].h_xid != xid) {
@@ -58,7 +58,7 @@ void retrieve_h_movie_frame(int    index, Drawable xid)
  * RETRIEVE_V_MOVIE_FRAME:
  */
 
-void retrieve_v_movie_frame(int index, Drawable xid)
+void retrieve_v_movie_frame(int index, QPaintDevice *pdev)
 {
     if(gd.movie.frame[index].v_xid != 0) {        /* can save to the pixmap */
         if(gd.movie.frame[index].v_xid != xid) {

@@ -37,7 +37,7 @@
  * RENDER_TOP_LAYERS: Render reference lines and map overlays 
  */
 
-int render_top_layers( Drawable xid)
+int render_top_layers( QPaintDevice *pdev)
 {
     /* render range_rings if selected */
     if(gd.legends.range) draw_cap_range_rings(xid);

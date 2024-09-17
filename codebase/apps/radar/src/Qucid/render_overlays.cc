@@ -33,7 +33,7 @@
 
 #define XPOINT_BUF_SIZE  1024
 
-static void draw_label_centered(Drawable xid, GC gc,
+static void draw_label_centered(QPaintDevice *pdev, GC gc,
 				int xx, int yy,
 				const char *label);
 
@@ -515,7 +515,7 @@ void render_map_overlays(Drawable  xid)
 // draw label, in different modes
 
 
-static void draw_label_centered(Drawable xid, GC gc,
+static void draw_label_centered(QPaintDevice *pdev, QBrush brush,
 				int xx, int yy,
 				const char *label)
   

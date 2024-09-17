@@ -31,6 +31,9 @@
 #ifndef RenderContext_HH
 #define RenderContext_HH
 
+#include <QBrush>
+#include <QPaintDevice>
+
 #include <rapplot/gplot.h>
 #include <Spdb/Symprod.hh>
 #include <Mdv/MdvxProj.hh>
@@ -74,7 +77,7 @@ public:
 
   // default constructor
   
-  RenderContext(Display *dpy, Drawable xid, GC gc,
+  RenderContext(/* Display *dpy, */ QPaintDevice *pdev, QBrush brush,
 		Colormap cmap, const MdvxProj &in_proj);
   
 
@@ -91,11 +94,11 @@ public:
   void set_vert_limits(double min_alt, double max_alt);
 
 
-  void set_drawable(Drawable id) { xid = id;  }
+  void set_drawable(QPaintDevice *dev) { pdev = dev;  }
 
   void set_draw_pick_boxes(bool st) { draw_pick_boxes = st; }
 
-  void set_gc(GC g) { gc = g; xref.gc = g; }
+  void set_brush(QBrush b) { brush = b; /* xref.gc = gc; */ }
   
   void set_offsets(int xoff, int yoff) { offset_x = xoff; offset_y = yoff; }
 
@@ -103,7 +106,7 @@ public:
 
   void set_hidden(bool show) { show_hidden = show; }
 
-  void set_xid(Drawable x) {  xref.drawable = x; }
+  // void set_xid(Drawable x) {  xref.drawable = x; }
 
   void set_iconscale(double km_across_screen); 
 
@@ -144,15 +147,16 @@ private:
 
   const MdvxProj &proj;   // Display Projections
 
-  Display *display;  // X11 related Members
-  Drawable xid;
+  // Display *display;  // X11 related Members
   Colormap cmap;
-  GC gc;
+  QPaintDevice *pdev;
+  QBrush brush;
+
 
   // Gplot structs
   gframe_t frame;
-  xref_t   xref;
-  psgc_t psgc;
+  // xref_t   xref;
+  // psgc_t psgc;
   int dev;
 
   double iconScale;

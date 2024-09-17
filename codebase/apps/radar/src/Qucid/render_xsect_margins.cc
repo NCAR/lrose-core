@@ -38,7 +38,7 @@
  * margin is set large enough
  */
 
-void draw_vwin_right_margin( Drawable xid, int page)
+void draw_vwin_right_margin( QPaintDevice *pdev, int page)
 {
   int x_start = 0;
   int y_start = 0;
@@ -71,7 +71,7 @@ void draw_vwin_right_margin( Drawable xid, int page)
  * DRAW_LEFT_LABEL: Draw an axis in the left margin & label it
  */
 
-void draw_vwin_left_margin( Drawable xid, int page) 
+void draw_vwin_left_margin( QPaintDevice *pdev, int page) 
 {
     int x_start;
     // int y_start;
@@ -169,7 +169,7 @@ void draw_vwin_left_margin( Drawable xid, int page)
  * DRAW_VWIN_TOP_LABEL: Label the top of the horizontal image
  */
 
-void draw_vwin_top_margin(Drawable xid, int page)
+void draw_vwin_top_margin(QPaintDevice *pdev, int page)
 {
     int    x_start,y_start;
     int    xmid,ymid;
@@ -229,7 +229,7 @@ void draw_vwin_top_margin(Drawable xid, int page)
  * DRAW_VWIN_BOT_LABEL: Draw an axis and lable the bottom margin
  */
 
-void draw_vwin_bot_margin(Drawable xid, int page)
+void draw_vwin_bot_margin(QPaintDevice *pdev, int page)
 {
     int i;
     int tick_xstart;

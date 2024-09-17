@@ -37,7 +37,7 @@
  *        and its associated overlays and labels  labels. 
  */
 
-int render_horiz_display( Drawable xid, int page, time_t start_time, time_t end_time)
+int render_horiz_display( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
 
   cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH xid: " << xid << endl;

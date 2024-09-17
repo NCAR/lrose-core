@@ -42,7 +42,7 @@
  *
  */
 
-void draw_cap_azimuth_lines(Drawable xid)
+void draw_cap_azimuth_lines(QPaintDevice *pdev)
 {
   
   static double az_interval = 0.0;

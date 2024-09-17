@@ -35,7 +35,7 @@
  *        margin if it is set large enough
  */
 
-int draw_hwin_right_margin( Drawable xid, int  page)
+int draw_hwin_right_margin( QPaintDevice *pdev, int  page)
 {
     int i;
     int x_start,y_start;

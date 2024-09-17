@@ -176,7 +176,7 @@ const char* height_label()
  *
  */
 
-int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t end_time)
+int draw_hwin_interior_labels( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
     int    i;
     int    out_of_date;    

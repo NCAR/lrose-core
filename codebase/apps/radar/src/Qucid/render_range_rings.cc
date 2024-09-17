@@ -41,7 +41,7 @@
  *
  */
 
-void draw_cap_range_rings( Drawable xid)
+void draw_cap_range_rings( QPaintDevice *pdev)
 {
     int    x,y;
     int    xmid,ymid;

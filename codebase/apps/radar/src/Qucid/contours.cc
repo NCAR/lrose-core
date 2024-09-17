@@ -54,7 +54,7 @@ static void draw_labels_for_line(const gframe_t *gframe,
 				  int n_points,
 				  GPoint *gpoints,
 				  double level,
-				  GC gc,
+				  QBrush brush,
 				  XFontStruct *font,
 				  char *label_loc,
 				  int max_n_labels_x,
@@ -65,7 +65,7 @@ static void fill_triangle(const gframe_t *frame, GC xgc,
 
 /////////////////////////////////////////////////////////////////////////
 
-void RenderLineContours(Drawable xid, contour_info_t *crec,
+void RenderLineContours(QPaintDevice *pdev, contour_info_t *crec,
 			bool is_vert /* = false */)
 
 {
@@ -263,7 +263,7 @@ static void draw_lines_for_level(const gframe_t &frame,
   
   // set gc
   
-  GC gc;
+  QBrush brush;
   double val = level.val;
 
   // check for special value
@@ -358,7 +358,7 @@ static void draw_labels_for_level(const gframe_t &frame,
     
   // set gc
   
-  GC gc;
+  QBrush brush;
   double val = level.val;
 
   // check for special value
@@ -417,7 +417,7 @@ static void draw_labels_for_line(const gframe_t *gframe,
 				 int n_points,
 				 GPoint *gpoints,
 				 double level,
-				 GC gc,
+				 QBrush brush,
 				 XFontStruct *font,
 				 char *label_loc,
 				 int max_n_labels_x,
@@ -525,7 +525,7 @@ static void draw_labels_for_line(const gframe_t *gframe,
 //////////////////////////
 // render filled polygons
 
-void RenderFilledPolygons(Drawable xid,
+void RenderFilledPolygons(QPaintDevice *pdev,
 			  met_record_t *mr, 
 			  bool is_vert /* = false */)
 
@@ -681,7 +681,7 @@ void RenderFilledPolygons(Drawable xid,
 
     const MdvxContourLevel level = levels[ilevel];
 
-    GC gc;
+    QBrush brush;
     if ((int) ilevel < vcm->nentries) {
       if (level.extra) {
 	gc = gd.legends.background_color->gc;

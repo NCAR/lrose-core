@@ -35,7 +35,7 @@
  * RENDER_VERT_DISPLAY: Render the vertical cross section display
  */
 
-int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_time)
+int render_vert_display( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
     int i;
     int x1,y1,ht,wd;    /* boundries of image area */

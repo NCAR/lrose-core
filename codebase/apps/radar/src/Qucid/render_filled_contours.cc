@@ -209,7 +209,7 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
  * rectangular grid
  */
 
-void draw_filled_contours( Drawable xid, int x_start[], int y_start[], met_record_t *mr)
+void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
    int num_levels;
    GC    gc_array[MAX_COLORS];
@@ -274,7 +274,7 @@ void draw_filled_contours( Drawable xid, int x_start[], int y_start[], met_recor
  * Distorted grid
  */
 
-void draw_filled_contours_d( Drawable xid,  met_record_t *mr)
+void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
 {
    int i,j;
    int num_levels;
@@ -428,7 +428,7 @@ void draw_filled_contours_d( Drawable xid,  met_record_t *mr)
  *
  */
 
-void draw_xsect_filled_contours( Drawable xid, int x_start[], int y_start[], met_record_t *mr)
+void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
    int i,j;
    int len;

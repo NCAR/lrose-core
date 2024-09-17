@@ -31,7 +31,7 @@
 
 #include "cidd.h"
 
-static void _draw_mark(Drawable xid, double xx, double yy,
+static void _draw_mark(QPaintDevice *pdev, double xx, double yy,
                        const Color_gc_t *color, int size);
 
 void render_click_marks()
@@ -102,7 +102,7 @@ void render_click_marks()
 /////////////////////////////////////////////////////////////
 // Draw a cross at the mark location
 
-static void _draw_mark(Drawable xid, double xx, double yy,
+static void _draw_mark(QPaintDevice *pdev, double xx, double yy,
                        const Color_gc_t *color, int size)
 
 {

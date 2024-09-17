@@ -48,7 +48,7 @@ double peak_icing(met_record_t *mr_icing, double start_km, double end_km);
  * RENDER_ROUTE_WINDS: Render the route winds line 
  */
 
-void render_route_winds( Drawable xid)
+void render_route_winds( QPaintDevice *pdev)
 {
     int i,loop_count, index;
     int num_route_segs,num_route_points;

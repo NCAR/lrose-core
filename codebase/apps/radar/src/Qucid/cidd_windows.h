@@ -117,10 +117,10 @@ typedef struct { /* WINDOW Data - for each display window */
  Drawable tmp_xid; /* X ID of area to drap fields that aren't updated */
  Drawable page_xid[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
 
- QPaintDevice vis_qpd; /* X ID of Visible canvas */
- QPaintDevice *can_qpd; /* X ID of last stage canvases to draw products on top of */
- QPaintDevice tmp_qpd; /* X ID of area to drap fields that aren't updated */
- QPaintDevice page_qpd[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
+ QPaintDevice *vis_qpd; /* X ID of Visible canvas */
+ QPaintDevice **can_qpd; /* X ID of last stage canvases to draw products on top of */
+ QPaintDevice *tmp_qpd; /* X ID of area to drap fields that aren't updated */
+ QPaintDevice *page_qpd[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
 
  draw_dim_t win_dim; /* Window dimensions and position */
  draw_dim_t can_dim; /* Canvas dimensions and position */

@@ -39,7 +39,7 @@
 #include <dsserver/DsLdataInfo.hh>
 
 static void dump_image_xml(const char *dir, const char *fname);
-static void dump_png(Drawable xid, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
+static void dump_png(QPaintDevice *pdev, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
 
 /*************************************************************************
  * GEN_IMAGE_FNAME
@@ -173,7 +173,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
   const char *fname;
   char dir[MAX_PATH_LEN * 2];
   Window w = 0;
-  Drawable xid;
+  QPaintDevice *pdev;
 
   // day dir?
 
@@ -408,7 +408,7 @@ static void dump_image_xml(const char *dir, const char *fname)
 //////////////////////////////////////////////////////////////////////////////
 // DUMP_PNG: Write the actual image as a png
 //
-static void dump_png(Drawable xid,
+static void dump_png(QPaintDevice *pdev,
                      Window w,
                      const char *dir,
                      const char *fname,

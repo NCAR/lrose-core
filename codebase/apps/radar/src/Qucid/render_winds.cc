@@ -34,13 +34,13 @@
 #include "cidd.h"
 
 
-int render_rect_wind_grid(Drawable xid, int k, int font_index);
-int render_distorted_wind_grid(Drawable xid, int k, int font_index);
+int render_rect_wind_grid(QPaintDevice *pdev, int k, int font_index);
+int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index);
 /**********************************************************************
  * RENDER_WIND_VECTORS:
  *
  */
-int render_wind_vectors(Drawable xid, int start_time, int end_time)
+int render_wind_vectors(QPaintDevice *pdev, int start_time, int end_time)
 {
     int   i,k;
     int   nx,ny;
@@ -187,7 +187,7 @@ int render_wind_vectors(Drawable xid, int start_time, int end_time)
 /**********************************************************************
  * RENDER_RECT_WIND_GRID: Render the winds on a regular rectangular grid
  */
-int render_rect_wind_grid(Drawable xid, int k, int font_index)
+int render_rect_wind_grid(QPaintDevice *pdev, int k, int font_index)
 {
     int    i,j;
     int    nx,ny;
@@ -396,7 +396,7 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
 /**********************************************************************
  * RENDER_DISTORTED_WIND_GRID
  */
-int render_distorted_wind_grid(Drawable xid, int k, int font_index)
+int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index)
 {
     int    i,j;
     int    nx,ny;

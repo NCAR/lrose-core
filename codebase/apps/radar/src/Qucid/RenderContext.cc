@@ -35,13 +35,14 @@
 //////////////////////////////////////////
 // DEFAULT CONSTRUCTOR
 
-RenderContext::RenderContext(Display *dpy, Drawable xid, GC gc,
+RenderContext::RenderContext(/* Display *dpy,*/ QPaintDevice *pdev,
+                             QBrush brush,
                              Colormap cmap, const MdvxProj &in_proj)
-                             : clip_limits_changed(false),
-			       vert_limits_changed(false),
-			       proj(in_proj), display(dpy),
-			       cmap(cmap),
-			       gc(gc)
+        : clip_limits_changed(false),
+          vert_limits_changed(false),
+          proj(in_proj), /* display(dpy), */
+          cmap(cmap),
+          pdev(pdev)
 {
   
   iconScale = 1.0;
@@ -60,15 +61,15 @@ RenderContext::RenderContext(Display *dpy, Drawable xid, GC gc,
   min_lat = -90.0;
   max_lat = 90.0;
   min_lon = -180.0;
- max_lon = 180.0;
+  max_lon = 180.0;
   min_alt = 0.0;
   max_alt = 100000.0;
 
   offset_x = 0;
   offset_y = 0;
 
-  xref.display = dpy;
-  xref.drawable = xid;
+  // xref.display = dpy;
+  // xref.drawable = xid;
 }
 
 //////////////
@@ -160,7 +161,7 @@ void RenderContext::set_domain( double xmin, double xmax, double ymin, double ym
     frame.w_ymin = ymin;
     frame.w_ymax = ymax;
 
-    frame.x = &xref;
+    // frame.x = &xref;
 
     xref.width = width;
     xref.height = height;

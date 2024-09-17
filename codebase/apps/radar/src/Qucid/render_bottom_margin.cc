@@ -32,7 +32,7 @@
 
 #include "cidd.h"
 
-int draw_alternate_hwin_bot_margin( Drawable xid);
+int draw_alternate_hwin_bot_margin( QPaintDevice *pdev);
 
 // Slope and intercept for time to pixel mapping function 
 static double secs_pixel; // Seconds per pixel
@@ -54,7 +54,7 @@ time_t time_from_pixel(int x_pixel)
  * DRAW_HWIN_BOT_MARGIN: Draw an axis and label the bottom margin
  */
 
-int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end_time)
+int draw_hwin_bot_margin( QPaintDevice *pdev, int  page, time_t start_time, time_t end_time)
 {
     int x1,x2;
     int label_width;
@@ -240,7 +240,7 @@ int draw_hwin_bot_margin( Drawable xid, int  page, time_t start_time, time_t end
  * DRAW_ALTERNATE_HWIN_BOT_MARGIN: Put a distance scale along the bottom
  */
 
-int draw_alternate_hwin_bot_margin( Drawable xid)
+int draw_alternate_hwin_bot_margin( QPaintDevice *pdev)
 {
     int    tick_xstart;
     int    tick_ystart,tick_yend;

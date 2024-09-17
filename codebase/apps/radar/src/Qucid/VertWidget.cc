@@ -1002,7 +1002,7 @@ int VertWidget::renderVMovieFrame(int index, QPainter &painter)
  * RENDER_VERT_DISPLAY: Render the vertical cross section display
  */
 
-int VertWidget::renderVertDisplay(Drawable xid,
+int VertWidget::renderVertDisplay(QPaintDevice *pdev,
                                   int page,
                                   time_t start_time,
                                   time_t end_time)

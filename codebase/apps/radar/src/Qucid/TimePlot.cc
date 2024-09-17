@@ -82,7 +82,7 @@ TimePlot::TimePlot(Color_gc_t &background,
 //////////////////////////////////////////
 // INIT: Set up the Time plot graphics, etc
 //
-void TimePlot::Init(Display *dpy, GC gc, Colormap cmap /* , Canvas canvas */)
+void TimePlot::Init(Display *dpy, QBrush brush, Colormap cmap /* , Canvas canvas */)
 {
     Window  root; // Root window ID of drawable
     unsigned int    border_width,depth; 

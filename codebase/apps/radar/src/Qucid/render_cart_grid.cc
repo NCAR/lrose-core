@@ -37,7 +37,7 @@
  *    Returns 1 on success, 0 on failure
  */
 
-int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
+int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
   int    i,j;
   int    ht,wd;               /* Dims of data rectangles  */

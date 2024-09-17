@@ -37,7 +37,7 @@
  *
  */
 
-int draw_filled_image( Drawable xid, int x_start[], int y_start[], met_record_t *mr)
+int draw_filled_image( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
     unsigned short    miss;           /* missing/unmeasured data value */
     unsigned short    bad;            /* bad/noise data value */

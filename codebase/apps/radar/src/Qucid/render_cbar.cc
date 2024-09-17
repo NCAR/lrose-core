@@ -37,7 +37,7 @@
  */
 
 void
-draw_colorbar(Display *dpy, Drawable xid, GC gc,  int x1,  int y1,  int width,  int height,
+draw_colorbar(Display *dpy, QPaintDevice *pdev, QBrush brush,  int x1,  int y1,  int width,  int height,
 	      int num_entries,  Val_color_t **vc,  int orient,  const char *units)
 {
     int 	i;

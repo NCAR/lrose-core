@@ -98,7 +98,7 @@ met_record_t    *choose_ht_sel_mr(int page)
  */
 
 void
-draw_height_selector(Display *dpy, Drawable xid, GC gc_axis, GC gc_ind,
+draw_height_selector(Display *dpy, QPaintDevice *pdev, QBrush brush_axis, QBrush brush_ind,
                  int page, int x1,  int y1,  int width,  int height)
 	      
 {

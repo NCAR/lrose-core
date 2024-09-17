@@ -33,7 +33,7 @@
 
 #define IDEAL_NUM_VERT_CONT_LEVELS 15.0
 
-void render_xsect_line_contours(Drawable xid,contour_info_t *crec)
+void render_xsect_line_contours(QPaintDevice *pdev,contour_info_t *crec)
 {
     int i,len;
     int tmp,num_vals;

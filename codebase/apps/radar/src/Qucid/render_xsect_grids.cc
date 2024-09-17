@@ -34,13 +34,13 @@
 #include <vector>
 #define MESSAGE_LEN 1024
 
-static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
 
 /**********************************************************************
  * RENDER_XSECT_GRIDS
  */
 
-int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
+int render_xsect_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
 
     int    i,j;
@@ -212,7 +212,7 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
 //////////////////////////
 // rendering for POLAR RHI
 
-static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
+static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 
 {
 

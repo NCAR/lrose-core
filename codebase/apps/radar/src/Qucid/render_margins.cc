@@ -36,7 +36,7 @@
  * RENDER_HORIZ_MARGINS: Render the margins for the horizontal display.
  */
 
-void render_horiz_margins(Drawable xid, int page,
+void render_horiz_margins(QPaintDevice *pdev, int page,
 			  time_t start_time, time_t end_time)
 {
   int    x1, y1, ht, wd;    /* boundries of image area */

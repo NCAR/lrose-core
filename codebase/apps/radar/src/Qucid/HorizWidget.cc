@@ -1798,7 +1798,7 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
   int h_image,v_image;
   int stat;
   int none_found = 1;
-  Drawable xid;
+  QPaintDevice *pdev;
   
   h_image = gd.h_win.page + 1;
   v_image = gd.v_win.page + 1;

@@ -39,7 +39,7 @@ double w_scale_factor = 0.0;
  * RENDER_VERT_WIND_VECTORS: Render vertical Cross section winds 
  */
 
-int render_vert_wind_vectors( Drawable xid)
+int render_vert_wind_vectors( QPaintDevice *pdev)
 {
     int i,j,k;
     // int wd;              /* Dims of drawing canvas */
