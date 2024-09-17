@@ -83,7 +83,7 @@ extern void pixel_to_grid_radar_no_cosine( met_record_t *mr, margin_t *margin,
                                            int *grid_x,    /* RETURN */
                                            int *grid_y);   /* RETURN */
 #ifndef CIDD_FONT
-extern void load_fonts( Display *dpy);
+// extern void load_fonts( Display *dpy);
 extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, int *ymid);
 #endif
 
@@ -121,12 +121,12 @@ extern void init_signal_handlers();
 #endif
 
 #ifndef COLORSCALES
-extern void setup_colorscales(Display *dpy);
+// extern void setup_colorscales(Display *dpy);
 extern void setup_color_mapping(Valcolormap_t *vcm,
 				double scale, double bias, int transform_type,
 				double bad_value, double missing_value);
 extern void autoscale_vcm(Valcolormap_t *vcm, double min, double max);
-extern GC Val2GC( Valcolormap_t *vcm, double val);
+extern GC Val2GC(Valcolormap_t *vcm, double val);
 
 #endif
 
@@ -450,53 +450,55 @@ extern int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_
 #endif
 
 #ifndef RENDER_CBAR
-extern void draw_colorbar(Display *dpy, QPaintDevice *pdev, GC gc,  int x1,  int y1,
-                   int width, int height,
-                   int num_entries,  Val_color_t **vc,
-                   int orient,  const char *units);
+// extern void draw_colorbar(Display *dpy, QPaintDevice *pdev, GC gc,  int x1,  int y1,
+//                           int width, int height,
+//                           int num_entries,  Val_color_t **vc,
+//                           int orient,  const char *units);
 #endif
 
 
 #ifndef RENDER_HT_SEL
 extern double height_from_pixel(int y_pixel, met_record_t *mr);
 extern met_record_t    *choose_ht_sel_mr(int page);
-extern void draw_height_selector(Display *dpy, QPaintDevice *pdev, GC gc_axis,
-	GC gc_ind, int page,  int x1,  int y1, int width, int height);
+// extern void draw_height_selector(Display *dpy, QPaintDevice *pdev, GC gc_axis,
+//                                  GC gc_ind, int page,  int x1,  int y1, int width, int height);
 #endif
 
 #ifndef RENDER_CONTROL
-extern int render_horiz_display( QPaintDevice *pdev, int page, time_t start_time,
-                         time_t end_time);
+extern int render_horiz_display(QPaintDevice *pdev, int page, time_t start_time,
+                                time_t end_time);
 #endif
 
 #ifndef RENDER_DISTORTED_GRID
-extern int  render_distorted_grid( QPaintDevice *pdev, met_record_t *mr, 
-                                 time_t start_time, time_t end_time,
-                                 int is_overlay_field);
+extern int  render_distorted_grid(QPaintDevice *pdev, met_record_t *mr, 
+                                  time_t start_time, time_t end_time,
+                                  int is_overlay_field);
 #endif
 
 #ifndef RENDER_FILLED_CONTOURS
-extern void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[],
-                           met_record_t *mr);
-extern void draw_filled_contours_d( QPaintDevice *pdev, met_record_t *mr);
+extern void draw_filled_contours(QPaintDevice *pdev,
+                                 int x_start[], int y_start[],
+                                 met_record_t *mr);
+extern void draw_filled_contours_d(QPaintDevice *pdev, met_record_t *mr);
 
-extern void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[],
-                           met_record_t *mr);
+extern void draw_xsect_filled_contours( QPaintDevice *pdev,
+                                        int x_start[], int y_start[],
+                                        met_record_t *mr);
 #endif
 
 extern void RenderFilledPolygons(QPaintDevice *pdev, met_record_t *mr, 
 				 bool is_vert = false);
 
 #ifndef RENDER_FILLED_IMAGE
-extern int draw_filled_image( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr);
+extern int draw_filled_image(QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr);
 #endif
 
 #ifndef RENDER_GRIDS
-extern int render_grid( QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+extern int render_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_LEFT_MARGIN
-extern int draw_hwin_left_margin( QPaintDevice *pdev);
+extern int draw_hwin_left_margin(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_LINE_CONTOURS
@@ -514,7 +516,7 @@ extern void render_xsect_line_contours(QPaintDevice *pdev, contour_info_t *crec)
 extern const char *vlevel_label(Mdvx::field_header_t *fhdr);
 extern const char * field_label( met_record_t *mr);
 extern const char* height_label();
-extern int draw_hwin_interior_labels( QPaintDevice *pdev, int page, time_t start_time, time_t end_time);
+extern int draw_hwin_interior_labels(QPaintDevice *pdev, int page, time_t start_time, time_t end_time);
 #endif
 
 #ifndef RENDER_MARGINS
@@ -533,24 +535,24 @@ extern void render_map_overlays(QPaintDevice *pdev);
 
 #ifndef RENDER_POLAR_GRID
 extern void rotate_points(double theta, double x_cent, double y_cent, double *xarr, double *yarr, int num_points);
-extern int render_polar_grid( QPaintDevice *pdev, met_record_t *mr,
+extern int render_polar_grid(QPaintDevice *pdev, met_record_t *mr,
                       time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_PRODUCTS
-extern void render_products( QPaintDevice *pdev, time_t start_time, time_t end_time);
+extern void render_products(QPaintDevice *pdev, time_t start_time, time_t end_time);
 #endif
 
 #ifndef RENDER_RANGE_RINGS
-extern void draw_cap_range_rings( QPaintDevice *pdev);
+extern void draw_cap_range_rings(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_RIGHT_MARGIN
-extern int draw_hwin_right_margin( QPaintDevice *pdev, int page);
+extern int draw_hwin_right_margin(QPaintDevice *pdev, int page);
 #endif
 
 #ifndef RENDER_ROUTE_WINDS
-extern void render_route_winds( QPaintDevice *pdev);
+extern void render_route_winds(QPaintDevice *pdev);
 extern void  ave_winds(met_record_t *mr_u, met_record_t *mr_v,
          double start_km, double end_km, double *ave_deg, double *ave_spd);
 extern double peak_turb(met_record_t *mr_turb, double start_km, double end_km);
@@ -559,8 +561,8 @@ extern void rotate_route(double theta);
 #endif
 
 #ifndef RENDER_TERRAIN
-extern void render_h_terrain( QPaintDevice *pdev, int page);
-extern void render_v_terrain( QPaintDevice *pdev);
+extern void render_h_terrain(QPaintDevice *pdev, int page);
+extern void render_v_terrain(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_CLICK_MARKS
@@ -568,11 +570,11 @@ extern int render_click_marks();
 #endif
 
 #ifndef RENDER_TOP_LAYERS
-extern int render_top_layers( QPaintDevice *pdev);
+extern int render_top_layers(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_TOP_MARGIN
-extern int draw_hwin_top_margin( QPaintDevice *pdev);
+extern int draw_hwin_top_margin(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_WINDS
@@ -580,22 +582,22 @@ extern int render_wind_vectors(QPaintDevice *pdev, int start_time, int end_time)
 #endif
 
 #ifndef RENDER_XSECT_CONTROL
-extern int render_vert_display( QPaintDevice *pdev, int page, time_t start_time, time_t end_time);
+extern int render_vert_display(QPaintDevice *pdev, int page, time_t start_time, time_t end_time);
 #endif
 
 #ifndef RENDER_XSECT_GRIDS
-extern int render_xsect_grid( QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+extern int render_xsect_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_XSECT_MARGINS
-extern void draw_vwin_right_margin( QPaintDevice *pdev, int page);
-extern void draw_vwin_left_margin( QPaintDevice *pdev, int page);
+extern void draw_vwin_right_margin(QPaintDevice *pdev, int page);
+extern void draw_vwin_left_margin(QPaintDevice *pdev, int page);
 extern void draw_vwin_top_margin(QPaintDevice *pdev, int page);
 extern void draw_vwin_bot_margin(QPaintDevice *pdev, int page);
 #endif
 
 #ifndef RENDER_XSECT_PRODUCTS
-extern void render_vert_products( QPaintDevice *pdev);
+extern void render_vert_products(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_XSECT_TOP_LAYERS
@@ -603,7 +605,7 @@ extern void render_xsect_top_layers(QPaintDevice *pdev, int page);
 #endif
 
 #ifndef RENDER_XSECT_WINDS
-extern int render_vert_wind_vectors( QPaintDevice *pdev);
+extern int render_vert_wind_vectors(QPaintDevice *pdev);
 #endif
 
 #ifndef ROUTE_WINDS_INIT

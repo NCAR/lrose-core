@@ -44,9 +44,9 @@
 #include <sys/shm.h>
 #include <vector>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>       
-#include <X11/Xresource.h>       
+// #include <X11/Xlib.h>
+// #include <X11/Xutil.h>       
+// #include <X11/Xresource.h>       
 
 #include <QPaintDevice>
 #include <QBrush>
@@ -220,8 +220,8 @@ public:
   QBrush ol_brush;        // Brush for drawing in the reference reference overlay color 
   QBrush clear_ol_brush;  // Brush for Removing the reference overlay color 
 
-  char *dpyName; // display name
-  Display *dpy;     // default Display pointer for copy operations 
+  // char *dpyName; // display name
+  // Display *dpy;     // default Display pointer for copy operations 
   Colormap cmap;
   Color_gc_t color[MAX_COLORS];   // stores all colors and GCs 
   Color_gc_t null_color;          // The color "transparent" 

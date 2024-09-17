@@ -95,7 +95,7 @@ public:
 
   // Render all products using the current context
   void draw(void);
-
+  
   SymprodRenderObj *get_closest_Rob() { return _active_Rob; }
 
   void draw_pick_obj(void); // Using the XOR GC

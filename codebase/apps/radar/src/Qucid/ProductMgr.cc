@@ -106,14 +106,14 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
       if(_params.show_data_messages) gui_label_h_frame(label,-1);
 
       if (_products[i]->getData(
-          (time_t) (start_time - (_params._symprod_prod_info[i].minutes_allow_before * 60)),
-          (time_t) (end_time + (_params._symprod_prod_info[i].minutes_allow_after * 60)),
-	  _context)) {
+                  (time_t) (start_time - (_params._symprod_prod_info[i].minutes_allow_before * 60)),
+                  (time_t) (end_time + (_params._symprod_prod_info[i].minutes_allow_after * 60)),
+                  _context)) {
 
-          _products[i]->_data_valid = 1;
-           return CIDD_FAILURE;
-     }
-    return INCOMPLETE;
+        _products[i]->_data_valid = 1;
+        return CIDD_FAILURE;
+      }
+      return INCOMPLETE;
     }
   }
 
@@ -135,16 +135,16 @@ void ProductMgr::pick_closest_obj(double lat, double lon)
 
   for (size_t i = 0; i < _products.size(); i++) {
 
-      dist = _products[i]->pick_closest_obj(lat, lon, _context);
+    dist = _products[i]->pick_closest_obj(lat, lon, _context);
 
 #ifdef DEBUG
-	  fprintf(stderr, "Prod: %d Min Dist: %g\n",i,dist);
+    fprintf(stderr, "Prod: %d Min Dist: %g\n",i,dist);
 #endif
 
-	  if(dist <= min_dist) { // greater than or equal to allow latest to be closest.
-		  min_dist = dist;
-		  _active_Rob = _products[i]->get_closest_symprod_obj();
-	  }
+    if(dist <= min_dist) { // greater than or equal to allow latest to be closest.
+      min_dist = dist;
+      _active_Rob = _products[i]->get_closest_symprod_obj();
+    }
   }
 
 }
@@ -156,19 +156,19 @@ void ProductMgr::pick_closest_obj(double lat, double lon)
 void ProductMgr::draw_pick_obj()
   
 {
-	_context.set_gc(gd.ol_gc);
-	_context.set_drawable(gd.hcan_xid);
-	_context.set_xid(gd.hcan_xid);
+  _context.set_brush(gd.ol_brush);
+  _context.set_drawable(gd.hcan_pdev);
+  _context.set_xid(gd.hcan_xid);
 
-	if(_active_Rob != NULL) {
-		_active_Rob->container->draw(_context);
-	} else {
-		 fprintf(stderr," NO Pickable product!\n");
-	}
+  if(_active_Rob != NULL) {
+    _active_Rob->container->draw(_context);
+  } else {
+    fprintf(stderr," NO Pickable product!\n");
+  }
 
-	_context.set_gc(gd.def_gc);
-	_context.set_drawable(gd.h_win.vis_xid);
-	_context.set_xid(gd.h_win.vis_xid);
+  _context.set_brush(gd.def_brush);
+  _context.set_drawable(gd.h_win.vis_xid);
+  _context.set_xid(gd.h_win.vis_xid);
 }
 
 //////////////////////////////////
@@ -178,12 +178,12 @@ void ProductMgr::draw_pick_obj()
 void ProductMgr::draw_pick_obj_plain()
   
 {
-	_context.set_gc(gd.def_gc);
-	_context.set_drawable(gd.hcan_xid);
-	_context.set_xid(gd.hcan_xid);
-	if(_active_Rob != NULL) {
-		_active_Rob->container->draw(_context);
-	}
+  _context.set_brush(gd.def_brush);
+  _context.set_drawable(gd.hcan_xid);
+  _context.set_xid(gd.hcan_xid);
+  if(_active_Rob != NULL) {
+    _active_Rob->container->draw(_context);
+  }
 }
 
 //////////////////////////////////
@@ -193,9 +193,9 @@ void ProductMgr::draw_pick_obj_plain()
 void ProductMgr::fill_export_fields(vector<world_pt_t> &wpt, string &label)
   
 {
-	if(_active_Rob != NULL) {
-		_active_Rob->container-> fill_export_fields(wpt, label);
-	}
+  if(_active_Rob != NULL) {
+    _active_Rob->container-> fill_export_fields(wpt, label);
+  }
 }
 
 //////////////////////////////////
@@ -270,7 +270,7 @@ void ProductMgr::reset_product_valid_flags_vert()
 //
 int ProductMgr::get_product_active(int product)
 {
-    return _products[product]->_active;
+  return _products[product]->_active;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ int ProductMgr::get_product_active(int product)
 //
 void ProductMgr::set_product_active(int product, int active)
 {
-    _products[product]->_active = active;
+  _products[product]->_active = active;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -286,7 +286,7 @@ void ProductMgr::set_product_active(int product, int active)
 //
 void ProductMgr::set_product_data_valid(int product, int valid)
 {
-    _products[product]->_data_valid  = valid;
+  _products[product]->_data_valid  = valid;
 }
 
 
@@ -295,7 +295,7 @@ void ProductMgr::set_product_data_valid(int product, int valid)
 //
 void ProductMgr::set_product_times_valid(int product, int valid)
 {
-    _products[product]->_times_valid  = valid;
+  _products[product]->_times_valid  = valid;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -303,7 +303,7 @@ void ProductMgr::set_product_times_valid(int product, int valid)
 //
 int ProductMgr::get_product_data_valid(int product)
 {
-    return _products[product]->_data_valid;
+  return _products[product]->_data_valid;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -311,7 +311,7 @@ int ProductMgr::get_product_data_valid(int product)
 //
 int ProductMgr::get_num_products()
 {
-    return (int) _products.size();
+  return (int) _products.size();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -338,32 +338,32 @@ void ProductMgr::check_product_validity(time_t tm,  DmapAccess &dmap)
 
   for (size_t i = 0; i < _products.size(); i++) {
 
-      if( _products[i]->_active) {
+    if( _products[i]->_active) {
 
-	   // pull out dir from url
-           char * start_ptr = strrchr(_params._symprod_prod_info[i].url,':');
-	   if(start_ptr == NULL) { // Must be a local file/dir based URL
-	       start_ptr = _params._symprod_prod_info[i].url;
-	   } else {
-	       start_ptr++;  // Move up one character
-	   }
+      // pull out dir from url
+      char * start_ptr = strrchr(_params._symprod_prod_info[i].url,':');
+      if(start_ptr == NULL) { // Must be a local file/dir based URL
+        start_ptr = _params._symprod_prod_info[i].url;
+      } else {
+        start_ptr++;  // Move up one character
+      }
 
-	   // Compare against all entries in data list
-	   for(int j = 0; j < nsets; j++ ) {
-	     const DMAP_info_t &info = dmap.getInfo(j);
+      // Compare against all entries in data list
+      for(int j = 0; j < nsets; j++ ) {
+        const DMAP_info_t &info = dmap.getInfo(j);
 
-	       // See if any data matches 
-	       if(strstr(info.dir,start_ptr) != NULL) {
-		  if(_products[i]->_last_collected < (int) info.last_reg_time) {
-                      _products[i]->_data_valid = 0;
-// 		      fprintf(stderr,"Product %s expired: last:%s",
-// 			      _sparams._prod_info[i].menu_label,
-// 			      asctime(gmtime(&(_products[i]->_last_collected))));
-//		      fprintf(stderr,"Now: %s",
-//			      asctime(gmtime(&((time_t) info.last_reg_time))));
-		  }
-	       }
-	    }
-	}
+        // See if any data matches 
+        if(strstr(info.dir,start_ptr) != NULL) {
+          if(_products[i]->_last_collected < (int) info.last_reg_time) {
+            _products[i]->_data_valid = 0;
+            // 		      fprintf(stderr,"Product %s expired: last:%s",
+            // 			      _sparams._prod_info[i].menu_label,
+            // 			      asctime(gmtime(&(_products[i]->_last_collected))));
+            //		      fprintf(stderr,"Now: %s",
+            //			      asctime(gmtime(&((time_t) info.last_reg_time))));
+          }
+        }
+      }
     }
+  }
 }

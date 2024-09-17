@@ -35,7 +35,8 @@
 //////////////////////////////////////////
 // DEFAULT CONSTRUCTOR
 
-RenderContext::RenderContext(/* Display *dpy,*/ QPaintDevice *pdev,
+RenderContext::RenderContext(/* Display *dpy,*/
+                             QPaintDevice *pdev,
                              QBrush brush,
                              Colormap cmap, const MdvxProj &in_proj)
         : clip_limits_changed(false),
@@ -55,8 +56,8 @@ RenderContext::RenderContext(/* Display *dpy,*/ QPaintDevice *pdev,
   *last_foreground_color = '\0';
   *last_background_color = '\0';
 
-  frame.ps = NULL; 
-  frame.psgc = NULL;
+  // frame.ps = NULL; 
+  // frame.psgc = NULL;
 
   min_lat = -90.0;
   max_lat = 90.0;
@@ -69,7 +70,9 @@ RenderContext::RenderContext(/* Display *dpy,*/ QPaintDevice *pdev,
   offset_y = 0;
 
   // xref.display = dpy;
-  // xref.drawable = xid;
+  xref.pdev = pdev;
+  xref.brush = brush;
+  
 }
 
 //////////////
@@ -153,25 +156,30 @@ void RenderContext::set_iconscale(double km_across_screen)
 // SET_DOMAIN 
 //
 
-void RenderContext::set_domain( double xmin, double xmax, double ymin, double ymax,
-                           int width,int height, XFontStruct *fontst)
+void RenderContext::set_domain(double xmin, double xmax, double ymin, double ymax,
+                               int width,int height, QFont *font)
 {
-    frame.w_xmin = xmin;
-    frame.w_xmax = xmax;
-    frame.w_ymin = ymin;
-    frame.w_ymax = ymax;
 
-    // frame.x = &xref;
+  frame.w_xmin = xmin;
+  frame.w_xmax = xmax;
+  frame.w_ymin = ymin;
+  frame.w_ymax = ymax;
 
-    xref.width = width;
-    xref.height = height;
-
-    xref.xscale = (double)xref.width / (frame.w_xmax - frame.w_xmin);
-    xref.yscale = (double)xref.height / (frame.w_ymax - frame.w_ymin); 
-
-
-    xref.gc = gc; 
-
-    xref.font = fontst;
+  if (frame.x) {
+    delete frame.x;
+  }
+  frame.x = &xref;
+  
+  xref.width = width;
+  xref.height = height;
+  
+  xref.xscale = (double)xref.width / (frame.w_xmax - frame.w_xmin);
+  xref.yscale = (double)xref.height / (frame.w_ymax - frame.w_ymin); 
+  
+  
+  xref.brush = brush;
+  
+  xref.font = font;
+  
 }
 

@@ -53,7 +53,53 @@ class SymprodRenderRectangle;
 class SymprodRenderChunk;
 
 ///////////////////////////////////////////////////////////////
-// class definition
+// class definitions
+
+class XrefObj {
+
+public:
+  
+  XrefObj() {
+    pdev = NULL;
+    pixmap = NULL;
+    width = height = 0;
+    xscale = yscale = 1.0;
+    QBrush brush;
+    font = NULL;
+  }
+  
+  // Display *display;
+  QPaintDevice *pdev;
+  Pixmap *pixmap;
+  size_t width, height;
+  double xscale, yscale;
+  QBrush brush;
+  QFont *font;
+
+};
+
+class GframeObj {
+
+public:
+  
+  GframeObj() {
+    w_xmin = w_ymin = -1000;
+    w_xmax = w_ymax = 1000;
+    x = new XrefObj;
+  }
+  
+  ~GframeObj() {
+    delete x;
+  }
+
+public:
+  
+  double w_xmin, w_ymin, w_xmax, w_ymax;
+  XrefObj *x;
+  // psref_t *ps;
+  // psgc_t *psgc;
+  
+};
 
 class RenderContext
 
@@ -77,12 +123,13 @@ public:
 
   // default constructor
   
-  RenderContext(/* Display *dpy, */ QPaintDevice *pdev, QBrush brush,
+  RenderContext(/* Display *dpy, */
+                QPaintDevice *pdev, QBrush brush,
 		Colormap cmap, const MdvxProj &in_proj);
   
 
   void set_domain( double xmin, double xmax, double ymin, double ymax,
-                    int width,int height, XFontStruct *fontst);
+                   int width,int height, QFont *font);
   
   void set_times(time_t ep_start, time_t ep_end,
                  time_t fr_start, time_t fr_end,
@@ -98,7 +145,7 @@ public:
 
   void set_draw_pick_boxes(bool st) { draw_pick_boxes = st; }
 
-  void set_brush(QBrush b) { brush = b; /* xref.gc = gc; */ }
+  void set_brush(QBrush b) { brush = b; xref.brush = b; }
   
   void set_offsets(int xoff, int yoff) { offset_x = xoff; offset_y = yoff; }
 
@@ -109,10 +156,11 @@ public:
   // void set_xid(Drawable x) {  xref.drawable = x; }
 
   void set_iconscale(double km_across_screen); 
-
+  
   void set_scale_constant(double constant) { scaleConstant = constant; }
 
   // destructor
+
   virtual ~RenderContext();
 
   char last_foreground_color[SYMPROD_COLOR_LEN];
@@ -121,6 +169,7 @@ public:
   void reset_fgbg(void); // Clear lst colors.
 
   int offset_x, offset_y;  
+
 protected:
   
   time_t epoch_start;
@@ -152,10 +201,9 @@ private:
   QPaintDevice *pdev;
   QBrush brush;
 
-
   // Gplot structs
-  gframe_t frame;
-  // xref_t   xref;
+  GframeObj frame;
+  XrefObj   xref;
   // psgc_t psgc;
   int dev;
 
