@@ -56,7 +56,7 @@ For details on builds and the code development environment, see:
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [Prepare for build](./docs/build/prepare_for_build.md) | Prepare you OS for building LROSE |
+| [Prepare for build](./docs/build/prepare_for_build.md) | Prepare your OS for building LROSE |
 | [Build overview](./docs/build/LROSE_build_main_page.md) | Building and code development |
 
 ### REPOSITORY ORGANIZATION
