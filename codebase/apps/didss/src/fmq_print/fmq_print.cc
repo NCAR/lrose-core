@@ -35,7 +35,7 @@
  *******************************************************************************/
 
 #define MAIN
-#include "fmq_print.h"
+#include "fmq_print.hh"
 #undef MAIN
 
 int main(int argc, char **argv)

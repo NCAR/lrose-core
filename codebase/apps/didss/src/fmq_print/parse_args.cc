@@ -34,7 +34,7 @@
  *
  *********************************************************************/
 
-#include "fmq_print.h"
+#include "fmq_print.hh"
 
 void parse_args(int argc, char **argv,
 		char **fmq_path_p)

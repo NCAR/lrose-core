@@ -34,7 +34,7 @@
  *
  *********************************************************************/
 
-#include "fmq_print.h"
+#include "fmq_print.hh"
 
 int print_slots(char *fmq_path)
 

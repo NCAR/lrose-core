@@ -34,7 +34,7 @@
  *
  *********************************************************************/
 
-#include "fmq_print.h"
+#include "fmq_print.hh"
 
 int print_stats(char *fmq_path)
 
