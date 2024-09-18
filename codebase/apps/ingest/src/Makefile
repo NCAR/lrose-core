@@ -58,7 +58,6 @@ SUB_DIRS = \
 	ShipObsIngest \
 	SigAirMet2Spdb \
 	SynopObsIngest \
-	Taf2Spdb \
 	UAEMesonet2Spdb \
 	Uf2Dsr \
 	Usgs2Spdb \

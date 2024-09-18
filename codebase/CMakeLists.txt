@@ -66,8 +66,6 @@ if(APPLE)
   endif(Qt5_FOUND)
 endif(APPLE)
 find_package (HDF5)
-# MAMBA_FORGE build - uncomment line below
-# set(CMAKE_PREFIX_PATH "$ENV{HOME}/mambaforge/")
 # find_package (NETCDF)
 # find_package (LROSE)
 if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)

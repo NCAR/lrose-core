@@ -102,6 +102,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 #Including Qt
 if (Qt5_FOUND)

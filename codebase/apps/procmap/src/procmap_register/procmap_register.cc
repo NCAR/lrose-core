@@ -44,7 +44,7 @@
 #include <toolsa/port.h>
 
 #define MAIN
-#include "procmap_register.h"
+#include "procmap_register.hh"
 #undef MAIN
 
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
    * set program name
    */
   
-  Glob->prog_name = "procmap_register";
+  Glob->prog_name = (char *) "procmap_register";
   
   /*
    * parse command line arguments

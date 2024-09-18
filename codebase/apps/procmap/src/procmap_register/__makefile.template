@@ -44,15 +44,15 @@ TARGET_FILE = procmap_register
 
 HDRS =
 
-SRCS = \
-	parse_args.c \
-	procmap_register.c
+CPPC_SRCS = \
+	parse_args.cc \
+	procmap_register.cc
 
 #
 # general targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets

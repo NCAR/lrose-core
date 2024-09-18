@@ -52,6 +52,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
+    mambaDir = os.path.join(homeDir, "mambaforge")
     coreDirDefault = os.path.join(thisScriptDir, "../..")
     parser = OptionParser(usage)
     parser.add_option('--debug',
@@ -76,6 +77,13 @@ def main():
     parser.add_option('--dependDirs',
                       dest='dependDirs', default='',
                       help='Comma-delimited list of dirs to be searched as dependencies. Each dir in the list will have include/ and lib/ subdirs.')
+    parser.add_option('--mambaBuild',
+                      dest='mambaBuild', default=False,
+                      action="store_true",
+                      help='Perform build using mamba installation.')
+    parser.add_option('--mambaDir',
+                      dest='mambaDir', default=mambaDir,
+                      help='Mamba-based build, specify the location of the mamba install')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -587,8 +595,10 @@ def writeCMakeListsTop(dir):
 
     fo.write('find_package (HDF5)\n')
 
-    fo.write('# MAMBA_FORGE build - uncomment line below\n')
-    fo.write('# set(CMAKE_PREFIX_PATH "$ENV{HOME}/mambaforge/")\n')
+    if (options.mambaBuild):
+        fo.write('# MAMBA_FORGE build\n')
+        fo.write('  set(MAMBA_INCLUDE_PATH %s/include)\n' % options.mambaDir)
+        fo.write('  set(MAMBA_LIBRARY_PATH %s/lib)\n' % options.mambaDir)
 
     fo.write('# find_package (NETCDF)\n')
     fo.write('# find_package (LROSE)\n')
@@ -958,23 +968,28 @@ def writeCMakeListsLib(libName, libSrcDir,
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    if (needX11 or needQt):
-        fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-        fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+    if (options.mambaBuild):
+        fo.write("include_directories (${MAMBA_INCLUDE_PATH})\n")
+    else:
+        if (needX11 or needQt):
+            fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
+            fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+            fo.write("endif()\n")
+        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
+        fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
         fo.write("endif()\n")
-    fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-    fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
-    fo.write("endif()\n")
-    fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
-    fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
-    fo.write("endif()\n")
-    fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
-    fo.write("  include_directories (/usr/include/hdf5/serial)\n")
-    fo.write("endif()\n")
-    fo.write("if(IS_DIRECTORY /usr/local/include)\n")
-    fo.write("  include_directories (/usr/local/include)\n")
-    fo.write("endif()\n")
-    fo.write("\n")
+        fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
+        fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
+        fo.write("  include_directories (/usr/include/hdf5/serial)\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/local/include)\n")
+        fo.write("  include_directories (/usr/local/include)\n")
+        fo.write("endif()\n")
+        fo.write("# NOTE: cannot add /usr/include using include_directories()\n")
+        fo.write("add_compile_options(-I/usr/include)\n")
+        fo.write("\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1411,23 +1426,28 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    if (needX11 or needQt):
-        fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-        fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+    if (options.mambaBuild):
+        fo.write("include_directories (${MAMBA_INCLUDE_PATH})\n")
+    else:
+        if (needX11 or needQt):
+            fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
+            fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
+            fo.write("endif()\n")
+        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
+        fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
         fo.write("endif()\n")
-    fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-    fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
-    fo.write("endif()\n")
-    fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
-    fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
-    fo.write("endif()\n")
-    fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
-    fo.write("  include_directories (/usr/include/hdf5/serial)\n")
-    fo.write("endif()\n")
-    fo.write("if(IS_DIRECTORY /usr/local/include)\n")
-    fo.write("  include_directories (/usr/local/include)\n")
-    fo.write("endif()\n")
-    fo.write("\n")
+        fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
+        fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
+        fo.write("  include_directories (/usr/include/hdf5/serial)\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/local/include)\n")
+        fo.write("  include_directories (/usr/local/include)\n")
+        fo.write("endif()\n")
+        fo.write("# NOTE: cannot add /usr/include using include_directories()\n")
+        fo.write("add_compile_options(-I/usr/include)\n")
+        fo.write("\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1437,26 +1457,37 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
-    if (needX11 or needQt):
-        fo.write("if (DEFINED X11_LIB_DIR)\n")
-        fo.write("  link_directories (${X11_LIB_DIR})\n")
+    if (options.mambaBuild):
+        fo.write("link_directories (${MAMBA_LIBRARY_PATH})\n")
+    else:
+        if (needX11 or needQt):
+            fo.write("if (DEFINED X11_LIB_DIR)\n")
+            fo.write("  link_directories (${X11_LIB_DIR})\n")
+            fo.write("endif()\n")
+        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
+        fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
         fo.write("endif()\n")
-    fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-    fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
-    fo.write("endif()\n")
-    fo.write("if (DEFINED HDF5_INSTALL_PREFIX)\n")
-    fo.write("  link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
-    fo.write("endif()\n")
-    fo.write("if (DEFINED HDF5_LIBRARY_DIRS)\n")
-    fo.write("  link_directories(${HDF5_LIBRARY_DIRS})\n")
-    fo.write("endif()\n")
-    fo.write("# add serial, for odd Debian hdf5 install\n")
-    fo.write("if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
-    fo.write("  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
-    fo.write("endif()\n")
-    fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
-    fo.write("  link_directories (/usr/local/lib)\n")
-    fo.write("endif()\n")
+        fo.write("if (DEFINED HDF5_INSTALL_PREFIX)\n")
+        fo.write("  link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
+        fo.write("endif()\n")
+        fo.write("if (DEFINED HDF5_LIBRARY_DIRS)\n")
+        fo.write("  link_directories(${HDF5_LIBRARY_DIRS})\n")
+        fo.write("endif()\n")
+        fo.write("# add serial, for odd Debian hdf5 install\n")
+        fo.write("if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+        fo.write("  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
+        fo.write("  link_directories (/usr/local/lib)\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/lib64)\n")
+        fo.write("  link_directories (/usr/lib64)\n")
+        fo.write("endif()\n")
+        fo.write("if(IS_DIRECTORY /usr/lib)\n")
+        fo.write("  link_directories (/usr/lib)\n")
+        fo.write("endif()\n")
+        fo.write("\n")
+        
     fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")\n')
     fo.write('  add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )\n')
     fo.write('endif()\n')

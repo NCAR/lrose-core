@@ -42,7 +42,7 @@
 #include <toolsa/procmap.h>
 #include <toolsa/str.h>
 
-#include "procmap_register.h"
+#include "procmap_register.hh"
 
 void parse_args(int argc, char **argv)
 {
@@ -73,13 +73,13 @@ void parse_args(int argc, char **argv)
    * set defaults
    */
   
-  Glob->name = "Procmap_test";
-  Glob->instance = "Procmap_test";
+  Glob->name = (char *) "Procmap_test";
+  Glob->instance = (char *) "Procmap_test";
   Glob->pid = (int)getpid();
   Glob->reg_interval = PROCMAP_REGISTER_INTERVAL;
   Glob->start_time = time((time_t *)NULL);
   Glob->status = 0;
-  Glob->status_str = "OK";
+  Glob->status_str = (char *) "OK";
   
   /*
    * look for command options
