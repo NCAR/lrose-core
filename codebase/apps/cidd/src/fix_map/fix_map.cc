@@ -35,51 +35,48 @@
  */
 int main(int argc, const char **argv)
 {
-	int  i,num_fields;
-	char buf[256];
-	FILE *infile;
-	double lon,lat,dist,last_lon;
-	char *cfield[8];
+  int  i,num_fields;
+  char buf[256];
+  FILE *infile;
+  double lon,lat;
+  char *cfield[8];
 
-	for(i=0; i < 8; i++) {
-          cfield[i] = (char *) calloc(1,64);
-        }
+  for(i=0; i < 8; i++) {
+    cfield[i] = (char *) calloc(1,64);
+  }
           
 
-	if(argc != 4) { 	/* take the input from stdin */
-		fprintf(stderr,"Usage: fix_map lat_offset lon_offset file > newfile\n");
-		exit(-1);
-	}
-	double lat_offset = atof(argv[1]);
-	double lon_offset = atof(argv[2]);
+  if(argc != 4) { 	/* take the input from stdin */
+    fprintf(stderr,"Usage: fix_map lat_offset lon_offset file > newfile\n");
+    exit(-1);
+  }
+  double lat_offset = atof(argv[1]);
+  double lon_offset = atof(argv[2]);
 
-	if((infile = fopen(argv[3],"r")) == NULL) {
-		fprintf(stderr," fix_map: can't open %s\n",argv[3]);
-		fprintf(stderr,"Usage: fix_map file > newfile\n");
-		exit(-1);
-	}
+  if((infile = fopen(argv[3],"r")) == NULL) {
+    fprintf(stderr," fix_map: can't open %s\n",argv[3]);
+    fprintf(stderr,"Usage: fix_map file > newfile\n");
+    exit(-1);
+  }
 
-	last_lon = -1000;
-
-	while(fgets(buf,256,infile) != NULL) {
-	   num_fields = STRparse(buf,cfield,256,8,64); 
-	   if(num_fields != 2 ||  *buf < '-') {
-	       fputs(buf,stdout);
-	   } else {
-	     lat = atof(cfield[0]);
-	     lon = atof(cfield[1]);
-	     if(lon <= -1000.0) {
-	       fputs(buf,stdout);
-	       last_lon = -1000;
-	     } else {
-			 lat += lat_offset;
-			 lon += lon_offset;
-			 printf("%.4f %.4f\n",lat,lon);
-	     }
+  while(fgets(buf,256,infile) != NULL) {
+    num_fields = STRparse(buf,cfield,256,8,64); 
+    if(num_fields != 2 ||  *buf < '-') {
+      fputs(buf,stdout);
+    } else {
+      lat = atof(cfield[0]);
+      lon = atof(cfield[1]);
+      if(lon <= -1000.0) {
+        fputs(buf,stdout);
+      } else {
+        lat += lat_offset;
+        lon += lon_offset;
+        printf("%.4f %.4f\n",lat,lon);
+      }
 
 
-	   }
     }
+  }
 
 
 }
