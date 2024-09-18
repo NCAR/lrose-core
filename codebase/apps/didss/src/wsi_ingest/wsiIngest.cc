@@ -93,7 +93,6 @@ enum
   iUpdate
 } gErrIDs;
 
-
 /**********************
    Function Prototypes
 **********************/
@@ -555,7 +554,7 @@ int main(int argc, char **argv)
 	    data_time_struct.day);
     
     sprintf(temp_filename, "%s/%s",
-	    Params.output_data.val[output_type].output_dir, output_subdir);
+            Params.output_data.val[output_type].output_dir, output_subdir);
     
     if (Params.debug_level >= DEBUG_NORM)
       fprintf(stderr, "Making output subdirectory <%s>\n", temp_filename);
