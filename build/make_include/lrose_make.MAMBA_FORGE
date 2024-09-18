@@ -1,0 +1,226 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################
+#
+# Macros for Makefile system
+#
+# EOL, NCAR, Boulder, Colorado, 80307, USA
+#
+############################################################
+
+#
+# system utilities
+#
+
+SHELL = /bin/sh
+RM = /bin/rm -f
+MV = /bin/mv -f
+CP = /bin/cp
+CP_DIR = /bin/cp -r
+MKDIR = /bin/mkdir -p
+TEST = /usr/bin/test
+PERL = /usr/bin/perl
+AWK = /usr/bin/awk
+PWD = pwd
+DATE = date -u
+
+#
+# includes
+#
+
+SYS_INCLUDES = -I$(HOME)/mambaforge/include
+SYS_X_INCLUDES = -I$(HOME)/mambaforge/include/X11
+SYS_XVIEW_INCLUDES =
+
+#
+# LD_LIBRARY_PATH
+#
+
+SYS_LD_LIBRARY_PATH =
+
+#
+# cppcheck
+#
+SYS_CPPCHECKFLAGS = $(LOC_INCLUDES) -d $(LROSE_INSTALL_DIR)/include
+SYS_CPPCHECKFLAGS2 = -I$(LOC_INC_DIR)
+
+#
+# compile
+#
+
+# C
+
+CC = gcc
+SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS) -fPIC
+PROFILE_FLAG = -pg
+DEBUG_FLAG = -g
+OPT_FLAG = -O2
+
+# C++
+
+CPPC = g++
+SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++17 -fPIC
+SYS_CPPC_INCLUDES =
+
+# FORTRAN
+
+FC = gfortran
+F90C = gfortran
+F95C = gfortran
+
+F90FLAGS = $(MY_F90FFLAGS) $(LOC_F90FFLAGS)
+
+# Compile -- special for C <-> FORTRAN
+# The "NATIVE" compilers need to be either both GNU or both
+# non-GNU for these compiles to work. If you use GNU, then
+# the USE_GNU_F2C must be set to "-DUSE_GNU_F2C" (no quotes).
+
+NATIVE_CC = gcc
+NATIVE_FC = gfortran
+NATIVE_LIB_DIR = 
+F_TO_C_LIBS = -lg2c
+USE_GNU_F2C = -DUSE_GNU_F2C
+SYS_FFLAGS = -DLITENDIAN $(MY_FFLAGS)
+
+#
+# link
+#
+
+STATIC_FLAG = -static
+SYS_LIBS = 
+SYS_CPPC_LIBS =
+LROSE_PROFILE_LIB_DIR = $(LROSE_INSTALL_DIR)/lib
+
+SYS_LDFLAGS = -L$(HOME)/mambaforge/lib $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"
+SYS_CPPC_LDFLAGS = -L$(HOME)/mambaforge/lib $(MY_CPPC_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"
+
+# Don't include -lXm, -lXpm as it fails with the libc6 version of libX11
+
+SYS_X_LIBS = -lXext -lXt -lX11 -lSM -lICE
+SYS_X_LDFLAGS = -L$(HOME)/mambaforge/lib
+
+SYS_F_LDFLAGS = $(MY_F_LDFLAGS)
+SYS_XVIEW_LDFLAGS =
+
+SYS_UCB_LIBS =
+SYS_UCB_LDFLAGS =
+
+#
+# Expect/TCL stuff
+#
+
+EXPECT_INCLUDES = -I/usr/include/tcl
+EXPECT_LIBS = -lexpect -ltcl -lutil -ldl
+
+#
+# Archiving libs
+#
+
+AR = ar
+ARFLAGS = rv
+RANLIB = na
+HAVE_RANLIB=FALSE
+
+#
+# yacc and lex
+#
+
+YACC = yacc
+LEX = lex
+SYS_YACCFLAGS = -d -t -v
+SYS_LEXFLAGS = 
+LEX_LIB = -ll
+YACC_LIB =
+
+# netCDF - note that your environment may not have all the listed versions
+#          of netCDF installed.
+# Important: in Debian lenny netCDF3 was the default, starting with Debian
+#            squeeze netCDF4 is the default. netCDF4 has an implicit dependency
+#            on HDF5 and udunits that was not the case in netCDF 3. Please
+#            use HOST_OS set to lrose_make.LINUX_64_squeeze for squeeze.
+#            in Debian jessie netCDF3 is no longer supported.
+#
+#       HDF5_INCLUDES    defines location of HDF5 include files
+#       HDF5_LD_FLAGS    defines location of HDF5 linker flags
+#       HDF5_LIBS        defines list of HDF5 libraries in correct order
+#       ZLIB_INCLUDES    defines location of zlib include files
+#       ZLIB_LD_FLAGS    defines location of zlib linker flags
+#       ZLIB_LIBS        defines list of zlib libraries in correct order
+#       SZIP_INCLUDES    defines location of SZIP include files
+#       SZIP_LD_FLAGS    defines location of SZIP linker flags
+#       SZIP_LIBS        defines list of SZIP libraries in correct order
+#       UDUNITS_INCS     defines location of udunits include files
+#       UDUNITS_LDFLAGS  defines location of udunits linkger flags
+#       NETCDF4_INCS 	 defines location of netCDF 4 include files
+#       NETCDF4_LDFLAGS  defines location of netCDF 4 libraries
+
+HDF_INCLUDES = -I$(HOME)/mambaforge/include
+HDF_LDFLAGS = -L$(HOME)/mambaforge/lib
+HDF_LIBS = -lmfhdf -ldf -ljpeg -lz
+
+ZLIB_INCLUDES=$(MY_ZLIB_INCS) -I$(HOME)/mambaforge/include
+ZLIB_LDFLAGS=$(MY_ZLIB_LDFLAGS) -Wl,-rpath,/usr/local/zlib/lib -L$(HOME)/mambaforge/lib
+ZLIB_LIBS=$(MY_ZLIB_LIBS) -lz
+
+SZIP_INCLUDES=$(MY_SZIP_INCS) -I$(HOME)/mambaforge/include
+SZIP_LDFLAGS=$(MY_SZIP_LDFLAGS) -Wl,-rpath,/usr/local/szip/lib -L$(HOME)/mambaforge/lib
+SZIP_LIBS=$(MY_SZIP_LIBS) -lsz
+
+UDUNITS_INCS=$(MY_UDUNITS_INCS) -I$(HOME)/mambaforge/include
+UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,$(HOME)/mambaforge/lib -L$(HOME)/mambaforge/lib
+
+HDF5_INCLUDES =$(MY_HDF5_INCS) -I$(HOME)/mambaforge/include $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
+HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,$(HOME)/mambaforge/lib -L$(HOME)/mambaforge/lib $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS) 
+HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
+
+NETCDF4_INCS=$(MY_NETCDF4_INCS) -I$(HOME)/mambaforge/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES)
+NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,$(HOME)/mambaforge/lib -L$(HOME)/mambaforge/lib $(HDF5_LDFLAGS) $(ZLIB_LDFLAGS)
+
+NETCDF_C_LIB=-lnetcdf
+NETCDF_C++_LIB=-lnetcdf_c++
+NETCDF_FF_LIB=-lnetcdff
+NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
+NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
+NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
+NETCDF_LIB_LIST=$(NETCDF4_LIBS)
+NETCDF_INCLUDES=$(NETCDF4_INCS)
+NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
+
+# QT5
+
+#PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
+#QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
+#QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
+#QT_CPPC_CFLAGS = -fPIC -std=c++17
+#QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
+
+
+# QT6
+
+PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
+QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
+QT_CPPC_CFLAGS = -fPIC -std=c++17
+QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
+
+
+# do not have jasper lib
+
+JASPER_CPPC_CFLAGS = -DNO_JASPER_LIB
+JASPER_INCLUDES =
+JASPER_LDFLAGS =
+JASPER_LIBS =
+
+# have jasper lib
+
+# JASPER_CPPC_CFLAGS =
+# JASPER_INCLUDES = -I/usr/local/jasper/include
+# JASPER_LDFLAGS = -L/usr/local/jasper/lib
+# JASPER_LIBS = -ljasper
+

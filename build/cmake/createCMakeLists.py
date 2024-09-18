@@ -586,6 +586,10 @@ def writeCMakeListsTop(dir):
         fo.write('endif(APPLE)\n')
 
     fo.write('find_package (HDF5)\n')
+
+    fo.write('# MAMBA_FORGE build - uncomment line below\n')
+    fo.write('# set(CMAKE_PREFIX_PATH "$ENV{HOME}/mambaforge/")\n')
+
     fo.write('# find_package (NETCDF)\n')
     fo.write('# find_package (LROSE)\n')
     fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
