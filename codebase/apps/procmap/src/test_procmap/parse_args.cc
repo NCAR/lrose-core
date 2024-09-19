@@ -36,7 +36,7 @@
  *
  *********************************************************************/
 
-#include "test_procmap.h"
+#include "test_procmap.hh"
 
 void parse_args(int argc, char **argv)
      

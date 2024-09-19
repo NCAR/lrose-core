@@ -21,61 +21,69 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/************************************************************************
- * procmap_unregister.h
+/*************************************************************************
+ * procmap_unregister.c :
  *
- * RAP, NCAR, Boulder CO
+ * Un-registers a process with the process mapper - used by PERL scripts to
+ * unregister.
+ *
+ * N. Rehak
+ *
+ * RAP NCAR Boulder Colorado USA
  *
  * June 1997
  *
- * Nancy Rehak
- ************************************************************************/
-
-/*
- **************************** includes *********************************
- */
+ **************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
+
+#include <toolsa/os_config.h>
+#include <toolsa/mem.h>
+#include <toolsa/pmu.h>
+#include <toolsa/port.h>
+
+#define MAIN
+#include "procmap_unregister.hh"
+#undef MAIN
 
 
-/*
- * global structure
- */
+int main(int argc, char **argv)
+{
+  /*
+   * allocate space for the global structure
+   */
+  
+  Glob = (global_t *)
+    umalloc((u_int) sizeof(global_t));
+  
+  /*
+   * set program name
+   */
+  
+  Glob->prog_name = "procmap_unregister";
+  
+  /*
+   * parse command line arguments
+   */
 
-typedef struct {
+  parse_args(argc, argv);
 
-  char *prog_name;            /* program name */
+  /*
+   * set signal handlers
+   */
 
-  char *name;
-  char *instance;
-  int pid;
-  int debug;
+  PORTsignal(SIGPIPE, SIG_IGN);
 
-} global_t;
+  /*
+   * Register with the process mapper
+   */
 
-/*
- * declare the global structure locally in the main,
- * and as an extern in all other routines
- */
+  if (Glob->debug) {
+    fprintf(stderr, "Unregistering name, instance, pid: %s, %s, %d\n",
+	    Glob->name, Glob->instance, Glob->pid);
+  }
+  PMU_unregister_pid(Glob->name, Glob->instance, Glob->pid);
 
-#ifdef MAIN
-
-global_t *Glob = NULL;
-
-#else
-
-extern global_t *Glob;
-
-#endif
-
-/*
- * function declarations
- */
-
-extern void parse_args(int, char **);
-
-
-
-
-
-
+  return(0);
+}

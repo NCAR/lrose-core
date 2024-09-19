@@ -22,46 +22,44 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /*************************************************************************
- * procmap_unregister.c :
+ * test_procmap.c :
  *
- * Un-registers a process with the process mapper - used by PERL scripts to
- * unregister.
+ * Tests the server mapper
  *
  * N. Rehak
  *
  * RAP NCAR Boulder Colorado USA
  *
- * June 1997
+ * October 1994
  *
  **************************************************************************/
 
-#include <stdio.h>
-#include <signal.h>
-
-#include <toolsa/os_config.h>
-#include <toolsa/mem.h>
-#include <toolsa/pmu.h>
-#include <toolsa/port.h>
-
 #define MAIN
-#include "procmap_unregister.h"
+#include "test_procmap.hh"
 #undef MAIN
 
+#include <signal.h>
+
+void ProcessExit(int sig);
 
 int main(int argc, char **argv)
+
 {
+
+  int forever = TRUE;
+  
   /*
    * allocate space for the global structure
    */
   
   Glob = (global_t *)
-    umalloc((u_int) sizeof(global_t));
+    malloc((u_int) sizeof(global_t));
   
   /*
    * set program name
    */
   
-  Glob->prog_name = "procmap_unregister";
+  Glob->prog_name = (char *) "test_procmap";
   
   /*
    * parse command line arguments
@@ -73,17 +71,59 @@ int main(int argc, char **argv)
    * set signal handlers
    */
 
+  PORTsignal(SIGINT, ProcessExit);
+  PORTsignal(SIGHUP, ProcessExit);
+  PORTsignal(SIGTERM, ProcessExit);
   PORTsignal(SIGPIPE, SIG_IGN);
 
   /*
-   * Register with the process mapper
+   * loop with the indicated sleep interval
    */
 
-  if (Glob->debug) {
-    fprintf(stderr, "Unregistering name, instance, pid: %s, %s, %d\n",
-	    Glob->name, Glob->instance, Glob->pid);
-  }
-  PMU_unregister_pid(Glob->name, Glob->instance, Glob->pid);
+  while (forever) {
 
+    fprintf(stdout, "Test_procmap name, instance: %s, %s\n",
+	    Glob->name, Glob->instance);
+
+    /*
+     * query the server mapper and print the response
+     */
+
+    if(test_mapper()) {
+      if (Glob->no_exit_flag)
+	fprintf(stderr, "**** Registration failed for %s %s\n",
+		Glob->name, Glob->instance);
+      else
+	return (-1);
+    }
+
+    fflush(stdout);
+
+    /*
+     * sleep the appropriate interval
+     */
+    
+    if (Glob->do_repeat) {
+      sleep((unsigned)Glob->repeat_int);
+    } else {
+      break;
+    }
+    
+  } /* while (forever) */
+
+  if (Glob->do_unregister)
+    PMU_unregister(Glob->name, Glob->instance);
+  
   return(0);
+
 }
+
+void ProcessExit(int sig)
+
+{
+
+  PMU_unregister(Glob->name, Glob->instance);
+  exit(sig);
+
+}
+

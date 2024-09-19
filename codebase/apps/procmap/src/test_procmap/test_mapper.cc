@@ -32,7 +32,7 @@
  *
  **************************************************************************/
 
-#include "test_procmap.h"
+#include "test_procmap.hh"
 #include <toolsa/sockutil.h>
 #include <sys/times.h>
 #include <dataport/port_types.h>

@@ -40,7 +40,7 @@
 #include <toolsa/port.h>
 #include <toolsa/str.h>
 
-#include "procmap_unregister.h"
+#include "procmap_unregister.hh"
 
 void parse_args(int argc, char **argv)
 {

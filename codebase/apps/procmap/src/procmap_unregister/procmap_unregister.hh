@@ -21,111 +21,56 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/*************************************************************************
- * test_procmap.c :
+/************************************************************************
+ * procmap_unregister.h
  *
- * Tests the server mapper
+ * RAP, NCAR, Boulder CO
  *
- * N. Rehak
+ * June 1997
  *
- * RAP NCAR Boulder Colorado USA
- *
- * October 1994
- *
- **************************************************************************/
+ * Nancy Rehak
+ ************************************************************************/
 
-#define MAIN
-#include "test_procmap.h"
-#undef MAIN
+/*
+ **************************** includes *********************************
+ */
 
-#include <signal.h>
+#include <stdio.h>
 
-void ProcessExit(int sig);
 
-int main(argc, argv)
-     int argc;
-     char **argv;
+/*
+ * global structure
+ */
 
-{
+typedef struct {
 
-  int forever = TRUE;
-  
-  /*
-   * allocate space for the global structure
-   */
-  
-  Glob = (global_t *)
-    malloc((u_int) sizeof(global_t));
-  
-  /*
-   * set program name
-   */
-  
-  Glob->prog_name = "test_procmap";
-  
-  /*
-   * parse command line arguments
-   */
+  char *prog_name;            /* program name */
 
-  parse_args(argc, argv);
+  char *name;
+  char *instance;
+  int pid;
+  int debug;
 
-  /*
-   * set signal handlers
-   */
+} global_t;
 
-  PORTsignal(SIGINT, ProcessExit);
-  PORTsignal(SIGHUP, ProcessExit);
-  PORTsignal(SIGTERM, ProcessExit);
-  PORTsignal(SIGPIPE, SIG_IGN);
+/*
+ * declare the global structure locally in the main,
+ * and as an extern in all other routines
+ */
 
-  /*
-   * loop with the indicated sleep interval
-   */
+#ifdef MAIN
 
-  while (forever) {
+global_t *Glob = NULL;
 
-    fprintf(stdout, "Test_procmap name, instance: %s, %s\n",
-	    Glob->name, Glob->instance);
+#else
 
-    /*
-     * query the server mapper and print the response
-     */
+extern global_t *Glob;
 
-    if(test_mapper()) {
-      if (Glob->no_exit_flag)
-	fprintf(stderr, "**** Registration failed for %s %s\n",
-		Glob->name, Glob->instance);
-      else
-	return (-1);
-    }
+#endif
 
-    fflush(stdout);
+/*
+ * function declarations
+ */
 
-    /*
-     * sleep the appropriate interval
-     */
-    
-    if (Glob->do_repeat) {
-      sleep((unsigned)Glob->repeat_int);
-    } else {
-      break;
-    }
-    
-  } /* while (forever) */
-
-  if (Glob->do_unregister)
-    PMU_unregister(Glob->name, Glob->instance);
-  
-  return(0);
-
-}
-
-void ProcessExit(int sig)
-
-{
-
-  PMU_unregister(Glob->name, Glob->instance);
-  exit(sig);
-
-}
+extern void parse_args(int, char **);
 
