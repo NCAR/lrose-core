@@ -20,21 +20,18 @@ and download the .sh file for your OS. For example, I downloaded:
 
 ```
   Mambaforge-24.7.1-0-Linux-x86_64.sh
-
 ```
 
 Make is executable:
 
 ```
   chmod +x Mambaforge-24.7.1-0-Linux-x86_64.sh
-
 ```
 
 and then run it:
 
 ```
   ./Mambaforge-24.7.1-0-Linux-x86_64.sh
-
 ```
 
 Install in the default location which is:
