@@ -21,37 +21,45 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/***************************************************************************
- * tidy_and_exit.c
+/****************************************************************************
+ * read_volume.c
  *
- * tidies up and quits
+ * Reads in the relevant original radar volume
  *
- * Mike Dixon
+ * Mike Dixon  RAP NCAR Boulder CO USA
  *
- * RAP, NCAR, Boulder, Colorado, USA
- *
- * July 1991
+ * October 1991
  *
  ****************************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
-void tidy_and_exit(int sig)
+void read_volume(vol_file_handle_t *v_handle,
+		 date_time_t *stime)
 
 {
 
+
+  char file_path[MAX_PATH_LEN];
+
   /*
-   * check memory allocation
+   * compute the volume file path
    */
 
-  umalloc_map();
-  umalloc_verify();
-  
+  sprintf(file_path, "%s%s%.4d%.2d%.2d%s%.2d%.2d%.2d.%s",
+	  Glob->original_rdata_dir, PATH_DELIM,
+	  stime->year, stime->month, stime->day,
+	  PATH_DELIM,
+	  stime->hour, stime->min, stime->sec,
+	  Glob->dobson_file_ext);
+
+  v_handle->vol_file_path = file_path;
+
   /*
-   * exit with code sig
+   * read in file
    */
 
-  exit(sig);
+  if (RfReadVolume(v_handle, "read_volume") != R_SUCCESS)
+    tidy_and_exit(-1);
 
 }
-

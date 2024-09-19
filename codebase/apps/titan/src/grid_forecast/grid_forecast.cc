@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 #define MAIN
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 #undef MAIN
 
 int main(int argc, char **argv)

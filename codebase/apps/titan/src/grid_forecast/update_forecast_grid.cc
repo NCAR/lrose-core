@@ -22,48 +22,116 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /*********************************************************************
- * read_params.c: reads the parameters, loads up the globals
+ * update_forecast_grid.c
+ *
+ * Flags the forecast grid with 255 at each current storm location.
+ * Then places the storm data, moved by forecast_dx and forecast_dy,
+ * in the forecast grid.
  *
  * RAP, NCAR, Boulder CO
  *
- * March 1991
+ * August 1992
  *
  * Mike Dixon
  *
  *********************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
-void read_params(void)
+void update_forecast_grid(storm_file_handle_t *s_handle,
+			  vol_file_handle_t *v_handle,
+			  ui08 *forecast_grid,
+			  si32 n_runs,
+			  double forecast_dx,
+			  double forecast_dy)
 
 {
 
+  ui08 *dbz_grid;
+
+  si32 jy, irun;
+  si32 start_ix, end_ix;
+  si32 index, jndex;
+  si32 nx, ny;
+  si32 dix, diy;
+
+  double dx, dy;
+
+  titan_grid_t *grid;
+  storm_file_run_t *run;
+
+  dbz_grid = v_handle->field_plane[Glob->dbz_field][0];
+
   /*
-   * get globals from the parameters
+   * compute cartesian params
+   */
+
+  grid = &s_handle->scan->grid;
+  nx = grid->nx;
+  ny = grid->ny;
+  dx = grid->dx;
+  dy = grid->dy;
+
+  /*
+   * compute the grid steps by which the storm is to be moved
+   */
+
+  if (forecast_dx >= 0)
+    dix = (si32) (forecast_dx / dx + 0.5);
+  else
+    dix = (si32) (forecast_dx / dx - 0.5);
+
+  if (forecast_dy >= 0)
+    diy = (si32) (forecast_dy / dy + 0.5);
+  else
+    diy = (si32) (forecast_dy / dy - 0.5);
+
+  /*
+   * load present storm locations with flag
+   */
+
+  for (irun = 0; irun < n_runs; irun++) {
+    
+    run = s_handle->runs + irun;
+
+    index = run->iy * nx + run->ix;
+
+    memset((char *) (forecast_grid + index),
+	   (int) DATA_MOVED_FLAG, (int) run->n);
+
+  } /* irun */
+
+  /*
+   * load forecast locations
    */
   
-  Glob->original_rdata_dir = uGetParamString(Glob->prog_name,
-					     "original_rdata_dir",
-					     ORIGINAL_RDATA_DIR);
+  for (irun = 0; irun < n_runs; irun++) {
+    
+    run = s_handle->runs + irun;
 
-  Glob->forecast_rdata_dir = uGetParamString(Glob->prog_name,
-					     "forecast_rdata_dir",
-					     FORECAST_RDATA_DIR);
+    jy = run->iy + diy;
+    
+    if (jy >= 0 && jy < ny) {
 
-  Glob->dobson_file_ext = uGetParamString(Glob->prog_name,
-					  "dobson_file_ext",
-					  DOBSON_FILE_EXT);
-  
-  Glob->min_history_in_secs = uGetParamLong(Glob->prog_name,
-					  "min_history_in_secs",
-					  MIN_HISTORY_IN_SECS);
+      start_ix = run->ix + dix;
+      end_ix = start_ix + run->n - 1;
 
-  Glob->forecast_lead_time = uGetParamLong(Glob->prog_name,
-					   "forecast_lead_time",
-					   FORECAST_LEAD_TIME);
+      if (start_ix < nx - 1 && end_ix > 0) {
 
-  Glob->dbz_field = uGetParamLong(Glob->prog_name,
-				  "dbz_field",
-				  DBZ_FIELD);
+	start_ix = MAX(start_ix, 0);
+	end_ix = MIN(end_ix, ny - 1);
 
+	index = run->iy * nx + run->ix;
+	jndex = jy * nx + start_ix;
+
+	memcpy ((void *) (forecast_grid + jndex),
+		(void *) (dbz_grid + index),
+		(size_t) (end_ix - start_ix + 1));
+
+      } /* if (start_ix ... */
+
+    } /* if (jy ... */
+
+  } /* irun */
+      
 }

@@ -21,45 +21,49 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/****************************************************************************
- * read_volume.c
+/*********************************************************************
+ * read_params.c: reads the parameters, loads up the globals
  *
- * Reads in the relevant original radar volume
+ * RAP, NCAR, Boulder CO
  *
- * Mike Dixon  RAP NCAR Boulder CO USA
+ * March 1991
  *
- * October 1991
+ * Mike Dixon
  *
- ****************************************************************************/
+ *********************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
-void read_volume(vol_file_handle_t *v_handle,
-		 date_time_t *stime)
+void read_params(void)
 
 {
 
-
-  char file_path[MAX_PATH_LEN];
-
   /*
-   * compute the volume file path
+   * get globals from the parameters
    */
+  
+  Glob->original_rdata_dir = uGetParamString(Glob->prog_name,
+					     "original_rdata_dir",
+					     ORIGINAL_RDATA_DIR);
 
-  sprintf(file_path, "%s%s%.4d%.2d%.2d%s%.2d%.2d%.2d.%s",
-	  Glob->original_rdata_dir, PATH_DELIM,
-	  stime->year, stime->month, stime->day,
-	  PATH_DELIM,
-	  stime->hour, stime->min, stime->sec,
-	  Glob->dobson_file_ext);
+  Glob->forecast_rdata_dir = uGetParamString(Glob->prog_name,
+					     "forecast_rdata_dir",
+					     FORECAST_RDATA_DIR);
 
-  v_handle->vol_file_path = file_path;
+  Glob->dobson_file_ext = uGetParamString(Glob->prog_name,
+					  "dobson_file_ext",
+					  DOBSON_FILE_EXT);
+  
+  Glob->min_history_in_secs = uGetParamLong(Glob->prog_name,
+					  "min_history_in_secs",
+					  MIN_HISTORY_IN_SECS);
 
-  /*
-   * read in file
-   */
+  Glob->forecast_lead_time = uGetParamLong(Glob->prog_name,
+					   "forecast_lead_time",
+					   FORECAST_LEAD_TIME);
 
-  if (RfReadVolume(v_handle, "read_volume") != R_SUCCESS)
-    tidy_and_exit(-1);
+  Glob->dbz_field = uGetParamLong(Glob->prog_name,
+				  "dbz_field",
+				  DBZ_FIELD);
 
 }

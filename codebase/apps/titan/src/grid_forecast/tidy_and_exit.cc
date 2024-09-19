@@ -22,54 +22,36 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /***************************************************************************
- * load_scan_times.c
+ * tidy_and_exit.c
  *
- * Loads up an array of scans times as julian time - the julian day plus the
- * fraction of the day
+ * tidies up and quits
  *
- * Mike Dixon  RAP NCAR Boulder CO USA
+ * Mike Dixon
  *
- * October 1991
+ * RAP, NCAR, Boulder, Colorado, USA
  *
- ***************************************************************************/
+ * July 1991
+ *
+ ****************************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
-date_time_t *load_scan_times(storm_file_handle_t *s_handle)
+void tidy_and_exit(int sig)
 
 {
 
-  static int first_call = TRUE;
-  static date_time_t *scan_time;
-  si32 n_scans, iscan;
+  /*
+   * check memory allocation
+   */
 
-  n_scans = s_handle->header->n_scans;
+  umalloc_map();
+  umalloc_verify();
+  
+  /*
+   * exit with code sig
+   */
 
-  if (first_call == TRUE) {
-
-    scan_time = (date_time_t *) umalloc
-      ((ui32) (n_scans * sizeof(date_time_t)));
-
-    first_call = FALSE;
-
-  } else {
-
-    scan_time = (date_time_t *) urealloc
-      ((char *) scan_time,
-       (ui32) (n_scans * sizeof(date_time_t)));
-
-  }
-
-  for (iscan = 0; iscan < n_scans; iscan++) {
-
-    if (RfReadStormScan(s_handle, iscan, "load_scan_time") != R_SUCCESS)
-      tidy_and_exit(-1);
-
-    scan_time[iscan].unix_time = s_handle->scan->time;
-    uconvert_from_utime(scan_time + iscan);
-
-  } /* iscan */
-
-  return (scan_time);
+  exit(sig);
 
 }
+

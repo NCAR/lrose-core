@@ -21,10 +21,11 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/**************************************************************************
- * open_files.c
+/***************************************************************************
+ * load_scan_times.c
  *
- * Opens the files, reads in the headers
+ * Loads up an array of scans times as julian time - the julian day plus the
+ * fraction of the day
  *
  * Mike Dixon  RAP NCAR Boulder CO USA
  *
@@ -32,80 +33,43 @@
  *
  ***************************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
-void open_files(storm_file_handle_t *s_handle,
-		track_file_handle_t *t_handle,
-		char **track_file_paths,
-		si32 file_num)
+date_time_t *load_scan_times(storm_file_handle_t *s_handle)
 
 {
 
-  char storm_file_path[MAX_PATH_LEN];
-  path_parts_t track_path_parts;
+  static int first_call = TRUE;
+  static date_time_t *scan_time;
+  si32 n_scans, iscan;
 
-  /*
-   * open track data file
-   */
+  n_scans = s_handle->header->n_scans;
 
-  if (RfOpenTrackFiles(t_handle,
-		       "r",
-		       track_file_paths[file_num],
-		       (char *) NULL,
-		       "open_files")) {
-    
-    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
-    fprintf(stderr, "Cannot open track files.\n");
-    perror(track_file_paths[file_num]);
-    tidy_and_exit(-1);
-    
+  if (first_call == TRUE) {
+
+    scan_time = (date_time_t *) umalloc
+      ((ui32) (n_scans * sizeof(date_time_t)));
+
+    first_call = FALSE;
+
+  } else {
+
+    scan_time = (date_time_t *) urealloc
+      ((char *) scan_time,
+       (ui32) (n_scans * sizeof(date_time_t)));
+
   }
-  
-  /*
-   * read in track file header
-   */
 
-  if (RfReadTrackHeader(t_handle, "open_files") != R_SUCCESS)
-    tidy_and_exit(-1);
+  for (iscan = 0; iscan < n_scans; iscan++) {
 
-  /*
-   * compute storm data file path
-   */
+    if (RfReadStormScan(s_handle, iscan, "load_scan_time") != R_SUCCESS)
+      tidy_and_exit(-1);
 
-  uparse_path(track_file_paths[file_num], &track_path_parts);
-  
-  sprintf(storm_file_path, "%s%s",
-	  track_path_parts.dir,
-	  t_handle->header->storm_header_file_name);
-  
-  /*
-   * open storm file
-   */
+    scan_time[iscan].unix_time = s_handle->scan->time;
+    uconvert_from_utime(scan_time + iscan);
 
-  if (RfOpenStormFiles(s_handle,
-		       "r",
-		       storm_file_path,
-		       (char *) NULL,
-		       "open_files")) {
-    
-    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
-    fprintf(stderr, "Cannot open storm files.\n");
-    perror(storm_file_path);
-    tidy_and_exit(-1);
-    
-  }
-  
-  /*
-   * read in storm properties file header
-   */
+  } /* iscan */
 
-  if (RfReadStormHeader(s_handle, "open_files") != R_SUCCESS)
-    tidy_and_exit(-1);
-  
-  /*
-   * free resources
-   */
-
-  ufree_parsed_path(&track_path_parts);
+  return (scan_time);
 
 }

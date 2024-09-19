@@ -32,7 +32,7 @@
  *
  ***************************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
 void process_track_file(storm_file_handle_t *s_handle,
 			track_file_handle_t *t_handle,

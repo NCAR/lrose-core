@@ -32,7 +32,7 @@
  *
  *********************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 
 void parse_args(int argc,
 		char **argv,
@@ -91,7 +91,7 @@ void parse_args(int argc,
       
     } else if (!strcmp(argv[i], "-debug")) {
       
-      debug_str = "true";
+      debug_str = (char *) "true";
       
     } else if (!strcmp(argv[i], "-mdebug")) {
 	

@@ -32,7 +32,7 @@
  *
  ************************************************************************/
 
-#include "grid_forecast.h"
+#include "grid_forecast.hh"
 #include <limits.h>
 
 void write_volume(vol_file_handle_t *v_handle,
@@ -45,7 +45,7 @@ void write_volume(vol_file_handle_t *v_handle,
   static char prev_dir_path[MAX_PATH_LEN];
   
   char file_name[MAX_PATH_LEN];
-  char file_path[MAX_PATH_LEN];
+  char file_path[MAX_PATH_LEN * 4];
   char dir_path[MAX_PATH_LEN];
   char call_str[BUFSIZ];
   char note_add[VOL_PARAMS_NOTE_LEN];
@@ -112,10 +112,10 @@ void write_volume(vol_file_handle_t *v_handle,
 	  vparams->mid_time.hour,
 	  vparams->mid_time.min,
 	  vparams->mid_time.sec);
-    
-  sprintf(file_path, "%s%s%s",
-	  dir_path, PATH_DELIM,
-	  file_name);
+  
+  snprintf(file_path, MAX_PATH_LEN * 4 - 1, "%s%s%s",
+           dir_path, PATH_DELIM,
+           file_name);
     
   /*
    * if current directory paths are not same as previous ones,
