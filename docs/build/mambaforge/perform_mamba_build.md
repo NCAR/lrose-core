@@ -1,4 +1,4 @@
-# How to perform an lrose-core build using a mambaforge installation
+## How to perform an lrose-core build using a mambaforge installation
 
 Normally lrose-core is built using the system libraries installed with the OS.
 
@@ -6,7 +6,7 @@ This procedure allows you to perform the build using only
 the packages installed via mamba-forge,
 which is a derivative of anaconda and conda-forge.
 
-## 1. Install mambaforge
+### 1. Install mambaforge
 
 The miniforge distribution is available in GitHub at:
 
@@ -40,7 +40,7 @@ Install in the default location which is:
   $HOME/mambaforge
 ```
 
-## 2. Install required packages in ```mambaforge```
+### 2. Install required packages in ```mambaforge```
 
 Check out ```lrose-bootstrap```:
 
@@ -55,7 +55,7 @@ Run the script to install the packages required by ```lrose-core```:
   ./install_mamba_packages
 ```
 
-## 3. Check out lrose-core and build
+### 3. Check out lrose-core and build
 
 Check out ```lrose-core```:
 
