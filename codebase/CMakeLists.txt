@@ -45,6 +45,7 @@ find_package (X11)
 if (DEFINED X11_X11_LIB)
   get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)
 endif()
+
 # Finding Qt
 
 find_package (Qt6 COMPONENTS Core QUIET)
@@ -58,6 +59,7 @@ elseif (Qt6_FOUND)
 else ()
   message(FATAL_ERROR, "Qt not found.")
 endif(Qt5_FOUND)
+
 if(APPLE)
   if (Qt5_FOUND)
     find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
@@ -65,9 +67,12 @@ if(APPLE)
     find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
   endif(Qt5_FOUND)
 endif(APPLE)
+
 find_package (HDF5)
+
 # find_package (NETCDF)
 # find_package (LROSE)
+
 if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)
   get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)
 endif()

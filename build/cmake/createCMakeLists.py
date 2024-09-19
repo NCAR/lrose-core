@@ -565,11 +565,19 @@ def writeCMakeListsTop(dir):
     fo.write('find_package(PkgConfig REQUIRED)\n')
     fo.write('\n')
 
+    if (options.mambaBuild):
+        fo.write('# MAMBAFORGE build, ignore system libs\n')
+        fo.write('  set(MAMBA_INCLUDE_PATH %s/include)\n' % options.mambaDir)
+        fo.write('  set(MAMBA_LIBRARY_PATH %s/lib)\n' % options.mambaDir)
+        fo.write('  set(CMAKE_SYSTEM_IGNORE_PATH "/usr/lib" "/usr/local/lib" "/usr/lib64" "/lib" "/lib64")\n')
+        fo.write('\n')
+
     if (globalNeedX11 or globalNeedQt):
         fo.write('find_package (X11)\n')
         fo.write("if (DEFINED X11_X11_LIB)\n")
         fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
         fo.write("endif()\n")
+        fo.write('\n')
 
     if (globalNeedQt):
         fo.write('# Finding Qt\n')
@@ -585,6 +593,7 @@ def writeCMakeListsTop(dir):
         fo.write('else ()\n')
         fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
         fo.write('endif(Qt5_FOUND)\n')
+        fo.write('\n')
         fo.write('if(APPLE)\n')
         if (options.mambaBuild):
             fo.write('  if (Qt5_FOUND)\n')
@@ -599,16 +608,15 @@ def writeCMakeListsTop(dir):
             fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
             fo.write('  endif(Qt5_FOUND)\n')
         fo.write('endif(APPLE)\n')
+        fo.write('\n')
 
     fo.write('find_package (HDF5)\n')
-
-    if (options.mambaBuild):
-        fo.write('# MAMBA_FORGE build\n')
-        fo.write('  set(MAMBA_INCLUDE_PATH %s/include)\n' % options.mambaDir)
-        fo.write('  set(MAMBA_LIBRARY_PATH %s/lib)\n' % options.mambaDir)
+    fo.write('\n')
 
     fo.write('# find_package (NETCDF)\n')
     fo.write('# find_package (LROSE)\n')
+    fo.write('\n')
+
     fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
     fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")
     fo.write("endif()\n")
