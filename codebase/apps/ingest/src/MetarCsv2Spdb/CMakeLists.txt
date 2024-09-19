@@ -102,11 +102,13 @@ endif()
 # link libs
 
 link_libraries (Spdb)
+link_libraries (rapformats)
 link_libraries (dsserver)
 link_libraries (didss)
-link_libraries (rapformats)
+link_libraries (physics)
+link_libraries (euclid)
+link_libraries (rapmath)
 link_libraries (toolsa)
-link_libraries (pthread)
 link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (netcdf)
@@ -114,8 +116,7 @@ link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (bz2)
-link_libraries (z)
+link_libraries (pthread)
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file

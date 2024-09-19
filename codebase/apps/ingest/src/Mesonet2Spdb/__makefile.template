@@ -37,9 +37,9 @@ TARGET_FILE = Mesonet2Spdb
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lphysics -ltoolsa -lpthread -ldataport -ltdrp \
-	$(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = -lSpdb -lrapformats -ldsserver -ldidss \
+	-lphysics -leuclid -lrapmath -ltoolsa -ldataport -ltdrp \
+	$(NETCDF4_LIBS) -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
