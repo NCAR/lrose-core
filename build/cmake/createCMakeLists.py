@@ -586,11 +586,18 @@ def writeCMakeListsTop(dir):
         fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
         fo.write('endif(Qt5_FOUND)\n')
         fo.write('if(APPLE)\n')
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-        fo.write('  endif(Qt5_FOUND)\n')
+        if (options.mambaBuild):
+            fo.write('  if (Qt5_FOUND)\n')
+            fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
+            fo.write('  elseif (Qt6_FOUND)\n')
+            fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
+            fo.write('  endif(Qt5_FOUND)\n')
+        else:
+            fo.write('  if (Qt5_FOUND)\n')
+            fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+            fo.write('  elseif (Qt6_FOUND)\n')
+            fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+            fo.write('  endif(Qt5_FOUND)\n')
         fo.write('endif(APPLE)\n')
 
     fo.write('find_package (HDF5)\n')
@@ -1546,13 +1553,20 @@ def addFindQt(fo):
     fo.write('endif(Qt5_FOUND)\n')
     
     fo.write('if(APPLE)\n')
-    fo.write('  if (Qt5_FOUND)\n')
-    fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-    fo.write('  elseif (Qt6_FOUND)\n')
-    fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-    fo.write('  endif(Qt5_FOUND)\n')
+    if (options.mambaBuild):
+        fo.write('  if (Qt5_FOUND)\n')
+        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
+        fo.write('  elseif (Qt6_FOUND)\n')
+        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
+        fo.write('  endif(Qt5_FOUND)\n')
+    else:
+        fo.write('  if (Qt5_FOUND)\n')
+        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+        fo.write('  elseif (Qt6_FOUND)\n')
+        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+        fo.write('  endif(Qt5_FOUND)\n')
     fo.write('endif(APPLE)\n')
-    
+
     fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
     fo.write("set (CMAKE_AUTOMOC ON)\n")
     fo.write("set (CMAKE_AUTORCC ON)\n")
@@ -1560,7 +1574,10 @@ def addFindQt(fo):
     
     fo.write('if (Qt5_FOUND)\n')
     fo.write("#QT5\n")
-    fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    if (options.mambaBuild):
+        fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH)\n" % options.mambaDir)
+    else:
+        fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
     fo.write("  pkg_search_module(Qt5Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Widgets REQUIRED)\n")
@@ -1568,7 +1585,10 @@ def addFindQt(fo):
     fo.write("  pkg_search_module(Qt5Qml REQUIRED)\n")
     fo.write('else()\n')
     fo.write("#QT6\n")
-    fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    if (options.mambaBuild):
+        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH)\n" % options.mambaDir)
+    else:
+        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
     fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Widgets REQUIRED)\n")
