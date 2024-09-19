@@ -53,17 +53,17 @@ LOC_CFLAGS =
 
 MODULE_TYPE=program
 
-HDRS = storms_to_tifs.h
+HDRS = storms_to_tifs.hh
 
-SRCS = \
-	init_indices.c \
-	load_scan_times.c \
-	open_files.c \
-	parse_args.c \
-	print_comments.c \
-	process_track_file.c \
-	storms_to_tifs.c \
-	tidy_and_exit.c
+CPPC_SRCS = \
+	init_indices.cc \
+	load_scan_times.cc \
+	open_files.cc \
+	parse_args.cc \
+	print_comments.cc \
+	process_track_file.cc \
+	storms_to_tifs.cc \
+	tidy_and_exit.cc
 
 #
 # standard targets

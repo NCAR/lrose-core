@@ -52,18 +52,18 @@ MODULE_TYPE=program
 
 HDRS = verify_day.h
 
-SRCS = \
-	init_indices.c \
-	load_cont_data.c \
-	load_scan_times.c \
-	open_files.c	 \
-	parse_args.c \
-	read_params.c \
-	read_verification_file.c \
-	tidy_and_exit.c \
-	update_ellipse_grid.c \
-	update_runs_grid.c \
-	verify_day.c
+CPPC_SRCS = \
+	init_indices.cc \
+	load_cont_data.cc \
+	load_scan_times.cc \
+	open_files.cc	 \
+	parse_args.cc \
+	read_params.cc \
+	read_verification_file.cc \
+	tidy_and_exit.cc \
+	update_ellipse_grid.cc \
+	update_runs_grid.cc \
+	verify_day.cc
 
 #
 # standard targets

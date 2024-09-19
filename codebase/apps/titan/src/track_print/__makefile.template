@@ -50,13 +50,13 @@ LOC_CFLAGS =
 
 MODULE_TYPE = program
 
-HDRS = track_print.h
+HDRS = track_print.hh
 
-SRCS = \
-	parse_args.c \
-	process_file.c \
-	tidy_and_exit.c \
-	track_print.c
+CPPC_SRCS = \
+	parse_args.cc \
+	process_file.cc \
+	tidy_and_exit.cc \
+	track_print.cc
 
 #
 # standard targets

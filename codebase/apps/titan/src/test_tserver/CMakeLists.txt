@@ -14,7 +14,7 @@ project (test_tserver)
 # source files
 
 set (SRCS
-      test_tserver.c
+      test_tserver.cc
     )
 
 # include directories

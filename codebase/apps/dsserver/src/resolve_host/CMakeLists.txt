@@ -14,7 +14,7 @@ project (resolve_host)
 # source files
 
 set (SRCS
-      resolve_host.c
+      resolve_host.cc
     )
 
 # include directories

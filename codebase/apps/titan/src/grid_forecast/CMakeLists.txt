@@ -14,17 +14,17 @@ project (grid_forecast)
 # source files
 
 set (SRCS
-      grid_forecast.c
-      init_indices.c
-      load_scan_times.c
-      open_files.c
-      parse_args.c
-      process_track_file.c
-      read_params.c
-      read_volume.c
-      tidy_and_exit.c
-      update_forecast_grid.c
-      write_volume.c
+      grid_forecast.cc
+      init_indices.cc
+      load_scan_times.cc
+      open_files.cc
+      parse_args.cc
+      process_track_file.cc
+      read_params.cc
+      read_volume.cc
+      tidy_and_exit.cc
+      update_forecast_grid.cc
+      write_volume.cc
     )
 
 # include directories

@@ -14,10 +14,10 @@ project (track_print)
 # source files
 
 set (SRCS
-      parse_args.c
-      process_file.c
-      tidy_and_exit.c
-      track_print.c
+      parse_args.cc
+      process_file.cc
+      tidy_and_exit.cc
+      track_print.cc
     )
 
 # include directories
