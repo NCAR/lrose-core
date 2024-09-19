@@ -91,16 +91,16 @@ int main()
    * set up server details
    */
 
-  prog_name = "test_tserver";
+  prog_name = (char *) "test_tserver";
 
-  servmap_host1 = "kodiak";
-  servmap_host2 = "none";
+  servmap_host1 = (char *) "kodiak";
+  servmap_host2 = (char *) "none";
 
-  server_subtype = "Dobson";
+  server_subtype = (char *) "Dobson";
 
-  server_instance = "Test";
+  server_instance = (char *) "Test";
 
-  default_host = "kodiak";
+  default_host = (char *) "kodiak";
 
   default_port = 44000;
 
@@ -131,7 +131,7 @@ int main()
    * set up sigpipe trap
    */
   
-  PORTsignal(SIGPIPE, (void (*)())handle_tserver_sigpipe);
+  PORTsignal(SIGPIPE, (PORTsigfunc) handle_tserver_sigpipe);
 
   /*
    * set up the request type - unused options are set first

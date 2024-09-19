@@ -49,7 +49,7 @@ static void compute_best_fit(ui08 **forecast_grid,
 
 static void load_mod_truth_grid(ui08 **truth_grid);
 
-static void print_grid(char *label,
+static void print_grid(const char *label,
 		       ui08 **grid);
 
 static void setup_template(void);
@@ -350,9 +350,9 @@ static void compute_as_is_point(ui08 **forecast_grid,
 
 {
 
-  register ui08 *truth, *forecast;
-  register long i;
-  register long n_succ = 0, n_fail = 0, n_false = 0, n_non = 0;
+  ui08 *truth, *forecast;
+  long i;
+  long n_succ = 0, n_fail = 0, n_false = 0, n_non = 0;
 
   /*
    * set pointer to start of grids
@@ -474,7 +474,7 @@ static void load_mod_truth_grid(ui08 **truth_grid)
  * print_grid()
  */
 
-static void print_grid(char *label,
+static void print_grid(const char *label,
 		       ui08 **grid)
 
 {

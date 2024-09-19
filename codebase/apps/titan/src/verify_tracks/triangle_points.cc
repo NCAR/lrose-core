@@ -54,8 +54,8 @@
 
 #include "verify_tracks.h"
 
-static int compare_x_coords();
-static int compare_y_coords();
+static int compare_x_coords(const void *v1, const void *v2);
+static int compare_y_coords(const void *v1, const void *v2);
 
 /*
  * the following form is the equation of a line through x0,y0 and x1,y1
@@ -232,12 +232,12 @@ void triangle_pts(point_t *pt0,
   /*
    * sort the triangle vertices into horizontal order
    */
-  
+
   qsort((char *) tri, 3, sizeof(point_t), compare_x_coords);
 
   hp_val_x = FORM(tri[1].y, tri[1].x,
-		   tri[0].y, tri[0].x,
-		   tri[2].y, tri[2].x);
+                  tri[0].y, tri[0].x,
+                  tri[2].y, tri[2].x);
   
   /*
    * fill in the grid
@@ -316,13 +316,14 @@ void triangle_pts(point_t *pt0,
  * based on the y coordinate (lowest to highest)
  */
 
-static int compare_y_coords(p1, p2)
-
-     point_t *p1, *p2;
+static int compare_y_coords(const void *v1, const void *v2)
 
 {
   
   double dy;
+
+  point_t *p1 = (point_t *) v1;
+  point_t *p2 = (point_t *) v2;
 
   dy = p1->y - p2->y;
 
@@ -340,13 +341,14 @@ static int compare_y_coords(p1, p2)
  * based on the x coordinate (lowest to highest)
  */
 
-static int compare_x_coords(p1, p2)
-
-     point_t *p1, *p2;
+static int compare_x_coords(const void *v1, const void *v2)
 
 {
   
   double dx;
+
+  point_t *p1 = (point_t *) v1;
+  point_t *p2 = (point_t *) v2;
 
   dx = p1->x - p2->x;
 

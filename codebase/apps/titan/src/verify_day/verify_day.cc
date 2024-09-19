@@ -188,7 +188,7 @@ int main(int argc, char **argv)
   fprintf(stdout, "\n");
 
   uprint_cont(&cont_table, stdout, Glob->prog_name,
-	      "    ", TRUE, TRUE);
+	      (char*) "    ", TRUE, TRUE);
 
   /*
    * quit

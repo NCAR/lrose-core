@@ -66,9 +66,9 @@ void find_last_descendant(track_file_handle_t *t_handle,
 
     if (t_handle->header->n_simple_tracks > nvisited_alloc) {
       if (visited == NULL) {
-	visited = umalloc(t_handle->header->n_simple_tracks);
+	visited = (ui08*) umalloc(t_handle->header->n_simple_tracks);
       } else {
-	visited = urealloc(visited, t_handle->header->n_simple_tracks);
+	visited = (ui08 *) urealloc(visited, t_handle->header->n_simple_tracks);
       }
       nvisited_alloc = t_handle->header->n_simple_tracks;
     }

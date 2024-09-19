@@ -386,7 +386,7 @@ static void print_layers(storm_file_handle_t *s_handle,
      
 {
 
-  char *spacer = "";
+  char *spacer = (char *) "";
   char *loc_label;
   long istorm, ientry, ilayer;
   storm_file_global_props_t *gprops;
@@ -419,9 +419,9 @@ static void print_layers(storm_file_handle_t *s_handle,
 	    utimstr(entry->time));
     
     if (s_handle->scan->grid.proj_type == TITAN_PROJ_FLAT) {
-      loc_label = " (km)";
+      loc_label = (char *) " (km)";
     } else {
-      loc_label = "(deg)";
+      loc_label = (char *) "(deg)";
     }
     
     /*
