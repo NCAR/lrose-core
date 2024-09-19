@@ -58,7 +58,7 @@
 #include <toolsa/umisc.h>
 
 #include "fs.h"
-#include "wsi_ingest_tdrp.h"
+#include "Params.hh"
 
 /******************************
    WSI Weather Header STructure
@@ -121,7 +121,7 @@ void tidy_and_exit(int sig);
  */
 
 char *Program_name;
-wsi_ingest_tdrp_struct Params;
+Params _params;
 
 ui08 wxBuf[kSerIOBufSz];
 
@@ -140,10 +140,7 @@ int main(int argc, char **argv)
   path_parts_t progname_parts;
   int check_params;
   int print_params;
-  char *params_file_path;
-  
   tdrp_override_t override;
-  TDRPtable *table;
   
   int output_type;
 
@@ -185,45 +182,25 @@ int main(int argc, char **argv)
    * parse command line arguments
    */
 
+  char *params_path = (char *) "unknown";
   parse_args(argc, argv, &check_params, &print_params,
-	     &params_file_path, &override);
-
+	     &params_path, &override);
+  
   /*
    * load up parameters
    */
   
-  table = wsi_ingest_tdrp_init(&Params);
-
-  if (TDRP_read(params_file_path,
-		table,
-		&Params,
-		override.list) == FALSE)
+  
+  if (_params.loadFromArgs(argc, argv,
+                           override.list,
+                           &params_path))
   {
     fprintf(stderr, "ERROR - %s:main\n", Program_name);
     fprintf(stderr, "Problems with params file '%s'\n",
-	    params_file_path);
+	    params_path);
     tidy_and_exit(-1);
   }
   
-  TDRP_free_override(&override);
-  
-  if (check_params)
-  {
-    TDRP_check_is_set(table, &Params);
-    tidy_and_exit(0);
-  }
-  
-  if (print_params)
-  {
-    TDRP_print_params(table, &Params, Program_name, TRUE);
-    tidy_and_exit(0);
-  }
-  
-  if (Params.malloc_debug_level > 0)
-  {
-    umalloc_debug(Params.malloc_debug_level);
-  }
-
   /*
    * Initialize the memory buffer used for collecting the header information for
    * the file.
@@ -237,37 +214,37 @@ int main(int argc, char **argv)
 
   LDATA_init_handle(&ldata_handle,
 		    Program_name,
-		    Params.debug_level >= DEBUG_NORM);
+		    _params.debug_level >= Params::DEBUG_NORM);
   
   /*
    * Initialize process registration
    */
 
-  PMU_auto_init(Program_name, Params.instance, PROCMAP_REGISTER_INTERVAL);
+  PMU_auto_init(Program_name, _params.instance, PROCMAP_REGISTER_INTERVAL);
   
   /**************************** Main Processing Begins ************************/
 
 
-  if (Params.debug_level >= DEBUG_NORM)
+  if (_params.debug_level >= Params::DEBUG_NORM)
     fprintf(stderr, "\nInitializing wsiIngest\n");
 
   /***** Open the network port for communications *****/
 
   PMU_auto_register("Openning network port");
   
-  if (open_net(Params.wsi_ip_address, Params.wsi_port) < 0)
+  if (open_net(_params.wsi_ip_address, _params.wsi_port) < 0)
   {
     fprintf(stderr, "Error Opening Network Port\n");
     exit(-1);
   }
   else
   {
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Opened Network Port\n");
   }
 
   /* start the data flowing */
-  if (Params.debug_level >= DEBUG_NORM)
+  if (_params.debug_level >= Params::DEBUG_NORM)
   {
     fprintf(stderr, "Starting wsiIngest Processing...\n");
     fprintf(stderr, "Waiting for image data header\n");
@@ -286,12 +263,12 @@ int main(int argc, char **argv)
     memset(wxBuf, 0, sizeof(wxBuf));
     memset(wxHdr, 0, sizeof(wxHdr));
 
-    if (Params.debug_level >= DEBUG_EXTRA)
+    if (_params.debug_level >= Params::DEBUG_EXTRA)
       fprintf(stderr, "Waiting for kHdrSg flag\n");
     
     byte_count = FlgDetect(wxBuf, kHdrSg, sizeof(wxBuf));
     
-    if (Params.debug_level >= DEBUG_EXTRA)
+    if (_params.debug_level >= Params::DEBUG_EXTRA)
       fprintf(stderr, "Got kHdrSg flag, byte_count = %d\n", byte_count);
     
     if (byte_count == -1)   /* Wait For Header Flag */
@@ -388,7 +365,7 @@ int main(int argc, char **argv)
       continue;
     }
 
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
     {
       fprintf(stderr, "\nWSI Wx Product Header Detected");
       fprintf(stderr, "   Data time: %s:%sGMT",  product.hour, product.mins);
@@ -432,12 +409,12 @@ int main(int argc, char **argv)
 
     output_type = -1;
     
-    for (i = 0; i < Params.output_data.len; i++)
+    for (i = 0; i < _params.output_data_n; i++)
     {
-      if ((STRequal_exact(product.type,     Params.output_data.val[i].product_type) &&
-	   STRequal_exact(product.coverage, Params.output_data.val[i].product_coverage)))
+      if ((STRequal_exact(product.type,     _params._output_data[i].product_type) &&
+	   STRequal_exact(product.coverage, _params._output_data[i].product_coverage)))
       {
-	if (Params.debug_level >= DEBUG_NORM)
+	if (_params.debug_level >= Params::DEBUG_NORM)
 	  fprintf(stderr, "Header selected for archive, starting processing...\n");
 
 	output_type = i;
@@ -453,7 +430,7 @@ int main(int argc, char **argv)
      * stream.
      */
 
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Accumulating Data...\n");
 
     status = FlgDetect(wxBuf, kLinSg, sizeof(wxBuf));
@@ -522,7 +499,7 @@ int main(int argc, char **argv)
 
     sprintf(output_filename, "%02d%02d%02d.%s", 
 	    data_time_struct.hour, data_time_struct.min, data_time_struct.sec,
-	    Params.output_data.val[output_type].output_ext);
+	    _params._output_data[output_type].output_ext);
 
     count = FlgDetect(wxBuf, kEndSg, sizeof(wxBuf));
     
@@ -554,9 +531,9 @@ int main(int argc, char **argv)
 	    data_time_struct.day);
     
     sprintf(temp_filename, "%s/%s",
-            Params.output_data.val[output_type].output_dir, output_subdir);
+            _params._output_data[output_type].output_dir, output_subdir);
     
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Making output subdirectory <%s>\n", temp_filename);
     
     if (makedir(temp_filename) != 0)
@@ -571,10 +548,10 @@ int main(int argc, char **argv)
     }
 
     sprintf(output_path, "%s/%s/%s",
-	    Params.output_data.val[output_type].output_dir,
+	    _params._output_data[output_type].output_dir,
 	    output_subdir, output_filename);
 
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Writing wsi raw image data to %s\n", output_path);
 
     /*
@@ -606,9 +583,9 @@ int main(int argc, char **argv)
     data_time = uunix_time(&data_time_struct);
     
     if (LDATA_info_write(&ldata_handle,
-			 Params.output_data.val[output_type].output_dir,
+			 _params._output_data[output_type].output_dir,
 			 data_time,
-			 Params.output_data.val[output_type].output_ext,
+			 _params._output_data[output_type].output_ext,
 			 temp_filename,
 			 (char *)NULL,
 			 0,
@@ -622,7 +599,7 @@ int main(int argc, char **argv)
       HandleErr(iNone);
     }
     
-    if (Params.debug_level >= DEBUG_NORM)
+    if (_params.debug_level >= Params::DEBUG_NORM)
     {
       fprintf(stderr, "Done with write\n");
       fprintf(stderr, "Waiting for next data header\n");
@@ -694,7 +671,7 @@ int FlgDetect( ui08 *read_buffer, ui08 flg, int bufLen)
 
     if (!flg0 && flgF0 == 0xF0 && *read_buffer == flg)
     {
-      if (flg == kLinSg && Params.debug_level >= DEBUG_NORM)
+      if (flg == kLinSg && _params.debug_level >= Params::DEBUG_NORM)
 	fprintf(stderr, "kLinSg flag found at position %d\n", count);
       
       return(count+1);
@@ -708,27 +685,27 @@ int FlgDetect( ui08 *read_buffer, ui08 flg, int bufLen)
       switch(flg)
       {
       case kEndSg:
-	if (Params.debug_level >= DEBUG_NORM)
+	if (_params.debug_level >= Params::DEBUG_NORM)
 	  fprintf(stderr, "\nBuffer Length Exceeded: End Segment Flag");
 	break;
 
       case kHdrSg:
-	if (Params.debug_level >= DEBUG_NORM)
+	if (_params.debug_level >= Params::DEBUG_NORM)
 	  fprintf(stderr, "\nBuffer Length Exceeded: Header Segment Flag");
 	break;
 
       case kTagSg:
-	if (Params.debug_level >= DEBUG_NORM)
+	if (_params.debug_level >= Params::DEBUG_NORM)
 	  fprintf(stderr, "\nBuffer Length Exceeded: Tag Segment Flag");
 	break;
 
       case kNavSg:
-	if (Params.debug_level >= DEBUG_NORM)
+	if (_params.debug_level >= Params::DEBUG_NORM)
 	  fprintf(stderr, "\nBuffer Length Exceeded: Navigation Segment Flag");
 	break;
       }
            
-      if (Params.debug_level >= DEBUG_NORM)
+      if (_params.debug_level >= Params::DEBUG_NORM)
 	fprintf(stderr, "Count        : %d\n", count);
       return( -1);
     }
@@ -811,7 +788,7 @@ void parse_args(int argc,
     }
     else if (STRequal_exact(argv[i], "-debug"))
     {
-      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      sprintf(tmp_str, "debug = Params::DEBUG_NORM;");
       TDRP_add_override(override, tmp_str);
     }
     else if (STRequal_exact(argv[i], "-mdebug"))
