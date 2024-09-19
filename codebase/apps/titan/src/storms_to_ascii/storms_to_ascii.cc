@@ -22,22 +22,19 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /************************************************************************
- * storms_to_tifs.c
+ * storms_to_ascii.c
  *
  * Prints out storm and track data for the track files in the
- * command line. 
+ * command line.
  *
  * Mike Dixon  RAP NCAR Boulder CO USA
  *
  * August 1992
- * 
- * (rjp, 7 Oct 2002) Revised version of storms_to_ascii.c code 
- * to print output in format for TIFS. 
- * 
+ *
  ************************************************************************/
 
 #define MAIN
-#include "storms_to_tifs.h"
+#include "storms_to_ascii.hh"
 #undef MAIN
 
 int main(int argc, char **argv)
@@ -94,10 +91,9 @@ int main(int argc, char **argv)
 
   /*
    * print comments to start of file
-   * (rjp 7 Oct 2002) Header printed in process_track_file. 
    */
 
-  /*  print_comments(stdout); */
+  print_comments(stdout);
 
   /*
    * loop through the track files

@@ -22,34 +22,36 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /***************************************************************************
- * init_indices.c
+ * tidy_and_exit.c
  *
- * initializes the track verification file handle
+ * tidies up and quits
  *
- * Mike Dixon  RAP NCAR Boulder CO USA
+ * Mike Dixon
  *
- * November 1991
+ * RAP, NCAR, Boulder, Colorado, USA
  *
- ***************************************************************************/
+ * July 1991
+ *
+ ****************************************************************************/
 
-#include "storms_to_tifs.h"
+#include "storms_to_ascii.hh"
 
-void init_indices(storm_file_handle_t *s_handle,
-		  track_file_handle_t *t_handle)
+void tidy_and_exit(int sig)
 
 {
 
   /*
-   * initialize storm file handle
-   */
-  
-  RfInitStormFileHandle(s_handle, Glob->prog_name);
-      
-  /*
-   * initialize track file handle
+   * check memory allocation
    */
 
-  RfInitTrackFileHandle(t_handle, Glob->prog_name);
+  umalloc_map();
+  umalloc_verify();
   
+  /*
+   * exit with code sig
+   */
+
+  exit(sig);
+
 }
 

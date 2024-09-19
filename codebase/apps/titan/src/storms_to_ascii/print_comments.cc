@@ -22,36 +22,35 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /***************************************************************************
- * tidy_and_exit.c
+ * print_comments.c
  *
- * tidies up and quits
+ * Prints comments lines
  *
  * Mike Dixon
  *
  * RAP, NCAR, Boulder, Colorado, USA
  *
- * July 1991
+ * Sept 1997
  *
  ****************************************************************************/
 
-#include "storms_to_tifs.h"
+#include "storms_to_ascii.hh"
 
-void tidy_and_exit(int sig)
+void print_comments(FILE *out)
 
 {
 
-  /*
-   * check memory allocation
-   */
-
-  umalloc_map();
-  umalloc_verify();
-  
-  /*
-   * exit with code sig
-   */
-
-  exit(sig);
+  fprintf(out, "# ");
+  fprintf(out, "year, month, day, hour, min, sec, x (km), y (km), ");
+  fprintf(out, "lat (deg), lon (deg), ");
+  fprintf(out, "precip area (km2), precip rate (mm/hr), ");
+  fprintf(out, "major radius (km), minor radius (km), ");
+  fprintf(out, "orientation from (deg TN), ");
+  fprintf(out, "volume (km3), mass (ktons), top (km msl), ");
+  fprintf(out, "max dBZ, mean dBZ, ");
+  fprintf(out, "%% vol > 40 dBZ, %% vol > 50 dBZ, ");
+  fprintf(out, "%% vol > 60 dBZ, %% vol > 70 dBZ, ");
+  fprintf(out, "speed (km/hr), dirn (deg T), ");
+  fprintf(out, "dvol_dt (km3/hr), precip_area_dt (km2/h)\n");
 
 }
-

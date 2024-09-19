@@ -34,7 +34,7 @@
  *
  ****************************************************************************/
 
-#include "storms_to_tifs.h"
+#include "storms_to_tifs.hh"
 
 void print_comments(FILE *out)
 

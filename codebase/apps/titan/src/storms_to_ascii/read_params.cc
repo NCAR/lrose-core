@@ -21,37 +21,25 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/***************************************************************************
- * tidy_and_exit.c
+/*********************************************************************
+ * read_params.c: reads the parameters, loads up the globals
  *
- * tidies up and quits
+ * RAP, NCAR, Boulder CO
+ *
+ * March 1991
  *
  * Mike Dixon
  *
- * RAP, NCAR, Boulder, Colorado, USA
- *
- * July 1991
- *
- ****************************************************************************/
+ *********************************************************************/
 
-#include "storms_to_ascii.h"
+#include "storms_to_ascii.hh"
 
-void tidy_and_exit(int sig)
+void read_params(void)
 
 {
 
   /*
-   * check memory allocation
+   * get globals from the parameters
    */
-
-  umalloc_map();
-  umalloc_verify();
   
-  /*
-   * exit with code sig
-   */
-
-  exit(sig);
-
 }
-

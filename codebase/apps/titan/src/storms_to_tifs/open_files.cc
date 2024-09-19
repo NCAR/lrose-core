@@ -21,36 +21,93 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/***************************************************************************
- * print_comments.c
+/*************************************************************************
+ * open_files.c
  *
- * Prints comments lines
+ * Opens the files, reads in the headers
  *
- * Mike Dixon
+ * Mike Dixon  RAP NCAR Boulder CO USA
  *
- * RAP, NCAR, Boulder, Colorado, USA
+ * October 1991
  *
- * Sept 1997
- *
- ****************************************************************************/
+ **************************************************************************/
 
-#include "storms_to_ascii.h"
+#include "storms_to_tifs.hh"
 
-void print_comments(FILE *out)
+void open_files(storm_file_handle_t *s_handle,
+		track_file_handle_t *t_handle,
+		char **track_file_paths,
+		si32 file_num)
 
 {
 
-  fprintf(out, "# ");
-  fprintf(out, "year, month, day, hour, min, sec, x (km), y (km), ");
-  fprintf(out, "lat (deg), lon (deg), ");
-  fprintf(out, "precip area (km2), precip rate (mm/hr), ");
-  fprintf(out, "major radius (km), minor radius (km), ");
-  fprintf(out, "orientation from (deg TN), ");
-  fprintf(out, "volume (km3), mass (ktons), top (km msl), ");
-  fprintf(out, "max dBZ, mean dBZ, ");
-  fprintf(out, "%% vol > 40 dBZ, %% vol > 50 dBZ, ");
-  fprintf(out, "%% vol > 60 dBZ, %% vol > 70 dBZ, ");
-  fprintf(out, "speed (km/hr), dirn (deg T), ");
-  fprintf(out, "dvol_dt (km3/hr), precip_area_dt (km2/h)\n");
+  char storm_file_path[MAX_PATH_LEN];
+  path_parts_t track_path_parts;
+
+  /*
+   * open track data file
+   */
+
+  if (RfOpenTrackFiles(t_handle,
+		       "r",
+		       track_file_paths[file_num],
+		       (char *) NULL,
+		       "open_files")) {
+    
+    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
+    fprintf(stderr, "Cannot open track files.\n");
+    perror(track_file_paths[file_num]);
+    tidy_and_exit(-1);
+    
+  }
+  
+  /*
+   * read in track file header
+   */
+
+  if (RfReadTrackHeader(t_handle, "open_files") != R_SUCCESS)
+    tidy_and_exit(-1);
+
+  /*
+   * compute storm data file path
+   */
+
+  uparse_path(track_file_paths[file_num], &track_path_parts);
+  
+  sprintf(storm_file_path, "%s%s",
+	  track_path_parts.dir,
+	  t_handle->header->storm_header_file_name);
+  
+  /*
+   * open storm file
+   */
+
+  if (RfOpenStormFiles(s_handle,
+		       "r",
+		       storm_file_path,
+		       (char *) NULL,
+		       "open_files")) {
+    
+    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
+    fprintf(stderr, "Cannot open storm files.\n");
+    perror(storm_file_path);
+    tidy_and_exit(-1);
+    
+  }
+  
+  /*
+   * read in storm properties file header
+   */
+
+  if (RfReadStormHeader(s_handle, "open_files") != R_SUCCESS)
+    tidy_and_exit(-1);
+  
+  /*
+   * free resources
+   */
+
+  ufree_parsed_path(&track_path_parts);
 
 }
+
+

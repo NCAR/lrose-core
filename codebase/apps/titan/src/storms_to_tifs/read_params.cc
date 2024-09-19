@@ -21,93 +21,25 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/*************************************************************************
- * open_files.c
+/*********************************************************************
+ * read_params.c: reads the parameters, loads up the globals
  *
- * Opens the files, reads in the headers
+ * RAP, NCAR, Boulder CO
  *
- * Mike Dixon  RAP NCAR Boulder CO USA
+ * March 1991
  *
- * October 1991
+ * Mike Dixon
  *
- **************************************************************************/
+ *********************************************************************/
 
-#include "storms_to_tifs.h"
+#include "storms_to_tifs.hh"
 
-void open_files(storm_file_handle_t *s_handle,
-		track_file_handle_t *t_handle,
-		char **track_file_paths,
-		si32 file_num)
+void read_params(void)
 
 {
 
-  char storm_file_path[MAX_PATH_LEN];
-  path_parts_t track_path_parts;
-
   /*
-   * open track data file
+   * get globals from the parameters
    */
-
-  if (RfOpenTrackFiles(t_handle,
-		       "r",
-		       track_file_paths[file_num],
-		       (char *) NULL,
-		       "open_files")) {
-    
-    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
-    fprintf(stderr, "Cannot open track files.\n");
-    perror(track_file_paths[file_num]);
-    tidy_and_exit(-1);
-    
-  }
   
-  /*
-   * read in track file header
-   */
-
-  if (RfReadTrackHeader(t_handle, "open_files") != R_SUCCESS)
-    tidy_and_exit(-1);
-
-  /*
-   * compute storm data file path
-   */
-
-  uparse_path(track_file_paths[file_num], &track_path_parts);
-  
-  sprintf(storm_file_path, "%s%s",
-	  track_path_parts.dir,
-	  t_handle->header->storm_header_file_name);
-  
-  /*
-   * open storm file
-   */
-
-  if (RfOpenStormFiles(s_handle,
-		       "r",
-		       storm_file_path,
-		       (char *) NULL,
-		       "open_files")) {
-    
-    fprintf(stderr, "ERROR - %s:open_files\n", Glob->prog_name);
-    fprintf(stderr, "Cannot open storm files.\n");
-    perror(storm_file_path);
-    tidy_and_exit(-1);
-    
-  }
-  
-  /*
-   * read in storm properties file header
-   */
-
-  if (RfReadStormHeader(s_handle, "open_files") != R_SUCCESS)
-    tidy_and_exit(-1);
-  
-  /*
-   * free resources
-   */
-
-  ufree_parsed_path(&track_path_parts);
-
 }
-
-

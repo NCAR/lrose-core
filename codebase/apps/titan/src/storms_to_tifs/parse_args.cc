@@ -32,7 +32,7 @@
  *
  *********************************************************************/
 
-#include "storms_to_tifs.h"
+#include "storms_to_tifs.hh"
 
 void parse_args(int argc,
 		char **argv,
@@ -94,7 +94,7 @@ void parse_args(int argc,
       
     } else if (!strcmp(argv[i], "-debug")) {
       
-      debug_str = "true";
+      debug_str = (char *) "true";
       
     } else if (!strcmp(argv[i], "-gmt_offset")) {
       

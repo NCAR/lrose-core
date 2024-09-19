@@ -32,7 +32,7 @@
  *
  **********************************************************************/
 
-#include "storms_to_ascii.h"
+#include "storms_to_tifs.hh"
 
 /* #define RAD_TO_DEG 57.29577951308092 */
 
@@ -49,7 +49,8 @@ void process_track_file(storm_file_handle_t *s_handle,
   double proj_area, precip_flux, precip_rate;
   double level;
   double percent, percent_40, percent_50, percent_60, percent_70;
-  double dx_dt, dy_dt, speed, dirn;
+  double dx_dt, dy_dt;
+  double speed, dirn;
   double dvolume_dt, dproj_area_dt;
   double storm_lat, storm_lon;
   double cart_lat, cart_lon;
@@ -57,6 +58,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 
   date_time_t *stime, ltime;
   date_time_t dtime;
+  date_time_t file_time;   /* rjp 27Oct99 */
   storm_file_params_t *sparams;
   storm_file_global_props_t *gprops;
   storm_file_dbz_hist_t *hist;
@@ -66,6 +68,53 @@ void process_track_file(storm_file_handle_t *s_handle,
   
   sparams = &s_handle->header->params;
   /* tparams = &t_handle->header->params; */
+  ugmtime(&file_time);
+
+ /* print header */
+    fprintf(stdout,"storms_to_ascii \n");
+    fprintf(stdout,"File created(UTC):   %s\n", utimestr(&file_time));
+    fprintf(stdout,"Last scan time(UTC): %s\n",
+        utimstr(s_handle->header->end_time));
+    fprintf(stdout," \n");
+    fprintf(stdout,"Radar location: \n");
+    fprintf(stdout,"   Lat:  %8.3f\n",
+        s_handle->scan->grid.proj_origin_lat);
+    fprintf(stdout,"   Long: %8.3f\n",
+        s_handle->scan->grid.proj_origin_lon);
+    fprintf(stdout," \n");
+    fprintf(stdout,"Storm file parameters: \n");
+    fprintf(stdout,"   Low dBZ threshold:       %4.0f\n",
+        sparams->low_dbz_threshold);
+    fprintf(stdout,"   High dBZ threshold:      %4.0f\n",
+        sparams->high_dbz_threshold);
+    fprintf(stdout,"   Hail dBZ threshold:      %4.0f\n",
+        sparams->hail_dbz_threshold);
+    fprintf(stdout,"   Base threshold (km):     %5.1f\n",
+        sparams->base_threshold);
+    fprintf(stdout,"   Top threshold (km):      %5.1f\n",
+        sparams->top_threshold);
+    fprintf(stdout,"   Min radar tops (km):     %5.1f\n",
+        sparams->min_radar_tops);
+    fprintf(stdout,"   Size threshold(km3/km2): %6.0f\n",
+        sparams->min_storm_size);
+    fprintf(stdout,"   Z-R coefficient:         %4.0f\n",
+        sparams->z_p_coeff);    
+    fprintf(stdout,"   Z-R exponent:            %5.1f\n",
+        sparams->z_p_exponent);
+    fprintf(stdout,"\n");
+
+    fprintf(stdout,"scan_num,complex_tk,simple_tk,");
+    fprintf(stdout,"yyyy,mm,dd,hh,mm,ss,");
+    fprintf(stdout,"centr_x(km),centr_y(km),lat(deg),long(deg),");
+    fprintf(stdout,"precip_area(km2),precip_rate(mm/hr),");
+    fprintf(stdout,"maj_rad(km),min_rad(km),orientation(degTN),");
+    fprintf(stdout,"vol(km3),mass(ktons),top(km),");
+    fprintf(stdout,"max_dBZ,mean_dBZ,");
+    fprintf(stdout,"%%V>40dBZ,%%V>50dBZ,");
+    fprintf(stdout,"%%V>60dBZ,%%V>70dBZ,");
+    fprintf(stdout,"speed(km/hr),dirn(degT),");
+    fprintf(stdout,"dV/dt(km3/hr),d(precip_area)/dt(km2/hr),");
+    fprintf(stdout,"vil(kg/m2),ht_max_dBZ(km)\n");
 
   /*
    * loop through the scans in the storm file
@@ -101,9 +150,9 @@ void process_track_file(storm_file_handle_t *s_handle,
 	
 	entry_found = FALSE;
 	
-	for (ientry = 0;
+        for (ientry = 0;
 	     ientry < t_handle->simple_params->duration_in_scans;
-	     ientry++) {
+            ientry++) {
 	  
 	  if (RfReadTrackEntry(t_handle, "process_track_file") != R_SUCCESS)
 	    tidy_and_exit(-1);
@@ -130,7 +179,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 	  fprintf(stderr, "ERROR - %s:process_track_file\n",
 		  Glob->prog_name);
 	  fprintf(stderr, "Time-matched entry not found.\n");
-	  fprintf(stderr, "Simple track num %ld\n", (long) isimple);
+	  fprintf(stderr, "Simple track num %ld\n", (long)isimple);
 	  fprintf(stderr, "Search time %s\n", utimestr(stime));
 	  tidy_and_exit(-1);
 	  
@@ -165,7 +214,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 	  range = 0.0;
 	  theta = 0.0;
 	} else {
-	  range = sqrt(x * x + y * y);
+	  range = sqrt(x*x + y*y);
 	  theta = atan2(x, y) * RAD_TO_DEG;
 	}
 
@@ -207,7 +256,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 	  if (level > 70.0)
 	    percent_70 += percent;
 
-	} /* interval */
+    } /* interval */
 
 	fprops = &entry->dval_dt;
 
@@ -230,9 +279,10 @@ void process_track_file(storm_file_handle_t *s_handle,
 	/*
 	 * print out properties as below
 	 *
+	 * iscan,complex_num,isimple,
 	 * year,month,day,hour,min,sec
-	 * x (km)
-	 * y (km)
+	 * proj_area_centroid_x (km)
+	 * proj_area_centroid_y (km)
 	 * latitude (deg)
 	 * longitude (deg - minus is west)
 	 * precip area (km2)
@@ -253,10 +303,16 @@ void process_track_file(storm_file_handle_t *s_handle,
 	 * direction of movement (deg from TN)
 	 * rate of change of volume (km3 / hr)
 	 * rate of change of precip area (km2 / hr)
+	 * vil kg/m^2 (pjp 28/2/03 add vil field
 	 */
 
+        /* (rjp 8Sep1999) Add scan num, complex_num, simple_num to output. */
+        fprintf(stdout,
+	        "%5d %5d %5d ",iscan, t_handle->simple_params->complex_track_num,
+                isimple);
+		
 	fprintf(stdout,
-		"%d %d %d %d %d %d ",
+		"%.4d %.2d %.2d %.2d %.2d %.2d ",
 		ltime.year,
 		ltime.month,
 		ltime.day,
@@ -265,7 +321,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 		ltime.sec);
 	
 	fprintf(stdout,
-		"%g %g %g %g %g %g %g %g %g ",
+		"%10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f ",
 		x, y,
 		storm_lat, storm_lon,
 		proj_area, precip_rate,
@@ -274,7 +330,7 @@ void process_track_file(storm_file_handle_t *s_handle,
 		gprops->proj_area_orientation);
 		
 	fprintf(stdout,
-		"%g %g %g %g %g ",
+		"%10.2f %10.2f %10.2f %10.2f %10.2f ",
 		gprops->volume,
 		gprops->mass,
 		gprops->top,
@@ -282,14 +338,16 @@ void process_track_file(storm_file_handle_t *s_handle,
 		gprops->dbz_mean);
 		
 	fprintf(stdout,
-		"%g %g %g %g ",
+		"%10.2f %10.2f %10.2f %10.2f ",
 		percent_40, percent_50,
 		percent_60, percent_70);
 		
 	fprintf(stdout,
-		"%g %g %g %g ",
+		"%10.2f %10.2f %10.2f %10.2f %10.2f %10.2f ",
 		speed, dirn,
-		dvolume_dt, dproj_area_dt);
+		dvolume_dt, dproj_area_dt,
+		gprops->vil_from_maxz,
+		gprops->ht_of_dbz_max);
 
 	fprintf(stdout, "\n");
 
@@ -300,9 +358,5 @@ void process_track_file(storm_file_handle_t *s_handle,
   } /* iscan */
 
 }
-
-
-
-
 
 

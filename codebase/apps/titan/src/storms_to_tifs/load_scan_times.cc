@@ -21,25 +21,55 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/*********************************************************************
- * read_params.c: reads the parameters, loads up the globals
+/*******************************************************************************
+ * load_scan_times.c
  *
- * RAP, NCAR, Boulder CO
+ * Loads up an array of scans times as julian time - the julian day plus the
+ * fraction of the day
  *
- * March 1991
+ * Mike Dixon  RAP NCAR Boulder CO USA
  *
- * Mike Dixon
+ * October 1991
  *
- *********************************************************************/
+ *******************************************************************************/
 
-#include "storms_to_ascii.h"
+#include "storms_to_tifs.hh"
 
-void read_params(void)
+date_time_t *load_scan_times(storm_file_handle_t *s_handle)
 
 {
 
-  /*
-   * get globals from the parameters
-   */
-  
+  static int first_call = TRUE;
+  static date_time_t *scan_time;
+  si32 n_scans, iscan;
+
+  n_scans = s_handle->header->n_scans;
+
+  if (first_call == TRUE) {
+
+    scan_time = (date_time_t *) umalloc
+      ((ui32) (n_scans * sizeof(date_time_t)));
+
+    first_call = FALSE;
+
+  } else {
+
+    scan_time = (date_time_t *) urealloc
+      ((char *) scan_time,
+       (ui32) (n_scans * sizeof(date_time_t)));
+
+  }
+
+  for (iscan = 0; iscan < n_scans; iscan++) {
+
+    if (RfReadStormScan(s_handle, iscan, "load_scan_time") != R_SUCCESS)
+      tidy_and_exit(-1);
+
+    scan_time[iscan].unix_time = s_handle->scan->time;
+    uconvert_from_utime(scan_time + iscan);
+
+  } /* iscan */
+
+  return (scan_time);
+
 }
