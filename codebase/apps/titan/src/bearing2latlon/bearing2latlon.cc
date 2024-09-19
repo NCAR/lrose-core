@@ -21,37 +21,87 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/***************************************************************************
- * tidy_and_exit.c
+/***********************************************************************
+ * bearing2latlon.c
  *
- * tidies up and quits
+ * Reads in bearing/distance pairs from stdin, computes the
+ * lat/lon pair and outputs to stdout.
+ * 
+ * Comments starting with # are passed through unchanged
  *
- * Mike Dixon
+ * Mike Dixon  RAP NCAR Boulder CO USA
  *
- * RAP, NCAR, Boulder, Colorado, USA
+ * Nov 1995
  *
- * July 1991
- *
- ****************************************************************************/
+ ************************************************************************/
 
-#include "bearing2latlon.h"
+#define MAIN
+#include "bearing2latlon.hh"
+#undef MAIN
 
-void tidy_and_exit(int sig)
+int main(int argc, char **argv)
 
 {
 
   /*
-   * check memory allocation
+   * basic declarations
    */
 
-  umalloc_map();
-  umalloc_verify();
+  char *params_file_path = NULL;
+  int check_params;
+  int print_params;
+  path_parts_t progname_parts;
+  tdrp_override_t override;
+
+  /*
+   * allocate space for the global structure
+   */
+  
+  Glob = (global_t *) umalloc(sizeof(global_t));
+
+  /*
+   * set program name
+   */
+  
+  uparse_path(argv[0], &progname_parts);
+  Glob->prog_name = (char *)
+    umalloc (strlen(progname_parts.base) + 1);
+  strcpy(Glob->prog_name, progname_parts.base);
   
   /*
-   * exit with code sig
+   * parse command line arguments
    */
+  
+  parse_args(argc, argv,
+	     &check_params, &print_params, &override,
+	     &params_file_path);
 
-  exit(sig);
+  /*
+   * load up parameters
+   */
+  
+  // load TDRP params from command line
+  
+  char *paramsPath = (char *) "unknown";
+  if (Glob->params.loadFromArgs(argc, argv,
+                                override.list,
+                                &paramsPath)) {
+    cerr << "ERROR: " << Glob->prog_name << endl;
+    cerr << "Problem with TDRP parameters." << endl;
+    tidy_and_exit(-1);
+  }
+  
+  if (Glob->params.malloc_debug_level > 0) {
+    umalloc_debug(Glob->params.malloc_debug_level);
+  }
+
+  filter();
+
+  /*
+   * quit
+   */
+  
+  return(0);
 
 }
 

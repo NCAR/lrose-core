@@ -6,7 +6,7 @@
  * Feb 1995
  */
 
-paramdef enum debug
+paramdef enum debug_t
 {
   p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_EXTRA};
   p_default = {DEBUG_OFF};

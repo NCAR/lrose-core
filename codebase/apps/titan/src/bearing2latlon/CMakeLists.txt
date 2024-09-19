@@ -14,11 +14,11 @@ project (bearing2latlon)
 # source files
 
 set (SRCS
-      bearing2latlon_tdrp.c
-      bearing2latlon.c
-      filter.c
-      parse_args.c
-      tidy_and_exit.c
+      Params.cc
+      bearing2latlon.cc
+      filter.cc
+      parse_args.cc
+      tidy_and_exit.cc
     )
 
 # include directories

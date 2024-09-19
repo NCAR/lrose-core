@@ -21,66 +21,75 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-#ifdef __cplusplus
- extern "C" {
-#endif
-
-/*
- * bearing2latlon.h
+/*********************************************************************
+ * filetr.c
  *
- * Header file for bearing2latlon
- */
+ * perform the filtering
+ *
+ * RAP, NCAR, Boulder CO
+ *
+ * Nov 1995
+ *
+ * Mike Dixon
+ *
+ *********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <sys/types.h>
+#include "bearing2latlon.hh"
 
-#include <toolsa/umisc.h>
-#include <toolsa/pjg.h>
-#include "tdrp/tdrp.h"
-#include "bearing2latlon_tdrp.h"
+void filter(void)
 
-/*
- * global struct
- */
+{
 
-typedef struct {
+  char line[BUFSIZ];
+  double bearing, range;
+  double lat, lon;
+  FILE *ifp;
 
-  char *prog_name;                /* program name */
-  TDRPtable *table;               /* TDRP parsing table */
-  bearing2latlon_tdrp_struct params;  /* parameter struct */
+  if (!strcmp(Glob->params.input_file, "stdin")) {
+    ifp = stdin;
+  } else {
+    if ((ifp = fopen(Glob->params.input_file, "r")) == NULL) {
+      fprintf(stderr, "ERROR - %s:filter\n", Glob->prog_name);
+      fprintf(stderr, "Cannot open input file for reading\n");
+      perror(Glob->params.input_file);
+    tidy_and_exit(-1);
+    }
+  }
+  
+  while (fgets(line, BUFSIZ, ifp) != NULL) {
+    
+    if (line[0] == '#') {
+      
+      fputs(line, stdout);
+      
+    } else {
 
-} global_t;
+      if (sscanf(line, "%lg%lg", &bearing, &range) != 2) {
 
-/*
- * declare the global structure locally in the main,
- * and as an extern in all other routines
- */
+	fputs(line, stdout);
 
-#ifdef MAIN
-global_t *Glob = NULL;
-#else
-extern global_t *Glob;
-#endif
+      } else {
+	
+	PJGLatLonPlusRTheta(Glob->params.origin.latitude,
+			    Glob->params.origin.longitude,
+			    range, bearing,
+			    &lat, &lon);
+	
+	fprintf(stdout, "%g %g\n", lat, lon);
 
-/*
- * function prototypes
- */
+      } /* if (sscanf(line, ... */
 
-extern void filter(void);
+    } /* if (line[0] == '#') */
 
-extern void parse_args(int argc,
-		       char **argv,
-		       int *check_params_p,
-		       int *print_params_p,
-		       tdrp_override_t *override,
-		       char **params_file_path_p);
+    fflush(stdout);
 
-extern void tidy_and_exit(int sig);
+  } /* while */
+  
+  fflush(stdout);
 
-#ifdef __cplusplus
+  if (ifp != stdin) {
+    fclose(ifp);
+  }
+
 }
-#endif
+

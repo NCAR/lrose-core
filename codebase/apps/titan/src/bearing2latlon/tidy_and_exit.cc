@@ -21,75 +21,37 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/*********************************************************************
- * filetr.c
+/***************************************************************************
+ * tidy_and_exit.c
  *
- * perform the filtering
- *
- * RAP, NCAR, Boulder CO
- *
- * Nov 1995
+ * tidies up and quits
  *
  * Mike Dixon
  *
- *********************************************************************/
+ * RAP, NCAR, Boulder, Colorado, USA
+ *
+ * July 1991
+ *
+ ****************************************************************************/
 
-#include "bearing2latlon.h"
+#include "bearing2latlon.hh"
 
-void filter(void)
+void tidy_and_exit(int sig)
 
 {
 
-  char line[BUFSIZ];
-  double bearing, range;
-  double lat, lon;
-  FILE *ifp;
+  /*
+   * check memory allocation
+   */
 
-  if (!strcmp(Glob->params.input_file, "stdin")) {
-    ifp = stdin;
-  } else {
-    if ((ifp = fopen(Glob->params.input_file, "r")) == NULL) {
-      fprintf(stderr, "ERROR - %s:filter\n", Glob->prog_name);
-      fprintf(stderr, "Cannot open input file for reading\n");
-      perror(Glob->params.input_file);
-    tidy_and_exit(-1);
-    }
-  }
+  umalloc_map();
+  umalloc_verify();
   
-  while (fgets(line, BUFSIZ, ifp) != NULL) {
-    
-    if (line[0] == '#') {
-      
-      fputs(line, stdout);
-      
-    } else {
+  /*
+   * exit with code sig
+   */
 
-      if (sscanf(line, "%lg%lg", &bearing, &range) != 2) {
-
-	fputs(line, stdout);
-
-      } else {
-	
-	PJGLatLonPlusRTheta(Glob->params.origin.latitude,
-			    Glob->params.origin.longitude,
-			    range, bearing,
-			    &lat, &lon);
-	
-	fprintf(stdout, "%g %g\n", lat, lon);
-
-      } /* if (sscanf(line, ... */
-
-    } /* if (line[0] == '#') */
-
-    fflush(stdout);
-
-  } /* while */
-  
-  fflush(stdout);
-
-  if (ifp != stdin) {
-    fclose(ifp);
-  }
+  exit(sig);
 
 }
 

@@ -32,7 +32,7 @@
  *
  *********************************************************************/
 
-#include "bearing2latlon.h"
+#include "bearing2latlon.hh"
 
 void parse_args(int argc,
 		char **argv,
