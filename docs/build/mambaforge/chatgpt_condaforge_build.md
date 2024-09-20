@@ -1,3 +1,11 @@
+## Instructions from ChatGpt
+
+Question:
+
+Please list the steps required to build a C++ package for conda-forge?
+
+Answer:
+
 To build and submit a C++ package to **conda-forge**, you generally follow these steps:
 
 ### 1. **Create a Recipe for the Package**
