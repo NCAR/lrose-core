@@ -135,7 +135,7 @@ You can push updates to the feedstock repository directly, and it will trigger r
 5. After review and acceptance, monitor the feedstock and address build issues if necessary.
 6. Maintain the feedstock for future updates.
 
-### 7. **Testing - specified in meta.yaml file**
+### 6. **Testing - specified in meta.yaml file**
 
 You can specify tests to validate the build under the `test` section. This section allows you to define commands, files, imports, or other checks to ensure that the package works as expected after installation.
 
