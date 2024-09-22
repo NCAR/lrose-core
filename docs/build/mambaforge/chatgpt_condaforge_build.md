@@ -135,3 +135,52 @@ You can push updates to the feedstock repository directly, and it will trigger r
 5. After review and acceptance, monitor the feedstock and address build issues if necessary.
 6. Maintain the feedstock for future updates.
 
+### 7. **Testing - specified in meta.yaml file**
+
+You can specify tests to validate the build under the `test` section. This section allows you to define commands, files, imports, or other checks to ensure that the package works as expected after installation.
+
+Here’s how you can structure the `test` section in the `meta.yaml`:
+
+#### Example:
+
+```yaml
+test:
+  # List of commands to run after the build to validate it
+  commands:
+    - my_command --version
+    - another_command --help
+
+  # Files that should be present after the build
+  files:
+    - bin/my_executable
+    - lib/libmylibrary.so
+
+  # Modules to import as a test (for Python packages)
+  imports:
+    - my_python_module
+    - another_module
+
+  # Environment variables for the test
+  env:
+    MY_ENV_VAR: some_value
+
+  # Extra dependencies needed for running tests
+  requires:
+    - pytest
+    - nose
+
+  # List of source files for Python or other tests
+  source_files:
+    - tests/test_my_package.py
+```
+
+#### Breakdown of the `test` section:
+1. **`commands`**: Shell commands that should be executed after the package is installed to verify it's functioning properly.
+2. **`files`**: Ensure certain files are present after installation (useful for binary packages).
+3. **`imports`**: Test whether certain Python modules can be imported (useful for Python packages).
+4. **`env`**: Set environment variables during testing if needed.
+5. **`requires`**: List of additional dependencies required for the tests (these will be installed only in the testing environment).
+6. **`source_files`**: Specify custom test files that should be included in the test environment.
+
+This structure ensures that the package is working properly after being built and installed.
+
