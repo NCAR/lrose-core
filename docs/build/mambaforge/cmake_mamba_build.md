@@ -1,4 +1,4 @@
-## How to perform an lrose-core build and install using mambaforge
+## How to perform an lrose-core cmake build using a mambaforge installation
 
 Normally lrose-core is built using the system libraries installed with the OS.
 
@@ -55,28 +55,34 @@ Run the script to install the packages required by ```lrose-core```:
   ./install_mamba_packages
 ```
 
-### 3. Build using conda-build
+### 3. Check out lrose-core and build
 
-conda-build will build lrose-code, using the recipe in the meta.yaml file.
-
-```
-  cd lrose-bootstrap/conda-forge/mambaforge
-  conda-build .
-```
-
-### 4. Install the package using the local build
-
-conda-build will build lrose-code, using the recipe in the meta.yaml file.
+Check out ```lrose-core```:
 
 ```
-   ~/mambaforge/bin/mamba install --use-local lrose-core
+  git clone https://github.com/ncar/lrose-core
 ```
 
-```lrose-core``` will be installed in:
+Run the script to set up the ```CMakeList.txt``` files for a mamba build:
 
 ```
-  *~/mambaforge/bin
-  *~/mambaforge/lib
-  *~/mambaforge/include
+  cd lrose-core/build/cmake
+  ./createCMakeLists.py --mambaBuild
+```
+
+Perform the build using cmake:
+
+```
+  cd lrose-core/codebase
+  mkdir build
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/tmp/lrose_mamba_build ..
+  make -j 8 install
+```
+
+The resulting libraries and apps should be installed in:
+
+```
+  /tmp/lrose_mamba_build
 ```
 
