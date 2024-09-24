@@ -74,9 +74,7 @@ conda-build will build lrose-code, using the recipe in the meta.yaml file.
 
 ```lrose-core``` will be installed in:
 
-```
-  *~/mambaforge/bin
-  *~/mambaforge/lib
-  *~/mambaforge/include
-```
+* ```~/mambaforge/bin```
+* ```~/mambaforge/lib```
+* ```~/mambaforge/include```
 
