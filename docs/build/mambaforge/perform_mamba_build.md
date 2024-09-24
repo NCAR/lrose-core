@@ -61,7 +61,7 @@ conda-build will build lrose-code, using the recipe in the meta.yaml file.
 
 ```
   cd lrose-bootstrap/conda-forge/mambaforge
-  conda-build .
+  ~/mambaforge/bin/conda-build .
 ```
 
 ### 4. Install the package using the local build
