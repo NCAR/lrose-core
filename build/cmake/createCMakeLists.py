@@ -569,7 +569,8 @@ def writeCMakeListsTop(dir):
         fo.write('# MAMBAFORGE build, ignore system libs\n')
         fo.write('  set(MAMBA_INCLUDE_PATH %s/include)\n' % options.mambaDir)
         fo.write('  set(MAMBA_LIBRARY_PATH %s/lib)\n' % options.mambaDir)
-        fo.write('  set(CMAKE_SYSTEM_IGNORE_PATH "/usr/lib" "/usr/local/lib" "/usr/lib64" "/lib" "/lib64")\n')
+        fo.write('  set(QT_HOST_PATH %s)\n' % options.mambaDir)
+        fo.write('  set(CMAKE_SYSTEM_IGNORE_PATH "/usr/lib" "/usr/local/lib" "/usr/lib64" "/lib" "/lib64" /opt/homebrew/lib)\n')
         fo.write('\n')
 
     if (globalNeedX11 or globalNeedQt):
