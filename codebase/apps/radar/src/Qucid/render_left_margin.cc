@@ -38,6 +38,8 @@
 
 int draw_hwin_left_margin( QPaintDevice *pdev) 
 {
+
+#ifdef NOTYET
     int    x_start;
     int    tick_xstart,tick_xend;
     int    tick_ystart;
@@ -106,6 +108,6 @@ int draw_hwin_left_margin( QPaintDevice *pdev)
     } else { // Draw it at the top
         XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc, x_start,(4*ymid),label,strlen(label));
     }
-
+#endif
     return 1;
 }

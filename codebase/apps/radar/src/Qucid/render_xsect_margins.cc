@@ -40,6 +40,9 @@
 
 void draw_vwin_right_margin( QPaintDevice *pdev, int page)
 {
+
+#ifdef NOTYET
+  
   int x_start = 0;
   int y_start = 0;
     int ht,wd;
@@ -65,6 +68,9 @@ void draw_vwin_right_margin( QPaintDevice *pdev, int page)
 		      x_start,y_start,
 		      wd,ht,mr->v_vcm.nentries,mr->v_vcm.vc,0,mr->field_units);
    }
+
+#endif
+    
 }
  
 /**********************************************************************
@@ -73,6 +79,7 @@ void draw_vwin_right_margin( QPaintDevice *pdev, int page)
 
 void draw_vwin_left_margin( QPaintDevice *pdev, int page) 
 {
+#ifdef NOTYET
     int x_start;
     // int y_start;
     int tick_xstart,tick_xend;
@@ -163,6 +170,8 @@ void draw_vwin_left_margin( QPaintDevice *pdev, int page)
     XDrawString(gd.dpy,xid,gd.legends.height_axis_color->gc,
 		x_start + 2, 2 * ymid + 1, label, strlen(label));
 
+#endif
+    
 }
 
 /**********************************************************************
@@ -171,6 +180,9 @@ void draw_vwin_left_margin( QPaintDevice *pdev, int page)
 
 void draw_vwin_top_margin(QPaintDevice *pdev, int page)
 {
+
+#ifdef NOTYET
+  
     int    x_start,y_start;
     int    xmid,ymid;
     int    ht,wd;
@@ -223,6 +235,8 @@ void draw_vwin_top_margin(QPaintDevice *pdev, int page)
     XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc,
         x_start + xmid,y_start + ymid,label,strlen(label));
 
+#endif
+
 }
 
 /**********************************************************************
@@ -231,6 +245,9 @@ void draw_vwin_top_margin(QPaintDevice *pdev, int page)
 
 void draw_vwin_bot_margin(QPaintDevice *pdev, int page)
 {
+
+#ifdef NOTYET
+  
     int i;
     int tick_xstart;
     int tick_ystart,tick_yend;
@@ -333,5 +350,7 @@ void draw_vwin_bot_margin(QPaintDevice *pdev, int page)
         gd.v_win.can_dim.width + (2 * xmid),
 	gd.v_win.can_dim.height - 2,u_label,strlen(u_label));
 
+#endif
+    
 }
 

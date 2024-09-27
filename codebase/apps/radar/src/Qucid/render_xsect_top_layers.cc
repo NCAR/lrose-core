@@ -38,6 +38,9 @@
 
 void render_xsect_top_layers(QPaintDevice *pdev, int page)
 {
+
+#ifdef NOTYET
+  
     int x1,y1,x2,y2;
     double   x_dproj,km_ht;
     double dir,spd;
@@ -161,5 +164,7 @@ void render_xsect_top_layers(QPaintDevice *pdev, int page)
 		       screen_label,strlen(screen_label));
  
     }
+
+#endif
 
 }

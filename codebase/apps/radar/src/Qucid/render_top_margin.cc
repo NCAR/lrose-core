@@ -40,6 +40,9 @@ int draw_alternate_top_margin( QPaintDevice *pdev);
 
 int draw_hwin_top_margin( QPaintDevice *pdev)
 {
+
+#ifdef NOTYET
+  
     int    tick_xstart;
     int    tick_ystart,tick_yend;
     int    label_width;
@@ -143,6 +146,8 @@ int draw_hwin_top_margin( QPaintDevice *pdev)
         current_tick += tick_spacing;
     };
 
+#endif
+    
   return CIDD_SUCCESS;
 }
 
@@ -153,6 +158,7 @@ int draw_hwin_top_margin( QPaintDevice *pdev)
 
 int draw_alternate_top_margin( QPaintDevice *pdev)
 {
+#ifdef NOTYET
     int    label_width;
     int    label_height;
     int    start_x;
@@ -183,6 +189,6 @@ int draw_alternate_top_margin( QPaintDevice *pdev)
     XDrawString(gd.dpy,xid,gd.legends.foreground_color->gc,
            gd.h_win.img_dim.width + gd.h_win.margin.left + (2 * xmid) - 2,
            gd.h_win.margin.top / 2 + ymid ,msg,strlen(msg));
-
+#endif
   return CIDD_SUCCESS;
 }

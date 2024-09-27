@@ -35,6 +35,9 @@
 
 void render_xsect_line_contours(QPaintDevice *pdev,contour_info_t *crec)
 {
+
+#ifdef NOTYET
+  
     int i,len;
     int tmp,num_vals;
     int cont_features;
@@ -286,5 +289,7 @@ void render_xsect_line_contours(QPaintDevice *pdev,contour_info_t *crec)
 
     if(using_temp) free(tmp_data);
 
+#endif
+    
     return;
 }

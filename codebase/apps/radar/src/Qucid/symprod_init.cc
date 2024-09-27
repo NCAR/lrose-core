@@ -37,6 +37,8 @@
 void init_symprods()
 {
 
+#ifdef NOTYET
+  
   int value;
   double min_lat, max_lat, min_lon, max_lon; 
   
@@ -99,4 +101,7 @@ void init_symprods()
       // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_lst,XV_WIDTH),NULL);
     }
   }
+
+#endif
+  
 }

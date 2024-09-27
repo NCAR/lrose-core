@@ -34,6 +34,8 @@
 #include "cidd.h"
 #include <toolsa/str.h>
 
+#ifdef NOTYET
+
 typedef struct route_seg {
   XPoint *pixel;
   int    num_points;
@@ -44,12 +46,18 @@ void  ave_winds(met_record_t *mr_u, met_record_t *mr_v,
                double start_km, double end_km, double *ave_deg, double *ave_spd);
 double peak_turb(met_record_t *mr_turb, double start_km, double end_km);
 double peak_icing(met_record_t *mr_icing, double start_km, double end_km);
+
+#endif
+
 /**********************************************************************
  * RENDER_ROUTE_WINDS: Render the route winds line 
  */
 
 void render_route_winds( QPaintDevice *pdev)
 {
+
+#ifdef NOTYET
+  
     int i,loop_count, index;
     int num_route_segs,num_route_points;
     double dir,spd;
@@ -263,7 +271,12 @@ void render_route_winds( QPaintDevice *pdev)
    //       PANEL_ITEM_COLOR, CMS_CONTROL_COLORS + 0,
    //       NULL);
    // xv_set (gd.v_win_v_win_pu->hazard_msg,XV_X,xv_get(gd.v_win_v_win_pu->route_msg,XV_WIDTH)+5,NULL);
+
+#endif
+  
 }
+
+#ifdef NOTYET
 
 /*****************************************************************
  * PEAK_ICING:  Return the Peak Icing value along the route
@@ -686,3 +699,5 @@ int calc_route_points(XPoint **pixel, route_seg_t **rseg, int *num_line_segs)
   *num_line_segs = num_segs + 1;
   return num_xsect_points;  // The total number of route segments to render
 }
+
+#endif

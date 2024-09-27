@@ -33,19 +33,23 @@
 
 #define XPOINT_BUF_SIZE  1024
 
+#ifdef NOTYET
+
 static void draw_label_centered(QPaintDevice *pdev, GC gc,
 				int xx, int yy,
 				const char *label);
 
-#ifdef JUNK
+static void normalize_longitude(double min_lon, double max_lon,
+                                double *normal_lon);
+
+#endif
+
+#ifdef NOTYET
 
 /************************************************************************
  * CALC_LOCAL_OVER_COORDS: Convert the lat/Lon coords to local X,Y KM coords.
  *
  */
-
-static void normalize_longitude(double min_lon, double max_lon,
-                                double *normal_lon);
 
 void calc_local_over_coords()
 {
@@ -333,7 +337,6 @@ static void normalize_longitude(double min_lon, double max_lon, double *normal_l
   }
 
 }
-
 
 #endif
 

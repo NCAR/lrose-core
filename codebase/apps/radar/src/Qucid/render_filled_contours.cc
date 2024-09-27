@@ -31,11 +31,11 @@
 #include "cidd.h"
 
 /**********************************************************************
- * COMPUTE_CONT_LEVELS:  Sets up Empty gc_array, and levels. Returns
+ * COMPUTE_CONT_LEVELS:  Sets up Empty brush_array, and levels. Returns
  *  The number of levels
  */
 
-int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *tmp_data)
+int compute_cont_levels(QBrush  *brush_array, double *levels, met_record_t *mr, float *tmp_data)
 {
    int i,j;
    int len;
@@ -55,13 +55,15 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
    const Mdvx::field_header_t &fhdr = (mr->h_mdvx->getFieldByNum(0))->getFieldHeader(); 
    ptr = (float *)  (mr->h_mdvx->getFieldByNum(0))->getVol(); 
 
-   if(gd.legends.out_of_range_color->gc != NULL) {
-       // Cap the bottom end of the scale.
-       levels[num_levels] = FLT_MIN;
-       // Default color is background.
-       gc_array[num_levels] =  gd.legends.out_of_range_color->gc;
-       num_levels++;
-   }
+   // if(gd.legends.out_of_range_color->brush != NULL) {
+
+   // Cap the bottom end of the scale.
+   levels[num_levels] = FLT_MIN;
+   // Default color is background.
+   brush_array[num_levels] =  gd.legends.out_of_range_color->brush;
+   num_levels++;
+   
+   // }
 
    if(mr->h_vcm.vc[0]->min < mr->h_vcm.vc[mr->h_vcm.nentries -1]->max) {
      for(i=0; i < mr->h_vcm.nentries; i++) {
@@ -74,7 +76,7 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
        // Make sure the data doesn't map to bad or missing - Could be 0 and 1
        if( c_val != fhdr.bad_data_value &&
            c_val != fhdr.missing_data_value) {
-           gc_array[num_levels] =  mr->h_vcm.vc[i]->gc;
+           brush_array[num_levels] =  mr->h_vcm.vc[i]->brush;
            levels[num_levels++] = c_val;
        }
      }
@@ -86,7 +88,7 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
      }
      if( c_val != fhdr.bad_data_value &&
      c_val != fhdr.missing_data_value) { 
-     gc_array[num_levels] =  mr->h_vcm.vc[mr->h_vcm.nentries-1]->gc;
+     brush_array[num_levels] =  mr->h_vcm.vc[mr->h_vcm.nentries-1]->brush;
      levels[num_levels++] = c_val;
      }
 
@@ -103,7 +105,7 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
        // Make sure the data doesn't map to bad or missing
        if( c_val != fhdr.bad_data_value && 
        c_val != fhdr.missing_data_value) {
-           gc_array[num_levels] =  mr->h_vcm.vc[i]->gc;
+           brush_array[num_levels] =  mr->h_vcm.vc[i]->brush;
            levels[num_levels++] = c_val;
        }
      }
@@ -115,17 +117,17 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
      }
      if( c_val != fhdr.bad_data_value &&
      c_val != fhdr.missing_data_value) { 
-     gc_array[num_levels] =  mr->h_vcm.vc[0]->gc;
+     brush_array[num_levels] =  mr->h_vcm.vc[0]->brush;
      levels[num_levels++] = c_val;
      }
    }
 
-   if(gd.legends.out_of_range_color->gc != NULL) {
-       /* Max out the top contour level to avoid "holes" in the graphics */
-       levels[num_levels] = FLT_MAX;
-       gc_array[num_levels] =  gd.legends.out_of_range_color->gc;
-       num_levels++;
-   }
+   // if(gd.legends.out_of_range_color->brush != NULL) {
+   /* Max out the top contour level to avoid "holes" in the graphics */
+   levels[num_levels] = FLT_MAX;
+   brush_array[num_levels] =  gd.legends.out_of_range_color->brush;
+   num_levels++;
+   // }
 
    bad_data =  fhdr.bad_data_value;
    miss_data =  fhdr.missing_data_value;
@@ -211,8 +213,9 @@ int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *
 
 void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
+#ifdef NOTYET
    int num_levels;
-   GC    gc_array[MAX_COLORS];
+   QBrush    brush_array[MAX_COLORS];
    double levels[MAX_COLORS];
    float *ptr,*t_ptr;
    int using_temp = 0;
@@ -220,7 +223,7 @@ void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met
 
    if(mr->h_data == NULL) return;
 
-   num_levels =  compute_cont_levels(gc_array, levels, mr, tmp_data);
+   num_levels =  compute_cont_levels(brush_array, levels, mr, tmp_data);
    if(num_levels == 0) return;
 
    if(tmp_data != NULL) using_temp = 1;
@@ -231,15 +234,15 @@ void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met
    ptr = (float *)  (mr->h_mdvx->getFieldByNum(0))->getVol(); 
 
 
-   if(gd.layers.missing_data_color->gc != NULL) {
-       XFillRectangle(gd.dpy,xid,gd.layers.missing_data_color->gc,
+   if(gd.layers.missing_data_color->brush != NULL) {
+       XFillRectangle(gd.dpy,xid,gd.layers.missing_data_color->brush,
               x_start[0], y_start[fhdr.ny-1],
               (x_start[fhdr.nx-2] - x_start[0]),
               (y_start[0] - y_start[fhdr.ny-2]));
    }
 
-   if(gd.layers.bad_data_color->gc != NULL) {
-       XFillRectangle(gd.dpy,xid,gd.layers.bad_data_color->gc,
+   if(gd.layers.bad_data_color->brush != NULL) {
+       XFillRectangle(gd.dpy,xid,gd.layers.bad_data_color->brush,
               x_start[0],y_start[fhdr.ny-1],
               (x_start[fhdr.nx-2] - x_start[0]),
               (y_start[0] - y_start[fhdr.ny-2]));
@@ -260,13 +263,15 @@ void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met
    } else {
        t_ptr = ptr;
    }
-   RASCONcontour(gc_array,t_ptr,(void *) &(fhdr.missing_data_value),RASCON_FLOAT,
+   RASCONcontour(brush_array,t_ptr,(void *) &(fhdr.missing_data_value),RASCON_FLOAT,
       num_levels,
       levels,
       RASCON_FILLED_CONTOURS, cont_features,
       1.0,0.0);
 
    if(using_temp) free(tmp_data);
+#endif
+
 }
 
 /**********************************************************************
@@ -276,9 +281,10 @@ void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met
 
 void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
 {
+#ifdef NOTYET
    int i,j;
    int num_levels;
-   GC    gc_array[MAX_COLORS];
+   QBrush    brush_array[MAX_COLORS];
    double levels[MAX_COLORS];
    float *ptr;
    int using_temp = 0;
@@ -294,7 +300,7 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
    if(mr->h_data == NULL) return;
 
    // tmp_data will either be NULL or will be allocated in compute_cont_levels()
-   num_levels =  compute_cont_levels(gc_array, levels, mr, tmp_data);
+   num_levels =  compute_cont_levels(brush_array, levels, mr, tmp_data);
 
    if(tmp_data != NULL) using_temp = 1;
 
@@ -330,13 +336,13 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
    gd.proj.latlon2xy(lat,lon,x_km,y_km); // World to Map
    disp_proj_to_pixel(&(gd.h_win.margin),x_km,y_km,&x2,&y2);
 
-   if(gd.layers.missing_data_color->gc != NULL) {
-       XFillRectangle(gd.dpy,xid,gd.layers.missing_data_color->gc,
+   if(gd.layers.missing_data_color->brush != NULL) {
+       XFillRectangle(gd.dpy,xid,gd.layers.missing_data_color->brush,
               x1, y1,x2-x1,y2-y1);
    }
 
-   if(gd.layers.bad_data_color->gc != NULL) {
-       XFillRectangle(gd.dpy,xid,gd.layers.bad_data_color->gc,
+   if(gd.layers.bad_data_color->brush != NULL) {
+       XFillRectangle(gd.dpy,xid,gd.layers.bad_data_color->brush,
               x1, y1,x2-x1,y2-y1);
    }
 
@@ -409,7 +415,7 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
         row1_ptr = ptr + ((j-1) * fhdr.nx);
         row2_ptr = ptr + (j * fhdr.nx);
 
-        RASCONcontour2Rows(gd.dpy,xid,gc_array,fhdr.nx,j,
+        RASCONcontour2Rows(gd.dpy,xid,brush_array,fhdr.nx,j,
                    (char *) row1_ptr, (char *) row2_ptr, (char *) &(fhdr.missing_data_value),
                    RASCON_FLOAT, num_levels,levels,bedge,
                    RASCON_FILLED_CONTOURS, cont_features, 1.0,0.0);
@@ -421,6 +427,8 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
    free(bedge);
    return;
 
+#endif
+
 }
 
 /**********************************************************************
@@ -430,10 +438,12 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
 
 void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
-   int i,j;
+
+#ifdef NOTYET
+  int i,j;
    int len;
    int num_levels;
-   GC    gc_array[MAX_COLORS];
+   QBrush    brush_array[MAX_COLORS];
    double levels[MAX_COLORS];
 
    double c_val;
@@ -452,9 +462,9 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
 
    num_levels = 0;
    // Cap the bottom end of the scale.
-   if(gd.legends.out_of_range_color->gc != NULL) {
+   if(gd.legends.out_of_range_color->brush != NULL) {
        levels[num_levels] = FLT_MIN; 
-       gc_array[num_levels] =  gd.legends.out_of_range_color->gc;
+       brush_array[num_levels] =  gd.legends.out_of_range_color->brush;
        num_levels++;
    }
 
@@ -465,7 +475,7 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
        } else {
      c_val = mr->v_vcm.vc[i]->min;
        }
-       gc_array[num_levels] =  mr->v_vcm.vc[i]->gc;
+       brush_array[num_levels] =  mr->v_vcm.vc[i]->brush;
        levels[num_levels++] = c_val;
      }
 
@@ -476,7 +486,7 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
      }
      if( c_val != fhdr.bad_data_value &&
      c_val != fhdr.missing_data_value) { 
-     gc_array[num_levels] =  mr->v_vcm.vc[mr->v_vcm.nentries-1]->gc;
+     brush_array[num_levels] =  mr->v_vcm.vc[mr->v_vcm.nentries-1]->brush;
      levels[num_levels++] = c_val;
      }
 
@@ -490,7 +500,7 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
      c_val = mr->v_vcm.vc[i]->min;
        }
 
-       gc_array[num_levels] =  mr->v_vcm.vc[i]->gc;
+       brush_array[num_levels] =  mr->v_vcm.vc[i]->brush;
        levels[num_levels++] = c_val;
 
      }
@@ -502,15 +512,15 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
      }
      if( c_val != fhdr.bad_data_value &&
      c_val != fhdr.missing_data_value) { 
-     gc_array[num_levels] =  mr->v_vcm.vc[0]->gc;
+     brush_array[num_levels] =  mr->v_vcm.vc[0]->brush;
      levels[num_levels++] = c_val;
      }
    }
 
-   if(gd.legends.out_of_range_color->gc != NULL) { 
+   if(gd.legends.out_of_range_color->brush != NULL) { 
        /* Max out the top contour level to avoid "holes" in the graphics */
        levels[num_levels] = FLT_MAX;
-       gc_array[num_levels] =  gd.legends.out_of_range_color->gc;
+       brush_array[num_levels] =  gd.legends.out_of_range_color->brush;
        num_levels++;
    }
 
@@ -602,12 +612,15 @@ void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[
        t_ptr = ptr;
    }
    RASCONinit(gd.dpy,xid,fhdr.nx,fhdr.nz,x_start,y_start);
-   RASCONcontour(gc_array,t_ptr,&bad_data,RASCON_FLOAT,
+   RASCONcontour(brush_array,t_ptr,&bad_data,RASCON_FLOAT,
       num_levels ,
       levels,
       RASCON_FILLED_CONTOURS, cont_features,
       1.0,0.0);
 
    if(using_temp) free(tmp_data);
+
+#endif
+   
 }
 

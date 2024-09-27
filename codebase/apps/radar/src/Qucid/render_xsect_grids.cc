@@ -34,7 +34,9 @@
 #include <vector>
 #define MESSAGE_LEN 1024
 
+#ifdef NOTYET
 static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+#endif
 
 /**********************************************************************
  * RENDER_XSECT_GRIDS
@@ -43,6 +45,8 @@ static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_
 int render_xsect_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
 
+#ifdef NOTYET
+  
     int    i,j;
     int    ht,wd;                /* Dims of drawing canvas */
     int    out_of_date;
@@ -205,12 +209,16 @@ int render_xsect_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, 
 	break;
       }
     }
+
+#endif
     
     return CIDD_SUCCESS;
 }
 
 //////////////////////////
 // rendering for POLAR RHI
+
+#ifdef NOTYET
 
 static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 
@@ -296,4 +304,7 @@ static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_
     
     return CIDD_SUCCESS;
 }
+
+#endif
+
 

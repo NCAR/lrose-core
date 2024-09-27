@@ -977,11 +977,12 @@ void VertWidget::selectVar(const size_t index)
 
 int VertWidget::renderVMovieFrame(int index, QPainter &painter)
 {
+  int stat = 0;
+#ifdef NOTYET
   int c_field = gd.v_win.page;
   
   if(gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
 
-  int stat = 0;
   
   switch(gd.movie.mode) {
     case REALTIME_MODE:
@@ -992,11 +993,11 @@ int VertWidget::renderVMovieFrame(int index, QPainter &painter)
       break;
          
   }
-
+#endif
   return stat;
 }
 
-
+#ifdef NOTYET
 
 /**********************************************************************
  * RENDER_VERT_DISPLAY: Render the vertical cross section display
@@ -1101,7 +1102,7 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
 
   render_xsect_top_layers(xid,page);
 
-  render_vert_products(xid);
+  // render_vert_products(xid);
 
   /* clear margin areas */
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
@@ -1141,3 +1142,5 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
 
   return CIDD_SUCCESS;
 }
+
+#endif

@@ -39,7 +39,6 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <Radx/NcfRadxFile.hh>
 #include "TimeControl.hh"
 #include "CartManager.hh"
 #include "cidd.h"
@@ -148,15 +147,15 @@ void TimeControl::_changeMovieLimits()
     gd.prod_mgr->reset_times_valid_flags();
   }
   
-  if(gd.time_plot) {
-    gd.time_plot->Set_times(gd.epoch_start,
-                            gd.epoch_end,
-                            gd.movie.frame[gd.movie.cur_frame].time_start,
-                            gd.movie.frame[gd.movie.cur_frame].time_end,
-                            (gd.movie.time_interval_mins * 60.0) + 0.5,
-                            gd.movie.num_frames);
-    gd.time_plot->Draw(); 
-  }
+  // if(gd.time_plot) {
+  //   gd.time_plot->Set_times(gd.epoch_start,
+  //                           gd.epoch_end,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_start,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_end,
+  //                           (gd.movie.time_interval_mins * 60.0) + 0.5,
+  //                           gd.movie.num_frames);
+  //   gd.time_plot->Draw(); 
+  // }
     
 }
 

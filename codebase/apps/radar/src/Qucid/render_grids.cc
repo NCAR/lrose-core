@@ -40,6 +40,9 @@
 
 int render_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
+
+#ifdef NOTYET
+  
   int    out_of_date;    
   int    stretch_secs;
   int    ht;            /* Dims of data rectangles  */
@@ -194,6 +197,9 @@ int render_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t
       
   }
 
+#endif
+  
   set_busy_state(0);
+
   return CIDD_SUCCESS;
 }

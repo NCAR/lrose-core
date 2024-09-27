@@ -78,6 +78,28 @@
 
 extern int errno;
 
+/*****************************************************************
+ * AUTOSCALE_VCM: Autoscale the value-color mapping
+ *        color to use
+ *
+ */
+
+void autoscale_vcm( Valcolormap_t *vcm, double min, double max)
+{
+    int    i;
+    double delta;
+
+    delta = (max - min) / (double) vcm->nentries;
+
+    if(delta == 0.0) delta = 0.1;
+
+    for(i=0; i < vcm->nentries; i++) {
+	vcm->vc[i]->min = min + (delta * i);
+	vcm->vc[i]->max = vcm->vc[i]->min + delta;
+    }
+
+}
+
 /**********************************************************************
  * CHECK_FOR_IO: This routine checks to see if any new data
  *  has arrived and updates the frame message
@@ -302,6 +324,7 @@ void check_for_io()
                 autoscale_vcm(&(mr->h_vcm), mr->h_fhdr.min_value, mr->h_fhdr.max_value);
 
               if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
+#ifdef NOTYET
                 /* Remap the data values onto the colorscale */
                 setup_color_mapping(&(mr->h_vcm),
                                     mr->h_fhdr.scale,
@@ -309,6 +332,7 @@ void check_for_io()
                                     mr->h_fhdr.transform_type,
                                     mr->h_fhdr.bad_data_value,
                                     mr->h_fhdr.missing_data_value);
+#endif
               }
               // Update last values
               mr->h_last_scale = mr->h_fhdr.scale;
@@ -474,12 +498,14 @@ void check_for_io()
                 autoscale_vcm(&(mr->v_vcm), mr->v_fhdr.min_value, mr->v_fhdr.max_value);
 
               /* Remap the data values onto the colorscale */
+#ifdef NOTYET
               setup_color_mapping(&(mr->v_vcm),
                                   mr->v_fhdr.scale,
                                   mr->v_fhdr.bias,
                                   mr->v_fhdr.transform_type,
                                   mr->v_fhdr.bad_data_value,
                                   mr->v_fhdr.missing_data_value);
+#endif
 
               // Update last values
               mr->v_last_scale = mr->v_fhdr.scale;

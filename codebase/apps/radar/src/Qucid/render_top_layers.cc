@@ -40,12 +40,12 @@
 int render_top_layers( QPaintDevice *pdev)
 {
     /* render range_rings if selected */
-    if(gd.legends.range) draw_cap_range_rings(xid);
+    if(gd.legends.range) draw_cap_range_rings(pdev);
      
-    render_map_overlays(xid);
+    // render_map_overlays(pdev);
 
     if( _params.display_ref_lines &&   gd.v_win.active) { /* render the ROUTE cross reference line */
-      render_route_winds(xid);
+      render_route_winds(pdev);
     }
 
     return CIDD_SUCCESS;

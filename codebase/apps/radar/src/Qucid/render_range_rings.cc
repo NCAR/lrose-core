@@ -43,6 +43,9 @@
 
 void draw_cap_range_rings( QPaintDevice *pdev)
 {
+
+#ifdef NOTYET
+  
     int    x,y;
     int    xmid,ymid;
     double    min_r,max_r;
@@ -225,5 +228,7 @@ void draw_cap_range_rings( QPaintDevice *pdev)
 
     /* render azimuth lines if selected */
     if(gd.legends.azimuths) draw_cap_azimuth_lines(xid);
+
+#endif
      
 }

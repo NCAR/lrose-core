@@ -37,12 +37,15 @@
 
 int render_vert_display( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
+
+#ifdef NOTYET
+  
     int i;
     int x1,y1,ht,wd;    /* boundries of image area */
     // int stat;
     contour_info_t cont; // contour params
 
-    if(xid == 0) return CIDD_FAILURE;
+    if(`xid == 0) return CIDD_FAILURE;
 
     if(_params.show_data_messages) {
        gui_label_h_frame("Rendering",-1);
@@ -130,7 +133,7 @@ int render_vert_display( QPaintDevice *pdev, int page, time_t start_time, time_t
 
     render_xsect_top_layers(xid,page);
 
-    render_vert_products(xid);
+    // render_vert_products(xid);
 
     /* clear margin areas */
     XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
@@ -168,5 +171,7 @@ int render_vert_display( QPaintDevice *pdev, int page, time_t start_time, time_t
 	set_busy_state(0); 
     }
 
+#endif
+    
     return CIDD_SUCCESS;
 }

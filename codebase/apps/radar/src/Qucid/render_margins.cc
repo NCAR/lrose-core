@@ -39,6 +39,9 @@
 void render_horiz_margins(QPaintDevice *pdev, int page,
 			  time_t start_time, time_t end_time)
 {
+
+#ifdef NOTYET
+  
   int    x1, y1, ht, wd;    /* boundries of image area */
 
          
@@ -69,5 +72,8 @@ void render_horiz_margins(QPaintDevice *pdev, int page,
   draw_hwin_interior_labels(xid, page, start_time, end_time);
 
   if(_params.show_data_messages) gui_label_h_frame(gd.frame_label, -1);
+
+#endif
+  
 }
 

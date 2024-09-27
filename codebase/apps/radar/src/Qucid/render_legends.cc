@@ -178,6 +178,9 @@ const char* height_label()
 
 int draw_hwin_interior_labels( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
+
+#ifdef NOTYET
+  
     int    i;
     int    out_of_date;    
     int    stretch_secs;
@@ -361,6 +364,9 @@ int draw_hwin_interior_labels( QPaintDevice *pdev, int page, time_t start_time, 
 	 y_start += gd.h_win.legends_delta_y;
         }
     }
+
+#endif
+    
     return CIDD_SUCCESS;
 }
  

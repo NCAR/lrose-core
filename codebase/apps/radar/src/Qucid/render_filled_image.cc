@@ -39,6 +39,9 @@
 
 int draw_filled_image( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
 {
+
+#ifdef NOTYET
+  
     unsigned short    miss;           /* missing/unmeasured data value */
     unsigned short    bad;            /* bad/noise data value */
     unsigned short   *im_ptr,*data_ptr;    /* pointers to the image & data arrays */
@@ -144,5 +147,8 @@ int draw_filled_image( QPaintDevice *pdev, int x_start[], int y_start[], met_rec
         gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
     XDestroyImage(img);    /* Deallocates both the structure and the image data */
+
+#endif
+    
     return CIDD_SUCCESS;
 }

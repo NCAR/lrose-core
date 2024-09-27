@@ -175,7 +175,6 @@ NORM_SRCS = \
 	render_line_contours.cc \
 	render_margins.cc \
 	render_movie_frame.cc \
-	render_overlays.cc \
 	render_polar_grid.cc \
 	render_products.cc \
 	render_range_rings.cc \
@@ -189,7 +188,6 @@ NORM_SRCS = \
 	render_xsect_grids.cc \
 	render_xsect_line_contours.cc \
 	render_xsect_margins.cc \
-	render_xsect_products.cc \
 	render_xsect_top_layers.cc \
 	render_xsect_winds.cc \
 	shmem_init.cc \

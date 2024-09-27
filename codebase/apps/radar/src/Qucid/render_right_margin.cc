@@ -37,6 +37,9 @@
 
 int draw_hwin_right_margin( QPaintDevice *pdev, int  page)
 {
+
+#ifdef NOTYET
+  
     int i;
     int x_start,y_start;
     int have_overlay_fields;
@@ -141,5 +144,7 @@ int draw_hwin_right_margin( QPaintDevice *pdev, int  page)
 			       page,x_start,y_start,wd,ht);
     }
 
+#endif
+    
     return 1;
 }

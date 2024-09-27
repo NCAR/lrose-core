@@ -119,8 +119,8 @@ typedef struct { /* WINDOW Data - for each display window */
 
  QPaintDevice *vis_pdev; /* X ID of Visible canvas */
  QPixmap **can_pdev; /* X ID of last stage canvases to draw products on top of */
- QPaintDevice *tmp_pdev; /* X ID of area to drap fields that aren't updated */
- QPaintDevice *page_pdev[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
+ QPixmap *tmp_pdev; /* X ID of area to draw fields that aren't updated */
+ QPixmap *page_pdev[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
 
  draw_dim_t win_dim; /* Window dimensions and position */
  draw_dim_t can_dim; /* Canvas dimensions and position */

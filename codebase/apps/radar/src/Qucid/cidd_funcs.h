@@ -531,7 +531,7 @@ extern int render_v_movie_frame( int    index, QPaintDevice *pdev);
 
 #ifndef RENDER_OVERLAYS
 // extern void calc_local_over_coords();
-extern void render_map_overlays(QPaintDevice *pdev);
+// extern void render_map_overlays(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_POLAR_GRID
@@ -598,7 +598,7 @@ extern void draw_vwin_bot_margin(QPaintDevice *pdev, int page);
 #endif
 
 #ifndef RENDER_XSECT_PRODUCTS
-extern void render_vert_products(QPaintDevice *pdev);
+// extern void render_vert_products(QPaintDevice *pdev);
 #endif
 
 #ifndef RENDER_XSECT_TOP_LAYERS

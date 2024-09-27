@@ -34,6 +34,9 @@
 
 void render_line_contours(QPaintDevice *pdev, contour_info_t *crec)
 {
+
+#ifdef NOTYET
+  
     int    i,j,len;
     int    startx,starty,endx,endy;
     int    x_grid[MAX_COLS],y_grid[MAX_ROWS];
@@ -423,6 +426,8 @@ void render_line_contours(QPaintDevice *pdev, contour_info_t *crec)
       if(bedge != NULL) free(bedge);
 	}
     if(using_temp) free(tmp_data);
-     
+
+#endif
+    
     return;
 }

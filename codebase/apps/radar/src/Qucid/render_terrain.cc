@@ -40,6 +40,9 @@
 
 void render_h_terrain( QPaintDevice *pdev, int page)
 {
+
+#ifdef NOTYET
+  
     int    i,j;
     int    ht,wd;               /* Dims of data rectangles  */
     int    startx,endx;        /* pixel limits of data area */
@@ -122,7 +125,9 @@ void render_h_terrain( QPaintDevice *pdev, int page)
 	     fprintf(stderr,"Terrain masking not implemented for distorted grids yet\n");
 	 }
 
-	 
+
+#endif
+        
     return;
 }
 
@@ -133,6 +138,9 @@ void render_h_terrain( QPaintDevice *pdev, int page)
 
 void render_v_terrain( QPaintDevice *pdev )
 {
+
+#ifdef NOTYET
+  
     int    i;
     int    num_points;
     int    start_x,end_x;
@@ -215,6 +223,8 @@ void render_v_terrain( QPaintDevice *pdev )
     for(i = 0; i < num_points-2; i++) { xpt[i].y -= 2;  }
     // Add the "skin" color
     XDrawLines(gd.dpy,xid,gd.layers.earth.color1->gc,xpt,num_points-2,CoordModeOrigin);
- 
+
+#endif
+    
     return;
 }

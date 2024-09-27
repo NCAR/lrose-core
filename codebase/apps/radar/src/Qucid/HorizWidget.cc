@@ -24,6 +24,7 @@
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
 #include "CartManager.hh"
+
 // #include "ParameterColorView.hh"
 // #include "FieldColorController.hh"
 // #include "DisplayFieldModel.hh"
@@ -1824,16 +1825,16 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
                                 gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
           if(gd.mrec[h_image]->auto_render) {
-            xid = gd.h_win.page_xid[h_image];
+            pdev = gd.h_win.page_pdev[h_image];
           } else {
-            xid = gd.h_win.tmp_xid;
+            pdev = gd.h_win.tmp_pdev;
           }
           QPainter painter(this);
           _renderHorizDisplay(painter, h_image,
                               gd.movie.frame[index].time_start,
                               gd.movie.frame[index].time_end);
           
-          save_h_movie_frame(index,xid,h_image);
+          save_h_movie_frame(index,pdev,h_image);
           
           gd.h_win.redraw[h_image] = 0;
         } else {
@@ -1858,13 +1859,15 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
                                 gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
           if(gd.mrec[v_image]->auto_render) {
-            xid = gd.v_win.page_xid[v_image];
+            pdev = gd.v_win.page_pdev[v_image];
           } else {
-            xid = gd.v_win.tmp_xid;
+            pdev = gd.v_win.tmp_pdev;
           }
           QPainter painter(this);
+#ifdef NOTYET
           vert->renderVertDisplay(painter, v_image, gd.movie.frame[index].time_start,
-                                  gd.movie.frame[index].time_end);    
+                                  gd.movie.frame[index].time_end);
+#endif
           gd.v_win.redraw[v_image] = 0;
         } else {
           return;
@@ -1956,8 +1959,8 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
 #endif
 
   // Clear time lists
-  if(gd.time_plot) gd.time_plot->clear_grid_tlist();
-  if(gd.time_plot) gd.time_plot->clear_prod_tlist();
+  // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
+  // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
 
   if(_params.show_data_messages) gui_label_h_frame("Rendering",-1);
 
@@ -1969,6 +1972,7 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
   }
 
   if(!_params.draw_main_on_top) {
+#ifdef HAVE_XID
     contour_info_t cont; // contour params 
     if(mr->render_method == LINE_CONTOURS) {
       cont.min = mr->cont_low;
@@ -1980,19 +1984,14 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
       cont.color = gd.legends.foreground_color;
       cont.vcm = &mr->h_vcm;
       if (gd.layers.use_alt_contours) {
-#ifdef HAVE_XID
         RenderLineContours(xid,&cont);
-#endif
       } else {
-#ifdef HAVE_XID
         render_line_contours(xid,&cont);
-#endif
       }
     } else {
-#ifdef HAVE_XID
       render_grid(xid,mr,start_time,end_time,0);
-#endif
     }
+#endif
     if(gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1) &&
@@ -2013,6 +2012,7 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
   }
 
   if(_params.draw_main_on_top) {
+#ifdef HAVE_XID
     contour_info_t cont; // contour params 
     if(mr->render_method == LINE_CONTOURS) {
       cont.min = mr->cont_low;
@@ -2024,19 +2024,14 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
       cont.color = gd.legends.foreground_color;
       cont.vcm = &mr->h_vcm;
       if (gd.layers.use_alt_contours) {
-#ifdef HAVE_XID
         RenderLineContours(xid,&cont);
-#endif
       } else {
-#ifdef HAVE_XID
         render_line_contours(xid,&cont);
-#endif
       }
     } else {
-#ifdef HAVE_XID
       render_grid(xid,mr,start_time,end_time,0);
-#endif
     }
+#endif
     if(gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {

@@ -34,6 +34,9 @@
 
 void render_products( QPaintDevice *pdev, time_t start_time, time_t end_time)
 {
+
+#ifdef NOTYET
+  
     int font_index;
     int i;
     time_t tm;    /* current time */
@@ -106,5 +109,7 @@ void render_products( QPaintDevice *pdev, time_t start_time, time_t end_time)
 
  	// if(gd.status_pu) xv_set(gd.status_pu->status_list,XV_SHOW,TRUE,NULL);
     }
+
+#endif
 
 }   

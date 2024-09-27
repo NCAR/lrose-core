@@ -3495,8 +3495,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   int msec_delay = 0;
   long tm = 0;
 
-  Pixmap h_xid = 0;
-  Pixmap v_xid = 0;
+  QPixmap *h_pdev = 0;
+  QPixmap *v_pdev = 0;
 
   struct timezone cur_tz;
 
@@ -3646,36 +3646,36 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   /* Decide which Pixmaps to use for rendering */
   if (gd.movie.movie_on ) {
     /* set to the movie frame Pixmaps */
-    h_xid = gd.movie.frame[index].h_xid;
-    if (h_xid == 0) {
+    h_pdev = gd.movie.frame[index].h_pdev;
+    if (h_pdev == 0) {
       if(mr->auto_render) {    
-        h_xid = gd.h_win.page_xid[gd.h_win.page];
+        h_pdev = gd.h_win.page_pdev[gd.h_win.page];
       } else {
-        h_xid = gd.h_win.tmp_xid;
+        h_pdev = gd.h_win.tmp_pdev;
       }
     }
 
-    v_xid = gd.movie.frame[index].v_xid;
-    if (v_xid == 0) {
+    v_pdev = gd.movie.frame[index].v_pdev;
+    if (v_pdev == 0) {
       if(mr->auto_render) {
-        v_xid = gd.v_win.page_xid[gd.v_win.page];
+        v_pdev = gd.v_win.page_pdev[gd.v_win.page];
       } else {
-        v_xid = gd.v_win.tmp_xid;
+        v_pdev = gd.v_win.tmp_pdev;
       }
     }
 	
   } else {
     /* set to the field Pixmaps */
     if(mr->auto_render) {
-      h_xid = gd.h_win.page_xid[gd.h_win.page];
+      h_pdev = gd.h_win.page_pdev[gd.h_win.page];
     } else {
-      h_xid = gd.h_win.tmp_xid;
+      h_pdev = gd.h_win.tmp_pdev;
     }
 
     if(gd.mrec[gd.v_win.page]->auto_render) {
-      v_xid = gd.v_win.page_xid[gd.v_win.page];
+      v_pdev = gd.v_win.page_pdev[gd.v_win.page];
     } else {
-      v_xid = gd.v_win.tmp_xid;
+      v_pdev = gd.v_win.tmp_pdev;
     }
   }
 
@@ -3806,12 +3806,12 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 		
     if (gd.movie.frame[index].redraw_horiz == 0) {
       /* Get Frame */
-      retrieve_h_movie_frame(index,h_xid);
+      retrieve_h_movie_frame(index,h_pdev);
       gd.h_copy_flag = 1;
     }
 
     if (gd.v_win.active && gd.movie.frame[index].redraw_vert == 0) {
-      retrieve_v_movie_frame(index,v_xid);
+      retrieve_v_movie_frame(index,v_pdev);
       gd.v_copy_flag = 1;
     }
 
@@ -3825,8 +3825,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       if (gather_vwin_data(gd.v_win.page,gd.movie.frame[index].time_start,
                            gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
         if (gd.v_win.redraw[gd.v_win.page]) {
-          render_v_movie_frame(index,v_xid);
-          save_v_movie_frame(index,v_xid);
+          render_v_movie_frame(index,v_pdev);
+          save_v_movie_frame(index,v_pdev);
         } 
         gd.movie.frame[index].redraw_vert = 0;
         gd.v_win.redraw[gd.v_win.page] = 0;
@@ -3884,8 +3884,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       if (gather_vwin_data(gd.v_win.page,gd.movie.frame[index].time_start,
                            gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
         gd.series_save_active = 1;
-        render_v_movie_frame(index,v_xid);
-        save_v_movie_frame(index,v_xid);
+        render_v_movie_frame(index,v_pdev);
+        save_v_movie_frame(index,v_pdev);
       }
 
     } // ii
@@ -3898,8 +3898,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gather_hwin_data(gd.h_win.page, gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
       if (gd.h_win.redraw[gd.h_win.page]) {
-        render_h_movie_frame(index,h_xid);
-        save_h_movie_frame(index,h_xid,gd.h_win.page);
+        render_h_movie_frame(index,h_pdev);
+        save_h_movie_frame(index,h_pdev,gd.h_win.page);
       } 
 
       /* make sure the horiz window's slider has the correct label */
@@ -3921,17 +3921,19 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gd.debug2) {
       fprintf(stderr,
               "\nCopying Horiz grid image - "
-              "field %d, index %d xid: %ld to xid: %ld\n",
-              gd.h_win.page,index,h_xid,gd.h_win.can_xid[gd.h_win.cur_cache_im]);
+              "field %d, index %d pdev: %p to pdev: %p\n",
+              gd.h_win.page,index,(void *) h_pdev, (void *)gd.h_win.can_pdev[gd.h_win.cur_cache_im]);
 
       if(gd.h_win.cur_cache_im == gd.h_win.last_cache_im) {
-        XCopyArea(gd.dpy,h_xid,
-                  gd.h_win.can_xid[gd.h_win.cur_cache_im],
+#ifdef NOTYET
+        XCopyArea(gd.dpy,h_pdev,
+                  gd.h_win.can_pdev[gd.h_win.cur_cache_im],
                   gd.def_gc,    0,0,
                   gd.h_win.can_dim.width,
                   gd.h_win.can_dim.height,
                   gd.h_win.can_dim.x_pos,
                   gd.h_win.can_dim.y_pos);
+#endif
       } else {
         gd.h_win.last_cache_im = gd.h_win.cur_cache_im; 
       }
@@ -3947,36 +3949,38 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       if (gd.debug2) {
         fprintf(stderr,
                 "\nTimer: Displaying Horiz final image - "
-                "field %d, index %d xid: %ld to xid: %ld\n",
+                "field %d, index %d pdev: %p to pdev: %p\n",
                 gd.h_win.page,index,
-                gd.h_win.can_xid[gd.h_win.cur_cache_im],
-                gd.h_win.vis_xid);
+                (void *) gd.h_win.can_pdev[gd.h_win.cur_cache_im],
+                (void *) gd.h_win.vis_pdev);
 
         /* Now copy last stage pixmap to visible pixmap */
-        XCopyArea(gd.dpy,gd.h_win.can_xid[gd.h_win.cur_cache_im],
-                  gd.h_win.vis_xid,
+#ifdef NOTYET
+        XCopyArea(gd.dpy,gd.h_win.can_pdev[gd.h_win.cur_cache_im],
+                  gd.h_win.vis_pdev,
                   gd.def_gc,    0,0,
                   gd.h_win.can_dim.width,
                   gd.h_win.can_dim.height,
                   gd.h_win.can_dim.x_pos,
                   gd.h_win.can_dim.y_pos);
+#endif
 
         if (gd.zoom_in_progress == 1) redraw_zoom_box();
         if (gd.pan_in_progress) redraw_pan_line();
         if (gd.route_in_progress) redraw_route_line(&gd.h_win);
 
         // Render a time indicator plot in the movie popup
-        if(gd.time_plot)
-        {
-          gd.time_plot->Set_times((time_t) gd.epoch_start,
-                                  (time_t) gd.epoch_end,
-                                  (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
-                                  (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
-                                  (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
-                                  gd.movie.num_frames); 
+        // if(gd.time_plot)
+        // {
+        //   gd.time_plot->Set_times((time_t) gd.epoch_start,
+        //                           (time_t) gd.epoch_end,
+        //                           (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
+        //                           (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
+        //                           (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
+        //                           gd.movie.num_frames); 
 
-          if(gd.movie.active) gd.time_plot->Draw();
-        }
+        //   if(gd.movie.active) gd.time_plot->Draw();
+        // }
     
         /* keep track of how much time will elapse showing the current image */
         gettimeofday(&last_frame_tm,&cur_tz);
@@ -3989,30 +3993,33 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       }
 
       if (gd.v_win.active && gd.v_copy_flag) {
-        if (gd.debug2) fprintf(stderr,"\nCopying Vert grid image - field %d, index %d xid: %ld to xid: %ld\n",
-                               gd.v_win.page,index,v_xid,gd.v_win.can_xid[gd.v_win.cur_cache_im]);
-
-        XCopyArea(gd.dpy,v_xid,
-                  gd.v_win.can_xid[gd.v_win.cur_cache_im],
+        if (gd.debug2) fprintf(stderr,"\nCopying Vert grid image - field %d, index %d pdev: %p to pdev: %p\n",
+                               gd.v_win.page,index,(void *) v_pdev,(void *) gd.v_win.can_pdev[gd.v_win.cur_cache_im]);
+#ifdef NOTYET
+        XCopyArea(gd.dpy,v_pdev,
+                  gd.v_win.can_pdev[gd.v_win.cur_cache_im],
                   gd.def_gc,    0,0,
                   gd.v_win.can_dim.width,
                   gd.v_win.can_dim.height,
                   gd.v_win.can_dim.x_pos,
                   gd.v_win.can_dim.y_pos);
+#endif
         gd.v_win.last_page  = gd.v_win.page;
         gd.v_copy_flag = 0;
 
-        if (gd.debug2) fprintf(stderr,"\nDisplaying Vert final image - field %d, index %d xid: %ld to xid: %ld\n",
-                               gd.v_win.page,index,gd.v_win.can_xid[gd.v_win.cur_cache_im],gd.v_win.vis_xid);
+        if (gd.debug2) fprintf(stderr,"\nDisplaying Vert final image - field %d, index %d pdev: %p to pdev: %p\n",
+                               gd.v_win.page,index,(void *) gd.v_win.can_pdev[gd.v_win.cur_cache_im],(void *) gd.v_win.vis_pdev);
 
         /* Now copy last stage pixmap to visible pixmap */
-        XCopyArea(gd.dpy,gd.v_win.can_xid[gd.v_win.cur_cache_im],
-                  gd.v_win.vis_xid,
+#ifdef NOTYET
+        XCopyArea(gd.dpy,gd.v_win.can_pdev[gd.v_win.cur_cache_im],
+                  gd.v_win.vis_pdev,
                   gd.def_gc,    0,0,
                   gd.v_win.can_dim.width,
                   gd.v_win.can_dim.height,
                   gd.v_win.can_dim.x_pos,
                   gd.v_win.can_dim.y_pos);
+#endif
 
       }
 

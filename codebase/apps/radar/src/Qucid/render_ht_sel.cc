@@ -97,6 +97,7 @@ met_record_t    *choose_ht_sel_mr(int page)
  * DRAW_HEIGHT_SELECTOR : Draw a Vertical height Selector/indicator
  */
 
+#ifdef NOTYET
 void
 draw_height_selector(Display *dpy, QPaintDevice *pdev, QBrush brush_axis, QBrush brush_ind,
                  int page, int x1,  int y1,  int width,  int height)
@@ -224,3 +225,5 @@ draw_height_selector(Display *dpy, QPaintDevice *pdev, QBrush brush_axis, QBrush
     XDrawRectangle(dpy,xid,gc_axis,x1,y1,width,height);
     return;
 }
+
+#endif

@@ -41,6 +41,9 @@ double w_scale_factor = 0.0;
 
 int render_vert_wind_vectors( QPaintDevice *pdev)
 {
+
+#ifdef NOTYET
+  
     int i,j,k;
     // int wd;              /* Dims of drawing canvas */
     int xmid,ymid;
@@ -465,5 +468,8 @@ int render_vert_wind_vectors( QPaintDevice *pdev)
     break;
 
     }  // Reference line switch
+
+#endif
+    
     return CIDD_SUCCESS;
 }

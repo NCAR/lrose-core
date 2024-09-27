@@ -42,6 +42,9 @@ int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index);
  */
 int render_wind_vectors(QPaintDevice *pdev, int start_time, int end_time)
 {
+
+#ifdef NOTYET
+  
     int   i,k;
     int   nx,ny;
     int   xmid,ymid;
@@ -180,8 +183,10 @@ int render_wind_vectors(QPaintDevice *pdev, int start_time, int end_time)
          }
       } // If no legend plotted yet
    } // for each wind set
-         
-   return(0);
+
+#endif         
+
+    return(0);
 }
 
 /**********************************************************************
@@ -189,7 +194,10 @@ int render_wind_vectors(QPaintDevice *pdev, int start_time, int end_time)
  */
 int render_rect_wind_grid(QPaintDevice *pdev, int k, int font_index)
 {
-    int    i,j;
+
+#ifdef NOTYET
+
+  int    i,j;
     int    nx,ny;
     int    num_ticks;
     int    width,height;
@@ -389,7 +397,9 @@ int render_rect_wind_grid(QPaintDevice *pdev, int k, int font_index)
       }
 
     }
-         
+
+#endif
+    
     return(0);
 }
 
@@ -398,6 +408,9 @@ int render_rect_wind_grid(QPaintDevice *pdev, int k, int font_index)
  */
 int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index)
 {
+
+#ifdef NOTYET
+  
     int    i,j;
     int    nx,ny;
     int    num_ticks;
@@ -627,6 +640,8 @@ int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index)
         ptr_u++;
       } // Each column
     }   // Each Row
-         
+
+#endif
+    
     return(0);
 }

@@ -39,8 +39,10 @@
 int render_h_movie_frame( int index, QPaintDevice *pdev)
 {
 
-  int    c_field;
   int stat = 0;
+#ifdef NOTYET
+  
+  int    c_field;
 
   c_field = gd.h_win.page;
   if(gd.debug2)
@@ -71,6 +73,7 @@ int render_h_movie_frame( int index, QPaintDevice *pdev)
       break;
   }
 
+#endif
 
   return stat;
 }
@@ -81,8 +84,12 @@ int render_h_movie_frame( int index, QPaintDevice *pdev)
 
 int render_v_movie_frame( int index, QPaintDevice *pdev)
 {
-  int    c_field;
+
   int    stat = 0;
+
+#ifdef NOTYET
+
+  int    c_field;
 
   c_field = gd.v_win.page;
 
@@ -98,5 +105,7 @@ int render_v_movie_frame( int index, QPaintDevice *pdev)
          
   }
 
+#endif
+  
   return stat;
 }

@@ -3250,24 +3250,8 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SymprodRenderObj.o SymprodRenderObj.cc
 
-TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
-		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxFile.hh \
-		$(HOME)/lrose/include/Radx/RadxTimeList.hh \
+TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxField.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
-		$(HOME)/lrose/include/Radx/RadxPacking.hh \
-		$(HOME)/lrose/include/Radx/RadxBuf.hh \
-		$(HOME)/lrose/include/Radx/RadxMsg.hh \
-		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxNcfStr.hh \
-		$(HOME)/lrose/include/Radx/RadxCfactors.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/Ncxx/Nc3xFile.hh \
-		$(HOME)/lrose/include/Ncxx/Nc3File.hh \
-		$(HOME)/lrose/include/Ncxx/Nc3Values.hh \
-		TimeControl.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
@@ -3278,9 +3262,17 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/Radx/Radx.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxPacking.hh \
+		$(HOME)/lrose/include/Radx/RadxBuf.hh \
+		$(HOME)/lrose/include/Radx/RadxMsg.hh \
+		$(HOME)/lrose/include/Radx/RadxRemap.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
+		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
 		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
 		$(HOME)/lrose/include/Fmq/DsFmq.hh \
 		$(HOME)/lrose/include/Fmq/Fmq.hh \
