@@ -39,6 +39,7 @@
 
 int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
+#ifdef NOTYET
   int    i,j;
   int    ht,wd;               /* Dims of data rectangles  */
   int    startx,endx;        /* pixel limits of data area */
@@ -294,7 +295,9 @@ int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, t
     } // switch (render_method)
 
   } // if (_params.clip_overlay_fields) ..
-  
+
+#endif  
+
   return CIDD_SUCCESS;
   
 }

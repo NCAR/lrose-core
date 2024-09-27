@@ -32,7 +32,7 @@
 
 #include "cidd.h"
 
-#include <rapplot/xrs.h>
+// #include <rapplot/xrs.h>
 
 extern void update_save_panel();
 

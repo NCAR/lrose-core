@@ -324,6 +324,7 @@ void do_zoom_pan()
 
 void redraw_vert_zoom_box()
 {
+#ifdef NOTYET
   int dx,dy;/* pixel distances */
   int sx,sy;
 
@@ -334,6 +335,8 @@ void redraw_vert_zoom_box()
   if(dy < 0) { sy = b_starty + dy; dy = -dy; } else { sy = b_starty; } 
 
   XDrawRectangle(gd.dpy,gd.vcan_xid,gd.ol_gc,sx,sy,dx,dy);
+#endif
+  
 }
  
 
@@ -345,6 +348,7 @@ void redraw_vert_zoom_box()
 
 void redraw_zoom_box()
 {
+#ifdef NOTYET
   int dx,dy;/* pixel distances */
   int sx,sy;
 
@@ -355,6 +359,7 @@ void redraw_zoom_box()
   if(dy < 0) { sy = b_starty + dy; dy = -dy; } else { sy = b_starty; } 
 
   XDrawRectangle(gd.dpy,gd.hcan_xid,gd.ol_gc,sx,sy,dx,dy);
+#endif
 }
  
 /*************************************************************************
@@ -366,7 +371,9 @@ void redraw_pan_line()
 {
 
   //XDrawLine(gd.dpy,gd.hcan_xid,gd.clear_ol_gc,p_startx,p_starty,p_lastx,p_lasty); /* BIT PLANE MODE */
+#ifdef NOTYET
   XDrawLine(gd.dpy,gd.hcan_xid,gd.ol_gc,p_startx,p_starty,p_lastx,p_lasty); /* XOR MODE */
+#endif
 }
 
 /*************************************************************************

@@ -916,22 +916,25 @@ void show_bookmk_menu( u_int value)
  */
 void show_xsect_panel( u_int value)
 {
-    Window  xid = 0;
-    Window  root;     /* Root window ID of drawable */
-    Window  parent;   /* Root window ID of drawable */
-    Window  *children;
-    unsigned int nchild;
+
+#ifdef NOTYET
+  Window  xid = 0;
+  Window  root;     /* Root window ID of drawable */
+  Window  parent;   /* Root window ID of drawable */
+  Window  *children;
+  unsigned int nchild;
+#endif
 #ifdef NOTNOW
     unsigned int display_width;
     unsigned int display_height;
-#endif
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#endif
 #ifdef NOTNOW
     int x_pos,y_pos;   /* Where to position window */
-#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#endif
 #ifdef NOTNOW
     int  choice_num;
     char *label;   // What this button is called
@@ -943,11 +946,14 @@ void show_xsect_panel( u_int value)
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
-        XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
-        XFree((caddr_t)children);
-        XGetGeometry(gd.dpy,xid,&root,&x,&y,&width,&height,&border_width,&depth);
-        /* take parents postion to get pos relative to root win */
-        XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
+#ifdef NOTYET
+      XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
+      XFree((caddr_t)children);
+      XGetGeometry(gd.dpy,xid,&root,&x,&y,&width,&height,&border_width,&depth);
+      /* take parents postion to get pos relative to root win */
+      XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
+#endif
+      
 #ifdef NOTNOW
 	display_width = DisplayWidth(gd.dpy,0);
 	display_height = DisplayHeight(gd.dpy,0);
@@ -1267,19 +1273,21 @@ void startup_printing( u_int value)
  */
 void startup_snapshot( u_int value)
 {
-    char cmd[1024];
-
-    snprintf(cmd,1024,"%s %ld %d %d > /dev/null 2>&1 &\n",SNAPSHOT_CMD,
-     gd.h_win.can_xid[gd.h_win.cur_cache_im],
-     gd.h_win.can_dim.width,gd.h_win.can_dim.height);
-
-    fprintf(stderr,"Executing: %s",cmd);
-    system(cmd);
+#ifdef NOTYET
+  char cmd[1024];
+  
+  snprintf(cmd,1024,"%s %ld %d %d > /dev/null 2>&1 &\n",SNAPSHOT_CMD,
+           gd.h_win.can_xid[gd.h_win.cur_cache_im],
+           gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+  
+  fprintf(stderr,"Executing: %s",cmd);
+  system(cmd);
 
     // u_int p_value;
     // p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.snapshot_bit);
     // gd.menu_bar.last_callback_value = p_value;
     // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
+#endif
 }
 
 #define BUFFER_SIZE   1024

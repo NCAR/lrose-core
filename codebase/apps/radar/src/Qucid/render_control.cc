@@ -40,7 +40,9 @@
 int render_horiz_display( QPaintDevice *pdev, int page, time_t start_time, time_t end_time)
 {
 
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH xid: " << xid << endl;
+#ifdef NOTYET
+  
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH pdev: " << pdev << endl;
   
   int i;
   contour_info_t cont; // contour params 
@@ -67,7 +69,7 @@ int render_horiz_display( QPaintDevice *pdev, int page, time_t start_time, time_
 
   /* Clear drawing area */
   cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
-  if(xid == 0) return CIDD_FAILURE;
+  if(pdev == 0) return CIDD_FAILURE;
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
                  0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
@@ -184,5 +186,7 @@ int render_horiz_display( QPaintDevice *pdev, int page, time_t start_time, time_
 
   update_frame_time_msg(gd.movie.cur_frame);
 
+#endif
+  
   return CIDD_SUCCESS;    /* avaliable data has been rendered */
 }

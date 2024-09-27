@@ -31,7 +31,7 @@
 
 #include "cidd.h"
 
-#include <png.h>
+// #include <png.h>
 
 #include <toolsa/str.h>
 #include <toolsa/DateTime.hh>
@@ -39,14 +39,14 @@
 #include <dsserver/DsLdataInfo.hh>
 
 static void dump_image_xml(const char *dir, const char *fname);
-static void dump_png(QPaintDevice *pdev, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
+static void dump_png(QPaintDevice *pdev, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
 
 /*************************************************************************
  * GEN_IMAGE_FNAME
  *
  */
 
-const char * gen_image_fname(const char *prefix,met_record_t *mr)
+const char *gen_image_fname(const char *prefix,met_record_t *mr)
 {
   static char nbuf[4096];
   char    tbuf[2048];
@@ -172,7 +172,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
   // char pathname[MAX_PATH_LEN * 4];
   const char *fname;
   char dir[MAX_PATH_LEN * 2];
-  Window w = 0;
+  // Window w = 0;
   QPaintDevice *pdev;
 
   // day dir?
@@ -220,11 +220,11 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
           snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.h_win.image_command);
         }
       }
-      xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
+      pdev = gd.h_win.can_pdev[gd.h_win.cur_cache_im];
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
       if(_params.output_geo_xml) dump_image_xml(dir, fname);
-      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      dump_png(pdev,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       {
         string path(dir);
@@ -258,7 +258,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
           snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.v_win.image_command);
         }
       }
-      xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
+      pdev = gd.v_win.can_pdev[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
       {
         string path(dir);
@@ -269,7 +269,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
         STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,path.c_str(),NAME_LENGTH - 1);
       }
 
-      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      dump_png(pdev,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;
 
     case BOTH_VIEWS:  /* The Both windows */
@@ -283,10 +283,10 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
           snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.h_win.image_command);
         }
       }
-      xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
+      pdev = gd.h_win.can_pdev[gd.h_win.cur_cache_im];
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
       if(_params.output_geo_xml) dump_image_xml(dir, fname);
-      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      dump_png(pdev,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       fname = gd.v_win.image_fname;
       if(print_flag) {
@@ -298,9 +298,9 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
           snprintf(cmd,MAX_PATH_LEN * 2,"%s",gd.v_win.image_command);
         }
       }
-      xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
+      pdev = gd.v_win.can_pdev[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
-      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      dump_png(pdev,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;
   }
 
@@ -409,7 +409,6 @@ static void dump_image_xml(const char *dir, const char *fname)
 // DUMP_PNG: Write the actual image as a png
 //
 static void dump_png(QPaintDevice *pdev,
-                     Window w,
                      const char *dir,
                      const char *fname,
                      const char *cmd,
@@ -419,6 +418,8 @@ static void dump_png(QPaintDevice *pdev,
                      int height)
 {
 
+#ifdef NOTYET
+  
   if (gd.debug || gd.debug1) {
     cerr << "DEBUG - dump_png:" << endl;
     cerr << " dir: " << dir << endl;
@@ -626,6 +627,8 @@ static void dump_png(QPaintDevice *pdev,
     snprintf(cmdbuf,MAX_PATH_LEN*2,"%s %s",cmd,pathname);
     safe_system(cmdbuf,_params.simple_command_timeout_secs);
   }
+
+#endif
 
 }
 

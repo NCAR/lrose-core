@@ -78,7 +78,6 @@ HDRS = \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
 	TimeList.hh \
-	TimePlot.hh \
 	VertWidget.hh \
 	VertWindow.hh \
 	VlevelManager.hh \
@@ -125,16 +124,13 @@ NORM_SRCS = \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \
 	TimeList.cc \
-	TimePlot.cc \
 	VlevelManager.cc \
 	WorldPlot.cc \
 	cidd_coords.cc \
-	cidd_font.cc \
 	cidd_init.cc \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
 	cidd_signals.cc \
-	colorscales.cc \
 	contours.cc \
 	data_gather.cc \
 	data_io.cc \
@@ -167,7 +163,6 @@ NORM_SRCS = \
 	render_azimuths.cc \
 	render_bottom_margin.cc \
 	render_cart_grid.cc \
-	render_cbar.cc \
 	render_click_marks.cc \
 	render_control.cc \
 	render_distorted_grid.cc \

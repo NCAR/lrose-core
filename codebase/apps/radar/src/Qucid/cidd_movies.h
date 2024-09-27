@@ -23,14 +23,17 @@
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 #ifndef CIDD_MOVIES_H
 #define CIDD_MOVIES_H
+
+class QPixmap;
+
 /*************************************************************************
  * CIDD_MOVIES.H : Definitions and control structures/variables for "movie"
  *    features for the CIDD display
  *
  */
 typedef struct {
-    Pixmap h_xid;       /* A memory pixmap for movie frames */
-    Pixmap v_xid;       /* A memory pixmap for movie frames */
+    QPixmap *h_pdev;       /* A memory pixmap for movie frames */
+    QPixmap *v_pdev;       /* A memory pixmap for movie frames */
     time_t time_start;  /* Time at starting point of image */
     time_t time_end;    /* Time at ending point of image */
     time_t time_mid;    /* Time at mid point of image */

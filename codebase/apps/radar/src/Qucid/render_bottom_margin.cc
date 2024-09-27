@@ -56,6 +56,7 @@ time_t time_from_pixel(int x_pixel)
 
 int draw_hwin_bot_margin( QPaintDevice *pdev, int  page, time_t start_time, time_t end_time)
 {
+#ifdef NOTYET
     int x1,x2;
     int label_width;
     int label_height;
@@ -232,7 +233,8 @@ int draw_hwin_bot_margin( QPaintDevice *pdev, int  page, time_t start_time, time
 	  XDrawLine(gd.dpy,xid,gd.legends.time_axis_color->gc,x1,y_end -4,x1,y_end);
        }
     }
-
+#endif
+    
     return 1;
 }
 
@@ -242,6 +244,7 @@ int draw_hwin_bot_margin( QPaintDevice *pdev, int  page, time_t start_time, time
 
 int draw_alternate_hwin_bot_margin( QPaintDevice *pdev)
 {
+#ifdef NOTYET
     int    tick_xstart;
     int    tick_ystart,tick_yend;
     int    label_width;
@@ -321,6 +324,6 @@ tick_spacing:  1.0));
 
         current_tick += tick_spacing;
     };
-
+#endif
   return CIDD_SUCCESS;
 }

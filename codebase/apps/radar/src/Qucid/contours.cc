@@ -35,33 +35,35 @@
 #define MAX_N_LABELS_X 15
 #define MAX_N_LABELS_Y 45
 
-static void draw_lines_for_level(const gframe_t &frame,
-			       int contourIndex,
-			       const MdvxContourLevel &level,
-			       contour_info_t *crec );
+#ifdef NOTYET
+static void draw_lines_for_level(const GframeObj &frame,
+                                 int contourIndex,
+                                 const MdvxContourLevel &level,
+                                 contour_info_t *crec );
 
-static void draw_labels_for_level(const gframe_t &frame,
+static void draw_labels_for_level(const GframeObj &frame,
 				  int contourIndex,
 				  const MdvxContourLevel &level,
 				  contour_info_t *crec,
-				  XFontStruct *font,
+				  QFont *font,
 				  char *label_loc,
 				  int max_n_labels_x,
 				  int max_n_labels_y);
   
-static void draw_labels_for_line(const gframe_t *gframe,
-				  int contourIndex,
-				  int n_points,
-				  GPoint *gpoints,
-				  double level,
-				  QBrush brush,
-				  XFontStruct *font,
-				  char *label_loc,
-				  int max_n_labels_x,
-				  int max_n_labels_y);
+static void draw_labels_for_line(const GframeObj *gframe,
+                                 int contourIndex,
+                                 int n_points,
+                                 GPoint *gpoints,
+                                 double level,
+                                 QBrush brush,
+                                 QFont *font,
+                                 char *label_loc,
+                                 int max_n_labels_x,
+                                 int max_n_labels_y);
 
-static void fill_triangle(const gframe_t *frame, GC xgc, 
+static void fill_triangle(const GframeObj *frame, QBrush xgc, 
 			  const MdvxContourTriangle &triangle, int mode);
+#endif
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -172,13 +174,15 @@ void RenderLineContours(QPaintDevice *pdev, contour_info_t *crec,
     }
   }
 
+#ifdef NOTYET
+
   // Pick a font size based on the detail thresholds and domain
 
   // int font_index = gd.uparams->getLong("contour_font_num", 6);
   int font_index = 0;
   if(font_index <0) font_index = 0;
   if(font_index >= _params.fonts_n) font_index = _params.fonts_n -1;
-  XFontStruct *font = gd.fontst[font_index];
+  QFont *font = gd.fontst[font_index];
   
   // set up the domain for rendering
 
@@ -207,15 +211,14 @@ void RenderLineContours(QPaintDevice *pdev, contour_info_t *crec,
   double top_km = (double)win->margin.top * y_dproj_per_pixel;
   double bot_km = (double)win->margin.bot * y_dproj_per_pixel;  
   
-  gframe_t *gframe = GCreateFrame(min_x - left_km,
-				  min_y - bot_km,
-				  max_x + right_km,
-				  max_y + top_km);
-  
+  GframeObj *gframe = RenderContext::gCreateFrame(min_x - left_km,
+                                                  min_y - bot_km,
+                                                  max_x + right_km,
+                                                  max_y + top_km);
+
   GSetXRef(gframe, gd.dpy, xid,
 	   win->can_dim.width, win->can_dim.height,
 	   font);
-
 
   // create array for keeping track of label positions
   int max_n_labels_x = MAX_N_LABELS_X;
@@ -245,22 +248,26 @@ void RenderLineContours(QPaintDevice *pdev, contour_info_t *crec,
 				 mr->time_list.tim,
 				 mr->time_list.num_entries,
 				 mr->h_date.unix_time);
-  }  
+  }
 
-  GFreeFrame(gframe);
+  delete gframe;
+
+#endif
 
 }
 
+#ifdef NOTYET
+  
 //////////////////////////////
 // draw given contour level
 
-static void draw_lines_for_level(const gframe_t &frame,
+static void draw_lines_for_level(const GframeObj &frame,
 				 int contourIndex,
 				 const MdvxContourLevel &level,
 				 contour_info_t *crec)
 
 {
-  
+
   // set gc
   
   QBrush brush;
@@ -334,24 +341,28 @@ static void draw_lines_for_level(const gframe_t &frame,
 
     } // is
 
-  } // if (level.lines.size() > 0) 
+  } // if (level.lines.size() > 0)
 
 }
+
+#endif
 
 ///////////////////////////////////////
 // draw labels for given contour level
 
-static void draw_labels_for_level(const gframe_t &frame,
+#ifdef NOTYET
+  
+static void draw_labels_for_level(const GframeObj &frame,
 				  int contourIndex,
 				  const MdvxContourLevel &level,
 				  contour_info_t *crec,
-				  XFontStruct *font,
+				  QFont *font,
 				  char *label_loc,
 				  int max_n_labels_x,
 				  int max_n_labels_y)
   
 {
-  
+
   if (level.lines.size() == 0) {
     return;
   }
@@ -405,26 +416,29 @@ static void draw_labels_for_level(const gframe_t &frame,
     } // if (line.pts.size() > 0)
     
   } // il
-  
+
 }
 
+#endif
+  
+#ifdef NOTYET
+  
 /*********************************
  * draw labels for given line
  */
 
-static void draw_labels_for_line(const gframe_t *gframe,
+static void draw_labels_for_line(const GframeObj *gframe,
 				 int contourIndex,
 				 int n_points,
 				 GPoint *gpoints,
 				 double level,
 				 QBrush brush,
-				 XFontStruct *font,
+				 QFont *font,
 				 char *label_loc,
 				 int max_n_labels_x,
 				 int max_n_labels_y)
 
 {
-
 
   // int n_ideal_labels = _params.n_ideal_contour_labels;
   int n_ideal_labels = 6;
@@ -522,6 +536,8 @@ static void draw_labels_for_line(const gframe_t *gframe,
 
 }
 
+#endif
+
 //////////////////////////
 // render filled polygons
 
@@ -531,6 +547,8 @@ void RenderFilledPolygons(QPaintDevice *pdev,
 
 {
 
+#ifdef NOTYET
+  
   // get the data field
 
   MdvxField field;
@@ -636,7 +654,7 @@ void RenderFilledPolygons(QPaintDevice *pdev,
   double top_km = (double)win->margin.top * y_dproj_per_pixel;
   double bot_km = (double)win->margin.bot * y_dproj_per_pixel;  
   
-  gframe_t *gframe = GCreateFrame(min_x - left_km,
+  GframeObj *gframe = GCreateFrame(min_x - left_km,
 				  min_y - bot_km,
 				  max_x + right_km,
 				  max_y + top_km);
@@ -706,17 +724,21 @@ void RenderFilledPolygons(QPaintDevice *pdev,
 
   GFreeFrame(gframe);
 
+#endif
+
 }
 
+#ifdef NOTYET
+  
 //////////////////////////////////////////////////////////////////////////////
 // GFillTriangle()
 
-static void fill_triangle(const gframe_t *frame, GC xgc, 
+static void fill_triangle(const GframeObj *frame, QBrush xgc, 
 			  const MdvxContourTriangle &triangle,
 			  int mode)
   
 {
-  
+
   // clip
   
   double xmin = LARGE_DOUBLE;
@@ -756,4 +778,6 @@ static void fill_triangle(const gframe_t *frame, GC xgc,
 	       xpoints, 3, Complex, mode);
 
 }
+
+#endif
 

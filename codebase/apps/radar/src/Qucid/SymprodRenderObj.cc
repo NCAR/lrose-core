@@ -42,7 +42,7 @@
 
 #include "cidd.h"
 
-void set_pick_box_xy(int x, int y, XPoint *bpt);
+void set_pick_box_xy(int x, int y, QPoint *bpt);
 //
 // initialize static variables
 
@@ -51,58 +51,58 @@ const int SymprodRenderObj::_stipple_bitmap_height = 10;
 const int SymprodRenderObj::_blankPixelSpacing = 10;
 
 const unsigned char SymprodRenderObj::_stipple10_bitmap_bits[] =
-{  0x82, 0x00, 0x04, 0x10, 0x40,
-   0x00, 0x01, 0x10, 0x02, 0x04,
-   0x20, 0x00, 0x00 
-};
+  {  0x82, 0x00, 0x04, 0x10, 0x40,
+     0x00, 0x01, 0x10, 0x02, 0x04,
+     0x20, 0x00, 0x00 
+  };
 
 const unsigned char SymprodRenderObj::_stipple20_bitmap_bits[] =
-{  0x92, 0x14, 0x04, 0x90, 0x41,
-   0x40, 0x81, 0x12, 0x02, 0x04,
-   0x20, 0x42, 0x00 
-};
+  {  0x92, 0x14, 0x04, 0x90, 0x41,
+     0x40, 0x81, 0x12, 0x02, 0x04,
+     0x20, 0x42, 0x00 
+  };
 
 const unsigned char SymprodRenderObj::_stipple30_bitmap_bits[] =
-{  0x92, 0x15, 0x14, 0x98, 0x41,
-   0x42, 0x85, 0x52, 0x82, 0x44,
-   0x24, 0x42, 0x20 
-};
+  {  0x92, 0x15, 0x14, 0x98, 0x41,
+     0x42, 0x85, 0x52, 0x82, 0x44,
+     0x24, 0x42, 0x20 
+  };
 
 const unsigned char SymprodRenderObj::_stipple40_bitmap_bits[] =
-{  0x92, 0x95, 0x54, 0x9a, 0x49,
-   0x4a, 0xa5, 0x52, 0xa2, 0x45,
-   0x24, 0x62, 0xa0 
-};
+  {  0x92, 0x95, 0x54, 0x9a, 0x49,
+     0x4a, 0xa5, 0x52, 0xa2, 0x45,
+     0x24, 0x62, 0xa0 
+  };
 
 const unsigned char SymprodRenderObj::_stipple50_bitmap_bits[] =
-{  0xba, 0x95, 0x54, 0xda, 0xc9,
-   0xca, 0xa5, 0x56, 0xaa, 0x4d,
-   0x64, 0x66, 0xa0 
-};
+  {  0xba, 0x95, 0x54, 0xda, 0xc9,
+     0xca, 0xa5, 0x56, 0xaa, 0x4d,
+     0x64, 0x66, 0xa0 
+  };
 
 const unsigned char SymprodRenderObj::_stipple60_bitmap_bits[] =
-{  0xba, 0xd5, 0x5d, 0xda, 0xcd,
-   0xda, 0xf5, 0x56, 0xaa, 0x5f,
-   0x64, 0x6e, 0xa0 
-};
+  {  0xba, 0xd5, 0x5d, 0xda, 0xcd,
+     0xda, 0xf5, 0x56, 0xaa, 0x5f,
+     0x64, 0x6e, 0xa0 
+  };
 
 const unsigned char SymprodRenderObj::_stipple70_bitmap_bits[] =
-{  0xbb, 0xf5, 0x5f, 0xde, 0xbb,
-   0xba, 0xf5, 0x77, 0xab, 0x5f,
-   0x65, 0x6e, 0xb0 
-};
+  {  0xbb, 0xf5, 0x5f, 0xde, 0xbb,
+     0xba, 0xf5, 0x77, 0xab, 0x5f,
+     0x65, 0x6e, 0xb0 
+  };
 
 const unsigned char SymprodRenderObj::_stipple80_bitmap_bits[] =
-{  0xfb, 0xf7, 0x7f, 0xde, 0xdd,
-   0xdb, 0xff, 0x77, 0xeb, 0x5f,
-   0x6d, 0x7f, 0xb0 
-};
+  {  0xfb, 0xf7, 0x7f, 0xde, 0xdd,
+     0xdb, 0xff, 0x77, 0xeb, 0x5f,
+     0x6d, 0x7f, 0xb0 
+  };
 
 const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
-{  0xff, 0xf7, 0x7f, 0xff, 0xff,
-   0xfb, 0xff, 0x7f, 0xeb, 0x7f,
-   0x6f, 0xff, 0xb0 
-};
+  {  0xff, 0xf7, 0x7f, 0xff, 0xff,
+     0xfb, 0xff, 0x7f, 0xeb, 0x7f,
+     0x6f, 0xff, 0xb0 
+  };
 
 
 
@@ -112,7 +112,7 @@ const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 SymprodRenderObj::SymprodRenderObj(SymprodRender *c)
 {
 
-   container = c;
+  container = c;
   _background_pixel = 0;
   _background_pixel_init = false;
 
@@ -124,18 +124,18 @@ SymprodRenderObj::~SymprodRenderObj()
 
 void SymprodRenderObj::draw(RenderContext &context)
 {
-	fprintf(stderr,"SymprodRenderObj:: Should not Get Here - Draw\n");
+  fprintf(stderr,"SymprodRenderObj:: Should not Get Here - Draw\n");
 }
 
 double SymprodRenderObj::dist(double lat, double lon)
 {
-	fprintf(stderr,"SymprodRenderObj::Should not Get Here - Dist\n");
-	return 999999.0;
+  fprintf(stderr,"SymprodRenderObj::Should not Get Here - Dist\n");
+  return 999999.0;
 }
 
 void SymprodRenderObj::fill_export_fields( vector<world_pt_t> &wpt, string &label)
 { 
-	fprintf(stderr,"SymprodRenderObj::Should not Get Here - Fill\n");
+  fprintf(stderr,"SymprodRenderObj::Should not Get Here - Fill\n");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -144,12 +144,12 @@ void SymprodRenderObj::fill_export_fields( vector<world_pt_t> &wpt, string &labe
 SymprodRenderText::SymprodRenderText(const void *prod_buffer,
 				     const int obj_offset,
 				     Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodText(prod_buffer, obj_offset),
-    prod(prod)
+        : SymprodRenderObj(c),
+          SymprodText(prod_buffer, obj_offset),
+          prod(prod)
   
 {
-	objtype = Symprod::OBJ_TEXT;
+  objtype = Symprod::OBJ_TEXT;
   
 }
 
@@ -157,20 +157,20 @@ void SymprodRenderText::draw(RenderContext &context)
 {
   // Normally, do not render hidden objects
   if(_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN) {
-     if(context.show_hidden ) { 
-	     if(context.showing_hidden) {
-			 return;  // Bail out - one already showing.
-		} else {
-			context.showing_hidden = true;
-		}
-	 } else {
-		 return; // Bail out - Not showing productrs.
-	 } 
+    if(context.show_hidden ) { 
+      if(context.showing_hidden) {
+        return;  // Bail out - one already showing.
+      } else {
+        context.showing_hidden = true;
+      }
+    } else {
+      return; // Bail out - Not showing productrs.
+    } 
   }
 
   // Don't show text if the image scale is too large.
   if (!(_hdr.detail_level & Symprod::DETAIL_LEVEL_IGNORE_TRESHOLDS) &&
-		  context.iconScale < prod._prodInfo.text_off_threshold) {
+      context.iconScale < prod._prodInfo.text_off_threshold) {
     return;
   }
 
@@ -181,38 +181,40 @@ void SymprodRenderText::draw(RenderContext &context)
 
   // set the colors
 
-  if (context.dev == XDEV) {
-    _setXColors(_hdr.color, _hdr.background_color,context);
-  }
+  // if (context.dev == XDEV) {
+  _setXColors(_hdr.color, _hdr.background_color,context);
+  // }
 
+#ifdef NOTYET
   int x_just = XJ_LEFT;
   int y_just = YJ_BELOW;
   
   // Convert the justification values.
 
   switch(_props.horiz_alignment) {
-  case Symprod::HORIZ_ALIGN_LEFT :
-    x_just = XJ_LEFT;
-    break;
-  case Symprod::HORIZ_ALIGN_CENTER :
-    x_just = XJ_CENTER;
-    break;
-  case Symprod::HORIZ_ALIGN_RIGHT :
-    x_just = XJ_RIGHT;
-    break;
+    case Symprod::HORIZ_ALIGN_LEFT :
+      x_just = XJ_LEFT;
+      break;
+    case Symprod::HORIZ_ALIGN_CENTER :
+      x_just = XJ_CENTER;
+      break;
+    case Symprod::HORIZ_ALIGN_RIGHT :
+      x_just = XJ_RIGHT;
+      break;
   }
   
   switch(_props.vert_alignment) {
-  case Symprod::VERT_ALIGN_TOP :
-    y_just = YJ_BELOW;
-    break;
-  case Symprod::VERT_ALIGN_CENTER :
-    y_just = YJ_CENTER;
-    break;
-  case Symprod::VERT_ALIGN_BOTTOM :
-    y_just = YJ_ABOVE;
-    break;
+    case Symprod::VERT_ALIGN_TOP :
+      y_just = YJ_BELOW;
+      break;
+    case Symprod::VERT_ALIGN_CENTER :
+      y_just = YJ_CENTER;
+      break;
+    case Symprod::VERT_ALIGN_BOTTOM :
+      y_just = YJ_ABOVE;
+      break;
   }
+#endif
   
   // Draw the text where indicated
 
@@ -230,12 +232,13 @@ void SymprodRenderText::draw(RenderContext &context)
   x_world += context.offset_x / context.frame.x->xscale;
   y_world -= context.offset_y / context.frame.x->yscale;
 
+#ifdef NOTYET
   int offset_x = _props.offset.x;
   int offset_y = _props.offset.y;
 
-  XFontStruct *propsFont = XLoadQueryFont(context.frame.x->display,
-					  _props.fontname);
-  XFontStruct *font;
+  QFont *propsFont = XLoadQueryFont(context.frame.x->display,
+                                    _props.fontname);
+  QFont *font;
   if (propsFont == NULL) {
     font = context.frame.x->font;
   } else {
@@ -246,8 +249,8 @@ void SymprodRenderText::draw(RenderContext &context)
   // Allocate a buffer for text manipulation.
   char *buf_ptr;
   if((buf_ptr = (char *) calloc(_text.size() +1,1)) == NULL) {
-	  perror("SymprodRenderText::draw Calloc failure");
-	  return;
+    perror("SymprodRenderText::draw Calloc failure");
+    return;
   }
   strncpy(buf_ptr,_text.c_str(),_text.size());
   char *ptr = buf_ptr;
@@ -259,7 +262,7 @@ void SymprodRenderText::draw(RenderContext &context)
   int direct, ascent, descent;
   XCharStruct overall;
   XTextExtents(context.frame.x->font, ptr, _text.size(),
-		 &direct, &ascent, &descent, &overall);
+               &direct, &ascent, &descent, &overall);
     
   // Skip down 1.2 font height units
   int  y_line_delta =  lrint((overall.ascent + overall.descent) * 1.2);
@@ -270,23 +273,23 @@ void SymprodRenderText::draw(RenderContext &context)
 
     if (strlen(_hdr.background_color) > 0) {
       GDrawImageStringOffset(context.dev, &context.frame, context.gc,
-			   font, &context.psgc,
-			   x_just, y_just, x_world, y_world,
-			   offset_x, offset_y - y_line_offset,
-			   ptr);
+                             font, &context.psgc,
+                             x_just, y_just, x_world, y_world,
+                             offset_x, offset_y - y_line_offset,
+                             ptr);
 
     } else {
       GDrawStringOffset(context.dev, &context.frame, context.gc,
-		      font, &context.psgc,
-		      x_just, y_just, x_world, y_world,
-		      offset_x, offset_y - y_line_offset,
-		      ptr);
-
+                        font, &context.psgc,
+                        x_just, y_just, x_world, y_world,
+                        offset_x, offset_y - y_line_offset,
+                        ptr);
+      
     }
-	// Move pointer over the previous line.
-	if(tptr != NULL) { ptr = tptr +1; } else { ptr = end_ptr;}
-
-	y_line_offset += y_line_delta; // move down on the screen.
+    // Move pointer over the previous line.
+    if(tptr != NULL) { ptr = tptr +1; } else { ptr = end_ptr;}
+    
+    y_line_offset += y_line_delta; // move down on the screen.
   }
 
   if(buf_ptr) free(buf_ptr);
@@ -294,6 +297,7 @@ void SymprodRenderText::draw(RenderContext &context)
   if (propsFont != NULL) {
     XFreeFont(context.frame.x->display, propsFont);
   }
+#endif
   
 }
 
@@ -324,27 +328,29 @@ double SymprodRenderText::dist(double lat, double lon)
 
 void SymprodRenderText::fill_export_fields( vector<world_pt_t> &wpt, string &label)
 {
-    label =   _text;
+  label =   _text;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Polyline objects
 
 SymprodRenderPolyline::
-SymprodRenderPolyline(const void *prod_buffer,
-		      const int obj_offset,
-		      Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodPolyline(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderPolyline(const void *prod_buffer,
+                        const int obj_offset,
+                        Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodPolyline(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_POLYLINE;
+  objtype = Symprod::OBJ_POLYLINE;
 }
 
 void SymprodRenderPolyline::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
   // set the colors
 
   if (context.dev == XDEV) {
@@ -506,15 +512,15 @@ void SymprodRenderPolyline::draw(RenderContext &context)
     context.proj.latlon2xy(points[0].lat, points[0].lon,
 			   gpt_start.x, gpt_start.y);
 
-	gpt_start.x += context.offset_x / context.frame.x->xscale;
-	gpt_start.y -= context.offset_y / context.frame.x->yscale;
+    gpt_start.x += context.offset_x / context.frame.x->xscale;
+    gpt_start.y -= context.offset_y / context.frame.x->yscale;
 
     context.proj.latlon2xy(points[_props.num_points - 1].lat,
 			   points[_props.num_points - 1].lon,
 			   gpt_end.x, gpt_end.y);
 
-	gpt_end.x += context.offset_x / context.frame.x->xscale;
-	gpt_end.y -= context.offset_y / context.frame.x->yscale;
+    gpt_end.x += context.offset_x / context.frame.x->xscale;
+    gpt_end.y -= context.offset_y / context.frame.x->yscale;
 	
     GDrawLine(context.dev, &context.frame,
 	      context.gc, &context.psgc,
@@ -531,17 +537,18 @@ void SymprodRenderPolyline::draw(RenderContext &context)
 
     // Make sure the point is not a pen up.
     while (_points[index].lon == Symprod::WPT_PENUP && index > 0) {
-	  index--;
+      index--;
     }
     // Determine the screen coordinates
-	context.proj.latlon2xy(points[index].lat,points[index].lon,km_x,km_y);
+    context.proj.latlon2xy(points[index].lat,points[index].lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
 
+#endif
 }
 
 double SymprodRenderPolyline::dist(double lat, double lon)
@@ -554,7 +561,7 @@ double SymprodRenderPolyline::dist(double lat, double lon)
 
   // Make sure the point is not a pen up.
   while (_points[index].lon == Symprod::WPT_PENUP && index > 0) {
-	  index--;
+    index--;
   }
 
   PJGLatLon2RTheta(_points[index].lat,_points[index].lon,lat,lon,&d,&theta);
@@ -570,7 +577,7 @@ void SymprodRenderPolyline::fill_export_fields( vector<world_pt_t> &wpt, string 
   for (int i = 0; i < _props.num_points; i++)  {
     w.lon = _points[i].lon;
     w.lat = _points[i].lat;
-	wpt.push_back(w);
+    wpt.push_back(w);
   }
   w.lat = -9999.9;
   w.lon = -9999.9;
@@ -581,20 +588,23 @@ void SymprodRenderPolyline::fill_export_fields( vector<world_pt_t> &wpt, string 
 // Iconline objects
 
 SymprodRenderIconline::
-SymprodRenderIconline(const void *prod_buffer,
-		      const int obj_offset,
-		      Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodIconline(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderIconline(const void *prod_buffer,
+                        const int obj_offset,
+                        Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodIconline(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_ICONLINE;
+  objtype = Symprod::OBJ_ICONLINE;
 }
 
 void SymprodRenderIconline::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   double iconScale = context.iconScale;
   // Get the centroid in x and y
   
@@ -617,26 +627,26 @@ void SymprodRenderIconline::draw(RenderContext &context)
       gpts[i].y = penup;
     } else {
       if (context.dev == XDEV) {
-	  if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
-		gpts[i].x = origin_x + _points[i].x / context.frame.x->xscale;
-		gpts[i].y = origin_y + _points[i].y / context.frame.x->yscale;
-	  } else {
-		gpts[i].x = origin_x + _points[i].x * (iconScale / context.frame.x->xscale);
-		gpts[i].y = origin_y + _points[i].y * (iconScale / context.frame.x->yscale);
-	  }
+        if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
+          gpts[i].x = origin_x + _points[i].x / context.frame.x->xscale;
+          gpts[i].y = origin_y + _points[i].y / context.frame.x->yscale;
+        } else {
+          gpts[i].x = origin_x + _points[i].x * (iconScale / context.frame.x->xscale);
+          gpts[i].y = origin_y + _points[i].y * (iconScale / context.frame.x->yscale);
+        }
       } else {
-          if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
-		gpts[i].x = origin_x + _points[i].x / context.frame.ps->xscale;
-		gpts[i].y = origin_y + _points[i].y / context.frame.ps->yscale;
-	  } else {
-		gpts[i].x = origin_x + _points[i].x * (iconScale / context.frame.ps->xscale);
-		gpts[i].y = origin_y + _points[i].y * (iconScale / context.frame.ps->yscale);
-	  }
+        if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
+          gpts[i].x = origin_x + _points[i].x / context.frame.ps->xscale;
+          gpts[i].y = origin_y + _points[i].y / context.frame.ps->yscale;
+        } else {
+          gpts[i].x = origin_x + _points[i].x * (iconScale / context.frame.ps->xscale);
+          gpts[i].y = origin_y + _points[i].y * (iconScale / context.frame.ps->yscale);
+        }
       }
     }
 
-	gpts[i].x +=  context.offset_x / context.frame.x->xscale;
-	gpts[i].y -=  context.offset_y / context.frame.x->yscale;
+    gpts[i].x +=  context.offset_x / context.frame.x->xscale;
+    gpts[i].y -=  context.offset_y / context.frame.x->yscale;
 
   }
 
@@ -754,13 +764,15 @@ void SymprodRenderIconline::draw(RenderContext &context)
     XPoint    bpt[8];
 
     // Determine the screen coordinates
-	context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
+    context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
+#endif
 
 }
 
@@ -791,15 +803,15 @@ void SymprodRenderIconline::fill_export_fields( vector<world_pt_t> &wpt, string 
 // StrokedIcon objects
 
 SymprodRenderStrokedIcon::
-SymprodRenderStrokedIcon(const void *prod_buffer,
-			 const int obj_offset,
-			 Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodStrokedIcon(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderStrokedIcon(const void *prod_buffer,
+                           const int obj_offset,
+                           Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodStrokedIcon(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_STROKED_ICON;
+  objtype = Symprod::OBJ_STROKED_ICON;
 }
 
 #define ICON_BUF_SIZE 32
@@ -807,10 +819,13 @@ SymprodRenderStrokedIcon(const void *prod_buffer,
 void SymprodRenderStrokedIcon::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 	  
   double iconScale = context.iconScale;
@@ -841,11 +856,11 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
 
   // First time through - grab a small buffer
   if( buf_size == 0) {
-      if((bpt = (XPoint *) calloc(ICON_BUF_SIZE,sizeof(XPoint))) == NULL) {
-	 perror("Malloc Error in SymprodRenderStrokedIcon::draw"); 
-	 exit(-1);
-      }
-      buf_size = ICON_BUF_SIZE;
+    if((bpt = (XPoint *) calloc(ICON_BUF_SIZE,sizeof(XPoint))) == NULL) {
+      perror("Malloc Error in SymprodRenderStrokedIcon::draw"); 
+      exit(-1);
+    }
+    buf_size = ICON_BUF_SIZE;
   }
   
   // initialize the world conversion
@@ -858,14 +873,14 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
     // worse case check - one big line
     if( _props.num_icon_pts  >= (int) buf_size )   {
 
-       // double the size until big enough
-       while(_props.num_icon_pts >= (int) buf_size) buf_size *= 2;
+      // double the size until big enough
+      while(_props.num_icon_pts >= (int) buf_size) buf_size *= 2;
 
-       // Reallocate the bufer
-       if((bpt = (XPoint *) realloc(bpt,buf_size * sizeof(XPoint))) == NULL) { 
-	   perror("Realloc Error in SymprodRenderStrokedIcon::draw");
-	   exit(-1);
-       }
+      // Reallocate the bufer
+      if((bpt = (XPoint *) realloc(bpt,buf_size * sizeof(XPoint))) == NULL) { 
+        perror("Realloc Error in SymprodRenderStrokedIcon::draw");
+        exit(-1);
+      }
     }
 
 #ifdef DEBUG    
@@ -887,17 +902,17 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
     npoints = 0;
     for (int ipt = 0; ipt < _props.num_icon_pts; ipt++) {
       if (_iconPts[ipt].x == Symprod::PPT_PENUP || _iconPts[ipt].y == Symprod::PPT_PENUP ) {
-	  XDrawLines(context.display,context.xid,context.gc,bpt,npoints,CoordModeOrigin);
-	  npoints = 0;
+        XDrawLines(context.display,context.xid,context.gc,bpt,npoints,CoordModeOrigin);
+        npoints = 0;
       } else { // Add point to the buffer 
 
-	  if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
-	        bpt[npoints].x =  _iconPts[ipt].x + pix_x;
-	        bpt[npoints].y = pix_y - _iconPts[ipt].y;
-	  } else {
-	        bpt[npoints].x = (short) floor(iconScale * _iconPts[ipt].x + 0.5) + pix_x;
-	        bpt[npoints].y = pix_y - (short) floor(iconScale * _iconPts[ipt].y + 0.5);
-	  }
+        if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
+          bpt[npoints].x =  _iconPts[ipt].x + pix_x;
+          bpt[npoints].y = pix_y - _iconPts[ipt].y;
+        } else {
+          bpt[npoints].x = (short) floor(iconScale * _iconPts[ipt].x + 0.5) + pix_x;
+          bpt[npoints].y = pix_y - (short) floor(iconScale * _iconPts[ipt].y + 0.5);
+        }
 	npoints++;
       }
     }// ipt
@@ -912,13 +927,15 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
     XPoint    bpt[8];
 
     // Determine the screen coordinates
-	context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
+    context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
+#endif
 
 }
 
@@ -936,11 +953,11 @@ void SymprodRenderStrokedIcon::fill_export_fields( vector<world_pt_t> &wpt, stri
 {
   world_pt_t w;
 
-    for (int ipt = 0; ipt < _props.num_icon_pts; ipt++) {
-      w.lon = _iconOrigins[ipt].lon;
-      w.lat = _iconOrigins[ipt].lat;
-	  wpt.push_back(w);
-	}
+  for (int ipt = 0; ipt < _props.num_icon_pts; ipt++) {
+    w.lon = _iconOrigins[ipt].lon;
+    w.lat = _iconOrigins[ipt].lat;
+    wpt.push_back(w);
+  }
   w.lat = -9999.9;
   w.lon = -9999.9;
   wpt.push_back(w);
@@ -950,25 +967,28 @@ void SymprodRenderStrokedIcon::fill_export_fields( vector<world_pt_t> &wpt, stri
 // NamedIcon objects
 
 SymprodRenderNamedIcon::
-SymprodRenderNamedIcon(const void *prod_buffer,
-		       const int obj_offset,
-		       Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodNamedIcon(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderNamedIcon(const void *prod_buffer,
+                         const int obj_offset,
+                         Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodNamedIcon(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_NAMED_ICON;
+  objtype = Symprod::OBJ_NAMED_ICON;
   
 }
 
 void SymprodRenderNamedIcon::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 
   // set the colors
@@ -978,6 +998,8 @@ void SymprodRenderNamedIcon::draw(RenderContext &context)
 
   cerr << "ERROR - SymprodRenderNamedIcon::draw()" << endl;
   cerr << "  Not yet implemented." << endl;
+
+#endif
 
 }
 
@@ -993,32 +1015,35 @@ double SymprodRenderNamedIcon::dist(double lat, double lon)
 
 void SymprodRenderNamedIcon::fill_export_fields( vector<world_pt_t> &wpt, string &label)
 {
-	 // Do nothing. - Not implemented.
+  // Do nothing. - Not implemented.
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // BitmapIcon objects
 
 SymprodRenderBitmapIcon::
-SymprodRenderBitmapIcon( const void *prod_buffer,
-			const int obj_offset,
-			Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodBitmapIcon(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderBitmapIcon( const void *prod_buffer,
+                           const int obj_offset,
+                           Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodBitmapIcon(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_BITMAP_ICON;
+  objtype = Symprod::OBJ_BITMAP_ICON;
   
 }
 
 void SymprodRenderBitmapIcon::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 	  
   double iconScale = context.iconScale;
@@ -1078,13 +1103,15 @@ void SymprodRenderBitmapIcon::draw(RenderContext &context)
     XPoint    bpt[8];
 
     // Determine the screen coordinates
-	context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
+    context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
+#endif
   
 }
 
@@ -1104,11 +1131,11 @@ void SymprodRenderBitmapIcon::fill_export_fields( vector<world_pt_t> &wpt, strin
 {
   world_pt_t w;
 
-    for (int ipt = 0; ipt < _props.num_icons; ipt++) {
-      w.lon = _iconOrigins[ipt].lon;
-      w.lat = _iconOrigins[ipt].lat;
-	  wpt.push_back(w);
-	}
+  for (int ipt = 0; ipt < _props.num_icons; ipt++) {
+    w.lon = _iconOrigins[ipt].lon;
+    w.lat = _iconOrigins[ipt].lat;
+    wpt.push_back(w);
+  }
   w.lat = -9999.9;
   w.lon = -9999.9;
   wpt.push_back(w);
@@ -1119,24 +1146,27 @@ void SymprodRenderBitmapIcon::fill_export_fields( vector<world_pt_t> &wpt, strin
 // Arc objects
 
 SymprodRenderArc::
-SymprodRenderArc(const void *prod_buffer,
-		 const int obj_offset,
-		 Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodArc(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderArc(const void *prod_buffer,
+                   const int obj_offset,
+                   Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodArc(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_ARC;
+  objtype = Symprod::OBJ_ARC;
 }
 
 void SymprodRenderArc::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 
   double iconScale = context.iconScale;
@@ -1233,13 +1263,15 @@ void SymprodRenderArc::draw(RenderContext &context)
     XPoint    bpt[8];
 
     // Determine the screen coordinates
-	context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
+    context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
+#endif
 
 }
 
@@ -1271,24 +1303,27 @@ void SymprodRenderArc::fill_export_fields( vector<world_pt_t> &wpt, string &labe
 // Rectangle objects
 
 SymprodRenderRectangle::
-SymprodRenderRectangle(const void *prod_buffer,
-		       const int obj_offset,
-		       Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodRectangle(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderRectangle(const void *prod_buffer,
+                         const int obj_offset,
+                         Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodRectangle(prod_buffer, obj_offset),
+            prod(prod)
   
 {
-	objtype = Symprod::OBJ_RECTANGLE;
+  objtype = Symprod::OBJ_RECTANGLE;
 }
 
 void SymprodRenderRectangle::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 
   // set the colors
@@ -1344,13 +1379,15 @@ void SymprodRenderRectangle::draw(RenderContext &context)
     XPoint    bpt[8];
 
     // Determine the screen coordinates
-	context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
+    context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
     disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
-	set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
+    set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
-	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
+    XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
+#endif
 
 }
 
@@ -1382,12 +1419,12 @@ void SymprodRenderRectangle::fill_export_fields( vector<world_pt_t> &wpt, string
 // Chunk objects
 
 SymprodRenderChunk::
-SymprodRenderChunk(const void *prod_buffer,
-		   const int obj_offset,
-		   Product &prod, SymprodRender *c)
-  : SymprodRenderObj(c),
-    SymprodChunk(prod_buffer, obj_offset),
-    prod(prod)
+  SymprodRenderChunk(const void *prod_buffer,
+                     const int obj_offset,
+                     Product &prod, SymprodRender *c)
+          : SymprodRenderObj(c),
+            SymprodChunk(prod_buffer, obj_offset),
+            prod(prod)
   
 {
   objtype = Symprod::OBJ_CHUNK;
@@ -1397,10 +1434,13 @@ SymprodRenderChunk(const void *prod_buffer,
 void SymprodRenderChunk::draw(RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   // Normally, do not render hidden objects
   if(!context.show_hidden &&
-		  (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
-	  return;
+     (_hdr.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return;
   }
 
   // set the colors
@@ -1413,22 +1453,24 @@ void SymprodRenderChunk::draw(RenderContext &context)
 
   switch (_props.chunk_type)  {
   
-  case SPDB_STATION_REPORT_ID :
-    _drawStationSingle(context);
-    break;
+    case SPDB_STATION_REPORT_ID :
+      _drawStationSingle(context);
+      break;
     
-  case SPDB_STATION_REPORT_ARRAY_ID :
-    _drawStationsFromArray(context);
-    break;
+    case SPDB_STATION_REPORT_ARRAY_ID :
+      _drawStationsFromArray(context);
+      break;
     
-  default :
-    cerr << "WARNING:  SymprodRenderChunk::draw." << endl;
-    cerr << "  Don't know how to render chunk type: "
-	 << _props.chunk_type << endl;
-    cerr << "  Skipping ...." << endl;
-    break;
+    default :
+      cerr << "WARNING:  SymprodRenderChunk::draw." << endl;
+      cerr << "  Don't know how to render chunk type: "
+           << _props.chunk_type << endl;
+      cerr << "  Skipping ...." << endl;
+      break;
     
   } /* endswitch - _props.chunk_type */
+
+#endif
 
 }
 
@@ -1445,7 +1487,7 @@ double SymprodRenderChunk::dist(double lat, double lon)
 
 void SymprodRenderChunk::fill_export_fields( vector<world_pt_t> &wpt, string &label)
 {
-	 // Do nothing. - Not implemented.
+  // Do nothing. - Not implemented.
 }
 
 ////////////////////////////////////////////////////////
@@ -1513,6 +1555,8 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
 {
   
 
+#ifdef NOTYET
+  
   double iconScale = context.iconScale;
   if (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) {
     iconScale = 1.0;
@@ -1722,14 +1766,14 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
     int shaft_len = (int) (_barbShaftLen * iconScale + 0.5);
     int line_width = 1;
 
-//     if(gd.h_win.km_across_screen < 200.0) {
-//       shaft_len = (int)  _barbShaftLen * 1.5;
-//       line_width = 2;
-//     }
-//     if(gd.h_win.km_across_screen < 50.0) {
-//       line_width = 3;
-//       shaft_len = (int) _barbShaftLen * 2.5;
-//     }
+    //     if(gd.h_win.km_across_screen < 200.0) {
+    //       shaft_len = (int)  _barbShaftLen * 1.5;
+    //       line_width = 2;
+    //     }
+    //     if(gd.h_win.km_across_screen < 50.0) {
+    //       line_width = 3;
+    //       shaft_len = (int) _barbShaftLen * 2.5;
+    //     }
 
     XSetLineAttributes(context.display, context.gc, line_width,
 		       LineSolid, CapButt, JoinBevel);
@@ -1750,6 +1794,8 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
 
   }
 
+#endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1761,6 +1807,8 @@ void SymprodRenderObj::_setXColors(char *foreground_color,
 
 {
 
+#ifdef NOTYET
+  
   // If the Color has changed, Set the GC
   
   if (!STRequal_exact(foreground_color, context.last_foreground_color)) {
@@ -1805,6 +1853,8 @@ void SymprodRenderObj::_setXColors(char *foreground_color,
 	       SYMPROD_COLOR_LEN);
     }
   }
+
+#endif
   
 }
 
@@ -1815,6 +1865,9 @@ void SymprodRenderObj::_setBackgroundColor(char *color_name,
                                            RenderContext &context)
 
 {
+
+#ifdef NOTYET
+  
   XColor xcolor;
 
   if (XParseColor(context.display, context.cmap, color_name, &xcolor) == 0) {
@@ -1826,6 +1879,8 @@ void SymprodRenderObj::_setBackgroundColor(char *color_name,
   XAllocColor(context.display, context.cmap, &xcolor);
   _background_pixel = xcolor.pixel;
   _background_pixel_init = true;
+
+#endif
 
 }
 
@@ -1839,81 +1894,83 @@ void SymprodRenderObj::setStipple(Symprod::fill_t filltype,
 
 {
 
+#ifdef NOTYET
+  
   Pixmap pixmap;
 
   switch (filltype) {
 
-  case Symprod::FILL_NONE :
-  case Symprod::FILL_SOLID :
-    XSetFillStyle(context.display, context.gc, FillSolid);
-    return;
-    break;
+    case Symprod::FILL_NONE :
+    case Symprod::FILL_SOLID :
+      XSetFillStyle(context.display, context.gc, FillSolid);
+      return;
+      break;
     
-  case Symprod::FILL_STIPPLE10 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple10_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE10 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple10_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE20 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple20_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE20 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple20_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE30 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple30_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE30 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple30_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE40 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple40_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE40 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple40_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE50 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple50_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE50 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple50_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE60 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple60_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE60 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple60_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE70 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple70_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE70 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple70_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE80 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple80_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE80 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple80_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
     
-  case Symprod::FILL_STIPPLE90 :
-    pixmap =
-      XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    (char *) _stipple90_bitmap_bits,
-			    _stipple_bitmap_width, _stipple_bitmap_height);
-    break;
+    case Symprod::FILL_STIPPLE90 :
+      pixmap =
+        XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
+                              (char *) _stipple90_bitmap_bits,
+                              _stipple_bitmap_width, _stipple_bitmap_height);
+      break;
 
-  default:
-    return;
+    default:
+      return;
     
   }
   
@@ -1923,6 +1980,8 @@ void SymprodRenderObj::setStipple(Symprod::fill_t filltype,
 
   XSetStipple(context.display, context.gc, pixmap);
   XFreePixmap(context.display, pixmap);
+
+#endif
 
 }
 
@@ -1992,17 +2051,20 @@ void SymprodRenderObj::_latLon2WorldConstrained(double lat,
 int SymprodRenderObj::_convertCapstyle2X(Symprod::capstyle_t capstyle)
   
 {
+#ifdef NOTYET
   switch (capstyle) {
-  case Symprod::CAPSTYLE_BUTT :
-    return(CapButt);
-  case Symprod::CAPSTYLE_NOT_LAST :
-    return(CapNotLast);
-  case Symprod::CAPSTYLE_PROJECTING :
-    return(CapProjecting);
-  case Symprod::CAPSTYLE_ROUND :
-    return(CapRound);
+    case Symprod::CAPSTYLE_BUTT :
+      return(CapButt);
+    case Symprod::CAPSTYLE_NOT_LAST :
+      return(CapNotLast);
+    case Symprod::CAPSTYLE_PROJECTING :
+      return(CapProjecting);
+    case Symprod::CAPSTYLE_ROUND :
+      return(CapRound);
   }
   return(CapButt);
+#endif
+  return 0;
 }
 
 
@@ -2011,15 +2073,18 @@ int SymprodRenderObj::_convertCapstyle2X(Symprod::capstyle_t capstyle)
 
 int SymprodRenderObj::_convertJoinstyle2X(Symprod::joinstyle_t joinstyle)
 {
+#ifdef NOTYET
   switch (joinstyle) {
-  case Symprod::JOINSTYLE_BEVEL :
-    return(JoinBevel);
-  case Symprod::JOINSTYLE_MITER :
-    return(JoinMiter);
-  case Symprod::JOINSTYLE_ROUND :
-    return(JoinRound);
+    case Symprod::JOINSTYLE_BEVEL :
+      return(JoinBevel);
+    case Symprod::JOINSTYLE_MITER :
+      return(JoinMiter);
+    case Symprod::JOINSTYLE_ROUND :
+      return(JoinRound);
   }
   return(JoinBevel);
+#endif
+  return 0;
 }
 
 
@@ -2028,23 +2093,27 @@ int SymprodRenderObj::_convertJoinstyle2X(Symprod::joinstyle_t joinstyle)
 
 int SymprodRenderObj::_convertLinetype2X(Symprod::linetype_t linetype)
 {
+#ifdef NOTYET
   switch (linetype) {
-  case Symprod::LINETYPE_SOLID :
-    return(LineSolid);
-  case Symprod::LINETYPE_DASH :
-    return(LineOnOffDash);
-  case Symprod::LINETYPE_DOT_DASH :
-    return(LineDoubleDash);
+    case Symprod::LINETYPE_SOLID :
+      return(LineSolid);
+    case Symprod::LINETYPE_DASH :
+      return(LineOnOffDash);
+    case Symprod::LINETYPE_DOT_DASH :
+      return(LineDoubleDash);
   }
   return(LineSolid);
+#endif
+  return 0;
 }
 //////////////////////////////////////////////////////////////////////
 // Set up an 8 point pick box around the input coords.
 
 #define PICK_BOX_SIZE 3
 
-void set_pick_box_xy(int x, int y, XPoint *bpt)
+void set_pick_box_xy(int x, int y, QPoint *bpt)
 {
+#ifdef NOTYET
   bpt[0].x = x - PICK_BOX_SIZE;
   bpt[0].y = y - PICK_BOX_SIZE;
 
@@ -2068,5 +2137,6 @@ void set_pick_box_xy(int x, int y, XPoint *bpt)
 
   bpt[7].x = x - PICK_BOX_SIZE;
   bpt[7].y = y + PICK_BOX_SIZE;
+#endif
 }
   

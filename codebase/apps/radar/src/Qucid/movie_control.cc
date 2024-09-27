@@ -162,10 +162,13 @@ void rotate_movie_frames()
     for(i = 0; i < gd.movie.num_frames - 1; i++) {
 	memcpy(&gd.movie.frame[i],&gd.movie.frame[i+1],sizeof(movie_frame_t));
 
+#ifdef NOTYET
         // Render a new time selector for this frame
         draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
+        
     }
 
     // Copy the first frame data to the last
@@ -200,6 +203,7 @@ void rotate_movie_frames()
 
 void adjust_pixmap_allocation()
 {
+#ifdef NOTYET
     int    i;
 
     /* First Remove any pixmaps that are not in the current movie loop */
@@ -237,6 +241,7 @@ void adjust_pixmap_allocation()
             gd.movie.frame[i].redraw_vert = 1;
         }
     }
+#endif
 }
 
 /*************************************************************************

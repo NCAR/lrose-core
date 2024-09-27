@@ -56,13 +56,15 @@ int save_h_movie_frame( int index, QPaintDevice *pdev, int page)
 	    /*
 		 * Copy the finished image to the final drawing area pixmap
          */
-	    XCopyArea(gd.dpy, xid,
-	       gd.h_win.can_xid[gd.h_win.cur_cache_im], 
-	       gd.def_gc,    0,0,
-           gd.h_win.can_dim.width,
-           gd.h_win.can_dim.height,
-           gd.h_win.can_dim.x_pos,
-           gd.h_win.can_dim.y_pos);
+#ifdef NOTYET
+        XCopyArea(gd.dpy, xid,
+                  gd.h_win.can_xid[gd.h_win.cur_cache_im], 
+                  gd.def_gc,    0,0,
+                  gd.h_win.can_dim.width,
+                  gd.h_win.can_dim.height,
+                  gd.h_win.can_dim.x_pos,
+                  gd.h_win.can_dim.y_pos);
+#endif
                                     
         /* Save the final drawing area pixmap  */
 		gd.generate_filename = 1;
@@ -77,6 +79,7 @@ int save_h_movie_frame( int index, QPaintDevice *pdev, int page)
      */
     if(page != gd.h_win.page) return 0;
 
+#ifdef NOTYET
     if(gd.movie.frame[index].h_xid != 0 &&
 		gd.movie.frame[index].h_xid != xid  ) {
         
@@ -91,7 +94,8 @@ int save_h_movie_frame( int index, QPaintDevice *pdev, int page)
             gd.h_win.can_dim.x_pos,
             gd.h_win.can_dim.y_pos);
 
-    } 
+    }
+#endif
         
     return 0;
 }
@@ -104,6 +108,7 @@ int save_v_movie_frame( int index, QPaintDevice *pdev)
 {
     if(gd.debug1) fprintf(stderr,"Saving XSECT movie_frame %d Save_active: %d\n",index,gd.series_save_active);
 
+#ifdef NOTYET
     if(gd.movie.frame[index].v_xid != 0 &&
 		gd.movie.frame[index].v_xid != xid) { 
 
@@ -117,7 +122,8 @@ int save_v_movie_frame( int index, QPaintDevice *pdev)
             gd.v_win.can_dim.x_pos,
             gd.v_win.can_dim.y_pos);
 
-    } 
+    }
+#endif
 
     /* Save the image for HTML or Series save inclusion */
     if(_params.image_dir != NULL && gd.series_save_active != 0 ) {

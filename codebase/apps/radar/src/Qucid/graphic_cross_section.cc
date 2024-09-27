@@ -32,7 +32,7 @@
  */
 
 #include <math.h>
-#include <X11/Xlib.h>
+// #include <X11/Xlib.h>
 
 #define GRAPHIC_CROSS_SECTION    1
 
@@ -80,41 +80,46 @@ void setup_route_area(int clear_flag )
 
 void redraw_route_line(win_param_t * win)
 {
-    int i;
 
-    // DEBUG
-    /*
+  // int i;
+  
+  // DEBUG
+  /*
     static int last_startx = -1;
     if(last_startx != r_startx) 
-	fprintf(stderr,"Num Segs: %d \t State: %d\t  start XY: %4d,%4d\t Last XY: %4d,%4d\n",
-		  win->route.num_segments, r_state,
-		  r_startx,r_starty,r_lastx,r_lasty);
-    */
-
-    for(i=0; i < win->route.num_segments; i++) {
-      XDrawLine(gd.dpy,gd.hcan_xid,gd.ol_gc,win->route.x_pos[i],win->route.y_pos[i],
-		win->route.x_pos[i+1],win->route.y_pos[i+1]);
-      
-      // DEBUG
-      /*
+    fprintf(stderr,"Num Segs: %d \t State: %d\t  start XY: %4d,%4d\t Last XY: %4d,%4d\n",
+    win->route.num_segments, r_state,
+    r_startx,r_starty,r_lastx,r_lasty);
+  */
+  
+#ifdef NOTYET
+  for(int i=0; i < win->route.num_segments; i++) {
+    XDrawLine(gd.dpy,gd.hcan_xid,gd.ol_gc,win->route.x_pos[i],win->route.y_pos[i],
+              win->route.x_pos[i+1],win->route.y_pos[i+1]);
+#endif
+    
+    // DEBUG
+    /*
       if(last_startx != r_startx) {
-	fprintf(stderr,"\tX,Y POS: %4d,%4d  X,Y World: %8.4f,%8.4f\n",
-	    win->route.x_pos[i],win->route.y_pos[i],
-	    win->route.x_world[i],win->route.y_world[i]);
-	    
+      fprintf(stderr,"\tX,Y POS: %4d,%4d  X,Y World: %8.4f,%8.4f\n",
+      win->route.x_pos[i],win->route.y_pos[i],
+      win->route.x_world[i],win->route.y_world[i]);
+      
       }
-      */
-    }
-
+    */
+    
     // DEBUG
      /*
-     if(last_startx != r_startx) {
-	fprintf(stderr,"\tX,Y POS: %4d,%4d  X,Y World: %8.4f,%8.4f\n",
-	    win->route.x_pos[i],win->route.y_pos[i],
+       if(last_startx != r_startx) {
+       fprintf(stderr,"\tX,Y POS: %4d,%4d  X,Y World: %8.4f,%8.4f\n",
+       win->route.x_pos[i],win->route.y_pos[i],
 	    win->route.x_world[i],win->route.y_world[i]);
-        last_startx = r_startx;
-    }
-    */
-	    
+            last_startx = r_startx;
+            }
+     */
+    
+#ifdef NOTYET
     XDrawLine(gd.dpy,gd.hcan_xid,gd.ol_gc,r_startx,r_starty,r_lastx,r_lasty);
+#endif
+    
 }   

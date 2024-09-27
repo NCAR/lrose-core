@@ -69,7 +69,7 @@ protected:
   unsigned long _background_pixel;
   bool _background_pixel_init;
   
-  Pixmap _stipple;
+  QPixmap _stipple;
   bool _stippleCreated;
 
 

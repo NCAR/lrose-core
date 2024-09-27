@@ -38,103 +38,105 @@
  */
 void manage_h_pixmaps(int  mode)  /* 1= create, 2 = replace, 3 = destroy */
 {
-    int    i;
+#ifdef NOTYET
+  int    i;
      
-    switch (mode)
-    {
+  switch (mode)
+  {
     case 1:        /* Create all pixmaps */
     case 2:        /* Replace Pixmaps */
-        for(i=0; i < gd.num_datafields; i++) {
-            if(gd.h_win.page_xid[i]) {
-                XFreePixmap(gd.dpy,gd.h_win.page_xid[i]);
-                gd.h_win.page_xid[i] = 0;
-            }
-
-            /* Create new field Pixmaps -f field updates automatically */
-            if(gd.mrec[i]->auto_render) {
-                gd.h_win.page_xid[i] = XCreatePixmap(gd.dpy, 
-                                                  gd.h_win.vis_xid, 
-                                                  gd.h_win.can_dim.width,
-                                                  gd.h_win.can_dim.height,
-                                                  gd.h_win.can_dim.depth);
-                gd.h_win.redraw[i] = 1;
-                /* clear drawing area */
-                XFillRectangle(gd.dpy,gd.h_win.page_xid[i],gd.legends.background_color->gc,
-                           0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
-            }
-
-        }
-        /* create last stage pixmaps */
-	for(i=0; i < _params.num_cache_zooms; i++) {
-            if(gd.h_win.can_xid[i]) XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
-            gd.h_win.can_xid[i] = XCreatePixmap(gd.dpy,
-                                gd.h_win.vis_xid,
-                                gd.h_win.can_dim.width,
-                                gd.h_win.can_dim.height,
-                                gd.h_win.can_dim.depth);
-            XFillRectangle(gd.dpy,gd.h_win.can_xid[i],gd.legends.background_color->gc,
-                           0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
-	}
-
-        /* create temporary area pixmaps */ 
-        if(gd.h_win.tmp_xid) XFreePixmap(gd.dpy,gd.h_win.tmp_xid);
-        gd.h_win.tmp_xid = XCreatePixmap(gd.dpy,
-                                gd.h_win.vis_xid,
-                                gd.h_win.can_dim.width,
-                                gd.h_win.can_dim.height,
-                                gd.h_win.can_dim.depth);
-        XFillRectangle(gd.dpy,gd.h_win.tmp_xid,gd.legends.background_color->gc,
-                           0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
-
-
-        /* release old movie frame pixmaps */
-        for(i=0;i < MAX_FRAMES; i++ )
-        {
-            if(gd.movie.frame[i].h_xid) {
-                XFreePixmap(gd.dpy,gd.movie.frame[i].h_xid); 
-                gd.movie.frame[i].h_xid = 0;
-            }
-        }
-        for(i=0; i < gd.movie.num_frames; i++) {
-            gd.movie.frame[i].h_xid =
-                XCreatePixmap(gd.dpy, 
-                              gd.h_win.vis_xid, 
-                              gd.h_win.can_dim.width,
-                              gd.h_win.can_dim.height,
-                              gd.h_win.can_dim.depth);
-            gd.movie.frame[i].redraw_horiz = 1;
-            /* clear drawing area */
-            XFillRectangle(gd.dpy,gd.movie.frame[i].h_xid,gd.legends.background_color->gc,
-                           0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      for(i=0; i < gd.num_datafields; i++) {
+        if(gd.h_win.page_xid[i]) {
+          XFreePixmap(gd.dpy,gd.h_win.page_xid[i]);
+          gd.h_win.page_xid[i] = 0;
         }
 
-        break;
+        /* Create new field Pixmaps -f field updates automatically */
+        if(gd.mrec[i]->auto_render) {
+          gd.h_win.page_xid[i] = XCreatePixmap(gd.dpy, 
+                                               gd.h_win.vis_xid, 
+                                               gd.h_win.can_dim.width,
+                                               gd.h_win.can_dim.height,
+                                               gd.h_win.can_dim.depth);
+          gd.h_win.redraw[i] = 1;
+          /* clear drawing area */
+          XFillRectangle(gd.dpy,gd.h_win.page_xid[i],gd.legends.background_color->gc,
+                         0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+        }
+
+      }
+      /* create last stage pixmaps */
+      for(i=0; i < _params.num_cache_zooms; i++) {
+        if(gd.h_win.can_xid[i]) XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
+        gd.h_win.can_xid[i] = XCreatePixmap(gd.dpy,
+                                            gd.h_win.vis_xid,
+                                            gd.h_win.can_dim.width,
+                                            gd.h_win.can_dim.height,
+                                            gd.h_win.can_dim.depth);
+        XFillRectangle(gd.dpy,gd.h_win.can_xid[i],gd.legends.background_color->gc,
+                       0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      }
+
+      /* create temporary area pixmaps */ 
+      if(gd.h_win.tmp_xid) XFreePixmap(gd.dpy,gd.h_win.tmp_xid);
+      gd.h_win.tmp_xid = XCreatePixmap(gd.dpy,
+                                       gd.h_win.vis_xid,
+                                       gd.h_win.can_dim.width,
+                                       gd.h_win.can_dim.height,
+                                       gd.h_win.can_dim.depth);
+      XFillRectangle(gd.dpy,gd.h_win.tmp_xid,gd.legends.background_color->gc,
+                     0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+
+
+      /* release old movie frame pixmaps */
+      for(i=0;i < MAX_FRAMES; i++ )
+      {
+        if(gd.movie.frame[i].h_xid) {
+          XFreePixmap(gd.dpy,gd.movie.frame[i].h_xid); 
+          gd.movie.frame[i].h_xid = 0;
+        }
+      }
+      for(i=0; i < gd.movie.num_frames; i++) {
+        gd.movie.frame[i].h_xid =
+          XCreatePixmap(gd.dpy, 
+                        gd.h_win.vis_xid, 
+                        gd.h_win.can_dim.width,
+                        gd.h_win.can_dim.height,
+                        gd.h_win.can_dim.depth);
+        gd.movie.frame[i].redraw_horiz = 1;
+        /* clear drawing area */
+        XFillRectangle(gd.dpy,gd.movie.frame[i].h_xid,gd.legends.background_color->gc,
+                       0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      }
+
+      break;
 
     case 3: // Destroy ALL
-        for(i=0;i < MAX_FRAMES; i++ ) {
-          if(gd.movie.frame[i].h_xid) {
-                XFreePixmap(gd.dpy,gd.movie.frame[i].h_xid); 
-                gd.movie.frame[i].h_xid = 0;
-          }
+      for(i=0;i < MAX_FRAMES; i++ ) {
+        if(gd.movie.frame[i].h_xid) {
+          XFreePixmap(gd.dpy,gd.movie.frame[i].h_xid); 
+          gd.movie.frame[i].h_xid = 0;
         }
-        for(i=0; i < gd.num_datafields; i++) {
-            if(gd.h_win.page_xid[i]) {
-                XFreePixmap(gd.dpy,gd.h_win.page_xid[i]);
-                gd.h_win.page_xid[i] = 0;
-            }
+      }
+      for(i=0; i < gd.num_datafields; i++) {
+        if(gd.h_win.page_xid[i]) {
+          XFreePixmap(gd.dpy,gd.h_win.page_xid[i]);
+          gd.h_win.page_xid[i] = 0;
         }
-	for(i=0; i < _params.num_cache_zooms; i++) {
-          if(gd.h_win.can_xid[i]) {
-            XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
-            gd.h_win.can_xid[i] = 0;
-          }
-	}
-        if(gd.h_win.tmp_xid) {
-            XFreePixmap(gd.dpy,gd.h_win.tmp_xid);
-            gd.h_win.tmp_xid = 0;
+      }
+      for(i=0; i < _params.num_cache_zooms; i++) {
+        if(gd.h_win.can_xid[i]) {
+          XFreePixmap(gd.dpy,gd.h_win.can_xid[i]);
+          gd.h_win.can_xid[i] = 0;
         }
-        break;
-    }
+      }
+      if(gd.h_win.tmp_xid) {
+        XFreePixmap(gd.dpy,gd.h_win.tmp_xid);
+        gd.h_win.tmp_xid = 0;
+      }
+      break;
+  }
+#endif
 }
 
 /*************************************************************************
@@ -144,99 +146,101 @@ void manage_h_pixmaps(int  mode)  /* 1= create, 2 = replace, 3 = destroy */
 
 void manage_v_pixmaps( int mode)   /* 1= create, 2 = replace, 3 = destroy */
 {
-    int i;
+#ifdef NOTYET
+  int i;
 
-    switch (mode) {
-        case 1:     /* Create all pixmaps */
-        case 2:     /* Replace Pixmaps */
-            for(i=0; i < gd.num_datafields; i++) {
-                if(gd.v_win.page_xid[i]) {
-                    XFreePixmap(gd.dpy,gd.v_win.page_xid[i]);
-                    gd.v_win.page_xid[i] = 0;
-                }
-                 /* Create new field Pixmaps */
-                if(gd.mrec[i]->auto_render) {
-                    gd.v_win.page_xid[i] = XCreatePixmap(gd.dpy,
-                        gd.v_win.vis_xid,
-                        gd.v_win.can_dim.width,
-                        gd.v_win.can_dim.height,
-                        gd.v_win.can_dim.depth);
-                    gd.v_win.redraw[i] = 1;
-                    /* Clear drawing area */
-                    XFillRectangle(gd.dpy,gd.v_win.page_xid[i],
-				   gd.legends.background_color->gc,
-                                   0,0,gd.v_win.can_dim.width,
-				   gd.v_win.can_dim.height);
-                }
-            }
+  switch (mode) {
+    case 1:     /* Create all pixmaps */
+    case 2:     /* Replace Pixmaps */
+      for(i=0; i < gd.num_datafields; i++) {
+        if(gd.v_win.page_xid[i]) {
+          XFreePixmap(gd.dpy,gd.v_win.page_xid[i]);
+          gd.v_win.page_xid[i] = 0;
+        }
+        /* Create new field Pixmaps */
+        if(gd.mrec[i]->auto_render) {
+          gd.v_win.page_xid[i] = XCreatePixmap(gd.dpy,
+                                               gd.v_win.vis_xid,
+                                               gd.v_win.can_dim.width,
+                                               gd.v_win.can_dim.height,
+                                               gd.v_win.can_dim.depth);
+          gd.v_win.redraw[i] = 1;
+          /* Clear drawing area */
+          XFillRectangle(gd.dpy,gd.v_win.page_xid[i],
+                         gd.legends.background_color->gc,
+                         0,0,gd.v_win.can_dim.width,
+                         gd.v_win.can_dim.height);
+        }
+      }
 
-            /* Create last stage Pixmaps */
-	    for(i=0; i < _params.num_cache_zooms; i++) {
-              gd.v_win.can_xid[i] =  XCreatePixmap(gd.dpy,
-                        gd.v_win.vis_xid,
-                        gd.v_win.can_dim.width,
-                        gd.v_win.can_dim.height,
-                        gd.v_win.can_dim.depth);
-              XFillRectangle(gd.dpy,gd.v_win.can_xid[i],gd.legends.background_color->gc,
-                        0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
-	     }
+      /* Create last stage Pixmaps */
+      for(i=0; i < _params.num_cache_zooms; i++) {
+        gd.v_win.can_xid[i] =  XCreatePixmap(gd.dpy,
+                                             gd.v_win.vis_xid,
+                                             gd.v_win.can_dim.width,
+                                             gd.v_win.can_dim.height,
+                                             gd.v_win.can_dim.depth);
+        XFillRectangle(gd.dpy,gd.v_win.can_xid[i],gd.legends.background_color->gc,
+                       0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      }
 
-            /* Create Pixmap for fields that don't update automatically */
-            gd.v_win.tmp_xid =  XCreatePixmap(gd.dpy,
-                        gd.v_win.vis_xid,
-                        gd.v_win.can_dim.width,
-                        gd.v_win.can_dim.height,
-                        gd.v_win.can_dim.depth);
-            XFillRectangle(gd.dpy,gd.v_win.tmp_xid,gd.legends.background_color->gc,
-                        0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
-              for(i=0;i < MAX_FRAMES; i++ ) {
-                if(gd.movie.frame[i].v_xid) {
-                    XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
-                    gd.movie.frame[i].v_xid = 0;
-                }
-            }
+      /* Create Pixmap for fields that don't update automatically */
+      gd.v_win.tmp_xid =  XCreatePixmap(gd.dpy,
+                                        gd.v_win.vis_xid,
+                                        gd.v_win.can_dim.width,
+                                        gd.v_win.can_dim.height,
+                                        gd.v_win.can_dim.depth);
+      XFillRectangle(gd.dpy,gd.v_win.tmp_xid,gd.legends.background_color->gc,
+                     0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      for(i=0;i < MAX_FRAMES; i++ ) {
+        if(gd.movie.frame[i].v_xid) {
+          XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
+          gd.movie.frame[i].v_xid = 0;
+        }
+      }
 
-            for(i=0; i < gd.movie.num_frames; i++) {
+      for(i=0; i < gd.movie.num_frames; i++) {
 
-                gd.movie.frame[i].v_xid = XCreatePixmap(gd.dpy,
-                    gd.v_win.vis_xid,
-                    gd.v_win.can_dim.width,
-                    gd.v_win.can_dim.height,
-                    gd.v_win.can_dim.depth);
-                gd.movie.frame[i].redraw_vert = 1;
-                /* Clear drawing area */
-                XFillRectangle(gd.dpy,gd.movie.frame[i].v_xid,
-                               gd.legends.background_color->gc,
-                               0,0,gd.v_win.can_dim.width,
-                               gd.v_win.can_dim.height);
-            }
+        gd.movie.frame[i].v_xid = XCreatePixmap(gd.dpy,
+                                                gd.v_win.vis_xid,
+                                                gd.v_win.can_dim.width,
+                                                gd.v_win.can_dim.height,
+                                                gd.v_win.can_dim.depth);
+        gd.movie.frame[i].redraw_vert = 1;
+        /* Clear drawing area */
+        XFillRectangle(gd.dpy,gd.movie.frame[i].v_xid,
+                       gd.legends.background_color->gc,
+                       0,0,gd.v_win.can_dim.width,
+                       gd.v_win.can_dim.height);
+      }
 
-        break;
+      break;
 
-        case 3:
-            for(i=0;i < MAX_FRAMES; i++ ) {
-              if(gd.movie.frame[i].v_xid) {
-                XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
-                gd.movie.frame[i].v_xid = 0;
-              }
-            }
-            for(i=0; i < gd.num_datafields; i++) {
-                if(gd.v_win.page_xid[i]) {
-                    XFreePixmap(gd.dpy,gd.v_win.page_xid[i]);
-                    gd.v_win.page_xid[i] = 0;
-                }
-            }
-	    for(i=0; i < _params.num_cache_zooms; i++) {
-              if(gd.v_win.can_xid[i]) {
-                XFreePixmap(gd.dpy,gd.v_win.can_xid[i]);
-                gd.v_win.can_xid[i] = 0;
-              }
-	    }
-            if(gd.v_win.tmp_xid) {
-                XFreePixmap(gd.dpy,gd.v_win.tmp_xid);
-                gd.v_win.tmp_xid = 0;
-            }
+    case 3:
+      for(i=0;i < MAX_FRAMES; i++ ) {
+        if(gd.movie.frame[i].v_xid) {
+          XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
+          gd.movie.frame[i].v_xid = 0;
+        }
+      }
+      for(i=0; i < gd.num_datafields; i++) {
+        if(gd.v_win.page_xid[i]) {
+          XFreePixmap(gd.dpy,gd.v_win.page_xid[i]);
+          gd.v_win.page_xid[i] = 0;
+        }
+      }
+      for(i=0; i < _params.num_cache_zooms; i++) {
+        if(gd.v_win.can_xid[i]) {
+          XFreePixmap(gd.dpy,gd.v_win.can_xid[i]);
+          gd.v_win.can_xid[i] = 0;
+        }
+      }
+      if(gd.v_win.tmp_xid) {
+        XFreePixmap(gd.dpy,gd.v_win.tmp_xid);
+        gd.v_win.tmp_xid = 0;
+      }
 
-        break;
-    }
+      break;
+  }
+#endif
 } 

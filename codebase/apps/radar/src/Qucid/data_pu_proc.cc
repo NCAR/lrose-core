@@ -61,11 +61,11 @@ void set_field(int value)
   }
   
   if(gd.mrec[gd.h_win.page]->auto_render && 
-     gd.h_win.page_xid[gd.h_win.page] != 0 &&
+     gd.h_win.page_pdev[gd.h_win.page] != 0 &&
      gd.h_win.redraw[gd.h_win.page] == 0) {
     
     save_h_movie_frame(gd.movie.cur_frame,
-                       gd.h_win.page_xid[gd.h_win.page],
+                       gd.h_win.page_pdev[gd.h_win.page],
                        gd.h_win.page);
   }
   

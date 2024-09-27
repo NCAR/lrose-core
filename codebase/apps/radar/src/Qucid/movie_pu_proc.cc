@@ -114,6 +114,7 @@ void update_movie_popup()
     gd.prod_mgr->reset_times_valid_flags();
   }
 
+#ifdef NOTYET
   if(gd.time_plot)
   {
     gd.time_plot->Set_times((time_t) gd.epoch_start,
@@ -124,6 +125,7 @@ void update_movie_popup()
                             gd.movie.num_frames);
     gd.time_plot->Draw(); 
   }
+#endif
     
 
 }
@@ -134,9 +136,12 @@ void update_movie_popup()
 
 void movie_start( u_int value)
 {
+
+#ifdef NOTYET
+
   int    i;
   int    sl_value;
-  Drawable    xid;
+  Drawable    pdev;
 
 
   if(value) {    /* Start command */
@@ -223,6 +228,8 @@ void movie_start( u_int value)
 
 #ifdef NOTNOW2
   start_timer();      /* Xview sometimes "forgets the interval timer" -restart it just in case */
+#endif
+
 #endif
 
 }
@@ -419,9 +426,11 @@ void set_display_time(time_t utime)
         found = 1;
         memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
         // Render a new time selector for this frame
+#ifdef NOTYET
         draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
         memset(&tmp_frame[j],0,sizeof(movie_frame_t));
       }
 	 
@@ -430,9 +439,10 @@ void set_display_time(time_t utime)
 
   // Reuse pixmaps in unused frames
   for(i=0 ; i < gd.movie.num_frames; i++) {
-    if(gd.movie.frame[i].h_xid) continue; // Alreday is accounted for.
+    if(gd.movie.frame[i].h_pdev) continue; // Alreday is accounted for.
 
     found = 0;
+#ifdef NOTYET
     for(j=0; j < MAX_FRAMES && !found; j++) {
       if(tmp_frame[j].h_xid) {
         found = 1;
@@ -443,6 +453,7 @@ void set_display_time(time_t utime)
         memset(&tmp_frame[j],0,sizeof(movie_frame_t));
       }
     }
+#endif
   }
 
   gd.movie.cur_frame = 0;
@@ -542,9 +553,11 @@ void set_end_frame(int num_frames)
         memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
 
         // Render time selector in reused frame
+#ifdef NOTYET
         draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
       }
 
       // Mark new frames for allocation & redrawing
@@ -557,9 +570,11 @@ void set_end_frame(int num_frames)
       for(i = 0, j = old_frames - gd.movie.num_frames ; j < old_frames; i++, j++) {
         memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
         // Render time selector in reused frame
+#ifdef NOTYET
         draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
       }
       // Copy unused frames too so they get de-allocated
       for(j = 0, i = gd.movie.num_frames; j < old_frames - gd.movie.num_frames; i++, j++) {
@@ -578,16 +593,20 @@ void set_end_frame(int num_frames)
       }
       // Render time selector in reused frames
       for(i= 0; i < old_frames; i++) {
-        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+ #ifdef NOTYET
+       draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
       }
     } else {
       // Render time selector in reused frames
       for(i= 0; i < gd.movie.num_frames; i++) {
+#ifdef NOTYET
         draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
                              gd.movie.frame[i].time_start,
                              gd.movie.frame[i].time_end);
+#endif
       }
     }
   }

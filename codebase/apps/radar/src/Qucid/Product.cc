@@ -267,7 +267,7 @@ void Product::draw(RenderContext &context)
     } // foreach symprod object
 
     if(_times.size() > 0) {
-      if(gd.time_plot) gd.time_plot->add_prod_tlist(_prodInfo.menu_label,_times);
+      //       if(gd.time_plot) gd.time_plot->add_prod_tlist(_prodInfo.menu_label,_times);
     }
 
   } // If product is selected and its data is valid 
@@ -347,7 +347,8 @@ int Product::getData(const time_t data_start_time,
     
     clearTimes();
     _timesNeedProcess = true;
-    double pixelsPerSec = ( gd.time_plot) ? gd.time_plot->getPixelsPerSec() : 1.0 ;
+    // double pixelsPerSec = ( gd.time_plot) ? gd.time_plot->getPixelsPerSec() : 1.0 ;
+    double pixelsPerSec = 1.0;
     int secsPerPixel = (int) (1.0 / pixelsPerSec);
     int delta = gd.epoch_end - gd.epoch_start;
     if (_spdbTimes.compileTimeList(timesUrl.getURLStr(),
@@ -530,7 +531,7 @@ bool Product::processTimeRefs()
   }
 
   _times = _spdbTimes.getTimeList();
-  if(gd.time_plot) gd.time_plot->Draw(); 
+  // if(gd.time_plot) gd.time_plot->Draw(); 
 
   return true;
 

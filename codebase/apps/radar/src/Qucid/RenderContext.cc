@@ -38,7 +38,7 @@
 RenderContext::RenderContext(/* Display *dpy,*/
                              QPaintDevice *pdev,
                              QBrush brush,
-                             Colormap cmap, const MdvxProj &in_proj)
+                             ColorMap cmap, const MdvxProj &in_proj)
         : clip_limits_changed(false),
           vert_limits_changed(false),
           proj(in_proj), /* display(dpy), */
@@ -51,7 +51,7 @@ RenderContext::RenderContext(/* Display *dpy,*/
   show_hidden = false;
   draw_pick_boxes = false;
 
-  dev = XDEV;  // X windows 
+  // dev = XDEV;  // X windows 
 
   *last_foreground_color = '\0';
   *last_background_color = '\0';
@@ -181,5 +181,33 @@ void RenderContext::set_domain(double xmin, double xmax, double ymin, double yma
   
   xref.font = font;
   
+}
+
+/**************************************************************************
+ * GCreateFrame(): creates a gframe_t structure, returns the pointer to the
+ *                 structure
+ *
+ *************************************************************************/
+
+GframeObj *RenderContext::gCreateFrame(double w_xmin, 
+                                       double w_ymin, 
+                                       double w_xmax, 
+                                       double w_ymax)
+
+{
+
+  GframeObj *gframe = new GframeObj;
+  
+  gframe->w_xmin = w_xmin;
+  gframe->w_ymin = w_ymin;
+  gframe->w_xmax = w_xmax;
+  gframe->w_ymax = w_ymax;
+
+  gframe->x = new XrefObj;
+  // gframe->ps = (psref_t *) ucalloc(1, sizeof(psref_t));
+  // gframe->psgc = (psgc_t *) ucalloc(1, sizeof(psgc_t));
+
+  return gframe;
+
 }
 

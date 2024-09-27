@@ -163,10 +163,10 @@ Qucid::Qucid(int argc, char **argv) :
 
   // get the display
   
-  if (_setupXDisplay(argc, argv)) {
-    cerr << "Cannot set up X display" << endl;
-    OK = false;
-  }
+  // if (_setupXDisplay(argc, argv)) {
+  //   cerr << "Cannot set up X display" << endl;
+  //   OK = false;
+  // }
   
   // init process mapper registration
   
@@ -226,6 +226,8 @@ int Qucid::Run(QApplication &app)
   
 }
 
+#ifdef NOTNOW
+
 //////////////////////////////////////////////////
 // set up the display variable
   
@@ -258,8 +260,6 @@ int Qucid::_setupXDisplay(int argc, char **argv)
   return 0;
 
 }
-
-#ifdef NOTNOW
 
 //////////////////////////////////////////////////
 // set up field objects, with their color maps

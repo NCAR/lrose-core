@@ -40,6 +40,9 @@ void update_frame_time_msg(int index);
 
 void modify_gui_objects()
 {
+
+#ifdef NOTYET
+  
     int    i,j;
 #ifdef NOTNOW
     int    height;
@@ -88,8 +91,8 @@ void modify_gui_objects()
 
 
     for(i=0; i < MAX_DATA_FIELDS; i++) {
-        gd.h_win.page_xid[i] = 0;
-        gd.v_win.page_xid[i] = 0;
+        gd.h_win.page_pdev[i] = 0;
+        gd.v_win.page_pdev[i] = 0;
     }
 
     XSetBackground(gd.dpy,gd.def_gc,gd.legends.background_color->pixval);
@@ -147,8 +150,8 @@ void modify_gui_objects()
     //     NULL);
 
     // XSetWindowColormap(gd.dpy,((Window) xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID,NULL)),gd.cmap);
-    XSetWindowColormap(gd.dpy,gd.hcan_xid,gd.cmap);
-    XSetWindowColormap(gd.dpy,gd.vcan_xid,gd.cmap);
+    XSetWindowColormap(gd.dpy,gd.hcan_pdev,gd.cmap);
+    XSetWindowColormap(gd.dpy,gd.vcan_pdev,gd.cmap);
 
     // xv_set(gd.h_win_horiz_bw->cp,PANEL_ITEM_X_GAP,2,NULL);
     // Setup the Main Menu Bar Cell Labels
@@ -756,6 +759,8 @@ void modify_gui_objects()
     // Set text fields in panel
     //update_draw_export_panel();
 
+#endif
+    
 }
 
 /*****************************************************************

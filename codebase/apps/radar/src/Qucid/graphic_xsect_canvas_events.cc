@@ -28,7 +28,7 @@
  * Frank Hage    July 1991 NCAR, Research Applications Program
  */
 
-#include <X11/Xlib.h>
+// #include <X11/Xlib.h>
 
 #define GRAPHIC_XSECT_CANVAS_EVENTS 1
 #include "cidd.h"

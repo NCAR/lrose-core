@@ -33,11 +33,14 @@
 
 #include <QBrush>
 #include <QPaintDevice>
+#include <QPixmap>
 
-#include <rapplot/gplot.h>
+// #include <rapplot/gplot.h>
+#include <qtplot/ColorMap.hh>
 #include <Spdb/Symprod.hh>
 #include <Mdv/MdvxProj.hh>
 
+class ColorMap;
 class ProductMgr;
 class Product;
 class SymprodRender;
@@ -51,6 +54,19 @@ class SymprodRenderBitmapIcon;
 class SymprodRenderArc;
 class SymprodRenderRectangle;
 class SymprodRenderChunk;
+
+/*
+ * text justification
+ */
+
+typedef enum {
+  XJ_LEFT = 1,
+  XJ_CENTER = 2,
+  XJ_RIGHT = 3,
+  YJ_ABOVE = 4,
+  YJ_CENTER = 5,
+  YJ_BELOW = 6
+} test_just_t;
 
 ///////////////////////////////////////////////////////////////
 // class definitions
@@ -70,7 +86,7 @@ public:
   
   // Display *display;
   QPaintDevice *pdev;
-  Pixmap *pixmap;
+  QPixmap *pixmap;
   size_t width, height;
   double xscale, yscale;
   QBrush brush;
@@ -101,6 +117,22 @@ public:
   
 };
 
+/*
+ * structure for point in world coords
+ */
+
+typedef struct {
+  double x, y;
+} GPoint;
+
+/*
+ * structure for rectangle in world coords
+ */
+
+typedef struct {
+  double x, y, width, height;
+} GRectangle;
+
 class RenderContext
 
 {
@@ -125,7 +157,7 @@ public:
   
   RenderContext(/* Display *dpy, */
                 QPaintDevice *pdev, QBrush brush,
-		Colormap cmap, const MdvxProj &in_proj);
+		ColorMap cmap, const MdvxProj &in_proj);
   
 
   void set_domain( double xmin, double xmax, double ymin, double ymax,
@@ -153,8 +185,8 @@ public:
 
   void set_hidden(bool show) { show_hidden = show; }
 
-  // void set_xid(Drawable x) {  xref.drawable = x; }
-
+  void set_xid(QPaintDevice *x) {  xref.pdev = x; }
+  
   void set_iconscale(double km_across_screen); 
   
   void set_scale_constant(double constant) { scaleConstant = constant; }
@@ -169,6 +201,11 @@ public:
   void reset_fgbg(void); // Clear lst colors.
 
   int offset_x, offset_y;  
+
+  static GframeObj *gCreateFrame(double w_xmin, 
+                                 double w_ymin, 
+                                 double w_xmax, 
+                                 double w_ymax);
 
 protected:
   
@@ -197,7 +234,7 @@ private:
   const MdvxProj &proj;   // Display Projections
 
   // Display *display;  // X11 related Members
-  Colormap cmap;
+  ColorMap cmap;
   QPaintDevice *pdev;
   QBrush brush;
 

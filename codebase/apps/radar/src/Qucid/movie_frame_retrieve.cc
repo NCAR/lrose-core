@@ -37,17 +37,19 @@
 
 void retrieve_h_movie_frame(int    index, QPaintDevice *pdev)
 {
-    if(gd.movie.frame[index].h_xid != 0) {        /* can get from the pixmap */
-        if(gd.movie.frame[index].h_xid != xid) {
-            if(gd.debug1) fprintf(stderr, "retrieve_h_movie_frame: Copying Horizontal movie_frame %d Xid: %ld to XID: %ld\n",
-                index,gd.movie.frame[index].h_xid, xid);
-            XCopyArea(gd.dpy,gd.movie.frame[index].h_xid,
-                xid,
+    if(gd.movie.frame[index].h_pdev != 0) {        /* can get from the pixmap */
+        if(gd.movie.frame[index].h_pdev != pdev) {
+#ifdef NOTYET
+          if(gd.debug1) fprintf(stderr, "retrieve_h_movie_frame: Copying Horizontal movie_frame %d Pdev: %ld to PDEV: %ld\n",
+                                index,gd.movie.frame[index].h_pdev, pdev);
+            XCopyArea(gd.dpy,gd.movie.frame[index].h_pdev,
+                pdev,
                 gd.def_gc,  0,0,
                 gd.h_win.can_dim.width,
                 gd.h_win.can_dim.height,
                 gd.h_win.can_dim.x_pos,
                 gd.h_win.can_dim.y_pos);
+#endif
         }
     
     } 
@@ -60,17 +62,19 @@ void retrieve_h_movie_frame(int    index, QPaintDevice *pdev)
 
 void retrieve_v_movie_frame(int index, QPaintDevice *pdev)
 {
-    if(gd.movie.frame[index].v_xid != 0) {        /* can save to the pixmap */
-        if(gd.movie.frame[index].v_xid != xid) {
-            if(gd.debug1) fprintf(stderr, "retrieve_v_movie_frame: Copying Horizontal movie_frame %d Xid: %ld to XID: %ld\n",
-                index,gd.movie.frame[index].v_xid, xid);
-            XCopyArea(gd.dpy, gd.movie.frame[index].v_xid,
-                xid,
+    if(gd.movie.frame[index].v_pdev != 0) {        /* can save to the pixmap */
+        if(gd.movie.frame[index].v_pdev != pdev) {
+#ifdef NOTYET
+            if(gd.debug1) fprintf(stderr, "retrieve_v_movie_frame: Copying Horizontal movie_frame %d Pdev: %ld to PDEV: %ld\n",
+                index,gd.movie.frame[index].v_pdev, pdev);
+            XCopyArea(gd.dpy, gd.movie.frame[index].v_pdev,
+                pdev,
                 gd.def_gc,  0,0,
                 gd.v_win.can_dim.width,
                 gd.v_win.can_dim.height,
                 gd.v_win.can_dim.x_pos,
                 gd.v_win.can_dim.y_pos);
+#endif
         }
 
     

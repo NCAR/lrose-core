@@ -32,7 +32,7 @@
 
 /**********************************************************************
  * COMPUTE_CONT_LEVELS:  Sets up Empty gc_array, and levels. Returns
- *  The number of 
+ *  The number of levels
  */
 
 int compute_cont_levels(GC  *gc_array, double *levels, met_record_t *mr, float *tmp_data)

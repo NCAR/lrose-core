@@ -47,6 +47,6 @@ typedef struct  {
 
     char color_name[NAME_LENGTH];  /* Color name*/
 
-}contour_info_t ;
+} contour_info_t ;
 
 #endif

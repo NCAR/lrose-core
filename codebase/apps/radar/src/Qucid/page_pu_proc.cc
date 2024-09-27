@@ -46,6 +46,8 @@ void update_layered_contour_panel();
  
 void set_color( char *cname, void* c_data)
 {
+
+#ifdef NOTYET
     XColor  rgb_def;
     Color_change_t *ptr;
     char string2[1024];
@@ -110,7 +112,8 @@ void set_color( char *cname, void* c_data)
       // xv_set(ptr->handle,PANEL_LABEL_STRING,cname,NULL);
     }
 
- 
+#endif
+    
     // gcc_suspend(TRUE);
  
     set_redraw_flags(1,1); /*  */

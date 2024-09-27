@@ -373,8 +373,8 @@ int init_data_space()
     snprintf(gd.movie.frame[ii].fname, NAME_LENGTH - 1,
              "%s/cidd_im%d_%d.",
              _params.image_dir, pid, ii);
-    gd.movie.frame[ii].h_xid = 0;
-    gd.movie.frame[ii].v_xid = 0;
+    gd.movie.frame[ii].h_pdev = 0;
+    gd.movie.frame[ii].v_pdev = 0;
     gd.movie.frame[ii].redraw_horiz = 1;
     gd.movie.frame[ii].redraw_vert = 1;
   }
@@ -2435,8 +2435,10 @@ static int _initZooms()
     _params.num_cache_zooms = 1 ;
   }
   
-  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
-  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
+  // gd.h_win.can_pdev = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
+  // gd.v_win.can_pdev = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
+  gd.h_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
+  gd.v_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
   
   gd.h_win.num_zoom_levels = _params.zoom_levels_n;
 
@@ -2754,8 +2756,8 @@ void init_globals()
   // gd.def_gc = 0;
   // gd.ol_gc = 0;
   // gd.clear_ol_gc = 0;
-  gd.dpyName = NULL;
-  gd.dpy = NULL;
+  // gd.dpyName = NULL;
+  // gd.dpy = NULL;
 
   // MEM_zero(gd.color);
   // MEM_zero(gd.null_color);
@@ -2776,7 +2778,7 @@ void init_globals()
 
   gd.coord_expt = NULL;
   gd.prod_mgr = NULL;
-  gd.time_plot = NULL;         
+  // gd.time_plot = NULL;         
   gd.r_context = NULL;    
   gd.station_loc = NULL;    
   gd.remote_ui = NULL;   

@@ -88,7 +88,7 @@ private:
   // methods
 
   void _initGlobals();
-  int _setupXDisplay(int argc, char **argv);
+  // int _setupXDisplay(int argc, char **argv);
   // int _setupDisplayFields();
 
 };

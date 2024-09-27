@@ -69,9 +69,9 @@
 #include <toolsa/utim.h>      // Unix time conversions 
 #include <toolsa/umisc.h>
 #include <toolsa/xdru.h>
-#include <rapplot/xrs.h>
+// #include <rapplot/xrs.h>
 #include <Spdb/StationLoc.hh> // Station locator class 
-#include <rapplot/xutils.h>   // X Windows related  support functions 
+// #include <rapplot/xutils.h>   // X Windows related  support functions 
 
 // MDVX support classes
 #include <Mdv/Mdvx_typedefs.hh>
@@ -110,7 +110,7 @@
 
 #include "RenderContext.hh"
 #include "ProductMgr.hh"
-#include "TimePlot.hh"
+// #include "TimePlot.hh"
 
 // GLOBAL DATA object
 
@@ -222,14 +222,14 @@ public:
 
   // char *dpyName; // display name
   // Display *dpy;     // default Display pointer for copy operations 
-  Colormap cmap;
+  ColorMap cmap;
   Color_gc_t color[MAX_COLORS];   // stores all colors and GCs 
   Color_gc_t null_color;          // The color "transparent" 
 
   // FONTS
   int num_fonts;                  // number of fonts in use 
-  Font ciddfont[MAX_FONTS];        // fonts in size order 
-  XFontStruct *fontst[MAX_FONTS]; // Font info 
+  QFont ciddfont[MAX_FONTS];        // fonts in size order 
+  QFont *fontst[MAX_FONTS]; // Font info 
 
   // Symbolic products - features
   
@@ -254,7 +254,7 @@ public:
 
   // Time scale plotter class for movie panel
 
-  TimePlot *time_plot;
+  // TimePlot *time_plot;
 
   // Control vartiables for movie looping
   

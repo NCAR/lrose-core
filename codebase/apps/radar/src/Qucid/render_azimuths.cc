@@ -84,12 +84,14 @@ void draw_cap_azimuth_lines(QPaintDevice *pdev)
       disp_proj_to_pixel(&gd.h_win.margin,lon2,lat2,&x2,&y2);
     }
 
+#ifdef NOTYET
     XUDRline_clip(gd.dpy, xid, gd.legends.range_ring_color->gc,
                   x1, y1, x2, y2,
                   gd.h_win.margin.left,
                   gd.h_win.margin.top,
                   gd.h_win.img_dim.width + gd.h_win.margin.left,
                   gd.h_win.img_dim.height + gd.h_win.margin.top);
+#endif
 
     az += az_interval;
 

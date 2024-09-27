@@ -32,6 +32,7 @@
 #define CIDD_COORDS 1
 
 #include "cidd.h"
+#include <toolsa/toolsa_macros.h>
 
 /**************************************************************************
  *  GET_BOUNDING_BOX: Return the current lat,lon bounding box of data on the display

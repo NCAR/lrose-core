@@ -41,6 +41,8 @@ void rotate_points(double theta, double x_cent, double y_cent, double *xarr, dou
 
 int render_distorted_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int  is_overlay_field)
 {
+
+#ifdef NOTYET
     int    i,j;
     unsigned short    *ptr;
     
@@ -246,6 +248,6 @@ int render_distorted_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_ti
 
     set_busy_state(0);
 
-
+#endif
     return 0;
 }

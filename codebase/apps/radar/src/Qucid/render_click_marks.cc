@@ -31,12 +31,15 @@
 
 #include "cidd.h"
 
+#ifdef NOTYET
 static void _draw_mark(QPaintDevice *pdev, double xx, double yy,
                        const Color_gc_t *color, int size);
+#endif
 
 void render_click_marks()
 {
 
+#ifdef NOTYET
   // do we need to plot clicks?
   
   bool plotClick = false;
@@ -96,12 +99,14 @@ void render_click_marks()
     int size = _params.latest_click_mark_size;
     _draw_mark(gd.h_win.vis_xid, xx, yy, gd.legends.latest_client_mark_color, size);
   }
+#endif
   
 }
 
 /////////////////////////////////////////////////////////////
 // Draw a cross at the mark location
 
+#ifdef NOTYET
 static void _draw_mark(QPaintDevice *pdev, double xx, double yy,
                        const Color_gc_t *color, int size)
 
@@ -139,5 +144,6 @@ static void _draw_mark(QPaintDevice *pdev, double xx, double yy,
   bpt[6].y = iy;
   
   XDrawLines(gd.dpy, xid, color->gc, bpt, 7, CoordModeOrigin);
-
+  
 }
+#endif

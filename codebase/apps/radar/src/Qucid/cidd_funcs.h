@@ -84,7 +84,7 @@ extern void pixel_to_grid_radar_no_cosine( met_record_t *mr, margin_t *margin,
                                            int *grid_y);   /* RETURN */
 #ifndef CIDD_FONT
 // extern void load_fonts( Display *dpy);
-extern Font choose_font( const char *string, int x_size, int y_size, int *xmid, int *ymid);
+extern QFont choose_font( const char *string, int x_size, int y_size, int *xmid, int *ymid);
 #endif
 
 #ifndef CIDD_INIT
@@ -126,7 +126,8 @@ extern void setup_color_mapping(Valcolormap_t *vcm,
 				double scale, double bias, int transform_type,
 				double bad_value, double missing_value);
 extern void autoscale_vcm(Valcolormap_t *vcm, double min, double max);
-extern GC Val2GC(Valcolormap_t *vcm, double val);
+// extern GC Val2GC(Valcolormap_t *vcm, double val);
+extern QBrush Val2Brush(Valcolormap_t *vcm, double val);
 
 #endif
 

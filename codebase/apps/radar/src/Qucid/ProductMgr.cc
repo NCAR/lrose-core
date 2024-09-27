@@ -158,7 +158,7 @@ void ProductMgr::draw_pick_obj()
 {
   _context.set_brush(gd.ol_brush);
   _context.set_drawable(gd.hcan_pdev);
-  _context.set_xid(gd.hcan_xid);
+  _context.set_xid(gd.hcan_pdev);
 
   if(_active_Rob != NULL) {
     _active_Rob->container->draw(_context);
@@ -167,8 +167,8 @@ void ProductMgr::draw_pick_obj()
   }
 
   _context.set_brush(gd.def_brush);
-  _context.set_drawable(gd.h_win.vis_xid);
-  _context.set_xid(gd.h_win.vis_xid);
+  _context.set_drawable(gd.h_win.vis_pdev);
+  _context.set_xid(gd.h_win.vis_pdev);
 }
 
 //////////////////////////////////
@@ -179,8 +179,8 @@ void ProductMgr::draw_pick_obj_plain()
   
 {
   _context.set_brush(gd.def_brush);
-  _context.set_drawable(gd.hcan_xid);
-  _context.set_xid(gd.hcan_xid);
+  _context.set_drawable(gd.hcan_pdev);
+  _context.set_xid(gd.hcan_pdev);
   if(_active_Rob != NULL) {
     _active_Rob->container->draw(_context);
   }

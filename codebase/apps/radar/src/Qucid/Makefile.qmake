@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -D_BSD_TYPES -DF_UNDERSCORE2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_QML_LIB -DQT_QMLINTEGRATION_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -D_REENTRANT -Wall -Wextra $(DEFINES)
 CXXFLAGS      = -pipe -g -D_REENTRANT -Wall -Wextra $(DEFINES)
-INCPATH       = -I. -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I-DQT_QMLINTEGRATION_LIB -I-DQT_NETWORK_LIB -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/dixon/lrose/include -I. -I/usr/lib64/qt6/mkspecs/linux-g++
+INCPATH       = -I. -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I-DQT_QMLINTEGRATION_LIB -I-DQT_NETWORK_LIB -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/mdtest/lrose/include -I. -I/usr/lib64/qt6/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,10 +37,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = Qucid1.0.0
-DISTDIR = /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/.tmp/Qucid1.0.0
+DISTDIR = /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/.tmp/Qucid1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath-link,/usr/lib64
-LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/dixon/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt6Widgets.so /usr/lib64/libQt6Gui.so /usr/lib64/libQt6Qml.so /usr/lib64/libQt6Network.so /usr/lib64/libQt6Core.so -lpthread -lGLX -lOpenGL   
+LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/mdtest/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt6Widgets.so /usr/lib64/libQt6Gui.so /usr/lib64/libQt6Qml.so /usr/lib64/libQt6Network.so /usr/lib64/libQt6Core.so -lpthread -lGLX -lOpenGL   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -1002,7 +1002,7 @@ moc_CartManager.cpp: CartManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
 
 moc_CartWidget.cpp: CartWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
@@ -1060,7 +1060,7 @@ moc_CartWidget.cpp: CartWidget.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartWidget.hh -o moc_CartWidget.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartWidget.hh -o moc_CartWidget.cpp
 
 moc_DisplayManager.cpp: DisplayManager.hh \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
@@ -1104,7 +1104,7 @@ moc_DisplayManager.cpp: DisplayManager.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
 
 moc_HorizWidget.cpp: HorizWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxVol.hh \
@@ -1163,7 +1163,7 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		WorldPlot.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
 
 moc_MapMenuItem.cpp: MapMenuItem.hh \
 		Params.hh \
@@ -1173,7 +1173,7 @@ moc_MapMenuItem.cpp: MapMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include MapMenuItem.hh -o moc_MapMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include MapMenuItem.hh -o moc_MapMenuItem.cpp
 
 moc_ProdMenuItem.cpp: ProdMenuItem.hh \
 		Params.hh \
@@ -1183,7 +1183,7 @@ moc_ProdMenuItem.cpp: ProdMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdMenuItem.hh -o moc_ProdMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdMenuItem.hh -o moc_ProdMenuItem.cpp
 
 moc_TimeControl.cpp: TimeControl.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
@@ -1194,7 +1194,7 @@ moc_TimeControl.cpp: TimeControl.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include TimeControl.hh -o moc_TimeControl.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include TimeControl.hh -o moc_TimeControl.cpp
 
 moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
@@ -1255,7 +1255,7 @@ moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
 
 moc_VertWindow.cpp: VertWindow.hh \
 		Params.hh \
@@ -1322,7 +1322,7 @@ moc_VertWindow.cpp: VertWindow.hh \
 		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
 
 moc_WindMenuItem.cpp: WindMenuItem.hh \
 		Params.hh \
@@ -1332,7 +1332,7 @@ moc_WindMenuItem.cpp: WindMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include WindMenuItem.hh -o moc_WindMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include WindMenuItem.hh -o moc_WindMenuItem.cpp
 
 moc_ZoomMenuItem.cpp: ZoomMenuItem.hh \
 		Params.hh \
@@ -1342,7 +1342,7 @@ moc_ZoomMenuItem.cpp: ZoomMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ZoomMenuItem.hh -o moc_ZoomMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ZoomMenuItem.hh -o moc_ZoomMenuItem.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1400,11 +1400,7 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -1478,8 +1474,7 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -1498,9 +1493,7 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Args.o Args.cc
 
 CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
@@ -1641,11 +1634,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
@@ -1671,7 +1660,6 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -1690,9 +1678,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CartManager.o CartManager.cc
 
 CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
@@ -1808,11 +1794,7 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/ushmem.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
@@ -1838,7 +1820,6 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -1857,9 +1838,7 @@ CartWidget.o: CartWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CartWidget.o CartWidget.cc
 
 Cdraw_P.o: Cdraw_P.cc Cdraw_P.hh \
@@ -1986,11 +1965,7 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -2054,7 +2029,6 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2073,9 +2047,7 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DisplayManager.o DisplayManager.cc
 
 HorizWidget.o: HorizWidget.cc HorizWidget.hh \
@@ -2193,11 +2165,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
@@ -2223,7 +2191,6 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2242,9 +2209,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o HorizWidget.o HorizWidget.cc
 
 MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
@@ -2284,11 +2249,7 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -2362,8 +2323,7 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2382,9 +2342,7 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MapMenuItem.o MapMenuItem.cc
 
 Main.o: Main.cc Qucid.hh \
@@ -2438,20 +2396,12 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/DateTime.hh \
 		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
 		$(HOME)/lrose/include/toolsa/heartbeat.h \
@@ -2487,6 +2437,8 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/swap.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/pmu.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/toolsa/http.h \
@@ -2498,12 +2450,13 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/umisc.h \
+		$(HOME)/lrose/include/toolsa/port.h \
+		$(HOME)/lrose/include/toolsa/ushmem.h \
+		$(HOME)/lrose/include/toolsa/uusleep.h \
+		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
@@ -2542,9 +2495,7 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Product.o Product.cc
 
 ProductMgr.o: ProductMgr.cc ProductMgr.hh \
@@ -2579,11 +2530,7 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -2662,8 +2609,7 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2674,8 +2620,6 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
-		TimePlot.hh \
-		TimeList.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
 		SymprodRenderObj.hh \
@@ -2723,11 +2667,7 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -2801,8 +2741,7 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2821,9 +2760,7 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ProdMenuItem.o ProdMenuItem.cc
 
 Qucid.o: Qucid.cc Qucid.hh \
@@ -2907,11 +2844,7 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -2970,8 +2903,6 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -2990,26 +2921,14 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Qucid.o Qucid.cc
 
 Reader.o: Reader.cc 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Reader.o Reader.cc
 
 RenderContext.o: RenderContext.cc RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/dataport/port_types.h \
 		$(HOME)/lrose/include/toolsa/MemBuf.hh \
@@ -3018,6 +2937,8 @@ RenderContext.o: RenderContext.cc RenderContext.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/DateTime.hh \
 		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
 		$(HOME)/lrose/include/toolsa/heartbeat.h \
@@ -3088,20 +3009,12 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		$(HOME)/lrose/include/toolsa/Socket.hh \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/DateTime.hh \
 		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
 		$(HOME)/lrose/include/toolsa/heartbeat.h \
@@ -3144,6 +3057,8 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/pmu.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/toolsa/http.h \
@@ -3155,12 +3070,13 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/umisc.h \
+		$(HOME)/lrose/include/toolsa/port.h \
+		$(HOME)/lrose/include/toolsa/ushmem.h \
+		$(HOME)/lrose/include/toolsa/uusleep.h \
+		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
@@ -3199,9 +3115,7 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SymprodRender.o SymprodRender.cc
 
 SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
@@ -3211,21 +3125,13 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		$(HOME)/lrose/include/toolsa/MemBuf.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/DateTime.hh \
 		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
 		$(HOME)/lrose/include/toolsa/heartbeat.h \
@@ -3265,6 +3171,8 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
 		$(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/ansi.h \
@@ -3280,12 +3188,13 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/umisc.h \
+		$(HOME)/lrose/include/toolsa/port.h \
+		$(HOME)/lrose/include/toolsa/ushmem.h \
+		$(HOME)/lrose/include/toolsa/uusleep.h \
+		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/didss/DsURL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
@@ -3338,9 +3247,7 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_funcs.h \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
-		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/dsserver/DmapMessage.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SymprodRenderObj.o SymprodRenderObj.cc
 
 TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
@@ -3425,11 +3332,7 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -3488,8 +3391,6 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -3508,9 +3409,7 @@ TimeControl.o: TimeControl.cc $(HOME)/lrose/include/Radx/NcfRadxFile.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TimeControl.o TimeControl.cc
 
 TimeList.o: TimeList.cc TimeList.hh
@@ -3551,11 +3450,7 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -3632,8 +3527,7 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -3749,11 +3643,7 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/didss/DsURL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
@@ -3792,7 +3682,7 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -3811,9 +3701,7 @@ VertWidget.o: VertWidget.cc VertWidget.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWidget.o VertWidget.cc
 
 VertWindow.o: VertWindow.cc CartManager.hh \
@@ -3927,11 +3815,7 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
@@ -3957,8 +3841,6 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -3977,9 +3859,7 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWindow.o VertWindow.cc
 
 WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
@@ -4019,11 +3899,7 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4097,8 +3973,7 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4117,9 +3992,7 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o WindMenuItem.o WindMenuItem.cc
 
 WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
@@ -4206,11 +4079,7 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4284,8 +4153,7 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4304,9 +4172,7 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ZoomMenuItem.o ZoomMenuItem.cc
 
 cidd_coords.o: cidd_coords.cc cidd.h \
@@ -4340,11 +4206,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4423,8 +4285,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4444,8 +4305,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/toolsa/toolsa_macros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_coords.o cidd_coords.cc
 
 cidd_font.o: cidd_font.cc cidd.h \
@@ -4479,11 +4339,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4562,8 +4418,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4583,8 +4438,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapplot/xrs.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_font.o cidd_font.cc
 
 cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
@@ -4623,11 +4477,7 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4704,8 +4554,6 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4724,9 +4572,7 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_init.o cidd_init.cc
 
 cidd_params.o: cidd_params.cc 
@@ -4763,11 +4609,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4846,8 +4688,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4866,9 +4707,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_remote_commands.o cidd_remote_commands.cc
 
 cidd_reset.o: cidd_reset.cc cidd.h \
@@ -4902,11 +4741,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -4985,8 +4820,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5005,9 +4839,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_reset.o cidd_reset.cc
 
 cidd_signals.o: cidd_signals.cc cidd.h \
@@ -5041,11 +4873,7 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5124,8 +4952,7 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5144,9 +4971,7 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cidd_signals.o cidd_signals.cc
 
 colorscales.o: colorscales.cc cidd.h \
@@ -5180,11 +5005,7 @@ colorscales.o: colorscales.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5263,8 +5084,7 @@ colorscales.o: colorscales.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5283,9 +5103,7 @@ colorscales.o: colorscales.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o colorscales.o colorscales.cc
 
 contours.o: contours.cc cidd.h \
@@ -5319,11 +5137,7 @@ contours.o: contours.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5402,8 +5216,7 @@ contours.o: contours.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5423,8 +5236,6 @@ contours.o: contours.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
 		$(HOME)/lrose/include/Mdv/MdvxContour.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o contours.o contours.cc
 
@@ -5459,11 +5270,7 @@ data_gather.o: data_gather.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5542,8 +5349,7 @@ data_gather.o: data_gather.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5562,9 +5368,7 @@ data_gather.o: data_gather.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data_gather.o data_gather.cc
 
 data_init.o: data_init.cc 
@@ -5601,11 +5405,7 @@ data_io.o: data_io.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5684,8 +5484,7 @@ data_io.o: data_io.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5704,9 +5503,7 @@ data_io.o: data_io.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data_io.o data_io.cc
 
 data_pu_proc.o: data_pu_proc.cc cidd.h \
@@ -5740,11 +5537,7 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5823,8 +5616,7 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5843,9 +5635,7 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data_pu_proc.o data_pu_proc.cc
 
 draw_export_init.o: draw_export_init.cc 
@@ -5882,11 +5672,7 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -5965,8 +5751,7 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -5986,8 +5771,6 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
 		$(HOME)/lrose/include/Fmq/DrawQueue.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o draw_pu_proc.o draw_pu_proc.cc
 
@@ -6022,11 +5805,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6105,8 +5884,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6125,9 +5903,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fields_pu_proc.o fields_pu_proc.cc
 
 graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
@@ -6161,11 +5937,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6244,8 +6016,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6264,9 +6035,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_canvas_events.o graphic_canvas_events.cc
 
 graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
@@ -6300,11 +6069,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6383,8 +6148,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6403,9 +6167,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_canvas_events_bkwd.o graphic_canvas_events_bkwd.cc
 
 graphic_check.o: graphic_check.cc 
@@ -6442,11 +6204,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6525,8 +6283,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6545,9 +6302,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_compute.o graphic_compute.cc
 
 graphic_cross_section.o: graphic_cross_section.cc cidd.h \
@@ -6581,11 +6336,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6664,8 +6415,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6684,9 +6434,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_cross_section.o graphic_cross_section.cc
 
 graphic_dump_image.o: graphic_dump_image.cc cidd.h \
@@ -6720,11 +6468,7 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6803,8 +6547,7 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6824,8 +6567,6 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
 		$(HOME)/lrose/include/dsserver/DsLdataInfo.hh \
 		$(HOME)/lrose/include/didss/LdataInfo.hh \
 		$(HOME)/lrose/include/toolsa/fmq.h \
@@ -6863,11 +6604,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -6946,8 +6683,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -6966,9 +6702,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_manage.o graphic_manage.cc
 
 graphic_margin_events.o: graphic_margin_events.cc cidd.h \
@@ -7002,11 +6736,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7085,8 +6815,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7105,9 +6834,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_margin_events.o graphic_margin_events.cc
 
 graphic_panel.o: graphic_panel.cc cidd.h \
@@ -7141,11 +6868,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7224,8 +6947,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7244,9 +6966,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_panel.o graphic_panel.cc
 
 graphic_reset.o: graphic_reset.cc cidd.h \
@@ -7280,11 +7000,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7363,8 +7079,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7383,9 +7098,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_reset.o graphic_reset.cc
 
 graphic_resize.o: graphic_resize.cc cidd.h \
@@ -7419,11 +7132,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7502,8 +7211,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7522,9 +7230,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_resize.o graphic_resize.cc
 
 graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
@@ -7558,11 +7264,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7641,8 +7343,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7661,9 +7362,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_xsect_canvas_events.o graphic_xsect_canvas_events.cc
 
 graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
@@ -7697,11 +7396,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7780,8 +7475,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7800,9 +7494,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_xsect_resize.o graphic_xsect_resize.cc
 
 graphic_zoom.o: graphic_zoom.cc cidd.h \
@@ -7836,11 +7528,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -7919,8 +7607,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -7939,9 +7626,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graphic_zoom.o graphic_zoom.cc
 
 gui_destroy.o: gui_destroy.cc cidd.h \
@@ -7975,11 +7660,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8058,8 +7739,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8078,9 +7758,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gui_destroy.o gui_destroy.cc
 
 gui_init.o: gui_init.cc 
@@ -8117,11 +7795,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8200,8 +7874,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8220,9 +7893,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gui_label_frame.o gui_label_frame.cc
 
 gui_modify.o: gui_modify.cc cidd.h \
@@ -8256,11 +7927,7 @@ gui_modify.o: gui_modify.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8339,8 +8006,7 @@ gui_modify.o: gui_modify.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8360,8 +8026,6 @@ gui_modify.o: gui_modify.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
 		icons/black.icon \
 		icons/white.icon
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gui_modify.o gui_modify.cc
@@ -8397,11 +8061,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8480,8 +8140,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8500,9 +8159,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o h_win_proc.o h_win_proc.cc
 
 mdvx_data_request.o: mdvx_data_request.cc cidd.h \
@@ -8536,11 +8193,7 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8619,8 +8272,7 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8639,9 +8291,7 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mdvx_data_request.o mdvx_data_request.cc
 
 movie_control.o: movie_control.cc cidd.h \
@@ -8675,11 +8325,7 @@ movie_control.o: movie_control.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8758,8 +8404,7 @@ movie_control.o: movie_control.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8778,9 +8423,7 @@ movie_control.o: movie_control.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movie_control.o movie_control.cc
 
 movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
@@ -8814,11 +8457,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -8897,8 +8536,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -8917,9 +8555,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movie_frame_retrieve.o movie_frame_retrieve.cc
 
 movie_frame_save.o: movie_frame_save.cc cidd.h \
@@ -8953,11 +8589,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9036,8 +8668,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9056,9 +8687,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movie_frame_save.o movie_frame_save.cc
 
 movie_pu_proc.o: movie_pu_proc.cc cidd.h \
@@ -9092,11 +8721,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9175,8 +8800,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9195,9 +8819,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movie_pu_proc.o movie_pu_proc.cc
 
 overlay_init.o: overlay_init.cc 
@@ -9234,11 +8856,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9317,8 +8935,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9337,9 +8954,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o page_pu_proc.o page_pu_proc.cc
 
 process_args.o: process_args.cc cidd.h \
@@ -9373,11 +8988,7 @@ process_args.o: process_args.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9456,8 +9067,7 @@ process_args.o: process_args.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9476,9 +9086,7 @@ process_args.o: process_args.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o process_args.o process_args.cc
 
 render_azimuths.o: render_azimuths.cc cidd.h \
@@ -9512,11 +9120,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9595,8 +9199,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9615,9 +9218,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_azimuths.o render_azimuths.cc
 
 render_bottom_margin.o: render_bottom_margin.cc cidd.h \
@@ -9651,11 +9252,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9734,8 +9331,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9754,9 +9350,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_bottom_margin.o render_bottom_margin.cc
 
 render_cart_grid.o: render_cart_grid.cc cidd.h \
@@ -9790,11 +9384,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -9873,8 +9463,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -9893,9 +9482,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_cart_grid.o render_cart_grid.cc
 
 render_cbar.o: render_cbar.cc cidd.h \
@@ -9929,11 +9516,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10012,8 +9595,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10032,9 +9614,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_cbar.o render_cbar.cc
 
 render_click_marks.o: render_click_marks.cc cidd.h \
@@ -10068,11 +9648,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10151,8 +9727,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10171,9 +9746,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_click_marks.o render_click_marks.cc
 
 render_control.o: render_control.cc cidd.h \
@@ -10207,11 +9780,7 @@ render_control.o: render_control.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10290,8 +9859,7 @@ render_control.o: render_control.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10310,9 +9878,7 @@ render_control.o: render_control.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_control.o render_control.cc
 
 render_distorted_grid.o: render_distorted_grid.cc cidd.h \
@@ -10346,11 +9912,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10429,8 +9991,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10449,9 +10010,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_distorted_grid.o render_distorted_grid.cc
 
 render_filled_contours.o: render_filled_contours.cc cidd.h \
@@ -10485,11 +10044,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10568,8 +10123,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10588,9 +10142,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_filled_contours.o render_filled_contours.cc
 
 render_filled_image.o: render_filled_image.cc cidd.h \
@@ -10624,11 +10176,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10707,8 +10255,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10727,9 +10274,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_filled_image.o render_filled_image.cc
 
 render_grids.o: render_grids.cc cidd.h \
@@ -10763,11 +10308,7 @@ render_grids.o: render_grids.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10846,8 +10387,7 @@ render_grids.o: render_grids.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -10866,9 +10406,7 @@ render_grids.o: render_grids.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_grids.o render_grids.cc
 
 render_ht_sel.o: render_ht_sel.cc cidd.h \
@@ -10902,11 +10440,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -10985,8 +10519,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11005,9 +10538,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_ht_sel.o render_ht_sel.cc
 
 render_left_margin.o: render_left_margin.cc cidd.h \
@@ -11041,11 +10572,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11124,8 +10651,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11144,9 +10670,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_left_margin.o render_left_margin.cc
 
 render_legends.o: render_legends.cc cidd.h \
@@ -11180,11 +10704,7 @@ render_legends.o: render_legends.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11263,8 +10783,7 @@ render_legends.o: render_legends.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11283,9 +10802,7 @@ render_legends.o: render_legends.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_legends.o render_legends.cc
 
 render_line_contours.o: render_line_contours.cc cidd.h \
@@ -11319,11 +10836,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11402,8 +10915,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11422,9 +10934,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_line_contours.o render_line_contours.cc
 
 render_margins.o: render_margins.cc cidd.h \
@@ -11458,11 +10968,7 @@ render_margins.o: render_margins.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11541,8 +11047,7 @@ render_margins.o: render_margins.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11561,9 +11066,7 @@ render_margins.o: render_margins.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_margins.o render_margins.cc
 
 render_movie_frame.o: render_movie_frame.cc cidd.h \
@@ -11597,11 +11100,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11680,8 +11179,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11700,9 +11198,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_movie_frame.o render_movie_frame.cc
 
 render_overlays.o: render_overlays.cc cidd.h \
@@ -11736,11 +11232,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11819,8 +11311,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11839,9 +11330,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_overlays.o render_overlays.cc
 
 render_polar_grid.o: render_polar_grid.cc cidd.h \
@@ -11875,11 +11364,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -11958,8 +11443,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -11978,9 +11462,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_polar_grid.o render_polar_grid.cc
 
 render_products.o: render_products.cc cidd.h \
@@ -12014,11 +11496,7 @@ render_products.o: render_products.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12097,8 +11575,7 @@ render_products.o: render_products.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12117,9 +11594,7 @@ render_products.o: render_products.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_products.o render_products.cc
 
 render_range_rings.o: render_range_rings.cc cidd.h \
@@ -12153,11 +11628,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12236,8 +11707,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12256,9 +11726,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_range_rings.o render_range_rings.cc
 
 render_right_margin.o: render_right_margin.cc cidd.h \
@@ -12292,11 +11760,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12375,8 +11839,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12395,9 +11858,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_right_margin.o render_right_margin.cc
 
 render_route_winds.o: render_route_winds.cc cidd.h \
@@ -12431,11 +11892,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12514,8 +11971,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12534,9 +11990,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_route_winds.o render_route_winds.cc
 
 render_terrain.o: render_terrain.cc cidd.h \
@@ -12570,11 +12024,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12653,8 +12103,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12673,9 +12122,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_terrain.o render_terrain.cc
 
 render_top_layers.o: render_top_layers.cc cidd.h \
@@ -12709,11 +12156,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12792,8 +12235,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12812,9 +12254,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_top_layers.o render_top_layers.cc
 
 render_top_margin.o: render_top_margin.cc cidd.h \
@@ -12848,11 +12288,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -12931,8 +12367,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -12951,9 +12386,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_top_margin.o render_top_margin.cc
 
 render_winds.o: render_winds.cc cidd.h \
@@ -12987,11 +12420,7 @@ render_winds.o: render_winds.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13070,8 +12499,7 @@ render_winds.o: render_winds.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13090,9 +12518,7 @@ render_winds.o: render_winds.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_winds.o render_winds.cc
 
 render_xsect_control.o: render_xsect_control.cc cidd.h \
@@ -13126,11 +12552,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13209,8 +12631,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13229,9 +12650,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_control.o render_xsect_control.cc
 
 render_xsect_grids.o: render_xsect_grids.cc cidd.h \
@@ -13265,11 +12684,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13348,8 +12763,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13368,9 +12782,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_grids.o render_xsect_grids.cc
 
 render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
@@ -13404,11 +12816,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13487,8 +12895,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13507,9 +12914,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_line_contours.o render_xsect_line_contours.cc
 
 render_xsect_margins.o: render_xsect_margins.cc cidd.h \
@@ -13543,11 +12948,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13626,8 +13027,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13646,9 +13046,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_margins.o render_xsect_margins.cc
 
 render_xsect_products.o: render_xsect_products.cc cidd.h \
@@ -13682,11 +13080,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13765,8 +13159,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13785,9 +13178,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_products.o render_xsect_products.cc
 
 render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
@@ -13821,11 +13212,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -13904,8 +13291,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13924,9 +13310,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_top_layers.o render_xsect_top_layers.cc
 
 render_xsect_winds.o: render_xsect_winds.cc cidd.h \
@@ -13960,11 +13344,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14043,8 +13423,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14063,9 +13442,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o render_xsect_winds.o render_xsect_winds.cc
 
 route_winds_init.o: route_winds_init.cc 
@@ -14102,11 +13479,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14185,8 +13558,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14205,9 +13577,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o shmem_init.o shmem_init.cc
 
 status_pu_proc.o: status_pu_proc.cc cidd.h \
@@ -14241,11 +13611,7 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14324,8 +13690,7 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14345,8 +13710,6 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh \
 		$(HOME)/lrose/include/toolsa/TaStr.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o status_pu_proc.o status_pu_proc.cc
 
@@ -14381,11 +13744,7 @@ symprod_init.o: symprod_init.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14464,8 +13823,7 @@ symprod_init.o: symprod_init.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14484,9 +13842,7 @@ symprod_init.o: symprod_init.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o symprod_init.o symprod_init.cc
 
 timer_control.o: timer_control.cc 
@@ -14523,11 +13879,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14606,8 +13958,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14626,9 +13977,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o v_win_proc.o v_win_proc.cc
 
 winds_init.o: winds_init.cc 
@@ -14665,11 +14014,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14748,8 +14093,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14768,9 +14112,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xview_file_access.o xview_file_access.cc
 
 zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
@@ -14804,11 +14146,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/toolsa/uusleep.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/rapplot/xrs.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/rapplot/xutils.h \
-		$(HOME)/lrose/include/rapplot/xudr.h \
-		$(HOME)/lrose/include/rapplot/rascon.h \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
@@ -14887,8 +14225,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
-		$(HOME)/lrose/include/rapplot/gplot.h \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -14907,9 +14244,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		$(HOME)/lrose/include/rapformats/station_reports.h \
 		$(HOME)/lrose/include/rapformats/metar_decode.h \
 		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h \
-		TimePlot.hh \
-		TimeList.hh
+		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o zoom_pu_proc.o zoom_pu_proc.cc
 
 qrc_resources.o: qrc_resources.cpp 
