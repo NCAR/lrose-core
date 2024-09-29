@@ -55,8 +55,6 @@ VertWindow::VertWindow(CartManager *manager):
   
   _vertWidget = new VertWidget(_main, *manager, *this);
   _vertWidget->setGrids(_params.vert_grids_on_at_startup);
-  _vertWidget->setRings(_params.vert_range_rings_on_at_startup);
-  _vertWidget->setAngleLines(_params.vert_elevation_lines_on_at_startup);
   _vertWidget->setParent(_vertTopFrame);
   
   // Connect the window resize signal to the VERT widget resize() method.

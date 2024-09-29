@@ -24,20 +24,46 @@
 #ifndef VertWidget_HH
 #define VertWidget_HH
 
-// #include "RayLoc.hh"
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
+
+#include <string>
+#include <vector>
+
+#include <QDialog>
+#include <QWidget>
+#include <QResizeEvent>
+#include <QImage>
+#include <QTimer>
+#include <QRubberBand>
+#include <QPoint>
+#include <QTransform>
+
+#include <Radx/RadxPlatform.hh>
+#include <Radx/RadxVol.hh>
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxTime.hh>
-// #include <deque>
-#include "CartWidget.hh"
+
+#include "ScaledLabel.hh"
+#include "WorldPlot.hh"
+
+class CartManager;
 class VertWindow;
 
-// Widget representing an RHI scan.  Beams are added to the scan as they
-// are received.  The widget can be set up to display the RHI in a 90 degree
-// view or in a 180 degree view.
+// Widget for vertical display.
 
-class DLL_EXPORT VertWidget : public CartWidget
+class DLL_EXPORT VertWidget : public QWidget
 {
-
+  
   // must include this if you use Qt signals/slots
   Q_OBJECT
 
@@ -63,34 +89,28 @@ class DLL_EXPORT VertWidget : public CartWidget
    */
 
   virtual ~VertWidget();
-
+  
   /**
    * @brief Configure the CartWidget for world coords
    */
-
+  
   virtual void configureWorldCoords(int zoomLevel = 0);
-
-  /**
-   * @brief Add a new beam to the display. Data for all fields and all
-   *        gates are provided, as well as color maps for all fields.
-   *        addBeam() will map the field values to  the correct color, and
-   *        render the beam for each field in the appropriate pixamp. The
-   *        existing wedge for this beam will be discarded.
-   *
-   * @param[in] gates          The number of gates (must match beam_data vector
-   *                             sizes).
-   * @param[in] beam_data      Vectors of data, one for each field.
-   * @param[in] maps           Colormaps, one for each field.
-   */
-
-  // void addBeam(const RadxRay *ray,
-  //              const std::vector< std::vector< double > > &beam_data,
-  //              const std::vector< DisplayField* > &fields);
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
-  void setArchiveMode(bool state) { _isArchiveMode = state; }
-  // void setStartOfSweep(bool state) { _isStartOfSweep = state; }
+  void setArchiveMode(bool state);
+  
+  /**********************************************
+   * turn on archive-style rendering - all fields
+   */
+
+  void activateArchiveRendering();
+
+  /**********************************************************************
+   * turn on reatlime-style rendering - non-selected fields in background
+   */
+
+  void activateRealtimeRendering();
 
   /**
    * @brief Select the field to display.
@@ -113,11 +133,61 @@ class DLL_EXPORT VertWidget : public CartWidget
   
   int renderVMovieFrame(int index, QPainter &painter);
 
+  /**
+   * @brief Specify the background color.
+   *
+   * @param[in] color     The background color.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  void backgroundColor(const QColor &color);
+
+  /**
+   * @brief Capture an image of the display.
+   *
+   * @return Returns the image. The caller must delete it when finished
+   *         with it.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  QImage *getImage();
+
+  /**
+   * @brief Capture a pixmap of the display.
+   *
+   * @return Returns the pixmap. The caller must delete it when finished
+   *         with it.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  QPixmap *getPixmap();
+		      
+  /**
+   * @brief Get the aspect ratio of the display.
+   *
+   * @return Returns the aspect ratio of the display.
+   */
+
+  // get zooms
+  
+  const WorldPlot getZoomWorld() const { return _zoomWorld; }
+  const vector<WorldPlot> getSavedZooms() const { return _savedZooms; }
+
+  //  virtual void ShowContextMenu(const QPoint &pos);
+  virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
+  void setFont();
+  virtual void informationMessage();
+
 signals:
 
   ////////////////
   // Qt signals //
   ////////////////
+
+  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
 
   /**
    * @brief Signal emitted when we have processed several beams.  This signal
@@ -151,23 +221,89 @@ signals:
   
   void refresh();
 
+  // paint event
+
+  void paintEvent(QPaintEvent *event);
+
+  /**
+   * @brief Slot called when a beam has finished rendering.
+   *
+   * @params[in] field_num   The index of the field that was rendered.  This
+   *                         is used to check if this was the selected field.
+   */
+
+  void displayImage(const size_t field_num);
+
+  /**
+   * @brief go back to prev zoom
+   */
+
+  void zoomBackView();
+
   /**
    * @brief Resize the window.
    *
    */
 
-  void resize(int width, int height);
+  void resize(const int width, const int height);
 
-  // paint event
+  /**
+   * @brief Set grids visibility.
+   *
+   * @param[in] enabled   True to show them, false otherwise.
+   */
 
-  void paintEvent(QPaintEvent *event);
+  void setGrids(const bool enabled);
 
+  // context menu
+  
+  virtual void contextMenuCancel();
+  virtual void contextMenuParameterColors();
+  virtual void contextMenuView();
+  virtual void contextMenuEditor();
+  virtual void contextMenuExamine(); // const QPoint &pos);
+  virtual void contextMenuDataWidget();
+  
 protected:
 
+  /////////////////////////
+  // Protected constants //
+  /////////////////////////
+
+  /**
+   * @brief The sine of 45 degrees.  Used for positioning the labels on the
+   *        45 degree lines.
+   */
+
+  static const double SIN_45;
+  
+  /**
+   * @brief The sine of 30 degrees.  Used for positioning the azimuth lines on
+   *        the 30 degree lines.
+   */
+
+  static const double SIN_30;
+  
+  /**
+   * @brief The cosine of 30 degrees.  Used for positioning the azimuth lines on
+   *        the 30 degree lines.
+   */
+
+  static const double COS_30;
+  
   ///////////////////////
   // Protected members //
   ///////////////////////
 
+  /**
+   * @brief Parent widget.
+   */
+
+  QWidget *_parent;
+  const CartManager &_manager;
+
+  // QMainWindow
+  
   const VertWindow &_vertWindow;
 
   // are we in archive mode? and if so are we at the start of a sweep?
@@ -196,11 +332,6 @@ protected:
    * @brief Pointers to all of the active beams are saved here.
    */
 
-  // std::deque<RhiBeam*> _rhiBeams;
-
-  // ray locations
-
-  // vector<RayLoc> _rayLoc;
   BeamHeight _beamHt;
 
   // computing angle limits of rays
@@ -211,18 +342,92 @@ protected:
   double _startElev;
   double _endElev;
 
-  // override mouse release event
-
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-
   /**
-   * @brief The number of RHI beams processed so far.  I have to keep track of
-   *        this so that I can automatically resize the window after processing
-   *        a few beams to get rid of a problem with widget size on startup.
+   * @brief The index of the field selected for display.
    */
 
-  int _beamsProcessed;
+  size_t _selectedField;
+
+  /**
+   * @brief The brush for the background.
+   */
+
+  QBrush _backgroundBrush;
+
+  /**
+   * @brief True if the grids display is enabled.
+   */
   
+  bool _gridsEnabled;
+
+  /**
+   * @brief This will create labels wiith nicely scaled values and
+   *        approriate units.
+   */
+
+  ScaledLabel _scaledLabel;
+
+  /**
+   * @brief Rubber band for zooming.
+   */
+
+  QRubberBand *_rubberBand;
+
+  /**
+   * @brief The rubber band origin.
+   */
+
+  QPoint _rubberBandOrigin;
+
+  // archive mode
+
+  bool _archiveMode;
+
+  /**
+   * @brief Last X,Y location of the mouse during mouse move events; used for
+   *        panning.
+   */
+
+  bool _pointClicked;
+  int _mousePressX, _mousePressY;
+  int _mouseReleaseX, _mouseReleaseY;
+  int _zoomCornerX, _zoomCornerY;
+  
+  /**
+   * @brief Location world of the latest click point.
+   */
+  
+  double _worldPressX, _worldPressY;
+  double _worldReleaseX, _worldReleaseY;
+
+  /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
+  
+  /**
+   * @brief The full window rendering dimensions.  These are different for
+   *        PPI windows and RHI windows.
+   */
+
+  QTransform _fullTransform;
+  WorldPlot _fullWorld;
+  
+  /**
+   * @brief The window to use for rendering.  This is where the zoom is
+   *        implemented.
+   */
+
+  bool _isZoomed;
+  QTransform _zoomTransform;
+  WorldPlot _zoomWorld;
+  vector<WorldPlot> _savedZooms;
+  
+  ///////////////////////
+  // Protected methods //
+  ///////////////////////
+
   // get ray closest to click point
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
@@ -235,6 +440,14 @@ protected:
    */
 
   virtual void _drawOverlays(QPainter &painter);
+
+  /**
+   * @brief Initialize the full window transform to use for the widget.
+   *
+   * @param[in] window    The full window to use for the widget.
+   */
+
+  void _setTransform(const QTransform &transform);
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -262,6 +475,53 @@ protected:
   // overide refresh images
 
   virtual void _refreshImages();
+
+  /////////////////////////////////
+  // Overridden QtWidget methods //
+  /////////////////////////////////
+
+  /**
+   * @brief Capture mouse move event for panning/zooming.
+   *
+   * @param[in] event   The mouse event.
+   */
+
+  virtual void mouseMoveEvent(QMouseEvent* event);
+
+  /**
+   * @brief Capture mouse press event which signals the start of
+   *        panning/zooming.
+   *
+   * @param[in] event    The mouse press event.
+   */
+
+  virtual void mousePressEvent(QMouseEvent* event);
+
+  /**
+   * @brief Capture mouse release event which signals the start of
+   * panning/zooming.
+   *
+   * @param[in] event    The mouse event.
+   */
+
+  virtual void mouseReleaseEvent(QMouseEvent* event);
+
+  /**
+   * @brief Handle a resize event. A timer is used to prevent refreshes until
+   *        the resize is finished.
+   *
+   * @brief event   The resize event.
+   */
+
+  virtual void resizeEvent(QResizeEvent * event);
+
+  // reset the world coords
+
+  void _resetWorld(int width, int height);
+
+  // rendering
+
+  void _performRendering();
 
 };
 

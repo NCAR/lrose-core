@@ -525,7 +525,7 @@ void CartManager::_setupWindows()
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
-  connect(_horiz, &CartWidget::customContextMenuRequested,
+  connect(_horiz, &HorizWidget::customContextMenuRequested,
 	  this, &CartManager::ShowContextMenu);
 
   // create status panel

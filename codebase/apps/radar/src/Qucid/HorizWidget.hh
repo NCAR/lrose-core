@@ -24,17 +24,45 @@
 #ifndef HorizWidget_HH
 #define HorizWidget_HH
 
-#include <Radx/RadxVol.hh>
-#include <Mdv/MdvxProj.hh>
-#include "CartWidget.hh"
-class VertWidget;
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
 
+#include <string>
+#include <vector>
+
+#include <QDialog>
+#include <QWidget>
+#include <QResizeEvent>
+#include <QImage>
+#include <QTimer>
+#include <QRubberBand>
+#include <QPoint>
+#include <QTransform>
+
+#include <Radx/RadxPlatform.hh>
+#include <Radx/RadxVol.hh>
+
+#include <Mdv/MdvxProj.hh>
+
+#include "WorldPlot.hh"
+#include "ScaledLabel.hh"
+
+class CartManager;
+class VertWidget;
 class QLabel;
 
-// Widget representing a PPI scan.  Beams are added to the scan as they
-// are received.
+// Widget representing a horizontal view
 
-class DLL_EXPORT HorizWidget : public CartWidget
+class DLL_EXPORT HorizWidget : public QWidget
 {
   // must include this if you use Qt signals/slots
   Q_OBJECT
@@ -67,33 +95,68 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   virtual void configureWorldCoords(int zoomLevel = 0);
 
-  /**
-   * @brief Add a new beam to the display. Data for all fields and all
-   *        gates are provided, as well as color maps for all fields.
-   *        addBeam() will map the field values to  the correct color, and
-   *        render the beam for each field in the appropriate pixamp. The
-   *        existing wedge for this beam will be discarded.
-   *
-   * @param[in] start_angle    The starting angle for the beam.
-   * @param[in] stop_angle     The ending angle for the beam.
-   * @param[in] gates          The number of gates (must match beam_data vector
-   *                             sizes).
-   * @param[in] beam_data      Vectors of data, one for each field.
+  /**********************************************
+   * turn on archive-style rendering - all fields
    */
+
+  void activateArchiveRendering();
+
+  /**********************************************************************
+   * turn on reatlime-style rendering - non-selected fields in background
+   */
+
+  void activateRealtimeRendering();
+
+  /**
+   * @brief Specify the background color.
+   *
+   * @param[in] color     The background color.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  void backgroundColor(const QColor &color);
+
+  /**
+   * @brief Specify the grid and rings color.
+   *
+   * @params[in] color   The grid/rings color.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  void gridRingsColor(const QColor &color);
+
+  /**
+   * @brief Capture an image of the display.
+   *
+   * @return Returns the image. The caller must delete it when finished
+   *         with it.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  QImage *getImage();
+
+  /**
+   * @brief Capture a pixmap of the display.
+   *
+   * @return Returns the pixmap. The caller must delete it when finished
+   *         with it.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  QPixmap *getPixmap();
+		      
+  // get zooms
   
-  // void addBeam(const RadxRay *ray,
-  //              const float start_angle, const float stop_angle,
-  //              const std::vector< std::vector< double > > &beam_data,
-  //              const std::vector< DisplayField* > &fields);
+  const WorldPlot getZoomWorld() const { return _zoomWorld; }
+  const vector<WorldPlot> getSavedZooms() const { return _savedZooms; }
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
-  void setArchiveMode(bool state) { _isArchiveMode = state; }
-  // void setStartOfSweep(bool state) { _isStartOfSweep = state; }
-
-  // get the number of beams stored in widget
-
-  // size_t getNumBeams() const;
+  void setArchiveMode(bool state);
 
   /**
    * @brief Select the field to display.
@@ -102,7 +165,7 @@ class DLL_EXPORT HorizWidget : public CartWidget
    */
 
   void selectVar(const size_t index);
-
+  
   /**
    * @brief Clear the specified field.
    *
@@ -154,6 +217,18 @@ class DLL_EXPORT HorizWidget : public CartWidget
   
   int renderHMovieFrame(int index, QPainter &painter);
   
+  // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
+  void setFont();
+  virtual void informationMessage();
+
+  ////////////////
+  // Qt signals //
+  ////////////////
+
+ signals:
+ 
+  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+
   //////////////
   // Qt slots //
   //////////////
@@ -161,21 +236,223 @@ class DLL_EXPORT HorizWidget : public CartWidget
  public slots:
    
   /**
+   * @brief Slot called when a beam has finished rendering.
+   *
+   * @params[in] field_num   The index of the field that was rendered.  This
+   *                         is used to check if this was the selected field.
+   */
+
+  void displayImage(const size_t field_num);
+
+  /**
+   * @brief go back to prev zoom
+   */
+
+  void zoomBackView();
+
+  /**
+   * @brief Resize the window.
+   *
+   */
+
+  void resize(const int width, const int height);
+
+  /**
+   * @brief Set ring visibility.
+   *
+   * @param[in] enabled    True to show them, false otherwise.
+   */
+
+  void setRings(const bool enabled);
+
+  /**
+   * @brief Set grids visibility.
+   *
+   * @param[in] enabled   True to show them, false otherwise.
+   */
+
+  void setGrids(const bool enabled);
+
+  /**
+   * @brief Set azimuth lines visibility.
+   *
+   * @param[in] enabled    True to show them, false otherwise.
+   */
+
+  void setAngleLines(const bool enabled);
+
+  /**
    * @brief Clear the data in the view.
    */
 
   void clear();
 
-  void contextMenuEditor();
-  void contextMenuParameterColors();
-  //  void changeToDisplayField(string fieldName); // , ColorMap newColorMap);
-
+  virtual void contextMenuCancel();
+  virtual void contextMenuParameterColors();
+  virtual void contextMenuView();
+  virtual void contextMenuEditor();
+  virtual void contextMenuExamine(); // const QPoint &pos);
+  virtual void contextMenuDataWidget();
+  
  protected:
 
-  // pointers to active beams
+  /////////////////////////
+  // Protected constants //
+  /////////////////////////
 
-  // std::vector<PpiBeam*> _ppiBeams;
+  /**
+   * @brief The sine of 45 degrees.  Used for positioning the labels on the
+   *        45 degree lines.
+   */
 
+  static const double SIN_45;
+  
+  /**
+   * @brief The sine of 30 degrees.  Used for positioning the azimuth lines on
+   *        the 30 degree lines.
+   */
+
+  static const double SIN_30;
+  
+  /**
+   * @brief The cosine of 30 degrees.  Used for positioning the azimuth lines on
+   *        the 30 degree lines.
+   */
+
+  static const double COS_30;
+  
+
+  ///////////////////////
+  // Protected members //
+  ///////////////////////
+
+  /**
+   * @brief Parent widget.
+   */
+
+  QWidget *_parent;
+  const CartManager &_manager;
+
+  /**
+   * @brief The index of the field selected for display.
+   */
+
+  size_t _selectedField;
+
+  /**
+   * @brief The brush for the background.
+   */
+
+  QBrush _backgroundBrush;
+
+  /**
+   * @brief The color for the grid and rings.
+   */
+
+  QColor _gridRingsColor;
+
+  /**
+   * @brief True if the ring display is enabled.
+   */
+
+  bool _ringsEnabled;
+
+  /**
+   * @brief True if the grids display is enabled.
+   */
+  
+  bool _gridsEnabled;
+
+  /**
+   * @brief True if the angle lines enabled.
+   */
+  bool _angleLinesEnabled;
+
+
+  /**
+   * @brief This will create labels wiith nicely scaled values and
+   *        approriate units.
+   */
+
+  ScaledLabel _scaledLabel;
+
+  /**
+   * @brief The maximum range of the beams, in km.  It affects the
+   *        labelling of the range rings
+   */
+
+  double _maxRangeKm;
+
+  // archive mode
+
+  bool _archiveMode;
+
+  /**
+   * @brief Last X,Y location of the mouse during mouse move events; used for
+   *        panning.
+   */
+
+  bool _pointClicked;
+  int _mousePressX, _mousePressY;
+  int _mouseReleaseX, _mouseReleaseY;
+  int _zoomCornerX, _zoomCornerY;
+  
+  /**
+   * @brief Location world of the latest click point.
+   */
+  
+  double _worldPressX, _worldPressY;
+  double _worldReleaseX, _worldReleaseY;
+
+  /**
+   * @brief Rubber band for zooming.
+   */
+
+  QRubberBand *_rubberBand;
+
+  /**
+   * @brief The rubber band origin.
+   */
+
+  QPoint _rubberBandOrigin;
+
+  /**
+   * @brief The current ring spacing in km.  This value is changed when we
+   *        zoom.
+   */
+
+  double _ringSpacing;
+  
+  /**
+   * @brief The aspect ratio of the display area.
+   */
+
+  // double _aspectRatio;
+  
+  /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
+  
+  /**
+   * @brief The full window rendering dimensions.  These are different for
+   *        PPI windows and RHI windows.
+   */
+
+  QTransform _fullTransform;
+  WorldPlot _fullWorld;
+  
+  /**
+   * @brief The window to use for rendering.  This is where the zoom is
+   *        implemented.
+   */
+
+  bool _isZoomed;
+  QTransform _zoomTransform;
+  WorldPlot _zoomWorld;
+  vector<WorldPlot> _savedZooms;
+  
   // are we in archive mode? and if so are we at the start of a sweep?
 
   bool _isArchiveMode;
@@ -188,21 +465,73 @@ class DLL_EXPORT HorizWidget : public CartWidget
   double _meanElev;
   double _sumElev;
   double _nRays;
+
   // RadxVol *_vol;
 
   // projection
 
   MdvxProj _proj;
 
-  // override mouse release event
+  ///////////////////////
+  // Protected methods //
+  ///////////////////////
+
+  /**
+   * @brief Capture mouse move event for panning/zooming.
+   *
+   * @param[in] event   The mouse event.
+   */
+
+  virtual void mouseMoveEvent(QMouseEvent* event);
+
+  /**
+   * @brief Capture mouse press event which signals the start of
+   *        panning/zooming.
+   *
+   * @param[in] event    The mouse press event.
+   */
+
+  virtual void mousePressEvent(QMouseEvent* event);
+
+  /**
+   * @brief Capture mouse release event which signals the start of
+   * panning/zooming.
+   *
+   * @param[in] event    The mouse event.
+   */
+
   virtual void mouseReleaseEvent(QMouseEvent* event);
+
+  /**
+   * @brief Handle a resize event. A timer is used to prevent refreshes until
+   *        the resize is finished.
+   *
+   * @brief event   The resize event.
+   */
+
+  virtual void resizeEvent(QResizeEvent * event);
 
   // used to detect shift key pressed for boundary editor (switches cursor)
   virtual void timerEvent(QTimerEvent * event);
 
-
+  // reset the world coords
+  
+  void _resetWorld(int width, int height);
+  
+  // rendering
+  
+  void _performRendering();
+  
   // get ray closest to click point
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
+
+  /**
+   * @brief Initialize the full window transform to use for the widget.
+   *
+   * @param[in] window    The full window to use for the widget.
+   */
+
+  void _setTransform(const QTransform &transform);
 
   /**
    * @brief Render the rings and grid. The current value of _ringsGridColor

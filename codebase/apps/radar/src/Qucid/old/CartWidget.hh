@@ -56,7 +56,6 @@
 // #include "RhiBeam.hh"
 // #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
-#include "WorldPlot.hh"
 // #include "DisplayField.hh"
 
 class CartManager;
@@ -209,7 +208,7 @@ class DLL_EXPORT CartWidget : public QWidget
   //////////////
 
  public slots:
-
+  
   /**
    * @brief Slot called when a beam has finished rendering.
    *

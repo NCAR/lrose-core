@@ -22,55 +22,119 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
+#include <assert.h>
+#include <cmath>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+
+#include <QTimer>
+#include <QBrush>
+#include <QPalette>
+#include <QPaintEngine>
+#include <QPen>
+#include <QResizeEvent>
+#include <QStylePainter>
+#include <QToolTip>
+#include <QMenu>
+#include <QAction>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QErrorMessage>
+
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/uusleep.h>
+#include <toolsa/LogStream.hh>
+
+#include "CartManager.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
-#include <toolsa/toolsa_macros.h>
-#include <Radx/RadxRay.hh>
 #include "cidd.h"
+
 using namespace std;
+
+const double VertWidget::SIN_45 = sin(45.0 * DEG_TO_RAD);
+const double VertWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
+const double VertWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 VertWidget::VertWidget(QWidget* parent,
                        const CartManager &manager,
                        const VertWindow &vertWindow) :
-        CartWidget(parent, manager),
+        QWidget(parent),
+        _parent(parent),
+        _manager(manager),
         _vertWindow(vertWindow),
-        _beamsProcessed(0)
+        _selectedField(0),
+        _backgroundBrush(QColor(_params.background_color)),
+        _gridsEnabled(false),
+        _scaledLabel(ScaledLabel::DistanceEng),
+        _rubberBand(0)
         
 {
+  
+  // mode
+
+  _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
+
+  // Set up the background color
+
+  QPalette new_palette = palette();
+  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  setPalette(new_palette);
+  
+  setBackgroundRole(QPalette::Dark);
+  setAutoFillBackground(true);
+  setAttribute(Qt::WA_OpaquePaintEvent);
+  
+  // Allow the widget to get focus
+  
+  setFocusPolicy(Qt::StrongFocus);
+
+  // create the rubber band
+  
+  _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+
+  // Allow the size_t type to be passed to slots
+
+  qRegisterMetaType<size_t>("size_t");
+
+  // init other values
+
+  _worldPressX = 0.0;
+  _worldPressY = 0.0;
+  _worldReleaseX = 0.0;
+  _worldReleaseY = 0.0;
+  _pointClicked = false;
+  _mousePressX = 0;
+  _mousePressY = 0;
+  _mouseReleaseX = 0;
+  _mouseReleaseY = 0;
+  _zoomCornerX = 0;
+  _zoomCornerY = 0;
   
   _prevElev = -9999.0;
   _prevAz = -9999.0;
   _prevTime = 0;
   
-  // _aspectRatio = _params.vert_aspect_ratio;
   _colorScaleWidth = _params.vert_color_scale_width;
 
   setGrids(_params.vert_grids_on_at_startup);
-  setRings(_params.vert_range_rings_on_at_startup);
-  setAngleLines(_params.vert_elevation_lines_on_at_startup);
-
+  
   // initialize world view
-
+  
   _maxHeightKm = _params.vert_max_height_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
-  // configureRange(_params.max_range_km);
-
-  // set up ray locators
-
-  // _rayLoc.resize(RayLoc::RAY_LOC_N);
 
   // archive mode
 
   _isArchiveMode = false;
   _isStartOfSweep = true;
-
+  
   _plotStartTime.set(0);
   _plotEndTime.set(0);
-  _meanAz = -9999.0;
-  _sumAz = 0.0;
-  _nRays = 0.0;
-
+  
 }
 
 
@@ -81,96 +145,7 @@ VertWidget::VertWidget(QWidget* parent,
 VertWidget::~VertWidget()
 {
 
-  // delete all of the dynamically created beams
-
-  // for (size_t i = 0; i < _vertBeams.size(); ++i) {
-  //   Beam::deleteIfUnused(_vertBeams[i]);
-  // }
-  // _vertBeams.clear();
-
 }
-
-
-#ifdef JUNK
-/*************************************************************************
- * addBeam()
- */
-
-void VertWidget::addBeam(const RadxRay *ray,
-                        const std::vector< std::vector< double > > &beam_data,
-                        const std::vector< DisplayField* > &fields)
-{
-
-  // compute the angle limits, and store the location of this ray
-
-  _computeAngleLimits(ray);
-  _storeRayLoc(ray);
-
-  // Add the beam to the beam list
-
-  double instHtKm = _manager.getPlatform().getAltitudeKm();
-  if (instHtKm < -1.0) {
-    instHtKm = 0.0;
-  }
-
-  // VertBeam* beam = new VertBeam(_params, ray, instHtKm,
-  //                             _fields.size(), _startElev, _endElev);
-  // beam->addClient();
-
-  // if ((int) _vertBeams.size() == _params.vert_beam_queue_size) {
-  //   VertBeam *oldBeam = _vertBeams.front();
-  //   Beam::deleteIfUnused(oldBeam);
-  //   _vertBeams.pop_front();
-  // }
-  // _vertBeams.push_back(beam);
-
-  // compute angles and times in archive mode
-  
-  if (_isArchiveMode) {
-
-    if (_isStartOfSweep) {
-      _plotStartTime = ray->getRadxTime();
-      _meanAz = -9999.0;
-      _sumAz = 0.0;
-      _nRays = 0.0;
-      _isStartOfSweep = false;
-    }
-    _plotEndTime = ray->getRadxTime();
-    _sumAz += ray->getAzimuthDeg();
-    _nRays++;
-    _meanAz = _sumAz / _nRays;
-
-  } // if (_isArchiveMode) 
-    
-  // Render the beam data.
-  
-  // Set up the brushes for all of the fields in this beam.  This can be
-  // done independently of a Painter object.
-    
-  // beam->fillColors(beam_data, fields, &_backgroundBrush);
-
-  // Add the new beams to the render lists for each of the fields
-  
-  // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-  //   if (field == _selectedField ||
-  //       _fieldRenderers[field]->isBackgroundRendered()) {
-  //     _fieldRenderers[field]->addBeam(beam);
-  //   } else {
-  //     beam->setBeingRendered(field, false);
-  //   }
-  // }
-  
-  // Start the threads to render the new beams
-  
-  _performRendering();
-
-  // if (_params.debug >= Params::DEBUG_VERBOSE &&
-  //     _vertBeams.size() % 10 == 0) {
-  //   cerr << "==>> _vertBeams.size(): " << _vertBeams.size() << endl;
-  // }
-
-}
-#endif
 
 /*************************************************************************
  * configureWorldCoords()
@@ -178,10 +153,6 @@ void VertWidget::addBeam(const RadxRay *ray,
 
 void VertWidget::configureWorldCoords(int zoomLevel)
 {
-
-  // Save the specified values
-  
-  // _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
 
@@ -202,8 +173,7 @@ void VertWidget::configureWorldCoords(int zoomLevel)
   
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
-  _fullWorld.setWorldLimits(0.0, 0.0,
-                            _maxRangeKm, _maxHeightKm);
+  _fullWorld.setWorldLimits(0.0, 0.0, 100.0, _maxHeightKm);
   
   _fullWorld.setLeftMargin(leftMargin);
   _fullWorld.setRightMargin(rightMargin);
@@ -282,7 +252,7 @@ void VertWidget::mouseReleaseEvent(QMouseEvent *e)
     // get ray closest to click point
 
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
+    
     // emit signal
 
     emit locationClicked(x_km, y_km, closestRay);
@@ -361,7 +331,6 @@ void VertWidget::_setGridSpacing()
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
   double yRange = _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld();
 
-  _ringSpacing = _getSpacing(xRange);
   _xGridSpacing = _getSpacing(xRange);
   _yGridSpacing = _getSpacing(yRange);
 
@@ -414,7 +383,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
 
   // painter.setWindow(_zoomWindow);
   
-  painter.setPen(_gridRingsColor);
+  painter.setPen(_params.vert_grid_color);
 
   // Draw the axes
 
@@ -450,69 +419,6 @@ void VertWidget::_drawOverlays(QPainter &painter)
     for (size_t ii = 0; ii < rightTicks.size(); ii++) {
       _zoomWorld.drawLine(painter, xMin, rightTicks[ii], xMax, rightTicks[ii]);
     }
-
-  }
-  
-  // Draw rings
-
-  if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Draw the rings
-
-    painter.save();
-    painter.setTransform(_zoomTransform);
-
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-
-    double ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-      painter.drawEllipse(rect);
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    // Draw the labels
-    
-    QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
-    painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
-    
-    ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-      ringRange += _ringSpacing;
-    }
-
-  } /* endif - draw rings */
-  
-  // Draw the azimuth lines
-
-  if (_angleLinesEnabled) {
-
-    // Draw the lines along the X and Y axes
-
-    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
-    // Draw the lines along the 30 degree lines
-
-    double end_pos1 = SIN_30 * _maxRangeKm;
-    double end_pos2 = COS_30 * _maxRangeKm;
-    
-    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
 
   }
   
@@ -615,183 +521,6 @@ void VertWidget::_drawOverlays(QPainter &painter)
   } // if (_archiveMode) {
 
 }
-
-///////////////////////////////////////////////////////////
-// Compute the limits of the ray angles
-
-void VertWidget::_computeAngleLimits(const RadxRay *ray)
-  
-{
-  
-  // double beamWidth = _platform.getRadarBeamWidthDegV();
-  double elev = ray->getElevationDeg();
-
-  // Determine the extent of this ray
-  
-  // double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
-  // if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 4.0) {
-    
-  double halfAngle = ray->getAngleResDeg() / 2.0;
-  if (_params.vert_override_rendering_beam_width) {
-    halfAngle = _params.vert_rendering_beam_width / 2.0;
-  }
-
-  _startElev = elev - halfAngle;
-  _endElev = elev + halfAngle;
-    
-  // } else {
-    
-  //   double maxHalfAngle = beamWidth / 2.0;
-  //   double prevOffset = maxHalfAngle;
-    
-  //   double halfElevDiff = elevDiff / 2.0;
-    
-  //   if (prevOffset > halfElevDiff) {
-  //     prevOffset = halfElevDiff;
-  //   }
-    
-  //   _startElev = elev - prevOffset;
-  //   _endElev = elev + maxHalfAngle;
-    
-  // }
-
-  _prevElev = elev;
-
-  double az = ray->getAzimuthDeg();
-  double azDiff = Radx::computeAngleDiff(az, _prevAz);
-  _prevAz = az;
-
-  RadxTime rtime = ray->getRadxTime();
-  double timeDiff = rtime - _prevTime;
-  _prevTime = rtime;
-
-  if (azDiff > 2.0 || timeDiff > 30) {
-    clear();
-  }
-    
-}
-
-///////////////////////////////////////////////////////////
-// store ray location
-
-void VertWidget::_storeRayLoc(const RadxRay *ray)
-{
-
-#ifdef NOTNOW
-  // compute start and end indices for _rayLoc
-  // VERTs elevation range from -180 to 180
-  // so add 180 to put the index in 0 to 3599 range
-
-  int startIndex = (int) ((_startElev + 180.0) * RayLoc::RAY_LOC_RES);
-  int endIndex = (int) ((_endElev + 180.0) * RayLoc::RAY_LOC_RES + 1);
-
-  // Clear out any rays in the locations list that are overlapped by the
-  // new ray
-    
-  _clearRayOverlap(startIndex, endIndex);
-  
-  // Set the locations associated with this ray
-
-  for (int ii = startIndex; ii <= endIndex; ii++) {
-    _rayLoc[ii].ray = ray;
-    _rayLoc[ii].active = true;
-    _rayLoc[ii].startIndex = startIndex;
-    _rayLoc[ii].endIndex = endIndex;
-  }
-#endif
-
-}
-
-#ifdef NOTNOW
-///////////////////////////////////////////////////////////
-// clear any locations that are overlapped by the given ray
-
-void VertWidget::_clearRayOverlap(const int startIndex,
-                                 const int endIndex)
-{
-  // Loop through the ray locations, clearing out old information
-
-  int i = startIndex;
-  
-  while (i <= endIndex)
-  {
-    RayLoc &loc = _rayLoc[i];
-    
-    // If this location isn't active, we can skip it
-
-    if (!loc.active)
-    {
-      ++i;
-      continue;
-    }
-    
-    int locStartIndex = loc.startIndex;
-    int locEndIndex = loc.endIndex;
-      
-    // If we get here, this location is active.  We now have 4 possible
-    // situations:
-
-    if (loc.startIndex < startIndex && loc.endIndex <= endIndex)
-    {
-      // The overlap area covers the end of the current beam.  Reduce the
-      // current beam down to just cover the area before the overlap area.
-
-      for (int j = startIndex; j <= locEndIndex; ++j)
-      {
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
-      }
-
-      // Update the end indices for the remaining locations in the current
-      // beam
-
-      for (int j = locStartIndex; j < startIndex; ++j)
-	_rayLoc[j].endIndex = startIndex - 1;
-    }
-    else if (loc.startIndex < startIndex && loc.endIndex > endIndex)
-    {
-      // The current beam is bigger than the overlap area.  This should never
-      // happen, so go ahead and just clear out the locations for the current
-      // beam.
-
-      for (int j = locStartIndex; j <= locEndIndex; ++j)
-      {
-        _rayLoc[j].clear();
-      }
-    }
-    else if (loc.endIndex > endIndex)
-    {
-      // The overlap area covers the beginning of the current beam.  Reduce the
-      // current beam down to just cover the area after the overlap area.
-
-      for (int j = locStartIndex; j <= endIndex; ++j)
-      {
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
-      }
-
-      // Update the start indices for the remaining locations in the current
-      // beam
-
-      for (int j = endIndex + 1; j <= locEndIndex; ++j)
-	_rayLoc[j].startIndex = endIndex + 1;
-    }
-    else
-    {
-      // The current beam is completely covered by the overlap area.  Clear
-      // out all of the locations for the current beam.
-
-      for (int j = locStartIndex; j <= locEndIndex; ++j)
-      {
-        _rayLoc[j].clear();
-      }
-    }
-    
-    i = locEndIndex + 1;
-  } /* endwhile - i */
-  
-}
-#endif
 
 /*************************************************************************
  * _refreshImages()
@@ -901,7 +630,7 @@ void VertWidget::adjustPixelScales()
  * resize()
  */
 
-void VertWidget::resize(int width, int height)
+void VertWidget::resize(const int width, const int height)
 {
   
   setGeometry(0, 0, width, height);
@@ -1144,3 +873,422 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
 }
 
 #endif
+
+/*************************************************************************
+ * set archive mode
+ */
+
+void VertWidget::setArchiveMode(bool state)
+{
+  _archiveMode = state;
+}
+
+/*************************************************************************
+ * zoomBack the view
+ */
+
+void VertWidget::zoomBackView()
+{
+  if (_savedZooms.size() == 0) {
+    _zoomWorld = _fullWorld;
+  } else {
+    _zoomWorld = _savedZooms[_savedZooms.size()-1];
+    _savedZooms.pop_back();
+  }
+  if (_savedZooms.size() == 0) {
+    _isZoomed = false;
+  }
+  _setTransform(_zoomWorld.getTransform());
+  _setGridSpacing();
+  _refreshImages();
+}
+
+
+/*************************************************************************
+ * setGrids()
+ */
+
+void VertWidget::setGrids(const bool enabled)
+{
+  _gridsEnabled = enabled;
+  update();
+}
+
+
+/*************************************************************************
+ * turn on archive-style rendering - all fields
+ */
+
+void VertWidget::activateArchiveRendering()
+{
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
+  // }
+}
+
+
+/*************************************************************************
+ * turn on reatlime-style rendering - non-selected fields in background
+ */
+
+void VertWidget::activateRealtimeRendering()
+{
+  
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   if (ii != _selectedField) {
+  //     _fieldRenderers[ii]->activateBackgroundRendering();
+  //   }
+  // }
+
+}
+
+/*************************************************************************
+ * displayImage()
+ */
+
+void VertWidget::displayImage(const size_t field_num)
+{
+  // If we weren't rendering the current field, do nothing
+  if (field_num != _selectedField) {
+    return;
+  }
+  cerr << "DISPLAY IMAGE" << endl;
+  update();
+}
+
+
+/*************************************************************************
+ * backgroundColor()
+ */
+
+void VertWidget::backgroundColor(const QColor &color)
+{
+  _backgroundBrush.setColor(color);
+  QPalette new_palette = palette();
+  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  setPalette(new_palette);
+  _refreshImages();
+}
+
+
+/*************************************************************************
+ * getImage()
+ */
+
+QImage* VertWidget::getImage()
+{
+  QPixmap pixmap = grab();
+  QImage* image = new QImage(pixmap.toImage());
+  return image;
+}
+
+
+/*************************************************************************
+ * getPixmap()
+ */
+
+QPixmap* VertWidget::getPixmap()
+{
+  QPixmap* pixmap = new QPixmap(grab());
+  return pixmap;
+}
+
+
+/*************************************************************************
+ * Slots
+ *************************************************************************/
+
+/*************************************************************************
+ * mousePressEvent()
+ */
+
+void VertWidget::mousePressEvent(QMouseEvent *e)
+{
+
+  // cerr << "cccc mousePressEvent" << endl;
+  
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  if (e->button() == Qt::RightButton) {
+    
+    //-------
+
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
+
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
+
+  } else {
+
+
+    _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
+    _rubberBand->show();
+
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
+
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+  }
+}
+
+
+/*************************************************************************
+ * mouseMoveEvent(), mouse button is down and mouse is moving
+ */
+
+void VertWidget::mouseMoveEvent(QMouseEvent * e)
+{
+
+  // cerr << "ccccc mouseMoveEvent" << endl;
+  
+  // Zooming with the mouse
+
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  int x = pos.x();
+  int y = pos.y();
+  int deltaX = x - _mousePressX;
+  int deltaY = y - _mousePressY;
+
+  // Make the rubberband aspect ratio match that
+  // of the window
+
+  // double dx = fabs(deltaY * _aspectRatio);
+  // double dy = fabs(dx / _aspectRatio);
+  double dx = fabs(deltaY);
+  double dy = fabs(dx);
+
+  // Preserve the signs
+
+  dx *= fabs(deltaX)/deltaX;
+  dy *= fabs(deltaY)/deltaY;
+
+  int moveX = (int) floor(dx + 0.5);
+  int moveY = (int) floor(dy + 0.5);
+
+  moveX = deltaX;
+  moveY = deltaY;
+  
+  QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
+
+  _zoomCornerX = _mousePressX + moveX;
+  _zoomCornerY = _mousePressY + moveY;
+
+  newRect = newRect.normalized();
+  _rubberBand->setGeometry(newRect);
+
+}
+
+#ifdef NOTNOW
+/**************   testing ******/
+
+void VertWidget::smartBrush(int xPixel, int yPixel) 
+{
+
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+  QImage qImage;
+  qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+  _drawOverlays(painter);
+
+}
+#endif
+
+/*************************************************************************
+ * resizeEvent()
+ */
+
+void VertWidget::resizeEvent(QResizeEvent * e)
+{
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  _resetWorld(width(), height());
+  adjustPixelScales();
+  _refreshImages();
+  update();
+}
+
+//////////////////////////////////////////////////////////////
+// reset the pixel size of the world view
+
+void VertWidget::_resetWorld(int width, int height)
+
+{
+
+  _fullWorld.resize(width, height);
+  _zoomWorld = _fullWorld;
+  _setTransform(_fullWorld.getTransform());
+  _setGridSpacing();
+
+}
+
+/*************************************************************************
+ * Protected methods
+ *************************************************************************/
+
+////////////////////
+// set the transform
+
+void VertWidget::_setTransform(const QTransform &transform)
+{
+  // float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+  // BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+
+  _fullTransform = transform;
+  _zoomTransform = transform;
+}
+  
+/*************************************************************************
+ * perform the rendering
+ */
+
+void VertWidget::_performRendering()
+{
+
+  // start the rendering
+  
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->signalRunToStart();
+  //   }
+  // } // ifield
+
+  // wait for rendering to complete
+  
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->waitForRunToComplete();
+  //   }
+  // } // ifield
+
+  update();
+
+}
+
+void VertWidget::informationMessage()
+{
+  
+  // QMessageBox::StandardButton reply;
+  // QLabel *informationLabel;
+  
+  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  //  if (reply == QMessageBox::Ok)
+  //  informationLabel->setText("OK");
+  //else
+  //  informationLabel->setText("Escape");
+
+}
+
+// void VertWidget::notImplemented()
+// {
+//   cerr << "inside notImplemented() ... " << endl;
+
+//   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
+//   // QLabel *informationLabel = new QLabel();
+
+//   errorMessageDialog->showMessage("This option is not implemented yet.");
+//   QLabel errorLabel;
+//   int frameStyle = QFrame::Sunken | QFrame::Panel;
+//   errorLabel.setFrameStyle(frameStyle);
+//   errorLabel.setText("If the box is unchecked, the message "
+// 		     "won't appear again.");
+
+//   cerr << "exiting notImplemented() " << endl;
+
+// }
+
+
+// slots for context editing; create and show the associated modeless dialog and return                                   
+
+void VertWidget::contextMenuCancel()
+{
+  // informationMessage();
+  // notImplemented();                                                                                                     
+}
+
+void VertWidget::contextMenuParameterColors()
+{
+  /*
+    LOG(DEBUG_VERBOSE) << "enter";
+
+    //DisplayField selectedField;
+
+    const DisplayField &field = _manager.getSelectedField();
+    const ColorMap &colorMapForSelectedField = field.getColorMap();
+    ParameterColorView *parameterColorView = new ParameterColorView(this);
+    vector<DisplayField> displayFields = _manager.getDisplayFields();
+    DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
+    FieldColorController fieldColorController(parameterColorView, displayFieldModel);
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display 
+    connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+    connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
+
+    // TODO: move this call to the controller?
+    parameterColorView.exec();
+
+    if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?
+    }
+  
+    // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
+    delete parameterColorView;
+    delete parameterColorModel;
+
+    LOG(DEBUG_VERBOSE) << "exit ";
+  */
+  informationMessage();
+   
+}
+
+void VertWidget::contextMenuView()
+{
+  informationMessage();
+  //  notImplemented();                                                                                                   
+}
+
+void VertWidget::contextMenuEditor()
+{
+  informationMessage();
+  //  notImplemented();                                                                                                   
+}
+
+
+void VertWidget::contextMenuExamine()         
+{
+  informationMessage();                                                                                                 
+
+}
+
+void VertWidget::contextMenuDataWidget()
+{
+  informationMessage();
+
+  //  notImplemented();                                                                                                   
+}
+
+void VertWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
+{
+
+}
+
+

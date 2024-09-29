@@ -47,14 +47,76 @@
 
 using namespace std;
 
-
+const double HorizWidget::SIN_45 = sin(45.0 * DEG_TO_RAD);
+const double HorizWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
+const double HorizWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 HorizWidget::HorizWidget(QWidget* parent,
                          const CartManager &manager) :
-        CartWidget(parent, manager)
+        QWidget(parent),
+        _parent(parent),
+        _manager(manager),
+        _selectedField(0),
+        _backgroundBrush(QColor(_params.background_color)),
+        _gridRingsColor(_params.grid_and_range_ring_color),
+        _ringsEnabled(false),
+        _gridsEnabled(false),
+        _angleLinesEnabled(false),
+        _scaledLabel(ScaledLabel::DistanceEng),
+        _rubberBand(0),
+        _ringSpacing(10.0)
         
 {
 
+  // mode
+
+  _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
+
+  // Set up the background color
+
+  QPalette new_palette = palette();
+  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  setPalette(new_palette);
+  
+  setBackgroundRole(QPalette::Dark);
+  setAutoFillBackground(true);
+  setAttribute(Qt::WA_OpaquePaintEvent);
+
+  // Allow the widget to get focus
+
+  setFocusPolicy(Qt::StrongFocus);
+
+  // create the rubber band
+
+  _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+
+  // Allow the size_t type to be passed to slots
+
+  qRegisterMetaType<size_t>("size_t");
+
+  // create the field renderers
+  
+  // for (size_t ii = 0; ii < _fields.size(); ii++) {
+  //   FieldRenderer *fieldRenderer =
+  //     new FieldRenderer(_params, ii, *_fields[ii]);
+  //   fieldRenderer->createImage(width(), height());
+  //   _fieldRenderers.push_back(fieldRenderer);
+  // }
+
+  // init other values
+
+  _worldPressX = 0.0;
+  _worldPressY = 0.0;
+  _worldReleaseX = 0.0;
+  _worldReleaseY = 0.0;
+  _pointClicked = false;
+  _mousePressX = 0;
+  _mousePressY = 0;
+  _mouseReleaseX = 0;
+  _mouseReleaseY = 0;
+  _zoomCornerX = 0;
+  _zoomCornerY = 0;
+  
   _colorScaleWidth = _params.color_scale_width;
 
   // initialoze world view
@@ -1017,7 +1079,7 @@ void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
     
     ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * SIN_45;
+      double labelPos = ringRange * HorizWidget::SIN_45;
       const string &labelStr = _scaledLabel.scale(ringRange);
       _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
       _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
@@ -1086,8 +1148,8 @@ void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
 
     // Draw the lines along the 30 degree lines
 
-    double end_pos1 = SIN_30 * _maxRangeKm;
-    double end_pos2 = COS_30 * _maxRangeKm;
+    double end_pos1 = HorizWidget::SIN_30 * _maxRangeKm;
+    double end_pos2 = HorizWidget::COS_30 * _maxRangeKm;
     
     _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
@@ -1431,62 +1493,6 @@ void HorizWidget::_refreshImages()
   update();
 }
 
-void HorizWidget::contextMenuParameterColors()
-{
-
-#ifdef NOTNOW
-  
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  //DisplayField selectedField;                                                                             
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField selectedField = _manager.getSelectedField();
-  string emphasis_color = "white";
-  string annotation_color = "white";
-  DisplayFieldModel *displayFieldModel = 
-    new DisplayFieldModel(displayFields, selectedField.getName(),
-			  _params.grid_and_range_ring_color,
-			  emphasis_color,
-			  annotation_color,
-			  _params.background_color);
-  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  CartManager::colorMapRedefineReceived(string, ColorMap)
-  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
-  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
-
-  /* TODO: combine with replot
-     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-     this, SLOT(backgroundColor(QColor)));
-  */
-
-  fieldColorController->startUp(); 
-
-  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
-  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
-  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
-  // TODO: move this call to the controller?                                                                
-  // parameterColorView.exec();
-
-  //  if(parameterColorController.Changes()) {
-  // TODO: what are changes?  new displayField(s)?                                                        
-  //}
- 
-  LOG(DEBUG_VERBOSE) << "exit ";
-
-#endif
-  
-}
-
 /*
   void HorizWidget::sillyReceived() {
   LOG(DEBUG_VERBOSE) << "enter";
@@ -1595,64 +1601,6 @@ void HorizWidget::ExamineEdit(const RadxRay *closestRay) {
   
 }
 #endif
-
-void HorizWidget::contextMenuEditor()
-{
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // get click location in world coords
-  // by using the location stored in class variables
-  double x_km = _worldPressX;
-  double y_km = _worldPressY;
-
-  // get ray closest to click point
-  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-  // TODO: make sure the point is in the valid area
-  if (closestRay == NULL) {
-    // report error
-    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
-    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
-  } else {
-    // ExamineEdit(closestRay);
-  }
-  LOG(DEBUG_VERBOSE) << "exit";
-}
-
-void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
-{
-
-  // _vol = vol;
-
-  QMenu contextMenu("Context menu", this);
-  
-  QAction action1("Cancel", this);
-  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
-  contextMenu.addAction(&action1);
-
-  QAction action3("Parameters + Colors", this);
-  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
-  contextMenu.addAction(&action3);
-
-  QAction action4("View", this);
-  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
-  contextMenu.addAction(&action4);
-
-  QAction action5("Editor", this);
-  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
-  contextMenu.addAction(&action5);
-  
-  QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
-  contextMenu.addAction(&action6);
-
-  /*
-    QAction action7("Data Widget", this);
-    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-    contextMenu.addAction(&action7);
-  */
-
-  contextMenu.exec(this->mapToGlobal(pos));
-}
 
 /*************************************************************************
  * react to click point from remote display - Sprite
@@ -2103,3 +2051,589 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
 
   return CIDD_SUCCESS;    /* avaliable data has been rendered */
 }
+
+/*************************************************************************
+ * set archive mode
+ */
+
+void HorizWidget::setArchiveMode(bool state)
+{
+  _archiveMode = state;
+}
+
+/*************************************************************************
+ * zoomBack the view
+ */
+
+void HorizWidget::zoomBackView()
+{
+  if (_savedZooms.size() == 0) {
+    _zoomWorld = _fullWorld;
+  } else {
+    _zoomWorld = _savedZooms[_savedZooms.size()-1];
+    _savedZooms.pop_back();
+  }
+  if (_savedZooms.size() == 0) {
+    _isZoomed = false;
+  }
+  _setTransform(_zoomWorld.getTransform());
+  _setGridSpacing();
+  _refreshImages();
+}
+
+
+/*************************************************************************
+ * setRings()
+ */
+
+void HorizWidget::setRings(const bool enabled)
+{
+  _ringsEnabled = enabled;
+  update();
+}
+
+
+/*************************************************************************
+ * setGrids()
+ */
+
+void HorizWidget::setGrids(const bool enabled)
+{
+  _gridsEnabled = enabled;
+  update();
+}
+
+
+/*************************************************************************
+ * setAngleLines()
+ */
+
+void HorizWidget::setAngleLines(const bool enabled)
+{
+  _angleLinesEnabled = enabled;
+  update();
+}
+
+
+/*************************************************************************
+ * turn on archive-style rendering - all fields
+ */
+
+void HorizWidget::activateArchiveRendering()
+{
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
+  // }
+}
+
+
+/*************************************************************************
+ * turn on reatlime-style rendering - non-selected fields in background
+ */
+
+void HorizWidget::activateRealtimeRendering()
+{
+  
+  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+  //   if (ii != _selectedField) {
+  //     _fieldRenderers[ii]->activateBackgroundRendering();
+  //   }
+  // }
+
+}
+
+/*************************************************************************
+ * displayImage()
+ */
+
+void HorizWidget::displayImage(const size_t field_num)
+{
+  // If we weren't rendering the current field, do nothing
+  if (field_num != _selectedField) {
+    return;
+  }
+  cerr << "DISPLAY IMAGE" << endl;
+  update();
+}
+
+
+/*************************************************************************
+ * backgroundColor()
+ */
+
+void HorizWidget::backgroundColor(const QColor &color)
+{
+  _backgroundBrush.setColor(color);
+  QPalette new_palette = palette();
+  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  setPalette(new_palette);
+  _refreshImages();
+}
+
+
+/*************************************************************************
+ * gridRingsColor()
+ */
+
+void HorizWidget::gridRingsColor(const QColor &color)
+{
+  LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
+  _gridRingsColor = color;
+  update();
+  LOG(DEBUG_VERBOSE) << "exit";
+}
+
+
+/*************************************************************************
+ * getImage()
+ */
+
+QImage* HorizWidget::getImage()
+{
+  QPixmap pixmap = grab();
+  QImage* image = new QImage(pixmap.toImage());
+  return image;
+}
+
+
+/*************************************************************************
+ * getPixmap()
+ */
+
+QPixmap* HorizWidget::getPixmap()
+{
+  QPixmap* pixmap = new QPixmap(grab());
+  return pixmap;
+}
+
+
+/*************************************************************************
+ * Slots
+ *************************************************************************/
+
+/*************************************************************************
+ * mousePressEvent()
+ */
+
+void HorizWidget::mousePressEvent(QMouseEvent *e)
+{
+
+  // cerr << "cccc mousePressEvent" << endl;
+  
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  if (e->button() == Qt::RightButton) {
+    
+    //-------
+
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
+
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
+
+  } else {
+
+
+    _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
+    _rubberBand->show();
+
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
+
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+  }
+}
+
+
+/*************************************************************************
+ * mouseMoveEvent(), mouse button is down and mouse is moving
+ */
+
+void HorizWidget::mouseMoveEvent(QMouseEvent * e)
+{
+
+  // cerr << "ccccc mouseMoveEvent" << endl;
+  
+  // Zooming with the mouse
+
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  int x = pos.x();
+  int y = pos.y();
+  int deltaX = x - _mousePressX;
+  int deltaY = y - _mousePressY;
+
+  // Make the rubberband aspect ratio match that
+  // of the window
+
+  // double dx = fabs(deltaY * _aspectRatio);
+  // double dy = fabs(dx / _aspectRatio);
+  double dx = fabs(deltaY);
+  double dy = fabs(dx);
+
+  // Preserve the signs
+
+  dx *= fabs(deltaX)/deltaX;
+  dy *= fabs(deltaY)/deltaY;
+
+  int moveX = (int) floor(dx + 0.5);
+  int moveY = (int) floor(dy + 0.5);
+
+  moveX = deltaX;
+  moveY = deltaY;
+  
+  QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
+
+  _zoomCornerX = _mousePressX + moveX;
+  _zoomCornerY = _mousePressY + moveY;
+
+  newRect = newRect.normalized();
+  _rubberBand->setGeometry(newRect);
+
+}
+
+#ifdef NOTNOW
+/**************   testing ******/
+
+void HorizWidget::smartBrush(int xPixel, int yPixel) 
+{
+
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+  QImage qImage;
+  qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+  _drawOverlays(painter);
+
+}
+#endif
+
+/*************************************************************************
+ * resizeEvent()
+ */
+
+void HorizWidget::resizeEvent(QResizeEvent * e)
+{
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  _resetWorld(width(), height());
+  adjustPixelScales();
+  _refreshImages();
+  update();
+}
+
+
+/*************************************************************************
+ * resize()
+ */
+
+void HorizWidget::resize(const int width, const int height)
+{
+
+  // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
+  // Set the geometry based on the aspect ratio that we need for this display.
+  // The setGeometry() method will fire off the resizeEvent() so we leave the
+  // updating of the display to that event.
+  
+  // int htNeeded = (int) ((width - _colorScaleWidth) + 0.5);
+  // if (height < htNeeded) {
+  //   htNeeded = height;
+  // }
+  // int widthNeeded = (int) (htNeeded + 0.5) + _colorScaleWidth;
+  // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ htNeeded, widthNeeded: " << htNeeded << ", " << widthNeeded << endl;
+  
+  // setGeometry(0, 0, widthNeeded, htNeeded);
+  setGeometry(0, 0, width, height);
+
+}
+
+//////////////////////////////////////////////////////////////
+// reset the pixel size of the world view
+
+void HorizWidget::_resetWorld(int width, int height)
+
+{
+
+  _fullWorld.resize(width, height);
+  _zoomWorld = _fullWorld;
+  _setTransform(_fullWorld.getTransform());
+  _setGridSpacing();
+
+}
+
+/*************************************************************************
+ * Protected methods
+ *************************************************************************/
+
+////////////////////
+// set the transform
+
+void HorizWidget::_setTransform(const QTransform &transform)
+{
+  // float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+  // BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+
+  _fullTransform = transform;
+  _zoomTransform = transform;
+}
+  
+/*************************************************************************
+ * perform the rendering
+ */
+
+void HorizWidget::_performRendering()
+{
+
+  // start the rendering
+  
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->signalRunToStart();
+  //   }
+  // } // ifield
+
+  // wait for rendering to complete
+  
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  //   if (ifield == _selectedField ||
+  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
+  //     _fieldRenderers[ifield]->waitForRunToComplete();
+  //   }
+  // } // ifield
+
+  update();
+
+}
+
+void HorizWidget::informationMessage()
+{
+  
+  // QMessageBox::StandardButton reply;
+  // QLabel *informationLabel;
+  
+  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+  //  if (reply == QMessageBox::Ok)
+  //  informationLabel->setText("OK");
+  //else
+  //  informationLabel->setText("Escape");
+
+}
+
+// void HorizWidget::notImplemented()
+// {
+//   cerr << "inside notImplemented() ... " << endl;
+
+//   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
+//   // QLabel *informationLabel = new QLabel();
+
+//   errorMessageDialog->showMessage("This option is not implemented yet.");
+//   QLabel errorLabel;
+//   int frameStyle = QFrame::Sunken | QFrame::Panel;
+//   errorLabel.setFrameStyle(frameStyle);
+//   errorLabel.setText("If the box is unchecked, the message "
+// 		     "won't appear again.");
+
+//   cerr << "exiting notImplemented() " << endl;
+
+// }
+
+
+// slots for context editing; create and show the associated modeless dialog and return                                   
+
+void HorizWidget::contextMenuCancel()
+{
+  // informationMessage();
+  // notImplemented();                                                                                                     
+}
+
+void HorizWidget::contextMenuParameterColors()
+{
+
+#ifdef NOTNOW
+  
+  LOG(DEBUG_VERBOSE) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField selectedField = _manager.getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+  DisplayFieldModel *displayFieldModel = 
+    new DisplayFieldModel(displayFields, selectedField.getName(),
+			  _params.grid_and_range_ring_color,
+			  emphasis_color,
+			  annotation_color,
+			  _params.background_color);
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+  //  CartManager::colorMapRedefineReceived(string, ColorMap)
+  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
+  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
+
+  /* TODO: combine with replot
+     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+     this, SLOT(backgroundColor(QColor)));
+  */
+
+  fieldColorController->startUp(); 
+
+  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
+  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
+  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
+  // TODO: move this call to the controller?                                                                
+  // parameterColorView.exec();
+
+  //  if(parameterColorController.Changes()) {
+  // TODO: what are changes?  new displayField(s)?                                                        
+  //}
+ 
+  LOG(DEBUG_VERBOSE) << "exit ";
+
+#endif
+  
+  informationMessage();
+  
+}
+
+#ifdef NOTNOW
+  
+void HorizWidget::contextMenuParameterColors()
+{
+  /*
+    LOG(DEBUG_VERBOSE) << "enter";
+
+    //DisplayField selectedField;
+
+    const DisplayField &field = _manager.getSelectedField();
+    const ColorMap &colorMapForSelectedField = field.getColorMap();
+    ParameterColorView *parameterColorView = new ParameterColorView(this);
+    vector<DisplayField> displayFields = _manager.getDisplayFields();
+    DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
+    FieldColorController fieldColorController(parameterColorView, displayFieldModel);
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display 
+    connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+    connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
+
+    // TODO: move this call to the controller?
+    parameterColorView.exec();
+
+    if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?
+    }
+  
+    // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
+    delete parameterColorView;
+    delete parameterColorModel;
+
+    LOG(DEBUG_VERBOSE) << "exit ";
+  */
+  informationMessage();
+   
+}
+
+#endif
+
+void HorizWidget::contextMenuView()
+{
+  informationMessage();
+  //  notImplemented();                                                                                                   
+}
+
+void HorizWidget::contextMenuExamine()         
+{
+  informationMessage();                                                                                                 
+
+}
+
+void HorizWidget::contextMenuDataWidget()
+{
+  informationMessage();
+
+  //  notImplemented();                                                                                                   
+}
+
+void HorizWidget::contextMenuEditor()
+{
+  LOG(DEBUG_VERBOSE) << "enter";
+
+  // get click location in world coords
+  // by using the location stored in class variables
+  double x_km = _worldPressX;
+  double y_km = _worldPressY;
+
+  // get ray closest to click point
+  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+  // TODO: make sure the point is in the valid area
+  if (closestRay == NULL) {
+    // report error
+    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
+    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
+  } else {
+    // ExamineEdit(closestRay);
+  }
+  LOG(DEBUG_VERBOSE) << "exit";
+}
+
+void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
+{
+
+  // _vol = vol;
+
+  QMenu contextMenu("Context menu", this);
+  
+  QAction action1("Cancel", this);
+  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+  contextMenu.addAction(&action1);
+
+  QAction action3("Parameters + Colors", this);
+  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+  contextMenu.addAction(&action3);
+
+  QAction action4("View", this);
+  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
+  contextMenu.addAction(&action4);
+
+  QAction action5("Editor", this);
+  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
+  contextMenu.addAction(&action5);
+  
+  QAction action6("Examine", this);
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+  contextMenu.addAction(&action6);
+
+  /*
+    QAction action7("Data Widget", this);
+    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+    contextMenu.addAction(&action7);
+  */
+
+  contextMenu.exec(this->mapToGlobal(pos));
+}
+

@@ -54,7 +54,6 @@ HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
 	CartManager.hh \
-	CartWidget.hh \
 	Cdraw_P.hh \
 	Cgui_P.hh \
 	Cimages_P.hh \
@@ -198,7 +197,6 @@ NORM_SRCS = \
 
 MOC_SRCS = \
 	CartManager.cc \
-	CartWidget.cc \
 	DisplayManager.cc \
 	HorizWidget.cc \
 	MapMenuItem.cc \
@@ -211,7 +209,6 @@ MOC_SRCS = \
 
 MOC_OUTPUT = \
 	moc_CartManager.cpp \
-	moc_CartWidget.cpp \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
