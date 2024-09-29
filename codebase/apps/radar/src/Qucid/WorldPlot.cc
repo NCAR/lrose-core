@@ -2344,6 +2344,18 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 }
 
 /////////////////////////////////////////////////////
+// render a data grid in Cartesian rectangular pixels
+
+void WorldPlot::renderDataGridRect(int page,
+                                   QPainter &painter)
+  
+{
+
+  cerr << "rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
+  
+}
+
+/////////////////////////////////////////////////////
 // print
 
 void WorldPlot::print(ostream &out)

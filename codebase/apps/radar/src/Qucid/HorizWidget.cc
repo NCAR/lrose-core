@@ -1691,8 +1691,7 @@ void HorizWidget::_renderGrid(QPainter &painter)
  * RENDER_H_MOVIE_FRAME: Render a horizontal display view
  */
 
-int HorizWidget::renderHMovieFrame(int index,
-                                   QPainter &painter)
+int HorizWidget::renderHorizFrame(int index)
 {
 
   int c_field = gd.h_win.page;
@@ -1707,22 +1706,22 @@ int HorizWidget::renderHMovieFrame(int index,
   switch(gd.movie.mode) {
     case REALTIME_MODE :
     case ARCHIVE_MODE :
-      stat = gather_hwin_data(c_field,
-                              gd.movie.frame[index].time_start,
-                              gd.movie.frame[index].time_end);
-      if(stat == CIDD_SUCCESS)  {
-        cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC" << endl;
-        _renderHorizDisplay(painter, c_field,
-                            gd.movie.frame[index].time_start,
-                            gd.movie.frame[index].time_end);
-      } else {
-        return stat;
-      }
+      // stat = gather_hwin_data(c_field,
+      //                         gd.movie.frame[index].time_start,
+      //                         gd.movie.frame[index].time_end);
+      // if(stat == CIDD_SUCCESS)  {
+      cerr << "HHHHHHHHHHHHHHHHHHHHHHH" << endl;
+      _renderHorizDisplay(c_field,
+                          gd.movie.frame[index].time_start,
+                          gd.movie.frame[index].time_end);
+      // } else {
+      //   return stat;
+      // }
       break;
          
     default:
       fprintf(stderr,
-              "Invalid movie mode %d in render_h_movie_frame\n",
+              "Invalid movie mode %d in renderHorizFrame\n",
               gd.movie.mode);
       break;
   }
@@ -1778,7 +1777,7 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
             pdev = gd.h_win.tmp_pdev;
           }
           QPainter painter(this);
-          _renderHorizDisplay(painter, h_image,
+          _renderHorizDisplay(h_image,
                               gd.movie.frame[index].time_start,
                               gd.movie.frame[index].time_end);
           
@@ -1871,15 +1870,14 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
  *        and its associated overlays and labels  labels. 
  */
 
-int HorizWidget::_renderHorizDisplay(QPainter &painter,
-                                     int page,
+int HorizWidget::_renderHorizDisplay(int page,
                                      time_t start_time,
                                      time_t end_time)
 {
 
   int i;
   met_record_t *mr;
-
+  
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
   if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
@@ -1901,6 +1899,8 @@ int HorizWidget::_renderHorizDisplay(QPainter &painter,
 
   /* Clear drawing area */
   cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
+  QPainter painter(this);
+  _zoomWorld.renderDataGridRect(page, painter);
 #ifdef HAVE_XID
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
                  0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);

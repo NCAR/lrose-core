@@ -3894,11 +3894,14 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
   /* Draw Selected field - Horizontal for this movie frame */
   if (gd.movie.frame[index].redraw_horiz) {
-    /* Draw Frame */ 
-    if (gather_hwin_data(gd.h_win.page, gd.movie.frame[index].time_start,
+    /* Draw Frame */
+    cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
+    if (gather_hwin_data(gd.h_win.page,
+                         gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
       if (gd.h_win.redraw[gd.h_win.page]) {
-        render_h_movie_frame(index,h_pdev);
+        // render_h_movie_frame(index,h_pdev);
+        _horiz->renderHorizFrame(index);
         save_h_movie_frame(index,h_pdev,gd.h_win.page);
       } 
 

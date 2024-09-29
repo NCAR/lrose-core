@@ -521,13 +521,17 @@ public:
   void drawColorScale(const ColorMap &colorMap,
                       QPainter &painter,
                       int unitsFontSize);
-
+  
   // adjust X and Y pixel scales to minimize distortion
   
   void adjustPixelScales();
+
+  // render a data grid in Cartesian rectangular pixels
+
+  void renderDataGridRect(int page, QPainter &painter);
   
   // print
-
+  
   void print(ostream &out);
 
 protected:

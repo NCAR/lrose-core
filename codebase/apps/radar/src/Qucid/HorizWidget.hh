@@ -215,7 +215,7 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   // render frame based on movie index
   
-  int renderHMovieFrame(int index, QPainter &painter);
+  int renderHorizFrame(int index);
   
   // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void setFont();
@@ -598,7 +598,7 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   void _initProjection();
   
-  int _renderHorizDisplay(QPainter &painter, int page, time_t start_time, time_t end_time);
+  int _renderHorizDisplay(int page, time_t start_time, time_t end_time);
   
 };
 
