@@ -192,7 +192,6 @@ NORM_SRCS = \
 	render_xsect_winds.cc \
 	shmem_init.cc \
 	status_pu_proc.cc \
-	symprod_init.cc \
 	v_win_proc.cc \
 	xview_file_access.cc \
 	zoom_pu_proc.cc

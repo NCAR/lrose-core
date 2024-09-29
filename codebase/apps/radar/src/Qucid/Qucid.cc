@@ -211,7 +211,7 @@ int Qucid::Run(QApplication &app)
   
   // Instantiate Symbolic products
 
-  init_symprods();
+  // init_symprods();
 
   /* make changes to objects for gui */
   

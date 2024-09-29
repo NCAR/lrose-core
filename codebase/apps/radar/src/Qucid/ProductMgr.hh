@@ -117,6 +117,7 @@ public:
   const vector<Product *> getProducts() const { return _products; }
 
   const Product *getProduct(int index) const {
+    cerr << "iiiiiiiiiii index, _products.size(): " << index << ", " << _products.size() << endl;
     if (index < (int) _products.size()) {
       return _products[index];
     } else {

@@ -62,6 +62,7 @@ static int _loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
 static int _initZooms();
 static void _initContours();
 static void _initOverlayFields();
+static void _initSymprods();
 
 static int _createCacheDirs();
 
@@ -685,15 +686,17 @@ int init_data_space()
     }
   }
 
-  ////////////////////////////////////////////
-  // contours
+  // initialize contours
 
   _initContours();
   
-  ////////////////////////////////////////////
-  // overlay fields
+  // initialize overlay fields
 
   _initOverlayFields();
+
+  // initialize symbolic products
+
+  _initSymprods();
 
 #ifdef NOTNOW
   
@@ -2682,6 +2685,71 @@ static void _initOverlayFields()
 
 }
 
+/////////////////////////////////
+// initialize sympbolic products
+
+static void _initSymprods()
+{
+
+  gd.r_context = new RenderContext(gd.h_win.vis_pdev,
+                                   gd.def_brush, gd.cmap, gd.proj);
+  
+  gd.prod_mgr = new ProductMgr(*gd.r_context, (gd.debug1 | gd.debug2));
+  
+  gd.r_context->set_scale_constant(_params.scale_constant);
+  
+  double min_lat, max_lat, min_lon, max_lon; 
+  get_bounding_box(min_lat,max_lat,min_lon,max_lon);
+  gd.r_context->set_clip_limits(min_lat, min_lon, max_lat, max_lon);
+  
+  if(_params.symprod_prod_info_n <= 32) {
+    int value = 0;
+    for (int ii = 0; ii < _params.symprod_prod_info_n && ii < 32; ii++) {
+      if(_params._symprod_prod_info[ii].on_by_default == TRUE) {
+        value |= 1 << ii;
+      }
+      gd.prod_mgr->set_product_active
+        (ii, (int) _params._symprod_prod_info[ii].on_by_default);
+    } // ii
+
+    // Set the widget's value and size the panel to fit the widget
+    
+    if(!gd.run_unmapped) {
+      // xv_set(gd.prod_pu->prod_st, PANEL_VALUE, value,XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
+      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_st,XV_HEIGHT),NULL);
+      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_st,XV_WIDTH),NULL);
+    }
+    
+  } else { // Use a  scrolling list when over 32 products are configured in
+    
+    for (int i = 0; i < _params.symprod_prod_info_n ; i++) {
+      if(!gd.run_unmapped) {
+        // xv_set(gd.prod_pu->prod_lst,
+        //      PANEL_LIST_INSERT, i,
+        //      PANEL_LIST_STRING, i, _params._symprod_prod_info[i].menu_label,
+        //      PANEL_LIST_CLIENT_DATA, i, i,
+        //      NULL);
+        
+        if(_params._symprod_prod_info[i].on_by_default == TRUE) {
+          // xv_set(gd.prod_pu->prod_lst,
+          //      PANEL_LIST_SELECT, i, TRUE,
+          //      NULL);
+        }
+      }
+
+      gd.prod_mgr->set_product_active(i,(int) _params._symprod_prod_info[i].on_by_default);
+    }
+
+    if(!gd.run_unmapped) {
+      // Set the widget's value and size the panel to fit the widget
+      // xv_set(gd.prod_pu->prod_st,XV_SHOW,FALSE, NULL);
+      // xv_set(gd.prod_pu->prod_lst, XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
+      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_lst,XV_HEIGHT),NULL);
+      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_lst,XV_WIDTH),NULL);
+    }
+  }
+
+}
 ///////////////////////////////////////////////////
 // get the archive url
 
