@@ -40,6 +40,11 @@ int render_h_movie_frame( int index, QPaintDevice *pdev)
 {
 
   int stat = 0;
+
+  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
+  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
+  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
+
 #ifdef NOTYET
   
   int    c_field;

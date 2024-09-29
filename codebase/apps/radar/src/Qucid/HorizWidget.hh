@@ -61,8 +61,6 @@ class DLL_EXPORT HorizWidget : public CartWidget
 
   virtual ~HorizWidget();
 
-
-
   /**
    * @brief Configure the CartWidget for world coords
    */
