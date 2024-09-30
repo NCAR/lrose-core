@@ -119,7 +119,7 @@ HorizWidget::HorizWidget(QWidget* parent,
   
   _colorScaleWidth = _params.color_scale_width;
 
-  // initialoze world view
+  // initialize world view
 
   configureWorldCoords(0);
 
@@ -132,19 +132,26 @@ HorizWidget::HorizWidget(QWidget* parent,
 
   _plotStartTime.set(0);
   _plotEndTime.set(0);
-  _meanElev = -9999.0;
-  _sumElev = 0.0;
-  _nRays = 0.0;
-  
+
+  _renderFrame = false;
+  _renderFrameIndex = 0;
+  _renderFramePage = 0;
+
+  _renderInvalidImages = false;
+  _invalidImagesFrameIndex = 0;
+  _vert = NULL;
+
   _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
   _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
   _openingFileInfoLabel->setVisible(false);
-
+  
   //fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
   // Todo: investigate implementing a listener pattern instead
+
   startTimer(50);
+
 }
 
 /*************************************************************************
@@ -251,142 +258,6 @@ void HorizWidget::clearVar(const size_t index)
 
 }
 
-
-#ifdef JUNK
-/*************************************************************************
- * addBeam()
- */
-
-void HorizWidget::addBeam(const RadxRay *ray,
-                          const float start_angle,
-                          const float stop_angle,
-                          const std::vector< std::vector< double > > &beam_data,
-                          const std::vector< DisplayField* > &fields)
-{
-
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // add a new beam to the display. 
-  // The steps are:
-  // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
-  //    create the beam(s) to be drawn.
-  // 2. fill the colors for all variables in the beams to be drawn
-  // 3. make the display list for the selected variables in the beams
-  //    to be drawn.
-  // 4. call the new display list(s)
-
-  // std::vector< PpiBeam* > newBeams;
-
-  // The start and stop angle MUST specify a clockwise fill for the sector.
-  // Thus if start_angle > stop_angle, we know that we have crossed the 0
-  // boundary, and must break it up into 2 beams.
-
-  // Create the new beam(s), to keep track of the display information.
-  // Beam start and stop angles are adjusted here so that they always 
-  // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
-  // it is split into two beams, each of them again obeying the clockwise
-  // rule. Prescribing these rules makes the beam culling logic a lot simpler.
-
-  // Normalize the start and stop angles.  I'm not convinced that this works
-  // for negative angles, but leave it for now.
-
-  double n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
-  double n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
-
-  if (n_start_angle <= n_stop_angle) {
-
-    // This beam does not cross the 0 degree angle.  Just add the beam to
-    // the beam list.
-
-    // PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), 
-    //                          n_start_angle, n_stop_angle);
-    // b->addClient();
-    // _cullBeams(b);
-    // _ppiBeams.push_back(b);
-    // newBeams.push_back(b);
-
-  } else {
-
-    // The beam crosses the 0 degree angle.  First add the portion of the
-    // beam to the left of the 0 degree point.
-
-    // PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
-    // b1->addClient();
-    // _cullBeams(b1);
-    // _ppiBeams.push_back(b1);
-    // newBeams.push_back(b1);
-
-    // Now add the portion of the beam to the right of the 0 degree point.
-
-    // PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
-    // b2->addClient();
-    // _cullBeams(b2);
-    // _ppiBeams.push_back(b2);
-    // newBeams.push_back(b2);
-
-  }
-
-  // compute angles and times in archive mode
-
-  // if (newBeams.size() > 0) {
-    
-  //   if (_isArchiveMode) {
-
-  //     if (_isStartOfSweep) {
-  //       _plotStartTime = ray->getRadxTime();
-  //       _meanElev = -9999.0;
-  //       _sumElev = 0.0;
-  //       _nRays = 0.0;
-  //       _isStartOfSweep = false;
-  //     }
-  //     _plotEndTime = ray->getRadxTime();
-  //     _sumElev += ray->getElevationDeg();
-  //     _nRays++;
-  //     _meanElev = _sumElev / _nRays;
-  //     LOG(DEBUG_VERBOSE) << "isArchiveMode _nRays = " << _nRays;    
-  //   } // if (_isArchiveMode) 
-    
-  // } // if (newBeams.size() > 0) 
-
-
-  // if (_params.debug >= Params::DEBUG_VERBOSE &&
-  //     _ppiBeams.size() % 10 == 0) {
-  //   cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
-  // }
-  // LOG(DEBUG_VERBOSE) << "number of new Beams " << newBeams.size();
-
-  // newBeams has pointers to all of the newly added beams.  Render the
-  // beam data.
-
-  // for (size_t ii = 0; ii < newBeams.size(); ii++) {
-
-  //   PpiBeam *beam = newBeams[ii];
-    
-  //   // Set up the brushes for all of the fields in this beam.  This can be
-  //   // done independently of a Painter object.
-    
-  //   beam->fillColors(beam_data, fields, &_backgroundBrush);
-
-  //   // Add the new beams to the render lists for each of the fields
-    
-  //   // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-  //   //   if (field == _selectedField ||
-  //   //       _fieldRenderers[field]->isBackgroundRendered()) {
-  //   //     _fieldRenderers[field]->addBeam(beam);
-  //   //   } else {
-  //   //     beam->setBeingRendered(field, false);
-  //   //   }
-  //   // }
-    
-  // } /* endfor - beam */
-
-  // Start the threads to render the new beams
-
-  _performRendering();
-
-  LOG(DEBUG_VERBOSE) << "exit";
-}
-#endif
 
 /*************************************************************************
  * configureWorldCoords()
@@ -530,10 +401,20 @@ void HorizWidget::paintEvent(QPaintEvent *event)
   QPainter painter(this);
   _zoomWorld.fillCanvas(painter, _params.background_color);
 
-  // render data grid
+  // render data grids
   
-  _renderGrid(painter);
+  if (_renderFrame) {
+    _renderGrids(painter);
+    _renderFrame = false;
+  }
 
+  // render invalid images
+  
+  if (_renderInvalidImages) {
+    _doRenderInvalidImages(painter, _invalidImagesFrameIndex, _vert);
+    _renderInvalidImages = false;
+  }
+  
   // draw axes
   
   string projUnits("km");
@@ -832,13 +713,13 @@ void HorizWidget::_drawOverlays(QPainter &painter)
 
     // elevation legend
 
-    snprintf(text, 1024, "Elevation(deg): %.2f", _meanElev);
-    legends.push_back(text);
+    // snprintf(text, 1024, "Elevation(deg): %.2f", _meanElev);
+    // legends.push_back(text);
 
     // nrays legend
 
-    snprintf(text, 1024, "NRays: %g", _nRays);
-    legends.push_back(text);
+    // snprintf(text, 1024, "NRays: %g", _nRays);
+    // legends.push_back(text);
     
     painter.save();
     painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
@@ -1210,242 +1091,6 @@ void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
 }
 
 /*************************************************************************
- * numBeams()
- */
-
-// size_t HorizWidget::getNumBeams() const
-// {
-//   // return _ppiBeams.size();
-//   return 0;
-// }
-
-/*************************************************************************
- * _beamIndex()
- */
-
-int HorizWidget::_beamIndex(const double start_angle,
-                            const double stop_angle)
-{
-
-  // Find where the center angle of the beam will fall within the beam array
-  
-  // int ii = (int)
-  //   (_ppiBeams.size()*(start_angle + (stop_angle-start_angle)/2)/360.0);
-
-  // // Take care of the cases at the ends of the beam list
-  
-  // if (ii < 0)
-  //   ii = 0;
-  // if (ii > (int)_ppiBeams.size() - 1)
-  //   ii = _ppiBeams.size() - 1;
-
-  // return ii;
-
-  return 0;
-
-}
-
-
-/*************************************************************************
- * _cullBeams()
- */
-
-#ifdef NOTNOW
-void HorizWidget::_cullBeams(const PpiBeam *beamAB)
-{
-  // This routine examines the collection of beams, and removes those that are 
-  // completely occluded by other beams. The algorithm gives precedence to the 
-  // most recent beams; i.e. beams at the end of the _ppiBeams vector.
-  //
-  // Remember that there won't be any beams that cross angles through zero; 
-  // otherwise the beam culling logic would be a real pain, and HorizWidget has
-  // already split incoming beams into two, if it received a beam of this type.
-  //
-  // The logic is as follows. First of all, just consider the start and stop angle 
-  // of a beam to be a linear region. We can diagram the angle interval of beam(AB) as:
-  //         a---------b
-  // 
-  // The culling logic will compare all other beams (XY) to AB, looking for an overlap.
-  // An example overlap might be:
-  //         a---------b
-  //    x---------y
-  // 
-  // If an overlap on beam XY is detected, the occluded region is recorded
-  //   as the interval (CD):        
-  //         a---------b
-  //    x---------y
-  //         c----d
-  // 
-  // The culling algorithm starts with the last beam in the list, and compares it with all
-  // preceeding beams, setting their overlap regions appropriately.
-  // Then the next to the last beam is compared with all preceeding beams.
-  // Previously found occluded regions will be expanded as they are detected.
-  // 
-  // Once the occluded region spans the entire beam, then the beam is known 
-  // to be hidden, and it doesn't need to be tested any more, nor is it it used as a 
-  // test on other beams.
-  //
-  // After the list has been completly processed in this manner, the completely occluded 
-  // beams are removed.
-  // .
-  // Note now that if the list is rendered from beginning to end, the more recent beams will
-  // overwrite the portions of previous beams that they share.
-  //
-
-  // NOTE - This algorithm doesn't handle beams that are occluded in different
-  // subsections.  For example, the following would be handled as a hidden
-  // beam even though the middle of the beam is still visible:
-  //         a---------b    c--------d
-  //              x-------------y
-
-  // Do nothing if we don't have any beams in the list
-
-  if (_ppiBeams.size() < 1)
-    return;
-
-  // Look through all of the beams in the list and record any place where
-  // this beam occludes any other beam.
-
-  bool need_to_cull = false;
-  
-  // Save the angle information for easier processing.
-  
-  double a = beamAB->startAngle;
-  double b = beamAB->stopAngle;
-
-  // Look at all of the beams in the list to see if any are occluded by this
-  // new beam
-
-  for (size_t j = 0; j < _ppiBeams.size(); ++j)
-  {
-    // Pull the beam from the list for ease of coding
-
-    PpiBeam *beamXY = _ppiBeams[j];
-
-    // If this beam has alread been marked hidden, we don't need to 
-    // look at it.
-
-    if (beamXY->hidden)
-      continue;
-      
-    // Again, save the angles for easier coding
-
-    double x = beamXY->startAngle;
-    double y = beamXY->stopAngle;
-
-    if (b <= x || a >= y)
-    {
-      //  handles these cases:
-      //  a-----b                a-----b
-      //           x-----------y
-      //  
-      // they don't overlap at all so do nothing
-    }
-    else if (a <= x && b >= y)
-    {
-      //     a------------------b
-      //        x-----------y
-      // completely covered
-
-      beamXY->hidden = true;
-      need_to_cull = true;
-    }
-    else if (a <= x && b <= y)
-    {
-      //   a-----------b
-      //        x-----------y
-      //
-      // We know that b > x because otherwise this would have been handled
-      // in the first case above.
-
-      // If the right part of this beam is already occluded, we can just
-      // mark the beam as hidden at this point.  Otherwise, we update the
-      // c and d values.
-
-      if (beamXY->rightEnd == y)
-      {
-	beamXY->hidden = true;
-	need_to_cull = true;
-      }
-      else
-      {
-	beamXY->leftEnd = x;
-	if (beamXY->rightEnd < b)
-	  beamXY->rightEnd = b;
-      }
-    }
-    else if (a >= x && b >= y)
-    {
-      //       a-----------b
-      //   x-----------y
-      //
-      // We know that a < y because otherwise this would have been handled
-      // in the first case above.
-      
-      // If the left part of this beam is already occluded, we can just
-      // mark the beam as hidden at this point.  Otherwise, we update the
-      // c and d values.
-
-      if (beamXY->leftEnd == x)
-      {
-	beamXY->hidden = true;
-	need_to_cull = true;
-      }
-      else
-      {
-	beamXY->rightEnd = y;
-	if (a < beamXY->leftEnd)
-	  beamXY->leftEnd = a;
-      }
-    }
-    else
-    {
-      // all that is left is this pathological case:
-      //     a-------b
-      //   x-----------y
-      //
-      // We need to extend c and d, if the are inside of a and b.  We know
-      // that a != x and b != y because otherwise this would have been
-      // handled in the third case above.
-
-      if (beamXY->leftEnd > a)
-	beamXY->leftEnd = a;
-      if (beamXY->rightEnd < b)
-	beamXY->rightEnd = b;
-	      
-    } /* endif */
-  } /* endfor - j */
-
-  // Now actually cull the list
-
-  if (need_to_cull)
-  {
-    // Note that i has to be an int rather than a size_t since we are going
-    // backwards through the list and will end when i < 0.
-
-    for (int i = _ppiBeams.size()-1; i >= 0; i--)
-    {
-      // Delete beams who are hidden but aren't currently being rendered.
-      // We can get the case where we have hidden beams that are being
-      // rendered when we do something (like resizing) that causes us to 
-      // have to rerender all of the current beams.  During the rerendering,
-      // new beams continue to come in and will obscure some of the beams
-      // that are still in the rendering queue.  These beams will be deleted
-      // during a later pass through this loop.
-
-      if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
-      {
-        Beam::deleteIfUnused(_ppiBeams[i]);
-	_ppiBeams.erase(_ppiBeams.begin()+i);
-      }
-    }
-
-  } /* endif - need_to_cull */
-  
-}
-#endif
-
-/*************************************************************************
  * _refreshImages()
  */
 
@@ -1676,68 +1321,67 @@ void HorizWidget::_initProjection()
 
 }
 
+//////////////////////////////////////////
+// set flags to control frame rendering
+
+void HorizWidget::setFrameForRendering(int page, int index)
+
+{
+  _renderFrame = true;
+  _renderFramePage = page;
+  _renderFrameIndex = index;
+  update(); // call paint event
+}
+  
+//////////////////////////////////////////
+// set flags to check for invalid images
+
+void HorizWidget::setRenderInvalidImages(int index, VertWidget *vert)
+
+{
+  _renderInvalidImages = true;
+  _invalidImagesFrameIndex = index;
+  _vert = vert;
+  update(); // call paint event
+}
+  
 /*************************************************************************
  * _renderGrid()
  */
 
-void HorizWidget::_renderGrid(QPainter &painter)
+void HorizWidget::_renderGrids(QPainter &painter)
 {
-
-
   
-}
-
-/*************************************************************************
- * RENDER_H_MOVIE_FRAME: Render a horizontal display view
- */
-
-int HorizWidget::renderHorizFrame(int index)
-{
-
-  int c_field = gd.h_win.page;
+  if (!_renderFrame) {
+    return;
+  }
+  
   if(gd.debug2) {
     fprintf(stderr,
             "Rendering Horizontal movie_frame %d - field: %d\n",
-            index, c_field);
+            _renderFrameIndex, _renderFramePage);
   }
   
-  int stat = 0;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHH" << endl;
+  _controlRendering(painter,
+                    _renderFramePage,
+                    gd.movie.frame[_renderFrameIndex].time_start,
+                    gd.movie.frame[_renderFrameIndex].time_end);
   
-  switch(gd.movie.mode) {
-    case REALTIME_MODE :
-    case ARCHIVE_MODE :
-      // stat = gather_hwin_data(c_field,
-      //                         gd.movie.frame[index].time_start,
-      //                         gd.movie.frame[index].time_end);
-      // if(stat == CIDD_SUCCESS)  {
-      cerr << "HHHHHHHHHHHHHHHHHHHHHHH" << endl;
-      _renderHorizDisplay(c_field,
-                          gd.movie.frame[index].time_start,
-                          gd.movie.frame[index].time_end);
-      // } else {
-      //   return stat;
-      // }
-      break;
-         
-    default:
-      fprintf(stderr,
-              "Invalid movie mode %d in renderHorizFrame\n",
-              gd.movie.mode);
-      break;
-  }
+  
+  _renderFrame = false;
 
-
-  return stat;
 }
 
 /************************************************************************
- * CHECK_FOR_INVALID_IMAGES: Check for images in which the data 
+ * RENDER_INVALID_IMAGES: Check for images in which the data 
  * are no longer valid. Look for the "best" invalid  image to 
  *  render.
  *
  */
 
-void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
+void HorizWidget::_doRenderInvalidImages(QPainter &painter,
+                                       int index, VertWidget *vert)
 {
 
   cerr << "CCCCCCCCCCCCCCCCCCCCC index: " << index << endl;
@@ -1777,9 +1421,10 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
             pdev = gd.h_win.tmp_pdev;
           }
           QPainter painter(this);
-          _renderHorizDisplay(h_image,
-                              gd.movie.frame[index].time_start,
-                              gd.movie.frame[index].time_end);
+          _controlRendering(painter,
+                            h_image,
+                            gd.movie.frame[index].time_start,
+                            gd.movie.frame[index].time_end);
           
           save_h_movie_frame(index,pdev,h_image);
           
@@ -1831,7 +1476,7 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
 
   // In html mode, cycle through all zooms and heights
   if(none_found && _params.html_mode && gd.io_info.outstanding_request == 0) {
-
+    
     /* If more zoom levels to render */
     if(gd.h_win.zoom_level < (gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
 
@@ -1870,9 +1515,9 @@ void HorizWidget::checkForInvalidImages(int index, VertWidget *vert)
  *        and its associated overlays and labels  labels. 
  */
 
-int HorizWidget::_renderHorizDisplay(int page,
-                                     time_t start_time,
-                                     time_t end_time)
+int HorizWidget::_controlRendering(QPainter &painter, int page,
+                                   time_t start_time,
+                                   time_t end_time)
 {
 
   
@@ -1896,9 +1541,8 @@ int HorizWidget::_renderHorizDisplay(int page,
   met_record_t *mr = gd.mrec[page];
  
   /* Clear drawing area */
-  cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
-  // QPainter painter(this);
-  // _zoomWorld.renderDataGridRect(page, painter);
+  cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGXXXXXXXXXXXXXXXXXXX main_on_top: " << _params.draw_main_on_top << endl;
+
 #ifdef HAVE_XID
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
                  0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
@@ -1908,11 +1552,13 @@ int HorizWidget::_renderHorizDisplay(int page,
   // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
   // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
 
-  if(_params.show_data_messages) gui_label_h_frame("Rendering",-1);
+  if(_params.show_data_messages) {
+    gui_label_h_frame("Rendering",-1);
+  }
 
   // RENDER the LAND_USE field first
-  if(gd.layers.earth.landuse_active) {
-    _renderGrid(page, gd.layers.earth.land_use,start_time,end_time,1);
+  if(gd.layers.earth.landuse_active && gd.layers.earth.land_use != NULL) {
+    _renderGrid(painter, page, gd.layers.earth.land_use,start_time,end_time,1);
     // render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
   }
 
@@ -1935,8 +1581,7 @@ int HorizWidget::_renderHorizDisplay(int page,
       }
 #endif
     } else {
-      _renderGrid(page, gd.layers.earth.land_use,start_time,end_time,1);
-      // render_grid(xid,mr,start_time,end_time,0);
+      _renderGrid(painter, page, mr, start_time, end_time, 0);
     }
     if(gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
@@ -1950,13 +1595,16 @@ int HorizWidget::_renderHorizDisplay(int page,
      
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < NUM_GRID_LAYERS; i++) {
-    if(gd.layers.overlay_field_on[i]) {
-      _renderGrid(page, gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
+    if(gd.layers.overlay_field_on[i] && gd.mrec[gd.layers.overlay_field[i]] != NULL) {
+      _renderGrid(painter, page, gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
       // render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
 
+  cerr << "FFFFFFFFFFFFFFFFFFGGGGGGGGGGGGGGGGGGGG" << endl;
+  
   if(_params.draw_main_on_top) {
+    cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
     if(mr->render_method == LINE_CONTOURS) {
 #ifdef NOTYET
       contour_info_t cont; // contour params 
@@ -1975,7 +1623,7 @@ int HorizWidget::_renderHorizDisplay(int page,
       }
 #endif
     } else {
-      _renderGrid(page, mr, start_time, end_time, 0);
+      _renderGrid(painter, page, mr, start_time, end_time, 0);
       // render_grid(xid,mr,start_time,end_time,0);
     }
     if(gd.layers.earth.terrain_active && 
@@ -2055,22 +1703,24 @@ int HorizWidget::_renderHorizDisplay(int page,
  *    Returns 1 on success, 0 on failure
  */
 
-#define MESSAGE_LEN 1024
-  
-int HorizWidget::_renderGrid(int page,
+int HorizWidget::_renderGrid(QPainter &painter,
+                             int page,
                              met_record_t *mr,
                              time_t start_time,
                              time_t end_time,
                              bool is_overlay_field)
 {
-
-  cerr << "QQQQQQQQQQQQQQQQQQQQQQ" << endl;
+  
+  if (mr == NULL) {
+    cerr << "KKKKKKKKKKKKKKKKKKKk" << endl;
+    return CIDD_SUCCESS;
+  }
     
 #ifdef NOTYET
-
+  
   int out_of_date = 0;
   int stretch_secs = (int) (60.0 * mr->time_allowance);
-  char message[MESSAGE_LEN];    /* Error message area */
+  char message[1024];    /* Error message area */
   
   if(_params.check_data_times) {
     if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
@@ -2097,9 +1747,9 @@ int HorizWidget::_renderGrid(int page,
          strncasecmp(mr->button_name,"Empty",5)) {
         /* display "Data Not Available" message */
         if(out_of_date) {
-          snprintf(message,MESSAGE_LEN,"%s - Data too Old", _params.no_data_message);
+          snprintf(message, 1023, "%s - Data too Old", _params.no_data_message);
         } else {
-          STRcopy(message,_params.no_data_message,MESSAGE_LEN);
+          STRcopy(message, _params.no_data_message, 1023);
         }
 
         int xmid,ymid;
@@ -2134,10 +1784,8 @@ int HorizWidget::_renderGrid(int page,
 
   // Decide Proper rendering routine
 
-  cerr << "OOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-  QPainter painter(this);
-  cerr << "NNNNNNNNNNNNNNNNNNNNNNNN" << endl;
-
+  cerr << "XXXXXXXXXXXX projType: " << Mdvx::projType2Str(mr->h_fhdr.proj_type) << endl;
+  
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.
       // If the projections match - Can use fast Rectangle rendering.
@@ -2203,6 +1851,9 @@ int HorizWidget::_renderGrid(int page,
       break;
       
     case  Mdvx::PROJ_LATLON:
+      cerr << "===========>> LATLONLATLON LLLLLLLLLLLLLL" << endl;
+      cerr << "===========>> mr->h_fhdr.proj_type: " << Mdvx::projType2Str(mr->h_fhdr.proj_type) << endl;
+      cerr << "===========>> gd.proj.getProjType(): " << Mdvx::projType2Str(gd.proj.getProjType()) << endl;
       if(mr->h_fhdr.proj_type == gd.proj.getProjType()) {
         if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
@@ -2514,6 +2165,7 @@ void HorizWidget::resizeEvent(QResizeEvent * e)
 {
   cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
+  _pixmap = _pixmap.scaled(width(), height());
   adjustPixelScales();
   _refreshImages();
   update();

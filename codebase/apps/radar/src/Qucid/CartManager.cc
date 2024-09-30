@@ -3895,14 +3895,14 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   /* Draw Selected field - Horizontal for this movie frame */
   if (gd.movie.frame[index].redraw_horiz) {
     /* Draw Frame */
-    cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
+    // cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
     if (gather_hwin_data(gd.h_win.page,
                          gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
       if (gd.h_win.redraw[gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
-        _horiz->renderHorizFrame(index);
-        save_h_movie_frame(index,h_pdev,gd.h_win.page);
+        _horiz->setFrameForRendering(gd.h_win.page, index);
+        save_h_movie_frame(index, h_pdev, gd.h_win.page);
       } 
 
       /* make sure the horiz window's slider has the correct label */
@@ -4045,7 +4045,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       msec_diff = ((cur_tm.tv_sec - last_dcheck_tm.tv_sec) * 1000) + ((cur_tm.tv_usec - last_dcheck_tm.tv_usec) / 1000);
 
       if (msec_diff < 0 ||  (msec_diff > redraw_interv  && gd.movie.movie_on == 0)) {
-        _horiz->checkForInvalidImages(index, _vert);
+        _horiz->setRenderInvalidImages(index, _vert);
 
         /* keep track of how much time will elapse since the last check */
         gettimeofday(&last_dcheck_tm,&cur_tz);

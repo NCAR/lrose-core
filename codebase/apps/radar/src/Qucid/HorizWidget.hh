@@ -47,6 +47,7 @@
 #include <QRubberBand>
 #include <QPoint>
 #include <QTransform>
+#include <QPixmap>
 
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxVol.hh>
@@ -210,15 +211,16 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   void paintEvent(QPaintEvent *event);
 
-  // check for images that need to be rendered
-  
-  void checkForInvalidImages(int index, VertWidget *vert);
+  // set flags to control rendering
 
-  // render frame based on movie index
+  void setFrameForRendering(int index, int page);
   
-  int renderHorizFrame(int index);
+  // set flags to render invalid images
   
+  void setRenderInvalidImages(int index, VertWidget *vert);
+
   // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
+
   void setFont();
   virtual void informationMessage();
 
@@ -334,6 +336,20 @@ class DLL_EXPORT HorizWidget : public QWidget
   QWidget *_parent;
   const CartManager &_manager;
 
+  // pixmap for rendering
+  
+  QPixmap _pixmap;
+
+  // flags for controlling rendering
+
+  bool _renderFrame;
+  int _renderFrameIndex;
+  int _renderFramePage;
+  
+  bool _renderInvalidImages;
+  int _invalidImagesFrameIndex;
+  VertWidget *_vert;
+  
   /**
    * @brief The index of the field selected for display.
    */
@@ -463,11 +479,9 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
-  double _meanElev;
-  double _sumElev;
-  double _nRays;
-
-  // RadxVol *_vol;
+  // double _meanElev;
+  // double _sumElev;
+  // double _nRays;
 
   // projection
 
@@ -541,7 +555,7 @@ class DLL_EXPORT HorizWidget : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  void _renderGrid(QPainter &painter);
+  void _renderGrids(QPainter &painter);
 
   void _drawOverlays(QPainter &painter);
 
@@ -570,42 +584,20 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   virtual void _refreshImages();
 
-  /**
-   * @brief For dynamically allocated beams, cull the beam list, removing
-   *        beams that are hidden by the given new beam.
-   *
-   * @params[in] beamAB     The new beam being added to the list.  Note that
-   *                        this beam must not already be added to the list
-   *                        when this method is called or it will be immediately
-   *                        removed again.
-   */
-
-  // void _cullBeams(const PpiBeam *beamAB);
-  
-  /**
-   * @brief Find the index in the _ppiBeams array of the beam that corresponds
-   *        to this angle. The beam angles must sweep in a counter clockwise,
-   *         i.e. cartessian, direction.
-   *
-   * @param[in] start_angle    Beginning angle of the beam.
-   * @param[in] stop_angle     Ending angle of the beam.
-   *
-   * @return Returns the index for the given beam.
-   */
-
-  inline int _beamIndex(const double start_angle, const double stop_angle);
-
   // initialize the geographic projection
 
   void _initProjection();
   
-  int _renderHorizDisplay(int page, time_t start_time, time_t end_time);
+  int _controlRendering(QPainter &painter, int page,
+                        time_t start_time, time_t end_time);
   
-  int _renderGrid(int page,
+  int _renderGrid(QPainter &painter, int page,
                   met_record_t *mr,
-                  time_t start_time,
-                  time_t end_time,
+                  time_t start_time, time_t end_time,
                   bool is_overlay_field);
+  
+  void _doRenderInvalidImages(QPainter &painter,
+                              int index, VertWidget *vert);
   
 };
 
