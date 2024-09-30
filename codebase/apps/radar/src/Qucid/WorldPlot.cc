@@ -42,8 +42,10 @@
 
 #include <rapmath/umath.h>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/utim.h>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
+
 using namespace std;
 
 ////////////////////////////////////////
@@ -2346,12 +2348,29 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 /////////////////////////////////////////////////////
 // render a data grid in Cartesian rectangular pixels
 
-void WorldPlot::renderDataGridRect(int page,
-                                   QPainter &painter)
+void WorldPlot::renderGridRect(int page,
+                               QPainter &painter,
+                               met_record_t *mr,
+                               time_t start_time,
+                               time_t end_time,
+                               bool is_overlay_field)
   
 {
 
-  cerr << "rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
+  cerr << "====>> rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
+  
+}
+
+void WorldPlot::renderGridDistorted(int page,
+                                    QPainter &painter,
+                                    met_record_t *mr,
+                                    time_t start_time,
+                                    time_t end_time,
+                                    bool is_overlay_field)
+  
+{
+
+  cerr << "====>> ddddddddddddddddddddddd page: " << page << endl;
   
 }
 

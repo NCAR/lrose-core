@@ -49,6 +49,12 @@
 #include <QFont>
 #include <Radx/RadxTime.hh>
 #include <Mdv/MdvxProj.hh>
+#include "cidd_macros.h"
+#include "cidd_structs.h"
+#include "cidd_colorscales.h"
+class DsMdvxThreaded;
+#include "cidd_field_data.h"
+
 class ColorMap;
 
 using namespace std;
@@ -528,7 +534,21 @@ public:
 
   // render a data grid in Cartesian rectangular pixels
 
-  void renderDataGridRect(int page, QPainter &painter);
+  void renderGridRect(int page,
+                      QPainter &painter,
+                      met_record_t *mr,
+                      time_t start_time,
+                      time_t end_time,
+                      bool is_overlay_field);
+  
+  // render a data grid in distorted polygon
+
+  void renderGridDistorted(int page,
+                           QPainter &painter,
+                           met_record_t *mr,
+                           time_t start_time,
+                           time_t end_time,
+                           bool is_overlay_field);
   
   // print
   

@@ -466,8 +466,8 @@ extern met_record_t    *choose_ht_sel_mr(int page);
 #endif
 
 #ifndef RENDER_CONTROL
-extern int render_horiz_display(QPaintDevice *pdev, int page, time_t start_time,
-                                time_t end_time);
+// extern int render_horiz_display(QPaintDevice *pdev, int page, time_t start_time,
+//                                time_t end_time);
 #endif
 
 #ifndef RENDER_DISTORTED_GRID
@@ -495,7 +495,7 @@ extern int draw_filled_image(QPaintDevice *pdev, int x_start[], int y_start[], m
 #endif
 
 #ifndef RENDER_GRIDS
-extern int render_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+// extern int render_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_LEFT_MARGIN

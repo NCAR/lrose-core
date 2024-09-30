@@ -53,8 +53,9 @@
 
 #include <Mdv/MdvxProj.hh>
 
-#include "WorldPlot.hh"
+#include "cidd.h"
 #include "ScaledLabel.hh"
+#include "WorldPlot.hh"
 
 class CartManager;
 class VertWidget;
@@ -599,6 +600,12 @@ class DLL_EXPORT HorizWidget : public QWidget
   void _initProjection();
   
   int _renderHorizDisplay(int page, time_t start_time, time_t end_time);
+  
+  int _renderGrid(int page,
+                  met_record_t *mr,
+                  time_t start_time,
+                  time_t end_time,
+                  bool is_overlay_field);
   
 };
 

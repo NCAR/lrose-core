@@ -28,6 +28,8 @@
 #ifndef CIDD_FIELD_DATA_H
 #define CIDD_FIELD_DATA_H
 
+#include <toolsa/utim.h>
+
 class ColorMap;
 
 typedef struct    {    /* METEROLOGICAL DATA record info - for each data field */

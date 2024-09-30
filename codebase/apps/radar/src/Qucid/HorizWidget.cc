@@ -43,7 +43,7 @@
 #include <QPainterPath>
 #include <algorithm>
 
-#include "cidd.h"
+// #include "cidd.h"
 
 using namespace std;
 
@@ -1875,8 +1875,6 @@ int HorizWidget::_renderHorizDisplay(int page,
                                      time_t end_time)
 {
 
-  int i;
-  met_record_t *mr;
   
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
   if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
@@ -1895,12 +1893,12 @@ int HorizWidget::_renderHorizDisplay(int page,
       break;
   }
 
-  mr = gd.mrec[page];
-
+  met_record_t *mr = gd.mrec[page];
+ 
   /* Clear drawing area */
   cerr << "XXXXXXXXXXXXXXXXXXXX" << endl;
-  QPainter painter(this);
-  _zoomWorld.renderDataGridRect(page, painter);
+  // QPainter painter(this);
+  // _zoomWorld.renderDataGridRect(page, painter);
 #ifdef HAVE_XID
   XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
                  0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
@@ -1914,15 +1912,14 @@ int HorizWidget::_renderHorizDisplay(int page,
 
   // RENDER the LAND_USE field first
   if(gd.layers.earth.landuse_active) {
-#ifdef HAVE_XID
-    render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
-#endif
+    _renderGrid(page, gd.layers.earth.land_use,start_time,end_time,1);
+    // render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
   }
 
   if(!_params.draw_main_on_top) {
-#ifdef HAVE_XID
-    contour_info_t cont; // contour params 
     if(mr->render_method == LINE_CONTOURS) {
+#ifdef NOTYET
+      contour_info_t cont; // contour params 
       cont.min = mr->cont_low;
       cont.max = mr->cont_high;
       cont.interval = mr->cont_interv;
@@ -1936,10 +1933,11 @@ int HorizWidget::_renderHorizDisplay(int page,
       } else {
         render_line_contours(xid,&cont);
       }
-    } else {
-      render_grid(xid,mr,start_time,end_time,0);
-    }
 #endif
+    } else {
+      _renderGrid(page, gd.layers.earth.land_use,start_time,end_time,1);
+      // render_grid(xid,mr,start_time,end_time,0);
+    }
     if(gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1) &&
@@ -1951,18 +1949,17 @@ int HorizWidget::_renderHorizDisplay(int page,
   }
      
   /* Render each of the gridded_overlay fields */
-  for(i=0; i < NUM_GRID_LAYERS; i++) {
+  for(int i=0; i < NUM_GRID_LAYERS; i++) {
     if(gd.layers.overlay_field_on[i]) {
-#ifdef HAVE_XID
-      render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
-#endif
+      _renderGrid(page, gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
+      // render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
 
   if(_params.draw_main_on_top) {
-#ifdef HAVE_XID
-    contour_info_t cont; // contour params 
     if(mr->render_method == LINE_CONTOURS) {
+#ifdef NOTYET
+      contour_info_t cont; // contour params 
       cont.min = mr->cont_low;
       cont.max = mr->cont_high;
       cont.interval = mr->cont_interv;
@@ -1976,10 +1973,11 @@ int HorizWidget::_renderHorizDisplay(int page,
       } else {
         render_line_contours(xid,&cont);
       }
-    } else {
-      render_grid(xid,mr,start_time,end_time,0);
-    }
 #endif
+    } else {
+      _renderGrid(page, mr, start_time, end_time, 0);
+      // render_grid(xid,mr,start_time,end_time,0);
+    }
     if(gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
@@ -1991,7 +1989,7 @@ int HorizWidget::_renderHorizDisplay(int page,
   }
 
   /* render contours if selected */
-  for(i= 0; i < NUM_CONT_LAYERS; i++) {
+  for(int i= 0; i < NUM_CONT_LAYERS; i++) {
     if(gd.layers.cont[i].active) {
       if (gd.layers.use_alt_contours) {
 #ifdef HAVE_XID
@@ -2050,6 +2048,190 @@ int HorizWidget::_renderHorizDisplay(int page,
   update_frame_time_msg(gd.movie.cur_frame);
 
   return CIDD_SUCCESS;    /* avaliable data has been rendered */
+}
+
+/**********************************************************************
+ * RENDER_GRID: Render a horizontal plane of  gridded data 
+ *    Returns 1 on success, 0 on failure
+ */
+
+#define MESSAGE_LEN 1024
+  
+int HorizWidget::_renderGrid(int page,
+                             met_record_t *mr,
+                             time_t start_time,
+                             time_t end_time,
+                             bool is_overlay_field)
+{
+
+  cerr << "QQQQQQQQQQQQQQQQQQQQQQ" << endl;
+    
+#ifdef NOTYET
+
+  int out_of_date = 0;
+  int stretch_secs = (int) (60.0 * mr->time_allowance);
+  char message[MESSAGE_LEN];    /* Error message area */
+  
+  if(_params.check_data_times) {
+    if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
+    if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
+  }
+
+  // Add the list of times to the time plot
+  // if(mr->time_list.num_entries > 0) {
+  //   if(gd.time_plot) gd.time_plot->add_grid_tlist(mr->legend_name,mr->time_list.tim,
+  //                                                 mr->time_list.num_entries,
+  //                                                 mr->h_date.unix_time);
+  // }
+
+  /* For the Main Field - Clear the screen and  Print a special message 
+   * and draw the wall clock time if the data is not availible 
+   */
+  if(!is_overlay_field) {
+
+
+    /* If no data in current response or data is way out of date */
+    if( mr->h_data == NULL || out_of_date ) {
+
+      if(strncasecmp(mr->button_name,"None",4) &&
+         strncasecmp(mr->button_name,"Empty",5)) {
+        /* display "Data Not Available" message */
+        if(out_of_date) {
+          snprintf(message,MESSAGE_LEN,"%s - Data too Old", _params.no_data_message);
+        } else {
+          STRcopy(message,_params.no_data_message,MESSAGE_LEN);
+        }
+
+        int xmid,ymid;
+        Font font = choose_font(message, gd.h_win.img_dim.width, gd.h_win.img_dim.height, &xmid, &ymid);
+        XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
+        XDrawImageString(gd.dpy,xid,gd.legends.foreground_color->gc,
+                         gd.h_win.margin.left + (gd.h_win.img_dim.width /2) + xmid  ,
+                         gd.h_win.margin.top + (gd.h_win.img_dim.height /4) + ymid ,
+                         message,strlen(message));
+
+        if(gd.debug2) {
+          fprintf(stderr, "No data from service: %s\n",
+                  gd.io_info.mr->url );
+        }
+
+	if(_params.show_clock) {
+          /* draw a clock */
+          int ht = (int) (gd.h_win.can_dim.height * 0.05);
+          int startx = gd.h_win.can_dim.width - gd.h_win.margin.right - ht - 5;
+          int starty = gd.h_win.margin.top + ht + 5;
+          XUDRdraw_clock(gd.dpy,xid,gd.legends.foreground_color->gc,
+                         startx,starty,ht, (start_time + (end_time - start_time) /2),1);
+	}
+      }  // if mr->button_name != "None"
+
+      return CIDD_FAILURE;
+    }
+  }
+#endif
+     
+  set_busy_state(1);
+
+  // Decide Proper rendering routine
+
+  cerr << "OOOOOOOOOOOOOOOOOOOOOOOO" << endl;
+  QPainter painter(this);
+  cerr << "NNNNNNNNNNNNNNNNNNNNNNNN" << endl;
+
+  switch(mr->h_fhdr.proj_type) {
+    default: // Projections which need only matching types and origins.
+      // If the projections match - Can use fast Rectangle rendering.
+      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
+         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        _zoomWorld.renderGridRect(page, painter, mr,
+                                  start_time, end_time,
+                                  is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+      } else { // Must use polygon rendering
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        _zoomWorld.renderGridDistorted(page, painter, mr,
+                                       start_time, end_time,
+                                       is_overlay_field);
+      }
+      break;
+
+    case  Mdvx::PROJ_FLAT: // Needs to test Param 1
+      // If the projections match - Can use fast Rectangle rendering.
+      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
+         (fabs(gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+        
+        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        _zoomWorld.renderGridRect(page, painter, mr,
+                                  start_time, end_time,
+                                  is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+      } else { // Must use polygon rendering
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        _zoomWorld.renderGridDistorted(page, painter, mr,
+                                       start_time, end_time,
+                                       is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+      }
+      break;
+      
+    case  Mdvx::PROJ_LAMBERT_CONF: // Needs to test param 1 & 2
+    case  Mdvx::PROJ_POLAR_STEREO: 
+    case  Mdvx::PROJ_OBLIQUE_STEREO:
+    case  Mdvx::PROJ_MERCATOR:
+      // If the projections match - Can use fast Rectangle rendering.
+      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
+         (fabs(gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+         (fabs(gd.proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
+         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        _zoomWorld.renderGridRect(page, painter, mr,
+                                  start_time, end_time,
+                                  is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+      } else { // Must use polygon rendering
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        _zoomWorld.renderGridDistorted(page, painter, mr,
+                                       start_time, end_time,
+                                       is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+      }
+      break;
+      
+    case  Mdvx::PROJ_LATLON:
+      if(mr->h_fhdr.proj_type == gd.proj.getProjType()) {
+        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        _zoomWorld.renderGridRect(page, painter, mr,
+                                  start_time, end_time,
+                                  is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+      } else {
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        _zoomWorld.renderGridDistorted(page, painter, mr,
+                                       start_time, end_time,
+                                       is_overlay_field);
+        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+      }
+      break;
+      
+    case  Mdvx::PROJ_POLAR_RADAR:
+      if(gd.debug2) fprintf(stderr,"render_polar_grid() selected\n");
+#ifdef NOTYET
+      render_polar_grid(page, painter, mr,start_time, end_time, 
+                        is_overlay_field);
+#endif
+      if(gd.debug2) fprintf(stderr,"render_polar_grid() done\n");
+      break;
+      
+  }
+
+  set_busy_state(0);
+
+  return CIDD_SUCCESS;
 }
 
 /*************************************************************************

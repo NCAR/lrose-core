@@ -163,11 +163,9 @@ NORM_SRCS = \
 	render_bottom_margin.cc \
 	render_cart_grid.cc \
 	render_click_marks.cc \
-	render_control.cc \
 	render_distorted_grid.cc \
 	render_filled_contours.cc \
 	render_filled_image.cc \
-	render_grids.cc \
 	render_ht_sel.cc \
 	render_left_margin.cc \
 	render_legends.cc \
