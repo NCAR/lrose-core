@@ -152,6 +152,14 @@ bool PjgMath::operator==(const PjgMath &other) const
   if (_proj_type != other._proj_type) {
     return false;
   }
+  if (_proj_type == PjgTypes::PROJ_LATLON) {
+    if (_origin_lon * other._origin_lon >= 0) {
+      // origins have same sign
+      return true;
+    } else {
+      return false;
+    }
+  }
   if (_origin_lat != other._origin_lat) {
     return false;
   }
