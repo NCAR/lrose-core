@@ -616,7 +616,7 @@ void WorldPlot::drawRectangle(QPainter &painter,
 // fill a rectangle
 
 void WorldPlot::fillRectangle(QPainter &painter,
-                              QBrush &brush,
+                              const QBrush &brush,
                               double x, double y,
                               double w, double h) 
 
@@ -653,7 +653,7 @@ void WorldPlot::fillCanvas(QPainter &painter,
 }
 
 void WorldPlot::fillCanvas(QPainter &painter,
-                           QBrush &brush) 
+                           const QBrush &brush) 
 
 {
   
@@ -670,7 +670,7 @@ void WorldPlot::fillCanvas(QPainter &painter,
 // fill a trapezium
 
 void WorldPlot::fillTrap(QPainter &painter,
-                         QBrush &brush,
+                         const QBrush &brush,
                          double x0, double y0,
                          double x1, double y1,
                          double x2, double y2,
@@ -2361,7 +2361,48 @@ void WorldPlot::renderGridRect(int page,
   cerr << "====>> rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
 
   // the data projection type and plot projection type are the same
-  // so we can use a linear transformation from data to world
+  // so we can use the (x,y) locations unchanged
+
+  // compute the location of the vertices
+  // these are the cell limits in (x, y)
+
+  cerr << "1111111111111111111111111111111111111" << endl;
+  
+  vector< vector<QPointF> > vertices;
+
+  double dy = mr->h_fhdr.grid_dy;
+  double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
+  double dx = mr->h_fhdr.grid_dx;
+  double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
+
+  double yy = lowy;
+  for(int iy = 0; iy <= mr->h_fhdr.ny; iy++, yy += dy) {
+    vector<QPointF> row;
+    double xx = lowx;
+    for(int ix = 0; ix <= mr->h_fhdr.nx; ix++, xx += dx) {
+      QPointF pt = getPixelPointF(xx, yy);
+      row.push_back(pt);
+    } // ix
+    vertices.push_back(row);
+  } // iy
+  
+  cerr << "2222222222222222222222222222222222222" << endl;
+  
+  // plot the rectangles for each grid cell
+
+  fl32 *val = mr->h_fl32_data;
+  
+  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
+    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
+      const QBrush *brush = mr->colorMap->dataBrush(*val);
+      fillRectangle(painter, *brush,
+                    vertices[iy][ix].x(), vertices[iy][ix].y(),
+                    vertices[iy][ix+1].x() - vertices[iy][ix].x(),
+                    vertices[iy][iy+1].y() - vertices[iy][iy].y());
+    } // ix
+  } // iy
+
+  cerr << "333333333333333333333333333333333" << endl;
   
 #ifdef NOTYET
   

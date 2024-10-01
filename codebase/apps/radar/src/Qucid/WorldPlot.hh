@@ -303,7 +303,7 @@ public:
   // fill a rectangle
 
   void fillRectangle(QPainter &painter,
-                     QBrush &brush,
+                     const QBrush &brush,
                      double x, double y,
                      double w, double h);
 
@@ -313,12 +313,12 @@ public:
                   const char *colorName);
   
   void fillCanvas(QPainter &painter,
-                  QBrush &brush);
+                  const QBrush &brush);
 
   // fill a trapezium
   
   void fillTrap(QPainter &painter,
-                QBrush &brush,
+                const QBrush &brush,
                 double x0, double y0,
                 double x1, double y1,
                 double x2, double y2,
@@ -556,6 +556,10 @@ public:
 
 protected:
 private:
+
+  typedef struct {
+    double x, y;
+  } WorldPoint;
 
   // dimensions of the window in pixels
   
