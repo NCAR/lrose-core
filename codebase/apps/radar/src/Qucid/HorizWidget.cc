@@ -1785,7 +1785,29 @@ int HorizWidget::_renderGrid(QPainter &painter,
   // Decide Proper rendering routine
 
   cerr << "XXXXXXXXXXXX projType: " << Mdvx::projType2Str(mr->h_fhdr.proj_type) << endl;
-  
+
+  const PjgMath &dataMath = mr->proj->getPjgMath();
+  const PjgMath &displayMath = gd.proj.getPjgMath();
+
+  if (gd.debug) {
+    cerr << "-->> data projection <<--" << endl;
+    dataMath.print(cerr);
+    cerr << "-->> display projection <<--" << endl;
+    displayMath.print(cerr);
+    cerr << "----------------------------" << endl;
+  }
+
+  if (dataMath == displayMath) {
+    _zoomWorld.renderGridRect(page, painter, mr,
+                              start_time, end_time,
+                              is_overlay_field);
+  } else {
+    _zoomWorld.renderGridDistorted(page, painter, mr,
+                                   start_time, end_time,
+                                   is_overlay_field);
+  }
+
+#ifdef NOTNOW
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.
       // If the projections match - Can use fast Rectangle rendering.
@@ -1879,6 +1901,8 @@ int HorizWidget::_renderGrid(QPainter &painter,
       break;
       
   }
+
+#endif
 
   set_busy_state(0);
 
