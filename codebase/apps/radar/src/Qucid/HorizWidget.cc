@@ -389,6 +389,10 @@ void HorizWidget::paintEvent(QPaintEvent *event)
 
   cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
 
+  if (!_renderFrame) {
+    return;
+  }
+
   if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
                               gd.h_win.cmax_x, gd.h_win.cmax_y);
@@ -399,15 +403,16 @@ void HorizWidget::paintEvent(QPaintEvent *event)
   // fill canvas with background color
   
   QPainter painter(this);
+  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
   _zoomWorld.fillCanvas(painter, _params.background_color);
-
+  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
+  
   // render data grids
   
-  if (_renderFrame) {
-    _renderGrids(painter);
-    _renderFrame = false;
-  }
-
+  cerr << "ZZZZZZZZZZZZZZZZZ" << endl;
+  _renderGrids(painter);
+  cerr << "ZZZZZZZZZZZZZZZZZ" << endl;
+  
   // render invalid images
   
   if (_renderInvalidImages) {
@@ -438,6 +443,8 @@ void HorizWidget::paintEvent(QPaintEvent *event)
   //if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
 
+  _renderFrame = false;
+  
 }
 
 
@@ -1520,6 +1527,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
                                    time_t end_time)
 {
 
+  cerr << "00000000000000000000000000000000000" << endl;
   
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
   if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
@@ -1540,14 +1548,6 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
 
   met_record_t *mr = gd.mrec[page];
  
-  /* Clear drawing area */
-  cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGXXXXXXXXXXXXXXXXXXX main_on_top: " << _params.draw_main_on_top << endl;
-
-#ifdef HAVE_XID
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 0,0,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
-#endif
-
   // Clear time lists
   // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
   // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
@@ -1581,6 +1581,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
       }
 #endif
     } else {
+      cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
       _renderGrid(painter, page, mr, start_time, end_time, 0);
     }
     if(gd.layers.earth.terrain_active && 
@@ -1596,6 +1597,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < NUM_GRID_LAYERS; i++) {
     if(gd.layers.overlay_field_on[i] && gd.mrec[gd.layers.overlay_field[i]] != NULL) {
+      cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
       _renderGrid(painter, page, gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
       // render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
@@ -1623,6 +1625,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
       }
 #endif
     } else {
+      cerr << "cccccccccccccccccccccccccccccc" << endl;
       _renderGrid(painter, page, mr, start_time, end_time, 0);
       // render_grid(xid,mr,start_time,end_time,0);
     }

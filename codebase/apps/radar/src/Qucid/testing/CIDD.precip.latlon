@@ -100,10 +100,10 @@ field_list = {
 # PRECIP
 #
 
-SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo.colors %  -5   80  5  cart   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+WRF-TMP    WRF-TMP    $(HOME)/data/lucid/precip/mdv/wrf&Temp   temp.colors   C   -5   80  5  cart   1 0
+WRF-RH     WRF-RH     $(HOME)/data/lucid/precip/mdv/wrf&RH     rh.colors   %   -5   80  5  cart   1 0
+WRF-DBZ-3D WRF-DBZ-3D $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  cart   1 0
+WRF-DBZ-2D WRF-DBZ-2D $(HOME)/data/lucid/precip/mdv/wrf&dbz_2d dbz.colors  dbz   -5   80  5  cart   1 0
 
 WRF-TMP    WRF-TMP    $(HOME)/data/lucid/precip/mdv/wrf&Temp   temp.colors   C   -5   80  5  dcont   1 0
 WRF-RH     WRF-RH     $(HOME)/data/lucid/precip/mdv/wrf&RH     rh.colors   %   -5   80  5  dcont   1 0
@@ -119,6 +119,11 @@ GFS-TMP   GFS-TMP  $(HOME)/data/lucid/precip/mdv/gfs&TMP  temp.colors   C   -5  
 GFS-RH    GFS-RH   $(HOME)/data/lucid/precip/mdv/gfs&RH   rh.colors   %   -5   80  5  dcont   1 0
 GFS-PRES  GFS-PRES $(HOME)/data/lucid/precip/mdv/gfs&Pressure pressure_mb.colors   m/s   -5   80  5  dcont   1 0
 ========   ========    mdvp::static//front.eol.ucar.edu:8080:/spacer/moments&Elevation       none.colors  m   -5 80 5 cont  1 0
+
+SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo.colors %  -5   80  5  cart   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 # SPOL MOMENTS
 
@@ -463,7 +468,7 @@ cidd.xsect_start_page:      1
 #
 # The Outer most domain:
 cidd.num_zoom_levels:       7
-cidd.start_zoom_level:      4
+cidd.start_zoom_level:      6
 
 # The number of Cached images for zooms.
 cidd.num_cache_zooms:       0

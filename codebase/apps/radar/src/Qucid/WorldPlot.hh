@@ -307,6 +307,13 @@ public:
                      double x, double y,
                      double w, double h);
 
+  // fill a rectangle in pixel coords
+  
+  void fillRectanglePixelCoords(QPainter &painter,
+                                const QBrush &brush,
+                                double xx, double yy,
+                                double width, double height);
+  
   // fill the entire canvas with a color
   
   void fillCanvas(QPainter &painter,

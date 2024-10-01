@@ -612,8 +612,8 @@ void WorldPlot::drawRectangle(QPainter &painter,
 
 }
 
-///////////////////
-// fill a rectangle
+//////////////////////////////////////////////////
+// fill a rectangle in world coords
 
 void WorldPlot::fillRectangle(QPainter &painter,
                               const QBrush &brush,
@@ -628,6 +628,20 @@ void WorldPlot::fillRectangle(QPainter &painter,
   double height = h * _yPixelsPerWorld * -1.0;
   yy -= height;
 
+  painter.fillRect(xx, yy, width, height, brush);
+
+}
+
+//////////////////////////////////////////////////
+// fill a rectangle in pixel coords
+
+void WorldPlot::fillRectanglePixelCoords(QPainter &painter,
+                                         const QBrush &brush,
+                                         double xx, double yy,
+                                         double width, double height) 
+  
+{
+    
   painter.fillRect(xx, yy, width, height, brush);
 
 }
@@ -2390,6 +2404,12 @@ void WorldPlot::renderGridRect(int page,
   
   // plot the rectangles for each grid cell
 
+  // {
+  //   QColor color("yelllow");
+  //   QBrush brush(color);
+  //   painter.fillRect(100, 100, 100, 100, brush);
+  // }
+
   fl32 *val = mr->h_fl32_data;
   
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
@@ -2397,12 +2417,13 @@ void WorldPlot::renderGridRect(int page,
       const QBrush *brush = mr->colorMap->dataBrush(*val);
       double xx = vertices[iy+1][ix].x();
       double yy = vertices[iy+1][ix].y();
-      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x();
-      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y();
+      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
+      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
       // cerr << "2222222222222222 x, y, width, ht: "
       //      << xx << ", " << yy << ", "
       //      << width << ", " << height << endl;
-      fillRectangle(painter, *brush, xx, yy, width, height);
+      fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
+      // fillRectangle(painter, *brush, xx, yy + height, width, height);
     } // ix
   } // iy
   
