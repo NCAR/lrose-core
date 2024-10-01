@@ -2359,6 +2359,11 @@ void WorldPlot::renderGridRect(int page,
 {
 
   cerr << "====>> rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
+
+  // the data projection type and plot projection type are the same
+  // so we can use a linear transformation from data to world
+  
+#ifdef NOTYET
   
   int i,j;
   int ht,wd;               /* Dims of data rectangles  */
@@ -2624,6 +2629,8 @@ void WorldPlot::renderGridRect(int page,
 
   } // if (_params.clip_overlay_fields) ..
 
+#endif
+  
 }
 
 void WorldPlot::renderGridDistorted(int page,

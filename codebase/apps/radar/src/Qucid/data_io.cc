@@ -133,7 +133,7 @@ void check_for_io()
             if(mr->h_mdvx->getThreadRetVal()) { // Error
               mr->h_data = NULL;
               mr->h_fl32_data = NULL;
-
+              
               // Save the master header for the file, even if we couldn't
               // get data for this field.  This is needed in case we are
               // dealing with forecast data

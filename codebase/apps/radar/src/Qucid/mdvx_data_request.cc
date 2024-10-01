@@ -214,7 +214,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr,
   }
   
   // Initiate the request - This becomes threaded if not in debug mode.
-
+  
   mr->h_mdvx->readVolume();
 
   // The check_for_io function (thread) will poll for complettion of the data request.
