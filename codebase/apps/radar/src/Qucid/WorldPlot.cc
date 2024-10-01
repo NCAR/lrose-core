@@ -2386,7 +2386,7 @@ void WorldPlot::renderGridRect(int page,
     vertices.push_back(row);
   } // iy
   
-  cerr << "2222222222222222222222222222222222222" << endl;
+  cerr << "2222222222222222222222222222222222222 vertices.size(): " << vertices.size() << endl;
   
   // plot the rectangles for each grid cell
 
@@ -2395,13 +2395,17 @@ void WorldPlot::renderGridRect(int page,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       const QBrush *brush = mr->colorMap->dataBrush(*val);
-      fillRectangle(painter, *brush,
-                    vertices[iy][ix].x(), vertices[iy][ix].y(),
-                    vertices[iy][ix+1].x() - vertices[iy][ix].x(),
-                    vertices[iy][iy+1].y() - vertices[iy][iy].y());
+      double xx = vertices[iy+1][ix].x();
+      double yy = vertices[iy+1][ix].y();
+      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x();
+      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y();
+      // cerr << "2222222222222222 x, y, width, ht: "
+      //      << xx << ", " << yy << ", "
+      //      << width << ", " << height << endl;
+      fillRectangle(painter, *brush, xx, yy, width, height);
     } // ix
   } // iy
-
+  
   cerr << "333333333333333333333333333333333" << endl;
   
 #ifdef NOTYET
