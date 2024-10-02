@@ -254,7 +254,7 @@ void CartManager::timerEvent(QTimerEvent *event)
   }
   
   // field change?
-
+  
   _checkForFieldChange();
   
   // Handle widget stuff that can't be done at initial setup.  For some reason
@@ -1912,6 +1912,9 @@ void CartManager::_zoomBack()
 
 void CartManager::_refresh()
 {
+  if (_horiz) {
+    _horiz->update();
+  }
 }
 
 ///////////////////////////////////////////////////////////
@@ -3735,15 +3738,15 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 
   /***** Handle Field changes *****/
 
-  if (gd.h_win.page != gd.h_win.last_page) {
-    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
+  if (gd.h_win.page != gd.h_win.prev_page) {
+    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
       if (gd.h_win.redraw[gd.h_win.page] == 0) {
         gd.h_copy_flag = 1;
-        gd.h_win.last_page = gd.h_win.page;
-        cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.last_page: " <<  gd.h_win.page << ", " << gd.h_win.last_page << endl;
+        gd.h_win.prev_page = gd.h_win.page;
+        cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
         set_redraw_flags(0,1);
         _vlevelManager.setFromMdvx();
         _createVlevelRadioButtons();
@@ -3756,13 +3759,13 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       }
     }
   }
-  if (gd.v_win.page != gd.v_win.last_page ) {
+  if (gd.v_win.page != gd.v_win.prev_page ) {
     if (gd.movie.movie_on ) {
       set_redraw_flags(0,1);
     } else {
       if (gd.v_win.redraw[gd.v_win.page] == 0) {
         gd.v_copy_flag = 1;
-        gd.v_win.last_page = gd.v_win.page;
+        gd.v_win.prev_page = gd.v_win.page;
       }
     }
   }
@@ -3893,12 +3896,15 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   } // if (_params.image_generate_vsection)
 
   /* Draw Selected field - Horizontal for this movie frame */
+#ifdef NOTNOW
   if (gd.movie.frame[index].redraw_horiz) {
+#endif
     /* Draw Frame */
-    // cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
+    cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
     if (gather_hwin_data(gd.h_win.page,
                          gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
+      cerr << "YYYYYYYYYYY index, page: " << index << ", " << gd.h_win.page << endl;
       if (gd.h_win.redraw[gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
         _horiz->setFrameForRendering(gd.h_win.page, index);
@@ -3912,7 +3918,9 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       gd.h_win.redraw[gd.h_win.page] = 0;
       gd.h_copy_flag = 1;
     }
+#ifdef NOTNOW
   }
+#endif
 	
 
   /* Selected Field or movie frame has changed
@@ -3940,7 +3948,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       } else {
         gd.h_win.last_cache_im = gd.h_win.cur_cache_im; 
       }
-      gd.h_win.last_page = gd.h_win.page;
+      gd.h_win.prev_page = gd.h_win.page;
       gd.h_copy_flag = 0;
 
       if (gd.zoom_in_progress == 1) redraw_zoom_box();
@@ -4007,7 +4015,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
                   gd.v_win.can_dim.x_pos,
                   gd.v_win.can_dim.y_pos);
 #endif
-        gd.v_win.last_page  = gd.v_win.page;
+        gd.v_win.prev_page  = gd.v_win.page;
         gd.v_copy_flag = 0;
 
         if (gd.debug2) fprintf(stderr,"\nDisplaying Vert final image - field %d, index %d pdev: %p to pdev: %p\n",

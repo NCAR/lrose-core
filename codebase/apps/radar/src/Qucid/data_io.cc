@@ -86,17 +86,17 @@ extern int errno;
 
 void autoscale_vcm( Valcolormap_t *vcm, double min, double max)
 {
-    int    i;
-    double delta;
+  int    i;
+  double delta;
 
-    delta = (max - min) / (double) vcm->nentries;
+  delta = (max - min) / (double) vcm->nentries;
 
-    if(delta == 0.0) delta = 0.1;
+  if(delta == 0.0) delta = 0.1;
 
-    for(i=0; i < vcm->nentries; i++) {
-	vcm->vc[i]->min = min + (delta * i);
-	vcm->vc[i]->max = vcm->vc[i]->min + delta;
-    }
+  for(i=0; i < vcm->nentries; i++) {
+    vcm->vc[i]->min = min + (delta * i);
+    vcm->vc[i]->max = vcm->vc[i]->min + delta;
+  }
 
 }
 
@@ -398,8 +398,8 @@ void check_for_io()
 
             if(n_read <= 1) {
               snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
-                      mr->legend_name,
-                      (gd.io_info.expire_time - time(0)));
+                       mr->legend_name,
+                       (gd.io_info.expire_time - time(0)));
             } else {
               if(n_read > gd.io_info.last_read) {
                 gettimeofday(&tm,&tz);
@@ -407,19 +407,19 @@ void check_for_io()
                 bps = (n_read - gd.io_info.last_read) /  elapsed_time(gd.io_info.last_time,tm);
                 if( bps < 512) {
                   snprintf(label,256,"READING %s Data  %.0f%% complete  - %.2g bytes/sec",
-                          mr->legend_name,
-                          comp,bps);
+                           mr->legend_name,
+                           comp,bps);
                 } else {
                   snprintf(label,256,"READING %s Data  %.0f%% complete  - %.2g Kb/sec",
-                          mr->legend_name,
-                          comp,bps/1000);
+                           mr->legend_name,
+                           comp,bps/1000);
                 }
                 gd.io_info.expire_time++;
                 gd.io_info.last_read = n_read;
                 gd.io_info.last_time = tm;
               } else {
                 snprintf(label,256,"READING %s Data  %.0f%% complete",
-                        mr->legend_name,comp);
+                         mr->legend_name,comp);
               }
             }
             if(_params.show_data_messages) gui_label_h_frame(label,1);
@@ -563,8 +563,8 @@ void check_for_io()
 
             if(n_read <= 1) {
               snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
-                      mr->legend_name,
-                      (gd.io_info.expire_time - time(0)));
+                       mr->legend_name,
+                       (gd.io_info.expire_time - time(0)));
             } else {
               if(n_read > gd.io_info.last_read) {
                 gettimeofday(&tm,&tz);
@@ -572,19 +572,19 @@ void check_for_io()
                 bps = (n_read - gd.io_info.last_read) /  elapsed_time(gd.io_info.last_time,tm);
                 if( bps < 512) {
                   snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
-                          mr->legend_name,
-                          comp,bps);
+                           mr->legend_name,
+                           comp,bps);
                 } else {
                   snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
-                          mr->legend_name,
-                          comp,bps/1000);
+                           mr->legend_name,
+                           comp,bps/1000);
                 }
                 gd.io_info.expire_time++;
                 gd.io_info.last_read = n_read;
                 gd.io_info.last_time = tm;
               } else {
                 snprintf(label,256,"READING %s Data  %.0f%% complete",
-                        mr->legend_name,comp);
+                         mr->legend_name,comp);
               }
             }
             if(_params.show_data_messages) gui_label_h_frame(label,1);
@@ -648,8 +648,8 @@ void check_for_io()
 
           } else {   // Still waiting for the request thread to complete
 	    snprintf(label,256,"Waiting for %s Data Index  %ld -  secs before timeout",
-                    mr->legend_name,
-                    (gd.io_info.expire_time - time(0)));
+                     mr->legend_name,
+                     (gd.io_info.expire_time - time(0)));
           }
           if(_params.show_data_messages) gui_label_h_frame(label,1);
 	     
@@ -721,8 +721,8 @@ void check_for_io()
 
         if(n_read <= 1) {
           snprintf(label,256,"Waiting for %s service  %ld -  secs before timeout",
-                  gd.io_info.prod->_prodInfo.menu_label,
-                  (gd.io_info.expire_time - time(0)));
+                   gd.io_info.prod->_prodInfo.menu_label,
+                   (gd.io_info.expire_time - time(0)));
         } else {
           if(n_read > gd.io_info.last_read) {
             gettimeofday(&tm,&tz);
@@ -731,12 +731,12 @@ void check_for_io()
 
             if( bps < 512) {
               snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g bytes/sec",
-                      gd.io_info.prod->_prodInfo.menu_label,
-                      comp,bps);
+                       gd.io_info.prod->_prodInfo.menu_label,
+                       comp,bps);
             } else {
               snprintf(label,256,"Reading %s Data  %.0f%% complete  - %.2g Kb/sec",
-                      gd.io_info.prod->_prodInfo.menu_label,
-                      comp,bps/1000);
+                       gd.io_info.prod->_prodInfo.menu_label,
+                       comp,bps/1000);
             }
 
             gd.io_info.last_read = n_read;
@@ -744,7 +744,7 @@ void check_for_io()
             gd.io_info.expire_time++;
           } else {
             snprintf(label,256,"Reading %s Data  %.0f%% complete",
-                    gd.io_info.prod->_prodInfo.menu_label, comp);
+                     gd.io_info.prod->_prodInfo.menu_label, comp);
           }
         }
         if(_params.show_data_messages) gui_label_h_frame(label,1);

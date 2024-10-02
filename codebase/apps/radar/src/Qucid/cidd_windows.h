@@ -70,7 +70,7 @@ typedef struct { /* WINDOW Data - for each display window */
  int *ip; /* instance pointer; hook to XView object structures*/
  int active; /* set to 1 if window is currently active */
  int page; /* Current page selected in the window */
- int last_page; /* The last page viewed */
+ int prev_page; /* The last page viewed */
  int movie_page; /* The page currently viewed in movie loops */
  int min_height; /* minimum height window is allowed to get to */
  int min_width; /* minimum width window is allowed to get to */

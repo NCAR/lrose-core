@@ -364,8 +364,8 @@ int init_data_space()
       
   }
   
-  gd.h_win.last_page = -1;
-  gd.v_win.last_page = -1;
+  gd.h_win.prev_page = -1;
+  gd.v_win.prev_page = -1;
   
   // movies
 

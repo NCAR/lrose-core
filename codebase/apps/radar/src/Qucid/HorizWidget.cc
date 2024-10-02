@@ -1439,7 +1439,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
         } else {
           return;
         }
-        if (h_image == gd.h_win.last_page && gd.h_win.redraw[h_image] == 0) {
+        if (h_image == gd.h_win.prev_page && gd.h_win.redraw[h_image] == 0) {
           gd.h_copy_flag = 1;
         }
       } // if (gd.h_win.redraw[h_image] ...
@@ -1471,7 +1471,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
         } else {
           return;
         }
-        if (v_image == gd.v_win.last_page && gd.v_win.redraw[v_image] == 0) gd.v_copy_flag = 1;
+        if (v_image == gd.v_win.prev_page && gd.v_win.redraw[v_image] == 0) gd.v_copy_flag = 1;
       }
     }
         
