@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for Qucid
+// main for Lucid
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,7 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Qucid.hh"
+#include "Lucid.hh"
 #include <QApplication>
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
@@ -40,7 +40,7 @@
 // file scope
 
 static void tidy_and_exit (int sig);
-static Qucid *Prog;
+static Lucid *Prog;
 static QApplication *app;
 
 // main
@@ -54,15 +54,15 @@ int main(int argc, char **argv)
   try {
 
     // The following line may fix the problem of the Boundary Editor
-    // not appearing in the menu bar when Qucid is built using
+    // not appearing in the menu bar when Lucid is built using
     // linux, run on a Mac.                                                                                                                       
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
     
     app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://QucidCycloneIcon.icns"));
+    app->setWindowIcon(QIcon("://LucidCycloneIcon.icns"));
     LOG(DEBUG_VERBOSE) << "After setting Window Icon\n";
-    Qucid *Prog;
-    Prog = new Qucid(argc, argv);
+    Lucid *Prog;
+    Prog = new Lucid(argc, argv);
     if (!Prog->OK) {
       return(-1);
     }

@@ -19,7 +19,7 @@ replaceGlobalStrings.py --path Main.cc
 replaceGlobalStrings.py --path Params.cc
 replaceGlobalStrings.py --path Product.cc
 replaceGlobalStrings.py --path ProductMgr.cc
-replaceGlobalStrings.py --path Qucid.cc
+replaceGlobalStrings.py --path Lucid.cc
 replaceGlobalStrings.py --path RenderContext.cc
 replaceGlobalStrings.py --path ScaledLabel.cc
 replaceGlobalStrings.py --path SiiPalette.cc

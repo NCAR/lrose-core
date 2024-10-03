@@ -1249,7 +1249,7 @@ void DisplayManager::_showClick()
 void DisplayManager::_howto()
 {
   string text;
-  text += "HOWTO HINTS FOR QUCID\n";
+  text += "HOWTO HINTS FOR Lucid\n";
   text += "========================\n";
   text += "\n";
   text += "Use NUMBER keys to display RAW fields\n";
@@ -1266,14 +1266,14 @@ void DisplayManager::_about()
 {
 
   //QMessageBox::about(this, tr("About Menu"),
-  //tr("Qucid is an integrating Cartesian display for weather data."));
+  //tr("Lucid is an integrating Cartesian display for weather data."));
 
   string text;
   
-  text += "Qucid is an integrating Cartesian display for weather data.\n\n";
-  text += "Get help with Qucid ...  \n ";
+  text += "Lucid is an integrating Cartesian display for weather data.\n\n";
+  text += "Get help with Lucid ...  \n ";
   text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
-  text += "\nQucid version ... \n ";  
+  text += "\nLucid version ... \n ";  
   text += "\nCopyright UCAR (c) 1990 - 2019  ";
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
   text += "\nNational Center for Atmospheric Research (NCAR)   ";  

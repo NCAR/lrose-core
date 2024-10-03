@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for ./Qucid
+ * TDRP params for ./Lucid
  **********************************************************************/
 
 //======================================================================
 //
-// Qucid is an integrating display for weather data products.
+// Lucid is an integrating display for weather data products.
 //
 // This is a C++ application using the QT GUI toolkit. It is based on 
 //   the legacy CIDD app.
@@ -89,10 +89,10 @@ instance = "test";
 // Directory for storing temporary files as a cache.
 //
 // The temporary files we cache are for the maps and color scales. Below 
-//   this top level directory Qucid will create subdirectories as follows:
-// 	(maps) 'top_level_cache_dir/Qucid/params_file_name/maps'
+//   this top level directory Lucid will create subdirectories as follows:
+// 	(maps) 'top_level_cache_dir/Lucid/params_file_name/maps'
 // 	(color_scales) 
-//   'top_level_cache_dir/Qucid/params_file_name/color_scales'.
+//   'top_level_cache_dir/Lucid/params_file_name/color_scales'.
 //
 // Type: string
 
@@ -113,7 +113,7 @@ clear_cache = FALSE;
 // Option to use 'curl' do download remote map and color_scale files.
 //
 // If true, we use the curl app for the downloads. If false, we use http 
-//   requests generated natively within Qucid.
+//   requests generated natively within Lucid.
 //
 // Type: boolean
 
@@ -4056,7 +4056,7 @@ product_adjustments = {
 //
 // Type: string
 
-images_output_dir = "/tmp/images/Qucid";
+images_output_dir = "/tmp/images/Lucid";
 
 ///////////// images_write_to_day_dir /////////////////
 //
@@ -4290,7 +4290,7 @@ images_sweep_index_list = { 0, 1, 2 };
  
 //======================================================================
 //
-// <QUCID_SPECIFIC_DETAILS>.
+// <LUCID_SPECIFIC_DETAILS>.
 //
 //======================================================================
  
@@ -4543,7 +4543,7 @@ horiz_main_legend_pos = LEGEND_TOP_LEFT;
 //
 // Option to override the azimuth beam width for rendering.
 //
-// Normally Qucid determines the azimuth rendering beam width 
+// Normally Lucid determines the azimuth rendering beam width 
 //   automatically. You can override this and specifcally set the azimuth 
 //   beam width for rendering.
 //
@@ -4732,7 +4732,7 @@ vert_beam_queue_size = 360;
 //
 // Option to override the azimuth beam width for rendering.
 //
-// Normally Qucid determines the azimuth rendering beam width 
+// Normally Lucid determines the azimuth rendering beam width 
 //   automatically. You can override this and specifcally set the azimuth 
 //   beam width for rendering.
 //
@@ -5330,7 +5330,7 @@ bscan_dwell_stats = DWELL_STATS_MIDDLE;
 
 //======================================================================
 //
-// </QUCID_SPECIFIC_DETAILS>.
+// </LUCID_SPECIFIC_DETAILS>.
 //
 //======================================================================
  

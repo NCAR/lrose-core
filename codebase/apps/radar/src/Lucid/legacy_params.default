@@ -1960,7 +1960,7 @@ paramdef int {
 
 
 paramdef string {
-  p_default = "Qucid";
+  p_default = "Lucid";
   p_descr = "";
   p_help = "";
 } cidd.horiz_frame_label;

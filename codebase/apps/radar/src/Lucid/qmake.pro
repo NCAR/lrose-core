@@ -1,12 +1,12 @@
-# qmake.pro for Qucid
+# qmake.pro for Lucid
 
 QT += widgets
 QT += qml
 # requires(qtConfig(filedialog))
 
 TEMPLATE = app
-TARGET = Qucid
-ICON = QucidCycloneIcon.icns 
+TARGET = Lucid
+ICON = LucidCycloneIcon.icns 
 
 CONFIG += qt
 CONFIG += debug
@@ -32,7 +32,7 @@ HEADERS += Params.hh
 HEADERS += Product.hh
 HEADERS += ProductMgr.hh
 HEADERS += ProdMenuItem.hh
-HEADERS += Qucid.hh
+HEADERS += Lucid.hh
 HEADERS += Reader.hh
 HEADERS += RenderContext.hh
 HEADERS += ScaledLabel.hh
@@ -84,7 +84,7 @@ SOURCES += Params.cc
 SOURCES += Product.cc
 SOURCES += ProductMgr.cc
 SOURCES += ProdMenuItem.cc
-SOURCES += Qucid.cc
+SOURCES += Lucid.cc
 SOURCES += Reader.cc
 SOURCES += RenderContext.cc
 SOURCES += ScaledLabel.cc

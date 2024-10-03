@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Qucid.cc
+// Lucid.cc
 //
-// Qucid display
+// Lucid display
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,11 +32,11 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Qucid is the Qt replacement for CIDD
+// Lucid is the Qt replacement for CIDD
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Qucid.hh"
+#include "Lucid.hh"
 #include "CartManager.hh"
 // #include "DisplayField.hh"
 #include "LegacyParams.hh"
@@ -57,8 +57,8 @@ using namespace std;
 
 // Constructor
 
-Qucid::Qucid(int argc, char **argv) :
-        _args("Qucid")
+Lucid::Lucid(int argc, char **argv) :
+        _args("Lucid")
 
 {
 
@@ -67,7 +67,7 @@ Qucid::Qucid(int argc, char **argv) :
 
   // set programe name
 
-  _progName = strdup("Qucid");
+  _progName = strdup("Lucid");
 
   // initialize legacy CIDD structs
   
@@ -87,7 +87,7 @@ Qucid::Qucid(int argc, char **argv) :
     // gd.db_name = strdup(legacyParamsPath.c_str());
     Path lpPath(legacyParamsPath);
     snprintf(tdrpParamsPath, 4999,
-             "/tmp/Qucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
+             "/tmp/Lucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
     LegacyParams lParams;
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     usingLegacyParams = true;
@@ -180,7 +180,7 @@ Qucid::Qucid(int argc, char **argv) :
 
 // destructor
 
-Qucid::~Qucid()
+Lucid::~Lucid()
 
 {
 
@@ -202,7 +202,7 @@ Qucid::~Qucid()
 //////////////////////////////////////////////////
 // Run
 
-int Qucid::Run(QApplication &app)
+int Lucid::Run(QApplication &app)
 {
 
   /* Establish color table & mappings  */
@@ -231,7 +231,7 @@ int Qucid::Run(QApplication &app)
 //////////////////////////////////////////////////
 // set up the display variable
   
-int Qucid::_setupXDisplay(int argc, char **argv)
+int Lucid::_setupXDisplay(int argc, char **argv)
 {
 
   /*
@@ -250,7 +250,7 @@ int Qucid::_setupXDisplay(int argc, char **argv)
   } /* i */
 	
   if((gd.dpy = XOpenDisplay(gd.dpyName)) == NULL) {
-    fprintf(stderr, "ERROR - Qucid::_setupXDisplay\n");
+    fprintf(stderr, "ERROR - Lucid::_setupXDisplay\n");
     fprintf(stderr,
 	    "Cannot open display '%s' or '%s'\n",
 	    gd.dpyName, getenv("DISPLAY"));
@@ -266,7 +266,7 @@ int Qucid::_setupXDisplay(int argc, char **argv)
 // use same map for raw and unfiltered fields
 // returns 0 on success, -1 on failure
   
-int Qucid::_setupDisplayFields()
+int Lucid::_setupDisplayFields()
 {
 
   // check for color map location
@@ -277,7 +277,7 @@ int Qucid::_setupDisplayFields()
     colorMapDir = Path::getPathRelToExec(_params.color_scale_urls);
     mapDir.setPath(colorMapDir);
     if (!mapDir.dirExists()) {
-      cerr << "ERROR - Qucid" << endl;
+      cerr << "ERROR - Lucid" << endl;
       cerr << "  Cannot find color scale directory" << endl;
       cerr << "  Primary is: " << _params.color_scale_urls << endl;
       cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
@@ -299,7 +299,7 @@ int Qucid::_setupDisplayFields()
     // check we have a valid label
     
     if (strlen(pfld.legend_label) == 0) {
-      cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
+      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
       cerr << "  Empty field legend_label, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
       continue;
@@ -308,7 +308,7 @@ int Qucid::_setupDisplayFields()
     // check we have a raw field name
     
     if (strlen(pfld.field_name) == 0) {
-      cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
+      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
       cerr << "  Empty raw field name, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
       continue;
@@ -336,7 +336,7 @@ int Qucid::_setupDisplayFields()
 
     } else {
 
-      cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
+      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;
       cerr << "  Looking for default color map for field " << pfld.legend_label << endl; 
       try {
@@ -383,7 +383,7 @@ int Qucid::_setupDisplayFields()
   } // ifield
 
   if (_displayFields.size() < 1) {
-    cerr << "ERROR - Qucid::_setupDisplayFields()" << endl;
+    cerr << "ERROR - Lucid::_setupDisplayFields()" << endl;
     cerr << "  No fields found" << endl;
     return -1;
   }

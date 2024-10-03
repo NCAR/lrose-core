@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for Qucid
+ * TDRP params for Lucid
  **********************************************************************/
 
 //======================================================================
 //
-// Qucid is an integrating display for weather data products.
+// Lucid is an integrating display for weather data products.
 //
 // This is a C++ application using the QT GUI toolkit. It is based on 
 //   the legacy CIDD app.
@@ -2625,7 +2625,7 @@ horiz_main_legend_pos = LEGEND_TOP_LEFT;
 //
 // Option to override the azimuth beam width for rendering.
 //
-// Normally Qucid determines the azimuth rendering beam width 
+// Normally Lucid determines the azimuth rendering beam width 
 //   automatically. You can override this and specifcally set the azimuth 
 //   beam width for rendering.
 //
@@ -2885,7 +2885,7 @@ vert_beam_queue_size = 360;
 //
 // Option to override the azimuth beam width for rendering.
 //
-// Normally Qucid determines the azimuth rendering beam width 
+// Normally Lucid determines the azimuth rendering beam width 
 //   automatically. You can override this and specifcally set the azimuth 
 //   beam width for rendering.
 //
@@ -3608,7 +3608,7 @@ bscan_dwell_stats = DWELL_STATS_MIDDLE;
 // Type: string
 //
 
-images_output_dir = "/tmp/images/Qucid";
+images_output_dir = "/tmp/images/Lucid";
 
 ///////////// images_write_to_day_dir /////////////////
 //

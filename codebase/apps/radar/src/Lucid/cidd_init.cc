@@ -95,8 +95,8 @@ int init_data_space()
   UTIMstruct temp_utime;
 
   if(!gd.quiet_mode) {
-    fprintf(stderr,"Qucid: Version %s\n", QUCID_VERSION);
-    fprintf(stderr,"Copyright: %s\n\n", QUCID_COPYRIGHT);
+    fprintf(stderr,"Lucid: Version %s\n", LUCID_VERSION);
+    fprintf(stderr,"Copyright: %s\n\n", LUCID_COPYRIGHT);
   }
 
   // debugging level
@@ -743,7 +743,7 @@ static int _initGrids()
   
   gd.num_datafields = _params.fields_n;
   if(gd.num_datafields <=0) {
-    fprintf(stderr,"Qucid requires at least one valid gridded data field to be defined\n");
+    fprintf(stderr,"Lucid requires at least one valid gridded data field to be defined\n");
     exit(-1);
   }
   
@@ -1119,7 +1119,7 @@ static void _initDrawExport()
   if (gd.draw.dexport == NULL) {
     fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
             gd.draw.num_draw_products);
-    perror("Qucid");
+    perror("Lucid");
     exit(-1);
   }
   
@@ -2867,7 +2867,7 @@ static int _createCacheDirs()
 
   gd.cacheDir = _params.top_level_cache_dir;
   gd.cacheDir += PATH_DELIM;
-  gd.cacheDir += "Qucid";
+  gd.cacheDir += "Lucid";
   gd.cacheDir += PATH_DELIM;
   gd.cacheDir += _paramsPathRequested.getFile(); // add params file name
 
@@ -2875,7 +2875,7 @@ static int _createCacheDirs()
 
   if (ta_makedir_recurse(gd.cacheDir.c_str())) {
     int err = errno;
-    cerr << "ERROR - Qucid" << endl;
+    cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make cache dir: " << gd.cacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
@@ -2884,7 +2884,7 @@ static int _createCacheDirs()
   gd.mapCacheDir = gd.cacheDir + PATH_DELIM + "maps";
   if (ta_makedir_recurse(gd.mapCacheDir.c_str())) {
     int err = errno;
-    cerr << "ERROR - Qucid" << endl;
+    cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make maps cache dir: " << gd.mapCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
@@ -2893,7 +2893,7 @@ static int _createCacheDirs()
   gd.colorscaleCacheDir = gd.cacheDir + PATH_DELIM + "color_scales";
   if (ta_makedir_recurse(gd.colorscaleCacheDir.c_str())) {
     int err = errno;
-    cerr << "ERROR - Qucid" << endl;
+    cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make color scales cache dir: " << gd.colorscaleCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
@@ -2902,7 +2902,7 @@ static int _createCacheDirs()
   gd.stationlocCacheDir = gd.cacheDir + PATH_DELIM + "stationloc";
   if (ta_makedir_recurse(gd.stationlocCacheDir.c_str())) {
     int err = errno;
-    cerr << "ERROR - Qucid" << endl;
+    cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make station locator cache dir: " << gd.stationlocCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;

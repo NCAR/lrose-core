@@ -2872,7 +2872,7 @@ void CartManager::_saveImageToFile(bool interactive)
       ldataInfo.setDebug();
     }
     ldataInfo.setLatestTime(_plotStartTime.utime());
-    ldataInfo.setWriter("Qucid");
+    ldataInfo.setWriter("Lucid");
     ldataInfo.setDataFileExt(_params.images_file_name_extension);
     ldataInfo.setDataType(_params.images_file_name_extension);
     ldataInfo.setRelDataPath(relPath);

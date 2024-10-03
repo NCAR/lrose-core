@@ -21,77 +21,40 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// Qucid.h
-//
-// Qucid object
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Sept 2023
-//
-///////////////////////////////////////////////////////////////
-//
-// Qucid is the Qt replacement for CIDD
-//
-///////////////////////////////////////////////////////////////
+/*****************************************************************
+ * CIDD_SIGNALS.CC 
+ */
 
-#ifndef Qucid_HH
-#define Qucid_HH
+#define CIDD_SIGNALS
+#include "cidd.h"
+#include "cidd_funcs.h"
 
-#include <string>
-#include <vector>
+/*****************************************************************
+ * SIGNAL_TRAP : Traps Signals so as to die gracefully
+ */
+void signal_trap(int signal)
+{
+    fprintf(stderr,"Lucid: received signal %d\n",signal);
+    // if(gd.finished_init) base_win_destroy(gd.h_win_horiz_bw->horiz_bw,DESTROY_PROCESS_DEATH);
+    exit(0);
+}
 
-#include "Args.hh"
-#include "Params.hh"
+/*****************************************************************
+ * SIGIO_TRAP : Traps IO Signal
+ */
+void sigio_trap(int signal)
+{
+    signal = 0;
+    if(gd.io_info.outstanding_request) check_for_io();
+}
 
-class QApplication;
-// class DisplayField;
-class CartManager;
+/*****************************************************************
+ * INIT_SIGNAL_HANDLERS: 
+ */
 
-class Qucid {
-  
-public:
-
-  // constructor
-
-  Qucid (int argc, char **argv);
-
-  // destructor
-  
-  virtual ~Qucid();
-
-  // run 
-
-  int Run(QApplication &app);
-
-  // data members
-
-  bool OK;
-
-protected:
-private:
-
-  // basic
-
-  string _progName;
-  Args _args;
-
-  // data fields
-
-  // vector<DisplayField *> _displayFields;
-
-  // managing the rendering objects
-
-  CartManager *_cartManager;
-  
-  // methods
-
-  void _initGlobals();
-  // int _setupXDisplay(int argc, char **argv);
-  // int _setupDisplayFields();
-
-};
-
-#endif
-
+void  init_signal_handlers()
+{
+    PORTsignal(SIGINT,signal_trap);
+    PORTsignal(SIGTERM,signal_trap);
+    PORTsignal(SIGIO,sigio_trap);
+}

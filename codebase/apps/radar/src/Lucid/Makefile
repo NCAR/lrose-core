@@ -31,7 +31,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = Qucid
+TARGET_FILE = Lucid
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
@@ -69,7 +69,7 @@ HDRS = \
 	Product.hh \
 	ProductMgr.hh \
 	ProdMenuItem.hh \
-	Qucid.hh \
+	Lucid.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
@@ -115,7 +115,7 @@ NORM_SRCS = \
 	Main.cc \
 	Product.cc \
 	ProductMgr.cc \
-	Qucid.cc \
+	Lucid.cc \
 	RenderContext.cc \
 	ScaledLabel.cc \
 	SiiPalette.cc \

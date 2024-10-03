@@ -30,8 +30,8 @@
 #ifndef CIDD_MACROS_H
 #define CIDD_MACROS_H
 
-#define QUCID_VERSION    "1.0 2024/09/01"
-#define QUCID_COPYRIGHT  "(c) 1991-2024,  National Center for Atmospheric Research"
+#define LUCID_VERSION    "1.0 2024/09/01"
+#define LUCID_COPYRIGHT  "(c) 1991-2024,  National Center for Atmospheric Research"
  
 #define MAX_COLORS    1024    /* maximum number of colors in images*/
 #define MAX_FRAMES    512     /* maximum number of movie frames  */
