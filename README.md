@@ -64,7 +64,7 @@ For details on builds and the code development environment, see:
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [docs](./docs/LROSE_DOCS_OVERVIEW.md ) | Documentation overview |
+| [docs](./docs/README.md ) | Documentation overview |
 | [build](./build/README.md) | build scripts, release scripts and associated files |
 | [codebase/libs](./docs/libs/lrose-libs-summary.pdf) | list of libraries |
 | [codebase/apps](./docs/apps/lrose-apps-summary.pdf) | list of applications |
