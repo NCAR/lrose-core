@@ -64,10 +64,10 @@ For details on builds and the code development environment, see:
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [docs](./docs/LROSE_DOCS_OVERVIEW.md ) | Documenation overview |
+| [docs](./docs/LROSE_DOCS_OVERVIEW.md ) | Documentation overview |
 | [build](./build/README.md) | build scripts, release scripts and associated files |
-| [codebase/libs](https://github.com/NCAR/lrose-core/blob/master/docs/libs/lrose-libs-summary.pdf) | list of libraries |
-| [codebase/apps](https://github.com/NCAR/lrose-core/blob/master/docs/apps/lrose-apps-summary.pdf) | list of applications |
+| [codebase/libs](./docs/libs/lrose-libs-summary.pdf) | list of libraries |
+| [codebase/apps](./docs/apps/lrose-apps-summary.pdf) | list of applications |
 | [lrose-bootstrap](https://github.com/NCAR/lrose-bootstrap) | Bootstrap scripts and configurations for releases and builds |
 
 ### DOCUMENTATION LINKS
