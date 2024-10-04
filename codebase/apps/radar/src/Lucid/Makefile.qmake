@@ -1286,6 +1286,8 @@ moc_VertWidget.cpp: VertWidget.hh \
 		cidd_colorscales.h \
 		cidd_field_data.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
@@ -1357,6 +1359,8 @@ moc_VertWindow.cpp: VertWindow.hh \
 		cidd_colorscales.h \
 		cidd_field_data.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
@@ -3639,12 +3643,12 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		VertWindow.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
 		$(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/ansi.h \
@@ -3796,11 +3800,11 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		cidd_colorscales.h \
 		cidd_field_data.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
 		$(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/ansi.h \
@@ -4046,11 +4050,11 @@ WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
+		$(HOME)/lrose/include/toolsa/mem.h \
+		$(HOME)/lrose/include/toolsa/membuf.h \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
 		$(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/ansi.h \
