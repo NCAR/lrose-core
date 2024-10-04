@@ -32,6 +32,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Lucid.hh"
+#include "cidd.h"
 #include <QApplication>
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
@@ -39,7 +40,8 @@
 
 // file scope
 
-static void tidy_and_exit (int sig);
+static void init_signal_handlers();
+static void tidy_and_exit(int sig);
 static Lucid *Prog;
 static QApplication *app;
 
@@ -66,6 +68,10 @@ int main(int argc, char **argv)
     if (!Prog->OK) {
       return(-1);
     }
+
+    // set up signal handling
+
+    init_signal_handlers();
     
     // run it
     
@@ -91,4 +97,34 @@ static void tidy_and_exit (int sig)
   delete(Prog);
   umsleep(1000);
   exit(sig);
+}
+
+/*****************************************************************
+ * SIGNAL_TRAP : Traps Signals so as to die gracefully
+ */
+
+static void signal_trap(int signal)
+{
+  fprintf(stderr,"Lucid: received signal %d\n",signal);
+  exit(0);
+}
+
+/*****************************************************************
+ * SIGIO_TRAP : Traps IO Signal
+ */
+static void sigio_trap(int signal)
+{
+  signal = 0;
+  if(gd.io_info.outstanding_request) check_for_io();
+}
+
+/*****************************************************************
+ * INIT_SIGNAL_HANDLERS: 
+ */
+
+static void init_signal_handlers()
+{
+  PORTsignal(SIGINT,signal_trap);
+  PORTsignal(SIGTERM,signal_trap);
+  PORTsignal(SIGIO,sigio_trap);
 }

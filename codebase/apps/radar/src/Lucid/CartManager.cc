@@ -3900,11 +3900,9 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   if (gd.movie.frame[index].redraw_horiz) {
 #endif
     /* Draw Frame */
-    cerr << "XXXXXXXX index, page: " << index << ", " << gd.h_win.page << endl;
     if (gather_hwin_data(gd.h_win.page,
                          gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-      cerr << "YYYYYYYYYYY index, page: " << index << ", " << gd.h_win.page << endl;
       if (gd.h_win.redraw[gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
         _horiz->setFrameForRendering(gd.h_win.page, index);

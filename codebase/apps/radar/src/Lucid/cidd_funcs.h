@@ -114,51 +114,25 @@ extern void remote_new_mdv_avail(const char *name);
 extern void remote_new_spdb_avail(const char *name);
 #endif
 
-#ifndef CIDD_SIGNALS
-extern void signal_trap( int signal);
-extern void sigio_trap(int signal);
-extern void init_signal_handlers();
-#endif
+// #ifndef COLORSCALES
+// // extern void setup_colorscales(Display *dpy);
+// extern void setup_color_mapping(Valcolormap_t *vcm,
+// 				double scale, double bias, int transform_type,
+// 				double bad_value, double missing_value);
+// // extern GC Val2GC(Valcolormap_t *vcm, double val);
+// extern QBrush Val2Brush(Valcolormap_t *vcm, double val);
+// #endif
 
-#ifndef COLORSCALES
-// extern void setup_colorscales(Display *dpy);
-extern void setup_color_mapping(Valcolormap_t *vcm,
-				double scale, double bias, int transform_type,
-				double bad_value, double missing_value);
+#ifndef DATA_HANDLING
+extern int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
+extern int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
 extern void autoscale_vcm(Valcolormap_t *vcm, double min, double max);
-// extern GC Val2GC(Valcolormap_t *vcm, double val);
-extern QBrush Val2Brush(Valcolormap_t *vcm, double val);
-
-#endif
-
-#ifndef DATA_GATHER
+extern void check_for_io();
 extern int gather_hwin_data( int page, time_t start_time, time_t end_time);
 extern int gather_vwin_data( int page, time_t start_time, time_t end_time);
 extern void gather_symprod_data();
 extern void cancel_pending_request();
-#endif
-
-#ifndef DATA_INIT
-extern void init_data_links(const char *param_buf, long param_buf_len, long line_no);
-#endif
-
-#ifndef DATA_IO
-extern void check_for_io();
-#endif
-
-#ifndef DATA_PU_PROC
-// extern void set_data_proc( Panel_item item, int value, Event *event);
 extern void set_field(int value);
-// extern int set_group_proc(Panel_item item, const char *string, Xv_opaque client_data, Panel_list_op op, Event *event, int row);
-#endif
-
-#ifndef MDVX_DATA_REQUEST
-extern int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
-extern int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
-#endif
-
-#ifndef DRAW_EXPORT_INIT
-void init_draw_export_links();
 #endif
 
 #ifndef DRAW_PU_PROC

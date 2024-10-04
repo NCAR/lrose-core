@@ -38,7 +38,6 @@
 
 #include "Lucid.hh"
 #include "CartManager.hh"
-// #include "DisplayField.hh"
 #include "LegacyParams.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
@@ -72,10 +71,6 @@ Lucid::Lucid(int argc, char **argv) :
   // initialize legacy CIDD structs
   
   init_globals();
-
-  // initialize signal handling
-  
-  init_signal_handlers();  
 
   // check for legacy params file
   // if found create a temporary tdrp file based on the legacy file
@@ -205,18 +200,6 @@ Lucid::~Lucid()
 int Lucid::Run(QApplication &app)
 {
 
-  /* Establish color table & mappings  */
-
-  // setup_colorscales(gd.dpy);
-  
-  // Instantiate Symbolic products
-
-  // init_symprods();
-
-  /* make changes to objects for gui */
-  
-  // modify_gui_objects();
-  
   gd.finished_init = 1;
 
   // create cartesian display

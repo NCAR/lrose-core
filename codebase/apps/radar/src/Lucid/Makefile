@@ -110,6 +110,7 @@ NORM_SRCS = \
 	Croutes_P.cc \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
+	DataHandling.cc \
 	FieldTableItem.cc \
 	LegacyParams.cc \
 	Main.cc \
@@ -129,12 +130,7 @@ NORM_SRCS = \
 	cidd_init.cc \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
-	cidd_signals.cc \
 	contours.cc \
-	data_gather.cc \
-	data_io.cc \
-	data_pu_proc.cc \
-	draw_pu_proc.cc \
 	fields_pu_proc.cc \
 	graphic_canvas_events.cc \
 	graphic_canvas_events_bkwd.cc \
@@ -153,7 +149,6 @@ NORM_SRCS = \
 	gui_label_frame.cc \
 	gui_modify.cc \
 	h_win_proc.cc \
-	mdvx_data_request.cc \
 	movie_control.cc \
 	movie_frame_retrieve.cc \
 	movie_frame_save.cc \
