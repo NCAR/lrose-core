@@ -124,14 +124,11 @@ extern void remote_new_spdb_avail(const char *name);
 // #endif
 
 #ifndef DATA_HANDLING
-extern int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
-extern int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_time, int page);
-extern void autoscale_vcm(Valcolormap_t *vcm, double min, double max);
-extern void check_for_io();
 extern int gather_hwin_data( int page, time_t start_time, time_t end_time);
 extern int gather_vwin_data( int page, time_t start_time, time_t end_time);
-extern void gather_symprod_data();
+extern void check_for_io();
 extern void cancel_pending_request();
+extern void autoscale_vcm(Valcolormap_t *vcm, double min, double max);
 extern void set_field(int value);
 #endif
 

@@ -46,16 +46,377 @@ static void _checkForHorizData(met_record_t *mr);
 static void _checkForVertData(met_record_t *mr);
 static void _checkForTimelistData(met_record_t *mr);
 static void _checkForSymprodData();
+static int _mdvRequestHorizPlane(met_record_t *mr, time_t start_time,time_t end_time, int page);
+static int _mdvRequestVertPlane(met_record_t *mr, time_t start_time,time_t end_time, int page);
+
+/**********************************************************************
+ * GATHER_HWIN_DATA: Collect all the data necessary for horizontal 
+ *    display windows 
+ */
+
+int gather_hwin_data(int page, time_t start_time, time_t end_time)
+{
+  int i;
+  time_t now;
+  met_record_t *mr;       /* pointer to record for convienence */
+
+  now = time(0);
+  /* Check to make sure we are not currently waiting on an I/O request */
+  if(gd.io_info.outstanding_request > 0) {
+    if(now > gd.io_info.expire_time) {
+      cancel_pending_request();
+      return CIDD_FAILURE;
+    }
+    return INCOMPLETE;
+  }
+
+  // MAIN GRID
+  mr = gd.mrec[page];    /* get pointer to data record */
+  if(mr->h_data_valid == 0) {
+    if(gd.debug1) {
+      fprintf(stderr,
+              "Requesting Data Field %d data time %s %s\n",
+              page, utimstr(start_time), utimstr(end_time));
+    }
+    gd.data_status_changed = 0;
+    if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
+      return CIDD_FAILURE;
+    } else {
+      return INCOMPLETE;
+    }
+  }
+
+  // TERRAIN GRID
+  if(gd.layers.earth.terrain_active && mr->ds_fhdr.nz > 1) {
+    mr = gd.layers.earth.terr;    /* get pointer to data record */
+    if(mr->h_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr,
+                "Requesting Terrain data time %ld %ld\n",
+                start_time, end_time);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  } 
+
+  // LANDUSE GRID
+  if(gd.layers.earth.landuse_active) {
+    mr = gd.layers.earth.land_use;    /* get pointer to data record */
+    if(mr->h_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr,
+                "Requesting Landuse data time %ld %ld\n",
+                start_time,end_time);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  } 
+
+  /* LAYERED GRIDS -  Request any needed data for gridded layers */
+  for(i=0; i < NUM_GRID_LAYERS; i++) {
+    if(gd.layers.overlay_field_on[i]) {
+      mr = gd.mrec[gd.layers.overlay_field[i]];
+      if(mr->h_data_valid == 0) {
+        if(gd.debug1) {
+          fprintf(stderr,
+                  "Requesting Overlay Field %d data\n",
+                  gd.layers.overlay_field[i]);
+        }
+        gd.data_status_changed = 0;
+        _mdvRequestHorizPlane(mr,start_time,end_time,page);
+        return INCOMPLETE;
+      }
+    }
+  }
+
+  /* CONTOURS: request any needed data for contours */
+  for(i=0; i < NUM_CONT_LAYERS; i++) {
+    if(gd.layers.cont[i].active) {
+      mr = gd.mrec[gd.layers.cont[i].field];
+      if(mr->h_data_valid == 0) {
+        if(gd.debug1) {
+          fprintf(stderr,
+                  "Requesting Contour Layer %d, field %d data\n",
+                  i, gd.layers.cont[i].field);
+        }
+        gd.data_status_changed = 0;
+        _mdvRequestHorizPlane(mr,start_time,end_time,page);
+        return INCOMPLETE;
+      }
+    }
+  }
+
+  // WINDS
+  for(i=0; i < gd.layers.num_wind_sets; i++) {
+    switch(gd.layers.wind_mode) {
+      default:
+      case WIND_MODE_ON:  /* gather data as usual */
+        break;
+
+      case WIND_MODE_LAST: /* Gather data for last frame only */
+        if(gd.movie.cur_frame != gd.movie.end_frame) continue;
+        break;
+
+      case WIND_MODE_STILL: /* Gather data for the last frame only
+                             * if the movie loop is off
+                             */
+        if(gd.movie.movie_on || gd.movie.cur_frame != gd.movie.end_frame) continue;
+        break;
+    }
+
+    if(gd.layers.wind_vectors  && gd.layers.wind[i].active ) {
+      mr = gd.layers.wind[i].wind_u;
+      if(mr->h_data_valid == 0) {
+        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - U\n", i);
+        gd.data_status_changed = 0;
+        _mdvRequestHorizPlane(mr,start_time,end_time,page);
+        return INCOMPLETE;
+      }
+    
+      mr = gd.layers.wind[i].wind_v;
+      if(mr->h_data_valid == 0) {
+        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - V\n", i);
+        gd.data_status_changed = 0;
+        _mdvRequestHorizPlane(mr,start_time,end_time,page);
+        return INCOMPLETE;
+      }
+    
+      mr = gd.layers.wind[i].wind_w;
+      if(mr != NULL) {
+        if(mr->h_data_valid == 0) {
+          if(gd.debug1) fprintf(stderr, "Requesting Wind %d  data - W\n", i);
+          gd.data_status_changed = 0;
+          _mdvRequestHorizPlane(mr,start_time,end_time,page);
+          return INCOMPLETE;
+        }
+      }
+    }
+  }
+
+  // Native SYMPROD DATA Gather
+  if(gd.prod.products_on) {
+    if(_params.symprod_short_requests) { 
+      return gd.prod_mgr->getData(start_time, end_time);
+    } else {
+      return gd.prod_mgr->getData(gd.epoch_start, gd.epoch_end);
+    }
+  } else {
+    return CIDD_SUCCESS;
+  }
+    
+}
+
+/**********************************************************************
+ * GATHER_VWIN_DATA: Collect all the data necessary for vertical 
+ *    display windows 
+ *
+ */
+
+int gather_vwin_data(int page, time_t start_time, time_t end_time)
+{
+  int    i;
+  met_record_t *mr;       /* pointer to record for convienence */
+  time_t now;
+
+  now = time(0);
+  /* Check to make sure we are not currently waiting on an I/O request */
+  if(gd.io_info.outstanding_request) {
+    if(now > gd.io_info.expire_time) {
+      cancel_pending_request();
+      return CIDD_FAILURE;
+    }
+    return INCOMPLETE;
+  }
+     
+  // MAIN GRID
+  mr = gd.mrec[page];    /* get pointer to data record */
+  if(mr->v_data_valid == 0) {
+    if(mr->h_data_valid == 0) {  // Need Header info obtained from horiz request
+      if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+	    
+    if(gd.debug1) fprintf(stderr, "Requesting False Color Field %d data\n", page);
+    gd.data_status_changed = 0;
+    if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+      return CIDD_FAILURE;
+    } else {
+      return INCOMPLETE;
+    }
+  }
+
+  // TERRAIN GRID
+  if(gd.layers.earth.terrain_active) {
+    mr = gd.layers.earth.terr;    /* get pointer to data record */
+    if(mr->v_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr,
+                "Requesting Terrain cross section data time %ld %ld\n",
+                start_time,end_time);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  } 
+
+  // Land use is not valid in cross section
+
+  // CONTOURS
+  for(i=0; i < NUM_CONT_LAYERS ; i++) {
+    if(gd.layers.cont[i].active) {
+      mr = gd.mrec[gd.layers.cont[i].field];
+      if(mr->v_data_valid == 0) {
+        if(gd.debug1) {
+          fprintf(stderr,
+                  "Requesting VERT Contour Field %d data\n",
+                  gd.layers.cont[i].field);
+        }
+        gd.data_status_changed = 0;
+        if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+          return CIDD_FAILURE;
+        } else {
+          return INCOMPLETE;
+        }
+      }
+    }
+  }
+
+  // ROUTE WINDs, TURBULENCE, ICING
+  if(gd.layers.route_wind.u_wind != NULL) {
+    mr = gd.layers.route_wind.u_wind;
+    if(mr->v_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr, "Requesting  %s Route data \n",mr->legend_name);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  }
+
+  if(gd.layers.route_wind.v_wind != NULL) {
+    mr = gd.layers.route_wind.v_wind;
+    if(mr->v_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr, "Requesting  %s Route data \n",mr->legend_name);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  }
+
+  if(gd.layers.route_wind.turb != NULL) {
+    mr = gd.layers.route_wind.turb;
+    if(mr->v_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr, "Requesting - %s Route data \n",mr->legend_name);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  }
+
+  if(gd.layers.route_wind.icing != NULL) {
+    mr = gd.layers.route_wind.icing;
+    if(mr->v_data_valid == 0) {
+      if(gd.debug1) {
+        fprintf(stderr, "Requesting Route Icing  - %s data\n",mr->legend_name);
+      }
+      gd.data_status_changed = 0;
+      if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+        return CIDD_FAILURE;
+      } else {
+        return INCOMPLETE;
+      }
+    }
+  }
+  
+  // WINDS
+  for(i=0; i < gd.layers.num_wind_sets; i++) {
+    if(gd.layers.wind_vectors  && gd.layers.wind[i].active) {
+      mr = gd.layers.wind[i].wind_u;
+      if(mr->v_data_valid == 0) {
+        if(gd.debug1) {
+          fprintf(stderr, "Requesting Wind %d - %s data - U\n", i,mr->legend_name);
+        }
+        gd.data_status_changed = 0;
+        if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+          return CIDD_FAILURE;
+        } else {
+          return INCOMPLETE;
+        }
+      }
+    
+      mr = gd.layers.wind[i].wind_v;
+      if(mr->v_data_valid == 0) {
+        if(gd.debug1) {
+          fprintf(stderr, "Requesting Wind %d - %s  data - V\n", i,mr->legend_name);
+        }
+        gd.data_status_changed = 0;
+        if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+          return CIDD_FAILURE;
+        } else {
+          return INCOMPLETE;
+        }
+      }
+    
+      mr = gd.layers.wind[i].wind_w;
+      if(mr != NULL) {
+        if(mr->v_data_valid == 0) {
+          if(gd.debug1) {
+            fprintf(stderr, "Requesting Wind %d - %s data - W\n", i,mr->legend_name);
+          }
+          gd.data_status_changed = 0;
+          if(_mdvRequestVertPlane(mr,start_time,end_time,page) < 0) {
+            return CIDD_FAILURE;
+          } else {
+            return INCOMPLETE;
+          }
+        }
+      }
+    }
+  }
+
+  return CIDD_SUCCESS;
+}
 
 /**********************************************************************
  * REQUEST_HORIZ_DATA_PLANE: Query the server for a data plane
  *
  */
 
-int mdvx_request_horiz_data_plane(met_record_t *mr,
-                                  time_t start_time,
-                                  time_t end_time,
-                                  int page)
+int _mdvRequestHorizPlane(met_record_t *mr,
+                          time_t start_time,
+                          time_t end_time,
+                          int page)
 {
 
   // Construct URL, check is valid.
@@ -238,10 +599,10 @@ int mdvx_request_horiz_data_plane(met_record_t *mr,
  *
  */
 
-int mdvx_request_vert_data_plane(met_record_t *mr,
-                                 time_t start_time,
-                                 time_t end_time,
-                                 int page)
+int _mdvRequestVertPlane(met_record_t *mr,
+                         time_t start_time,
+                         time_t end_time,
+                         int page)
 {
 
   // Construct URL, check is valid.
@@ -592,365 +953,6 @@ void check_for_io()
       
   } // switch
 
-}
-
-/**********************************************************************
- * GATHER_HWIN_DATA: Collect all the data necessary for horizontal 
- *    display windows 
- */
-
-int gather_hwin_data(int page, time_t start_time, time_t end_time)
-{
-  int i;
-  time_t now;
-  met_record_t *mr;       /* pointer to record for convienence */
-
-  now = time(0);
-  /* Check to make sure we are not currently waiting on an I/O request */
-  if(gd.io_info.outstanding_request > 0) {
-    if(now > gd.io_info.expire_time) {
-      cancel_pending_request();
-      return CIDD_FAILURE;
-    }
-    return INCOMPLETE;
-  }
-
-  // MAIN GRID
-  mr = gd.mrec[page];    /* get pointer to data record */
-  if(mr->h_data_valid == 0) {
-    if(gd.debug1) {
-      fprintf(stderr,
-              "Requesting Data Field %d data time %s %s\n",
-              page, utimstr(start_time), utimstr(end_time));
-    }
-    gd.data_status_changed = 0;
-    if(mdvx_request_horiz_data_plane(mr,start_time,end_time,page) < 0) {
-      return CIDD_FAILURE;
-    } else {
-      return INCOMPLETE;
-    }
-  }
-
-  // TERRAIN GRID
-  if(gd.layers.earth.terrain_active && mr->ds_fhdr.nz > 1) {
-    mr = gd.layers.earth.terr;    /* get pointer to data record */
-    if(mr->h_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr,
-                "Requesting Terrain data time %ld %ld\n",
-                start_time, end_time);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_horiz_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  } 
-
-  // LANDUSE GRID
-  if(gd.layers.earth.landuse_active) {
-    mr = gd.layers.earth.land_use;    /* get pointer to data record */
-    if(mr->h_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr,
-                "Requesting Landuse data time %ld %ld\n",
-                start_time,end_time);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_horiz_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  } 
-
-  /* LAYERED GRIDS -  Request any needed data for gridded layers */
-  for(i=0; i < NUM_GRID_LAYERS; i++) {
-    if(gd.layers.overlay_field_on[i]) {
-      mr = gd.mrec[gd.layers.overlay_field[i]];
-      if(mr->h_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr,
-                  "Requesting Overlay Field %d data\n",
-                  gd.layers.overlay_field[i]);
-        }
-        gd.data_status_changed = 0;
-        mdvx_request_horiz_data_plane(mr,start_time,end_time,page);
-        return INCOMPLETE;
-      }
-    }
-  }
-
-  /* CONTOURS: request any needed data for contours */
-  for(i=0; i < NUM_CONT_LAYERS; i++) {
-    if(gd.layers.cont[i].active) {
-      mr = gd.mrec[gd.layers.cont[i].field];
-      if(mr->h_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr,
-                  "Requesting Contour Layer %d, field %d data\n",
-                  i, gd.layers.cont[i].field);
-        }
-        gd.data_status_changed = 0;
-        mdvx_request_horiz_data_plane(mr,start_time,end_time,page);
-        return INCOMPLETE;
-      }
-    }
-  }
-
-  // WINDS
-  for(i=0; i < gd.layers.num_wind_sets; i++) {
-    switch(gd.layers.wind_mode) {
-      default:
-      case WIND_MODE_ON:  /* gather data as usual */
-        break;
-
-      case WIND_MODE_LAST: /* Gather data for last frame only */
-        if(gd.movie.cur_frame != gd.movie.end_frame) continue;
-        break;
-
-      case WIND_MODE_STILL: /* Gather data for the last frame only
-                             * if the movie loop is off
-                             */
-        if(gd.movie.movie_on || gd.movie.cur_frame != gd.movie.end_frame) continue;
-        break;
-    }
-
-    if(gd.layers.wind_vectors  && gd.layers.wind[i].active ) {
-      mr = gd.layers.wind[i].wind_u;
-      if(mr->h_data_valid == 0) {
-        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - U\n", i);
-        gd.data_status_changed = 0;
-        mdvx_request_horiz_data_plane(mr,start_time,end_time,page);
-        return INCOMPLETE;
-      }
-    
-      mr = gd.layers.wind[i].wind_v;
-      if(mr->h_data_valid == 0) {
-        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - V\n", i);
-        gd.data_status_changed = 0;
-        mdvx_request_horiz_data_plane(mr,start_time,end_time,page);
-        return INCOMPLETE;
-      }
-    
-      mr = gd.layers.wind[i].wind_w;
-      if(mr != NULL) {
-        if(mr->h_data_valid == 0) {
-          if(gd.debug1) fprintf(stderr, "Requesting Wind %d  data - W\n", i);
-          gd.data_status_changed = 0;
-          mdvx_request_horiz_data_plane(mr,start_time,end_time,page);
-          return INCOMPLETE;
-        }
-      }
-    }
-  }
-
-  // Native SYMPROD DATA Gather
-  if(gd.prod.products_on) {
-    if(_params.symprod_short_requests) { 
-      return gd.prod_mgr->getData(start_time, end_time);
-    } else {
-      return gd.prod_mgr->getData(gd.epoch_start, gd.epoch_end);
-    }
-  } else {
-    return CIDD_SUCCESS;
-  }
-    
-}
-
-/**********************************************************************
- * GATHER_VWIN_DATA: Collect all the data necessary for vertical 
- *    display windows 
- *
- */
-
-int gather_vwin_data(int page, time_t start_time, time_t end_time)
-{
-  int    i;
-  met_record_t *mr;       /* pointer to record for convienence */
-  time_t now;
-
-  now = time(0);
-  /* Check to make sure we are not currently waiting on an I/O request */
-  if(gd.io_info.outstanding_request) {
-    if(now > gd.io_info.expire_time) {
-      cancel_pending_request();
-      return CIDD_FAILURE;
-    }
-    return INCOMPLETE;
-  }
-     
-  // MAIN GRID
-  mr = gd.mrec[page];    /* get pointer to data record */
-  if(mr->v_data_valid == 0) {
-    if(mr->h_data_valid == 0) {  // Need Header info obtained from horiz request
-      if(mdvx_request_horiz_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-	    
-    if(gd.debug1) fprintf(stderr, "Requesting False Color Field %d data\n", page);
-    gd.data_status_changed = 0;
-    if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-      return CIDD_FAILURE;
-    } else {
-      return INCOMPLETE;
-    }
-  }
-
-  // TERRAIN GRID
-  if(gd.layers.earth.terrain_active) {
-    mr = gd.layers.earth.terr;    /* get pointer to data record */
-    if(mr->v_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr,
-                "Requesting Terrain cross section data time %ld %ld\n",
-                start_time,end_time);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  } 
-
-  // Land use is not valid in cross section
-
-  // CONTOURS
-  for(i=0; i < NUM_CONT_LAYERS ; i++) {
-    if(gd.layers.cont[i].active) {
-      mr = gd.mrec[gd.layers.cont[i].field];
-      if(mr->v_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr,
-                  "Requesting VERT Contour Field %d data\n",
-                  gd.layers.cont[i].field);
-        }
-        gd.data_status_changed = 0;
-        if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-          return CIDD_FAILURE;
-        } else {
-          return INCOMPLETE;
-        }
-      }
-    }
-  }
-
-  // ROUTE WINDs, TURBULENCE, ICING
-  if(gd.layers.route_wind.u_wind != NULL) {
-    mr = gd.layers.route_wind.u_wind;
-    if(mr->v_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr, "Requesting  %s Route data \n",mr->legend_name);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  }
-
-  if(gd.layers.route_wind.v_wind != NULL) {
-    mr = gd.layers.route_wind.v_wind;
-    if(mr->v_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr, "Requesting  %s Route data \n",mr->legend_name);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  }
-
-  if(gd.layers.route_wind.turb != NULL) {
-    mr = gd.layers.route_wind.turb;
-    if(mr->v_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr, "Requesting - %s Route data \n",mr->legend_name);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  }
-
-  if(gd.layers.route_wind.icing != NULL) {
-    mr = gd.layers.route_wind.icing;
-    if(mr->v_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr, "Requesting Route Icing  - %s data\n",mr->legend_name);
-      }
-      gd.data_status_changed = 0;
-      if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-        return CIDD_FAILURE;
-      } else {
-        return INCOMPLETE;
-      }
-    }
-  }
-  
-  // WINDS
-  for(i=0; i < gd.layers.num_wind_sets; i++) {
-    if(gd.layers.wind_vectors  && gd.layers.wind[i].active) {
-      mr = gd.layers.wind[i].wind_u;
-      if(mr->v_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr, "Requesting Wind %d - %s data - U\n", i,mr->legend_name);
-        }
-        gd.data_status_changed = 0;
-        if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-          return CIDD_FAILURE;
-        } else {
-          return INCOMPLETE;
-        }
-      }
-    
-      mr = gd.layers.wind[i].wind_v;
-      if(mr->v_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr, "Requesting Wind %d - %s  data - V\n", i,mr->legend_name);
-        }
-        gd.data_status_changed = 0;
-        if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-          return CIDD_FAILURE;
-        } else {
-          return INCOMPLETE;
-        }
-      }
-    
-      mr = gd.layers.wind[i].wind_w;
-      if(mr != NULL) {
-        if(mr->v_data_valid == 0) {
-          if(gd.debug1) {
-            fprintf(stderr, "Requesting Wind %d - %s data - W\n", i,mr->legend_name);
-          }
-          gd.data_status_changed = 0;
-          if(mdvx_request_vert_data_plane(mr,start_time,end_time,page) < 0) {
-            return CIDD_FAILURE;
-          } else {
-            return INCOMPLETE;
-          }
-        }
-      }
-    }
-  }
-
-  return CIDD_SUCCESS;
 }
 
 /**********************************************************************
