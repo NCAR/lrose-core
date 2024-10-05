@@ -72,12 +72,12 @@ void reset_terrain_valid_flags(int hflag,int vflag)
   if(hflag) {
     if(gd.layers.earth.terrain_active) {
       gd.layers.earth.terr->h_data_valid = 0;
-      gd.layers.earth.terr->h_date.unix_time = 0;
+      gd.layers.earth.terr->h_date.setToZero();
     }
 
     if(gd.layers.earth.landuse_active) {
       gd.layers.earth.land_use->h_data_valid = 0;
-      gd.layers.earth.land_use->h_date.unix_time = 0;
+      gd.layers.earth.land_use->h_date.setToZero();
     }
   }
 
@@ -85,7 +85,7 @@ void reset_terrain_valid_flags(int hflag,int vflag)
 
     if(gd.layers.earth.terrain_active) {
       gd.layers.earth.terr->v_data_valid = 0;
-      gd.layers.earth.terr->v_date.unix_time = 0;
+      gd.layers.earth.terr->v_date.setToZero();
     }
 
   }
@@ -153,18 +153,18 @@ void reset_data_valid_flags(int hflag,int vflag)
         gd.mrec[i]->h_data_valid = 1;
       } else {
         gd.mrec[i]->h_data_valid = 0;
-        gd.mrec[i]->h_date.unix_time = 0;
+        gd.mrec[i]->h_date.setToZero();
       }
     }
 
     for(i=0; i < gd.layers.num_wind_sets; i++) {
       gd.layers.wind[i].wind_u->h_data_valid = 0;
-      gd.layers.wind[i].wind_u->h_date.unix_time = 0;
+      gd.layers.wind[i].wind_u->h_date.setToZero();
       gd.layers.wind[i].wind_v->h_data_valid = 0;
-      gd.layers.wind[i].wind_v->h_date.unix_time = 0;
+      gd.layers.wind[i].wind_v->h_date.setToZero();
       if(gd.layers.wind[i].wind_w != NULL) {
         gd.layers.wind[i].wind_w->h_data_valid = 0;
-        gd.layers.wind[i].wind_w->h_date.unix_time = 0;
+        gd.layers.wind[i].wind_w->h_date.setToZero();
       }
     }
 
@@ -176,49 +176,49 @@ void reset_data_valid_flags(int hflag,int vflag)
         gd.mrec[i]->v_data_valid = 1;
       } else {
         gd.mrec[i]->v_data_valid = 0;
-        gd.mrec[i]->v_date.unix_time = 0;
+        gd.mrec[i]->v_date.setToZero();
       }
     }
 
     if(gd.layers.earth.terrain_active) {
       gd.layers.earth.terr->v_data_valid = 0;
-      gd.layers.earth.terr->v_date.unix_time = 0;
+      gd.layers.earth.terr->v_date.setToZero();
     }
 
     if(gd.layers.route_wind.u_wind != NULL) {
       gd.layers.route_wind.u_wind->v_data_valid = 0;
-      gd.layers.route_wind.u_wind->v_date.unix_time = 0;
+      gd.layers.route_wind.u_wind->v_date.setToZero();
     }
 
     if(gd.layers.route_wind.v_wind != NULL) {
       gd.layers.route_wind.v_wind->v_data_valid = 0;
-      gd.layers.route_wind.v_wind->v_date.unix_time = 0;
+      gd.layers.route_wind.v_wind->v_date.setToZero();
     }
 
     if(gd.layers.route_wind.turb != NULL) {
       gd.layers.route_wind.turb->v_data_valid = 0;
-      gd.layers.route_wind.turb->v_date.unix_time = 0;
+      gd.layers.route_wind.turb->v_date.setToZero();
     }
 
     if(gd.layers.route_wind.icing != NULL) {
       gd.layers.route_wind.icing->v_data_valid = 0;
-      gd.layers.route_wind.icing->v_date.unix_time = 0;
+      gd.layers.route_wind.icing->v_date.setToZero();
     }
 
     for(i=0; i < gd.layers.num_wind_sets; i++) {
       if(gd.layers.wind[i].wind_u != NULL) {
         gd.layers.wind[i].wind_u->v_data_valid = 0;
-        gd.layers.wind[i].wind_u->v_date.unix_time = 0;
+        gd.layers.wind[i].wind_u->v_date.setToZero();
       }
 
       if(gd.layers.wind[i].wind_v != NULL) {
         gd.layers.wind[i].wind_v->v_data_valid = 0;
-        gd.layers.wind[i].wind_v->v_date.unix_time = 0;
+        gd.layers.wind[i].wind_v->v_date.setToZero();
       }
 
       if(gd.layers.wind[i].wind_w != NULL) {
         gd.layers.wind[i].wind_w->v_data_valid = 0;
-        gd.layers.wind[i].wind_w->v_date.unix_time = 0;
+        gd.layers.wind[i].wind_w->v_date.setToZero();
       }
     }
   }

@@ -1285,7 +1285,6 @@ moc_VertWidget.cpp: VertWidget.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		moc_predefs.h \
@@ -1358,7 +1357,6 @@ moc_VertWindow.cpp: VertWindow.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		moc_predefs.h \
@@ -3642,7 +3640,6 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		VertWindow.hh \
@@ -3662,6 +3659,7 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/Path.hh \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
+		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/umisc.h \
 		$(HOME)/lrose/include/toolsa/port.h \
 		$(HOME)/lrose/include/toolsa/ushmem.h \
@@ -3799,7 +3797,6 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		cidd_field_data.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		cidd.h \
@@ -3818,6 +3815,7 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/toolsa/Path.hh \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
+		$(HOME)/lrose/include/toolsa/utim.h \
 		$(HOME)/lrose/include/toolsa/umisc.h \
 		$(HOME)/lrose/include/toolsa/port.h \
 		$(HOME)/lrose/include/toolsa/ushmem.h \

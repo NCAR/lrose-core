@@ -76,10 +76,11 @@ const char * field_label( met_record_t *mr)
     static char label[2048];
 
     /* Convert to a string */
+    time_t utime = mr->h_date.utime();
     if(_params.use_local_timestamps) {
-      strftime(tlabel,256,_params.label_time_format,localtime_r(&mr->h_date.unix_time,&tms));
+      strftime(tlabel,256,_params.label_time_format,localtime_r(&utime,&tms));
     } else {
-      strftime(tlabel,256,_params.label_time_format,gmtime_r(&mr->h_date.unix_time,&tms));
+      strftime(tlabel,256,_params.label_time_format,gmtime_r(&utime,&tms));
     }
 
     // now = time(NULL);

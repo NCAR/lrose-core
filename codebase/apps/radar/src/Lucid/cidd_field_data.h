@@ -28,7 +28,7 @@
 #ifndef CIDD_FIELD_DATA_H
 #define CIDD_FIELD_DATA_H
 
-#include <toolsa/utim.h>
+#include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 
 class ColorMap;
@@ -107,10 +107,8 @@ public:
     h_fl32_data = NULL;
     v_fl32_data = NULL;
 
-    // MEM_zero(time_list);
-    
-    MEM_zero(h_date);
-    MEM_zero(v_date);
+    h_date.setToNever();
+    v_date.setToNever();
     
     proj = NULL;
 
@@ -215,8 +213,8 @@ public:
   Valcolormap_t h_vcm; /* Data value to X color info */
   Valcolormap_t v_vcm; /* Data value to X color info */
   
-  UTIMstruct h_date; /* date and time stamp of latest data - Horiz */
-  UTIMstruct v_date; /* date and time stamp of latest data - Vert */
+  DateTime h_date; /* date and time stamp of latest data - Horiz */
+  DateTime v_date; /* date and time stamp of latest data - Vert */
   
   MdvxProj *proj; /* Pointer to projection class */
   

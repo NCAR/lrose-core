@@ -1369,7 +1369,8 @@ static void _checkForHorizData(met_record_t *mr)
           mr->h_mdvx->vertTypeZUnits(mr->h_vhdr.type[0]),LABEL_LENGTH);
     
   // Record the date
-  UTIMunix_to_date(mr->h_mhdr.time_centroid,&mr->h_date);
+  mr->h_date.set(mr->h_mhdr.time_centroid);
+  // UTIMunix_to_date(mr->h_mhdr.time_centroid,&mr->h_date);
     
   mr->h_data_valid = 1;
   mr->last_collected = time(0);
@@ -1533,7 +1534,7 @@ static void _checkForVertData(met_record_t *mr)
   }
   
   // Record the date
-  UTIMunix_to_date(mr->v_mhdr.time_centroid,&mr->v_date);
+  mr->v_date.set(mr->v_mhdr.time_centroid);
   
   // Record the actual way points returned, if it's the key field .
   if (gd.mrec[gd.h_win.page] == mr) {

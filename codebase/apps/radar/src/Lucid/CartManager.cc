@@ -3339,7 +3339,7 @@ void CartManager::_checkForDataUpdates(time_t tm)
 	// See if any data matches
 	if(strstr(info.dir,dir_buf) != NULL) {
           // Note unix_time is signed (time_t)  and info.end_time is unsigned int
-          if (gd.mrec[i]->h_date.unix_time < (int) info.end_time) {
+          if (gd.mrec[i]->h_date.utime() < (time_t) info.end_time) {
             gd.mrec[i]->h_data_valid = 0;
             gd.mrec[i]->v_data_valid = 0;
           }
@@ -3371,7 +3371,7 @@ void CartManager::_checkForDataUpdates(time_t tm)
           // See if any data matches
           if(strstr(info.dir,dir_buf) != NULL) {
             // Check if that data is more current
-            if (gd.layers.wind[i].wind_u->h_date.unix_time < (int) info.end_time) {
+            if (gd.layers.wind[i].wind_u->h_date.utime() < (time_t) info.end_time) {
               gd.layers.wind[i].wind_u->h_data_valid = 0;
               gd.layers.wind[i].wind_u->v_data_valid = 0;
               gd.layers.wind[i].wind_v->h_data_valid = 0;
