@@ -76,6 +76,8 @@ public:
 
   void setToNever(); // sets to invalid
 
+  void setToZero(); // sets to 0 = 1970/01/01_00:00:00
+
   void set(time_t when);
  
   void set(time_t when, double subSec);
