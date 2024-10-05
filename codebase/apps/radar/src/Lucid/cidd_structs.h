@@ -27,91 +27,89 @@
  * CIDD_STRUCTS.H:  Misc Data structure defns for CIDD
  */
 
-typedef struct {    /* Vertical Spacing Information */
-  double min, cent, max;
-} vert_spacing_t;
+class vert_spacing_t {    /* Vertical Spacing Information */
+public:
+  vert_spacing_t() {
+    min = 0.0;
+    cent = 0.0;
+    max = 0.0;
+  }
+  double min;
+  double cent;
+  double max;
+};
 
-typedef struct {    /* Dynamic Data Status info */
-  int  is_dynamic;
+class status_msg_t {    /* Dynamic Data Status info */
+public:
+  status_msg_t() {
+    is_dynamic = 0;
+    last_accessed = 0;
+    memset(stat_msg, 0, sizeof(stat_msg));
+    status_fname = NULL;
+  }
+  int is_dynamic;
   time_t last_accessed;
   char stat_msg[TITLE_LENGTH];
   const char *status_fname;
-} status_msg_t;
+};
 
-// typedef struct {  // Menu Bar - NOTE: Only 32 bits can be defined!
-//     int num_menu_bar_cells;
-//     u_int last_callback_value;
-
-//     int loop_onoff_bit;     // Menu bar cell numbers
-//     int winds_onoff_bit;    // 0 == Not used
-//     int symprods_onoff_bit; 
-//     int show_forecast_menu_bit;
-//     int print_button_bit;
-//     int help_button_bit;
-//     int show_time_panel_bit;
-//     int show_dpd_menu_bit;
-//     int show_dpd_panel_bit;
-//     int show_view_menu_bit; // 10
-//     int show_xsect_panel_bit;
-//     int show_grid_panel_bit;
-//     int show_map_menu_bit;
-//     int show_bookmark_menu_bit;
-//     int reload_bit;
-//     int set_draw_mode_bit;
-//     int reset_bit;
-//     int set_to_now_bit;
-//     int show_prod_menu_bit;
-//     int show_status_win_bit; // 20
-//     int show_gen_time_win_bit;
-//     int close_popups_bit;
-//     int report_mode_bit;
-//     int exit_button_bit;
-//     int clone_button_bit;
-//     int show_past_menu_bit;
-//     int show_cmd_menu_bit;
-//     int snapshot_bit;   
-//     int landuse_onoff_bit;  // 29
-//     int set_route_mode_bit; //30
-//     int set_pick_mode_bit; //31
-//     int zoom_back_bit;  // 32
-
-// } menu_bar_t;
-
-/**********************************************************************
- * CIDD_STRUCTS.H:  Misc Data structure defns for CIDD
- */
-
-
-typedef struct { // Bookmarks
+class bookmark_t { // Bookmarks
+public:
+  bookmark_t() {
+    label = NULL;
+    url = NULL;
+  }
   const char *label;
   const char *url;
-} bookmark_t;
-
-typedef struct { // Draw-Export
-  int  default_serial_no;
-  double  default_valid_minutes;
-  time_t	data_time;
-  char *product_id_label;
-  char *product_label_text;
-  char *product_fmq_url;
-  char *param_line;
-} draw_export_info_t;
+};
 
 typedef struct {
   double lat;
   double lon;
 } world_pt_t;
 
-typedef struct { // Draw-Export
+class draw_export_info_t { // Draw-Export
+public:
+  draw_export_info_t() {
+    default_serial_no = 0;
+    default_valid_minutes = 0.0;
+    data_time = 0;
+    product_id_label = NULL;
+    product_label_text = NULL;
+    product_fmq_url = NULL;
+    param_line = NULL;
+  }
+  int default_serial_no;
+  double default_valid_minutes;
+  time_t data_time;
+  char *product_id_label;
+  char *product_label_text;
+  char *product_fmq_url;
+  char *param_line;
+};
+
+class draw_export_t { // Draw-Export
+public:
+  draw_export_t() {
+    num_draw_products = 0;
+    cur_draw_product = 0;
+    dexport = NULL;
+  }
   int num_draw_products;
   int cur_draw_product;
   draw_export_info_t *dexport;
-} draw_export_t;
+};
 
-typedef struct { // Time-List
+class time_list_t { // Time-List
+public:
+  time_list_t() {
+    num_entries = 0;
+    num_alloc_entries = 0;
+    tim = NULL;
+  }
   unsigned int num_entries;
   unsigned int num_alloc_entries;
   time_t *tim;
-} time_list_t;
+};
 
 #endif

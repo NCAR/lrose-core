@@ -144,8 +144,8 @@ void VertWindow::_createActions(VertWidget *vert)
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
   _ringsAct->setChecked(_params.vert_range_rings_on_at_startup);
-  connect(_ringsAct, SIGNAL(triggered(bool)),
-	  vert, SLOT(setRings(bool)));
+  // connect(_ringsAct, SIGNAL(triggered(bool)),
+  //         vert, SLOT(setRings(bool)));
 
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
@@ -158,8 +158,8 @@ void VertWindow::_createActions(VertWidget *vert)
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.vert_elevation_lines_on_at_startup);
-  connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  vert, SLOT(setAngleLines(bool)));
+  // connect(_azLinesAct, SIGNAL(triggered(bool)),
+  //         vert, SLOT(setAngleLines(bool)));
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));

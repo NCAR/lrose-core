@@ -210,7 +210,7 @@ int init_data_space()
   // Bookmarks for a menu of URLS - Index starts at 1
   
   if(_params.bookmarks_n > 0) {
-    gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),_params.bookmarks_n);
+    gd.bookmark = new bookmark_t[_params.bookmarks_n];
   }
   for(int ii = 0; ii < _params.bookmarks_n; ii++) {
     gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
@@ -1114,8 +1114,7 @@ static void _initDrawExport()
 {
 
   gd.draw.num_draw_products = _params.draw_export_info_n;
-  gd.draw.dexport = (draw_export_info_t *)
-    calloc(gd.draw.num_draw_products, sizeof(draw_export_info_t));
+  gd.draw.dexport = new draw_export_info_t[gd.draw.num_draw_products];
   if (gd.draw.dexport == NULL) {
     fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
             gd.draw.num_draw_products);
@@ -2816,7 +2815,7 @@ void init_globals()
 
   MEM_zero(gd.data_info);
   
-  MEM_zero(gd.gen_time_list);
+  // MEM_zero(gd.gen_time_list);
 
   MEM_zero(gd.h_win);
   MEM_zero(gd.v_win);
@@ -2841,8 +2840,8 @@ void init_globals()
   gd.bookmark = NULL;
   MEM_zero(gd.movie);
   MEM_zero(gd.io_info);
-  MEM_zero(gd.status);
-  MEM_zero(gd.draw);
+  // MEM_zero(gd.status);
+  // MEM_zero(gd.draw);
 
   gd.coord_expt = NULL;
   gd.prod_mgr = NULL;

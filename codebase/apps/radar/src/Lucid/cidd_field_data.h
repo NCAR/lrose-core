@@ -58,7 +58,7 @@ public:
     detail_thresh_min = 0.0;
     detail_thresh_max = 0.0;
 
-    MEM_zero(vert);
+    // MEM_zero(vert);
 
     ht_pixel = 0.0;
     y_intercept = 0.0;
@@ -107,7 +107,7 @@ public:
     h_fl32_data = NULL;
     v_fl32_data = NULL;
 
-    MEM_zero(time_list);
+    // MEM_zero(time_list);
     
     MEM_zero(h_date);
     MEM_zero(v_date);
