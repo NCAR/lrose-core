@@ -126,7 +126,8 @@ CartManager::CartManager() :
 
   _timerEventCount = 0;
   _guiSizeInitialized = false;
-
+  _archiveMode = true;
+  
   m_pInstance = this;
 
   // initialize
@@ -2293,6 +2294,8 @@ void CartManager::_createFieldMenu()
       
     } // icol
   } // irow
+
+  cerr << "MMMMMMMMMM nrows,ncols: " << nrows << ", " << ncols << endl;
   
   _fieldTable->verticalHeader()->setVisible(false);
   _fieldTable->horizontalHeader()->setVisible(false);
