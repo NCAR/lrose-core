@@ -67,7 +67,7 @@ HTTPgetURL(char* url, size_t timeout_msec, char **resource, int * resource_len)
     char *start,*end,*ptr;
 
     char hostname[256];
-    char document[1024];
+    char document[1000];
     char command[HTTP_COMM_BUF_SIZE];
     char buf[HTTP_HEAD_BUF_SIZE];
 
@@ -101,16 +101,16 @@ HTTPgetURL(char* url, size_t timeout_msec, char **resource, int * resource_len)
     }
 
     /* Find the Resource part */
-    strncpy(document,end,1024);
-    document[1023] = '\0';
-
+    strncpy(document,end,1000);
+    document[999] = '\0';
+    
     /* Open a connection to the HTTP server */
     if((infd = SKU_open_client(hostname,port)) < 0) {
         return -2;
     }
 
     /* Build up request message */
-    sprintf(command,"GET %s HTTP/1.0\r\n",document);
+    snprintf(command, HTTP_COMM_BUF_SIZE - 1, "GET %s HTTP/1.0\r\n", document);
     sprintf(buf,"User-Agent: NCAR/RAP HTTPgetURL()/1.0\r\n");
     strcat(command,buf);
     strcat(command,"\r\n"); /* End of request message indicator */

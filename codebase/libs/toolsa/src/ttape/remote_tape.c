@@ -246,7 +246,7 @@ int
 
 {
   int new_process;
-  char buffer[CMD_BUF_SZ];			/* Command buffer.  */
+  char buffer[CMD_BUF_SZ * 2];			/* Command buffer.  */
   char host_name[MAX_HOST_LEN];			/* The remote host name.  */
   char tape_dev[CMD_BUF_SZ];			/* The remote device name.  */
   char user_login[CMD_BUF_SZ];	    /* The remote user name.  */
@@ -324,7 +324,7 @@ int
   close (rmt_stdout[1]);
 
   /* Attempt to open the tape device.  */
-  sprintf (buffer, "O%s\n%d\n", tape_dev, oflag);
+  snprintf (buffer, sizeof(buffer) - 1, "O%s\n%d\n", tape_dev, oflag);
 
   if (snd_command (buffer) == -1 || rmt_tape_status () == -1)
     return -1;
