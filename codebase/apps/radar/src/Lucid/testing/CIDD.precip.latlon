@@ -1397,8 +1397,8 @@ id_label = "Terrain";
 // Type: string
 //
 
-terrain_url = "$(HOME)/data/lucid/precip/mdv/terrain&Elevation";
-// terrain_url = "";
+// terrain_url = "$(HOME)/data/lucid/precip/mdv/terrain&Elevation";
+terrain_url = "";
 
 ///////////// height_scaler ///////////////////////////
 //
