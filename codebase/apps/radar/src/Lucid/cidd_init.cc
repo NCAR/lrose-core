@@ -2607,8 +2607,8 @@ static void _initContours()
   }
 
   for(int ii = 0; ii < gd.num_datafields; ii++) {
-    gd.h_win.redraw[ii] = 1;
-    gd.v_win.redraw[ii] = 1;
+    gd.h_win.redraw_flag[ii] = 1;
+    gd.v_win.redraw_flag[ii] = 1;
   }
 
   for(int ii = 0; ii < _params.contour_fields_n; ii++ ) {
@@ -2817,8 +2817,8 @@ void init_globals()
   
   // MEM_zero(gd.gen_time_list);
 
-  MEM_zero(gd.h_win);
-  MEM_zero(gd.v_win);
+  // MEM_zero(gd.h_win);
+  // MEM_zero(gd.v_win);
 
   // gd.def_gc = 0;
   // gd.ol_gc = 0;
