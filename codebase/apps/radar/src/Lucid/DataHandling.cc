@@ -1027,12 +1027,12 @@ void set_field(int value)
   }
   
   for(i=0; i < gd.num_datafields; i++) {
-    if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw[i] = 1;
+    if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
   }
   
   if(gd.mrec[gd.h_win.page]->auto_render && 
      gd.h_win.page_pdev[gd.h_win.page] != 0 &&
-     gd.h_win.redraw[gd.h_win.page] == 0) {
+     gd.h_win.redraw_flag[gd.h_win.page] == 0) {
     
     save_h_movie_frame(gd.movie.cur_frame,
                        gd.h_win.page_pdev[gd.h_win.page],
@@ -1127,7 +1127,7 @@ static void _checkForHorizData(met_record_t *mr)
     gd.io_info.busy_status = 0;
     gd.io_info.outstanding_request = 0;
     gd.io_info.request_type = 0;
-    gd.h_win.redraw[gd.io_info.page] = 1;
+    gd.h_win.redraw_flag[gd.io_info.page] = 1;
       
     if(gd.debug || gd.debug1) {
       fprintf(stderr,"Aborted Read: Error %d - %s\n",
@@ -1156,7 +1156,7 @@ static void _checkForHorizData(met_record_t *mr)
     gd.io_info.busy_status = 0;
     gd.io_info.outstanding_request = 0;
     gd.io_info.request_type = 0;
-    gd.h_win.redraw[gd.io_info.page] = 1;
+    gd.h_win.redraw_flag[gd.io_info.page] = 1;
     mr->h_data_valid = 1;
     mr->last_collected = time(0);
     return;
@@ -1374,7 +1374,7 @@ static void _checkForHorizData(met_record_t *mr)
     
   mr->h_data_valid = 1;
   mr->last_collected = time(0);
-  gd.h_win.redraw[gd.io_info.page] = 1;
+  gd.h_win.redraw_flag[gd.io_info.page] = 1;
   // Indicate its safe to use the data
   gd.io_info.busy_status = 0;
   // Indicate data is no longer pending
@@ -1458,7 +1458,7 @@ static void _checkForVertData(met_record_t *mr)
     gd.io_info.busy_status = 0;
     gd.io_info.outstanding_request = 0;
     gd.io_info.request_type = 0;
-    gd.h_win.redraw[gd.io_info.page] = 1;
+    gd.h_win.redraw_flag[gd.io_info.page] = 1;
     
     if(gd.debug || gd.debug1) {
       fprintf(stderr,"Aborted Read: Error %d - %s\n",
@@ -1567,7 +1567,7 @@ static void _checkForVertData(met_record_t *mr)
   //gd.v_win.cmin_y =  gd.v_win.min_ht;
   //gd.v_win.cmax_y =  gd.v_win.max_ht;
   
-  gd.v_win.redraw[gd.io_info.page] = 1;
+  gd.v_win.redraw_flag[gd.io_info.page] = 1;
   gd.io_info.busy_status = 0;
   gd.io_info.outstanding_request = 0;
   gd.io_info.request_type = 0;

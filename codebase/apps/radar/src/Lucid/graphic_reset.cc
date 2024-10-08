@@ -249,8 +249,8 @@ void set_redraw_flags(int h_flag,int v_flag)
 
     }
     for(i=0; i < gd.num_datafields; i++) {
-      if(gd.h_win.redraw[i] == 0) {
-        gd.h_win.redraw[i] = 1;
+      if(gd.h_win.redraw_flag[i] == 0) {
+        gd.h_win.redraw_flag[i] = 1;
         hit = 1;
       }
     }
@@ -261,7 +261,7 @@ void set_redraw_flags(int h_flag,int v_flag)
       gd.movie.frame[i].redraw_vert = 1;
     }
     for(i=0; i < gd.num_datafields; i++) {
-      gd.v_win.redraw[i] = 1;
+      gd.v_win.redraw_flag[i] = 1;
     }
   }
 

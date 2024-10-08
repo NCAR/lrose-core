@@ -3406,7 +3406,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
   if (gd.mrec[gd.h_win.page]->h_data_valid == 0 ||
       gd.prod_mgr->num_products_invalid() > 0) {
     gd.movie.frame[frame_index].redraw_horiz = 1;
-    gd.h_win.redraw[gd.h_win.page] = 1;
+    gd.h_win.redraw_flag[gd.h_win.page] = 1;
   }
 
   for ( i=0; i < gd.layers.num_wind_sets; i++ ) {
@@ -3414,16 +3414,16 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
     if (gd.layers.wind[i].active) {
       if (gd.layers.wind[i].wind_u->h_data_valid == 0) {
         gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw[gd.h_win.page] = 1;
+        gd.h_win.redraw_flag[gd.h_win.page] = 1;
       }
       if (gd.layers.wind[i].wind_v->h_data_valid == 0) {
         gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw[gd.h_win.page] = 1;
+        gd.h_win.redraw_flag[gd.h_win.page] = 1;
       }
       if (gd.layers.wind[i].wind_w != NULL &&
           gd.layers.wind[i].wind_w->h_data_valid == 0) {
         gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw[gd.h_win.page] = 1;
+        gd.h_win.redraw_flag[gd.h_win.page] = 1;
       }
     }
   }
@@ -3434,7 +3434,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
     if(gd.layers.cont[i].active) {
       if(gd.mrec[gd.layers.cont[i].field]->h_data_valid == 0) {
 	gd.movie.frame[frame_index].redraw_horiz = 1;
-	gd.h_win.redraw[gd.h_win.page] = 1;
+	gd.h_win.redraw_flag[gd.h_win.page] = 1;
       }
     }
   } 
@@ -3445,7 +3445,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
   if (gd.v_win.active ) {
     if(gd.mrec[gd.v_win.page]->v_data_valid == 0)  {
       gd.movie.frame[frame_index].redraw_vert = 1;
-      gd.v_win.redraw[gd.v_win.page] = 1;
+      gd.v_win.redraw_flag[gd.v_win.page] = 1;
     }
 
     for ( i=0; i < gd.layers.num_wind_sets; i++ ) {
@@ -3453,16 +3453,16 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
       if (gd.layers.wind[i].active) {
 	if (gd.layers.wind[i].wind_u->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw[gd.v_win.page] = 1;
+          gd.v_win.redraw_flag[gd.v_win.page] = 1;
 	}
 	if (gd.layers.wind[i].wind_v->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw[gd.v_win.page] = 1;
+          gd.v_win.redraw_flag[gd.v_win.page] = 1;
 	}
 	if (gd.layers.wind[i].wind_w != NULL &&
             gd.layers.wind[i].wind_w->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw[gd.v_win.page] = 1;
+          gd.v_win.redraw_flag[gd.v_win.page] = 1;
 	}
       }
     }
@@ -3472,7 +3472,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
       if(gd.layers.cont[i].active) {
 	if(gd.mrec[gd.layers.cont[i].field]->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw[gd.v_win.page] = 1;
+          gd.v_win.redraw_flag[gd.v_win.page] = 1;
 	}
       }
     } 
@@ -3746,7 +3746,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
-      if (gd.h_win.redraw[gd.h_win.page] == 0) {
+      if (gd.h_win.redraw_flag[gd.h_win.page] == 0) {
         gd.h_copy_flag = 1;
         gd.h_win.prev_page = gd.h_win.page;
         cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
@@ -3766,7 +3766,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gd.movie.movie_on ) {
       set_redraw_flags(0,1);
     } else {
-      if (gd.v_win.redraw[gd.v_win.page] == 0) {
+      if (gd.v_win.redraw_flag[gd.v_win.page] == 0) {
         gd.v_copy_flag = 1;
         gd.v_win.prev_page = gd.v_win.page;
       }
@@ -3830,12 +3830,12 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gd.movie.frame[index].redraw_vert) {
       if (gather_vwin_data(gd.v_win.page,gd.movie.frame[index].time_start,
                            gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-        if (gd.v_win.redraw[gd.v_win.page]) {
+        if (gd.v_win.redraw_flag[gd.v_win.page]) {
           render_v_movie_frame(index,v_pdev);
           save_v_movie_frame(index,v_pdev);
         } 
         gd.movie.frame[index].redraw_vert = 0;
-        gd.v_win.redraw[gd.v_win.page] = 0;
+        gd.v_win.redraw_flag[gd.v_win.page] = 0;
         gd.v_copy_flag = 1;
       }
     }
@@ -3906,7 +3906,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if (gather_hwin_data(gd.h_win.page,
                          gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-      if (gd.h_win.redraw[gd.h_win.page]) {
+      if (gd.h_win.redraw_flag[gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
         _horiz->setFrameForRendering(gd.h_win.page, index);
         save_h_movie_frame(index, h_pdev, gd.h_win.page);
@@ -3916,7 +3916,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
       set_height_label();
 
       gd.movie.frame[index].redraw_horiz = 0;
-      gd.h_win.redraw[gd.h_win.page] = 0;
+      gd.h_win.redraw_flag[gd.h_win.page] = 0;
       gd.h_copy_flag = 1;
     }
 #ifdef NOTNOW
@@ -4040,8 +4040,8 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
         int ready = 1;
 
         // Check to make sure the images are done
-        if((gd.save_im_win & PLAN_VIEW) && gd.h_win.redraw[gd.h_win.page] != 0) ready = 0;
-        if((gd.save_im_win & XSECT_VIEW) && gd.v_win.redraw[gd.v_win.page] != 0) ready = 0;
+        if((gd.save_im_win & PLAN_VIEW) && gd.h_win.redraw_flag[gd.h_win.page] != 0) ready = 0;
+        if((gd.save_im_win & XSECT_VIEW) && gd.v_win.redraw_flag[gd.v_win.page] != 0) ready = 0;
         if(ready) {
           dump_cidd_image(gd.save_im_win,0,0,gd.h_win.page);
           gd.image_needs_saved = 0;

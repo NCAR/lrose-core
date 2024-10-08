@@ -140,7 +140,7 @@ void remote_set_h_page(char *name)
   for(int i = 0; i < gd.num_datafields; i++) {
       if(strcmp(name,gd.mrec[i]->button_name) == 0) {
 	  gd.h_win.page = i;
-	  gd.h_win.redraw[i] = 1; 
+	  gd.h_win.redraw_flag[i] = 1; 
 	  gd.movie.frame[gd.movie.cur_frame].redraw_horiz = 1;
       }
   }
@@ -212,7 +212,7 @@ void remote_set_h_page_num(int  num)
 {
       if( num >= 0 && num < gd.num_datafields) {
 	  gd.h_win.page = num;
-	  gd.h_win.redraw[num] = 1; 
+	  gd.h_win.redraw_flag[num] = 1; 
 	  gd.movie.frame[gd.movie.cur_frame].redraw_horiz = 1;
       }
 }
@@ -232,7 +232,7 @@ void remote_set_v_page(char *name)
   for(int i = 0; i < gd.num_datafields; i++) {
       if(strcmp(name,gd.mrec[i]->button_name) == 0) {
 	  gd.v_win.page = i;
-	  gd.v_win.redraw[i] = 1; 
+	  gd.v_win.redraw_flag[i] = 1; 
 	  gd.movie.frame[gd.movie.cur_frame].redraw_vert = 1;
       }
   }
@@ -243,7 +243,7 @@ void remote_set_v_page_num(int  num)
 {
       if( num >= 0 && num < gd.num_datafields) {
 	  gd.v_win.page = num;
-	  gd.v_win.redraw[num] = 1; 
+	  gd.v_win.redraw_flag[num] = 1; 
 	  gd.movie.frame[gd.movie.cur_frame].redraw_vert = 1;
       }
 }

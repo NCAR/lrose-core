@@ -1416,7 +1416,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
     
     if (gd.mrec[h_image]->currently_displayed && gd.mrec[h_image]->auto_render) {
       
-      if (gd.h_win.redraw[h_image] || (gd.mrec[h_image]->h_data_valid == 0)) {
+      if (gd.h_win.redraw_flag[h_image] || (gd.mrec[h_image]->h_data_valid == 0)) {
         none_found = 0;
         stat = gather_hwin_data(h_image,
                                 gd.movie.frame[index].time_start,
@@ -1435,14 +1435,14 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
           
           save_h_movie_frame(index,pdev,h_image);
           
-          gd.h_win.redraw[h_image] = 0;
+          gd.h_win.redraw_flag[h_image] = 0;
         } else {
           return;
         }
-        if (h_image == gd.h_win.prev_page && gd.h_win.redraw[h_image] == 0) {
+        if (h_image == gd.h_win.prev_page && gd.h_win.redraw_flag[h_image] == 0) {
           gd.h_copy_flag = 1;
         }
-      } // if (gd.h_win.redraw[h_image] ...
+      } // if (gd.h_win.redraw_flag[h_image] ...
     } // if (gd.mrec[h_image]->currently_displayed ...
     h_image++;
 
@@ -1453,7 +1453,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
     if (v_image >= gd.num_datafields) v_image = 0;
 
     if (gd.mrec[v_image]->currently_displayed && gd.mrec[v_image]->auto_render) {
-      if ((gd.v_win.active) && (gd.v_win.redraw[v_image] || (gd.mrec[v_image]->v_data_valid == 0))) {
+      if ((gd.v_win.active) && (gd.v_win.redraw_flag[v_image] || (gd.mrec[v_image]->v_data_valid == 0))) {
         stat = gather_vwin_data(v_image, gd.movie.frame[index].time_start,
                                 gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
@@ -1467,11 +1467,11 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
           vert->renderVertDisplay(painter, v_image, gd.movie.frame[index].time_start,
                                   gd.movie.frame[index].time_end);
 #endif
-          gd.v_win.redraw[v_image] = 0;
+          gd.v_win.redraw_flag[v_image] = 0;
         } else {
           return;
         }
-        if (v_image == gd.v_win.prev_page && gd.v_win.redraw[v_image] == 0) gd.v_copy_flag = 1;
+        if (v_image == gd.v_win.prev_page && gd.v_win.redraw_flag[v_image] == 0) gd.v_copy_flag = 1;
       }
     }
         

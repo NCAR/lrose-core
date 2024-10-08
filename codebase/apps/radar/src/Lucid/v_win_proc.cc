@@ -51,7 +51,7 @@ void set_v_field(int field_no)
 	}
 
     for(i=0; i < gd.num_datafields; i++) {
-        if(gd.mrec[i]->auto_render == 0) gd.v_win.redraw[i] = 1;
+        if(gd.mrec[i]->auto_render == 0) gd.v_win.redraw_flag[i] = 1;
     }
 
     for(i=0; i < MAX_FRAMES; i++) {
