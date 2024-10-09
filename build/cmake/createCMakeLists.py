@@ -179,9 +179,18 @@ def main():
 
     if (options.debug):
         print("=============================================", file=sys.stderr)
-        print("Writing to top-level codebase dir: ",
+        print("Writing to top-level dir: ",
+              coreDir, file=sys.stderr)
+    writeCMakeListsTop(coreDir)
+    nOther = nOther + 1
+
+    # write the codebase level CMakeLists.txt file
+
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("Writing to codebase dir: ",
               codebaseDir, file=sys.stderr)
-    writeCMakeListsTop(codebaseDir)
+    writeCMakeListsCodebase(codebaseDir)
     nOther = nOther + 1
 
     # debug print
@@ -523,6 +532,37 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
     fo.write('project (lrose-core)\n')
     fo.write('\n')
+    fo.write('add_subdirectory(codebase)\n')
+    fo.write('\n')
+    fo.close
+
+########################################################################
+# Write out codebase level CMakeLists.txt
+
+def writeCMakeListsCodebase(dir):
+
+    cmakePath = os.path.join(dir, "CMakeLists.txt")
+    if (options.debug):
+        print("--->> Writing codebase level CMakeLists.txt, dir: ",
+              dir, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+    
+    fo = open(cmakePath, 'w')
+
+    fo.write("###############################################################\n")
+    fo.write('#\n')
+    fo.write('# Codebase-level CMakeLists file for lrose-core\n')
+    fo.write('#\n')
+    fo.write('# dir: %s\n' % dir[dir.find('lrose-core'):])
+    fo.write('#\n')
+    fo.write('# written by script %s\n' % thisScriptName)
+    fo.write('#\n')
+    fo.write("###############################################################\n")
+    fo.write('\n')
+    fo.write('cmake_minimum_required(VERSION 3.7)\n')
+    fo.write('\n')
+    fo.write('project (lrose-core)\n')
+    fo.write('\n')
 
     fo.write('# set policy CMP0100 so that AUTOMOC finds .hh files\n')
     fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.17.0")\n')
@@ -654,7 +694,7 @@ def writeCMakeListsTop(dir):
     fo.write('  # Add a custom generator for TDRP Params.cc and Params.hh files\n')
     fo.write('  # from their associated paramdef.<app> file\n')
     fo.write('\n')
-    fo.write('  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen)\n')
+    fo.write('  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen)\n')
     fo.write('\n')
     fo.write('  add_custom_command (\n')
     fo.write('    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc\n')
@@ -662,9 +702,9 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
     fo.write('    # Run tdrp_gen, explicitly using the one from this build instead of\n')
     fo.write('    # any version that may be in the user\'s path.\n')
-    fo.write('    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/libs/tdrp/src &&\n')
+    fo.write('    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/codebase/libs/tdrp/src &&\n')
     fo.write('      cd ${CMAKE_CURRENT_SOURCE_DIR} &&\n')
-    fo.write('      ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen\n')
+    fo.write('      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen\n')
     fo.write('        -c++\n')
     fo.write('        -f paramdef.${PROJECT_NAME}\n')
     fo.write('        -prog ${PROJECT_NAME}\n')
@@ -751,7 +791,7 @@ def writeCMakeListsRecurse(dir, subdirList):
     fo.write("#\n")
     fo.write("###############################################################\n")
     fo.write("\n")
-    fo.write("project (LROSE-CORE)\n")
+    fo.write("project (lrose-core)\n")
     fo.write("\n")
 
     if (len(subdirList) > 0):

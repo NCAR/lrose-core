@@ -1,16 +1,16 @@
 ###############################################################
 #
-# CMakeLists for cmake recursion
+# Top-level CMakeLists file for lrose-core
 #
-# dir: lrose-core/codebase/libs/kd
+# dir: lrose-core
 #
 # written by script createCMakeLists.py
 #
 ###############################################################
 
+cmake_minimum_required(VERSION 3.7)
+
 project (lrose-core)
 
-# subdirectories
-
-add_subdirectory (src)
+add_subdirectory(codebase)
 

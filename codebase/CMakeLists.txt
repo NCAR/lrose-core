@@ -1,6 +1,6 @@
 ###############################################################
 #
-# Top-level CMakeLists file for lrose-core
+# Codebase-level CMakeLists file for lrose-core
 #
 # dir: lrose-core/codebase
 #
@@ -103,7 +103,7 @@ function(makeTdrpParams)
   # Add a custom generator for TDRP Params.cc and Params.hh files
   # from their associated paramdef.<app> file
 
-  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen)
+  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen)
 
   add_custom_command (
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
@@ -111,9 +111,9 @@ function(makeTdrpParams)
 
     # Run tdrp_gen, explicitly using the one from this build instead of
     # any version that may be in the user's path.
-    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/libs/tdrp/src &&
+    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/codebase/libs/tdrp/src &&
       cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-      ${CMAKE_BINARY_DIR}/apps/tdrp/src/tdrp_gen/tdrp_gen
+      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
         -c++
         -f paramdef.${PROJECT_NAME}
         -prog ${PROJECT_NAME}
