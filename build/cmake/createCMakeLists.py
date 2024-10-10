@@ -606,12 +606,13 @@ def writeCMakeListsCodebase(dir):
     fo.write('\n')
     
     fo.write('if (DEFINED MAMBA_BUILD)\n')
-    fo.write('# MAMBAFORGE build, ignore system libs\n')
+    fo.write('# MAMBA builds ignore system includes and libs, use mamba dirs\n')
     fo.write('  set(MAMBA_INCLUDE_PATH ${MAMBA_ROOT}/include)\n')
     fo.write('  set(MAMBA_LIBRARY_PATH ${MAMBA_ROOT}/lib)\n')
     fo.write('  set(QT_HOST_PATH ${MAMBA_ROOT})\n')
-    fo.write('  set(CMAKE_SYSTEM_IGNORE_PATH "/usr/lib" "/usr/local/lib" "/usr/lib64" "/lib" "/lib64" /opt/homebrew/lib /usr/local/lib)\n')
-    fo.write("endif(MAMBA_BUILD)\n")
+    fo.write('  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)\n')
+    fo.write('  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")\n')
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
     fo.write('\n')
 
     if (globalNeedX11 or globalNeedQt):
@@ -636,26 +637,22 @@ def writeCMakeListsCodebase(dir):
         fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
         fo.write('endif(Qt5_FOUND)\n')
         fo.write('\n')
+
         fo.write('if(APPLE)\n')
-
-        fo.write('if (DEFINED MAMBA_BUILD)\n')
-
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n')
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n')
-        fo.write('  endif(Qt5_FOUND)\n')
-
-        fo.write('else ()\n')
-
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-        fo.write('  endif(Qt5_FOUND)\n')
-
-        fo.write('endif(MAMBA_BUILD)\n')
-
+        fo.write('  if (DEFINED MAMBA_BUILD)\n')
+        fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+        fo.write('    if (Qt5_FOUND)\n')
+        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n')
+        fo.write('    elseif (Qt6_FOUND)\n')
+        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n')
+        fo.write('    endif(Qt5_FOUND)\n')
+        fo.write('  else ()\n')
+        fo.write('    if (Qt5_FOUND)\n')
+        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+        fo.write('    elseif (Qt6_FOUND)\n')
+        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+        fo.write('    endif(Qt5_FOUND)\n')
+        fo.write('  endif(DEFINED MAMBA_BUILD)\n')
         fo.write('endif(APPLE)\n')
         fo.write('\n')
 
@@ -1033,6 +1030,7 @@ def writeCMakeListsLib(libName, libSrcDir,
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
     fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
     fo.write('  include_directories (${MAMBA_INCLUDE_PATH})\n')
     fo.write('else()\n')
     if (needX11 or needQt):
@@ -1054,7 +1052,7 @@ def writeCMakeListsLib(libName, libSrcDir,
     fo.write("  # NOTE: cannot add /usr/include using include_directories()\n")
     fo.write("  add_compile_options(-I/usr/include)\n")
     fo.write("  \n")
-    fo.write("endif(MAMBA_BUILD)\n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1493,6 +1491,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
 
     fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
     fo.write('  include_directories (${MAMBA_INCLUDE_PATH})\n')
     fo.write('else()\n')
     if (needX11 or needQt):
@@ -1514,7 +1513,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("  # NOTE: cannot add /usr/include using include_directories()\n")
     fo.write("  add_compile_options(-I/usr/include)\n")
     fo.write("  \n")
-    fo.write("endif(MAMBA_BUILD)\n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1526,6 +1525,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
 
     fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
     fo.write('  link_directories (${MAMBA_LIBRARY_PATH})\n')
     fo.write('else()\n')
     if (needX11 or needQt):
@@ -1555,7 +1555,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("    link_directories (/usr/lib)\n")
     fo.write("  endif()\n")
     fo.write("\n")
-    fo.write("endif(MAMBA_BUILD)\n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
     fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")\n')
     fo.write('  add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )\n')
@@ -1616,6 +1616,7 @@ def addFindQt(fo):
     
     fo.write('if(APPLE)\n')
     fo.write('  if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
     fo.write('    if (Qt5_FOUND)\n')
     fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n')
     fo.write('    elseif (Qt6_FOUND)\n')
@@ -1627,7 +1628,7 @@ def addFindQt(fo):
     fo.write('    elseif (Qt6_FOUND)\n')
     fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
     fo.write('    endif(Qt5_FOUND)\n')
-    fo.write('  endif(MAMBA_BUILD)\n')
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write('endif(APPLE)\n')
 
     fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
@@ -1641,7 +1642,7 @@ def addFindQt(fo):
     fo.write("    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n")
     fo.write('  else()\n')
     fo.write("    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
-    fo.write('  endif(MAMBA_BUILD)\n')
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write("  pkg_search_module(Qt5Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Widgets REQUIRED)\n")
@@ -1653,7 +1654,7 @@ def addFindQt(fo):
     fo.write("    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MAMBA_ROOT} NO_DEFAULT_PATH)\n")
     fo.write('  else()\n')
     fo.write("    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
-    fo.write('  endif(MAMBA_BUILD)\n')
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Widgets REQUIRED)\n")

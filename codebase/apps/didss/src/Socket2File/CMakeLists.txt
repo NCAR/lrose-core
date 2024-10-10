@@ -53,6 +53,7 @@ include_directories (../../../../libs/titan/src/include)
 include_directories (../../../../libs/toolsa/src/include)
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
 if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
   include_directories (${MAMBA_INCLUDE_PATH})
 else()
   if (DEFINED netCDF_INSTALL_PREFIX)
@@ -70,11 +71,12 @@ else()
   # NOTE: cannot add /usr/include using include_directories()
   add_compile_options(-I/usr/include)
   
-endif(MAMBA_BUILD)
+endif(DEFINED MAMBA_BUILD)
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
   link_directories (${MAMBA_LIBRARY_PATH})
 else()
   if (DEFINED netCDF_INSTALL_PREFIX)
@@ -100,7 +102,7 @@ else()
     link_directories (/usr/lib)
   endif()
 
-endif(MAMBA_BUILD)
+endif(DEFINED MAMBA_BUILD)
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

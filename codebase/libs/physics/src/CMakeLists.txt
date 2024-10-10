@@ -47,6 +47,7 @@ include_directories (../../titan/src/include)
 include_directories (../../toolsa/src/include)
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
 if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
   include_directories (${MAMBA_INCLUDE_PATH})
 else()
   if (DEFINED netCDF_INSTALL_PREFIX)
@@ -64,7 +65,7 @@ else()
   # NOTE: cannot add /usr/include using include_directories()
   add_compile_options(-I/usr/include)
   
-endif(MAMBA_BUILD)
+endif(DEFINED MAMBA_BUILD)
 # source files
 
 set (SRCS
