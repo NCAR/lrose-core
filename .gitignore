@@ -769,6 +769,7 @@ codebase/apps/radar/src/SpectraPlot/SpectraPlot
 codebase/apps/radar/src/SpectraScope/SpectraScope
 
 codebase/apps/xpol/src/ProSensing2Dsr/ProSensing2Dsr
+codebase/apps/xpol/src/XpolScanControl/XpolScanControl
 
 codebase/Makefile
 codebase/libs/Fmq/src/.libs/
