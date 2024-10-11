@@ -614,7 +614,10 @@ def writeCMakeListsCodebase(dir):
         fo.write('\n')
 
     if (globalNeedX11 or globalNeedQt):
-        fo.write('find_package (X11)\n')
+        if (options.mambaBuild):
+            fo.write('find_package (X11 NO_SYSTEM_ENVIRONMENT_PATH)\n')
+        else:
+            fo.write('find_package (X11)\n')
         fo.write("if (DEFINED X11_X11_LIB)\n")
         fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
         fo.write("endif()\n")
@@ -623,7 +626,10 @@ def writeCMakeListsCodebase(dir):
     if (globalNeedQt):
         fo.write('# Finding Qt\n')
         fo.write('\n')
-        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
+        if (options.mambaBuild):
+            fo.write('find_package (Qt6 COMPONENTS Core NO_SYSTEM_ENVIRONMENT_PATH)\n')
+        else:
+            fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
         fo.write('if (NOT Qt6_FOUND)\n')
         fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
         fo.write('endif()\n')
@@ -1589,7 +1595,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 def addFindQt(fo):
 
     fo.write('#Finding Qt\n')
-    fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
+    if (options.mambaBuild):
+        fo.write('find_package (Qt6 COMPONENTS Core NO_SYSTEM_ENVIRONMENT_PATH)\n')
+    else:
+        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
     fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
     fo.write('endif()\n')
@@ -1635,7 +1644,7 @@ def addFindQt(fo):
     fo.write('else()\n')
     fo.write("#QT6\n")
     if (options.mambaBuild):
-        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH)\n" % options.mambaDir)
+        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH NO_SYSTEM_ENVIRONMENT_PATH)\n" % options.mambaDir)
     else:
         fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
     fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
