@@ -1688,3 +1688,16 @@ QImage *ColorMap::getColorScaleLegend() {
 
 }
 
+/////////////////////////////////////////////////////
+// check that color name is valid
+
+bool ColorMap::isColorNameValid(QString colorName)
+{
+#if QT_VERSION >= 0x060000
+  QColor color = QColor::fromString(colorName);
+#else
+  QColor color;
+  color.setNamedColor(colorName);
+#endif
+  return color.isValid();
+}

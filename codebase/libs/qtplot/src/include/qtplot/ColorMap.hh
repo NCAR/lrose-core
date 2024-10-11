@@ -349,6 +349,10 @@ class DLL_EXPORT ColorMap {
 
   QImage *getColorScaleLegend();
 
+  // check for valid color
+
+  static bool isColorNameValid(QString colorName);
+
  protected:
 
   bool _debug;
