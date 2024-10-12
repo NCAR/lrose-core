@@ -60,6 +60,9 @@ private slots:
 private:
   ColorMapTemplates *_colorMapTemplates;
   QColor _stringToQColor(string colorName);
+// check that color name is valid
+
+  bool _isValidColorName(QString colorName);
 
 };
 
