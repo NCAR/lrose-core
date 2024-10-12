@@ -485,7 +485,7 @@ void
     igreen.push_back((int) (green[i] * 255 + 0.5));
     iblue.push_back((int) (blue[i] * 255 + 0.5));
   }
-  setMap(rangeMin, rangeMax, red, green, blue);
+  setMap(rangeMin, rangeMax, ired, igreen, iblue);
   
 }
 
@@ -1694,10 +1694,10 @@ QImage *ColorMap::getColorScaleLegend() {
 bool ColorMap::isColorNameValid(QString colorName)
 {
 #if QT_VERSION >= 0x060000
-  QColor color = QColor::fromString(colorName);
+  return QColor::isValidColorName(colorName);
 #else
   QColor color;
   color.setNamedColor(colorName);
-#endif
   return color.isValid();
+#endif
 }
