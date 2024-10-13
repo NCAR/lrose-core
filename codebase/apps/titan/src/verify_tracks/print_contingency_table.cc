@@ -35,7 +35,7 @@
 #include "verify_tracks.h"
 
 void print_contingency_table(FILE *fout,
-			     char *label,
+			     const char *label,
 			     vt_count_t *count)
 
 {

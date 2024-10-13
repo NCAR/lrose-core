@@ -192,6 +192,16 @@ public:
 
   bool redraw_horiz;
   bool redraw_vert;
+  bool time_has_changed;
+  bool field_has_changed;
+  bool zoom_has_changed;
+  bool vsect_has_changed;
+  double ht_has_changed;
+
+  time_t prev_time;
+  int prev_field;
+  double prev_min_x, prev_min_y, prev_max_x, prev_max_y;
+  double prev_ht;
 
   // projections
   

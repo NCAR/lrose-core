@@ -44,10 +44,9 @@
 
 typedef struct {
 
-  char *prog_name;            /* program name */
-
-  char *name;
-  char *instance;
+  const char *prog_name;            /* program name */
+  const char *name;
+  const char *instance;
   int pid;
   int debug;
 

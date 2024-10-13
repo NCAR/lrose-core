@@ -51,7 +51,7 @@ void parse_args(int argc,
   char *end_pt;
   char usage[BUFSIZ];
   char *malloc_debug_str;
-  char *debug_str;
+  const char *debug_str;
 
   /*
    * set usage string

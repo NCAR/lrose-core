@@ -359,11 +359,11 @@ extern void perform_verification(storm_file_handle_t *s_handle,
 				 vt_stats_t *total_stats);
 
 extern void print_contingency_table(FILE *fout,
-				    char *label,
+				    const char *label,
 				    vt_count_t *count);
 
 extern void print_stats(FILE *fout,
-			char *label,
+			const char *label,
 			vt_stats_t *stats);
 
 extern void read_params(void);

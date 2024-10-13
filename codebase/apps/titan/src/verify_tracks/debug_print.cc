@@ -37,7 +37,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-static void print_grid(char *label,
+static void print_grid(const char *label,
 		       ui08 **forecast_grid,
 		       ui08 **verify_grid);
 
@@ -88,7 +88,7 @@ void debug_print(track_file_handle_t *t_handle,
  * print_grid()
  */
 
-static void print_grid(char *label,
+static void print_grid(const char *label,
 		       ui08 **forecast_grid,
 		       ui08 **verify_grid)
 

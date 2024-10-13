@@ -125,9 +125,9 @@ static int get_info(PROCMAP_info_t **return_info_p)
   memset ((void *) &request,
 	  (int) 0, (size_t) sizeof(PROCMAP_request_t));
   
-  strncpy(request.name, Glob->name, PROCMAP_NAME_MAX);
+  strncpy(request.name, Glob->name, PROCMAP_NAME_MAX - 1);
   strncpy(request.instance, Glob->instance,
-	  PROCMAP_INSTANCE_MAX);
+	  PROCMAP_INSTANCE_MAX - 1);
   
   nprocs = 0;
   

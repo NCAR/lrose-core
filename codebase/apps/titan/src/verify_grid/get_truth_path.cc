@@ -50,7 +50,7 @@ char *get_truth_path (char *detect_file_path)
 
 {
 
-  static char truth_file_path[MAX_PATH_LEN];
+  static char truth_file_path[MAX_PATH_LEN * 2];
 
   char dir_path[MAX_PATH_LEN];
   char *name, file_ext[16];
@@ -121,9 +121,9 @@ char *get_truth_path (char *detect_file_path)
      * the correct subdirectory
      */
     
-    sprintf(dir_path, "%s/%.4d%.2d%.2d",
-	    Glob->params.truth_data_dir,
-	    this_dt->year, this_dt->month, this_dt->day);
+    snprintf(dir_path, MAX_PATH_LEN - 1, "%s/%.4d%.2d%.2d",
+             Glob->params.truth_data_dir,
+             this_dt->year, this_dt->month, this_dt->day);
 	
     /*
      * load file name of the closest scan to the requested time
@@ -224,11 +224,10 @@ static int find_best_file (char *dir_path,
       time_diff = abs ((int) (file_dt.unix_time - search_time));
 	  
       if (time_diff < *time_error) {
-	    
+        
 	*time_error = time_diff;
-	sprintf(file_path, "%s%s%s",
-		dir_path, PATH_DELIM,
-		dp->d_name);
+	snprintf(file_path, MAX_PATH_LEN * 2 - 1, "%s%s%s",
+                 dir_path, PATH_DELIM, dp->d_name);
 	f_count++;
 	    
       } /*if (time_diff < *time_error) */

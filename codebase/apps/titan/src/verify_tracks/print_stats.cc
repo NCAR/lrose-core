@@ -36,12 +36,13 @@
 
 static vt_stats_t *Stats;
 static void print_stat(FILE *fout,
-		       char *label,
+		       const char *label,
 		       fl32 *bias_p,
 		       int print_norm);
 
 void print_stats(FILE *fout,
-		 char *heading, vt_stats_t *stats)
+		 const char *heading,
+                 vt_stats_t *stats)
 
 {
 
@@ -103,7 +104,7 @@ void print_stats(FILE *fout,
  */
 
 static void print_stat(FILE *fout,
-		       char *label,
+		       const char *label,
 		       fl32 *bias_p,
 		       int print_norm)
 

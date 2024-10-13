@@ -243,7 +243,7 @@ static void cont_specified_grid(contingency_t *cont,
 				FILE* scan_cont_file)
 
 {
-  static char *routine_name = "cont_specified_grid";
+  static const char *routine_name = "cont_specified_grid";
   
   static int first_call = TRUE;
   static ui08 *truth_grid, *detect_grid;

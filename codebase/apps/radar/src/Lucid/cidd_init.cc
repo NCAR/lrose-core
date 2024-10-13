@@ -369,8 +369,22 @@ int init_data_space()
 
   // global redraw flags
 
-  gd.redraw_horiz = false;
-  gd.redraw_vert = false;
+  gd.redraw_horiz = true;
+  gd.redraw_vert = true;
+
+  gd.time_has_changed = true;
+  gd.field_has_changed = true;
+  gd.zoom_has_changed = true;
+  gd.vsect_has_changed = true;
+  gd.ht_has_changed = true;
+
+  gd.prev_time = -1;
+  gd.prev_field = -1;
+  gd.prev_min_x = -9999.0;
+  gd.prev_min_y = -9999.0;
+  gd.prev_max_x = -9999.0;
+  gd.prev_max_y = -9999.0;
+  gd.prev_ht = -9999.0;
   
   // movies
 

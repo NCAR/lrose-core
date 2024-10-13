@@ -48,11 +48,11 @@
 
 typedef struct {
 
-  char *prog_name;            /* program name */
-  char *param_path_name;      /* parameters file path */
-  char *procmap_host;         /* name of server mapper host */
-  char *name;
-  char *instance;
+  const char *prog_name;            /* program name */
+  const char *param_path_name;      /* parameters file path */
+  const char *procmap_host;         /* name of server mapper host */
+  const char *name;
+  const char *instance;
   int do_repeat;
   int do_register;
   int do_unregister;
