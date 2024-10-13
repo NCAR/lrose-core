@@ -153,9 +153,9 @@ class DLL_EXPORT HorizWidget : public QWidget
 		      
   // get zooms
   
-  const WorldPlot getZoomWorld() const { return _zoomWorld; }
-  const vector<WorldPlot> getSavedZooms() const { return _savedZooms; }
-
+  const WorldPlot &getZoomWorld() const { return _zoomWorld; }
+  const vector<WorldPlot> &getSavedZooms() const { return _savedZooms; }
+  
   // are we in archive mode? and if so are we at the start of a sweep?
 
   void setArchiveMode(bool state);

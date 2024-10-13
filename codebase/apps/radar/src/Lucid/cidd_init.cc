@@ -380,11 +380,19 @@ int init_data_space()
 
   gd.prev_time = -1;
   gd.prev_field = -1;
-  gd.prev_min_x = -9999.0;
-  gd.prev_min_y = -9999.0;
-  gd.prev_max_x = -9999.0;
-  gd.prev_max_y = -9999.0;
+  gd.prev_zoom_min_x = -9999.0;
+  gd.prev_zoom_min_y = -9999.0;
+  gd.prev_zoom_max_x = -9999.0;
+  gd.prev_zoom_max_y = -9999.0;
   gd.prev_ht = -9999.0;
+  
+  gd.selected_time = -2;
+  gd.selected_field = -2;
+  gd.selected_zoom_min_x = -9998.0;
+  gd.selected_zoom_min_y = -9998.0;
+  gd.selected_zoom_max_x = -9998.0;
+  gd.selected_zoom_max_y = -9998.0;
+  gd.selected_ht = -9998.0;
   
   // movies
 
@@ -464,6 +472,7 @@ int init_data_space()
     
     UTIMunix_to_date(gd.movie.start_time,&temp_utime);
     gd.movie.demo_mode = 0;
+    gd.selected_time = clock;
     
   } else {
 
@@ -478,6 +487,7 @@ int init_data_space()
       DateTime startTime;
       startTime.set(_params.archive_start_time);
       gd.movie.start_time = startTime.utime();
+      gd.selected_time = startTime.utime();
       
     }
     gd.movie.demo_mode = 1;
@@ -497,6 +507,8 @@ int init_data_space()
     
     gd.h_win.movie_page = gd.h_win.page;
     gd.v_win.movie_page = gd.v_win.page;
+    gd.selected_field = gd.h_win.page;
+    
     gd.movie.cur_frame = 0;
 
   } // if(strlen(_params.demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE))
@@ -528,6 +540,7 @@ int init_data_space()
 
   if(gd.num_render_heights == 0) {
     gd.h_win.cur_ht = _params.start_ht;
+    gd.selected_ht = _params.start_ht;
   }
 
   /////////////////////////////////////////////
@@ -2501,6 +2514,11 @@ static int _initZooms()
     gd.h_win.max_y = _params.domain_limit_max_y;
   }
 
+  gd.selected_zoom_min_x = gd.h_win.min_x;
+  gd.selected_zoom_min_y = gd.h_win.min_y;
+  gd.selected_zoom_max_x = gd.h_win.max_x;
+  gd.selected_zoom_max_y = gd.h_win.max_y;
+  
   for(int izoom = 0; izoom < gd.h_win.num_zoom_levels; izoom++) {
     
     double minx = _params._zoom_levels[izoom].min_x;
@@ -2769,11 +2787,14 @@ static void _initSymprods()
 
 }
 ///////////////////////////////////////////////////
-// get the archive url
+// initialize global variables
 
 void init_globals()
   
 {
+
+  gd.argc = 0;
+  gd.argv = NULL;             
 
   gd.hcan_pdev = NULL;
   gd.vcan_pdev = NULL;
@@ -2782,94 +2803,114 @@ void init_globals()
   gd.debug1 = 0;
   gd.debug2 = 0;
     
-  gd.argc = 0;
   gd.display_projection = 0;
+  gd.wsddm_mode = 0;   
   gd.quiet_mode = 0;   
   gd.report_mode = 0;   
   gd.run_unmapped = 0;   
-  gd.use_cosine_correction = -1;
+  gd.use_cosine_correction = 0;
+  gd.drawing_mode = 0;
   MEM_zero(gd.product_detail_threshold);
   MEM_zero(gd.product_detail_adjustment);
 
   gd.mark_latest_client_location = 0; 
   gd.forecast_mode = 0;     
   gd.data_format = 0; 
-
+  
   gd.num_colors = 0;       
   gd.num_draw_colors = 0;  
   gd.map_overlay_color_index_start = 0;
-  gd.last_event_time = 0;  
-  gd.epoch_start = 0;      
-  gd.epoch_end  = 0;       
-  gd.model_run_time = 0;  
-  gd.data_request_time = 0; 
   gd.finished_init = 0;    
 
   gd.num_datafields = 0;   
   gd.num_menu_fields = 0;  
+  gd.num_field_menu_cols = 0;  
   gd.num_map_overlays = 0; 
+  gd.num_bookmarks = 0;
   gd.num_render_heights = 0;
+  gd.num_cache_zooms = 0;
   gd.cur_render_height = 0; 
   gd.cur_field_set = 0;     
   gd.save_im_win = 0;       
   gd.image_needs_saved = 0; 
   gd.generate_filename = 0; 
+  gd.max_time_list_span = 0; 
 
   gd.pan_in_progress = 0;    
   gd.zoom_in_progress = 0;   
   gd.route_in_progress = 0;  
+  gd.data_timeout_secs = 0;  
   gd.data_status_changed = 0;
   gd.series_save_active = 0; 
 
   gd.num_field_labels = 0;  
   MEM_zero(gd.field_index);
+  gd.movieframe_time_mode = 0; 
   gd.aspect_correction = 0; 
   MEM_zero(gd.height_array);
-  MEM_zero(gd.proj_param);
 
-  gd.argv = NULL;             
+  gd.redraw_horiz = 0;
+  gd.redraw_vert = 0;
+  gd.time_has_changed = 0;
+  gd.field_has_changed = 0;
+  gd.zoom_has_changed = 0;
+  gd.vsect_has_changed = 0;
+  gd.ht_has_changed = 0;
+
+  gd.prev_time = 0;
+  gd.prev_field = 0;
+  gd.prev_zoom_min_x = 0;
+  gd.prev_zoom_min_y = 0;
+  gd.prev_zoom_max_x = 0;
+  gd.prev_zoom_max_y = 0;
+  gd.prev_ht = 0;
+
+  gd.selected_time = 0;
+  gd.selected_field = 0;
+  gd.selected_zoom_min_x = 0;
+  gd.selected_zoom_min_y = 0;
+  gd.selected_zoom_max_x = 0;
+  gd.selected_zoom_max_y = 0;
+  gd.selected_ht = 0;
+
+  gd.last_event_time = 0;  
+  gd.epoch_start = 0;      
+  gd.epoch_end  = 0;       
+  gd.model_run_time = 0;  
+  gd.data_request_time = 0; 
+
+  gd.projection_type = NULL;
+  MEM_zero(gd.proj_param);
+  
+  gd.demo_time = NULL;
+
   gd.orig_wd = NULL;           
+  gd.frame_label = NULL;          
   gd.app_name = NULL;          
   gd.app_instance = NULL;      
 
   MEM_zero(gd.data_info);
-  
-  // MEM_zero(gd.gen_time_list);
 
-  // MEM_zero(gd.h_win);
-  // MEM_zero(gd.v_win);
-
-  // gd.def_gc = 0;
-  // gd.ol_gc = 0;
-  // gd.clear_ol_gc = 0;
-  // gd.dpyName = NULL;
-  // gd.dpy = NULL;
-
-  // MEM_zero(gd.color);
-  // MEM_zero(gd.null_color);
-  
+  gd.num_fonts = 0;
   MEM_zero(gd.ciddfont);
   MEM_zero(gd.fontst);
     
   MEM_zero(gd.prod);
-  // MEM_zero(gd.over);
+  gd.prod_mgr = NULL;
+  
   MEM_zero(gd.mrec);
-  // MEM_zero(gd.layers);
   MEM_zero(gd.legends);
-  gd.bookmark = NULL;
+
   MEM_zero(gd.movie);
   MEM_zero(gd.io_info);
-  // MEM_zero(gd.status);
-  // MEM_zero(gd.draw);
-
-  gd.coord_expt = NULL;
-  gd.prod_mgr = NULL;
-  // gd.time_plot = NULL;         
+  
   gd.r_context = NULL;    
   gd.station_loc = NULL;    
   gd.remote_ui = NULL;   
-
+  gd.bookmark = NULL;
+  
   gd.coord_key = 0;
+  gd.coord_expt = NULL;
 
   gd.h_copy_flag = 0;
   gd.v_copy_flag = 0;

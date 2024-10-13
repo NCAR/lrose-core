@@ -629,13 +629,13 @@ void TimeControl::_acceptGuiSelections()
 {
   _startTime = _guiStartTime;
   _endTime = _guiEndTime;
-  _selectedTime = _guiSelectedTime;
+  _setSelectedTime(_guiSelectedTime);
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
   _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
   _endTime = _startTime + _movieDurationSecs;
-  _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
+  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
   // set redraw flags
   _changeMovieLimits();
 }
@@ -710,6 +710,17 @@ void TimeControl::setGuiEndTime(const RadxTime &val)
 }
 
 ////////////////////////////////////////////////////////
+// set selected time
+
+void TimeControl::_setSelectedTime(const RadxTime &val)
+{
+  gd.prev_time = _selectedTime.utime();
+  _selectedTime = val;
+  gd.selected_time = _selectedTime.utime();
+  gd.time_has_changed = true;
+}
+
+////////////////////////////////////////////////////////
 // set gui selected time label
 
 void TimeControl::setGuiSelectedTime(const RadxTime &val)
@@ -739,7 +750,7 @@ void TimeControl::setStartTime(const RadxTime &rtime)
     _startTime.set(RadxTime::NOW);
   }
   _endTime = _startTime + _movieDurationSecs;
-  _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
+  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
@@ -759,7 +770,7 @@ void TimeControl::setEndTime(const RadxTime &rtime)
     _endTime.set(RadxTime::NOW);
   }
   _startTime = _endTime - _movieDurationSecs;
-  _selectedTime = _startTime + _frameIndex * _frameIntervalSecs;
+  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
@@ -789,7 +800,7 @@ void TimeControl::_goBack1()
   _timeSliderInProgress = false;
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _selectedTime = _guiSelectedTime;
+  _setSelectedTime(_guiSelectedTime);
   setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();
@@ -839,7 +850,7 @@ void TimeControl::_goFwd1()
   _timeSliderInProgress = false;
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _selectedTime = _guiSelectedTime;
+  _setSelectedTime(_guiSelectedTime);
   setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();

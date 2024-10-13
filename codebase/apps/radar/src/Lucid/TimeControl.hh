@@ -207,6 +207,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // move in time
   
+  void _setSelectedTime(const RadxTime &val);
+
   void _goBack1();
   void _goBackDuration();
   void _goBackMult();

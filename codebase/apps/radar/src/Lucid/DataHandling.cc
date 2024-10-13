@@ -1001,16 +1001,16 @@ void cancel_pending_request()
  */
 void set_field(int value)
 {
-  int i;
-  int tmp;
+
   static int last_page = 0;
   static int last_value = 0;
   static int cur_value = 0;
   
   if(value < 0) {
-    tmp = last_page;
+    int tmp = last_page;
     last_page = gd.h_win.page;
     gd.h_win.page = tmp;
+    gd.v_win.page = tmp;
     tmp = cur_value;
     cur_value = last_value;
     value = last_value;
@@ -1020,10 +1020,11 @@ void set_field(int value)
     last_value = cur_value;
     cur_value = value;
     gd.h_win.page = gd.field_index[value];
+    gd.v_win.page = gd.field_index[value];
     cerr << "FFFFFFFFFFFF value, new page: " << cur_value << ", " << gd.h_win.page << endl;
   }
   
-  for(i=0; i < gd.num_datafields; i++) {
+  for(int i=0; i < gd.num_datafields; i++) {
     if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
   }
   
@@ -1036,7 +1037,7 @@ void set_field(int value)
                        gd.h_win.page);
   }
   
-  for(i=0; i < MAX_FRAMES; i++) {
+  for(int i=0; i < MAX_FRAMES; i++) {
     gd.movie.frame[i].redraw_horiz = 1;
   }
   

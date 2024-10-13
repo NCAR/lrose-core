@@ -152,11 +152,6 @@ public:
   int num_colors;       // Total colors allocated 
   int num_draw_colors;  // Total number of colors excluding color scale colors 
   int map_overlay_color_index_start;
-  time_t last_event_time;  // the unix time of when the last activity occured
-  time_t epoch_start;      //  The start of the movie loop
-  time_t epoch_end ;       //  the end of the movie loop
-  time_t model_run_time;  //  Which Model run to use.  When 0 = Ask for "lastest"
-  time_t data_request_time; // Time for which Mdv data is requested
   int finished_init;    // 0 before xview init, 1 after.
 
   int num_datafields;   // the number of fields in the data.info file 
@@ -188,7 +183,7 @@ public:
   double aspect_correction; // Aspect ratio correction for LAT-LON mode 
   double height_array[MAX_SECTS];  // Heights to render in HTML MODE
 
-  // global redraw flags
+  // selected values
 
   bool redraw_horiz;
   bool redraw_vert;
@@ -196,12 +191,25 @@ public:
   bool field_has_changed;
   bool zoom_has_changed;
   bool vsect_has_changed;
-  double ht_has_changed;
+  bool ht_has_changed;
 
   time_t prev_time;
   int prev_field;
-  double prev_min_x, prev_min_y, prev_max_x, prev_max_y;
+  double prev_zoom_min_x, prev_zoom_min_y;
+  double prev_zoom_max_x, prev_zoom_max_y;
   double prev_ht;
+
+  time_t selected_time;
+  int selected_field;
+  double selected_zoom_min_x, selected_zoom_min_y;
+  double selected_zoom_max_x, selected_zoom_max_y;
+  double selected_ht;
+
+  time_t last_event_time;  // the unix time of when the last activity occured
+  time_t epoch_start;      //  The start of the movie loop
+  time_t epoch_end ;       //  the end of the movie loop
+  time_t model_run_time;  //  Which Model run to use.  When 0 = Ask for "lastest"
+  time_t data_request_time; // Time for which Mdv data is requested
 
   // projections
   

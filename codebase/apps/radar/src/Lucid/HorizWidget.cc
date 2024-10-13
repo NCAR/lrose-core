@@ -519,6 +519,11 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
+
+    gd.prev_zoom_min_x = _worldPressX;
+    gd.prev_zoom_min_y = _worldPressY;
+    gd.prev_zoom_max_x = _worldReleaseX;
+    gd.prev_zoom_max_y = _worldReleaseY;
     
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
@@ -530,10 +535,10 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     
     _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
                               _worldReleaseX, _worldReleaseY);
-
+    
     adjustPixelScales();
     _setTransform(_zoomWorld.getTransform());
-
+    
     _setGridSpacing();
 
     // enable unzoom button
@@ -543,6 +548,13 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     // Update the window in the renderers
 
     gd.redraw_horiz = true;
+    gd.zoom_has_changed = true;
+
+    gd.selected_zoom_min_x = _worldPressX;
+    gd.selected_zoom_min_y = _worldPressY;
+    gd.selected_zoom_max_x = _worldReleaseX;
+    gd.selected_zoom_max_y = _worldReleaseY;
+
     _refreshImages();
 
   }

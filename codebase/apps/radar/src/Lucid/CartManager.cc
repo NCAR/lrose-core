@@ -3091,9 +3091,8 @@ void CartManager::_checkForFieldChange()
     _fieldTableCurrentColumn = _fieldTable->currentColumn();
     _fieldTableCurrentRow = _fieldTable->currentRow();
     int fieldNum = item->getFieldIndex();
+    gd.prev_field = gd.h_win.page;
     set_field(fieldNum);
-    gd.h_win.page = fieldNum;
-    gd.v_win.page = fieldNum;
     if (_params.debug) {
       const Params::field_t *fparams = item->getFieldParams();
       cerr << "Changing to field: " << fparams->button_label << endl;
@@ -3103,10 +3102,12 @@ void CartManager::_checkForFieldChange()
       cerr << "      button_name: " << gd.mrec[fieldNum]->button_name << endl;
       cerr << "      legend_name: " << gd.mrec[fieldNum]->legend_name << endl;
     }
+    gd.redraw_horiz = true;
+    gd.field_has_changed = true;
+    gd.selected_field = fieldNum;
+  
   }
 
-  gd.redraw_horiz = true;
-  
 }
 
 /////////////////////////////////////////////////////////
