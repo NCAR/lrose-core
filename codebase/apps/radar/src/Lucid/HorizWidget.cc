@@ -541,7 +541,8 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     _manager.enableZoomButton();
     
     // Update the window in the renderers
-    
+
+    gd.redraw_horiz = true;
     _refreshImages();
 
   }

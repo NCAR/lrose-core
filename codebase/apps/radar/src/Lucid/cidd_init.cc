@@ -366,6 +366,11 @@ int init_data_space()
   
   gd.h_win.prev_page = -1;
   gd.v_win.prev_page = -1;
+
+  // global redraw flags
+
+  gd.redraw_horiz = false;
+  gd.redraw_vert = false;
   
   // movies
 

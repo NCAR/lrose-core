@@ -188,6 +188,11 @@ public:
   double aspect_correction; // Aspect ratio correction for LAT-LON mode 
   double height_array[MAX_SECTS];  // Heights to render in HTML MODE
 
+  // global redraw flags
+
+  bool redraw_horiz;
+  bool redraw_vert;
+
   // projections
   
   const char *projection_type;

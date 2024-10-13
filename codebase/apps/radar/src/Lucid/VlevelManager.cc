@@ -201,7 +201,7 @@ void VlevelManager::setLevel(double level)
   if (_vlevels.size() == 0) {
     return;
   }
-
+  
   double minDiff = 1.0e99;
   for (size_t ii = 0; ii < _vlevels.size(); ii++) {
     double level = _vlevels[ii].level;
@@ -213,6 +213,7 @@ void VlevelManager::setLevel(double level)
   } // ii
 
   _selectedLevel = _vlevels[_guiIndex].level;
+  gd.redraw_horiz = true;
 
 }
 

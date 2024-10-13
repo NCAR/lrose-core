@@ -282,6 +282,11 @@ void CartManager::timerEvent(QTimerEvent *event)
 
   _ciddTimerFunc(event);
 
+  if (gd.redraw_horiz) {
+    _horiz->update();
+    gd.redraw_horiz = false;
+  }
+
 #ifdef JUNK
   if (_timerEventCount % 100 == 0) {
     cerr << "888888888888888 main width, height: " << width() << ", " << height() << endl;
@@ -346,6 +351,7 @@ void CartManager::resizeEvent(QResizeEvent *event)
   }
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   // emit frameResized(_horizFrame->width(), _horizFrame->height());
+  gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1174,6 +1180,8 @@ void CartManager::_changeVlevel(bool value) {
       // _horiz->setStartOfVlevel(true);
       // _vert->setStartOfVlevel(true);
       _moveUpDown();
+
+      gd.redraw_horiz = true;
       
       // reloadBoundaries();
       return;
@@ -1202,6 +1210,7 @@ void CartManager::_changeVlevelRadioButton(int increment)
   if (increment != 0) {
     _vlevelManager.changeSelectedIndex(increment);
     _vlevelRButtons->at(_vlevelManager.getGuiIndex())->setChecked(true);
+    gd.redraw_horiz = true;
   }
   
 }
@@ -1906,6 +1915,7 @@ void CartManager::_zoomBack()
   if (_horiz->getSavedZooms().size() == 0) {
     _zoomBackAct->setEnabled(false);
   }
+  gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -1939,6 +1949,7 @@ void CartManager::_changeField(int fieldId, bool guiMode)
       QRadioButton *button =
         (QRadioButton *) _fieldGroup->button(_prevFieldNum);
       button->click();
+      gd.redraw_horiz = true;
       return;
     }
   }
@@ -3093,6 +3104,8 @@ void CartManager::_checkForFieldChange()
       cerr << "      legend_name: " << gd.mrec[fieldNum]->legend_name << endl;
     }
   }
+
+  gd.redraw_horiz = true;
   
 }
 
@@ -3126,6 +3139,8 @@ void CartManager::_handleFirstTimerEvent()
   // _statusLayout->setColumnMinimumWidth(1, maxWidth);
   // cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
   
+  gd.redraw_horiz = true;
+
 }
 
 /////////////////////////////////////////////////////////
