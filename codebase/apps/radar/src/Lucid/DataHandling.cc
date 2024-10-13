@@ -56,11 +56,8 @@ static int _mdvRequestVertPlane(met_record_t *mr, time_t start_time,time_t end_t
 
 int gather_hwin_data(int page, time_t start_time, time_t end_time)
 {
-  int i;
-  time_t now;
-  met_record_t *mr;       /* pointer to record for convienence */
 
-  now = time(0);
+  time_t now = time(0);
   /* Check to make sure we are not currently waiting on an I/O request */
   if(gd.io_info.outstanding_request > 0) {
     if(now > gd.io_info.expire_time) {
@@ -71,7 +68,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   }
 
   // MAIN GRID
-  mr = gd.mrec[page];    /* get pointer to data record */
+  met_record_t *mr = gd.mrec[page];    /* get pointer to data record */
   if(mr->h_data_valid == 0) {
     if(gd.debug1) {
       fprintf(stderr,
@@ -123,7 +120,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   } 
 
   /* LAYERED GRIDS -  Request any needed data for gridded layers */
-  for(i=0; i < NUM_GRID_LAYERS; i++) {
+  for(int i=0; i < NUM_GRID_LAYERS; i++) {
     if(gd.layers.overlay_field_on[i]) {
       mr = gd.mrec[gd.layers.overlay_field[i]];
       if(mr->h_data_valid == 0) {
@@ -140,7 +137,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   }
 
   /* CONTOURS: request any needed data for contours */
-  for(i=0; i < NUM_CONT_LAYERS; i++) {
+  for(int i=0; i < NUM_CONT_LAYERS; i++) {
     if(gd.layers.cont[i].active) {
       mr = gd.mrec[gd.layers.cont[i].field];
       if(mr->h_data_valid == 0) {
@@ -157,7 +154,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   }
 
   // WINDS
-  for(i=0; i < gd.layers.num_wind_sets; i++) {
+  for(int i=0; i < gd.layers.num_wind_sets; i++) {
     switch(gd.layers.wind_mode) {
       default:
       case WIND_MODE_ON:  /* gather data as usual */
