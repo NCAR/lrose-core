@@ -97,7 +97,7 @@ SYS_LIBS =
 SYS_CPPC_LIBS =
 LROSE_PROFILE_LIB_DIR = $(LROSE_INSTALL_DIR)/lib
 
-SYS_LDFLAGS = -L/usr/lib64 $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib" -L/usr/lib/x86_64-linux-gnu/hdf5/serial
+SYS_LDFLAGS = -L/usr/lib64 $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib" -L/usr/lib/x86_64-linux-gnu/hdf5/serial $(NETCDF4_LDFLAGS)
 SYS_CPPC_LDFLAGS = -L/usr/lib64 $(MY_CPPC_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"
 
 # Don't include -lXm, -lXpm as it fails with the libc6 version of libX11
@@ -178,6 +178,9 @@ UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/nrit/ral/udunits2/lib -L/opt/u
 HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/nrit/ral/hdf5/include -I/usr/include/hdf5/serial $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
 HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/nrit/ral/hdf5/lib -L/opt/hdf5/lib -L/nrit/ral/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5 -L/usr/lib/x86_64-linux-gnu/hdf5/serial $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS) 
 HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
+
+#MY_NETCDF4_INCS = $(NETCDF4_INCS)
+#MY_NETCDF4_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf4/include -I/nrit/ral/netcdf4/include -I/nrit/ral/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,/nrit/ral/netcdf4/lib -L/opt/netcdf4/lib -L/nrit/ral/netcdf4/lib -L/nrit/ral/lib $(HDF5_LDFLAGS) $(ZLIB_LDFLAGS)
