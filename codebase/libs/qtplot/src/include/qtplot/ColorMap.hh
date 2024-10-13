@@ -347,9 +347,7 @@ class DLL_EXPORT ColorMap {
 
   bool isDefault() const { return _isDefault; }
 
-  QImage *getColorScaleLegend();
-
-  // check for valid color
+  // check whether a color name is valid
 
   static bool isColorNameValid(QString colorName);
 
