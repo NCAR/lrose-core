@@ -48,7 +48,7 @@ using namespace std;
 GemSweepField::GemSweepField(int num, bool debug, bool verbose) :
         _debug(debug),
         _verbose(verbose),
-        _num(num),
+        _sweepNum(num),
         _fieldData(NULL)
 
 {
@@ -64,7 +64,7 @@ GemSweepField::GemSweepField(const GemSweepField &orig, int num,
                    bool debug, bool verbose) :
         _debug(debug),
         _verbose(verbose),
-        _num(num),
+        _sweepNum(num),
         _fieldData(NULL)
 
 {
@@ -75,6 +75,8 @@ GemSweepField::GemSweepField(const GemSweepField &orig, int num,
   _debug = orig._debug;
   _verbose = orig._verbose;
 
+  _volNum = 0;
+  
   _startTime = orig._startTime;
   _fieldName = orig._fieldName;
 
@@ -103,10 +105,28 @@ GemSweepField::GemSweepField(const GemSweepField &orig, int num,
   _radarConstV = orig._radarConstV;
 
   _xmitPeakPowerKw = orig._xmitPeakPowerKw;
-  _ifMhz = orig._ifMhz;
+  _xmitPeakPowerKwH = orig._xmitPeakPowerKwH;
+  _xmitPeakPowerKwV = orig._xmitPeakPowerKwV;
 
   _noisePowerDbzH = orig._noisePowerDbzH;
   _noisePowerDbzV = orig._noisePowerDbzV;
+
+  _noiseDbmH = orig._noiseDbmH;
+  _noiseDbmV = orig._noiseDbmV;
+
+  _beamWidthH = orig._beamWidthH;
+  _beamWidthV = orig._beamWidthV;
+
+  _antGainH = orig._antGainH;
+  _antGainV = orig._antGainV;
+
+  _txPathLossH = orig._txPathLossH;
+  _txPathLossV = orig._txPathLossV;
+  _rxPathLossH = orig._rxPathLossH;
+  _rxPathLossV = orig._rxPathLossV;
+  _radomeLoss = orig._radomeLoss;
+
+  _ifMhz = orig._ifMhz;
 
   _minValue = orig._minValue;
   _maxValue = orig._maxValue;
@@ -162,10 +182,28 @@ void GemSweepField::clear()
   _radarConstV = Radx::missingMetaDouble;
 
   _xmitPeakPowerKw = Radx::missingMetaDouble;
-  _ifMhz = Radx::missingMetaDouble;
+  _xmitPeakPowerKwH = Radx::missingMetaDouble;
+  _xmitPeakPowerKwV = Radx::missingMetaDouble;
 
   _noisePowerDbzH = Radx::missingMetaDouble;
   _noisePowerDbzV = Radx::missingMetaDouble;
+
+  _noiseDbmH = Radx::missingMetaDouble;
+  _noiseDbmV = Radx::missingMetaDouble;
+
+  _beamWidthH = Radx::missingMetaDouble;
+  _beamWidthV = Radx::missingMetaDouble;
+
+  _antGainH = Radx::missingMetaDouble;
+  _antGainV = Radx::missingMetaDouble;
+
+  _txPathLossH = Radx::missingMetaDouble;
+  _txPathLossV = Radx::missingMetaDouble;
+  _rxPathLossH = Radx::missingMetaDouble;
+  _rxPathLossV = Radx::missingMetaDouble;
+  _radomeLoss = Radx::missingMetaDouble;
+
+  _ifMhz = Radx::missingMetaDouble;
 
   _minValue = 0;
   _maxValue = 0;
@@ -192,7 +230,7 @@ void GemSweepField::print(ostream &out) const
   
 {
 
-  out << "Sweep number: " << _num << endl;
+  out << "Sweep number: " << _sweepNum << endl;
 
   out << "  Start time: " << RadxTime::strm(_startTime) << endl;
   out << "  FieldName: " << _fieldName << endl;
@@ -222,10 +260,28 @@ void GemSweepField::print(ostream &out) const
   out << "  radarConstV: " << _radarConstV << endl;
 
   out << "  xmitPeakPowerKw: " << _xmitPeakPowerKw << endl;
-  out << "  ifMhz: " << _ifMhz << endl;
+  out << "  xmitPeakPowerKwH: " << _xmitPeakPowerKwH << endl;
+  out << "  xmitPeakPowerKwV: " << _xmitPeakPowerKwV << endl;
 
   out << "  noisePowerDbzH: " << _noisePowerDbzH << endl;
   out << "  noisePowerDbzV: " << _noisePowerDbzV << endl;
+
+  out << "  noiseDbmH: " << _noiseDbmH << endl;
+  out << "  noiseDbmV: " << _noiseDbmV << endl;
+
+  out << "  beamWidthH: " << _beamWidthH << endl;
+  out << "  beamWidthV: " << _beamWidthV << endl;
+
+  out << "  antGainH: " << _antGainH << endl;
+  out << "  antGainV: " << _antGainV << endl;
+
+  out << "  txPathLossH: " << _txPathLossH << endl;
+  out << "  txPathLossV: " << _txPathLossV << endl;
+  out << "  rxPathLossH: " << _rxPathLossH << endl;
+  out << "  rxPathLossV: " << _rxPathLossV << endl;
+  out << "  radomeLoss: " << _radomeLoss << endl;
+
+  out << "  ifMhz: " << _ifMhz << endl;
 
   out << "  minValue: " << _minValue << endl;
   out << "  maxValue: " << _maxValue << endl;
@@ -247,7 +303,7 @@ int GemSweepField::decodeInfoXml(const string &xmlBuf)
 {
 
   if (_verbose) {
-    cerr << "--->>> Decoding XML for sweep: " << _num << endl;
+    cerr << "--->>> Decoding XML for sweep: " << _sweepNum << endl;
     cerr << "===XML===XML===XML===XML===XML===XML===" << endl;
     cerr << xmlBuf << endl;
     cerr << "===XML===XML===XML===XML===XML===XML===" << endl;
@@ -259,25 +315,34 @@ int GemSweepField::decodeInfoXml(const string &xmlBuf)
   string sliceBuf;
   if (RadxXml::readString(xmlBuf, "slice", sliceBuf, attributes)) {
     cerr << "ERROR - GemSweepField::decodeXml" << endl;
-    cerr << "  Sweep num: " << _num << endl;
+    cerr << "  Sweep num: " << _sweepNum << endl;
     cerr << "  Cannot find <slice> tag" << endl;
     return -1;
   }
 
-  int num;
-  if (RadxXml::readIntAttr(attributes, "refid", num) == 0) {
-    if (num != _num) {
+  // sweep num
+  
+  int sweepNum;
+  if (RadxXml::readIntAttr(attributes, "refid", sweepNum) == 0) {
+    if (sweepNum != _sweepNum) {
       cerr << "WARNING - GemSweepField::decodeXml" << endl;
-      cerr << "  Sweep num incorrect: " << num << endl;
-      cerr << "  Should be: " << _num << endl;
+      cerr << "  Sweep num incorrect: " << sweepNum << endl;
+      cerr << "  Should be: " << _sweepNum << endl;
     }
+  }
+
+  // vol num
+  
+  int volNum;
+  if (RadxXml::readInt(sliceBuf, "volno", volNum) == 0) {
+    _volNum = volNum;
   }
 
   // fixed angle
 
   if (RadxXml::readDouble(sliceBuf, "posangle", _fixedAngle)) {
     cerr << "ERROR - GemSweepField::decodeXml" << endl;
-    cerr << "  Sweep num: " << _num << endl;
+    cerr << "  Sweep num: " << _sweepNum << endl;
     cerr << "  Cannot set fixed angle <posangle>" << endl;
     return -1;
   }
@@ -312,8 +377,11 @@ int GemSweepField::decodeInfoXml(const string &xmlBuf)
 
   // pulse width index and value
   
-  if (RadxXml::readInt(sliceBuf, "pw_index", _pulseWidthIndex) == 0) {
-    _pulseWidthUs = _getPulseWidth(_pulseWidthIndex);
+  if (RadxXml::readDouble(sliceBuf, "pw_usec", _pulseWidthUs) != 0) {
+    // cannot find pw_sec, use env var instead
+    if (RadxXml::readInt(sliceBuf, "pw_index", _pulseWidthIndex) == 0) {
+      _pulseWidthUs = _getPulseWidth(_pulseWidthIndex);
+    }
   }
 
   // antenna speed
@@ -336,12 +404,43 @@ int GemSweepField::decodeInfoXml(const string &xmlBuf)
   // transmit power
 
   RadxXml::readDouble(sliceBuf, "gdrxmaxpowkw", _xmitPeakPowerKw);
+  RadxXml::readDouble(sliceBuf, "gdrx5txpowkwh", _xmitPeakPowerKwH);
+  RadxXml::readDouble(sliceBuf, "gdrx5txpowkwv", _xmitPeakPowerKwV);
+
+  // noise power
+  
   RadxXml::readDouble(sliceBuf, "noise_power_dbz", _noisePowerDbzH);
   RadxXml::readDouble(sliceBuf, "noise_power_dbz_dpv", _noisePowerDbzV);
 
+  if (_radarConstH != Radx::missingMetaDouble && _noisePowerDbzH != Radx::missingMetaDouble) {
+    _noiseDbmH = _noisePowerDbzH - _radarConstH;
+  }
+
+  if (_radarConstV != Radx::missingMetaDouble && _noisePowerDbzV != Radx::missingMetaDouble) {
+    _noiseDbmV = _noisePowerDbzV - _radarConstV;
+  }
+
+  // cals
+
+  RadxXml::readDouble(sliceBuf, "spbhorbeam", _beamWidthH);
+  RadxXml::readDouble(sliceBuf, "spbverbeam", _beamWidthV);
+  
+  RadxXml::readDouble(sliceBuf, "spbantgain", _antGainH);
+  RadxXml::readDouble(sliceBuf, "spbdpvantgain", _antGainV);
+
+  RadxXml::readDouble(sliceBuf, "spbtxloss", _txPathLossH);
+  RadxXml::readDouble(sliceBuf, "spbdpvtxloss", _txPathLossV);
+
+  RadxXml::readDouble(sliceBuf, "spbrxloss", _rxPathLossH);
+  RadxXml::readDouble(sliceBuf, "spbdpvrxloss", _rxPathLossV);
+
+  RadxXml::readDouble(sliceBuf, "spbradomloss", _radomeLoss);
+    
   // IF frequency
 
   RadxXml::readDouble(sliceBuf, "gdrxanctxfreq", _ifMhz);
+
+  // cal info
 
   // get nyquist from max velocity value
 

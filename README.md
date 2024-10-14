@@ -35,7 +35,8 @@ The latest release can be found at:
 | [Cyclone](https://github.com/nsf-lrose/lrose-cyclone) | LROSE year 2, final |
 | [Elle](https://github.com/nsf-lrose/lrose-elle) | LROSE year 3, final |
 | [Topaz](https://github.com/nsf-lrose/lrose-topaz) | LROSE year 4 |
-| [Jade](https://github.com/nsf-lrose/lrose-jade) | LROSE outyear |
+| [Jade](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20230814) | LROSE final Jade release |
+| [Colette](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20230814) | LROSE Colette spring 2024 release |
 
 
 ### INSTALLING FROM DOWNLOADS
@@ -56,18 +57,17 @@ For details on builds and the code development environment, see:
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [Prepare for build](./docs/build/prepare_for_build.md) | Prepare you OS for building LROSE |
+| [Prepare for build](./docs/build/prepare_for_build.md) | Prepare your OS for building LROSE |
 | [Build overview](./docs/build/LROSE_build_main_page.md) | Building and code development |
 
 ### REPOSITORY ORGANIZATION
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [docs](./docs) | README files |
-| [build](./build) | build scripts, release scripts and associated files |
-| [codebase/libs](./codebase/libs) | library source code |
-| [codebase/apps](./codebase/apps) | application source code |
-| [lrose-bootstrap](https://github.com/NCAR/lrose-bootstrap) | Bootstrap scripts |
+| [build](./build/README.md) | build scripts, release scripts and associated files |
+| [codebase/libs](./docs/libs/lrose-libs-summary.pdf) | list of libraries |
+| [codebase/apps](./docs/apps/lrose-apps-summary.pdf) | list of applications |
+| [github.com/ncar/lrose-bootstrap](https://github.com/NCAR/lrose-bootstrap) | Bootstrap scripts and configurations for releases and builds |
 
 ### DOCUMENTATION LINKS
 

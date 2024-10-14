@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// UndoRedoModel.hh
+// UndoRedoModel.cc
 //
 // Coordinates undo and redo activities
 //
@@ -175,6 +175,18 @@ int UndoRedoModel::getCurrentVersionNum(int fileNum) {
     return -1;
   }
 }
+
+//
+// return a list of paths to all previous version of the fileNum
+// Use to reconstruct a data file fractured into sweeps.
+//
+void UndoRedoModel::getAllPreviousVersions(int fileNum, queue<string> *list) {
+  int cv = getCurrentVersionNum(fileNum);
+  for (int i=cv; i>0; i--) {
+    list->push(_constructFullTempPath(fileNum, i));
+  }
+}
+
   //save(int fileNum)
   //fn = getCurrentVersion(file#) 
   // move (fn, savePath)
@@ -481,5 +493,6 @@ void UndoRedoModel::_removeTempDirs() {
     }
   //}
   //
+  
 }
 

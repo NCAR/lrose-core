@@ -14,9 +14,9 @@ project (test_procmap)
 # source files
 
 set (SRCS
-      parse_args.c
-      test_mapper.c
-      test_procmap.c
+      parse_args.cc
+      test_mapper.cc
+      test_procmap.cc
     )
 
 # include directories
@@ -65,6 +65,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 # link directories
 
@@ -85,6 +87,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(IS_DIRECTORY /usr/lib64)
+  link_directories (/usr/lib64)
+endif()
+if(IS_DIRECTORY /usr/lib)
+  link_directories (/usr/lib)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

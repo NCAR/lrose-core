@@ -81,6 +81,7 @@ public:
   string getNextVersion(int fileIdx);
   string getCurrentVersion(int fieldIdx);
   string getPreviousVersion(int fileIndex);
+  void getAllPreviousVersions(int fileNum, queue<string> *list);
 
   void waterMarkVersion();
   void undoBatchMode();

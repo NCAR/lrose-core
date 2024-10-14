@@ -36,6 +36,7 @@
 #include <Radx/RadxGeoref.hh>
 
 #include <vector>
+#include <queue>
 
 
 using namespace std;
@@ -62,7 +63,7 @@ public:
   void writeData(string path, bool compressed = false);
   void writeData(string path, RadxVol *vol, bool compressed = false);
 
-  int mergeDataFiles(string dest_path, string source_path, string original_path);
+  // int mergeDataFiles(string dest_path, string source_path, string original_path);
 
   vector<string> *getPossibleFieldNames(string fileName);
   vector<string> *getUniqueFieldNameList();
@@ -73,6 +74,8 @@ public:
   void SetData(string &fieldName, 
             float azimuth, float sweepAngle, vector<float> *fieldData);
   void SetData(string &fieldName, 
+            int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
+  void SetData(RadxVol *vol, string &fieldName,
             int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
 
   void SetData(string &fieldName, float value);
@@ -96,6 +99,7 @@ public:
   RadxTime getStartTimeSecs();
   RadxTime getEndTimeSecs();
 
+  RadxField *fetchDataField(RadxVol *vol, RadxRay *ray, string &fieldName);
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   //const RadxField *fetchDataField(const RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
@@ -104,16 +108,19 @@ public:
   size_t getNRaysSweepIndex(int sweepIndex);
   size_t getFirstRayIndex(int sweepIndex);
   size_t getLastRayIndex(int sweepIndex);  
+  size_t getFirstRayIndex(RadxVol *vol, int sweepIndex);
+  size_t getLastRayIndex(RadxVol *vol, int sweepIndex);
 
 
   vector<RadxRay *> &getRays();
+  vector<RadxRay *> &getRays(RadxVol *vol);
   RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
   float getMissingFl32(string fieldName);
   double getRayAzimuthDeg(size_t rayIdx);
   double getRayNyquistVelocityMps(size_t rayIdx);
 
-  int getNSweeps();
+  size_t getNSweeps();
   vector<double> *getSweepAngles();
   vector<int> *getSweepNumbers();
   //vector<double> *getSweepAngles(string fileName);
@@ -122,6 +129,9 @@ public:
   int getSweepNumber(int sweepIndex);
   int getSweepIndexFromSweepNumber(int sweepNumber);
   int getSweepIndexFromSweepAngle(float elevation);
+  size_t getSweepIndexInVolume(RadxVol *vol,
+                               float sweepAngle,
+                               int sweepNumber);
   double getSweepAngleFromSweepNumber(int sweepNumber);
 
   const string &getPathInUse();
@@ -139,21 +149,18 @@ public:
   const RadxGeoref *getGeoreference(size_t rayIdx);
   bool getGeoreferenceApplied(size_t rayIdx);
 
-  int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
+  size_t getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
 
   size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
   size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
-  RadxVol *mergeDataFields(string originalSourcePath);
-  RadxVol *mergeDataFields(string currentVersionPath, string originalSourcePath);
+  void getFieldNames(RadxVol &vol, vector<string> *fieldNames);
 
   Radx::PrimaryAxis_t getPrimaryAxis();
 
   void printAzimuthInRayOrder();
-  void writeWithMergeData(string outputPath, string originalSourcePath);
-  void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
 
- RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
+  RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
     bool debug_verbose = false, bool debug_extra = false);
 
   RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
@@ -166,7 +173,47 @@ public:
   void clearVolume();
 
   void sanityCheckVolume(string &msg);
+
+//  use when no prompt to overwrite ...
+//  void writeWithMergeData(string outputPath, string originalSourcePath);
+//  void writeWithMergeData(string outputPath, RadxVol *radxVol, string originalSourcePath);
   
+  // void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
+
+// use when we need to prompt before overwrite ...
+
+  int mergeSelectedFileVersions(string dest_path, // string source_path,
+                                string originalPath,
+                                queue<string> *listOfVersions,
+                                string justFilename);
+  
+  int mergeFileVersions(string outputPath, string sourcePath,
+                    string originalPath,
+                    queue<string> *listOfVersions,
+                                string justFilename);
+  /*int mergeFileVersions(string dest_path, string source_path,
+                                     string originalPath,
+                                     vector<string> *listOfVersions);
+   */
+  void _mergeFileVersions(RadxVol *accumulator,
+                         queue<string> *listOfVersions,
+                                string justFilename);
+
+  void _mergeSweepsFromFileVersions(RadxVol *accumulator,
+                                   queue<string> *listOfVersions,
+                                   string justFilename);
+
+  void mergeSweeps(RadxVol *radxVol, string &dataFilePath,
+                   vector<bool> *sweepUpdated);
+  
+  // RadxVol *mergeDataFields(string originalSourcePath);
+  void mergeDataFields(RadxVol *radxVol, string originalSourcePath);
+  void mergeDataFields2(RadxVol *radxVol, string originalSourcePath); // May not be used??
+  void overwriteSweepRays(RadxVol *dstVol, int dstSweepIndex, RadxVol *srcVol, RadxSweep *srcSweep); 
+  void _mergeWrite(RadxVol *accumulator,
+                        queue<string> *listOfVersions,
+                        string justFilename,
+                        string outputPath); 
 private:
   
   DataModel();
@@ -187,6 +234,8 @@ private:
 
   size_t calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset);
 
+  
+
 //DataModel *DataModel::_instance = NULL;  
   static DataModel *_instance;
 
@@ -206,6 +255,7 @@ private:
   vector<int> _lookAheadSweepNumbers;
   vector<double> _lookAheadSweepAngles;
   vector<RadxField *> _lookAheadFields;  
+  vector<string> _lookAheadFieldNames;
 
 };
 

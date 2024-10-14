@@ -451,6 +451,14 @@ public:
   field_rename_t *_field_rename;
   int field_rename_n;
 
+  tdrp_bool_t add_coverage_flag;
+
+  char* name_of_field_encoding_coverage;
+
+  double input_field_value_for_coverage;
+
+  char* name_of_coverage_flag_output_field;
+
   char* output_url;
 
   char* data_set_info;
@@ -534,7 +542,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[65];
+  mutable TDRPtable _table[70];
 
   const char *_className;
 

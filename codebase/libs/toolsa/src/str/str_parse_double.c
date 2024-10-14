@@ -59,7 +59,7 @@ int	STRparse_double(inpstr,outfields,maxchr,max_fields)
 #endif /* __STDC__ */
  
 {
-	char	tmpbuf[1024];	/* temporary buffer for conversion	*/
+	char	tmpbuf[2048];	/* temporary buffer for conversion	*/
 	char	blanks[1024];
 	int	ii = 0;		/* input string counter		*/
 	int	jj = 0;		/* temp buffer counter		*/
@@ -93,7 +93,7 @@ int	STRparse_double(inpstr,outfields,maxchr,max_fields)
 			outfields[kk++] = atof(tmpbuf);
 			if(kk == max_fields) return(kk);
 			fstat = 0;
-			strncpy(tmpbuf,blanks,256); /* clear out buffer */
+			strncpy(tmpbuf,blanks,1024); /* clear out buffer */
 		}
 	}
 

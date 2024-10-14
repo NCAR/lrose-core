@@ -8,7 +8,7 @@
 #
 ###############################################################
 
-project (LROSE-CORE)
+project (lrose-core)
 
 # subdirectories
 
@@ -40,7 +40,9 @@ add_subdirectory (GtsSockIngest)
 add_subdirectory (LdmDynamic2Static)
 add_subdirectory (LdmMetars2File)
 add_subdirectory (Ltg2Spdb)
+add_subdirectory (Mesonet2Spdb)
 add_subdirectory (Metar2Spdb)
+add_subdirectory (MetarCsv2Spdb)
 add_subdirectory (Mrms2Mdv)
 add_subdirectory (MrmsGribIngest)
 add_subdirectory (NWSsoundingIngest)
@@ -61,6 +63,7 @@ add_subdirectory (SerialIngest)
 add_subdirectory (ShipObsIngest)
 add_subdirectory (SigAirMet2Spdb)
 add_subdirectory (SynopObsIngest)
+add_subdirectory (UAEMesonet2Spdb)
 add_subdirectory (Uf2Dsr)
 add_subdirectory (Usgs2Spdb)
 add_subdirectory (WafsTiled2Mdv)

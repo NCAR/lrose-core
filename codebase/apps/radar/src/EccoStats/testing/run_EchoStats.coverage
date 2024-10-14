@@ -1,0 +1,46 @@
+#! /bin/csh
+
+
+set LOG_DIR=/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats/logs
+
+mkdir -p $LOG_DIR
+
+EccoStats -params EccoStats.coverage -debug -start "2021 01 01 00 00 00" -end "2021 02 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210101.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 02 01 00 00 00" -end "2021 03 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210201.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 03 01 00 00 00" -end "2021 04 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210301.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 04 01 00 00 00" -end "2021 05 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210401.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 05 01 00 00 00" -end "2021 06 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210501.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 06 01 00 00 00" -end "2021 07 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210601.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 07 01 00 00 00" -end "2021 08 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210701.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 08 01 00 00 00" -end "2021 09 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210801.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 09 01 00 00 00" -end "2021 10 01 00 00 00" >& ${LOG_DIR}/EccoStats.20210901.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 10 01 00 00 00" -end "2021 11 01 00 00 00" >& ${LOG_DIR}/EccoStats.20211001.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 11 01 00 00 00" -end "2021 12 01 00 00 00" >& ${LOG_DIR}/EccoStats.20211101.log &
+EccoStats -params EccoStats.coverage -debug -start "2021 12 01 00 00 00" -end "2022 01 01 00 00 00" >& ${LOG_DIR}/EccoStats.20211201.log &
+
+EccoStats -params EccoStats.coverage -debug -start "2022 01 01 00 00 00" -end "2022 02 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220101.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 02 01 00 00 00" -end "2022 03 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220201.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 03 01 00 00 00" -end "2022 04 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220301.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 04 01 00 00 00" -end "2022 05 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220401.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 05 01 00 00 00" -end "2022 06 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220501.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 06 01 00 00 00" -end "2022 07 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220601.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 07 01 00 00 00" -end "2022 08 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220701.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 08 01 00 00 00" -end "2022 09 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220801.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 09 01 00 00 00" -end "2022 10 01 00 00 00" >& ${LOG_DIR}/EccoStats.20220901.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 10 01 00 00 00" -end "2022 11 01 00 00 00" >& ${LOG_DIR}/EccoStats.20221001.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 11 01 00 00 00" -end "2022 12 01 00 00 00" >& ${LOG_DIR}/EccoStats.20221101.log &
+EccoStats -params EccoStats.coverage -debug -start "2022 12 01 00 00 00" -end "2023 01 01 00 00 00" >& ${LOG_DIR}/EccoStats.20221201.log &
+
+EccoStats -params EccoStats.coverage -debug -start "2023 01 01 00 00 00" -end "2023 02 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230101.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 02 01 00 00 00" -end "2023 03 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230201.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 03 01 00 00 00" -end "2023 04 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230301.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 04 01 00 00 00" -end "2023 05 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230401.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 05 01 00 00 00" -end "2023 06 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230501.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 06 01 00 00 00" -end "2023 07 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230601.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 07 01 00 00 00" -end "2023 08 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230701.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 08 01 00 00 00" -end "2023 09 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230801.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 09 01 00 00 00" -end "2023 10 01 00 00 00" >& ${LOG_DIR}/EccoStats.20230901.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 10 01 00 00 00" -end "2023 11 01 00 00 00" >& ${LOG_DIR}/EccoStats.20231001.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 11 01 00 00 00" -end "2023 12 01 00 00 00" >& ${LOG_DIR}/EccoStats.20231101.log &
+EccoStats -params EccoStats.coverage -debug -start "2023 12 01 00 00 00" -end "2024 01 01 00 00 00" >& ${LOG_DIR}/EccoStats.20231201.log &
+

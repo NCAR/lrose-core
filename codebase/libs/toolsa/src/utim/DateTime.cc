@@ -314,6 +314,14 @@ void
 }
 
 void
+  DateTime::setToZero()
+{
+  _uTime = 0; 
+  _subSec = 0;
+  setLeadDeltaTime(NULL);
+}
+
+void
   DateTime::set(time_t when)
 {
   _uTime = when; 

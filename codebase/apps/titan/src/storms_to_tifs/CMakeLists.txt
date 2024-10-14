@@ -14,14 +14,14 @@ project (storms_to_tifs)
 # source files
 
 set (SRCS
-      init_indices.c
-      load_scan_times.c
-      open_files.c
-      parse_args.c
-      print_comments.c
-      process_track_file.c
-      storms_to_tifs.c
-      tidy_and_exit.c
+      init_indices.cc
+      load_scan_times.cc
+      open_files.cc
+      parse_args.cc
+      print_comments.cc
+      process_track_file.cc
+      storms_to_tifs.cc
+      tidy_and_exit.cc
     )
 
 # include directories
@@ -70,6 +70,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 # link directories
 
@@ -90,6 +92,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(IS_DIRECTORY /usr/lib64)
+  link_directories (/usr/lib64)
+endif()
+if(IS_DIRECTORY /usr/lib)
+  link_directories (/usr/lib)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

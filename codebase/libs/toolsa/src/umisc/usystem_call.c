@@ -72,9 +72,6 @@ static int pid;
 static int s_pipe(int fd[2]);
 #endif
 
-extern int socketpair(int, int, int, int *);
-extern FILE *fdopen(int, const char *);
-
 #define DONE_LEN 8
 
 #endif

@@ -848,6 +848,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("ADD COVERAGE FLAG");
+    tt->comment_text = tdrpStrDup("Option to add a field indicating the coverage");
+    tt++;
+    
+    // Parameter 'add_coverage_flag'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_coverage_flag");
+    tt->descr = tdrpStrDup("If TRUE, determine the coverage field using a special value in an input field.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &add_coverage_flag - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'name_of_field_encoding_coverage'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("name_of_field_encoding_coverage");
+    tt->descr = tdrpStrDup("Name of the input field used to detect coverage.");
+    tt->help = tdrpStrDup("As an example, the radar reflectivity input field may contain a special value to indicate valid radar coverage. The input field name is specified as that AFTER renaming (see above).");
+    tt->val_offset = (char *) &name_of_field_encoding_coverage - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'input_field_value_for_coverage'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("input_field_value_for_coverage");
+    tt->descr = tdrpStrDup("The value of the field used to indicate coverage.");
+    tt->help = tdrpStrDup("Note: this is separate from the missing_data_value, which indicates poor data. The coverage flag indicates that a measurement was taken at the grid location.As an example, the reflectivity field may contain a special value to indicate coverage. The field name specified is after renaming (see above).");
+    tt->val_offset = (char *) &input_field_value_for_coverage - &_start_;
+    tt->single_val.d = -99;
+    tt++;
+    
+    // Parameter 'name_of_coverage_flag_output_field'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("name_of_coverage_flag_output_field");
+    tt->descr = tdrpStrDup("Name of the output coverage flag field.");
+    tt->help = tdrpStrDup("This is added to the output volume.");
+    tt->val_offset = (char *) &name_of_coverage_flag_output_field - &_start_;
+    tt->single_val.s = tdrpStrDup("Coverage");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -988,11 +1045,11 @@
     tt->single_val.i = 120;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("CONVERT TO COLUMN-MAX VALUES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1009,11 +1066,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("REMAPPING GRID PROJECTION ON OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1300,11 +1357,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("PRINT OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1345,11 +1402,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("PRINT SECTIONS PARAMETERS");
     tt->comment_text = tdrpStrDup("Parameters only used with -printSec or debug > 1\n. For each grib message prints the sections defined below.");
     tt++;

@@ -14,29 +14,29 @@ project (verify_tracks)
 # source files
 
 set (SRCS
-      compute_contingency_data.c
-      compute_errors.c
-      compute_lookup.c
-      compute_stats.c
-      debug_print.c
-      find_last_descendant.c
-      increment_count.c
-      init_indices.c
-      load_file_stats.c
-      load_grid.c
-      load_props.c
-      load_scan_times.c
-      open_files.c
-      parse_args.c
-      perform_verification.c
-      print_contingency_table.c
-      print_stats.c
-      read_params.c
-      save_verification_parameters.c
-      set_counts_to_longs.c
-      tidy_and_exit.c
-      triangle_points.c
-      verify_tracks.c
+      compute_contingency_data.cc
+      compute_errors.cc
+      compute_lookup.cc
+      compute_stats.cc
+      debug_print.cc
+      find_last_descendant.cc
+      increment_count.cc
+      init_indices.cc
+      load_file_stats.cc
+      load_grid.cc
+      load_props.cc
+      load_scan_times.cc
+      open_files.cc
+      parse_args.cc
+      perform_verification.cc
+      print_contingency_table.cc
+      print_stats.cc
+      read_params.cc
+      save_verification_parameters.cc
+      set_counts_to_longs.cc
+      tidy_and_exit.cc
+      triangle_points.cc
+      verify_tracks.cc
     )
 
 # include directories
@@ -85,6 +85,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 # link directories
 
@@ -105,6 +107,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(IS_DIRECTORY /usr/lib64)
+  link_directories (/usr/lib64)
+endif()
+if(IS_DIRECTORY /usr/lib)
+  link_directories (/usr/lib)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

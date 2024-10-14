@@ -941,7 +941,9 @@ void ufree2(void **two_d_pointers)
    * free up data buffer
    */
 
-  ufree((void *) *two_d_pointers);
+  if (two_d_pointers != NULL) {
+    ufree((void *) *two_d_pointers);
+  }
   
   /*
    * free up 2d-pointer array
@@ -966,13 +968,17 @@ void ufree3(void ***three_d_pointers)
    * free up data buffer
    */
 
-  ufree((void *) **three_d_pointers);
+  if (three_d_pointers != NULL) {
+    ufree((void *) **three_d_pointers);
+  }
   
   /*
    * free up 2d-pointer array
    */
 
-  ufree((void *) *three_d_pointers);
+  if (three_d_pointers != NULL) {
+    ufree((void *) *three_d_pointers);
+  }
 
   /*
    * free up 3d-pointer array

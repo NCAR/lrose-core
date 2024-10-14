@@ -44,13 +44,13 @@ LOC_LIBS = \
 
 HDRS =
 
-SRCS = resolve_host.c
+CPPC_SRCS = resolve_host.cc
 
 #
 # C targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets

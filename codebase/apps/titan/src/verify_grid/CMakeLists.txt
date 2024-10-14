@@ -15,20 +15,20 @@ project (verify_grid)
 
 set (SRCS
       verify_grid_tdrp.c
-      init_indices.c
-      get_truth_path.c
-      init_intermediate_grid.c
-      parse_args.c
-      parse_threshold.c
-      print_cart_params.c
-      print_contingency_table.c
-      print_header.c
-      print_stats.c
-      tidy_and_exit.c
-      update_cont.c
-      update_regression.c
-      update_stats.c
-      verify_grid.c
+      init_indices.cc
+      get_truth_path.cc
+      init_intermediate_grid.cc
+      parse_args.cc
+      parse_threshold.cc
+      print_cart_params.cc
+      print_contingency_table.cc
+      print_header.cc
+      print_stats.cc
+      tidy_and_exit.cc
+      update_cont.cc
+      update_regression.cc
+      update_stats.cc
+      verify_grid.cc
     )
 
 # include directories
@@ -77,6 +77,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 # link directories
 
@@ -97,6 +99,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(IS_DIRECTORY /usr/lib64)
+  link_directories (/usr/lib64)
+endif()
+if(IS_DIRECTORY /usr/lib)
+  link_directories (/usr/lib)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

@@ -255,7 +255,9 @@ codebase/apps/ingest/src/LdmDynamic2Static/LdmDynamic2Static
 codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File
 codebase/apps/ingest/src/Ltg2Spdb/Ltg2Spdb
 codebase/apps/ingest/src/madis2Spdb/madis2Spdb
+codebase/apps/ingest/src/Mesonet2Spdb/Mesonet2Spdb
 codebase/apps/ingest/src/Metar2Spdb/Metar2Spdb
+codebase/apps/ingest/src/MetarCsv2Spdb/MetarCsv2Spdb
 codebase/apps/ingest/src/Metreport2Spdb/Metreport2Spdb
 codebase/apps/ingest/src/Mrms2Mdv/Mrms2Mdv
 codebase/apps/ingest/src/MrmsGribIngest/MrmsGribIngest
@@ -281,6 +283,8 @@ codebase/apps/ingest/src/Sigmet2Dsr/Sigmet2Dsr
 codebase/apps/ingest/src/SigmetRaw2Dsr/SigmetRaw2Dsr
 codebase/apps/ingest/src/SigmetUdp2Dsr/SigmetUdp2Dsr
 codebase/apps/ingest/src/SynopObsIngest/SynopObsIngest
+codebase/apps/ingest/src/Taf2Spdb/Taf2Spdb
+codebase/apps/ingest/src/UAEMesonet2Spdb/UAEMesonet2Spdb
 codebase/apps/ingest/src/Uf2Dsr/Uf2Dsr
 codebase/apps/ingest/src/Usgs2Spdb/Usgs2Spdb
 codebase/apps/ingest/src/WafsTiled2Mdv/WafsTiled2Mdv
@@ -301,7 +305,6 @@ codebase/apps/ingest/src/hiResNidsVil2Mdv/hiResNidsVil2Mdv
 codebase/apps/ingest/src/lowResNids2Mdv/lowResNids2Mdv
 codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
-
 codebase/apps/mdv_utils/src/Affirm/Affirm
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
 codebase/apps/mdv_utils/src/CreateTestMdv/CreateTestMdv
@@ -449,6 +452,7 @@ codebase/apps/radar/src/DsrMerge/DsrMerge
 codebase/apps/radar/src/DualDopplerLobes/DualDopplerLobes
 codebase/apps/radar/src/Ecco/Ecco
 codebase/apps/radar/src/Ecco/ResTestEcco/ResTestEcco
+codebase/apps/radar/src/EccoStats/EccoStats
 
 codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake
@@ -496,7 +500,8 @@ codebase/apps/radar/src/MergeHcrAndHsrl/MergeHcrAndHsrl
 codebase/apps/radar/src/Mpd2Radx/Mpd2Radx
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/NoiseMon/NoiseMon
-codebase/apps/radar/src/Qucid/Qucid
+codebase/apps/radar/src/Lucid/Lucid
+codebase/apps/radar/src/Lucid/moc_*
 codebase/apps/radar/src/PartRain/PartRain
 codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute
@@ -764,6 +769,7 @@ codebase/apps/radar/src/SpectraPlot/SpectraPlot
 codebase/apps/radar/src/SpectraScope/SpectraScope
 
 codebase/apps/xpol/src/ProSensing2Dsr/ProSensing2Dsr
+codebase/apps/xpol/src/XpolScanControl/XpolScanControl
 
 codebase/Makefile
 codebase/libs/Fmq/src/.libs/

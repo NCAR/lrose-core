@@ -47,18 +47,18 @@ MODULE_TYPE = program
 
 HDRS = didss_print.h
 
-SRCS = \
-	fmq_print.c \
-	parse_args.c \
-	print_all.c \
-	print_slots.c \
-	print_stats.c
+CPPC_SRCS = \
+	fmq_print.cc \
+	parse_args.cc \
+	print_all.cc \
+	print_slots.cc \
+	print_stats.cc
 
 #
 # standard targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets

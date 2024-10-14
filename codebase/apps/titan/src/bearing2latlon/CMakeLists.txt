@@ -14,11 +14,11 @@ project (bearing2latlon)
 # source files
 
 set (SRCS
-      bearing2latlon_tdrp.c
-      bearing2latlon.c
-      filter.c
-      parse_args.c
-      tidy_and_exit.c
+      Params.cc
+      bearing2latlon.cc
+      filter.cc
+      parse_args.cc
+      tidy_and_exit.cc
     )
 
 # include directories
@@ -67,6 +67,8 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
+# NOTE: cannot add /usr/include using include_directories()
+add_compile_options(-I/usr/include)
 
 # link directories
 
@@ -87,6 +89,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(IS_DIRECTORY /usr/lib64)
+  link_directories (/usr/lib64)
+endif()
+if(IS_DIRECTORY /usr/lib)
+  link_directories (/usr/lib)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()
