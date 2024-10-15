@@ -152,7 +152,7 @@ public:
     BEAM_SPECIFY_N_SAMPLES = 0,
     BEAM_SPECIFY_ANGLE = 1,
     BEAM_CONSTANT_STEERING_ANGLE = 2,
-    BEAM_CONSTANT_PULSE_WIDTH = 3
+    BEAM_PULSE_WIDTH_CHANGE = 3
   } beam_method_t;
 
   typedef enum {

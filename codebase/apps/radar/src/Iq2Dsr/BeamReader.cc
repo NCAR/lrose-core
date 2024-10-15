@@ -305,9 +305,9 @@ Beam *BeamReader::getNextBeam()
         return NULL;
       }
       
-    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_PULSE_WIDTH) {
+    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_PULSE_WIDTH_CHANGE) {
 
-      if (_readConstantPulseWidthBeam()) {
+      if (_readPulseWidthChangeBeam()) {
         // end of data
         return NULL;
       }
@@ -709,10 +709,11 @@ int BeamReader::_readConstantSteeringAngleBeam()
     
 //////////////////////////////////////////////////
 // read in data for a beam with constant pulse
-// width, as in HCR.
+// width, for a case where the pulse widths
+// are changing dwell to dwell.
 // returns 0 on success, -1 on failure
 
-int BeamReader::_readConstantPulseWidthBeam()
+int BeamReader::_readPulseWidthChangeBeam()
   
 {
 
