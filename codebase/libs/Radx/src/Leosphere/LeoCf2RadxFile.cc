@@ -1347,10 +1347,10 @@ void LeoCf2RadxFile::_setAnglesFromXml(const string &xml)
   _elLimit1 = NAN;
   _elLimit2 = NAN;
 
-  RadxXml::readDouble(xml, "Azimuth_Angle_1_(°)", _azLimit1);
-  RadxXml::readDouble(xml, "Azimuth_Angle_2_(°)", _azLimit2);
-  RadxXml::readDouble(xml, "Elevation_Angle_1_(°)", _elLimit1);
-  RadxXml::readDouble(xml, "Elevation_Angle_2_(°)", _elLimit2);
+  RadxXml::readDouble(xml, "Azimuth_Angle_1_(ï¿½)", _azLimit1);
+  RadxXml::readDouble(xml, "Azimuth_Angle_2_(ï¿½)", _azLimit2);
+  RadxXml::readDouble(xml, "Elevation_Angle_1_(ï¿½)", _elLimit1);
+  RadxXml::readDouble(xml, "Elevation_Angle_2_(ï¿½)", _elLimit2);
 
   _fixedAngle = -9999;
   _rhiMode = false;
@@ -2419,7 +2419,16 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
      }
      string name = att.getName();
      string value;
-     att.getValues(value);
+     try{
+        att.getValues(value);
+     } catch (NcxxException &e) {
+        // newer leosphere netcdfs have res_id as an int attribute rather than
+        // a string (it's an int number either way). convert here to avoid
+        // exception about getting a string value out of an int attribute.
+        int intValue;
+        att.getValues(&intValue);
+        value = to_string(intValue);
+     }
      //if (name.find("scan_file_name") != string::npos) {
        //if (value.find("RHI") != string::npos)
        //  _sweepMode = value; //(Radx::SWEEP_MODE_RHI);  
