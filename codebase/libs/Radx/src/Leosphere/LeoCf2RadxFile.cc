@@ -1347,10 +1347,10 @@ void LeoCf2RadxFile::_setAnglesFromXml(const string &xml)
   _elLimit1 = NAN;
   _elLimit2 = NAN;
 
-  RadxXml::readDouble(xml, "Azimuth_Angle_1_(�)", _azLimit1);
-  RadxXml::readDouble(xml, "Azimuth_Angle_2_(�)", _azLimit2);
-  RadxXml::readDouble(xml, "Elevation_Angle_1_(�)", _elLimit1);
-  RadxXml::readDouble(xml, "Elevation_Angle_2_(�)", _elLimit2);
+  RadxXml::readDouble(xml, "Azimuth_Angle_1_(º)", _azLimit1);
+  RadxXml::readDouble(xml, "Azimuth_Angle_2_(º)", _azLimit2);
+  RadxXml::readDouble(xml, "Elevation_Angle_1_(º)", _elLimit1);
+  RadxXml::readDouble(xml, "Elevation_Angle_2_(º)", _elLimit2);
 
   _fixedAngle = -9999;
   _rhiMode = false;
