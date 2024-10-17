@@ -616,9 +616,9 @@ paramdef int {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Specify the pulse width.";
-  p_help = "Each dwell muct have a constant pulse width. Here we specify the pulse width for valid dwells. See 'fixed_pulse_width_us'. Dwells with different pulse widths are discarded.";
-} specify_pulse_width;
+  p_descr = "Specify the pulse width to be fixed.";
+  p_help = "Time series must have constant fixed pulse width. Data with other pulse widths are discarded.";
+} specify_fixed_pulse_width;
 
 paramdef double {
   p_default = 1.0;

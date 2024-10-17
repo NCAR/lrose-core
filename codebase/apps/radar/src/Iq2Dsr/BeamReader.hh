@@ -178,6 +178,7 @@ private:
   
   // beam identification
 
+  bool _beamError;
   si64 _beamCount;
   int _midIndex, _startIndex, _endIndex;
   si64 _prevBeamPulseSeqNum; // pulse after center of beam

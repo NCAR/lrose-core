@@ -897,7 +897,7 @@ public:
 
   int max_n_samples;
 
-  tdrp_bool_t specify_pulse_width;
+  tdrp_bool_t specify_fixed_pulse_width;
 
   double fixed_pulse_width_us;
 

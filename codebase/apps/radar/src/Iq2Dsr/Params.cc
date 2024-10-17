@@ -1680,15 +1680,15 @@
     tt->single_val.i = 128;
     tt++;
     
-    // Parameter 'specify_pulse_width'
+    // Parameter 'specify_fixed_pulse_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_pulse_width");
-    tt->descr = tdrpStrDup("Specify the pulse width.");
-    tt->help = tdrpStrDup("Each dwell muct have a constant pulse width. Here we specify the pulse width for valid dwells. See 'fixed_pulse_width_us'. Dwells with different pulse widths are discarded.");
-    tt->val_offset = (char *) &specify_pulse_width - &_start_;
+    tt->param_name = tdrpStrDup("specify_fixed_pulse_width");
+    tt->descr = tdrpStrDup("Specify the pulse width to be fixed.");
+    tt->help = tdrpStrDup("Time series must have constant fixed pulse width. Data with other pulse widths are discarded.");
+    tt->val_offset = (char *) &specify_fixed_pulse_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
