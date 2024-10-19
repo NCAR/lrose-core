@@ -227,13 +227,13 @@ int HcrShortLongCombine::_runRealtime()
       
       RadxMsg msg;
       rayCombined->serialize(msg);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "=========== Writing out ray =============" << endl;
-        cerr << "  time, el, az: "
+      if ((_params.debug >= Params::DEBUG_VERBOSE) ||
+          (_params.debug && (_nRaysWritten % 1000 == 0))) {
+        cerr << "Writing ray, time, el, az, rayNum: "
              << rayCombined->getRadxTime().asString(3) << ", "
              << rayCombined->getElevationDeg() << ", "
-             << rayCombined->getAzimuthDeg() << endl;
-        cerr << "=========================================" << endl;
+             << rayCombined->getAzimuthDeg() << ", "
+             << _nRaysWritten << endl;
       }
       
       // write the message
@@ -316,13 +316,13 @@ int HcrShortLongCombine::_runArchive()
       
       RadxMsg msg;
       rayCombined->serialize(msg);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "=========== Writing out ray =============" << endl;
-        cerr << "  time, el, az: "
+      if ((_params.debug >= Params::DEBUG_VERBOSE) ||
+          (_params.debug && (_nRaysWritten % 1000 == 0))) {
+        cerr << "Writing ray, time, el, az, rayNum: "
              << rayCombined->getRadxTime().asString(3) << ", "
              << rayCombined->getElevationDeg() << ", "
-             << rayCombined->getAzimuthDeg() << endl;
-        cerr << "=========================================" << endl;
+             << rayCombined->getAzimuthDeg() << ", "
+             << _nRaysWritten << endl;
       }
       
       // write the message
