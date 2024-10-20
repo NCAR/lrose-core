@@ -1053,7 +1053,7 @@ public:
   
   RadxField *computeDwellField(RadxField::StatsMethod_t method,
                                const vector<const RadxField *> &rayFieldsIn,
-                               double maxFractionMissing = 0.25);
+                               double maxFractionMissing = 0.66);
 
   /// convert enums to strings
 

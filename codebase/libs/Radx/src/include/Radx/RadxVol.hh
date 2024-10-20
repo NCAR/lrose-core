@@ -1289,7 +1289,7 @@ public:
   RadxRay *computeFieldStats
     (RadxField::StatsMethod_t globalMethod,
      vector<RadxField::NamedStatsMethod> namedMethods,  
-     double maxFractionMissing = 0.25);
+     double maxFractionMissing = 0.66);
 
   //@}
 
