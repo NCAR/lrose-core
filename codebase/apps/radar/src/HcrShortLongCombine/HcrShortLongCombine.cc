@@ -722,8 +722,9 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
 
   // combine short rays into a single ray
 
-  RadxRay *rayCombined = _dwellVolShort.computeFieldStats(_globalMethod,
-                                                          _namedMethods);
+  RadxRay *rayCombined =
+    _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods,
+                                     _params.dwell_stats_max_fraction_missing);
   
   // long rays
   // sanity check
@@ -747,7 +748,9 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
 
   // combine long rays into a single ray
   
-  RadxRay *rayLong = _dwellVolLong.computeFieldStats(_globalMethod, _namedMethods);
+  RadxRay *rayLong =
+    _dwellVolLong.computeFieldStats(_globalMethod, _namedMethods,
+                                    _params.dwell_stats_max_fraction_missing);
   
   // rename short fields
 

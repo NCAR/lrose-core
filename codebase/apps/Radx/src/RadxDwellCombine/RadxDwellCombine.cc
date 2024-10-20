@@ -1202,9 +1202,10 @@ int RadxDwellCombine::_runFmq()
         if (_params.debug >= Params::DEBUG_VERBOSE) {
           cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
         }
-        RadxRay *dwellRay = _dwellVol.computeFieldStats(_globalMethod,
-                                                        _namedMethods);
-
+        RadxRay *dwellRay =
+          _dwellVol.computeFieldStats(_globalMethod,
+                                      _namedMethods,
+                                      _params.dwell_stats_max_fraction_missing);
         RadxTime dwellRayTime(dwellRay->getRadxTime());
         double deltaSecs = dwellRayTime - prevDwellRayTime;
 
