@@ -184,7 +184,7 @@ private:
                       time_t dataTime,
                       const string &dataType);
 
-  void _updatePlatform(RadxRay *ray);
+  void _updatePlatform();
   void _updateRcalib();
 
   double _computeDeltaAngle(double a1, double a2);
@@ -218,7 +218,7 @@ private:
 
   void _computeMaxRangeLut(double radarAltitudeKm);
   
-  void _computeEndOfVolTime(time_t beamTime);
+  void _computeEndOfVolTime(time_t rayTime);
 
   bool _checkEndOfVol360(RadxRay *ray);
 

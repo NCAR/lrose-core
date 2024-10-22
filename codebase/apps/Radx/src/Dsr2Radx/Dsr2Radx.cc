@@ -383,7 +383,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   // set platform parameters if avaliable
 
   if (_reader->getPlatformUpdated()) {
-    _updatePlatform(ray);
+    _updatePlatform();
   }
 
   // set calibration parameters if avaliable
@@ -540,6 +540,15 @@ int Dsr2Radx::_processRay(RadxRay *ray)
         cerr << "Going back in time - reprocessing old data?" << endl;
       }
       _computeEndOfVolTime(ray->getTimeSecs());
+      _clearData();
+    } else if ((ray->getTimeSecs() - _endOfVolTime) >
+               _params.nsecs_per_volume * 2) {
+      // data gap, start again
+      if (_params.debug) {
+        cerr << "Jumping over data gap" << endl;
+      }
+      _computeEndOfVolTime(ray->getTimeSecs());
+      _clearData();
     }
     if (ray->getTimeSecs() >= _endOfVolTime) {
       _endOfVol = true;
@@ -595,7 +604,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   if ((int) _vol.getNRays() > _params.max_rays_in_vol) {
     _endOfVol = true;
   }
-
+  
   // check in sweep mode?
 
   if (ray->getSweepMode() != _sweepMode &&
@@ -657,6 +666,7 @@ int Dsr2Radx::_processRay(RadxRay *ray)
         _cachedRay = NULL;
       }
       if (_endOfVol) {
+        _updatePlatform();
         if (_endOfVolAutomatic ||
             _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM ||
             _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM ||
@@ -716,6 +726,10 @@ int Dsr2Radx::_processVol()
     cerr << "**** Start Dsr2Radx::_processVol() ****" << endl;
   }
 
+  // update metadata as needed
+  
+  _updatePlatform();
+  
   // load the current scan mode - PPI or RHI
   
   _loadCurrentScanMode();
@@ -1157,13 +1171,13 @@ int Dsr2Radx::_writeLdataInfo(const string &outputDir,
 ////////////////////////////////////////////////////////////////
 // update platform params
 
-void Dsr2Radx::_updatePlatform(RadxRay *ray)
+void Dsr2Radx::_updatePlatform()
 
 {
 
   const RadxPlatform &platform = _reader->getPlatform();
   _vol.setPlatform(platform);
-
+  
   if (_params.override_radar_name) {
     _vol.setInstrumentName(_params.radar_name);
   }
@@ -1938,13 +1952,13 @@ void Dsr2Radx::_computeMaxRangeLut(double radarAltitudeKm)
 /////////////////////////////////////////////////////////////////
 // compute time for end of volume
 	
-void Dsr2Radx::_computeEndOfVolTime(time_t beamTime)
+void Dsr2Radx::_computeEndOfVolTime(time_t rayTime)
 
 {
 
   int secsPerDay = 86400;
-  int jDay = beamTime / secsPerDay;
-  int secInDay = beamTime % secsPerDay;
+  int jDay = rayTime / secsPerDay;
+  int secInDay = rayTime % secsPerDay;
   int volInDay = secInDay / _params.nsecs_per_volume;
   int endOfVolSec = (volInDay + 1) * _params.nsecs_per_volume;
   if (endOfVolSec > secsPerDay) {
