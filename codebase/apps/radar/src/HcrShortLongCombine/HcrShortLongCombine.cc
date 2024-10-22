@@ -708,7 +708,7 @@ int HcrShortLongCombine::_checkForTimeGap(RadxRay *latestRayShort)
   // check for time gap
   
   RadxTime latestTimeShort = latestRayShort->getRadxTime();
-  if ((latestTimeShort - _prevTimeShort) > _dwellLengthSecs * 2) {
+  if ((latestTimeShort - _prevTimeShort) > _dwellLengthSecs * 5) {
 
     // start again
     _clearDwellRays();
