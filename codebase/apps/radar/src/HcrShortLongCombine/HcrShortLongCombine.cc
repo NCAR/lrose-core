@@ -534,6 +534,7 @@ int HcrShortLongCombine::_prepareInputRays()
   // compute the latest time
   
   RadxTime latestTime = shortTime;
+  _prevTimeShort = shortTime;
   if (longTime > latestTime) {
     latestTime = longTime;
   }
@@ -620,6 +621,9 @@ int HcrShortLongCombine::_readNextDwell()
   
   while (true) {
     RadxRay *ray = _readRayShort();
+    if (_checkForTimeGap(ray)) {
+      return -1;
+    }
     if (ray == NULL) {
       cerr << "ERROR - HcrShortLongCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
@@ -691,6 +695,38 @@ int HcrShortLongCombine::_readNextDwell()
 
   return 0;
 
+}
+
+/////////////////////////////////////////////////////////////////
+// check for a significant time gap
+// if found, re-initialize
+
+int HcrShortLongCombine::_checkForTimeGap(RadxRay *latestRayShort)
+
+{
+
+  // check for time gap
+  
+  RadxTime latestTimeShort = latestRayShort->getRadxTime();
+  if ((latestTimeShort - _prevTimeShort) > _dwellLengthSecs * 2) {
+
+    // start again
+    _clearDwellRays();
+    _cacheRayShort = NULL;
+    _cacheRayLong = NULL;
+    
+    if (_prepareInputRays()) {
+      _prevTimeShort = latestTimeShort;
+      cerr << "HcrShortLongCombine::_checkForTimeGap" << endl;
+      cerr << "  _prepareInputRays() failed" << endl;
+      return -1;
+    }
+    
+  }
+
+  _prevTimeShort = latestTimeShort;
+  return 0;
+  
 }
 
 /////////////////////////////////////////////////////////////////

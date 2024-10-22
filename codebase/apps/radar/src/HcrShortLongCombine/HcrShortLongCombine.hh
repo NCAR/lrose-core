@@ -125,10 +125,12 @@ private:
   RadxTime _dwellEndTime;
   RadxTime _dwellMidTime;
   RadxTime _latestRayTime;
+
+  RadxTime _prevTimeShort;
   
   RadxRay *_cacheRayShort;
   RadxRay *_cacheRayLong;
-
+  
   vector<RadxRay *> _dwellRaysShort;
   vector<RadxRay *> _dwellRaysLong;
 
@@ -148,6 +150,7 @@ private:
 
   int _prepareInputRays();
   int _readNextDwell();
+  int _checkForTimeGap(RadxRay *latestRayShort);
   RadxRay *_combineDwellRays();
   void _clearDwellRays();
 
