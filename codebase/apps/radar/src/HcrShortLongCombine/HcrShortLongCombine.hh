@@ -139,10 +139,14 @@ private:
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
 
+  double _meanLatShort, _meanLonShort, _meanAltShort;
+  double _meanLatLong, _meanLonLong, _meanAltLong;
+
   // methods
 
   int _runRealtime();
   int _runArchive();
+  int _computeMeanLocation();
 
   int _openInputFmqs();
   int _openOutputFmq();

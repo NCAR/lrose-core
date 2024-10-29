@@ -649,6 +649,39 @@
     tt->single_val.e = REALTIME;
     tt++;
     
+    // Parameter 'compute_mean_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mean_location");
+    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
+    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see later) if override_radar_location is set to true.");
+    tt->val_offset = (char *) &compute_mean_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
+    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based insytallation.");
+    tt++;
+    
+    // Parameter 'compute_mean_radar_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mean_radar_location");
+    tt->descr = tdrpStrDup("Option to compute mean radar location.");
+    tt->help = tdrpStrDup("This mode will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to true.");
+    tt->val_offset = (char *) &compute_mean_radar_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'input_fmq_url_short'
     // ctype is 'char*'
     
@@ -709,11 +742,11 @@
     tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OVERRIDE PLATFORM TYPE?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -768,11 +801,11 @@
     tt->single_val.e = PLATFORM_AIRCRAFT_FORE;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OVERRIDE PRIMARY AXIS?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -817,11 +850,11 @@
     tt->single_val.e = PRIMARY_AXIS_Y_PRIME;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OVERRIDE SWEEP MODE?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -896,11 +929,68 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("OVERRIDE RADAR LOCATION?");
+    tt->comment_text = tdrpStrDup("This will override the latitude/longitude/altitude in the georeference data blocks. It is only intended for use in a ground-based insytallation.");
+    tt++;
+    
+    // Parameter 'override_radar_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_location");
+    tt->descr = tdrpStrDup("Option to override radar location.");
+    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude.");
+    tt->val_offset = (char *) &override_radar_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'radar_location'
+    // ctype is '_radar_location_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("radar_location");
+    tt->descr = tdrpStrDup("Radar location if override is set true.");
+    tt->help = tdrpStrDup("The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.");
+    tt->val_offset = (char *) &radar_location - &_start_;
+    tt->struct_def.name = tdrpStrDup("radar_location_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("latitudeDeg");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &radar_location.latitudeDeg - (char *) &radar_location;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("longitudeDeg");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &radar_location.longitudeDeg - (char *) &radar_location;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &radar_location.altitudeKm - (char *) &radar_location;
+    tt->n_struct_vals = 3;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0;
+      tt->struct_vals[2].d = 0;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
     tt->comment_text = tdrpStrDup("Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.");
     tt++;
@@ -961,11 +1051,11 @@
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1035,11 +1125,11 @@
       tt->struct_vals[3].e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
     tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt++;
@@ -1116,11 +1206,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;

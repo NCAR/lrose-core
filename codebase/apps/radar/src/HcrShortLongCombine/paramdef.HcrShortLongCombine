@@ -52,6 +52,24 @@ paramdef enum mode_t {
   p_help = "\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.";
 } mode;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see later) if override_radar_location is set to true.";
+} compute_mean_location;
+
+commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based insytallation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute mean radar location.";
+  p_help = "This mode will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to true.";
+} compute_mean_radar_location;
+
+
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_short";
   p_descr = "FMQ from which to read the short pulse moments stream.";
@@ -192,6 +210,29 @@ paramdef double {
   p_descr = "Specified maximim range - km.";
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
+
+commentdef {
+  p_header = "OVERRIDE RADAR LOCATION?";
+  p_text = "This will override the latitude/longitude/altitude in the georeference data blocks. It is only intended for use in a ground-based insytallation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override radar location.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude.";
+} override_radar_location;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} radar_location;
 
 commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";

@@ -159,18 +159,13 @@ HcrShortLongCombine::~HcrShortLongCombine()
 int HcrShortLongCombine::Run()
 {
 
-  int iret = 0;
-
-  switch (_params.mode) {
-    case Params::ARCHIVE:
-      iret = _runArchive();
-      break;
-    case Params::REALTIME:
-    default:
-      iret = _runRealtime();
-  } // switch
-
-  return iret;
+  if (_params.compute_mean_location) {
+    return _computeMeanLocation();
+  } else if (_params.mode == Params::ARCHIVE) {
+    return _runArchive();
+  } else {
+    return _runRealtime();
+  }
 
 }
 
@@ -237,12 +232,14 @@ int HcrShortLongCombine::_runRealtime()
       }
       
       // write the message
-      
-      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                               msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
-        cerr << "  Cannot write ray to output queue" << endl;
-        iret = -1;
+
+      if (_outputFmq) {
+        if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                 msg.assembledMsg(), msg.lengthAssembled())) {
+          cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+          cerr << "  Cannot write ray to output queue" << endl;
+          iret = -1;
+        }
       }
       _nRaysWritten++;
       
@@ -327,11 +324,13 @@ int HcrShortLongCombine::_runArchive()
       
       // write the message
       
-      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                               msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
-        cerr << "  Cannot write ray to output queue" << endl;
-        iret = -1;
+      if (_outputFmq) {
+        if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                 msg.assembledMsg(), msg.lengthAssembled())) {
+          cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+          cerr << "  Cannot write ray to output queue" << endl;
+          iret = -1;
+        }
       }
       _nRaysWritten++;
       
@@ -341,7 +340,7 @@ int HcrShortLongCombine::_runArchive()
 
     } else {
 
-      cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+      cerr << "ERROR - HcrShortLongCombine::_runArchive" << endl;
       cerr << "  no combined ray created" << endl;
       iret = -1;
       
@@ -353,6 +352,109 @@ int HcrShortLongCombine::_runArchive()
 
 }
 
+//////////////////////////////////////////////////
+// Compute mean location
+
+int HcrShortLongCombine::_computeMeanLocation()
+{
+
+  if (_params.debug) {
+    cerr << "HcrShortLongCombine::_computeMeanLocation()" << endl;
+  }
+
+  // Instantiate and initialize the input radar queues
+  
+  if (_openFileReaders()) {
+    return -1;
+  }
+  
+  // process short rays for the dwell
+
+  if (_params.debug) {
+    cerr << "  Computing mean location for short pulse data ...." << endl;
+  }
+
+  double sumLatShort = 0.0;
+  double sumLonShort = 0.0;
+  double sumAltShort = 0.0;
+  long nRaysShort = 0;
+
+  RadxRay *rayShort = _readerShort->readNextRay();
+  while (rayShort != NULL) {
+    const RadxGeoref *georef = rayShort->getGeoreference();
+    if (georef != NULL) {
+      sumLatShort += georef->getLatitude();
+      sumLonShort += georef->getLongitude();
+      sumAltShort += georef->getAltitudeKmMsl();
+      nRaysShort += 1.0;
+    }
+    if (nRaysShort % 10000 == 0) {
+      cerr << "  data time, n rays short processed: "
+           << rayShort->getRadxTime().asString(6) << ", "
+           << nRaysShort << endl;
+    }
+    delete rayShort;
+    rayShort = _readerShort->readNextRay();
+  } // while
+  
+  _meanLatShort = _meanLonShort = _meanAltShort = -9999.0;
+  if (nRaysShort > 0) {
+    _meanLatShort = sumLatShort / nRaysShort;
+    _meanLonShort = sumLonShort / nRaysShort;
+    _meanAltShort = sumAltShort / nRaysShort;
+  }
+  
+  // process long rays for the dwell
+
+  double sumLatLong = 0.0;
+  double sumLonLong = 0.0;
+  double sumAltLong = 0.0;
+  long nRaysLong = 0;
+  
+  RadxRay *rayLong = _readerLong->readNextRay();
+  while (rayLong != NULL) {
+    const RadxGeoref *georef = rayLong->getGeoreference();
+    if (georef != NULL) {
+      sumLatLong += georef->getLatitude();
+      sumLonLong += georef->getLongitude();
+      sumAltLong += georef->getAltitudeKmMsl();
+      nRaysLong += 1.0;
+    }
+    if (nRaysLong % 10000 == 0) {
+      cerr << "  data time, n rays long processed: "
+           << rayLong->getRadxTime().asString(6) << ", "
+           << nRaysLong << endl;
+    }
+    delete rayLong;
+    rayLong = _readerLong->readNextRay();
+  } // while
+
+  _meanLatLong = _meanLonLong = _meanAltLong = -9999.0;
+  if (nRaysLong > 0) {
+    _meanLatLong = sumLatLong / nRaysLong;
+    _meanLonLong = sumLonLong / nRaysLong;
+    _meanAltLong = sumAltLong / nRaysLong;
+  }
+
+  fprintf(stderr, "HcrShortLongCombine::_computeMeanLocation()\n");
+  fprintf(stderr, "\n");
+  fprintf(stderr, "  nRaysShort           : %ld\n", nRaysShort);
+  fprintf(stderr, "  meanLatShort (deg)   : %10.6f\n", _meanLatShort);
+  fprintf(stderr, "  meanLonShort (deg)   : %10.6f\n", _meanLonShort);
+  fprintf(stderr, "  meanAltShort (kmMSL) : %10.6f\n", _meanAltShort);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "  nRaysLong            : %ld\n", nRaysLong);
+  fprintf(stderr, "  meanLatLong (deg)    : %10.6f\n", _meanLatLong);
+  fprintf(stderr, "  meanLonLong (deg)    : %10.6f\n", _meanLonLong);
+  fprintf(stderr, "  meanAltLong (kmMSL)  : %10.6f\n", _meanAltLong);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "  meanLat (deg)    : %10.6f\n", (_meanLatLong + _meanLatShort) / 2.0);
+  fprintf(stderr, "  meanLon (deg)    : %10.6f\n", (_meanLonLong + _meanLonShort) / 2.0);
+  fprintf(stderr, "  meanAlt (kmMSL)  : %10.6f\n", (_meanAltLong + _meanAltShort) / 2.0);
+
+  return 0;
+
+}
 //////////////////////////////////////////////////
 // Open input fmqs
 
@@ -1118,10 +1220,12 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     RadxMsg msg;
     platform.serialize(msg);
     // write the platform to the output queue
-    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                             msg.assembledMsg(), msg.lengthAssembled())) {
-      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
-      cerr << "  Cannot write platform to queue" << endl;
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+        cerr << "  Cannot write platform to queue" << endl;
+      }
     }
 
   } // if (_readerShort->getPlatformUpdated())
@@ -1137,10 +1241,12 @@ RadxRay *HcrShortLongCombine::_readRayShort()
       RadxMsg msg;
       calib.serialize(msg);
       // write to output queue
-      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                               msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
-        cerr << "  Cannot write calib to queue" << endl;
+      if (_outputFmq) {
+        if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                 msg.assembledMsg(), msg.lengthAssembled())) {
+          cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+          cerr << "  Cannot write calib to queue" << endl;
+        }
       }
     } // ii
   }
@@ -1157,10 +1263,12 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     RadxMsg msg;
     status.serialize(msg);
     // write to output queue
-    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                             msg.assembledMsg(), msg.lengthAssembled())) {
-      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
-      cerr << "  Cannot write status xml to queue" << endl;
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+        cerr << "  Cannot write status xml to queue" << endl;
+      }
     }
   }
   
@@ -1172,10 +1280,12 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     RadxMsg msg;
     event.serialize(msg);
     // write to output queue
-    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                             msg.assembledMsg(), msg.lengthAssembled())) {
-      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
-      cerr << "  Cannot write start of vol event to queue" << endl;
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+        cerr << "  Cannot write start of vol event to queue" << endl;
+      }
     }
   } // ii
 
@@ -1241,10 +1351,12 @@ RadxRay *HcrShortLongCombine::_readRayLong()
       RadxMsg msg;
       calib.serialize(msg);
       // write to output queue
-      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                               msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrLongLongCombine::_readRayLong" << endl;
-        cerr << "  Cannot write calib to queue" << endl;
+      if (_outputFmq) {
+        if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                 msg.assembledMsg(), msg.lengthAssembled())) {
+          cerr << "ERROR - HcrLongLongCombine::_readRayLong" << endl;
+          cerr << "  Cannot write calib to queue" << endl;
+        }
       }
     } // ii
   }
