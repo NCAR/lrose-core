@@ -835,6 +835,7 @@ IwrfMomReaderFile::IwrfMomReaderFile(const char *input_dir,
                            use_ldata_info);
   
   _rayIndex = 0;
+  _startTimeFound = false;
 
 }
 
@@ -861,6 +862,7 @@ IwrfMomReaderFile::IwrfMomReaderFile(const char *input_dir,
                            end_time.utime());
 
   _rayIndex = 0;
+  _startTimeFound = false;
 
 }
 
@@ -875,7 +877,7 @@ IwrfMomReaderFile::IwrfMomReaderFile(const vector<string> &fileList) :
 
   _input = new DsInputPath("IwrfMomReaderFile", false, _fileList);
   _rayIndex = 0;
-  _fileIndex = -1;
+  _startTimeFound = false;
 
 }
 
@@ -930,7 +932,7 @@ RadxRay *IwrfMomReaderFile::readNextRay()
   _savedEvents.clear();
   
   // check the next ray is available in the current file
-  
+
   if (_rayIndex >= _vol.getRays().size()) {
     // need new file - flags will be set
     if (_readNextFile()) {
@@ -946,7 +948,7 @@ RadxRay *IwrfMomReaderFile::readNextRay()
   // in archive mode, and for first file,
   // read until ray time exceeds start time
 
-  if (_archiveStartTime.utime() != RadxTime::NEVER && _fileIndex == 0) {
+  if (_archiveStartTime.utime() != RadxTime::NEVER && !_startTimeFound) {
     for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
       _rayIndex = iray;
       const RadxRay &ray = *_vol.getRays()[_rayIndex];
@@ -955,6 +957,7 @@ RadxRay *IwrfMomReaderFile::readNextRay()
       }
     }
   }
+  _startTimeFound = true;
 
   const RadxRay &thisRay = *_vol.getRays()[_rayIndex];
   RadxEvent event;
@@ -985,7 +988,7 @@ RadxRay *IwrfMomReaderFile::readNextRay()
 
   RadxRay *ray = new RadxRay(thisRay);
   _rayIndex++;
-  
+
   return ray;
 
 }
@@ -1046,7 +1049,6 @@ int IwrfMomReaderFile::_readNextFile()
 
   // set the metadata
 
-  _fileIndex++;
   _platform = _vol.getPlatform();
   _statusXml = _vol.getStatusXml();
   _rcalibs.clear();
