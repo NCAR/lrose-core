@@ -438,10 +438,6 @@ public:
 
   mode_t mode;
 
-  tdrp_bool_t compute_mean_location;
-
-  tdrp_bool_t compute_mean_radar_location;
-
   char* input_fmq_url_short;
 
   char* input_fmq_url_long;
@@ -472,7 +468,11 @@ public:
 
   radar_location_t radar_location;
 
+  tdrp_bool_t compute_mean_location;
+
   double dwell_length_secs;
+
+  tdrp_bool_t round_dwell_time_to_nearest_interval;
 
   dwell_stats_method_t dwell_stats_method;
 

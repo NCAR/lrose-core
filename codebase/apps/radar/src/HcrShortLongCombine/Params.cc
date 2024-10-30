@@ -649,39 +649,6 @@
     tt->single_val.e = REALTIME;
     tt++;
     
-    // Parameter 'compute_mean_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_mean_location");
-    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
-    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see later) if override_radar_location is set to true.");
-    tt->val_offset = (char *) &compute_mean_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
-    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based insytallation.");
-    tt++;
-    
-    // Parameter 'compute_mean_radar_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_mean_radar_location");
-    tt->descr = tdrpStrDup("Option to compute mean radar location.");
-    tt->help = tdrpStrDup("This mode will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to true.");
-    tt->val_offset = (char *) &compute_mean_radar_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'input_fmq_url_short'
     // ctype is 'char*'
     
@@ -742,11 +709,11 @@
     tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("OVERRIDE PLATFORM TYPE?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -801,11 +768,11 @@
     tt->single_val.e = PLATFORM_AIRCRAFT_FORE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OVERRIDE PRIMARY AXIS?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -850,11 +817,11 @@
     tt->single_val.e = PRIMARY_AXIS_Y_PRIME;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OVERRIDE SWEEP MODE?");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -929,11 +896,11 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OVERRIDE RADAR LOCATION?");
     tt->comment_text = tdrpStrDup("This will override the latitude/longitude/altitude in the georeference data blocks. It is only intended for use in a ground-based insytallation.");
     tt++;
@@ -986,6 +953,27 @@
       tt->struct_vals[2].d = 0;
     tt++;
     
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
+    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based insytallation.");
+    tt++;
+    
+    // Parameter 'compute_mean_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mean_location");
+    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
+    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.");
+    tt->val_offset = (char *) &compute_mean_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1005,6 +993,18 @@
     tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time.");
     tt->val_offset = (char *) &dwell_length_secs - &_start_;
     tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'round_dwell_time_to_nearest_interval'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("round_dwell_time_to_nearest_interval");
+    tt->descr = tdrpStrDup("Option to round the dwell time to the nearest dwell interval.");
+    tt->help = tdrpStrDup("If TRUE, the time for each dwell is rounded to the closest dwell_length_secs. The dwell will be centered on the rounded time.");
+    tt->val_offset = (char *) &round_dwell_time_to_nearest_interval - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'dwell_stats_method'

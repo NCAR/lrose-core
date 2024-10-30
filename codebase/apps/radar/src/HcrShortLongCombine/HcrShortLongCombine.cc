@@ -378,17 +378,24 @@ int HcrShortLongCombine::_computeMeanLocation()
   double sumLonShort = 0.0;
   double sumAltShort = 0.0;
   long nRaysShort = 0;
-
+  
   RadxRay *rayShort = _readerShort->readNextRay();
   while (rayShort != NULL) {
     const RadxGeoref *georef = rayShort->getGeoreference();
     if (georef != NULL) {
-      sumLatShort += georef->getLatitude();
-      sumLonShort += georef->getLongitude();
-      sumAltShort += georef->getAltitudeKmMsl();
-      nRaysShort += 1.0;
+      double lat = georef->getLatitude();
+      double lon = georef->getLongitude();
+      double alt = georef->getAltitudeKmMsl();
+      if (lat >= -90.0 && lat <= 90.0 &&
+          lon >= -360.0 && lon <= 360 &&
+          alt > -1.0 && alt < 25.0) {
+        sumLatShort += lat;
+        sumLonShort += lon;
+        sumAltShort += alt;
+        nRaysShort += 1.0;
+      }
     }
-    if (nRaysShort % 10000 == 0) {
+    if (nRaysShort > 0 && nRaysShort % 10000 == 0) {
       cerr << "  data time, n rays short processed: "
            << rayShort->getRadxTime().asString(6) << ", "
            << nRaysShort << endl;
@@ -415,12 +422,19 @@ int HcrShortLongCombine::_computeMeanLocation()
   while (rayLong != NULL) {
     const RadxGeoref *georef = rayLong->getGeoreference();
     if (georef != NULL) {
-      sumLatLong += georef->getLatitude();
-      sumLonLong += georef->getLongitude();
-      sumAltLong += georef->getAltitudeKmMsl();
-      nRaysLong += 1.0;
+      double lat = georef->getLatitude();
+      double lon = georef->getLongitude();
+      double alt = georef->getAltitudeKmMsl();
+      if (lat >= -90.0 && lat <= 90.0 &&
+          lon >= -360.0 && lon <= 360 &&
+          alt > -1.0 && alt < 25.0) {
+        sumLatLong += lat;
+        sumLonLong += lon;
+        sumAltLong += alt;
+        nRaysLong += 1.0;
+      }
     }
-    if (nRaysLong % 10000 == 0) {
+    if (nRaysLong > 0 && nRaysLong % 10000 == 0) {
       cerr << "  data time, n rays long processed: "
            << rayLong->getRadxTime().asString(6) << ", "
            << nRaysLong << endl;

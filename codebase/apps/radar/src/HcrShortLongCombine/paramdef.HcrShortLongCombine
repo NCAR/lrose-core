@@ -52,24 +52,6 @@ paramdef enum mode_t {
   p_help = "\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.";
 } mode;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
-  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see later) if override_radar_location is set to true.";
-} compute_mean_location;
-
-commentdef {
-  p_header = "COMPUTE MEAN RADAR LOCATION?";
-  p_text = "This mode will compute the mean radar location for a ground-based insytallation.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to compute mean radar location.";
-  p_help = "This mode will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to true.";
-} compute_mean_radar_location;
-
-
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_short";
   p_descr = "FMQ from which to read the short pulse moments stream.";
@@ -235,6 +217,17 @@ paramdef struct radar_location_t {
 } radar_location;
 
 commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based insytallation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
+} compute_mean_location;
+
+commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";
   p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
 }
@@ -244,6 +237,12 @@ paramdef double {
   p_descr = "Specify the output dwell length (secs).";
   p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
 } dwell_length_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to round the dwell time to the nearest dwell interval.";
+  p_help = "If TRUE, the time for each dwell is rounded to the closest dwell_length_secs. The dwell will be centered on the rounded time.";
+} round_dwell_time_to_nearest_interval;
 
 typedef enum {
   DWELL_STATS_MEAN = 0,

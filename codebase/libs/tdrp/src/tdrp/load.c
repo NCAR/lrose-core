@@ -1376,6 +1376,7 @@ static int expand_for_single_val(tdrpVal_t *val)
   char work_str[TDRP_LINE_MAX];
   char combo_str[TDRP_LINE_MAX];
   char env_cpy[TDRP_LINE_MAX];
+  char final_str[TDRP_LINE_MAX * 2];
 
   char *dollar_bracket;
   char *closing_bracket;
@@ -1473,7 +1474,7 @@ static int expand_for_single_val(tdrpVal_t *val)
     
     *dollar_bracket = '\0';
     snprintf(combo_str, TDRP_LINE_MAX, "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX);
+    strncpy(final_str, combo_str, TDRP_LINE_MAX);
     env_found = TRUE;
     
   } /* while */
@@ -1484,7 +1485,7 @@ static int expand_for_single_val(tdrpVal_t *val)
   
   if (env_found) {
     tdrpFree(val->s);
-    val->s = tdrpStrDup(work_str);
+    val->s = tdrpStrDup(final_str);
   }
 
   return iret;
@@ -1506,9 +1507,10 @@ static int expand_token(tdrpToken_t *token)
 
 {
 
-  char work_str[TDRP_LINE_MAX * 2];
-  char combo_str[TDRP_LINE_MAX];
+  char tok_str[TDRP_LINE_MAX];
+  char combo_str[TDRP_LINE_MAX * 2];
   char env_cpy[TDRP_LINE_MAX];
+  char final_str[TDRP_LINE_MAX * 3];
 
   char *dollar_bracket;
   char *closing_bracket;
@@ -1525,16 +1527,16 @@ static int expand_token(tdrpToken_t *token)
    * copy in the string variable
    */
 
-  tdrpStrNcopy(work_str, token->tok, TDRP_LINE_MAX);
-
+  tdrpStrNcopy(tok_str, token->tok, TDRP_LINE_MAX);
+  
   /*
    * look for opening '$(' sequence
    */
   
-  while ((dollar_bracket = strstr(work_str, "$(")) != NULL) {
+  while ((dollar_bracket = strstr(tok_str, "$(")) != NULL) {
     
     memset (env_cpy, 0, TDRP_LINE_MAX);
-    pre_str = work_str;
+    pre_str = tok_str;
     env_str = dollar_bracket + 2;
     
     if ((closing_bracket = strchr(env_str, ')')) == NULL) {
@@ -1545,7 +1547,7 @@ static int expand_token(tdrpToken_t *token)
       
       fprintf(stderr, "\n>>> TDRP_WARNING <<< - expand_token\n");
       fprintf(stderr, "No closing bracket for env variable\n");
-      fprintf(stderr, "Expanding string '%s'", work_str);
+      fprintf(stderr, "Expanding string '%s'", tok_str);
       /* iret = -1; */
       break;
       
@@ -1594,7 +1596,7 @@ static int expand_token(tdrpToken_t *token)
       
       fprintf(stderr, "\n>>> TDRP_WARNING <<< - expand_token\n");
       fprintf(stderr, "Env str too long.\n");
-      fprintf(stderr, "Expanding string '%s'", work_str);
+      fprintf(stderr, "Expanding string '%s'", tok_str);
       /* iret = -1; */
       break;
       
@@ -1605,9 +1607,9 @@ static int expand_token(tdrpToken_t *token)
      */
     
     *dollar_bracket = '\0';
-    snprintf(combo_str, TDRP_LINE_MAX,
+    snprintf(combo_str, TDRP_LINE_MAX * 2 - 1,
              "%s%s%s", pre_str, env_val, post_str);
-    strncpy(work_str, combo_str, TDRP_LINE_MAX);
+    strncpy(final_str, combo_str, TDRP_LINE_MAX * 3 - 1);
     env_found = TRUE;
     
   } /* while */
@@ -1618,7 +1620,7 @@ static int expand_token(tdrpToken_t *token)
   
   if (env_found) {
     tdrpFree(token->tok);
-    token->tok = tdrpStrDup(work_str);
+    token->tok = tdrpStrDup(final_str);
   }
 
   return iret;
