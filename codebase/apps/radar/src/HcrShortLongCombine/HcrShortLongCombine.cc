@@ -1220,6 +1220,7 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   // check for platform update
   
   if (_readerShort->getPlatformUpdated()) {
+
     RadxPlatform platform = _readerShort->getPlatform();
     _platformShort = platform;
     _setPlatformMetadata(_platformShort);
@@ -1229,6 +1230,11 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     }
     _prtShort = rayShort->getPrtSec();
     _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
+    if (_params.override_radar_location) {
+      _platformShort.setLatitudeDeg(_params.radar_location.latitudeDeg);
+      _platformShort.setLongitudeDeg(_params.radar_location.longitudeDeg);
+      _platformShort.setAltitudeKm(_params.radar_location.altitudeKm);
+    }
     
     // create message
     RadxMsg msg;
@@ -1303,6 +1309,17 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     }
   } // ii
 
+  // override location as required
+
+  if (_params.override_radar_location) {
+    RadxGeoref *georef = rayShort->getGeoreference();
+    if (georef != NULL) {
+      georef->setLatitude(_params.radar_location.latitudeDeg);
+      georef->setLongitude(_params.radar_location.longitudeDeg);
+      georef->setAltitudeKmMsl(_params.radar_location.altitudeKm);
+    }
+  }
+  
   return rayShort;
 
 }
@@ -1325,11 +1342,18 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   // check for platform update
   
   if (_readerLong->getPlatformUpdated()) {
+
     const RadxPlatform &platform = _readerLong->getPlatform();
     _platformLong = platform;
     _setPlatformMetadata(_platformLong);
     _prtLong = rayLong->getPrtSec();
     _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
+    if (_params.override_radar_location) {
+      _platformLong.setLatitudeDeg(_params.radar_location.latitudeDeg);
+      _platformLong.setLongitudeDeg(_params.radar_location.longitudeDeg);
+      _platformLong.setAltitudeKm(_params.radar_location.altitudeKm);
+    }
+
     double prtRatio = _prtShort / _prtLong;
     int ratio60 = (int) (prtRatio * 60.0 + 0.5);
     if (ratio60 == 40) {
@@ -1391,6 +1415,17 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   
   _eventsLong = _readerLong->getEvents();
 
+  // override location as required
+
+  if (_params.override_radar_location) {
+    RadxGeoref *georef = rayLong->getGeoreference();
+    if (georef != NULL) {
+      georef->setLatitude(_params.radar_location.latitudeDeg);
+      georef->setLongitude(_params.radar_location.longitudeDeg);
+      georef->setAltitudeKmMsl(_params.radar_location.altitudeKm);
+    }
+  }
+  
   return rayLong;
 
 }
