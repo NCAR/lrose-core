@@ -660,14 +660,16 @@ int HcrShortLongCombine::_prepareInputRays()
   
   double dwellMidSecs = (floor(latestSecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
   
-  _dwellMidTime.setFromDouble(dwellMidSecs);
-  _dwellStartTime = _dwellMidTime - _dwellLengthSecsHalf;
-  _dwellEndTime = _dwellMidTime + _dwellLengthSecsHalf;
-  
+  _nextDwellMidTime.setFromDouble(dwellMidSecs);
+  _nextDwellStartTime = _nextDwellMidTime - _dwellLengthSecsHalf;
+  _nextDwellEndTime = _nextDwellMidTime + _dwellLengthSecsHalf;
+  _thisDwellMidTime = _nextDwellMidTime - _dwellLengthSecs;
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
-    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
-    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
+    cerr << "====>> thisDwellMidTime  : " << _thisDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
+    cerr << "====>> nextDwellMidTime  : " << _nextDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellEndTime  : " << _nextDwellEndTime.asString(6) << endl;
   }
 
   // read short rays, prepare for first dwell
@@ -679,7 +681,7 @@ int HcrShortLongCombine::_prepareInputRays()
       cerr << "========>> short queue done <<==========" << endl;
       return -1;
     }
-    if (ray->getRadxTime() >= _dwellStartTime) {
+    if (ray->getRadxTime() >= _nextDwellStartTime) {
       // save for next dwell
       _cacheRayShort = ray;
       break;
@@ -698,7 +700,7 @@ int HcrShortLongCombine::_prepareInputRays()
       cerr << "========>> long queue done <<==========" << endl;
       return -1;
     }
-    if (ray->getRadxTime() >= _dwellStartTime) {
+    if (ray->getRadxTime() >= _nextDwellStartTime) {
       // save for next dwell
       _cacheRayLong = ray;
       break;
@@ -749,7 +751,7 @@ int HcrShortLongCombine::_readNextDwell()
       }
       return -1;
     }
-    if (ray->getRadxTime() >= _dwellEndTime) {
+    if (ray->getRadxTime() >= _nextDwellEndTime) {
       // save for start of next dwell
       _cacheRayShort = ray;
       break;
@@ -771,7 +773,7 @@ int HcrShortLongCombine::_readNextDwell()
       }
       return -1;
     }
-    if (ray->getRadxTime() >= _dwellEndTime) {
+    if (ray->getRadxTime() >= _nextDwellEndTime) {
       // save for start of next dwell
       _cacheRayLong = ray;
       break;
@@ -799,14 +801,16 @@ int HcrShortLongCombine::_readNextDwell()
   
   // set to advance to next dwell
   
-  _dwellStartTime = _dwellEndTime;
-  _dwellMidTime = _dwellStartTime + _dwellLengthSecsHalf;
-  _dwellEndTime = _dwellStartTime + _dwellLengthSecs;
+  _nextDwellStartTime = _nextDwellEndTime;
+  _nextDwellMidTime = _nextDwellStartTime + _dwellLengthSecsHalf;
+  _nextDwellEndTime = _nextDwellStartTime + _dwellLengthSecs;
+  _thisDwellMidTime = _nextDwellMidTime - _dwellLengthSecs;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
-    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
-    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
+    cerr << "====>> thisDwellMidTime  : " << _thisDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
+    cerr << "====>> nextDwellMidTime  : " << _nextDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellEndTime  : " << _nextDwellEndTime.asString(6) << endl;
   }
 
   return 0;
@@ -867,6 +871,7 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   for (size_t iray = 0; iray < nRaysShort; iray++) {
     _dwellVolShort.addRay(_dwellRaysShort[iray]);
   }
+  _dwellVolShort.loadVolumeInfoFromRays();
 
   // ownership of rays passed to vol, which will free them
 
@@ -893,6 +898,7 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   for (size_t iray = 0; iray < nRaysLong; iray++) {
     _dwellVolLong.addRay(_dwellRaysLong[iray]);
   }
+  _dwellVolLong.loadVolumeInfoFromRays();
   
   // ownership of rays passed to vol, which will free them
 
@@ -928,17 +934,21 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
 
   _unfoldVel(rayCombined);
 
-  // free up memory
-
-  _dwellVolShort.clear();
-  _dwellVolLong.clear();
-
   // set sweep mode if required
   
   if (_params.override_sweep_mode) {
     rayCombined->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
   }
+
+  // set the combined time
+
+  rayCombined->setTime(_thisDwellMidTime);
   
+  // free up memory
+
+  _dwellVolShort.clear();
+  _dwellVolLong.clear();
+
   // return combined ray
   
   return rayCombined;

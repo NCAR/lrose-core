@@ -472,8 +472,6 @@ public:
 
   double dwell_length_secs;
 
-  tdrp_bool_t round_dwell_time_to_nearest_interval;
-
   dwell_stats_method_t dwell_stats_method;
 
   double dwell_stats_max_fraction_missing;
@@ -514,7 +512,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 

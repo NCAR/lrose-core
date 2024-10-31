@@ -121,11 +121,12 @@ private:
   double _dwellLengthSecs;
   double _dwellLengthSecsHalf;
   
-  RadxTime _dwellStartTime;
-  RadxTime _dwellEndTime;
-  RadxTime _dwellMidTime;
-  RadxTime _latestRayTime;
+  RadxTime _nextDwellStartTime;
+  RadxTime _nextDwellEndTime;
+  RadxTime _nextDwellMidTime;
+  RadxTime _thisDwellMidTime;
 
+  RadxTime _latestRayTime;
   RadxTime _prevTimeShort;
   
   RadxRay *_cacheRayShort;

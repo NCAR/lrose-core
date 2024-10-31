@@ -995,18 +995,6 @@
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'round_dwell_time_to_nearest_interval'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("round_dwell_time_to_nearest_interval");
-    tt->descr = tdrpStrDup("Option to round the dwell time to the nearest dwell interval.");
-    tt->help = tdrpStrDup("If TRUE, the time for each dwell is rounded to the closest dwell_length_secs. The dwell will be centered on the rounded time.");
-    tt->val_offset = (char *) &round_dwell_time_to_nearest_interval - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'dwell_stats_method'
     // ctype is '_dwell_stats_method_t'
     
