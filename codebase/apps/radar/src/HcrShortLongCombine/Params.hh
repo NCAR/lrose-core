@@ -464,9 +464,9 @@ public:
 
   double max_range_km;
 
-  tdrp_bool_t override_radar_location;
+  tdrp_bool_t fixed_location_mode;
 
-  radar_location_t radar_location;
+  radar_location_t fixed_radar_location;
 
   tdrp_bool_t compute_mean_location;
 

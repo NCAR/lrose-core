@@ -901,31 +901,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OVERRIDE RADAR LOCATION?");
-    tt->comment_text = tdrpStrDup("This will override the latitude/longitude/altitude in the georeference data blocks. It is only intended for use in a ground-based insytallation.");
+    tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE");
+    tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
     tt++;
     
-    // Parameter 'override_radar_location'
+    // Parameter 'fixed_location_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_location");
-    tt->descr = tdrpStrDup("Option to override radar location.");
-    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude.");
-    tt->val_offset = (char *) &override_radar_location - &_start_;
+    tt->param_name = tdrpStrDup("fixed_location_mode");
+    tt->descr = tdrpStrDup("Option to set fixed location in ground-based mode.");
+    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.");
+    tt->val_offset = (char *) &fixed_location_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'radar_location'
+    // Parameter 'fixed_radar_location'
     // ctype is '_radar_location_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("radar_location");
+    tt->param_name = tdrpStrDup("fixed_radar_location");
     tt->descr = tdrpStrDup("Radar location if override is set true.");
     tt->help = tdrpStrDup("The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.");
-    tt->val_offset = (char *) &radar_location - &_start_;
+    tt->val_offset = (char *) &fixed_radar_location - &_start_;
     tt->struct_def.name = tdrpStrDup("radar_location_t");
     tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
@@ -934,17 +934,17 @@
       tt->struct_def.fields[0].fname = tdrpStrDup("latitudeDeg");
       tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &radar_location.latitudeDeg - (char *) &radar_location;
+        (char *) &fixed_radar_location.latitudeDeg - (char *) &fixed_radar_location;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("longitudeDeg");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &radar_location.longitudeDeg - (char *) &radar_location;
+        (char *) &fixed_radar_location.longitudeDeg - (char *) &fixed_radar_location;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &radar_location.altitudeKm - (char *) &radar_location;
+        (char *) &fixed_radar_location.altitudeKm - (char *) &fixed_radar_location;
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

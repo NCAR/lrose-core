@@ -1240,10 +1240,10 @@ RadxRay *HcrShortLongCombine::_readRayShort()
     }
     _prtShort = rayShort->getPrtSec();
     _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
-    if (_params.override_radar_location) {
-      _platformShort.setLatitudeDeg(_params.radar_location.latitudeDeg);
-      _platformShort.setLongitudeDeg(_params.radar_location.longitudeDeg);
-      _platformShort.setAltitudeKm(_params.radar_location.altitudeKm);
+    if (_params.fixed_location_mode) {
+      _platformShort.setLatitudeDeg(_params.fixed_radar_location.latitudeDeg);
+      _platformShort.setLongitudeDeg(_params.fixed_radar_location.longitudeDeg);
+      _platformShort.setAltitudeKm(_params.fixed_radar_location.altitudeKm);
     }
     
     // create message
@@ -1321,12 +1321,20 @@ RadxRay *HcrShortLongCombine::_readRayShort()
 
   // override location as required
 
-  if (_params.override_radar_location) {
+  if (_params.fixed_location_mode) {
     RadxGeoref *georef = rayShort->getGeoreference();
     if (georef != NULL) {
-      georef->setLatitude(_params.radar_location.latitudeDeg);
-      georef->setLongitude(_params.radar_location.longitudeDeg);
-      georef->setAltitudeKmMsl(_params.radar_location.altitudeKm);
+      georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
+      georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
+      georef->setAltitudeKmMsl(_params.fixed_radar_location.altitudeKm);
+      georef->setEwVelocity(0.0);
+      georef->setNsVelocity(0.0);
+      georef->setVertVelocity(0.0);
+      georef->setHeading(0.0);
+      georef->setTrack(0.0);
+      georef->setEwWind(0.0);
+      georef->setNsWind(0.0);
+      georef->setVertWind(0.0);
     }
   }
   
@@ -1358,10 +1366,10 @@ RadxRay *HcrShortLongCombine::_readRayLong()
     _setPlatformMetadata(_platformLong);
     _prtLong = rayLong->getPrtSec();
     _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
-    if (_params.override_radar_location) {
-      _platformLong.setLatitudeDeg(_params.radar_location.latitudeDeg);
-      _platformLong.setLongitudeDeg(_params.radar_location.longitudeDeg);
-      _platformLong.setAltitudeKm(_params.radar_location.altitudeKm);
+    if (_params.fixed_location_mode) {
+      _platformLong.setLatitudeDeg(_params.fixed_radar_location.latitudeDeg);
+      _platformLong.setLongitudeDeg(_params.fixed_radar_location.longitudeDeg);
+      _platformLong.setAltitudeKm(_params.fixed_radar_location.altitudeKm);
     }
 
     double prtRatio = _prtShort / _prtLong;
@@ -1427,12 +1435,20 @@ RadxRay *HcrShortLongCombine::_readRayLong()
 
   // override location as required
 
-  if (_params.override_radar_location) {
+  if (_params.fixed_location_mode) {
     RadxGeoref *georef = rayLong->getGeoreference();
     if (georef != NULL) {
-      georef->setLatitude(_params.radar_location.latitudeDeg);
-      georef->setLongitude(_params.radar_location.longitudeDeg);
-      georef->setAltitudeKmMsl(_params.radar_location.altitudeKm);
+      georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
+      georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
+      georef->setAltitudeKmMsl(_params.fixed_radar_location.altitudeKm);
+      georef->setEwVelocity(0.0);
+      georef->setNsVelocity(0.0);
+      georef->setVertVelocity(0.0);
+      georef->setHeading(0.0);
+      georef->setTrack(0.0);
+      georef->setEwWind(0.0);
+      georef->setNsWind(0.0);
+      georef->setVertWind(0.0);
     }
   }
   
