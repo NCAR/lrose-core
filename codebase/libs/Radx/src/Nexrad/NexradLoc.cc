@@ -148,6 +148,7 @@ const NexradLoc::locInfo_t NexradLoc::_locInfo[_nStations] = {
   { 94703,	"KOKX",	"NEW_YORK_CITY","NY",	40,	51,	56,	-72,	51,	50,	26 },
   { 4106,	"KOTX",	"SPOKANE",	"WA",	47,	40,	49,	-117,	37,	36,	727 },
   { 3948,	"KOUN",	"NORMAN",	"OK",	35,	14,	10,	-97,	27,	44,	390 },
+  { 3948,	"NOP4",	"NORMAN",	"OK",	35,	14,	10,	-97,	27,	44,	390 },
   { 3816,	"KPAH",	"PADUCAH",	"KY",	37,	4,	6,	-88,	46,	19,	119 },
   { 4832,	"KPBZ",	"PITTSBURGH",	"PA",	40,	31,	54,	-80,	13,	6,	361 },
   { 24155,	"KPDT",	"PENDLETON",	"OR",	45,	41,	26,	-118,	51,	10,	462 },
