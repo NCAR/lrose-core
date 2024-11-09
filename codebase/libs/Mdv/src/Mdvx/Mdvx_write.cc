@@ -423,8 +423,8 @@ int Mdvx::_writeAsMdv32(const string &outputPath)
     if (_fields[i]->_write_volume(outfile, writeOffset, nextOffset)) {
 
       _errStr += _fields[i]->getErrStr();
-      char field_string[10];
-      sprintf(field_string, "%d", i);
+      char field_string[32];
+      snprintf(field_string, 31, "%d", i);
       
       _errStr += "ERROR - Mdvx::_writeAsMdv32\n";
       _errStr += string("  Error writing volume for field ")
@@ -581,8 +581,8 @@ int Mdvx::_writeAsMdv64(const string &outputPath)
     if (_fields[i]->_write_volume(outfile, writeOffset, nextOffset)) {
 
       _errStr += _fields[i]->getErrStr();
-      char field_string[10];
-      sprintf(field_string, "%d", i);
+      char field_string[32];
+      snprintf(field_string, 31, "%d", i);
       
       _errStr += "ERROR - Mdvx::_writeAsMdv64\n";
       _errStr += string("  Error writing volume for field ")
@@ -1505,9 +1505,14 @@ int Mdvx::_writeChunkHeader64(const int chunk_num,
 void Mdvx::_checkEnvBeforeWrite() const
 {
 
+  // default is NETCDF unless XML is specified
+  
+  if (_writeFormat != FORMAT_XML) {
+    _writeFormat = FORMAT_NCF;
+  }
+  
   // check environment for write control
 
-  _writeFormat = FORMAT_NCF;
   char *writeFormatStr = getenv("MDV_WRITE_FORMAT");
   if (writeFormatStr != NULL) {
     if (!strcmp(writeFormatStr, "FORMAT_MDV")) {

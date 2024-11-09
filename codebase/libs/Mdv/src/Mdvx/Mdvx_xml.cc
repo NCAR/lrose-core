@@ -152,6 +152,11 @@ int Mdvx::_writeAsXml(const string &output_path) const
 
   string xmlPathStr = outPathStr + ".xml";
   string bufPathStr = outPathStr + ".buf";
+  Path opath(outPathStr);
+  if (opath.getExt() == "xml") {
+    xmlPathStr = outPathStr;
+    bufPathStr = opath.getDirectory() + opath.getDelimeter() + opath.getBase() + ".buf";
+  }
   
   _pathInUse = xmlPathStr;
 
@@ -737,9 +742,9 @@ int Mdvx::_readVolumeXml(bool fill_missing,
                                        remapLut, is_vsection, false,
                                        vsection_min_lon, vsection_max_lon)) {
       _errStr += "ERROR - Mdvx::_readVolumeXml.\n";
-      char errstr[128];
-      sprintf(errstr, "  Converting field: %s\n",
-              field->getFieldHeader().field_name);
+      char errstr[2048];
+      snprintf(errstr, 2047, "  Converting field: %s\n",
+               field->getFieldHeader().field_name);
       _errStr += errstr;
       _errStr += field->getErrStr();
       return -1;
