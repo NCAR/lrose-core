@@ -126,6 +126,12 @@ public:
   // struct typedefs
 
   typedef struct {
+    double latitudeDeg;
+    double longitudeDeg;
+    double altitudeKm;
+  } radar_location_t;
+
+  typedef struct {
     char* field_name;
     dwell_stats_method_t stats_method;
   } stats_method_field_t;
@@ -458,6 +464,12 @@ public:
 
   double max_range_km;
 
+  tdrp_bool_t fixed_location_mode;
+
+  radar_location_t fixed_radar_location;
+
+  tdrp_bool_t compute_mean_location;
+
   double dwell_length_secs;
 
   dwell_stats_method_t dwell_stats_method;
@@ -500,7 +512,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[45];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 

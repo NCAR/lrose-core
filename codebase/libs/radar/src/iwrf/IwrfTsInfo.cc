@@ -44,6 +44,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/RadarCalib.hh>
 #include <rapformats/DsRadarCalib.hh>
+#include <Radx/NexradLoc.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////
@@ -2208,6 +2209,26 @@ int IwrfTsInfo::_readRvp8Info(FILE *in)
   // derive range info
 
   _deriveRangeFromRvp8Info(tsProc);
+
+  // get NEXRAD lat/lon/alt from if necessary
+
+  if ((radarInfo.latitude_deg < -90.0) ||
+      (radarInfo.latitude_deg > 90.0) ||
+      (radarInfo.longitude_deg < -360.0) ||
+      (radarInfo.longitude_deg > 360.0) ||
+      (radarInfo.altitude_m < -200.0) ||
+      (radarInfo.altitude_m > 9900.0)) {
+
+    string radarName(radarInfo.radar_name, 4);
+    NexradLoc loc;
+    if (loc.loadLocationFromName(radarName) == 0) {
+      radarInfo.latitude_deg = loc.getLatDecimalDeg();
+      radarInfo.longitude_deg = loc.getLonDecimalDeg();
+      radarInfo.altitude_m = loc.getHtMeters();
+      memcpy(radarInfo.radar_name, radarName.c_str(), 5);
+    }
+    
+  }
 
   // set the individual info structs
 

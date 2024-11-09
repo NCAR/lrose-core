@@ -121,14 +121,17 @@ private:
   double _dwellLengthSecs;
   double _dwellLengthSecsHalf;
   
-  RadxTime _dwellStartTime;
-  RadxTime _dwellEndTime;
-  RadxTime _dwellMidTime;
+  RadxTime _nextDwellStartTime;
+  RadxTime _nextDwellEndTime;
+  RadxTime _nextDwellMidTime;
+  RadxTime _thisDwellMidTime;
+
   RadxTime _latestRayTime;
+  RadxTime _prevTimeShort;
   
   RadxRay *_cacheRayShort;
   RadxRay *_cacheRayLong;
-
+  
   vector<RadxRay *> _dwellRaysShort;
   vector<RadxRay *> _dwellRaysLong;
 
@@ -137,10 +140,14 @@ private:
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
 
+  double _meanLatShort, _meanLonShort, _meanAltShort;
+  double _meanLatLong, _meanLonLong, _meanAltLong;
+
   // methods
 
   int _runRealtime();
   int _runArchive();
+  int _computeMeanLocation();
 
   int _openInputFmqs();
   int _openOutputFmq();
@@ -148,6 +155,7 @@ private:
 
   int _prepareInputRays();
   int _readNextDwell();
+  int _checkForTimeGap(RadxRay *latestRayShort);
   RadxRay *_combineDwellRays();
   void _clearDwellRays();
 

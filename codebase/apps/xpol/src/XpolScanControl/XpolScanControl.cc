@@ -1107,7 +1107,7 @@ int XpolScanControl::_runSurveillance(double startAz,
     return -1;
   }
   fprintf(_paxiFile, "# Surveillance command\n");
-  fprintf(_paxiFile, "Volume el=%g elSpan=%g elInc=%g azVel=%g elVel=%g;\n",
+  fprintf(_paxiFile, "Loop count=2 name=Volume el=%g elSpan=%g elInc=%g azVel=%g elVel=%g;\n",
           startEl, elSpan, deltaEl, azVel, elVel);
   _closePaxiFile();
 
@@ -1152,13 +1152,14 @@ int XpolScanControl::_runSurveillance(double startAz,
       _transition = false;
     }
 
+
     if (nextElError < thisElError) {
 
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      //if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "--->> _runSurveillance, end of sweep" << endl;
         cerr << "  thisElError, nextElError: "
              << thisElError << ", " << nextElError << endl;
-      }
+        //}
       
       // new sweep
 
@@ -1173,11 +1174,11 @@ int XpolScanControl::_runSurveillance(double startAz,
 
     } else if (prevElError < thisElError) {
 
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      // if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "--->> _runSurveillance, end of volume" << endl;
         cerr << "  thisElError, prevElError: "
              << thisElError << ", " << prevElError << endl;
-      }
+        // }
       
       // end of volume
       
@@ -1186,6 +1187,8 @@ int XpolScanControl::_runSurveillance(double startAz,
 
       return 0;
 
+    } else {
+        cerr << "--->> _runSurveillance, dropped through sweep and volume test" << endl;
     }
     
     // pass beam through

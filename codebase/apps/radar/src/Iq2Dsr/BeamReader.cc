@@ -305,9 +305,9 @@ Beam *BeamReader::getNextBeam()
         return NULL;
       }
       
-    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_PULSE_WIDTH) {
+    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_PULSE_WIDTH_CHANGE) {
 
-      if (_readConstantPulseWidthBeam()) {
+      if (_readPulseWidthChangeBeam()) {
         // end of data
         return NULL;
       }
@@ -339,7 +339,14 @@ Beam *BeamReader::getNextBeam()
         return NULL;
       }
       
-    } // if (_indexTheBeams)
+    } // if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_STEERING_ANGLE)
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      RadxTime ptime(_pulseQueue[0]->getTime(), _pulseQueue[0]->getNanoSecs() / 1.0e9);
+      cerr << "  pulse0 time, el, az: "
+           << ptime.asString(6) << ", "
+           << _pulseQueue[0]->getEl() << ", " << _pulseQueue[0]->getAz() << endl;
+    }
 
   } while (!_beamOk());
 
@@ -368,31 +375,6 @@ Beam *BeamReader::getNextBeam()
   _pulseWidthUs = _pulseQueue[_midIndex]->getPulseWidthUs();
   _beamCount++;
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (_isAlternating) {
-      cerr << "==>> Fast alternating mode" << endl;
-      cerr << "     prt: " << _prt << endl;
-      cerr << "     ngates: " << _nGates << endl;
-    } else if (_isStaggeredPrt) {
-      cerr << "==>> Staggered PRT mode" << endl;
-      cerr << "     prt short: " << _prtShort << endl;
-      cerr << "     prt long: " << _prtLong << endl;
-      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
-      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
-    } else if (_isDualPrt) {
-      cerr << "==>> Dual PRT mode" << endl;
-      cerr << "     prt this beam: " << _prt << endl;
-      cerr << "     ngates: " << _nGates << endl;
-    } else {
-      cerr << "==>> Single PRT mode" << endl;
-      cerr << "     prt: " << _prt << endl;
-      cerr << "     ngates: " << _nGates << endl;
-    }
-    cerr << "    pulseWidthUs: " << _pulseWidthUs << endl;
-    cerr << "    beamCount: " << _beamCount << endl;
-  }
-  
-
   // load the pulse shared_ptr-s into a vector for just this beam
   // reversing the order, so we start with oldest pulse
       
@@ -417,6 +399,31 @@ Beam *BeamReader::getNextBeam()
       _pulseReader->getOpsInfo().get_proc_xmit_rcv_mode();
   }
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_isAlternating) {
+      cerr << "==>> Fast alternating mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    } else if (_isStaggeredPrt) {
+      cerr << "==>> Staggered PRT mode" << endl;
+      cerr << "     prt short: " << _prtShort << endl;
+      cerr << "     prt long: " << _prtLong << endl;
+      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
+      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
+    } else if (_isDualPrt) {
+      cerr << "==>> Dual PRT mode" << endl;
+      cerr << "     prt this beam: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    } else {
+      cerr << "==>> Single PRT mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    }
+    cerr << "    pulseWidthUs: " << _pulseWidthUs << endl;
+    cerr << "    nSamples: " << beamPulses.size() << endl;
+    cerr << "    beamCount: " << _beamCount << endl;
+  }
+
   // get a beam from the pool if available,
   // otherwise create a new one
       
@@ -511,8 +518,8 @@ int BeamReader::_initializeQueue()
 {
 
   size_t nStart = _params.min_n_samples;
-  if (nStart < 55) {
-    nStart = 55;
+  if (nStart < 64) {
+    nStart = 64;
   }
   while (_pulseQueue.size() < nStart) {
     if (_getNextPulse() == NULL) {
@@ -552,6 +559,7 @@ int BeamReader::_readDualPrtBeam()
     shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
+      _beamError = true;
       return -1;
     }
 
@@ -597,6 +605,7 @@ int BeamReader::_readDualPrtBeam()
   
   _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
   
+  _beamError = false;
   return 0;
 
 }
@@ -618,6 +627,7 @@ int BeamReader::_readNonIndexedBeam()
   for (int ii = 0; ii < _nSamples; ii++) {
     if (_getNextPulse() == NULL) {
       // end of data
+      _beamError = true;
       return -1;
     }
   }
@@ -625,9 +635,11 @@ int BeamReader::_readNonIndexedBeam()
   // finalize the beam for use
 
   if (_finalizeNonIndexedBeam()) {
+    _beamError = true;
     return -1;
   }
 
+  _beamError = false;
   return 0;
 
 }
@@ -654,6 +666,7 @@ int BeamReader::_readConstantSteeringAngleBeam()
     shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
+      _beamError = true;
       return -1;
     }
 
@@ -703,16 +716,18 @@ int BeamReader::_readConstantSteeringAngleBeam()
   
   _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
   
+  _beamError = false;
   return 0;
 
 }
     
 //////////////////////////////////////////////////
 // read in data for a beam with constant pulse
-// width, as in HCR.
+// width, for a case where the pulse widths
+// are changing dwell to dwell.
 // returns 0 on success, -1 on failure
 
-int BeamReader::_readConstantPulseWidthBeam()
+int BeamReader::_readPulseWidthChangeBeam()
   
 {
 
@@ -721,6 +736,7 @@ int BeamReader::_readConstantPulseWidthBeam()
   int nPulsesInDwell = 0;
   int warningCount = 0;
   double pulseWidthUs = -9999;
+  bool pulseWidthChange = false;
   
   while (nPulsesInDwell <= _params.max_n_samples) {
     
@@ -728,6 +744,7 @@ int BeamReader::_readConstantPulseWidthBeam()
     shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
+      _beamError = true;
       return -1;
     }
     warningCount++;
@@ -735,14 +752,13 @@ int BeamReader::_readConstantPulseWidthBeam()
     // save pulse width from first pulse
     
     if (nPulsesInDwell == 0) {
-      if (_params.specify_pulse_width) {
+      if (_params.specify_fixed_pulse_width) {
         // check for valid pulse width
         if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
           // _getNextPulse() automatically inserted this pulse at the front of
           // _pulseQueue, but we don't want it! Remove it from the deque now.
           _pulseQueue.pop_front();
-
-          if (warningCount == 100000) {
+          if (warningCount == _params.max_n_samples * 10) {
             cerr << "WARNING - " << warningCount << " consecutive pulses with width != "
 		 << _params.fixed_pulse_width_us << " us" << endl;
             warningCount = 0;
@@ -753,17 +769,28 @@ int BeamReader::_readConstantPulseWidthBeam()
       }
       pulseWidthUs = pulse->getPulseWidthUs();
     }
-
+    
     // check if pulse width has changed
     
     if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3 && nPulsesInDwell > 1) {
+      pulseWidthChange = true;
+      _cacheLatestPulse(); // save for start of next beam
       break;
     }
     
     nPulsesInDwell++;
-
+    
   } // while
 
+  if (!pulseWidthChange) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - BeamReader::_readPulseWidthChangeBeam" << endl;
+      cerr << "  Did not find pulse width change" << endl;
+    }
+    _beamError = true;
+    return 0;
+  }
+  
   // set PRT (and mean PRF)
 
   _setPrt();
@@ -787,6 +814,7 @@ int BeamReader::_readConstantPulseWidthBeam()
   
   _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
   
+  _beamError = false;
   return 0;
 
 }
@@ -804,6 +832,7 @@ int BeamReader::_readIndexedBeam()
   
   if (_findNextIndexedBeam()) {
     // end of data
+    _beamError = true;
     return -1;
   }
 
@@ -815,6 +844,7 @@ int BeamReader::_readIndexedBeam()
     // antenna too slow for indexing
     // finalize non-indexed beam for use
     if (_finalizeNonIndexedBeam()) {
+      _beamError = true;
       return -1;
     }
     return 0;
@@ -840,6 +870,7 @@ int BeamReader::_readIndexedBeam()
   for (int ii = 0; ii < nNeeded; ii++) {
     if (_getNextPulse() == NULL) {
       // end of data
+      _beamError = true;
       return -1;
     }
   }
@@ -848,6 +879,7 @@ int BeamReader::_readIndexedBeam()
   // pulse type for alternating or staggered PRT mode
   
   if (_checkStartConditions()) {
+    _beamError = true;
     return -1;
   }
 
@@ -867,8 +899,9 @@ int BeamReader::_readIndexedBeam()
 
   _setPrt();
 
+  _beamError = false;
   return 0;
-  
+
 }
     
 //////////////////////////////////////////////////////////////////////
@@ -1468,7 +1501,6 @@ shared_ptr<IwrfTsPulse> BeamReader::_doReadNextPulse()
 
     // The reader gave us something; save it as _prevPulse
     _prevPulse = sptr;
-    cerr << "_doReadNextPulse initialized _prevPulse to " << hex << _prevPulse << dec << endl;
   }
 
   // Get a pulse shared_ptr from the pool
@@ -1689,14 +1721,79 @@ shared_ptr<IwrfTsPulse> BeamReader::_popFromInterpQueue()
 bool BeamReader::_beamOk()
  
 {
+
+  // check for beamError flag
   
-  if (!_params.check_for_missing_pulses) {
-    // no need to check
-    return true;
+  if (_beamError) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - BeamReader::_beamOk" << endl;
+      cerr << "  Error forming beam" << endl;
+    }
+    _clearPulseQueue();
+    return false;
   }
+  
+  // check for constant pulse width in dwell, or queue, if pulse width
+  // is used to find dwell, or is specified constant
+  
+  if ((_momentsMgr->getBeamMethod() == Params::BEAM_PULSE_WIDTH_CHANGE)) {
+    
+    // check for constant pulse width in beam only
+    
+    double prevPulseWidthUs = _pulseQueue[_startIndex]->get_pulse_width_us();
+    for (int ii = _startIndex - 1; ii >= _endIndex; ii--) {
+      double pulseWidthUs = _pulseQueue[ii]->get_pulse_width_us();
+      if (fabs(pulseWidthUs - prevPulseWidthUs) > 1.0e-9) {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "WARNING - BeamReader::_beamOk" << endl;
+          cerr << "  Pulse width changes in beam:" << endl;
+          cerr << "    pulseWidthUs: " << pulseWidthUs << endl;
+          cerr << "    prevPulseWidthUs: " << prevPulseWidthUs << endl;
+        }
+        _clearPulseQueue();
+        return false;
+      }
+    }
+    
+  } else if (_params.specify_fixed_pulse_width) {
+    
+    // check for constant pulse width in full queue
+    
+    double prevPulseWidthUs = _pulseQueue[0]->get_pulse_width_us();
+    for (int ii = 1; ii < (int) _pulseQueue.size(); ii++) {
+      double pulseWidthUs = _pulseQueue[ii]->get_pulse_width_us();
+      if (fabs(pulseWidthUs - prevPulseWidthUs) > 1.0e-9) {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "WARNING - BeamReader::_beamOk" << endl;
+          cerr << "  Pulse width changes in queue:" << endl;
+          cerr << "    pulseWidthUs: " << pulseWidthUs << endl;
+          cerr << "    prevPulseWidthUs: " << prevPulseWidthUs << endl;
+        }
+        _clearPulseQueue();
+        return false;
+      }
+    }
+
+    if (fabs(prevPulseWidthUs - _params.fixed_pulse_width_us) > 2.0e-3) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - BeamReader::_beamOk" << endl;
+        cerr << "  Pulse width incorrect in dwell:" << endl;
+        cerr << "    pulseWidthUs: " << prevPulseWidthUs << endl;
+        cerr << "    should be: " << _params.fixed_pulse_width_us << endl;
+      }
+      _clearPulseQueue();
+      return false;
+    }
+    
+  } // if ((_momentsMgr->getBeamMethod() == Params::BEAM_PULSE_WIDTH_CHANGE)) {
 
   // check for missing pulses in the sequence numbers
   
+  if (!_params.check_for_missing_pulses) {
+    // no need to check further
+    return true;
+  }
+
   bool pulsesMissing = false;
   si64 prevSeqNum = _pulseQueue[_startIndex]->get_pulse_seq_num();
   for (int ii = _startIndex - 1; ii >= _endIndex; ii--) {
@@ -1715,6 +1812,7 @@ bool BeamReader::_beamOk()
 
   if (_params.discard_beams_with_missing_pulses) {
     if (pulsesMissing) {
+      cerr << "WARNING - BeamReader::_beamOk" << endl;
       cerr << "  n pulses in queue to be discarded: " << _pulseQueue.size() << endl;
       int midIndex = (_startIndex + _endIndex) / 2;
       shared_ptr<IwrfTsPulse> pulse = _pulseQueue[midIndex];
@@ -1975,11 +2073,7 @@ void BeamReader::_setPrt()
 
   // set prt, assuming single PRT for now
   
-  if (_params.specify_pulse_width) {
-    _prt = _pulseQueue[_pulseQueue.size() / 2]->getPrt();
-  } else {
-    _prt = _pulseQueue[0]->getPrt();
-  }
+  _prt = _pulseQueue[0]->getPrt();
   if (_params.override_primary_prt) {
     _prt = _params.primary_prt_secs;
   }

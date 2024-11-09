@@ -194,6 +194,40 @@ paramdef double {
 } max_range_km;
 
 commentdef {
+  p_header = "GROUND-BASED MODE";
+  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set fixed location in ground-based mode.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
+} fixed_location_mode;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} fixed_radar_location;
+
+commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based insytallation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
+} compute_mean_location;
+
+commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";
   p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
 }
