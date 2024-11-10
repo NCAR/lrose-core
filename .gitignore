@@ -3,7 +3,8 @@
 # build files
 
 *.so
-*.o
+*.o 
+*.o.tmp
 *.a
 *.la
 *.lo

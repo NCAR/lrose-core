@@ -179,8 +179,8 @@ NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5
 #QT_CPPC_CFLAGS = -std=c++17
 #QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
-QJSENGINE = -F/usr/local/Cellar/qt/6.7.0_1/lib -framework QtQml
-PKG_CONFIG_PATH = /usr/local/Cellar/qt/6.7.0_1/libexec/lib/pkgconfig
+QJSENGINE = -F/usr/local/Cellar/qt/6.7.2_2/lib -framework QtQml
+PKG_CONFIG_PATH = /usr/local/Cellar/qt/6.7.2_2/libexec/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui)
 QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui)
 QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui)
