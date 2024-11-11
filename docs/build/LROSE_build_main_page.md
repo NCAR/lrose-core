@@ -14,20 +14,11 @@ These are the recommended builds, if you just want working apps and cannot get t
 | [vortrac](./build_vortrac.md) | Build vortrac using cmake |
 | [samurai](./build_samurai.md) | Build samurai using cmake |
 
-## Autoconf builds
+## Conda-forge builds
 
-If for some reason cmake does not work for lrose-core, you can try the autoconf build.
+See:
 
-Also, autoconf is used for building CIDD, and NetCDF if required.
-
-If the system install for NetCDF on your system does not work well, you can build it instead.
-It should be installed with the same prefix as you plan to use for the core.
-
-| Target | Notes  |
-| ---------- |:------:|
-| [lrose-core](./LROSE_autoconf_build.linux.md) | Build using autoconf |
-| [CIDD](./CIDD_build.linux.md) | Build CIDD in 32-bit emulation mode. LINUX only |
-| [NetCDF](./NETCDF_build.linux.md) | Build HDF5 and NetCDF |
+* [github.com/NCAR/lrose-bootstrap/miniforge](https://github.com/NCAR/lrose-bootstrap/tree/main/miniforge)
 
 ## Manual builds and code development
 
