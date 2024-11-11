@@ -52,7 +52,6 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    mambaDir = os.path.join(homeDir, "mambaforge")
     coreDirDefault = os.path.join(thisScriptDir, "../..")
     parser = OptionParser(usage)
     parser.add_option('--debug',
@@ -77,13 +76,6 @@ def main():
     parser.add_option('--dependDirs',
                       dest='dependDirs', default='',
                       help='Comma-delimited list of dirs to be searched as dependencies. Each dir in the list will have include/ and lib/ subdirs.')
-    parser.add_option('--mambaBuild',
-                      dest='mambaBuild', default=False,
-                      action="store_true",
-                      help='Perform build using mamba installation.')
-    parser.add_option('--mambaDir',
-                      dest='mambaDir', default=mambaDir,
-                      help='Mamba-based build, specify the location of the mamba install')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -605,19 +597,26 @@ def writeCMakeListsCodebase(dir):
     fo.write('find_package(PkgConfig REQUIRED)\n')
     fo.write('\n')
 
-    if (options.mambaBuild):
-        fo.write('# MAMBAFORGE build, ignore system libs\n')
-        fo.write('  set(MAMBA_INCLUDE_PATH %s/include)\n' % options.mambaDir)
-        fo.write('  set(MAMBA_LIBRARY_PATH %s/lib)\n' % options.mambaDir)
-        fo.write('  set(QT_HOST_PATH %s)\n' % options.mambaDir)
-        fo.write('  set(CMAKE_SYSTEM_IGNORE_PATH "/usr/lib" "/usr/local/lib" "/usr/lib64" "/lib" "/lib64" /opt/homebrew/lib /usr/local/lib)\n')
-        fo.write('\n')
+#   miniforge build
+
+    fo.write('set(MINIFORGE_ROOT "$ENV{HOME}/miniforge3")\n')
+    fo.write('if (DEFINED MINIFORGE_DIR)\n')
+    fo.write('  set(MINIFORGE_ROOT "${MINIFORGE_DIR}")\n')
+    fo.write("endif()\n")
+    fo.write('\n')
+    
+    fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system includes and libs, use mamba dirs\n')
+    fo.write('  set(MAMBA_INCLUDE_PATH ${MINIFORGE_ROOT}/include)\n')
+    fo.write('  set(MAMBA_LIBRARY_PATH ${MINIFORGE_ROOT}/lib)\n')
+    fo.write('  set(QT_HOST_PATH ${MINIFORGE_ROOT})\n')
+    fo.write('  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)\n')
+    fo.write('  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")\n')
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
+    fo.write('\n')
 
     if (globalNeedX11 or globalNeedQt):
-        if (options.mambaBuild):
-            fo.write('find_package (X11 NO_SYSTEM_ENVIRONMENT_PATH)\n')
-        else:
-            fo.write('find_package (X11)\n')
+        fo.write('find_package (X11)\n')
         fo.write("if (DEFINED X11_X11_LIB)\n")
         fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
         fo.write("endif()\n")
@@ -626,10 +625,7 @@ def writeCMakeListsCodebase(dir):
     if (globalNeedQt):
         fo.write('# Finding Qt\n')
         fo.write('\n')
-        if (options.mambaBuild):
-            fo.write('find_package (Qt6 COMPONENTS Core NO_SYSTEM_ENVIRONMENT_PATH)\n')
-        else:
-            fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
+        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
         fo.write('if (NOT Qt6_FOUND)\n')
         fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
         fo.write('endif()\n')
@@ -641,19 +637,22 @@ def writeCMakeListsCodebase(dir):
         fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
         fo.write('endif(Qt5_FOUND)\n')
         fo.write('\n')
+
         fo.write('if(APPLE)\n')
-        if (options.mambaBuild):
-            fo.write('  if (Qt5_FOUND)\n')
-            fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
-            fo.write('  elseif (Qt6_FOUND)\n')
-            fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
-            fo.write('  endif(Qt5_FOUND)\n')
-        else:
-            fo.write('  if (Qt5_FOUND)\n')
-            fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-            fo.write('  elseif (Qt6_FOUND)\n')
-            fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-            fo.write('  endif(Qt5_FOUND)\n')
+        fo.write('  if (DEFINED MAMBA_BUILD)\n')
+        fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+        fo.write('    if (Qt5_FOUND)\n')
+        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
+        fo.write('    elseif (Qt6_FOUND)\n')
+        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
+        fo.write('    endif(Qt5_FOUND)\n')
+        fo.write('  else ()\n')
+        fo.write('    if (Qt5_FOUND)\n')
+        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+        fo.write('    elseif (Qt6_FOUND)\n')
+        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+        fo.write('    endif(Qt5_FOUND)\n')
+        fo.write('  endif(DEFINED MAMBA_BUILD)\n')
         fo.write('endif(APPLE)\n')
         fo.write('\n')
 
@@ -1030,28 +1029,30 @@ def writeCMakeListsLib(libName, libSrcDir,
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    if (options.mambaBuild):
-        fo.write("include_directories (${MAMBA_INCLUDE_PATH})\n")
-    else:
-        if (needX11 or needQt):
-            fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-            fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
-            fo.write("endif()\n")
-        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-        fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
-        fo.write("endif()\n")
-        fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
-        fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
-        fo.write("  include_directories (/usr/include/hdf5/serial)\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/local/include)\n")
-        fo.write("  include_directories (/usr/local/include)\n")
-        fo.write("endif()\n")
-        fo.write("# NOTE: cannot add /usr/include using include_directories()\n")
-        fo.write("add_compile_options(-I/usr/include)\n")
-        fo.write("\n")
+    fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+    fo.write('  include_directories (${MAMBA_INCLUDE_PATH})\n')
+    fo.write('else()\n')
+    if (needX11 or needQt):
+        fo.write("  if (DEFINED X11_X11_INCLUDE_PATH)\n")
+        fo.write("    include_directories (${X11_X11_INCLUDE_PATH})\n")
+        fo.write("  endif()\n")
+    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("    include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
+    fo.write("  endif()\n")
+    fo.write("  if (DEFINED HDF5_C_INCLUDE_DIR)\n")
+    fo.write("    include_directories (${HDF5_C_INCLUDE_DIR})\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
+    fo.write("    include_directories (/usr/include/hdf5/serial)\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/local/include)\n")
+    fo.write("    include_directories (/usr/local/include)\n")
+    fo.write("  endif()\n")
+    fo.write("  # NOTE: cannot add /usr/include using include_directories()\n")
+    fo.write("  #add_compile_options(-I/usr/include)\n")
+    fo.write("  \n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1488,28 +1489,31 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    if (options.mambaBuild):
-        fo.write("include_directories (${MAMBA_INCLUDE_PATH})\n")
-    else:
-        if (needX11 or needQt):
-            fo.write("if (DEFINED X11_X11_INCLUDE_PATH)\n")
-            fo.write("  include_directories (${X11_X11_INCLUDE_PATH})\n")
-            fo.write("endif()\n")
-        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-        fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
-        fo.write("endif()\n")
-        fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
-        fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
-        fo.write("  include_directories (/usr/include/hdf5/serial)\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/local/include)\n")
-        fo.write("  include_directories (/usr/local/include)\n")
-        fo.write("endif()\n")
-        fo.write("# NOTE: cannot add /usr/include using include_directories()\n")
-        fo.write("add_compile_options(-I/usr/include)\n")
-        fo.write("\n")
+
+    fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+    fo.write('  include_directories (${MAMBA_INCLUDE_PATH})\n')
+    fo.write('else()\n')
+    if (needX11 or needQt):
+        fo.write("  if (DEFINED X11_X11_INCLUDE_PATH)\n")
+        fo.write("    include_directories (${X11_X11_INCLUDE_PATH})\n")
+        fo.write("  endif()\n")
+    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("    include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
+    fo.write("  endif()\n")
+    fo.write("  if (DEFINED HDF5_C_INCLUDE_DIR)\n")
+    fo.write("    include_directories (${HDF5_C_INCLUDE_DIR})\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
+    fo.write("    include_directories (/usr/include/hdf5/serial)\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/local/include)\n")
+    fo.write("    include_directories (/usr/local/include)\n")
+    fo.write("  endif()\n")
+    fo.write("  # NOTE: cannot add /usr/include using include_directories()\n")
+    fo.write("  #add_compile_options(-I/usr/include)\n")
+    fo.write("  \n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
     if (needQt):
         addQtIncludes(fo)
@@ -1519,37 +1523,40 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
-    if (options.mambaBuild):
-        fo.write("link_directories (${MAMBA_LIBRARY_PATH})\n")
-    else:
-        if (needX11 or needQt):
-            fo.write("if (DEFINED X11_LIB_DIR)\n")
-            fo.write("  link_directories (${X11_LIB_DIR})\n")
-            fo.write("endif()\n")
-        fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
-        fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
-        fo.write("endif()\n")
-        fo.write("if (DEFINED HDF5_INSTALL_PREFIX)\n")
-        fo.write("  link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
-        fo.write("endif()\n")
-        fo.write("if (DEFINED HDF5_LIBRARY_DIRS)\n")
-        fo.write("  link_directories(${HDF5_LIBRARY_DIRS})\n")
-        fo.write("endif()\n")
-        fo.write("# add serial, for odd Debian hdf5 install\n")
-        fo.write("if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
-        fo.write("  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
-        fo.write("  link_directories (/usr/local/lib)\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/lib64)\n")
-        fo.write("  link_directories (/usr/lib64)\n")
-        fo.write("endif()\n")
-        fo.write("if(IS_DIRECTORY /usr/lib)\n")
-        fo.write("  link_directories (/usr/lib)\n")
-        fo.write("endif()\n")
-        fo.write("\n")
-        
+
+    fo.write('if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+    fo.write('  link_directories (${MAMBA_LIBRARY_PATH})\n')
+    fo.write('else()\n')
+    if (needX11 or needQt):
+        fo.write("  if (DEFINED X11_LIB_DIR)\n")
+        fo.write("    link_directories (${X11_LIB_DIR})\n")
+        fo.write("  endif()\n")
+    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("    link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
+    fo.write("  endif()\n")
+    fo.write("  if (DEFINED HDF5_INSTALL_PREFIX)\n")
+    fo.write("    link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
+    fo.write("  endif()\n")
+    fo.write("  if (DEFINED HDF5_LIBRARY_DIRS)\n")
+    fo.write("    link_directories(${HDF5_LIBRARY_DIRS})\n")
+    fo.write("  endif()\n")
+    fo.write("# add serial, for odd Debian hdf5 install\n")
+    fo.write("  if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("    link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/local/lib)\n")
+    fo.write("    link_directories (/usr/local/lib)\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/lib64)\n")
+    fo.write("    link_directories (/usr/lib64)\n")
+    fo.write("  endif()\n")
+    fo.write("  if(IS_DIRECTORY /usr/lib)\n")
+    fo.write("    link_directories (/usr/lib)\n")
+    fo.write("  endif()\n")
+    fo.write("\n")
+    fo.write("endif(DEFINED MAMBA_BUILD)\n")
+
     fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")\n')
     fo.write('  add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )\n')
     fo.write('endif()\n')
@@ -1595,10 +1602,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 def addFindQt(fo):
 
     fo.write('#Finding Qt\n')
-    if (options.mambaBuild):
-        fo.write('find_package (Qt6 COMPONENTS Core NO_SYSTEM_ENVIRONMENT_PATH)\n')
-    else:
-        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
+    fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
     fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
     fo.write('endif()\n')
@@ -1611,18 +1615,20 @@ def addFindQt(fo):
     fo.write('endif(Qt5_FOUND)\n')
     
     fo.write('if(APPLE)\n')
-    if (options.mambaBuild):
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS %s NO_DEFAULT_PATH)\n' % options.mambaDir)
-        fo.write('  endif(Qt5_FOUND)\n')
-    else:
-        fo.write('  if (Qt5_FOUND)\n')
-        fo.write('    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-        fo.write('  elseif (Qt6_FOUND)\n')
-        fo.write('    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-        fo.write('  endif(Qt5_FOUND)\n')
+    fo.write('  if (DEFINED MAMBA_BUILD)\n')
+    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
+    fo.write('    if (Qt5_FOUND)\n')
+    fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
+    fo.write('    elseif (Qt6_FOUND)\n')
+    fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
+    fo.write('    endif(Qt5_FOUND)\n')
+    fo.write('  else()\n')
+    fo.write('    if (Qt5_FOUND)\n')
+    fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+    fo.write('    elseif (Qt6_FOUND)\n')
+    fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+    fo.write('    endif(Qt5_FOUND)\n')
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write('endif(APPLE)\n')
 
     fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
@@ -1632,10 +1638,11 @@ def addFindQt(fo):
     
     fo.write('if (Qt5_FOUND)\n')
     fo.write("#QT5\n")
-    if (options.mambaBuild):
-        fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH)\n" % options.mambaDir)
-    else:
-        fo.write("  find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write('  if (DEFINED MAMBA_BUILD)\n')
+    fo.write("    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n")
+    fo.write('  else()\n')
+    fo.write("    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write("  pkg_search_module(Qt5Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt5Widgets REQUIRED)\n")
@@ -1643,10 +1650,11 @@ def addFindQt(fo):
     fo.write("  pkg_search_module(Qt5Qml REQUIRED)\n")
     fo.write('else()\n')
     fo.write("#QT6\n")
-    if (options.mambaBuild):
-        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS %s NO_DEFAULT_PATH NO_SYSTEM_ENVIRONMENT_PATH)\n" % options.mambaDir)
-    else:
-        fo.write("  find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write('  if (DEFINED MAMBA_BUILD)\n')
+    fo.write("    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n")
+    fo.write('  else()\n')
+    fo.write("    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write("  pkg_search_module(Qt6Core REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Gui REQUIRED)\n")
     fo.write("  pkg_search_module(Qt6Widgets REQUIRED)\n")
