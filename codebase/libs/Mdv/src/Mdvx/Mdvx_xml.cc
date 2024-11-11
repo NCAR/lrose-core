@@ -79,6 +79,15 @@ void Mdvx::writeToXmlBuffer(string &hdr, MemBuf &buf,
     // if it is compressed, convert the compression type to GZIP_VOL
     // since that is the only compression supported in XML
 
+    // first check requested compression
+    
+    if (fhdr.requested_compression != COMPRESSION_NONE &&
+        fhdr.compression_type != COMPRESSION_GZIP_VOL) {
+      field.compress(COMPRESSION_GZIP_VOL);
+    }
+
+    // then check compression type in header
+    
     if (fhdr.compression_type != COMPRESSION_NONE &&
         fhdr.compression_type != COMPRESSION_GZIP_VOL) {
       field.compress(COMPRESSION_GZIP_VOL);
