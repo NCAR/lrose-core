@@ -27,6 +27,26 @@ set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)
 set(CMAKE_IGNORE_PREFIX_PATH "$ENV{HOME}/anaconda3;$ENV{HOME}/anaconda2")
 message("CMAKE_IGNORE_PREFIX_PATH: ${CMAKE_IGNORE_PREFIX_PATH}")
 
+message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}") 
+message("CONDA_PREFIX: ${CONDA_PREFIX}") 
+message("CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH}") 
+message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}") 
+message("CONDA_BUILD: ${CONDA_BUILD}") 
+message("CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}") 
+message("CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}") 
+message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}") 
+message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}") 
+message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}") 
+message("PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}") 
+message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
+message("CMAKE_LIBRARIES: ${CMAKE_LIBRARIES}") 
+message("CMAKE_INCLUDE_PATH: ${CMAKE_INCLUDE_PATH}") 
+message("CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}") 
+message("CMAKE_CURRENT_LIST_DIR: ${CMAKE_CURRENT_LIST_DIR}") 
+message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}") 
+message("QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ${QT_ADDITIONAL_PACKAGES_PREFIX_PATH}") 
+message("2222222222222 Qt6_FOUND: ${Qt6_FOUND}") 
+
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../build/cmake/"
@@ -50,9 +70,15 @@ if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system includes and libs, use mamba dirs
   set(MAMBA_INCLUDE_PATH ${MINIFORGE_ROOT}/include)
   set(MAMBA_LIBRARY_PATH ${MINIFORGE_ROOT}/lib)
-  set(QT_HOST_PATH ${MINIFORGE_ROOT})
-  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
-  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")
+  set(QT_HOST_PATH ${MINIFORGE_ROOT}) 
+  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew") 
+  if (APPLE)
+    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH TRUE)
+    message("4444444444444 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH TRUE)") 
+  else()
+    message("55555555555555555 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)") 
+    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE) 
+  endif()
 endif(DEFINED MAMBA_BUILD)
 
 find_package (X11)
@@ -74,6 +100,8 @@ else ()
   message(FATAL_ERROR, "Qt not found.")
 endif(Qt5_FOUND)
 
+message("333333333333 Qt6_FOUND: ${Qt6_FOUND}") 
+
 if(APPLE)
   if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system libs, use mamba libs
@@ -91,7 +119,40 @@ if(APPLE)
   endif(DEFINED MAMBA_BUILD)
 endif(APPLE)
 
-find_package (HDF5)
+message("aaaaaaaaaaaaaaaaaaaaaaaaaaa") 
+
+if (Qt5_FOUND)
+#QT5
+  if (DEFINED MAMBA_BUILD)
+    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+  else()
+    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  endif(DEFINED MAMBA_BUILD)
+  pkg_search_module(Qt5Core REQUIRED)
+  pkg_search_module(Qt5Gui REQUIRED)
+  pkg_search_module(Qt5Widgets REQUIRED)
+  pkg_search_module(Qt5Network REQUIRED)
+  pkg_search_module(Qt5Qml REQUIRED)
+else()
+#QT6
+  if (DEFINED MAMBA_BUILD)
+    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+  else()
+    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  endif(DEFINED MAMBA_BUILD)
+  pkg_search_module(Qt6Core REQUIRED)
+  pkg_search_module(Qt6Gui REQUIRED)
+  pkg_search_module(Qt6Widgets REQUIRED)
+  pkg_search_module(Qt6Network REQUIRED)
+  pkg_search_module(Qt6Qml REQUIRED)
+endif(Qt5_FOUND)
+
+if (DEFINED MAMBA_BUILD)
+  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE) 
+  message("666666666666666666666666 set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)") 
+ endif(DEFINED MAMBA_BUILD)
+
+ find_package (HDF5)
 
 # find_package (NETCDF)
 # find_package (LROSE)
@@ -169,6 +230,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
 endif()
 
+  message("77777777777777777777777777777") 
+
 add_subdirectory(libs)
+
+  message("8888888888888888888888888888888") 
+
 add_subdirectory(apps)
 
