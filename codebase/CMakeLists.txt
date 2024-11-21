@@ -202,6 +202,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
 endif()
 
+  message("77777777777777777777777777777") 
+
 add_subdirectory(libs)
+
+  message("8888888888888888888888888888888") 
+
 add_subdirectory(apps)
 
