@@ -571,7 +571,29 @@ def writeCMakeListsCodebase(dir):
 
     fo.write('# do not scan anaconda directories\n')
     fo.write('set(CMAKE_IGNORE_PREFIX_PATH "$ENV{HOME}/anaconda3;$ENV{HOME}/anaconda2")\n')
-    fo.write('message("CMAKE_IGNORE_PREFIX_PATH: ${CMAKE_IGNORE_PREFIX_PATH}")\n')
+
+    fo.write('# print some variables for debugging\n')
+    fo.write('message("========>> Variables for debugging <<========")\n')
+    fo.write('message("====>> CMAKE_IGNORE_PREFIX_PATH: ${CMAKE_IGNORE_PREFIX_PATH}")\n')
+    fo.write('message("====>> CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")\n')
+    fo.write('message("====>> CONDA_PREFIX: ${CONDA_PREFIX}")\n')
+    fo.write('message("====>> CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH}")\n')
+    fo.write('message("====>> CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")\n')
+    fo.write('message("====>> CONDA_BUILD: ${CONDA_BUILD}")\n')
+    fo.write('message("====>> CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")\n')
+    fo.write('message("====>> CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")\n')
+    fo.write('message("====>> CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")\n')
+    fo.write('message("====>> CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")\n')
+    fo.write('message("====>> CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")\n')
+    fo.write('message("====>> PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}")\n')
+    fo.write('message("====>> CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")\n')
+    fo.write('message("====>> CMAKE_LIBRARIES: ${CMAKE_LIBRARIES}")\n')
+    fo.write('message("====>> CMAKE_INCLUDE_PATH: ${CMAKE_INCLUDE_PATH}")\n')
+    fo.write('message("====>> CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}")\n')
+    fo.write('message("====>> CMAKE_CURRENT_LIST_DIR: ${CMAKE_CURRENT_LIST_DIR}")\n')
+    fo.write('message("====>> CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")\n')
+    fo.write('message("====>> QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ${QT_ADDITIONAL_PACKAGES_PREFIX_PATH}")\n')
+    fo.write('message("=============================================")\n')
     fo.write('\n')
 
     if (options.verboseMake):
@@ -599,6 +621,7 @@ def writeCMakeListsCodebase(dir):
 
 #   miniforge build
 
+    fo.write('# miniforge3 conda-forge build\n')
     fo.write('set(MINIFORGE_ROOT "$ENV{HOME}/miniforge3")\n')
     fo.write('if (DEFINED MINIFORGE_DIR)\n')
     fo.write('  set(MINIFORGE_ROOT "${MINIFORGE_DIR}")\n')
@@ -612,8 +635,19 @@ def writeCMakeListsCodebase(dir):
     fo.write('  set(QT_HOST_PATH ${MINIFORGE_ROOT})\n')
     fo.write('  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)\n')
     fo.write('  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")\n')
+
+    if (globalNeedQt):
+        fo.write('# On APPLE OSX, for QT we need to find OpenGL provided by the system SDK\n')
+        fo.write('  if (APPLE)\n')
+        fo.write('    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH TRUE)\n')
+        fo.write('    message("======>> set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH TRUE)")\n') 
+        fo.write('  else()\n')
+        fo.write('    message("======>> set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)")\n') 
+        fo.write('    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)\n') 
+        fo.write('  endif()\n')
+        
     fo.write("endif(DEFINED MAMBA_BUILD)\n")
-    fo.write('\n')
+    fo.write('\n\n')
 
     if (globalNeedX11 or globalNeedQt):
         fo.write('find_package (X11)\n')
@@ -623,38 +657,13 @@ def writeCMakeListsCodebase(dir):
         fo.write('\n')
 
     if (globalNeedQt):
-        fo.write('# Finding Qt\n')
-        fo.write('\n')
-        fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
-        fo.write('if (NOT Qt6_FOUND)\n')
-        fo.write('  find_package (Qt5 COMPONENTS Core QUIET)\n')
-        fo.write('endif()\n')
-        fo.write('if (Qt5_FOUND)\n')
-        fo.write('  message(STATUS "Found Qt5: ${Qt5_VERSION}")\n')
-        fo.write('elseif (Qt6_FOUND)\n')
-        fo.write('    message(STATUS "Found Qt6: ${Qt6_VERSION}")\n')
-        fo.write('else ()\n')
-        fo.write('  message(FATAL_ERROR, "Qt not found.")\n')
-        fo.write('endif(Qt5_FOUND)\n')
-        fo.write('\n')
-
-        fo.write('if(APPLE)\n')
-        fo.write('  if (DEFINED MAMBA_BUILD)\n')
-        fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
-        fo.write('    if (Qt5_FOUND)\n')
-        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
-        fo.write('    elseif (Qt6_FOUND)\n')
-        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)\n')
-        fo.write('    endif(Qt5_FOUND)\n')
-        fo.write('  else ()\n')
-        fo.write('    if (Qt5_FOUND)\n')
-        fo.write('      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
-        fo.write('    elseif (Qt6_FOUND)\n')
-        fo.write('      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
-        fo.write('    endif(Qt5_FOUND)\n')
-        fo.write('  endif(DEFINED MAMBA_BUILD)\n')
-        fo.write('endif(APPLE)\n')
-        fo.write('\n')
+        addFindQt(fo)
+        
+    if (globalNeedQt):
+        fo.write('if (DEFINED MAMBA_BUILD)\n')
+        fo.write('set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)\n') 
+        fo.write('message("======>> set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)")\n') 
+        fo.write('endif(DEFINED MAMBA_BUILD)\n')
 
     fo.write('find_package (HDF5)\n')
     fo.write('\n')
@@ -1018,8 +1027,8 @@ def writeCMakeListsLib(libName, libSrcDir,
     fo.write("project (lib%s)\n" % libName)
     fo.write("\n")
     
-    if (needQt):
-        addFindQt(fo)
+#    if (needQt):
+#        addFindQt(fo)
 
     fo.write("# include directories\n")
     fo.write("\n")
@@ -1479,8 +1488,8 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("    )\n")
     fo.write("\n")
 
-    if (needQt):
-        addFindQt(fo)
+#    if (needQt):
+#        addFindQt(fo)
 
     fo.write("# include directories\n")
     fo.write("\n")
@@ -1601,7 +1610,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
 def addFindQt(fo):
 
-    fo.write('#Finding Qt\n')
+    fo.write('# Finding Qt\n')
     fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
     fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
