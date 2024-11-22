@@ -1611,6 +1611,14 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 def addFindQt(fo):
 
     fo.write('# Finding Qt\n')
+
+    fo.write('if(APPLE)\n')
+    fo.write('  if (DEFINED MAMBA_BUILD)\n')
+    fo.write('    set(Qt6_NO_OPENGL TRUE)\n')
+    fo.write('    set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)\n')
+    fo.write('  endif(DEFINED MAMBA_BUILD)\n')
+    fo.write('endif(APPLE)\n')
+
     fo.write('find_package (Qt6 COMPONENTS Core QUIET)\n')
     fo.write('if (NOT Qt6_FOUND)\n')
     fo.write('  find_package (Qt5 COMPONENTS Core REQUIRED)\n')
