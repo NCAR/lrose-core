@@ -1603,7 +1603,7 @@ def addFindQt(fo):
 
     fo.write('if(APPLE)\n')
     fo.write('  if (DEFINED MAMBA_BUILD)\n')
-    fo.write('    set(Qt6_NO_OPENGL TRUE)\n') 
+    fo.write('    set(Qt6_NO_OPENGL TRUE)\n')
     fo.write('    set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)\n')
     fo.write('  endif(DEFINED MAMBA_BUILD)\n')
     fo.write('endif(APPLE)\n')
