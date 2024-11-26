@@ -792,7 +792,7 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
 //////////////////////////////////////////////
 // return string for specified sweep mode
 
-string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode)
+string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode) const
 {
   
   switch (mode) {

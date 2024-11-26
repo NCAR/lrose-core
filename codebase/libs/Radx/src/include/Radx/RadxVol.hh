@@ -1450,7 +1450,7 @@ public:
 
   // return string for specified sweep mode
 
-  string getSweepModeLabel(Radx::SweepMode_t mode);
+  string getSweepModeLabel(Radx::SweepMode_t mode) const;
   
   /// get the predominant range geometry
 
