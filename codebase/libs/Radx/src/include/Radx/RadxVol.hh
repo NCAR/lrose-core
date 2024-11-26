@@ -633,6 +633,25 @@ public:
                     double foldLimitLower,
                     double foldLimitUpper);
 
+  // override default sweep mode labels
+  // these are used in file names
+
+  void setSweepModeNotSetLabel(const string &val) { _sweepModeNotSetLabel = val; }
+  void setSweepModeSectorLabel(const string &val) { _sweepModeSectorLabel = val; }
+  void setSweepModeCoplaneLabel(const string &val) { _sweepModeCoplaneLabel = val; }
+  void setSweepModeRhiLabel(const string &val) { _sweepModeRhiLabel = val; }
+  void setSweepModeVertLabel(const string &val) { _sweepModeVertLabel = val; }
+  void setSweepModeIdleLabel(const string &val) { _sweepModeIdleLabel = val; }
+  void setSweepModeAzSurLabel(const string &val) { _sweepModeAzSurLabel = val; }
+  void setSweepModeElSurLabel(const string &val) { _sweepModeElSurLabel = val; }
+  void setSweepModeSunLabel(const string &val) { _sweepModeSunLabel = val; }
+  void setSweepModeSunRhiLabel(const string &val) { _sweepModeSunRhiLabel = val; }
+  void setSweepModeCalLabel(const string &val) { _sweepModeCalLabel = val; }
+  void setSweepModeManLabel(const string &val) { _sweepModeManLabel = val; }
+  void setSweepModeDbsLabel(const string &val) { _sweepModeDbsLabel = val; }
+  void setSweepModeTrajLabel(const string &val) { _sweepModeTrajLabel = val; }
+  void setSweepModeParLabel(const string &val) { _sweepModeParLabel = val; }
+  
   /// Load volume information from the rays.
   ///
   /// This sets the volume number and the start and end times.
@@ -1429,6 +1448,10 @@ public:
   
   Radx::SweepMode_t getPredomSweepModeFromAngles() const;
 
+  // return string for specified sweep mode
+
+  string getSweepModeLabel(Radx::SweepMode_t mode);
+  
   /// get the predominant range geometry
 
   void getPredomRayGeom(double &startRangeKm, double &gateSpacingKm) const;
@@ -1964,6 +1987,24 @@ private:
 
   mutable bool _sweepModeFromAnglesChecked;
   mutable Radx::SweepMode_t _predomSweepModeFromAngles;
+
+  // sweep mode strings
+
+  string _sweepModeNotSetLabel;
+  string _sweepModeSectorLabel;
+  string _sweepModeCoplaneLabel;
+  string _sweepModeRhiLabel;
+  string _sweepModeVertLabel;
+  string _sweepModeIdleLabel;
+  string _sweepModeAzSurLabel;
+  string _sweepModeElSurLabel;
+  string _sweepModeSunLabel;
+  string _sweepModeSunRhiLabel;
+  string _sweepModeCalLabel;
+  string _sweepModeManLabel;
+  string _sweepModeDbsLabel;
+  string _sweepModeTrajLabel;
+  string _sweepModeParLabel;
   
   // times
 

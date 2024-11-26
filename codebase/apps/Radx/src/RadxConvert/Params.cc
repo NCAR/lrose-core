@@ -3063,6 +3063,120 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'override_sweep_mode_labels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_sweep_mode_labels");
+    tt->descr = tdrpStrDup("Option to override the labels of the sweep modes.");
+    tt->help = tdrpStrDup("If TRUE, the specified sweep mode labels are used in the file names. See above: include_scan_type_in_file_name.");
+    tt->val_offset = (char *) &override_sweep_mode_labels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sweep_mode_labels'
+    // ctype is '_sweep_mode_labels_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sweep_mode_labels");
+    tt->descr = tdrpStrDup("Sets the strings used for the labels for each sweep mode.");
+    tt->help = tdrpStrDup("These are used in the output file name. See 'include_scan_type_in_file_name'.");
+    tt->val_offset = (char *) &sweep_mode_labels - &_start_;
+    tt->struct_def.name = tdrpStrDup("sweep_mode_labels_t");
+    tt->struct_def.nfields = 14;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("sector_label");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &sweep_mode_labels.sector_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("coplane_label");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &sweep_mode_labels.coplane_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("rhi_label");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &sweep_mode_labels.rhi_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("vert_label");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &sweep_mode_labels.vert_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("idle_label");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &sweep_mode_labels.idle_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[5].fname = tdrpStrDup("az_sur_label");
+      tt->struct_def.fields[5].ptype = STRING_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &sweep_mode_labels.az_sur_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[6].fname = tdrpStrDup("el_sur_label");
+      tt->struct_def.fields[6].ptype = STRING_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &sweep_mode_labels.el_sur_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[7].fname = tdrpStrDup("sunscan_label");
+      tt->struct_def.fields[7].ptype = STRING_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &sweep_mode_labels.sunscan_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[8].fname = tdrpStrDup("sunscan_rhi_label");
+      tt->struct_def.fields[8].ptype = STRING_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &sweep_mode_labels.sunscan_rhi_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[9].fname = tdrpStrDup("cal_label");
+      tt->struct_def.fields[9].ptype = STRING_TYPE;
+      tt->struct_def.fields[9].rel_offset = 
+        (char *) &sweep_mode_labels.cal_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[10].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[10].fname = tdrpStrDup("man_label");
+      tt->struct_def.fields[10].ptype = STRING_TYPE;
+      tt->struct_def.fields[10].rel_offset = 
+        (char *) &sweep_mode_labels.man_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[11].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[11].fname = tdrpStrDup("dbs_label");
+      tt->struct_def.fields[11].ptype = STRING_TYPE;
+      tt->struct_def.fields[11].rel_offset = 
+        (char *) &sweep_mode_labels.dbs_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[12].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[12].fname = tdrpStrDup("traj_label");
+      tt->struct_def.fields[12].ptype = STRING_TYPE;
+      tt->struct_def.fields[12].rel_offset = 
+        (char *) &sweep_mode_labels.traj_label - (char *) &sweep_mode_labels;
+      tt->struct_def.fields[13].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[13].fname = tdrpStrDup("par_label");
+      tt->struct_def.fields[13].ptype = STRING_TYPE;
+      tt->struct_def.fields[13].rel_offset = 
+        (char *) &sweep_mode_labels.par_label - (char *) &sweep_mode_labels;
+    tt->n_struct_vals = 14;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("PPI");
+      tt->struct_vals[1].s = tdrpStrDup("COP");
+      tt->struct_vals[2].s = tdrpStrDup("RHI");
+      tt->struct_vals[3].s = tdrpStrDup("VER");
+      tt->struct_vals[4].s = tdrpStrDup("IDL");
+      tt->struct_vals[5].s = tdrpStrDup("SUR");
+      tt->struct_vals[6].s = tdrpStrDup("AIR");
+      tt->struct_vals[7].s = tdrpStrDup("SUN");
+      tt->struct_vals[8].s = tdrpStrDup("SRH");
+      tt->struct_vals[9].s = tdrpStrDup("CAL");
+      tt->struct_vals[10].s = tdrpStrDup("MAN");
+      tt->struct_vals[11].s = tdrpStrDup("DBS");
+      tt->struct_vals[12].s = tdrpStrDup("TRJ");
+      tt->struct_vals[13].s = tdrpStrDup("PAR");
+    tt++;
+    
     // Parameter 'include_scan_name_in_file_name'
     // ctype is 'tdrp_bool_t'
     

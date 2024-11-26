@@ -1261,6 +1261,50 @@ paramdef boolean {
 } include_scan_type_in_file_name;
 
 paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the labels of the sweep modes.";
+  p_help = "If TRUE, the specified sweep mode labels are used in the file names. See above: include_scan_type_in_file_name.";
+} override_sweep_mode_labels;
+
+typedef struct {
+  string sector_label;
+  string coplane_label;
+  string rhi_label;
+  string vert_label;
+  string idle_label;
+  string az_sur_label;
+  string el_sur_label;
+  string sunscan_label;
+  string sunscan_rhi_label;
+  string cal_label;
+  string man_label;
+  string dbs_label;
+  string traj_label;
+  string par_label;
+} sweep_mode_labels_t;
+
+paramdef struct sweep_mode_labels_t {
+  p_default = {
+    sector_label = "PPI",
+    coplane_label = "COP",
+    rhi_label = "RHI",
+    vert_label = "VER",
+    idle_label = "IDL",
+    az_sur_label = "SUR",
+    el_sur_label = "AIR",
+    sunscan_label = "SUN",
+    sunscan_rhi_label = "SRH",
+    cal_label = "CAL",
+    man_label = "MAN",
+    dbs_label = "DBS",
+    traj_label = "TRJ",
+    par_label = "PAR"
+  };
+  p_descr = "Sets the strings used for the labels for each sweep mode.";
+  p_help = "These are used in the output file name. See 'include_scan_type_in_file_name'.";
+} sweep_mode_labels;
+
+paramdef boolean {
   p_default = false;
   p_descr = "Option to include the scan name in the file name.";
   p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";

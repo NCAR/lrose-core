@@ -3906,7 +3906,7 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
     if (vol.getSweeps().size() > 0) {
       Radx::SweepMode_t predomSweepMode = vol.getPredomSweepMode();
       scanType = "_";
-      scanType += Radx::sweepModeToShortStr(predomSweepMode);
+      scanType += vol.getSweepModeLabel(predomSweepMode);
     }
   }
 

@@ -171,6 +171,24 @@ void RadxVol::_init()
     _searchRays[ii] = NULL;
   }
 
+  // set strings for sweep modes
+  
+  _sweepModeNotSetLabel = "XXX";
+  _sweepModeSectorLabel = "PPI";
+  _sweepModeCoplaneLabel = "COP";
+  _sweepModeRhiLabel = "RHI";
+  _sweepModeVertLabel = "VER";
+  _sweepModeIdleLabel = "IDL";
+  _sweepModeAzSurLabel = "SUR";
+  _sweepModeElSurLabel = "AIR";
+  _sweepModeSunLabel = "SUN";
+  _sweepModeSunRhiLabel = "SRH";
+  _sweepModeCalLabel = "CAL";
+  _sweepModeManLabel = "MAN";
+  _sweepModeDbsLabel = "DBS";
+  _sweepModeTrajLabel = "TRJ";
+  _sweepModeParLabel = "PAR";
+
 }
 
 //////////////////////////////////////////////////
@@ -768,6 +786,67 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
     predomMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
   }
   return predomMode;
+
+}
+
+//////////////////////////////////////////////
+// return string for specified sweep mode
+
+string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode)
+{
+  
+  switch (mode) {
+    case Radx::SWEEP_MODE_NOT_SET: {
+      return _sweepModeNotSetLabel;
+    }
+    case Radx::SWEEP_MODE_SECTOR: {
+      return _sweepModeSectorLabel;
+    }
+    case Radx::SWEEP_MODE_COPLANE: {
+      return _sweepModeCoplaneLabel;
+    }
+    case Radx::SWEEP_MODE_RHI: {
+      return _sweepModeRhiLabel;
+    }
+    case Radx::SWEEP_MODE_VERTICAL_POINTING: {
+      return _sweepModeVertLabel;
+    }
+    case Radx::SWEEP_MODE_IDLE: {
+      return _sweepModeIdleLabel;
+    }
+    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE: {
+      return _sweepModeAzSurLabel;
+    }
+    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE: {
+      return _sweepModeElSurLabel;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN: {
+      return _sweepModeSunLabel;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN_RHI: {
+      return _sweepModeSunRhiLabel;
+    }
+    case Radx::SWEEP_MODE_CALIBRATION: {
+      return _sweepModeCalLabel;
+    }
+    case Radx::SWEEP_MODE_POINTING:
+    case Radx::SWEEP_MODE_MANUAL_PPI:
+    case Radx::SWEEP_MODE_MANUAL_RHI: {
+      return _sweepModeManLabel;
+    }
+    case Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING: {
+      return _sweepModeDbsLabel;
+    }
+    case Radx::SWEEP_MODE_COMPLEX_TRAJECTORY: {
+      return _sweepModeTrajLabel;
+    }
+    case Radx::SWEEP_MODE_ELECTRONIC_STEERING: {
+      return _sweepModeParLabel;
+    }
+    default: {
+      return _sweepModeAzSurLabel;
+    }
+  } // switch
 
 }
 
