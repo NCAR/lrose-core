@@ -337,6 +337,18 @@ paramdef string {
   p_help = "See override_site_name.";
 } site_name;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the scan name.";
+  p_help = "If true, the scan name provided will be used.";
+} override_scan_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Scan name.";
+  p_help = "See override_scan_name.";
+} scan_name;
+
 commentdef {
   p_header = "OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT";
 }

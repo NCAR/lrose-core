@@ -794,6 +794,9 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
   if (_params.override_site_name) {
     vol.setSiteName(_params.site_name);
   }
+  if (_params.override_scan_name) {
+    vol.setScanName(_params.scan_name);
+  }
     
   // apply time offset
 

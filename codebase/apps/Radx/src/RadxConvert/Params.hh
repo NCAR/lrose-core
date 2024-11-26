@@ -615,6 +615,10 @@ public:
 
   char* site_name;
 
+  tdrp_bool_t override_scan_name;
+
+  char* scan_name;
+
   tdrp_bool_t override_volume_number;
 
   int starting_volume_number;
@@ -880,7 +884,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[204];
+  mutable TDRPtable _table[206];
 
   const char *_className;
 

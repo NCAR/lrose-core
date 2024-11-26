@@ -1217,6 +1217,30 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
+    // Parameter 'override_scan_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_scan_name");
+    tt->descr = tdrpStrDup("Option to override the scan name.");
+    tt->help = tdrpStrDup("If true, the scan name provided will be used.");
+    tt->val_offset = (char *) &override_scan_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'scan_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("scan_name");
+    tt->descr = tdrpStrDup("Scan name.");
+    tt->help = tdrpStrDup("See override_scan_name.");
+    tt->val_offset = (char *) &scan_name - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
