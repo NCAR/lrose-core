@@ -415,7 +415,8 @@ RadxNcfStr::RadxNcfStr()
   ANTENNA_GAIN_V_LONG = "calibrated_radar_antenna_gain_v_channel";
   ANTENNA_TRANSITION_LONG = "antenna_is_in_transition_between_sweeps";
   AZIMUTH_CORRECTION_LONG = "azimuth_angle_correction";
-  AZIMUTH_LONG = "ray_azimuth_angle";
+  AZIMUTH_LONG = "azimuth_angle_from_true_north";
+  AZIMUTH_STANDARD = "ray_azimuth_angle";
   BASE_DBZ_1KM_HC_LONG = "radar_reflectivity_at_1km_at_zero_snr_h_co_polar_channel";
   BASE_DBZ_1KM_HX_LONG = "radar_reflectivity_at_1km_at_zero_snr_h_cross_polar_channel";
   BASE_DBZ_1KM_VC_LONG = "radar_reflectivity_at_1km_at_zero_snr_v_co_polar_channel";
@@ -438,7 +439,8 @@ RadxNcfStr::RadxNcfStr()
   EASTWARD_VELOCITY_LONG = "platform_eastward_velocity";
   EASTWARD_WIND_LONG = "eastward_wind_speed";
   ELEVATION_CORRECTION_LONG = "ray_elevation_angle_correction";
-  ELEVATION_LONG = "ray_elevation_angle";
+  ELEVATION_LONG = "elevation_angle_from_horizontal_plane";
+  ELEVATION_STANDARD = "ray_elevation_angle";
   FIXED_ANGLE_LONG = "ray_target_fixed_angle";
   FOLLOW_MODE_LONG = "follow_mode_for_scan_strategy";
   FREQUENCY_LONG = "transmission_frequency";

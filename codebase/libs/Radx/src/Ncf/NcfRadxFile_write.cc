@@ -941,7 +941,7 @@ int NcfRadxFile::_addCoordinateVariables()
   int iret = 0;
   iret |= _file.addAttr(_timeVar, STANDARD_NAME, TIME);
   iret |= _file.addAttr(_timeVar, LONG_NAME,
-                        "time in seconds since volume start");
+                        "time_in_seconds_since_volume_start");
   iret |= _file.addAttr(_timeVar, CALENDAR, GREGORIAN);
 
   char timeUnitsStr[256];
@@ -1376,7 +1376,7 @@ int NcfRadxFile::_addCalibVariables()
 
   iret |= _file.addMetaVar(_rCalTimeVar, R_CALIB_TIME,
                            "", R_CALIB_TIME_LONG, 
-                           nc3Char, _calDim, _stringLen32Dim, "");
+                           nc3Char, _calDim, _stringLen32Dim, "UTC");
   iret |= _file.addAttr(_rCalTimeVar, META_GROUP, RADAR_CALIBRATION);
 
   iret |= _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
@@ -1545,10 +1545,10 @@ int NcfRadxFile::_addRayVariables()
   iret |= _file.addAttr(_rayGateSpacingVar, UNITS, METERS);
 
   iret |= _file.addMetaVar(_azimuthVar, AZIMUTH,
-                           "", AZIMUTH_LONG, nc3Float, _timeDim, DEGREES);
-
+                           AZIMUTH_STANDARD, AZIMUTH_LONG, nc3Float, _timeDim, DEGREES);
+  
   iret |= _file.addMetaVar(_elevationVar, ELEVATION,
-                           "", ELEVATION_LONG, nc3Float, _timeDim, DEGREES);
+                           ELEVATION_STANDARD, ELEVATION_LONG, nc3Float, _timeDim, DEGREES);
   iret |= _file.addAttr(_elevationVar, POSITIVE, UP);
   
   iret |= _file.addMetaVar(_pulseWidthVar, PULSE_WIDTH,
