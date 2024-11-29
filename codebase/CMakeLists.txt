@@ -55,10 +55,12 @@ if (DEFINED MAMBA_BUILD)
   set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")
 endif(DEFINED MAMBA_BUILD)
 
-find_package (X11)
-if (DEFINED X11_X11_LIB)
-  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)
-endif()
+if(APPLE)
+if (DEFINED MAMBA_BUILD)
+set(Qt6_NO_OPENGL TRUE)
+set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)
+endif(DEFINED MAMBA_BUILD)
+endif(APPLE)
 
 # Finding Qt
 
@@ -91,7 +93,12 @@ if(APPLE)
   endif(DEFINED MAMBA_BUILD)
 endif(APPLE)
 
-find_package (HDF5)
+find_package (X11)
+if (DEFINED X11_X11_LIB)
+  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)
+endif()
+
+ find_package (HDF5)
 
 # find_package (NETCDF)
 # find_package (LROSE)

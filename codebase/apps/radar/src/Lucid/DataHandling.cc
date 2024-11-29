@@ -53,13 +53,14 @@ static int _mdvRequestVertPlane(met_record_t *mr, time_t start_time,time_t end_t
  * GATHER_HWIN_DATA: Collect all the data necessary for horizontal 
  *    display windows 
  */
-
+ 
 int gather_hwin_data(int page, time_t start_time, time_t end_time)
 {
 
   time_t now = time(0);
   /* Check to make sure we are not currently waiting on an I/O request */
   if(gd.io_info.outstanding_request > 0) {
+    cerr << "ddddddddddddddd111111111111111" << endl;
     if(now > gd.io_info.expire_time) {
       cancel_pending_request();
       return CIDD_FAILURE;
@@ -70,6 +71,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   // MAIN GRID
   met_record_t *mr = gd.mrec[page];    /* get pointer to data record */
   if(mr->h_data_valid == 0) {
+    cerr << "ddddddddddddddd22222222222221111" << endl;
     if(gd.debug1) {
       fprintf(stderr,
               "Requesting Data Field %d data time %s %s\n",
@@ -81,6 +83,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
     } else {
       return INCOMPLETE;
     }
+    cerr << "ddddddddddddddd333333333333333" << endl;
   }
 
   // TERRAIN GRID

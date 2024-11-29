@@ -3093,6 +3093,7 @@ void CartManager::_checkForFieldChange()
     int fieldNum = item->getFieldIndex();
     gd.prev_field = gd.h_win.page;
     set_field(fieldNum);
+    gd.mrec[fieldNum]->h_data_valid = 0;
     if (_params.debug) {
       const Params::field_t *fparams = item->getFieldParams();
       cerr << "Changing to field: " << fparams->button_label << endl;
@@ -3105,6 +3106,7 @@ void CartManager::_checkForFieldChange()
     gd.redraw_horiz = true;
     gd.field_has_changed = true;
     gd.selected_field = fieldNum;
+    gd.h_win.page = fieldNum;
   
   }
 
@@ -3758,7 +3760,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   /***** Handle Field changes *****/
 
   if (gd.h_win.page != gd.h_win.prev_page) {
-    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
+    cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
@@ -3919,6 +3921,7 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   if (gd.movie.frame[index].redraw_horiz) {
 #endif
     /* Draw Frame */
+  
     if (gather_hwin_data(gd.h_win.page,
                          gd.movie.frame[index].time_start,
                          gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
