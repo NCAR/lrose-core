@@ -1,4 +1,4 @@
-# ENVIRONMENT VARIABLES USED LROSE
+# ENVIRONMENT VARIABLES USED BY LROSE
 
 This document describes the most commonly-used environment variables which control the functionality of the LROSE libraries and applications.
 
@@ -80,7 +80,7 @@ Library: Mdv
 
 Default: 10
 
-Action: When seraching a directory for data stored in forecast file name format (yyyymmdd/g_hhmmss/f_ssssssss.ext) the library needs to know how far back in time to look for forecast data which may be valid at the current time. It looks back a maximum of this number of days.
+Action: When searching a directory for data stored in forecast file name format (yyyymmdd/g_hhmmss/f_ssssssss.ext) the library needs to know how far back in time to look for forecast data which may be valid at the current time. It looks back a maximum of this number of days.
 
 Library: dids
 
@@ -98,7 +98,7 @@ Library: Mdv
 
 Default: 30000
 
-Action: This is the timeout, in milli-secs, used in communications between clients and servers. The default value of 30 secs (30000 msecs) was chosen so that programs would not block too long and fail to register with procmap, thereby causing them to be restarted. You may need to inccrease the value over slow lines. If you increase the value, you may be wise to run without the restart layer.
+Action: This is the timeout, in milli-secs, used in communications between clients and servers. The default value of 30 secs (30000 msecs) was chosen so that programs would not block too long and fail to register with procmap, thereby causing them to be restarted. You may need to increase the value over slow lines. If you increase the value, you may be wise to run without the restart layer.
 
 Library: dsserver
 
@@ -144,25 +144,17 @@ Action: If set to "true", the Spdb library will not require a lock on the data b
 
 Library: Spdb
 
-### $CLOSE_SOCKET_IN_CHILD
-
-Default: undefined
-
-Action: If set to "true", the servers will close the listening socket in child processes. This should not be necessary, but was for Linux kernels 2.0.x, and possibly earlier kernels. It is not necessary on Solaris or Linux potato or kernels 2.4 and later. Only set this variable if your system is getting too many open files. You can check this with the 'lsof' command.
-
-Library: dsserver
-
 ## LATEST DATA INFO FILES
 
 The _latest_data_info files are small files which are written to a data directory to indicate the time of the latest data written to that directory.
 
 The following files will be written:
 
-* _latest_data_info - legacy, original text file. Kept for backward compatibility.
-* _latest_data_info.xml - XML description of the latest data.
-* _latest_data_info.stat - status file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
-* _latest_data_info.buf - buffer file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
-* _latest_data_info.lock - lock file to prevent simultaneous writes of the queue.
+* ```_latest_data_info``` - legacy, original text file. Kept for backward compatibility.
+* ```_latest_data_info.xml``` - XML description of the latest data.
+* ```_latest_data_info.stat``` - status file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
+* ```_latest_data_info.buf``` - buffer file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
+* ```_latest_data_info.lock``` - lock file to prevent simultaneous writes of the queue.
 
 ### $LDATA_FMQ_ACTIVE
 
