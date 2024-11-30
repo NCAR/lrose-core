@@ -2,11 +2,15 @@
 
 This document describes the most commonly-used environment variables which control the functionality of the LROSE libraries and applications.
 
-NOTE: When a variable may be set to "true"/"false", or "TRUE"/"FALSE", this is case-insensitive.
+NOTES:
 
-## Data system root
+The environment variables are shown starting with ```$```. This is only for clarity in this document, when you set the environment variable the $ is not part of the name.
 
-### DATA_DIR
+When a variable may be set to "true"/"false", or "TRUE"/"FALSE", this is case-insensitive.
+
+## DATA SYSTEM ROOT
+
+### $DATA_DIR
 
 Default: none
 
@@ -14,9 +18,9 @@ Action: Top-level data directory for a project. If relative paths are specified 
 
 Libraries: didss, dsserver
 
-## MDV file writes and reads
+## MDV FILES
 
-### MDV_WRITE_FORMAT
+### $MDV_WRITE_FORMAT
 
 Default: FORMAT_NCF
 
@@ -30,7 +34,7 @@ Options are:
 
 Library: Mdv
 
-### MDV_WRITE_USING_EXTENDED_PATHS
+### $MDV_WRITE_USING_EXTENDED_PATHS
 
 Default: FALSE
 
@@ -51,7 +55,7 @@ becomes
 
 Library: Mdv
   
-### MDV_WRITE_ADD_YEAR_SUBDIR
+### $MDV_WRITE_ADD_YEAR_SUBDIR
 
 Default: FALSE
 
@@ -72,7 +76,7 @@ becomes
 
 Library: Mdv
   
-### MAX_FORECAST_LEAD_DAYS
+### $MAX_FORECAST_LEAD_DAYS
 
 Default: 10
 
@@ -80,7 +84,7 @@ Action: When seraching a directory for data stored in forecast file name format 
 
 Library: dids
 
-### MDV_GRID_TOLERANCE
+### $MDV_GRID_TOLERANCE
 
 Default: 0.0000001
 
@@ -90,7 +94,7 @@ Library: Mdv
 
 ## Server communication
 
-### DS_COMM_TIMEOUT_MSECS
+### $DS_COMM_TIMEOUT_MSECS
 
 Default: 30000
 
@@ -98,7 +102,7 @@ Action: This is the timeout, in milli-secs, used in communications between clien
 
 Library: dsserver
 
-### DS_PING_TIMEOUT_MSECS
+### $DS_PING_TIMEOUT_MSECS
 
 Default: 10000
 
@@ -106,7 +110,7 @@ Action: This is the timeout, in milli-secs, used when pinging a server to see if
 
 Library: dsserver
 
-### DS_BASE_PORT
+### $DS_BASE_PORT
 
 Default: 5430
 
@@ -114,7 +118,7 @@ Action: All ports in the DS server system are calculated relative to this port. 
 
 Library: dsserver
 
-### FCOPY_SERVER_ALLOW_NO_LOCK
+### $FCOPY_SERVER_ALLOW_NO_LOCK
 
 Options: TRUE, FALSE
 
@@ -124,7 +128,7 @@ Action: Allows DsFCopyServer to not lock files on write. If TRUE, lock files wil
 
 Library: dsserver
 
-### FCOPY_SERVER_TMP_DIR
+### $FCOPY_SERVER_TMP_DIR
 
 Default: none
 
@@ -132,7 +136,7 @@ Action: Specify tmp dir for DsFCopyServer on write. Normally DsFCopyServer write
 
 Library: dsserver
 
-### SPDB_ALLOW_NO_LOCK
+### $SPDB_ALLOW_NO_LOCK
 
 Default: undefined
 
@@ -140,7 +144,7 @@ Action: If set to "true", the Spdb library will not require a lock on the data b
 
 Library: Spdb
 
-### CLOSE_SOCKET_IN_CHILD
+### $CLOSE_SOCKET_IN_CHILD
 
 Default: undefined
 
@@ -160,7 +164,7 @@ The following files will be written:
 * _latest_data_info.buf - buffer file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
 * _latest_data_info.lock - lock file to prevent simultaneous writes of the queue.
 
-### LDATA_FMQ_ACTIVE
+### $LDATA_FMQ_ACTIVE
 
 Options: true, false
 
@@ -170,7 +174,7 @@ Action: By default the FMQ is active. If this is set to "false", the FMQ (file m
 
 Library: didss
 
-### LDATA_FMQ_NSLOTS
+### $LDATA_FMQ_NSLOTS
 
 Type: integer
 
@@ -180,7 +184,7 @@ Action: The number of slots in the FMQ, if it is active. The queue wraps once th
 
 Library: didss
 
-### LDATA_NO_WRITE
+### $LDATA_NO_WRITE
 
 Type: boolean string, true/false
 
@@ -194,7 +198,7 @@ Libraries: toolsa didss dsserver
 
 The process management layer relies on ```procmap```, the process mapper. Programs register a hearbeat with procmap, typically once per minute. Normally one procmap runs per host. The auto_restart script checks the procmap list against an expected list of processes, and restarts those which are not running.
 
-### PROCMAP_DIR
+### $PROCMAP_DIR
 
 Default: not defined
 
@@ -202,7 +206,7 @@ Action: If defined, it should be a directory path. Each time a process registers
 
 Libraries: toolsa
 
-### PROCMAP_VERBOSE
+### $PROCMAP_VERBOSE
 
 Default: not defined
 
@@ -210,11 +214,11 @@ Action: If set to "true", verbose debugging messages are printed out during comm
 
 Library: toolsa
 
-### DATA MAPPER
+### $DATA MAPPER
 
 The ```DataMapper``` is a small server that keeps track of writes to the data system. Applications register with DataMapper each time data is written to disk.
 
-### DATA_MAPPER_ACTIVE
+### $DATA_MAPPER_ACTIVE
 
 Default: true
 
@@ -222,7 +226,7 @@ Action: Set to 'false' to prevent apps from registering with the DataMapper.
 
 Library: dsserver
 
-### DATAMAP_VERBOSE
+### $DATAMAP_VERBOSE
 
 Default: not defined
 
@@ -230,7 +234,7 @@ Action: If set to "true", verbose debugging messages are printed out during comm
 
 Library: toolsa
 
-### DATA_MAPPER_DEBUG
+### $DATA_MAPPER_DEBUG
 
 Default: not defined
 
