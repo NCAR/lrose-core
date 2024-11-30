@@ -11,7 +11,6 @@ and distributed server system).
 
 | Variable | Default value | Description | Code library |
 | -------- |:-------------:|:-----------:|:------------:|
-
 | RAP_DATA_DIR | undefined | If set, URLs point to locations relative to RAP_DATA_DIR, unless the file part of the URL starts with / or ., in which case the absolute or relative paths are used. | didss dsserver |
   | DATA_DIR  | undefined  | Alternartive to RAP_DATA_DIR. If RAP_DATA_DIR is defined, it is used. If not, DATA_DIR is used if defined.  | didss dsserver  | 
   | DATA_MAPPER_ACTIVE  | true  | Set to 'false' to turn off automatic access from clients to DataMapper.  | dsserver  | 
