@@ -21,9 +21,5 @@ and distributed server system).
   | SPDB_ALLOW_NO_LOCK  | undefined  | If set to "true", the Spdb library will not require a lock on the data base files for reads. Locks are still required for writes. This may be used if you are reading data across a cross-mount for which file locking is not implemented. However, the better strategy is to contact a server which has local access to the data.  | Spdb  | 
   | CLOSE_SOCKET_IN_CHILD  | undefined  | If set to "true", the servers will close the listening socket in child processes. This should not be necessary, but was for Linux kernels 2.0.x, and possibly earlier kernels. It is not necessary on Solaris or Linux potato or kernels 2.4 and later. Only set this variable if your system is getting too many open files. You can check this with the 'lsof' command.  | dsserver  | 
   | MAX_FORECAST_LEAD_DAYS  | 10  | When seraching a directory for data stored in forecast file name format (yyyymmdd/g_hhmmss/f_ssssssss.ext) the library needs to know how far back in time to look for forecast data which may be valid at the current time. It looks back a maximum of this number of days. | didss |
-| MDV_WRITE_FORMAT | FORMAT_NCF | Format for writing MDV files. Options are:
-* FORMAT_NCF (NetCDF CF, the default)
-* FORMAT_MDV (legacy 32-bit format)
-* FORMAT_XML (XML header and data buffer)
-| Mdvx |
+| MDV_WRITE_FORMAT | FORMAT_NCF | Format for writing MDV files. Options are: <ul><li>FORMAT_NCF (NetCDF CF, the default)</li><li>FORMAT_MDV (legacy 32-bit format)</li><li>FORMAT_XML (XML header and data buffer)</li></ul> | Mdvx |
 
