@@ -71,5 +71,5 @@ Fundamental to the Radx package is the RadxVol class, which represents a radar v
 
 The data model which Radx is intended to represent is documented as follows:
 
-https://github.com/NCAR/CfRadial/blob/master/docs/WMO_IM_Radar_and_Lidar_v0.5.pdf
+https://github.com/NCAR/CfRadial/blob/master/support_docs/WMO_IM_Radar_and_Lidar_v0.5.pdf
 
