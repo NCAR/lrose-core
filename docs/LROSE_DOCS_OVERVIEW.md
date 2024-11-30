@@ -36,6 +36,15 @@ See the full TDRP docs at:
 
   http://htmlpreview.github.io/?https://github.com/NCAR/lrose-core/blob/master/docs/tdrp/index.html
 
+## Runtime environment variables
+
+There are a number of environment variables that can be used to control the processes at runtime.
+These generally override the TDRP parameters.
+
+See:
+
+* [https://ncar.github.io/lrose-core/docs/runtime/env_vars.html](https://ncar.github.io/lrose-core/docs/runtime/env_vars.html)
+
 ## LROSE applications and data system
 
 ## Software functionality overview
