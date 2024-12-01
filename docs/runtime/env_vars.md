@@ -2,9 +2,7 @@
 
 This document describes the most commonly-used environment variables which control the functionality of the LROSE libraries and applications.
 
-NOTES:
-
-When a variable may be set to "true"/"false", or "TRUE"/"FALSE", this is case-insensitive.
+NOTE: when a variable may be set to "true"/"false", or "TRUE"/"FALSE", this is case-insensitive.
 
 --------------------------------------
 
@@ -152,7 +150,7 @@ Type: boolean string, lower case (true/false)
 
 Default: true
 
-Action: By default the FMQ is active. If this is set to "false", the FMQ (file message queue) option will be deactivated. If active, the apps write both a text file and an FMQ containing the latest data info. The FMQ option is useful for cases in which data arrives rapidly and the client may miss data information while polling. Since the FMQ is a queue, the client can read the entries without risk of missing an entry.
+Action: By default the FMQ is active. If this is set to "false", the FMQ (file message queue) option will be deactivated. If active, the apps write both a text file and an FMQ containing the latest data info. The FMQ option is useful for cases in which data arrives rapidly and the client may miss data information while polling. Since the FMQ is a queue, the client can read the entries without risk of missing an entry. We recommend that you do not set this to false unless you have a really good reason to do so - e.g. perhaps writing across a cross-mount.
 
 Library: didss
 
