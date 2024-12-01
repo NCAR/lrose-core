@@ -4,27 +4,29 @@ This document describes the most commonly-used environment variables which contr
 
 NOTES:
 
-The environment variables are shown starting with ```$```. This is only for clarity in this document, when you set the environment variable the $ is not part of the name.
-
 When a variable may be set to "true"/"false", or "TRUE"/"FALSE", this is case-insensitive.
+
+--------------------------------------
 
 ## DATA SYSTEM ROOT
 
-### $DATA_DIR
+### ***DATA_DIR***
 
-Default: none
+Default: not defined
 
-Action: Top-level data directory for a project. If relative paths are specified in a parameter file, the path is relative to $DATA_DIR.
+Action: Optional top-level data directory for a project. If relative paths are specified in a parameter file, the path is relative to $DATA_DIR.
 
 Libraries: didss, dsserver
 
+--------------------------------------
+
 ## MDV FILES
 
-### $MDV_WRITE_FORMAT
+### ***MDV_WRITE_FORMAT***
+
+Type: string
 
 Default: FORMAT_NCF
-
-Action: Format for writing MDV files.
 
 Options are:
 
@@ -32,117 +34,105 @@ Options are:
 * FORMAT_MDV (legacy 32-bit format)
 * FORMAT_XML (XML header and data buffer)
 
-Library: Mdv
+Action: Format for writing MDV files.
 
-### $MDV_WRITE_USING_EXTENDED_PATHS
+Library: Mdvx
+
+### ***MDV_WRITE_USING_EXTENDED_PATHS***
+
+Type: boolean string, upper case (TRUE/FALSE)
 
 Default: FALSE
 
 Action: Causes MDV apps to add the date to the file name.
 
-Options are:
-
-* TRUE
-* FALSE
-
-If TRUE
+If TRUE:
 
 ```  yyyymmdd/hhmmss.mdv```
 
-becomes
+becomes:
 
 ```  yyyymmdd/yyyymmdd_hhmmss.mdv```
 
-Library: Mdv
+Library: Mdvx
   
-### $MDV_WRITE_ADD_YEAR_SUBDIR
+### ***MDV_WRITE_ADD_YEAR_SUBDIR***
+
+Type: boolean string, upper case (TRUE/FALSE)
 
 Default: FALSE
 
 Action: Causes MDV apps to prepend the date to the output path.
 
-Options are:
-
-* TRUE
-* FALSE
-
-If TRUE
+If TRUE:
 
 ```  yyyymmdd/hhmmss.mdv```
 
-becomes
+becomes:
 
 ```  yyyy/yyyymmdd/hhmmss.mdv```
 
-Library: Mdv
+If both MDV_WRITE_USING_EXTENDED_PATHS and MDV_WRITE_ADD_YEAR_SUBDIR are TRUE, the path would be:
+
+```  yyyy/yyyymmdd/yyyymmdd_hhmmss.mdv```
+
+Library: Mdvx
   
-### $MAX_FORECAST_LEAD_DAYS
+### ***MDV_NCF_COMPRESS***
 
-Default: 10
+Type: boolean string, upper case (TRUE/FALSE)
 
-Action: When searching a directory for data stored in forecast file name format (yyyymmdd/g_hhmmss/f_ssssssss.ext) the library needs to know how far back in time to look for forecast data which may be valid at the current time. It looks back a maximum of this number of days.
+Default: TRUE
 
-Library: dids
+Action: If FALSE, compression will not be performed when writing MDV files as NetCDF.
 
-### $MDV_GRID_TOLERANCE
+Library: Mdvx
+
+### ***MDV_NCF_COMPRESSION_LEVEL***
+
+Type: integer
+
+Default: 4
+
+Min: 1
+
+Max: 9
+
+Action: Compression level used to deflate data when writing MDV as NetCDF. 4 works well for almost all purposes, and is quite efficient from a CPU usage point of view.
+
+Library: Mdvx
+
+### ***MDV2NETCDF_WRITE_LATLON_ARRAYS***
+
+Type: boolean string, upper case (TRUE/FALSE)
+
+Default: FALSE
+
+Action: If TRUE, and grid coords is latlon, the lat/lon arrays will be written for MDV NetCDF files. This action is also controlled at the application level, for selected applications.
+
+Library: Mdvx
+
+### ***MDV_GRID_TOLERANCE***
+
+Type: floating point
 
 Default: 0.0000001
 
 Action: Tolerance used when checking whether two grids are equal.
 
-Library: Mdv
+Library: Mdvx
 
-## Server communication
+### ***MAX_FORECAST_LEAD_DAYS***
 
-### $DS_COMM_TIMEOUT_MSECS
+Type: integer
 
-Default: 30000
+Default: 10
 
-Action: This is the timeout, in milli-secs, used in communications between clients and servers. The default value of 30 secs (30000 msecs) was chosen so that programs would not block too long and fail to register with procmap, thereby causing them to be restarted. You may need to increase the value over slow lines. If you increase the value, you may be wise to run without the restart layer.
+Action: When searching a directory for data stored in forecast file name format (yyyymmdd/g_hhmmss/f_ssssssss.ext) the library needs to know how far back in time to look for forecast data which may be valid at the current time. It looks back a maximum of this number of days.
 
-Library: dsserver
+Library: didss
 
-### $DS_PING_TIMEOUT_MSECS
-
-Default: 10000
-
-Action: This is the timeout, in milli-secs, used when pinging a server to see if it is alive. It is used by clients to check whether a server is up, before making the data request. If the server is down, the client makes a request to the server manager (DsServerMgr) to start the server. The DsServerMgr starts the server and then uses a ping to make sure it is alive, before returning a successful flag to the client.
-
-Library: dsserver
-
-### $DS_BASE_PORT
-
-Default: 5430
-
-Action: All ports in the DS server system are calculated relative to this port. If you need to run two server systems on a single host, for eaxmple for  two different users, you can override the default. To be safe, pick a number at least 1000 above the default, because the server ports are in the immediate range above the base.
-
-Library: dsserver
-
-### $FCOPY_SERVER_ALLOW_NO_LOCK
-
-Options: TRUE, FALSE
-
-Default: FALSE
-
-Action: Allows DsFCopyServer to not lock files on write. If TRUE, lock files will not be required on write. Normally locking should be used. Only set this to allow writing across a cross-mount, which is not recommended anyway. But if you have to ....
-
-Library: dsserver
-
-### $FCOPY_SERVER_TMP_DIR
-
-Default: none
-
-Action: Specify tmp dir for DsFCopyServer on write. Normally DsFCopyServer writes tmp files in the subdirectory being used. If this env var is set, the tmp file will be written to the specified directory. WARNING - make sure the tmp dir and the data dir are on the same partition.
-
-Library: dsserver
-
-### $SPDB_ALLOW_NO_LOCK
-
-Default: undefined
-
-Action: If set to "true", the Spdb library will not require a lock on the data base files for reads. Locks are still required for writes. This may be used if you are reading data across a cross-mount for which file locking is not implemented. However, the better strategy is to contact a server which has local access to the data.
-
-Library: Spdb
+--------------------------------------
 
 ## LATEST DATA INFO FILES
 
@@ -156,9 +146,9 @@ The following files will be written:
 * ```_latest_data_info.buf``` - buffer file for a small queue (FMQ) of entries. A queue is needed to ensure that entries are not missed when a number of files are written in rapid succession.
 * ```_latest_data_info.lock``` - lock file to prevent simultaneous writes of the queue.
 
-### $LDATA_FMQ_ACTIVE
+### ***LDATA_FMQ_ACTIVE***
 
-Options: true, false
+Type: boolean string, lower case (true/false)
 
 Default: true
 
@@ -166,7 +156,7 @@ Action: By default the FMQ is active. If this is set to "false", the FMQ (file m
 
 Library: didss
 
-### $LDATA_FMQ_NSLOTS
+### ***LDATA_FMQ_NSLOTS***
 
 Type: integer
 
@@ -176,7 +166,7 @@ Action: The number of slots in the FMQ, if it is active. The queue wraps once th
 
 Library: didss
 
-### $LDATA_NO_WRITE
+### ***LDATA_NO_WRITE***
 
 Type: boolean string, true/false
 
@@ -186,11 +176,15 @@ Action: If set to "true", no _latest_data_info files will be written. This is so
 
 Libraries: toolsa didss dsserver
 
+--------------------------------------
+
 ## THE PROCESS MAPPER
 
 The process management layer relies on ```procmap```, the process mapper. Programs register a hearbeat with procmap, typically once per minute. Normally one procmap runs per host. The auto_restart script checks the procmap list against an expected list of processes, and restarts those which are not running.
 
-### $PROCMAP_DIR
+### ***PROCMAP_DIR***
+
+Type: string
 
 Default: not defined
 
@@ -198,39 +192,143 @@ Action: If defined, it should be a directory path. Each time a process registers
 
 Libraries: toolsa
 
-### $PROCMAP_VERBOSE
+### ***PROCMAP_DEBUG_MSGS***
 
-Default: not defined
+Type: boolean string, lower case (true/false)
+
+Default: false
+
+Action: If set to "true", debugging messages are printed out during communication with procmap.
+
+Library: toolsa
+
+### ***PROCMAP_VERBOSE***
+
+Type: boolean string, lower case (true/false)
+
+Default: false
 
 Action: If set to "true", verbose debugging messages are printed out during communication with procmap.
 
 Library: toolsa
 
-### $DATA MAPPER
+--------------------------------------
+
+## THE DATA MAPPER
 
 The ```DataMapper``` is a small server that keeps track of writes to the data system. Applications register with DataMapper each time data is written to disk.
 
-### $DATA_MAPPER_ACTIVE
+### ***DATA_MAPPER_ACTIVE***
+
+Type: boolean string, lower case (true/false)
 
 Default: true
 
-Action: Set to 'false' to prevent apps from registering with the DataMapper.
+Action: Set to "false" to prevent apps from registering with the DataMapper.
 
 Library: dsserver
 
-### $DATAMAP_VERBOSE
+### ***DATAMAP_VERBOSE***
 
-Default: not defined
+Type: boolean string, lower case (true/false)
+
+Default: false
 
 Action: If set to "true", verbose debugging messages are printed out during communication with DataMapper.
 
 Library: toolsa
 
-### $DATA_MAPPER_DEBUG
+### ***DATA_MAPPER_DEBUG***
 
-Default: not defined
+Type: boolean string, lower case (true/false)
+
+Default: false
 
 Action: Set to 'true' to see debug messages from DATA_MAPPER access requests.
 
 Library: dsserver
+
+## SERVER COMMUNICATION
+
+### ***DS_COMM_TIMEOUT_MSECS***
+
+Type: integer
+
+Default: 30000
+
+Action: This is the timeout, in milli-secs, used in communications between clients and servers. The default value of 30 secs (30000 msecs) was chosen so that programs would not block too long and fail to register with procmap, thereby causing them to be restarted. You may need to increase the value over slow lines. If you increase the value, you may be wise to run without the restart layer.
+
+Library: dsserver
+
+### ***DS_PING_TIMEOUT_MSECS***
+
+Default: 10000
+
+Action: This is the timeout, in milli-secs, used when pinging a server to see if it is alive. It is used by clients to check whether a server is up, before making the data request. If the server is down, the client makes a request to the server manager (DsServerMgr) to start the server. The DsServerMgr starts the server and then uses a ping to make sure it is alive, before returning a successful flag to the client.
+
+Library: dsserver
+
+### ***DS_BASE_PORT***
+
+Type: integer
+
+Default: 5430
+
+Action: All ports in the DS server system are calculated relative to this port. If you need to run two server systems on a single host, for example for  two different users, you can override the default. To be safe, pick a number at least 1000 above the default, because the server ports are in the immediate range above the base.
+
+Library: dsserver
+
+### ***DS_SERVER_MAX_CLIENTS***
+
+Type: integer
+
+Default: 1024
+
+Action: Number of clients that a dsserver will accept at any time.
+
+Library: dsserver
+
+### ***FCOPY_SERVER_ALLOW_NO_LOCK***
+
+Type: boolean string, upper case (TRUE/FALSE)
+
+Default: FALSE
+
+Action: Allows DsFCopyServer to not lock files on write. If TRUE, lock files will not be required on write. Normally locking should be used. Only set this to allow writing across a cross-mount, which is not recommended anyway. But if you have to ....
+
+Library: dsserver
+
+### ***FCOPY_SERVER_TMP_DIR***
+
+Type: boolean string, lower case (true/false)
+
+Default: false
+
+Action: If defined, specifies the tmp dir for DsFCopyServer on write. Normally DsFCopyServer writes tmp files in the subdirectory being used. If this env var is set, the tmp file will be written to the specified directory. WARNING - make sure the tmp dir and the data dir are on the same partition.
+
+Library: dsserver
+
+### ***SPDB_ALLOW_NO_LOCK***
+
+Type: boolean string, lower case (true/false)
+
+Default: false
+
+Action: If set to "true", the Spdb library will not require a lock on the data base files for reads. Locks are still required for writes. This may be used if you are reading data across a cross-mount for which file locking is not implemented. However, the better strategy is to contact a server which has local access to the data.
+
+Library: Spdb
+
+## READING GEMATRONIC FILES
+
+### ***GEMATRONIK_PULSE_WIDTHS***
+
+Type: string
+
+Default: "0.5 1.0 2.0"
+
+Format: space-delimited list.
+
+Action: For some older Gematronic radar volume files, the pulse widths are not specified. If that is the case, these pulse widths provide a default list.
+
+Library: Radx
 
