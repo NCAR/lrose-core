@@ -97,9 +97,9 @@ int render_vert_wind_vectors( QPaintDevice *pdev)
     unsigned short   bad_v;           /* Missing data value */
     unsigned short   bad_w;           /* Missing data value */
 
-    met_record_t *mr_u;       /* pointer to U record for convienence */
-    met_record_t *mr_v;       /* pointer to V record for convienence */
-    met_record_t *mr_w;       /* pointer to W record for convienence */
+    MetRecord *mr_u;       /* pointer to U record for convienence */
+    MetRecord *mr_v;       /* pointer to V record for convienence */
+    MetRecord *mr_w;       /* pointer to W record for convienence */
 
     Font    font;
 

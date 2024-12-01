@@ -42,10 +42,10 @@ typedef struct route_seg {
 } route_seg_t;
 
 int calc_route_points(XPoint **pixel, route_seg_t **, int *num_route_segs);
-void  ave_winds(met_record_t *mr_u, met_record_t *mr_v,
+void  ave_winds(MetRecord *mr_u, MetRecord *mr_v,
                double start_km, double end_km, double *ave_deg, double *ave_spd);
-double peak_turb(met_record_t *mr_turb, double start_km, double end_km);
-double peak_icing(met_record_t *mr_icing, double start_km, double end_km);
+double peak_turb(MetRecord *mr_turb, double start_km, double end_km);
+double peak_icing(MetRecord *mr_icing, double start_km, double end_km);
 
 #endif
 
@@ -282,7 +282,7 @@ void render_route_winds( QPaintDevice *pdev)
  * PEAK_ICING:  Return the Peak Icing value along the route
  */
 
-double peak_icing(met_record_t *mr_icing, double start_km, double end_km)
+double peak_icing(MetRecord *mr_icing, double start_km, double end_km)
 {
     int i;
     int start_index;
@@ -342,7 +342,7 @@ double peak_icing(met_record_t *mr_icing, double start_km, double end_km)
  * PEAK_TURB:  Return the Peak turbulence value along the route
  */
 
-double peak_turb(met_record_t *mr_turb, double start_km, double end_km)
+double peak_turb(MetRecord *mr_turb, double start_km, double end_km)
 {
     int i;
     int start_index;
@@ -403,7 +403,7 @@ double peak_turb(met_record_t *mr_turb, double start_km, double end_km)
  * AVE_WINDS:  Average the winds along the cross section.
  */
 
-void  ave_winds(met_record_t *mr_u, met_record_t *mr_v,
+void  ave_winds(MetRecord *mr_u, MetRecord *mr_v,
                double start_km, double end_km, 
 	       double *ave_deg, double *ave_spd)  // Returned values
 {

@@ -66,6 +66,7 @@ HDRS = \
 	HorizWidget.hh \
 	LegacyParams.hh \
 	MapMenuItem.hh \
+	MetRecord.hh \
 	Product.hh \
 	ProductMgr.hh \
 	ProdMenuItem.hh \
@@ -88,7 +89,6 @@ HDRS = \
 	cidd_contours.h \
 	cidd_data_io.h \
 	cidd_dpd.h \
-	cidd_field_data.h \
 	cidd_funcs.h \
 	cidd_layers.h \
 	cidd_legend.h \
@@ -114,6 +114,7 @@ NORM_SRCS = \
 	FieldTableItem.cc \
 	LegacyParams.cc \
 	Main.cc \
+	MetRecord.cc \
 	Product.cc \
 	ProductMgr.cc \
 	Lucid.cc \

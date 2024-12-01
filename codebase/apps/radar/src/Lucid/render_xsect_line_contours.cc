@@ -56,7 +56,7 @@ void render_xsect_line_contours(QPaintDevice *pdev,contour_info_t *crec)
     float   *ptr,*t_ptr;
     float   *ptr2 = NULL;
     float *tmp_data = NULL;
-    met_record_t *mr;       /* convienence pointer to a data record */
+    MetRecord *mr;       /* convienence pointer to a data record */
 
     GC    gc_array[MAX_CONT_LEVELS];
     GC    special_value_gc = gd.def_gc;

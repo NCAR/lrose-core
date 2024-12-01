@@ -76,7 +76,7 @@ void VlevelManager::setFromMdvx()
   if (gd.h_win.page >= gd.num_datafields) {
     return;
   }
-  met_record_t *mrec = gd.mrec[gd.h_win.page];
+  MetRecord *mrec = gd.mrec[gd.h_win.page];
   if (mrec->ds_fhdr.nz > MDV64_MAX_VLEVELS) {
     return;
   }

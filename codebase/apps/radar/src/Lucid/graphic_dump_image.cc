@@ -46,7 +46,7 @@ static void dump_png(QPaintDevice *pdev, const char *dir, const char *fname, con
  *
  */
 
-const char *gen_image_fname(const char *prefix,met_record_t *mr)
+const char *gen_image_fname(const char *prefix,MetRecord *mr)
 {
   static char nbuf[4096];
   char    tbuf[2048];

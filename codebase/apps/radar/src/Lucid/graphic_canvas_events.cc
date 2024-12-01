@@ -125,7 +125,7 @@ Notify_value can_event_proc(Window win, Event *event,
   char    lon_string[16];
   char    dist_string[16];
   char    dir_string[16];
-  met_record_t    *mr;
+  MetRecord    *mr;
 
   struct timeval tp;
   struct timezone tzp;
@@ -1153,7 +1153,7 @@ void handle_click_h(Event *event,
   if (clickAzDeg < 0) clickAzDeg += 360.0;
 
   double twiceRad = PSEUDO_RADIUS * 2.0;
-  met_record_t *mr =  gd.mrec[gd.h_win.page];
+  MetRecord *mr =  gd.mrec[gd.h_win.page];
   double radarHt = mr->h_mhdr.sensor_alt;
   double htCorr = (clickRangeKm * clickRangeKm) / twiceRad;
   double htKm = gd.h_win.cur_ht;

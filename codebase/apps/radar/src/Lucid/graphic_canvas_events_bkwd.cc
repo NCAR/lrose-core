@@ -47,7 +47,7 @@ extern int r_state;
 
 static fl32 _missingVal = -9999;
 static fl32 _badVal = -9999;
-static met_record_t *_mr = NULL;
+static MetRecord *_mr = NULL;
 static double pseudo_diam = 17066.0; /* 4/3 earth diam for radar beam corrections */
 
 static int last_frame = -1;

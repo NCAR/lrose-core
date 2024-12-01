@@ -3513,7 +3513,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
 void CartManager::_ciddTimerFunc(QTimerEvent *event)
 {
 
-  met_record_t *mr;
+  MetRecord *mr;
   int index,flag = 0;
   int msec_diff = 0;
   int msec_delay = 0;

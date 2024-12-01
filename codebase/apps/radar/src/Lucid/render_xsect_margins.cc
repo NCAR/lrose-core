@@ -46,7 +46,7 @@ void draw_vwin_right_margin( QPaintDevice *pdev, int page)
   int x_start = 0;
   int y_start = 0;
     int ht,wd;
-    met_record_t *mr;       /* pointer to record for convienence */
+    MetRecord *mr;       /* pointer to record for convienence */
 
     if(gd.v_win.margin.right <= 20) return;
 
@@ -92,7 +92,7 @@ void draw_vwin_left_margin( QPaintDevice *pdev, int page)
     double  current_tick;
     char    label[128];
     Font    font;
-    met_record_t *mr;       /* pointer to record for convienence */
+    MetRecord *mr;       /* pointer to record for convienence */
  
     if(gd.v_win.margin.left == 0) return;
     mr = choose_ht_sel_mr(page);
@@ -186,7 +186,7 @@ void draw_vwin_top_margin(QPaintDevice *pdev, int page)
     int    x_start,y_start;
     int    xmid,ymid;
     int    ht,wd;
-    met_record_t *mr;        /* pointer to record for convienence */
+    MetRecord *mr;        /* pointer to record for convienence */
     char    timestr[1024];
     char    label[TITLE_LENGTH * 10];
     Font    font;
@@ -258,7 +258,7 @@ void draw_vwin_bot_margin(QPaintDevice *pdev, int page)
     double  current_tick;
     char    label[16];
     Font    font;
-    // met_record_t *mr;       /* pointer to record for convienence */
+    // MetRecord *mr;       /* pointer to record for convienence */
 
     double unit_per_km;
     const char *u_label;

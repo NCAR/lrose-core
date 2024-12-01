@@ -53,7 +53,7 @@
 #include "cidd_structs.h"
 #include "cidd_colorscales.h"
 class DsMdvxThreaded;
-#include "cidd_field_data.h"
+#include "MetRecord.hh"
 
 class ColorMap;
 
@@ -543,7 +543,7 @@ public:
 
   void renderGridRect(int page,
                       QPainter &painter,
-                      met_record_t *mr,
+                      MetRecord *mr,
                       time_t start_time,
                       time_t end_time,
                       bool is_overlay_field);
@@ -552,7 +552,7 @@ public:
 
   void renderGridDistorted(int page,
                            QPainter &painter,
-                           met_record_t *mr,
+                           MetRecord *mr,
                            time_t start_time,
                            time_t end_time,
                            bool is_overlay_field);

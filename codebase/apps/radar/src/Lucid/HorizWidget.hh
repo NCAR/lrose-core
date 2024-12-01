@@ -592,7 +592,7 @@ class DLL_EXPORT HorizWidget : public QWidget
                         time_t start_time, time_t end_time);
   
   int _renderGrid(QPainter &painter, int page,
-                  met_record_t *mr,
+                  MetRecord *mr,
                   time_t start_time, time_t end_time,
                   bool is_overlay_field);
   

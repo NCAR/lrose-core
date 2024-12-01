@@ -86,7 +86,7 @@ void set_domain_zoom(double zoom_min_x, double zoom_min_y,
   double lat,lon;
   struct timeval tp;
   struct timezone tzp;
-  met_record_t *mr;
+  MetRecord *mr;
   gettimeofday(&tp, &tzp); 
 
   /* set latest zoom coordinates */

@@ -33,7 +33,7 @@
 // HEIGHT_FROM_PIXEL Return the height given a pixel location, relative
 //                   to the height axis
 
-double height_from_pixel(int y_pixel,met_record_t    *mr)
+double height_from_pixel(int y_pixel,MetRecord    *mr)
 {
     return (mr->ht_pixel * y_pixel + mr->y_intercept);
 }
@@ -42,10 +42,10 @@ double height_from_pixel(int y_pixel,met_record_t    *mr)
 // CHOOSE_HT_SEL_MR : Choose an appripriate data record to render
 //                    a height selector for the current page.
 
-met_record_t    *choose_ht_sel_mr(int page)
+MetRecord    *choose_ht_sel_mr(int page)
 {
      int i;
-     met_record_t *mr;
+     MetRecord *mr;
 
      // First check the key field for the current page
      mr = gd.mrec[page];
@@ -113,7 +113,7 @@ draw_height_selector(Display *dpy, QPaintDevice *pdev, QBrush brush_axis, QBrush
     // double      range;
     double      value;
 
-    met_record_t *mr;
+    MetRecord *mr;
     char    	label[LABEL_LENGTH];
     Font    	font;
 

@@ -74,9 +74,9 @@ public:
   double units_scale_factor;
   double reference_speed;
 
-  met_record_t *wind_u;
-  met_record_t *wind_v;
-  met_record_t *wind_w;
+  MetRecord *wind_u;
+  MetRecord *wind_v;
+  MetRecord *wind_w;
   
   char *data_info; /* Data source info string */
   char color_name[NAME_LENGTH];  /* Color name*/

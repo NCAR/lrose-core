@@ -44,7 +44,7 @@ int draw_hwin_right_margin( QPaintDevice *pdev, int  page)
     int x_start,y_start;
     int have_overlay_fields;
     int    ht,wd;
-    met_record_t *mr;        /* pointer to record for convienence */
+    MetRecord *mr;        /* pointer to record for convienence */
 
     if(gd.h_win.margin.right <= 0) return 0;
 

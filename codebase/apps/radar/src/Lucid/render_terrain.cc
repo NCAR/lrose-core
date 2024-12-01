@@ -57,7 +57,7 @@ void render_h_terrain( QPaintDevice *pdev, int page)
     unsigned short    miss;           /* Missing data value */
     unsigned short    bad;            /* Bad data value */
 
-    met_record_t *mr = gd.layers.earth.terr;
+    MetRecord *mr = gd.layers.earth.terr;
 
     // Convert altitude into the Grid's vertical units
     altitude = gd.mrec[page]->vert[gd.mrec[page]->plane].min / _params.terrain_height_scaler;;
@@ -154,7 +154,7 @@ void render_v_terrain( QPaintDevice *pdev )
     unsigned short    bad;            /* Missing data value */
     XPoint      xpt[MAX_COLS];
     static int first_time = 1;
-    met_record_t *mr = gd.layers.earth.terr;
+    MetRecord *mr = gd.layers.earth.terr;
 
     if(first_time) {
       XSetLineAttributes(gd.dpy, gd.layers.earth.color1->gc, 3,

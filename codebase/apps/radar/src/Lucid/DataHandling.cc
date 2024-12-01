@@ -31,23 +31,23 @@
 #include <cerrno>
 #include "cidd.h"
 
-static string _getUrl(met_record_t *mr);
+static string _getUrl(MetRecord *mr);
 
-static string _getFieldName(met_record_t *mr);
+static string _getFieldName(MetRecord *mr);
 
-static int _getTimeList(met_record_t *mr,
+static int _getTimeList(MetRecord *mr,
                         time_t start_time,
                         time_t end_time,
                         int page);
 
 void cancel_pending_request();
 
-static void _checkForHorizData(met_record_t *mr);
-static void _checkForVertData(met_record_t *mr);
-static void _checkForTimelistData(met_record_t *mr);
+static void _checkForHorizData(MetRecord *mr);
+static void _checkForVertData(MetRecord *mr);
+static void _checkForTimelistData(MetRecord *mr);
 static void _checkForSymprodData();
-static int _mdvRequestHorizPlane(met_record_t *mr, time_t start_time,time_t end_time, int page);
-static int _mdvRequestVertPlane(met_record_t *mr, time_t start_time,time_t end_time, int page);
+static int _mdvRequestHorizPlane(MetRecord *mr, time_t start_time,time_t end_time, int page);
+static int _mdvRequestVertPlane(MetRecord *mr, time_t start_time,time_t end_time, int page);
 
 /**********************************************************************
  * GATHER_HWIN_DATA: Collect all the data necessary for horizontal 
@@ -69,7 +69,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   }
 
   // MAIN GRID
-  met_record_t *mr = gd.mrec[page];    /* get pointer to data record */
+  MetRecord *mr = gd.mrec[page];    /* get pointer to data record */
   if(mr->h_data_valid == 0) {
     cerr << "ddddddddddddddd22222222222221111" << endl;
     if(gd.debug1) {
@@ -225,7 +225,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
 int gather_vwin_data(int page, time_t start_time, time_t end_time)
 {
   int    i;
-  met_record_t *mr;       /* pointer to record for convienence */
+  MetRecord *mr;       /* pointer to record for convienence */
   time_t now;
 
   now = time(0);
@@ -413,7 +413,7 @@ int gather_vwin_data(int page, time_t start_time, time_t end_time)
  *
  */
 
-int _mdvRequestHorizPlane(met_record_t *mr,
+int _mdvRequestHorizPlane(MetRecord *mr,
                           time_t start_time,
                           time_t end_time,
                           int page)
@@ -599,7 +599,7 @@ int _mdvRequestHorizPlane(met_record_t *mr,
  *
  */
 
-int _mdvRequestVertPlane(met_record_t *mr,
+int _mdvRequestVertPlane(MetRecord *mr,
                          time_t start_time,
                          time_t end_time,
                          int page)
@@ -728,7 +728,7 @@ int _mdvRequestVertPlane(met_record_t *mr,
  *
  */
 
-int _getTimeList(met_record_t *mr,
+int _getTimeList(MetRecord *mr,
                  time_t start_time,
                  time_t end_time,
                  int page)
@@ -835,7 +835,7 @@ int _getTimeList(met_record_t *mr,
  *
  */
 
-string _getUrl(met_record_t *mr)
+string _getUrl(MetRecord *mr)
 {
 
   // url from met record
@@ -875,7 +875,7 @@ string _getUrl(met_record_t *mr)
  *
  */
 
-string _getFieldName(met_record_t *mr)
+string _getFieldName(MetRecord *mr)
 {
 
   char field_name[512];
@@ -927,7 +927,7 @@ void check_for_io()
   switch (gd.io_info.mode) {
     
     case DSMDVX_DATA: {  // Handle MDV data
-      met_record_t *mr = gd.io_info.mr;
+      MetRecord *mr = gd.io_info.mr;
       switch(gd.io_info.request_type) {
         case HORIZ_REQUEST:
           _checkForHorizData(mr);
@@ -1060,7 +1060,7 @@ void set_field(int value)
  * has arrived
  */
 
-static void _checkForHorizData(met_record_t *mr)
+static void _checkForHorizData(MetRecord *mr)
 
 {
   // Check if our data access thread  is done
@@ -1395,7 +1395,7 @@ static void _checkForHorizData(met_record_t *mr)
  * vert section data has arrived
  */
 
-static void _checkForVertData(met_record_t *mr)
+static void _checkForVertData(MetRecord *mr)
 
 {
 
@@ -1586,7 +1586,7 @@ static void _checkForVertData(met_record_t *mr)
  * time list data has arrived
  */
 
-static void _checkForTimelistData(met_record_t *mr)
+static void _checkForTimelistData(MetRecord *mr)
 
 {
 

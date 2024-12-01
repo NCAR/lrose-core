@@ -100,7 +100,7 @@ Notify_value h_pan_event_proc( Window   win, Event *event,
     int   num_fields;
     int   field_index;
     int   height_index;
-    met_record_t    *mr;
+    MetRecord    *mr;
     
     /*
      * Process keyboard events.  Only process them when the key is

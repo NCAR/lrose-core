@@ -832,7 +832,7 @@ const char * frame_time_msg(int index)
     struct tm res;
     struct tm res_e;
     struct tm res_s;
-    met_record_t    *mr;
+    MetRecord    *mr;
     char    label1[32];
     char    label2[64];
     char    label3[64];

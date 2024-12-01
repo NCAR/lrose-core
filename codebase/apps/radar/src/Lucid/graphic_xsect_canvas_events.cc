@@ -54,7 +54,7 @@ Notify_value v_can_events( Window win, Event *event, Notify_arg arg,
   fl32 *ptr;              /* pointer to the data */
   unsigned short *uptr;  /* pointer to short data */
   double value;           /* data value after scaling */
-  met_record_t *mr;       /* convienence pointer to a data record */
+  MetRecord *mr;       /* convienence pointer to a data record */
   char    text[128];
 
   /* Move to front of and motion drag events */
@@ -416,7 +416,7 @@ static void handle_click(Event *event, int click_x, int click_y)
   if (clickAzDeg < 0) clickAzDeg += 360.0;
 
   double twiceRad = PSEUDO_RADIUS * 2.0;
-  met_record_t *mr = gd.mrec[gd.v_win.page];
+  MetRecord *mr = gd.mrec[gd.v_win.page];
   double radarHt = mr->v_mhdr.sensor_alt;
   double htCorr = (clickRangeKm * clickRangeKm) / twiceRad;
   double relHtKm = htKm - radarHt - htCorr;

@@ -45,7 +45,7 @@
 
 static int _initGrids();
 static void _initWinds();
-static void _initWindComponent(met_record_t *wrec,
+static void _initWindComponent(MetRecord *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW);
 static void _initTerrain();
@@ -785,8 +785,8 @@ static int _initGrids()
     
     /* get space for data info */
     
-    gd.mrec[ifld] = new met_record_t;
-    met_record_t *mrec = gd.mrec[ifld]; 
+    gd.mrec[ifld] = new MetRecord;
+    MetRecord *mrec = gd.mrec[ifld]; 
     
     STRcopy(mrec->legend_name, fld.legend_label, NAME_LENGTH);
     STRcopy(mrec->button_name, fld.button_label, NAME_LENGTH);
@@ -970,14 +970,14 @@ static void _initWinds()
 
     // initialize the components
 
-    lwind.wind_u = new met_record_t;
+    lwind.wind_u = new MetRecord;
     _initWindComponent(lwind.wind_u, windp, true, false, false);
 
-    lwind.wind_v = new met_record_t;
+    lwind.wind_v = new MetRecord;
     _initWindComponent(lwind.wind_v, windp, false, true, false);
 
     if(strncasecmp(windp.w_field_name, "None", 4) != 0) {
-      lwind.wind_w = new met_record_t;
+      lwind.wind_w = new MetRecord;
       _initWindComponent(lwind.wind_w, windp, false, false, true);
     } else {
       lwind.wind_w = NULL;
@@ -994,7 +994,7 @@ static void _initWinds()
 //////////////////////////////////
 // initialize wind component
 
-static void _initWindComponent(met_record_t *wrec,
+static void _initWindComponent(MetRecord *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW)
   
@@ -1070,7 +1070,7 @@ static void _initTerrain()
   if (strlen(_params.terrain_url) > 0) {
     
     gd.layers.earth.terrain_active = 1;
-    gd.layers.earth.terr = new met_record_t;
+    gd.layers.earth.terr = new MetRecord;
     if(gd.layers.earth.terr == NULL) {
       fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
@@ -1097,7 +1097,7 @@ static void _initTerrain()
   if (strlen(_params.landuse_url) > 0) {
 
     gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
-    gd.layers.earth.land_use = new met_record_t;
+    gd.layers.earth.land_use = new MetRecord;
     if(gd.layers.earth.land_use == NULL) {
       fprintf(stderr,"Cannot allocate space for land_use data\n");
       exit(-1);
@@ -1201,7 +1201,7 @@ static void _initRouteWinds()
 
   if(strlen(_params.route_u_url) > 1) {
 
-    met_record_t *mr = new met_record_t;
+    MetRecord *mr = new MetRecord;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route U Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1234,7 +1234,7 @@ static void _initRouteWinds()
   
   if(strlen(_params.route_v_url) > 1) {
     
-    met_record_t *mr = new met_record_t;
+    MetRecord *mr = new MetRecord;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route V Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1267,7 +1267,7 @@ static void _initRouteWinds()
 
   if(strlen(_params.route_turb_url) > 1) {
 
-    met_record_t *mr = new met_record_t;
+    MetRecord *mr = new MetRecord;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route TURB\n");
       perror("cidd_init::_initRouteWinds");
@@ -1300,7 +1300,7 @@ static void _initRouteWinds()
   
   if(strlen(_params.route_icing_url) > 1) {
 
-    met_record_t *mr = new met_record_t;
+    MetRecord *mr = new MetRecord;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route ICING\n");
       perror("cidd_init::_initRouteWinds");

@@ -801,7 +801,7 @@ void set_cscale_apply_proc(Panel_item item, Event *event)
 {
     int i;
     double delta;
-    met_record_t    *mr;
+    MetRecord    *mr;
     // Use unused parameters
     item = 0; event = NULL;
 

@@ -35,7 +35,7 @@
  *  The number of levels
  */
 
-int compute_cont_levels(QBrush  *brush_array, double *levels, met_record_t *mr, float *tmp_data)
+int compute_cont_levels(QBrush  *brush_array, double *levels, MetRecord *mr, float *tmp_data)
 {
    int i,j;
    int len;
@@ -211,7 +211,7 @@ int compute_cont_levels(QBrush  *brush_array, double *levels, met_record_t *mr, 
  * rectangular grid
  */
 
-void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
+void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], MetRecord *mr)
 {
 #ifdef NOTYET
    int num_levels;
@@ -279,7 +279,7 @@ void draw_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met
  * Distorted grid
  */
 
-void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
+void draw_filled_contours_d( QPaintDevice *pdev,  MetRecord *mr)
 {
 #ifdef NOTYET
    int i,j;
@@ -436,7 +436,7 @@ void draw_filled_contours_d( QPaintDevice *pdev,  met_record_t *mr)
  *
  */
 
-void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr)
+void draw_xsect_filled_contours( QPaintDevice *pdev, int x_start[], int y_start[], MetRecord *mr)
 {
 
 #ifdef NOTYET

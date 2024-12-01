@@ -74,7 +74,7 @@ void RenderLineContours(QPaintDevice *pdev, contour_info_t *crec,
 
   // get the data field
 
-  met_record_t *mr = gd.mrec[crec->field];
+  MetRecord *mr = gd.mrec[crec->field];
   MdvxField field;
   if (is_vert) {
     if(mr->v_mdvx->getField(0) == NULL) return;
@@ -542,7 +542,7 @@ static void draw_labels_for_line(const GframeObj *gframe,
 // render filled polygons
 
 void RenderFilledPolygons(QPaintDevice *pdev,
-			  met_record_t *mr, 
+			  MetRecord *mr, 
 			  bool is_vert /* = false */)
 
 {

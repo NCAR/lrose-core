@@ -68,7 +68,7 @@ const char *vlevel_label(Mdvx::field_header_t *fhdr)
  * FIELD_LABEL: Return a Label string for a field 
  */
 
-const char * field_label( met_record_t *mr)
+const char * field_label( MetRecord *mr)
 {
   // time_t  now;
     struct tm tms;
@@ -138,7 +138,7 @@ const char* height_label()
 {
    static char label[256];
 
-   met_record_t *mr;       /* pointer to record for convienence */
+   MetRecord *mr;       /* pointer to record for convienence */
    mr = choose_ht_sel_mr(gd.h_win.page);
 
    switch(mr->h_vhdr.type[0]) {
@@ -188,7 +188,7 @@ int draw_hwin_interior_labels( QPaintDevice *pdev, int page, time_t start_time, 
     int    x_start,y_start;
     int    xmid,ymid;
     int    ht,wd;
-    met_record_t *mr;        /* pointer to record for convienence */
+    MetRecord *mr;        /* pointer to record for convienence */
     char    label[LABEL_LEN * 8];
     Font    font;
 

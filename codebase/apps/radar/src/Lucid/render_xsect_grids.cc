@@ -35,14 +35,14 @@
 #define MESSAGE_LEN 1024
 
 #ifdef NOTYET
-static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+static int render_polar_rhi( QPaintDevice *pdev, MetRecord *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 /**********************************************************************
  * RENDER_XSECT_GRIDS
  */
 
-int render_xsect_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
+int render_xsect_grid( QPaintDevice *pdev, MetRecord *mr, time_t start_time, time_t end_time, int is_overlay_field)
 {
 
 #ifdef NOTYET
@@ -220,7 +220,7 @@ int render_xsect_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time, 
 
 #ifdef NOTYET
 
-static int render_polar_rhi( QPaintDevice *pdev, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field)
+static int render_polar_rhi( QPaintDevice *pdev, MetRecord *mr, time_t start_time, time_t end_time, int is_overlay_field)
 
 {
 

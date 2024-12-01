@@ -56,7 +56,7 @@ void render_line_contours(QPaintDevice *pdev, contour_info_t *crec)
     float   *ptr;
     float   *ptr2;
     float *tmp_data = NULL;
-    met_record_t *mr;       /* convienence pointer to a data record */
+    MetRecord *mr;       /* convienence pointer to a data record */
 
     mr = gd.mrec[crec->field];
 

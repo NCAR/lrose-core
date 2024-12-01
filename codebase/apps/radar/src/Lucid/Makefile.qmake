@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -D_BSD_TYPES -DF_UNDERSCORE2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_QML_LIB -DQT_QMLINTEGRATION_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -D_REENTRANT -Wall -Wextra $(DEFINES)
 CXXFLAGS      = -pipe -g -D_REENTRANT -Wall -Wextra $(DEFINES)
-INCPATH       = -I. -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I-DQT_QMLINTEGRATION_LIB -I-DQT_NETWORK_LIB -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/dixon/lrose/include -I. -I/usr/lib64/qt6/mkspecs/linux-g++
+INCPATH       = -I. -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I-DQT_QMLINTEGRATION_LIB -I-DQT_NETWORK_LIB -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/mdtest/lrose/include -I. -I/usr/lib64/qt6/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,10 +37,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = Lucid1.0.0
-DISTDIR = /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/.tmp/Lucid1.0.0
+DISTDIR = /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/.tmp/Lucid1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath-link,/usr/lib64
-LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/dixon/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt6Widgets.so /usr/lib64/libQt6Gui.so /usr/lib64/libQt6Qml.so /usr/lib64/libQt6Network.so /usr/lib64/libQt6Core.so -lpthread -lGLX -lOpenGL   
+LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/mdtest/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt6Widgets.so /usr/lib64/libQt6Gui.so /usr/lib64/libQt6Qml.so /usr/lib64/libQt6Network.so /usr/lib64/libQt6Core.so -lpthread -lGLX -lOpenGL   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -1000,7 +1000,7 @@ moc_CartManager.cpp: CartManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
 
 moc_DisplayManager.cpp: DisplayManager.hh \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
@@ -1044,7 +1044,7 @@ moc_DisplayManager.cpp: DisplayManager.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
 
 moc_HorizWidget.cpp: HorizWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
@@ -1154,7 +1154,7 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1192,7 +1192,7 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		WorldPlot.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
 
 moc_MapMenuItem.cpp: MapMenuItem.hh \
 		Params.hh \
@@ -1202,7 +1202,7 @@ moc_MapMenuItem.cpp: MapMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include MapMenuItem.hh -o moc_MapMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include MapMenuItem.hh -o moc_MapMenuItem.cpp
 
 moc_ProdMenuItem.cpp: ProdMenuItem.hh \
 		Params.hh \
@@ -1212,7 +1212,7 @@ moc_ProdMenuItem.cpp: ProdMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdMenuItem.hh -o moc_ProdMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdMenuItem.hh -o moc_ProdMenuItem.cpp
 
 moc_TimeControl.cpp: TimeControl.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
@@ -1223,7 +1223,7 @@ moc_TimeControl.cpp: TimeControl.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include TimeControl.hh -o moc_TimeControl.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include TimeControl.hh -o moc_TimeControl.cpp
 
 moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
@@ -1284,12 +1284,19 @@ moc_VertWidget.cpp: VertWidget.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
 
 moc_VertWindow.cpp: VertWindow.hh \
 		Params.hh \
@@ -1356,12 +1363,19 @@ moc_VertWindow.cpp: VertWindow.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
 
 moc_WindMenuItem.cpp: WindMenuItem.hh \
 		Params.hh \
@@ -1371,7 +1385,7 @@ moc_WindMenuItem.cpp: WindMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include WindMenuItem.hh -o moc_WindMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include WindMenuItem.hh -o moc_WindMenuItem.cpp
 
 moc_ZoomMenuItem.cpp: ZoomMenuItem.hh \
 		Params.hh \
@@ -1381,7 +1395,7 @@ moc_ZoomMenuItem.cpp: ZoomMenuItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ZoomMenuItem.hh -o moc_ZoomMenuItem.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ZoomMenuItem.hh -o moc_ZoomMenuItem.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1499,7 +1513,7 @@ Args.o: Args.cc Args.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1675,7 +1689,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1896,7 +1910,7 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2039,7 +2053,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2189,7 +2203,7 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2323,7 +2337,7 @@ Main.o: Main.cc Lucid.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2478,7 +2492,7 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		cidd_winds.h \
 		cidd_contours.h \
@@ -2598,7 +2612,7 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2730,7 +2744,7 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2892,7 +2906,7 @@ Lucid.o: Lucid.cc Lucid.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3098,7 +3112,7 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		cidd_winds.h \
 		cidd_contours.h \
@@ -3227,7 +3241,7 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3372,7 +3386,7 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3508,7 +3522,7 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_structs.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3639,9 +3653,12 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		VertWindow.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
@@ -3666,12 +3683,9 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
-		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_data_io.h \
@@ -3796,9 +3810,12 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -3823,12 +3840,9 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
-		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_data_io.h \
@@ -3962,7 +3976,7 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4047,9 +4061,16 @@ WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
+		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
+		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
+		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -4060,7 +4081,6 @@ WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/toolsa/http.h \
 		$(HOME)/lrose/include/toolsa/HttpURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
 		$(HOME)/lrose/include/toolsa/pjg.h \
 		$(HOME)/lrose/include/toolsa/pjg_types.h \
 		$(HOME)/lrose/include/toolsa/pjg_flat.h \
@@ -4074,15 +4094,9 @@ WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
 		$(HOME)/lrose/include/toolsa/ucopyright.h \
 		$(HOME)/lrose/include/toolsa/xdru.h \
 		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
 		$(HOME)/lrose/include/Fmq/DsFmq.hh \
 		$(HOME)/lrose/include/Fmq/Fmq.hh \
@@ -4231,7 +4245,7 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4363,7 +4377,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4496,7 +4510,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4632,7 +4646,7 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4766,7 +4780,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4898,7 +4912,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5036,7 +5050,7 @@ contours.o: contours.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5184,7 +5198,7 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5317,7 +5331,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5449,7 +5463,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5581,7 +5595,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5716,7 +5730,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5848,7 +5862,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5980,7 +5994,7 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6116,7 +6130,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6248,7 +6262,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6380,7 +6394,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6512,7 +6526,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6644,7 +6658,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6776,7 +6790,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6908,7 +6922,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7040,7 +7054,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7172,7 +7186,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7307,7 +7321,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7439,7 +7453,7 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7573,7 +7587,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7708,7 +7722,7 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7840,7 +7854,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7972,7 +7986,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8104,7 +8118,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8239,7 +8253,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8371,7 +8385,7 @@ process_args.o: process_args.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8503,7 +8517,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8635,7 +8649,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8767,7 +8781,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8899,7 +8913,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9031,7 +9045,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9166,7 +9180,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9298,7 +9312,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9430,7 +9444,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9565,7 +9579,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9697,7 +9711,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9829,7 +9843,7 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9961,7 +9975,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10093,7 +10107,7 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10225,7 +10239,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10357,7 +10371,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10489,7 +10503,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10621,7 +10635,7 @@ render_products.o: render_products.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10753,7 +10767,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10885,7 +10899,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11017,7 +11031,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11149,7 +11163,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11281,7 +11295,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11413,7 +11427,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11545,7 +11559,7 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11677,7 +11691,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11809,7 +11823,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11941,7 +11955,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12073,7 +12087,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12205,7 +12219,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12337,7 +12351,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12469,7 +12483,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12604,7 +12618,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12736,7 +12750,7 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12875,7 +12889,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -13010,7 +13024,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -13142,7 +13156,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
-		cidd_field_data.h \
+		MetRecord.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \

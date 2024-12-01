@@ -431,8 +431,8 @@ int render_distorted_wind_grid(QPaintDevice *pdev, int k, int font_index)
     unsigned short    *ptr_u;
     unsigned short    *ptr_v;
 
-    met_record_t *mr_u;
-    // met_record_t *mr_v;
+    MetRecord *mr_u;
+    // MetRecord *mr_v;
 
     /* get pointers to desired sections - Parent has checked for null */
     ptr_u = (unsigned short *) gd.layers.wind[k].wind_u->h_data;

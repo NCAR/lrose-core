@@ -247,7 +247,7 @@ void lonlat_to_pixel( margin_t    *margin, double    lon, double    lat,
  *
  */
 
-void disp_proj_to_grid( met_record_t *mr, double km_x, double km_y,
+void disp_proj_to_grid( MetRecord *mr, double km_x, double km_y,
     int    *grid_x,    /* RETURN */
     int    *grid_y)    /* RETURN */
 {
@@ -260,7 +260,7 @@ void disp_proj_to_grid( met_record_t *mr, double km_x, double km_y,
  *
  */
 
-void grid_to_disp_proj( met_record_t *mr, int grid_x, int grid_y,
+void grid_to_disp_proj( MetRecord *mr, int grid_x, int grid_y,
     double    *km_x,    /* RETURN */
     double    *km_y)    /* RETURN */
 {
@@ -274,7 +274,7 @@ void grid_to_disp_proj( met_record_t *mr, int grid_x, int grid_y,
  *
  */
 
-void pixel_to_grid( met_record_t *mr, margin_t *margin, int pix_x, int pix_y,
+void pixel_to_grid( MetRecord *mr, margin_t *margin, int pix_x, int pix_y,
     int *grid_x,    /* RETURN */
     int *grid_y)    /* RETURN */
 {
@@ -309,7 +309,7 @@ void pixel_to_grid( met_record_t *mr, margin_t *margin, int pix_x, int pix_y,
  * pointing data.
  */
 
-void pixel_to_grid_radar_no_cosine(met_record_t *mr,
+void pixel_to_grid_radar_no_cosine(MetRecord *mr,
                                    margin_t *margin, 
                                    int pix_x, int pix_y,
                                    int *grid_x,    /* RETURN */
@@ -398,7 +398,7 @@ void disp_proj_to_pixel_v( margin_t    *margin, double    km_x, double    km_ht,
  *
  */
 
-void disp_proj_to_grid_v( met_record_t *mr, double    km_x, double    km_ht,
+void disp_proj_to_grid_v( MetRecord *mr, double    km_x, double    km_ht,
     int    *grid_x,    /* RETURN */
     int    *grid_y)    /* RETURN */
 {

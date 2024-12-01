@@ -47,16 +47,16 @@ extern void pixel_to_lonlat( margin_t *margin, int pix_x, int pix_y,
 extern void lonlat_to_pixel( margin_t    *margin, double    lon, double    lat,
         int    *pix_x,    /* RETURN */
         int    *pix_y);   /* RETURN */ 
-extern void pixel_to_grid( met_record_t *mr, margin_t *margin, int pix_x, int pix_y,
+extern void pixel_to_grid( MetRecord *mr, margin_t *margin, int pix_x, int pix_y,
         int *grid_x,    /* RETURN */
         int *grid_y);   /* RETURN */
-extern void disp_proj_to_grid( met_record_t *mr, double km_x, double km_y,
+extern void disp_proj_to_grid( MetRecord *mr, double km_x, double km_y,
         int    *grid_x,    /* RETURN */
         int    *grid_y);   /* RETURN */
-extern void grid_to_disp_proj( met_record_t *mr, int grid_x, int grid_y,
+extern void grid_to_disp_proj( MetRecord *mr, int grid_x, int grid_y,
         double    *km_x,    /* RETURN */
         double    *km_y);   /* RETURN */ 
-extern void grid_to_disp_proj_v( met_record_t *mr, int    grid_x, int    grid_y,
+extern void grid_to_disp_proj_v( MetRecord *mr, int    grid_x, int    grid_y,
         double    *km_x,   /* RETURN */
         double    *km_y);  /* RETURN */
 extern void pixel_to_disp_proj_v( margin_t    *margin, int    pix_x, int    pix_y,
@@ -65,20 +65,20 @@ extern void pixel_to_disp_proj_v( margin_t    *margin, int    pix_x, int    pix_
 extern void disp_proj_to_pixel_v( margin_t    *margin, double    km_x, double    km_ht,
         int    *pix_x,    /* RETURN */
         int    *pix_y);   /* RETURN */
-extern void disp_proj_to_grid_v( met_record_t *mr, double    km_x, double    km_ht,
+extern void disp_proj_to_grid_v( MetRecord *mr, double    km_x, double    km_ht,
         int    *grid_x,    /* RETURN */
         int    *grid_y);   /* RETURN */
-extern void rad_grid_to_pixel( margin_t *margin, met_record_t *mr, double grid_x, double grid_y,
+extern void rad_grid_to_pixel( margin_t *margin, MetRecord *mr, double grid_x, double grid_y,
         int    *pix_x,    /* RETURN */
         int    *pix_y);   /* RETURN */
-extern void rad_grid_to_disp_proj( met_record_t *mr, double    grid_x, double    grid_y,
+extern void rad_grid_to_disp_proj( MetRecord *mr, double    grid_x, double    grid_y,
         double    *km_x,    /* RETURN */
         double    *km_y);   /* RETURN */
 extern double disp_proj_dist(double x1, double y1, double x2, double y2);
 extern double elapsed_time(struct timeval &tm1, struct timeval &tm2);
 #endif
 
-extern void pixel_to_grid_radar_no_cosine( met_record_t *mr, margin_t *margin,
+extern void pixel_to_grid_radar_no_cosine( MetRecord *mr, margin_t *margin,
                                            int pix_x, int pix_y,
                                            int *grid_x,    /* RETURN */
                                            int *grid_y);   /* RETURN */
@@ -243,7 +243,7 @@ extern void redraw_route_line(win_param_t * win);
 #endif
 
 #ifndef GRAPHIC_DUMP_IMAGE
-extern const char * gen_image_fname(const char* prefix,met_record_t *mr);
+extern const char * gen_image_fname(const char* prefix,MetRecord *mr);
 extern void dump_cidd_image(int win, int confirm_flag,int print_flag,int page);
 #endif
 
@@ -382,7 +382,7 @@ extern void set_end_frame(int num_frames);
 #endif
 
 #ifndef GEN_TIME_PU_PROC
-extern met_record_t    *choose_model_mr(int page);
+extern MetRecord    *choose_model_mr(int page);
 extern void show_gen_time_menu( u_int value);
 // extern void gen_time_proc(Panel_item item, int value, Event *event);
 #endif
@@ -417,7 +417,7 @@ extern int draw_hwin_bot_margin( QPaintDevice *pdev, int page,
 #endif
 
 #ifndef RENDER_CART_GRID
-extern int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_time,
+extern int render_cart_grid( QPaintDevice *pdev, MetRecord *mr, time_t start_time,
                       time_t end_time, int is_overlay_field);
 #endif
 
@@ -430,8 +430,8 @@ extern int render_cart_grid( QPaintDevice *pdev, met_record_t *mr, time_t start_
 
 
 #ifndef RENDER_HT_SEL
-extern double height_from_pixel(int y_pixel, met_record_t *mr);
-extern met_record_t    *choose_ht_sel_mr(int page);
+extern double height_from_pixel(int y_pixel, MetRecord *mr);
+extern MetRecord    *choose_ht_sel_mr(int page);
 // extern void draw_height_selector(Display *dpy, QPaintDevice *pdev, GC gc_axis,
 //                                  GC gc_ind, int page,  int x1,  int y1, int width, int height);
 #endif
@@ -442,7 +442,7 @@ extern met_record_t    *choose_ht_sel_mr(int page);
 #endif
 
 #ifndef RENDER_DISTORTED_GRID
-extern int  render_distorted_grid(QPaintDevice *pdev, met_record_t *mr, 
+extern int  render_distorted_grid(QPaintDevice *pdev, MetRecord *mr, 
                                   time_t start_time, time_t end_time,
                                   int is_overlay_field);
 #endif
@@ -450,23 +450,23 @@ extern int  render_distorted_grid(QPaintDevice *pdev, met_record_t *mr,
 #ifndef RENDER_FILLED_CONTOURS
 extern void draw_filled_contours(QPaintDevice *pdev,
                                  int x_start[], int y_start[],
-                                 met_record_t *mr);
-extern void draw_filled_contours_d(QPaintDevice *pdev, met_record_t *mr);
+                                 MetRecord *mr);
+extern void draw_filled_contours_d(QPaintDevice *pdev, MetRecord *mr);
 
 extern void draw_xsect_filled_contours( QPaintDevice *pdev,
                                         int x_start[], int y_start[],
-                                        met_record_t *mr);
+                                        MetRecord *mr);
 #endif
 
-extern void RenderFilledPolygons(QPaintDevice *pdev, met_record_t *mr, 
+extern void RenderFilledPolygons(QPaintDevice *pdev, MetRecord *mr, 
 				 bool is_vert = false);
 
 #ifndef RENDER_FILLED_IMAGE
-extern int draw_filled_image(QPaintDevice *pdev, int x_start[], int y_start[], met_record_t *mr);
+extern int draw_filled_image(QPaintDevice *pdev, int x_start[], int y_start[], MetRecord *mr);
 #endif
 
 #ifndef RENDER_GRIDS
-// extern int render_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+// extern int render_grid(QPaintDevice *pdev,  MetRecord *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_LEFT_MARGIN
@@ -486,7 +486,7 @@ extern void render_xsect_line_contours(QPaintDevice *pdev, contour_info_t *crec)
 
 #ifndef RENDER_LEGENDS
 extern const char *vlevel_label(Mdvx::field_header_t *fhdr);
-extern const char * field_label( met_record_t *mr);
+extern const char * field_label( MetRecord *mr);
 extern const char* height_label();
 extern int draw_hwin_interior_labels(QPaintDevice *pdev, int page, time_t start_time, time_t end_time);
 #endif
@@ -507,7 +507,7 @@ extern int render_v_movie_frame( int    index, QPaintDevice *pdev);
 
 #ifndef RENDER_POLAR_GRID
 extern void rotate_points(double theta, double x_cent, double y_cent, double *xarr, double *yarr, int num_points);
-extern int render_polar_grid(QPaintDevice *pdev, met_record_t *mr,
+extern int render_polar_grid(QPaintDevice *pdev, MetRecord *mr,
                       time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
@@ -525,10 +525,10 @@ extern int draw_hwin_right_margin(QPaintDevice *pdev, int page);
 
 #ifndef RENDER_ROUTE_WINDS
 extern void render_route_winds(QPaintDevice *pdev);
-extern void  ave_winds(met_record_t *mr_u, met_record_t *mr_v,
+extern void  ave_winds(MetRecord *mr_u, MetRecord *mr_v,
          double start_km, double end_km, double *ave_deg, double *ave_spd);
-extern double peak_turb(met_record_t *mr_turb, double start_km, double end_km);
-extern double peak_icing(met_record_t *mr_icing, double start_km, double end_km); 
+extern double peak_turb(MetRecord *mr_turb, double start_km, double end_km);
+extern double peak_icing(MetRecord *mr_icing, double start_km, double end_km); 
 extern void rotate_route(double theta); 
 #endif
 
@@ -558,7 +558,7 @@ extern int render_vert_display(QPaintDevice *pdev, int page, time_t start_time, 
 #endif
 
 #ifndef RENDER_XSECT_GRIDS
-extern int render_xsect_grid(QPaintDevice *pdev,  met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
+extern int render_xsect_grid(QPaintDevice *pdev,  MetRecord *mr, time_t start_time, time_t end_time, int is_overlay_field);
 #endif
 
 #ifndef RENDER_XSECT_MARGINS

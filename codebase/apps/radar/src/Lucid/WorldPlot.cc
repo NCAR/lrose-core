@@ -2365,7 +2365,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
 void WorldPlot::renderGridRect(int page,
                                QPainter &painter,
-                               met_record_t *mr,
+                               MetRecord *mr,
                                time_t start_time,
                                time_t end_time,
                                bool is_overlay_field)
@@ -2701,7 +2701,7 @@ void WorldPlot::renderGridRect(int page,
 
 void WorldPlot::renderGridDistorted(int page,
                                     QPainter &painter,
-                                    met_record_t *mr,
+                                    MetRecord *mr,
                                     time_t start_time,
                                     time_t end_time,
                                     bool is_overlay_field)

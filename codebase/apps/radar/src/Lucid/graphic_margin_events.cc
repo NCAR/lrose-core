@@ -39,7 +39,7 @@
 
 void set_height(int index)
 {
-   met_record_t    *mr;
+   MetRecord    *mr;
 
    static double last_ht =  0.0;
 
@@ -176,7 +176,7 @@ void right_margin_event(Event *event)
     int xpix,ypix;  
     double height;
     double dist1,dist2;
-    met_record_t    *mr;
+    MetRecord    *mr;
 
     struct timeval tp;
     struct timezone tzp;
