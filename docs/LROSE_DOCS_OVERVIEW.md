@@ -43,7 +43,7 @@ These generally override the TDRP parameters.
 
 See:
 
-* [https://ncar.github.io/lrose-core/docs/runtime/env_vars.html](https://ncar.github.io/lrose-core/docs/runtime/env_vars.html)
+* [Run-time environment variables](./runtime/env_vars.md)
 
 ## LROSE applications and data system
 
