@@ -193,15 +193,15 @@ int MetRecord::requestHorizPlane(time_t start_time,
       gd.data_request_time = mid_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                gd.model_run_time,
-                                mid_time - gd.model_run_time);
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            gd.model_run_time,
+                            mid_time - gd.model_run_time);
       } else {
         h_mdvx->setReadTime(Mdvx::READ_CLOSEST,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                mid_time);
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            mid_time);
       }
       break;
 
@@ -209,15 +209,15 @@ int MetRecord::requestHorizPlane(time_t start_time,
       gd.data_request_time = end_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                gd.model_run_time,
-                                (end_time - gd.model_run_time));
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            gd.model_run_time,
+                            (end_time - gd.model_run_time));
       } else {
         h_mdvx->setReadTime(Mdvx::READ_FIRST_BEFORE,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                end_time + 1, 0);
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            end_time + 1, 0);
       }
       
       if(gd.debug1) {
@@ -232,15 +232,15 @@ int MetRecord::requestHorizPlane(time_t start_time,
       gd.data_request_time = start_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                gd.model_run_time,
-                                (start_time - gd.model_run_time));
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            gd.model_run_time,
+                            (start_time - gd.model_run_time));
       } else {
         h_mdvx->setReadTime(Mdvx::READ_FIRST_AFTER,
-                                fullUrl,
-                                (int) (60 * time_allowance),
-                                start_time-1, 0);
+                            fullUrl,
+                            (int) (60 * time_allowance),
+                            start_time-1, 0);
       }
       if(gd.debug1) {
         fprintf(stderr,
@@ -255,12 +255,12 @@ int MetRecord::requestHorizPlane(time_t start_time,
   if(composite_mode) {
     // Ask for data that covers the whole vertical domain 
     h_mdvx->setReadVlevelLimits((double)gd.h_win.min_ht,
-                                    (double)gd.h_win.max_ht);
+                                (double)gd.h_win.max_ht);
     h_mdvx->setReadComposite();
   } else {
     // Ask for plane closest to the display's current average height
     h_mdvx->setReadVlevelLimits(gd.h_win.cur_ht + alt_offset,
-                                    gd.h_win.cur_ht + alt_offset);
+                                gd.h_win.cur_ht + alt_offset);
   }
      
   if(_params.always_get_full_domain == 0) {
@@ -272,7 +272,7 @@ int MetRecord::requestHorizPlane(time_t start_time,
   } else {
     if (!_params.do_not_clip_on_mdv_request) {
       h_mdvx->setReadHorizLimits(-90.0, gd.h_win.origin_lon - 179.9999,
-                                     90.0, gd.h_win.origin_lon + 179.9999);
+                                 90.0, gd.h_win.origin_lon + 179.9999);
     }
   }
   
@@ -367,37 +367,37 @@ int MetRecord::requestVertSection(time_t start_time,
     case CLOSEST_TO_FRAME_CENTER :
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,(int)(60 * time_allowance),
-                                gd.model_run_time,
-                                (int)start_time + ((end_time  - start_time)/2) - gd.model_run_time);
+                            fullUrl,(int)(60 * time_allowance),
+                            gd.model_run_time,
+                            (int)start_time + ((end_time  - start_time)/2) - gd.model_run_time);
       } else {
         v_mdvx->setReadTime(Mdvx::READ_CLOSEST,
-                                fullUrl,(int)(60 * time_allowance),
-                                (int)start_time + ((end_time  - start_time)/2));
+                            fullUrl,(int)(60 * time_allowance),
+                            (int)start_time + ((end_time  - start_time)/2));
       }
       break;
 
     case FIRST_BEFORE_END_OF_FRAME:
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,(int)(60 * time_allowance),
-                                gd.model_run_time,
-                                (end_time - gd.model_run_time));
+                            fullUrl,(int)(60 * time_allowance),
+                            gd.model_run_time,
+                            (end_time - gd.model_run_time));
       } else {
         v_mdvx->setReadTime(Mdvx::READ_FIRST_BEFORE,
-                                fullUrl,(int)(60 * time_allowance), end_time+1,0);
+                            fullUrl,(int)(60 * time_allowance), end_time+1,0);
       }
       break;
 
     case FIRST_AFTER_START_OF_FRAME:
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                                fullUrl,(int)(60 * time_allowance),
-                                gd.model_run_time,
-                                (start_time - gd.model_run_time));
+                            fullUrl,(int)(60 * time_allowance),
+                            gd.model_run_time,
+                            (start_time - gd.model_run_time));
       } else {
         v_mdvx->setReadTime(Mdvx::READ_FIRST_AFTER,
-                                fullUrl,(int)(60 * time_allowance), start_time-1,0);
+                            fullUrl,(int)(60 * time_allowance), start_time-1,0);
       }
       break;
   }
@@ -488,11 +488,11 @@ int MetRecord::_getTimeList(time_t start_time,
   if(gd.model_run_time != 0 &&
      h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
     h_mdvx->setTimeListModeLead(fullUrl,
-                                    gd.model_run_time);
+                                gd.model_run_time);
   } else {
     h_mdvx->setTimeListModeValid(fullUrl,
-                                     gd.epoch_start - delta,
-                                     gd.epoch_end + delta);
+                                 gd.epoch_start - delta,
+                                 gd.epoch_end + delta);
   }
   if(gd.debug1) {
     fprintf(stderr, "Gathering Time List for %s\n", fullUrl.c_str());
