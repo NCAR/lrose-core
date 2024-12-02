@@ -53,6 +53,18 @@ public:
   
   MetRecord();
 
+  // Get data for a horiz plane
+
+  int requestHorizPlane(time_t start_time,
+                        time_t end_time,
+                        int page);
+  
+  // Get data for a vert section
+
+  int requestVertSection(time_t start_time,
+                         time_t end_time,
+                         int page);
+  
   // public members
   
   int plane; /* plane of data rendered in horiz visible area */
@@ -157,6 +169,16 @@ public:
   Mdvx::vlevel_header_t v_vhdr;
   
   ColorMap *colorMap;
+
+private:
+
+  int _getTimeList(time_t start_time,
+                   time_t end_time,
+                   int page);
+  
+  string _getFullUrl();
+  
+  string _getFieldName();
 
 };
 
