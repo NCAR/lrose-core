@@ -1,4 +1,4 @@
-## How to perform an lrose-core cmake build using a mambaforge installation
+## How to perform an lrose-core cmake build using a miniforge3 installation
 
 Normally lrose-core is built using the system libraries installed with the OS.
 
@@ -6,7 +6,7 @@ This procedure allows you to perform the build using only
 the packages installed via mamba-forge,
 which is a derivative of anaconda and conda-forge.
 
-### 1. Install mambaforge
+### 1. Install miniforge3
 
 The miniforge distribution is available in GitHub at:
 
@@ -14,33 +14,33 @@ The miniforge distribution is available in GitHub at:
 
 Go to the latest release, for example:
 
-* [https://github.com/conda-forge/miniforge/releases/tag/24.7.1-0](https://github.com/conda-forge/miniforge/releases/tag/24.7.1-0)
+* [https://github.com/conda-forge/miniforge/releases/tag/24.9.2-0](https://github.com/conda-forge/miniforge/releases/tag/24.9.2-0)
 
-and download the .sh file for your OS. For example, I downloaded:
+and download the .sh file for your OS. For example, for LINUX x86_64, I downloaded:
 
 ```
-  Mambaforge-24.7.1-0-Linux-x86_64.sh
+  Miniforge3-24.9.2-0-Linux-x86_64.sh
 ```
 
 Make is executable:
 
 ```
-  chmod +x Mambaforge-24.7.1-0-Linux-x86_64.sh
+  chmod +x Miniforge3-24.9.2-0-Linux-x86_64.sh
 ```
 
 and then run it:
 
 ```
-  ./Mambaforge-24.7.1-0-Linux-x86_64.sh
+  ./Miniforge3-24.9.2-0-Linux-x86_64.sh
 ```
 
 Install in the default location which is:
 
 ```
-  $HOME/mambaforge
+  $HOME/miniforge3
 ```
 
-### 2. Install required packages in ```mambaforge```
+### 2. Install required packages in ```miniforge3```
 
 Check out ```lrose-bootstrap```:
 
@@ -51,8 +51,8 @@ Check out ```lrose-bootstrap```:
 Run the script to install the packages required by ```lrose-core```:
 
 ```
-  cd lrose-bootstrap/conda-forge/mambaforge
-  ./install_mamba_packages
+  cd lrose-bootstrap/conda-forge/miniforge3
+  ./install_mamba_packages.linux
 ```
 
 ### 3. Check out lrose-core and build
