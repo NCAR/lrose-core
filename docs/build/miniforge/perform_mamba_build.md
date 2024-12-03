@@ -1,4 +1,4 @@
-## How to perform an lrose-core build and install using mambaforge
+## How to perform an lrose-core build and install using miniforge
 
 Normally lrose-core is built using the system libraries installed with the OS.
 
