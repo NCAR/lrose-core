@@ -22,7 +22,7 @@ and download the .sh file for your OS. For example, for LINUX x86_64, I download
   Miniforge3-24.9.2-0-Linux-x86_64.sh
 ```
 
-Make is executable:
+Make it executable:
 
 ```
   chmod +x Miniforge3-24.9.2-0-Linux-x86_64.sh
