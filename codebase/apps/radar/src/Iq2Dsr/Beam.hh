@@ -544,6 +544,7 @@ private:
   double _getCorrectedEl(double el);
 
   void _correctAltitudeForEgm();
+  void _setGeorefForFixedMode();
 
 };
 

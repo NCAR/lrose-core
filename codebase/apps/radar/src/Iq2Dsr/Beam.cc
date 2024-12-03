@@ -445,6 +445,9 @@ void Beam::_prepareForComputeMoments()
     if (_params.correct_altitude_for_egm) {
       _correctAltitudeForEgm();
     }
+    if (_params.georef_fixed_location_mode) {
+      _setGeorefForFixedMode();
+    }
   }
 
   // set elevation / azimuth
@@ -3502,7 +3505,7 @@ void Beam::_overrideOpsInfo()
   if (_params.override_radar_name) {
     _opsInfo.overrideRadarName(_params.radar_name);
   }
-  if (_params.override_radar_location) {
+  if (_params.override_radar_location || _params.georef_fixed_location_mode) {
     _opsInfo.overrideRadarLocation(_params.radar_altitude_meters,
 				   _params.radar_latitude_deg,
 				   _params.radar_longitude_deg);
@@ -6885,6 +6888,29 @@ void Beam::_correctAltitudeForEgm()
   double geoidM = egm.getGeoidM(_georef.latitude, _georef.longitude);
   double altCorrKm = (geoidM * -1.0) / 1000.0;
   _georef.altitude_msl_km += altCorrKm;
+
+}
+
+//////////////////////////////////////////////////////////////////
+/// Set the georef information for fixed mode
+
+void Beam::_setGeorefForFixedMode()
+
+{
+
+  _georef.latitude = _params.radar_latitude_deg;
+  _georef.longitude = _params.radar_longitude_deg;
+  _georef.altitude_msl_km = _params.radar_altitude_meters / 1000.0;
+
+  _georef.ew_velocity_mps = 0.0;
+  _georef.ns_velocity_mps = 0.0;
+  _georef.vert_velocity_mps = 0.0;
+  _georef.heading_deg = 0.0;
+  _georef.track_deg = 0.0;
+  _georef.drift_angle_deg = 0.0;
+  _georef.ew_horiz_wind_mps = 0.0;
+  _georef.ns_horiz_wind_mps = 0.0;
+  _georef.vert_wind_mps = 0.0;
 
 }
 

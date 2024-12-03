@@ -2358,7 +2358,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
-    tt->comment_text = tdrpStrDup("Also, optionally correct georeference height.");
+    tt->comment_text = tdrpStrDup("Also, optionally (a) correct georeference height, and (b) set georeference velocities to 0 for ground-based operations.");
     tt++;
     
     // Parameter 'correct_hcr_v_rx_gain_for_temperature'
@@ -2431,6 +2431,18 @@
     tt->help = tdrpStrDup("Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.");
     tt->val_offset = (char *) &egm_2008_geoid_file - &_start_;
     tt->single_val.s = tdrpStrDup("./EGM_2008_WGS84_2.5minx2.5min.nc");
+    tt++;
+    
+    // Parameter 'georef_fixed_location_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("georef_fixed_location_mode");
+    tt->descr = tdrpStrDup("Option to set fixed location for ground-based HCR observations.");
+    tt->help = tdrpStrDup("If TRUE, we will override the metadata for latitude/longitude/altitude, and set platform velocities to 0. Make sure to set the parameters radar_latitude_deg, radar_longitude_deg and radar_altitude_meters.");
+    tt->val_offset = (char *) &georef_fixed_location_mode - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 11'

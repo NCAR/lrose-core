@@ -995,6 +995,8 @@ public:
 
   char* egm_2008_geoid_file;
 
+  tdrp_bool_t georef_fixed_location_mode;
+
   tdrp_bool_t noise_mon_correct_cal_rx_gain;
 
   char* noise_mon_spdb_url;
@@ -1392,7 +1394,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[321];
+  mutable TDRPtable _table[322];
 
   const char *_className;
 

@@ -937,7 +937,7 @@ paramdef struct rx_temp_gain_correction_t {
 
 commentdef {
   p_header = "FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB";
-  p_text = "Also, optionally correct georeference height.";
+  p_text = "Also, optionally (a) correct georeference height, and (b) set georeference velocities to 0 for ground-based operations.";
 }
 
 paramdef boolean {
@@ -973,6 +973,12 @@ paramdef string {
   p_descr = "Path to geoid table file.";
   p_help = "Downloads available from https://earth-info.nga.mil/GandG/wgs84/gravitymod. NetCDF file is on the shared drive at HCR->dataProcessing->AltitudeCorrection. The app Egm2Mdv will convert the downloadable file to a netCDF format file.";
 } egm_2008_geoid_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed location for ground-based HCR observations.";
+  p_help = "If TRUE, we will override the metadata for latitude/longitude/altitude, and set platform velocities to 0. Make sure to set the parameters radar_latitude_deg, radar_longitude_deg and radar_altitude_meters.";
+} georef_fixed_location_mode;
 
 commentdef {
   p_header = "CORRECT CALIBRATION RECEIVER GAIN USING MEASURED NOISE VALUES";

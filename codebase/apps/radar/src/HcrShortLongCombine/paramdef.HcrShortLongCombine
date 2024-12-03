@@ -218,7 +218,7 @@ paramdef struct radar_location_t {
 
 commentdef {
   p_header = "COMPUTE MEAN RADAR LOCATION?";
-  p_text = "This mode will compute the mean radar location for a ground-based insytallation.";
+  p_text = "This mode will compute the mean radar location for a ground-based installation.";
 }
 
 paramdef boolean {
