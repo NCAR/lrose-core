@@ -162,8 +162,8 @@ private:
   void _unfoldVel(RadxRay *rayCombined);
 
   void _computeVelCorrectedForVertMotion(RadxRay *ray,
-                                         RadxField *velShort,
-                                         RadxField *velLong,
+                                         RadxField *velRawShort,
+                                         RadxField *velRawLong,
                                          RadxField *velUnfolded);
   
   double _correctForNyquist(double vel, double nyquist);

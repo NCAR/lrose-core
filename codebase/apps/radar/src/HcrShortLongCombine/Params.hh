@@ -483,15 +483,17 @@ public:
 
   tdrp_bool_t perform_velocity_unfolding;
 
-  char* input_vel_field_name;
+  char* input_vel_raw_field_name;
+
+  char* input_vel_corr_field_name;
 
   char* suffix_to_add_for_short_pulse_fields;
 
   char* suffix_to_add_for_long_pulse_fields;
 
-  char* vel_unfolded_field_name;
+  char* output_vel_corr_field_name;
 
-  tdrp_bool_t correct_velocity_for_platform_vertical_motion;
+  char* output_vel_unfolded_field_name;
 
   char* output_fmq_url;
 
@@ -512,7 +514,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[50];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

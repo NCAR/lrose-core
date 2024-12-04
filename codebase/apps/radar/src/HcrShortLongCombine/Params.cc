@@ -869,7 +869,7 @@
       tt->enum_def.fields[7].val = SWEEP_MODE_SUNSCAN_RHI;
       tt->enum_def.fields[8].name = tdrpStrDup("SWEEP_MODE_ELECTRONIC_STEERING");
       tt->enum_def.fields[8].val = SWEEP_MODE_ELECTRONIC_STEERING;
-    tt->single_val.e = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+    tt->single_val.e = SWEEP_MODE_VERTICAL_POINTING;
     tt++;
     
     // Parameter 'set_max_range'
@@ -959,7 +959,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
-    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based insytallation.");
+    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
     tt++;
     
     // Parameter 'compute_mean_location'
@@ -1134,15 +1134,27 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'input_vel_field_name'
+    // Parameter 'input_vel_raw_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_field_name");
-    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data.");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name");
+    tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
     tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
-    tt->val_offset = (char *) &input_vel_field_name - &_start_;
+    tt->val_offset = (char *) &input_vel_raw_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW");
+    tt++;
+    
+    // Parameter 'input_vel_corr_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name");
+    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
+    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
+    tt->val_offset = (char *) &input_vel_corr_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("VEL");
     tt++;
     
@@ -1170,28 +1182,28 @@
     tt->single_val.s = tdrpStrDup("_long");
     tt++;
     
-    // Parameter 'vel_unfolded_field_name'
+    // Parameter 'output_vel_corr_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vel_unfolded_field_name");
-    tt->descr = tdrpStrDup("Name for the unfolded velocity.");
-    tt->help = tdrpStrDup("This is an output field, computed by unfolding the dual-prt vel fields.");
-    tt->val_offset = (char *) &vel_unfolded_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_unfold");
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name");
+    tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
+    tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
+    tt->val_offset = (char *) &output_vel_corr_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'correct_velocity_for_platform_vertical_motion'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'output_vel_unfolded_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("correct_velocity_for_platform_vertical_motion");
-    tt->descr = tdrpStrDup("Option to correct the estimated velocity corrected for vertical platform motion.");
-    tt->help = tdrpStrDup("For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.");
-    tt->val_offset = (char *) &correct_velocity_for_platform_vertical_motion - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_unfolded_field_name");
+    tt->descr = tdrpStrDup("Name for the unfolded velocity.");
+    tt->help = tdrpStrDup("This is an output field, computed by unfolding the dual-prt vel fields.");
+    tt->val_offset = (char *) &output_vel_unfolded_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_unfold_short");
     tt++;
     
     // Parameter 'Comment 11'

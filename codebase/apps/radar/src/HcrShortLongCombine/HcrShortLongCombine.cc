@@ -30,7 +30,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Combines 100Hz HCR moments stream containing both long and short pulses,
+// Combines 50Hz HCR moments stream containing both long and short pulses,
 // and optionally long and short PRTs. Groups the long and short pulses
 // into dwells (normally 10Hz). We write out the individual fields
 // (i.e. long and short) and combined fields.
@@ -782,6 +782,26 @@ int HcrShortLongCombine::_readNextDwell()
     }
   }
 
+  // remove the corrected velocity field if it exists, since it will
+  // be replaced by values computed in this app
+  
+  for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
+    RadxRay *ray = _dwellRaysShort[ii];
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
+    if (velCorr != NULL) {
+      ray->removeField(_params.input_vel_corr_field_name);
+    }
+  }
+  for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
+    RadxRay *ray = _dwellRaysLong[ii];
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
+    if (velCorr != NULL) {
+      ray->removeField(_params.input_vel_corr_field_name);
+    }
+  }
+  
+  // debug prints
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=================>> short ray count: " << _dwellRaysShort.size() << endl;
     for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
@@ -798,7 +818,7 @@ int HcrShortLongCombine::_readNextDwell()
     }
     cerr << "========================================" << endl;
   }
-  
+
   // set to advance to next dwell
   
   _nextDwellStartTime = _nextDwellEndTime;
@@ -974,19 +994,22 @@ void HcrShortLongCombine::_clearDwellRays()
 }
 
 ////////////////////////////////////////////////////////////////
-// unfold the velocity, add unfolded field to ray
+// Unfold the velocity, add unfolded field to ray.
+// We need to use the raw velocity - i.e. not corrected for
+// the vertical platform motion.
+// The plaform motion correction is applied AFTER unfolding.
 
 void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
-
+  
 {
 
-  string velShortName = _params.input_vel_field_name;
-  velShortName += _params.suffix_to_add_for_short_pulse_fields;
-  string velLongName = _params.input_vel_field_name;
-  velLongName += _params.suffix_to_add_for_long_pulse_fields;
+  string velRawShortName = _params.input_vel_raw_field_name;
+  velRawShortName += _params.suffix_to_add_for_short_pulse_fields;
+  string velRawLongName = _params.input_vel_raw_field_name;
+  velRawLongName += _params.suffix_to_add_for_long_pulse_fields;
 
-  RadxField *velShort = rayCombined->getField(velShortName);
-  RadxField *velLong = rayCombined->getField(velLongName);
+  RadxField *velShort = rayCombined->getField(velRawShortName);
+  RadxField *velLong = rayCombined->getField(velRawLongName);
 
   if (velShort == NULL || velLong == NULL) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1000,7 +1023,7 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
   velLong->convertToFl32();
 
   RadxField *velUnfold = new RadxField(*velShort);
-  velUnfold->setName(_params.vel_unfolded_field_name);
+  velUnfold->setName(_params.output_vel_unfolded_field_name);
 
   // compute the unfolded velocity
 
@@ -1054,6 +1077,16 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
   rayCombined->setNyquistMps(_nyquistUnfolded);
   _computeVelCorrectedForVertMotion(rayCombined, velShort, velLong, velUnfold);
 
+  // rename vel fields
+  
+  string velCorrShortName = _params.output_vel_corr_field_name;
+  velCorrShortName += _params.suffix_to_add_for_short_pulse_fields;
+  string velCorrLongName = _params.output_vel_corr_field_name;
+  velCorrLongName += _params.suffix_to_add_for_long_pulse_fields;
+
+  velShort->setName(velCorrShortName);
+  velLong->setName(velCorrLongName);
+  
   // add field to ray
   
   rayCombined->addField(velUnfold);
@@ -1101,7 +1134,7 @@ void HcrShortLongCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
   const RadxGeoref *georef = ray->getGeoreference();
   if (georef == NULL) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - _computeVelocityCorrectedForMotion" << endl;
+      cerr << "WARNING - _computeVelCorrectedForVertMotion" << endl;
       cerr << "  No georef information found" << endl;
       cerr << "  Correction will not be applied" << endl;
     }

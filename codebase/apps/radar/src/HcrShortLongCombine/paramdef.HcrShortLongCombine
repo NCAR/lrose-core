@@ -177,7 +177,7 @@ typedef enum {
 } sweep_mode_t;
 
 paramdef enum sweep_mode_t {
-  p_default = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  p_default = SWEEP_MODE_VERTICAL_POINTING;
   p_descr = "Sweep mode for all sweeps.";
   p_help = "See override_sweep_mode.";
 } sweep_mode;
@@ -297,10 +297,16 @@ paramdef boolean {
 } perform_velocity_unfolding;
 
 paramdef string {
-  p_default = "VEL";
-  p_descr = "This is the name for the velocity field in the input data.";
+  p_default = "VEL_RAW";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
   p_help = "The field name must be the same for the short- and long-prt rays.";
-} input_vel_field_name;
+} input_vel_raw_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name;
 
 paramdef string {
   p_default = "_short";
@@ -315,16 +321,16 @@ paramdef string {
 } suffix_to_add_for_long_pulse_fields;
 
 paramdef string {
-  p_default = "VEL_unfold";
+  p_default = "VEL";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name;
+
+paramdef string {
+  p_default = "VEL_unfold_short";
   p_descr = "Name for the unfolded velocity.";
   p_help = "This is an output field, computed by unfolding the dual-prt vel fields.";
-} vel_unfolded_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to correct the estimated velocity corrected for vertical platform motion.";
-  p_help = "For an airborne platform, we measure the vertical velocity of the platform using an INS system. We can optionally correct the measured velocity for the plaform vertical motion. This correction is applied AFTER the unfolding computation.";
-} correct_velocity_for_platform_vertical_motion;
+} output_vel_unfolded_field_name;
 
 commentdef {
   p_header = "OUTPUT FMQ";
