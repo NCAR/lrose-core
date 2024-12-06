@@ -201,17 +201,17 @@ public:
   } noise_method_t;
 
   typedef enum {
-    CENSORING_NONE = 0,
-    CENSORING_BY_NOISE_FLAG = 1,
-    CENSORING_BY_SNR_AND_NCP = 2
-  } censoring_mode_t;
-
-  typedef enum {
     PHASE_DECODE_NONE = 0,
     PHASE_DECODE_RANDOM = 1,
     PHASE_DECODE_SZ = 2,
     PHASE_DECODE_SZ1 = 3
   } phase_decoding_t;
+
+  typedef enum {
+    CENSORING_NONE = 0,
+    CENSORING_BY_NOISE_FLAG = 1,
+    CENSORING_BY_SNR_AND_NCP = 2
+  } censoring_mode_t;
 
   typedef enum {
     DBZ = 0,
@@ -814,8 +814,6 @@ public:
 
   double primary_prt_secs;
 
-  double georef_time_margin_secs;
-
   tdrp_bool_t apply_azimuth_offset;
 
   double azimuth_offset;
@@ -828,25 +826,9 @@ public:
 
   scan_mode_t scan_mode_for_override;
 
-  tdrp_bool_t use_secondary_georeference;
-
   tdrp_bool_t check_radar_id;
 
   int radar_id;
-
-  double nsecs_for_antenna_rate;
-
-  tdrp_bool_t interpolate_antenna_angles;
-
-  double angle_interp_max_change;
-
-  int angle_interp_max_queue_size;
-
-  tdrp_bool_t angle_interp_adjust_for_latency;
-
-  double angle_interp_latency;
-
-  tdrp_bool_t angle_interp_debug;
 
   platform_type_t platform_type;
 
@@ -895,6 +877,10 @@ public:
 
   tdrp_bool_t control_xmit_rcv_mode_from_time_series;
 
+  tdrp_bool_t check_for_missing_pulses;
+
+  tdrp_bool_t discard_beams_with_missing_pulses;
+
   tdrp_bool_t compute_zdr_using_snr;
 
   tdrp_bool_t adjust_dbz_for_measured_xmit_power;
@@ -905,10 +891,6 @@ public:
 
   double max_measured_xmit_power_dbm;
 
-  tdrp_bool_t check_for_missing_pulses;
-
-  tdrp_bool_t discard_beams_with_missing_pulses;
-
   tdrp_bool_t correct_for_system_phidp;
 
   int zdr_median_filter_len;
@@ -917,13 +899,25 @@ public:
 
   int staggered_prt_median_filter_len;
 
+  spectrum_width_method_t spectrum_width_method;
+
+  tdrp_bool_t threshold_zdr_using_snr;
+
+  double min_snr_db_for_zdr;
+
+  tdrp_bool_t threshold_ldr_using_snr;
+
+  double min_snr_db_for_ldr;
+
   tdrp_bool_t compute_velocity_corrected_for_platform_motion;
 
   tdrp_bool_t compute_width_corrected_for_platform_motion;
 
   double width_correction_beamwidth_deg;
 
-  spectrum_width_method_t spectrum_width_method;
+  double georef_time_margin_secs;
+
+  tdrp_bool_t use_secondary_georeference;
 
   char* startup_cal_file;
 
@@ -944,19 +938,11 @@ public:
 
   double zdr_correction_db;
 
-  tdrp_bool_t threshold_zdr_using_snr;
-
-  double min_snr_db_for_zdr;
-
   tdrp_bool_t override_cal_ldr_corrections;
 
   double ldr_correction_db_h;
 
   double ldr_correction_db_v;
-
-  tdrp_bool_t threshold_ldr_using_snr;
-
-  double min_snr_db_for_ldr;
 
   tdrp_bool_t override_cal_system_phidp;
 
@@ -1142,14 +1128,6 @@ public:
 
   double interest_threshold_for_signal;
 
-  censoring_mode_t censoring_mode;
-
-  double censoring_snr_threshold;
-
-  double censoring_ncp_threshold;
-
-  int censoring_min_valid_run;
-
   tdrp_bool_t change_aiq_sign;
 
   phase_decoding_t phase_decoding;
@@ -1324,6 +1302,14 @@ public:
 
   int beam_wait_msecs;
 
+  censoring_mode_t censoring_mode;
+
+  double censoring_snr_threshold;
+
+  double censoring_ncp_threshold;
+
+  int censoring_min_valid_run;
+
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -1361,6 +1347,20 @@ public:
 
   double max_fixed_angle_error_rhi;
 
+  double nsecs_for_antenna_rate;
+
+  tdrp_bool_t interpolate_antenna_angles;
+
+  double angle_interp_max_change;
+
+  int angle_interp_max_queue_size;
+
+  tdrp_bool_t angle_interp_adjust_for_latency;
+
+  double angle_interp_latency;
+
+  tdrp_bool_t angle_interp_debug;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1368,7 +1368,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[315];
+  mutable TDRPtable _table[318];
 
   const char *_className;
 

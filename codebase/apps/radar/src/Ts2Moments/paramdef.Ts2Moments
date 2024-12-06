@@ -92,7 +92,7 @@ paramdef string {
 } input_dir;
 
 commentdef {
-  p_header = "MODIFYING INPUT META-DATA";
+  p_header = "QUALIFYING AND/OR MODIFYING INPUT METADATA";
 };
 
 paramdef boolean {
@@ -149,12 +149,6 @@ paramdef double {
   p_help = "See override_primary_prt.";
 } primary_prt_secs;
 
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Margin for matching platform goeref with pulses (secs).";
-  p_help = "The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.";
-} georef_time_margin_secs;
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to apply an offset to the azimuth values.";
@@ -209,12 +203,6 @@ paramdef enum scan_mode_t {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "If true, use the secondary georeference packet.";
-  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
-} use_secondary_georeference;
-
-paramdef boolean {
-  p_default = FALSE;
   p_descr = "Option to check the radar ID in the time series data stream.";
   p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
 } check_radar_id;
@@ -226,58 +214,7 @@ paramdef int {
 } radar_id;
 
 commentdef {
-  p_header = "COMPUTING THE ANTENNA RATE";
-  p_text = "This is required for computing the number of samples in a dwell, and for angle interpolation if set,";
-};
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Time for computing antenna rate (sec).";
-  p_help = "The rate computed over this time period. If angle interpolation is used, then set this to a larger value than the default. A value of 0.5 is suggested for this case.";
-} nsecs_for_antenna_rate;
-
-commentdef {
-  p_header = "INTERPOLATION OF ANTENNA ANGLES";
-};
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to interpolate antenna angles to make sure they vary smoothly.";
-  p_help = "Some systems send angles which jump from one value to another and then remain constant for a number of pulses. This option allows you to interpolate these angles so that they vary smoothly from pulse to pulse. In RHI mode the elevation angles are smoothed. In other modes the azimuth angles are smoothed.";
-} interpolate_antenna_angles;
-
-paramdef double {
-  p_default = 2.5;
-  p_descr = "Maximum change in angle for interpolation (deg).";
-  p_help = "See interpolate_antenna_angles. This is the maximum permissable change in angle for interpolation to be performed. If the difference in angle between 2 pulses exceeds this value, interpolation is not performed.";
-} angle_interp_max_change;
-
-paramdef int {
-  p_default = 200;
-  p_descr = "Maximum queue size for interpolating angles.";
-  p_help = "If more than this number of pulses have constant angles, interpolation will not be done.";
-} angle_interp_max_queue_size;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to adjust antenna angles for latency in the processing.";
-  p_help = "In some systems, the angles are tagged to the IQ pulses late, so that they lag the real angles. Set this to TRUE to adjust for the latency by adjusting the angles for latency multiplied by the angular rate.";
-} angle_interp_adjust_for_latency;
-
-paramdef double {
-  p_default = 0.1;
-  p_descr = "Latency of antenna angles (secs).";
-  p_help = "See 'adjust_angles_for_latency'.";
-} angle_interp_latency;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to turn on debugging for antenna angle interpolation.";
-  p_help = "If TRUE, interpolation diagnostics will be printed.";
-} angle_interp_debug;
-
-commentdef {
-  p_header = "RADAR PARAMETERS";
+  p_header = "OVERRIDING RADAR PARAMETERS";
   p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
 };
 
@@ -406,7 +343,7 @@ paramdef double {
 } radar_wavelength_cm;
 
 commentdef {
-  p_header = "MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION";
+  p_header = "FINDING THE BEAM/DWELL and SETTING THE MOMENTS PARAMETERS";
 };
 
 typedef enum {
@@ -646,6 +583,22 @@ paramdef boolean {
 } control_xmit_rcv_mode_from_time_series;
 
 paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be flagged and a message printed.";
+} check_for_missing_pulses;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to discard beams with missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
+} discard_beams_with_missing_pulses;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
+
+paramdef boolean {
   p_default = false;
   p_descr = "Option to compute ZDR using SNR instead of power.";
   p_help = "If true, we compute ZDR as SNRHC/SNRVC. This method applies the receiver gain, and has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relative to SNR, not power.";
@@ -677,18 +630,6 @@ paramdef double {
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Option to check for missing pulses in the time series.";
-  p_help = "If missing pulses are found, the beam formed by those pulses will be flagged and a message printed.";
-} check_for_missing_pulses;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to discard beams with missing pulses in the time series.";
-  p_help = "If missing pulses are found, the beam formed by those pulses will be discarded.";
-} discard_beams_with_missing_pulses;
-
-paramdef boolean {
-  p_default = true;
   p_descr = "Option to correct for system phidp.";
   p_help = "If true, the H and V correlation phases will be corrected by adding/subtracting the system phidp value as appropriate. This avoids premature wrapping of the phased from which phidp and velocity are computed. If false, this correction will not be applied. To find the system phidp, set this to false and compute phidp for vertically-pointing data.";
 } correct_for_system_phidp;
@@ -711,6 +652,46 @@ paramdef int {
   p_help = "If less than 3, no filtering will be performed.";
 } staggered_prt_median_filter_len;
 
+typedef enum {
+  WIDTH_METHOD_R0R1,
+  WIDTH_METHOD_R1R2,
+  WIDTH_METHOD_HYBRID
+} spectrum_width_method_t;
+
+paramdef enum spectrum_width_method_t {
+  p_default = WIDTH_METHOD_R0R1;
+  p_descr = "Method for computing spectrum width.";
+  p_help = "R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.";
+} spectrum_width_method;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold ZDR using SNR.";
+  p_help = "If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.";
+} threshold_zdr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing ZDR (dB).";
+  p_help = "If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.";
+} min_snr_db_for_zdr;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold LDR using SNR.";
+  p_help = "If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.";
+} threshold_ldr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing LDR (dB).";
+  p_help = "For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.";
+} min_snr_db_for_ldr;
+
+commentdef {
+  p_header = "MOBILE PLATFORMS";
+};
+
 paramdef boolean {
   p_default = false;
   p_descr = "Option to compute velocity corrected for platform motion.";
@@ -729,17 +710,17 @@ paramdef double {
   p_help = "This may differ from the nominal radar spectrum width.";
 } width_correction_beamwidth_deg;
 
-typedef enum {
-  WIDTH_METHOD_R0R1,
-  WIDTH_METHOD_R1R2,
-  WIDTH_METHOD_HYBRID
-} spectrum_width_method_t;
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin for matching platform goeref with pulses (secs).";
+  p_help = "The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.";
+} georef_time_margin_secs;
 
-paramdef enum spectrum_width_method_t {
-  p_default = WIDTH_METHOD_R0R1;
-  p_descr = "Method for computing spectrum width.";
-  p_help = "R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.";
-} spectrum_width_method;
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
 
 commentdef {
   p_header = "RADAR CALIBRATION";
@@ -814,18 +795,6 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to threshold ZDR using SNR.";
-  p_help = "If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.";
-} threshold_zdr_using_snr;
-
-paramdef double {
-  p_default = -7.0;
-  p_descr = "Min SNR for computing ZDR (dB).";
-  p_help = "If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.";
-} min_snr_db_for_zdr;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Option to override the LDR corrections in the calibration data.";
   p_help = "If true, the parameters 'ldrh_correction_db' and 'ldrv_correction_db' will override the ldr corrections in the calibration data.";
 } override_cal_ldr_corrections;
@@ -841,18 +810,6 @@ paramdef double {
   p_descr = "LDRV correction to be applied to all calibrations (dB).";
   p_help = "See 'override_cal_ldr_corrections'.";
 } ldr_correction_db_v;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to threshold LDR using SNR.";
-  p_help = "If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.";
-} threshold_ldr_using_snr;
-
-paramdef double {
-  p_default = -7.0;
-  p_descr = "Min SNR for computing LDR (dB).";
-  p_help = "For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.";
-} min_snr_db_for_ldr;
 
 paramdef boolean {
   p_default = false;
@@ -1508,41 +1465,6 @@ paramdef double {
 } interest_threshold_for_signal;
 
 commentdef {
-  p_header = "CENSORING OUTPUT FIELDS";
-  p_text = "You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.";
-}
-
-typedef enum {
-  CENSORING_NONE,
-  CENSORING_BY_NOISE_FLAG,
-  CENSORING_BY_SNR_AND_NCP
-} censoring_mode_t;
-
-paramdef enum censoring_mode_t {
-  p_default = CENSORING_NONE;
-  p_descr = "Control of the censoring operation.";
-  p_help = "\tCENSORING_NONE: no censoring performed.\n\tCENSORING_BY_NOISE_FLAG: censor fields for gates with NOISE_FLAG set to true.\n\tCENSORING_BY_SNR_AND_NCP: censoring is performed using thresholds applied to SNR and NCP.";
-} censoring_mode;
-
-paramdef double {
-  p_default = -1.0;
-  p_descr = "SNR threshold for censoring (dB).";
-  p_help = "Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.";
-} censoring_snr_threshold;
-
-paramdef double {
-  p_default = 0.15;
-  p_descr = "NCP threshold for censoring.";
-  p_help = "Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.";
-} censoring_ncp_threshold;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Minimum valid run of non-censored gates.";
-  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
-} censoring_min_valid_run;
-
-commentdef {
   p_header = "REFRACTIVITY FIELDS";
 };
 
@@ -2044,9 +1966,9 @@ paramdef string {
 } output_fmq_url;
 
 paramdef boolean {
-  p_default = FALSE;
+  p_default = TRUE;
   p_descr = "Write output moments in Radx format.";
-  p_help = "If TRUE moments are written as Radx messages. If FALSE moments are written as DsRadar messages. ";
+  p_help = "If TRUE moments are written as Radx messages. If FALSE moments are written as legacy DsRadar messages. ";
 } output_moments_in_radx_format;
 
 paramdef int {
@@ -2091,6 +2013,46 @@ paramdef int {
   p_descr = "Wait per beam (milli-secs)";
   p_help = "FILELIST, ARCHIVE and SIMULATE modes only.";
 } beam_wait_msecs;
+
+commentdef {
+  p_header = "CENSORING OUTPUT FIELDS";
+  p_text = "You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.";
+}
+
+typedef enum {
+  CENSORING_NONE,
+  CENSORING_BY_NOISE_FLAG,
+  CENSORING_BY_SNR_AND_NCP
+} censoring_mode_t;
+
+paramdef enum censoring_mode_t {
+  p_default = CENSORING_NONE;
+  p_descr = "Control of the censoring operation.";
+  p_help = "\tCENSORING_NONE: no censoring performed.\n\tCENSORING_BY_NOISE_FLAG: censor fields for gates with NOISE_FLAG set to true.\n\tCENSORING_BY_SNR_AND_NCP: censoring is performed using thresholds applied to SNR and NCP.";
+} censoring_mode;
+
+paramdef double {
+  p_default = -1.0;
+  p_descr = "SNR threshold for censoring (dB).";
+  p_help = "Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.";
+} censoring_snr_threshold;
+
+paramdef double {
+  p_default = 0.15;
+  p_descr = "NCP threshold for censoring.";
+  p_help = "Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.";
+} censoring_ncp_threshold;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} censoring_min_valid_run;
+
+commentdef {
+  p_header = "SELECTING OUTPUT FIELDS";
+  p_text = "Select the fields you want in the output FMQ.";
+};
 
 typedef enum {
 
@@ -2613,4 +2575,55 @@ paramdef double {
   p_descr = "Maximum permissable error in the pointing angle in RHI mode (deg).";
   p_descr = "See 'check_transition_from_fixed_angle_error'.";
 } max_fixed_angle_error_rhi;
+
+commentdef {
+  p_header = "COMPUTING THE ANTENNA RATE";
+  p_text = "This is required for computing the number of samples in a dwell, and for angle interpolation if set,";
+};
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Time for computing antenna rate (sec).";
+  p_help = "The rate computed over this time period. If angle interpolation is used, then set this to a larger value than the default. A value of 0.5 is suggested for this case.";
+} nsecs_for_antenna_rate;
+
+commentdef {
+  p_header = "INTERPOLATION OF ANTENNA ANGLES";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to interpolate antenna angles to make sure they vary smoothly.";
+  p_help = "Some systems send angles which jump from one value to another and then remain constant for a number of pulses. This option allows you to interpolate these angles so that they vary smoothly from pulse to pulse. In RHI mode the elevation angles are smoothed. In other modes the azimuth angles are smoothed.";
+} interpolate_antenna_angles;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Maximum change in angle for interpolation (deg).";
+  p_help = "See interpolate_antenna_angles. This is the maximum permissable change in angle for interpolation to be performed. If the difference in angle between 2 pulses exceeds this value, interpolation is not performed.";
+} angle_interp_max_change;
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Maximum queue size for interpolating angles.";
+  p_help = "If more than this number of pulses have constant angles, interpolation will not be done.";
+} angle_interp_max_queue_size;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to adjust antenna angles for latency in the processing.";
+  p_help = "In some systems, the angles are tagged to the IQ pulses late, so that they lag the real angles. Set this to TRUE to adjust for the latency by adjusting the angles for latency multiplied by the angular rate.";
+} angle_interp_adjust_for_latency;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Latency of antenna angles (secs).";
+  p_help = "See 'adjust_angles_for_latency'.";
+} angle_interp_latency;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to turn on debugging for antenna angle interpolation.";
+  p_help = "If TRUE, interpolation diagnostics will be printed.";
+} angle_interp_debug;
 

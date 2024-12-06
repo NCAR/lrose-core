@@ -729,7 +729,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("MODIFYING INPUT META-DATA");
+    tt->comment_hdr = tdrpStrDup("QUALIFYING AND/OR MODIFYING INPUT METADATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -841,18 +841,6 @@
     tt->single_val.d = 0.001;
     tt++;
     
-    // Parameter 'georef_time_margin_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("georef_time_margin_secs");
-    tt->descr = tdrpStrDup("Margin for matching platform goeref with pulses (secs).");
-    tt->help = tdrpStrDup("The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.");
-    tt->val_offset = (char *) &georef_time_margin_secs - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'apply_azimuth_offset'
     // ctype is 'tdrp_bool_t'
     
@@ -951,18 +939,6 @@
     tt->single_val.e = SCAN_MODE_UNKNOWN;
     tt++;
     
-    // Parameter 'use_secondary_georeference'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_secondary_georeference");
-    tt->descr = tdrpStrDup("If true, use the secondary georeference packet.");
-    tt->help = tdrpStrDup("By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.");
-    tt->val_offset = (char *) &use_secondary_georeference - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'check_radar_id'
     // ctype is 'tdrp_bool_t'
     
@@ -992,109 +968,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("COMPUTING THE ANTENNA RATE");
-    tt->comment_text = tdrpStrDup("This is required for computing the number of samples in a dwell, and for angle interpolation if set,");
-    tt++;
-    
-    // Parameter 'nsecs_for_antenna_rate'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("nsecs_for_antenna_rate");
-    tt->descr = tdrpStrDup("Time for computing antenna rate (sec).");
-    tt->help = tdrpStrDup("The rate computed over this time period. If angle interpolation is used, then set this to a larger value than the default. A value of 0.5 is suggested for this case.");
-    tt->val_offset = (char *) &nsecs_for_antenna_rate - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("INTERPOLATION OF ANTENNA ANGLES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'interpolate_antenna_angles'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("interpolate_antenna_angles");
-    tt->descr = tdrpStrDup("Option to interpolate antenna angles to make sure they vary smoothly.");
-    tt->help = tdrpStrDup("Some systems send angles which jump from one value to another and then remain constant for a number of pulses. This option allows you to interpolate these angles so that they vary smoothly from pulse to pulse. In RHI mode the elevation angles are smoothed. In other modes the azimuth angles are smoothed.");
-    tt->val_offset = (char *) &interpolate_antenna_angles - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'angle_interp_max_change'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("angle_interp_max_change");
-    tt->descr = tdrpStrDup("Maximum change in angle for interpolation (deg).");
-    tt->help = tdrpStrDup("See interpolate_antenna_angles. This is the maximum permissable change in angle for interpolation to be performed. If the difference in angle between 2 pulses exceeds this value, interpolation is not performed.");
-    tt->val_offset = (char *) &angle_interp_max_change - &_start_;
-    tt->single_val.d = 2.5;
-    tt++;
-    
-    // Parameter 'angle_interp_max_queue_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("angle_interp_max_queue_size");
-    tt->descr = tdrpStrDup("Maximum queue size for interpolating angles.");
-    tt->help = tdrpStrDup("If more than this number of pulses have constant angles, interpolation will not be done.");
-    tt->val_offset = (char *) &angle_interp_max_queue_size - &_start_;
-    tt->single_val.i = 200;
-    tt++;
-    
-    // Parameter 'angle_interp_adjust_for_latency'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("angle_interp_adjust_for_latency");
-    tt->descr = tdrpStrDup("Option to adjust antenna angles for latency in the processing.");
-    tt->help = tdrpStrDup("In some systems, the angles are tagged to the IQ pulses late, so that they lag the real angles. Set this to TRUE to adjust for the latency by adjusting the angles for latency multiplied by the angular rate.");
-    tt->val_offset = (char *) &angle_interp_adjust_for_latency - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'angle_interp_latency'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("angle_interp_latency");
-    tt->descr = tdrpStrDup("Latency of antenna angles (secs).");
-    tt->help = tdrpStrDup("See 'adjust_angles_for_latency'.");
-    tt->val_offset = (char *) &angle_interp_latency - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'angle_interp_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("angle_interp_debug");
-    tt->descr = tdrpStrDup("Option to turn on debugging for antenna angle interpolation.");
-    tt->help = tdrpStrDup("If TRUE, interpolation diagnostics will be printed.");
-    tt->val_offset = (char *) &angle_interp_debug - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("RADAR PARAMETERS");
+    tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
     
@@ -1310,12 +1184,12 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("FINDING THE BEAM/DWELL and SETTING THE MOMENTS PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1733,6 +1607,39 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'check_for_missing_pulses'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_for_missing_pulses");
+    tt->descr = tdrpStrDup("Option to check for missing pulses in the time series.");
+    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be flagged and a message printed.");
+    tt->val_offset = (char *) &check_for_missing_pulses - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'discard_beams_with_missing_pulses'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("discard_beams_with_missing_pulses");
+    tt->descr = tdrpStrDup("Option to discard beams with missing pulses in the time series.");
+    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be discarded.");
+    tt->val_offset = (char *) &discard_beams_with_missing_pulses - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'compute_zdr_using_snr'
     // ctype is 'tdrp_bool_t'
     
@@ -1793,30 +1700,6 @@
     tt->single_val.d = 86;
     tt++;
     
-    // Parameter 'check_for_missing_pulses'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_for_missing_pulses");
-    tt->descr = tdrpStrDup("Option to check for missing pulses in the time series.");
-    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be flagged and a message printed.");
-    tt->val_offset = (char *) &check_for_missing_pulses - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'discard_beams_with_missing_pulses'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("discard_beams_with_missing_pulses");
-    tt->descr = tdrpStrDup("Option to discard beams with missing pulses in the time series.");
-    tt->help = tdrpStrDup("If missing pulses are found, the beam formed by those pulses will be discarded.");
-    tt->val_offset = (char *) &discard_beams_with_missing_pulses - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'correct_for_system_phidp'
     // ctype is 'tdrp_bool_t'
     
@@ -1865,6 +1748,85 @@
     tt->single_val.i = 1;
     tt++;
     
+    // Parameter 'spectrum_width_method'
+    // ctype is '_spectrum_width_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spectrum_width_method");
+    tt->descr = tdrpStrDup("Method for computing spectrum width.");
+    tt->help = tdrpStrDup("R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.");
+    tt->val_offset = (char *) &spectrum_width_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("spectrum_width_method_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WIDTH_METHOD_R0R1");
+      tt->enum_def.fields[0].val = WIDTH_METHOD_R0R1;
+      tt->enum_def.fields[1].name = tdrpStrDup("WIDTH_METHOD_R1R2");
+      tt->enum_def.fields[1].val = WIDTH_METHOD_R1R2;
+      tt->enum_def.fields[2].name = tdrpStrDup("WIDTH_METHOD_HYBRID");
+      tt->enum_def.fields[2].val = WIDTH_METHOD_HYBRID;
+    tt->single_val.e = WIDTH_METHOD_R0R1;
+    tt++;
+    
+    // Parameter 'threshold_zdr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_zdr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold ZDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.");
+    tt->val_offset = (char *) &threshold_zdr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_zdr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_zdr");
+    tt->descr = tdrpStrDup("Min SNR for computing ZDR (dB).");
+    tt->help = tdrpStrDup("If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_zdr - &_start_;
+    tt->single_val.d = -7;
+    tt++;
+    
+    // Parameter 'threshold_ldr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_ldr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold LDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.");
+    tt->val_offset = (char *) &threshold_ldr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_ldr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_ldr");
+    tt->descr = tdrpStrDup("Min SNR for computing LDR (dB).");
+    tt->help = tdrpStrDup("For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_ldr - &_start_;
+    tt->single_val.d = -7;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("MOBILE PLATFORMS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'compute_velocity_corrected_for_platform_motion'
     // ctype is 'tdrp_bool_t'
     
@@ -1901,26 +1863,28 @@
     tt->single_val.d = 0.69;
     tt++;
     
-    // Parameter 'spectrum_width_method'
-    // ctype is '_spectrum_width_method_t'
+    // Parameter 'georef_time_margin_secs'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("spectrum_width_method");
-    tt->descr = tdrpStrDup("Method for computing spectrum width.");
-    tt->help = tdrpStrDup("R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.");
-    tt->val_offset = (char *) &spectrum_width_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("spectrum_width_method_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WIDTH_METHOD_R0R1");
-      tt->enum_def.fields[0].val = WIDTH_METHOD_R0R1;
-      tt->enum_def.fields[1].name = tdrpStrDup("WIDTH_METHOD_R1R2");
-      tt->enum_def.fields[1].val = WIDTH_METHOD_R1R2;
-      tt->enum_def.fields[2].name = tdrpStrDup("WIDTH_METHOD_HYBRID");
-      tt->enum_def.fields[2].val = WIDTH_METHOD_HYBRID;
-    tt->single_val.e = WIDTH_METHOD_R0R1;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("georef_time_margin_secs");
+    tt->descr = tdrpStrDup("Margin for matching platform goeref with pulses (secs).");
+    tt->help = tdrpStrDup("The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.");
+    tt->val_offset = (char *) &georef_time_margin_secs - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'use_secondary_georeference'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_secondary_georeference");
+    tt->descr = tdrpStrDup("If true, use the secondary georeference packet.");
+    tt->help = tdrpStrDup("By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.");
+    tt->val_offset = (char *) &use_secondary_georeference - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 9'
@@ -2121,30 +2085,6 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'threshold_zdr_using_snr'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("threshold_zdr_using_snr");
-    tt->descr = tdrpStrDup("Option to threshold ZDR using SNR.");
-    tt->help = tdrpStrDup("If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.");
-    tt->val_offset = (char *) &threshold_zdr_using_snr - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'min_snr_db_for_zdr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_snr_db_for_zdr");
-    tt->descr = tdrpStrDup("Min SNR for computing ZDR (dB).");
-    tt->help = tdrpStrDup("If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.");
-    tt->val_offset = (char *) &min_snr_db_for_zdr - &_start_;
-    tt->single_val.d = -7;
-    tt++;
-    
     // Parameter 'override_cal_ldr_corrections'
     // ctype is 'tdrp_bool_t'
     
@@ -2179,30 +2119,6 @@
     tt->help = tdrpStrDup("See 'override_cal_ldr_corrections'.");
     tt->val_offset = (char *) &ldr_correction_db_v - &_start_;
     tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'threshold_ldr_using_snr'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("threshold_ldr_using_snr");
-    tt->descr = tdrpStrDup("Option to threshold LDR using SNR.");
-    tt->help = tdrpStrDup("If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.");
-    tt->val_offset = (char *) &threshold_ldr_using_snr - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'min_snr_db_for_ldr'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_snr_db_for_ldr");
-    tt->descr = tdrpStrDup("Min SNR for computing LDR (dB).");
-    tt->help = tdrpStrDup("For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.");
-    tt->val_offset = (char *) &min_snr_db_for_ldr - &_start_;
-    tt->single_val.d = -7;
     tt++;
     
     // Parameter 'override_cal_system_phidp'
@@ -3624,73 +3540,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 20");
-    tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
-    tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
-    tt++;
-    
-    // Parameter 'censoring_mode'
-    // ctype is '_censoring_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("censoring_mode");
-    tt->descr = tdrpStrDup("Control of the censoring operation.");
-    tt->help = tdrpStrDup("\tCENSORING_NONE: no censoring performed.\n\tCENSORING_BY_NOISE_FLAG: censor fields for gates with NOISE_FLAG set to true.\n\tCENSORING_BY_SNR_AND_NCP: censoring is performed using thresholds applied to SNR and NCP.");
-    tt->val_offset = (char *) &censoring_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("censoring_mode_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CENSORING_NONE");
-      tt->enum_def.fields[0].val = CENSORING_NONE;
-      tt->enum_def.fields[1].name = tdrpStrDup("CENSORING_BY_NOISE_FLAG");
-      tt->enum_def.fields[1].val = CENSORING_BY_NOISE_FLAG;
-      tt->enum_def.fields[2].name = tdrpStrDup("CENSORING_BY_SNR_AND_NCP");
-      tt->enum_def.fields[2].val = CENSORING_BY_SNR_AND_NCP;
-    tt->single_val.e = CENSORING_NONE;
-    tt++;
-    
-    // Parameter 'censoring_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("censoring_snr_threshold");
-    tt->descr = tdrpStrDup("SNR threshold for censoring (dB).");
-    tt->help = tdrpStrDup("Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.");
-    tt->val_offset = (char *) &censoring_snr_threshold - &_start_;
-    tt->single_val.d = -1;
-    tt++;
-    
-    // Parameter 'censoring_ncp_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("censoring_ncp_threshold");
-    tt->descr = tdrpStrDup("NCP threshold for censoring.");
-    tt->help = tdrpStrDup("Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.");
-    tt->val_offset = (char *) &censoring_ncp_threshold - &_start_;
-    tt->single_val.d = 0.15;
-    tt++;
-    
-    // Parameter 'censoring_min_valid_run'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("censoring_min_valid_run");
-    tt->descr = tdrpStrDup("Minimum valid run of non-censored gates.");
-    tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
-    tt->val_offset = (char *) &censoring_min_valid_run - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'Comment 21'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("REFRACTIVITY FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3707,11 +3556,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("PHASE DECODING PROCESSING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3864,11 +3713,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("CMD - CLUTTER MITIGATION DECISION system");
     tt->comment_text = tdrpStrDup("Option to compute and use CMD fields.");
     tt++;
@@ -4212,11 +4061,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4478,11 +4327,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD.");
     tt->comment_text = tdrpStrDup("If clutter is present along with weather, RHOHV should increase after application of the clutter filter. The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0. We use different improvement thresholds to decide whether the filtered spectrum should be used for power or phase related fields.");
     tt++;
@@ -4547,11 +4396,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD");
     tt->comment_text = tdrpStrDup("You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.");
     tt++;
@@ -4696,11 +4545,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4925,11 +4774,11 @@
     tt->single_val.d = 0.7;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4953,9 +4802,9 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_moments_in_radx_format");
     tt->descr = tdrpStrDup("Write output moments in Radx format.");
-    tt->help = tdrpStrDup("If TRUE moments are written as Radx messages. If FALSE moments are written as DsRadar messages. ");
+    tt->help = tdrpStrDup("If TRUE moments are written as Radx messages. If FALSE moments are written as legacy DsRadar messages. ");
     tt->val_offset = (char *) &output_moments_in_radx_format - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'output_fmq_size'
@@ -5041,6 +4890,82 @@
     tt->help = tdrpStrDup("FILELIST, ARCHIVE and SIMULATE modes only.");
     tt->val_offset = (char *) &beam_wait_msecs - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 28'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 28");
+    tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
+    tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
+    tt++;
+    
+    // Parameter 'censoring_mode'
+    // ctype is '_censoring_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("censoring_mode");
+    tt->descr = tdrpStrDup("Control of the censoring operation.");
+    tt->help = tdrpStrDup("\tCENSORING_NONE: no censoring performed.\n\tCENSORING_BY_NOISE_FLAG: censor fields for gates with NOISE_FLAG set to true.\n\tCENSORING_BY_SNR_AND_NCP: censoring is performed using thresholds applied to SNR and NCP.");
+    tt->val_offset = (char *) &censoring_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("censoring_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CENSORING_NONE");
+      tt->enum_def.fields[0].val = CENSORING_NONE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CENSORING_BY_NOISE_FLAG");
+      tt->enum_def.fields[1].val = CENSORING_BY_NOISE_FLAG;
+      tt->enum_def.fields[2].name = tdrpStrDup("CENSORING_BY_SNR_AND_NCP");
+      tt->enum_def.fields[2].val = CENSORING_BY_SNR_AND_NCP;
+    tt->single_val.e = CENSORING_NONE;
+    tt++;
+    
+    // Parameter 'censoring_snr_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("censoring_snr_threshold");
+    tt->descr = tdrpStrDup("SNR threshold for censoring (dB).");
+    tt->help = tdrpStrDup("Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.");
+    tt->val_offset = (char *) &censoring_snr_threshold - &_start_;
+    tt->single_val.d = -1;
+    tt++;
+    
+    // Parameter 'censoring_ncp_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("censoring_ncp_threshold");
+    tt->descr = tdrpStrDup("NCP threshold for censoring.");
+    tt->help = tdrpStrDup("Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.");
+    tt->val_offset = (char *) &censoring_ncp_threshold - &_start_;
+    tt->single_val.d = 0.15;
+    tt++;
+    
+    // Parameter 'censoring_min_valid_run'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("censoring_min_valid_run");
+    tt->descr = tdrpStrDup("Minimum valid run of non-censored gates.");
+    tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
+    tt->val_offset = (char *) &censoring_min_valid_run - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'Comment 29'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 29");
+    tt->comment_hdr = tdrpStrDup("SELECTING OUTPUT FIELDS");
+    tt->comment_text = tdrpStrDup("Select the fields you want in the output FMQ.");
     tt++;
     
     // Parameter 'output_fields'
@@ -6066,11 +5991,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -6147,11 +6072,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -6242,11 +6167,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6309,6 +6234,108 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_fixed_angle_error_rhi - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'Comment 33'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 33");
+    tt->comment_hdr = tdrpStrDup("COMPUTING THE ANTENNA RATE");
+    tt->comment_text = tdrpStrDup("This is required for computing the number of samples in a dwell, and for angle interpolation if set,");
+    tt++;
+    
+    // Parameter 'nsecs_for_antenna_rate'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("nsecs_for_antenna_rate");
+    tt->descr = tdrpStrDup("Time for computing antenna rate (sec).");
+    tt->help = tdrpStrDup("The rate computed over this time period. If angle interpolation is used, then set this to a larger value than the default. A value of 0.5 is suggested for this case.");
+    tt->val_offset = (char *) &nsecs_for_antenna_rate - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'Comment 34'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 34");
+    tt->comment_hdr = tdrpStrDup("INTERPOLATION OF ANTENNA ANGLES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'interpolate_antenna_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interpolate_antenna_angles");
+    tt->descr = tdrpStrDup("Option to interpolate antenna angles to make sure they vary smoothly.");
+    tt->help = tdrpStrDup("Some systems send angles which jump from one value to another and then remain constant for a number of pulses. This option allows you to interpolate these angles so that they vary smoothly from pulse to pulse. In RHI mode the elevation angles are smoothed. In other modes the azimuth angles are smoothed.");
+    tt->val_offset = (char *) &interpolate_antenna_angles - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'angle_interp_max_change'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("angle_interp_max_change");
+    tt->descr = tdrpStrDup("Maximum change in angle for interpolation (deg).");
+    tt->help = tdrpStrDup("See interpolate_antenna_angles. This is the maximum permissable change in angle for interpolation to be performed. If the difference in angle between 2 pulses exceeds this value, interpolation is not performed.");
+    tt->val_offset = (char *) &angle_interp_max_change - &_start_;
+    tt->single_val.d = 2.5;
+    tt++;
+    
+    // Parameter 'angle_interp_max_queue_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("angle_interp_max_queue_size");
+    tt->descr = tdrpStrDup("Maximum queue size for interpolating angles.");
+    tt->help = tdrpStrDup("If more than this number of pulses have constant angles, interpolation will not be done.");
+    tt->val_offset = (char *) &angle_interp_max_queue_size - &_start_;
+    tt->single_val.i = 200;
+    tt++;
+    
+    // Parameter 'angle_interp_adjust_for_latency'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("angle_interp_adjust_for_latency");
+    tt->descr = tdrpStrDup("Option to adjust antenna angles for latency in the processing.");
+    tt->help = tdrpStrDup("In some systems, the angles are tagged to the IQ pulses late, so that they lag the real angles. Set this to TRUE to adjust for the latency by adjusting the angles for latency multiplied by the angular rate.");
+    tt->val_offset = (char *) &angle_interp_adjust_for_latency - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'angle_interp_latency'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("angle_interp_latency");
+    tt->descr = tdrpStrDup("Latency of antenna angles (secs).");
+    tt->help = tdrpStrDup("See 'adjust_angles_for_latency'.");
+    tt->val_offset = (char *) &angle_interp_latency - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'angle_interp_debug'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("angle_interp_debug");
+    tt->descr = tdrpStrDup("Option to turn on debugging for antenna angle interpolation.");
+    tt->help = tdrpStrDup("If TRUE, interpolation diagnostics will be printed.");
+    tt->val_offset = (char *) &angle_interp_debug - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL
