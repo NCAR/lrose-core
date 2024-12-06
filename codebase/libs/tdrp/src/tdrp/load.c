@@ -45,6 +45,7 @@
 static int do_load(token_handle_t *handle,
 		   const char *param_file_path, TDRPtable *table,
 		   int expand_env, int debug);
+static int expand_all_env(tdrpVal_t *var);
 static int expand_for_single_val(tdrpVal_t *var);
 static int expand_token(tdrpToken_t *token);
 static int expand_all_vals(TDRPtable *table);
@@ -1313,10 +1314,10 @@ static int expand_all_vals(TDRPtable *table)
       
       if (tt->is_array) {
 	for (i = 0; i < tt->array_n; i++) {
-	  iret |= expand_for_single_val(tt->array_vals + i);
+	  iret |= expand_all_env(tt->array_vals + i);
 	}
       } else {
-	iret |= expand_for_single_val(&tt->single_val);
+	iret |= expand_all_env(&tt->single_val);
       }
 
     } else if (tt->ptype == STRUCT_TYPE) {
@@ -1327,7 +1328,7 @@ static int expand_all_vals(TDRPtable *table)
 	  for (i = 0; i < tt->struct_def.nfields; i++) {
 	    index = j * tt->struct_def.nfields + i;
 	    if (tt->struct_def.fields[i].ptype == STRING_TYPE) {
-	      iret |= expand_for_single_val(tt->struct_vals + index);
+	      iret |= expand_all_env(tt->struct_vals + index);
 	    }
 	  } /* i */
 	} /* j */
@@ -1336,7 +1337,7 @@ static int expand_all_vals(TDRPtable *table)
 
 	for (i = 0; i < tt->struct_def.nfields; i++) {
 	  if (tt->struct_def.fields[i].ptype == STRING_TYPE) {
-	    iret |= expand_for_single_val(tt->struct_vals + i);
+	    iret |= expand_all_env(tt->struct_vals + i);
 	  } /* i */
 	}
 	    
@@ -1354,6 +1355,31 @@ static int expand_all_vals(TDRPtable *table)
     return (0);
   }
 
+}
+
+/******************************************************************
+ * expand_all_env()
+ *
+ * Expand environment variables into string type for the given
+ * table entry.
+ *
+ * The first env variable found is expanded.
+ * The env variable must be in the $(ENV_VAR) format.
+ *
+ * Returns 0 on success, -1 on failure.
+ *
+ */
+
+static int expand_all_env(tdrpVal_t *val)
+{
+  int iret = 0;
+  char *dollar_bracket;
+  while ((dollar_bracket = strstr(val->s, "$(")) != NULL) {
+    if (expand_for_single_val(val) != 0) {
+      iret = -1;
+    }
+  } // while
+  return iret;
 }
 
 /******************************************************************
@@ -1400,7 +1426,7 @@ static int expand_for_single_val(tdrpVal_t *val)
    */
   
   while ((dollar_bracket = strstr(work_str, "$(")) != NULL) {
-    
+
     memset (env_cpy, 0, TDRP_LINE_MAX);
     pre_str = work_str;
     env_str = dollar_bracket + 2;
