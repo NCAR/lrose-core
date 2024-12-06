@@ -75,12 +75,25 @@ public:
   } debug_t;
 
   typedef enum {
-    FILELIST = 0,
+    REALTIME = 0,
     ARCHIVE = 1,
-    REALTIME = 2,
-    SIMULATE = 3,
-    FMQ = 4
+    FILELIST = 2,
+    SIMULATE = 3
   } mode_t;
+
+  typedef enum {
+    SCAN_MODE_UNKNOWN = 0,
+    SCAN_MODE_SECTOR = 1,
+    SCAN_MODE_COPLANE = 2,
+    SCAN_MODE_RHI = 3,
+    SCAN_MODE_VERTICAL_POINTING = 4,
+    SCAN_MODE_IDLE = 7,
+    SCAN_MODE_SURVEILLANCE = 8,
+    SCAN_MODE_SUNSCAN = 11,
+    SCAN_MODE_POINTING = 12,
+    SCAN_MODE_MANUAL_PPI = 15,
+    SCAN_MODE_MANUAL_RHI = 16
+  } scan_mode_t;
 
   typedef enum {
     PLATFORM_FIXED = 1,
@@ -105,20 +118,6 @@ public:
     PRIMARY_AXIS_Y_PRIME = 4,
     PRIMARY_AXIS_X_PRIME = 5
   } primary_axis_t;
-
-  typedef enum {
-    SCAN_MODE_UNKNOWN = 0,
-    SCAN_MODE_SECTOR = 1,
-    SCAN_MODE_COPLANE = 2,
-    SCAN_MODE_RHI = 3,
-    SCAN_MODE_VERTICAL_POINTING = 4,
-    SCAN_MODE_IDLE = 7,
-    SCAN_MODE_SURVEILLANCE = 8,
-    SCAN_MODE_SUNSCAN = 11,
-    SCAN_MODE_POINTING = 12,
-    SCAN_MODE_MANUAL_PPI = 15,
-    SCAN_MODE_MANUAL_RHI = 16
-  } scan_mode_t;
 
   typedef enum {
     SINGLE_POL = 0,
@@ -797,10 +796,6 @@ public:
 
   char* input_dir;
 
-  tdrp_bool_t use_ldata_info_file;
-
-  int max_realtime_valid_age;
-
   tdrp_bool_t invert_hv_flag;
 
   tdrp_bool_t swap_receiver_channels;
@@ -820,6 +815,18 @@ public:
   double primary_prt_secs;
 
   double georef_time_margin_secs;
+
+  tdrp_bool_t apply_azimuth_offset;
+
+  double azimuth_offset;
+
+  tdrp_bool_t apply_elevation_offset;
+
+  double elevation_offset;
+
+  tdrp_bool_t override_scan_mode;
+
+  scan_mode_t scan_mode_for_override;
 
   tdrp_bool_t use_secondary_georeference;
 
@@ -868,18 +875,6 @@ public:
   tdrp_bool_t override_radar_wavelength;
 
   double radar_wavelength_cm;
-
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
-  tdrp_bool_t override_scan_mode;
-
-  scan_mode_t scan_mode_for_override;
 
   moments_params_t *_moments_params;
   int moments_params_n;
@@ -1373,7 +1368,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[316];
+  mutable TDRPtable _table[315];
 
   const char *_className;
 

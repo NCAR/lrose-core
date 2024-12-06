@@ -671,23 +671,21 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.");
+    tt->help = tdrpStrDup("In REALTIME mode, the program opens the input_fmq, and reads time series data from the queue. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[0].val = FILELIST;
+      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
+      tt->enum_def.fields[0].val = REALTIME;
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[1].val = ARCHIVE;
-      tt->enum_def.fields[2].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[2].val = REALTIME;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[2].val = FILELIST;
       tt->enum_def.fields[3].name = tdrpStrDup("SIMULATE");
       tt->enum_def.fields[3].val = SIMULATE;
-      tt->enum_def.fields[4].name = tdrpStrDup("FMQ");
-      tt->enum_def.fields[4].val = FMQ;
-    tt->single_val.e = FMQ;
+    tt->single_val.e = REALTIME;
     tt++;
     
     // Parameter 'input_fmq'
@@ -720,36 +718,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
-    tt->descr = tdrpStrDup("Dir for input data files.");
-    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.");
+    tt->descr = tdrpStrDup("Dir for ARCHIVE input data files.");
+    tt->help = tdrpStrDup("This is used in ARCHIVE mode. In FILELIST and SIMULATE modes, the file paths are specified on the command line.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("./input");
     tt++;
     
-    // Parameter 'use_ldata_info_file'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_ldata_info_file");
-    tt->descr = tdrpStrDup("Option to use _latest_data_info file as input trigger.");
-    tt->help = tdrpStrDup("REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.");
-    tt->val_offset = (char *) &use_ldata_info_file - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_realtime_valid_age'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_valid_age");
-    tt->descr = tdrpStrDup("Max valid age of rdata input files in realtime mode (secs)");
-    tt->help = tdrpStrDup("This the max valid age for an incoming file. The program will wait for a data file more recent than this age.");
-    tt->val_offset = (char *) &max_realtime_valid_age - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.i = 1;
-    tt->single_val.i = 360;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("MODIFYING INPUT META-DATA");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'invert_hv_flag'
@@ -872,6 +853,104 @@
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'apply_azimuth_offset'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_azimuth_offset");
+    tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
+    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
+    tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'azimuth_offset'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("azimuth_offset");
+    tt->descr = tdrpStrDup("Azimuth offset (degrees).");
+    tt->help = tdrpStrDup("See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.");
+    tt->val_offset = (char *) &azimuth_offset - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'apply_elevation_offset'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_elevation_offset");
+    tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
+    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
+    tt->val_offset = (char *) &apply_elevation_offset - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'elevation_offset'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("elevation_offset");
+    tt->descr = tdrpStrDup("Elevation offset (degrees).");
+    tt->help = tdrpStrDup("See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.");
+    tt->val_offset = (char *) &elevation_offset - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'override_scan_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_scan_mode");
+    tt->descr = tdrpStrDup("Option to override the scan mode in the time series data.");
+    tt->help = tdrpStrDup("Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.");
+    tt->val_offset = (char *) &override_scan_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'scan_mode_for_override'
+    // ctype is '_scan_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("scan_mode_for_override");
+    tt->descr = tdrpStrDup("Select the scan mode for override");
+    tt->help = tdrpStrDup("See 'override_scan_mode'");
+    tt->val_offset = (char *) &scan_mode_for_override - &_start_;
+    tt->enum_def.name = tdrpStrDup("scan_mode_t");
+    tt->enum_def.nfields = 11;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SCAN_MODE_UNKNOWN");
+      tt->enum_def.fields[0].val = SCAN_MODE_UNKNOWN;
+      tt->enum_def.fields[1].name = tdrpStrDup("SCAN_MODE_SECTOR");
+      tt->enum_def.fields[1].val = SCAN_MODE_SECTOR;
+      tt->enum_def.fields[2].name = tdrpStrDup("SCAN_MODE_COPLANE");
+      tt->enum_def.fields[2].val = SCAN_MODE_COPLANE;
+      tt->enum_def.fields[3].name = tdrpStrDup("SCAN_MODE_RHI");
+      tt->enum_def.fields[3].val = SCAN_MODE_RHI;
+      tt->enum_def.fields[4].name = tdrpStrDup("SCAN_MODE_VERTICAL_POINTING");
+      tt->enum_def.fields[4].val = SCAN_MODE_VERTICAL_POINTING;
+      tt->enum_def.fields[5].name = tdrpStrDup("SCAN_MODE_IDLE");
+      tt->enum_def.fields[5].val = SCAN_MODE_IDLE;
+      tt->enum_def.fields[6].name = tdrpStrDup("SCAN_MODE_SURVEILLANCE");
+      tt->enum_def.fields[6].val = SCAN_MODE_SURVEILLANCE;
+      tt->enum_def.fields[7].name = tdrpStrDup("SCAN_MODE_SUNSCAN");
+      tt->enum_def.fields[7].val = SCAN_MODE_SUNSCAN;
+      tt->enum_def.fields[8].name = tdrpStrDup("SCAN_MODE_POINTING");
+      tt->enum_def.fields[8].val = SCAN_MODE_POINTING;
+      tt->enum_def.fields[9].name = tdrpStrDup("SCAN_MODE_MANUAL_PPI");
+      tt->enum_def.fields[9].val = SCAN_MODE_MANUAL_PPI;
+      tt->enum_def.fields[10].name = tdrpStrDup("SCAN_MODE_MANUAL_RHI");
+      tt->enum_def.fields[10].val = SCAN_MODE_MANUAL_RHI;
+    tt->single_val.e = SCAN_MODE_UNKNOWN;
+    tt++;
+    
     // Parameter 'use_secondary_georeference'
     // ctype is 'tdrp_bool_t'
     
@@ -908,11 +987,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COMPUTING THE ANTENNA RATE");
     tt->comment_text = tdrpStrDup("This is required for computing the number of samples in a dwell, and for angle interpolation if set,");
     tt++;
@@ -929,11 +1008,11 @@
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION OF ANTENNA ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1010,11 +1089,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -1231,109 +1310,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'apply_azimuth_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_azimuth_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
-    tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_offset");
-    tt->descr = tdrpStrDup("Azimuth offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.");
-    tt->val_offset = (char *) &azimuth_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'apply_elevation_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_elevation_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
-    tt->val_offset = (char *) &apply_elevation_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'elevation_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elevation_offset");
-    tt->descr = tdrpStrDup("Elevation offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.");
-    tt->val_offset = (char *) &elevation_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'override_scan_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_scan_mode");
-    tt->descr = tdrpStrDup("Option to override the scan mode in the time series data.");
-    tt->help = tdrpStrDup("Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.");
-    tt->val_offset = (char *) &override_scan_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'scan_mode_for_override'
-    // ctype is '_scan_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("scan_mode_for_override");
-    tt->descr = tdrpStrDup("Select the scan mode for override");
-    tt->help = tdrpStrDup("See 'override_scan_mode'");
-    tt->val_offset = (char *) &scan_mode_for_override - &_start_;
-    tt->enum_def.name = tdrpStrDup("scan_mode_t");
-    tt->enum_def.nfields = 11;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SCAN_MODE_UNKNOWN");
-      tt->enum_def.fields[0].val = SCAN_MODE_UNKNOWN;
-      tt->enum_def.fields[1].name = tdrpStrDup("SCAN_MODE_SECTOR");
-      tt->enum_def.fields[1].val = SCAN_MODE_SECTOR;
-      tt->enum_def.fields[2].name = tdrpStrDup("SCAN_MODE_COPLANE");
-      tt->enum_def.fields[2].val = SCAN_MODE_COPLANE;
-      tt->enum_def.fields[3].name = tdrpStrDup("SCAN_MODE_RHI");
-      tt->enum_def.fields[3].val = SCAN_MODE_RHI;
-      tt->enum_def.fields[4].name = tdrpStrDup("SCAN_MODE_VERTICAL_POINTING");
-      tt->enum_def.fields[4].val = SCAN_MODE_VERTICAL_POINTING;
-      tt->enum_def.fields[5].name = tdrpStrDup("SCAN_MODE_IDLE");
-      tt->enum_def.fields[5].val = SCAN_MODE_IDLE;
-      tt->enum_def.fields[6].name = tdrpStrDup("SCAN_MODE_SURVEILLANCE");
-      tt->enum_def.fields[6].val = SCAN_MODE_SURVEILLANCE;
-      tt->enum_def.fields[7].name = tdrpStrDup("SCAN_MODE_SUNSCAN");
-      tt->enum_def.fields[7].val = SCAN_MODE_SUNSCAN;
-      tt->enum_def.fields[8].name = tdrpStrDup("SCAN_MODE_POINTING");
-      tt->enum_def.fields[8].val = SCAN_MODE_POINTING;
-      tt->enum_def.fields[9].name = tdrpStrDup("SCAN_MODE_MANUAL_PPI");
-      tt->enum_def.fields[9].val = SCAN_MODE_MANUAL_PPI;
-      tt->enum_def.fields[10].name = tdrpStrDup("SCAN_MODE_MANUAL_RHI");
-      tt->enum_def.fields[10].val = SCAN_MODE_MANUAL_RHI;
-    tt->single_val.e = SCAN_MODE_UNKNOWN;
-    tt++;
-    
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1942,11 +1923,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2260,11 +2241,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("CORRECT RECEIVER GAINS BASED ON MEASURED TEMPERATURE IN STATUS XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2352,11 +2333,11 @@
       tt->struct_vals[15].s = tdrpStrDup("<HcrStatus><HcrReceiverStatus><EikTemp>");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("FOR HCR, CORRECT RECEIVER GAIN FOR TEMPERATURE USING VALUES FROM SPDB");
     tt->comment_text = tdrpStrDup("Also, optionally (a) correct georeference height, and (b) set georeference velocities to 0 for ground-based operations.");
     tt++;
@@ -2445,11 +2426,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("CORRECT CALIBRATION RECEIVER GAIN USING MEASURED NOISE VALUES");
     tt->comment_text = tdrpStrDup("Noise values are measured using NoiseMon, which computes the noise for gates above a designated height, and checks that rays are not close to the sun or contain significant reflectivity.");
     tt++;
@@ -2586,11 +2567,11 @@
     tt->single_val.d = 0.01296;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2667,11 +2648,11 @@
     tt->single_val.d = 0.84;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("ATMOSPHERIC ATTENUATION CORRECTION METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2710,11 +2691,11 @@
     tt->single_val.d = 0.012;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -2921,11 +2902,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -3162,11 +3143,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP using Bringi method");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -3259,11 +3240,11 @@
     tt->single_val.d = 0.75;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("NOISE DETECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3360,11 +3341,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for NOISE LOCATION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
     tt++;
@@ -3638,11 +3619,11 @@
     tt->single_val.d = 0.51;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
     tt++;
@@ -3705,11 +3686,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("REFRACTIVITY FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3726,11 +3707,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("PHASE DECODING PROCESSING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3883,11 +3864,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("CMD - CLUTTER MITIGATION DECISION system");
     tt->comment_text = tdrpStrDup("Option to compute and use CMD fields.");
     tt++;
@@ -4231,11 +4212,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4497,11 +4478,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD.");
     tt->comment_text = tdrpStrDup("If clutter is present along with weather, RHOHV should increase after application of the clutter filter. The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0. We use different improvement thresholds to decide whether the filtered spectrum should be used for power or phase related fields.");
     tt++;
@@ -4566,11 +4547,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD");
     tt->comment_text = tdrpStrDup("You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.");
     tt++;
@@ -4715,11 +4696,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4944,11 +4925,11 @@
     tt->single_val.d = 0.7;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6085,11 +6066,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -6166,11 +6147,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -6261,11 +6242,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

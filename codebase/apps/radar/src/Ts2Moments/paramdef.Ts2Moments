@@ -64,13 +64,13 @@ commentdef {
 };
 
 typedef enum {
-  FILELIST, ARCHIVE, REALTIME, SIMULATE, FMQ
+  REALTIME, ARCHIVE, FILELIST, SIMULATE
 } mode_t;
 
 paramdef enum mode_t {
-  p_default = FMQ;
+  p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.";
+  p_help = "In REALTIME mode, the program opens the input_fmq, and reads time series data from the queue. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar.";
 } mode;
 
 paramdef string {
@@ -87,22 +87,13 @@ paramdef boolean {
 
 paramdef string {
   p_default = "./input";
-  p_descr = "Dir for input data files.";
-  p_help = "This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.";
+  p_descr = "Dir for ARCHIVE input data files.";
+  p_help = "This is used in ARCHIVE mode. In FILELIST and SIMULATE modes, the file paths are specified on the command line.";
 } input_dir;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use _latest_data_info file as input trigger.";
-  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
-} use_ldata_info_file;
-
-paramdef int {
-  p_default = 360;
-  p_min = 1;
-  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
-  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
-} max_realtime_valid_age;
+commentdef {
+  p_header = "MODIFYING INPUT META-DATA";
+};
 
 paramdef boolean {
   p_default = FALSE;
@@ -163,6 +154,58 @@ paramdef double {
   p_descr = "Margin for matching platform goeref with pulses (secs).";
   p_help = "The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.";
 } georef_time_margin_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the azimuth values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+} apply_azimuth_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth offset (degrees).";
+  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
+} azimuth_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the elevation values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+} apply_elevation_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Elevation offset (degrees).";
+  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
+} elevation_offset;
+
+typedef enum {
+
+  SCAN_MODE_UNKNOWN = 0,
+  SCAN_MODE_SECTOR = 1,
+  SCAN_MODE_COPLANE = 2,
+  SCAN_MODE_RHI = 3,
+  SCAN_MODE_VERTICAL_POINTING = 4,
+  SCAN_MODE_IDLE = 7,
+  SCAN_MODE_SURVEILLANCE = 8,
+  SCAN_MODE_SUNSCAN = 11,
+  SCAN_MODE_POINTING = 12,
+  SCAN_MODE_MANUAL_PPI = 15,
+  SCAN_MODE_MANUAL_RHI = 16
+
+} scan_mode_t;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the scan mode in the time series data.";
+  p_help = "Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.";
+} override_scan_mode;
+
+paramdef enum scan_mode_t {
+  p_default = SCAN_MODE_UNKNOWN;
+  p_descr = "Select the scan mode for override";
+  p_help = "See 'override_scan_mode'";
+} scan_mode_for_override;
 
 paramdef boolean {
   p_default = FALSE;
@@ -361,58 +404,6 @@ paramdef double {
   p_descr = "Radar wavelength (cm).";
   p_help = "See override_radar_wavelength.";
 } radar_wavelength_cm;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
-} apply_azimuth_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Azimuth offset (degrees).";
-  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
-} azimuth_offset;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
-} apply_elevation_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Elevation offset (degrees).";
-  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
-} elevation_offset;
-
-typedef enum {
-
-  SCAN_MODE_UNKNOWN = 0,
-  SCAN_MODE_SECTOR = 1,
-  SCAN_MODE_COPLANE = 2,
-  SCAN_MODE_RHI = 3,
-  SCAN_MODE_VERTICAL_POINTING = 4,
-  SCAN_MODE_IDLE = 7,
-  SCAN_MODE_SURVEILLANCE = 8,
-  SCAN_MODE_SUNSCAN = 11,
-  SCAN_MODE_POINTING = 12,
-  SCAN_MODE_MANUAL_PPI = 15,
-  SCAN_MODE_MANUAL_RHI = 16
-
-} scan_mode_t;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override the scan mode in the time series data.";
-  p_help = "Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.";
-} override_scan_mode;
-
-paramdef enum scan_mode_t {
-  p_default = SCAN_MODE_UNKNOWN;
-  p_descr = "Select the scan mode for override";
-  p_help = "See 'override_scan_mode'";
-} scan_mode_for_override;
 
 commentdef {
   p_header = "MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION";

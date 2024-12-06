@@ -219,7 +219,7 @@ BeamReader::BeamReader(const string &prog_name,
     iwrfDebug = IWRF_DEBUG_NORM;
   } 
     
-  if (_params.mode == Params::FMQ) {
+  if (_params.mode == Params::REALTIME) {
     _pulseReader = new IwrfTsReaderFmq(_params.input_fmq,
                                        iwrfDebug,
                                        _params.position_fmq_at_start);
