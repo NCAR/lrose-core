@@ -38,7 +38,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "Ts2Moments.hh"
-#include "SpectraPrint.hh"
 #include <toolsa/str.h>
 #include <toolsa/port.h>
 #include <signal.h>

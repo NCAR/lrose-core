@@ -5037,6 +5037,19 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'data_mapper_report_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("data_mapper_report_interval");
+    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
+    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
+    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
+    tt->is_private = TRUE;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'beam_wait_msecs'
     // ctype is 'int'
     
@@ -6315,139 +6328,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_fixed_angle_error_rhi - &_start_;
     tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'selected_region'
-    // ctype is '_selected_region_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("selected_region");
-    tt->descr = tdrpStrDup("Region for selected prints and spectra files.");
-    tt->help = tdrpStrDup("See do_selected_print and write_spectra_files.");
-    tt->val_offset = (char *) &selected_region - &_start_;
-    tt->is_private = TRUE;
-    tt->struct_def.name = tdrpStrDup("selected_region_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("min_el");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &selected_region.min_el - (char *) &selected_region;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("max_el");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &selected_region.max_el - (char *) &selected_region;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("min_az");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &selected_region.min_az - (char *) &selected_region;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("max_az");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &selected_region.max_az - (char *) &selected_region;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("min_range");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &selected_region.min_range - (char *) &selected_region;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("max_range");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &selected_region.max_range - (char *) &selected_region;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 0;
-      tt->struct_vals[3].d = 1;
-      tt->struct_vals[4].d = 0;
-      tt->struct_vals[5].d = 1;
-    tt++;
-    
-    // Parameter 'do_selected_print'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_selected_print");
-    tt->descr = tdrpStrDup("Option to print info for a selected region.");
-    tt->help = tdrpStrDup("If true, debug info for a selected region will be printed to stderr.");
-    tt->val_offset = (char *) &do_selected_print - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'spectra_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("spectra_dir");
-    tt->descr = tdrpStrDup("Directory to which spectra are written.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &spectra_dir - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.s = tdrpStrDup("/tmp/spectra");
-    tt++;
-    
-    // Parameter 'write_individual_spectra_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_individual_spectra_files");
-    tt->descr = tdrpStrDup("Option to write individual spectral files.");
-    tt->help = tdrpStrDup("If true, ASCII files with the spectra are written to the specified directory, for the selected region. A separate file is written for each spectrum.");
-    tt->val_offset = (char *) &write_individual_spectra_files - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_combined_spectra_file'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_combined_spectra_file");
-    tt->descr = tdrpStrDup("Option to write combined spectra file.");
-    tt->help = tdrpStrDup("If true, a single file is written, with one line per spectrum.");
-    tt->val_offset = (char *) &write_combined_spectra_file - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'min_snr_for_combined_spectra_file'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_snr_for_combined_spectra_file");
-    tt->descr = tdrpStrDup("Minimum SNR for writing combined spectra to file (dB).");
-    tt->help = tdrpStrDup("The spectrum will only be added if the SNR exceeds this value.");
-    tt->val_offset = (char *) &min_snr_for_combined_spectra_file - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'data_mapper_report_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("data_mapper_report_interval");
-    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
-    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
-    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
-    tt->is_private = TRUE;
-    tt->single_val.i = 5;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -485,15 +485,6 @@ public:
     tdrp_bool_t write_filtered;
   } output_field_t;
 
-  typedef struct {
-    double min_el;
-    double max_el;
-    double min_az;
-    double max_az;
-    double min_range;
-    double max_range;
-  } selected_region_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -1334,6 +1325,8 @@ public:
 
   tdrp_bool_t write_blocking;
 
+  int data_mapper_report_interval;
+
   int beam_wait_msecs;
 
   output_field_t *_output_fields;
@@ -1373,20 +1366,6 @@ public:
 
   double max_fixed_angle_error_rhi;
 
-  selected_region_t selected_region;
-
-  tdrp_bool_t do_selected_print;
-
-  char* spectra_dir;
-
-  tdrp_bool_t write_individual_spectra_files;
-
-  tdrp_bool_t write_combined_spectra_file;
-
-  double min_snr_for_combined_spectra_file;
-
-  int data_mapper_report_interval;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1394,7 +1373,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[322];
+  mutable TDRPtable _table[316];
 
   const char *_className;
 

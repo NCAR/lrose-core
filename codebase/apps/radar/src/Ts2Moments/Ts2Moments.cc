@@ -41,7 +41,6 @@
 #include <iostream>
 #include <toolsa/pmu.h>
 #include "EgmCorrection.hh"
-#include "SpectraPrint.hh"
 #include "Ts2Moments.hh"
 using namespace std;
 
@@ -210,10 +209,6 @@ Ts2Moments::Ts2Moments(int argc, char **argv)
     _writeThread->signalWorkToStart();
 
   }
-
-  // create SpectraFile object
-
-  SpectraPrint::Inst(_params);
 
   // initialize EGM correction for georef height, if needed
 

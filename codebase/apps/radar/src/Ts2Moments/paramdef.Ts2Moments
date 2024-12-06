@@ -1168,12 +1168,6 @@ paramdef double {
   p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
 } min_snr_db_for_residue_correction;
 
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to apply a regression clutter filter.";
-//   p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
-// } use_polynomial_regression_clutter_filter;
-
 paramdef boolean {
   p_default = true;
   p_descr = "Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).";
@@ -1221,12 +1215,6 @@ paramdef enum notch_interp_method_t {
   p_descr = "For the regression filter, option to interpolate power across the notch.";
   p_help = "If NONE, no interpolation is performed. If LINEAR, a linear interpolation is performed across the notch. If GAUSSIAN, an iterative Gaussian interpolation is performed across the notch.";
 } regression_filter_notch_interp_method;
-
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to use a simple notch for clutter filtering.";
-//   p_help = "If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.";
-// } use_simple_notch_clutter_filter;
 
 paramdef double {
   p_default = 3.0;
@@ -2101,6 +2089,13 @@ paramdef boolean {
 } write_blocking;
 
 paramdef int {
+  p_private = TRUE;
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef int {
   p_default = 0;
   p_descr = "Wait per beam (milli-secs)";
   p_help = "FILELIST, ARCHIVE and SIMULATE modes only.";
@@ -2627,72 +2622,4 @@ paramdef double {
   p_descr = "Maximum permissable error in the pointing angle in RHI mode (deg).";
   p_descr = "See 'check_transition_from_fixed_angle_error'.";
 } max_fixed_angle_error_rhi;
-
-// commentdef {
-//   p_header = "SPECTRAL PRINTS FOR DEBUGGING";
-// };
-
-typedef struct {
-  double min_el;
-  double max_el;
-  double min_az;
-  double max_az;
-  double min_range;
-  double max_range;
-} selected_region_t;
-
-paramdef struct selected_region_t {
-  p_private = TRUE;
-  p_default = {
-    min_el = 0.0,
-    max_el = 1.0,
-    min_az = 0.0,
-    max_az = 1.0,
-    min_range = 0.0,
-    max_range = 1.0
-  };
-  p_descr = "Region for selected prints and spectra files.";
-  p_help = "See do_selected_print and write_spectra_files.";
-} selected_region;
-
-paramdef boolean {
-  p_private = TRUE;
-  p_default = false;
-  p_descr = "Option to print info for a selected region.";
-  p_help = "If true, debug info for a selected region will be printed to stderr.";
-} do_selected_print;
-
-paramdef string {
-  p_private = TRUE;
-  p_default = "/tmp/spectra";
-  p_descr = "Directory to which spectra are written.";
-} spectra_dir;
-
-paramdef boolean {
-  p_private = TRUE;
-  p_default = false;
-  p_descr = "Option to write individual spectral files.";
-  p_help = "If true, ASCII files with the spectra are written to the specified directory, for the selected region. A separate file is written for each spectrum.";
-} write_individual_spectra_files;
-
-paramdef boolean {
-  p_private = TRUE;
-  p_default = false;
-  p_descr = "Option to write combined spectra file.";
-  p_help = "If true, a single file is written, with one line per spectrum.";
-} write_combined_spectra_file;
-
-paramdef double {
-  p_private = TRUE;
-  p_default = 10;
-  p_descr = "Minimum SNR for writing combined spectra to file (dB).";
-  p_help = "The spectrum will only be added if the SNR exceeds this value.";
-} min_snr_for_combined_spectra_file;
-
-paramdef int {
-  p_private = TRUE;
-  p_default = 5;
-  p_descr = "Number of seconds between reports to DataMapper.";
-  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
-} data_mapper_report_interval;
 
