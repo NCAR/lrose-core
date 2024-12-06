@@ -536,6 +536,7 @@ codebase/apps/radar/src/TsAscope/Makefile.qmake
 codebase/apps/radar/src/TsAscope/moc_*cpp
 codebase/apps/radar/src/TsAscope/moc_predefs.h
 
+codebase/apps/radar/src/Ts2Moments/Ts2Moments
 codebase/apps/radar/src/Ts2NetCDF/Ts2NetCDF
 codebase/apps/radar/src/TsCalAuto/TsCalAuto
 codebase/apps/radar/src/TsConvert/TsConvert
