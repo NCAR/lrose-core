@@ -2,100 +2,33 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: Sprite
+# app name: Ts2Moments
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/Sprite
+# dir: lrose-core/codebase/apps/radar/src/Ts2Moments
 ###############################################################
 
-project (Sprite)
+project (Ts2Moments)
 
 # source files
 
 set (SRCS
       Params.cc
       Args.cc
-      AscopePlot.cc
       Beam.cc
-      BeamMgr.cc
-      ColorMap.cc
-      IqPlot.cc
+      BeamReader.cc
+      Calibration.cc
+      Cmd.cc
+      EgmCorrection.cc
+      Ts2Moments.cc
+      MomentsMgr.cc
       Main.cc
-      RadarSpectra.cc
-      ScaledLabel.cc
-      Sprite.cc
-      SpritePlot.cc
-      TsReader.cc
-      WaterfallPlot.cc
-      WorldPlot.cc
-      SpriteMgr.cc
-      SpriteWidget.cc
+      OutputFmq.cc
+      PulseQueue.cc
+      SpectraPrint.cc
+      Threads.cc
     )
-
-if(APPLE)
-  if (DEFINED MAMBA_BUILD)
-    set(Qt6_NO_OPENGL TRUE)
-    set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)
-  endif(DEFINED MAMBA_BUILD)
-endif(APPLE)
-#Finding Qt
-find_package (Qt6 COMPONENTS Core QUIET)
-if (NOT Qt6_FOUND)
-  find_package (Qt5 COMPONENTS Core REQUIRED)
-endif()
-if (Qt5_FOUND)
-  message(STATUS "Found Qt5: ${Qt5_VERSION}")
-elseif (Qt6_FOUND)
-    message(STATUS "Found Qt6: ${Qt6_VERSION}")
-else ()
-  message(FATAL_ERROR, "Qt not found.")
-endif(Qt5_FOUND)
-if(APPLE)
-  if (DEFINED MAMBA_BUILD)
-# MAMBA builds ignore system libs, use mamba libs
-    if (Qt5_FOUND)
-      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
-    elseif (Qt6_FOUND)
-      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
-    endif(Qt5_FOUND)
-  else()
-    if (Qt5_FOUND)
-      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
-    elseif (Qt6_FOUND)
-      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
-    endif(Qt5_FOUND)
-  endif(DEFINED MAMBA_BUILD)
-endif(APPLE)
-set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_AUTOMOC ON)
-set (CMAKE_AUTORCC ON)
-set (CMAKE_AUTOUIC ON)
-if (Qt5_FOUND)
-#QT5
-  if (DEFINED MAMBA_BUILD)
-    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
-  else()
-    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-  endif(DEFINED MAMBA_BUILD)
-  pkg_search_module(Qt5Core REQUIRED)
-  pkg_search_module(Qt5Gui REQUIRED)
-  pkg_search_module(Qt5Widgets REQUIRED)
-  pkg_search_module(Qt5Network REQUIRED)
-  pkg_search_module(Qt5Qml REQUIRED)
-else()
-#QT6
-  if (DEFINED MAMBA_BUILD)
-    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
-  else()
-    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-  endif(DEFINED MAMBA_BUILD)
-  pkg_search_module(Qt6Core REQUIRED)
-  pkg_search_module(Qt6Gui REQUIRED)
-  pkg_search_module(Qt6Widgets REQUIRED)
-  pkg_search_module(Qt6Network REQUIRED)
-  pkg_search_module(Qt6Qml REQUIRED)
-endif(Qt5_FOUND)
 
 # include directories
 
@@ -135,9 +68,6 @@ if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system libs, use mamba libs
   include_directories (${MAMBA_INCLUDE_PATH})
 else()
-  if (DEFINED X11_X11_INCLUDE_PATH)
-    include_directories (${X11_X11_INCLUDE_PATH})
-  endif()
   if (DEFINED netCDF_INSTALL_PREFIX)
     include_directories (${netCDF_INSTALL_PREFIX}/include)
   endif()
@@ -154,21 +84,6 @@ else()
   #add_compile_options(-I/usr/include)
   
 endif(DEFINED MAMBA_BUILD)
-#Including Qt
-if (Qt5_FOUND)
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${Qt5Gui_INCLUDE_DIRS})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-include_directories(${Qt5Network_INCLUDE_DIRS})
-include_directories(${Qt5Qml_INCLUDE_DIRS})
-else()
-include_directories(${Qt6Core_INCLUDE_DIRS})
-include_directories(${Qt6Gui_INCLUDE_DIRS})
-include_directories(${Qt6Widgets_INCLUDE_DIRS})
-include_directories(${Qt6Network_INCLUDE_DIRS})
-include_directories(${Qt6Qml_INCLUDE_DIRS})
-endif(Qt5_FOUND)
-
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
@@ -176,9 +91,6 @@ if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system libs, use mamba libs
   link_directories (${MAMBA_LIBRARY_PATH})
 else()
-  if (DEFINED X11_LIB_DIR)
-    link_directories (${X11_LIB_DIR})
-  endif()
   if (DEFINED netCDF_INSTALL_PREFIX)
     link_directories (${netCDF_INSTALL_PREFIX}/lib)
   endif()
@@ -234,21 +146,6 @@ link_libraries (fftw3)
 link_libraries (bz2)
 link_libraries (z)
 link_libraries (pthread)
-#Linking Qt
-if (Qt5_FOUND)
-  link_libraries (${Qt5Core_LIBRARIES})
-  link_libraries (${Qt5Gui_LIBRARIES})
-  link_libraries (${Qt5Widgets_LIBRARIES})
-  link_libraries (${Qt5Network_LIBRARIES})
-  link_libraries (${Qt5Qml_LIBRARIES})
-else()
-  link_libraries (${Qt6Core_LIBRARIES})
-  link_libraries (${Qt6Gui_LIBRARIES})
-  link_libraries (${Qt6Widgets_LIBRARIES})
-  link_libraries (${Qt6Network_LIBRARIES})
-  link_libraries (${Qt6Qml_LIBRARIES})
-endif(Qt5_FOUND)
-
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -256,7 +153,7 @@ endif(Qt5_FOUND)
 makeTdrpParams()
 # application
 
-add_executable (Sprite ${SRCS})
+add_executable (Ts2Moments ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

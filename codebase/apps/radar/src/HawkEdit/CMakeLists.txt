@@ -86,6 +86,12 @@ set (SRCS
       FunctionEditor.cc
     )
 
+if(APPLE)
+  if (DEFINED MAMBA_BUILD)
+    set(Qt6_NO_OPENGL TRUE)
+    set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)
+  endif(DEFINED MAMBA_BUILD)
+endif(APPLE)
 #Finding Qt
 find_package (Qt6 COMPONENTS Core QUIET)
 if (NOT Qt6_FOUND)
