@@ -1134,64 +1134,76 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'input_vel_raw_field_name'
+    // Parameter 'input_vel_raw_field_name_short'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_raw_field_name");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_short");
     tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
     tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
-    tt->val_offset = (char *) &input_vel_raw_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_RAW");
+    tt->val_offset = (char *) &input_vel_raw_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_short");
     tt++;
     
-    // Parameter 'input_vel_corr_field_name'
+    // Parameter 'input_vel_raw_field_name_long'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_corr_field_name");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_long");
+    tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
+    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_long");
+    tt++;
+    
+    // Parameter 'input_vel_corr_field_name_short'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_short");
     tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
     tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
-    tt->val_offset = (char *) &input_vel_corr_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
+    tt->val_offset = (char *) &input_vel_corr_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_short");
     tt++;
     
-    // Parameter 'suffix_to_add_for_short_pulse_fields'
+    // Parameter 'input_vel_corr_field_name_long'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("suffix_to_add_for_short_pulse_fields");
-    tt->descr = tdrpStrDup("This suffix is added to the input fields for short-prt moments.");
-    tt->help = tdrpStrDup("For each incoming short-pulse field, we add this suffix to the incoming field name.");
-    tt->val_offset = (char *) &suffix_to_add_for_short_pulse_fields - &_start_;
-    tt->single_val.s = tdrpStrDup("_short");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_long");
+    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
+    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
+    tt->val_offset = (char *) &input_vel_corr_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_long");
     tt++;
     
-    // Parameter 'suffix_to_add_for_long_pulse_fields'
+    // Parameter 'output_vel_corr_field_name_short'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("suffix_to_add_for_long_pulse_fields");
-    tt->descr = tdrpStrDup("This suffix is added to the input fields for long-prt moments.");
-    tt->help = tdrpStrDup("For each incoming long-pulse field, we add this suffix to the incoming field name.");
-    tt->val_offset = (char *) &suffix_to_add_for_long_pulse_fields - &_start_;
-    tt->single_val.s = tdrpStrDup("_long");
-    tt++;
-    
-    // Parameter 'output_vel_corr_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_vel_corr_field_name");
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_short");
     tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
     tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
-    tt->val_offset = (char *) &output_vel_corr_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
+    tt->val_offset = (char *) &output_vel_corr_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_short");
+    tt++;
+    
+    // Parameter 'output_vel_corr_field_name_long'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_long");
+    tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
+    tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
+    tt->val_offset = (char *) &output_vel_corr_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_long");
     tt++;
     
     // Parameter 'output_vel_unfolded_field_name'

@@ -297,34 +297,52 @@ paramdef boolean {
 } perform_velocity_unfolding;
 
 paramdef string {
-  p_default = "VEL_RAW";
+  p_default = "VEL_RAW_short";
   p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
   p_help = "The field name must be the same for the short- and long-prt rays.";
-} input_vel_raw_field_name;
+} input_vel_raw_field_name_short;
 
 paramdef string {
-  p_default = "VEL";
+  p_default = "VEL_RAW_long";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_raw_field_name_long;
+
+paramdef string {
+  p_default = "VEL_short";
   p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
   p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
-} input_vel_corr_field_name;
+} input_vel_corr_field_name_short;
 
 paramdef string {
-  p_default = "_short";
-  p_descr = "This suffix is added to the input fields for short-prt moments.";
-  p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
-} suffix_to_add_for_short_pulse_fields;
+  p_default = "VEL_long";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name_long;
+
+// paramdef string {
+//   p_default = "_short";
+//   p_descr = "This suffix is added to the input fields for short-prt moments.";
+//   p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_short_pulse_fields;
+
+// paramdef string {
+//   p_default = "_long";
+//   p_descr = "This suffix is added to the input fields for long-prt moments.";
+//   p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_long_pulse_fields;
 
 paramdef string {
-  p_default = "_long";
-  p_descr = "This suffix is added to the input fields for long-prt moments.";
-  p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
-} suffix_to_add_for_long_pulse_fields;
-
-paramdef string {
-  p_default = "VEL";
+  p_default = "VEL_short";
   p_descr = "Name for the corrected velocity on output.";
   p_help = "The name of the output fields for velocity corrected for platform motion.";
-} output_vel_corr_field_name;
+} output_vel_corr_field_name_short;
+
+paramdef string {
+  p_default = "VEL_long";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name_long;
 
 paramdef string {
   p_default = "VEL_unfold_short";

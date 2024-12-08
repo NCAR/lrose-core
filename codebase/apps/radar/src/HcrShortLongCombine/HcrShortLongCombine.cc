@@ -787,16 +787,16 @@ int HcrShortLongCombine::_readNextDwell()
   
   for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
     RadxRay *ray = _dwellRaysShort[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_short);
     if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name);
+      ray->removeField(_params.input_vel_corr_field_name_short);
     }
   }
   for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
     RadxRay *ray = _dwellRaysLong[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_long);
     if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name);
+      ray->removeField(_params.input_vel_corr_field_name_long);
     }
   }
   
@@ -932,20 +932,20 @@ RadxRay *HcrShortLongCombine::_combineDwellRays()
   
   // rename short fields
 
-  vector<RadxField *> fieldsShort = rayCombined->getFields();
-  for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
-    RadxField *fld = fieldsShort[ifield];
-    string newName = fld->getName() + _params.suffix_to_add_for_short_pulse_fields;
-    fld->setName(newName);
-  }
+  // vector<RadxField *> fieldsShort = rayCombined->getFields();
+  // for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
+  //   RadxField *fld = fieldsShort[ifield];
+  //   string newName = fld->getName() + _params.suffix_to_add_for_short_pulse_fields;
+  //   fld->setName(newName);
+  // }
 
   // add long fields to short ray
 
   vector<RadxField *> fieldsLong = rayLong->getFields();
   for (size_t ifield = 0; ifield < fieldsLong.size(); ifield++) {
     RadxField *fld = new RadxField(*fieldsLong[ifield]);
-    string newName = fld->getName() + _params.suffix_to_add_for_long_pulse_fields;
-    fld->setName(newName);
+    // string newName = fld->getName() + _params.suffix_to_add_for_long_pulse_fields;
+    // fld->setName(newName);
     rayCombined->addField(fld);
   }
   delete rayLong;
@@ -1003,11 +1003,11 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
   
 {
 
-  string velRawShortName = _params.input_vel_raw_field_name;
-  velRawShortName += _params.suffix_to_add_for_short_pulse_fields;
-  string velRawLongName = _params.input_vel_raw_field_name;
-  velRawLongName += _params.suffix_to_add_for_long_pulse_fields;
-
+  string velRawShortName = _params.input_vel_raw_field_name_short;
+  // velRawShortName += _params.suffix_to_add_for_short_pulse_fields;
+  string velRawLongName = _params.input_vel_raw_field_name_long;
+  // velRawLongName += _params.suffix_to_add_for_long_pulse_fields;
+  
   RadxField *velShort = rayCombined->getField(velRawShortName);
   RadxField *velLong = rayCombined->getField(velRawLongName);
 
@@ -1079,10 +1079,10 @@ void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
 
   // rename vel fields
   
-  string velCorrShortName = _params.output_vel_corr_field_name;
-  velCorrShortName += _params.suffix_to_add_for_short_pulse_fields;
-  string velCorrLongName = _params.output_vel_corr_field_name;
-  velCorrLongName += _params.suffix_to_add_for_long_pulse_fields;
+  string velCorrShortName = _params.output_vel_corr_field_name_short;
+  // velCorrShortName += _params.suffix_to_add_for_short_pulse_fields;
+  string velCorrLongName = _params.output_vel_corr_field_name_long;
+  // velCorrLongName += _params.suffix_to_add_for_long_pulse_fields;
 
   velShort->setName(velCorrShortName);
   velLong->setName(velCorrLongName);
