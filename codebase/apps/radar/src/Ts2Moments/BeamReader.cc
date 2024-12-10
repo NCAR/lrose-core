@@ -2520,6 +2520,9 @@ void BeamReader::_checkIsStaggeredPrt()
 {
 
   _isStaggeredPrt = false;
+  if ((int) _pulseQueue.size() < _nSamples) {
+    return;
+  }
 
   shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
   shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
@@ -2600,17 +2603,22 @@ void BeamReader::_checkStaggeredStartsOnShort()
 
 {
 
+  _startsOnPrtShort = false;
+
   if (!_isStaggeredPrt) {
     return;
   }
   
   // the pulses are stored in reverse order
 
+  if ((int) _pulseQueue.size() < _nSamples) {
+    return;
+  }
+
   shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
   shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
 
   if (pulse0 == NULL || pulse1 == NULL) {
-    _startsOnPrtShort = false;
     return;
   }
 
