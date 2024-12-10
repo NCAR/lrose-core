@@ -2524,6 +2524,10 @@ void BeamReader::_checkIsStaggeredPrt()
   shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
   shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
 
+  if (pulse0 == NULL || pulse1 == NULL) {
+    return;
+  }
+
   double prt0 = pulse0->getPrt();
   double prt1 = pulse1->getPrt();
 
@@ -2604,6 +2608,11 @@ void BeamReader::_checkStaggeredStartsOnShort()
 
   shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
   shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
+
+  if (pulse0 == NULL || pulse1 == NULL) {
+    _startsOnPrtShort = false;
+    return;
+  }
 
   double prt0 = pulse0->getPrt();
   double prt1 = pulse1->getPrt();
