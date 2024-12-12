@@ -63,7 +63,6 @@ HDRS = \
 	MomentsMgr.hh \
 	OutputFmq.hh \
 	PulseQueue.hh \
-	SpectraPrint.hh \
 	Threads.hh
 
 CPPC_SRCS = \
@@ -79,7 +78,6 @@ CPPC_SRCS = \
 	Main.cc \
 	OutputFmq.cc \
 	PulseQueue.cc \
-	SpectraPrint.cc \
 	Threads.cc
 
 #
