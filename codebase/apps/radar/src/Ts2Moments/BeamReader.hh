@@ -195,6 +195,7 @@ private:
   double _prt;
   double _meanPrf;
   double _pulseWidthUs;
+  deque<bool> _fixedPulseWidthCheck;
 
   // pulse-to-pulse HV alternating mode
 
@@ -277,6 +278,7 @@ private:
   int _findNextIndexedBeam();
   int _finalizeNonIndexedBeam();
   int _checkStartConditions();
+  int _checkFixedPulseWidth();
   void _constrainPulsesToWithinDwell();
 
   shared_ptr<IwrfTsPulse> _getNextPulse();

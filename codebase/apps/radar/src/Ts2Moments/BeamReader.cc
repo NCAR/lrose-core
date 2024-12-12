@@ -636,7 +636,7 @@ int BeamReader::_readNonIndexedBeam()
 
   if (_finalizeNonIndexedBeam()) {
     _beamError = true;
-    return -1;
+    return 0;
   }
 
   _beamError = false;
@@ -1030,6 +1030,13 @@ int BeamReader::_finalizeNonIndexedBeam()
   if (_checkStartConditions()) {
     return -1;
   }
+  
+  // check for fixed pulse width
+  if (_params.specify_fixed_pulse_width) {
+    if (_checkFixedPulseWidth()) {
+      return -1;
+    }
+  }
 
   // set indices, compute angles and rate
 
@@ -1101,6 +1108,51 @@ int BeamReader::_checkStartConditions()
 
   }
 
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// check that we have fixed pulse width operations
+// we check nSamples * 4 pulses to make sure
+
+int BeamReader::_checkFixedPulseWidth()
+  
+{
+
+  // we accumulate 4 times the number of samples in a dwell
+  // to make sure the pulse width is constant over multiple
+  // dwells
+  
+  _fixedPulseWidthCheck.resize(_nSamples * 4, false);
+
+  // for each pulse in the queue, check the width
+  
+  for (int ii = 0; ii < _nSamples; ii++) {
+    shared_ptr<IwrfTsPulse> pulse = _pulseQueue[ii];
+    _fixedPulseWidthCheck.pop_back();
+    double pulseWidthUs = pulse->get_pulse_width_us();
+    if (fabs(pulseWidthUs - _params.fixed_pulse_width_us) <= 2.0e-3) {
+      // pulse matches the desired width
+      _fixedPulseWidthCheck.push_front(true);
+    } else {
+      // pulse does not match the desired width
+      _fixedPulseWidthCheck.push_front(false);
+    }
+  }
+
+  // are there any bad pulses found?
+  // if so return error
+  
+  for (size_t ii = 0; ii < _fixedPulseWidthCheck.size(); ii++) {
+    if (!_fixedPulseWidthCheck[ii]) {
+      // found a pulse that does not match desired width
+      return -1;
+    }
+  }
+
+  // all good
+  
   return 0;
 
 }
