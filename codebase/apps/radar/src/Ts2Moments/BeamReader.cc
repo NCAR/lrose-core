@@ -280,6 +280,8 @@ Beam *BeamReader::getNextBeam()
 
   do { // loop here until the beam checks out as OK
 
+    PMU_auto_register("Reading beam");
+    
     // read a single pulse, so we can determine what mode is current
     // this pulse will be reused later
     // reading this pulse will set class members in terms of
