@@ -91,6 +91,29 @@ public:
   } dwell_stats_method_t;
 
   typedef enum {
+    PLATFORM_FIXED = 1,
+    PLATFORM_VEHICLE = 2,
+    PLATFORM_SHIP = 3,
+    PLATFORM_AIRCRAFT_FORE = 5,
+    PLATFORM_AIRCRAFT_AFT = 6,
+    PLATFORM_AIRCRAFT_TAIL = 7,
+    PLATFORM_AIRCRAFT_BELLY = 8,
+    PLATFORM_AIRCRAFT_ROOF = 9,
+    PLATFORM_AIRCRAFT_NOSE = 10,
+    PLATFORM_SATELLITE_ORBIT = 11,
+    PLATFORM_SATELLITE_GEOSTAT = 12
+  } platform_type_t;
+
+  typedef enum {
+    PRIMARY_AXIS_Z = 0,
+    PRIMARY_AXIS_Y = 1,
+    PRIMARY_AXIS_X = 2,
+    PRIMARY_AXIS_Z_PRIME = 3,
+    PRIMARY_AXIS_Y_PRIME = 4,
+    PRIMARY_AXIS_X_PRIME = 5
+  } primary_axis_t;
+
+  typedef enum {
     LOGICAL_AND = 0,
     LOGICAL_OR = 1
   } logical_t;
@@ -133,6 +156,12 @@ public:
     char* field_name;
     dwell_stats_method_t stats_method;
   } stats_method_field_t;
+
+  typedef struct {
+    double latitudeDeg;
+    double longitudeDeg;
+    double altitudeKm;
+  } radar_location_t;
 
   typedef struct {
     char* name;
@@ -525,6 +554,18 @@ public:
 
   char* author_override;
 
+  tdrp_bool_t fixed_location_mode;
+
+  radar_location_t fixed_radar_location;
+
+  tdrp_bool_t override_platform_type;
+
+  platform_type_t platform_type;
+
+  tdrp_bool_t override_primary_axis;
+
+  primary_axis_t primary_axis;
+
   tdrp_bool_t apply_censoring;
 
   censoring_field_t *_censoring_fields;
@@ -609,7 +650,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[85];
+  mutable TDRPtable _table[94];
 
   const char *_className;
 

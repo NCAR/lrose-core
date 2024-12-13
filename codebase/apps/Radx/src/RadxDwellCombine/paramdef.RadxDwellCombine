@@ -294,6 +294,101 @@ paramdef string {
 } author_override;
 
 commentdef {
+  p_header = "GROUND-BASED MODE for MOVING PLATFORM GEOREFERENCE";
+  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set fixed location in ground-based mode.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
+} fixed_location_mode;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} fixed_radar_location;
+
+commentdef {
+  p_header = "OVERRIDE PLATFORM TYPE?";
+}
+
+typedef enum {
+  PLATFORM_FIXED = 1,
+  PLATFORM_VEHICLE = 2,
+  PLATFORM_SHIP = 3,
+  PLATFORM_AIRCRAFT_FORE = 5,
+  PLATFORM_AIRCRAFT_AFT = 6,
+  PLATFORM_AIRCRAFT_TAIL = 7,
+  PLATFORM_AIRCRAFT_BELLY = 8,
+  PLATFORM_AIRCRAFT_ROOF = 9,
+  PLATFORM_AIRCRAFT_NOSE = 10,
+  PLATFORM_SATELLITE_ORBIT = 11,
+  PLATFORM_SATELLITE_GEOSTAT = 12
+} platform_type_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
+    "\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n"
+    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
+    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
+    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
+    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
+    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+} override_platform_type;
+
+paramdef enum platform_type_t {
+  p_default = PLATFORM_AIRCRAFT_FORE;
+  p_descr = "Platform type.";
+  p_help = "See override_platform_type.";
+} platform_type;
+
+commentdef {
+  p_header = "OVERRIDE PRIMARY AXIS?";
+}
+
+typedef enum {
+  PRIMARY_AXIS_Z = 0, ///< vertical
+  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+} primary_axis_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPRIMARY_AXIS_Z - vertical\n"
+    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
+    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
+    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
+    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
+    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
+} override_primary_axis;
+
+paramdef enum primary_axis_t {
+  p_default = PRIMARY_AXIS_Y_PRIME;
+  p_descr = "Platform type.";
+  p_help = "See override_primary_axis.";
+} primary_axis;
+
+commentdef {
   p_header = "CENSORING";
   p_text = "You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.";
 }
@@ -301,7 +396,7 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Apply censoring based on field values and thresholds.";
-  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied.";
+  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied. NOTE: does not apply to FMQ mode.";
 } apply_censoring;
 
 typedef enum {
