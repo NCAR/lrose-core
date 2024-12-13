@@ -26,7 +26,6 @@ set (SRCS
       Main.cc
       OutputFmq.cc
       PulseQueue.cc
-      SpectraPrint.cc
       Threads.cc
     )
 
