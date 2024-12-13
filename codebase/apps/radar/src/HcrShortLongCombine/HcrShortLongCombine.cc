@@ -469,6 +469,7 @@ int HcrShortLongCombine::_computeMeanLocation()
   return 0;
 
 }
+
 //////////////////////////////////////////////////
 // Open input fmqs
 
@@ -544,7 +545,7 @@ int HcrShortLongCombine::_openOutputFmq()
   if (_params.output_fmq_data_mapper_report_interval > 0) {
     _outputFmq->setRegisterWithDmap(true, _params.output_fmq_data_mapper_report_interval);
   }
-  _outputFmq->setSingleWriter();
+  // _outputFmq->setSingleWriter();
 
   return 0;
 

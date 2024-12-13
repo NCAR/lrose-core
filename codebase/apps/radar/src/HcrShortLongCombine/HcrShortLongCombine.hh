@@ -49,7 +49,6 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <rapformats/DsRadarMsg.hh>
-#include <Fmq/DsRadarQueue.hh>
 #include <radar/IwrfMomReader.hh>
 class RadxFile;
 class RadxRay;
@@ -83,7 +82,7 @@ private:
   Args _args;
   Params _params;
 
-  // reading fmq in realtime
+  // reading input moments
 
   IwrfMomReader *_readerShort;
   IwrfMomReader *_readerLong;
