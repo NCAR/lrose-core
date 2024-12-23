@@ -2736,12 +2736,12 @@ void RadxVol::combineRhi()
 
   // ensure there is only one sweep in the volume
   if (_sweeps.size() != 1) {
-    cerr << "Error: combineRHI only one sweep per volume" << endl;
+    cerr << "Error: combineRHI requires only one sweep per volume" << endl;
     return;
   }
 
   if (!checkIsRhi()) {
-    cerr << "Error: attempting to combine RHI scans on non-RHI data" << endl;
+    cerr << "Warning: attempting to combine RHI scans on non-RHI data" << endl;
     return;
   }
   
