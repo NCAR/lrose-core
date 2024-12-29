@@ -83,6 +83,7 @@ HDRS = \
 	VlevelManager.hh \
 	WindMenuItem.hh \
 	WorldPlot.hh \
+	ZoomBox.hh \
 	ZoomMenuItem.hh \
 	cidd.h \
 	cidd_colorscales.h \
@@ -127,6 +128,7 @@ NORM_SRCS = \
 	TimeList.cc \
 	VlevelManager.cc \
 	WorldPlot.cc \
+	ZoomBox.cc \
 	cidd_coords.cc \
 	cidd_init.cc \
 	cidd_remote_commands.cc \

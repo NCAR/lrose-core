@@ -31,6 +31,8 @@
 // Dec 2024
 //
 ///////////////////////////////////////////////////////////////
+// METEROLOGICAL DATA record info - for each data field
+///////////////////////////////////////////////////////////////
 
 #ifndef MET_RECORD_HH
 #define MET_RECORD_HH
@@ -45,7 +47,7 @@
 
 class ColorMap;
 
-class MetRecord {    /* METEROLOGICAL DATA record info - for each data field */
+class MetRecord {
 
 public:
 
@@ -172,6 +174,9 @@ public:
 
 private:
 
+  DateTime _reqTime;
+
+  
   int _getTimeList(time_t start_time,
                    time_t end_time,
                    int page);
