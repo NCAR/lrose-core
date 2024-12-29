@@ -44,6 +44,8 @@
 #include "cidd_macros.h"
 #include "cidd_structs.h"
 #include "cidd_colorscales.h"
+#include "ZoomBox.hh"
+#include "WayPts.hh"
 
 class ColorMap;
 
@@ -174,8 +176,16 @@ public:
 
 private:
 
-  DateTime _reqTime;
+  // data request details
+  
+  DateTime _timeReq;
+  ZoomBox _zoomBoxReq; // horiz data
+  double _zlevelReq;   // horiz data
+  WayPts _wayPtsReq;   // vert section data
 
+  // data status
+
+  
   
   int _getTimeList(time_t start_time,
                    time_t end_time,

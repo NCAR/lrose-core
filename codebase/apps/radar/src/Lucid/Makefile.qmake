@@ -1155,6 +1155,8 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1294,6 +1296,8 @@ moc_VertWidget.cpp: VertWidget.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/toolsa/Socket.hh \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
@@ -1373,6 +1377,8 @@ moc_VertWindow.cpp: VertWindow.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/toolsa/Socket.hh \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
@@ -1514,6 +1520,8 @@ Args.o: Args.cc Args.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1690,6 +1698,8 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -1911,6 +1921,8 @@ DisplayManager.o: DisplayManager.cc DisplayManager.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2054,6 +2066,8 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2204,6 +2218,8 @@ MapMenuItem.o: MapMenuItem.cc MapMenuItem.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2338,6 +2354,8 @@ Main.o: Main.cc Lucid.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2493,6 +2511,8 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		cidd_winds.h \
 		cidd_contours.h \
@@ -2613,6 +2633,8 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2745,6 +2767,8 @@ ProdMenuItem.o: ProdMenuItem.cc ProdMenuItem.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -2907,6 +2931,8 @@ Lucid.o: Lucid.cc Lucid.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3113,6 +3139,8 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		cidd_winds.h \
 		cidd_contours.h \
@@ -3242,6 +3270,8 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3387,6 +3417,8 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3523,6 +3555,8 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_structs.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -3659,6 +3693,8 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		VertWindow.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
@@ -3816,6 +3852,8 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -3977,6 +4015,8 @@ WindMenuItem.o: WindMenuItem.cc WindMenuItem.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4071,6 +4111,8 @@ WorldPlot.o: WorldPlot.cc $(HOME)/lrose/include/rapmath/umath.h \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
 		$(HOME)/lrose/include/toolsa/Socket.hh \
 		$(HOME)/lrose/include/toolsa/SockUtil.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
@@ -4246,6 +4288,8 @@ ZoomMenuItem.o: ZoomMenuItem.cc ZoomMenuItem.hh \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4378,6 +4422,8 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4511,6 +4557,8 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4647,6 +4695,8 @@ cidd_init.o: cidd_init.cc $(HOME)/lrose/include/shapelib/shapefil.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4781,6 +4831,8 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -4913,6 +4965,8 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5051,6 +5105,8 @@ contours.o: contours.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5199,6 +5255,8 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5332,6 +5390,8 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5464,6 +5524,8 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5596,6 +5658,8 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5731,6 +5795,8 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5863,6 +5929,8 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -5995,6 +6063,8 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6131,6 +6201,8 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6263,6 +6335,8 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6395,6 +6469,8 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6527,6 +6603,8 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6659,6 +6737,8 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6791,6 +6871,8 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -6923,6 +7005,8 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7055,6 +7139,8 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7187,6 +7273,8 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7322,6 +7410,8 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7454,6 +7544,8 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7588,6 +7680,8 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7723,6 +7817,8 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7855,6 +7951,8 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -7987,6 +8085,8 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8119,6 +8219,8 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8254,6 +8356,8 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8386,6 +8490,8 @@ process_args.o: process_args.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8518,6 +8624,8 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8650,6 +8758,8 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8782,6 +8892,8 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -8914,6 +9026,8 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9046,6 +9160,8 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9181,6 +9297,8 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9313,6 +9431,8 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9445,6 +9565,8 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9580,6 +9702,8 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9712,6 +9836,8 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9844,6 +9970,8 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -9976,6 +10104,8 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10108,6 +10238,8 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10240,6 +10372,8 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10372,6 +10506,8 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10504,6 +10640,8 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10636,6 +10774,8 @@ render_products.o: render_products.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10768,6 +10908,8 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -10900,6 +11042,8 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11032,6 +11176,8 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11164,6 +11310,8 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11296,6 +11444,8 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11428,6 +11578,8 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11560,6 +11712,8 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11692,6 +11846,8 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11824,6 +11980,8 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -11956,6 +12114,8 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12088,6 +12248,8 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12220,6 +12382,8 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12352,6 +12516,8 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12484,6 +12650,8 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12619,6 +12787,8 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12751,6 +12921,8 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -12890,6 +13062,8 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -13025,6 +13199,8 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \
@@ -13157,6 +13333,8 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_structs.h \
 		cidd_colorscales.h \
 		MetRecord.hh \
+		ZoomBox.hh \
+		WayPts.hh \
 		cidd_data_io.h \
 		Product.hh \
 		Csyprod_P.hh \

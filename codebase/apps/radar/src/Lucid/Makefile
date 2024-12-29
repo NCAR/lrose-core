@@ -81,6 +81,7 @@ HDRS = \
 	VertWidget.hh \
 	VertWindow.hh \
 	VlevelManager.hh \
+	WayPts.hh \
 	WindMenuItem.hh \
 	WorldPlot.hh \
 	ZoomBox.hh \
@@ -127,6 +128,7 @@ NORM_SRCS = \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	VlevelManager.cc \
+	WayPts.cc \
 	WorldPlot.cc \
 	ZoomBox.cc \
 	cidd_coords.cc \

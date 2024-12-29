@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ZoomBox.hh
+// WayPts.hh
 //
-// Zoom limits object
+// Way points for vert section
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,66 +33,70 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ZoomBox_HH
-#define ZoomBox_HH
+#ifndef WayPts_HH
+#define WayPts_HH
 
+#include <string>
+#include <vector>
 #include <iostream>
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
-/// ZOOM BOX CLASS
+/// Way points for vert section
 
-class ZoomBox {
+class WayPts {
   
 public:
 
   /// constructor
   
-  ZoomBox();
-
-  ZoomBox(double minLat, double maxLat,
-          double minLon, double maxLon);
+  WayPts();
 
   /// copy constructor
   
-  ZoomBox(const ZoomBox &rhs);
-
+  WayPts(const WayPts &rhs);
+  
   /// destructor
 
-  virtual ~ZoomBox();
+  virtual ~WayPts();
   
   /// assignment
   
-  ZoomBox& operator=(const ZoomBox &rhs);
+  WayPts& operator=(const WayPts &rhs);
   
   // Check for equality
-
-  bool operator==(const ZoomBox &rhs);
   
-  /// set limits
+  bool operator==(const WayPts &rhs);
   
-  void setLatLimits(double minLat, double maxLat);
-  void setLonLimits(double minLon, double maxLon);
+  /// add a point
   
-  /// clear limits
+  void addPoint(double lat, double lon);
   
-  void clearLimits();
+  /// clear way points
+  
+  void clear();
   
   /// print
   
   virtual void print(ostream &out) const;
 
+  // get methods
+
+  size_t getNPoints() const { return _lat.size(); }
+  const vector<double> &getLatList() const { return _lat; }
+  const vector<double> &getLonList() const { return _lon; }
+  void getPoint(size_t index, double &lat, double &lon) const;
+
 protected:
   
   // data
-
-  double _minLat, _maxLat;
-  double _minLon, _maxLon;
+  
+  vector<double> _lat;
+  vector<double> _lon;
   
   // methods
   
-  void _init();
-  ZoomBox & _copy(const ZoomBox &rhs); 
+  WayPts & _copy(const WayPts &rhs); 
 
 private:
   
