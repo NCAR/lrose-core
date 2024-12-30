@@ -135,6 +135,10 @@ MetRecord::MetRecord()
   
   colorMap = NULL;
   
+  _zlevelReq = -9999.0;
+  _valid = false;
+  _new = false;
+
 }
 
 /**********************************************************************

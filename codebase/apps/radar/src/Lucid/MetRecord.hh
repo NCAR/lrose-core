@@ -183,6 +183,9 @@ private:
   double _zlevelReq;   // horiz data
   WayPts _wayPtsReq;   // vert section data
 
+  bool _valid;
+  bool _new;
+
   // data status
 
   
