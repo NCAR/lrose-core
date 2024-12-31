@@ -461,7 +461,7 @@ int _mdvRequestHorizPlane(MetRecord *mr,
   
   switch(_params.gather_data_mode ) {
 
-    case CLOSEST_TO_FRAME_CENTER:
+    case Params::CLOSEST_TO_FRAME_CENTER:
       gd.data_request_time = mid_time;
       if(gd.model_run_time != 0 && mr->h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         mr->h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -477,7 +477,7 @@ int _mdvRequestHorizPlane(MetRecord *mr,
       }
       break;
 
-    case FIRST_BEFORE_END_OF_FRAME:
+    case Params::FIRST_BEFORE_END_OF_FRAME:
       gd.data_request_time = end_time;
       if(gd.model_run_time != 0 && mr->h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         mr->h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -500,7 +500,7 @@ int _mdvRequestHorizPlane(MetRecord *mr,
       }
       break;
 
-    case FIRST_AFTER_START_OF_FRAME:
+    case Params::FIRST_AFTER_START_OF_FRAME:
       gd.data_request_time = start_time;
       if(gd.model_run_time != 0 && mr->h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         mr->h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -637,7 +637,7 @@ int _mdvRequestVertPlane(MetRecord *mr,
   end_time += (int) (mr->time_offset * 60);
   
   switch(_params.gather_data_mode ) {
-    case CLOSEST_TO_FRAME_CENTER :
+    case Params::CLOSEST_TO_FRAME_CENTER :
       if(gd.model_run_time != 0 && mr->v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         mr->v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                                 url,(int)(60 * mr->time_allowance),
@@ -650,7 +650,7 @@ int _mdvRequestVertPlane(MetRecord *mr,
       }
       break;
 
-    case FIRST_BEFORE_END_OF_FRAME:
+    case Params::FIRST_BEFORE_END_OF_FRAME:
       if(gd.model_run_time != 0 && mr->v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         mr->v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                                 url,(int)(60 * mr->time_allowance),
@@ -662,7 +662,7 @@ int _mdvRequestVertPlane(MetRecord *mr,
       }
       break;
 
-    case FIRST_AFTER_START_OF_FRAME:
+    case Params::FIRST_AFTER_START_OF_FRAME:
       if(gd.model_run_time != 0 && mr->v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         mr->v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                                 url,(int)(60 * mr->time_allowance),

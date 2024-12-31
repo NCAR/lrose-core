@@ -2530,15 +2530,25 @@
     tt++;
     
     // Parameter 'gather_data_mode'
-    // ctype is 'int'
+    // ctype is '_gather_data_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
+    tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("gather_data_mode");
-    tt->descr = tdrpStrDup("Sets whether we request data closest to the midpoint of a movie frame (0) or the end (1).");
-    tt->help = tdrpStrDup("0= Midpoint requests(Closest_to), 1 = End point requests (First_before). Typically, real-time operation should operate as 1 (End point requests). Choose mode 0 if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.");
+    tt->descr = tdrpStrDup("Sets whether we request data closest to the start, midpoint or end of a movie frame.");
+    tt->help = tdrpStrDup("CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.");
     tt->val_offset = (char *) &gather_data_mode - &_start_;
-    tt->single_val.i = 0;
+    tt->enum_def.name = tdrpStrDup("gather_data_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLOSEST_TO_FRAME_CENTER");
+      tt->enum_def.fields[0].val = CLOSEST_TO_FRAME_CENTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("FIRST_BEFORE_END_OF_FRAME");
+      tt->enum_def.fields[1].val = FIRST_BEFORE_END_OF_FRAME;
+      tt->enum_def.fields[2].name = tdrpStrDup("FIRST_AFTER_START_OF_FRAME");
+      tt->enum_def.fields[2].val = FIRST_AFTER_START_OF_FRAME;
+    tt->single_val.e = CLOSEST_TO_FRAME_CENTER;
     tt++;
     
     // Parameter 'redraw_interval'

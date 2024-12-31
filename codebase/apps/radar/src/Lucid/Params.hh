@@ -155,6 +155,12 @@ public:
   } mode_t;
 
   typedef enum {
+    CLOSEST_TO_FRAME_CENTER = 0,
+    FIRST_BEFORE_END_OF_FRAME = 1,
+    FIRST_AFTER_START_OF_FRAME = 2
+  } gather_data_mode_t;
+
+  typedef enum {
     CREATE_IMAGES_THEN_EXIT = 0,
     CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
@@ -811,7 +817,7 @@ public:
 
   double time_search_stretch_factor;
 
-  int gather_data_mode;
+  gather_data_mode_t gather_data_mode;
 
   int redraw_interval;
 

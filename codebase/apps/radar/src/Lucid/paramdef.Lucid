@@ -1170,10 +1170,16 @@ paramdef double {
   p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
 } time_search_stretch_factor;
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Sets whether we request data closest to the midpoint of a movie frame (0) or the end (1).";
-  p_help = "0= Midpoint requests(Closest_to), 1 = End point requests (First_before). Typically, real-time operation should operate as 1 (End point requests). Choose mode 0 if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
+typedef enum {
+  CLOSEST_TO_FRAME_CENTER = 0,
+  FIRST_BEFORE_END_OF_FRAME = 1,
+  FIRST_AFTER_START_OF_FRAME = 2
+} gather_data_mode_t;
+
+paramdef enum gather_data_mode_t {
+  p_default = CLOSEST_TO_FRAME_CENTER;
+  p_descr = "Sets whether we request data closest to the start, midpoint or end of a movie frame.";
+  p_help = "CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
 } gather_data_mode;
 
 paramdef int {

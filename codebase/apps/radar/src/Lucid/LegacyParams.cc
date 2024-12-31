@@ -1086,7 +1086,15 @@ int LegacyParams::_readMainParams()
   
   // data retrieval
   _getDouble("cidd.stretch_factor", 1.5, true, "time_search_stretch_factor");
-  _getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
+  int dmode = _getLong("cidd.gather_data_mode", 0, false);
+  if (dmode == 1) {
+    fprintf(_tdrpFile, "gather_data_mode = FIRST_BEFORE_END_OF_FRAME;\n");
+  } else if (dmode == 2) {
+    fprintf(_tdrpFile, "gather_data_mode = FIRST_AFTER_START_OF_FRAME;\n");
+  } else {
+    fprintf(_tdrpFile, "gather_data_mode = CLOSEST_TO_FRAME_CENTER;\n");
+  }
+  
   _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
   _getLong("cidd.update_interval", UPDATE_INTERVAL);
   _getString("cidd.datamap_host", "");

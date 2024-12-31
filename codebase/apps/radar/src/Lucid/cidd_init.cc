@@ -496,7 +496,7 @@ int init_data_space()
 
     gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
 
-    if(_params.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
+    if(_params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
       // Offset movie frame by 1/2 frame interval so that interest time
       // lies on frame mid point
       gd.movie.start_time -=  (time_t) (gd.movie.time_interval_mins * 30.0);

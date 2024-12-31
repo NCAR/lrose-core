@@ -152,7 +152,24 @@ int MetRecord::requestHorizPlane(time_t start_time,
                                  time_t end_time,
                                  int page)
 {
+
+  time_t mid_time = start_time + (end_time - start_time) / 2;
+
+  // compute request time
   
+  switch(_params.gather_data_mode) {
+    case Params::CLOSEST_TO_FRAME_CENTER:
+      gd.data_request_time = mid_time;
+      break;
+    case Params::FIRST_BEFORE_END_OF_FRAME:
+      gd.data_request_time = end_time;
+      break;
+    case Params::FIRST_AFTER_START_OF_FRAME:
+      gd.data_request_time = start_time;
+      break;
+
+  } // gather_data_mode
+
   // Construct URL, check is valid.
   
   string fullUrl(_getFullUrl());
@@ -192,11 +209,9 @@ int MetRecord::requestHorizPlane(time_t start_time,
 
   // set up read
   
-  time_t mid_time = start_time + (end_time - start_time) / 2;
-  
   switch(_params.gather_data_mode ) {
     
-    case CLOSEST_TO_FRAME_CENTER:
+    case Params::CLOSEST_TO_FRAME_CENTER:
       gd.data_request_time = mid_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -212,7 +227,7 @@ int MetRecord::requestHorizPlane(time_t start_time,
       }
       break;
 
-    case FIRST_BEFORE_END_OF_FRAME:
+    case Params::FIRST_BEFORE_END_OF_FRAME:
       gd.data_request_time = end_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -235,7 +250,7 @@ int MetRecord::requestHorizPlane(time_t start_time,
       }
       break;
 
-    case FIRST_AFTER_START_OF_FRAME:
+    case Params::FIRST_AFTER_START_OF_FRAME:
       gd.data_request_time = start_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
@@ -371,7 +386,7 @@ int MetRecord::requestVertSection(time_t start_time,
   end_time += (int) (time_offset * 60);
   
   switch(_params.gather_data_mode ) {
-    case CLOSEST_TO_FRAME_CENTER :
+    case Params::CLOSEST_TO_FRAME_CENTER :
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,(int)(60 * time_allowance),
@@ -384,7 +399,7 @@ int MetRecord::requestVertSection(time_t start_time,
       }
       break;
 
-    case FIRST_BEFORE_END_OF_FRAME:
+    case Params::FIRST_BEFORE_END_OF_FRAME:
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,(int)(60 * time_allowance),
@@ -396,7 +411,7 @@ int MetRecord::requestVertSection(time_t start_time,
       }
       break;
 
-    case FIRST_AFTER_START_OF_FRAME:
+    case Params::FIRST_AFTER_START_OF_FRAME:
       if(gd.model_run_time != 0 && v_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         v_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,(int)(60 * time_allowance),
@@ -520,10 +535,11 @@ int MetRecord::_getTimeList(time_t start_time,
   double min_lat, max_lat, min_lon, max_lon;
   _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
   
-  // Set up the DsMdvx request object
   if (!_params.do_not_clip_on_mdv_request) {
     h_mdvx->setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
   }
+
+  // Set up the DsMdvx request object
 
   // Gather time list
   gd.io_info.mode = DSMDVX_DATA;
@@ -666,128 +682,102 @@ bool MetRecord::isNewV() const {
 void MetRecord::_getBoundingBox(double &min_lat, double &max_lat,
                                 double &min_lon, double &max_lon)
 {
+
+  // init
   
+  max_lon = -360.0;
+  min_lon = 360.0;
+  max_lat = -180.0;
+  min_lat = 180.0;
+    
   // condition the longitudes for this zoom
   
   double meanx = (gd.h_win.cmin_x + gd.h_win.cmax_x) / 2.0;
   double meany = (gd.h_win.cmin_y + gd.h_win.cmax_y) / 2.0;
-  double meanLat, meanLon;
-  double lon1,lon2,lat1,lat2;
   
-  gd.proj.xy2latlon(meanx,meany,meanLat,meanLon);
-  // Make sure meanLon makes since.
+  // Make sure meanLon makes sense
+  
+  double meanLat, meanLon;
+  gd.proj.xy2latlon(meanx, meany, meanLat, meanLon);
   if (meanLon > gd.h_win.max_x) {
     meanLon -= 360.0;
   } else if (meanLon < gd.h_win.min_x) {
     meanLon += 360.0;
   }
   gd.proj.setConditionLon2Ref(true, meanLon);
+
+  // set box limits
   
   if(_params.always_get_full_domain) {
 
-    gd.proj.xy2latlon(gd.h_win.min_x,gd.h_win.min_y,min_lat,min_lon);
-    gd.proj.xy2latlon(gd.h_win.max_x,gd.h_win.max_y,max_lat,max_lon);
+    // use win limits
+    
+    gd.proj.xy2latlon(gd.h_win.min_x, gd.h_win.min_y, min_lat, min_lon);
+    gd.proj.xy2latlon(gd.h_win.max_x, gd.h_win.max_y, max_lat, max_lon);
+    
+  } else if (gd.display_projection == Mdvx::PROJ_LATLON) {
+    
+    // latlon projection
+    
+    double lon1 = gd.h_win.cmin_x;
+    double lon2 = gd.h_win.cmax_x;
+    
+    if((lon2 - lon1) > 360.0) {
+      lon1 = gd.h_win.min_x;
+      lon2 = gd.h_win.max_x; 
+    }
+    
+    double lat1 = gd.h_win.cmin_y;
+    double lat2 = gd.h_win.cmax_y;
+    if((lat2 - lat1) > 360.0) {
+      lat1 = gd.h_win.min_y;
+      lat2 = gd.h_win.max_y; 
+    }
+    
+    gd.proj.xy2latlon(lon1, lat1, min_lat, min_lon);
+    gd.proj.xy2latlon(lon2, lat2, max_lat, max_lon);
 
   } else {
 
-    switch(gd.display_projection) {
-      default:
-        lon1 = gd.h_win.cmin_x;
-        lon2 = gd.h_win.cmax_x;
-        
-        if((lon2 - lon1) > 360.0) {
-          lon1 = gd.h_win.min_x;
-          lon2 = gd.h_win.max_x; 
-        }
-        
-        
-        lat1 = gd.h_win.cmin_y;
-        lat2 = gd.h_win.cmax_y;
-        if((lat2 - lat1) > 360.0) {
-          lat1 = gd.h_win.min_y;
-          lat2 = gd.h_win.max_y; 
-        }
-        
-        gd.proj.xy2latlon(lon1, lat1,min_lat,min_lon);
-        gd.proj.xy2latlon(lon2, lat2,max_lat,max_lon);
-        
-        break;
-        
-      case Mdvx::PROJ_FLAT :
-      case Mdvx::PROJ_LAMBERT_CONF:
-      case Mdvx::PROJ_POLAR_STEREO:
-      case Mdvx::PROJ_OBLIQUE_STEREO:
-      case Mdvx::PROJ_MERCATOR:
-        double lat,lon;
-        
-        // Compute the bounding box
-        max_lon = -360.0;
-        min_lon = 360.0;
-        max_lat = -180.0;
-        min_lat = 180.0;
-        
-        // Check each corner of the projection + 4 mid points, top, bottom
-        // Left and right 
-        
-        // Lower left
-        gd.proj.xy2latlon(gd.h_win.cmin_x , gd.h_win.cmin_y ,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Lower midpoint
-        gd.proj.xy2latlon((gd.h_win.cmin_x +gd.h_win.cmax_x)/2 , gd.h_win.cmin_y,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Lower right
-        gd.proj.xy2latlon(gd.h_win.cmax_x , gd.h_win.cmin_y ,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Right midpoint
-        gd.proj.xy2latlon(gd.h_win.cmax_x , (gd.h_win.cmin_y + gd.h_win.cmax_y)/2,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Upper right
-        gd.proj.xy2latlon(gd.h_win.cmax_x , gd.h_win.cmax_y ,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Upper midpoint
-        gd.proj.xy2latlon((gd.h_win.cmin_x +gd.h_win.cmax_x)/2 , gd.h_win.cmax_y,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Upper left
-        gd.proj.xy2latlon(gd.h_win.cmin_x , gd.h_win.cmax_y ,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-        
-        // Left midpoint
-        gd.proj.xy2latlon(gd.h_win.cmin_x , (gd.h_win.cmin_y + gd.h_win.cmax_y)/2,lat,lon);
-        if(lon > max_lon) max_lon = lon;
-        if(lon < min_lon) min_lon = lon;
-        if(lat > max_lat) max_lat = lat;
-        if(lat < min_lat) min_lat = lat;
-	
-        break;
-    }
+    // all other projections
 
+    // Compute the bounding box
+    // Check each corner of the projection + 4 mid points, top, bottom
+    // Left and right 
+    
+    // Lower left
+    double lat,lon;
+    gd.proj.xy2latlon(gd.h_win.cmin_x , gd.h_win.cmin_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Lower midpoint
+    gd.proj.xy2latlon((gd.h_win.cmin_x + gd.h_win.cmax_x)/2, gd.h_win.cmin_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Lower right
+    gd.proj.xy2latlon(gd.h_win.cmax_x,gd.h_win.cmin_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Right midpoint
+    gd.proj.xy2latlon(gd.h_win.cmax_x, (gd.h_win.cmin_y + gd.h_win.cmax_y)/2, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Upper right
+    gd.proj.xy2latlon(gd.h_win.cmax_x, gd.h_win.cmax_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Upper midpoint
+    gd.proj.xy2latlon((gd.h_win.cmin_x + gd.h_win.cmax_x)/2, gd.h_win.cmax_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Upper left
+    gd.proj.xy2latlon(gd.h_win.cmin_x, gd.h_win.cmax_y, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
+    // Left midpoint
+    gd.proj.xy2latlon(gd.h_win.cmin_x, (gd.h_win.cmin_y + gd.h_win.cmax_y)/2, lat, lon);
+    _adjustBoundingBox(lat, lon, min_lat, max_lat, min_lon, max_lon);
+    
   } // if(_params.always_get_full_domain)
   
   if(gd.display_projection == Mdvx::PROJ_LATLON ) {
@@ -795,5 +785,26 @@ void MetRecord::_getBoundingBox(double &min_lat, double &max_lat,
     gd.proj.initLatlon(originLon);
   }
   
+}
+
+///////////////////////////////////////////////////////////////////
+// adjust bounding box lat lon limits
+
+void MetRecord::_adjustBoundingBox(double lat, double lon,
+                                   double &minLat, double &maxLat,
+                                   double &minLon, double &maxLon)
+{
+  if(lon > maxLon) {
+    maxLon = lon;
+  }
+  if(lon < minLon) {
+    minLon = lon;
+  }
+  if(lat > maxLat) {
+    maxLat = lat;
+  }
+  if(lat < minLat) {
+    minLat = lat;
+  }
 }
 

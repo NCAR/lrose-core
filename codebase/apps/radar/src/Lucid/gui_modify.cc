@@ -863,13 +863,13 @@ const char * frame_time_msg(int index)
          /* Frame Begin label */
          if(_params.use_local_timestamps) {
 			 switch (_params.gather_data_mode) {
-				 case CLOSEST_TO_FRAME_CENTER:
+                           case Params::CLOSEST_TO_FRAME_CENTER:
                      gmt = localtime_r(&gd.movie.frame[index].time_mid,&res);
 				 break;
-				 case FIRST_BEFORE_END_OF_FRAME:
+				 case Params::FIRST_BEFORE_END_OF_FRAME:
                      gmt = localtime_r(&gd.movie.frame[index].time_end,&res);
 				 break;
-				 case FIRST_AFTER_START_OF_FRAME:
+				 case Params::FIRST_AFTER_START_OF_FRAME:
                      gmt = localtime_r(&gd.movie.frame[index].time_start,&res);
 				 break;
 			 }
@@ -877,13 +877,13 @@ const char * frame_time_msg(int index)
              gmt_e = localtime_r(&gd.movie.frame[index].time_end,&res_e);
          } else {
 			 switch (_params.gather_data_mode) {
-				 case CLOSEST_TO_FRAME_CENTER:
+				 case Params::CLOSEST_TO_FRAME_CENTER:
                      gmt = gmtime_r(&gd.movie.frame[index].time_mid,&res);
 				 break;
-				 case FIRST_BEFORE_END_OF_FRAME:
+				 case Params::FIRST_BEFORE_END_OF_FRAME:
                      gmt = gmtime_r(&gd.movie.frame[index].time_end,&res);
 				 break;
-				 case FIRST_AFTER_START_OF_FRAME:
+				 case Params::FIRST_AFTER_START_OF_FRAME:
                      gmt = gmtime_r(&gd.movie.frame[index].time_start,&res);
 				 break;
 			 }

@@ -217,6 +217,9 @@ private:
   void _getBoundingBox(double &min_lat, double &max_lat,
                        double &min_lon, double &max_lon);
   
+  void _adjustBoundingBox(double lat, double lon,
+                          double &minLat, double &maxLat,
+                          double &minLon, double &maxLon);
 };
 
 #endif
