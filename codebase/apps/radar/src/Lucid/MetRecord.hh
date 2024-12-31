@@ -37,10 +37,13 @@
 #ifndef MET_RECORD_HH
 #define MET_RECORD_HH
 
+#include <QMutex>
+
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvxThreaded.hh>
 #include <Mdv/DsMdvx.hh>
+
 #include "cidd_macros.h"
 #include "cidd_structs.h"
 #include "cidd_colorscales.h"
@@ -63,6 +66,7 @@ public:
   bool isValidV() const;
 
   // is the data new?
+  // if new is true, sets to false and returns true
   
   bool isNewH() const;
   bool isNewV() const;
@@ -186,15 +190,17 @@ public:
 
 private:
 
+  mutable QMutex _statusMutex;
+
   // data request details
   
   DateTime _timeReq;
   ZoomBox _zoomBoxReq; // horiz data
   double _zlevelReq;   // horiz data
   WayPts _wayPtsReq;   // vert section data
-
+  
   bool _validH, _validV;
-  bool _newH, _newV;
+  mutable bool _newH, _newV;
 
   // data status
 

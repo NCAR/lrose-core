@@ -32,6 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <QMutexLocker>
 #include <qtplot/ColorMap.hh>
 #include "cidd.h"
 #include "MetRecord.hh"
@@ -629,22 +630,31 @@ string MetRecord::_getFieldName()
 // is the data valid?
 
 bool MetRecord::isValidH() const {
+  QMutexLocker locker(&_statusMutex);
   return _validH;
 }
 
 bool MetRecord::isValidV() const {
+  QMutexLocker locker(&_statusMutex);
   return _validV;
 }
 
 //////////////////////////////////////////////////////
 // is the data new?
+// if new is true, sets to false and returns true
 
 bool MetRecord::isNewH() const {
-  return _newH;
+  QMutexLocker locker(&_statusMutex);
+  bool isNew = _newH;
+  _newH = false;
+  return isNew;
 }
 
 bool MetRecord::isNewV() const {
-  return _newV;
+  QMutexLocker locker(&_statusMutex);
+  bool isNew = _newV;
+  _newV = false;
+  return isNew;
 }
 
 
