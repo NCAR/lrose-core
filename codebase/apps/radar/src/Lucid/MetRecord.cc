@@ -136,8 +136,10 @@ MetRecord::MetRecord()
   colorMap = NULL;
   
   _zlevelReq = -9999.0;
-  _valid = false;
-  _new = false;
+  _validH = false;
+  _validV = false;
+  _newH = false;
+  _newV = false;
 
 }
 
@@ -621,6 +623,28 @@ string MetRecord::_getFieldName()
 
   return field_name;
 
+}
+
+//////////////////////////////////////////////////////
+// is the data valid?
+
+bool MetRecord::isValidH() const {
+  return _validH;
+}
+
+bool MetRecord::isValidV() const {
+  return _validV;
+}
+
+//////////////////////////////////////////////////////
+// is the data new?
+
+bool MetRecord::isNewH() const {
+  return _newH;
+}
+
+bool MetRecord::isNewV() const {
+  return _newV;
 }
 
 

@@ -57,6 +57,16 @@ public:
   
   MetRecord();
 
+  // is the data valid?
+  
+  bool isValidH() const;
+  bool isValidV() const;
+
+  // is the data new?
+  
+  bool isNewH() const;
+  bool isNewV() const;
+
   // Get data for a horiz plane
 
   int requestHorizPlane(time_t start_time,
@@ -183,8 +193,8 @@ private:
   double _zlevelReq;   // horiz data
   WayPts _wayPtsReq;   // vert section data
 
-  bool _valid;
-  bool _new;
+  bool _validH, _validV;
+  bool _newH, _newV;
 
   // data status
 
