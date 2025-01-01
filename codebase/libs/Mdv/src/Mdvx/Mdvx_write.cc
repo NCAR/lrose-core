@@ -332,7 +332,7 @@ int Mdvx::writeToPath(const string &outputPath)
   DateTime dtime(_mhdr.time_centroid);
 
   // force NetCDF output instead of MDV for large files
-  // or data beyond a specified date (2025)
+  // or data beyond a specified date (2038)
   
   if (_internalFormat == FORMAT_NCF ||
       writeLen >= SI32_MAX ||
