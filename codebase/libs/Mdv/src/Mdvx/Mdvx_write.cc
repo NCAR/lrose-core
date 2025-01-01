@@ -336,7 +336,7 @@ int Mdvx::writeToPath(const string &outputPath)
   
   if (_internalFormat == FORMAT_NCF ||
       writeLen >= SI32_MAX ||
-      dtime.getYear() >= 2025) {
+      dtime.getYear() >= 2038) {
     _writeFormat = FORMAT_NCF;
   }
   
