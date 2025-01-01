@@ -110,7 +110,6 @@
 
 #include "RenderContext.hh"
 #include "ProductMgr.hh"
-// #include "TimePlot.hh"
 
 // GLOBAL DATA object
 

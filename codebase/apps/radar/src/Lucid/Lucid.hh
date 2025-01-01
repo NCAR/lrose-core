@@ -41,15 +41,17 @@
 
 #include <string>
 #include <vector>
+#include <QObject>
 
 #include "Args.hh"
 #include "Params.hh"
 
 class QApplication;
-// class DisplayField;
 class CartManager;
 
-class Lucid {
+class Lucid : public QObject {
+
+  Q_OBJECT
   
 public:
 
@@ -63,7 +65,7 @@ public:
 
   // run 
 
-  int Run(QApplication &app);
+  int RunApp(QApplication &app);
 
   // data members
 

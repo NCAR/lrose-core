@@ -178,6 +178,7 @@ SOURCES       = Args.cc \
 		moc_HorizWidget.cpp \
 		moc_MapMenuItem.cpp \
 		moc_ProdMenuItem.cpp \
+		moc_Lucid.cpp \
 		moc_TimeControl.cpp \
 		moc_VertWidget.cpp \
 		moc_VertWindow.cpp \
@@ -310,6 +311,7 @@ OBJECTS       = Args.o \
 		moc_HorizWidget.o \
 		moc_MapMenuItem.o \
 		moc_ProdMenuItem.o \
+		moc_Lucid.o \
 		moc_TimeControl.o \
 		moc_VertWidget.o \
 		moc_VertWindow.o \
@@ -947,9 +949,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -dM -E -o moc_predefs.h /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapMenuItem.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+compiler_moc_header_make_all: moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapMenuItem.cpp moc_ProdMenuItem.cpp moc_Lucid.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapMenuItem.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+	-$(DEL_FILE) moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_MapMenuItem.cpp moc_ProdMenuItem.cpp moc_Lucid.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 moc_CartManager.cpp: CartManager.hh \
 		DisplayManager.hh \
 		$(HOME)/lrose/include/qtplot/ColorMap.hh \
@@ -1215,6 +1217,17 @@ moc_ProdMenuItem.cpp: ProdMenuItem.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
 	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include ProdMenuItem.hh -o moc_ProdMenuItem.cpp
+
+moc_Lucid.cpp: Lucid.hh \
+		Args.hh \
+		$(HOME)/lrose/include/tdrp/tdrp.h \
+		$(HOME)/lrose/include/tdrp/tdrp_p.h \
+		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
+		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		Params.hh \
+		moc_predefs.h \
+		/usr/lib64/qt6/libexec/moc
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include Lucid.hh -o moc_Lucid.cpp
 
 moc_TimeControl.cpp: TimeControl.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
@@ -13387,6 +13400,9 @@ moc_MapMenuItem.o: moc_MapMenuItem.cpp
 
 moc_ProdMenuItem.o: moc_ProdMenuItem.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_ProdMenuItem.o moc_ProdMenuItem.cpp
+
+moc_Lucid.o: moc_Lucid.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_Lucid.o moc_Lucid.cpp
 
 moc_TimeControl.o: moc_TimeControl.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_TimeControl.o moc_TimeControl.cpp

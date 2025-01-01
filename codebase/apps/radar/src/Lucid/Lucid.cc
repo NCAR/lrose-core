@@ -57,6 +57,7 @@ using namespace std;
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
+        // QObject(nullptr),
         _args("Lucid")
 
 {
@@ -197,7 +198,7 @@ Lucid::~Lucid()
 //////////////////////////////////////////////////
 // Run
 
-int Lucid::Run(QApplication &app)
+int Lucid::RunApp(QApplication &app)
 {
 
   gd.finished_init = 1;

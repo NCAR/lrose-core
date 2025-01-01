@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     
     // run it
     
-    int iret = Prog->Run(*app);
+    int iret = Prog->RunApp(*app);
     
     // clean up
     

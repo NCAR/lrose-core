@@ -119,7 +119,6 @@ NORM_SRCS = \
 	MetRecord.cc \
 	Product.cc \
 	ProductMgr.cc \
-	Lucid.cc \
 	RenderContext.cc \
 	ScaledLabel.cc \
 	SiiPalette.cc \
@@ -194,6 +193,7 @@ NORM_SRCS = \
 	zoom_pu_proc.cc
 
 MOC_SRCS = \
+	Lucid.cc \
 	CartManager.cc \
 	DisplayManager.cc \
 	HorizWidget.cc \
@@ -206,6 +206,7 @@ MOC_SRCS = \
 	ZoomMenuItem.cc
 
 MOC_OUTPUT = \
+	moc_Lucid.cpp \
 	moc_CartManager.cpp \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
