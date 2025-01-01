@@ -57,7 +57,6 @@ using namespace std;
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
-        // QObject(nullptr),
         _args("Lucid")
 
 {
@@ -139,7 +138,7 @@ Lucid::Lucid(int argc, char **argv) :
     
     // initialize globals, get/set defaults, establish data sources etc.
 
-  if (init_data_space()) {
+  if (init_data_space(this)) {
     OK = false;
     return;
   }

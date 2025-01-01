@@ -90,6 +90,7 @@ class CartManager : public DisplayManager {
   Q_OBJECT
 
 public:
+
   static CartManager* Instance();
 
   // boundary editor dialog

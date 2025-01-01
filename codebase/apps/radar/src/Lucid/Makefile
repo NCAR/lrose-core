@@ -116,7 +116,6 @@ NORM_SRCS = \
 	FieldTableItem.cc \
 	LegacyParams.cc \
 	Main.cc \
-	MetRecord.cc \
 	Product.cc \
 	ProductMgr.cc \
 	RenderContext.cc \
@@ -198,6 +197,7 @@ MOC_SRCS = \
 	DisplayManager.cc \
 	HorizWidget.cc \
 	MapMenuItem.cc \
+	MetRecord.cc \
 	ProdMenuItem.cc \
 	TimeControl.cc \
 	VertWidget.cc \
@@ -211,6 +211,7 @@ MOC_OUTPUT = \
 	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
+	moc_MetRecord.cpp \
 	moc_ProdMenuItem.cpp \
 	moc_TimeControl.cpp \
 	moc_VertWidget.cpp \

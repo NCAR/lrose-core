@@ -28,6 +28,8 @@
 #ifndef CIDD_FUNCS_H
 #define CIDD_FUNCS_H
 
+#include <QObject>
+
 #include "cidd_windows.h"
 #include "cidd_maps.h"
 #include "Params.hh"
@@ -88,7 +90,7 @@ extern QFont choose_font( const char *string, int x_size, int y_size, int *xmid,
 #endif
 
 #ifndef CIDD_INIT
-extern int init_data_space();
+extern int init_data_space(QObject *lucid);
 extern void init_globals();
 #endif
 

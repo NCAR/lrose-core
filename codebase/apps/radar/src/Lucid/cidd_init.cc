@@ -89,7 +89,7 @@ static void _normalizeLongitude(double min_lon,
  * INIT_DATA_SPACE : Init all globals and set up defaults
  */
 
-int init_data_space()
+int init_data_space(QObject *lucid)
 {
 
   UTIMstruct temp_utime;

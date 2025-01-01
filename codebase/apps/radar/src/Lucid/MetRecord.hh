@@ -37,6 +37,7 @@
 #ifndef MET_RECORD_HH
 #define MET_RECORD_HH
 
+#include <QObject>
 #include <QMutex>
 
 #include <toolsa/DateTime.hh>
@@ -52,13 +53,15 @@
 
 class ColorMap;
 
-class MetRecord {
+class MetRecord : public QObject {
+
+  Q_OBJECT
 
 public:
 
   // constructor
   
-  MetRecord();
+  MetRecord(QObject* parent = nullptr);
 
   // is the data valid?
   
@@ -194,6 +197,7 @@ public:
 
 private:
 
+  QObject *_lucid;
   mutable QMutex _statusMutex;
 
   // data request details

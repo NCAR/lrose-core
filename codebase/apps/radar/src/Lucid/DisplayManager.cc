@@ -87,7 +87,7 @@ using namespace std;
 DisplayManager::DisplayManager(/* const Params &params,
                                const vector<DisplayField *> &fields,
                                bool haveFilteredFields */) :
-        QMainWindow(NULL)
+        QMainWindow(nullptr)
         // _params(params),
         // _fields(fields),
         // _haveFilteredFields(haveFilteredFields)

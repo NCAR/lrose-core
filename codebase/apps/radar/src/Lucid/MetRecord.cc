@@ -40,8 +40,8 @@
 ///////////////////////////////////////////////
 // constructor
 
-MetRecord::MetRecord()
-
+MetRecord::MetRecord(QObject* parent) :
+        _lucid(parent)
 {
   
   // initialize
