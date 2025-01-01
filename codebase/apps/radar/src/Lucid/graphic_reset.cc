@@ -45,14 +45,14 @@ void reset_time_list_valid_flags()
   int    i;
 
   for(i=0; i < gd.num_datafields; i++) {
-    gd.mrec[i]->time_list_valid = 0;
+    gd.mrec[i]->setTimeListValid(false);
   }
 
   for(i=0; i < gd.layers.num_wind_sets; i++) {
-    gd.layers.wind[i].wind_u->time_list_valid = 0;
-    gd.layers.wind[i].wind_v->time_list_valid = 0;
+    gd.layers.wind[i].wind_u->setTimeListValid(false);
+    gd.layers.wind[i].wind_v->setTimeListValid(false);
     if(gd.layers.wind[i].wind_w != NULL) {
-      gd.layers.wind[i].wind_w->time_list_valid = 0;
+      gd.layers.wind[i].wind_w->setTimeListValid(false);
     }
   }
     

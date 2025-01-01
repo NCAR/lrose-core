@@ -71,6 +71,11 @@ public:
   bool isNewH() const;
   bool isNewV() const;
 
+  // time list
+  
+  void setTimeListValid(bool state) { _timeListValid = state; }
+  bool getTimeListValid() const { return _timeListValid; }
+  
   // Get data for a horiz plane
 
   int requestHorizPlane(time_t start_time,
@@ -97,7 +102,6 @@ public:
  
   int h_data_valid; /* 1 = Valid data pointer, 0 = invalid */
   int v_data_valid; /* 1 = Valid data pointer, 0 = invalid */
-  int time_list_valid; /* 1 = Valid data , 0 = invalid */
 
   int vert_type; /* TYPE of vertical grid - See Mdv/Mdvx_enums.hh */
 
@@ -195,16 +199,19 @@ private:
   // data request details
   
   DateTime _timeReq;
-  ZoomBox _zoomBoxReq; // horiz data
-  double _zlevelReq;   // horiz data
-  WayPts _wayPtsReq;   // vert section data
+  ZoomBox _zoomBoxReq;                   // horiz data
+  double _vLevelMinReq, _vLevelMaxReq;   // horiz data
+  WayPts _wayPtsReq;                     // vert section data
   
   bool _validH, _validV;
   mutable bool _newH, _newV;
 
+  bool _timeListValid;
+
   // data status
 
-  
+  bool _checkRequestChangedH(time_t start_time, time_t end_time);
+  bool _checkRequestChangedV(time_t start_time, time_t end_time);
   
   int _getTimeList(time_t start_time,
                    time_t end_time,
@@ -213,6 +220,11 @@ private:
   string _getFullUrl();
   
   string _getFieldName();
+
+  void _setValidH(bool state);
+  void _setValidV(bool state);
+  void _setNewH(bool state);
+  void _setNewV(bool state);
 
   void _getBoundingBox(double &min_lat, double &max_lat,
                        double &min_lon, double &max_lon);

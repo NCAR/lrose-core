@@ -57,7 +57,7 @@ MetRecord::MetRecord()
   last_collected = 0;
   h_data_valid = 0;
   v_data_valid = 0;
-  time_list_valid = 0;
+  _timeListValid = false;
   vert_type = 0;
   alt_offset = 0.0;
   detail_thresh_min = 0.0;
@@ -136,7 +136,8 @@ MetRecord::MetRecord()
   
   colorMap = NULL;
   
-  _zlevelReq = -9999.0;
+  _vLevelMinReq = -9999.0;
+  _vLevelMaxReq = -9999.0;
   _validH = false;
   _validV = false;
   _newH = false;
@@ -153,47 +154,39 @@ int MetRecord::requestHorizPlane(time_t start_time,
                                  int page)
 {
 
-  time_t mid_time = start_time + (end_time - start_time) / 2;
-
-  // compute request time
+  // apply offset the request time
   
-  switch(_params.gather_data_mode) {
-    case Params::CLOSEST_TO_FRAME_CENTER:
-      gd.data_request_time = mid_time;
-      break;
-    case Params::FIRST_BEFORE_END_OF_FRAME:
-      gd.data_request_time = end_time;
-      break;
-    case Params::FIRST_AFTER_START_OF_FRAME:
-      gd.data_request_time = start_time;
-      break;
+  start_time += (int) (time_offset * 60);
+  end_time += (int) (time_offset * 60);
 
-  } // gather_data_mode
-
+  // check for change in request details
+  
+  if (!_checkRequestChangedH(start_time, end_time)) {
+    // no changes to the request, use what we have, mark as new
+    _setNewH(true);
+    return 0;
+  }
+  
   // Construct URL, check is valid.
   
   string fullUrl(_getFullUrl());
   DsURL URL(fullUrl);  
-  if(URL.isValid() != TRUE) {
-    cerr << "111111 ==>> MetRecord::requestHorizPlane Bogus URL: "
-         << fullUrl << endl;
+  if(!URL.isValid()) {
+    cerr << "ERROR - MetRecord::requestHorizPlane, field: " << _getFieldName() << endl;
+    cerr << "  Bad URL: " << fullUrl << endl;
     h_data_valid = 1;
     return -1;
   }
-
-  // Offset the request time
-  
-  start_time += (int) (time_offset * 60);
-  end_time += (int) (time_offset * 60);
-  
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, fullUrl.c_str());
     // Disable threading while in debug mode
     h_mdvx->setThreadingOff();
   }
-
+  
   // Gather a data index for this field  
-  if(time_list_valid == 0) {
+  // TODO - check this!!!
+  
+  if(!_timeListValid) {
     _getTimeList(start_time, end_time,  page);
     return 0; // Must wait until it's done
   }
@@ -206,40 +199,40 @@ int MetRecord::requestHorizPlane(time_t start_time,
   
   h_mdvx->clearRead(); 
   h_mdvx->addReadField(fieldName);
-
+  
   // set up read
+  
+  gd.data_request_time = _timeReq.utime();
   
   switch(_params.gather_data_mode ) {
     
     case Params::CLOSEST_TO_FRAME_CENTER:
-      gd.data_request_time = mid_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,
                             (int) (60 * time_allowance),
                             gd.model_run_time,
-                            mid_time - gd.model_run_time);
+                            _timeReq.utime() - gd.model_run_time);
       } else {
         h_mdvx->setReadTime(Mdvx::READ_CLOSEST,
                             fullUrl,
                             (int) (60 * time_allowance),
-                            mid_time);
+                            _timeReq.utime());
       }
       break;
 
     case Params::FIRST_BEFORE_END_OF_FRAME:
-      gd.data_request_time = end_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,
                             (int) (60 * time_allowance),
                             gd.model_run_time,
-                            (end_time - gd.model_run_time));
+                            (_timeReq.utime() - gd.model_run_time));
       } else {
         h_mdvx->setReadTime(Mdvx::READ_FIRST_BEFORE,
                             fullUrl,
                             (int) (60 * time_allowance),
-                            end_time + 1, 0);
+                            _timeReq.utime() + 1, 0);
       }
       
       if(gd.debug1) {
@@ -251,18 +244,17 @@ int MetRecord::requestHorizPlane(time_t start_time,
       break;
 
     case Params::FIRST_AFTER_START_OF_FRAME:
-      gd.data_request_time = start_time;
       if(gd.model_run_time != 0 && h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
         h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                             fullUrl,
                             (int) (60 * time_allowance),
                             gd.model_run_time,
-                            (start_time - gd.model_run_time));
+                            (_timeReq.utime() - gd.model_run_time));
       } else {
         h_mdvx->setReadTime(Mdvx::READ_FIRST_AFTER,
                             fullUrl,
                             (int) (60 * time_allowance),
-                            start_time-1, 0);
+                            _timeReq.utime()-1, 0);
       }
       if(gd.debug1) {
         fprintf(stderr,
@@ -274,39 +266,26 @@ int MetRecord::requestHorizPlane(time_t start_time,
 
   } // gather_data_mode
 
+  // vlevel
+  
+  h_mdvx->setReadVlevelLimits(_vLevelMinReq, _vLevelMaxReq);
   if(composite_mode) {
     // Ask for data that covers the whole vertical domain 
-    h_mdvx->setReadVlevelLimits((double)gd.h_win.min_ht,
-                                (double)gd.h_win.max_ht);
     h_mdvx->setReadComposite();
-  } else {
-    // Ask for plane closest to the display's current average height
-    h_mdvx->setReadVlevelLimits(gd.h_win.cur_ht + alt_offset,
-                                gd.h_win.cur_ht + alt_offset);
   }
-     
-  if(_params.always_get_full_domain == 0) {
-    double min_lat, max_lat, min_lon, max_lon;
-    _getBoundingBox(min_lat, max_lat, min_lon, max_lon); 
-    if (!_params.do_not_clip_on_mdv_request) {
-      h_mdvx->setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
-    }
-  } else {
-    if (!_params.do_not_clip_on_mdv_request) {
-      h_mdvx->setReadHorizLimits(-90.0, gd.h_win.origin_lon - 179.9999,
-                                 90.0, gd.h_win.origin_lon + 179.9999);
-    }
-  }
+
+  // zoom
+
+  h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat(),
+                             _zoomBoxReq.getMinLon(),
+                             _zoomBoxReq.getMaxLat(),
+                             _zoomBoxReq.getMaxLon());
   
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
   if (!_params.do_not_decimate_on_mdv_request) {
-    // if(_params.aspect_ratio > 1.0) {
     h_mdvx->setReadDecimate(gd.h_win.img_dim.width * gd.h_win.img_dim.width);
-    // } else {
-    //   h_mdvx->setReadDecimate(gd.h_win.img_dim.height * gd.h_win.img_dim.height);
-    // }
   }
-     
+  
   h_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
   h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
   if(_params.request_compressed_data) {
@@ -343,7 +322,84 @@ int MetRecord::requestHorizPlane(time_t start_time,
   return 0;
   
 }
- 
+
+////////////////////////////////////////////////////////////
+// check whether H request has changed
+// returns true if changed, false if no change
+
+bool MetRecord::_checkRequestChangedH(time_t start_time,
+                                      time_t end_time)
+{
+  
+  // compute requested time
+  
+  DateTime timeReq(start_time);
+  switch(_params.gather_data_mode) {
+    case Params::CLOSEST_TO_FRAME_CENTER: {
+      time_t midTime = start_time + (end_time - start_time) / 2;
+      timeReq = midTime;
+      break;
+    }
+    case Params::FIRST_BEFORE_END_OF_FRAME: {
+      timeReq = end_time;
+      break;
+    }
+    case Params::FIRST_AFTER_START_OF_FRAME: {
+      timeReq = start_time;
+      break;
+    }
+
+  } // gather_data_mode
+
+  // compute requested vlevel limits
+  
+  double vLevelMinReq, vLevelMaxReq;
+  if(composite_mode) {
+    vLevelMinReq = gd.h_win.min_ht;
+    vLevelMaxReq = gd.h_win.max_ht;
+  } else {
+    vLevelMinReq = gd.h_win.cur_ht + alt_offset;
+    vLevelMaxReq = gd.h_win.cur_ht + alt_offset;
+  }
+
+  // compute requested zoom domain
+  
+  ZoomBox zoomBoxReq;
+  if(!_params.always_get_full_domain) {
+    double min_lat, max_lat, min_lon, max_lon;
+    _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
+    zoomBoxReq.setLatLimits(min_lat, max_lat);
+    zoomBoxReq.setLonLimits(min_lon, max_lon);
+  } else if (_params.do_not_clip_on_mdv_request) {
+    zoomBoxReq.clearLimits();
+  } else {
+    zoomBoxReq.setLatLimits(-90.0, 90.0);
+    zoomBoxReq.setLonLimits(gd.h_win.origin_lon - 179.9999, gd.h_win.origin_lon + 179.9999);
+  }
+
+  // check if request is unchanged from previous call
+
+  QMutexLocker locker(&_statusMutex);
+  if (_validH &&
+      timeReq == _timeReq &&
+      fabs(vLevelMinReq - _vLevelMinReq) < 1.0e-5 &&
+      fabs(vLevelMaxReq - _vLevelMaxReq) < 1.0e-5 &&
+      zoomBoxReq == _zoomBoxReq) {
+    // no changes, use what we have, mark as new
+    return false;
+  }
+  
+  // save request for comparison next time
+
+  _timeReq = timeReq;
+  _vLevelMinReq = vLevelMinReq;
+  _vLevelMaxReq = vLevelMaxReq;
+  _zoomBoxReq = zoomBoxReq;
+
+  return true;
+
+}
+
 /**********************************************************************
  * Request data for a vertical section
  */
@@ -564,17 +620,17 @@ int MetRecord::_getTimeList(time_t start_time,
     if (h_mdvx->compileTimeList()) {
       cout << "ERROR -CIDD:  setTimeListModeValid" << endl;
       cout << h_mdvx->getErrStr();
-      time_list_valid = 1;
+      _timeListValid = true;
     }  
   } else {
     gd.io_info.outstanding_request = 0;
-    time_list_valid = 1;
+    _timeListValid = true;
   }
 
   return 0;  // return from this request.
   
   // When the thread is done the check_for_io function will gather and store the
-  // timelist info and then set time_list_valid = 1 (true);
+  // timelist info and then set _timeListValid = 1 (true);
   
 }
 
@@ -655,6 +711,16 @@ bool MetRecord::isValidV() const {
   return _validV;
 }
 
+void MetRecord::_setValidH(bool state) {
+  QMutexLocker locker(&_statusMutex);
+  _validH = state;
+}
+
+void MetRecord::_setValidV(bool state) {
+  QMutexLocker locker(&_statusMutex);
+  _validV = state;
+}
+
 //////////////////////////////////////////////////////
 // is the data new?
 // if new is true, sets to false and returns true
@@ -671,6 +737,16 @@ bool MetRecord::isNewV() const {
   bool isNew = _newV;
   _newV = false;
   return isNew;
+}
+
+void MetRecord::_setNewH(bool state) {
+  QMutexLocker locker(&_statusMutex);
+  _newH = state;
+}
+
+void MetRecord::_setNewV(bool state) {
+  QMutexLocker locker(&_statusMutex);
+  _newV = state;
 }
 
 

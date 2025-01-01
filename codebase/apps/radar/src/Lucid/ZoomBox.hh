@@ -82,6 +82,13 @@ public:
   
   virtual void print(ostream &out) const;
 
+  // get limits
+
+  double getMinLat() const { return _minLat; }
+  double getMaxLat() const { return _maxLat; }
+  double getMinLon() const { return _minLon; }
+  double getMaxLon() const { return _maxLon; }
+
 protected:
   
   // data
