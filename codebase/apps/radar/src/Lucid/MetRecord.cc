@@ -884,3 +884,78 @@ void MetRecord::_adjustBoundingBox(double lat, double lon,
   }
 }
 
+#ifdef JUNK
+
+#include <QCoreApplication>
+#include <QThread>
+#include <QObject>
+#include <QDebug>
+
+// Worker class definition
+class Worker : public QObject {
+    Q_OBJECT
+
+public:
+    Worker(QObject* parentObject, QObject* parent = nullptr)
+        : QObject(parent), m_parentObject(parentObject) {}
+
+public slots:
+    void doWork() {
+        qDebug() << "Worker thread started. Parent object:" << m_parentObject;
+        // Simulate some work
+        for (int i = 0; i < 5; ++i) {
+            qDebug() << "Working... Step" << i + 1;
+            QThread::sleep(1); // Simulate time-consuming work
+        }
+        qDebug() << "Work completed!";
+        emit workFinished();
+    }
+
+signals:
+    void workFinished();
+
+private:
+    QObject* m_parentObject;
+};
+
+// Main class definition
+class MainClass : public QObject {
+    Q_OBJECT
+
+public:
+    MainClass(QObject* parent = nullptr) : QObject(parent) {}
+
+    void startWorker() {
+        Worker* worker = new Worker(this); // Pass the current object as reference
+        QThread* thread = new QThread;
+
+        worker->moveToThread(thread);
+
+        // Connect signals and slots
+        connect(thread, &QThread::started, worker, &Worker::doWork);
+        connect(worker, &Worker::workFinished, this, &MainClass::onWorkFinished);
+        connect(worker, &Worker::workFinished, thread, &QThread::quit);
+        connect(thread, &QThread::finished, worker, &Worker::deleteLater);
+        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+        thread->start();
+    }
+
+public slots:
+    void onWorkFinished() {
+        qDebug() << "Work finished in worker thread!";
+    }
+};
+
+// Main function
+int main(int argc, char* argv[]) {
+    QCoreApplication app(argc, argv);
+
+    MainClass mainObj;
+    mainObj.startWorker();
+
+    return app.exec();
+}
+
+#include "main.moc"
+#endif
