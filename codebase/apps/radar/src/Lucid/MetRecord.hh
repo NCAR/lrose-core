@@ -182,7 +182,7 @@ public:
   MdvxProj *proj; /* Pointer to projection class */
   
   // MDV Data class sets - One for horizontal, one for vertical
-  DsMdvx *h_mdvx;
+  DsMdvxThreaded *h_mdvx;
   MdvxField *h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;

@@ -63,7 +63,7 @@ public slots:
     emit readDone();
   }
 signals:
-  void readDone();
+  void readDone() {};
 private:
   MetRecord* mr;
 };
@@ -233,10 +233,12 @@ int MetRecord::requestHorizPlane(time_t start_time,
     h_data_valid = 1;
     return -1;
   }
+
+  // turn off threading, we are using QThread
+  h_mdvx->setThreadingOff();
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, fullUrl.c_str());
     // Disable threading while in debug mode
-    // h_mdvx->setThreadingOff();
   }
   
   // Gather a data index for this field  
@@ -488,10 +490,10 @@ int MetRecord::requestVertSection(time_t start_time,
   h_mdvx->clearRead(); 
   h_mdvx->addReadField(fieldName);
   
+  v_mdvx->setThreadingOff();
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Vert Plane - page : %d  -  %s\n", page, fullUrl.c_str());
     // Disable threading while in debug mode
-    v_mdvx->setThreadingOff();
   }
   
   // offset the request time
@@ -613,11 +615,11 @@ int MetRecord::_getTimeList(time_t start_time,
   end_time += (int) (time_offset * 60);
   time_t delta = gd.epoch_end - gd.epoch_start;
   
+  h_mdvx->setThreadingOff();
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Time List page : %d  -  %s\n",
             page, fullUrl.c_str());
     // Disable threading while in debug mode
-    // h_mdvx->setThreadingOff();
   }
 
   h_mdvx->clearTimeListMode();
