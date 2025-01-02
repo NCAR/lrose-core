@@ -42,8 +42,8 @@
 
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
-#include <Mdv/DsMdvxThreaded.hh>
 #include <Mdv/DsMdvx.hh>
+#include <Mdv/DsMdvxThreaded.hh>
 
 #include "cidd_macros.h"
 #include "cidd_structs.h"
@@ -90,6 +90,10 @@ public:
   int requestVertSection(time_t start_time,
                          time_t end_time,
                          int page);
+
+  // perform the vol read for Horiz
+
+  void startReadVolH();
   
   // public members
   
@@ -178,11 +182,12 @@ public:
   MdvxProj *proj; /* Pointer to projection class */
   
   // MDV Data class sets - One for horizontal, one for vertical
-  DsMdvxThreaded *h_mdvx;
+  DsMdvx *h_mdvx;
   MdvxField *h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;
-  Mdvx::vlevel_header_t h_vhdr; 
+  Mdvx::vlevel_header_t h_vhdr;
+  int iret_h_mdvx_read;
   
   Mdvx::field_header_t ds_fhdr; // Data Set's Field header
   Mdvx::vlevel_header_t ds_vhdr; // Vertical height headers
@@ -194,6 +199,9 @@ public:
   Mdvx::vlevel_header_t v_vhdr;
   
   ColorMap *colorMap;
+
+public slots:
+  void readDoneH();
 
 private:
 
