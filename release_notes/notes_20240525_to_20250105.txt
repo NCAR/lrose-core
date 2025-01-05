@@ -1,3 +1,8 @@
+# command to create this file
+#
+#   git log --until 2025/01/05 --since 2024/05/25 > & /tmp/gitlog.txt
+#
+
     apps/radar/Lucid - working on MetRecord
     apps/radar/Lucid - in MetRecord, adding readH in QThread
     libs/Mdvx - MdvxWrite.cc - when determining whether to use NetCDF vs old MDV format, extend date from 2025 to 2038
