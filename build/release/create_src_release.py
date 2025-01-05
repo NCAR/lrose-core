@@ -190,10 +190,10 @@ def main():
     trimToMakefiles("libs")
     trimToMakefiles("apps")
 
-    # set up autoconf
+    # set up autoconf - no longer tested and supported
 
-    logPath = prepareLogFile("setup-autoconf");
-    setupAutoconf()
+    # logPath = prepareLogFile("setup-autoconf");
+    # setupAutoconf()
 
     # create CMakeFiles.txt files for cmake
     
