@@ -1,0 +1,2017 @@
+commit bd03deaf127690378be03b7493aaa30a0e701e79
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 5 11:11:31 2025 -0700
+
+    Adding ReleaseNotes_20250105.md
+
+commit 0c9e186dba0b3980eb9349378a1dbbc0d80df764
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 5 09:40:12 2025 -0700
+
+    create_src_release.py - commenting out autoconf option
+
+commit 2445b5a4d38a8fb249181e8b7c0f652d161d8f79
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jan 4 18:43:33 2025 -0700
+
+    apps/radar/Ts2Moments/Cmd.cc - removing C code versions, see Iq2Dsr
+
+commit ef4a565b3f63b382409fecb65420cf8e52129c89
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jan 4 18:09:52 2025 -0700
+
+    codebase/apps/ingest/src/_makefiles/makefile.lrose-core, codebase/apps/radar/src/_makefiles/makefile.lrose-core - adding new apps
+
+commit 8b542bd19ba356120bbfefee0e2e50277134e9e0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 1 20:20:03 2025 -0700
+
+    apps/radar/Lucid - working on MetRecord
+
+commit 834160637be944fab57f26f1e76c658e36bba477
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 1 17:05:36 2025 -0700
+
+    apps/radar/Lucid - in MetRecord, adding readH in QThread
+
+commit 33fc0f84e4c771a1fbd7d6d387ef9f85566446d5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 1 08:28:14 2025 -0700
+
+    libs/Mdvx - MdvxWrite.cc - when determining whether to use NetCDF vs old MDV format, extend date from 2025 to 2038
+
+commit 4864e71972bf72cd7b4b53d5eaa28c1a56e1cf8a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 1 08:25:52 2025 -0700
+
+    libs/Mdvx - MdvxWrite.cc - when determining whether to use NetCDF vs old MDV format, extend date from 2025 to 2038
+
+commit 1d615b051b4bd9fbbe05230b5037eb1add018881
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 1 08:18:08 2025 -0700
+
+    libs/Mdvx - MdvxWrite.cc - when determining whether to use NetCDF vs old MDV format, extend date from 2025 to 2038
+
+commit 351a82a720869a7fa754fddf58295b4817f10178
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 19:08:43 2024 -0700
+
+    apps/radar/Lucid - making Lucid and MetRecord objects QObjects
+
+commit 143f4ff17b6be338da9a985089a052cbc58c6a07
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 19:03:37 2024 -0700
+
+    apps/radar/Lucid - making Lucid and MetRecord objects QObjects
+
+commit abeb463bd3dc414b5484346e253ae1fa86918e3c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 18:28:32 2024 -0700
+
+    apps/radar/Lucid - making Lucid class a QObject
+
+commit d9620e5be0c2f834c5c9d859c0fbf919e716fbed
+Merge: d99e05123 63f3b3717
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 17:45:54 2024 -0700
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit d99e0512383c6015790c2a4d2648de7afa7cf680
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 17:45:38 2024 -0700
+
+    apps/radar/Lucid/MetRecord - working on data retrievals
+
+commit 63f3b3717466e940db236a34b65d739d63630c28
+Author: Isabel Suhr <isabels@ucar.edu>
+Date:   Tue Dec 31 17:13:31 2024 -0700
+
+    Update cmake build script to work on alma9 (#135)
+
+commit 5798f59639864d55fcf2523bb58ac6badd6e2588
+Author: Isabel Suhr <isabels@ucar.edu>
+Date:   Tue Dec 31 17:08:14 2024 -0700
+
+    Leosphere format update (#134)
+    
+    * Update for recent leosphere file format changes: sweep group attribute res_id is now an int attribute, not a string attribute. Catch exception of trying to convert an int to a string, and instead get its value as an int and then convert to string.
+    
+    * Oops, fix degree symbols
+    
+    * Oops, fix degree symbols, again
+    
+    * Update wording on combineRHI errors: change error to warning when trying to combine RHI on non RHI files, since file processing still works apart from combining RHI, make wording on multiple sweeps error a little clearer.
+
+commit e3df3fb35b5ff33f159f27173d35035e620859ab
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 31 14:06:28 2024 -0700
+
+    apps/radar/Lucid - Params::data_gather_mode to enum
+
+commit 503a7b6a1e9d02ac54068bdf05a0b3ee8c0339a0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 30 18:18:11 2024 -0700
+
+    apps/radar/Lucid/MetRecord - adding _getBoundingBox()
+
+commit 4ca43f0d14cab4629039650ebcffb8a66ca1dd91
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 30 18:04:48 2024 -0700
+
+    apps/radar/Lucid/MetRecord - adding mutex for checking status
+
+commit 9871d6e5eccce80d18fe923d57d2fd7c28e72dec
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 30 17:40:34 2024 -0700
+
+    apps/radar/Lucid - adding valid() and new() to MetRecord class
+
+commit 35ed008913bc35a9d3eacc55a033e1780ca5b656
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 29 21:39:56 2024 -0700
+
+    apps/radar/Lucid - working on MetRecord
+
+commit 8d3756ee02302067b32c2c74ce770329171bc914
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 29 15:54:00 2024 -0700
+
+    apps/radar/Lucid - adding WayPts class
+
+commit 863016b63f7171d1c0499d82985840e4ea2abc9a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 29 15:16:08 2024 -0700
+
+    apps/radar/Lucid - adding ZoomBox class
+
+commit 6ac63a8849a308581af6aaf89804e327e64b413e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Dec 13 01:21:09 2024 +0000
+
+    apps/Radx/RadxDwellCombine - for realtime FMQ mode, upgrading to use IwrfMomReader
+
+commit b983c4003c772730be5053ca8100a2c196ba8ecf
+Merge: 86a423d74 75c10894d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Dec 13 00:42:05 2024 +0000
+
+    Merge branch 'master' of github.com:NCAR/lrose-core
+
+commit 86a423d745bab2c64d9c2021226ff666224beaea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Dec 13 00:41:52 2024 +0000
+
+    apps/radar/HcrShortLongCombine - setting output fmq to allow multiple writers
+
+commit 75c10894d2b17ad285cec2c8463f858b833a95eb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 12 14:25:33 2024 -0700
+
+    Ts2Moments - CMakeLists.txt updated
+
+commit c2625039968f7b106f180d03b23ff0d9c9f1dd41
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 12 01:21:53 2024 +0000
+
+    apps/radar/Ts2Moments - adding PMU() call to BeamReader
+
+commit 507a1c4b3457babe45cacc6e8cd21e74454a7725
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 12 01:13:27 2024 +0000
+
+    apps/radar/Ts2Moments - adding checkFixedPulseWidth()
+
+commit 47235f65d5f64255d08c9c9e815e4f0e6c1608aa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 10 19:05:38 2024 +0000
+
+    apps/radar/Ts2Moments/BeamReader.cc - checkIsStaggeredPrt() - checking for NULL for pulse0 or pulse1 before dereferencing
+
+commit 01e467a6edc17704f085813b323244981d1ec30d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 10 18:44:39 2024 +0000
+
+    apps/radar/Ts2Moments/BeamReader.cc - checkIsStaggeredPrt() - checking for NULL for pulse0 or pulse1 before dereferencing
+
+commit 500843d253313d38f70715475f686bbc118d5df8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 8 00:39:29 2024 +0000
+
+    Changing so that input fields are already qualified with short and long
+
+commit 856692707e5a458914f6cdca1215bdf227f02a41
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Dec 6 15:37:20 2024 -0700
+
+    apps/radar/Ts2Moments - params docs
+
+commit 1d411486760b4af479ec8732abd990f41259c655
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 19:07:05 2024 -0700
+
+    apps/radar/Ts2Moments - cleaning up paramdef file
+
+commit cedd62555bd44e8daa3e8e7fdf92903d13543e2f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 18:44:11 2024 -0700
+
+    apps/radar/Ts2Moments - removing FMQ mode, making it REALTIME
+
+commit 9da0644918f302e53e08b7646e580028a9ea09e9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 18:31:01 2024 -0700
+
+    apps/radar/Ts2Moments - removing SpectraPrint
+
+commit c983879c564a1ee17b4837b4328c87c2978ebd40
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 18:06:56 2024 -0700
+
+    cmakefiles - adding code to not check for opengl in mac build for conda forge
+
+commit aa2b381ac15991a354b24d70d6396fc0b23e5de1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 18:04:35 2024 -0700
+
+    adding apps/radar/Ts2Moments, a copy of Iq2Dsr. This will be cleaned up to remove unused legacy complexity
+
+commit 8aab5756671386e7171700ca9170064a790856e1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 18:03:15 2024 -0700
+
+    adding apps/radar/Ts2Moments, a copy of Iq2Dsr. This will be cleaned up to remove unused legacy complexity
+
+commit 896d4f937679d1d2febd39fb35118ad4028a8237
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Dec 5 17:48:56 2024 -0700
+
+    libs/tdrp/load.c - fixing bug in substituting env vars
+
+commit 6508cff00b1da473b1fc941cfc20e0030394deb6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Dec 4 16:28:06 2024 -0700
+
+    apps/radar/HcrShortLongCombine - fixing problem with applying vel corrections twice
+
+commit 4a98af54f847d95a2e1cf7d3091b701d1007d69b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Dec 3 16:02:31 2024 -0700
+
+    apps/radar/Iq2Dsr - adding param for georef_fixed_location_mode, for HCR in ground-based ops
+
+commit 25940fecf12a6dedc44c010a24e135cf1edd230d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 2 17:31:38 2024 -0700
+
+    docs on miniforge build
+
+commit 596d48524846481b539eeefab2e54e7eb28e1e9b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 2 17:30:42 2024 -0700
+
+    docs on miniforge build
+
+commit 5996e20fca19343fc1d907c66f98d17e065ed00d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Dec 2 16:26:12 2024 -0700
+
+    docs on miniforge build
+
+commit c5a7cf964ef616c5fb4a1cdfbb8915af6ffd15ec
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 18:02:14 2024 -0700
+
+    apps/radar/Lucid - working on MetRecord class, for data retrievals
+
+commit 29206e1e2629866259899c2afa1e634f71dbb920
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 17:59:50 2024 -0700
+
+    apps/radar/Lucid - working on MetRecord class, for data retrievals
+
+commit 588d42617ddce3f986c158eedd654d76c52f427a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 15:16:14 2024 -0700
+
+    apps/radar/Lucid - met_record_t -> MetRecord class
+
+commit 1b21b0c1a2ce965b29a03b4dcda013a8cb1331c0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 07:51:56 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 7c9d19cee503098e8333cfc7dc8d99df33b6ebb2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 07:50:13 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 2147f0c2468c7527ca66e2910114047fda4eb4cd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Dec 1 07:43:23 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit fdb996df44b755b810a4eb4c800648c1cf4d3de9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 15:34:36 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 25f48cb4a171a9c019ddc37ea687c947982040c9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 15:26:52 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit fc41cdf491d398be56a7645d2d2498ddf5f3909b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 15:24:11 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 8889f901f85269adf88246fc16f9c191f777c92c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 15:20:41 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 714803935355671c10a3b84ba95ddd1ff5831b60
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:21:22 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 4a419d324ebdf028676da8bb7ff6cd733fb97830
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:20:18 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit eeab6a02341762b099d17009a360bfb8fd2f2b38
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:18:46 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit ebc320b2cc3d89b437ef4f83825fbf3e143b771b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:17:40 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit cd9aacf7ba37259ff3093b6dd5e76ef4a1a47bce
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:02:19 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 82027d19934de3e233472885d9c7d407cf06c1a4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 10:00:18 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit e134b1aaa6360131c57626abd34174473d619aeb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:57:35 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 36da7eec948729719ded75345015d42aabe3159f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:55:05 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 39dab8bdac797a26a39e0bb881abdb56226f663e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:54:23 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit 99bb97dfc4db19d8e8a3c4cd93635c8c22f42a5f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:52:13 2024 -0700
+
+    Adding docs/runtime/env_vars.md
+
+commit f5122be3c2b33eb0d3fa44728a67a7f4fabf6db8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:16:27 2024 -0700
+
+    updating docs/runtime/env_vars.html
+
+commit 85f2d7c88d01fab943bbf934f6e6f42c7a27b8be
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:12:20 2024 -0700
+
+    Updating LROSE_DOCS_OVERVIEW.md
+
+commit 07c72186ddfafbf21b77516257aa49c460755deb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 09:00:15 2024 -0700
+
+    Fixing broken link -- LROSE_DOCS_OVERVIEW.m
+
+commit b70ffe238483eb2418dab836c166cc56eca5a8b6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 30 08:51:13 2024 -0700
+
+    LROSE_DOCS_OVERVIEW.md - fixing typo
+
+commit d37f423b47a5eb950a5de82b6e805d7d28578a9a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Nov 29 12:27:17 2024 -0700
+
+    apps/radar/Lucid - testing data retrievals
+
+commit 9ffd0c0680285eef2ead00c57903d8af00f4bac7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 26 06:58:08 2024 -0700
+
+    (a) libs/Radx - in RadxVol, adding option to set the sweep mode labels. (b) In apps/Radx/RadxConvert - adding option to override sweep mode labels in file name
+
+commit 4809baf05a6dc3c628c7c42019f26eb04292a205
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 26 06:52:47 2024 -0700
+
+    (a) libs/Radx - in RadxVol, adding option to set the sweep mode labels. (b) In apps/Radx/RadxConvert - adding option to override sweep mode labels in file name
+
+commit b21c0ffd9f494fa29a563d40a2973081a97baf34
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 26 04:02:56 2024 -0700
+
+    libs/Radx/NcfRadxFile: (a) r_calib_time variable - setting units to UTC. (b) time variable - replacing spaces with underscores in long name. (c) azimuth variable: making the long name the standard name, and creating new long name. (d) elevation variable: making the long name the standard name and creating a new long name
+
+commit a798965a9cdc40e2a1d6f85faf53cb172f1a4eaf
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 26 03:33:25 2024 -0700
+
+    apps/Radx/RadxConvert - adding param to override scan name
+
+commit d99125d4d2788eae22106ea7e626a536a60fdf08
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Nov 24 02:13:53 2024 -0700
+
+    build/cmake/createCMakeLists.py - in addFindQt, ignoring OpenGL
+
+commit 1e442d51de6fce5c823d7487cb6dc86a2c31e89b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Nov 24 02:06:57 2024 -0700
+
+    build/cmake/createCMakeLists.py - in addFindQt, ignoring OpenGL
+
+commit 98b5a9e566b5aa0ddfb68de407e20ec40e23290b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Nov 21 10:39:18 2024 -0700
+
+    conda-build - bringing CMakeLists back to previous
+
+commit 7701708a230c3161281fe235a044957a668e165f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Nov 21 02:34:48 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit 22c3bb15436de89f5b76bf423a74700d1d8a6028
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Nov 21 02:13:17 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit eb47965878b801440998c6f8e520f307edb8a55f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Nov 20 16:08:26 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit 06624ca08f81f364c9860a050a95619b9556263f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Nov 20 01:58:28 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit e6728620bfc0f81d6e9b2077c8edc3a50d411ee4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Nov 20 00:50:50 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit 83881e6c56cce0a7a96ac29a50268b66bb96bf0e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 19 16:20:42 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit ac288eaca5dbc09658cf516569582807d3371088
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 19 15:00:11 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit 5b953908b98328ee7608d16885cab7fafa907382
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 19 10:27:44 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit 023af140ff20344cfa3327f24791a557149598b4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Nov 19 10:14:23 2024 -0700
+
+    Mac OSX test for conda build. Commenting out find_path() for qt6
+
+commit ee4883ebb3d4ee62fa031cc9f5a9b5d4b94cde53
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 18 15:08:08 2024 -0700
+
+    codebase/CMakeLists.txt - adding messages to print out CONDA build variables
+
+commit ca014789e4570bfc9f90b631496f17b4f9bfca75
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 18 14:18:31 2024 -0700
+
+    codebase/CMakeLists.txt - testing options for qt6 build under conda-forge on OSX
+
+commit 1d3de5e6fcbe9ca76a4227ded08b1915f2bb3c70
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 18 10:12:18 2024 -0700
+
+    codebase/CMakeLists.txt - adding messages to print out CONDA build variables
+
+commit 4cc8a73865c3b4ba2512ef067c2a0963a34dea5e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 11 23:19:42 2024 -0700
+
+    build/cmake/createCMakeLists.py - reverting
+
+commit 552fe42d7768caeacd68d5140a30d2b70f5f5596
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 11 16:41:07 2024 -0700
+
+    build/cmake/createCMakeLists.py - for MAMBA_BUILD do not search for packages
+
+commit fbcd4fb7a9aa85a658f627affe2654785be0e595
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 11 15:39:49 2024 -0700
+
+    libs/Mdv/src/Mdvx/Mdvx_xml.cc - fixing compression, using requested_compression
+
+commit 03078e116d90c96850b035dd49b4db60da59263e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Nov 10 17:30:33 2024 -0700
+
+    createCMakeLists.py - moving from mambaBuild command line arg to MAMBA_BUILD variable
+
+commit fdc9ee8029bf8913b98b154ac98a3cc1bf4c5311
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Nov 10 17:01:51 2024 -0700
+
+    docs/build/LROSE_build_main_page.md - adding link to miniforge build in bootstrap
+
+commit 9d7c9c172ac7ca41f9a29a580179a63be6cd7890
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Nov 9 18:39:57 2024 -0700
+
+    OSX updating qt6 homebrew location
+
+commit 264af322a29d10dc1af3cc919b8e499dff7da9e2
+Merge: 2c18de746 f8d0f6f97
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Nov 8 18:01:04 2024 -0700
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit 2c18de7461d0baf9eaa64a685c1ad79bb7f8c027
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Nov 8 18:00:39 2024 -0700
+
+    libs/Mdv - for Mdvx_write as XML, fixing problem with not writing XML, defaulting to NC
+
+commit f8d0f6f972351a24bd67778b80dc09ce2583be31
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Nov 6 20:13:01 2024 +0000
+
+    modified the paxi command in _runSurveilance to use the loop command to run
+    the specified scan twice. This was necessary to meet the test to trigger an
+    end of a volume.
+
+commit 95bac5fe732ff36a9e14b012258c3e458c13b23e
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Nov 6 10:14:27 2024 -0700
+
+    (a) libs/Radx - adding NOP4 to NexradLoc. (b) In IwrfTsInfo, setting NEXRAD radar location if possible
+
+commit 0b9d5b5a9a523b7517ff140253c7f855179faedf
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Nov 4 13:43:38 2024 -0700
+
+    apps/radar/HcrShortLongCombine - adding fixed_location_mode instead of override_radar_location
+
+commit 601418e2ff7ddc3c55ffc470465c8483868b3cb7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 30 18:53:50 2024 -0600
+
+    apps/radar/HcrShortLongCombine - setting output times to rounded mid time
+
+commit 93f6504fe0c440c9108c7afe6665aa36981b5502
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 30 18:05:49 2024 -0600
+
+    apps/radar/HcrShortLongCombine - adding option to override radar location for ground-based ops
+
+commit c61a0a2f1119ef05e22d740ceac7189c5c13c2bb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 30 17:43:01 2024 -0600
+
+    libs/tdrp: (a) in print.c, adjusting the print format for double types to %.9g. (b) in load.c, adjusting buffer sizes to avoid warnings about sprintf buffer overruns
+
+commit a567c8a732e775217d5880c299dd0fc2d715f6eb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 28 19:07:23 2024 -0600
+
+    apps/radar/HcrShortLongCombine - adding mode to compute mean posn from georef data
+
+commit 2ac558f6dfb59b33e766a7f47de6ade4a2a9d6ad
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 28 19:06:38 2024 -0600
+
+    libs/radar/IwrfMomReader - fixing bug in file version of getNextRay()
+
+commit f6646c4a666a4f0d63bcd5998013e115174ab6d7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 22 17:39:29 2024 -0600
+
+    apps/Radx/Dsr2Radx - updating platform before writing vol
+
+commit 7b174863aaa71ac6ab961d3afe43b89ddfe891d2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 22 16:23:06 2024 -0600
+
+    apps/radar/HcrShortLongCombine.cc - adding check for time gate, restart processing if ray time gaps exceeds the dwell time significantly
+
+commit 14b6f778e338b46fda1866c5383a6608827b47c7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 22 16:22:36 2024 -0600
+
+    apps/radar/HcrShortLongCombine.cc - adding check for time gate, restart processing if ray time gaps exceeds the dwell time significantly
+
+commit 283dbecdb123a68f01cab63b6c7b2ee8400c830e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 20 12:08:47 2024 -0600
+
+    libs/Radx/src/include/Radx/RadxField.hh, libs/Radx/src/include/Radx/RadxVol.hh - changing val of maxFractionMissing from 0.25 to 0.66
+
+commit a251b2c18c545b574773273c8a629dfc64240257
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 20 12:05:48 2024 -0600
+
+    Radx/src/RadxDwellCombine/RadxDwellCombine.cc, radar/src/HcrShortLongCombine/HcrShortLongCombine.cc - adding use of parameter dwell_stats_max_fraction_missing
+
+commit e59a767eb1842634af48f963605749a7fbb24736
+Merge: fbc295846 acabaa006
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 18 21:30:53 2024 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit fbc29584647f20886d08f916da95b5abfa6b8c74
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 18 21:30:21 2024 -0600
+
+    Adding ls_poly_template.hh to libs/rapmath and libs/radar/regrFiltHubbert - template for forsythe polynomials
+
+commit acabaa00660bde8964b0adb92a463dec505d155d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Oct 17 12:08:48 2024 -0600
+
+    apps/radar/src/HcrShortLongCombine/HcrShortLongCombine.cc - fixing debug prints
+
+commit 288a170b40e50f4ed79253c5e05b13077562c020
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 16 20:55:28 2024 -0600
+
+    apps/radar/Iq2Dsr - working on dual-prt dwell processing for HCR
+
+commit 1460f7b255e7ec41f1209bc5a4bfdd867e13847c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 15 17:55:06 2024 -0600
+
+    apps/radar/Iq2Dsr - working on dwells with dual pulse widths
+
+commit 0b50320381a44c1933a787c7837ef78f54e4c2db
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 14 16:41:57 2024 -0600
+
+    lrose_make.LINUX_LROSE_WITH_JASPER - updating QT6 includes
+
+commit 5ef28b4909a965a388d22013e42c35f9fb88073b
+Merge: dc1696192 16ef3b85b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 14 16:09:50 2024 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit dc1696192904780c546573ded308a15641ead4c0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 14 16:09:35 2024 -0600
+
+    Adding cmake files for apps/radar/src/HcrShortLongCombine
+
+commit 16ef3b85bac7bcafe0cbd840a62edc7b0df2b7a2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 14 02:28:36 2024 +0000
+
+    build/make_include/lrose_make.LINUX_QT5 - setting c++ std to 11
+
+commit e31400b2731d6f9209d11f4c34a1596330551a29
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 13 16:34:02 2024 -0600
+
+    apps/radar/Lucid - working on intelligent data retrieval and rendering
+
+commit 52420271fce2b7f5e175794a9384b06f76b779a6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 13 15:10:30 2024 -0600
+
+    apps - fixing errors wrt const char*
+
+commit 688a6f79ca8e05622a66364ce93505968b1bf124
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 13 11:50:52 2024 -0600
+
+    apps/radar/Lucid - working on DataHandling.cc
+
+commit 77203ce189393bc88282de06ef6d4fcea3b34dbb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 12 21:51:05 2024 -0600
+
+    Lucid - working on forcing render when selection changes
+
+commit e8ab1676af8c240e2bcedef05543f6760e5eed8b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 13 00:16:34 2024 +0000
+
+    build/make_include/lrose_make.LINUX_NRIT
+
+commit d24399cf0414d6a9e2004ff2e9804477ad6f441a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 12 18:01:54 2024 -0600
+
+    libs/qtplot, apps/radar Qt apps - fixing bug in ColorMap class causing infinite recursion when setMap() method is called
+
+commit 3c1fed99472580bd557891f121fc0e44a939867a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 12 17:45:10 2024 -0600
+
+    apps/radar/src/deprecated/LUCID_shiva - adding ColorMap class to directory, in case this version is needed
+
+commit ea67f1a9b2f5de6b31059fb917435ff64daa079c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 12 17:32:07 2024 -0600
+
+    apps/radar/HawkEye class FieldColorController adding _isValidColorName() method to support qt5 and qt6
+
+commit c144bbdf0221a43c90132159fd15154a8c91cc04
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 12 12:07:20 2024 -0600
+
+    libs/qtplot/ColorMap.cc (a) fixing bug in setMap() causing recursion and (b) modifying isColorNameValid() to use QColor::isValidColorName()
+
+commit f7356493661c118be0ae1d7f9b666690467cbba1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 11 17:45:00 2024 -0600
+
+    libs/qtplot/ColorMap - adding isColorNameValid() method
+
+commit 9bc541d14745f733e8a23fcb6059932e3f31c0d4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 11 20:30:17 2024 +0000
+
+    Adding lrose_make.LINUX_NRIT
+
+commit 566b67d8440e9c2e40a4ee1a22d0538e873afce7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 11 14:05:27 2024 -0600
+
+    .gitignore - adding XpolScanControl app binary
+
+commit e96f072f6c4e5540e09f560862a320a8bbff971f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Oct 10 20:48:42 2024 -0600
+
+    createCMakeFiles.py - adding use of NO_SYSTEM_ENVIRONMENT_PATH for qt6 search
+
+commit 99a8d7d4ac46e96c3ab1e92574b5077dfd674c83
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 8 20:40:57 2024 -0600
+
+    Moving autoconf build scripts to deprecated
+
+commit acff85d1b0a6b0aba6a260fa2f2867f853bb458c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 8 19:51:22 2024 -0600
+
+    build/cmake/createCMakeLists.py - adding top-level CMakeLists.txt file, build should be done from this level
+
+commit 805bd363478a8e4a00194eaf90eebc629a3fa72f
+Merge: d1ede5865 694b27409
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 8 17:11:26 2024 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit d1ede586508dc0f0172a84ad96065df016e07948
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 8 17:11:00 2024 -0600
+
+    build/deprecated/singularity/custom.centos.8.def - changing name to be valid on windows platform
+
+commit 694b274093c942e301120e73cd282e57a127cded
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 7 20:54:48 2024 -0600
+
+    apps/radar/Lucid - make win_param_t a class instead of a struct
+
+commit 660f48c3f8f5ed1c7d18c0c7ba230292312f7b4e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 7 20:12:59 2024 -0600
+
+    apps/radar/Lucid - testing CIDD.precip.latlon
+
+commit 20e372c6548deea7f075ed5ffdd82ff3e88f801e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Oct 7 08:39:58 2024 -0600
+
+    libs/toolsa - cleaning up code for sprintf and strncpy, to ensure no array overruns
+
+commit 7d668682a6a27a4ad6826976d67e98585bc46f21
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Oct 6 12:56:49 2024 -0600
+
+    apps/radar/Lucid CartManager.cc - initializing _archiveMode
+
+commit 3a61cd82a1ee52a0d38bf14cff91de9390d4f8fc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 5 17:26:12 2024 -0600
+
+    Changing field info h_date and v_date from UTIMstruct to DateTime class
+
+commit c451ec8fb1a83fbc7e488a60e78fa9f3e5a1720e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 5 17:25:43 2024 -0600
+
+    libs/toolsa/DateTime class - adding setToZero()
+
+commit aad1c2dbde1ed802215e5822b2e3e605ac106b8c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Oct 5 17:01:28 2024 -0600
+
+    cidd_structs - changing structs to classes where applicable
+
+commit e56a0b19d22b176a409b23aab27a00d367b7f420
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 17:35:54 2024 -0600
+
+    apps/radar/Lucid - making met_record_t a class
+
+commit 630b6a81e66f9c3132a9d8c2e6df63909fabfa29
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 17:02:57 2024 -0600
+
+    apps/radar/Lucid - collating data routines into DataHandling.cc
+
+commit 512dcca91da26a85658d47d480c415ece723c9f5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 15:10:08 2024 -0600
+
+    apps/radar/Lucid - collating data routines into DataHandling.cc
+
+commit 38f2ea3c1b4fe637cb49d87170276d2bcbbc1361
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 14:26:45 2024 -0600
+
+    apps/radar/Lucid - collating data routines into DataHandling.cc
+
+commit 8491582f39900486ca46103748f58acb74e3c902
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 14:08:23 2024 -0600
+
+    Updating README files
+
+commit e075e7f0c4211b49dabf1b7e558f5e09586f407f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 14:07:31 2024 -0600
+
+    Updating README files
+
+commit 24a7aef68a3e282db11f19ec28126d7a3279ddee
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 13:59:03 2024 -0600
+
+    Updating README files
+
+commit c3b34165e4124eea2a0e4e73706f0ec378b5e01d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 13:56:08 2024 -0600
+
+    Updating README files
+
+commit 8fbd492edcb89f5fbca4d0cf7043ae4ff01360f4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 13:52:50 2024 -0600
+
+    Updating README files
+
+commit efe7057d59f6c886efc6bd5d11e364c0b491bb8c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 13:51:19 2024 -0600
+
+    Updating README files
+
+commit 50a5d270c88e0019fa6b781452315173c686cc3f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 13:44:32 2024 -0600
+
+    Updating README files
+
+commit ddbe6472b9de3b621704615bab9f23ee2c8489c2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Oct 4 11:39:20 2024 -0600
+
+    Fixing broken links in README.md
+
+commit 07e84bcb27306aa7f4d04feb840f365a17069b2a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 2 18:22:48 2024 -0600
+
+    apps/radar/Qucid -> apps/radar/Lucid
+
+commit 9004c5637a6e378325c89659110e286a335d878c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 2 18:08:50 2024 -0600
+
+    apps/radar/LUCID - moving into deprecated
+
+commit 34acc410788d0b2de025042cf59fa6aec3111b81
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Oct 2 17:58:40 2024 -0600
+
+    apps/radar/Qucid - working on streamlining data retrieval
+
+commit b94fa4f8adba0fe7dc89c82798bebec22fea1884
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 1 14:54:38 2024 -0600
+
+    apps/radar/Qucid - working on regular grid display
+
+commit 6f3bb52849060c2baa7e4f1e38a58c3d3c540113
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 1 10:25:35 2024 -0600
+
+    apps/radar/Qucid - working on regular grid display
+
+commit 6ca1242eb11cc0cf39c7d5c13deb28c8627dd090
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 1 10:13:42 2024 -0600
+
+    apps/radar/Qucid - working on regular grid display
+
+commit fcfea47c6248e98a89854a14fb47793f8f1dd63b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 1 09:36:35 2024 -0600
+
+    apps/radar/Qucid - working on regular grid display
+
+commit c8936f61a38ad171b9ac6a5c7b8dd5dc5a444b08
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Oct 1 09:31:34 2024 -0600
+
+    libs/euclid/PjgMath - fixing bug in operator(==) for latlon projection
+
+commit 2b0bea6a2b3a660a6357fdcd6844b5d5e74fc928
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 30 21:30:04 2024 -0600
+
+    apps/radar/Qucid - working on data grid rendering
+
+commit 58fda19b58f095741810fa6c789f91c6efa4d94a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 30 16:49:51 2024 -0600
+
+    apps/radar/Qucid - grid rendering
+
+commit 6573ee64d4522f17216686e9f9a1381ef9b6692a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 30 16:29:26 2024 -0600
+
+    apps/radar/Qucid - developing grid rendering
+
+commit ee89e7e5fb52808d2cb8ce15a1bb2c1b9ca5d2b8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 29 21:41:03 2024 -0600
+
+    apps/radar/Qucid - working on grid rendering
+
+commit 2355e2380192a745fd585a7ff9b1bb321a794ee0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 29 16:09:54 2024 -0600
+
+    apps/radar/Qucid - rendering horiz rect grid
+
+commit 1b437b3b286663baf4b47df5ca456044c977fcf9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 29 12:47:11 2024 -0600
+
+    apps/radar/Qucid - making HorizWidget and VertWidget classes stand-alone, instead of inheriting from CartWidget
+
+commit d9d5e3a4f6bf40e8644ec2b67f975c7af9af0a89
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 29 11:39:52 2024 -0600
+
+    apps/radar/Qucid - testing data retrieval
+
+commit 7a055e2cf6a26614686c1ad33509cc1b9a272a81
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 29 09:27:13 2024 -0600
+
+    apps/radar/Qucid - adding symprodInit()
+
+commit 92b913e8b6c5c7f3b46a1d4d8bfdac85a72edbfa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Sep 27 17:43:19 2024 -0600
+
+    apps/radar/Qucid - working on X11 to Qt conversion
+
+commit 321ad445e2d0b839b5f64b7feae66ee18d198329
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Sep 27 17:21:08 2024 -0600
+
+    apps/radar/HawkEye/FieldColorController.cc - isValidColor() -> isValidColorName()
+
+commit 176709729afa147770fa6c6542959a9af1128607
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Sep 27 14:36:27 2024 -0600
+
+    apps/radar/Qucid - working on X11 to Qt conversion
+
+commit c5b9286a1947573f59d588487dbacb8ff5c94919
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 25 21:13:11 2024 -0600
+
+    createCMakeLists.py -adding /usr/local/lib to ignore dir for mamba build
+
+commit 44f0500c3f57c35219eed4932ccaafaae90bf651
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 25 17:52:05 2024 -0600
+
+    build/cmake/createCMakeLists.py - for mambe build adding QT_HOST_PATH
+
+commit 9b2a3196b7b1c8d7f09bfecfbdb2f1dce263f62a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 23 18:02:59 2024 -0600
+
+    mamba build docs
+
+commit cb7422bedd85cc39e168a70a7ff5118e61282f52
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 23 18:01:45 2024 -0600
+
+    mamba build docs
+
+commit 7b7438838b5a2fa246c362284da493324d0f6b59
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 23 17:59:34 2024 -0600
+
+    mamba build docs
+
+commit af7101611db7f5d48deba687f0128bef5ea48f65
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 22 14:32:29 2024 -0600
+
+    docs/build/mambaforge/chatgpt_condaforge_build.md - adding test details for meta.yaml
+
+commit 8e90f9e5d758de58a3553260a63c666aae18dbae
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 22 14:31:26 2024 -0600
+
+    docs/build/mambaforge/chatgpt_condaforge_build.md - adding test details for meta.yaml
+
+commit ec5597e939fa3fad5b975072b1fe2c51319193e0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 18:46:24 2024 -0600
+
+    Adding docs/build/mambaforge/chatgpt_condaforge_build.md
+
+commit c8acdad83f4219055017556a3c45d68412ccb765
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 18:43:21 2024 -0600
+
+    Adding docs/build/mambaforge/chatgpt_condaforge_build.md
+
+commit e60b1841391c4bc33d0a67ab45e8d61061518677
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 17:12:08 2024 -0600
+
+    mambaforge build doc
+
+commit 10044a465b3cf7cfa9036261f29b007dfde562d9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 16:11:44 2024 -0600
+
+    docs/build/mambaforge/perform_mamba_build.md
+
+commit f37b66c9b9c7e1756d3bc959ffea173798582f81
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 15:57:20 2024 -0600
+
+    Adding docs/build/mambaforge/perform_mamba_build.md
+
+commit 3e7e2db5fcac3200c1f18122003223ca23758dde
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 15:01:35 2024 -0600
+
+    titan apps - changing legacy apps to compile under C++
+
+commit 1a4438bf6cb05db8c87ef1e670ed16aab8deb505
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 14:47:34 2024 -0600
+
+    apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
+
+commit 53663408c5ef5fa7f1e8060ea0a956cde0d2b1e6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 14:42:29 2024 -0600
+
+    apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
+
+commit 3c043fe26230daf03385932d25aec2cfdb3e99fc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 13:00:35 2024 -0600
+
+    apps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
+
+commit c5cc8977499f835c84de3891f16327225c55bbf6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 12:54:09 2024 -0600
+
+    apps/titan/grid_forecast - converting to compile as C++ app
+
+commit debfc779cea45c3b32f9a181c981648df63f4e31
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 12:26:01 2024 -0600
+
+    cmake - fixing createCMakeLists.py so that for the mamba build the system libraries are excluded
+
+commit 3cafd991da8321b6cc888be862ef393384965a9d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Sep 19 07:40:07 2024 -0600
+
+    build/cmake/createCMakeLists.py - updating for QT in mamba build
+
+commit 4fa91cebfd2f2f6a1c5882b8269b48ac096df821
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 22:27:58 2024 -0600
+
+    cmake build for mamba - converting apps from C to C++: procmap_register, procmap_unregister, test_procmap, bearing2latlon
+
+commit 185d2bbcdabba39e8b31f42e688bb4677ddd18ea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 21:29:52 2024 -0600
+
+    apps/procmap/src - procmap_register, procmap_unregister, test_procmap - converting C to C++
+
+commit 112f3bc6d013a933e6e97b0fd6e966e35c7f690f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 21:29:48 2024 -0600
+
+    apps/procmap/src - procmap_register, procmap_unregister, test_procmap - converting C to C++
+
+commit 62e90ac9c14b1bfdc7ccf8e610722216541d4d2c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 20:58:41 2024 -0600
+
+    apps/ingest/Mesonet2Spdb MetarCsv2Spdb UAEMesonet2Spdb: fixing link lines for cmake build
+
+commit 17499860d322631328458711fe12f915a2bb98e9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 19:21:18 2024 -0600
+
+    apps/didss/wsi_ingest - upgrading to C++
+
+commit 5370d3b3ddae5b1a38bf9c1c4e0708bf9cbd76e5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 15:51:11 2024 -0600
+
+    cmake build - testing changes to use with mamba for conda-forge
+
+commit 7473c4b447759bd181cd8241183a5ba0d9795ccb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 11:15:17 2024 -0600
+
+    apps/didss/src/wsi_ingest - converting C to C++ for build
+
+commit dd825faebfe8d0f4b5b648386fe545a75bb83cb3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 11:14:58 2024 -0600
+
+    apps/didss/src/fmq_print - converting C to C++ for build
+
+commit 6427389a66aa6852d13fbfce55eaacb04ada5225
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 11:14:55 2024 -0600
+
+    apps/didss/src/fmq_print - converting C to C++ for build
+
+commit 73c2f48265e147af28196579faa13e53bf7e39bd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Sep 18 11:00:18 2024 -0600
+
+    C app -> C++ app
+
+commit 5e0c8f967c7625f77bf7c169ff3ee33bd9402f05
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 17 21:07:27 2024 -0600
+
+    Testing build using MAMBA_FORGE
+
+commit 5058d41ea0d11f50e9bbc421122414872b84debc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 17 20:32:31 2024 -0600
+
+    Adding apps ingest Mesonet2Spdb, MetarCsv2Spdb, Taf2Spdb, UAEMesonet2Spdb
+
+commit eef440107c677da7b894cf5d7612516b103f1749
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 17 20:30:56 2024 -0600
+
+    build/cmake/createCMakeLists.py - adding commented out option for MAMBA forge
+
+commit 11affd1814245557afbaa7ff1687418a97456c27
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 17 16:57:11 2024 -0600
+
+    apps/radar/Qucid - working on rendering
+
+commit e70f27f6def5a1326da0ed7ee44130ec9ef5b3e8
+Author: Mike Dixon <mike-dixon@users.noreply.github.com>
+Date:   Tue Sep 17 14:44:23 2024 -0600
+
+    Update README.md fpr typo
+
+commit 6ea561627e1ded25250c5183a4205a9f1c59fb53
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 17 08:38:24 2024 -0600
+
+    apps/radar/Qucid - working on rendering
+
+commit fc7c9eea05579e0f196eda7ef8e5034c381843a9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 16 16:48:47 2024 -0600
+
+    apps/radar/Qucid - working on Drawable xid -> QPaintDevice qpd
+
+commit cf8602d8d7403a76045e8985d2b40f608149c66c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Sep 3 16:08:06 2024 -0600
+
+    apps/radar/Qucid - working on data retrievals
+
+commit 6384265f5c359e334219a602e1b25ce043605d33
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 2 19:19:25 2024 -0600
+
+    apps/radar/Qucid - working on data rendering
+
+commit 3793c63dd2acb3259445a5c9f57301cef324ff5f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 2 18:11:00 2024 -0600
+
+    apps/radar/Qucid - Zoom back action moved into zoom menu
+
+commit c2ccb2f16e2d0e985f6ef4b495f5d68699ed9f20
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Sep 2 10:43:40 2024 -0600
+
+    apps/radar/Qucid - working on vertical selector
+
+commit f932b9a423f80ad1bba2c71738ed9605e654f660
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 1 21:51:01 2024 -0600
+
+    apps/radar/Qucid - testing window size and placement
+
+commit e32cb0a3d550148ee3a4864052113094fca6b709
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Sep 1 19:04:55 2024 -0600
+
+    apps/radar/Qucid - working on vert level selector
+
+commit 968a8ecbb9000b18f344b6c139b6f46b12943a15
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 28 21:50:53 2024 -0600
+
+    apps/radar/Qucid - adding VlevelManager class
+
+commit d14a0e77f2a50d63ce8ad36cd825e421615897f7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 28 21:13:01 2024 -0600
+
+    apps/radar/Qucid - adding VlevelManager class
+
+commit 33e9c9d660d46d1a5bad28d1e859349227e56c69
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 24 22:01:10 2024 -0600
+
+    apps/radar/Qucid - debugging drawing maps
+
+commit c780c5b2d79f749f929bc1ae125b65d5c002712a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 23 11:42:39 2024 -0600
+
+    apps/ingest - adding Mesonet2Spdb, MetarCsv2SPdb, Taf2Spdb and UAEMesonet2Spdb to the build
+
+commit 54d60196d5e788a309f304a799d37d0077886cd8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Aug 20 14:43:49 2024 -0600
+
+    apps/radar/Qucid - testing map plotting
+
+commit 9ba62f7586ea95cf4d45ba2a5b1a84c584097e03
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 19 17:39:56 2024 -0600
+
+    apps/radar/Qucid - working on window placement on desktop
+
+commit c9dc21fb52b9e1c3f1f5337398145a283d94b6c8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 19 10:17:05 2024 -0600
+
+    apps/radar/Qucid - working on window placement on desktop
+
+commit 16743f429030d1ad615452033600007327adf3d3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 19 08:17:36 2024 -0600
+
+    apps/radar/Qucid - testing map rendering
+
+commit 56d8354597dd2aceb0a9f7319a644470d0211000
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 19 08:11:58 2024 -0600
+
+    apps/radar/Qucid - testing map rendering
+
+commit 6dcac99b50912fe95dc8e62f9d77acd998b99646
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 18 22:35:35 2024 -0600
+
+    apps/radar/Qucid - working on map rendering
+
+commit 1a6b36d3bb362330cedde076f9afe4ea9ae9a9ef
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 18 19:48:40 2024 -0600
+
+    apps/radar/Qucid - working on map rendering
+
+commit 1189ad704c4877775e069133d2d6bf111ff00bf6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 18 17:20:48 2024 -0600
+
+    apps/radar/Qucid - working on map overlay code
+
+commit 66b5b7cc2fb058939b15333197efb2e0c45ece69
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 18 07:32:31 2024 -0600
+
+    apps/radar/Qucid - moving calc_local_over_coords() into cidd_init.cc
+
+commit 4384b9bb5155ee33a58076524333be2521794ada
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 17 16:31:40 2024 -0600
+
+    apps/radar/Qucid Overlay_t -> MapOverlay_t, cidd_overlays.h -> cidd_maps.h
+
+commit d67f57e2655b717b68696ff1293af3a044252bda
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 16 18:43:49 2024 -0600
+
+    apps/radar/Qucid - initializing projection
+
+commit 9e62b1b4a894556fb38bc7a7b5bb6f75fa3e14e4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 16 16:58:52 2024 -0600
+
+    apps/radar/Qucid - fixing init zoom state from zoom labels
+
+commit d3ac3c524d9abf916a9313452f7cac8f238f34fa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 15 17:14:27 2024 -0600
+
+    apps/radar/Qucid - setting aspect for latlon
+
+commit 2165b653176d2624d3e92bac10ea2fcece6c9cf9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 15 16:54:36 2024 -0600
+
+    apps/radar/Qucid - setting aspect for latlon
+
+commit 05cb7fa434a50cbb9ec8f66f6b1dd7c06c4c43ee
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 21:54:16 2024 -0600
+
+    apps/radar/Qucid - working on saved zooms
+
+commit 564103aa1e39c260d2e25e6df1da305f0575af61
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 21:42:13 2024 -0600
+
+    apps/radar/Qucid - working on saved zooms
+
+commit 0319deac948bb1945c5b19440d6030e4ba14cd7d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 21:29:49 2024 -0600
+
+    apps/radar/Qucid - working on saved zooms
+
+commit 45f48ee05f02c562ffa07b1bd5aa5820d340dd18
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 21:21:21 2024 -0600
+
+    Adding testing/Qucid.precip.test
+
+commit fb263b008983acca8975d51bdfc0c3ec68b3cdf0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 19:11:40 2024 -0600
+
+    apps/radar/Qucid - getting zoom level from menu
+
+commit 062fe43b9250d2c733d4de223a801d74601c9f1c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 19:05:56 2024 -0600
+
+    apps/radar/Qucid - getting zoom level from menu
+
+commit 368838daecd1c5d1951280875230b7a162428924
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 16:38:33 2024 -0600
+
+    apps/radar/Qucid - working on resizing
+
+commit bf1ccd70d7b6e18da4e8c68575b2edb386114f0c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 16:19:31 2024 -0600
+
+    apps/radar/Qucid - testing color scale rendering
+
+commit bc652dfc54bbeef0cfb1e013782be7f5b1af236f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 14:39:05 2024 -0600
+
+    libs/qtplot/ColorMap - fixing bug in copy constructor
+
+commit 8169a2b7975ad572baa6b8f7681be05c5e065135
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 14 13:39:22 2024 -0600
+
+    apps/radar/Qucid - adjusting x,y pixel scales
+
+commit ac503c56de46209558818c2c2f486bd17d36d076
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Aug 13 21:59:41 2024 -0600
+
+    apps/radar/Qucid - testing resize window
+
+commit dcddb12f7f2fa8f32548c3b7fac451c45a544884
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Aug 13 18:23:31 2024 -0600
+
+    apps/radar/Qucid - initializing WorldPlot
+
+commit f146e4a55e1c3238bd02490b1aed9e807d076ead
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 12 19:25:16 2024 -0600
+
+    apps/radar/Qucid - working on full canvas rendering
+
+commit 0cfa02dba03b09bcbee45b2a73343a5f5dcdd7fa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 12 11:42:55 2024 -0600
+
+    apps/radar/Qucid - working on full canvas rendering
+
+commit e529121315697e0d20dc855dd33d737c00ae1f65
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 11 21:11:11 2024 -0600
+
+    apps/radar/Qucid - working on rendering
+
+commit 1176a501127c0c11db45cc6d20ca6a59ea872a28
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 11 20:21:56 2024 -0600
+
+    apps/radar/Qucid - working on rendering
+
+commit 7d6c1acb8a2b826e02af79deb3bc1348777f8e6b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 11 18:17:18 2024 -0600
+
+    apps/radar/Qucid - developing rendering
+
+commit bc4dd11d182f5cb58a2d3ed0518fcb2290536283
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 11 17:46:10 2024 -0600
+
+    Qucid/params -> testing
+
+commit 99cbfd2138f0c6ccd9f5e36bcdb12644c0da99cb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 11 17:45:40 2024 -0600
+
+    Qucid/params -> testing
+
+commit f1d509958fde4a666201798fe5f90786902eee38
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Aug 6 10:57:53 2024 -0600
+
+    apps/radar/EccoStats - testing with various coverage fractions
+
+commit 170115eab8e444b957f1f68f449920eece2a3b0a
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Aug 4 19:07:57 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit aff19db740f9df8396f1563604a77c88e7b9b4da
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Aug 4 18:54:56 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit 7809ade74829e12a24d4d9a96fc9b0298360bc90
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Aug 4 18:15:51 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit af226a4de2d25f549f2436236ab55223ced1ae0e
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Aug 4 18:10:30 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit d38e3c87117114dfd469270db8609408a93b607e
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Aug 3 18:22:42 2024 -0600
+
+    apps/radar/EccoStats - adding check on radar coverage
+
+commit c2b944dbb22d83750afd3eeee4a276671f7dd491
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Aug 3 18:16:40 2024 -0600
+
+    apps/radar/EccoStats - adding check on radar coverage
+
+commit 7d2b78ba7e1ad32e63e2826c10bb1f0cd98db0bb
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Aug 3 17:29:23 2024 -0600
+
+    apps/radar/EccoStats - adding check on radar coverage
+
+commit dc3cddd9b3ea1977936f158d57af146e86850aa7
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Aug 3 17:04:32 2024 -0600
+
+    apps/radar/EccoStats - adding check on radar coverage
+
+commit 5cc22205832bb125daafcfd5468472e0e94a55ff
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Aug 3 15:56:23 2024 -0600
+
+    apps/radar/EccoStats - adding check on radar coverage
+
+commit 05daf309e1890cf4e8614c13657e9db7e6a5c83a
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 2 18:02:26 2024 -0600
+
+    apps/radar/EccoStats - adding option to censor based on the coverage height fraction
+
+commit eb4ef2bcd0e54f8f74162a77a7c08923ba204416
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 2 18:00:01 2024 -0600
+
+    apps/radar/EccoStats - adding option to censor based on the coverage height fraction
+
+commit 3f82ff4823c0e6bee28c0e96ec69db3db478898d
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 2 17:57:36 2024 -0600
+
+    apps/radar/EccoStats - adding option to censor based on the coverage height fraction
+
+commit b90805c767d32abb84ddcedf7e21554f7842ded0
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 2 16:53:47 2024 -0600
+
+    apps/Radx/RadxStats - for print_fixed_angle_table, only include sweep with nrays > 1
+
+commit ca1c279d0a800bf1b675eb46ca1e84f0d7ae2e75
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 16:36:42 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit fd3179aca7251c74ff2578c4319fe5850b42bf70
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 16:25:23 2024 -0600
+
+    apps/radar/EccoStats - adding coverage computations
+
+commit 34339f1594077f2f37b1b7fa6049e7fdad6c4baa
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 16:19:29 2024 -0600
+
+    apps/radar/EccoStats - adding coverage computations
+
+commit 8a8f35db2986126de8ee42c233f6671ee341230a
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 16:18:59 2024 -0600
+
+    libs/toolsa - umalloc - in free2 and free3, extra checking for nulls
+
+commit b220c2d4011822c4732684607605a3b2dc3ca719
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 15:11:17 2024 -0600
+
+    apps/radar/EccoStats - working on adding computation of coverage fields for MRMS grid
+
+commit b555ad43bdcdabc82cd523aeeaacfa5b38ea946b
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 31 12:24:35 2024 -0600
+
+    apps/radar/EccoStats - working on adding computation of coverage fields for MRMS grid
+
+commit e3ab6214302162e62c155c7026a0423a86cf39af
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 29 18:28:55 2024 -0600
+
+    libs/rapmath/umath - adding ForsytheC.cc, a C++ implementation of the Forsythe algorithm, as documentation
+
+commit 82381ff06ed6917c8254de82ee6f9c22aa6ba111
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 29 18:28:37 2024 -0600
+
+    libs/rapmath/umath - adding ForsytheC.cc, a C++ implementation of the Forsythe algorithm, as documentation
+
+commit a491a94f46cb4a929d8f02443cc87fcd5d364cf4
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 29 14:49:20 2024 -0600
+
+    apps/radar/EccoStats - testing and running cases
+
+commit 2e04ea93da0f7a9640b9e20c26fcff1f5235e597
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 29 11:44:25 2024 -0600
+
+    apps/radar/EccoStats - testing and running cases
+
+commit 85403b248b7faa9fe9e6cb4e6c2ce8adc167d07e
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 21:20:16 2024 -0600
+
+    apps/radar/EccoStats - fixing file output times
+
+commit 2707abd2cd5a2254ce0041e0f39393b1aafcc33e
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 12:54:56 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit de41a174767ad4c47203d7ab04c96d1adb320085
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 12:54:30 2024 -0600
+
+    apps/radar/EccoStats - testing
+
+commit ac0cd3edb9c63e3223f89dd904ba059cabfb39d6
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 12:08:32 2024 -0600
+
+    apps/radar/EccoStats - adding frac fields
+
+commit 25fac756136c67743b164fd42f7c1671a2164953
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 11:44:41 2024 -0600
+
+    apps/radar/EccoStats - adding frac fields
+
+commit d037d90a0ab4fa403b4641c04e18708fc4bbc080
+Author: dixon <dixon@ucar.edu>
+Date:   Sun Jul 28 11:01:22 2024 -0600
+
+    apps/radar/EccoStats - debugging terrain ht and water flag fields
+
+commit 7ce3bb95937738ccbdd094ac281f8e08e1e5f8f0
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Jul 27 18:31:37 2024 -0600
+
+    apps/radar/src/EccoStats - development in progress - testing and debugging
+
+commit 69fb95bcd91d208387456ee4888c018ade18fb37
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Jul 27 16:46:47 2024 -0600
+
+    apps/radar/src/EccoStats - development in progress - adding month range option
+
+commit 8089f4469f92235d24f5d1c970519a151b0c8042
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Jul 27 16:34:48 2024 -0600
+
+    apps/radar/src/EccoStats - development in progress - adding month range option
+
+commit f285c7e9a354ed366ed2ffa36f65ada526ff95b8
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Jul 27 16:34:22 2024 -0600
+
+    libs/didss/DsInputPath - adding option to set month range for archive mode
+
+commit 2a9d170e955759cf1b1b5cdc8929d64f7e63d443
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Jul 26 16:58:46 2024 -0600
+
+    Developing apps/radar/EccoStats
+
+commit b3d339f8cfb8cdeaf8631037376e0b9d789f22eb
+Author: Chris Burghart <burghart@ucar.edu>
+Date:   Fri Jul 26 11:38:51 2024 -0500
+
+    clean up handling of tdrp_gen during build
+    
+    Creation of Params.hh and Params.cc files during build no longer
+    requires an installed version of tdrp_gen. Instead, the tdrp_gen
+    created in the build tree is now explicitly used if Params files must
+    be generated while building.
+    
+    This means that tdrp_gen is now never installed unless the user
+    runs "make install".
+
+commit 0532ffbd445fba52c87e974bdc73ad1f2f2bc03b
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Jul 26 10:58:29 2024 -0600
+
+    Developing apps/radar/EccoStats
+
+commit f19e62e70458b59cd852d21fc021c8a91ca7ade2
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 25 14:55:46 2024 -0600
+
+    Developing apps/radar/EccoStats
+
+commit f818191e9044ebb1343a290e7ec82502c852fb30
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 25 11:32:57 2024 -0600
+
+    Adding apps/radar/EccoStats
+
+commit d0e738b11cc07f0737d1d715eeaef841ef67f1d4
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 25 11:12:44 2024 -0600
+
+    Working on apps/radar/EccoStats
+
+commit 33ae1b0ec73d0923706d98ab133880cdc15ad3fd
+Merge: 91e9ccac9 c6782f056
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 25 11:03:11 2024 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit 91e9ccac9ca1f6f7d04f7f223df965e55a4a546f
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 25 11:02:59 2024 -0600
+
+    Adding apps/radar/EccoStats
+
+commit c6782f056e8ed8440f4fe8c20900cf2ea4b9d7f1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 24 19:36:15 2024 -0600
+
+    build/cmake/createCMakeLists.py - adding add_custom_command section to build tdrp_gen if needed
+
+commit c36b888f1d01124ad14ed72074230c70c3b746d2
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 24 11:29:10 2024 -0600
+
+    Adding apps/radar/EccoStats
+
+commit f9f206fbc660a951d9f88e256c3429b08df298ad
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 23 18:25:57 2024 -0600
+
+    libs/Radx/GemRadxFile - adding SNR2 noise-subtracted fields
+
+commit f9490433031b724d86dd4b36cff9dc57a3e6fbfd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 23 15:34:27 2024 -0600
+
+    libs/Radx - updating reading of Gematronik files
+
+commit 56b46717d5062053f22edaf9b3ed3ec26492fd53
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Mon Jul 15 12:08:09 2024 -0600
+
+    HawkEdit changes for save file bug; compiles and working; issue #69 from lrose-HawkEdit repo
+
+commit a66bbf979c96f70e652853ca9da02720a9e71911
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 15 11:25:06 2024 -0600
+
+    apps/radar/Qucid - working on setting zoom states
+
+commit e648249a015610525de0d146ef703d999e8de56b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 15 10:47:54 2024 -0600
+
+    apps/radar/Qucid - testing with data set from PRECIP
+
+commit d308a8cd24551b621bc440c8479a00ed75697753
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 15 10:34:36 2024 -0600
+
+    apps/radar/Qucid - adding test data set from PRECIP
+
+commit 82f7e0970ba868b142c98a67f546019b8b005569
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 11 07:33:40 2024 -0600
+
+    apps/radar/Qucid - removing simulation parameters
+
+commit d7b4482a08610884a32489493cae1e34be12acbf
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 11 07:29:29 2024 -0600
+
+    apps/radar/Qucid - working on WorldPlot upgrade
+
+commit a7e606e152467c3949aafc2d58c25611589d8f1f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 10 04:31:29 2024 -0600
+
+    apps/radar/Qucid - working on WorldPlot upgrade
+
+commit 1f77c102e2e3377c8877c9a2a7cb45f845382763
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 14:07:15 2024 -0600
+
+    apps/radar/Qucid - testing retrieval of station_location file in cidd_init
+
+commit f13ee609a3715f706b3f90042ac8b27d6a726e65
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 13:56:52 2024 -0600
+
+    apps/radar/Qucid - testing retrieval of station_location file in cidd_init
+
+commit 49eb797d10260ac673c974a23a4c514502378c72
+Merge: caf8713d6 8546ef8c5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 13:34:45 2024 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit caf8713d68c1187a6450fcc54c09f60058a4155b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 13:34:30 2024 -0600
+
+    apps/radar/Qucid - testing map file retrieval
+
+commit 8546ef8c5b27453e586b9a961f1bda00f65f0030
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Tue Jul 9 12:53:58 2024 -0600
+
+    HawkEdit changes for save file bug; compiles; issue #69 from lrose-HawkEdit repo
+
+commit 5aec7f2ee22b7737432bed05d0b3cb926a32bf31
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 09:49:08 2024 -0600
+
+    apps/radar/Qucid - working on map file retrieval
+
+commit b984853febe8bc162fda94fc840e0eeb9888230c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 08:23:12 2024 -0600
+
+    apps/radar/Qucid - working on reading in color scales for met records
+
+commit 2c06f4faa2aae99f40746fd26231e4cb980e4097
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 9 08:03:40 2024 -0600
+
+    apps/radar/Qucid - working on reading in color scales for met records
+
+commit eeaa8206ade0db58e45566fb6b87275b8510977d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 12:04:15 2024 -0600
+
+    apps/radar/Qucid - working on color scale retieval
+
+commit 0052a64e406d1913120c8d5ddbe2beb7a41e3841
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 11:48:47 2024 -0600
+
+    apps/radar/Qucid - working on color scale retieval
+
+commit e5f00d255df322c71b0f8005361dbfbe8caf8f00
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 11:39:03 2024 -0600
+
+    apps/radar/Qucid - working on color scale retieval
+
+commit b0ce6251f358f1742df25cc0992d012fde97e3c2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 09:49:57 2024 -0600
+
+    apps/radar/Qucid - working on color scale retieval
+
+commit 4286ecd93e28edfd8d8d6c3b9e50e191abade476
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 09:23:13 2024 -0600
+
+    apps/radar/Qucid - working on color scale retieval
+
+commit 53f97422819609581a7eb2ae86516ad5011ba5da
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 8 06:41:10 2024 -0600
+
+    apps/radar/Qucid - working on snprintf warnings
+
+commit 869ba54e51df4ad86f8d22b70b235ea47b23c9ea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 23 04:24:23 2024 -0600
+
+    HcrShortLongCombine.test
+
+commit 0f98d10cfcc499b3f904522a686b606ef3c09f19
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 23 04:23:26 2024 -0600
+
+    Qucid - working on reading color scales
+
+commit 5e10a6fda7b85081c577a5f1709c4bbe648a17fe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 18 02:50:51 2024 -0600
+
+    apps/radar/HcrShortLongCombine - testing archive mode
+
+commit 97aac19d695d112c23ef387d1e5ff36b74d9ff49
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 17 16:11:40 2024 -0600
+
+    apps/radar/HcrShortLongCombine - testing archive mode
+
+commit 3d53f2c9c44c8de6dc2053179d90113bfbfb6dc2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 17 15:39:05 2024 -0600
+
+    apps/radar/HcrShortLongCombine - testing archive mode
+
+commit be189a14fb72f689f65396b34dae8548844edba6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 17 12:03:06 2024 -0600
+
+    apps/radar/HcrShortLongCombine - working on archive mode
+
+commit c7dc59b4a3b4306eac586eab0c509bc7f802dbbe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 17 11:16:34 2024 -0600
+
+    apps/radar/HcrShortLongCombine - working on archive mode
+
+commit d5725128ebffe589e11a9d98c37df9e1953d0a34
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 16 14:09:12 2024 -0600
+
+    libs/tdrp/load.c - fixing snprintf which was overwriting
+
+commit 650ec8545d57e0f95a9c86ad019928268023f530
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 16 02:35:11 2024 -0600
+
+    apps/radar/HcrShortLongCombine - in Args.cc changing sprintf to snprintf
+
+commit 1c54aadb08dd41a14da6c5f420ddf8e37043f50a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 27 17:51:30 2024 -0600
+
+    apps/radar/HcrShortLongCombine - adding correction for platform vertical velocity
+
+commit c2cba1784ae5b8fcd2b6e39afe1b6d413bcc6d6c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat May 25 14:39:01 2024 -0600
+
+    Adding docs/images/colette_rose.png
+
+commit 1444ac4f9a3f9bf61c3ce9c2ae66190eb6efd588
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat May 25 14:14:35 2024 -0600
+
+    Adding release notes for 20240525 release
