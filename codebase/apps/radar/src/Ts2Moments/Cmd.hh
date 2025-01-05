@@ -177,8 +177,6 @@ private:
                                   int nPoints,
                                   vector<InterestMap::ImPoint> &pts);
   void _applyGapFilter(int nGates);
-  void _applyGapFilterCVersion(int nGates);
-  void _applySpeckleFilterCVersion(int nGates);
   void _applyInfillFilter(int nGates);
   void _applySpeckleFilter(int nGates);
   void _runSpeckleFilter(int nGates, int minRunLen, double modThreshold);

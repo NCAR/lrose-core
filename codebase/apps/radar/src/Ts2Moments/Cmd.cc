@@ -44,8 +44,6 @@
 #include <radar/KdpFilt.hh>
 #include <radar/RadarMoments.hh>
 #include "Cmd.hh"
-#include "c_code/cmd_gap_filter.c"
-#include "c_code/cmd_speckle_filter.c"
 using namespace std;
 
 ////////////////////////////////////////////////////
@@ -1225,72 +1223,6 @@ void Cmd::_applyGapFilter(int nGates)
   delete[] sumWtsForward;
   delete[] sumWtsReverse;
   delete[] weights;
-
-}
-
-////////////////////////////////////////////////////////////
-// apply C version of gap filter
-
-void Cmd::_applyGapFilterCVersion(int nGates)
-
-{
-
-  TaArray<int> cmd_flag_;
-  int *cmd_flag = cmd_flag_.alloc(nGates);
-  TaArray<double> cmd_;
-  double *cmd = cmd_.alloc(nGates);
-
-  for (int igate = 0; igate < nGates; igate++) {
-    cmd_flag[igate] = (int) (_gateData[igate]->flds->cmd_flag + 0.5);
-    cmd[igate] = _gateData[igate]->flds->cmd;
-  }
-  
-  apply_cmd_flag_gap_filter(nGates, cmd, cmd_flag,
-                            _params.cmd_gap_filter_len,
-                            _params.cmd_gap_filter_threshold);
-
-  for (int igate = 0; igate < nGates; igate++) {
-    _gateData[igate]->flds->cmd_flag = cmd_flag[igate];
-  }
-
-}
-
-////////////////////////////////////////////////////////////
-// apply C version of speckle filter
-
-void Cmd::_applySpeckleFilterCVersion(int nGates)
-
-{
-
-  int igate, ii;
-  TaArray<int> cmd_flag_;
-  int *cmd_flag = cmd_flag_.alloc(nGates);
-  TaArray<double> cmd_;
-  double *cmd = cmd_.alloc(nGates);
-
-  for (igate = 0; igate < nGates; igate++) {
-    cmd_flag[igate] = (int) (_gateData[igate]->flds->cmd_flag + 0.5);
-    cmd[igate] = _gateData[igate]->flds->cmd;
-  }
-  
-  int nThresholds = _params.cmd_speckle_filter_thresholds_n;
-  TaArray<int> runLen_;
-  int *runLen = runLen_.alloc(nThresholds);
-  TaArray<double> modThresholds_;
-  double *modThresholds = modThresholds_.alloc(nThresholds);
-  
-  for (ii = 0; ii < nThresholds; ii++) {
-    runLen[ii] = _params._cmd_speckle_filter_thresholds[ii].length;
-    modThresholds[ii] =
-      _params._cmd_speckle_filter_thresholds[ii].min_valid_cmd;
-  }
-  
-  apply_cmd_speckle_filter(nGates, cmd, cmd_flag,
-                           nThresholds, runLen, modThresholds);
-
-  for (igate = 0; igate < nGates; igate++) {
-    _gateData[igate]->flds->cmd_flag = cmd_flag[igate];
-  }
 
 }
 
