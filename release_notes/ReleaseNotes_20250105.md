@@ -125,7 +125,6 @@ NOTE - this is still under development.
 * libs/tdrp/load.c - fixing bug in substituting env vars
 * libs/tdrp: (a) in print.c, adjusting the print format for double types to %.9g. (b) in load.c, adjusting buffer sizes to avoid warnings about sprintf buffer overruns
 * libs/tdrp/load.c - fixing snprintf which was overwriting
-
 * libs/radar/IwrfMomReader - fixing bug in file version of getNextRay()
 * apps/Radx/Dsr2Radx - updating platform before writing vol
 * apps/radar/HcrShortLongCombine.cc - adding check for time gate, restart processing if ray time gaps exceeds the dwell time significantly
@@ -145,13 +144,11 @@ NOTE - this is still under development.
 * apps/radar/Ts2Moments - removing FMQ mode, making it REALTIME
 * apps/radar/Ts2Moments - removing SpectraPrint
 * adding apps/radar/Ts2Moments, a copy of Iq2Dsr. This will be cleaned up to remove unused legacy complexity
-
 * apps/radar/HcrShortLongCombine - setting output fmq to allow multiple writers
 * apps/radar/HcrShortLongCombine - adding fixed_location_mode instead of override_radar_location
 * apps/radar/HcrShortLongCombine - setting output times to rounded mid time
 * apps/radar/HcrShortLongCombine - adding option to override radar location for ground-based ops
 * apps/radar/HcrShortLongCombine - adding mode to compute mean posn from georef data
-
 * apps/radar/Iq2Dsr - adding param for georef_fixed_location_mode, for HCR in ground-based ops
 * apps/radar/Iq2Dsr - working on dual-prt dwell processing for HCR
 * apps/radar/Iq2Dsr - working on dwells with dual pulse widths
@@ -161,13 +158,11 @@ NOTE - this is still under development.
 * Changing field info h_date and v_date from UTIMstruct to DateTime class
 * cidd_structs - changing structs to classes where applicable
 * apps/radar/HawkEye/FieldColorController.cc - isValidColor() -> isValidColorName()
-
 * titan apps - changing legacy apps to compile under C++
 * apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
 * apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
 ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * apps/titan/grid_forecast - converting to compile as C++ app
-
 * apps/procmap/src - procmap_register, procmap_unregister, test_procmap - converting C to C++
 * apps/ingest/Mesonet2Spdb MetarCsv2Spdb UAEMesonet2Spdb: fixing link lines for cmake build
 * apps/didss/wsi_ingest - upgrading to C++
@@ -187,7 +182,6 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * apps/radar/src/EccoStats - development in progress - adding month range option
 * apps/radar/HcrShortLongCombine - in Args.cc changing sprintf to snprintf
 * apps/radar/HcrShortLongCombine - adding correction for platform vertical velocity
-
 * Adding ls_poly_template.hh to libs/rapmath and libs/radar/regrFiltHubbert - template for forsythe polynomials
 * libs/toolsa - cleaning up code for sprintf and strncpy, to ensure no array overruns
 * libs/toolsa/DateTime class - adding setToZero()
