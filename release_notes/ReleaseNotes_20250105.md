@@ -108,22 +108,24 @@ NOTE - this is still under development.
 * libs/Radx/src/include/Radx/RadxField.hh, libs/Radx/src/include/Radx/RadxVol.hh - changing val of maxFractionMissing from 0.25 to 0.66
 * Radx/src/RadxDwellCombine/RadxDwellCombine.cc, radar/src/HcrShortLongCombine/HcrShortLongCombine.cc - adding use of parameter dwell_stats_max_fraction_missing
 * apps/Radx/RadxStats - for print_fixed_angle_table, only include sweep with nrays > 1
-* libs/Radx/GemRadxFile - adding SNR2 noise-subtracted fields
 * libs/Radx - updating reading of Gematronik files
-* apps/radar/HcrShortLongCombine - testing archive mode
+* libs/Radx/GemRadxFile - adding SNR2 noise-subtracted fields
 
 
 
 ## Bug fixes
 
+* apps/radar/HcrShortLongCombine - testing archive mode
+* apps/radar/HcrShortLongCombine - fixing problem with applying vel corrections twice
 * libs/Mdvx - MdvxWrite.cc - when determining whether to use NetCDF vs old MDV format, extend date from 2025 to 2038
 * Changing so that input fields are already qualified with short and long
-* libs/tdrp/load.c - fixing bug in substituting env vars
-* apps/radar/HcrShortLongCombine - fixing problem with applying vel corrections twice
 * libs/Mdv/src/Mdvx/Mdvx_xml.cc - fixing compression, using requested_compression
 * libs/Mdv - for Mdvx_write as XML, fixing problem with not writing XML, defaulting to NC
- * modified the paxi command in _runSurveilance to use the loop command to run  the specified scan twice. This was necessary to meet the test to trigger an  end of a volume.
+* modified the paxi command in _runSurveilance to use the loop command to run  the specified scan twice. This was necessary to meet the test to trigger an  end of a volume.
+* libs/tdrp/load.c - fixing bug in substituting env vars
 * libs/tdrp: (a) in print.c, adjusting the print format for double types to %.9g. (b) in load.c, adjusting buffer sizes to avoid warnings about sprintf buffer overruns
+* libs/tdrp/load.c - fixing snprintf which was overwriting
+
 * libs/radar/IwrfMomReader - fixing bug in file version of getNextRay()
 * apps/Radx/Dsr2Radx - updating platform before writing vol
 * apps/radar/HcrShortLongCombine.cc - adding check for time gate, restart processing if ray time gaps exceeds the dwell time significantly
@@ -131,12 +133,10 @@ NOTE - this is still under development.
 * apps - fixing errors wrt const char*
 * libs/qtplot, apps/radar Qt apps - fixing bug in ColorMap class causing infinite recursion when setMap() method is called
 * libs/qtplot/ColorMap.cc (a) fixing bug in setMap() causing recursion and (b) modifying isColorNameValid() to use QColor::isValidColorName()
-* libs/tdrp/load.c - fixing snprintf which was overwriting
 
 ## Updates to applications and associated libraries
 
 * apps/radar/Ts2Moments/Cmd.cc - removing C code versions, see Iq2Dsr
-* apps/radar/HcrShortLongCombine - setting output fmq to allow multiple writers
 * apps/radar/Ts2Moments - adding PMU() call to BeamReader
 * apps/radar/Ts2Moments - adding checkFixedPulseWidth()
 * apps/radar/Ts2Moments/BeamReader.cc - checkIsStaggeredPrt() - checking for NULL for pulse0 or pulse1 before dereferencing
@@ -145,29 +145,29 @@ NOTE - this is still under development.
 * apps/radar/Ts2Moments - removing FMQ mode, making it REALTIME
 * apps/radar/Ts2Moments - removing SpectraPrint
 * adding apps/radar/Ts2Moments, a copy of Iq2Dsr. This will be cleaned up to remove unused legacy complexity
-* apps/radar/Iq2Dsr - adding param for georef_fixed_location_mode, for HCR in ground-based ops
+
+* apps/radar/HcrShortLongCombine - setting output fmq to allow multiple writers
 * apps/radar/HcrShortLongCombine - adding fixed_location_mode instead of override_radar_location
 * apps/radar/HcrShortLongCombine - setting output times to rounded mid time
 * apps/radar/HcrShortLongCombine - adding option to override radar location for ground-based ops
 * apps/radar/HcrShortLongCombine - adding mode to compute mean posn from georef data
-* Adding ls_poly_template.hh to libs/rapmath and libs/radar/regrFiltHubbert - template for forsythe polynomials
+
+* apps/radar/Iq2Dsr - adding param for georef_fixed_location_mode, for HCR in ground-based ops
 * apps/radar/Iq2Dsr - working on dual-prt dwell processing for HCR
 * apps/radar/Iq2Dsr - working on dwells with dual pulse widths
 * apps/radar/src/deprecated/LUCID_shiva - adding ColorMap class to directory, in case this version is needed
 * apps/radar/HawkEye class FieldColorController adding _isValidColorName() method to support qt5 and qt6
-* libs/qtplot/ColorMap - adding isColorNameValid() method
 * .gitignore - adding XpolScanControl app binary
-* libs/toolsa - cleaning up code for sprintf and strncpy, to ensure no array overruns
 * Changing field info h_date and v_date from UTIMstruct to DateTime class
-* libs/toolsa/DateTime class - adding setToZero()
 * cidd_structs - changing structs to classes where applicable
-* libs/euclid/PjgMath - fixing bug in operator(==) for latlon projection
 * apps/radar/HawkEye/FieldColorController.cc - isValidColor() -> isValidColorName()
+
 * titan apps - changing legacy apps to compile under C++
 * apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
 * apps/radar/titan - modifying legacy apps test_tserver, track_print, verify_day, verify_grid and verify_tracks to compile as C++ instead of C
 ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * apps/titan/grid_forecast - converting to compile as C++ app
+
 * apps/procmap/src - procmap_register, procmap_unregister, test_procmap - converting C to C++
 * apps/ingest/Mesonet2Spdb MetarCsv2Spdb UAEMesonet2Spdb: fixing link lines for cmake build
 * apps/didss/wsi_ingest - upgrading to C++
@@ -176,29 +176,34 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * C app -> C++ app
 * Adding apps ingest Mesonet2Spdb, MetarCsv2Spdb, Taf2Spdb, UAEMesonet2Spdb
 * apps/ingest - adding Mesonet2Spdb, MetarCsv2SPdb, Taf2Spdb and UAEMesonet2Spdb to the build
-* libs/qtplot/ColorMap - fixing bug in copy constructor
 * apps/radar/EccoStats - testing with various coverage fractions
 * apps/radar/EccoStats - adding check on radar coverage
 * apps/radar/EccoStats - adding option to censor based on the coverage height fraction
 * apps/radar/EccoStats - adding coverage computations
-* libs/toolsa - umalloc - in free2 and free3, extra checking for nulls
 * apps/radar/EccoStats - working on adding computation of coverage fields for MRMS grid
-* libs/rapmath/umath - adding ForsytheC.cc, a C++ implementation of the Forsythe algorithm, as documentation
 * apps/radar/EccoStats - fixing file output times
 * apps/radar/EccoStats - adding frac fields
 * apps/radar/EccoStats - debugging terrain ht and water flag fields
 * apps/radar/src/EccoStats - development in progress - adding month range option
-* libs/didss/DsInputPath - adding option to set month range for archive mode
 * apps/radar/HcrShortLongCombine - in Args.cc changing sprintf to snprintf
 * apps/radar/HcrShortLongCombine - adding correction for platform vertical velocity
 
+* Adding ls_poly_template.hh to libs/rapmath and libs/radar/regrFiltHubbert - template for forsythe polynomials
+* libs/toolsa - cleaning up code for sprintf and strncpy, to ensure no array overruns
+* libs/toolsa/DateTime class - adding setToZero()
+* libs/euclid/PjgMath - fixing bug in operator(==) for latlon projection
+* libs/qtplot/ColorMap - fixing bug in copy constructor
+* libs/qtplot/ColorMap - adding isColorNameValid() method
+* libs/toolsa - umalloc - in free2 and free3, extra checking for nulls
+* libs/rapmath/umath - adding ForsytheC.cc, a C++ implementation of the Forsythe algorithm, as documentation
+* libs/didss/DsInputPath - adding option to set month range for archive mode
 
 ## Builds - general
 
 * commenting out autoconf option
+* Moving autoconf build scripts to deprecated
 * codebase/apps/ingest/src/_makefiles/makefile.lrose-core, codebase/apps/radar/src/_makefiles/makefile.lrose-core - adding new apps
 * Update cmake build script to work on alma9 (#135)
-* build/cmake/createCMakeLists.py - in addFindQt, ignoring OpenG
 * OSX updating qt6 homebrew location
 * lrose_make.LINUX_LROSE_WITH_JASPER - updating QT6 includes
 * Adding cmake files for apps/radar/src/HcrShortLongCombine
@@ -206,8 +211,9 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * build/make_include/lrose_make.LINUX_NRIT
 * Adding lrose_make.LINUX_NRIT
 * createCMakeFiles.py - adding use of NO_SYSTEM_ENVIRONMENT_PATH for qt6 search
-* Moving autoconf build scripts to deprecated
+* build/cmake/createCMakeLists.py - in addFindQt, ignoring OpenG
 * build/cmake/createCMakeLists.py - adding top-level CMakeLists.txt file, build should be done from this level
+* build/cmake/createCMakeLists.py - adding add_custom_command section to build tdrp_gen if needed
 * build/deprecated/singularity/custom.centos.8.def - changing name to be valid on windows platform
 * clean up handling of tdrp_gen during build
     Creation of Params.hh and Params.cc files during build no longer
@@ -216,7 +222,6 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
     be generated while building.
     This means that tdrp_gen is now never installed unless the user 
     runs "make install".
-* build/cmake/createCMakeLists.py - adding add_custom_command section to build tdrp_gen if needed
 
 
 ## Builds - updating to support conda forge packaging
