@@ -9,7 +9,6 @@ NOTE - this is still under development.
 ## HawkEdit
 
 * HawkEdit changes for save file bug; compiles and working; issue #69 from lrose-HawkEdit repo
-* HawkEdit changes for save file bug; compiles; issue #69 from lrose-HawkEdit repo
 
 ## LUCID
 * apps/radar/Lucid - working on MetRecord
@@ -174,7 +173,6 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * apps/didss/wsi_ingest - upgrading to C++
 * apps/didss/src/wsi_ingest - converting C to C++ for build
 * apps/didss/src/fmq_print - converting C to C++ for build
-* apps/didss/src/fmq_print - converting C to C++ for build
 * C app -> C++ app
 * Adding apps ingest Mesonet2Spdb, MetarCsv2Spdb, Taf2Spdb, UAEMesonet2Spdb
 * apps/ingest - adding Mesonet2Spdb, MetarCsv2SPdb, Taf2Spdb and UAEMesonet2Spdb to the build
@@ -195,7 +193,7 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * apps/radar/HcrShortLongCombine - adding correction for platform vertical velocity
 
 
-## Builds - general:
+## Builds - general
 
 * commenting out autoconf option
 * codebase/apps/ingest/src/_makefiles/makefile.lrose-core, codebase/apps/radar/src/_makefiles/makefile.lrose-core - adding new apps
@@ -221,7 +219,7 @@ ap.ps/titan/storms_to_ascii, storms_to_tifs - converting to C++ build
 * build/cmake/createCMakeLists.py - adding add_custom_command section to build tdrp_gen if needed
 
 
-## Builds - updating to support conda forge:
+## Builds - updating to support conda forge packaging
 * cmakefiles - adding code to not check for opengl in mac build for conda forge
 * docs on miniforge build
 * conda-build - bringing CMakeLists back to previous
