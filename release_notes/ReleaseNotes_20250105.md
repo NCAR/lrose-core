@@ -10,7 +10,7 @@ NOTE - this is still under development.
 
 * HawkEdit changes for save file bug; compiles and working; issue #69 from lrose-HawkEdit repo
 
-## LUCID
+## LUCID - replacement for CIDD.
 
 * apps/radar/Lucid - this is a work in progress. It is not yet a working application.
 
