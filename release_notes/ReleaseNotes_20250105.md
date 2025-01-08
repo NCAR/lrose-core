@@ -4,8 +4,6 @@ This is the final version of the Colette release.
 
 These release notes are a summary of git commit notes since the 20240525 release.
 
-NOTE - this is still under development.
-
 ## HawkEdit
 
 * HawkEdit changes for save file bug; compiles and working; issue #69 from lrose-HawkEdit repo
