@@ -61,7 +61,6 @@ HDRS = \
 	Croutes_P.hh \
 	Csyprod_P.hh \
 	Cterrain_P.hh \
-	DisplayManager.hh \
 	FieldTableItem.hh \
 	HorizWidget.hh \
 	LegacyParams.hh \
@@ -194,7 +193,6 @@ NORM_SRCS = \
 MOC_SRCS = \
 	Lucid.cc \
 	CartManager.cc \
-	DisplayManager.cc \
 	HorizWidget.cc \
 	MapMenuItem.cc \
 	MetRecord.cc \
@@ -208,7 +206,6 @@ MOC_SRCS = \
 MOC_OUTPUT = \
 	moc_Lucid.cpp \
 	moc_CartManager.cpp \
-	moc_DisplayManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
 	moc_MetRecord.cpp \

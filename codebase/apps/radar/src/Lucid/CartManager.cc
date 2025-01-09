@@ -119,7 +119,6 @@ CartManager* CartManager::Instance()
 // Constructor
 
 CartManager::CartManager() :
-        DisplayManager(),
         _vlevelManager(),
         _vertWindowDisplayed(false)
 {
@@ -182,7 +181,7 @@ CartManager::CartManager() :
 
   // set initial field to 0
 
-  _changeField(0, false);
+  // _changeField(0, false);
 
   // init for timer
   
@@ -371,11 +370,11 @@ void CartManager::keyPressEvent(QKeyEvent * e)
   
   // for '.', swap with previous field
   
-  if (keychar == '.') {
-    QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-    button->click();
-    return;
-  }
+  // if (keychar == '.') {
+  //   QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
+  //   button->click();
+  //   return;
+  // }
   
   // for ESC, freeze / unfreeze
 
@@ -523,11 +522,13 @@ void CartManager::_setupWindows()
   _vert = _vertWindow->getWidget();
   
   // connect slots for location
-  
+
+#ifdef NOTNOW
   connect(_horiz, &HorizWidget::locationClicked,
           this, &CartManager::_horizLocationClicked);
   connect(_vert, &VertWidget::locationClicked,
           this, &CartManager::_vertLocationClicked);
+#endif
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
@@ -1928,6 +1929,17 @@ void CartManager::_refresh()
   }
 }
 
+////////////////////////////////////////////////////////
+// handle params file
+
+void CartManager::_openFile() {
+}
+
+void CartManager::_saveFile() {
+}
+
+
+#ifdef NOTNOW
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
@@ -1981,6 +1993,7 @@ void CartManager::_changeField(int fieldId, bool guiMode)
 
   // refreshBoundaries();
 }
+#endif
 
 #ifdef NOTYET
 // TODO: need to add the background changed, etc. 
@@ -2037,6 +2050,8 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 }
 #endif
 
+#ifdef NOTNOW
+
 ///////////////////////////////////////////////////
 // respond to a change in click location on the HORIZ
 
@@ -2046,8 +2061,6 @@ void CartManager::_horizLocationClicked(double xkm, double ykm,
 {
 
   cerr << "1111111111 horizLocationClicked, xkm, km: " << xkm << ", " << ykm << endl;
-  
-#ifdef NOTNOW
   
   // find the relevant ray
   // ignore closest ray sent in
@@ -2082,8 +2095,6 @@ void CartManager::_horizLocationClicked(double xkm, double ykm,
 
   _locationClicked(xkm, ykm, ray);
 
-#endif
-  
 }
 
 ///////////////////////////////////////////////////
@@ -2159,8 +2170,6 @@ void CartManager::_locationClicked(double xkm, double ykm,
     _altitudeClicked->setText(text);
   }
 
-#ifdef NOTYET
-  
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setSelectValue(-9999.0);
     _fields[ii]->setDialogText("----");
@@ -2218,14 +2227,14 @@ void CartManager::_locationClicked(double xkm, double ykm,
   
   _updateStatusPanel(ray);
 
-#endif
-  
   // write the click location to FMQ
 
   _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
   
 }
 
+#endif
+  
 //////////////////////////////////////////////
 // get size of table widget
 
@@ -2679,14 +2688,14 @@ void CartManager::_createImageFiles()
     _plotEndTime = _horiz->getPlotEndTime();
   }
 
+#ifdef NOTYET
+  
   // save current field
 
   int fieldNum = _fieldNum;
   
   // loop through fields
 
-#ifdef NOTYET
-  
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     
     // select field
@@ -2705,12 +2714,12 @@ void CartManager::_createImageFiles()
 
   }
 
-#endif
-  
   // change field back
 
   _changeField(fieldNum, false);
 
+#endif
+  
   if (_params.debug) {
     cerr << "Done creating image files" << endl;
   }
@@ -2907,31 +2916,6 @@ void CartManager::ShowContextMenu(const QPoint &pos) {
   _horiz->ShowContextMenu(pos /*, &_vol*/);
 }
 
-
-/////////////////////////////////////////////////////
-// howto help
-
-void CartManager::_howto()
-{
-  string text;
-  text += "HOWTO HINTS FOR HAWK-EYE in POLAR mode\n";
-  text += "======================================\n";
-  text += "\n";
-  text += "To go forward  in time, click in data window, hit Right Arrow\n";
-  text += "To go backward in time, click in data window, hit Left  Arrow\n";
-  text += "\n";
-  text += "To change fields, click on field buttons\n";
-  text += "  Once active, you can use the arrow keys to change the field selection\n";
-  text += "  Hit '.' to toggle between the two latest fields\n";
-  text += "\n";
-  text += "Hot-keys for fields:\n";
-  text += "  Use NUMBER or LETTER keys to display RAW fields\n";
-  text += "  Use ALT-NUMBER and ALT-LETTER keys to display FILTERED fields\n";
-  text += "\n";
-  text += "To see field data at a point:\n";
-  text += "  Click in main window\n";
-  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
-}
 
 #ifdef NOTNOW
 // Creates the boundary editor dialog and associated event slots
@@ -3132,12 +3116,12 @@ void CartManager::_handleFirstTimerEvent()
   // The default values for the labels must be their maximum size for this
   // to work.  This is ugly, but it works.
   
-  int maxWidth = 0;
-  for (size_t ii = 0; ii < _valsRight.size(); ii++) {
-    if (maxWidth < _valsRight[ii]->width()) {
-      maxWidth = _valsRight[ii]->width();
-    }
-  }
+  // int maxWidth = 0;
+  // for (size_t ii = 0; ii < _valsRight.size(); ii++) {
+  //   if (maxWidth < _valsRight[ii]->width()) {
+  //     maxWidth = _valsRight[ii]->width();
+  //   }
+  // }
 
   // _statusLayout->setColumnMinimumWidth(1, maxWidth);
   // cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
@@ -3152,8 +3136,9 @@ void CartManager::_handleFirstTimerEvent()
 void CartManager::_readClickPoint()
 {
 
+#ifdef NOTNOW
   bool gotNew = false;
-
+  
   if (_readClickPointFmq(gotNew) == 0) {
     if (gotNew) {
       if (_params.debug) {
@@ -3166,6 +3151,7 @@ void CartManager::_readClickPoint()
       }
     }
   }
+#endif
   
 }
 
@@ -4108,3 +4094,111 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
   }
 
 }
+
+///////////////////////////////////////////
+// set text for GUI panels
+
+void CartManager::_setText(char *text,
+                           size_t maxTextLen,
+                           const char *format,
+                           int val)
+{
+  if (abs(val) < 9999) {
+    snprintf(text, maxTextLen, format, val);
+  } else {
+    snprintf(text, maxTextLen, format, -9999);
+  }
+}
+
+void CartManager::_setText(char *text,
+                           size_t maxTextLen,
+                           const char *format,
+                           double val)
+{
+  if (fabs(val) < 9999) {
+    snprintf(text, maxTextLen, format, val);
+  } else {
+    snprintf(text, maxTextLen, format, -9999.0);
+  }
+}
+
+/////////////////////////////
+// show data at click point
+
+void CartManager::_showClick()
+{
+#ifdef NOTNOW
+  if (_clickReportDialog) {
+    if (_clickReportDialog->isVisible()) {
+      _clickReportDialog->setVisible(false);
+    } else {
+      if (_clickReportDialog->x() == 0 &&
+          _clickReportDialog->y() == 0) {
+        QPoint pos;
+        pos.setX(x() + width() + 5);
+        pos.setY(y());
+        _clickReportDialog->move(pos);
+      }
+      _clickReportDialog->setVisible(true);
+      _clickReportDialog->raise();
+    }
+  }
+#endif
+}
+
+/////////////////////////////////////////////////////
+// howto help
+
+void CartManager::_howto()
+{
+  string text;
+  text += "HOWTO HINTS FOR Lucid\n";
+  text += "========================\n";
+  text += "\n";
+  text += "Use NUMBER keys to display RAW fields\n";
+  text += "Use ALT-NUMBER keys to display FILTERED fields\n";
+  text += "Hit '.' to toggle between the two latest fields\n";
+  text += "\n";
+  text += "You can also use the arrow keys to select different fields\n";
+  text += "\n";
+  text += "Click in main window to get field data at a point.\n";
+  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+}
+
+void CartManager::_about()
+{
+
+  //QMessageBox::about(this, tr("About Menu"),
+  //tr("Lucid is an integrating Cartesian display for weather data."));
+
+  string text;
+  
+  text += "Lucid is an integrating Cartesian display for weather data.\n\n";
+  text += "Get help with Lucid ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nLucid version ... \n ";  
+  text += "\nCopyright UCAR (c) 1990 - 2019  ";
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
+
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}
+

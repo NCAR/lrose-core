@@ -63,7 +63,6 @@ SOURCES       = Args.cc \
 		Cterrain_P.cc \
 		DataHandling.cc \
 		DisplayField.cc \
-		DisplayManager.cc \
 		FieldTableItem.cc \
 		HorizWidget.cc \
 		LegacyParams.cc \
@@ -160,7 +159,6 @@ SOURCES       = Args.cc \
 		xview_file_access.cc \
 		zoom_pu_proc.cc qrc_resources.cpp \
 		moc_CartManager.cpp \
-		moc_DisplayManager.cpp \
 		moc_HorizWidget.cpp \
 		moc_Lucid.cpp \
 		moc_MapMenuItem.cpp \
@@ -182,7 +180,6 @@ OBJECTS       = Args.o \
 		Cterrain_P.o \
 		DataHandling.o \
 		DisplayField.o \
-		DisplayManager.o \
 		FieldTableItem.o \
 		HorizWidget.o \
 		LegacyParams.o \
@@ -280,7 +277,6 @@ OBJECTS       = Args.o \
 		zoom_pu_proc.o \
 		qrc_resources.o \
 		moc_CartManager.o \
-		moc_DisplayManager.o \
 		moc_HorizWidget.o \
 		moc_Lucid.o \
 		moc_MapMenuItem.o \
@@ -396,6 +392,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -426,7 +423,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Csyprod_P.hh \
 		Cterrain_P.hh \
 		DisplayField.hh \
-		DisplayManager.hh \
 		FieldTableItem.hh \
 		HorizWidget.hh \
 		LegacyParams.hh \
@@ -480,7 +476,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Cterrain_P.cc \
 		DataHandling.cc \
 		DisplayField.cc \
-		DisplayManager.cc \
 		FieldTableItem.cc \
 		HorizWidget.cc \
 		LegacyParams.cc \
@@ -692,6 +687,7 @@ Makefile.qmake: qmake.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -824,6 +820,7 @@ Makefile.qmake: qmake.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64
 /usr/lib64/qt6/mkspecs/features/qt_config.prf:
 /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf:
 /usr/lib64/qt6/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /usr/lib64/qt6/mkspecs/features/exclusive_builds.prf:
 /usr/lib64/qt6/mkspecs/features/toolchain.prf:
 /usr/lib64/qt6/mkspecs/features/default_pre.prf:
@@ -866,8 +863,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Args.hh CartManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh DisplayManager.hh FieldTableItem.hh HorizWidget.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh ZoomBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
-	$(COPY_FILE) --parents Args.cc CartManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DataHandling.cc DisplayField.cc DisplayManager.cc FieldTableItem.cc HorizWidget.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc ZoomBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc status_pu_proc.cc v_win_proc.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
+	$(COPY_FILE) --parents Args.hh CartManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh FieldTableItem.hh HorizWidget.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh ZoomBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
+	$(COPY_FILE) --parents Args.cc CartManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DataHandling.cc DisplayField.cc FieldTableItem.cc HorizWidget.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc ZoomBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc status_pu_proc.cc v_win_proc.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -910,104 +907,33 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -dM -E -o moc_predefs.h /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+compiler_moc_header_make_all: moc_CartManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_CartManager.cpp moc_DisplayManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+	-$(DEL_FILE) moc_CartManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 moc_CartManager.cpp: CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
-		$(HOME)/lrose/include/Radx/RadxField.hh \
-		$(HOME)/lrose/include/Radx/RadxPacking.hh \
-		$(HOME)/lrose/include/Radx/RadxBuf.hh \
-		$(HOME)/lrose/include/Radx/RadxMsg.hh \
-		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
-		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
-		$(HOME)/lrose/include/Radx/RadxSweep.hh \
-		moc_predefs.h \
-		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
-
-moc_DisplayManager.cpp: DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
 		$(HOME)/lrose/include/Radx/RadxPacking.hh \
 		$(HOME)/lrose/include/Radx/RadxBuf.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
 
 moc_HorizWidget.cpp: HorizWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
@@ -1630,28 +1556,17 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Radx/RadxPath.hh \
 		$(HOME)/lrose/include/Ncxx/H5x.hh \
 		CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
-		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
+		$(HOME)/lrose/include/Radx/RadxArray.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		FieldTableItem.hh \
 		HorizWidget.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -1710,6 +1625,12 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
 		cidd_structs.h \
@@ -1730,6 +1651,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -1755,6 +1677,8 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		ProdMenuItem.hh \
 		TimeControl.hh \
 		VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VertWindow.hh \
 		WindMenuItem.hh \
 		ZoomMenuItem.hh
@@ -1945,165 +1869,6 @@ DisplayField.o: DisplayField.cc DisplayField.hh \
 		SiiPalette.hh \
 		ColorTableManager.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DisplayField.o DisplayField.cc
-
-DisplayManager.o: DisplayManager.cc DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
-		$(HOME)/lrose/include/Radx/RadxField.hh \
-		$(HOME)/lrose/include/Radx/RadxPacking.hh \
-		$(HOME)/lrose/include/Radx/RadxBuf.hh \
-		$(HOME)/lrose/include/Radx/RadxMsg.hh \
-		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
-		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
-		$(HOME)/lrose/include/toolsa/LogStream.hh \
-		$(HOME)/lrose/include/toolsa/copyright.h \
-		$(HOME)/lrose/include/toolsa/LogFile.hh \
-		$(HOME)/lrose/include/toolsa/TaXml.hh \
-		$(HOME)/lrose/include/Radx/RadxFile.hh \
-		$(HOME)/lrose/include/Radx/RadxTimeList.hh \
-		cidd.h \
-		$(HOME)/lrose/include/dataport/bigend.h \
-		$(HOME)/lrose/include/dataport/swap.h \
-		$(HOME)/lrose/include/toolsa/mem.h \
-		$(HOME)/lrose/include/toolsa/membuf.h \
-		$(HOME)/lrose/include/toolsa/globals.h \
-		$(HOME)/lrose/include/toolsa/str.h \
-		$(HOME)/lrose/include/toolsa/ansi.h \
-		$(HOME)/lrose/include/toolsa/pmu.h \
-		$(HOME)/lrose/include/toolsa/procmap.h \
-		$(HOME)/lrose/include/toolsa/http.h \
-		$(HOME)/lrose/include/toolsa/HttpURL.hh \
-		$(HOME)/lrose/include/toolsa/pjg.h \
-		$(HOME)/lrose/include/toolsa/pjg_types.h \
-		$(HOME)/lrose/include/toolsa/pjg_flat.h \
-		$(HOME)/lrose/include/toolsa/Path.hh \
-		$(HOME)/lrose/include/toolsa/sockutil.h \
-		$(HOME)/lrose/include/toolsa/servmap.h \
-		$(HOME)/lrose/include/toolsa/utim.h \
-		$(HOME)/lrose/include/toolsa/umisc.h \
-		$(HOME)/lrose/include/toolsa/port.h \
-		$(HOME)/lrose/include/toolsa/ushmem.h \
-		$(HOME)/lrose/include/toolsa/uusleep.h \
-		$(HOME)/lrose/include/toolsa/ucopyright.h \
-		$(HOME)/lrose/include/toolsa/xdru.h \
-		$(HOME)/lrose/include/Spdb/StationLoc.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_32.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_typedefs_64.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx.hh \
-		$(HOME)/lrose/include/toolsa/TaFile.hh \
-		$(HOME)/lrose/include/toolsa/file_io.h \
-		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_constants.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_read.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_write.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_timelist.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_print.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_BE.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_xml.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_ncf.hh \
-		$(HOME)/lrose/include/Mdv/Mdvx_vsect.hh \
-		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
-		$(HOME)/lrose/include/Mdv/MdvxField.hh \
-		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
-		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
-		$(HOME)/lrose/include/euclid/PjgMath.hh \
-		$(HOME)/lrose/include/euclid/Pjg.hh \
-		$(HOME)/lrose/include/euclid/PjgTypes.hh \
-		$(HOME)/lrose/include/euclid/sincos.h \
-		$(HOME)/lrose/include/euclid/PjgAzimEquidistMath.hh \
-		$(HOME)/lrose/include/euclid/PjgPolarRadarMath.hh \
-		$(HOME)/lrose/include/euclid/PjgAlbersMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLambertAzimMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLambertConfMath.hh \
-		$(HOME)/lrose/include/euclid/PjgLatlonMath.hh \
-		$(HOME)/lrose/include/euclid/PjgPolarStereoMath.hh \
-		$(HOME)/lrose/include/euclid/PjgObliqueStereoMath.hh \
-		$(HOME)/lrose/include/euclid/PjgMercatorMath.hh \
-		$(HOME)/lrose/include/euclid/PjgTransMercatorMath.hh \
-		$(HOME)/lrose/include/euclid/PjgVertPerspMath.hh \
-		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
-		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
-		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
-		Params.hh \
-		$(HOME)/lrose/include/tdrp/tdrp.h \
-		$(HOME)/lrose/include/tdrp/tdrp_p.h \
-		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
-		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
-		$(HOME)/lrose/include/rapformats/coord_export.h \
-		cidd_macros.h \
-		cidd_structs.h \
-		cidd_colorscales.h \
-		MetRecord.hh \
-		ZoomBox.hh \
-		WayPts.hh \
-		cidd_data_io.h \
-		Product.hh \
-		Csyprod_P.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdbThreaded.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdb.hh \
-		$(HOME)/lrose/include/Spdb/Spdb.hh \
-		$(HOME)/lrose/include/Spdb/Product_defines.hh \
-		$(HOME)/lrose/include/Spdb/Spdb_typedefs.hh \
-		$(HOME)/lrose/include/Spdb/DsSpdbMsg.hh \
-		SymprodRender.hh \
-		$(HOME)/lrose/include/Spdb/Symprod.hh \
-		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
-		RenderContext.hh \
-		cidd_winds.h \
-		cidd_contours.h \
-		cidd_movies.h \
-		cidd_maps.h \
-		cidd_products.h \
-		cidd_layers.h \
-		Croutes_P.hh \
-		cidd_windows.h \
-		cidd_legend.h \
-		cidd_funcs.h \
-		ProductMgr.hh \
-		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
-		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
-		SymprodRenderObj.hh \
-		$(HOME)/lrose/include/Spdb/SymprodObj.hh \
-		$(HOME)/lrose/include/rapformats/station_reports.h \
-		$(HOME)/lrose/include/rapformats/metar_decode.h \
-		$(HOME)/lrose/include/rapformats/metar.h \
-		$(HOME)/lrose/include/rapformats/nws_oso_local.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DisplayManager.o DisplayManager.cc
 
 FieldTableItem.o: FieldTableItem.cc FieldTableItem.hh \
 		Params.hh \
@@ -2390,13 +2155,10 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
 		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		$(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/LogStream.hh \
 		$(HOME)/lrose/include/toolsa/copyright.h \
@@ -2443,58 +2205,37 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		Params.hh \
 		CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
+		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
 		$(HOME)/lrose/include/Radx/RadxPacking.hh \
 		$(HOME)/lrose/include/Radx/RadxBuf.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		LegacyParams.hh \
 		Cgui_P.hh \
 		cidd_params.h \
 		SoloDefaultColorWrapper.hh \
 		SiiPalette.hh \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		ColorTableManager.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/Path.hh \
+		$(HOME)/lrose/include/toolsa/DateTime.hh \
+		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
 		cidd.h \
+		$(HOME)/lrose/include/dataport/port_types.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
@@ -2504,6 +2245,7 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/toolsa/http.h \
 		$(HOME)/lrose/include/toolsa/HttpURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
 		$(HOME)/lrose/include/toolsa/pjg.h \
 		$(HOME)/lrose/include/toolsa/pjg_types.h \
 		$(HOME)/lrose/include/toolsa/pjg_flat.h \
@@ -2524,6 +2266,8 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
+		$(HOME)/lrose/include/toolsa/heartbeat.h \
+		$(HOME)/lrose/include/toolsa/MemBuf.hh \
 		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_constants.hh \
@@ -2535,7 +2279,10 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_xml.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_ncf.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_vsect.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -2557,6 +2304,16 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/toolsa/compress.h \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
+		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
+		$(HOME)/lrose/include/didss/DsMessage.hh \
+		$(HOME)/lrose/include/didss/ds_message.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
 		cidd_structs.h \
@@ -3751,63 +3508,42 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		VlevelManager.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
 		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
 		$(HOME)/lrose/include/Radx/RadxPacking.hh \
 		$(HOME)/lrose/include/Radx/RadxBuf.hh \
 		$(HOME)/lrose/include/Radx/RadxMsg.hh \
 		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		cidd.h \
+		$(HOME)/lrose/include/dataport/port_types.h \
 		$(HOME)/lrose/include/dataport/bigend.h \
 		$(HOME)/lrose/include/dataport/swap.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/toolsa/globals.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/toolsa/str.h \
 		$(HOME)/lrose/include/toolsa/ansi.h \
 		$(HOME)/lrose/include/toolsa/pmu.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/toolsa/http.h \
 		$(HOME)/lrose/include/toolsa/HttpURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
 		$(HOME)/lrose/include/toolsa/pjg.h \
 		$(HOME)/lrose/include/toolsa/pjg_types.h \
 		$(HOME)/lrose/include/toolsa/pjg_flat.h \
 		$(HOME)/lrose/include/toolsa/Path.hh \
+		$(HOME)/lrose/include/toolsa/DateTime.hh \
+		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
 		$(HOME)/lrose/include/toolsa/sockutil.h \
 		$(HOME)/lrose/include/toolsa/servmap.h \
 		$(HOME)/lrose/include/toolsa/utim.h \
@@ -3825,6 +3561,8 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
+		$(HOME)/lrose/include/toolsa/heartbeat.h \
+		$(HOME)/lrose/include/toolsa/MemBuf.hh \
 		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_constants.hh \
@@ -3836,7 +3574,10 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_xml.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_ncf.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_vsect.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/Mdv/MdvxField.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
@@ -3858,6 +3599,16 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/toolsa/compress.h \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
+		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
+		$(HOME)/lrose/include/didss/DsMessage.hh \
+		$(HOME)/lrose/include/didss/ds_message.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
 		cidd_structs.h \
@@ -3878,6 +3629,7 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4045,59 +3797,41 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/copyright.h \
 		$(HOME)/lrose/include/toolsa/LogFile.hh \
 		CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
-		$(HOME)/lrose/include/Radx/RadxField.hh \
-		$(HOME)/lrose/include/Radx/RadxPacking.hh \
-		$(HOME)/lrose/include/Radx/RadxBuf.hh \
-		$(HOME)/lrose/include/Radx/RadxMsg.hh \
-		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
-		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
+		$(HOME)/lrose/include/Radx/Radx.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
+		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPacking.hh \
+		$(HOME)/lrose/include/Radx/RadxBuf.hh \
+		$(HOME)/lrose/include/Radx/RadxMsg.hh \
+		$(HOME)/lrose/include/Radx/RadxRemap.hh \
+		$(HOME)/lrose/include/Radx/RadxArray.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
+		$(HOME)/lrose/include/dataport/port_types.h \
+		$(HOME)/lrose/include/toolsa/DateTime.hh \
+		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
+		$(HOME)/lrose/include/toolsa/heartbeat.h \
+		$(HOME)/lrose/include/toolsa/MemBuf.hh \
 		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
@@ -4134,7 +3868,11 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		ZoomBox.hh \
 		WayPts.hh \
@@ -4166,6 +3904,16 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/toolsa/compress.h \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
+		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
+		$(HOME)/lrose/include/didss/DsMessage.hh \
+		$(HOME)/lrose/include/didss/ds_message.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_data_io.h \
 		Product.hh \
@@ -4180,6 +3928,7 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -4202,61 +3951,43 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWidget.o VertWidget.cc
 
 VertWindow.o: VertWindow.cc CartManager.hh \
-		DisplayManager.hh \
-		$(HOME)/lrose/include/qtplot/ColorMap.hh \
-		$(HOME)/lrose/include/euclid/SunPosn.hh \
-		$(HOME)/lrose/include/Radx/RadxTime.hh \
-		$(HOME)/lrose/include/Radx/RadxRay.hh \
-		$(HOME)/lrose/include/Radx/Radx.hh \
-		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
-		$(HOME)/lrose/include/Radx/RadxField.hh \
-		$(HOME)/lrose/include/Radx/RadxPacking.hh \
-		$(HOME)/lrose/include/Radx/RadxBuf.hh \
-		$(HOME)/lrose/include/Radx/RadxMsg.hh \
-		$(HOME)/lrose/include/Radx/RadxRemap.hh \
-		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
-		$(HOME)/lrose/include/Radx/RadxVol.hh \
-		$(HOME)/lrose/include/Radx/RadxArray.hh \
-		$(HOME)/lrose/include/Radx/RadxGeoref.hh \
-		$(HOME)/lrose/include/radar/ClickPointFmq.hh \
-		$(HOME)/lrose/include/Fmq/DsFmq.hh \
-		$(HOME)/lrose/include/Fmq/Fmq.hh \
-		$(HOME)/lrose/include/toolsa/compress.h \
-		$(HOME)/lrose/include/dataport/port_types.h \
-		$(HOME)/lrose/include/toolsa/MemBuf.hh \
-		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
-		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
-		$(HOME)/lrose/include/toolsa/heartbeat.h \
-		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
-		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
-		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
-		$(HOME)/lrose/include/didss/DsMessage.hh \
-		$(HOME)/lrose/include/didss/ds_message.h \
-		$(HOME)/lrose/include/didss/DsURL.hh \
-		$(HOME)/lrose/include/toolsa/URL.hh \
-		$(HOME)/lrose/include/toolsa/Socket.hh \
-		$(HOME)/lrose/include/toolsa/SockUtil.hh \
-		$(HOME)/lrose/include/toolsa/DateTime.hh \
-		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
-		$(HOME)/lrose/include/toolsa/udatetime.h \
-		$(HOME)/lrose/include/toolsa/os_config.h \
-		$(HOME)/lrose/include/radar/BeamHeight.hh \
-		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
+		$(HOME)/lrose/include/Radx/Radx.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
+		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPacking.hh \
+		$(HOME)/lrose/include/Radx/RadxBuf.hh \
+		$(HOME)/lrose/include/Radx/RadxMsg.hh \
+		$(HOME)/lrose/include/Radx/RadxRemap.hh \
+		$(HOME)/lrose/include/Radx/RadxArray.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		VertWindow.hh \
 		VertWidget.hh \
+		$(HOME)/lrose/include/radar/BeamHeight.hh \
+		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		ScaledLabel.hh \
 		WorldPlot.hh \
 		$(HOME)/lrose/include/Mdv/MdvxProj.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx.hh \
+		$(HOME)/lrose/include/dataport/port_types.h \
+		$(HOME)/lrose/include/toolsa/DateTime.hh \
+		$(HOME)/lrose/include/toolsa/DeltaTime.hh \
+		$(HOME)/lrose/include/toolsa/udatetime.h \
+		$(HOME)/lrose/include/toolsa/os_config.h \
 		$(HOME)/lrose/include/toolsa/TaFile.hh \
 		$(HOME)/lrose/include/toolsa/file_io.h \
+		$(HOME)/lrose/include/toolsa/heartbeat.h \
+		$(HOME)/lrose/include/toolsa/MemBuf.hh \
 		$(HOME)/lrose/include/Mdv/MdvxTimeList.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_enums.hh \
 		$(HOME)/lrose/include/Mdv/Mdvx_typedefs.hh \
@@ -4293,7 +4024,11 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/toolsa/mem.h \
 		$(HOME)/lrose/include/toolsa/membuf.h \
 		$(HOME)/lrose/include/Mdv/DsMdvx.hh \
+		$(HOME)/lrose/include/didss/DsURL.hh \
+		$(HOME)/lrose/include/toolsa/URL.hh \
 		$(HOME)/lrose/include/toolsa/ThreadSocket.hh \
+		$(HOME)/lrose/include/toolsa/Socket.hh \
+		$(HOME)/lrose/include/toolsa/SockUtil.hh \
 		$(HOME)/lrose/include/Mdv/DsMdvxThreaded.hh \
 		ZoomBox.hh \
 		WayPts.hh \
@@ -4325,6 +4060,16 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/Mdv/MdvxVsectLut.hh \
 		$(HOME)/lrose/include/Mdv/MdvxRemapLut.hh \
 		$(HOME)/lrose/include/Fmq/RemoteUIQueue.hh \
+		$(HOME)/lrose/include/Fmq/DsFmq.hh \
+		$(HOME)/lrose/include/Fmq/Fmq.hh \
+		$(HOME)/lrose/include/toolsa/compress.h \
+		$(HOME)/lrose/include/Fmq/FmqDeviceFile.hh \
+		$(HOME)/lrose/include/Fmq/FmqDevice.hh \
+		$(HOME)/lrose/include/Fmq/FmqDeviceShmem.hh \
+		$(HOME)/lrose/include/Fmq/DsFmqMsg.hh \
+		$(HOME)/lrose/include/dsserver/DsServerMsg.hh \
+		$(HOME)/lrose/include/didss/DsMessage.hh \
+		$(HOME)/lrose/include/didss/ds_message.h \
 		$(HOME)/lrose/include/rapformats/coord_export.h \
 		cidd_data_io.h \
 		Product.hh \
@@ -4339,6 +4084,7 @@ VertWindow.o: VertWindow.cc CartManager.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
 		$(HOME)/lrose/include/Spdb/Symprod_typedefs.hh \
 		RenderContext.hh \
+		$(HOME)/lrose/include/qtplot/ColorMap.hh \
 		cidd_winds.h \
 		cidd_contours.h \
 		cidd_movies.h \
@@ -13918,9 +13664,6 @@ qrc_resources.o: qrc_resources.cpp
 
 moc_CartManager.o: moc_CartManager.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_CartManager.o moc_CartManager.cpp
-
-moc_DisplayManager.o: moc_DisplayManager.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_DisplayManager.o moc_DisplayManager.cpp
 
 moc_HorizWidget.o: moc_HorizWidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_HorizWidget.o moc_HorizWidget.cpp

@@ -47,7 +47,6 @@
 
 // #include "Args.hh"
 // #include "Params.hh"
-#include "DisplayManager.hh"
 #include "VlevelManager.hh"
 
 // #include "RayLoc.hh"
@@ -68,6 +67,8 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QHBoxLayout;
+class QVBoxLayout;
 class QDateTime;
 class QDateTimeEdit;
 class QFileDialog;
@@ -85,7 +86,7 @@ class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
 
-class CartManager : public DisplayManager {
+class CartManager : public QMainWindow {
   
   Q_OBJECT
 
@@ -127,6 +128,12 @@ public:
   void setArchiveMode(bool state);
   bool getArchiveMode() const { return _archiveMode; }
 
+  // get selected name and units
+
+  const string &getSelectedFieldLabel() const { return _selectedLabel; }
+  const string &getSelectedFieldName() const { return _selectedName; }
+  const string &getSelectedFieldUnits() const { return _selectedUnits; }
+
   // input file list for archive mode
 
   // void setArchiveFileList(const vector<string> &list,
@@ -160,12 +167,17 @@ signals:
 
 private:
 
+  int _mainTimerId;
+  bool _frozen;
+  
   int _timerEventCount;
   bool _guiSizeInitialized;
 
   static CartManager* m_pInstance;
   // // string _openFilePath;
 
+  // boundary editor
+  
   string _boundaryDir;
   void setBoundaryDir();
 
@@ -188,6 +200,15 @@ private:
   // // RadxTime _readerRayTime;
   // // RadxVol _vol;
 
+  // field
+  
+  int _fieldNum;
+  int _prevFieldNum;
+  string _selectedName;
+  string _selectedLabel;
+  string _selectedUnits;
+  QLabel *_valueLabel;
+
   // vlevels
 
   VlevelManager _vlevelManager;
@@ -195,6 +216,10 @@ private:
   QFrame *_vlevelFrame;
   QGroupBox *_vlevelPanel;
   vector<QRadioButton *> *_vlevelRButtons;
+
+  // main window frame
+
+  QFrame *_main;
 
   // horizontal view windows
 
@@ -233,6 +258,17 @@ private:
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showVertAct;
+
+  QAction *_exitAct;
+  QAction *_freezeAct;
+  QAction *_clearAct;
+  QAction *_zoomBackAct;
+  QAction *_reloadAct;
+  QAction *_showClickAct;
+  QAction *_showBoundaryEditorAct;
+  QAction *_howtoAct;
+  QAction *_aboutAct;
+  QAction *_aboutQtAct;
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
@@ -335,7 +371,7 @@ private:
 
   // set top bar
 
-  virtual void _setTitleBar();
+  void _setTitleBar();
   
   // local methods
 
@@ -389,10 +425,8 @@ private:
 
   void _createTimeControl();
 
-  // override howto and boundaryEditor
-
-  void _howto();
-
+  // check for status change
+  
   void _checkForFieldChange();
   void _handleFirstTimerEvent();
   void _readClickPoint();
@@ -405,18 +439,26 @@ private:
   void _checkWhatNeedsRendering(int frame_index);
   void _ciddTimerFunc(QTimerEvent *event);
        
+  // setting text
+
+  void _setText(char *text, size_t maxTextLen, const char *format, int val);
+  void _setText(char *text, size_t maxTextLen, const char *format, double val);
+  
 private slots:
 
   //////////////
   // Qt slots //
   //////////////
 
-  // override
-
-  virtual void _freeze();
-  virtual void _zoomBack();
-  virtual void _refresh();
-  virtual void _changeField(int fieldId, bool guiMode = true);
+  void _howto();
+  void _about();
+  void _showClick();
+  void _freeze();
+  void _zoomBack();
+  void _refresh();
+  // void _changeField(int fieldId, bool guiMode = true);
+  void _openFile();
+  void _saveFile();
 
   // vlevels
 
@@ -428,12 +470,14 @@ private slots:
 
   // local
 
+#ifdef NOTNOW
   void _horizLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _vertLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
+#endif
 
   // field menu
   
