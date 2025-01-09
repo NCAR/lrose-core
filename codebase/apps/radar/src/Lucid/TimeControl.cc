@@ -40,12 +40,12 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include "TimeControl.hh"
-#include "CartManager.hh"
+#include "GuiManager.hh"
 #include "cidd.h"
 
 // Constructor
 
-TimeControl::TimeControl(CartManager *parent,
+TimeControl::TimeControl(GuiManager *parent,
                          const Params &params) :
         QDialog(parent),
         _parent(parent),

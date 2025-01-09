@@ -28,7 +28,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartManager manages cartesian rendering - plan view
+// GuiManager manages cartesian rendering - plan view
 //
 ///////////////////////////////////////////////////////////////
 
@@ -90,7 +90,7 @@
 #include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
 
-#include "CartManager.hh"
+#include "GuiManager.hh"
 // #include "DisplayField.hh"
 #include "FieldTableItem.hh"
 #include "HorizWidget.hh"
@@ -109,16 +109,16 @@
 using namespace std;
 using namespace H5x;
 
-CartManager* CartManager::m_pInstance = NULL;
+GuiManager* GuiManager::m_pInstance = NULL;
 
-CartManager* CartManager::Instance()
+GuiManager* GuiManager::Instance()
 {
   return m_pInstance;
 }
 
 // Constructor
 
-CartManager::CartManager() :
+GuiManager::GuiManager() :
         _vlevelManager(),
         _vertWindowDisplayed(false)
 {
@@ -197,7 +197,7 @@ CartManager::CartManager() :
 
 // destructor
 
-CartManager::~CartManager()
+GuiManager::~GuiManager()
 
 {
 
@@ -214,7 +214,7 @@ CartManager::~CartManager()
 //////////////////////////////////////////////////
 // Run
 
-int CartManager::run(QApplication &app)
+int GuiManager::run(QApplication &app)
 {
 
   // make window visible
@@ -232,7 +232,7 @@ int CartManager::run(QApplication &app)
 //////////////////////////////////////////////////
 // enable the zoom button - called by PolarWidgets
 
-void CartManager::enableZoomButton() const
+void GuiManager::enableZoomButton() const
 {
   _zoomBackAct->setEnabled(true);
 }
@@ -240,7 +240,7 @@ void CartManager::enableZoomButton() const
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
-void CartManager::timerEvent(QTimerEvent *event)
+void GuiManager::timerEvent(QTimerEvent *event)
 {
 
   // register with procmap
@@ -342,7 +342,7 @@ void CartManager::timerEvent(QTimerEvent *event)
 ///////////////////////////////////////////////
 // override resize event
 
-void CartManager::resizeEvent(QResizeEvent *event)
+void GuiManager::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent, width, height: "
@@ -354,7 +354,7 @@ void CartManager::resizeEvent(QResizeEvent *event)
 }
 
 ////////////////////////////////////////////////////////////////
-void CartManager::keyPressEvent(QKeyEvent * e)
+void GuiManager::keyPressEvent(QKeyEvent * e)
 {
 
   // get key pressed
@@ -469,7 +469,7 @@ void CartManager::keyPressEvent(QKeyEvent * e)
 
 }
 
-void CartManager::_moveUpDown() 
+void GuiManager::_moveUpDown() 
 {
   this->setCursor(Qt::WaitCursor);
   // _plotArchiveData();
@@ -479,7 +479,7 @@ void CartManager::_moveUpDown()
 //////////////////////////////////////////////////
 // Set radar name in title bar
 
-void CartManager::_setTitleBar()
+void GuiManager::_setTitleBar()
 {
   string windowTitle = _params.horiz_frame_label;
   setWindowTitle(tr(windowTitle.c_str()));
@@ -488,7 +488,7 @@ void CartManager::_setTitleBar()
 //////////////////////////////////////////////////
 // set up windows and widgets
   
-void CartManager::_setupWindows()
+void GuiManager::_setupWindows()
 {
 
   // set up windows
@@ -525,16 +525,16 @@ void CartManager::_setupWindows()
 
 #ifdef NOTNOW
   connect(_horiz, &HorizWidget::locationClicked,
-          this, &CartManager::_horizLocationClicked);
+          this, &GuiManager::_horizLocationClicked);
   connect(_vert, &VertWidget::locationClicked,
-          this, &CartManager::_vertLocationClicked);
+          this, &GuiManager::_vertLocationClicked);
 #endif
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
   connect(_horiz, &HorizWidget::customContextMenuRequested,
-	  this, &CartManager::ShowContextMenu);
+	  this, &GuiManager::ShowContextMenu);
 
   // create status panel
 
@@ -575,7 +575,7 @@ void CartManager::_setupWindows()
   _setTitleBar();
   setMinimumSize(400, 400);
   // resize(_params.main_window_width, _params.main_window_height);
-  // connect(this, &CartManager::frameResized, _horiz, &HorizWidget::resize);
+  // connect(this, &GuiManager::frameResized, _horiz, &HorizWidget::resize);
   resize(_params.horiz_default_width, _params.horiz_default_height);
   
   // set location on screen
@@ -601,7 +601,7 @@ void CartManager::_setupWindows()
 //////////////////////////////////////////////////
 // add/remove  vlevel panel (archive mode only)
 
-// void CartManager::_setVlevelPanelVisibility()
+// void GuiManager::_setVlevelPanelVisibility()
 // {
 //   if (_vlevelPanel != NULL) {
 //     _vlevelPanel->setVisible(true);
@@ -611,49 +611,49 @@ void CartManager::_setupWindows()
 //////////////////////////////
 // create actions for menus
 
-void CartManager::_createActions()
+void GuiManager::_createActions()
 {
 
   // show field menu
   _showFieldMenuAct = new QAction(tr("Fields"), this);
   _showFieldMenuAct->setStatusTip(tr("Show field menu"));
   connect(_showFieldMenuAct, &QAction::triggered,
-          this, &CartManager::_showFieldMenu);
+          this, &GuiManager::_showFieldMenu);
   
   // freeze display
   _freezeAct = new QAction(tr("Freeze"), this);
   _freezeAct->setShortcut(tr("Esc"));
   _freezeAct->setStatusTip(tr("Freeze display"));
-  connect(_freezeAct, &QAction::triggered, this, &CartManager::_freeze);
+  connect(_freezeAct, &QAction::triggered, this, &GuiManager::_freeze);
   
   // show user click in dialog
   _showClickAct = new QAction(tr("Values"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
-  connect(_showClickAct, &QAction::triggered, this, &CartManager::_showClick);
+  connect(_showClickAct, &QAction::triggered, this, &GuiManager::_showClick);
 
   // show boundary editor dialog
   // _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
   // _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
-  // connect(_showBoundaryEditorAct, &QAction::triggered, this, &CartManager::showBoundaryEditor);
+  // connect(_showBoundaryEditorAct, &QAction::triggered, this, &GuiManager::showBoundaryEditor);
   
   // show time control window
   _showTimeControlAct = new QAction(tr("Movie"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
   connect(_showTimeControlAct, &QAction::triggered,
-          this, &CartManager::_showTimeControl);
+          this, &GuiManager::_showTimeControl);
   
   // unzoom display
   
   // _zoomBackAct = new QAction(tr("Back"), this);
   // _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
   // _zoomBackAct->setEnabled(false);
-  // connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
+  // connect(_zoomBackAct, &QAction::triggered, this, &GuiManager::_zoomBack);
 
   // reload data
   
   _reloadAct = new QAction(tr("Reload"), this);
   _reloadAct->setStatusTip(tr("Reload data"));
-  connect(_reloadAct, &QAction::triggered, this, &CartManager::_refresh);
+  connect(_reloadAct, &QAction::triggered, this, &GuiManager::_refresh);
 
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
@@ -665,19 +665,19 @@ void CartManager::_createActions()
   _exitAct = new QAction(tr("E&xit"), this);
   _exitAct->setShortcut(tr("Ctrl+Q"));
   _exitAct->setStatusTip(tr("Exit the application"));
-  connect(_exitAct, &QAction::triggered, this, &CartManager::close);
+  connect(_exitAct, &QAction::triggered, this, &GuiManager::close);
 
   // file chooser for Open
   _openFileAct = new QAction(tr("O&pen"), this);
   _openFileAct->setShortcut(tr("Ctrl+F"));
   _openFileAct->setStatusTip(tr("Open File"));
-  connect(_openFileAct, &QAction::triggered, this, &CartManager::_openFile);
+  connect(_openFileAct, &QAction::triggered, this, &GuiManager::_openFile);
 
   // file chooser for Save
   _saveFileAct = new QAction(tr("S&ave"), this);
   //_saveFileAct->setShortcut(tr("Ctrl+S"));
   _saveFileAct->setStatusTip(tr("Save File"));
-  connect(_saveFileAct, &QAction::triggered, this, &CartManager::_saveFile);
+  connect(_saveFileAct, &QAction::triggered, this, &GuiManager::_saveFile);
 
   // show range rings
 
@@ -713,11 +713,11 @@ void CartManager::_createActions()
   
   _howtoAct = new QAction(tr("Howto"), this);
   _howtoAct->setStatusTip(tr("Show the application's Howto box"));
-  connect(_howtoAct, &QAction::triggered, this, &CartManager::_howto);
+  connect(_howtoAct, &QAction::triggered, this, &GuiManager::_howto);
 
   _aboutAct = new QAction(tr("About"), this);
   _aboutAct->setStatusTip(tr("Show the application's About box"));
-  connect(_aboutAct, &QAction::triggered, this, &CartManager::_about);
+  connect(_aboutAct, &QAction::triggered, this, &GuiManager::_about);
 
   _aboutQtAct = new QAction(tr("About &Qt"), this);
   _aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
@@ -727,14 +727,14 @@ void CartManager::_createActions()
   
   _saveImageAct = new QAction(tr("Save-Image"), this);
   _saveImageAct->setStatusTip(tr("Save image to png file"));
-  connect(_saveImageAct, &QAction::triggered, this, &CartManager::_saveImageToFile);
+  connect(_saveImageAct, &QAction::triggered, this, &GuiManager::_saveImageToFile);
 
 }
 
 ////////////////
 // create menus
 
-void CartManager::_createMenus()
+void GuiManager::_createMenus()
 {
 
   // file menu
@@ -797,7 +797,7 @@ void CartManager::_createMenus()
 /////////////////////////////////////////////////////////////
 // populate maps menu
 
-void CartManager::_populateMapsMenu()
+void GuiManager::_populateMapsMenu()
 {
 
   // maps enabled
@@ -808,7 +808,7 @@ void CartManager::_populateMapsMenu()
   _mapsEnabledAct->setCheckable(true);
   _mapsEnabledAct->setChecked(_mapsEnabled);
   connect(_mapsEnabledAct, &QAction::toggled,
-	  this, &CartManager::_setMapsEnabled);
+	  this, &GuiManager::_setMapsEnabled);
 
   _mapsMenu->addAction(_mapsEnabledAct);
   _mapsMenu->addSeparator();
@@ -849,7 +849,7 @@ void CartManager::_populateMapsMenu()
 ////////////////////////////////////////////////////////////
 // enable maps
 
-void CartManager::_setMapsEnabled(bool enable)
+void GuiManager::_setMapsEnabled(bool enable)
 {
   _mapsEnabled = enable;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -860,7 +860,7 @@ void CartManager::_setMapsEnabled(bool enable)
 /////////////////////////////////////////////////////////////
 // populate products menu
 
-void CartManager::_populateProductsMenu()
+void GuiManager::_populateProductsMenu()
 {
 
   // products enabled
@@ -871,7 +871,7 @@ void CartManager::_populateProductsMenu()
   _productsEnabledAct->setCheckable(true);
   _productsEnabledAct->setChecked(_productsEnabled);
   connect(_productsEnabledAct, &QAction::toggled,
-	  this, &CartManager::_setProductsEnabled);
+	  this, &GuiManager::_setProductsEnabled);
 
   _productsMenu->addAction(_productsEnabledAct);
   _productsMenu->addSeparator();
@@ -913,7 +913,7 @@ void CartManager::_populateProductsMenu()
 ////////////////////////////////////////////////////////////
 // enable products
 
-void CartManager::_setProductsEnabled(bool enable)
+void GuiManager::_setProductsEnabled(bool enable)
 {
   _productsEnabled = enable;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -924,7 +924,7 @@ void CartManager::_setProductsEnabled(bool enable)
 /////////////////////////////////////////////////////////////
 // populate winds menu
 
-void CartManager::_populateWindsMenu()
+void GuiManager::_populateWindsMenu()
 {
 
   // winds enabled
@@ -935,7 +935,7 @@ void CartManager::_populateWindsMenu()
   _windsEnabledAct->setCheckable(true);
   _windsEnabledAct->setChecked(_windsEnabled);
   connect(_windsEnabledAct, &QAction::toggled,
-	  this, &CartManager::_setWindsEnabled);
+	  this, &GuiManager::_setWindsEnabled);
 
   _windsMenu->addAction(_windsEnabledAct);
   _windsMenu->addSeparator();
@@ -976,7 +976,7 @@ void CartManager::_populateWindsMenu()
 ////////////////////////////////////////////////////////////
 // enable winds
 
-void CartManager::_setWindsEnabled(bool enable)
+void GuiManager::_setWindsEnabled(bool enable)
 {
   _windsEnabled = enable;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -988,7 +988,7 @@ void CartManager::_setWindsEnabled(bool enable)
 // populate zooms menu
 // this is exclusive - only 1 item selected at a time
 
-void CartManager::_populateZoomsMenu()
+void GuiManager::_populateZoomsMenu()
 {
 
   _zoomsActionGroup = new QActionGroup(_zoomsMenu);
@@ -998,7 +998,7 @@ void CartManager::_populateZoomsMenu()
   _zoomBackAct = new QAction(tr("Zoom back"), this);
   _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
   _zoomBackAct->setEnabled(false);
-  connect(_zoomBackAct, &QAction::triggered, this, &CartManager::_zoomBack);
+  connect(_zoomBackAct, &QAction::triggered, this, &GuiManager::_zoomBack);
   _zoomsMenu->addAction(_zoomBackAct);
   
   // loop through zoom entries
@@ -1048,7 +1048,7 @@ void CartManager::_populateZoomsMenu()
 /////////////////////////////////////////////////////////////
 // populate overlays menu
 
-void CartManager::_populateOverlaysMenu()
+void GuiManager::_populateOverlaysMenu()
 {
 
   _overlaysMenu->addAction(_ringsAct);
@@ -1063,7 +1063,7 @@ void CartManager::_populateOverlaysMenu()
 // create the vlevel panel
 // buttons will be filled in by createVlevelRadioButtons()
 
-void CartManager::_createVlevelFrame()
+void GuiManager::_createVlevelFrame()
 {
   
   _vlevelFrame = new QFrame(_main);
@@ -1085,7 +1085,7 @@ void CartManager::_createVlevelFrame()
 // create radio buttons
 // this requires that _vlevelManager is up to date with vlevel info
 
-void CartManager::_createVlevelRadioButtons() 
+void GuiManager::_createVlevelRadioButtons() 
 {
 
   // clear previous
@@ -1139,7 +1139,7 @@ void CartManager::_createVlevelRadioButtons()
 ///////////////////////////////////////////////////////////////////
 // create vlevel panel of radio buttons
 
-void CartManager::_clearVlevelRadioButtons() 
+void GuiManager::_clearVlevelRadioButtons() 
 {
   
   QLayoutItem* child;
@@ -1158,10 +1158,10 @@ void CartManager::_clearVlevelRadioButtons()
 /////////////////////////////////////////////////////////////
 // change vlevel
 
-void CartManager::_changeVlevel(bool value) {
+void GuiManager::_changeVlevel(bool value) {
   
   if (_params.debug) {
-    cerr << "From CartManager: the vlevel was changed ";
+    cerr << "From GuiManager: the vlevel was changed ";
     cerr << endl;
   }
   
@@ -1200,7 +1200,7 @@ void CartManager::_changeVlevel(bool value) {
 // value = +1 move forward
 // value = -1 move backward in vlevels
 
-void CartManager::_changeVlevelRadioButton(int increment)
+void GuiManager::_changeVlevelRadioButton(int increment)
 
 {
   
@@ -1219,7 +1219,7 @@ void CartManager::_changeVlevelRadioButton(int increment)
 /////////////////////////////
 // get data in realtime mode
 
-void CartManager::_handleRealtimeData(QTimerEvent * event)
+void GuiManager::_handleRealtimeData(QTimerEvent * event)
 
 {
 
@@ -1231,7 +1231,7 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
 ///////////////////////////////////////
 // set input file list for archive mode
 
-// void CartManager::setArchiveFileList(const vector<string> &list,
+// void GuiManager::setArchiveFileList(const vector<string> &list,
 //                                      bool fromCommandLine /* = true */)
 // {
 
@@ -1296,7 +1296,7 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
 // // get archive file list by searching for files
 // // returns 0 on success, -1 on failure
 
-// int CartManager::loadArchiveFileList()
+// int GuiManager::loadArchiveFileList()
 
 // {
 //   return 0;
@@ -1306,7 +1306,7 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
 //////////////////////////////////////
 // handle data in archive mode
 
-void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
+void GuiManager::_handleArchiveData(/*QTimerEvent * event*/)
 
 {
   
@@ -1362,7 +1362,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
-// int CartManager::_getArchiveData()
+// int GuiManager::_getArchiveData()
 
 // {
 
@@ -1385,7 +1385,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
     
 //     if (file.readFromPath(inputPath, _vol)) {
 //       string errMsg = "ERROR - Cannot retrieve archive data\n";
-//       errMsg += "CartManager::_getArchiveData\n";
+//       errMsg += "GuiManager::_getArchiveData\n";
 //       errMsg += file.getErrStr() + "\n";
 //       errMsg += "  path: " + inputPath + "\n";
 //       cerr << errMsg;
@@ -1440,11 +1440,11 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 // apply new, edited  data in archive mode
 // the volume has been updated 
 
-// void CartManager::_applyDataEdits()
+// void GuiManager::_applyDataEdits()
 // {
 
 //   if (_params.debug) {
-//     std::ofstream outfile("/tmp/voldebug_CartManager_applyDataEdits.txt");
+//     std::ofstream outfile("/tmp/voldebug_GuiManager_applyDataEdits.txt");
 //     _vol.printWithFieldData(outfile);  
 //     outfile << "_vol = " << &_vol << endl;
 //   }
@@ -1455,7 +1455,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 /////////////////////////////
 // plot data in archive mode
 
-// void CartManager::_plotArchiveData()
+// void GuiManager::_plotArchiveData()
 
 // {
 
@@ -1481,7 +1481,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 //////////////////////////////////////////////////
 // set up read
 
-// void CartManager::_setupVolRead(RadxFile &file)
+// void GuiManager::_setupVolRead(RadxFile &file)
 // {
 
 //   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1502,7 +1502,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 //////////////////////////////////////////////////////////////
 // handle an incoming ray
 
-// void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
+// void GuiManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 // {
 
@@ -1639,7 +1639,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 ///////////////////////////////////////////////////////////
 // store ray location
 
-// void CartManager::_storeRayLoc(const RadxRay *ray, 
+// void GuiManager::_storeRayLoc(const RadxRay *ray, 
 //                                const double az,
 //                                const double beam_width)
 // {
@@ -1746,7 +1746,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 ///////////////////////////////////////////////////////////
 // clear any locations that are overlapped by the given ray
 
-// void CartManager::_clearRayOverlap(const int start_index, const int end_index)
+// void GuiManager::_clearRayOverlap(const int start_index, const int end_index)
 // {
 
 // #ifdef NOTNOW
@@ -1894,7 +1894,7 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 ////////////////////////////////////////////
 // freeze / unfreeze
 
-void CartManager::_freeze()
+void GuiManager::_freeze()
 {
   if (_frozen) {
     _frozen = false;
@@ -1910,7 +1910,7 @@ void CartManager::_freeze()
 ////////////////////////////////////////////
 // unzoom
 
-void CartManager::_zoomBack()
+void GuiManager::_zoomBack()
 {
   _horiz->zoomBackView();
   if (_horiz->getSavedZooms().size() == 0) {
@@ -1922,7 +1922,7 @@ void CartManager::_zoomBack()
 ////////////////////////////////////////////
 // refresh
 
-void CartManager::_refresh()
+void GuiManager::_refresh()
 {
   if (_horiz) {
     _horiz->update();
@@ -1932,10 +1932,10 @@ void CartManager::_refresh()
 ////////////////////////////////////////////////////////
 // handle params file
 
-void CartManager::_openFile() {
+void GuiManager::_openFile() {
 }
 
-void CartManager::_saveFile() {
+void GuiManager::_saveFile() {
 }
 
 
@@ -1943,7 +1943,7 @@ void CartManager::_saveFile() {
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
-void CartManager::_changeField(int fieldId, bool guiMode)
+void GuiManager::_changeField(int fieldId, bool guiMode)
 
 {
 
@@ -1983,8 +1983,8 @@ void CartManager::_changeField(int fieldId, bool guiMode)
   char text[128];
   if (_selectedField->getSelectValue() > -9990) {
     snprintf(text, 128, "%g %s", 
-            _selectedField->getSelectValue(),
-            _selectedField->getUnits().c_str());
+             _selectedField->getSelectValue(),
+             _selectedField->getUnits().c_str());
   } else {
     text[0] = '\0';
   }
@@ -1997,11 +1997,11 @@ void CartManager::_changeField(int fieldId, bool guiMode)
 
 #ifdef NOTYET
 // TODO: need to add the background changed, etc. 
-void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-                                           QColor gridColor,
-                                           QColor emphasisColor,
-                                           QColor annotationColor,
-                                           QColor backgroundColor) {
+void GuiManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
+                                          QColor gridColor,
+                                          QColor emphasisColor,
+                                          QColor annotationColor,
+                                          QColor backgroundColor) {
 
   LOG(DEBUG_VERBOSE) << "enter";
 
@@ -2037,7 +2037,7 @@ void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMa
   LOG(DEBUG_VERBOSE) << "exit";
 }
 
-void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
+void GuiManager::setVolume() { // const RadxVol &radarDataVolume) {
 
   LOG(DEBUG_VERBOSE) << "enter";
 
@@ -2055,8 +2055,8 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 ///////////////////////////////////////////////////
 // respond to a change in click location on the HORIZ
 
-void CartManager::_horizLocationClicked(double xkm, double ykm, 
-                                        const RadxRay *closestRay)
+void GuiManager::_horizLocationClicked(double xkm, double ykm, 
+                                       const RadxRay *closestRay)
 
 {
 
@@ -2100,8 +2100,8 @@ void CartManager::_horizLocationClicked(double xkm, double ykm,
 ///////////////////////////////////////////////////
 // respond to a change in click location on the VERT
 
-void CartManager::_vertLocationClicked(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
+void GuiManager::_vertLocationClicked(double xkm, double ykm, 
+                                      const RadxRay *closestRay)
   
 {
 
@@ -2112,13 +2112,13 @@ void CartManager::_vertLocationClicked(double xkm, double ykm,
 ////////////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-void CartManager::_locationClicked(double xkm, double ykm,
-                                   const RadxRay *ray)
+void GuiManager::_locationClicked(double xkm, double ykm,
+                                  const RadxRay *ray)
   
 {
 
   if (_params.debug) {
-    cerr << "*** Entering CartManager::_locationClicked()" << endl;
+    cerr << "*** Entering GuiManager::_locationClicked()" << endl;
   }
   
   double rangeKm = sqrt(xkm * xkm + ykm * ykm);
@@ -2144,12 +2144,12 @@ void CartManager::_locationClicked(double xkm, double ykm,
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
   snprintf(text, 256, "%.4d/%.2d/%.2d",
-          rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
+           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
   _dateClicked->setText(text);
 
   snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
-          rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) (ray->getNanoSecs() / 1000000)));
+           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+           ((int) (ray->getNanoSecs() / 1000000)));
   _timeClicked->setText(text);
   
   _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
@@ -2238,9 +2238,9 @@ void CartManager::_locationClicked(double xkm, double ykm,
 //////////////////////////////////////////////
 // get size of table widget
 
-QSize CartManager::_getTableWidgetSize(QTableWidget *t,
-                                       bool includeVertHeader,
-                                       bool includeHorizHeader)
+QSize GuiManager::_getTableWidgetSize(QTableWidget *t,
+                                      bool includeVertHeader,
+                                      bool includeHorizHeader)
 {
   int w = 4;
   if (includeVertHeader) {
@@ -2262,7 +2262,7 @@ QSize CartManager::_getTableWidgetSize(QTableWidget *t,
 //////////////////////////////////////////////
 // create the field menu
 
-void CartManager::_createFieldMenu()
+void GuiManager::_createFieldMenu()
 {
 
   // top-level
@@ -2345,7 +2345,7 @@ void CartManager::_createFieldMenu()
 /////////////////////////////////////
 // show the field menu
 
-void CartManager::_showFieldMenu()
+void GuiManager::_showFieldMenu()
 {
 
   if (_fieldMenu) {
@@ -2363,7 +2363,7 @@ void CartManager::_showFieldMenu()
 /////////////////////////////////////
 // place the field menu
 
-void CartManager::_placeFieldMenu()
+void GuiManager::_placeFieldMenu()
 {
   if (_fieldMenu) {
     if (!_fieldMenuPlaced) {
@@ -2384,7 +2384,7 @@ void CartManager::_placeFieldMenu()
 //////////////////////////////////////////////
 // create the time panel
 
-void CartManager::_createTimeControl()
+void GuiManager::_createTimeControl()
 {
   
   _timeControl = new TimeControl(this, _params);
@@ -2395,7 +2395,7 @@ void CartManager::_createTimeControl()
 /////////////////////////////////////
 // show the time controller dialog
 
-void CartManager::_showTimeControl()
+void GuiManager::_showTimeControl()
 {
 
   if (_timeControl) {
@@ -2413,7 +2413,7 @@ void CartManager::_showTimeControl()
 /////////////////////////////////////
 // place the time controller dialog
 
-void CartManager::_placeTimeControl()
+void GuiManager::_placeTimeControl()
 {
   if (_timeControl) {
     if (!_timeControlPlaced) {
@@ -2434,7 +2434,7 @@ void CartManager::_placeTimeControl()
 
 // BoundaryEditor circle (radius) slider has changed value
 
-void CartManager::_circleRadiusSliderValueChanged(int value)
+void GuiManager::_circleRadiusSliderValueChanged(int value)
 {
   //returns true if existing circle was resized with this new radius
   // if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
@@ -2444,7 +2444,7 @@ void CartManager::_circleRadiusSliderValueChanged(int value)
 
 // BoundaryEditor brush (size) slider has changed value
 
-void CartManager::_brushRadiusSliderValueChanged(int value)
+void GuiManager::_brushRadiusSliderValueChanged(int value)
 {
   // BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
@@ -2452,7 +2452,7 @@ void CartManager::_brushRadiusSliderValueChanged(int value)
 // set the directory (_boundaryDir) into which boundary
 // files will be read/written for current radar file (_openFilePath)
 
-void CartManager::setBoundaryDir()
+void GuiManager::setBoundaryDir()
 {
   // if (!_openFilePath.empty()) {
   //   _boundaryDir =
@@ -2466,7 +2466,7 @@ void CartManager::setBoundaryDir()
 /////////////////////////////////////
 // clear display widgets
 
-void CartManager::_clear()
+void GuiManager::_clear()
 {
   if (_horiz) {
     _horiz->clear();
@@ -2479,7 +2479,7 @@ void CartManager::_clear()
 /////////////////////////////////////
 // set archive mode
 
-void CartManager::setArchiveMode(bool state)
+void GuiManager::setArchiveMode(bool state)
 {
 
   // _setSweepPanelVisibility();
@@ -2509,7 +2509,7 @@ void CartManager::setArchiveMode(bool state)
 /////////////////////////////////////
 // activate realtime rendering
 
-void CartManager::_activateRealtimeRendering()
+void GuiManager::_activateRealtimeRendering()
 {
   // _nGates = 1000;
   // _maxRangeKm = 1000;
@@ -2525,7 +2525,7 @@ void CartManager::_activateRealtimeRendering()
 /////////////////////////////////////
 // activate archive rendering
 
-void CartManager::_activateArchiveRendering()
+void GuiManager::_activateArchiveRendering()
 {
   _clear();
   if (_horiz) {
@@ -2539,7 +2539,7 @@ void CartManager::_activateArchiveRendering()
 /////////////////////////////////////////////////////
 // creating image files in realtime mode
 
-void CartManager::_createRealtimeImageFiles()
+void GuiManager::_createRealtimeImageFiles()
 {
 
   // int interval = _params.images_schedule_interval_secs;
@@ -2586,7 +2586,7 @@ void CartManager::_createRealtimeImageFiles()
 /////////////////////////////////////////////////////
 // creating image files in archive mode
 
-void CartManager::_createArchiveImageFiles()
+void GuiManager::_createArchiveImageFiles()
 {
 
   if (_params.images_creation_mode ==
@@ -2636,7 +2636,7 @@ void CartManager::_createArchiveImageFiles()
 /////////////////////////////////////////////////////
 // creating one image per field, for each level
 
-void CartManager::_createImageFilesAllLevels()
+void GuiManager::_createImageFilesAllLevels()
 {
   
   // if (_params.images_set_sweep_index_list) {
@@ -2663,11 +2663,11 @@ void CartManager::_createImageFilesAllLevels()
 /////////////////////////////////////////////////////
 // creating one image per field
 
-void CartManager::_createImageFiles()
+void GuiManager::_createImageFiles()
 {
 
   if (_params.debug) {
-    cerr << "CartManager::_createImageFiles()" << endl;
+    cerr << "GuiManager::_createImageFiles()" << endl;
   }
 
   PMU_auto_register("createImageFiles");
@@ -2726,7 +2726,7 @@ void CartManager::_createImageFiles()
 
 }
 
-string CartManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
+string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
   // set times from plots
   if (_vertMode) {
@@ -2751,7 +2751,7 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
 
   if (ta_makedir_recurse(outputDir.c_str())) {
     string errmsg("Cannot create output dir: " + outputDir);
-    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
+    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
       QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -2783,19 +2783,19 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
     char timeStr[1024];
     if (_params.images_include_seconds_in_time_part) {
       snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d%.2d",
-              _plotStartTime.getYear(),
-              _plotStartTime.getMonth(),
-              _plotStartTime.getDay(),
-              _plotStartTime.getHour(),
-              _plotStartTime.getMin(),
-              _plotStartTime.getSec());
+               _plotStartTime.getYear(),
+               _plotStartTime.getMonth(),
+               _plotStartTime.getDay(),
+               _plotStartTime.getHour(),
+               _plotStartTime.getMin(),
+               _plotStartTime.getSec());
     } else {
       snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d",
-              _plotStartTime.getYear(),
-              _plotStartTime.getMonth(),
-              _plotStartTime.getDay(),
-              _plotStartTime.getHour(),
-              _plotStartTime.getMin());
+               _plotStartTime.getYear(),
+               _plotStartTime.getMonth(),
+               _plotStartTime.getDay(),
+               _plotStartTime.getHour(),
+               _plotStartTime.getMin());
     }
     fileName += timeStr;
   }
@@ -2845,7 +2845,7 @@ string CartManager::_getOutputPath(bool interactive, string &outputDir, string f
 // If interactive is true, use dialog boxes to indicate errors or report
 // where the image was saved.
 
-void CartManager::_saveImageToFile(bool interactive)
+void GuiManager::_saveImageToFile(bool interactive)
 {
 
   cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
@@ -2865,7 +2865,7 @@ void CartManager::_saveImageToFile(bool interactive)
   // write the file
   if (!image.save(outputPath.c_str())) {
     string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
+    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
       QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -2901,7 +2901,7 @@ void CartManager::_saveImageToFile(bool interactive)
     ldataInfo.setRelDataPath(relPath);
     
     if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
+      cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
       cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
       return;
     }
@@ -2912,14 +2912,14 @@ void CartManager::_saveImageToFile(bool interactive)
 
 
 
-void CartManager::ShowContextMenu(const QPoint &pos) {
+void GuiManager::ShowContextMenu(const QPoint &pos) {
   _horiz->ShowContextMenu(pos /*, &_vol*/);
 }
 
 
 #ifdef NOTNOW
 // Creates the boundary editor dialog and associated event slots
-void CartManager::_createBoundaryEditorDialog()
+void GuiManager::_createBoundaryEditorDialog()
 {
   _boundaryEditorDialog = new QDialog(this);
   _boundaryEditorDialog->setMaximumHeight(368);
@@ -2948,7 +2948,7 @@ void CartManager::_createBoundaryEditorDialog()
   _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
   connect(_boundaryEditorPolygonBtn, &QPushButton::clicked,
-          this, &CartManager::polygonBtnBoundaryEditorClick);
+          this, &GuiManager::polygonBtnBoundaryEditorClick);
 
   _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorCircleBtn->setMaximumWidth(130);
@@ -2958,7 +2958,7 @@ void CartManager::_createBoundaryEditorDialog()
   _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
   connect(_boundaryEditorCircleBtn, &QPushButton::clicked,
-          this, &CartManager::circleBtnBoundaryEditorClick());
+          this, &GuiManager::circleBtnBoundaryEditorClick());
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
   _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -2973,7 +2973,7 @@ void CartManager::_createBoundaryEditorDialog()
   _circleRadiusSlider->setMaximum(200);
   _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
   connect(_circleRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &CartManager::_circleRadiusSliderValueChanged(int));
+          this, &GuiManager::_circleRadiusSliderValueChanged(int));
 
   _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorBrushBtn->setMaximumWidth(130);
@@ -2983,7 +2983,7 @@ void CartManager::_createBoundaryEditorDialog()
   _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
   connect(_boundaryEditorBrushBtn, &QPushButton::clicked,
-          this, &CartManager::brushBtnBoundaryEditorClick());
+          this, &GuiManager::brushBtnBoundaryEditorClick());
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
   _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -2998,7 +2998,7 @@ void CartManager::_createBoundaryEditorDialog()
   _brushRadiusSlider->setMaximum(75);
   _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
   connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &CartManager::_brushRadiusSliderValueChanged(int));
+          this, &GuiManager::_brushRadiusSliderValueChanged(int));
 
   _boundaryEditorBrushBtn->setChecked(TRUE);
   _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog),
@@ -3022,7 +3022,7 @@ void CartManager::_createBoundaryEditorDialog()
   _boundaryEditorList->insertItem(0, newItem1);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
   connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)),
-          this, &CartManager::onBoundaryEditorListItemClicked(QListWidgetItem*));
+          this, &GuiManager::onBoundaryEditorListItemClicked(QListWidgetItem*));
 
   // horizontal layout contains the "Clear", "Help", and "Save" buttons
   QHBoxLayout *hLayout = new QHBoxLayout;
@@ -3032,13 +3032,13 @@ void CartManager::_createBoundaryEditorDialog()
   _boundaryEditorClearBtn->setText("Clear");
   hLayout->addWidget(_boundaryEditorClearBtn);
   connect(_boundaryEditorClearBtn, &QPushButton::clicked,
-          this, &CartManager::clearBoundaryEditorClick());
+          this, &GuiManager::clearBoundaryEditorClick());
 
   _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorHelpBtn->setText("Help");
   hLayout->addWidget(_boundaryEditorHelpBtn);
   connect(_boundaryEditorHelpBtn, &QPushButton::clicked,
-          this, &CartManager::helpBoundaryEditorClick());
+          this, &GuiManager::helpBoundaryEditorClick());
   
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
   _boundaryEditorSaveBtn->setText("Save");
@@ -3051,7 +3051,7 @@ void CartManager::_createBoundaryEditorDialog()
 /////////////////////////////////////////////////////////
 // check for field change
 
-void CartManager::_checkForFieldChange()
+void GuiManager::_checkForFieldChange()
 {
 
   if (_fieldTable == NULL) {
@@ -3099,7 +3099,7 @@ void CartManager::_checkForFieldChange()
 /////////////////////////////////////////////////////////
 // handle first time event
 
-void CartManager::_handleFirstTimerEvent()
+void GuiManager::_handleFirstTimerEvent()
 {
 
   cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
@@ -3133,7 +3133,7 @@ void CartManager::_handleFirstTimerEvent()
 /////////////////////////////////////////////////////////
 // read click point from FMQ - i.e. from another app
 
-void CartManager::_readClickPoint()
+void GuiManager::_readClickPoint()
 {
 
 #ifdef NOTNOW
@@ -3160,7 +3160,7 @@ void CartManager::_readClickPoint()
  * HANDLE_CLIENT_EVENT: 
  */
 
-void CartManager::_handleClientEvent()
+void GuiManager::_handleClientEvent()
 {
 
   time_t clock;
@@ -3258,7 +3258,7 @@ void CartManager::_handleClientEvent()
  * the data's expiration time has been exceeded - Mark it invalid if so.
  */
 
-void CartManager::_checkForExpiredData(time_t tm)
+void GuiManager::_checkForExpiredData(time_t tm)
 {
   int i;
 
@@ -3299,7 +3299,7 @@ void CartManager::_checkForExpiredData(time_t tm)
  * new data has arrived - Mark it invalid if so.
  */
 
-void CartManager::_checkForDataUpdates(time_t tm)
+void GuiManager::_checkForDataUpdates(time_t tm)
 {
   DmapAccess dmap;
   int i,j;
@@ -3400,7 +3400,7 @@ void CartManager::_checkForDataUpdates(time_t tm)
 ////////////////////////////////////////////////////////////////// 
 // _checkWhatNeedsRendering:
 
-void CartManager::_checkWhatNeedsRendering(int frame_index)
+void GuiManager::_checkWhatNeedsRendering(int frame_index)
 {
   int i;
   
@@ -3496,7 +3496,7 @@ void CartManager::_checkWhatNeedsRendering(int frame_index)
  *
  */
 
-void CartManager::_ciddTimerFunc(QTimerEvent *event)
+void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 {
 
   MetRecord *mr;
@@ -3525,10 +3525,10 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
     if(!_params.run_once_and_exit) {
       char buf[128];
       snprintf(buf,128,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
-              (int) (cur_tm.tv_sec - gd.last_event_time),
-              gd.io_info.outstanding_request,
-              gd.io_info.mode,
-              gd.io_info.request_type);
+               (int) (cur_tm.tv_sec - gd.last_event_time),
+               gd.io_info.outstanding_request,
+               gd.io_info.mode,
+               gd.io_info.request_type);
       if(gd.debug || gd.debug1 || gd.debug2) {
         PMU_force_register(buf);
       } else {
@@ -4098,10 +4098,10 @@ void CartManager::_ciddTimerFunc(QTimerEvent *event)
 ///////////////////////////////////////////
 // set text for GUI panels
 
-void CartManager::_setText(char *text,
-                           size_t maxTextLen,
-                           const char *format,
-                           int val)
+void GuiManager::_setText(char *text,
+                          size_t maxTextLen,
+                          const char *format,
+                          int val)
 {
   if (abs(val) < 9999) {
     snprintf(text, maxTextLen, format, val);
@@ -4110,10 +4110,10 @@ void CartManager::_setText(char *text,
   }
 }
 
-void CartManager::_setText(char *text,
-                           size_t maxTextLen,
-                           const char *format,
-                           double val)
+void GuiManager::_setText(char *text,
+                          size_t maxTextLen,
+                          const char *format,
+                          double val)
 {
   if (fabs(val) < 9999) {
     snprintf(text, maxTextLen, format, val);
@@ -4125,7 +4125,7 @@ void CartManager::_setText(char *text,
 /////////////////////////////
 // show data at click point
 
-void CartManager::_showClick()
+void GuiManager::_showClick()
 {
 #ifdef NOTNOW
   if (_clickReportDialog) {
@@ -4149,7 +4149,7 @@ void CartManager::_showClick()
 /////////////////////////////////////////////////////
 // howto help
 
-void CartManager::_howto()
+void GuiManager::_howto()
 {
   string text;
   text += "HOWTO HINTS FOR Lucid\n";
@@ -4165,7 +4165,7 @@ void CartManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
-void CartManager::_about()
+void GuiManager::_about()
 {
 
   //QMessageBox::about(this, tr("About Menu"),

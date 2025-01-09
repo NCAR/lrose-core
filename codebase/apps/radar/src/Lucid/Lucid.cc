@@ -37,7 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Lucid.hh"
-#include "CartManager.hh"
+#include "GuiManager.hh"
 #include "LegacyParams.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
@@ -62,7 +62,7 @@ Lucid::Lucid(int argc, char **argv) :
 {
 
   OK = true;
-  _cartManager = NULL;
+  _guiManager = NULL;
 
   // set programe name
 
@@ -179,8 +179,8 @@ Lucid::~Lucid()
 
 {
 
-  if (_cartManager) {
-    delete _cartManager;
+  if (_guiManager) {
+    delete _guiManager;
   }
 
   // if (_bscanManager) {
@@ -204,8 +204,8 @@ int Lucid::RunApp(QApplication &app)
 
   // create cartesian display
   
-  _cartManager = new CartManager;
-  return _cartManager->run(app);
+  _guiManager = new GuiManager;
+  return _guiManager->run(app);
   
 }
 

@@ -15,7 +15,7 @@ RESOURCES = resources.qrc
 # RESOURCES = customcompleter.qrc
 
 HEADERS += Args.hh
-HEADERS += CartManager.hh
+HEADERS += GuiManager.hh
 HEADERS += Cdraw_P.hh
 HEADERS += Cgui_P.hh
 HEADERS += Cimages_P.hh
@@ -69,7 +69,7 @@ HEADERS += cidd_windows.h
 HEADERS += cidd_winds.h
 
 SOURCES += Args.cc
-SOURCES += CartManager.cc
+SOURCES += GuiManager.cc
 SOURCES += Cdraw_P.cc
 SOURCES += Cgui_P.cc
 SOURCES += Cimages_P.cc

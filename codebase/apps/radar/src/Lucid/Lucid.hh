@@ -47,7 +47,7 @@
 #include "Params.hh"
 
 class QApplication;
-class CartManager;
+class GuiManager;
 
 class Lucid : public QObject {
 
@@ -85,7 +85,7 @@ private:
 
   // managing the rendering objects
 
-  CartManager *_cartManager;
+  GuiManager *_guiManager;
   
   // methods
 

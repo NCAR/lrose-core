@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// CartManager.hh
+// GuiManager.hh
 //
-// CartManager object
+// GuiManager object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,15 +32,15 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartManager manages polar data gathering and dissemination
+// GuiManager manages polar data gathering and dissemination
 // for HORIZs and VERTs
 //
 // Rendering is delegated to HorizWidget and VertWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef CartManager_HH
-#define CartManager_HH
+#ifndef GuiManager_HH
+#define GuiManager_HH
 
 #include <string>
 #include <vector>
@@ -86,13 +86,13 @@ class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
 
-class CartManager : public QMainWindow {
+class GuiManager : public QMainWindow {
   
   Q_OBJECT
 
 public:
 
-  static CartManager* Instance();
+  static GuiManager* Instance();
 
   // boundary editor dialog
   QDialog *_boundaryEditorDialog;
@@ -100,14 +100,14 @@ public:
 
   // constructor
   
-  CartManager();
-  // CartManager(const Params &params,
+  GuiManager();
+  // GuiManager(const Params &params,
   //             const vector<DisplayField *> &fields,
   //             bool haveFilteredFields);
   
   // destructor
   
-  virtual ~CartManager();
+  virtual ~GuiManager();
 
   // run 
 
@@ -173,7 +173,7 @@ private:
   int _timerEventCount;
   bool _guiSizeInitialized;
 
-  static CartManager* m_pInstance;
+  static GuiManager* m_pInstance;
   // // string _openFilePath;
 
   // boundary editor
@@ -472,9 +472,9 @@ private slots:
 
 #ifdef NOTNOW
   void _horizLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
+                             const RadxRay *closestRay);
   void _vertLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
+                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);
 #endif

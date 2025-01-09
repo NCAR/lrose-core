@@ -24,7 +24,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "HorizWidget.hh"
 #include "VertWidget.hh"
-#include "CartManager.hh"
+#include "GuiManager.hh"
 
 // #include "ParameterColorView.hh"
 // #include "FieldColorController.hh"
@@ -53,7 +53,7 @@ const double HorizWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double HorizWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 HorizWidget::HorizWidget(QWidget* parent,
-                         const CartManager &manager) :
+                         const GuiManager &manager) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -2367,7 +2367,7 @@ void HorizWidget::contextMenuParameterColors()
   //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
   connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
   	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  CartManager::colorMapRedefineReceived(string, ColorMap)
+  //  GuiManager::colorMapRedefineReceived(string, ColorMap)
   //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
   //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
 

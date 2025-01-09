@@ -53,7 +53,7 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = Args.cc \
-		CartManager.cc \
+		GuiManager.cc \
 		Cdraw_P.cc \
 		Cgui_P.cc \
 		Cimages_P.cc \
@@ -158,7 +158,7 @@ SOURCES       = Args.cc \
 		v_win_proc.cc \
 		xview_file_access.cc \
 		zoom_pu_proc.cc qrc_resources.cpp \
-		moc_CartManager.cpp \
+		moc_GuiManager.cpp \
 		moc_HorizWidget.cpp \
 		moc_Lucid.cpp \
 		moc_MapMenuItem.cpp \
@@ -170,7 +170,7 @@ SOURCES       = Args.cc \
 		moc_WindMenuItem.cpp \
 		moc_ZoomMenuItem.cpp
 OBJECTS       = Args.o \
-		CartManager.o \
+		GuiManager.o \
 		Cdraw_P.o \
 		Cgui_P.o \
 		Cimages_P.o \
@@ -276,7 +276,7 @@ OBJECTS       = Args.o \
 		xview_file_access.o \
 		zoom_pu_proc.o \
 		qrc_resources.o \
-		moc_CartManager.o \
+		moc_GuiManager.o \
 		moc_HorizWidget.o \
 		moc_Lucid.o \
 		moc_MapMenuItem.o \
@@ -414,7 +414,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/features/yacc.prf \
 		/usr/lib64/qt6/mkspecs/features/lex.prf \
 		qmake.pro Args.hh \
-		CartManager.hh \
+		GuiManager.hh \
 		Cdraw_P.hh \
 		Cgui_P.hh \
 		Cimages_P.hh \
@@ -466,7 +466,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		cidd_structs.h \
 		cidd_windows.h \
 		cidd_winds.h Args.cc \
-		CartManager.cc \
+		GuiManager.cc \
 		Cdraw_P.cc \
 		Cgui_P.cc \
 		Cimages_P.cc \
@@ -863,8 +863,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Args.hh CartManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh FieldTableItem.hh HorizWidget.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh ZoomBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
-	$(COPY_FILE) --parents Args.cc CartManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DataHandling.cc DisplayField.cc FieldTableItem.cc HorizWidget.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc ZoomBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc status_pu_proc.cc v_win_proc.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
+	$(COPY_FILE) --parents Args.hh GuiManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh DisplayField.hh FieldTableItem.hh HorizWidget.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SoloDefaultColorWrapper.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh ZoomBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
+	$(COPY_FILE) --parents Args.cc GuiManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc DataHandling.cc DisplayField.cc FieldTableItem.cc HorizWidget.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SoloDefaultColorWrapper.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc ZoomBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc draw_pu_proc.cc fields_pu_proc.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc h_win_proc.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc movie_pu_proc.cc page_pu_proc.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc status_pu_proc.cc v_win_proc.cc xview_file_access.cc zoom_pu_proc.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -907,10 +907,10 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -dM -E -o moc_predefs.h /usr/lib64/qt6/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_CartManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+compiler_moc_header_make_all: moc_GuiManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_CartManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
-moc_CartManager.cpp: CartManager.hh \
+	-$(DEL_FILE) moc_GuiManager.cpp moc_HorizWidget.cpp moc_Lucid.cpp moc_MapMenuItem.cpp moc_MetRecord.cpp moc_ProdMenuItem.cpp moc_TimeControl.cpp moc_VertWidget.cpp moc_VertWindow.cpp moc_WindMenuItem.cpp moc_ZoomMenuItem.cpp
+moc_GuiManager.cpp: GuiManager.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -933,7 +933,7 @@ moc_CartManager.cpp: CartManager.hh \
 		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		moc_predefs.h \
 		/usr/lib64/qt6/libexec/moc
-	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
+	/usr/lib64/qt6/libexec/moc $(DEFINES) --include /home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/moc_predefs.h -I/usr/lib64/qt6/mkspecs/linux-g++ -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid -I/usr/include/qt6/QtCore -I/usr/include/qt6 -I/usr/lib64/qt6/mkspecs/linux-g++ -I/usr/include/qt6/QtWidgets -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_WIDGETS_LIB -I/usr/include/qt6/QtGui -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_GUI_LIB -I/usr/include/qt6/QtNetwork -I/usr/include/qt6/QtQml -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QML_LIB -I/usr/include/qt6/QtQmlIntegration -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_QMLINTEGRATION_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_NETWORK_LIB -I/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/mdtest/git/lrose-core/codebase/apps/radar/src/Lucid/$(HOME)/lrose/include' -I/home/mdtest/lrose/include -I/usr/include/c++/11 -I/usr/include/c++/11/x86_64-redhat-linux -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-redhat-linux/11/include -I/usr/local/include -I/usr/include GuiManager.hh -o moc_GuiManager.cpp
 
 moc_HorizWidget.cpp: HorizWidget.hh \
 		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
@@ -1500,7 +1500,7 @@ Args.o: Args.cc Args.hh \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Args.o Args.cc
 
-CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
+GuiManager.o: GuiManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/pmu.h \
 		$(HOME)/lrose/include/toolsa/procmap.h \
 		$(HOME)/lrose/include/dataport/port_types.h \
@@ -1555,7 +1555,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		$(HOME)/lrose/include/Radx/RadxPath.hh \
 		$(HOME)/lrose/include/Ncxx/H5x.hh \
-		CartManager.hh \
+		GuiManager.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -1682,7 +1682,7 @@ CartManager.o: CartManager.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		VertWindow.hh \
 		WindMenuItem.hh \
 		ZoomMenuItem.hh
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CartManager.o CartManager.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o GuiManager.o GuiManager.cc
 
 Cdraw_P.o: Cdraw_P.cc Cdraw_P.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -2154,7 +2154,7 @@ HorizWidget.o: HorizWidget.cc HorizWidget.hh \
 		VertWidget.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
-		CartManager.hh \
+		GuiManager.hh \
 		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxSweep.hh \
 		$(HOME)/lrose/include/Radx/RadxRay.hh \
@@ -2204,7 +2204,7 @@ Lucid.o: Lucid.cc Lucid.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
 		Params.hh \
-		CartManager.hh \
+		GuiManager.hh \
 		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxTime.hh \
 		$(HOME)/lrose/include/Radx/RadxVol.hh \
@@ -3507,7 +3507,7 @@ TimeControl.o: TimeControl.cc TimeControl.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
-		CartManager.hh \
+		GuiManager.hh \
 		VlevelManager.hh \
 		$(HOME)/lrose/include/Radx/RadxVol.hh \
 		$(HOME)/lrose/include/Radx/Radx.hh \
@@ -3796,7 +3796,7 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/toolsa/LogStream.hh \
 		$(HOME)/lrose/include/toolsa/copyright.h \
 		$(HOME)/lrose/include/toolsa/LogFile.hh \
-		CartManager.hh \
+		GuiManager.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -3950,7 +3950,7 @@ VertWidget.o: VertWidget.cc $(HOME)/lrose/include/toolsa/toolsa_macros.h \
 		$(HOME)/lrose/include/rapformats/nws_oso_local.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VertWidget.o VertWidget.cc
 
-VertWindow.o: VertWindow.cc CartManager.hh \
+VertWindow.o: VertWindow.cc GuiManager.hh \
 		VlevelManager.hh \
 		Params.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -13662,8 +13662,8 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 qrc_resources.o: qrc_resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_resources.o qrc_resources.cpp
 
-moc_CartManager.o: moc_CartManager.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_CartManager.o moc_CartManager.cpp
+moc_GuiManager.o: moc_GuiManager.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_GuiManager.o moc_GuiManager.cpp
 
 moc_HorizWidget.o: moc_HorizWidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_HorizWidget.o moc_HorizWidget.cpp

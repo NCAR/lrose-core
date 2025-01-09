@@ -3,7 +3,7 @@
 replaceGlobalStrings.py --path cidd_init.cc
 
 replaceGlobalStrings.py --path Args.cc
-replaceGlobalStrings.py --path CartManager.cc
+replaceGlobalStrings.py --path GuiManager.cc
 replaceGlobalStrings.py --path CartWidget.cc
 replaceGlobalStrings.py --path Cdraw_P.cc
 replaceGlobalStrings.py --path Cgui_P.cc

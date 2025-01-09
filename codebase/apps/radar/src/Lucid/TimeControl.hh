@@ -64,7 +64,7 @@
 class QFrame;
 class QHBoxLayout;
 class QVBoxLayout;
-class CartManager;
+class GuiManager;
 
 #include <Radx/RadxTime.hh>
 #include "Params.hh"
@@ -79,7 +79,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // constructor
   
-  TimeControl(CartManager *parent,
+  TimeControl(GuiManager *parent,
               const Params &params);
   
   // destructor
@@ -136,7 +136,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
  protected:
 
-  CartManager *_parent;
+  GuiManager *_parent;
   const Params &_params;
   
   QFrame *_timePanel;

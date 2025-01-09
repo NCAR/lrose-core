@@ -56,7 +56,7 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class CartManager;
+class GuiManager;
 class VertWindow;
 
 // Widget for vertical display.
@@ -81,7 +81,7 @@ class DLL_EXPORT VertWidget : public QWidget
    */
 
   VertWidget(QWidget* parent, 
-             const CartManager &manager,
+             const GuiManager &manager,
              const VertWindow &vertWindow);
 
   /**
@@ -300,7 +300,7 @@ protected:
    */
 
   QWidget *_parent;
-  const CartManager &_manager;
+  const GuiManager &_manager;
 
   // QMainWindow
   

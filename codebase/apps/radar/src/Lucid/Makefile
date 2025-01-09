@@ -53,7 +53,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	CartManager.hh \
+	GuiManager.hh \
 	Cdraw_P.hh \
 	Cgui_P.hh \
 	Cimages_P.hh \
@@ -192,7 +192,7 @@ NORM_SRCS = \
 
 MOC_SRCS = \
 	Lucid.cc \
-	CartManager.cc \
+	GuiManager.cc \
 	HorizWidget.cc \
 	MapMenuItem.cc \
 	MetRecord.cc \
@@ -205,7 +205,7 @@ MOC_SRCS = \
 
 MOC_OUTPUT = \
 	moc_Lucid.cpp \
-	moc_CartManager.cpp \
+	moc_GuiManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
 	moc_MetRecord.cpp \

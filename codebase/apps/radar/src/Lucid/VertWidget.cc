@@ -47,7 +47,7 @@
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
 
-#include "CartManager.hh"
+#include "GuiManager.hh"
 #include "VertWidget.hh"
 #include "VertWindow.hh"
 #include "cidd.h"
@@ -59,7 +59,7 @@ const double VertWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double VertWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 VertWidget::VertWidget(QWidget* parent,
-                       const CartManager &manager,
+                       const GuiManager &manager,
                        const VertWindow &vertWindow) :
         QWidget(parent),
         _parent(parent),

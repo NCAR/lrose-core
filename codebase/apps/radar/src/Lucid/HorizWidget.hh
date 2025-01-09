@@ -58,7 +58,7 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
-class CartManager;
+class GuiManager;
 class VertWidget;
 class QLabel;
 
@@ -83,7 +83,7 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
   
   HorizWidget(QWidget* parent,
-              const CartManager &manager);
+              const GuiManager &manager);
 
   /**
    * @brief Destructor.
@@ -334,7 +334,7 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
 
   QWidget *_parent;
-  const CartManager &_manager;
+  const GuiManager &_manager;
 
   // pixmap for rendering
   

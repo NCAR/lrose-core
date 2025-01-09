@@ -26,7 +26,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#include "CartManager.hh"
+#include "GuiManager.hh"
 #include "VertWindow.hh"
 #include "cidd.h"
 
@@ -36,7 +36,7 @@ using namespace std;
  * Constructor
  */
 
-VertWindow::VertWindow(CartManager *manager):
+VertWindow::VertWindow(GuiManager *manager):
         QMainWindow(manager),
         _manager(manager)
         
@@ -128,7 +128,7 @@ void VertWindow::resizeEvent(QResizeEvent *event)
 ////////////////////////////////////////////////////////////////
 void VertWindow::keyPressEvent(QKeyEvent * e)
 {
-  // pass event up to CartManager
+  // pass event up to GuiManager
   _manager->keyPressEvent(e);
 }
 

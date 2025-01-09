@@ -47,7 +47,7 @@
 #include "Params.hh"
 #include "VertWidget.hh"
 
-class CartManager;
+class GuiManager;
 // class DisplayField;
 
 class DLL_EXPORT VertWindow : public QMainWindow
@@ -68,7 +68,7 @@ public:
    * @param[in] parent   The parent widget.
    */
   
-  VertWindow(CartManager *manager);
+  VertWindow(GuiManager *manager);
 
   /**
    * @brief Destructor
@@ -158,7 +158,7 @@ protected:
 
   // the polar manager that created this window
 
-  CartManager *_manager;
+  GuiManager *_manager;
 
   /**
    * @brief The View menu.
