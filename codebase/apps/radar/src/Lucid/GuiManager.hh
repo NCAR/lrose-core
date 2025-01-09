@@ -204,6 +204,7 @@ private:
   
   int _fieldNum;
   int _prevFieldNum;
+  bool _fieldNumChanged;
   string _selectedName;
   string _selectedLabel;
   string _selectedUnits;

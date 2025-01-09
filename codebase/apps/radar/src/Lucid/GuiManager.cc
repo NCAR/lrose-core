@@ -160,7 +160,10 @@ GuiManager::GuiManager() :
   _fieldMenuLayout = NULL;
   _fieldTableCurrentColumn = -1;
   _fieldTableCurrentRow = -1;
-
+  _prevFieldNum = 0;
+  _fieldNum = 0;
+  _fieldNumChanged = false;
+  
   _timeControl = NULL;
   _timeControlPlaced = false;
   
@@ -3074,23 +3077,25 @@ void GuiManager::_checkForFieldChange()
   } else {
     _fieldTableCurrentColumn = _fieldTable->currentColumn();
     _fieldTableCurrentRow = _fieldTable->currentRow();
-    int fieldNum = item->getFieldIndex();
+    _prevFieldNum = _fieldNum;
+    _fieldNum = item->getFieldIndex();
+    _fieldNumChanged = true;
     gd.prev_field = gd.h_win.page;
-    set_field(fieldNum);
-    gd.mrec[fieldNum]->h_data_valid = 0;
+    set_field(_fieldNum);
+    gd.mrec[_fieldNum]->h_data_valid = 0;
     if (_params.debug) {
       const Params::field_t *fparams = item->getFieldParams();
       cerr << "Changing to field: " << fparams->button_label << endl;
       cerr << "              url: " << fparams->url << endl;
-      cerr << "         fieldNum: " << fieldNum << endl;
-      cerr << "      field_label: " << gd.mrec[fieldNum]->field_label << endl;
-      cerr << "      button_name: " << gd.mrec[fieldNum]->button_name << endl;
-      cerr << "      legend_name: " << gd.mrec[fieldNum]->legend_name << endl;
+      cerr << "         fieldNum: " << _fieldNum << endl;
+      cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
+      cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
+      cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
     }
     gd.redraw_horiz = true;
     gd.field_has_changed = true;
-    gd.selected_field = fieldNum;
-    gd.h_win.page = fieldNum;
+    gd.selected_field = _fieldNum;
+    gd.h_win.page = _fieldNum;
   
   }
 
@@ -3746,14 +3751,14 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
   /***** Handle Field changes *****/
 
   if (gd.h_win.page != gd.h_win.prev_page) {
-    cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
+    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
     if (gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
       if (gd.h_win.redraw_flag[gd.h_win.page] == 0) {
         gd.h_copy_flag = 1;
         gd.h_win.prev_page = gd.h_win.page;
-        cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
+        // cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
         set_redraw_flags(0,1);
         _vlevelManager.setFromMdvx();
         _createVlevelRadioButtons();
