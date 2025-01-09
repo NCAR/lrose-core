@@ -44,56 +44,6 @@
 #include "cidd.h"
 
 ///////////////////////////////////////////////
-// Worker for read H volume in thread
-
-class ReadVolH : public QObject {
-  Q_OBJECT
-public:
-  ReadVolH(MetRecord* parentObject, QObject* parent = nullptr)
-          : QObject(parent), mr(parentObject) {}
-public slots:
-  void doRead() {
-    qDebug() << "ReadVolH thread started. Parent object:" << mr;
-    int iret = mr->h_mdvx->readVolume();
-    qDebug() << "ReadVolH returned, iret: " << ", " << iret;
-    if (iret) {
-      qDebug() << mr->h_mdvx->getErrStr();
-    }
-    mr->iret_h_mdvx_read = iret;
-    emit readDone();
-  }
-signals:
-  void readDone() {};
-private:
-  MetRecord* mr;
-};
-
-//////////////////////////////
-// start H vol read in thread
-
-void MetRecord::startReadVolH() {
-  ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
-  QThread* thread = new QThread;
-  worker->moveToThread(thread);
-  // Connect signals and slots
-  connect(thread, &QThread::started, worker, &ReadVolH::doRead);
-  connect(worker, &ReadVolH::readDone, this, &MetRecord::readDoneH);
-  connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
-  connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
-  connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-  thread->start();
-}
-
-////////////////////////
-// done with H vol read
-
-void MetRecord::readDoneH() {
-  qDebug() << "readDone in ReadVolH worker thread";
-  _setValidH(iret_h_mdvx_read == 0);
-  _setNewH(true);
-}
-
-///////////////////////////////////////////////
 // constructor
 
 MetRecord::MetRecord(QObject* parent) :
@@ -942,5 +892,49 @@ void MetRecord::_adjustBoundingBox(double lat, double lon,
   if(lat < minLat) {
     minLat = lat;
   }
+}
+
+///////////////////////////////////////////////
+// Worker for read H volume in thread
+
+ReadVolH::ReadVolH(MetRecord* parentObject, QObject* parent) :
+        QObject(parent), _mr(parentObject)
+{
+}
+
+void ReadVolH::doRead() {
+  qDebug() << "ReadVolH thread started. Parent object:" << _mr;
+  int iret = _mr->h_mdvx->readVolume();
+  qDebug() << "ReadVolH returned, iret: " << ", " << iret;
+  if (iret) {
+    qDebug() << _mr->h_mdvx->getErrStr();
+  }
+  _mr->iret_h_mdvx_read = iret;
+  emit readDone();
+}
+
+//////////////////////////////
+// start H vol read in thread
+
+void MetRecord::startReadVolH() {
+  ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
+  QThread* thread = new QThread;
+  worker->moveToThread(thread);
+  // Connect signals and slots
+  connect(thread, &QThread::started, worker, &ReadVolH::doRead);
+  connect(worker, &ReadVolH::readDone, this, &MetRecord::readDoneH);
+  // connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
+  connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
+  connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+  thread->start();
+}
+
+////////////////////////
+// done with H vol read
+
+void MetRecord::readDoneH() {
+  qDebug() << "readDone in ReadVolH worker thread";
+  _setValidH(iret_h_mdvx_read == 0);
+  _setNewH(true);
 }
 

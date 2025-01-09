@@ -52,6 +52,8 @@
 #include "WayPts.hh"
 
 class ColorMap;
+class MetRecord;
+class ReadVolH;
 
 class MetRecord : public QObject {
 
@@ -244,6 +246,27 @@ private:
   void _adjustBoundingBox(double lat, double lon,
                           double &minLat, double &maxLat,
                           double &minLon, double &maxLon);
+};
+
+// Worker for read H volume in thread
+
+class ReadVolH : public QObject {
+  
+  Q_OBJECT
+
+public:
+  
+  ReadVolH(MetRecord* parentObject, QObject* parent = nullptr);
+
+public slots:
+  void doRead();
+  
+signals:
+  void readDone();
+
+private:
+  MetRecord* _mr;
+
 };
 
 #endif
