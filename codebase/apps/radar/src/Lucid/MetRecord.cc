@@ -160,6 +160,8 @@ int MetRecord::requestHorizPlane(time_t start_time,
                                  int page)
 {
 
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
+  
   // apply offset the request time
   
   start_time += (int) (time_offset * 60);

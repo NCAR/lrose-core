@@ -279,9 +279,30 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // read click point info from FMQ
   
   _readClickPoint();
+
+  // field change?
+
+  if (_fieldNumChanged) {
+    int index = gd.movie.cur_frame;
+    if (gd.movie.cur_frame < 0) {
+      index = gd.movie.num_frames - 1;
+    }
+    MetRecord *mr = gd.mrec[_fieldNum];
+    if (mr->requestHorizPlane(gd.movie.frame[index].time_start,
+                              gd.movie.frame[index].time_end,
+                              gd.h_win.page)) {
+      cerr << "ERROR - GuiManager::timerEvent" << endl;
+      cerr << "  mr->requestHorizPlane" << endl;
+      cerr << "  time_start: " << DateTime::strm(gd.movie.frame[index].time_start) << endl;
+      cerr << "  time_end: " << DateTime::strm(gd.movie.frame[index].time_end) << endl;
+      cerr << "  page: " << gd.h_win.page << endl;
+    }
+    _fieldNumChanged = false;
+  }
+
   
   // handle legacy cidd timer event
-
+  
   _ciddTimerFunc(event);
 
   if (gd.redraw_horiz) {
