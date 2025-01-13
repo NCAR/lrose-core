@@ -221,6 +221,7 @@ private:
   double _latitudeDeg;
   double _longitudeDeg;
   double _altitudeM;
+  double _gndHtM;
   double _startRangeM;
   double _gateSpacingM;
   double _nyquistVel;
@@ -231,11 +232,19 @@ private:
   double _pulseWidthUsec;
   double _bandWidthHertz;
 
+  double _unambigRangeM;
+  double _azSpeedDegPerSec;
+  double _prfHigh;
+  double _prfLow;
+  double _wavelengthCm;
+  double _angleResDeg;
+  int _nSamples;
+  
   double _sqiThresh;
   double _logThresh;
   double _sigThresh;
   double _csrThresh;
-
+  
   int _dbtThreshFlag;
   int _dbzThreshFlag;
   int _velThreshFlag;

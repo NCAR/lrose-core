@@ -558,7 +558,7 @@ int NoaaFslRadxFile::_readFile(const string &path)
   }
   
   // read time variable
-  
+
   if (_readTimes()) {
     _addErrStr(errStr);
     return -1;
@@ -742,7 +742,7 @@ int NoaaFslRadxFile::_readDimensions()
 // read the scalars
 
 int NoaaFslRadxFile::_readScalars()
-
+  
 {
 
   int iret = 0;
@@ -750,28 +750,53 @@ int NoaaFslRadxFile::_readScalars()
 
   // sweep number
 
+  _sweepNumber = 0;
   if (_file.readIntVal("elevationNumber", _sweepNumber, Radx::missingMetaInt)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'elevationNumber' variable, setting to 0" << endl;
+    }
     iret = -1;
   }
 
   // elevation angle
-  
+
+  _elevationAngle = 0.0;
   if (_file.readDoubleVal("elevationAngle", _elevationAngle, Radx::missingMetaDouble)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'elevationAngle' variable, setting to 0" << endl;
+    }
     iret = -1;
   }
 
   // lat, lon, alt
 
+  _latitudeDeg = 0.0;
   if (_file.readDoubleVal("siteLat", _latitudeDeg, Radx::missingMetaDouble)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'siteLat' variable, setting to 0" << endl;
+    }
     iret = -1;
   }
 
+  _longitudeDeg = 0.0;
   if (_file.readDoubleVal("siteLon", _longitudeDeg, Radx::missingMetaDouble)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'siteLon' variable, setting to 0" << endl;
+    }
     iret = -1;
   }
 
+  _altitudeM = 0.0;
   if (_file.readDoubleVal("siteAlt", _altitudeM,
                           units, Radx::missingMetaDouble)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'siteAlt' variable, setting to 0" << endl;
+    }
     iret = -1;
   }
   if (units == "km") {
@@ -780,25 +805,38 @@ int NoaaFslRadxFile::_readScalars()
 
   // start range, gate spacing
 
+  _gateSpacingM = 250.0;
   if (_file.readDoubleVal("gateSize", _gateSpacingM,
                           units, Radx::missingMetaDouble)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'gateSize' variable, setting to 250" << endl;
+    }
     iret = -1;
   }
   if (units == "km") {
     _gateSpacingM *= 1000.0;
   }
 
-  if (_file.readDoubleVal("firstGateRange", _startRangeM,
+  // init start range to center of first gate
+
+  _startRangeM += _gateSpacingM / 2.0;
+
+  if (_file.readDoubleVal("firstgateRange", _startRangeM,
                           units, Radx::missingMetaDouble)) {
-    iret = -1;
+    if (_file.readDoubleVal("firstGateRange", _startRangeM,
+                            units, Radx::missingMetaDouble)) {
+      if (_debug) {
+        cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+        cerr << " Cannot find 'firstGateRange' variable, setting to gateSize/2 = "
+             << _startRangeM << endl;
+      }
+      iret = -1;
+    }
   }
   if (units == "km") {
     _startRangeM *= 1000.0;
   }
-
-  // set start range to center of first gate
-
-  _startRangeM += _gateSpacingM / 2.0;
 
   // nyquist
 
@@ -807,7 +845,9 @@ int NoaaFslRadxFile::_readScalars()
   // calibration
 
   _file.readDoubleVal("calibConst", _calibConst, Radx::missingMetaDouble);
-  _file.readDoubleVal("radarConst", _radarConst, Radx::missingMetaDouble);
+  if (_file.readDoubleVal("radarConst", _radarConst, Radx::missingMetaDouble)) {
+    _file.readDoubleVal("RadarConst", _radarConst, Radx::missingMetaDouble);
+  }
 
   // beam width
 
@@ -816,19 +856,45 @@ int NoaaFslRadxFile::_readScalars()
 
   // pulse width
 
-  _file.readDoubleVal("pulseWidth", _pulseWidthUsec, units, Radx::missingMetaDouble);
-  if (units == "sec" || units == "s") {
-    _pulseWidthUsec *= 1.0e6;
+  if (_file.readDoubleVal("pulseWidth", _pulseWidthUsec,
+                          units, Radx::missingMetaDouble) == 0) {
+    if (units == "sec" || units == "s") {
+      _pulseWidthUsec *= 1.0e6;
+    }
   }
   
   // band width
 
-  _file.readDoubleVal("bandWidth", _bandWidthHertz, units, Radx::missingMetaDouble);
-  if (units.find("mega") != string::npos) {
-    _bandWidthHertz *= 1.0e6;
-  } else if (units.find("giga") != string::npos) {
-    _bandWidthHertz *= 1.0e9;
+  if (_file.readDoubleVal("bandWidth", _bandWidthHertz,
+                          units, Radx::missingMetaDouble) == 0) {
+    if (units.find("mega") != string::npos) {
+      _bandWidthHertz *= 1.0e6;
+    } else if (units.find("giga") != string::npos) {
+      _bandWidthHertz *= 1.0e9;
+    }
   }
+
+  if (_file.readDoubleVal("unambigrange", _unambigRangeM,
+                          units, Radx::missingMetaDouble) == 0) {
+    if (units == "kilometer" || units == "km") {
+      _unambigRangeM *= 1.0e3;
+    }
+  }
+
+  if (_file.readDoubleVal("waveLength", _wavelengthCm,
+                          units, Radx::missingMetaDouble) == 0) {
+    if (units == "m" || units == "meters") {
+      _wavelengthCm *= 1.0e2;
+    }
+  }
+
+  _file.readDoubleVal("azimuthSpeed", _azSpeedDegPerSec, Radx::missingMetaDouble);
+  _file.readDoubleVal("angleResolution", _angleResDeg, Radx::missingMetaDouble);
+
+  _file.readDoubleVal("_prfHigh", _prfHigh, Radx::missingMetaDouble);
+  _file.readDoubleVal("_prfLow", _prfLow, Radx::missingMetaDouble);
+
+  _file.readIntVal("sampleNum", _nSamples, Radx::missingMetaInt);
 
   // thresholds
 
@@ -871,8 +937,8 @@ int NoaaFslRadxFile::_readScalars()
   if (iret) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readScalars");
   }
-
-  return iret;
+    
+  return 0;
 
 }
 
