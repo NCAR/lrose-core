@@ -179,7 +179,7 @@ private:
 
   // dimensions
 
-  Nc3Dim *_timeDim;  // "radial"
+  Nc3Dim *_radialDim;  // "radial"
   Nc3Dim *_rangeDim; // "bin"
   Nc3Dim *_sweepDim; // "sweep"
 
@@ -194,12 +194,14 @@ private:
   string _statusXml;
   
   // times
-  
+
+  double _startTime;
   double _refTimeSecsFile;
-  vector<time_t> _rayTimes;
+  vector<RadxTime> _rayTimes;
   vector<double> _dTimes;
   bool _rayTimesIncrease;
-  size_t _nTimesInFile;
+  size_t _nRadials;
+  size_t _nTimes;
   
   // range
 

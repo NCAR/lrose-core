@@ -46,6 +46,7 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/RadxRcalib.hh>
+#include <Radx/RadxComplex.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -89,14 +90,14 @@ void NoaaFslRadxFile::clear()
 
   _file.close();
 
-  _timeDim = NULL;
+  _radialDim = NULL;
   _rangeDim = NULL;
 
-  // _timeVar = NULL;
   _rayTimes.clear();
   _dTimes.clear();
   _rayTimesIncrease = true;
-  _nTimesInFile = 0;
+  _nRadials = 0;
+  _nTimes = 0;
 
   _raysVol.clear();
   _raysFile.clear();
@@ -507,9 +508,10 @@ int NoaaFslRadxFile::_readFile(const string &path)
 
   string errStr("ERROR - NoaaFslRadxFile::readFromPath");
   
-  // clear tmp vars
-  
-  _nTimesInFile = 0;
+  // clear vars
+
+  _nRadials = 0;
+  _nTimes = 0;
   _nRangeInFile = 0;
 
   // open file
@@ -565,7 +567,7 @@ int NoaaFslRadxFile::_readFile(const string &path)
   }
 
   // read in ray variables
-
+  
   if (_readRayVariables()) {
     _addErrStr(errStr);
     return -1;
@@ -605,7 +607,7 @@ int NoaaFslRadxFile::_readFile(const string &path)
   // add file rays to vol rays
 
   for (size_t ii = 0; ii < _raysFile.size(); ii++) {
-    
+
     RadxRay *ray = _raysFile[ii];
     
     // check if we should keep this ray or discard it
@@ -712,9 +714,9 @@ int NoaaFslRadxFile::_readDimensions()
   // read required dimensions
 
   int iret = 0;
-  iret |= _file.readDim("radial", _timeDim);
+  iret |= _file.readDim("radial", _radialDim);
   if (iret == 0) {
-    _nTimesInFile = _timeDim->size();
+    _nRadials = _radialDim->size();
   }
 
   _nRangeInFile = 0;
@@ -728,6 +730,8 @@ int NoaaFslRadxFile::_readDimensions()
   if (iret == 0) {
     _nSweeps = _sweepDim->size();
   }
+
+  _nTimes = _nRadials * _nSweeps;
   
   if (iret) {
     _addErrStr("ERROR - NoaaFslRadxFile::_file.readDimensions");
@@ -747,6 +751,17 @@ int NoaaFslRadxFile::_readScalars()
 
   int iret = 0;
   string units;
+
+  // start time
+
+  _startTime = 0.0;
+  if (_file.readDoubleVal("esStartTime", _startTime, 0.0)) {
+    if (_debug) {
+      cerr << "WARNING - NoaaFlsRadxFile::_readScalars()" << endl;
+      cerr << " Cannot find 'esStartTime' variable, setting to 0" << endl;
+    }
+    iret = -1;
+  }
 
   // sweep number
 
@@ -968,38 +983,38 @@ int NoaaFslRadxFile::_readSweepAngles()
 
 {
 
-  Nc3Var *anglesVar = _file.getNc3File()->get_var("elevationList");
-  if (anglesVar == NULL) {
+  Nc3Var *elevsVar = _file.getNc3File()->get_var("elevationList");
+  if (elevsVar == NULL) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
     _addErrStr("  Cannot find sweep angles variable, name: ", "elevationList");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
-  if (anglesVar->num_dims() < 1) {
+  if (elevsVar->num_dims() < 1) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
     _addErrStr("  elevationList variable has no dimensions");
     return -1;
   }
-  Nc3Dim *sweepDim = anglesVar->get_dim(0);
+  Nc3Dim *sweepDim = elevsVar->get_dim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
     _addErrStr("  elevationList has incorrect dimension, name: ", sweepDim->name());
     return -1;
   }
 
-  // read the angles array
+  // read the elevs array
   
-  RadxArray<double> angles_;
-  double *angles = angles_.alloc(_nSweeps);
-  if (anglesVar->get(angles, _nSweeps) == 0) {
+  RadxArray<double> elevs_;
+  double *elevs = elevs_.alloc(_nSweeps);
+  if (elevsVar->get(elevs, _nSweeps) == 0) {
     _addErrStr("ERROdR - NoaaFslRadxFile::_readSweepAngles");
     _addErrStr("  Candnot read elevationList variable");
     return -1;
   }
   _elevList.clear();
   for (size_t ii = 0; ii < _nSweeps; ii++) {
-    _elevList.push_back(angles[ii]);
+    _elevList.push_back(elevs[ii]);
   }
   
   return 0;
@@ -1030,7 +1045,7 @@ int NoaaFslRadxFile::_readTimes()
     return -1;
   }
   Nc3Dim *timeDim = timeVar->get_dim(0);
-  if (timeDim != _timeDim) {
+  if (timeDim != _radialDim) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
     return -1;
@@ -1055,17 +1070,35 @@ int NoaaFslRadxFile::_readTimes()
   // set the time array
   
   RadxArray<double> dtimes_;
-  double *dtimes = dtimes_.alloc(_nTimesInFile);
-  if (timeVar->get(dtimes, _nTimesInFile) == 0) {
+  double *dtimes = dtimes_.alloc(_nRadials);
+  if (timeVar->get(dtimes, _nRadials) == 0) {
     _addErrStr("ERROdR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  Candnot read Time variable");
     return -1;
   }
+
+  // compute az speed
+  double sumDeltaTime = 0.0;
+  double sumDeltaAz = 0.0;
+  for (size_t ii = 1; ii < _nRadials; ii++) {
+    double deltaTime = dtimes[ii] - dtimes[ii-1];
+    double deltaAz = fabs(RadxComplex::computeDiffDeg(_azimuth[ii], _azimuth[ii-1]));
+    sumDeltaTime += deltaTime;
+    sumDeltaAz += deltaAz;
+  } // ii
+  double meanDeltaTime = sumDeltaTime / _nRadials;
+  _azSpeedDegPerSec = sumDeltaAz / sumDeltaTime;
+
+  // set ray times
+
   _dTimes.clear();
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    _rayTimes.push_back((time_t) dtimes[ii]);
-    _dTimes.push_back(dtimes[ii]);
+  double rayTime = _startTime + meanDeltaTime / 2.0;
+  for (size_t ii = 0; ii < _nTimes; ii++) {
+    _rayTimes.push_back(rayTime);
+    _dTimes.push_back(rayTime);
+    rayTime += meanDeltaTime;
   }
+  
   
   return 0;
 
@@ -1094,13 +1127,13 @@ int NoaaFslRadxFile::_readRayVariables()
   int iret = 0;
 
   _readRayVar("radialAzim", _azimuthUnits, _azimuth);
-  if ((int) _azimuth.size() != _timeDim->size()) {
+  if ((int) _azimuth.size() != _radialDim->size()) {
     _addErrStr("ERROR - radialAzim variable required");
     iret = -1;
   }
   
   _readRayVar("radialElev", _elevationUnits, _elevation);
-  if ((int) _elevation.size() != _timeDim->size()) {
+  if ((int) _elevation.size() != _radialDim->size()) {
     _addErrStr("ERROR - Elevation variable required");
     iret = -1;
   }
@@ -1136,10 +1169,7 @@ int NoaaFslRadxFile::_createRays(const string &path)
 
     // set time
     
-    // double rayTimeDouble = _dTimes[rayIndex];
-    time_t rayUtimeSecs = _rayTimes[rayIndex];
-    int rayNanoSecs = 0;
-    ray->setTime(rayUtimeSecs, rayNanoSecs);
+    ray->setTime(_rayTimes[rayIndex]);
     
     // sweep info
     
@@ -1185,7 +1215,7 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
     // check that we have the correct dimensions
     Nc3Dim* timeDim = var->get_dim(0);
     Nc3Dim* rangeDim = var->get_dim(1);
-    if (timeDim != _timeDim || rangeDim != _rangeDim) {
+    if (timeDim != _radialDim || rangeDim != _rangeDim) {
       continue;
     }
     
@@ -1348,7 +1378,7 @@ int NoaaFslRadxFile::_readRayVar(const string &name,
   Nc3Var *var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      for (size_t ii = 0; ii < _nTimes; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -1361,16 +1391,16 @@ int NoaaFslRadxFile::_readRayVar(const string &name,
 
   // load up data
 
-  double *data = new double[_nTimesInFile];
+  double *data = new double[_nTimes];
   double *dd = data;
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+  if (var->get(data, _nTimes)) {
+    for (size_t ii = 0; ii < _nTimes; ii++, dd++) {
       vals.push_back(*dd);
     }
   } else {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      for (size_t ii = 0; ii < _nTimes; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -1428,7 +1458,7 @@ Nc3Var* NoaaFslRadxFile::_getRayVar(const string &name, bool required)
     return NULL;
   }
   Nc3Dim *timeDim = var->get_dim(0);
-  if (timeDim != _timeDim) {
+  if (timeDim != _radialDim) {
     if (required) {
       _addErrStr("ERROR - NoaaFslRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
@@ -1458,9 +1488,9 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  size_t nGatesTot = _nTimes * _nRangeInFile;
   Radx::fl64 *data = new Radx::fl64[nGatesTot];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  int iret = !var->get(data, _nTimes, _nRangeInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1481,11 +1511,11 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
     
     size_t rayIndex = ii;
     
-    if (rayIndex > _nTimesInFile - 1) {
+    if (rayIndex > _nTimes - 1) {
       cerr << "WARNING - NoaaFslRadxFile::_addFl64FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  nTimesInFile: " << _nTimes << endl;
       cerr << "  skipping ...." << endl;
       continue;
     }
@@ -1525,9 +1555,9 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  size_t nGatesTot = _nTimes * _nRangeInFile;
   Radx::fl32 *data = new Radx::fl32[nGatesTot];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  int iret = !var->get(data, _nTimes, _nRangeInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1548,11 +1578,11 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
     
     size_t rayIndex = ii;
 
-    if (rayIndex > _nTimesInFile - 1) {
+    if (rayIndex > _nTimes - 1) {
       cerr << "WARNING - NoaaFslRadxFile::_addFl32FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  nTimesInFile: " << _nTimes << endl;
       cerr << "  skipping ...." << endl;
       continue;
     }
@@ -1594,9 +1624,9 @@ int NoaaFslRadxFile::_addSi32FieldToRays(Nc3Var* var,
 
   // get data from array
   
-  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  size_t nGatesTot = _nTimes * _nRangeInFile;
   Radx::si32 *data = new Radx::si32[nGatesTot];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  int iret = !var->get(data, _nTimes, _nRangeInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1617,11 +1647,11 @@ int NoaaFslRadxFile::_addSi32FieldToRays(Nc3Var* var,
     
     size_t rayIndex = ii;
 
-    if (rayIndex > _nTimesInFile - 1) {
+    if (rayIndex > _nTimes - 1) {
       cerr << "WARNING - NoaaFslRadxFile::_addSi32FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  nTimesInFile: " << _nTimes << endl;
       cerr << "  skipping ...." << endl;
       continue;
     }
@@ -1664,9 +1694,9 @@ int NoaaFslRadxFile::_addSi16FieldToRays(Nc3Var* var,
 
   // get data from array
   
-  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  size_t nGatesTot = _nTimes * _nRangeInFile;
   Radx::si16 *data = new Radx::si16[nGatesTot];
-  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  int iret = !var->get(data, _nTimes, _nRangeInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1687,11 +1717,11 @@ int NoaaFslRadxFile::_addSi16FieldToRays(Nc3Var* var,
     
     size_t rayIndex = ii;
 
-    if (rayIndex > _nTimesInFile - 1) {
+    if (rayIndex > _nTimes - 1) {
       cerr << "WARNING - NoaaFslRadxFile::_addSi16FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  nTimesInFile: " << _nTimes << endl;
       cerr << "  skipping ...." << endl;
       continue;
     }
@@ -1734,9 +1764,9 @@ int NoaaFslRadxFile::_addSi08FieldToRays(Nc3Var* var,
 
   // get data from array
   
-  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  size_t nGatesTot = _nTimes * _nRangeInFile;
   Radx::si08 *data = new Radx::si08[nGatesTot];
-  int iret = !var->get((ncbyte *) data, _nTimesInFile, _nRangeInFile);
+  int iret = !var->get((ncbyte *) data, _nTimes, _nRangeInFile);
   if (iret) {
     delete[] data;
     return -1;
@@ -1757,11 +1787,11 @@ int NoaaFslRadxFile::_addSi08FieldToRays(Nc3Var* var,
     
     size_t rayIndex = ii;
 
-    if (rayIndex > _nTimesInFile - 1) {
+    if (rayIndex > _nTimes - 1) {
       cerr << "WARNING - NoaaFslRadxFile::_addSi08FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
-      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  nTimesInFile: " << _nTimes << endl;
       cerr << "  skipping ...." << endl;
       continue;
     }
@@ -1819,7 +1849,7 @@ int NoaaFslRadxFile::_loadReadVolume()
   _readVol->setRadarReceiverBandwidthMhz(_bandWidthHertz / 1.0e6);
 
   _readVol->copyRangeGeom(_geom);
-
+  
   for (int ii = 0; ii < (int) _raysVol.size(); ii++) {
     _raysVol[ii]->setVolumeNumber(_volumeNumber);
     _raysVol[ii]->setPulseWidthUsec(_pulseWidthUsec);
