@@ -282,8 +282,7 @@ private:
   int _readScalars();
   int _readSweepAngles();
   int _readTimes();
-  void _clearRayVariables();
-  int _readRayVariables();
+  int _readAzEl();
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
   

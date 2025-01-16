@@ -559,16 +559,16 @@ int NoaaFslRadxFile::_readFile(const string &path)
     return 0;
   }
   
-  // read time variable
-
-  if (_readTimes()) {
+  // read in ray az and el
+  
+  if (_readAzEl()) {
     _addErrStr(errStr);
     return -1;
   }
 
-  // read in ray variables
-  
-  if (_readRayVariables()) {
+  // read time variable
+
+  if (_readTimes()) {
     _addErrStr(errStr);
     return -1;
   }
@@ -637,7 +637,8 @@ int NoaaFslRadxFile::_readFile(const string &path)
 
   // clean up
 
-  _clearRayVariables();
+  _azimuth.clear();
+  _elevation.clear();
 
   return 0;
 
@@ -1099,50 +1100,95 @@ int NoaaFslRadxFile::_readTimes()
     rayTime += meanDeltaTime;
   }
   
-  
   return 0;
-
-}
-
-///////////////////////////////////
-// clear the ray variables
-
-void NoaaFslRadxFile::_clearRayVariables()
-
-{
-
-  _azimuth.clear();
-  _elevation.clear();
 
 }
 
 ///////////////////////////////////
 // read in ray variables
 
-int NoaaFslRadxFile::_readRayVariables()
+int NoaaFslRadxFile::_readAzEl()
 
 {
 
-  _clearRayVariables();
+  _azimuth.clear();
+  _elevation.clear();
   int iret = 0;
 
-  _readRayVar("radialAzim", _azimuthUnits, _azimuth);
-  if ((int) _azimuth.size() != _radialDim->size()) {
-    _addErrStr("ERROR - radialAzim variable required");
-    iret = -1;
+  // elevation
+  
+  Nc3Var *elevVar = _file.getNc3File()->get_var("radialElev");
+  if (elevVar == NULL) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  Cannot find elev angles variable, name: ", "radialElev");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
   }
   
-  _readRayVar("radialElev", _elevationUnits, _elevation);
-  if ((int) _elevation.size() != _radialDim->size()) {
-    _addErrStr("ERROR - Elevation variable required");
-    iret = -1;
+  if (elevVar->num_dims() < 1) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  radialElev variable has no dimensions");
+    return -1;
   }
-  
-  if (iret) {
-    _addErrStr("ERROR - NoaaFslRadxFile::_readRayVariables");
+  Nc3Dim *radialDim = elevVar->get_dim(0);
+  if (radialDim != _radialDim) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  elevations has incorrect dimension, name: ", radialDim->name());
     return -1;
   }
 
+  // read the elev array
+  
+  RadxArray<double> elev_;
+  double *elev = elev_.alloc(_nRadials);
+  if (elevVar->get(elev, _nRadials) == 0) {
+    _addErrStr("ERROdR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  Candnot read elevation angles variable: radialElev");
+    return -1;
+  }
+  for (size_t ii = 0; ii < _nRadials; ii++) {
+    _elevation.push_back(elev[ii]);
+  }
+
+  // azimuth
+  
+  Nc3Var *azVar = _file.getNc3File()->get_var("radialAzim");
+  if (azVar == NULL) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  Cannot find az angles variable, name: ", "radialAzim");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
+  }
+  
+  if (azVar->num_dims() < 1) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  radialAzim variable has no dimensions");
+    return -1;
+  }
+  if (radialDim != _radialDim) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  azimuth has incorrect dimension, name: ", radialDim->name());
+    return -1;
+  }
+
+  // read the az array
+  
+  RadxArray<double> az_;
+  double *az = az_.alloc(_nRadials);
+  if (azVar->get(az, _nRadials) == 0) {
+    _addErrStr("ERROdR - NoaaFslRadxFile::_readAzEl");
+    _addErrStr("  Candnot read azimuth angles variable: radialAzim");
+    return -1;
+  }
+  for (size_t ii = 0; ii < _nRadials; ii++) {
+    _azimuth.push_back(az[ii]);
+  }
+  
+  if (iret) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readAzEl");
+    return -1;
+  }
+  
   return 0;
 
 }
@@ -1858,6 +1904,7 @@ int NoaaFslRadxFile::_loadReadVolume()
 
   // add rays to vol - they will be freed by vol
 
+  cerr << "222222222222222222221111111111111111111" << endl;
   for (size_t ii = 0; ii < _raysVol.size(); ii++) {
     _readVol->addRay(_raysVol[ii]);
   }
@@ -1873,6 +1920,7 @@ int NoaaFslRadxFile::_loadReadVolume()
   
   // load the sweep information from the rays
 
+  cerr << "333333333333333333331111111111111111111" << endl;
   _readVol->loadSweepInfoFromRays();
 
   // constrain the sweep data as appropriate
@@ -1899,26 +1947,32 @@ int NoaaFslRadxFile::_loadReadVolume()
 
   // calibration
 
+  cerr << "444444444444444444441111111111111111111" << endl;
   RadxRcalib *calib = new RadxRcalib;
   calib->setRadarConstantH(_radarConst);
   _readVol->addCalib(calib);
 
   // load the volume information from the rays
 
+  cerr << "55555555555555555551111111111111111111" << endl;
   _readVol->loadVolumeInfoFromRays();
   
   // check for indexed rays, set info on rays
 
+  cerr << "66666666666666666661111111111111111111" << endl;
   _readVol->checkForIndexedRays();
 
   // compute fixed angles as mean angle from sweeps
   
+  cerr << "77777777777777771111111111111111111" << endl;
   _computeFixedAngles();
 
   // set the sweep mode from rays
   
+  cerr << "888888888888888881111111111111111111" << endl;
   _readVol->setSweepScanModeFromRayAngles();
     
+  cerr << "9999999999999991111111111111111111" << endl;
   return 0;
 
 }
