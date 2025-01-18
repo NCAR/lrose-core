@@ -1474,7 +1474,7 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
 
   Radx::fl64 missingVal = Radx::missingFl64;
@@ -1482,6 +1482,22 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
+  } else {
+    // check for -999.9 and -9999
+    double nMiss_999 = 0;
+    double nMiss_9999 = 0;
+    for (size_t ii = 0; ii < nGatesTot; ii++) {
+      if (fabs(data[ii] - -999.9) < 10) {
+        nMiss_999++;
+      } else if (fabs(data[ii] - -9999.0) < 10) { 
+        nMiss_9999++;
+      }
+    }
+    if (nMiss_999 > nMiss_9999) {
+      missingVal = -999.9;
+    } else if (nMiss_9999 > 0) {
+      missingVal = -9999.0;
+    }
   }
 
   // load field on rays
@@ -1555,8 +1571,24 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
+  } else {
+    // check for -999.9 and -9999
+    double nMiss_999 = 0;
+    double nMiss_9999 = 0;
+    for (size_t ii = 0; ii < nGatesTot; ii++) {
+      if (fabs(data[ii] - -999.9) < 10) {
+        nMiss_999++;
+      } else if (fabs(data[ii] - -9999.0) < 10) { 
+        nMiss_9999++;
+      }
+    }
+    if (nMiss_999 > nMiss_9999) {
+      missingVal = -999.9;
+    } else if (nMiss_9999 > 0) {
+      missingVal = -9999.0;
+    }
   }
-  
+
   // load field on rays
 
   for (size_t ii = 0; ii < _raysFile.size(); ii++) {
