@@ -182,7 +182,7 @@ private:
   Nc3Dim *_radialDim;  // "radial"
   Nc3Dim *_rangeDim; // "bin"
   Nc3Dim *_sweepDim; // "sweep"
-
+  
   // global att
 
   string _title;
@@ -286,11 +286,6 @@ private:
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(const string &name, string &units,
-                  vector<double> &vals, bool required = true);
-  
-  Nc3Var* _getRayVar(const string &name, bool required);
-
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName);
