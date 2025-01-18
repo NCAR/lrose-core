@@ -1109,7 +1109,7 @@ int NoaaFslRadxFile::_readTimes()
     sumDeltaTime += deltaTime;
     sumDeltaAz += deltaAz;
   } // ii
-  double meanDeltaTime = sumDeltaTime / _nRadials;
+  double meanDeltaTime = sumDeltaTime / (_nRadials - 1.0);
   _azSpeedDegPerSec = sumDeltaAz / sumDeltaTime;
 
   // set ray times
@@ -1117,7 +1117,9 @@ int NoaaFslRadxFile::_readTimes()
   _dTimes.clear();
   double rayTime = _startTime + meanDeltaTime / 2.0;
   for (size_t ii = 0; ii < _nTimes; ii++) {
-    _rayTimes.push_back(rayTime);
+    time_t secs = rayTime;
+    double subSecs = rayTime - secs;
+    _rayTimes.push_back(RadxTime(secs, subSecs));
     _dTimes.push_back(rayTime);
     rayTime += meanDeltaTime;
   }
@@ -1240,13 +1242,15 @@ int NoaaFslRadxFile::_createRays(const string &path)
     ray->setTime(_rayTimes[rayIndex]);
     
     // sweep info
-    
-    ray->setSweepNumber(rayIndex / _nRadials);
-    ray->setAzimuthDeg(_azimuth[rayIndex]);
-    ray->setElevationDeg(_elevation[rayIndex]);
-    
+
+    int sweepNum = rayIndex / _nRadials;
+    ray->setSweepNumber(sweepNum);
+
+    int radialNum = rayIndex % _nRadials;
+    ray->setElevationDeg(_elevList[sweepNum]);
+    ray->setAzimuthDeg(_azimuth[radialNum]);
+
     ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    // ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
     ray->setPrtMode(Radx::PRT_MODE_FIXED);
     
     // add to ray vector
