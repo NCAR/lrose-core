@@ -362,12 +362,276 @@ int MetRecord::getHorizPlane()
   }
   iret_h_mdvx_read = iret;
 
-  // h_mdvx->readVolume();
+  if (iret) {
 
-  // The check_for_io function (thread) will poll for completion of the data request.
-  // Once the data's in or ithe request times out, this data is marked as valid
+    // error - indicate data is no longer pending
+
+    // Save the master header for the file, even if we couldn't
+    // get data for this field.  This is needed in case we are
+    // dealing with forecast data
+      
+    h_data = NULL;
+    h_fl32_data = NULL;
+    h_mhdr = h_mdvx->getMasterHeader();
+    h_data_valid = 1;
+    last_collected = time(0);
+      
+    gd.io_info.busy_status = 0;
+    gd.io_info.outstanding_request = 0;
+    gd.io_info.request_type = 0;
+    gd.h_win.redraw_flag[gd.io_info.page] = 1;
+
+    cerr << "1111111111111111111 requestHorizPlane ERROR" << endl;
+    return -1;
+    
+  } else if (h_mdvx->getFieldByNum(0) == NULL) {
+    
+    gd.io_info.busy_status = 0;
+    gd.io_info.outstanding_request = 0;
+    gd.io_info.request_type = 0;
+    gd.h_win.redraw_flag[gd.io_info.page] = 1;
+    h_data_valid = 1;
+    last_collected = time(0);
+
+    cerr << "1111111111111111111 requestHorizPlane ERROR" << endl;
+    return -1;
+
+  }
+
+  // data is in
   
+  cerr << "111111111111111111111111111111111111111 requestHorizPlane GOT DATA" << endl;
+  
+  // Indicate data update is in progress.
+  
+  gd.io_info.busy_status = 1;
+  
+  MdvxField *hfld = h_mdvx->getFieldByNum(0);
+  Mdvx::field_header_t fh = hfld->getFieldHeader();
+  if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
+
+    *h_mdvx_int16 = *hfld; // Copy for INT16 data
+    
+    if(h_vcm.nentries < 2 || fh.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+      
+      h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE);
+
+    } else {
+      
+      // Convert the copy to - Decompressed INT16 - Covering the range of the colorscale
+      double range = (h_vcm.vc[h_vcm.nentries-1]->max - h_vcm.vc[0]->min);
+      double scale = range / (MAX_COLOR_CELLS -2);
+      double bias = h_vcm.vc[0]->min - (2 * scale); // Preserve 0, 1 as legitimate NAN values
+        
+      h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE,
+                                    Mdvx::SCALING_SPECIFIED,scale,bias);
+    }
+      
+    // Record where int8 data is in memory. - Used for fast polygon fills.
+    h_data = (unsigned short *) h_mdvx_int16->getVol();
+    
+    // Convert the AS-IS to 32 bits float. - Used for Contouring, Data reporting.
+    (h_mdvx->getFieldByNum(0))->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+    // Record where float data is in memory.
+    h_fl32_data = (fl32  *) h_mdvx->getFieldByNum(0)->getVol();
+      
+    // Find Headers for quick reference
+    h_mhdr = h_mdvx->getMasterHeader();
+    h_fhdr = h_mdvx_int16->getFieldHeader();
+    h_vhdr = h_mdvx_int16->getVlevelHeader();
+
+  } else {
+      
+    // Decompress
+    hfld->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_NONE);
+      
+    // Record where data is in memory. 
+    h_data = (unsigned short *) hfld->getVol();
+      
+    // Record where float data is in memory.
+    h_fl32_data = (fl32  *) hfld->getVol();
+      
+    // Find Headers for quick reference
+    h_mhdr = h_mdvx->getMasterHeader();
+    h_fhdr = hfld->getFieldHeader();
+    h_vhdr = hfld->getVlevelHeader();
+
+  } // compression
+    
+  // Init projection
+
+  proj->init(h_fhdr);
+    
+  // condition longitudes to be in same hemisphere
+  // as origin
+  proj->setConditionLon2Origin(true);
+    
+  // Implemented for MOBILE RADARS - 
+  if(_params.domain_follows_data &&
+     this == gd.mrec[gd.h_win.page] ) { // Only for the primary field
+    double dx,locx;
+    double dy,locy;
+    int index = gd.h_win.zoom_level;
+      
+    if(h_fhdr.proj_origin_lat != gd.h_win.origin_lat ||
+       h_fhdr.proj_origin_lon != gd.h_win.origin_lon) {
+        
+      dx = gd.h_win.zmax_x[index] - gd.h_win.zmin_x[index];
+      dy = gd.h_win.zmax_y[index] - gd.h_win.zmin_y[index];
+        
+      switch(gd.display_projection) {
+        case Mdvx::PROJ_LATLON:
+          gd.h_win.origin_lat = h_fhdr.proj_origin_lat;
+          gd.h_win.origin_lon = h_fhdr.proj_origin_lon;
+            
+          gd.h_win.zmin_x[index] = h_fhdr.proj_origin_lon - (dx / 2.0);
+          gd.h_win.zmax_x[index] = h_fhdr.proj_origin_lon + (dx / 2.0);
+          gd.h_win.zmin_y[index] = h_fhdr.proj_origin_lat - (dy / 2.0);
+          gd.h_win.zmax_y[index] = h_fhdr.proj_origin_lat + (dy / 2.0);
+            
+          break;
+            
+        default:
+          gd.proj.latlon2xy(h_fhdr.proj_origin_lat,h_fhdr.proj_origin_lon,locx,locy);
+            
+          gd.h_win.zmin_x[index] = locx - (dx / 2.0);
+          gd.h_win.zmax_x[index] = locx + (dx / 2.0);
+          gd.h_win.zmin_y[index] = locy - (dy / 2.0);
+          gd.h_win.zmax_y[index] = locy + (dy / 2.0);
+            
+          break;
+            
+      }
+      /* Set current area to our indicated zoom area */
+      gd.h_win.cmin_x = gd.h_win.zmin_x[index];
+      gd.h_win.cmax_x = gd.h_win.zmax_x[index];
+      gd.h_win.cmin_y = gd.h_win.zmin_y[index];
+      gd.h_win.cmax_y = gd.h_win.zmax_y[index];
+	
+      reset_time_list_valid_flags();
+      reset_data_valid_flags(1,0);
+      reset_terrain_valid_flags(1,0);
+      set_redraw_flags(1,0);
+      h_data_valid = 1;  // This field is still valid, though
+      setTimeListValid(true);
+	
+	
+    }
+  }
+  
+  if (gd.debug1) {
+    cerr << "nx, ny: "
+         << h_fhdr.nx << ", "
+         << h_fhdr.ny << endl;
+    cerr << "dx, dy: "
+         << h_fhdr.grid_dx << ", "
+         << h_fhdr.grid_dy << endl;
+    cerr << "minx, miny: "
+         << h_fhdr.grid_minx << ", "
+         << h_fhdr.grid_miny << endl;
+    cerr << "maxx, maxy: "
+         << h_fhdr.grid_minx + (h_fhdr.nx - 1) * h_fhdr.grid_dx << ", "
+         << h_fhdr.grid_miny + (h_fhdr.ny - 1) * h_fhdr.grid_dy << endl;
+  }
+    
+  // Punt and use the field headers if the file headers are not avail
+  if(hfld->getFieldHeaderFile() == NULL) 
+    ds_fhdr = (hfld->getFieldHeader());
+  else 
+    ds_fhdr = *(hfld->getFieldHeaderFile());
+    
+  if(hfld->getVlevelHeaderFile() == NULL) 
+    ds_vhdr = (hfld->getVlevelHeader());
+  else 
+    ds_vhdr = *(hfld->getVlevelHeaderFile());
+    
+  // Recompute the color scale lookup table if necessary
+  if(h_fhdr.scale != h_last_scale ||
+     h_fhdr.bias != h_last_bias   ||
+     h_fhdr.missing_data_value != h_last_missing   ||
+     h_fhdr.bad_data_value != h_last_bad ||
+     h_fhdr.transform_type != h_last_transform ) {
+      
+    if(auto_scale)
+      autoscale_vcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
+      
+    if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
+#ifdef NOTYET
+      /* Remap the data values onto the colorscale */
+      setup_color_mapping(&(h_vcm),
+                          h_fhdr.scale,
+                          h_fhdr.bias,
+                          h_fhdr.transform_type,
+                          h_fhdr.bad_data_value,
+                          h_fhdr.missing_data_value);
+#endif
+    }
+    // Update last values
+    h_last_scale = h_fhdr.scale;
+    h_last_bias = h_fhdr.bias;
+    h_last_missing = h_fhdr.missing_data_value;
+    h_last_bad = h_fhdr.bad_data_value;
+    h_last_transform = h_fhdr.transform_type;
+  }
+    
+  // Compute the vertical levels 
+  plane = 0;
+  for(int i=0; i < ds_fhdr.nz; i++) { 
+    // Find out which plane we received
+    if(ds_vhdr.level[i] == h_vhdr.level[0]) plane = i;
+    if(i == 0) { // Lowest plane 
+      double delta = (ds_vhdr.level[i+1] - ds_vhdr.level[i]) / 2.0;
+      vert[i].min = ds_vhdr.level[0] - delta;
+      vert[i].cent = ds_vhdr.level[0];
+      vert[i].max = ds_vhdr.level[0] + delta;
+        
+    } else if (i == ds_fhdr.nz -1) { // highest plane
+      double delta = (ds_vhdr.level[i] - ds_vhdr.level[i-1]) / 2.0;
+      vert[i].min = ds_vhdr.level[i] - delta;
+      vert[i].cent = ds_vhdr.level[i];
+      vert[i].max = ds_vhdr.level[i] + delta;
+        
+    } else { // Middle planes
+      double delta = (ds_vhdr.level[i] - ds_vhdr.level[i-1]) / 2.0;
+      vert[i].min = ds_vhdr.level[i] - delta;
+      vert[i].cent = ds_vhdr.level[i];
+        
+      delta = (ds_vhdr.level[i+1] - ds_vhdr.level[i]) / 2.0;
+      vert[i].max = ds_vhdr.level[i] + delta;
+    }
+  }
+    
+    
+  // Record the dimensional Units of the volume
+  STRcopy(units_label_cols,
+          h_mdvx->projType2XUnits(h_fhdr.proj_type),LABEL_LENGTH);
+  STRcopy(units_label_rows,
+          h_mdvx->projType2YUnits(h_fhdr.proj_type),LABEL_LENGTH);
+  STRcopy(units_label_sects,
+          h_mdvx->vertTypeZUnits(h_vhdr.type[0]),LABEL_LENGTH);
+    
+  // Record the date
+  h_date.set(h_mhdr.time_centroid);
+  // UTIMunix_to_date(h_mhdr.time_centroid,&h_date);
+    
+  h_data_valid = 1;
+  last_collected = time(0);
+  gd.h_win.redraw_flag[gd.io_info.page] = 1;
+  // Indicate its safe to use the data
+  gd.io_info.busy_status = 0;
+  // Indicate data is no longer pending
+  gd.io_info.outstanding_request = 0;
+  gd.io_info.request_type = 0;
+    
+  if (_params.show_data_messages) {
+    gui_label_h_frame("Done",-1);
+  } else {
+    set_busy_state(0);
+  }
+
+
   cerr << "1111111111111111111 requestHorizPlane END" << endl;
+
   return 0;
   
 }
@@ -676,13 +940,13 @@ int MetRecord::_getTimeList(time_t start_time,
     _timeListValid = true;
   }
 
-  {
-    const vector<time_t> &validTimes = h_mdvx->getValidTimes();
-    for (size_t ii = 0; ii < validTimes.size(); ii++) {
-      cerr << "1111111111111 ii, validTime: " << ii
-           << ", " << DateTime::strm(validTimes[ii]) << endl;
-    }
-  }
+  // {
+  //   const vector<time_t> &validTimes = h_mdvx->getValidTimes();
+  //   for (size_t ii = 0; ii < validTimes.size(); ii++) {
+  //     cerr << "1111111111111 ii, validTime: " << ii
+  //          << ", " << DateTime::strm(validTimes[ii]) << endl;
+  //   }
+  // }
 
   return 0;  // return from this request.
   

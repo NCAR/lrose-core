@@ -387,12 +387,12 @@ void HorizWidget::adjustPixelScales()
 
 void HorizWidget::paintEvent(QPaintEvent *event)
 {
-
-  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
-
+  
   if (!_renderFrame) {
     return;
   }
+
+  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
 
   if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
@@ -404,15 +404,11 @@ void HorizWidget::paintEvent(QPaintEvent *event)
   // fill canvas with background color
   
   QPainter painter(this);
-  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
   _zoomWorld.fillCanvas(painter, _params.background_color);
-  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
   
   // render data grids
   
-  cerr << "ZZZZZZZZZZZZZZZZZ" << endl;
   _renderGrids(painter);
-  cerr << "ZZZZZZZZZZZZZZZZZ" << endl;
   
   // render invalid images
   
@@ -1382,8 +1378,8 @@ void HorizWidget::_renderGrids(QPainter &painter)
             "Rendering Horizontal movie_frame %d - field: %d\n",
             _renderFrameIndex, _renderFramePage);
   }
-  
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHH HorizWidget::_renderGrids" << endl;
+
+  cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>> HorizWidget::_renderGrids" << endl;
   _controlRendering(painter,
                     _renderFramePage,
                     gd.movie.frame[_renderFrameIndex].time_start,
@@ -1729,7 +1725,7 @@ int HorizWidget::_renderGrid(QPainter &painter,
 {
   
   if (mr == NULL) {
-    cerr << "KKKKKKKKKKKKKKKKKKKk" << endl;
+    cerr << "mr == NULL - NNNNNNNNNNNNNNNNNNNNNNNNN" << endl;
     return CIDD_SUCCESS;
   }
     

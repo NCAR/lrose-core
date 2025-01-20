@@ -275,12 +275,12 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (_timerEventCount == 10) {
     _placeTimeControl();
   }
-  
+
   // read click point info from FMQ
   
   _readClickPoint();
   
-  // field change?
+  // field change? request new data
 
   if (_fieldNumChanged) {
     int index = gd.movie.cur_frame;
@@ -307,28 +307,30 @@ void GuiManager::timerEvent(QTimerEvent *event)
   }
 
   // handle legacy cidd timer event
-  
+
+  // _autoCreateFunc();
   // _ciddTimerFunc(event);
-  
-  if (gd.redraw_horiz) {
+
+  // check for new data
+
+  MetRecord *mr = gd.mrec[_fieldNum];
+  if (mr->isNewH()) {
+    int index = gd.movie.cur_frame;
+    if (gd.movie.cur_frame < 0) {
+      index = gd.movie.num_frames - 1;
+    }
+    _horiz->setFrameForRendering(gd.h_win.page, index);
+    cerr << endl << endl << endl;
+    cerr << endl << endl << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
     _horiz->update();
     gd.redraw_horiz = false;
   }
-
-#ifdef JUNK
-  if (_timerEventCount % 100 == 0) {
-    cerr << "888888888888888 main width, height: " << width() << ", " << height() << endl;
-    cerr << "888888888888888 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
-    cerr << "888888888888888 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  }
   
-  if (_timerEventCount == 650) {
-    resize(width() + 1, height() + 1);
-    resize(width() - 1, height() - 1);
-    cerr << "777777777777778 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
-    cerr << "777777777777778 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  }
-#endif
+  // if (gd.redraw_horiz) {
+  //   _horiz->update();
+  //   gd.redraw_horiz = false;
+  // }
 
   // if (_archiveMode) {
   //   if (_archiveRetrievalPending) {
@@ -338,33 +340,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // } else {
   //   _handleRealtimeData(event);
   // }
-  
-  // handle image creation
-
-  if (_params.images_auto_create) {
-
-    // if we are just creating files in archive mode
-    // and then exiting, do that now
-    
-    if ((_params.images_creation_mode ==
-         Params::CREATE_IMAGES_THEN_EXIT) ||
-        (_params.images_creation_mode ==
-         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
-      _createArchiveImageFiles();
-      close();
-      return;
-    }
-    
-    // if we are creating files in realtime mode, do that now
-    
-    if (_params.images_creation_mode ==
-        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRealtimeData(event);
-      _createRealtimeImageFiles();
-      return;
-    }
-    
-  } // if (_params.images_auto_create)
   
 }
 
@@ -1248,7 +1223,7 @@ void GuiManager::_changeVlevelRadioButton(int increment)
 /////////////////////////////
 // get data in realtime mode
 
-void GuiManager::_handleRealtimeData(QTimerEvent * event)
+void GuiManager::_handleRealtimeData()
 
 {
 
@@ -2444,6 +2419,7 @@ void GuiManager::_showTimeControl()
 
 void GuiManager::_placeTimeControl()
 {
+
   if (_timeControl) {
     if (!_timeControlPlaced) {
       int topFrameWidth = _timeControl->geometry().y() - _timeControl->y();
@@ -2459,6 +2435,23 @@ void GuiManager::_placeTimeControl()
       }
     }
   }
+
+#ifdef JUNK
+  if (_timerEventCount % 100 == 0) {
+    cerr << "888888888888888 main width, height: " << width() << ", " << height() << endl;
+    cerr << "888888888888888 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
+    cerr << "888888888888888 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  }
+  
+  if (_timerEventCount == 650) {
+    resize(width() + 1, height() + 1);
+    resize(width() - 1, height() - 1);
+    cerr << "777777777777778 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
+    cerr << "777777777777778 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  }
+
+#endif
+
 }
 
 // BoundaryEditor circle (radius) slider has changed value
@@ -3625,6 +3618,11 @@ void GuiManager::_about()
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Legacy - to be remove later
+//////////////////////////////////////////////////////////////////////////////
+
+
 /************************************************************************
  * TIMER_FUNC: This routine acts as the main branch point for most of the
  * threads involved in the display. This function gets called through
@@ -3637,6 +3635,39 @@ void GuiManager::_about()
  * Finally Background Rendering is scheduled
  *
  */
+
+void GuiManager::_autoCreateFunc()
+{
+
+    // handle image creation
+
+  if (_params.images_auto_create) {
+
+    // if we are just creating files in archive mode
+    // and then exiting, do that now
+    
+    if ((_params.images_creation_mode ==
+         Params::CREATE_IMAGES_THEN_EXIT) ||
+        (_params.images_creation_mode ==
+         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
+      _createArchiveImageFiles();
+      close();
+      return;
+    }
+    
+    // if we are creating files in realtime mode, do that now
+    
+    if (_params.images_creation_mode ==
+        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+      _handleRealtimeData();
+      _createRealtimeImageFiles();
+      return;
+    }
+    
+  } // if (_params.images_auto_create)
+
+}
+
 
 void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 {

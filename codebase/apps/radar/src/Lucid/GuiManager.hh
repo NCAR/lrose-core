@@ -388,8 +388,8 @@ private:
 
   // data retrieval
 
-  void _handleRealtimeData(QTimerEvent * event);
-  void _handleArchiveData(/* QTimerEvent * event */);
+  void _handleRealtimeData();
+  void _handleArchiveData();
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
@@ -448,6 +448,7 @@ private:
 
   // legacy
   
+  void _autoCreateFunc();
   void _ciddTimerFunc(QTimerEvent *event);
 
 private slots:

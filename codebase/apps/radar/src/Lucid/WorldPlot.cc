@@ -2372,7 +2372,7 @@ void WorldPlot::renderGridRect(int page,
   
 {
 
-  cerr << "====>> rrrrrrrrrrrrrrrrrrrrrrr page: " << page << endl;
+  cerr << "====>> KKKKKKKKKKKKKKKKKKKKKK page: " << page << endl;
 
   // the data projection type and plot projection type are the same
   // so we can use the (x,y) locations unchanged
@@ -2380,20 +2380,24 @@ void WorldPlot::renderGridRect(int page,
   // compute the location of the vertices
   // these are the cell limits in (x, y)
 
-  cerr << "1111111111111111111111111111111111111" << endl;
-  
   vector< vector<QPointF> > vertices;
 
+  int nx = mr->h_fhdr.nx;
+  int ny = mr->h_fhdr.ny;
   double dy = mr->h_fhdr.grid_dy;
   double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
   double dx = mr->h_fhdr.grid_dx;
   double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
 
+  cerr << "====>> nx, ny: " << nx << ", " << ny << endl;
+  cerr << "====>> dx, dy: " << dx << ", " << dy << endl;
+  cerr << "====>> lowx, lowy: " << lowx << ", " << lowy << endl;
+
   double yy = lowy;
-  for(int iy = 0; iy <= mr->h_fhdr.ny; iy++, yy += dy) {
+  for(int iy = 0; iy <= ny; iy++, yy += dy) {
     vector<QPointF> row;
     double xx = lowx;
-    for(int ix = 0; ix <= mr->h_fhdr.nx; ix++, xx += dx) {
+    for(int ix = 0; ix <= nx; ix++, xx += dx) {
       QPointF pt = getPixelPointF(xx, yy);
       row.push_back(pt);
     } // ix
