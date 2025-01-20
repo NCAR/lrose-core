@@ -172,161 +172,11 @@ int MetRecord::requestHorizPlane(time_t start_time,
   
   if (!_checkRequestChangedH(_startTime.utime(), _endTime.utime())) {
     // no changes to the request, use what we have, mark as new
-    cerr << "1111111111111111111 requestHorizPlane _setNewH(true)" << endl;
+    cerr << "1111111111111111111 ==>>>> requestHorizPlane - no change <<<<==" << endl;
     _setNewH(true);
     return 0;
   }
-  
-  // Construct URL, check is valid.
-  
-  string fullUrl(_getFullUrl());
-  DsURL URL(fullUrl);  
-  if(!URL.isValid()) {
-    cerr << "ERROR - MetRecord::requestHorizPlane, field: " << _getFieldName() << endl;
-    cerr << "  Bad URL: " << fullUrl << endl;
-    h_data_valid = 1;
-    cerr << "1111111111111111111 requestHorizPlane bad URL: " << _getFullUrl() << endl;
-    return -1;
-  }
 
-  // turn off threading, we are using QThread
-  h_mdvx->setThreadingOff();
-  if(gd.debug1) {
-    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, fullUrl.c_str());
-    // Disable threading while in debug mode
-  }
-  
-  // Gather a data index for this field  
-  // TODO - check this!!!
-  
-  if(!_timeListValid) {
-    if (_getTimeList(start_time, end_time,  page)) {
-      cerr << "1111111111111111111 requestHorizPlane getTimeList() failed" << endl;
-      return -1;
-    }
-  }
-  
-  // get field name
-  
-  string fieldName(_getFieldName());
-  
-  // add field to request
-  
-  h_mdvx->clearRead(); 
-  h_mdvx->addReadField(fieldName);
-  
-  // set up read
-  
-  gd.data_request_time = _timeReq.utime();
-  
-  switch(_params.gather_data_mode ) {
-    
-    case Params::CLOSEST_TO_FRAME_CENTER:
-      if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
-        h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            gd.model_run_time,
-                            _timeReq.utime() - gd.model_run_time);
-      } else {
-        h_mdvx->setReadTime(Mdvx::READ_CLOSEST,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            _timeReq.utime());
-      }
-      break;
-
-    case Params::FIRST_BEFORE_END_OF_FRAME:
-      if(gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
-        h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            gd.model_run_time,
-                            (_timeReq.utime() - gd.model_run_time));
-      } else {
-        h_mdvx->setReadTime(Mdvx::READ_FIRST_BEFORE,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            _timeReq.utime() + 1, 0);
-      }
-      
-      if(gd.debug1) {
-        fprintf(stderr,
-                "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
-                fullUrl.c_str(), fieldName.c_str(),
-                (int) (60 * time_allowance), end_time + 1);
-      }
-      break;
-
-    case Params::FIRST_AFTER_START_OF_FRAME:
-      if(gd.model_run_time != 0 && h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
-        h_mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            gd.model_run_time,
-                            (_timeReq.utime() - gd.model_run_time));
-      } else {
-        h_mdvx->setReadTime(Mdvx::READ_FIRST_AFTER,
-                            fullUrl,
-                            (int) (60 * time_allowance),
-                            _timeReq.utime()-1, 0);
-      }
-      if(gd.debug1) {
-        fprintf(stderr,
-                "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
-                fullUrl.c_str(), fieldName.c_str(),
-                (int) (60 * time_allowance), start_time - 1);
-      }
-      break;
-
-  } // gather_data_mode
-
-  // vlevel
-  
-  h_mdvx->setReadVlevelLimits(_vLevelMinReq, _vLevelMaxReq);
-  if(composite_mode) {
-    // Ask for data that covers the whole vertical domain 
-    h_mdvx->setReadComposite();
-  }
-
-  // zoom
-
-  h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat(),
-                             _zoomBoxReq.getMinLon(),
-                             _zoomBoxReq.getMaxLat(),
-                             _zoomBoxReq.getMaxLon());
-  
-  // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
-  if (!_params.do_not_decimate_on_mdv_request) {
-    h_mdvx->setReadDecimate(gd.h_win.img_dim.width * gd.h_win.img_dim.width);
-  }
-  
-  h_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
-  h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
-  if(_params.request_compressed_data) {
-    if(_params.request_gzip_vol_compression) {
-      h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
-    } else {
-      h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
-    }
-  }
-
-  // request full field header for vert info
-
-  h_mdvx->setReadFieldFileHeaders();
-
-  gd.io_info.mode = DSMDVX_DATA;
-  gd.io_info.request_type = HORIZ_REQUEST;    /* Horizontal data access */
-  gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
-  gd.io_info.busy_status = 0;
-  gd.io_info.page = page;
-  gd.io_info.outstanding_request = 1;
-  gd.io_info.mr = this;
-  
-  //if(gd.debug1) {
-  fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, fullUrl.c_str());
-  // }
-  
   // Initiate the request in thread
 
   cerr << "1111111111111111111 requestHorizPlane before startReadVolH" << endl;
@@ -347,10 +197,10 @@ int MetRecord::requestHorizPlane(time_t start_time,
  * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
  */
 
-int MetRecord::_getHorizPlane()
+int MetRecord::getHorizPlane()
 {
 
-  cerr << "JJJJJJJJJJJJJJJJ 11111111111 MetRecord::_getHorizPlane()" << endl;
+  cerr << "JJJJJJJJJJJJJJJJ 11111111111 MetRecord::getHorizPlane()" << endl;
   
   // Construct URL, check is valid.
   
@@ -503,11 +353,15 @@ int MetRecord::_getHorizPlane()
   // }
   
   // Initiate the request in thread
-
-  cerr << "1111111111111111111 requestHorizPlane before startReadVolH" << endl;
-  startReadVolH();
-  cerr << "1111111111111111111 requestHorizPlane after startReadVolH" << endl;
   
+  int iret = h_mdvx->readVolume();
+  if (iret) {
+    cerr << "1111111 MetRecord::getHorizPlane, iret: " << ", " << iret << endl;
+    qDebug() << "MetRecord::getHorizPlane returned, iret: " << ", " << iret;
+    qDebug() << h_mdvx->getErrStr();
+  }
+  iret_h_mdvx_read = iret;
+
   // h_mdvx->readVolume();
 
   // The check_for_io function (thread) will poll for completion of the data request.
@@ -822,6 +676,14 @@ int MetRecord::_getTimeList(time_t start_time,
     _timeListValid = true;
   }
 
+  {
+    const vector<time_t> &validTimes = h_mdvx->getValidTimes();
+    for (size_t ii = 0; ii < validTimes.size(); ii++) {
+      cerr << "1111111111111 ii, validTime: " << ii
+           << ", " << DateTime::strm(validTimes[ii]) << endl;
+    }
+  }
+
   return 0;  // return from this request.
   
   // When the thread is done the check_for_io function will gather and store the
@@ -1090,13 +952,9 @@ ReadVolH::ReadVolH(MetRecord* parentObject, QObject* parent) :
 void ReadVolH::doRead() {
   cerr << "111111111 ReadVolH thread started. Parent object:" << _mr << endl;
   qDebug() << "ReadVolH thread started. Parent object:" << _mr;
-  int iret = _mr->h_mdvx->readVolume();
+  int iret = _mr->getHorizPlane();
   cerr << "1111111 ReadVolH returned, iret: " << ", " << iret << endl;
   qDebug() << "ReadVolH returned, iret: " << ", " << iret;
-  if (iret) {
-    qDebug() << _mr->h_mdvx->getErrStr();
-  }
-  _mr->iret_h_mdvx_read = iret;
   emit readDone();
 }
 

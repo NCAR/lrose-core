@@ -57,10 +57,11 @@ static int _mdvRequestVertPlane(MetRecord *mr, time_t start_time,time_t end_time
 int gather_hwin_data(int page, time_t start_time, time_t end_time)
 {
 
+  return 0;
+  
   time_t now = time(0);
   /* Check to make sure we are not currently waiting on an I/O request */
   if(gd.io_info.outstanding_request > 0) {
-    // cerr << "ddddddddddddddd111111111111111" << endl;
     if(now > gd.io_info.expire_time) {
       cancel_pending_request();
       return CIDD_FAILURE;
@@ -71,30 +72,28 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   // MAIN GRID
   MetRecord *mr = gd.mrec[page];    /* get pointer to data record */
   if(mr->h_data_valid == 0) {
-    // cerr << "ddddddddddddddd22222222222221111" << endl;
-    if(gd.debug1) {
-      fprintf(stderr,
-              "Requesting Data Field %d data time %s %s\n",
-              page, utimstr(start_time), utimstr(end_time));
-    }
+    // if(gd.debug1) {
+    //   fprintf(stderr,
+    //           "Requesting Data Field %d data time %s %s\n",
+    //           page, utimstr(start_time), utimstr(end_time));
+    // }
     gd.data_status_changed = 0;
     if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
       return CIDD_FAILURE;
     } else {
       return INCOMPLETE;
     }
-    // cerr << "ddddddddddddddd333333333333333" << endl;
   }
 
   // TERRAIN GRID
   if(gd.layers.earth.terrain_active && mr->ds_fhdr.nz > 1) {
     mr = gd.layers.earth.terr;    /* get pointer to data record */
     if(mr->h_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr,
-                "Requesting Terrain data time %ld %ld\n",
-                start_time, end_time);
-      }
+      // if(gd.debug1) {
+      //   fprintf(stderr,
+      //           "Requesting Terrain data time %ld %ld\n",
+      //           start_time, end_time);
+      // }
       gd.data_status_changed = 0;
       if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
         return CIDD_FAILURE;
@@ -108,11 +107,11 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
   if(gd.layers.earth.landuse_active) {
     mr = gd.layers.earth.land_use;    /* get pointer to data record */
     if(mr->h_data_valid == 0) {
-      if(gd.debug1) {
-        fprintf(stderr,
-                "Requesting Landuse data time %ld %ld\n",
-                start_time,end_time);
-      }
+      // if(gd.debug1) {
+      //   fprintf(stderr,
+      //           "Requesting Landuse data time %ld %ld\n",
+      //           start_time,end_time);
+      // }
       gd.data_status_changed = 0;
       if(_mdvRequestHorizPlane(mr,start_time,end_time,page) < 0) {
         return CIDD_FAILURE;
@@ -127,11 +126,11 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
     if(gd.layers.overlay_field_on[i]) {
       mr = gd.mrec[gd.layers.overlay_field[i]];
       if(mr->h_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr,
-                  "Requesting Overlay Field %d data\n",
-                  gd.layers.overlay_field[i]);
-        }
+        // if(gd.debug1) {
+        //   fprintf(stderr,
+        //           "Requesting Overlay Field %d data\n",
+        //           gd.layers.overlay_field[i]);
+        // }
         gd.data_status_changed = 0;
         _mdvRequestHorizPlane(mr,start_time,end_time,page);
         return INCOMPLETE;
@@ -144,11 +143,11 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
     if(gd.layers.cont[i].active) {
       mr = gd.mrec[gd.layers.cont[i].field];
       if(mr->h_data_valid == 0) {
-        if(gd.debug1) {
-          fprintf(stderr,
-                  "Requesting Contour Layer %d, field %d data\n",
-                  i, gd.layers.cont[i].field);
-        }
+        // if(gd.debug1) {
+        //   fprintf(stderr,
+        //           "Requesting Contour Layer %d, field %d data\n",
+        //           i, gd.layers.cont[i].field);
+        // }
         gd.data_status_changed = 0;
         _mdvRequestHorizPlane(mr,start_time,end_time,page);
         return INCOMPLETE;
@@ -177,7 +176,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
     if(gd.layers.wind_vectors  && gd.layers.wind[i].active ) {
       mr = gd.layers.wind[i].wind_u;
       if(mr->h_data_valid == 0) {
-        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - U\n", i);
+        // if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - U\n", i);
         gd.data_status_changed = 0;
         _mdvRequestHorizPlane(mr,start_time,end_time,page);
         return INCOMPLETE;
@@ -185,7 +184,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
     
       mr = gd.layers.wind[i].wind_v;
       if(mr->h_data_valid == 0) {
-        if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - V\n", i);
+        // if(gd.debug1) fprintf(stderr, "Requesting Wind %d data - V\n", i);
         gd.data_status_changed = 0;
         _mdvRequestHorizPlane(mr,start_time,end_time,page);
         return INCOMPLETE;
@@ -194,7 +193,7 @@ int gather_hwin_data(int page, time_t start_time, time_t end_time)
       mr = gd.layers.wind[i].wind_w;
       if(mr != NULL) {
         if(mr->h_data_valid == 0) {
-          if(gd.debug1) fprintf(stderr, "Requesting Wind %d  data - W\n", i);
+          // if(gd.debug1) fprintf(stderr, "Requesting Wind %d  data - W\n", i);
           gd.data_status_changed = 0;
           _mdvRequestHorizPlane(mr,start_time,end_time,page);
           return INCOMPLETE;
@@ -434,11 +433,11 @@ int _mdvRequestHorizPlane(MetRecord *mr,
   start_time += (int) (mr->time_offset * 60);
   end_time += (int) (mr->time_offset * 60);
   
-  if(gd.debug1) {
-    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
-    // Disable threading while in debug mode
-    mr->h_mdvx->setThreadingOff();
-  }
+  // if(gd.debug1) {
+  //   fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
+  //   // Disable threading while in debug mode
+  //   mr->h_mdvx->setThreadingOff();
+  // }
 
   // Gather a data index for this field  
   if(!mr->getTimeListValid()) {
@@ -492,12 +491,12 @@ int _mdvRequestHorizPlane(MetRecord *mr,
                                 end_time + 1, 0);
       }
       
-      if(gd.debug1) {
-        fprintf(stderr,
-                "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
-                url.c_str(), fieldName.c_str(),
-                (int) (60 * mr->time_allowance), end_time + 1);
-      }
+      // if(gd.debug1) {
+      //   fprintf(stderr,
+      //           "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
+      //           url.c_str(), fieldName.c_str(),
+      //           (int) (60 * mr->time_allowance), end_time + 1);
+      // }
       break;
 
     case Params::FIRST_AFTER_START_OF_FRAME:
@@ -514,12 +513,12 @@ int _mdvRequestHorizPlane(MetRecord *mr,
                                 (int) (60 * mr->time_allowance),
                                 start_time-1, 0);
       }
-      if(gd.debug1) {
-        fprintf(stderr,
-                "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
-                url.c_str(), fieldName.c_str(),
-                (int) (60 * mr->time_allowance), start_time - 1);
-      }
+      // if(gd.debug1) {
+      //   fprintf(stderr,
+      //           "{ READ_VOLUME_REQUEST, \"%s\", \"%s\", %d, %ld },\n",
+      //           url.c_str(), fieldName.c_str(),
+      //           (int) (60 * mr->time_allowance), start_time - 1);
+      // }
       break;
 
   } // gather_data_mode
@@ -579,9 +578,9 @@ int _mdvRequestHorizPlane(MetRecord *mr,
   gd.io_info.outstanding_request = 1;
   gd.io_info.mr = mr;
   
-  if(gd.debug1) {
-    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
-  }
+  // if(gd.debug1) {
+  //   fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
+  // }
   
   // Initiate the request - This becomes threaded if not in debug mode.
   
