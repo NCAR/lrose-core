@@ -212,6 +212,9 @@ private:
 
   // data request details
   
+  DateTime _startTime, _endTime;
+  int _page;
+
   DateTime _timeReq;
   ZoomBox _zoomBoxReq;                   // horiz data
   double _vLevelMinReq, _vLevelMaxReq;   // horiz data
@@ -226,6 +229,8 @@ private:
 
   bool _checkRequestChangedH(time_t start_time, time_t end_time);
   bool _checkRequestChangedV(time_t start_time, time_t end_time);
+
+  int _getHorizPlane();
   
   int _getTimeList(time_t start_time,
                    time_t end_time,

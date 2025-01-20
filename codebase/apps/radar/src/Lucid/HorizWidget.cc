@@ -1383,7 +1383,7 @@ void HorizWidget::_renderGrids(QPainter &painter)
             _renderFrameIndex, _renderFramePage);
   }
   
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHH" << endl;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHH HorizWidget::_renderGrids" << endl;
   _controlRendering(painter,
                     _renderFramePage,
                     gd.movie.frame[_renderFrameIndex].time_start,

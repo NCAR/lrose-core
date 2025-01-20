@@ -44,18 +44,6 @@
 //
 
 field_list = {
-  { "WIDE area products", "WIDE_" },
-  { "SPOL QC",  "SPOLQC_" },
-  { "SPOL field",  "SPOL_" },
-  { "NEXRAD radial moments", "NEXR_" },
-  { "NEXRAD radial PID/precip", "NEXP_ " },
-  { "DOW mobile",  "DOW_" },
-  { "CART lowlevel", "CART_LL_ " },
-  { "CART 3D", "CART_3D_ " },
-  { "QPE radial", "QPER_ " },
-  { "QPE cart", "QPEC_ " },
-  { "VDRAS",  "VDRASr_" },
-  { "REFRACT surveillance",  "REFR_" }
 };
 
 </GUI_CONFIG>
