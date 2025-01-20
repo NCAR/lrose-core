@@ -249,7 +249,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // register with procmap
 
   PMU_auto_register("timerEvent");
-
+  
   // check ID
   
   if (event->timerId() != _mainTimerId) {
@@ -263,7 +263,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // Handle widget stuff that can't be done at initial setup.  For some reason
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
-
+  
   if (_timerEventCount == 0) {
     _handleFirstTimerEvent();
   }    
@@ -279,7 +279,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // read click point info from FMQ
   
   _readClickPoint();
-
+  
   // field change?
 
   if (_fieldNumChanged) {
@@ -300,11 +300,16 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _fieldNumChanged = false;
   }
 
+  // handle client events
   
+  if(gd.coord_expt->client_event != NO_MESSAGE) {
+    _handleClientEvent();
+  }
+
   // handle legacy cidd timer event
   
-  _ciddTimerFunc(event);
-
+  // _ciddTimerFunc(event);
+  
   if (gd.redraw_horiz) {
     _horiz->update();
     gd.redraw_horiz = false;
@@ -3191,8 +3196,12 @@ void GuiManager::_handleClientEvent()
 
   time_t clock;
   
-  if(gd.debug1) fprintf(stderr,"Found Client Event: %d, Args: %s\n",
-			gd.coord_expt->client_event,gd.coord_expt->client_args);
+  if(gd.debug1) {
+    fprintf(stderr,
+            "Found Client Event: %d, Args: %s\n",
+            gd.coord_expt->client_event,
+            gd.coord_expt->client_args);
+  }
   
   switch(gd.coord_expt->client_event) {
     case NEW_MDV_AVAIL:
@@ -3509,6 +3518,113 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
   }
 }
 
+///////////////////////////////////////////
+// set text for GUI panels
+
+void GuiManager::_setText(char *text,
+                          size_t maxTextLen,
+                          const char *format,
+                          int val)
+{
+  if (abs(val) < 9999) {
+    snprintf(text, maxTextLen, format, val);
+  } else {
+    snprintf(text, maxTextLen, format, -9999);
+  }
+}
+
+void GuiManager::_setText(char *text,
+                          size_t maxTextLen,
+                          const char *format,
+                          double val)
+{
+  if (fabs(val) < 9999) {
+    snprintf(text, maxTextLen, format, val);
+  } else {
+    snprintf(text, maxTextLen, format, -9999.0);
+  }
+}
+
+/////////////////////////////
+// show data at click point
+
+void GuiManager::_showClick()
+{
+#ifdef NOTNOW
+  if (_clickReportDialog) {
+    if (_clickReportDialog->isVisible()) {
+      _clickReportDialog->setVisible(false);
+    } else {
+      if (_clickReportDialog->x() == 0 &&
+          _clickReportDialog->y() == 0) {
+        QPoint pos;
+        pos.setX(x() + width() + 5);
+        pos.setY(y());
+        _clickReportDialog->move(pos);
+      }
+      _clickReportDialog->setVisible(true);
+      _clickReportDialog->raise();
+    }
+  }
+#endif
+}
+
+/////////////////////////////////////////////////////
+// howto help
+
+void GuiManager::_howto()
+{
+  string text;
+  text += "HOWTO HINTS FOR Lucid\n";
+  text += "========================\n";
+  text += "\n";
+  text += "Use NUMBER keys to display RAW fields\n";
+  text += "Use ALT-NUMBER keys to display FILTERED fields\n";
+  text += "Hit '.' to toggle between the two latest fields\n";
+  text += "\n";
+  text += "You can also use the arrow keys to select different fields\n";
+  text += "\n";
+  text += "Click in main window to get field data at a point.\n";
+  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+}
+
+void GuiManager::_about()
+{
+
+  //QMessageBox::about(this, tr("About Menu"),
+  //tr("Lucid is an integrating Cartesian display for weather data."));
+
+  string text;
+  
+  text += "Lucid is an integrating Cartesian display for weather data.\n\n";
+  text += "Get help with Lucid ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nLucid version ... \n ";  
+  text += "\nCopyright UCAR (c) 1990 - 2019  ";
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
+
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}
+
 /************************************************************************
  * TIMER_FUNC: This routine acts as the main branch point for most of the
  * threads involved in the display. This function gets called through
@@ -3538,10 +3654,6 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
   if(gd.io_info.outstanding_request) {
     check_for_io();
-  }
-
-  if(gd.coord_expt->client_event != NO_MESSAGE) {
-    _handleClientEvent();
   }
 
   gettimeofday(&cur_tm,&cur_tz);
@@ -3674,7 +3786,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
         index = gd.movie.cur_frame;
       }
     }
-  }
+  } // if (gd.movie.movie_on)
 
   /* Set up convienient pointer to main met record */
   mr = gd.mrec[gd.h_win.page];
@@ -4119,112 +4231,5 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
   }
 
-}
-
-///////////////////////////////////////////
-// set text for GUI panels
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          int val)
-{
-  if (abs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999);
-  }
-}
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          double val)
-{
-  if (fabs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999.0);
-  }
-}
-
-/////////////////////////////
-// show data at click point
-
-void GuiManager::_showClick()
-{
-#ifdef NOTNOW
-  if (_clickReportDialog) {
-    if (_clickReportDialog->isVisible()) {
-      _clickReportDialog->setVisible(false);
-    } else {
-      if (_clickReportDialog->x() == 0 &&
-          _clickReportDialog->y() == 0) {
-        QPoint pos;
-        pos.setX(x() + width() + 5);
-        pos.setY(y());
-        _clickReportDialog->move(pos);
-      }
-      _clickReportDialog->setVisible(true);
-      _clickReportDialog->raise();
-    }
-  }
-#endif
-}
-
-/////////////////////////////////////////////////////
-// howto help
-
-void GuiManager::_howto()
-{
-  string text;
-  text += "HOWTO HINTS FOR Lucid\n";
-  text += "========================\n";
-  text += "\n";
-  text += "Use NUMBER keys to display RAW fields\n";
-  text += "Use ALT-NUMBER keys to display FILTERED fields\n";
-  text += "Hit '.' to toggle between the two latest fields\n";
-  text += "\n";
-  text += "You can also use the arrow keys to select different fields\n";
-  text += "\n";
-  text += "Click in main window to get field data at a point.\n";
-  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
-}
-
-void GuiManager::_about()
-{
-
-  //QMessageBox::about(this, tr("About Menu"),
-  //tr("Lucid is an integrating Cartesian display for weather data."));
-
-  string text;
-  
-  text += "Lucid is an integrating Cartesian display for weather data.\n\n";
-  text += "Get help with Lucid ...  \n ";
-  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
-  text += "\nLucid version ... \n ";  
-  text += "\nCopyright UCAR (c) 1990 - 2019  ";
-  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
-  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
-  text += "\nBoulder, Colorado, USA ";  
-  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
-  text += " forms, with or without modification, are permitted provided that";  
-  text += " the following conditions are met: ";  
-  text += "\n1) If the software is modified to produce derivative works,";  
-  text += " such modified software should be clearly marked, so as not";  
-  text += " to confuse it with the version available from UCAR. ";  
-  text += "\n2) Redistributions of source code must retain the above copyright";  
-  text += " notice, this list of conditions and the following disclaimer.";  
-  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
-  text += " notice, this list of conditions and the following disclaimer in the";  
-  text += " documentation and/or other materials provided with the distribution.";  
-  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
-  text += "if any, may be used to endorse or promote products derived from";  
-  text += " this software without specific prior written permission.";  
-  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
-  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
-  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
-
-  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
 

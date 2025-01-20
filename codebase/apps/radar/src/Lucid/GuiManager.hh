@@ -119,8 +119,8 @@ public:
 
   // override event handling
 
-  virtual void timerEvent (QTimerEvent * event);
-  virtual void resizeEvent (QResizeEvent * event);
+  virtual void timerEvent(QTimerEvent * event);
+  virtual void resizeEvent(QResizeEvent * event);
   virtual void keyPressEvent(QKeyEvent* event);
 
   // set/get archive mode
@@ -133,7 +133,7 @@ public:
   const string &getSelectedFieldLabel() const { return _selectedLabel; }
   const string &getSelectedFieldName() const { return _selectedName; }
   const string &getSelectedFieldUnits() const { return _selectedUnits; }
-
+  
   // input file list for archive mode
 
   // void setArchiveFileList(const vector<string> &list,
@@ -435,16 +435,21 @@ private:
   // for timer
   
   void _handleClientEvent();
+  void _handleImageCreationEvent();
+
   void _checkForExpiredData(time_t tm);
   void _checkForDataUpdates(time_t tm);
   void _checkWhatNeedsRendering(int frame_index);
-  void _ciddTimerFunc(QTimerEvent *event);
        
   // setting text
 
   void _setText(char *text, size_t maxTextLen, const char *format, int val);
   void _setText(char *text, size_t maxTextLen, const char *format, double val);
+
+  // legacy
   
+  void _ciddTimerFunc(QTimerEvent *event);
+
 private slots:
 
   //////////////
