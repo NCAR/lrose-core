@@ -677,17 +677,17 @@ bool MetRecord::_checkRequestChangedH(time_t start_time,
 
   // compute requested zoom domain
   
-  ZoomBox zoomBoxReq;
+  LatLonBox zoomBoxReq;
   if(!_params.always_get_full_domain) {
     double min_lat, max_lat, min_lon, max_lon;
     _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
-    zoomBoxReq.setLatLimits(min_lat, max_lat);
-    zoomBoxReq.setLonLimits(min_lon, max_lon);
+    zoomBoxReq.setLimits(min_lat, max_lat, min_lon, max_lon);
   } else if (_params.do_not_clip_on_mdv_request) {
     zoomBoxReq.clearLimits();
   } else {
-    zoomBoxReq.setLatLimits(-90.0, 90.0);
-    zoomBoxReq.setLonLimits(gd.h_win.origin_lon - 179.9999, gd.h_win.origin_lon + 179.9999);
+    zoomBoxReq.setLimits(-90.0, 90.0,
+                         gd.h_win.origin_lon - 179.9999,
+                         gd.h_win.origin_lon + 179.9999);
   }
 
   // check if request is unchanged from previous call

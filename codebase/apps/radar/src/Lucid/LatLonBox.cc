@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ZoomBox.cc
+// LatLonBox.cc
 //
 // Zoom limits object
 //
@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "ZoomBox.hh"
+#include "LatLonBox.hh"
 #include <cmath>
 
 using namespace std;
@@ -41,14 +41,14 @@ using namespace std;
 //////////////
 // Constructor
 
-ZoomBox::ZoomBox()
+LatLonBox::LatLonBox()
   
 {
   _init();
 }
 
-ZoomBox::ZoomBox(double minLat, double maxLat,
-                 double minLon, double maxLon) :
+LatLonBox::LatLonBox(double minLat, double maxLat,
+                     double minLon, double maxLon) :
         _minLat(minLat),
         _maxLat(maxLat),
         _minLon(minLon),
@@ -61,7 +61,7 @@ ZoomBox::ZoomBox(double minLat, double maxLat,
 // Copy constructor
 //
 
-ZoomBox::ZoomBox(const ZoomBox &rhs)
+LatLonBox::LatLonBox(const LatLonBox &rhs)
 {
   _copy(rhs);
 }
@@ -69,7 +69,7 @@ ZoomBox::ZoomBox(const ZoomBox &rhs)
 /////////////
 // destructor
 
-ZoomBox::~ZoomBox()
+LatLonBox::~LatLonBox()
 {
 }
 
@@ -77,7 +77,7 @@ ZoomBox::~ZoomBox()
 // Assignment
 //
 
-ZoomBox &ZoomBox::operator=(const ZoomBox &rhs)
+LatLonBox &LatLonBox::operator=(const LatLonBox &rhs)
 {
   return _copy(rhs);
 }
@@ -86,7 +86,7 @@ ZoomBox &ZoomBox::operator=(const ZoomBox &rhs)
 // Check for equality
 //
 
-bool ZoomBox::operator==(const ZoomBox &rhs)
+bool LatLonBox::operator==(const LatLonBox &rhs)
 {
   if (fabs(_minLat - rhs._minLat) > 1.0e-5) {
     return false;
@@ -106,7 +106,7 @@ bool ZoomBox::operator==(const ZoomBox &rhs)
 /////////////////////////////////////////////////////////
 // initialize data members
 
-void ZoomBox::_init()
+void LatLonBox::_init()
   
 {
   _minLat = -90.0;
@@ -118,7 +118,7 @@ void ZoomBox::_init()
 /////////////////////////////////////////////////////////
 // clear the limits
 
-void ZoomBox::clearLimits()
+void LatLonBox::clearLimits()
 {
   _init();
 }
@@ -127,7 +127,7 @@ void ZoomBox::clearLimits()
 // copy - used by copy constructor and operator =
 //
 
-ZoomBox &ZoomBox::_copy(const ZoomBox &rhs)
+LatLonBox &LatLonBox::_copy(const LatLonBox &rhs)
   
 {
   
@@ -148,16 +148,13 @@ ZoomBox &ZoomBox::_copy(const ZoomBox &rhs)
 /////////////////////////////////////////////////////////
 // set limits
 
-void ZoomBox::setLatLimits(double minLat,
-                           double maxLat)
+void LatLonBox::setLimits(double minLat,
+                          double maxLat,
+                          double minLon,
+                          double maxLon)
 {
   _minLat = minLat;
   _maxLat = maxLat;
-}
-
-void ZoomBox::setLonLimits(double minLon,
-                           double maxLon)
-{
   _minLon = minLon;
   _maxLon = maxLon;
 }
@@ -165,9 +162,9 @@ void ZoomBox::setLonLimits(double minLon,
 /////////////////////////////////////////////////////////
 // print
 
-void ZoomBox::print(ostream &out) const
+void LatLonBox::print(ostream &out) const
 {
-  out << "  ZoomBox:" << endl;
+  out << "  LatLonBox:" << endl;
   out << "    minLat: " << _minLat << endl;
   out << "    maxLat: " << _maxLat << endl;
   out << "    minLon: " << _minLon << endl;

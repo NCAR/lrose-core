@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ZoomBox.hh
+// LatLonBox.hh
 //
 // Zoom limits object
 //
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ZoomBox_HH
-#define ZoomBox_HH
+#ifndef LatLonBox_HH
+#define LatLonBox_HH
 
 #include <iostream>
 using namespace std;
@@ -42,37 +42,37 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 /// ZOOM BOX CLASS
 
-class ZoomBox {
+class LatLonBox {
   
 public:
 
   /// constructor
   
-  ZoomBox();
+  LatLonBox();
 
-  ZoomBox(double minLat, double maxLat,
-          double minLon, double maxLon);
+  LatLonBox(double minLat, double maxLat,
+            double minLon, double maxLon);
 
   /// copy constructor
   
-  ZoomBox(const ZoomBox &rhs);
+  LatLonBox(const LatLonBox &rhs);
 
   /// destructor
 
-  virtual ~ZoomBox();
+  virtual ~LatLonBox();
   
   /// assignment
   
-  ZoomBox& operator=(const ZoomBox &rhs);
+  LatLonBox& operator=(const LatLonBox &rhs);
   
   // Check for equality
 
-  bool operator==(const ZoomBox &rhs);
+  bool operator==(const LatLonBox &rhs);
   
   /// set limits
   
-  void setLatLimits(double minLat, double maxLat);
-  void setLonLimits(double minLon, double maxLon);
+  void setLimits(double minLat, double maxLat,
+                 double minLon, double maxLon);
   
   /// clear limits
   
@@ -99,7 +99,7 @@ protected:
   // methods
   
   void _init();
-  ZoomBox & _copy(const ZoomBox &rhs); 
+  LatLonBox & _copy(const LatLonBox &rhs); 
 
 private:
   

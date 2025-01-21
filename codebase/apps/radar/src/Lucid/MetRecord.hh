@@ -48,7 +48,7 @@
 #include "cidd_macros.h"
 #include "cidd_structs.h"
 #include "cidd_colorscales.h"
-#include "ZoomBox.hh"
+#include "LatLonBox.hh"
 #include "WayPts.hh"
 
 class ColorMap;
@@ -218,7 +218,7 @@ private:
   int _page;
 
   DateTime _timeReq;
-  ZoomBox _zoomBoxReq;                   // horiz data
+  LatLonBox _zoomBoxReq;                    // horiz data
   double _vLevelMinReq, _vLevelMaxReq;   // horiz data
   WayPts _wayPtsReq;                     // vert section data
   

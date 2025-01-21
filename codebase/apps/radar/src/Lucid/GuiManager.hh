@@ -48,6 +48,7 @@
 // #include "Args.hh"
 // #include "Params.hh"
 #include "VlevelManager.hh"
+#include "XyBox.hh"
 
 // #include "RayLoc.hh"
 // #include "ContextEditingView.hh"
@@ -133,6 +134,10 @@ public:
   const string &getSelectedFieldLabel() const { return _selectedLabel; }
   const string &getSelectedFieldName() const { return _selectedName; }
   const string &getSelectedFieldUnits() const { return _selectedUnits; }
+
+  // set the xy zoom
+
+  void setXyZoom(double minY, double maxY, double minX, double maxX);
   
   // input file list for archive mode
 
@@ -200,24 +205,6 @@ private:
   // // RadxTime _readerRayTime;
   // // RadxVol _vol;
 
-  // field
-  
-  int _fieldNum;
-  int _prevFieldNum;
-  bool _fieldNumChanged;
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
-  QLabel *_valueLabel;
-
-  // vlevels
-
-  VlevelManager _vlevelManager;
-  QVBoxLayout *_vlevelVBoxLayout;
-  QFrame *_vlevelFrame;
-  QGroupBox *_vlevelPanel;
-  vector<QRadioButton *> *_vlevelRButtons;
-
   // main window frame
 
   QFrame *_main;
@@ -239,6 +226,28 @@ private:
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
 
+  // field
+  
+  int _fieldNum;
+  int _prevFieldNum;
+  string _selectedName;
+  string _selectedLabel;
+  string _selectedUnits;
+  QLabel *_valueLabel;
+
+  // vlevels
+
+  VlevelManager _vlevelManager;
+  QVBoxLayout *_vlevelVBoxLayout;
+  QFrame *_vlevelFrame;
+  QGroupBox *_vlevelPanel;
+  vector<QRadioButton *> *_vlevelRButtons;
+
+  // zooms
+
+  XyBox _zoomXy;
+  XyBox _prevZoomXy;
+  
   // archive mode
   
   bool _archiveMode; // false for realtime mode
@@ -407,7 +416,7 @@ private:
   void _clearRayOverlap(const int start_index, const int end_index);
 
   // modes
-
+  
   void _activateRealtimeRendering();
   void _activateArchiveRendering();
 
@@ -428,7 +437,8 @@ private:
 
   // check for status change
   
-  void _checkForFieldChange();
+  bool _checkForFieldChange();
+  bool _checkForZoomChange();
   void _handleFirstTimerEvent();
   void _readClickPoint();
     

@@ -83,7 +83,7 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
   
   HorizWidget(QWidget* parent,
-              const GuiManager &manager);
+              GuiManager &manager);
 
   /**
    * @brief Destructor.
@@ -334,7 +334,7 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
 
   QWidget *_parent;
-  const GuiManager &_manager;
+  GuiManager &_manager;
 
   // pixmap for rendering
   

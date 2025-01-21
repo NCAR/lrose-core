@@ -69,6 +69,7 @@ HDRS = \
 	Product.hh \
 	ProductMgr.hh \
 	ProdMenuItem.hh \
+	LatLonBox.hh \
 	Lucid.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
@@ -83,7 +84,7 @@ HDRS = \
 	WayPts.hh \
 	WindMenuItem.hh \
 	WorldPlot.hh \
-	ZoomBox.hh \
+	XyBox.hh \
 	ZoomMenuItem.hh \
 	cidd.h \
 	cidd_colorscales.h \
@@ -113,6 +114,7 @@ NORM_SRCS = \
 	Cterrain_P.cc \
 	DataHandling.cc \
 	FieldTableItem.cc \
+	LatLonBox.cc \
 	LegacyParams.cc \
 	Main.cc \
 	Product.cc \
@@ -127,7 +129,7 @@ NORM_SRCS = \
 	VlevelManager.cc \
 	WayPts.cc \
 	WorldPlot.cc \
-	ZoomBox.cc \
+	XyBox.cc \
 	cidd_coords.cc \
 	cidd_init.cc \
 	cidd_remote_commands.cc \

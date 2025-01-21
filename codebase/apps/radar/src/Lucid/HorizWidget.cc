@@ -53,7 +53,7 @@ const double HorizWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double HorizWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 HorizWidget::HorizWidget(QWidget* parent,
-                         const GuiManager &manager) :
+                         GuiManager &manager) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -325,6 +325,11 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
 
+  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
+                     _zoomWorld.getYMaxWorld(),
+                     _zoomWorld.getXMinWorld(),
+                     _zoomWorld.getXMaxWorld()); 
+  
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
@@ -551,6 +556,8 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     gd.selected_zoom_min_y = _worldPressY;
     gd.selected_zoom_max_x = _worldReleaseX;
     gd.selected_zoom_max_y = _worldReleaseY;
+
+    _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
 
     _refreshImages();
 

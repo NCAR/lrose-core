@@ -119,7 +119,6 @@ GuiManager* GuiManager::Instance()
 // Constructor
 
 GuiManager::GuiManager() :
-        _vlevelManager(),
         _vertWindowDisplayed(false)
 {
 
@@ -162,7 +161,6 @@ GuiManager::GuiManager() :
   _fieldTableCurrentRow = -1;
   _prevFieldNum = 0;
   _fieldNum = 0;
-  _fieldNumChanged = false;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -240,6 +238,16 @@ void GuiManager::enableZoomButton() const
   _zoomBackAct->setEnabled(true);
 }
 
+//////////////////////////////////////////////////
+// set the XY zoom limits
+
+void GuiManager::setXyZoom(double minY, double maxY,
+                           double minX, double maxX)
+{
+  _prevZoomXy = _zoomXy;
+  _zoomXy.setLimits(minY, maxY, minX, maxX);
+}
+
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
@@ -255,10 +263,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (event->timerId() != _mainTimerId) {
     return;
   }
-  
-  // field change?
-  
-  _checkForFieldChange();
   
   // Handle widget stuff that can't be done at initial setup.  For some reason
   // the widget sizes are off until we get to this point.  There's probably
@@ -280,9 +284,28 @@ void GuiManager::timerEvent(QTimerEvent *event)
   
   _readClickPoint();
   
+  // handle client events
+  
+  if(gd.coord_expt->client_event != NO_MESSAGE) {
+    _handleClientEvent();
+  }
+
   // field change? request new data
 
-  if (_fieldNumChanged) {
+  bool needNewData = false;
+  if (_checkForFieldChange()) {
+    needNewData = true;
+  }
+  
+  // zoom change?
+  
+  if (_checkForZoomChange()) {
+    needNewData = true;
+  }
+
+  // get new data if needed - this is done in a thread
+
+  if (needNewData) {
     int index = gd.movie.cur_frame;
     if (gd.movie.cur_frame < 0) {
       index = gd.movie.num_frames - 1;
@@ -297,19 +320,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
       cerr << "  time_end: " << DateTime::strm(gd.movie.frame[index].time_end) << endl;
       cerr << "  page: " << gd.h_win.page << endl;
     }
-    _fieldNumChanged = false;
   }
-
-  // handle client events
-  
-  if(gd.coord_expt->client_event != NO_MESSAGE) {
-    _handleClientEvent();
-  }
-
-  // handle legacy cidd timer event
-
-  // _autoCreateFunc();
-  // _ciddTimerFunc(event);
 
   // check for new data
 
@@ -327,6 +338,11 @@ void GuiManager::timerEvent(QTimerEvent *event)
     gd.redraw_horiz = false;
   }
   
+  // handle legacy cidd timer event
+  
+  // _autoCreateFunc();
+  // _ciddTimerFunc(event);
+
   // if (gd.redraw_horiz) {
   //   _horiz->update();
   //   gd.redraw_horiz = false;
@@ -997,7 +1013,6 @@ void GuiManager::_populateZoomsMenu()
 
   _zoomsActionGroup = new QActionGroup(_zoomsMenu);
   _zoomsActionGroup->setExclusive(true);
-  
   
   _zoomBackAct = new QAction(tr("Zoom back"), this);
   _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
@@ -2436,21 +2451,23 @@ void GuiManager::_placeTimeControl()
     }
   }
 
-#ifdef JUNK
-  if (_timerEventCount % 100 == 0) {
-    cerr << "888888888888888 main width, height: " << width() << ", " << height() << endl;
-    cerr << "888888888888888 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
-    cerr << "888888888888888 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  }
+  // if (_timerEventCount % 100 == 0) {
+  //   cerr << "888888888888888 main width, height: "
+  //        << width() << ", " << height() << endl;
+  //   cerr << "888888888888888 _horiz width, height: "
+  //        << _horiz->width() << ", " << _horiz->height() << endl;
+  //   cerr << "888888888888888 vlevelFrame width, height: "
+  //        << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  // }
   
-  if (_timerEventCount == 650) {
-    resize(width() + 1, height() + 1);
-    resize(width() - 1, height() - 1);
-    cerr << "777777777777778 _horiz width, height: " << _horiz->width() << ", " << _horiz->height() << endl;
-    cerr << "777777777777778 vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  }
-
-#endif
+  // if (_timerEventCount == 650) {
+  //   resize(width() + 1, height() + 1);
+  //   resize(width() - 1, height() - 1);
+  //   cerr << "777777777777778 _horiz width, height: "
+  //        << _horiz->width() << ", " << _horiz->height() << endl;
+  //   cerr << "777777777777778 vlevelFrame width, height: "
+  //        << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  // }
 
 }
 
@@ -3073,17 +3090,17 @@ void GuiManager::_createBoundaryEditorDialog()
 /////////////////////////////////////////////////////////
 // check for field change
 
-void GuiManager::_checkForFieldChange()
+bool GuiManager::_checkForFieldChange()
 {
 
   if (_fieldTable == NULL) {
-    return;
+    return false;
   }
 
   if (_fieldTableCurrentRow == _fieldTable->currentRow() &&
       _fieldTableCurrentColumn == _fieldTable->currentColumn()) {
     // no change
-    return;
+    return false;
   }
   
   const FieldTableItem *item =
@@ -3093,31 +3110,44 @@ void GuiManager::_checkForFieldChange()
   if (item->text().toStdString().size() == 0) {
     _fieldTable->setCurrentCell(_fieldTableCurrentRow,
                                 _fieldTableCurrentColumn);
-  } else {
-    _fieldTableCurrentColumn = _fieldTable->currentColumn();
-    _fieldTableCurrentRow = _fieldTable->currentRow();
-    _prevFieldNum = _fieldNum;
-    _fieldNum = item->getFieldIndex();
-    _fieldNumChanged = true;
-    gd.prev_field = gd.h_win.page;
-    set_field(_fieldNum);
-    gd.mrec[_fieldNum]->h_data_valid = 0;
-    if (_params.debug) {
-      const Params::field_t *fparams = item->getFieldParams();
-      cerr << "Changing to field: " << fparams->button_label << endl;
-      cerr << "              url: " << fparams->url << endl;
-      cerr << "         fieldNum: " << _fieldNum << endl;
-      cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
-      cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
-      cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
-    }
-    gd.redraw_horiz = true;
-    gd.field_has_changed = true;
-    gd.selected_field = _fieldNum;
-    gd.h_win.page = _fieldNum;
-  
+    return false;
   }
+  
+  _fieldTableCurrentColumn = _fieldTable->currentColumn();
+  _fieldTableCurrentRow = _fieldTable->currentRow();
+  _prevFieldNum = _fieldNum;
+  _fieldNum = item->getFieldIndex();
+  gd.prev_field = gd.h_win.page;
+  set_field(_fieldNum);
+  gd.mrec[_fieldNum]->h_data_valid = 0;
+  if (_params.debug) {
+    const Params::field_t *fparams = item->getFieldParams();
+    cerr << "Changing to field: " << fparams->button_label << endl;
+    cerr << "              url: " << fparams->url << endl;
+    cerr << "         fieldNum: " << _fieldNum << endl;
+    cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
+    cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
+    cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
+  }
+  gd.redraw_horiz = true;
+  gd.field_has_changed = true;
+  gd.selected_field = _fieldNum;
+  gd.h_win.page = _fieldNum;
 
+  return true;
+
+}
+
+/////////////////////////////////////////////////////////
+// check for zoom change
+
+bool GuiManager::_checkForZoomChange()
+{
+  if (_zoomXy != _prevZoomXy) {
+    _prevZoomXy = _zoomXy;
+    return true;
+  }
+  return false;
 }
 
 /////////////////////////////////////////////////////////
