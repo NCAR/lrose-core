@@ -48,7 +48,6 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
-#include <rapformats/DsRadarMsg.hh>
 #include <radar/IwrfMomReader.hh>
 class RadxFile;
 class RadxRay;
