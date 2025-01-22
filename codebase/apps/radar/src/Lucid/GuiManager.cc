@@ -1029,6 +1029,7 @@ void GuiManager::_populateZoomsMenu()
     // create item for this entry
     
     ZoomMenuItem *item = new ZoomMenuItem;
+    item->setManager(this);
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
 

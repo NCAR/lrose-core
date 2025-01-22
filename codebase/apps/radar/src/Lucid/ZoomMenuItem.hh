@@ -58,6 +58,7 @@
 using namespace std;
 
 class Overlay_t;
+class GuiManager;
 
 class DLL_EXPORT ZoomMenuItem : public QObject {
   
@@ -75,6 +76,7 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
   
   // set
   
+  void setManager(GuiManager *val) { _manager = val; }
   void setZoomParams(Params::zoom_level_t *val) { _zoomParams = val; }
   void setZoomIndex(int val) { _zoomIndex = val; }
   void setAction(QAction *val) { _act = val; }
@@ -86,8 +88,9 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
   QAction *getAction() { return _act; }
 
  protected:
-
+  
   QObject *_parent;
+  GuiManager *_manager;
   Params::zoom_level_t *_zoomParams;
   int _zoomIndex;
   QAction *_act;               

@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ZoomMenuItem.hh"
+#include "GuiManager.hh"
 #include "cidd.h"
 
 // Constructor
@@ -47,7 +48,7 @@ ZoomMenuItem::ZoomMenuItem(QObject *parent) :
         _act(NULL)
         
 {
-  
+  _manager = NULL;
 }
 
 // destructor
@@ -83,6 +84,13 @@ void ZoomMenuItem::toggled(bool checked)
     gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
     gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
     gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+  }
+
+  if (_manager != NULL) {
+    _manager->setXyZoom(gd.h_win.cmin_y,
+                        gd.h_win.cmax_y,
+                        gd.h_win.cmin_x,
+                        gd.h_win.cmax_x); 
   }
 
 }

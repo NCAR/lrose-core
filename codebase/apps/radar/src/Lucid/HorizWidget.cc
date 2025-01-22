@@ -1955,6 +1955,10 @@ void HorizWidget::zoomBackView()
   }
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
+  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
+                     _zoomWorld.getYMaxWorld(),
+                     _zoomWorld.getXMinWorld(),
+                     _zoomWorld.getXMaxWorld()); 
   _refreshImages();
 }
 
