@@ -80,15 +80,20 @@ HorizWidget::HorizWidget(QWidget* parent,
   
   setBackgroundRole(QPalette::Dark);
   setAutoFillBackground(true);
-  setAttribute(Qt::WA_OpaquePaintEvent);
-
-  // Allow the widget to get focus
-
-  setFocusPolicy(Qt::StrongFocus);
+  // setAttribute(Qt::WA_OpaquePaintEvent);
 
   // create the rubber band
 
   _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
+  // _rubberBand->setStyleSheet("background: rgba(0, 0, 255, 50); border: 2px solid blue;");
+  _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
+  // _rubberBand->setAttribute(Qt::WA_NoSystemBackground);
+  _rubberBand->setStyleSheet("background: transparent;");
+  // _rubberBand->setStyleSheet("background: transparent; border: 2px dashed rgba(0, 0, 255, 150);");
+
+  // Allow the widget to get focus
+
+  setFocusPolicy(Qt::StrongFocus);
 
   // Allow the size_t type to be passed to slots
 
@@ -446,129 +451,6 @@ void HorizWidget::paintEvent(QPaintEvent *event)
 
   _renderFrame = false;
   
-}
-
-
-/*************************************************************************
- * mouseReleaseEvent()
- */
-void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
-{
-
-  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
-
-  _pointClicked = false;
-
-  QRect rgeom = _rubberBand->geometry();
-
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
-
-#if QT_VERSION >= 0x060000
-  QPointF pos(e->position());
-#else
-  QPointF pos(e->pos());
-#endif
-
-  _mouseReleaseX = pos.x();
-  _mouseReleaseY = pos.y();
-
-  // get click location in world coords
-  
-  if (rgeom.width() <= 20) {
-    
-    // Emit a signal to indicate that the click location has changed
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-#ifdef NOTNOW    
-    // If boundary editor active, then interpret boundary mouse release event
-    BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
-    if (_manager._boundaryEditorDialog->isVisible()) {
-      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
-        if (!editor->isAClosedPolygon()) {
-          editor->addPoint(_worldReleaseX, _worldReleaseY);
-        } else { //polygon finished, user may want to insert/delete a point
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-    	}
-      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
-        if (editor->isAClosedPolygon()) {
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-        } else {
-          editor->makeCircle(_worldReleaseX,
-                             _worldReleaseY,
-                             editor->getCircleRadius());
-    	}
-      }
-    }
-#endif
-
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
-    
-    // get ray closest to click point
-    
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-    
-    // emit signal
-
-    emit locationClicked(x_km, y_km, closestRay);
-    
-  } else {
-
-    // mouse moved more than 20 pixels, so a zoom occurred
-
-    gd.prev_zoom_min_x = _worldPressX;
-    gd.prev_zoom_min_y = _worldPressY;
-    gd.prev_zoom_max_x = _worldReleaseX;
-    gd.prev_zoom_max_y = _worldReleaseY;
-    
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
-    _savedZooms.push_back(_zoomWorld);
-    
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
-                              _worldReleaseX, _worldReleaseY);
-    
-    adjustPixelScales();
-    _setTransform(_zoomWorld.getTransform());
-    
-    _setGridSpacing();
-
-    // enable unzooms
-    
-    _manager.enableZoomBackButton();
-    _manager.enableZoomOutButton();
-    
-    // Update the window in the renderers
-
-    gd.redraw_horiz = true;
-    gd.zoom_has_changed = true;
-
-    gd.selected_zoom_min_x = _worldPressX;
-    gd.selected_zoom_min_y = _worldPressY;
-    gd.selected_zoom_max_x = _worldReleaseX;
-    gd.selected_zoom_max_y = _worldReleaseY;
-
-    _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
-
-    _refreshImages();
-
-  }
-    
-  // hide the rubber band
-  
-  _paintZoomRect();
-  _rubberBand->hide();
-  update();
-
 }
 
 
@@ -2205,6 +2087,129 @@ void HorizWidget::mouseMoveEvent(QMouseEvent * e)
   _paintZoomRect();
 
 }
+
+/*************************************************************************
+ * mouseReleaseEvent()
+ */
+void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
+{
+
+  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
+
+  _pointClicked = false;
+
+  QRect rgeom = _rubberBand->geometry();
+
+  // If the mouse hasn't moved much, assume we are clicking rather than
+  // zooming
+
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  _mouseReleaseX = pos.x();
+  _mouseReleaseY = pos.y();
+
+  // get click location in world coords
+  
+  if (rgeom.width() <= 20) {
+    
+    // Emit a signal to indicate that the click location has changed
+    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+
+#ifdef NOTNOW    
+    // If boundary editor active, then interpret boundary mouse release event
+    BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
+    if (_manager._boundaryEditorDialog->isVisible()) {
+      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
+        if (!editor->isAClosedPolygon()) {
+          editor->addPoint(_worldReleaseX, _worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+    	}
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        } else {
+          editor->makeCircle(_worldReleaseX,
+                             _worldReleaseY,
+                             editor->getCircleRadius());
+    	}
+      }
+    }
+#endif
+
+    double x_km = _worldReleaseX;
+    double y_km = _worldReleaseY;
+    _pointClicked = true;
+    
+    // get ray closest to click point
+    
+    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+    
+    // emit signal
+
+    emit locationClicked(x_km, y_km, closestRay);
+    
+  } else {
+
+    // mouse moved more than 20 pixels, so a zoom occurred
+
+    gd.prev_zoom_min_x = _worldPressX;
+    gd.prev_zoom_min_y = _worldPressY;
+    gd.prev_zoom_max_x = _worldReleaseX;
+    gd.prev_zoom_max_y = _worldReleaseY;
+    
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+
+    _savedZooms.push_back(_zoomWorld);
+    
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                              _worldReleaseX, _worldReleaseY);
+    
+    adjustPixelScales();
+    _setTransform(_zoomWorld.getTransform());
+    
+    _setGridSpacing();
+
+    // enable unzooms
+    
+    _manager.enableZoomBackButton();
+    _manager.enableZoomOutButton();
+    
+    // Update the window in the renderers
+
+    gd.redraw_horiz = true;
+    gd.zoom_has_changed = true;
+
+    gd.selected_zoom_min_x = _worldPressX;
+    gd.selected_zoom_min_y = _worldPressY;
+    gd.selected_zoom_max_x = _worldReleaseX;
+    gd.selected_zoom_max_y = _worldReleaseY;
+
+    _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
+
+    _refreshImages();
+
+  }
+    
+  // hide the rubber band
+  
+  _paintZoomRect();
+  _rubberBand->hide();
+  update();
+
+}
+
 
 #ifdef NOTNOW
 /**************   testing ******/

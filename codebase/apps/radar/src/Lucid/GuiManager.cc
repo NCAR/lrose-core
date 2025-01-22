@@ -193,7 +193,9 @@ GuiManager::GuiManager() :
   last_dcheck_tm = {0,0};
   last_tick = 0;
   client_seq_num = 0;
-  
+
+  // QApplication::setStyle("Fusion");
+
 }
 
 // destructor
