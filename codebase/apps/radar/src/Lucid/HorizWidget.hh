@@ -62,6 +62,27 @@ class GuiManager;
 class VertWidget;
 class QLabel;
 
+// custom rubber band for transparent rectangle
+
+class CustomRubberBand : public QRubberBand {
+public:
+  CustomRubberBand(Shape shape, QWidget *parent = nullptr)
+          : QRubberBand(shape, parent) {}
+  
+protected:
+  void paintEvent(QPaintEvent *event) override {
+    QPainter painter(this);
+    // painter.setRenderHint(QPainter::Antialiasing);
+    // Draw border
+    QPen pen(Qt::black, 2); // Black border, 2 pixels wide
+    painter.setPen(pen);
+    // Transparent background
+    painter.setBrush(Qt::NoBrush);
+    // Adjust to stay within bounds    
+    painter.drawRect(rect().adjusted(0, 0, -1, -1));
+  }
+};
+
 // Widget representing a horizontal view
 
 class DLL_EXPORT HorizWidget : public QWidget
@@ -155,6 +176,7 @@ class DLL_EXPORT HorizWidget : public QWidget
   
   const WorldPlot &getZoomWorld() const { return _zoomWorld; }
   const vector<WorldPlot> &getSavedZooms() const { return _savedZooms; }
+  void clearSavedZooms() { _savedZooms.clear(); }
   
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -252,6 +274,12 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
 
   void zoomBackView();
+
+  /**
+   * @brief unzoom all the way
+   */
+
+  void zoomOutView();
 
   /**
    * @brief Resize the window.

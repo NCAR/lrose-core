@@ -114,10 +114,11 @@ public:
 
   int run(QApplication &app);
 
-  // enable the zoom button - called by PolarWidget
+  // enable the unzoom actions
 
-  void enableZoomButton() const;
-
+  void enableZoomBackButton() const;
+  void enableZoomOutButton() const;
+  
   // override event handling
 
   virtual void timerEvent(QTimerEvent * event);
@@ -273,6 +274,7 @@ private:
   QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_zoomBackAct;
+  QAction *_zoomOutAct;
   QAction *_reloadAct;
   QAction *_showClickAct;
   QAction *_showBoundaryEditorAct;
@@ -472,6 +474,7 @@ private slots:
   void _showClick();
   void _freeze();
   void _zoomBack();
+  void _zoomOut();
   void _refresh();
   // void _changeField(int fieldId, bool guiMode = true);
   void _openFile();

@@ -1,4 +1,3 @@
-
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
@@ -64,7 +63,7 @@ HorizWidget::HorizWidget(QWidget* parent,
         _gridsEnabled(false),
         _angleLinesEnabled(false),
         _scaledLabel(ScaledLabel::DistanceEng),
-        _rubberBand(0),
+        _rubberBand(NULL),
         _ringSpacing(10.0)
         
 {
@@ -543,9 +542,10 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
     
     _setGridSpacing();
 
-    // enable unzoom button
+    // enable unzooms
     
-    _manager.enableZoomButton();
+    _manager.enableZoomBackButton();
+    _manager.enableZoomOutButton();
     
     // Update the window in the renderers
 
@@ -1962,6 +1962,23 @@ void HorizWidget::zoomBackView()
   _refreshImages();
 }
 
+/*************************************************************************
+ * zoom all the way out
+ */
+
+void HorizWidget::zoomOutView()
+{
+  _zoomWorld = _fullWorld;
+  _savedZooms.clear();
+  _isZoomed = false;
+  _setTransform(_zoomWorld.getTransform());
+  _setGridSpacing();
+  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
+                     _zoomWorld.getYMaxWorld(),
+                     _zoomWorld.getXMinWorld(),
+                     _zoomWorld.getXMaxWorld()); 
+  _refreshImages();
+}
 
 /*************************************************************************
  * setRings()
@@ -2181,6 +2198,7 @@ void HorizWidget::mouseMoveEvent(QMouseEvent * e)
   _zoomCornerY = _mousePressY + moveY;
 
   newRect = newRect.normalized();
+  
   _rubberBand->setGeometry(newRect);
 
 }

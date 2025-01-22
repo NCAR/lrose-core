@@ -231,11 +231,16 @@ int GuiManager::run(QApplication &app)
 }
 
 //////////////////////////////////////////////////
-// enable the zoom button - called by PolarWidgets
+// enable the zoom button - called by Widgets
 
-void GuiManager::enableZoomButton() const
+void GuiManager::enableZoomBackButton() const
 {
   _zoomBackAct->setEnabled(true);
+}
+
+void GuiManager::enableZoomOutButton() const
+{
+  _zoomOutAct->setEnabled(true);
 }
 
 //////////////////////////////////////////////////
@@ -1013,6 +1018,12 @@ void GuiManager::_populateZoomsMenu()
 
   _zoomsActionGroup = new QActionGroup(_zoomsMenu);
   _zoomsActionGroup->setExclusive(true);
+  
+  _zoomOutAct = new QAction(tr("Zoom out"), this);
+  _zoomOutAct->setStatusTip(tr("Unzoom all the way"));
+  _zoomOutAct->setEnabled(false);
+  connect(_zoomOutAct, &QAction::triggered, this, &GuiManager::_zoomOut);
+  _zoomsMenu->addAction(_zoomOutAct);
   
   _zoomBackAct = new QAction(tr("Zoom back"), this);
   _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
@@ -1927,14 +1938,27 @@ void GuiManager::_freeze()
 }
 
 ////////////////////////////////////////////
-// unzoom
+// unzoom to previous zoom
 
 void GuiManager::_zoomBack()
 {
   _horiz->zoomBackView();
   if (_horiz->getSavedZooms().size() == 0) {
     _zoomBackAct->setEnabled(false);
+    _zoomOutAct->setEnabled(false);
   }
+  gd.redraw_horiz = true;
+}
+
+////////////////////////////////////////////
+// unzoom all the way out
+
+void GuiManager::_zoomOut()
+{
+  _horiz->zoomOutView();
+  _horiz->clearSavedZooms();
+  _zoomBackAct->setEnabled(false);
+  _zoomOutAct->setEnabled(false);
   gd.redraw_horiz = true;
 }
 
