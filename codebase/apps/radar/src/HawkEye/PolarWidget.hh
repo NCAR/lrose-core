@@ -400,12 +400,6 @@ class DLL_EXPORT PolarWidget : public QWidget
   QRubberBand *_rubberBand;
 
   /**
-   * @brief The rubber band origin.
-   */
-
-  QPoint _rubberBandOrigin;
-
-  /**
    * @brief The current ring spacing in km.  This value is changed when we
    *        zoom.
    */
