@@ -68,7 +68,8 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
   
   // constructor
   
-  ZoomMenuItem(QObject *parent = nullptr);
+  ZoomMenuItem(QObject *parent,
+               GuiManager *manager);
   
   // destructor
   
@@ -76,7 +77,6 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
   
   // set
   
-  void setManager(GuiManager *val) { _manager = val; }
   void setZoomParams(Params::zoom_level_t *val) { _zoomParams = val; }
   void setZoomIndex(int val) { _zoomIndex = val; }
   void setAction(QAction *val) { _act = val; }

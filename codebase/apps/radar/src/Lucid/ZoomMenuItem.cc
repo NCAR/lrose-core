@@ -41,14 +41,16 @@
 
 // Constructor
 
-ZoomMenuItem::ZoomMenuItem(QObject *parent) :
+ZoomMenuItem::ZoomMenuItem(QObject *parent,
+                           GuiManager *manager) :
         _parent(parent),
+        _manager(manager),
         _zoomParams(NULL),
         _zoomIndex(-1),
         _act(NULL)
         
 {
-  _manager = NULL;
+  // _manager = NULL;
 }
 
 // destructor
