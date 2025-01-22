@@ -72,12 +72,12 @@ public:
 protected:
   void paintEvent(QPaintEvent *event) override {
     QPainter painter(this);
+    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
     // painter.setRenderHint(QPainter::Antialiasing);
     // Draw border
-    QPen pen(Qt::black, 2); // Black border, 2 pixels wide
-    painter.setPen(pen);
+    painter.setPen(QColor(0xff, 0xff, 0xff));
     // Transparent background
-    painter.setBrush(Qt::NoBrush);
+    // painter.setBrush(Qt::NoBrush);
     // Adjust to stay within bounds    
     painter.drawRect(rect().adjusted(0, 0, -1, -1));
   }
@@ -453,7 +453,8 @@ class DLL_EXPORT HorizWidget : public QWidget
    * @brief Rubber band for zooming.
    */
 
-  QRubberBand *_rubberBand;
+  CustomRubberBand *_rubberBand;
+  QRect _zoomRect;
 
   /**
    * @brief The rubber band origin.

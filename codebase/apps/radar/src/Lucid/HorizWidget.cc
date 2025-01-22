@@ -88,7 +88,7 @@ HorizWidget::HorizWidget(QWidget* parent,
 
   // create the rubber band
 
-  _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+  _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
 
   // Allow the size_t type to be passed to slots
 
