@@ -564,7 +564,8 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
   }
     
   // hide the rubber band
-
+  
+  _paintZoomRect();
   _rubberBand->hide();
   update();
 
@@ -2140,6 +2141,7 @@ void HorizWidget::mousePressEvent(QMouseEvent *e)
 
 
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
+    _paintZoomRect();
     _rubberBand->show();
 
     _mousePressX = pos.x();
@@ -2200,6 +2202,7 @@ void HorizWidget::mouseMoveEvent(QMouseEvent * e)
   newRect = newRect.normalized();
   
   _rubberBand->setGeometry(newRect);
+  _paintZoomRect();
 
 }
 
@@ -2537,3 +2540,19 @@ void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
   contextMenu.exec(this->mapToGlobal(pos));
 }
 
+//////////////////////////////////////////
+// paint the user-selected zoom rectangle
+
+void HorizWidget::_paintZoomRect()
+{
+  QRect zrect = _rubberBand->geometry();
+  cerr << "Zoom rect x, y: "
+       << zrect.x() << ", " << zrect.y() << endl;
+  cerr << "Zoom rect width, height: "
+       << zrect.width() << ", " << zrect.height() << endl;
+  QPainter painter(this);
+  // painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+  painter.setPen(QColor(0xff, 0xff, 0xff));
+  painter.drawRect(zrect);
+}
+  

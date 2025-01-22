@@ -71,15 +71,18 @@ public:
   
 protected:
   void paintEvent(QPaintEvent *event) override {
+    QRubberBand::paintEvent(event);
+#ifdef NOTNOW
     QPainter painter(this);
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
     // painter.setRenderHint(QPainter::Antialiasing);
     // Draw border
-    painter.setPen(QColor(0xff, 0xff, 0xff));
+    // painter.setPen(QColor(0xff, 0xff, 0xff));
     // Transparent background
-    // painter.setBrush(Qt::NoBrush);
+    painter.setBrush(Qt::NoBrush);
     // Adjust to stay within bounds    
     painter.drawRect(rect().adjusted(0, 0, -1, -1));
+#endif
   }
 };
 
@@ -454,13 +457,6 @@ class DLL_EXPORT HorizWidget : public QWidget
    */
 
   CustomRubberBand *_rubberBand;
-  QRect _zoomRect;
-
-  /**
-   * @brief The rubber band origin.
-   */
-
-  QPoint _rubberBandOrigin;
 
   /**
    * @brief The current ring spacing in km.  This value is changed when we
@@ -627,6 +623,11 @@ class DLL_EXPORT HorizWidget : public QWidget
   
   void _doRenderInvalidImages(QPainter &painter,
                               int index, VertWidget *vert);
+  
+  // paint the user-selected zoom rectangle
+  
+  void _setZoomRectPainter();
+  void _paintZoomRect();
   
 };
 
