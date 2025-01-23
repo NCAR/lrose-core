@@ -80,14 +80,6 @@ public:
     FILELIST = 2
   } mode_t;
 
-  typedef enum {
-    NO_COMPRESSION = 0,
-    RLE_COMPRESSION = 1,
-    LZO_COMPRESSION = 2,
-    ZLIB_COMPRESSION = 3,
-    BZIP_COMPRESSION = 4
-  } compression_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -445,8 +437,6 @@ public:
 
   tdrp_bool_t write_blocking;
 
-  compression_t output_compression;
-
   int output_n_slots;
 
   int output_buf_size;
@@ -458,7 +448,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

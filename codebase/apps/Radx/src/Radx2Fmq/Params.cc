@@ -984,7 +984,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_url");
-    tt->descr = tdrpStrDup("Output URL for DsRadarQueue fmq.");
+    tt->descr = tdrpStrDup("Output URL for DsRadarQueue FMQ in Radx format.");
     tt->help = tdrpStrDup("The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.");
     tt->val_offset = (char *) &output_url - &_start_;
     tt->single_val.s = tdrpStrDup("fmq/ncf");
@@ -1012,32 +1012,6 @@
     tt->help = tdrpStrDup("If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.");
     tt->val_offset = (char *) &write_blocking - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compression'
-    // ctype is '_compression_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_compression");
-    tt->descr = tdrpStrDup("Output compression options.");
-    tt->help = tdrpStrDup("The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.");
-    tt->val_offset = (char *) &output_compression - &_start_;
-    tt->enum_def.name = tdrpStrDup("compression_t");
-    tt->enum_def.nfields = 5;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("NO_COMPRESSION");
-      tt->enum_def.fields[0].val = NO_COMPRESSION;
-      tt->enum_def.fields[1].name = tdrpStrDup("RLE_COMPRESSION");
-      tt->enum_def.fields[1].val = RLE_COMPRESSION;
-      tt->enum_def.fields[2].name = tdrpStrDup("LZO_COMPRESSION");
-      tt->enum_def.fields[2].val = LZO_COMPRESSION;
-      tt->enum_def.fields[3].name = tdrpStrDup("ZLIB_COMPRESSION");
-      tt->enum_def.fields[3].val = ZLIB_COMPRESSION;
-      tt->enum_def.fields[4].name = tdrpStrDup("BZIP_COMPRESSION");
-      tt->enum_def.fields[4].val = BZIP_COMPRESSION;
-    tt->single_val.e = ZLIB_COMPRESSION;
     tt++;
     
     // Parameter 'output_n_slots'

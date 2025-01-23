@@ -138,7 +138,7 @@ Radx2Fmq::Radx2Fmq(int argc, char **argv)
 		   _progName.c_str(),
 		   _params.debug >= Params::DEBUG_VERBOSE,
 		   DsFmq::READ_WRITE, DsFmq::END,
-		   _params.output_compression != Params::NO_COMPRESSION,
+		   false,
 		   _params.output_n_slots,
 		   _params.output_buf_size)) {
     cerr << "WARNING - trying to create new fmq" << endl;
@@ -146,7 +146,7 @@ Radx2Fmq::Radx2Fmq(int argc, char **argv)
 		     _progName.c_str(),
                      _params.debug >= Params::DEBUG_VERBOSE,
 		     DsFmq::CREATE, DsFmq::START,
-		     _params.output_compression != Params::NO_COMPRESSION,
+		     false,
 		     _params.output_n_slots,
 		     _params.output_buf_size)) {
       cerr << "ERROR - Radx2Fmq" << endl;
@@ -156,9 +156,6 @@ Radx2Fmq::Radx2Fmq(int argc, char **argv)
     }
   }
       
-  _rQueue.setCompressionMethod((ta_compression_method_t)
-			       _params.output_compression);
-
   if (_params.write_blocking) {
     _rQueue.setBlockingWrite();
   }

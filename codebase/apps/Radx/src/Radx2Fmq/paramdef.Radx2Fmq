@@ -205,7 +205,7 @@ commentdef {
 
 paramdef string {
   p_default = "fmq/ncf";
-  p_descr = "Output URL for DsRadarQueue fmq.";
+  p_descr = "Output URL for DsRadarQueue FMQ in Radx format.";
   p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
 } output_url;
 
@@ -220,16 +220,6 @@ paramdef boolean {
   p_descr = "Option to block on write when the radar queue fills up.";
   p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
 } write_blocking;
-
-typedef enum {
-  NO_COMPRESSION, RLE_COMPRESSION, LZO_COMPRESSION, ZLIB_COMPRESSION, BZIP_COMPRESSION
-} compression_t;
-  
-paramdef enum compression_t {
-  p_default = ZLIB_COMPRESSION;
-  p_descr = "Output compression options.";
-  p_help = "The data may be optionally compressed for output. BZIP is generally the slowest but most compact. ZLIB uses the gzip compression algorithm, which is faster than BZIP, and for some data more compact as well. LZO is faster than BZIP and ZLIB, but not as compact. RLE is simple run-length encoding compression, which is the fastest and least compact.";
-} output_compression;
 
 paramdef int {
   p_default = 5000;
