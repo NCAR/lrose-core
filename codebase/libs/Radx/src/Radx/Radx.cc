@@ -85,6 +85,10 @@ const char* Radx::AIRCRAFT_FORE = "aircraft_fore";
 const char* Radx::AIRCRAFT_NOSE = "aircraft_nose";
 const char* Radx::AIRCRAFT_ROOF = "aircraft_roof";
 const char* Radx::AIRCRAFT_TAIL = "aircraft_tail";
+const char* Radx::APAR_FORE_DOPPLER_RHI = "apar_fore_doppler_rhi";
+const char* Radx::APAR_AFT_DOPPLER_RHI = "apar_aft_doppler_rhi";
+const char* Radx::APAR_DUALPOL_RHI = "apar_dualpol_rhi";
+const char* Radx::APAR_SECTOR_PPI = "apar_sector_ppi";
 const char* Radx::AXIS_X = "axis_x";
 const char* Radx::AXIS_X_PRIME = "axis_x_prime";
 const char* Radx::AXIS_Y = "axis_y";
@@ -473,6 +477,18 @@ string Radx::sweepModeToStr(SweepMode_t mode)
     case SWEEP_MODE_ELECTRONIC_STEERING: {
       return Radx::ELECTRONIC_STEERING;
     }
+    case SWEEP_MODE_APAR_FORE_DOPPLER_RHI: {
+      return Radx::APAR_FORE_DOPPLER_RHI;
+    }
+    case SWEEP_MODE_APAR_AFT_DOPPLER_RHI: {
+      return Radx::APAR_AFT_DOPPLER_RHI;
+    }
+    case SWEEP_MODE_APAR_DUALPOL_RHI: {
+      return Radx::APAR_DUALPOL_RHI;
+    }
+    case SWEEP_MODE_APAR_SECTOR_PPI: {
+      return Radx::APAR_SECTOR_PPI;
+    }
     default: {
       return Radx::UNKNOWN;
     }
@@ -529,6 +545,18 @@ string Radx::sweepModeToShortStr(SweepMode_t mode)
     }
     case SWEEP_MODE_ELECTRONIC_STEERING: {
       return "PAR";
+    }
+    case SWEEP_MODE_APAR_FORE_DOPPLER_RHI: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_AFT_DOPPLER_RHI: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_DUALPOL_RHI: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_SECTOR_PPI: {
+      return "PPI";
     }
     default: {
       return "SUR";
@@ -615,6 +643,18 @@ Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)
   }
   if (str.find(Radx::ELECTRONIC_STEERING) != string::npos) {
     return SWEEP_MODE_ELECTRONIC_STEERING;
+  }
+  if (str.find(Radx::APAR_FORE_DOPPLER_RHI) != string::npos) {
+    return SWEEP_MODE_APAR_FORE_DOPPLER_RHI;
+  }
+  if (str.find(Radx::APAR_AFT_DOPPLER_RHI) != string::npos) {
+    return SWEEP_MODE_APAR_AFT_DOPPLER_RHI;
+  }
+  if (str.find(Radx::APAR_DUALPOL_RHI) != string::npos) {
+    return SWEEP_MODE_APAR_DUALPOL_RHI;
+  }
+  if (str.find(Radx::APAR_SECTOR_PPI) != string::npos) {
+    return SWEEP_MODE_APAR_SECTOR_PPI;
   }
   return SWEEP_MODE_NOT_SET;
 }

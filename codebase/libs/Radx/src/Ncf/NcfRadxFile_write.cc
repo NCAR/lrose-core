@@ -272,6 +272,9 @@ int NcfRadxFile::_writeSweepToDir(const RadxVol &vol,
 
   string fixedAngleLabel = "el";
   if (sweep.getSweepMode() == Radx::SWEEP_MODE_RHI ||
+      sweep.getSweepMode() == Radx::SWEEP_MODE_APAR_FORE_DOPPLER_RHI ||
+      sweep.getSweepMode() == Radx::SWEEP_MODE_APAR_AFT_DOPPLER_RHI ||
+      sweep.getSweepMode() == Radx::SWEEP_MODE_APAR_DUALPOL_RHI ||
       sweep.getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
     fixedAngleLabel = "az";
   }

@@ -651,6 +651,14 @@ public:
   void setSweepModeDbsLabel(const string &val) { _sweepModeDbsLabel = val; }
   void setSweepModeTrajLabel(const string &val) { _sweepModeTrajLabel = val; }
   void setSweepModeParLabel(const string &val) { _sweepModeParLabel = val; }
+  void setSweepModeAparForeDopplerRhiLabel(const string &val)
+  { _sweepModeAparForeDopplerRhiLabel = val; }
+  void setSweepModeAparAftDopplerRhiLabel(const string &val)
+  { _sweepModeAparAftDopplerRhiLabel = val; }
+  void setSweepModeAparDualpolRhiLabel(const string &val)
+  { _sweepModeAparDualpolRhiLabel = val; }
+  void setSweepModeAparSectorPpiLabel(const string &val)
+  { _sweepModeAparSectorPpiLabel = val; }
   
   /// Load volume information from the rays.
   ///
@@ -2005,6 +2013,10 @@ private:
   string _sweepModeDbsLabel;
   string _sweepModeTrajLabel;
   string _sweepModeParLabel;
+  string _sweepModeAparForeDopplerRhiLabel;
+  string _sweepModeAparAftDopplerRhiLabel;
+  string _sweepModeAparDualpolRhiLabel;
+  string _sweepModeAparSectorPpiLabel;
   
   // times
 
