@@ -689,6 +689,7 @@ codebase/apps/Radx/src/FixRadxValues/FixRadxValues
 codebase/apps/Radx/src/GroundEchoStats/GroundEchoStats
 codebase/apps/Radx/src/Pid2Grid/Pid2Grid
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
+codebase/apps/Radx/src/Radx2Fmq/Radx2Fmq
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
 codebase/apps/Radx/src/RadxBufr/RadxBufr
 codebase/apps/Radx/src/RadxCalUpdate/RadxCalUpdate

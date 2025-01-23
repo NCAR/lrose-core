@@ -50,6 +50,8 @@
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxRcalib.hh>
+#include <Radx/RadxStatusXml.hh>
+#include <Radx/RadxEvent.hh>
 #include <Radx/RadxPath.hh>
 #include "Radx2Fmq.hh"
 using namespace std;
@@ -62,8 +64,6 @@ Radx2Fmq::Radx2Fmq(int argc, char **argv)
 
   isOK = true;
   _input = NULL;
-  _prevNGates = -1;
-  _prevSweepNum = -1;
 
   // set programe name
   
@@ -134,33 +134,9 @@ Radx2Fmq::Radx2Fmq(int argc, char **argv)
 
   // initialize the output queue
 
-  if (_rQueue.init(_params.output_url,
-		   _progName.c_str(),
-		   _params.debug >= Params::DEBUG_VERBOSE,
-		   DsFmq::READ_WRITE, DsFmq::END,
-		   false,
-		   _params.output_n_slots,
-		   _params.output_buf_size)) {
-    cerr << "WARNING - trying to create new fmq" << endl;
-    if (_rQueue.init(_params.output_url,
-		     _progName.c_str(),
-                     _params.debug >= Params::DEBUG_VERBOSE,
-		     DsFmq::CREATE, DsFmq::START,
-		     false,
-		     _params.output_n_slots,
-		     _params.output_buf_size)) {
-      cerr << "ERROR - Radx2Fmq" << endl;
-      cerr << "  Cannot open fmq, URL: " << _params.output_url << endl;
-      isOK = false;
-      return;
-    }
-  }
-      
-  if (_params.write_blocking) {
-    _rQueue.setBlockingWrite();
-  }
-  if (_params.data_mapper_report_interval > 0) {
-    _rQueue.setRegisterWithDmap(true, _params.data_mapper_report_interval);
+  if (_openOutputFmq()) {
+    isOK = false;
+    return;
   }
 
   return;
@@ -310,21 +286,25 @@ int Radx2Fmq::_processFile(const string filePath)
 
   vol.loadFieldsFromRays(true);
   
-  // convert all fields to same encoding
-
-  _convertFieldsToUniformType(vol);
-
   // put start of volume
 
-  _rQueue.putStartOfVolume(vol.getVolumeNumber());
+  int iret = 0;
+  _putStartOfVolume(vol);
 
-  // put status XML is appropriate
-
-  _writeStatusXml(vol);
+  // put platform, calibs and status
+  
+  if (_writePlatform(vol)) {
+    iret = -1;
+  }
+  if (_writeStatusXml(vol)) {
+    iret = -1;
+  }
+  if (_writeCalibs(vol)) {
+    iret = -1;
+  }
 
   // loop through the sweeps
-
-  int iret = 0;
+  
   for (int ii = 0; ii < (int) vol.getSweeps().size(); ii++) {
     if (_processSweep(vol, ii)) {
       iret = -1;
@@ -333,7 +313,7 @@ int Radx2Fmq::_processFile(const string filePath)
 
   // put end of volume
 
-  _rQueue.putEndOfVolume(vol.getVolumeNumber());
+  _putEndOfVolume(vol);
 
   return iret;
 
@@ -346,33 +326,27 @@ int Radx2Fmq::_processSweep(const RadxVol &vol,
                             int sweepIndex)
 
 {
-
+  
   const RadxSweep &sweep = *vol.getSweeps()[sweepIndex];
 
-  // put start of tilt
+  // put start of sweep
 
-  _rQueue.putStartOfTilt(sweep.getSweepNumber());
-
-  if (sweepIndex == 0) {
-    if (_writeCalibration(vol)) {
-      cerr << "ERROR - Radx2Fmq::_processSweep" << endl;
-      cerr << "  Cannot write calibration" << endl;
-      return -1;
-    }
-  }
-
-  // write beams
-
+  const RadxRay &startRay = *(vol.getRays()[sweep.getStartRayIndex()]);
+  _putStartOfSweep(startRay);
+  
+  // write rays
+  
   for (size_t ii = sweep.getStartRayIndex();
        ii <= sweep.getEndRayIndex(); ii++) {
-    if (_writeBeam(vol, sweep, ii, *vol.getRays()[ii])) {
+    if (_writeRay(*vol.getRays()[ii])) {
       return -1;
     }
   }
 
-  // put end of tilt
+  // put end of sweep
 
-  _rQueue.putEndOfTilt(sweep.getSweepNumber());
+  const RadxRay &endRay = *(vol.getRays()[sweep.getEndRayIndex()]);
+  _putEndOfSweep(endRay);
 
   return 0;
 
@@ -439,583 +413,331 @@ void Radx2Fmq::_setupRead(RadxFile &file)
   
 }
 
-//////////////////////////////////////////////////
-// convert all fields to same data type
-// widening as required
+///////////////////////////////////////////////////////////
+// open output fmq
 
-void Radx2Fmq::_convertFieldsToUniformType(RadxVol &vol)
-
+int Radx2Fmq::_openOutputFmq()
+  
 {
 
-  // search for the narrowest data type which works for all
-  // fields
+  if (_outputFmq != NULL) {
+    delete _outputFmq;
+  }
+
+  _outputFmq = new DsFmq;
   
-  _dataByteWidth = 1;
-  for (int ii = 0; ii < (int) vol.getFields().size(); ii++) {
-    const RadxField &fld = *vol.getFields()[ii];
-    if (fld.getByteWidth() > _dataByteWidth) {
-      _dataByteWidth = fld.getByteWidth();
+  // initialize the output queue
+  
+  if (_outputFmq->init(_params.output_url,
+                       _progName.c_str(),
+                       _params.debug >= Params::DEBUG_VERBOSE,
+                       DsFmq::READ_WRITE, DsFmq::END,
+                       false,
+                       _params.output_n_slots,
+                       _params.output_buf_size)) {
+    cerr << "WARNING - trying to create new fmq" << endl;
+    if (_outputFmq->init(_params.output_url,
+                         _progName.c_str(),
+                         _params.debug >= Params::DEBUG_VERBOSE,
+                         DsFmq::CREATE, DsFmq::START,
+                         false,
+                         _params.output_n_slots,
+                         _params.output_buf_size)) {
+      cerr << "ERROR - " << _progName << "::openOutputFmq" << endl;
+      cerr << "  Cannot open output radx fmq, URL: " << _params.output_url << endl;
+      return -1;
     }
   }
-
-  if (_dataByteWidth == 1) {
-    _dataType = Radx::SI08;
-  } else if (_dataByteWidth == 2) {
-    _dataType = Radx::SI16;
-  } else {
-    _dataType = Radx::FL32;
+  
+  if (_params.write_blocking) {
+    _outputFmq->setBlockingWrite();
+  }
+  if (_params.data_mapper_report_interval > 0) {
+    _outputFmq->setRegisterWithDmap(true, _params.data_mapper_report_interval);
   }
   
-  vol.setFieldsToUniformType(_dataType);
-
-}
-
-//////////////////////////////////////////////////
-// write radar and field parameters
-
-int Radx2Fmq::_writeParams(const RadxVol &vol,
-                           const RadxSweep &sweep,
-                           const RadxRay &ray)
-
-{
-
-  // radar parameters
-
-  DsRadarMsg msg;
-  DsRadarParams &rparams = msg.getRadarParams();
-  
-  rparams.radarId = 0;
-  rparams.radarType = _getDsRadarType(vol.getPlatformType());
-  rparams.numFields = ray.getFields().size();
-  rparams.numGates = ray.getNGates();
-  rparams.samplesPerBeam = ray.getNSamples();
-  rparams.scanType = 0;
-  rparams.scanMode = _getDsScanMode(sweep.getSweepMode());
-  rparams.followMode = _getDsFollowMode(sweep.getFollowMode());
-  rparams.polarization =
-    _getDsPolarizationMode(sweep.getPolarizationMode());
-  rparams.scanTypeName =
-    Radx::sweepModeToStr(sweep.getSweepMode());
-  rparams.prfMode = _getDsPrfMode(sweep.getPrtMode(), ray.getPrtRatio());
-  
-  if (vol.getRcalibs().size() > 0) {
-    rparams.radarConstant = vol.getRcalibs()[0]->getRadarConstantH();
-  }
-
-  rparams.altitude = vol.getAltitudeKm();
-  rparams.latitude = vol.getLatitudeDeg();
-  rparams.longitude = vol.getLongitudeDeg();
-  rparams.gateSpacing = vol.getGateSpacingKm();
-  rparams.startRange = vol.getStartRangeKm();
-  rparams.horizBeamWidth = vol.getRadarBeamWidthDegH();
-  rparams.vertBeamWidth = vol.getRadarBeamWidthDegV();
-  rparams.antennaGain = vol.getRadarAntennaGainDbH();
-  rparams.wavelength = vol.getWavelengthM() * 100.0;
-
-  rparams.pulseWidth = ray.getPulseWidthUsec();
-  rparams.pulseRepFreq = 1.0 / ray.getPrtSec();
-  rparams.prt = ray.getPrtSec();
-  rparams.prt2 = ray.getPrtSec() / ray.getPrtRatio();
-  rparams.unambigRange = ray.getUnambigRangeKm();
-  rparams.unambigVelocity = ray.getNyquistMps();
-
-  if (vol.getRcalibs().size() > 0) {
-    const RadxRcalib &cal = *vol.getRcalibs()[0];
-    rparams.xmitPeakPower = pow(10.0, cal.getXmitPowerDbmH() / 10.0) / 1000.0;
-    rparams.receiverGain = cal.getReceiverGainDbHc();
-    rparams.receiverMds = cal.getNoiseDbmHc() - rparams.receiverGain;
-    rparams.systemGain = rparams.antennaGain + rparams.receiverGain;
-    rparams.measXmitPowerDbmH = cal.getXmitPowerDbmH();
-    rparams.measXmitPowerDbmV = cal.getXmitPowerDbmV();
-  }
-
-  rparams.radarName = vol.getInstrumentName() + "/" + vol.getSiteName();
-  rparams.scanTypeName = vol.getScanName();
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    rparams.print(cerr);
-  }
-
-  // field parameters
-
-  vector<DsFieldParams* > &fieldParams = msg.getFieldParams();
-  
-  for (int ifield = 0; ifield < (int) vol.getFields().size(); ifield++) {
-
-    const RadxField &fld = *vol.getFields()[ifield];
-    double dsScale = 1.0, dsBias = 0.0;
-    int dsMissing = 0;
-    if (_dataType == Radx::SI08) {
-      dsMissing = fld.getMissingSi08() + 128;
-      dsScale = fld.getScale();
-      dsBias = fld.getOffset() - 128.0 * dsScale;
-    } else if (_dataType == Radx::SI16) {
-      dsMissing = fld.getMissingSi16() + 32768;
-      dsScale = fld.getScale();
-      dsBias = fld.getOffset() - 32768.0 * dsScale;
-    } else if (_dataType == Radx::FL32) {
-      dsMissing = (int) floor(fld.getMissingFl32() + 0.5);
-    }
-
-    DsFieldParams *fParams = new DsFieldParams(fld.getName().c_str(),
-                                               fld.getUnits().c_str(),
-                                               dsScale, dsBias,
-                                               _dataByteWidth,
-                                               dsMissing);
-    fieldParams.push_back(fParams);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      fParams->print(cerr);
-    }
-
-  } // ifield
-
-  // put params
-  
-  int content = DsRadarMsg::FIELD_PARAMS | DsRadarMsg::RADAR_PARAMS;
-  if(_rQueue.putDsMsg(msg, content)) {
-    cerr << "ERROR - Radx2Fmq::_writeFieldParams()" << endl;
-    cerr << "  Cannot write field params to FMQ" << endl;
-    cerr << "  URL: " << _params.output_url << endl;
-    return -1;
-  }
-        
   return 0;
 
 }
 
-//////////////////////////////////////////////////
-// write status xml
+////////////////////////////////////////
+// Write radar and field params to queue
+//
+// Returns 0 on success, -1 on failure
 
-int Radx2Fmq::_writeStatusXml(const RadxVol &vol)
-  
+int Radx2Fmq::_writePlatform(const RadxVol &vol)
+
 {
 
-  string statusXml = vol.getStatusXml();
-  if (statusXml.size() == 0) {
-    return 0;
-  }
-
-  // create DsRadar message
+  RadxPlatform platform = vol.getPlatform();
   
-  DsRadarMsg msg;
-  msg.setStatusXml(statusXml);
+  RadxMsg msg;
+  platform.serialize(msg);
   
   // write the message
   
-  if (_rQueue.putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
-    cerr << "ERROR - Radx2Fmq::_writeStatusXml" << endl;
-    cerr << "  Cannot put status XML to queue" << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// write calibration
-
-int Radx2Fmq::_writeCalibration(const RadxVol &vol)
-  
-{
-
-  if (vol.getRcalibs().size() < 1) {
-    // no cal data
-    return 0;
-  }
-
-  // use first calibration
-
-  DsRadarMsg msg;
-  DsRadarCalib &calOut = msg.getRadarCalib();
-  const RadxRcalib &calIn = *vol.getRcalibs()[0];
-
-  calOut.setCalibTime(calIn.getCalibTime());
-
-  calOut.setWavelengthCm(vol.getWavelengthCm());
-  calOut.setBeamWidthDegH(vol.getRadarBeamWidthDegH());
-  calOut.setBeamWidthDegV(vol.getRadarBeamWidthDegV());
-  calOut.setAntGainDbH(vol.getRadarAntennaGainDbH());
-  calOut.setAntGainDbV(vol.getRadarAntennaGainDbV());
-
-  calOut.setPulseWidthUs(calIn.getPulseWidthUsec());
-  calOut.setXmitPowerDbmH(calIn.getXmitPowerDbmH());
-  calOut.setXmitPowerDbmV(calIn.getXmitPowerDbmV());
-  
-  calOut.setTwoWayWaveguideLossDbH(calIn.getTwoWayWaveguideLossDbH());
-  calOut.setTwoWayWaveguideLossDbV(calIn.getTwoWayWaveguideLossDbV());
-  calOut.setTwoWayRadomeLossDbH(calIn.getTwoWayRadomeLossDbH());
-  calOut.setTwoWayRadomeLossDbV(calIn.getTwoWayRadomeLossDbV());
-  calOut.setReceiverMismatchLossDb(calIn.getReceiverMismatchLossDb());
-  
-  calOut.setRadarConstH(calIn.getRadarConstantH());
-  calOut.setRadarConstV(calIn.getRadarConstantV());
-  
-  calOut.setNoiseDbmHc(calIn.getNoiseDbmHc());
-  calOut.setNoiseDbmHx(calIn.getNoiseDbmHx());
-  calOut.setNoiseDbmVc(calIn.getNoiseDbmVc());
-  calOut.setNoiseDbmVx(calIn.getNoiseDbmVx());
-  
-  calOut.setReceiverGainDbHc(calIn.getReceiverGainDbHc());
-  calOut.setReceiverGainDbHx(calIn.getReceiverGainDbHx());
-  calOut.setReceiverGainDbVc(calIn.getReceiverGainDbVc());
-  calOut.setReceiverGainDbVx(calIn.getReceiverGainDbVx());
-  
-  calOut.setReceiverSlopeDbHc(calIn.getReceiverSlopeDbHc());
-  calOut.setReceiverSlopeDbHx(calIn.getReceiverSlopeDbHx());
-  calOut.setReceiverSlopeDbVc(calIn.getReceiverSlopeDbVc());
-  calOut.setReceiverSlopeDbVx(calIn.getReceiverSlopeDbVx());
-  
-  calOut.setBaseDbz1kmHc(calIn.getBaseDbz1kmHc());
-  calOut.setBaseDbz1kmHx(calIn.getBaseDbz1kmHx());
-  calOut.setBaseDbz1kmVc(calIn.getBaseDbz1kmVc());
-  calOut.setBaseDbz1kmVx(calIn.getBaseDbz1kmVx());
-  
-  calOut.setSunPowerDbmHc(calIn.getSunPowerDbmHc());
-  calOut.setSunPowerDbmHx(calIn.getSunPowerDbmHx());
-  calOut.setSunPowerDbmVc(calIn.getSunPowerDbmVc());
-  calOut.setSunPowerDbmVx(calIn.getSunPowerDbmVx());
-  
-  calOut.setNoiseSourcePowerDbmH(calIn.getNoiseSourcePowerDbmH());
-  calOut.setNoiseSourcePowerDbmV(calIn.getNoiseSourcePowerDbmV());
-  
-  calOut.setPowerMeasLossDbH(calIn.getPowerMeasLossDbH());
-  calOut.setPowerMeasLossDbV(calIn.getPowerMeasLossDbV());
-  
-  calOut.setCouplerForwardLossDbH(calIn.getCouplerForwardLossDbH());
-  calOut.setCouplerForwardLossDbV(calIn.getCouplerForwardLossDbV());
-  
-  calOut.setZdrCorrectionDb(calIn.getZdrCorrectionDb());
-  calOut.setLdrCorrectionDbH(calIn.getLdrCorrectionDbH());
-  calOut.setLdrCorrectionDbV(calIn.getLdrCorrectionDbV());
-  calOut.setSystemPhidpDeg(calIn.getSystemPhidpDeg());
-  
-  calOut.setTestPowerDbmH(calIn.getTestPowerDbmH());
-  calOut.setTestPowerDbmV(calIn.getTestPowerDbmV());
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    calOut.print(cerr);
-  }
-  
-  // put calibration
-  
-  int content = (int) DsRadarMsg::RADAR_CALIB;
-  if(_rQueue.putDsMsg(msg, content)) {
-    cerr << "ERROR - Radx2Fmq::_writeCalibration()" << endl;
-    cerr << "  Cannot write calibration to FMQ" << endl;
-    cerr << "  URL: " << _params.output_url << endl;
-    return -1;
-  }
-        
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// write beam
-
-int Radx2Fmq::_writeBeam(const RadxVol &vol,
-                         const RadxSweep &sweep,
-                         int rayNumInSweep,
-                         const RadxRay &ray)
-  
-{
-
-  // write params if needed
-
-  int nGates = ray.getNGates();
-  const vector<RadxField *> &fields = vol.getFields();
-  int nFields = vol.getFields().size();
-  int nPoints = nGates * nFields;
-
-  bool needWriteParams = false;
-  
-  if (rayNumInSweep == 0 || _prevNGates != nGates) {
-    needWriteParams = true;
-  }
-
-  if (_prevSweepNum != ray.getSweepNumber()) {
-    needWriteParams = true;
-    _prevSweepNum = ray.getSweepNumber();
-  }
-
-  if ((int) _prevFieldNames.size() != nFields) {
-    needWriteParams = true;
-  } else {
-    for (int ii = 0; ii < nFields; ii++) {
-      if (_prevFieldNames[ii] != fields[ii]->getName()) {
-        needWriteParams = true;
-      }
-    }
-  }
-
-  if (needWriteParams) {
-
-    _prevNGates = nGates;
-    _prevFieldNames.clear();
-    for (int ii = 0; ii < nFields; ii++) {
-      _prevFieldNames.push_back(fields[ii]->getName());
-    }
-  
-    if (_writeParams(vol, sweep, ray)) {
-      cerr << "ERROR - Radx2Fmq::_writeBeam" << endl;
-      cerr << "  Cannot write params" << endl;
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_writePlatform" << endl;
+    cerr << "  Cannot write platform to queue" << endl;
+    // reopen the queue
+    if (_openOutputFmq()) {
       return -1;
     }
-
   }
-
-  // meta-data
-
-  DsRadarMsg msg;
-  DsRadarBeam &beam = msg.getRadarBeam();
-
-  beam.dataTime = ray.getTimeSecs();
-  beam.nanoSecs = (int) (ray.getNanoSecs() + 0.5);
-  beam.referenceTime = 0;
-
-  beam.byteWidth = _dataByteWidth;
-
-  beam.volumeNum = ray.getVolumeNumber();
-  beam.tiltNum = ray.getSweepNumber();
-  Radx::SweepMode_t sweepMode = ray.getSweepMode();
-  beam.scanMode = _getDsScanMode(sweepMode);
-  beam.antennaTransition = ray.getAntennaTransition();
   
-  beam.azimuth = ray.getAzimuthDeg();
-  beam.elevation = ray.getElevationDeg();
-  
-  if (sweepMode == Radx::SWEEP_MODE_RHI ||
-      sweepMode == Radx::SWEEP_MODE_MANUAL_RHI) {
-    beam.targetAz = ray.getFixedAngleDeg();
-  } else {
-    beam.targetElev = ray.getFixedAngleDeg();
-  }
+  return 0;
 
-  beam.beamIsIndexed = ray.getIsIndexed();
-  beam.angularResolution = ray.getAngleResDeg();
-  beam.nSamples = ray.getNSamples();
+}
 
-  beam.measXmitPowerDbmH = ray.getMeasXmitPowerDbmH();
-  beam.measXmitPowerDbmV = ray.getMeasXmitPowerDbmV();
+////////////////////////////////////////
+// Write radar calib to queue
+// Returns 0 on success, -1 on failure
 
-  // field data - must be re-ordered to gate-by-gate
+int Radx2Fmq::_writeCalibs(const RadxVol &vol)
 
-  if (_dataByteWidth == 1) {
+{
 
-    // 1-byte ints
+  const vector<RadxRcalib *> &rcalibs = vol.getRcalibs();
 
-    ui08 *data = new ui08[nPoints];
-    for (int ifield = 0; ifield < nFields; ifield++) {
-      ui08 *dd = data + ifield;
-      const RadxField &fld = *ray.getFields()[ifield];
-      const Radx::si08 *fd = (Radx::si08 *) fld.getData();
-      if (fd == NULL) {
-        cerr << "ERROR - Radx2Fmq::_writeBeam" << endl;
-        cerr << "  NULL data pointer, field name, elev, az: "
-             << fld.getName() << ", "
-             << ray.getElevationDeg() << ", "
-             << ray.getAzimuthDeg() << endl;
-        delete[] data;
+  for (size_t ii = 0; ii < rcalibs.size(); ii++) {
+
+    RadxRcalib rcalib = *rcalibs[ii];
+    
+    // create message
+    
+    RadxMsg msg;
+    rcalib.serialize(msg);
+    
+    // write the message
+    
+    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                             msg.assembledMsg(), msg.lengthAssembled())) {
+      cerr << "ERROR - Radx2Fmq::_writeCalibs" << endl;
+      cerr << "  Cannot write calib to queue" << endl;
+      // reopen the queue
+      if (_openOutputFmq()) {
         return -1;
       }
-      for (int igate = 0; igate < nGates; igate++, dd += nFields, fd++) {
-        int uu = *fd + 128;
-        *dd = (ui08) uu;
-      }
     }
-    beam.loadData(data, nPoints * sizeof(ui08), sizeof(ui08));
-    delete[] data;
     
-  } else if (_dataByteWidth == 2) {
-
-    // 2-byte ints
-
-    ui16 *data = new ui16[nPoints];
-    for (int ifield = 0; ifield < nFields; ifield++) {
-      ui16 *dd = data + ifield;
-      const RadxField &fld = *ray.getFields()[ifield];
-      const Radx::si16 *fd = (Radx::si16 *) fld.getData();
-      if (fd == NULL) {
-        cerr << "ERROR - Radx2Fmq::_writeBeam" << endl;
-        cerr << "  NULL data pointer, field name, elev, az: "
-             << fld.getName() << ", "
-             << ray.getElevationDeg() << ", "
-             << ray.getAzimuthDeg() << endl;
-        delete[] data;
-        return -1;
-      }
-      for (int igate = 0; igate < nGates; igate++, dd += nFields, fd++) {
-        int uu = *fd + 32768;
-        *dd = (ui16) uu;
-      }
-    }
-    beam.loadData(data, nPoints * sizeof(ui16), sizeof(ui16));
-    delete[] data;
-    
-  } else {
-
-    // 4-byte floats
-
-    fl32 *data = new fl32[nPoints];
-    for (int ifield = 0; ifield < nFields; ifield++) {
-      fl32 *dd = data + ifield;
-      const RadxField &fld = *ray.getFields()[ifield];
-      const Radx::fl32 *fd = (Radx::fl32 *) fld.getData();
-      if (fd == NULL) {
-        cerr << "ERROR - Radx2Fmq::_writeBeam" << endl;
-        cerr << "  NULL data pointer, field name, elev, az: "
-             << fld.getName() << ", "
-             << ray.getElevationDeg() << ", "
-             << ray.getAzimuthDeg() << endl;
-        delete[] data;
-        return -1;
-      }
-      for (int igate = 0; igate < nGates; igate++, dd += nFields, fd++) {
-        *dd = *fd;
-      }
-    }
-    beam.loadData(data, nPoints * sizeof(fl32), sizeof(fl32));
-    delete[] data;
-    
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    beam.print(cerr);
-  }
-  
-  // put beam
-  
-  int content = (int) DsRadarMsg::RADAR_BEAM;
-  if(_rQueue.putDsMsg(msg, content)) {
-    cerr << "ERROR - Radx2Fmq::_writeBeam()" << endl;
-    cerr << "  Cannot write beam to FMQ" << endl;
-    cerr << "  URL: " << _params.output_url << endl;
-    return -1;
-  }
-
-  if (_params.do_simulate) {
-    umsleep(_params.sim_delay_msecs);
-  }
+  } // ii
 
   return 0;
 
 }
 
-//////////////////////////////////////////////////
-// get Dsr enums from Radx enums
+////////////////////////////////////////
+// Write status XML to queue
+// Returns 0 on success, -1 on failure
 
-int Radx2Fmq::_getDsRadarType(Radx::PlatformType_t ptype)
-
-{
-  switch (ptype) {
-    case Radx::PLATFORM_TYPE_VEHICLE:
-      return DS_RADAR_VEHICLE_TYPE;
-    case Radx::PLATFORM_TYPE_SHIP:
-      return DS_RADAR_SHIPBORNE_TYPE;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
-      return DS_RADAR_AIRBORNE_FORE_TYPE;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
-      return DS_RADAR_AIRBORNE_AFT_TYPE;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
-      return DS_RADAR_AIRBORNE_TAIL_TYPE;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
-      return DS_RADAR_AIRBORNE_LOWER_TYPE;
-    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
-      return DS_RADAR_AIRBORNE_UPPER_TYPE;
-    default:
-      return DS_RADAR_GROUND_TYPE;
-  }
-}
-
-int Radx2Fmq::_getDsScanMode(Radx::SweepMode_t mode)
+int Radx2Fmq::_writeStatusXml(const RadxVol &vol)
 
 {
-  switch (mode) {
-    case Radx::SWEEP_MODE_SECTOR:
-      return DS_RADAR_SECTOR_MODE;
-    case Radx::SWEEP_MODE_COPLANE:
-      return DS_RADAR_COPLANE_MODE;
-    case Radx::SWEEP_MODE_RHI:
-      return DS_RADAR_RHI_MODE;
-    case Radx::SWEEP_MODE_VERTICAL_POINTING:
-      return DS_RADAR_VERTICAL_POINTING_MODE;
-    case Radx::SWEEP_MODE_IDLE:
-      return DS_RADAR_IDLE_MODE;
-    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE:
-      return DS_RADAR_SURVEILLANCE_MODE;
-    case Radx::SWEEP_MODE_SUNSCAN:
-      return DS_RADAR_SUNSCAN_MODE;
-    case Radx::SWEEP_MODE_POINTING:
-      return DS_RADAR_POINTING_MODE;
-    case Radx::SWEEP_MODE_MANUAL_PPI:
-      return DS_RADAR_MANUAL_MODE;
-    case Radx::SWEEP_MODE_MANUAL_RHI:
-      return DS_RADAR_MANUAL_MODE;
-    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
-    default:
-      return DS_RADAR_SURVEILLANCE_MODE;
-  }
-}
 
-int Radx2Fmq::_getDsFollowMode(Radx::FollowMode_t mode)
+  // create RadxStatusXml object
 
-{
-  switch (mode) {
-    case Radx::FOLLOW_MODE_SUN:
-      return DS_RADAR_FOLLOW_MODE_SUN;
-    case Radx::FOLLOW_MODE_VEHICLE:
-      return DS_RADAR_FOLLOW_MODE_VEHICLE;
-    case Radx::FOLLOW_MODE_AIRCRAFT:
-      return DS_RADAR_FOLLOW_MODE_AIRCRAFT;
-    case Radx::FOLLOW_MODE_TARGET:
-      return DS_RADAR_FOLLOW_MODE_TARGET;
-    case Radx::FOLLOW_MODE_MANUAL:
-      return DS_RADAR_FOLLOW_MODE_MANUAL;
-    default:
-      return DS_RADAR_FOLLOW_MODE_NONE;
-  }
-}
-
-int Radx2Fmq::_getDsPolarizationMode(Radx::PolarizationMode_t mode)
-
-{
-  switch (mode) {
-    case Radx::POL_MODE_HORIZONTAL:
-      return DS_POLARIZATION_HORIZ_TYPE;
-    case Radx::POL_MODE_VERTICAL:
-      return DS_POLARIZATION_VERT_TYPE;
-    case Radx::POL_MODE_HV_ALT:
-      return DS_POLARIZATION_DUAL_HV_ALT;
-    case Radx::POL_MODE_HV_SIM:
-      return DS_POLARIZATION_DUAL_HV_SIM;
-    case Radx::POL_MODE_CIRCULAR:
-      return DS_POLARIZATION_RIGHT_CIRC_TYPE;
-    default:
-      return DS_POLARIZATION_HORIZ_TYPE;
-  }
-}
-
-int Radx2Fmq::_getDsPrfMode(Radx::PrtMode_t mode,
-                           double prtRatio)
+  RadxStatusXml status;
+  status.setXmlStr(vol.getStatusXml());
   
-{
-  switch (mode) {
-    case Radx::PRT_MODE_FIXED:
-      return DS_RADAR_PRF_MODE_FIXED;
-    case Radx::PRT_MODE_STAGGERED:
-    case Radx::PRT_MODE_DUAL:
-      if (fabs(prtRatio - 0.6667 < 0.01)) {
-        return DS_RADAR_PRF_MODE_STAGGERED_2_3;
-      } else if (fabs(prtRatio - 0.75 < 0.01)) {
-        return DS_RADAR_PRF_MODE_STAGGERED_3_4;
-      } else if (fabs(prtRatio - 0.8 < 0.01)) {
-        return DS_RADAR_PRF_MODE_STAGGERED_4_5;
-      } else {
-        return DS_RADAR_PRF_MODE_FIXED;
-      }
-    default:
-      return DS_RADAR_PRF_MODE_FIXED;
+  // create message
+  
+  RadxMsg msg;
+  status.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_writeStatusXml" << endl;
+    cerr << "  Cannot write status xml to queue" << endl;
+    // reopen the queue
+    if (_openOutputFmq()) {
+      return -1;
+    }
   }
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
+// Write beam data to queue
+//
+// Returns 0 on success, -1 on failure
+
+int Radx2Fmq::_writeRay(RadxRay &ray)
+
+{
+
+  // create message
+  
+  RadxMsg msg;
+  ray.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_writeRay" << endl;
+    cerr << "  Cannot write ray to queue" << endl;
+    // reopen the queue
+    if (_openOutputFmq()) {
+      return -1;
+    }
+  }
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
+// put volume flags
+
+void Radx2Fmq::_putStartOfVolume(const RadxVol &vol)
+{
+
+  // create event
+  
+  RadxEvent event;
+
+  RadxTime startTime = vol.getStartRadxTime();
+  event.setTime(startTime.utime(), startTime.getSubSec() * 1.0e9);
+
+  event.setStartOfVolume(true);
+  event.setVolumeNumber(vol.getVolumeNumber());
+
+  const vector<RadxRay *> &rays = vol.getRays();
+  event.setSweepMode(rays[0]->getSweepMode());
+  
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_putStartOfVolume" << endl;
+    cerr << "  Cannot write start of vol event to queue" << endl;
+    // reopen the queue
+    _openOutputFmq();
+  }
+
+}
+
+void Radx2Fmq::_putEndOfVolume(const RadxVol &vol)
+{
+  
+  // create event
+  
+  RadxEvent event;
+  RadxTime endTime = vol.getEndRadxTime();
+  event.setTime(endTime.utime(), endTime.getSubSec() * 1.0e9);
+
+  event.setEndOfVolume(true);
+  event.setVolumeNumber(vol.getVolumeNumber());
+
+  const vector<RadxRay *> &rays = vol.getRays();
+  event.setSweepMode(rays[rays.size()-1]->getSweepMode());
+  
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_putEndOfVolume" << endl;
+    cerr << "  Cannot write end of vol event to queue" << endl;
+    // reopen the queue
+    _openOutputFmq();
+  }
+
+}
+
+void Radx2Fmq::_putStartOfSweep(const RadxRay &ray)
+{
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(ray.getTimeSecs(), ray.getNanoSecs());
+  event.setStartOfSweep(true);
+  event.setSweepNumber(ray.getSweepNumber());
+  event.setSweepMode(ray.getSweepMode());
+
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_putStartOfSweep" << endl;
+    cerr << "  Cannot write start of sweep event to queue" << endl;
+    // reopen the queue
+    _openOutputFmq();
+  }
+
+}
+
+void Radx2Fmq::_putEndOfSweep(const RadxRay &ray)
+{
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(ray.getTimeSecs(), ray.getNanoSecs());
+  event.setEndOfSweep(true);
+  event.setSweepNumber(ray.getSweepNumber());
+  event.setSweepMode(ray.getSweepMode());
+
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_putEndOfSweep" << endl;
+    cerr << "  Cannot write end of sweep event to queue" << endl;
+    // reopen the queue
+    _openOutputFmq();
+  }
+
+}
+
+void Radx2Fmq::_putNewSweepMode(Radx::SweepMode_t sweepMode, const RadxRay &ray)
+{
+  
+  // create event
+  
+  RadxEvent event;
+  event.setTime(ray.getTimeSecs(), ray.getNanoSecs());
+  event.setSweepMode(sweepMode);
+  
+  // create message
+  
+  RadxMsg msg;
+  event.serialize(msg);
+  
+  // write the message
+  
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - Radx2Fmq::_putNewSweepMode" << endl;
+    cerr << "  Cannot write new sweep mode event to queue" << endl;
+    // reopen the queue
+    _openOutputFmq();
+  }
+
 }
 

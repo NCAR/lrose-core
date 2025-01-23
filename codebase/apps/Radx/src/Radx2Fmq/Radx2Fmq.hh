@@ -83,36 +83,28 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+
   DsInputPath *_input;
-  DsRadarQueue _rQueue;
-
-  Radx::DataType_t _dataType;
-  int _dataByteWidth;
   vector<string> _readPaths;
-  
-  int _prevNGates;
-  int _prevSweepNum;
-  vector<string> _prevFieldNames;
 
+  DsFmq *_outputFmq;
+  
   int _runSimulate();
   int _processFile(const string filePath);
   int _processSweep(const RadxVol &vol, int sweepIndex);
   void _setupRead(RadxFile &file);
-  void _convertFieldsToUniformType(RadxVol &vol);
-
-  int _writeParams(const RadxVol &vol, const RadxSweep &sweep, const RadxRay &ray);
+  
+  int _openOutputFmq();
+  int _writePlatform(const RadxVol &vol);
+  int _writeCalibs(const RadxVol &vol);
   int _writeStatusXml(const RadxVol &vol);
-  int _writeCalibration(const RadxVol &vol);
-  int _writeBeam(const RadxVol &vol,
-                 const RadxSweep &sweep,
-                 int rayNumInSweep, const RadxRay &ray);
-
-  int _getDsRadarType(Radx::PlatformType_t ptype);
-  int _getDsScanMode(Radx::SweepMode_t mode);
-  int _getDsFollowMode(Radx::FollowMode_t mode);
-  int _getDsPolarizationMode(Radx::PolarizationMode_t mode);
-  int _getDsPrfMode(Radx::PrtMode_t mode, double prtRatio);
-    
+  int _writeRay(RadxRay &ray);
+  void _putStartOfVolume(const RadxVol &vol);
+  void _putEndOfVolume(const RadxVol &vol);
+  void _putStartOfSweep(const RadxRay &ray);
+  void _putEndOfSweep(const RadxRay &ray);
+  void _putNewSweepMode(Radx::SweepMode_t sweepMode, const RadxRay &ray);
+  
 };
 
 #endif
