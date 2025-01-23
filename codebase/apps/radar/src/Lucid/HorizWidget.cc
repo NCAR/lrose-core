@@ -86,9 +86,9 @@ HorizWidget::HorizWidget(QWidget* parent,
 
   _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
   // _rubberBand->setStyleSheet("background: rgba(0, 0, 255, 50); border: 2px solid blue;");
-  _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
+  // _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
   // _rubberBand->setAttribute(Qt::WA_NoSystemBackground);
-  _rubberBand->setStyleSheet("background: transparent;");
+  // _rubberBand->setStyleSheet("background: transparent;");
   // _rubberBand->setStyleSheet("background: transparent; border: 2px dashed rgba(0, 0, 255, 150);");
 
   // Allow the widget to get focus
