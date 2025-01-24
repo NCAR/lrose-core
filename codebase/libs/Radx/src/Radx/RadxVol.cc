@@ -758,8 +758,8 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
   modeMap[Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING] = 0;
   modeMap[Radx::SWEEP_MODE_COMPLEX_TRAJECTORY] = 0;
   modeMap[Radx::SWEEP_MODE_ELECTRONIC_STEERING] = 0;
-  modeMap[Radx::SWEEP_MODE_APAR_FORE_DOPPLER_RHI] = 0;
-  modeMap[Radx::SWEEP_MODE_APAR_AFT_DOPPLER_RHI] = 0;
+  modeMap[Radx::SWEEP_MODE_APAR_FORE_DOPPLER] = 0;
+  modeMap[Radx::SWEEP_MODE_APAR_AFT_DOPPLER] = 0;
   modeMap[Radx::SWEEP_MODE_APAR_DUALPOL_RHI] = 0;
   modeMap[Radx::SWEEP_MODE_APAR_SECTOR_PPI] = 0;
   
@@ -851,10 +851,10 @@ string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode) const
     case Radx::SWEEP_MODE_ELECTRONIC_STEERING: {
       return _sweepModeParLabel;
     }
-    case Radx::SWEEP_MODE_APAR_FORE_DOPPLER_RHI: {
+    case Radx::SWEEP_MODE_APAR_FORE_DOPPLER: {
       return _sweepModeAparForeDopplerRhiLabel;
     }
-    case Radx::SWEEP_MODE_APAR_AFT_DOPPLER_RHI: {
+    case Radx::SWEEP_MODE_APAR_AFT_DOPPLER: {
       return _sweepModeAparAftDopplerRhiLabel;
     }
     case Radx::SWEEP_MODE_APAR_DUALPOL_RHI: {
@@ -5194,8 +5194,8 @@ void RadxVol::_checkForIndexedRays(const RadxSweep *sweep) const
   Radx::SweepMode_t mode = sweep->getSweepMode();
   bool isRhi = false;
   if (mode == Radx::SWEEP_MODE_RHI ||
-      mode == Radx::SWEEP_MODE_APAR_FORE_DOPPLER_RHI ||
-      mode == Radx::SWEEP_MODE_APAR_AFT_DOPPLER_RHI ||
+      mode == Radx::SWEEP_MODE_APAR_FORE_DOPPLER ||
+      mode == Radx::SWEEP_MODE_APAR_AFT_DOPPLER ||
       mode == Radx::SWEEP_MODE_APAR_DUALPOL_RHI ||
       mode == Radx::SWEEP_MODE_APAR_SECTOR_PPI ||
       mode == Radx::SWEEP_MODE_MANUAL_RHI) {

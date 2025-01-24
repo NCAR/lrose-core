@@ -320,9 +320,9 @@ public:
     SWEEP_MODE_DOPPLER_BEAM_SWINGING = 18, ///< as in profiler or lidar
     SWEEP_MODE_COMPLEX_TRAJECTORY = 19,  ///< any sequential angle sequence
     SWEEP_MODE_ELECTRONIC_STEERING = 20,  ///< as in phased array
-    SWEEP_MODE_APAR_FORE_DOPPLER_RHI = 21,  ///< forward Doppler RHI for APAR
-    SWEEP_MODE_APAR_AFT_DOPPLER_RHI = 22,  ///< forward Doppler RHI for APAR
-    SWEEP_MODE_APAR_DUALPOL_RHI = 23,  ///< forward Doppler RHI for APAR
+    SWEEP_MODE_APAR_FORE_DOPPLER = 21,  ///< forward Doppler for APAR
+    SWEEP_MODE_APAR_AFT_DOPPLER = 22,  ///< aft Doppler for APAR
+    SWEEP_MODE_APAR_DUALPOL_RHI = 23,  ///< dual pol RHI for APAR
     SWEEP_MODE_APAR_SECTOR_PPI = 24,  ///< surveillance sector PPI for APAR
     SWEEP_MODE_LAST
 
@@ -453,8 +453,8 @@ public:
   const static char* AIRCRAFT_NOSE;
   const static char* AIRCRAFT_ROOF;
   const static char* AIRCRAFT_TAIL;
-  const static char* APAR_FORE_DOPPLER_RHI;
-  const static char* APAR_AFT_DOPPLER_RHI;
+  const static char* APAR_FORE_DOPPLER;
+  const static char* APAR_AFT_DOPPLER;
   const static char* APAR_DUALPOL_RHI;
   const static char* APAR_SECTOR_PPI;
   const static char* AXIS_X;

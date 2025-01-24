@@ -1848,8 +1848,8 @@ int NcfRadxFile::_checkSweepIndices()
   if (sweepFirst->getSweepMode() == Radx::SWEEP_MODE_RHI  ||
       sweepFirst->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE ||
       sweepFirst->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
-      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_FORE_DOPPLER_RHI ||
-      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_AFT_DOPPLER_RHI ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_FORE_DOPPLER ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_AFT_DOPPLER ||
       sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_DUALPOL_RHI) {
     isRhi = true;
   }
