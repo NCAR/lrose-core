@@ -161,6 +161,7 @@ GuiManager::GuiManager() :
   _fieldTableCurrentRow = -1;
   _prevFieldNum = 0;
   _fieldNum = 0;
+  _fieldHasChanged = false;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -300,8 +301,10 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // field change? request new data
 
   bool needNewData = false;
-  if (_checkForFieldChange()) {
+  // if (_checkForFieldChange()) {
+  if (_fieldHasChanged) {
     needNewData = true;
+    _fieldHasChanged = false;
   }
   
   // zoom change?
@@ -2347,21 +2350,25 @@ void GuiManager::_createFieldMenu()
     // is this row active?
     for (int icol = 0; icol < ncols; icol++) {
       int fieldNum = irow * ncols + icol;
-      FieldTableItem *item = new FieldTableItem("");
+      FieldTableItem *item = new FieldTableItem(this, "");
+      item->setFlags(item->flags() & ~Qt::ItemIsEditable);
       if (fieldNum < _params.fields_n) {
         if (strlen(_params._fields[fieldNum].group_name) > 0) {
           item->setText(_params._fields[fieldNum].button_label);
           item->setFieldIndex(fieldNum);
+          if (strlen(_params._fields[fieldNum].button_label) == 0) {
+            // gray out
+            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+            item->setBackground(Qt::lightGray);
+            item->setForeground(Qt::gray);
+          }
         }
       }
       item->setFieldParams(&_params._fields[fieldNum]);
       _fieldTable->setItem(irow, icol, item);
-      
     } // icol
   } // irow
 
-  cerr << "MMMMMMMMMM nrows,ncols: " << nrows << ", " << ncols << endl;
-  
   _fieldTable->verticalHeader()->setVisible(false);
   _fieldTable->horizontalHeader()->setVisible(false);
 
@@ -2381,9 +2388,9 @@ void GuiManager::_createFieldMenu()
   
   _fieldTable->setMaximumSize(_getTableWidgetSize(_fieldTable, false, false));
   _fieldTable->setMinimumSize(_fieldTable->maximumSize());
-  
-  // connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
-  //         _fieldTable, SLOT(setCurrentCell(const int, const int)));
+
+  connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
+          this, SLOT(_fieldTableCellClicked(const int, const int)));
   
 }
 
@@ -2425,6 +2432,51 @@ void GuiManager::_placeFieldMenu()
     }
   }
 }
+
+void GuiManager::_fieldTableCellClicked(int row, int col)
+{
+
+  cerr << "FFFFFFFFFFFFF field menu clicked, row, col: "
+       << row << ", " << col << endl;
+
+  if (_fieldTableCurrentRow == _fieldTable->currentRow() &&
+      _fieldTableCurrentColumn == _fieldTable->currentColumn()) {
+    // no change
+    _fieldHasChanged = false;
+    return;
+  }
+  
+  _fieldTableCurrentColumn = col;
+  _fieldTableCurrentRow = row;
+  
+  const FieldTableItem *item =
+    (const FieldTableItem *) _fieldTable->item(row, col);
+  _prevFieldNum = _fieldNum;
+  _fieldNum = item->getFieldIndex();
+  
+  gd.prev_field = gd.h_win.page;
+  set_field(_fieldNum);
+  gd.mrec[_fieldNum]->h_data_valid = 0;
+
+  if (_params.debug) {
+    const Params::field_t *fparams = item->getFieldParams();
+    cerr << "Changing to field: " << fparams->button_label << endl;
+    cerr << "              url: " << fparams->url << endl;
+    cerr << "         fieldNum: " << _fieldNum << endl;
+    cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
+    cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
+    cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
+  }
+
+  gd.redraw_horiz = true;
+  gd.field_has_changed = true;
+  gd.selected_field = _fieldNum;
+  gd.h_win.page = _fieldNum;
+
+  _fieldHasChanged = true;
+  
+}
+
 
 //////////////////////////////////////////////
 // create the time panel
@@ -3110,9 +3162,9 @@ void GuiManager::_createBoundaryEditorDialog()
   hLayout->addWidget(_boundaryEditorSaveBtn);
 
 }
-
 #endif
 
+#ifdef JUNK
 /////////////////////////////////////////////////////////
 // check for field change
 
@@ -3163,6 +3215,8 @@ bool GuiManager::_checkForFieldChange()
   return true;
 
 }
+
+#endif
 
 /////////////////////////////////////////////////////////
 // check for zoom change

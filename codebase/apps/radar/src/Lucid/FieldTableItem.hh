@@ -54,6 +54,9 @@
 #include <vector>
 #include <QTableWidgetItem>
 #include "Params.hh"
+#include "GuiManager.hh"
+
+class GuiManager;
 
 using namespace std;
 
@@ -65,7 +68,8 @@ class DLL_EXPORT FieldTableItem : public QTableWidgetItem {
   
   // constructor
   
-  FieldTableItem(const QString &text, int type = Type);
+  FieldTableItem(GuiManager *manager,
+                 const QString &text, int type = Type);
   
   // destructor
   
@@ -83,6 +87,7 @@ class DLL_EXPORT FieldTableItem : public QTableWidgetItem {
 
  protected:
 
+  GuiManager *_manager;
   Params::field_t *_fparams;
   int _index;
 

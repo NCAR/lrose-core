@@ -80,7 +80,7 @@ HorizWidget::HorizWidget(QWidget* parent,
   
   setBackgroundRole(QPalette::Dark);
   setAutoFillBackground(true);
-  // setAttribute(Qt::WA_OpaquePaintEvent);
+  setAttribute(Qt::WA_OpaquePaintEvent);
 
   // create the rubber band
 

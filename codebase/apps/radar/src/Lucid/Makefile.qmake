@@ -1882,6 +1882,23 @@ FieldTableItem.o: FieldTableItem.cc FieldTableItem.hh \
 		$(HOME)/lrose/include/tdrp/tdrp_p.h \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h \
+		GuiManager.hh \
+		VlevelManager.hh \
+		$(HOME)/lrose/include/Radx/RadxTime.hh \
+		$(HOME)/lrose/include/Radx/RadxVol.hh \
+		$(HOME)/lrose/include/Radx/Radx.hh \
+		$(HOME)/lrose/include/Radx/RadxPlatform.hh \
+		$(HOME)/lrose/include/Radx/RadxField.hh \
+		$(HOME)/lrose/include/Radx/RadxRangeGeom.hh \
+		$(HOME)/lrose/include/Radx/RadxPacking.hh \
+		$(HOME)/lrose/include/Radx/RadxBuf.hh \
+		$(HOME)/lrose/include/Radx/RadxMsg.hh \
+		$(HOME)/lrose/include/Radx/RadxRemap.hh \
+		$(HOME)/lrose/include/Radx/RadxArray.hh \
+		$(HOME)/lrose/include/Radx/RadxSweep.hh \
+		$(HOME)/lrose/include/Radx/RadxRay.hh \
+		XyBox.hh \
+		$(HOME)/lrose/include/euclid/SunPosn.hh \
 		cidd.h \
 		$(HOME)/lrose/include/dataport/port_types.h \
 		$(HOME)/lrose/include/dataport/bigend.h \

@@ -40,8 +40,10 @@
 
 // Constructor
 
-FieldTableItem::FieldTableItem(const QString &text, int type) :
+FieldTableItem::FieldTableItem(GuiManager *manager,
+                               const QString &text, int type) :
         QTableWidgetItem(text, type),
+        _manager(manager),
         _fparams(NULL)
 {
   

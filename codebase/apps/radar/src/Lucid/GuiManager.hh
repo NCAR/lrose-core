@@ -227,15 +227,6 @@ private:
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
 
-  // field
-  
-  int _fieldNum;
-  int _prevFieldNum;
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
-  QLabel *_valueLabel;
-
   // vlevels
 
   VlevelManager _vlevelManager;
@@ -292,8 +283,17 @@ private:
   bool _fieldMenuPlaced;
   QFrame *_fieldMenuPanel;
   QVBoxLayout *_fieldMenuLayout;
+
   int _fieldTableCurrentColumn;
   int _fieldTableCurrentRow;
+  bool _fieldHasChanged;
+
+  int _fieldNum;
+  int _prevFieldNum;
+  string _selectedName;
+  string _selectedLabel;
+  string _selectedUnits;
+  QLabel *_valueLabel;
 
   // maps
 
@@ -439,7 +439,7 @@ private:
 
   // check for status change
   
-  bool _checkForFieldChange();
+  // bool _checkForFieldChange();
   bool _checkForZoomChange();
   void _handleFirstTimerEvent();
   void _readClickPoint();
@@ -487,9 +487,9 @@ private slots:
   void _clearVlevelRadioButtons();
   void _changeVlevel(bool value);
   void _changeVlevelRadioButton(int value);
-
+  
   // local
-
+  
 #ifdef NOTNOW
   void _horizLocationClicked(double xkm, double ykm,
                              const RadxRay *closestRay);
@@ -503,6 +503,7 @@ private slots:
   
   void _showFieldMenu();
   void _placeFieldMenu();
+  void _fieldTableCellClicked(int row, int col);
 
   // maps
 
