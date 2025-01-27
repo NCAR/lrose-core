@@ -85,7 +85,8 @@ public:
 
   int requestHorizPlane(time_t start_time,
                         time_t end_time,
-                        int page);
+                        int page,
+                        double vlevel);
 
   int getHorizPlane();
   

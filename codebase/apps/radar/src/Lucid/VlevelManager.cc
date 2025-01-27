@@ -279,6 +279,8 @@ double VlevelManager::getLevel(ssize_t vlevelIndex /* = -1*/) const
   if (vlevelIndex < 0) {
     if (_guiIndex < 0) {
       return 0.0;
+    } else if (_guiIndex > (int) _vlevels.size() - 1) {
+      return 0.0;
     } else {
       return _vlevels[_guiIndex].level;
     }

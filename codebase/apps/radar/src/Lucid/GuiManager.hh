@@ -234,6 +234,7 @@ private:
   QFrame *_vlevelFrame;
   QGroupBox *_vlevelPanel;
   vector<QRadioButton *> *_vlevelRButtons;
+  bool _vlevelHasChanged;
 
   // zooms
 

@@ -151,7 +151,8 @@ GuiManager::GuiManager() :
   _vlevelVBoxLayout = NULL;
   _vlevelFrame = NULL;
   _vlevelPanel = NULL;
-
+  _vlevelHasChanged = false;
+  
   _fieldMenu = NULL;
   _fieldTable = NULL;
   _fieldMenuPlaced = false;
@@ -313,6 +314,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
     needNewData = true;
   }
 
+  // vlevel change?
+
+  if (_vlevelHasChanged) {
+    needNewData = true;
+    _vlevelHasChanged = false;
+  }
+
   // get new data if needed - this is done in a thread
 
   if (needNewData) {
@@ -323,7 +331,8 @@ void GuiManager::timerEvent(QTimerEvent *event)
     MetRecord *mr = gd.mrec[_fieldNum];
     if (mr->requestHorizPlane(gd.movie.frame[index].time_start,
                               gd.movie.frame[index].time_end,
-                              gd.h_win.page)) {
+                              gd.h_win.page,
+                              _vlevelManager.getLevel())) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
       cerr << "  mr->requestHorizPlane" << endl;
       cerr << "  time_start: " << DateTime::strm(gd.movie.frame[index].time_start) << endl;
@@ -341,11 +350,19 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     _horiz->setFrameForRendering(gd.h_win.page, index);
-    cerr << endl << endl << endl;
-    cerr << endl << endl << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
     cerr << "+++++++++++++++++++++++++++++++++++" << endl;
     _horiz->update();
     gd.redraw_horiz = false;
+    _vlevelManager.setFromMdvx();
+    _createVlevelRadioButtons();
   }
   
   // handle legacy cidd timer event
@@ -1217,6 +1234,7 @@ void GuiManager::_changeVlevel(bool value) {
       // _vert->setStartOfVlevel(true);
       _moveUpDown();
 
+      _vlevelHasChanged = true;
       gd.redraw_horiz = true;
       
       // reloadBoundaries();

@@ -157,16 +157,20 @@ MetRecord::MetRecord(QObject* parent) :
 
 int MetRecord::requestHorizPlane(time_t start_time,
                                  time_t end_time,
-                                 int page)
+                                 int page,
+                                 double vlevel)
 {
 
   cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH MetRecord::requestHorizPlane()" << endl;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH page, vlevel: " << page << ", " << vlevel << endl;
   
   // apply offset the request time
   
   _startTime.set(start_time + time_offset * 60);
   _endTime.set(end_time + time_offset * 60);
   _page = page;
+  _vLevelMinReq = vlevel;
+  _vLevelMaxReq = vlevel;
   
   // check for change in request details
   

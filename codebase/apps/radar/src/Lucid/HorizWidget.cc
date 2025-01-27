@@ -2241,7 +2241,9 @@ void HorizWidget::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   adjustPixelScales();
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _refreshImages();
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   update();
 }
 
