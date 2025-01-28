@@ -814,11 +814,11 @@ int _getTimeList(MetRecord *mr,
     if (mr->h_mdvx->compileTimeList()) {
       cout << "ERROR -CIDD:  setTimeListModeValid" << endl;
       cout << mr->h_mdvx->getErrStr();
-      mr->setTimeListValid(true);
+      // mr->setTimeListValid(true);
     }  
   } else {
     gd.io_info.outstanding_request = 0;
-    mr->setTimeListValid(true);
+    // mr->setTimeListValid(true);
   }
 
   return 0;  // return from this request.
@@ -1271,7 +1271,7 @@ static void _checkForHorizData(MetRecord *mr)
       reset_terrain_valid_flags(1,0);
       set_redraw_flags(1,0);
       mr->h_data_valid = 1;  // This field is still valid, though
-      mr->setTimeListValid(true);
+      // mr->setTimeListValid(true);
 	
 	
     }
@@ -1610,7 +1610,7 @@ static void _checkForTimelistData(MetRecord *mr)
     gd.io_info.outstanding_request = 0;
     gd.io_info.request_type = 0;
     gd.io_info.mode = 0;
-    mr->setTimeListValid(true);
+    // mr->setTimeListValid(true);
     if(gd.debug || gd.debug1) {
       fprintf(stderr,"TIMELIST_REQUEST Error %d - %s\n",
               mr->h_mdvx->getThreadRetVal(),
@@ -1652,7 +1652,7 @@ static void _checkForTimelistData(MetRecord *mr)
   }
   
   // indicate we're done 
-  mr->setTimeListValid(true);
+  // mr->setTimeListValid(true);
   gd.io_info.outstanding_request = 0;
   gd.io_info.request_type = 0;
   gd.io_info.mode = 0;

@@ -78,15 +78,15 @@ public:
 
   // time list
   
-  void setTimeListValid(bool state) { _timeListValid = state; }
+  // void setTimeListValid(bool state) { _timeListValid = state; }
   bool getTimeListValid() const { return _timeListValid; }
   
   // Get data for a horiz plane
 
   int requestHorizPlane(time_t start_time,
                         time_t end_time,
-                        int page,
-                        double vlevel);
+                        double vLevel,
+                        int page);
 
   int getHorizPlane();
   
@@ -216,21 +216,22 @@ private:
   // data request details
   
   DateTime _startTime, _endTime;
-  int _page;
-
   DateTime _timeReq;
-  LatLonBox _zoomBoxReq;                    // horiz data
-  double _vLevelMinReq, _vLevelMaxReq;   // horiz data
+  LatLonBox _zoomBoxReq;                 // horiz data
+  double _vLevelReq;                     // horiz data
   WayPts _wayPtsReq;                     // vert section data
   
   bool _validH, _validV;
   mutable bool _newH, _newV;
 
+  // data returned
+  
+  int _page;
   bool _timeListValid;
 
   // data status
 
-  bool _checkRequestChangedH(time_t start_time, time_t end_time);
+  bool _checkRequestChangedH(time_t start_time, time_t end_time, double vLevel);
   bool _checkRequestChangedV(time_t start_time, time_t end_time);
 
   int _getTimeList(time_t start_time,

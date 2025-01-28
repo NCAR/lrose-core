@@ -158,7 +158,7 @@ void remote_new_mdv_avail(const char *name)
       if (strncmp(gd.mrec[i]->button_name,name,MAX_CLIENT_EVENT_ARG) == 0) {
           gd.mrec[i]->h_data_valid = 0;
           gd.mrec[i]->v_data_valid = 0;
-          gd.mrec[i]->setTimeListValid(false);
+          // gd.mrec[i]->setTimeListValid(false);
           need_redraw = 1;
       }
     }
@@ -168,16 +168,16 @@ void remote_new_mdv_avail(const char *name)
       if (strncmp(gd.layers.wind[i].wind_u->button_name,name,MAX_CLIENT_EVENT_ARG) == 0) {
           gd.layers.wind[i].wind_u->h_data_valid = 0;
           gd.layers.wind[i].wind_u->v_data_valid = 0;
-          gd.layers.wind[i].wind_u->setTimeListValid(false);
+          // gd.layers.wind[i].wind_u->setTimeListValid(false);
 
           gd.layers.wind[i].wind_v->h_data_valid = 0;
           gd.layers.wind[i].wind_v->v_data_valid = 0;
-          gd.layers.wind[i].wind_v->setTimeListValid(false);
+          // gd.layers.wind[i].wind_v->setTimeListValid(false);
 
           if(gd.layers.wind[i].wind_w != NULL) {
             gd.layers.wind[i].wind_w->h_data_valid = 0;
             gd.layers.wind[i].wind_w->v_data_valid = 0;
-            gd.layers.wind[i].wind_w->setTimeListValid(false);
+            // gd.layers.wind[i].wind_w->setTimeListValid(false);
           }
 
           need_redraw = 1;

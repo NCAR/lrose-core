@@ -72,6 +72,8 @@ void VlevelManager::setFromMdvx()
 
 {
 
+  double selectedLevel = _selectedLevel;
+  
   _vlevels.clear();
   if (gd.h_win.page >= gd.num_datafields) {
     return;
@@ -113,6 +115,8 @@ void VlevelManager::setFromMdvx()
       _units.clear();
   }
 
+  setLevel(selectedLevel);
+  
   cerr << "QQQQQQQQQQQQQQQQ _vlevel.size(), units: " << _vlevels.size() << ", " << _units << endl;
   
 }

@@ -166,6 +166,8 @@ GuiManager::GuiManager() :
   
   _timeControl = NULL;
   _timeControlPlaced = false;
+
+  _vlevelManager.setLevel(_params.start_ht);
   
   setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
   _archiveStartTime.set(_params.archive_start_time);
@@ -331,8 +333,8 @@ void GuiManager::timerEvent(QTimerEvent *event)
     MetRecord *mr = gd.mrec[_fieldNum];
     if (mr->requestHorizPlane(gd.movie.frame[index].time_start,
                               gd.movie.frame[index].time_end,
-                              gd.h_win.page,
-                              _vlevelManager.getLevel())) {
+                              _vlevelManager.getLevel(),
+                              gd.h_win.page)) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
       cerr << "  mr->requestHorizPlane" << endl;
       cerr << "  time_start: " << DateTime::strm(gd.movie.frame[index].time_start) << endl;
@@ -1159,7 +1161,7 @@ void GuiManager::_createVlevelRadioButtons()
   char buf[256];
   _vlevelRButtons = new vector<QRadioButton *>();
   
-  for (int ielev = 0; ielev < (int) _vlevelManager.getNVlevels(); ielev++) {
+ for (int ielev = 0; ielev < (int) _vlevelManager.getNVlevels(); ielev++) {
     
     std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
     QRadioButton *radio1 = new QRadioButton(buf); 

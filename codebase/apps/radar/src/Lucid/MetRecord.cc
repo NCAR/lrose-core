@@ -142,8 +142,7 @@ MetRecord::MetRecord(QObject* parent) :
   
   colorMap = NULL;
   
-  _vLevelMinReq = -9999.0;
-  _vLevelMaxReq = -9999.0;
+  _vLevelReq = -9999.0;
   _validH = false;
   _validV = false;
   _newH = false;
@@ -157,24 +156,23 @@ MetRecord::MetRecord(QObject* parent) :
 
 int MetRecord::requestHorizPlane(time_t start_time,
                                  time_t end_time,
-                                 int page,
-                                 double vlevel)
+                                 double vLevel,
+                                 int page)
 {
 
   cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH MetRecord::requestHorizPlane()" << endl;
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH page, vlevel: " << page << ", " << vlevel << endl;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   vLevel: " << vLevel << endl;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   page: " << page << endl;
   
   // apply offset the request time
   
   _startTime.set(start_time + time_offset * 60);
   _endTime.set(end_time + time_offset * 60);
   _page = page;
-  _vLevelMinReq = vlevel;
-  _vLevelMaxReq = vlevel;
   
   // check for change in request details
   
-  if (!_checkRequestChangedH(_startTime.utime(), _endTime.utime())) {
+  if (!_checkRequestChangedH(_startTime.utime(), _endTime.utime(), vLevel)) {
     // no changes to the request, use what we have, mark as new
     cerr << "1111111111111111111 ==>>>> requestHorizPlane - no change <<<<==" << endl;
     _setNewH(true);
@@ -182,7 +180,7 @@ int MetRecord::requestHorizPlane(time_t start_time,
   }
 
   // Initiate the request in thread
-
+  
   cerr << "1111111111111111111 requestHorizPlane before startReadVolH" << endl;
   startReadVolH();
   cerr << "1111111111111111111 requestHorizPlane after startReadVolH" << endl;
@@ -231,6 +229,7 @@ int MetRecord::getHorizPlane()
   if(!_timeListValid) {
     if (_getTimeList(_startTime.utime(), _endTime.utime(),  _page)) {
       cerr << "1111111111111111111 requestHorizPlane getTimeList() failed" << endl;
+      _timeListValid = false;
       return -1;
     }
   }
@@ -312,7 +311,7 @@ int MetRecord::getHorizPlane()
 
   // vlevel
   
-  h_mdvx->setReadVlevelLimits(_vLevelMinReq, _vLevelMaxReq);
+  h_mdvx->setReadVlevelLimits(_vLevelReq, _vLevelReq);
   if(composite_mode) {
     // Ask for data that covers the whole vertical domain 
     h_mdvx->setReadComposite();
@@ -517,8 +516,7 @@ int MetRecord::getHorizPlane()
       reset_terrain_valid_flags(1,0);
       set_redraw_flags(1,0);
       h_data_valid = 1;  // This field is still valid, though
-      setTimeListValid(true);
-	
+      // _timeListValid = true;
 	
     }
   }
@@ -645,7 +643,8 @@ int MetRecord::getHorizPlane()
 // returns true if changed, false if no change
 
 bool MetRecord::_checkRequestChangedH(time_t start_time,
-                                      time_t end_time)
+                                      time_t end_time,
+                                      double vLevel)
 {
   
   // compute requested time
@@ -668,17 +667,6 @@ bool MetRecord::_checkRequestChangedH(time_t start_time,
 
   } // gather_data_mode
 
-  // compute requested vlevel limits
-  
-  double vLevelMinReq, vLevelMaxReq;
-  if(composite_mode) {
-    vLevelMinReq = gd.h_win.min_ht;
-    vLevelMaxReq = gd.h_win.max_ht;
-  } else {
-    vLevelMinReq = gd.h_win.cur_ht + alt_offset;
-    vLevelMaxReq = gd.h_win.cur_ht + alt_offset;
-  }
-
   // compute requested zoom domain
   
   LatLonBox zoomBoxReq;
@@ -694,14 +682,23 @@ bool MetRecord::_checkRequestChangedH(time_t start_time,
                          gd.h_win.origin_lon + 179.9999);
   }
 
+  // check if vlevel has changed
+  
+  bool vLevelChanged = false;
+  if(!composite_mode) {
+    if (fabs(vLevel - _vLevelReq) > 1.0e-5) {
+      vLevelChanged = true;
+    }
+  }
+  cerr << "LLLLLLLLLL vLevel, _vLevelReq, vLevelChanged: " << vLevel << ", " << _vLevelReq << ", " << vLevelChanged << endl;
+  
   // check if request is unchanged from previous call
 
   QMutexLocker locker(&_statusMutex);
   if (_validH &&
       timeReq == _timeReq &&
-      fabs(vLevelMinReq - _vLevelMinReq) < 1.0e-5 &&
-      fabs(vLevelMaxReq - _vLevelMaxReq) < 1.0e-5 &&
-      zoomBoxReq == _zoomBoxReq) {
+      zoomBoxReq == _zoomBoxReq &&
+      !vLevelChanged) {
     // no changes, use what we have, mark as new
     return false;
   }
@@ -709,9 +706,8 @@ bool MetRecord::_checkRequestChangedH(time_t start_time,
   // save request for comparison next time
 
   _timeReq = timeReq;
-  _vLevelMinReq = vLevelMinReq;
-  _vLevelMaxReq = vLevelMaxReq;
   _zoomBoxReq = zoomBoxReq;
+  _vLevelReq = vLevel;
 
   return true;
 
@@ -1247,9 +1243,15 @@ void MetRecord::startReadVolH() {
 // done with H vol read
 
 void MetRecord::readDoneH() {
-  cerr << "1111111111111 readDone in ReadVolH worker thread" << endl;
-  qDebug() << "readDone in ReadVolH worker thread";
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
+  {
+    MdvxField *hfld = h_mdvx->getFieldByNum(0);
+    Mdvx::field_header_t fh = hfld->getFieldHeader();
+    Mdvx::vlevel_header_t vh = hfld->getVlevelHeader();
+    cerr << "1111111111111 readDone in ReadVolH worker thread" << endl;
+    cerr << "1111111111111 vLevel: " << vh.level[fh.nz-1] << endl;
+    qDebug() << "readDone in ReadVolH worker thread";
+  }
 }
 
