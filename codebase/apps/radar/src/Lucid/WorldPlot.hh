@@ -52,7 +52,6 @@
 #include "cidd_macros.h"
 #include "cidd_structs.h"
 #include "cidd_colorscales.h"
-class DsMdvxThreaded;
 #include "MetRecord.hh"
 
 class ColorMap;

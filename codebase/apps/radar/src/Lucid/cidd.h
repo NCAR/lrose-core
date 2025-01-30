@@ -80,7 +80,7 @@
 #include <Mdv/MdvxProj.hh>
 
 // MDV Protocol classes
-#include <Mdv/DsMdvxThreaded.hh>
+#include <Mdv/DsMdvx.hh>
 
 // FMQ Support Classes
 #include <Fmq/RemoteUIQueue.hh>

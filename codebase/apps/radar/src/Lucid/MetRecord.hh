@@ -43,7 +43,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
-#include <Mdv/DsMdvxThreaded.hh>
+// #include <Mdv/DsMdvxThreaded.hh>
 
 #include "cidd_macros.h"
 #include "cidd_structs.h"
@@ -185,7 +185,8 @@ public:
   MdvxProj *proj; /* Pointer to projection class */
   
   // MDV Data class sets - One for horizontal, one for vertical
-  DsMdvxThreaded *h_mdvx;
+  // DsMdvxThreaded *h_mdvx;
+  DsMdvx *h_mdvx;
   MdvxField *h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;
@@ -195,7 +196,8 @@ public:
   Mdvx::field_header_t ds_fhdr; // Data Set's Field header
   Mdvx::vlevel_header_t ds_vhdr; // Vertical height headers
   
-  DsMdvxThreaded *v_mdvx;
+  // DsMdvxThreaded *v_mdvx;
+  DsMdvx *v_mdvx;
   MdvxField *v_mdvx_int16;
   Mdvx::master_header_t v_mhdr;
   Mdvx::field_header_t v_fhdr;
@@ -260,6 +262,9 @@ private:
   void _adjustBoundingBox(double lat, double lon,
                           double &minLat, double &maxLat,
                           double &minLon, double &maxLon);
+
+  void _autoscaleVcm(Valcolormap_t *vcm, double min, double max);
+  
 };
 
 // Worker for read H volume in thread

@@ -2474,7 +2474,7 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   _fieldNum = item->getFieldIndex();
   
   gd.prev_field = gd.h_win.page;
-  set_field(_fieldNum);
+  _setField(_fieldNum);
   gd.mrec[_fieldNum]->h_data_valid = 0;
 
   if (_params.debug) {
@@ -3215,7 +3215,7 @@ bool GuiManager::_checkForFieldChange()
   _prevFieldNum = _fieldNum;
   _fieldNum = item->getFieldIndex();
   gd.prev_field = gd.h_win.page;
-  set_field(_fieldNum);
+  _setField(_fieldNum);
   gd.mrec[_fieldNum]->h_data_valid = 0;
   if (_params.debug) {
     const Params::field_t *fparams = item->getFieldParams();
@@ -3798,6 +3798,64 @@ void GuiManager::_autoCreateFunc()
 }
 
 
+/*************************************************************************
+ * Set proper flags which switching fields 
+ */
+void GuiManager::_setField(int value)
+{
+
+  static int last_page = 0;
+  static int last_value = 0;
+  static int cur_value = 0;
+  
+  if(value < 0) {
+    int tmp = last_page;
+    last_page = gd.h_win.page;
+    gd.h_win.page = tmp;
+    gd.v_win.page = tmp;
+    tmp = cur_value;
+    cur_value = last_value;
+    value = last_value;
+    last_value = tmp;
+  } else {
+    last_page = gd.h_win.page;
+    last_value = cur_value;
+    cur_value = value;
+    gd.h_win.page = gd.field_index[value];
+    gd.v_win.page = gd.field_index[value];
+    // cerr << "FFFFFFFFFFFF value, new page: " << cur_value << ", " << gd.h_win.page << endl;
+  }
+  
+  for(int i=0; i < gd.num_datafields; i++) {
+    if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
+  }
+  
+  if(gd.mrec[gd.h_win.page]->auto_render && 
+     gd.h_win.page_pdev[gd.h_win.page] != 0 &&
+     gd.h_win.redraw_flag[gd.h_win.page] == 0) {
+    
+    save_h_movie_frame(gd.movie.cur_frame,
+                       gd.h_win.page_pdev[gd.h_win.page],
+                       gd.h_win.page);
+  }
+  
+  for(int i=0; i < MAX_FRAMES; i++) {
+    gd.movie.frame[i].redraw_horiz = 1;
+  }
+  
+  if(gd.movie.movie_on ) {
+    reset_data_valid_flags(1,0);
+  }
+  
+  // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
+  
+  /* make sure the horiz window's slider has the correct label */
+  set_height_label();
+
+}
+
+#ifdef JUNK
+
 void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 {
 
@@ -3812,9 +3870,9 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
   struct timezone cur_tz;
 
-  if(gd.io_info.outstanding_request) {
-    check_for_io();
-  }
+  // if(gd.io_info.outstanding_request) {
+  //   check_for_io();
+  // }
 
   gettimeofday(&cur_tm,&cur_tz);
 
@@ -4392,4 +4450,6 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
   }
 
 }
+
+#endif
 

@@ -627,7 +627,7 @@ int _mdvRequestVertPlane(MetRecord *mr,
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Vert Plane - page : %d  -  %s\n", page,mr->url);
     // Disable threading while in debug mode
-    mr->v_mdvx->setThreadingOff();
+    // mr->v_mdvx->setThreadingOff();
   }
   
   // offset the request time

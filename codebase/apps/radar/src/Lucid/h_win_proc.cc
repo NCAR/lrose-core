@@ -1187,18 +1187,18 @@ void show_grid_panel( u_int value)
  */
 void report_mode_onoff( u_int value)
 {
-    if(value > 0) {
-        gd.report_mode  = 1;
-	if(gd.movie.cur_frame != gd.movie.last_frame) {
-	    gather_hwin_data(gd.h_win.page,
-		      gd.movie.frame[gd.movie.cur_frame].time_start,
-		      gd.movie.frame[gd.movie.cur_frame].time_end);
-	    gd.movie.last_frame = gd.movie.cur_frame;
-	    gui_label_h_frame("Gathering correct data",-1);
-        }
-    } else {
-         gd.report_mode = 0;
+  if(value > 0) {
+    gd.report_mode  = 1;
+    if(gd.movie.cur_frame != gd.movie.last_frame) {
+      // gather_hwin_data(gd.h_win.page,
+      //                  gd.movie.frame[gd.movie.cur_frame].time_start,
+      //                  gd.movie.frame[gd.movie.cur_frame].time_end);
+      gd.movie.last_frame = gd.movie.cur_frame;
+      gui_label_h_frame("Gathering correct data",-1);
     }
+  } else {
+    gd.report_mode = 0;
+  }
 }
 
 /*************************************************************************

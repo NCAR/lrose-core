@@ -1288,9 +1288,11 @@ void HorizWidget::_renderGrids(QPainter &painter)
  */
 
 void HorizWidget::_doRenderInvalidImages(QPainter &painter,
-                                       int index, VertWidget *vert)
+                                         int index, VertWidget *vert)
 {
 
+#ifdef JUNK
+  
   cerr << "CCCCCCCCCCCCCCCCCCCCC index: " << index << endl;
   
   int i;
@@ -1414,6 +1416,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
       exit(-1);
     }
   }
+#endif
   return;
 }
 

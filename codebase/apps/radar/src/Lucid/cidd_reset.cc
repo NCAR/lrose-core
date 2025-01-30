@@ -51,7 +51,7 @@ void invalidate_all_data()
   reset_time_list_valid_flags();
 
   // Cancel any pending requests
-  cancel_pending_request();
+  // cancel_pending_request();
 }
 
 //*******************************************************************
@@ -286,6 +286,6 @@ void reset_display()
   gd.coord_expt->pointer_seq_num++; 
 
   // Restore the initial page
-  set_field(planview_start_page);
+  // set_field(planview_start_page);
   set_v_field(gd.field_index[xsect_start_page]);
 }

@@ -115,7 +115,7 @@ static void signal_trap(int signal)
 static void sigio_trap(int signal)
 {
   signal = 0;
-  if(gd.io_info.outstanding_request) check_for_io();
+  // if(gd.io_info.outstanding_request) check_for_io();
 }
 
 /*****************************************************************

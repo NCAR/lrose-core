@@ -876,8 +876,8 @@ static int _initGrids()
     STRcopy(mrec->units_label_sects,"KM",LABEL_LENGTH);
 
     // instantiate classes
-    mrec->h_mdvx = new DsMdvxThreaded;
-    mrec->v_mdvx = new DsMdvxThreaded;
+    mrec->h_mdvx = new DsMdvx;
+    mrec->v_mdvx = new DsMdvx;
     mrec->h_mdvx_int16 = new MdvxField;
     mrec->v_mdvx_int16 = new MdvxField;
     mrec->proj = new MdvxProj;
@@ -1050,8 +1050,8 @@ static void _initWindComponent(MetRecord *wrec,
   
   // instantiate classes for data retrieval
   
-  wrec->h_mdvx = new DsMdvxThreaded;
-  wrec->v_mdvx = new DsMdvxThreaded;
+  wrec->h_mdvx = new DsMdvx;
+  wrec->v_mdvx = new DsMdvx;
   wrec->h_mdvx_int16 = new MdvxField;
   wrec->v_mdvx_int16 = new MdvxField;
 
@@ -1086,8 +1086,8 @@ static void _initTerrain()
     STRcopy(gd.layers.earth.terr->url,
             _params.terrain_url,URL_LENGTH);
     
-    gd.layers.earth.terr->h_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.terr->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.terr->h_mdvx = new DsMdvx;
+    gd.layers.earth.terr->v_mdvx = new DsMdvx;
     gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
     gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
     gd.layers.earth.terr->proj =  new MdvxProj;
@@ -1113,8 +1113,8 @@ static void _initTerrain()
     STRcopy(gd.layers.earth.land_use->url,
             _params.landuse_url, URL_LENGTH);
     
-    gd.layers.earth.land_use->h_mdvx = new DsMdvxThreaded;
-    gd.layers.earth.land_use->v_mdvx = new DsMdvxThreaded;
+    gd.layers.earth.land_use->h_mdvx = new DsMdvx;
+    gd.layers.earth.land_use->v_mdvx = new DsMdvx;
     gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
     gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
     gd.layers.earth.land_use->proj =  new MdvxProj;
@@ -1224,8 +1224,8 @@ static void _initRouteWinds()
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
-    // instantiate DsMdvxThreaded class
-    mr->v_mdvx = new DsMdvxThreaded;
+    // instantiate DsMdvx class
+    mr->v_mdvx = new DsMdvx;
     mr->v_mdvx_int16 = new MdvxField;
 
   } // U WINDS
@@ -1257,8 +1257,8 @@ static void _initRouteWinds()
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
     
-    // instantiate DsMdvxThreaded class
-    mr->v_mdvx = new DsMdvxThreaded;
+    // instantiate DsMdvx class
+    mr->v_mdvx = new DsMdvx;
     mr->v_mdvx_int16 = new MdvxField;
 
   } // V WINDS
@@ -1290,8 +1290,8 @@ static void _initRouteWinds()
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
-    // instantiate DsMdvxThreaded class
-    mr->v_mdvx = new DsMdvxThreaded;
+    // instantiate DsMdvx class
+    mr->v_mdvx = new DsMdvx;
     mr->v_mdvx_int16 = new MdvxField;
     
   } // TURB
@@ -1323,8 +1323,8 @@ static void _initRouteWinds()
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
-    // instantiate DsMdvxThreaded class
-    mr->v_mdvx = new DsMdvxThreaded;
+    // instantiate DsMdvx class
+    mr->v_mdvx = new DsMdvx;
     mr->v_mdvx_int16 = new MdvxField;
 
   } // ICING

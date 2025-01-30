@@ -453,7 +453,8 @@ private:
   // legacy
   
   void _autoCreateFunc();
-  void _ciddTimerFunc(QTimerEvent *event);
+  // void _ciddTimerFunc(QTimerEvent *event);
+  void _setField(int value);
 
 private slots:
 

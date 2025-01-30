@@ -111,7 +111,6 @@ NORM_SRCS = \
 	Croutes_P.cc \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
-	DataHandling.cc \
 	FieldTableItem.cc \
 	LatLonBox.cc \
 	LegacyParams.cc \

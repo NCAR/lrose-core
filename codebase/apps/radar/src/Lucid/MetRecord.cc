@@ -477,8 +477,9 @@ int MetRecord::getHorizPlane()
      h_fhdr.bad_data_value != h_last_bad ||
      h_fhdr.transform_type != h_last_transform ) {
       
-    if(auto_scale)
-      autoscale_vcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
+    if(auto_scale) {
+      _autoscaleVcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
+    }
       
     if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
 #ifdef NOTYET
@@ -613,6 +614,7 @@ bool MetRecord::_checkRequestChangedH(const DateTime &midTime,
   _timeReq = reqTime;
   _zoomBoxReq = zoomBoxReq;
   _vLevelReq = vLevel;
+  cerr << "KKKKKKKKKKKKK vLevel, _vLevelReq, vLevelChanged: " << vLevel << ", " << _vLevelReq << ", " << vLevelChanged << endl;
 
   return true;
 
@@ -641,7 +643,7 @@ int MetRecord::requestVertSection(const DateTime &midTime,
   string fieldName(_getFieldName());
   v_mdvx->clearRead(); 
   v_mdvx->addReadField(fieldName);
-  v_mdvx->setThreadingOff();
+  // v_mdvx->setThreadingOff();
   if(gd.debug1) {
     fprintf(stderr, "Get MDVX Vert Plane - page : %d  -  %s\n", page, fullUrl.c_str());
     // Disable threading while in debug mode
@@ -1235,5 +1237,27 @@ void MetRecord::readDoneH() {
     cerr << "1111111111111 vLevel: " << vh.level[fh.nz-1] << endl;
     qDebug() << "readDone in ReadVolH worker thread";
   }
+}
+
+/*****************************************************************
+ * AUTOSCALE_VCM: Autoscale the value-color mapping
+ *        color to use
+ *
+ */
+
+void MetRecord::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
+{
+  int    i;
+  double delta;
+  
+  delta = (max - min) / (double) vcm->nentries;
+  
+  if(delta == 0.0) delta = 0.1;
+
+  for(i=0; i < vcm->nentries; i++) {
+    vcm->vc[i]->min = min + (delta * i);
+    vcm->vc[i]->max = vcm->vc[i]->min + delta;
+  }
+
 }
 
