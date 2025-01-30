@@ -45,14 +45,9 @@
 #include <string>
 #include <vector>
 
-// #include "Args.hh"
-// #include "Params.hh"
 #include "VlevelManager.hh"
 #include "XyBox.hh"
 
-// #include "RayLoc.hh"
-// #include "ContextEditingView.hh"
-// #include "BoundaryPointEditor.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
@@ -75,7 +70,6 @@ class QDateTimeEdit;
 class QFileDialog;
 class QTableWidget;
 
-// class DisplayField;
 class HorizWidget;
 class VertWidget;
 class VertWindow;
@@ -102,9 +96,6 @@ public:
   // constructor
   
   GuiManager();
-  // GuiManager(const Params &params,
-  //             const vector<DisplayField *> &fields,
-  //             bool haveFilteredFields);
   
   // destructor
   
@@ -141,7 +132,7 @@ public:
   void setXyZoom(double minY, double maxY, double minX, double maxX);
   
   // input file list for archive mode
-
+  
   // void setArchiveFileList(const vector<string> &list,
   //                         bool fromCommandLine = true);
 

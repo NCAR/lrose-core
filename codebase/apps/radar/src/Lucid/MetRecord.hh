@@ -82,9 +82,8 @@ public:
   bool getTimeListValid() const { return _timeListValid; }
   
   // Get data for a horiz plane
-
-  int requestHorizPlane(time_t start_time,
-                        time_t end_time,
+  
+  int requestHorizPlane(const DateTime &midTime,
                         double vLevel,
                         int page);
 
@@ -92,10 +91,9 @@ public:
   
   // Get data for a vert section
 
-  int requestVertSection(time_t start_time,
-                         time_t end_time,
+  int requestVertSection(const DateTime &midTime,
                          int page);
-
+  
   // perform the vol read for Horiz
 
   void startReadVolH();
@@ -154,7 +152,7 @@ public:
   double cont_interv; /* contour interval */
   
   double time_allowance; /* Valid while less than this number of minutes out of date */
-  double time_offset; /* Offsets data requests by this amount - minutes*/
+  // double time_offset; /* Offsets data requests by this amount - minutes*/
   
   char units_label_cols[LABEL_LENGTH]; /* units of columns- "km", etc */
   char units_label_rows[LABEL_LENGTH]; /* units of rows- "km", etc */
@@ -215,7 +213,7 @@ private:
 
   // data request details
   
-  DateTime _startTime, _endTime;
+  DateTime _midTime;
   DateTime _timeReq;
   LatLonBox _zoomBoxReq;                 // horiz data
   double _vLevelReq;                     // horiz data
@@ -224,19 +222,28 @@ private:
   bool _validH, _validV;
   mutable bool _newH, _newV;
 
-  // data returned
+  // data read and returned
   
   int _page;
   bool _timeListValid;
+  double _vLevel;
 
   // data status
 
-  bool _checkRequestChangedH(time_t start_time, time_t end_time, double vLevel);
-  bool _checkRequestChangedV(time_t start_time, time_t end_time);
+  bool _checkRequestChangedH(const DateTime &midTime, double vLevel);
+  bool _checkRequestChangedV(const DateTime &midTime);
 
-  int _getTimeList(time_t start_time,
-                   time_t end_time,
-                   int page);
+  void _computeReqTime(const DateTime &midTime,
+                       DateTime &reqTime);
+  
+  void _setReadTimes(const string &url,
+                     const DateTime &reqTime,
+                     Mdvx *mdvx);
+  
+  int _getTimeList(const string &url,
+                   const DateTime &midTime,
+                   int page,
+                   Mdvx *mdvx);
   
   string _getFullUrl();
   

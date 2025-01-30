@@ -331,8 +331,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     MetRecord *mr = gd.mrec[_fieldNum];
-    if (mr->requestHorizPlane(gd.movie.frame[index].time_start,
-                              gd.movie.frame[index].time_end,
+    if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
                               _vlevelManager.getLevel(),
                               gd.h_win.page)) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;

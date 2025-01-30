@@ -74,7 +74,6 @@ HDRS = \
 	RenderContext.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
-	SoloDefaultColorWrapper.hh \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
 	TimeList.hh \
@@ -122,7 +121,6 @@ NORM_SRCS = \
 	RenderContext.cc \
 	ScaledLabel.cc \
 	SiiPalette.cc \
-	SoloDefaultColorWrapper.cc \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \
 	TimeList.cc \

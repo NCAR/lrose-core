@@ -9,19 +9,21 @@
 
 #include "ColorTableManager.hh"
 
-// Global variables
+// initialize instance
 
-ColorTableManager *ColorTableManager::_instance = (ColorTableManager *)0;
-
+ColorTableManager *ColorTableManager::_instance = nullptr;
 
 /*********************************************************************
  * Constructor
  */
 
-ColorTableManager::ColorTableManager() // :
-  //_asciiColorTables(0),
-  //_colorTableNamesList(0)
+ColorTableManager::ColorTableManager()
 {
+
+  if (_instance != nullptr) {
+    return;
+  }
+  
   // Create the color tables
 
   _initDefaultTables();
@@ -29,6 +31,7 @@ ColorTableManager::ColorTableManager() // :
   // Set the singleton instance pointer
 
   _instance = this;
+
 }
 
 
@@ -47,148 +50,13 @@ ColorTableManager::~ColorTableManager()
 
 ColorTableManager *ColorTableManager::getInstance()
 {
-  if (_instance == 0)
+  if (_instance == nullptr) {
     new ColorTableManager();
+  }
   
   return _instance;
 }
 
-
-#ifdef NOTNOW
-
-/*********************************************************************
- * absorbTable()
- */
-
-
-std::string ColorTableManager::absorbTable(const char *filename)
-{
-
-  // Open the file
-
-  /*
-  FILE *stream;
-  if ((stream = fopen(filename, "r")) == 0)
-  {
-    char mess[256];
-    
-    snprintf(mess, "Unable to open color table file %s\n", filename);
-    sii_message(mess);
-    return "";
-  }
-
-  // Get the size of the file
-  // NOTE:  Replace with stat to get file size
-
-  size_t lenx = fseek(stream, 0L, SEEK_END); // at end of file 
-  size_t len0 = ftell(stream);	// how big is the file 
-  rewind(stream);
-
-  // Extract the file name from the path
-
-  const char *table_name;
-  if ((table_name = strrchr(filename, '/')) != 0)
-    table_name++;
-  else
-    table_name = filename;
-
-  std::string table_buffer = "";
-  
-  table_buffer += std::string("colortable ") + table_name + "\n";
-
-  // Read the file into a local buffer.
-  // NOTE:  Check for errors on read???
-
-  char *buf = (char *)malloc(len0 + 1);
-  if (buf == 0)
-    return "";
-  lenx = fread(buf, sizeof(char), len0, stream);
-
-  // Separate the buffer into lines
-
-  std::vector< std::string > lines;
-  tokenize(buf, lines, "\n");
-        
-  for (size_t jj = 0; jj < lines.size(); jj++)
-  {
-    std::string line = lines[jj];
-    
-    // Anything after a "!" is a comment
-
-    std::size_t comment_pos = line.find("!");
-    if (comment_pos != std::string::npos)
-      line = line.substr(0, comment_pos);
-    
-    // If the line is too short, skip it
-
-    if (line.size() < 2)
-      continue;
-
-    if (line.find("colortable") != std::string::npos)
-      continue;
-    
-    table_buffer += line + "\n";
-  }
-
-  free(buf);
-
-  // Remove the final CR from the table buffer
-
-  table_buffer = table_buffer.substr(0, table_buffer.size() - 1);
-  putAsciiColorTable(table_name, table_buffer.c_str());
-
-  return table_name;
-
-*/ return "";
-
-}
-
-
-/*********************************************************************
- * dumpTables()
- */
-bool ColorTableManager::dumpTables(FILE *stream) const
-{
-/*
-  struct gen_dsc {
-    char name_struct[4];
-    int32_t sizeof_struct;
-  };
-  
-  struct gen_dsc gd;
-  strncpy (gd.name_struct, "SCTB", 4);
-
-  for(GSList *gsl = _colorTableNamesList; gsl; gsl = gsl->next)
-  {
-    char *aa = (char *)gsl->data;
-    char *bb = getAsciiTable(aa);
-    size_t len = strlen(bb);
-    gd.sizeof_struct = 8 + len;
-
-    size_t nn;
-    
-    if ((nn = fwrite(&gd, sizeof(char), sizeof(gd), stream)) < sizeof(gd))
-    {
-      char mess[256];
-      snprintf(mess, "Problem writing color table: %s\n", aa);
-      solo_message(mess);
-      return false;
-    }
-
-    if ((nn = fwrite((void *)bb, sizeof(char), len, stream)) < len)
-    {
-      char mess[256];
-      snprintf(mess, "Problem writing color table: %s\n", aa);
-      solo_message(mess);
-      return false;
-    }
-    
-  }
- */
-  return true;
-}
-
-#endif
 
 /*********************************************************************
  * getAsciiColorTable()
@@ -197,54 +65,10 @@ bool ColorTableManager::dumpTables(FILE *stream) const
 
 vector<string> ColorTableManager::getAsciiColorTable(string name)
 {
-  //string key = name;
-  // this doesn't need to be a dictionary; just a vector list
   vector<string> colorsAsStrings;
   colorsAsStrings = _asciiColorTables[name];
   return colorsAsStrings;
 }
-
-
-/*********************************************************************
- * putAsciiColorTable()
- */
-// ok, make this a dictionary instead of a GTree
-
-void ColorTableManager::putAsciiColorTable(string name,
-					   vector<string> table)
-{
-  //string key = name;
-  // this doesn't need to be a dictionary; just a vector list
-  _asciiColorTables[name] = table;
-
-  /*
-
-  // Allocate space for the color table name (key) and contents (value), and 
-  // copy the incoming parameters since we need to make sure these don't 
-  // disappear.
-  char *key = (char *)g_malloc0(strlen(name) + 1);
-  strcpy(key, name);
-  
-  char *value = (char *)g_malloc0(strlen(table) + 1);
-  strcpy(value, table);
-
-  if ((char * )g_tree_lookup(_asciiColorTables, (gpointer)key) == 0)
-  {
-    _colorTableNamesList =
-      g_slist_insert_sorted(_colorTableNamesList, key, (GCompareFunc)strcmp);
-  }
-
-  g_tree_insert(_asciiColorTables, (gpointer)key, (gpointer)value);
-
-  // NOTE: This statement has no effect since nn isn't used anywhere.
-
-//  int nn = g_tree_nnodes(_asciiColorTables);
-
-  _colorTableNames.push_back(key);
-  sort(_colorTableNames.begin(), _colorTableNames.end());
-  */
-}
-
 
 /**********************************************************************
  *              Private Member Functions                              *
@@ -282,20 +106,7 @@ void ColorTableManager::_addTable(const char **at, int nn)
     return;
   }
   
-  //GString *gen_gs = g_string_new("");
-  //sii_glom_strings(at, nn, gen_gs);
-  
-  //char *buf = (char *)g_malloc0(gen_gs->len + 1);
-  //strncpy(buf, gen_gs->str, gen_gs->len);
-  //buf[gen_gs->len] = '\0';
-  //putAsciiColorTable(tokens[1].c_str(), buf);
-
-  //string sArray[nn] = {"aaa", "bbb", "ccc"};
-  vector<string> sVector;
-  sVector.assign(at, at+nn);
-  putAsciiColorTable(token, sVector);
 }
-
 
 /*********************************************************************
  * _initDefaultTables()
@@ -484,42 +295,6 @@ void ColorTableManager::_initDefaultTables()
 
   nn = sizeof(ewilson17)/sizeof(char *);
   _addTable(ewilson17, nn);
-/*
-  // wild25
-
-  const char * wild25[] = {
-    "colortable wild25",
-    "	254/256.0 4/256.0   255/256.0",
-    "	217/256.0 4/256.0   255/256.0",
-    "	180/256.0 4/256.0   255/256.0",
-    "	146/256.0 4/256.0   255/256.0",
-    "	99/256.0 4/256.0   255/256.0",
-    "	4/256.0 4/256.0	  255/256.0",
-    "	4/256.0	 128/256.0   255/256.0",
-    "	4/256.0	 193/256.0   255/256.0",
-    "	4/256.0	  252/256.0 17/256.0",
-    "	4/256.0	  169/256.0 17/256.0",
-    "	4/256.0	  132/256.0 17/256.0",
-    "	4/256.0	  83/256.0  17/256.0",
-    "	200/256.0 200/256.0 200/256.0",
-    "	167/256.0 72/256.0 3/256.0",
-    "	217/256.0 149/256.0 96/256.0",
-    "	255/256.0 184/256.0 31/256.0",
-    "	255/256.0 255/256.0 3/256.0",
-    "	254/256.0 190/256.0 190/256.0",
-    "	254/256.0 136/256.0 136/256.0",
-    "	254/256.0 87/256.0  87/256.0",
-    "	254/256.0 119/256.0  0/256.0",
-    "	223/256.0 80/256.0  0/256.0",
-    "	138/256.0 0/256.0   0/256.0",
-    "	210/256.0 0/256.0   0/256.0",
-    "	255/256.0 0/256.0   0/256.0",
-    "endtable",
-  };
-
-  nn = sizeof(wild25)/sizeof(char *);
-  _addTable(wild25, nn);
-*/
 
   // scook18
 

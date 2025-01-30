@@ -39,7 +39,6 @@
 #include "Lucid.hh"
 #include "GuiManager.hh"
 #include "LegacyParams.hh"
-#include "SoloDefaultColorWrapper.hh"
 #include <toolsa/mem.h>
 #include <toolsa/Path.hh>
 #include <qtplot/ColorMap.hh>
@@ -143,26 +142,6 @@ Lucid::Lucid(int argc, char **argv) :
     return;
   }
 
-  // print color scales if debugging
-  // if (_params.debug) {
-  //   SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-  //   sd.PrintColorScales();
-  // } 
-
-  // set up display fields
-
-  // if (_setupDisplayFields()) {
-  //   OK = false;
-  //   return;
-  // }
-
-  // get the display
-  
-  // if (_setupXDisplay(argc, argv)) {
-  //   cerr << "Cannot set up X display" << endl;
-  //   OK = false;
-  // }
-  
   // init process mapper registration
   
   if (_params.register_with_procmap) {
@@ -183,15 +162,6 @@ Lucid::~Lucid()
     delete _guiManager;
   }
 
-  // if (_bscanManager) {
-  //   delete _bscanManager;
-  // }
-
-  // for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-  //   delete _displayFields[ii];
-  // }
-  // _displayFields.clear();
-
 }
 
 //////////////////////////////////////////////////
@@ -209,170 +179,3 @@ int Lucid::RunApp(QApplication &app)
   
 }
 
-#ifdef NOTNOW
-
-//////////////////////////////////////////////////
-// set up the display variable
-  
-int Lucid::_setupXDisplay(int argc, char **argv)
-{
-
-  /*
-   * search for display name on command line
-   */
-
-  gd.dpyName = NULL;
-  
-  for (int i =  1; i < argc; i++) {
-    if (!strcmp(argv[i], "-display") || !strcmp(argv[i], "-d")) {
-      if (i < argc - 1) {
-	gd.dpyName = new char[strlen(argv[i+1]) + 1];
-	strcpy(gd.dpyName, argv[i+1]);
-      }
-    }
-  } /* i */
-	
-  if((gd.dpy = XOpenDisplay(gd.dpyName)) == NULL) {
-    fprintf(stderr, "ERROR - Lucid::_setupXDisplay\n");
-    fprintf(stderr,
-	    "Cannot open display '%s' or '%s'\n",
-	    gd.dpyName, getenv("DISPLAY"));
-    return -1;
-  }
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// set up field objects, with their color maps
-// use same map for raw and unfiltered fields
-// returns 0 on success, -1 on failure
-  
-int Lucid::_setupDisplayFields()
-{
-
-  // check for color map location
-  
-  string colorMapDir = _params.color_scale_urls;
-  Path mapDir(colorMapDir);
-  if (!mapDir.dirExists()) {
-    colorMapDir = Path::getPathRelToExec(_params.color_scale_urls);
-    mapDir.setPath(colorMapDir);
-    if (!mapDir.dirExists()) {
-      cerr << "ERROR - Lucid" << endl;
-      cerr << "  Cannot find color scale directory" << endl;
-      cerr << "  Primary is: " << _params.color_scale_urls << endl;
-      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
-      return -1;
-    }
-    if (_params.debug) {
-      cerr << "NOTE - using color scales relative to executable location" << endl;
-      cerr << "  Exec path: " << Path::getExecPath() << endl;
-      cerr << "  Color scale dir:: " << colorMapDir << endl;
-    }
-  }
-
-  // we interleave unfiltered fields and filtered fields
-
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-
-    const Params::field_t &pfld = _params._fields[ifield];
-
-    // check we have a valid label
-    
-    if (strlen(pfld.legend_label) == 0) {
-      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
-      cerr << "  Empty field legend_label, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-    
-    // check we have a raw field name
-    
-    if (strlen(pfld.field_name) == 0) {
-      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
-      cerr << "  Empty raw field name, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-
-    // create color map
-    
-    string colorMapPath = colorMapDir;
-    colorMapPath += PATH_DELIM;
-    colorMapPath += pfld.color_map;
-    ColorMap map;
-    // map.setName(pfld.legend_label);
-    map.setName(pfld.color_map);
-    map.setUnits(pfld.field_units);
-    cerr << "MMMMMMMMMMMMMMMM colorMap name: " << pfld.color_map << endl;
-    // TODO: the logic here is a little weird ... the legend_label and units have been set, but are we throwing them away?
-
-    bool noColorMap = false;
-
-    if (map.readMap(colorMapPath) == 0) {
-      
-      cerr << "NNNNNNNNNNNNNNNNNNNNNNNN colorMap name: " << pfld.color_map << endl;
-      
-      map.setName(pfld.color_map);
-
-    } else {
-
-      cerr << "WARNING - Lucid::_setupDisplayFields()" << endl;
-      cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-      cerr << "  Looking for default color map for field " << pfld.legend_label << endl; 
-      try {
-        // check here for smart color scale; look up by field name/legend_label and
-        // see if the name is a usual parameter for a known color map
-        SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.legend_label);
-        cerr << "  found default color map for " <<  pfld.legend_label  << endl;
-        // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
-        map = colorMap;
-        // HERE: What is missing from the ColorMap object??? 
-      } catch (std::out_of_range &ex) {
-        cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
-        // Just set the colormap to a generic color map
-        // use range to indicate it needs update; update when we have access to the actual data values
-        map = ColorMap(0.0, 1.0);
-        noColorMap = true; 
-        // return -1
-      }
-
-    } // if (map.readMap(colorMapPath)
-
-    // unfiltered field
-
-    DisplayField *field =
-      new DisplayField(pfld.legend_label, pfld.field_name, pfld.field_units, 
-                       "a", map, ifield, false);
-    if (noColorMap) {
-      field->setNoColorMap();
-    }
-
-    _displayFields.push_back(field);
-
-    // filtered field
-
-    if (strlen(pfld.field_name) > 0) {
-      string filtField_Label = string(pfld.legend_label) + "-filt";
-      DisplayField *filt =
-        new DisplayField(pfld.legend_label, pfld.field_name, pfld.field_units, "a", 
-                         map, ifield, true);
-      _displayFields.push_back(filt);
-    }
-
-  } // ifield
-
-  if (_displayFields.size() < 1) {
-    cerr << "ERROR - Lucid::_setupDisplayFields()" << endl;
-    cerr << "  No fields found" << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-
-#endif

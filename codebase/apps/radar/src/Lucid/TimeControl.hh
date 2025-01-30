@@ -82,6 +82,14 @@ class DLL_EXPORT TimeControl : public QDialog {
   TimeControl(GuiManager *parent,
               const Params &params);
   
+  /**
+   * @brief Retrieve the singleton instance of this class.
+   *
+   * @return Returns a pointer to the instance.
+   */
+  
+  static TimeControl *getInstance();
+  
   // destructor
   
   virtual ~TimeControl();
@@ -124,6 +132,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   double getMovieDurationSecs() const { return _movieDurationSecs; }
   int getFrameIndex() const { return _frameIndex; }
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
+  double getFrameIntervalSecs() const { return _frameIntervalSecs; }
 
   // convert between Qt and Radx date/time objects
 
@@ -134,8 +143,12 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   void populateGui();
   
- protected:
+ private:
 
+  // Singleton instance pointer.
+
+  static TimeControl *_instance;
+  
   GuiManager *_parent;
   const Params &_params;
   

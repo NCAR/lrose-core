@@ -33,7 +33,6 @@ public:
 
   static ColorTableManager *getInstance();
   
-
   // Access methods //
 
   int getNumColorTables() const
@@ -51,7 +50,6 @@ public:
     return _colorTableNames;
   }
   
-
   std::string getTableNamesString()
   {
     std::string return_string = "";
@@ -72,39 +70,9 @@ public:
     _colorTableNames.clear();
   }
   
-  /**
-   * @brief Add the color table in the given file to the list.
-   *
-   * @param[in] filename   The color table full file path.
-   *
-   * @return Returns the name of the new color table on success, "" on failure.
-   */
-
-#ifdef NOTNOW
-  std::string absorbTable(const char *filename);
-  
-  bool dumpTables(FILE *stream) const;
-#endif
-  
-  // void putAsciiColorTable(const char *name, const char *table);
-  void putAsciiColorTable(string name, vector<string> table);
   vector<string> getAsciiColorTable(string name); 
-/* 
-  char *getAsciiTable(const char *name) const
-  {
-    return (char *)g_tree_lookup(_asciiColorTables, (gpointer)name);
-  }
- */ 
 
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  // protected:
-
-  ///////////////////////
-  // Protected members //
-  ///////////////////////
+private:
 
   /**
    * @brief Singleton instance pointer.
@@ -122,25 +90,12 @@ public:
    * @brief The ascii color table list.
    */
 
-  //GTree *_asciiColorTables;
-  // map< color table name, list of strings containing color definitions > _asciiColorTables;
   std::map<std::string, std::vector<string> > _asciiColorTables;
 
   /**
-   * @brief The list of color table names.
+   * @brief Constructor. This is private because this is a singleton object.
    */
-
-  //GSList *_colorTableNamesList;
   
-
-  ///////////////////////
-  // Protected methods //
-  ///////////////////////
-
-  /**
-   * @brief Constructor.  This is private because this is a singleton object.
-   */
-
   ColorTableManager();
 
   void _addTable(const char **at, int nn);

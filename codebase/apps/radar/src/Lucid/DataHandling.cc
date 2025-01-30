@@ -430,8 +430,8 @@ int _mdvRequestHorizPlane(MetRecord *mr,
 
   // Offset the request time
 
-  start_time += (int) (mr->time_offset * 60);
-  end_time += (int) (mr->time_offset * 60);
+  // start_time += (int) (mr->time_offset * 60);
+  // end_time += (int) (mr->time_offset * 60);
   
   // if(gd.debug1) {
   //   fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", page, mr->url);
@@ -632,8 +632,8 @@ int _mdvRequestVertPlane(MetRecord *mr,
   
   // offset the request time
 
-  start_time += (int) (mr->time_offset * 60);
-  end_time += (int) (mr->time_offset * 60);
+  // start_time += (int) (mr->time_offset * 60);
+  // end_time += (int) (mr->time_offset * 60);
   
   switch(_params.gather_data_mode ) {
     case Params::CLOSEST_TO_FRAME_CENTER :
@@ -746,8 +746,8 @@ int _getTimeList(MetRecord *mr,
   
   // offset the request time
   
-  start_time += (int) (mr->time_offset * 60);
-  end_time += (int) (mr->time_offset * 60);
+  // start_time += (int) (mr->time_offset * 60);
+  // end_time += (int) (mr->time_offset * 60);
   time_t delta = gd.epoch_end - gd.epoch_start;
   
   if(gd.debug1) {

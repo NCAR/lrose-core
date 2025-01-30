@@ -35,6 +35,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -42,6 +43,10 @@
 #include "TimeControl.hh"
 #include "GuiManager.hh"
 #include "cidd.h"
+
+// initialize instance
+
+TimeControl *TimeControl::_instance = nullptr;
 
 // Constructor
 
@@ -52,6 +57,10 @@ TimeControl::TimeControl(GuiManager *parent,
         _params(params)
         
 {
+
+  if (_instance != nullptr) {
+    return;
+  }
 
   _timePanel = NULL;
   _timeLayout = NULL;
@@ -102,6 +111,16 @@ TimeControl::TimeControl(GuiManager *parent,
   setGuiSelectedTime(_guiSelectedTime);
 
 }
+
+/*********************************************************************
+ * Inst()
+ */
+
+TimeControl *TimeControl::getInstance()
+{
+  return _instance;
+}
+
 
 ////////////////////////////
 // destructor

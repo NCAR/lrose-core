@@ -531,7 +531,7 @@ void update_grid_config_gui()
     snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->cscale_delta);
     // xv_set(gd.fields_pu->f_config_tx8,PANEL_VALUE,str,NULL);
 
-    snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->time_offset);
+    // snprintf(str,1024,"%.2f",gd.mrec[grid_config_field]->time_offset);
     // xv_set(gd.fields_pu->f_config_tx9,PANEL_VALUE,str,NULL);
 
     // xv_set(gd.fields_pu->ren_meth_st,PANEL_VALUE,gd.mrec[grid_config_field]->render_method & 1,NULL);
@@ -604,7 +604,7 @@ void update_wind_config_gui()
     snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->alt_offset);
     // xv_set(gd.fields_pu->wind_alt_tx,PANEL_VALUE,str,NULL);
       
-    snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_offset);
+    // snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_offset);
     // xv_set(gd.fields_pu->textfield1,PANEL_VALUE,str,NULL);
       
     snprintf(str,URL_LENGTH,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_allowance);
