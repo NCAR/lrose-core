@@ -57,7 +57,6 @@ HDRS = \
 	Cdraw_P.hh \
 	Cgui_P.hh \
 	Cimages_P.hh \
-	ColorTableManager.hh \
 	Croutes_P.hh \
 	Csyprod_P.hh \
 	Cterrain_P.hh \
@@ -73,7 +72,6 @@ HDRS = \
 	Lucid.hh \
 	RenderContext.hh \
 	ScaledLabel.hh \
-	SiiPalette.hh \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
 	TimeList.hh \
@@ -107,7 +105,6 @@ NORM_SRCS = \
 	Cdraw_P.cc \
 	Cgui_P.cc \
 	Cimages_P.cc \
-	ColorTableManager.cc \
 	Croutes_P.cc \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
@@ -119,7 +116,6 @@ NORM_SRCS = \
 	ProductMgr.cc \
 	RenderContext.cc \
 	ScaledLabel.cc \
-	SiiPalette.cc \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \
 	TimeList.cc \

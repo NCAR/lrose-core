@@ -57,7 +57,6 @@ SOURCES       = Args.cc \
 		Cdraw_P.cc \
 		Cgui_P.cc \
 		Cimages_P.cc \
-		ColorTableManager.cc \
 		Croutes_P.cc \
 		Csyprod_P.cc \
 		Cterrain_P.cc \
@@ -75,7 +74,6 @@ SOURCES       = Args.cc \
 		ProductMgr.cc \
 		RenderContext.cc \
 		ScaledLabel.cc \
-		SiiPalette.cc \
 		SymprodRender.cc \
 		SymprodRenderObj.cc \
 		TimeControl.cc \
@@ -164,7 +162,6 @@ OBJECTS       = Args.o \
 		Cdraw_P.o \
 		Cgui_P.o \
 		Cimages_P.o \
-		ColorTableManager.o \
 		Croutes_P.o \
 		Csyprod_P.o \
 		Cterrain_P.o \
@@ -182,7 +179,6 @@ OBJECTS       = Args.o \
 		ProductMgr.o \
 		RenderContext.o \
 		ScaledLabel.o \
-		SiiPalette.o \
 		SymprodRender.o \
 		SymprodRenderObj.o \
 		TimeControl.o \
@@ -372,7 +368,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -398,7 +393,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Cdraw_P.hh \
 		Cgui_P.hh \
 		Cimages_P.hh \
-		ColorTableManager.hh \
 		Croutes_P.hh \
 		Csyprod_P.hh \
 		Cterrain_P.hh \
@@ -449,7 +443,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		Cdraw_P.cc \
 		Cgui_P.cc \
 		Cimages_P.cc \
-		ColorTableManager.cc \
 		Croutes_P.cc \
 		Csyprod_P.cc \
 		Cterrain_P.cc \
@@ -467,7 +460,6 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		ProductMgr.cc \
 		RenderContext.cc \
 		ScaledLabel.cc \
-		SiiPalette.cc \
 		SymprodRender.cc \
 		SymprodRenderObj.cc \
 		TimeControl.cc \
@@ -656,7 +648,6 @@ Makefile.qmake: qmake.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -789,7 +780,6 @@ Makefile.qmake: qmake.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64
 /usr/lib64/qt6/mkspecs/features/qt_config.prf:
 /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf:
 /usr/lib64/qt6/mkspecs/features/spec_post.prf:
-.qmake.stash:
 /usr/lib64/qt6/mkspecs/features/exclusive_builds.prf:
 /usr/lib64/qt6/mkspecs/features/toolchain.prf:
 /usr/lib64/qt6/mkspecs/features/default_pre.prf:
@@ -832,8 +822,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Args.hh GuiManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh ColorTableManager.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh FieldTableItem.hh HorizWidget.hh LatLonBox.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh XyBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
-	$(COPY_FILE) --parents Args.cc GuiManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc ColorTableManager.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc FieldTableItem.cc HorizWidget.cc LatLonBox.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SiiPalette.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc XyBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc xview_file_access.cc $(DISTDIR)/
+	$(COPY_FILE) --parents Args.hh GuiManager.hh Cdraw_P.hh Cgui_P.hh Cimages_P.hh Croutes_P.hh Csyprod_P.hh Cterrain_P.hh FieldTableItem.hh HorizWidget.hh LatLonBox.hh LegacyParams.hh Lucid.hh MapMenuItem.hh MetRecord.hh Params.hh ProdMenuItem.hh Product.hh ProductMgr.hh RenderContext.hh ScaledLabel.hh SiiPalette.hh SymprodRender.hh SymprodRenderObj.hh TimeControl.hh TimeList.hh TimePlot.hh VertWidget.hh VertWindow.hh VlevelManager.hh WayPts.hh WindMenuItem.hh WorldPlot.hh XyBox.hh ZoomMenuItem.hh cidd.h cidd_colorscales.h cidd_contours.h cidd_data_io.h cidd_dpd.h cidd_funcs.h cidd_layers.h cidd_legend.h cidd_macros.h cidd_maps.h cidd_movies.h cidd_params.h cidd_products.h cidd_structs.h cidd_windows.h cidd_winds.h $(DISTDIR)/
+	$(COPY_FILE) --parents Args.cc GuiManager.cc Cdraw_P.cc Cgui_P.cc Cimages_P.cc Croutes_P.cc Csyprod_P.cc Cterrain_P.cc FieldTableItem.cc HorizWidget.cc LatLonBox.cc LegacyParams.cc Lucid.cc Main.cc MapMenuItem.cc MetRecord.cc Params.cc ProdMenuItem.cc Product.cc ProductMgr.cc RenderContext.cc ScaledLabel.cc SymprodRender.cc SymprodRenderObj.cc TimeControl.cc TimeList.cc TimePlot.cc VertWidget.cc VertWindow.cc VlevelManager.cc WayPts.cc WindMenuItem.cc WorldPlot.cc XyBox.cc ZoomMenuItem.cc cidd_coords.cc cidd_font.cc cidd_init.cc cidd_remote_commands.cc cidd_reset.cc contours.cc graphic_canvas_events.cc graphic_canvas_events_bkwd.cc graphic_compute.cc graphic_cross_section.cc graphic_dump_image.cc graphic_manage.cc graphic_margin_events.cc graphic_panel.cc graphic_reset.cc graphic_resize.cc graphic_xsect_canvas_events.cc graphic_xsect_resize.cc graphic_zoom.cc gui_destroy.cc gui_label_frame.cc gui_modify.cc movie_control.cc movie_frame_retrieve.cc movie_frame_save.cc process_args.cc render_azimuths.cc render_bottom_margin.cc render_cart_grid.cc render_cbar.cc render_click_marks.cc render_distorted_grid.cc render_filled_contours.cc render_filled_image.cc render_ht_sel.cc render_left_margin.cc render_legends.cc render_line_contours.cc render_margins.cc render_movie_frame.cc render_overlays.cc render_polar_grid.cc render_products.cc render_range_rings.cc render_right_margin.cc render_route_winds.cc render_terrain.cc render_top_layers.cc render_top_margin.cc render_winds.cc render_xsect_control.cc render_xsect_grids.cc render_xsect_line_contours.cc render_xsect_margins.cc render_xsect_products.cc render_xsect_top_layers.cc render_xsect_winds.cc shmem_init.cc xview_file_access.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -1669,9 +1659,6 @@ Cimages_P.o: Cimages_P.cc Cimages_P.hh \
 		$(HOME)/lrose/include/tdrp/tdrpbuf.h \
 		$(HOME)/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Cimages_P.o Cimages_P.cc
-
-ColorTableManager.o: ColorTableManager.cc ColorTableManager.hh
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ColorTableManager.o ColorTableManager.cc
 
 Croutes_P.o: Croutes_P.cc Croutes_P.hh \
 		$(HOME)/lrose/include/tdrp/tdrp.h \
@@ -3057,10 +3044,6 @@ RenderContext.o: RenderContext.cc RenderContext.hh \
 
 ScaledLabel.o: ScaledLabel.cc ScaledLabel.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ScaledLabel.o ScaledLabel.cc
-
-SiiPalette.o: SiiPalette.cc SiiPalette.hh \
-		ColorTableManager.hh
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SiiPalette.o SiiPalette.cc
 
 SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		$(HOME)/lrose/include/Spdb/Symprod.hh \
