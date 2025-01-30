@@ -179,7 +179,9 @@ void rotate_movie_frames()
 
     reset_time_points();
 
-    if(! gd.run_unmapped) update_movie_popup();
+    if(! gd.run_unmapped) {
+      // update_movie_popup();
+    }
 
     if (gd.movie.reset_frames) {
         set_redraw_flags(1, 1);

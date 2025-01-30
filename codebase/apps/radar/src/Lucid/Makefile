@@ -132,7 +132,6 @@ NORM_SRCS = \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
 	contours.cc \
-	fields_pu_proc.cc \
 	graphic_canvas_events.cc \
 	graphic_canvas_events_bkwd.cc \
 	graphic_compute.cc \
@@ -149,12 +148,9 @@ NORM_SRCS = \
 	gui_destroy.cc \
 	gui_label_frame.cc \
 	gui_modify.cc \
-	h_win_proc.cc \
 	movie_control.cc \
 	movie_frame_retrieve.cc \
 	movie_frame_save.cc \
-	movie_pu_proc.cc \
-	page_pu_proc.cc \
 	render_azimuths.cc \
 	render_bottom_margin.cc \
 	render_cart_grid.cc \
@@ -184,10 +180,7 @@ NORM_SRCS = \
 	render_xsect_top_layers.cc \
 	render_xsect_winds.cc \
 	shmem_init.cc \
-	status_pu_proc.cc \
-	v_win_proc.cc \
-	xview_file_access.cc \
-	zoom_pu_proc.cc
+	xview_file_access.cc
 
 MOC_SRCS = \
 	Lucid.cc \

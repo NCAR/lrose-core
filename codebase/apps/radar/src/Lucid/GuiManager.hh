@@ -455,6 +455,9 @@ private:
   void _autoCreateFunc();
   // void _ciddTimerFunc(QTimerEvent *event);
   void _setField(int value);
+  void _setDisplayTime(time_t utime);
+  void _setEndFrame(int num_frames);
+  void _updateMoviePopup();
 
 private slots:
 

@@ -522,7 +522,9 @@ void remote_set_time(char *time_str)
 
        gd.movie.cur_frame = gd.movie.end_frame;
        reset_time_points();
-       if(! gd.run_unmapped) update_movie_popup(); 
+       if(! gd.run_unmapped) {
+         // update_movie_popup();
+       }
        reset_data_valid_flags(1,1);
        set_redraw_flags(1,1);
    } 

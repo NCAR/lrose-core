@@ -3355,7 +3355,7 @@ void GuiManager::_handleClientEvent()
     case SET_NUM_FRAMES:
       int	nframes;
       if((sscanf(gd.coord_expt->client_args,"%d",&nframes)) == 1) {
-        set_end_frame(nframes);
+        _setEndFrame(nframes);
       } else {
         fprintf(stderr,"Invalid SET_NUM_FRAMES: Args: %s\n",gd.coord_expt->client_args);
       }
@@ -3393,7 +3393,7 @@ void GuiManager::_handleClientEvent()
 		
         interest_time = UTIMdate_to_unix(&ts);
 
-        set_display_time(interest_time);
+        _setDisplayTime(interest_time);
         invalidate_all_data();
         set_redraw_flags(1,1);
       } else {
@@ -3850,7 +3850,331 @@ void GuiManager::_setField(int value)
   // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
   
   /* make sure the horiz window's slider has the correct label */
-  set_height_label();
+
+  // set_height_label();
+
+}
+
+/*************************************************************************
+ * SET_DISPLAY_TIME
+ */
+
+void GuiManager::_setDisplayTime(time_t utime)
+{
+  int i,j,found;
+  time_t    last_time;
+  time_t    target_time;
+
+  movie_frame_t    tmp_frame[MAX_FRAMES];    /* info about each frame */
+
+  last_time = gd.movie.start_time;
+     
+  // Round to the nearest even interval 
+  utime -= (utime % gd.movie.round_to_seconds);
+
+  // Already set to this time
+  if(utime == gd.movie.start_time) return;
+
+  /* if starting time moves more than 2 volume intervals, assume we want archive mode */
+  if(abs(last_time - utime) > (2 * gd.movie.time_interval_mins * 60)) {
+    gd.movie.mode = ARCHIVE_MODE;
+    gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
+    gd.coord_expt->time_seq_num++;
+    // xv_set(gd.movie_pu->movie_type_st,PANEL_VALUE,ARCHIVE_MODE,NULL);
+
+  } else {
+    if(gd.movie.mode == REALTIME_MODE) {
+      gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
+      gd.coord_expt->time_seq_num++;
+
+      // Not Sensible to change start times in real time mode - Ignore;
+      _updateMoviePopup();
+      return ;
+    }
+  }
+
+  gd.movie.start_time = utime;
+
+  // Record the time we're currently on
+  target_time = gd.movie.frame[gd.movie.cur_frame].time_start;
+
+  // Make a temporary copy
+  memcpy(tmp_frame,gd.movie.frame,sizeof(movie_frame_t) * MAX_FRAMES);
+
+  // Zero out global array
+  memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
+
+  // Fill in time points on global array
+  reset_time_points();
+
+  // Search for frames already rendered for this interval and use them
+  for(i=0 ; i < gd.movie.num_frames; i++) {
+    found = 0;
+    for(j=0; j < MAX_FRAMES && !found; j++) {
+      if(gd.movie.frame[i].time_start == tmp_frame[j].time_start) {
+        found = 1;
+        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+        // Render a new time selector for this frame
+#ifdef NOTYET
+        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+                             gd.movie.frame[i].time_start,
+                             gd.movie.frame[i].time_end);
+#endif
+        memset(&tmp_frame[j],0,sizeof(movie_frame_t));
+      }
+	 
+    }
+  }
+
+  // Reuse pixmaps in unused frames
+  for(i=0 ; i < gd.movie.num_frames; i++) {
+    if(gd.movie.frame[i].h_pdev) continue; // Alreday is accounted for.
+
+    found = 0;
+#ifdef NOTYET
+    for(j=0; j < MAX_FRAMES && !found; j++) {
+      if(tmp_frame[j].h_xid) {
+        found = 1;
+        gd.movie.frame[i].h_xid = tmp_frame[j].h_xid;
+        gd.movie.frame[i].v_xid = tmp_frame[j].v_xid;
+        gd.movie.frame[i].redraw_horiz = 1;
+        gd.movie.frame[i].redraw_vert = 1;
+        memset(&tmp_frame[j],0,sizeof(movie_frame_t));
+      }
+    }
+#endif
+  }
+
+  gd.movie.cur_frame = 0;
+  for(i=0; i < gd.movie.num_frames; i++) {
+    if(target_time >= gd.movie.frame[i].time_start &&
+       target_time <= gd.movie.frame[i].time_end) {
+
+      gd.movie.cur_frame = i;
+    }
+  }
+
+  // Reset gridded and product data validity flags
+  invalidate_all_data();
+
+  _updateMoviePopup();
+     
+}
+
+/*************************************************************************
+ *  SET_END_FRAME
+ */
+void GuiManager::_setEndFrame(int num_frames)
+  
+{
+  int i,j;
+  time_t    target_time;
+  movie_frame_t    tmp_frame[MAX_FRAMES];    /* info about each frame */
+  int old_frames;
+
+  gd.movie.end_frame = num_frames -1;
+
+  // Sanity check
+  if(gd.movie.end_frame < 0) gd.movie.end_frame = 0;
+  if(gd.movie.end_frame >= MAX_FRAMES) gd.movie.end_frame = MAX_FRAMES -1;
+  old_frames = gd.movie.num_frames;
+  gd.movie.num_frames = gd.movie.end_frame +1;
+
+  if(gd.movie.num_frames > 1) {
+    // xv_set(gd.movie_pu->movie_frame_sl,XV_SHOW,TRUE,NULL);
+  } else {
+    // xv_set(gd.movie_pu->movie_frame_sl,XV_SHOW,FALSE,NULL);
+  }
+
+  target_time = gd.movie.frame[gd.movie.cur_frame].time_start;
+
+  if(gd.movie.mode == REALTIME_MODE) {
+    gd.movie.cur_frame = gd.movie.end_frame;
+    // Make a temporary copy
+    memcpy(tmp_frame,gd.movie.frame,sizeof(movie_frame_t) * MAX_FRAMES);
+
+    // Zero out global array
+    memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
+
+    // Start point changes
+    gd.movie.start_time -= (time_t) ((gd.movie.time_interval_mins * 60.0) *
+                                     (gd.movie.num_frames - old_frames));
+
+    reset_time_points();
+	 
+    if(gd.movie.num_frames > old_frames) {
+      // copy original frames
+      for(i = gd.movie.num_frames - old_frames, j = 0; j < old_frames; i++, j++) {
+        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+
+        // Render time selector in reused frame
+#ifdef NOTYET
+        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+                             gd.movie.frame[i].time_start,
+                             gd.movie.frame[i].time_end);
+#endif
+      }
+
+      // Mark new frames for allocation & redrawing
+      j = gd.movie.num_frames - old_frames;
+      for(i = 0; i < j; i++) {
+        gd.movie.frame[i].redraw_horiz = 1;
+        gd.movie.frame[i].redraw_vert = 1;
+      }
+    } else {
+      for(i = 0, j = old_frames - gd.movie.num_frames ; j < old_frames; i++, j++) {
+        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+        // Render time selector in reused frame
+#ifdef NOTYET
+        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+                             gd.movie.frame[i].time_start,
+                             gd.movie.frame[i].time_end);
+#endif
+      }
+      // Copy unused frames too so they get de-allocated
+      for(j = 0, i = gd.movie.num_frames; j < old_frames - gd.movie.num_frames; i++, j++) {
+        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+      }
+    }
+  } else {
+    gd.movie.cur_frame = 0;
+    // Start point remains the same
+    reset_time_points();
+
+    if(gd.movie.num_frames > old_frames) {
+      for(i = gd.movie.num_frames -1; i < old_frames; i++) {
+        gd.movie.frame[i].redraw_horiz = 1;
+        gd.movie.frame[i].redraw_vert = 1;
+      }
+      // Render time selector in reused frames
+      for(i= 0; i < old_frames; i++) {
+ #ifdef NOTYET
+       draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+                             gd.movie.frame[i].time_start,
+                             gd.movie.frame[i].time_end);
+#endif
+      }
+    } else {
+      // Render time selector in reused frames
+      for(i= 0; i < gd.movie.num_frames; i++) {
+#ifdef NOTYET
+        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
+                             gd.movie.frame[i].time_start,
+                             gd.movie.frame[i].time_end);
+#endif
+      }
+    }
+  }
+     
+  for(i=0; i < gd.movie.num_frames; i++) {
+    if(target_time >= gd.movie.frame[i].time_start &&
+       target_time <= gd.movie.frame[i].time_end) {
+
+      gd.movie.cur_frame = i;
+    }
+  }
+  // Reset gridded and product data validity flags
+  invalidate_all_data();
+     
+  _updateMoviePopup();
+
+  adjust_pixmap_allocation();
+     
+  return;
+}
+
+/*************************************************************************
+ * UPDATE_MOVIE_PU: Update critical displayed values on the movie popup
+ */
+
+void GuiManager::_updateMoviePopup()
+{
+  int        index;
+  char    text[64];
+  char    fmt_text[128];
+  struct tm tms;
+
+  if(gd.movie.cur_frame < 0) {
+    index =  gd.movie.num_frames - 1;
+  } else {
+    index = gd.movie.cur_frame;
+  }
+ 
+  /* Update the Current Frame Begin Time text */
+  snprintf(fmt_text,128,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
+  if(_params.use_local_timestamps) {
+    strftime (text,64,fmt_text,localtime_r(&gd.movie.frame[index].time_mid,&tms));
+  } else {
+    strftime (text,64,fmt_text,gmtime_r(&gd.movie.frame[index].time_mid,&tms));
+  }
+  // xv_set(gd.movie_pu->fr_begin_msg,PANEL_LABEL_STRING,text,NULL);
+  
+  // Update the movie time start text
+  if(_params.use_local_timestamps) {
+    strftime (text, 64, _params.moviestart_time_format,
+              localtime_r(&gd.movie.start_time,&tms));
+  } else {
+    strftime (text, 64, _params.moviestart_time_format,
+              gmtime_r(&gd.movie.start_time,&tms));
+  }
+  // xv_set(gd.movie_pu->start_time_tx,PANEL_VALUE,text,NULL);
+
+  // xv_set(gd.movie_pu->movie_type_st,PANEL_VALUE,gd.movie.mode,NULL);
+
+  if(gd.debug1) printf("Time Start: %ld, End: %ld\n",gd.movie.frame[index].time_start,
+                       gd.movie.frame[index].time_end);
+   
+  /* update the time_interval  text */
+  switch(gd.movie.climo_mode) {
+    case REGULAR_INTERVAL:
+      snprintf(text,64,"%.2f",gd.movie.time_interval_mins);
+      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
+      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
+      break;
+
+    case DAILY_INTERVAL:
+      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
+      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"day",NULL);
+      break;
+
+    case YEARLY_INTERVAL:
+      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
+      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"yr",NULL);
+      break;
+
+  }
+
+  /* update the forecast period text */
+  snprintf(text,64,"%.2f",gd.movie.forecast_interval);
+  // xv_set(gd.movie_pu->fcast_per_tx,PANEL_VALUE,text,NULL);
+
+  // xv_set(gd.movie_pu->movie_frame_sl,
+  //        PANEL_MIN_VALUE,gd.movie.start_frame + 1,
+  //        PANEL_MAX_VALUE,gd.movie.end_frame + 1,
+  //        PANEL_VALUE,gd.movie.cur_frame +1,
+  //        NULL);
+
+  /* update the start/end frames text */
+  snprintf(text,64,"%d",gd.movie.end_frame +1);
+  // xv_set(gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
+
+  if (gd.prod_mgr) {
+    gd.prod_mgr->reset_times_valid_flags();
+  }
+
+#ifdef NOTYET
+  if(gd.time_plot)
+  {
+    gd.time_plot->Set_times((time_t) gd.epoch_start,
+                            (time_t) gd.epoch_end,
+                            (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
+                            (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
+                            (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
+                            gd.movie.num_frames);
+    gd.time_plot->Draw(); 
+  }
+#endif
+    
 
 }
 
@@ -4274,7 +4598,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       } 
 
       /* make sure the horiz window's slider has the correct label */
-      set_height_label();
+      //set_height_label();
 
       gd.movie.frame[index].redraw_horiz = 0;
       gd.h_win.redraw_flag[gd.h_win.page] = 0;

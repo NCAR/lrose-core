@@ -156,7 +156,7 @@ void reset_display()
     gd.movie.cur_frame = 0;
      
     reset_time_points();
-    update_movie_popup();
+    // update_movie_popup();
      
   }
 
@@ -208,7 +208,9 @@ void reset_display()
     //  & ~(gd.menu_bar.winds_onoff_bit);
   }
 
-  if(! gd.run_unmapped) update_movie_popup();
+  if(! gd.run_unmapped) {
+    // update_movie_popup();
+  }
 
   close_all_popups();
 
@@ -287,5 +289,7 @@ void reset_display()
 
   // Restore the initial page
   // set_field(planview_start_page);
-  set_v_field(gd.field_index[xsect_start_page]);
+
+  // set_v_field(gd.field_index[xsect_start_page]);
+
 }

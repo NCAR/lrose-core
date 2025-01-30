@@ -168,7 +168,7 @@ void SymprodRender::draw(RenderContext &context)
 	      _prodProps.num_objs,
 	      msg1);
 
-  add_message_to_status_win(msg2,0);
+  // add_message_to_status_win(msg2,0);
   
   for (size_t i = 0; i < _objs.size(); i++) {
 

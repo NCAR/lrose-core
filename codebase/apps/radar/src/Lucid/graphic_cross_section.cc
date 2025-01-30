@@ -65,7 +65,7 @@ void setup_route_area(int clear_flag )
   // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,value,NULL);
   // gd.menu_bar.last_callback_value = value;
   
-  show_xsect_panel((u_int)1);
+  // show_xsect_panel((u_int)1);
   
   gd.v_win.active = 1;
   set_redraw_flags(1,1);

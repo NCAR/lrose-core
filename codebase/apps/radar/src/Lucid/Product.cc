@@ -293,7 +293,7 @@ int Product::getData(const time_t data_start_time,
   _chunksNeedProcess = true;
 
   snprintf(msg,128,"Gathering %s data",_prodInfo.menu_label);
-  add_message_to_status_win(msg,0);
+  // add_message_to_status_win(msg,0);
 
   if (_debug) {
     cerr << "Product:" << _prodInfo.menu_label << endl;
@@ -484,7 +484,7 @@ bool Product::processChunks()
 
   snprintf(msg, 128,
           "                                  ->   %d Chunks retrieved in %.3g seconds\n",(int)chunks.size(),t3);
-  add_message_to_status_win(msg,0);
+  // add_message_to_status_win(msg,0);
 
   if(_debug) {
       int i = chunks.size();

@@ -403,9 +403,9 @@ void save_current_zoom(double zoom_min_x, double zoom_min_y,
 void zoom_back()
 {
   if (_zoom_stack.size() > 0) {
-    GeomState geom = _zoom_stack[_zoom_stack.size()-1];
+    // GeomState geom = _zoom_stack[_zoom_stack.size()-1];
     _zoom_stack.pop_back();
-    set_domain_zoom(geom.minx, geom.miny, geom.maxx, geom.maxy);
+    // set_domain_zoom(geom.minx, geom.miny, geom.maxx, geom.maxy);
   }
 }
 
