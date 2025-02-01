@@ -11,7 +11,7 @@ import os
 import sys
 
 import numpy as np
-import scipy.stats as stats
+#import scipy.stats as stats
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
