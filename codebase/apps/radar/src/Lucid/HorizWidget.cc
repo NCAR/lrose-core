@@ -577,6 +577,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
+#ifdef NOTNOW
   // add the legends
   
   if (_archiveMode) {
@@ -654,6 +655,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     painter.restore();
 
   } // if (_archiveMode) {
+#endif
 
 }
 
@@ -1713,6 +1715,44 @@ int HorizWidget::_renderGrid(QPainter &painter,
                                    is_overlay_field);
   }
 
+  // legends
+  
+  {
+
+    painter.save();
+
+    vector<string> legends;
+    char text[4096];
+    legends.push_back(mr->h_date.asString(0)); // field data time
+    snprintf(text, 4096, "%s %s", mr->fieldLabel().c_str(), mr->vlevelLabel().c_str());
+    legends.push_back(text);
+
+    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
+    painter.setBrush(Qt::black);
+    painter.setBackgroundMode(Qt::OpaqueMode);
+  
+    switch (_params.horiz_main_legend_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+    default: {}
+    }
+    
+    // painter.setBrush(Qt::white);
+    // painter.setBackgroundMode(Qt::TransparentMode);
+    painter.restore();
+
+  }
+  
 #ifdef NOTNOW
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.
