@@ -97,6 +97,12 @@ public:
   // perform the vol read for Horiz
 
   void startReadVolH();
+
+  // get labels for legends
+  
+  string vlevelLabel();
+  string fieldLabel();
+  string heightLabel();
   
   // public members
   

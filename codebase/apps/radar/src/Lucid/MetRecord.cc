@@ -1261,3 +1261,139 @@ void MetRecord::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
 
 }
 
+/**********************************************************************
+ * VLEVEL_LABEL: Return an appropriate units label for a field's
+ *               vertical coordinate system
+ */                  
+string MetRecord::vlevelLabel()
+{
+  switch(h_fhdr.vlevel_type)  {
+    case Mdvx::VERT_TYPE_SIGMA_P:
+      return("Sigma P");
+    case Mdvx::VERT_TYPE_PRESSURE:
+      return("mb");
+    case Mdvx::VERT_TYPE_Z:
+      return("km");
+    case Mdvx::VERT_TYPE_SIGMA_Z:
+      return("Sigma Z");
+    case Mdvx::VERT_TYPE_ETA:
+      return("ETA");
+    case Mdvx::VERT_TYPE_THETA:
+      return("Theta");
+    case Mdvx::VERT_TYPE_MIXED:
+      return("Mixed");
+    case Mdvx::VERT_TYPE_ELEV:
+    case Mdvx::VERT_VARIABLE_ELEV:
+      return("Deg");
+    case Mdvx::VERT_FLIGHT_LEVEL:
+      return("FL");
+    default:
+      return "";
+  }
+}
+
+/**********************************************************************
+ * FIELD_LABEL: Return a Label string for a field 
+ */
+
+string MetRecord::fieldLabel()
+{
+
+  // time_t  now;
+  struct tm tms;
+  char tlabel[1024];
+  char label[2048];
+  
+  // Convert to a string
+  
+  time_t utime = h_date.utime();
+  if(_params.use_local_timestamps) {
+    strftime(tlabel,256,_params.label_time_format,localtime_r(&utime,&tms));
+  } else {
+    strftime(tlabel,256,_params.label_time_format,gmtime_r(&utime,&tms));
+  }
+  
+  // now = time(NULL);
+  label[0] = '\0';
+  
+  if(composite_mode == FALSE) {
+    // Check for surface fields 
+    if(((vert[plane].cent == 0.0) && (h_fhdr.grid_dz == 0)) ||
+       h_fhdr.vlevel_type == Mdvx::VERT_TYPE_SURFACE ||
+       h_fhdr.vlevel_type == Mdvx::VERT_TYPE_COMPOSITE ||
+       ds_fhdr.nz == 1) {  
+      //snprintf(label,"%s At Surface %s",
+      snprintf(label,2048,"%s: %s",
+               legend_name,
+               tlabel);
+    } else {
+      // Reverse order of label and value if units are "FL" 
+      if(strcmp(units_label_sects,"FL") == 0) {
+        snprintf(label,2048,"%s: %s %03.0f %s",
+                 legend_name,
+                 units_label_sects,
+                 vert[plane].cent,
+                 tlabel);
+      }else {
+        snprintf(label,2048,"%s: %g %s %s",
+                 legend_name,
+                 vert[plane].cent,
+                 units_label_sects,
+                 tlabel);
+      }
+    }
+  } else {
+    snprintf(label,2048,"%s: All levels %s",
+             legend_name,
+             tlabel);
+  }
+  
+  /* If data is Forecast, add a  label */
+  if( h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) {
+    strcat(label," FORECAST Gen");
+  }
+  
+  return label;
+  
+}
+
+/*************************************************************************
+ * HEIGHT_LABEL: Return the height label
+ */
+string MetRecord::heightLabel()
+{
+
+  static char label[256];
+  
+  switch(h_vhdr.type[0]) {
+    case Mdvx::VERT_TYPE_SURFACE:
+      strcpy(label,"   " );    // For Now-  Because many Taiwan fields are wrongly
+      // set to "Surface", example: Freezing Level.
+      //strcpy(label,"Surface" );
+      break;
+      
+    case 0:
+    case Mdvx::VERT_VARIABLE_ELEV:
+    case Mdvx::VERT_FIELDS_VAR_ELEV:
+    case Mdvx::VERT_TYPE_COMPOSITE:
+      strcpy(label,"   " );
+      break;
+      
+    case Mdvx::VERT_SATELLITE_IMAGE:
+      strcpy(label,"Sat Image" );
+      break;
+      
+    case Mdvx::VERT_FLIGHT_LEVEL:
+      snprintf(label,256,"Flight Level %03d", (int)gd.h_win.cur_ht);
+      break;
+      
+    default:
+      snprintf(label,256,"%g %s",gd.h_win.cur_ht,
+               units_label_sects);
+      break;
+  }
+  
+  return label;
+  
+}
+

@@ -1,0 +1,3 @@
+#! /bin/csh
+
+./PlotRangeHeight.py --compute --debug --gateSpacingM 225 --maxHt 20 --elevations "0.48,0.88,1.32,1.8,2.42,3.12,4,5.1,6.42,8,10.02,12.48,15.6,19.51" --nGates 1000
