@@ -126,6 +126,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // get
   
+  const RadxTime &getSelectedTime() const { return _selectedTime; }
   const RadxTime &getStartTime() const { return _startTime; }
   const RadxTime &getEndTime() const { return _endTime; }
   int getNFramesMovie() const { return _nFramesMovie; }

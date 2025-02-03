@@ -321,13 +321,11 @@ private:
   TimeControl *_timeControl;
   bool _timeControlPlaced;
 
-  int _nArchiveScans;
+  // creating images in archive mode
+  
   vector<string> _archiveFileList;
   bool _archiveFilesHaveDayDir;
   RadxTime _archiveIntermediateTime;
-  RadxTime _startDisplayTime;
-  RadxTime _currentDisplayTime;  // is this needed??
-  RadxTime _endDisplayTime;
 
   // saving images in real time mode
 
