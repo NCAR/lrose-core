@@ -131,53 +131,6 @@ TimeControl::~TimeControl()
 
 }
 
-/////////////////////////////////////////
-// set flags for change in selected time
-
-void TimeControl::_acceptSelectedTime()
-{
-  cerr << "====>> acceptSelectedTime()" << endl;
-  gd.data_request_time = _selectedTime.utime();
-  invalidate_all_data(); // TODO later - check if this is correct
-  set_redraw_flags(1, 1);
-}
-
-/////////////////////////////////////////
-// set flags for change in movie limits
-
-void TimeControl::_changeMovieLimits()
-{
-
-  cerr << "====>> changeMovieLimits()" << endl;
-  gd.epoch_start = _startTime.utime();
-  gd.epoch_end = _endTime.utime();
-  gd.data_request_time = _selectedTime.utime();
-  gd.movie.num_frames = _nFramesMovie;
-  gd.movie.start_frame = 0;
-  gd.movie.start_frame = _nFramesMovie - 1;
-  gd.movie.display_time_msec = _loopDwellMsecs;
-  gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
-
-  reset_time_points();
-  invalidate_all_data();
-  set_redraw_flags(1, 1);
-  
-  if (gd.prod_mgr) {
-    gd.prod_mgr->reset_times_valid_flags();
-  }
-  
-  // if(gd.time_plot) {
-  //   gd.time_plot->Set_times(gd.epoch_start,
-  //                           gd.epoch_end,
-  //                           gd.movie.frame[gd.movie.cur_frame].time_start,
-  //                           gd.movie.frame[gd.movie.cur_frame].time_end,
-  //                           (gd.movie.time_interval_mins * 60.0) + 0.5,
-  //                           gd.movie.num_frames);
-  //   gd.time_plot->Draw(); 
-  // }
-    
-}
-
 //////////////////////////////////////////////
 // populate the time panel gui
 
@@ -640,6 +593,53 @@ void TimeControl::populateGui()
   
 }
 
+/////////////////////////////////////////
+// set flags for change in selected time
+
+void TimeControl::_acceptSelectedTime()
+{
+  cerr << "====>> acceptSelectedTime()" << endl;
+  gd.data_request_time = _selectedTime.utime();
+  invalidate_all_data(); // TODO later - check if this is correct
+  set_redraw_flags(1, 1);
+}
+
+/////////////////////////////////////////
+// set flags for change in movie limits
+
+void TimeControl::_changeMovieLimits()
+{
+
+  cerr << "====>> changeMovieLimits()" << endl;
+  gd.epoch_start = _startTime.utime();
+  gd.epoch_end = _endTime.utime();
+  gd.data_request_time = _selectedTime.utime();
+  gd.movie.num_frames = _nFramesMovie;
+  gd.movie.start_frame = 0;
+  gd.movie.start_frame = _nFramesMovie - 1;
+  gd.movie.display_time_msec = _loopDwellMsecs;
+  gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
+
+  reset_time_points();
+  invalidate_all_data();
+  set_redraw_flags(1, 1);
+  
+  if (gd.prod_mgr) {
+    gd.prod_mgr->reset_times_valid_flags();
+  }
+  
+  // if(gd.time_plot) {
+  //   gd.time_plot->Set_times(gd.epoch_start,
+  //                           gd.epoch_end,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_start,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_end,
+  //                           (gd.movie.time_interval_mins * 60.0) + 0.5,
+  //                           gd.movie.num_frames);
+  //   gd.time_plot->Draw(); 
+  // }
+    
+}
+
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted
@@ -737,7 +737,6 @@ void TimeControl::_setSelectedTime(const DateTime &val)
   _selectedTime = val;
   gd.selected_time = _selectedTime.utime();
   gd.time_has_changed = true;
-  _manager->setSelectedTime(_selectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -955,7 +954,9 @@ void TimeControl::_timeSliderValueChanged(int value)
     return;
   }
   // set redraw flags
-  _changeMovieLimits();
+  // _changeMovieLimits();
+  _setSelectedTime(_guiSelectedTime);
+  _manager->setSelectedTime(_selectedTime);
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -974,8 +975,9 @@ void TimeControl::_timeSliderReleased()
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   setGuiSelectedTime(_guiSelectedTime);
+  _manager->setSelectedTime(_selectedTime);
   // set redraw flags
-  _changeMovieLimits();
+  // _changeMovieLimits();
 }
 
 void TimeControl::_timeSliderPressed() 
