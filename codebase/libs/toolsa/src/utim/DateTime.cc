@@ -45,16 +45,22 @@ const time_t DateTime::NEVER = -LARGE_LONG;
 /* days in the month */
 static int daysOfMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
+// default constructor
+
 DateTime::DateTime()
 {
   _init();
 }
+
+// construct with a time_t
 
 DateTime::DateTime(time_t when)
 {
   _init();
   _uTime = when;
 }
+
+// construct with time_t and sub seconds
 
 DateTime::DateTime(time_t when, bool setSubSec, double subSec)
 {
@@ -66,12 +72,20 @@ DateTime::DateTime(time_t when, bool setSubSec, double subSec)
   _normalize();
 }
 
+// construct with lead seconds for forecast data
+
 DateTime::DateTime(time_t when, size_t leadSecs)
 {
   _init();
   _uTime = when;
   setLeadSecs(leadSecs);
 }
+
+// construct with string
+// Support setting time using a string of the format: "YYYY-MM-DD-HH-MM-SS"
+// where: "-" represents a valid delimeter [/_: ]
+// e.g. "1958/12/28 10:57:00"
+// e.g. "19581228105700"
 
 DateTime::DateTime(const char *when)
 {
@@ -83,6 +97,8 @@ DateTime::DateTime(const string &when)
   _init(when);
 }
 
+// construct with date and time, plus subsec
+
 DateTime::DateTime(int year, int month, int day,
                    int hour, int min, int sec,
                    double subSec)
@@ -91,11 +107,16 @@ DateTime::DateTime(int year, int month, int day,
   _leadTime = NULL;
 }
 
+// copy constructor
+
 DateTime::DateTime(const DateTime & orig)
 {
   _leadTime = NULL;
   copy (orig);
 }
+
+///////////////////
+// destructor
 
 DateTime::~DateTime()
 {
