@@ -115,7 +115,7 @@ VertWidget::VertWidget(QWidget* parent,
   
   _prevElev = -9999.0;
   _prevAz = -9999.0;
-  _prevTime = 0;
+  _prevTime.setToZero();
   
   _colorScaleWidth = _params.vert_color_scale_width;
 
@@ -132,8 +132,8 @@ VertWidget::VertWidget(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
   
-  _plotStartTime.set(0);
-  _plotEndTime.set(0);
+  _plotStartTime.setToZero();
+  _plotEndTime.setToZero();
   
 }
 

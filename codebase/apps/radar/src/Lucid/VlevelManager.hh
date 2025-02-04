@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 #include "Params.hh"
-#include <Radx/RadxTime.hh>
+#include <toolsa/DateTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>

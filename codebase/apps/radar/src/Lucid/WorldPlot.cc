@@ -1751,8 +1751,8 @@ void WorldPlot::drawRangeAxes(QPainter &painter,
 // time axes
     
 void WorldPlot::drawTimeAxes(QPainter &painter,
-                             const RadxTime &startTime,
-                             const RadxTime &endTime,
+                             const DateTime &startTime,
+                             const DateTime &endTime,
                              bool drawGrid,
                              const QColor &lineColor,
                              const QColor &gridColor,
@@ -1802,9 +1802,9 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
     ((time_t) (endTime.utime() / intervalSecs)) * intervalSecs;
   int nTicks = (endUsecs - startUsecs) / intervalSecs + 1;
   
-  vector<RadxTime> ticks;
+  vector<DateTime> ticks;
   for (int ii = 0; ii < nTicks; ii++) {
-    RadxTime tickTime(startUsecs + ii * intervalSecs);
+    DateTime tickTime(startUsecs + ii * intervalSecs);
     ticks.push_back(tickTime);
   }
 
@@ -1837,7 +1837,7 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
     
     painter.setPen(lineColor);
 
-    const RadxTime &tickTime = ticks[i];
+    const DateTime &tickTime = ticks[i];
     double val = tickTime - startTime;
     double pix = getXPixel(val);
     QLineF qlineBottom(pix, _yMinPixel, pix, _yMinPixel - _xAxisTickLen);
@@ -1916,9 +1916,9 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
 // distance ticks on time axis
 
 void WorldPlot::drawDistanceTicks(QPainter &painter,
-                                  const RadxTime &startTime,
+                                  const DateTime &startTime,
                                   const vector<double> &tickDists,
-                                  const vector<RadxTime> &tickTimes,
+                                  const vector<DateTime> &tickTimes,
                                   const QColor &lineColor,
                                   const QColor &textColor,
                                   const QFont &valuesFont)
@@ -1935,7 +1935,7 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
 
   for (size_t i = 0; i < tickDists.size(); i++) {
     
-    const RadxTime &tickTime = tickTimes[i];
+    const DateTime &tickTime = tickTimes[i];
     double distVal = tickDists[i];
     
     if (!std::isfinite(distVal)) {

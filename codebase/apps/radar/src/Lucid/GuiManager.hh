@@ -130,6 +130,13 @@ public:
   // set the xy zoom
 
   void setXyZoom(double minY, double maxY, double minX, double maxX);
+
+  // set the selected time
+
+  void setSelectedTime(const DateTime &val) {
+    _selectedTime = val;
+    cerr << "0000000000000000 selectedTime: " << _selectedTime.asString() << endl;
+  }
   
   // input file list for archive mode
   
@@ -194,7 +201,7 @@ private:
 
   // // input data
   
-  // // RadxTime _readerRayTime;
+  // // DateTime _readerRayTime;
   // // RadxVol _vol;
 
   // main window frame
@@ -215,8 +222,8 @@ private:
   
   // times for data
 
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
+  DateTime _plotStartTime;
+  DateTime _plotEndTime;
 
   // vlevels
 
@@ -235,7 +242,7 @@ private:
   // archive mode
   
   bool _archiveMode; // false for realtime mode
-  RadxTime _archiveStartTime;// start time for archive mode
+  DateTime _archiveStartTime;// start time for archive mode
   
   // top-level menus
 
@@ -320,18 +327,20 @@ private:
   
   TimeControl *_timeControl;
   bool _timeControlPlaced;
-
+  DateTime _selectedTime;
+  DateTime _prevSelectedTime;
+  
   // creating images in archive mode
   
   vector<string> _archiveFileList;
   bool _archiveFilesHaveDayDir;
-  RadxTime _archiveIntermediateTime;
+  DateTime _archiveIntermediateTime;
 
   // saving images in real time mode
 
-  RadxTime _imagesScheduledTime;
-  RadxTime _imagesStartTime;
-  RadxTime _imagesEndTime;
+  DateTime _imagesScheduledTime;
+  DateTime _imagesStartTime;
+  DateTime _imagesEndTime;
   int _imagesScanIntervalSecs;
 
   // polygon 

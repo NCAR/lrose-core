@@ -86,7 +86,7 @@
 #include <Radx/RadxFile.hh>
 #include <Radx/NcfRadxFile.hh>
 #include <Radx/RadxSweep.hh>
-#include <Radx/RadxTime.hh>
+#include <toolsa/DateTime.hh>
 #include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
 
@@ -166,6 +166,8 @@ GuiManager::GuiManager() :
   
   _timeControl = NULL;
   _timeControlPlaced = false;
+  _selectedTime.setToNever();
+  _prevSelectedTime.setToNever();
 
   _vlevelManager.setLevel(_params.start_ht);
   
@@ -317,10 +319,17 @@ void GuiManager::timerEvent(QTimerEvent *event)
   }
 
   // vlevel change?
-
+  
   if (_vlevelHasChanged) {
     needNewData = true;
     _vlevelHasChanged = false;
+  }
+
+  // time change
+
+  if (_selectedTime != _prevSelectedTime) {
+    needNewData = true;
+    _prevSelectedTime = _selectedTime;
   }
 
   // get new data if needed - this is done in a thread
@@ -1291,7 +1300,7 @@ void GuiManager::_handleRealtimeData()
 
 //   if (fromCommandLine && list.size() > 0) {
 //     // determine start and end time from file list
-//     RadxTime startTime, endTime;
+//     DateTime startTime, endTime;
 //     NcfRadxFile::getTimeFromPath(list[0], startTime);
 //     NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
 //     // round to nearest five minutes
@@ -2753,7 +2762,7 @@ void GuiManager::_createArchiveImageFiles()
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
     
-    for (RadxTime stime = _imagesStartTime;
+    for (DateTime stime = _imagesStartTime;
          stime <= _imagesEndTime;
          stime += _params.images_schedule_interval_secs) {
       

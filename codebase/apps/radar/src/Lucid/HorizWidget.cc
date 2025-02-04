@@ -135,8 +135,8 @@ HorizWidget::HorizWidget(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
-  _plotStartTime.set(0);
-  _plotEndTime.set(0);
+  // _plotStartTime.set(0);
+  // _plotEndTime.set(0);
 
   _renderFrame = false;
   _renderFrameIndex = 0;

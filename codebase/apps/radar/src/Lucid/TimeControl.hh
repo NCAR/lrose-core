@@ -66,7 +66,7 @@ class QHBoxLayout;
 class QVBoxLayout;
 class GuiManager;
 
-#include <Radx/RadxTime.hh>
+#include <toolsa/DateTime.hh>
 #include "Params.hh"
 
 using namespace std;
@@ -97,8 +97,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   // set
 
   void setStartTimeFromEdit(const QDateTime &val);
-  void setStartTime(const RadxTime &rtime);
-  void setEndTime(const RadxTime &rtime);
+  void setStartTime(const DateTime &rtime);
+  void setEndTime(const DateTime &rtime);
 
   void setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
   void setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
@@ -114,9 +114,9 @@ class DLL_EXPORT TimeControl : public QDialog {
     _fwdMult->setEnabled(val);
   }
 
-  void setGuiStartTime(const RadxTime &val);
-  void setGuiEndTime(const RadxTime &val);
-  void setGuiSelectedTime(const RadxTime &val);
+  void setGuiStartTime(const DateTime &val);
+  void setGuiEndTime(const DateTime &val);
+  void setGuiSelectedTime(const DateTime &val);
 
   void setFrameIndex(int val) { _frameIndex = val; }
 
@@ -126,9 +126,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // get
   
-  const RadxTime &getSelectedTime() const { return _selectedTime; }
-  const RadxTime &getStartTime() const { return _startTime; }
-  const RadxTime &getEndTime() const { return _endTime; }
+  const DateTime &getSelectedTime() const { return _selectedTime; }
+  const DateTime &getStartTime() const { return _startTime; }
+  const DateTime &getEndTime() const { return _endTime; }
   int getNFramesMovie() const { return _nFramesMovie; }
   double getMovieDurationSecs() const { return _movieDurationSecs; }
   int getFrameIndex() const { return _frameIndex; }
@@ -137,8 +137,8 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // convert between Qt and Radx date/time objects
 
-  static QDateTime getQDateTime(const RadxTime &rtime);
-  static RadxTime getRadxTime(const QDateTime &qtime);
+  static QDateTime getQDateTime(const DateTime &rtime);
+  static DateTime getDateTime(const QDateTime &qtime);
   
   // populate the gui
 
@@ -150,7 +150,7 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   static TimeControl *_instance;
   
-  GuiManager *_parent;
+  GuiManager *_manager;
   const Params &_params;
   
   QFrame *_timePanel;
@@ -181,18 +181,18 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // gui selections before accept
   
-  RadxTime _guiStartTime;
-  RadxTime _guiEndTime;
-  RadxTime _guiSelectedTime;
+  DateTime _guiStartTime;
+  DateTime _guiEndTime;
+  DateTime _guiSelectedTime;
   int _guiNFramesMovie;
   double _guiFrameIntervalSecs;
   int _guiFrameIndex;
 
   // selections after accept
   
-  RadxTime _startTime;
-  RadxTime _endTime;
-  RadxTime _selectedTime;
+  DateTime _startTime;
+  DateTime _endTime;
+  DateTime _selectedTime;
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
@@ -221,7 +221,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // move in time
   
-  void _setSelectedTime(const RadxTime &val);
+  void _setSelectedTime(const DateTime &val);
 
   void _goBack1();
   void _goBackDuration();

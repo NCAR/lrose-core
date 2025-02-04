@@ -51,7 +51,7 @@
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxVol.hh>
 #include <radar/BeamHeight.hh>
-#include <Radx/RadxTime.hh>
+#include <toolsa/DateTime.hh>
 
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
@@ -122,8 +122,8 @@ class DLL_EXPORT VertWidget : public QWidget
 
   // get plot times
 
-  const RadxTime &getPlotStartTime() { return _plotStartTime; }
-  const RadxTime &getPlotEndTime() { return _plotEndTime; }
+  const DateTime &getPlotStartTime() { return _plotStartTime; }
+  const DateTime &getPlotEndTime() { return _plotEndTime; }
 
   // adjust pixel scale to suit window size etc.
 
@@ -313,8 +313,8 @@ protected:
 
   // angles and times in archive mode
 
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
+  DateTime _plotStartTime;
+  DateTime _plotEndTime;
   double _meanAz;
   double _sumAz;
   double _nRays;
@@ -336,7 +336,7 @@ protected:
 
   // computing angle limits of rays
 
-  RadxTime _prevTime;
+  DateTime _prevTime;
   double _prevAz;
   double _prevElev;
   double _startElev;

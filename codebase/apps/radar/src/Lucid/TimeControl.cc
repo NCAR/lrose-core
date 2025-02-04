@@ -53,7 +53,7 @@ TimeControl *TimeControl::_instance = nullptr;
 TimeControl::TimeControl(GuiManager *parent,
                          const Params &params) :
         QDialog(parent),
-        _parent(parent),
+        _manager(parent),
         _params(params)
         
 {
@@ -269,7 +269,7 @@ void TimeControl::populateGui()
 
   _realtimeSelector = new QCheckBox(realtimeFrame);
   _realtimeSelector->setChecked(_isRealtime);
-  _parent->setArchiveMode(!_isRealtime);
+  _manager->setArchiveMode(!_isRealtime);
 
   realtimeFrameLayout->addWidget(realtimeTitle, 0,
                                  Qt::AlignTop | Qt::AlignCenter);
@@ -707,7 +707,7 @@ void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 
-void TimeControl::setGuiStartTime(const RadxTime &val)
+void TimeControl::setGuiStartTime(const DateTime &val)
 {
   if (!_startTimeEdit) {
     return;
@@ -719,7 +719,7 @@ void TimeControl::setGuiStartTime(const RadxTime &val)
 ////////////////////////////////////////////////////////
 // set gui widget from archive end time
 
-void TimeControl::setGuiEndTime(const RadxTime &val)
+void TimeControl::setGuiEndTime(const DateTime &val)
 {
   if (!_endTimeLabel) {
     return;
@@ -731,18 +731,19 @@ void TimeControl::setGuiEndTime(const RadxTime &val)
 ////////////////////////////////////////////////////////
 // set selected time
 
-void TimeControl::_setSelectedTime(const RadxTime &val)
+void TimeControl::_setSelectedTime(const DateTime &val)
 {
   gd.prev_time = _selectedTime.utime();
   _selectedTime = val;
   gd.selected_time = _selectedTime.utime();
   gd.time_has_changed = true;
+  _manager->setSelectedTime(_selectedTime);
 }
 
 ////////////////////////////////////////////////////////
 // set gui selected time label
 
-void TimeControl::setGuiSelectedTime(const RadxTime &val)
+void TimeControl::setGuiSelectedTime(const DateTime &val)
 {
   if (!_selectedTimeLabel) {
     return;
@@ -761,12 +762,12 @@ void TimeControl::setGuiSelectedTime(const RadxTime &val)
 ////////////////////////////////////////////////////////
 // set movie start time
 
-void TimeControl::setStartTime(const RadxTime &rtime)
+void TimeControl::setStartTime(const DateTime &rtime)
 
 {
   _startTime = rtime;
   if (!_startTime.isValid()) {
-    _startTime.set(RadxTime::NOW);
+    _startTime.setToNow();
   }
   _endTime = _startTime + _movieDurationSecs;
   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
@@ -781,12 +782,12 @@ void TimeControl::setStartTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // set movie end time
 
-void TimeControl::setEndTime(const RadxTime &rtime)
+void TimeControl::setEndTime(const DateTime &rtime)
 
 {
   _endTime = rtime;
   if (!_endTime.isValid()) {
-    _endTime.set(RadxTime::NOW);
+    _endTime.setToNow();
   }
   _startTime = _endTime - _movieDurationSecs;
   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
@@ -1026,7 +1027,7 @@ void TimeControl::_setRealtime(Qt::CheckState val)
     _isRealtime = false;
     cerr << "Archive mode" << endl;
   }
-  _parent->setArchiveMode(!_isRealtime);
+  _manager->setArchiveMode(!_isRealtime);
 }
 #else
 void TimeControl::_setRealtime(int val)
@@ -1038,7 +1039,7 @@ void TimeControl::_setRealtime(int val)
     _isRealtime = true;
     cerr << "Realtime mode" << endl;
   }
-  _parent->setArchiveMode(!_isRealtime);
+  _manager->setArchiveMode(!_isRealtime);
 }
 #endif
 
@@ -1086,7 +1087,7 @@ void TimeControl::_setLoopDelayMsecs(int val)
 ////////////////////////////////////////////////////////
 // convert between Qt and Radx date/time objects
 
-QDateTime TimeControl::getQDateTime(const RadxTime &rtime)
+QDateTime TimeControl::getQDateTime(const DateTime &rtime)
 {
   QDate date(rtime.getYear(), 
              rtime.getMonth(),
@@ -1098,9 +1099,9 @@ QDateTime TimeControl::getQDateTime(const RadxTime &rtime)
   return qtime;
 }
 
-RadxTime TimeControl::getRadxTime(const QDateTime &qtime)
+DateTime TimeControl::getDateTime(const QDateTime &qtime)
 {
-  RadxTime rtime(qtime.date().year(),
+  DateTime rtime(qtime.date().year(),
                  qtime.date().month(),
                  qtime.date().day(),
                  qtime.time().hour(),

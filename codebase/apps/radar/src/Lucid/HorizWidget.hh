@@ -214,8 +214,8 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   // get plot times
 
-  const RadxTime &getPlotStartTime() { return _plotStartTime; }
-  const RadxTime &getPlotEndTime() { return _plotEndTime; }
+  const DateTime &getPlotStartTime() { return _plotStartTime; }
+  const DateTime &getPlotEndTime() { return _plotEndTime; }
 
   void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
 
@@ -502,8 +502,8 @@ class DLL_EXPORT HorizWidget : public QWidget
 
   // angles and times in archive mode
 
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
+  DateTime _plotStartTime;
+  DateTime _plotEndTime;
   // double _meanElev;
   // double _sumElev;
   // double _nRays;

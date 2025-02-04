@@ -47,7 +47,7 @@
 #include <QTransform>
 #include <QColor>
 #include <QFont>
-#include <Radx/RadxTime.hh>
+#include <toolsa/DateTime.hh>
 #include <Mdv/MdvxProj.hh>
 #include "cidd_macros.h"
 #include "cidd_structs.h"
@@ -465,8 +465,8 @@ public:
   // top and bottom axes as time variable, for bscan
   
   void drawTimeAxes(QPainter &painter,
-                    const RadxTime &startTime,
-                    const RadxTime &endTime,
+                    const DateTime &startTime,
+                    const DateTime &endTime,
                     bool drawGrid,
                     const QColor &lineColor,
                     const QColor &gridColor,
@@ -478,9 +478,9 @@ public:
   // distance ticks on time axis
 
   void drawDistanceTicks(QPainter &painter,
-                         const RadxTime &startTime,
+                         const DateTime &startTime,
                          const vector<double> &tickDists,
-                         const vector<RadxTime> &tickTimes,
+                         const vector<DateTime> &tickTimes,
                          const QColor &lineColor,
                          const QColor &textColor,
                          const QFont &valuesFont);
