@@ -78,7 +78,7 @@ class DLL_EXPORT TimeControl : public QDialog {
  public:
   
   // constructor
-  
+
   TimeControl(GuiManager *parent,
               const Params &params);
   
@@ -94,37 +94,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   virtual ~TimeControl();
 
-  // set
-
-  void setStartTimeFromEdit(const QDateTime &val);
-  void setStartTime(const DateTime &rtime);
-  void setEndTime(const DateTime &rtime);
-
-  void setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
-  void setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
-  void setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
-  
-  void setEnabled(bool val) {
-    _startTimeEdit->setEnabled(val);
-    _back1->setEnabled(val);
-    _fwd1->setEnabled(val);
-    _backDuration->setEnabled(val);
-    _fwdDuration->setEnabled(val);
-    _backMult->setEnabled(val);
-    _fwdMult->setEnabled(val);
-  }
-
-  void setGuiStartTime(const DateTime &val);
-  void setGuiEndTime(const DateTime &val);
-  void setGuiSelectedTime(const DateTime &val);
-
-  void setFrameIndex(int val) { _frameIndex = val; }
-
-  void setSelectedTimeLabel(const string &text) {
-    _selectedTimeLabel->setText(text.c_str());
-  }
-  
-  // get
+  // get info
   
   const DateTime &getSelectedTime() const { return _selectedTime; }
   const DateTime &getStartTime() const { return _startTime; }
@@ -136,14 +106,20 @@ class DLL_EXPORT TimeControl : public QDialog {
   double getFrameIntervalSecs() const { return _frameIntervalSecs; }
 
   // convert between Qt and Radx date/time objects
-
+  
   static QDateTime getQDateTime(const DateTime &rtime);
   static DateTime getDateTime(const QDateTime &qtime);
-  
-  // populate the gui
 
-  void populateGui();
+  // set enabled on the GUI
+  // controls greyed-out behavior
   
+  void setEnabled(bool val); // for archive image generation
+
+  // go back and fwd by 1 time step
+  
+  void goBack1();
+  void goFwd1();
+
  private:
 
   // Singleton instance pointer.
@@ -152,6 +128,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   GuiManager *_manager;
   const Params &_params;
+
+  // GUI elements
   
   QFrame *_timePanel;
   QVBoxLayout *_timeLayout;
@@ -179,7 +157,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   QSpinBox *_loopDwellSelector;
   QSpinBox *_loopDelaySelector;
   
-  // gui selections before accept
+  // gui state - the 'view'
   
   DateTime _guiStartTime;
   DateTime _guiEndTime;
@@ -188,7 +166,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _guiFrameIntervalSecs;
   int _guiFrameIndex;
 
-  // selections after accept
+  // accepted state - i.e. the 'model'
   
   DateTime _startTime;
   DateTime _endTime;
@@ -197,18 +175,43 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _frameIntervalSecs;
   int _frameIndex;
 
-  // other selections
+  // parameters
   
   double _movieDurationSecs;
   int _loopDwellMsecs;
   int _loopDelayMsecs;
   bool _isRealtime;
   bool _isSweep;
+  
+  // private methods
+  
+  void _populateGui();
+  
+  void _setStartTimeFromEdit(const QDateTime &val);
+  void _setStartTime(const DateTime &rtime);
 
+  void _setNFramesMovie(int val);
+  void _setIntervalSecs(double val);
+  void _setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
+  void _setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
+  void _setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
+  
+  void _setGuiStartTime(const DateTime &val);
+  void _setGuiEndTime(const DateTime &val);
+  void _setGuiSelectedTime(const DateTime &val);
+  
+  void _setFrameIndex(int val) { _frameIndex = val; }
+
+  void _setSelectedTimeLabel(const string &text) {
+    _selectedTimeLabel->setText(text.c_str());
+  }
+  
+  void _setEndTime();
   void _acceptSelectedTime();
   void _changeMovieLimits();
+  void _resetMovieFrameTimes();
 
- public slots:
+ private slots:
 
   // actions
   
@@ -222,14 +225,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   // move in time
   
   void _setSelectedTime(const DateTime &val);
+  
+  void _shiftBack1();
+  void _shiftBack3();
 
-  void _goBack1();
-  void _goBackDuration();
-  void _goBackMult();
-
-  void _goFwd1();
-  void _goFwdDuration();
-  void _goFwdMult();
+  void _shiftFwd1();
+  void _shiftFwd3();
 
   // time slider
   

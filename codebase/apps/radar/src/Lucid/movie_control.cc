@@ -142,7 +142,7 @@ void reset_time_points()
 }
 
 /************************************************************************
- * ROTATE_MOVIE_FRAMES: Rotate the data in the  movie frames down one-
+ * ROTATE_MOVIE_FRAMES: Rotate the data in the movie frames down one-
  * Move the oldest data to the newest slot
  *
  */

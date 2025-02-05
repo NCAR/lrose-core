@@ -490,7 +490,7 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     }
     // _horiz->setStartOfVlevel(true);
     // _vert->setStartOfVlevel(true);
-    _timeControl->_goBack1();
+    _timeControl->goBack1();
     
   } else if (key == Qt::Key_Right) {
 
@@ -499,7 +499,7 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     }
     // _horiz->setStartOfVlevel(true);
     // _vert->setStartOfVlevel(true);
-    _timeControl->_goFwd1();
+    _timeControl->goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
@@ -2514,7 +2514,6 @@ void GuiManager::_createTimeControl()
 {
   
   _timeControl = new TimeControl(this, _params);
-  _timeControl->setStartTime(_archiveStartTime);
 
 }
 
@@ -2754,8 +2753,8 @@ void GuiManager::_createArchiveImageFiles()
       
       while (_timeControl->getStartTime() <= _imagesEndTime) {
         _createImageFilesAllLevels();
-        _timeControl->setStartTime(_timeControl->getStartTime() +
-                                   _imagesScanIntervalSecs);
+        // _timeControl->setStartTime(_timeControl->getStartTime() +
+        //                            _imagesScanIntervalSecs);
       }
       
     }
@@ -2767,9 +2766,9 @@ void GuiManager::_createArchiveImageFiles()
          stime <= _imagesEndTime;
          stime += _params.images_schedule_interval_secs) {
       
-      _timeControl->setStartTime(stime);
-      _timeControl->setEndTime(_timeControl->getStartTime() +
-                               _imagesScanIntervalSecs);
+      // _timeControl->setStartTime(stime);
+      // _timeControl->setEndTime(_timeControl->getStartTime() +
+      //                          _imagesScanIntervalSecs);
       
       _createImageFilesAllLevels();
       

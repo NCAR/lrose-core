@@ -104,11 +104,11 @@ TimeControl::TimeControl(GuiManager *parent,
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
   
-  populateGui();
+  _populateGui();
 
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 
 }
 
@@ -134,7 +134,7 @@ TimeControl::~TimeControl()
 //////////////////////////////////////////////
 // populate the time panel gui
 
-void TimeControl::populateGui()
+void TimeControl::_populateGui()
 {
   
   setWindowTitle("Time and movie loop controller");
@@ -339,7 +339,7 @@ void TimeControl::populateGui()
   _startTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   _startTimeEdit->setCalendarPopup(true);
   connect(_startTimeEdit, &QDateTimeEdit::dateTimeChanged,
-          this, &TimeControl::setStartTimeFromEdit);
+          this, &TimeControl::_setStartTimeFromEdit);
   _startTimeEdit->setToolTip("Start time of movie");
   
   startTimeFrameLayout->addWidget(startTitle, 0, Qt::AlignTop);
@@ -386,7 +386,7 @@ void TimeControl::populateGui()
   _selectedTimeLabel = new QLabel(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
   _selectedTimeLabel->setToolTip("This is the selected data time");
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiSelectedTime(_guiSelectedTime);
   
   selectedTimeFrameLayout->addWidget(selectedTitle, 0, Qt::AlignTop);
   selectedTimeFrameLayout->addWidget(_selectedTimeLabel, 0, Qt::AlignTop);
@@ -453,20 +453,20 @@ void TimeControl::populateGui()
   
   _back1 = new QPushButton(backButtonFrame);
   _back1->setText("<");
-  connect(_back1, &QPushButton::clicked, this, &TimeControl::_goBack1);
+  connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
   _back1->setToolTip("Go back by 1 frame");
   _back1->setStyleSheet(buttonStyle);
 
   _backDuration = new QPushButton(backButtonFrame);
   _backDuration->setText("<<");
-  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::_goBackDuration);
+  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::_shiftBack1);
   _backDuration->setToolTip("Go back by 1 movie duration");
   _backDuration->setStyleSheet(buttonStyle);
   
   _backMult = new QPushButton(backButtonFrame);
   _backMult->setText("<<<");
-  connect(_backMult, &QPushButton::clicked, this, &TimeControl::_goBackMult);
-  _backMult->setToolTip("Go back by 6 movie durations");
+  connect(_backMult, &QPushButton::clicked, this, &TimeControl::_shiftBack3);
+  _backMult->setToolTip("Go back by 3 movie durations");
   _backMult->setStyleSheet(buttonStyle);
   
   backButtonFrameLayout->addWidget(_backMult, 0, Qt::AlignLeft);
@@ -481,20 +481,20 @@ void TimeControl::populateGui()
   
   _fwd1 = new QPushButton(fwdButtonFrame);
   _fwd1->setText(">");
-  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::_goFwd1);
+  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
   _fwd1->setToolTip("Go forward by 1 frame");
   _fwd1->setStyleSheet(buttonStyle);
     
   _fwdDuration = new QPushButton(fwdButtonFrame);
   _fwdDuration->setText(">>");
-  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_goFwdDuration);
+  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_shiftFwd1);
   _fwdDuration->setToolTip("Go forward by 1 movie duration");
   _fwdDuration->setStyleSheet(buttonStyle);
 
   _fwdMult = new QPushButton(fwdButtonFrame);
   _fwdMult->setText(">>>");
-  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::_goFwdMult);
-  _fwdMult->setToolTip("Go forward by 6 movie durations");
+  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::_shiftFwd3);
+  _fwdMult->setToolTip("Go forward by 3 movie durations");
   _fwdMult->setStyleSheet(buttonStyle);
 
   fwdButtonFrameLayout->addWidget(_fwd1, 0, Qt::AlignRight);
@@ -620,7 +620,7 @@ void TimeControl::_changeMovieLimits()
   gd.movie.display_time_msec = _loopDwellMsecs;
   gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
 
-  reset_time_points();
+  _resetMovieFrameTimes();
   invalidate_all_data();
   set_redraw_flags(1, 1);
   
@@ -667,9 +667,9 @@ void TimeControl::_cancelGuiSelections()
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
@@ -690,24 +690,54 @@ void TimeControl::_outputMovieLoop()
   cerr << "Output movie loop" << endl;
 }
 
+//////////////////////////////
+// set number of movie frames
+
+void TimeControl::_setNFramesMovie(int val)
+{
+  _nFramesMovie = val;
+}
+
+////////////////////////////////
+// set movie frame interval secs
+
+void TimeControl::_setIntervalSecs(double val)
+{
+  _frameIntervalSecs = val;
+}
+
+////////////////////////////////
+// enable the gui elements
+
+void TimeControl::setEnabled(bool val)
+{
+  _startTimeEdit->setEnabled(val);
+  _back1->setEnabled(val);
+  _fwd1->setEnabled(val);
+  _backDuration->setEnabled(val);
+  _fwdDuration->setEnabled(val);
+  _backMult->setEnabled(val);
+  _fwdMult->setEnabled(val);
+}
+
 /////////////////////////////////////////////////////////////////////
 // grab the start time from the editor widget
 
-void TimeControl::setStartTimeFromEdit(const QDateTime &val) {
+void TimeControl::_setStartTimeFromEdit(const QDateTime &val) {
   QDate dd = val.date();
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 
-void TimeControl::setGuiStartTime(const DateTime &val)
+void TimeControl::_setGuiStartTime(const DateTime &val)
 {
   if (!_startTimeEdit) {
     return;
@@ -719,7 +749,7 @@ void TimeControl::setGuiStartTime(const DateTime &val)
 ////////////////////////////////////////////////////////
 // set gui widget from archive end time
 
-void TimeControl::setGuiEndTime(const DateTime &val)
+void TimeControl::_setGuiEndTime(const DateTime &val)
 {
   if (!_endTimeLabel) {
     return;
@@ -742,7 +772,7 @@ void TimeControl::_setSelectedTime(const DateTime &val)
 ////////////////////////////////////////////////////////
 // set gui selected time label
 
-void TimeControl::setGuiSelectedTime(const DateTime &val)
+void TimeControl::_setGuiSelectedTime(const DateTime &val)
 {
   if (!_selectedTimeLabel) {
     return;
@@ -761,10 +791,10 @@ void TimeControl::setGuiSelectedTime(const DateTime &val)
 ////////////////////////////////////////////////////////
 // set movie start time
 
-void TimeControl::setStartTime(const DateTime &rtime)
+void TimeControl::_setStartTime(const DateTime &stime)
 
 {
-  _startTime = rtime;
+  _startTime = stime;
   if (!_startTime.isValid()) {
     _startTime.setToNow();
   }
@@ -773,37 +803,37 @@ void TimeControl::setStartTime(const DateTime &rtime)
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
   _guiSelectedTime = _selectedTime;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
-////////////////////////////////////////////////////////
-// set movie end time
+// ////////////////////////////////////////////////////////
+// // set movie end time
 
-void TimeControl::setEndTime(const DateTime &rtime)
+// void TimeControl::_setEndTime(const DateTime &rtime)
 
-{
-  _endTime = rtime;
-  if (!_endTime.isValid()) {
-    _endTime.setToNow();
-  }
-  _startTime = _endTime - _movieDurationSecs;
-  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
-  _guiStartTime = _startTime;
-  _guiEndTime = _endTime;
-  _guiSelectedTime = _selectedTime;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
-}
+// {
+//   _endTime = rtime;
+//   if (!_endTime.isValid()) {
+//     _endTime.setToNow();
+//   }
+//   _startTime = _endTime - _movieDurationSecs;
+//   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
+//   _guiStartTime = _startTime;
+//   _guiEndTime = _endTime;
+//   _guiSelectedTime = _selectedTime;
+//   setGuiStartTime(_guiStartTime);
+//   setGuiEndTime(_guiEndTime);
+//   setGuiSelectedTime(_guiSelectedTime);
+// }
 
 ////////////////////////////////////////////////////////
 // go back or fwd
 
-// go back by 1 frame
+// go back by 1 time step
 
-void TimeControl::_goBack1()
+void TimeControl::goBack1()
 {
   // change index
   if (_guiFrameIndex == 0) {
@@ -820,40 +850,40 @@ void TimeControl::_goBack1()
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   _setSelectedTime(_guiSelectedTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();
 }
 
-// go back by movie duration
+// shift back by movie duration
 
-void TimeControl::_goBackDuration()
+void TimeControl::_shiftBack1()
 {
   int deltaSecs = _endTime - _startTime;
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
-// go back by movie duration * 6
+// shift back by 3 movie durations
 
-void TimeControl::_goBackMult()
+void TimeControl::_shiftBack3()
 {
-  int deltaSecs = (_endTime - _startTime) * 6;
+  int deltaSecs = (_endTime - _startTime) * 3;
   _guiStartTime -= deltaSecs;
   _guiEndTime -= deltaSecs;
   _guiSelectedTime -= deltaSecs;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
-// go fwd by 1 frame
+// go fwd by 1 time step
 
-void TimeControl::_goFwd1()
+void TimeControl::goFwd1()
 {
   // change index
   if (_guiFrameIndex == _nFramesMovie - 1) {
@@ -870,35 +900,35 @@ void TimeControl::_goFwd1()
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   _setSelectedTime(_guiSelectedTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();
 }
 
-// go fwd by movie duration
+// shift fwd by one movie duration
 
-void TimeControl::_goFwdDuration()
+void TimeControl::_shiftFwd1()
 {
   int deltaSecs = _endTime - _startTime;
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
-// go fwd by movie duration * 6
+// shoft fwd by 3 movie durations
 
-void TimeControl::_goFwdMult()
+void TimeControl::_shiftFwd3()
 {
-  int deltaSecs = (_endTime - _startTime) * 6;
+  int deltaSecs = (_endTime - _startTime) * 3;
   _guiStartTime += deltaSecs;
   _guiEndTime += deltaSecs;
   _guiSelectedTime += deltaSecs;
-  setGuiStartTime(_guiStartTime);
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiStartTime(_guiStartTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
 // trap time slider trigger - no action for now
@@ -949,7 +979,7 @@ void TimeControl::_timeSliderValueChanged(int value)
     cerr << "Time slider changed, value: " << value << endl;
   }
   _guiSelectedTime = _guiStartTime + value * _guiFrameIntervalSecs;
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiSelectedTime(_guiSelectedTime);
   if (_timeSliderInProgress) {
     return;
   }
@@ -974,7 +1004,7 @@ void TimeControl::_timeSliderReleased()
   _timeSliderInProgress = false;
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiSelectedTime(_guiSelectedTime);
   _manager->setSelectedTime(_selectedTime);
   // set redraw flags
   // _changeMovieLimits();
@@ -1001,8 +1031,8 @@ void TimeControl::_timeSliderSetNFrames(int val)
   }
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
 // set frame interval
@@ -1013,8 +1043,8 @@ void TimeControl::_setFrameIntervalSecs(double val)
   _movieDurationSecs = (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
   _guiEndTime = _guiStartTime + _movieDurationSecs;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  setGuiEndTime(_guiEndTime);
-  setGuiSelectedTime(_guiSelectedTime);
+  _setGuiEndTime(_guiEndTime);
+  _setGuiSelectedTime(_guiSelectedTime);
 }
 
 // realtime mode?
@@ -1110,5 +1140,90 @@ DateTime TimeControl::getDateTime(const QDateTime &qtime)
                  qtime.time().minute(),
                  qtime.time().second());
   return rtime;
+}
+
+/************************************************************************
+ * RESET_TIME_POINTS: Calc the beginning and ending time points for
+ * each movie frame
+ */
+
+void TimeControl::_resetMovieFrameTimes()
+{
+
+  if(gd.debug2) {
+    printf("Resetting time points - mode: %d\n",gd.movie.mode);
+  }
+  
+  switch(gd.movie.climo_mode) {
+    case REGULAR_INTERVAL:
+      for (int i = 0; i < gd.movie.num_frames; i++)
+      {
+	double time_interval_secs = gd.movie.time_interval_mins * 60.0;
+	
+	gd.movie.frame[i].time_start =
+	  (time_t)(gd.movie.start_time + (i * time_interval_secs) + 0.5);
+        
+	gd.movie.frame[i].time_mid =
+	  (time_t)(gd.movie.start_time + ((i + 0.5) * time_interval_secs) + 0.5);
+        
+	gd.movie.frame[i].time_end =
+	  (time_t)(gd.movie.frame[i].time_start + time_interval_secs + 0.5);
+        
+      }
+      break;
+      
+    case DAILY_INTERVAL:
+      for (int i = 0; i < gd.movie.num_frames; i++) {
+        gd.movie.frame[i].time_start = (time_t)
+          (gd.movie.start_time + (i * 1440 * 60.0));
+        
+        gd.movie.frame[i].time_mid = (time_t)
+          (gd.movie.start_time + (gd.movie.frame_span * 30.0));
+        
+        gd.movie.frame[i].time_end =  (time_t)
+          (gd.movie.frame[i].time_start + (gd.movie.frame_span * 60.0));
+        
+      }
+      break;
+      
+    case YEARLY_INTERVAL:
+      time_t    ft;
+      UTIMstruct t;
+      UTIMunix_to_date(gd.movie.start_time,&t);
+      for (int i = 0; i < gd.movie.num_frames; i++, t.year++) {
+        ft = UTIMdate_to_unix(&t);
+        gd.movie.frame[i].time_start = (time_t) ft;
+        
+        gd.movie.frame[i].time_mid = (time_t)
+          (gd.movie.frame[i].time_start + (gd.movie.frame_span * 30.0));
+        
+        gd.movie.frame[i].time_end =  (time_t)
+          (gd.movie.frame[i].time_start + (gd.movie.frame_span * 60.0));
+        
+      }
+      break;
+  }
+  reset_time_list_valid_flags();
+  
+  if (gd.prod_mgr) gd.prod_mgr->reset_times_valid_flags();
+  
+  gd.epoch_start = (time_t) gd.movie.start_time;
+  gd.epoch_end =  (time_t) (gd.movie.frame[gd.movie.num_frames -1].time_end);
+  
+  if(gd.coord_expt != NULL) {
+    gd.coord_expt->epoch_start = gd.epoch_start;
+    gd.coord_expt->epoch_end = gd.epoch_end;
+    gd.coord_expt->click_type = CIDD_OTHER_CLICK;
+    gd.coord_expt->pointer_seq_num++;
+    gd.coord_expt->time_min = gd.movie.frame[gd.movie.cur_frame].time_start;
+    gd.coord_expt->time_max = gd.movie.frame[gd.movie.cur_frame].time_end;
+    if(gd.movie.movie_on) { 
+      gd.coord_expt->time_cent = gd.coord_expt->epoch_end;
+    } else {
+      gd.coord_expt->time_cent = gd.coord_expt->time_min +
+        ((gd.coord_expt->time_max - gd.coord_expt->time_min)/2);
+    }
+  }
+  
 }
 
