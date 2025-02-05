@@ -100,10 +100,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   const DateTime &getStartTime() const { return _startTime; }
   const DateTime &getEndTime() const { return _endTime; }
   int getNFramesMovie() const { return _nFramesMovie; }
-  double getMovieDurationSecs() const { return _movieDurationSecs; }
+  double getFrameIntervalSecs() const { return _frameIntervalSecs; }
+  double getMovieDurationSecs() const {
+    return (_nFramesMovie - 1) * _frameIntervalSecs;
+  }
   int getFrameIndex() const { return _frameIndex; }
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
-  double getFrameIntervalSecs() const { return _frameIntervalSecs; }
 
   // convert between Qt and Radx date/time objects
   
@@ -133,6 +135,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QFrame *_timePanel;
   QVBoxLayout *_timeLayout;
+
+  QPushButton *_startButton;
+  QPushButton *_stopButton;
+  QPushButton *_outputButton;
   
   QDateTimeEdit *_startTimeEdit;
   QLabel *_endTimeLabel;
@@ -141,12 +147,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   QSlider *_timeSlider;
   bool _timeSliderInProgress;
   
-  QPushButton *_back1;
-  QPushButton *_fwd1;
-  QPushButton *_backDuration;
-  QPushButton *_fwdDuration;
-  QPushButton *_backMult;
-  QPushButton *_fwdMult;
+  QPushButton *_goBack1Button;
+  QPushButton *_goFwd1Button;
+  QPushButton *_shiftBack1Button;
+  QPushButton *_shiftFwd1Button;
+  QPushButton *_shiftBack3Button;
+  QPushButton *_shiftFwd3Button;
   
   QSpinBox *_nFramesSelector;
   QDoubleSpinBox *_frameIntervalSelector;
@@ -174,10 +180,11 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
+  vector<DateTime> _frameTimes;
 
   // parameters
   
-  double _movieDurationSecs;
+  // double _movieDurationSecs;
   int _loopDwellMsecs;
   int _loopDelayMsecs;
   bool _isRealtime;
@@ -190,8 +197,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setStartTimeFromEdit(const QDateTime &val);
   void _setStartTime(const DateTime &rtime);
 
-  void _setNFramesMovie(int val);
-  void _setIntervalSecs(double val);
+  void _setGuiNFramesMovie(int val);
+  void _setGuiIntervalSecs(double val);
   void _setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
   void _setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
   void _setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
@@ -208,8 +215,12 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   void _setEndTime();
   void _acceptSelectedTime();
-  void _changeMovieLimits();
+  // void _changeMovieLimits();
   void _resetMovieFrameTimes();
+
+  double _getGuiMovieDurationSecs() const {
+    return (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
+  }
 
  private slots:
 
@@ -238,7 +249,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _timeSliderValueChanged(int value);
   void _timeSliderReleased();
   void _timeSliderPressed();
-  void _timeSliderSetNFrames(int val);
+
+  void _setNFrames(int val);
   void _setFrameIntervalSecs(double val);
 
 #if QT_VERSION >= 0x067000

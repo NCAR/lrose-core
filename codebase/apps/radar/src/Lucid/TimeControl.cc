@@ -64,17 +64,25 @@ TimeControl::TimeControl(GuiManager *parent,
 
   _timePanel = NULL;
   _timeLayout = NULL;
+
+  _startButton = NULL;
+  _stopButton = NULL;
+  _outputButton = NULL;
+  
   _startTimeEdit = NULL;
   _endTimeLabel = NULL;
   _selectedTimeLabel = NULL;
+
   _timeSlider = NULL;
   _timeSliderInProgress = false;
-  _back1 = NULL;
-  _fwd1 = NULL;
-  _backDuration = NULL;
-  _fwdDuration = NULL;
-  _backMult = NULL;
-  _fwdMult = NULL;
+
+  _goBack1Button = NULL;
+  _goFwd1Button = NULL;
+  _shiftBack1Button = NULL;
+  _shiftFwd1Button = NULL;
+  _shiftBack3Button = NULL;
+  _shiftFwd3Button = NULL;
+  
   _nFramesSelector = NULL;
   _frameIntervalSelector = NULL;
   _realtimeSelector = NULL;
@@ -84,11 +92,10 @@ TimeControl::TimeControl(GuiManager *parent,
   
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
-  _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
   _frameIndex = 0;
   
   _startTime.set(_params.archive_start_time);
-  _endTime = _startTime + _movieDurationSecs;
+  _endTime = _startTime + getMovieDurationSecs();
   _selectedTime = _startTime;
 
   _guiStartTime = _startTime;
@@ -451,27 +458,27 @@ void TimeControl::_populateGui()
   backButtonFrameLayout->setSpacing(3);
   backButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
   
-  _back1 = new QPushButton(backButtonFrame);
-  _back1->setText("<");
-  connect(_back1, &QPushButton::clicked, this, &TimeControl::goBack1);
-  _back1->setToolTip("Go back by 1 frame");
-  _back1->setStyleSheet(buttonStyle);
+  _goBack1Button = new QPushButton(backButtonFrame);
+  _goBack1Button->setText("<");
+  connect(_goBack1Button, &QPushButton::clicked, this, &TimeControl::goBack1);
+  _goBack1Button->setToolTip("Go back by 1 frame");
+  _goBack1Button->setStyleSheet(buttonStyle);
 
-  _backDuration = new QPushButton(backButtonFrame);
-  _backDuration->setText("<<");
-  connect(_backDuration, &QPushButton::clicked, this, &TimeControl::_shiftBack1);
-  _backDuration->setToolTip("Go back by 1 movie duration");
-  _backDuration->setStyleSheet(buttonStyle);
+  _shiftBack1Button = new QPushButton(backButtonFrame);
+  _shiftBack1Button->setText("<<");
+  connect(_shiftBack1Button, &QPushButton::clicked, this, &TimeControl::_shiftBack1);
+  _shiftBack1Button->setToolTip("Go back by 1 movie duration");
+  _shiftBack1Button->setStyleSheet(buttonStyle);
   
-  _backMult = new QPushButton(backButtonFrame);
-  _backMult->setText("<<<");
-  connect(_backMult, &QPushButton::clicked, this, &TimeControl::_shiftBack3);
-  _backMult->setToolTip("Go back by 3 movie durations");
-  _backMult->setStyleSheet(buttonStyle);
+  _shiftBack3Button = new QPushButton(backButtonFrame);
+  _shiftBack3Button->setText("<<<");
+  connect(_shiftBack3Button, &QPushButton::clicked, this, &TimeControl::_shiftBack3);
+  _shiftBack3Button->setToolTip("Go back by 3 movie durations");
+  _shiftBack3Button->setStyleSheet(buttonStyle);
   
-  backButtonFrameLayout->addWidget(_backMult, 0, Qt::AlignLeft);
-  backButtonFrameLayout->addWidget(_backDuration, 0, Qt::AlignLeft);
-  backButtonFrameLayout->addWidget(_back1, 0, Qt::AlignLeft);
+  backButtonFrameLayout->addWidget(_shiftBack3Button, 0, Qt::AlignLeft);
+  backButtonFrameLayout->addWidget(_shiftBack1Button, 0, Qt::AlignLeft);
+  backButtonFrameLayout->addWidget(_goBack1Button, 0, Qt::AlignLeft);
 
   QFrame *fwdButtonFrame = new QFrame(timeLower);
   QHBoxLayout *fwdButtonFrameLayout = new QHBoxLayout;
@@ -479,27 +486,27 @@ void TimeControl::_populateGui()
   fwdButtonFrameLayout->setSpacing(3);
   fwdButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
   
-  _fwd1 = new QPushButton(fwdButtonFrame);
-  _fwd1->setText(">");
-  connect(_fwd1, &QPushButton::clicked, this, &TimeControl::goFwd1);
-  _fwd1->setToolTip("Go forward by 1 frame");
-  _fwd1->setStyleSheet(buttonStyle);
+  _goFwd1Button = new QPushButton(fwdButtonFrame);
+  _goFwd1Button->setText(">");
+  connect(_goFwd1Button, &QPushButton::clicked, this, &TimeControl::goFwd1);
+  _goFwd1Button->setToolTip("Go forward by 1 frame");
+  _goFwd1Button->setStyleSheet(buttonStyle);
     
-  _fwdDuration = new QPushButton(fwdButtonFrame);
-  _fwdDuration->setText(">>");
-  connect(_fwdDuration, &QPushButton::clicked, this, &TimeControl::_shiftFwd1);
-  _fwdDuration->setToolTip("Go forward by 1 movie duration");
-  _fwdDuration->setStyleSheet(buttonStyle);
+  _shiftFwd1Button = new QPushButton(fwdButtonFrame);
+  _shiftFwd1Button->setText(">>");
+  connect(_shiftFwd1Button, &QPushButton::clicked, this, &TimeControl::_shiftFwd1);
+  _shiftFwd1Button->setToolTip("Go forward by 1 movie duration");
+  _shiftFwd1Button->setStyleSheet(buttonStyle);
 
-  _fwdMult = new QPushButton(fwdButtonFrame);
-  _fwdMult->setText(">>>");
-  connect(_fwdMult, &QPushButton::clicked, this, &TimeControl::_shiftFwd3);
-  _fwdMult->setToolTip("Go forward by 3 movie durations");
-  _fwdMult->setStyleSheet(buttonStyle);
+  _shiftFwd3Button = new QPushButton(fwdButtonFrame);
+  _shiftFwd3Button->setText(">>>");
+  connect(_shiftFwd3Button, &QPushButton::clicked, this, &TimeControl::_shiftFwd3);
+  _shiftFwd3Button->setToolTip("Go forward by 3 movie durations");
+  _shiftFwd3Button->setStyleSheet(buttonStyle);
 
-  fwdButtonFrameLayout->addWidget(_fwd1, 0, Qt::AlignRight);
-  fwdButtonFrameLayout->addWidget(_fwdDuration, 0, Qt::AlignRight);
-  fwdButtonFrameLayout->addWidget(_fwdMult, 0, Qt::AlignRight);
+  fwdButtonFrameLayout->addWidget(_goFwd1Button, 0, Qt::AlignRight);
+  fwdButtonFrameLayout->addWidget(_shiftFwd1Button, 0, Qt::AlignRight);
+  fwdButtonFrameLayout->addWidget(_shiftFwd3Button, 0, Qt::AlignRight);
 
   // time slider
   
@@ -532,10 +539,10 @@ void TimeControl::_populateGui()
   _nFramesSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_nFramesSelector, &QSpinBox::valueChanged,
-          this, &TimeControl::_timeSliderSetNFrames);
+          this, &TimeControl::_setGuiNFrames);
 #else
   connect(_nFramesSelector, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderSetNFrames(int)));
+          this, SLOT(_setGuiNFrames(int)));
 #endif
 
   _frameIntervalSelector = new QDoubleSpinBox(timeSliderFrame);
@@ -547,10 +554,10 @@ void TimeControl::_populateGui()
   _frameIntervalSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_frameIntervalSelector, &QDoubleSpinBox::valueChanged,
-          this, &TimeControl::_setFrameIntervalSecs);
+          this, &TimeControl::_setGuiFrameIntervalSecs);
 #else
   connect(_frameIntervalSelector, SIGNAL(valueChanged(double)),
-          this, SLOT(_setFrameIntervalSecs(double)));
+          this, SLOT(_setGuiFrameIntervalSecs(double)));
 #endif
 
   // connect signals and slots
@@ -593,40 +600,29 @@ void TimeControl::_populateGui()
   
 }
 
-/////////////////////////////////////////
-// set flags for change in selected time
-
-void TimeControl::_acceptSelectedTime()
-{
-  cerr << "====>> acceptSelectedTime()" << endl;
-  gd.data_request_time = _selectedTime.utime();
-  invalidate_all_data(); // TODO later - check if this is correct
-  set_redraw_flags(1, 1);
-}
-
-/////////////////////////////////////////
+////////////////////////////////////////
 // set flags for change in movie limits
 
-void TimeControl::_changeMovieLimits()
-{
+// void TimeControl::_changeMovieLimits()
+// {
 
-  cerr << "====>> changeMovieLimits()" << endl;
-  gd.epoch_start = _startTime.utime();
-  gd.epoch_end = _endTime.utime();
-  gd.data_request_time = _selectedTime.utime();
-  gd.movie.num_frames = _nFramesMovie;
-  gd.movie.start_frame = 0;
-  gd.movie.start_frame = _nFramesMovie - 1;
-  gd.movie.display_time_msec = _loopDwellMsecs;
-  gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
+//   cerr << "====>> changeMovieLimits()" << endl;
+//   gd.epoch_start = _startTime.utime();
+//   gd.epoch_end = _endTime.utime();
+//   gd.data_request_time = _selectedTime.utime();
+//   gd.movie.num_frames = _nFramesMovie;
+//   gd.movie.start_frame = 0;
+//   gd.movie.start_frame = _nFramesMovie - 1;
+//   gd.movie.display_time_msec = _loopDwellMsecs;
+//   gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
 
-  _resetMovieFrameTimes();
-  invalidate_all_data();
-  set_redraw_flags(1, 1);
+//   _resetMovieFrameTimes();
+//   invalidate_all_data();
+//   set_redraw_flags(1, 1);
   
-  if (gd.prod_mgr) {
-    gd.prod_mgr->reset_times_valid_flags();
-  }
+//   if (gd.prod_mgr) {
+//     gd.prod_mgr->reset_times_valid_flags();
+//   }
   
   // if(gd.time_plot) {
   //   gd.time_plot->Set_times(gd.epoch_start,
@@ -638,7 +634,7 @@ void TimeControl::_changeMovieLimits()
   //   gd.time_plot->Draw(); 
   // }
     
-}
+// }
 
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
@@ -648,15 +644,11 @@ void TimeControl::_acceptGuiSelections()
 {
   _startTime = _guiStartTime;
   _endTime = _guiEndTime;
-  _setSelectedTime(_guiSelectedTime);
+  _selectedTime = _guiSelectedTime;
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
-  _movieDurationSecs = (_nFramesMovie - 1) * _frameIntervalSecs;
-  _endTime = _startTime + _movieDurationSecs;
-  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
-  // set redraw flags
-  _changeMovieLimits();
+  _manager->setSelectedTime(_selectedTime);
 }
 
 void TimeControl::_cancelGuiSelections()
@@ -670,6 +662,8 @@ void TimeControl::_cancelGuiSelections()
   _setGuiStartTime(_guiStartTime);
   _setGuiEndTime(_guiEndTime);
   _setGuiSelectedTime(_guiSelectedTime);
+  _nFramesSelector->setValue(_guiNFramesMovie);
+  _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
 }
 
 ////////////////////////////////////////////////////////
@@ -693,17 +687,17 @@ void TimeControl::_outputMovieLoop()
 //////////////////////////////
 // set number of movie frames
 
-void TimeControl::_setNFramesMovie(int val)
+void TimeControl::_setGuiNFramesMovie(int val)
 {
-  _nFramesMovie = val;
+  _guiNFramesMovie = val;
 }
 
 ////////////////////////////////
 // set movie frame interval secs
 
-void TimeControl::_setIntervalSecs(double val)
+void TimeControl::_setGuiIntervalSecs(double val)
 {
-  _frameIntervalSecs = val;
+  _guiFrameIntervalSecs = val;
 }
 
 ////////////////////////////////
@@ -712,12 +706,12 @@ void TimeControl::_setIntervalSecs(double val)
 void TimeControl::setEnabled(bool val)
 {
   _startTimeEdit->setEnabled(val);
-  _back1->setEnabled(val);
-  _fwd1->setEnabled(val);
-  _backDuration->setEnabled(val);
-  _fwdDuration->setEnabled(val);
-  _backMult->setEnabled(val);
-  _fwdMult->setEnabled(val);
+  _goBack1Button->setEnabled(val);
+  _goFwd1Button->setEnabled(val);
+  _shiftBack1Button->setEnabled(val);
+  _shiftFwd1Button->setEnabled(val);
+  _shiftBack3Button->setEnabled(val);
+  _shiftFwd3Button->setEnabled(val);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -728,10 +722,8 @@ void TimeControl::_setStartTimeFromEdit(const QDateTime &val) {
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
-  _guiEndTime = _guiStartTime + _movieDurationSecs;
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _setGuiEndTime(_guiStartTime + _getGuiMovieDurationSecs());
+  _setGuiSelectedTime(_guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs);
 }
 
 ////////////////////////////////////////////////////////
@@ -742,6 +734,7 @@ void TimeControl::_setGuiStartTime(const DateTime &val)
   if (!_startTimeEdit) {
     return;
   }
+  _guiStartTime = val;
   QDateTime qtime = getQDateTime(val);
   _startTimeEdit->setDateTime(qtime);
 }
@@ -754,8 +747,22 @@ void TimeControl::_setGuiEndTime(const DateTime &val)
   if (!_endTimeLabel) {
     return;
   }
+  _guiEndTime = val;
   QDateTime qtime = getQDateTime(val);
   _endTimeLabel->setText(val.asString(0).c_str());
+}
+
+////////////////////////////////////////////////////////
+// set gui selected time label
+
+void TimeControl::_setGuiSelectedTime(const DateTime &val)
+{
+  if (!_selectedTimeLabel) {
+    return;
+  }
+  _guiSelectedTime = val;
+  QDateTime qtime = getQDateTime(val);
+  _selectedTimeLabel->setText(val.asString(0).c_str());
 }
 
 ////////////////////////////////////////////////////////
@@ -770,25 +777,6 @@ void TimeControl::_setSelectedTime(const DateTime &val)
 }
 
 ////////////////////////////////////////////////////////
-// set gui selected time label
-
-void TimeControl::_setGuiSelectedTime(const DateTime &val)
-{
-  if (!_selectedTimeLabel) {
-    return;
-  }
-  char text[128];
-  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           val.getYear(),
-           val.getMonth(),
-           val.getDay(),
-           val.getHour(),
-           val.getMin(),
-           val.getSec());
-  _selectedTimeLabel->setText(text);
-}
-
-////////////////////////////////////////////////////////
 // set movie start time
 
 void TimeControl::_setStartTime(const DateTime &stime)
@@ -798,7 +786,7 @@ void TimeControl::_setStartTime(const DateTime &stime)
   if (!_startTime.isValid()) {
     _startTime.setToNow();
   }
-  _endTime = _startTime + _movieDurationSecs;
+  _endTime = _startTime + getMovieDurationSecs();
   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
@@ -818,7 +806,7 @@ void TimeControl::_setStartTime(const DateTime &stime)
 //   if (!_endTime.isValid()) {
 //     _endTime.setToNow();
 //   }
-//   _startTime = _endTime - _movieDurationSecs;
+//   _startTime = _endTime - getMovieDurationSecs();
 //   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
 //   _guiStartTime = _startTime;
 //   _guiEndTime = _endTime;
@@ -827,6 +815,17 @@ void TimeControl::_setStartTime(const DateTime &stime)
 //   setGuiEndTime(_guiEndTime);
 //   setGuiSelectedTime(_guiSelectedTime);
 // }
+
+/////////////////////////////////////////
+// set flags for change in selected time
+
+void TimeControl::_acceptSelectedTime()
+{
+  cerr << "====>> acceptSelectedTime()" << endl;
+  gd.data_request_time = _selectedTime.utime();
+  invalidate_all_data(); // TODO later - check if this is correct
+  set_redraw_flags(1, 1);
+}
 
 ////////////////////////////////////////////////////////
 // go back or fwd
@@ -986,6 +985,7 @@ void TimeControl::_timeSliderValueChanged(int value)
   // set redraw flags
   // _changeMovieLimits();
   _setSelectedTime(_guiSelectedTime);
+  _resetMovieFrameTimes();
   _manager->setSelectedTime(_selectedTime);
 }
 
@@ -1021,15 +1021,14 @@ void TimeControl::_timeSliderPressed()
 
 // set number of slider frames
 
-void TimeControl::_timeSliderSetNFrames(int val) 
+void TimeControl::_setNFrames(int val) 
 {
   _guiNFramesMovie = val;
   _timeSlider->setMaximum(_guiNFramesMovie - 1);
-  _movieDurationSecs = (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
   if (_guiFrameIndex >= _guiNFramesMovie) {
     _guiFrameIndex = _guiNFramesMovie - 1;
   }
-  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiEndTime = _guiStartTime + _getGuiMovieDurationSecs();
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   _setGuiEndTime(_guiEndTime);
   _setGuiSelectedTime(_guiSelectedTime);
@@ -1040,8 +1039,7 @@ void TimeControl::_timeSliderSetNFrames(int val)
 void TimeControl::_setFrameIntervalSecs(double val) 
 {
   _guiFrameIntervalSecs = val;
-  _movieDurationSecs = (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
-  _guiEndTime = _guiStartTime + _movieDurationSecs;
+  _guiEndTime = _guiStartTime + getMovieDurationSecs();
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   _setGuiEndTime(_guiEndTime);
   _setGuiSelectedTime(_guiSelectedTime);
