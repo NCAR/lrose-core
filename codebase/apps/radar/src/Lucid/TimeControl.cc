@@ -96,11 +96,9 @@ TimeControl::TimeControl(GuiManager *parent,
   
   _startTime.set(_params.archive_start_time);
   _endTime = _startTime + getMovieDurationSecs();
-  _selectedTime = _startTime;
 
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
-  _guiSelectedTime = _selectedTime;
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
@@ -636,6 +634,48 @@ void TimeControl::_populateGui()
     
 // }
 
+////////////////////////////////
+// has the time changed?
+
+bool TimeControl::timeHasChanged()
+{
+  if (_timeHasChanged) {
+    _timeHasChanged = false;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+  ////////////////////////////////
+// enable the gui elements
+
+void TimeControl::setEnabled(bool val)
+{
+  _startTimeEdit->setEnabled(val);
+  _goBack1Button->setEnabled(val);
+  _goFwd1Button->setEnabled(val);
+  _shiftBack1Button->setEnabled(val);
+  _shiftFwd1Button->setEnabled(val);
+  _shiftBack3Button->setEnabled(val);
+  _shiftFwd3Button->setEnabled(val);
+}
+
+/////////////////////////////////////////////////////////////
+// get the selected time
+
+DateTime TimeControl::getSelectedTime() const
+{
+  DateTime stime(_startTime + _frameIndex * _frameIntervalSecs);
+  return stime;
+}
+
+DateTime TimeControl::_getGuiSelectedTime() const
+{
+  DateTime stime(_guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs);
+  return stime;
+}
+
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted
@@ -644,18 +684,15 @@ void TimeControl::_acceptGuiSelections()
 {
   _startTime = _guiStartTime;
   _endTime = _guiEndTime;
-  _selectedTime = _guiSelectedTime;
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
-  _manager->setSelectedTime(_selectedTime);
 }
 
 void TimeControl::_cancelGuiSelections()
 {
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
-  _guiSelectedTime = _selectedTime;
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
@@ -698,20 +735,6 @@ void TimeControl::_setGuiNFramesMovie(int val)
 void TimeControl::_setGuiIntervalSecs(double val)
 {
   _guiFrameIntervalSecs = val;
-}
-
-////////////////////////////////
-// enable the gui elements
-
-void TimeControl::setEnabled(bool val)
-{
-  _startTimeEdit->setEnabled(val);
-  _goBack1Button->setEnabled(val);
-  _goFwd1Button->setEnabled(val);
-  _shiftBack1Button->setEnabled(val);
-  _shiftFwd1Button->setEnabled(val);
-  _shiftBack3Button->setEnabled(val);
-  _shiftFwd3Button->setEnabled(val);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -768,13 +791,13 @@ void TimeControl::_setGuiSelectedTime(const DateTime &val)
 ////////////////////////////////////////////////////////
 // set selected time
 
-void TimeControl::_setSelectedTime(const DateTime &val)
-{
-  gd.prev_time = _selectedTime.utime();
-  _selectedTime = val;
-  gd.selected_time = _selectedTime.utime();
-  gd.time_has_changed = true;
-}
+// void TimeControl::_setSelectedTime(const DateTime &val)
+// {
+//   gd.prev_time = _selectedTime.utime();
+//   _selectedTime = val;
+//   gd.selected_time = _selectedTime.utime();
+//   gd.time_has_changed = true;
+// }
 
 ////////////////////////////////////////////////////////
 // set movie start time
@@ -787,10 +810,8 @@ void TimeControl::_setStartTime(const DateTime &stime)
     _startTime.setToNow();
   }
   _endTime = _startTime + getMovieDurationSecs();
-  _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
   _guiStartTime = _startTime;
   _guiEndTime = _endTime;
-  _guiSelectedTime = _selectedTime;
   _setGuiStartTime(_guiStartTime);
   _setGuiEndTime(_guiEndTime);
   _setGuiSelectedTime(_guiSelectedTime);
@@ -822,7 +843,7 @@ void TimeControl::_setStartTime(const DateTime &stime)
 void TimeControl::_acceptSelectedTime()
 {
   cerr << "====>> acceptSelectedTime()" << endl;
-  gd.data_request_time = _selectedTime.utime();
+  // gd.data_request_time = _selectedTime.utime();
   invalidate_all_data(); // TODO later - check if this is correct
   set_redraw_flags(1, 1);
 }
@@ -848,8 +869,8 @@ void TimeControl::goBack1()
   _timeSliderInProgress = false;
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setSelectedTime(_guiSelectedTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  // _setSelectedTime(_guiSelectedTime);
+  // _setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();
 }
@@ -864,7 +885,7 @@ void TimeControl::_shiftBack1()
   _guiSelectedTime -= deltaSecs;
   _setGuiStartTime(_guiStartTime);
   _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  //_setGuiSelectedTime(_guiSelectedTime);
 }
 
 // shift back by 3 movie durations
@@ -898,8 +919,8 @@ void TimeControl::goFwd1()
   _timeSliderInProgress = false;
   // update GUI
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setSelectedTime(_guiSelectedTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  // _setSelectedTime(_guiSelectedTime);
+  // _setGuiSelectedTime(_guiSelectedTime);
   // set redraw flags
   _acceptSelectedTime();
 }
@@ -984,9 +1005,9 @@ void TimeControl::_timeSliderValueChanged(int value)
   }
   // set redraw flags
   // _changeMovieLimits();
-  _setSelectedTime(_guiSelectedTime);
+  // _setSelectedTime(_guiSelectedTime);
   _resetMovieFrameTimes();
-  _manager->setSelectedTime(_selectedTime);
+  // _manager->setSelectedTime(_selectedTime);
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -1005,7 +1026,7 @@ void TimeControl::_timeSliderReleased()
   _guiFrameIndex = value;
   _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
   _setGuiSelectedTime(_guiSelectedTime);
-  _manager->setSelectedTime(_selectedTime);
+  // _manager->setSelectedTime(_selectedTime);
   // set redraw flags
   // _changeMovieLimits();
 }

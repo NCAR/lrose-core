@@ -131,13 +131,6 @@ public:
 
   void setXyZoom(double minY, double maxY, double minX, double maxX);
 
-  // set the selected time
-
-  void setSelectedTime(const DateTime &val) {
-    _selectedTime = val;
-    cerr << "0000000000000000 selectedTime: " << _selectedTime.asString() << endl;
-  }
-  
   // input file list for archive mode
   
   // void setArchiveFileList(const vector<string> &list,
@@ -327,8 +320,6 @@ private:
   
   TimeControl *_timeControl;
   bool _timeControlPlaced;
-  DateTime _selectedTime;
-  DateTime _prevSelectedTime;
   
   // creating images in archive mode
   
@@ -432,10 +423,6 @@ private:
                             bool includeHorizHeader);
   void _createFieldMenu();
   
-  // time controller
-
-  void _createTimeControl();
-
   // check for status change
   
   // bool _checkForFieldChange();

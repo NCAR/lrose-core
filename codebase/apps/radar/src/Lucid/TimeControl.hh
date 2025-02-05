@@ -95,8 +95,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   virtual ~TimeControl();
 
   // get info
-  
-  const DateTime &getSelectedTime() const { return _selectedTime; }
+
+  bool timeHasChanged();
+  DateTime getSelectedTime() const;
   const DateTime &getStartTime() const { return _startTime; }
   const DateTime &getEndTime() const { return _endTime; }
   int getNFramesMovie() const { return _nFramesMovie; }
@@ -173,10 +174,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _guiFrameIndex;
 
   // accepted state - i.e. the 'model'
-  
+
+  bool _timeHasChanged;
   DateTime _startTime;
   DateTime _endTime;
-  DateTime _selectedTime;
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
@@ -222,6 +223,8 @@ class DLL_EXPORT TimeControl : public QDialog {
     return (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
   }
 
+  DateTime _getGuiSelectedTime() const;
+                                      
  private slots:
 
   // actions
@@ -235,7 +238,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // move in time
   
-  void _setSelectedTime(const DateTime &val);
+  // void _setSelectedTime(const DateTime &val);
   
   void _shiftBack1();
   void _shiftBack3();

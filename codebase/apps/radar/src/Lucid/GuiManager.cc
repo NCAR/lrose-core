@@ -166,8 +166,8 @@ GuiManager::GuiManager() :
   
   _timeControl = NULL;
   _timeControlPlaced = false;
-  _selectedTime.setToNever();
-  _prevSelectedTime.setToNever();
+  // _selectedTime.setToNever();
+  // _prevSelectedTime.setToNever();
 
   _vlevelManager.setLevel(_params.start_ht);
   
@@ -327,12 +327,11 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // time change
 
-  if (_selectedTime != _prevSelectedTime) {
+  if (_timeControl->timeHasChanged()) {
     needNewData = true;
-    _prevSelectedTime = _selectedTime;
   }
 
-  // get new data if needed - this is done in a thread
+  // get new data if needed - data is retrieved in a thread
 
   if (needNewData) {
     int index = gd.movie.cur_frame;
@@ -341,8 +340,10 @@ void GuiManager::timerEvent(QTimerEvent *event)
     }
     // gd.movie.frame[index].time_mid = _selectedTime.utime();
     MetRecord *mr = gd.mrec[_fieldNum];
-    cerr << "***********************************" << endl;
-    if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
+    cerr << "*********************************** selTime: "
+         << _timeControl->getSelectedTime().asString(0) << endl;
+    // if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
+    if (mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                               _vlevelManager.getLevel(),
                               gd.h_win.page)) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
@@ -622,7 +623,7 @@ void GuiManager::_setupWindows()
   
   // time panel
   
-  _createTimeControl();
+  _timeControl = new TimeControl(this, _params);
   
   // fill out menu bar
 
@@ -2507,16 +2508,6 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   
 }
 
-
-//////////////////////////////////////////////
-// create the time panel
-
-void GuiManager::_createTimeControl()
-{
-  
-  _timeControl = new TimeControl(this, _params);
-
-}
 
 /////////////////////////////////////
 // show the time controller dialog
