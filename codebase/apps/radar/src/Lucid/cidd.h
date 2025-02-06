@@ -95,7 +95,6 @@
 
 // Display's structures
 #include "cidd_structs.h"    // CIDD specific structure definitions 
-#include "cidd_colorscales.h"// CIDD structs for Colorscales 
 #include "MetRecord.hh"      // Met field data
 #include "cidd_data_io.h"    // CIDD structs for Data IO
 #include "cidd_winds.h"      // CIDD structs for Winds Fields
@@ -106,7 +105,6 @@
 #include "cidd_layers.h"     // CIDD structs for Layered products 
 #include "cidd_windows.h"    // CIDD structs for GUI Windows 
 #include "cidd_legend.h"     // CIDD structs for Window Legends 
-#include "cidd_funcs.h"      // CIDD specific function prototype definitions 
 
 #include "RenderContext.hh"
 #include "ProductMgr.hh"
@@ -339,5 +337,4 @@ extern Path _paramsPathUsed;
 
 #endif
 
-#include "cidd_funcs.h"
 
