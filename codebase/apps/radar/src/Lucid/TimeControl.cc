@@ -115,13 +115,13 @@ TimeControl::TimeControl(GuiManager *parent,
   _populateGui();
 
   // set the GUI times
-  
+
   _updateTimesInGui();
 
   // disable these buttons at startup
 
   _enableAcceptCancel(false);
-  
+
 }
 
 /*********************************************************************
@@ -673,6 +673,7 @@ void TimeControl::_acceptGuiSelections()
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
   _enableAcceptCancel(false);
+  _computeFrameTimes();
   _timeHasChanged = true;
 }
 
@@ -686,6 +687,7 @@ void TimeControl::_cancelGuiSelections()
   _nFramesSelector->setValue(_guiNFramesMovie);
   _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
   _enableAcceptCancel(false);
+  _computeFrameTimes();
 }
 
 ////////////////////////////////////////////////////////
@@ -731,7 +733,6 @@ void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
-  _updateTimesInGui();
   _enableAcceptCancel(true);
 }
 
@@ -763,6 +764,8 @@ void TimeControl::_updateTimesInGui()
   
   _endTimeLabel->setText(_getGuiEndTime().asString(0).c_str());
   _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
+
+  _computeFrameTimes();
 
 }
 
@@ -978,6 +981,7 @@ void TimeControl::_setNFrames(int val)
   _enableAcceptCancel(true);
 }
 
+//////////////////////////////////////////////
 // set frame interval
 // needs user to accept for it to take effect
 
@@ -989,6 +993,18 @@ void TimeControl::_setFrameIntervalSecs(double val)
   _guiFrameIntervalSecs = val;
   _updateTimesInGui();
   _enableAcceptCancel(true);
+}
+
+//////////////////////////////////////////////
+// compute the frame times
+
+void TimeControl::_computeFrameTimes()
+{
+  _frameTimes.clear();
+  for (int ii = 0; ii < _nFramesMovie; ii++) {
+    DateTime frameTime(_startTime + ii * _frameIntervalSecs);
+    _frameTimes.push_back(frameTime);
+  }
 }
 
 // realtime mode?

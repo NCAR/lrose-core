@@ -184,7 +184,6 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // parameters
   
-  // double _movieDurationSecs;
   int _loopDwellMsecs;
   int _loopDelayMsecs;
   bool _isRealtime;
@@ -225,6 +224,8 @@ class DLL_EXPORT TimeControl : public QDialog {
                                       
   void _enableAcceptCancel(bool val);
                                      
+  void _computeFrameTimes();
+                           
  private slots:
 
   // actions
@@ -237,8 +238,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _outputMovieLoop();
   
   // move in time
-  
-  // void _setSelectedTime(const DateTime &val);
   
   void _shiftBack1();
   void _shiftBack3();
