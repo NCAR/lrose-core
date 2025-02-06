@@ -48,6 +48,8 @@
 
 class QApplication;
 class GuiManager;
+class MetRecord;
+class MapOverlay_t;
 
 class Lucid : public QObject {
 
@@ -88,10 +90,56 @@ private:
   GuiManager *_guiManager;
   
   // methods
-
+  
   void _initGlobals();
-  // int _setupXDisplay(int argc, char **argv);
-  // int _setupDisplayFields();
+  int _initDataSpace();
+
+  int _initGrids();
+  void _initWinds();
+  void _initWindComponent(MetRecord *wrec,
+                          const Params::wind_t &windp,
+                          bool isU, bool isV, bool isW);
+  void _initTerrain();
+  void _initDrawExport();
+  void _initRouteWinds();
+
+  int _initMaps();
+  int _loadRapMap(MapOverlay_t *ov,
+                  const string &mapFilePath);
+
+  int _loadShapeMap(MapOverlay_t *ov,
+                    const string &shpFilePath,
+                    const string &shxFilePath);
+  
+  void _calcMapCoordsProj();
+  void _calcMapCoordsLatLon();
+  int _initStationLoc();
+  
+  int _initZooms();
+  void _initContours();
+  void _initOverlayFields();
+  void _initSymprods();
+  
+  int _createCacheDirs();
+  
+  int _getResourceCachePath(const string &cacheDir,
+                            const string &resourceUrl,
+                            const string &resourceName,
+                            string &cachePath);
+  
+  int _getColorscaleCachePath(const string &colorscaleName,
+                              string &cachePath);
+  
+  int _getMapCachePath(const string &mapName,
+                       string &cachePath,
+                       string &cachePathX);
+  
+  int _readFileIntoBuffer(const string &path,
+                          char* &buf, int &len);
+  
+  void _normalizeLongitude(double min_lon,
+                           double max_lon,
+                           double *normal_lon);
 
 };
 

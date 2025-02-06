@@ -101,7 +101,6 @@ SOURCES += XyBox.cc
 SOURCES += ZoomMenuItem.cc
 SOURCES += cidd_coords.cc
 SOURCES += cidd_font.cc
-SOURCES += cidd_init.cc
 SOURCES += cidd_remote_commands.cc
 SOURCES += cidd_reset.cc
 SOURCES += contours.cc

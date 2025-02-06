@@ -124,7 +124,6 @@ NORM_SRCS = \
 	WorldPlot.cc \
 	XyBox.cc \
 	cidd_coords.cc \
-	cidd_init.cc \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
 	contours.cc \

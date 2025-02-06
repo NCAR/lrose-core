@@ -103,7 +103,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   int getNFramesMovie() const { return _nFramesMovie; }
   double getFrameIntervalSecs() const { return _frameIntervalSecs; }
   double getMovieDurationSecs() const {
-    return (_nFramesMovie - 1) * _frameIntervalSecs;
+    return _nFramesMovie * _frameIntervalSecs;
   }
   int getFrameIndex() const { return _frameIndex; }
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
@@ -213,10 +213,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   }
   
   void _setEndTime();
-  void _resetMovieFrameTimes();
 
   double _getGuiMovieDurationSecs() const {
-    return (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
+    return _guiNFramesMovie * _guiFrameIntervalSecs;
   }
 
   DateTime _getGuiEndTime() const;
