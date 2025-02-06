@@ -99,7 +99,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   bool timeHasChanged();
   DateTime getSelectedTime() const;
   const DateTime &getStartTime() const { return _startTime; }
-  const DateTime &getEndTime() const { return _endTime; }
+  DateTime getEndTime() const;
   int getNFramesMovie() const { return _nFramesMovie; }
   double getFrameIntervalSecs() const { return _frameIntervalSecs; }
   double getMovieDurationSecs() const {
@@ -167,8 +167,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   // gui state - the 'view'
   
   DateTime _guiStartTime;
-  DateTime _guiEndTime;
-  DateTime _guiSelectedTime;
   int _guiNFramesMovie;
   double _guiFrameIntervalSecs;
   int _guiFrameIndex;
@@ -177,7 +175,6 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   bool _timeHasChanged;
   DateTime _startTime;
-  DateTime _endTime;
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
@@ -197,7 +194,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   void _setStartTimeFromEdit(const QDateTime &val);
   void _setStartTime(const DateTime &rtime);
-
+  
   void _setGuiNFramesMovie(int val);
   void _setGuiIntervalSecs(double val);
   void _setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
@@ -205,8 +202,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setTimeSliderPosition(int val) { _timeSlider->setSliderPosition(val); }
   
   void _setGuiStartTime(const DateTime &val);
-  void _setGuiEndTime(const DateTime &val);
-  void _setGuiSelectedTime(const DateTime &val);
+  void _updateTimesInGui();
+  void _updateSelectedTimeInGui();
   
   void _setFrameIndex(int val) { _frameIndex = val; }
 
@@ -223,6 +220,7 @@ class DLL_EXPORT TimeControl : public QDialog {
     return (_guiNFramesMovie - 1) * _guiFrameIntervalSecs;
   }
 
+  DateTime _getGuiEndTime() const;
   DateTime _getGuiSelectedTime() const;
                                       
  private slots:

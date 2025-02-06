@@ -62,6 +62,8 @@ TimeControl::TimeControl(GuiManager *parent,
     return;
   }
 
+  // initialize variables
+  
   _timePanel = NULL;
   _timeLayout = NULL;
 
@@ -90,30 +92,29 @@ TimeControl::TimeControl(GuiManager *parent,
   _loopDwellSelector = NULL;
   _loopDelaySelector = NULL;
   
+  _startTime.set(_params.archive_start_time);
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
   _frameIndex = 0;
   
-  _startTime.set(_params.archive_start_time);
-  _endTime = _startTime + getMovieDurationSecs();
-
   _guiStartTime = _startTime;
-  _guiEndTime = _endTime;
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
   
   _loopDwellMsecs = _params.movie_dwell_msecs;
   _loopDelayMsecs = _params.loop_delay_msecs;
-
+  
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
+
+  // create the GUI
   
   _populateGui();
 
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  // set the GUI times
+  
+  _updateTimesInGui();
 
 }
 
@@ -391,7 +392,7 @@ void TimeControl::_populateGui()
   _selectedTimeLabel = new QLabel(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
   _selectedTimeLabel->setToolTip("This is the selected data time");
-  _setGuiSelectedTime(_guiSelectedTime);
+  // _setGuiSelectedTime(_guiSelectedTime);
   
   selectedTimeFrameLayout->addWidget(selectedTitle, 0, Qt::AlignTop);
   selectedTimeFrameLayout->addWidget(_selectedTimeLabel, 0, Qt::AlignTop);
@@ -598,42 +599,6 @@ void TimeControl::_populateGui()
   
 }
 
-////////////////////////////////////////
-// set flags for change in movie limits
-
-// void TimeControl::_changeMovieLimits()
-// {
-
-//   cerr << "====>> changeMovieLimits()" << endl;
-//   gd.epoch_start = _startTime.utime();
-//   gd.epoch_end = _endTime.utime();
-//   gd.data_request_time = _selectedTime.utime();
-//   gd.movie.num_frames = _nFramesMovie;
-//   gd.movie.start_frame = 0;
-//   gd.movie.start_frame = _nFramesMovie - 1;
-//   gd.movie.display_time_msec = _loopDwellMsecs;
-//   gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
-
-//   _resetMovieFrameTimes();
-//   invalidate_all_data();
-//   set_redraw_flags(1, 1);
-  
-//   if (gd.prod_mgr) {
-//     gd.prod_mgr->reset_times_valid_flags();
-//   }
-  
-  // if(gd.time_plot) {
-  //   gd.time_plot->Set_times(gd.epoch_start,
-  //                           gd.epoch_end,
-  //                           gd.movie.frame[gd.movie.cur_frame].time_start,
-  //                           gd.movie.frame[gd.movie.cur_frame].time_end,
-  //                           (gd.movie.time_interval_mins * 60.0) + 0.5,
-  //                           gd.movie.num_frames);
-  //   gd.time_plot->Draw(); 
-  // }
-    
-// }
-
 ////////////////////////////////
 // has the time changed?
 
@@ -676,6 +641,21 @@ DateTime TimeControl::_getGuiSelectedTime() const
   return stime;
 }
 
+/////////////////////////////////////////////////////////////
+// get the end time
+
+DateTime TimeControl::getEndTime() const
+{
+  DateTime stime(_startTime + (_nFramesMovie - 1) * _frameIntervalSecs);
+  return stime;
+}
+
+DateTime TimeControl::_getGuiEndTime() const
+{
+  DateTime stime(_guiStartTime + (_guiNFramesMovie - 1) * _guiFrameIntervalSecs);
+  return stime;
+}
+
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted
@@ -683,7 +663,6 @@ DateTime TimeControl::_getGuiSelectedTime() const
 void TimeControl::_acceptGuiSelections()
 {
   _startTime = _guiStartTime;
-  _endTime = _guiEndTime;
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
@@ -692,13 +671,10 @@ void TimeControl::_acceptGuiSelections()
 void TimeControl::_cancelGuiSelections()
 {
   _guiStartTime = _startTime;
-  _guiEndTime = _endTime;
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _updateTimesInGui();
   _nFramesSelector->setValue(_guiNFramesMovie);
   _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
 }
@@ -740,13 +716,13 @@ void TimeControl::_setGuiIntervalSecs(double val)
 /////////////////////////////////////////////////////////////////////
 // grab the start time from the editor widget
 
-void TimeControl::_setStartTimeFromEdit(const QDateTime &val) {
+void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
+{
   QDate dd = val.date();
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
-  _setGuiEndTime(_guiStartTime + _getGuiMovieDurationSecs());
-  _setGuiSelectedTime(_guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs);
+  _updateTimesInGui();
 }
 
 ////////////////////////////////////////////////////////
@@ -763,41 +739,33 @@ void TimeControl::_setGuiStartTime(const DateTime &val)
 }
 
 ////////////////////////////////////////////////////////
-// set gui widget from archive end time
+// update GUI times from start time
 
-void TimeControl::_setGuiEndTime(const DateTime &val)
+void TimeControl::_updateTimesInGui()
 {
-  if (!_endTimeLabel) {
+
+  if (!_startTimeEdit) {
     return;
   }
-  _guiEndTime = val;
-  QDateTime qtime = getQDateTime(val);
-  _endTimeLabel->setText(val.asString(0).c_str());
+
+  QDateTime qtime = getQDateTime(_guiStartTime);
+  _startTimeEdit->setDateTime(qtime);
+  
+  _endTimeLabel->setText(_getGuiEndTime().asString(0).c_str());
+  _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
+
 }
 
 ////////////////////////////////////////////////////////
-// set gui selected time label
+// update GUI selected time
 
-void TimeControl::_setGuiSelectedTime(const DateTime &val)
+void TimeControl::_updateSelectedTimeInGui()
 {
   if (!_selectedTimeLabel) {
     return;
   }
-  _guiSelectedTime = val;
-  QDateTime qtime = getQDateTime(val);
-  _selectedTimeLabel->setText(val.asString(0).c_str());
+  _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
 }
-
-////////////////////////////////////////////////////////
-// set selected time
-
-// void TimeControl::_setSelectedTime(const DateTime &val)
-// {
-//   gd.prev_time = _selectedTime.utime();
-//   _selectedTime = val;
-//   gd.selected_time = _selectedTime.utime();
-//   gd.time_has_changed = true;
-// }
 
 ////////////////////////////////////////////////////////
 // set movie start time
@@ -809,33 +777,9 @@ void TimeControl::_setStartTime(const DateTime &stime)
   if (!_startTime.isValid()) {
     _startTime.setToNow();
   }
-  _endTime = _startTime + getMovieDurationSecs();
   _guiStartTime = _startTime;
-  _guiEndTime = _endTime;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _updateTimesInGui();
 }
-
-// ////////////////////////////////////////////////////////
-// // set movie end time
-
-// void TimeControl::_setEndTime(const DateTime &rtime)
-
-// {
-//   _endTime = rtime;
-//   if (!_endTime.isValid()) {
-//     _endTime.setToNow();
-//   }
-//   _startTime = _endTime - getMovieDurationSecs();
-//   _setSelectedTime(_startTime + _frameIndex * _frameIntervalSecs);
-//   _guiStartTime = _startTime;
-//   _guiEndTime = _endTime;
-//   _guiSelectedTime = _selectedTime;
-//   setGuiStartTime(_guiStartTime);
-//   setGuiEndTime(_guiEndTime);
-//   setGuiSelectedTime(_guiSelectedTime);
-// }
 
 /////////////////////////////////////////
 // set flags for change in selected time
@@ -849,9 +793,8 @@ void TimeControl::_acceptSelectedTime()
 }
 
 ////////////////////////////////////////////////////////
-// go back or fwd
-
 // go back by 1 time step
+// accepted immediately
 
 void TimeControl::goBack1()
 {
@@ -868,40 +811,34 @@ void TimeControl::goBack1()
   _timeSlider->setSliderPosition(_guiFrameIndex);
   _timeSliderInProgress = false;
   // update GUI
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  // _setSelectedTime(_guiSelectedTime);
-  // _setGuiSelectedTime(_guiSelectedTime);
-  // set redraw flags
-  _acceptSelectedTime();
+  _updateSelectedTimeInGui();
+  // accepte updated time
+  _acceptGuiSelections();
 }
 
+/////////////////////////////////////////////////
 // shift back by movie duration
+// needs user to accept for it to take effect
 
 void TimeControl::_shiftBack1()
 {
-  int deltaSecs = _endTime - _startTime;
-  _guiStartTime -= deltaSecs;
-  _guiEndTime -= deltaSecs;
-  _guiSelectedTime -= deltaSecs;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  //_setGuiSelectedTime(_guiSelectedTime);
+  _guiStartTime -= _getGuiMovieDurationSecs();
+  _updateTimesInGui();
 }
 
+/////////////////////////////////////////////////
 // shift back by 3 movie durations
+// needs user to accept for it to take effect
 
 void TimeControl::_shiftBack3()
 {
-  int deltaSecs = (_endTime - _startTime) * 3;
-  _guiStartTime -= deltaSecs;
-  _guiEndTime -= deltaSecs;
-  _guiSelectedTime -= deltaSecs;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _guiStartTime -= _getGuiMovieDurationSecs() * 3;
+  _updateTimesInGui();
 }
 
+/////////////////////////////////////////////////
 // go fwd by 1 time step
+// accepted immediately
 
 void TimeControl::goFwd1()
 {
@@ -918,37 +855,29 @@ void TimeControl::goFwd1()
   _timeSlider->setSliderPosition(_guiFrameIndex);
   _timeSliderInProgress = false;
   // update GUI
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  // _setSelectedTime(_guiSelectedTime);
-  // _setGuiSelectedTime(_guiSelectedTime);
-  // set redraw flags
-  _acceptSelectedTime();
+  _updateSelectedTimeInGui();
+  // accept new time
+  _acceptGuiSelections();
 }
 
+/////////////////////////////////////////////////
 // shift fwd by one movie duration
+// needs user to accept for it to take effect
 
 void TimeControl::_shiftFwd1()
 {
-  int deltaSecs = _endTime - _startTime;
-  _guiStartTime += deltaSecs;
-  _guiEndTime += deltaSecs;
-  _guiSelectedTime += deltaSecs;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _guiStartTime += _getGuiMovieDurationSecs();
+  _updateTimesInGui();
 }
 
-// shoft fwd by 3 movie durations
+/////////////////////////////////////////////////
+// shift fwd by 3 movie durations
+// needs user to accept for it to take effect
 
 void TimeControl::_shiftFwd3()
 {
-  int deltaSecs = (_endTime - _startTime) * 3;
-  _guiStartTime += deltaSecs;
-  _guiEndTime += deltaSecs;
-  _guiSelectedTime += deltaSecs;
-  _setGuiStartTime(_guiStartTime);
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _guiStartTime += _getGuiMovieDurationSecs() * 3;
+  _updateTimesInGui();
 }
 
 // trap time slider trigger - no action for now
@@ -998,16 +927,11 @@ void TimeControl::_timeSliderValueChanged(int value)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
   }
-  _guiSelectedTime = _guiStartTime + value * _guiFrameIntervalSecs;
-  _setGuiSelectedTime(_guiSelectedTime);
+  _guiFrameIndex = value;
+  _updateSelectedTimeInGui();
   if (_timeSliderInProgress) {
     return;
   }
-  // set redraw flags
-  // _changeMovieLimits();
-  // _setSelectedTime(_guiSelectedTime);
-  _resetMovieFrameTimes();
-  // _manager->setSelectedTime(_selectedTime);
 }
 
 void TimeControl::_timeSliderReleased() 
@@ -1024,11 +948,7 @@ void TimeControl::_timeSliderReleased()
   }
   _timeSliderInProgress = false;
   _guiFrameIndex = value;
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setGuiSelectedTime(_guiSelectedTime);
-  // _manager->setSelectedTime(_selectedTime);
-  // set redraw flags
-  // _changeMovieLimits();
+  _updateSelectedTimeInGui();
 }
 
 void TimeControl::_timeSliderPressed() 
@@ -1040,30 +960,34 @@ void TimeControl::_timeSliderPressed()
   _timeSliderInProgress = true;
 }
 
-// set number of slider frames
+//////////////////////////////////////////////////
+// set number of movie frames
+// needs user to accept for it to take effect
 
 void TimeControl::_setNFrames(int val) 
 {
+  if (val < 1) {
+    return;
+  }
   _guiNFramesMovie = val;
   _timeSlider->setMaximum(_guiNFramesMovie - 1);
   if (_guiFrameIndex >= _guiNFramesMovie) {
     _guiFrameIndex = _guiNFramesMovie - 1;
+    _timeSlider->setSliderPosition(_guiFrameIndex);
   }
-  _guiEndTime = _guiStartTime + _getGuiMovieDurationSecs();
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _updateTimesInGui();
 }
 
 // set frame interval
+// needs user to accept for it to take effect
 
 void TimeControl::_setFrameIntervalSecs(double val) 
 {
+  if (val < 1) {
+    return;
+  }
   _guiFrameIntervalSecs = val;
-  _guiEndTime = _guiStartTime + getMovieDurationSecs();
-  _guiSelectedTime = _guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs;
-  _setGuiEndTime(_guiEndTime);
-  _setGuiSelectedTime(_guiSelectedTime);
+  _updateTimesInGui();
 }
 
 // realtime mode?
@@ -1245,4 +1169,40 @@ void TimeControl::_resetMovieFrameTimes()
   }
   
 }
+
+////////////////////////////////////////
+// set flags for change in movie limits
+
+// void TimeControl::_changeMovieLimits()
+// {
+
+//   cerr << "====>> changeMovieLimits()" << endl;
+//   gd.epoch_start = _startTime.utime();
+//   gd.epoch_end = _endTime.utime();
+//   gd.data_request_time = _selectedTime.utime();
+//   gd.movie.num_frames = _nFramesMovie;
+//   gd.movie.start_frame = 0;
+//   gd.movie.start_frame = _nFramesMovie - 1;
+//   gd.movie.display_time_msec = _loopDwellMsecs;
+//   gd.movie.delay = _loopDelayMsecs / _loopDwellMsecs;
+
+//   _resetMovieFrameTimes();
+//   invalidate_all_data();
+//   set_redraw_flags(1, 1);
+  
+//   if (gd.prod_mgr) {
+//     gd.prod_mgr->reset_times_valid_flags();
+//   }
+  
+  // if(gd.time_plot) {
+  //   gd.time_plot->Set_times(gd.epoch_start,
+  //                           gd.epoch_end,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_start,
+  //                           gd.movie.frame[gd.movie.cur_frame].time_end,
+  //                           (gd.movie.time_interval_mins * 60.0) + 0.5,
+  //                           gd.movie.num_frames);
+  //   gd.time_plot->Draw(); 
+  // }
+    
+// }
 
