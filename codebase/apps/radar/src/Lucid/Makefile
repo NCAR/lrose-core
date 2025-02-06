@@ -129,7 +129,7 @@ MOC_SRCS = \
 	GuiManager.cc \
 	HorizWidget.cc \
 	MapMenuItem.cc \
-	MetRecord.cc \
+	MdvReader.cc \
 	ProdMenuItem.cc \
 	TimeControl.cc \
 	VertWidget.cc \
@@ -142,7 +142,7 @@ MOC_OUTPUT = \
 	moc_GuiManager.cpp \
 	moc_HorizWidget.cpp \
 	moc_MapMenuItem.cpp \
-	moc_MetRecord.cpp \
+	moc_MdvReader.cpp \
 	moc_ProdMenuItem.cpp \
 	moc_TimeControl.cpp \
 	moc_VertWidget.cpp \

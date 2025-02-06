@@ -95,7 +95,8 @@
 
 // Display's structures
 #include "cidd_structs.h"    // CIDD specific structure definitions 
-#include "MetRecord.hh"      // Met field data
+#include "cidd_colorscales.h"// CIDD structs for Colorscales 
+#include "MdvReader.hh"      // Met field data
 #include "cidd_data_io.h"    // CIDD structs for Data IO
 #include "cidd_winds.h"      // CIDD structs for Winds Fields
 #include "cidd_contours.h"   // CIDD structs for Contours
@@ -258,7 +259,7 @@ public:
 
   // gridded data records
   
-  MetRecord *mrec[MAX_DATA_FIELDS];
+  MdvReader *mrec[MAX_DATA_FIELDS];
   
   // Control variables for layers features
   

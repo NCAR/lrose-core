@@ -1014,8 +1014,8 @@ int Lucid::_initGrids()
     
     /* get space for data info */
     
-    gd.mrec[ifld] = new MetRecord;
-    MetRecord *mrec = gd.mrec[ifld]; 
+    gd.mrec[ifld] = new MdvReader;
+    MdvReader *mrec = gd.mrec[ifld]; 
     
     STRcopy(mrec->legend_name, fld.legend_label, NAME_LENGTH);
     STRcopy(mrec->button_name, fld.button_label, NAME_LENGTH);
@@ -1199,14 +1199,14 @@ void Lucid::_initWinds()
 
     // initialize the components
 
-    lwind.wind_u = new MetRecord;
+    lwind.wind_u = new MdvReader;
     _initWindComponent(lwind.wind_u, windp, true, false, false);
 
-    lwind.wind_v = new MetRecord;
+    lwind.wind_v = new MdvReader;
     _initWindComponent(lwind.wind_v, windp, false, true, false);
 
     if(strncasecmp(windp.w_field_name, "None", 4) != 0) {
-      lwind.wind_w = new MetRecord;
+      lwind.wind_w = new MdvReader;
       _initWindComponent(lwind.wind_w, windp, false, false, true);
     } else {
       lwind.wind_w = NULL;
@@ -1223,7 +1223,7 @@ void Lucid::_initWinds()
 //////////////////////////////////
 // initialize wind component
 
-void Lucid::_initWindComponent(MetRecord *wrec,
+void Lucid::_initWindComponent(MdvReader *wrec,
                                const Params::wind_t &windp,
                                bool isU, bool isV, bool isW)
   
@@ -1299,7 +1299,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.terrain_url) > 0) {
     
     gd.layers.earth.terrain_active = 1;
-    gd.layers.earth.terr = new MetRecord;
+    gd.layers.earth.terr = new MdvReader;
     if(gd.layers.earth.terr == NULL) {
       fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
@@ -1326,7 +1326,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.landuse_url) > 0) {
 
     gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
-    gd.layers.earth.land_use = new MetRecord;
+    gd.layers.earth.land_use = new MdvReader;
     if(gd.layers.earth.land_use == NULL) {
       fprintf(stderr,"Cannot allocate space for land_use data\n");
       exit(-1);
@@ -1430,7 +1430,7 @@ void Lucid::_initRouteWinds()
 
   if(strlen(_params.route_u_url) > 1) {
 
-    MetRecord *mr = new MetRecord;
+    MdvReader *mr = new MdvReader;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route U Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1463,7 +1463,7 @@ void Lucid::_initRouteWinds()
   
   if(strlen(_params.route_v_url) > 1) {
     
-    MetRecord *mr = new MetRecord;
+    MdvReader *mr = new MdvReader;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route V Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1496,7 +1496,7 @@ void Lucid::_initRouteWinds()
 
   if(strlen(_params.route_turb_url) > 1) {
 
-    MetRecord *mr = new MetRecord;
+    MdvReader *mr = new MdvReader;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route TURB\n");
       perror("cidd_init::_initRouteWinds");
@@ -1529,7 +1529,7 @@ void Lucid::_initRouteWinds()
   
   if(strlen(_params.route_icing_url) > 1) {
 
-    MetRecord *mr = new MetRecord;
+    MdvReader *mr = new MdvReader;
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route ICING\n");
       perror("cidd_init::_initRouteWinds");

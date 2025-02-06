@@ -22,7 +22,7 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ///////////////////////////////////////////////////////////////
-// MetRecord.cc
+// MdvReader.cc
 //
 // Field data object
 //
@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MetRecord.hh"
+#include "MdvReader.hh"
 #include "TimeControl.hh"
 
 #include <QCoreApplication>
@@ -47,7 +47,7 @@
 ///////////////////////////////////////////////
 // constructor
 
-MetRecord::MetRecord(QObject* parent) :
+MdvReader::MdvReader(QObject* parent) :
         _lucid(parent)
 {
   
@@ -155,12 +155,12 @@ MetRecord::MetRecord(QObject* parent) :
  * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
  */
 
-int MetRecord::requestHorizPlane(const DateTime &midTime,
+int MdvReader::requestHorizPlane(const DateTime &midTime,
                                  double vLevel,
                                  int page)
 {
 
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH MetRecord::requestHorizPlane()" << endl;
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH MdvReader::requestHorizPlane()" << endl;
   cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   midTime: "
        << midTime.asString(0) << endl;
   cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   vLevel: " << vLevel << endl;
@@ -192,17 +192,17 @@ int MetRecord::requestHorizPlane(const DateTime &midTime,
  * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
  */
 
-int MetRecord::getHorizPlane()
+int MdvReader::getHorizPlane()
 {
 
-  cerr << "JJJJJJJJJJJJJJJJ 11111111111 MetRecord::getHorizPlane()" << endl;
+  cerr << "JJJJJJJJJJJJJJJJ 11111111111 MdvReader::getHorizPlane()" << endl;
   
   // Construct URL, check is valid.
   
   string fullUrl(_getFullUrl());
   DsURL URL(fullUrl);  
   if(!URL.isValid()) {
-    cerr << "ERROR - MetRecord::requestHorizPlane, field: " << _getFieldName() << endl;
+    cerr << "ERROR - MdvReader::requestHorizPlane, field: " << _getFieldName() << endl;
     cerr << "  Bad URL: " << fullUrl << endl;
     h_data_valid = 1;
     cerr << "1111111111111111111 requestHorizPlane bad URL: " << _getFullUrl() << endl;
@@ -282,8 +282,8 @@ int MetRecord::getHorizPlane()
   
   int iret = h_mdvx->readVolume();
   if (iret) {
-    cerr << "1111111 MetRecord::getHorizPlane, iret: " << ", " << iret << endl;
-    qDebug() << "MetRecord::getHorizPlane returned, iret: " << ", " << iret;
+    cerr << "1111111 MdvReader::getHorizPlane, iret: " << ", " << iret << endl;
+    qDebug() << "MdvReader::getHorizPlane returned, iret: " << ", " << iret;
     qDebug() << h_mdvx->getErrStr();
   }
   iret_h_mdvx_read = iret;
@@ -566,7 +566,7 @@ int MetRecord::getHorizPlane()
 // check whether H request has changed
 // returns true if changed, false if no change
 
-bool MetRecord::_checkRequestChangedH(const DateTime &midTime,
+bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
                                       double vLevel)
 {
 
@@ -624,7 +624,7 @@ bool MetRecord::_checkRequestChangedH(const DateTime &midTime,
  * Request data for a vertical section
  */
 
-int MetRecord::requestVertSection(const DateTime &midTime,
+int MdvReader::requestVertSection(const DateTime &midTime,
                                   int page)
 {
   
@@ -712,7 +712,7 @@ int MetRecord::requestVertSection(const DateTime &midTime,
 ////////////////////////////////////////////////////////////
 // compute request time from mid time
 
-void MetRecord::_computeReqTime(const DateTime &midTime,
+void MdvReader::_computeReqTime(const DateTime &midTime,
                                 DateTime &reqTime)
 {
 
@@ -745,7 +745,7 @@ void MetRecord::_computeReqTime(const DateTime &midTime,
 ////////////////////////////////////////////////////////////
 // set read times for Mdvx object
 
-void MetRecord::_setReadTimes(const string &url,
+void MdvReader::_setReadTimes(const string &url,
                               const DateTime &reqTime,
                               Mdvx *mdvx)
 {
@@ -829,7 +829,7 @@ void MetRecord::_setReadTimes(const string &url,
  *
  */
 
-int MetRecord::_getTimeList(const string &url,
+int MdvReader::_getTimeList(const string &url,
                             const DateTime &midTime,
                             int page,
                             Mdvx *mdvx)
@@ -940,7 +940,7 @@ int MetRecord::_getTimeList(const string &url,
  *
  */
 
-string MetRecord::_getFullUrl()
+string MdvReader::_getFullUrl()
 {
   
   // url from met record
@@ -980,7 +980,7 @@ string MetRecord::_getFullUrl()
  *
  */
 
-string MetRecord::_getFieldName()
+string MdvReader::_getFieldName()
 {
   
   char field_name[512];
@@ -1001,22 +1001,22 @@ string MetRecord::_getFieldName()
 //////////////////////////////////////////////////////
 // is the data valid?
 
-bool MetRecord::isValidH() const {
+bool MdvReader::isValidH() const {
   QMutexLocker locker(&_statusMutex);
   return _validH;
 }
 
-bool MetRecord::isValidV() const {
+bool MdvReader::isValidV() const {
   QMutexLocker locker(&_statusMutex);
   return _validV;
 }
 
-void MetRecord::_setValidH(bool state) {
+void MdvReader::_setValidH(bool state) {
   QMutexLocker locker(&_statusMutex);
   _validH = state;
 }
 
-void MetRecord::_setValidV(bool state) {
+void MdvReader::_setValidV(bool state) {
   QMutexLocker locker(&_statusMutex);
   _validV = state;
 }
@@ -1025,26 +1025,26 @@ void MetRecord::_setValidV(bool state) {
 // is the data new?
 // if new is true, sets to false and returns true
 
-bool MetRecord::isNewH() const {
+bool MdvReader::isNewH() const {
   QMutexLocker locker(&_statusMutex);
   bool isNew = _newH;
   _newH = false;
   return isNew;
 }
 
-bool MetRecord::isNewV() const {
+bool MdvReader::isNewV() const {
   QMutexLocker locker(&_statusMutex);
   bool isNew = _newV;
   _newV = false;
   return isNew;
 }
 
-void MetRecord::_setNewH(bool state) {
+void MdvReader::_setNewH(bool state) {
   QMutexLocker locker(&_statusMutex);
   _newH = state;
 }
 
-void MetRecord::_setNewV(bool state) {
+void MdvReader::_setNewV(bool state) {
   QMutexLocker locker(&_statusMutex);
   _newV = state;
 }
@@ -1055,7 +1055,7 @@ void MetRecord::_setNewV(bool state) {
  * Compute the current lat,lon bounding box of data on the display
  */
 
-void MetRecord::_getBoundingBox(double &min_lat, double &max_lat,
+void MdvReader::_getBoundingBox(double &min_lat, double &max_lat,
                                 double &min_lon, double &max_lon)
 {
 
@@ -1166,7 +1166,7 @@ void MetRecord::_getBoundingBox(double &min_lat, double &max_lat,
 ///////////////////////////////////////////////////////////////////
 // adjust bounding box lat lon limits
 
-void MetRecord::_adjustBoundingBox(double lat, double lon,
+void MdvReader::_adjustBoundingBox(double lat, double lon,
                                    double &minLat, double &maxLat,
                                    double &minLon, double &maxLon)
 {
@@ -1187,7 +1187,7 @@ void MetRecord::_adjustBoundingBox(double lat, double lon,
 ///////////////////////////////////////////////
 // Worker for read H volume in thread
 
-ReadVolH::ReadVolH(MetRecord* parentObject, QObject* parent) :
+ReadVolH::ReadVolH(MdvReader* parentObject, QObject* parent) :
         QObject(parent), _mr(parentObject)
 {
 }
@@ -1204,14 +1204,14 @@ void ReadVolH::doRead() {
 //////////////////////////////
 // start H vol read in thread
 
-void MetRecord::startReadVolH() {
+void MdvReader::startReadVolH() {
   cerr << "1111111111111111112222222222222222222223333333333333333333" << endl;
   ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
   QThread* thread = new QThread;
   worker->moveToThread(thread);
   // Connect signals and slots
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
-  connect(worker, &ReadVolH::readDone, this, &MetRecord::readDoneH);
+  connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
   // connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
   connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
   connect(thread, &QThread::finished, thread, &QThread::deleteLater);
@@ -1221,7 +1221,7 @@ void MetRecord::startReadVolH() {
 ////////////////////////
 // done with H vol read
 
-void MetRecord::readDoneH() {
+void MdvReader::readDoneH() {
   if (h_mdvx->getFieldByNum(0) == nullptr) {
     _setValidH(false);
     _setNewH(false);
@@ -1245,7 +1245,7 @@ void MetRecord::readDoneH() {
  *
  */
 
-void MetRecord::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
+void MdvReader::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
 {
   int    i;
   double delta;
@@ -1265,7 +1265,7 @@ void MetRecord::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
  * VLEVEL_LABEL: Return an appropriate units label for a field's
  *               vertical coordinate system
  */                  
-string MetRecord::vlevelLabel()
+string MdvReader::vlevelLabel()
 {
   switch(h_fhdr.vlevel_type)  {
     case Mdvx::VERT_TYPE_SIGMA_P:
@@ -1296,7 +1296,7 @@ string MetRecord::vlevelLabel()
  * FIELD_LABEL: Return a Label string for a field 
  */
 
-string MetRecord::fieldLabel()
+string MdvReader::fieldLabel()
 {
 
   // time_t  now;
@@ -1360,7 +1360,7 @@ string MetRecord::fieldLabel()
 /*************************************************************************
  * HEIGHT_LABEL: Return the height label
  */
-string MetRecord::heightLabel()
+string MdvReader::heightLabel()
 {
 
   static char label[256];

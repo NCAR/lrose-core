@@ -49,7 +49,7 @@ typedef struct {    //
     struct timeval last_time;    // The last time data was read
 
     // Pointers to objests from where data was being requested.
-    MetRecord    *mr;   // pointer to the meterological data object 
+    MdvReader    *mr;   // pointer to the meterological data object 
     Product *prod;         // Pointer to the Product data object *
 } io_info_t;
  

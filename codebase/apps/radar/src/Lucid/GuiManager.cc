@@ -339,7 +339,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     // gd.movie.frame[index].time_mid = _selectedTime.utime();
-    MetRecord *mr = gd.mrec[_fieldNum];
+    MdvReader *mr = gd.mrec[_fieldNum];
     cerr << "*********************************** selTime: "
          << _timeControl->getSelectedTime().asString(0) << endl;
     // if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
@@ -356,7 +356,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // check for new data
 
-  MetRecord *mr = gd.mrec[_fieldNum];
+  MdvReader *mr = gd.mrec[_fieldNum];
   if (mr->isNewH()) {
     int index = gd.movie.cur_frame;
     if (gd.movie.cur_frame < 0) {
@@ -4192,7 +4192,7 @@ void GuiManager::_updateMoviePopup()
 void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 {
 
-  MetRecord *mr;
+  MdvReader *mr;
   int index,flag = 0;
   int msec_diff = 0;
   int msec_delay = 0;

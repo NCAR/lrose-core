@@ -48,7 +48,7 @@
 
 class QApplication;
 class GuiManager;
-class MetRecord;
+class MdvReader;
 class MapOverlay_t;
 
 class Lucid : public QObject {
@@ -96,7 +96,7 @@ private:
 
   int _initGrids();
   void _initWinds();
-  void _initWindComponent(MetRecord *wrec,
+  void _initWindComponent(MdvReader *wrec,
                           const Params::wind_t &windp,
                           bool isU, bool isV, bool isW);
   void _initTerrain();

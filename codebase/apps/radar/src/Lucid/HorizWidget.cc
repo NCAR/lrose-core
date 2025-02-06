@@ -1451,7 +1451,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
       break;
   }
 
-  MetRecord *mr = gd.mrec[page];
+  MdvReader *mr = gd.mrec[page];
  
   // Clear time lists
   // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
@@ -1613,7 +1613,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
 
 int HorizWidget::_renderGrid(QPainter &painter,
                              int page,
-                             MetRecord *mr,
+                             MdvReader *mr,
                              time_t start_time,
                              time_t end_time,
                              bool is_overlay_field)

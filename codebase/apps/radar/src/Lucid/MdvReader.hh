@@ -22,7 +22,7 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ///////////////////////////////////////////////////////////////
-// MetRecord.hh
+// MdvReader.hh
 //
 // Field data object
 //
@@ -43,7 +43,6 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
-// #include <Mdv/DsMdvxThreaded.hh>
 
 #include "cidd_macros.h"
 #include "cidd_structs.h"
@@ -52,10 +51,10 @@
 #include "WayPts.hh"
 
 class ColorMap;
-class MetRecord;
+class MdvReader;
 class ReadVolH;
 
-class MetRecord : public QObject {
+class MdvReader : public QObject {
 
   Q_OBJECT
 
@@ -63,7 +62,7 @@ public:
 
   // constructor
   
-  MetRecord(QObject* parent = nullptr);
+  MdvReader(QObject* parent = nullptr);
 
   // is the data valid?
   
@@ -281,7 +280,7 @@ class ReadVolH : public QObject {
 
 public:
   
-  ReadVolH(MetRecord* parentObject, QObject* parent = nullptr);
+  ReadVolH(MdvReader* parentObject, QObject* parent = nullptr);
 
 public slots:
   void doRead();
@@ -290,7 +289,7 @@ signals:
   void readDone();
 
 private:
-  MetRecord* _mr;
+  MdvReader* _mr;
 
 };
 

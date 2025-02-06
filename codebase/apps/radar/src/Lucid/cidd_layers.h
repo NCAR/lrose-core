@@ -39,8 +39,8 @@ typedef struct {
 
   int terrain_active;       /* if True - draw terrain features */
   int landuse_active;       /* if True - draw landuse features */
-  MetRecord *terr;          // terrain
-  MetRecord *land_use;
+  MdvReader *terr;          // terrain
+  MdvReader *land_use;
   
   Color_gc_t *color1;  // skin color
   Color_gc_t *color2;  // core color
@@ -70,10 +70,10 @@ typedef struct {
   int num_predef_routes;
   route_track_t *route;// Predefined routes
   
-  MetRecord *u_wind;
-  MetRecord *v_wind;
-  MetRecord *turb;
-  MetRecord *icing;
+  MdvReader *u_wind;
+  MdvReader *v_wind;
+  MdvReader *turb;
+  MdvReader *icing;
   
   // Croutes_P *_P;  // TDRP Params - See paramdef.Cidd_routes
   

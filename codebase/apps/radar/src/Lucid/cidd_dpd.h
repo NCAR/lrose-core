@@ -31,18 +31,18 @@
 #define CIDD_DPD_H
 
 typedef struct {
-    MetRecord *u_wind;
-    MetRecord *v_wind;
-    MetRecord *w_wind;
-    MetRecord *temper;
-    MetRecord *turbulence;
-    MetRecord *icing;
+    MdvReader *u_wind;
+    MdvReader *v_wind;
+    MdvReader *w_wind;
+    MdvReader *temper;
+    MdvReader *turbulence;
+    MdvReader *icing;
 } route_t;
 
 typedef struct {
-    MetRecord *u_wind;
-    MetRecord *v_wind;
-    MetRecord *w_wind;
+    MdvReader *u_wind;
+    MdvReader *v_wind;
+    MdvReader *w_wind;
 } winds_t;
 
 
@@ -51,10 +51,10 @@ typedef struct {
     int num_contour_grids;
     int num_wind_grids;
 
-    MetRecord *key_grid;
-    MetRecord *terrain;
-    MetRecord **layer_grid;
-    MetRecord **contour_grid;
+    MdvReader *key_grid;
+    MdvReader *terrain;
+    MdvReader **layer_grid;
+    MdvReader **contour_grid;
 
     winds_t **wind_grid;
 
