@@ -459,7 +459,7 @@ cidd.north_angle:        0.0
 #cidd.scale_units_label:  nm
 
 # When set to 1, always gets full domain, zooms don't force a data request
-cidd.always_get_full_domain:  0
+cidd.always_get_full_domain:  1
 
 # Set the aspect ratio of the domain for Cidd. Cidd will preserve this aspect
 # ration for all zooms. Ratio is Width/Height.
