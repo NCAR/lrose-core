@@ -69,6 +69,8 @@ TimeControl::TimeControl(GuiManager *parent,
 
   _startButton = NULL;
   _stopButton = NULL;
+  _acceptButton = NULL;
+  _cancelButton = NULL;
   _outputButton = NULL;
   
   _startTimeEdit = NULL;
@@ -405,24 +407,24 @@ void TimeControl::_populateGui()
   acceptCancelFrameLayout->setSpacing(2);
   acceptCancelFrameLayout->setContentsMargins(2, 2, 2, 2);
   
-  QPushButton *acceptButton = new QPushButton(acceptCancelFrame);
-  acceptButton->setText("Accept");
-  connect(acceptButton, &QPushButton::clicked, this,
+  _acceptButton = new QPushButton(acceptCancelFrame);
+  _acceptButton->setText("Accept");
+  connect(_acceptButton, &QPushButton::clicked, this,
           &TimeControl::_acceptGuiSelections);
-  acceptButton->setToolTip("Accept the selection");
-  acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: seagreen;");
+  _acceptButton->setToolTip("Accept the selection");
+  _acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                               "background-color: seagreen;");
   
-  QPushButton *cancelButton = new QPushButton(acceptCancelFrame);
-  cancelButton->setText("Cancel");
-  connect(cancelButton, &QPushButton::clicked, this,
+  _cancelButton = new QPushButton(acceptCancelFrame);
+  _cancelButton->setText("Cancel");
+  connect(_cancelButton, &QPushButton::clicked, this,
           &TimeControl::_cancelGuiSelections);
-  cancelButton->setToolTip("Cancel the selection");
-  cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
-                              "background-color: red;");
+  _cancelButton->setToolTip("Cancel the selection");
+  _cancelButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+                               "background-color: red;");
 
-  acceptCancelFrameLayout->addWidget(acceptButton, 0, Qt::AlignTop);
-  acceptCancelFrameLayout->addWidget(cancelButton, 0, Qt::AlignTop);
+  acceptCancelFrameLayout->addWidget(_acceptButton, 0, Qt::AlignTop);
+  acceptCancelFrameLayout->addWidget(_cancelButton, 0, Qt::AlignTop);
 
   //////////////////////////////////////////////////////////////////////
   // lower panel contents

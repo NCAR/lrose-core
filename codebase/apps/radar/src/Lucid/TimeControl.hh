@@ -139,6 +139,8 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   QPushButton *_startButton;
   QPushButton *_stopButton;
+  QPushButton *_acceptButton;
+  QPushButton *_cancelButton;
   QPushButton *_outputButton;
   
   QDateTimeEdit *_startTimeEdit;
