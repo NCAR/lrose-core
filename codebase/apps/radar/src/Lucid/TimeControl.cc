@@ -118,6 +118,10 @@ TimeControl::TimeControl(GuiManager *parent,
   
   _updateTimesInGui();
 
+  // disable these buttons at startup
+
+  _enableAcceptCancel(false);
+  
 }
 
 /*********************************************************************
@@ -245,7 +249,7 @@ void TimeControl::_populateGui()
           &TimeControl::_setRealtime);
 #endif
   
-  // sweep?
+  // sweep in movie mode?
 
   QFrame *sweepFrame = new QFrame(timeUpper);
   QVBoxLayout *sweepFrameLayout = new QVBoxLayout;
@@ -414,7 +418,7 @@ void TimeControl::_populateGui()
   _acceptButton->setToolTip("Accept the selection");
   _acceptButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                                "background-color: seagreen;");
-  
+
   _cancelButton = new QPushButton(acceptCancelFrame);
   _cancelButton->setText("Cancel");
   connect(_cancelButton, &QPushButton::clicked, this,
@@ -540,10 +544,10 @@ void TimeControl::_populateGui()
   _nFramesSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_nFramesSelector, &QSpinBox::valueChanged,
-          this, &TimeControl::_setGuiNFrames);
+          this, &TimeControl::_setNFrames);
 #else
   connect(_nFramesSelector, SIGNAL(valueChanged(int)),
-          this, SLOT(_setGuiNFrames(int)));
+          this, SLOT(_setNFrames(int)));
 #endif
 
   _frameIntervalSelector = new QDoubleSpinBox(timeSliderFrame);
@@ -555,10 +559,10 @@ void TimeControl::_populateGui()
   _frameIntervalSelector->setContentsMargins(2, 2, 2, 2);
 #if QT_VERSION >= 0x067000
   connect(_frameIntervalSelector, &QDoubleSpinBox::valueChanged,
-          this, &TimeControl::_setGuiFrameIntervalSecs);
+          this, &TimeControl::_setFrameIntervalSecs);
 #else
   connect(_frameIntervalSelector, SIGNAL(valueChanged(double)),
-          this, SLOT(_setGuiFrameIntervalSecs(double)));
+          this, SLOT(_setFrameIntervalSecs(double)));
 #endif
 
   // connect signals and slots
@@ -668,6 +672,8 @@ void TimeControl::_acceptGuiSelections()
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
+  _enableAcceptCancel(false);
+  _timeHasChanged = true;
 }
 
 void TimeControl::_cancelGuiSelections()
@@ -679,6 +685,7 @@ void TimeControl::_cancelGuiSelections()
   _updateTimesInGui();
   _nFramesSelector->setValue(_guiNFramesMovie);
   _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
+  _enableAcceptCancel(false);
 }
 
 ////////////////////////////////////////////////////////
@@ -702,7 +709,7 @@ void TimeControl::_outputMovieLoop()
 //////////////////////////////
 // set number of movie frames
 
-void TimeControl::_setGuiNFramesMovie(int val)
+void TimeControl::_setGuiNFrames(int val)
 {
   _guiNFramesMovie = val;
 }
@@ -725,6 +732,7 @@ void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
   _updateTimesInGui();
+  _enableAcceptCancel(true);
 }
 
 ////////////////////////////////////////////////////////
@@ -781,17 +789,6 @@ void TimeControl::_setStartTime(const DateTime &stime)
   }
   _guiStartTime = _startTime;
   _updateTimesInGui();
-}
-
-/////////////////////////////////////////
-// set flags for change in selected time
-
-void TimeControl::_acceptSelectedTime()
-{
-  cerr << "====>> acceptSelectedTime()" << endl;
-  // gd.data_request_time = _selectedTime.utime();
-  invalidate_all_data(); // TODO later - check if this is correct
-  set_redraw_flags(1, 1);
 }
 
 ////////////////////////////////////////////////////////
@@ -945,12 +942,12 @@ void TimeControl::_timeSliderReleased()
   if (value < 0 || value > _nFramesMovie - 1) {
     return;
   }
-  if (value == _guiFrameIndex) {
-    return;
-  }
   _timeSliderInProgress = false;
-  _guiFrameIndex = value;
+  // _guiFrameIndex = value;
+  _frameIndex = value;
   _updateSelectedTimeInGui();
+  _acceptGuiSelections();
+  _timeHasChanged = true;
 }
 
 void TimeControl::_timeSliderPressed() 
@@ -978,6 +975,7 @@ void TimeControl::_setNFrames(int val)
     _timeSlider->setSliderPosition(_guiFrameIndex);
   }
   _updateTimesInGui();
+  _enableAcceptCancel(true);
 }
 
 // set frame interval
@@ -990,6 +988,7 @@ void TimeControl::_setFrameIntervalSecs(double val)
   }
   _guiFrameIntervalSecs = val;
   _updateTimesInGui();
+  _enableAcceptCancel(true);
 }
 
 // realtime mode?
@@ -1059,6 +1058,22 @@ void TimeControl::_setLoopDelayMsecs(int val)
 {
   _loopDelayMsecs = val;
   cerr << "_loopDelayMsecs: " << _loopDelayMsecs << endl;
+}
+
+///////////////////////////////////
+// enable accept and cancel buttons
+
+void TimeControl::_enableAcceptCancel(bool val)
+{
+  _acceptButton->setEnabled(val);
+  _cancelButton->setEnabled(val);
+  if (val) {
+    _acceptButton->setStyleSheet("background-color: seagreen;");
+    _cancelButton->setStyleSheet("background-color: red;");
+  } else {
+    _acceptButton->setStyleSheet("background-color: lightgray;");
+    _cancelButton->setStyleSheet("background-color: lightgray;");
+  }
 }
 
 ////////////////////////////////////////////////////////

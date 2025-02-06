@@ -197,7 +197,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setStartTimeFromEdit(const QDateTime &val);
   void _setStartTime(const DateTime &rtime);
   
-  void _setGuiNFramesMovie(int val);
+  void _setGuiNFrames(int val);
   void _setGuiIntervalSecs(double val);
   void _setTimeSliderMinimum(int val) { _timeSlider->setMinimum(val); }
   void _setTimeSliderMaximum(int val) { _timeSlider->setMaximum(val); }
@@ -214,8 +214,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   }
   
   void _setEndTime();
-  void _acceptSelectedTime();
-  // void _changeMovieLimits();
   void _resetMovieFrameTimes();
 
   double _getGuiMovieDurationSecs() const {
@@ -225,6 +223,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   DateTime _getGuiEndTime() const;
   DateTime _getGuiSelectedTime() const;
                                       
+  void _enableAcceptCancel(bool val);
+                                     
  private slots:
 
   // actions
