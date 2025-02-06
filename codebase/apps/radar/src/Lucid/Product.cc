@@ -480,10 +480,12 @@ bool Product::processChunks()
 
   gettimeofday(&tm2,&tz);
 
-  t3 = elapsed_time(gd.io_info.request_time,tm2);
-
+  t3 = _elapsedTime(gd.io_info.request_time,tm2);
+  
   snprintf(msg, 128,
-          "                                  ->   %d Chunks retrieved in %.3g seconds\n",(int)chunks.size(),t3);
+           "                                  ->   %d Chunks retrieved in %.3g seconds\n",
+           (int)chunks.size(),t3);
+
   // add_message_to_status_win(msg,0);
 
   if(_debug) {
@@ -737,5 +739,23 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
   } // If product is selected and its data is valid 
 
   return min_dist;
+}
+
+/**************************************************************************
+ * ELAPSED_TIME: Compute the elapsed time in seconds
+ */
+
+double Product::_elapsedTime(struct timeval &tm1, struct timeval &tm2) 
+{
+  long t1,t2;
+  
+  t1 = tm2.tv_sec - tm1.tv_sec;
+  t2 = tm2.tv_usec - tm1.tv_usec; 
+  if(t2 < 0) {  // Must borrow a million microsecs from the seconds column  
+    t1--;
+    t2 += 1000000;
+  }  
+  
+  return (double) t1 + ((double) t2 / 1000000.0);
 }
 

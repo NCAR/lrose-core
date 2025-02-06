@@ -122,6 +122,8 @@ protected:
   bool _chunksNeedProcess;
   bool _timesNeedProcess;
   
+  double _elapsedTime(struct timeval &tm1, struct timeval &tm2);
+  
 private:
 
 };

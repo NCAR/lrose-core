@@ -122,60 +122,7 @@ NORM_SRCS = \
 	VlevelManager.cc \
 	WayPts.cc \
 	WorldPlot.cc \
-	XyBox.cc \
-	cidd_coords.cc \
-	cidd_remote_commands.cc \
-	cidd_reset.cc \
-	contours.cc \
-	graphic_canvas_events.cc \
-	graphic_canvas_events_bkwd.cc \
-	graphic_compute.cc \
-	graphic_cross_section.cc \
-	graphic_dump_image.cc \
-	graphic_manage.cc \
-	graphic_margin_events.cc \
-	graphic_panel.cc \
-	graphic_reset.cc \
-	graphic_resize.cc \
-	graphic_xsect_canvas_events.cc \
-	graphic_xsect_resize.cc \
-	graphic_zoom.cc \
-	gui_destroy.cc \
-	gui_label_frame.cc \
-	gui_modify.cc \
-	movie_control.cc \
-	movie_frame_retrieve.cc \
-	movie_frame_save.cc \
-	render_azimuths.cc \
-	render_bottom_margin.cc \
-	render_cart_grid.cc \
-	render_click_marks.cc \
-	render_distorted_grid.cc \
-	render_filled_contours.cc \
-	render_filled_image.cc \
-	render_ht_sel.cc \
-	render_left_margin.cc \
-	render_legends.cc \
-	render_line_contours.cc \
-	render_margins.cc \
-	render_movie_frame.cc \
-	render_polar_grid.cc \
-	render_products.cc \
-	render_range_rings.cc \
-	render_right_margin.cc \
-	render_route_winds.cc \
-	render_terrain.cc \
-	render_top_layers.cc \
-	render_top_margin.cc \
-	render_winds.cc \
-	render_xsect_control.cc \
-	render_xsect_grids.cc \
-	render_xsect_line_contours.cc \
-	render_xsect_margins.cc \
-	render_xsect_top_layers.cc \
-	render_xsect_winds.cc \
-	shmem_init.cc \
-	xview_file_access.cc
+	XyBox.cc
 
 MOC_SRCS = \
 	Lucid.cc \

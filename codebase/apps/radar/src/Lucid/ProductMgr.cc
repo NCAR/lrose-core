@@ -103,7 +103,9 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
       char label[128];
       snprintf(label,128,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
 
+#ifdef NOTNOW
       if(_params.show_data_messages) gui_label_h_frame(label,-1);
+#endif
 
       if (_products[i]->getData(
                   (time_t) (start_time - (_params._symprod_prod_info[i].minutes_allow_before * 60)),

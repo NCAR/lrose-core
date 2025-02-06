@@ -3317,6 +3317,8 @@ void GuiManager::_readClickPoint()
 void GuiManager::_handleClientEvent()
 {
 
+#ifdef NOTNOW
+  
   time_t clock;
   
   if(gd.debug1) {
@@ -3336,8 +3338,8 @@ void GuiManager::_handleClientEvent()
       break;
 
     case RELOAD_DATA:
-      invalidate_all_data();
-      set_redraw_flags(1,1);
+      // invalidate_all_data();
+      // set_redraw_flags(1,1);
       break;
 
     case SET_FRAME_NUM:
@@ -3373,9 +3375,9 @@ void GuiManager::_handleClientEvent()
       gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
       gd.coord_expt->time_seq_num++;
 
-      reset_time_points();
-      invalidate_all_data();
-      set_redraw_flags(1,1);
+      // reset_time_points();
+      // invalidate_all_data();
+      // set_redraw_flags(1,1);
 
       // Set forecast and past time choosers to "now"
       // xv_set(gd.fcast_pu->fcast_st,PANEL_VALUE,0,NULL);
@@ -3395,8 +3397,8 @@ void GuiManager::_handleClientEvent()
         interest_time = UTIMdate_to_unix(&ts);
 
         _setDisplayTime(interest_time);
-        invalidate_all_data();
-        set_redraw_flags(1,1);
+        // invalidate_all_data();
+        // set_redraw_flags(1,1);
       } else {
         fprintf(stderr,"Invalid SET_TIME Args: %s\n",gd.coord_expt->client_args);
       }
@@ -3408,6 +3410,9 @@ void GuiManager::_handleClientEvent()
 
   // Reset  the command
   gd.coord_expt->client_event = NO_MESSAGE;
+
+#endif
+  
 }
 
 
@@ -3467,7 +3472,7 @@ void GuiManager::_checkForDataUpdates(time_t tm)
   if( strlen(_params.datamap_host) < 2 || dmap.reqAllInfo(_params.datamap_host) != 0) {
 
     // Force a reload of the data
-    reset_data_valid_flags(1,1);
+    // reset_data_valid_flags(1,1);
     if (gd.prod_mgr) {
       gd.prod_mgr->reset_product_valid_flags();
       gd.prod_mgr->reset_times_valid_flags();
@@ -3834,10 +3839,13 @@ void GuiManager::_setField(int value)
   if(gd.mrec[gd.h_win.page]->auto_render && 
      gd.h_win.page_pdev[gd.h_win.page] != 0 &&
      gd.h_win.redraw_flag[gd.h_win.page] == 0) {
-    
+
+#ifdef NOTNOW
     save_h_movie_frame(gd.movie.cur_frame,
                        gd.h_win.page_pdev[gd.h_win.page],
                        gd.h_win.page);
+#endif
+    
   }
   
   for(int i=0; i < MAX_FRAMES; i++) {
@@ -3845,7 +3853,7 @@ void GuiManager::_setField(int value)
   }
   
   if(gd.movie.movie_on ) {
-    reset_data_valid_flags(1,0);
+    // reset_data_valid_flags(1,0);
   }
   
   // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
@@ -3906,7 +3914,7 @@ void GuiManager::_setDisplayTime(time_t utime)
   memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
 
   // Fill in time points on global array
-  reset_time_points();
+  // reset_time_points();
 
   // Search for frames already rendered for this interval and use them
   for(i=0 ; i < gd.movie.num_frames; i++) {
@@ -3956,7 +3964,7 @@ void GuiManager::_setDisplayTime(time_t utime)
   }
 
   // Reset gridded and product data validity flags
-  invalidate_all_data();
+  // invalidate_all_data();
 
   _updateMoviePopup();
      
@@ -4001,7 +4009,7 @@ void GuiManager::_setEndFrame(int num_frames)
     gd.movie.start_time -= (time_t) ((gd.movie.time_interval_mins * 60.0) *
                                      (gd.movie.num_frames - old_frames));
 
-    reset_time_points();
+    // reset_time_points();
 	 
     if(gd.movie.num_frames > old_frames) {
       // copy original frames
@@ -4040,7 +4048,7 @@ void GuiManager::_setEndFrame(int num_frames)
   } else {
     gd.movie.cur_frame = 0;
     // Start point remains the same
-    reset_time_points();
+    // reset_time_points();
 
     if(gd.movie.num_frames > old_frames) {
       for(i = gd.movie.num_frames -1; i < old_frames; i++) {
@@ -4075,11 +4083,11 @@ void GuiManager::_setEndFrame(int num_frames)
     }
   }
   // Reset gridded and product data validity flags
-  invalidate_all_data();
+  // invalidate_all_data();
      
   _updateMoviePopup();
 
-  adjust_pixmap_allocation();
+  // adjust_pixmap_allocation();
      
   return;
 }
@@ -4461,7 +4469,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
   /******** Handle Frame changes ********/
   if (gd.movie.last_frame != gd.movie.cur_frame && gd.movie.cur_frame >= 0) {
 
-    reset_data_valid_flags(1,1);
+    // reset_data_valid_flags(1,1);
 
     if(_params.symprod_short_requests) {
       // All product data must be reloaded - Set all to invalid
@@ -4595,7 +4603,9 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       if (gd.h_win.redraw_flag[gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
         _horiz->setFrameForRendering(gd.h_win.page, index);
+#ifdef NOTNOW
         save_h_movie_frame(index, h_pdev, gd.h_win.page);
+#endif
       } 
 
       /* make sure the horiz window's slider has the correct label */

@@ -120,6 +120,8 @@ private:
   void _initOverlayFields();
   void _initSymprods();
   
+  void _initShared();
+  
   int _createCacheDirs();
   
   int _getResourceCachePath(const string &cacheDir,
@@ -140,6 +142,14 @@ private:
   void _normalizeLongitude(double min_lon,
                            double max_lon,
                            double *normal_lon);
+
+  void _getBoundingBox(double &min_lat,
+                       double &max_lat,
+                       double &min_lon,
+                       double &max_lon);
+
+  double _dispProjDist(double x1, double y1,
+                       double x2, double y2);
 
 };
 

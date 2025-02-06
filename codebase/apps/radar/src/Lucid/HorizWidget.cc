@@ -1458,7 +1458,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
   // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
 
   if(_params.show_data_messages) {
-    gui_label_h_frame("Rendering",-1);
+    // gui_label_h_frame("Rendering",-1);
   }
 
   // RENDER the LAND_USE field first
@@ -1601,7 +1601,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
   render_horiz_margins(xid,page,start_time,end_time);
 #endif
 
-  update_frame_time_msg(gd.movie.cur_frame);
+  // update_frame_time_msg(gd.movie.cur_frame);
 
   return CIDD_SUCCESS;    /* avaliable data has been rendered */
 }
@@ -1686,9 +1686,10 @@ int HorizWidget::_renderGrid(QPainter &painter,
       return CIDD_FAILURE;
     }
   }
-#endif
      
   set_busy_state(1);
+
+#endif
 
   // Decide Proper rendering routine
 
@@ -1848,9 +1849,9 @@ int HorizWidget::_renderGrid(QPainter &painter,
       
   }
 
-#endif
-
   set_busy_state(0);
+
+#endif
 
   return CIDD_SUCCESS;
 }

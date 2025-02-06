@@ -434,11 +434,11 @@ int MetRecord::getHorizPlane()
       gd.h_win.cmin_y = gd.h_win.zmin_y[index];
       gd.h_win.cmax_y = gd.h_win.zmax_y[index];
 	
-      reset_time_list_valid_flags();
-      reset_data_valid_flags(1,0);
-      reset_terrain_valid_flags(1,0);
-      set_redraw_flags(1,0);
-      h_data_valid = 1;  // This field is still valid, though
+      // reset_time_list_valid_flags();
+      // reset_data_valid_flags(1,0);
+      // reset_terrain_valid_flags(1,0);
+      // set_redraw_flags(1,0);
+      // h_data_valid = 1;  // This field is still valid, though
       // _timeListValid = true;
 	
     }
@@ -550,9 +550,9 @@ int MetRecord::getHorizPlane()
   gd.io_info.request_type = 0;
     
   if (_params.show_data_messages) {
-    gui_label_h_frame("Done",-1);
+    // gui_label_h_frame("Done",-1);
   } else {
-    set_busy_state(0);
+    // set_busy_state(0);
   }
 
 
@@ -870,7 +870,7 @@ int MetRecord::_getTimeList(const string &url,
   char label[1024];
   snprintf(label, 1024, "Requesting time list for %s data", legend_name);
   if(_params.show_data_messages) {
-    gui_label_h_frame(label, 1);
+    // gui_label_h_frame(label, 1);
   } else {
     // set_busy_state(1);
   }

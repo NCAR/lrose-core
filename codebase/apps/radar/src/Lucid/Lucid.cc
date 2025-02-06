@@ -367,7 +367,7 @@ int Lucid::_initDataSpace()
   // initialize shared memory
   
   PMU_auto_register("Initializing SHMEM");
-  init_shared(); /* Initialize Shared memory based communications */
+  _initShared(); /* Initialize Shared memory based communications */
   
   
   // html mode
@@ -741,9 +741,10 @@ int Lucid::_initDataSpace()
 
   } // if(strlen(_params.demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE))
 
+#ifdef CHECK_LATER
+
   reset_time_points(); // reset movie
 
-#ifdef CHECK_LATER
   if(_params.html_mode || gd.movie.num_frames < 3 ) {
     _params.bot_margin_render_style = gd.uparams->getLong("cidd.bot_margin_render_style", 1);
   } else {
@@ -842,8 +843,8 @@ int Lucid::_initDataSpace()
     gd.h_win.cmax_y - ((gd.h_win.cmax_y - gd.h_win.cmin_y) / 4);
 
   gd.h_win.route.seg_length[0] =
-    disp_proj_dist(gd.h_win.route.x_world[0],gd.h_win.route.y_world[0],
-                   gd.h_win.route.x_world[1],gd.h_win.route.y_world[1]);
+    _dispProjDist(gd.h_win.route.x_world[0],gd.h_win.route.y_world[0],
+                  gd.h_win.route.x_world[1],gd.h_win.route.y_world[1]);
 
   gd.h_win.route.total_length = gd.h_win.route.seg_length[0];
 
@@ -1642,11 +1643,12 @@ void Lucid::_initRouteWinds()
     gd.layers.route_wind.route[ii].total_length = 0.0;
     for(int kk = 0; kk < gd.layers.route_wind.route[ii].num_segments; kk++) {
       gd.layers.route_wind.route[ii].seg_length[kk] = 
-        disp_proj_dist(gd.layers.route_wind.route[ii].x_world[kk],
-                       gd.layers.route_wind.route[ii].y_world[kk],
-                       gd.layers.route_wind.route[ii].x_world[kk+1],
-                       gd.layers.route_wind.route[ii].y_world[kk+1]);
-      gd.layers.route_wind.route[ii].total_length += gd.layers.route_wind.route[ii].seg_length[kk];
+        _dispProjDist(gd.layers.route_wind.route[ii].x_world[kk],
+                      gd.layers.route_wind.route[ii].y_world[kk],
+                      gd.layers.route_wind.route[ii].x_world[kk+1],
+                      gd.layers.route_wind.route[ii].y_world[kk+1]);
+      gd.layers.route_wind.route[ii].total_length +=
+        gd.layers.route_wind.route[ii].seg_length[kk];
     }
     
   } // ii
@@ -2963,7 +2965,7 @@ void Lucid::_initSymprods()
   gd.r_context->set_scale_constant(_params.scale_constant);
   
   double min_lat, max_lat, min_lon, max_lon; 
-  get_bounding_box(min_lat,max_lat,min_lon,max_lon);
+  _getBoundingBox(min_lat,max_lat,min_lon,max_lon);
   gd.r_context->set_clip_limits(min_lat, min_lon, max_lat, max_lon);
   
   if(_params.symprod_prod_info_n <= 32) {
@@ -3014,6 +3016,57 @@ void Lucid::_initSymprods()
   }
 
 }
+
+/************************************************************************
+ * INIT_SHARED:  Initialize the shared memory communications
+ *
+ */
+
+void Lucid::_initShared()
+{
+
+  /* Initialize shared memory area for coordinate/selection communications */
+
+  gd.coord_expt->button =  0;
+  gd.coord_expt->selection_sec = 0;
+  gd.coord_expt->selection_usec = 0;
+  
+  gd.epoch_start = (time_t)
+    (gd.movie.start_time - (gd.movie.time_interval_mins * 30.0));   
+  gd.epoch_end = (time_t)
+    (gd.movie.start_time +
+     (gd.movie.num_frames * gd.movie.time_interval_mins * 60.0) -
+     (gd.movie.time_interval_mins * 30.0)); 
+
+  gd.coord_expt->epoch_start = gd.epoch_start;
+  gd.coord_expt->epoch_end = gd.epoch_end;
+  
+  gd.coord_expt->time_min = gd.movie.frame[gd.movie.num_frames -1].time_start;
+  gd.coord_expt->time_max = gd.movie.frame[gd.movie.num_frames -1].time_end;
+  if(gd.movie.movie_on) {
+    gd.coord_expt->time_cent = gd.epoch_end; 
+  } else {
+    gd.coord_expt->time_cent = gd.coord_expt->time_min +
+      (gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
+  } 
+  gd.coord_expt->pointer_seq_num = 0;
+
+  gd.coord_expt->datum_latitude = _params.origin_latitude;
+  gd.coord_expt->datum_longitude = _params.origin_longitude;
+
+  gd.coord_expt->pointer_x = 0.0;
+  gd.coord_expt->pointer_y = 0.0;
+  gd.coord_expt->pointer_lon = gd.coord_expt->datum_longitude;
+  gd.coord_expt->pointer_lat = gd.coord_expt->datum_latitude;
+
+  gd.coord_expt->focus_x = 0.0;
+  gd.coord_expt->focus_y = 0.0;
+  gd.coord_expt->focus_lat = gd.coord_expt->datum_latitude;
+  gd.coord_expt->focus_lon = gd.coord_expt->datum_longitude;
+
+  gd.coord_expt->click_type = CIDD_RESET_CLICK;
+}
+
 ////////////////////////////////////////////////////
 // create cache directories
 
@@ -3342,4 +3395,164 @@ void Lucid::_normalizeLongitude(double min_lon, double max_lon, double *normal_l
   }
 
 }
+/**************************************************************************
+ *  GET_BOUNDING_BOX: Return the current lat,lon bounding box of data on the display
+ */
+
+void Lucid::_getBoundingBox(double &min_lat,
+                            double &max_lat,
+                            double &min_lon,
+                            double &max_lon)
+{
+
+  // condition the longitudes for this zoom
+
+  double meanx = (gd.h_win.cmin_x + gd.h_win.cmax_x) / 2.0;
+  double meany = (gd.h_win.cmin_y + gd.h_win.cmax_y) / 2.0;
+  double meanLat, meanLon;
+  double lon1,lon2,lat1,lat2;
+
+  gd.proj.xy2latlon(meanx,meany,meanLat,meanLon);
+  // Make sure meanLon makes since.
+  if (meanLon > gd.h_win.max_x) {
+  		meanLon -= 360.0;
+  } else if (meanLon < gd.h_win.min_x) {
+		meanLon += 360.0;
+  }
+  gd.proj.setConditionLon2Ref(true, meanLon);
+  
+    if(_params.always_get_full_domain) {
+            gd.proj.xy2latlon(gd.h_win.min_x,gd.h_win.min_y,min_lat,min_lon);
+            gd.proj.xy2latlon(gd.h_win.max_x,gd.h_win.max_y,max_lat,max_lon);
+     } else {
+        switch(gd.display_projection) {
+          default:
+			lon1 = gd.h_win.cmin_x;
+			lon2 = gd.h_win.cmax_x;
+
+			if((lon2 - lon1) > 360.0) {
+			   lon1 = gd.h_win.min_x;
+			   lon2 = gd.h_win.max_x; 
+			}
+
+
+			lat1 = gd.h_win.cmin_y;
+			lat2 = gd.h_win.cmax_y;
+			if((lat2 - lat1) > 360.0) {
+			   lat1 = gd.h_win.min_y;
+			   lat2 = gd.h_win.max_y; 
+			}
+
+            gd.proj.xy2latlon(lon1, lat1,min_lat,min_lon);
+            gd.proj.xy2latlon(lon2, lat2,max_lat,max_lon);
+
+          break;
+ 
+		  case Mdvx::PROJ_FLAT :
+          case Mdvx::PROJ_LAMBERT_CONF:
+		  case Mdvx::PROJ_POLAR_STEREO:
+		  case Mdvx::PROJ_OBLIQUE_STEREO:
+		  case Mdvx::PROJ_MERCATOR:
+            double lat,lon;
+ 
+            // Compute the bounding box
+            max_lon = -360.0;
+            min_lon = 360.0;
+            max_lat = -180.0;
+            min_lat = 180.0;
+ 
+            // Check each corner of the projection + 4 mid points, top, bottom
+			// Left and right 
+
+            // Lower left
+            gd.proj.xy2latlon(gd.h_win.cmin_x , gd.h_win.cmin_y ,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+ 
+            // Lower midpoint
+            gd.proj.xy2latlon((gd.h_win.cmin_x +gd.h_win.cmax_x)/2 , gd.h_win.cmin_y,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+ 
+            // Lower right
+            gd.proj.xy2latlon(gd.h_win.cmax_x , gd.h_win.cmin_y ,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+ 
+            // Right midpoint
+            gd.proj.xy2latlon(gd.h_win.cmax_x , (gd.h_win.cmin_y + gd.h_win.cmax_y)/2,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+
+            // Upper right
+            gd.proj.xy2latlon(gd.h_win.cmax_x , gd.h_win.cmax_y ,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+
+            // Upper midpoint
+            gd.proj.xy2latlon((gd.h_win.cmin_x +gd.h_win.cmax_x)/2 , gd.h_win.cmax_y,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+ 
+            // Upper left
+            gd.proj.xy2latlon(gd.h_win.cmin_x , gd.h_win.cmax_y ,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+
+            // Left midpoint
+            gd.proj.xy2latlon(gd.h_win.cmin_x , (gd.h_win.cmin_y + gd.h_win.cmax_y)/2,lat,lon);
+            if(lon > max_lon) max_lon = lon;
+            if(lon < min_lon) min_lon = lon;
+            if(lat > max_lat) max_lat = lat;
+            if(lat < min_lat) min_lat = lat;
+			 
+          break;
+       }
+   }
+
+   if(gd.display_projection == Mdvx::PROJ_LATLON ) {
+     double originLon = (min_lon + max_lon) / 2.0;
+     gd.proj.initLatlon(originLon);
+   }
+}
+
+/**************************************************************************
+ *  DISP_PROJ_DIST; Compute Distance between two display projection coordinates
+ */
+
+double Lucid::_dispProjDist(double x1, double y1, double x2, double y2)
+{
+  double dist,theta;
+  double diff_x;
+  double diff_y;
+  
+  switch(gd.display_projection) {
+    default:
+      diff_x = (x2 - x1);
+      diff_y = (y2 - y1);
+      dist =  sqrt((diff_y * diff_y) + (diff_x * diff_x));
+      break;
+      
+    case Mdvx::PROJ_LATLON:
+      PJGLatLon2RTheta(y1,x1, y2, x2, &dist, &theta);
+      break;
+  }
+  return dist;
+  
+}
+
 
