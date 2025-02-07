@@ -1226,8 +1226,6 @@ public:
 
   int num_field_menu_cols;
 
-  tdrp_bool_t wsddm_mode;
-
   tdrp_bool_t one_click_rhi;
 
   double rotate_coarse_adjust;
@@ -1522,7 +1520,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[515];
+  mutable TDRPtable _table[514];
 
   const char *_className;
 

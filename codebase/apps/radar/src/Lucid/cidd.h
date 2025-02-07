@@ -118,9 +118,6 @@ public:
   
   // Command line arguments
   
-  int argc;
-  char **argv;
-
   QPaintDevice *hcan_pdev;    
   QPaintDevice *vcan_pdev;    
 
@@ -135,7 +132,6 @@ public:
 
   int display_projection;// Which projection CIDD Uses for display  - Enum
 
-  int wsddm_mode;   // 1 =  End User/WSDDM  mode - 
   int quiet_mode;   // 1 =  Do not output normal startup and shutdown messages
   int report_mode;   // 1 =  Do continious data value reporting
   int run_unmapped;   // 1 runs unmapped

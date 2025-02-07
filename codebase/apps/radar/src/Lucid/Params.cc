@@ -5334,18 +5334,6 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'wsddm_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wsddm_mode");
-    tt->descr = tdrpStrDup("Turn on WSDDM-specific behavior.");
-    tt->help = tdrpStrDup("Go to end of loop when movie stops. No on-image no-data message when winds are missing");
-    tt->val_offset = (char *) &wsddm_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'one_click_rhi'
     // ctype is 'tdrp_bool_t'
     

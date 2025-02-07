@@ -189,9 +189,6 @@ void Lucid::_initGlobals()
   
 {
 
-  gd.argc = 0;
-  gd.argv = NULL;             
-
   gd.hcan_pdev = NULL;
   gd.vcan_pdev = NULL;
     
@@ -200,7 +197,6 @@ void Lucid::_initGlobals()
   gd.debug2 = 0;
     
   gd.display_projection = 0;
-  gd.wsddm_mode = 0;   
   gd.quiet_mode = 0;   
   gd.report_mode = 0;   
   gd.run_unmapped = 0;   

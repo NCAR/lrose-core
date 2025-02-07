@@ -365,11 +365,8 @@ int Args::_processLegacyArgs(int argc, const char **argv)
   const char *token;
   UTIMstruct temp_utime;
 
-  // gd.db_name = strdup("");    /* Set the default data base name */
   TDRP_str_replace(&_params.http_proxy_url, "");
 
-  gd.argv = (char **) argv;
-  gd.argc = argc;
   gd.orig_wd = getcwd(NULL,0);
 
   if((app_ptr = strrchr(argv[0],'/')) == NULL) {
@@ -395,7 +392,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
 
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
-        // gd.db_name = strdup(optarg);
         _usingLegacyParams = true;
         _legacyParamsPath = strdup(optarg); 
       } else {

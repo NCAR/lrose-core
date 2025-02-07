@@ -2593,12 +2593,6 @@ paramdef int {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Turn on WSDDM-specific behavior.";
-  p_help = "Go to end of loop when movie stops. No on-image no-data message when winds are missing";
-} wsddm_mode;
-
-paramdef boolean {
-  p_default = FALSE;
   p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
   p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
 } one_click_rhi;
