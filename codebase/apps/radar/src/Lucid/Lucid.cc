@@ -1013,12 +1013,12 @@ int Lucid::_initGrids()
     gd.mread[ifld] = new MdvReader;
     MdvReader *mread = gd.mread[ifld]; 
     
-    STRcopy(mread->legend_name, fld.legend_label, NAME_LENGTH);
-    STRcopy(mread->button_name, fld.button_label, NAME_LENGTH);
+    mread->legend_name = fld.legend_label;
+    mread->button_name = fld.button_label;
     
     if(_params.html_mode == 0 && _params.replace_underscores) {
       /* Replace Underscores with spaces in names */
-      for(int jj = strlen(mread->button_name)-1 ; jj >= 0; jj--) {
+      for(int jj = (int) mread->button_name.size() -1 ; jj >= 0; jj--) {
         if(mread->button_name[jj] == '_') {
           mread->button_name[jj] = ' ';
         }
@@ -1028,15 +1028,15 @@ int Lucid::_initGrids()
       } // jj
     }
     
-    STRcopy(mread->url, fld.url, URL_LENGTH);
-    STRcopy(mread->field_label, fld.field_name, NAME_LENGTH);
-    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
+    mread->url = fld.url;
+    mread->field_label = fld.field_name;
+    mread->color_file = fld.color_map;
 
     // if units are "" or --, set to zero-length string
     if (!strcmp(fld.field_units, "\"\"") || !strcmp(fld.field_units, "--")) {
-      STRcopy(mread->field_units, "", LABEL_LENGTH);
+      mread->field_units.clear();
     } else {
-      STRcopy(mread->field_units, fld.field_units, LABEL_LENGTH);
+      mread->field_units = fld.field_units;
     }
 
     mread->cont_low = fld.contour_low;
@@ -1108,8 +1108,7 @@ int Lucid::_initGrids()
     mread->proj = new MdvxProj;
 
     mread->colorMap = NULL;
-    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
-    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
+    mread->color_file = fld.color_map;
     string colorscaleCachePath;
     if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
       iret = -1;
@@ -1234,17 +1233,19 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->time_list.num_alloc_entries = 0;
   wrec->time_list.num_entries = 0;
   
-  STRcopy(wrec->legend_name, windp.legend_label, NAME_LENGTH);
+  wrec->legend_name = windp.legend_label;
   if (isW) {
-    snprintf(wrec->button_name, NAME_LENGTH - 1, "%s_W ", windp.button_label);
+    char text[NAME_LENGTH];
+    snprintf(text, NAME_LENGTH - 1, "%s_W ", windp.button_label);
+    wrec->button_name = text;
   } else {
-    STRcopy(wrec->button_name, windp.button_label, NAME_LENGTH);
+    wrec->button_name = windp.button_label;
   }
-  STRcopy(wrec->url, windp.url, URL_LENGTH);
+  wrec->url = windp.url;
   
   /* Replace Underscores with spaces in names */
   if(_params.html_mode == 0 && _params.replace_underscores) {
-    for(int jj = strlen(wrec->button_name) - 1; jj >= 0; jj--) {
+    for(int jj = (int) wrec->button_name.size() - 1; jj >= 0; jj--) {
       if(wrec->button_name[jj] == '_') {
         wrec->button_name[jj] = ' ';
       }
@@ -1257,16 +1258,16 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   // Append the field name
 
   if (isU) {
-    strcat(wrec->url, windp.u_field_name);
+    wrec->url = windp.u_field_name;
   } else if (isV) {
-    strcat(wrec->url, windp.v_field_name);
+    wrec->url = windp.v_field_name;
   } else {
-    strcat(wrec->url, windp.w_field_name);
+    wrec->url = windp.w_field_name;
   }
   
   // units
   
-  STRcopy(wrec->field_units, windp.units, LABEL_LENGTH);
+  wrec->field_units = windp.units;
   wrec->currently_displayed = 1;
   
   wrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
@@ -1302,14 +1303,10 @@ void Lucid::_initTerrain()
     }
     
     gd.layers.earth.terr->time_allowance = 1000000000; // 30+ years
-    STRcopy(gd.layers.earth.terr->color_file,
-            _params.landuse_colorscale,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->button_name,
-            _params.terrain_id_label,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->legend_name,
-            _params.terrain_id_label,NAME_LENGTH);
-    STRcopy(gd.layers.earth.terr->url,
-            _params.terrain_url,URL_LENGTH);
+    gd.layers.earth.terr->color_file = _params.landuse_colorscale;
+    gd.layers.earth.terr->button_name = _params.terrain_id_label;
+    gd.layers.earth.terr->legend_name = _params.terrain_id_label;
+    gd.layers.earth.terr->url = _params.terrain_url;
     
     gd.layers.earth.terr->h_mdvx = new DsMdvx;
     gd.layers.earth.terr->v_mdvx = new DsMdvx;
@@ -1329,14 +1326,10 @@ void Lucid::_initTerrain()
     }
     
     gd.layers.earth.land_use->time_allowance = 1000000000; // 30+ years
-    STRcopy(gd.layers.earth.land_use->color_file,
-            _params.landuse_colorscale, NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->button_name,
-            _params.terrain_id_label,  NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->legend_name,
-            _params.terrain_id_label, NAME_LENGTH);
-    STRcopy(gd.layers.earth.land_use->url,
-            _params.landuse_url, URL_LENGTH);
+    gd.layers.earth.land_use->color_file = _params.landuse_colorscale;
+    gd.layers.earth.land_use->button_name = _params.terrain_id_label;
+    gd.layers.earth.land_use->legend_name = _params.terrain_id_label;
+    gd.layers.earth.land_use->url = _params.landuse_url;
     
     gd.layers.earth.land_use->h_mdvx = new DsMdvx;
     gd.layers.earth.land_use->v_mdvx = new DsMdvx;
@@ -1439,11 +1432,11 @@ void Lucid::_initRouteWinds()
     mr->h_vcm.nentries = 0;
     mr->h_fhdr.scale = -1.0;
     mr->h_last_scale = 0.0;
-    STRcopy(mr->legend_name, "ROUTE_U_WIND", NAME_LENGTH);
-    STRcopy(mr->button_name, "ROUTE_U_WIND", NAME_LENGTH);
-    STRcopy(mr->url, _params.route_u_url, URL_LENGTH);
+    mr->legend_name = "ROUTE_U_WIND";
+    mr->button_name = "ROUTE_U_WIND";
+    mr->url = _params.route_u_url;
 
-    STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
+    mr->field_units = "unknown";
     mr->currently_displayed = 1;
     mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
@@ -1472,11 +1465,11 @@ void Lucid::_initRouteWinds()
     mr->h_vcm.nentries = 0;
     mr->h_fhdr.scale = -1.0;
     mr->h_last_scale = 0.0;
-    STRcopy(mr->legend_name, "ROUTE_V_WIND", NAME_LENGTH);
-    STRcopy(mr->button_name, "ROUTE_V_WIND", NAME_LENGTH);
-    STRcopy(mr->url, _params.route_v_url, URL_LENGTH);
+    mr->legend_name = "ROUTE_V_WIND";
+    mr->button_name = "ROUTE_V_WIND";
+    mr->url = _params.route_v_url;
     
-    STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
+    mr->field_units = "unknown";
     mr->currently_displayed = 1;
     mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
@@ -1505,11 +1498,11 @@ void Lucid::_initRouteWinds()
     mr->h_vcm.nentries = 0;
     mr->h_fhdr.scale = -1.0;
     mr->h_last_scale = 0.0;
-    STRcopy(mr->legend_name, "ROUTE_TURB", NAME_LENGTH);
-    STRcopy(mr->button_name, "ROUTE_TURB", NAME_LENGTH);
-    STRcopy(mr->url, _params.route_turb_url, URL_LENGTH);
+    mr->legend_name = "ROUTE_TURB";
+    mr->button_name  = "ROUTE_TURB";
+    mr->url = _params.route_turb_url;
     
-    STRcopy(mr->field_units, "unknown", LABEL_LENGTH);
+    mr->field_units = "unknown";
     mr->currently_displayed = 1;
     mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
@@ -1538,11 +1531,10 @@ void Lucid::_initRouteWinds()
     mr->h_vcm.nentries = 0;
     mr->h_fhdr.scale = -1.0;
     mr->h_last_scale = 0.0;
-    STRcopy(mr->legend_name, "ROUTE_ICING", NAME_LENGTH);
-    STRcopy(mr->button_name, "ROUTE_ICING", NAME_LENGTH);
-    STRcopy(mr->url, _params.route_icing_url, URL_LENGTH);
-
-    STRcopy(mr->field_units,"unknown",LABEL_LENGTH);
+    mr->legend_name = "ROUTE_ICING";
+    mr->button_name = "ROUTE_ICING";
+    mr->url = _params.route_icing_url;
+    mr->field_units = "unknown";
     mr->currently_displayed = 1;
     mr->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
     mr->h_fhdr.proj_origin_lon = 0.0;
@@ -2891,7 +2883,7 @@ void Lucid::_initContours()
     }
     
     for (int jj = 0; jj < gd.num_datafields; jj++) {
-      if (strcmp(gd.mread[jj]->button_name, contourFieldName) == 0) {
+      if (gd.mread[jj]->button_name.compare(contourFieldName) == 0) {
         gd.layers.cont[ii].field = jj;
         if(cfield.on_at_startup) {
           gd.layers.cont[ii].active = 1;
@@ -2934,7 +2926,7 @@ void Lucid::_initOverlayFields()
     }
     
     for(int jj = 0; jj <  gd.num_datafields; jj++) {
-      if(strcmp(gd.mread[jj]->button_name, fieldName) == 0) {  
+      if(gd.mread[jj]->button_name.compare(fieldName) == 0) {  
         if(lfield.on_at_startup) {
           gd.layers.overlay_field_on[ii] = 1;
         } else {

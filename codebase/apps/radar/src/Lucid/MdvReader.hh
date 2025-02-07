@@ -120,11 +120,11 @@ public:
 
   int vert_type; /* TYPE of vertical grid - See Mdv/Mdvx_enums.hh */
 
-  double alt_offset; /* In native units - km/deg/sigma/pressure/etc */
+  // double alt_offset; /* In native units - km/deg/sigma/pressure/etc */
 
   double detail_thresh_min; /* Grids are visible when distance (km) across */
   double detail_thresh_max; /* across the screen is between min and max */
-
+  
   vert_spacing_t vert[MAX_SECTS]; // Holds min,cent and max for each plane.
 
   double ht_pixel; // Slope of function between elevation height and screen Y
@@ -165,12 +165,20 @@ public:
   char vunits_label_cols[LABEL_LENGTH];/* units of vert columns- "km", etc */
   char vunits_label_rows[LABEL_LENGTH];/* units of vert rows- "km", etc */
   char vunits_label_sects[LABEL_LENGTH];/* units of vert sections- "mbar", etc */
-  char field_units[LABEL_LENGTH]; /* Units label of the data */
-  char button_name[NAME_LENGTH]; /* Field name for buttons, label, - "dbZ" etc - From Config file */
-  char legend_name[NAME_LENGTH]; /* name for legends , - "MHR" etc - From Config file */
-  char field_label[NAME_LENGTH]; /* field name, label, - "dbZ" etc - As reported by Data source */
-  char url[URL_LENGTH]; /* server URL- mdvp:://host:port:dir */
-  char color_file[NAME_LENGTH]; /* color scale file name */
+
+  string field_units; /* Units label of the data */
+  string button_name; /* Field name for buttons, label, - "dbZ" etc - From Config file */
+  string legend_name; /* name for legends , - "MHR" etc - From Config file */
+  string field_label; /* field name, label, - "dbZ" etc - As reported by Data source */
+  string url; /* server URL- mdvp:://host:port:dir */
+  string color_file; /* color scale file name */
+  
+  // char field_units[LABEL_LENGTH]; /* Units label of the data */
+  // char button_name[NAME_LENGTH]; /* Field name for buttons, label, - "dbZ" etc - From Config file */
+  // char legend_name[NAME_LENGTH]; /* name for legends , - "MHR" etc - From Config file */
+  // char field_label[NAME_LENGTH]; /* field name, label, - "dbZ" etc - As reported by Data source */
+  // char url[URL_LENGTH]; /* server URL- mdvp:://host:port:dir */
+  // char color_file[NAME_LENGTH]; /* color scale file name */
   
   unsigned short *h_data; /* pointer to Horizontal int8 data */
   unsigned short *v_data; /* pointer to Vertical d int8 data */ 

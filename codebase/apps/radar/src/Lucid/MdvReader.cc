@@ -66,7 +66,7 @@ MdvReader::MdvReader(QObject* parent) :
   v_data_valid = 0;
   _timeListValid = false;
   vert_type = 0;
-  alt_offset = 0.0;
+  // alt_offset = 0.0;
   detail_thresh_min = 0.0;
   detail_thresh_max = 0.0;
   
@@ -106,12 +106,12 @@ MdvReader::MdvReader(QObject* parent) :
   MEM_zero(vunits_label_cols);
   MEM_zero(vunits_label_rows);
   MEM_zero(vunits_label_sects);
-  MEM_zero(field_units);
-  MEM_zero(button_name);
-  MEM_zero(legend_name);
-  MEM_zero(field_label);
-  MEM_zero(url);
-  MEM_zero(color_file);
+  // MEM_zero(field_units);
+  // MEM_zero(button_name);
+  // MEM_zero(legend_name);
+  // MEM_zero(field_label);
+  // MEM_zero(url);
+  // MEM_zero(color_file);
   
   h_data = NULL;
   v_data = NULL;
@@ -868,7 +868,7 @@ int MdvReader::_getTimeList(const string &url,
   }
 
   char label[1024];
-  snprintf(label, 1024, "Requesting time list for %s data", legend_name);
+  snprintf(label, 1024, "Requesting time list for %s data", legend_name.c_str());
   if(_params.show_data_messages) {
     // gui_label_h_frame(label, 1);
   } else {
@@ -982,20 +982,15 @@ string MdvReader::_getFullUrl()
 
 string MdvReader::_getFieldName()
 {
-  
-  char field_name[512];
-  MEM_zero(field_name);
-  strncpy(field_name, field_label, 256);
-  
-  // Replace carets with spaces
-
-  char *ptr = field_name;
-  while ((ptr = strchr(field_name,'^')) != NULL) {
-    *ptr = ' ';
+  string tmpName(field_label);
+  while (true) {
+    size_t pos = tmpName.find('^');
+    if (pos == string::npos) {
+      return tmpName;
+    }
+    tmpName.replace(pos, 1, '_', 1);
   }
-
-  return field_name;
-
+  return tmpName;
 }
 
 //////////////////////////////////////////////////////
@@ -1324,19 +1319,19 @@ string MdvReader::fieldLabel()
        ds_fhdr.nz == 1) {  
       //snprintf(label,"%s At Surface %s",
       snprintf(label,2048,"%s: %s",
-               legend_name,
+               legend_name.c_str(),
                tlabel);
     } else {
       // Reverse order of label and value if units are "FL" 
       if(strcmp(units_label_sects,"FL") == 0) {
         snprintf(label,2048,"%s: %s %03.0f %s",
-                 legend_name,
+                 legend_name.c_str(),
                  units_label_sects,
                  vert[plane].cent,
                  tlabel);
       }else {
         snprintf(label,2048,"%s: %g %s %s",
-                 legend_name,
+                 legend_name.c_str(),
                  vert[plane].cent,
                  units_label_sects,
                  tlabel);
@@ -1344,7 +1339,7 @@ string MdvReader::fieldLabel()
     }
   } else {
     snprintf(label,2048,"%s: All levels %s",
-             legend_name,
+             legend_name.c_str(),
              tlabel);
   }
   

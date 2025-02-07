@@ -3486,15 +3486,19 @@ void GuiManager::_checkForDataUpdates(time_t tm)
     if(gd.debug1) fprintf(stderr,"Found %d Datamapper info sets\n",nsets);
 
     /* look thru all data fields */
+
     for (i=0; i < gd.num_datafields; i++) {
+
       // pull out dir from URL
 
-      end_ptr = strrchr(gd.mread[i]->url,'&');
+      char tmpUrl[MAX_PATH_LEN];
+      strncpy(tmpUrl, gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
+      end_ptr = strrchr(tmpUrl, '&');
       if(end_ptr == NULL) continue;  // broken URL.
-
-      start_ptr =  strrchr(gd.mread[i]->url,':');
+      
+      start_ptr =  strrchr(tmpUrl, ':');
       if(start_ptr == NULL) {
-	start_ptr =  gd.mread[i]->url; // Must be a local file/dir based URL
+	start_ptr =  tmpUrl; // Must be a local file/dir based URL
       } else {
 	start_ptr++;  // Move up one character
       }
@@ -3516,18 +3520,23 @@ void GuiManager::_checkForDataUpdates(time_t tm)
 	}
       }
     }
-
+    
     for (i=0; i < gd.layers.num_wind_sets; i++ ) {
       /* Look through wind field data too */
       if (gd.layers.wind[i].active) {
 	// pull out dir from URL
 
-	end_ptr = strrchr(gd.layers.wind[i].wind_u->url,'&');
+        char tmpUrl[MAX_PATH_LEN];
+        strncpy(tmpUrl, gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
+        
+        char tmp2[MAX_PATH_LEN];
+        strncpy(tmp2, gd.layers.wind[i].wind_u->url.c_str(), MAX_PATH_LEN - 1);
+	end_ptr = strrchr(tmp2,'&');
 	if(end_ptr == NULL) continue;  // broken URL.
-
-	start_ptr =  strrchr(gd.layers.wind[i].wind_u->url,':');
+        
+	start_ptr =  strrchr(tmp2,':');
 	if(start_ptr == NULL) {
-          start_ptr =  gd.mread[i]->url; // Must be a local file/dir based URL
+          start_ptr = tmpUrl; // Must be a local file/dir based URL
 	} else {
           start_ptr++;  // Move up one character
 	}
