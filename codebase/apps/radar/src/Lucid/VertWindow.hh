@@ -45,7 +45,7 @@
 #include <vector>
 
 #include "Params.hh"
-#include "VertWidget.hh"
+#include "VertView.hh"
 
 class GuiManager;
 // class DisplayField;
@@ -78,7 +78,7 @@ public:
   
   // get the VERT widget
 
-  VertWidget *getWidget() { return _vertWidget; }
+  VertView *getView() { return _vertView; }
 
   /**
    * @brief Set the azimuth value displayed in the window.
@@ -99,7 +99,7 @@ public:
 
   void setRadarName(const string &radar_name);
 
-  // enable the zoom button - called by VertWidget
+  // enable the zoom button - called by VertView
   
   void enableZoomButton() const;
 
@@ -154,7 +154,7 @@ protected:
    */
 
   QFrame *_vertTopFrame;
-  VertWidget *_vertWidget;
+  VertView *_vertView;
 
   // the polar manager that created this window
 
@@ -229,7 +229,7 @@ protected:
    * @param[in] vert    A pointer to the VERT widget in this window.
    */
 
-  void _createActions(VertWidget *vert);
+  void _createActions(VertView *vert);
 
   /**
    * @brief Create the menus for the menu bar on this window.

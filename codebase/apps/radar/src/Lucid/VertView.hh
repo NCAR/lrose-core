@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef VertWidget_HH
-#define VertWidget_HH
+#ifndef VertView_HH
+#define VertView_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -61,7 +61,7 @@ class VertWindow;
 
 // Widget for vertical display.
 
-class DLL_EXPORT VertWidget : public QWidget
+class DLL_EXPORT VertView : public QWidget
 {
   
   // must include this if you use Qt signals/slots
@@ -80,15 +80,15 @@ class DLL_EXPORT VertWidget : public QWidget
    * @param[in] params   TDRP parameters.
    */
 
-  VertWidget(QWidget* parent, 
-             const GuiManager &manager,
-             const VertWindow &vertWindow);
+  VertView(QWidget* parent, 
+           const GuiManager &manager,
+           const VertWindow &vertWindow);
 
   /**
    * @brief Destructor.
    */
 
-  virtual ~VertWidget();
+  virtual ~VertView();
   
   /**
    * @brief Configure the CartWidget for world coords
@@ -181,7 +181,7 @@ class DLL_EXPORT VertWidget : public QWidget
   void setFont();
   virtual void informationMessage();
 
-signals:
+ signals:
 
   ////////////////
   // Qt signals //
@@ -264,7 +264,7 @@ signals:
   virtual void contextMenuExamine(); // const QPoint &pos);
   virtual void contextMenuDataWidget();
   
-protected:
+ protected:
 
   /////////////////////////
   // Protected constants //

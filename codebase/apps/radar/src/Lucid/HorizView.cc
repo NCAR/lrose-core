@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include "HorizWidget.hh"
-#include "VertWidget.hh"
+#include "HorizView.hh"
+#include "VertView.hh"
 #include "GuiManager.hh"
 
 // #include "ParameterColorView.hh"
@@ -47,12 +47,12 @@
 
 using namespace std;
 
-const double HorizWidget::SIN_45 = sin(45.0 * DEG_TO_RAD);
-const double HorizWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
-const double HorizWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
+const double HorizView::SIN_45 = sin(45.0 * DEG_TO_RAD);
+const double HorizView::SIN_30 = sin(30.0 * DEG_TO_RAD);
+const double HorizView::COS_30 = cos(30.0 * DEG_TO_RAD);
 
-HorizWidget::HorizWidget(QWidget* parent,
-                         GuiManager &manager) :
+HorizView::HorizView(QWidget* parent,
+                     GuiManager &manager) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -163,7 +163,7 @@ HorizWidget::HorizWidget(QWidget* parent,
  * Destructor
  */
 
-HorizWidget::~HorizWidget()
+HorizView::~HorizView()
 {
 
   // delete all of the dynamically created beams
@@ -179,7 +179,7 @@ HorizWidget::~HorizWidget()
  * clear()
  */
 
-void HorizWidget::clear()
+void HorizView::clear()
 {
   // Clear out the beam array
   
@@ -198,7 +198,7 @@ void HorizWidget::clear()
  * selectVar()
  */
 
-void HorizWidget::selectVar(const size_t index)
+void HorizView::selectVar(const size_t index)
 {
 
   // If the field index isn't actually changing, we don't need to do anything
@@ -208,7 +208,7 @@ void HorizWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> HorizWidget::selectVar() for field index: " 
+    cerr << "=========>> HorizView::selectVar() for field index: " 
          << index << endl;
   }
 
@@ -242,7 +242,7 @@ void HorizWidget::selectVar(const size_t index)
  * clearVar()
  */
 
-void HorizWidget::clearVar(const size_t index)
+void HorizView::clearVar(const size_t index)
 {
 
   if ((int) index >= _params.fields_n) {
@@ -268,7 +268,7 @@ void HorizWidget::clearVar(const size_t index)
  * configureWorldCoords()
  */
 
-void HorizWidget::configureWorldCoords(int zoomLevel)
+void HorizView::configureWorldCoords(int zoomLevel)
 
 {
 
@@ -347,7 +347,7 @@ void HorizWidget::configureWorldCoords(int zoomLevel)
 // or is pressing the Shift key
 // Todo: investigate implementing a listener pattern instead
 
-void HorizWidget::timerEvent(QTimerEvent *event)
+void HorizView::timerEvent(QTimerEvent *event)
 {
 
   bool doUpdate = false;
@@ -380,10 +380,10 @@ void HorizWidget::timerEvent(QTimerEvent *event)
 /*************************************************************************
  * adjust pixel scale for correct aspect ratio etc
  */
-void HorizWidget::adjustPixelScales()
+void HorizView::adjustPixelScales()
 {
 
-  // cerr << "==>> hhhhhh HorizWidget::adjustPixelScales() <<==" << endl;
+  // cerr << "==>> hhhhhh HorizView::adjustPixelScales() <<==" << endl;
   // _zoomWorld.setProjection(_proj);
   _zoomWorld.setProjection(gd.proj);
   _zoomWorld.adjustPixelScales();
@@ -394,7 +394,7 @@ void HorizWidget::adjustPixelScales()
  * paintEvent()
  */
 
-void HorizWidget::paintEvent(QPaintEvent *event)
+void HorizView::paintEvent(QPaintEvent *event)
 {
   
   if (!_renderFrame) {
@@ -457,7 +457,7 @@ void HorizWidget::paintEvent(QPaintEvent *event)
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *HorizWidget::_getClosestRay(double x_km, double y_km)
+const RadxRay *HorizView::_getClosestRay(double x_km, double y_km)
 
 {
 
@@ -496,7 +496,7 @@ const RadxRay *HorizWidget::_getClosestRay(double x_km, double y_km)
  * _setGridSpacing()
  */
 
-void HorizWidget::_setGridSpacing()
+void HorizView::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -536,7 +536,7 @@ void HorizWidget::_setGridSpacing()
  * _drawOverlays()
  */
 
-void HorizWidget::_drawOverlays(QPainter &painter)
+void HorizView::_drawOverlays(QPainter &painter)
 {
 
   // draw the maps
@@ -663,7 +663,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
  * draw map overlays
  */
 
-void HorizWidget::_drawMaps(QPainter &painter)
+void HorizView::_drawMaps(QPainter &painter)
 
 {
 
@@ -823,7 +823,7 @@ void HorizWidget::_drawMaps(QPainter &painter)
  * draw rings for polar type data fields
  */
 
-void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
+void HorizView::_drawRingsAndAzLines(QPainter &painter)
 {
 
   // Don't try to draw rings if we haven't been configured yet or if the
@@ -869,7 +869,7 @@ void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
     
     ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * HorizWidget::SIN_45;
+      double labelPos = ringRange * HorizView::SIN_45;
       const string &labelStr = _scaledLabel.scale(ringRange);
       _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
       _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
@@ -938,8 +938,8 @@ void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
 
     // Draw the lines along the 30 degree lines
 
-    double end_pos1 = HorizWidget::SIN_30 * _maxRangeKm;
-    double end_pos2 = HorizWidget::COS_30 * _maxRangeKm;
+    double end_pos1 = HorizView::SIN_30 * _maxRangeKm;
+    double end_pos2 = HorizView::COS_30 * _maxRangeKm;
     
     _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
@@ -954,7 +954,7 @@ void HorizWidget::_drawRingsAndAzLines(QPainter &painter)
 
 }
   
-void HorizWidget::showOpeningFileMsg(bool isVisible)
+void HorizView::showOpeningFileMsg(bool isVisible)
 {
   _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
   _openingFileInfoLabel->setVisible(isVisible);
@@ -980,9 +980,9 @@ void HorizWidget::showOpeningFileMsg(bool isVisible)
 
 // draw text in world coords
 
-void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
-                                  int text_x, int text_y,
-                                  int flags)
+void HorizView::_drawScreenText(QPainter &painter, const string &text,
+                                int text_x, int text_y,
+                                int flags)
   
 {
 
@@ -1003,7 +1003,7 @@ void HorizWidget::_drawScreenText(QPainter &painter, const string &text,
  * _refreshImages()
  */
 
-void HorizWidget::_refreshImages()
+void HorizView::_refreshImages()
 {
 
 #ifdef NOTNOW  
@@ -1048,13 +1048,13 @@ void HorizWidget::_refreshImages()
 }
 
 /*
-  void HorizWidget::sillyReceived() {
+  void HorizView::sillyReceived() {
   LOG(DEBUG_VERBOSE) << "enter";
   LOG(DEBUG_VERBOSE) << "exit";
   }
 */
 /*
-  void HorizWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
+  void HorizView::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
   {
   LOG(DEBUG_VERBOSE) << "enter";
   // connect the new color map with the field                                                                    
@@ -1093,7 +1093,7 @@ void HorizWidget::_refreshImages()
 
 #ifdef NOTNOW
 
-void HorizWidget::ExamineEdit(const RadxRay *closestRay) {
+void HorizView::ExamineEdit(const RadxRay *closestRay) {
   
 
   // get an version of the ray that we can edit
@@ -1161,9 +1161,9 @@ void HorizWidget::ExamineEdit(const RadxRay *closestRay) {
  * redraw the click point cursor
  */
 
-void HorizWidget::setClickPoint(double azimuthDeg,
-                                double elevationDeg,
-                                double rangeKm)
+void HorizView::setClickPoint(double azimuthDeg,
+                              double elevationDeg,
+                              double rangeKm)
 {
 
   double x_km =
@@ -1183,7 +1183,7 @@ void HorizWidget::setClickPoint(double azimuthDeg,
  * initialize the geographic projection
  */
 
-void HorizWidget::_initProjection()
+void HorizView::_initProjection()
 {
 
   if (_params.proj_type == Params::PROJ_LATLON) {
@@ -1233,7 +1233,7 @@ void HorizWidget::_initProjection()
 //////////////////////////////////////////
 // set flags to control frame rendering
 
-void HorizWidget::setFrameForRendering(int page, int index)
+void HorizView::setFrameForRendering(int page, int index)
 
 {
   _renderFrame = true;
@@ -1245,7 +1245,7 @@ void HorizWidget::setFrameForRendering(int page, int index)
 //////////////////////////////////////////
 // set flags to check for invalid images
 
-void HorizWidget::setRenderInvalidImages(int index, VertWidget *vert)
+void HorizView::setRenderInvalidImages(int index, VertView *vert)
 
 {
   _renderInvalidImages = true;
@@ -1258,7 +1258,7 @@ void HorizWidget::setRenderInvalidImages(int index, VertWidget *vert)
  * _renderGrid()
  */
 
-void HorizWidget::_renderGrids(QPainter &painter)
+void HorizView::_renderGrids(QPainter &painter)
 {
   
   if (!_renderFrame) {
@@ -1271,7 +1271,7 @@ void HorizWidget::_renderGrids(QPainter &painter)
             _renderFrameIndex, _renderFramePage);
   }
 
-  cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>> HorizWidget::_renderGrids" << endl;
+  cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>> HorizView::_renderGrids" << endl;
   _controlRendering(painter,
                     _renderFramePage,
                     gd.movie.frame[_renderFrameIndex].time_start,
@@ -1289,8 +1289,8 @@ void HorizWidget::_renderGrids(QPainter &painter)
  *
  */
 
-void HorizWidget::_doRenderInvalidImages(QPainter &painter,
-                                         int index, VertWidget *vert)
+void HorizView::_doRenderInvalidImages(QPainter &painter,
+                                       int index, VertView *vert)
 {
 
 #ifdef JUNK
@@ -1427,9 +1427,9 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
  *        and its associated overlays and labels  labels. 
  */
 
-int HorizWidget::_controlRendering(QPainter &painter, int page,
-                                   time_t start_time,
-                                   time_t end_time)
+int HorizView::_controlRendering(QPainter &painter, int page,
+                                 time_t start_time,
+                                 time_t end_time)
 {
 
   cerr << "00000000000000000000000000000000000" << endl;
@@ -1611,12 +1611,12 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
  *    Returns 1 on success, 0 on failure
  */
 
-int HorizWidget::_renderGrid(QPainter &painter,
-                             int page,
-                             MdvReader *mr,
-                             time_t start_time,
-                             time_t end_time,
-                             bool is_overlay_field)
+int HorizView::_renderGrid(QPainter &painter,
+                           int page,
+                           MdvReader *mr,
+                           time_t start_time,
+                           time_t end_time,
+                           bool is_overlay_field)
 {
   
   if (mr == NULL) {
@@ -1745,7 +1745,7 @@ int HorizWidget::_renderGrid(QPainter &painter,
       case Params::LEGEND_BOTTOM_RIGHT:
         _zoomWorld.drawLegendsBottomRight(painter, legends);
         break;
-    default: {}
+      default: {}
     }
     
     // painter.setBrush(Qt::white);
@@ -1860,7 +1860,7 @@ int HorizWidget::_renderGrid(QPainter &painter,
  * set archive mode
  */
 
-void HorizWidget::setArchiveMode(bool state)
+void HorizView::setArchiveMode(bool state)
 {
   _archiveMode = state;
 }
@@ -1869,7 +1869,7 @@ void HorizWidget::setArchiveMode(bool state)
  * zoomBack the view
  */
 
-void HorizWidget::zoomBackView()
+void HorizView::zoomBackView()
 {
   if (_savedZooms.size() == 0) {
     _zoomWorld = _fullWorld;
@@ -1893,7 +1893,7 @@ void HorizWidget::zoomBackView()
  * zoom all the way out
  */
 
-void HorizWidget::zoomOutView()
+void HorizView::zoomOutView()
 {
   _zoomWorld = _fullWorld;
   _savedZooms.clear();
@@ -1911,7 +1911,7 @@ void HorizWidget::zoomOutView()
  * setRings()
  */
 
-void HorizWidget::setRings(const bool enabled)
+void HorizView::setRings(const bool enabled)
 {
   _ringsEnabled = enabled;
   update();
@@ -1922,7 +1922,7 @@ void HorizWidget::setRings(const bool enabled)
  * setGrids()
  */
 
-void HorizWidget::setGrids(const bool enabled)
+void HorizView::setGrids(const bool enabled)
 {
   _gridsEnabled = enabled;
   update();
@@ -1933,7 +1933,7 @@ void HorizWidget::setGrids(const bool enabled)
  * setAngleLines()
  */
 
-void HorizWidget::setAngleLines(const bool enabled)
+void HorizView::setAngleLines(const bool enabled)
 {
   _angleLinesEnabled = enabled;
   update();
@@ -1944,7 +1944,7 @@ void HorizWidget::setAngleLines(const bool enabled)
  * turn on archive-style rendering - all fields
  */
 
-void HorizWidget::activateArchiveRendering()
+void HorizView::activateArchiveRendering()
 {
   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
   //   _fieldRenderers[ii]->setBackgroundRenderingOn();
@@ -1956,7 +1956,7 @@ void HorizWidget::activateArchiveRendering()
  * turn on reatlime-style rendering - non-selected fields in background
  */
 
-void HorizWidget::activateRealtimeRendering()
+void HorizView::activateRealtimeRendering()
 {
   
   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
@@ -1971,7 +1971,7 @@ void HorizWidget::activateRealtimeRendering()
  * displayImage()
  */
 
-void HorizWidget::displayImage(const size_t field_num)
+void HorizView::displayImage(const size_t field_num)
 {
   // If we weren't rendering the current field, do nothing
   if (field_num != _selectedField) {
@@ -1986,7 +1986,7 @@ void HorizWidget::displayImage(const size_t field_num)
  * backgroundColor()
  */
 
-void HorizWidget::backgroundColor(const QColor &color)
+void HorizView::backgroundColor(const QColor &color)
 {
   _backgroundBrush.setColor(color);
   QPalette new_palette = palette();
@@ -2000,7 +2000,7 @@ void HorizWidget::backgroundColor(const QColor &color)
  * gridRingsColor()
  */
 
-void HorizWidget::gridRingsColor(const QColor &color)
+void HorizView::gridRingsColor(const QColor &color)
 {
   LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
   _gridRingsColor = color;
@@ -2013,7 +2013,7 @@ void HorizWidget::gridRingsColor(const QColor &color)
  * getImage()
  */
 
-QImage* HorizWidget::getImage()
+QImage* HorizView::getImage()
 {
   QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
@@ -2025,7 +2025,7 @@ QImage* HorizWidget::getImage()
  * getPixmap()
  */
 
-QPixmap* HorizWidget::getPixmap()
+QPixmap* HorizView::getPixmap()
 {
   QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
@@ -2040,7 +2040,7 @@ QPixmap* HorizWidget::getPixmap()
  * mousePressEvent()
  */
 
-void HorizWidget::mousePressEvent(QMouseEvent *e)
+void HorizView::mousePressEvent(QMouseEvent *e)
 {
 
   // cerr << "cccc mousePressEvent" << endl;
@@ -2083,7 +2083,7 @@ void HorizWidget::mousePressEvent(QMouseEvent *e)
  * mouseMoveEvent(), mouse button is down and mouse is moving
  */
 
-void HorizWidget::mouseMoveEvent(QMouseEvent * e)
+void HorizView::mouseMoveEvent(QMouseEvent * e)
 {
 
   // cerr << "ccccc mouseMoveEvent" << endl;
@@ -2135,7 +2135,7 @@ void HorizWidget::mouseMoveEvent(QMouseEvent * e)
 /*************************************************************************
  * mouseReleaseEvent()
  */
-void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
+void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
 
   cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
@@ -2258,7 +2258,7 @@ void HorizWidget::mouseReleaseEvent(QMouseEvent *e)
 #ifdef NOTNOW
 /**************   testing ******/
 
-void HorizWidget::smartBrush(int xPixel, int yPixel) 
+void HorizView::smartBrush(int xPixel, int yPixel) 
 {
 
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
@@ -2279,7 +2279,7 @@ void HorizWidget::smartBrush(int xPixel, int yPixel)
  * resizeEvent()
  */
 
-void HorizWidget::resizeEvent(QResizeEvent * e)
+void HorizView::resizeEvent(QResizeEvent * e)
 {
   cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
@@ -2296,7 +2296,7 @@ void HorizWidget::resizeEvent(QResizeEvent * e)
  * resize()
  */
 
-void HorizWidget::resize(const int width, const int height)
+void HorizView::resize(const int width, const int height)
 {
 
   // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
@@ -2319,7 +2319,7 @@ void HorizWidget::resize(const int width, const int height)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void HorizWidget::_resetWorld(int width, int height)
+void HorizView::_resetWorld(int width, int height)
 
 {
 
@@ -2337,7 +2337,7 @@ void HorizWidget::_resetWorld(int width, int height)
 ////////////////////
 // set the transform
 
-void HorizWidget::_setTransform(const QTransform &transform)
+void HorizView::_setTransform(const QTransform &transform)
 {
   // float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
   // BoundaryPointEditor::Instance()->setWorldScale(worldScale);
@@ -2350,7 +2350,7 @@ void HorizWidget::_setTransform(const QTransform &transform)
  * perform the rendering
  */
 
-void HorizWidget::_performRendering()
+void HorizView::_performRendering()
 {
 
   // start the rendering
@@ -2375,7 +2375,7 @@ void HorizWidget::_performRendering()
 
 }
 
-void HorizWidget::informationMessage()
+void HorizView::informationMessage()
 {
   
   // QMessageBox::StandardButton reply;
@@ -2390,7 +2390,7 @@ void HorizWidget::informationMessage()
 
 }
 
-// void HorizWidget::notImplemented()
+// void HorizView::notImplemented()
 // {
 //   cerr << "inside notImplemented() ... " << endl;
 
@@ -2411,13 +2411,13 @@ void HorizWidget::informationMessage()
 
 // slots for context editing; create and show the associated modeless dialog and return                                   
 
-void HorizWidget::contextMenuCancel()
+void HorizView::contextMenuCancel()
 {
   // informationMessage();
   // notImplemented();                                                                                                     
 }
 
-void HorizWidget::contextMenuParameterColors()
+void HorizView::contextMenuParameterColors()
 {
 
 #ifdef NOTNOW
@@ -2477,7 +2477,7 @@ void HorizWidget::contextMenuParameterColors()
 
 #ifdef NOTNOW
   
-void HorizWidget::contextMenuParameterColors()
+void HorizView::contextMenuParameterColors()
 {
   /*
     LOG(DEBUG_VERBOSE) << "enter";
@@ -2514,26 +2514,26 @@ void HorizWidget::contextMenuParameterColors()
 
 #endif
 
-void HorizWidget::contextMenuView()
+void HorizView::contextMenuView()
 {
   informationMessage();
   //  notImplemented();                                                                                                   
 }
 
-void HorizWidget::contextMenuExamine()         
+void HorizView::contextMenuExamine()         
 {
   informationMessage();                                                                                                 
 
 }
 
-void HorizWidget::contextMenuDataWidget()
+void HorizView::contextMenuDataWidget()
 {
   informationMessage();
 
   //  notImplemented();                                                                                                   
 }
 
-void HorizWidget::contextMenuEditor()
+void HorizView::contextMenuEditor()
 {
   LOG(DEBUG_VERBOSE) << "enter";
 
@@ -2555,7 +2555,7 @@ void HorizWidget::contextMenuEditor()
   LOG(DEBUG_VERBOSE) << "exit";
 }
 
-void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
+void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
 {
 
   // _vol = vol;
@@ -2594,7 +2594,7 @@ void HorizWidget::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
 //////////////////////////////////////////
 // paint the user-selected zoom rectangle
 
-void HorizWidget::_paintZoomRect()
+void HorizView::_paintZoomRect()
 {
   QRect zrect = _rubberBand->geometry();
   cerr << "Zoom rect x, y: "

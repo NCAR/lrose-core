@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef HorizWidget_HH
-#define HorizWidget_HH
+#ifndef HorizView_HH
+#define HorizView_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -59,7 +59,7 @@
 #include "WorldPlot.hh"
 
 class GuiManager;
-class VertWidget;
+class VertView;
 class QLabel;
 
 // custom rubber band for transparent rectangle
@@ -88,7 +88,7 @@ protected:
 
 // Widget representing a horizontal view
 
-class DLL_EXPORT HorizWidget : public QWidget
+class DLL_EXPORT HorizView : public QWidget
 {
   // must include this if you use Qt signals/slots
   Q_OBJECT
@@ -106,14 +106,14 @@ class DLL_EXPORT HorizWidget : public QWidget
    * @param[in] params   TDRP parameters.
    */
   
-  HorizWidget(QWidget* parent,
-              GuiManager &manager);
+  HorizView(QWidget* parent,
+            GuiManager &manager);
 
   /**
    * @brief Destructor.
    */
 
-  virtual ~HorizWidget();
+  virtual ~HorizView();
 
   /**
    * @brief Configure the CartWidget for world coords
@@ -242,7 +242,7 @@ class DLL_EXPORT HorizWidget : public QWidget
   
   // set flags to render invalid images
   
-  void setRenderInvalidImages(int index, VertWidget *vert);
+  void setRenderInvalidImages(int index, VertView *vert);
 
   // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
 
@@ -379,7 +379,7 @@ class DLL_EXPORT HorizWidget : public QWidget
   
   bool _renderInvalidImages;
   int _invalidImagesFrameIndex;
-  VertWidget *_vert;
+  VertView *_vert;
   
   /**
    * @brief The index of the field selected for display.
@@ -622,7 +622,7 @@ class DLL_EXPORT HorizWidget : public QWidget
                   bool is_overlay_field);
   
   void _doRenderInvalidImages(QPainter &painter,
-                              int index, VertWidget *vert);
+                              int index, VertView *vert);
   
   // paint the user-selected zoom rectangle
   

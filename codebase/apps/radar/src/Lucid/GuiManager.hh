@@ -35,7 +35,7 @@
 // GuiManager manages polar data gathering and dissemination
 // for HORIZs and VERTs
 //
-// Rendering is delegated to HorizWidget and VertWidget
+// Rendering is delegated to HorizView and VertWidget
 //
 ///////////////////////////////////////////////////////////////
 
@@ -70,8 +70,8 @@ class QDateTimeEdit;
 class QFileDialog;
 class QTableWidget;
 
-class HorizWidget;
-class VertWidget;
+class HorizView;
+class VertView;
 class VertWindow;
 class RadxPlatform;
 class TimeScaleWidget;
@@ -204,12 +204,12 @@ private:
   // horizontal view windows
 
   QFrame *_horizFrame;
-  HorizWidget *_horiz;
+  HorizView *_horiz;
   
   // vertical view windows
 
   VertWindow *_vertWindow;
-  VertWidget *_vert;
+  VertView *_vert;
   bool _vertWindowDisplayed;
   bool _vertMode;
   

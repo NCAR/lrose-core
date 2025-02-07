@@ -93,11 +93,11 @@
 #include "GuiManager.hh"
 // #include "DisplayField.hh"
 #include "FieldTableItem.hh"
-#include "HorizWidget.hh"
+#include "HorizView.hh"
 #include "MapMenuItem.hh"
 #include "ProdMenuItem.hh"
 #include "TimeControl.hh"
-#include "VertWidget.hh"
+#include "VertView.hh"
 #include "VertWindow.hh"
 #include "WindMenuItem.hh"
 #include "ZoomMenuItem.hh"
@@ -569,7 +569,7 @@ void GuiManager::_setupWindows()
 
   // configure the HORIZ
 
-  _horiz = new HorizWidget(_horizFrame, *this);
+  _horiz = new HorizView(_horizFrame, *this);
 
   // Create the VERT window
 
@@ -579,12 +579,12 @@ void GuiManager::_setupWindows()
 
   // set pointer to the vertWidget
 
-  _vert = _vertWindow->getWidget();
+  _vert = _vertWindow->getView();
   
   // connect slots for location
 
 #ifdef NOTNOW
-  connect(_horiz, &HorizWidget::locationClicked,
+  connect(_horiz, &HorizView::locationClicked,
           this, &GuiManager::_horizLocationClicked);
   connect(_vert, &VertWidget::locationClicked,
           this, &GuiManager::_vertLocationClicked);
@@ -593,7 +593,7 @@ void GuiManager::_setupWindows()
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
-  connect(_horiz, &HorizWidget::customContextMenuRequested,
+  connect(_horiz, &HorizView::customContextMenuRequested,
 	  this, &GuiManager::ShowContextMenu);
 
   // create status panel
@@ -635,7 +635,7 @@ void GuiManager::_setupWindows()
   _setTitleBar();
   setMinimumSize(400, 400);
   // resize(_params.main_window_width, _params.main_window_height);
-  // connect(this, &GuiManager::frameResized, _horiz, &HorizWidget::resize);
+  // connect(this, &GuiManager::frameResized, _horiz, &HorizView::resize);
   resize(_params.horiz_default_width, _params.horiz_default_height);
   
   // set location on screen
@@ -718,8 +718,8 @@ void GuiManager::_createActions()
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, &QAction::triggered, _horiz, &HorizWidget::clear);
-  connect(_clearAct, &QAction::triggered, _vert, &VertWidget::clear);
+  connect(_clearAct, &QAction::triggered, _horiz, &HorizView::clear);
+  connect(_clearAct, &QAction::triggered, _vert, &VertView::clear);
 
   // exit app
   _exitAct = new QAction(tr("E&xit"), this);
@@ -745,7 +745,7 @@ void GuiManager::_createActions()
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
   _ringsAct->setChecked(_params.horiz_range_rings_on_at_startup);
-  connect(_ringsAct, &QAction::triggered, _horiz, &HorizWidget::setRings);
+  connect(_ringsAct, &QAction::triggered, _horiz, &HorizView::setRings);
 
   // show grids
 
@@ -753,7 +753,7 @@ void GuiManager::_createActions()
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
   _gridsAct->setChecked(_params.horiz_grids_on_at_startup);
-  connect(_gridsAct, &QAction::triggered, _horiz, &HorizWidget::setGrids);
+  connect(_gridsAct, &QAction::triggered, _horiz, &HorizView::setGrids);
 
   // show azimuth lines
   
@@ -761,13 +761,13 @@ void GuiManager::_createActions()
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.horiz_azimuth_lines_on_at_startup);
-  connect(_azLinesAct, &QAction::triggered, _horiz, &HorizWidget::setAngleLines);
+  connect(_azLinesAct, &QAction::triggered, _horiz, &HorizView::setAngleLines);
 
   // show VERT window
 
   _showVertAct = new QAction(tr("Show VERT Window"), this);
   _showVertAct->setStatusTip(tr("Show the VERT Window"));
-  connect(_showVertAct, &QAction::triggered, _vertWindow, &VertWidget::show);
+  connect(_showVertAct, &QAction::triggered, _vertWindow, &VertView::show);
 
   // howto and about
   

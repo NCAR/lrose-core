@@ -51,30 +51,30 @@ VertWindow::VertWindow(GuiManager *manager):
   _vertTopFrame = new QFrame(_main);
   _vertTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  // create VERT widget
+  // create VERT view
   
-  _vertWidget = new VertWidget(_main, *manager, *this);
-  _vertWidget->setGrids(_params.vert_grids_on_at_startup);
-  _vertWidget->setParent(_vertTopFrame);
+  _vertView = new VertView(_main, *manager, *this);
+  _vertView->setGrids(_params.vert_grids_on_at_startup);
+  _vertView->setParent(_vertTopFrame);
   
-  // Connect the window resize signal to the VERT widget resize() method.
+  // Connect the window resize signal to the VERT view resize() method.
 
   connect(this, SIGNAL(windowResized(const int, const int)),
-	  _vertWidget, SLOT(resize(const int, const int)));
+	  _vertView, SLOT(resize(const int, const int)));
   
-  // Connect the first beam recieved widget from the VertWidget object to the
+  // Connect the first beam recieved view from the VertView object to the
   // resize() method so that we resize the window after processing several
   // VERT beams.  This is done to get around a window resizing problem at
   // startup.
 
-  connect(_vertWidget, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
+  connect(_vertView, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
   
   // Create the status panel
   
   _createStatusPanel(_params.label_font_size);
   
   // Create the main window layout.  We need a layout so the main window can
-  // contain multiple widgets.
+  // contain multiple views.
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
   main_layout->setContentsMargins(0,0,0,0);
@@ -83,7 +83,7 @@ VertWindow::VertWindow(GuiManager *manager):
   
   // Create the actions and the menus
 
-  _createActions(_vertWidget);
+  _createActions(_vertView);
   _createMenus();
 
   // Set the window attributes.
@@ -138,7 +138,7 @@ void VertWindow::keyPressEvent(QKeyEvent * e)
  * _createActions()
  */
 
-void VertWindow::_createActions(VertWidget *vert)
+void VertWindow::_createActions(VertView *vert)
 {
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
@@ -169,7 +169,7 @@ void VertWindow::_createActions(VertWidget *vert)
 }
 
 //////////////////////////////////////////////////
-// enable the zoom button - called by VertWidget
+// enable the zoom button - called by VertView
 
 void VertWindow::enableZoomButton() const
 {
@@ -181,7 +181,7 @@ void VertWindow::enableZoomButton() const
 
 void VertWindow::_unzoom()
 {
-  _vertWidget->unzoomView();
+  _vertView->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 

@@ -61,7 +61,7 @@ HDRS = \
 	Csyprod_P.hh \
 	Cterrain_P.hh \
 	FieldTableItem.hh \
-	HorizWidget.hh \
+	HorizView.hh \
 	LegacyParams.hh \
 	MapMenuItem.hh \
 	MetRecord.hh \
@@ -75,7 +75,7 @@ HDRS = \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
 	TimeList.hh \
-	VertWidget.hh \
+	VertView.hh \
 	VertWindow.hh \
 	VlevelManager.hh \
 	WayPts.hh \
@@ -127,12 +127,12 @@ NORM_SRCS = \
 MOC_SRCS = \
 	Lucid.cc \
 	GuiManager.cc \
-	HorizWidget.cc \
+	HorizView.cc \
 	MapMenuItem.cc \
 	MdvReader.cc \
 	ProdMenuItem.cc \
 	TimeControl.cc \
-	VertWidget.cc \
+	VertView.cc \
 	VertWindow.cc \
 	WindMenuItem.cc \
 	ZoomMenuItem.cc
@@ -140,12 +140,12 @@ MOC_SRCS = \
 MOC_OUTPUT = \
 	moc_Lucid.cpp \
 	moc_GuiManager.cpp \
-	moc_HorizWidget.cpp \
+	moc_HorizView.cpp \
 	moc_MapMenuItem.cpp \
 	moc_MdvReader.cpp \
 	moc_ProdMenuItem.cpp \
 	moc_TimeControl.cpp \
-	moc_VertWidget.cpp \
+	moc_VertView.cpp \
 	moc_VertWindow.cpp \
 	moc_WindMenuItem.cpp \
 	moc_ZoomMenuItem.cpp

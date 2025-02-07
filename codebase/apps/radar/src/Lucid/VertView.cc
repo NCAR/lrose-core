@@ -48,19 +48,19 @@
 #include <toolsa/LogStream.hh>
 
 #include "GuiManager.hh"
-#include "VertWidget.hh"
+#include "VertView.hh"
 #include "VertWindow.hh"
 #include "cidd.h"
 
 using namespace std;
 
-const double VertWidget::SIN_45 = sin(45.0 * DEG_TO_RAD);
-const double VertWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
-const double VertWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
+const double VertView::SIN_45 = sin(45.0 * DEG_TO_RAD);
+const double VertView::SIN_30 = sin(30.0 * DEG_TO_RAD);
+const double VertView::COS_30 = cos(30.0 * DEG_TO_RAD);
 
-VertWidget::VertWidget(QWidget* parent,
-                       const GuiManager &manager,
-                       const VertWindow &vertWindow) :
+VertView::VertView(QWidget* parent,
+                   const GuiManager &manager,
+                   const VertWindow &vertWindow) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -142,7 +142,7 @@ VertWidget::VertWidget(QWidget* parent,
  * Destructor
  */
 
-VertWidget::~VertWidget()
+VertView::~VertView()
 {
 
 }
@@ -151,7 +151,7 @@ VertWidget::~VertWidget()
  * configureWorldCoords()
  */
 
-void VertWidget::configureWorldCoords(int zoomLevel)
+void VertView::configureWorldCoords(int zoomLevel)
 {
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
@@ -217,7 +217,7 @@ void VertWidget::configureWorldCoords(int zoomLevel)
  * mouseReleaseEvent()
  */
 
-void VertWidget::mouseReleaseEvent(QMouseEvent *e)
+void VertView::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
@@ -293,7 +293,7 @@ void VertWidget::mouseReleaseEvent(QMouseEvent *e)
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *VertWidget::_getClosestRay(double xx, double yy)
+const RadxRay *VertView::_getClosestRay(double xx, double yy)
 
 {
 
@@ -325,7 +325,7 @@ const RadxRay *VertWidget::_getClosestRay(double xx, double yy)
  * _setGridSpacing()
  */
 
-void VertWidget::_setGridSpacing()
+void VertView::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -340,7 +340,7 @@ void VertWidget::_setGridSpacing()
  * Get spacing for a given distance range
  */
 
-double VertWidget::_getSpacing(double range)
+double VertView::_getSpacing(double range)
 {
 
   if (range <= 1.0) {
@@ -368,7 +368,7 @@ double VertWidget::_getSpacing(double range)
  * _drawOverlays()
  */
 
-void VertWidget::_drawOverlays(QPainter &painter)
+void VertView::_drawOverlays(QPainter &painter)
 {
 
   // save painter state
@@ -526,7 +526,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
  * _refreshImages()
  */
 
-void VertWidget::_refreshImages()
+void VertView::_refreshImages()
 {
 
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -573,7 +573,7 @@ void VertWidget::_refreshImages()
  * clear()
  */
 
-void VertWidget::clear()
+void VertView::clear()
 {
 
   // Clear out the beam array
@@ -595,7 +595,7 @@ void VertWidget::clear()
  * refresh()
  */
 
-void VertWidget::refresh()
+void VertView::refresh()
 {
   _refreshImages();
 }
@@ -604,7 +604,7 @@ void VertWidget::refresh()
  * unzoom the view
  */
 
-void VertWidget::unzoomView()
+void VertView::unzoomView()
 {
   
   _zoomWorld = _fullWorld;
@@ -619,10 +619,10 @@ void VertWidget::unzoomView()
 /*************************************************************************
  * adjust pixel scale for correct aspect ratio etc
  */
-void VertWidget::adjustPixelScales()
+void VertView::adjustPixelScales()
 {
 
-  cerr << "==>> hhhhhh VertWidget::adjustPixelScales() <<==" << endl;
+  cerr << "==>> hhhhhh VertView::adjustPixelScales() <<==" << endl;
 
 }
 
@@ -630,7 +630,7 @@ void VertWidget::adjustPixelScales()
  * resize()
  */
 
-void VertWidget::resize(const int width, const int height)
+void VertView::resize(const int width, const int height)
 {
   
   setGeometry(0, 0, width, height);
@@ -643,7 +643,7 @@ void VertWidget::resize(const int width, const int height)
  * paintEvent()
  */
 
-void VertWidget::paintEvent(QPaintEvent *event)
+void VertView::paintEvent(QPaintEvent *event)
 {
 
   QPainter painter(this);
@@ -660,7 +660,7 @@ void VertWidget::paintEvent(QPaintEvent *event)
  * selectVar()
  */
 
-void VertWidget::selectVar(const size_t index)
+void VertView::selectVar(const size_t index)
 {
 
   // If the field index isn't actually changing, we don't need to do anything
@@ -670,7 +670,7 @@ void VertWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> VertWidget::selectVar() for field index: " 
+    cerr << "=========>> VertView::selectVar() for field index: " 
          << index << endl;
   }
 
@@ -704,7 +704,7 @@ void VertWidget::selectVar(const size_t index)
  * RENDER_V_MOVIE_FRAME:
  */
 
-int VertWidget::renderVMovieFrame(int index, QPainter &painter)
+int VertView::renderVMovieFrame(int index, QPainter &painter)
 {
   int stat = 0;
 #ifdef NOTYET
@@ -732,10 +732,10 @@ int VertWidget::renderVMovieFrame(int index, QPainter &painter)
  * RENDER_VERT_DISPLAY: Render the vertical cross section display
  */
 
-int VertWidget::renderVertDisplay(QPaintDevice *pdev,
-                                  int page,
-                                  time_t start_time,
-                                  time_t end_time)
+int VertView::renderVertDisplay(QPaintDevice *pdev,
+                                int page,
+                                time_t start_time,
+                                time_t end_time)
 {
 
   int i;
@@ -878,7 +878,7 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
  * set archive mode
  */
 
-void VertWidget::setArchiveMode(bool state)
+void VertView::setArchiveMode(bool state)
 {
   _archiveMode = state;
 }
@@ -887,7 +887,7 @@ void VertWidget::setArchiveMode(bool state)
  * zoomBack the view
  */
 
-void VertWidget::zoomBackView()
+void VertView::zoomBackView()
 {
   if (_savedZooms.size() == 0) {
     _zoomWorld = _fullWorld;
@@ -908,7 +908,7 @@ void VertWidget::zoomBackView()
  * setGrids()
  */
 
-void VertWidget::setGrids(const bool enabled)
+void VertView::setGrids(const bool enabled)
 {
   _gridsEnabled = enabled;
   update();
@@ -919,7 +919,7 @@ void VertWidget::setGrids(const bool enabled)
  * turn on archive-style rendering - all fields
  */
 
-void VertWidget::activateArchiveRendering()
+void VertView::activateArchiveRendering()
 {
   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
   //   _fieldRenderers[ii]->setBackgroundRenderingOn();
@@ -931,7 +931,7 @@ void VertWidget::activateArchiveRendering()
  * turn on reatlime-style rendering - non-selected fields in background
  */
 
-void VertWidget::activateRealtimeRendering()
+void VertView::activateRealtimeRendering()
 {
   
   // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
@@ -946,7 +946,7 @@ void VertWidget::activateRealtimeRendering()
  * displayImage()
  */
 
-void VertWidget::displayImage(const size_t field_num)
+void VertView::displayImage(const size_t field_num)
 {
   // If we weren't rendering the current field, do nothing
   if (field_num != _selectedField) {
@@ -961,7 +961,7 @@ void VertWidget::displayImage(const size_t field_num)
  * backgroundColor()
  */
 
-void VertWidget::backgroundColor(const QColor &color)
+void VertView::backgroundColor(const QColor &color)
 {
   _backgroundBrush.setColor(color);
   QPalette new_palette = palette();
@@ -975,7 +975,7 @@ void VertWidget::backgroundColor(const QColor &color)
  * getImage()
  */
 
-QImage* VertWidget::getImage()
+QImage* VertView::getImage()
 {
   QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
@@ -987,7 +987,7 @@ QImage* VertWidget::getImage()
  * getPixmap()
  */
 
-QPixmap* VertWidget::getPixmap()
+QPixmap* VertView::getPixmap()
 {
   QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
@@ -1002,7 +1002,7 @@ QPixmap* VertWidget::getPixmap()
  * mousePressEvent()
  */
 
-void VertWidget::mousePressEvent(QMouseEvent *e)
+void VertView::mousePressEvent(QMouseEvent *e)
 {
 
   // cerr << "cccc mousePressEvent" << endl;
@@ -1044,7 +1044,7 @@ void VertWidget::mousePressEvent(QMouseEvent *e)
  * mouseMoveEvent(), mouse button is down and mouse is moving
  */
 
-void VertWidget::mouseMoveEvent(QMouseEvent * e)
+void VertView::mouseMoveEvent(QMouseEvent * e)
 {
 
   // cerr << "ccccc mouseMoveEvent" << endl;
@@ -1094,7 +1094,7 @@ void VertWidget::mouseMoveEvent(QMouseEvent * e)
 #ifdef NOTNOW
 /**************   testing ******/
 
-void VertWidget::smartBrush(int xPixel, int yPixel) 
+void VertView::smartBrush(int xPixel, int yPixel) 
 {
 
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
@@ -1115,7 +1115,7 @@ void VertWidget::smartBrush(int xPixel, int yPixel)
  * resizeEvent()
  */
 
-void VertWidget::resizeEvent(QResizeEvent * e)
+void VertView::resizeEvent(QResizeEvent * e)
 {
   cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
@@ -1127,7 +1127,7 @@ void VertWidget::resizeEvent(QResizeEvent * e)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void VertWidget::_resetWorld(int width, int height)
+void VertView::_resetWorld(int width, int height)
 
 {
 
@@ -1145,7 +1145,7 @@ void VertWidget::_resetWorld(int width, int height)
 ////////////////////
 // set the transform
 
-void VertWidget::_setTransform(const QTransform &transform)
+void VertView::_setTransform(const QTransform &transform)
 {
   // float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
   // BoundaryPointEditor::Instance()->setWorldScale(worldScale);
@@ -1158,7 +1158,7 @@ void VertWidget::_setTransform(const QTransform &transform)
  * perform the rendering
  */
 
-void VertWidget::_performRendering()
+void VertView::_performRendering()
 {
 
   // start the rendering
@@ -1183,7 +1183,7 @@ void VertWidget::_performRendering()
 
 }
 
-void VertWidget::informationMessage()
+void VertView::informationMessage()
 {
   
   // QMessageBox::StandardButton reply;
@@ -1198,7 +1198,7 @@ void VertWidget::informationMessage()
 
 }
 
-// void VertWidget::notImplemented()
+// void VertView::notImplemented()
 // {
 //   cerr << "inside notImplemented() ... " << endl;
 
@@ -1219,13 +1219,13 @@ void VertWidget::informationMessage()
 
 // slots for context editing; create and show the associated modeless dialog and return                                   
 
-void VertWidget::contextMenuCancel()
+void VertView::contextMenuCancel()
 {
   // informationMessage();
   // notImplemented();                                                                                                     
 }
 
-void VertWidget::contextMenuParameterColors()
+void VertView::contextMenuParameterColors()
 {
   /*
     LOG(DEBUG_VERBOSE) << "enter";
@@ -1260,33 +1260,33 @@ void VertWidget::contextMenuParameterColors()
    
 }
 
-void VertWidget::contextMenuView()
+void VertView::contextMenuView()
 {
   informationMessage();
   //  notImplemented();                                                                                                   
 }
 
-void VertWidget::contextMenuEditor()
+void VertView::contextMenuEditor()
 {
   informationMessage();
   //  notImplemented();                                                                                                   
 }
 
 
-void VertWidget::contextMenuExamine()         
+void VertView::contextMenuExamine()         
 {
   informationMessage();                                                                                                 
 
 }
 
-void VertWidget::contextMenuDataWidget()
+void VertView::contextMenuDataWidget()
 {
   informationMessage();
 
   //  notImplemented();                                                                                                   
 }
 
-void VertWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
+void VertView::ShowContextMenu(const QPoint &pos, RadxVol *vol)
 {
 
 }
