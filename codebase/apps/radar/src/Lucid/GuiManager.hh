@@ -72,7 +72,7 @@ class QTableWidget;
 
 class HorizView;
 class VertView;
-class VertWindow;
+class VertManager;
 class RadxPlatform;
 class TimeScaleWidget;
 class MapMenuItem;
@@ -208,7 +208,7 @@ private:
   
   // vertical view windows
 
-  VertWindow *_vertWindow;
+  VertManager *_vertWindow;
   VertView *_vert;
   bool _vertWindowDisplayed;
   bool _vertMode;

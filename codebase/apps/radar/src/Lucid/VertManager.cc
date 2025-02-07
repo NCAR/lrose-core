@@ -27,7 +27,7 @@
 #include <QLabel>
 
 #include "GuiManager.hh"
-#include "VertWindow.hh"
+#include "VertManager.hh"
 #include "cidd.h"
 
 using namespace std;
@@ -36,7 +36,7 @@ using namespace std;
  * Constructor
  */
 
-VertWindow::VertWindow(GuiManager *manager):
+VertManager::VertManager(GuiManager *manager):
         QMainWindow(manager),
         _manager(manager)
         
@@ -99,7 +99,7 @@ VertWindow::VertWindow(GuiManager *manager):
  * Destructor
  */
 
-VertWindow::~VertWindow()
+VertManager::~VertManager()
 {
 
 }
@@ -109,7 +109,7 @@ VertWindow::~VertWindow()
  * resize()
  */
 
-void VertWindow::resize()
+void VertManager::resize()
 {
   emit windowResized(_vertTopFrame->width(), _vertTopFrame->height());
 }
@@ -119,14 +119,14 @@ void VertWindow::resize()
  * resizeEvent()
  */
 
-void VertWindow::resizeEvent(QResizeEvent *event)
+void VertManager::resizeEvent(QResizeEvent *event)
 {
   resize();
 }
 
 
 ////////////////////////////////////////////////////////////////
-void VertWindow::keyPressEvent(QKeyEvent * e)
+void VertManager::keyPressEvent(QKeyEvent * e)
 {
   // pass event up to GuiManager
   _manager->keyPressEvent(e);
@@ -138,7 +138,7 @@ void VertWindow::keyPressEvent(QKeyEvent * e)
  * _createActions()
  */
 
-void VertWindow::_createActions(VertView *vert)
+void VertManager::_createActions(VertView *vert)
 {
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
@@ -171,7 +171,7 @@ void VertWindow::_createActions(VertView *vert)
 //////////////////////////////////////////////////
 // enable the zoom button - called by VertView
 
-void VertWindow::enableZoomButton() const
+void VertManager::enableZoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -179,7 +179,7 @@ void VertWindow::enableZoomButton() const
 ////////////////////////////////
 // unzoom display
 
-void VertWindow::_unzoom()
+void VertManager::_unzoom()
 {
   _vertView->unzoomView();
   _unzoomAct->setEnabled(false);
@@ -189,7 +189,7 @@ void VertWindow::_unzoom()
  * _createMenus()
  */
 
-void VertWindow::_createMenus()
+void VertManager::_createMenus()
 {
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
   _overlaysMenu->addAction(_ringsAct);
@@ -205,7 +205,7 @@ void VertWindow::_createMenus()
  * _createStatusPanel()
  */
 
-void VertWindow::_createStatusPanel(const int label_font_size)
+void VertManager::_createStatusPanel(const int label_font_size)
 {
   // Create the status panel
   
@@ -263,7 +263,7 @@ void VertWindow::_createStatusPanel(const int label_font_size)
  * @brief Set the azimuth value displayed in the window.
  */
 
-void VertWindow::setAzimuth(const double azimuth)
+void VertManager::setAzimuth(const double azimuth)
 {
   if (_manager->getArchiveMode()) {
     _azValue->setText("-----");
@@ -280,7 +280,7 @@ void VertWindow::setAzimuth(const double azimuth)
  * @brief Set the elevation value displayed in the window.
  */
 
-void VertWindow::setElevation(const double elevation)
+void VertManager::setElevation(const double elevation)
 {
   if (_manager->getArchiveMode()) {
     _elevValue->setText("-----");
@@ -299,7 +299,7 @@ void VertWindow::setElevation(const double elevation)
  *        title.
  */
 
-void VertWindow::setRadarName(const string &radar_name)
+void VertManager::setRadarName(const string &radar_name)
 {
   string window_title = "VERT -- " + radar_name;
   setWindowTitle(tr(window_title.c_str()));

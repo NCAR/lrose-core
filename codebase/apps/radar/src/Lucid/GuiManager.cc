@@ -98,7 +98,7 @@
 #include "ProdMenuItem.hh"
 #include "TimeControl.hh"
 #include "VertView.hh"
-#include "VertWindow.hh"
+#include "VertManager.hh"
 #include "WindMenuItem.hh"
 #include "ZoomMenuItem.hh"
 
@@ -573,7 +573,7 @@ void GuiManager::_setupWindows()
 
   // Create the VERT window
 
-  _vertWindow = new VertWindow(this);
+  _vertWindow = new VertManager(this);
   _vertWindow->setRadarName("unknown");
   // _vertWindow->setRadarName(_params.radar_name);
 

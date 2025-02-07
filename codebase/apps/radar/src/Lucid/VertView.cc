@@ -49,7 +49,7 @@
 
 #include "GuiManager.hh"
 #include "VertView.hh"
-#include "VertWindow.hh"
+#include "VertManager.hh"
 #include "cidd.h"
 
 using namespace std;
@@ -60,7 +60,7 @@ const double VertView::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 VertView::VertView(QWidget* parent,
                    const GuiManager &manager,
-                   const VertWindow &vertWindow) :
+                   const VertManager &vertWindow) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),

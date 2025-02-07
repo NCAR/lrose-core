@@ -57,7 +57,7 @@
 #include "WorldPlot.hh"
 
 class GuiManager;
-class VertWindow;
+class VertManager;
 
 // Widget for vertical display.
 
@@ -82,7 +82,7 @@ class DLL_EXPORT VertView : public QWidget
 
   VertView(QWidget* parent, 
            const GuiManager &manager,
-           const VertWindow &vertWindow);
+           const VertManager &vertWindow);
 
   /**
    * @brief Destructor.
@@ -304,7 +304,7 @@ class DLL_EXPORT VertView : public QWidget
 
   // QMainWindow
   
-  const VertWindow &_vertWindow;
+  const VertManager &_vertWindow;
 
   // are we in archive mode? and if so are we at the start of a sweep?
 

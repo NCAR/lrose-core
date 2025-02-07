@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef VertWindow_HH
-#define VertWindow_HH
+#ifndef VertManager_HH
+#define VertManager_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -50,7 +50,7 @@
 class GuiManager;
 // class DisplayField;
 
-class DLL_EXPORT VertWindow : public QMainWindow
+class DLL_EXPORT VertManager : public QMainWindow
 {
 
   // must include this if you use Qt signals/slots
@@ -68,13 +68,13 @@ public:
    * @param[in] parent   The parent widget.
    */
   
-  VertWindow(GuiManager *manager);
+  VertManager(GuiManager *manager);
 
   /**
    * @brief Destructor
    */
 
-  virtual ~VertWindow();
+  virtual ~VertManager();
   
   // get the VERT widget
 

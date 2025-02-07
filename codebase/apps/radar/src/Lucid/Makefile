@@ -76,7 +76,7 @@ HDRS = \
 	SymprodRenderObj.hh \
 	TimeList.hh \
 	VertView.hh \
-	VertWindow.hh \
+	VertManager.hh \
 	VlevelManager.hh \
 	WayPts.hh \
 	WindMenuItem.hh \
@@ -133,7 +133,7 @@ MOC_SRCS = \
 	ProdMenuItem.cc \
 	TimeControl.cc \
 	VertView.cc \
-	VertWindow.cc \
+	VertManager.cc \
 	WindMenuItem.cc \
 	ZoomMenuItem.cc
 
@@ -146,7 +146,7 @@ MOC_OUTPUT = \
 	moc_ProdMenuItem.cpp \
 	moc_TimeControl.cpp \
 	moc_VertView.cpp \
-	moc_VertWindow.cpp \
+	moc_VertManager.cpp \
 	moc_WindMenuItem.cpp \
 	moc_ZoomMenuItem.cpp
 
