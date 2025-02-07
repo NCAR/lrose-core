@@ -84,7 +84,7 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
   			  (time_t) gd.epoch_end,
   			  (time_t) start_time,
   			  (time_t) end_time,
-			  gd.mrec[gd.h_win.page]->h_date.utime());
+			  gd.mread[gd.h_win.page]->h_date.utime());
 
   // get the data
   

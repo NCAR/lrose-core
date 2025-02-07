@@ -381,12 +381,12 @@ int Product::getData(const time_t data_start_time,
   // Send the information about the current display limits, just in case
   // the server cares
 
-  int vlevel_num = gd.mrec[gd.h_win.page]->plane;
+  int vlevel_num = gd.mread[gd.h_win.page]->plane;
     
   _spdb.setHorizLimits(context.min_lat, context.min_lon,
 		       context.max_lat, context.max_lon);
-  _spdb.setVertLimits(gd.mrec[gd.h_win.page]->vert[vlevel_num].min,
-		      gd.mrec[gd.h_win.page]->vert[vlevel_num].max);
+  _spdb.setVertLimits(gd.mread[gd.h_win.page]->vert[vlevel_num].min,
+		      gd.mread[gd.h_win.page]->vert[vlevel_num].max);
 
   int iret;
   if (_prodInfo.render_type == Params::SYMPROD_RENDER_GET_VALID) {

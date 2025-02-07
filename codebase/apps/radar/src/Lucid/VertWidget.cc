@@ -443,7 +443,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   int fieldNum = gd.h_win.page;
-  const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
+  const ColorMap &colorMap = *(gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
   
   // add legends with time, field name and elevation angle
@@ -757,15 +757,15 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
                  0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
 
   if(!_params.draw_main_on_top) { 
-    if(gd.mrec[page]->render_method == LINE_CONTOURS) {
-      cont.min = gd.mrec[page]->cont_low;
-      cont.max = gd.mrec[page]->cont_high;
-      cont.interval = gd.mrec[page]->cont_interv;
+    if(gd.mread[page]->render_method == LINE_CONTOURS) {
+      cont.min = gd.mread[page]->cont_low;
+      cont.max = gd.mread[page]->cont_high;
+      cont.interval = gd.mread[page]->cont_interv;
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
       cont.color = gd.legends.foreground_color;
-      cont.vcm = &gd.mrec[page]->v_vcm;
+      cont.vcm = &gd.mread[page]->v_vcm;
       if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
         //if (gd.layers.use_alt_contours) {
         RenderLineContours(xid, &cont, true);
@@ -773,28 +773,28 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
         render_xsect_line_contours(xid,&cont);
       }
     } else {
-      render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
-      // stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+      render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
+      // stat =  render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
     }
   }
     
   /* Render each of the gridded_overlay fields */
   for(i=0; i < NUM_GRID_LAYERS; i++) {           
     if(gd.layers.overlay_field_on[i]) {
-      render_xsect_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
+      render_xsect_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   } 
 
   if(_params.draw_main_on_top) { 
-    if(gd.mrec[page]->render_method == LINE_CONTOURS) {
-      cont.min = gd.mrec[page]->cont_low;
-      cont.max = gd.mrec[page]->cont_high;
-      cont.interval = gd.mrec[page]->cont_interv;
+    if(gd.mread[page]->render_method == LINE_CONTOURS) {
+      cont.min = gd.mread[page]->cont_low;
+      cont.max = gd.mread[page]->cont_high;
+      cont.interval = gd.mread[page]->cont_interv;
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
       cont.color = gd.legends.foreground_color;
-      cont.vcm = &gd.mrec[page]->v_vcm;
+      cont.vcm = &gd.mread[page]->v_vcm;
       if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
         // if (gd.layers.use_alt_contours) {
         RenderLineContours(xid, &cont, true);
@@ -802,8 +802,8 @@ int VertWidget::renderVertDisplay(QPaintDevice *pdev,
         render_xsect_line_contours(xid,&cont);
       }
     } else {
-      // stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
-      render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+      // stat =  render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
+      render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
     }
   }
 

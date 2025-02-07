@@ -290,7 +290,7 @@ void Lucid::_initGlobals()
   MEM_zero(gd.prod);
   gd.prod_mgr = NULL;
   
-  MEM_zero(gd.mrec);
+  MEM_zero(gd.mread);
   MEM_zero(gd.legends);
 
   MEM_zero(gd.movie);
@@ -1010,119 +1010,119 @@ int Lucid::_initGrids()
     
     /* get space for data info */
     
-    gd.mrec[ifld] = new MdvReader;
-    MdvReader *mrec = gd.mrec[ifld]; 
+    gd.mread[ifld] = new MdvReader;
+    MdvReader *mread = gd.mread[ifld]; 
     
-    STRcopy(mrec->legend_name, fld.legend_label, NAME_LENGTH);
-    STRcopy(mrec->button_name, fld.button_label, NAME_LENGTH);
+    STRcopy(mread->legend_name, fld.legend_label, NAME_LENGTH);
+    STRcopy(mread->button_name, fld.button_label, NAME_LENGTH);
     
     if(_params.html_mode == 0 && _params.replace_underscores) {
       /* Replace Underscores with spaces in names */
-      for(int jj = strlen(mrec->button_name)-1 ; jj >= 0; jj--) {
-        if(mrec->button_name[jj] == '_') {
-          mrec->button_name[jj] = ' ';
+      for(int jj = strlen(mread->button_name)-1 ; jj >= 0; jj--) {
+        if(mread->button_name[jj] == '_') {
+          mread->button_name[jj] = ' ';
         }
-        if(mrec->legend_name[jj] == '_') {
-          mrec->legend_name[jj] = ' ';
+        if(mread->legend_name[jj] == '_') {
+          mread->legend_name[jj] = ' ';
         }
       } // jj
     }
     
-    STRcopy(mrec->url, fld.url, URL_LENGTH);
-    STRcopy(mrec->field_label, fld.field_name, NAME_LENGTH);
-    STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
+    STRcopy(mread->url, fld.url, URL_LENGTH);
+    STRcopy(mread->field_label, fld.field_name, NAME_LENGTH);
+    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
 
     // if units are "" or --, set to zero-length string
     if (!strcmp(fld.field_units, "\"\"") || !strcmp(fld.field_units, "--")) {
-      STRcopy(mrec->field_units, "", LABEL_LENGTH);
+      STRcopy(mread->field_units, "", LABEL_LENGTH);
     } else {
-      STRcopy(mrec->field_units, fld.field_units, LABEL_LENGTH);
+      STRcopy(mread->field_units, fld.field_units, LABEL_LENGTH);
     }
 
-    mrec->cont_low = fld.contour_low;
-    mrec->cont_high = fld.contour_high;
-    mrec->cont_interv = fld.contour_interval;
+    mread->cont_low = fld.contour_low;
+    mread->cont_high = fld.contour_high;
+    mread->cont_interv = fld.contour_interval;
 
-    mrec->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
+    mread->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval_mins;
 
     if (fld.render_mode == Params::POLYGONS) {
-      mrec->render_method = POLYGONS;
+      mread->render_method = POLYGONS;
     } else if (fld.render_mode == Params::FILLED_CONTOURS) {
-      mrec->render_method = FILLED_CONTOURS;
+      mread->render_method = FILLED_CONTOURS;
     } else if (fld.render_mode == Params::DYNAMIC_CONTOURS) {
-      mrec->render_method = DYNAMIC_CONTOURS;
+      mread->render_method = DYNAMIC_CONTOURS;
     } else if (fld.render_mode == Params::LINE_CONTOURS) {
-      mrec->render_method = LINE_CONTOURS;
+      mread->render_method = LINE_CONTOURS;
     }
 
     if (fld.composite_mode) {
-      mrec->composite_mode = TRUE;
+      mread->composite_mode = TRUE;
     }
 
     if (fld.auto_scale) {
-      mrec->auto_scale = TRUE;
+      mread->auto_scale = TRUE;
     }
 
     if (fld.display_in_menu) {
-      mrec->currently_displayed = 1;
+      mread->currently_displayed = 1;
     } else {
-      mrec->currently_displayed = 0;
+      mread->currently_displayed = 0;
     }
     
     if(_params.run_once_and_exit) {
-      mrec->auto_render = 1;
+      mread->auto_render = 1;
     } else {
-      mrec->auto_render = fld.auto_render;
+      mread->auto_render = fld.auto_render;
     }
     
-    mrec->last_elev = (char *)NULL;
-    mrec->elev_size = 0;
+    mread->last_elev = (char *)NULL;
+    mread->elev_size = 0;
     
-    mrec->plane = 0;
-    mrec->h_data_valid = 0;
-    mrec->v_data_valid = 0;
-    mrec->h_last_scale  = -1.0;
-    mrec->h_last_bias  = -1.0;
-    mrec->h_last_missing  = -1.0;
-    mrec->h_last_bad  = -1.0;
-    mrec->h_last_transform  = -1;
-    mrec->v_last_scale  = -1.0;
-    mrec->v_last_bias  = -1.0;
-    mrec->v_last_missing  = -1.0;
-    mrec->v_last_bad  = -1.0;
-    mrec->v_last_transform  = -1;
-    mrec->h_fhdr.proj_origin_lat  = 0.0;
-    mrec->h_fhdr.proj_origin_lon  = 0.0;
-    mrec->time_list.num_alloc_entries = 0;
-    mrec->time_list.num_entries = 0;
+    mread->plane = 0;
+    mread->h_data_valid = 0;
+    mread->v_data_valid = 0;
+    mread->h_last_scale  = -1.0;
+    mread->h_last_bias  = -1.0;
+    mread->h_last_missing  = -1.0;
+    mread->h_last_bad  = -1.0;
+    mread->h_last_transform  = -1;
+    mread->v_last_scale  = -1.0;
+    mread->v_last_bias  = -1.0;
+    mread->v_last_missing  = -1.0;
+    mread->v_last_bad  = -1.0;
+    mread->v_last_transform  = -1;
+    mread->h_fhdr.proj_origin_lat  = 0.0;
+    mread->h_fhdr.proj_origin_lon  = 0.0;
+    mread->time_list.num_alloc_entries = 0;
+    mread->time_list.num_entries = 0;
     
-    STRcopy(mrec->units_label_cols,"KM",LABEL_LENGTH);
-    STRcopy(mrec->units_label_rows,"KM",LABEL_LENGTH);
-    STRcopy(mrec->units_label_sects,"KM",LABEL_LENGTH);
+    STRcopy(mread->units_label_cols,"KM",LABEL_LENGTH);
+    STRcopy(mread->units_label_rows,"KM",LABEL_LENGTH);
+    STRcopy(mread->units_label_sects,"KM",LABEL_LENGTH);
 
     // instantiate classes
-    mrec->h_mdvx = new DsMdvx;
-    mrec->v_mdvx = new DsMdvx;
-    mrec->h_mdvx_int16 = new MdvxField;
-    mrec->v_mdvx_int16 = new MdvxField;
-    mrec->proj = new MdvxProj;
+    mread->h_mdvx = new DsMdvx;
+    mread->v_mdvx = new DsMdvx;
+    mread->h_mdvx_int16 = new MdvxField;
+    mread->v_mdvx_int16 = new MdvxField;
+    mread->proj = new MdvxProj;
 
-    mrec->colorMap = NULL;
-    STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
-    STRcopy(mrec->color_file, fld.color_map, NAME_LENGTH);
+    mread->colorMap = NULL;
+    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
+    STRcopy(mread->color_file, fld.color_map, NAME_LENGTH);
     string colorscaleCachePath;
-    if (_getColorscaleCachePath(mrec->color_file, colorscaleCachePath)) {
+    if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
       iret = -1;
     }
-    mrec->colorMap = new ColorMap(colorscaleCachePath.c_str(),
+    mread->colorMap = new ColorMap(colorscaleCachePath.c_str(),
                                   _params.debug >= Params::DEBUG_EXTRA);
-    mrec->colorMap->setName(fld.color_map);
-    mrec->colorMap->setUnits(mrec->field_units);
+    mread->colorMap->setName(fld.color_map);
+    mread->colorMap->setUnits(mread->field_units);
     
   } // ifld
   
   /* Make sure the first field is always on */
-  gd.mrec[0]->currently_displayed = 1;
+  gd.mread[0]->currently_displayed = 1;
 
   return iret;
 
@@ -2860,9 +2860,9 @@ void Lucid::_initContours()
 
   for(int ii = 0; ii < NUM_CONT_LAYERS; ii++) {
     gd.layers.cont[ii].field = 0;
-    gd.layers.cont[ii].min = gd.mrec[0]->cont_low;
-    gd.layers.cont[ii].max = gd.mrec[0]->cont_high;
-    gd.layers.cont[ii].interval = gd.mrec[0]->cont_interv;
+    gd.layers.cont[ii].min = gd.mread[0]->cont_low;
+    gd.layers.cont[ii].max = gd.mread[0]->cont_high;
+    gd.layers.cont[ii].interval = gd.mread[0]->cont_interv;
     gd.layers.cont[ii].labels_on  = _params.label_contours;
   }
   for(int ii = 0; ii < NUM_GRID_LAYERS; ii++) {
@@ -2891,16 +2891,16 @@ void Lucid::_initContours()
     }
     
     for (int jj = 0; jj < gd.num_datafields; jj++) {
-      if (strcmp(gd.mrec[jj]->button_name, contourFieldName) == 0) {
+      if (strcmp(gd.mread[jj]->button_name, contourFieldName) == 0) {
         gd.layers.cont[ii].field = jj;
         if(cfield.on_at_startup) {
           gd.layers.cont[ii].active = 1;
         } else {
           gd.layers.cont[ii].active = 0;
         }
-        gd.layers.cont[ii].min = gd.mrec[jj]->cont_low;
-        gd.layers.cont[ii].max = gd.mrec[jj]->cont_high;
-        gd.layers.cont[ii].interval = gd.mrec[jj]->cont_interv;
+        gd.layers.cont[ii].min = gd.mread[jj]->cont_low;
+        gd.layers.cont[ii].max = gd.mread[jj]->cont_high;
+        gd.layers.cont[ii].interval = gd.mread[jj]->cont_interv;
         strncpy(gd.layers.cont[ii].color_name, cfield.color, NAME_LENGTH);
         break;
       }
@@ -2934,7 +2934,7 @@ void Lucid::_initOverlayFields()
     }
     
     for(int jj = 0; jj <  gd.num_datafields; jj++) {
-      if(strcmp(gd.mrec[jj]->button_name, fieldName) == 0) {  
+      if(strcmp(gd.mread[jj]->button_name, fieldName) == 0) {  
         if(lfield.on_at_startup) {
           gd.layers.overlay_field_on[ii] = 1;
         } else {

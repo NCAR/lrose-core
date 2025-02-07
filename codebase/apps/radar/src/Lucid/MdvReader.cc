@@ -394,7 +394,7 @@ int MdvReader::getHorizPlane()
     
   // Implemented for MOBILE RADARS - 
   if(_params.domain_follows_data &&
-     this == gd.mrec[gd.h_win.page] ) { // Only for the primary field
+     this == gd.mread[gd.h_win.page] ) { // Only for the primary field
     double dx,locx;
     double dy,locy;
     int index = gd.h_win.zoom_level;

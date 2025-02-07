@@ -574,7 +574,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   int fieldNum = gd.h_win.page;
-  const ColorMap &colorMap = *(gd.mrec[fieldNum]->colorMap);
+  const ColorMap &colorMap = *(gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
 #ifdef NOTNOW
@@ -1318,15 +1318,15 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
       h_image = 0;
     }
     
-    if (gd.mrec[h_image]->currently_displayed && gd.mrec[h_image]->auto_render) {
+    if (gd.mread[h_image]->currently_displayed && gd.mread[h_image]->auto_render) {
       
-      if (gd.h_win.redraw_flag[h_image] || (gd.mrec[h_image]->h_data_valid == 0)) {
+      if (gd.h_win.redraw_flag[h_image] || (gd.mread[h_image]->h_data_valid == 0)) {
         none_found = 0;
         stat = gather_hwin_data(h_image,
                                 gd.movie.frame[index].time_start,
                                 gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
-          if(gd.mrec[h_image]->auto_render) {
+          if(gd.mread[h_image]->auto_render) {
             pdev = gd.h_win.page_pdev[h_image];
           } else {
             pdev = gd.h_win.tmp_pdev;
@@ -1347,7 +1347,7 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
           gd.h_copy_flag = 1;
         }
       } // if (gd.h_win.redraw_flag[h_image] ...
-    } // if (gd.mrec[h_image]->currently_displayed ...
+    } // if (gd.mread[h_image]->currently_displayed ...
     h_image++;
 
     /*
@@ -1356,12 +1356,12 @@ void HorizWidget::_doRenderInvalidImages(QPainter &painter,
 
     if (v_image >= gd.num_datafields) v_image = 0;
 
-    if (gd.mrec[v_image]->currently_displayed && gd.mrec[v_image]->auto_render) {
-      if ((gd.v_win.active) && (gd.v_win.redraw_flag[v_image] || (gd.mrec[v_image]->v_data_valid == 0))) {
+    if (gd.mread[v_image]->currently_displayed && gd.mread[v_image]->auto_render) {
+      if ((gd.v_win.active) && (gd.v_win.redraw_flag[v_image] || (gd.mread[v_image]->v_data_valid == 0))) {
         stat = gather_vwin_data(v_image, gd.movie.frame[index].time_start,
                                 gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
-          if(gd.mrec[v_image]->auto_render) {
+          if(gd.mread[v_image]->auto_render) {
             pdev = gd.v_win.page_pdev[v_image];
           } else {
             pdev = gd.v_win.tmp_pdev;
@@ -1451,7 +1451,7 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
       break;
   }
 
-  MdvReader *mr = gd.mrec[page];
+  MdvReader *mr = gd.mread[page];
  
   // Clear time lists
   // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
@@ -1501,10 +1501,10 @@ int HorizWidget::_controlRendering(QPainter &painter, int page,
      
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < NUM_GRID_LAYERS; i++) {
-    if(gd.layers.overlay_field_on[i] && gd.mrec[gd.layers.overlay_field[i]] != NULL) {
+    if(gd.layers.overlay_field_on[i] && gd.mread[gd.layers.overlay_field[i]] != NULL) {
       cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
-      _renderGrid(painter, page, gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
-      // render_grid(xid,gd.mrec[gd.layers.overlay_field[i]],start_time,end_time,1);
+      _renderGrid(painter, page, gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
+      // render_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
 

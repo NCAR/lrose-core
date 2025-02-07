@@ -78,20 +78,20 @@ void VlevelManager::setFromMdvx()
   if (gd.h_win.page >= gd.num_datafields) {
     return;
   }
-  MdvReader *mrec = gd.mrec[gd.h_win.page];
-  if (mrec->ds_fhdr.nz > MDV64_MAX_VLEVELS) {
+  MdvReader *mread = gd.mread[gd.h_win.page];
+  if (mread->ds_fhdr.nz > MDV64_MAX_VLEVELS) {
     return;
   }
-  //  for (int iz = 0; iz < mrec->ds_fhdr.nz; iz++) {
-  for (int iz = mrec->ds_fhdr.nz - 1; iz >= 0; iz--) {
+  //  for (int iz = 0; iz < mread->ds_fhdr.nz; iz++) {
+  for (int iz = mread->ds_fhdr.nz - 1; iz >= 0; iz--) {
     GuiVlevel glevel;
     glevel.indexInFile = iz;
     glevel.indexInGui = iz;
-    glevel.level = mrec->ds_vhdr.level[iz];
+    glevel.level = mread->ds_vhdr.level[iz];
     _vlevels.push_back(glevel);
   }
 
-  switch(mrec->ds_fhdr.vlevel_type) {
+  switch(mread->ds_fhdr.vlevel_type) {
     case Mdvx::VERT_TYPE_Z:
     case Mdvx::VERT_TYPE_SIGMA_Z:
       _units = "km";

@@ -339,7 +339,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     // gd.movie.frame[index].time_mid = _selectedTime.utime();
-    MdvReader *mr = gd.mrec[_fieldNum];
+    MdvReader *mr = gd.mread[_fieldNum];
     cerr << "*********************************** selTime: "
          << _timeControl->getSelectedTime().asString(0) << endl;
     // if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
@@ -356,7 +356,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // check for new data
 
-  MdvReader *mr = gd.mrec[_fieldNum];
+  MdvReader *mr = gd.mread[_fieldNum];
   if (mr->isNewH()) {
     int index = gd.movie.cur_frame;
     if (gd.movie.cur_frame < 0) {
@@ -2053,9 +2053,9 @@ void GuiManager::_changeField(int fieldId, bool guiMode)
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
-  _selectedName = gd.mrec[gd.h_win.page]->h_fhdr.field_name;
-  _selectedLabel = gd.mrec[gd.h_win.page]->h_fhdr.field_name;
-  _selectedUnits = gd.mrec[gd.h_win.page]->h_fhdr.units;
+  _selectedName = gd.mread[gd.h_win.page]->h_fhdr.field_name;
+  _selectedLabel = gd.mread[gd.h_win.page]->h_fhdr.field_name;
+  _selectedUnits = gd.mread[gd.h_win.page]->h_fhdr.units;
 
 #ifdef NOTYET
   _selectedLabelWidget->setText(_selectedLabel.c_str());
@@ -2487,16 +2487,16 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   
   gd.prev_field = gd.h_win.page;
   _setField(_fieldNum);
-  gd.mrec[_fieldNum]->h_data_valid = 0;
+  gd.mread[_fieldNum]->h_data_valid = 0;
 
   if (_params.debug) {
     const Params::field_t *fparams = item->getFieldParams();
     cerr << "Changing to field: " << fparams->button_label << endl;
     cerr << "              url: " << fparams->url << endl;
     cerr << "         fieldNum: " << _fieldNum << endl;
-    cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
-    cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
-    cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
+    cerr << "      field_label: " << gd.mread[_fieldNum]->field_label << endl;
+    cerr << "      button_name: " << gd.mread[_fieldNum]->button_name << endl;
+    cerr << "      legend_name: " << gd.mread[_fieldNum]->legend_name << endl;
   }
 
   gd.redraw_horiz = true;
@@ -3217,15 +3217,15 @@ bool GuiManager::_checkForFieldChange()
   _fieldNum = item->getFieldIndex();
   gd.prev_field = gd.h_win.page;
   _setField(_fieldNum);
-  gd.mrec[_fieldNum]->h_data_valid = 0;
+  gd.mread[_fieldNum]->h_data_valid = 0;
   if (_params.debug) {
     const Params::field_t *fparams = item->getFieldParams();
     cerr << "Changing to field: " << fparams->button_label << endl;
     cerr << "              url: " << fparams->url << endl;
     cerr << "         fieldNum: " << _fieldNum << endl;
-    cerr << "      field_label: " << gd.mrec[_fieldNum]->field_label << endl;
-    cerr << "      button_name: " << gd.mrec[_fieldNum]->button_name << endl;
-    cerr << "      legend_name: " << gd.mrec[_fieldNum]->legend_name << endl;
+    cerr << "      field_label: " << gd.mread[_fieldNum]->field_label << endl;
+    cerr << "      button_name: " << gd.mread[_fieldNum]->button_name << endl;
+    cerr << "      legend_name: " << gd.mread[_fieldNum]->legend_name << endl;
   }
   gd.redraw_horiz = true;
   gd.field_has_changed = true;
@@ -3429,12 +3429,12 @@ void GuiManager::_checkForExpiredData(time_t tm)
   /* look thru primary data fields */
   for (i=0; i < gd.num_datafields; i++) {
     /* if data has expired or field should be updated */
-    if (gd.mrec[i]->h_mhdr.time_expire < tm ) {
+    if (gd.mread[i]->h_mhdr.time_expire < tm ) {
       //        if(gd.debug1) fprintf(stderr,"Field: %s expired at %s\n",
-      //		 gd.mrec[i]->button_name,
-      //		 asctime(gmtime(&((time_t) gd.mrec[i]->h_mhdr.time_expire))));
-      gd.mrec[i]->h_data_valid = 0;
-      gd.mrec[i]->v_data_valid = 0;
+      //		 gd.mread[i]->button_name,
+      //		 asctime(gmtime(&((time_t) gd.mread[i]->h_mhdr.time_expire))));
+      gd.mread[i]->h_data_valid = 0;
+      gd.mread[i]->v_data_valid = 0;
     }
   }
 
@@ -3489,12 +3489,12 @@ void GuiManager::_checkForDataUpdates(time_t tm)
     for (i=0; i < gd.num_datafields; i++) {
       // pull out dir from URL
 
-      end_ptr = strrchr(gd.mrec[i]->url,'&');
+      end_ptr = strrchr(gd.mread[i]->url,'&');
       if(end_ptr == NULL) continue;  // broken URL.
 
-      start_ptr =  strrchr(gd.mrec[i]->url,':');
+      start_ptr =  strrchr(gd.mread[i]->url,':');
       if(start_ptr == NULL) {
-	start_ptr =  gd.mrec[i]->url; // Must be a local file/dir based URL
+	start_ptr =  gd.mread[i]->url; // Must be a local file/dir based URL
       } else {
 	start_ptr++;  // Move up one character
       }
@@ -3509,9 +3509,9 @@ void GuiManager::_checkForDataUpdates(time_t tm)
 	// See if any data matches
 	if(strstr(info.dir,dir_buf) != NULL) {
           // Note unix_time is signed (time_t)  and info.end_time is unsigned int
-          if (gd.mrec[i]->h_date.utime() < (time_t) info.end_time) {
-            gd.mrec[i]->h_data_valid = 0;
-            gd.mrec[i]->v_data_valid = 0;
+          if (gd.mread[i]->h_date.utime() < (time_t) info.end_time) {
+            gd.mread[i]->h_data_valid = 0;
+            gd.mread[i]->v_data_valid = 0;
           }
 	}
       }
@@ -3527,7 +3527,7 @@ void GuiManager::_checkForDataUpdates(time_t tm)
 
 	start_ptr =  strrchr(gd.layers.wind[i].wind_u->url,':');
 	if(start_ptr == NULL) {
-          start_ptr =  gd.mrec[i]->url; // Must be a local file/dir based URL
+          start_ptr =  gd.mread[i]->url; // Must be a local file/dir based URL
 	} else {
           start_ptr++;  // Move up one character
 	}
@@ -3570,7 +3570,7 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
   // If data used to draw plan view is invalid
   // Indicate plan view image needs rerendering
   
-  if (gd.mrec[gd.h_win.page]->h_data_valid == 0 ||
+  if (gd.mread[gd.h_win.page]->h_data_valid == 0 ||
       gd.prod_mgr->num_products_invalid() > 0) {
     gd.movie.frame[frame_index].redraw_horiz = 1;
     gd.h_win.redraw_flag[gd.h_win.page] = 1;
@@ -3599,7 +3599,7 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
 
   for(i= 0; i < NUM_CONT_LAYERS; i++) {
     if(gd.layers.cont[i].active) {
-      if(gd.mrec[gd.layers.cont[i].field]->h_data_valid == 0) {
+      if(gd.mread[gd.layers.cont[i].field]->h_data_valid == 0) {
 	gd.movie.frame[frame_index].redraw_horiz = 1;
 	gd.h_win.redraw_flag[gd.h_win.page] = 1;
       }
@@ -3610,7 +3610,7 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
   // Indicate pcross section image needs rerendering
   
   if (gd.v_win.active ) {
-    if(gd.mrec[gd.v_win.page]->v_data_valid == 0)  {
+    if(gd.mread[gd.v_win.page]->v_data_valid == 0)  {
       gd.movie.frame[frame_index].redraw_vert = 1;
       gd.v_win.redraw_flag[gd.v_win.page] = 1;
     }
@@ -3637,7 +3637,7 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
     /* Check overlay contours if active */
     for(i= 0; i < NUM_CONT_LAYERS; i++) {
       if(gd.layers.cont[i].active) {
-	if(gd.mrec[gd.layers.cont[i].field]->v_data_valid == 0) {
+	if(gd.mread[gd.layers.cont[i].field]->v_data_valid == 0) {
           gd.movie.frame[frame_index].redraw_vert = 1;
           gd.v_win.redraw_flag[gd.v_win.page] = 1;
 	}
@@ -3833,10 +3833,10 @@ void GuiManager::_setField(int value)
   }
   
   for(int i=0; i < gd.num_datafields; i++) {
-    if(gd.mrec[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
+    if(gd.mread[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
   }
   
-  if(gd.mrec[gd.h_win.page]->auto_render && 
+  if(gd.mread[gd.h_win.page]->auto_render && 
      gd.h_win.page_pdev[gd.h_win.page] != 0 &&
      gd.h_win.redraw_flag[gd.h_win.page] == 0) {
 
@@ -4262,7 +4262,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
     gd.coord_expt->time_cent = gd.coord_expt->time_min +
       (gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
   }
-  gd.coord_expt->time_current_field = gd.mrec[gd.h_win.page]->h_mhdr.time_centroid;
+  gd.coord_expt->time_current_field = gd.mread[gd.h_win.page]->h_mhdr.time_centroid;
 
   if (gd.movie.movie_on ) {
     flag = 1;        /* set OK state */
@@ -4340,7 +4340,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
   } // if (gd.movie.movie_on)
 
   /* Set up convienient pointer to main met record */
-  mr = gd.mrec[gd.h_win.page];
+  mr = gd.mread[gd.h_win.page];
 
   /* Decide which Pixmaps to use for rendering */
   if (gd.movie.movie_on ) {
@@ -4371,7 +4371,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       h_pdev = gd.h_win.tmp_pdev;
     }
 
-    if(gd.mrec[gd.v_win.page]->auto_render) {
+    if(gd.mread[gd.v_win.page]->auto_render) {
       v_pdev = gd.v_win.page_pdev[gd.v_win.page];
     } else {
       v_pdev = gd.v_win.tmp_pdev;
@@ -4498,7 +4498,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       gd.coord_expt->click_type = CIDD_OTHER_CLICK;
       gd.coord_expt->pointer_seq_num++;
     }
-    gd.coord_expt->time_current_field = gd.mrec[gd.h_win.page]->h_mhdr.time_centroid;
+    gd.coord_expt->time_current_field = gd.mread[gd.h_win.page]->h_mhdr.time_centroid;
 
     /* Change Labels on Frame Begin, End messages */
     update_frame_time_msg(index);

@@ -255,7 +255,7 @@ public:
 
   // gridded data records
   
-  MdvReader *mrec[MAX_DATA_FIELDS];
+  MdvReader *mread[MAX_DATA_FIELDS];
   
   // Control variables for layers features
   
