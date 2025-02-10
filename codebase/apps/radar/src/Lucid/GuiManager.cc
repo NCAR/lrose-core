@@ -227,8 +227,15 @@ int GuiManager::run(QApplication &app)
 {
 
   // make window visible
-
+  
   show();
+
+  // move to starting point
+  
+  QPoint pos;
+  pos.setX(_params.horiz_default_x_pos);
+  pos.setY(_params.horiz_default_y_pos);
+  move(pos);
   
   // set timer running
   
@@ -552,7 +559,7 @@ void GuiManager::_setupWindows()
 {
 
   // set up windows
-
+  
   _main = new QFrame(this);
   QHBoxLayout *mainLayout = new QHBoxLayout;
   _main->setLayout(mainLayout);
@@ -2448,20 +2455,25 @@ void GuiManager::_showFieldMenu()
 
 void GuiManager::_placeFieldMenu()
 {
-  if (_fieldMenu) {
-    if (!_fieldMenuPlaced) {
-      int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
-      int topFrameHeight =
-        _fieldMenu->frameGeometry().height() - _fieldMenu->height();
-      QPoint pos;
-      pos.setX(x() + (frameGeometry().width()));
-      pos.setY(y());
-      _fieldMenu->move(pos);
-      if (topFrameWidth != 0 || topFrameHeight != 0) {
-        _fieldMenuPlaced = true;
-      }
-    }
+  if (!_fieldMenu) {
+    return;
   }
+  
+  if (_fieldMenuPlaced) {
+    return;
+  }
+  
+  int titleBarHt = frameGeometry().height() - geometry().height();
+  // int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
+  // int topFrameHeight =
+  //   _fieldMenu->frameGeometry().height() - _fieldMenu->height();
+  QPoint pos;
+  pos.setX(x() + (frameGeometry().width()));
+  pos.setY(y() + titleBarHt);
+  _fieldMenu->move(pos);
+
+  _fieldMenuPlaced = true;
+
 }
 
 void GuiManager::_fieldTableCellClicked(int row, int col)
@@ -2533,24 +2545,29 @@ void GuiManager::_showTimeControl()
 void GuiManager::_placeTimeControl()
 {
 
+  if (!_timeControl) {
+    return;
+  }
+
   if (_timeControl->x() == 0 && _timeControl->y() == 0) {
     // not yet sized and placed
     return;
   }
   
-  if (_timeControl) {
-    if (!_timeControlPlaced) {
-      int titleBarHt = frameGeometry().height() - geometry().height();
-      QPoint pos;
-      pos.setX(_timeControl->x());
-      pos.setY(frameGeometry().height() + titleBarHt);
-      _timeControl->move(pos);
-      _timeControlPlaced = true;
-    }
+  if (_timeControlPlaced) {
+    return;
   }
+  
+  int titleBarHt = frameGeometry().height() - geometry().height();
+  QPoint pos;
+  pos.setX(_timeControl->x());
+  pos.setY(y() + frameGeometry().height() + titleBarHt);
+  _timeControl->move(pos);
+  _timeControlPlaced = true;
 
 }
 
+////////////////////////////////////////////////////////
 // BoundaryEditor circle (radius) slider has changed value
 
 void GuiManager::_circleRadiusSliderValueChanged(int value)

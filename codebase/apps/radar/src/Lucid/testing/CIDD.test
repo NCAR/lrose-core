@@ -763,8 +763,8 @@ cidd.horiz_legends_delta_y:  30
 cidd.horiz_default_height:    950
 cidd.horiz_min_height:        400
 cidd.horiz_min_width:         400
-cidd.horiz_default_x_pos:     0
-cidd.horiz_default_y_pos:     0
+cidd.horiz_default_x_pos:     20
+cidd.horiz_default_y_pos:     20
 
 cidd.horiz_top_margin:        30
 cidd.horiz_bot_margin:        20
@@ -964,7 +964,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 8
+cidd.num_field_menu_cols: 4
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.
