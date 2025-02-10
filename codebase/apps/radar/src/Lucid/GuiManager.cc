@@ -2533,39 +2533,21 @@ void GuiManager::_showTimeControl()
 void GuiManager::_placeTimeControl()
 {
 
+  if (_timeControl->x() == 0 && _timeControl->y() == 0) {
+    // not yet sized and placed
+    return;
+  }
+  
   if (_timeControl) {
     if (!_timeControlPlaced) {
-      int topFrameWidth = _timeControl->geometry().y() - _timeControl->y();
-      int topFrameHeight =
-        _timeControl->frameGeometry().height() - _timeControl->height();
+      int titleBarHt = frameGeometry().height() - geometry().height();
       QPoint pos;
-      pos.setX(x() + (frameGeometry().width() / 2) -
-               (_timeControl->frameGeometry().width()/2));
-      pos.setY(y() + frameGeometry().height());
+      pos.setX(_timeControl->x());
+      pos.setY(frameGeometry().height() + titleBarHt);
       _timeControl->move(pos);
-      if (topFrameWidth != 0 || topFrameHeight != 0) {
-        _timeControlPlaced = true;
-      }
+      _timeControlPlaced = true;
     }
   }
-
-  // if (_timerEventCount % 100 == 0) {
-  //   cerr << "888888888888888 main width, height: "
-  //        << width() << ", " << height() << endl;
-  //   cerr << "888888888888888 _horiz width, height: "
-  //        << _horiz->width() << ", " << _horiz->height() << endl;
-  //   cerr << "888888888888888 vlevelFrame width, height: "
-  //        << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  // }
-  
-  // if (_timerEventCount == 650) {
-  //   resize(width() + 1, height() + 1);
-  //   resize(width() - 1, height() - 1);
-  //   cerr << "777777777777778 _horiz width, height: "
-  //        << _horiz->width() << ", " << _horiz->height() << endl;
-  //   cerr << "777777777777778 vlevelFrame width, height: "
-  //        << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  // }
 
 }
 
