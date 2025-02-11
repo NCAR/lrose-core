@@ -1782,10 +1782,10 @@ void WorldPlot::drawTimeAxes(QPainter &painter,
   int intervalSecs = 86400;
 
   int canonicalSecs[] = { 1, 2, 3, 5, 10, 15, 20, 30,
-                          1 * 60, 2 * 60, 3 * 60, 5 * 60,
-                          10 * 60, 15 * 60, 20 * 60, 30 * 60,
-                          1 * 3600, 2 * 3600, 3 * 3600, 4 * 3600,
-                          6 * 3600, 8 * 3600, 12 * 3600, 24 * 3600 };
+    1 * 60, 2 * 60, 3 * 60, 5 * 60,
+    10 * 60, 15 * 60, 20 * 60, 30 * 60,
+    1 * 3600, 2 * 3600, 3 * 3600, 4 * 3600,
+    6 * 3600, 8 * 3600, 12 * 3600, 24 * 3600 };
 
   int nCanonical = sizeof(canonicalSecs) / sizeof(int);
 
@@ -1965,20 +1965,20 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
     // if (((pix + labelRect.width() / 2 + 2) < maxX) &&
     //     ((pix - labelRect.width() / 2 - 2) > _xMinPixel)) {
 
-      qreal labelX = (qreal) (pix - labelRect.width() / 2.0);
-      qreal labelY =
-        (qreal) (_yMinPixel + labelRect.height());
+    qreal labelX = (qreal) (pix - labelRect.width() / 2.0);
+    qreal labelY =
+      (qreal) (_yMinPixel + labelRect.height());
 
-      QRectF bRect2(labelX, labelY,
-                    labelRect.width() + 2, labelRect.height() + 5);
-      painter.drawText(bRect2, Qt::AlignCenter, distLabel);
+    QRectF bRect2(labelX, labelY,
+                  labelRect.width() + 2, labelRect.height() + 5);
+    painter.drawText(bRect2, Qt::AlignCenter, distLabel);
 
-      // ticks above bottom axis
+    // ticks above bottom axis
       
-      painter.setPen(lineColor);
+    painter.setPen(lineColor);
       
-      QLineF qline(pix, _yMinPixel, pix, _yMinPixel - _xAxisTickLen);
-      painter.drawLine(qline);
+    QLineF qline(pix, _yMinPixel, pix, _yMinPixel - _xAxisTickLen);
+    painter.drawLine(qline);
       
     // }
 
@@ -2332,7 +2332,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
     int iyy = (int) (topY[cmap.size()-1] - patchHt * 0.5);
     painter.drawText(xStart, iyy, width, iPatchHt, 
-                       Qt::AlignVCenter | Qt::AlignHCenter, 
+                     Qt::AlignVCenter | Qt::AlignHCenter, 
                      label);
   }
 
@@ -2404,8 +2404,6 @@ void WorldPlot::renderGridRect(int page,
     vertices.push_back(row);
   } // iy
   
-  cerr << "2222222222222222222222222222222222222 vertices.size(): " << vertices.size() << endl;
-  
   // plot the rectangles for each grid cell
 
   // {
@@ -2430,8 +2428,6 @@ void WorldPlot::renderGridRect(int page,
       // fillRectangle(painter, *brush, xx, yy + height, width, height);
     } // ix
   } // iy
-  
-  cerr << "333333333333333333333333333333333" << endl;
   
 #ifdef NOTYET
   

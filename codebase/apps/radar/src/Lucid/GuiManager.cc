@@ -371,14 +371,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
     }
     _horiz->setFrameForRendering(gd.h_win.page, index);
     cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
     _horiz->update();
     gd.redraw_horiz = false;
     _vlevelManager.setFromMdvx();
@@ -2469,7 +2461,7 @@ void GuiManager::_placeFieldMenu()
   //   _fieldMenu->frameGeometry().height() - _fieldMenu->height();
   QPoint pos;
   pos.setX(x() + (frameGeometry().width()));
-  pos.setY(y() + titleBarHt);
+  pos.setY(y() + titleBarHt - 5);
   _fieldMenu->move(pos);
 
   _fieldMenuPlaced = true;
@@ -2561,7 +2553,7 @@ void GuiManager::_placeTimeControl()
   int titleBarHt = frameGeometry().height() - geometry().height();
   QPoint pos;
   pos.setX(_timeControl->x());
-  pos.setY(y() + frameGeometry().height() + titleBarHt);
+  pos.setY(y() + frameGeometry().height() + titleBarHt - 5);
   _timeControl->move(pos);
   _timeControlPlaced = true;
 

@@ -371,7 +371,6 @@ void HorizView::timerEvent(QTimerEvent *event)
   // }
   
   if (doUpdate) {  //only update if something has changed
-    cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
     update();
   }
 }
@@ -383,8 +382,6 @@ void HorizView::timerEvent(QTimerEvent *event)
 void HorizView::adjustPixelScales()
 {
 
-  // cerr << "==>> hhhhhh HorizView::adjustPixelScales() <<==" << endl;
-  // _zoomWorld.setProjection(_proj);
   _zoomWorld.setProjection(gd.proj);
   _zoomWorld.adjustPixelScales();
   
@@ -400,8 +397,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   if (!_renderFrame) {
     return;
   }
-
-  cerr << "PPPPPPPPPPPPPPPPPp paintEvent PPPPPPPPPPPPPPP" << endl;
 
   if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
@@ -592,8 +587,6 @@ void HorizView::_drawOverlays(QPainter &painter)
     snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
 
-    // cerr << "SSSSSSSSSSSSSSSS " << text << endl;
-    
     // radar and site name legend
 
     string radarName("unknown");
@@ -1432,8 +1425,6 @@ int HorizView::_controlRendering(QPainter &painter, int page,
                                  time_t end_time)
 {
 
-  cerr << "00000000000000000000000000000000000" << endl;
-  
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
   if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
@@ -1486,7 +1477,6 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       }
 #endif
     } else {
-      cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
       _renderGrid(painter, page, mr, start_time, end_time, 0);
     }
     if(gd.layers.earth.terrain_active && 
@@ -1507,11 +1497,8 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       // render_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
-
-  cerr << "FFFFFFFFFFFFFFFFFFGGGGGGGGGGGGGGGGGGGG" << endl;
   
   if(_params.draw_main_on_top) {
-    cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
     if(mr->render_method == LINE_CONTOURS) {
 #ifdef NOTYET
       contour_info_t cont; // contour params 
