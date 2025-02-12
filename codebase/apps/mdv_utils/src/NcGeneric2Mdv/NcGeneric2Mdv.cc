@@ -842,12 +842,30 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       cerr << "  xySwapped: " << (xySwapped?"Y":"N") << endl;
     }
 
-    _addDataField(var, mdvx, itime, xySwapped);
+    // check if field is needed
+    
+    bool useField = false;
+    Params::output_field_t *ofld = NULL;
+    if (_params.specify_output_fields) {
+      for (int ii = 0; ii < _params.output_fields_n; ii++) {
+        if (strcmp(var->name(), _params._output_fields[ii].input_field_name) == 0) {
+          useField = true;
+          ofld = _params._output_fields + ii;
+          break;
+        }
+      }
+    } else {
+      useField = true;
+    }
+    
+    if (useField) {
+      _addDataField(var, mdvx, itime, xySwapped, ofld);
+    }
 
   } // ivar
   
   return 0;
-
+  
 }
 
 /////////////////////////////////////////////////
@@ -856,18 +874,19 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
 // Returns 0 on success, -1 on failure
 
 int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
-                                 int itime, bool xySwapped)
+                                 int itime, bool xySwapped,
+                                 Params::output_field_t *ofld)
 
 {
 
   Nc3Att *missingAtt = var->get_att("missing_value");
   if (missingAtt == NULL) {
     missingAtt = var->get_att("_FillValue");
-    if (missingAtt == NULL) {
-      cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
+    if (missingAtt == NULL && _params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - NcGeneric2Mdv::_addDataField" << endl;
       cerr << "  Cannot find missing_value of _FillValue attribute" << endl;
       cerr << "  field name: " << var->name() << endl;
-      return -1;
+      cerr << "  Setting missing to -9999" << endl;
     }
   }
 
@@ -934,7 +953,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    float missing = missingAtt->as_float(0);
+    float missing = -9999.0;
+    if (missingAtt != NULL) {
+      missing = missingAtt->as_float(0);
+    }
     for (int ii = 0; ii < npts; ii++) {
       if (std::isnan(fvals[ii]) || fvals[ii] == missing) {
         vals[ii] = _missingFloat;
@@ -991,7 +1013,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    double missing = missingAtt->as_double(0);
+    double missing = -9999.0;
+    if (missingAtt != NULL) {
+      missing = missingAtt->as_double(0);
+    }
     for (int ii = 0; ii < npts; ii++) {
       if (std::isnan(dvals[ii]) || dvals[ii] == missing) {
         vals[ii] = _missingFloat;
@@ -1081,7 +1106,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      int missing = missingAtt->as_int(0);
+      int missing = -9999;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_int(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (ivals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1138,7 +1166,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      short missing = missingAtt->as_short(0);
+      short missing = -9999;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_short(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (svals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1198,7 +1229,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
       
-      ncbyte missing = missingAtt->as_ncbyte(0);
+      ncbyte missing = -128;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_ncbyte(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (bvals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1281,6 +1315,18 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
   if (longNameAtt != NULL) {
     longName = longNameAtt->as_string(0);
     delete longNameAtt;
+  }
+
+  if (ofld != NULL) {
+    if (strlen(ofld->output_field_name) != 0) {
+      fieldName = ofld->output_field_name;
+    }
+    if (strlen(ofld->long_field_name) != 0) {
+      longName = ofld->long_field_name;
+    }
+    if (strlen(ofld->output_units) != 0) {
+      units = ofld->output_units;
+    }
   }
 
   // create fields and add to mdvx object

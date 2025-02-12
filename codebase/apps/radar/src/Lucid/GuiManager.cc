@@ -614,6 +614,9 @@ void GuiManager::_setupWindows()
   cerr << "VVVVVVVVVV vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
   
   mainLayout->addWidget(_vlevelFrame);
+  
+  cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+
   // _setVlevelPanelVisibility();
 
   // field menu
@@ -644,6 +647,13 @@ void GuiManager::_setupWindows()
   pos.setY(_params.main_window_start_y);
   move(pos);
   show();
+
+  cerr << "XXXXXXXXXXXXXXXXXX vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+
+  cerr << "VVVVVVVVVVVVVVV _vlevel width: " << _vlevelFrame->size().width() << endl;
+  cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
+  resize(width() + _vlevelFrame->size().width(), height());
+  cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
 
   // set up field status dialog
   // _createClickReportDialog();

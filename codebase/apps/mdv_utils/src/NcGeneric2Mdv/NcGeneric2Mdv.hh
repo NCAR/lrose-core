@@ -162,7 +162,9 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, int itime);
   int _addDataFields(DsMdvx &mdvx, int itime);
-  int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
+  int _addDataField(Nc3Var *var, DsMdvx &mdvx,
+                    int itime, bool xySwapped,
+                    Params::output_field_t *ofld);
   
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
