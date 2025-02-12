@@ -2455,13 +2455,11 @@ void GuiManager::_placeFieldMenu()
     return;
   }
   
-  int titleBarHt = frameGeometry().height() - geometry().height();
-  // int topFrameWidth = _fieldMenu->geometry().y() - _fieldMenu->y();
-  // int topFrameHeight =
-  //   _fieldMenu->frameGeometry().height() - _fieldMenu->height();
+  int margin = (frameGeometry().width() - geometry().width()) / 2;
+  int titleBarHt = frameGeometry().height() - geometry().height() - margin;
   QPoint pos;
   pos.setX(x() + (frameGeometry().width()));
-  pos.setY(y() + titleBarHt - 5);
+  pos.setY(y() + titleBarHt);
   _fieldMenu->move(pos);
 
   _fieldMenuPlaced = true;
@@ -2550,13 +2548,17 @@ void GuiManager::_placeTimeControl()
     return;
   }
   
-  int titleBarHt = frameGeometry().height() - geometry().height();
+  int margin = (frameGeometry().width() - geometry().width()) / 2;
+  int titleBarHt = frameGeometry().height() - geometry().height() - margin;
+  
   QPoint pos;
-  pos.setX(_timeControl->x());
-  pos.setY(y() + frameGeometry().height() + titleBarHt - 5);
+  pos.setX(x() + margin);
+  pos.setY(y() + frameGeometry().height() + titleBarHt);
   _timeControl->move(pos);
   _timeControlPlaced = true;
 
+  _timeControl->resize(width(), _timeControl->height());
+  
 }
 
 ////////////////////////////////////////////////////////
