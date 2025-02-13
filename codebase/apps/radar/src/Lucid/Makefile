@@ -78,6 +78,7 @@ HDRS = \
 	VertView.hh \
 	VertManager.hh \
 	VlevelManager.hh \
+	VlevelSelector.hh \
 	WayPts.hh \
 	WindMenuItem.hh \
 	WorldPlot.hh \
@@ -134,6 +135,7 @@ MOC_SRCS = \
 	TimeControl.cc \
 	VertView.cc \
 	VertManager.cc \
+	VlevelSelector.cc \
 	WindMenuItem.cc \
 	ZoomMenuItem.cc
 
@@ -147,6 +149,7 @@ MOC_OUTPUT = \
 	moc_TimeControl.cpp \
 	moc_VertView.cpp \
 	moc_VertManager.cpp \
+	moc_VlevelSelector.cpp \
 	moc_WindMenuItem.cpp \
 	moc_ZoomMenuItem.cpp
 
