@@ -444,6 +444,22 @@ paramdef double {
 } remap_offset_origin_longitude;
 
 commentdef {
+  p_header = "OPTIONS TO GET METADATA FROM GLOBAL ATTRIBUTES.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Get the date and time from the global attributes.";
+  p_help = "If true, we read year, month, day, hour, minute, second from global attributes.";
+} get_date_and_time_from_global_attributes;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Get the missing value from the global attributes.";
+  p_help = "If true, we read missing_value from global attributes. Otherwise we get that from the field attributes.";
+} get_missing_value_from_global_attributes;
+
+commentdef {
   p_header = "OPTION TO SELECT SPECIFIC FIELDS TO PROCESS.";
   p_text = "Use this to select fields to include, and the rest will be excluded.";
 }

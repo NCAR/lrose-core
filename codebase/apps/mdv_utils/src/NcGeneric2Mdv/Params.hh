@@ -537,6 +537,10 @@ public:
 
   double remap_offset_origin_longitude;
 
+  tdrp_bool_t get_date_and_time_from_global_attributes;
+
+  tdrp_bool_t get_missing_value_from_global_attributes;
+
   tdrp_bool_t specify_output_fields;
 
   output_field_t *_output_fields;
@@ -575,7 +579,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[83];
+  mutable TDRPtable _table[86];
 
   const char *_className;
 

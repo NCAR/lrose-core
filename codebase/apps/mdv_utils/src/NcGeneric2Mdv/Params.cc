@@ -1393,6 +1393,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OPTIONS TO GET METADATA FROM GLOBAL ATTRIBUTES.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'get_date_and_time_from_global_attributes'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("get_date_and_time_from_global_attributes");
+    tt->descr = tdrpStrDup("Get the date and time from the global attributes.");
+    tt->help = tdrpStrDup("If true, we read year, month, day, hour, minute, second from global attributes.");
+    tt->val_offset = (char *) &get_date_and_time_from_global_attributes - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'get_missing_value_from_global_attributes'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("get_missing_value_from_global_attributes");
+    tt->descr = tdrpStrDup("Get the missing value from the global attributes.");
+    tt->help = tdrpStrDup("If true, we read missing_value from global attributes. Otherwise we get that from the field attributes.");
+    tt->val_offset = (char *) &get_missing_value_from_global_attributes - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SELECT SPECIFIC FIELDS TO PROCESS.");
     tt->comment_text = tdrpStrDup("Use this to select fields to include, and the rest will be excluded.");
     tt++;
@@ -1460,11 +1493,11 @@
       tt->struct_vals[7].s = tdrpStrDup("m/s");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -1539,11 +1572,11 @@
       tt->struct_vals[9].s = tdrpStrDup("C");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SUN ANGLE CORRECTION");
     tt->comment_text = tdrpStrDup("Applies only to satellite visible fields.");
     tt++;
@@ -1603,11 +1636,11 @@
     tt->single_val.d = 1e+12;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1624,11 +1657,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/from_netcdf");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1685,11 +1718,11 @@
     tt->single_val.e = COMPRESSION_GZIP;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;

@@ -104,6 +104,7 @@ private:
   // NetCDF coordinate variables
 
   Nc3Var *_baseTimeVar;
+  DateTime _globalTime; // time from globals
   Nc3Var *_timeOffsetVar;
   Nc3Var *_zVar;
   Nc3Var *_yVar;
@@ -116,6 +117,7 @@ private:
 
   string _source;
   string _history;
+  float _globalMissing;
 
   // data set members
   
@@ -157,6 +159,7 @@ private:
   // load up dimensions and variables
 
   int _loadMetaData();
+  void _readGlobals();
 
   /// set MDV headers
 

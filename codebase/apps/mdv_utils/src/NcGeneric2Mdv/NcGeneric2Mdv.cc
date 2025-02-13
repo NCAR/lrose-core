@@ -709,7 +709,58 @@ int NcGeneric2Mdv::_loadMetaData()
   
   _initInputProjection();
 
+  _readGlobals();
+
   return 0;
+
+}
+
+/////////////////////////////////////////////
+// read the global attributes as requested
+
+void NcGeneric2Mdv::_readGlobals()
+
+{
+
+  // date/time
+
+  _globalTime.set(time(NULL)); // initialize to now
+
+  if (_params.get_date_and_time_from_global_attributes) {
+
+    for (int ii = 0; ii < _ncFile->num_atts(); ii++) {
+      Nc3Att* att = _ncFile->get_att(ii);
+      if (att == NULL) {
+        continue;
+      }
+      if (!strcmp(att->name(), "year")) {
+        _globalTime.setYear(att->as_int(0));
+      } else if (!strcmp(att->name(), "month")) {
+        _globalTime.setMonth(att->as_int(0));
+      } else if (!strcmp(att->name(), "day")) {
+        _globalTime.setDay(att->as_int(0));
+      } else if (!strcmp(att->name(), "hour")) {
+        _globalTime.setHour(att->as_int(0));
+      } else if (!strcmp(att->name(), "minute")) {
+        _globalTime.setMin(att->as_int(0));
+      } else if (!strcmp(att->name(), "second")) {
+        _globalTime.setSec(att->as_int(0));
+      }
+      delete att;
+    } // ii
+
+  } // if (_params.get_date_and_time_from_global_attributes) {
+  
+  // missing value
+
+  _globalMissing = _missingFloat;
+  if (_params.get_missing_value_from_global_attributes) {
+    Nc3Att *att = _ncFile->get_att("missing_value");
+    if (att != NULL) {
+      _globalMissing = att->as_float(0);
+      delete att;
+    }
+  } // if (_params.get_missing_value_from_global_attributes) {
 
 }
 
@@ -726,12 +777,14 @@ int NcGeneric2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 
   // time
 
-  time_t baseTimeUtc = 0;
-  if (_baseTimeVar) {
-    baseTimeUtc = _baseTimeVar->as_int(0);
-  } else {
-    DateTime btime(_params.base_time_string);
-    baseTimeUtc = btime.utime();
+  time_t baseTimeUtc = _globalTime.utime();
+  if (!_params.get_date_and_time_from_global_attributes) {
+    if (_baseTimeVar) {
+      baseTimeUtc = _baseTimeVar->as_int(0);
+    } else {
+      DateTime btime(_params.base_time_string);
+      baseTimeUtc = btime.utime();
+    }
   }
 
   // check time units
@@ -953,7 +1006,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    float missing = -9999.0;
+    float missing = _globalMissing;
     if (missingAtt != NULL) {
       missing = missingAtt->as_float(0);
     }
@@ -1013,7 +1066,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    double missing = -9999.0;
+    double missing = _globalMissing;
     if (missingAtt != NULL) {
       missing = missingAtt->as_double(0);
     }
@@ -1106,7 +1159,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      int missing = -9999;
+      int missing = (int) _globalMissing;
       if (missingAtt != NULL) {
         missing = missingAtt->as_int(0);
       }
@@ -1166,7 +1219,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      short missing = -9999;
+      short missing = (short) _globalMissing;
       if (missingAtt != NULL) {
         missing = missingAtt->as_short(0);
       }
