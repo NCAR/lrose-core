@@ -114,7 +114,7 @@ public:
   // override event handling
 
   virtual void timerEvent(QTimerEvent * event);
-  virtual void resizeEvent(QResizeEvent * event);
+  virtual void resizeEvent(QResizeEvent * event) override;
   virtual void keyPressEvent(QKeyEvent* event);
 
   // set/get archive mode
@@ -170,7 +170,7 @@ private:
   
   int _timerEventCount;
   bool _guiSizeInitialized;
-
+  
   static GuiManager* m_pInstance;
   // // string _openFilePath;
 
@@ -202,6 +202,11 @@ private:
 
   QFrame *_main;
 
+  // resize
+
+  bool _resized;
+  QTimer *_resizeTimer;
+  
   // horizontal view windows
 
   QFrame *_horizFrame;
@@ -492,6 +497,10 @@ private slots:
                         const RadxRay *ray);
 #endif
 
+  // resize event
+  
+  void _resizeFinished();
+  
   // field menu
   
   void _showFieldMenu();

@@ -130,6 +130,10 @@ GuiManager::GuiManager() :
 
   // initialize
 
+  _main = NULL;
+  _resizeTimer = NULL;
+  _resized = false;
+  
   _horizFrame = NULL;
   _horiz = NULL;
 
@@ -298,6 +302,8 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // field change? request new data
 
+  cerr << "NNNNNNNNNNNNNNNNNNNNNNNNNN1111111111111111111111111" << endl;
+  
   bool needNewData = false;
   // if (_checkForFieldChange()) {
   if (_fieldHasChanged) {
@@ -324,6 +330,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
     needNewData = true;
   }
 
+  // resize?
+
+  if (_resized) {
+    needNewData = true;
+    _resized = false;
+  }
+
   // get new data if needed - data is retrieved in a thread
 
   if (needNewData) {
@@ -347,6 +360,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // check for new data
 
+  cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMmm111111111111111111111111" << endl;
   MdvReader *mr = gd.mread[_fieldNum];
   if (mr->isNewH()) {
     int index = gd.movie.cur_frame;
@@ -360,6 +374,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _vlevelManager.setFromMdvx();
     _createVlevelRadioButtons();
   }
+  cerr << "OOOOOOOOOOOOOOOOOOOOOOOOOOo111111111111111111111111" << endl;
   
   // handle legacy cidd timer event
   
@@ -387,14 +402,51 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
 void GuiManager::resizeEvent(QResizeEvent *event)
 {
+  QWidget::resizeEvent(event);
+  // Restart the timer on each resize event
+  _resizeTimer->start();
+}
+
+void GuiManager::_resizeFinished() {
+  // Called after the resize events have "settled"
+  qDebug() << "RRRRRRRRRRRRRRRRRSSSSSSSSSSSS Resize is complete. Final size:" << size();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent, width, height: "
          << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   }
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   // emit frameResized(_horizFrame->width(), _horizFrame->height());
-  gd.redraw_horiz = true;
+  _resized = true;
 }
+
+class MyWidget : public QWidget {
+    Q_OBJECT
+public:
+  MyWidget(QWidget *parent = nullptr) : QWidget(parent) {
+    // Set up the timer; adjust the interval as needed.
+        resizeTimer = new QTimer(this);
+        resizeTimer->setInterval(250); // 250ms delay
+        resizeTimer->setSingleShot(true);
+        connect(resizeTimer, &QTimer::timeout, this, &MyWidget::resizeFinished);
+    }
+
+protected:
+    void resizeEvent(QResizeEvent *event) override {
+        QWidget::resizeEvent(event);
+        // Restart the timer on each resize event
+        resizeTimer->start();
+    }
+
+private slots:
+    void resizeFinished() {
+        // Called after the resize events have "settled"
+        qDebug() << "Resize is complete. Final size:" << size();
+    }
+
+private:
+    QTimer *resizeTimer;
+};
+
 
 ////////////////////////////////////////////////////////////////
 void GuiManager::keyPressEvent(QKeyEvent * e)
@@ -596,6 +648,12 @@ void GuiManager::_setupWindows()
   _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width, cmap0, this);
   mainLayout->addWidget(_vlevelSelector);
                                        
+  // resize timer for debouncing resize events
+  
+  _resizeTimer = new QTimer(this);
+  _resizeTimer->setInterval(50); // 0.5s delay
+  _resizeTimer->setSingleShot(true);
+  connect(_resizeTimer, &QTimer::timeout, this, &GuiManager::_resizeFinished);
 
   // _setVlevelPanelVisibility();
 
