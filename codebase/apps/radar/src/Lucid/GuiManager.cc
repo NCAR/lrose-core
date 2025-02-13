@@ -91,12 +91,12 @@
 #include <Ncxx/H5x.hh>
 
 #include "GuiManager.hh"
-// #include "DisplayField.hh"
 #include "FieldTableItem.hh"
 #include "HorizView.hh"
 #include "MapMenuItem.hh"
 #include "ProdMenuItem.hh"
 #include "TimeControl.hh"
+#include "VlevelSelector.hh"
 #include "VertView.hh"
 #include "VertManager.hh"
 #include "WindMenuItem.hh"
@@ -130,18 +130,6 @@ GuiManager::GuiManager() :
 
   // initialize
 
-  // _firstTime = true;
-  // _urlOK = true;
-
-  // _prevAz = -9999.0;
-  // _prevEl = -9999.0;
-  // _startAz = -9999.0;
-  // _endAz = -9999.0;
-  // _vertMode = false;
-
-  // _nGates = 1000;
-  // _maxRangeKm = 1.0;
-  
   _horizFrame = NULL;
   _horiz = NULL;
 
@@ -166,8 +154,6 @@ GuiManager::GuiManager() :
   
   _timeControl = NULL;
   _timeControlPlaced = false;
-  // _selectedTime.setToNever();
-  // _prevSelectedTime.setToNever();
 
   _vlevelManager.setLevel(_params.start_ht);
   
@@ -345,11 +331,9 @@ void GuiManager::timerEvent(QTimerEvent *event)
     if (gd.movie.cur_frame < 0) {
       index = gd.movie.num_frames - 1;
     }
-    // gd.movie.frame[index].time_mid = _selectedTime.utime();
     MdvReader *mr = gd.mread[_fieldNum];
     cerr << "*********************************** selTime: "
          << _timeControl->getSelectedTime().asString(0) << endl;
-    // if (mr->requestHorizPlane(gd.movie.frame[index].time_mid,
     if (mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                               _vlevelManager.getLevel(),
                               gd.h_win.page)) {
@@ -489,8 +473,6 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    // _horiz->setStartOfVlevel(true);
-    // _vert->setStartOfVlevel(true);
     _timeControl->goBack1();
     
   } else if (key == Qt::Key_Right) {
@@ -498,32 +480,26 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    // _horiz->setStartOfVlevel(true);
-    // _vert->setStartOfVlevel(true);
     _timeControl->goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
     if (_vlevelManager.getGuiIndex() > 0) {
-
       if (_params.debug) {
         cerr << "Clicked up arrow, go up a vlevel" << endl;
       }
       _changeVlevelRadioButton(-1);
-
     }
 
   } else if (key == Qt::Key_Down) {
 
     if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNVlevels() - 1) {
-      
       if (_params.debug) {
         cerr << "Clicked down arrow, go down a vlevel" << endl;
       }
       _changeVlevelRadioButton(+1);
-      
     }
-
+    
   }
 
 }
@@ -531,7 +507,6 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
 void GuiManager::_moveUpDown() 
 {
   this->setCursor(Qt::WaitCursor);
-  // _plotArchiveData();
   this->setCursor(Qt::ArrowCursor);
 }
 
@@ -569,7 +544,7 @@ void GuiManager::_setupWindows()
   // configure the HORIZ
 
   _horiz = new HorizView(_horizFrame, *this);
-
+  
   // Create the VERT window
 
   _vertWindow = new VertManager(this);
@@ -616,6 +591,11 @@ void GuiManager::_setupWindows()
   mainLayout->addWidget(_vlevelFrame);
   
   cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+
+  ColorMap *cmap0 = gd.mread[0]->colorMap;
+  _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width, cmap0, this);
+  mainLayout->addWidget(_vlevelSelector);
+                                       
 
   // _setVlevelPanelVisibility();
 

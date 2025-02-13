@@ -3104,6 +3104,11 @@ paramdef int {
 } color_scale_width;
 
 paramdef int {
+  p_default = 80;
+  p_descr = "Width of vlevel selector (pixels).";
+} vlevel_selector_width;
+
+paramdef int {
   p_default = 12;
   p_descr = "Basic font size for labels (pixels).";
   p_help = "Some of the labels are scaled relative to this size.";

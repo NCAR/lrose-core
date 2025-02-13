@@ -6383,6 +6383,18 @@
     tt->single_val.i = 60;
     tt++;
     
+    // Parameter 'vlevel_selector_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_width");
+    tt->descr = tdrpStrDup("Width of vlevel selector (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_width - &_start_;
+    tt->single_val.i = 80;
+    tt++;
+    
     // Parameter 'label_font_size'
     // ctype is 'int'
     

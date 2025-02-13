@@ -1345,6 +1345,8 @@ public:
 
   int color_scale_width;
 
+  int vlevel_selector_width;
+
   int label_font_size;
 
   char* background_color2;
@@ -1520,7 +1522,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[514];
+  mutable TDRPtable _table[515];
 
   const char *_className;
 

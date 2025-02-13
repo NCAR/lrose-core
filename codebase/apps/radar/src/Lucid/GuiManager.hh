@@ -80,6 +80,7 @@ class ProdMenuItem;
 class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
+class VlevelSelector;
 
 class GuiManager : public QMainWindow {
   
@@ -226,6 +227,8 @@ private:
   QGroupBox *_vlevelPanel;
   vector<QRadioButton *> *_vlevelRButtons;
   bool _vlevelHasChanged;
+
+  VlevelSelector *_vlevelSelector;
 
   // zooms
 
