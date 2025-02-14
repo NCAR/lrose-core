@@ -31,12 +31,16 @@
 #include <QPaintEvent>
 #include <iostream>
 #include <cmath>
+#include "cidd.h"
 using namespace std;
 
-VlevelSelector::VlevelSelector(int width, const ColorMap *cmap,
+VlevelSelector::VlevelSelector(int width,
+                               const ColorMap *cmap,
+                               VlevelManager &vlevelManager,
                                QWidget* parent) :
         QWidget(parent),
-        _colorMap(cmap)
+        _colorMap(cmap),
+        _vlevelManager(vlevelManager)
 {
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -50,20 +54,49 @@ VlevelSelector::~VlevelSelector()
 }
 
 /******************************************************************/
-void VlevelSelector::setColorMap(const ColorMap *map) {
+void VlevelSelector::setColorMap(const ColorMap *map)
+{
   _colorMap = map;
   update();
 }
 
 /******************************************************************/
-void VlevelSelector::setAnnotationOff() {
+void VlevelSelector::setAnnotationOff()
+{
   _annotation = false;
 }
 
 /******************************************************************/
-void
-  VlevelSelector::paintEvent(QPaintEvent* e) {
+void VlevelSelector::paintEvent(QPaintEvent* e)
+{
 
+  // set up world coords
+
+  double vlevelMin = _vlevelManager.getLevelMin();
+  double vlevelMax = _vlevelManager.getLevelMax();
+  double vlevelRange = vlevelMax - vlevelMin;
+  double worldYMin = vlevelMin;
+  double worldYMax = vlevelMax;
+  if (vlevelMin == vlevelMax) {
+    worldYMin -= 1.0;
+    worldYMax += 1.0;
+  } else {
+    worldYMin -= vlevelRange / 20.0;
+    worldYMax += vlevelRange / 20.0;
+  }
+
+  _world.setWorldLimitsX(0.0, 1.0);
+  _world.setWorldLimitsY(worldYMin, worldYMax);
+  _world.setWindowGeom(width(), height(), 0, 0);
+  
+  QPainter p;
+  p.begin(this);
+  _world.fillCanvas(p, _params.background_color);
+  p.end();
+  return;
+
+
+#ifdef JUNK
   const std::vector<ColorMap::CmapEntry> &cmap = _colorMap->getEntries();
   
   int nBlocks = cmap.size() + 2;
@@ -156,6 +189,8 @@ void
 
   p.end();
 
+#endif
+  
 }
 
 /******************************************************************/

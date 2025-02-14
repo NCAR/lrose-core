@@ -651,7 +651,10 @@ void GuiManager::_setupWindows()
   cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
 
   ColorMap *cmap0 = gd.mread[0]->colorMap;
-  _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width, cmap0, this);
+  _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width,
+                                       cmap0,
+                                       _vlevelManager,
+                                       this);
   mainLayout->addWidget(_vlevelSelector);
                                        
   // resize timer for debouncing resize events

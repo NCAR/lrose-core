@@ -33,6 +33,8 @@
 #include <string>
 #include <QImage>
 #include <QPixmap>
+#include "WorldPlot.hh"
+#include "VlevelManager.hh"
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -58,6 +60,7 @@ public:
 
   VlevelSelector(int width,
                  const ColorMap *cmap,
+                 VlevelManager &vlevelManager,
                  QWidget* parent = 0);
 
   virtual ~VlevelSelector(void);
@@ -98,6 +101,8 @@ public:
  private:
   
   bool _annotation;
+  WorldPlot _world;
+  VlevelManager &_vlevelManager;
 
 };
 

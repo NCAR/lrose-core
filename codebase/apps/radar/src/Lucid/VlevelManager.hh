@@ -109,6 +109,18 @@ public:
       return _vlevels[index].level;
     }
   }
+  double getLevelMax() const {
+    if (_vlevels.size() < 1) {
+      return 0.0;
+    }
+    return _vlevels[_vlevels.size()-1].level;
+  }
+  double getLevelMin() const {
+    if (_vlevels.size() < 1) {
+      return 0.0;
+    }
+    return _vlevels[0].level;
+  }
 
   int getGuiIndex() const { return _guiIndex; }
   int getFileIndex() const { return _vlevels[_guiIndex].indexInFile; }
