@@ -242,6 +242,7 @@ private:
   int _page;
   bool _timeListValid;
   double _vLevel;
+  bool _readBusyH;
 
   // data status
 

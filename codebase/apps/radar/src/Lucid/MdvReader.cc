@@ -64,7 +64,6 @@ MdvReader::MdvReader(QObject* parent) :
   last_collected = 0;
   h_data_valid = 0;
   v_data_valid = 0;
-  _timeListValid = false;
   vert_type = 0;
   // alt_offset = 0.0;
   detail_thresh_min = 0.0;
@@ -98,7 +97,6 @@ MdvReader::MdvReader(QObject* parent) :
   cont_interv = 0.0;
   
   time_allowance = 0.0;
-  // time_offset = 0.0;
   
   MEM_zero(units_label_cols);
   MEM_zero(units_label_rows);
@@ -106,12 +104,6 @@ MdvReader::MdvReader(QObject* parent) :
   MEM_zero(vunits_label_cols);
   MEM_zero(vunits_label_rows);
   MEM_zero(vunits_label_sects);
-  // MEM_zero(field_units);
-  // MEM_zero(button_name);
-  // MEM_zero(legend_name);
-  // MEM_zero(field_label);
-  // MEM_zero(url);
-  // MEM_zero(color_file);
   
   h_data = NULL;
   v_data = NULL;
@@ -149,6 +141,11 @@ MdvReader::MdvReader(QObject* parent) :
   _newH = false;
   _newV = false;
 
+  _page = 0;
+  _timeListValid = false;
+  _vLevel = 0;
+  _readBusyH = false;
+
 }
 
 /**********************************************************************
@@ -183,7 +180,7 @@ int MdvReader::requestHorizPlane(const DateTime &midTime,
   cerr << "1111111111111111111 requestHorizPlane before startReadVolH" << endl;
   startReadVolH();
   cerr << "1111111111111111111 requestHorizPlane after startReadVolH" << endl;
-  
+   
   return 0;
   
 }
@@ -202,10 +199,10 @@ int MdvReader::getHorizPlane()
   string fullUrl(_getFullUrl());
   DsURL URL(fullUrl);  
   if(!URL.isValid()) {
-    cerr << "ERROR - MdvReader::requestHorizPlane, field: " << _getFieldName() << endl;
+    cerr << "ERROR - MdvReader::getHorizPlane, field: " << _getFieldName() << endl;
     cerr << "  Bad URL: " << fullUrl << endl;
     h_data_valid = 1;
-    cerr << "1111111111111111111 requestHorizPlane bad URL: " << _getFullUrl() << endl;
+    cerr << "1111111111111111111 getHorizPlane bad URL: " << _getFullUrl() << endl;
     return -1;
   }
   
@@ -217,7 +214,7 @@ int MdvReader::getHorizPlane()
   
   if(!_timeListValid) {
     if (_getTimeList(fullUrl, _midTime,  _page, h_mdvx)) {
-      cerr << "1111111111111111111 requestHorizPlane getTimeList() failed" << endl;
+      cerr << "1111111111111111111 getHorizPlane getTimeList() failed" << endl;
       _timeListValid = false;
       return -1;
     }
@@ -307,7 +304,7 @@ int MdvReader::getHorizPlane()
     gd.io_info.request_type = 0;
     gd.h_win.redraw_flag[gd.io_info.page] = 1;
 
-    cerr << "1111111111111111111 requestHorizPlane ERROR" << endl;
+    cerr << "1111111111111111111 getHorizPlane ERROR" << endl;
     return -1;
     
   } else if (h_mdvx->getFieldByNum(0) == NULL) {
@@ -319,14 +316,19 @@ int MdvReader::getHorizPlane()
     h_data_valid = 1;
     last_collected = time(0);
 
-    cerr << "1111111111111111111 requestHorizPlane ERROR" << endl;
+    cerr << "1111111111111111111 getHorizPlane ERROR" << endl;
     return -1;
 
   }
 
   // data is in
   
-  cerr << "111111111111111111111111111111111111111 requestHorizPlane GOT DATA" << endl;
+  cerr << "111111111111111111111111111111111111111 getHorizPlane GOT DATA" << endl;
+
+  if (h_mdvx->getNFields() < 1 || h_mdvx->getFieldByNum(0) == NULL)  {
+    cerr << "1111111111111111111 getHorizPlane ERROR - no fields returned" << endl;
+    return -1;
+  }
   
   // Indicate data update is in progress.
   
@@ -352,14 +354,16 @@ int MdvReader::getHorizPlane()
       h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE,
                                     Mdvx::SCALING_SPECIFIED,scale,bias);
     }
-      
+    
     // Record where int8 data is in memory. - Used for fast polygon fills.
     h_data = (unsigned short *) h_mdvx_int16->getVol();
     
     // Convert the AS-IS to 32 bits float. - Used for Contouring, Data reporting.
-    (h_mdvx->getFieldByNum(0))->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+    // cerr << "1111111111111111111 getNFields(): " << h_mdvx->getNFields() << endl;
+    // cerr << "11111111111111111 h_mdvx->getFieldByNum(0): " << h_mdvx->getFieldByNum(0) << endl;
+    hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
     // Record where float data is in memory.
-    h_fl32_data = (fl32  *) h_mdvx->getFieldByNum(0)->getVol();
+    h_fl32_data = (fl32  *) hfld->getVol();
       
     // Find Headers for quick reference
     h_mhdr = h_mdvx->getMasterHeader();
@@ -556,7 +560,7 @@ int MdvReader::getHorizPlane()
   }
 
 
-  cerr << "1111111111111111111 requestHorizPlane END" << endl;
+  cerr << "1111111111111111111 getHorizPlane END" << endl;
 
   return 0;
   
@@ -1200,6 +1204,11 @@ void ReadVolH::doRead() {
 // start H vol read in thread
 
 void MdvReader::startReadVolH() {
+  if (_readBusyH) {
+    qDebug() << "readVolH() is already in progress. Ignoring new request.";
+    return;
+  }
+  _readBusyH = true;
   cerr << "1111111111111111112222222222222222222223333333333333333333" << endl;
   ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
   QThread* thread = new QThread;
@@ -1220,6 +1229,7 @@ void MdvReader::readDoneH() {
   if (h_mdvx->getFieldByNum(0) == nullptr) {
     _setValidH(false);
     _setNewH(false);
+    _readBusyH = false;
     return;
   }
   _setValidH(iret_h_mdvx_read == 0);
@@ -1232,6 +1242,7 @@ void MdvReader::readDoneH() {
     cerr << "1111111111111 vLevel: " << vh.level[fh.nz-1] << endl;
     qDebug() << "readDone in ReadVolH worker thread";
   }
+  _readBusyH = false;
 }
 
 /*****************************************************************

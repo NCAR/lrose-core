@@ -302,8 +302,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // field change? request new data
 
-  cerr << "NNNNNNNNNNNNNNNNNNNNNNNNNN1111111111111111111111111" << endl;
-  
   bool needNewData = false;
   // if (_checkForFieldChange()) {
   if (_fieldHasChanged) {
@@ -360,7 +358,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // check for new data
 
-  cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMmm111111111111111111111111" << endl;
   MdvReader *mr = gd.mread[_fieldNum];
   if (mr->isNewH()) {
     int index = gd.movie.cur_frame;
@@ -368,13 +365,11 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     _horiz->setFrameForRendering(gd.h_win.page, index);
-    cerr << "+++++++++++++++++++++++++++++++++++" << endl;
     _horiz->update();
     gd.redraw_horiz = false;
     _vlevelManager.setFromMdvx();
     _createVlevelRadioButtons();
   }
-  cerr << "OOOOOOOOOOOOOOOOOOOOOOOOOOo111111111111111111111111" << endl;
   
   // handle legacy cidd timer event
   
@@ -402,6 +397,17 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
 void GuiManager::resizeEvent(QResizeEvent *event)
 {
+#ifdef JUNK
+  // Called after the resize events have "settled"
+  qDebug() << "RRRRRRRRRRRRRRRRRSSSSSSSSSSSS Resize is complete. Final size:" << size();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "resizeEvent, width, height: "
+         << _horizFrame->width() << ", " << _horizFrame->height() << endl;
+  }
+  _horiz->resize(_horizFrame->width(), _horizFrame->height());
+  // emit frameResized(_horizFrame->width(), _horizFrame->height());
+  _resized = true;
+#endif
   QWidget::resizeEvent(event);
   // Restart the timer on each resize event
   _resizeTimer->start();
@@ -651,7 +657,7 @@ void GuiManager::_setupWindows()
   // resize timer for debouncing resize events
   
   _resizeTimer = new QTimer(this);
-  _resizeTimer->setInterval(50); // 0.5s delay
+  _resizeTimer->setInterval(250); // 0.25s delay
   _resizeTimer->setSingleShot(true);
   connect(_resizeTimer, &QTimer::timeout, this, &GuiManager::_resizeFinished);
 
