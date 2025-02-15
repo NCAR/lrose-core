@@ -369,6 +369,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
     gd.redraw_horiz = false;
     _vlevelManager.setFromMdvx();
     _createVlevelRadioButtons();
+    _vlevelSelector->update();
   }
   
   // handle legacy cidd timer event

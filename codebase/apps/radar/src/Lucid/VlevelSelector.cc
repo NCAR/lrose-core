@@ -42,10 +42,44 @@ VlevelSelector::VlevelSelector(int width,
         _colorMap(cmap),
         _vlevelManager(vlevelManager)
 {
+  
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  update();
   _annotation = true;
+
+  int leftMargin = _params.horiz_left_margin;
+  int rightMargin =  _params.horiz_right_margin;
+  int topMargin =  _params.horiz_top_margin;
+  int bottomMargin =  _params.horiz_bot_margin;
+  int axisTickLen = _params.horiz_axis_tick_len;
+  int nTicksIdeal = _params.horiz_n_ticks_ideal;
+  int axisTextMargin = _params.horiz_axis_text_margin;
+
+  _world.setLeftMargin(leftMargin);
+  _world.setRightMargin(rightMargin);
+  _world.setTopMargin(topMargin);
+  _world.setBottomMargin(bottomMargin);
+
+  _world.setAxisTextMargin(axisTextMargin);
+  _world.setXAxisTickLen(axisTickLen);
+  _world.setXNTicksIdeal(nTicksIdeal);
+  _world.setYAxisTickLen(axisTickLen);
+  _world.setYNTicksIdeal(nTicksIdeal);
+
+  _world.setTitleFontSize(_params.horiz_title_font_size);
+  _world.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
+  _world.setTickValuesFontSize(_params.horiz_tick_values_font_size);
+  _world.setLegendFontSize(_params.horiz_legend_font_size);
+
+  _world.setTitleColor(_params.horiz_title_color);
+  _world.setAxisLineColor(_params.horiz_axes_color);
+  _world.setAxisTextColor(_params.horiz_axes_color);
+  _world.setGridColor(_params.horiz_grid_color);
+
+  _world.setYAxisLabelsInside(_params.vert_tick_values_inside);
+  
+  update();
+  
 }
 
 /******************************************************************/
@@ -70,7 +104,7 @@ void VlevelSelector::setAnnotationOff()
 void VlevelSelector::paintEvent(QPaintEvent* e)
 {
 
-  // set up world coords
+  // update world coords
 
   double vlevelMin = _vlevelManager.getLevelMin();
   double vlevelMax = _vlevelManager.getLevelMax();
@@ -88,11 +122,24 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   _world.setWorldLimitsX(0.0, 1.0);
   _world.setWorldLimitsY(worldYMin, worldYMax);
   _world.setWindowGeom(width(), height(), 0, 0);
+
+  // draw Y axis
   
-  QPainter p;
-  p.begin(this);
-  _world.fillCanvas(p, _params.background_color);
-  p.end();
+  QPainter painter;
+  painter.begin(this);
+
+  _world.fillCanvas(painter, _params.background_color);
+  _world.drawAxisLeft(painter, _vlevelManager.getUnits(), true, true, true, false);
+
+  // draw selected vlevel
+
+  double vlevel = _vlevelManager.getLevel();
+  _world.drawLine(painter, 0, vlevel, 1, vlevel);
+
+  _world.drawTitleTopCenter(painter, "Vlevel");
+
+  painter.end();
+
   return;
 
 
