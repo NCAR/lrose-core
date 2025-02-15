@@ -3104,11 +3104,6 @@ paramdef int {
 } color_scale_width;
 
 paramdef int {
-  p_default = 100;
-  p_descr = "Width of vlevel selector (pixels).";
-} vlevel_selector_width;
-
-paramdef int {
   p_default = 12;
   p_descr = "Basic font size for labels (pixels).";
   p_help = "Some of the labels are scaled relative to this size.";
@@ -3149,6 +3144,94 @@ paramdef int {
   p_default = 1;
   p_descr = "Line width for click cross.";
 } click_cross_line_width;
+
+commentdef {
+  p_header = "VERTICAL SELECTOR";
+}
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Width of vlevel selector (pixels).";
+} vlevel_selector_width;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Height of top margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} vlevel_selector_top_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Height of bottom margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} vlevel_selector_bottom_margin;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of left margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} vlevel_selector_left_margin;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Width of right margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} vlevel_selector_right_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Length of ticks on axes (pixels).";
+} vlevel_selector_axis_tick_len;
+
+paramdef int {
+  p_default = 16;
+  p_descr = "Ideal number of ticks on axes.";
+} vlevel_selector_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} vlevel_selector_axis_text_margin;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} vlevel_selector_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in vlevel_selector (pixels).";
+} vlevel_selector_labels_font_size;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of background in vlevel selector.";
+} vlevel_selector_background_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of titles in vlevel selector.";
+} vlevel_selector_title_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes in vlevel selector.";
+} vlevel_selector_axis_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of labels in vlevel_selector.";
+} vlevel_selector_labels_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of selection marker in vlevel selector.";
+} vlevel_selector_marker_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of data values in vlevel selector.";
+} vlevel_selector_data_values_color;
 
 commentdef {
   p_header = "HORIZ MODE DISPLAY";

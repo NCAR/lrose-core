@@ -49,15 +49,15 @@ VlevelSelector::VlevelSelector(int width,
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _annotation = true;
+  
+  int leftMargin = _params.vlevel_selector_left_margin;
+  int rightMargin = _params.vlevel_selector_right_margin;
+  int topMargin = _params.vlevel_selector_top_margin;
+  int bottomMargin = _params.vlevel_selector_bottom_margin;
 
-  int leftMargin = _params.horiz_left_margin;
-  // int rightMargin =  _params.horiz_right_margin;
-  int rightMargin = 10;
-  int topMargin =  _params.horiz_top_margin;
-  int bottomMargin =  _params.horiz_bot_margin;
-  int axisTickLen = _params.horiz_axis_tick_len;
-  int nTicksIdeal = _params.horiz_n_ticks_ideal;
-  int axisTextMargin = _params.horiz_axis_text_margin;
+  int axisTickLen = _params.vlevel_selector_axis_tick_len;
+  int nTicksIdeal = _params.vlevel_selector_n_ticks_ideal;
+  int axisTextMargin = _params.vlevel_selector_axis_text_margin;
 
   _world.setLeftMargin(leftMargin);
   _world.setRightMargin(rightMargin);
@@ -65,22 +65,19 @@ VlevelSelector::VlevelSelector(int width,
   _world.setBottomMargin(bottomMargin);
 
   _world.setAxisTextMargin(axisTextMargin);
-  _world.setXAxisTickLen(axisTickLen);
-  _world.setXNTicksIdeal(nTicksIdeal);
   _world.setYAxisTickLen(axisTickLen);
   _world.setYNTicksIdeal(nTicksIdeal);
 
-  _world.setTitleFontSize(_params.horiz_title_font_size);
-  _world.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
-  _world.setTickValuesFontSize(_params.horiz_tick_values_font_size);
-  _world.setLegendFontSize(_params.horiz_legend_font_size);
+  _world.setTitleFontSize(_params.vlevel_selector_title_font_size);
+  _world.setAxisLabelFontSize(_params.vlevel_selector_labels_font_size);
+  _world.setTickValuesFontSize(_params.vlevel_selector_labels_font_size);
+  _world.setLegendFontSize(_params.vlevel_selector_title_font_size);
 
-  _world.setTitleColor(_params.horiz_title_color);
-  _world.setAxisLineColor(_params.horiz_axes_color);
-  _world.setAxisTextColor(_params.horiz_axes_color);
-  _world.setGridColor(_params.horiz_grid_color);
+  _world.setTitleColor(_params.vlevel_selector_title_color);
+  _world.setAxisLineColor(_params.vlevel_selector_axis_color);
+  _world.setAxisTextColor(_params.vlevel_selector_axis_color);
 
-  _world.setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _world.setYAxisLabelsInside(false);
   
   update();
   
@@ -119,8 +116,8 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
     worldYMin -= 1.0;
     worldYMax += 1.0;
   } else {
-    worldYMin -= vlevelRange / 20.0;
-    worldYMax += vlevelRange / 20.0;
+    worldYMin -= vlevelRange / 40.0;
+    worldYMax += vlevelRange / 40.0;
   }
 
   _world.setWorldLimitsX(0.0, 1.0);
@@ -131,33 +128,32 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   
   QPainter painter;
   painter.begin(this);
-  _world.fillCanvas(painter, _params.background_color);
+  _world.fillCanvas(painter, _params.vlevel_selector_background_color);
 
   // draw available levels
 
   for (size_t ii = 0; ii < _vlevelManager.getNLevels(); ii++) {
     double vlevel = _vlevelManager.getLevel(ii);
-    QPen pen(Qt::blue);
-    pen.setWidth(2);
+    QPen pen(_params.vlevel_selector_data_values_color);
+    pen.setWidth(3);
     painter.setPen(pen);
-    _world.drawLine(painter, 0, vlevel, 1, vlevel);
+    _world.drawLine(painter, 0.3, vlevel, 0.55, vlevel);
   }
   
   // draw selected vlevel
   
   double vlevel = _vlevelManager.getLevel();
-  QPen pen(Qt::red);
-  pen.setWidth(4);
-  painter.setPen(pen);
-  // _world.drawLine(painter, 0.5, vlevel, 1, vlevel);
+  // QPen pen(_params.vlevel_selector_marker_color);
+  // pen.setWidth(4);
+  // painter.setPen(pen);
+  QBrush brush(_params.vlevel_selector_marker_color);
 
   double ptrHalfHt = 10.0 / _world.getYPixelsPerWorld();
   cerr << "HHHHHHHHHHHHHHH ptrHalfHt: " << ptrHalfHt << endl;
   QVector<QPointF> poly;
-  poly.push_back(QPointF(0.5, vlevel));
+  poly.push_back(QPointF(0.6, vlevel));
   poly.push_back(QPointF(1.0, vlevel + ptrHalfHt));
   poly.push_back(QPointF(1.0, vlevel - ptrHalfHt));
-  QBrush brush(Qt::red);
   _world.fillPolygon(painter, brush, poly);
   
   // draw Y axis

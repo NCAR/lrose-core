@@ -6383,18 +6383,6 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'vlevel_selector_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vlevel_selector_width");
-    tt->descr = tdrpStrDup("Width of vlevel selector (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vlevel_selector_width - &_start_;
-    tt->single_val.i = 100;
-    tt++;
-    
     // Parameter 'label_font_size'
     // ctype is 'int'
     
@@ -6496,6 +6484,207 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 58");
+    tt->comment_hdr = tdrpStrDup("VERTICAL SELECTOR");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'vlevel_selector_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_width");
+    tt->descr = tdrpStrDup("Width of vlevel selector (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_width - &_start_;
+    tt->single_val.i = 100;
+    tt++;
+    
+    // Parameter 'vlevel_selector_top_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in VLEVEL_SELECTOR mode (pixels).");
+    tt->help = tdrpStrDup("Titles go in the top margin.");
+    tt->val_offset = (char *) &vlevel_selector_top_margin - &_start_;
+    tt->single_val.i = 50;
+    tt++;
+    
+    // Parameter 'vlevel_selector_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in VLEVEL_SELECTOR mode (pixels).");
+    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->val_offset = (char *) &vlevel_selector_bottom_margin - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'vlevel_selector_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in VLEVEL_SELECTOR mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the left margin.");
+    tt->val_offset = (char *) &vlevel_selector_left_margin - &_start_;
+    tt->single_val.i = 40;
+    tt++;
+    
+    // Parameter 'vlevel_selector_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in VLEVEL_SELECTOR mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the right margin.");
+    tt->val_offset = (char *) &vlevel_selector_right_margin - &_start_;
+    tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'vlevel_selector_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_axis_tick_len - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'vlevel_selector_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_n_ticks_ideal - &_start_;
+    tt->single_val.i = 16;
+    tt++;
+    
+    // Parameter 'vlevel_selector_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_axis_text_margin");
+    tt->descr = tdrpStrDup("Margin around some text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_axis_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'vlevel_selector_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_title_font_size - &_start_;
+    tt->single_val.i = 12;
+    tt++;
+    
+    // Parameter 'vlevel_selector_labels_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_labels_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in vlevel_selector (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_labels_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'vlevel_selector_background_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_background_color");
+    tt->descr = tdrpStrDup("Color of background in vlevel selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_background_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'vlevel_selector_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_title_color");
+    tt->descr = tdrpStrDup("Color of titles in vlevel selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'vlevel_selector_axis_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_axis_color");
+    tt->descr = tdrpStrDup("Color of axes in vlevel selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_axis_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'vlevel_selector_labels_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_labels_color");
+    tt->descr = tdrpStrDup("Color of labels in vlevel_selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_labels_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'vlevel_selector_marker_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_marker_color");
+    tt->descr = tdrpStrDup("Color of selection marker in vlevel selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_marker_color - &_start_;
+    tt->single_val.s = tdrpStrDup("orange");
+    tt++;
+    
+    // Parameter 'vlevel_selector_data_values_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vlevel_selector_data_values_color");
+    tt->descr = tdrpStrDup("Color of data values in vlevel selector.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vlevel_selector_data_values_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'Comment 59'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 59");
     tt->comment_hdr = tdrpStrDup("HORIZ MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6584,11 +6773,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 59'
+    // Parameter 'Comment 60'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 59");
+    tt->param_name = tdrpStrDup("Comment 60");
     tt->comment_hdr = tdrpStrDup("VERT MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6833,11 +7022,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 60'
+    // Parameter 'Comment 61'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 60");
+    tt->param_name = tdrpStrDup("Comment 61");
     tt->comment_hdr = tdrpStrDup("BSCAN TIME LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6882,11 +7071,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 61'
+    // Parameter 'Comment 62'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 61");
+    tt->param_name = tdrpStrDup("Comment 62");
     tt->comment_hdr = tdrpStrDup("BSCAN REALTIME CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6927,11 +7116,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 62'
+    // Parameter 'Comment 63'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 62");
+    tt->param_name = tdrpStrDup("Comment 63");
     tt->comment_hdr = tdrpStrDup("BSCAN RANGE AND ALTITUDE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7042,11 +7231,11 @@
     tt->single_val.e = RANGE_AXIS_ALTITUDE;
     tt++;
     
-    // Parameter 'Comment 63'
+    // Parameter 'Comment 64'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 63");
+    tt->param_name = tdrpStrDup("Comment 64");
     tt->comment_hdr = tdrpStrDup("BSCAN ANGLE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7123,11 +7312,11 @@
     tt->single_val.d = 91;
     tt++;
     
-    // Parameter 'Comment 64'
+    // Parameter 'Comment 65'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 64");
+    tt->param_name = tdrpStrDup("Comment 65");
     tt->comment_hdr = tdrpStrDup("BSCAN CENSOR DATA BELOW SURFACE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7192,11 +7381,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 65'
+    // Parameter 'Comment 66'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 65");
+    tt->param_name = tdrpStrDup("Comment 66");
     tt->comment_hdr = tdrpStrDup("BSCAN MARGINS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7285,11 +7474,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 66'
+    // Parameter 'Comment 67'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 66");
+    tt->param_name = tdrpStrDup("Comment 67");
     tt->comment_hdr = tdrpStrDup("BSCAN TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7414,11 +7603,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 67'
+    // Parameter 'Comment 68'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 67");
+    tt->param_name = tdrpStrDup("Comment 68");
     tt->comment_hdr = tdrpStrDup("DISTANCE SCALE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7447,11 +7636,11 @@
     tt->single_val.i = 50;
     tt++;
     
-    // Parameter 'Comment 68'
+    // Parameter 'Comment 69'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 68");
+    tt->param_name = tdrpStrDup("Comment 69");
     tt->comment_hdr = tdrpStrDup("BSCAN LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7528,11 +7717,11 @@
     tt->single_val.e = LEGEND_TOP_RIGHT;
     tt++;
     
-    // Parameter 'Comment 69'
+    // Parameter 'Comment 70'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 69");
+    tt->param_name = tdrpStrDup("Comment 70");
     tt->comment_hdr = tdrpStrDup("BSCAN DWELL CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -7587,11 +7776,11 @@
     tt->single_val.e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 70'
+    // Parameter 'Comment 71'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 70");
+    tt->param_name = tdrpStrDup("Comment 71");
     tt->comment_hdr = tdrpStrDup("</LUCID_SPECIFIC_DETAILS>");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -1345,8 +1345,6 @@ public:
 
   int color_scale_width;
 
-  int vlevel_selector_width;
-
   int label_font_size;
 
   char* background_color2;
@@ -1362,6 +1360,38 @@ public:
   int click_cross_size;
 
   int click_cross_line_width;
+
+  int vlevel_selector_width;
+
+  int vlevel_selector_top_margin;
+
+  int vlevel_selector_bottom_margin;
+
+  int vlevel_selector_left_margin;
+
+  int vlevel_selector_right_margin;
+
+  int vlevel_selector_axis_tick_len;
+
+  int vlevel_selector_n_ticks_ideal;
+
+  int vlevel_selector_axis_text_margin;
+
+  int vlevel_selector_title_font_size;
+
+  int vlevel_selector_labels_font_size;
+
+  char* vlevel_selector_background_color;
+
+  char* vlevel_selector_title_color;
+
+  char* vlevel_selector_axis_color;
+
+  char* vlevel_selector_labels_color;
+
+  char* vlevel_selector_marker_color;
+
+  char* vlevel_selector_data_values_color;
 
   tdrp_bool_t horiz_grids_on_at_startup;
 
@@ -1522,7 +1552,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[515];
+  mutable TDRPtable _table[531];
 
   const char *_className;
 
