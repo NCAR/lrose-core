@@ -36,6 +36,8 @@
 #include "WorldPlot.hh"
 #include "VlevelManager.hh"
 
+class GuiManager;
+
 #ifndef DLL_EXPORT
 #ifdef WIN32
 #ifdef QT_PLUGIN
@@ -61,7 +63,7 @@ public:
   VlevelSelector(int width,
                  const ColorMap *cmap,
                  VlevelManager &vlevelManager,
-                 QWidget* parent = 0);
+                 GuiManager* parent = 0);
 
   virtual ~VlevelSelector(void);
   
@@ -103,6 +105,7 @@ public:
   bool _annotation;
   WorldPlot _world;
   VlevelManager &_vlevelManager;
+  GuiManager *_guiManager;
 
 };
 

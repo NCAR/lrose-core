@@ -21,7 +21,9 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
 #include "VlevelSelector.hh"
+#include "GuiManager.hh"
 
 #include <QWidget>
 #include <QLabel>
@@ -37,10 +39,11 @@ using namespace std;
 VlevelSelector::VlevelSelector(int width,
                                const ColorMap *cmap,
                                VlevelManager &vlevelManager,
-                               QWidget* parent) :
-        QWidget(parent),
+                               GuiManager *guiManager) :
+        QWidget(guiManager),
         _colorMap(cmap),
-        _vlevelManager(vlevelManager)
+        _vlevelManager(vlevelManager),
+        _guiManager(guiManager)
 {
   
   setMinimumSize(width, 100);
@@ -49,7 +52,7 @@ VlevelSelector::VlevelSelector(int width,
 
   int leftMargin = _params.horiz_left_margin;
   // int rightMargin =  _params.horiz_right_margin;
-  int rightMargin = 20;
+  int rightMargin = 10;
   int topMargin =  _params.horiz_top_margin;
   int bottomMargin =  _params.horiz_bot_margin;
   int axisTickLen = _params.horiz_axis_tick_len;
@@ -268,9 +271,23 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
 }
 
 /******************************************************************/
-void
-  VlevelSelector::mouseReleaseEvent(QMouseEvent *e) {
+void VlevelSelector::mouseReleaseEvent(QMouseEvent *e)
+{
+  
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  double yVal = _world.getYWorld(pos.y());
+  _vlevelManager.setLevel(yVal);
+  _guiManager->setVlevelHasChanged(true);
+
+  cerr << "YYYYYYYYYYYYYYYYYYY yVal: " << yVal << endl;
+
   emit released();
+
 }
 
 /******************************************************************/

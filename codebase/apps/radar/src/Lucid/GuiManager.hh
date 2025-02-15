@@ -132,6 +132,10 @@ public:
 
   void setXyZoom(double minY, double maxY, double minX, double maxX);
 
+  // set flag to indicate change in vlevel
+
+  void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
+
   // input file list for archive mode
   
   // void setArchiveFileList(const vector<string> &list,

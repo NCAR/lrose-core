@@ -192,7 +192,7 @@ void VlevelManager::set(const RadxVol &vol)
 }
 
 /////////////////////////////////////////////////////////////
-// set angle
+// set vlevel
 // size effect: sets the selected index
 
 void VlevelManager::setLevel(double level)
