@@ -313,14 +313,12 @@ public:
                                 double xx, double yy,
                                 double width, double height);
   
-  // fill the entire canvas with a color
+  // fill a polygon
   
-  void fillCanvas(QPainter &painter,
-                  const char *colorName);
+  void fillPolygon(QPainter &painter,
+                   const QBrush &brush,
+                   const QVector<QPointF> &points);
   
-  void fillCanvas(QPainter &painter,
-                  const QBrush &brush);
-
   // fill a trapezium
   
   void fillTrap(QPainter &painter,
@@ -329,6 +327,14 @@ public:
                 double x1, double y1,
                 double x2, double y2,
                 double x3, double y3);
+
+  // fill the entire canvas with a color
+  
+  void fillCanvas(QPainter &painter,
+                  const char *colorName);
+  
+  void fillCanvas(QPainter &painter,
+                  const QBrush &brush);
 
   // draw an arc
 

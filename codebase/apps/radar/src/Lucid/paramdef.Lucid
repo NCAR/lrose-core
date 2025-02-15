@@ -3104,7 +3104,7 @@ paramdef int {
 } color_scale_width;
 
 paramdef int {
-  p_default = 80;
+  p_default = 100;
   p_descr = "Width of vlevel selector (pixels).";
 } vlevel_selector_width;
 

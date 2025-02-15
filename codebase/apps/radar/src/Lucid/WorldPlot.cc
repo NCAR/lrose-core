@@ -646,37 +646,44 @@ void WorldPlot::fillRectanglePixelCoords(QPainter &painter,
 
 }
 
-//////////////////////////////////////
-// fill the entire canvas with a color
+////////////////////////////////////////////////////////
+// fill a polygon
 
-void WorldPlot::fillCanvas(QPainter &painter,
-                           const char *colorName) 
+void WorldPlot::fillPolygon(QPainter &painter,
+                            const QBrush &brush,
+                            const QVector<QPointF> &points)
   
 {
   
-  double xx = _xPixOffset;
-  double yy = _yPixOffset;
-  double width = _widthPixels;
-  double height = _heightPixels;
-
-  QColor color(colorName);
-  QBrush brush(color);
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
   
-  painter.fillRect(xx, yy, width, height, brush);
-
-}
-
-void WorldPlot::fillCanvas(QPainter &painter,
-                           const QBrush &brush) 
-
-{
+  // create a vector of points
   
-  double xx = _xPixOffset;
-  double yy = _yPixOffset;
-  double width = _widthPixels;
-  double height = _heightPixels;
+  QVector<QPointF> pixPts;
+  for (int ii = 0; ii < (int) points.size(); ii++) {
+    QPointF pt(getXPixel(points[ii].x()), getYPixel(points[ii].y()));
+    pixPts.push_back(pt);
+    cerr << "ppppp x, y, pixx, pixy: "
+         << points[ii].x() << ", " << points[ii].y() << ", "
+         << pt.x() << ", " << pt.y() << endl;
+  }
+  // close polygon
+  pixPts.push_back(pixPts[0]);
   
-  painter.fillRect(xx, yy, width, height, brush);
+  // create a polygon from the points
+  QPolygonF poly(pixPts);
+
+  // add the polygon to a painter path
+  QPainterPath path;
+  path.addPolygon(poly);
+
+  // fill the path
+
+  painter.fillPath(path, brush);
+  // drawPath(painter, path);
+
+  painter.restore();
 
 }
 
@@ -721,6 +728,40 @@ void WorldPlot::fillTrap(QPainter &painter,
   // drawPath(painter, path);
 
   painter.restore();
+
+}
+
+//////////////////////////////////////
+// fill the entire canvas with a color
+
+void WorldPlot::fillCanvas(QPainter &painter,
+                           const char *colorName) 
+  
+{
+  
+  double xx = _xPixOffset;
+  double yy = _yPixOffset;
+  double width = _widthPixels;
+  double height = _heightPixels;
+
+  QColor color(colorName);
+  QBrush brush(color);
+  
+  painter.fillRect(xx, yy, width, height, brush);
+
+}
+
+void WorldPlot::fillCanvas(QPainter &painter,
+                           const QBrush &brush) 
+
+{
+  
+  double xx = _xPixOffset;
+  double yy = _yPixOffset;
+  double width = _widthPixels;
+  double height = _heightPixels;
+  
+  painter.fillRect(xx, yy, width, height, brush);
 
 }
 
@@ -1144,6 +1185,7 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
   
   QFont font(painter.font());
   font.setPointSizeF(_axisLabelFontSize);
+  font.setBold(true);
   painter.setFont(font);
   
   // axis units label
@@ -1208,7 +1250,7 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
     }
     qreal labelY = (qreal) (ypix - (labelRect.height() / 2));
     QRectF bRect2(labelX, labelY,
-                  labelRect.width() + 2, labelRect.height() + 5);
+                  labelRect.width() + 2, labelRect.height() + 2);
     if ((fabs(labelY - unitsY) > labelRect.height() + _axisTextMargin) &&
         (fabs(labelY - _yMinPixel) > labelRect.height() + _axisTextMargin)) {
       if (doLabels) {

@@ -48,7 +48,8 @@ VlevelSelector::VlevelSelector(int width,
   _annotation = true;
 
   int leftMargin = _params.horiz_left_margin;
-  int rightMargin =  _params.horiz_right_margin;
+  // int rightMargin =  _params.horiz_right_margin;
+  int rightMargin = 20;
   int topMargin =  _params.horiz_top_margin;
   int bottomMargin =  _params.horiz_bot_margin;
   int axisTickLen = _params.horiz_axis_tick_len;
@@ -123,19 +124,45 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   _world.setWorldLimitsY(worldYMin, worldYMax);
   _world.setWindowGeom(width(), height(), 0, 0);
 
-  // draw Y axis
+  // fill with background
   
   QPainter painter;
   painter.begin(this);
-
   _world.fillCanvas(painter, _params.background_color);
+
+  // draw available levels
+
+  for (size_t ii = 0; ii < _vlevelManager.getNLevels(); ii++) {
+    double vlevel = _vlevelManager.getLevel(ii);
+    QPen pen(Qt::blue);
+    pen.setWidth(2);
+    painter.setPen(pen);
+    _world.drawLine(painter, 0, vlevel, 1, vlevel);
+  }
+  
+  // draw selected vlevel
+  
+  double vlevel = _vlevelManager.getLevel();
+  QPen pen(Qt::red);
+  pen.setWidth(4);
+  painter.setPen(pen);
+  // _world.drawLine(painter, 0.5, vlevel, 1, vlevel);
+
+  double ptrHalfHt = 10.0 / _world.getYPixelsPerWorld();
+  cerr << "HHHHHHHHHHHHHHH ptrHalfHt: " << ptrHalfHt << endl;
+  QVector<QPointF> poly;
+  poly.push_back(QPointF(0.5, vlevel));
+  poly.push_back(QPointF(1.0, vlevel + ptrHalfHt));
+  poly.push_back(QPointF(1.0, vlevel - ptrHalfHt));
+  QBrush brush(Qt::red);
+  _world.fillPolygon(painter, brush, poly);
+  
+  // draw Y axis
+  
   _world.drawAxisLeft(painter, _vlevelManager.getUnits(), true, true, true, false);
 
-  // draw selected vlevel
-
-  double vlevel = _vlevelManager.getLevel();
-  _world.drawLine(painter, 0, vlevel, 1, vlevel);
-
+  // draw title
+  
   _world.drawTitleTopCenter(painter, "Vlevel");
 
   painter.end();

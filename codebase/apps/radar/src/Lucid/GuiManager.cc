@@ -552,7 +552,7 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
 
   } else if (key == Qt::Key_Down) {
 
-    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNVlevels() - 1) {
+    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNLevels() - 1) {
       if (_params.debug) {
         cerr << "Clicked down arrow, go down a vlevel" << endl;
       }
@@ -1229,7 +1229,7 @@ void GuiManager::_createVlevelRadioButtons()
   char buf[256];
   _vlevelRButtons = new vector<QRadioButton *>();
   
- for (int ielev = 0; ielev < (int) _vlevelManager.getNVlevels(); ielev++) {
+ for (int ielev = 0; ielev < (int) _vlevelManager.getNLevels(); ielev++) {
     
     std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
     QRadioButton *radio1 = new QRadioButton(buf); 

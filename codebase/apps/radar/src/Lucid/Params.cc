@@ -6392,7 +6392,7 @@
     tt->descr = tdrpStrDup("Width of vlevel selector (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_width - &_start_;
-    tt->single_val.i = 80;
+    tt->single_val.i = 100;
     tt++;
     
     // Parameter 'label_font_size'

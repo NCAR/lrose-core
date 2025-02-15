@@ -99,16 +99,17 @@ public:
 
   // get methods
 
-  size_t getNVlevels() const { return _vlevels.size(); }
+  size_t getNLevels() const { return _vlevels.size(); }
   const vector<GuiVlevel> &getGuiLevels() const { return _vlevels; }
   const GuiVlevel getSelectedVlevel() const { return _vlevels[_guiIndex]; }
-  double getLevel(int index) const {
-    if (index >= (int) _vlevels.size()) {
-      return _vlevels[_vlevels.size()-1].level;
-    } else {
-      return _vlevels[index].level;
-    }
-  }
+  double getLevel(ssize_t vlevelIndex = -1) const;
+  // double getLevel(int index) const {
+  //   if (index >= (int) _vlevels.size()) {
+  //     return _vlevels[_vlevels.size()-1].level;
+  //   } else {
+  //     return _vlevels[index].level;
+  //   }
+  // }
   double getLevelMax() const {
     if (_vlevels.size() < 1) {
       return 0.0;
@@ -127,7 +128,6 @@ public:
   int getSelectedLevel() const { return _selectedLevel; }
   bool getReversedInGui() const { return _reversedInGui; }
   
-  double getLevel(ssize_t vlevelIndex = -1) const;
   const string &getUnits() const { return _units; }
 
   private:
