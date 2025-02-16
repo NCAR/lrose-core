@@ -1001,6 +1001,44 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
 
 }
 
+///////////////////////	
+// Titles top center
+    
+void WorldPlot::drawTitlesTopCenter(QPainter &painter,
+                                    const vector<string> &titles) 
+  
+{
+  
+  painter.save();
+
+  // compute line spacing
+  
+  QRect tRect0(painter.fontMetrics().tightBoundingRect("TITLE"));
+  int startY = tRect0.height();
+  int lineSpacing = (int) (tRect0.height() * 2);
+
+  // set font
+  
+  QFont font(painter.font());
+  font.setPointSizeF(_legendFontSize);
+  font.setBold(true);
+  painter.setFont(font);
+  
+  // draw sequential titles
+  
+  for (size_t ii = 0; ii < titles.size(); ii++) {
+    string title(titles[ii]);
+    QRect lRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
+    qreal xx = (qreal) ((_widthPixels - lRect.width()) / 2.0);
+    qreal yy = startY + ii * lineSpacing;
+    QRectF bRect(xx, yy, lRect.width() + 2, lRect.height() + 2);
+    painter.drawText(bRect, Qt::AlignCenter, title.c_str());
+  }
+  
+  painter.restore();
+
+}
+
 /////////////////////////////////////////////////////////	
 // Y axis label
     

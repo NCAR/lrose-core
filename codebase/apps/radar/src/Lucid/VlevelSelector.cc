@@ -50,32 +50,24 @@ VlevelSelector::VlevelSelector(int width,
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   _annotation = true;
   
-  int leftMargin = _params.vlevel_selector_left_margin;
-  int rightMargin = _params.vlevel_selector_right_margin;
-  int topMargin = _params.vlevel_selector_top_margin;
-  int bottomMargin = _params.vlevel_selector_bottom_margin;
+  _world.setLeftMargin(_params.vlevel_selector_left_margin);
+  _world.setRightMargin(_params.vlevel_selector_right_margin);
+  _world.setTopMargin(_params.vlevel_selector_top_margin);
+  _world.setBottomMargin(_params.vlevel_selector_bottom_margin);
 
-  int axisTickLen = _params.vlevel_selector_axis_tick_len;
-  int nTicksIdeal = _params.vlevel_selector_n_ticks_ideal;
-  int axisTextMargin = _params.vlevel_selector_axis_text_margin;
-
-  _world.setLeftMargin(leftMargin);
-  _world.setRightMargin(rightMargin);
-  _world.setTopMargin(topMargin);
-  _world.setBottomMargin(bottomMargin);
-
-  _world.setAxisTextMargin(axisTextMargin);
-  _world.setYAxisTickLen(axisTickLen);
-  _world.setYNTicksIdeal(nTicksIdeal);
+  _world.setAxisTextMargin(_params.vlevel_selector_axis_text_margin);
+  _world.setYAxisTickLen(_params.vlevel_selector_axis_tick_len);
+  _world.setYNTicksIdeal(_params.vlevel_selector_n_ticks_ideal);
 
   _world.setTitleFontSize(_params.vlevel_selector_title_font_size);
   _world.setAxisLabelFontSize(_params.vlevel_selector_labels_font_size);
   _world.setTickValuesFontSize(_params.vlevel_selector_labels_font_size);
-  _world.setLegendFontSize(_params.vlevel_selector_title_font_size);
 
   _world.setTitleColor(_params.vlevel_selector_title_color);
   _world.setAxisLineColor(_params.vlevel_selector_axis_color);
   _world.setAxisTextColor(_params.vlevel_selector_axis_color);
+
+  _world.setLegendFontSize(_params.vlevel_selector_title_font_size);
 
   _world.setYAxisLabelsInside(false);
   
@@ -104,6 +96,12 @@ void VlevelSelector::setAnnotationOff()
 /******************************************************************/
 void VlevelSelector::paintEvent(QPaintEvent* e)
 {
+
+  if (_vlevelManager.getNLevels() == 1) {
+    _world.setYNTicksIdeal(3);
+  } else {
+    _world.setYNTicksIdeal(_params.vlevel_selector_n_ticks_ideal);
+  }
 
   // update world coords
 
@@ -143,13 +141,9 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   // draw selected vlevel
   
   double vlevel = _vlevelManager.getLevel();
-  // QPen pen(_params.vlevel_selector_marker_color);
-  // pen.setWidth(4);
-  // painter.setPen(pen);
   QBrush brush(_params.vlevel_selector_marker_color);
 
   double ptrHalfHt = 10.0 / _world.getYPixelsPerWorld();
-  cerr << "HHHHHHHHHHHHHHH ptrHalfHt: " << ptrHalfHt << endl;
   QVector<QPointF> poly;
   poly.push_back(QPointF(0.6, vlevel));
   poly.push_back(QPointF(1.0, vlevel + ptrHalfHt));
@@ -158,12 +152,35 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   
   // draw Y axis
   
-  _world.drawAxisLeft(painter, _vlevelManager.getUnits(), true, true, true, false);
-
-  // draw title
+  _world.drawAxisLeft(painter, "", true, true, true, false);
   
-  _world.drawTitleTopCenter(painter, "Vlevel");
+  // draw titles
 
+  {
+    
+    QPen pen(_params.vlevel_selector_title_color);
+    painter.setPen(pen);
+    
+    vector<string> titles;
+    if (_vlevelManager.getUnits().find("deg") != string::npos) {
+      titles.push_back("Elev angle");
+    } else if (_vlevelManager.getUnits().find("km") != string::npos ||
+               _vlevelManager.getUnits().find("m") != string::npos) {
+      titles.push_back("Height");
+    } else {
+      titles.push_back("Vlevel");
+    }
+    if (_vlevelManager.getUnits().size() > 0) {
+      titles.push_back(_vlevelManager.getUnits());
+    }
+    char text[1024];
+    snprintf(text, 1024, "%g", _vlevelManager.getLevel());
+    titles.push_back(text);
+    
+    _world.drawTitlesTopCenter(painter, titles);
+
+  }
+  
   painter.end();
 
   return;

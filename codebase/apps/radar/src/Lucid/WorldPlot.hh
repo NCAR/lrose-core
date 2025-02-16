@@ -403,6 +403,10 @@ public:
     
   void drawTitleTopCenter(QPainter &painter,
                           const string &title);
+
+  void drawTitlesTopCenter(QPainter &painter,
+                           const vector<string> &titles);
+  
   // Y axis label
     
   void drawYAxisLabelLeft(QPainter &painter, const string &label);

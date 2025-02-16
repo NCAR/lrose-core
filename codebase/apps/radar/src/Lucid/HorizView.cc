@@ -274,35 +274,24 @@ void HorizView::configureWorldCoords(int zoomLevel)
 
   // set world view
 
-  int leftMargin = _params.horiz_left_margin;
-  int rightMargin =  _params.horiz_right_margin;
-  int topMargin =  _params.horiz_top_margin;
-  int bottomMargin =  _params.horiz_bot_margin;
-  int colorScaleWidth = _params.color_scale_width;
-  int axisTickLen = _params.horiz_axis_tick_len;
-  int nTicksIdeal = _params.horiz_n_ticks_ideal;
-  int titleTextMargin = _params.horiz_title_text_margin;
-  int legendTextMargin = _params.horiz_legend_text_margin;
-  int axisTextMargin = _params.horiz_axis_text_margin;
-
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
   _fullWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
                             gd.h_win.cmax_x, gd.h_win.cmax_y);
   
-  _fullWorld.setLeftMargin(leftMargin);
-  _fullWorld.setRightMargin(rightMargin);
-  _fullWorld.setTopMargin(topMargin);
-  _fullWorld.setBottomMargin(bottomMargin);
-  _fullWorld.setTitleTextMargin(titleTextMargin);
-  _fullWorld.setLegendTextMargin(legendTextMargin);
-  _fullWorld.setAxisTextMargin(axisTextMargin);
-  _fullWorld.setColorScaleWidth(colorScaleWidth);
+  _fullWorld.setLeftMargin(_params.horiz_left_margin);
+  _fullWorld.setRightMargin(_params.horiz_right_margin);
+  _fullWorld.setTopMargin(_params.horiz_top_margin);
+  _fullWorld.setBottomMargin(_params.horiz_bot_margin);
+  _fullWorld.setTitleTextMargin(_params.horiz_title_text_margin);
+  _fullWorld.setLegendTextMargin(_params.horiz_legend_text_margin);
+  _fullWorld.setAxisTextMargin(_params.horiz_axis_text_margin);
+  _fullWorld.setColorScaleWidth(_params.color_scale_width);
 
-  _fullWorld.setXAxisTickLen(axisTickLen);
-  _fullWorld.setXNTicksIdeal(nTicksIdeal);
-  _fullWorld.setYAxisTickLen(axisTickLen);
-  _fullWorld.setYNTicksIdeal(nTicksIdeal);
+  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
 
   _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
@@ -314,10 +303,6 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisTextColor(_params.horiz_axes_color);
   _fullWorld.setGridColor(_params.horiz_grid_color);
 
-  // cerr << "FFFFFFFFFFFFFFF Full world" << endl;
-  // _fullWorld.print(cerr);
-  // cerr << "FFFFFFFFFFFFFFF Full world" << endl;
-  
   // initialize the projection
 
   _initProjection();

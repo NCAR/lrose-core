@@ -3155,7 +3155,7 @@ paramdef int {
 } vlevel_selector_width;
 
 paramdef int {
-  p_default = 50;
+  p_default = 70;
   p_descr = "Height of top margin in VLEVEL_SELECTOR mode (pixels).";
   p_help = "Titles go in the top margin.";
 } vlevel_selector_top_margin;
@@ -3209,7 +3209,7 @@ paramdef string {
 } vlevel_selector_background_color;
 
 paramdef string {
-  p_default = "white";
+  p_default = "orange";
   p_descr = "Color of titles in vlevel selector.";
 } vlevel_selector_title_color;
 

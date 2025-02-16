@@ -6509,7 +6509,7 @@
     tt->descr = tdrpStrDup("Height of top margin in VLEVEL_SELECTOR mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
     tt->val_offset = (char *) &vlevel_selector_top_margin - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 70;
     tt++;
     
     // Parameter 'vlevel_selector_bottom_margin'
@@ -6629,7 +6629,7 @@
     tt->descr = tdrpStrDup("Color of titles in vlevel selector.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("orange");
     tt++;
     
     // Parameter 'vlevel_selector_axis_color'
