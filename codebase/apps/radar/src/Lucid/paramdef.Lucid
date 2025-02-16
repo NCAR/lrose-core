@@ -3150,7 +3150,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 100;
+  p_default = 90;
   p_descr = "Width of vlevel selector (pixels).";
 } vlevel_selector_width;
 

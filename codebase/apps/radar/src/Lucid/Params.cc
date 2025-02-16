@@ -6497,7 +6497,7 @@
     tt->descr = tdrpStrDup("Width of vlevel selector (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_width - &_start_;
-    tt->single_val.i = 100;
+    tt->single_val.i = 90;
     tt++;
     
     // Parameter 'vlevel_selector_top_margin'

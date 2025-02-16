@@ -91,10 +91,13 @@ public:
  protected:
 
   /// Capture a mouse release and emit a released() signal.
-  virtual void mouseReleaseEvent(QMouseEvent* e);
+  virtual void mouseReleaseEvent(QMouseEvent* e) override;
+
+  /// Capture a key press event
+  virtual void keyPressEvent(QKeyEvent* e) override;
 
   /// The paint event is where we will draw the color bar.
-  virtual void paintEvent(QPaintEvent* e);
+  virtual void paintEvent(QPaintEvent* e) override;
 
   /// A default color map, so that the plugin can
   /// display something.

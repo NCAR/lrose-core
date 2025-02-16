@@ -238,11 +238,16 @@ int MdvReader::getHorizPlane()
   }
   
   // zoom
-  
-  h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat(),
-                             _zoomBoxReq.getMinLon(),
-                             _zoomBoxReq.getMaxLat(),
-                             _zoomBoxReq.getMaxLon());
+
+  double dlat = _zoomBoxReq.getMaxLat() - _zoomBoxReq.getMinLat();
+  double dlon = _zoomBoxReq.getMaxLon() - _zoomBoxReq.getMinLon();
+  double dlatExtra = fabs(dlat) / 4.0;
+  double dlonExtra = fabs(dlon) / 4.0;
+
+  h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
+                             _zoomBoxReq.getMinLon() - dlonExtra,
+                             _zoomBoxReq.getMaxLat() + dlatExtra,
+                             _zoomBoxReq.getMaxLon() + dlonExtra);
   
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
   if (!_params.do_not_decimate_on_mdv_request) {

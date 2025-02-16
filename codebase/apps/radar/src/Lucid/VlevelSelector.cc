@@ -286,6 +286,43 @@ void VlevelSelector::mouseReleaseEvent(QMouseEvent *e)
 
 }
 
+////////////////////////////////////////////////////////////////
+void VlevelSelector::keyPressEvent(QKeyEvent * e)
+{
+
+  // get key pressed
+  
+  char keychar = e->text().toLatin1().data()[0];
+  int key = e->key();
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "VlevelSelector, clicked char: "
+         << keychar << ":" << (int) keychar << endl;
+    cerr << "         key: " << hex << key << dec << endl;
+  }
+  
+  if (key == Qt::Key_Up) {
+    
+    if (_vlevelManager.getGuiIndex() > 0) {
+      if (_params.debug) {
+        cerr << "VlevelSelector clicked up arrow, go up a vlevel" << endl;
+      }
+      // _changeVlevelRadioButton(-1);
+    }
+
+  } else if (key == Qt::Key_Down) {
+
+    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNLevels() - 1) {
+      if (_params.debug) {
+        cerr << "VlevelSelector clicked down arrow, go down a vlevel" << endl;
+      }
+      // _changeVlevelRadioButton(+1);
+    }
+    
+  }
+
+}
+
 /******************************************************************/
 QImage* VlevelSelector::getImage()
 {	
