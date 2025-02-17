@@ -140,9 +140,9 @@ GuiManager::GuiManager() :
   _vertWindow = NULL;
   _vert = NULL;
 
-  _vlevelVBoxLayout = NULL;
-  _vlevelFrame = NULL;
-  _vlevelPanel = NULL;
+  // _vlevelVBoxLayout = NULL;
+  // _vlevelFrame = NULL;
+  // _vlevelPanel = NULL;
   _vlevelHasChanged = false;
   
   _fieldMenu = NULL;
@@ -312,6 +312,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (_fieldHasChanged) {
     needNewData = true;
     _fieldHasChanged = false;
+    cerr << "CCCCCCCCCCCCCCCCCCCCCCCC" << endl;
   }
   
   // zoom change?
@@ -373,7 +374,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
     if (gd.h_win.page < gd.num_datafields) {
       _vlevelManager.set(*gd.mread[gd.h_win.page]);
     }
-    _createVlevelRadioButtons();
     _vlevelSelector->update();
   }
   
@@ -447,10 +447,10 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
   
   // for ESC, freeze / unfreeze
 
-  if (keychar == 27) {
-    _freezeAct->trigger();
-    return;
-  }
+  // if (keychar == 27) {
+  //   _freezeAct->trigger();
+  //   return;
+  // }
 
   // check for up/down in vlevels
   
@@ -468,23 +468,25 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     }
     _timeControl->goFwd1();
     
-  // } else if (key == Qt::Key_Up) {
-
-  //   if (_vlevelManager.getIndexInGui() > 0) {
-  //     if (_params.debug) {
-  //       cerr << "Clicked up arrow, go up a vlevel" << endl;
-  //     }
-  //     // _changeVlevelRadioButton(-1);
-  //   }
-
-  // } else if (key == Qt::Key_Down) {
-
-  //   if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
-  //     if (_params.debug) {
-  //       cerr << "Clicked down arrow, go down a vlevel" << endl;
-  //     }
-  //     // _changeVlevelRadioButton(+1);
-  //   }
+  } else if (key == Qt::Key_Up) {
+    
+    if (_vlevelManager.getIndexInGui() > 0) {
+      if (_params.debug) {
+        cerr << "Clicked up arrow, go up a vlevel" << endl;
+      }
+      _vlevelSelector->keyPressEvent(e);
+      // _changeVlevelRadioButton(-1);
+    }
+    
+  } else if (key == Qt::Key_Down) {
+    
+    if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
+      if (_params.debug) {
+        cerr << "Clicked down arrow, go down a vlevel" << endl;
+      }
+      _vlevelSelector->keyPressEvent(e);
+      // _changeVlevelRadioButton(+1);
+    }
     
   }
 
@@ -500,11 +502,11 @@ void GuiManager::_swap(int &val1, int &val2)
   val2 = tmp;
 }
 
-void GuiManager::_moveUpDown() 
-{
-  this->setCursor(Qt::WaitCursor);
-  this->setCursor(Qt::ArrowCursor);
-}
+// void GuiManager::_moveUpDown() 
+// {
+//   this->setCursor(Qt::WaitCursor);
+//   this->setCursor(Qt::ArrowCursor);
+// }
 
 //////////////////////////////////////////////////
 // Set radar name in title bar
@@ -566,13 +568,7 @@ void GuiManager::_setupWindows()
   connect(_horiz, &HorizView::customContextMenuRequested,
 	  this, &GuiManager::ShowContextMenu);
 
-  // vlevel panel
-
-  _createVlevelFrame();
-  cerr << "VVVVVVVVVV vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  //mainLayout->addWidget(_vlevelFrame);
-  
-  cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  // vlevel selector
 
   _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width,
                                        _vlevelManager, this);
@@ -584,8 +580,6 @@ void GuiManager::_setupWindows()
   _resizeTimer->setInterval(250); // 0.25s delay
   _resizeTimer->setSingleShot(true);
   connect(_resizeTimer, &QTimer::timeout, this, &GuiManager::_resizeFinished);
-
-  // _setVlevelPanelVisibility();
 
   // field menu
 
@@ -616,12 +610,12 @@ void GuiManager::_setupWindows()
   move(pos);
   show();
 
-  cerr << "XXXXXXXXXXXXXXXXXX vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
+  // cerr << "XXXXXXXXXXXXXXXXXX vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
 
-  cerr << "VVVVVVVVVVVVVVV _vlevel width: " << _vlevelFrame->size().width() << endl;
-  cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
-  resize(width() + _vlevelFrame->size().width(), height());
-  cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
+  // cerr << "VVVVVVVVVVVVVVV _vlevel width: " << _vlevelFrame->size().width() << endl;
+  // cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
+  // resize(width() + _vlevelFrame->size().width(), height());
+  // cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
 
   // set up field status dialog
   // _createClickReportDialog();
@@ -658,10 +652,10 @@ void GuiManager::_createActions()
           this, &GuiManager::_showFieldMenu);
   
   // freeze display
-  _freezeAct = new QAction(tr("Freeze"), this);
-  _freezeAct->setShortcut(tr("Esc"));
-  _freezeAct->setStatusTip(tr("Freeze display"));
-  connect(_freezeAct, &QAction::triggered, this, &GuiManager::_freeze);
+  // _freezeAct = new QAction(tr("Freeze"), this);
+  // _freezeAct->setShortcut(tr("Esc"));
+  // _freezeAct->setStatusTip(tr("Freeze display"));
+  // connect(_freezeAct, &QAction::triggered, this, &GuiManager::_freeze);
   
   // show user click in dialog
   _showClickAct = new QAction(tr("Values"), this);
@@ -819,7 +813,7 @@ void GuiManager::_createMenus()
 
   // misc actions
   
-  menuBar()->addAction(_freezeAct);
+  // menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
   // menuBar()->addAction(_showBoundaryEditorAct);
   menuBar()->addAction(_reloadAct);
@@ -1105,134 +1099,134 @@ void GuiManager::_populateOverlaysMenu()
 // create the vlevel panel
 // buttons will be filled in by createVlevelRadioButtons()
 
-void GuiManager::_createVlevelFrame()
-{
+// void GuiManager::_createVlevelFrame()
+// {
   
-  _vlevelFrame = new QFrame(_main);
-  QHBoxLayout *frameLayout = new QHBoxLayout;
-  _vlevelFrame->setLayout(frameLayout);
+//   _vlevelFrame = new QFrame(_main);
+//   QHBoxLayout *frameLayout = new QHBoxLayout;
+//   _vlevelFrame->setLayout(frameLayout);
   
-  _vlevelPanel = new QGroupBox("Z", _vlevelFrame);
-  frameLayout->addWidget(_vlevelPanel);
-  _vlevelVBoxLayout = new QVBoxLayout;
-  _vlevelPanel->setLayout(_vlevelVBoxLayout);
-  _vlevelPanel->setAlignment(Qt::AlignHCenter);
+//   _vlevelPanel = new QGroupBox("Z", _vlevelFrame);
+//   frameLayout->addWidget(_vlevelPanel);
+//   _vlevelVBoxLayout = new QVBoxLayout;
+//   _vlevelPanel->setLayout(_vlevelVBoxLayout);
+//   _vlevelPanel->setAlignment(Qt::AlignHCenter);
   
-  _vlevelRButtons = new vector<QRadioButton *>();
+//   _vlevelRButtons = new vector<QRadioButton *>();
   
   
-}
+// }
 
 /////////////////////////////////////////////////////////////////////
 // create radio buttons
 // this requires that _vlevelManager is up to date with vlevel info
 
-void GuiManager::_createVlevelRadioButtons() 
-{
+// void GuiManager::_createVlevelRadioButtons() 
+// {
 
-  // clear previous
+//   // clear previous
   
-  _clearVlevelRadioButtons();
+//   _clearVlevelRadioButtons();
   
-  // fonts
+//   // fonts
   
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont fontm2 = dummy.font();
-  int fsize = _params.label_font_size;
-  int fsizem2 = _params.label_font_size - 2;
-  font.setPixelSize(fsize);
-  fontm2.setPixelSize(fsizem2);
+//   QLabel dummy;
+//   QFont font = dummy.font();
+//   QFont fontm2 = dummy.font();
+//   int fsize = _params.label_font_size;
+//   int fsizem2 = _params.label_font_size - 2;
+//   font.setPixelSize(fsize);
+//   fontm2.setPixelSize(fsizem2);
   
-  // radar and site name
+//   // radar and site name
   
-  char buf[256];
-  _vlevelRButtons = new vector<QRadioButton *>();
+//   char buf[256];
+//   _vlevelRButtons = new vector<QRadioButton *>();
   
- for (int ielev = 0; ielev < (int) _vlevelManager.getNLevels(); ielev++) {
+//  for (int ielev = 0; ielev < (int) _vlevelManager.getNLevels(); ielev++) {
     
-    std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
-    QRadioButton *radio1 = new QRadioButton(buf); 
-    radio1->setFont(fontm2); 
+//     std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
+//     QRadioButton *radio1 = new QRadioButton(buf); 
+//     radio1->setFont(fontm2); 
     
-    if (ielev == _vlevelManager.getIndexInGui()) {
-      radio1->setChecked(true);
-    }
+//     if (ielev == _vlevelManager.getIndexInGui()) {
+//       radio1->setChecked(true);
+//     }
     
-    _vlevelRButtons->push_back(radio1);
-    _vlevelVBoxLayout->addWidget(radio1);
+//     _vlevelRButtons->push_back(radio1);
+//     _vlevelVBoxLayout->addWidget(radio1);
     
-    // connect slot for vlevel change
+//     // connect slot for vlevel change
                               
-    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeVlevel(bool)));
+//     connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeVlevel(bool)));
     
-  }
+//   }
 
-  QString title("Z");
-  if (_vlevelManager.getUnits().size() > 0) {
-    title += "(";
-    title += _vlevelManager.getUnits();
-    title += ")";
-  }
-  _vlevelPanel->setTitle(title);
+//   QString title("Z");
+//   if (_vlevelManager.getUnits().size() > 0) {
+//     title += "(";
+//     title += _vlevelManager.getUnits();
+//     title += ")";
+//   }
+//   _vlevelPanel->setTitle(title);
 
-}
+// }
 
 ///////////////////////////////////////////////////////////////////
 // create vlevel panel of radio buttons
 
-void GuiManager::_clearVlevelRadioButtons() 
-{
+// void GuiManager::_clearVlevelRadioButtons() 
+// {
   
-  QLayoutItem* child;
-  if (_vlevelVBoxLayout != NULL) {
-    while (_vlevelVBoxLayout->count() !=0) {
-      child = _vlevelVBoxLayout->takeAt(0);
-      if (child->widget() !=0) {
-        delete child->widget();
-      }
-      delete child;
-    }
-  }
+//   QLayoutItem* child;
+//   if (_vlevelVBoxLayout != NULL) {
+//     while (_vlevelVBoxLayout->count() !=0) {
+//       child = _vlevelVBoxLayout->takeAt(0);
+//       if (child->widget() !=0) {
+//         delete child->widget();
+//       }
+//       delete child;
+//     }
+//   }
   
-}
+// }
 
 /////////////////////////////////////////////////////////////
 // change vlevel
 
-void GuiManager::_changeVlevel(bool value) {
+// void GuiManager::_changeVlevel(bool value) {
   
-  if (_params.debug) {
-    cerr << "From GuiManager: the vlevel was changed ";
-    cerr << endl;
-  }
+//   if (_params.debug) {
+//     cerr << "From GuiManager: the vlevel was changed ";
+//     cerr << endl;
+//   }
   
-  if (!value) {
-    return;
-  }
+//   if (!value) {
+//     return;
+//   }
   
-  for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
-       vlevelIndex++) {
-    if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
-      _vlevelManager.setIndexInGui(vlevelIndex);
-      if (_params.debug) {
-        cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
-        cerr << "  moving to vlevel index, value: "
-             << vlevelIndex << ", " << _vlevelManager.getLevel() << endl;
-      }
-      // _horiz->setStartOfVlevel(true);
-      // _vert->setStartOfVlevel(true);
-      _moveUpDown();
+//   for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
+//        vlevelIndex++) {
+//     if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
+//       _vlevelManager.setIndexInGui(vlevelIndex);
+//       if (_params.debug) {
+//         cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
+//         cerr << "  moving to vlevel index, value: "
+//              << vlevelIndex << ", " << _vlevelManager.getLevel() << endl;
+//       }
+//       // _horiz->setStartOfVlevel(true);
+//       // _vert->setStartOfVlevel(true);
+//       _moveUpDown();
 
-      _vlevelHasChanged = true;
-      gd.redraw_horiz = true;
+//       _vlevelHasChanged = true;
+//       gd.redraw_horiz = true;
       
-      // reloadBoundaries();
-      return;
-    }
-  }  // ii
+//       // reloadBoundaries();
+//       return;
+//     }
+//   }  // ii
   
-}
+// }
 
 ///////////////////////////////////////////////////////////////
 // change vlevel
@@ -1243,21 +1237,21 @@ void GuiManager::_changeVlevel(bool value) {
 // value = +1 move forward
 // value = -1 move backward in vlevels
 
-void GuiManager::_changeVlevelRadioButton(int increment)
+// void GuiManager::_changeVlevelRadioButton(int increment)
 
-{
+// {
   
-  if (_params.debug) {
-    cerr << "-->> changing vlevel index by increment: " << increment << endl;
-  }
+//   if (_params.debug) {
+//     cerr << "-->> changing vlevel index by increment: " << increment << endl;
+//   }
   
-  if (increment != 0) {
-    _vlevelManager.changeIndexInGui(increment);
-    _vlevelRButtons->at(_vlevelManager.getIndexInGui())->setChecked(true);
-    gd.redraw_horiz = true;
-  }
+//   if (increment != 0) {
+//     _vlevelManager.changeIndexInGui(increment);
+//     _vlevelRButtons->at(_vlevelManager.getIndexInGui())->setChecked(true);
+//     gd.redraw_horiz = true;
+//   }
   
-}
+// }
 
 /////////////////////////////
 // get data in realtime mode
@@ -1937,18 +1931,18 @@ void GuiManager::_handleArchiveData(/*QTimerEvent * event*/)
 ////////////////////////////////////////////
 // freeze / unfreeze
 
-void GuiManager::_freeze()
-{
-  if (_frozen) {
-    _frozen = false;
-    _freezeAct->setText("Freeze");
-    _freezeAct->setStatusTip(tr("Click to freeze display, or hit ESC"));
-  } else {
-    _frozen = true;
-    _freezeAct->setText("Unfreeze");
-    _freezeAct->setStatusTip(tr("Click to unfreeze display, or hit ESC"));
-  }
-}
+// void GuiManager::_freeze()
+// {
+//   if (_frozen) {
+//     _frozen = false;
+//     _freezeAct->setText("Freeze");
+//     _freezeAct->setStatusTip(tr("Click to freeze display, or hit ESC"));
+//   } else {
+//     _frozen = true;
+//     _freezeAct->setText("Unfreeze");
+//     _freezeAct->setStatusTip(tr("Click to unfreeze display, or hit ESC"));
+//   }
+// }
 
 ////////////////////////////////////////////
 // unzoom to previous zoom
@@ -2446,9 +2440,6 @@ void GuiManager::_placeFieldMenu()
 
 void GuiManager::_fieldTableCellClicked(int row, int col)
 {
-
-  cerr << "FFFFFFFFFFFFF field menu clicked, row, col: "
-       << row << ", " << col << endl;
 
   if (_fieldTableRow == _fieldTable->currentRow() &&
       _fieldTableCol == _fieldTable->currentColumn()) {

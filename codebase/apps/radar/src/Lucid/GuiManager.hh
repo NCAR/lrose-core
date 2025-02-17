@@ -90,10 +90,6 @@ public:
 
   static GuiManager* Instance();
 
-  // boundary editor dialog
-  QDialog *_boundaryEditorDialog;
-  QGridLayout *_boundaryEditorDialogLayout;
-
   // constructor
   
   GuiManager();
@@ -107,7 +103,7 @@ public:
   int run(QApplication &app);
 
   // enable the unzoom actions
-
+  
   void enableZoomBackButton() const;
   void enableZoomOutButton() const;
   
@@ -135,7 +131,7 @@ public:
   // set flag to indicate change in vlevel
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
-
+  
   // input file list for archive mode
   
   // void setArchiveFileList(const vector<string> &list,
@@ -156,6 +152,10 @@ public:
 
   //  const RadxVol getDataVolume();
 
+  // boundary editor dialog
+  QDialog *_boundaryEditorDialog;
+  QGridLayout *_boundaryEditorDialogLayout;
+
 public slots:
 
   // void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
@@ -170,20 +170,13 @@ signals:
 private:
 
   int _mainTimerId;
-  bool _frozen;
+  // bool _frozen;
   
   int _timerEventCount;
   bool _guiSizeInitialized;
   
   static GuiManager* m_pInstance;
   // // string _openFilePath;
-
-  // boundary editor
-  
-  string _boundaryDir;
-  void setBoundaryDir();
-
-  // string getBoundaryFilePath(string boundaryFileName);
 
   // // bool _firstTime;
   // // bool _urlOK;
@@ -231,12 +224,11 @@ private:
   // vlevels
 
   VlevelManager _vlevelManager;
-  QVBoxLayout *_vlevelVBoxLayout;
-  QFrame *_vlevelFrame;
-  QGroupBox *_vlevelPanel;
-  vector<QRadioButton *> *_vlevelRButtons;
+  // QVBoxLayout *_vlevelVBoxLayout;
+  // QFrame *_vlevelFrame;
+  // QGroupBox *_vlevelPanel;
+  // vector<QRadioButton *> *_vlevelRButtons;
   bool _vlevelHasChanged;
-
   VlevelSelector *_vlevelSelector;
 
   // zooms
@@ -266,7 +258,7 @@ private:
   QAction *_showVertAct;
 
   QAction *_exitAct;
-  QAction *_freezeAct;
+  // QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_zoomBackAct;
   QAction *_zoomOutAct;
@@ -280,7 +272,7 @@ private:
   QAction *_saveFileAct;
   QAction *_saveImageAct;
 
-  // field menu
+  // fields
   
   QDialog *_fieldMenu;
   QTableWidget *_fieldTable;
@@ -301,7 +293,7 @@ private:
   string _selectedLabel;
   string _selectedUnits;
   QLabel *_valueLabel;
-
+  
   bool _fieldHasChanged;
 
   // maps
@@ -351,6 +343,12 @@ private:
   DateTime _imagesEndTime;
   int _imagesScanIntervalSecs;
 
+  // boundary editor
+  
+  string _boundaryDir;
+  void setBoundaryDir();
+  string getBoundaryFilePath(string boundaryFileName);
+
   // polygon 
 
   QPushButton *_boundaryEditorClearBtn;
@@ -362,7 +360,7 @@ private:
   QListWidget *_boundaryEditorList;
   QLabel *_boundaryEditorInfoLabel;
   bool forceHide = true;
-
+  
   QSlider *_circleRadiusSlider;
   QSlider *_brushRadiusSlider;
 
@@ -380,12 +378,12 @@ private:
   
   //////////////////////////////
   // private methods
-
+  
   // open File 
 
   // void _openFile();
   // void _saveFile();
-  void _moveUpDown();
+  // void _moveUpDown();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // set top bar
@@ -393,7 +391,7 @@ private:
   void _setTitleBar();
   
   // local methods
-
+  
   void _clear();
   void _setupWindows();
   void _createActions();
@@ -483,7 +481,7 @@ private slots:
   void _howto();
   void _about();
   void _showClick();
-  void _freeze();
+  // void _freeze();
   void _zoomBack();
   void _zoomOut();
   void _refresh();
@@ -493,23 +491,23 @@ private slots:
 
   // vlevels
 
-  void _createVlevelFrame();
-  void _createVlevelRadioButtons();
-  void _clearVlevelRadioButtons();
-  void _changeVlevel(bool value);
-  void _changeVlevelRadioButton(int value);
+  // void _createVlevelFrame();
+  // void _createVlevelRadioButtons();
+  // void _clearVlevelRadioButtons();
+  // void _changeVlevel(bool value);
+  // void _changeVlevelRadioButton(int value);
   
   // local
   
-#ifdef NOTNOW
-  void _horizLocationClicked(double xkm, double ykm,
-                             const RadxRay *closestRay);
-  void _vertLocationClicked(double xkm, double ykm,
-                            const RadxRay *closestRay);
-  void _locationClicked(double xkm, double ykm,
-                        const RadxRay *ray);
-#endif
-
+// #ifdef NOTNOW
+//   void _horizLocationClicked(double xkm, double ykm,
+//                              const RadxRay *closestRay);
+//   void _vertLocationClicked(double xkm, double ykm,
+//                             const RadxRay *closestRay);
+//   void _locationClicked(double xkm, double ykm,
+//                         const RadxRay *ray);
+// #endif
+  
   // resize event
   
   void _resizeFinished();

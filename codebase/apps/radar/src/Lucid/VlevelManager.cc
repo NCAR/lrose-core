@@ -96,10 +96,10 @@ void VlevelManager::set(const RadxVol &vol)
   }
 
   // check if levels are in ascending or descending order
-  // if ascending, reverse so that they are descending in this object
+  // if descending, reverse so that they are asscending in this object
   // that matches a top-down rendering of the levels in the widget
 
-  if (sweepsInVol[0]->getFixedAngleDeg() < 
+  if (sweepsInVol[0]->getFixedAngleDeg() > 
       sweepsInVol[sweepsInVol.size()-1]->getFixedAngleDeg()) {
     _reversedInGui = true;
   }
@@ -151,7 +151,7 @@ void VlevelManager::set(const MdvReader &mread)
   if (nz > MDV64_MAX_VLEVELS) {
     nz = MDV64_MAX_VLEVELS;
   }
-  for (int iz = nz - 1; iz >= 0; iz--) {
+  for (int iz = 0; iz < nz; iz++) {
     GuiVlevel glevel;
     glevel.indexInData = iz;
     glevel.indexInGui = iz;

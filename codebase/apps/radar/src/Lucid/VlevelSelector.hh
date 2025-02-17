@@ -64,6 +64,9 @@ public:
 
   virtual ~VlevelSelector(void);
   
+  /// Capture a key press event
+  virtual void keyPressEvent(QKeyEvent* e) override;
+
  signals:
 
   void released();
@@ -75,9 +78,6 @@ public:
   
   /// Capture a mouse move event.
   virtual void mouseMoveEvent(QMouseEvent* e) override;
-
-  /// Capture a key press event
-  virtual void keyPressEvent(QKeyEvent* e) override;
 
   /// The paint event is where we will draw the color bar.
   virtual void paintEvent(QPaintEvent* e) override;

@@ -306,6 +306,7 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
         cerr << "VlevelSelector clicked up arrow, go up a vlevel" << endl;
       }
       _vlevelManager.changeIndexInGui(1);
+      _guiManager->setVlevelHasChanged(true);
     }
 
   } else if (key == Qt::Key_Down) {
@@ -315,6 +316,7 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
         cerr << "VlevelSelector clicked down arrow, go down a vlevel" << endl;
       }
       _vlevelManager.changeIndexInGui(-1);
+      _guiManager->setVlevelHasChanged(true);
     }
     
   }
