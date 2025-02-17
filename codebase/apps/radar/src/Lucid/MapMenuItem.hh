@@ -58,6 +58,7 @@
 using namespace std;
 
 class MapOverlay_t;
+class GuiManager;
 
 class DLL_EXPORT MapMenuItem : public QObject {
   
@@ -67,7 +68,8 @@ class DLL_EXPORT MapMenuItem : public QObject {
   
   // constructor
   
-  MapMenuItem(QObject *parent = nullptr);
+  MapMenuItem(QObject *parent,
+              GuiManager *manager);
   
   // destructor
   
@@ -90,6 +92,7 @@ class DLL_EXPORT MapMenuItem : public QObject {
  protected:
 
   QObject *_parent;
+  GuiManager *_manager;
   Params::map_t *_mapParams;
   MapOverlay_t *_overlay;
   int _mapIndex;

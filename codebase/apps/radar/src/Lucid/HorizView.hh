@@ -186,24 +186,6 @@ class DLL_EXPORT HorizView : public QWidget
   void setArchiveMode(bool state);
 
   /**
-   * @brief Select the field to display.
-   *
-   * @param[in] index   Index of the field to display, zero based.
-   */
-
-  void selectVar(const size_t index);
-  
-  /**
-   * @brief Clear the specified field.
-   *
-   * @param[in] index    Index of the field to be cleared, zero based.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  void clearVar(const size_t index);
-
-  /**
    * react to click point from remote display - Sprite
    * redraw the click point cursor
    */

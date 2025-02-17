@@ -4324,7 +4324,7 @@
     tt->descr = tdrpStrDup("Color for grid (if plotted).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
+    tt->single_val.s = tdrpStrDup("gray");
     tt++;
     
     // Parameter 'vert_top_margin'
@@ -6617,7 +6617,7 @@
     tt->descr = tdrpStrDup("Color of background in vlevel selector.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_background_color - &_start_;
-    tt->single_val.s = tdrpStrDup("black");
+    tt->single_val.s = tdrpStrDup("darkslateblue");
     tt++;
     
     // Parameter 'vlevel_selector_title_color'

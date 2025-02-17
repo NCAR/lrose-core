@@ -99,15 +99,6 @@ HorizView::HorizView(QWidget* parent,
 
   qRegisterMetaType<size_t>("size_t");
 
-  // create the field renderers
-  
-  // for (size_t ii = 0; ii < _fields.size(); ii++) {
-  //   FieldRenderer *fieldRenderer =
-  //     new FieldRenderer(_params, ii, *_fields[ii]);
-  //   fieldRenderer->createImage(width(), height());
-  //   _fieldRenderers.push_back(fieldRenderer);
-  // }
-
   // init other values
 
   _worldPressX = 0.0;
@@ -137,7 +128,7 @@ HorizView::HorizView(QWidget* parent,
 
   // _plotStartTime.set(0);
   // _plotEndTime.set(0);
-
+  
   _renderFrame = false;
   _renderFrameIndex = 0;
   _renderFramePage = 0;
@@ -166,13 +157,6 @@ HorizView::HorizView(QWidget* parent,
 HorizView::~HorizView()
 {
 
-  // delete all of the dynamically created beams
-  
-  // for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-  //   Beam::deleteIfUnused(_ppiBeams[i]);
-  // }
-  // _ppiBeams.clear();
-
 }
 
 /*************************************************************************
@@ -181,88 +165,9 @@ HorizView::~HorizView()
 
 void HorizView::clear()
 {
-  // Clear out the beam array
-  
-  // for (size_t i = 0; i < _ppiBeams.size(); i++) {
-  //   Beam::deleteIfUnused(_ppiBeams[i]);
-  // }
-  // _ppiBeams.clear();
-  
-  // Now rerender the images
-  
   _refreshImages();
   showOpeningFileMsg(false);
 }
-
-/*************************************************************************
- * selectVar()
- */
-
-void HorizView::selectVar(const size_t index)
-{
-
-  // If the field index isn't actually changing, we don't need to do anything
-  
-  if (_selectedField == index) {
-    return;
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> HorizView::selectVar() for field index: " 
-         << index << endl;
-  }
-
-  // If this field isn't being rendered in the background, render all of
-  // the beams for it
-
-  // if (!_fieldRenderers[index]->isBackgroundRendered()) {
-  //   std::vector< PpiBeam* >::iterator beam;
-  //   for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-  //     (*beam)->setBeingRendered(index, true);
-  //     _fieldRenderers[index]->addBeam(*beam);
-  //   }
-  // }
-  _performRendering();
-
-  // Do any needed housekeeping when the field selection is changed
-
-  // _fieldRenderers[_selectedField]->unselectField();
-  // _fieldRenderers[index]->selectField();
-  
-  // Change the selected field index
-
-  _selectedField = index;
-
-  // Update the display
-
-  update();
-}
-
-/*************************************************************************
- * clearVar()
- */
-
-void HorizView::clearVar(const size_t index)
-{
-
-  if ((int) index >= _params.fields_n) {
-    return;
-  }
-
-  // Set the brush for every beam/gate for this field to use the background
-  // color
-
-  // std::vector< PpiBeam* >::iterator beam;
-  // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-  //   (*beam)->resetFieldBrush(index, &_backgroundBrush);
-  // }
-  
-  if (index == _selectedField) {
-    update();
-  }
-
-}
-
 
 /*************************************************************************
  * configureWorldCoords()
@@ -1886,7 +1791,7 @@ void HorizView::zoomOutView()
 void HorizView::setRings(const bool enabled)
 {
   _ringsEnabled = enabled;
-  update();
+  _manager.setOverlaysHaveChanged(true);
 }
 
 
@@ -1897,7 +1802,7 @@ void HorizView::setRings(const bool enabled)
 void HorizView::setGrids(const bool enabled)
 {
   _gridsEnabled = enabled;
-  update();
+  _manager.setOverlaysHaveChanged(true);
 }
 
 
@@ -1908,7 +1813,7 @@ void HorizView::setGrids(const bool enabled)
 void HorizView::setAngleLines(const bool enabled)
 {
   _angleLinesEnabled = enabled;
-  update();
+  _manager.setOverlaysHaveChanged(true);
 }
 
 
@@ -2202,7 +2107,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     // Update the window in the renderers
 
-    gd.redraw_horiz = true;
+    //     gd.redraw_horiz = true;
     gd.zoom_has_changed = true;
 
     gd.selected_zoom_min_x = _worldPressX;

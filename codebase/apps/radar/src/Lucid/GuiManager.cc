@@ -161,6 +161,7 @@ GuiManager::GuiManager() :
   _prevFieldTableRow = -1;
 
   _fieldHasChanged = false;
+  _overlaysHaveChanged = false;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -306,44 +307,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _handleClientEvent();
   }
 
-  // field change? request new data
+  // check for state change
 
-  bool needNewData = false;
-  if (_fieldHasChanged) {
-    needNewData = true;
-    _fieldHasChanged = false;
-    cerr << "CCCCCCCCCCCCCCCCCCCCCCCC" << endl;
-  }
-  
-  // zoom change?
-  
-  if (_checkForZoomChange()) {
-    needNewData = true;
-  }
-
-  // vlevel change?
-  
-  if (_vlevelHasChanged) {
-    needNewData = true;
-    _vlevelHasChanged = false;
-  }
-
-  // time change
-
-  if (_timeControl->timeHasChanged()) {
-    needNewData = true;
-  }
-
-  // resize?
-
-  if (_resized) {
-    needNewData = true;
-    _resized = false;
-  }
+  bool stateChanged = _checkForStateChange();
 
   // get new data if needed - data is retrieved in a thread
 
-  if (needNewData) {
+  if (stateChanged) {
     int index = gd.movie.cur_frame;
     if (gd.movie.cur_frame < 0) {
       index = gd.movie.num_frames - 1;
@@ -370,7 +340,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
     }
     _horiz->setFrameForRendering(gd.h_win.page, index);
     _horiz->update();
-    gd.redraw_horiz = false;
+    // gd.redraw_horiz = false;
     if (gd.h_win.page < gd.num_datafields) {
       _vlevelManager.set(*gd.mread[gd.h_win.page]);
     }
@@ -396,6 +366,56 @@ void GuiManager::timerEvent(QTimerEvent *event)
   //   _handleRealtimeData(event);
   // }
   
+}
+
+///////////////////////////////////////////
+// check for state changes
+
+bool GuiManager::_checkForStateChange()
+
+{
+  
+  bool stateHasChanged = false;
+  if (_fieldHasChanged) {
+    stateHasChanged = true;
+    _fieldHasChanged = false;
+  }
+  
+  // zoom change?
+  
+  if (_checkForZoomChange()) {
+    stateHasChanged = true;
+  }
+
+  // vlevel change?
+  
+  if (_vlevelHasChanged) {
+    stateHasChanged = true;
+    _vlevelHasChanged = false;
+  }
+
+  // time change
+
+  if (_timeControl->timeHasChanged()) {
+    stateHasChanged = true;
+  }
+
+  // resize?
+
+  if (_resized) {
+    stateHasChanged = true;
+    _resized = false;
+  }
+
+  // overlays?
+
+  if (_overlaysHaveChanged) {
+    stateHasChanged = true;
+    _overlaysHaveChanged = false;
+  }
+
+  return stateHasChanged;
+
 }
 
 ///////////////////////////////////////////////
@@ -852,7 +872,7 @@ void GuiManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapMenuItem *item = new MapMenuItem;
+    MapMenuItem *item = new MapMenuItem(nullptr, this);
     QAction *act = new QAction;
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
@@ -1809,7 +1829,7 @@ void GuiManager::_zoomBack()
     _zoomBackAct->setEnabled(false);
     _zoomOutAct->setEnabled(false);
   }
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -1821,7 +1841,7 @@ void GuiManager::_zoomOut()
   _horiz->clearSavedZooms();
   _zoomBackAct->setEnabled(false);
   _zoomOutAct->setEnabled(false);
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -1843,62 +1863,6 @@ void GuiManager::_openFile() {
 void GuiManager::_saveFile() {
 }
 
-
-#ifdef NOTNOW
-///////////////////////////////////////////////////////////
-// respond to change field request from field button group
-
-void GuiManager::_changeField(int fieldId, bool guiMode)
-
-{
-
-  // _selectedField = _fields[fieldId];
-  
-  if (_params.debug) {
-    cerr << "Changing to field id: " << fieldId << endl;
-    // _selectedField->print(cerr);
-  }
-
-  // if we click the already-selected field, go back to previous field
-
-  if (guiMode) {
-    if (_fieldNum == fieldId && _prevFieldNum >= 0) {
-      QRadioButton *button =
-        (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-      button->click();
-      gd.redraw_horiz = true;
-      return;
-    }
-  }
-
-  _prevFieldNum = _fieldNum;
-  _fieldNum = fieldId;
-  
-  _horiz->selectVar(_fieldNum);
-  _vert->selectVar(_fieldNum);
-
-  // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-
-  _selectedName = gd.mread[gd.h_win.page]->h_fhdr.field_name;
-  _selectedLabel = gd.mread[gd.h_win.page]->h_fhdr.field_name;
-  _selectedUnits = gd.mread[gd.h_win.page]->h_fhdr.units;
-
-#ifdef NOTYET
-  _selectedLabelWidget->setText(_selectedLabel.c_str());
-  char text[128];
-  if (_selectedField->getSelectValue() > -9990) {
-    snprintf(text, 128, "%g %s", 
-             _selectedField->getSelectValue(),
-             _selectedField->getUnits().c_str());
-  } else {
-    text[0] = '\0';
-  }
-  _valueLabel->setText(text);
-#endif
-
-  // refreshBoundaries();
-}
-#endif
 
 #ifdef NOTYET
 // TODO: need to add the background changed, etc. 
@@ -2329,7 +2293,7 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
     cerr << "      legend_name: " << gd.mread[_fieldNum]->legend_name << endl;
   }
 
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
   gd.field_has_changed = true;
   gd.selected_field = _fieldNum;
   gd.h_win.page = _fieldNum;
@@ -3101,7 +3065,7 @@ void GuiManager::_handleFirstTimerEvent()
   // _statusLayout->setColumnMinimumWidth(1, maxWidth);
   // cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
   
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
 
 }
 

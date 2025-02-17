@@ -2080,7 +2080,7 @@ paramdef string {
 } horiz_axes_color;
 
 paramdef string {
-  p_default = "white";
+  p_default = "gray";
   p_descr = "Color for grid (if plotted).";
 } horiz_grid_color;
 
@@ -3204,7 +3204,7 @@ paramdef int {
 } vlevel_selector_labels_font_size;
 
 paramdef string {
-  p_default = "black";
+  p_default = "darkslateblue";
   p_descr = "Color of background in vlevel selector.";
 } vlevel_selector_background_color;
 

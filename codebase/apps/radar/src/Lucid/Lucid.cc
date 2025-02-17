@@ -241,7 +241,7 @@ void Lucid::_initGlobals()
   gd.aspect_correction = 0; 
   MEM_zero(gd.height_array);
 
-  gd.redraw_horiz = 0;
+  // gd.redraw_horiz = 0;
   gd.redraw_vert = 0;
   gd.time_has_changed = 0;
   gd.field_has_changed = 0;
@@ -593,7 +593,7 @@ int Lucid::_initDataSpace()
 
   // global redraw flags
 
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
   gd.redraw_vert = true;
 
   gd.time_has_changed = true;

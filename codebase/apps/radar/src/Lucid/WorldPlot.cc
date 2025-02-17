@@ -1216,7 +1216,8 @@ void WorldPlot::drawAxisLeft(QPainter &painter,
   
   if (doLine) {
     painter.setPen(lineColor);
-    drawLine(painter, _xMinWorld, _yMinWorld, _xMinWorld, _yMaxWorld);
+    QLineF qlineGrid(_xMinPixel, _yMinPixel, _xMinPixel, _yMaxPixel);
+    painter.drawLine(qlineGrid);
   }
 
   // font
@@ -1325,13 +1326,15 @@ void WorldPlot::drawAxisRight(QPainter &painter,
 
   if (doLine) {
     painter.setPen(lineColor);
-    drawLine(painter, _xMaxWorld, _yMinWorld, _xMaxWorld, _yMaxWorld);
+    QLineF qlineGrid(_xMaxPixel, _yMinPixel, _xMaxPixel, _yMaxPixel);
+    painter.drawLine(qlineGrid);
   }
 
   // font
 
   QFont font(painter.font());
   font.setPointSizeF(_axisLabelFontSize);
+  font.setBold(true);
   painter.setFont(font);
 
   // axis units label
@@ -1426,13 +1429,15 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
   
   if (doLine) {
     painter.setPen(lineColor);
-    drawLine(painter, _xMinWorld, _yMinWorld, _xMaxWorld, _yMinWorld);
+    QLineF qlineGrid(_xMinPixel, _yMinPixel, _xMaxPixel, _yMinPixel);
+    painter.drawLine(qlineGrid);
   }
     
   // font
 
   QFont font(painter.font());
   font.setPointSizeF(_axisLabelFontSize);
+  font.setBold(true);
   painter.setFont(font);
 
   // axis units label
@@ -1532,13 +1537,15 @@ void WorldPlot::drawAxisTop(QPainter &painter,
 	
   if (doLine) {
     painter.setPen(lineColor);
-    drawLine(painter, _xMinWorld, _yMaxWorld, _xMaxWorld, _yMaxWorld);
+    QLineF qlineGrid(_xMinPixel, _yMaxPixel, _xMaxPixel, _yMaxPixel);
+    painter.drawLine(qlineGrid);
   }
 	
   // font
 
   QFont font(painter.font());
   font.setPointSizeF(_axisLabelFontSize);
+  font.setBold(true);
   painter.setFont(font);
 
   // axis units label
@@ -2286,13 +2293,10 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   
 {
 
-  // cerr << "CCCCCCCCCCCCCC colorMap name: " << colorMap.getName() << endl;
-  // cerr << "CCCCCCCCCCCCCC labelsSetByValue: " << colorMap.labelsSetByValue() << endl;
-  
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
   int pltHt = _plotHeight;
-  int width = _colorScaleWidth - 2;
+  int width = _colorScaleWidth - 4;
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth;
   int yStart = _topMargin + _yMaxPixel + unitsFontSize;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom

@@ -128,9 +128,10 @@ public:
 
   void setXyZoom(double minY, double maxY, double minX, double maxX);
 
-  // set flag to indicate change in vlevel
+  // set flag to indicate changes
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
+  void setOverlaysHaveChanged(bool val) { _overlaysHaveChanged = val; }
   
   // boundary editor dialog
   QDialog *_boundaryEditorDialog;
@@ -251,12 +252,13 @@ private:
   
   bool _fieldHasChanged;
 
-  // maps
+  // maps and overlays
 
   QMenu *_mapsMenu;
   QAction *_mapsEnabledAct;
-  bool _mapsEnabled;
   vector<MapMenuItem *> _mapMenuItems;
+  bool _mapsEnabled;
+  bool _overlaysHaveChanged;
   
   // winds
 
@@ -384,7 +386,7 @@ private:
   
   // check for status change
   
-  // bool _checkForFieldChange();
+  bool _checkForStateChange();
   bool _checkForZoomChange();
   void _handleFirstTimerEvent();
   void _readClickPoint();

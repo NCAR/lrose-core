@@ -219,7 +219,7 @@ void VlevelManager::setLevel(double level)
   gd.h_win.cur_ht = _selectedLevel;
   gd.selected_ht = _selectedLevel;
   gd.ht_has_changed = true;
-  gd.redraw_horiz = true;
+  // gd.redraw_horiz = true;
   
 }
 

@@ -179,7 +179,7 @@ public:
 
   // selected values
 
-  bool redraw_horiz;
+  // bool redraw_horiz;
   bool redraw_vert;
   bool time_has_changed;
   bool field_has_changed;

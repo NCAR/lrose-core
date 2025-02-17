@@ -36,12 +36,15 @@
 ///////////////////////////////////////////////////////////////
 
 #include "MapMenuItem.hh"
+#include "GuiManager.hh"
 #include "cidd.h"
 
 // Constructor
 
-MapMenuItem::MapMenuItem(QObject *parent) :
+MapMenuItem::MapMenuItem(QObject *parent,
+                         GuiManager *manager) :
         _parent(parent),
+        _manager(manager),
         _mapParams(NULL),
         _overlay(NULL),
         _mapIndex(-1),
@@ -79,6 +82,10 @@ void MapMenuItem::toggled(bool checked)
     cerr << "  control_label: " << _mapParams->control_label << endl;
     cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
     cerr << "  active: " << gd.overlays[_mapIndex]->active << endl;
+  }
+
+  if (_manager != NULL) {
+    _manager->setOverlaysHaveChanged(true);
   }
 
 }
