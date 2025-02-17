@@ -310,7 +310,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   bool needNewData = false;
   if (_fieldHasChanged) {
-    cerr << "111111111111111 CCCCCCCCCCCC fieldHasChanged" << endl;
     needNewData = true;
     _fieldHasChanged = false;
   }
@@ -349,8 +348,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
       index = gd.movie.num_frames - 1;
     }
     MdvReader *mr = gd.mread[_fieldNum];
-    cerr << "*********************************** selTime: "
-         << _timeControl->getSelectedTime().asString(0) << endl;
     if (mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                               _vlevelManager.getLevel(),
                               gd.h_win.page)) {
@@ -403,6 +400,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
 ///////////////////////////////////////////////
 // override resize event
+// we use a timer to debounce the resize event
 
 void GuiManager::resizeEvent(QResizeEvent *event)
 {
@@ -411,14 +409,14 @@ void GuiManager::resizeEvent(QResizeEvent *event)
   _resizeTimer->start();
 }
 
-void GuiManager::_resizeFinished() {
+void GuiManager::_resizeFinished()
+{
   // Called after the resize events have "settled"
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent, width, height: "
          << _horizFrame->width() << ", " << _horizFrame->height() << endl;
   }
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  // emit frameResized(_horizFrame->width(), _horizFrame->height());
   _resized = true;
 }
 
@@ -576,11 +574,8 @@ void GuiManager::_setupWindows()
   
   cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
 
-  ColorMap *cmap0 = gd.mread[0]->colorMap;
   _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width,
-                                       cmap0,
-                                       _vlevelManager,
-                                       this);
+                                       _vlevelManager, this);
   mainLayout->addWidget(_vlevelSelector);
                                        
   // resize timer for debouncing resize events

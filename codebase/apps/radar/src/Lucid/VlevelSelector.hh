@@ -24,8 +24,6 @@
 #ifndef VLEVEL_SELECTOR_HH
 #define VLEVEL_SELECTOR_HH
 
-#include <qtplot/ColorMap.hh>
-
 #include <QWidget>
 #include <QLayout>
 #include <QVBoxLayout>
@@ -61,25 +59,10 @@ class DLL_EXPORT VlevelSelector: public QWidget
 public:
 
   VlevelSelector(int width,
-                 const ColorMap *cmap,
                  VlevelManager &vlevelManager,
                  GuiManager* parent = 0);
 
   virtual ~VlevelSelector(void);
-  
-  /// Set the color map, update the view
-  /// @param map The corresponding color map.
-  void setColorMap(const ColorMap *map);
-
-  /// @returns An image of the color bar. The caller must delte
-  /// it when finished.
-  QImage* getImage();
-  
-  /// @returns A pixmap of the color bar. The caller must delete it 
-  /// when finished.
-  QPixmap* getPixmap();
-
-  QPixmap* getPixmap(int width, int height);
   
  signals:
 
@@ -89,7 +72,7 @@ public:
 
   /// Capture a mouse release and emit a released() signal.
   virtual void mouseReleaseEvent(QMouseEvent* e) override;
-
+  
   /// Capture a mouse move event.
   virtual void mouseMoveEvent(QMouseEvent* e) override;
 
@@ -98,10 +81,6 @@ public:
 
   /// The paint event is where we will draw the color bar.
   virtual void paintEvent(QPaintEvent* e) override;
-
-  /// A default color map, so that the plugin can
-  /// display something.
-  const ColorMap *_colorMap;
 
  private:
   

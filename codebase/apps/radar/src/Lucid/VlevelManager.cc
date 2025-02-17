@@ -68,7 +68,7 @@ VlevelManager::~VlevelManager()
 }
 
 /////////////////////////////////////////////////////////////
-// set from a volume
+// set from a Radx volume
 
 void VlevelManager::set(const RadxVol &vol)
   
