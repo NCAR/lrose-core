@@ -1034,12 +1034,13 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
 
   // get bounding rectangle
   
-  QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
+  QRect tRect(painter.fontMetrics().boundingRect(title.c_str()));
+
+  // set location
   
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
-  qreal yy = (qreal) getYPixCanvas(2 * _titleTextMargin);
-  
-  QRectF bRect(xx, yy, tRect.width() + 6, tRect.height() + 6);
+  qreal yy = (qreal) ((_topMargin - tRect.height()) / 4.0);
+  QRectF bRect(xx, yy, tRect.width(), tRect.height());
     
   // draw the text
     
@@ -1490,15 +1491,15 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
 
   // axis units label
 	
-  QRect capRect(painter.fontMetrics().tightBoundingRect("XXX"));
+  QRect htRect(painter.fontMetrics().tightBoundingRect("XXXyyygg"));
   QRect unitsRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
   qreal unitsX = (qreal) (_xMaxPixel - unitsRect.width());
-  qreal unitsY = (qreal) (_yMinPixel + capRect.height() - 2);
+  qreal unitsY = (qreal) (_yMinPixel + htRect.height() - 2);
   if (_xAxisLabelsInside) {
-    unitsY = (qreal) (_yMinPixel - capRect.height() - 2);
+    unitsY = (qreal) (_yMinPixel - htRect.height() - 2);
   }
   QRectF bRect(unitsX, unitsY,
-               unitsRect.width() + 2, capRect.height() + 5);
+               unitsRect.width() + 2, htRect.height() + 5);
   if (doLabels) {
     painter.setPen(textColor);
     painter.drawText(bRect, Qt::AlignCenter, units.c_str());
