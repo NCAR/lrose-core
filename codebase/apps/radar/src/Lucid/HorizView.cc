@@ -310,6 +310,14 @@ void HorizView::paintEvent(QPaintEvent *event)
     _doRenderInvalidImages(painter, _invalidImagesFrameIndex, _vert);
     _renderInvalidImages = false;
   }
+
+  // set axis areas to background color
+
+  _zoomWorld.fillMargins(painter, _params.background_color);
+
+  // title
+
+  _zoomWorld.drawTitleTopCenter(painter, _params.horiz_frame_label);
   
   // draw axes
   

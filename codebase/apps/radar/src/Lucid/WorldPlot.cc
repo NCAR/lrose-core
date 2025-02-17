@@ -765,6 +765,43 @@ void WorldPlot::fillCanvas(QPainter &painter,
 
 }
 
+///////////////////////////////////////////////////
+// fill the margins with color
+
+void WorldPlot::fillMargins(QPainter &painter,
+                            const char *colorName) 
+  
+{
+
+  QBrush brush(colorName);
+
+  // left margin
+  
+  fillRectanglePixelCoords(painter, brush,
+                           0, 0,
+                           _leftMargin, _heightPixels);
+
+  // right margin
+  
+  fillRectanglePixelCoords(painter, brush,
+                           _xMaxPixel, 0,
+                           _rightMargin + _colorScaleWidth,
+                           _heightPixels);
+  
+  // top margin
+  
+  fillRectanglePixelCoords(painter, brush,
+                           0, 0,
+                           _widthPixels, _topMargin);
+
+  // bottom margin
+  
+  fillRectanglePixelCoords(painter, brush,
+                           0, _yMinPixel,
+                           _widthPixels, _bottomMargin);
+
+}
+
 //////////////
 // draw an arc
 
@@ -986,6 +1023,15 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
 
 {
 
+  painter.save();
+
+  // set font
+  
+  QFont font(painter.font());
+  font.setPointSizeF(_titleFontSize);
+  font.setBold(true);
+  painter.setFont(font);
+
   // get bounding rectangle
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
@@ -993,12 +1039,14 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
   qreal yy = (qreal) getYPixCanvas(2 * _titleTextMargin);
   
-  QRectF bRect(xx, yy, tRect.width() + 4, tRect.height() + 4);
+  QRectF bRect(xx, yy, tRect.width() + 6, tRect.height() + 6);
     
   // draw the text
     
   painter.drawText(bRect, Qt::AlignTop, title.c_str());
-
+  
+  painter.restore();
+  
 }
 
 ///////////////////////	
@@ -1020,7 +1068,7 @@ void WorldPlot::drawTitlesTopCenter(QPainter &painter,
   // set font
   
   QFont font(painter.font());
-  font.setPointSizeF(_legendFontSize);
+  font.setPointSizeF(_titleFontSize);
   font.setBold(true);
   painter.setFont(font);
   
@@ -2296,7 +2344,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
   int pltHt = _plotHeight;
-  int width = _colorScaleWidth - 4;
+  int width = _colorScaleWidth - _rightMargin;
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth;
   int yStart = _topMargin + _yMaxPixel + unitsFontSize;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
@@ -2431,7 +2479,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
     int iyy = (int) (topY[cmap.size()-1] - patchHt * 1.0);
-    int ixx = _xPixOffset + _widthPixels - width;
+    int ixx = _xPixOffset + _widthPixels - width - _rightMargin / 2;
     QString qunits(units.c_str());
     painter.drawText(ixx, iyy, width, tRect.height() + 6, 
                      Qt::AlignTop | Qt::AlignHCenter, qunits);

@@ -336,6 +336,11 @@ public:
   void fillCanvas(QPainter &painter,
                   const QBrush &brush);
 
+  // fill the margins with color
+  
+  void fillMargins(QPainter &painter,
+                   const char *colorName);
+  
   // draw an arc
 
   void drawArc(QPainter &painter,
