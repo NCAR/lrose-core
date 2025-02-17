@@ -25,11 +25,6 @@
 #include "VertView.hh"
 #include "GuiManager.hh"
 
-// #include "ParameterColorView.hh"
-// #include "FieldColorController.hh"
-// #include "DisplayFieldModel.hh"
-// #include "BoundaryPointEditor.hh"
-
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/LogStream.hh>
 #include <QApplication>
@@ -521,8 +516,9 @@ void HorizView::_drawOverlays(QPainter &painter)
     // legends.push_back(text);
     
     painter.save();
-    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
-    painter.setBrush(Qt::black);
+    painter.setPen(_params.horiz_legend_color);
+    painter.setPen(_params.horiz_legend_font_size);
+    painter.setBrush(_params.background_color);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
     switch (_params.horiz_main_legend_pos) {
@@ -1609,10 +1605,10 @@ int HorizView::_renderGrid(QPainter &painter,
 
     vector<string> legends;
     char text[4096];
-    legends.push_back(mr->h_date.asString(0)); // field data time
+    // legends.push_back(mr->h_date.asString(0)); // field data time
     snprintf(text, 4096, "%s %s", mr->fieldLabel().c_str(), mr->vlevelLabel().c_str());
     legends.push_back(text);
-
+    
     painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
@@ -1633,8 +1629,6 @@ int HorizView::_renderGrid(QPainter &painter,
       default: {}
     }
     
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
     painter.restore();
 
   }

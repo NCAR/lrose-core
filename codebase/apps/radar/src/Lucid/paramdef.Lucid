@@ -2011,7 +2011,7 @@ paramdef int {
 } horiz_right_margin;
 
 paramdef int {
-  p_default = 5;
+  p_default = 6;
   p_descr = "Width of title text margin (pixels).";
   p_help = "Size of title test margin for horiz window.";
 } horiz_title_text_margin;

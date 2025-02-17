@@ -785,7 +785,7 @@ void WorldPlot::fillMargins(QPainter &painter,
   
   fillRectanglePixelCoords(painter, brush,
                            _xMaxPixel, 0,
-                           _rightMargin + _colorScaleWidth,
+                           _rightMargin + _colorScaleWidth + 1,
                            _heightPixels);
   
   // top margin
@@ -793,7 +793,7 @@ void WorldPlot::fillMargins(QPainter &painter,
   fillRectanglePixelCoords(painter, brush,
                            0, 0,
                            _widthPixels, _topMargin);
-
+  
   // bottom margin
   
   fillRectanglePixelCoords(painter, brush,
@@ -1131,8 +1131,8 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
   QRect tRect(painter.fontMetrics().tightBoundingRect("TITLE"));
               
   qreal xx = (qreal) (_xMinPixel + _yAxisTickLen + _legendTextMargin);
-  qreal yy = _yMaxPixel + _xAxisTickLen + tRect.height();
-
+  qreal yy = _yMaxPixel + _xAxisTickLen + _legendTextMargin;
+  
   QFont font(painter.font());
   font.setPointSizeF(_legendFontSize);
   painter.setFont(font);
@@ -1141,7 +1141,7 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
     string legend(legends[i]);
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
-    painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    painter.drawText(bRect, Qt::AlignTop, legend.c_str());
     yy += (_legendTextMargin + lRect.height());
   }
   

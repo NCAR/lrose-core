@@ -4168,7 +4168,7 @@
     tt->descr = tdrpStrDup("Width of title text margin (pixels).");
     tt->help = tdrpStrDup("Size of title test margin for horiz window.");
     tt->val_offset = (char *) &horiz_title_text_margin - &_start_;
-    tt->single_val.i = 5;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'horiz_legend_text_margin'
