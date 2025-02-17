@@ -1253,18 +1253,6 @@ void GuiManager::_populateOverlaysMenu()
   
 // }
 
-/////////////////////////////
-// get data in realtime mode
-
-void GuiManager::_handleRealtimeData()
-
-{
-
-  _horiz->setArchiveMode(false);
-  _vert->setArchiveMode(false);
-
-}
-
 ///////////////////////////////////////
 // set input file list for archive mode
 
@@ -1339,139 +1327,6 @@ void GuiManager::_handleRealtimeData()
 //   return 0;
 
 // }
-
-//////////////////////////////////////
-// handle data in archive mode
-
-void GuiManager::_handleArchiveData(/*QTimerEvent * event*/)
-
-{
-  
-  if (_params.debug) {
-    cerr << "handling archive data ..." << endl;
-  }
-
-  //   _horiz->setArchiveMode(true);
-  //   _horiz->setStartOfSweep(true);
-
-  //   _vert->setArchiveMode(true);
-  //   _vert->setStartOfSweep(true);
-
-  //   // set cursor to wait cursor
-
-  //   this->setCursor(Qt::WaitCursor);
-  //   _timeControl->setCursor(Qt::WaitCursor);
-  
-  //   // get data
-  //   try {
-  //     _getArchiveData();
-  //   } catch (FileIException &ex) {
-  //     this->setCursor(Qt::ArrowCursor);
-  //     _timeControl->setCursor(Qt::ArrowCursor);
-  //     return;
-  //   }
-  //   _activateArchiveRendering();
-
-  //   // set up sweep GUI
-
-  //   _clearSweepRadioButtons();
-  //   _createSweepRadioButtons();
-  
-  //   if (_vol.checkIsRhi()) {
-  //     _vertMode = true;
-  //   } else {
-  //     _vertMode = false;
-  //   }
-
-  //   // plot the data
-  
-  //   _plotArchiveData();
-  //   this->setCursor(Qt::ArrowCursor);
-  //   _timeControl->setCursor(Qt::ArrowCursor);
-
-  // if (_firstTime) {
-  //   _firstTime = false;
-  // }
-  
-}
-
-/////////////////////////////
-// get data in archive mode
-// returns 0 on success, -1 on failure
-
-// int GuiManager::_getArchiveData()
-
-// {
-
-//   // set up file object for reading
-  
-//   RadxFile file;
-//   _vol.clear();
-//   _setupVolRead(file);
-  
-//   if (_timeControl->getArchiveScanIndex() >= 0 &&
-//       _timeControl->getArchiveScanIndex() < (int) _archiveFileList.size()) {
-    
-//     string inputPath = _archiveFileList[_timeControl->getArchiveScanIndex()];
-    
-//     if(_params.debug) {
-//       cerr << "  reading data file path: " << inputPath << endl;
-//       cerr << "  archive file index: "
-//            << _timeControl->getArchiveScanIndex() << endl;
-//     }
-    
-//     if (file.readFromPath(inputPath, _vol)) {
-//       string errMsg = "ERROR - Cannot retrieve archive data\n";
-//       errMsg += "GuiManager::_getArchiveData\n";
-//       errMsg += file.getErrStr() + "\n";
-//       errMsg += "  path: " + inputPath + "\n";
-//       cerr << errMsg;
-//       if (!_params.images_auto_create)  {
-//         QErrorMessage errorDialog;
-//         errorDialog.setMinimumSize(400, 250);
-//         errorDialog.showMessage(errMsg.c_str());
-//         errorDialog.exec();
-//       }
-//       return -1;
-//     } 
-
-//   }
-
-//   // set plot times
-  
-//   _plotStartTime = _vol.getStartTimeSecs();
-//   _plotEndTime = _vol.getEndTimeSecs();
-
-//   char text[128];
-//   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-//            _plotStartTime.getYear(),
-//            _plotStartTime.getMonth(),
-//            _plotStartTime.getDay(),
-//            _plotStartTime.getHour(),
-//            _plotStartTime.getMin(),
-//            _plotStartTime.getSec());
-
-//   _timeControl->setSelectedTimeLabel(text);
-  
-//   // adjust angles for elevation surveillance if needed
-
-//   _vol.setAnglesForElevSurveillance();
-
-//   // compute the fixed angles from the rays
-//   // so that we reflect reality
-  
-//   _vol.computeFixedAnglesFromRays();
-
-//   // load the sweep manager
-  
-//   // _sweepManager.set(_vol);
-
-//    _platform = _vol.getPlatform();
-   
-//   return 0;
-
-// }
-
 
 /////////////////////////////
 // apply new, edited  data in archive mode
@@ -2483,6 +2338,60 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   
 }
 
+/*************************************************************************
+ * Set proper flags which switching fields 
+ */
+
+void GuiManager::_setField(int value)
+{
+
+  static int last_page = 0;
+  static int last_value = 0;
+  static int cur_value = 0;
+  
+  if(value < 0) {
+    int tmp = last_page;
+    last_page = gd.h_win.page;
+    gd.h_win.page = tmp;
+    gd.v_win.page = tmp;
+    tmp = cur_value;
+    cur_value = last_value;
+    value = last_value;
+    last_value = tmp;
+  } else {
+    last_page = gd.h_win.page;
+    last_value = cur_value;
+    cur_value = value;
+    gd.h_win.page = gd.field_index[value];
+    gd.v_win.page = gd.field_index[value];
+  }
+  
+  for(int i=0; i < gd.num_datafields; i++) {
+    if(gd.mread[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
+  }
+  
+  if(gd.mread[gd.h_win.page]->auto_render && 
+     gd.h_win.page_pdev[gd.h_win.page] != 0 &&
+     gd.h_win.redraw_flag[gd.h_win.page] == 0) {
+
+#ifdef NOTNOW
+    save_h_movie_frame(gd.movie.cur_frame,
+                       gd.h_win.page_pdev[gd.h_win.page],
+                       gd.h_win.page);
+#endif
+    
+  }
+  
+  for(int i=0; i < MAX_FRAMES; i++) {
+    gd.movie.frame[i].redraw_horiz = 1;
+  }
+  
+  if(gd.movie.movie_on ) {
+    // reset_data_valid_flags(1,0);
+  }
+  
+}
+
 
 /////////////////////////////////////
 // show the time controller dialog
@@ -2779,7 +2688,7 @@ void GuiManager::_createImageFiles()
 
   // _horiz->setStartOfSweep(true);
   // _vert->setStartOfSweep(true);
-  _handleArchiveData();
+  // _handleArchiveData();
 
   // set times from plots
 
@@ -3715,8 +3624,8 @@ void GuiManager::_autoCreateFunc()
     
     if (_params.images_creation_mode ==
         Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRealtimeData();
-      _createRealtimeImageFiles();
+      // _handleRealtimeData();
+      // _createRealtimeImageFiles();
       return;
     }
     
@@ -3724,66 +3633,6 @@ void GuiManager::_autoCreateFunc()
 
 }
 
-
-/*************************************************************************
- * Set proper flags which switching fields 
- */
-void GuiManager::_setField(int value)
-{
-
-  static int last_page = 0;
-  static int last_value = 0;
-  static int cur_value = 0;
-  
-  if(value < 0) {
-    int tmp = last_page;
-    last_page = gd.h_win.page;
-    gd.h_win.page = tmp;
-    gd.v_win.page = tmp;
-    tmp = cur_value;
-    cur_value = last_value;
-    value = last_value;
-    last_value = tmp;
-  } else {
-    last_page = gd.h_win.page;
-    last_value = cur_value;
-    cur_value = value;
-    gd.h_win.page = gd.field_index[value];
-    gd.v_win.page = gd.field_index[value];
-    // cerr << "FFFFFFFFFFFF value, new page: " << cur_value << ", " << gd.h_win.page << endl;
-  }
-  
-  for(int i=0; i < gd.num_datafields; i++) {
-    if(gd.mread[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
-  }
-  
-  if(gd.mread[gd.h_win.page]->auto_render && 
-     gd.h_win.page_pdev[gd.h_win.page] != 0 &&
-     gd.h_win.redraw_flag[gd.h_win.page] == 0) {
-
-#ifdef NOTNOW
-    save_h_movie_frame(gd.movie.cur_frame,
-                       gd.h_win.page_pdev[gd.h_win.page],
-                       gd.h_win.page);
-#endif
-    
-  }
-  
-  for(int i=0; i < MAX_FRAMES; i++) {
-    gd.movie.frame[i].redraw_horiz = 1;
-  }
-  
-  if(gd.movie.movie_on ) {
-    // reset_data_valid_flags(1,0);
-  }
-  
-  // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
-  
-  /* make sure the horiz window's slider has the correct label */
-
-  // set_height_label();
-
-}
 
 /*************************************************************************
  * SET_DISPLAY_TIME

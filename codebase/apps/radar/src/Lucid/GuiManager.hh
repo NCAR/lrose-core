@@ -132,26 +132,6 @@ public:
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
   
-  // input file list for archive mode
-  
-  // void setArchiveFileList(const vector<string> &list,
-  //                         bool fromCommandLine = true);
-
-  // const vector<string> &getArchiveFileList() const {
-  //   return _archiveFileList;
-  // }
-  // size_t getArchiveFileListSize() const {
-  //   return _archiveFileList.size();
-  // }
-  
-  // load archive file list by searching for files
-  // returns 0 on success, -1 on failure
-  
-  // int loadArchiveFileList();
-  // void setArchiveRetrievalPending();
-
-  //  const RadxVol getDataVolume();
-
   // boundary editor dialog
   QDialog *_boundaryEditorDialog;
   QGridLayout *_boundaryEditorDialogLayout;
@@ -170,30 +150,10 @@ signals:
 private:
 
   int _mainTimerId;
-  // bool _frozen;
   
   int _timerEventCount;
   bool _guiSizeInitialized;
-  
   static GuiManager* m_pInstance;
-  // // string _openFilePath;
-
-  // // bool _firstTime;
-  // // bool _urlOK;
-
-  // // beam geometry
-  
-  // // int _nGates;
-  // // double _maxRangeKm;
-
-  // // ray locations
-
-  // // vector<RayLoc> _rayLoc;
-
-  // // input data
-  
-  // // DateTime _readerRayTime;
-  // // RadxVol _vol;
 
   // main window frame
 
@@ -205,7 +165,7 @@ private:
   QTimer *_resizeTimer;
   
   // horizontal view windows
-
+  
   QFrame *_horizFrame;
   HorizView *_horiz;
   
@@ -224,12 +184,8 @@ private:
   // vlevels
 
   VlevelManager _vlevelManager;
-  // QVBoxLayout *_vlevelVBoxLayout;
-  // QFrame *_vlevelFrame;
-  // QGroupBox *_vlevelPanel;
-  // vector<QRadioButton *> *_vlevelRButtons;
-  bool _vlevelHasChanged;
   VlevelSelector *_vlevelSelector;
+  bool _vlevelHasChanged;
 
   // zooms
 
@@ -239,7 +195,7 @@ private:
   // archive mode
   
   bool _archiveMode; // false for realtime mode
-  DateTime _archiveStartTime;// start time for archive mode
+  DateTime _archiveStartTime; // start time for archive mode
   
   // top-level menus
 
@@ -258,7 +214,6 @@ private:
   QAction *_showVertAct;
 
   QAction *_exitAct;
-  // QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_zoomBackAct;
   QAction *_zoomOutAct;
@@ -383,7 +338,6 @@ private:
 
   // void _openFile();
   // void _saveFile();
-  // void _moveUpDown();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // set top bar
@@ -402,20 +356,10 @@ private:
   void _populateWindsMenu();
   void _populateZoomsMenu();
 
-  // data retrieval
-
-  void _handleRealtimeData();
-  void _handleArchiveData();
-  int _getArchiveData();
-  void _plotArchiveData();
-  void _setupVolRead(RadxFile &file);
-  //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
-  void _applyDataEdits(); // const RadxVol &editedVol);
-
   // draw beam
 
   void _handleRay(RadxPlatform &platform, RadxRay *ray);
-
+  
   // ray handling for display
 
   void _storeRayLoc(const RadxRay *ray, const double az,
