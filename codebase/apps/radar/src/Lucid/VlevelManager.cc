@@ -52,7 +52,7 @@ VlevelManager::VlevelManager()
 {
   
   _reversedInGui = false;
-  _guiIndex = 0;
+  _indexInGui = 0;
   _selectedLevel = 0.0;
   _mdvxVlevelType = Mdvx::VERT_TYPE_UNKNOWN;
 
@@ -91,7 +91,7 @@ void VlevelManager::set(const RadxVol &vol)
   // zero length case
   
   if (sweepsInVol.size() == 0) {
-    setGuiIndex(0);
+    setIndexInGui(0);
     return;
   }
 
@@ -111,22 +111,22 @@ void VlevelManager::set(const RadxVol &vol)
     }
     GuiVlevel glevel;
     glevel.level = sweepsInVol[jj]->getFixedAngleDeg();
-    glevel.indexInFile = jj;
+    glevel.indexInData = jj;
     glevel.indexInGui = ii;
     _vlevels.push_back(glevel);
   }
 
   // initialize vlevel index if needed
 
-  if (init || _guiIndex > ((int) _vlevels.size()-1)) {
-    setGuiIndex(_vlevels.size() - 1);
-  } else if (_guiIndex < 0) {
-    _guiIndex = 0;
+  if (init || _indexInGui > ((int) _vlevels.size()-1)) {
+    setIndexInGui(_vlevels.size() - 1);
+  } else if (_indexInGui < 0) {
+    _indexInGui = 0;
   }
 
   // set selected angle
 
-  _selectedLevel = _vlevels[_guiIndex].level;
+  _selectedLevel = _vlevels[_indexInGui].level;
   _units = "deg";
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -153,7 +153,7 @@ void VlevelManager::set(const MdvReader &mread)
   }
   for (int iz = nz - 1; iz >= 0; iz--) {
     GuiVlevel glevel;
-    glevel.indexInFile = iz;
+    glevel.indexInData = iz;
     glevel.indexInGui = iz;
     glevel.level = mread.ds_vhdr.level[iz];
     _vlevels.push_back(glevel);
@@ -198,7 +198,7 @@ void VlevelManager::setLevel(double level)
 {
   
   _selectedLevel = level;
-  _guiIndex = 0;
+  _indexInGui = 0;
   
   if (_vlevels.size() == 0) {
     return;
@@ -209,12 +209,12 @@ void VlevelManager::setLevel(double level)
     double level = _vlevels[ii].level;
     double diff = fabs(level - _selectedLevel);
     if (diff < minDiff) {
-      _guiIndex = ii;
+      _indexInGui = ii;
       minDiff = diff;
     }
   } // ii
 
-  _selectedLevel = _vlevels[_guiIndex].level;
+  _selectedLevel = _vlevels[_indexInGui].level;
   gd.prev_ht = gd.h_win.cur_ht;
   gd.h_win.cur_ht = _selectedLevel;
   gd.selected_ht = _selectedLevel;
@@ -226,48 +226,32 @@ void VlevelManager::setLevel(double level)
 /////////////////////////////////////////////////////////////
 // set selected gui index
 
-void VlevelManager::setGuiIndex(int index) 
+void VlevelManager::setIndexInGui(int index) 
 {
 
-  _guiIndex = index;
-  if (_guiIndex < 0) {
-    _guiIndex = 0;
-  } else if (_guiIndex > (int) _vlevels.size() - 1) {
-    _guiIndex = _vlevels.size() - 1;
+  _indexInGui = index;
+  if (_indexInGui < 0) {
+    _indexInGui = 0;
+  } else if (_indexInGui > (int) _vlevels.size() - 1) {
+    _indexInGui = _vlevels.size() - 1;
   }
-  _selectedLevel = _vlevels[_guiIndex].level;
+  _selectedLevel = _vlevels[_indexInGui].level;
 
 }
-
-
-/////////////////////////////////////////////////////////////
-// set selected file index
-
-void VlevelManager::setFileIndex(int index) 
-{
-
-  for (size_t ii = 0; ii < _vlevels.size(); ii++) {
-    if (_vlevels[ii].indexInFile == index) {
-      setGuiIndex(index);
-    }
-  }
-
-}
-
 
 /////////////////////////////////////////////////////////////
 // change selected index by the specified value
 
-void VlevelManager::changeSelectedIndex(int increment) 
+void VlevelManager::changeIndexInGui(int increment) 
 {
 
-  _guiIndex += increment;
-  if (_guiIndex < 0) {
-    _guiIndex = 0;
-  } else if (_guiIndex > (int) _vlevels.size() - 1) {
-    _guiIndex = _vlevels.size() - 1;
+  _indexInGui += increment;
+  if (_indexInGui < 0) {
+    _indexInGui = 0;
+  } else if (_indexInGui > (int) _vlevels.size() - 1) {
+    _indexInGui = _vlevels.size() - 1;
   }
-  _selectedLevel = _vlevels[_guiIndex].level;
+  _selectedLevel = _vlevels[_indexInGui].level;
 
 }
 
@@ -279,12 +263,12 @@ double VlevelManager::getLevel(ssize_t vlevelIndex /* = -1*/) const
 {
   
   if (vlevelIndex < 0) {
-    if (_guiIndex < 0) {
+    if (_indexInGui < 0) {
       return 0.0;
-    } else if (_guiIndex > (int) _vlevels.size() - 1) {
+    } else if (_indexInGui > (int) _vlevels.size() - 1) {
       return 0.0;
     } else {
-      return _vlevels[_guiIndex].level;
+      return _vlevels[_indexInGui].level;
     }
   } 
 

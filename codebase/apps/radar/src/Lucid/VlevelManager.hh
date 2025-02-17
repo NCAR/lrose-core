@@ -58,11 +58,11 @@ public:
   class GuiVlevel {
   public:
     double level;
-    int indexInFile;
+    int indexInData;
     int indexInGui;
     GuiVlevel() {
       level = 0.0;
-      indexInFile = 0;
+      indexInData = 0;
       indexInGui = 0;
     }
   };
@@ -90,18 +90,14 @@ public:
 
   // set the index for the GUI
 
-  void setGuiIndex(int index);
-
-  // set the index for the file
-
-  void setFileIndex(int index);
+  void setIndexInGui(int index);
 
   // change selected index by the specified increment
-
-  void changeSelectedIndex(int increment);
+  
+  void changeIndexInGui(int increment);
   
   // get number of levels
-
+  
   size_t getNLevels() const { return _vlevels.size(); }
 
   // get levels
@@ -110,7 +106,7 @@ public:
 
   // get the selected level
   
-  const GuiVlevel getSelectedVlevel() const { return _vlevels[_guiIndex]; }
+  const GuiVlevel getSelectedVlevel() const { return _vlevels[_indexInGui]; }
 
   // get level for index
   
@@ -148,8 +144,8 @@ public:
 
   // get gui-specific values
   
-  int getGuiIndex() const { return _guiIndex; }
-  int getFileIndex() const { return _vlevels[_guiIndex].indexInFile; }
+  int getIndexInGui() const { return _indexInGui; }
+  int getIndexInData() const { return _vlevels[_indexInGui].indexInData; }
   int getSelectedLevel() const { return _selectedLevel; }
   bool getReversedInGui() const { return _reversedInGui; }
 
@@ -164,7 +160,7 @@ private:
 
   // selection
 
-  int _guiIndex;
+  int _indexInGui;
   double _selectedLevel;
 
 };

@@ -468,23 +468,23 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     }
     _timeControl->goFwd1();
     
-  } else if (key == Qt::Key_Up) {
+  // } else if (key == Qt::Key_Up) {
 
-    if (_vlevelManager.getGuiIndex() > 0) {
-      if (_params.debug) {
-        cerr << "Clicked up arrow, go up a vlevel" << endl;
-      }
-      _changeVlevelRadioButton(-1);
-    }
+  //   if (_vlevelManager.getIndexInGui() > 0) {
+  //     if (_params.debug) {
+  //       cerr << "Clicked up arrow, go up a vlevel" << endl;
+  //     }
+  //     // _changeVlevelRadioButton(-1);
+  //   }
 
-  } else if (key == Qt::Key_Down) {
+  // } else if (key == Qt::Key_Down) {
 
-    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNLevels() - 1) {
-      if (_params.debug) {
-        cerr << "Clicked down arrow, go down a vlevel" << endl;
-      }
-      _changeVlevelRadioButton(+1);
-    }
+  //   if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
+  //     if (_params.debug) {
+  //       cerr << "Clicked down arrow, go down a vlevel" << endl;
+  //     }
+  //     // _changeVlevelRadioButton(+1);
+  //   }
     
   }
 
@@ -1155,7 +1155,7 @@ void GuiManager::_createVlevelRadioButtons()
     QRadioButton *radio1 = new QRadioButton(buf); 
     radio1->setFont(fontm2); 
     
-    if (ielev == _vlevelManager.getGuiIndex()) {
+    if (ielev == _vlevelManager.getIndexInGui()) {
       radio1->setChecked(true);
     }
     
@@ -1214,7 +1214,7 @@ void GuiManager::_changeVlevel(bool value) {
   for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
        vlevelIndex++) {
     if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
-      _vlevelManager.setGuiIndex(vlevelIndex);
+      _vlevelManager.setIndexInGui(vlevelIndex);
       if (_params.debug) {
         cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
         cerr << "  moving to vlevel index, value: "
@@ -1252,8 +1252,8 @@ void GuiManager::_changeVlevelRadioButton(int increment)
   }
   
   if (increment != 0) {
-    _vlevelManager.changeSelectedIndex(increment);
-    _vlevelRButtons->at(_vlevelManager.getGuiIndex())->setChecked(true);
+    _vlevelManager.changeIndexInGui(increment);
+    _vlevelRButtons->at(_vlevelManager.getIndexInGui())->setChecked(true);
     gd.redraw_horiz = true;
   }
   

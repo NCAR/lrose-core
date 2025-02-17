@@ -301,20 +301,20 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
   
   if (key == Qt::Key_Up) {
     
-    if (_vlevelManager.getGuiIndex() > 0) {
+    if (_vlevelManager.getIndexInGui() > 0) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked up arrow, go up a vlevel" << endl;
       }
-      // _changeVlevelRadioButton(-1);
+      _vlevelManager.changeIndexInGui(1);
     }
 
   } else if (key == Qt::Key_Down) {
 
-    if (_vlevelManager.getGuiIndex() < (int) _vlevelManager.getNLevels() - 1) {
+    if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked down arrow, go down a vlevel" << endl;
       }
-      // _changeVlevelRadioButton(+1);
+      _vlevelManager.changeIndexInGui(-1);
     }
     
   }
