@@ -150,10 +150,16 @@ GuiManager::GuiManager() :
   _fieldMenuPlaced = false;
   _fieldMenuPanel = NULL;
   _fieldMenuLayout = NULL;
-  _fieldTableCurrentColumn = -1;
-  _fieldTableCurrentRow = -1;
-  _prevFieldNum = 0;
+
   _fieldNum = 0;
+  _prevFieldNum = -1;
+
+  _fieldTableCol = 0;
+  _fieldTableRow = 0;
+
+  _prevFieldTableCol = -1;
+  _prevFieldTableRow = -1;
+
   _fieldHasChanged = false;
   
   _timeControl = NULL;
@@ -304,6 +310,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   bool needNewData = false;
   if (_fieldHasChanged) {
+    cerr << "111111111111111 CCCCCCCCCCCC fieldHasChanged" << endl;
     needNewData = true;
     _fieldHasChanged = false;
   }
@@ -432,11 +439,13 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
   
   // for '.', swap with previous field
   
-  // if (keychar == '.') {
-  //   QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-  //   button->click();
-  //   return;
-  // }
+  if (keychar == '.') {
+    if (_prevFieldNum >= 0) {
+      _fieldTable->setCurrentCell(_prevFieldTableRow, _prevFieldTableCol);
+      emit _fieldTable->cellClicked(_prevFieldTableRow, _prevFieldTableCol);
+    }
+    return;
+  }
   
   // for ESC, freeze / unfreeze
 
@@ -481,6 +490,16 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     
   }
 
+}
+
+///////////////////////////////////
+// swap 2 ints
+
+void GuiManager::_swap(int &val1, int &val2) 
+{
+  int tmp = val1;
+  val1 = val2;
+  val2 = tmp;
 }
 
 void GuiManager::_moveUpDown() 
@@ -2436,18 +2455,22 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   cerr << "FFFFFFFFFFFFF field menu clicked, row, col: "
        << row << ", " << col << endl;
 
-  if (_fieldTableCurrentRow == _fieldTable->currentRow() &&
-      _fieldTableCurrentColumn == _fieldTable->currentColumn()) {
+  if (_fieldTableRow == _fieldTable->currentRow() &&
+      _fieldTableCol == _fieldTable->currentColumn()) {
     // no change
     _fieldHasChanged = false;
     return;
   }
+
+  _prevFieldTableCol = _fieldTableCol;
+  _prevFieldTableRow = _fieldTableRow;
   
-  _fieldTableCurrentColumn = col;
-  _fieldTableCurrentRow = row;
+  _fieldTableCol = col;
+  _fieldTableRow = row;
   
   const FieldTableItem *item =
     (const FieldTableItem *) _fieldTable->item(row, col);
+
   _prevFieldNum = _fieldNum;
   _fieldNum = item->getFieldIndex();
   
@@ -3139,60 +3162,6 @@ void GuiManager::_createBoundaryEditorDialog()
   hLayout->addWidget(_boundaryEditorSaveBtn);
 
 }
-#endif
-
-#ifdef JUNK
-/////////////////////////////////////////////////////////
-// check for field change
-
-bool GuiManager::_checkForFieldChange()
-{
-
-  if (_fieldTable == NULL) {
-    return false;
-  }
-
-  if (_fieldTableCurrentRow == _fieldTable->currentRow() &&
-      _fieldTableCurrentColumn == _fieldTable->currentColumn()) {
-    // no change
-    return false;
-  }
-  
-  const FieldTableItem *item =
-    (const FieldTableItem *) _fieldTable->item(_fieldTable->currentRow(),
-                                               _fieldTable->currentColumn());
-  
-  if (item->text().toStdString().size() == 0) {
-    _fieldTable->setCurrentCell(_fieldTableCurrentRow,
-                                _fieldTableCurrentColumn);
-    return false;
-  }
-  
-  _fieldTableCurrentColumn = _fieldTable->currentColumn();
-  _fieldTableCurrentRow = _fieldTable->currentRow();
-  _prevFieldNum = _fieldNum;
-  _fieldNum = item->getFieldIndex();
-  gd.prev_field = gd.h_win.page;
-  _setField(_fieldNum);
-  gd.mread[_fieldNum]->h_data_valid = 0;
-  if (_params.debug) {
-    const Params::field_t *fparams = item->getFieldParams();
-    cerr << "Changing to field: " << fparams->button_label << endl;
-    cerr << "              url: " << fparams->url << endl;
-    cerr << "         fieldNum: " << _fieldNum << endl;
-    cerr << "      field_label: " << gd.mread[_fieldNum]->field_label << endl;
-    cerr << "      button_name: " << gd.mread[_fieldNum]->button_name << endl;
-    cerr << "      legend_name: " << gd.mread[_fieldNum]->legend_name << endl;
-  }
-  gd.redraw_horiz = true;
-  gd.field_has_changed = true;
-  gd.selected_field = _fieldNum;
-  gd.h_win.page = _fieldNum;
-
-  return true;
-
-}
-
 #endif
 
 /////////////////////////////////////////////////////////

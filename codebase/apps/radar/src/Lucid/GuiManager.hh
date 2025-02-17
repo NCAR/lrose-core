@@ -288,16 +288,21 @@ private:
   QFrame *_fieldMenuPanel;
   QVBoxLayout *_fieldMenuLayout;
 
-  int _fieldTableCurrentColumn;
-  int _fieldTableCurrentRow;
-  bool _fieldHasChanged;
-
   int _fieldNum;
   int _prevFieldNum;
+
+  int _fieldTableCol;
+  int _fieldTableRow;
+
+  int _prevFieldTableCol;
+  int _prevFieldTableRow;
+
   string _selectedName;
   string _selectedLabel;
   string _selectedUnits;
   QLabel *_valueLabel;
+
+  bool _fieldHasChanged;
 
   // maps
 
@@ -456,6 +461,10 @@ private:
   void _setText(char *text, size_t maxTextLen, const char *format, int val);
   void _setText(char *text, size_t maxTextLen, const char *format, double val);
 
+  // swap 2 int items
+
+  void _swap(int &val1, int &val2);
+
   // legacy
   
   void _autoCreateFunc();
@@ -464,7 +473,7 @@ private:
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();
-
+                          
 private slots:
 
   //////////////
