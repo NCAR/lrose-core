@@ -71,9 +71,6 @@ public:
   /// @param map The corresponding color map.
   void setColorMap(const ColorMap *map);
 
-  /// Turn on/off annotation
-  void setAnnotationOff();
-  
   /// @returns An image of the color bar. The caller must delte
   /// it when finished.
   QImage* getImage();
@@ -93,6 +90,9 @@ public:
   /// Capture a mouse release and emit a released() signal.
   virtual void mouseReleaseEvent(QMouseEvent* e) override;
 
+  /// Capture a mouse move event.
+  virtual void mouseMoveEvent(QMouseEvent* e) override;
+
   /// Capture a key press event
   virtual void keyPressEvent(QKeyEvent* e) override;
 
@@ -105,10 +105,13 @@ public:
 
  private:
   
-  bool _annotation;
   WorldPlot _world;
   VlevelManager &_vlevelManager;
   GuiManager *_guiManager;
+
+  bool _mouseMoveInProgress;
+  int _mouseMoveX, _mouseMoveY;
+  string _mouseMoveValStr;
 
 };
 

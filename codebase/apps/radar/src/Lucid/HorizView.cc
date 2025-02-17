@@ -2058,8 +2058,6 @@ void HorizView::mousePressEvent(QMouseEvent *e)
 void HorizView::mouseMoveEvent(QMouseEvent * e)
 {
 
-  // cerr << "ccccc mouseMoveEvent" << endl;
-  
   // Zooming with the mouse
 
 #if QT_VERSION >= 0x060000

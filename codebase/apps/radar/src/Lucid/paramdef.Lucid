@@ -3194,7 +3194,7 @@ paramdef int {
 } vlevel_selector_axis_text_margin;
 
 paramdef int {
-  p_default = 12;
+  p_default = 10;
   p_descr = "Font size of center title (pixels).";
 } vlevel_selector_title_font_size;
 

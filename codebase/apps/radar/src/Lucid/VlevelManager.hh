@@ -47,6 +47,9 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
+#include <Mdv/Mdvx.hh>
+
+class MdvReader;
 
 class VlevelManager {
   
@@ -78,7 +81,7 @@ public:
   
   // set from Mdvx data
 
-  void setFromMdvx();
+  void set(const MdvReader &mread);
   
   // set the level
   // size effect: sets the selected index
@@ -96,7 +99,7 @@ public:
   // change selected index by the specified increment
 
   void changeSelectedIndex(int increment);
-
+  
   // get methods
 
   size_t getNLevels() const { return _vlevels.size(); }
@@ -127,6 +130,8 @@ public:
   int getFileIndex() const { return _vlevels[_guiIndex].indexInFile; }
   int getSelectedLevel() const { return _selectedLevel; }
   bool getReversedInGui() const { return _reversedInGui; }
+
+  Mdvx::vlevel_type_t getMdvxVlevelType() const { return _mdvxVlevelType; }
   
   const string &getUnits() const { return _units; }
 
@@ -137,6 +142,7 @@ public:
   vector<GuiVlevel> _vlevels;
   bool _reversedInGui;
   string _units;
+  Mdvx::vlevel_type_t _mdvxVlevelType;
 
   // selection
 

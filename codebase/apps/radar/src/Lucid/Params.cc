@@ -6593,7 +6593,7 @@
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_title_font_size - &_start_;
-    tt->single_val.i = 12;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'vlevel_selector_labels_font_size'

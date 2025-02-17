@@ -41,6 +41,7 @@
 using namespace std;
 
 #include "VlevelManager.hh"
+#include "MdvReader.hh"
 #include "cidd.h"
 
 /////////////////////////////////////////////////////////////
@@ -53,6 +54,7 @@ VlevelManager::VlevelManager()
   _reversedInGui = false;
   _guiIndex = 0;
   _selectedLevel = 0.0;
+  _mdvxVlevelType = Mdvx::VERT_TYPE_UNKNOWN;
 
 }
 
@@ -65,62 +67,6 @@ VlevelManager::~VlevelManager()
   _vlevels.clear();
 }
 
-/////////////////////////////////////////////////////////////
-// set from Mdvx data
-
-void VlevelManager::setFromMdvx()
-
-{
-
-  double selectedLevel = _selectedLevel;
-  
-  _vlevels.clear();
-  if (gd.h_win.page >= gd.num_datafields) {
-    return;
-  }
-  MdvReader *mread = gd.mread[gd.h_win.page];
-  if (mread->ds_fhdr.nz > MDV64_MAX_VLEVELS) {
-    return;
-  }
-  //  for (int iz = 0; iz < mread->ds_fhdr.nz; iz++) {
-  for (int iz = mread->ds_fhdr.nz - 1; iz >= 0; iz--) {
-    GuiVlevel glevel;
-    glevel.indexInFile = iz;
-    glevel.indexInGui = iz;
-    glevel.level = mread->ds_vhdr.level[iz];
-    _vlevels.push_back(glevel);
-  }
-
-  switch(mread->ds_fhdr.vlevel_type) {
-    case Mdvx::VERT_TYPE_Z:
-    case Mdvx::VERT_TYPE_SIGMA_Z:
-      _units = "km";
-      break;
-    case Mdvx::VERT_TYPE_PRESSURE:
-    case Mdvx::VERT_TYPE_SIGMA_P:
-      _units = "hPa";
-      break;
-    case Mdvx::VERT_TYPE_THETA:
-      _units = "K";
-      break;
-    case Mdvx::VERT_TYPE_ELEV:
-    case Mdvx::VERT_VARIABLE_ELEV:
-    case Mdvx::VERT_TYPE_AZ:
-      _units = "deg";
-      break;
-    case Mdvx::VERT_FLIGHT_LEVEL:
-      _units = "FL";
-      break;
-    default:
-      _units.clear();
-  }
-
-  setLevel(selectedLevel);
-  
-  cerr << "QQQQQQQQQQQQQQQQ _vlevel.size(), units: " << _vlevels.size() << ", " << _units << endl;
-  
-}
-  
 /////////////////////////////////////////////////////////////
 // set from a volume
 
@@ -191,6 +137,58 @@ void VlevelManager::set(const RadxVol &vol)
 
 }
 
+/////////////////////////////////////////////////////////////
+// set from Mdvx data
+
+void VlevelManager::set(const MdvReader &mread)
+
+{
+
+  double selectedLevel = _selectedLevel;
+  
+  _vlevels.clear();
+  int nz = mread.ds_fhdr.nz;
+  if (nz > MDV64_MAX_VLEVELS) {
+    nz = MDV64_MAX_VLEVELS;
+  }
+  for (int iz = nz - 1; iz >= 0; iz--) {
+    GuiVlevel glevel;
+    glevel.indexInFile = iz;
+    glevel.indexInGui = iz;
+    glevel.level = mread.ds_vhdr.level[iz];
+    _vlevels.push_back(glevel);
+  }
+
+  _mdvxVlevelType = (Mdvx::vlevel_type_t) mread.ds_fhdr.vlevel_type;
+
+  switch(_mdvxVlevelType) {
+    case Mdvx::VERT_TYPE_Z:
+    case Mdvx::VERT_TYPE_SIGMA_Z:
+      _units = "km";
+      break;
+    case Mdvx::VERT_TYPE_PRESSURE:
+    case Mdvx::VERT_TYPE_SIGMA_P:
+      _units = "hPa";
+      break;
+    case Mdvx::VERT_TYPE_THETA:
+      _units = "K";
+      break;
+    case Mdvx::VERT_TYPE_ELEV:
+    case Mdvx::VERT_VARIABLE_ELEV:
+    case Mdvx::VERT_TYPE_AZ:
+      _units = "deg";
+      break;
+    case Mdvx::VERT_FLIGHT_LEVEL:
+      _units = "FL";
+      break;
+    default:
+      _units.clear();
+  }
+
+  setLevel(selectedLevel);
+  
+}
+  
 /////////////////////////////////////////////////////////////
 // set vlevel
 // size effect: sets the selected index

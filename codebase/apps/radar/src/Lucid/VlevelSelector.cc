@@ -48,7 +48,6 @@ VlevelSelector::VlevelSelector(int width,
   
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  _annotation = true;
   
   _world.setLeftMargin(_params.vlevel_selector_left_margin);
   _world.setRightMargin(_params.vlevel_selector_right_margin);
@@ -70,6 +69,8 @@ VlevelSelector::VlevelSelector(int width,
   _world.setLegendFontSize(_params.vlevel_selector_title_font_size);
 
   _world.setYAxisLabelsInside(false);
+
+  _mouseMoveInProgress = false;
   
   update();
   
@@ -85,12 +86,6 @@ void VlevelSelector::setColorMap(const ColorMap *map)
 {
   _colorMap = map;
   update();
-}
-
-/******************************************************************/
-void VlevelSelector::setAnnotationOff()
-{
-  _annotation = false;
 }
 
 /******************************************************************/
@@ -156,35 +151,84 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   
   // draw titles
 
-  {
-    
-    QPen pen(_params.vlevel_selector_title_color);
-    painter.setPen(pen);
-    
-    vector<string> titles;
-    if (_vlevelManager.getUnits().find("deg") != string::npos) {
-      titles.push_back("Elev angle");
-    } else if (_vlevelManager.getUnits().find("km") != string::npos ||
-               _vlevelManager.getUnits().find("m") != string::npos) {
+  QPen pen(_params.vlevel_selector_title_color);
+  painter.setPen(pen);
+  
+  vector<string> titles;
+  bool writeValue = false;
+  switch (_vlevelManager.getMdvxVlevelType()) {
+    case Mdvx::VERT_TYPE_Z:
       titles.push_back("Height");
-    } else {
-      titles.push_back("Vlevel");
-    }
-    if (_vlevelManager.getUnits().size() > 0) {
-      titles.push_back(_vlevelManager.getUnits());
-    }
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_SIGMA_Z:
+      titles.push_back("Sigma Level");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_PRESSURE:
+      titles.push_back("Pressure");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_SIGMA_P:
+      titles.push_back("SigmaP");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_THETA:
+      titles.push_back("Theta");
+      writeValue = true;
+    case Mdvx::VERT_TYPE_ELEV:
+    case Mdvx::VERT_VARIABLE_ELEV:
+      titles.push_back("Elevation");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_AZ:
+      titles.push_back("Azimuth");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_FLIGHT_LEVEL:
+      titles.push_back("Flight Level");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_ETA:
+      titles.push_back("ETA Level");
+      writeValue = true;
+      break;
+    case Mdvx::VERT_TYPE_SURFACE:
+      titles.push_back("Surface");
+      break;
+    case Mdvx::VERT_TYPE_COMPOSITE:
+      titles.push_back("Composite");
+      break;
+    case Mdvx::VERT_SATELLITE_IMAGE:
+      titles.push_back("Satellite");
+      break;
+    default:
+      titles.push_back("Vert Level");
+      break;
+  }
+
+  if (writeValue) {
     char text[1024];
     snprintf(text, 1024, "%g", _vlevelManager.getLevel());
     titles.push_back(text);
-    
-    _world.drawTitlesTopCenter(painter, titles);
-
+    if (_vlevelManager.getUnits().size() > 0) {
+      titles.push_back(_vlevelManager.getUnits());
+    }
   }
-  
+
+  _world.drawTitlesTopCenter(painter, titles);
+
+  // label mouse move vlevel
+
+  if (_mouseMoveInProgress) {
+    _world.drawTextScreenCoords(painter, _mouseMoveValStr,
+                                _mouseMoveX, _mouseMoveY,
+                                Qt::AlignLeft | Qt::AlignVCenter);
+  }
+
   painter.end();
 
   return;
-
 
 #ifdef JUNK
   const std::vector<ColorMap::CmapEntry> &cmap = _colorMap->getEntries();
@@ -199,7 +243,6 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   // paint swatches
   
   QPainter p;
-
   p.begin(this);
   p.setPen(Qt::SolidLine);
   for (size_t ii = 0; ii < cmap.size(); ii++) {
@@ -299,8 +342,38 @@ void VlevelSelector::mouseReleaseEvent(QMouseEvent *e)
 
   cerr << "YYYYYYYYYYYYYYYYYYY yVal: " << yVal << endl;
 
+  _mouseMoveInProgress = false;
+  
   emit released();
 
+}
+
+/******************************************************************/
+void VlevelSelector::mouseMoveEvent(QMouseEvent *e)
+{
+  
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  int xx = _params.vlevel_selector_left_margin / 2;
+  int yy = pos.y();
+  double yVal = _world.getYWorld(pos.y());
+  
+  char text[1024];
+  snprintf(text, 1024, "%g", yVal);
+
+  cerr << "YYYYYYYYYYYYYYYYYYY yy, yVal: " << yy << ", " << yVal << endl;
+
+  _mouseMoveX = xx;
+  _mouseMoveY = yy;
+  _mouseMoveValStr = text;
+  _mouseMoveInProgress = true;
+
+  update();
+  
 }
 
 ////////////////////////////////////////////////////////////////

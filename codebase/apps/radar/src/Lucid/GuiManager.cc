@@ -367,7 +367,9 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _horiz->setFrameForRendering(gd.h_win.page, index);
     _horiz->update();
     gd.redraw_horiz = false;
-    _vlevelManager.setFromMdvx();
+    if (gd.h_win.page < gd.num_datafields) {
+      _vlevelManager.set(*gd.mread[gd.h_win.page]);
+    }
     _createVlevelRadioButtons();
     _vlevelSelector->update();
   }
