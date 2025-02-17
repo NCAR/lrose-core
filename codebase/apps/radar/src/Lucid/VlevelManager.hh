@@ -100,25 +100,33 @@ public:
 
   void changeSelectedIndex(int increment);
   
-  // get methods
+  // get number of levels
 
   size_t getNLevels() const { return _vlevels.size(); }
+
+  // get levels
+  
   const vector<GuiVlevel> &getGuiLevels() const { return _vlevels; }
+
+  // get the selected level
+  
   const GuiVlevel getSelectedVlevel() const { return _vlevels[_guiIndex]; }
+
+  // get level for index
+  
   double getLevel(ssize_t vlevelIndex = -1) const;
-  // double getLevel(int index) const {
-  //   if (index >= (int) _vlevels.size()) {
-  //     return _vlevels[_vlevels.size()-1].level;
-  //   } else {
-  //     return _vlevels[index].level;
-  //   }
-  // }
+
+  // get max level
+  
   double getLevelMax() const {
     if (_vlevels.size() < 1) {
       return 0.0;
     }
     return _vlevels[_vlevels.size()-1].level;
   }
+
+  // get min level
+  
   double getLevelMin() const {
     if (_vlevels.size() < 1) {
       return 0.0;
@@ -126,19 +134,29 @@ public:
     return _vlevels[0].level;
   }
 
+  // get level closest to passed-in value
+  
+  double getLevelClosest(double level);
+
+  // get type of Vlevel in Mdvx
+  
+  Mdvx::vlevel_type_t getMdvxVlevelType() const { return _mdvxVlevelType; }
+
+  // get units
+  
+  const string &getUnits() const { return _units; }
+
+  // get gui-specific values
+  
   int getGuiIndex() const { return _guiIndex; }
   int getFileIndex() const { return _vlevels[_guiIndex].indexInFile; }
   int getSelectedLevel() const { return _selectedLevel; }
   bool getReversedInGui() const { return _reversedInGui; }
 
-  Mdvx::vlevel_type_t getMdvxVlevelType() const { return _mdvxVlevelType; }
-  
-  const string &getUnits() const { return _units; }
-
-  private:
+private:
   
   // vlevels
-
+  
   vector<GuiVlevel> _vlevels;
   bool _reversedInGui;
   string _units;

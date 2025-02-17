@@ -296,4 +296,29 @@ double VlevelManager::getLevel(ssize_t vlevelIndex /* = -1*/) const
 
 }
 
+/////////////////////////////////////////////////////////////
+// get level closest to the value passed in
+
+double VlevelManager::getLevelClosest(double level)
+  
+{
+  
+  if (_vlevels.size() == 0) {
+    return 0.0;
+  }
+
+  int index = 0;
+  double minDiff = 1.0e99;
+  for (size_t ii = 0; ii < _vlevels.size(); ii++) {
+    double diff = fabs(level - _vlevels[ii].level);
+    if (diff < minDiff) {
+      index = ii;
+      minDiff = diff;
+    }
+  } // ii
+
+  return _vlevels[index].level;
+
+}
+
   

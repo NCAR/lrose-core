@@ -209,7 +209,11 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
 
   if (writeValue) {
     char text[1024];
-    snprintf(text, 1024, "%g", _vlevelManager.getLevel());
+    if (_mouseMoveInProgress) {
+      titles.push_back(_mouseMoveValStr);
+    } else {
+      snprintf(text, 1024, "%g", _vlevelManager.getLevel());
+    }
     titles.push_back(text);
     if (_vlevelManager.getUnits().size() > 0) {
       titles.push_back(_vlevelManager.getUnits());
