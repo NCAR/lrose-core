@@ -303,7 +303,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // field change? request new data
 
   bool needNewData = false;
-  // if (_checkForFieldChange()) {
   if (_fieldHasChanged) {
     needNewData = true;
     _fieldHasChanged = false;
@@ -400,17 +399,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
 void GuiManager::resizeEvent(QResizeEvent *event)
 {
-#ifdef JUNK
-  // Called after the resize events have "settled"
-  qDebug() << "RRRRRRRRRRRRRRRRRSSSSSSSSSSSS Resize is complete. Final size:" << size();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "resizeEvent, width, height: "
-         << _horizFrame->width() << ", " << _horizFrame->height() << endl;
-  }
-  _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  // emit frameResized(_horizFrame->width(), _horizFrame->height());
-  _resized = true;
-#endif
   QWidget::resizeEvent(event);
   // Restart the timer on each resize event
   _resizeTimer->start();
@@ -418,7 +406,6 @@ void GuiManager::resizeEvent(QResizeEvent *event)
 
 void GuiManager::_resizeFinished() {
   // Called after the resize events have "settled"
-  qDebug() << "RRRRRRRRRRRRRRRRRSSSSSSSSSSSS Resize is complete. Final size:" << size();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent, width, height: "
          << _horizFrame->width() << ", " << _horizFrame->height() << endl;
@@ -427,35 +414,6 @@ void GuiManager::_resizeFinished() {
   // emit frameResized(_horizFrame->width(), _horizFrame->height());
   _resized = true;
 }
-
-class MyWidget : public QWidget {
-    Q_OBJECT
-public:
-  MyWidget(QWidget *parent = nullptr) : QWidget(parent) {
-    // Set up the timer; adjust the interval as needed.
-        resizeTimer = new QTimer(this);
-        resizeTimer->setInterval(250); // 250ms delay
-        resizeTimer->setSingleShot(true);
-        connect(resizeTimer, &QTimer::timeout, this, &MyWidget::resizeFinished);
-    }
-
-protected:
-    void resizeEvent(QResizeEvent *event) override {
-        QWidget::resizeEvent(event);
-        // Restart the timer on each resize event
-        resizeTimer->start();
-    }
-
-private slots:
-    void resizeFinished() {
-        // Called after the resize events have "settled"
-        qDebug() << "Resize is complete. Final size:" << size();
-    }
-
-private:
-    QTimer *resizeTimer;
-};
-
 
 ////////////////////////////////////////////////////////////////
 void GuiManager::keyPressEvent(QKeyEvent * e)
@@ -486,46 +444,6 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     _freezeAct->trigger();
     return;
   }
-
-#ifdef JUNK
-  
-  // check for short-cut keys to fields
-
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    
-    const DisplayField *field = _fields[ifield];
-
-    char shortcut = 0;
-    if (field->getShortcut().size() > 0) {
-      shortcut = field->getShortcut()[0];
-    }
-    
-    bool correctField = false;
-    if (shortcut == keychar) {
-      if (mods & Qt::AltModifier) {
-        if (field->getIsFilt()) {
-          correctField = true;
-        }
-      } else {
-        if (!field->getIsFilt()) {
-          correctField = true;
-        }
-      }
-    }
-
-    if (correctField) {
-      if (_params.debug) {
-	cerr << "Short-cut key pressed: " << shortcut << endl;
-	cerr << "  field label: " << field->getLabel() << endl;
-	cerr << "   field name: " << field->getName() << endl;
-      }
-      QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
-      button->click();
-      break;
-    }
-
-  }
-#endif
 
   // check for up/down in vlevels
   
@@ -610,10 +528,9 @@ void GuiManager::_setupWindows()
 
   _vertWindow = new VertManager(this);
   _vertWindow->setRadarName("unknown");
-  // _vertWindow->setRadarName(_params.radar_name);
-
+  
   // set pointer to the vertWidget
-
+  
   _vert = _vertWindow->getView();
   
   // connect slots for location
@@ -627,29 +544,16 @@ void GuiManager::_setupWindows()
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
+
   // customContextMenuRequested(e->pos());
   connect(_horiz, &HorizView::customContextMenuRequested,
 	  this, &GuiManager::ShowContextMenu);
 
-  // create status panel
-
-  // _createStatusPanel();
-
-  // create fields panel
-  
-  // _createFieldPanel();
-
-  // add widgets
-
-  // mainLayout->addWidget(_statusPanel);
-  // mainLayout->addWidget(_fieldPanel);
-  
   // vlevel panel
 
   _createVlevelFrame();
   cerr << "VVVVVVVVVV vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-  
-  mainLayout->addWidget(_vlevelFrame);
+  //mainLayout->addWidget(_vlevelFrame);
   
   cerr << "WWWWWWWWWWWWWWWWW vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
 

@@ -111,7 +111,8 @@ public:
 
   bool _mouseMoveInProgress;
   int _mouseMoveX, _mouseMoveY;
-  string _mouseMoveValStr;
+  double _mouseMoveVlevel;
+  string _mouseMoveVlevelStr;
 
 };
 

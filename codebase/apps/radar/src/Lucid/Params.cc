@@ -6533,7 +6533,7 @@
     tt->descr = tdrpStrDup("Width of left margin in VLEVEL_SELECTOR mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &vlevel_selector_left_margin - &_start_;
-    tt->single_val.i = 40;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'vlevel_selector_right_margin'
@@ -6617,7 +6617,7 @@
     tt->descr = tdrpStrDup("Color of background in vlevel selector.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vlevel_selector_background_color - &_start_;
-    tt->single_val.s = tdrpStrDup("gray");
+    tt->single_val.s = tdrpStrDup("black");
     tt++;
     
     // Parameter 'vlevel_selector_title_color'

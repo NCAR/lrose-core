@@ -137,14 +137,23 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   
   double vlevel = _vlevelManager.getLevel();
   QBrush brush(_params.vlevel_selector_marker_color);
-
   double ptrHalfHt = 10.0 / _world.getYPixelsPerWorld();
   QVector<QPointF> poly;
-  poly.push_back(QPointF(0.6, vlevel));
+  poly.push_back(QPointF(0.7, vlevel));
   poly.push_back(QPointF(1.0, vlevel + ptrHalfHt));
   poly.push_back(QPointF(1.0, vlevel - ptrHalfHt));
   _world.fillPolygon(painter, brush, poly);
   
+  if (_mouseMoveInProgress) {
+    double vlevelM = _mouseMoveVlevel;
+    QBrush brushM(_params.vlevel_selector_data_values_color);
+    QVector<QPointF> polyM;
+    polyM.push_back(QPointF(0.7, vlevelM));
+    polyM.push_back(QPointF(1.0, vlevelM + ptrHalfHt));
+    polyM.push_back(QPointF(1.0, vlevelM - ptrHalfHt));
+    _world.fillPolygon(painter, brushM, polyM);
+  }
+    
   // draw Y axis
   
   _world.drawAxisLeft(painter, "", true, true, true, false);
@@ -210,11 +219,11 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   if (writeValue) {
     char text[1024];
     if (_mouseMoveInProgress) {
-      titles.push_back(_mouseMoveValStr);
+      titles.push_back(_mouseMoveVlevelStr);
     } else {
       snprintf(text, 1024, "%g", _vlevelManager.getLevel());
+      titles.push_back(text);
     }
-    titles.push_back(text);
     if (_vlevelManager.getUnits().size() > 0) {
       titles.push_back(_vlevelManager.getUnits());
     }
@@ -225,7 +234,9 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   // label mouse move vlevel
 
   if (_mouseMoveInProgress) {
-    _world.drawTextScreenCoords(painter, _mouseMoveValStr,
+    QPen penM(_params.vlevel_selector_data_values_color);
+    painter.setPen(penM);
+    _world.drawTextScreenCoords(painter, _mouseMoveVlevelStr,
                                 _mouseMoveX, _mouseMoveY,
                                 Qt::AlignLeft | Qt::AlignVCenter);
   }
@@ -365,15 +376,18 @@ void VlevelSelector::mouseMoveEvent(QMouseEvent *e)
   int xx = _params.vlevel_selector_left_margin / 2;
   int yy = pos.y();
   double yVal = _world.getYWorld(pos.y());
-  
-  char text[1024];
-  snprintf(text, 1024, "%g", yVal);
-
-  cerr << "YYYYYYYYYYYYYYYYYYY yy, yVal: " << yy << ", " << yVal << endl;
 
   _mouseMoveX = xx;
   _mouseMoveY = yy;
-  _mouseMoveValStr = text;
+  _mouseMoveVlevel = _vlevelManager.getLevelClosest(yVal);
+  
+  char text[1024];
+  snprintf(text, 1024, "%g", _mouseMoveVlevel);
+
+  cerr << "YYYYYYYYYYYYYYYYYYY yy, yVal: " << yy << ", " << yVal << endl;
+  cerr << "YYYYYYYYYYYYYYYYYYY closest yVal: " << _mouseMoveVlevel << endl;
+  
+  _mouseMoveVlevelStr = text;
   _mouseMoveInProgress = true;
 
   update();

@@ -3167,7 +3167,7 @@ paramdef int {
 } vlevel_selector_bottom_margin;
 
 paramdef int {
-  p_default = 40;
+  p_default = 30;
   p_descr = "Width of left margin in VLEVEL_SELECTOR mode (pixels).";
   p_help = "Height scale goes in the left margin.";
 } vlevel_selector_left_margin;
@@ -3204,7 +3204,7 @@ paramdef int {
 } vlevel_selector_labels_font_size;
 
 paramdef string {
-  p_default = "gray";
+  p_default = "black";
   p_descr = "Color of background in vlevel selector.";
 } vlevel_selector_background_color;
 
