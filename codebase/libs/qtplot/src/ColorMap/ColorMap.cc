@@ -612,6 +612,18 @@ void ColorMap::dataColor
 }
 
 ////////////////////////////////////////////////////////
+/// Check value is within valid range
+
+bool ColorMap::withinValidRange(double data) const
+{
+  int index = _getLutIndexCheck(data);
+  if (index < 0) {
+    return false;
+  }
+  return true;
+}
+
+////////////////////////////////////////////////////////
 // set color map
 //
 // Returns 0 on success, -1 on failure
@@ -1468,8 +1480,9 @@ void ColorMap::_computeLut()
 
 }
   
-////////////////////
+////////////////////////////////////
 // get lut index
+// always returns valid index
 
 int ColorMap::_getLutIndex(double data) const
 
@@ -1490,6 +1503,35 @@ int ColorMap::_getLutIndex(double data) const
     index = 0;
   } else if (index > (LUT_SIZE-1)) {
     index = LUT_SIZE - 1;
+  }
+
+  return index;
+
+}
+
+////////////////////////////////////
+// get lut index with valid check
+// returns -1 if outside valid range
+
+int ColorMap::_getLutIndexCheck(double data) const
+  
+{
+
+  int index = 0;
+  if (_useLog10ForLut) {
+    if (data > 0) {
+      index = (int) (LUT_SIZE * (log10(data) - _rangeMin)/(_range));
+    } else {
+      index = 0;
+    }
+  } else {
+    index = (int) (LUT_SIZE * (data - _rangeMin)/(_range));
+  }
+  
+  if (index < 0) {
+    index = -1;
+  } else if (index > (LUT_SIZE-1)) {
+    index = -1;
   }
 
   return index;
