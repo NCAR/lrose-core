@@ -340,12 +340,17 @@ int MdvReader::getHorizPlane()
   gd.io_info.busy_status = 1;
   
   MdvxField *hfld = h_mdvx->getFieldByNum(0);
-  Mdvx::field_header_t fh = hfld->getFieldHeader();
-  if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
+  if(hfld->getFieldHeader().encoding_type == Mdvx::ENCODING_RGBA32) {
+    hfld->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_NONE);
+  } else{
+    hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  }
+  Mdvx::field_header_t fhdr = hfld->getFieldHeader();
+  if(fhdr.encoding_type != Mdvx::ENCODING_RGBA32) {
 
     *h_mdvx_int16 = *hfld; // Copy for INT16 data
     
-    if(h_vcm.nentries < 2 || fh.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+    if(h_vcm.nentries < 2 || fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
       
       h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE);
 
@@ -366,14 +371,16 @@ int MdvReader::getHorizPlane()
     // Convert the AS-IS to 32 bits float. - Used for Contouring, Data reporting.
     // cerr << "1111111111111111111 getNFields(): " << h_mdvx->getNFields() << endl;
     // cerr << "11111111111111111 h_mdvx->getFieldByNum(0): " << h_mdvx->getFieldByNum(0) << endl;
-    hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+    // hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
     // Record where float data is in memory.
     h_fl32_data = (fl32  *) hfld->getVol();
       
     // Find Headers for quick reference
     h_mhdr = h_mdvx->getMasterHeader();
-    h_fhdr = h_mdvx_int16->getFieldHeader();
-    h_vhdr = h_mdvx_int16->getVlevelHeader();
+    h_fhdr = hfld->getFieldHeader();
+    h_vhdr = hfld->getVlevelHeader();
+    // h_fhdr = h_mdvx_int16->getFieldHeader();
+    // h_vhdr = h_mdvx_int16->getVlevelHeader();
 
   } else {
       
@@ -490,17 +497,6 @@ int MdvReader::getHorizPlane()
       _autoscaleVcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
     }
       
-    if(fh.encoding_type != Mdvx::ENCODING_RGBA32) {
-#ifdef NOTYET
-      /* Remap the data values onto the colorscale */
-      setup_color_mapping(&(h_vcm),
-                          h_fhdr.scale,
-                          h_fhdr.bias,
-                          h_fhdr.transform_type,
-                          h_fhdr.bad_data_value,
-                          h_fhdr.missing_data_value);
-#endif
-    }
     // Update last values
     h_last_scale = h_fhdr.scale;
     h_last_bias = h_fhdr.bias;
@@ -1241,10 +1237,10 @@ void MdvReader::readDoneH() {
   _setNewH(true);
   {
     MdvxField *hfld = h_mdvx->getFieldByNum(0);
-    Mdvx::field_header_t fh = hfld->getFieldHeader();
+    Mdvx::field_header_t fhdr = hfld->getFieldHeader();
     Mdvx::vlevel_header_t vh = hfld->getVlevelHeader();
     cerr << "1111111111111 readDone in ReadVolH worker thread" << endl;
-    cerr << "1111111111111 vLevel: " << vh.level[fh.nz-1] << endl;
+    cerr << "1111111111111 vLevel: " << vh.level[fhdr.nz-1] << endl;
     qDebug() << "readDone in ReadVolH worker thread";
   }
   _readBusyH = false;

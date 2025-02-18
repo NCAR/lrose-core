@@ -1140,8 +1140,8 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
   
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
-    QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    QRect lRect(painter.fontMetrics().boundingRect(legend.c_str()));
+    QRectF bRect(xx, yy, lRect.width() + 6, lRect.height() + 6);
     painter.drawText(bRect, Qt::AlignTop, legend.c_str());
     yy += (_legendTextMargin + lRect.height());
   }
@@ -2546,10 +2546,23 @@ void WorldPlot::renderGridRect(int page,
   // }
 
   fl32 *val = mr->h_fl32_data;
+  fl32 miss = mr->h_fhdr.missing_data_value;
+  fl32 bad = mr->h_fhdr.bad_data_value;
+  
+  // cerr << "BBBBBBBBBBBBBBBBBB miss, bad: " << miss << ", " << bad << endl;
+  // Mdvx::printFieldHeader(mr->h_fhdr, cerr);
+  // cerr << "BBBBBBBBBBBBBBBBBB miss, bad: " << miss << ", " << bad << endl;
   
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
-      const QBrush *brush = mr->colorMap->dataBrush(*val);
+      fl32 fval = *val;
+      if (fval == miss || fval == bad) {
+        continue;
+      }
+      if (!mr->colorMap->withinValidRange(fval)) {
+        continue;
+      }
+      const QBrush *brush = mr->colorMap->dataBrush(fval);
       double xx = vertices[iy+1][ix].x();
       double yy = vertices[iy+1][ix].y();
       double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
