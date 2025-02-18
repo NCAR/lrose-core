@@ -238,7 +238,7 @@ void Lucid::_initGlobals()
   gd.num_field_labels = 0;  
   MEM_zero(gd.field_index);
   gd.movieframe_time_mode = 0; 
-  gd.aspect_correction = 0; 
+  gd.aspect_correction = 1.0;
   MEM_zero(gd.height_array);
 
   // gd.redraw_horiz = 0;
@@ -2807,13 +2807,13 @@ int Lucid::_initZooms()
       gd.h_win.zmin_y[izoom] =  gd.h_win.max_y - delta_y;
     }
 
-    // if(_params.aspect_ratio <= 0.0) {
-    //   _params.aspect_ratio = fabs(delta_x/delta_y);
-    // }
+    if(_params.horiz_aspect_ratio <= 0.0) {
+      _params.horiz_aspect_ratio = fabs(delta_x/delta_y);
+    }
     
     gd.aspect_correction =
       cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * DEG_TO_RAD);
-
+    
     /* Make sure domains are consistant with the window aspect ratio */
 
     if (gd.display_projection == Mdvx::PROJ_LATLON) {

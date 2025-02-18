@@ -1393,6 +1393,8 @@ public:
 
   char* vlevel_selector_data_values_color;
 
+  double horiz_aspect_ratio;
+
   tdrp_bool_t horiz_grids_on_at_startup;
 
   tdrp_bool_t horiz_range_rings_on_at_startup;
@@ -1552,7 +1554,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[531];
+  mutable TDRPtable _table[532];
 
   const char *_className;
 

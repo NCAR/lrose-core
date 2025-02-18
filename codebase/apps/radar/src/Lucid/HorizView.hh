@@ -451,7 +451,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @brief The aspect ratio of the display area.
    */
 
-  // double _aspectRatio;
+  double _aspectRatio;
   
   /**
    * @brief The width of the color scale

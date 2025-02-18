@@ -557,7 +557,8 @@ void GuiManager::_setupWindows()
   _horizFrame = new QFrame(_main);
   mainLayout->addWidget(_horizFrame);
   _horizFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  _horizFrame->resize(_params.horiz_default_width, _params.horiz_default_height);
+  _horizFrame->resize(_params.horiz_default_width + _params.color_scale_width,
+                      _params.horiz_default_height);
 
   // configure the HORIZ
 

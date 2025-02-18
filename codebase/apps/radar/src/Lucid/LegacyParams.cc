@@ -1378,7 +1378,8 @@ int LegacyParams::_readMainParams()
   // main window (horiz view)
   _getLong("cidd.horiz_default_y_pos",0);
   _getLong("cidd.horiz_default_x_pos",0);
-  double aspectRatio = _getDouble("cidd.aspect_ratio", 1.0, false);
+  double aspectRatio = _getDouble("cidd.aspect_ratio", 0.0, false);
+  fprintf(_tdrpFile, "horiz_aspect_ratio = %g;\n", aspectRatio);
   int ht = _getLong("cidd.horiz_default_height", 800);
   long defaultWidth = (int) (ht * aspectRatio + 0.5);
   _getLong("cidd.horiz_default_width", defaultWidth);
@@ -1388,6 +1389,8 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.horiz_bot_margin", 20);
   _getLong("cidd.horiz_left_margin", 20);
   _getLong("cidd.horiz_right_margin", 80);
+  // int rightMargin = _getLong("cidd.horiz_right_margin", 80.0, false);
+  fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
   _getLong("cidd.horiz_legends_start_x", 0);
   _getLong("cidd.horiz_legends_start_y", 0);
   _getLong("cidd.horiz_legends_delta_y", 0);

@@ -4156,7 +4156,7 @@
     tt->descr = tdrpStrDup("Width of right margin (pixels).");
     tt->help = tdrpStrDup("Size of right margin for horiz window.");
     tt->val_offset = (char *) &horiz_right_margin - &_start_;
-    tt->single_val.i = 80;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'horiz_title_text_margin'
@@ -6687,6 +6687,18 @@
     tt->param_name = tdrpStrDup("Comment 59");
     tt->comment_hdr = tdrpStrDup("HORIZ MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'horiz_aspect_ratio'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("horiz_aspect_ratio");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of HORIZ window.");
+    tt->help = tdrpStrDup("If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain.");
+    tt->val_offset = (char *) &horiz_aspect_ratio - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'horiz_grids_on_at_startup'

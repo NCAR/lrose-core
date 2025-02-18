@@ -2005,7 +2005,7 @@ paramdef int {
 } horiz_left_margin;
 
 paramdef int {
-  p_default = 80;
+  p_default = 6;
   p_descr = "Width of right margin (pixels).";
   p_help = "Size of right margin for horiz window.";
 } horiz_right_margin;
@@ -3254,11 +3254,11 @@ commentdef {
 //   p_default = HORIZ_FULL;
 // } horiz_display_type;
 
-// paramdef double {
-//   p_default = 1.0;
-//   p_descr = "Aspect ratio (width/height) of HORIZ window.";
-//   p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-// } horiz_aspect_ratio;
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Aspect ratio (width/height) of HORIZ window.";
+  p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain.";
+} horiz_aspect_ratio;
 
 paramdef boolean {
   p_default = false;
