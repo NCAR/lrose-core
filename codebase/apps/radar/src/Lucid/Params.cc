@@ -1116,158 +1116,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("<WIND_GRIDS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'winds_enabled_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("winds_enabled_at_startup");
-    tt->descr = tdrpStrDup("Enable winds at start.");
-    tt->help = tdrpStrDup("If FALSE, winds will not be emabled at startup. You will have to turn them on via the winds menu.");
-    tt->val_offset = (char *) &winds_enabled_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'winds'
-    // ctype is '_wind_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("winds");
-    tt->descr = tdrpStrDup("Winds to be displayed.");
-    tt->help = tdrpStrDup("button_label: appears on the GUI. \nlegend_label: appears in the plot. \nurl: location of data or data server. Form is 'protocol://host:port/dir/'\nu_field_name: U component field name. \nv_field_name: V component field name. \nw_field_name: W component field name. Set to 'none' if no W vectors.\nunits: wind speed units. \nline_width: line width to be used for wind vectors. \nmarker_type:\n  ARROW: centered on data point.\n  VECTOR: vertex at data point.\n  BARB: N hemisphere.\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere.\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector.\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes.\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold.\n  BARB_SH: S Hemisphere.\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units.\n\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section\n");
-    tt->array_offset = (char *) &_winds - &_start_;
-    tt->array_n_offset = (char *) &winds_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(wind_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("wind_t");
-    tt->struct_def.nfields = 11;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("button_label");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_winds->button_label - (char *) _winds;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("legend_label");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_winds->legend_label - (char *) _winds;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("url");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_winds->url - (char *) _winds;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("u_field_name");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_winds->u_field_name - (char *) _winds;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("v_field_name");
-      tt->struct_def.fields[4].ptype = STRING_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_winds->v_field_name - (char *) _winds;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[5].fname = tdrpStrDup("w_field_name");
-      tt->struct_def.fields[5].ptype = STRING_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_winds->w_field_name - (char *) _winds;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[6].fname = tdrpStrDup("units");
-      tt->struct_def.fields[6].ptype = STRING_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_winds->units - (char *) _winds;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[7].fname = tdrpStrDup("line_width");
-      tt->struct_def.fields[7].ptype = INT_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &_winds->line_width - (char *) _winds;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("wind_marker_t");
-      tt->struct_def.fields[8].fname = tdrpStrDup("marker_type");
-      tt->struct_def.fields[8].ptype = ENUM_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_winds->marker_type - (char *) _winds;
-        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("wind_marker_t");
-        tt->struct_def.fields[8].enum_def.nfields = 9;
-        tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
-        tt->struct_def.fields[8].enum_def.fields[0].val = WIND_ARROW;
-        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
-        tt->struct_def.fields[8].enum_def.fields[1].val = WIND_VECTOR;
-        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
-        tt->struct_def.fields[8].enum_def.fields[2].val = WIND_BARB;
-        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
-        tt->struct_def.fields[8].enum_def.fields[3].val = WIND_LABELEDBARB;
-        tt->struct_def.fields[8].enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
-        tt->struct_def.fields[8].enum_def.fields[4].val = WIND_TUFT;
-        tt->struct_def.fields[8].enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
-        tt->struct_def.fields[8].enum_def.fields[5].val = WIND_TICKVECTOR;
-        tt->struct_def.fields[8].enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
-        tt->struct_def.fields[8].enum_def.fields[6].val = WIND_METBARB;
-        tt->struct_def.fields[8].enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
-        tt->struct_def.fields[8].enum_def.fields[7].val = WIND_BARB_SH;
-        tt->struct_def.fields[8].enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
-        tt->struct_def.fields[8].enum_def.fields[8].val = WIND_LABELEDBARB_SH;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[9].fname = tdrpStrDup("color");
-      tt->struct_def.fields[9].ptype = STRING_TYPE;
-      tt->struct_def.fields[9].rel_offset = 
-        (char *) &_winds->color - (char *) _winds;
-      tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[10].fname = tdrpStrDup("on_at_startup");
-      tt->struct_def.fields[10].ptype = BOOL_TYPE;
-      tt->struct_def.fields[10].rel_offset = 
-        (char *) &_winds->on_at_startup - (char *) _winds;
-    tt->n_struct_vals = 22;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("GFS");
-      tt->struct_vals[1].s = tdrpStrDup("GFS");
-      tt->struct_vals[2].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago");
-      tt->struct_vals[3].s = tdrpStrDup("U");
-      tt->struct_vals[4].s = tdrpStrDup("V");
-      tt->struct_vals[5].s = tdrpStrDup("W");
-      tt->struct_vals[6].s = tdrpStrDup("m/s");
-      tt->struct_vals[7].i = 1;
-      tt->struct_vals[8].e = WIND_ARROW;
-      tt->struct_vals[9].s = tdrpStrDup("white");
-      tt->struct_vals[10].b = pTRUE;
-      tt->struct_vals[11].s = tdrpStrDup("WRF");
-      tt->struct_vals[12].s = tdrpStrDup("WRF");
-      tt->struct_vals[13].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/relampago");
-      tt->struct_vals[14].s = tdrpStrDup("U");
-      tt->struct_vals[15].s = tdrpStrDup("V");
-      tt->struct_vals[16].s = tdrpStrDup("W");
-      tt->struct_vals[17].s = tdrpStrDup("m/s");
-      tt->struct_vals[18].i = 1;
-      tt->struct_vals[19].e = WIND_ARROW;
-      tt->struct_vals[20].s = tdrpStrDup("yellow");
-      tt->struct_vals[21].b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("</WIND_GRIDS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("<MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1387,29 +1235,29 @@
     tt->single_val.i = 8;
     tt++;
     
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("</MAPS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
+    tt->comment_hdr = tdrpStrDup("<PROJECTION>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 13");
-    tt->comment_hdr = tdrpStrDup("</MAPS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 14'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("<PROJECTION>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 15'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("Projection for horizontal view");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1640,20 +1488,20 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("</PROJECTION>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("<DATA_RETRIEVAL>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1848,20 +1696,20 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("</DATA_RETRIEVAL>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("<MOVIE_LOOPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2062,11 +1910,11 @@
     tt->single_val.i = 100;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("</MOVIE_LOOPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2143,20 +1991,20 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("<ZOOM_DOMAINS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("Zoom views.");
     tt->comment_text = tdrpStrDup("These are the pre-defined zoom levels.");
     tt++;
@@ -2272,11 +2120,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("Zoom domain limits.");
     tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
     tt++;
@@ -2329,12 +2177,21 @@
     tt->single_val.d = 10000;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("</ZOOM_DOMAINS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 23'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 23");
+    tt->comment_hdr = tdrpStrDup("<HORIZ_PLOT>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -2362,11 +2219,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.");
     tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
     tt++;
@@ -2443,11 +2300,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("Server access.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2476,20 +2333,20 @@
     tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
     tt++;
     
+    // Parameter 'Comment 26'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 26");
+    tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
+    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
+    tt++;
+    
     // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 27");
-    tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
-    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
-    tt++;
-    
-    // Parameter 'Comment 28'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("Setting colors.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2638,11 +2495,11 @@
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("TIME_CONTROL_GUI");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2707,11 +2564,11 @@
       tt->array_vals[5].s = tdrpStrDup("blue");
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("Mode flags.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2836,11 +2693,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("Window sizes.");
     tt->comment_text = tdrpStrDup("Window width and height is specified in pixels.");
     tt++;
@@ -2989,11 +2846,11 @@
     tt->single_val.i = 400;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("Margin details.");
     tt->comment_text = tdrpStrDup("Margins are specified in pixels.");
     tt++;
@@ -3442,11 +3299,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
     tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.");
     tt++;
@@ -3523,11 +3380,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("Draw range rings and azimuth lines.");
     tt->comment_text = tdrpStrDup("These apply to radars only.");
     tt++;
@@ -3676,210 +3533,11 @@
     tt->single_val.d = 200;
     tt++;
     
-    // Parameter 'Comment 35'
+    // Parameter 'Comment 34'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 35");
-    tt->comment_hdr = tdrpStrDup("Plotting wind vectors.");
-    tt->comment_text = tdrpStrDup("See also the wind layers section.");
-    tt++;
-    
-    // Parameter 'all_winds_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("all_winds_on");
-    tt->descr = tdrpStrDup("Plot all wind layers.");
-    tt->help = tdrpStrDup("Turns on all wind layers.");
-    tt->val_offset = (char *) &all_winds_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'wind_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wind_mode");
-    tt->descr = tdrpStrDup("Activate wind rendering.");
-    tt->help = tdrpStrDup("TO DO - check how this works.");
-    tt->val_offset = (char *) &wind_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'barb_shaft_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("barb_shaft_len");
-    tt->descr = tdrpStrDup("Wind barb shaft length (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &barb_shaft_len - &_start_;
-    tt->single_val.i = 33;
-    tt++;
-    
-    // Parameter 'ideal_x_vectors'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ideal_x_vectors");
-    tt->descr = tdrpStrDup("Ideal number of vectors in the x dimension.");
-    tt->help = tdrpStrDup("The display will space the wind vectors in x accordingly.");
-    tt->val_offset = (char *) &ideal_x_vectors - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'ideal_y_vectors'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ideal_y_vectors");
-    tt->descr = tdrpStrDup("Ideal number of vectors in the y dimension.");
-    tt->help = tdrpStrDup("The display will space the wind vectors in y accordingly.");
-    tt->val_offset = (char *) &ideal_y_vectors - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'wind_head_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wind_head_size");
-    tt->descr = tdrpStrDup("Minimum arrow head size for wind vectors (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_head_size - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'wind_head_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_head_angle");
-    tt->descr = tdrpStrDup("Angle of arrow head for wind vectors (deg).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_head_angle - &_start_;
-    tt->single_val.d = 45;
-    tt++;
-    
-    // Parameter 'wind_scaler'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wind_scaler");
-    tt->descr = tdrpStrDup("The display will space the wind vectors in x accordingly.");
-    tt->help = tdrpStrDup("Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.");
-    tt->val_offset = (char *) &wind_scaler - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'wind_time_scale_interval'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_time_scale_interval");
-    tt->descr = tdrpStrDup("inutes between steps on the wind scaling slider.");
-    tt->help = tdrpStrDup("Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity");
-    tt->val_offset = (char *) &wind_time_scale_interval - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_marker_type'
-    // ctype is '_wind_marker_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("wind_marker_type");
-    tt->descr = tdrpStrDup("Wind marker rendering style.");
-    tt->help = tdrpStrDup("See WIND section for details on rendering style.");
-    tt->val_offset = (char *) &wind_marker_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("wind_marker_t");
-    tt->enum_def.nfields = 9;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
-      tt->enum_def.fields[0].val = WIND_ARROW;
-      tt->enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
-      tt->enum_def.fields[1].val = WIND_VECTOR;
-      tt->enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
-      tt->enum_def.fields[2].val = WIND_BARB;
-      tt->enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
-      tt->enum_def.fields[3].val = WIND_LABELEDBARB;
-      tt->enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
-      tt->enum_def.fields[4].val = WIND_TUFT;
-      tt->enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
-      tt->enum_def.fields[5].val = WIND_TICKVECTOR;
-      tt->enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
-      tt->enum_def.fields[6].val = WIND_METBARB;
-      tt->enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
-      tt->enum_def.fields[7].val = WIND_BARB_SH;
-      tt->enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
-      tt->enum_def.fields[8].val = WIND_LABELEDBARB_SH;
-    tt->single_val.e = WIND_ARROW;
-    tt++;
-    
-    // Parameter 'wind_w_scale_factor'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_w_scale_factor");
-    tt->descr = tdrpStrDup("Scale the vertical velocity by this factor, relative to the U/V. ");
-    tt->help = tdrpStrDup("W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.");
-    tt->val_offset = (char *) &wind_w_scale_factor - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_units_scale_factor'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_units_scale_factor");
-    tt->descr = tdrpStrDup("Value to convert from the your reference speed units to m/sec. ");
-    tt->help = tdrpStrDup("i.e. wind_units_scale_factor =  m/sec / chosen units.");
-    tt->val_offset = (char *) &wind_units_scale_factor - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'wind_reference_speed'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("wind_reference_speed");
-    tt->descr = tdrpStrDup("Sets the length of the wind vector reference legend.");
-    tt->help = tdrpStrDup("The legend shows a symbos representing a wind speed of this value.");
-    tt->val_offset = (char *) &wind_reference_speed - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'wind_units_label'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wind_units_label");
-    tt->descr = tdrpStrDup("Select the label to be printed next to the reference bar.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_units_label - &_start_;
-    tt->single_val.s = tdrpStrDup("m/sec");
-    tt++;
-    
-    // Parameter 'Comment 36'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 36");
+    tt->param_name = tdrpStrDup("Comment 34");
     tt->comment_hdr = tdrpStrDup("Plotting contours in data fields.");
     tt->comment_text = tdrpStrDup("In the data layers section you can select contour plotting.");
     tt++;
@@ -4024,11 +3682,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 37'
+    // Parameter 'Comment 35'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 37");
+    tt->param_name = tdrpStrDup("Comment 35");
     tt->comment_hdr = tdrpStrDup("Overlain fields as layers.");
     tt->comment_text = tdrpStrDup("Layers are rendered in order. i.e. last layer will be on top.");
     tt++;
@@ -4076,11 +3734,11 @@
       tt->struct_vals[9].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 38'
+    // Parameter 'Comment 36'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 38");
+    tt->param_name = tdrpStrDup("Comment 36");
     tt->comment_hdr = tdrpStrDup("Overall rendering order.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4097,11 +3755,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 39'
+    // Parameter 'Comment 37'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 39");
+    tt->param_name = tdrpStrDup("Comment 37");
     tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
     tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
     tt++;
@@ -4130,11 +3788,11 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 40'
+    // Parameter 'Comment 38'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 40");
+    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("<FONTS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4170,20 +3828,20 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 41'
+    // Parameter 'Comment 39'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 41");
+    tt->param_name = tdrpStrDup("Comment 39");
     tt->comment_hdr = tdrpStrDup("</FONTS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 42'
+    // Parameter 'Comment 40'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 42");
+    tt->param_name = tdrpStrDup("Comment 40");
     tt->comment_hdr = tdrpStrDup("Analog clock.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4224,11 +3882,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 43'
+    // Parameter 'Comment 41'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 43");
+    tt->param_name = tdrpStrDup("Comment 41");
     tt->comment_hdr = tdrpStrDup("GUI.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4377,11 +4035,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 44'
+    // Parameter 'Comment 42'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 44");
+    tt->param_name = tdrpStrDup("Comment 42");
     tt->comment_hdr = tdrpStrDup("HELP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4422,11 +4080,11 @@
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 45'
+    // Parameter 'Comment 43'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 45");
+    tt->param_name = tdrpStrDup("Comment 43");
     tt->comment_hdr = tdrpStrDup("BOOKMARKS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4480,11 +4138,11 @@
     tt->single_val.s = tdrpStrDup("/opt/google/chrome/chrome %U");
     tt++;
     
-    // Parameter 'Comment 46'
+    // Parameter 'Comment 44'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 46");
+    tt->param_name = tdrpStrDup("Comment 44");
     tt->comment_hdr = tdrpStrDup("RENDERING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4573,11 +4231,11 @@
     tt->single_val.i = 61600;
     tt++;
     
-    // Parameter 'Comment 47'
+    // Parameter 'Comment 45'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 47");
+    tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("RENDERING PRODUCTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4669,20 +4327,20 @@
       tt->struct_vals[5].i = 1;
     tt++;
     
-    // Parameter 'Comment 48'
+    // Parameter 'Comment 46'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 48");
+    tt->param_name = tdrpStrDup("Comment 46");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 49'
+    // Parameter 'Comment 47'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 49");
+    tt->param_name = tdrpStrDup("Comment 47");
     tt->comment_hdr = tdrpStrDup("<CREATING_IMAGES>");
     tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\nThe following parameters control the output directory, and the construction of the file name");
     tt++;
@@ -4831,11 +4489,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 50'
+    // Parameter 'Comment 48'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 50");
+    tt->param_name = tdrpStrDup("Comment 48");
     tt->comment_hdr = tdrpStrDup("Option to create images automatically");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4979,20 +4637,20 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 51'
+    // Parameter 'Comment 49'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 51");
+    tt->param_name = tdrpStrDup("Comment 49");
     tt->comment_hdr = tdrpStrDup("</CREATING_IMAGES>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 52'
+    // Parameter 'Comment 50'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 52");
+    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("<GUI_AND_WINDOWS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5153,11 +4811,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 53'
+    // Parameter 'Comment 51'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 53");
+    tt->param_name = tdrpStrDup("Comment 51");
     tt->comment_hdr = tdrpStrDup("VERTICAL SELECTOR");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5354,11 +5012,11 @@
     tt->single_val.s = tdrpStrDup("cyan");
     tt++;
     
-    // Parameter 'Comment 54'
+    // Parameter 'Comment 52'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 54");
+    tt->param_name = tdrpStrDup("Comment 52");
     tt->comment_hdr = tdrpStrDup("<HORIZ_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5459,20 +5117,20 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 55'
+    // Parameter 'Comment 53'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 55");
+    tt->param_name = tdrpStrDup("Comment 53");
     tt->comment_hdr = tdrpStrDup("</HORIZ_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 56'
+    // Parameter 'Comment 54'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 56");
+    tt->param_name = tdrpStrDup("Comment 54");
     tt->comment_hdr = tdrpStrDup("<VERT_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5717,20 +5375,20 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 57'
+    // Parameter 'Comment 55'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 57");
+    tt->param_name = tdrpStrDup("Comment 55");
     tt->comment_hdr = tdrpStrDup("<VERT_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 58'
+    // Parameter 'Comment 56'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 58");
+    tt->param_name = tdrpStrDup("Comment 56");
     tt->comment_hdr = tdrpStrDup("<SYMBOLIC_PRODUCTS>.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5904,29 +5562,29 @@
       tt->struct_vals[9].b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 57'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 57");
+    tt->comment_hdr = tdrpStrDup("</SYMBOLIC_PRODUCTS>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 58'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 58");
+    tt->comment_hdr = tdrpStrDup("<TERRAIN>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 59'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 59");
-    tt->comment_hdr = tdrpStrDup("</SYMBOLIC_PRODUCTS>.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 60'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 60");
-    tt->comment_hdr = tdrpStrDup("<TERRAIN>.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 61'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 61");
     tt->comment_hdr = tdrpStrDup("Terrain Parameters");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6061,12 +5719,330 @@
     tt->single_val.s = tdrpStrDup("red4");
     tt++;
     
+    // Parameter 'Comment 60'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 60");
+    tt->comment_hdr = tdrpStrDup("</TERRAIN>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 61'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 61");
+    tt->comment_hdr = tdrpStrDup("<WINDS>");
+    tt->comment_text = tdrpStrDup("Plotting wind vector overlays on grids.");
+    tt++;
+    
+    // Parameter 'winds_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("winds_on_at_startup");
+    tt->descr = tdrpStrDup("Enable winds at start.");
+    tt->help = tdrpStrDup("If FALSE, winds will not be enabled at startup. You will have to turn them on via the winds menu.");
+    tt->val_offset = (char *) &winds_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'winds'
+    // ctype is '_wind_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("winds");
+    tt->descr = tdrpStrDup("Winds to be displayed.");
+    tt->help = tdrpStrDup("button_label: appears on the GUI. \nlegend_label: appears in the plot. \nurl: location of data or data server. Form is 'protocol://host:port/dir/'\nu_field_name: U component field name. \nv_field_name: V component field name. \nw_field_name: W component field name. Set to 'none' if no W vectors.\nunits: wind speed units. \nline_width: line width to be used for wind vectors. \nmarker_type:\n  ARROW: centered on data point.\n  VECTOR: vertex at data point.\n  BARB: N hemisphere.\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere.\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector.\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes.\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold.\n  BARB_SH: S Hemisphere.\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units.\n\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section\n");
+    tt->array_offset = (char *) &_winds - &_start_;
+    tt->array_n_offset = (char *) &winds_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(wind_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("wind_t");
+    tt->struct_def.nfields = 11;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("button_label");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_winds->button_label - (char *) _winds;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("legend_label");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_winds->legend_label - (char *) _winds;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("url");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_winds->url - (char *) _winds;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("u_field_name");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_winds->u_field_name - (char *) _winds;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("v_field_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_winds->v_field_name - (char *) _winds;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[5].fname = tdrpStrDup("w_field_name");
+      tt->struct_def.fields[5].ptype = STRING_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_winds->w_field_name - (char *) _winds;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[6].fname = tdrpStrDup("units");
+      tt->struct_def.fields[6].ptype = STRING_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_winds->units - (char *) _winds;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[7].fname = tdrpStrDup("line_width");
+      tt->struct_def.fields[7].ptype = INT_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_winds->line_width - (char *) _winds;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("wind_marker_t");
+      tt->struct_def.fields[8].fname = tdrpStrDup("marker_type");
+      tt->struct_def.fields[8].ptype = ENUM_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_winds->marker_type - (char *) _winds;
+        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("wind_marker_t");
+        tt->struct_def.fields[8].enum_def.nfields = 9;
+        tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
+        tt->struct_def.fields[8].enum_def.fields[0].val = WIND_ARROW;
+        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
+        tt->struct_def.fields[8].enum_def.fields[1].val = WIND_VECTOR;
+        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
+        tt->struct_def.fields[8].enum_def.fields[2].val = WIND_BARB;
+        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
+        tt->struct_def.fields[8].enum_def.fields[3].val = WIND_LABELEDBARB;
+        tt->struct_def.fields[8].enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
+        tt->struct_def.fields[8].enum_def.fields[4].val = WIND_TUFT;
+        tt->struct_def.fields[8].enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
+        tt->struct_def.fields[8].enum_def.fields[5].val = WIND_TICKVECTOR;
+        tt->struct_def.fields[8].enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
+        tt->struct_def.fields[8].enum_def.fields[6].val = WIND_METBARB;
+        tt->struct_def.fields[8].enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
+        tt->struct_def.fields[8].enum_def.fields[7].val = WIND_BARB_SH;
+        tt->struct_def.fields[8].enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
+        tt->struct_def.fields[8].enum_def.fields[8].val = WIND_LABELEDBARB_SH;
+      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[9].fname = tdrpStrDup("color");
+      tt->struct_def.fields[9].ptype = STRING_TYPE;
+      tt->struct_def.fields[9].rel_offset = 
+        (char *) &_winds->color - (char *) _winds;
+      tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[10].fname = tdrpStrDup("on_at_startup");
+      tt->struct_def.fields[10].ptype = BOOL_TYPE;
+      tt->struct_def.fields[10].rel_offset = 
+        (char *) &_winds->on_at_startup - (char *) _winds;
+    tt->n_struct_vals = 22;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("GFS");
+      tt->struct_vals[1].s = tdrpStrDup("GFS");
+      tt->struct_vals[2].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago");
+      tt->struct_vals[3].s = tdrpStrDup("U");
+      tt->struct_vals[4].s = tdrpStrDup("V");
+      tt->struct_vals[5].s = tdrpStrDup("W");
+      tt->struct_vals[6].s = tdrpStrDup("m/s");
+      tt->struct_vals[7].i = 1;
+      tt->struct_vals[8].e = WIND_ARROW;
+      tt->struct_vals[9].s = tdrpStrDup("white");
+      tt->struct_vals[10].b = pTRUE;
+      tt->struct_vals[11].s = tdrpStrDup("WRF");
+      tt->struct_vals[12].s = tdrpStrDup("WRF");
+      tt->struct_vals[13].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/relampago");
+      tt->struct_vals[14].s = tdrpStrDup("U");
+      tt->struct_vals[15].s = tdrpStrDup("V");
+      tt->struct_vals[16].s = tdrpStrDup("W");
+      tt->struct_vals[17].s = tdrpStrDup("m/s");
+      tt->struct_vals[18].i = 1;
+      tt->struct_vals[19].e = WIND_ARROW;
+      tt->struct_vals[20].s = tdrpStrDup("yellow");
+      tt->struct_vals[21].b = pTRUE;
+    tt++;
+    
+    // Parameter 'wind_barb_shaft_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_barb_shaft_len");
+    tt->descr = tdrpStrDup("Wind barb shaft length (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_barb_shaft_len - &_start_;
+    tt->single_val.i = 33;
+    tt++;
+    
+    // Parameter 'wind_ideal_x_vectors'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_ideal_x_vectors");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the x dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in x accordingly.");
+    tt->val_offset = (char *) &wind_ideal_x_vectors - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'wind_ideal_y_vectors'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_ideal_y_vectors");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the y dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in y accordingly.");
+    tt->val_offset = (char *) &wind_ideal_y_vectors - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'wind_head_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_head_size");
+    tt->descr = tdrpStrDup("Minimum arrow head size for wind vectors (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_head_size - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'wind_head_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_head_angle");
+    tt->descr = tdrpStrDup("Angle of arrow head for wind vectors (deg).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_head_angle - &_start_;
+    tt->single_val.d = 45;
+    tt++;
+    
+    // Parameter 'wind_scaler'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wind_scaler");
+    tt->descr = tdrpStrDup("The display will space the wind vectors in x accordingly.");
+    tt->help = tdrpStrDup("Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.");
+    tt->val_offset = (char *) &wind_scaler - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'wind_time_scale_interval'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_time_scale_interval");
+    tt->descr = tdrpStrDup("inutes between steps on the wind scaling slider.");
+    tt->help = tdrpStrDup("Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity");
+    tt->val_offset = (char *) &wind_time_scale_interval - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_marker_type'
+    // ctype is '_wind_marker_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("wind_marker_type");
+    tt->descr = tdrpStrDup("Wind marker rendering style.");
+    tt->help = tdrpStrDup("See WIND section for details on rendering style.");
+    tt->val_offset = (char *) &wind_marker_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("wind_marker_t");
+    tt->enum_def.nfields = 9;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
+      tt->enum_def.fields[0].val = WIND_ARROW;
+      tt->enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
+      tt->enum_def.fields[1].val = WIND_VECTOR;
+      tt->enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
+      tt->enum_def.fields[2].val = WIND_BARB;
+      tt->enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
+      tt->enum_def.fields[3].val = WIND_LABELEDBARB;
+      tt->enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
+      tt->enum_def.fields[4].val = WIND_TUFT;
+      tt->enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
+      tt->enum_def.fields[5].val = WIND_TICKVECTOR;
+      tt->enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
+      tt->enum_def.fields[6].val = WIND_METBARB;
+      tt->enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
+      tt->enum_def.fields[7].val = WIND_BARB_SH;
+      tt->enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
+      tt->enum_def.fields[8].val = WIND_LABELEDBARB_SH;
+    tt->single_val.e = WIND_ARROW;
+    tt++;
+    
+    // Parameter 'wind_w_scale_factor'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_w_scale_factor");
+    tt->descr = tdrpStrDup("Scale the vertical velocity by this factor, relative to the U/V. ");
+    tt->help = tdrpStrDup("W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.");
+    tt->val_offset = (char *) &wind_w_scale_factor - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_units_scale_factor'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_units_scale_factor");
+    tt->descr = tdrpStrDup("Value to convert from the your reference speed units to m/sec. ");
+    tt->help = tdrpStrDup("i.e. wind_units_scale_factor =  m/sec / chosen units.");
+    tt->val_offset = (char *) &wind_units_scale_factor - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'wind_reference_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("wind_reference_speed");
+    tt->descr = tdrpStrDup("Sets the length of the wind vector reference legend.");
+    tt->help = tdrpStrDup("The legend shows a symbos representing a wind speed of this value.");
+    tt->val_offset = (char *) &wind_reference_speed - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'wind_units_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wind_units_label");
+    tt->descr = tdrpStrDup("Select the label to be printed next to the reference bar.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wind_units_label - &_start_;
+    tt->single_val.s = tdrpStrDup("m/sec");
+    tt++;
+    
     // Parameter 'Comment 62'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 62");
-    tt->comment_hdr = tdrpStrDup("</TERRAIN>.");
+    tt->comment_hdr = tdrpStrDup("</WINDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

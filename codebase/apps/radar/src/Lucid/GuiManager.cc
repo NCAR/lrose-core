@@ -981,7 +981,7 @@ void GuiManager::_populateWindsMenu()
 
   // winds enabled
 
-  _windsEnabled = _params.winds_enabled_at_startup;
+  _windsEnabled = _params.winds_on_at_startup;
   _windsEnabledAct = new QAction(tr("Winds enabled"), this);
   _windsEnabledAct->setStatusTip(tr("Enable / disable all winds"));
   _windsEnabledAct->setCheckable(true);

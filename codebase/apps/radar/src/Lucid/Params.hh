@@ -87,18 +87,6 @@ public:
   } grid_render_mode_t;
 
   typedef enum {
-    WIND_ARROW = 0,
-    WIND_VECTOR = 1,
-    WIND_BARB = 2,
-    WIND_LABELEDBARB = 3,
-    WIND_TUFT = 4,
-    WIND_TICKVECTOR = 5,
-    WIND_METBARB = 6,
-    WIND_BARB_SH = 7,
-    WIND_LABELEDBARB_SH = 8
-  } wind_marker_t;
-
-  typedef enum {
     PROJ_LATLON = 0,
     PROJ_LAMBERT_CONF = 3,
     PROJ_MERCATOR = 4,
@@ -157,6 +145,18 @@ public:
   } terrain_render_type_t;
 
   typedef enum {
+    WIND_ARROW = 0,
+    WIND_VECTOR = 1,
+    WIND_BARB = 2,
+    WIND_LABELEDBARB = 3,
+    WIND_TUFT = 4,
+    WIND_TICKVECTOR = 5,
+    WIND_METBARB = 6,
+    WIND_BARB_SH = 7,
+    WIND_LABELEDBARB_SH = 8
+  } wind_marker_t;
+
+  typedef enum {
     IMAGE_DEBUG_OFF = 0,
     IMAGE_DEBUG_NORM = 1,
     IMAGE_DEBUG_VERBOSE = 2
@@ -193,20 +193,6 @@ public:
     tdrp_bool_t auto_scale;
     tdrp_bool_t auto_render;
   } field_t;
-
-  typedef struct {
-    char* button_label;
-    char* legend_label;
-    char* url;
-    char* u_field_name;
-    char* v_field_name;
-    char* w_field_name;
-    char* units;
-    int line_width;
-    wind_marker_t marker_type;
-    char* color;
-    tdrp_bool_t on_at_startup;
-  } wind_t;
 
   typedef struct {
     char* map_code;
@@ -260,6 +246,20 @@ public:
     tdrp_bool_t request_data_on_zoom;
     tdrp_bool_t request_data_on_vert_change;
   } symprod_prod_info_t;
+
+  typedef struct {
+    char* button_label;
+    char* legend_label;
+    char* url;
+    char* u_field_name;
+    char* v_field_name;
+    char* w_field_name;
+    char* units;
+    int line_width;
+    wind_marker_t marker_type;
+    char* color;
+    tdrp_bool_t on_at_startup;
+  } wind_t;
 
   typedef struct {
     char* vsection_label;
@@ -622,11 +622,6 @@ public:
   field_t *_fields;
   int fields_n;
 
-  tdrp_bool_t winds_enabled_at_startup;
-
-  wind_t *_winds;
-  int winds_n;
-
   char* map_urls;
 
   tdrp_bool_t maps_enabled_at_startup;
@@ -970,34 +965,6 @@ public:
 
   double azimuth_radius;
 
-  tdrp_bool_t all_winds_on;
-
-  tdrp_bool_t wind_mode;
-
-  int barb_shaft_len;
-
-  int ideal_x_vectors;
-
-  int ideal_y_vectors;
-
-  int wind_head_size;
-
-  double wind_head_angle;
-
-  int wind_scaler;
-
-  double wind_time_scale_interval;
-
-  wind_marker_t wind_marker_type;
-
-  double wind_w_scale_factor;
-
-  double wind_units_scale_factor;
-
-  double wind_reference_speed;
-
-  char* wind_units_label;
-
   contour_field_t *_contour_fields;
   int contour_fields_n;
 
@@ -1283,6 +1250,35 @@ public:
 
   char* terrain_earth_color2;
 
+  tdrp_bool_t winds_on_at_startup;
+
+  wind_t *_winds;
+  int winds_n;
+
+  int wind_barb_shaft_len;
+
+  int wind_ideal_x_vectors;
+
+  int wind_ideal_y_vectors;
+
+  int wind_head_size;
+
+  double wind_head_angle;
+
+  int wind_scaler;
+
+  double wind_time_scale_interval;
+
+  wind_marker_t wind_marker_type;
+
+  double wind_w_scale_factor;
+
+  double wind_units_scale_factor;
+
+  double wind_reference_speed;
+
+  char* wind_units_label;
+
   char* click_point_fmq_url;
 
   int simple_command_timeout_secs;
@@ -1415,7 +1411,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[487];
+  mutable TDRPtable _table[485];
 
   const char *_className;
 

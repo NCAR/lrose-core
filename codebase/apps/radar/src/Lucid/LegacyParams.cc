@@ -1435,11 +1435,23 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.azmith_lines", 0, true, "azimuth_lines");
 
   // winds
-  _getBoolean("cidd.wind_mode", 0);
-  _getBoolean("cidd.all_winds_on", 1);
-  _getLong("cidd.barb_shaft_len", 33);
-  _getLong("cidd.ideal_x_vectors", 20);
-  _getLong("cidd.ideal_y_vectors", 20);
+  // _getBoolean("cidd.wind_mode", 0);
+  bool windsOn = _getBoolean("cidd.all_winds_on", 1, false);
+  if (windsOn) {
+    fprintf(_tdrpFile, "winds_on_at_startup = TRUE;\n");
+  } else {
+    fprintf(_tdrpFile, "winds_on_at_startup = FALSE;\n");
+  }
+  
+  int shaftLen = _getLong("cidd.barb_shaft_len", 33, false);
+  fprintf(_tdrpFile, "wind_barb_shaft_len = %d;\n", shaftLen);
+  
+  int idealXVec = _getLong("cidd.ideal_x_vectors", 20, false);
+  fprintf(_tdrpFile, "wind_ideal_x_vectors = %d;\n", idealXVec);
+  
+  int idealYVec = _getLong("cidd.ideal_y_vectors", 20, false);
+  fprintf(_tdrpFile, "wind_ideal_y_vectors = %d;\n", idealYVec);
+  
   _getLong("cidd.wind_head_size", 5);
   _getDouble("cidd.wind_head_angle", 45.0);
   _getLong("cidd.wind_scaler", 3);

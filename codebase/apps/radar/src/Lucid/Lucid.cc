@@ -890,9 +890,9 @@ int Lucid::_initDataSpace()
   
   // initialize wind Rendering
 
-  gd.layers.wind_vectors = _params.all_winds_on;
+  gd.layers.wind_vectors = _params.winds_on_at_startup;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
-  gd.layers.wind_mode = _params.wind_mode;
+  gd.layers.wind_mode = 0; // Legacy ON
   gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
   gd.layers.wind_scaler = _params.wind_scaler;
   gd.legends.range = _params.range_rings;

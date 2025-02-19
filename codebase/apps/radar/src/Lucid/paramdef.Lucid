@@ -302,104 +302,6 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<WIND_GRIDS>";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Enable winds at start.";
-  p_help = "If FALSE, winds will not be emabled at startup. You will have to turn them on via the winds menu.";
-} winds_enabled_at_startup;
-
-typedef enum {
-  WIND_ARROW,
-  WIND_VECTOR,
-  WIND_BARB,
-  WIND_LABELEDBARB,
-  WIND_TUFT,
-  WIND_TICKVECTOR,
-  WIND_METBARB,
-  WIND_BARB_SH,
-  WIND_LABELEDBARB_SH
-} wind_marker_t;
-
-typedef struct {
-  string button_label;
-  string legend_label;
-  string url;
-  string u_field_name;
-  string v_field_name;
-  string w_field_name;
-  string units;
-  int line_width;
-  wind_marker_t marker_type;
-  string color;
-  boolean on_at_startup;
-} wind_t;
-
-paramdef struct wind_t {
-  p_default = {
-    {
-      button_label = "GFS",
-      legend_label = "GFS",
-      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago",
-      u_field_name = "U",
-      v_field_name = "V",
-      w_field_name = "W",
-      units = "m/s",
-      line_width = 1,
-      marker_type = WIND_ARROW,
-      color = "white",
-      on_at_startup = true
-    }
-    ,
-    {
-      button_label = "WRF",
-      legend_label = "WRF",
-      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/relampago",
-      u_field_name = "U",
-      v_field_name = "V",
-      w_field_name = "W",
-      units = "m/s",
-      line_width = 1,
-      marker_type = WIND_ARROW,
-      color = "yellow",
-      on_at_startup = true
-    }
-  };
-  p_descr = "Winds to be displayed.";
-  p_help =
-    "button_label: appears on the GUI. "
-    "\nlegend_label: appears in the plot. "
-    "\nurl: location of data or data server. Form is 'protocol://host:port/dir/'"
-    "\nu_field_name: U component field name. "
-    "\nv_field_name: V component field name. "
-    "\nw_field_name: W component field name. Set to 'none' if no W vectors."
-    "\nunits: wind speed units. "
-    "\nline_width: line width to be used for wind vectors. "
-    "\nmarker_type:"
-    "\n  ARROW: centered on data point."
-    "\n  VECTOR: vertex at data point."
-    "\n  BARB: N hemisphere."
-    "\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere."
-    "\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector."
-    "\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes."
-    "\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold."
-    "\n  BARB_SH: S Hemisphere."
-    "\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp."
-    "\n"
-    "\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units." 
-    "\n"
-    "\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs"
-    "\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section"
-    "\n";
-} winds[];
-
-commentdef {
-  p_header = "</WIND_GRIDS>";
-}
-
-commentdef {
   p_header = "<MAPS>";
 }
 
@@ -979,6 +881,10 @@ paramdef double {
 
 commentdef {
   p_header = "</ZOOM_DOMAINS>";
+}
+
+commentdef {
+  p_header = "<HORIZ_PLOT>";
 }
 
 paramdef int {
@@ -1629,95 +1535,6 @@ paramdef double {
   p_descr = "Max radius for azimuth lines.";
   p_help = "If azimuth lines are on.";
 } azimuth_radius;
-
-commentdef {
-  p_header = "Plotting wind vectors.";
-  p_text = "See also the wind layers section.";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot all wind layers.";
-  p_help = "Turns on all wind layers.";
-} all_winds_on;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Activate wind rendering.";
-  p_help = "TO DO - check how this works.";
-} wind_mode;
-
-paramdef int {
-  p_default = 33;
-  p_descr = "Wind barb shaft length (pixels).";
-  p_help = "";
-} barb_shaft_len;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Ideal number of vectors in the x dimension.";
-  p_help = "The display will space the wind vectors in x accordingly.";
-} ideal_x_vectors;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Ideal number of vectors in the y dimension.";
-  p_help = "The display will space the wind vectors in y accordingly.";
-} ideal_y_vectors;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Minimum arrow head size for wind vectors (pixels).";
-  p_help = "";
-} wind_head_size;
-
-paramdef double {
-  p_default = 45;
-  p_descr = "Angle of arrow head for wind vectors (deg).";
-  p_help = "";
-} wind_head_angle;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "The display will space the wind vectors in x accordingly.";
-  p_help = "Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.";
-} wind_scaler;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "inutes between steps on the wind scaling slider.";
-  p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
-} wind_time_scale_interval;
-
-paramdef enum wind_marker_t {
-  p_default = WIND_ARROW;
-  p_descr = "Wind marker rendering style.";
-  p_help = "See WIND section for details on rendering style.";
-} wind_marker_type;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";
-  p_help = "W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.";
-} wind_w_scale_factor;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Value to convert from the your reference speed units to m/sec. ";
-  p_help = "i.e. wind_units_scale_factor =  m/sec / chosen units.";
-} wind_units_scale_factor;
-
-paramdef double {
-  p_default = 10;
-  p_descr = "Sets the length of the wind vector reference legend.";
-  p_help = "The legend shows a symbos representing a wind speed of this value.";
-} wind_reference_speed;
-
-paramdef string {
-  p_default = "m/sec";
-  p_descr = "Select the label to be printed next to the reference bar.";
-  p_help = "";
-} wind_units_label;
 
 commentdef {
   p_header = "Plotting contours in data fields.";
@@ -2857,6 +2674,176 @@ paramdef string {
 
 commentdef {
   p_header = "</TERRAIN>.";
+}
+
+commentdef {
+  p_header = "<WINDS>";
+  p_text = "Plotting wind vector overlays on grids.";
+}
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Enable winds at start.";
+  p_help = "If FALSE, winds will not be enabled at startup. You will have to turn them on via the winds menu.";
+} winds_on_at_startup;
+
+typedef enum {
+  WIND_ARROW,
+  WIND_VECTOR,
+  WIND_BARB,
+  WIND_LABELEDBARB,
+  WIND_TUFT,
+  WIND_TICKVECTOR,
+  WIND_METBARB,
+  WIND_BARB_SH,
+  WIND_LABELEDBARB_SH
+} wind_marker_t;
+
+typedef struct {
+  string button_label;
+  string legend_label;
+  string url;
+  string u_field_name;
+  string v_field_name;
+  string w_field_name;
+  string units;
+  int line_width;
+  wind_marker_t marker_type;
+  string color;
+  boolean on_at_startup;
+} wind_t;
+
+paramdef struct wind_t {
+  p_default = {
+    {
+      button_label = "GFS",
+      legend_label = "GFS",
+      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/gfs/relampago",
+      u_field_name = "U",
+      v_field_name = "V",
+      w_field_name = "W",
+      units = "m/s",
+      line_width = 1,
+      marker_type = WIND_ARROW,
+      color = "white",
+      on_at_startup = true
+    }
+    ,
+    {
+      button_label = "WRF",
+      legend_label = "WRF",
+      url = "mdvp:://front.eol.ucar.edu:8080:relampago/mdv/wrf/relampago",
+      u_field_name = "U",
+      v_field_name = "V",
+      w_field_name = "W",
+      units = "m/s",
+      line_width = 1,
+      marker_type = WIND_ARROW,
+      color = "yellow",
+      on_at_startup = true
+    }
+  };
+  p_descr = "Winds to be displayed.";
+  p_help =
+    "button_label: appears on the GUI. "
+    "\nlegend_label: appears in the plot. "
+    "\nurl: location of data or data server. Form is 'protocol://host:port/dir/'"
+    "\nu_field_name: U component field name. "
+    "\nv_field_name: V component field name. "
+    "\nw_field_name: W component field name. Set to 'none' if no W vectors."
+    "\nunits: wind speed units. "
+    "\nline_width: line width to be used for wind vectors. "
+    "\nmarker_type:"
+    "\n  ARROW: centered on data point."
+    "\n  VECTOR: vertex at data point."
+    "\n  BARB: N hemisphere."
+    "\n  LABELEDBARB: labeled to nearest 10 degrees at the center - N.Hemisphere."
+    "\n  TUFT: like a piece of yarn - the least obtrusive - like a headless vector."
+    "\n  TICKVECTOR: Cross ticks at wind_time_scale_interval minutes."
+    "\n  METBARB: Calcs latitude. Works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts auto switching between cart and cont. Uses dynamic_contour_treshold."
+    "\n  BARB_SH: S Hemisphere."
+    "\n  LABELEDBARB_SH: labeled to nearest 10 degrees at the center - N. Hemisp."
+    "\n"
+    "\nNOTE: When using arrow,vector,tuft,tickvector, the data must be in m/sec for the scaling to work correctly. For the others (Barbs), the units are arbitrary, but the flag units on the barbs will reflect the data's native units." 
+    "\n"
+    "\nExample: '-2,metbarb' --> width 2, off to start, using winds aloft chart barbs"
+    "\nExample: '1'  --> Width 1, on to start, uses cidd.wind_marker_type: defined in main section"
+    "\n";
+} winds[];
+
+paramdef int {
+  p_default = 33;
+  p_descr = "Wind barb shaft length (pixels).";
+  p_help = "";
+} wind_barb_shaft_len;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Ideal number of vectors in the x dimension.";
+  p_help = "The display will space the wind vectors in x accordingly.";
+} wind_ideal_x_vectors;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Ideal number of vectors in the y dimension.";
+  p_help = "The display will space the wind vectors in y accordingly.";
+} wind_ideal_y_vectors;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Minimum arrow head size for wind vectors (pixels).";
+  p_help = "";
+} wind_head_size;
+
+paramdef double {
+  p_default = 45;
+  p_descr = "Angle of arrow head for wind vectors (deg).";
+  p_help = "";
+} wind_head_angle;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "The display will space the wind vectors in x accordingly.";
+  p_help = "Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.";
+} wind_scaler;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "inutes between steps on the wind scaling slider.";
+  p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
+} wind_time_scale_interval;
+
+paramdef enum wind_marker_t {
+  p_default = WIND_ARROW;
+  p_descr = "Wind marker rendering style.";
+  p_help = "See WIND section for details on rendering style.";
+} wind_marker_type;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";
+  p_help = "W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.";
+} wind_w_scale_factor;
+
+paramdef double {
+  p_default = 1;
+  p_descr = "Value to convert from the your reference speed units to m/sec. ";
+  p_help = "i.e. wind_units_scale_factor =  m/sec / chosen units.";
+} wind_units_scale_factor;
+
+paramdef double {
+  p_default = 10;
+  p_descr = "Sets the length of the wind vector reference legend.";
+  p_help = "The legend shows a symbos representing a wind speed of this value.";
+} wind_reference_speed;
+
+paramdef string {
+  p_default = "m/sec";
+  p_descr = "Select the label to be printed next to the reference bar.";
+  p_help = "";
+} wind_units_label;
+
+commentdef {
+  p_header = "</WINDS>";
 }
 
 //////////////////////////////////////////////////////////
