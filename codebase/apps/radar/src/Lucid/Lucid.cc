@@ -443,13 +443,13 @@ int Lucid::_initDataSpace()
 
   // origin latitude and longitude
   
-  gd.h_win.origin_lat = _params.origin_latitude;
-  gd.h_win.origin_lon = _params.origin_longitude;
+  gd.h_win.origin_lat = _params.proj_origin_lat;
+  gd.h_win.origin_lon = _params.proj_origin_lon;
 
   // click location on reset
   
-  gd.h_win.reset_click_lat = _params.reset_click_latitude;
-  gd.h_win.reset_click_lon = _params.reset_click_longitude;
+  gd.h_win.reset_click_lat = _params.proj_origin_lat;
+  gd.h_win.reset_click_lon = _params.proj_origin_lon;
 
   // projection
   
@@ -457,23 +457,23 @@ int Lucid::_initDataSpace()
     
     gd.display_projection = Mdvx::PROJ_FLAT;
     gd.proj_param[0] = _params.proj_rotation; // rotation rel to TN
-    gd.proj.initFlat(_params.origin_latitude,
-                     _params.origin_longitude,
+    gd.proj.initFlat(_params.proj_origin_lat,
+                     _params.proj_origin_lon,
                      _params.proj_rotation);
     if(gd.debug) {
       fprintf(stderr, "Cartesian projection\n");
       fprintf(stderr, "Origin at: %g, %g\n", 
-              _params.origin_latitude,_params.origin_longitude);
+              _params.proj_origin_lat,_params.proj_origin_lon);
     }
     
   } else if (_params.proj_type == Params::PROJ_LATLON) {
 
     gd.display_projection = Mdvx::PROJ_LATLON;
-    gd.proj.initLatlon(_params.origin_longitude);
+    gd.proj.initLatlon(_params.proj_origin_lon);
     if(gd.debug) {
       fprintf(stderr, "LATLON/Cylindrical projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
     }
     
   } else if (_params.proj_type == Params::PROJ_LAMBERT_CONF) {
@@ -481,14 +481,14 @@ int Lucid::_initDataSpace()
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
     gd.proj_param[0] = _params.proj_lat1;
     gd.proj_param[1] = _params.proj_lat2;
-    gd.proj.initLambertConf(_params.origin_latitude,
-                            _params.origin_longitude,
+    gd.proj.initLambertConf(_params.proj_origin_lat,
+                            _params.proj_origin_lon,
                             _params.proj_lat1,
                             _params.proj_lat2);
     if(gd.debug) {
       fprintf(stderr, "LAMBERT projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
       fprintf(stderr, "Parallels at: %g, %g\n",
               _params.proj_lat1, _params.proj_lat2);
     }
@@ -502,12 +502,12 @@ int Lucid::_initDataSpace()
     gd.proj.initStereographic(_params.proj_tangent_lat,
                               _params.proj_tangent_lon,
                               _params.proj_central_scale);
-    gd.proj.setOffsetOrigin(_params.origin_latitude,
-                            _params.origin_longitude);
+    gd.proj.setOffsetOrigin(_params.proj_origin_lat,
+                            _params.proj_origin_lon);
     if(gd.debug) {
       fprintf(stderr, "Oblique Stereographic projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude,_params.origin_longitude);
+              _params.proj_origin_lat,_params.proj_origin_lon);
       fprintf(stderr, "Tangent at: %g, %g\n",
               _params.proj_tangent_lat, _params.proj_tangent_lon);
     }
@@ -523,11 +523,11 @@ int Lucid::_initDataSpace()
        (Mdvx::pole_type_t) (_params.proj_tangent_lat < 0.0 ?
                             Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
        _params.proj_central_scale);
-    gd.proj.setOffsetOrigin(_params.origin_latitude, _params.origin_longitude);
+    gd.proj.setOffsetOrigin(_params.proj_origin_lat, _params.proj_origin_lon);
     if(gd.debug) {
       fprintf(stderr, "Polar Stereographic projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
       fprintf(stderr, "Tangent at: %g, %g\n",
               _params.proj_tangent_lat, _params.proj_tangent_lon);
       fprintf(stderr, "Central scale: %g\n",
@@ -537,24 +537,24 @@ int Lucid::_initDataSpace()
   } else if (_params.proj_type == Params::PROJ_MERCATOR) {
     
     gd.display_projection = Mdvx::PROJ_MERCATOR;
-    gd.proj.initMercator(_params.origin_latitude,_params.origin_longitude);
+    gd.proj.initMercator(_params.proj_origin_lat, _params.proj_origin_lon);
     if(gd.debug) {
       fprintf(stderr, "MERCATOR projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
     }
       
   } else if (_params.proj_type == Params::PROJ_TRANS_MERCATOR) {
     
     gd.display_projection = Mdvx::PROJ_TRANS_MERCATOR;
     gd.proj_param[0] = _params.proj_central_scale;
-    gd.proj.initTransMercator(_params.origin_latitude,
-                              _params.origin_longitude,
+    gd.proj.initTransMercator(_params.proj_origin_lat,
+                              _params.proj_origin_lon,
                               _params.proj_central_scale);
     if(gd.debug) {
       fprintf(stderr, "TRANS_MERCATOR projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
       fprintf(stderr, "Central scale: %g\n",
               _params.proj_central_scale);
     }
@@ -564,14 +564,14 @@ int Lucid::_initDataSpace()
     gd.display_projection = Mdvx::PROJ_ALBERS;
     gd.proj_param[0] = _params.proj_lat1;
     gd.proj_param[1] = _params.proj_lat2;
-    gd.proj.initAlbers(_params.origin_latitude,
-                       _params.origin_longitude,
+    gd.proj.initAlbers(_params.proj_origin_lat,
+                       _params.proj_origin_lon,
                        _params.proj_lat1,
                        _params.proj_lat2);
     if(gd.debug) {
       fprintf(stderr, "ALBERS projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
       fprintf(stderr, "Parallels at: %g, %g\n",
               _params.proj_lat1, _params.proj_lat2);
     }
@@ -579,11 +579,11 @@ int Lucid::_initDataSpace()
   } else if (_params.proj_type == Params::PROJ_LAMBERT_AZIM) {
     
     gd.display_projection = Mdvx::PROJ_LAMBERT_AZIM;
-    gd.proj.initLambertAzim(_params.origin_latitude,_params.origin_longitude);
+    gd.proj.initLambertAzim(_params.proj_origin_lat,_params.proj_origin_lon);
     if(gd.debug) {
       fprintf(stderr, "LAMBERT_AZIM projection\n");
       fprintf(stderr, "Origin at: %g, %g\n",
-              _params.origin_latitude, _params.origin_longitude);
+              _params.proj_origin_lat, _params.proj_origin_lon);
     }
       
   }
@@ -865,8 +865,8 @@ int Lucid::_initDataSpace()
   gd.v_win.zmin_y = (double *) calloc(sizeof(double), 1);
   gd.v_win.zmax_y = (double *) calloc(sizeof(double), 1);
 
-  gd.v_win.origin_lat = _params.origin_latitude;
-  gd.v_win.origin_lon = _params.origin_longitude;
+  gd.v_win.origin_lat = _params.proj_origin_lat;
+  gd.v_win.origin_lon = _params.proj_origin_lon;
   gd.v_win.min_x = gd.h_win.min_x;
   gd.v_win.max_x = gd.h_win.max_x;
   gd.v_win.min_y = gd.h_win.min_y;
@@ -3039,8 +3039,8 @@ void Lucid::_initShared()
   } 
   gd.coord_expt->pointer_seq_num = 0;
 
-  gd.coord_expt->datum_latitude = _params.origin_latitude;
-  gd.coord_expt->datum_longitude = _params.origin_longitude;
+  gd.coord_expt->datum_latitude = _params.proj_origin_lat;
+  gd.coord_expt->datum_longitude = _params.proj_origin_lon;
 
   gd.coord_expt->pointer_x = 0.0;
   gd.coord_expt->pointer_y = 0.0;

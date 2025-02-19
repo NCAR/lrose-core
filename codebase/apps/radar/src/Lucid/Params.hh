@@ -75,6 +75,11 @@ public:
   } debug_t;
 
   typedef enum {
+    MODE_ARCHIVE = 0,
+    MODE_REALTIME = 1
+  } mode_t;
+
+  typedef enum {
     POLYGONS = 0,
     FILLED_CONTOURS = 1,
     DYNAMIC_CONTOURS = 2,
@@ -104,11 +109,6 @@ public:
     PROJ_ALBERS = 16,
     PROJ_LAMBERT_AZIM = 17
   } projection_t;
-
-  typedef enum {
-    MODE_ARCHIVE = 0,
-    MODE_REALTIME = 1
-  } mode_t;
 
   typedef enum {
     CLOSEST_TO_FRAME_CENTER = 0,
@@ -589,6 +589,10 @@ public:
 
   int idle_reset_seconds;
 
+  mode_t start_mode;
+
+  char* archive_start_time;
+
   char* color_scale_urls;
 
   field_t *_fields;
@@ -642,10 +646,6 @@ public:
 
   tdrp_bool_t use_cosine_correction;
 
-  mode_t start_mode;
-
-  char* archive_start_time;
-
   tdrp_bool_t check_data_times;
 
   tdrp_bool_t check_clipping;
@@ -698,6 +698,8 @@ public:
 
   double movie_magnify_factor;
 
+  char* moviestart_time_format;
+
   char* climo_mode;
 
   int climo_max_time_span_days;
@@ -710,8 +712,6 @@ public:
 
   char* scale_units_label;
 
-  double min_zoom_threshold;
-
   tdrp_bool_t enable_status_window;
 
   tdrp_bool_t report_clicks_in_status_window;
@@ -719,28 +719,6 @@ public:
   tdrp_bool_t report_clicks_in_degM_and_nm;
 
   double magnetic_variation_deg;
-
-  tdrp_bool_t enable_save_image_panel;
-
-  double domain_limit_min_x;
-
-  double domain_limit_max_x;
-
-  double domain_limit_min_y;
-
-  double domain_limit_max_y;
-
-  double origin_latitude;
-
-  double origin_longitude;
-
-  double reset_click_latitude;
-
-  double reset_click_longitude;
-
-  int planview_start_page;
-
-  int xsect_start_page;
 
   zoom_level_t *_zoom_levels;
   int zoom_levels_n;
@@ -750,6 +728,20 @@ public:
   tdrp_bool_t zoom_limits_in_latlon;
 
   int num_cache_zooms;
+
+  double min_zoom_threshold;
+
+  double domain_limit_min_x;
+
+  double domain_limit_max_x;
+
+  double domain_limit_min_y;
+
+  double domain_limit_max_y;
+
+  int planview_start_page;
+
+  int xsect_start_page;
 
   double min_ht;
 
@@ -791,12 +783,6 @@ public:
 
   char* bad_data_color;
 
-  char* latest_click_mark_color;
-
-  char* latest_client_mark_color;
-
-  tdrp_bool_t click_posn_rel_to_origin;
-
   char* epoch_indicator_color;
 
   char* now_time_color;
@@ -813,8 +799,6 @@ public:
   int latlon_mode;
 
   char* label_time_format;
-
-  char* moviestart_time_format;
 
   char* frame_range_time_format;
 
@@ -1132,6 +1116,8 @@ public:
   int *_images_sweep_index_list;
   int images_sweep_index_list_n;
 
+  tdrp_bool_t enable_save_image_panel;
+
   int main_window_width;
 
   int main_window_height;
@@ -1279,6 +1265,12 @@ public:
 
   int complex_command_timeout_secs;
 
+  char* latest_click_mark_color;
+
+  tdrp_bool_t click_posn_rel_to_origin;
+
+  char* latest_client_mark_color;
+
   tdrp_bool_t image_generation_active;
 
   image_debug_t image_debug;
@@ -1399,7 +1391,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[476];
+  mutable TDRPtable _table[473];
 
   const char *_className;
 

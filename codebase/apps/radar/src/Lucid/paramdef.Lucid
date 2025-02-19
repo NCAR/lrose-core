@@ -85,6 +85,38 @@ commentdef {
   p_header = "</DEBUGGING AND PROCESS CONTROL>";
 }
 
+//////////////////////////////////////////////////////////////////
+// Modes of operations and time handling
+
+commentdef {
+  p_header = "<MODES_AND_TIMES>";
+}
+
+commentdef {
+  p_header = "STARTUP MODE and TIME parameters";
+  p_text = "Start up in REALTIME or ARCHIVE mode.";
+}
+
+typedef enum {
+  MODE_ARCHIVE, MODE_REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = MODE_ARCHIVE;
+  p_descr = "Operating mode at start.";
+  p_help = "In ARCHIVE mode, the movie start time will be set to archive_start_time. In REALTIME mode the movie end time will be set to NOW, and the movie start time will be computed relative to the end time.";
+} start_mode;
+
+paramdef string {
+  p_default = "2022 05 26 01 00 00";
+  p_descr = "Start time for archive mode.";
+  p_help = "This is the start of the movie time interval.";
+} archive_start_time;
+
+commentdef {
+  p_header = "</MODES_AND_TIMES>";
+}
+
 commentdef {
   p_header = "<DATA_GRIDS>";
 }
@@ -505,38 +537,6 @@ commentdef {
 }
 
 //////////////////////////////////////////////////////////////////
-// Modes of operations and time handling
-
-commentdef {
-  p_header = "<MODES_AND_TIMES>";
-}
-
-commentdef {
-  p_header = "STARTUP MODE and TIME parameters";
-  p_text = "Start up in REALTIME or ARCHIVE mode.";
-}
-
-typedef enum {
-  MODE_ARCHIVE, MODE_REALTIME
-} mode_t;
-
-paramdef enum mode_t {
-  p_default = MODE_ARCHIVE;
-  p_descr = "Operating mode at start.";
-  p_help = "In ARCHIVE mode, the movie start time will be set to archive_start_time. In REALTIME mode the movie end time will be set to NOW, and the movie start time will be computed relative to the end time.";
-} start_mode;
-
-paramdef string {
-  p_default = "2022 05 26 01 00 00";
-  p_descr = "Start time for archive mode.";
-  p_help = "This is the start of the movie time interval.";
-} archive_start_time;
-
-commentdef {
-  p_header = "</MODES_AND_TIMES>";
-}
-
-//////////////////////////////////////////////////////////////////
 // DATA RETRIEVAL
 
 commentdef {
@@ -718,6 +718,12 @@ paramdef double {
 } movie_magnify_factor;
 
 paramdef string {
+  p_default = "%Y/%m/%d %H:%M:%S";
+  p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
+  p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
+} moviestart_time_format;
+
+paramdef string {
   p_default = "regular";
   p_descr = "Options are 'regular', 'daily' or 'yearly'";
   p_help = "Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. CIDD will recognize these special 'intervals' and will do the right thing.";
@@ -757,12 +763,6 @@ paramdef string {
   p_help = "km, nm, deg";
 } scale_units_label;
 
-paramdef double {
-  p_default = 5;
-  p_descr = "Minimum distance to zoom into to in KM.";
-  p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
-} min_zoom_threshold;
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Enable the status window.";
@@ -787,76 +787,9 @@ paramdef double {
   p_help = "Variation is true minus magnetic.";
 } magnetic_variation_deg;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the single middle button click to save image feature.";
-  p_help = "Warning - will allow users shell access, or to write to other dirs.";
-} enable_save_image_panel;
-
 commentdef {
-  p_header = "The Outer most domain.";
-  p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
+  p_header = "<ZOOM_DOMAINS>";
 }
-
-paramdef double {
-  p_default = -10000;
-  p_descr = "Minimum X for outer domain.";
-  p_help = "";
-} domain_limit_min_x;
-
-paramdef double {
-  p_default = 10000;
-  p_descr = "Maximum X for outer domain.";
-  p_help = "";
-} domain_limit_max_x;
-
-paramdef double {
-  p_default = -10000;
-  p_descr = "Minimum Y for outer domain.";
-  p_help = "";
-} domain_limit_min_y;
-
-paramdef double {
-  p_default = 10000;
-  p_descr = "Maximum Y for outer domain.";
-  p_help = "";
-} domain_limit_max_y;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "The longitude of the center of the display. Internal range rings are relative to this point.";
-  p_help = "";
-} origin_latitude;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "The latitude of the center of the display. Internal range rings are relative to this point.";
-  p_help = "";
-} origin_longitude;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.";
-  p_help = "";
-} reset_click_latitude;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.";
-  p_help = "";
-} reset_click_longitude;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Select the data field/page to start on.";
-  p_help = "For the horizontal view.";
-} planview_start_page;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Select the data field/page to start on.";
-  p_help = "For the vertical (cross section) view.";
-} xsect_start_page;
 
 commentdef {
   p_header = "Zoom views.";
@@ -930,6 +863,57 @@ paramdef int {
   p_descr = "The number of Cached images for zooms.";
   p_help = "";
 } num_cache_zooms;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Minimum distance to zoom into to in KM.";
+  p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
+} min_zoom_threshold;
+
+commentdef {
+  p_header = "Zoom domain limits.";
+  p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
+}
+
+paramdef double {
+  p_default = -10000;
+  p_descr = "Minimum X for outer domain.";
+  p_help = "";
+} domain_limit_min_x;
+
+paramdef double {
+  p_default = 10000;
+  p_descr = "Maximum X for outer domain.";
+  p_help = "";
+} domain_limit_max_x;
+
+paramdef double {
+  p_default = -10000;
+  p_descr = "Minimum Y for outer domain.";
+  p_help = "";
+} domain_limit_min_y;
+
+paramdef double {
+  p_default = 10000;
+  p_descr = "Maximum Y for outer domain.";
+  p_help = "";
+} domain_limit_max_y;
+
+commentdef {
+  p_header = "</ZOOM_DOMAINS>";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Select the data field/page to start on.";
+  p_help = "For the horizontal view.";
+} planview_start_page;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Select the data field/page to start on.";
+  p_help = "For the vertical (cross section) view.";
+} xsect_start_page;
 
 commentdef {
   p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
@@ -1071,24 +1055,6 @@ paramdef string {
   p_help = "Otherwise, these data will be plotted in the indicated color.";
 } bad_data_color;
 
-paramdef string {
-  p_default = "red";
-  p_descr = "Color of mark showing latest click location.";
-  p_help = "";
-} latest_click_mark_color;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of mark showing latest click of remote client.";
-  p_help = "";
-} latest_client_mark_color;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Compute click posn in coords relative to display origin.";
-  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
-} click_posn_rel_to_origin;
-
 commentdef {
   p_header = "TIME_CONTROL_GUI";
   p_text = "";
@@ -1146,12 +1112,6 @@ paramdef string {
   p_descr = "Set the format for the time strings.";
   p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
 } label_time_format;
-
-paramdef string {
-  p_default = "%Y/%m/%d %H:%M:%S";
-  p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
-  p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
-} moviestart_time_format;
 
 paramdef string {
   p_default = "%H:%M";
@@ -2194,7 +2154,7 @@ paramdef boolean {
 } images_write_latest_data_info;
 
 commentdef {
-  p_header = "OPTION TO CREATE IMAGES AUTOMATICALLY";
+  p_header = "Option to create images automatically";
 }
 
 paramdef boolean {
@@ -2258,16 +2218,18 @@ paramdef int {
   p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
 } images_sweep_index_list[];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Enable the single middle button click to save image feature.";
+  p_help = "Warning - will allow users shell access, or to write to other dirs.";
+} enable_save_image_panel;
+
 commentdef {
   p_header = "</CREATING_IMAGES>";
 }
 
 commentdef {
-  p_header = "<LUCID_SPECIFIC_DETAILS>";
-}
-
-commentdef {
-  p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
+  p_header = "<GUI_AND_WINDOWS>";
 }
 
 paramdef int {
@@ -2845,6 +2807,24 @@ paramdef int {
   p_descr = "Length of time to wait before killing complex external commands.";
   p_help = "Used when spawning animation building script.";
 } complex_command_timeout_secs;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of mark showing latest click location.";
+  p_help = "";
+} latest_click_mark_color;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute click posn in coords relative to display origin.";
+  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
+} click_posn_rel_to_origin;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of mark showing latest click of remote client.";
+  p_help = "";
+} latest_client_mark_color;
 
 commentdef {
   p_header = "</CLICK_POINT_MESSAGING>";

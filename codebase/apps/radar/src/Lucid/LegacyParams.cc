@@ -1203,13 +1203,17 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.domain_limit_max_y",10000);
   
   // origin latitude and longitude
-  _originLatitude = _getDouble("cidd.origin_latitude", 0.0);
-  _originLongitude = _getDouble("cidd.origin_longitude", 0.0);
+  _originLatitude = _getDouble("cidd.origin_latitude", 0.0, false);
+  _originLongitude = _getDouble("cidd.origin_longitude", 0.0, false);
+
+  fprintf(_tdrpFile, "proj_origin_lat = %g;\n", _originLatitude);
+  fprintf(_tdrpFile, "proj_origin_lat = %g;\n", _originLatitude);
 
   // click location on reset
-  _getDouble("cidd.reset_click_latitude", _originLatitude);
-  _getDouble("cidd.reset_click_longitude", _originLongitude);
+  _getDouble("cidd.reset_click_latitude", _originLatitude, false);
+  _getDouble("cidd.reset_click_longitude", _originLongitude, false);
 
+  
   // startup pages
   _getLong("cidd.planview_start_page", 1); // subtract 1
   _getLong("cidd.xsect_start_page", 1); // subtract 1
