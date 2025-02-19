@@ -593,6 +593,30 @@ public:
 
   char* archive_start_time;
 
+  int main_window_x_pos;
+
+  int main_window_y_pos;
+
+  int horiz_plot_width;
+
+  int horiz_plot_height;
+
+  int main_window_min_width;
+
+  int main_window_min_height;
+
+  int vert_window_x_pos;
+
+  int vert_window_y_pos;
+
+  int vert_plot_width;
+
+  int vert_plot_height;
+
+  int vert_window_min_width;
+
+  int vert_window_min_height;
+
   char* color_scale_urls;
 
   field_t *_fields;
@@ -1391,7 +1415,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[473];
+  mutable TDRPtable _table[487];
 
   const char *_className;
 

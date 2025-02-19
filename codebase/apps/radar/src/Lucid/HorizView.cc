@@ -2085,41 +2085,43 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     // mouse moved more than 20 pixels, so a zoom occurred
 
-    gd.prev_zoom_min_x = _worldPressX;
-    gd.prev_zoom_min_y = _worldPressY;
-    gd.prev_zoom_max_x = _worldReleaseX;
-    gd.prev_zoom_max_y = _worldReleaseY;
+    _handleZoom();
     
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    // gd.prev_zoom_min_x = _worldPressX;
+    // gd.prev_zoom_min_y = _worldPressY;
+    // gd.prev_zoom_max_x = _worldReleaseX;
+    // gd.prev_zoom_max_y = _worldReleaseY;
+    
+    // _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    // _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+    // _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+    // _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _savedZooms.push_back(_zoomWorld);
+    // _savedZooms.push_back(_zoomWorld);
     
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
-                              _worldReleaseX, _worldReleaseY);
+    // _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+    //                           _worldReleaseX, _worldReleaseY);
     
-    adjustPixelScales();
-    _setTransform(_zoomWorld.getTransform());
+    // adjustPixelScales();
+    // _setTransform(_zoomWorld.getTransform());
     
-    _setGridSpacing();
+    // _setGridSpacing();
 
-    // enable unzooms
+    // // enable unzooms
     
-    _manager.enableZoomBackButton();
-    _manager.enableZoomOutButton();
+    // _manager.enableZoomBackButton();
+    // _manager.enableZoomOutButton();
     
-    // Update the window in the renderers
+    // // Update the window in the renderers
 
-    //     gd.redraw_horiz = true;
-    gd.zoom_has_changed = true;
+    // //     gd.redraw_horiz = true;
+    // gd.zoom_has_changed = true;
 
-    gd.selected_zoom_min_x = _worldPressX;
-    gd.selected_zoom_min_y = _worldPressY;
-    gd.selected_zoom_max_x = _worldReleaseX;
-    gd.selected_zoom_max_y = _worldReleaseY;
+    // gd.selected_zoom_min_x = _worldPressX;
+    // gd.selected_zoom_min_y = _worldPressY;
+    // gd.selected_zoom_max_x = _worldReleaseX;
+    // gd.selected_zoom_max_y = _worldReleaseY;
 
     _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
 
@@ -2134,6 +2136,70 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   update();
 
 }
+
+/*************************************************************************
+ * handle zoom event
+ */
+
+void HorizView::_handleZoom()
+{
+
+  // save previous zoom in world coords
+  
+  gd.prev_zoom_min_x = _worldPressX;
+  gd.prev_zoom_min_y = _worldPressY;
+  gd.prev_zoom_max_x = _worldReleaseX;
+  gd.prev_zoom_max_y = _worldReleaseY;
+
+  _savedZooms.push_back(_zoomWorld);
+  
+  // get mouse coords in world coords
+  
+  double worldPressX = _zoomWorld.getXWorld(_mousePressX);
+  double worldPressY = _zoomWorld.getYWorld(_mousePressY);
+  
+  double worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+  double worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+  
+  // make a copy of the current world zoom and set updated world limits
+
+  WorldPlot tmpWorld(_zoomWorld);
+  
+  tmpWorld.setWorldLimits(worldPressX, worldPressY,
+                          worldReleaseX, worldReleaseY);
+  
+  adjustPixelScales();
+  
+  _setTransform(_zoomWorld.getTransform());
+  
+  _setGridSpacing();
+  
+  // enable unzooms
+  
+  _manager.enableZoomBackButton();
+  _manager.enableZoomOutButton();
+  
+  // Update the window in the renderers
+  
+  //     gd.redraw_horiz = true;
+  gd.zoom_has_changed = true;
+  
+  gd.selected_zoom_min_x = _worldPressX;
+  gd.selected_zoom_min_y = _worldPressY;
+  gd.selected_zoom_max_x = _worldReleaseX;
+  gd.selected_zoom_max_y = _worldReleaseY;
+  
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  _resetWorld(width(), height());
+  _pixmap = _pixmap.scaled(width(), height());
+  adjustPixelScales();
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  _refreshImages();
+  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
+  update();
+}
+
+
 
 
 #ifdef NOTNOW

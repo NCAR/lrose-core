@@ -536,6 +536,10 @@ class DLL_EXPORT HorizView : public QWidget
   // used to detect shift key pressed for boundary editor (switches cursor)
   virtual void timerEvent(QTimerEvent * event);
 
+  // handle a zoom change
+
+  void _handleZoom();
+  
   // reset the world coords
   
   void _resetWorld(int width, int height);

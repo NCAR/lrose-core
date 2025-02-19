@@ -2269,7 +2269,7 @@ void WorldPlot::adjustPixelScales()
     
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
   _plotHeight = _heightPixels - _topMargin - _bottomMargin;
-    
+  
   _xMinPixel = _leftMargin + _xPixOffset;
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
   _yMaxPixel = _topMargin + _yPixOffset;

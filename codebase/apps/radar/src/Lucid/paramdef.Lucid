@@ -118,6 +118,84 @@ commentdef {
 }
 
 commentdef {
+  p_header = "<WINDOWS>";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main horizontal window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
+} main_window_x_pos;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main horizontal window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
+} main_window_y_pos;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of horizontal plot (pixels).";
+  p_help = "This is for the plot only. It does not include color scale width.";
+} horiz_plot_width;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup height of horizontal plot (pixels).";
+} horiz_plot_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} main_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} main_window_min_height;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup X for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
+} vert_window_x_pos;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup Y for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
+} vert_window_y_pos;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of vertical plot (pixels).";
+  p_help = "This is for the plot only. It does not include color scale width.";
+} vert_plot_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Startup height of vertical plot (pixels).";
+} vert_plot_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_height;
+
+commentdef {
+  p_header = "<WINDOWS>";
+}
+
+commentdef {
   p_header = "<DATA_GRIDS>";
 }
 
