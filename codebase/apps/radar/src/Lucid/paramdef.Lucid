@@ -9,8 +9,8 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Lucid is an integrating display for weather data products.";
-  p_text = "This is a C++ application using the QT GUI toolkit. It is based on the legacy CIDD app.";
+  p_header = "Lucid is an app for integrating multiple weather data products into a single display.";
+  p_text = "Lucid is a C++ application using the QT GUI toolkit. It is based on the legacy CIDD app.";
 }
 
 commentdef {
@@ -75,12 +75,18 @@ paramdef boolean {
   p_help = "If true, we use the curl app for the downloads. If false, we use http requests generated natively within Lucid.";
 } use_curl_for_downloads;
 
+paramdef int {
+  p_default = 0;
+  p_descr = "After this period of inactivity, the display will reset itself to a known starting point";
+  p_help = "Set this <= 0 to essentially turn off.";
+} idle_reset_seconds;
+
 commentdef {
   p_header = "</DEBUGGING AND PROCESS CONTROL>";
 }
 
 commentdef {
-  p_header = "<GRIDS>";
+  p_header = "<DATA_GRIDS>";
 }
 
 paramdef string {
@@ -182,11 +188,11 @@ paramdef struct field_t {
 } fields[];
 
 commentdef {
-  p_header = "</GRIDS>";
+  p_header = "</DATA_GRIDS>";
 }
 
 commentdef {
-  p_header = "<WINDS>";
+  p_header = "<WIND_GRIDS>";
 }
 
 paramdef boolean {
@@ -280,7 +286,7 @@ paramdef struct wind_t {
 } winds[];
 
 commentdef {
-  p_header = "</WINDS>";
+  p_header = "</WIND_GRIDS>";
 }
 
 commentdef {
@@ -358,6 +364,10 @@ commentdef {
 
 commentdef {
   p_header = "<PROJECTION>";
+}
+
+commentdef {
+  p_header = "Projection for horizontal view";
 }
 
 // paramdef string {
@@ -494,536 +504,11 @@ commentdef {
   p_header = "</PROJECTION>";
 }
 
-commentdef {
-  p_header = "CLICK POINT DATA MESSAGING";
-  p_text = "Writing the click point location to an FMQ in XML format.";
-}
-
-paramdef string {
-  p_default = "/tmp/fmq/click_point";
-  p_descr = "URL for click point URL.";
-  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
-} click_point_fmq_url;
-
-//////////////////////////////////////////////////////////
-// paramdef.Cidd_Draw: Parameter definitions for Human Drawn
-// Products
+//////////////////////////////////////////////////////////////////
+// Modes of operations and time handling
 
 commentdef {
-  p_header = "DRAW_EXPORT Parameters";
-};
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Is drawing for export active?";
-} draw_export_active;
-
-typedef struct {
-  string id_label;
-  string url;
-  double valid_minutes;
-  int default_id_no;
-  string default_label;
-} draw_export_t;
-
-paramdef struct draw_export_t {
-  p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
-                {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
-  p_descr = "Human Drawn Products for Export Parameters.";
-  p_help = 
-    " Each Entry needs:\n"
-    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
-    "    ID_LABEL - This is used to designate Product types\n"
-    "    FMQ_URL: example: fmqp:://host::dir/file \n"
-    "   Valid_Minutes: How many minutes the product is valid by default\n"
-    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
-    "   Default_label: Test to place into Label field by default\n"
-    "\n";
-} draw_export_info[];
-
-/////////////////////////////////////////////////////////////////////////
-// <SYMPRODS>
-
-commentdef {
-  p_header = "<SYMPRODS>.";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Enable symprods at start.";
-  p_help = "If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.";
-} symprods_enabled_at_startup;
-
-typedef enum {
-  SYMPROD_DEBUG_OFF, SYMPROD_DEBUG_NORM, SYMPROD_DEBUG_VERBOSE
-} symprod_debug_t;
-
-paramdef enum symprod_debug_t {
-  p_default = SYMPROD_DEBUG_OFF;
-  p_help = "Debug option.\n"
-  "If set, debug messages will be printed appropriately.\n";
-} symprod_debug;
-
-paramdef boolean { 
-  p_descr = "Gather Data Frame by Frame, Otherwise by loop span";
-  p_help = "Gathers Products valid for the current frame only - Speeds up"
-  " gathering of large data sets, like METAR data" ;
-  p_default = FALSE;
-} symprod_short_requests;
-
-paramdef boolean { 
-  p_descr = "Request data using GZIP compression";
-  p_help = "If true, symprod data will be GZIP compressed by the server.";
-  p_default = FALSE;
-} symprod_gzip_requests;
-
-typedef enum {
-  SYMPROD_RENDER_ALL,             // Do no temporal clipping
-  SYMPROD_RENDER_ALL_VALID,       // Render all Valid in frame
-  SYMPROD_RENDER_VALID_IN_LAST_FRAME,   // Render all Valid in the last movie frame 
-  SYMPROD_RENDER_LATEST_IN_FRAME, // Render the latest product of like data_types (ID) valid in the frame.
-  SYMPROD_RENDER_LATEST_IN_LOOP,  // Render the latest product of like data_types (ID) valid in the movie loop.
-  SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME,// Render the latest product before the end of frame time
-  SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME,// Render the latest product before the data time in each frame 
-  SYMPROD_RENDER_FIRST_AFTER_DATA_TIME, // Render the earliest product after the data time in each frame 
-  SYMPROD_RENDER_ALL_BEFORE_DATA_TIME,  // Render all valid products before the data time in each frame 
-  SYMPROD_RENDER_ALL_AFTER_DATA_TIME,   // Render all valid products after the data time in each frame 
-  SYMPROD_RENDER_GET_VALID, // Render only those returned with an SPDB GetValid() call
-  SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME // Render products which have not expired at the frame time
-} symprod_render_type_t;
-
-typedef struct {
-  string menu_label;
-  string url;
-  int data_type;
-  symprod_render_type_t render_type;
-  boolean on_by_default;
-  double minutes_allow_before;
-  double minutes_allow_after;
-  double text_off_threshold;
-  boolean request_data_on_zoom;
-  boolean request_data_on_vert_change;
-} symprod_prod_info_t;
-
-paramdef struct symprod_prod_info_t {
-
-  p_descr = "Product Source and Rendering Information Array";
-  
-  p_help =
-    "The fields in the structure are as follows:\n"
-    "\n"
-    "  menu_label: label to be used for the product in menu.\n"
-    "\n"
-    "  url: for retrieving the data.\n"
-    "    example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2\n"
-    "\n"
-    "  data_type: used when querying the SPDB data server\n"
-    "    (set to 0 to retrieve all data).\n"
-    "\n"
-    "  render_type: Select how temporal clipping is done:\n"
-    "    SYMPROD_RENDER_ALL: Do no temporal clipping.\n"
-    "    SYMPROD_RENDER_ALL_VALID: Render all Valid in frame\n"
-    "    SYMPROD_RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
-    "    SYMPROD_RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
-    "    SYMPROD_RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
-    "    SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
-    "    SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
-    "    SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
-    "    SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
-    "    SYMPROD_RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
-    "    SYMPROD_RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
-    "    SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
-    "\n"
-    "Note: all comparisons are less than or equal or greater than or equal\n"
-    "\n"
-    "  on_by_default: True or False\n"
-    "\n"
-    "  minutes_allow_before: Stretch the frame time this many minutes - prior\n"
-    "  minutes_allow_after: Stretch the frame time this many minutes - after\n"
-    "\n"
-    "  text_off_threshold: Threshold where text disappears. Use the function:\n"
-    "      log10(scaling_constant/km_distance_across_screen ) + 1.0\n"
-    "      Use 0.0 to disable the off feature. (always displayed)\n"
-    "\n"
-    "  request_data_on_zoom: Flag indicating whether to request new data for\n"
-    "      this product whenever the user changes the zoom.  Normally, this\n"
-    "      should be set to false for efficiency reasons.  If the products\n"
-    "      to be rendered would change with a zoom change then this should be\n"
-    "      set to true.\n"
-    "\n"
-    "  request_data_on_vert_change: Flag indicating whether to request new data\n"
-    "      for this product whenever the user changes the currently displayed\n"
-    "      vertical level.  Normally, this should be set to false for efficiency\n"
-    "      reasons.  If the products to be rendered would change with a zoom\n"
-    "      change then this should be set to true.\n"
-    "\n";
-  
-  p_default = {
-    {
-      menu_label = "RHI-ticks",
-      url = "spdbp:Rhi2Symprod://localhost::spdb/rhi",
-      data_type = 0,
-      render_type = SYMPROD_RENDER_ALL_VALID,
-      on_by_default = FALSE,
-      minutes_allow_before = 20.0,
-      minutes_allow_after = 10.0,
-      text_off_threshold = 0.4,
-      request_data_on_zoom = false,
-      request_data_on_vert_change = false
-    }
-  };
-
-} symprod_prod_info[];
-
-commentdef {
-  p_header = "</SYMPRODS>.";
-}
-
-//////////////////////////////////////////////////////////
-// paramdef.Cidd_terrain: Parameter definitions for
-// Terrain Data
-
-commentdef {
-  p_header = "Terrain Parameters";
-  p_comment = "Note: Terrain Fields must be on the same projection as the Display";
-};
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Is the terrain section active?";
-} terrain_active;
-
-paramdef string {
-  p_default = "Terrain";
-  p_descr = "Label used for legends";
-} terrain_id_label ;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Used to located gridded terrain data. Set to empty string for no terrain.";
-  p_help = "Terrain_URL \n"
-  " Note example URL:\n"
-  "  mdvp::static//venus::mdv/terrain&Elevation\n"
-  " Field name follows the Ampersand. Use #N for field number override "
-  "  Use caret: ^ as a substitute for spaces in field names";
-  "\n";
-} terrain_url;
-
-paramdef double {
-  p_default = 0.03280834;
-  p_descr = "Conversion from terrain units to local coords";
-  p_help = "Choose a scaler which converts plane height values\n"
-    "Default is Hecto-feet (FL) per meter";
-} terrain_height_scaler;
-
-paramdef string {
-  p_default = "mdvp:://tempest:0:topo/relief/mdv&RGBA";
-  p_descr = "Used to located gridded land use data";
-  p_help = "Land Use URL \n"
-  " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
-  " Field name follows the Ampersand. Use #N for field number override "
-  "  Use caret: ^ as a substitute for spaces in field names";
-  "\n";
-} landuse_url;
-
-paramdef string {
-  p_default = "terrain.colors";
-  p_descr = "Color lookup table for Land use";
-  p_help = "Land Use colorscale file name\n"
-  " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
-} landuse_colorscale;
-
-typedef enum {
-  TERRAIN_RENDER_FILLED_CONT = 1, TERRAIN_RENDER_RECTANGLES, TERRAIN_RENDER_DYNAMIC_CONTOURS
-} terrain_render_type_t;
-
-paramdef enum terrain_render_type_t {
-  p_default = TERRAIN_RENDER_RECTANGLES;
-  p_descr = "Land Use rendering style";
-  p_help = "Use Contours only for continious data like elevation";
-} landuse_render_method;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Default Display state of Land Use/ Basemap";
-} landuse_active;
-
-paramdef string {
-  p_default = "sienna";
-  p_descr = "Earth's skin color";
-} terrain_earth_color1;
-
-paramdef string {
-  p_default = "red4";
-  p_descr = "Earth's core color";
-} terrain_earth_color2;
-
-/////////////////////////////////////////////////////////////////////////
-// paramdef.CIDD_images
-//
-// This file contains the TDRP parameter definitions for handling some
-// of the CIDD image generation options.
-
-commentdef {
-  p_header = "IMAGE_GENERATION";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Is the image generation section active?";
-} image_generation_active;
-
-typedef enum {
-  IMAGE_DEBUG_OFF, IMAGE_DEBUG_NORM, IMAGE_DEBUG_VERBOSE
-} image_debug_t;
-
-paramdef enum image_debug_t {
-  p_default = IMAGE_DEBUG_OFF;
-  p_help = "Debug option.\n"
-  "If set, debug messages will be printed appropriately.\n";
-} image_debug;
-
-paramdef boolean { 
-  p_descr = "Generate images for specified vertical sections.";
-  p_help = "If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
-  p_default = FALSE;
-} image_generate_vsection;
-
-paramdef boolean { 
-  p_descr = "The specified waypts are in latlon degree units.";
-  p_help = "If TRUE, the waypts are specified in lat/lon degrees. If FALSE, they are specified in (xkm, ykm) units in the current projection.";
-  p_default = FALSE;
-} image_vsection_waypts_in_latlon;
-
-typedef struct {
-  string vsection_label;
-  int n_waypts;
-  string waypt_locs;
-} image_vsection_spec_t;
-
-paramdef struct image_vsection_spec_t {
-
-  p_descr = "Vertical section information array";
-  
-  p_help =
-    "The fields in the structure are as follows:\n"
-    "\n"
-    "  vsection_label: label to be used for the specified vertical section.\n"
-    "\n"
-    "  n_waypts: number of waypts for specifying the vert section.\n"
-    "            Normally this is 2 - for a single vertical section segment.\n"
-    "\n"
-    "  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n"
-    "\n";
-  
-  p_default = {
-    {
-      vsection_label = "RHI-north",
-      n_waypts = 2,
-      waypt_locs = "(0, 0) (0, 150)"
-    }
-  };
-
-} image_vsection_spec[];
-
-//////////////////////////////////////////////////////////
-// paramdef.Cidd_routes: Parameter definitions for 
-// Predefined route wind, etc support
-
-commentdef {
-  p_header = "ROUTE VSECTIONS";
-};
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Activates route winds vert section.";
-  p_help = "If FALSE, no route winds functionality is available.";
-} route_winds_active;
-
-typedef enum {
-  ROUTE_DEBUG_OFF, ROUTE_DEBUG_NORM, ROUTE_DEBUG_VERBOSE
-} route_debug_t;
-
-paramdef enum route_debug_t {
-  p_default = ROUTE_DEBUG_OFF;
-  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
-} route_debug; 
-
-paramdef int {
-  p_default = 13;
-  p_descr = " Maximum height in Pixels of labels";
-} route_font_height;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Default state of the add_waypoints_labels";
-  p_help = "0 = off, 1 = on";
-} route_add_waypoints_labels;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Default state of the add_wind_text labels";
-  p_help = "0 = off, 1 = on";
-} route_add_wind_text;
-
-typedef enum {
-  ROUTE_REGULAR_INTERVALS, ROUTE_EQUAL_DIVISIONS
-} route_label_style_t; 
-
-paramdef enum route_label_style_t {
-  p_default = ROUTE_REGULAR_INTERVALS;
-  p_descr = "How to space the labels along the route.";
-  p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
-} route_label_style;
-
-paramdef double {
-  p_default = 55.6;
-  p_help =  "Used if label_style is set to REGULAR_INTERVALS";
-  p_descr = "Distance in km between winds labels";
-} route_label_interval;
-
-paramdef int {
-  p_default = 10;
-  p_min = 2;
-  p_max = 100;
-  p_descr = "number of route wind labels to plot along the route.";
-  p_help = "Typically this should be set between 5 and 20";
-} route_num_labels; 
-
-paramdef int {
-  p_default = 3;
-  p_min = 1;
-  p_max = 20;
-  p_descr = "Width in pixels of the route winds track";
-} route_track_line_width;
-
-paramdef string {
-  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&U"; 
-  p_descr = "U Wind Componet";
-  p_help = " URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname\n";
-} route_u_url;
-
-paramdef string {
-  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&V"; 
-  p_descr = "v Wind Componet";
-} route_v_url;
-
-paramdef string {
-  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
-  p_descr = "Turbulence Index";
-} route_turb_url;
-
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Value at which the turbulence is considered Low";
-} route_turb_low_thresh;
-
-paramdef double {
-  p_default = 0.50;
-  p_descr = "Value at which the turbulence is considered Moderate";
-} route_turb_mod_thresh;
-
-paramdef double {
-  p_default = 0.75;
-  p_descr = "Value at which the turbulence is considered High";
-} route_turb_high_thresh;
-
-paramdef string {
-  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
-  p_descr = "Icing Index";
-} route_icing_url;
-
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Value at which the icing is considered Light";
-} route_icing_low_thresh;
-
-paramdef double {
-  p_default = 0.50;
-  p_descr = "Value at which the icing is considered Moderate";
-} route_icing_mod_thresh;
-
-paramdef double {
-  p_default = 0.75;
-  p_descr = "Value at which the icing is considered Heavy";
-} route_icing_high_thresh;
-
-paramdef string {
-  p_default = {
-    "A-1 8 "
-    "BULAN 27.0917 124.0000 "
-    "OSTAR 26.3317 123.0000 "
-    "SHARK 25.8333 122.3583 "
-    "ANNNA 25.5717 122.0217 "
-    "APU 25.1767 121.5233 "
-    "HLG 24.6400 120.7833 "
-    "MKG 23.5583 119.6283 "
-    "ELATO 22.3333 117.5000 ",
-
-    "M-750 12 "
-    "MOLKA 26.6583 124.0000 "
-    "MORSU 25.9100 123.0000 "
-    "LEKOS 25.5100 122.4717 "
-    "ROBIN 25.4200 122.2083 "
-    "NOKAS 25.1317 121.9917 "
-    "SANAS 24.8967 121.6917 "
-    "PILOX 24.4150 121.0250 "
-    "ANLOT 23.9417 120.5233 "
-    "TOROX 23.3533 119.9083 "
-    "RENOT 22.5683 118.5117 "
-    "DADON 22.2767 118.0033 "
-    "ENVAR 21.9917 117.5000 ",
-
-    "G-581 7 "
-    "IGURU 23.9500 124.0000 "
-    "TULTO 23.3233 123.0000 "
-    "HCN 21.9283 120.8433 "
-    "PARPA 22.0150 120.1683 "
-    "CYRUS 22.2167 118.5317 "
-    "DADON 22.2767 118.0033 "
-    "ELATO 22.3333 117.5000 ",
-
-    "B-591 9 "
-    "APU 25.1767 121.5233 "
-    "SANAS 24.8967 121.6917 "
-    "TINHO 24.3533 122.0283 "
-    "TITUS 23.8283 121.8517 "
-    "TACLE 22.9933 121.5867 "
-    "GID 22.6733 121.4867 "
-    "TUNNY 22.3600 121.2150 "
-    "HCN 21.9283 120.8433 "
-    "DOREX 21.0000 120.7833 ",
-
-    "R-583 5 "
-    "BORDO 26.0167 124.0000 "
-    "KIKIT 25.8817 123.5917 "
-    "PABSO 25.6517 122.8750 "
-    "LEKOS 25.5100 122.4717 "
-    "APU 25.1767 121.5233 ",
-
-    "G-86 3 "
-    "HCN 21.9283 120.8433 "
-    "ANDRE 21.7783 120.1683 "
-    "KAPLI 21.1667 117.5000 ",
-
-    "B-576 3 "
-    "SALMI 28.3150 124.0000 "
-    "BERBA 27.0783 123.0000 "
-    "APU 25.1767 121.5233 "
-  };
-  p_descr = " Route path strings - Format of each string is"
-  "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
-  p_help = "ROUTE_LABEL will be used in the menu, \n"
-  "NPoints = Number of way points in route \n"
-  "  Followed by NPoint triplets of the following:\n"
-  "ID_string -> usually a Airport or VOR \n"
-  "Lat Lon :  decimal degrees\n";
-  "\n";
-  "Note: Make sure white space separates the fields!\n";
-} route_paths[];
-
-commentdef {
-  p_header = "<MAIN>";
+  p_header = "<MODES_AND_TIMES>";
 }
 
 commentdef {
@@ -1048,7 +533,121 @@ paramdef string {
 } archive_start_time;
 
 commentdef {
-  p_header = "Movie loops";
+  p_header = "</MODES_AND_TIMES>";
+}
+
+//////////////////////////////////////////////////////////////////
+// DATA RETRIEVAL
+
+commentdef {
+  p_header = "<DATA_RETRIEVAL>";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Used to reject 'out of date' data.";
+  p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
+} check_data_times;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
+  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
+} check_clipping;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Sets the allowable time error for data to appear in movie frames.";
+  p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
+} time_search_stretch_factor;
+
+typedef enum {
+  CLOSEST_TO_FRAME_CENTER = 0,
+  FIRST_BEFORE_END_OF_FRAME = 1,
+  FIRST_AFTER_START_OF_FRAME = 2
+} gather_data_mode_t;
+
+paramdef enum gather_data_mode_t {
+  p_default = CLOSEST_TO_FRAME_CENTER;
+  p_descr = "Sets whether we request data closest to the start, midpoint or end of a movie frame.";
+  p_help = "CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
+} gather_data_mode;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Number of seconds between data update requests.";
+  p_help = "The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:";
+} update_interval;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "DataMapper Host";
+  p_help = "Host on which the DataMapper app is running.";
+} datamap_host;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Number of seconds to wait for data to come in before giving up.";
+  p_help = "On very slow networks this may need to go as high as 180 seconds.";
+} data_timeout_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request data from MDV servers be compressed.";
+  p_help = "When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.";
+} request_compressed_data;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use gzip-style compression for remote data access.";
+  p_help = "See 'request_compressed_data'.";
+} request_gzip_vol_compression;
+
+paramdef int {
+  p_default = 24;
+  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
+  p_help = "More hours means more Model runs will appear in the menu.";
+} model_run_list_hours;
+
+paramdef double {
+  p_default = 24;
+  p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
+  p_help = "See SHOW_FORECAST_MENU menu bar button";
+} forecast_interval_hours;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
+  p_help = "See SHOW_PAST_MENU menu bar button.";
+} past_interval_hours;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request the outer domain established by domain_limit params.";
+  p_help = "i.e. do not clip the data on request.";
+} always_get_full_domain;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request the whole earth or Hemisphere, centered on the origin.";
+  p_help = "";
+} do_not_clip_on_mdv_request;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Do not decimate on MDV request, get all points from MDV server.";
+  p_help = "";
+} do_not_decimate_on_mdv_request;
+
+commentdef {
+  p_header = "</DATA_RETRIEVAL>";
+}
+
+///////////////////////////////////////////////////////////////////
+// movie loops
+
+commentdef {
+  p_header = "<MOVIE_LOOPS>";
 }
 
 paramdef int {
@@ -1112,9 +711,11 @@ paramdef boolean {
   p_help = "If TRUE, this will slow down data gathering for movie rendering.";
 } reset_frames;
 
-commentdef {
-  p_header = "Climatology";
-}
+paramdef double {
+  p_default = 1;
+  p_descr = "When a Forecast hour is chosen, magnify the time interval by this factor.";
+  p_help = "This adjusts the frame time_interval to be more appropriate for forecast (model) data, which is often output on a more coarse time interval. When 'Now' is selected the magnification is undone.";
+} movie_magnify_factor;
 
 paramdef string {
   p_default = "regular";
@@ -1134,295 +735,15 @@ paramdef double {
   p_help = "The time_interval will be either '1 day' or '1 year'";
 } climo_frame_span_mins;
 
-paramdef double {
-  p_default = 24;
-  p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
-  p_help = "See SHOW_FORECAST_MENU menu bar button";
-} forecast_interval_hours;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
-  p_help = "See SHOW_PAST_MENU menu bar button.";
-} past_interval_hours;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "When a Forecast hour is chosen, magnify the time interval by this factor.";
-  p_help = "This adjusts the frame time_interval to be more appropriate for forecast (model) data, which is often output on a more coarse time interval. When 'Now' is selected the magnification is undone.";
-} movie_magnify_factor;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Used to reject 'out of date' data.";
-  p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
-} check_data_times;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
-  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
-} check_clipping;
-
-paramdef double {
-  p_default = 6.0;
-  p_descr = "Sets the allowable time error for data to appear in movie frames.";
-  p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
-} time_search_stretch_factor;
-
-typedef enum {
-  CLOSEST_TO_FRAME_CENTER = 0,
-  FIRST_BEFORE_END_OF_FRAME = 1,
-  FIRST_AFTER_START_OF_FRAME = 2
-} gather_data_mode_t;
-
-paramdef enum gather_data_mode_t {
-  p_default = CLOSEST_TO_FRAME_CENTER;
-  p_descr = "Sets whether we request data closest to the start, midpoint or end of a movie frame.";
-  p_help = "CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
-} gather_data_mode;
-
 paramdef int {
   p_default = 100;
   p_descr = "Number of milliseconds between checks for images needing redrawn.";
   p_help = "Set this lower on faster hardware - Recommended 50-250. This sets the ultimate speed of the movie looping.";
 } redraw_interval;
 
-paramdef int {
-  p_default = 120;
-  p_descr = "Number of seconds between data update requests.";
-  p_help = "The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:";
-} update_interval;
-
-paramdef string {
-  p_default = "localhost";
-  p_descr = "DataMapper Host";
-  p_help = "Host on which the DataMapper app is running.";
-} datamap_host;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Number of seconds to wait for data to come in before giving up.";
-  p_help = "On very slow networks this may need to go as high as 180 seconds.";
-} data_timeout_secs;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Length of time to wait before killing simple external commands.";
-  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
-} simple_command_timeout_secs;
-
-paramdef int {
-  p_default = 180;
-  p_descr = "Length of time to wait before killing complex external commands.";
-  p_help = "Used when spawning animation building script.";
-} complex_command_timeout_secs;
-
-paramdef int {
-  p_default = 24;
-  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
-  p_help = "More hours means more Model runs will appear in the menu.";
-} model_run_list_hours;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "After this period of inactivity, the display will reset itself to a known starting point";
-  p_help = "Set this <= 0 to essentially turn off.";
-} idle_reset_seconds;
-
 commentdef {
-  p_header = "Image generation";
+  p_header = "</MOVIE_LOOPS>";
 }
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set this to TRUE to activate automatic HTML output mode.";
-  p_help = "Note: image_dir MUST be set.";
-} html_mode;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "After this period of inactivity, the display will reset itself to a known starting point.";
-  p_help = "Set this to FALSE to essentially turn off.";
-} run_once_and_exit;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set transparency of generated images.";
-  p_help = "If FALSE, the normal background color is used. Set to TRUE for transparent background.";
-} transparent_images;
-
-paramdef string {
-  p_default = "/tmp/image_dir";
-  p_descr = "Directory for output image plots.";
-  p_help = "";
-} image_dir;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Save images to subdirs based on date.";
-  p_help = "";
-} save_images_to_day_subdir;
-
-paramdef string {
-  p_default = "png";
-  p_descr = "Sets the output image type.";
-  p_help = "In latest version, only png type is available.";
-} image_ext;
-
-paramdef string {
-  p_default = "CP";
-  p_descr = "The prefix for the horiz (plan view) image file names.";
-  p_help = "";
-} image_horiz_prefix;
-
-paramdef string {
-  p_default = "CV";
-  p_descr = "The prefix for the vert image file names";
-  p_help = "";
-} image_vert_prefix;
-
-paramdef string {
-  p_default = "_";
-  p_descr = "The separator used in the image file names.";
-  p_help = "";
-} image_name_separator;
-
-commentdef {
-  p_header = "The HTML MODE Output file name is built from parts.";
-  p_text = "Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_label + zoom_level + [button_label] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adds height to the output file name.";
-  p_help = "";
-} add_height_to_filename;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Adds frame time to the output file name.";
-  p_help = "";
-} add_frame_time_to_filename;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adds GUI button label to the output file name.";
-  p_help = "";
-} add_button_name_to_filename;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adds frame number to the output file name.";
-  p_help = "";
-} add_frame_num_to_filename;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adds model gen time to the output file name.";
-  p_help = "";
-} add_gen_time_to_filename;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adds data valid time to the output file name.";
-  p_help = "";
-} add_valid_time_to_filename;
-
-commentdef {
-  p_header = "Separate Horizontal and Vertical Image save resources.";
-  p_text = "NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.";
-}
-
-paramdef string {
-  p_default = "/tmp/cidd_horiz_image_dir";
-  p_descr = "Image directory for horiz images.";
-  p_help = "Note - this is initially set to image_dir";
-} horiz_image_dir;
-
-paramdef string {
-  p_default = "cidd_horiz_view.png";
-  p_descr = "The default file name until reset by the user.";
-  p_help = "Appends other info automatically.";
-} horiz_image_fname;
-
-paramdef string {
-  p_default = "convert_image.csh";
-  p_descr = "Command to be run after image is created.";
-  p_help = "Note that this is initially set to 'image_convert_script'.";
-} horiz_image_command;
-
-paramdef string {
-  p_default = "/tmp/cidd_vert_image_dir";
-  p_descr = "Image directory for vert images.";
-  p_help = "Note - this is initially set to image_dir";
-} vert_image_dir;
-
-paramdef string {
-  p_default = "cidd_vert_view.png";
-  p_descr = "The default file name until reset by the user.";
-  p_help = "Appends other info automatically.";
-} vert_image_fname;
-
-paramdef string {
-  p_default = "convert_image.csh";
-  p_descr = "Command to be run after image is created.";
-  p_help = "Note that this is initially set to 'image_convert_script'.";
-} vert_image_command;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Output an imagename.xml file which contains geo referencing information.";
-  p_help = "If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.";
-} output_geo_xml;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Georef info is in lat/lon projection.";
-  p_help = "For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.";
-} use_latlon_in_geo_xml;
-
-paramdef string {
-  p_default = "%H%M";
-  p_descr = "Set the format for the time fields in the names of output xwd images.";
-  p_help = "See strftime(3) for options.  Default is: %H%M.";
-} movieframe_time_format;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} movieframe_time_mode;
-
-paramdef string {
-  p_default = "convert_image.csh";
-  p_descr = "This script will be exec'd if set whenever an html_mode image is output.";
-  p_help = "The full path name of the xwd image will be sent as the script argument. Setting horiz_image_command or cidd.horiz_image_command will override this and allow separate scripts to be called for horiz and vert images.";
-} image_convert_script;
-
-paramdef string {
-  p_default = "do_print.csh";
-  p_descr = "This script will be exec'd if set whenever a print command is issued.";
-  p_help = "The full path name of the xwd image will be sent as the script argument.";
-} print_script;
-
-paramdef string {
-  p_default = "make_anim.csh";
-  p_descr = "When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.";
-  p_help = "The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.";
-} series_convert_script;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request data from MDV servers be compressed.";
-  p_help = "When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.";
-} request_compressed_data;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Use gzip-style compression for remote data access.";
-  p_help = "See 'request_compressed_data'.";
-} request_gzip_vol_compression;
 
 paramdef double {
   p_default = 0.5395932;
@@ -1436,35 +757,11 @@ paramdef string {
   p_help = "km, nm, deg";
 } scale_units_label;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request the outer domain established by domain_limit params.";
-  p_help = "i.e. do not clip the data on request.";
-} always_get_full_domain;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request the whole earth or Hemisphere, centered on the origin.";
-  p_help = "";
-} do_not_clip_on_mdv_request;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Do not decimate on MDV request, get all points from MDV server.";
-  p_help = "";
-} do_not_decimate_on_mdv_request;
-
 paramdef double {
   p_default = 5;
   p_descr = "Minimum distance to zoom into to in KM.";
   p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
 } min_zoom_threshold;
-
-// paramdef double {
-//   p_default = 1;
-//   p_descr = "Set the aspect ratio of the domain for the display.";
-//   p_help = "Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
-// } aspect_ratio;
 
 paramdef boolean {
   p_default = FALSE;
@@ -3129,30 +2426,13 @@ paramdef string {
 } vlevel_selector_data_values_color;
 
 commentdef {
-  p_header = "HORIZ MODE DISPLAY";
+  p_header = "<HORIZ_VIEW>";
 }
-
-// typedef enum
-// {
-//   HORIZ_FULL,
-//   HORIZ_AIRBORNE
-// } horiz_display_type_t;
-
-// paramdef enum horiz_display_type_t
-// {
-//   p_descr = "Type of display to use for the HORIZ window.";
-//   p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
-//            "This is the default.\n"
-//            "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
-//            "This display shows just the 180 degrees of radar pointing forward "
-//            "from the nose of the plane.\n";
-//   p_default = HORIZ_FULL;
-// } horiz_display_type;
 
 paramdef double {
   p_default = 0.0;
   p_descr = "Aspect ratio (width/height) of HORIZ window.";
-  p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain.";
+  p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain. Lucid will preserve this aspect ratio for all zooms. Ratio is Width/Height. Note Lucid applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
 } horiz_aspect_ratio;
 
 paramdef boolean {
@@ -3193,7 +2473,11 @@ paramdef double {
 } horiz_rendering_beam_width;
 
 commentdef {
-  p_header = "VERT MODE DISPLAY";
+  p_header = "</HORIZ_VIEW>";
+}
+
+commentdef {
+  p_header = "<VERT_VIEW>";
 }
 
 paramdef int {
@@ -3307,6 +2591,756 @@ paramdef double {
 } vert_rendering_beam_width;
 
 commentdef {
-  p_header = "</LUCID_SPECIFIC_DETAILS>";
+  p_header = "<VERT_VIEW>";
 }
+
+/////////////////////////////////////////////////////////////////////////
+// <SYMPRODS>
+
+commentdef {
+  p_header = "<SYMBOLIC_PRODUCTS>.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Enable symprods at start.";
+  p_help = "If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.";
+} symprods_enabled_at_startup;
+
+typedef enum {
+  SYMPROD_DEBUG_OFF, SYMPROD_DEBUG_NORM, SYMPROD_DEBUG_VERBOSE
+} symprod_debug_t;
+
+paramdef enum symprod_debug_t {
+  p_default = SYMPROD_DEBUG_OFF;
+  p_help = "Debug option.\n"
+  "If set, debug messages will be printed appropriately.\n";
+} symprod_debug;
+
+paramdef boolean { 
+  p_descr = "Gather Data Frame by Frame, Otherwise by loop span";
+  p_help = "Gathers Products valid for the current frame only - Speeds up"
+  " gathering of large data sets, like METAR data" ;
+  p_default = FALSE;
+} symprod_short_requests;
+
+paramdef boolean { 
+  p_descr = "Request data using GZIP compression";
+  p_help = "If true, symprod data will be GZIP compressed by the server.";
+  p_default = FALSE;
+} symprod_gzip_requests;
+
+typedef enum {
+  SYMPROD_RENDER_ALL,             // Do no temporal clipping
+  SYMPROD_RENDER_ALL_VALID,       // Render all Valid in frame
+  SYMPROD_RENDER_VALID_IN_LAST_FRAME,   // Render all Valid in the last movie frame 
+  SYMPROD_RENDER_LATEST_IN_FRAME, // Render the latest product of like data_types (ID) valid in the frame.
+  SYMPROD_RENDER_LATEST_IN_LOOP,  // Render the latest product of like data_types (ID) valid in the movie loop.
+  SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME,// Render the latest product before the end of frame time
+  SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME,// Render the latest product before the data time in each frame 
+  SYMPROD_RENDER_FIRST_AFTER_DATA_TIME, // Render the earliest product after the data time in each frame 
+  SYMPROD_RENDER_ALL_BEFORE_DATA_TIME,  // Render all valid products before the data time in each frame 
+  SYMPROD_RENDER_ALL_AFTER_DATA_TIME,   // Render all valid products after the data time in each frame 
+  SYMPROD_RENDER_GET_VALID, // Render only those returned with an SPDB GetValid() call
+  SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME // Render products which have not expired at the frame time
+} symprod_render_type_t;
+
+typedef struct {
+  string menu_label;
+  string url;
+  int data_type;
+  symprod_render_type_t render_type;
+  boolean on_by_default;
+  double minutes_allow_before;
+  double minutes_allow_after;
+  double text_off_threshold;
+  boolean request_data_on_zoom;
+  boolean request_data_on_vert_change;
+} symprod_prod_info_t;
+
+paramdef struct symprod_prod_info_t {
+
+  p_descr = "Product Source and Rendering Information Array";
+  
+  p_help =
+    "The fields in the structure are as follows:\n"
+    "\n"
+    "  menu_label: label to be used for the product in menu.\n"
+    "\n"
+    "  url: for retrieving the data.\n"
+    "    example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2\n"
+    "\n"
+    "  data_type: used when querying the SPDB data server\n"
+    "    (set to 0 to retrieve all data).\n"
+    "\n"
+    "  render_type: Select how temporal clipping is done:\n"
+    "    SYMPROD_RENDER_ALL: Do no temporal clipping.\n"
+    "    SYMPROD_RENDER_ALL_VALID: Render all Valid in frame\n"
+    "    SYMPROD_RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
+    "    SYMPROD_RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
+    "    SYMPROD_RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
+    "    SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
+    "    SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
+    "    SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
+    "    SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
+    "    SYMPROD_RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
+    "    SYMPROD_RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
+    "    SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
+    "\n"
+    "Note: all comparisons are less than or equal or greater than or equal\n"
+    "\n"
+    "  on_by_default: True or False\n"
+    "\n"
+    "  minutes_allow_before: Stretch the frame time this many minutes - prior\n"
+    "  minutes_allow_after: Stretch the frame time this many minutes - after\n"
+    "\n"
+    "  text_off_threshold: Threshold where text disappears. Use the function:\n"
+    "      log10(scaling_constant/km_distance_across_screen ) + 1.0\n"
+    "      Use 0.0 to disable the off feature. (always displayed)\n"
+    "\n"
+    "  request_data_on_zoom: Flag indicating whether to request new data for\n"
+    "      this product whenever the user changes the zoom.  Normally, this\n"
+    "      should be set to false for efficiency reasons.  If the products\n"
+    "      to be rendered would change with a zoom change then this should be\n"
+    "      set to true.\n"
+    "\n"
+    "  request_data_on_vert_change: Flag indicating whether to request new data\n"
+    "      for this product whenever the user changes the currently displayed\n"
+    "      vertical level.  Normally, this should be set to false for efficiency\n"
+    "      reasons.  If the products to be rendered would change with a zoom\n"
+    "      change then this should be set to true.\n"
+    "\n";
+  
+  p_default = {
+    {
+      menu_label = "RHI-ticks",
+      url = "spdbp:Rhi2Symprod://localhost::spdb/rhi",
+      data_type = 0,
+      render_type = SYMPROD_RENDER_ALL_VALID,
+      on_by_default = FALSE,
+      minutes_allow_before = 20.0,
+      minutes_allow_after = 10.0,
+      text_off_threshold = 0.4,
+      request_data_on_zoom = false,
+      request_data_on_vert_change = false
+    }
+  };
+
+} symprod_prod_info[];
+
+commentdef {
+  p_header = "</SYMBOLIC_PRODUCTS>.";
+}
+
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_terrain: Parameter definitions for
+// Terrain Data
+
+commentdef {
+  p_header = "<TERRAIN>.";
+}
+
+commentdef {
+  p_header = "Terrain Parameters";
+  p_comment = "Note: Terrain Fields must be on the same projection as the Display";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is the terrain section active?";
+} terrain_active;
+
+paramdef string {
+  p_default = "Terrain";
+  p_descr = "Label used for legends";
+} terrain_id_label ;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Used to located gridded terrain data. Set to empty string for no terrain.";
+  p_help = "Terrain_URL \n"
+  " Note example URL:\n"
+  "  mdvp::static//venus::mdv/terrain&Elevation\n"
+  " Field name follows the Ampersand. Use #N for field number override "
+  "  Use caret: ^ as a substitute for spaces in field names";
+  "\n";
+} terrain_url;
+
+paramdef double {
+  p_default = 0.03280834;
+  p_descr = "Conversion from terrain units to local coords";
+  p_help = "Choose a scaler which converts plane height values\n"
+    "Default is Hecto-feet (FL) per meter";
+} terrain_height_scaler;
+
+paramdef string {
+  p_default = "mdvp:://tempest:0:topo/relief/mdv&RGBA";
+  p_descr = "Used to located gridded land use data";
+  p_help = "Land Use URL \n"
+  " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
+  " Field name follows the Ampersand. Use #N for field number override "
+  "  Use caret: ^ as a substitute for spaces in field names";
+  "\n";
+} landuse_url;
+
+paramdef string {
+  p_default = "terrain.colors";
+  p_descr = "Color lookup table for Land use";
+  p_help = "Land Use colorscale file name\n"
+  " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
+} landuse_colorscale;
+
+typedef enum {
+  TERRAIN_RENDER_FILLED_CONT = 1, TERRAIN_RENDER_RECTANGLES, TERRAIN_RENDER_DYNAMIC_CONTOURS
+} terrain_render_type_t;
+
+paramdef enum terrain_render_type_t {
+  p_default = TERRAIN_RENDER_RECTANGLES;
+  p_descr = "Land Use rendering style";
+  p_help = "Use Contours only for continious data like elevation";
+} landuse_render_method;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Default Display state of Land Use/ Basemap";
+} landuse_active;
+
+paramdef string {
+  p_default = "sienna";
+  p_descr = "Earth's skin color";
+} terrain_earth_color1;
+
+paramdef string {
+  p_default = "red4";
+  p_descr = "Earth's core color";
+} terrain_earth_color2;
+
+commentdef {
+  p_header = "</TERRAIN>.";
+}
+
+//////////////////////////////////////////////////////////
+// Inter-process communication for the latest click point
+// Allows Lucid to control and collaborate with other apps.
+
+commentdef {
+  p_header = "<CLICK_POINT_MESSAGING>";
+  p_text = "Writing the click point location to an FMQ in XML format.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
+} click_point_fmq_url;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Length of time to wait before killing simple external commands.";
+  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
+} simple_command_timeout_secs;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Length of time to wait before killing complex external commands.";
+  p_help = "Used when spawning animation building script.";
+} complex_command_timeout_secs;
+
+commentdef {
+  p_header = "</CLICK_POINT_MESSAGING>";
+}
+
+/////////////////////////////////////////////////////////////////////////
+// paramdef.CIDD_images
+//
+// This file contains the TDRP parameter definitions for handling some
+// of the CIDD image generation options.
+
+commentdef {
+  p_header = "<IMAGE_GENERATION>";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is the image generation section active?";
+} image_generation_active;
+
+typedef enum {
+  IMAGE_DEBUG_OFF, IMAGE_DEBUG_NORM, IMAGE_DEBUG_VERBOSE
+} image_debug_t;
+
+paramdef enum image_debug_t {
+  p_default = IMAGE_DEBUG_OFF;
+  p_help = "Debug option.\n"
+  "If set, debug messages will be printed appropriately.\n";
+} image_debug;
+
+paramdef boolean { 
+  p_descr = "Generate images for specified vertical sections.";
+  p_help = "If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
+  p_default = FALSE;
+} image_generate_vsection;
+
+paramdef boolean { 
+  p_descr = "The specified waypts are in latlon degree units.";
+  p_help = "If TRUE, the waypts are specified in lat/lon degrees. If FALSE, they are specified in (xkm, ykm) units in the current projection.";
+  p_default = FALSE;
+} image_vsection_waypts_in_latlon;
+
+typedef struct {
+  string vsection_label;
+  int n_waypts;
+  string waypt_locs;
+} image_vsection_spec_t;
+
+paramdef struct image_vsection_spec_t {
+
+  p_descr = "Vertical section information array";
+  
+  p_help =
+    "The fields in the structure are as follows:\n"
+    "\n"
+    "  vsection_label: label to be used for the specified vertical section.\n"
+    "\n"
+    "  n_waypts: number of waypts for specifying the vert section.\n"
+    "            Normally this is 2 - for a single vertical section segment.\n"
+    "\n"
+    "  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n"
+    "\n";
+  
+  p_default = {
+    {
+      vsection_label = "RHI-north",
+      n_waypts = 2,
+      waypt_locs = "(0, 0) (0, 150)"
+    }
+  };
+
+} image_vsection_spec[];
+
+commentdef {
+  p_header = "Orig CIDD image generation";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set this to TRUE to activate automatic HTML output mode.";
+  p_help = "Note: image_dir MUST be set.";
+} html_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "After this period of inactivity, the display will reset itself to a known starting point.";
+  p_help = "Set this to FALSE to essentially turn off.";
+} run_once_and_exit;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set transparency of generated images.";
+  p_help = "If FALSE, the normal background color is used. Set to TRUE for transparent background.";
+} transparent_images;
+
+paramdef string {
+  p_default = "/tmp/image_dir";
+  p_descr = "Directory for output image plots.";
+  p_help = "";
+} image_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Save images to subdirs based on date.";
+  p_help = "";
+} save_images_to_day_subdir;
+
+paramdef string {
+  p_default = "png";
+  p_descr = "Sets the output image type.";
+  p_help = "In latest version, only png type is available.";
+} image_ext;
+
+paramdef string {
+  p_default = "CP";
+  p_descr = "The prefix for the horiz (plan view) image file names.";
+  p_help = "";
+} image_horiz_prefix;
+
+paramdef string {
+  p_default = "CV";
+  p_descr = "The prefix for the vert image file names";
+  p_help = "";
+} image_vert_prefix;
+
+paramdef string {
+  p_default = "_";
+  p_descr = "The separator used in the image file names.";
+  p_help = "";
+} image_name_separator;
+
+commentdef {
+  p_header = "The HTML MODE Output file name is built from parts.";
+  p_text = "Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_label + zoom_level + [button_label] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Adds height to the output file name.";
+  p_help = "";
+} add_height_to_filename;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Adds frame time to the output file name.";
+  p_help = "";
+} add_frame_time_to_filename;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Adds GUI button label to the output file name.";
+  p_help = "";
+} add_button_name_to_filename;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Adds frame number to the output file name.";
+  p_help = "";
+} add_frame_num_to_filename;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Adds model gen time to the output file name.";
+  p_help = "";
+} add_gen_time_to_filename;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Adds data valid time to the output file name.";
+  p_help = "";
+} add_valid_time_to_filename;
+
+commentdef {
+  p_header = "Separate Horizontal and Vertical Image save resources.";
+  p_text = "NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.";
+}
+
+paramdef string {
+  p_default = "/tmp/cidd_horiz_image_dir";
+  p_descr = "Image directory for horiz images.";
+  p_help = "Note - this is initially set to image_dir";
+} horiz_image_dir;
+
+paramdef string {
+  p_default = "cidd_horiz_view.png";
+  p_descr = "The default file name until reset by the user.";
+  p_help = "Appends other info automatically.";
+} horiz_image_fname;
+
+paramdef string {
+  p_default = "convert_image.csh";
+  p_descr = "Command to be run after image is created.";
+  p_help = "Note that this is initially set to 'image_convert_script'.";
+} horiz_image_command;
+
+paramdef string {
+  p_default = "/tmp/cidd_vert_image_dir";
+  p_descr = "Image directory for vert images.";
+  p_help = "Note - this is initially set to image_dir";
+} vert_image_dir;
+
+paramdef string {
+  p_default = "cidd_vert_view.png";
+  p_descr = "The default file name until reset by the user.";
+  p_help = "Appends other info automatically.";
+} vert_image_fname;
+
+paramdef string {
+  p_default = "convert_image.csh";
+  p_descr = "Command to be run after image is created.";
+  p_help = "Note that this is initially set to 'image_convert_script'.";
+} vert_image_command;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Output an imagename.xml file which contains geo referencing information.";
+  p_help = "If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.";
+} output_geo_xml;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Georef info is in lat/lon projection.";
+  p_help = "For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.";
+} use_latlon_in_geo_xml;
+
+paramdef string {
+  p_default = "%H%M";
+  p_descr = "Set the format for the time fields in the names of output xwd images.";
+  p_help = "See strftime(3) for options.  Default is: %H%M.";
+} movieframe_time_format;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} movieframe_time_mode;
+
+paramdef string {
+  p_default = "convert_image.csh";
+  p_descr = "This script will be exec'd if set whenever an html_mode image is output.";
+  p_help = "The full path name of the xwd image will be sent as the script argument. Setting horiz_image_command or cidd.horiz_image_command will override this and allow separate scripts to be called for horiz and vert images.";
+} image_convert_script;
+
+paramdef string {
+  p_default = "do_print.csh";
+  p_descr = "This script will be exec'd if set whenever a print command is issued.";
+  p_help = "The full path name of the xwd image will be sent as the script argument.";
+} print_script;
+
+paramdef string {
+  p_default = "make_anim.csh";
+  p_descr = "When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.";
+  p_help = "The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.";
+} series_convert_script;
+
+commentdef {
+  p_header = "</IMAGE_GENERATION>";
+}
+
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_Draw: Parameter definitions for Human Drawn
+// Products
+
+commentdef {
+  p_header = "<DRAW_EXPORT>";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is drawing for export active?";
+} draw_export_active;
+
+typedef struct {
+  string id_label;
+  string url;
+  double valid_minutes;
+  int default_id_no;
+  string default_label;
+} draw_export_t;
+
+paramdef struct draw_export_t {
+  p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
+                {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
+  p_descr = "Human Drawn Products for Export Parameters.";
+  p_help = 
+    " Each Entry needs:\n"
+    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
+    "    ID_LABEL - This is used to designate Product types\n"
+    "    FMQ_URL: example: fmqp:://host::dir/file \n"
+    "   Valid_Minutes: How many minutes the product is valid by default\n"
+    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
+    "   Default_label: Test to place into Label field by default\n"
+    "\n";
+} draw_export_info[];
+
+commentdef {
+  p_header = "</DRAW_EXPORT>";
+};
+
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_routes: Parameter definitions for 
+// Predefined route wind, etc support
+
+commentdef {
+  p_header = "<ROUTE_VERT_SECTIONS>";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Activates route winds vert section.";
+  p_help = "If FALSE, no route winds functionality is available.";
+} route_winds_active;
+
+typedef enum {
+  ROUTE_DEBUG_OFF, ROUTE_DEBUG_NORM, ROUTE_DEBUG_VERBOSE
+} route_debug_t;
+
+paramdef enum route_debug_t {
+  p_default = ROUTE_DEBUG_OFF;
+  p_help = "Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output";
+} route_debug; 
+
+paramdef int {
+  p_default = 13;
+  p_descr = " Maximum height in Pixels of labels";
+} route_font_height;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_waypoints_labels";
+  p_help = "0 = off, 1 = on";
+} route_add_waypoints_labels;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Default state of the add_wind_text labels";
+  p_help = "0 = off, 1 = on";
+} route_add_wind_text;
+
+typedef enum {
+  ROUTE_REGULAR_INTERVALS, ROUTE_EQUAL_DIVISIONS
+} route_label_style_t; 
+
+paramdef enum route_label_style_t {
+  p_default = ROUTE_REGULAR_INTERVALS;
+  p_descr = "How to space the labels along the route.";
+  p_help = "REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.";
+} route_label_style;
+
+paramdef double {
+  p_default = 55.6;
+  p_help =  "Used if label_style is set to REGULAR_INTERVALS";
+  p_descr = "Distance in km between winds labels";
+} route_label_interval;
+
+paramdef int {
+  p_default = 10;
+  p_min = 2;
+  p_max = 100;
+  p_descr = "number of route wind labels to plot along the route.";
+  p_help = "Typically this should be set between 5 and 20";
+} route_num_labels; 
+
+paramdef int {
+  p_default = 3;
+  p_min = 1;
+  p_max = 20;
+  p_descr = "Width in pixels of the route winds track";
+} route_track_line_width;
+
+paramdef string {
+  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&U"; 
+  p_descr = "U Wind Componet";
+  p_help = " URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname\n";
+} route_u_url;
+
+paramdef string {
+  p_default = "mdvp::zoom_mds//neptune::mdv/mm5&V"; 
+  p_descr = "v Wind Componet";
+} route_v_url;
+
+paramdef string {
+  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
+  p_descr = "Turbulence Index";
+} route_turb_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the turbulence is considered Low";
+} route_turb_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the turbulence is considered Moderate";
+} route_turb_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the turbulence is considered High";
+} route_turb_high_thresh;
+
+paramdef string {
+  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
+  p_descr = "Icing Index";
+} route_icing_url;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Value at which the icing is considered Light";
+} route_icing_low_thresh;
+
+paramdef double {
+  p_default = 0.50;
+  p_descr = "Value at which the icing is considered Moderate";
+} route_icing_mod_thresh;
+
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Value at which the icing is considered Heavy";
+} route_icing_high_thresh;
+
+paramdef string {
+  p_default = {
+    "A-1 8 "
+    "BULAN 27.0917 124.0000 "
+    "OSTAR 26.3317 123.0000 "
+    "SHARK 25.8333 122.3583 "
+    "ANNNA 25.5717 122.0217 "
+    "APU 25.1767 121.5233 "
+    "HLG 24.6400 120.7833 "
+    "MKG 23.5583 119.6283 "
+    "ELATO 22.3333 117.5000 ",
+
+    "M-750 12 "
+    "MOLKA 26.6583 124.0000 "
+    "MORSU 25.9100 123.0000 "
+    "LEKOS 25.5100 122.4717 "
+    "ROBIN 25.4200 122.2083 "
+    "NOKAS 25.1317 121.9917 "
+    "SANAS 24.8967 121.6917 "
+    "PILOX 24.4150 121.0250 "
+    "ANLOT 23.9417 120.5233 "
+    "TOROX 23.3533 119.9083 "
+    "RENOT 22.5683 118.5117 "
+    "DADON 22.2767 118.0033 "
+    "ENVAR 21.9917 117.5000 ",
+
+    "G-581 7 "
+    "IGURU 23.9500 124.0000 "
+    "TULTO 23.3233 123.0000 "
+    "HCN 21.9283 120.8433 "
+    "PARPA 22.0150 120.1683 "
+    "CYRUS 22.2167 118.5317 "
+    "DADON 22.2767 118.0033 "
+    "ELATO 22.3333 117.5000 ",
+
+    "B-591 9 "
+    "APU 25.1767 121.5233 "
+    "SANAS 24.8967 121.6917 "
+    "TINHO 24.3533 122.0283 "
+    "TITUS 23.8283 121.8517 "
+    "TACLE 22.9933 121.5867 "
+    "GID 22.6733 121.4867 "
+    "TUNNY 22.3600 121.2150 "
+    "HCN 21.9283 120.8433 "
+    "DOREX 21.0000 120.7833 ",
+
+    "R-583 5 "
+    "BORDO 26.0167 124.0000 "
+    "KIKIT 25.8817 123.5917 "
+    "PABSO 25.6517 122.8750 "
+    "LEKOS 25.5100 122.4717 "
+    "APU 25.1767 121.5233 ",
+
+    "G-86 3 "
+    "HCN 21.9283 120.8433 "
+    "ANDRE 21.7783 120.1683 "
+    "KAPLI 21.1667 117.5000 ",
+
+    "B-576 3 "
+    "SALMI 28.3150 124.0000 "
+    "BERBA 27.0783 123.0000 "
+    "APU 25.1767 121.5233 "
+  };
+  p_descr = " Route path strings - Format of each string is"
+  "ROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n";
+  p_help = "ROUTE_LABEL will be used in the menu, \n"
+  "NPoints = Number of way points in route \n"
+  "  Followed by NPoint triplets of the following:\n"
+  "ID_string -> usually a Airport or VOR \n"
+  "Lat Lon :  decimal degrees\n";
+  "\n";
+  "Note: Make sure white space separates the fields!\n";
+} route_paths[];
+
+commentdef {
+  p_header = "</ROUTE_VERT_SECTIONS>";
+};
 

@@ -106,6 +106,30 @@ public:
   } projection_t;
 
   typedef enum {
+    MODE_ARCHIVE = 0,
+    MODE_REALTIME = 1
+  } mode_t;
+
+  typedef enum {
+    CLOSEST_TO_FRAME_CENTER = 0,
+    FIRST_BEFORE_END_OF_FRAME = 1,
+    FIRST_AFTER_START_OF_FRAME = 2
+  } gather_data_mode_t;
+
+  typedef enum {
+    CREATE_IMAGES_THEN_EXIT = 0,
+    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
+    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
+  } images_creation_mode_t;
+
+  typedef enum {
+    LEGEND_TOP_LEFT = 0,
+    LEGEND_TOP_RIGHT = 1,
+    LEGEND_BOTTOM_LEFT = 2,
+    LEGEND_BOTTOM_RIGHT = 3
+  } legend_pos_t;
+
+  typedef enum {
     SYMPROD_DEBUG_OFF = 0,
     SYMPROD_DEBUG_NORM = 1,
     SYMPROD_DEBUG_VERBOSE = 2
@@ -148,30 +172,6 @@ public:
     ROUTE_REGULAR_INTERVALS = 0,
     ROUTE_EQUAL_DIVISIONS = 1
   } route_label_style_t;
-
-  typedef enum {
-    MODE_ARCHIVE = 0,
-    MODE_REALTIME = 1
-  } mode_t;
-
-  typedef enum {
-    CLOSEST_TO_FRAME_CENTER = 0,
-    FIRST_BEFORE_END_OF_FRAME = 1,
-    FIRST_AFTER_START_OF_FRAME = 2
-  } gather_data_mode_t;
-
-  typedef enum {
-    CREATE_IMAGES_THEN_EXIT = 0,
-    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
-    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
-  } images_creation_mode_t;
-
-  typedef enum {
-    LEGEND_TOP_LEFT = 0,
-    LEGEND_TOP_RIGHT = 1,
-    LEGEND_BOTTOM_LEFT = 2,
-    LEGEND_BOTTOM_RIGHT = 3
-  } legend_pos_t;
 
   // struct typedefs
 
@@ -220,33 +220,6 @@ public:
   } map_t;
 
   typedef struct {
-    char* id_label;
-    char* url;
-    double valid_minutes;
-    int default_id_no;
-    char* default_label;
-  } draw_export_t;
-
-  typedef struct {
-    char* menu_label;
-    char* url;
-    int data_type;
-    symprod_render_type_t render_type;
-    tdrp_bool_t on_by_default;
-    double minutes_allow_before;
-    double minutes_allow_after;
-    double text_off_threshold;
-    tdrp_bool_t request_data_on_zoom;
-    tdrp_bool_t request_data_on_vert_change;
-  } symprod_prod_info_t;
-
-  typedef struct {
-    char* vsection_label;
-    int n_waypts;
-    char* waypt_locs;
-  } image_vsection_spec_t;
-
-  typedef struct {
     char* label;
     double min_x;
     double min_y;
@@ -274,6 +247,33 @@ public:
     double threshold;
     int font_index_adj;
   } product_adjustment_t;
+
+  typedef struct {
+    char* menu_label;
+    char* url;
+    int data_type;
+    symprod_render_type_t render_type;
+    tdrp_bool_t on_by_default;
+    double minutes_allow_before;
+    double minutes_allow_after;
+    double text_off_threshold;
+    tdrp_bool_t request_data_on_zoom;
+    tdrp_bool_t request_data_on_vert_change;
+  } symprod_prod_info_t;
+
+  typedef struct {
+    char* vsection_label;
+    int n_waypts;
+    char* waypt_locs;
+  } image_vsection_spec_t;
+
+  typedef struct {
+    char* id_label;
+    char* url;
+    double valid_minutes;
+    int default_id_no;
+    char* default_label;
+  } draw_export_t;
 
   ///////////////////////////
   // Member functions
@@ -587,6 +587,8 @@ public:
 
   tdrp_bool_t use_curl_for_downloads;
 
+  int idle_reset_seconds;
+
   char* color_scale_urls;
 
   field_t *_fields;
@@ -640,99 +642,39 @@ public:
 
   tdrp_bool_t use_cosine_correction;
 
-  char* click_point_fmq_url;
-
-  tdrp_bool_t draw_export_active;
-
-  draw_export_t *_draw_export_info;
-  int draw_export_info_n;
-
-  tdrp_bool_t symprods_enabled_at_startup;
-
-  symprod_debug_t symprod_debug;
-
-  tdrp_bool_t symprod_short_requests;
-
-  tdrp_bool_t symprod_gzip_requests;
-
-  symprod_prod_info_t *_symprod_prod_info;
-  int symprod_prod_info_n;
-
-  tdrp_bool_t terrain_active;
-
-  char* terrain_id_label;
-
-  char* terrain_url;
-
-  double terrain_height_scaler;
-
-  char* landuse_url;
-
-  char* landuse_colorscale;
-
-  terrain_render_type_t landuse_render_method;
-
-  tdrp_bool_t landuse_active;
-
-  char* terrain_earth_color1;
-
-  char* terrain_earth_color2;
-
-  tdrp_bool_t image_generation_active;
-
-  image_debug_t image_debug;
-
-  tdrp_bool_t image_generate_vsection;
-
-  tdrp_bool_t image_vsection_waypts_in_latlon;
-
-  image_vsection_spec_t *_image_vsection_spec;
-  int image_vsection_spec_n;
-
-  tdrp_bool_t route_winds_active;
-
-  route_debug_t route_debug;
-
-  int route_font_height;
-
-  int route_add_waypoints_labels;
-
-  int route_add_wind_text;
-
-  route_label_style_t route_label_style;
-
-  double route_label_interval;
-
-  int route_num_labels;
-
-  int route_track_line_width;
-
-  char* route_u_url;
-
-  char* route_v_url;
-
-  char* route_turb_url;
-
-  double route_turb_low_thresh;
-
-  double route_turb_mod_thresh;
-
-  double route_turb_high_thresh;
-
-  char* route_icing_url;
-
-  double route_icing_low_thresh;
-
-  double route_icing_mod_thresh;
-
-  double route_icing_high_thresh;
-
-  char* *_route_paths;
-  int route_paths_n;
-
   mode_t start_mode;
 
   char* archive_start_time;
+
+  tdrp_bool_t check_data_times;
+
+  tdrp_bool_t check_clipping;
+
+  double time_search_stretch_factor;
+
+  gather_data_mode_t gather_data_mode;
+
+  int update_interval;
+
+  char* datamap_host;
+
+  int data_timeout_secs;
+
+  tdrp_bool_t request_compressed_data;
+
+  tdrp_bool_t request_gzip_vol_compression;
+
+  int model_run_list_hours;
+
+  double forecast_interval_hours;
+
+  double past_interval_hours;
+
+  tdrp_bool_t always_get_full_domain;
+
+  tdrp_bool_t do_not_clip_on_mdv_request;
+
+  tdrp_bool_t do_not_decimate_on_mdv_request;
 
   int n_movie_frames;
 
@@ -754,111 +696,19 @@ public:
 
   tdrp_bool_t reset_frames;
 
+  double movie_magnify_factor;
+
   char* climo_mode;
 
   int climo_max_time_span_days;
 
   double climo_frame_span_mins;
 
-  double forecast_interval_hours;
-
-  double past_interval_hours;
-
-  double movie_magnify_factor;
-
-  tdrp_bool_t check_data_times;
-
-  tdrp_bool_t check_clipping;
-
-  double time_search_stretch_factor;
-
-  gather_data_mode_t gather_data_mode;
-
   int redraw_interval;
-
-  int update_interval;
-
-  char* datamap_host;
-
-  int data_timeout_secs;
-
-  int simple_command_timeout_secs;
-
-  int complex_command_timeout_secs;
-
-  int model_run_list_hours;
-
-  int idle_reset_seconds;
-
-  tdrp_bool_t html_mode;
-
-  tdrp_bool_t run_once_and_exit;
-
-  tdrp_bool_t transparent_images;
-
-  char* image_dir;
-
-  tdrp_bool_t save_images_to_day_subdir;
-
-  char* image_ext;
-
-  char* image_horiz_prefix;
-
-  char* image_vert_prefix;
-
-  char* image_name_separator;
-
-  tdrp_bool_t add_height_to_filename;
-
-  tdrp_bool_t add_frame_time_to_filename;
-
-  tdrp_bool_t add_button_name_to_filename;
-
-  tdrp_bool_t add_frame_num_to_filename;
-
-  tdrp_bool_t add_gen_time_to_filename;
-
-  tdrp_bool_t add_valid_time_to_filename;
-
-  char* horiz_image_dir;
-
-  char* horiz_image_fname;
-
-  char* horiz_image_command;
-
-  char* vert_image_dir;
-
-  char* vert_image_fname;
-
-  char* vert_image_command;
-
-  tdrp_bool_t output_geo_xml;
-
-  tdrp_bool_t use_latlon_in_geo_xml;
-
-  char* movieframe_time_format;
-
-  int movieframe_time_mode;
-
-  char* image_convert_script;
-
-  char* print_script;
-
-  char* series_convert_script;
-
-  tdrp_bool_t request_compressed_data;
-
-  tdrp_bool_t request_gzip_vol_compression;
 
   double scale_units_per_km;
 
   char* scale_units_label;
-
-  tdrp_bool_t always_get_full_domain;
-
-  tdrp_bool_t do_not_clip_on_mdv_request;
-
-  tdrp_bool_t do_not_decimate_on_mdv_request;
 
   double min_zoom_threshold;
 
@@ -1392,6 +1242,156 @@ public:
 
   double vert_rendering_beam_width;
 
+  tdrp_bool_t symprods_enabled_at_startup;
+
+  symprod_debug_t symprod_debug;
+
+  tdrp_bool_t symprod_short_requests;
+
+  tdrp_bool_t symprod_gzip_requests;
+
+  symprod_prod_info_t *_symprod_prod_info;
+  int symprod_prod_info_n;
+
+  tdrp_bool_t terrain_active;
+
+  char* terrain_id_label;
+
+  char* terrain_url;
+
+  double terrain_height_scaler;
+
+  char* landuse_url;
+
+  char* landuse_colorscale;
+
+  terrain_render_type_t landuse_render_method;
+
+  tdrp_bool_t landuse_active;
+
+  char* terrain_earth_color1;
+
+  char* terrain_earth_color2;
+
+  char* click_point_fmq_url;
+
+  int simple_command_timeout_secs;
+
+  int complex_command_timeout_secs;
+
+  tdrp_bool_t image_generation_active;
+
+  image_debug_t image_debug;
+
+  tdrp_bool_t image_generate_vsection;
+
+  tdrp_bool_t image_vsection_waypts_in_latlon;
+
+  image_vsection_spec_t *_image_vsection_spec;
+  int image_vsection_spec_n;
+
+  tdrp_bool_t html_mode;
+
+  tdrp_bool_t run_once_and_exit;
+
+  tdrp_bool_t transparent_images;
+
+  char* image_dir;
+
+  tdrp_bool_t save_images_to_day_subdir;
+
+  char* image_ext;
+
+  char* image_horiz_prefix;
+
+  char* image_vert_prefix;
+
+  char* image_name_separator;
+
+  tdrp_bool_t add_height_to_filename;
+
+  tdrp_bool_t add_frame_time_to_filename;
+
+  tdrp_bool_t add_button_name_to_filename;
+
+  tdrp_bool_t add_frame_num_to_filename;
+
+  tdrp_bool_t add_gen_time_to_filename;
+
+  tdrp_bool_t add_valid_time_to_filename;
+
+  char* horiz_image_dir;
+
+  char* horiz_image_fname;
+
+  char* horiz_image_command;
+
+  char* vert_image_dir;
+
+  char* vert_image_fname;
+
+  char* vert_image_command;
+
+  tdrp_bool_t output_geo_xml;
+
+  tdrp_bool_t use_latlon_in_geo_xml;
+
+  char* movieframe_time_format;
+
+  int movieframe_time_mode;
+
+  char* image_convert_script;
+
+  char* print_script;
+
+  char* series_convert_script;
+
+  tdrp_bool_t draw_export_active;
+
+  draw_export_t *_draw_export_info;
+  int draw_export_info_n;
+
+  tdrp_bool_t route_winds_active;
+
+  route_debug_t route_debug;
+
+  int route_font_height;
+
+  int route_add_waypoints_labels;
+
+  int route_add_wind_text;
+
+  route_label_style_t route_label_style;
+
+  double route_label_interval;
+
+  int route_num_labels;
+
+  int route_track_line_width;
+
+  char* route_u_url;
+
+  char* route_v_url;
+
+  char* route_turb_url;
+
+  double route_turb_low_thresh;
+
+  double route_turb_mod_thresh;
+
+  double route_turb_high_thresh;
+
+  char* route_icing_url;
+
+  double route_icing_low_thresh;
+
+  double route_icing_mod_thresh;
+
+  double route_icing_high_thresh;
+
+  char* *_route_paths;
+  int route_paths_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1399,7 +1399,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[465];
+  mutable TDRPtable _table[476];
 
   const char *_className;
 
