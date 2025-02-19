@@ -2050,7 +2050,7 @@ paramdef int {
 
 paramdef int {
   p_default = 10;
-  p_descr = "Font size of axis labels in horiz view (pixels).";
+  p_descr = "Font size of axis labels in bscan (pixels).";
 } horiz_axis_label_font_size;
 
 paramdef int {
@@ -2143,7 +2143,7 @@ paramdef int {
 
 paramdef int {
   p_default = 10;
-  p_descr = "Font size of axis labels in vert (pixels).";
+  p_descr = "Font size of axis labels in bscan (pixels).";
 } vert_axis_label_font_size;
 
 paramdef int {
@@ -2970,6 +2970,111 @@ commentdef {
 }
 
 commentdef {
+  p_header = "STATUS TO BE SHOWN IN GUI";
+}
+
+typedef struct {
+
+  boolean azimuth;
+  boolean elevation;
+  boolean fixed_angle;
+  boolean volume_number;
+  boolean sweep_number;
+  boolean n_samples;
+  boolean n_gates;
+  boolean gate_length;
+  boolean pulse_width;
+  boolean prf_mode;
+  boolean prf;
+  boolean nyquist;
+  boolean max_range;
+  boolean unambiguous_range;
+  boolean measured_power_h;
+  boolean measured_power_v;
+  boolean scan_name;
+  boolean scan_mode;
+  boolean polarization_mode;
+  boolean latitude;
+  boolean longitude;
+  boolean altitude;
+  boolean altitude_rate;
+  boolean sun_elevation;
+  boolean sun_azimuth;
+  boolean speed;
+  boolean heading;
+  boolean track;
+
+} show_status_t;
+
+paramdef struct show_status_t {
+
+  p_default = {
+    azimuth = true,
+    elevation = true,
+    fixed_angle = true,
+    volume_number = false,
+    sweep_number = true,
+    n_samples = true,
+    n_gates = true,
+    gate_length = true,
+    pulse_width = true,
+    prf_mode = true,
+    prf = true,
+    nyquist = true,
+    max_range = true,
+    unambiguous_range = true,
+    measured_power_h = false,
+    measured_power_v = false,
+    scan_name = false,
+    scan_mode = true,
+    polarization_mode = true,
+    latitude = true,
+    longitude = true,
+    altitude = true,
+    altitude_rate = false,
+    sun_elevation = true,
+    sun_azimuth = true,
+    speed = false,
+    heading = false,
+    track = false
+  };
+
+  p_descr = "Indicate which status items to show in GUI.";
+
+  p_help = "These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.";
+
+} show_status_in_gui;
+
+commentdef {
+  p_header = "NAMES AND LABELS";
+}
+
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Option to override radar name in the data.";
+// } override_radar_name;
+
+// paramdef string {
+//   p_default = "SPOL";
+//   p_descr = "Radar name if overridden.";
+// } radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to display the site name in the left panel.";
+} display_site_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override site name in the data.";
+} override_site_name;
+
+paramdef string {
+  p_default = "MARSHALL";
+  p_descr = "Site name if overridden.";
+} site_name;
+
+commentdef {
   p_header = "WINDOW DIMENSIONS AND PLOTTING DETAILS";
 }
 
@@ -3305,6 +3410,351 @@ paramdef double {
   p_descr = "Rendering beam width, if override is active.";
   p_help = "See 'vert_override_rendering_beam_width'";
 } vert_rendering_beam_width;
+
+commentdef {
+  p_header = "BSCAN TIME LIMITS";
+}
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Number of seconds in BSCAN display.";
+  p_help = "In REALTIME mode, when we reach the right-hand side of the display, the existing plot will be moved left to make room for more data.";
+} bscan_time_span_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to truncate the plot start time to even seconds.";
+  p_help = "If true, we truncate the start time to the previous second.";
+} bscan_truncate_start_time;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Precision of subseconds in time labels.";
+  p_help = "Number of decimals of precision in time labels. Set to 0 for times in integer seconds.";
+  p_min = 0;
+  p_max = 9;
+} bscan_subsec_precision;
+
+commentdef {
+  p_header = "BSCAN REALTIME CONTROLS";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "What fraction of the existing data to save when moving the plot to the left.";
+  p_help = "When we reach the right-hand side of the display, we need to move the plot to the left. This is the fraction of the plot that is saved after the move has taken place.";
+} bscan_realtime_fraction_saved;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Min time between incoming beams (secs).";
+  p_help = "If beams arrive too fast, we discard some so that the time between the beams is at least this long.";
+} bscan_min_secs_between_reading_beams;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min time between rendering (secs).";
+  p_help = "Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU and/or GPU.";
+} bscan_min_secs_between_rendering_beams;
+
+commentdef {
+  p_header = "BSCAN RANGE AND ALTITUDE LIMITS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Specify the min and max range when in range mode.";
+  p_help = "If false, we will use the start range and max range in the data.";
+} bscan_specify_range_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Min range to be plotted (km).";
+  p_help = "Used if 'bscan_specify_range_limits' is true.";
+} bscan_min_range_km;
+
+paramdef double {
+  p_default = 25;
+  p_descr = "Max range to be plotted (km).";
+  p_help = "Used if 'bscan_specify_range_limits' is true.";
+} bscan_max_range_km;
+
+paramdef double {
+  p_default = -0.5;
+  p_descr = "Min altitude plotted (km).";
+} bscan_min_altitude_km;
+
+paramdef double {
+  p_default = 25;
+  p_descr = "Max altitude plotted (km).";
+} bscan_max_altitude_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Use feet for altitude units?";
+  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
+} bscan_altitude_in_feet;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Use feet for range units?";
+  p_descr = "If true, kft (kilofeet) will be used. If false, km will be used.";
+} bscan_range_in_feet;
+
+typedef enum {
+  RANGE_AXIS_UP, RANGE_AXIS_DOWN, RANGE_AXIS_ALTITUDE
+} range_axis_mode_t;
+
+paramdef enum range_axis_mode_t {
+  p_default = RANGE_AXIS_ALTITUDE;
+  p_descr = "Options for plotting range in the vertical scale.";
+  p_help = "RANGE_AXIS_UP - instrument is at the bottom, range plotted positively upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the altitude of the gates in earth coordinates.";
+} bscan_range_axis_mode;
+
+commentdef {
+  p_header = "BSCAN ANGLE LIMITS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the min and max elevation angle.";
+  p_help = "If true, only beams within the specified limits will be plotted.";
+} bscan_specify_elevation_limits;
+
+paramdef double {
+  p_default = 89;
+  p_descr = "Min elevation angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
+} bscan_min_elevation_deg;
+
+paramdef double {
+  p_default = 91;
+  p_descr = "Max elevation angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_elevation_limits' is true.";
+} bscan_max_elevation_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the min and max azimuth angle.";
+  p_help = "If true, only beams within the specified limits will be plotted.";
+} bscan_specify_azimuth_limits;
+
+paramdef double {
+  p_default = 89;
+  p_descr = "Min azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_min_azimuth_deg;
+
+paramdef double {
+  p_default = 91;
+  p_descr = "Max azimuth angle to be plotted (deg).";
+  p_help = "Used if 'bscan_specify_azimuth_limits' is true.";
+} bscan_max_azimuth_deg;
+
+commentdef {
+  p_header = "BSCAN CENSOR DATA BELOW SURFACE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to censor data below the measured surface";
+  p_descr = "If true, and we can identify the surface echo, suppress data below the surface.";
+} bscan_censor_data_below_surface;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of field used to identify the surface from the data.";
+  p_help = "The surface will be identified at the gate with the maximum value in this field.";
+} bscan_surface_field;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minumum range to the surface (km).";
+  p_help = "We will search for the surface echo in the gates beyound this range.";
+} bscan_min_range_to_surface_km;
+
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Margin of data plotted beyond the surface (km).";
+  p_help = "We will censor the data beyond the surface gate, plus this range margin.";
+} bscan_surface_range_margin_km;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum value of the surface field, below the measured surface.";
+  p_help = "After finding the range to the surface, we inspect the surface_field values below the surface. If we find values that exceed this parameter, we conclude that the surface cannot be reliably found.";
+} bscan_max_field_val_below_surface;
+
+commentdef {
+  p_header = "BSCAN MARGINS";
+}
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Height of top margin in BSCAN mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} bscan_top_margin;
+
+paramdef int {
+  p_default = 45;
+  p_descr = "Height of bottom margin in BSCAN mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} bscan_bottom_margin;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Width of left margin in BSCAN mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} bscan_left_margin;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of right margin in BSCAN mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} bscan_right_margin;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Length of ticks on axes (pixels).";
+} bscan_axis_tick_len;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Ideal number of ticks on axes.";
+} bscan_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} bscan_text_margin;
+
+commentdef {
+  p_header = "BSCAN TITLES, LABELS AND AXES";
+}
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Font size of center title (pixels).";
+} bscan_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in bscan (pixels).";
+} bscan_axis_label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis values (pixels).";
+} bscan_axis_values_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes in bscan.";
+} bscan_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on bscan.";
+} bscan_grid_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of labels in bscan.";
+} bscan_labels_color;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular time intervals.";
+} bscan_draw_time_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines across plot at regular range intervals.";
+} bscan_draw_range_grid_lines;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw a line for the instrument location.";
+  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
+} bscan_draw_instrument_height_line;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of instrument height line in ALTITUDE plot.";
+} bscan_instrument_height_color;
+
+commentdef {
+  p_header = "DISTANCE SCALE";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot distance as well as time on the time axis.";
+  p_help = "If true, extra tick marks will show the distance in km along the time axis, in addition to the time.";
+} bscan_add_distance_to_time_axis;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Number of segments to be used for computing distance.";
+  p_help = "We divide the rays into this number of segments and then compute the distance travelled during each segment using the change in lat/lon position. We keep the number of segments reasonably small to avoid unnecessary CPU usage.";
+} bscan_n_segments_for_computing_distance;
+
+commentdef {
+  p_header = "BSCAN LEGENDS";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} bscan_plot_starting_latlon_as_legend;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'bscan_plot_starting_latlon_as_legend'.";
+} bscan_starting_latlon_legend_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the mean track and speed in a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} bscan_plot_mean_track_and_speed_as_legend;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_RIGHT;
+  p_descr = "Position of track/speed legend in plot";
+  p_help = "The mean track and speed will be plotted as a legend in the location specified. See 'bscan_plot_track_and_speed_as_legend'.";
+} bscan_mean_track_and_speed_legend_pos;
+
+commentdef {
+  p_header = "BSCAN DWELL CONTROLS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Compute dwell from image size and time range.";
+  p_help = "If TRUE, we compute the optimal dwell so that there will be approximately 1 dwell for each pixel in the resulting image. If FALSE, the dwell is specified below.";;
+} bscan_archive_dwell_auto;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Specified dwell time for archive mode (secs).";
+} bscan_archive_dwell_secs;
+
+typedef enum {
+  DWELL_STATS_MEAN = 0,
+  DWELL_STATS_MEDIAN = 1,
+  DWELL_STATS_MAXIMUM = 2,
+  DWELL_STATS_MINIMUM = 3,
+  DWELL_STATS_MIDDLE = 4
+} bscan_dwell_stats_t;
+
+paramdef enum bscan_dwell_stats_t {
+  p_default = DWELL_STATS_MIDDLE;
+  p_descr = "Method for computing stats on the dwell.";
+  p_help = "Applies to READ_RAYS_IN_INTERVAL mode. MIDDLE refers to the middle ray in the dwell sequence.";
+} bscan_dwell_stats;
 
 commentdef {
   p_header = "</LUCID_SPECIFIC_DETAILS>";

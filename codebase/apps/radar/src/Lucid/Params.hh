@@ -173,20 +173,6 @@ public:
     LEGEND_BOTTOM_RIGHT = 3
   } legend_pos_t;
 
-  typedef enum {
-    RANGE_AXIS_UP = 0,
-    RANGE_AXIS_DOWN = 1,
-    RANGE_AXIS_ALTITUDE = 2
-  } range_axis_mode_t;
-
-  typedef enum {
-    DWELL_STATS_MEAN = 0,
-    DWELL_STATS_MEDIAN = 1,
-    DWELL_STATS_MAXIMUM = 2,
-    DWELL_STATS_MINIMUM = 3,
-    DWELL_STATS_MIDDLE = 4
-  } bscan_dwell_stats_t;
-
   // struct typedefs
 
   typedef struct {
@@ -288,37 +274,6 @@ public:
     double threshold;
     int font_index_adj;
   } product_adjustment_t;
-
-  typedef struct {
-    tdrp_bool_t azimuth;
-    tdrp_bool_t elevation;
-    tdrp_bool_t fixed_angle;
-    tdrp_bool_t volume_number;
-    tdrp_bool_t sweep_number;
-    tdrp_bool_t n_samples;
-    tdrp_bool_t n_gates;
-    tdrp_bool_t gate_length;
-    tdrp_bool_t pulse_width;
-    tdrp_bool_t prf_mode;
-    tdrp_bool_t prf;
-    tdrp_bool_t nyquist;
-    tdrp_bool_t max_range;
-    tdrp_bool_t unambiguous_range;
-    tdrp_bool_t measured_power_h;
-    tdrp_bool_t measured_power_v;
-    tdrp_bool_t scan_name;
-    tdrp_bool_t scan_mode;
-    tdrp_bool_t polarization_mode;
-    tdrp_bool_t latitude;
-    tdrp_bool_t longitude;
-    tdrp_bool_t altitude;
-    tdrp_bool_t altitude_rate;
-    tdrp_bool_t sun_elevation;
-    tdrp_bool_t sun_azimuth;
-    tdrp_bool_t speed;
-    tdrp_bool_t heading;
-    tdrp_bool_t track;
-  } show_status_t;
 
   ///////////////////////////
   // Member functions
@@ -1327,14 +1282,6 @@ public:
   int *_images_sweep_index_list;
   int images_sweep_index_list_n;
 
-  show_status_t show_status_in_gui;
-
-  tdrp_bool_t display_site_name;
-
-  tdrp_bool_t override_site_name;
-
-  char* site_name;
-
   int main_window_width;
 
   int main_window_height;
@@ -1445,108 +1392,6 @@ public:
 
   double vert_rendering_beam_width;
 
-  double bscan_time_span_secs;
-
-  tdrp_bool_t bscan_truncate_start_time;
-
-  int bscan_subsec_precision;
-
-  double bscan_realtime_fraction_saved;
-
-  double bscan_min_secs_between_reading_beams;
-
-  double bscan_min_secs_between_rendering_beams;
-
-  tdrp_bool_t bscan_specify_range_limits;
-
-  double bscan_min_range_km;
-
-  double bscan_max_range_km;
-
-  double bscan_min_altitude_km;
-
-  double bscan_max_altitude_km;
-
-  tdrp_bool_t bscan_altitude_in_feet;
-
-  tdrp_bool_t bscan_range_in_feet;
-
-  range_axis_mode_t bscan_range_axis_mode;
-
-  tdrp_bool_t bscan_specify_elevation_limits;
-
-  double bscan_min_elevation_deg;
-
-  double bscan_max_elevation_deg;
-
-  tdrp_bool_t bscan_specify_azimuth_limits;
-
-  double bscan_min_azimuth_deg;
-
-  double bscan_max_azimuth_deg;
-
-  tdrp_bool_t bscan_censor_data_below_surface;
-
-  char* bscan_surface_field;
-
-  double bscan_min_range_to_surface_km;
-
-  double bscan_surface_range_margin_km;
-
-  double bscan_max_field_val_below_surface;
-
-  int bscan_top_margin;
-
-  int bscan_bottom_margin;
-
-  int bscan_left_margin;
-
-  int bscan_right_margin;
-
-  int bscan_axis_tick_len;
-
-  int bscan_n_ticks_ideal;
-
-  int bscan_text_margin;
-
-  int bscan_title_font_size;
-
-  int bscan_axis_label_font_size;
-
-  int bscan_axis_values_font_size;
-
-  char* bscan_axes_color;
-
-  char* bscan_grid_color;
-
-  char* bscan_labels_color;
-
-  tdrp_bool_t bscan_draw_time_grid_lines;
-
-  tdrp_bool_t bscan_draw_range_grid_lines;
-
-  tdrp_bool_t bscan_draw_instrument_height_line;
-
-  char* bscan_instrument_height_color;
-
-  tdrp_bool_t bscan_add_distance_to_time_axis;
-
-  int bscan_n_segments_for_computing_distance;
-
-  tdrp_bool_t bscan_plot_starting_latlon_as_legend;
-
-  legend_pos_t bscan_starting_latlon_legend_pos;
-
-  tdrp_bool_t bscan_plot_mean_track_and_speed_as_legend;
-
-  legend_pos_t bscan_mean_track_and_speed_legend_pos;
-
-  tdrp_bool_t bscan_archive_dwell_auto;
-
-  double bscan_archive_dwell_secs;
-
-  bscan_dwell_stats_t bscan_dwell_stats;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1554,7 +1399,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[532];
+  mutable TDRPtable _table[465];
 
   const char *_className;
 
