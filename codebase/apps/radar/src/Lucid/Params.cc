@@ -3838,7 +3838,7 @@
     tt->descr = tdrpStrDup("Set the format for the time strings.");
     tt->help = tdrpStrDup("See 'man strftime' for format options. Can add additional text as part of the Time string.");
     tt->val_offset = (char *) &label_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%m/%d/%y %H:%M:%S");
+    tt->single_val.s = tdrpStrDup("%Y/%m/%d %H:%M:%S");
     tt++;
     
     // Parameter 'moviestart_time_format'
@@ -3850,7 +3850,7 @@
     tt->descr = tdrpStrDup("Set the format for the time string in the movie start time text field of the movie pop-up window.");
     tt->help = tdrpStrDup("This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.");
     tt->val_offset = (char *) &moviestart_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%H:%M %m/%d/%Y");
+    tt->single_val.s = tdrpStrDup("%Y/%m/%d %H:%M:%S");
     tt++;
     
     // Parameter 'frame_range_time_format'
@@ -4192,7 +4192,7 @@
     tt->descr = tdrpStrDup("Color for legends in horizontal plot.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_legend_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'horiz_axis_text_margin'

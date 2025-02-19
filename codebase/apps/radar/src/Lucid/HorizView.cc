@@ -466,6 +466,45 @@ void HorizView::_drawOverlays(QPainter &painter)
   const ColorMap &colorMap = *(gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
+  // add the legends
+  
+  {
+    
+    painter.save();
+    MdvReader *mr = gd.mread[_renderFramePage];
+    
+    vector<string> legends;
+    legends.push_back(mr->fieldLabel());
+    
+    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
+    painter.setBrush(Qt::black);
+    painter.setBackgroundMode(Qt::OpaqueMode);
+
+    QFont lfont(painter.font());
+    lfont.setPointSizeF(_params.horiz_legend_font_size);
+    lfont.setBold(true);
+    painter.setFont(lfont);
+    
+    switch (_params.horiz_main_legend_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
+    }
+    
+    painter.restore();
+
+  }
+  
 #ifdef NOTNOW
   // add the legends
   
@@ -1598,42 +1637,6 @@ int HorizView::_renderGrid(QPainter &painter,
                                    is_overlay_field);
   }
 
-  // legends
-  
-  {
-
-    painter.save();
-
-    vector<string> legends;
-    char text[4096];
-    // legends.push_back(mr->h_date.asString(0)); // field data time
-    snprintf(text, 4096, "%s %s", mr->fieldLabel().c_str(), mr->vlevelLabel().c_str());
-    legends.push_back(text);
-    
-    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
-    painter.setBrush(Qt::black);
-    painter.setBackgroundMode(Qt::OpaqueMode);
-  
-    switch (_params.horiz_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-    
-    painter.restore();
-
-  }
-  
 #ifdef NOTNOW
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.

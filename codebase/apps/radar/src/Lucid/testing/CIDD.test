@@ -102,25 +102,25 @@ field_list = {
 
 # MRMS mosaic
 
-WIDE_MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
-WIDE_MRMS_DBZ_3D      MRMS_DBZ_3D      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
-WIDE_MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
-WIDE_3HR_ACCUM_PID      3HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
-WIDE_3HR_ACCUM_HYBRID   3HR_ACCUM_HYBRID   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_HYBRID  precip_accum.colors  mm  -5 80 5 radial 1 0
-WIDE_3HR_ACCUM_Z_ZDR    3HR_ACCUM_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_Z_ZDR   precip_accum.colors  mm  -5 80 5 radial 1 0
-WIDE_3HR_ACCUM_ZH       3HR_ACCUM_ZH       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_ZH      precip_accum.colors  mm  -5 80 5 radial 1 0
-WIDE_24HR_ACCUM_PID      24HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_24hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
+MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
+MRMS_DBZ_3D      MRMS_DBZ_3D      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
+MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
+3HR_ACCUM_PID      3HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_HYBRID   3HR_ACCUM_HYBRID   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_HYBRID  precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_Z_ZDR    3HR_ACCUM_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_Z_ZDR   precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_ZH       3HR_ACCUM_ZH       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_ZH      precip_accum.colors  mm  -5 80 5 radial 1 0
+24HR_ACCUM_PID      24HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_24hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
 
 # SURFACE data, LTG rate
 
-WIDE_Vis   SAT_Vis  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_1km?use_http=true&gvar_ch1  sat_cloud.colors  albedo   -5   80  5  dcont   1 0
-WIDE_IR2   SAT_IR2  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch2   sat_tempC_toga.colors   C   -5   80  5  dcont   1 0
-WIDE_IR3   SAT_IR3  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch3   sat_tempC_2.colors   C   -5   80  5  dcont   1 0
-WIDE_IR4   SAT_IR4  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch4   sat_tempC_2.colors   C   -5   80  5  dcont   1 0
-WIDE_Temp  SURF_Temp  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true&Temp        temp.colors m -5 80 5 dcont 1 0
-WIDE_DewPt SURF_DewPt mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true&DewPoint    temp.colors m -5 80 5 dcont 1 0
-WIDE_RUC-temp   RUC-temp   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&TMP  temp.colors   C   -5   80  5  dcont   1 0
-WIDE_RUC-RH     RUC-RH     mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&RH   rh.colors   %   -5   80  5  dcont   1 0
+Vis   SAT_Vis  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_1km?use_http=true&gvar_ch1  sat_cloud.colors  albedo   -5   80  5  dcont   1 0
+IR2   SAT_IR2  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch2   sat_tempC_toga.colors   C   -5   80  5  dcont   1 0
+IR3   SAT_IR3  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch3   sat_tempC_2.colors   C   -5   80  5  dcont   1 0
+IR4   SAT_IR4  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_4km?use_http=true&gvar_ch4   sat_tempC_2.colors   C   -5   80  5  dcont   1 0
+Temp  SURF_Temp  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true&Temp        temp.colors m -5 80 5 dcont 1 0
+DewPt SURF_DewPt mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true&DewPoint    temp.colors m -5 80 5 dcont 1 0
+RUC-temp   RUC-temp   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&TMP  temp.colors   C   -5   80  5  dcont   1 0
+RUC-RH     RUC-RH     mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&RH   rh.colors   %   -5   80  5  dcont   1 0
 
 #############################
 # NEXRAD RADIAL MOMENTS
@@ -716,7 +716,7 @@ cidd.latlon_mode:        0
 # Set the format for the time strings. See 'man strftime' for format options.
 # Can add additional text as part of the Time string.
 # Default is: "%m/%d/%Y %H:%M:%S"
-cidd.label_time_format:  %m/%d/%Y %H:%M:%S
+cidd.label_time_format:  %Y/%m/%d %H:%M:%S
 
 # Plot a Legend for each Grid overlay; 0=Off, 1=On
 cidd.layer_legends_on: 1  
@@ -949,6 +949,7 @@ cidd.vert_image_dir:    /tmp
 cidd.vert_image_fname:    CV
 cidd.vert_image_command:  convert_image.csh
 
+cidd.use_local_timestamps: 0
 
 #Toggle for displaying an analog clock in the upper right hand corner of the image
 cidd.show_clock:       0

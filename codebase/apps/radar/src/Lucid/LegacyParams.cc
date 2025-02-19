@@ -1068,6 +1068,7 @@ int LegacyParams::_readMainParams()
   
   _getLong("cidd.temporal_rounding", 300);
   _getString("cidd.climo_mode", "regular");
+  _getBoolean("cidd.use_local_timestamps", 0);
   
   /* movies */
   _getLong("cidd.max_time_list_span", 365, true, "climo_max_time_span_days");

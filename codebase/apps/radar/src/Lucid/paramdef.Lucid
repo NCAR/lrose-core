@@ -1845,13 +1845,13 @@ paramdef int {
 } latlon_mode;
 
 paramdef string {
-  p_default = "%m/%d/%y %H:%M:%S";
+  p_default = "%Y/%m/%d %H:%M:%S";
   p_descr = "Set the format for the time strings.";
   p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
 } label_time_format;
 
 paramdef string {
-  p_default = "%H:%M %m/%d/%Y";
+  p_default = "%Y/%m/%d %H:%M:%S";
   p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
   p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
 } moviestart_time_format;
@@ -2023,7 +2023,7 @@ paramdef int {
 } horiz_legend_text_margin;
 
 paramdef string {
-  p_default = "yellow";
+  p_default = "white";
   p_descr = "Color for legends in horizontal plot.";
 } horiz_legend_color;
 

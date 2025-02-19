@@ -1306,21 +1306,13 @@ string MdvReader::vlevelLabel()
 string MdvReader::fieldLabel()
 {
 
-  // time_t  now;
-  struct tm tms;
-  char tlabel[1024];
+  
+  // Convert time to a string
+  
+  string tlabel =
+    h_date.strfTime(_params.label_time_format, !_params.use_local_timestamps);
+
   char label[2048];
-  
-  // Convert to a string
-  
-  time_t utime = h_date.utime();
-  if(_params.use_local_timestamps) {
-    strftime(tlabel,256,_params.label_time_format,localtime_r(&utime,&tms));
-  } else {
-    strftime(tlabel,256,_params.label_time_format,gmtime_r(&utime,&tms));
-  }
-  
-  // now = time(NULL);
   label[0] = '\0';
   
   if(composite_mode == FALSE) {
@@ -1332,7 +1324,7 @@ string MdvReader::fieldLabel()
       //snprintf(label,"%s At Surface %s",
       snprintf(label,2048,"%s: %s",
                legend_name.c_str(),
-               tlabel);
+               tlabel.c_str());
     } else {
       // Reverse order of label and value if units are "FL" 
       if(strcmp(units_label_sects,"FL") == 0) {
@@ -1340,25 +1332,25 @@ string MdvReader::fieldLabel()
                  legend_name.c_str(),
                  units_label_sects,
                  vert[plane].cent,
-                 tlabel);
+                 tlabel.c_str());
       }else {
         snprintf(label,2048,"%s: %g %s %s",
                  legend_name.c_str(),
                  vert[plane].cent,
                  units_label_sects,
-                 tlabel);
+                 tlabel.c_str());
       }
     }
   } else {
     snprintf(label,2048,"%s: All levels %s",
              legend_name.c_str(),
-             tlabel);
+             tlabel.c_str());
   }
   
   /* If data is Forecast, add a  label */
-  if( h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) {
-    strcat(label," FORECAST Gen");
-  }
+  // if( h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) {
+  //   strcat(label," FORECAST Gen");
+  // }
   
   return label;
   
