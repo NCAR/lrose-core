@@ -2807,9 +2807,9 @@ int Lucid::_initZooms()
       gd.h_win.zmin_y[izoom] =  gd.h_win.max_y - delta_y;
     }
 
-    if(_params.horiz_aspect_ratio <= 0.0) {
-      _params.horiz_aspect_ratio = fabs(delta_x/delta_y);
-    }
+    // if(_params.horiz_aspect_ratio <= 0.0) {
+    //   _params.horiz_aspect_ratio = fabs(delta_x/delta_y);
+    // }
     
     gd.aspect_correction =
       cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * DEG_TO_RAD);

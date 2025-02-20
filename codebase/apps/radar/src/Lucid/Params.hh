@@ -593,17 +593,15 @@ public:
 
   char* archive_start_time;
 
-  int main_window_x_pos;
+  int horiz_window_x_pos;
 
-  int main_window_y_pos;
+  int horiz_window_y_pos;
 
   int horiz_plot_width;
 
   int horiz_plot_height;
 
-  int main_window_min_width;
-
-  int main_window_min_height;
+  int horiz_color_scale_width;
 
   int vert_window_x_pos;
 
@@ -612,6 +610,10 @@ public:
   int vert_plot_width;
 
   int vert_plot_height;
+
+  int horiz_window_min_width;
+
+  int horiz_window_min_height;
 
   int vert_window_min_width;
 
@@ -831,30 +833,6 @@ public:
 
   tdrp_bool_t display_ref_lines;
 
-  int horiz_default_x_pos;
-
-  int horiz_default_y_pos;
-
-  int horiz_default_width;
-
-  int horiz_default_height;
-
-  int horiz_min_width;
-
-  int horiz_min_height;
-
-  int vert_default_x_pos;
-
-  int vert_default_y_pos;
-
-  int vert_default_width;
-
-  int vert_default_height;
-
-  int vert_min_width;
-
-  int vert_min_height;
-
   int top_margin_render_style;
 
   int bot_margin_render_style;
@@ -928,18 +906,6 @@ public:
   char* vert_axes_color;
 
   char* vert_grid_color;
-
-  int horiz_legends_start_x;
-
-  int horiz_legends_start_y;
-
-  int horiz_legends_delta_y;
-
-  int vert_legends_start_x;
-
-  int vert_legends_start_y;
-
-  int vert_legends_delta_y;
 
   tdrp_bool_t range_rings;
 
@@ -1109,16 +1075,6 @@ public:
 
   tdrp_bool_t enable_save_image_panel;
 
-  int main_window_width;
-
-  int main_window_height;
-
-  int main_window_start_x;
-
-  int main_window_start_y;
-
-  int color_scale_width;
-
   int label_font_size;
 
   char* background_color2;
@@ -1166,8 +1122,6 @@ public:
   char* vlevel_selector_marker_color;
 
   char* vlevel_selector_data_values_color;
-
-  double horiz_aspect_ratio;
 
   tdrp_bool_t horiz_grids_on_at_startup;
 
@@ -1411,7 +1365,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[485];
+  mutable TDRPtable _table[463];
 
   const char *_className;
 

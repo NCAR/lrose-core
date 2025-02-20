@@ -125,13 +125,13 @@ paramdef int {
   p_default = 0;
   p_descr = "Startup X for main horizontal window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
-} main_window_x_pos;
+} horiz_window_x_pos;
 
 paramdef int {
   p_default = 0;
   p_descr = "Startup Y for main horizontal window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
-} main_window_y_pos;
+} horiz_window_y_pos;
 
 paramdef int {
   p_default = 1000;
@@ -145,27 +145,20 @@ paramdef int {
 } horiz_plot_height;
 
 paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} main_window_min_width;
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} horiz_color_scale_width;
 
 paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} main_window_min_height;
-
-paramdef int {
-  p_default = 500;
+  p_default = -1;
   p_descr = "Startup X for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
 } vert_window_x_pos;
 
 paramdef int {
-  p_default = 500;
+  p_default = -1;
   p_descr = "Startup Y for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
 } vert_window_y_pos;
 
 paramdef int {
@@ -178,6 +171,18 @@ paramdef int {
   p_default = 600;
   p_descr = "Startup height of vertical plot (pixels).";
 } vert_plot_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_height;
 
 paramdef int {
   p_default = 600;
@@ -1134,83 +1139,6 @@ paramdef boolean {
 } display_ref_lines;
 
 commentdef {
-  p_header = "Window sizes.";
-  p_text = "Window width and height is specified in pixels.";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} horiz_default_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
-  p_help = "The main display window will start at this location.";
-} horiz_default_y_pos;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Default width of main window (pixels).";
-  p_help = "Height of main window at startup.";
-} horiz_default_width;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Default height of main window (pixels).";
-  p_help = "Width of main window at startup.";
-} horiz_default_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_min_height;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of vert window, relative to top-left of screen (pixels).";
-  p_help = "The vert display window will start at this location.";
-} vert_default_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup position of vert window, relative to top-left of screen (pixels).";
-  p_help = "The vert display window will start at this location.";
-} vert_default_y_pos;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Default width of vert section window (pixels).";
-  p_help = "Height of vert section window at startup.";
-} vert_default_width;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Default height of vert section window (pixels).";
-  p_help = "Width of vert section window at startup.";
-} vert_default_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of vert section window (pixels).";
-  p_help = "The user cannot shrink the vert section window smaller than this.";
-} vert_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of vert section window (pixels).";
-  p_help = "The user cannot shrink the vert section window smaller than this.";
-} vert_min_height;
-
-commentdef {
   p_header = "Margin details.";
   p_text = "Margins are specified in pixels.";
 }
@@ -1422,42 +1350,6 @@ commentdef {
   p_header = "Legends displayed within the plot window.";
   p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
 }
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends start x position (pixels).";
-  p_help = "Relative to top left of window.";
-} horiz_legends_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends start y position (pixels).";
-  p_help = "Relative to top left of window.";
-} horiz_legends_start_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Horizontal window legends spacing (pixels).";
-  p_help = "This is the line spacing between the legends.";
-} horiz_legends_delta_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends start x position (pixels).";
-  p_help = "Relative to top left of window.";
-} vert_legends_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends start y position (pixels).";
-  p_help = "Relative to top left of window.";
-} vert_legends_start_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Vertical window legends spacing (pixels).";
-  p_help = "This is the line spacing between the legends.";
-} vert_legends_delta_y;
 
 commentdef {
   p_header = "Draw range rings and azimuth lines.";
@@ -2128,31 +2020,6 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 1100;
-  p_descr = "Startup width of main window (pixels).";
-} main_window_width;
-
-paramdef int {
-  p_default = 635;
-  p_descr = "Startup height of main window (pixels).";
-} main_window_height;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup X for main window (pixels).";
-} main_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for main window (pixels).";
-} main_window_start_y;
-
-paramdef int {
-  p_default = 60;
-  p_descr = "Width of color scale (pixels).";
-} color_scale_width;
-
-paramdef int {
   p_default = 12;
   p_descr = "Basic font size for labels (pixels).";
   p_help = "Some of the labels are scaled relative to this size.";
@@ -2195,7 +2062,11 @@ paramdef int {
 } click_cross_line_width;
 
 commentdef {
-  p_header = "VERTICAL SELECTOR";
+  p_header = "</GUI_AND_WINDOWS>";
+}
+
+commentdef {
+  p_header = "<VERTICAL_SELECTOR_GUI>";
 }
 
 paramdef int {
@@ -2283,14 +2154,18 @@ paramdef string {
 } vlevel_selector_data_values_color;
 
 commentdef {
+  p_header = "</VERTICAL_SELECTOR_GUI>";
+}
+
+commentdef {
   p_header = "<HORIZ_VIEW>";
 }
 
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Aspect ratio (width/height) of HORIZ window.";
-  p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain. Lucid will preserve this aspect ratio for all zooms. Ratio is Width/Height. Note Lucid applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
-} horiz_aspect_ratio;
+// paramdef double {
+//   p_default = 0.0;
+//   p_descr = "Aspect ratio (width/height) of HORIZ window.";
+//   p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain. Lucid will preserve this aspect ratio for all zooms. Ratio is Width/Height. Note Lucid applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
+// } horiz_aspect_ratio;
 
 paramdef boolean {
   p_default = false;

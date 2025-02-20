@@ -1381,40 +1381,70 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.bot_margin_render_style", 1);
   
   // main window (horiz view)
-  _getLong("cidd.horiz_default_y_pos",0);
-  _getLong("cidd.horiz_default_x_pos",0);
-  double aspectRatio = _getDouble("cidd.aspect_ratio", 0.0, false);
-  fprintf(_tdrpFile, "horiz_aspect_ratio = %g;\n", aspectRatio);
-  int ht = _getLong("cidd.horiz_default_height", 800);
-  long defaultWidth = (int) (ht * aspectRatio + 0.5);
-  _getLong("cidd.horiz_default_width", defaultWidth);
-  _getLong("cidd.horiz_min_height", 400);
-  _getLong("cidd.horiz_min_width", 600);
+
+  int horizXpos = _getLong("cidd.horiz_default_x_pos", 0, false);
+  fprintf(_tdrpFile, "horiz_window_x_pos = %d;\n", horizXpos);
+  
+  int horizYpos = _getLong("cidd.horiz_default_y_pos", 0, false);
+  fprintf(_tdrpFile, "horiz_window_y_pos = %d;\n", horizYpos);
+  
+  int horizMinWidth = _getLong("cidd.horiz_min_width", 400, false);
+  fprintf(_tdrpFile, "horiz_window_min_width = %d;\n", horizMinWidth);
+  
+  int horizMinHeight = _getLong("cidd.horiz_min_height", 400, false);
+  fprintf(_tdrpFile, "horiz_window_min_height = %d;\n", horizMinHeight);
+  
+  int horizHeight = _getLong("cidd.horiz_default_height", 800, false);
+  double aspectRatio = _getDouble("cidd.aspect_ratio", 1.0, false);
+  if (aspectRatio <= 0.0) {
+    aspectRatio = 1.0;
+  }
+  int horizWidth = (int) (horizHeight * aspectRatio + 0.5);
+  
+  fprintf(_tdrpFile, "horiz_plot_width = %d;\n", horizWidth);
+  fprintf(_tdrpFile, "horiz_plot_height = %d;\n", horizHeight);
+  
+  // int rightMargin = _getLong("cidd.horiz_right_margin", 60, false);
+  // fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", rightMargin);
+  
   _getLong("cidd.horiz_top_margin", 20);
   _getLong("cidd.horiz_bot_margin", 20);
   _getLong("cidd.horiz_left_margin", 20);
-  _getLong("cidd.horiz_right_margin", 80);
   // int rightMargin = _getLong("cidd.horiz_right_margin", 80.0, false);
   fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
-  _getLong("cidd.horiz_legends_start_x", 0);
-  _getLong("cidd.horiz_legends_start_y", 0);
-  _getLong("cidd.horiz_legends_delta_y", 0);
+
+  // _getLong("cidd.horiz_legends_start_x", 0);
+  // _getLong("cidd.horiz_legends_start_y", 0);
+  // _getLong("cidd.horiz_legends_delta_y", 0);
 
   // vertical section
   
-  _getLong("cidd.vert_default_x_pos", 0);
-  _getLong("cidd.vert_default_y_pos", 0);
-  _getLong("cidd.vert_default_height", 400);
-  _getLong("cidd.vert_default_width", 600);
-  _getLong("cidd.vert_min_height", 400);
-  _getLong("cidd.vert_min_width", 600);
+  int vertXpos = _getLong("cidd.vert_default_x_pos", -1, false);
+  fprintf(_tdrpFile, "vert_window_x_pos = %d;\n", vertXpos);
+  
+  int vertYpos = _getLong("cidd.vert_default_y_pos", -1, false);
+  fprintf(_tdrpFile, "vert_window_y_pos = %d;\n", vertYpos);
+  
+  int vertWidth = _getLong("cidd.vert_default_width", 400, false);
+  fprintf(_tdrpFile, "vert_plot_width = %d;\n", vertWidth);
+
+  int vertHeight = _getLong("cidd.vert_default_height", 400, false);
+  fprintf(_tdrpFile, "vert_plot_height = %d;\n", vertHeight);
+
+  int vertMinWidth = _getLong("cidd.vert_min_width", 400, false);
+  fprintf(_tdrpFile, "vert_window_min_width = %d;\n", vertMinWidth);
+  
+  int vertMinHeight = _getLong("cidd.vert_min_height", 400, false);
+  fprintf(_tdrpFile, "vert_window_min_height = %d;\n", vertMinHeight);
+  
   _getLong("cidd.vert_top_margin", 20);
   _getLong("cidd.vert_bot_margin", 20);
   _getLong("cidd.vert_left_margin", 20);
   _getLong("cidd.vert_right_margin", 80);
-  _getLong("cidd.vert_legends_start_x", 0);
-  _getLong("cidd.vert_legends_start_y", 0);
-  _getLong("cidd.vert_legends_delta_y", 0);
+
+  // _getLong("cidd.vert_legends_start_x", 0);
+  // _getLong("cidd.vert_legends_start_y", 0);
+  // _getLong("cidd.vert_legends_delta_y", 0);
 
   // range rings
   _getBoolean("cidd.range_rings", 0);

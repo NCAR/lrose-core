@@ -230,8 +230,8 @@ int GuiManager::run(QApplication &app)
   // move to starting point
   
   QPoint pos;
-  pos.setX(_params.horiz_default_x_pos);
-  pos.setY(_params.horiz_default_y_pos);
+  pos.setX(_params.horiz_window_x_pos);
+  pos.setY(_params.horiz_window_y_pos);
   move(pos);
   
   // set timer running
@@ -557,8 +557,8 @@ void GuiManager::_setupWindows()
   _horizFrame = new QFrame(_main);
   mainLayout->addWidget(_horizFrame);
   _horizFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  _horizFrame->resize(_params.horiz_default_width + _params.color_scale_width,
-                      _params.horiz_default_height);
+  _horizFrame->resize(_params.horiz_plot_width + _params.horiz_color_scale_width,
+                      _params.horiz_plot_height);
 
   // configure the HORIZ
 
@@ -618,25 +618,19 @@ void GuiManager::_setupWindows()
   // title bar
 
   _setTitleBar();
-  setMinimumSize(400, 400);
+  setMinimumSize(_params.horiz_window_min_width, _params.horiz_window_min_height);
   // resize(_params.main_window_width, _params.main_window_height);
   // connect(this, &GuiManager::frameResized, _horiz, &HorizView::resize);
-  resize(_params.horiz_default_width, _params.horiz_default_height);
+  resize(_params.horiz_plot_width + _params.horiz_color_scale_width,
+         _params.horiz_plot_height);
   
   // set location on screen
 
   QPoint pos;
-  pos.setX(_params.main_window_start_x);
-  pos.setY(_params.main_window_start_y);
+  pos.setX(_params.horiz_window_x_pos);
+  pos.setY(_params.horiz_window_y_pos);
   move(pos);
   show();
-
-  // cerr << "XXXXXXXXXXXXXXXXXX vlevelFrame width, height: " << _vlevelFrame->width() << ", " << _vlevelFrame->height() << endl;
-
-  // cerr << "VVVVVVVVVVVVVVV _vlevel width: " << _vlevelFrame->size().width() << endl;
-  // cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
-  // resize(width() + _vlevelFrame->size().width(), height());
-  // cerr << "VVVVVVVVVVVVVVV width, height: " << width() << ", " << height() << endl;
 
   // set up field status dialog
   // _createClickReportDialog();
@@ -3042,31 +3036,8 @@ bool GuiManager::_checkForZoomChange()
 void GuiManager::_handleFirstTimerEvent()
 {
 
-  cerr << "dddddddddddddddddd start of _handleFirstTimerEvent" << endl;
-  cerr << "dddddd horiz resize, width, height: " << _horizFrame->width() << ", " << _horizFrame->height() << endl;
-
-  // QSize sz = size();
-  // resize(sz.width()+1, sz.height()+1);
-  
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
   _horiz->adjustPixelScales();
-  
-  // Set the size of the second column to the size of the largest
-  // label.  This should keep the column from wiggling as the values change.
-  // The default values for the labels must be their maximum size for this
-  // to work.  This is ugly, but it works.
-  
-  // int maxWidth = 0;
-  // for (size_t ii = 0; ii < _valsRight.size(); ii++) {
-  //   if (maxWidth < _valsRight[ii]->width()) {
-  //     maxWidth = _valsRight[ii]->width();
-  //   }
-  // }
-
-  // _statusLayout->setColumnMinimumWidth(1, maxWidth);
-  // cerr << "dddddddddddddddddd end of _handleFirstTimerEvent" << endl;
-  
-  // gd.redraw_horiz = true;
 
 }
 

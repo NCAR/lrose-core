@@ -96,7 +96,8 @@ HorizView::HorizView(QWidget* parent,
 
   // init other values
 
-  _aspectRatio = _params.horiz_aspect_ratio;
+  // _aspectRatio = _params.horiz_aspect_ratio;
+  _aspectRatio = 1.0;
   _worldPressX = 0.0;
   _worldPressY = 0.0;
   _worldReleaseX = 0.0;
@@ -109,7 +110,7 @@ HorizView::HorizView(QWidget* parent,
   _zoomCornerX = 0;
   _zoomCornerY = 0;
   
-  _colorScaleWidth = _params.color_scale_width;
+  _colorScaleWidth = _params.horiz_color_scale_width;
 
   // initialize world view
 
@@ -187,7 +188,7 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _fullWorld.setTitleTextMargin(_params.horiz_title_text_margin);
   _fullWorld.setLegendTextMargin(_params.horiz_legend_text_margin);
   _fullWorld.setAxisTextMargin(_params.horiz_axis_text_margin);
-  _fullWorld.setColorScaleWidth(_params.color_scale_width);
+  _fullWorld.setColorScaleWidth(_params.horiz_color_scale_width);
 
   _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
   _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
@@ -1198,7 +1199,6 @@ void HorizView::_renderGrids(QPainter &painter)
             _renderFrameIndex, _renderFramePage);
   }
 
-  cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>> HorizView::_renderGrids" << endl;
   _controlRendering(painter,
                     _renderFramePage,
                     gd.movie.frame[_renderFrameIndex].time_start,
@@ -1426,7 +1426,6 @@ int HorizView::_controlRendering(QPainter &painter, int page,
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < NUM_GRID_LAYERS; i++) {
     if(gd.layers.overlay_field_on[i] && gd.mread[gd.layers.overlay_field[i]] != NULL) {
-      cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
       _renderGrid(painter, page, gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
       // render_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
     }
@@ -1451,7 +1450,6 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       }
 #endif
     } else {
-      cerr << "cccccccccccccccccccccccccccccc" << endl;
       _renderGrid(painter, page, mr, start_time, end_time, 0);
       // render_grid(xid,mr,start_time,end_time,0);
     }
@@ -1541,7 +1539,6 @@ int HorizView::_renderGrid(QPainter &painter,
 {
   
   if (mr == NULL) {
-    cerr << "mr == NULL - NNNNNNNNNNNNNNNNNNNNNNNNN" << endl;
     return CIDD_SUCCESS;
   }
     
@@ -1613,8 +1610,6 @@ int HorizView::_renderGrid(QPainter &painter,
 #endif
 
   // Decide Proper rendering routine
-
-  cerr << "XXXXXXXXXXXX projType: " << Mdvx::projType2Str(mr->h_fhdr.proj_type) << endl;
 
   const PjgMath &dataMath = mr->proj->getPjgMath();
   const PjgMath &displayMath = gd.proj.getPjgMath();
@@ -1703,9 +1698,6 @@ int HorizView::_renderGrid(QPainter &painter,
       break;
       
     case  Mdvx::PROJ_LATLON:
-      cerr << "===========>> LATLONLATLON LLLLLLLLLLLLLL" << endl;
-      cerr << "===========>> mr->h_fhdr.proj_type: " << Mdvx::projType2Str(mr->h_fhdr.proj_type) << endl;
-      cerr << "===========>> gd.proj.getProjType(): " << Mdvx::projType2Str(gd.proj.getProjType()) << endl;
       if(mr->h_fhdr.proj_type == gd.proj.getProjType()) {
         if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
@@ -1926,8 +1918,6 @@ QPixmap* HorizView::getPixmap()
 void HorizView::mousePressEvent(QMouseEvent *e)
 {
 
-  // cerr << "cccc mousePressEvent" << endl;
-  
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
@@ -2018,8 +2008,6 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
  */
 void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
-
-  cerr << "==>> KKKKKKKKKK mouseReleaseEvent <<==" << endl;
 
   _pointClicked = false;
 
@@ -2189,38 +2177,13 @@ void HorizView::_handleZoom()
   gd.selected_zoom_max_x = _worldReleaseX;
   gd.selected_zoom_max_y = _worldReleaseY;
   
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   adjustPixelScales();
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _refreshImages();
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   update();
+  
 }
-
-
-
-
-#ifdef NOTNOW
-/**************   testing ******/
-
-void HorizView::smartBrush(int xPixel, int yPixel) 
-{
-
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-  QImage qImage;
-  qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-  _drawOverlays(painter);
-
-}
-#endif
 
 /*************************************************************************
  * resizeEvent()
@@ -2228,13 +2191,10 @@ void HorizView::smartBrush(int xPixel, int yPixel)
 
 void HorizView::resizeEvent(QResizeEvent * e)
 {
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   adjustPixelScales();
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _refreshImages();
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   update();
 }
 
@@ -2246,19 +2206,6 @@ void HorizView::resizeEvent(QResizeEvent * e)
 void HorizView::resize(const int width, const int height)
 {
 
-  // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ width, height: " << width << ", " << height << endl;
-  // Set the geometry based on the aspect ratio that we need for this display.
-  // The setGeometry() method will fire off the resizeEvent() so we leave the
-  // updating of the display to that event.
-  
-  // int htNeeded = (int) ((width - _colorScaleWidth) + 0.5);
-  // if (height < htNeeded) {
-  //   htNeeded = height;
-  // }
-  // int widthNeeded = (int) (htNeeded + 0.5) + _colorScaleWidth;
-  // cerr << "QQQQQQQQQQQQQQQQQQQQQQQQ htNeeded, widthNeeded: " << htNeeded << ", " << widthNeeded << endl;
-  
-  // setGeometry(0, 0, widthNeeded, htNeeded);
   setGeometry(0, 0, width, height);
 
 }
@@ -2337,25 +2284,7 @@ void HorizView::informationMessage()
 
 }
 
-// void HorizView::notImplemented()
-// {
-//   cerr << "inside notImplemented() ... " << endl;
-
-//   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
-//   // QLabel *informationLabel = new QLabel();
-
-//   errorMessageDialog->showMessage("This option is not implemented yet.");
-//   QLabel errorLabel;
-//   int frameStyle = QFrame::Sunken | QFrame::Panel;
-//   errorLabel.setFrameStyle(frameStyle);
-//   errorLabel.setText("If the box is unchecked, the message "
-// 		     "won't appear again.");
-
-//   cerr << "exiting notImplemented() " << endl;
-
-// }
-
-
+/////////////////////////////////////////////////////////////////////////////////////
 // slots for context editing; create and show the associated modeless dialog and return                                   
 
 void HorizView::contextMenuCancel()

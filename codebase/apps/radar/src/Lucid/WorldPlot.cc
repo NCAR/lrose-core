@@ -664,9 +664,9 @@ void WorldPlot::fillPolygon(QPainter &painter,
   for (int ii = 0; ii < (int) points.size(); ii++) {
     QPointF pt(getXPixel(points[ii].x()), getYPixel(points[ii].y()));
     pixPts.push_back(pt);
-    cerr << "ppppp x, y, pixx, pixy: "
-         << points[ii].x() << ", " << points[ii].y() << ", "
-         << pt.x() << ", " << pt.y() << endl;
+    // cerr << "ppppp x, y, pixx, pixy: "
+    //      << points[ii].x() << ", " << points[ii].y() << ", "
+    //      << pt.x() << ", " << pt.y() << endl;
   }
   // close polygon
   pixPts.push_back(pixPts[0]);
