@@ -619,10 +619,10 @@ void VertView::unzoomView()
 /*************************************************************************
  * adjust pixel scale for correct aspect ratio etc
  */
-void VertView::adjustPixelScales()
+void VertView::updatePixelScales()
 {
 
-  cerr << "==>> hhhhhh VertView::adjustPixelScales() <<==" << endl;
+  cerr << "==>> hhhhhh VertView::updatePixelScales() <<==" << endl;
 
 }
 
@@ -1119,7 +1119,7 @@ void VertView::resizeEvent(QResizeEvent * e)
 {
   cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
   _resetWorld(width(), height());
-  adjustPixelScales();
+  updatePixelScales();
   _refreshImages();
   update();
 }

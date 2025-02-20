@@ -551,7 +551,7 @@ public:
   
   // adjust X and Y pixel scales to minimize distortion
   
-  void adjustPixelScales();
+  void updatePixelScales();
 
   // render a data grid in Cartesian rectangular pixels
 

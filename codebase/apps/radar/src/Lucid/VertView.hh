@@ -127,7 +127,7 @@ class DLL_EXPORT VertView : public QWidget
 
   // adjust pixel scale to suit window size etc.
 
-  virtual void adjustPixelScales();
+  virtual void updatePixelScales();
 
   // render frame based on movie index
   

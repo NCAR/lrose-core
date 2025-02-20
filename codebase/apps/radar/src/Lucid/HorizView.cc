@@ -266,11 +266,11 @@ void HorizView::timerEvent(QTimerEvent *event)
 /*************************************************************************
  * adjust pixel scale for correct aspect ratio etc
  */
-void HorizView::adjustPixelScales()
+void HorizView::updatePixelScales()
 {
 
   _zoomWorld.setProjection(gd.proj);
-  _zoomWorld.adjustPixelScales();
+  _zoomWorld.updatePixelScales();
   
 }
 
@@ -2025,11 +2025,16 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   _mouseReleaseX = pos.x();
   _mouseReleaseY = pos.y();
 
-  // get click location in world coords
+  double distX = _mouseReleaseX - _mousePressX;
+  double distY = _mouseReleaseY - _mousePressY;
+  double distMoved = sqrt(distX * distX + distY * distY);
+  cerr << "ddddddddddddddddd distMoved: " << distMoved << endl;
   
-  if (rgeom.width() <= 20) {
+  if (distMoved <= 20) {
     
-    // Emit a signal to indicate that the click location has changed
+    // mouse moved less than 20 pixels, so we interpret that as a click
+    // get click location in world coords
+
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
@@ -2065,7 +2070,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
     
-    // emit signal
+    // Emit a signal to indicate that the click location has changed
 
     emit locationClicked(x_km, y_km, closestRay);
     
@@ -2073,43 +2078,43 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     // mouse moved more than 20 pixels, so a zoom occurred
 
-    _handleZoom();
+    // _handleZoom();
     
-    // gd.prev_zoom_min_x = _worldPressX;
-    // gd.prev_zoom_min_y = _worldPressY;
-    // gd.prev_zoom_max_x = _worldReleaseX;
-    // gd.prev_zoom_max_y = _worldReleaseY;
+    gd.prev_zoom_min_x = _worldPressX;
+    gd.prev_zoom_min_y = _worldPressY;
+    gd.prev_zoom_max_x = _worldReleaseX;
+    gd.prev_zoom_max_y = _worldReleaseY;
     
-    // _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    // _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    // _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    // _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    // _savedZooms.push_back(_zoomWorld);
+    _savedZooms.push_back(_zoomWorld);
     
-    // _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
-    //                           _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                              _worldReleaseX, _worldReleaseY);
     
-    // adjustPixelScales();
-    // _setTransform(_zoomWorld.getTransform());
+    updatePixelScales();
+    _setTransform(_zoomWorld.getTransform());
     
-    // _setGridSpacing();
+    _setGridSpacing();
 
-    // // enable unzooms
+    // enable unzooms
     
-    // _manager.enableZoomBackButton();
-    // _manager.enableZoomOutButton();
+    _manager.enableZoomBackButton();
+    _manager.enableZoomOutButton();
     
     // // Update the window in the renderers
 
     // //     gd.redraw_horiz = true;
-    // gd.zoom_has_changed = true;
+    gd.zoom_has_changed = true;
 
-    // gd.selected_zoom_min_x = _worldPressX;
-    // gd.selected_zoom_min_y = _worldPressY;
-    // gd.selected_zoom_max_x = _worldReleaseX;
-    // gd.selected_zoom_max_y = _worldReleaseY;
+    gd.selected_zoom_min_x = _worldPressX;
+    gd.selected_zoom_min_y = _worldPressY;
+    gd.selected_zoom_max_x = _worldReleaseX;
+    gd.selected_zoom_max_y = _worldReleaseY;
 
     _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
 
@@ -2151,12 +2156,12 @@ void HorizView::_handleZoom()
   
   // make a copy of the current world zoom and set updated world limits
 
-  WorldPlot tmpWorld(_zoomWorld);
+  // WorldPlot tmpWorld(_zoomWorld);
   
-  tmpWorld.setWorldLimits(worldPressX, worldPressY,
-                          worldReleaseX, worldReleaseY);
+  // tmpWorld.setWorldLimits(worldPressX, worldPressY,
+  //                         worldReleaseX, worldReleaseY);
   
-  adjustPixelScales();
+  // updatePixelScales();
   
   _setTransform(_zoomWorld.getTransform());
   
@@ -2179,7 +2184,7 @@ void HorizView::_handleZoom()
   
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
-  adjustPixelScales();
+  updatePixelScales();
   _refreshImages();
   update();
   
@@ -2193,7 +2198,7 @@ void HorizView::resizeEvent(QResizeEvent * e)
 {
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
-  adjustPixelScales();
+  updatePixelScales();
   _refreshImages();
   update();
 }

@@ -206,7 +206,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   // adjust pixel scale to suit window size etc.
 
-  virtual void adjustPixelScales();
+  virtual void updatePixelScales();
 
   // override QWidget methods
   

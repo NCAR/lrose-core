@@ -3037,7 +3037,7 @@ void GuiManager::_handleFirstTimerEvent()
 {
 
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  _horiz->adjustPixelScales();
+  _horiz->updatePixelScales();
 
 }
 

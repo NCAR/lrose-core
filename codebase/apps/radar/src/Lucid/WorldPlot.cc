@@ -2261,10 +2261,10 @@ void WorldPlot::_computeTransform()
 
 }
 
-///////////////////////////////////////
-// adjust X and Y pixel scales to minimize distortion
+//////////////////////////////////////////////////////////
+// update X and Y pixel scales to minimize distortion
 
-void WorldPlot::adjustPixelScales()
+void WorldPlot::updatePixelScales()
 {
     
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
