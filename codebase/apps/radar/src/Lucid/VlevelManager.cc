@@ -50,11 +50,9 @@ using namespace std;
 VlevelManager::VlevelManager()
         
 {
-  
-  _reversedInGui = false;
-  _indexInGui = 0;
-  _selectedLevel = 0.0;
-  _mdvxVlevelType = Mdvx::VERT_TYPE_UNKNOWN;
+
+  _init();
+  _requestedLevel = 0.0;
 
 }
 
@@ -64,7 +62,7 @@ VlevelManager::VlevelManager()
 VlevelManager::~VlevelManager()
 
 {
-  _vlevels.clear();
+  _levels.clear();
 }
 
 /////////////////////////////////////////////////////////////
@@ -73,65 +71,55 @@ VlevelManager::~VlevelManager()
 void VlevelManager::set(const RadxVol &vol)
   
 {
-
-  // first time?
-
-  bool init = false;
-  if (_vlevels.size() == 0) {
-    init = true;
-  }
-
+  
   // init
-
-  _vlevels.clear();
-  _reversedInGui = false;
+  
+  _levels.clear();
+  _orderReversed = false;
 
   const vector<RadxSweep *> sweepsInVol = vol.getSweeps();
 
   // zero length case
   
   if (sweepsInVol.size() == 0) {
-    setIndexInGui(0);
+    _init();
     return;
   }
-
+  
   // check if levels are in ascending or descending order
   // if descending, reverse so that they are asscending in this object
   // that matches a top-down rendering of the levels in the widget
 
   if (sweepsInVol[0]->getFixedAngleDeg() > 
       sweepsInVol[sweepsInVol.size()-1]->getFixedAngleDeg()) {
-    _reversedInGui = true;
+    _orderReversed = true;
   }
-
+  
   for (ssize_t ii = 0; ii < (ssize_t) sweepsInVol.size(); ii++) {
     ssize_t jj = ii;
-    if (_reversedInGui) {
+    if (_orderReversed) {
       jj = sweepsInVol.size() - 1 - ii;
     }
-    GuiVlevel glevel;
-    glevel.level = sweepsInVol[jj]->getFixedAngleDeg();
-    glevel.indexInData = jj;
-    glevel.indexInGui = ii;
-    _vlevels.push_back(glevel);
+    _levels.push_back(sweepsInVol[jj]->getFixedAngleDeg());
   }
 
-  // initialize vlevel index if needed
+  // set selected index
 
-  if (init || _indexInGui > ((int) _vlevels.size()-1)) {
-    setIndexInGui(_vlevels.size() - 1);
-  } else if (_indexInGui < 0) {
-    _indexInGui = 0;
-  }
+  _setSelectedIndex();
+  
+  // set type
+  
+  _mdvxVlevelType = Mdvx::VERT_TYPE_ELEV;
 
-  // set selected angle
-
-  _selectedLevel = _vlevels[_indexInGui].level;
+  // set units
+  
   _units = "deg";
 
+  // debug message
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (_reversedInGui) {
-      cerr << "INFO - VlevelManager: vlevel list is reversed in GUI" << endl;
+    if (_orderReversed) {
+      cerr << "INFO - VlevelManager set from Radx, vlevel list is reversed" << endl;
     }
   }
 
@@ -144,23 +132,31 @@ void VlevelManager::set(const MdvReader &mread)
 
 {
 
-  double selectedLevel = _selectedLevel;
+  // init
   
-  _vlevels.clear();
+  _levels.clear();
+  _orderReversed = false;
+
+  // load up levels
+  
   int nz = mread.ds_fhdr.nz;
   if (nz > MDV64_MAX_VLEVELS) {
     nz = MDV64_MAX_VLEVELS;
   }
   for (int iz = 0; iz < nz; iz++) {
-    GuiVlevel glevel;
-    glevel.indexInData = iz;
-    glevel.indexInGui = iz;
-    glevel.level = mread.ds_vhdr.level[iz];
-    _vlevels.push_back(glevel);
+    _levels.push_back(mread.ds_vhdr.level[iz]);
   }
 
+  // set selected index
+
+  _setSelectedIndex();
+  
+  // set type
+  
   _mdvxVlevelType = (Mdvx::vlevel_type_t) mread.ds_fhdr.vlevel_type;
 
+  // set units
+  
   switch(_mdvxVlevelType) {
     case Mdvx::VERT_TYPE_Z:
     case Mdvx::VERT_TYPE_SIGMA_Z:
@@ -185,135 +181,194 @@ void VlevelManager::set(const MdvReader &mread)
       _units.clear();
   }
 
-  setLevel(selectedLevel);
-  
 }
   
 /////////////////////////////////////////////////////////////
-// set vlevel
+// request a given vlevel
 // size effect: sets the selected index
+// returns selected level
 
-void VlevelManager::setLevel(double level)
+double VlevelManager::requestLevel(double val)
   
 {
-  
-  // if empty, set single vlevel
-  
-  if (_vlevels.size() == 0) {
-    GuiVlevel gv;
-    gv.level = level;
-    gv.indexInGui = 0;
-    gv.indexInData = 0;
-    _vlevels.push_back(gv);
-    _selectedLevel = level;
-    _indexInGui = 0;
-    return;
-  }
 
-  // find closest vlevel
+  _checkConsistent();
+  _requestedLevel = val;
   
-  _selectedLevel = level;
-  _indexInGui = 0;
-
+  // find closest index
+  
+  _selectedIndex = 0;
   double minDiff = 1.0e99;
-  for (size_t ii = 0; ii < _vlevels.size(); ii++) {
-    double level = _vlevels[ii].level;
-    double diff = fabs(level - _selectedLevel);
+  for (size_t ii = 0; ii < _levels.size(); ii++) {
+    double diff = fabs(_levels[ii] - val);
     if (diff < minDiff) {
-      _indexInGui = ii;
+      _selectedIndex = ii;
       minDiff = diff;
     }
   } // ii
 
-  _selectedLevel = _vlevels[_indexInGui].level;
-  gd.prev_ht = gd.h_win.cur_ht;
-  gd.h_win.cur_ht = _selectedLevel;
-  gd.selected_ht = _selectedLevel;
-  gd.ht_has_changed = true;
-  // gd.redraw_horiz = true;
+  return _levels[_selectedIndex];
   
-}
-
-/////////////////////////////////////////////////////////////
-// set selected gui index
-
-void VlevelManager::setIndexInGui(int index) 
-{
-
-  _indexInGui = index;
-  if (_indexInGui < 0) {
-    _indexInGui = 0;
-  } else if (_indexInGui > (int) _vlevels.size() - 1) {
-    _indexInGui = _vlevels.size() - 1;
-  }
-  _selectedLevel = _vlevels[_indexInGui].level;
-
 }
 
 /////////////////////////////////////////////////////////////
 // change selected index by the specified value
 
-void VlevelManager::changeIndexInGui(int increment) 
+void VlevelManager::incrementIndex(int incr) 
 {
 
-  _indexInGui += increment;
-  if (_indexInGui < 0) {
-    _indexInGui = 0;
-  } else if (_indexInGui > (int) _vlevels.size() - 1) {
-    _indexInGui = _vlevels.size() - 1;
-  }
-  _selectedLevel = _vlevels[_indexInGui].level;
-
+  _selectedIndex += incr;
+  _checkConsistent();
+  
 }
 
 
 /////////////////////////////////////////////////////////////
-// get the vlevel, optionally specifying an index
+// Get the vlevel, optionally specifying an index.
+// If index == -1, use _selectedIndex.
 
-double VlevelManager::getLevel(ssize_t vlevelIndex /* = -1*/) const 
+double VlevelManager::getLevel(int index /* = -1*/) const 
 {
-  
-  if (vlevelIndex < 0) {
-    if (_indexInGui < 0) {
-      return 0.0;
-    } else if (_indexInGui > (int) _vlevels.size() - 1) {
-      return 0.0;
-    } else {
-      return _vlevels[_indexInGui].level;
-    }
-  } 
 
-  if (vlevelIndex < (ssize_t) _vlevels.size()) {
-    return _vlevels[vlevelIndex].level;
+  // return level for requested index, if supplied
+  
+  if (index >= 0 && index < (int) _levels.size()) {
+    return _levels[index];
   }
 
-  return _vlevels[_vlevels.size()-1].level;
+  // check for bounds
+  
+  if (index < 0) {
+    return _levels[0];
+  }
+  
+  if (index >= (int) _levels.size()) {
+    return _levels[_levels.size()-1];
+  }
+
+  // return val selected
+  
+  return _levels[_selectedIndex];
 
 }
 
 /////////////////////////////////////////////////////////////
 // get level closest to the value passed in
 
-double VlevelManager::getLevelClosest(double level)
+double VlevelManager::getLevelClosest(double level,
+                                      int *index /* = nullptr */)
   
 {
   
-  if (_vlevels.size() == 0) {
+  if (_levels.size() == 0) {
+    if (index) {
+      *index = 0;
+    }
     return 0.0;
   }
 
-  int index = 0;
+  int indx = 0;
   double minDiff = 1.0e99;
-  for (size_t ii = 0; ii < _vlevels.size(); ii++) {
-    double diff = fabs(level - _vlevels[ii].level);
+  for (size_t ii = 0; ii < _levels.size(); ii++) {
+    double diff = fabs(level - _levels[ii]);
     if (diff < minDiff) {
-      index = ii;
+      indx = ii;
       minDiff = diff;
     }
   } // ii
 
-  return _vlevels[index].level;
+  if (index) {
+    *index = indx;
+  }
+
+  return _levels[indx];
 
 }
 
   
+/////////////////////////////////////////////////////////////
+// get max level
+  
+double VlevelManager::getLevelMax() const
+{
+  if (_levels.size() < 1) {
+    return 0.0;
+  }
+  return _levels[_levels.size()-1];
+}
+
+/////////////////////////////////////////////////////////////
+// get min level
+  
+double VlevelManager::getLevelMin() const
+{
+  if (_levels.size() < 1) {
+    return 0.0;
+  }
+  return _levels[0];
+}
+
+//////////////////////////////////////////////////////////////////
+// init to single 0-val entry
+// the object is guaranteed to have at least 1 entry in _levels
+
+void VlevelManager::_init()
+        
+{
+  
+  _levels.clear();
+  _levels.push_back(0.0);
+  _selectedIndex = 0;
+  _orderReversed = false;
+  _mdvxVlevelType = Mdvx::VERT_TYPE_UNKNOWN;
+
+}
+
+//////////////////////////////////////////////////////////////////
+// check that object is consistent
+// if not, fix it
+
+void VlevelManager::_checkConsistent()
+        
+{
+
+  // make sure we have at least 1 entry
+  
+  if (_levels.size() == 0) {
+    _levels.push_back(0.0);
+  }
+
+  // make sure selection is within bounds
+  
+  if (_selectedIndex < 0) {
+    _selectedIndex = 0;
+  } else if (_selectedIndex > (int) _levels.size() - 1) {
+    _selectedIndex = _levels.size() - 1;
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////
+// set the selected index from the requested level,
+// for internal consistency
+
+void VlevelManager::_setSelectedIndex()
+  
+{
+
+  _checkConsistent();
+  
+  // find index for closest vlevel
+  
+  _selectedIndex = 0;
+  double minDiff = 1.0e99;
+  for (size_t ii = 0; ii < _levels.size(); ii++) {
+    double diff = fabs(_levels[ii] - _requestedLevel);
+    if (diff < minDiff) {
+      _selectedIndex = ii;
+      minDiff = diff;
+    }
+  } // ii
+
+}
+

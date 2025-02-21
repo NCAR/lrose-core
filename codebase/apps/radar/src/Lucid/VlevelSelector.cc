@@ -126,7 +126,7 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
   
   // draw selected vlevel
   
-  double vlevel = _vlevelManager.getLevel();
+  double vlevel = _vlevelManager.getSelectedLevel();
   QBrush brush(_params.vlevel_selector_marker_color);
   double ptrHalfHt = 10.0 / _world.getYPixelsPerWorld();
   QVector<QPointF> poly;
@@ -247,7 +247,7 @@ void VlevelSelector::mouseReleaseEvent(QMouseEvent *e)
 #endif
 
   double yVal = _world.getYWorld(pos.y());
-  _vlevelManager.setLevel(yVal);
+  _vlevelManager.requestLevel(yVal);
   _guiManager->setVlevelHasChanged(true);
 
   _mouseMoveInProgress = false;
@@ -301,21 +301,21 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
   
   if (key == Qt::Key_Up) {
     
-    if (_vlevelManager.getIndexInGui() > 0) {
+    if (_vlevelManager.getSelectedIndex() > 0) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked up arrow, go up a vlevel" << endl;
       }
-      _vlevelManager.changeIndexInGui(1);
+      _vlevelManager.incrementIndex(1);
       _guiManager->setVlevelHasChanged(true);
     }
 
   } else if (key == Qt::Key_Down) {
 
-    if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
+    if (_vlevelManager.getSelectedIndex() < (int) _vlevelManager.getNLevels() - 1) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked down arrow, go down a vlevel" << endl;
       }
-      _vlevelManager.changeIndexInGui(-1);
+      _vlevelManager.incrementIndex(-1);
       _guiManager->setVlevelHasChanged(true);
     }
     

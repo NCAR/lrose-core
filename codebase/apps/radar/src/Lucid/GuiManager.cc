@@ -159,9 +159,9 @@ GuiManager::GuiManager() :
   _prevFieldTableCol = -1;
   _prevFieldTableRow = -1;
 
-  _vlevelManager.setLevel(_params.start_ht);
+  _vlevelManager.requestLevel(_params.start_ht);
   _vlevelHasChanged = true;
-  cerr << "WWWWWWWWWWWWWWWWWWWWWW_vlevelManager.getLevel(): " << _vlevelManager.getLevel() << endl;
+  cerr << "WWWWWWWWWWWWWWWWWWWWWW_vlevelManager.getRequestedLevel(): " << _vlevelManager.getRequestedLevel() << endl;
   
   
   _overlaysHaveChanged = true;
@@ -352,11 +352,9 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     frameIndex = gd.movie.num_frames - 1;
   }
 
-  cerr << "VVVVVVVVVVVVVVVVV _vlevelManager.getLevel(): " << _vlevelManager.getLevel() << endl;
-  
   if (stateChanged) {
     mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
-                          _vlevelManager.getLevel(),
+                          _vlevelManager.getRequestedLevel(),
                           gd.h_win.page);
   }
   
@@ -507,7 +505,7 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     
   } else if (key == Qt::Key_Up) {
     
-    if (_vlevelManager.getIndexInGui() > 0) {
+    if (_vlevelManager.getSelectedIndex() > 0) {
       if (_params.debug) {
         cerr << "Clicked up arrow, go up a vlevel" << endl;
       }
@@ -517,7 +515,7 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     
   } else if (key == Qt::Key_Down) {
     
-    if (_vlevelManager.getIndexInGui() < (int) _vlevelManager.getNLevels() - 1) {
+    if (_vlevelManager.getSelectedIndex() < (int) _vlevelManager.getNLevels() - 1) {
       if (_params.debug) {
         cerr << "Clicked down arrow, go down a vlevel" << endl;
       }

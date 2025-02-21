@@ -159,7 +159,7 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
                                   int page)
 {
   
-  if(gd.debug2) {
+  if(gd.debug1) {
     cerr << "=====>>> MdvReader::requestHorizPlane()" << endl;
     cerr << "   midTime: " << midTime.asString(0) << endl;
     cerr << "   vLevel: " << vLevel << endl;

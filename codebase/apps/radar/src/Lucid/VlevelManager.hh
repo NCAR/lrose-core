@@ -55,18 +55,6 @@ class VlevelManager {
   
 public:
 
-  class GuiVlevel {
-  public:
-    double level;
-    int indexInData;
-    int indexInGui;
-    GuiVlevel() {
-      level = 0.0;
-      indexInData = 0;
-      indexInGui = 0;
-    }
-  };
-
   // constructor
   
   VlevelManager();
@@ -83,57 +71,52 @@ public:
 
   void set(const MdvReader &mread);
   
-  // set the level
+  // request a given vlevel
   // size effect: sets the selected index
-
-  void setLevel(double selectedLevel);
-
-  // set the index for the GUI
-
-  void setIndexInGui(int index);
-
-  // change selected index by the specified increment
+  // returns selected level
   
-  void changeIndexInGui(int increment);
+  double requestLevel(double val);
+  
+  // change selected index by the specified increment
+  // pos for up, neg for down
+  
+  void incrementIndex(int incr);
   
   // get number of levels
   
-  size_t getNLevels() const { return _vlevels.size(); }
+  size_t getNLevels() const { return _levels.size(); }
 
   // get levels
   
-  const vector<GuiVlevel> &getGuiLevels() const { return _vlevels; }
+  const vector<double> &getLevels() const { return _levels; }
+  
+  // get the requested level
+  
+  double getRequestedLevel() const { return _requestedLevel; }
 
   // get the selected level
   
-  const GuiVlevel getSelectedVlevel() const { return _vlevels[_indexInGui]; }
-
-  // get level for index
+  double getSelectedLevel() const { return _levels[_selectedIndex]; }
   
-  double getLevel(ssize_t vlevelIndex = -1) const;
-
-  // get max level
+  // get index for selected data
   
-  double getLevelMax() const {
-    if (_vlevels.size() < 1) {
-      return 0.0;
-    }
-    return _vlevels[_vlevels.size()-1].level;
-  }
+  int getSelectedIndex() const { return _selectedIndex; }
 
-  // get min level
+  // Get the vlevel, optionally specifying an index.
+  // If index == -1, use _selectedIndex.
   
-  double getLevelMin() const {
-    if (_vlevels.size() < 1) {
-      return 0.0;
-    }
-    return _vlevels[0].level;
-  }
-
+  double getLevel(int index = -1) const;
+  
   // get level closest to passed-in value
+  // side effect - sets index if non-null
   
-  double getLevelClosest(double level);
+  double getLevelClosest(double level, int *index = nullptr);
 
+  // get max/min level
+  
+  double getLevelMax() const;
+  double getLevelMin() const;
+  
   // get type of Vlevel in Mdvx
   
   Mdvx::vlevel_type_t getMdvxVlevelType() const { return _mdvxVlevelType; }
@@ -142,27 +125,34 @@ public:
   
   const string &getUnits() const { return _units; }
 
-  // get gui-specific values
+  // was the order reversed compared to the data?
   
-  int getIndexInGui() const { return _indexInGui; }
-  int getIndexInData() const { return _vlevels[_indexInGui].indexInData; }
-  int getSelectedLevel() const { return _selectedLevel; }
-  bool getReversedInGui() const { return _reversedInGui; }
+  bool getOrderReversed() const { return _orderReversed; }
 
 private:
   
-  // vlevels
+  vector<double> _levels;
+  double _requestedLevel;
+  int _selectedIndex;
+
+  bool _orderReversed; // with respect to data
   
-  vector<GuiVlevel> _vlevels;
-  bool _reversedInGui;
   string _units;
   Mdvx::vlevel_type_t _mdvxVlevelType;
 
-  // selection
+  // init to single 0-valued entry
+  
+  void _init();
 
-  int _indexInGui;
-  double _selectedLevel;
+  // check that object is consistent, if not, fix it
 
+  void _checkConsistent();
+  
+  // set the selected index from the requested level,
+  // for internal consistency
+  
+  void _setSelectedIndex();
+  
 };
 
 #endif
