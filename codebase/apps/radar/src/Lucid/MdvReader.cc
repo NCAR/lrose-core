@@ -601,10 +601,30 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
       vLevelChanged = true;
     }
   }
-  cerr << "LLLLLLLLLL vLevel, _vLevelReq, vLevelChanged: " << vLevel << ", " << _vLevelReq << ", " << vLevelChanged << endl;
-  
+
   // check if request is unchanged from previous call
 
+  if(gd.debug1) {
+    cerr << "MdvReader::_checkRequestChangedH" << endl;
+    if (!_validH) {
+      cerr << "  _validH is false" << endl;
+    }
+    if (reqTime != _timeReq) {
+      cerr << "  reqTime has changed: "
+           << _timeReq.asString(0) << " to " << reqTime.asString(0) << endl;
+    }
+    if (zoomBoxReq != _zoomBoxReq) {
+      cerr << "  zoomBoxReq has changed:" << endl;
+      _zoomBoxReq.print(cerr);
+      cerr << "  to:" << endl;
+      zoomBoxReq.print(cerr);
+    }
+    if (vLevelChanged) {
+      cerr << "vLevelChanged, vLevel, _vLevelReq, vLevelChanged: "
+           << vLevel << ", " << _vLevelReq << endl;
+    }
+  }
+  
   QMutexLocker locker(&_statusMutex);
   if (_validH &&
       reqTime == _timeReq &&
@@ -614,13 +634,16 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
     return false;
   }
   
+  if(gd.debug1) {
+    cerr << "MdvReader::_checkRequestChangedH - TRUE" << endl;
+  }
+  
   // save request for comparison next time
 
   _timeReq = reqTime;
   _zoomBoxReq = zoomBoxReq;
   _vLevelReq = vLevel;
-  cerr << "KKKKKKKKKKKKK vLevel, _vLevelReq, vLevelChanged: " << vLevel << ", " << _vLevelReq << ", " << vLevelChanged << endl;
-
+  
   return true;
 
 }
@@ -841,12 +864,13 @@ int MdvReader::_getTimeList(const string &url,
 {
 
   double movieDurationSecs = _params.frame_interval_secs * _params.n_movie_frames;
+  DateTime movieStartTime;
   TimeControl *tc = TimeControl::getInstance();
   if (tc != nullptr) {
-    movieDurationSecs = TimeControl::getInstance()->getMovieDurationSecs();
+    movieDurationSecs = tc->getMovieDurationSecs();
+    movieStartTime = tc->getStartTime();
   }
   
-  DateTime movieStartTime((time_t)gd.epoch_start);
   DateTime movieEndTime(movieStartTime + movieDurationSecs);
   time_t delta = movieEndTime - movieStartTime;
   DateTime listStartTime(movieStartTime - delta);

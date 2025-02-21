@@ -123,7 +123,7 @@ GuiManager::GuiManager() :
 {
 
   _timerEventCount = 0;
-  _guiSizeInitialized = false;
+  _setupWindowsComplete = false;
   _archiveMode = true;
   
   m_pInstance = this;
@@ -292,9 +292,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
 
   // get the time control into the right place
   // we need to let the windows fully draw
-
+  
   if (_timerEventCount == 10) {
     _placeTimeControl();
+  }
+
+  if (!_setupWindowsComplete) {
+    return;
   }
 
   // read click point info from FMQ
@@ -374,17 +378,19 @@ void GuiManager::timerEvent(QTimerEvent *event)
 bool GuiManager::_checkForStateChange()
 
 {
-  
+
   bool stateHasChanged = false;
   if (_fieldHasChanged) {
     stateHasChanged = true;
     _fieldHasChanged = false;
+    cerr << "fffffffffffffffffffff FFFFFFFFFFFFFFFFF" << endl;
   }
   
   // zoom change?
   
   if (_checkForZoomChange()) {
     stateHasChanged = true;
+    cerr << "zzzzzzzzzzzzzzzzzzzzz FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // vlevel change?
@@ -392,12 +398,14 @@ bool GuiManager::_checkForStateChange()
   if (_vlevelHasChanged) {
     stateHasChanged = true;
     _vlevelHasChanged = false;
+    cerr << "vvvvvvvvvvvvvvvvvvvvv FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // time change
 
   if (_timeControl->timeHasChanged()) {
     stateHasChanged = true;
+    cerr << "ttttttttttttttttttttt FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // resize?
@@ -405,6 +413,7 @@ bool GuiManager::_checkForStateChange()
   if (_resized) {
     stateHasChanged = true;
     _resized = false;
+    cerr << "rrrrrrrrrrrrrrrrrrrrr FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // overlays?
@@ -412,6 +421,7 @@ bool GuiManager::_checkForStateChange()
   if (_overlaysHaveChanged) {
     stateHasChanged = true;
     _overlaysHaveChanged = false;
+    cerr << "ooooooooooooooooooooo FFFFFFFFFFFFFFFFF" << endl;
   }
 
   return stateHasChanged;
@@ -631,6 +641,8 @@ void GuiManager::_setupWindows()
   pos.setY(_params.horiz_window_y_pos);
   move(pos);
   show();
+
+  _setupWindowsComplete = true;
 
   // set up field status dialog
   // _createClickReportDialog();

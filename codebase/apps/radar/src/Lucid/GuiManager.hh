@@ -151,9 +151,8 @@ signals:
 private:
 
   int _mainTimerId;
-  
   int _timerEventCount;
-  bool _guiSizeInitialized;
+  bool _setupWindowsComplete;
   static GuiManager* m_pInstance;
 
   // main window frame

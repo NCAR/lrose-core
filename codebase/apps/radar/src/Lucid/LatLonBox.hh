@@ -68,6 +68,7 @@ public:
   // Check for equality
 
   bool operator==(const LatLonBox &rhs);
+  bool operator!=(const LatLonBox &rhs);
   
   /// set limits
   

@@ -103,6 +103,11 @@ bool LatLonBox::operator==(const LatLonBox &rhs)
   return true;
 }
 
+bool LatLonBox::operator!=(const LatLonBox &rhs)
+{
+  return !operator==(rhs);
+}
+
 /////////////////////////////////////////////////////////
 // initialize data members
 

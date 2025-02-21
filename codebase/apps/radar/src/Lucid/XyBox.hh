@@ -67,8 +67,8 @@ public:
   
   // Check for equality
 
-  bool operator==(const XyBox &rhs);
-  bool operator!=(const XyBox &rhs);
+  bool operator== (const XyBox &rhs);
+  bool operator!= (const XyBox &rhs);
   
   /// set limits
   

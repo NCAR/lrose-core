@@ -79,7 +79,7 @@ XyBox::~XyBox()
 // Assignment
 //
 
-XyBox &XyBox::operator=(const XyBox &rhs)
+XyBox &XyBox::operator= (const XyBox &rhs)
 {
   return _copy(rhs);
 }
@@ -88,7 +88,7 @@ XyBox &XyBox::operator=(const XyBox &rhs)
 // Check for equality
 //
 
-bool XyBox::operator==(const XyBox &rhs)
+bool XyBox::operator== (const XyBox &rhs)
 {
   if (fabs(_minY - rhs._minY) > 1.0e-5) {
     return false;
@@ -105,7 +105,7 @@ bool XyBox::operator==(const XyBox &rhs)
   return true;
 }
 
-bool XyBox::operator!=(const XyBox &rhs)
+bool XyBox::operator!= (const XyBox &rhs)
 {
   return !operator==(rhs);
 }

@@ -2438,7 +2438,7 @@ void Lucid::_calcMapCoordsProj()
   
   for(int ii=0; ii < gd.num_map_overlays; ii++) {        /* For Each Overlay */
     MapOverlay_t *ov =  gd.overlays[ii];
-    if(gd.debug)  printf("Converting Overlay %s ... ",ov->control_label.c_str());
+    if(gd.debug)  printf("Converting map %s\n", ov->control_label.c_str());
     
     /* Convert all labels   */
     for(int jj=0; jj < ov->num_labels; jj++) { 
@@ -2533,7 +2533,7 @@ void Lucid::_calcMapCoordsLatLon()
   
   for(int ii=0; ii < gd.num_map_overlays; ii++) {        /* For Each Overlay */
     MapOverlay_t *ov =  gd.overlays[ii];
-    if(gd.debug)  printf("Converting Overlay %s ",ov->control_label.c_str());
+    if(gd.debug)  printf("Converting map %s\n", ov->control_label.c_str());
     
     for(int jj=0; jj < ov->num_labels; jj++) {        /* Convert all labels   */
       int clip_flag = 0;
