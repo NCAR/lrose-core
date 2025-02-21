@@ -429,6 +429,8 @@ void HorizView::_setGridSpacing()
 void HorizView::_drawOverlays(QPainter &painter)
 {
 
+  cerr << "333333333333333333333OOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
+  
   // draw the maps
 
   _drawMaps(painter);
@@ -440,6 +442,8 @@ void HorizView::_drawOverlays(QPainter &painter)
   // click point cross hairs
   
   if (_pointClicked) {
+
+    cerr<< "QQQQQQQQQQQQQQQQQQQQQCCCCCCCCCCCCCCCCCCCC" << endl;
     
     painter.save();
 
@@ -1102,6 +1106,7 @@ void HorizView::setClickPoint(double azimuthDeg,
   _mouseReleaseX = _zoomWorld.getIxPixel(x_km);
   _mouseReleaseY = _zoomWorld.getIyPixel(y_km);
   _pointClicked = true;
+  cerr << "RRRRRRRRRRRRRRRRRRRRRXCCCCCCCCCCCCCCCCCCCCC" << endl;
 
   update();
 
@@ -2009,6 +2014,7 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
 void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
 
+  cerr << "1111111111111111111112CCCCCCCCCCCCCCCCCCCPPPPPPPPPPPPPPPPPPPPPP" << endl;
   _pointClicked = false;
 
   QRect rgeom = _rubberBand->geometry();
@@ -2065,6 +2071,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
     _pointClicked = true;
+    _manager.setOverlaysHaveChanged(true);
     
     // get ray closest to click point
     
