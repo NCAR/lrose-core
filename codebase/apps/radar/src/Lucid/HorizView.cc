@@ -429,14 +429,10 @@ void HorizView::_setGridSpacing()
 void HorizView::_drawOverlays(QPainter &painter)
 {
 
-  cerr << "333333333333333333333OOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-  
   // draw the maps
 
   _drawMaps(painter);
   
-  cerr << "4444444444444444444444OOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-
   // draw rings and azimith lines for polar data sets
 
   _drawRingsAndAzLines(painter);
@@ -445,8 +441,6 @@ void HorizView::_drawOverlays(QPainter &painter)
   
   if (_pointClicked) {
 
-    cerr<< "QQQQQQQQQQQQQQQQQQQQQCCCCCCCCCCCCCCCCCCCC" << endl;
-    
     painter.save();
 
     int startX = _mouseReleaseX - _params.click_cross_size / 2;
@@ -512,8 +506,6 @@ void HorizView::_drawOverlays(QPainter &painter)
 
   }
   
-  cerr << "55555555555555555555555555OOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-
 #ifdef NOTNOW
   // add the legends
   
@@ -1110,7 +1102,6 @@ void HorizView::setClickPoint(double azimuthDeg,
   _mouseReleaseX = _zoomWorld.getIxPixel(x_km);
   _mouseReleaseY = _zoomWorld.getIyPixel(y_km);
   _pointClicked = true;
-  cerr << "RRRRRRRRRRRRRRRRRRRRRXCCCCCCCCCCCCCCCCCCCCC" << endl;
 
   update();
 
@@ -1230,8 +1221,6 @@ void HorizView::_doRenderInvalidImages(QPainter &painter,
 {
 
 #ifdef JUNK
-  
-  cerr << "CCCCCCCCCCCCCCCCCCCCC index: " << index << endl;
   
   int i;
   int h_image,v_image;
@@ -2016,10 +2005,9 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
 void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
 
-  cerr << "1111111111111111111112CCCCCCCCCCCCCCCCCCCPPPPPPPPPPPPPPPPPPPPPP" << endl;
   _pointClicked = false;
 
-  QRect rgeom = _rubberBand->geometry();
+  // QRect rgeom = _rubberBand->geometry();
 
   // If the mouse hasn't moved much, assume we are clicking rather than
   // zooming
@@ -2036,7 +2024,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   double distX = _mouseReleaseX - _mousePressX;
   double distY = _mouseReleaseY - _mousePressY;
   double distMoved = sqrt(distX * distX + distY * distY);
-  cerr << "ddddddddddddddddd distMoved: " << distMoved << endl;
   
   if (distMoved <= 20) {
     
@@ -2480,18 +2467,4 @@ void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
   contextMenu.exec(this->mapToGlobal(pos));
 }
 
-//////////////////////////////////////////
-// paint the user-selected zoom rectangle
-
-void HorizView::_paintZoomRect(QPainter &painter)
-{
-  QRect zrect = _rubberBand->geometry();
-  cerr << "Zoom rect x, y: "
-       << zrect.x() << ", " << zrect.y() << endl;
-  cerr << "Zoom rect width, height: "
-       << zrect.width() << ", " << zrect.height() << endl;
-  // painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-  painter.setPen(QColor(0xff, 0xff, 0xff));
-  painter.drawRect(zrect);
-}
   

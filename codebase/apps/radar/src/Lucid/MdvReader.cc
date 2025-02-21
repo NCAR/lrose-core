@@ -201,7 +201,6 @@ int MdvReader::getHorizPlane()
     cerr << "ERROR - MdvReader::getHorizPlane, field: " << _getFieldName() << endl;
     cerr << "  Bad URL: " << fullUrl << endl;
     h_data_valid = 1;
-    cerr << "1111111111111111111 getHorizPlane bad URL: " << _getFullUrl() << endl;
     return -1;
   }
   
@@ -213,7 +212,7 @@ int MdvReader::getHorizPlane()
   
   if(!_timeListValid) {
     if (_getTimeList(fullUrl, _midTime,  _page, h_mdvx)) {
-      cerr << "1111111111111111111 getHorizPlane getTimeList() failed" << endl;
+      cerr << "MdvReader::getHorizPlane()::_getTimeList() failed" << endl;
       _timeListValid = false;
       return -1;
     }
@@ -938,22 +937,14 @@ int MdvReader::_getTimeList(const string &url,
   if((gd.epoch_end - gd.epoch_start) <
      (_params.climo_max_time_span_days * 1440  * 60)) {
     if (mdvx->compileTimeList()) {
-      cout << "ERROR -CIDD:  setTimeListModeValid" << endl;
-      cout << mdvx->getErrStr();
+      cerr << "ERROR -CIDD:  setTimeListModeValid" << endl;
+      cerr << mdvx->getErrStr();
       _timeListValid = true;
     }  
   } else {
     gd.io_info.outstanding_request = 0;
     _timeListValid = true;
   }
-
-  // {
-  //   const vector<time_t> &validTimes = mdvx->getValidTimes();
-  //   for (size_t ii = 0; ii < validTimes.size(); ii++) {
-  //     cerr << "1111111111111 ii, validTime: " << ii
-  //          << ", " << DateTime::strm(validTimes[ii]) << endl;
-  //   }
-  // }
 
   return 0;  // return from this request.
   
@@ -1216,10 +1207,8 @@ ReadVolH::ReadVolH(MdvReader* parentObject, QObject* parent) :
 }
 
 void ReadVolH::doRead() {
-  cerr << "111111111 ReadVolH thread started. Parent object:" << _mr << endl;
   qDebug() << "ReadVolH thread started. Parent object:" << _mr;
   int iret = _mr->getHorizPlane();
-  cerr << "1111111 ReadVolH returned, iret: " << ", " << iret << endl;
   qDebug() << "ReadVolH returned, iret: " << ", " << iret;
   emit readDone();
 }
@@ -1233,7 +1222,6 @@ void MdvReader::startReadVolH() {
     return;
   }
   _readBusyH = true;
-  cerr << "1111111111111111112222222222222222222223333333333333333333" << endl;
   ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
   QThread* thread = new QThread;
   worker->moveToThread(thread);
@@ -1251,7 +1239,6 @@ void MdvReader::startReadVolH() {
 
 void MdvReader::readDoneH() {
   if (h_mdvx->getFieldByNum(0) == nullptr) {
-    cerr << "FFFFFFFFFFFFFF FALSE FALSE" << endl;
     _setValidH(false);
     _setNewH(false);
     _readBusyH = false;
@@ -1259,14 +1246,7 @@ void MdvReader::readDoneH() {
   }
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
-  {
-    MdvxField *hfld = h_mdvx->getFieldByNum(0);
-    Mdvx::field_header_t fhdr = hfld->getFieldHeader();
-    Mdvx::vlevel_header_t vh = hfld->getVlevelHeader();
-    cerr << "1111111111111 readDone in ReadVolH worker thread" << endl;
-    cerr << "1111111111111 vLevel: " << vh.level[fhdr.nz-1] << endl;
-    qDebug() << "readDone in ReadVolH worker thread";
-  }
+  qDebug() << "readDone in ReadVolH worker thread";
   _readBusyH = false;
 }
 

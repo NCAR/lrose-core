@@ -161,8 +161,6 @@ GuiManager::GuiManager() :
 
   _vlevelManager.requestLevel(_params.start_ht);
   _vlevelHasChanged = true;
-  cerr << "WWWWWWWWWWWWWWWWWWWWWW_vlevelManager.getRequestedLevel(): " << _vlevelManager.getRequestedLevel() << endl;
-  
   
   _overlaysHaveChanged = true;
   

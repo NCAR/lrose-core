@@ -610,10 +610,6 @@ class DLL_EXPORT HorizView : public QWidget
   void _doRenderInvalidImages(QPainter &painter,
                               int index, VertView *vert);
   
-  // paint the user-selected zoom rectangle
-  
-  void _paintZoomRect(QPainter &painter);
-  
 };
 
 
