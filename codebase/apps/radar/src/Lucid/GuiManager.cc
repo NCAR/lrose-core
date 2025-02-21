@@ -123,7 +123,6 @@ GuiManager::GuiManager() :
 {
 
   _timerEventCount = 0;
-  _setupWindowsComplete = false;
   _archiveMode = true;
   
   m_pInstance = this;
@@ -143,7 +142,6 @@ GuiManager::GuiManager() :
   // _vlevelVBoxLayout = NULL;
   // _vlevelFrame = NULL;
   // _vlevelPanel = NULL;
-  _vlevelHasChanged = false;
   
   _fieldMenu = NULL;
   _fieldTable = NULL;
@@ -153,21 +151,24 @@ GuiManager::GuiManager() :
 
   _fieldNum = 0;
   _prevFieldNum = -1;
-
+  _fieldHasChanged = true;
+  
   _fieldTableCol = 0;
   _fieldTableRow = 0;
-
+  
   _prevFieldTableCol = -1;
   _prevFieldTableRow = -1;
 
-  _fieldHasChanged = false;
-  _overlaysHaveChanged = false;
+  _vlevelManager.setLevel(_params.start_ht);
+  _vlevelHasChanged = true;
+  cerr << "WWWWWWWWWWWWWWWWWWWWWW_vlevelManager.getLevel(): " << _vlevelManager.getLevel() << endl;
+  
+  
+  _overlaysHaveChanged = true;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
 
-  _vlevelManager.setLevel(_params.start_ht);
-  
   setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
   _archiveStartTime.set(_params.archive_start_time);
 
@@ -297,10 +298,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _placeTimeControl();
   }
 
-  if (!_setupWindowsComplete) {
-    return;
-  }
-
   // read click point info from FMQ
   
   _readClickPoint();
@@ -311,47 +308,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _handleClientEvent();
   }
 
-  // check for state change
-
-  bool stateChanged = _checkForStateChange();
-
-  // get new data if needed - data is retrieved in a thread
-
-  if (stateChanged) {
-    int index = gd.movie.cur_frame;
-    if (gd.movie.cur_frame < 0) {
-      index = gd.movie.num_frames - 1;
-    }
-    MdvReader *mr = gd.mread[_fieldNum];
-    if (mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
-                              _vlevelManager.getLevel(),
-                              gd.h_win.page)) {
-      cerr << "ERROR - GuiManager::timerEvent" << endl;
-      cerr << "  mr->requestHorizPlane" << endl;
-      cerr << "  time_start: " << DateTime::strm(gd.movie.frame[index].time_start) << endl;
-      cerr << "  time_end: " << DateTime::strm(gd.movie.frame[index].time_end) << endl;
-      cerr << "  page: " << gd.h_win.page << endl;
-    }
-  }
-
-  // check for new data
+  // is previous read still busy?
 
   MdvReader *mr = gd.mread[_fieldNum];
-  if (mr->isNewH()) {
-    int index = gd.movie.cur_frame;
-    if (gd.movie.cur_frame < 0) {
-      index = gd.movie.num_frames - 1;
-    }
-    _horiz->setFrameForRendering(gd.h_win.page, index);
-    _horiz->update();
-    // gd.redraw_horiz = false;
-    if (gd.h_win.page < gd.num_datafields) {
-      _vlevelManager.set(*gd.mread[gd.h_win.page]);
-    }
-    _vlevelSelector->update();
+  if (!mr->getReadBusyH()) {
+    // read the H data if needed
+    _checkAndReadH(mr);
   }
-  
-  // handle legacy cidd timer event
   
   // _autoCreateFunc();
   // _ciddTimerFunc(event);
@@ -372,6 +335,56 @@ void GuiManager::timerEvent(QTimerEvent *event)
   
 }
 
+//////////////////////////////////////////////////////////////
+// check if we need new H data, and read accordingly
+  
+void GuiManager::_checkAndReadH(MdvReader *mr)
+{
+
+  // check for state change
+  
+  bool stateChanged = _checkForStateChange();
+  
+  // get new data if needed - data is retrieved in a thread
+  
+  int frameIndex = gd.movie.cur_frame;
+  if (gd.movie.cur_frame < 0) {
+    frameIndex = gd.movie.num_frames - 1;
+  }
+
+  cerr << "VVVVVVVVVVVVVVVVV _vlevelManager.getLevel(): " << _vlevelManager.getLevel() << endl;
+  
+  if (stateChanged) {
+    mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
+                          _vlevelManager.getLevel(),
+                          gd.h_win.page);
+  }
+  
+  // check for new data
+  
+  if (mr->isNewH()) {
+    if (!mr->isValidH()) {
+      cerr << "ERROR - GuiManager::timerEvent" << endl;
+      cerr << "  mr->requestHorizPlane" << endl;
+      cerr << "  time_start: " << DateTime::strm(gd.movie.frame[frameIndex].time_start) << endl;
+      cerr << "  time_end: " << DateTime::strm(gd.movie.frame[frameIndex].time_end) << endl;
+      cerr << "  page: " << gd.h_win.page << endl;
+    }
+    int frameIndex = gd.movie.cur_frame;
+    if (gd.movie.cur_frame < 0) {
+      frameIndex = gd.movie.num_frames - 1;
+    }
+    _horiz->setFrameForRendering(gd.h_win.page, frameIndex);
+    _horiz->update();
+    // gd.redraw_horiz = false;
+    if (gd.h_win.page < gd.num_datafields) {
+      _vlevelManager.set(*gd.mread[gd.h_win.page]);
+    }
+    _vlevelSelector->update();
+  }
+
+}
+
 ///////////////////////////////////////////
 // check for state changes
 
@@ -383,14 +396,12 @@ bool GuiManager::_checkForStateChange()
   if (_fieldHasChanged) {
     stateHasChanged = true;
     _fieldHasChanged = false;
-    cerr << "fffffffffffffffffffff FFFFFFFFFFFFFFFFF" << endl;
   }
   
   // zoom change?
   
   if (_checkForZoomChange()) {
     stateHasChanged = true;
-    cerr << "zzzzzzzzzzzzzzzzzzzzz FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // vlevel change?
@@ -398,14 +409,12 @@ bool GuiManager::_checkForStateChange()
   if (_vlevelHasChanged) {
     stateHasChanged = true;
     _vlevelHasChanged = false;
-    cerr << "vvvvvvvvvvvvvvvvvvvvv FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // time change
 
   if (_timeControl->timeHasChanged()) {
     stateHasChanged = true;
-    cerr << "ttttttttttttttttttttt FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // resize?
@@ -413,7 +422,6 @@ bool GuiManager::_checkForStateChange()
   if (_resized) {
     stateHasChanged = true;
     _resized = false;
-    cerr << "rrrrrrrrrrrrrrrrrrrrr FFFFFFFFFFFFFFFFF" << endl;
   }
 
   // overlays?
@@ -421,7 +429,6 @@ bool GuiManager::_checkForStateChange()
   if (_overlaysHaveChanged) {
     stateHasChanged = true;
     _overlaysHaveChanged = false;
-    cerr << "ooooooooooooooooooooo FFFFFFFFFFFFFFFFF" << endl;
   }
 
   return stateHasChanged;
@@ -641,8 +648,6 @@ void GuiManager::_setupWindows()
   pos.setY(_params.horiz_window_y_pos);
   move(pos);
   show();
-
-  _setupWindowsComplete = true;
 
   // set up field status dialog
   // _createClickReportDialog();

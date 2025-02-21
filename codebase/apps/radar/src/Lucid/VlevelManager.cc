@@ -197,13 +197,24 @@ void VlevelManager::setLevel(double level)
   
 {
   
-  _selectedLevel = level;
-  _indexInGui = 0;
+  // if empty, set single vlevel
   
   if (_vlevels.size() == 0) {
+    GuiVlevel gv;
+    gv.level = level;
+    gv.indexInGui = 0;
+    gv.indexInData = 0;
+    _vlevels.push_back(gv);
+    _selectedLevel = level;
+    _indexInGui = 0;
     return;
   }
+
+  // find closest vlevel
   
+  _selectedLevel = level;
+  _indexInGui = 0;
+
   double minDiff = 1.0e99;
   for (size_t ii = 0; ii < _vlevels.size(); ii++) {
     double level = _vlevels[ii].level;

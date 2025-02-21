@@ -152,7 +152,6 @@ private:
 
   int _mainTimerId;
   int _timerEventCount;
-  bool _setupWindowsComplete;
   static GuiManager* m_pInstance;
 
   // main window frame
@@ -385,6 +384,7 @@ private:
   
   // check for status change
   
+  void _checkAndReadH(MdvReader *mr);
   bool _checkForStateChange();
   bool _checkForZoomChange();
   void _handleFirstTimerEvent();

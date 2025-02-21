@@ -122,6 +122,10 @@ TimeControl::TimeControl(GuiManager *parent,
 
   _enableAcceptCancel(false);
 
+  // set instance
+  
+  _instance = this;
+
 }
 
 /*********************************************************************

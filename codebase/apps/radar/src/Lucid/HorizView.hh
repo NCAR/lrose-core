@@ -612,8 +612,7 @@ class DLL_EXPORT HorizView : public QWidget
   
   // paint the user-selected zoom rectangle
   
-  void _setZoomRectPainter();
-  void _paintZoomRect();
+  void _paintZoomRect(QPainter &painter);
   
 };
 

@@ -102,8 +102,8 @@ field_list = {
 
 # MRMS mosaic
 
-MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
 MRMS_DBZ_3D      MRMS_DBZ_3D      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
+MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
 MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
 3HR_ACCUM_PID      3HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
 3HR_ACCUM_HYBRID   3HR_ACCUM_HYBRID   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_HYBRID  precip_accum.colors  mm  -5 80 5 radial 1 0

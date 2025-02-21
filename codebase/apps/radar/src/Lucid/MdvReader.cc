@@ -150,18 +150,21 @@ MdvReader::MdvReader(QObject* parent) :
 
 /**********************************************************************
  * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
+ * This is implemented in a thread.
+ * On error, isValidH is set to false.
  */
 
-int MdvReader::requestHorizPlane(const DateTime &midTime,
-                                 double vLevel,
-                                 int page)
+void MdvReader::requestHorizPlane(const DateTime &midTime,
+                                  double vLevel,
+                                  int page)
 {
-
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH MdvReader::requestHorizPlane()" << endl;
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   midTime: "
-       << midTime.asString(0) << endl;
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   vLevel: " << vLevel << endl;
-  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH   page: " << page << endl;
+  
+  if(gd.debug2) {
+    cerr << "=====>>> MdvReader::requestHorizPlane()" << endl;
+    cerr << "   midTime: " << midTime.asString(0) << endl;
+    cerr << "   vLevel: " << vLevel << endl;
+    cerr << "   page: " << page << endl;
+  }
   
   _midTime = midTime;
   _page = page;
@@ -170,18 +173,16 @@ int MdvReader::requestHorizPlane(const DateTime &midTime,
   
   if (!_checkRequestChangedH(_midTime, vLevel)) {
     // no changes to the request, use what we have, mark as new
-    cerr << "1111111111111111111 ==>>>> requestHorizPlane - no change <<<<==" << endl;
+    if(gd.debug2) {
+      cerr << "======>> requestHorizPlane - no change <<<<==" << endl;
+    }
     _setNewH(true);
-    return 0;
+    return;
   }
 
   // Initiate the request in thread
   
-  cerr << "1111111111111111111 requestHorizPlane before startReadVolH" << endl;
   startReadVolH();
-  cerr << "1111111111111111111 requestHorizPlane after startReadVolH" << endl;
-   
-  return 0;
   
 }
 
@@ -192,8 +193,6 @@ int MdvReader::requestHorizPlane(const DateTime &midTime,
 int MdvReader::getHorizPlane()
 {
 
-  cerr << "JJJJJJJJJJJJJJJJ 11111111111 MdvReader::getHorizPlane()" << endl;
-  
   // Construct URL, check is valid.
   
   string fullUrl(_getFullUrl());
@@ -634,7 +633,7 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
     return false;
   }
   
-  if(gd.debug1) {
+  if(gd.debug2) {
     cerr << "MdvReader::_checkRequestChangedH - TRUE" << endl;
   }
   
@@ -863,14 +862,14 @@ int MdvReader::_getTimeList(const string &url,
                             Mdvx *mdvx)
 {
 
-  double movieDurationSecs = _params.frame_interval_secs * _params.n_movie_frames;
-  DateTime movieStartTime;
   TimeControl *tc = TimeControl::getInstance();
-  if (tc != nullptr) {
-    movieDurationSecs = tc->getMovieDurationSecs();
-    movieStartTime = tc->getStartTime();
+  if (tc == nullptr) {
+    // TimeControl does not yet exist
+    return -1;
   }
   
+  double movieDurationSecs = tc->getMovieDurationSecs();
+  DateTime movieStartTime(tc->getStartTime());
   DateTime movieEndTime(movieStartTime + movieDurationSecs);
   time_t delta = movieEndTime - movieStartTime;
   DateTime listStartTime(movieStartTime - delta);
@@ -1252,6 +1251,7 @@ void MdvReader::startReadVolH() {
 
 void MdvReader::readDoneH() {
   if (h_mdvx->getFieldByNum(0) == nullptr) {
+    cerr << "FFFFFFFFFFFFFF FALSE FALSE" << endl;
     _setValidH(false);
     _setNewH(false);
     _readBusyH = false;

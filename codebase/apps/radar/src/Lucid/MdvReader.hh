@@ -75,16 +75,22 @@ public:
   bool isNewH() const;
   bool isNewV() const;
 
+  // is the previous read busy
+
+  bool getReadBusyH() { return _readBusyH; }
+
   // time list
   
   // void setTimeListValid(bool state) { _timeListValid = state; }
   bool getTimeListValid() const { return _timeListValid; }
   
   // Get data for a horiz plane
-  
-  int requestHorizPlane(const DateTime &midTime,
-                        double vLevel,
-                        int page);
+  // This is implemented in a thread.
+  // On error, isValidH is set to false.
+
+  void requestHorizPlane(const DateTime &midTime,
+                         double vLevel,
+                         int page);
 
   int getHorizPlane();
   
