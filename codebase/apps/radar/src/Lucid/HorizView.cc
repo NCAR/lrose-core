@@ -162,7 +162,7 @@ HorizView::~HorizView()
 
 void HorizView::clear()
 {
-  _refreshImages();
+  _performRendering();
   showOpeningFileMsg(false);
 }
 
@@ -506,85 +506,6 @@ void HorizView::_drawOverlays(QPainter &painter)
 
   }
   
-#ifdef NOTNOW
-  // add the legends
-  
-  if (_archiveMode) {
-    
-    // add legends with time, field name and elevation angle
-
-    vector<string> legends;
-    char text[1024];
-
-    // time legend
-
-    snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(0).c_str());
-    legends.push_back(text);
-
-    // radar and site name legend
-
-    string radarName("unknown");
-    // string radarName(_platform.getInstrumentName());
-    // if (_params.override_radar_name) {
-    //   radarName = _params.radar_name;
-    // }
-    string siteName("unknown");
-    // string siteName(_platform.getInstrumentName());
-    // if (_params.override_site_name) {
-    //   siteName = _params.site_name;
-    // }
-    string radarSiteLabel = radarName;
-    if (siteName.size() > 0 && siteName != radarName) {
-      radarSiteLabel += "/";
-      radarSiteLabel += siteName;
-    }
-    legends.push_back(radarSiteLabel);
-
-    // field name legend
-
-    // string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
-    // snprintf(text, "Field: %s", fieldName.c_str());
-    // legends.push_back(text);
-
-    // elevation legend
-
-    // snprintf(text, 1024, "Elevation(deg): %.2f", _meanElev);
-    // legends.push_back(text);
-
-    // nrays legend
-
-    // snprintf(text, 1024, "NRays: %g", _nRays);
-    // legends.push_back(text);
-    
-    painter.save();
-    painter.setPen(_params.horiz_legend_color);
-    painter.setPen(_params.horiz_legend_font_size);
-    painter.setBrush(_params.background_color);
-    painter.setBackgroundMode(Qt::OpaqueMode);
-
-    switch (_params.horiz_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
-    painter.restore();
-
-  } // if (_archiveMode) {
-#endif
-
 }
 
 /*************************************************************************
@@ -971,7 +892,6 @@ void HorizView::_refreshImages()
   // do the rendering
 
   _performRendering();
-
   update();
 }
 
@@ -1759,7 +1679,7 @@ void HorizView::zoomBackView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
-  _refreshImages();
+  _performRendering();
 }
 
 /*************************************************************************
@@ -1777,7 +1697,7 @@ void HorizView::zoomOutView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
-  _refreshImages();
+  _performRendering();
 }
 
 /*************************************************************************
@@ -1865,7 +1785,7 @@ void HorizView::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  _refreshImages();
+  _performRendering();
 }
 
 
@@ -2074,47 +1994,17 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     // mouse moved more than 20 pixels, so a zoom occurred
 
-    // _handleZoom();
+    // save current zoom
     
-    gd.prev_zoom_min_x = _worldPressX;
-    gd.prev_zoom_min_y = _worldPressY;
-    gd.prev_zoom_max_x = _worldReleaseX;
-    gd.prev_zoom_max_y = _worldReleaseY;
-    
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
     _savedZooms.push_back(_zoomWorld);
-    
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
-                              _worldReleaseX, _worldReleaseY);
-    
-    updatePixelScales();
-    _setTransform(_zoomWorld.getTransform());
-    
-    _setGridSpacing();
 
-    // enable unzooms
+    // handle the zoom action
+
+    _handleZoom();
     
-    _manager.enableZoomBackButton();
-    _manager.enableZoomOutButton();
+    // render
     
-    // // Update the window in the renderers
-
-    // //     gd.redraw_horiz = true;
-    gd.zoom_has_changed = true;
-
-    gd.selected_zoom_min_x = _worldPressX;
-    gd.selected_zoom_min_y = _worldPressY;
-    gd.selected_zoom_max_x = _worldReleaseX;
-    gd.selected_zoom_max_y = _worldReleaseY;
-
-    _manager.setXyZoom(_worldPressY, _worldReleaseY, _worldPressX, _worldReleaseX); 
-
-    _refreshImages();
+    _performRendering();
 
   }
     
@@ -2132,34 +2022,19 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 void HorizView::_handleZoom()
 {
 
-  // save previous zoom in world coords
+  _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+  _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+  _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+  _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
   
-  gd.prev_zoom_min_x = _worldPressX;
-  gd.prev_zoom_min_y = _worldPressY;
-  gd.prev_zoom_max_x = _worldReleaseX;
-  gd.prev_zoom_max_y = _worldReleaseY;
-
-  _savedZooms.push_back(_zoomWorld);
+  // update world coords transform
   
-  // get mouse coords in world coords
+  _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                            _worldReleaseX, _worldReleaseY);
   
-  double worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  double worldPressY = _zoomWorld.getYWorld(_mousePressY);
-  
-  double worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-  double worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-  
-  // make a copy of the current world zoom and set updated world limits
-
-  // WorldPlot tmpWorld(_zoomWorld);
-  
-  // tmpWorld.setWorldLimits(worldPressX, worldPressY,
-  //                         worldReleaseX, worldReleaseY);
-  
-  // updatePixelScales();
+  updatePixelScales();
   
   _setTransform(_zoomWorld.getTransform());
-  
   _setGridSpacing();
   
   // enable unzooms
@@ -2167,21 +2042,10 @@ void HorizView::_handleZoom()
   _manager.enableZoomBackButton();
   _manager.enableZoomOutButton();
   
-  // Update the window in the renderers
-  
-  //     gd.redraw_horiz = true;
-  gd.zoom_has_changed = true;
-  
-  gd.selected_zoom_min_x = _worldPressX;
-  gd.selected_zoom_min_y = _worldPressY;
-  gd.selected_zoom_max_x = _worldReleaseX;
-  gd.selected_zoom_max_y = _worldReleaseY;
-  
-  _resetWorld(width(), height());
-  _pixmap = _pixmap.scaled(width(), height());
-  updatePixelScales();
-  _refreshImages();
-  update();
+  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
+                     _zoomWorld.getYMaxWorld(),
+                     _zoomWorld.getXMinWorld(),
+                     _zoomWorld.getXMaxWorld());
   
 }
 
@@ -2194,8 +2058,7 @@ void HorizView::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   updatePixelScales();
-  _refreshImages();
-  update();
+  _performRendering();
 }
 
 

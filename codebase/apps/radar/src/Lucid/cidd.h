@@ -189,14 +189,10 @@ public:
 
   time_t prev_time;
   int prev_field;
-  double prev_zoom_min_x, prev_zoom_min_y;
-  double prev_zoom_max_x, prev_zoom_max_y;
   double prev_ht;
 
   time_t selected_time;
   int selected_field;
-  double selected_zoom_min_x, selected_zoom_min_y;
-  double selected_zoom_max_x, selected_zoom_max_y;
   double selected_ht;
 
   time_t last_event_time;  // the unix time of when the last activity occured

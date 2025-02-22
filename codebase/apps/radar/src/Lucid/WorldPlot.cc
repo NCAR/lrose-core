@@ -2266,7 +2266,11 @@ void WorldPlot::_computeTransform()
 
 void WorldPlot::updatePixelScales()
 {
-    
+
+  // compute pixel space transform
+
+  _computeTransform();
+
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
   _plotHeight = _heightPixels - _topMargin - _bottomMargin;
   
@@ -2274,13 +2278,27 @@ void WorldPlot::updatePixelScales()
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
   _yMaxPixel = _topMargin + _yPixOffset;
   _yMinPixel = _yMaxPixel + _plotHeight - 1;
-    
+
+  // compute world coords per pixel in each dirn
+  
   _xPixelsPerWorld =
     (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
 
-  if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.999)) {
+  // correct y for aspect change in LATLON projection
+  // to preserve the plotted aspect ratio
+  
+  double aspectCorr = 1.0;
+  if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
+    double meanLat = (_yMaxWorld + _yMinWorld) / 2.0;
+    aspectCorr = cos(meanLat * DEG_TO_RAD);
+  }
+  _yPixelsPerWorld /= aspectCorr;
+
+  // adjust the world coords of the corners, based on the shape
+  
+  if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.9999)) {
     // adjust y pixel scale
     if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
@@ -2291,7 +2309,7 @@ void WorldPlot::updatePixelScales()
     double yHalf = ((_yMaxPixel - _yMinPixel) / 2.0) / _yPixelsPerWorld;
     _yMinWorld = yMean - yHalf; 
     _yMaxWorld = yMean + yHalf;
-  } else if (fabs(_yPixelsPerWorld) < fabs(_xPixelsPerWorld * 0.999)) {
+  } else if (fabs(_yPixelsPerWorld) < fabs(_xPixelsPerWorld * 0.9999)) {
     // adjust x pixel scale
     if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
@@ -2307,20 +2325,6 @@ void WorldPlot::updatePixelScales()
     // return;
   }
   
-  // correct for lat/lon aspect distortion
-
-  // cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" << endl;
-  // _proj.print(cerr);
-  // cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" << endl;
-  if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
-    double meanLat = (_yMaxWorld + _yMinWorld) / 2.0;
-    double aspectCorrection = cos(meanLat * DEG_TO_RAD);
-    _yPixelsPerWorld /= aspectCorrection;
-    // cerr << "AAAAAAAAAAAAAAA _yMaxWorld, _yMinWorld: " << _yMaxWorld << ", " << _yMinWorld << endl;
-    // cerr << "AAAAAAAAAAAAAAA meanLat: " << meanLat << endl;
-    // cerr << "AAAAAAAAAAAAAAA aspectCorrection: " << aspectCorrection << endl;
-  }
-
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);

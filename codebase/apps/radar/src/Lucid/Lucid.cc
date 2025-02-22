@@ -251,18 +251,10 @@ void Lucid::_initGlobals()
 
   gd.prev_time = 0;
   gd.prev_field = 0;
-  gd.prev_zoom_min_x = 0;
-  gd.prev_zoom_min_y = 0;
-  gd.prev_zoom_max_x = 0;
-  gd.prev_zoom_max_y = 0;
   gd.prev_ht = 0;
 
   gd.selected_time = 0;
   gd.selected_field = 0;
-  gd.selected_zoom_min_x = 0;
-  gd.selected_zoom_min_y = 0;
-  gd.selected_zoom_max_x = 0;
-  gd.selected_zoom_max_y = 0;
   gd.selected_ht = 0;
 
   gd.last_event_time = 0;  
@@ -604,18 +596,10 @@ int Lucid::_initDataSpace()
 
   gd.prev_time = -1;
   gd.prev_field = -1;
-  gd.prev_zoom_min_x = -9999.0;
-  gd.prev_zoom_min_y = -9999.0;
-  gd.prev_zoom_max_x = -9999.0;
-  gd.prev_zoom_max_y = -9999.0;
   gd.prev_ht = -9999.0;
   
   gd.selected_time = -2;
   gd.selected_field = -2;
-  gd.selected_zoom_min_x = -9998.0;
-  gd.selected_zoom_min_y = -9998.0;
-  gd.selected_zoom_max_x = -9998.0;
-  gd.selected_zoom_max_y = -9998.0;
   gd.selected_ht = -9998.0;
   
   // movies
@@ -2148,20 +2132,7 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
   int index;
   int point;
   int num_points;        
-  // int ret_stat;
-  // char *str_ptr;
-  // char name_base[1024];  /* Buffer for input names */
-  // char dirname[4096];   /* Buffer for directories to search */
-  // char name_buf[2048];  /* Buffer for input names */
-  // char name_buf2[2048]; /* Buffer for input names */
-  // char *map_buf;
-  // int map_len;
-  // FILE *map_file;
-
-  // int pid = getpid();
-
-  // Shape File is Found and Open
-
+  
   int n_objects = 0;
   int shape_type = 0;
   int part_num = 0;
@@ -2687,8 +2658,6 @@ int Lucid::_initZooms()
     _params.num_cache_zooms = 1 ;
   }
   
-  // gd.h_win.can_pdev = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
-  // gd.v_win.can_pdev = (Drawable *) calloc(sizeof(Drawable *), _params.num_cache_zooms);
   gd.h_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
   gd.v_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
   
@@ -2732,11 +2701,6 @@ int Lucid::_initZooms()
     gd.h_win.max_y = _params.domain_limit_max_y;
   }
 
-  gd.selected_zoom_min_x = gd.h_win.min_x;
-  gd.selected_zoom_min_y = gd.h_win.min_y;
-  gd.selected_zoom_max_x = gd.h_win.max_x;
-  gd.selected_zoom_max_y = gd.h_win.max_y;
-  
   for(int izoom = 0; izoom < gd.h_win.num_zoom_levels; izoom++) {
     
     double minx = _params._zoom_levels[izoom].min_x;
