@@ -2777,6 +2777,8 @@ int Lucid::_initZooms()
     
     gd.aspect_correction =
       cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * DEG_TO_RAD);
+
+    cerr << "GGGGGGGGGGAAAAAAAAAA aspect_correction: " << gd.aspect_correction << endl;
     
     /* Make sure domains are consistant with the window aspect ratio */
 
@@ -3476,7 +3478,7 @@ void Lucid::_getBoundingBox(double &min_lat,
        }
    }
 
-   if(gd.display_projection == Mdvx::PROJ_LATLON ) {
+    if(gd.display_projection == Mdvx::PROJ_LATLON ) {
      double originLon = (min_lon + max_lon) / 2.0;
      gd.proj.initLatlon(originLon);
    }

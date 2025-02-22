@@ -2269,8 +2269,6 @@ void WorldPlot::updatePixelScales()
 
   // compute pixel space transform
 
-  _computeTransform();
-
   _plotWidth = _widthPixels - _leftMargin - _rightMargin - _colorScaleWidth;
   _plotHeight = _heightPixels - _topMargin - _bottomMargin;
   
@@ -2280,7 +2278,12 @@ void WorldPlot::updatePixelScales()
   _yMinPixel = _yMaxPixel + _plotHeight - 1;
 
   // compute world coords per pixel in each dirn
-  
+
+  cerr << "AAAAAAAAAAAAAAAA  _xMinWorld, _xMaxWorld: "
+       << _xMinWorld << ", " << _xMaxWorld << endl;
+  cerr << "AAAAAAAAAAAAAAAA  _yMinWorld, _yMaxWorld: "
+       << _yMinWorld << ", " << _yMaxWorld << endl;
+
   _xPixelsPerWorld =
     (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
   _yPixelsPerWorld =
@@ -2295,6 +2298,8 @@ void WorldPlot::updatePixelScales()
     aspectCorr = cos(meanLat * DEG_TO_RAD);
   }
   _yPixelsPerWorld /= aspectCorr;
+
+  cerr << "AAAAAAAAAAAAAAAAAAAAA aspectCorr: " << aspectCorr << endl;
 
   // adjust the world coords of the corners, based on the shape
   
@@ -2322,8 +2327,19 @@ void WorldPlot::updatePixelScales()
     _xMaxWorld = xMean + xHalf;
   } else {
     // no change
-    // return;
   }
+
+  cerr << "BBBBBBBBBBBBBBBB  _xMinWorld, _xMaxWorld: "
+       << _xMinWorld << ", " << _xMaxWorld << endl;
+  cerr << "BBBBBBBBBBBBBBBB  _yMinWorld, _yMaxWorld: "
+       << _yMinWorld << ", " << _yMaxWorld << endl;
+
+  // recompute
+  
+  _xPixelsPerWorld =
+    (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
+  _yPixelsPerWorld =
+    (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
   
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
@@ -2334,6 +2350,18 @@ void WorldPlot::updatePixelScales()
   _yMinWindow = getYWorld(_yPixOffset);
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
+
+  _computeTransform();
+  
+  // _transform.reset();
+  // _transform.translate(_xMinPixel, _yMinPixel);
+  // _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
+  // _transform.translate(-_xMinWorld, -_yMinWorld);
+    
+  // _xMinWindow = getXWorld(_xPixOffset);
+  // _yMinWindow = getYWorld(_yPixOffset);
+  // _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
+  // _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
 }
 
