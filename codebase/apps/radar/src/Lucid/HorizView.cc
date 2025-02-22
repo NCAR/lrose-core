@@ -96,8 +96,6 @@ HorizView::HorizView(QWidget* parent,
 
   // init other values
 
-  // _aspectRatio = _params.horiz_aspect_ratio;
-  _aspectRatio = 1.0;
   _worldPressX = 0.0;
   _worldPressY = 0.0;
   _worldReleaseX = 0.0;
@@ -1892,10 +1890,11 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   // Make the rubberband aspect ratio match that
   // of the window
 
-  double dx = fabs(deltaY * _aspectRatio);
-  double dy = fabs(dx / _aspectRatio);
-  // double dx = fabs(deltaY);
-  // double dy = fabs(dx);
+  double aspectRatio =
+    (double) _zoomWorld.getPlotHeight() / (double) _zoomWorld.getPlotWidth();
+  
+  double dx = fabs(deltaY / aspectRatio);
+  double dy = fabs(dx * aspectRatio);
 
   // Preserve the signs
 
@@ -1905,9 +1904,6 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   int moveX = (int) floor(dx + 0.5);
   int moveY = (int) floor(dy + 0.5);
 
-  moveX = deltaX;
-  moveY = deltaY;
-  
   QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
 
   _zoomCornerX = _mousePressX + moveX;
