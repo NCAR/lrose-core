@@ -1298,9 +1298,9 @@ int HorizView::_controlRendering(QPainter &painter, int page,
   // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
   // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
 
-  if(_params.show_data_messages) {
-    // gui_label_h_frame("Rendering",-1);
-  }
+  // if(_params.show_data_messages) {
+  //   // gui_label_h_frame("Rendering",-1);
+  // }
 
   // RENDER the LAND_USE field first
   if(gd.layers.earth.landuse_active && gd.layers.earth.land_use != NULL) {

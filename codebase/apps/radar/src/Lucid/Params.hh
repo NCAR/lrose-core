@@ -87,6 +87,12 @@ public:
   } grid_render_mode_t;
 
   typedef enum {
+    CLOSEST_TO_FRAME_CENTER = 0,
+    FIRST_BEFORE_END_OF_FRAME = 1,
+    FIRST_AFTER_START_OF_FRAME = 2
+  } gather_data_mode_t;
+
+  typedef enum {
     PROJ_LATLON = 0,
     PROJ_LAMBERT_CONF = 3,
     PROJ_MERCATOR = 4,
@@ -97,12 +103,6 @@ public:
     PROJ_ALBERS = 16,
     PROJ_LAMBERT_AZIM = 17
   } projection_t;
-
-  typedef enum {
-    CLOSEST_TO_FRAME_CENTER = 0,
-    FIRST_BEFORE_END_OF_FRAME = 1,
-    FIRST_AFTER_START_OF_FRAME = 2
-  } gather_data_mode_t;
 
   typedef enum {
     CREATE_IMAGES_THEN_EXIT = 0,
@@ -619,10 +619,62 @@ public:
 
   int vert_window_min_height;
 
+  double scale_units_per_km;
+
+  char* scale_units_label;
+
+  tdrp_bool_t enable_status_window;
+
+  tdrp_bool_t report_clicks_in_status_window;
+
+  double min_ht;
+
+  double max_ht;
+
+  double start_ht;
+
+  double locator_margin_km;
+
+  char* station_loc_url;
+
   char* color_scale_urls;
 
   field_t *_fields;
   int fields_n;
+
+  tdrp_bool_t check_data_times;
+
+  tdrp_bool_t check_clipping;
+
+  double time_search_stretch_factor;
+
+  gather_data_mode_t gather_data_mode;
+
+  int update_interval;
+
+  char* datamap_host;
+
+  int data_timeout_secs;
+
+  tdrp_bool_t request_compressed_data;
+
+  tdrp_bool_t request_gzip_vol_compression;
+
+  int model_run_list_hours;
+
+  double forecast_interval_hours;
+
+  double past_interval_hours;
+
+  tdrp_bool_t always_get_full_domain;
+
+  tdrp_bool_t do_not_clip_on_mdv_request;
+
+  tdrp_bool_t do_not_decimate_on_mdv_request;
+
+  char* http_tunnel_url;
+
+  char* http_proxy_url;
 
   char* map_urls;
 
@@ -667,35 +719,9 @@ public:
 
   tdrp_bool_t use_cosine_correction;
 
-  tdrp_bool_t check_data_times;
+  tdrp_bool_t report_clicks_in_degM_and_nm;
 
-  tdrp_bool_t check_clipping;
-
-  double time_search_stretch_factor;
-
-  gather_data_mode_t gather_data_mode;
-
-  int update_interval;
-
-  char* datamap_host;
-
-  int data_timeout_secs;
-
-  tdrp_bool_t request_compressed_data;
-
-  tdrp_bool_t request_gzip_vol_compression;
-
-  int model_run_list_hours;
-
-  double forecast_interval_hours;
-
-  double past_interval_hours;
-
-  tdrp_bool_t always_get_full_domain;
-
-  tdrp_bool_t do_not_clip_on_mdv_request;
-
-  tdrp_bool_t do_not_decimate_on_mdv_request;
+  double magnetic_variation_deg;
 
   int n_movie_frames;
 
@@ -729,18 +755,6 @@ public:
 
   int redraw_interval;
 
-  double scale_units_per_km;
-
-  char* scale_units_label;
-
-  tdrp_bool_t enable_status_window;
-
-  tdrp_bool_t report_clicks_in_status_window;
-
-  tdrp_bool_t report_clicks_in_degM_and_nm;
-
-  double magnetic_variation_deg;
-
   zoom_level_t *_zoom_levels;
   int zoom_levels_n;
 
@@ -759,26 +773,6 @@ public:
   double domain_limit_min_y;
 
   double domain_limit_max_y;
-
-  int planview_start_page;
-
-  int xsect_start_page;
-
-  double min_ht;
-
-  double max_ht;
-
-  double start_ht;
-
-  double locator_margin_km;
-
-  char* station_loc_url;
-
-  char* remote_ui_url;
-
-  char* http_tunnel_url;
-
-  char* http_proxy_url;
 
   char* foreground_color;
 
@@ -813,12 +807,6 @@ public:
   char* *_time_tick_colors;
   int time_tick_colors_n;
 
-  tdrp_bool_t show_height_sel;
-
-  tdrp_bool_t show_data_messages;
-
-  int latlon_mode;
-
   char* label_time_format;
 
   char* frame_range_time_format;
@@ -832,10 +820,6 @@ public:
   tdrp_bool_t display_labels;
 
   tdrp_bool_t display_ref_lines;
-
-  int top_margin_render_style;
-
-  int bot_margin_render_style;
 
   int horiz_top_margin;
 
@@ -1312,6 +1296,8 @@ public:
 
   char* series_convert_script;
 
+  char* remote_ui_url;
+
   tdrp_bool_t draw_export_active;
 
   draw_export_t *_draw_export_info;
@@ -1365,7 +1351,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[463];
+  mutable TDRPtable _table[456];
 
   const char *_className;
 

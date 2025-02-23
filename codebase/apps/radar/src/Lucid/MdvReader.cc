@@ -552,11 +552,11 @@ int MdvReader::getHorizPlane()
   gd.io_info.outstanding_request = 0;
   gd.io_info.request_type = 0;
     
-  if (_params.show_data_messages) {
-    // gui_label_h_frame("Done",-1);
-  } else {
-    // set_busy_state(0);
-  }
+  // if (_params.show_data_messages) {
+  //   // gui_label_h_frame("Done",-1);
+  // } else {
+  //   // set_busy_state(0);
+  // }
 
 
   cerr << "1111111111111111111 getHorizPlane END" << endl;
@@ -896,11 +896,11 @@ int MdvReader::_getTimeList(const string &url,
 
   char label[1024];
   snprintf(label, 1024, "Requesting time list for %s data", legend_name.c_str());
-  if(_params.show_data_messages) {
-    // gui_label_h_frame(label, 1);
-  } else {
-    // set_busy_state(1);
-  }
+  // if(_params.show_data_messages) {
+  //   // gui_label_h_frame(label, 1);
+  // } else {
+  //   // set_busy_state(1);
+  // }
 
   // This is important because different scales can have diffrerent
   // temporal resolutions. - Must pass in the bounding box to get an 

@@ -568,6 +568,15 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("Parameter sections in this file:");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("<DEBUGGING AND PROCESS CONTROL>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -704,21 +713,12 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 2'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("</DEBUGGING AND PROCESS CONTROL>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("<MODES_AND_TIMES>");
+    tt->comment_hdr = tdrpStrDup("</DEBUGGING AND PROCESS CONTROL>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -727,6 +727,15 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("<MODES_AND_TIMES>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("STARTUP MODE and TIME parameters");
     tt->comment_text = tdrpStrDup("Start up in REALTIME or ARCHIVE mode.");
     tt++;
@@ -763,20 +772,38 @@
     tt->single_val.s = tdrpStrDup("2022 05 26 01 00 00");
     tt++;
     
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("</MODES_AND_TIMES>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("</MODES_AND_TIMES>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("<GUI>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("</GUI>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("<WINDOWS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -937,20 +964,137 @@
     tt->single_val.i = 400;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'scale_units_per_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("scale_units_per_km");
+    tt->descr = tdrpStrDup("Set the scale factor and label for Range rings and Distance scales.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &scale_units_per_km - &_start_;
+    tt->single_val.d = 0.539593;
+    tt++;
+    
+    // Parameter 'scale_units_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("scale_units_label");
+    tt->descr = tdrpStrDup("Set the units labels.");
+    tt->help = tdrpStrDup("km, nm, deg");
+    tt->val_offset = (char *) &scale_units_label - &_start_;
+    tt->single_val.s = tdrpStrDup("km");
+    tt++;
+    
+    // Parameter 'enable_status_window'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("enable_status_window");
+    tt->descr = tdrpStrDup("Enable the status window.");
+    tt->help = tdrpStrDup("If FALSE, no status window is displayed.");
+    tt->val_offset = (char *) &enable_status_window - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'report_clicks_in_status_window'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("report_clicks_in_status_window");
+    tt->descr = tdrpStrDup("Report clicks in the status window.");
+    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
+    tt->val_offset = (char *) &report_clicks_in_status_window - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("<WINDOWS>");
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.");
+    tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
+    tt++;
+    
+    // Parameter 'min_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht");
+    tt->descr = tdrpStrDup("Minimum ht of cross section.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &min_ht - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'max_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_ht");
+    tt->descr = tdrpStrDup("Maximum ht of cross section.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &max_ht - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'start_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("start_ht");
+    tt->descr = tdrpStrDup("Starting height of horizontal view.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &start_ht - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'locator_margin_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("locator_margin_km");
+    tt->descr = tdrpStrDup("Station locator features.");
+    tt->help = tdrpStrDup("Maximum allowed  Distance in km between request point and station.");
+    tt->val_offset = (char *) &locator_margin_km - &_start_;
+    tt->single_val.d = 50;
+    tt++;
+    
+    // Parameter 'station_loc_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("station_loc_url");
+    tt->descr = tdrpStrDup("Full Path File name or http URL to a station data file.");
+    tt->help = tdrpStrDup("The format of each line is:  ID, LAT, LON, ALT(m), TYPE.");
+    tt->val_offset = (char *) &station_loc_url - &_start_;
+    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/maps/Taiwan_stations.dat");
+    tt++;
+    
+    // Parameter 'Comment 11'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("</WINDOWS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("<DATA_GRIDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1114,20 +1258,261 @@
       tt->struct_vals[31].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("</DATA_GRIDS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("<DATA_RETRIEVAL>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'check_data_times'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_data_times");
+    tt->descr = tdrpStrDup("Used to reject 'out of date' data.");
+    tt->help = tdrpStrDup("Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.");
+    tt->val_offset = (char *) &check_data_times - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'check_clipping'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_clipping");
+    tt->descr = tdrpStrDup("Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.");
+    tt->help = tdrpStrDup("Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.");
+    tt->val_offset = (char *) &check_clipping - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'time_search_stretch_factor'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("time_search_stretch_factor");
+    tt->descr = tdrpStrDup("Sets the allowable time error for data to appear in movie frames.");
+    tt->help = tdrpStrDup("(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.");
+    tt->val_offset = (char *) &time_search_stretch_factor - &_start_;
+    tt->single_val.d = 6;
+    tt++;
+    
+    // Parameter 'gather_data_mode'
+    // ctype is '_gather_data_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("gather_data_mode");
+    tt->descr = tdrpStrDup("Sets whether we request data closest to the start, midpoint or end of a movie frame.");
+    tt->help = tdrpStrDup("CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.");
+    tt->val_offset = (char *) &gather_data_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("gather_data_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLOSEST_TO_FRAME_CENTER");
+      tt->enum_def.fields[0].val = CLOSEST_TO_FRAME_CENTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("FIRST_BEFORE_END_OF_FRAME");
+      tt->enum_def.fields[1].val = FIRST_BEFORE_END_OF_FRAME;
+      tt->enum_def.fields[2].name = tdrpStrDup("FIRST_AFTER_START_OF_FRAME");
+      tt->enum_def.fields[2].val = FIRST_AFTER_START_OF_FRAME;
+    tt->single_val.e = CLOSEST_TO_FRAME_CENTER;
+    tt++;
+    
+    // Parameter 'update_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("update_interval");
+    tt->descr = tdrpStrDup("Number of seconds between data update requests.");
+    tt->help = tdrpStrDup("The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:");
+    tt->val_offset = (char *) &update_interval - &_start_;
+    tt->single_val.i = 120;
+    tt++;
+    
+    // Parameter 'datamap_host'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("datamap_host");
+    tt->descr = tdrpStrDup("DataMapper Host");
+    tt->help = tdrpStrDup("Host on which the DataMapper app is running.");
+    tt->val_offset = (char *) &datamap_host - &_start_;
+    tt->single_val.s = tdrpStrDup("localhost");
+    tt++;
+    
+    // Parameter 'data_timeout_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("data_timeout_secs");
+    tt->descr = tdrpStrDup("Number of seconds to wait for data to come in before giving up.");
+    tt->help = tdrpStrDup("On very slow networks this may need to go as high as 180 seconds.");
+    tt->val_offset = (char *) &data_timeout_secs - &_start_;
+    tt->single_val.i = 30;
+    tt++;
+    
+    // Parameter 'request_compressed_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("request_compressed_data");
+    tt->descr = tdrpStrDup("Request data from MDV servers be compressed.");
+    tt->help = tdrpStrDup("When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.");
+    tt->val_offset = (char *) &request_compressed_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'request_gzip_vol_compression'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("request_gzip_vol_compression");
+    tt->descr = tdrpStrDup("Use gzip-style compression for remote data access.");
+    tt->help = tdrpStrDup("See 'request_compressed_data'.");
+    tt->val_offset = (char *) &request_gzip_vol_compression - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'model_run_list_hours'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("model_run_list_hours");
+    tt->descr = tdrpStrDup("Gather model run times within these number of hours from the end of the movie loop.");
+    tt->help = tdrpStrDup("More hours means more Model runs will appear in the menu.");
+    tt->val_offset = (char *) &model_run_list_hours - &_start_;
+    tt->single_val.i = 24;
+    tt++;
+    
+    // Parameter 'forecast_interval_hours'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("forecast_interval_hours");
+    tt->descr = tdrpStrDup("This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu");
+    tt->help = tdrpStrDup("See SHOW_FORECAST_MENU menu bar button");
+    tt->val_offset = (char *) &forecast_interval_hours - &_start_;
+    tt->single_val.d = 24;
+    tt++;
+    
+    // Parameter 'past_interval_hours'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("past_interval_hours");
+    tt->descr = tdrpStrDup("The maximum number of hours in the PAST a user can selectfrom the quick forecast menu");
+    tt->help = tdrpStrDup("See SHOW_PAST_MENU menu bar button.");
+    tt->val_offset = (char *) &past_interval_hours - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'always_get_full_domain'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("always_get_full_domain");
+    tt->descr = tdrpStrDup("Request the outer domain established by domain_limit params.");
+    tt->help = tdrpStrDup("i.e. do not clip the data on request.");
+    tt->val_offset = (char *) &always_get_full_domain - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'do_not_clip_on_mdv_request'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("do_not_clip_on_mdv_request");
+    tt->descr = tdrpStrDup("Request the whole earth or Hemisphere, centered on the origin.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &do_not_clip_on_mdv_request - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'do_not_decimate_on_mdv_request'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("do_not_decimate_on_mdv_request");
+    tt->descr = tdrpStrDup("Do not decimate on MDV request, get all points from MDV server.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &do_not_decimate_on_mdv_request - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'http_tunnel_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("http_tunnel_url");
+    tt->descr = tdrpStrDup("Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.");
+    tt->help = tdrpStrDup("USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.");
+    tt->val_offset = (char *) &http_tunnel_url - &_start_;
+    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/DsServerTunnel.");
+    tt++;
+    
+    // Parameter 'http_proxy_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("http_proxy_url");
+    tt->descr = tdrpStrDup("USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.");
+    tt->help = tdrpStrDup("# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n");
+    tt->val_offset = (char *) &http_proxy_url - &_start_;
+    tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
+    tt++;
+    
+    // Parameter 'Comment 15'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 15");
+    tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
+    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
+    tt++;
+    
+    // Parameter 'Comment 16'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 16");
+    tt->comment_hdr = tdrpStrDup("</DATA_RETRIEVAL>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 17'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("<MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1247,29 +1632,29 @@
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("</MAPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("<PROJECTION>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("Projection for horizontal view");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1500,228 +1885,44 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'report_clicks_in_degM_and_nm'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("report_clicks_in_degM_and_nm");
+    tt->descr = tdrpStrDup("Report click position in degrees magnetic and nautical miles.");
+    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
+    tt->val_offset = (char *) &report_clicks_in_degM_and_nm - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'magnetic_variation_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("magnetic_variation_deg");
+    tt->descr = tdrpStrDup("Set the magnetic variation for the display location.");
+    tt->help = tdrpStrDup("Variation is true minus magnetic.");
+    tt->val_offset = (char *) &magnetic_variation_deg - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("</PROJECTION>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
-    tt->comment_hdr = tdrpStrDup("<DATA_RETRIEVAL>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'check_data_times'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_data_times");
-    tt->descr = tdrpStrDup("Used to reject 'out of date' data.");
-    tt->help = tdrpStrDup("Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.");
-    tt->val_offset = (char *) &check_data_times - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'check_clipping'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_clipping");
-    tt->descr = tdrpStrDup("Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.");
-    tt->help = tdrpStrDup("Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.");
-    tt->val_offset = (char *) &check_clipping - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'time_search_stretch_factor'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("time_search_stretch_factor");
-    tt->descr = tdrpStrDup("Sets the allowable time error for data to appear in movie frames.");
-    tt->help = tdrpStrDup("(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.");
-    tt->val_offset = (char *) &time_search_stretch_factor - &_start_;
-    tt->single_val.d = 6;
-    tt++;
-    
-    // Parameter 'gather_data_mode'
-    // ctype is '_gather_data_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("gather_data_mode");
-    tt->descr = tdrpStrDup("Sets whether we request data closest to the start, midpoint or end of a movie frame.");
-    tt->help = tdrpStrDup("CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.");
-    tt->val_offset = (char *) &gather_data_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("gather_data_mode_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLOSEST_TO_FRAME_CENTER");
-      tt->enum_def.fields[0].val = CLOSEST_TO_FRAME_CENTER;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIRST_BEFORE_END_OF_FRAME");
-      tt->enum_def.fields[1].val = FIRST_BEFORE_END_OF_FRAME;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIRST_AFTER_START_OF_FRAME");
-      tt->enum_def.fields[2].val = FIRST_AFTER_START_OF_FRAME;
-    tt->single_val.e = CLOSEST_TO_FRAME_CENTER;
-    tt++;
-    
-    // Parameter 'update_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("update_interval");
-    tt->descr = tdrpStrDup("Number of seconds between data update requests.");
-    tt->help = tdrpStrDup("The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:");
-    tt->val_offset = (char *) &update_interval - &_start_;
-    tt->single_val.i = 120;
-    tt++;
-    
-    // Parameter 'datamap_host'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("datamap_host");
-    tt->descr = tdrpStrDup("DataMapper Host");
-    tt->help = tdrpStrDup("Host on which the DataMapper app is running.");
-    tt->val_offset = (char *) &datamap_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
-    tt++;
-    
-    // Parameter 'data_timeout_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("data_timeout_secs");
-    tt->descr = tdrpStrDup("Number of seconds to wait for data to come in before giving up.");
-    tt->help = tdrpStrDup("On very slow networks this may need to go as high as 180 seconds.");
-    tt->val_offset = (char *) &data_timeout_secs - &_start_;
-    tt->single_val.i = 30;
-    tt++;
-    
-    // Parameter 'request_compressed_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("request_compressed_data");
-    tt->descr = tdrpStrDup("Request data from MDV servers be compressed.");
-    tt->help = tdrpStrDup("When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.");
-    tt->val_offset = (char *) &request_compressed_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'request_gzip_vol_compression'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("request_gzip_vol_compression");
-    tt->descr = tdrpStrDup("Use gzip-style compression for remote data access.");
-    tt->help = tdrpStrDup("See 'request_compressed_data'.");
-    tt->val_offset = (char *) &request_gzip_vol_compression - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'model_run_list_hours'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("model_run_list_hours");
-    tt->descr = tdrpStrDup("Gather model run times within these number of hours from the end of the movie loop.");
-    tt->help = tdrpStrDup("More hours means more Model runs will appear in the menu.");
-    tt->val_offset = (char *) &model_run_list_hours - &_start_;
-    tt->single_val.i = 24;
-    tt++;
-    
-    // Parameter 'forecast_interval_hours'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("forecast_interval_hours");
-    tt->descr = tdrpStrDup("This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu");
-    tt->help = tdrpStrDup("See SHOW_FORECAST_MENU menu bar button");
-    tt->val_offset = (char *) &forecast_interval_hours - &_start_;
-    tt->single_val.d = 24;
-    tt++;
-    
-    // Parameter 'past_interval_hours'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("past_interval_hours");
-    tt->descr = tdrpStrDup("The maximum number of hours in the PAST a user can selectfrom the quick forecast menu");
-    tt->help = tdrpStrDup("See SHOW_PAST_MENU menu bar button.");
-    tt->val_offset = (char *) &past_interval_hours - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'always_get_full_domain'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("always_get_full_domain");
-    tt->descr = tdrpStrDup("Request the outer domain established by domain_limit params.");
-    tt->help = tdrpStrDup("i.e. do not clip the data on request.");
-    tt->val_offset = (char *) &always_get_full_domain - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'do_not_clip_on_mdv_request'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_not_clip_on_mdv_request");
-    tt->descr = tdrpStrDup("Request the whole earth or Hemisphere, centered on the origin.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &do_not_clip_on_mdv_request - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'do_not_decimate_on_mdv_request'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_not_decimate_on_mdv_request");
-    tt->descr = tdrpStrDup("Do not decimate on MDV request, get all points from MDV server.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &do_not_decimate_on_mdv_request - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 16'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("</DATA_RETRIEVAL>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 17'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("<MOVIE_LOOPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1922,101 +2123,29 @@
     tt->single_val.i = 100;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("</MOVIE_LOOPS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'scale_units_per_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("scale_units_per_km");
-    tt->descr = tdrpStrDup("Set the scale factor and label for Range rings and Distance scales.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &scale_units_per_km - &_start_;
-    tt->single_val.d = 0.539593;
-    tt++;
-    
-    // Parameter 'scale_units_label'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("scale_units_label");
-    tt->descr = tdrpStrDup("Set the units labels.");
-    tt->help = tdrpStrDup("km, nm, deg");
-    tt->val_offset = (char *) &scale_units_label - &_start_;
-    tt->single_val.s = tdrpStrDup("km");
-    tt++;
-    
-    // Parameter 'enable_status_window'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("enable_status_window");
-    tt->descr = tdrpStrDup("Enable the status window.");
-    tt->help = tdrpStrDup("If FALSE, no status window is displayed.");
-    tt->val_offset = (char *) &enable_status_window - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'report_clicks_in_status_window'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("report_clicks_in_status_window");
-    tt->descr = tdrpStrDup("Report clicks in the status window.");
-    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
-    tt->val_offset = (char *) &report_clicks_in_status_window - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'report_clicks_in_degM_and_nm'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("report_clicks_in_degM_and_nm");
-    tt->descr = tdrpStrDup("Report click position in degrees magnetic and nautical miles.");
-    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
-    tt->val_offset = (char *) &report_clicks_in_degM_and_nm - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'magnetic_variation_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("magnetic_variation_deg");
-    tt->descr = tdrpStrDup("Set the magnetic variation for the display location.");
-    tt->help = tdrpStrDup("Variation is true minus magnetic.");
-    tt->val_offset = (char *) &magnetic_variation_deg - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("<ZOOM_DOMAINS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("Zoom views.");
     tt->comment_text = tdrpStrDup("These are the pre-defined zoom levels.");
     tt++;
@@ -2132,11 +2261,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("Zoom domain limits.");
     tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
     tt++;
@@ -2189,177 +2318,21 @@
     tt->single_val.d = 10000;
     tt++;
     
-    // Parameter 'Comment 22'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
-    tt->comment_hdr = tdrpStrDup("</ZOOM_DOMAINS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 23'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
-    tt->comment_hdr = tdrpStrDup("<HORIZ_PLOT>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'planview_start_page'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("planview_start_page");
-    tt->descr = tdrpStrDup("Select the data field/page to start on.");
-    tt->help = tdrpStrDup("For the horizontal view.");
-    tt->val_offset = (char *) &planview_start_page - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'xsect_start_page'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("xsect_start_page");
-    tt->descr = tdrpStrDup("Select the data field/page to start on.");
-    tt->help = tdrpStrDup("For the vertical (cross section) view.");
-    tt->val_offset = (char *) &xsect_start_page - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'Comment 24'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.");
-    tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
-    tt++;
-    
-    // Parameter 'min_ht'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_ht");
-    tt->descr = tdrpStrDup("Minimum ht of cross section.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &min_ht - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'max_ht'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_ht");
-    tt->descr = tdrpStrDup("Maximum ht of cross section.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &max_ht - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'start_ht'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("start_ht");
-    tt->descr = tdrpStrDup("Starting height of horizontal view.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &start_ht - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'locator_margin_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("locator_margin_km");
-    tt->descr = tdrpStrDup("Station locator features.");
-    tt->help = tdrpStrDup("Maximum allowed  Distance in km between request point and station.");
-    tt->val_offset = (char *) &locator_margin_km - &_start_;
-    tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'station_loc_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("station_loc_url");
-    tt->descr = tdrpStrDup("Full Path File name or http URL to a station data file.");
-    tt->help = tdrpStrDup("The format of each line is:  ID, LAT, LON, ALT(m), TYPE.");
-    tt->val_offset = (char *) &station_loc_url - &_start_;
-    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/maps/Taiwan_stations.dat");
-    tt++;
-    
-    // Parameter 'remote_ui_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("remote_ui_url");
-    tt->descr = tdrpStrDup("FMQ Type URL for Receiving Remote commands.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &remote_ui_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
-    tt++;
-    
-    // Parameter 'Comment 25'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
-    tt->comment_hdr = tdrpStrDup("Server access.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'http_tunnel_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("http_tunnel_url");
-    tt->descr = tdrpStrDup("Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.");
-    tt->help = tdrpStrDup("USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.");
-    tt->val_offset = (char *) &http_tunnel_url - &_start_;
-    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/DsServerTunnel.");
-    tt++;
-    
-    // Parameter 'http_proxy_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("http_proxy_url");
-    tt->descr = tdrpStrDup("USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.");
-    tt->help = tdrpStrDup("# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n");
-    tt->val_offset = (char *) &http_proxy_url - &_start_;
-    tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
-    tt++;
-    
-    // Parameter 'Comment 26'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
-    tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
-    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
-    tt++;
-    
     // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 27");
-    tt->comment_hdr = tdrpStrDup("Setting colors.");
+    tt->comment_hdr = tdrpStrDup("</ZOOM_DOMAINS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 28'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 28");
+    tt->comment_hdr = tdrpStrDup("<COLORS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -2507,15 +2480,6 @@
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
     
-    // Parameter 'Comment 28'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
-    tt->comment_hdr = tdrpStrDup("TIME_CONTROL_GUI");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'epoch_indicator_color'
     // ctype is 'char*'
     
@@ -2581,44 +2545,17 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 29");
-    tt->comment_hdr = tdrpStrDup("Mode flags.");
+    tt->comment_hdr = tdrpStrDup("</COLORS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'show_height_sel'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("show_height_sel");
-    tt->descr = tdrpStrDup("Show the height selector in the right margin.");
-    tt->help = tdrpStrDup("oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.");
-    tt->val_offset = (char *) &show_height_sel - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'show_data_messages'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("show_data_messages");
-    tt->descr = tdrpStrDup("Show data status messages at top of image.");
-    tt->help = tdrpStrDup("There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.");
-    tt->val_offset = (char *) &show_data_messages - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'latlon_mode'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("latlon_mode");
-    tt->descr = tdrpStrDup("Sets the format for output of Lat, Lon's.");
-    tt->help = tdrpStrDup("0= Decimal Degrees, 1 = deg min' sec'.");
-    tt->val_offset = (char *) &latlon_mode - &_start_;
-    tt->single_val.i = 0;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 30");
+    tt->comment_hdr = tdrpStrDup("<HORIZ_PLOT>");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'label_time_format'
@@ -2703,39 +2640,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &display_ref_lines - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 30'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
-    tt->comment_hdr = tdrpStrDup("Margin details.");
-    tt->comment_text = tdrpStrDup("Margins are specified in pixels.");
-    tt++;
-    
-    // Parameter 'top_margin_render_style'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("top_margin_render_style");
-    tt->descr = tdrpStrDup("TOP Margin styles.");
-    tt->help = tdrpStrDup(" 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label");
-    tt->val_offset = (char *) &top_margin_render_style - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'bot_margin_render_style'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("bot_margin_render_style");
-    tt->descr = tdrpStrDup("Bottom Margin Styles.");
-    tt->help = tdrpStrDup("1 - Distance Scale. 2 - Time Scale.");
-    tt->val_offset = (char *) &bot_margin_render_style - &_start_;
-    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'horiz_top_margin'
@@ -6356,6 +6260,18 @@
     tt->param_name = tdrpStrDup("Comment 71");
     tt->comment_hdr = tdrpStrDup("<DRAW_EXPORT>");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'remote_ui_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("remote_ui_url");
+    tt->descr = tdrpStrDup("FMQ Type URL for Receiving Remote commands.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &remote_ui_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
     tt++;
     
     // Parameter 'draw_export_active'

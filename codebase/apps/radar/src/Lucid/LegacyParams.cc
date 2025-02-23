@@ -1215,8 +1215,8 @@ int LegacyParams::_readMainParams()
 
   
   // startup pages
-  _getLong("cidd.planview_start_page", 1); // subtract 1
-  _getLong("cidd.xsect_start_page", 1); // subtract 1
+  // _getLong("cidd.planview_start_page", 1); // subtract 1
+  // _getLong("cidd.xsect_start_page", 1); // subtract 1
 
   // zooms
 
@@ -1352,13 +1352,13 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "// </TIME_CONTROL_GUI>\n");
   
   /* Toggle for displaying the height Selector in Right Margin */
-  _getBoolean("cidd.show_height_sel", 1);
+  // _getBoolean("cidd.show_height_sel", 1);
 
   /* Toggle for displaying data access and rendering messages */
-  _getBoolean("cidd.show_data_messages", 1);
+  // _getBoolean("cidd.show_data_messages", 1);
 
   // mode for writing latlon values
-  _getLong("cidd.latlon_mode",0);
+  // _getLong("cidd.latlon_mode",0);
 
   // time labels
   _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
@@ -1377,8 +1377,8 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.display_ref_lines", 1);
 
   // margins
-  _getLong("cidd.top_margin_render_style", 1);
-  _getLong("cidd.bot_margin_render_style", 1);
+  // _getLong("cidd.top_margin_render_style", 1);
+  // _getLong("cidd.bot_margin_render_style", 1);
   
   // main window (horiz view)
 

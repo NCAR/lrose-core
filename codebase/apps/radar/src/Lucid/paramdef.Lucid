@@ -14,6 +14,24 @@ commentdef {
 }
 
 commentdef {
+  p_header = "Parameter sections in this file:";
+  p_text =
+    "<DEBUGGING AND PROCESS CONTROL> - instance name, debug levels\n"
+    "<MODES_AND_TIMES> - REALTIME vs ARCHIVE\n"
+    "<GUI> - GUI elements\n"
+    "<WINDOWS> - window size and placement\n"
+    "<DATA_GRIDS> - fields to be displayed\n"
+    "<DATA_RETRIEVAL> - how to read the data\n"
+    "<MAPS> - map overlays\n"
+    "<PROJECTION> - world coordinate projection for main window\n"
+    "<MOVIE_LOOPS> - animations\n"
+    "<ZOOM_DOMAINS> - pre-defined zooms\n"
+    "<HORIZ_PLOT> - horizontal plan-view display\n"
+    "<VERT_PLOT> - vertical cross-section display\n"
+    
+}
+
+commentdef {
   p_header = "<DEBUGGING AND PROCESS CONTROL>";
 }
 
@@ -117,6 +135,17 @@ commentdef {
   p_header = "</MODES_AND_TIMES>";
 }
 
+///////////////////////////////////////////////////////////////////
+// GUI
+
+commentdef {
+  p_header = "<GUI>";
+}
+
+commentdef {
+  p_header = "</GUI>";
+}
+
 commentdef {
   p_header = "<WINDOWS>";
 }
@@ -196,8 +225,67 @@ paramdef int {
   p_help = "The user cannot shrink the vertical window smaller than this.";
 } vert_window_min_height;
 
+paramdef double {
+  p_default = 0.5395932;
+  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
+  p_help = "";
+} scale_units_per_km;
+
+paramdef string {
+  p_default = "km";
+  p_descr = "Set the units labels.";
+  p_help = "km, nm, deg";
+} scale_units_label;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Enable the status window.";
+  p_help = "If FALSE, no status window is displayed.";
+} enable_status_window;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Report clicks in the status window.";
+  p_help = "By default distance are in km and bearings in deg T.";
+} report_clicks_in_status_window;
+
 commentdef {
-  p_header = "<WINDOWS>";
+  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
+  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
+}
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum ht of cross section.";
+  p_help = "";
+} min_ht;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Maximum ht of cross section.";
+  p_help = "";
+} max_ht;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Starting height of horizontal view.";
+  p_help = "";
+} start_ht;
+
+paramdef double {
+  p_default = 50;
+  p_descr = "Station locator features.";
+  p_help = "Maximum allowed  Distance in km between request point and station.";
+} locator_margin_km;
+
+paramdef string {
+  p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";
+  p_descr = "Full Path File name or http URL to a station data file.";
+  p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
+} station_loc_url;
+
+commentdef {
+  p_header = "</WINDOWS>";
 }
 
 commentdef {
@@ -304,6 +392,130 @@ paramdef struct field_t {
 
 commentdef {
   p_header = "</DATA_GRIDS>";
+}
+
+//////////////////////////////////////////////////////////////////
+// DATA RETRIEVAL
+
+commentdef {
+  p_header = "<DATA_RETRIEVAL>";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Used to reject 'out of date' data.";
+  p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
+} check_data_times;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
+  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
+} check_clipping;
+
+paramdef double {
+  p_default = 6.0;
+  p_descr = "Sets the allowable time error for data to appear in movie frames.";
+  p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
+} time_search_stretch_factor;
+
+typedef enum {
+  CLOSEST_TO_FRAME_CENTER = 0,
+  FIRST_BEFORE_END_OF_FRAME = 1,
+  FIRST_AFTER_START_OF_FRAME = 2
+} gather_data_mode_t;
+
+paramdef enum gather_data_mode_t {
+  p_default = CLOSEST_TO_FRAME_CENTER;
+  p_descr = "Sets whether we request data closest to the start, midpoint or end of a movie frame.";
+  p_help = "CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
+} gather_data_mode;
+
+paramdef int {
+  p_default = 120;
+  p_descr = "Number of seconds between data update requests.";
+  p_help = "The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:";
+} update_interval;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "DataMapper Host";
+  p_help = "Host on which the DataMapper app is running.";
+} datamap_host;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Number of seconds to wait for data to come in before giving up.";
+  p_help = "On very slow networks this may need to go as high as 180 seconds.";
+} data_timeout_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request data from MDV servers be compressed.";
+  p_help = "When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.";
+} request_compressed_data;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use gzip-style compression for remote data access.";
+  p_help = "See 'request_compressed_data'.";
+} request_gzip_vol_compression;
+
+paramdef int {
+  p_default = 24;
+  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
+  p_help = "More hours means more Model runs will appear in the menu.";
+} model_run_list_hours;
+
+paramdef double {
+  p_default = 24;
+  p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
+  p_help = "See SHOW_FORECAST_MENU menu bar button";
+} forecast_interval_hours;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
+  p_help = "See SHOW_PAST_MENU menu bar button.";
+} past_interval_hours;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request the outer domain established by domain_limit params.";
+  p_help = "i.e. do not clip the data on request.";
+} always_get_full_domain;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Request the whole earth or Hemisphere, centered on the origin.";
+  p_help = "";
+} do_not_clip_on_mdv_request;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Do not decimate on MDV request, get all points from MDV server.";
+  p_help = "";
+} do_not_decimate_on_mdv_request;
+
+paramdef string {
+  p_default = "http://www.rap.ucar.edu/DsServerTunnel.";
+  p_descr = "Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.";
+  p_help = "USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.";
+} http_tunnel_url;
+
+paramdef string {
+  p_default = "http://webcache.ucar.edu:3128/";
+  p_descr = "USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.";
+  p_help = "# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n";
+} http_proxy_url;
+
+commentdef {
+  p_header = "Another view of the possible Service Topologies.";
+  p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
+}
+
+commentdef {
+  p_header = "</DATA_RETRIEVAL>";
 }
 
 commentdef {
@@ -517,115 +729,20 @@ paramdef boolean {
 
 } use_cosine_correction;
 
-commentdef {
-  p_header = "</PROJECTION>";
-}
-
-//////////////////////////////////////////////////////////////////
-// DATA RETRIEVAL
-
-commentdef {
-  p_header = "<DATA_RETRIEVAL>";
-}
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Used to reject 'out of date' data.";
-  p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
-} check_data_times;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
-  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
-} check_clipping;
-
-paramdef double {
-  p_default = 6.0;
-  p_descr = "Sets the allowable time error for data to appear in movie frames.";
-  p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
-} time_search_stretch_factor;
-
-typedef enum {
-  CLOSEST_TO_FRAME_CENTER = 0,
-  FIRST_BEFORE_END_OF_FRAME = 1,
-  FIRST_AFTER_START_OF_FRAME = 2
-} gather_data_mode_t;
-
-paramdef enum gather_data_mode_t {
-  p_default = CLOSEST_TO_FRAME_CENTER;
-  p_descr = "Sets whether we request data closest to the start, midpoint or end of a movie frame.";
-  p_help = "CLOSEST_TO_FRAME_CENTER: closest to frame midpoint; FIRST_BEFORE_END_OF_FRAME: closest to frame end time; FIRST_AFTER_START_OF_FRAME: closest to the start time of the frame. Typically, real-time operation should operate as closest to end of frame. Choose CENTER if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
-} gather_data_mode;
-
-paramdef int {
-  p_default = 120;
-  p_descr = "Number of seconds between data update requests.";
-  p_help = "The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:";
-} update_interval;
-
-paramdef string {
-  p_default = "localhost";
-  p_descr = "DataMapper Host";
-  p_help = "Host on which the DataMapper app is running.";
-} datamap_host;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Number of seconds to wait for data to come in before giving up.";
-  p_help = "On very slow networks this may need to go as high as 180 seconds.";
-} data_timeout_secs;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request data from MDV servers be compressed.";
-  p_help = "When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.";
-} request_compressed_data;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Use gzip-style compression for remote data access.";
-  p_help = "See 'request_compressed_data'.";
-} request_gzip_vol_compression;
-
-paramdef int {
-  p_default = 24;
-  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
-  p_help = "More hours means more Model runs will appear in the menu.";
-} model_run_list_hours;
-
-paramdef double {
-  p_default = 24;
-  p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
-  p_help = "See SHOW_FORECAST_MENU menu bar button";
-} forecast_interval_hours;
+  p_descr = "Report click position in degrees magnetic and nautical miles.";
+  p_help = "By default distance are in km and bearings in deg T.";
+} report_clicks_in_degM_and_nm;
 
 paramdef double {
   p_default = 0;
-  p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
-  p_help = "See SHOW_PAST_MENU menu bar button.";
-} past_interval_hours;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request the outer domain established by domain_limit params.";
-  p_help = "i.e. do not clip the data on request.";
-} always_get_full_domain;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Request the whole earth or Hemisphere, centered on the origin.";
-  p_help = "";
-} do_not_clip_on_mdv_request;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Do not decimate on MDV request, get all points from MDV server.";
-  p_help = "";
-} do_not_decimate_on_mdv_request;
+  p_descr = "Set the magnetic variation for the display location.";
+  p_help = "Variation is true minus magnetic.";
+} magnetic_variation_deg;
 
 commentdef {
-  p_header = "</DATA_RETRIEVAL>";
+  p_header = "</PROJECTION>";
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -736,42 +853,6 @@ commentdef {
   p_header = "</MOVIE_LOOPS>";
 }
 
-paramdef double {
-  p_default = 0.5395932;
-  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
-  p_help = "";
-} scale_units_per_km;
-
-paramdef string {
-  p_default = "km";
-  p_descr = "Set the units labels.";
-  p_help = "km, nm, deg";
-} scale_units_label;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the status window.";
-  p_help = "If FALSE, no status window is displayed.";
-} enable_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Report clicks in the status window.";
-  p_help = "By default distance are in km and bearings in deg T.";
-} report_clicks_in_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Report click position in degrees magnetic and nautical miles.";
-  p_help = "By default distance are in km and bearings in deg T.";
-} report_clicks_in_degM_and_nm;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Set the magnetic variation for the display location.";
-  p_help = "Variation is true minus magnetic.";
-} magnetic_variation_deg;
-
 commentdef {
   p_header = "<ZOOM_DOMAINS>";
 }
@@ -780,12 +861,6 @@ commentdef {
   p_header = "Zoom views.";
   p_text = "These are the pre-defined zoom levels.";
 }
-
-// paramdef int {
-//   p_default = 1;
-//   p_descr = "The number of zoom levels.";
-//   p_help = "";
-// } num_zoom_levels;
 
 typedef struct {
   string label;
@@ -889,87 +964,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<HORIZ_PLOT>";
-}
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Select the data field/page to start on.";
-  p_help = "For the horizontal view.";
-} planview_start_page;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Select the data field/page to start on.";
-  p_help = "For the vertical (cross section) view.";
-} xsect_start_page;
-
-commentdef {
-  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
-  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
-}
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Minimum ht of cross section.";
-  p_help = "";
-} min_ht;
-
-paramdef double {
-  p_default = 30;
-  p_descr = "Maximum ht of cross section.";
-  p_help = "";
-} max_ht;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Starting height of horizontal view.";
-  p_help = "";
-} start_ht;
-
-paramdef double {
-  p_default = 50;
-  p_descr = "Station locator features.";
-  p_help = "Maximum allowed  Distance in km between request point and station.";
-} locator_margin_km;
-
-paramdef string {
-  p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";
-  p_descr = "Full Path File name or http URL to a station data file.";
-  p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
-} station_loc_url;
-
-paramdef string {
-  p_default = "/tmp/remoteUI";
-  p_descr = "FMQ Type URL for Receiving Remote commands.";
-  p_help = "";
-} remote_ui_url;
-
-commentdef {
-  p_header = "Server access.";
-  p_text = "";
-}
-
-paramdef string {
-  p_default = "http://www.rap.ucar.edu/DsServerTunnel.";
-  p_descr = "Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.";
-  p_help = "USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.";
-} http_tunnel_url;
-
-paramdef string {
-  p_default = "http://webcache.ucar.edu:3128/";
-  p_descr = "USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.";
-  p_help = "# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n";
-} http_proxy_url;
-
-commentdef {
-  p_header = "Another view of the possible Service Topologies.";
-  p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
-}
-
-commentdef {
-  p_header = "Setting colors.";
-  p_text = "";
+  p_header = "<COLORS>";
 }
 
 paramdef string {
@@ -1044,11 +1039,6 @@ paramdef string {
   p_help = "Otherwise, these data will be plotted in the indicated color.";
 } bad_data_color;
 
-commentdef {
-  p_header = "TIME_CONTROL_GUI";
-  p_text = "";
-}
-
 paramdef string {
   p_default = "orange";
   p_descr = "Time Control (Movie) Pop-up Colors.";
@@ -1074,27 +1064,12 @@ paramdef string {
 } time_tick_colors[];
 
 commentdef {
-  p_header = "Mode flags.";
-  p_text = "";
+  p_header = "</COLORS>";
 }
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Show the height selector in the right margin.";
-  p_help = "oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.";
-} show_height_sel;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Show data status messages at top of image.";
-  p_help = "There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.";
-} show_data_messages;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Sets the format for output of Lat, Lon's.";
-  p_help = "0= Decimal Degrees, 1 = deg min' sec'.";
-} latlon_mode;
+commentdef {
+  p_header = "<HORIZ_PLOT>";
+}
 
 paramdef string {
   p_default = "%Y/%m/%d %H:%M:%S";
@@ -1137,23 +1112,6 @@ paramdef boolean {
   p_descr = "Switch to turn on/off Height, Route and Wind Scale reference lines.";
   p_help = "";
 } display_ref_lines;
-
-commentdef {
-  p_header = "Margin details.";
-  p_text = "Margins are specified in pixels.";
-}
-
-paramdef int {
-  p_default = 1;
-  p_descr = "TOP Margin styles.";
-  p_help = " 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label";
-} top_margin_render_style;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Bottom Margin Styles.";
-  p_help = "1 - Distance Scale. 2 - Time Scale.";
-} bot_margin_render_style;
 
 paramdef int {
   p_default = 20;
@@ -3031,6 +2989,12 @@ commentdef {
 commentdef {
   p_header = "<DRAW_EXPORT>";
 };
+
+paramdef string {
+  p_default = "/tmp/remoteUI";
+  p_descr = "FMQ Type URL for Receiving Remote commands.";
+  p_help = "";
+} remote_ui_url;
 
 paramdef boolean {
   p_default = false;
