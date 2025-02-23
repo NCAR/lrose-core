@@ -664,9 +664,6 @@ void WorldPlot::fillPolygon(QPainter &painter,
   for (int ii = 0; ii < (int) points.size(); ii++) {
     QPointF pt(getXPixel(points[ii].x()), getYPixel(points[ii].y()));
     pixPts.push_back(pt);
-    // cerr << "ppppp x, y, pixx, pixy: "
-    //      << points[ii].x() << ", " << points[ii].y() << ", "
-    //      << pt.x() << ", " << pt.y() << endl;
   }
   // close polygon
   pixPts.push_back(pixPts[0]);
@@ -966,16 +963,8 @@ void WorldPlot::drawTextScreenCoords(QPainter &painter, const string &text,
                                                  tRect.width() + 2,
                                                  tRect.height() + 2,
                                                  flags, text.c_str()));
-  // QRect bRect(painter.fontMetrics().boundingRect(text_ix - tRect.width() / 2,
-  //                                                text_iy - tRect.height() / 2,
-  //                                                tRect.width() + 2,
-  //                                                tRect.height() + 2,
-  //                                                flags, text.c_str()));
-    
   painter.drawText(bRect, flags, text.c_str());
 
-  // cerr << "DDDDDDDDDDD x, y, w, h, text: " << bRect.x() << ", " << bRect.y() << ", " << bRect.width() << ", " << bRect.height() << ", " << text << endl;
-    
 }
 
 /////////////////////////////////////
@@ -2279,11 +2268,6 @@ void WorldPlot::updatePixelScales()
 
   // compute world coords per pixel in each dirn
 
-  cerr << "AAAAAAAAAAAAAAAA  _xMinWorld, _xMaxWorld: "
-       << _xMinWorld << ", " << _xMaxWorld << endl;
-  cerr << "AAAAAAAAAAAAAAAA  _yMinWorld, _yMaxWorld: "
-       << _yMinWorld << ", " << _yMaxWorld << endl;
-
   _xPixelsPerWorld =
     (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
   _yPixelsPerWorld =
@@ -2299,12 +2283,13 @@ void WorldPlot::updatePixelScales()
   }
   _yPixelsPerWorld /= aspectCorr;
 
-  cerr << "AAAAAAAAAAAAAAAAAAAAA aspectCorr: " << aspectCorr << endl;
-
   // adjust the world coords of the corners, based on the shape
+
+  double plotAspect = fabs(_xPixelsPerWorld / _yPixelsPerWorld);
   
-  if (fabs(_xPixelsPerWorld) < fabs(_yPixelsPerWorld * 0.9999)) {
+  if (plotAspect < aspectCorr) {
     // adjust y pixel scale
+    _xPixelsPerWorld = _yPixelsPerWorld * aspectCorr;
     if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
     } else {
@@ -2314,8 +2299,9 @@ void WorldPlot::updatePixelScales()
     double yHalf = ((_yMaxPixel - _yMinPixel) / 2.0) / _yPixelsPerWorld;
     _yMinWorld = yMean - yHalf; 
     _yMaxWorld = yMean + yHalf;
-  } else if (fabs(_yPixelsPerWorld) < fabs(_xPixelsPerWorld * 0.9999)) {
+  } else {
     // adjust x pixel scale
+    _yPixelsPerWorld = _xPixelsPerWorld / aspectCorr;
     if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
     } else {
@@ -2325,14 +2311,7 @@ void WorldPlot::updatePixelScales()
     double xHalf = ((_xMaxPixel - _xMinPixel) / 2.0) / _xPixelsPerWorld;
     _xMinWorld = xMean - xHalf; 
     _xMaxWorld = xMean + xHalf;
-  } else {
-    // no change
   }
-
-  cerr << "BBBBBBBBBBBBBBBB  _xMinWorld, _xMaxWorld: "
-       << _xMinWorld << ", " << _xMaxWorld << endl;
-  cerr << "BBBBBBBBBBBBBBBB  _yMinWorld, _yMaxWorld: "
-       << _yMinWorld << ", " << _yMaxWorld << endl;
 
   // recompute
   
@@ -2353,16 +2332,6 @@ void WorldPlot::updatePixelScales()
 
   _computeTransform();
   
-  // _transform.reset();
-  // _transform.translate(_xMinPixel, _yMinPixel);
-  // _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
-  // _transform.translate(-_xMinWorld, -_yMinWorld);
-    
-  // _xMinWindow = getXWorld(_xPixOffset);
-  // _yMinWindow = getYWorld(_yPixOffset);
-  // _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
-  // _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
-
 }
 
 /////////////////////////////////////////////////////
@@ -2537,8 +2506,6 @@ void WorldPlot::renderGridRect(int page,
   
 {
 
-  cerr << "====>> KKKKKKKKKKKKKKKKKKKKKK page: " << page << endl;
-
   // the data projection type and plot projection type are the same
   // so we can use the (x,y) locations unchanged
 
@@ -2553,10 +2520,6 @@ void WorldPlot::renderGridRect(int page,
   double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
   double dx = mr->h_fhdr.grid_dx;
   double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
-
-  cerr << "====>> nx, ny: " << nx << ", " << ny << endl;
-  cerr << "====>> dx, dy: " << dx << ", " << dy << endl;
-  cerr << "====>> lowx, lowy: " << lowx << ", " << lowy << endl;
 
   double yy = lowy;
   for(int iy = 0; iy <= ny; iy++, yy += dy) {
@@ -2581,10 +2544,6 @@ void WorldPlot::renderGridRect(int page,
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
-  // cerr << "BBBBBBBBBBBBBBBBBB miss, bad: " << miss << ", " << bad << endl;
-  // Mdvx::printFieldHeader(mr->h_fhdr, cerr);
-  // cerr << "BBBBBBBBBBBBBBBBBB miss, bad: " << miss << ", " << bad << endl;
-  
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
@@ -2599,11 +2558,7 @@ void WorldPlot::renderGridRect(int page,
       double yy = vertices[iy+1][ix].y();
       double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
       double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
-      // cerr << "2222222222222222 x, y, width, ht: "
-      //      << xx << ", " << yy << ", "
-      //      << width << ", " << height << endl;
       fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
-      // fillRectangle(painter, *brush, xx, yy + height, width, height);
     } // ix
   } // iy
   
