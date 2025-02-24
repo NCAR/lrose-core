@@ -1293,6 +1293,13 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.locator_margin_km", 50.0);
   _getString("cidd.station_loc_url", "");
 
+  int maps_font_mode = _getLong("cidd.font_display_mode", 1, false);
+  if (maps_font_mode == 0) {
+    fprintf(_tdrpFile, "map_font_background = MAP_FONT_BACKGROUND_TRANSPARENT\n;");
+  } else {
+    fprintf(_tdrpFile, "map_font_background = MAP_FONT_BACKGROUND_OPAQUE\n;");
+  }
+
   // server access
 
   _getString("cidd.remote_ui_url", "");
@@ -1656,33 +1663,33 @@ int LegacyParams::_readMainParams()
 
   // fonts
 
-  fprintf(_tdrpFile, "// <FONTS>\n");
+  // fprintf(_tdrpFile, "// <FONTS>\n");
 
-  _numFonts = _getLong("cidd.num_fonts", 1, false);
-  _getLong("cidd.font_display_mode",1);
+  // _numFonts = _getLong("cidd.num_fonts", 1, false);
+  // _getLong("cidd.font_display_mode",1);
   
-  vector<string> fonts;
-  for(int ii = 0; ii < _numFonts; ii++) {
-    char str_buf[1024];
-    snprintf(str_buf, 1023, "cidd.font%d", ii + 1);
-    string font = _getString(str_buf, "none", false);
-    if (font.find("none") == string::npos) {
-      fonts.push_back(font);
-    }
-  } // ii
+  // vector<string> fonts;
+  // for(int ii = 0; ii < _numFonts; ii++) {
+  //   char str_buf[1024];
+  //   snprintf(str_buf, 1023, "cidd.font%d", ii + 1);
+  //   string font = _getString(str_buf, "none", false);
+  //   if (font.find("none") == string::npos) {
+  //     fonts.push_back(font);
+  //   }
+  // } // ii
 
-  fprintf(_tdrpFile, "fonts = {\n");
-  for(size_t ifont = 0; ifont < fonts.size(); ifont++) {
-    string &font = fonts[ifont];
-    fprintf(_tdrpFile, "  \"%s\"", font.c_str());
-    if (ifont < fonts.size() - 1) {
-      fprintf(_tdrpFile, ",\n");
-    } else {
-      fprintf(_tdrpFile, "\n");
-    }
-  } // ifont
-  fprintf(_tdrpFile, "};\n");
-  fprintf(_tdrpFile, "// </FONTS>\n");
+  // fprintf(_tdrpFile, "fonts = {\n");
+  // for(size_t ifont = 0; ifont < fonts.size(); ifont++) {
+  //   string &font = fonts[ifont];
+  //   fprintf(_tdrpFile, "  \"%s\"", font.c_str());
+  //   if (ifont < fonts.size() - 1) {
+  //     fprintf(_tdrpFile, ",\n");
+  //   } else {
+  //     fprintf(_tdrpFile, "\n");
+  //   }
+  // } // ifont
+  // fprintf(_tdrpFile, "};\n");
+  // fprintf(_tdrpFile, "// </FONTS>\n");
   
   /* Toggle for displaying the analog clock */
   _getBoolean("cidd.show_clock", 0);
@@ -1711,49 +1718,49 @@ int LegacyParams::_readMainParams()
   _getString("cidd.status_info_file", "");
   _getString("cidd.help_command", "");
 
-  ////////////////////////////////////////////////////////
-  // Bookmarks for a menu of URLS - Index starts at 1
+  // ////////////////////////////////////////////////////////
+  // // Bookmarks for a menu of URLS - Index starts at 1
   
-  fprintf(_tdrpFile, "// <BOOKMARKS>\n");
+  // fprintf(_tdrpFile, "// <BOOKMARKS>\n");
   
-  _getString("cidd.bookmark_command", "");
-  _numBookmarks = _getLong("cidd.num_bookmarks", 0, false);
+  // _getString("cidd.bookmark_command", "");
+  // _numBookmarks = _getLong("cidd.num_bookmarks", 0, false);
 
-  // read bookmark labels and urls
+  // // read bookmark labels and urls
   
-  vector<Bookmark> bookmarks;
-  for(int ii = 0; ii < _numBookmarks; ii++) {
-    Bookmark bookmark;
-    char str_buf[1024];
-    snprintf(str_buf, 1023, "cidd.bookmark_label%d", ii + 1);
-    bookmark.label = _getString(str_buf, "not_found", false);
-    if (bookmark.label.find("not_found") == 0) {
-      continue;
-    }
-    snprintf(str_buf, 1023, "cidd.bookmark%d", ii + 1);
-    bookmark.url = _getString(str_buf, "not_found", false);
-    if (bookmark.url.find("not_found") == 0) {
-      continue;
-    }
-    bookmarks.push_back(bookmark);
-  } // i
+  // vector<Bookmark> bookmarks;
+  // for(int ii = 0; ii < _numBookmarks; ii++) {
+  //   Bookmark bookmark;
+  //   char str_buf[1024];
+  //   snprintf(str_buf, 1023, "cidd.bookmark_label%d", ii + 1);
+  //   bookmark.label = _getString(str_buf, "not_found", false);
+  //   if (bookmark.label.find("not_found") == 0) {
+  //     continue;
+  //   }
+  //   snprintf(str_buf, 1023, "cidd.bookmark%d", ii + 1);
+  //   bookmark.url = _getString(str_buf, "not_found", false);
+  //   if (bookmark.url.find("not_found") == 0) {
+  //     continue;
+  //   }
+  //   bookmarks.push_back(bookmark);
+  // } // i
 
-  // write to TDRP
+  // // write to TDRP
   
-  fprintf(_tdrpFile, "bookmarks = {\n");
-  for(size_t ii = 0; ii < bookmarks.size(); ii++) {
-    Bookmark &bookmark = bookmarks[ii];
-    fprintf(_tdrpFile, "  {\n");
-    fprintf(_tdrpFile, "    label = \"%s\",\n", bookmark.label.c_str());
-    fprintf(_tdrpFile, "    url = \"%s\"\n", bookmark.url.c_str());
-    fprintf(_tdrpFile, "  }\n");
-    if (ii < bookmarks.size() - 1) {
-      fprintf(_tdrpFile, "  ,\n");
-    }
-  } // izoom
-  fprintf(_tdrpFile, "};\n");
+  // fprintf(_tdrpFile, "bookmarks = {\n");
+  // for(size_t ii = 0; ii < bookmarks.size(); ii++) {
+  //   Bookmark &bookmark = bookmarks[ii];
+  //   fprintf(_tdrpFile, "  {\n");
+  //   fprintf(_tdrpFile, "    label = \"%s\",\n", bookmark.label.c_str());
+  //   fprintf(_tdrpFile, "    url = \"%s\"\n", bookmark.url.c_str());
+  //   fprintf(_tdrpFile, "  }\n");
+  //   if (ii < bookmarks.size() - 1) {
+  //     fprintf(_tdrpFile, "  ,\n");
+  //   }
+  // } // izoom
+  // fprintf(_tdrpFile, "};\n");
   
-  fprintf(_tdrpFile, "// </BOOKMARKS>\n");
+  // fprintf(_tdrpFile, "// </BOOKMARKS>\n");
   
   // image intensity
   _getDouble("cidd.image_inten", 0.8);

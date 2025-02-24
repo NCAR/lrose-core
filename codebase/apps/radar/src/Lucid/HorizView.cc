@@ -591,7 +591,7 @@ void HorizView::_drawMaps(QPainter &painter)
       // add icon label
       
       painter.save();
-      if(_params.font_display_mode == 0) {
+      if(_params.map_font_background == Params::MAP_FONT_BACKGROUND_TRANSPARENT) {
         painter.setBackgroundMode(Qt::TransparentMode);
       } else {
         painter.setBackgroundMode(Qt::OpaqueMode);

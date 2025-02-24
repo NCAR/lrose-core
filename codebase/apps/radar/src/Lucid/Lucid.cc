@@ -218,7 +218,7 @@ void Lucid::_initGlobals()
   gd.num_menu_fields = 0;  
   gd.num_field_menu_cols = 0;  
   gd.num_map_overlays = 0; 
-  gd.num_bookmarks = 0;
+  // gd.num_bookmarks = 0;
   gd.num_render_heights = 0;
   gd.num_cache_zooms = 0;
   gd.cur_render_height = 0; 
@@ -291,7 +291,7 @@ void Lucid::_initGlobals()
   gd.r_context = NULL;    
   gd.station_loc = NULL;    
   gd.remote_ui = NULL;   
-  gd.bookmark = NULL;
+  // gd.bookmark = NULL;
   
   gd.coord_key = 0;
   gd.coord_expt = NULL;
@@ -425,13 +425,13 @@ int Lucid::_initDataSpace()
 
   // Bookmarks for a menu of URLS - Index starts at 1
   
-  if(_params.bookmarks_n > 0) {
-    gd.bookmark = new bookmark_t[_params.bookmarks_n];
-  }
-  for(int ii = 0; ii < _params.bookmarks_n; ii++) {
-    gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
-    gd.bookmark[ii].label = strdup(_params._bookmarks[ii].label);
-  }
+  // if(_params.bookmarks_n > 0) {
+  //   gd.bookmark = new bookmark_t[_params.bookmarks_n];
+  // }
+  // for(int ii = 0; ii < _params.bookmarks_n; ii++) {
+  //   gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
+  //   gd.bookmark[ii].label = strdup(_params._bookmarks[ii].label);
+  // }
 
   // origin latitude and longitude
   

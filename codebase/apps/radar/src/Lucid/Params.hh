@@ -93,6 +93,11 @@ public:
   } gather_data_mode_t;
 
   typedef enum {
+    MAP_FONT_BACKGROUND_TRANSPARENT = 0,
+    MAP_FONT_BACKGROUND_OPAQUE = 1
+  } map_font_background_t;
+
+  typedef enum {
     PROJ_LATLON = 0,
     PROJ_LAMBERT_CONF = 3,
     PROJ_MERCATOR = 4,
@@ -223,11 +228,6 @@ public:
     char* field_name;
     tdrp_bool_t on_at_startup;
   } layer_field_t;
-
-  typedef struct {
-    char* label;
-    char* url;
-  } bookmark_t;
 
   typedef struct {
     double threshold;
@@ -589,9 +589,53 @@ public:
 
   int idle_reset_seconds;
 
+  int coord_key;
+
+  int titan_key;
+
   mode_t start_mode;
 
   char* archive_start_time;
+
+  int num_field_menu_cols;
+
+  tdrp_bool_t one_click_rhi;
+
+  double rotate_coarse_adjust;
+
+  double rotate_medium_adjust;
+
+  double rotate_fine_adjust;
+
+  tdrp_bool_t disable_pick_mode;
+
+  tdrp_bool_t replace_underscores;
+
+  tdrp_bool_t close_popups;
+
+  char* status_info_file;
+
+  tdrp_bool_t show_clock;
+
+  tdrp_bool_t draw_clock_local;
+
+  tdrp_bool_t use_local_timestamps;
+
+  int label_font_size;
+
+  char* background_color2;
+
+  char* text_color;
+
+  char* grid_and_range_ring_color;
+
+  int range_ring_label_font_size;
+
+  char* click_cross_color;
+
+  int click_cross_size;
+
+  int click_cross_line_width;
 
   int horiz_window_x_pos;
 
@@ -619,23 +663,11 @@ public:
 
   int vert_window_min_height;
 
-  double scale_units_per_km;
-
-  char* scale_units_label;
-
-  tdrp_bool_t enable_status_window;
-
-  tdrp_bool_t report_clicks_in_status_window;
-
   double min_ht;
 
   double max_ht;
 
   double start_ht;
-
-  double locator_margin_km;
-
-  char* station_loc_url;
 
   char* color_scale_urls;
 
@@ -676,6 +708,10 @@ public:
 
   char* http_proxy_url;
 
+  double locator_margin_km;
+
+  char* station_loc_url;
+
   char* map_urls;
 
   tdrp_bool_t maps_enabled_at_startup;
@@ -684,6 +720,8 @@ public:
   int maps_n;
 
   int maps_font_size;
+
+  map_font_background_t map_font_background;
 
   projection_t proj_type;
 
@@ -915,6 +953,12 @@ public:
 
   double azimuth_radius;
 
+  tdrp_bool_t clip_overlay_fields;
+
+  char* horiz_frame_label;
+
+  char* no_data_message;
+
   contour_field_t *_contour_fields;
   int contour_fields_n;
 
@@ -943,52 +987,6 @@ public:
 
   int latest_click_mark_size;
 
-  char* *_fonts;
-  int fonts_n;
-
-  int font_display_mode;
-
-  tdrp_bool_t show_clock;
-
-  tdrp_bool_t draw_clock_local;
-
-  tdrp_bool_t use_local_timestamps;
-
-  int num_field_menu_cols;
-
-  tdrp_bool_t one_click_rhi;
-
-  double rotate_coarse_adjust;
-
-  double rotate_medium_adjust;
-
-  double rotate_fine_adjust;
-
-  tdrp_bool_t disable_pick_mode;
-
-  tdrp_bool_t replace_underscores;
-
-  tdrp_bool_t close_popups;
-
-  tdrp_bool_t clip_overlay_fields;
-
-  char* horiz_frame_label;
-
-  char* no_data_message;
-
-  char* status_info_file;
-
-  char* help_command;
-
-  char* canvas_help;
-
-  char* frame_message_help;
-
-  bookmark_t *_bookmarks;
-  int bookmarks_n;
-
-  char* bookmark_command;
-
   double image_inten;
 
   int inten_levels;
@@ -999,9 +997,13 @@ public:
 
   int dynamic_contour_threshold;
 
-  int coord_key;
+  double scale_units_per_km;
 
-  int titan_key;
+  char* scale_units_label;
+
+  tdrp_bool_t enable_status_window;
+
+  tdrp_bool_t report_clicks_in_status_window;
 
   tdrp_bool_t products_on;
 
@@ -1058,22 +1060,6 @@ public:
   int images_sweep_index_list_n;
 
   tdrp_bool_t enable_save_image_panel;
-
-  int label_font_size;
-
-  char* background_color2;
-
-  char* text_color;
-
-  char* grid_and_range_ring_color;
-
-  int range_ring_label_font_size;
-
-  char* click_cross_color;
-
-  int click_cross_size;
-
-  int click_cross_line_width;
 
   int vlevel_selector_width;
 
@@ -1295,6 +1281,12 @@ public:
   char* print_script;
 
   char* series_convert_script;
+
+  char* help_command;
+
+  char* canvas_help;
+
+  char* frame_message_help;
 
   char* remote_ui_url;
 

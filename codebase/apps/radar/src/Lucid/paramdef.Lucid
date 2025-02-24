@@ -16,9 +16,9 @@ commentdef {
 commentdef {
   p_header = "Parameter sections in this file:";
   p_text =
-    "<DEBUGGING AND PROCESS CONTROL> - instance name, debug levels\n"
-    "<MODES_AND_TIMES> - REALTIME vs ARCHIVE\n"
-    "<GUI> - GUI elements\n"
+    "<DEBUGGING> - set debug levels\n"
+    "<PROCESS_CONTROL> - and interprocess communication\n"
+    "<GUI> - User interface\n"
     "<WINDOWS> - window size and placement\n"
     "<DATA_GRIDS> - fields to be displayed\n"
     "<DATA_RETRIEVAL> - how to read the data\n"
@@ -26,13 +26,19 @@ commentdef {
     "<PROJECTION> - world coordinate projection for main window\n"
     "<MOVIE_LOOPS> - animations\n"
     "<ZOOM_DOMAINS> - pre-defined zooms\n"
+    "<COLORS> - colors for display elements\n"
     "<HORIZ_PLOT> - horizontal plan-view display\n"
     "<VERT_PLOT> - vertical cross-section display\n"
-    
+    "<OVERLAYS> - geometric overlays and legends\n"
+    "<RENDERING> - details on rendering\n"
+    "<SYMBOLIC_PRODUCTS> - rendering products as overlays\n"
+    "<CREATING_IMAGES> - image generation\n"
+    "<HELP> - user help\n"
+    "";    
 }
 
 commentdef {
-  p_header = "<DEBUGGING AND PROCESS CONTROL>";
+  p_header = "<DEBUGGING>";
 }
 
 typedef enum {
@@ -62,6 +68,14 @@ paramdef boolean {
   p_descr = "Verbose diagnostics.";
   p_help = "Developer debugging information.";
 } debug2_flag;
+
+commentdef {
+  p_header = "</DEBUGGING>";
+}
+
+commentdef {
+  p_header = "<PROCESS_CONTROL>";
+}
 
 paramdef boolean {
   p_default = FALSE;
@@ -99,16 +113,17 @@ paramdef int {
   p_help = "Set this <= 0 to essentially turn off.";
 } idle_reset_seconds;
 
-commentdef {
-  p_header = "</DEBUGGING AND PROCESS CONTROL>";
-}
+paramdef int {
+  p_default = 61500;
+  p_descr = "Key for coordinate in shared memory.";
+  p_help = "Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.";
+} coord_key;
 
-//////////////////////////////////////////////////////////////////
-// Modes of operations and time handling
-
-commentdef {
-  p_header = "<MODES_AND_TIMES>";
-}
+paramdef int {
+  p_default = 61600;
+  p_descr = "Key for titan clicks in shared memory.";
+  p_help = "Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.";
+} titan_key;
 
 commentdef {
   p_header = "STARTUP MODE and TIME parameters";
@@ -132,7 +147,7 @@ paramdef string {
 } archive_start_time;
 
 commentdef {
-  p_header = "</MODES_AND_TIMES>";
+  p_header = "</PROCESS_CONTROL>";
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -141,6 +156,125 @@ commentdef {
 commentdef {
   p_header = "<GUI>";
 }
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Set this parameter to force the field menu pop-up to this many columns.";
+  p_help = "";
+} num_field_menu_cols;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
+  p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
+} one_click_rhi;
+
+paramdef double {
+  p_default = 6;
+  p_descr = "CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
+  p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
+} rotate_coarse_adjust;
+
+paramdef double {
+  p_default = 2;
+  p_descr = "Adjust RHI azimuth in medium mode.";
+  p_help = "Keys 4-6.";
+} rotate_medium_adjust;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Adjust RHI azimuth in fine mode.";
+  p_help = "Keys 1-3.";
+} rotate_fine_adjust;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Disable pick feature.";
+  p_help = "";
+} disable_pick_mode;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Underscores in field names and legends are replaced by spaces.";
+  p_help = "";
+} replace_underscores;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Close CIDD's pop ups When the main window is closed.";
+  p_help = "Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops";
+} close_popups;
+
+paramdef string {
+  p_default = "";
+  p_descr = "System NO-Data Status/Info File.";
+  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
+} status_info_file;
+
+commentdef {
+  p_header = "Analog clock.";
+  p_text = "";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set TRUE for displaying an analog clock in the upper right hand corner of the image.";
+  p_help = "";
+} show_clock;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set TRUE for clock in local time.";
+  p_help = "Otherwise UTC.";
+} draw_clock_local;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "TRUE: time stamps are local. FALSE: time stamps are UTC.";
+  p_help = "All Input time widgets expect UTC when FALSE, local times when set TRUE.";
+} use_local_timestamps;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} label_font_size;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} background_color2;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of text annotation in main display.";
+} text_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of grids and range rings.";
+} grid_and_range_ring_color;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} range_ring_label_font_size;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of cross at click point.";
+} click_cross_color;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Size of cross at click point (pixels).";
+  p_help = "Size of cross drawn at click point, to select data.";
+} click_cross_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line width for click cross.";
+} click_cross_line_width;
 
 commentdef {
   p_header = "</GUI>";
@@ -225,30 +359,6 @@ paramdef int {
   p_help = "The user cannot shrink the vertical window smaller than this.";
 } vert_window_min_height;
 
-paramdef double {
-  p_default = 0.5395932;
-  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
-  p_help = "";
-} scale_units_per_km;
-
-paramdef string {
-  p_default = "km";
-  p_descr = "Set the units labels.";
-  p_help = "km, nm, deg";
-} scale_units_label;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the status window.";
-  p_help = "If FALSE, no status window is displayed.";
-} enable_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Report clicks in the status window.";
-  p_help = "By default distance are in km and bearings in deg T.";
-} report_clicks_in_status_window;
-
 commentdef {
   p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
   p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
@@ -271,18 +381,6 @@ paramdef double {
   p_descr = "Starting height of horizontal view.";
   p_help = "";
 } start_ht;
-
-paramdef double {
-  p_default = 50;
-  p_descr = "Station locator features.";
-  p_help = "Maximum allowed  Distance in km between request point and station.";
-} locator_margin_km;
-
-paramdef string {
-  p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";
-  p_descr = "Full Path File name or http URL to a station data file.";
-  p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
-} station_loc_url;
 
 commentdef {
   p_header = "</WINDOWS>";
@@ -514,6 +612,18 @@ commentdef {
   p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
 }
 
+paramdef double {
+  p_default = 50;
+  p_descr = "Station locator features.";
+  p_help = "Maximum allowed  Distance in km between request point and station.";
+} locator_margin_km;
+
+paramdef string {
+  p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";
+  p_descr = "Full Path File name or http URL to a station data file.";
+  p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
+} station_loc_url;
+
 commentdef {
   p_header = "</DATA_RETRIEVAL>";
 }
@@ -586,6 +696,16 @@ paramdef int {
   p_default = 8;
   p_descr = "Font size for labels on maps.";
 } maps_font_size;
+
+typedef enum {
+  MAP_FONT_BACKGROUND_TRANSPARENT, MAP_FONT_BACKGROUND_OPAQUE
+} map_font_background_t;
+
+paramdef enum map_font_background_t {
+  p_default = MAP_FONT_BACKGROUND_TRANSPARENT;
+  p_descr = "Font rendering mode for maps.";
+  p_help = "MAP_FONT_BACKGROUND_OPAQUE: Clears background behind label text. MAP_FONT_BACKGROUND_TRANSPARENT: does not clear background.";
+} map_font_background;
 
 commentdef {
   p_header = "</MAPS>";
@@ -1211,6 +1331,14 @@ paramdef string {
   p_descr = "Color for grid (if plotted).";
 } horiz_grid_color;
 
+commentdef {
+  p_header = "</HORIZ_PLOT>";
+}
+
+commentdef {
+  p_header = "<VERT_PLOT>";
+}
+
 paramdef int {
   p_default = 20;
   p_descr = "Height of top margin (pixels).";
@@ -1305,6 +1433,14 @@ paramdef string {
 } vert_grid_color;
 
 commentdef {
+  p_header = "</VERT_PLOT>";
+}
+
+commentdef {
+  p_header = "<OVERLAYS>";
+}
+
+commentdef {
   p_header = "Legends displayed within the plot window.";
   p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
 }
@@ -1385,6 +1521,32 @@ paramdef double {
   p_descr = "Max radius for azimuth lines.";
   p_help = "If azimuth lines are on.";
 } azimuth_radius;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "The default behavior is to render the overlay fields using the same render method as the primary field.";
+  p_help = "CIDD can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.";
+} clip_overlay_fields;
+
+paramdef string {
+  p_default = "Lucid";
+  p_descr = "Label in top bar of main window.";
+  p_help = "";
+} horiz_frame_label;
+
+paramdef string {
+  p_default = "NO DATA FOUND (in this area at the selected time)";
+  p_descr = "Message to display when no data is found.";
+  p_help = "";
+} no_data_message;
+
+commentdef {
+  p_header = "</OVERLAYS>";
+}
+
+commentdef {
+  p_header = "<RENDERING>";
+}
 
 commentdef {
   p_header = "Plotting contours in data fields.";
@@ -1539,186 +1701,6 @@ paramdef int {
   p_help = "Location clicked in client app.";
 } latest_click_mark_size;
 
-commentdef {
-  p_header = "<FONTS>";
-}
-
-paramdef string {
-  p_default = { "fixed" };
-  p_descr = "List of fonts in order of increasing size.";
-  p_help = "The optimum font size will be used in regions of the plot that have limited space.";
-} fonts[];
-
-paramdef int {
-  p_default = 1;
-  p_descr = "1 - Clears background behind label text. 0 - Does not clear.";
-  p_help = "Using 1 can maket the text stand out better, but some data is overwritten.";
-} font_display_mode;
-
-commentdef {
-  p_header = "</FONTS>";
-}
-
-commentdef {
-  p_header = "Analog clock.";
-  p_text = "";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for displaying an analog clock in the upper right hand corner of the image.";
-  p_help = "";
-} show_clock;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for clock in local time.";
-  p_help = "Otherwise UTC.";
-} draw_clock_local;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "TRUE: time stamps are local. FALSE: time stamps are UTC.";
-  p_help = "All Input time widgets expect UTC when FALSE, local times when set TRUE.";
-} use_local_timestamps;
-
-commentdef {
-  p_header = "GUI.";
-  p_text = "";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Set this parameter to force the field menu pop-up to this many columns.";
-  p_help = "";
-} num_field_menu_cols;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
-  p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
-} one_click_rhi;
-
-paramdef double {
-  p_default = 6;
-  p_descr = "CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
-  p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
-} rotate_coarse_adjust;
-
-paramdef double {
-  p_default = 2;
-  p_descr = "Adjust RHI azimuth in medium mode.";
-  p_help = "Keys 4-6.";
-} rotate_medium_adjust;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Adjust RHI azimuth in fine mode.";
-  p_help = "Keys 1-3.";
-} rotate_fine_adjust;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Disable pick feature.";
-  p_help = "";
-} disable_pick_mode;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Underscores in field names and legends are replaced by spaces.";
-  p_help = "";
-} replace_underscores;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Close CIDD's pop ups When the main window is closed.";
-  p_help = "Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops";
-} close_popups;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "The default behavior is to render the overlay fields using the same render method as the primary field.";
-  p_help = "CIDD can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.";
-} clip_overlay_fields;
-
-paramdef string {
-  p_default = "Lucid";
-  p_descr = "Label in top bar of main window.";
-  p_help = "";
-} horiz_frame_label;
-
-paramdef string {
-  p_default = "NO DATA FOUND (in this area at the selected time)";
-  p_descr = "Message to display when no data is found.";
-  p_help = "";
-} no_data_message;
-
-paramdef string {
-  p_default = "";
-  p_descr = "System NO-Data Status/Info File.";
-  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
-} status_info_file;
-
-commentdef {
-  p_header = "HELP";
-  p_text = "";
-}
-
-paramdef string {
-  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
-  p_descr = "Main command to run to get help.";
-  p_help = "";
-} help_command;
-
-paramdef string {
-  p_default = "cidd_help::canvas";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} canvas_help;
-
-paramdef string {
-  p_default = "cidd_help:frame_message";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} frame_message_help;
-
-commentdef {
-  p_header = "BOOKMARKS";
-  p_text = "";
-}
-
-typedef struct {
-  string label;
-  string url;
-} bookmark_t;
-
-paramdef struct bookmark_t {
-  p_default = {
-    {
-      label = "ROC",
-      url = "http://mars/aoaws/doc/roc_mds.html"
-    }
-    ,
-    {
-      label = "ADDS",
-      url = "http://adds.awc-kc.noaa.gov/"
-    }
-  };
-  p_descr = "Bookmarks for specific topics.";
-  p_help = "Drive the browser to the given url when the button is clicked.";
-} bookmarks[];
-
-paramdef string {
-  p_default = "/opt/google/chrome/chrome %U";
-  p_descr = "This command is run whenever a BOOKMARK_MENU button is pressed.";
-  p_help = "The characters: %U are replaced with the url text from the parameters; cidd.bookmarkN below.";
-} bookmark_command;
-
-commentdef {
-  p_header = "RENDERING";
-  p_text = "";
-}
-
 paramdef double {
   p_default = 0.8;
   p_descr = "Sets the relative intensity of images, relative to the overlays.";
@@ -1749,21 +1731,36 @@ paramdef int {
   p_help = "Grids containing less than the threshold cells will be rendered as filled contours. Used for 'dcont' style rendering";
 } dynamic_contour_threshold;
 
-paramdef int {
-  p_default = 61500;
-  p_descr = "Key for coordinate in shared memory.";
-  p_help = "Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.";
-} coord_key;
+paramdef double {
+  p_default = 0.5395932;
+  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
+  p_help = "";
+} scale_units_per_km;
 
-paramdef int {
-  p_default = 61600;
-  p_descr = "Key for titan clicks in shared memory.";
-  p_help = "Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.";
-} titan_key;
+paramdef string {
+  p_default = "km";
+  p_descr = "Set the units labels.";
+  p_help = "km, nm, deg";
+} scale_units_label;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Enable the status window.";
+  p_help = "If FALSE, no status window is displayed.";
+} enable_status_window;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Report clicks in the status window.";
+  p_help = "By default distance are in km and bearings in deg T.";
+} report_clicks_in_status_window;
 
 commentdef {
-  p_header = "RENDERING PRODUCTS";
-  p_text = "";
+  p_header = "</RENDERING>";
+}
+
+commentdef {
+  p_header = "<SYMBOLIC_PRODUCTS>";
 }
 
 paramdef boolean {
@@ -1817,7 +1814,7 @@ paramdef struct product_adjustment_t {
 } product_adjustments[3];
 
 commentdef {
-  p_header = "</MAIN>";
+  p_header = "</SYMBOLIC_PRODUCTS>";
 }
 
 commentdef {
@@ -1976,48 +1973,6 @@ commentdef {
 commentdef {
   p_header = "<GUI_AND_WINDOWS>";
 }
-
-paramdef int {
-  p_default = 12;
-  p_descr = "Basic font size for labels (pixels).";
-  p_help = "Some of the labels are scaled relative to this size.";
-} label_font_size;
-
-paramdef string {
-  p_default = "black";
-  p_descr = "Color of main display background.";
-} background_color2;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of text annotation in main display.";
-} text_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of grids and range rings.";
-} grid_and_range_ring_color;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} range_ring_label_font_size;
-
-paramdef string {
-  p_default = "cyan";
-  p_descr = "Color of cross at click point.";
-} click_cross_color;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Size of cross at click point (pixels).";
-  p_help = "Size of cross drawn at click point, to select data.";
-} click_cross_size;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Line width for click cross.";
-} click_cross_line_width;
 
 commentdef {
   p_header = "</GUI_AND_WINDOWS>";
@@ -2980,6 +2935,32 @@ paramdef string {
 
 commentdef {
   p_header = "</IMAGE_GENERATION>";
+}
+
+commentdef {
+  p_header = "<HELP>";
+}
+
+paramdef string {
+  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
+  p_descr = "Main command to run to get help.";
+  p_help = "";
+} help_command;
+
+paramdef string {
+  p_default = "cidd_help::canvas";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} canvas_help;
+
+paramdef string {
+  p_default = "cidd_help:frame_message";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} frame_message_help;
+
+commentdef {
+  p_header = "</HELP>";
 }
 
 //////////////////////////////////////////////////////////

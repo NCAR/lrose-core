@@ -152,7 +152,7 @@ public:
   int num_menu_fields;  // the number of items in the data field menus 
   int num_field_menu_cols; // number of columns in the data field menus 
   int num_map_overlays; // the number of overlays in the system 
-  int num_bookmarks;    // the number of bookmarks defined
+  // int num_bookmarks;    // the number of bookmarks defined
   int num_render_heights;// the number of heights to render in HTML mode
   int num_cache_zooms;   // the number of cached images for quick access
   int cur_render_height; // Current height being rendered in HTML mode
@@ -299,7 +299,7 @@ public:
 
   // Array of bookmarks
   
-  bookmark_t *bookmark;
+  // bookmark_t *bookmark;
   
   // shared memory
 
