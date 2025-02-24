@@ -30,7 +30,6 @@
 //////////////////////////////////////////////////////////
 
 #include "Args.hh"
-#include "Params.hh"
 #include "LegacyParams.hh"
 #include "cidd.h"
 #include <cstring>
@@ -40,10 +39,12 @@ using namespace std;
 
 // Constructor
 
-Args::Args (const string &prog_name)
+Args::Args (const string &prog_name,
+            Params &params) :
+        _progName(prog_name),
+        _params(params)
 
 {
-  _progName = prog_name;
   _usingLegacyParams = false;
 }
 

@@ -53,6 +53,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	GlobalData.hh \
 	GuiManager.hh \
 	Cdraw_P.hh \
 	Cgui_P.hh \
@@ -110,6 +111,7 @@ NORM_SRCS = \
 	Csyprod_P.cc \
 	Cterrain_P.cc \
 	FieldTableItem.cc \
+	GlobalData.cc \
 	LatLonBox.cc \
 	LegacyParams.cc \
 	Main.cc \
