@@ -87,6 +87,7 @@ public:
   WorldPlot _world;
   VlevelManager &_vlevelManager;
   GuiManager *_guiManager;
+  const Params &_params;
 
   bool _mouseMoveInProgress;
   int _mouseMoveX, _mouseMoveY;

@@ -107,6 +107,7 @@ public:
 protected:
   
 private:
+
   Display *display;  // X11 related Members
   Colormap cmap;
   GC gc;

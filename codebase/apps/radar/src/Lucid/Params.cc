@@ -50,8 +50,13 @@
  * @author Automatically generated
  *
  */
+
+/* This class is a singleton */
 #include "Params.hh"
 #include <cstring>
+
+// singleton instance is global
+Params *Params::_instance = (Params *) NULL;
 
   ////////////////////////////////////////////
   // Default constructor
@@ -133,6 +138,21 @@
 
     freeAll();
 
+    if (_instance) {
+      delete _instance;
+      _instance = NULL;
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Inst(): retrieve singleton instance
+  //
+  Params *Params::Inst()
+  {
+    if (_instance == (Params *) NULL) {
+      _instance = new Params;
+    }
+    return _instance;
   }
 
   ////////////////////////////////////////////

@@ -301,6 +301,7 @@ class DLL_EXPORT VertView : public QWidget
 
   QWidget *_parent;
   const GuiManager &_manager;
+  const Params &_params;
 
   // QMainWindow
   

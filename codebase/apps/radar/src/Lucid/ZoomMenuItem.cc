@@ -45,6 +45,7 @@ ZoomMenuItem::ZoomMenuItem(QObject *parent,
                            GuiManager *manager) :
         _parent(parent),
         _manager(manager),
+        _params(*Params::Inst()),
         _zoomParams(NULL),
         _zoomIndex(-1),
         _act(NULL)

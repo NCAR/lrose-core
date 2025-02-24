@@ -41,7 +41,9 @@ VlevelSelector::VlevelSelector(int width,
                                GuiManager *guiManager) :
         QWidget(guiManager),
         _vlevelManager(vlevelManager),
-        _guiManager(guiManager)
+        _guiManager(guiManager),
+        _params(*Params::Inst())
+
 {
   
   setMinimumSize(width, 100);

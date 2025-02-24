@@ -80,6 +80,7 @@ private:
 
   string _progName;
   Args _args;
+  Params &_params;
 
   // data fields
 
