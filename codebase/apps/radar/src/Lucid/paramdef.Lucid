@@ -16,25 +16,29 @@ commentdef {
 commentdef {
   p_header = "Parameter sections in this file:";
   p_text =
-    "<DEBUGGING> - set debug levels\n"
-    "<PROCESS_CONTROL> - and interprocess communication\n"
-    "<GUI> - User interface\n"
-    "<WINDOWS> - window size and placement\n"
-    "<DATA_GRIDS> - fields to be displayed\n"
-    "<DATA_RETRIEVAL> - how to read the data\n"
-    "<MAPS> - map overlays\n"
-    "<PROJECTION> - world coordinate projection for main window\n"
-    "<MOVIE_LOOPS> - animations\n"
-    "<ZOOM_DOMAINS> - pre-defined zooms\n"
-    "<COLORS> - colors for display elements\n"
-    "<HORIZ_PLOT> - horizontal plan-view display\n"
-    "<VERT_PLOT> - vertical cross-section display\n"
-    "<OVERLAYS> - geometric overlays and legends\n"
-    "<RENDERING> - details on rendering\n"
-    "<SYMBOLIC_PRODUCTS> - rendering products as overlays\n"
-    "<CREATING_IMAGES> - image generation\n"
-    "<HELP> - user help\n"
-    "";    
+    "\t<DEBUGGING> - set debug levels\n"
+    "\t<PROCESS_CONTROL> - and interprocess communication\n"
+    "\t<FIELDS> - fields to be displayed\n"
+    "\t<DATA_RETRIEVAL> - how to read the data\n"
+    "\t<MAPS> - map overlays\n"
+    "\t<PROJECTION> - world coordinate projection for main window\n"
+    "\t<MOVIE_LOOPS> - animations\n"
+    "\t<ZOOM_DOMAINS> - pre-defined zooms\n"
+    "\t<GUI> - User interface\n"
+    "\t<WINDOWS> - window size and placement\n"
+    "\t<HORIZ_VIEW> - horizontal plan-view display\n"
+    "\t<VERT_VIEW> - vertical cross-section display\n"
+    "\t<COLORS> - colors for display elements\n"
+    "\t<OVERLAYS> - geometric overlays and legends\n"
+    "\t<RENDERING> - details on rendering\n"
+    "\t<SYMBOLIC_PRODUCTS> - rendering products as overlays\n"
+    "\t<TERRAIN> - getting and rendering terrain data\n"
+    "\t<WINDS> - getting and rendering gridded winds\n"
+    "\t<IMAGE_GENERATION> - image generation\n"
+    "\t<AUTO_VERT> - predefined vertical sections for image generation\n"
+    "\t<PLUGINS> - Communicating with other applications\n"
+    "\t<HELP> - user help\n"
+    "\n";    
 }
 
 commentdef {
@@ -150,244 +154,8 @@ commentdef {
   p_header = "</PROCESS_CONTROL>";
 }
 
-///////////////////////////////////////////////////////////////////
-// GUI
-
 commentdef {
-  p_header = "<GUI>";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Set this parameter to force the field menu pop-up to this many columns.";
-  p_help = "";
-} num_field_menu_cols;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
-  p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
-} one_click_rhi;
-
-paramdef double {
-  p_default = 6;
-  p_descr = "CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
-  p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
-} rotate_coarse_adjust;
-
-paramdef double {
-  p_default = 2;
-  p_descr = "Adjust RHI azimuth in medium mode.";
-  p_help = "Keys 4-6.";
-} rotate_medium_adjust;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Adjust RHI azimuth in fine mode.";
-  p_help = "Keys 1-3.";
-} rotate_fine_adjust;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Disable pick feature.";
-  p_help = "";
-} disable_pick_mode;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Underscores in field names and legends are replaced by spaces.";
-  p_help = "";
-} replace_underscores;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Close CIDD's pop ups When the main window is closed.";
-  p_help = "Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops";
-} close_popups;
-
-paramdef string {
-  p_default = "";
-  p_descr = "System NO-Data Status/Info File.";
-  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
-} status_info_file;
-
-commentdef {
-  p_header = "Analog clock.";
-  p_text = "";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for displaying an analog clock in the upper right hand corner of the image.";
-  p_help = "";
-} show_clock;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for clock in local time.";
-  p_help = "Otherwise UTC.";
-} draw_clock_local;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "TRUE: time stamps are local. FALSE: time stamps are UTC.";
-  p_help = "All Input time widgets expect UTC when FALSE, local times when set TRUE.";
-} use_local_timestamps;
-
-paramdef int {
-  p_default = 12;
-  p_descr = "Basic font size for labels (pixels).";
-  p_help = "Some of the labels are scaled relative to this size.";
-} label_font_size;
-
-paramdef string {
-  p_default = "black";
-  p_descr = "Color of main display background.";
-} background_color2;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of text annotation in main display.";
-} text_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of grids and range rings.";
-} grid_and_range_ring_color;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} range_ring_label_font_size;
-
-paramdef string {
-  p_default = "cyan";
-  p_descr = "Color of cross at click point.";
-} click_cross_color;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Size of cross at click point (pixels).";
-  p_help = "Size of cross drawn at click point, to select data.";
-} click_cross_size;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Line width for click cross.";
-} click_cross_line_width;
-
-commentdef {
-  p_header = "</GUI>";
-}
-
-commentdef {
-  p_header = "<WINDOWS>";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup X for main horizontal window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
-} horiz_window_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for main horizontal window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
-} horiz_window_y_pos;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Startup width of horizontal plot (pixels).";
-  p_help = "This is for the plot only. It does not include color scale width.";
-} horiz_plot_width;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Startup height of horizontal plot (pixels).";
-} horiz_plot_height;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale (pixels).";
-} horiz_color_scale_width;
-
-paramdef int {
-  p_default = -1;
-  p_descr = "Startup X for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
-} vert_window_x_pos;
-
-paramdef int {
-  p_default = -1;
-  p_descr = "Startup Y for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
-} vert_window_y_pos;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Startup width of vertical plot (pixels).";
-  p_help = "This is for the plot only. It does not include color scale width.";
-} vert_plot_width;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Startup height of vertical plot (pixels).";
-} vert_plot_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_window_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_window_min_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of vertical window (pixels).";
-  p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of vertical window (pixels).";
-  p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_height;
-
-commentdef {
-  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
-  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
-}
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Minimum ht of cross section.";
-  p_help = "";
-} min_ht;
-
-paramdef double {
-  p_default = 30;
-  p_descr = "Maximum ht of cross section.";
-  p_help = "";
-} max_ht;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Starting height of horizontal view.";
-  p_help = "";
-} start_ht;
-
-commentdef {
-  p_header = "</WINDOWS>";
-}
-
-commentdef {
-  p_header = "<DATA_GRIDS>";
+  p_header = "<FIELDS>";
 }
 
 paramdef string {
@@ -488,8 +256,14 @@ paramdef struct field_t {
     "/n";
 } fields[];
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Underscores in field names and legends are replaced by spaces.";
+  p_help = "";
+} replace_underscores;
+
 commentdef {
-  p_header = "</DATA_GRIDS>";
+  p_header = "</FIELDS>";
 }
 
 //////////////////////////////////////////////////////////////////
@@ -504,12 +278,6 @@ paramdef boolean {
   p_descr = "Used to reject 'out of date' data.";
   p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
 } check_data_times;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
-  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
-} check_clipping;
 
 paramdef double {
   p_default = 6.0;
@@ -594,6 +362,12 @@ paramdef boolean {
   p_descr = "Do not decimate on MDV request, get all points from MDV server.";
   p_help = "";
 } do_not_decimate_on_mdv_request;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
+  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
+} check_clipping;
 
 paramdef string {
   p_default = "http://www.rap.ucar.edu/DsServerTunnel.";
@@ -713,17 +487,8 @@ commentdef {
 
 commentdef {
   p_header = "<PROJECTION>";
+  p_text = "Geographic projection for horizontal view.";
 }
-
-commentdef {
-  p_header = "Projection for horizontal view";
-}
-
-// paramdef string {
-//   p_default = "CARTESIAN";
-//   p_descr = "Sets the projection for the plan view.";
-//   p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
-// } proj_type_str;
 
 typedef enum {
   PROJ_LATLON = 0,
@@ -1083,112 +848,314 @@ commentdef {
   p_header = "</ZOOM_DOMAINS>";
 }
 
+///////////////////////////////////////////////////////////////////
+// GUI
+
 commentdef {
-  p_header = "<COLORS>";
+  p_header = "<GUI>";
 }
 
-paramdef string {
-  p_default = "white";
-  p_descr = "Legends, scales.";
+paramdef int {
+  p_default = 0;
+  p_descr = "Set this parameter to force the field menu pop-up to this many columns.";
   p_help = "";
-} foreground_color;
+} num_field_menu_cols;
 
-paramdef string {
-  p_default = "black";
-  p_descr = "Background of images.";
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
+  p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
+} one_click_rhi;
+
+paramdef double {
+  p_default = 6;
+  p_descr = "CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
+  p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
+} rotate_coarse_adjust;
+
+paramdef double {
+  p_default = 2;
+  p_descr = "Adjust RHI azimuth in medium mode.";
+  p_help = "Keys 4-6.";
+} rotate_medium_adjust;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Adjust RHI azimuth in fine mode.";
+  p_help = "Keys 1-3.";
+} rotate_fine_adjust;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Disable pick feature.";
   p_help = "";
-} background_color;
+} disable_pick_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Close CIDD's pop ups When the main window is closed.";
+  p_help = "Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops";
+} close_popups;
 
 paramdef string {
-  p_default = "black";
-  p_descr = "Background of margins.";
+  p_default = "";
+  p_descr = "System NO-Data Status/Info File.";
+  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
+} status_info_file;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Enable the status window.";
+  p_help = "If FALSE, no status window is displayed.";
+} enable_status_window;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Report clicks in the status window.";
+  p_help = "By default distance are in km and bearings in deg T.";
+} report_clicks_in_status_window;
+
+commentdef {
+  p_header = "Analog clock.";
+  p_text = "";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set TRUE for displaying an analog clock in the upper right hand corner of the image.";
   p_help = "";
-} margin_color;
+} show_clock;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set TRUE for clock in local time.";
+  p_help = "Otherwise UTC.";
+} draw_clock_local;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "TRUE: time stamps are local. FALSE: time stamps are UTC.";
+  p_help = "All Input time widgets expect UTC when FALSE, local times when set TRUE.";
+} use_local_timestamps;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} label_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} range_ring_label_font_size;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Size of cross at click point (pixels).";
+  p_help = "Size of cross drawn at click point, to select data.";
+} click_cross_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line width for click cross.";
+} click_cross_line_width;
+
+paramdef int {
+  p_default = 90;
+  p_descr = "Width of vlevel selector (pixels).";
+} vlevel_selector_width;
+
+paramdef int {
+  p_default = 70;
+  p_descr = "Height of top margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} vlevel_selector_top_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Height of bottom margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} vlevel_selector_bottom_margin;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Width of left margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} vlevel_selector_left_margin;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Width of right margin in VLEVEL_SELECTOR mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} vlevel_selector_right_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Length of ticks on axes (pixels).";
+} vlevel_selector_axis_tick_len;
+
+paramdef int {
+  p_default = 16;
+  p_descr = "Ideal number of ticks on axes.";
+} vlevel_selector_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} vlevel_selector_axis_text_margin;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of center title (pixels).";
+} vlevel_selector_title_font_size;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of axis labels in vlevel_selector (pixels).";
+} vlevel_selector_labels_font_size;
 
 paramdef string {
-  p_default = "transparent";
-  p_descr = "Render values outside the data range of the color scale.";
-  p_help = "";
-} out_of_range_color;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of the cross section reference line.";
-  p_help = "";
-} route_path_color;
-
-paramdef string {
-  p_default = "pink";
-  p_descr = "Text in the time axis margins.";
-  p_help = "";
-} time_axis_color;
-
-paramdef string {
-  p_default = "gray50";
-  p_descr = "A solid rectangle showing the movie frame extent.";
-  p_help = "";
-} time_frame_color;
-
-paramdef string {
-  p_default = "pink";
-  p_descr = "The text in the height selector margin.";
-  p_help = "";
-} height_axis_color;
-
-paramdef string {
-  p_default = "gray50";
-  p_descr = "A solid rectangle showing the height extent of the data plane.";
-  p_help = "";
-} height_indicator_color;
-
-paramdef string {
-  p_default = "grey";
-  p_descr = "Range rings and azimuth lines.";
-  p_help = "";
-} range_ring_color;
-
-paramdef string {
-  p_default = "transparent";
-  p_descr = "Set to 'transparent' to avoid having these plotted. ";
-  p_help = "Otherwise, these data will be plotted in the indicated color.";
-} missing_data_color;
-
-paramdef string {
-  p_default = "transparent";
-  p_descr = "Set to 'transparent' to avoid having these plotted. ";
-  p_help = "Otherwise, these data will be plotted in the indicated color.";
-} bad_data_color;
+  p_default = "darkslateblue";
+  p_descr = "Color of background in vlevel selector.";
+} vlevel_selector_background_color;
 
 paramdef string {
   p_default = "orange";
-  p_descr = "Time Control (Movie) Pop-up Colors.";
-  p_help = "";
-} epoch_indicator_color;
+  p_descr = "Color of titles in vlevel selector.";
+} vlevel_selector_title_color;
 
 paramdef string {
-  p_default = "red";
-  p_descr = "Color of current time tick.";
-  p_help = "";
-} now_time_color;
+  p_default = "white";
+  p_descr = "Color of axes in vlevel selector.";
+} vlevel_selector_axis_color;
 
 paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of time ticks - main grid.";
-  p_help = "";
-} time_tick_color;
+  p_default = "white";
+  p_descr = "Color of labels in vlevel_selector.";
+} vlevel_selector_labels_color;
 
 paramdef string {
-  p_default = { "cyan", "yellow", "magenta", "green", "red", "blue" };
-  p_descr = "List of colors for time ticks for symbolic products.";
-  p_help = "The time ticks are drawn in order, from top down, in the time control GUI.";
-} time_tick_colors[];
+  p_default = "orange";
+  p_descr = "Color of selection marker in vlevel selector.";
+} vlevel_selector_marker_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of data values in vlevel selector.";
+} vlevel_selector_data_values_color;
 
 commentdef {
-  p_header = "</COLORS>";
+  p_header = "</GUI>";
 }
 
 commentdef {
-  p_header = "<HORIZ_PLOT>";
+  p_header = "<WINDOWS>";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main horizontal window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards.";
+} horiz_window_x_pos;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main horizontal window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right.";
+} horiz_window_y_pos;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of horizontal plot (pixels).";
+  p_help = "This is for the plot only. It does not include color scale width.";
+} horiz_plot_width;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup height of horizontal plot (pixels).";
+} horiz_plot_height;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} horiz_color_scale_width;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Startup X for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
+} vert_window_x_pos;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Startup Y for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
+} vert_window_y_pos;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of vertical plot (pixels).";
+  p_help = "This is for the plot only. It does not include color scale width.";
+} vert_plot_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Startup height of vertical plot (pixels).";
+} vert_plot_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_height;
+
+commentdef {
+  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
+  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
+}
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum ht of cross section.";
+  p_help = "";
+} min_ht;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Maximum ht of cross section.";
+  p_help = "";
+} max_ht;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Starting height of horizontal view.";
+  p_help = "";
+} start_ht;
+
+commentdef {
+  p_header = "</WINDOWS>";
+}
+
+commentdef {
+  p_header = "<HORIZ_VIEW>";
 }
 
 paramdef string {
@@ -1331,12 +1298,49 @@ paramdef string {
   p_descr = "Color for grid (if plotted).";
 } horiz_grid_color;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set HORIZ grids overlay on at startup.";
+} horiz_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set HORIZ range rings overlay on at startup.";
+} horiz_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
+} horiz_azimuth_lines_on_at_startup;
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the HORIZ plot window";
+  p_help = "This include time, field name and elevation angle.";
+} horiz_main_legend_pos;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} horiz_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'horiz_override_rendering_beam_width'";
+} horiz_rendering_beam_width;
+
 commentdef {
-  p_header = "</HORIZ_PLOT>";
+  p_header = "</HORIZ_VIEW>";
 }
 
 commentdef {
-  p_header = "<VERT_PLOT>";
+  p_header = "<VERT_VIEW>";
 }
 
 paramdef int {
@@ -1432,8 +1436,242 @@ paramdef string {
   p_descr = "Color for grid (if plotted).";
 } vert_grid_color;
 
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup width of VERT window (pixels).";
+} vert_window_width;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Startup height of VERT window (pixels).";
+} vert_window_height;
+
+paramdef int {
+  p_default = 1100;
+  p_descr = "Startup X for VERT window (pixels).";
+} vert_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for VERT window (pixels).";
+} vert_window_start_y;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin in VERT mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} vert_top_margin2;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin in VERT mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} vert_bottom_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of left margin in VERT mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} vert_left_margin2;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of right margin in VERT mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} vert_right_margin2;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} vert_label_font_size;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} vert_text_margin;
+
+// paramdef double {
+//   p_default = 1.0;
+//   p_descr = "Aspect ratio (width/height) of VERT window.";
+//   p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
+// } vert_aspect_ratio;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height of data in VERT window (km).";
+  p_descr = "This can be adjusted interactively.";
+} vert_max_height_km;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale for VERT window (pixels).";
+} vert_color_scale_width;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set VERT grids overlay on at startup.";
+} vert_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set VERT range rings overlay on at startup.";
+} vert_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set VERT elevation lines overlay on at startup.";
+} vert_elevation_lines_on_at_startup;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the VERT plot window";
+  p_help = "This include time, field name and elevation angle.";
+} vert_main_legend_pos;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Size of the queue for VERT beams.";
+  p_help = "After the queue reaches this size, older beams are discarded.";
+} vert_beam_queue_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth beam width for rendering.";
+  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
+} vert_override_rendering_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Rendering beam width, if override is active.";
+  p_help = "See 'vert_override_rendering_beam_width'";
+} vert_rendering_beam_width;
+
 commentdef {
-  p_header = "</VERT_PLOT>";
+  p_header = "</VERT_VIEW>";
+}
+
+commentdef {
+  p_header = "<COLORS>";
+}
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Legends, scales.";
+  p_help = "";
+} foreground_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Background of images.";
+  p_help = "";
+} background_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} background_color2;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of text annotation in main display.";
+} text_color;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of grids and range rings.";
+} grid_and_range_ring_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of cross at click point.";
+} click_cross_color;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Background of margins.";
+  p_help = "";
+} margin_color;
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "Render values outside the data range of the color scale.";
+  p_help = "";
+} out_of_range_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of the cross section reference line.";
+  p_help = "";
+} route_path_color;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "Text in the time axis margins.";
+  p_help = "";
+} time_axis_color;
+
+paramdef string {
+  p_default = "gray50";
+  p_descr = "A solid rectangle showing the movie frame extent.";
+  p_help = "";
+} time_frame_color;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "The text in the height selector margin.";
+  p_help = "";
+} height_axis_color;
+
+paramdef string {
+  p_default = "gray50";
+  p_descr = "A solid rectangle showing the height extent of the data plane.";
+  p_help = "";
+} height_indicator_color;
+
+paramdef string {
+  p_default = "grey";
+  p_descr = "Range rings and azimuth lines.";
+  p_help = "";
+} range_ring_color;
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "Set to 'transparent' to avoid having these plotted. ";
+  p_help = "Otherwise, these data will be plotted in the indicated color.";
+} missing_data_color;
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "Set to 'transparent' to avoid having these plotted. ";
+  p_help = "Otherwise, these data will be plotted in the indicated color.";
+} bad_data_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Time Control (Movie) Pop-up Colors.";
+  p_help = "";
+} epoch_indicator_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of current time tick.";
+  p_help = "";
+} now_time_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of time ticks - main grid.";
+  p_help = "";
+} time_tick_color;
+
+paramdef string {
+  p_default = { "cyan", "yellow", "magenta", "green", "red", "blue" };
+  p_descr = "List of colors for time ticks for symbolic products.";
+  p_help = "The time ticks are drawn in order, from top down, in the time control GUI.";
+} time_tick_colors[];
+
+commentdef {
+  p_header = "</COLORS>";
 }
 
 commentdef {
@@ -1743,18 +1981,6 @@ paramdef string {
   p_help = "km, nm, deg";
 } scale_units_label;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the status window.";
-  p_help = "If FALSE, no status window is displayed.";
-} enable_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Report clicks in the status window.";
-  p_help = "By default distance are in km and bearings in deg T.";
-} report_clicks_in_status_window;
-
 commentdef {
   p_header = "</RENDERING>";
 }
@@ -1812,432 +2038,6 @@ paramdef struct product_adjustment_t {
   p_descr = "Thresholds and adjustment for font sizes for products.";
   p_help = "The adjustment increases or decreases the font index. This index is used to choose the font from the fonts[] array. The thresholds are computed as units of km across the image.";
 } product_adjustments[3];
-
-commentdef {
-  p_header = "</SYMBOLIC_PRODUCTS>";
-}
-
-commentdef {
-  p_header = "<CREATING_IMAGES>";
-  p_text =
-    "In creating files for the field catalog, the file name is of the form:\n\n"
-    "\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\n"
-    "The following parameters control the output directory, and the construction of the file name";
-}
-
-paramdef string {
-  p_default = "/tmp/images/Lucid";
-  p_descr = "Output directory for images generated by this app.";
-} images_output_dir;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to create a subdirectory for each day.";
-  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
-} images_write_to_day_dir;
-
-paramdef string {
-  p_default = "radar";
-  p_descr = "Set the category string.";
-  p_help = "If empty, no category will be included.";
-} images_file_name_category;
-
-paramdef string {
-  p_default = "NSF_NCAR_GV_HCR";
-  p_descr = "Set the platform string.";
-  p_help = "If empty, no platform will be included.";
-} images_file_name_platform;
-
-paramdef string {
-  p_default = "png";
-  p_descr = "Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.";
-  p_help = "An extension is always required";
-} images_file_name_extension;
-
-paramdef string {
-  p_default = ".";
-  p_descr = "Set the delimiter between the parts of the file name.";
-  p_help = "NOTE: before the extension the delimited is always a period: '.'.";
-} images_file_name_delimiter;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
-  p_help = "If FALSE, the time part will be omitted.";
-} images_include_time_part_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
-  p_help = "If FALSE, the SS will be excluuded from the time part.";
-} images_include_seconds_in_time_part;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Normally the file name includes the field label (product type).";
-  p_help = "If FALSE, the field label will be omitted.";
-} images_include_field_label_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the scan type in the image file name.";
-  p_help = "If TRUE, the scan type will be added to the image file name.";
-} images_include_scan_type_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the scan Id in the image file name.";
-  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to write latest_data_info files when an image is created.";
-  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
-} images_write_latest_data_info;
-
-commentdef {
-  p_header = "Option to create images automatically";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to create images automatically.";
-  p_descr = "If true, images will either be created on a schedule, or the images will be created for a single time and the app will then exit.";
-} images_auto_create;
-
-typedef enum {
-  CREATE_IMAGES_THEN_EXIT,
-  CREATE_IMAGES_ON_REALTIME_SCHEDULE,
-  CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
-} images_creation_mode_t;
-
-paramdef enum images_creation_mode_t {
-  p_default = CREATE_IMAGES_THEN_EXIT;
-  p_descr = "Mode for controlling auto image creation.";
-  p_help = "\n\nCREATE_IMAGES_FROM_GUI: create images interactively using the GUI.\n\nCREATE_IMAGES_THEN_EXIT: for the specified start time and time span, create an output image for every field in the fields array, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.";
-} images_creation_mode;
-
-paramdef int {
-  p_default = 300;
-  p_descr = "Interval at which images are created on schedule (secs).";
-  p_help = "The application waits until the interval has passed, plus any specified delay, and then creates the images.";
-} images_schedule_interval_secs;
-
-paramdef int {
-  p_default = 60;
-  p_descr = "Delay between scheduled time and image creation (secs).";
-  p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
-} images_schedule_delay_secs;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "Start time for image generation in archive mode.";
-  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
-} images_archive_start_time;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "End time for image generation in archive mode.";
-  p_help = "Image generation is terminated when the search time exceeds this end time.";
-  p_help = "Only applicable for image generation.";
-} images_archive_end_time;
-
-paramdef int {
-  p_default = 300;
-  p_descr = "Time between scans in archive mode (secs).";
-  p_help = "Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.";
-} images_scan_interval_secs;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to specify the sweep indexes for the image generation.";
-  p_help = "If TRUE, only the specified sweeps will be processed.";
-} images_set_sweep_index_list;
-
-paramdef int {
-  p_default = { 0, 1, 2 };
-  p_descr = "List of valid sweep indexes for image generation.";
-  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
-} images_sweep_index_list[];
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the single middle button click to save image feature.";
-  p_help = "Warning - will allow users shell access, or to write to other dirs.";
-} enable_save_image_panel;
-
-commentdef {
-  p_header = "</CREATING_IMAGES>";
-}
-
-commentdef {
-  p_header = "<GUI_AND_WINDOWS>";
-}
-
-commentdef {
-  p_header = "</GUI_AND_WINDOWS>";
-}
-
-commentdef {
-  p_header = "<VERTICAL_SELECTOR_GUI>";
-}
-
-paramdef int {
-  p_default = 90;
-  p_descr = "Width of vlevel selector (pixels).";
-} vlevel_selector_width;
-
-paramdef int {
-  p_default = 70;
-  p_descr = "Height of top margin in VLEVEL_SELECTOR mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} vlevel_selector_top_margin;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Height of bottom margin in VLEVEL_SELECTOR mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} vlevel_selector_bottom_margin;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Width of left margin in VLEVEL_SELECTOR mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} vlevel_selector_left_margin;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Width of right margin in VLEVEL_SELECTOR mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} vlevel_selector_right_margin;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Length of ticks on axes (pixels).";
-} vlevel_selector_axis_tick_len;
-
-paramdef int {
-  p_default = 16;
-  p_descr = "Ideal number of ticks on axes.";
-} vlevel_selector_n_ticks_ideal;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} vlevel_selector_axis_text_margin;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Font size of center title (pixels).";
-} vlevel_selector_title_font_size;
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Font size of axis labels in vlevel_selector (pixels).";
-} vlevel_selector_labels_font_size;
-
-paramdef string {
-  p_default = "darkslateblue";
-  p_descr = "Color of background in vlevel selector.";
-} vlevel_selector_background_color;
-
-paramdef string {
-  p_default = "orange";
-  p_descr = "Color of titles in vlevel selector.";
-} vlevel_selector_title_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of axes in vlevel selector.";
-} vlevel_selector_axis_color;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of labels in vlevel_selector.";
-} vlevel_selector_labels_color;
-
-paramdef string {
-  p_default = "orange";
-  p_descr = "Color of selection marker in vlevel selector.";
-} vlevel_selector_marker_color;
-
-paramdef string {
-  p_default = "cyan";
-  p_descr = "Color of data values in vlevel selector.";
-} vlevel_selector_data_values_color;
-
-commentdef {
-  p_header = "</VERTICAL_SELECTOR_GUI>";
-}
-
-commentdef {
-  p_header = "<HORIZ_VIEW>";
-}
-
-// paramdef double {
-//   p_default = 0.0;
-//   p_descr = "Aspect ratio (width/height) of HORIZ window.";
-//   p_help = "If set <= 0.0, Lucid will compute the aspect ratio based on the extent of the initial zoom domain. Lucid will preserve this aspect ratio for all zooms. Ratio is Width/Height. Note Lucid applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
-// } horiz_aspect_ratio;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set HORIZ grids overlay on at startup.";
-} horiz_grids_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ range rings overlay on at startup.";
-} horiz_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
-} horiz_azimuth_lines_on_at_startup;
-
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the HORIZ plot window";
-  p_help = "This include time, field name and elevation angle.";
-} horiz_main_legend_pos;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} horiz_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'horiz_override_rendering_beam_width'";
-} horiz_rendering_beam_width;
-
-commentdef {
-  p_header = "</HORIZ_VIEW>";
-}
-
-commentdef {
-  p_header = "<VERT_VIEW>";
-}
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup width of VERT window (pixels).";
-} vert_window_width;
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup height of VERT window (pixels).";
-} vert_window_height;
-
-paramdef int {
-  p_default = 1100;
-  p_descr = "Startup X for VERT window (pixels).";
-} vert_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for VERT window (pixels).";
-} vert_window_start_y;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin in VERT mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} vert_top_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin in VERT mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} vert_bottom_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} vert_left_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of right margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} vert_right_margin2;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} vert_label_font_size;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} vert_text_margin;
-
-// paramdef double {
-//   p_default = 1.0;
-//   p_descr = "Aspect ratio (width/height) of VERT window.";
-//   p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
-// } vert_aspect_ratio;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Max height of data in VERT window (km).";
-  p_descr = "This can be adjusted interactively.";
-} vert_max_height_km;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale for VERT window (pixels).";
-} vert_color_scale_width;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set VERT grids overlay on at startup.";
-} vert_grids_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set VERT range rings overlay on at startup.";
-} vert_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set VERT elevation lines overlay on at startup.";
-} vert_elevation_lines_on_at_startup;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the VERT plot window";
-  p_help = "This include time, field name and elevation angle.";
-} vert_main_legend_pos;
-
-paramdef int {
-  p_default = 360;
-  p_descr = "Size of the queue for VERT beams.";
-  p_help = "After the queue reaches this size, older beams are discarded.";
-} vert_beam_queue_size;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} vert_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'vert_override_rendering_beam_width'";
-} vert_rendering_beam_width;
-
-commentdef {
-  p_header = "<VERT_VIEW>";
-}
 
 /////////////////////////////////////////////////////////////////////////
 // <SYMPRODS>
@@ -2378,17 +2178,12 @@ commentdef {
 }
 
 //////////////////////////////////////////////////////////
-// paramdef.Cidd_terrain: Parameter definitions for
 // Terrain Data
 
 commentdef {
-  p_header = "<TERRAIN>.";
+  p_header = "<TERRAIN>";
+  p_text = "Note: Terrain Fields must be on the same projection as the Display";
 }
-
-commentdef {
-  p_header = "Terrain Parameters";
-  p_comment = "Note: Terrain Fields must be on the same projection as the Display";
-};
 
 paramdef boolean {
   p_default = false;
@@ -2634,64 +2429,154 @@ commentdef {
   p_header = "</WINDS>";
 }
 
-//////////////////////////////////////////////////////////
-// Inter-process communication for the latest click point
-// Allows Lucid to control and collaborate with other apps.
-
-commentdef {
-  p_header = "<CLICK_POINT_MESSAGING>";
-  p_text = "Writing the click point location to an FMQ in XML format.";
-}
-
-paramdef string {
-  p_default = "/tmp/fmq/click_point";
-  p_descr = "URL for click point URL.";
-  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
-} click_point_fmq_url;
-
-paramdef int {
-  p_default = 30;
-  p_descr = "Length of time to wait before killing simple external commands.";
-  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
-} simple_command_timeout_secs;
-
-paramdef int {
-  p_default = 180;
-  p_descr = "Length of time to wait before killing complex external commands.";
-  p_help = "Used when spawning animation building script.";
-} complex_command_timeout_secs;
-
-paramdef string {
-  p_default = "red";
-  p_descr = "Color of mark showing latest click location.";
-  p_help = "";
-} latest_click_mark_color;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Compute click posn in coords relative to display origin.";
-  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
-} click_posn_rel_to_origin;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of mark showing latest click of remote client.";
-  p_help = "";
-} latest_client_mark_color;
-
-commentdef {
-  p_header = "</CLICK_POINT_MESSAGING>";
-}
-
 /////////////////////////////////////////////////////////////////////////
-// paramdef.CIDD_images
-//
 // This file contains the TDRP parameter definitions for handling some
 // of the CIDD image generation options.
 
 commentdef {
   p_header = "<IMAGE_GENERATION>";
+  p_text =
+    "In creating files for the field catalog, the file name is of the form:\n\n"
+    "\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\n"
+    "The following parameters control the output directory, and the construction of the file name";
 }
+
+paramdef string {
+  p_default = "/tmp/images/Lucid";
+  p_descr = "Output directory for images generated by this app.";
+} images_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create a subdirectory for each day.";
+  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
+} images_write_to_day_dir;
+
+paramdef string {
+  p_default = "radar";
+  p_descr = "Set the category string.";
+  p_help = "If empty, no category will be included.";
+} images_file_name_category;
+
+paramdef string {
+  p_default = "NSF_NCAR_GV_HCR";
+  p_descr = "Set the platform string.";
+  p_help = "If empty, no platform will be included.";
+} images_file_name_platform;
+
+paramdef string {
+  p_default = "png";
+  p_descr = "Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.";
+  p_help = "An extension is always required";
+} images_file_name_extension;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Set the delimiter between the parts of the file name.";
+  p_help = "NOTE: before the extension the delimited is always a period: '.'.";
+} images_file_name_delimiter;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the time part will be omitted.";
+} images_include_time_part_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the SS will be excluuded from the time part.";
+} images_include_seconds_in_time_part;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes the field label (product type).";
+  p_help = "If FALSE, the field label will be omitted.";
+} images_include_field_label_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan type in the image file name.";
+  p_help = "If TRUE, the scan type will be added to the image file name.";
+} images_include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the image file name.";
+  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write latest_data_info files when an image is created.";
+  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
+} images_write_latest_data_info;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create images automatically.";
+  p_descr = "If true, images will either be created on a schedule, or the images will be created for a single time and the app will then exit.";
+} images_auto_create;
+
+typedef enum {
+  CREATE_IMAGES_THEN_EXIT,
+  CREATE_IMAGES_ON_REALTIME_SCHEDULE,
+  CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
+} images_creation_mode_t;
+
+paramdef enum images_creation_mode_t {
+  p_default = CREATE_IMAGES_THEN_EXIT;
+  p_descr = "Mode for controlling auto image creation.";
+  p_help = "\n\nCREATE_IMAGES_FROM_GUI: create images interactively using the GUI.\n\nCREATE_IMAGES_THEN_EXIT: for the specified start time and time span, create an output image for every field in the fields array, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.";
+} images_creation_mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval at which images are created on schedule (secs).";
+  p_help = "The application waits until the interval has passed, plus any specified delay, and then creates the images.";
+} images_schedule_interval_secs;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Delay between scheduled time and image creation (secs).";
+  p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
+} images_schedule_delay_secs;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for image generation in archive mode.";
+  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
+} images_archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for image generation in archive mode.";
+  p_help = "Image generation is terminated when the search time exceeds this end time.";
+  p_help = "Only applicable for image generation.";
+} images_archive_end_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.";
+} images_scan_interval_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the sweep indexes for the image generation.";
+  p_help = "If TRUE, only the specified sweeps will be processed.";
+} images_set_sweep_index_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep indexes for image generation.";
+  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
+} images_sweep_index_list[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Enable the single middle button click to save image feature.";
+  p_help = "Warning - will allow users shell access, or to write to other dirs.";
+} enable_save_image_panel;
 
 paramdef boolean {
   p_default = false;
@@ -2937,84 +2822,12 @@ commentdef {
   p_header = "</IMAGE_GENERATION>";
 }
 
-commentdef {
-  p_header = "<HELP>";
-}
-
-paramdef string {
-  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
-  p_descr = "Main command to run to get help.";
-  p_help = "";
-} help_command;
-
-paramdef string {
-  p_default = "cidd_help::canvas";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} canvas_help;
-
-paramdef string {
-  p_default = "cidd_help:frame_message";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} frame_message_help;
-
-commentdef {
-  p_header = "</HELP>";
-}
-
 //////////////////////////////////////////////////////////
-// paramdef.Cidd_Draw: Parameter definitions for Human Drawn
-// Products
+// Predefined vertical sections for route winds
 
 commentdef {
-  p_header = "<DRAW_EXPORT>";
-};
-
-paramdef string {
-  p_default = "/tmp/remoteUI";
-  p_descr = "FMQ Type URL for Receiving Remote commands.";
-  p_help = "";
-} remote_ui_url;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Is drawing for export active?";
-} draw_export_active;
-
-typedef struct {
-  string id_label;
-  string url;
-  double valid_minutes;
-  int default_id_no;
-  string default_label;
-} draw_export_t;
-
-paramdef struct draw_export_t {
-  p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
-                {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
-  p_descr = "Human Drawn Products for Export Parameters.";
-  p_help = 
-    " Each Entry needs:\n"
-    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
-    "    ID_LABEL - This is used to designate Product types\n"
-    "    FMQ_URL: example: fmqp:://host::dir/file \n"
-    "   Valid_Minutes: How many minutes the product is valid by default\n"
-    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
-    "   Default_label: Test to place into Label field by default\n"
-    "\n";
-} draw_export_info[];
-
-commentdef {
-  p_header = "</DRAW_EXPORT>";
-};
-
-//////////////////////////////////////////////////////////
-// paramdef.Cidd_routes: Parameter definitions for 
-// Predefined route wind, etc support
-
-commentdef {
-  p_header = "<ROUTE_VERT_SECTIONS>";
+  p_header = "<AUTO_VERT>";
+  p_text = "Predefined vertical sections for image generation.";
 };
 
 paramdef boolean {
@@ -3206,6 +3019,115 @@ paramdef string {
 } route_paths[];
 
 commentdef {
-  p_header = "</ROUTE_VERT_SECTIONS>";
+  p_header = "</AUTO_VERT>";
 };
+
+//////////////////////////////////////////////////////////
+// Inter-process communication for the latest click point
+// Allows Lucid to control and collaborate with other apps.
+
+commentdef {
+  p_header = "<PLUGINS>";
+  p_text = "Communicating with other applications.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
+} click_point_fmq_url;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Length of time to wait before killing simple external commands.";
+  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
+} simple_command_timeout_secs;
+
+paramdef int {
+  p_default = 180;
+  p_descr = "Length of time to wait before killing complex external commands.";
+  p_help = "Used when spawning animation building script.";
+} complex_command_timeout_secs;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of mark showing latest click location.";
+  p_help = "";
+} latest_click_mark_color;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Compute click posn in coords relative to display origin.";
+  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
+} click_posn_rel_to_origin;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of mark showing latest click of remote client.";
+  p_help = "";
+} latest_client_mark_color;
+
+paramdef string {
+  p_default = "/tmp/remoteUI";
+  p_descr = "FMQ Type URL for Receiving Remote commands.";
+  p_help = "";
+} remote_ui_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Is drawing for export active?";
+} draw_export_active;
+
+typedef struct {
+  string id_label;
+  string url;
+  double valid_minutes;
+  int default_id_no;
+  string default_label;
+} draw_export_t;
+
+paramdef struct draw_export_t {
+  p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
+                {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
+  p_descr = "Human Drawn Products for Export Parameters.";
+  p_help = 
+    " Each Entry needs:\n"
+    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
+    "    ID_LABEL - This is used to designate Product types\n"
+    "    FMQ_URL: example: fmqp:://host::dir/file \n"
+    "   Valid_Minutes: How many minutes the product is valid by default\n"
+    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
+    "   Default_label: Test to place into Label field by default\n"
+    "\n";
+} draw_export_info[];
+
+commentdef {
+  p_header = "</PLUGINS>";
+};
+
+commentdef {
+  p_header = "<HELP>";
+}
+
+paramdef string {
+  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
+  p_descr = "Main command to run to get help.";
+  p_help = "";
+} help_command;
+
+paramdef string {
+  p_default = "cidd_help::canvas";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} canvas_help;
+
+paramdef string {
+  p_default = "cidd_help:frame_message";
+  p_descr = "Help text links.";
+  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
+} frame_message_help;
+
+commentdef {
+  p_header = "</HELP>";
+}
 

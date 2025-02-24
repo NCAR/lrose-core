@@ -110,12 +110,6 @@ public:
   } projection_t;
 
   typedef enum {
-    CREATE_IMAGES_THEN_EXIT = 0,
-    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
-    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
-  } images_creation_mode_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -160,6 +154,12 @@ public:
     WIND_BARB_SH = 7,
     WIND_LABELEDBARB_SH = 8
   } wind_marker_t;
+
+  typedef enum {
+    CREATE_IMAGES_THEN_EXIT = 0,
+    CREATE_IMAGES_ON_REALTIME_SCHEDULE = 1,
+    CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
+  } images_creation_mode_t;
 
   typedef enum {
     IMAGE_DEBUG_OFF = 0,
@@ -597,86 +597,14 @@ public:
 
   char* archive_start_time;
 
-  int num_field_menu_cols;
-
-  tdrp_bool_t one_click_rhi;
-
-  double rotate_coarse_adjust;
-
-  double rotate_medium_adjust;
-
-  double rotate_fine_adjust;
-
-  tdrp_bool_t disable_pick_mode;
-
-  tdrp_bool_t replace_underscores;
-
-  tdrp_bool_t close_popups;
-
-  char* status_info_file;
-
-  tdrp_bool_t show_clock;
-
-  tdrp_bool_t draw_clock_local;
-
-  tdrp_bool_t use_local_timestamps;
-
-  int label_font_size;
-
-  char* background_color2;
-
-  char* text_color;
-
-  char* grid_and_range_ring_color;
-
-  int range_ring_label_font_size;
-
-  char* click_cross_color;
-
-  int click_cross_size;
-
-  int click_cross_line_width;
-
-  int horiz_window_x_pos;
-
-  int horiz_window_y_pos;
-
-  int horiz_plot_width;
-
-  int horiz_plot_height;
-
-  int horiz_color_scale_width;
-
-  int vert_window_x_pos;
-
-  int vert_window_y_pos;
-
-  int vert_plot_width;
-
-  int vert_plot_height;
-
-  int horiz_window_min_width;
-
-  int horiz_window_min_height;
-
-  int vert_window_min_width;
-
-  int vert_window_min_height;
-
-  double min_ht;
-
-  double max_ht;
-
-  double start_ht;
-
   char* color_scale_urls;
 
   field_t *_fields;
   int fields_n;
 
-  tdrp_bool_t check_data_times;
+  tdrp_bool_t replace_underscores;
 
-  tdrp_bool_t check_clipping;
+  tdrp_bool_t check_data_times;
 
   double time_search_stretch_factor;
 
@@ -703,6 +631,8 @@ public:
   tdrp_bool_t do_not_clip_on_mdv_request;
 
   tdrp_bool_t do_not_decimate_on_mdv_request;
+
+  tdrp_bool_t check_clipping;
 
   char* http_tunnel_url;
 
@@ -812,38 +742,103 @@ public:
 
   double domain_limit_max_y;
 
-  char* foreground_color;
+  int num_field_menu_cols;
 
-  char* background_color;
+  tdrp_bool_t one_click_rhi;
 
-  char* margin_color;
+  double rotate_coarse_adjust;
 
-  char* out_of_range_color;
+  double rotate_medium_adjust;
 
-  char* route_path_color;
+  double rotate_fine_adjust;
 
-  char* time_axis_color;
+  tdrp_bool_t disable_pick_mode;
 
-  char* time_frame_color;
+  tdrp_bool_t close_popups;
 
-  char* height_axis_color;
+  char* status_info_file;
 
-  char* height_indicator_color;
+  tdrp_bool_t enable_status_window;
 
-  char* range_ring_color;
+  tdrp_bool_t report_clicks_in_status_window;
 
-  char* missing_data_color;
+  tdrp_bool_t show_clock;
 
-  char* bad_data_color;
+  tdrp_bool_t draw_clock_local;
 
-  char* epoch_indicator_color;
+  tdrp_bool_t use_local_timestamps;
 
-  char* now_time_color;
+  int label_font_size;
 
-  char* time_tick_color;
+  int range_ring_label_font_size;
 
-  char* *_time_tick_colors;
-  int time_tick_colors_n;
+  int click_cross_size;
+
+  int click_cross_line_width;
+
+  int vlevel_selector_width;
+
+  int vlevel_selector_top_margin;
+
+  int vlevel_selector_bottom_margin;
+
+  int vlevel_selector_left_margin;
+
+  int vlevel_selector_right_margin;
+
+  int vlevel_selector_axis_tick_len;
+
+  int vlevel_selector_n_ticks_ideal;
+
+  int vlevel_selector_axis_text_margin;
+
+  int vlevel_selector_title_font_size;
+
+  int vlevel_selector_labels_font_size;
+
+  char* vlevel_selector_background_color;
+
+  char* vlevel_selector_title_color;
+
+  char* vlevel_selector_axis_color;
+
+  char* vlevel_selector_labels_color;
+
+  char* vlevel_selector_marker_color;
+
+  char* vlevel_selector_data_values_color;
+
+  int horiz_window_x_pos;
+
+  int horiz_window_y_pos;
+
+  int horiz_plot_width;
+
+  int horiz_plot_height;
+
+  int horiz_color_scale_width;
+
+  int vert_window_x_pos;
+
+  int vert_window_y_pos;
+
+  int vert_plot_width;
+
+  int vert_plot_height;
+
+  int horiz_window_min_width;
+
+  int horiz_window_min_height;
+
+  int vert_window_min_width;
+
+  int vert_window_min_height;
+
+  double min_ht;
+
+  double max_ht;
+
+  double start_ht;
 
   char* label_time_format;
 
@@ -895,6 +890,18 @@ public:
 
   char* horiz_grid_color;
 
+  tdrp_bool_t horiz_grids_on_at_startup;
+
+  tdrp_bool_t horiz_range_rings_on_at_startup;
+
+  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
+
+  legend_pos_t horiz_main_legend_pos;
+
+  tdrp_bool_t horiz_override_rendering_beam_width;
+
+  double horiz_rendering_beam_width;
+
   int vert_top_margin;
 
   int vert_bot_margin;
@@ -928,6 +935,85 @@ public:
   char* vert_axes_color;
 
   char* vert_grid_color;
+
+  int vert_window_width;
+
+  int vert_window_height;
+
+  int vert_window_start_x;
+
+  int vert_window_start_y;
+
+  int vert_top_margin2;
+
+  int vert_bottom_margin;
+
+  int vert_left_margin2;
+
+  int vert_right_margin2;
+
+  int vert_label_font_size;
+
+  int vert_text_margin;
+
+  double vert_max_height_km;
+
+  int vert_color_scale_width;
+
+  tdrp_bool_t vert_grids_on_at_startup;
+
+  tdrp_bool_t vert_range_rings_on_at_startup;
+
+  tdrp_bool_t vert_elevation_lines_on_at_startup;
+
+  legend_pos_t vert_main_legend_pos;
+
+  int vert_beam_queue_size;
+
+  tdrp_bool_t vert_override_rendering_beam_width;
+
+  double vert_rendering_beam_width;
+
+  char* foreground_color;
+
+  char* background_color;
+
+  char* background_color2;
+
+  char* text_color;
+
+  char* grid_and_range_ring_color;
+
+  char* click_cross_color;
+
+  char* margin_color;
+
+  char* out_of_range_color;
+
+  char* route_path_color;
+
+  char* time_axis_color;
+
+  char* time_frame_color;
+
+  char* height_axis_color;
+
+  char* height_indicator_color;
+
+  char* range_ring_color;
+
+  char* missing_data_color;
+
+  char* bad_data_color;
+
+  char* epoch_indicator_color;
+
+  char* now_time_color;
+
+  char* time_tick_color;
+
+  char* *_time_tick_colors;
+  int time_tick_colors_n;
 
   tdrp_bool_t range_rings;
 
@@ -1001,10 +1087,6 @@ public:
 
   char* scale_units_label;
 
-  tdrp_bool_t enable_status_window;
-
-  tdrp_bool_t report_clicks_in_status_window;
-
   tdrp_bool_t products_on;
 
   int product_line_width;
@@ -1015,133 +1097,6 @@ public:
 
   product_adjustment_t *_product_adjustments;
   int product_adjustments_n;
-
-  char* images_output_dir;
-
-  tdrp_bool_t images_write_to_day_dir;
-
-  char* images_file_name_category;
-
-  char* images_file_name_platform;
-
-  char* images_file_name_extension;
-
-  char* images_file_name_delimiter;
-
-  tdrp_bool_t images_include_time_part_in_file_name;
-
-  tdrp_bool_t images_include_seconds_in_time_part;
-
-  tdrp_bool_t images_include_field_label_in_file_name;
-
-  tdrp_bool_t images_include_scan_type_in_file_name;
-
-  tdrp_bool_t images_include_scan_id_in_file_name;
-
-  tdrp_bool_t images_write_latest_data_info;
-
-  tdrp_bool_t images_auto_create;
-
-  images_creation_mode_t images_creation_mode;
-
-  int images_schedule_interval_secs;
-
-  int images_schedule_delay_secs;
-
-  char* images_archive_start_time;
-
-  char* images_archive_end_time;
-
-  int images_scan_interval_secs;
-
-  tdrp_bool_t images_set_sweep_index_list;
-
-  int *_images_sweep_index_list;
-  int images_sweep_index_list_n;
-
-  tdrp_bool_t enable_save_image_panel;
-
-  int vlevel_selector_width;
-
-  int vlevel_selector_top_margin;
-
-  int vlevel_selector_bottom_margin;
-
-  int vlevel_selector_left_margin;
-
-  int vlevel_selector_right_margin;
-
-  int vlevel_selector_axis_tick_len;
-
-  int vlevel_selector_n_ticks_ideal;
-
-  int vlevel_selector_axis_text_margin;
-
-  int vlevel_selector_title_font_size;
-
-  int vlevel_selector_labels_font_size;
-
-  char* vlevel_selector_background_color;
-
-  char* vlevel_selector_title_color;
-
-  char* vlevel_selector_axis_color;
-
-  char* vlevel_selector_labels_color;
-
-  char* vlevel_selector_marker_color;
-
-  char* vlevel_selector_data_values_color;
-
-  tdrp_bool_t horiz_grids_on_at_startup;
-
-  tdrp_bool_t horiz_range_rings_on_at_startup;
-
-  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
-
-  legend_pos_t horiz_main_legend_pos;
-
-  tdrp_bool_t horiz_override_rendering_beam_width;
-
-  double horiz_rendering_beam_width;
-
-  int vert_window_width;
-
-  int vert_window_height;
-
-  int vert_window_start_x;
-
-  int vert_window_start_y;
-
-  int vert_top_margin2;
-
-  int vert_bottom_margin;
-
-  int vert_left_margin2;
-
-  int vert_right_margin2;
-
-  int vert_label_font_size;
-
-  int vert_text_margin;
-
-  double vert_max_height_km;
-
-  int vert_color_scale_width;
-
-  tdrp_bool_t vert_grids_on_at_startup;
-
-  tdrp_bool_t vert_range_rings_on_at_startup;
-
-  tdrp_bool_t vert_elevation_lines_on_at_startup;
-
-  legend_pos_t vert_main_legend_pos;
-
-  int vert_beam_queue_size;
-
-  tdrp_bool_t vert_override_rendering_beam_width;
-
-  double vert_rendering_beam_width;
 
   tdrp_bool_t symprods_enabled_at_startup;
 
@@ -1203,17 +1158,50 @@ public:
 
   char* wind_units_label;
 
-  char* click_point_fmq_url;
+  char* images_output_dir;
 
-  int simple_command_timeout_secs;
+  tdrp_bool_t images_write_to_day_dir;
 
-  int complex_command_timeout_secs;
+  char* images_file_name_category;
 
-  char* latest_click_mark_color;
+  char* images_file_name_platform;
 
-  tdrp_bool_t click_posn_rel_to_origin;
+  char* images_file_name_extension;
 
-  char* latest_client_mark_color;
+  char* images_file_name_delimiter;
+
+  tdrp_bool_t images_include_time_part_in_file_name;
+
+  tdrp_bool_t images_include_seconds_in_time_part;
+
+  tdrp_bool_t images_include_field_label_in_file_name;
+
+  tdrp_bool_t images_include_scan_type_in_file_name;
+
+  tdrp_bool_t images_include_scan_id_in_file_name;
+
+  tdrp_bool_t images_write_latest_data_info;
+
+  tdrp_bool_t images_auto_create;
+
+  images_creation_mode_t images_creation_mode;
+
+  int images_schedule_interval_secs;
+
+  int images_schedule_delay_secs;
+
+  char* images_archive_start_time;
+
+  char* images_archive_end_time;
+
+  int images_scan_interval_secs;
+
+  tdrp_bool_t images_set_sweep_index_list;
+
+  int *_images_sweep_index_list;
+  int images_sweep_index_list_n;
+
+  tdrp_bool_t enable_save_image_panel;
 
   tdrp_bool_t image_generation_active;
 
@@ -1282,19 +1270,6 @@ public:
 
   char* series_convert_script;
 
-  char* help_command;
-
-  char* canvas_help;
-
-  char* frame_message_help;
-
-  char* remote_ui_url;
-
-  tdrp_bool_t draw_export_active;
-
-  draw_export_t *_draw_export_info;
-  int draw_export_info_n;
-
   tdrp_bool_t route_winds_active;
 
   route_debug_t route_debug;
@@ -1336,6 +1311,31 @@ public:
   char* *_route_paths;
   int route_paths_n;
 
+  char* click_point_fmq_url;
+
+  int simple_command_timeout_secs;
+
+  int complex_command_timeout_secs;
+
+  char* latest_click_mark_color;
+
+  tdrp_bool_t click_posn_rel_to_origin;
+
+  char* latest_client_mark_color;
+
+  char* remote_ui_url;
+
+  tdrp_bool_t draw_export_active;
+
+  draw_export_t *_draw_export_info;
+  int draw_export_info_n;
+
+  char* help_command;
+
+  char* canvas_help;
+
+  char* frame_message_help;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1343,7 +1343,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[456];
+  mutable TDRPtable _table[440];
 
   const char *_className;
 
