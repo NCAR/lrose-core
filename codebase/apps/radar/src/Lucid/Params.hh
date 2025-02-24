@@ -834,12 +834,6 @@ public:
 
   int vert_window_min_height;
 
-  double min_ht;
-
-  double max_ht;
-
-  double start_ht;
-
   char* label_time_format;
 
   char* frame_range_time_format;
@@ -901,6 +895,12 @@ public:
   tdrp_bool_t horiz_override_rendering_beam_width;
 
   double horiz_rendering_beam_width;
+
+  double min_ht;
+
+  double max_ht;
+
+  double start_ht;
 
   int vert_top_margin;
 
@@ -1343,7 +1343,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[440];
+  mutable TDRPtable _table[436];
 
   const char *_className;
 

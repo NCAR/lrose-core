@@ -740,10 +740,6 @@ commentdef {
 
 commentdef {
   p_header = "<ZOOM_DOMAINS>";
-}
-
-commentdef {
-  p_header = "Zoom views.";
   p_text = "These are the pre-defined zoom levels.";
 }
 
@@ -914,11 +910,6 @@ paramdef boolean {
   p_descr = "Report clicks in the status window.";
   p_help = "By default distance are in km and bearings in deg T.";
 } report_clicks_in_status_window;
-
-commentdef {
-  p_header = "Analog clock.";
-  p_text = "";
-}
 
 paramdef boolean {
   p_default = FALSE;
@@ -1128,29 +1119,6 @@ paramdef int {
 } vert_window_min_height;
 
 commentdef {
-  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
-  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
-}
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Minimum ht of cross section.";
-  p_help = "";
-} min_ht;
-
-paramdef double {
-  p_default = 30;
-  p_descr = "Maximum ht of cross section.";
-  p_help = "";
-} max_ht;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Starting height of horizontal view.";
-  p_help = "";
-} start_ht;
-
-commentdef {
   p_header = "</WINDOWS>";
 }
 
@@ -1342,6 +1310,29 @@ commentdef {
 commentdef {
   p_header = "<VERT_VIEW>";
 }
+
+commentdef {
+  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
+  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
+}
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum ht of cross section.";
+  p_help = "";
+} min_ht;
+
+paramdef double {
+  p_default = 30;
+  p_descr = "Maximum ht of cross section.";
+  p_help = "";
+} max_ht;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Starting height of horizontal view.";
+  p_help = "";
+} start_ht;
 
 paramdef int {
   p_default = 20;
@@ -1678,32 +1669,20 @@ commentdef {
   p_header = "<OVERLAYS>";
 }
 
-commentdef {
-  p_header = "Legends displayed within the plot window.";
-  p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
-}
-
-commentdef {
-  p_header = "Draw range rings and azimuth lines.";
-  p_text = "These apply to radars only.";
-}
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Turn range rings on/off.";
-  p_help = "TRUE means on - i.r. plot range rings.";
+  p_help = "TRUE means on - i.r. plot range rings. These apply to radars only.";
 } range_rings;
 
 paramdef double {
   p_default = 50;
   p_descr = "Spacing between range rings (km).";
-  p_help = "";
 } range_ring_spacing;
 
 paramdef double {
   p_default = 500;
   p_descr = "Maximum range ring (km)";
-  p_help = "";
 } max_ring_range;
 
 paramdef boolean {
@@ -1788,7 +1767,7 @@ commentdef {
 
 commentdef {
   p_header = "Plotting contours in data fields.";
-  p_text = "In the data layers section you can select contour plotting.";
+  p_text = "In the FIELDS section you can select contour plotting.";
 }
 
 typedef struct {
