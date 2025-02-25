@@ -42,7 +42,9 @@
 #include <string>
 #include <vector>
 #include <QObject>
+#include <toolsa/Path.hh> 
 
+#include "GlobalData.hh"
 #include "Args.hh"
 #include "Params.hh"
 
@@ -77,22 +79,20 @@ protected:
 private:
 
   // basic
-
+  
   string _progName;
-  Args _args;
+  GlobalData &gd;
   Params &_params;
+  Args _args;
+  Path _paramsPathRequested;
+  Path _paramsPathUsed;
 
-  // data fields
-
-  // vector<DisplayField *> _displayFields;
-
-  // managing the rendering objects
-
+  // main GUI
+  
   GuiManager *_guiManager;
   
   // methods
   
-  void _initGlobals();
   int _initDataSpace();
 
   int _initGrids();

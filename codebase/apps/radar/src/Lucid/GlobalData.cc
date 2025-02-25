@@ -33,13 +33,11 @@
 ///////////////////////////////////////////////////////////////
 
 #include "GlobalData.hh"
-#include <toolsa/mem.h>
 
 #ifdef JUNK
 #include <toolsa/Path.hh>
 #include <toolsa/TaStr.hh>
 #include <shapelib/shapefil.h>
-
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -47,14 +45,15 @@
 
 using namespace std;
 
+//////////////////////////////////////////////////////
 // Constructor
 
 GlobalData::GlobalData()
 
 {
   
-  hcan_pdev = NULL;
-  vcan_pdev = NULL;
+  hcan_pdev = nullptr;
+  vcan_pdev = nullptr;
     
   debug = 0;
   debug1 = 0;
@@ -125,43 +124,37 @@ GlobalData::GlobalData()
   model_run_time = 0;  
   data_request_time = 0; 
 
-  projection_type = NULL;
+  projection_type = nullptr;
   MEM_zero(proj_param);
   
-  demo_time = NULL;
+  demo_time = nullptr;
 
-  orig_wd = NULL;           
-  frame_label = NULL;          
-  app_name = NULL;          
-  app_instance = NULL;      
+  orig_wd = nullptr;           
+  frame_label = nullptr;          
+  app_name = nullptr;          
+  app_instance = nullptr;      
 
   MEM_zero(data_info);
 
-  num_fonts = 0;
-  MEM_zero(ciddfont);
-  MEM_zero(fontst);
-    
-  MEM_zero(prod);
-  prod_mgr = NULL;
+  prod_mgr = nullptr;
   
   MEM_zero(mread);
-  MEM_zero(legends);
 
-  MEM_zero(movie);
-  MEM_zero(io_info);
+  // MEM_zero(io_info);
   
-  r_context = NULL;    
-  station_loc = NULL;    
-  remote_ui = NULL;   
+  r_context = nullptr;    
+  station_loc = nullptr;    
+  remote_ui = nullptr;   
   
   coord_key = 0;
-  coord_expt = NULL;
+  coord_expt = nullptr;
 
   h_copy_flag = 0;
   v_copy_flag = 0;
 
 }
 
+//////////////////////////////////////////
 // destructor
 
 GlobalData::~GlobalData()
@@ -172,140 +165,6 @@ GlobalData::~GlobalData()
 }
 
 #ifdef NOTNOW
-
-//////////////////////////////////////////////////
-// Run
-
-int GlobalData::RunApp(QApplication &app)
-{
-
-  gd.finished_init = 1;
-
-  // create cartesian display
-  
-  _guiManager = new GuiManager;
-  return _guiManager->run(app);
-  
-}
-
-///////////////////////////////////////////////////
-// initialize global variables
-
-void GlobalData::_initGlobals()
-  
-{
-
-  gd.hcan_pdev = NULL;
-  gd.vcan_pdev = NULL;
-    
-  gd.debug = 0;
-  gd.debug1 = 0;
-  gd.debug2 = 0;
-    
-  gd.display_projection = 0;
-  gd.quiet_mode = 0;   
-  gd.report_mode = 0;   
-  gd.run_unmapped = 0;   
-  gd.use_cosine_correction = 0;
-  gd.drawing_mode = 0;
-  MEM_zero(gd.product_detail_threshold);
-  MEM_zero(gd.product_detail_adjustment);
-
-  gd.mark_latest_client_location = 0; 
-  gd.forecast_mode = 0;     
-  gd.data_format = 0; 
-  
-  gd.num_colors = 0;       
-  gd.num_draw_colors = 0;  
-  gd.map_overlay_color_index_start = 0;
-  gd.finished_init = 0;    
-
-  gd.num_datafields = 0;   
-  gd.num_menu_fields = 0;  
-  gd.num_field_menu_cols = 0;  
-  gd.num_map_overlays = 0; 
-  // gd.num_bookmarks = 0;
-  gd.num_render_heights = 0;
-  gd.num_cache_zooms = 0;
-  gd.cur_render_height = 0; 
-  gd.cur_field_set = 0;     
-  gd.save_im_win = 0;       
-  gd.image_needs_saved = 0; 
-  gd.generate_filename = 0; 
-  gd.max_time_list_span = 0; 
-
-  gd.pan_in_progress = 0;    
-  gd.zoom_in_progress = 0;   
-  gd.route_in_progress = 0;  
-  gd.data_timeout_secs = 0;  
-  gd.data_status_changed = 0;
-  gd.series_save_active = 0; 
-
-  gd.num_field_labels = 0;  
-  MEM_zero(gd.field_index);
-  gd.movieframe_time_mode = 0; 
-  gd.aspect_correction = 1.0;
-  MEM_zero(gd.height_array);
-
-  // gd.redraw_horiz = 0;
-  gd.redraw_vert = 0;
-  gd.time_has_changed = 0;
-  gd.field_has_changed = 0;
-  gd.zoom_has_changed = 0;
-  gd.vsect_has_changed = 0;
-  gd.ht_has_changed = 0;
-
-  gd.prev_time = 0;
-  gd.prev_field = 0;
-  gd.prev_ht = 0;
-
-  gd.selected_time = 0;
-  gd.selected_field = 0;
-  gd.selected_ht = 0;
-
-  gd.last_event_time = 0;  
-  gd.epoch_start = 0;      
-  gd.epoch_end  = 0;       
-  gd.model_run_time = 0;  
-  gd.data_request_time = 0; 
-
-  gd.projection_type = NULL;
-  MEM_zero(gd.proj_param);
-  
-  gd.demo_time = NULL;
-
-  gd.orig_wd = NULL;           
-  gd.frame_label = NULL;          
-  gd.app_name = NULL;          
-  gd.app_instance = NULL;      
-
-  MEM_zero(gd.data_info);
-
-  gd.num_fonts = 0;
-  MEM_zero(gd.ciddfont);
-  MEM_zero(gd.fontst);
-    
-  MEM_zero(gd.prod);
-  gd.prod_mgr = NULL;
-  
-  MEM_zero(gd.mread);
-  MEM_zero(gd.legends);
-
-  MEM_zero(gd.movie);
-  MEM_zero(gd.io_info);
-  
-  gd.r_context = NULL;    
-  gd.station_loc = NULL;    
-  gd.remote_ui = NULL;   
-  // gd.bookmark = NULL;
-  
-  gd.coord_key = 0;
-  gd.coord_expt = NULL;
-
-  gd.h_copy_flag = 0;
-  gd.v_copy_flag = 0;
-
-}
 
 /*****************************************************************
  * Initialize the data variables
@@ -352,7 +211,7 @@ int GlobalData::_initDataSpace()
   gd.coord_key = _params.coord_key;
   if((gd.coord_expt = (coord_export_t *) ushm_create(gd.coord_key,
                                                      sizeof(coord_export_t),
-                                                     0666)) == NULL) {
+                                                     0666)) == nullptr) {
     fprintf(stderr, "Could not create shared mem for interprocess comms\n");
     exit(-1);
   }
@@ -964,7 +823,7 @@ int GlobalData::_initDataSpace()
     f_name = gd.uparams->getString(
             p_name, "fixed");
     gd.fontst[i] = (XFontStruct *) XLoadQueryFont(dpy,f_name);
-    if(gd.fontst[i] != NULL) {
+    if(gd.fontst[i] != nullptr) {
       gd.ciddfont[i]  = gd.fontst[i]->fid;
     } else {
       fprintf(stderr,"Can't load font: %s\n",f_name);
@@ -1065,7 +924,7 @@ int GlobalData::_initGrids()
       mread->auto_render = fld.auto_render;
     }
     
-    mread->last_elev = (char *)NULL;
+    mread->last_elev = (char *)nullptr;
     mread->elev_size = 0;
     
     mread->plane = 0;
@@ -1097,7 +956,7 @@ int GlobalData::_initGrids()
     mread->v_mdvx_int16 = new MdvxField;
     mread->proj = new MdvxProj;
 
-    mread->colorMap = NULL;
+    mread->colorMap = nullptr;
     mread->color_file = fld.color_map;
     string colorscaleCachePath;
     if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
@@ -1194,7 +1053,7 @@ void GlobalData::_initWinds()
       lwind.wind_w = new MdvReader;
       _initWindComponent(lwind.wind_w, windp, false, false, true);
     } else {
-      lwind.wind_w = NULL;
+      lwind.wind_w = nullptr;
     }
 
     lwind.units_scale_factor = _params.wind_units_scale_factor;
@@ -1287,7 +1146,7 @@ void GlobalData::_initTerrain()
     
     gd.layers.earth.terrain_active = 1;
     gd.layers.earth.terr = new MdvReader;
-    if(gd.layers.earth.terr == NULL) {
+    if(gd.layers.earth.terr == nullptr) {
       fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
     }
@@ -1310,7 +1169,7 @@ void GlobalData::_initTerrain()
 
     gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
     gd.layers.earth.land_use = new MdvReader;
-    if(gd.layers.earth.land_use == NULL) {
+    if(gd.layers.earth.land_use == nullptr) {
       fprintf(stderr,"Cannot allocate space for land_use data\n");
       exit(-1);
     }
@@ -1355,7 +1214,7 @@ void GlobalData::_initDrawExport()
 
   gd.draw.num_draw_products = _params.draw_export_info_n;
   gd.draw.dexport = new draw_export_info_t[gd.draw.num_draw_products];
-  if (gd.draw.dexport == NULL) {
+  if (gd.draw.dexport == nullptr) {
     fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
             gd.draw.num_draw_products);
     perror("GlobalData");
@@ -1410,7 +1269,7 @@ void GlobalData::_initRouteWinds()
   if(strlen(_params.route_u_url) > 1) {
 
     MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
+    if(mr == nullptr) {
       fprintf(stderr,"Unable to allocate space for Route U Wind\n");
       perror("cidd_init::_initRouteWinds");
       exit(-1);
@@ -1443,7 +1302,7 @@ void GlobalData::_initRouteWinds()
   if(strlen(_params.route_v_url) > 1) {
     
     MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
+    if(mr == nullptr) {
       fprintf(stderr,"Unable to allocate space for Route V Wind\n");
       perror("cidd_init::_initRouteWinds");
       exit(-1);
@@ -1476,7 +1335,7 @@ void GlobalData::_initRouteWinds()
   if(strlen(_params.route_turb_url) > 1) {
 
     MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
+    if(mr == nullptr) {
       fprintf(stderr,"Unable to allocate space for Route TURB\n");
       perror("cidd_init::_initRouteWinds");
       exit(-1);
@@ -1509,7 +1368,7 @@ void GlobalData::_initRouteWinds()
   if(strlen(_params.route_icing_url) > 1) {
 
     MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
+    if(mr == nullptr) {
       fprintf(stderr,"Unable to allocate space for Route ICING\n");
       perror("cidd_init::_initRouteWinds");
       exit(-1);
@@ -1542,7 +1401,7 @@ void GlobalData::_initRouteWinds()
   // Allocate space for num_predef_routes + 1 for the custom/user defined route
 
   if((gd.layers.route_wind.route =(route_track_t *) 
-      calloc(gd.layers.route_wind.num_predef_routes + 1, sizeof(route_track_t))) == NULL) {
+      calloc(gd.layers.route_wind.num_predef_routes + 1, sizeof(route_track_t))) == nullptr) {
     fprintf(stderr,"Unable to allocate space for %d Routes\n",
             gd.layers.route_wind.num_predef_routes + 1);
     perror("CIDD route_winds_init");
@@ -1764,22 +1623,22 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
   char *str_ptr = strtok_r(map_buf, "\n", &lasts);
 
-  while (str_ptr != NULL) {        /* read all lines in buffer */
+  while (str_ptr != nullptr) {        /* read all lines in buffer */
 
     if(*str_ptr != '#') {
 
       if(strncasecmp(str_ptr,"MAP_NAME",8) == 0) {    /* Currently Ignore */
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
       if(strncasecmp(str_ptr,"TRANSFORM",9) == 0) {    /* Currently Ignore */
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
       if(strncasecmp(str_ptr,"PROJECTION",10) == 0) {    /* Currently Ignore */
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
@@ -1796,7 +1655,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
               realloc(ov->geo_icondef, ov->num_alloc_icondefs * sizeof(Geo_feat_icondef_t *)); 
           }
         }
-        if(ov->geo_icondef == NULL) {
+        if(ov->geo_icondef == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon definition pointer array!\n");
           exit(-1);
         }
@@ -1809,7 +1668,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_icondef[index] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
         ZERO_STRUCT(ov->geo_icondef[index]);
 
-        if(ov->geo_icondef[index] == NULL) {
+        if(ov->geo_icondef[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
           exit(-1);
         }
@@ -1820,7 +1679,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_icondef[index]->x = (short *) calloc(1,num_points * sizeof(short));
         ov->geo_icondef[index]->y = (short *) calloc(1,num_points * sizeof(short));
 
-        if(ov->geo_icondef[index]->x == NULL || ov->geo_icondef[index]->y == NULL) {
+        if(ov->geo_icondef[index]->x == nullptr || ov->geo_icondef[index]->y == nullptr) {
           fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
                   ov->map_file_name.c_str(),num_points);
           exit(-1);
@@ -1829,9 +1688,9 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         /* Read in all of the points */
         for(j=0,point = 0; j < num_points; j++) {
 
-          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
 
-          if(str_ptr != NULL && STRparse(str_ptr,cfield,256,32,64) == 2) {
+          if(str_ptr != nullptr && STRparse(str_ptr,cfield,256,32,64) == 2) {
             ov->geo_icondef[index]->x[point] = atoi(cfield[0]);
             ov->geo_icondef[index]->y[point] = atoi(cfield[1]);
             point++;
@@ -1839,7 +1698,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
         ov->geo_icondef[index]->num_points = point;
         ov->num_icondefs++;
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
@@ -1856,7 +1715,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
               realloc(ov->geo_icon, ov->num_alloc_icons * sizeof(Geo_feat_icon_t *)); 
           }
         }
-        if(ov->geo_icon == NULL) {
+        if(ov->geo_icon == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon pointer array!\n");
           exit(-1);
         }
@@ -1865,7 +1724,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
         ZERO_STRUCT(ov->geo_icon[index]);
 
-        if(ov->geo_icon[index] == NULL) {
+        if(ov->geo_icon[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
           exit(-1);
         }
@@ -1876,7 +1735,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
 
         /* find the definition for the line segments that make up the icon */
-        ov->geo_icon[index]->icon = NULL;
+        ov->geo_icon[index]->icon = nullptr;
         found = 0;
         for(j=0; j < ov->num_icondefs && found == 0; j++) {
           if(strcmp(ov->geo_icondef[j]->name,cfield[1]) == 0) {
@@ -1887,7 +1746,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         if(found == 0) {    
           fprintf(stderr,"No Icon definition: %s found in file %s!\n",cfield[1],ov->map_file_name.c_str());
-          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
           continue;
         }
 
@@ -1920,7 +1779,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
 
         ov->num_icons++;
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
@@ -1937,7 +1796,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
               realloc(ov->geo_polyline, ov->num_alloc_polylines * sizeof(Geo_feat_polyline_t *)); 
           }
         }
-        if(ov->geo_polyline == NULL) {
+        if(ov->geo_polyline == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Polyline pointer array!\n");
           exit(-1);
         }
@@ -1950,7 +1809,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
         ZERO_STRUCT(ov->geo_polyline[index]);
 
-        if(ov->geo_polyline[index] == NULL) {
+        if(ov->geo_polyline[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
           exit(-1);
         }
@@ -1960,7 +1819,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
           fprintf(stderr,"Warning!: Bad POLYLINE Definition. File: %s, Line: %s\n",name_buf,str_ptr);
           fprintf(stderr,"        : Format should be:    POLYLINE Label #points\n");
           fprintf(stderr,"        : Skipping \n");
-          str_ptr = strtok_r(NULL,"\n",&lasts); // move to next line
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // move to next line
           continue;
         }
 
@@ -1970,7 +1829,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_polyline[index]->proj_x = (double *) calloc(1,num_points * sizeof(double));
         ov->geo_polyline[index]->proj_y = (double *) calloc(1,num_points * sizeof(double));
 
-        if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
+        if(ov->geo_polyline[index]->lat == nullptr || ov->geo_polyline[index]->lon == nullptr) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
                   ov->map_file_name.c_str(),num_points);
           exit(-1);
@@ -1978,8 +1837,8 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         /* Read in all of the points */
         for(j=0,point = 0; j < num_points; j++) {
-          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
-          if(str_ptr != NULL && STRparse(str_ptr,cfield,256,32,64) >= 2) {
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
+          if(str_ptr != nullptr && STRparse(str_ptr,cfield,256,32,64) >= 2) {
             ov->geo_polyline[index]->lat[point] = atof(cfield[0]);
             ov->geo_polyline[index]->lon[point] = atof(cfield[1]);
             point++;
@@ -1987,7 +1846,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
         ov->geo_polyline[index]->num_points = point;
         ov->num_polylines++;
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
@@ -2004,7 +1863,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
               realloc(ov->geo_label, ov->num_alloc_labels * sizeof(Geo_feat_label_t *)); 
           }
         }
-        if(ov->geo_label == NULL) {
+        if(ov->geo_label == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Label pointer array!\n");
           exit(-1);
         }
@@ -2015,14 +1874,14 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
         ZERO_STRUCT(ov->geo_label[index]);
 
-        if(ov->geo_label[index] == NULL) {
+        if(ov->geo_label[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Label definition!\n");
           exit(-1);
         }
 
         if((num_fields = STRparse(str_ptr,cfield,256,32,64)) < 8) {
           fprintf(stderr,"Too few fields in LABEL line: %s\n",str_ptr);
-          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
           continue;
         } 
         ov->geo_label[index]->min_lat = atof(cfield[1]);
@@ -2042,7 +1901,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
             strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
         }
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
@@ -2060,7 +1919,7 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
               realloc(ov->geo_label, ov->num_alloc_labels * sizeof(Geo_feat_label_t *)); 
           }
         }
-        if(ov->geo_label == NULL) {
+        if(ov->geo_label == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Label pointer array!\n");
           exit(-1);
         }
@@ -2070,14 +1929,14 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
         ZERO_STRUCT(ov->geo_label[index]);
 
-        if(ov->geo_label[index] == NULL) {
+        if(ov->geo_label[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Label definition!\n");
           exit(-1);
         }
 
         if((num_fields = STRparse(str_ptr,cfield,256,32,64)) < 4) {
           fprintf(stderr,"Too few fields in SIMPLELABEL line: %s\n",str_ptr);
-          str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+          str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
           continue;
         } 
         ov->geo_label[index]->min_lat = atof(cfield[1]);
@@ -2097,20 +1956,20 @@ int GlobalData::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
             strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
         }
-        str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+        str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
         continue;
       }
 
     } 
 
     // Nothing matches
-    str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
+    str_ptr = strtok_r(nullptr,"\n",&lasts); // grab next line
 
   }  // End of while additional lines exist in buffer
 
-  if(map_buf!= NULL) {
+  if(map_buf!= nullptr) {
     free(map_buf);
-    map_buf = NULL;
+    map_buf = nullptr;
   }
 
   for(i=0; i < 32; i++)  free(cfield[i]);         /* free space for sub strings */
@@ -2129,7 +1988,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
   // open shape file
 
   SHPHandle SH;
-  if((SH = SHPOpen(shpFilePath.c_str(), "rb")) == NULL) {
+  if((SH = SHPOpen(shpFilePath.c_str(), "rb")) == nullptr) {
     cerr << "ERROR - _loadShapeMap, cannot open shape file: " << shpFilePath << endl;
     return -1;
   }
@@ -2143,7 +2002,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
   int shape_type = 0;
   int part_num = 0;
   
-  SHPGetInfo(SH, &n_objects, &shape_type, NULL, NULL);
+  SHPGetInfo(SH, &n_objects, &shape_type, nullptr, nullptr);
 
   if(gd.debug) {
     fprintf(stderr,"Found %d objects, type %d  in %s\n",n_objects, shape_type, ov->map_file_name.c_str());
@@ -2171,7 +2030,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
               realloc(ov->geo_polyline, ov->num_alloc_polylines * sizeof(Geo_feat_polyline_t *)); 
           }
         }
-        if(ov->geo_polyline == NULL) {
+        if(ov->geo_polyline == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Polyline pointer array!\n");
           exit(-1);
         }
@@ -2179,7 +2038,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
         /* get space for the Polyline definition */
         ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
         ZERO_STRUCT(ov->geo_polyline[index]);
-        if(ov->geo_polyline[index] == NULL) {
+        if(ov->geo_polyline[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
           exit(-1);
         }
@@ -2192,7 +2051,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
         ov->geo_polyline[index]->proj_x = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
         ov->geo_polyline[index]->proj_y = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
 
-        if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
+        if(ov->geo_polyline[index]->lat == nullptr || ov->geo_polyline[index]->lon == nullptr) {
           fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
                   ov->map_file_name.c_str(),SO->nVertices);
           exit(-1);
@@ -2226,7 +2085,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
             ov->num_alloc_icondefs = 1;
           }
                 
-          if(ov->geo_icondef == NULL) {
+          if(ov->geo_icondef == nullptr) {
             fprintf(stderr,"Unable to allocate memory for Icon definition pointer array!\n");
             exit(-1);
           }
@@ -2235,7 +2094,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
           ov->geo_icondef[0] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
           ZERO_STRUCT(ov->geo_icondef[0]);
 
-          if(ov->geo_icondef[0] == NULL) {
+          if(ov->geo_icondef[0] == nullptr) {
             fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
             exit(-1);
           }
@@ -2245,7 +2104,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
           ov->geo_icondef[0]->x = (short *) calloc(1,num_points * sizeof(short));
           ov->geo_icondef[0]->y = (short *) calloc(1,num_points * sizeof(short));
 
-          if(ov->geo_icondef[0]->x == NULL || ov->geo_icondef[0]->y == NULL) {
+          if(ov->geo_icondef[0]->x == nullptr || ov->geo_icondef[0]->y == nullptr) {
             fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
                     ov->map_file_name.c_str(),num_points);
             exit(-1);
@@ -2284,7 +2143,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
               realloc(ov->geo_icon, ov->num_alloc_icons * sizeof(Geo_feat_icon_t *)); 
           }
         }
-        if(ov->geo_icon == NULL) {
+        if(ov->geo_icon == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon pointer array!\n");
           exit(-1);
         }
@@ -2293,7 +2152,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
         ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
         ZERO_STRUCT(ov->geo_icon[index]);
 
-        if(ov->geo_icon[index] == NULL) {
+        if(ov->geo_icon[index] == nullptr) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
           exit(-1);
         }
@@ -2309,7 +2168,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
         break;
 
       default:
-      case SHPT_NULL:
+      case SHPT_nullptr:
       case SHPT_MULTIPOINT:
       case SHPT_POLYGONZ:
       case SHPT_MULTIPOINTZ:
@@ -2322,7 +2181,7 @@ int GlobalData::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const
         break;
     }
 
-    if(SO != NULL) SHPDestroyObject(SO);
+    if(SO != nullptr) SHPDestroyObject(SO);
   }  // End of each object
 
   return 0;
@@ -2616,7 +2475,7 @@ int GlobalData::_initStationLoc()
     fprintf(stderr,"Loading Station data from: %s\n", _params.station_loc_url);
   }
   gd.station_loc =  new StationLoc();
-  if(gd.station_loc == NULL) {
+  if(gd.station_loc == nullptr) {
     fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
     exit(-1);
   }
@@ -2941,9 +2800,9 @@ void GlobalData::_initSymprods()
     // Set the widget's value and size the panel to fit the widget
     
     if(!gd.run_unmapped) {
-      // xv_set(gd.prod_pu->prod_st, PANEL_VALUE, value,XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_st,XV_HEIGHT),NULL);
-      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_st,XV_WIDTH),NULL);
+      // xv_set(gd.prod_pu->prod_st, PANEL_VALUE, value,XV_SHOW,TRUE,XV_X,0,XV_Y,0, nullptr);
+      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_st,XV_HEIGHT),nullptr);
+      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_st,XV_WIDTH),nullptr);
     }
     
   } else { // Use a  scrolling list when over 32 products are configured in
@@ -2954,12 +2813,12 @@ void GlobalData::_initSymprods()
         //      PANEL_LIST_INSERT, i,
         //      PANEL_LIST_STRING, i, _params._symprod_prod_info[i].menu_label,
         //      PANEL_LIST_CLIENT_DATA, i, i,
-        //      NULL);
+        //      nullptr);
         
         if(_params._symprod_prod_info[i].on_by_default == TRUE) {
           // xv_set(gd.prod_pu->prod_lst,
           //      PANEL_LIST_SELECT, i, TRUE,
-          //      NULL);
+          //      nullptr);
         }
       }
 
@@ -2968,10 +2827,10 @@ void GlobalData::_initSymprods()
 
     if(!gd.run_unmapped) {
       // Set the widget's value and size the panel to fit the widget
-      // xv_set(gd.prod_pu->prod_st,XV_SHOW,FALSE, NULL);
-      // xv_set(gd.prod_pu->prod_lst, XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_lst,XV_HEIGHT),NULL);
-      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_lst,XV_WIDTH),NULL);
+      // xv_set(gd.prod_pu->prod_st,XV_SHOW,FALSE, nullptr);
+      // xv_set(gd.prod_pu->prod_lst, XV_SHOW,TRUE,XV_X,0,XV_Y,0, nullptr);
+      // xv_set(gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(gd.prod_pu->prod_lst,XV_HEIGHT),nullptr);
+      // xv_set(gd.prod_pu->prod_pu,XV_WIDTH,xv_get(gd.prod_pu->prod_lst,XV_WIDTH),nullptr);
     }
   }
 
@@ -3177,7 +3036,7 @@ int GlobalData::_getResourceCachePath(const string &cacheDir,
     // write buffer to cache file
 
     FILE *cacheFile = fopen(cachePath.c_str(), "w");
-    if (cacheFile == NULL) {
+    if (cacheFile == nullptr) {
       int err = errno;
       cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
       cerr << "  Cannot open cache file for writing: " << cachePath << endl;

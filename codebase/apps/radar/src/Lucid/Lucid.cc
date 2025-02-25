@@ -40,7 +40,10 @@
 #include "GuiManager.hh"
 #include "LegacyParams.hh"
 #include <toolsa/mem.h>
-#include <toolsa/Path.hh>
+#include <toolsa/pmu.h>
+#include <toolsa/utim.h>
+#include <toolsa/umisc.h>
+#include <toolsa/str.h>
 #include <toolsa/TaStr.hh>
 #include <shapelib/shapefil.h>
 #include <qtplot/ColorMap.hh>
@@ -51,29 +54,25 @@
 #include <QApplication>
 #include <QErrorMessage>
 
-#define THIS_IS_MAIN 1 /* This is the main module */
-#include "cidd.h"
+// #define THIS_IS_MAIN 1 /* This is the main module */
 
 using namespace std;
 
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
-        _args("Lucid"),
-        _params(*Params::Inst())
+        _progName("Lucid"),
+        gd(GlobalData::Instance()),
+        _params(*Params::Inst()),
+        _args("Lucid", _params)
 
 {
 
   OK = true;
-  _guiManager = NULL;
 
   // set programe name
 
   _progName = strdup("Lucid");
-
-  // initialize legacy CIDD structs
-  
-  _initGlobals();
 
   // check for legacy params file
   // if found create a temporary tdrp file based on the legacy file
@@ -183,125 +182,6 @@ int Lucid::RunApp(QApplication &app)
   
 }
 
-///////////////////////////////////////////////////
-// initialize global variables
-
-void Lucid::_initGlobals()
-  
-{
-
-  gd.hcan_pdev = NULL;
-  gd.vcan_pdev = NULL;
-    
-  gd.debug = 0;
-  gd.debug1 = 0;
-  gd.debug2 = 0;
-    
-  gd.display_projection = 0;
-  gd.quiet_mode = 0;   
-  gd.report_mode = 0;   
-  gd.run_unmapped = 0;   
-  gd.use_cosine_correction = 0;
-  gd.drawing_mode = 0;
-  MEM_zero(gd.product_detail_threshold);
-  MEM_zero(gd.product_detail_adjustment);
-
-  gd.mark_latest_client_location = 0; 
-  gd.forecast_mode = 0;     
-  gd.data_format = 0; 
-  
-  gd.num_colors = 0;       
-  gd.num_draw_colors = 0;  
-  gd.map_overlay_color_index_start = 0;
-  gd.finished_init = 0;    
-
-  gd.num_datafields = 0;   
-  gd.num_menu_fields = 0;  
-  gd.num_field_menu_cols = 0;  
-  gd.num_map_overlays = 0; 
-  // gd.num_bookmarks = 0;
-  gd.num_render_heights = 0;
-  gd.num_cache_zooms = 0;
-  gd.cur_render_height = 0; 
-  gd.cur_field_set = 0;     
-  gd.save_im_win = 0;       
-  gd.image_needs_saved = 0; 
-  gd.generate_filename = 0; 
-  gd.max_time_list_span = 0; 
-
-  gd.pan_in_progress = 0;    
-  gd.zoom_in_progress = 0;   
-  gd.route_in_progress = 0;  
-  gd.data_timeout_secs = 0;  
-  gd.data_status_changed = 0;
-  gd.series_save_active = 0; 
-
-  gd.num_field_labels = 0;  
-  MEM_zero(gd.field_index);
-  gd.movieframe_time_mode = 0; 
-  gd.aspect_correction = 1.0;
-  MEM_zero(gd.height_array);
-
-  // gd.redraw_horiz = 0;
-  gd.redraw_vert = 0;
-  gd.time_has_changed = 0;
-  gd.field_has_changed = 0;
-  gd.zoom_has_changed = 0;
-  gd.vsect_has_changed = 0;
-  gd.ht_has_changed = 0;
-
-  gd.prev_time = 0;
-  gd.prev_field = 0;
-  gd.prev_ht = 0;
-
-  gd.selected_time = 0;
-  gd.selected_field = 0;
-  gd.selected_ht = 0;
-
-  gd.last_event_time = 0;  
-  gd.epoch_start = 0;      
-  gd.epoch_end  = 0;       
-  gd.model_run_time = 0;  
-  gd.data_request_time = 0; 
-
-  gd.projection_type = NULL;
-  MEM_zero(gd.proj_param);
-  
-  gd.demo_time = NULL;
-
-  gd.orig_wd = NULL;           
-  gd.frame_label = NULL;          
-  gd.app_name = NULL;          
-  gd.app_instance = NULL;      
-
-  MEM_zero(gd.data_info);
-
-  gd.num_fonts = 0;
-  MEM_zero(gd.ciddfont);
-  MEM_zero(gd.fontst);
-    
-  MEM_zero(gd.prod);
-  gd.prod_mgr = NULL;
-  
-  MEM_zero(gd.mread);
-  MEM_zero(gd.legends);
-
-  MEM_zero(gd.movie);
-  MEM_zero(gd.io_info);
-  
-  gd.r_context = NULL;    
-  gd.station_loc = NULL;    
-  gd.remote_ui = NULL;   
-  // gd.bookmark = NULL;
-  
-  gd.coord_key = 0;
-  gd.coord_expt = NULL;
-
-  gd.h_copy_flag = 0;
-  gd.v_copy_flag = 0;
-
-}
-
 /*****************************************************************
  * Initialize the data variables
  */
@@ -312,8 +192,8 @@ int Lucid::_initDataSpace()
   UTIMstruct temp_utime;
   
   if(!gd.quiet_mode) {
-    fprintf(stderr,"Lucid: Version %s\n", LUCID_VERSION);
-    fprintf(stderr,"Copyright: %s\n\n", LUCID_COPYRIGHT);
+    fprintf(stderr,"Lucid: Version %s\n", Constants::LUCID_VERSION);
+    fprintf(stderr,"Copyright: %s\n\n", Constants::LUCID_COPYRIGHT);
   }
 
   // debugging level
@@ -606,8 +486,8 @@ int Lucid::_initDataSpace()
   // movies
 
   int pid = getpid();
-  for(int ii = 0; ii < MAX_FRAMES; ii++) {
-    snprintf(gd.movie.frame[ii].fname, NAME_LENGTH - 1,
+  for(int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
+    snprintf(gd.movie.frame[ii].fname, Constants::NAME_LENGTH - 1,
              "%s/cidd_im%d_%d.",
              _params.image_dir, pid, ii);
     gd.movie.frame[ii].h_pdev = 0;
