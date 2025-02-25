@@ -39,6 +39,7 @@
 #include "Lucid.hh"
 #include "GuiManager.hh"
 #include "LegacyParams.hh"
+#include "MdvReader.hh"
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
 #include <toolsa/utim.h>
@@ -47,6 +48,7 @@
 #include <toolsa/TaStr.hh>
 #include <shapelib/shapefil.h>
 #include <qtplot/ColorMap.hh>
+#include <Fmq/RemoteUIQueue.hh>
 
 #include <string>
 #include <iostream>
@@ -523,13 +525,7 @@ int Lucid::_initDataSpace()
 
   // climatology mode for movies
   
-  gd.movie.climo_mode = REGULAR_INTERVAL;
-  if(strncmp(_params.climo_mode, "daily", 5) == 0) {
-    gd.movie.climo_mode = DAILY_INTERVAL;
-  }
-  if(strncmp(_params.climo_mode, "yearly",6) == 0) {
-    gd.movie.climo_mode = YEARLY_INTERVAL;
-  }
+  gd.movie.climo_mode = (int) _params.climo_mode;
 
   // Use cosine correction for computing range in polar data
   // check if set by Args
@@ -711,15 +707,15 @@ int Lucid::_initDataSpace()
 
   /* Automatically define the Custom Zoom levels */
 
-  for(int ii = 0; ii <= NUM_CUSTOM_ZOOMS; ii++) {
+  for(int ii = 0; ii <= Constants::NUM_CUSTOM_ZOOMS; ii++) {
     gd.h_win.zmin_x[gd.h_win.num_zoom_levels] = gd.h_win.zmin_x[0] + 
-      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
+      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
     gd.h_win.zmax_x[gd.h_win.num_zoom_levels] = gd.h_win.zmax_x[0] - 
-      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
+      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
     gd.h_win.zmin_y[gd.h_win.num_zoom_levels] = gd.h_win.zmin_y[0] + 
-      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
+      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
     gd.h_win.zmax_y[gd.h_win.num_zoom_levels] = gd.h_win.zmax_y[0] - 
-      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - ii  + 2.0));
+      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
     gd.h_win.num_zoom_levels++;
   }
 
@@ -757,12 +753,12 @@ int Lucid::_initDataSpace()
 
   gd.layers.wind_vectors = _params.winds_on_at_startup;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
-  gd.layers.wind_mode = 0; // Legacy ON
+  gd.layers.wind_mode = WIND_MODE_ON;
   gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
   gd.layers.wind_scaler = _params.wind_scaler;
-  gd.legends.range = _params.range_rings;
-  int plot_azimuths = _params.azimuth_lines;
-  gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
+  // gd.legends.range = _params.range_rings;
+  // int plot_azimuths = _params.azimuth_lines;
+  // gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
 
   _initWinds();
 
@@ -2562,13 +2558,13 @@ int Lucid::_initZooms()
   gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
   
   gd.h_win.zmin_x =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
   gd.h_win.zmax_x =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
   gd.h_win.zmin_y =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
   gd.h_win.zmax_y =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
 
   if (gd.display_projection == Mdvx::PROJ_LATLON) {
     gd.h_win.min_x = max(_params.domain_limit_min_x, -360.0);

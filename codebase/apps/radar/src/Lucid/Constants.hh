@@ -51,6 +51,7 @@ public:
   static constexpr int NUM_GRID_LAYERS = 16;
   static constexpr int NUM_CONT_LAYERS = 16;
   static constexpr int NUM_PRODUCT_DETAIL_THRESHOLDS = 3;
+  static constexpr int NUM_CUSTOM_ZOOMS = 3;
   
   static constexpr int NAME_LENGTH = 256;
   static constexpr int LABEL_LENGTH = 256;

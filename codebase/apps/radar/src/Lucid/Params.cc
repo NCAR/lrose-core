@@ -1231,7 +1231,7 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("http_proxy_url");
-    tt->descr = tdrpStrDup("USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.");
+    tt->descr = tdrpStrDup("USE THIS TO CROSS A FIREWALL AT THE Client/Lucid End of the Chain.");
     tt->help = tdrpStrDup("# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n");
     tt->val_offset = (char *) &http_proxy_url - &_start_;
     tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
@@ -1243,7 +1243,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
-    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
+    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nLucid<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nLucid<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nLucid<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
     tt++;
     
     // Parameter 'locator_margin_km'
@@ -1858,15 +1858,25 @@ Params *Params::_instance = (Params *) NULL;
     tt++;
     
     // Parameter 'climo_mode'
-    // ctype is 'char*'
+    // ctype is '_climo_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
+    tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("climo_mode");
-    tt->descr = tdrpStrDup("Options are 'regular', 'daily' or 'yearly'");
-    tt->help = tdrpStrDup("Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. CIDD will recognize these special 'intervals' and will do the right thing.");
+    tt->descr = tdrpStrDup("Sets the interval over which the climatology is computed.");
+    tt->help = tdrpStrDup("Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. Lucid will recognize these special 'intervals' and will do the right thing.");
     tt->val_offset = (char *) &climo_mode - &_start_;
-    tt->single_val.s = tdrpStrDup("regular");
+    tt->enum_def.name = tdrpStrDup("climo_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLIMO_REGULAR_INTERVAL");
+      tt->enum_def.fields[0].val = CLIMO_REGULAR_INTERVAL;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLIMO_DAILY_INTERVAL");
+      tt->enum_def.fields[1].val = CLIMO_DAILY_INTERVAL;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLIMO_YEARLY_INTERVAL");
+      tt->enum_def.fields[2].val = CLIMO_YEARLY_INTERVAL;
+    tt->single_val.e = CLIMO_REGULAR_INTERVAL;
     tt++;
     
     // Parameter 'climo_max_time_span_days'
@@ -2040,7 +2050,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("Zoom domain limits.");
-    tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
+    tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: Lucid does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
     tt++;
     
     // Parameter 'domain_limit_min_x'
@@ -2139,7 +2149,7 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rotate_coarse_adjust");
-    tt->descr = tdrpStrDup("CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).");
+    tt->descr = tdrpStrDup("Lucid uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).");
     tt->help = tdrpStrDup("7-9 is coarse, 4-6 is medium, and 1-3 is fine.");
     tt->val_offset = (char *) &rotate_coarse_adjust - &_start_;
     tt->single_val.d = 6;
@@ -2187,8 +2197,8 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("close_popups");
-    tt->descr = tdrpStrDup("Close CIDD's pop ups When the main window is closed.");
-    tt->help = tdrpStrDup("Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops");
+    tt->descr = tdrpStrDup("Close Lucid's pop ups When the main window is closed.");
+    tt->help = tdrpStrDup("Set this to FALSE if you don't want Lucid to close its pop ups when switching between virtual desktops");
     tt->val_offset = (char *) &close_popups - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4027,7 +4037,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("clip_overlay_fields");
     tt->descr = tdrpStrDup("The default behavior is to render the overlay fields using the same render method as the primary field.");
-    tt->help = tdrpStrDup("CIDD can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.");
+    tt->help = tdrpStrDup("Lucid can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.");
     tt->val_offset = (char *) &clip_overlay_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4302,7 +4312,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
-    tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
+    tt->comment_text = tdrpStrDup("Lucid can cooperate with a secondary app, receiving click details via shared memo");
     tt++;
     
     // Parameter 'mark_latest_click_location'
@@ -4781,7 +4791,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("landuse_colorscale");
     tt->descr = tdrpStrDup("Color lookup table for Land use");
-    tt->help = tdrpStrDup("Land Use colorscale file name\n Note: CIDD looks in the colorscale dir, then in the current dir for this file");
+    tt->help = tdrpStrDup("Land Use colorscale file name\n Note: Lucid looks in the colorscale dir, then in the current dir for this file");
     tt->val_offset = (char *) &landuse_colorscale - &_start_;
     tt->single_val.s = tdrpStrDup("terrain.colors");
     tt++;
@@ -5504,7 +5514,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("image_generate_vsection");
     tt->descr = tdrpStrDup("Generate images for specified vertical sections.");
-    tt->help = tdrpStrDup("If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.");
+    tt->help = tdrpStrDup("If TRUE, and Lucid is in html_mode, it will generate vertical section images in addition to the normal plan view images.");
     tt->val_offset = (char *) &image_generate_vsection - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -5567,7 +5577,7 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 48");
-    tt->comment_hdr = tdrpStrDup("Orig CIDD image generation");
+    tt->comment_hdr = tdrpStrDup("Orig Lucid image generation");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -5920,7 +5930,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("series_convert_script");
     tt->descr = tdrpStrDup("When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.");
-    tt->help = tdrpStrDup("The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.");
+    tt->help = tdrpStrDup("The arguments will be a list of each output file in the series. Lucid will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.");
     tt->val_offset = (char *) &series_convert_script - &_start_;
     tt->single_val.s = tdrpStrDup("make_anim.csh");
     tt++;
@@ -6421,7 +6431,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Main command to run to get help.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &help_command - &_start_;
-    tt->single_val.s = tdrpStrDup("chrome http://front.eol.ucar.edu/displayParams/CIDD'");
+    tt->single_val.s = tdrpStrDup("chrome http://front.eol.ucar.edu/displayParams/Lucid'");
     tt++;
     
     // Parameter 'canvas_help'

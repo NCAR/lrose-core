@@ -46,6 +46,32 @@ class StationLoc;
 class RemoteUIQueue;
 
 /////////////////////////////////////////////////////////////////
+// enums
+
+typedef enum ops_mode_t {
+  REALTIME_MODE = 0,
+  ARCHIVE_MODE = 1
+} ops_mode_t;
+
+typedef enum wind_mode_t {
+  WIND_MODE_ON = 0,     /* Wind vectors on in each frame */
+  WIND_MODE_LAST = 1,   /* Wind vectors on only in the last frame */
+  WIND_MODE_STILL =  2  /* Wind vectors on only in the last framef movie is off */
+} wind_mode_t;
+
+typedef enum wind_marker_t {
+  ARROWS = 1,           // Centered Arrow
+  TUFT = 2,             // Trailing Tuft
+  BARB = 3,             // Simple Wind Barb - N Hemisphere
+  VECTOR = 4,           // Arrow with base at data point
+  TICKVECTOR = 5,       // Arrow with base at data point with time ticks
+  LABELEDBARB = 6,      // Labeled Wind Barb N. Hemisphere 
+  METBARB = 7,          // Barb labeled like upper air charts, hemisphere correct 
+  BARB_SH = 8,          // S. Hemisphere Simple Barb
+  LABELEDBARB_SH = 9    // S. Hemisphere Labeled Barb
+} wind_marker_;
+
+/////////////////////////////////////////////////////////////////
 // worker classes
 
 class Val_color_t {   /* data value to color mappings */
@@ -250,274 +276,8 @@ public:
   zoom_t *child;
 };
  
-class win_param_t { /* WINDOW Data - for each display window */
-
-public:
-  
-  win_param_t()
-  {
-    
-    ip = nullptr;
-    
-    active = 0;
-    page = 0;
-    prev_page = 0;
-    movie_page = 0;
-    min_height = 0;
-    min_width = 0;
-    zoom_level = 0;
-    prev_zoom_level = 0;
-    cur_cache_im = 0;
-    last_cache_im = 0;
-    num_zoom_levels = 0;
-    start_zoom_level = 0;
-    MEM_zero(redraw_flag);
-    selectionChanged = 0;
-    
-    legends_start_x = 0;
-    legends_start_y = 0;
-    legends_delta_y = 0;
-    
-    origin_lat = 0.0;
-    origin_lon = 0.0;
-    reset_click_lon = 0.0;
-    reset_click_lat = 0.0;
-    min_x = max_x = 0.0;
-    min_y = max_y = 0.0;
-    min_lat = max_lat = 0.0;
-    min_lon = max_lon = 0.0;
-    min_ht = max_ht = 0.0;
-    min_r = max_r = 0.0;
-    min_deg = max_deg = 0.0;
-    cmin_x = cmax_x = 0.0;
-    cmin_y = cmax_y = 0.0;
-    cur_ht = 0.0;
-    
-    zmin_x = zmax_x = nullptr;
-    zmin_y = zmax_y = nullptr;
-    zmin_ht = zmax_ht = 0.0;
-    
-    km_across_screen = 0.0;
-    
-    // MEM_zero(route);
-    
-    vis_pdev = nullptr;
-    can_pdev = nullptr;
-    tmp_pdev = nullptr;
-    MEM_zero(page_pdev);
-    
-    MEM_zero(title);
-    MEM_zero(image_dir);
-    MEM_zero(image_fname);
-    MEM_zero(image_command);
-    
-  }
-  
-  int *ip; /* instance pointer; hook to XView object structures*/
-  int active; /* set to 1 if window is currently active */
-  int page; /* Current page selected in the window */
-  int prev_page; /* The last page viewed */
-  int movie_page; /* The page currently viewed in movie loops */
-  int min_height; /* minimum height window is allowed to get to */
-  int min_width; /* minimum width window is allowed to get to */
-  int zoom_level; /* index to use for zoom boundary coords */
-  int prev_zoom_level; /* index to use for zoom boundary coords */
-  int cur_cache_im; /* index to current XID Cache */
-  int last_cache_im; /* index to last XID Cache */
-  int num_zoom_levels; /* number of stored zoom levels */
-  int start_zoom_level; /* The starting zoom level - for reset function */
-  int redraw_flag[Constants::MAX_DATA_FIELDS]; /* set to 1 when field needs re-rendered */
-  int selectionChanged;
-  
-  int legends_start_x; /* the X value for the first legend character */
-  int legends_start_y; /* the Y value for the first legend */
-  int legends_delta_y; /* the Y spacing between the legends */
-
-  double origin_lat; /* Latitude origin of the window's coord system */
-  double origin_lon; /* Longitude origin of the window's coord system */
-  double reset_click_lon; /* Latitude */
-  double reset_click_lat; /* Longitude */
-
-  double min_x,max_x; /* Km limits of full display area */
-  double min_y,max_y; /* Km limits of full display area */
-  double min_lat,max_lat; /* Globe limits of full display area */
-  double min_lon,max_lon; /* Globe limits of full display area */
-  double min_ht,max_ht; /* Km limits of full display area */
-  double min_r,max_r; /* Radial r limits of full display area */
-
-  double min_deg,max_deg;/* Radial deg limits of full display area */
-
-  double cmin_x,cmax_x; /* X limits of current display area */
-  double cmin_y,cmax_y; /* Y limits of current display area */
-  double cur_ht; /* Z Height of current display area */
-
-  double *zmin_x,*zmax_x; /* X limits of zoomed display area */
-  double *zmin_y,*zmax_y; /* Y limits of zoomed display area */
-  double zmin_ht,zmax_ht; /* Z limits of zoomed display area */
-
-  double km_across_screen; /* Approx. distance across the window (KM) */
-
-  // route_track_t route;
-
-  // Drawable vis_xid; /* X ID of Visible canvas */
-  // Drawable *can_xid; /* X ID of last stage canvases to draw products on top of */
-  // Drawable tmp_xid; /* X ID of area to drap fields that aren't updated */
-  // Drawable page_xid[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
-
-  QPaintDevice *vis_pdev; /* X ID of Visible canvas */
-  QPixmap **can_pdev; /* X ID of last stage canvases to draw products on top of */
-  QPixmap *tmp_pdev; /* X ID of area to draw fields that aren't updated */
-  QPixmap *page_pdev[Constants::MAX_DATA_FIELDS]; /* draw Pixmap for each field */
-
-  draw_dim_t win_dim; /* Window dimensions and position */
-  draw_dim_t can_dim; /* Canvas dimensions and position */
-  draw_dim_t img_dim; /* Image Pixmaps dimensions and positions */
-  margin_t margin; /* Canvas Margin dimensions */
-
-  char title[Constants::MAX_TITLE];
-  char image_dir[Constants::MAX_PATH];
-  char image_fname[Constants::MAX_PATH];
-  char image_command[Constants::MAX_PATH];
-	 
-};
-
-class prod_detail_thresh_t
-{
-public:
-  prod_detail_thresh_t() {
-    threshold = 0.0;
-    adjustment = 0;
-  }
-  double threshold;
-  int adjustment;
-};
-
-class prod_info_t
-{
-public:
-  prod_info_t() {
-    products_on = 0;
-    prod_line_width = 0;
-    prod_font_num = 0;    
-    MEM_zero(detail);
-  }
-  int products_on;     /* Flag to turn products on/off globally */
-  int prod_line_width; /* How wide to make the lines */
-  int prod_font_num;    
-  prod_detail_thresh_t detail[Constants::NUM_PRODUCT_DETAIL_THRESHOLDS];
-};
-
-////////////////////////////////////////////////////////////////
-// movie loops
-
-class movie_frame_t
-{
-public:
-  movie_frame_t() {
-    h_pdev = nullptr;
-    v_pdev = nullptr;
-    time_start = 0;
-    time_end = 0;
-    time_mid = 0;
-    redraw_horiz = 0;
-    redraw_vert = 0;
-    MEM_zero(fname);
-    MEM_zero(vfname);
-  }
-  QPixmap *h_pdev;       /* A memory pixmap for movie frames */
-  QPixmap *v_pdev;       /* A memory pixmap for movie frames */
-  time_t time_start;  /* Time at starting point of image */
-  time_t time_end;    /* Time at ending point of image */
-  time_t time_mid;    /* Time at mid point of image */
-  int    redraw_horiz;       /* 1 = rerender */
-  int    redraw_vert;        /* 1 = rerender */
-  char   fname[Constants::NAME_LENGTH];   /* file name for this image */
-  char   vfname[Constants::NAME_LENGTH];  /* file name for this image */
-};
-     
-
-class movie_control_t
-{
-
-public:
-
-  movie_control_t() {
-    active = 0;
-    mode = 0;
-    magnify_mode = 0;
-    sweep_on = 0;
-    sweep_dir = 0;
-    display_time_msec = 0;
-    num_frames = 0;
-    start_frame = 0;
-    end_frame = 0;
-    cur_frame = 0;
-    last_frame = 0;
-    movie_on = 0;
-    delay = 0;
-    round_to_seconds = 0;
-    magnify_factor = 0.0;
-    time_interval_mins = 0.0;
-    mr_stretch_factor = 0.0;
-    start_time = 0;
-    demo_time = 0;
-    demo_mode = 0;
-    reset_frames = 0;
-    climo_mode = 0;
-    forecast_interval = 0.0;
-    past_interval = 0.0;
-    frame_span = 0.0;
-  }
-
-  int    active;                /*  Set to 1 when movie panel is open */
-  int    mode;                /* 0= realtime mode, 1= archive mode, 2 = elevation movie */
-  int    magnify_mode;         /* 1 = Magnify mode  turned on - When setting forecast mode. */
-  int    sweep_on;             /*  1 = Sweep instead of loop */
-  int    sweep_dir;            /*  Either +1 (forward)  or -1 (backward) */
-  int    display_time_msec;    /* TIme each movie frame should be displayed - msecs */
-  int    num_frames;            /* Total number of frames in loop */
-  int    start_frame;        /* The frame to start with */
-  int    end_frame;            /* The frame to end with */
-  int    cur_frame;            /* the currently visible frame number */
-  int    last_frame;            /* The last frame visible */
-  int    movie_on;           /* 0 = off, Other: movie is on */
-  int    delay;                /* Number of frame ticks to delay at end of loop */
-  int    round_to_seconds;    /* The number of seconds to round data times to */
-  int demo_mode;                  /* Starts up in demo mode */
-  int reset_frames;       /* Reset valid flags on frames when frame index updates */
-  int climo_mode;         /* Climotology mode - restricts the time span of data requests. */
-  double    magnify_factor;   /* Amount to magnify time scales when switching into forecast mode */
-  double    time_interval_mins;   /* in minutes */
-  double    mr_stretch_factor;    /* Factor to mult time_interval by for most recent data */
-  double forecast_interval; /* Interval to display menu options into the future in hours */
-  double past_interval;     /* Interval to display menu options into the past in hours */
-  double    frame_span;     /* minutes spanning one movie frame - Used for climo mode  */
-  time_t    start_time;           /* Time of the first frame */
-  time_t    demo_time;            /* First frame in demo mode */
-  movie_frame_t    frame[Constants::MAX_FRAMES];    /* info about each frame */
-
-};
-
 ///////////////////////////////////////////////////////////////
 // Wind Vectors
-
-typedef enum wind_mode_t {
-  WIND_MODE_ON = 0,     /* Wind vectors on in each frame */
-  WIND_MODE_LAST = 1,   /* Wind vectors on only in the last frame */
-  WIND_MODE_STILL =  2  /* Wind vectors on only in the last framef movie is off */
-} wind_mode_t;
-
-typedef enum wind_marker_t {
-  ARROWS = 1,           // Centered Arrow
-  TUFT = 2,             // Trailing Tuft
-  BARB = 3,             // Simple Wind Barb - N Hemisphere
-  VECTOR = 4,           // Arrow with base at data point
-  TICKVECTOR = 5,       // Arrow with base at data point with time ticks
-  LABELEDBARB = 6,      // Labeled Wind Barb N. Hemisphere 
-  METBARB = 7,          // Barb labeled like upper air charts, hemisphere correct 
-  BARB_SH = 8,          // S. Hemisphere Simple Barb
-  LABELEDBARB_SH = 9    // S. Hemisphere Labeled Barb
-} wind_marker_;
 
 class wind_data_t {
 
@@ -627,6 +387,32 @@ public:
   MdvReader *v_wind;
 }; 
 
+class prod_detail_thresh_t
+{
+public:
+  prod_detail_thresh_t() {
+    threshold = 0.0;
+    adjustment = 0;
+  }
+  double threshold;
+  int adjustment;
+};
+
+class prod_info_t
+{
+public:
+  prod_info_t() {
+    products_on = 0;
+    prod_line_width = 0;
+    prod_font_num = 0;    
+    MEM_zero(detail);
+  }
+  int products_on;     /* Flag to turn products on/off globally */
+  int prod_line_width; /* How wide to make the lines */
+  int prod_font_num;    
+  prod_detail_thresh_t detail[Constants::NUM_PRODUCT_DETAIL_THRESHOLDS];
+};
+
 class layers_t {
 
 public:
@@ -707,6 +493,230 @@ public:
   
   double special_contour_value;      // which value to draw wider 
   
+};
+
+// window data - for each display mode, horiz and vcert
+
+class win_param_t {
+
+public:
+  
+  win_param_t()
+  {
+    
+    ip = nullptr;
+    
+    active = 0;
+    page = 0;
+    prev_page = 0;
+    movie_page = 0;
+    min_height = 0;
+    min_width = 0;
+    zoom_level = 0;
+    prev_zoom_level = 0;
+    cur_cache_im = 0;
+    last_cache_im = 0;
+    num_zoom_levels = 0;
+    start_zoom_level = 0;
+    MEM_zero(redraw_flag);
+    selectionChanged = 0;
+    
+    legends_start_x = 0;
+    legends_start_y = 0;
+    legends_delta_y = 0;
+    
+    origin_lat = 0.0;
+    origin_lon = 0.0;
+    reset_click_lon = 0.0;
+    reset_click_lat = 0.0;
+    min_x = max_x = 0.0;
+    min_y = max_y = 0.0;
+    min_lat = max_lat = 0.0;
+    min_lon = max_lon = 0.0;
+    min_ht = max_ht = 0.0;
+    min_r = max_r = 0.0;
+    min_deg = max_deg = 0.0;
+    cmin_x = cmax_x = 0.0;
+    cmin_y = cmax_y = 0.0;
+    cur_ht = 0.0;
+    
+    zmin_x = zmax_x = nullptr;
+    zmin_y = zmax_y = nullptr;
+    zmin_ht = zmax_ht = 0.0;
+    
+    km_across_screen = 0.0;
+    
+    // MEM_zero(route);
+    
+    vis_pdev = nullptr;
+    can_pdev = nullptr;
+    tmp_pdev = nullptr;
+    MEM_zero(page_pdev);
+    
+    MEM_zero(title);
+    MEM_zero(image_dir);
+    MEM_zero(image_fname);
+    MEM_zero(image_command);
+    
+  }
+  
+  int *ip; /* instance pointer; hook to XView object structures*/
+  int active; /* set to 1 if window is currently active */
+  int page; /* Current page selected in the window */
+  int prev_page; /* The last page viewed */
+  int movie_page; /* The page currently viewed in movie loops */
+  int min_height; /* minimum height window is allowed to get to */
+  int min_width; /* minimum width window is allowed to get to */
+  int zoom_level; /* index to use for zoom boundary coords */
+  int prev_zoom_level; /* index to use for zoom boundary coords */
+  int cur_cache_im; /* index to current XID Cache */
+  int last_cache_im; /* index to last XID Cache */
+  int num_zoom_levels; /* number of stored zoom levels */
+  int start_zoom_level; /* The starting zoom level - for reset function */
+  int redraw_flag[Constants::MAX_DATA_FIELDS]; /* set to 1 when field needs re-rendered */
+  int selectionChanged;
+  
+  int legends_start_x; /* the X value for the first legend character */
+  int legends_start_y; /* the Y value for the first legend */
+  int legends_delta_y; /* the Y spacing between the legends */
+
+  double origin_lat; /* Latitude origin of the window's coord system */
+  double origin_lon; /* Longitude origin of the window's coord system */
+  double reset_click_lon; /* Latitude */
+  double reset_click_lat; /* Longitude */
+
+  double min_x,max_x; /* Km limits of full display area */
+  double min_y,max_y; /* Km limits of full display area */
+  double min_lat,max_lat; /* Globe limits of full display area */
+  double min_lon,max_lon; /* Globe limits of full display area */
+  double min_ht,max_ht; /* Km limits of full display area */
+  double min_r,max_r; /* Radial r limits of full display area */
+
+  double min_deg,max_deg;/* Radial deg limits of full display area */
+
+  double cmin_x,cmax_x; /* X limits of current display area */
+  double cmin_y,cmax_y; /* Y limits of current display area */
+  double cur_ht; /* Z Height of current display area */
+
+  double *zmin_x,*zmax_x; /* X limits of zoomed display area */
+  double *zmin_y,*zmax_y; /* Y limits of zoomed display area */
+  double zmin_ht,zmax_ht; /* Z limits of zoomed display area */
+
+  double km_across_screen; /* Approx. distance across the window (KM) */
+
+  route_track_t route;
+
+  // Drawable vis_xid; /* X ID of Visible canvas */
+  // Drawable *can_xid; /* X ID of last stage canvases to draw products on top of */
+  // Drawable tmp_xid; /* X ID of area to drap fields that aren't updated */
+  // Drawable page_xid[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
+
+  QPaintDevice *vis_pdev; /* X ID of Visible canvas */
+  QPixmap **can_pdev; /* X ID of last stage canvases to draw products on top of */
+  QPixmap *tmp_pdev; /* X ID of area to draw fields that aren't updated */
+  QPixmap *page_pdev[Constants::MAX_DATA_FIELDS]; /* draw Pixmap for each field */
+
+  draw_dim_t win_dim; /* Window dimensions and position */
+  draw_dim_t can_dim; /* Canvas dimensions and position */
+  draw_dim_t img_dim; /* Image Pixmaps dimensions and positions */
+  margin_t margin; /* Canvas Margin dimensions */
+
+  char title[Constants::MAX_TITLE];
+  char image_dir[Constants::MAX_PATH];
+  char image_fname[Constants::MAX_PATH];
+  char image_command[Constants::MAX_PATH];
+	 
+};
+
+////////////////////////////////////////////////////////////////
+// movie loops
+
+class movie_frame_t
+{
+public:
+  movie_frame_t() {
+    h_pdev = nullptr;
+    v_pdev = nullptr;
+    time_start = 0;
+    time_end = 0;
+    time_mid = 0;
+    redraw_horiz = 0;
+    redraw_vert = 0;
+    MEM_zero(fname);
+    MEM_zero(vfname);
+  }
+  QPixmap *h_pdev;       /* A memory pixmap for movie frames */
+  QPixmap *v_pdev;       /* A memory pixmap for movie frames */
+  time_t time_start;  /* Time at starting point of image */
+  time_t time_end;    /* Time at ending point of image */
+  time_t time_mid;    /* Time at mid point of image */
+  int    redraw_horiz;       /* 1 = rerender */
+  int    redraw_vert;        /* 1 = rerender */
+  char   fname[Constants::NAME_LENGTH];   /* file name for this image */
+  char   vfname[Constants::NAME_LENGTH];  /* file name for this image */
+};
+     
+
+class movie_control_t
+{
+
+public:
+
+  movie_control_t() {
+    active = 0;
+    mode = 0;
+    magnify_mode = 0;
+    sweep_on = 0;
+    sweep_dir = 0;
+    display_time_msec = 0;
+    num_frames = 0;
+    start_frame = 0;
+    end_frame = 0;
+    cur_frame = 0;
+    last_frame = 0;
+    movie_on = 0;
+    delay = 0;
+    round_to_seconds = 0;
+    magnify_factor = 0.0;
+    time_interval_mins = 0.0;
+    mr_stretch_factor = 0.0;
+    start_time = 0;
+    demo_time = 0;
+    demo_mode = 0;
+    reset_frames = 0;
+    climo_mode = 0;
+    forecast_interval = 0.0;
+    past_interval = 0.0;
+    frame_span = 0.0;
+  }
+
+  int active; /* Set to 1 when movie panel is open */
+  int mode; /* 0= realtime mode, 1= archive mode, 2 = elevation movie */
+  int magnify_mode; /* 1 = Magnify mode  turned on - When setting forecast mode. */
+  int sweep_on; /*  1 = Sweep instead of loop */
+  int sweep_dir; /*  Either +1 (forward)  or -1 (backward) */
+  int display_time_msec; /* TIme each movie frame should be displayed - msecs */
+  int num_frames; /* Total number of frames in loop */
+  int start_frame; /* The frame to start with */
+  int end_frame; /* The frame to end with */
+  int cur_frame; /* the currently visible frame number */
+  int last_frame; /* The last frame visible */
+  int movie_on; /* 0 = off, Other: movie is on */
+  int delay; /* Number of frame ticks to delay at end of loop */
+  int round_to_seconds; /* The number of seconds to round data times to */
+  int demo_mode; /* Starts up in demo mode */
+  int reset_frames; /* Reset valid flags on frames when frame index updates */
+  int climo_mode; /* Climotology mode - restricts the time span of data requests. */
+  double magnify_factor; /* Amount to magnify time scales when switching into forecast mode */
+  double time_interval_mins; /* in minutes */
+  double mr_stretch_factor; /* Factor to mult time_interval by for most recent data */
+  double forecast_interval; /* Interval to display menu options into the future in hours */
+  double past_interval; /* Interval to display menu options into the past in hours */
+  double frame_span; /* minutes spanning one movie frame - Used for climo mode  */
+  time_t start_time; /* Time of the first frame */
+  time_t demo_time; /* First frame in demo mode */
+  movie_frame_t frame[Constants::MAX_FRAMES]; /* info about each frame */
+
 };
 
 ///////////////////////////////////////////////////////////////////////

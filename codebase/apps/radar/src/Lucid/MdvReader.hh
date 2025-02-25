@@ -44,9 +44,9 @@
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
 
-#include "cidd_macros.h"
-#include "cidd_structs.h"
-#include "cidd_colorscales.h"
+// #include "cidd_macros.h"
+// #include "cidd_structs.h"
+// #include "cidd_colorscales.h"
 #include "LatLonBox.hh"
 #include "WayPts.hh"
 
@@ -131,7 +131,7 @@ public:
   double detail_thresh_min; /* Grids are visible when distance (km) across */
   double detail_thresh_max; /* across the screen is between min and max */
   
-  vert_spacing_t vert[MAX_SECTS]; // Holds min,cent and max for each plane.
+  vert_spacing_t vert[Constants::MAX_SECTS]; // Holds min,cent and max for each plane.
 
   double ht_pixel; // Slope of function between elevation height and screen Y
   double y_intercept; // Intercept of function between elevation and screen Y
@@ -165,12 +165,12 @@ public:
   double time_allowance; /* Valid while less than this number of minutes out of date */
   // double time_offset; /* Offsets data requests by this amount - minutes*/
   
-  char units_label_cols[LABEL_LENGTH]; /* units of columns- "km", etc */
-  char units_label_rows[LABEL_LENGTH]; /* units of rows- "km", etc */
-  char units_label_sects[LABEL_LENGTH];/* units of sections- "mbar", etc */
-  char vunits_label_cols[LABEL_LENGTH];/* units of vert columns- "km", etc */
-  char vunits_label_rows[LABEL_LENGTH];/* units of vert rows- "km", etc */
-  char vunits_label_sects[LABEL_LENGTH];/* units of vert sections- "mbar", etc */
+  char units_label_cols[Constants::LABEL_LENGTH]; /* units of columns- "km", etc */
+  char units_label_rows[Constants::LABEL_LENGTH]; /* units of rows- "km", etc */
+  char units_label_sects[Constants::LABEL_LENGTH];/* units of sections- "mbar", etc */
+  char vunits_label_cols[Constants::LABEL_LENGTH];/* units of vert columns- "km", etc */
+  char vunits_label_rows[Constants::LABEL_LENGTH];/* units of vert rows- "km", etc */
+  char vunits_label_sects[Constants::LABEL_LENGTH];/* units of vert sections- "mbar", etc */
 
   string field_units; /* Units label of the data */
   string button_name; /* Field name for buttons, label, - "dbZ" etc - From Config file */

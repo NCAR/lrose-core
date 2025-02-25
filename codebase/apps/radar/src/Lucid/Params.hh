@@ -110,6 +110,12 @@ public:
   } projection_t;
 
   typedef enum {
+    CLIMO_REGULAR_INTERVAL = 0,
+    CLIMO_DAILY_INTERVAL = 1,
+    CLIMO_YEARLY_INTERVAL = 2
+  } climo_mode_t;
+
+  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -723,7 +729,7 @@ public:
 
   char* moviestart_time_format;
 
-  char* climo_mode;
+  climo_mode_t climo_mode;
 
   int climo_max_time_span_days;
 

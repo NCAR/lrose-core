@@ -1067,9 +1067,16 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "frame_interval_secs = %g;\n", frameIntervalMins * 60.0);
   
   _getLong("cidd.temporal_rounding", 300);
-  _getString("cidd.climo_mode", "regular");
+  string climoStr = _getString("cidd.climo_mode", "regular", false);
+  if (climoStr.find("regular") != string::npos) {
+    fprintf(_tdrpFile, "climo_mode = CLIMO_REGULAR_INTERVAL\n");
+  } else if (climoStr.find("daily") != string::npos) {
+    fprintf(_tdrpFile, "climo_mode = CLIMO_DAILY_INTERVAL\n");
+  } else if (climoStr.find("yearly") != string::npos) {
+    fprintf(_tdrpFile, "climo_mode = CLIMO_YEARLY_INTERVAL\n");
+  }
   _getBoolean("cidd.use_local_timestamps", 0);
-  
+
   /* movies */
   _getLong("cidd.max_time_list_span", 365, true, "climo_max_time_span_days");
   _getDouble("cidd.frame_span", 10.0, true, "climo_frame_span_mins");

@@ -135,7 +135,8 @@ commentdef {
 }
 
 typedef enum {
-  MODE_ARCHIVE, MODE_REALTIME
+  MODE_REALTIME = 0,
+  MODE_ARCHIVE = 1
 } mode_t;
 
 paramdef enum mode_t {
@@ -377,13 +378,13 @@ paramdef string {
 
 paramdef string {
   p_default = "http://webcache.ucar.edu:3128/";
-  p_descr = "USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.";
+  p_descr = "USE THIS TO CROSS A FIREWALL AT THE Client/Lucid End of the Chain.";
   p_help = "# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n";
 } http_proxy_url;
 
 commentdef {
   p_header = "Another view of the possible Service Topologies.";
-  p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
+  p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nLucid<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nLucid<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nLucid<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
 }
 
 paramdef double {
@@ -710,10 +711,16 @@ paramdef string {
   p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
 } moviestart_time_format;
 
-paramdef string {
-  p_default = "regular";
-  p_descr = "Options are 'regular', 'daily' or 'yearly'";
-  p_help = "Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. CIDD will recognize these special 'intervals' and will do the right thing.";
+typedef enum {
+  CLIMO_REGULAR_INTERVAL = 0,
+  CLIMO_DAILY_INTERVAL  = 1,
+  CLIMO_YEARLY_INTERVAL = 2
+} climo_mode_t;
+
+paramdef enum climo_mode_t {
+  p_default = CLIMO_REGULAR_INTERVAL;
+  p_descr = "Sets the interval over which the climatology is computed.";
+  p_help = "Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. Lucid will recognize these special 'intervals' and will do the right thing.";
 } climo_mode;
 
 paramdef int {
@@ -813,7 +820,7 @@ paramdef double {
 
 commentdef {
   p_header = "Zoom domain limits.";
-  p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
+  p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: Lucid does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
 }
 
 paramdef double {
@@ -865,7 +872,7 @@ paramdef boolean {
 
 paramdef double {
   p_default = 6;
-  p_descr = "CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
+  p_descr = "Lucid uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
   p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
 } rotate_coarse_adjust;
 
@@ -889,8 +896,8 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Close CIDD's pop ups When the main window is closed.";
-  p_help = "Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops";
+  p_descr = "Close Lucid's pop ups When the main window is closed.";
+  p_help = "Set this to FALSE if you don't want Lucid to close its pop ups when switching between virtual desktops";
 } close_popups;
 
 paramdef string {
@@ -1742,7 +1749,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "The default behavior is to render the overlay fields using the same render method as the primary field.";
-  p_help = "CIDD can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.";
+  p_help = "Lucid can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.";
 } clip_overlay_fields;
 
 paramdef string {
@@ -1903,7 +1910,7 @@ paramdef boolean {
 
 commentdef {
   p_header = "Marking click location from separate app.";
-  p_text = "CIDD can cooperate with a secondary app, receiving click details via shared memo";
+  p_text = "Lucid can cooperate with a secondary app, receiving click details via shared memo";
 }
 
 paramdef boolean {
@@ -2206,7 +2213,7 @@ paramdef string {
   p_default = "terrain.colors";
   p_descr = "Color lookup table for Land use";
   p_help = "Land Use colorscale file name\n"
-  " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
+  " Note: Lucid looks in the colorscale dir, then in the current dir for this file"; 
 } landuse_colorscale;
 
 typedef enum {
@@ -2410,7 +2417,7 @@ commentdef {
 
 /////////////////////////////////////////////////////////////////////////
 // This file contains the TDRP parameter definitions for handling some
-// of the CIDD image generation options.
+// of the Lucid image generation options.
 
 commentdef {
   p_header = "<IMAGE_GENERATION>";
@@ -2574,7 +2581,7 @@ paramdef enum image_debug_t {
 
 paramdef boolean { 
   p_descr = "Generate images for specified vertical sections.";
-  p_help = "If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
+  p_help = "If TRUE, and Lucid is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
   p_default = FALSE;
 } image_generate_vsection;
 
@@ -2616,7 +2623,7 @@ paramdef struct image_vsection_spec_t {
 } image_vsection_spec[];
 
 commentdef {
-  p_header = "Orig CIDD image generation";
+  p_header = "Orig Lucid image generation";
 }
 
 paramdef boolean {
@@ -2794,7 +2801,7 @@ paramdef string {
 paramdef string {
   p_default = "make_anim.csh";
   p_descr = "When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.";
-  p_help = "The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.";
+  p_help = "The arguments will be a list of each output file in the series. Lucid will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.";
 } series_convert_script;
 
 commentdef {
@@ -3089,7 +3096,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "chrome http://front.eol.ucar.edu/displayParams/CIDD'";
+  p_default = "chrome http://front.eol.ucar.edu/displayParams/Lucid'";
   p_descr = "Main command to run to get help.";
   p_help = "";
 } help_command;
