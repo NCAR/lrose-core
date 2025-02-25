@@ -33,8 +33,9 @@
 #include <QBrush>
 #include <qtplot/ColorMap.hh>
 
-#include "cidd_macros.h"    // defines etc
+// #include "cidd_macros.h"    // defines etc
 #include "cidd_structs.h"   // general class definitions 
+#include <Mdv/MdvxProj.hh>
 
 #ifdef JUNK
 

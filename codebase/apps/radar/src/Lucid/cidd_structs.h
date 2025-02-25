@@ -44,12 +44,11 @@ public:
   status_msg_t() {
     is_dynamic = 0;
     last_accessed = 0;
-    memset(stat_msg, 0, sizeof(stat_msg));
     status_fname = NULL;
   }
   int is_dynamic;
   time_t last_accessed;
-  char stat_msg[TITLE_LENGTH];
+  string stat_msg;
   const char *status_fname;
 };
 
