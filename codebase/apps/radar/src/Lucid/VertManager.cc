@@ -28,7 +28,7 @@
 
 #include "GuiManager.hh"
 #include "VertManager.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 using namespace std;
 

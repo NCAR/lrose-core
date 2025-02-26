@@ -89,7 +89,7 @@ public:
 protected:
 
   Params &_params;
-  GlobalData &gd;
+  GlobalData &_gd;
   
   Product &prod; 
 

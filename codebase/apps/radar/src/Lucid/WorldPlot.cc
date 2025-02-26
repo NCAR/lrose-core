@@ -45,7 +45,7 @@
 #include <toolsa/utim.h>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 using namespace std;
 

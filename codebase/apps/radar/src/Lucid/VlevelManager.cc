@@ -42,7 +42,7 @@ using namespace std;
 
 #include "VlevelManager.hh"
 #include "MdvReader.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 /////////////////////////////////////////////////////////////
 // Constructor

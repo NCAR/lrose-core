@@ -127,7 +127,7 @@ public:
 protected:
   
   Params &_params;
-  GlobalData &gd;
+  GlobalData &_gd;
   RenderContext &_context; // Drawing context for window 
   vector<Product *> _products;
   SymprodRenderObj *_active_Rob;

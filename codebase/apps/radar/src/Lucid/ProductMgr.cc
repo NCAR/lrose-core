@@ -44,7 +44,7 @@
 
 ProductMgr::ProductMgr(RenderContext &context, int debug) :
         _params(Params::Instance()),
-        gd(GlobalData::Instance()),
+        _gd(GlobalData::Instance()),
         _context(context)
           
 {
@@ -87,25 +87,25 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
 
   // set context times
 
-  gd.r_context->set_times((time_t) gd.epoch_start,
-  			  (time_t) gd.epoch_end,
-  			  (time_t) start_time,
-  			  (time_t) end_time,
-			  gd.mread[gd.h_win.page]->h_date.utime());
+  _gd.r_context->set_times((time_t) _gd.epoch_start,
+                           (time_t) _gd.epoch_end,
+                           (time_t) start_time,
+                           (time_t) end_time,
+                           _gd.mread[_gd.h_win.page]->h_date.utime());
 
   // get the data
   
   for (size_t i = 0; i < _products.size(); i++) {
     if(_products[i]->_data_valid == 0 && _products[i]->_active  ) {
 
-      // gd.io_info.prod = _products[i];
-      // gd.io_info.outstanding_request = 1; 
-      // gd.io_info.request_type = SYMPROD_REQUEST;
-      // gd.io_info.mode = SYMPROD_DATA;
-      // gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
-      // gd.io_info.last_read = 0;
+      // _gd.io_info.prod = _products[i];
+      // _gd.io_info.outstanding_request = 1; 
+      // _gd.io_info.request_type = SYMPROD_REQUEST;
+      // _gd.io_info.mode = SYMPROD_DATA;
+      // _gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
+      // _gd.io_info.last_read = 0;
 
-      if(gd.debug1) _products[i]->setThreadingOff();
+      if(_gd.debug1) _products[i]->setThreadingOff();
 
       char label[128];
       snprintf(label,128,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
@@ -165,9 +165,9 @@ void ProductMgr::pick_closest_obj(double lat, double lon)
 void ProductMgr::draw_pick_obj()
   
 {
-  _context.set_brush(gd.ol_brush);
-  _context.set_drawable(gd.hcan_pdev);
-  _context.set_xid(gd.hcan_pdev);
+  _context.set_brush(_gd.ol_brush);
+  _context.set_drawable(_gd.hcan_pdev);
+  _context.set_xid(_gd.hcan_pdev);
 
   if(_active_Rob != NULL) {
     _active_Rob->container->draw(_context);
@@ -175,9 +175,9 @@ void ProductMgr::draw_pick_obj()
     fprintf(stderr," NO Pickable product!\n");
   }
 
-  _context.set_brush(gd.def_brush);
-  _context.set_drawable(gd.h_win.vis_pdev);
-  _context.set_xid(gd.h_win.vis_pdev);
+  _context.set_brush(_gd.def_brush);
+  _context.set_drawable(_gd.h_win.vis_pdev);
+  _context.set_xid(_gd.h_win.vis_pdev);
 }
 
 //////////////////////////////////
@@ -187,9 +187,9 @@ void ProductMgr::draw_pick_obj()
 void ProductMgr::draw_pick_obj_plain()
   
 {
-  _context.set_brush(gd.def_brush);
-  _context.set_drawable(gd.hcan_pdev);
-  _context.set_xid(gd.hcan_pdev);
+  _context.set_brush(_gd.def_brush);
+  _context.set_drawable(_gd.hcan_pdev);
+  _context.set_xid(_gd.hcan_pdev);
   if(_active_Rob != NULL) {
     _active_Rob->container->draw(_context);
   }

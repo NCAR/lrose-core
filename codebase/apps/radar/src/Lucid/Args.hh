@@ -35,6 +35,7 @@
 #define ARGS_H
 
 #include "Params.hh"
+#include "GlobalData.hh"
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <string>
@@ -47,8 +48,7 @@ public:
 
   // constructor
 
-  Args (const string &prog_name,
-        Params &params);
+  Args (const string &prog_name);
 
   // destructor
 
@@ -91,8 +91,10 @@ protected:
   
 private:
 
-  string _progName;
   Params &_params;
+  GlobalData &_gd;
+
+  string _progName;
 
   bool _usingLegacyParams;
   string _legacyParamsPath;

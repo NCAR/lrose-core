@@ -112,7 +112,7 @@ public:
 protected:
   
   Params &_params;
-  GlobalData &gd;
+  GlobalData &_gd;
   bool _debug;
 
   DsSpdbThreaded _spdb;

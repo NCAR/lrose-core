@@ -36,7 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ProdMenuItem.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 // Constructor
 

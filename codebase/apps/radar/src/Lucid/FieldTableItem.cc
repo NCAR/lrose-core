@@ -36,7 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "FieldTableItem.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 // Constructor
 

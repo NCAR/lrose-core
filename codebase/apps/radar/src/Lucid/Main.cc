@@ -32,11 +32,12 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Lucid.hh"
-#include "cidd.h"
 #include <QApplication>
+#include <toolsa/port.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
 #include <QIcon>
+#include <csignal>
 
 // file scope
 
@@ -115,7 +116,6 @@ static void signal_trap(int signal)
 static void sigio_trap(int signal)
 {
   signal = 0;
-  // if(gd.io_info.outstanding_request) check_for_io();
 }
 
 /*****************************************************************

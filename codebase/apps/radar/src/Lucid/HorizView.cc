@@ -38,7 +38,7 @@
 #include <QPainterPath>
 #include <algorithm>
 
-// #include "cidd.h"
+// #include "GlobalData.hh"
 
 using namespace std;
 

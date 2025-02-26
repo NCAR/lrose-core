@@ -42,7 +42,7 @@
 #include <QVBoxLayout>
 #include "TimeControl.hh"
 #include "GuiManager.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 // initialize instance
 

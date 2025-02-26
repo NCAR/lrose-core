@@ -110,7 +110,7 @@ const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 
 SymprodRenderObj::SymprodRenderObj(SymprodRender *c) :
         _params(Params::Instance()),
-        gd(GlobalData::Instance())
+        _gd(GlobalData::Instance())
 {
 
   container = c;
@@ -306,7 +306,7 @@ double SymprodRenderText::dist(double lat, double lon)
 {
   double d = 999999.99; // A huge distance by default.
 
-  if (( gd.r_context == NULL ) || ( gd.r_context->frame.x == NULL )){
+  if (( _gd.r_context == NULL ) || ( _gd.r_context->frame.x == NULL )){
     // Just not ready yet - still in the rendering process. Niles Oien June 2010.
     return d;
   }
@@ -315,8 +315,8 @@ double SymprodRenderText::dist(double lat, double lon)
 
   double lat2,lon2,dx,dy;
 
-  dx = _props.offset.x / gd.r_context->frame.x->xscale;
-  dy = _props.offset.y / gd.r_context->frame.x->yscale;
+  dx = _props.offset.x / _gd.r_context->frame.x->xscale;
+  dy = _props.offset.y / _gd.r_context->frame.x->yscale;
 
   // Shift the point closer to the actual text location.
   PJGLatLonPlusDxDy(_props.origin.lat,_props.origin.lon,dx,dy,&lat2,&lon2);
@@ -542,7 +542,7 @@ void SymprodRenderPolyline::draw(RenderContext &context)
     }
     // Determine the screen coordinates
     context.proj.latlon2xy(points[index].lat,points[index].lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -766,7 +766,7 @@ void SymprodRenderIconline::draw(RenderContext &context)
 
     // Determine the screen coordinates
     context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -929,7 +929,7 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
 
     // Determine the screen coordinates
     context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -1105,7 +1105,7 @@ void SymprodRenderBitmapIcon::draw(RenderContext &context)
 
     // Determine the screen coordinates
     context.proj.latlon2xy(_iconOrigins[0].lat, _iconOrigins[0].lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -1265,7 +1265,7 @@ void SymprodRenderArc::draw(RenderContext &context)
 
     // Determine the screen coordinates
     context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -1381,7 +1381,7 @@ void SymprodRenderRectangle::draw(RenderContext &context)
 
     // Determine the screen coordinates
     context.proj.latlon2xy(_props.origin.lat, _props.origin.lon,km_x,km_y);
-    disp_proj_to_pixel(&(gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
+    disp_proj_to_pixel(&(_gd.h_win.margin),km_x,km_y,&pix_x,&pix_y);
 
     set_pick_box_xy(pix_x + context.offset_x,pix_y + context.offset_y, bpt);
 	
@@ -1767,11 +1767,11 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
     int shaft_len = (int) (_barbShaftLen * iconScale + 0.5);
     int line_width = 1;
 
-    //     if(gd.h_win.km_across_screen < 200.0) {
+    //     if(_gd.h_win.km_across_screen < 200.0) {
     //       shaft_len = (int)  _barbShaftLen * 1.5;
     //       line_width = 2;
     //     }
-    //     if(gd.h_win.km_across_screen < 50.0) {
+    //     if(_gd.h_win.km_across_screen < 50.0) {
     //       line_width = 3;
     //       shaft_len = (int) _barbShaftLen * 2.5;
     //     }

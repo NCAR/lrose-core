@@ -102,9 +102,9 @@
 #include "WindMenuItem.hh"
 #include "ZoomMenuItem.hh"
 
-// cidd.h must be included AFTER qt includes because of #define None in X11/X.h
+// GlobalData.hh must be included AFTER qt includes because of #define None in X11/X.h
 
-#include "cidd.h"
+#include "GlobalData.hh"
 
 using namespace std;
 using namespace H5x;

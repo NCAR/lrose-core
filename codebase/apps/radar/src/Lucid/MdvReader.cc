@@ -42,7 +42,7 @@
 #include <QMutexLocker>
 
 #include <qtplot/ColorMap.hh>
-#include "cidd.h"
+#include "GlobalData.hh"
 
 ///////////////////////////////////////////////
 // constructor

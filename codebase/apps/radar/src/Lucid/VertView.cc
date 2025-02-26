@@ -50,7 +50,7 @@
 #include "GuiManager.hh"
 #include "VertView.hh"
 #include "VertManager.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 using namespace std;
 

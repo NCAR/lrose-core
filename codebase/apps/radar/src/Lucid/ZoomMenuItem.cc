@@ -37,7 +37,7 @@
 
 #include "ZoomMenuItem.hh"
 #include "GuiManager.hh"
-#include "cidd.h"
+#include "GlobalData.hh"
 
 // Constructor
 

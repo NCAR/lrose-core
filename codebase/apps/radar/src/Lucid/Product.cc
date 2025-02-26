@@ -44,7 +44,7 @@ Product::Product(int debug,
                  Params::symprod_prod_info_t &prodInfo) :
         _prodInfo(prodInfo),
         _params(Params::Instance()),
-        gd(GlobalData::Instance()),
+        _gd(GlobalData::Instance()),
         _debug(debug)
         
         
@@ -111,171 +111,171 @@ void Product::draw(RenderContext &context)
     if(props.start_time > props2.start_time) reverse_order = true;
 
     for (int i = 0; i < (int) _symprods.size(); i++) {
-	 if(reverse_order) {
-	     index = _symprods.size() -1 - i;
-	 } else {
-	     index = i;
-	 }
-	props = _symprods[index]->getProps();
+      if(reverse_order) {
+        index = _symprods.size() -1 - i;
+      } else {
+        index = i;
+      }
+      props = _symprods[index]->getProps();
 
-	 switch(_prodInfo.render_type) {
+      switch(_prodInfo.render_type) {
 
-	   case Params::SYMPROD_RENDER_ALL:
-	   case Params::SYMPROD_RENDER_GET_VALID:
-	   case Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:
-	   case Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:
-	       _symprods[index]->draw(context);  // Render the product
-	   break;
+        case Params::SYMPROD_RENDER_ALL:
+        case Params::SYMPROD_RENDER_GET_VALID:
+        case Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:
+        case Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:
+          _symprods[index]->draw(context);  // Render the product
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
-             if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
-	        props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
-	           _symprods[index]->draw(context);  // Render the product
+        case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
+          if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
+             props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
+            _symprods[index]->draw(context);  // Render the product
 
-	     }
-	   break;
+          }
+          break;
 
-	   case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
-             if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
-	        props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
-	        (_prodInfo.minutes_allow_before * 60)) {
+        case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
+          if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
+             props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
+             (_prodInfo.minutes_allow_before * 60)) {
 
-	           _symprods[index]->draw(context);  // Render the product
+            _symprods[index]->draw(context);  // Render the product
 
-	     }
-	   break;
+          }
+          break;
 
-	   case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j <  obj_list.size(); j++)  {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true;
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0; j <  obj_list.size(); j++)  {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true;
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
-	         props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j < obj_list.size() && !already_done; j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0; j < obj_list.size() && !already_done; j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
-	         props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0 ; j < obj_list.size(); j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0 ; j < obj_list.size(); j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
-		 props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j < obj_list.size(); j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	     }
+          // search through the object list 
+          for(size_t j = 0; j < obj_list.size(); j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
+        case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
 
-	      // If it's valid, render it.
-              if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
-		 props.start_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If it's valid, render it.
+          if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
+              props.start_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
+        case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
 
-	      // If it's valid, render it.
-              if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
+          // If it's valid, render it.
+          if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
 
-	          _symprods[index]->draw(context);  // Render the product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            _symprods[index]->draw(context);  // Render the product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	} 
+      } 
 
     } // foreach symprod object
 
     if(_times.size() > 0) {
-      //       if(gd.time_plot) gd.time_plot->add_prod_tlist(_prodInfo.menu_label,_times);
+      //       if(_gd.time_plot) _gd.time_plot->add_prod_tlist(_prodInfo.menu_label,_times);
     }
 
   } // If product is selected and its data is valid 
@@ -311,7 +311,7 @@ int Product::getData(const time_t data_start_time,
     cerr << "  URL: " << _prodInfo.url << endl;
   }
 
-  // gettimeofday(&gd.io_info.request_time,&tz);
+  // gettimeofday(&_gd.io_info.request_time,&tz);
 
   *spdbp_url = '\0'; // insure null termination
   *tmp_str = '\0';
@@ -333,8 +333,8 @@ int Product::getData(const time_t data_start_time,
 
   if (_active &&
       (!_times_valid ||
-       _prev_epoch_start != gd.epoch_start ||
-       _prev_epoch_end != gd.epoch_end)) {
+       _prev_epoch_start != _gd.epoch_start ||
+       _prev_epoch_end != _gd.epoch_end)) {
     
     // request the time list
     
@@ -345,8 +345,8 @@ int Product::getData(const time_t data_start_time,
     if (_debug) {
       cerr << "orig url: " << spdbp_url << endl;
       cerr << "times url: " << timesUrl.getURLStr() << endl;
-      cerr << "epoch_start: " << DateTime::str(gd.epoch_start) << endl;
-      cerr << "epoch_end: " << DateTime::str(gd.epoch_end) << endl;
+      cerr << "epoch_start: " << DateTime::str(_gd.epoch_start) << endl;
+      cerr << "epoch_end: " << DateTime::str(_gd.epoch_end) << endl;
       cerr << "_prev_epoch_start: "
 	   << DateTime::str(_prev_epoch_start) << endl;
       cerr << "_prev_epoch_end: "
@@ -355,25 +355,25 @@ int Product::getData(const time_t data_start_time,
     
     clearTimes();
     _timesNeedProcess = true;
-    // double pixelsPerSec = ( gd.time_plot) ? gd.time_plot->getPixelsPerSec() : 1.0 ;
+    // double pixelsPerSec = ( _gd.time_plot) ? _gd.time_plot->getPixelsPerSec() : 1.0 ;
     double pixelsPerSec = 1.0;
     int secsPerPixel = (int) (1.0 / pixelsPerSec);
-    int delta = gd.epoch_end - gd.epoch_start;
+    int delta = _gd.epoch_end - _gd.epoch_start;
     if (_spdbTimes.compileTimeList(timesUrl.getURLStr(),
-				   gd.epoch_start - delta,
-				   gd.epoch_end + delta,
+				   _gd.epoch_start - delta,
+				   _gd.epoch_end + delta,
 				   secsPerPixel)) {
       cerr << "ERROR - Product:" << _prodInfo.menu_label << endl;
       cerr << "  Cannot get times from" ;
       cerr << "  URL: " << _prodInfo.url << endl;
-      cerr << "  startTime: " << utimstr(gd.epoch_start);
-      cerr << "  endTime: " << utimstr(gd.epoch_end) << endl;
+      cerr << "  startTime: " << utimstr(_gd.epoch_start);
+      cerr << "  endTime: " << utimstr(_gd.epoch_end) << endl;
       cerr << _spdbTimes.getErrStr() << endl;
     }
     
     _times_valid = 1;
-    _prev_epoch_start = gd.epoch_start;
-    _prev_epoch_end = gd.epoch_end;
+    _prev_epoch_start = _gd.epoch_start;
+    _prev_epoch_end = _gd.epoch_end;
     
   }
   
@@ -389,12 +389,12 @@ int Product::getData(const time_t data_start_time,
   // Send the information about the current display limits, just in case
   // the server cares
 
-  int vlevel_num = gd.mread[gd.h_win.page]->plane;
+  int vlevel_num = _gd.mread[_gd.h_win.page]->plane;
     
   _spdb.setHorizLimits(context.min_lat, context.min_lon,
 		       context.max_lat, context.max_lon);
-  _spdb.setVertLimits(gd.mread[gd.h_win.page]->vert[vlevel_num].min,
-		      gd.mread[gd.h_win.page]->vert[vlevel_num].max);
+  _spdb.setVertLimits(_gd.mread[_gd.h_win.page]->vert[vlevel_num].min,
+		      _gd.mread[_gd.h_win.page]->vert[vlevel_num].max);
 
   int iret;
   if (_prodInfo.render_type == Params::SYMPROD_RENDER_GET_VALID) {
@@ -428,7 +428,7 @@ int Product::getData(const time_t data_start_time,
 
   } else if ( _params.symprod_short_requests && _prodInfo.render_type == Params::SYMPROD_RENDER_LATEST_IN_FRAME) {
 
-     _spdb.setUniqueLatest();
+    _spdb.setUniqueLatest();
     iret = _spdb.getInterval(spdbp_url,
 			     data_start_time, data_end_time,
 			     _prodInfo.data_type);
@@ -441,13 +441,13 @@ int Product::getData(const time_t data_start_time,
   if (iret) {
     cerr << "ERROR - Product:" << _prodInfo.menu_label << endl;
     cerr << "  Cannot get data from" ;
-      cerr << "  URL: " << _prodInfo.url << endl;
-      cerr << "  startTime: " << utimstr(data_start_time);
-      cerr << "  endTime: " << utimstr(data_end_time) << endl;
-      cerr << _spdb.getErrStr() << endl;
-      _data_valid = 1;
-      _last_collected = time(0);
-      return -1;
+    cerr << "  URL: " << _prodInfo.url << endl;
+    cerr << "  startTime: " << utimstr(data_start_time);
+    cerr << "  endTime: " << utimstr(data_end_time) << endl;
+    cerr << _spdb.getErrStr() << endl;
+    _data_valid = 1;
+    _last_collected = time(0);
+    return -1;
   }
   
   _data_valid = 1;
@@ -488,7 +488,7 @@ bool Product::processChunks()
 
   gettimeofday(&tm2,&tz);
 
-  // t3 = _elapsedTime(gd.io_info.request_time,tm2);
+  // t3 = _elapsedTime(_gd.io_info.request_time,tm2);
   
   snprintf(msg, 128,
            "                                  ->   %d Chunks retrieved\n",
@@ -544,7 +544,7 @@ bool Product::processTimeRefs()
   }
 
   _times = _spdbTimes.getTimeList();
-  // if(gd.time_plot) gd.time_plot->Draw(); 
+  // if(_gd.time_plot) _gd.time_plot->Draw(); 
 
   return true;
 
@@ -579,172 +579,172 @@ double Product::pick_closest_obj(double lat, double lon, RenderContext &context)
     if(props.start_time > props2.start_time) reverse_order = true;
 
     for (int i = _symprods.size() -1; i >= 0;  i--) {
-	 if(reverse_order) {
-	     index = _symprods.size() -1 - i;
-	 } else {
-	     index = i;
-	 }
-	props = _symprods[index]->getProps();
+      if(reverse_order) {
+        index = _symprods.size() -1 - i;
+      } else {
+        index = i;
+      }
+      props = _symprods[index]->getProps();
 
-	 switch(_prodInfo.render_type) {
+      switch(_prodInfo.render_type) {
 
-	   case Params::SYMPROD_RENDER_ALL:
-	   case Params::SYMPROD_RENDER_GET_VALID:
-	       dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-	   break;
+        case Params::SYMPROD_RENDER_ALL:
+        case Params::SYMPROD_RENDER_GET_VALID:
+          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
-             if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
-	        props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
-	           dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+        case Params::SYMPROD_RENDER_ALL_VALID: // Valid in the given time frame
+          if(props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
+             props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
+            dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
 
-	     }
-	   break;
+          }
+          break;
 
-	   case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
-             if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
-	        props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
-	        (_prodInfo.minutes_allow_before * 60)) {
+        case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
+          if(props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
+             props.expire_time >= context.epoch_end - (context.frame_end - context.frame_start) -
+             (_prodInfo.minutes_allow_before * 60)) {
 
-	           dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
 
-	     }
-	   break;
+          }
+          break;
 
-	   case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j <  obj_list.size(); j++)  {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true;
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0; j <  obj_list.size(); j++)  {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true;
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, check it .
-              if( !already_done && 
-		 props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
-	         props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, check it .
+          if( !already_done && 
+              props.start_time <= context.frame_end + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.frame_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            dist =_symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j < obj_list.size() && !already_done; j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0; j < obj_list.size() && !already_done; j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
-	         props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0 ; j < obj_list.size(); j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	      }
+          // search through the object list 
+          for(size_t j = 0 ; j < obj_list.size(); j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
-		 props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
+              props.expire_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
-	     already_done = false;
+        case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
+          already_done = false;
 
-	     // search through the object list 
-	     for(size_t j = 0; j < obj_list.size(); j++) {
-                 // prods with same start time are allowed
-	         if (obj_list[j].start_time == props.start_time) {
-	  	   continue;
-	         }
-		 // If the data type matches
-		 if(obj_list[j].data_type == props.data_type) {
-		   already_done = true; 
-		   break;
-		 }
-	     }
+          // search through the object list 
+          for(size_t j = 0; j < obj_list.size(); j++) {
+            // prods with same start time are allowed
+            if (obj_list[j].start_time == props.start_time) {
+              continue;
+            }
+            // If the data type matches
+            if(obj_list[j].data_type == props.data_type) {
+              already_done = true; 
+              break;
+            }
+          }
 
-	      // If its wasn't already in the list and its valid, render it.
-              if( !already_done && 
-		 props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
+          // If its wasn't already in the list and its valid, render it.
+          if( !already_done && 
+              props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
 
-	          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
+        case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
 
-	      // If it's valid, render it.
-              if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
-		 props.start_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
+          // If it's valid, render it.
+          if( props.start_time <= context.data_time + (_prodInfo.minutes_allow_after * 60) &&
+              props.start_time >= context.epoch_start - (_prodInfo.minutes_allow_before * 60)) {
 
-	          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-	     } 
-	   break;
+            dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+          } 
+          break;
 
-	   case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
+        case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
 
-	      // If it's valid, render it.
-              if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
-		 props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
+          // If it's valid, render it.
+          if( props.start_time >= context.data_time - (_prodInfo.minutes_allow_before * 60) &&
+              props.start_time <= context.epoch_end + (_prodInfo.minutes_allow_after * 60)) {
 
-	          dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
-		  obj_list.push_back(props); // add it to the list
-	     } 
-	   break;
+            dist = _symprods[index]->pick_closest_obj(lat,lon);  // Pick the closest product
+            obj_list.push_back(props); // add it to the list
+          } 
+          break;
 
-	 default: {}
+        default: {}
 
-	}  // Switch on product render type
+      }  // Switch on product render type
 
-	if(dist < min_dist) {
-			min_dist = dist;
-			closest_symprod_obj = _symprods[index]->get_closest_obj();
-	}
-   } // foreach symprod object
+      if(dist < min_dist) {
+        min_dist = dist;
+        closest_symprod_obj = _symprods[index]->get_closest_obj();
+      }
+    } // foreach symprod object
 
 
   } // If product is selected and its data is valid 

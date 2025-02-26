@@ -70,7 +70,7 @@ public:
 protected:
   
   Params &_params;
-  GlobalData &gd;
+  GlobalData &_gd;
   
   unsigned long _background_pixel;
   bool _background_pixel_init;

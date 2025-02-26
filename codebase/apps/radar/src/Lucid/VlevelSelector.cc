@@ -33,7 +33,7 @@
 #include <QPaintEvent>
 #include <iostream>
 #include <cmath>
-#include "cidd.h"
+#include "GlobalData.hh"
 using namespace std;
 
 VlevelSelector::VlevelSelector(int width,

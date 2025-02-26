@@ -81,7 +81,7 @@ private:
   // basic
   
   Params &_params;
-  GlobalData &gd;
+  GlobalData &_gd;
   string _progName;
   Args _args;
   Path _paramsPathRequested;
