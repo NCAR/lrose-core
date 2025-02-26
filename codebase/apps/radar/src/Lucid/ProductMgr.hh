@@ -34,6 +34,7 @@
 #define ProductMgr_HH
 
 #include "GlobalData.hh"
+#include "Params.hh"
 #include "Product.hh"
 #include <dsserver/DmapAccess.hh>
 
@@ -125,10 +126,10 @@ public:
 
 protected:
   
+  Params &_params;
+  GlobalData &gd;
   RenderContext &_context; // Drawing context for window 
-  
   vector<Product *> _products;
-  
   SymprodRenderObj *_active_Rob;
   
 private:

@@ -38,6 +38,7 @@
 
 SymprodRender::SymprodRender(Product &p) :
         Symprod(),
+        _params(Params::Instance()),
         gd(GlobalData::Instance()),
         prod(p)
 

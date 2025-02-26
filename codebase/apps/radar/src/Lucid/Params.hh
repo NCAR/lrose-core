@@ -75,8 +75,8 @@ public:
   } debug_t;
 
   typedef enum {
-    MODE_ARCHIVE = 0,
-    MODE_REALTIME = 1
+    MODE_REALTIME = 0,
+    MODE_ARCHIVE = 1
   } mode_t;
 
   typedef enum {
@@ -289,9 +289,13 @@ public:
 
   static Params *Inst();
 
+  // Get singleton instance reference
+
+  static Params &Instance();
+
 private:
 
-    // Singleton instance pointer is private
+    // Singleton instance is private
     static Params *_instance;
 
     // Constructor is private
@@ -1306,22 +1310,6 @@ public:
 
   char* route_v_url;
 
-  char* route_turb_url;
-
-  double route_turb_low_thresh;
-
-  double route_turb_mod_thresh;
-
-  double route_turb_high_thresh;
-
-  char* route_icing_url;
-
-  double route_icing_low_thresh;
-
-  double route_icing_mod_thresh;
-
-  double route_icing_high_thresh;
-
   char* *_route_paths;
   int route_paths_n;
 
@@ -1357,7 +1345,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[436];
+  mutable TDRPtable _table[428];
 
   const char *_className;
 

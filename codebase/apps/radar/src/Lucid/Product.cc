@@ -43,8 +43,8 @@
 Product::Product(int debug,
                  Params::symprod_prod_info_t &prodInfo) :
         _prodInfo(prodInfo),
+        _params(Params::Instance()),
         gd(GlobalData::Instance()),
-        _params(*Params::Inst()),
         _debug(debug)
         
         

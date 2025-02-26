@@ -111,21 +111,17 @@ public:
 
 protected:
   
-  GlobalData &gd;
-
   Params &_params;
-  
+  GlobalData &gd;
   bool _debug;
 
   DsSpdbThreaded _spdb;
+  DsSpdbThreaded _spdbTimes;
 
   vector<SymprodRender *> _symprods;
-
   SymprodRenderObj *closest_symprod_obj;
 
   double closest_dist;
-  
-  DsSpdbThreaded _spdbTimes;
   vector<time_t> _times;
   time_t _prev_epoch_start;
   time_t _prev_epoch_end;

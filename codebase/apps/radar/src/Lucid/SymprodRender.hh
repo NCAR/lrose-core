@@ -39,6 +39,7 @@
 #include <Spdb/Symprod.hh>
 #include "Constants.hh"
 #include "GlobalData.hh"
+#include "Params.hh"
 
 class SymprodRenderObj;
 class RenderContext;
@@ -87,6 +88,7 @@ public:
 
 protected:
 
+  Params &_params;
   GlobalData &gd;
   
   Product &prod; 

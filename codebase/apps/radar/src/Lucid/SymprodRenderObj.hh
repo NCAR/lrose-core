@@ -69,6 +69,7 @@ public:
 
 protected:
   
+  Params &_params;
   GlobalData &gd;
   
   unsigned long _background_pixel;

@@ -73,9 +73,9 @@ using namespace std;
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
-        _progName("Lucid"),
+        _params(Params::Instance()),
         gd(GlobalData::Instance()),
-        _params(*Params::Inst()),
+        _progName("Lucid"),
         _args("Lucid", _params)
 
 {

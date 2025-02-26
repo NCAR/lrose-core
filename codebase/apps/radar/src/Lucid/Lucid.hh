@@ -80,9 +80,9 @@ private:
 
   // basic
   
-  string _progName;
-  GlobalData &gd;
   Params &_params;
+  GlobalData &gd;
+  string _progName;
   Args _args;
   Path _paramsPathRequested;
   Path _paramsPathUsed;

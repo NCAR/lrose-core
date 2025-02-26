@@ -37,6 +37,14 @@ public:
   static constexpr const char *LUCID_VERSION = "1.0 2025/03/01";
   static constexpr const char *LUCID_COPYRIGHT =
     "(c) 1991-2024,  National Center for Atmospheric Research";
+
+  // return codes
+  
+  static constexpr int CIDD_SUCCESS = 0;
+  static constexpr int CIDD_FAILURE = 1;
+  static constexpr int INCOMPLETE = 2;
+
+  // array sizes
   
   static constexpr int MAX_DATA_FIELDS = 1000;
   static constexpr int MAX_SECTS = 128;
@@ -46,9 +54,6 @@ public:
   static constexpr int MAX_COLOR_CELLS = 65536;
   static constexpr int MAX_CACHE_PIXMAPS = 64;
 
-  static constexpr int MAX_PATH = 1024;
-  static constexpr int MAX_TITLE = 1024;
-
   static constexpr int NUM_GRID_LAYERS = 16;
   static constexpr int NUM_CONT_LAYERS = 16;
   static constexpr int NUM_PRODUCT_DETAIL_THRESHOLDS = 3;
@@ -57,12 +62,18 @@ public:
   static constexpr int NUM_PARSE_FIELDS = (MAX_ROUTE +2) * 3;
   static constexpr int PARSE_FIELD_SIZE = 1024;
   
+  // string max len
+  
+  static constexpr int MAX_PATH = 1024;
+  static constexpr int MAX_TITLE = 1024;
   static constexpr int NAME_LENGTH = 256;
   static constexpr int TITLE_LENGTH = 256;
   static constexpr int LABEL_LENGTH = 256;
   static constexpr int URL_LENGTH = 1024;
   static constexpr int URL_MIN_SIZE = 8;
 
+  // math and physical constants
+  
   static constexpr double DEG_TO_RAD = 0.017453292519943295; // degrees to radians conversion
   static constexpr double DEG_RAD = 57.29577951308232;  // degrees per radian
 

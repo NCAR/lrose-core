@@ -35,12 +35,17 @@
 
 #include "ProductMgr.hh"
 #include "RenderContext.hh"
+#include "SymprodRender.hh"
 #include "SymprodRenderObj.hh"
+#include "MdvReader.hh"
 
 //////////////////////////////////////////
 // default constructor
 
-ProductMgr::ProductMgr(RenderContext &context, int debug) : _context(context)
+ProductMgr::ProductMgr(RenderContext &context, int debug) :
+        _params(Params::Instance()),
+        gd(GlobalData::Instance()),
+        _context(context)
           
 {
   _active_Rob = NULL;
@@ -93,18 +98,18 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
   for (size_t i = 0; i < _products.size(); i++) {
     if(_products[i]->_data_valid == 0 && _products[i]->_active  ) {
 
-      gd.io_info.prod = _products[i];
-      gd.io_info.outstanding_request = 1; 
-      gd.io_info.request_type = SYMPROD_REQUEST;
-      gd.io_info.mode = SYMPROD_DATA;
-      gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
-      gd.io_info.last_read = 0;
+      // gd.io_info.prod = _products[i];
+      // gd.io_info.outstanding_request = 1; 
+      // gd.io_info.request_type = SYMPROD_REQUEST;
+      // gd.io_info.mode = SYMPROD_DATA;
+      // gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
+      // gd.io_info.last_read = 0;
 
       if(gd.debug1) _products[i]->setThreadingOff();
 
       char label[128];
       snprintf(label,128,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
-
+      
 #ifdef NOTNOW
       if(_params.show_data_messages) gui_label_h_frame(label,-1);
 #endif
@@ -115,13 +120,13 @@ int ProductMgr::getData(time_t start_time, time_t end_time)
                   _context)) {
 
         _products[i]->_data_valid = 1;
-        return CIDD_FAILURE;
+        return Constants::CIDD_FAILURE;
       }
-      return INCOMPLETE;
+      return Constants::INCOMPLETE;
     }
   }
 
-  return CIDD_SUCCESS;
+  return Constants::CIDD_SUCCESS;
 
 }
 

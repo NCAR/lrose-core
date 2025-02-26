@@ -155,6 +155,14 @@ Params *Params::_instance = (Params *) NULL;
     return _instance;
   }
 
+  Params &Params::Instance()
+  {
+    if (_instance == (Params *) NULL) {
+      _instance = new Params;
+    }
+    return *_instance;
+  }
+
   ////////////////////////////////////////////
   // Assignment
   //
@@ -797,10 +805,10 @@ Params *Params::_instance = (Params *) NULL;
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("MODE_ARCHIVE");
-      tt->enum_def.fields[0].val = MODE_ARCHIVE;
-      tt->enum_def.fields[1].name = tdrpStrDup("MODE_REALTIME");
-      tt->enum_def.fields[1].val = MODE_REALTIME;
+      tt->enum_def.fields[0].name = tdrpStrDup("MODE_REALTIME");
+      tt->enum_def.fields[0].val = MODE_REALTIME;
+      tt->enum_def.fields[1].name = tdrpStrDup("MODE_ARCHIVE");
+      tt->enum_def.fields[1].val = MODE_ARCHIVE;
     tt->single_val.e = MODE_ARCHIVE;
     tt++;
     
@@ -6109,102 +6117,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &route_v_url - &_start_;
     tt->single_val.s = tdrpStrDup("mdvp::zoom_mds//neptune::mdv/mm5&V");
-    tt++;
-    
-    // Parameter 'route_turb_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("route_turb_url");
-    tt->descr = tdrpStrDup("Turbulence Index");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_turb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp::d3_d4//neptune::mdv/mm5&Turb");
-    tt++;
-    
-    // Parameter 'route_turb_low_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_turb_low_thresh");
-    tt->descr = tdrpStrDup("Value at which the turbulence is considered Low");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_turb_low_thresh - &_start_;
-    tt->single_val.d = 0.25;
-    tt++;
-    
-    // Parameter 'route_turb_mod_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_turb_mod_thresh");
-    tt->descr = tdrpStrDup("Value at which the turbulence is considered Moderate");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_turb_mod_thresh - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'route_turb_high_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_turb_high_thresh");
-    tt->descr = tdrpStrDup("Value at which the turbulence is considered High");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_turb_high_thresh - &_start_;
-    tt->single_val.d = 0.75;
-    tt++;
-    
-    // Parameter 'route_icing_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("route_icing_url");
-    tt->descr = tdrpStrDup("Icing Index");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_icing_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp::d3_d4//neptune::mdv/mm5&Icing");
-    tt++;
-    
-    // Parameter 'route_icing_low_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_icing_low_thresh");
-    tt->descr = tdrpStrDup("Value at which the icing is considered Light");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_icing_low_thresh - &_start_;
-    tt->single_val.d = 0.25;
-    tt++;
-    
-    // Parameter 'route_icing_mod_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_icing_mod_thresh");
-    tt->descr = tdrpStrDup("Value at which the icing is considered Moderate");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_icing_mod_thresh - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'route_icing_high_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_icing_high_thresh");
-    tt->descr = tdrpStrDup("Value at which the icing is considered Heavy");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_icing_high_thresh - &_start_;
-    tt->single_val.d = 0.75;
     tt++;
     
     // Parameter 'route_paths'

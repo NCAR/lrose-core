@@ -109,6 +109,7 @@ const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 // Abstract base class
 
 SymprodRenderObj::SymprodRenderObj(SymprodRender *c) :
+        _params(Params::Instance()),
         gd(GlobalData::Instance())
 {
 
