@@ -31,7 +31,7 @@
 //
 /////////////////////////////////////////////////////////////
 
-#include "cidd_macros.h"
+#include "Constants.hh"
 #include "LegacyParams.hh"
 #include "Cimages_P.hh"
 #include "Croutes_P.hh"
@@ -942,7 +942,7 @@ int LegacyParams::_loadKeyValPairsHttp(const string &fname,
   
   // Allow 5 seconds to retrieve the data 
   
-  if(_httpProxyUrl.size() > URL_MIN_SIZE) {
+  if(_httpProxyUrl.size() > Constants::URL_MIN_SIZE) {
     ret_stat = HTTPgetURL_via_proxy(_httpProxyUrl.c_str(), fname.c_str(), 5000,
 				    &db_buf, &db_len);
   } else {
@@ -964,7 +964,7 @@ int LegacyParams::_loadKeyValPairsHttp(const string &fname,
     fprintf(stderr,
 	    "The most common problem is usually missing  the :// part \n");
     fprintf(stderr,"or a misspelled/incorrect host, directory or filename\n");
-    if(_httpProxyUrl.size() > URL_MIN_SIZE)
+    if(_httpProxyUrl.size() > Constants::URL_MIN_SIZE)
       fprintf(stderr,"Also Check Proxy URL:%s\n", _httpProxyUrl.c_str());
     return -1;
   }
@@ -1103,8 +1103,8 @@ int LegacyParams::_readMainParams()
     fprintf(_tdrpFile, "gather_data_mode = CLOSEST_TO_FRAME_CENTER;\n");
   }
   
-  _getLong("cidd.redraw_interval", REDRAW_INTERVAL);
-  _getLong("cidd.update_interval", UPDATE_INTERVAL);
+  _getLong("cidd.redraw_interval", Constants::REDRAW_INTERVAL);
+  _getLong("cidd.update_interval", Constants::UPDATE_INTERVAL);
   _getString("cidd.datamap_host", "");
   _getLong("cidd.data_timeout_secs", 10);
   _getLong("cidd.simple_command_timeout_secs",30);
@@ -1909,7 +1909,7 @@ int LegacyParams::_readGrids()
       continue;
     }
 
-    if(flds.size() < MAX_DATA_FIELDS - 1) {
+    if(flds.size() < Constants::MAX_DATA_FIELDS - 1) {
       
       Field fld;
       

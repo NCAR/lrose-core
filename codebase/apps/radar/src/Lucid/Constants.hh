@@ -72,6 +72,11 @@ public:
   static constexpr int URL_LENGTH = 1024;
   static constexpr int URL_MIN_SIZE = 8;
 
+  // default params
+
+  static constexpr int REDRAW_INTERVAL = 1000;
+  static constexpr int UPDATE_INTERVAL = 120;
+
   // math and physical constants
   
   static constexpr double LUCID_DEG_TO_RAD = 0.017453292519943295; // degrees to radians conversion
