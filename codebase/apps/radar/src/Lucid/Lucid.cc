@@ -48,6 +48,9 @@
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/TaStr.hh>
+#include <toolsa/http.h>
+#include <toolsa/HttpURL.hh>
+#include <toolsa/pjg.h>       // Map projection geometry 
 #include <shapelib/shapefil.h>
 #include <qtplot/ColorMap.hh>
 #include <Mdv/Mdvx_typedefs.hh>
