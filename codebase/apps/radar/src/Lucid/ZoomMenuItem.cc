@@ -45,7 +45,8 @@ ZoomMenuItem::ZoomMenuItem(QObject *parent,
                            GuiManager *manager) :
         _parent(parent),
         _manager(manager),
-        _params(*Params::Inst()),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _zoomParams(NULL),
         _zoomIndex(-1),
         _act(NULL)
@@ -82,18 +83,18 @@ void ZoomMenuItem::toggled(bool checked)
     if (_params.debug >= Params::DEBUG_NORM) {
       cerr << "==>> Changing to zoom level: " << _zoomParams->label << endl;
     }
-    gd.h_win.zoom_level = _zoomIndex;
-    gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
-    gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
-    gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
-    gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+    _gd.h_win.zoom_level = _zoomIndex;
+    _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
+    _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
+    _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
+    _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
   }
 
   if (_manager != NULL) {
-    _manager->setXyZoom(gd.h_win.cmin_y,
-                        gd.h_win.cmax_y,
-                        gd.h_win.cmin_x,
-                        gd.h_win.cmax_x); 
+    _manager->setXyZoom(_gd.h_win.cmin_y,
+                        _gd.h_win.cmax_y,
+                        _gd.h_win.cmin_x,
+                        _gd.h_win.cmax_x); 
   }
 
 }

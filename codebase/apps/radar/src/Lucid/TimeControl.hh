@@ -67,6 +67,7 @@ class QVBoxLayout;
 class GuiManager;
 
 #include <toolsa/DateTime.hh>
+#include "GlobalData.hh"
 #include "Params.hh"
 
 using namespace std;
@@ -79,8 +80,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // constructor
 
-  TimeControl(GuiManager *parent,
-              const Params &params);
+  TimeControl(GuiManager *parent);
   
   /**
    * @brief Retrieve the singleton instance of this class.
@@ -130,7 +130,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   static TimeControl *_instance;
   
   GuiManager *_manager;
-  const Params &_params;
+  Params &_params;
+  GlobalData &_gd;
+  
 
   // GUI elements
   

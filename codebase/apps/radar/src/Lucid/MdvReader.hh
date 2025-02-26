@@ -44,9 +44,9 @@
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
 
-// #include "cidd_macros.h"
-// #include "cidd_structs.h"
-// #include "cidd_colorscales.h"
+#include "GlobalData.hh"
+#include "Params.hh"
+
 #include "LatLonBox.hh"
 #include "WayPts.hh"
 
@@ -228,6 +228,9 @@ public slots:
   void readDoneH();
 
 private:
+
+  Params &_params;
+  GlobalData &_gd;
 
   QObject *_lucid;
   mutable QMutex _statusMutex;

@@ -64,7 +64,8 @@ VertView::VertView(QWidget* parent,
         QWidget(parent),
         _parent(parent),
         _manager(manager),
-        _params(*Params::Inst()),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _vertWindow(vertWindow),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
@@ -443,8 +444,8 @@ void VertView::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  int fieldNum = gd.h_win.page;
-  const ColorMap &colorMap = *(gd.mread[fieldNum]->colorMap);
+  int fieldNum = _gd.h_win.page;
+  const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
   
   // add legends with time, field name and elevation angle
@@ -709,17 +710,17 @@ int VertView::renderVMovieFrame(int index, QPainter &painter)
 {
   int stat = 0;
 #ifdef NOTYET
-  int c_field = gd.v_win.page;
+  int c_field = _gd.v_win.page;
   
-  if(gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
+  if(_gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
 
   
-  switch(gd.movie.mode) {
+  switch(_gd.movie.mode) {
     case REALTIME_MODE:
     case ARCHIVE_MODE:
       stat = render_vert_display(xid, c_field,
-                                 gd.movie.frame[index].time_start,
-                                 gd.movie.frame[index].time_end);
+                                 _gd.movie.frame[index].time_start,
+                                 _gd.movie.frame[index].time_end);
       break;
          
   }
@@ -752,81 +753,81 @@ int VertView::renderVertDisplay(QPaintDevice *pdev,
     set_busy_state(1);
   }
 
-  if(gd.debug2) fprintf(stderr,"Rendering Vertical Image, page :%d\n",page);
+  if(_gd.debug2) fprintf(stderr,"Rendering Vertical Image, page :%d\n",page);
   /* Clear drawing area */
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 0,0,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
+                 0,0,_gd.v_win.can_dim.width,_gd.v_win.can_dim.height);
 
   if(!_params.draw_main_on_top) { 
-    if(gd.mread[page]->render_method == LINE_CONTOURS) {
-      cont.min = gd.mread[page]->cont_low;
-      cont.max = gd.mread[page]->cont_high;
-      cont.interval = gd.mread[page]->cont_interv;
+    if(_gd.mread[page]->render_method == LINE_CONTOURS) {
+      cont.min = _gd.mread[page]->cont_low;
+      cont.max = _gd.mread[page]->cont_high;
+      cont.interval = _gd.mread[page]->cont_interv;
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
-      cont.color = gd.legends.foreground_color;
-      cont.vcm = &gd.mread[page]->v_vcm;
+      cont.color = _gd.legends.foreground_color;
+      cont.vcm = &_gd.mread[page]->v_vcm;
       if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
-        //if (gd.layers.use_alt_contours) {
+        //if (_gd.layers.use_alt_contours) {
         RenderLineContours(xid, &cont, true);
       } else {
         render_xsect_line_contours(xid,&cont);
       }
     } else {
-      render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
-      // stat =  render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
+      render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
+      // stat =  render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
     }
   }
     
   /* Render each of the gridded_overlay fields */
   for(i=0; i < NUM_GRID_LAYERS; i++) {           
-    if(gd.layers.overlay_field_on[i]) {
-      render_xsect_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
+    if(_gd.layers.overlay_field_on[i]) {
+      render_xsect_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   } 
 
   if(_params.draw_main_on_top) { 
-    if(gd.mread[page]->render_method == LINE_CONTOURS) {
-      cont.min = gd.mread[page]->cont_low;
-      cont.max = gd.mread[page]->cont_high;
-      cont.interval = gd.mread[page]->cont_interv;
+    if(_gd.mread[page]->render_method == LINE_CONTOURS) {
+      cont.min = _gd.mread[page]->cont_low;
+      cont.max = _gd.mread[page]->cont_high;
+      cont.interval = _gd.mread[page]->cont_interv;
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
-      cont.color = gd.legends.foreground_color;
-      cont.vcm = &gd.mread[page]->v_vcm;
+      cont.color = _gd.legends.foreground_color;
+      cont.vcm = &_gd.mread[page]->v_vcm;
       if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
-        // if (gd.layers.use_alt_contours) {
+        // if (_gd.layers.use_alt_contours) {
         RenderLineContours(xid, &cont, true);
       } else {
         render_xsect_line_contours(xid,&cont);
       }
     } else {
-      // stat =  render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
-      render_xsect_grid(xid,gd.mread[page],start_time,end_time,0);
+      // stat =  render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
+      render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
     }
   }
 
   /* render contours if selected */
   for(i=0; i < NUM_CONT_LAYERS; i++) {
-    if(gd.layers.cont[i].active) {    
+    if(_gd.layers.cont[i].active) {    
       if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
- 	// if (gd.layers.use_alt_contours) {
-        RenderLineContours(xid, &(gd.layers.cont[i]), true);
+ 	// if (_gd.layers.use_alt_contours) {
+        RenderLineContours(xid, &(_gd.layers.cont[i]), true);
       } else {
-        render_xsect_line_contours(xid, &(gd.layers.cont[i]));
+        render_xsect_line_contours(xid, &(_gd.layers.cont[i]));
       }
     }
   }
 
   /* render Winds if selected */
-  if(gd.layers.wind_vectors) {
+  if(_gd.layers.wind_vectors) {
     render_vert_wind_vectors(xid);
   }
 
   // Render masking terrain
-  if(gd.layers.earth.terrain_active) {
+  if(_gd.layers.earth.terrain_active) {
     render_v_terrain(xid);
   }
 
@@ -835,19 +836,19 @@ int VertView::renderVertDisplay(QPaintDevice *pdev,
   // render_vert_products(xid);
 
   /* clear margin areas */
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 0,0,gd.v_win.can_dim.width,gd.v_win.margin.top);
+  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
+                 0,0,_gd.v_win.can_dim.width,_gd.v_win.margin.top);
 
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 0,gd.v_win.can_dim.height - gd.v_win.margin.bot,
-                 gd.v_win.can_dim.width,gd.v_win.margin.bot);
+  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
+                 0,_gd.v_win.can_dim.height - _gd.v_win.margin.bot,
+                 _gd.v_win.can_dim.width,_gd.v_win.margin.bot);
 
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 0,0,gd.v_win.margin.left,gd.v_win.can_dim.height);
+  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
+                 0,0,_gd.v_win.margin.left,_gd.v_win.can_dim.height);
 
-  XFillRectangle(gd.dpy,xid,gd.legends.background_color->gc,
-                 gd.v_win.can_dim.width - gd.v_win.margin.right,
-                 0,gd.v_win.margin.right,gd.v_win.can_dim.height);
+  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
+                 _gd.v_win.can_dim.width - _gd.v_win.margin.right,
+                 0,_gd.v_win.margin.right,_gd.v_win.can_dim.height);
 
 
   draw_vwin_right_margin(xid,page);
@@ -856,16 +857,16 @@ int VertView::renderVertDisplay(QPaintDevice *pdev,
   draw_vwin_bot_margin(xid,page);
 
   /* Add a border */
-  x1 = gd.v_win.margin.left -1;
-  y1 = gd.v_win.margin.top -1;
-  wd = gd.v_win.img_dim.width +1;
-  ht = gd.v_win.img_dim.height +1;
+  x1 = _gd.v_win.margin.left -1;
+  y1 = _gd.v_win.margin.top -1;
+  wd = _gd.v_win.img_dim.width +1;
+  ht = _gd.v_win.img_dim.height +1;
   /* Add a border around the plot */
-  XDrawRectangle(gd.dpy,xid,gd.legends.foreground_color->gc,x1,y1,wd,ht);
+  XDrawRectangle(_gd.dpy,xid,_gd.legends.foreground_color->gc,x1,y1,wd,ht);
  
 
   if(_params.show_data_messages) {
-    gui_label_h_frame(gd.frame_label,-1);
+    gui_label_h_frame(_gd.frame_label,-1);
   } else {
     set_busy_state(0); 
   }

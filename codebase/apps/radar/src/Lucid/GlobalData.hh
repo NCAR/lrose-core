@@ -644,6 +644,20 @@ class movie_frame_t
 {
 public:
   movie_frame_t() {
+    init();
+  }
+  movie_frame_t(const movie_frame_t &rhs) {
+    h_pdev = rhs.h_pdev;
+    v_pdev = rhs.v_pdev;
+    time_start = rhs.time_start;
+    time_end = rhs.time_end;
+    time_mid = rhs.time_mid;
+    redraw_horiz = rhs.redraw_horiz;
+    redraw_vert = rhs.redraw_vert;
+    memcpy(fname, rhs.fname, Constants::NAME_LENGTH);
+    memcpy(vfname, rhs.vfname, Constants::NAME_LENGTH);
+  }
+  void init() {
     h_pdev = nullptr;
     v_pdev = nullptr;
     time_start = 0;
@@ -659,10 +673,10 @@ public:
   time_t time_start;  /* Time at starting point of image */
   time_t time_end;    /* Time at ending point of image */
   time_t time_mid;    /* Time at mid point of image */
-  int    redraw_horiz;       /* 1 = rerender */
-  int    redraw_vert;        /* 1 = rerender */
-  char   fname[Constants::NAME_LENGTH];   /* file name for this image */
-  char   vfname[Constants::NAME_LENGTH];  /* file name for this image */
+  int redraw_horiz;       /* 1 = rerender */
+  int redraw_vert;        /* 1 = rerender */
+  char fname[Constants::NAME_LENGTH];   /* file name for this image */
+  char vfname[Constants::NAME_LENGTH];  /* file name for this image */
 };
      
 

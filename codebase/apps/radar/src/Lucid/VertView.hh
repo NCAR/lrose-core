@@ -53,6 +53,9 @@
 #include <radar/BeamHeight.hh>
 #include <toolsa/DateTime.hh>
 
+#include "GlobalData.hh"
+#include "Params.hh"
+
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
@@ -301,7 +304,9 @@ class DLL_EXPORT VertView : public QWidget
 
   QWidget *_parent;
   const GuiManager &_manager;
-  const Params &_params;
+
+  Params &_params;
+  GlobalData &_gd;
 
   // QMainWindow
   

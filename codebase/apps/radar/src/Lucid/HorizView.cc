@@ -21,11 +21,13 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
 #include "HorizView.hh"
 #include "VertView.hh"
 #include "GuiManager.hh"
 
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/pmu.h>
 #include <toolsa/LogStream.hh>
 #include <QApplication>
 #include <QMenu>
@@ -51,6 +53,8 @@ HorizView::HorizView(QWidget* parent,
         QWidget(parent),
         _parent(parent),
         _manager(manager),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
@@ -176,8 +180,8 @@ void HorizView::configureWorldCoords(int zoomLevel)
 
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
-  _fullWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
-                            gd.h_win.cmax_x, gd.h_win.cmax_y);
+  _fullWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
+                            _gd.h_win.cmax_x, _gd.h_win.cmax_y);
   
   _fullWorld.setLeftMargin(_params.horiz_left_margin);
   _fullWorld.setRightMargin(_params.horiz_right_margin);
@@ -267,7 +271,7 @@ void HorizView::timerEvent(QTimerEvent *event)
 void HorizView::updatePixelScales()
 {
 
-  _zoomWorld.setProjection(gd.proj);
+  _zoomWorld.setProjection(_gd.proj);
   _zoomWorld.updatePixelScales();
   
 }
@@ -283,10 +287,10 @@ void HorizView::paintEvent(QPaintEvent *event)
     return;
   }
 
-  if (gd.h_win.zoom_level != gd.h_win.prev_zoom_level) {
-    _zoomWorld.setWorldLimits(gd.h_win.cmin_x, gd.h_win.cmin_y,
-                              gd.h_win.cmax_x, gd.h_win.cmax_y);
-    gd.h_win.prev_zoom_level = gd.h_win.zoom_level;
+  if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
+    _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
+                              _gd.h_win.cmax_x, _gd.h_win.cmax_y);
+    _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
     _savedZooms.clear();
   }
 
@@ -317,7 +321,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   // draw axes
   
   string projUnits("km");
-  if (gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
+  if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
     projUnits = "deg";
   }
   _zoomWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
@@ -461,8 +465,8 @@ void HorizView::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  int fieldNum = gd.h_win.page;
-  const ColorMap &colorMap = *(gd.mread[fieldNum]->colorMap);
+  int fieldNum = _gd.h_win.page;
+  const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
   // add the legends
@@ -470,7 +474,7 @@ void HorizView::_drawOverlays(QPainter &painter)
   {
     
     painter.save();
-    MdvReader *mr = gd.mread[_renderFramePage];
+    MdvReader *mr = _gd.mread[_renderFramePage];
     
     vector<string> legends;
     legends.push_back(mr->fieldLabel());
@@ -518,15 +522,15 @@ void HorizView::_drawMaps(QPainter &painter)
 
   // Loop throughs maps
   
-  for(int ii = gd.num_map_overlays - 1; ii >= 0; ii--) {
+  for(int ii = _gd.num_map_overlays - 1; ii >= 0; ii--) {
     
-    if(!gd.overlays[ii]->active ||
-       (gd.overlays[ii]->detail_thresh_min > gd.h_win.km_across_screen) ||
-       (gd.overlays[ii]->detail_thresh_max < gd.h_win.km_across_screen))  {
+    if(!_gd.overlays[ii]->active ||
+       (_gd.overlays[ii]->detail_thresh_min > _gd.h_win.km_across_screen) ||
+       (_gd.overlays[ii]->detail_thresh_max < _gd.h_win.km_across_screen))  {
       continue;
     }
       
-    MapOverlay_t *ov = gd.overlays[ii];
+    MapOverlay_t *ov = _gd.overlays[ii];
 
     // create the pen for this map
     
@@ -1111,7 +1115,7 @@ void HorizView::_renderGrids(QPainter &painter)
     return;
   }
   
-  if(gd.debug2) {
+  if(_gd.debug2) {
     fprintf(stderr,
             "Rendering Horizontal movie_frame %d - field: %d\n",
             _renderFrameIndex, _renderFramePage);
@@ -1119,8 +1123,8 @@ void HorizView::_renderGrids(QPainter &painter)
 
   _controlRendering(painter,
                     _renderFramePage,
-                    gd.movie.frame[_renderFrameIndex].time_start,
-                    gd.movie.frame[_renderFrameIndex].time_end);
+                    _gd.movie.frame[_renderFrameIndex].time_start,
+                    _gd.movie.frame[_renderFrameIndex].time_end);
   
   
   _renderFrame = false;
@@ -1146,79 +1150,79 @@ void HorizView::_doRenderInvalidImages(QPainter &painter,
   int none_found = 1;
   QPaintDevice *pdev;
   
-  h_image = gd.h_win.page + 1;
-  v_image = gd.v_win.page + 1;
+  h_image = _gd.h_win.page + 1;
+  v_image = _gd.v_win.page + 1;
   if(!_params.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
   
   /* look through the rest of the images  */
-  for (i=0; i < gd.num_datafields-1; i++) {    
+  for (i=0; i < _gd.num_datafields-1; i++) {    
     
     /*
      * Render horizontal image, if necessary.
      */
     
-    if (h_image >= gd.num_datafields) {
+    if (h_image >= _gd.num_datafields) {
       h_image = 0;
     }
     
-    if (gd.mread[h_image]->currently_displayed && gd.mread[h_image]->auto_render) {
+    if (_gd.mread[h_image]->currently_displayed && _gd.mread[h_image]->auto_render) {
       
-      if (gd.h_win.redraw_flag[h_image] || (gd.mread[h_image]->h_data_valid == 0)) {
+      if (_gd.h_win.redraw_flag[h_image] || (_gd.mread[h_image]->h_data_valid == 0)) {
         none_found = 0;
         stat = gather_hwin_data(h_image,
-                                gd.movie.frame[index].time_start,
-                                gd.movie.frame[index].time_end);
+                                _gd.movie.frame[index].time_start,
+                                _gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
-          if(gd.mread[h_image]->auto_render) {
-            pdev = gd.h_win.page_pdev[h_image];
+          if(_gd.mread[h_image]->auto_render) {
+            pdev = _gd.h_win.page_pdev[h_image];
           } else {
-            pdev = gd.h_win.tmp_pdev;
+            pdev = _gd.h_win.tmp_pdev;
           }
           QPainter painter(this);
           _controlRendering(painter,
                             h_image,
-                            gd.movie.frame[index].time_start,
-                            gd.movie.frame[index].time_end);
+                            _gd.movie.frame[index].time_start,
+                            _gd.movie.frame[index].time_end);
           
           save_h_movie_frame(index,pdev,h_image);
           
-          gd.h_win.redraw_flag[h_image] = 0;
+          _gd.h_win.redraw_flag[h_image] = 0;
         } else {
           return;
         }
-        if (h_image == gd.h_win.prev_page && gd.h_win.redraw_flag[h_image] == 0) {
-          gd.h_copy_flag = 1;
+        if (h_image == _gd.h_win.prev_page && _gd.h_win.redraw_flag[h_image] == 0) {
+          _gd.h_copy_flag = 1;
         }
-      } // if (gd.h_win.redraw_flag[h_image] ...
-    } // if (gd.mread[h_image]->currently_displayed ...
+      } // if (_gd.h_win.redraw_flag[h_image] ...
+    } // if (_gd.mread[h_image]->currently_displayed ...
     h_image++;
 
     /*
      * Render vertical image, if necessary.
      */
 
-    if (v_image >= gd.num_datafields) v_image = 0;
+    if (v_image >= _gd.num_datafields) v_image = 0;
 
-    if (gd.mread[v_image]->currently_displayed && gd.mread[v_image]->auto_render) {
-      if ((gd.v_win.active) && (gd.v_win.redraw_flag[v_image] || (gd.mread[v_image]->v_data_valid == 0))) {
-        stat = gather_vwin_data(v_image, gd.movie.frame[index].time_start,
-                                gd.movie.frame[index].time_end);
+    if (_gd.mread[v_image]->currently_displayed && _gd.mread[v_image]->auto_render) {
+      if ((_gd.v_win.active) && (_gd.v_win.redraw_flag[v_image] || (_gd.mread[v_image]->v_data_valid == 0))) {
+        stat = gather_vwin_data(v_image, _gd.movie.frame[index].time_start,
+                                _gd.movie.frame[index].time_end);
         if (stat == CIDD_SUCCESS) {
-          if(gd.mread[v_image]->auto_render) {
-            pdev = gd.v_win.page_pdev[v_image];
+          if(_gd.mread[v_image]->auto_render) {
+            pdev = _gd.v_win.page_pdev[v_image];
           } else {
-            pdev = gd.v_win.tmp_pdev;
+            pdev = _gd.v_win.tmp_pdev;
           }
           QPainter painter(this);
 #ifdef NOTYET
-          vert->renderVertDisplay(painter, v_image, gd.movie.frame[index].time_start,
-                                  gd.movie.frame[index].time_end);
+          vert->renderVertDisplay(painter, v_image, _gd.movie.frame[index].time_start,
+                                  _gd.movie.frame[index].time_end);
 #endif
-          gd.v_win.redraw_flag[v_image] = 0;
+          _gd.v_win.redraw_flag[v_image] = 0;
         } else {
           return;
         }
-        if (v_image == gd.v_win.prev_page && gd.v_win.redraw_flag[v_image] == 0) gd.v_copy_flag = 1;
+        if (v_image == _gd.v_win.prev_page && _gd.v_win.redraw_flag[v_image] == 0) _gd.v_copy_flag = 1;
       }
     }
         
@@ -1229,26 +1233,26 @@ void HorizView::_doRenderInvalidImages(QPainter &painter,
   //  happening
 
   // In html mode, cycle through all zooms and heights
-  if(none_found && _params.html_mode && gd.io_info.outstanding_request == 0) {
+  if(none_found && _params.html_mode && _gd.io_info.outstanding_request == 0) {
     
     /* If more zoom levels to render */
-    if(gd.h_win.zoom_level < (gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
+    if(_gd.h_win.zoom_level < (_gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
 
       /* Set zoom to next level */
-      gd.h_win.zoom_level++;
-      // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+      _gd.h_win.zoom_level++;
+      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
 
       // If more heights to render
-    } else if (gd.cur_render_height < gd.num_render_heights -1) {
+    } else if (_gd.cur_render_height < _gd.num_render_heights -1) {
 
       // Set height to next level
-      gd.cur_render_height++;
-      if(gd.debug) fprintf(stderr,"HTML_MODE: Height now: %g\n",gd.h_win.cur_ht);
-      gd.h_win.cur_ht = gd.height_array[gd.cur_render_height];
+      _gd.cur_render_height++;
+      if(_gd.debug) fprintf(stderr,"HTML_MODE: Height now: %g\n",_gd.h_win.cur_ht);
+      _gd.h_win.cur_ht = _gd.height_array[_gd.cur_render_height];
 
       // Reset Zoom back to first  level
-      gd.h_win.zoom_level = 0;
-      // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+      _gd.h_win.zoom_level = 0;
+      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
 
       // Make sure new data gets loaded
       reset_data_valid_flags(1,0);
@@ -1256,8 +1260,8 @@ void HorizView::_doRenderInvalidImages(QPainter &painter,
                
       // No more heights and no more zooms to render
     } else if(_params.run_once_and_exit) {
-      if(!gd.quiet_mode)  fprintf(stderr,"Exiting\n");
-      // xv_destroy(gd.h_win_horiz_bw->horiz_bw);
+      if(!_gd.quiet_mode)  fprintf(stderr,"Exiting\n");
+      // xv_destroy(_gd.h_win_horiz_bw->horiz_bw);
       exit(-1);
     }
   }
@@ -1276,36 +1280,36 @@ int HorizView::_controlRendering(QPainter &painter, int page,
 {
 
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
-  if(gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
+  if(_gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
   // compute distance across the image for setting font sizes, etc.
-  switch(gd.display_projection) {
+  switch(_gd.display_projection) {
     default:
     case Mdvx::PROJ_FLAT :
     case Mdvx::PROJ_LAMBERT_CONF :
       /* compute km across the image */
-      gd.h_win.km_across_screen = (gd.h_win.cmax_x - gd.h_win.cmin_x);
+      _gd.h_win.km_across_screen = (_gd.h_win.cmax_x - _gd.h_win.cmin_x);
       break;
 
     case Mdvx::PROJ_LATLON :
-      gd.h_win.km_across_screen = (gd.h_win.cmax_x - gd.h_win.cmin_x) * KM_PER_DEG_AT_EQ;
+      _gd.h_win.km_across_screen = (_gd.h_win.cmax_x - _gd.h_win.cmin_x) * KM_PER_DEG_AT_EQ;
       break;
   }
 
-  MdvReader *mr = gd.mread[page];
+  MdvReader *mr = _gd.mread[page];
  
   // Clear time lists
-  // if(gd.time_plot) gd.time_plot->clear_grid_tlist();
-  // if(gd.time_plot) gd.time_plot->clear_prod_tlist();
+  // if(_gd.time_plot) _gd.time_plot->clear_grid_tlist();
+  // if(_gd.time_plot) _gd.time_plot->clear_prod_tlist();
 
   // if(_params.show_data_messages) {
   //   // gui_label_h_frame("Rendering",-1);
   // }
 
   // RENDER the LAND_USE field first
-  if(gd.layers.earth.landuse_active && gd.layers.earth.land_use != NULL) {
-    _renderGrid(painter, page, gd.layers.earth.land_use,start_time,end_time,1);
-    // render_grid(xid,gd.layers.earth.land_use,start_time,end_time,1);
+  if(_gd.layers.earth.landuse_active && _gd.layers.earth.land_use != NULL) {
+    _renderGrid(painter, page, _gd.layers.earth.land_use,start_time,end_time,1);
+    // render_grid(xid,_gd.layers.earth.land_use,start_time,end_time,1);
   }
 
   if(!_params.draw_main_on_top) {
@@ -1318,9 +1322,9 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
-      cont.color = gd.legends.foreground_color;
+      cont.color = _gd.legends.foreground_color;
       cont.vcm = &mr->h_vcm;
-      if (gd.layers.use_alt_contours) {
+      if (_gd.layers.use_alt_contours) {
         RenderLineContours(xid,&cont);
       } else {
         render_line_contours(xid,&cont);
@@ -1329,7 +1333,7 @@ int HorizView::_controlRendering(QPainter &painter, int page,
     } else {
       _renderGrid(painter, page, mr, start_time, end_time, 0);
     }
-    if(gd.layers.earth.terrain_active && 
+    if(_gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1) &&
        mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_ELEV) {
@@ -1340,10 +1344,10 @@ int HorizView::_controlRendering(QPainter &painter, int page,
   }
      
   /* Render each of the gridded_overlay fields */
-  for(int i=0; i < NUM_GRID_LAYERS; i++) {
-    if(gd.layers.overlay_field_on[i] && gd.mread[gd.layers.overlay_field[i]] != NULL) {
-      _renderGrid(painter, page, gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
-      // render_grid(xid,gd.mread[gd.layers.overlay_field[i]],start_time,end_time,1);
+  for(int i=0; i < Constants::NUM_GRID_LAYERS; i++) {
+    if(_gd.layers.overlay_field_on[i] && _gd.mread[_gd.layers.overlay_field[i]] != NULL) {
+      _renderGrid(painter, page, _gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
+      // render_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
   
@@ -1357,9 +1361,9 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       cont.active = 1;
       cont.field = page;
       cont.labels_on = _params.label_contours;
-      cont.color = gd.legends.foreground_color;
+      cont.color = _gd.legends.foreground_color;
       cont.vcm = &mr->h_vcm;
-      if (gd.layers.use_alt_contours) {
+      if (_gd.layers.use_alt_contours) {
         RenderLineContours(xid,&cont);
       } else {
         render_line_contours(xid,&cont);
@@ -1369,7 +1373,7 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       _renderGrid(painter, page, mr, start_time, end_time, 0);
       // render_grid(xid,mr,start_time,end_time,0);
     }
-    if(gd.layers.earth.terrain_active && 
+    if(_gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
 
@@ -1380,23 +1384,23 @@ int HorizView::_controlRendering(QPainter &painter, int page,
   }
 
   /* render contours if selected */
-  for(int i= 0; i < NUM_CONT_LAYERS; i++) {
-    if(gd.layers.cont[i].active) {
-      if (gd.layers.use_alt_contours) {
+  for(int i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
+    if(_gd.layers.cont[i].active) {
+      if (_gd.layers.use_alt_contours) {
 #ifdef HAVE_XID
-        RenderLineContours(xid, &(gd.layers.cont[i]));
+        RenderLineContours(xid, &(_gd.layers.cont[i]));
 #endif
       } else {
 #ifdef HAVE_XID
-        render_line_contours(xid, &(gd.layers.cont[i]));
+        render_line_contours(xid, &(_gd.layers.cont[i]));
 #endif
       }
     }
   }
 
   /* render Winds if selected */
-  if(gd.layers.wind_vectors) {
-    switch(gd.layers.wind_mode) {
+  if(_gd.layers.wind_vectors) {
+    switch(_gd.layers.wind_mode) {
       default:
       case WIND_MODE_ON:  /* winds get rendered in each frame */
 #ifdef HAVE_XID
@@ -1405,7 +1409,7 @@ int HorizView::_controlRendering(QPainter &painter, int page,
         break;
         
       case WIND_MODE_LAST: /* Winds get rendered in last farame only */
-        if(gd.movie.cur_frame == gd.movie.end_frame)
+        if(_gd.movie.cur_frame == _gd.movie.end_frame)
 #ifdef HAVE_XID
           render_wind_vectors(xid,start_time,end_time);
 #endif
@@ -1414,7 +1418,7 @@ int HorizView::_controlRendering(QPainter &painter, int page,
       case WIND_MODE_STILL: /* Winds get rendered in the last frame only
                              * if the movie loop is off
                              */
-        if(!gd.movie.movie_on && gd.movie.cur_frame == gd.movie.end_frame)
+        if(!_gd.movie.movie_on && _gd.movie.cur_frame == _gd.movie.end_frame)
 #ifdef HAVE_XID
           render_wind_vectors(xid,start_time,end_time);
 #endif
@@ -1436,9 +1440,9 @@ int HorizView::_controlRendering(QPainter &painter, int page,
   render_horiz_margins(xid,page,start_time,end_time);
 #endif
 
-  // update_frame_time_msg(gd.movie.cur_frame);
+  // update_frame_time_msg(_gd.movie.cur_frame);
 
-  return CIDD_SUCCESS;    /* avaliable data has been rendered */
+  return Constants::CIDD_SUCCESS;    /* avaliable data has been rendered */
 }
 
 /**********************************************************************
@@ -1455,7 +1459,7 @@ int HorizView::_renderGrid(QPainter &painter,
 {
   
   if (mr == NULL) {
-    return CIDD_SUCCESS;
+    return Constants::CIDD_SUCCESS;
   }
     
 #ifdef NOTYET
@@ -1471,7 +1475,7 @@ int HorizView::_renderGrid(QPainter &painter,
 
   // Add the list of times to the time plot
   // if(mr->time_list.num_entries > 0) {
-  //   if(gd.time_plot) gd.time_plot->add_grid_tlist(mr->legend_name,mr->time_list.tim,
+  //   if(_gd.time_plot) _gd.time_plot->add_grid_tlist(mr->legend_name,mr->time_list.tim,
   //                                                 mr->time_list.num_entries,
   //                                                 mr->h_date.unix_time);
   // }
@@ -1495,24 +1499,24 @@ int HorizView::_renderGrid(QPainter &painter,
         }
 
         int xmid,ymid;
-        Font font = choose_font(message, gd.h_win.img_dim.width, gd.h_win.img_dim.height, &xmid, &ymid);
-        XSetFont(gd.dpy,gd.legends.foreground_color->gc,font);
-        XDrawImageString(gd.dpy,xid,gd.legends.foreground_color->gc,
-                         gd.h_win.margin.left + (gd.h_win.img_dim.width /2) + xmid  ,
-                         gd.h_win.margin.top + (gd.h_win.img_dim.height /4) + ymid ,
+        Font font = choose_font(message, _gd.h_win.img_dim.width, _gd.h_win.img_dim.height, &xmid, &ymid);
+        XSetFont(_gd.dpy,_gd.legends.foreground_color->gc,font);
+        XDrawImageString(_gd.dpy,xid,_gd.legends.foreground_color->gc,
+                         _gd.h_win.margin.left + (_gd.h_win.img_dim.width /2) + xmid  ,
+                         _gd.h_win.margin.top + (_gd.h_win.img_dim.height /4) + ymid ,
                          message,strlen(message));
 
-        if(gd.debug2) {
+        if(_gd.debug2) {
           fprintf(stderr, "No data from service: %s\n",
-                  gd.io_info.mr->url );
+                  _gd.io_info.mr->url );
         }
 
 	if(_params.show_clock) {
           /* draw a clock */
-          int ht = (int) (gd.h_win.can_dim.height * 0.05);
-          int startx = gd.h_win.can_dim.width - gd.h_win.margin.right - ht - 5;
-          int starty = gd.h_win.margin.top + ht + 5;
-          XUDRdraw_clock(gd.dpy,xid,gd.legends.foreground_color->gc,
+          int ht = (int) (_gd.h_win.can_dim.height * 0.05);
+          int startx = _gd.h_win.can_dim.width - _gd.h_win.margin.right - ht - 5;
+          int starty = _gd.h_win.margin.top + ht + 5;
+          XUDRdraw_clock(_gd.dpy,xid,_gd.legends.foreground_color->gc,
                          startx,starty,ht, (start_time + (end_time - start_time) /2),1);
 	}
       }  // if mr->button_name != "None"
@@ -1528,9 +1532,9 @@ int HorizView::_renderGrid(QPainter &painter,
   // Decide Proper rendering routine
 
   const PjgMath &dataMath = mr->proj->getPjgMath();
-  const PjgMath &displayMath = gd.proj.getPjgMath();
+  const PjgMath &displayMath = _gd.proj.getPjgMath();
 
-  if (gd.debug) {
+  if (_gd.debug) {
     cerr << "-->> data projection <<--" << endl;
     dataMath.print(cerr);
     cerr << "-->> display projection <<--" << endl;
@@ -1552,16 +1556,16 @@ int HorizView::_renderGrid(QPainter &painter,
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
-         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
+         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
       } else { // Must use polygon rendering
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
                                        start_time, end_time,
                                        is_overlay_field);
@@ -1570,22 +1574,22 @@ int HorizView::_renderGrid(QPainter &painter,
 
     case  Mdvx::PROJ_FLAT: // Needs to test Param 1
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
-         (fabs(gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
+         (fabs(_gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
         
-        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
       } else { // Must use polygon rendering
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
                                        start_time, end_time,
                                        is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
       }
       break;
       
@@ -1594,48 +1598,48 @@ int HorizView::_renderGrid(QPainter &painter,
     case  Mdvx::PROJ_OBLIQUE_STEREO:
     case  Mdvx::PROJ_MERCATOR:
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == gd.proj.getProjType() &&
-         (fabs(gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(gd.proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
-         (fabs(gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
+         (fabs(_gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+         (fabs(_gd.proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
+         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
+         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
       } else { // Must use polygon rendering
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
                                        start_time, end_time,
                                        is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
       }
       break;
       
     case  Mdvx::PROJ_LATLON:
-      if(mr->h_fhdr.proj_type == gd.proj.getProjType()) {
-        if(gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+      if(mr->h_fhdr.proj_type == _gd.proj.getProjType()) {
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
       } else {
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
                                        start_time, end_time,
                                        is_overlay_field);
-        if(gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
       }
       break;
       
     case  Mdvx::PROJ_POLAR_RADAR:
-      if(gd.debug2) fprintf(stderr,"render_polar_grid() selected\n");
+      if(_gd.debug2) fprintf(stderr,"render_polar_grid() selected\n");
 #ifdef NOTYET
       render_polar_grid(page, painter, mr,start_time, end_time, 
                         is_overlay_field);
 #endif
-      if(gd.debug2) fprintf(stderr,"render_polar_grid() done\n");
+      if(_gd.debug2) fprintf(stderr,"render_polar_grid() done\n");
       break;
       
   }
@@ -1644,7 +1648,7 @@ int HorizView::_renderGrid(QPainter &painter,
 
 #endif
 
-  return CIDD_SUCCESS;
+  return Constants::CIDD_SUCCESS;
 }
 
 /*************************************************************************

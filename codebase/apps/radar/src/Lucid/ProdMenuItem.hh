@@ -53,6 +53,7 @@
 #include <vector>
 #include <QObject>
 #include <QAction>
+#include "GlobalData.hh"
 #include "Params.hh"
 class Product;
 
@@ -91,6 +92,8 @@ class DLL_EXPORT ProdMenuItem : public QObject {
  protected:
 
   QObject *_parent;
+  Params &_params;
+  GlobalData &_gd;
   Params::symprod_prod_info_t *_prodParams;
   const Product *_product;
   int _prodIndex;

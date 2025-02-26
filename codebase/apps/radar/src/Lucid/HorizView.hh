@@ -54,7 +54,9 @@
 
 #include <Mdv/MdvxProj.hh>
 
-#include "cidd.h"
+#include "GlobalData.hh"
+#include "Params.hh"
+
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
@@ -348,6 +350,9 @@ class DLL_EXPORT HorizView : public QWidget
 
   QWidget *_parent;
   GuiManager &_manager;
+
+  Params &_params;
+  GlobalData &_gd;
 
   // pixmap for rendering
   

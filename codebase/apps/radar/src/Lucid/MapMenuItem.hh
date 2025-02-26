@@ -53,6 +53,7 @@
 #include <vector>
 #include <QObject>
 #include <QAction>
+#include "GlobalData.hh"
 #include "Params.hh"
 
 using namespace std;
@@ -93,6 +94,10 @@ class DLL_EXPORT MapMenuItem : public QObject {
 
   QObject *_parent;
   GuiManager *_manager;
+
+  Params &_params;
+  GlobalData &_gd;
+
   Params::map_t *_mapParams;
   MapOverlay_t *_overlay;
   int _mapIndex;

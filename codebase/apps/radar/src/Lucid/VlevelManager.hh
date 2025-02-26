@@ -42,6 +42,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include "GlobalData.hh"
 #include "Params.hh"
 #include <toolsa/DateTime.hh>
 #include <Radx/RadxVol.hh>
@@ -131,6 +132,9 @@ public:
 
 private:
   
+  Params &_params;
+  GlobalData &_gd;
+
   vector<double> _levels;
   double _requestedLevel;
   int _selectedIndex;

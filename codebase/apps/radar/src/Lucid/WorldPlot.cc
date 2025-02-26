@@ -41,18 +41,18 @@
 #include <QtGui/QPainterPath>
 
 #include <rapmath/umath.h>
-#include <toolsa/toolsa_macros.h>
 #include <toolsa/utim.h>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
-#include "GlobalData.hh"
 
 using namespace std;
 
 ////////////////////////////////////////
 // default constructor
 
-WorldPlot::WorldPlot()
+WorldPlot::WorldPlot() :
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance())
 {
 
   _widthPixels = 1000;
@@ -112,7 +112,9 @@ WorldPlot::WorldPlot()
 ////////////////////////////////////////
 // copy constructor
 
-WorldPlot::WorldPlot(const WorldPlot &rhs)
+WorldPlot::WorldPlot(const WorldPlot &rhs):
+  _params(Params::Instance()),
+  _gd(GlobalData::Instance())
 
 {
   _copy(rhs);

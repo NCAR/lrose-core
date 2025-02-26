@@ -45,6 +45,10 @@
 
 using namespace std;
 
+// singleton instance is global
+
+GlobalData *GlobalData::_instance = (GlobalData *) NULL;
+
 //////////////////////////////////////////////////////
 // Constructor
 
@@ -97,7 +101,7 @@ GlobalData::GlobalData()
   data_status_changed = 0;
   series_save_active = 0; 
 
-  num_field_labels = 0;  
+  num_field_labels = 0;
   MEM_zero(field_index);
   movieframe_time_mode = 0; 
   aspect_correction = 1.0;

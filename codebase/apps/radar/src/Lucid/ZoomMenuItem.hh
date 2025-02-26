@@ -53,6 +53,7 @@
 #include <vector>
 #include <QObject>
 #include <QAction>
+#include "GlobalData.hh"
 #include "Params.hh"
 
 using namespace std;
@@ -91,7 +92,8 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
   
   QObject *_parent;
   GuiManager *_manager;
-  const Params &_params;
+  Params &_params;
+  GlobalData &_gd;
   Params::zoom_level_t *_zoomParams;
   int _zoomIndex;
   QAction *_act;               

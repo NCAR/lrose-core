@@ -42,6 +42,8 @@
 
 WindMenuItem::WindMenuItem(QObject *parent) :
         _parent(parent),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _windParams(NULL),
         _windData(NULL),
         _windIndex(-1),
@@ -68,11 +70,11 @@ void WindMenuItem::toggled(bool checked)
 
   // set activity depending on checked
   
-  if (_windIndex < (int) gd.layers.wind.size()) {
+  if (_windIndex < (int) _gd.layers.wind.size()) {
     if (checked) {
-      gd.layers.wind[_windIndex].active = 1;
+      _gd.layers.wind[_windIndex].active = 1;
     } else {
-      gd.layers.wind[_windIndex].active = 0;
+      _gd.layers.wind[_windIndex].active = 0;
     }
     _windParams->on_at_startup = (tdrp_bool_t) checked;
   }
@@ -82,7 +84,7 @@ void WindMenuItem::toggled(bool checked)
     cerr << "  windIndex: " << _windIndex << endl;
     cerr << "  button_label: " << _windParams->button_label << endl;
     cerr << "  url: " << _windParams->url << endl;
-    cerr << "  active: " << gd.layers.wind[_windIndex].active << endl;
+    cerr << "  active: " << _gd.layers.wind[_windIndex].active << endl;
   }
 
 }

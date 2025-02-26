@@ -1069,11 +1069,11 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.temporal_rounding", 300);
   string climoStr = _getString("cidd.climo_mode", "regular", false);
   if (climoStr.find("regular") != string::npos) {
-    fprintf(_tdrpFile, "climo_mode = CLIMO_REGULAR_INTERVAL\n");
+    fprintf(_tdrpFile, "climo_mode = CLIMO_REGULAR_INTERVAL;\n");
   } else if (climoStr.find("daily") != string::npos) {
-    fprintf(_tdrpFile, "climo_mode = CLIMO_DAILY_INTERVAL\n");
+    fprintf(_tdrpFile, "climo_mode = CLIMO_DAILY_INTERVAL;\n");
   } else if (climoStr.find("yearly") != string::npos) {
-    fprintf(_tdrpFile, "climo_mode = CLIMO_YEARLY_INTERVAL\n");
+    fprintf(_tdrpFile, "climo_mode = CLIMO_YEARLY_INTERVAL;\n");
   }
   _getBoolean("cidd.use_local_timestamps", 0);
 

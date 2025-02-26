@@ -36,12 +36,14 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ProdMenuItem.hh"
-#include "GlobalData.hh"
+#include "ProductMgr.hh"
 
 // Constructor
 
 ProdMenuItem::ProdMenuItem(QObject *parent) :
         _parent(parent),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _prodParams(NULL),
         _prodIndex(-1),
         _act(NULL)
@@ -64,13 +66,13 @@ ProdMenuItem::~ProdMenuItem()
 
 void ProdMenuItem::toggled(bool checked)
 {
-  if (_prodIndex < gd.prod_mgr->get_num_products()) {
-    gd.prod_mgr->set_product_active(_prodIndex, checked);
+  if (_prodIndex < _gd.prod_mgr->get_num_products()) {
+    _gd.prod_mgr->set_product_active(_prodIndex, checked);
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> ProdMenuItem toggled, is_on? " << checked << endl;
     cerr << "  prodIndex: " << _prodIndex << endl;
-    cerr << "  active: " << gd.prod_mgr->get_product_active(_prodIndex) << endl;
+    cerr << "  active: " << _gd.prod_mgr->get_product_active(_prodIndex) << endl;
     cerr << "  menu_label: " << _prodParams->menu_label << endl;
     cerr << "  url: " << _prodParams->url << endl;
   }

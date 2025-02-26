@@ -91,6 +91,7 @@
 #include <Ncxx/H5x.hh>
 
 #include "GuiManager.hh"
+#include "ProductMgr.hh"
 #include "FieldTableItem.hh"
 #include "HorizView.hh"
 #include "MapMenuItem.hh"
@@ -119,6 +120,8 @@ GuiManager* GuiManager::Instance()
 // Constructor
 
 GuiManager::GuiManager() :
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _vertWindowDisplayed(false)
 {
 
@@ -302,13 +305,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
   
   // handle client events
   
-  if(gd.coord_expt->client_event != NO_MESSAGE) {
+  if(_gd.coord_expt->client_event != NO_MESSAGE) {
     _handleClientEvent();
   }
 
   // is previous read still busy?
 
-  MdvReader *mr = gd.mread[_fieldNum];
+  MdvReader *mr = _gd.mread[_fieldNum];
   if (!mr->getReadBusyH()) {
     // read the H data if needed
     _checkAndReadH(mr);
@@ -317,9 +320,9 @@ void GuiManager::timerEvent(QTimerEvent *event)
   // _autoCreateFunc();
   // _ciddTimerFunc(event);
 
-  // if (gd.redraw_horiz) {
+  // if (_gd.redraw_horiz) {
   //   _horiz->update();
-  //   gd.redraw_horiz = false;
+  //   _gd.redraw_horiz = false;
   // }
 
   // if (_archiveMode) {
@@ -345,15 +348,15 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   
   // get new data if needed - data is retrieved in a thread
   
-  int frameIndex = gd.movie.cur_frame;
-  if (gd.movie.cur_frame < 0) {
-    frameIndex = gd.movie.num_frames - 1;
+  int frameIndex = _gd.movie.cur_frame;
+  if (_gd.movie.cur_frame < 0) {
+    frameIndex = _gd.movie.num_frames - 1;
   }
 
   if (stateChanged) {
     mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                           _vlevelManager.getRequestedLevel(),
-                          gd.h_win.page);
+                          _gd.h_win.page);
   }
   
   // check for new data
@@ -362,19 +365,19 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (!mr->isValidH()) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
       cerr << "  mr->requestHorizPlane" << endl;
-      cerr << "  time_start: " << DateTime::strm(gd.movie.frame[frameIndex].time_start) << endl;
-      cerr << "  time_end: " << DateTime::strm(gd.movie.frame[frameIndex].time_end) << endl;
-      cerr << "  page: " << gd.h_win.page << endl;
+      cerr << "  time_start: " << DateTime::strm(_gd.movie.frame[frameIndex].time_start) << endl;
+      cerr << "  time_end: " << DateTime::strm(_gd.movie.frame[frameIndex].time_end) << endl;
+      cerr << "  page: " << _gd.h_win.page << endl;
     }
-    int frameIndex = gd.movie.cur_frame;
-    if (gd.movie.cur_frame < 0) {
-      frameIndex = gd.movie.num_frames - 1;
+    int frameIndex = _gd.movie.cur_frame;
+    if (_gd.movie.cur_frame < 0) {
+      frameIndex = _gd.movie.num_frames - 1;
     }
-    _horiz->setFrameForRendering(gd.h_win.page, frameIndex);
+    _horiz->setFrameForRendering(_gd.h_win.page, frameIndex);
     _horiz->update();
-    // gd.redraw_horiz = false;
-    if (gd.h_win.page < gd.num_datafields) {
-      _vlevelManager.set(*gd.mread[gd.h_win.page]);
+    // _gd.redraw_horiz = false;
+    if (_gd.h_win.page < _gd.num_datafields) {
+      _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
     }
     _vlevelSelector->update();
   }
@@ -621,7 +624,7 @@ void GuiManager::_setupWindows()
   
   // time panel
   
-  _timeControl = new TimeControl(this, _params);
+  _timeControl = new TimeControl(this);
   
   // fill out menu bar
 
@@ -884,7 +887,7 @@ void GuiManager::_populateMapsMenu()
     QAction *act = new QAction;
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
-    item->setOverlay(gd.overlays[imap]);
+    item->setOverlay(_gd.overlays[imap]);
     item->setAction(act);
     act->setText(mparams.map_code);
     act->setStatusTip(tr("Turn map layer on/off"));
@@ -944,7 +947,7 @@ void GuiManager::_populateProductsMenu()
     // create action for this entry
 
     ProdMenuItem *item = new ProdMenuItem;
-    const Product *product = gd.prod_mgr->getProduct(iprod);
+    const Product *product = _gd.prod_mgr->getProduct(iprod);
     QAction *act = new QAction;
     item->setProdParams(&prodParams);
     item->setProduct(product);
@@ -1011,7 +1014,7 @@ void GuiManager::_populateWindsMenu()
     QAction *act = new QAction;
     item->setWindParams(&wparams);
     item->setWindIndex(iwind);
-    item->setWindData(&gd.layers.wind[iwind]);
+    item->setWindData(&_gd.layers.wind[iwind]);
     item->setAction(act);
     act->setText(wparams.button_label);
     act->setStatusTip(tr("Turn wind layer on/off"));
@@ -1084,7 +1087,7 @@ void GuiManager::_populateZoomsMenu()
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));
     act->setCheckable(true);
-    if (izoom == gd.h_win.zoom_level) {
+    if (izoom == _gd.h_win.zoom_level) {
       act->setChecked(true);
     }
     
@@ -1247,7 +1250,7 @@ void GuiManager::_populateOverlaysMenu()
 //       _moveUpDown();
 
 //       _vlevelHasChanged = true;
-//       gd.redraw_horiz = true;
+//       _gd.redraw_horiz = true;
       
 //       // reloadBoundaries();
 //       return;
@@ -1276,7 +1279,7 @@ void GuiManager::_populateOverlaysMenu()
 //   if (increment != 0) {
 //     _vlevelManager.changeIndexInGui(increment);
 //     _vlevelRButtons->at(_vlevelManager.getIndexInGui())->setChecked(true);
-//     gd.redraw_horiz = true;
+//     _gd.redraw_horiz = true;
 //   }
   
 // }
@@ -1837,7 +1840,7 @@ void GuiManager::_zoomBack()
     _zoomBackAct->setEnabled(false);
     _zoomOutAct->setEnabled(false);
   }
-  // gd.redraw_horiz = true;
+  // _gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -1849,7 +1852,7 @@ void GuiManager::_zoomOut()
   _horiz->clearSavedZooms();
   _zoomBackAct->setEnabled(false);
   _zoomOutAct->setEnabled(false);
-  // gd.redraw_horiz = true;
+  // _gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -2287,24 +2290,24 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   _prevFieldNum = _fieldNum;
   _fieldNum = item->getFieldIndex();
   
-  gd.prev_field = gd.h_win.page;
+  _gd.prev_field = _gd.h_win.page;
   _setField(_fieldNum);
-  gd.mread[_fieldNum]->h_data_valid = 0;
+  _gd.mread[_fieldNum]->h_data_valid = 0;
 
   if (_params.debug) {
     const Params::field_t *fparams = item->getFieldParams();
     cerr << "Changing to field: " << fparams->button_label << endl;
     cerr << "              url: " << fparams->url << endl;
     cerr << "         fieldNum: " << _fieldNum << endl;
-    cerr << "      field_label: " << gd.mread[_fieldNum]->field_label << endl;
-    cerr << "      button_name: " << gd.mread[_fieldNum]->button_name << endl;
-    cerr << "      legend_name: " << gd.mread[_fieldNum]->legend_name << endl;
+    cerr << "      field_label: " << _gd.mread[_fieldNum]->field_label << endl;
+    cerr << "      button_name: " << _gd.mread[_fieldNum]->button_name << endl;
+    cerr << "      legend_name: " << _gd.mread[_fieldNum]->legend_name << endl;
   }
 
-  // gd.redraw_horiz = true;
-  gd.field_has_changed = true;
-  gd.selected_field = _fieldNum;
-  gd.h_win.page = _fieldNum;
+  // _gd.redraw_horiz = true;
+  _gd.field_has_changed = true;
+  _gd.selected_field = _fieldNum;
+  _gd.h_win.page = _fieldNum;
 
   _fieldHasChanged = true;
   
@@ -2323,42 +2326,42 @@ void GuiManager::_setField(int value)
   
   if(value < 0) {
     int tmp = last_page;
-    last_page = gd.h_win.page;
-    gd.h_win.page = tmp;
-    gd.v_win.page = tmp;
+    last_page = _gd.h_win.page;
+    _gd.h_win.page = tmp;
+    _gd.v_win.page = tmp;
     tmp = cur_value;
     cur_value = last_value;
     value = last_value;
     last_value = tmp;
   } else {
-    last_page = gd.h_win.page;
+    last_page = _gd.h_win.page;
     last_value = cur_value;
     cur_value = value;
-    gd.h_win.page = gd.field_index[value];
-    gd.v_win.page = gd.field_index[value];
+    _gd.h_win.page = _gd.field_index[value];
+    _gd.v_win.page = _gd.field_index[value];
   }
   
-  for(int i=0; i < gd.num_datafields; i++) {
-    if(gd.mread[i]->auto_render == 0) gd.h_win.redraw_flag[i] = 1;
+  for(int i=0; i < _gd.num_datafields; i++) {
+    if(_gd.mread[i]->auto_render == 0) _gd.h_win.redraw_flag[i] = 1;
   }
   
-  if(gd.mread[gd.h_win.page]->auto_render && 
-     gd.h_win.page_pdev[gd.h_win.page] != 0 &&
-     gd.h_win.redraw_flag[gd.h_win.page] == 0) {
+  if(_gd.mread[_gd.h_win.page]->auto_render && 
+     _gd.h_win.page_pdev[_gd.h_win.page] != 0 &&
+     _gd.h_win.redraw_flag[_gd.h_win.page] == 0) {
 
 #ifdef NOTNOW
-    save_h_movie_frame(gd.movie.cur_frame,
-                       gd.h_win.page_pdev[gd.h_win.page],
-                       gd.h_win.page);
+    save_h_movie_frame(_gd.movie.cur_frame,
+                       _gd.h_win.page_pdev[_gd.h_win.page],
+                       _gd.h_win.page);
 #endif
     
   }
   
-  for(int i=0; i < MAX_FRAMES; i++) {
-    gd.movie.frame[i].redraw_horiz = 1;
+  for(int i=0; i < Constants::MAX_FRAMES; i++) {
+    _gd.movie.frame[i].redraw_horiz = 1;
   }
   
-  if(gd.movie.movie_on ) {
+  if(_gd.movie.movie_on ) {
     // reset_data_valid_flags(1,0);
   }
   
@@ -3091,20 +3094,20 @@ void GuiManager::_handleClientEvent()
   
   time_t clock;
   
-  if(gd.debug1) {
+  if(_gd.debug1) {
     fprintf(stderr,
             "Found Client Event: %d, Args: %s\n",
-            gd.coord_expt->client_event,
-            gd.coord_expt->client_args);
+            _gd.coord_expt->client_event,
+            _gd.coord_expt->client_args);
   }
   
-  switch(gd.coord_expt->client_event) {
+  switch(_gd.coord_expt->client_event) {
     case NEW_MDV_AVAIL:
-      remote_new_mdv_avail(gd.coord_expt->client_args);
+      remote_new_mdv_avail(_gd.coord_expt->client_args);
       break;
       
     case NEW_SPDB_AVAIL:
-      remote_new_spdb_avail(gd.coord_expt->client_args);
+      remote_new_spdb_avail(_gd.coord_expt->client_args);
       break;
 
     case RELOAD_DATA:
@@ -3114,46 +3117,46 @@ void GuiManager::_handleClientEvent()
 
     case SET_FRAME_NUM:
       int	frame;
-      if((sscanf(gd.coord_expt->client_args,"%d",&frame)) == 1) {
+      if((sscanf(_gd.coord_expt->client_args,"%d",&frame)) == 1) {
         /* Sanity Check */
         if(frame <= 0 ) frame = 1;
-        if(frame > gd.movie.num_frames ) frame = gd.movie.num_frames ;
+        if(frame > _gd.movie.num_frames ) frame = _gd.movie.num_frames ;
 
-        gd.movie.cur_frame = frame - 1;
+        _gd.movie.cur_frame = frame - 1;
       } else {
-        fprintf(stderr,"Invalid SET_FRAME_NUM: Args: %s\n",gd.coord_expt->client_args);
+        fprintf(stderr,"Invalid SET_FRAME_NUM: Args: %s\n",_gd.coord_expt->client_args);
       }
       break;
 
     case SET_NUM_FRAMES:
       int	nframes;
-      if((sscanf(gd.coord_expt->client_args,"%d",&nframes)) == 1) {
+      if((sscanf(_gd.coord_expt->client_args,"%d",&nframes)) == 1) {
         _setEndFrame(nframes);
       } else {
-        fprintf(stderr,"Invalid SET_NUM_FRAMES: Args: %s\n",gd.coord_expt->client_args);
+        fprintf(stderr,"Invalid SET_NUM_FRAMES: Args: %s\n",_gd.coord_expt->client_args);
       }
       break;
 
     case SET_REALTIME:
-      gd.movie.mode = REALTIME_MODE;
-      gd.movie.cur_frame = gd.movie.num_frames -1;
-      gd.movie.end_frame = gd.movie.num_frames -1;
+      _gd.movie.mode = REALTIME_MODE;
+      _gd.movie.cur_frame = _gd.movie.num_frames -1;
+      _gd.movie.end_frame = _gd.movie.num_frames -1;
       clock = time(0);
-      gd.movie.start_time = clock - (time_t) ((gd.movie.num_frames -1) *
-                                              gd.movie.time_interval_mins * 60.0);
-      gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
-      gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
-      gd.coord_expt->time_seq_num++;
+      _gd.movie.start_time = clock - (time_t) ((_gd.movie.num_frames -1) *
+                                              _gd.movie.time_interval_mins * 60.0);
+      _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
+      _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
+      _gd.coord_expt->time_seq_num++;
 
       // reset_time_points();
       // invalidate_all_data();
       // set_redraw_flags(1,1);
 
       // Set forecast and past time choosers to "now"
-      // xv_set(gd.fcast_pu->fcast_st,PANEL_VALUE,0,NULL);
-      // xv_set(gd.past_pu->past_hr_st,PANEL_VALUE,0,NULL);
+      // xv_set(_gd.fcast_pu->fcast_st,PANEL_VALUE,0,NULL);
+      // xv_set(_gd.past_pu->past_hr_st,PANEL_VALUE,0,NULL);
       // Set movie mode widget to REALTIME 
-      // xv_set(gd.movie_pu->movie_type_st,PANEL_VALUE,0,NULL);
+      // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,0,NULL);
 
       break;
 
@@ -3161,7 +3164,7 @@ void GuiManager::_handleClientEvent()
       UTIMstruct ts;
       time_t interest_time;
 
-      if((sscanf(gd.coord_expt->client_args,"%ld %ld %ld %ld %ld %ld",
+      if((sscanf(_gd.coord_expt->client_args,"%ld %ld %ld %ld %ld %ld",
                  &ts.year,&ts.month,&ts.day, &ts.hour,&ts.min,&ts.sec)) == 6) {
 		
         interest_time = UTIMdate_to_unix(&ts);
@@ -3170,7 +3173,7 @@ void GuiManager::_handleClientEvent()
         // invalidate_all_data();
         // set_redraw_flags(1,1);
       } else {
-        fprintf(stderr,"Invalid SET_TIME Args: %s\n",gd.coord_expt->client_args);
+        fprintf(stderr,"Invalid SET_TIME Args: %s\n",_gd.coord_expt->client_args);
       }
       break;
 
@@ -3179,7 +3182,7 @@ void GuiManager::_handleClientEvent()
   }
 
   // Reset  the command
-  gd.coord_expt->client_event = NO_MESSAGE;
+  _gd.coord_expt->client_event = NO_MESSAGE;
 
 #endif
   
@@ -3197,31 +3200,31 @@ void GuiManager::_checkForExpiredData(time_t tm)
 
   // Mark all data past the expiration data as invalid
   /* look thru primary data fields */
-  for (i=0; i < gd.num_datafields; i++) {
+  for (i=0; i < _gd.num_datafields; i++) {
     /* if data has expired or field should be updated */
-    if (gd.mread[i]->h_mhdr.time_expire < tm ) {
-      //        if(gd.debug1) fprintf(stderr,"Field: %s expired at %s\n",
-      //		 gd.mread[i]->button_name,
-      //		 asctime(gmtime(&((time_t) gd.mread[i]->h_mhdr.time_expire))));
-      gd.mread[i]->h_data_valid = 0;
-      gd.mread[i]->v_data_valid = 0;
+    if (_gd.mread[i]->h_mhdr.time_expire < tm ) {
+      //        if(_gd.debug1) fprintf(stderr,"Field: %s expired at %s\n",
+      //		 _gd.mread[i]->button_name,
+      //		 asctime(gmtime(&((time_t) _gd.mread[i]->h_mhdr.time_expire))));
+      _gd.mread[i]->h_data_valid = 0;
+      _gd.mread[i]->v_data_valid = 0;
     }
   }
 
   /* Look through wind field data too */
-  for (i=0; i < gd.layers.num_wind_sets; i++ ) {
-    if (gd.layers.wind[i].active) {
-      if (gd.layers.wind[i].wind_u->h_mhdr.time_expire < tm) {
-        gd.layers.wind[i].wind_u->h_data_valid = 0;
-        gd.layers.wind[i].wind_u->v_data_valid = 0;
+  for (i=0; i < _gd.layers.num_wind_sets; i++ ) {
+    if (_gd.layers.wind[i].active) {
+      if (_gd.layers.wind[i].wind_u->h_mhdr.time_expire < tm) {
+        _gd.layers.wind[i].wind_u->h_data_valid = 0;
+        _gd.layers.wind[i].wind_u->v_data_valid = 0;
       }
-      if (gd.layers.wind[i].wind_v->h_mhdr.time_expire < tm) {
-        gd.layers.wind[i].wind_v->h_data_valid = 0;
-        gd.layers.wind[i].wind_v->v_data_valid = 0;
+      if (_gd.layers.wind[i].wind_v->h_mhdr.time_expire < tm) {
+        _gd.layers.wind[i].wind_v->h_data_valid = 0;
+        _gd.layers.wind[i].wind_v->v_data_valid = 0;
       }
-      if (gd.layers.wind[i].wind_w != NULL && gd.layers.wind[i].wind_w->h_mhdr.time_expire < tm) {
-        gd.layers.wind[i].wind_w->h_data_valid = 0;
-        gd.layers.wind[i].wind_w->v_data_valid = 0;
+      if (_gd.layers.wind[i].wind_w != NULL && _gd.layers.wind[i].wind_w->h_mhdr.time_expire < tm) {
+        _gd.layers.wind[i].wind_w->h_data_valid = 0;
+        _gd.layers.wind[i].wind_w->v_data_valid = 0;
       }
     }
   }
@@ -3243,9 +3246,9 @@ void GuiManager::_checkForDataUpdates(time_t tm)
 
     // Force a reload of the data
     // reset_data_valid_flags(1,1);
-    if (gd.prod_mgr) {
-      gd.prod_mgr->reset_product_valid_flags();
-      gd.prod_mgr->reset_times_valid_flags();
+    if (_gd.prod_mgr) {
+      _gd.prod_mgr->reset_product_valid_flags();
+      _gd.prod_mgr->reset_times_valid_flags();
     }
 
   } else {   // Got valid  data back from the Data Mapper
@@ -3253,16 +3256,16 @@ void GuiManager::_checkForDataUpdates(time_t tm)
     int nsets = dmap.getNInfo();
 
 
-    if(gd.debug1) fprintf(stderr,"Found %d Datamapper info sets\n",nsets);
+    if(_gd.debug1) fprintf(stderr,"Found %d Datamapper info sets\n",nsets);
 
     /* look thru all data fields */
 
-    for (i=0; i < gd.num_datafields; i++) {
+    for (i=0; i < _gd.num_datafields; i++) {
 
       // pull out dir from URL
 
       char tmpUrl[MAX_PATH_LEN];
-      strncpy(tmpUrl, gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
+      strncpy(tmpUrl, _gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
       end_ptr = strrchr(tmpUrl, '&');
       if(end_ptr == NULL) continue;  // broken URL.
       
@@ -3283,24 +3286,24 @@ void GuiManager::_checkForDataUpdates(time_t tm)
 	// See if any data matches
 	if(strstr(info.dir,dir_buf) != NULL) {
           // Note unix_time is signed (time_t)  and info.end_time is unsigned int
-          if (gd.mread[i]->h_date.utime() < (time_t) info.end_time) {
-            gd.mread[i]->h_data_valid = 0;
-            gd.mread[i]->v_data_valid = 0;
+          if (_gd.mread[i]->h_date.utime() < (time_t) info.end_time) {
+            _gd.mread[i]->h_data_valid = 0;
+            _gd.mread[i]->v_data_valid = 0;
           }
 	}
       }
     }
     
-    for (i=0; i < gd.layers.num_wind_sets; i++ ) {
+    for (i=0; i < _gd.layers.num_wind_sets; i++ ) {
       /* Look through wind field data too */
-      if (gd.layers.wind[i].active) {
+      if (_gd.layers.wind[i].active) {
 	// pull out dir from URL
 
         char tmpUrl[MAX_PATH_LEN];
-        strncpy(tmpUrl, gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
+        strncpy(tmpUrl, _gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
         
         char tmp2[MAX_PATH_LEN];
-        strncpy(tmp2, gd.layers.wind[i].wind_u->url.c_str(), MAX_PATH_LEN - 1);
+        strncpy(tmp2, _gd.layers.wind[i].wind_u->url.c_str(), MAX_PATH_LEN - 1);
 	end_ptr = strrchr(tmp2,'&');
 	if(end_ptr == NULL) continue;  // broken URL.
         
@@ -3320,14 +3323,14 @@ void GuiManager::_checkForDataUpdates(time_t tm)
           // See if any data matches
           if(strstr(info.dir,dir_buf) != NULL) {
             // Check if that data is more current
-            if (gd.layers.wind[i].wind_u->h_date.utime() < (time_t) info.end_time) {
-              gd.layers.wind[i].wind_u->h_data_valid = 0;
-              gd.layers.wind[i].wind_u->v_data_valid = 0;
-              gd.layers.wind[i].wind_v->h_data_valid = 0;
-              gd.layers.wind[i].wind_v->v_data_valid = 0;
-              if (gd.layers.wind[i].wind_w != NULL) {
-		gd.layers.wind[i].wind_w->h_data_valid = 0;
-		gd.layers.wind[i].wind_w->v_data_valid = 0;
+            if (_gd.layers.wind[i].wind_u->h_date.utime() < (time_t) info.end_time) {
+              _gd.layers.wind[i].wind_u->h_data_valid = 0;
+              _gd.layers.wind[i].wind_u->v_data_valid = 0;
+              _gd.layers.wind[i].wind_v->h_data_valid = 0;
+              _gd.layers.wind[i].wind_v->v_data_valid = 0;
+              if (_gd.layers.wind[i].wind_w != NULL) {
+		_gd.layers.wind[i].wind_w->h_data_valid = 0;
+		_gd.layers.wind[i].wind_w->v_data_valid = 0;
               }
             }
           }  // If a match
@@ -3335,7 +3338,7 @@ void GuiManager::_checkForDataUpdates(time_t tm)
       }   // If wind layer is active
     }     // For all wind layers
 
-    gd.prod_mgr->check_product_validity(tm, dmap);
+    _gd.prod_mgr->check_product_validity(tm, dmap);
   } // If data mapper info is availible
 }
 
@@ -3349,38 +3352,38 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
   // If data used to draw plan view is invalid
   // Indicate plan view image needs rerendering
   
-  if (gd.mread[gd.h_win.page]->h_data_valid == 0 ||
-      gd.prod_mgr->num_products_invalid() > 0) {
-    gd.movie.frame[frame_index].redraw_horiz = 1;
-    gd.h_win.redraw_flag[gd.h_win.page] = 1;
+  if (_gd.mread[_gd.h_win.page]->h_data_valid == 0 ||
+      _gd.prod_mgr->num_products_invalid() > 0) {
+    _gd.movie.frame[frame_index].redraw_horiz = 1;
+    _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
   }
 
-  for ( i=0; i < gd.layers.num_wind_sets; i++ ) {
+  for ( i=0; i < _gd.layers.num_wind_sets; i++ ) {
     // Look through wind field data too
-    if (gd.layers.wind[i].active) {
-      if (gd.layers.wind[i].wind_u->h_data_valid == 0) {
-        gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw_flag[gd.h_win.page] = 1;
+    if (_gd.layers.wind[i].active) {
+      if (_gd.layers.wind[i].wind_u->h_data_valid == 0) {
+        _gd.movie.frame[frame_index].redraw_horiz = 1;
+        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
       }
-      if (gd.layers.wind[i].wind_v->h_data_valid == 0) {
-        gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw_flag[gd.h_win.page] = 1;
+      if (_gd.layers.wind[i].wind_v->h_data_valid == 0) {
+        _gd.movie.frame[frame_index].redraw_horiz = 1;
+        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
       }
-      if (gd.layers.wind[i].wind_w != NULL &&
-          gd.layers.wind[i].wind_w->h_data_valid == 0) {
-        gd.movie.frame[frame_index].redraw_horiz = 1;
-        gd.h_win.redraw_flag[gd.h_win.page] = 1;
+      if (_gd.layers.wind[i].wind_w != NULL &&
+          _gd.layers.wind[i].wind_w->h_data_valid == 0) {
+        _gd.movie.frame[frame_index].redraw_horiz = 1;
+        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
       }
     }
   }
 
   // Check overlay contours if active
 
-  for(i= 0; i < NUM_CONT_LAYERS; i++) {
-    if(gd.layers.cont[i].active) {
-      if(gd.mread[gd.layers.cont[i].field]->h_data_valid == 0) {
-	gd.movie.frame[frame_index].redraw_horiz = 1;
-	gd.h_win.redraw_flag[gd.h_win.page] = 1;
+  for(i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
+    if(_gd.layers.cont[i].active) {
+      if(_gd.mread[_gd.layers.cont[i].field]->h_data_valid == 0) {
+	_gd.movie.frame[frame_index].redraw_horiz = 1;
+	_gd.h_win.redraw_flag[_gd.h_win.page] = 1;
       }
     }
   } 
@@ -3388,37 +3391,37 @@ void GuiManager::_checkWhatNeedsRendering(int frame_index)
   // If data used to draw cross section is invalid
   // Indicate pcross section image needs rerendering
   
-  if (gd.v_win.active ) {
-    if(gd.mread[gd.v_win.page]->v_data_valid == 0)  {
-      gd.movie.frame[frame_index].redraw_vert = 1;
-      gd.v_win.redraw_flag[gd.v_win.page] = 1;
+  if (_gd.v_win.active ) {
+    if(_gd.mread[_gd.v_win.page]->v_data_valid == 0)  {
+      _gd.movie.frame[frame_index].redraw_vert = 1;
+      _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
     }
 
-    for ( i=0; i < gd.layers.num_wind_sets; i++ ) {
+    for ( i=0; i < _gd.layers.num_wind_sets; i++ ) {
       /* Look through wind field data too */
-      if (gd.layers.wind[i].active) {
-	if (gd.layers.wind[i].wind_u->v_data_valid == 0) {
-          gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw_flag[gd.v_win.page] = 1;
+      if (_gd.layers.wind[i].active) {
+	if (_gd.layers.wind[i].wind_u->v_data_valid == 0) {
+          _gd.movie.frame[frame_index].redraw_vert = 1;
+          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
 	}
-	if (gd.layers.wind[i].wind_v->v_data_valid == 0) {
-          gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw_flag[gd.v_win.page] = 1;
+	if (_gd.layers.wind[i].wind_v->v_data_valid == 0) {
+          _gd.movie.frame[frame_index].redraw_vert = 1;
+          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
 	}
-	if (gd.layers.wind[i].wind_w != NULL &&
-            gd.layers.wind[i].wind_w->v_data_valid == 0) {
-          gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw_flag[gd.v_win.page] = 1;
+	if (_gd.layers.wind[i].wind_w != NULL &&
+            _gd.layers.wind[i].wind_w->v_data_valid == 0) {
+          _gd.movie.frame[frame_index].redraw_vert = 1;
+          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
 	}
       }
     }
 
     /* Check overlay contours if active */
-    for(i= 0; i < NUM_CONT_LAYERS; i++) {
-      if(gd.layers.cont[i].active) {
-	if(gd.mread[gd.layers.cont[i].field]->v_data_valid == 0) {
-          gd.movie.frame[frame_index].redraw_vert = 1;
-          gd.v_win.redraw_flag[gd.v_win.page] = 1;
+    for(i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
+      if(_gd.layers.cont[i].active) {
+	if(_gd.mread[_gd.layers.cont[i].field]->v_data_valid == 0) {
+          _gd.movie.frame[frame_index].redraw_vert = 1;
+          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
 	}
       }
     } 
@@ -3593,27 +3596,27 @@ void GuiManager::_setDisplayTime(time_t utime)
   time_t    last_time;
   time_t    target_time;
 
-  movie_frame_t    tmp_frame[MAX_FRAMES];    /* info about each frame */
+  movie_frame_t    tmp_frame[Constants::MAX_FRAMES];    /* info about each frame */
 
-  last_time = gd.movie.start_time;
+  last_time = _gd.movie.start_time;
      
   // Round to the nearest even interval 
-  utime -= (utime % gd.movie.round_to_seconds);
+  utime -= (utime % _gd.movie.round_to_seconds);
 
   // Already set to this time
-  if(utime == gd.movie.start_time) return;
+  if(utime == _gd.movie.start_time) return;
 
   /* if starting time moves more than 2 volume intervals, assume we want archive mode */
-  if(abs(last_time - utime) > (2 * gd.movie.time_interval_mins * 60)) {
-    gd.movie.mode = ARCHIVE_MODE;
-    gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
-    gd.coord_expt->time_seq_num++;
-    // xv_set(gd.movie_pu->movie_type_st,PANEL_VALUE,ARCHIVE_MODE,NULL);
+  if(abs(last_time - utime) > (2 * _gd.movie.time_interval_mins * 60)) {
+    _gd.movie.mode = ARCHIVE_MODE;
+    _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
+    _gd.coord_expt->time_seq_num++;
+    // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,ARCHIVE_MODE,NULL);
 
   } else {
-    if(gd.movie.mode == REALTIME_MODE) {
-      gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
-      gd.coord_expt->time_seq_num++;
+    if(_gd.movie.mode == REALTIME_MODE) {
+      _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
+      _gd.coord_expt->time_seq_num++;
 
       // Not Sensible to change start times in real time mode - Ignore;
       _updateMoviePopup();
@@ -3621,64 +3624,67 @@ void GuiManager::_setDisplayTime(time_t utime)
     }
   }
 
-  gd.movie.start_time = utime;
+  _gd.movie.start_time = utime;
 
   // Record the time we're currently on
-  target_time = gd.movie.frame[gd.movie.cur_frame].time_start;
+  target_time = _gd.movie.frame[_gd.movie.cur_frame].time_start;
 
   // Make a temporary copy
-  memcpy(tmp_frame,gd.movie.frame,sizeof(movie_frame_t) * MAX_FRAMES);
-
   // Zero out global array
-  memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
-
+  for (int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
+    tmp_frame[ii] = _gd.movie.frame[ii];
+    _gd.movie.frame[ii].init();
+  }
+  // memcpy(tmp_frame,_gd.movie.frame,sizeof(movie_frame_t) * Constants::MAX_FRAMES);
+  
+  
   // Fill in time points on global array
   // reset_time_points();
 
   // Search for frames already rendered for this interval and use them
-  for(i=0 ; i < gd.movie.num_frames; i++) {
+  for(i=0 ; i < _gd.movie.num_frames; i++) {
     found = 0;
-    for(j=0; j < MAX_FRAMES && !found; j++) {
-      if(gd.movie.frame[i].time_start == tmp_frame[j].time_start) {
+    for(j=0; j < Constants::MAX_FRAMES && !found; j++) {
+      if(_gd.movie.frame[i].time_start == tmp_frame[j].time_start) {
         found = 1;
-        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+        _gd.movie.frame[i] = tmp_frame[j];
         // Render a new time selector for this frame
 #ifdef NOTYET
-        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
-                             gd.movie.frame[i].time_start,
-                             gd.movie.frame[i].time_end);
+        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
+                             _gd.movie.frame[i].time_start,
+                             _gd.movie.frame[i].time_end);
 #endif
-        memset(&tmp_frame[j],0,sizeof(movie_frame_t));
+        tmp_frame[j].init();
       }
 	 
     }
   }
 
   // Reuse pixmaps in unused frames
-  for(i=0 ; i < gd.movie.num_frames; i++) {
-    if(gd.movie.frame[i].h_pdev) continue; // Alreday is accounted for.
+  for(i=0 ; i < _gd.movie.num_frames; i++) {
+    if(_gd.movie.frame[i].h_pdev) continue; // Alreday is accounted for.
 
     found = 0;
 #ifdef NOTYET
-    for(j=0; j < MAX_FRAMES && !found; j++) {
+    for(j=0; j < Constants::MAX_FRAMES && !found; j++) {
       if(tmp_frame[j].h_xid) {
         found = 1;
-        gd.movie.frame[i].h_xid = tmp_frame[j].h_xid;
-        gd.movie.frame[i].v_xid = tmp_frame[j].v_xid;
-        gd.movie.frame[i].redraw_horiz = 1;
-        gd.movie.frame[i].redraw_vert = 1;
+        _gd.movie.frame[i].h_xid = tmp_frame[j].h_xid;
+        _gd.movie.frame[i].v_xid = tmp_frame[j].v_xid;
+        _gd.movie.frame[i].redraw_horiz = 1;
+        _gd.movie.frame[i].redraw_vert = 1;
         memset(&tmp_frame[j],0,sizeof(movie_frame_t));
       }
     }
 #endif
   }
 
-  gd.movie.cur_frame = 0;
-  for(i=0; i < gd.movie.num_frames; i++) {
-    if(target_time >= gd.movie.frame[i].time_start &&
-       target_time <= gd.movie.frame[i].time_end) {
+  _gd.movie.cur_frame = 0;
+  for(i=0; i < _gd.movie.num_frames; i++) {
+    if(target_time >= _gd.movie.frame[i].time_start &&
+       target_time <= _gd.movie.frame[i].time_end) {
 
-      gd.movie.cur_frame = i;
+      _gd.movie.cur_frame = i;
     }
   }
 
@@ -3697,108 +3703,109 @@ void GuiManager::_setEndFrame(int num_frames)
 {
   int i,j;
   time_t    target_time;
-  movie_frame_t    tmp_frame[MAX_FRAMES];    /* info about each frame */
+  movie_frame_t    tmp_frame[Constants::MAX_FRAMES];    /* info about each frame */
   int old_frames;
 
-  gd.movie.end_frame = num_frames -1;
-
+  _gd.movie.end_frame = num_frames -1;
+  
   // Sanity check
-  if(gd.movie.end_frame < 0) gd.movie.end_frame = 0;
-  if(gd.movie.end_frame >= MAX_FRAMES) gd.movie.end_frame = MAX_FRAMES -1;
-  old_frames = gd.movie.num_frames;
-  gd.movie.num_frames = gd.movie.end_frame +1;
-
-  if(gd.movie.num_frames > 1) {
-    // xv_set(gd.movie_pu->movie_frame_sl,XV_SHOW,TRUE,NULL);
+  if(_gd.movie.end_frame < 0) _gd.movie.end_frame = 0;
+  if(_gd.movie.end_frame >= Constants::MAX_FRAMES) _gd.movie.end_frame = Constants::MAX_FRAMES -1;
+  old_frames = _gd.movie.num_frames;
+  _gd.movie.num_frames = _gd.movie.end_frame +1;
+  
+  if(_gd.movie.num_frames > 1) {
+    // xv_set(_gd.movie_pu->movie_frame_sl,XV_SHOW,TRUE,NULL);
   } else {
-    // xv_set(gd.movie_pu->movie_frame_sl,XV_SHOW,FALSE,NULL);
+    // xv_set(_gd.movie_pu->movie_frame_sl,XV_SHOW,FALSE,NULL);
   }
 
-  target_time = gd.movie.frame[gd.movie.cur_frame].time_start;
+  target_time = _gd.movie.frame[_gd.movie.cur_frame].time_start;
 
-  if(gd.movie.mode == REALTIME_MODE) {
-    gd.movie.cur_frame = gd.movie.end_frame;
+  if(_gd.movie.mode == REALTIME_MODE) {
+    _gd.movie.cur_frame = _gd.movie.end_frame;
     // Make a temporary copy
-    memcpy(tmp_frame,gd.movie.frame,sizeof(movie_frame_t) * MAX_FRAMES);
-
     // Zero out global array
-    memset(gd.movie.frame,0,sizeof(movie_frame_t) * MAX_FRAMES);
-
+    for (int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
+      tmp_frame[ii] = _gd.movie.frame[ii];
+      _gd.movie.frame[ii].init();
+    }
+    
     // Start point changes
-    gd.movie.start_time -= (time_t) ((gd.movie.time_interval_mins * 60.0) *
-                                     (gd.movie.num_frames - old_frames));
-
+    _gd.movie.start_time -= (time_t) ((_gd.movie.time_interval_mins * 60.0) *
+                                      (_gd.movie.num_frames - old_frames));
+    
     // reset_time_points();
-	 
-    if(gd.movie.num_frames > old_frames) {
+    
+    if(_gd.movie.num_frames > old_frames) {
       // copy original frames
-      for(i = gd.movie.num_frames - old_frames, j = 0; j < old_frames; i++, j++) {
-        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
-
+      for(i = _gd.movie.num_frames - old_frames, j = 0; j < old_frames; i++, j++) {
+        _gd.movie.frame[i] = tmp_frame[j];
+        
         // Render time selector in reused frame
 #ifdef NOTYET
-        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
-                             gd.movie.frame[i].time_start,
-                             gd.movie.frame[i].time_end);
+        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
+                             _gd.movie.frame[i].time_start,
+                             _gd.movie.frame[i].time_end);
 #endif
       }
-
+      
       // Mark new frames for allocation & redrawing
-      j = gd.movie.num_frames - old_frames;
+      j = _gd.movie.num_frames - old_frames;
       for(i = 0; i < j; i++) {
-        gd.movie.frame[i].redraw_horiz = 1;
-        gd.movie.frame[i].redraw_vert = 1;
+        _gd.movie.frame[i].redraw_horiz = 1;
+        _gd.movie.frame[i].redraw_vert = 1;
       }
     } else {
-      for(i = 0, j = old_frames - gd.movie.num_frames ; j < old_frames; i++, j++) {
-        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+      for(i = 0, j = old_frames - _gd.movie.num_frames ; j < old_frames; i++, j++) {
+        _gd.movie.frame[i] = tmp_frame[j];
         // Render time selector in reused frame
 #ifdef NOTYET
-        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
-                             gd.movie.frame[i].time_start,
-                             gd.movie.frame[i].time_end);
+        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
+                             _gd.movie.frame[i].time_start,
+                             _gd.movie.frame[i].time_end);
 #endif
       }
       // Copy unused frames too so they get de-allocated
-      for(j = 0, i = gd.movie.num_frames; j < old_frames - gd.movie.num_frames; i++, j++) {
-        memcpy(&gd.movie.frame[i],&tmp_frame[j],sizeof(movie_frame_t));
+      for(j = 0, i = _gd.movie.num_frames; j < old_frames - _gd.movie.num_frames; i++, j++) {
+        _gd.movie.frame[i] = tmp_frame[j];
       }
     }
   } else {
-    gd.movie.cur_frame = 0;
+    _gd.movie.cur_frame = 0;
     // Start point remains the same
     // reset_time_points();
 
-    if(gd.movie.num_frames > old_frames) {
-      for(i = gd.movie.num_frames -1; i < old_frames; i++) {
-        gd.movie.frame[i].redraw_horiz = 1;
-        gd.movie.frame[i].redraw_vert = 1;
+    if(_gd.movie.num_frames > old_frames) {
+      for(i = _gd.movie.num_frames -1; i < old_frames; i++) {
+        _gd.movie.frame[i].redraw_horiz = 1;
+        _gd.movie.frame[i].redraw_vert = 1;
       }
       // Render time selector in reused frames
       for(i= 0; i < old_frames; i++) {
- #ifdef NOTYET
-       draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
-                             gd.movie.frame[i].time_start,
-                             gd.movie.frame[i].time_end);
+#ifdef NOTYET
+       draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
+                             _gd.movie.frame[i].time_start,
+                             _gd.movie.frame[i].time_end);
 #endif
       }
     } else {
       // Render time selector in reused frames
-      for(i= 0; i < gd.movie.num_frames; i++) {
+      for(i= 0; i < _gd.movie.num_frames; i++) {
 #ifdef NOTYET
-        draw_hwin_bot_margin(gd.movie.frame[i].h_xid,gd.h_win.page,
-                             gd.movie.frame[i].time_start,
-                             gd.movie.frame[i].time_end);
+        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
+                             _gd.movie.frame[i].time_start,
+                             _gd.movie.frame[i].time_end);
 #endif
       }
     }
   }
      
-  for(i=0; i < gd.movie.num_frames; i++) {
-    if(target_time >= gd.movie.frame[i].time_start &&
-       target_time <= gd.movie.frame[i].time_end) {
+  for(i=0; i < _gd.movie.num_frames; i++) {
+    if(target_time >= _gd.movie.frame[i].time_start &&
+       target_time <= _gd.movie.frame[i].time_end) {
 
-      gd.movie.cur_frame = i;
+      _gd.movie.cur_frame = i;
     }
   }
   // Reset gridded and product data validity flags
@@ -3822,84 +3829,84 @@ void GuiManager::_updateMoviePopup()
   char    fmt_text[128];
   struct tm tms;
 
-  if(gd.movie.cur_frame < 0) {
-    index =  gd.movie.num_frames - 1;
+  if(_gd.movie.cur_frame < 0) {
+    index =  _gd.movie.num_frames - 1;
   } else {
-    index = gd.movie.cur_frame;
+    index = _gd.movie.cur_frame;
   }
  
   /* Update the Current Frame Begin Time text */
   snprintf(fmt_text,128,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
   if(_params.use_local_timestamps) {
-    strftime (text,64,fmt_text,localtime_r(&gd.movie.frame[index].time_mid,&tms));
+    strftime (text,64,fmt_text,localtime_r(&_gd.movie.frame[index].time_mid,&tms));
   } else {
-    strftime (text,64,fmt_text,gmtime_r(&gd.movie.frame[index].time_mid,&tms));
+    strftime (text,64,fmt_text,gmtime_r(&_gd.movie.frame[index].time_mid,&tms));
   }
-  // xv_set(gd.movie_pu->fr_begin_msg,PANEL_LABEL_STRING,text,NULL);
+  // xv_set(_gd.movie_pu->fr_begin_msg,PANEL_LABEL_STRING,text,NULL);
   
   // Update the movie time start text
   if(_params.use_local_timestamps) {
     strftime (text, 64, _params.moviestart_time_format,
-              localtime_r(&gd.movie.start_time,&tms));
+              localtime_r(&_gd.movie.start_time,&tms));
   } else {
     strftime (text, 64, _params.moviestart_time_format,
-              gmtime_r(&gd.movie.start_time,&tms));
+              gmtime_r(&_gd.movie.start_time,&tms));
   }
-  // xv_set(gd.movie_pu->start_time_tx,PANEL_VALUE,text,NULL);
+  // xv_set(_gd.movie_pu->start_time_tx,PANEL_VALUE,text,NULL);
 
-  // xv_set(gd.movie_pu->movie_type_st,PANEL_VALUE,gd.movie.mode,NULL);
+  // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,_gd.movie.mode,NULL);
 
-  if(gd.debug1) printf("Time Start: %ld, End: %ld\n",gd.movie.frame[index].time_start,
-                       gd.movie.frame[index].time_end);
+  if(_gd.debug1) printf("Time Start: %ld, End: %ld\n",_gd.movie.frame[index].time_start,
+                       _gd.movie.frame[index].time_end);
    
   /* update the time_interval  text */
-  switch(gd.movie.climo_mode) {
-    case REGULAR_INTERVAL:
-      snprintf(text,64,"%.2f",gd.movie.time_interval_mins);
-      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
-      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
+  switch(_gd.movie.climo_mode) {
+    case Params::CLIMO_REGULAR_INTERVAL:
+      snprintf(text,64,"%.2f",_gd.movie.time_interval_mins);
+      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
+      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
       break;
 
-    case DAILY_INTERVAL:
-      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
-      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"day",NULL);
+    case Params::CLIMO_DAILY_INTERVAL:
+      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
+      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"day",NULL);
       break;
 
-    case YEARLY_INTERVAL:
-      // xv_set(gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
-      // xv_set(gd.movie_pu->min_msg,PANEL_LABEL_STRING,"yr",NULL);
+    case Params::CLIMO_YEARLY_INTERVAL:
+      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
+      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"yr",NULL);
       break;
 
   }
 
   /* update the forecast period text */
-  snprintf(text,64,"%.2f",gd.movie.forecast_interval);
-  // xv_set(gd.movie_pu->fcast_per_tx,PANEL_VALUE,text,NULL);
+  snprintf(text,64,"%.2f",_gd.movie.forecast_interval);
+  // xv_set(_gd.movie_pu->fcast_per_tx,PANEL_VALUE,text,NULL);
 
-  // xv_set(gd.movie_pu->movie_frame_sl,
-  //        PANEL_MIN_VALUE,gd.movie.start_frame + 1,
-  //        PANEL_MAX_VALUE,gd.movie.end_frame + 1,
-  //        PANEL_VALUE,gd.movie.cur_frame +1,
+  // xv_set(_gd.movie_pu->movie_frame_sl,
+  //        PANEL_MIN_VALUE,_gd.movie.start_frame + 1,
+  //        PANEL_MAX_VALUE,_gd.movie.end_frame + 1,
+  //        PANEL_VALUE,_gd.movie.cur_frame +1,
   //        NULL);
 
   /* update the start/end frames text */
-  snprintf(text,64,"%d",gd.movie.end_frame +1);
-  // xv_set(gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
+  snprintf(text,64,"%d",_gd.movie.end_frame +1);
+  // xv_set(_gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
 
-  if (gd.prod_mgr) {
-    gd.prod_mgr->reset_times_valid_flags();
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_times_valid_flags();
   }
 
 #ifdef NOTYET
-  if(gd.time_plot)
+  if(_gd.time_plot)
   {
-    gd.time_plot->Set_times((time_t) gd.epoch_start,
-                            (time_t) gd.epoch_end,
-                            (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
-                            (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
-                            (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
-                            gd.movie.num_frames);
-    gd.time_plot->Draw(); 
+    _gd.time_plot->Set_times((time_t) _gd.epoch_start,
+                            (time_t) _gd.epoch_end,
+                            (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_start,
+                            (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_end,
+                            (time_t)((_gd.movie.time_interval_mins * 60.0) + 0.5),
+                            _gd.movie.num_frames);
+    _gd.time_plot->Draw(); 
   }
 #endif
     
@@ -3922,7 +3929,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
   struct timezone cur_tz;
 
-  // if(gd.io_info.outstanding_request) {
+  // if(_gd.io_info.outstanding_request) {
   //   check_for_io();
   // }
 
@@ -3933,11 +3940,11 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
     if(!_params.run_once_and_exit) {
       char buf[128];
       snprintf(buf,128,"Idle %d secs, Req: %d, Mode: %d, Type: %d",
-               (int) (cur_tm.tv_sec - gd.last_event_time),
-               gd.io_info.outstanding_request,
-               gd.io_info.mode,
-               gd.io_info.request_type);
-      if(gd.debug || gd.debug1 || gd.debug2) {
+               (int) (cur_tm.tv_sec - _gd.last_event_time),
+               _gd.io_info.outstanding_request,
+               _gd.io_info.mode,
+               _gd.io_info.request_type);
+      if(_gd.debug || _gd.debug1 || _gd.debug2) {
         PMU_force_register(buf);
       } else {
         PMU_auto_register(buf);
@@ -3946,79 +3953,79 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
     }
     update_ticker(cur_tm.tv_sec);
     last_tick = cur_tm.tv_sec;
-    if(gd.last_event_time < (last_tick - _params.idle_reset_seconds)) {
+    if(_gd.last_event_time < (last_tick - _params.idle_reset_seconds)) {
       reset_display();
-      gd.last_event_time = last_tick;
+      _gd.last_event_time = last_tick;
     }
   }
 
-  msec_delay = gd.movie.display_time_msec;
+  msec_delay = _gd.movie.display_time_msec;
 
   /**** Get present frame index *****/
-  if (gd.movie.cur_frame < 0) {
-    index = gd.movie.num_frames - 1;
+  if (_gd.movie.cur_frame < 0) {
+    index = _gd.movie.num_frames - 1;
   } else {
-    index = gd.movie.cur_frame;
+    index = _gd.movie.cur_frame;
   }
   // If no images or IO are pending - Check for remote commands
-  if(gd.image_needs_saved == 0 &&
-     gd.movie.frame[index].redraw_horiz == 0 &&
-     gd.io_info.outstanding_request == 0) { 
+  if(_gd.image_needs_saved == 0 &&
+     _gd.movie.frame[index].redraw_horiz == 0 &&
+     _gd.io_info.outstanding_request == 0) { 
 
-    if(gd.v_win.active == 0 || gd.movie.frame[index].redraw_vert == 0) {
-      if(gd.remote_ui != NULL) ingest_remote_commands();
+    if(_gd.v_win.active == 0 || _gd.movie.frame[index].redraw_vert == 0) {
+      if(_gd.remote_ui != NULL) ingest_remote_commands();
     }
   }
 
   // Update the times in the Coordinate SHMEM
-  gd.coord_expt->epoch_start = gd.epoch_start;
-  gd.coord_expt->epoch_end = gd.epoch_end; 
-  gd.coord_expt->time_min = gd.movie.frame[index].time_start;
-  gd.coord_expt->time_max = gd.movie.frame[index].time_end;
-  if(gd.movie.movie_on) { 
-    gd.coord_expt->time_cent = gd.coord_expt->epoch_end;
+  _gd.coord_expt->epoch_start = _gd.epoch_start;
+  _gd.coord_expt->epoch_end = _gd.epoch_end; 
+  _gd.coord_expt->time_min = _gd.movie.frame[index].time_start;
+  _gd.coord_expt->time_max = _gd.movie.frame[index].time_end;
+  if(_gd.movie.movie_on) { 
+    _gd.coord_expt->time_cent = _gd.coord_expt->epoch_end;
   } else {
-    gd.coord_expt->time_cent = gd.coord_expt->time_min +
-      (gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
+    _gd.coord_expt->time_cent = _gd.coord_expt->time_min +
+      (_gd.coord_expt->time_max - _gd.coord_expt->time_min) / 2;
   }
-  gd.coord_expt->time_current_field = gd.mread[gd.h_win.page]->h_mhdr.time_centroid;
+  _gd.coord_expt->time_current_field = _gd.mread[_gd.h_win.page]->h_mhdr.time_centroid;
 
-  if (gd.movie.movie_on ) {
+  if (_gd.movie.movie_on ) {
     flag = 1;        /* set OK state */
-    if (gd.movie.frame[index].redraw_horiz != 0) flag = 0;
-    if (gd.movie.frame[index].redraw_vert != 0 && gd.v_win.active) flag = 0;
+    if (_gd.movie.frame[index].redraw_horiz != 0) flag = 0;
+    if (_gd.movie.frame[index].redraw_vert != 0 && _gd.v_win.active) flag = 0;
 
     msec_diff =
       ((cur_tm.tv_sec - last_frame_tm.tv_sec) * 1000) +
       ((cur_tm.tv_usec - last_frame_tm.tv_usec) / 1000);
 
-    if (flag && msec_diff > gd.movie.display_time_msec) {
+    if (flag && msec_diff > _gd.movie.display_time_msec) {
       /* Advance Movie frame */
-      gd.movie.cur_frame += gd.movie.sweep_dir;    
+      _gd.movie.cur_frame += _gd.movie.sweep_dir;    
 
       /* reset to beginning of the loop if needed */
-      if (gd.movie.cur_frame > gd.movie.end_frame) {
-	if(gd.series_save_active) { // End of the Series Save - Turn off
+      if (_gd.movie.cur_frame > _gd.movie.end_frame) {
+	if(_gd.series_save_active) { // End of the Series Save - Turn off
           char cmd[4096];
-          gd.series_save_active = 0;
-          gd.movie.movie_on = 0;
+          _gd.series_save_active = 0;
+          _gd.movie.movie_on = 0;
           if(_params.series_convert_script !=NULL) {
             STRncopy(cmd,_params.series_convert_script,4096);
-            for(int ii= gd.movie.start_frame; ii <= gd.movie.end_frame; ii++) {
+            for(int ii= _gd.movie.start_frame; ii <= _gd.movie.end_frame; ii++) {
               STRconcat(cmd," ",4096);
-              STRconcat(cmd,gd.movie.frame[ii].fname,4096);
+              STRconcat(cmd,_gd.movie.frame[ii].fname,4096);
             }
             printf("Running: %s\n",cmd);
           }
           set_busy_state(1);
           safe_system(cmd,_params.complex_command_timeout_secs);
 
-          if(gd.v_win.active) {
+          if(_gd.v_win.active) {
             if(_params.series_convert_script !=NULL) {
               STRncopy(cmd,_params.series_convert_script,4096);
-              for(int ii= gd.movie.start_frame; ii <= gd.movie.end_frame; ii++) {
+              for(int ii= _gd.movie.start_frame; ii <= _gd.movie.end_frame; ii++) {
                 STRconcat(cmd," ",4096);
-                STRconcat(cmd,gd.movie.frame[ii].vfname,4096);
+                STRconcat(cmd,_gd.movie.frame[ii].vfname,4096);
               }
               printf("Running: %s\n",cmd);
             }
@@ -4027,94 +4034,94 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
           }
 
           set_busy_state(0);
-          gd.movie.cur_frame = gd.movie.end_frame;
+          _gd.movie.cur_frame = _gd.movie.end_frame;
 	} else {
-          if(gd.movie.sweep_on) {
-            gd.movie.sweep_dir = -1;
-            gd.movie.cur_frame = gd.movie.end_frame -1;
+          if(_gd.movie.sweep_on) {
+            _gd.movie.sweep_dir = -1;
+            _gd.movie.cur_frame = _gd.movie.end_frame -1;
           } else {
-            gd.movie.cur_frame = gd.movie.start_frame -1;
+            _gd.movie.cur_frame = _gd.movie.start_frame -1;
           }
 	}
       }
 
-      if(gd.movie.cur_frame < gd.movie.start_frame) { 
-        gd.movie.sweep_dir = 1;
-        if(gd.movie.sweep_on) {
-          gd.movie.cur_frame = gd.movie.start_frame+1;
+      if(_gd.movie.cur_frame < _gd.movie.start_frame) { 
+        _gd.movie.sweep_dir = 1;
+        if(_gd.movie.sweep_on) {
+          _gd.movie.cur_frame = _gd.movie.start_frame+1;
         }
       }
 	
-      if (gd.movie.cur_frame == gd.movie.end_frame) {
-        msec_delay = gd.movie.delay;
+      if (_gd.movie.cur_frame == _gd.movie.end_frame) {
+        msec_delay = _gd.movie.delay;
       }
 
       /**** recalc current frame index *****/
-      if (gd.movie.cur_frame < 0) {
-        index =  gd.movie.num_frames - 1;
+      if (_gd.movie.cur_frame < 0) {
+        index =  _gd.movie.num_frames - 1;
       } else {
-        index = gd.movie.cur_frame;
+        index = _gd.movie.cur_frame;
       }
     }
-  } // if (gd.movie.movie_on)
+  } // if (_gd.movie.movie_on)
 
   /* Set up convienient pointer to main met record */
-  mr = gd.mread[gd.h_win.page];
+  mr = _gd.mread[_gd.h_win.page];
 
   /* Decide which Pixmaps to use for rendering */
-  if (gd.movie.movie_on ) {
+  if (_gd.movie.movie_on ) {
     /* set to the movie frame Pixmaps */
-    h_pdev = gd.movie.frame[index].h_pdev;
+    h_pdev = _gd.movie.frame[index].h_pdev;
     if (h_pdev == 0) {
       if(mr->auto_render) {    
-        h_pdev = gd.h_win.page_pdev[gd.h_win.page];
+        h_pdev = _gd.h_win.page_pdev[_gd.h_win.page];
       } else {
-        h_pdev = gd.h_win.tmp_pdev;
+        h_pdev = _gd.h_win.tmp_pdev;
       }
     }
 
-    v_pdev = gd.movie.frame[index].v_pdev;
+    v_pdev = _gd.movie.frame[index].v_pdev;
     if (v_pdev == 0) {
       if(mr->auto_render) {
-        v_pdev = gd.v_win.page_pdev[gd.v_win.page];
+        v_pdev = _gd.v_win.page_pdev[_gd.v_win.page];
       } else {
-        v_pdev = gd.v_win.tmp_pdev;
+        v_pdev = _gd.v_win.tmp_pdev;
       }
     }
 	
   } else {
     /* set to the field Pixmaps */
     if(mr->auto_render) {
-      h_pdev = gd.h_win.page_pdev[gd.h_win.page];
+      h_pdev = _gd.h_win.page_pdev[_gd.h_win.page];
     } else {
-      h_pdev = gd.h_win.tmp_pdev;
+      h_pdev = _gd.h_win.tmp_pdev;
     }
 
-    if(gd.mread[gd.v_win.page]->auto_render) {
-      v_pdev = gd.v_win.page_pdev[gd.v_win.page];
+    if(_gd.mread[_gd.v_win.page]->auto_render) {
+      v_pdev = _gd.v_win.page_pdev[_gd.v_win.page];
     } else {
-      v_pdev = gd.v_win.tmp_pdev;
+      v_pdev = _gd.v_win.tmp_pdev;
     }
   }
 
   /******* Handle Real Time Updating  ********/
-  switch (gd.movie.mode) {
+  switch (_gd.movie.mode) {
     case REALTIME_MODE :
       if (time_for_a_new_frame()) {
 	rotate_movie_frames(); 
 	/* Vectors must be removed from the (currently) last frame if the wind_mode > 0 */
-	if(gd.layers.wind_mode && gd.layers.wind_vectors)  {
-          gd.movie.frame[gd.movie.cur_frame].redraw_horiz = 1;
+	if(_gd.layers.wind_mode && _gd.layers.wind_vectors)  {
+          _gd.movie.frame[_gd.movie.cur_frame].redraw_horiz = 1;
 	}
 
 	// All product data must be reloaded - Set all to invalid
-	if (gd.prod_mgr) {
-          gd.prod_mgr->reset_product_valid_flags();
-          gd.prod_mgr->reset_times_valid_flags();
+	if (_gd.prod_mgr) {
+          _gd.prod_mgr->reset_product_valid_flags();
+          _gd.prod_mgr->reset_times_valid_flags();
 	}
 
 	/* Move movie loop to the last frame when aging off old movie frames */
-	gd.movie.cur_frame = gd.movie.end_frame;
+	_gd.movie.cur_frame = _gd.movie.end_frame;
 	goto return_point;
       }
 
@@ -4123,7 +4130,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       if ( tm >= update_due ) {
 
 	/* Check only on the last frame - Because its the only "live/realtime" one */
-	if (gd.movie.cur_frame == gd.movie.num_frames -1) {
+	if (_gd.movie.cur_frame == _gd.movie.num_frames -1) {
           update_due = tm + update_interv;
 
           _checkForExpiredData(tm);  // Look for old data
@@ -4133,8 +4140,8 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
           _checkWhatNeedsRendering(index);
 
           // Auto click to get ancillary displays to update too.
-          gd.coord_expt->click_type = CIDD_OTHER_CLICK;
-          gd.coord_expt->pointer_seq_num++;
+          _gd.coord_expt->click_type = CIDD_OTHER_CLICK;
+          _gd.coord_expt->pointer_seq_num++;
 	}
       }
 
@@ -4146,22 +4153,22 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
     default:
       fprintf(stderr,
               "Invalid movie mode %d in timer_func\n",
-              gd.movie.mode);
+              _gd.movie.mode);
       break;
   } 
 
 
   /***** Handle Field changes *****/
 
-  if (gd.h_win.page != gd.h_win.prev_page) {
-    // cerr << "FFFFFFFFFFF gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
-    if (gd.movie.movie_on ) {
+  if (_gd.h_win.page != _gd.h_win.prev_page) {
+    // cerr << "FFFFFFFFFFF _gd.h_win.page, _gd.h_win.prev_page: " <<  _gd.h_win.page << ", " << _gd.h_win.prev_page << endl;
+    if (_gd.movie.movie_on ) {
       set_redraw_flags(1,0);
     } else {
-      if (gd.h_win.redraw_flag[gd.h_win.page] == 0) {
-        gd.h_copy_flag = 1;
-        gd.h_win.prev_page = gd.h_win.page;
-        // cerr << "GGGGGGGGGGGGGG gd.h_win.page, gd.h_win.prev_page: " <<  gd.h_win.page << ", " << gd.h_win.prev_page << endl;
+      if (_gd.h_win.redraw_flag[_gd.h_win.page] == 0) {
+        _gd.h_copy_flag = 1;
+        _gd.h_win.prev_page = _gd.h_win.page;
+        // cerr << "GGGGGGGGGGGGGG _gd.h_win.page, _gd.h_win.prev_page: " <<  _gd.h_win.page << ", " << _gd.h_win.prev_page << endl;
         set_redraw_flags(0,1);
         _vlevelManager.setFromMdvx();
         _createVlevelRadioButtons();
@@ -4174,81 +4181,81 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       }
     }
   }
-  if (gd.v_win.page != gd.v_win.prev_page ) {
-    if (gd.movie.movie_on ) {
+  if (_gd.v_win.page != _gd.v_win.prev_page ) {
+    if (_gd.movie.movie_on ) {
       set_redraw_flags(0,1);
     } else {
-      if (gd.v_win.redraw_flag[gd.v_win.page] == 0) {
-        gd.v_copy_flag = 1;
-        gd.v_win.prev_page = gd.v_win.page;
+      if (_gd.v_win.redraw_flag[_gd.v_win.page] == 0) {
+        _gd.v_copy_flag = 1;
+        _gd.v_win.prev_page = _gd.v_win.page;
       }
     }
   }
 
   /******** Handle Frame changes ********/
-  if (gd.movie.last_frame != gd.movie.cur_frame && gd.movie.cur_frame >= 0) {
+  if (_gd.movie.last_frame != _gd.movie.cur_frame && _gd.movie.cur_frame >= 0) {
 
     // reset_data_valid_flags(1,1);
 
     if(_params.symprod_short_requests) {
       // All product data must be reloaded - Set all to invalid
-      gd.prod_mgr->reset_product_valid_flags();
+      _gd.prod_mgr->reset_product_valid_flags();
     }
 
     /* Move the indicators */
-    // xv_set(gd.movie_pu->movie_frame_sl,
-    //        PANEL_VALUE, gd.movie.cur_frame + 1,
+    // xv_set(_gd.movie_pu->movie_frame_sl,
+    //        PANEL_VALUE, _gd.movie.cur_frame + 1,
     //        NULL);
 	
-    if(gd.debug2) {
+    if(_gd.debug2) {
       printf("Moved movie frame, index : %d\n",index);
     }
 
-    gd.coord_expt->epoch_start = gd.epoch_start;
-    gd.coord_expt->epoch_end = gd.epoch_end;
+    _gd.coord_expt->epoch_start = _gd.epoch_start;
+    _gd.coord_expt->epoch_end = _gd.epoch_end;
 
-    if(gd.movie.movie_on) {
-      gd.coord_expt->time_cent = gd.coord_expt->epoch_end;
+    if(_gd.movie.movie_on) {
+      _gd.coord_expt->time_cent = _gd.coord_expt->epoch_end;
     } else {
-      gd.coord_expt->time_min = gd.movie.frame[index].time_start;
-      gd.coord_expt->time_max = gd.movie.frame[index].time_end;
-      gd.coord_expt->time_cent = gd.coord_expt->time_min +
-	(gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
-      gd.coord_expt->click_type = CIDD_OTHER_CLICK;
-      gd.coord_expt->pointer_seq_num++;
+      _gd.coord_expt->time_min = _gd.movie.frame[index].time_start;
+      _gd.coord_expt->time_max = _gd.movie.frame[index].time_end;
+      _gd.coord_expt->time_cent = _gd.coord_expt->time_min +
+	(_gd.coord_expt->time_max - _gd.coord_expt->time_min) / 2;
+      _gd.coord_expt->click_type = CIDD_OTHER_CLICK;
+      _gd.coord_expt->pointer_seq_num++;
     }
-    gd.coord_expt->time_current_field = gd.mread[gd.h_win.page]->h_mhdr.time_centroid;
+    _gd.coord_expt->time_current_field = _gd.mread[_gd.h_win.page]->h_mhdr.time_centroid;
 
     /* Change Labels on Frame Begin, End messages */
     update_frame_time_msg(index);
 		
-    if (gd.movie.frame[index].redraw_horiz == 0) {
+    if (_gd.movie.frame[index].redraw_horiz == 0) {
       /* Get Frame */
       retrieve_h_movie_frame(index,h_pdev);
-      gd.h_copy_flag = 1;
+      _gd.h_copy_flag = 1;
     }
 
-    if (gd.v_win.active && gd.movie.frame[index].redraw_vert == 0) {
+    if (_gd.v_win.active && _gd.movie.frame[index].redraw_vert == 0) {
       retrieve_v_movie_frame(index,v_pdev);
-      gd.v_copy_flag = 1;
+      _gd.v_copy_flag = 1;
     }
 
-    gd.movie.last_frame = gd.movie.cur_frame;
+    _gd.movie.last_frame = _gd.movie.cur_frame;
   }
 
 
   /* Draw Selected field - Vertical  for this movie frame */
-  if (gd.v_win.active) {
-    if (gd.movie.frame[index].redraw_vert) {
-      if (gather_vwin_data(gd.v_win.page,gd.movie.frame[index].time_start,
-                           gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-        if (gd.v_win.redraw_flag[gd.v_win.page]) {
+  if (_gd.v_win.active) {
+    if (_gd.movie.frame[index].redraw_vert) {
+      if (gather_vwin_data(_gd.v_win.page,_gd.movie.frame[index].time_start,
+                           _gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
+        if (_gd.v_win.redraw_flag[_gd.v_win.page]) {
           render_v_movie_frame(index,v_pdev);
           save_v_movie_frame(index,v_pdev);
         } 
-        gd.movie.frame[index].redraw_vert = 0;
-        gd.v_win.redraw_flag[gd.v_win.page] = 0;
-        gd.v_copy_flag = 1;
+        _gd.movie.frame[index].redraw_vert = 0;
+        _gd.v_win.redraw_flag[_gd.v_win.page] = 0;
+        _gd.v_copy_flag = 1;
       }
     }
   }
@@ -4282,26 +4289,26 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       for (size_t jj = 0; jj < toks.size(); jj++) {
         double xx, yy;
         if (sscanf(toks[jj].c_str(), "%lg, %lg", &xx, &yy) == 2) {
-          gd.h_win.route.x_world[jj] = xx;
-          gd.h_win.route.y_world[jj] = yy;
+          _gd.h_win.route.x_world[jj] = xx;
+          _gd.h_win.route.y_world[jj] = yy;
           npts_found++;
         }
       }
 
       if (npts_found == vsect.n_waypts && npts_found > 1) {
-        gd.h_win.route.total_length = 0.0;
-        gd.h_win.route.num_segments = npts_found - 1;
-        for (int iseg = 0; iseg < gd.h_win.route.num_segments; iseg++) {
-          gd.h_win.route.seg_length[iseg] =
-            disp_proj_dist(gd.h_win.route.x_world[iseg],gd.h_win.route.y_world[iseg],
-                           gd.h_win.route.x_world[iseg+1],gd.h_win.route.y_world[iseg+1]);
-          gd.h_win.route.total_length += gd.h_win.route.seg_length[iseg];
+        _gd.h_win.route.total_length = 0.0;
+        _gd.h_win.route.num_segments = npts_found - 1;
+        for (int iseg = 0; iseg < _gd.h_win.route.num_segments; iseg++) {
+          _gd.h_win.route.seg_length[iseg] =
+            disp_proj_dist(_gd.h_win.route.x_world[iseg],_gd.h_win.route.y_world[iseg],
+                           _gd.h_win.route.x_world[iseg+1],_gd.h_win.route.y_world[iseg+1]);
+          _gd.h_win.route.total_length += _gd.h_win.route.seg_length[iseg];
         }
       }
       
-      if (gather_vwin_data(gd.v_win.page,gd.movie.frame[index].time_start,
-                           gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-        gd.series_save_active = 1;
+      if (gather_vwin_data(_gd.v_win.page,_gd.movie.frame[index].time_start,
+                           _gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
+        _gd.series_save_active = 1;
         render_v_movie_frame(index,v_pdev);
         save_v_movie_frame(index,v_pdev);
       }
@@ -4312,27 +4319,27 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
   /* Draw Selected field - Horizontal for this movie frame */
 #ifdef NOTNOW
-  if (gd.movie.frame[index].redraw_horiz) {
+  if (_gd.movie.frame[index].redraw_horiz) {
 #endif
     /* Draw Frame */
   
-    if (gather_hwin_data(gd.h_win.page,
-                         gd.movie.frame[index].time_start,
-                         gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
-      if (gd.h_win.redraw_flag[gd.h_win.page]) {
+    if (gather_hwin_data(_gd.h_win.page,
+                         _gd.movie.frame[index].time_start,
+                         _gd.movie.frame[index].time_end) == CIDD_SUCCESS) {
+      if (_gd.h_win.redraw_flag[_gd.h_win.page]) {
         // render_h_movie_frame(index,h_pdev);
-        _horiz->setFrameForRendering(gd.h_win.page, index);
+        _horiz->setFrameForRendering(_gd.h_win.page, index);
 #ifdef NOTNOW
-        save_h_movie_frame(index, h_pdev, gd.h_win.page);
+        save_h_movie_frame(index, h_pdev, _gd.h_win.page);
 #endif
       } 
 
       /* make sure the horiz window's slider has the correct label */
       //set_height_label();
 
-      gd.movie.frame[index].redraw_horiz = 0;
-      gd.h_win.redraw_flag[gd.h_win.page] = 0;
-      gd.h_copy_flag = 1;
+      _gd.movie.frame[index].redraw_horiz = 0;
+      _gd.h_win.redraw_flag[_gd.h_win.page] = 0;
+      _gd.h_copy_flag = 1;
     }
 #ifdef NOTNOW
   }
@@ -4343,70 +4350,70 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
    * Copy background image onto visible canvas
    */
   
-  if (gd.h_copy_flag || (gd.h_win.cur_cache_im != gd.h_win.last_cache_im)) {
+  if (_gd.h_copy_flag || (_gd.h_win.cur_cache_im != _gd.h_win.last_cache_im)) {
 
-    if (gd.debug2) {
+    if (_gd.debug2) {
       fprintf(stderr,
               "\nCopying Horiz grid image - "
               "field %d, index %d pdev: %p to pdev: %p\n",
-              gd.h_win.page,index,(void *) h_pdev, (void *)gd.h_win.can_pdev[gd.h_win.cur_cache_im]);
+              _gd.h_win.page,index,(void *) h_pdev, (void *)_gd.h_win.can_pdev[_gd.h_win.cur_cache_im]);
 
-      if(gd.h_win.cur_cache_im == gd.h_win.last_cache_im) {
+      if(_gd.h_win.cur_cache_im == _gd.h_win.last_cache_im) {
 #ifdef NOTYET
-        XCopyArea(gd.dpy,h_pdev,
-                  gd.h_win.can_pdev[gd.h_win.cur_cache_im],
-                  gd.def_gc,    0,0,
-                  gd.h_win.can_dim.width,
-                  gd.h_win.can_dim.height,
-                  gd.h_win.can_dim.x_pos,
-                  gd.h_win.can_dim.y_pos);
+        XCopyArea(_gd.dpy,h_pdev,
+                  _gd.h_win.can_pdev[_gd.h_win.cur_cache_im],
+                  _gd.def_gc,    0,0,
+                  _gd.h_win.can_dim.width,
+                  _gd.h_win.can_dim.height,
+                  _gd.h_win.can_dim.x_pos,
+                  _gd.h_win.can_dim.y_pos);
 #endif
       } else {
-        gd.h_win.last_cache_im = gd.h_win.cur_cache_im; 
+        _gd.h_win.last_cache_im = _gd.h_win.cur_cache_im; 
       }
-      gd.h_win.prev_page = gd.h_win.page;
-      gd.h_copy_flag = 0;
+      _gd.h_win.prev_page = _gd.h_win.page;
+      _gd.h_copy_flag = 0;
 
-      if (gd.zoom_in_progress == 1) redraw_zoom_box();
-      if (gd.pan_in_progress) redraw_pan_line();
-      if (gd.route_in_progress) redraw_route_line(&gd.h_win);
+      if (_gd.zoom_in_progress == 1) redraw_zoom_box();
+      if (_gd.pan_in_progress) redraw_pan_line();
+      if (_gd.route_in_progress) redraw_route_line(&_gd.h_win);
 
       if(!_params.run_once_and_exit) PMU_auto_register("Rendering Products (OK)");
 
-      if (gd.debug2) {
+      if (_gd.debug2) {
         fprintf(stderr,
                 "\nTimer: Displaying Horiz final image - "
                 "field %d, index %d pdev: %p to pdev: %p\n",
-                gd.h_win.page,index,
-                (void *) gd.h_win.can_pdev[gd.h_win.cur_cache_im],
-                (void *) gd.h_win.vis_pdev);
+                _gd.h_win.page,index,
+                (void *) _gd.h_win.can_pdev[_gd.h_win.cur_cache_im],
+                (void *) _gd.h_win.vis_pdev);
 
         /* Now copy last stage pixmap to visible pixmap */
 #ifdef NOTYET
-        XCopyArea(gd.dpy,gd.h_win.can_pdev[gd.h_win.cur_cache_im],
-                  gd.h_win.vis_pdev,
-                  gd.def_gc,    0,0,
-                  gd.h_win.can_dim.width,
-                  gd.h_win.can_dim.height,
-                  gd.h_win.can_dim.x_pos,
-                  gd.h_win.can_dim.y_pos);
+        XCopyArea(_gd.dpy,_gd.h_win.can_pdev[_gd.h_win.cur_cache_im],
+                  _gd.h_win.vis_pdev,
+                  _gd.def_gc,    0,0,
+                  _gd.h_win.can_dim.width,
+                  _gd.h_win.can_dim.height,
+                  _gd.h_win.can_dim.x_pos,
+                  _gd.h_win.can_dim.y_pos);
 #endif
 
-        if (gd.zoom_in_progress == 1) redraw_zoom_box();
-        if (gd.pan_in_progress) redraw_pan_line();
-        if (gd.route_in_progress) redraw_route_line(&gd.h_win);
+        if (_gd.zoom_in_progress == 1) redraw_zoom_box();
+        if (_gd.pan_in_progress) redraw_pan_line();
+        if (_gd.route_in_progress) redraw_route_line(&_gd.h_win);
 
         // Render a time indicator plot in the movie popup
-        // if(gd.time_plot)
+        // if(_gd.time_plot)
         // {
-        //   gd.time_plot->Set_times((time_t) gd.epoch_start,
-        //                           (time_t) gd.epoch_end,
-        //                           (time_t) gd.movie.frame[gd.movie.cur_frame].time_start,
-        //                           (time_t) gd.movie.frame[gd.movie.cur_frame].time_end,
-        //                           (time_t)((gd.movie.time_interval_mins * 60.0) + 0.5),
-        //                           gd.movie.num_frames); 
+        //   _gd.time_plot->Set_times((time_t) _gd.epoch_start,
+        //                           (time_t) _gd.epoch_end,
+        //                           (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_start,
+        //                           (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_end,
+        //                           (time_t)((_gd.movie.time_interval_mins * 60.0) + 0.5),
+        //                           _gd.movie.num_frames); 
 
-        //   if(gd.movie.active) gd.time_plot->Draw();
+        //   if(_gd.movie.active) _gd.time_plot->Draw();
         // }
     
         /* keep track of how much time will elapse showing the current image */
@@ -4414,52 +4421,52 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 	
       }
 
-      if(gd.v_win.cur_cache_im != gd.v_win.last_cache_im) {
-        gd.v_copy_flag = 1;
-        gd.v_win.last_cache_im = gd.v_win.cur_cache_im;
+      if(_gd.v_win.cur_cache_im != _gd.v_win.last_cache_im) {
+        _gd.v_copy_flag = 1;
+        _gd.v_win.last_cache_im = _gd.v_win.cur_cache_im;
       }
 
-      if (gd.v_win.active && gd.v_copy_flag) {
-        if (gd.debug2) fprintf(stderr,"\nCopying Vert grid image - field %d, index %d pdev: %p to pdev: %p\n",
-                               gd.v_win.page,index,(void *) v_pdev,(void *) gd.v_win.can_pdev[gd.v_win.cur_cache_im]);
+      if (_gd.v_win.active && _gd.v_copy_flag) {
+        if (_gd.debug2) fprintf(stderr,"\nCopying Vert grid image - field %d, index %d pdev: %p to pdev: %p\n",
+                               _gd.v_win.page,index,(void *) v_pdev,(void *) _gd.v_win.can_pdev[_gd.v_win.cur_cache_im]);
 #ifdef NOTYET
-        XCopyArea(gd.dpy,v_pdev,
-                  gd.v_win.can_pdev[gd.v_win.cur_cache_im],
-                  gd.def_gc,    0,0,
-                  gd.v_win.can_dim.width,
-                  gd.v_win.can_dim.height,
-                  gd.v_win.can_dim.x_pos,
-                  gd.v_win.can_dim.y_pos);
+        XCopyArea(_gd.dpy,v_pdev,
+                  _gd.v_win.can_pdev[_gd.v_win.cur_cache_im],
+                  _gd.def_gc,    0,0,
+                  _gd.v_win.can_dim.width,
+                  _gd.v_win.can_dim.height,
+                  _gd.v_win.can_dim.x_pos,
+                  _gd.v_win.can_dim.y_pos);
 #endif
-        gd.v_win.prev_page  = gd.v_win.page;
-        gd.v_copy_flag = 0;
+        _gd.v_win.prev_page  = _gd.v_win.page;
+        _gd.v_copy_flag = 0;
 
-        if (gd.debug2) fprintf(stderr,"\nDisplaying Vert final image - field %d, index %d pdev: %p to pdev: %p\n",
-                               gd.v_win.page,index,(void *) gd.v_win.can_pdev[gd.v_win.cur_cache_im],(void *) gd.v_win.vis_pdev);
+        if (_gd.debug2) fprintf(stderr,"\nDisplaying Vert final image - field %d, index %d pdev: %p to pdev: %p\n",
+                               _gd.v_win.page,index,(void *) _gd.v_win.can_pdev[_gd.v_win.cur_cache_im],(void *) _gd.v_win.vis_pdev);
 
         /* Now copy last stage pixmap to visible pixmap */
 #ifdef NOTYET
-        XCopyArea(gd.dpy,gd.v_win.can_pdev[gd.v_win.cur_cache_im],
-                  gd.v_win.vis_pdev,
-                  gd.def_gc,    0,0,
-                  gd.v_win.can_dim.width,
-                  gd.v_win.can_dim.height,
-                  gd.v_win.can_dim.x_pos,
-                  gd.v_win.can_dim.y_pos);
+        XCopyArea(_gd.dpy,_gd.v_win.can_pdev[_gd.v_win.cur_cache_im],
+                  _gd.v_win.vis_pdev,
+                  _gd.def_gc,    0,0,
+                  _gd.v_win.can_dim.width,
+                  _gd.v_win.can_dim.height,
+                  _gd.v_win.can_dim.x_pos,
+                  _gd.v_win.can_dim.y_pos);
 #endif
 
       }
 
       // If remote driven image(s) needs saved - do it.
-      if(gd.image_needs_saved ) {
+      if(_gd.image_needs_saved ) {
         int ready = 1;
 
         // Check to make sure the images are done
-        if((gd.save_im_win & PLAN_VIEW) && gd.h_win.redraw_flag[gd.h_win.page] != 0) ready = 0;
-        if((gd.save_im_win & XSECT_VIEW) && gd.v_win.redraw_flag[gd.v_win.page] != 0) ready = 0;
+        if((_gd.save_im_win & PLAN_VIEW) && _gd.h_win.redraw_flag[_gd.h_win.page] != 0) ready = 0;
+        if((_gd.save_im_win & XSECT_VIEW) && _gd.v_win.redraw_flag[_gd.v_win.page] != 0) ready = 0;
         if(ready) {
-          dump_cidd_image(gd.save_im_win,0,0,gd.h_win.page);
-          gd.image_needs_saved = 0;
+          dump_cidd_image(_gd.save_im_win,0,0,_gd.h_win.page);
+          _gd.image_needs_saved = 0;
         }
       }
 
@@ -4468,7 +4475,7 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
 
       msec_diff = ((cur_tm.tv_sec - last_dcheck_tm.tv_sec) * 1000) + ((cur_tm.tv_usec - last_dcheck_tm.tv_usec) / 1000);
 
-      if (msec_diff < 0 ||  (msec_diff > redraw_interv  && gd.movie.movie_on == 0)) {
+      if (msec_diff < 0 ||  (msec_diff > redraw_interv  && _gd.movie.movie_on == 0)) {
         _horiz->setRenderInvalidImages(index, _vert);
 
         /* keep track of how much time will elapse since the last check */
@@ -4478,14 +4485,14 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
       
     return_point:
 
-      if (gd.movie.movie_on == 0) {
-        if (gd.zoom_in_progress == 1) redraw_zoom_box();
-        if (gd.pan_in_progress) redraw_pan_line();
-        if (gd.route_in_progress) redraw_route_line(&gd.h_win);
+      if (_gd.movie.movie_on == 0) {
+        if (_gd.zoom_in_progress == 1) redraw_zoom_box();
+        if (_gd.pan_in_progress) redraw_pan_line();
+        if (_gd.route_in_progress) redraw_route_line(&_gd.h_win);
 
-        if (gd.zoom_in_progress == 1) redraw_zoom_box();
-        if (gd.pan_in_progress) redraw_pan_line();
-        if (gd.route_in_progress) redraw_route_line(&gd.h_win);
+        if (_gd.zoom_in_progress == 1) redraw_zoom_box();
+        if (_gd.pan_in_progress) redraw_pan_line();
+        if (_gd.route_in_progress) redraw_route_line(&_gd.h_win);
 
       } else {
         gettimeofday(&cur_tm,&cur_tz);
@@ -4494,9 +4501,9 @@ void GuiManager::_ciddTimerFunc(QTimerEvent *event)
         if(msec_delay <= 0 || msec_delay > 10000) msec_delay = 100;
       }
 
-      if (client_seq_num != gd.coord_expt->client_seq_num) {
+      if (client_seq_num != _gd.coord_expt->client_seq_num) {
         render_click_marks();
-        client_seq_num = gd.coord_expt->client_seq_num;
+        client_seq_num = _gd.coord_expt->client_seq_num;
       }
       
     }

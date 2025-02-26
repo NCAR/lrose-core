@@ -44,6 +44,7 @@
 #include <QMenuBar>
 #include <vector>
 
+#include "GlobalData.hh"
 #include "Params.hh"
 #include "VertView.hh"
 
@@ -143,6 +144,13 @@ protected:
   // Protected members //
   ///////////////////////
 
+  // the polar manager that created this window
+
+  GuiManager *_manager;
+
+  Params &_params;
+  GlobalData &_gd;
+
   /**
    * @brief The main frame for the window.
    */
@@ -155,10 +163,6 @@ protected:
 
   QFrame *_vertTopFrame;
   VertView *_vertView;
-
-  // the polar manager that created this window
-
-  GuiManager *_manager;
 
   /**
    * @brief The View menu.

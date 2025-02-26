@@ -47,7 +47,9 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 // Constructor
 
-VlevelManager::VlevelManager()
+VlevelManager::VlevelManager() :
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance())
         
 {
 

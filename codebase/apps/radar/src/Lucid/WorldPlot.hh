@@ -49,9 +49,8 @@
 #include <QFont>
 #include <toolsa/DateTime.hh>
 #include <Mdv/MdvxProj.hh>
-#include "cidd_macros.h"
-#include "cidd_structs.h"
-#include "cidd_colorscales.h"
+#include "GlobalData.hh"
+#include "Params.hh"
 #include "MdvReader.hh"
 
 class ColorMap;
@@ -577,6 +576,9 @@ public:
 
 protected:
 private:
+
+  Params &_params;
+  GlobalData &_gd;
 
   typedef struct {
     double x, y;

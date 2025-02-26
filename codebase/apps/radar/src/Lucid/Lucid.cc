@@ -2662,7 +2662,7 @@ int Lucid::_initZooms()
     // }
     
     _gd.aspect_correction =
-      cos(((_gd.h_win.zmax_y[izoom] + _gd.h_win.zmin_y[izoom])/2.0) * Constants::DEG_TO_RAD);
+      cos(((_gd.h_win.zmax_y[izoom] + _gd.h_win.zmin_y[izoom])/2.0) * Constants::LUCID_DEG_TO_RAD);
 
     /* Make sure domains are consistant with the window aspect ratio */
 

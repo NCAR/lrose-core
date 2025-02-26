@@ -45,6 +45,8 @@ MapMenuItem::MapMenuItem(QObject *parent,
                          GuiManager *manager) :
         _parent(parent),
         _manager(manager),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
         _mapParams(NULL),
         _overlay(NULL),
         _mapIndex(-1),
@@ -70,8 +72,8 @@ void MapMenuItem::toggled(bool checked)
 {
   // set activity depending on checked
   
-  if (_mapIndex < (int) gd.overlays.size()) {
-    gd.overlays[_mapIndex]->active = checked;
+  if (_mapIndex < (int) _gd.overlays.size()) {
+    _gd.overlays[_mapIndex]->active = checked;
     _mapParams->on_at_startup = (tdrp_bool_t) checked;
   }
 
@@ -81,7 +83,7 @@ void MapMenuItem::toggled(bool checked)
     cerr << "  map_code: " << _mapParams->map_code << endl;
     cerr << "  control_label: " << _mapParams->control_label << endl;
     cerr << "  map_file_name: " << _mapParams->map_file_name << endl;
-    cerr << "  active: " << gd.overlays[_mapIndex]->active << endl;
+    cerr << "  active: " << _gd.overlays[_mapIndex]->active << endl;
   }
 
   if (_manager != NULL) {

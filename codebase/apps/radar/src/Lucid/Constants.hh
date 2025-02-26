@@ -74,15 +74,15 @@ public:
 
   // math and physical constants
   
-  static constexpr double DEG_TO_RAD = 0.017453292519943295; // degrees to radians conversion
-  static constexpr double DEG_RAD = 57.29577951308232;  // degrees per radian
+  static constexpr double LUCID_DEG_TO_RAD = 0.017453292519943295; // degrees to radians conversion
+  static constexpr double LUCID_DEG_RAD = 57.29577951308232;  // degrees per radian
 
-  static constexpr double RADIAN90 = 1.5707963267948966; // radian value for 90 degrees 
-  static constexpr double RADIAN180 = 3.1415926535897930; // radian value for 180 degrees 
-  static constexpr double RADIAN270 = 4.7123889803846900; // radian value for 270 degrees 
+  static constexpr double LUCID_RADIAN90 = 1.5707963267948966; // radian value for 90 degrees 
+  static constexpr double LUCID_RADIAN180 = 3.1415926535897930; // radian value for 180 degrees 
+  static constexpr double LUCID_RADIAN270 = 4.7123889803846900; // radian value for 270 degrees 
 
-  static constexpr double KM_PER_DEG_AT_EQ = 111.198487;
-  static constexpr double PSEUDO_RADIUS = 8533.0; // 4/3 earth radius
+  static constexpr double LUCID_KM_PER_DEG_AT_EQ = 111.198487;
+  static constexpr double LUCID_PSEUDO_RADIUS = 8533.0; // 4/3 earth radius
 
 };
 

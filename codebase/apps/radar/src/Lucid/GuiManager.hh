@@ -45,6 +45,8 @@
 #include <string>
 #include <vector>
 
+#include "GlobalData.hh"
+#include "Params.hh"
 #include "VlevelManager.hh"
 #include "XyBox.hh"
 
@@ -149,6 +151,9 @@ public slots:
 signals:
 
 private:
+
+  Params &_params;
+  GlobalData &_gd;
 
   int _mainTimerId;
   int _timerEventCount;

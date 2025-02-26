@@ -42,7 +42,6 @@
 #include <QVBoxLayout>
 #include "TimeControl.hh"
 #include "GuiManager.hh"
-#include "GlobalData.hh"
 
 // initialize instance
 
@@ -50,11 +49,11 @@ TimeControl *TimeControl::_instance = nullptr;
 
 // Constructor
 
-TimeControl::TimeControl(GuiManager *parent,
-                         const Params &params) :
+TimeControl::TimeControl(GuiManager *parent) :
         QDialog(parent),
         _manager(parent),
-        _params(params)
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance())
         
 {
 
@@ -542,7 +541,7 @@ void TimeControl::_populateGui()
 
   _nFramesSelector = new QSpinBox(timeSliderFrame);
   _nFramesSelector->setMinimum(1);
-  _nFramesSelector->setMaximum(MAX_FRAMES);
+  _nFramesSelector->setMaximum(Constants::MAX_FRAMES);
   _nFramesSelector->setPrefix("N frames: ");
   _nFramesSelector->setValue(_nFramesMovie);
   _nFramesSelector->setContentsMargins(2, 2, 2, 2);

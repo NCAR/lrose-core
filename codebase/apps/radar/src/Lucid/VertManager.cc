@@ -38,7 +38,9 @@ using namespace std;
 
 VertManager::VertManager(GuiManager *manager):
         QMainWindow(manager),
-        _manager(manager)
+        _manager(manager),
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance())
         
 {
   // Create the main frame which contains everything in this window
