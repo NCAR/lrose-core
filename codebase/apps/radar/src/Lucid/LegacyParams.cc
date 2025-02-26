@@ -2911,21 +2911,21 @@ int LegacyParams::_readRouteWindsTdrp()
   fprintf(_tdrpFile, "route_u_url = \"%s\";\n", routes.u_url);
   fprintf(_tdrpFile, "route_v_url = \"%s\";\n", routes.v_url);
 
-  fprintf(_tdrpFile, "route_turb_url = \"%s\";\n", routes.turb_url);
-  fprintf(_tdrpFile, "route_turb_low_thresh = %lg;\n",
-          routes.turb_low_thresh);
-  fprintf(_tdrpFile, "route_turb_mod_thresh = %lg;\n",
-          routes.turb_mod_thresh);
-  fprintf(_tdrpFile, "route_turb_high_thresh = %lg;\n",
-          routes.turb_hi_thresh);
+  // fprintf(_tdrpFile, "route_turb_url = \"%s\";\n", routes.turb_url);
+  // fprintf(_tdrpFile, "route_turb_low_thresh = %lg;\n",
+  //         routes.turb_low_thresh);
+  // fprintf(_tdrpFile, "route_turb_mod_thresh = %lg;\n",
+  //         routes.turb_mod_thresh);
+  // fprintf(_tdrpFile, "route_turb_high_thresh = %lg;\n",
+  //         routes.turb_hi_thresh);
 
-  fprintf(_tdrpFile, "route_icing_url = \"%s\";\n", routes.icing_url);
-  fprintf(_tdrpFile, "route_icing_low_thresh = %lg;\n",
-          routes.icing_low_thresh);
-  fprintf(_tdrpFile, "route_icing_mod_thresh = %lg;\n",
-          routes.icing_mod_thresh);
-  fprintf(_tdrpFile, "route_icing_high_thresh = %lg;\n",
-          routes.icing_hi_thresh);
+  // fprintf(_tdrpFile, "route_icing_url = \"%s\";\n", routes.icing_url);
+  // fprintf(_tdrpFile, "route_icing_low_thresh = %lg;\n",
+  //         routes.icing_low_thresh);
+  // fprintf(_tdrpFile, "route_icing_mod_thresh = %lg;\n",
+  //         routes.icing_mod_thresh);
+  // fprintf(_tdrpFile, "route_icing_high_thresh = %lg;\n",
+  //         routes.icing_hi_thresh);
   
   fprintf(_tdrpFile, "route_paths = {\n");
   for (int ii = 0; ii < routes.route_paths_n; ii++) {

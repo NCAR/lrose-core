@@ -40,6 +40,8 @@
 #include "GuiManager.hh"
 #include "LegacyParams.hh"
 #include "MdvReader.hh"
+#include "RenderContext.hh"
+#include "ProductMgr.hh"
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
 #include <toolsa/utim.h>
@@ -48,7 +50,12 @@
 #include <toolsa/TaStr.hh>
 #include <shapelib/shapefil.h>
 #include <qtplot/ColorMap.hh>
+#include <Mdv/Mdvx_typedefs.hh>
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxField.hh>
+#include <Mdv/MdvxProj.hh>
 #include <Fmq/RemoteUIQueue.hh>
+#include <Spdb/StationLoc.hh> // Station locator class 
 
 #include <string>
 #include <iostream>
@@ -957,9 +964,9 @@ int Lucid::_initGrids()
     mread->time_list.num_alloc_entries = 0;
     mread->time_list.num_entries = 0;
     
-    STRcopy(mread->units_label_cols,"KM",LABEL_LENGTH);
-    STRcopy(mread->units_label_rows,"KM",LABEL_LENGTH);
-    STRcopy(mread->units_label_sects,"KM",LABEL_LENGTH);
+    STRcopy(mread->units_label_cols,"KM",Constants::LABEL_LENGTH);
+    STRcopy(mread->units_label_rows,"KM",Constants::LABEL_LENGTH);
+    STRcopy(mread->units_label_sects,"KM",Constants::LABEL_LENGTH);
 
     // instantiate classes
     mread->h_mdvx = new DsMdvx;
@@ -995,8 +1002,6 @@ void Lucid::_initWinds()
 {
 
 
-  int default_marker_type = ARROWS;
-
   if (_params.winds_n == 0) {
     return;
   }
@@ -1014,7 +1019,7 @@ void Lucid::_initWinds()
     wind_data_t &lwind = gd.layers.wind[ii];
     
     // marker type
-    lwind.marker_type = default_marker_type;
+    lwind.marker_type = ARROWS;
     switch (windp.marker_type) {
       case Params::WIND_VECTOR:
         lwind.marker_type = VECTOR;
@@ -1045,7 +1050,7 @@ void Lucid::_initWinds()
         lwind.marker_type = ARROWS;
         break;
     }
-    STRcopy(lwind.color_name, windp.color, NAME_LENGTH);
+    STRcopy(lwind.color_name, windp.color, Constants::NAME_LENGTH);
     lwind.active = windp.on_at_startup;
     lwind.line_width = windp.line_width;
     // Sanity check
@@ -1096,8 +1101,8 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   
   wrec->legend_name = windp.legend_label;
   if (isW) {
-    char text[NAME_LENGTH];
-    snprintf(text, NAME_LENGTH - 1, "%s_W ", windp.button_label);
+    char text[Constants::NAME_LENGTH];
+    snprintf(text, Constants::NAME_LENGTH - 1, "%s_W ", windp.button_label);
     wrec->button_name = text;
   } else {
     wrec->button_name = windp.button_label;
@@ -1244,18 +1249,18 @@ void Lucid::_initDrawExport()
     STRcopy(dexp.product_id_label, dinfo.id_label, len);
     
     // product_label_text
-    dexp.product_label_text = (char *) calloc(1,TITLE_LENGTH);
-    STRcopy(dexp.product_label_text, dinfo.default_label, TITLE_LENGTH);
+    dexp.product_label_text = (char *) calloc(1,Constants::TITLE_LENGTH);
+    STRcopy(dexp.product_label_text, dinfo.default_label, Constants::TITLE_LENGTH);
     
     // FMQ URL 
     len = strlen(dinfo.url) + 1;
-    if(len > NAME_LENGTH) {
+    if(len > Constants::NAME_LENGTH) {
       fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
-              dinfo.url,URL_LENGTH);
+              dinfo.url,Constants::URL_LENGTH);
       exit(-1);
     }
-    dexp.product_fmq_url = (char *) calloc(1, URL_LENGTH);
-    STRcopy(dexp.product_fmq_url, dinfo.url, URL_LENGTH);
+    dexp.product_fmq_url = (char *) calloc(1, Constants::URL_LENGTH);
+    STRcopy(dexp.product_fmq_url, dinfo.url, Constants::URL_LENGTH);
     
     // Get the Default valid time  
     dexp.default_valid_minutes = dinfo.valid_minutes;
@@ -1269,9 +1274,6 @@ void Lucid::_initDrawExport()
 
 ////////////////////////////////////////////////////////////////
 // Initialize route winds
-
-#define NUM_PARSE_FIELDS (MAX_ROUTE_SEGMENTS +2) * 3
-#define PARSE_FIELD_SIZE 1024
 
 void Lucid::_initRouteWinds()
 {
@@ -1342,6 +1344,8 @@ void Lucid::_initRouteWinds()
 
   } // V WINDS
 
+#ifdef NOTNOW
+  
   // TURB Met Record
 
   if(strlen(_params.route_turb_url) > 1) {
@@ -1407,6 +1411,8 @@ void Lucid::_initRouteWinds()
 
   } // ICING
 
+#endif
+
   // How many are route are defined in the file
   gd.layers.route_wind.num_predef_routes = _params.route_paths_n;
 
@@ -1420,19 +1426,19 @@ void Lucid::_initRouteWinds()
     exit(-1);
   }
   
-  char *cfield[NUM_PARSE_FIELDS];
-  for(int ii = 0; ii < NUM_PARSE_FIELDS; ii++) {
-    cfield[ii] =(char *) calloc(PARSE_FIELD_SIZE, 1);
+  char *cfield[Constants::NUM_PARSE_FIELDS];
+  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
+    cfield[ii] =(char *) calloc(Constants::PARSE_FIELD_SIZE, 1);
   }
   
   for(int ii = 0; ii < gd.layers.route_wind.num_predef_routes; ii++) {
     
     int num_fields = STRparse(_params._route_paths[ii], cfield,
                               strlen(_params._route_paths[ii]),
-                              NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
-    if(num_fields == NUM_PARSE_FIELDS) {
+                              Constants::NUM_PARSE_FIELDS, Constants::PARSE_FIELD_SIZE);
+    if(num_fields == Constants::NUM_PARSE_FIELDS) {
       fprintf(stderr,"Warning: Route path: %s\n Too long. Only %d segments allowed \n",
-              _params._route_paths[ii], MAX_ROUTE_SEGMENTS);
+              _params._route_paths[ii], Constants::MAX_ROUTE);
     }
     
     // Collect Label
@@ -1448,9 +1454,9 @@ void Lucid::_initRouteWinds()
 
     // Sanity check
     if(gd.layers.route_wind.route[ii].num_segments <= 0 || 
-       gd.layers.route_wind.route[ii].num_segments >  MAX_ROUTE_SEGMENTS) {
+       gd.layers.route_wind.route[ii].num_segments >  Constants::MAX_ROUTE) {
       fprintf(stderr,"Warning: Route path: %s\n Error Only 1-%d segments allowed \n",
-              _params._route_paths[ii], MAX_ROUTE_SEGMENTS);
+              _params._route_paths[ii], Constants::MAX_ROUTE);
       continue;
     }
     
@@ -1507,7 +1513,7 @@ void Lucid::_initRouteWinds()
          &gd.h_win.route,sizeof(route_track_t));
 
   /* free temp space */
-  for(int ii = 0; ii < NUM_PARSE_FIELDS; ii++) {
+  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
     free(cfield[ii]);
   }
   
@@ -1678,13 +1684,13 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
         /* get space for the icon definition */
         ov->geo_icondef[index] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
-        ZERO_STRUCT(ov->geo_icondef[index]);
+        MEM_zero_ptr(ov->geo_icondef[index]);
 
         if(ov->geo_icondef[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
           exit(-1);
         }
-        STRcopy(ov->geo_icondef[index]->name,cfield[1],NAME_LENGTH);
+        STRcopy(ov->geo_icondef[index]->name,cfield[1],Constants::NAME_LENGTH);
         num_points = atoi(cfield[2]);
 
         /* Get space for points in the icon */
@@ -1734,7 +1740,7 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         /* get space for the Icon */
         ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
-        ZERO_STRUCT(ov->geo_icon[index]);
+        MEM_zero_ptr(ov->geo_icon[index]);
 
         if(ov->geo_icon[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
@@ -1771,13 +1777,13 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         /* gather up remaining text fields */
         ov->geo_icon[index]->label[0] = '\0';
         len = 2;
-        for(j = 6; j < num_fields && len < LABEL_LENGTH; j++ ) {
-          strncat(ov->geo_icon[index]->label,cfield[j],LABEL_LENGTH - len);
+        for(j = 6; j < num_fields && len < Constants::LABEL_LENGTH; j++ ) {
+          strncat(ov->geo_icon[index]->label,cfield[j],Constants::LABEL_LENGTH - len);
           len = strlen(ov->geo_icon[index]->label) +1;
 
           // Separate multiple text label fiedds with spaces.
           if( j < num_fields -1) {
-            strncat(ov->geo_icon[index]->label," ",LABEL_LENGTH - len);
+            strncat(ov->geo_icon[index]->label," ",Constants::LABEL_LENGTH - len);
             len = strlen(ov->geo_icon[index]->label) +1;
           }
         }
@@ -1819,13 +1825,13 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
         /* get space for the Polyline definition */
         ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
-        ZERO_STRUCT(ov->geo_polyline[index]);
+        MEM_zero_ptr(ov->geo_polyline[index]);
 
         if(ov->geo_polyline[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
           exit(-1);
         }
-        STRcopy(ov->geo_polyline[index]->label,cfield[1],LABEL_LENGTH);
+        STRcopy(ov->geo_polyline[index]->label,cfield[1],Constants::LABEL_LENGTH);
         num_points = atoi(cfield[2]);
         if(num_points <=0 ) {
           fprintf(stderr,"Warning!: Bad POLYLINE Definition. File: %s, Line: %s\n",name_buf,str_ptr);
@@ -1884,7 +1890,7 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
                      
         /* get space for the Label definition */
         ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
-        ZERO_STRUCT(ov->geo_label[index]);
+        MEM_zero_ptr(ov->geo_label[index]);
 
         if(ov->geo_label[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Label definition!\n");
@@ -1906,11 +1912,11 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         ov->geo_label[index]->display_string[0] = '\0';
         len = 2;
-        for(j = 8; j < num_fields && len < NAME_LENGTH; j++) {
-          strncat(ov->geo_label[index]->display_string,cfield[j],NAME_LENGTH - len);
+        for(j = 8; j < num_fields && len < Constants::NAME_LENGTH; j++) {
+          strncat(ov->geo_label[index]->display_string,cfield[j],Constants::NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
           if(j < num_fields -1)
-            strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
+            strncat(ov->geo_label[index]->display_string," ",Constants::NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
         }
         str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
@@ -1939,7 +1945,7 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         /* get space for the Label definition */
         ov->geo_label[index] = (Geo_feat_label_t *) calloc(1,sizeof(Geo_feat_label_t));
-        ZERO_STRUCT(ov->geo_label[index]);
+        MEM_zero_ptr(ov->geo_label[index]);
 
         if(ov->geo_label[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Label definition!\n");
@@ -1961,11 +1967,11 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
 
         ov->geo_label[index]->display_string[0] = '\0';
         len = 2;
-        for(j = 3; j < num_fields && len < NAME_LENGTH; j++) {
-          strncat(ov->geo_label[index]->display_string,cfield[j],NAME_LENGTH - len);
+        for(j = 3; j < num_fields && len < Constants::NAME_LENGTH; j++) {
+          strncat(ov->geo_label[index]->display_string,cfield[j],Constants::NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
           if(j < num_fields -1)
-            strncat(ov->geo_label[index]->display_string," ",NAME_LENGTH - len);
+            strncat(ov->geo_label[index]->display_string," ",Constants::NAME_LENGTH - len);
           len = strlen(ov->geo_label[index]->display_string) +1;
         }
         str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
@@ -2049,13 +2055,13 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
 
         /* get space for the Polyline definition */
         ov->geo_polyline[index] = (Geo_feat_polyline_t *) calloc(1,sizeof(Geo_feat_polyline_t));
-        ZERO_STRUCT(ov->geo_polyline[index]);
+        MEM_zero_ptr(ov->geo_polyline[index]);
         if(ov->geo_polyline[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Polyline definition!\n");
           exit(-1);
         }
 
-        STRcopy(ov->geo_polyline[index]->label,"Shape",LABEL_LENGTH);
+        STRcopy(ov->geo_polyline[index]->label,"Shape",Constants::LABEL_LENGTH);
 
         /* Get space for points in the polyline */
         ov->geo_polyline[index]->lat = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
@@ -2104,7 +2110,7 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
 
           /* get space for the icon definition */
           ov->geo_icondef[0] = (Geo_feat_icondef_t *) calloc(1,sizeof(Geo_feat_icondef_t));
-          ZERO_STRUCT(ov->geo_icondef[0]);
+          MEM_zero_ptr(ov->geo_icondef[0]);
 
           if(ov->geo_icondef[0] == NULL) {
             fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
@@ -2162,7 +2168,7 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
 
         /* get space for the Icon */
         ov->geo_icon[index] = (Geo_feat_icon_t *) calloc(1,sizeof(Geo_feat_icon_t));
-        ZERO_STRUCT(ov->geo_icon[index]);
+        MEM_zero_ptr(ov->geo_icon[index]);
 
         if(ov->geo_icon[index] == NULL) {
           fprintf(stderr,"Unable to allocate memory for Icon definition!\n");
@@ -2528,8 +2534,8 @@ int Lucid::_initZooms()
     return -1;
   }
 
-  if(_params.num_cache_zooms > MAX_CACHE_PIXMAPS) {
-    _params.num_cache_zooms = MAX_CACHE_PIXMAPS;
+  if(_params.num_cache_zooms > Constants::MAX_CACHE_PIXMAPS) {
+    _params.num_cache_zooms = Constants::MAX_CACHE_PIXMAPS;
   }
   if(_params.num_cache_zooms < 1) {
     _params.num_cache_zooms = 1 ;
@@ -2653,10 +2659,8 @@ int Lucid::_initZooms()
     // }
     
     gd.aspect_correction =
-      cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * DEG_TO_RAD);
+      cos(((gd.h_win.zmax_y[izoom] + gd.h_win.zmin_y[izoom])/2.0) * Constants::DEG_TO_RAD);
 
-    cerr << "GGGGGGGGGGAAAAAAAAAA aspect_correction: " << gd.aspect_correction << endl;
-    
     /* Make sure domains are consistant with the window aspect ratio */
 
     if (gd.display_projection == Mdvx::PROJ_LATLON) {
@@ -2693,14 +2697,14 @@ void Lucid::_initContours()
 
 {
 
-  for(int ii = 0; ii < NUM_CONT_LAYERS; ii++) {
+  for(int ii = 0; ii < Constants::NUM_CONT_LAYERS; ii++) {
     gd.layers.cont[ii].field = 0;
     gd.layers.cont[ii].min = gd.mread[0]->cont_low;
     gd.layers.cont[ii].max = gd.mread[0]->cont_high;
     gd.layers.cont[ii].interval = gd.mread[0]->cont_interv;
     gd.layers.cont[ii].labels_on  = _params.label_contours;
   }
-  for(int ii = 0; ii < NUM_GRID_LAYERS; ii++) {
+  for(int ii = 0; ii < Constants::NUM_GRID_LAYERS; ii++) {
     gd.layers.overlay_field[ii] = 0;
   }
 
@@ -2713,7 +2717,7 @@ void Lucid::_initContours()
     
     Params::contour_field_t &cfield = _params._contour_fields[ii];
     
-    strncpy(gd.layers.cont[ii].color_name, cfield.color, NAME_LENGTH);
+    strncpy(gd.layers.cont[ii].color_name, cfield.color, Constants::NAME_LENGTH);
     
     /* Replace underscores with spaces in contour field names */
     char *contourFieldName = cfield.field_name;
@@ -2736,7 +2740,7 @@ void Lucid::_initContours()
         gd.layers.cont[ii].min = gd.mread[jj]->cont_low;
         gd.layers.cont[ii].max = gd.mread[jj]->cont_high;
         gd.layers.cont[ii].interval = gd.mread[jj]->cont_interv;
-        strncpy(gd.layers.cont[ii].color_name, cfield.color, NAME_LENGTH);
+        strncpy(gd.layers.cont[ii].color_name, cfield.color, Constants::NAME_LENGTH);
         break;
       }
       

@@ -35,10 +35,11 @@
 #include <QPaintDevice>
 #include <QPixmap>
 
-// #include <rapplot/gplot.h>
 #include <qtplot/ColorMap.hh>
 #include <Spdb/Symprod.hh>
 #include <Mdv/MdvxProj.hh>
+
+#include "Constants.hh"
 
 class ColorMap;
 class ProductMgr;
@@ -84,7 +85,6 @@ public:
     font = NULL;
   }
   
-  // Display *display;
   QPaintDevice *pdev;
   QPixmap *pixmap;
   size_t width, height;
@@ -112,8 +112,6 @@ public:
   
   double w_xmin, w_ymin, w_xmax, w_ymax;
   XrefObj *x;
-  // psref_t *ps;
-  // psgc_t *psgc;
   
 };
 
@@ -155,8 +153,7 @@ public:
 
   // default constructor
   
-  RenderContext(/* Display *dpy, */
-                QPaintDevice *pdev, QBrush brush,
+  RenderContext(QPaintDevice *pdev, QBrush brush,
 		ColorMap cmap, const MdvxProj &in_proj);
   
 
@@ -241,7 +238,6 @@ private:
   // Gplot structs
   GframeObj frame;
   XrefObj   xref;
-  // psgc_t psgc;
   int dev;
 
   double iconScale;

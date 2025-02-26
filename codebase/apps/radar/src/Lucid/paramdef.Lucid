@@ -2890,45 +2890,45 @@ paramdef string {
   p_descr = "v Wind Componet";
 } route_v_url;
 
-paramdef string {
-  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
-  p_descr = "Turbulence Index";
-} route_turb_url;
+// paramdef string {
+//   p_default = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
+//   p_descr = "Turbulence Index";
+// } route_turb_url;
 
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Value at which the turbulence is considered Low";
-} route_turb_low_thresh;
+// paramdef double {
+//   p_default = 0.25;
+//   p_descr = "Value at which the turbulence is considered Low";
+// } route_turb_low_thresh;
 
-paramdef double {
-  p_default = 0.50;
-  p_descr = "Value at which the turbulence is considered Moderate";
-} route_turb_mod_thresh;
+// paramdef double {
+//   p_default = 0.50;
+//   p_descr = "Value at which the turbulence is considered Moderate";
+// } route_turb_mod_thresh;
 
-paramdef double {
-  p_default = 0.75;
-  p_descr = "Value at which the turbulence is considered High";
-} route_turb_high_thresh;
+// paramdef double {
+//   p_default = 0.75;
+//   p_descr = "Value at which the turbulence is considered High";
+// } route_turb_high_thresh;
 
-paramdef string {
-  p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
-  p_descr = "Icing Index";
-} route_icing_url;
+// paramdef string {
+//   p_default = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
+//   p_descr = "Icing Index";
+// } route_icing_url;
 
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Value at which the icing is considered Light";
-} route_icing_low_thresh;
+// paramdef double {
+//   p_default = 0.25;
+//   p_descr = "Value at which the icing is considered Light";
+// } route_icing_low_thresh;
 
-paramdef double {
-  p_default = 0.50;
-  p_descr = "Value at which the icing is considered Moderate";
-} route_icing_mod_thresh;
+// paramdef double {
+//   p_default = 0.50;
+//   p_descr = "Value at which the icing is considered Moderate";
+// } route_icing_mod_thresh;
 
-paramdef double {
-  p_default = 0.75;
-  p_descr = "Value at which the icing is considered Heavy";
-} route_icing_high_thresh;
+// paramdef double {
+//   p_default = 0.75;
+//   p_descr = "Value at which the icing is considered Heavy";
+// } route_icing_high_thresh;
 
 paramdef string {
   p_default = {

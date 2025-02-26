@@ -44,6 +44,7 @@ public:
   static constexpr int MAX_FRAMES = 1024;
   static constexpr int MAX_ROUTE = 128;
   static constexpr int MAX_COLOR_CELLS = 65536;
+  static constexpr int MAX_CACHE_PIXMAPS = 64;
 
   static constexpr int MAX_PATH = 1024;
   static constexpr int MAX_TITLE = 1024;
@@ -52,11 +53,25 @@ public:
   static constexpr int NUM_CONT_LAYERS = 16;
   static constexpr int NUM_PRODUCT_DETAIL_THRESHOLDS = 3;
   static constexpr int NUM_CUSTOM_ZOOMS = 3;
+
+  static constexpr int NUM_PARSE_FIELDS = (MAX_ROUTE +2) * 3;
+  static constexpr int PARSE_FIELD_SIZE = 1024;
   
   static constexpr int NAME_LENGTH = 256;
+  static constexpr int TITLE_LENGTH = 256;
   static constexpr int LABEL_LENGTH = 256;
+  static constexpr int URL_LENGTH = 1024;
+  static constexpr int URL_MIN_SIZE = 8;
 
-  
+  static constexpr double DEG_TO_RAD = 0.017453292519943295; // degrees to radians conversion
+  static constexpr double DEG_RAD = 57.29577951308232;  // degrees per radian
+
+  static constexpr double RADIAN90 = 1.5707963267948966; // radian value for 90 degrees 
+  static constexpr double RADIAN180 = 3.1415926535897930; // radian value for 180 degrees 
+  static constexpr double RADIAN270 = 4.7123889803846900; // radian value for 270 degrees 
+
+  static constexpr double KM_PER_DEG_AT_EQ = 111.198487;
+  static constexpr double PSEUDO_RADIUS = 8533.0; // 4/3 earth radius
 
 };
 

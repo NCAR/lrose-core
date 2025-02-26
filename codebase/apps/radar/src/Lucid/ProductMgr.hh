@@ -33,13 +33,12 @@
 #ifndef ProductMgr_HH
 #define ProductMgr_HH
 
-#include "cidd.h"
+#include "GlobalData.hh"
+#include "Product.hh"
 #include <dsserver/DmapAccess.hh>
 
-#include "RenderContext.hh"
-#include "Product.hh"
-#include "SymprodRenderObj.hh"
-
+class RenderContext;
+class SymprodRenderObj;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -117,7 +116,6 @@ public:
   const vector<Product *> getProducts() const { return _products; }
 
   const Product *getProduct(int index) const {
-    // cerr << "iiiiiiiiiii index, _products.size(): " << index << ", " << _products.size() << endl;
     if (index < (int) _products.size()) {
       return _products[index];
     } else {
@@ -130,7 +128,7 @@ protected:
   RenderContext &_context; // Drawing context for window 
   
   vector<Product *> _products;
-
+  
   SymprodRenderObj *_active_Rob;
   
 private:

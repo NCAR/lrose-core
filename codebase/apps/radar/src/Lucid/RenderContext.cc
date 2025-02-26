@@ -35,15 +35,14 @@
 //////////////////////////////////////////
 // DEFAULT CONSTRUCTOR
 
-RenderContext::RenderContext(/* Display *dpy,*/
-                             QPaintDevice *pdev,
+RenderContext::RenderContext(QPaintDevice *pdev,
                              QBrush brush,
-                             ColorMap cmap, const MdvxProj &in_proj)
-        : clip_limits_changed(false),
-          vert_limits_changed(false),
-          proj(in_proj), /* display(dpy), */
-          cmap(cmap),
-          pdev(pdev)
+                             ColorMap cmap, const MdvxProj &in_proj) :
+        clip_limits_changed(false),
+        vert_limits_changed(false),
+        proj(in_proj),
+        cmap(cmap),
+        pdev(pdev)
 {
   
   iconScale = 1.0;
@@ -51,13 +50,8 @@ RenderContext::RenderContext(/* Display *dpy,*/
   show_hidden = false;
   draw_pick_boxes = false;
 
-  // dev = XDEV;  // X windows 
-
   *last_foreground_color = '\0';
   *last_background_color = '\0';
-
-  // frame.ps = NULL; 
-  // frame.psgc = NULL;
 
   min_lat = -90.0;
   max_lat = 90.0;
@@ -69,7 +63,6 @@ RenderContext::RenderContext(/* Display *dpy,*/
   offset_x = 0;
   offset_y = 0;
 
-  // xref.display = dpy;
   xref.pdev = pdev;
   xref.brush = brush;
   
@@ -204,8 +197,6 @@ GframeObj *RenderContext::gCreateFrame(double w_xmin,
   gframe->w_ymax = w_ymax;
 
   gframe->x = new XrefObj;
-  // gframe->ps = (psref_t *) ucalloc(1, sizeof(psref_t));
-  // gframe->psgc = (psgc_t *) ucalloc(1, sizeof(psgc_t));
 
   return gframe;
 

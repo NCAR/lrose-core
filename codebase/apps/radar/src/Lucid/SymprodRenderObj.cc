@@ -33,14 +33,13 @@
 //////////////////////////////////////////////////////////
 
 #include "SymprodRenderObj.hh"
+#include "RenderContext.hh"
 #include "Product.hh"
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
 #include <vector>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>     // Map projection geometry
-
-#include "cidd.h"
 
 void set_pick_box_xy(int x, int y, QPoint *bpt);
 //
@@ -109,7 +108,8 @@ const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 //////////////////////////////////////////////////////////////////////////////
 // Abstract base class
 
-SymprodRenderObj::SymprodRenderObj(SymprodRender *c)
+SymprodRenderObj::SymprodRenderObj(SymprodRender *c) :
+        gd(GlobalData::Instance())
 {
 
   container = c;

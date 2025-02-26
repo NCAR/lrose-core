@@ -30,12 +30,16 @@
 //////////////////////////////////////////////////////////
 
 #include "SymprodRender.hh"
+#include "SymprodRenderObj.hh"
+#include <dataport/bigend.h>
 
 //////////////////////////////////////////
 // default constructor
 
-SymprodRender::SymprodRender(Product &p)
-  : Symprod(), prod(p)
+SymprodRender::SymprodRender(Product &p) :
+        Symprod(),
+        gd(GlobalData::Instance()),
+        prod(p)
 
 {
 }
@@ -171,8 +175,8 @@ void SymprodRender::draw(RenderContext &context)
   // add_message_to_status_win(msg2,0);
   
   for (size_t i = 0; i < _objs.size(); i++) {
-
-    if(!gd.io_info.busy_status) _objs[i]->draw(context);
+    // if(!gd.io_info.busy_status) _objs[i]->draw(context);
+    _objs[i]->draw(context);
   }
 
 }

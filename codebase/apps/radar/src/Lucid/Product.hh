@@ -36,10 +36,16 @@
 #ifndef Product_HH
 #define Product_HH
 
-#include "Csyprod_P.hh"
 #include <Spdb/DsSpdbThreaded.hh>
-#include "SymprodRender.hh"
-#include "cidd.h"
+#include <Spdb/Symprod.hh>
+#include "Constants.hh"
+#include "GlobalData.hh"
+#include "Csyprod_P.hh"
+#include "Params.hh"
+
+class SymprodRender;
+class SymprodRenderObj;
+class RenderContext;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -95,7 +101,7 @@ public:
   // Returns closest distance.
   double pick_closest_obj(double lat, double lon, RenderContext &context);
 
-  SymprodRenderObj * get_closest_symprod_obj() {return closest_symprod_obj; }
+  SymprodRenderObj *get_closest_symprod_obj() {return closest_symprod_obj; }
 
   Params::symprod_prod_info_t &_prodInfo;
 
@@ -104,6 +110,10 @@ public:
   vector<Symprod::prod_hdr_props_t>  obj_list;  
 
 protected:
+  
+  GlobalData &gd;
+
+  Params &_params;
   
   bool _debug;
 

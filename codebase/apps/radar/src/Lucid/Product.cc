@@ -31,15 +31,23 @@
 #include <string>
 #include <toolsa/str.h>
 #include "Product.hh"
+#include "RenderContext.hh"
+#include "SymprodRender.hh"
+#include "SymprodRenderObj.hh"
+#include "SymprodRender.hh"
+#include "MdvReader.hh"
 
 //////////////////////////////////////////
 // default constructor
 
 Product::Product(int debug,
                  Params::symprod_prod_info_t &prodInfo) :
-        _prodInfo(prodInfo), _debug(debug)
+        _prodInfo(prodInfo),
+        gd(GlobalData::Instance()),
+        _params(*Params::Inst()),
+        _debug(debug)
         
-  
+        
 {
   _data_valid = 0;
   _times_valid = 0;
@@ -284,7 +292,7 @@ int Product::getData(const time_t data_start_time,
   
 {
 
-  struct timezone tz;
+  // struct timezone tz;
   char msg[128];
   char spdbp_url[1024];
   char tmp_str[1024];
@@ -303,17 +311,17 @@ int Product::getData(const time_t data_start_time,
     cerr << "  URL: " << _prodInfo.url << endl;
   }
 
-  gettimeofday(&gd.io_info.request_time,&tz);
+  // gettimeofday(&gd.io_info.request_time,&tz);
 
   *spdbp_url = '\0'; // insure null termination
   *tmp_str = '\0';
   STRcopy(spdbp_url,_prodInfo.url,1024);
 
   // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
-  if(strlen(_params.http_tunnel_url) > URL_MIN_SIZE) { 
+  if(strlen(_params.http_tunnel_url) > Constants::URL_MIN_SIZE) { 
     // If using the a proxy - Add the a proxy_url to the Url as a name=value pair 
     // Note this must be used in conjunction with a tunnel_url.
-    if((strlen(_params.http_proxy_url)) > URL_MIN_SIZE) {
+    if((strlen(_params.http_proxy_url)) > Constants::URL_MIN_SIZE) {
       snprintf(tmp_str,1024, "?tunnel_url=%s&proxy_url=%s",_params.http_tunnel_url,_params.http_proxy_url);
     } else {
       snprintf(tmp_str,1024, "?tunnel_url=%s",_params.http_tunnel_url);
@@ -463,7 +471,7 @@ bool Product::processChunks()
 		      
   struct timeval tm2;
   struct timezone tz;
-  double t3;
+  // double t3;
   char msg[128];
 
   if (_debug) {
@@ -480,17 +488,20 @@ bool Product::processChunks()
 
   gettimeofday(&tm2,&tz);
 
-  t3 = _elapsedTime(gd.io_info.request_time,tm2);
+  // t3 = _elapsedTime(gd.io_info.request_time,tm2);
   
   snprintf(msg, 128,
-           "                                  ->   %d Chunks retrieved in %.3g seconds\n",
-           (int)chunks.size(),t3);
-
+           "                                  ->   %d Chunks retrieved\n",
+           (int)chunks.size());
+  // snprintf(msg, 128,
+  //          "                                  ->   %d Chunks retrieved in %.3g seconds\n",
+  //          (int)chunks.size(),t3);
+  
   // add_message_to_status_win(msg,0);
 
   if(_debug) {
-      int i = chunks.size();
-      cerr << i << " Chunks retrieved in " << t3 << " seconds" << endl;
+    cerr << "N Chunks retrieved" << chunks.size() << endl;
+    // cerr << i << " Chunks retrieved in " << t3 << " seconds" << endl;
   }
 
   for (size_t ii = 0; ii < chunks.size(); ii++) {

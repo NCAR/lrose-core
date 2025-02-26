@@ -71,6 +71,15 @@ typedef enum wind_marker_t {
   LABELEDBARB_SH = 9    // S. Hemisphere Labeled Barb
 } wind_marker_;
 
+// Methods of rendering Gridded false colored data
+
+typedef enum {
+  POLYGONS = 0,
+  FILLED_CONTOURS = 1,
+  DYNAMIC_CONTOURS = 2,
+  LINE_CONTOURS = 3
+} render_method_t;
+ 
 /////////////////////////////////////////////////////////////////
 // worker classes
 

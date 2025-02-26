@@ -36,11 +36,14 @@
 #define SymprodRenderObj_HH
 
 #include <Spdb/SymprodObj.hh>
-#include "RenderContext.hh"
 #include <rapformats/station_reports.h>
-#include "cidd.h"
+#include "Constants.hh"
+#include "GlobalData.hh"
 
 class SymprodRender;
+class RenderContext;
+class Product;
+
 //////////////////////
 // Abstract base class
 
@@ -51,7 +54,7 @@ class SymprodRenderObj
 public:
 
   SymprodRenderObj(SymprodRender *c);
-
+  
   virtual ~SymprodRenderObj();
   
   virtual void draw(RenderContext &context);  
@@ -66,12 +69,13 @@ public:
 
 protected:
   
+  GlobalData &gd;
+  
   unsigned long _background_pixel;
   bool _background_pixel_init;
   
   QPixmap _stipple;
   bool _stippleCreated;
-
 
   static const int _blankPixelSpacing;
   static const int _stipple_bitmap_width;
@@ -110,9 +114,8 @@ protected:
   static int _convertJoinstyle2X(Symprod::joinstyle_t joinstyle);
   static int _convertLinetype2X(Symprod::linetype_t linetype);
 
-
 private:
-  
+
 };
 
 /////////////////////////////////////////////////////////////////////

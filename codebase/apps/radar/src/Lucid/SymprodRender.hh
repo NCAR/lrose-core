@@ -37,14 +37,12 @@
 #define SymprodRender_HH
 
 #include <Spdb/Symprod.hh>
-#include <Spdb/DsSpdb.hh>
-#include "RenderContext.hh"
-#include "Product.hh"
-
-#include <dataport/bigend.h>
-#include "cidd.h"
+#include "Constants.hh"
+#include "GlobalData.hh"
 
 class SymprodRenderObj;
+class RenderContext;
+class Product;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -89,6 +87,8 @@ public:
 
 protected:
 
+  GlobalData &gd;
+  
   Product &prod; 
 
   vector<SymprodRenderObj *> _objs;
