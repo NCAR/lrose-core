@@ -2845,8 +2845,8 @@ void WorldPlot::renderGridDistorted(int page,
   
 {
 
-  // the data projection type and plot projection type are the same
-  // so we can use the (x,y) locations unchanged
+  // the data projection type and plot projection type are not the same
+  // so we need to compute the lat/lon of each corner of the grid cells
 
   // compute the location of the vertices
   // these are the cell limits in (x, y)
@@ -2860,6 +2860,19 @@ void WorldPlot::renderGridDistorted(int page,
   double dx = mr->h_fhdr.grid_dx;
   double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
 
+  // initially fill with missing values
+  
+  for(int iy = 0; iy <= ny; iy++) {
+    vector<QPointF> row;
+    for(int ix = 0; ix <= nx; ix++) {
+      QPointF pt = getPixelPointF(-9999.0, -9999.0);
+      row.push_back(pt);
+    } // ix
+    vertices.push_back(row);
+  } // iy
+
+  // now compute the vertices
+  
   double yy = lowy;
   for(int iy = 0; iy <= ny; iy++, yy += dy) {
     vector<QPointF> row;
@@ -2883,8 +2896,10 @@ void WorldPlot::renderGridDistorted(int page,
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
-  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
-    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
+  yy = lowy;
+  for(int iy = 0; iy < mr->h_fhdr.ny; iy++, yy += dy) {
+    double xx = lowx;
+    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, xx += dx, val++) {
       fl32 fval = *val;
       if (fval == miss || fval == bad) {
         continue;
@@ -2893,11 +2908,11 @@ void WorldPlot::renderGridDistorted(int page,
         continue;
       }
       const QBrush *brush = mr->colorMap->dataBrush(fval);
-      double xx = vertices[iy+1][ix].x();
-      double yy = vertices[iy+1][ix].y();
+      double xx0 = vertices[iy+1][ix].x();
+      double yy0 = vertices[iy+1][ix].y();
       double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
       double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
-      fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
+      fillRectanglePixelCoords(painter, *brush, xx0, yy0, width, height);
     } // ix
   } // iy
   
