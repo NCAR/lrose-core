@@ -2508,6 +2508,8 @@ void WorldPlot::renderGridRect(int page,
   
 {
 
+  cerr << "RRRRRRRRRRRRRRR ====>> renderGridRect, page: " << page << endl;
+
   // the data projection type and plot projection type are the same
   // so we can use the (x,y) locations unchanged
 
@@ -2843,9 +2845,83 @@ void WorldPlot::renderGridDistorted(int page,
   
 {
 
+  // the data projection type and plot projection type are the same
+  // so we can use the (x,y) locations unchanged
+
+  // compute the location of the vertices
+  // these are the cell limits in (x, y)
+  
+  vector< vector<QPointF> > vertices;
+  
+  int nx = mr->h_fhdr.nx;
+  int ny = mr->h_fhdr.ny;
+  double dy = mr->h_fhdr.grid_dy;
+  double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
+  double dx = mr->h_fhdr.grid_dx;
+  double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
+
+  double yy = lowy;
+  for(int iy = 0; iy <= ny; iy++, yy += dy) {
+    vector<QPointF> row;
+    double xx = lowx;
+    for(int ix = 0; ix <= nx; ix++, xx += dx) {
+      QPointF pt = getPixelPointF(xx, yy);
+      row.push_back(pt);
+    } // ix
+    vertices.push_back(row);
+  } // iy
+  
+  // plot the rectangles for each grid cell
+
+  // {
+  //   QColor color("yelllow");
+  //   QBrush brush(color);
+  //   painter.fillRect(100, 100, 100, 100, brush);
+  // }
+
+  fl32 *val = mr->h_fl32_data;
+  fl32 miss = mr->h_fhdr.missing_data_value;
+  fl32 bad = mr->h_fhdr.bad_data_value;
+  
+  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
+    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
+      fl32 fval = *val;
+      if (fval == miss || fval == bad) {
+        continue;
+      }
+      if (!mr->colorMap->withinValidRange(fval)) {
+        continue;
+      }
+      const QBrush *brush = mr->colorMap->dataBrush(fval);
+      double xx = vertices[iy+1][ix].x();
+      double yy = vertices[iy+1][ix].y();
+      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
+      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
+      fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
+    } // ix
+  } // iy
+  
   cerr << "====>> ddddddddddddddddddddddd page: " << page << endl;
   
 }
+
+/////////////////////////////////////////////////////
+// render polar radar grid
+
+void WorldPlot::renderGridRadarPolar(int page,
+                                     QPainter &painter,
+                                     MdvReader *mr,
+                                     time_t start_time,
+                                     time_t end_time,
+                                     bool is_overlay_field)
+  
+{
+
+  cerr << "====>> radar polar radar polar, page: " << page << endl;
+  
+
+}
+
 
 /////////////////////////////////////////////////////
 // print

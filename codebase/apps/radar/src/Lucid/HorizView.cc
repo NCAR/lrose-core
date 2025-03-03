@@ -1531,9 +1531,10 @@ int HorizView::_renderGrid(QPainter &painter,
 
   // Decide Proper rendering routine
 
+  Mdvx::Mdvx::projection_type_t projType = mr->proj->getProjType();
   const PjgMath &dataMath = mr->proj->getPjgMath();
   const PjgMath &displayMath = _gd.proj.getPjgMath();
-
+  
   if (_gd.debug) {
     cerr << "-->> data projection <<--" << endl;
     dataMath.print(cerr);
@@ -1542,10 +1543,17 @@ int HorizView::_renderGrid(QPainter &painter,
     cerr << "----------------------------" << endl;
   }
 
-  if (dataMath == displayMath) {
-    _zoomWorld.renderGridRect(page, painter, mr,
-                              start_time, end_time,
-                              is_overlay_field);
+  if (projType == Mdvx::PROJ_POLAR_RADAR) {
+    _zoomWorld.renderGridRadarPolar(page, painter, mr,
+                                    start_time, end_time,
+                                    is_overlay_field);
+  } else if (dataMath == displayMath) {
+    // _zoomWorld.renderGridRect(page, painter, mr,
+    //                           start_time, end_time,
+    //                           is_overlay_field);
+    _zoomWorld.renderGridDistorted(page, painter, mr,
+                                   start_time, end_time,
+                                   is_overlay_field);
   } else {
     _zoomWorld.renderGridDistorted(page, painter, mr,
                                    start_time, end_time,
@@ -1559,11 +1567,11 @@ int HorizView::_renderGrid(QPainter &painter,
       if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
@@ -1579,11 +1587,11 @@ int HorizView::_renderGrid(QPainter &painter,
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
         
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
@@ -1603,11 +1611,11 @@ int HorizView::_renderGrid(QPainter &painter,
          (fabs(_gd.proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
@@ -1619,11 +1627,11 @@ int HorizView::_renderGrid(QPainter &painter,
       
     case  Mdvx::PROJ_LATLON:
       if(mr->h_fhdr.proj_type == _gd.proj.getProjType()) {
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() selected\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
         _zoomWorld.renderGridRect(page, painter, mr,
                                   start_time, end_time,
                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridRect() done\n");
+        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else {
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
         _zoomWorld.renderGridDistorted(page, painter, mr,
