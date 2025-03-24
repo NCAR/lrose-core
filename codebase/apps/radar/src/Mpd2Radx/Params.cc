@@ -636,7 +636,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 3;
@@ -1070,9 +1070,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("instrument_name");
     tt->descr = tdrpStrDup("Instrument name.");
-    tt->help = tdrpStrDup("See override_instrument_name.");
+    tt->help = tdrpStrDup("If not empty, override the instrument name.");
     tt->val_offset = (char *) &instrument_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'site_name'
@@ -1082,9 +1082,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("site_name");
     tt->descr = tdrpStrDup("Site name.");
-    tt->help = tdrpStrDup("See override_site_name.");
+    tt->help = tdrpStrDup("If not empty, override the site name.");
     tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 7'

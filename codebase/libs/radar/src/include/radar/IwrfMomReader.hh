@@ -314,11 +314,11 @@ private:
   
   DsInputPath *_input;
   vector<string> _fileList;
-  int _fileIndex;
   string _inputDir;
   string _inputPath;
   RadxVol _vol;
   size_t _rayIndex;
+  bool _startTimeFound;
   RadxTime _archiveStartTime;
   RadxTime _archiveEndTime;
 

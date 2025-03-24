@@ -105,6 +105,7 @@ private:
 
   void _remapProjection(DsMdvx &mdvx);
   void _encodeFields(DsMdvx &mdvx);
+  void _addCoverageFlag(DsMdvx &mdvx);
 
 };
 

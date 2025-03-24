@@ -183,11 +183,11 @@ def main():
         os.makedirs(cmakeBuildDir)
     except:
         print("Dir exists: " + cmakeBuildDir, file=sys.stderr)
-    os.chdir(cmakeBuildDir)
     if (options.use_cmake3):
+        os.chdir(cmakeBuildDir)
         shellCmd("cmake3 -DCMAKE_INSTALL_PREFIX=" + options.prefix + " ..")
     else:
-        shellCmd("cmake -DCMAKE_INSTALL_PREFIX=" + options.prefix + " ..")
+        shellCmd("cmake -S . -B build")
 
     # build and install libs
 

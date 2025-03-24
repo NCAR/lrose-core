@@ -71,7 +71,7 @@ DsInputPath::DsInputPath (const string &prog_name,
   _prog_name = prog_name;
   _debug = debug;
   _mode = ARCHIVE_MODE;
-  
+
   // load up file paths map - paths sorted alphbetically
   
   for (int i = 0; i < n_files; i++) {
@@ -322,6 +322,10 @@ void DsInputPath::_init()
   _use_inotify = false;
   _inotifyFd = -1;
   
+  _checkMonth = false;
+  _minMonth = -1;
+  _maxMonth = -1;
+  
 }
 
 /////////////////////////
@@ -512,6 +516,24 @@ void DsInputPath::setUseInotify(bool useInotifyFlag /*= true */)
 void DsInputPath::setMaxRecursionDepth(int max_depth)
 {
   _max_recursion_depth = max_depth;
+}
+
+///////////////////////////////////////////////////////////
+// set the valid month range
+//
+// Limit the dates to within this month range, inclusively.
+// If minMonth is less than or equal to maxMonth, then the
+// range is from the min to the max, inclusively.
+// If minMonth is greater than maxMonth, then the
+// range is from the min to 12, and then 1 to the max, inclusively.
+// i.e. the valid range wraps.
+
+void DsInputPath::setValidMonthRange(int minMonth, int maxMonth)
+
+{
+  _checkMonth = true;
+  _minMonth = minMonth;
+  _maxMonth = maxMonth;
 }
 
 ///////////////////////////////////////////////////////////
@@ -1305,6 +1327,30 @@ int DsInputPath::_nextArchive()
     const string &path = _archivePathList[_pathPosn];
     _pathPosn++;
     
+    // check for month as appropriate
+
+    if (_checkMonth) {
+      // get file time
+      time_t ptime;
+      if (getDataTime(path, ptime) == 0) {
+        DateTime pathTime(ptime);
+        int month = pathTime.getMonth();
+        // check if month is valid
+        if (_minMonth <= _maxMonth) {
+          if (month < _minMonth || month > _maxMonth) {
+            // month not valid
+            continue;
+          }
+        } else {
+          // month range wraps
+          if (month < _minMonth && month > _maxMonth) {
+            // month not valid
+            continue;
+          }
+        }
+      }
+    } // if (_checkMonth)
+    
     // Make sure the file exists before returning it
     
     if (ta_stat_is_file(path.c_str())) {
@@ -2046,7 +2092,7 @@ void DsInputPath::_insertRealtimePair(time_t file_time, const string &path)
 {
 
   // insert if file exists
-
+  
   if (ta_stat_is_file(path.c_str())) {
     TimePathPair timePath;
     timePath.first = file_time;

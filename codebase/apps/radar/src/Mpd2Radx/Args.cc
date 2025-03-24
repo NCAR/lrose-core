@@ -168,7 +168,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       } else {
 	OK = false;
       }
-	
+      
+    } else {
+      
+      tdrpCheckArgAndWarn(argv[i], stderr);
+
     }
     
   } // i
@@ -184,6 +188,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "Mpd2Radx reads MPD-style raw Netcdf data files, and converts them to a standard CfRadial format" << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

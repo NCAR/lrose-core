@@ -367,7 +367,7 @@ class LroseVortrac < Formula
 
   depends_on 'libx11'
   depends_on 'libxext'
-  depends_on 'qt6'
+  depends_on 'qt5'
   depends_on 'armadillo'
   depends_on 'libzip'
   depends_on 'cmake'

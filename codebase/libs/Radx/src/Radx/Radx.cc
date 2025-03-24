@@ -85,6 +85,10 @@ const char* Radx::AIRCRAFT_FORE = "aircraft_fore";
 const char* Radx::AIRCRAFT_NOSE = "aircraft_nose";
 const char* Radx::AIRCRAFT_ROOF = "aircraft_roof";
 const char* Radx::AIRCRAFT_TAIL = "aircraft_tail";
+const char* Radx::APAR_FORE_DOPPLER = "apar_fore_doppler";
+const char* Radx::APAR_AFT_DOPPLER = "apar_aft_doppler";
+const char* Radx::APAR_DUALPOL_RHI = "apar_dualpol_rhi";
+const char* Radx::APAR_SECTOR_PPI = "apar_sector_ppi";
 const char* Radx::AXIS_X = "axis_x";
 const char* Radx::AXIS_X_PRIME = "axis_x_prime";
 const char* Radx::AXIS_Y = "axis_y";
@@ -473,6 +477,18 @@ string Radx::sweepModeToStr(SweepMode_t mode)
     case SWEEP_MODE_ELECTRONIC_STEERING: {
       return Radx::ELECTRONIC_STEERING;
     }
+    case SWEEP_MODE_APAR_FORE_DOPPLER: {
+      return Radx::APAR_FORE_DOPPLER;
+    }
+    case SWEEP_MODE_APAR_AFT_DOPPLER: {
+      return Radx::APAR_AFT_DOPPLER;
+    }
+    case SWEEP_MODE_APAR_DUALPOL_RHI: {
+      return Radx::APAR_DUALPOL_RHI;
+    }
+    case SWEEP_MODE_APAR_SECTOR_PPI: {
+      return Radx::APAR_SECTOR_PPI;
+    }
     default: {
       return Radx::UNKNOWN;
     }
@@ -530,6 +546,18 @@ string Radx::sweepModeToShortStr(SweepMode_t mode)
     case SWEEP_MODE_ELECTRONIC_STEERING: {
       return "PAR";
     }
+    case SWEEP_MODE_APAR_FORE_DOPPLER: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_AFT_DOPPLER: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_DUALPOL_RHI: {
+      return "RHI";
+    }
+    case SWEEP_MODE_APAR_SECTOR_PPI: {
+      return "PPI";
+    }
     default: {
       return "SUR";
     }
@@ -567,36 +595,14 @@ Radx::DataType_t Radx::dataTypeFromStr(const string &str)
 
 Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)
 {
-
-  if (str.find(Radx::SECTOR) != string::npos) {
-    return SWEEP_MODE_SECTOR;
-  }
-  if (str.find(Radx::COPLANE) != string::npos) {
-    return SWEEP_MODE_COPLANE;
-  }
-  if (str.find(Radx::RHI) != string::npos) {
-    return SWEEP_MODE_RHI;
-  }
   if (str.find(Radx::VERTICAL_POINTING) != string::npos) {
     return SWEEP_MODE_VERTICAL_POINTING;
-  }
-  if (str.find(Radx::IDLE) != string::npos) {
-    return SWEEP_MODE_IDLE;
   }
   if (str.find(Radx::AZIMUTH_SURVEILLANCE) != string::npos) {
     return SWEEP_MODE_AZIMUTH_SURVEILLANCE;
   }
   if (str.find(Radx::ELEVATION_SURVEILLANCE) != string::npos) {
     return SWEEP_MODE_ELEVATION_SURVEILLANCE;
-  }
-  if (str.find(Radx::SUNSCAN) != string::npos) {
-    return SWEEP_MODE_SUNSCAN;
-  }
-  if (str.find(Radx::POINTING) != string::npos) {
-    return SWEEP_MODE_POINTING;
-  }
-  if (str.find(Radx::CALIBRATION) != string::npos) {
-    return SWEEP_MODE_CALIBRATION;
   }
   if (str.find(Radx::MANUAL_PPI) != string::npos) {
     return SWEEP_MODE_MANUAL_PPI;
@@ -615,6 +621,41 @@ Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)
   }
   if (str.find(Radx::ELECTRONIC_STEERING) != string::npos) {
     return SWEEP_MODE_ELECTRONIC_STEERING;
+  }
+  if (str.find(Radx::APAR_FORE_DOPPLER) != string::npos) {
+    return SWEEP_MODE_APAR_FORE_DOPPLER;
+  }
+  if (str.find(Radx::APAR_AFT_DOPPLER) != string::npos) {
+    return SWEEP_MODE_APAR_AFT_DOPPLER;
+  }
+  if (str.find(Radx::APAR_DUALPOL_RHI) != string::npos) {
+    return SWEEP_MODE_APAR_DUALPOL_RHI;
+  }
+  if (str.find(Radx::APAR_SECTOR_PPI) != string::npos) {
+    return SWEEP_MODE_APAR_SECTOR_PPI;
+  }
+
+  // Generic names last to avoid inadvertently finding a substring
+  if (str.find(Radx::SECTOR) != string::npos) {
+    return SWEEP_MODE_SECTOR;
+  }
+  if (str.find(Radx::COPLANE) != string::npos) {
+    return SWEEP_MODE_COPLANE;
+  }
+  if (str.find(Radx::RHI) != string::npos) {
+    return SWEEP_MODE_RHI;
+  }
+  if (str.find(Radx::IDLE) != string::npos) {
+    return SWEEP_MODE_IDLE;
+  }
+  if (str.find(Radx::SUNSCAN) != string::npos) {
+    return SWEEP_MODE_SUNSCAN;
+  }
+  if (str.find(Radx::POINTING) != string::npos) {
+    return SWEEP_MODE_POINTING;
+  }
+  if (str.find(Radx::CALIBRATION) != string::npos) {
+    return SWEEP_MODE_CALIBRATION;
   }
   return SWEEP_MODE_NOT_SET;
 }

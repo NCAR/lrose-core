@@ -8,7 +8,7 @@
 #
 ###############################################################
 
-project (LROSE-CORE)
+project (lrose-core)
 
 # subdirectories
 

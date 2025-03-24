@@ -119,6 +119,16 @@ public:
   void setMaxValidHtKm(double val) { _maxValidHtKm = val; }
 
   ////////////////////////////////////////////////////////////////////
+  // Min valid height AGL for shallow-to-mid transition
+
+  void setMinHtKmAglForMid(double val) { _minHtKmAglForMid = val; }
+
+  ////////////////////////////////////////////////////////////////////
+  // Min valid height AGL for mid-to-deep transition
+
+  void setMinHtKmAglForDeep(double val) { _minHtKmAglForDeep = val; }
+
+  ////////////////////////////////////////////////////////////////////
   // Use the col max reflectivity for computing the texture,
   // instead of doing this on each plane.
   // This uses less CPU.
@@ -302,7 +312,12 @@ public:
                double minx, double miny,
                const vector<double> &zKm,
                bool projIsLatLon = false);
+
+  ////////////////////////////////////////////////////////////////////
+  // set terrain ht if available
   
+  void setTerrainHtField(const fl32 *ht, fl32 missingVal);
+
   ////////////////////////////////////////////////////////////////////
   // compute the echoType
   // Returns 0 on success, -1 on failure
@@ -375,6 +390,9 @@ private:
   
   static const fl32 _missingFl32;
   static const ui08 _missingUi08;
+
+  const fl32 *_terrainHt;
+  fl32 _terrainMissingVal;
   
   bool _debug; // Print debug messages
   bool _verbose; // Print verbose debug messages
@@ -386,6 +404,9 @@ private:
   bool _useDbzColMax;
   double _minValidDbz;
   double _baseDbz;
+
+  double _minHtKmAglForMid;
+  double _minHtKmAglForDeep;
 
   double _minConvectivityForConvective;
   double _maxConvectivityForStratiform;

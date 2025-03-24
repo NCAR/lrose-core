@@ -124,8 +124,8 @@ void ldmFileStrobe::strobe(){
     //
     // Put together the total filename and stat it.
     //
-    char fileName[1024];
-    sprintf(fileName,"%s/%s", _directory, dp->d_name);
+    char fileName[10000];
+    snprintf(fileName, 9999, "%s/%s", _directory, dp->d_name);
     
     int fileSize = _passesStatTest(fileName);
     if ( fileSize == 0 ) continue;

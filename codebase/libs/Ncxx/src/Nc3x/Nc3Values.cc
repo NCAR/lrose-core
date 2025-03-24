@@ -67,6 +67,7 @@ std::ostream& operator<< (std::ostream& os, const Nc3Values& vals)
 implement(Nc3Values,ncbyte)
 implement(Nc3Values,char)
 implement(Nc3Values,short)
+implement(Nc3Values,ushort)
 implement(Nc3Values,int)
 implement(Nc3Values,nclong)
 implement(Nc3Values,long)
@@ -76,6 +77,7 @@ implement(Nc3Values,double)
 Ncbytes_for_one_implement(ncbyte)
 Ncbytes_for_one_implement(char)
 Ncbytes_for_one_implement(short)
+Ncbytes_for_one_implement(ushort)
 Ncbytes_for_one_implement(int)
 Ncbytes_for_one_implement(nclong)
 Ncbytes_for_one_implement(long)
@@ -83,6 +85,7 @@ Ncbytes_for_one_implement(float)
 Ncbytes_for_one_implement(double)
 
 as_ncbyte_implement(short)
+as_ncbyte_implement(ushort)
 as_ncbyte_implement(int)
 as_ncbyte_implement(nclong)
 as_ncbyte_implement(long)
@@ -101,6 +104,7 @@ inline ncbyte Nc3Values_ncbyte::as_ncbyte( long n ) const
 }
 
 as_char_implement(short)
+as_char_implement(ushort)
 as_char_implement(int)
 as_char_implement(nclong)
 as_char_implement(long)
@@ -118,6 +122,7 @@ inline char Nc3Values_char::as_char( long n ) const
     return the_values[n];
 }
 
+as_short_implement(ushort)
 as_short_implement(int)
 as_short_implement(nclong)
 as_short_implement(long)
@@ -140,6 +145,28 @@ inline short Nc3Values_short::as_short( long n ) const
     return the_values[n];
 }
 
+as_ushort_implement(short)
+as_ushort_implement(int)
+as_ushort_implement(nclong)
+as_ushort_implement(long)
+as_ushort_implement(int64_t)
+as_ushort_implement(float)
+as_ushort_implement(double)
+
+inline ushort Nc3Values_ncbyte::as_ushort( long n ) const
+{
+    return the_values[n];
+}
+
+inline ushort Nc3Values_char::as_ushort( long n ) const
+{
+    return the_values[n];
+}
+
+inline ushort Nc3Values_ushort::as_ushort( long n ) const
+{
+    return the_values[n];
+}
 
 as_int_implement(float)
 as_int_implement(double)
@@ -155,6 +182,11 @@ inline int Nc3Values_char::as_int( long n ) const
 }
 
 inline int Nc3Values_short::as_int( long n ) const
+{
+    return the_values[n];
+}
+
+inline int Nc3Values_ushort::as_int( long n ) const
 {
     return the_values[n];
 }
@@ -197,6 +229,11 @@ inline nclong Nc3Values_short::as_nclong( long n ) const
     return the_values[n];
 }
 
+inline nclong Nc3Values_ushort::as_nclong( long n ) const
+{
+    return the_values[n];
+}
+
 inline nclong Nc3Values_int::as_nclong( long n ) const
 {
     return the_values[n];
@@ -231,6 +268,11 @@ inline long Nc3Values_char::as_long( long n ) const
 }
 
 inline long Nc3Values_short::as_long( long n ) const
+{
+    return the_values[n];
+}
+
+inline long Nc3Values_ushort::as_long( long n ) const
 {
     return the_values[n];
 }
@@ -274,6 +316,11 @@ inline int64_t Nc3Values_short::as_int64( long n ) const
     return the_values[n];
 }
 
+inline int64_t Nc3Values_ushort::as_int64( long n ) const
+{
+    return the_values[n];
+}
+
 inline int64_t Nc3Values_int::as_int64( long n ) const
 {
     return the_values[n];
@@ -297,6 +344,7 @@ inline int64_t Nc3Values_int64_t::as_int64( long n ) const
 as_float_implement(ncbyte)
 as_float_implement(char)
 as_float_implement(short)
+as_float_implement(ushort)
 as_float_implement(int)
 as_float_implement(nclong)
 as_float_implement(long)
@@ -307,6 +355,7 @@ as_float_implement(double)
 as_double_implement(ncbyte)
 as_double_implement(char)
 as_double_implement(short)
+as_double_implement(ushort)
 as_double_implement(int)
 as_double_implement(nclong)
 as_double_implement(long)
@@ -315,6 +364,7 @@ as_double_implement(float)
 as_double_implement(double)
 
 as_string_implement(short)
+as_string_implement(ushort)
 as_string_implement(int)
 as_string_implement(nclong)
 as_string_implement(long)
@@ -339,6 +389,15 @@ inline char* Nc3Values_char::as_string( long n ) const
 }
 
 std::ostream& Nc3Values_short::print(std::ostream& os) const
+{
+    for(int i = 0; i < the_number - 1; i++)
+      os << the_values[i] << ", ";
+    if (the_number > 0)
+      os << the_values[the_number-1] ;
+    return os;
+}
+
+std::ostream& Nc3Values_ushort::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";

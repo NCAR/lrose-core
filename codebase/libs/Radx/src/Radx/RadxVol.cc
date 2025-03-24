@@ -171,6 +171,28 @@ void RadxVol::_init()
     _searchRays[ii] = NULL;
   }
 
+  // set strings for sweep modes
+  
+  _sweepModeNotSetLabel = "XXX";
+  _sweepModeSectorLabel = "PPI";
+  _sweepModeCoplaneLabel = "COP";
+  _sweepModeRhiLabel = "RHI";
+  _sweepModeVertLabel = "VER";
+  _sweepModeIdleLabel = "IDL";
+  _sweepModeAzSurLabel = "SUR";
+  _sweepModeElSurLabel = "AIR";
+  _sweepModeSunLabel = "SUN";
+  _sweepModeSunRhiLabel = "SRH";
+  _sweepModeCalLabel = "CAL";
+  _sweepModeManLabel = "MAN";
+  _sweepModeDbsLabel = "DBS";
+  _sweepModeTrajLabel = "TRJ";
+  _sweepModeParLabel = "PAR";
+  _sweepModeAparForeDopplerRhiLabel = "RHI";
+  _sweepModeAparAftDopplerRhiLabel = "RHI";
+  _sweepModeAparDualpolRhiLabel = "RHI";
+  _sweepModeAparSectorPpiLabel = "PPI";
+
 }
 
 //////////////////////////////////////////////////
@@ -736,7 +758,11 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
   modeMap[Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING] = 0;
   modeMap[Radx::SWEEP_MODE_COMPLEX_TRAJECTORY] = 0;
   modeMap[Radx::SWEEP_MODE_ELECTRONIC_STEERING] = 0;
-
+  modeMap[Radx::SWEEP_MODE_APAR_FORE_DOPPLER] = 0;
+  modeMap[Radx::SWEEP_MODE_APAR_AFT_DOPPLER] = 0;
+  modeMap[Radx::SWEEP_MODE_APAR_DUALPOL_RHI] = 0;
+  modeMap[Radx::SWEEP_MODE_APAR_SECTOR_PPI] = 0;
+  
   // accumulate the number of rays for each mode
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -768,6 +794,79 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
     predomMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
   }
   return predomMode;
+
+}
+
+//////////////////////////////////////////////
+// return string for specified sweep mode
+
+string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode) const
+{
+  
+  switch (mode) {
+    case Radx::SWEEP_MODE_NOT_SET: {
+      return _sweepModeNotSetLabel;
+    }
+    case Radx::SWEEP_MODE_SECTOR: {
+      return _sweepModeSectorLabel;
+    }
+    case Radx::SWEEP_MODE_COPLANE: {
+      return _sweepModeCoplaneLabel;
+    }
+    case Radx::SWEEP_MODE_RHI: {
+      return _sweepModeRhiLabel;
+    }
+    case Radx::SWEEP_MODE_VERTICAL_POINTING: {
+      return _sweepModeVertLabel;
+    }
+    case Radx::SWEEP_MODE_IDLE: {
+      return _sweepModeIdleLabel;
+    }
+    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE: {
+      return _sweepModeAzSurLabel;
+    }
+    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE: {
+      return _sweepModeElSurLabel;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN: {
+      return _sweepModeSunLabel;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN_RHI: {
+      return _sweepModeSunRhiLabel;
+    }
+    case Radx::SWEEP_MODE_CALIBRATION: {
+      return _sweepModeCalLabel;
+    }
+    case Radx::SWEEP_MODE_POINTING:
+    case Radx::SWEEP_MODE_MANUAL_PPI:
+    case Radx::SWEEP_MODE_MANUAL_RHI: {
+      return _sweepModeManLabel;
+    }
+    case Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING: {
+      return _sweepModeDbsLabel;
+    }
+    case Radx::SWEEP_MODE_COMPLEX_TRAJECTORY: {
+      return _sweepModeTrajLabel;
+    }
+    case Radx::SWEEP_MODE_ELECTRONIC_STEERING: {
+      return _sweepModeParLabel;
+    }
+    case Radx::SWEEP_MODE_APAR_FORE_DOPPLER: {
+      return _sweepModeAparForeDopplerRhiLabel;
+    }
+    case Radx::SWEEP_MODE_APAR_AFT_DOPPLER: {
+      return _sweepModeAparAftDopplerRhiLabel;
+    }
+    case Radx::SWEEP_MODE_APAR_DUALPOL_RHI: {
+      return _sweepModeAparDualpolRhiLabel;
+    }
+    case Radx::SWEEP_MODE_APAR_SECTOR_PPI: {
+      return _sweepModeAparSectorPpiLabel;
+    }
+    default: {
+      return _sweepModeAzSurLabel;
+    }
+  } // switch
 
 }
 
@@ -2657,12 +2756,12 @@ void RadxVol::combineRhi()
 
   // ensure there is only one sweep in the volume
   if (_sweeps.size() != 1) {
-    cerr << "Error: combineRHI only one sweep per volume" << endl;
+    cerr << "Error: combineRHI requires only one sweep per volume" << endl;
     return;
   }
 
   if (!checkIsRhi()) {
-    cerr << "Error: attempting to combine RHI scans on non-RHI data" << endl;
+    cerr << "Warning: attempting to combine RHI scans on non-RHI data" << endl;
     return;
   }
   
@@ -4732,6 +4831,47 @@ void RadxVol::sortSweepsByFixedAngle()
   
 }
 
+////////////////////////////////////////////////////////////////////////
+// combine sweeps with same fixed angle, reordering the rays accordingly.
+// the sweep fixed angles must agree within the diff
+
+void RadxVol::combineSweepsByFixedAngle(double maxFixedAngleDiff)
+  
+{
+
+  // sanity check
+  
+  if (_sweeps.size() < 2) {
+    return;
+  }
+
+  // sort sweeps by fixed angle
+
+  sortSweepsByFixedAngle();
+
+  // check for consecutive sweeps with same fixed angle
+
+  for (size_t isweep = 0; isweep < _sweeps.size() - 1; isweep++) {
+    RadxSweep *thisSweep = _sweeps[isweep];
+    RadxSweep *nextSweep = _sweeps[isweep + 1];
+    if (fabs(thisSweep->getFixedAngleDeg() -
+             nextSweep->getFixedAngleDeg()) < maxFixedAngleDiff) {
+      // sweep fixed angles are close, use same sweep num
+      int sweepNum = thisSweep->getSweepNumber();
+      for (size_t iray = nextSweep->getStartRayIndex(); 
+           iray <= nextSweep->getEndRayIndex(); iray++) {
+        _rays[iray]->setSweepNumber(sweepNum);
+      } // iray
+    }
+  }
+
+  // load the sweep info from rays
+
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+  
+}
+
 /////////////////////////////////////////////////////////////////
 // Sort rays in each sweep by azimuth
 // Assumes sweep info is already set
@@ -5054,6 +5194,10 @@ void RadxVol::_checkForIndexedRays(const RadxSweep *sweep) const
   Radx::SweepMode_t mode = sweep->getSweepMode();
   bool isRhi = false;
   if (mode == Radx::SWEEP_MODE_RHI ||
+      mode == Radx::SWEEP_MODE_APAR_FORE_DOPPLER ||
+      mode == Radx::SWEEP_MODE_APAR_AFT_DOPPLER ||
+      mode == Radx::SWEEP_MODE_APAR_DUALPOL_RHI ||
+      mode == Radx::SWEEP_MODE_APAR_SECTOR_PPI ||
       mode == Radx::SWEEP_MODE_MANUAL_RHI) {
     isRhi = true;
   }

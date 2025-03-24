@@ -102,6 +102,7 @@ private:
   int _processFile(const string &filePath);
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
+  void _finalizeVol(RadxVol &vol);
   int _writeVol(RadxVol &vol);
 
   int _processMpdNcFile(const string &filePath);

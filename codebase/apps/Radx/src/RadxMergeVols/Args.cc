@@ -174,6 +174,8 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+  
+  out << "RadxMergeVols merges multiple CfRadial volumes, from different directories and containing different fields, into a single file.\n" << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

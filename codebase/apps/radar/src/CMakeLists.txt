@@ -8,7 +8,7 @@
 #
 ###############################################################
 
-project (LROSE-CORE)
+project (lrose-core)
 
 # subdirectories
 
@@ -67,6 +67,7 @@ add_subdirectory (StaggeredLimits)
 add_subdirectory (SunCal)
 add_subdirectory (SunCpCompute)
 add_subdirectory (SweepInfo2Spdb)
+add_subdirectory (Ts2Moments)
 add_subdirectory (Ts2NetCDF)
 add_subdirectory (TsCalAuto)
 add_subdirectory (TsConvert)

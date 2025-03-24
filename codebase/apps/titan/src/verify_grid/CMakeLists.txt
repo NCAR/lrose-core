@@ -15,20 +15,20 @@ project (verify_grid)
 
 set (SRCS
       verify_grid_tdrp.c
-      init_indices.c
-      get_truth_path.c
-      init_intermediate_grid.c
-      parse_args.c
-      parse_threshold.c
-      print_cart_params.c
-      print_contingency_table.c
-      print_header.c
-      print_stats.c
-      tidy_and_exit.c
-      update_cont.c
-      update_regression.c
-      update_stats.c
-      verify_grid.c
+      init_indices.cc
+      get_truth_path.cc
+      init_intermediate_grid.cc
+      parse_args.cc
+      parse_threshold.cc
+      print_cart_params.cc
+      print_contingency_table.cc
+      print_header.cc
+      print_stats.cc
+      tidy_and_exit.cc
+      update_cont.cc
+      update_regression.cc
+      update_stats.cc
+      verify_grid.cc
     )
 
 # include directories
@@ -65,38 +65,57 @@ include_directories (../../../../libs/tdrp/src/include)
 include_directories (../../../../libs/titan/src/include)
 include_directories (../../../../libs/toolsa/src/include)
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
-if (DEFINED netCDF_INSTALL_PREFIX)
-  include_directories (${netCDF_INSTALL_PREFIX}/include)
-endif()
-if (DEFINED HDF5_C_INCLUDE_DIR)
-  include_directories (${HDF5_C_INCLUDE_DIR})
-endif()
-if(IS_DIRECTORY /usr/include/hdf5/serial)
-  include_directories (/usr/include/hdf5/serial)
-endif()
-if(IS_DIRECTORY /usr/local/include)
-  include_directories (/usr/local/include)
-endif()
-
+if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
+  include_directories (${MAMBA_INCLUDE_PATH})
+else()
+  if (DEFINED netCDF_INSTALL_PREFIX)
+    include_directories (${netCDF_INSTALL_PREFIX}/include)
+  endif()
+  if (DEFINED HDF5_C_INCLUDE_DIR)
+    include_directories (${HDF5_C_INCLUDE_DIR})
+  endif()
+  if(IS_DIRECTORY /usr/include/hdf5/serial)
+    include_directories (/usr/include/hdf5/serial)
+  endif()
+  if(IS_DIRECTORY /usr/local/include)
+    include_directories (/usr/local/include)
+  endif()
+  # NOTE: cannot add /usr/include using include_directories()
+  #add_compile_options(-I/usr/include)
+  
+endif(DEFINED MAMBA_BUILD)
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-if (DEFINED netCDF_INSTALL_PREFIX)
-  link_directories (${netCDF_INSTALL_PREFIX}/lib)
-endif()
-if (DEFINED HDF5_INSTALL_PREFIX)
-  link_directories (${HDF5_INSTALL_PREFIX}/lib)
-endif()
-if (DEFINED HDF5_LIBRARY_DIRS)
-  link_directories(${HDF5_LIBRARY_DIRS})
-endif()
+if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
+  link_directories (${MAMBA_LIBRARY_PATH})
+else()
+  if (DEFINED netCDF_INSTALL_PREFIX)
+    link_directories (${netCDF_INSTALL_PREFIX}/lib)
+  endif()
+  if (DEFINED HDF5_INSTALL_PREFIX)
+    link_directories (${HDF5_INSTALL_PREFIX}/lib)
+  endif()
+  if (DEFINED HDF5_LIBRARY_DIRS)
+    link_directories(${HDF5_LIBRARY_DIRS})
+  endif()
 # add serial, for odd Debian hdf5 install
-if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
-  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
-endif()
-if(IS_DIRECTORY /usr/local/lib)
-  link_directories (/usr/local/lib)
-endif()
+  if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
+    link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
+  endif()
+  if(IS_DIRECTORY /usr/local/lib)
+    link_directories (/usr/local/lib)
+  endif()
+  if(IS_DIRECTORY /usr/lib64)
+    link_directories (/usr/lib64)
+  endif()
+  if(IS_DIRECTORY /usr/lib)
+    link_directories (/usr/lib)
+  endif()
+
+endif(DEFINED MAMBA_BUILD)
 if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
   add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 endif()

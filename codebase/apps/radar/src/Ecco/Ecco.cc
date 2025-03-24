@@ -43,7 +43,7 @@
 #include "TerrainHt.hh"
 using namespace std;
 
-const fl32 Ecco::_missing = -9999.0;
+const fl32 Ecco::_missingFl32 = -9999.0;
 
 // Constructor
 
@@ -121,6 +121,8 @@ Ecco::Ecco(int argc, char **argv)
   if (_params.use_terrain_ht_data) {
     _terrainHt = new TerrainHt(_params);
   }
+  _terrainHtField = NULL;
+  _waterField = NULL;
 
   // set up ConvStratFinder object
 
@@ -132,6 +134,8 @@ Ecco::Ecco(int argc, char **argv)
   _finder.setUseMultipleThreads(_params.use_multiple_threads);
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
+  _finder.setMinHtKmAglForMid(_params.min_ht_km_agl_for_mid);
+  _finder.setMinHtKmAglForDeep(_params.min_ht_km_agl_for_deep);
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setBaseDbz(_params.base_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
@@ -260,6 +264,15 @@ int Ecco::Run()
       }
     }
 
+    // set terrain height if available
+
+    MdvxField *htField = _inMdvx.getField("TerrainHt");
+    if (htField != NULL) {
+      const fl32 *ht = (const fl32*) htField->getVol();
+      fl32 missingHt = htField->getFieldHeader().missing_data_value;
+      _finder.setTerrainHtField(ht, missingHt);
+    }
+    
     // compute the convective/stratiform partition
 
     const fl32 *dbz = (const fl32*) dbzField->getVol();
@@ -349,8 +362,69 @@ int Ecco::_addTerrainHtField()
   // get geometry from DBZ field
   
   MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+  Mdvx::field_header_t fhdrDbz = dbzField->getFieldHeader();
 
-  // create terrain ht field - this is 2D
+  // create projection object
+
+  MdvxProj proj(fhdrDbz);
+
+  // check if this was previously computed and the grid is unchanged
+  
+  if (proj == _dbzProj &&
+      _terrainHtField != NULL &&
+      _waterField != NULL) {
+    // copy previous fields
+    MdvxField *terrainHtField = new MdvxField(*_terrainHtField);
+    _inMdvx.addField(terrainHtField);
+    MdvxField *waterField = new MdvxField(*_waterField);
+    _inMdvx.addField(waterField);
+    return 0;
+  }
+  // save proj
+  _dbzProj = proj;
+  
+  // load up height and water data
+  
+  float *ht = new float[fhdrDbz.nx * fhdrDbz.ny];
+  ui08 *water = new ui08[fhdrDbz.nx * fhdrDbz.ny];
+  
+  int index = 0;
+  double yy = fhdrDbz.grid_miny;
+  for (int iy = 0; iy < fhdrDbz.ny; iy++, yy += fhdrDbz.grid_dy) {
+    double xx = fhdrDbz.grid_minx;
+    for (int ix = 0; ix < fhdrDbz.nx; ix++, xx += fhdrDbz.grid_dx, index++) {
+      
+      // get lat/lon
+      double lat, lon;
+      proj.xy2latlon(xx, yy, lat, lon);
+
+      // get height
+      
+      double terrainHtM = 0.0;
+      bool isWater = true;
+      if (_terrainHt->getHt(lat, lon, terrainHtM, isWater) == 0) {
+        ht[index] = terrainHtM;
+        if (isWater) {
+          water[index] = 1;
+        } else {
+          water[index] = 0;
+        }
+      } else {
+        ht[index] = 0.0;
+        water[index] = 2;
+      }
+
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "xx, yy, lat, lon, ht, water: "
+             << xx << ", " << yy << ", "
+             << lat << ", " << lon << ", "
+             << terrainHtM << ", " << (isWater?"Y":"N") << endl;
+      }
+      
+    } // ix
+  } // iy
+
+  // create terrain ht 2D field
   
   Mdvx::field_header_t fhdrTerrain = dbzField->getFieldHeader();
   fhdrTerrain.nz = 1;
@@ -359,68 +433,64 @@ int Ecco::_addTerrainHtField()
   fhdrTerrain.volume_size = planeSize32;
   fhdrTerrain.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdrTerrain.data_element_nbytes = 4;
-  fhdrTerrain.missing_data_value = _missing;
-  fhdrTerrain.bad_data_value = _missing;
+  fhdrTerrain.missing_data_value = _missingFl32;
+  fhdrTerrain.bad_data_value = _missingFl32;
   fhdrTerrain.scale = 1.0;
   fhdrTerrain.bias = 0.0;
 
-  Mdvx::vlevel_header_t vhdr2d;
-  MEM_zero(vhdr2d);
-  vhdr2d.level[0] = 0;
-  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  Mdvx::vlevel_header_t vhdrTerrain;
+  MEM_zero(vhdrTerrain);
+  vhdrTerrain.level[0] = 0;
+  vhdrTerrain.type[0] = Mdvx::VERT_TYPE_SURFACE;
   
   MdvxField::setFieldName("TerrainHt", fhdrTerrain);
   MdvxField::setFieldNameLong("Terrain height MSL", fhdrTerrain);
   MdvxField::setUnits("m", fhdrTerrain);
-  MdvxField *terrainHtField =
-    new MdvxField(fhdrTerrain, vhdr2d, NULL, false, false, false);
-
-  // create projection object
-
-  MdvxProj proj(fhdrTerrain);
-  
-  // load up height data
-  
-  float *ht = new float[fhdrTerrain.nx * fhdrTerrain.ny];
-  
-  int ii = 0;
-  double yy = fhdrTerrain.grid_miny;
-  for (int iy = 0; iy < fhdrTerrain.ny; iy++, yy += fhdrTerrain.grid_dy) {
-    double xx = fhdrTerrain.grid_minx;
-    for (int ix = 0; ix < fhdrTerrain.nx; ix++, xx += fhdrTerrain.grid_dx, ii++) {
-      
-      // get lat/lon
-      double lat, lon;
-      proj.xy2latlon(xx, yy, lat, lon);
-
-      // get height
-
-      double terrainHtM = 0.0;
-      bool isWater = true;
-      if (_terrainHt->getHt(lat, lon, terrainHtM, isWater) == 0) {
-        ht[ii] = terrainHtM;
-      } else {
-        ht[ii] = 0.0;
-      }
-
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "xx, yy, lat, lon, ht: "
-             << xx << ", "
-             << yy << ", "
-             << lat << ", "
-             << lon << ", "
-             << terrainHtM << endl;
-      }
-      
-    } // ix
-  } // iy
-
-  terrainHtField->setVolData(ht, planeSize32, Mdvx::ENCODING_FLOAT32);
+  _terrainHtField =
+    new MdvxField(fhdrTerrain, vhdrTerrain, ht, false, false, false);
   delete[] ht;
 
-  // add field to input object
+  // add ht field to input object
   
+  MdvxField *terrainHtField = new MdvxField(*_terrainHtField);
   _inMdvx.addField(terrainHtField);
+  
+  // return now if no water layer to be added
+  
+  if (!_params.add_water_layer) {
+    delete[] water;
+    return 0;
+  }
+
+  // create water layer field - this is 2D
+  
+  Mdvx::field_header_t fhdrWater = dbzField->getFieldHeader();
+  fhdrWater.nz = 1;
+  fhdrWater.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize08 = fhdrWater.nx * fhdrWater.ny * sizeof(ui08);
+  fhdrWater.volume_size = planeSize08;
+  fhdrWater.encoding_type = Mdvx::ENCODING_INT8;
+  fhdrWater.data_element_nbytes = 1;
+  fhdrWater.missing_data_value = 2;
+  fhdrWater.bad_data_value = 2;
+  fhdrWater.scale = 1.0;
+  fhdrWater.bias = 0.0;
+  
+  Mdvx::vlevel_header_t vhdrWater;
+  MEM_zero(vhdrWater);
+  vhdrWater.level[0] = 0;
+  vhdrWater.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  MdvxField::setFieldName("WaterFlag", fhdrWater);
+  MdvxField::setFieldNameLong("Water, flag 1=water, 0=land, 2=missing", fhdrWater);
+  MdvxField::setUnits("", fhdrWater);
+  _waterField = new MdvxField(fhdrWater, vhdrWater, water, false, false, false);
+  delete[] water;
+  
+  // add water field to input object
+  
+  MdvxField *waterField = new MdvxField(*_waterField);
+  _inMdvx.addField(waterField);
 
   return 0;
 
@@ -429,7 +499,7 @@ int Ecco::_addTerrainHtField()
 /////////////////////////////////////////////////////////
 // add fields to the output object
 
-void Ecco::_addFields()
+void Ecco::_addFieldsToOutput()
   
 {
 
@@ -445,8 +515,8 @@ void Ecco::_addFields()
   fhdr2d.volume_size = planeSize32;
   fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr2d.data_element_nbytes = 4;
-  fhdr2d.missing_data_value = _missing;
-  fhdr2d.bad_data_value = _missing;
+  fhdr2d.missing_data_value = _missingFl32;
+  fhdr2d.bad_data_value = _missingFl32;
   fhdr2d.scale = 1.0;
   fhdr2d.bias = 0.0;
   
@@ -555,8 +625,8 @@ void Ecco::_addFields()
   
   Mdvx::field_header_t fhdr3d = dbzField->getFieldHeader();
   Mdvx::vlevel_header_t vhdr3d = dbzField->getVlevelHeader();
-  fhdr3d.missing_data_value = _missing;
-  fhdr3d.bad_data_value = _missing;
+  fhdr3d.missing_data_value = _missingFl32;
+  fhdr3d.bad_data_value = _missingFl32;
 
   if (_params.write_convective_dbz) {
     // reflectivity only where convection has been identified
@@ -617,6 +687,26 @@ void Ecco::_addFields()
 
   if (_params.write_clumping_debug_fields) {
     _addClumpingDebugFields();
+  }
+
+  // add ht data if available
+  
+  if (_params.use_terrain_ht_data) {
+    MdvxField *htFieldIn = _inMdvx.getField("TerrainHt");
+    if (htFieldIn != NULL) {
+      MdvxField *htFieldOut = new MdvxField(*htFieldIn);
+      htFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
+      _outMdvx.addField(htFieldOut);
+    }
+    // add water field
+    if (_params.add_water_layer) {
+      MdvxField *waterFieldIn = _inMdvx.getField("WaterFlag");
+      if (waterFieldIn != NULL) {
+        MdvxField *waterFieldOut = new MdvxField(*waterFieldIn);
+        waterFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
+        _outMdvx.addField(waterFieldOut);
+      }
+    }
   }
   
 }
@@ -708,8 +798,8 @@ void Ecco::_computeHts(double tempC,
   fhdr.volume_size = planeSize32;
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = 4;
-  fhdr.missing_data_value = _missing;
-  fhdr.bad_data_value = _missing;
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
   
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
@@ -838,7 +928,7 @@ int Ecco::_doWrite()
   
   // add fields
   
-  _addFields();
+  _addFieldsToOutput();
   
   // write out
   
@@ -931,8 +1021,8 @@ void Ecco::_addClumpingDebugFields()
   fhdr2d.volume_size = planeSize32;
   fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr2d.data_element_nbytes = 4;
-  fhdr2d.missing_data_value = _missing;
-  fhdr2d.bad_data_value = _missing;
+  fhdr2d.missing_data_value = _missingFl32;
+  fhdr2d.bad_data_value = _missingFl32;
   fhdr2d.scale = 1.0;
   fhdr2d.bias = 0.0;
   

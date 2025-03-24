@@ -141,6 +141,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
       } else {
 	iret = -1;
       }
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
       
     } // if
     
@@ -156,6 +160,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "AcGeorefCompare reads multiple ac georef data sets from SPDB and compares them. It is designed to compare the NCAR GV INS with the HCR Gmigits unit." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

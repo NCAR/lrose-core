@@ -225,6 +225,23 @@ public:
     char* lookup_table;
   } variable_transform_field_t;
 
+  typedef struct {
+    char* sector_label;
+    char* coplane_label;
+    char* rhi_label;
+    char* vert_label;
+    char* idle_label;
+    char* az_sur_label;
+    char* el_sur_label;
+    char* sunscan_label;
+    char* sunscan_rhi_label;
+    char* cal_label;
+    char* man_label;
+    char* dbs_label;
+    char* traj_label;
+    char* par_label;
+  } sweep_mode_labels_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -615,6 +632,10 @@ public:
 
   char* site_name;
 
+  tdrp_bool_t override_scan_name;
+
+  char* scan_name;
+
   tdrp_bool_t override_volume_number;
 
   int starting_volume_number;
@@ -705,6 +726,10 @@ public:
   tdrp_bool_t adjust_sweep_limits_using_angles;
 
   tdrp_bool_t sort_sweeps_by_fixed_angle;
+
+  tdrp_bool_t combine_sweeps_by_fixed_angle;
+
+  double combined_sweep_max_fixed_angle_diff;
 
   tdrp_bool_t reverse_sweep_order_in_vol;
 
@@ -813,6 +838,10 @@ public:
 
   tdrp_bool_t include_scan_type_in_file_name;
 
+  tdrp_bool_t override_sweep_mode_labels;
+
+  sweep_mode_labels_t sweep_mode_labels;
+
   tdrp_bool_t include_scan_name_in_file_name;
 
   tdrp_bool_t include_scan_id_in_file_name;
@@ -876,7 +905,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[202];
+  mutable TDRPtable _table[208];
 
   const char *_className;
 

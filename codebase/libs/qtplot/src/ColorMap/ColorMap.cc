@@ -191,6 +191,7 @@ ColorMap &ColorMap::_copy(const ColorMap &rhs)
 
     _useLog10Transform = rhs._useLog10Transform;
     _useLog10ForLut = rhs._useLog10ForLut;
+    _saturation = rhs._saturation;
 
     _entries = rhs._entries;
     _transitionVals = rhs._transitionVals;
@@ -484,7 +485,7 @@ void
     igreen.push_back((int) (green[i] * 255 + 0.5));
     iblue.push_back((int) (blue[i] * 255 + 0.5));
   }
-  setMap(rangeMin, rangeMax, red, green, blue);
+  setMap(rangeMin, rangeMax, ired, igreen, iblue);
   
 }
 
@@ -608,6 +609,18 @@ void ColorMap::dataColor
   green = entry.greenNorm;
   blue = entry.blueNorm;
 
+}
+
+////////////////////////////////////////////////////////
+/// Check value is within valid range
+
+bool ColorMap::withinValidRange(double data) const
+{
+  int index = _getLutIndexCheck(data);
+  if (index < 0) {
+    return false;
+  }
+  return true;
 }
 
 ////////////////////////////////////////////////////////
@@ -1467,8 +1480,9 @@ void ColorMap::_computeLut()
 
 }
   
-////////////////////
+////////////////////////////////////
 // get lut index
+// always returns valid index
 
 int ColorMap::_getLutIndex(double data) const
 
@@ -1495,6 +1509,35 @@ int ColorMap::_getLutIndex(double data) const
 
 }
 
+////////////////////////////////////
+// get lut index with valid check
+// returns -1 if outside valid range
+
+int ColorMap::_getLutIndexCheck(double data) const
+  
+{
+
+  int index = 0;
+  if (_useLog10ForLut) {
+    if (data > 0) {
+      index = (int) (LUT_SIZE * (log10(data) - _rangeMin)/(_range));
+    } else {
+      index = 0;
+    }
+  } else {
+    index = (int) (LUT_SIZE * (data - _rangeMin)/(_range));
+  }
+  
+  if (index < 0) {
+    index = -1;
+  } else if (index > (LUT_SIZE-1)) {
+    index = -1;
+  }
+
+  return index;
+
+}
+
 ////////////////////
 // extract the r,g,b values and reset the map
 
@@ -1515,175 +1558,16 @@ void
 
 }
 
+/////////////////////////////////////////////////////
+// check that color name is valid
 
-//  How to draw the color scale?? can it just be an Image that gets 
-//layered???
-// use ImageComposer and painter.setCompositionMode(...)
-
-////////////////////////////////////////////////////
-// draw the color scale (1 pixel wide x nEntries high)
-
-QImage *ColorMap::getColorScaleLegend() {
-  // const ColorMap &colorMap,  // internal
-  // QPainter &painter,
-  // int unitsFontSize = 10;
-  
-  LOG(DEBUG) << "enter";
-  
-  int pltHt = _entries.size(); // _plotHeight;
-  // int width = 10; // _colorScaleWidth;
-  QImage *image = new QImage(10, pltHt, QImage::Format_RGB32);
-  image->fill("black");
-  QPainter painter(image);
-
-  //const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
-
-  // plot using x:0 - 100, y: 0 - 100; (0,0) upper left corner
-  //QTransform *textTransform = configureTextTransform();
-  //painter.setWorldTransform(*textTransform); 
-
-  //int _plotHeight = height();
-  //int _widthPixels = width();
-
-
-
-  //double widthInPixels = width();
-  //double widthInWorld = 100;
-
-  //double colorScaleWidthScaled = _colorScaleWidth * widthInWorld / _widthPixels; // widthInPixels;;
-  //int xStart = 100; // _widthPixels - width;
-  // size_t nHts = _entries.size() + 1; // leave some space at top and bottom
-  // double patchHt = (double)(pltHt) / nHts;
-  // int iPatchHt = (int) patchHt;
-  // int bottomMargin = (int) patchHt/2.0;
-
-  // fill the swatches with the color
-  
-  //painter.save();
-  painter.setPen(Qt::SolidLine);
-  // int scaleYTop = 0, scaleYBot = 0;
-  for (size_t ii = 0; ii < _entries.size(); ii++) {
-    const ColorMap::CmapEntry &entry = _entries[ii];
-    QColor color(entry.red, entry.green, entry.blue);
-    painter.setBrush(color);
-    //double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
-    // double topY = (100-bottomMargin) - (ii+1)*patchHt;
-    double x, y, width, height;
-    x = 0, y = ii; width = 1; height = 1;
-    QRectF r(x, y, width, height); // xStart, topY, width, patchHt);
-    painter.fillRect(r, color);
-   // if (ii == 0) {
-   //   scaleYBot = topY + patchHt;
-   // } else if (ii == _entries.size() - 1) {
-   //   scaleYTop = topY;
-   // }
-  }
-  /*
-
-  // get precision based on data
-  
-  double minDelta = 1.0e99;
-  for (size_t ii = 0; ii < cmap.size(); ii++) {
-    const ColorMap::CmapEntry &entry = cmap[ii];
-    double delta = fabs(entry.maxVal - entry.minVal);
-    if (delta < minDelta) minDelta = delta;
-  }
-  int ndecimals = 0;
-  char format = 'f';
-  if (minDelta <= 0.025) {
-    ndecimals = 3;
-    format = 'g';
-  } else if (minDelta <= 0.05) {
-    ndecimals = 3;
-  } else if (minDelta <= 0.25) {
-    ndecimals = 2;
-  } else if (minDelta <= 25) {
-    ndecimals = 1;
-  }
-
-  // save state
-
-  //painter.save();
-
-  // scale the font
-  
-  QFont font = painter.font();
-
-  font.setPointSize(2);
-  painter.setFont(font);
-  
-  // add labels
-
-  painter.setBrush(Qt::black);
-  painter.setBackgroundMode(Qt::OpaqueMode);
-  QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
-  int textHt = tRect.height();
-
-  int xStartPlusABit = xStart + colorScaleWidthScaled/4;  
-  
-  if (colorMap.labelsSetByValue()) {
-
-    LOG(DEBUG) << "colorMap.labelsSetByValue";
-  
-    // label values specified in the color scale file
-
-    const vector<ColorMap::CmapLabel> &labels = colorMap.getSpecifiedLabels();
-    double scaleHeight = scaleYBot - scaleYTop;
-    for (size_t ii = 0; ii < labels.size(); ii++) {
-      const ColorMap::CmapLabel &label = labels[ii];
-      double yy = scaleYBot - scaleHeight * label.position;
-      double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2;
-      painter.drawText(xStartPlusABit, 
-                       (int) yPos, // yy - textHt / 2, 
-                       width + 4, textHt + 4, 
-                       Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
-                       label.text.c_str());
-    } // ii
-
-  } else {
-    LOG(DEBUG) << "label the color transitions";
-
-    // label the color transitions
-    // we space the labels vertically by at least 2 * text height
-    
-    //double yy = pltHt - (patchHt * 1.0) + _topMargin;
-    double prevIyy = -1;
-
-    for (size_t ii = 0; ii < cmap.size(); ii++) {
-      const ColorMap::CmapEntry &entry = cmap[ii];
-      QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
-
-        double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2; // /2;
-        painter.drawText(xStartPlusABit, //  xStart+5, 
-                         (int) yPos, // iyy, 
-                         //width, iPatchHt, 
-                         width + 4, textHt + 4, 
-                         Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
-                         label);
-    }
-    
-    // last label at top
-    
-    const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
-    QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
-    int ii = cmap.size();
-    double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2; // /2;
-    painter.drawText(xStartPlusABit,
-                         (int) yPos, // iyy, 
-                         //width, iPatchHt, 
-                         width + 4, textHt + 4, 
-                         Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
-                         label);    
-  }
-
-
-  // restore state
-
-  // painter.restore();
-  */
-  LOG(DEBUG) << "exit";
-
-  return image;
-
+bool ColorMap::isColorNameValid(QString colorName)
+{
+#if QT_VERSION >= 0x060000
+  return QColor::isValidColorName(colorName);
+#else
+  QColor color;
+  color.setNamedColor(colorName);
+  return color.isValid();
+#endif
 }
-

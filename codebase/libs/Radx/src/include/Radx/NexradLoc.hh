@@ -94,7 +94,7 @@ private:
     int htMeters;
   } locInfo_t;
 
-  static const int _nStations = 156;
+  static const int _nStations = 157;
   static const locInfo_t _locInfo[_nStations];
 
   void _load(int index);

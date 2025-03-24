@@ -94,6 +94,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -108,6 +113,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "PartRain (Particle-ID/Rain-rate) application. PartRain reads dual-polarization moments in an input DsRadar FMQ, computes rain rate and particle ID, and writes the results to a DsRadar queue." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

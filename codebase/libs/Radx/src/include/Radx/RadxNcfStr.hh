@@ -438,6 +438,7 @@ protected:
   const char* ANTENNA_TRANSITION_LONG;
   const char* AZIMUTH_CORRECTION_LONG;
   const char* AZIMUTH_LONG;
+  const char* AZIMUTH_STANDARD;
   const char* BASE_DBZ_1KM_HC_LONG;
   const char* BASE_DBZ_1KM_HX_LONG;
   const char* BASE_DBZ_1KM_VC_LONG;
@@ -461,6 +462,7 @@ protected:
   const char* EASTWARD_WIND_LONG;
   const char* ELEVATION_CORRECTION_LONG;
   const char* ELEVATION_LONG;
+  const char* ELEVATION_STANDARD;
   const char* FIXED_ANGLE_LONG;
   const char* FOLLOW_MODE_LONG;
   const char* FREQUENCY_LONG;

@@ -36,7 +36,7 @@
 
 #include <dataport/port_types.h>
 
-#include "wsi_ingest_tdrp.h"
+#include "Params.hh"
 
 
 #define kNetRdSz        8192
@@ -96,4 +96,4 @@ void          UpdateFile(void);
    External Declarations
 ************************/
 
-extern wsi_ingest_tdrp_struct Params;
+extern Params _params;

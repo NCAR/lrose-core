@@ -53,6 +53,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 
 #include <Radx/RadxPath.hh>
 
@@ -89,6 +90,7 @@ public:
 
   string getCurrentVersion(int fileNum);
   int getCurrentVersionNum(int fileNum);
+  void getAllPreviousVersions(int fileNum, queue<string> *list);
 
   //save(int fileNum)
   //fn = getCurrentVersion(file#) 

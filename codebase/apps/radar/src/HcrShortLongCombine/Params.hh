@@ -80,6 +80,41 @@ public:
   } mode_t;
 
   typedef enum {
+    PLATFORM_FIXED = 1,
+    PLATFORM_VEHICLE = 2,
+    PLATFORM_SHIP = 3,
+    PLATFORM_AIRCRAFT_FORE = 5,
+    PLATFORM_AIRCRAFT_AFT = 6,
+    PLATFORM_AIRCRAFT_TAIL = 7,
+    PLATFORM_AIRCRAFT_BELLY = 8,
+    PLATFORM_AIRCRAFT_ROOF = 9,
+    PLATFORM_AIRCRAFT_NOSE = 10,
+    PLATFORM_SATELLITE_ORBIT = 11,
+    PLATFORM_SATELLITE_GEOSTAT = 12
+  } platform_type_t;
+
+  typedef enum {
+    PRIMARY_AXIS_Z = 0,
+    PRIMARY_AXIS_Y = 1,
+    PRIMARY_AXIS_X = 2,
+    PRIMARY_AXIS_Z_PRIME = 3,
+    PRIMARY_AXIS_Y_PRIME = 4,
+    PRIMARY_AXIS_X_PRIME = 5
+  } primary_axis_t;
+
+  typedef enum {
+    SWEEP_MODE_SECTOR = 1,
+    SWEEP_MODE_RHI = 3,
+    SWEEP_MODE_VERTICAL_POINTING = 4,
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+    SWEEP_MODE_SUNSCAN = 11,
+    SWEEP_MODE_POINTING = 12,
+    SWEEP_MODE_SUNSCAN_RHI = 17,
+    SWEEP_MODE_ELECTRONIC_STEERING = 20
+  } sweep_mode_t;
+
+  typedef enum {
     DWELL_STATS_MEAN = 0,
     DWELL_STATS_MEDIAN = 1,
     DWELL_STATS_MAXIMUM = 2,
@@ -88,49 +123,18 @@ public:
     DWELL_STATS_DISCRETE_MODE = 5
   } dwell_stats_method_t;
 
-  typedef enum {
-    OUTPUT_ENCODING_ASIS = 0,
-    OUTPUT_ENCODING_FLOAT32 = 1,
-    OUTPUT_ENCODING_INT32 = 2,
-    OUTPUT_ENCODING_INT16 = 3,
-    OUTPUT_ENCODING_INT08 = 4
-  } output_encoding_t;
-
-  typedef enum {
-    SCALING_DYNAMIC = 0,
-    SCALING_SPECIFIED = 1
-  } output_scaling_t;
-
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_CFRADIAL2 = 1
-  } output_format_t;
-
-  typedef enum {
-    START_AND_END_TIMES = 0,
-    START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2,
-    SPECIFY_FILE_NAME = 3
-  } filename_mode_t;
-
   // struct typedefs
+
+  typedef struct {
+    double latitudeDeg;
+    double longitudeDeg;
+    double altitudeKm;
+  } radar_location_t;
 
   typedef struct {
     char* field_name;
     dwell_stats_method_t stats_method;
   } stats_method_field_t;
-
-  typedef struct {
-    char* input_field_name;
-    char* output_field_name;
-    char* long_name;
-    char* standard_name;
-    char* output_units;
-    output_encoding_t encoding;
-    output_scaling_t output_scaling;
-    double output_scale;
-    double output_offset;
-  } output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -434,19 +438,37 @@ public:
 
   mode_t mode;
 
-  char* input_dir_short;
-
-  char* input_dir_long;
-
   char* input_fmq_url_short;
 
   char* input_fmq_url_long;
 
   tdrp_bool_t seek_to_end_of_input_fmq;
 
+  char* input_dir_short;
+
+  char* input_dir_long;
+
+  tdrp_bool_t override_platform_type;
+
+  platform_type_t platform_type;
+
+  tdrp_bool_t override_primary_axis;
+
+  primary_axis_t primary_axis;
+
+  tdrp_bool_t override_sweep_mode;
+
+  sweep_mode_t sweep_mode;
+
   tdrp_bool_t set_max_range;
 
   double max_range_km;
+
+  tdrp_bool_t fixed_location_mode;
+
+  radar_location_t fixed_radar_location;
+
+  tdrp_bool_t compute_mean_location;
 
   double dwell_length_secs;
 
@@ -459,47 +481,21 @@ public:
   stats_method_field_t *_stats_method_fields;
   int stats_method_fields_n;
 
-  tdrp_bool_t set_output_fields;
+  tdrp_bool_t perform_velocity_unfolding;
 
-  output_field_t *_output_fields;
-  int output_fields_n;
+  char* input_vel_raw_field_name_short;
 
-  tdrp_bool_t exclude_specified_fields;
+  char* input_vel_raw_field_name_long;
 
-  char* *_excluded_fields;
-  int excluded_fields_n;
+  char* input_vel_corr_field_name_short;
 
-  tdrp_bool_t set_output_encoding_for_all_fields;
+  char* input_vel_corr_field_name_long;
 
-  output_encoding_t output_encoding;
+  char* output_vel_corr_field_name_short;
 
-  output_format_t output_format;
+  char* output_vel_corr_field_name_long;
 
-  char* output_dir;
-
-  filename_mode_t output_filename_mode;
-
-  char* output_filename_prefix;
-
-  tdrp_bool_t write_output_files_on_time_boundaries;
-
-  int output_file_time_interval_secs;
-
-  tdrp_bool_t include_instrument_name_in_file_name;
-
-  tdrp_bool_t include_subsecs_in_file_name;
-
-  tdrp_bool_t include_scan_type_in_file_name;
-
-  tdrp_bool_t use_hyphen_in_file_name_datetime_part;
-
-  char* output_filename;
-
-  tdrp_bool_t append_day_dir_to_output_dir;
-
-  tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t write_latest_data_info;
+  char* output_vel_unfolded_field_name;
 
   char* output_fmq_url;
 
@@ -520,7 +516,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

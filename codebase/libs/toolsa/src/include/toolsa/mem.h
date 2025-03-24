@@ -32,7 +32,8 @@
 #include <memory.h>
 
 #define MEM_zero(a) memset(&(a), 0, sizeof((a)))
-
+#define MEM_zero_ptr(p) memset((void *)(p),0,sizeof (*(p)))
+   
 extern void *MEM_alloc(size_t size);
 extern void *MEM_calloc (size_t nelem, size_t elsize);
 extern void *MEM_realloc (void *ptr, size_t size);

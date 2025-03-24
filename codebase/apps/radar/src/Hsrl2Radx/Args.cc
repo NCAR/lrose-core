@@ -168,7 +168,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       } else {
 	OK = false;
       }
-	
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     }
     
   } // i
@@ -184,6 +188,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "Reads UW HSRL data files in CfRadial format, with range in ht MSL, and converts to a standard CfRadial, with range measured from the instrument instead of MSL." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

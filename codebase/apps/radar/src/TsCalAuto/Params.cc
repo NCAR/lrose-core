@@ -930,9 +930,33 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_manual_siggen_control");
     tt->descr = tdrpStrDup("Option to manually set the siggen.");
-    tt->help = tdrpStrDup("Use for testing etc.");
+    tt->help = tdrpStrDup("The user will be prompted with the required siggen power.");
     tt->val_offset = (char *) &use_manual_siggen_control - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'prompt_user_with_attenuation'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("prompt_user_with_attenuation");
+    tt->descr = tdrpStrDup("Option to prompt with attenuation instead of siggen power.");
+    tt->help = tdrpStrDup("On some systems the injected power level is controlled with a variable attenuator instead of by setting the siggen power. If this is set to true, the user will be prompted with the required attenuation in dB.");
+    tt->val_offset = (char *) &prompt_user_with_attenuation - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'variable_attenuation_start_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("variable_attenuation_start_value");
+    tt->descr = tdrpStrDup("Initial attenuation value (dB)");
+    tt->help = tdrpStrDup("This is the variable attenuator setting corresponding to the siggen_sequence_start_power. We use this value to compute the attenuation with which to prompt the user.");
+    tt->val_offset = (char *) &variable_attenuation_start_value - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'suspend_test_pulse'

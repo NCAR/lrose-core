@@ -190,10 +190,10 @@ def main():
     trimToMakefiles("libs")
     trimToMakefiles("apps")
 
-    # set up autoconf
+    # set up autoconf - no longer tested and supported
 
-    logPath = prepareLogFile("setup-autoconf");
-    setupAutoconf()
+    # logPath = prepareLogFile("setup-autoconf");
+    # setupAutoconf()
 
     # create CMakeFiles.txt files for cmake
     
@@ -391,7 +391,7 @@ def createQtMocFiles(appDir):
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
-    shellCmd("qmake-qt6 -o Makefile.qmake");
+    shellCmd("qmake-qt5 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################

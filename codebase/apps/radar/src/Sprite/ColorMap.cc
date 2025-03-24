@@ -470,7 +470,7 @@ void
     igreen.push_back((int) (green[i] * 255 + 0.5));
     iblue.push_back((int) (blue[i] * 255 + 0.5));
   }
-  setMap(rangeMin, rangeMax, red, green, blue);
+  setMap(rangeMin, rangeMax, ired, igreen, iblue);
   
 }
 

@@ -48,8 +48,6 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
-#include <rapformats/DsRadarMsg.hh>
-#include <Fmq/DsRadarQueue.hh>
 #include <radar/IwrfMomReader.hh>
 class RadxFile;
 class RadxRay;
@@ -82,9 +80,8 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  vector<string> _readPaths;
 
-  // reading fmq in realtime
+  // reading input moments
 
   IwrfMomReader *_readerShort;
   IwrfMomReader *_readerLong;
@@ -93,10 +90,6 @@ private:
 
   DsFmq *_outputFmq;
 
-  DsRadarParams _rparams;
-  vector<DsPlatformGeoref> _georefs;
-  bool _needWriteParams;
-  int _inputContents;
   int _nRaysRead;
   int _nRaysWritten;
 
@@ -109,19 +102,34 @@ private:
   vector<RadxEvent> _eventsShort;
   vector<RadxEvent> _eventsLong;
 
+  double _wavelengthM;
+  double _prtShort;
+  double _prtLong;
+  double _nyquistShort;
+  double _nyquistLong;
+  double _nyquistUnfolded;
+
+  int _stagM;
+  int _stagN;
+  int _LL;
+  int _PP_[32];
+  
   // combining
 
   double _dwellLengthSecs;
   double _dwellLengthSecsHalf;
   
-  RadxTime _dwellStartTime;
-  RadxTime _dwellEndTime;
-  RadxTime _dwellMidTime;
+  RadxTime _nextDwellStartTime;
+  RadxTime _nextDwellEndTime;
+  RadxTime _nextDwellMidTime;
+  RadxTime _thisDwellMidTime;
+
   RadxTime _latestRayTime;
+  RadxTime _prevTimeShort;
   
   RadxRay *_cacheRayShort;
   RadxRay *_cacheRayLong;
-
+  
   vector<RadxRay *> _dwellRaysShort;
   vector<RadxRay *> _dwellRaysLong;
 
@@ -130,55 +138,42 @@ private:
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
 
-  // output data on time boundaries
-
-  RadxTime _nextEndOfVolTime;
-  RadxVol _splitVol;
+  double _meanLatShort, _meanLonShort, _meanAltShort;
+  double _meanLatLong, _meanLonLong, _meanAltLong;
 
   // methods
 
   int _runRealtime();
   int _runArchive();
+  int _computeMeanLocation();
 
-  int _openFmqs();
+  int _openInputFmqs();
+  int _openOutputFmq();
+  int _openFileReaders();
+
   int _prepareInputRays();
   int _readNextDwell();
+  int _checkForTimeGap(RadxRay *latestRayShort);
   RadxRay *_combineDwellRays();
   void _clearDwellRays();
+
   void _unfoldVel(RadxRay *rayCombined);
+
+  void _computeVelCorrectedForVertMotion(RadxRay *ray,
+                                         RadxField *velRawShort,
+                                         RadxField *velRawLong,
+                                         RadxField *velUnfolded);
+  
+  double _correctForNyquist(double vel, double nyquist);
+  
   RadxRay *_readRayShort();
   RadxRay *_readRayLong();
   
-  int _openFileReaders();
-  int _processFile(const string &filePath);
-  void _setupRead(RadxFile &file);
-  void _convertFields(RadxVol &vol);
-  void _convertAllFields(RadxVol &vol);
-  void _setupWrite(RadxFile &file);
-  void _setGlobalAttr(RadxVol &vol);
-
-  int _writeVol(RadxVol &vol);
-  int _writeVolOnTimeBoundary(RadxVol &vol);
-  int _writeSplitVol();
-  void _setNextEndOfVolTime(RadxTime &refTime);
-
-  int _combineDwells(RadxVol &vol);
-  int _combineDwellsCentered(RadxVol &vol);
   RadxField::StatsMethod_t
     _getDwellStatsMethod(Params::dwell_stats_method_t method);
 
-  int _writeParams(const RadxRay *ray);
-  int _writeRay(const RadxRay *ray);
+  void _setPlatformMetadata(RadxPlatform &platform);
 
-  bool _isOutputField(const string &name);
-
-  Radx::SweepMode_t _getRadxSweepMode(int dsrScanMode);
-  Radx::PolarizationMode_t _getRadxPolarizationMode(int dsrPolMode);
-  Radx::FollowMode_t _getRadxFollowMode(int dsrMode);
-  Radx::PrtMode_t _getRadxPrtMode(int dsrMode);
-
-  int _getDsScanMode(Radx::SweepMode_t mode);
-    
 };
 
 #endif

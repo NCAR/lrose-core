@@ -35,7 +35,9 @@ SUB_DIRS = \
 	LdmDynamic2Static \
 	LdmMetars2File \
 	Ltg2Spdb \
+	Mesonet2Spdb \
 	Metar2Spdb \
+	MetarCsv2Spdb \
 	Mrms2Mdv \
 	MrmsGribIngest \
 	NWSsoundingIngest \
@@ -56,6 +58,7 @@ SUB_DIRS = \
 	ShipObsIngest \
 	SigAirMet2Spdb \
 	SynopObsIngest \
+	UAEMesonet2Spdb \
 	Uf2Dsr \
 	Usgs2Spdb \
 	WafsTiled2Mdv \

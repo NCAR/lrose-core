@@ -693,6 +693,16 @@ short Nc3TypedComponent::as_short( long n ) const {
   return rval;
 }
 
+ushort Nc3TypedComponent::as_ushort( long n ) const {
+  Nc3Values* tmp = values();
+  if (tmp == NULL) {
+    return 0;
+  }
+  ushort rval = tmp->as_ushort(n);
+  delete tmp;
+  return rval;
+}
+
 int Nc3TypedComponent::as_int( long n ) const {
   Nc3Values* tmp = values();
   if (tmp == NULL) {
@@ -787,6 +797,9 @@ Nc3Values* Nc3TypedComponent::get_space( long numVals ) const
       break;
     case nc3Short:
       valp = new Nc3Values_short(numVals);
+      break;
+    case nc3Ushort:
+      valp = new Nc3Values_ushort(numVals);
       break;
     case nc3Byte:
     case nc3Char:
@@ -934,6 +947,12 @@ Nc3Values* Nc3Var::values( void ) const
                                 (short *)valp->base())
                                  );
       break;
+    case nc3Ushort:
+      status = Nc3Error::set_err(
+              nc_get_vara_ushort(the_file->id(), the_id, crnr, edgs, 
+                                 (ushort *)valp->base())
+                                 );
+      break;
     case nc3Byte:
       status = Nc3Error::set_err(
               nc_get_vara_schar(the_file->id(), the_id, crnr, edgs, 
@@ -1045,6 +1064,12 @@ Nc3Values* Nc3Var::get_rec(Nc3Dim* rdim, long slice)
       status = Nc3Error::set_err(
               nc_get_vara_short(the_file->id(), the_id, start, edge, 
                                 (short *)valp->base())
+                                 );
+      break;
+    case nc3Ushort:
+      status = Nc3Error::set_err(
+              nc_get_vara_ushort(the_file->id(), the_id, start, edge, 
+                                 (ushort *)valp->base())
                                  );
       break;
     case nc3Byte:
@@ -1647,6 +1672,26 @@ Nc3Bool Nc3Var::put( const short* vals, long edge0, long edge1, long edge2, long
   return Nc3Error::set_err( nc_put_vara_short (the_file->id(), the_id, start, count, vals) ) == NC_NOERR;
 }
 
+Nc3Bool Nc3Var::put( const ushort* vals, long edge0, long edge1, long edge2, long edge3, long edge4) {
+  if (! the_file->data_mode()) return 0;
+  size_t count[5];
+  count[0] = edge0;
+  count[1] = edge1;
+  count[2] = edge2;
+  count[3] = edge3;
+  count[4] = edge4;
+  for (int i = 0; i < 5; i++) {
+    if (count[i]) {
+      if (num_dims() < i) return 0;
+    } else break;
+  }
+  size_t start[5];
+  for (int j = 0; j < 5; j++) {
+    start[j] = the_cur[j];
+  }
+  return Nc3Error::set_err( nc_put_vara_ushort (the_file->id(), the_id, start, count, vals) ) == NC_NOERR;
+}
+
 Nc3Bool Nc3Var::put( const int* vals, long edge0, long edge1, long edge2, long edge3, long edge4) {
   if (! the_file->data_mode()) return 0;
   size_t count[5];
@@ -1776,6 +1821,13 @@ Nc3Bool Nc3Var::put( const short* vals, const long* count ) {
   size_t start[1024];
   for (int i = 0; i < num_dims(); i++) start[i] = the_cur[i];
   return Nc3Error::set_err( nc_put_vara_short (the_file->id(), the_id, start, (const size_t *) count, vals) ) == NC_NOERR;
+}
+
+Nc3Bool Nc3Var::put( const ushort* vals, const long* count ) {
+  if (! the_file->data_mode()) return 0;
+  size_t start[1024];
+  for (int i = 0; i < num_dims(); i++) start[i] = the_cur[i];
+  return Nc3Error::set_err( nc_put_vara_ushort (the_file->id(), the_id, start, (const size_t *) count, vals) ) == NC_NOERR;
 }
 
 Nc3Bool Nc3Var::put( const int* vals, const long* count ) {
@@ -1927,6 +1979,26 @@ Nc3Bool Nc3Var::get( short* vals, long edge0, long edge1, long edge2, long edge3
   return Nc3Error::set_err( nc_get_vara_short (the_file->id(), the_id, start, count, vals) ) == NC_NOERR;
 }
 
+Nc3Bool Nc3Var::get( ushort* vals, long edge0, long edge1, long edge2, long edge3, long edge4) const {
+  if (! the_file->data_mode()) return 0;
+  size_t count[5];
+  count[0] = edge0;
+  count[1] = edge1;
+  count[2] = edge2;
+  count[3] = edge3;
+  count[4] = edge4;
+  for (int i = 0; i < 5; i++) {
+    if (count[i]) {
+      if (num_dims() < i) return 0;
+    } else break;
+  }
+  size_t start[5];
+  for (int j = 0; j < 5; j++) {
+    start[j] = the_cur[j];
+  }
+  return Nc3Error::set_err( nc_get_vara_ushort (the_file->id(), the_id, start, count, vals) ) == NC_NOERR;
+}
+
 Nc3Bool Nc3Var::get( int* vals, long edge0, long edge1, long edge2, long edge3, long edge4) const {
   if (! the_file->data_mode()) return 0;
   size_t count[5];
@@ -2048,6 +2120,14 @@ Nc3Bool Nc3Var::get( short* vals, const long* count ) const {
   size_t start[1024];
   for (int i = 0; i < num_dims(); i++) start[i] = the_cur[i];
   return Nc3Error::set_err( nc_get_vara_short (the_file->id(), the_id, start,
+                                               (const size_t *) count, vals) ) == NC_NOERR;
+}
+
+Nc3Bool Nc3Var::get( ushort* vals, const long* count ) const {
+  if (! the_file->data_mode()) return 0;
+  size_t start[1024];
+  for (int i = 0; i < num_dims(); i++) start[i] = the_cur[i];
+  return Nc3Error::set_err( nc_get_vara_ushort (the_file->id(), the_id, start,
                                                (const size_t *) count, vals) ) == NC_NOERR;
 }
 

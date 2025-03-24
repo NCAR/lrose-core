@@ -304,6 +304,7 @@ typedef struct TDRPtable {
 extern void tdrpUsage(FILE *out);
 extern int tdrpIsArgValid(const char *arg);
 extern int tdrpIsArgValidN(const char *arg);
+extern void tdrpCheckArgAndWarn(const char *arg, FILE *out);
 
 /*
  * overrides

@@ -309,8 +309,12 @@ int SquareDegree::_readFromFile()
 
   // read in water data
 
-  if (_readWaterFile(ulOffset)) {
-    return -1;
+  if (_params.add_water_layer) {
+    if (_readWaterFile(ulOffset)) {
+      return -1;
+    }
+  } else {
+    _waterAvail = false;
   }
 
   return 0;

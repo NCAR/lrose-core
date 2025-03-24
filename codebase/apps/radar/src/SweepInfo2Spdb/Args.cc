@@ -118,6 +118,11 @@ int Args::parse (int argc, char **argv,
 	iret = -1;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -134,6 +139,10 @@ void Args::_usage(ostream &out,
 		  const string &prog_name)
 
 {
+
+  out << endl;
+  out << "SweepInfo2Spdb reads sweep data from UDP or a catalog file, and writes the info to an SPDB data base." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

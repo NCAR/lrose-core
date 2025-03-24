@@ -76,7 +76,7 @@ protected:
   
 private:
 
-  static const fl32 _missing;
+  static const fl32 _missingFl32;
 
   string _progName;
   char *_paramsPath;
@@ -92,10 +92,12 @@ private:
   MdvxField _deepHtField;
 
   TerrainHt *_terrainHt;
+  MdvxProj _dbzProj;
+  MdvxField *_terrainHtField, *_waterField;
 
   int _doRead();
   int _addTerrainHtField();
-  void _addFields();
+  void _addFieldsToOutput();
   int _readTempProfile(time_t dbzTime,
                        const MdvxField *dbzField);
   void _computeHts(double tempC,

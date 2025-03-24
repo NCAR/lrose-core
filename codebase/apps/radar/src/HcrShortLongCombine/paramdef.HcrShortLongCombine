@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.";
+  p_header = "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
 }
 
 commentdef {
@@ -49,20 +49,8 @@ typedef enum {
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.";
+  p_help = "\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.";
 } mode;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
-  p_descr = "Input directory short.";
-  p_help = "ARCHIVE mode only. Directory for short pulse files.";
-} input_dir_short;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
-  p_descr = "Input directory long.";
-  p_help = "ARCHIVE mode only. Directory for long pulse files.";
-} input_dir_long;
 
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_short";
@@ -82,9 +70,117 @@ paramdef boolean {
   p_help = "REALTIME mode only. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
 } seek_to_end_of_input_fmq;
 
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
+  p_descr = "Input directory short.";
+  p_help = "ARCHIVE mode only. Directory for short pulse files.";
+} input_dir_short;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
+  p_descr = "Input directory long.";
+  p_help = "ARCHIVE mode only. Directory for long pulse files.";
+} input_dir_long;
+
 commentdef {
-  p_header = "LIMIT RANGE?";
+  p_header = "OVERRIDE PLATFORM TYPE?";
 }
+
+typedef enum {
+  PLATFORM_FIXED = 1,
+  PLATFORM_VEHICLE = 2,
+  PLATFORM_SHIP = 3,
+  PLATFORM_AIRCRAFT_FORE = 5,
+  PLATFORM_AIRCRAFT_AFT = 6,
+  PLATFORM_AIRCRAFT_TAIL = 7,
+  PLATFORM_AIRCRAFT_BELLY = 8,
+  PLATFORM_AIRCRAFT_ROOF = 9,
+  PLATFORM_AIRCRAFT_NOSE = 10,
+  PLATFORM_SATELLITE_ORBIT = 11,
+  PLATFORM_SATELLITE_GEOSTAT = 12
+} platform_type_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
+    "\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n"
+    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
+    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
+    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
+    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
+    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+} override_platform_type;
+
+paramdef enum platform_type_t {
+  p_default = PLATFORM_AIRCRAFT_FORE;
+  p_descr = "Platform type.";
+  p_help = "See override_platform_type.";
+} platform_type;
+
+commentdef {
+  p_header = "OVERRIDE PRIMARY AXIS?";
+}
+
+typedef enum {
+  PRIMARY_AXIS_Z = 0, ///< vertical
+  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+} primary_axis_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPRIMARY_AXIS_Z - vertical\n"
+    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
+    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
+    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
+    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
+    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
+} override_primary_axis;
+
+paramdef enum primary_axis_t {
+  p_default = PRIMARY_AXIS_Y_PRIME;
+  p_descr = "Platform type.";
+  p_help = "See override_primary_axis.";
+} primary_axis;
+
+commentdef {
+  p_header = "OVERRIDE SWEEP MODE?";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the sweep modes in the data.";
+  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
+} override_sweep_mode;
+
+typedef enum {
+  SWEEP_MODE_SECTOR = 1,
+  SWEEP_MODE_RHI = 3,
+  SWEEP_MODE_VERTICAL_POINTING = 4,
+  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+  SWEEP_MODE_SUNSCAN = 11,
+  SWEEP_MODE_POINTING = 12,
+  SWEEP_MODE_SUNSCAN_RHI = 17,
+  SWEEP_MODE_ELECTRONIC_STEERING = 20
+} sweep_mode_t;
+
+paramdef enum sweep_mode_t {
+  p_default = SWEEP_MODE_VERTICAL_POINTING;
+  p_descr = "Sweep mode for all sweeps.";
+  p_help = "See override_sweep_mode.";
+} sweep_mode;
 
 paramdef boolean {
   p_default = false;
@@ -98,7 +194,42 @@ paramdef double {
 } max_range_km;
 
 commentdef {
+  p_header = "GROUND-BASED MODE";
+  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set fixed location in ground-based mode.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
+} fixed_location_mode;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} fixed_radar_location;
+
+commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based installation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
+} compute_mean_location;
+
+commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";
+  p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
 }
 
 paramdef double {
@@ -155,190 +286,72 @@ paramdef struct stats_method_field_t {
 } stats_method_fields[];
 
 commentdef {
-  p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+  p_header = "FIELD NAMES for combination";
+  p_text = "The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
 }
 
 paramdef boolean {
-  p_default = false;
-  p_descr = "Set the field names and output encoding";
-  p_help = "If false, all fields will be used.";
-} set_output_fields;
-
-typedef enum {
-  OUTPUT_ENCODING_ASIS,
-  OUTPUT_ENCODING_FLOAT32,
-  OUTPUT_ENCODING_INT32,
-  OUTPUT_ENCODING_INT16,
-  OUTPUT_ENCODING_INT08
-} output_encoding_t;
-
-typedef enum {
-  SCALING_DYNAMIC,
-  SCALING_SPECIFIED
-} output_scaling_t;
-
-typedef struct {
-  string input_field_name; 
-  string output_field_name; 
-  string long_name; 
-  string standard_name; 
-  string output_units;
-  output_encoding_t encoding;
-  output_scaling_t output_scaling;
-  double output_scale;
-  double output_offset;
-} output_field_t;
-
-paramdef struct output_field_t {
-  p_default = {
-    { "DBZ",
-      "DBZ",
-      "reflectivity",
-      "equivalent_reflectivity_factor",
-      "dBZ",
-      OUTPUT_ENCODING_ASIS,
-      SCALING_DYNAMIC, 0.01, 0.0
-    },
-    { "VEL", 
-      "VEL", 
-      "radial_velocity",
-      "radial_velocity_of_scatterers_away_from_instrument",
-      "m/s", 
-      OUTPUT_ENCODING_ASIS,
-      SCALING_DYNAMIC, 0.01, 0.0
-    }
-  };
-  p_descr = "Output field details.";
-  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
-} output_fields[];
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to exclude fields in the specified list.";
-  p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
-} exclude_specified_fields;
+  p_default = true;
+  p_descr = "Option to unfold the velocity field.";
+  p_help = "If false, the short vel will be copied to the unfolded field. The vel_unfolded field will be added to the output data set.";
+} perform_velocity_unfolding;
 
 paramdef string {
-  p_default = { "DBZ", "VEL" };
-  p_descr = "List of fields to be excluded.";
-  p_help = "List the names to be excluded";
-} excluded_fields[];
+  p_default = "VEL_RAW_short";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_raw_field_name_short;
+
+paramdef string {
+  p_default = "VEL_RAW_long";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_raw_field_name_long;
+
+paramdef string {
+  p_default = "VEL_short";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name_short;
+
+paramdef string {
+  p_default = "VEL_long";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name_long;
+
+// paramdef string {
+//   p_default = "_short";
+//   p_descr = "This suffix is added to the input fields for short-prt moments.";
+//   p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_short_pulse_fields;
+
+// paramdef string {
+//   p_default = "_long";
+//   p_descr = "This suffix is added to the input fields for long-prt moments.";
+//   p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_long_pulse_fields;
+
+paramdef string {
+  p_default = "VEL_short";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name_short;
+
+paramdef string {
+  p_default = "VEL_long";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name_long;
+
+paramdef string {
+  p_default = "VEL_unfold_short";
+  p_descr = "Name for the unfolded velocity.";
+  p_help = "This is an output field, computed by unfolding the dual-prt vel fields.";
+} output_vel_unfolded_field_name;
 
 commentdef {
-  p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set output encoding for all fields";
-} set_output_encoding_for_all_fields;
-
-paramdef enum output_encoding_t {
-  p_default = OUTPUT_ENCODING_ASIS;
-  p_descr = "Output encoding for all fields, if requested.";
-} output_encoding;
-
-commentdef {
-  p_header = "WRITE CFRADIAL FILES";
-}
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_CFRADIAL2
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
-
-paramdef string {
-  p_default = "./output";
-  p_descr = "Output directory path.";
-  p_help = "Files will be written to this directory.";
-} output_dir;
-
-typedef enum {
-  START_AND_END_TIMES,
-  START_TIME_ONLY,
-  END_TIME_ONLY,
-  SPECIFY_FILE_NAME
-} filename_mode_t;
-
-paramdef enum filename_mode_t {
-  p_default = START_AND_END_TIMES;
-  p_descr = "Mode for computing output file name.";
-  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
-} output_filename_mode;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Optional prefix for output filename.";
-  p_help = "If empty, the standard prefix will be used.";
-} output_filename_prefix;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write the output files on time boundaries.";
-  p_help = "See 'output_file_time_interval_secs'.";
-} write_output_files_on_time_boundaries;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Time interval at which files will be written out (secs).";
-  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
-} output_file_time_interval_secs;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the instrument name in the file name.";
-  p_help = "Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
-} include_instrument_name_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include sub-seconds in date-time part of file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
-} include_subsecs_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the scan type in the file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
-} include_scan_type_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use a hyphen between date and time in filename.";
-  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
-} use_hyphen_in_file_name_datetime_part;
-
-paramdef string {
-  p_default = "cfradial.test.nc";
-  p_descr = "Name of output file.";
-  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
-} output_filename;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Add the day directory to the output directory.";
-  p_help = "Path will be output_dir/yyyymmdd/filename.";
-} append_day_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Add the year directory to the output directory.";
-  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
-} append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
-
-commentdef {
-  p_header = "OUTPUT IN FMQ MODE";
+  p_header = "OUTPUT FMQ";
 }
 
 paramdef string {

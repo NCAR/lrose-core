@@ -85,6 +85,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
       
     } // if
     
@@ -100,6 +104,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "Cov2Mom reads covariances in an input DsRadar FMQ, computes moments and writes them out to DsRadar queue." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

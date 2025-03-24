@@ -36,12 +36,10 @@ TARGET_FILE = ../libqtplot.a
 
 HDRS = \
 	../include/qtplot/ColorMap.hh \
-	../include/qtplot/ColorBar.hh \
 	../include/qtplot/X11ColorMap.hh
 
 CPPC_SRCS = \
 	ColorMap.cc \
-	ColorBar.cc \
 	X11ColorMap.cc
 
 #

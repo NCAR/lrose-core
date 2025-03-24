@@ -245,8 +245,10 @@ int write_hh_file(const char *class_name,
     
     fprintf(hfile, "  // Get singleton instance pointer\n\n");
     fprintf(hfile, "  static %s *Inst();\n\n", class_name);
+    fprintf(hfile, "  // Get singleton instance reference\n\n");
+    fprintf(hfile, "  static %s &Instance();\n\n", class_name);
     fprintf(hfile, "private:\n\n");
-    fprintf(hfile, "    // Singleton instance pointer is private\n");
+    fprintf(hfile, "    // Singleton instance is private\n");
     fprintf(hfile, "    static %s *_instance;\n\n", class_name);
     fprintf(hfile, "    // Constructor is private\n");
     fprintf(hfile, "    %s ();\n\n", class_name);
@@ -724,6 +726,14 @@ int write_cc_file(const char *class_name,
     fprintf(cfile, "      _instance = new %s;\n", class_name);
     fprintf(cfile, "    }\n");
     fprintf(cfile, "    return _instance;\n");
+    fprintf(cfile, "  }\n");
+    fprintf(cfile, "\n");
+    fprintf(cfile, "  %s &%s::Instance()\n", class_name, class_name);
+    fprintf(cfile, "  {\n");
+    fprintf(cfile, "    if (_instance == (%s *) NULL) {\n", class_name);
+    fprintf(cfile, "      _instance = new %s;\n", class_name);
+    fprintf(cfile, "    }\n");
+    fprintf(cfile, "    return *_instance;\n");
     fprintf(cfile, "  }\n");
     fprintf(cfile, "\n");
 

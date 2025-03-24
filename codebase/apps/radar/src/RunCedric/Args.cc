@@ -117,6 +117,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
 
   } // i
@@ -131,6 +136,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "RunCedric supervises the running of cedric for Dual Doppler synthesis. It prepares a cedric input file, calls cedric, and then converts the output to mdv by calling cedric2mdv." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

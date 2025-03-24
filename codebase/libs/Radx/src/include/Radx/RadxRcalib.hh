@@ -389,7 +389,7 @@ private:
   double _receiverMismatchLossDb;
 
   /* dielectric constant in water */
-
+  
   double _kSquaredWater;
   
   /* Radar constant for each waveguide */

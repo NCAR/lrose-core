@@ -49,7 +49,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <rapformats/DsRadarMsg.hh>
-#include <Fmq/DsRadarQueue.hh>
+#include <radar/IwrfMomReader.hh>
 class RadxFile;
 class RadxRay;
 using namespace std;
@@ -83,21 +83,27 @@ private:
   Params _params;
   vector<string> _readPaths;
 
-  // fmq mode
+  // reading input moments
 
-  DsRadarQueue _inputFmq;
-  DsRadarQueue _outputFmq;
-  DsRadarMsg _inputMsg;
-  DsRadarMsg _outputMsg;
-  DsRadarParams _rparams;
-  vector<DsPlatformGeoref> _georefs;
-  bool _needWriteParams;
-  int _inputContents;
+  IwrfMomReader *_momReader;
   int _nRaysRead;
+
+  RadxPlatform _platform;
+  vector<RadxRcalib> _calibs;
+  string _statusXml;
+  vector<RadxEvent> _events;
+
+  // fmq output
+
+  DsFmq *_outputFmq;
   int _nRaysWritten;
-
+  
+  double _wavelengthM;
+  double _prt;
+  double _nyquist;
+  
   // combining
-
+  
   RadxVol _dwellVol;
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
@@ -108,55 +114,56 @@ private:
 
   RadxTime _nextEndOfVolTime;
   RadxVol _splitVol;
-
+  
   // censoring
 
   int _nWarnCensorPrint;
 
-  // methods
+  // fmq mode
+  
+  int _runFmq();
+  int _openInputFmq();
+  int _openOutputFmq();
+  RadxRay *_readFmqRay();
+  
+  // file-based modes
 
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
-  int _runFmq();
-
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
-  void _applyLinearTransform(RadxVol &vol);
-  void _setFieldFoldsAttribute(RadxVol &vol);
-  void _convertFields(RadxVol &vol);
-  void _convertAllFields(RadxVol &vol);
+
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
-
   int _writeVol(RadxVol &vol);
   int _writeVolOnTimeBoundary(RadxVol &vol);
   int _writeSplitVol();
   void _setNextEndOfVolTime(RadxTime &refTime);
 
+  // processing
+  
+  void _applyLinearTransform(RadxVol &vol);
+  void _setFieldFoldsAttribute(RadxVol &vol);
+  void _convertFields(RadxVol &vol);
+  void _convertAllFields(RadxVol &vol);
+
+  // combining dwells
+  
   int _combineDwells(RadxVol &vol);
   int _combineDwellsCentered(RadxVol &vol);
   RadxField::StatsMethod_t
     _getDwellStatsMethod(Params::dwell_stats_method_t method);
 
-  int _readFmqMsg(bool &gotMsg);
-  void _loadRadarParams();
-  RadxRay *_createInputRay();
-  int _writeParams(const RadxRay *ray);
-  int _writeRay(const RadxRay *ray);
-
-  bool _isOutputField(const string &name);
-
-  Radx::SweepMode_t _getRadxSweepMode(int dsrScanMode);
-  Radx::PolarizationMode_t _getRadxPolarizationMode(int dsrPolMode);
-  Radx::FollowMode_t _getRadxFollowMode(int dsrMode);
-  Radx::PrtMode_t _getRadxPrtMode(int dsrMode);
-
-  int _getDsScanMode(Radx::SweepMode_t mode);
-    
+  // censoring
+  
   void _censorFields(RadxVol &vol);
   void _censorRay(RadxRay *ray);
+
+  // modify platform metadata
+  
+  void _setPlatformMetadata(RadxPlatform &platform);
 
 };
 

@@ -200,6 +200,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     } // if
     
   } // i
@@ -214,6 +218,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "IpsTs2NetCDF reads radar time series data in IPS format, and writes files in netCDF format. Supports Idependent Pulse Sampling." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

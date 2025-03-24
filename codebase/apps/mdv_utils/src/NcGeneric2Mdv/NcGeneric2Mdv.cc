@@ -709,7 +709,58 @@ int NcGeneric2Mdv::_loadMetaData()
   
   _initInputProjection();
 
+  _readGlobals();
+
   return 0;
+
+}
+
+/////////////////////////////////////////////
+// read the global attributes as requested
+
+void NcGeneric2Mdv::_readGlobals()
+
+{
+
+  // date/time
+
+  _globalTime.set(time(NULL)); // initialize to now
+
+  if (_params.get_date_and_time_from_global_attributes) {
+
+    for (int ii = 0; ii < _ncFile->num_atts(); ii++) {
+      Nc3Att* att = _ncFile->get_att(ii);
+      if (att == NULL) {
+        continue;
+      }
+      if (!strcmp(att->name(), "year")) {
+        _globalTime.setYear(att->as_int(0));
+      } else if (!strcmp(att->name(), "month")) {
+        _globalTime.setMonth(att->as_int(0));
+      } else if (!strcmp(att->name(), "day")) {
+        _globalTime.setDay(att->as_int(0));
+      } else if (!strcmp(att->name(), "hour")) {
+        _globalTime.setHour(att->as_int(0));
+      } else if (!strcmp(att->name(), "minute")) {
+        _globalTime.setMin(att->as_int(0));
+      } else if (!strcmp(att->name(), "second")) {
+        _globalTime.setSec(att->as_int(0));
+      }
+      delete att;
+    } // ii
+
+  } // if (_params.get_date_and_time_from_global_attributes) {
+  
+  // missing value
+
+  _globalMissing = _missingFloat;
+  if (_params.get_missing_value_from_global_attributes) {
+    Nc3Att *att = _ncFile->get_att("missing_value");
+    if (att != NULL) {
+      _globalMissing = att->as_float(0);
+      delete att;
+    }
+  } // if (_params.get_missing_value_from_global_attributes) {
 
 }
 
@@ -726,12 +777,14 @@ int NcGeneric2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 
   // time
 
-  time_t baseTimeUtc = 0;
-  if (_baseTimeVar) {
-    baseTimeUtc = _baseTimeVar->as_int(0);
-  } else {
-    DateTime btime(_params.base_time_string);
-    baseTimeUtc = btime.utime();
+  time_t baseTimeUtc = _globalTime.utime();
+  if (!_params.get_date_and_time_from_global_attributes) {
+    if (_baseTimeVar) {
+      baseTimeUtc = _baseTimeVar->as_int(0);
+    } else {
+      DateTime btime(_params.base_time_string);
+      baseTimeUtc = btime.utime();
+    }
   }
 
   // check time units
@@ -842,12 +895,30 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       cerr << "  xySwapped: " << (xySwapped?"Y":"N") << endl;
     }
 
-    _addDataField(var, mdvx, itime, xySwapped);
+    // check if field is needed
+    
+    bool useField = false;
+    Params::output_field_t *ofld = NULL;
+    if (_params.specify_output_fields) {
+      for (int ii = 0; ii < _params.output_fields_n; ii++) {
+        if (strcmp(var->name(), _params._output_fields[ii].input_field_name) == 0) {
+          useField = true;
+          ofld = _params._output_fields + ii;
+          break;
+        }
+      }
+    } else {
+      useField = true;
+    }
+    
+    if (useField) {
+      _addDataField(var, mdvx, itime, xySwapped, ofld);
+    }
 
   } // ivar
   
   return 0;
-
+  
 }
 
 /////////////////////////////////////////////////
@@ -856,18 +927,19 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
 // Returns 0 on success, -1 on failure
 
 int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
-                                 int itime, bool xySwapped)
+                                 int itime, bool xySwapped,
+                                 Params::output_field_t *ofld)
 
 {
 
   Nc3Att *missingAtt = var->get_att("missing_value");
   if (missingAtt == NULL) {
     missingAtt = var->get_att("_FillValue");
-    if (missingAtt == NULL) {
-      cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
+    if (missingAtt == NULL && _params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - NcGeneric2Mdv::_addDataField" << endl;
       cerr << "  Cannot find missing_value of _FillValue attribute" << endl;
       cerr << "  field name: " << var->name() << endl;
-      return -1;
+      cerr << "  Setting missing to -9999" << endl;
     }
   }
 
@@ -934,7 +1006,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    float missing = missingAtt->as_float(0);
+    float missing = _globalMissing;
+    if (missingAtt != NULL) {
+      missing = missingAtt->as_float(0);
+    }
     for (int ii = 0; ii < npts; ii++) {
       if (std::isnan(fvals[ii]) || fvals[ii] == missing) {
         vals[ii] = _missingFloat;
@@ -991,7 +1066,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
     // save data
     
-    double missing = missingAtt->as_double(0);
+    double missing = _globalMissing;
+    if (missingAtt != NULL) {
+      missing = missingAtt->as_double(0);
+    }
     for (int ii = 0; ii < npts; ii++) {
       if (std::isnan(dvals[ii]) || dvals[ii] == missing) {
         vals[ii] = _missingFloat;
@@ -1081,7 +1159,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      int missing = missingAtt->as_int(0);
+      int missing = (int) _globalMissing;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_int(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (ivals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1138,7 +1219,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
 
-      short missing = missingAtt->as_short(0);
+      short missing = (short) _globalMissing;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_short(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (svals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1198,7 +1282,10 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
       // save data
       
-      ncbyte missing = missingAtt->as_ncbyte(0);
+      ncbyte missing = -128;
+      if (missingAtt != NULL) {
+        missing = missingAtt->as_ncbyte(0);
+      }
       for (int ii = 0; ii < npts; ii++) {
         if (bvals[ii] == missing) {
           vals[ii] = _missingFloat;
@@ -1281,6 +1368,18 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
   if (longNameAtt != NULL) {
     longName = longNameAtt->as_string(0);
     delete longNameAtt;
+  }
+
+  if (ofld != NULL) {
+    if (strlen(ofld->output_field_name) != 0) {
+      fieldName = ofld->output_field_name;
+    }
+    if (strlen(ofld->long_field_name) != 0) {
+      longName = ofld->long_field_name;
+    }
+    if (strlen(ofld->output_units) != 0) {
+      units = ofld->output_units;
+    }
   }
 
   // create fields and add to mdvx object

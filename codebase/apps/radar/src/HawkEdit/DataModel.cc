@@ -179,6 +179,45 @@ void DataModel::SetDataByIndex(string &fieldName,
   LOG(DEBUG) << "exit ";
 }
 
+void DataModel::SetData(RadxVol *vol, string &fieldName,
+            int rayIdx, RadxSweep *sweep, vector<float> *fieldData) {
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+  vol->loadRaysFromFields(); // loadFieldsFromRays();
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+
+  RadxField *field;
+
+  //  get the ray for this field
+  const vector<RadxRay *>  &rays = vol->getRays();
+  if (rays.size() <= 0) {
+    LOG(DEBUG) <<  "ERROR - no rays found";
+  }
+  RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "no ray found";
+  }
+
+  // get the data (in) and create space for new data (out)
+  field = fetchDataField(vol, ray, fieldName);
+  size_t nGates = ray->getNGates();
+
+  if (field == NULL) {
+    throw std::invalid_argument("no RadxField found ");
+  }
+
+  vector<float> deref = *fieldData;
+  const Radx::fl32 *radxData = &deref[0];
+  bool isLocal = true;  //?? not sure about this
+  field->setDataFl32(nGates, radxData, isLocal);
+  
+  LOG(DEBUG) << "exit ";
+}
+
 void DataModel::SetData(string &fieldName, 
             int rayIdx, RadxSweep *sweep, vector<float> *fieldData) { 
 
@@ -772,45 +811,126 @@ Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
   return _vol->getPrimaryAxis();
 }
 
+// Working here ...
+// What options do we want when merging data fields?
+// We don't want to corrupt our internal working version of the radar volume.
+// Maybe we work with a temporary, accumulator volume that is the merge
+// of the original and the working version.
+// I can do incremental reads of the files; yes, but it is awkward.
+// So, don't do this. There is a concern, this may be optimal
+// so that there are not big files in memory at the same time.
+// Read the metadata, read sweeps as needed, not the entire file.
+
+
 // merge edited fields (those read in memory) with
 // those fields in the original data file
-RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
+/*TODO: maybe just send a pointer to the rays and the number of rays? No.
+void DataModel::mergeDataFields(RadxVol *dstVol,
+                                    size_t dstStartRayIndex
+                                    size_t dstEndRayIndex
+                                    RadxVol *srcVol,
+                                    size_t srcStartRayIndex
+                                    size_t srcEndRayIndex
+                                    working here
 
-
-  // read the source_path into a separate volume, then merge the fields and 
-  //_volSecondary = read
-  // write to the dest_path
-
-  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
-  _selectFieldsNotInVolume(allPossibleFieldNames);
-  // allPossibleFieldNames is now filtered to remove fields in the current selected file
-
-  bool debug_verbose = false;
-  bool debug_extra = false;
-
-  // make a copy of the selected radar volume
-  RadxVol *primaryVol = new RadxVol();
-  *primaryVol = *_vol;
-
-  RadxVol *secondaryVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
-     debug_verbose, debug_extra);
-
-  // ----
-    // merge the primary and seconday volumes, using the primary
-    // volume to hold the merged data
+                                    //string originalSourcePath
+) {
+  int error = 0;
+  size_t dstNRays = dstEndRayIndex - dstStartRayIndex + 1;
+  size_t srcNRays = srcEndRayIndex - srcStartRayIndex + 1;
+  
+  if (dstNRays != srcNRays) {
+    error = 1;
+    return error;
+  }
+  
+  // This won't work! I need to add the fields with all their metadata!
+  // Well, it will work if the fields are NOT new fields
+  // So, add the new fields.  And bulk import the existing fields.
     
-  // add secondary rays to primary vol
+  vector<size_t> rayNGates;
+  rayNGates.reserve(dstNRays);
+  size_t i;
+  for (i = dstStartRayIndex; i<dstEndRayIndex; i++) {
+    RadxRay *dstRay = dstVol->getRay.at(i);
+    // TODO: if dstNGates != srcNGates ==> error
+    rayNGates.push_back(dstRay->getNGates);
+  }
 
+  dstVol->loadFieldsFromRays();
+  srcVol->loadFieldsFromRays();
+  // read the source_path into a separate volume, then merge the fields and
+*/
+/*
+    Need to add sweeps from secondary file to primary file;
+    script edits with apply to all sweeps generates a complete version file in undo/redo stack
+    script edits to current sweep generate single sweep version file?
+    spreadsheet edits generate single sweep version file in undo/redo stack
+    to reconstitute the complete edits, need to walk up/down the version stack
+ 
+  // compare to the original file
+  size_t nsweeps_primary = primaryVol->getNSweeps();
+  size_t nsweeps_secondary = secondaryVol->getNSweeps();
+    
+  // if the number of sweeps is the same,
+  // then we can use the latest version in the stack
+  if (nsweeps_primary == nsweeps_secondary) {
+    useLatestVersion();
+  } else {
+    // if the number of sweeps is different, then we have incremental edits and
+    // and need to walk up/down the version stack and assemble a complete file
+    // with all the sweeps.
+    assembleFromVersionStack(primaryVol, secondaryVol);
+  }
+*/
+/*
+  // now merge any fields that were not imported from the
+  // original file.
   int maxSweepNum = 0;
-  vector<RadxRay *> &pRays = primaryVol->getRays();
-  const vector<RadxRay *> &sRays = secondaryVol->getRays();
-  for (size_t iray = 0; iray < pRays.size(); iray++) {
-    RadxRay &pRay = *pRays[iray];
-    const RadxRay *sRay = sRays[iray];
-    // for each field in secondary vol
-    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
-      string fieldName = allPossibleFieldNames->at(ifield);
+  //vector<RadxRay *> &pRays = primaryVol->getRays();
+  //const vector<RadxRay *> &sRays = secondaryVol->getRays();
+  //if (pRays.size() != sRays.size()) {
+    // report an error!
+  //  cout << "ERROR!!! unequal number of rays while merging for file save." << endl;
+  //}
+  
+  // The number of rays for each sweep will stay constant.
+  // The fields can vary from sweep to sweep.
+  // The sweeps may or may not be in each file version (RadxVol).
+  
+  // So, let's make the fields continuous in memory.
+  // Then we can add fields quickly in one chunk.
+  
+  
+  
+  // data is a linear chunk of memory with data for a field
+  // the dimensions are
+  // ray1Gate0 ... ray1GateN_1
+  // ray2Gate0 ... ray2GateN_2
+  // ...
+  // rayRGate0 ... rayRGateN_R
+  //
+  // rayNGates = {N_1, N_2, ... N_R}  the number of gates for each ray
+  //
+  void RadxField::setDataFl32(const vector<size_t> &rayNGates,
+                              const Radx::fl32 *data)
+  
+  vector<RadxRay *> dstRays = getRays(RadxVol *dstVol)
+  vector<RadxRay *> srcRays = getRays(RadxVol *srcVol)
+  
+  for (size_t offset = 0; offset < dstNRays; offset++) {
+    
+    RadxRay *dstRay = dstRays+offset;
+    RadxRay *srcRay = srcRays+offset;
+    // for each field in source vol
+    Do the rays have field info?
+    Yes,
+    vector<RadxField *> srcFields = srcVol->getFields();
+    // TODO: use iterator here ...
+    for (size_t ifield = 0; ifield < srcFields->size(); ifield++) {
+      string fieldName = srcFields->at(ifield);
       const RadxField *sfield = sRay->getField(fieldName);
+      
       RadxField *copyField = new RadxField();
       *copyField = *sfield;
       // Add a previously-created field to the ray. The field must have
@@ -818,7 +938,63 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
       //  this field passes to the ray, which will free the field object
       // using delete().
       // void addField(RadxField *field);
-      pRay.addField(copyField);
+      RadxField *dstField = dstRay->getField(fieldName);
+      RadxField *getField(const string &name);
+      // delete the field in the destination, if it exists
+      // If isLocal is true, the data will be copied to the
+      // local buffer.
+      //if (field exists in dstRay)
+      if (dstField != NULL) {
+        //copy src data to dst field
+        // for a vector of rays
+        // rayNGates[0] = 50  # of gates for ray 0
+        // rayNGates[1] = 50  # of gates for ray 1
+        // ...
+        // rayNGates[nRays] = 60
+        // data must be
+        // ray0gate0, ray0gate1, ... ray0gate49
+        // ray1gate0, ...
+        // ...
+        // rayNgate0, ...            rayNgate59
+        dstField->setDataFl32(const vector<size_t> &rayNGates,
+                                    const Radx::fl32 *data)
+      } else {
+        // add new field to ray with data
+      }
+      
+      bool isLocal?
+      dstRay->addField(copyField);
+      
+      
+      void RadxField::setDataRemote(const RadxField &other,
+                                    const void *data,
+                                    size_t nGates)
+      
+      
+      -----
+      
+      RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
+      if (ray == NULL) {
+        LOG(DEBUG) << "ERROR - ray is NULL";
+        throw "no ray found";
+      }
+
+      // get the data (in) and create space for new data (out)
+      field = fetchDataField(vol, ray, fieldName);
+      size_t nGates = ray->getNGates();
+
+      if (field == NULL) {
+        throw std::invalid_argument("no RadxField found ");
+      }
+
+      vector<float> deref = *fieldData;
+      const Radx::fl32 *radxData = &deref[0];
+      bool isLocal = true;  //?? not sure about this
+      field->setDataFl32(nGates, radxData, isLocal);
+      
+      --
+      
+      
     } // ifield
   } // iray
 
@@ -839,7 +1015,201 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
   return primaryVol;
 
 }
+*/
 
+
+// fill the fieldNames vector with field names
+// in the vol.
+void DataModel::getFieldNames(RadxVol &vol, vector<string> *fieldNames) {
+
+  vol.loadFieldsFromRays();
+  vector<RadxField *> lookAheadFieldsTemp = vol.getFields();
+
+  size_t nFields = lookAheadFieldsTemp.size();
+  fieldNames->reserve(nFields);
+  for (vector<RadxField *>::const_iterator iter = lookAheadFieldsTemp.begin(); iter != lookAheadFieldsTemp.end(); ++iter)
+  {
+    RadxField *field = *iter;
+    string name = field->getName();
+      fieldNames->push_back(name);
+  }
+}
+
+// change the radxVol sent.
+// There is another version of this function, that
+// creates and returns a new RadxVol.
+//
+// merge fields in radxVol (currently in memory) with
+// those fields in the original data file
+// the result of the merge is returned in radxVol
+void DataModel::mergeDataFields(RadxVol *radxVol, string originalSourcePath) {
+
+  // read the original source into a separate volume,
+  // then add fields from the original that are NOT in
+  // the radxVol
+
+  vector<string> currentVersionFieldNames;
+  getFieldNames(*radxVol, &currentVersionFieldNames);
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
+  _selectFieldsNotInCurrentVersion(&currentVersionFieldNames, allPossibleFieldNames);
+
+  // allPossibleFieldNames now contains only the fields
+  // NOT in the current version of file
+
+  bool debug_verbose = false;
+  bool debug_extra = false;
+
+  RadxVol *originalVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
+     debug_verbose, debug_extra);
+    
+  // add secondary rays to primary vol
+
+  int maxSweepNum = 0;
+  vector<RadxRay *> &pRays = radxVol->getRays();
+  const vector<RadxRay *> &sRays = originalVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    RadxRay &pRay = *pRays[iray];
+    const RadxRay *sRay = sRays[iray];
+    // for each field in secondary vol
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
+  } // iray
+
+  // finalize the volume
+
+  radxVol->setPackingFromRays();
+  radxVol->loadVolumeInfoFromRays();
+  radxVol->loadSweepInfoFromRays();
+  radxVol->remapToPredomGeom();
+  
+  delete allPossibleFieldNames;
+  currentVersionFieldNames.clear();
+  delete originalVol;
+
+}
+
+// change the radxVol sent.
+// There is another version of this function, that
+// creates and returns a new RadxVol.
+//
+// merge fields in radxVol (currently in memory) with
+// those fields in the original data file
+// the result of the merge is returned in radxVol
+void DataModel::mergeDataFields2(RadxVol *radxVol, string originalSourcePath) {
+
+  // read the original source into a separate volume,
+  // then add fields from the original that are NOT in
+  // the radxVol
+
+  vector<string> currentVersionFieldNames;
+  getFieldNames(*radxVol, &currentVersionFieldNames);
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
+  _selectFieldsNotInCurrentVersion(&currentVersionFieldNames, allPossibleFieldNames);
+
+  // allPossibleFieldNames now contains only the fields
+  // NOT in the current version of file
+
+  bool debug_verbose = false;
+  bool debug_extra = false;
+
+  RadxVol *originalVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
+     debug_verbose, debug_extra);
+    
+  // add secondary rays to primary vol
+
+  int maxSweepNum = 0;
+  vector<RadxRay *> &pRays = radxVol->getRays();
+  const vector<RadxRay *> &sRays = originalVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    RadxRay &pRay = *pRays[iray];
+    const RadxRay *sRay = sRays[iray];
+    // for each field in secondary vol
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
+  } // iray
+
+  // finalize the volume
+
+  radxVol->setPackingFromRays();
+  radxVol->loadVolumeInfoFromRays();
+  radxVol->loadSweepInfoFromRays();
+  radxVol->remapToPredomGeom();
+  
+  delete allPossibleFieldNames;
+  currentVersionFieldNames.clear();
+  delete originalVol;
+
+}
+/*
+// add field to destination (dst) rays from source (src) rays
+void DataModel::addFieldWithData(RadxVol *dstVol,
+                                 RadxVol *srcVol,
+                                 string &fieldName,
+                                 vector<RadxRay *> *dstRays,
+                                 vector<RadxRay *> *srcRays
+                                 ) {
+  
+  if (dstRays->size() != srcRays->size())
+    throw "Error: DataModel::addFieldWithData unequal number of rays";
+  // if fieldName !exist in srcRays ==> error
+  // if fieldName exists in dstRays ==> error
+  
+  for (size_t iray = 0; iray < srcRays.size(); iray++) {
+    RadxRay srcRay = srcRays->at(iray);
+    RadxRay dstRay = dstRays->at(iray);
+    
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
+  } // iray
+
+  // finalize the volume
+
+  primaryVol->setPackingFromRays();
+  primaryVol->loadVolumeInfoFromRays();
+  primaryVol->loadSweepInfoFromRays();
+  primaryVol->remapToPredomGeom();
+  
+  delete allPossibleFieldNames;
+  delete currentVersionFieldNames;
+  delete secondaryVol;
+
+  return primaryVol;
+
+}
+ */
+
+
+/*
 // merge edited fields (those read in memory) with
 // those fields in the original data file
 // returns merged radar volume
@@ -905,7 +1275,31 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
   return primaryVol;
 
 }
+ */
 
+// primaryVol is the accumulator
+// secondaryVol is the original volume
+// need access to the undo/redo stack
+// This should be an UndoRedoController method! 
+//void DataModel::assembleFromVersionStack(RadxVol *primaryVol,
+//                                         RadxVol *secondaryVol) {
+  // start at the most recent changes and walk to the oldest changes
+  // overwrite sweep changes
+  
+  // Do we have to assemble the entire RadxVol in memory before
+  // writing it to a file? Or can we write incrementally to
+  // a file one sweep at a time? Nope.  The Radx lib only writes
+  // a complete file.
+  
+  // Probably need a temporary accumulating RadxVol,
+  // so that the working volume is not corrupted.
+  // primaryVol should be a copy of the working volume.
+  
+  
+//}
+
+
+/*
 // use to merge data with currently selected data file
 void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
 
@@ -913,16 +1307,259 @@ void DataModel::writeWithMergeData(string outputPath, string originalSourcePath)
     writeData(outputPath, mergedVolume);
     delete mergedVolume;
 }
+ */
 
-// use to merge data with a data file NOT currently selected
-void DataModel::writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath) {
+/*
+// use to merge data with a file NOT currently selected
+void DataModel::writeWithMergeData(string outputPath, RadxVol *radxVol, string originalSourcePath) {
 
-    RadxVol *mergedVolume = mergeDataFields(currentVersionPath, originalSourcePath);
-    writeData(outputPath, mergedVolume);
-    delete mergedVolume;
+  mergeSweeps(radxVol, originalSourcePath);
+  mergeDataFields(radxVol, originalSourcePath);
+  writeData(outputPath, radxVol);
+}
+*/
+
+void DataModel::_mergeSweepsFromFileVersions(RadxVol *accumulator,
+                                   queue<string> *listOfVersions,
+                                   string justFilename) {
+  
+  //queue<string>::iterator versionFileName;
+  //for (versionFileName = listOfVersions->begin();
+  //     versionFileName != listOfVersions->end(); ++versionFileName)
+  vector<bool> sweepUpdated;
+  size_t nSweeps = accumulator->getNSweeps();
+  sweepUpdated.resize(nSweeps, false);
+  while (!listOfVersions->empty()) {
+    string filePath = listOfVersions->front();
+    filePath.append("/");  // TODO: this should be path separator!!! use RadxPath for this
+    filePath.append(justFilename);
+    mergeSweeps(accumulator, filePath, &sweepUpdated);
+    listOfVersions->pop();
+  }
 }
 
-// Make write no compression the default, 
+int DataModel::mergeSelectedFileVersions(string dest_path,
+                                         string originalPath,
+                                         queue<string> *listOfVersions,
+                                         string justFilename) {
+  LOG(DEBUG) << "enter";
+  int success = 0;
+  RadxVol accumulator;
+  //TODO: I think the accumulator needs to be the complete file, with all the  sweeps and all the rays.  If we use the working version, we may need to add sweeps, which might be weird compared to overwriting sweeps??
+  
+  
+  RadxFile file;
+
+  accumulator.clear();
+
+  file.setReadMetadataOnly(false);
+  string inputPath = originalPath;
+  
+  LOG(DEBUG) << "  reading data file path: " << inputPath;
+    
+  if (file.readFromPath(inputPath, accumulator)) {
+    string errMsg = "ERROR - Cannot retrieve previous version of file\n";
+    errMsg += "DataModel::mergeDataFileVersions\n";
+    errMsg += file.getErrStr() + "\n";
+    errMsg += "  path: " + inputPath + "\n";
+    cerr << errMsg;
+    throw std::invalid_argument(errMsg);
+  }
+  accumulator.loadSweepInfoFromRays();
+
+  // TODO: then, no need to pass around the original path!!!!
+  //*accumulator = *_vol;  // duplicate the current volume as the accumulator
+  //_mergeFileVersions(accumulator, listOfVersions, justFilename);
+  _mergeWrite(&accumulator, listOfVersions, justFilename,
+              dest_path);
+  //delete accumulator;
+  LOG(DEBUG) << "exit";
+  return success;
+}
+
+// listOfVersions, with the latest version at the END,
+// and the oldest version at the front.
+int DataModel::mergeFileVersions(string outputPath, string sourcePath,
+                                 // TODO: what is sourcePath???
+                                     string originalPath,
+                                     queue<string> *listOfVersions,
+                                     string justFilename) {
+  
+  LOG(DEBUG) << "enter";
+  
+  int success = 0;
+  // go through each version starting with the latest
+  // if there is a sweep in the version that is NOT in the
+  // current version, then add it to the current version.
+  // Otherwise, the sweep is old, discard it.
+  
+  RadxVol *accumulator;
+  //if (isCurrentFile) {
+  //  accumulatorFile = *_vol;  // TODO: test!!! is this a copy? or the original?
+  //} else {
+  // start with the latest version of this file. get it into memorym
+  // and use it as an accumulator
+  // remove the last element
+  //string currentVersionPath = listOfVersions->front();
+  //listOfVersions->pop();
+  vector<string> *fieldNames = getPossibleFieldNames(originalPath);
+  bool debug_verbose = false;
+  bool debug_extra = false;
+  accumulator = getRadarVolume(originalPath, fieldNames,
+       debug_verbose, debug_extra);
+  _mergeWrite(accumulator, listOfVersions, justFilename,
+              outputPath);
+  //_mergeFileVersions(accumulator, listOfVersions, justFilename);
+  
+  // now merge the data fields
+  //writeWithMergeData(outputPath, accumulator, originalPath);
+  LOG(DEBUG) << "exit";
+  return success;
+}
+
+// GOOD
+void DataModel::_mergeWrite(RadxVol *accumulator,
+                        queue<string> *listOfVersions,
+                        string justFilename,
+                        string outputPath) {
+  _mergeSweepsFromFileVersions(accumulator, listOfVersions, justFilename);
+  //mergeDataFields(accumulator, originalSourcePath);
+  writeData(outputPath, accumulator);
+}
+
+// merge sweeps from dataFilePath into the radxVol
+// overwrite the sweep/ray/field data in radxVol, if the
+// sweep has NOT been updated.
+// radxVol in/out
+// sweepUpdated in/out
+// dataFilePath in
+void DataModel::mergeSweeps(RadxVol *dstVol, string &dataFilePath,
+                            vector<bool> *sweepUpdated) {
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol previousVersion;
+
+  previousVersion.clear();
+
+  file.setReadMetadataOnly(false);
+  string inputPath = dataFilePath;
+  
+  LOG(DEBUG) << "  reading data file path: " << inputPath;
+    
+  if (file.readFromPath(inputPath, previousVersion)) {
+    string errMsg = "ERROR - Cannot retrieve previous version of file\n";
+    errMsg += "DataModel::mergeDataFileVersions\n";
+    errMsg += file.getErrStr() + "\n";
+    errMsg += "  path: " + inputPath + "\n";
+    cerr << errMsg;
+    throw std::invalid_argument(errMsg);
+  }
+  previousVersion.loadSweepInfoFromRays();
+  const vector<RadxSweep *> sweeps = previousVersion.getSweepsAsInFile();
+  size_t nSweeps = sweeps.size();
+  if (nSweeps <= 0) {
+    throw std::invalid_argument("no sweeps found in previous version of file");
+  }
+  
+  for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+  {
+    RadxSweep *sweep = *iter;
+    // TODO: sometimes, the sweep numbers are NOT sequential AND
+    // sometimes the sweep numbers are not even available,
+    // so I need to find a sweep index, or find the sweep by angle?
+    double sweepAngle = sweep->getFixedAngleDeg();
+    int sweepNumber = sweep->getSweepNumber();
+    int dstSweepIndex = getSweepIndexInVolume(dstVol, sweepAngle, sweepNumber);
+    cout << "sweep num " << sweepNumber << " angle " << sweepAngle << endl;
+    // find the sweep
+    //RadxSweep *accumulatorSweep = radxVol->getSweepByNumber(sweepNumber);
+      //radxVol->addSweep(sweep);
+
+    if (!sweepUpdated->at(dstSweepIndex)) {
+      overwriteSweepRays(dstVol, dstSweepIndex, &previousVersion, sweep);
+      sweepUpdated->at(sweepNumber) = true;
+    }
+  }
+}
+
+// GOOD
+// srcSweep is from an edited version
+void DataModel::overwriteSweepRays(RadxVol *dstVol, int dstSweepIndex, RadxVol *srcVol, RadxSweep *srcSweep) {
+  // the number of rays will be the same, but the fields may be different
+  // We need to reconcile the fields
+  
+  if (!srcSweep->getRaysAreIndexed()) {
+    throw "Error DataModel::overwriteSweepRays rays are NOT indexed in sweep";
+  }
+  size_t dstStartRayIndex = getFirstRayIndex(dstVol, dstSweepIndex);
+  size_t dstEndRayIndex = getLastRayIndex(dstVol, dstSweepIndex);
+  
+  size_t srcStartRayIndex = srcSweep->getStartRayIndex(); // getFirstRayIndex(srcVol, srcSweepIndex);
+  size_t srcEndRayIndex = srcSweep->getEndRayIndex(); // getLastRayIndex(srcVol, srcSweepIndex);
+  
+  vector<RadxRay *> srcRays = srcVol->getRays();
+  vector<RadxRay *> dstRays = dstVol->getRays();
+  
+  // Do we just want to insert all the rays from the source into the
+  // destination? The ray indexes seem to stay the same. Yes.
+  // This is probably the easiest.
+ 
+  // go by offset, from 0 to srcEndRayIndex - srcStartRayIndex + 1;
+  // because the indexes may be in different locations within the rays
+  // The ray order should be the same between the source and the destination
+  //for each source ray
+  size_t nRaysInSweep = srcEndRayIndex - srcStartRayIndex + 1;
+  // sanity check the ray indexes
+  if (srcStartRayIndex + nRaysInSweep - 1 > srcEndRayIndex)
+    throw "Error source indexes are not compatible";
+  if (dstStartRayIndex + nRaysInSweep - 1 > dstEndRayIndex)
+    throw "Error destination indexes are not compatible";
+  if (nRaysInSweep != dstEndRayIndex - dstStartRayIndex + 1)
+    throw "Error DataModel::overwriteSweepRays incompatible number of rays while merging sweeps";
+  
+  RadxRay *firstRay = srcRays.at(srcStartRayIndex);
+  const vector<RadxField *> srcFields = firstRay->getFields();
+  RadxRay *dstFirstRay = dstRays.at(dstStartRayIndex);
+  vector<RadxField *> dstFields = dstFirstRay->getFields();
+  
+  for (int offset = 0; offset < nRaysInSweep; offset += 1) {
+    // working here ...
+    // for each field in src
+    vector<RadxField *>::const_iterator srcIter;
+    for (srcIter = srcFields.begin(); srcIter != srcFields.end(); ++srcIter ) {
+      RadxField *srcField = *srcIter;
+      string srcFieldName = srcField->getName();
+      RadxRay *srcRay = srcRays.at(srcStartRayIndex + offset);
+      RadxRay *dstRay = dstRays.at(dstStartRayIndex + offset);
+      
+      RadxField *srcFieldInCurrentRay = srcRay->getField(srcFieldName);
+      if (srcField == NULL)
+        throw "DataModel::overwriteSweepRays WHOA! We have a major error";
+      string units = srcFieldInCurrentRay->getUnits();
+      size_t nGates = srcRay->getNGates();
+      Radx::fl32 missingValue = srcFieldInCurrentRay->getMissingFl32();
+      Radx::fl32 *data = srcFieldInCurrentRay->getDataFl32();
+      bool isLocal=true;
+      
+      // if field exists in dst
+      RadxField *foundField = dstRay->getField(srcFieldName);
+      if (foundField != NULL) {
+          //vector<float> deref = *data;
+          //const Radx::fl32 *radxData = &deref[0];
+          if (nGates != dstRay->getNGates())
+            throw "DataModel::overwriteSweepRays Another major error";
+          foundField->setDataFl32(nGates, data, isLocal);
+          
+      } else {
+        // add field to destination
+        dstRay->addField(srcFieldName, units, nGates, missingValue, data, isLocal);
+      }
+    }
+  }
+}
+
+// Make write no compression the default,
 //  then turn compression on with final save of files.
 // NOTE: side effect of changing the class variable _currentFilePath
 void DataModel::writeData(string path, bool compressed) {
@@ -961,14 +1598,14 @@ void DataModel::writeData(string path, RadxVol *vol, bool compressed) {
       throw std::invalid_argument(errStr);
     }
 }
-
+/*
 int DataModel::mergeDataFiles(string dest_path, string source_path, string original_path) {
 
   writeWithMergeData(dest_path, source_path, original_path);
   return 0;
 
 }
-
+*/
 void DataModel::update() {
 
 }
@@ -1041,6 +1678,55 @@ bool DataModel::fieldExists(size_t rayIdx, string fieldName) {
   } catch (std::invalid_argument &ex) {
     return false;
   }
+}
+
+// TODO: combine with other form of the same method
+RadxField *DataModel::fetchDataField(RadxVol *vol, RadxRay *ray, string &fieldName) {
+  if (fieldName.length() <= 0) {
+    cerr << "fieldName is empty!!" << endl;
+  }
+
+  if (vol == NULL) {
+    throw std::invalid_argument("volume is NULL; no data found");
+  }
+  vol->loadRaysFromFields();
+
+  vector<RadxField *> fields;
+  try {
+    fields = ray->getFields();
+  
+  // dataField = ray->getField(fieldName);  often this doesn't work, and
+  // throws an vector exception that cannot be trapped.  Sometimes the
+  // field name map is built and sometimes not, so avoid using this function.
+  } catch (std::exception &ex) {
+    string msg = "DataModel::fetchDataField unknown error occurred: ";
+    msg.append(fieldName);
+    throw std::invalid_argument(msg);
+  }
+
+  if (fields.size() <=0) {
+    return NULL;
+  }
+
+  RadxField *dataField = NULL;
+  vector<RadxField *>::iterator it = fields.begin();
+  bool found = false;
+  while (!found && it != fields.end()) {
+    RadxField *f = *it;
+    if (f->getName().compare(fieldName) == 0) {
+      found = true;
+      dataField = f;
+    }
+    ++it;
+  }
+
+  if (dataField == NULL) {
+    string msg = "DataModel::fetchDataField No field found in ray: ";
+    msg.append(fieldName);
+    throw std::invalid_argument(msg);
+  }
+
+  return dataField;
 }
 
 RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
@@ -1192,12 +1878,17 @@ size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
 
 // get the first ray for a sweep
 size_t DataModel::getFirstRayIndex(int sweepIndex) {
+  return getFirstRayIndex(_vol, sweepIndex);
+}
+
+// get the first ray for a sweep
+size_t DataModel::getFirstRayIndex(RadxVol *vol, int sweepIndex) {
   if (sweepIndex < 0) {
     throw std::invalid_argument("DataModel::getFirstRayIndex: bad sweep index < 0");
   }
-  _vol->loadRaysFromFields();
+  vol->loadRaysFromFields();
   
-  const vector<RadxSweep *> sweeps = _vol->getSweeps();
+  const vector<RadxSweep *> sweeps = vol->getSweeps();
   if (sweepIndex >= sweeps.size()) {
     throw std::invalid_argument("DataModel::getFirstRayIndex: sweep index > number of sweeps");
   }
@@ -1211,9 +1902,14 @@ size_t DataModel::getFirstRayIndex(int sweepIndex) {
 
 // get the last ray for a sweep
 size_t DataModel::getLastRayIndex(int sweepIndex) {
-  _vol->loadRaysFromFields();
+  return getLastRayIndex(_vol, sweepIndex);
+}
+
+
+size_t DataModel::getLastRayIndex(RadxVol *vol, int sweepIndex) {
+  vol->loadRaysFromFields();
   
-  const vector<RadxSweep *> sweeps = _vol->getSweeps();
+  const vector<RadxSweep *> sweeps = vol->getSweeps();
   if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
     string msg = "DataModel::getLastRayIndex sweepIndex out of bounds ";
     msg.append(std::to_string(sweepIndex));
@@ -1258,6 +1954,11 @@ double DataModel::getRayNyquistVelocityMps(size_t rayIdx) {
 vector<RadxRay *> &DataModel::getRays() {
   //const vector<RadxRay *>  &rays = vol->getRays();
 	return _vol->getRays();
+}
+
+vector<RadxRay *> &DataModel::getRays(RadxVol *vol) {
+  //const vector<RadxRay *>  &rays = vol->getRays();
+  return vol->getRays();
 }
 
 RadxRay *DataModel::getRay(size_t rayIdx) {
@@ -1370,6 +2071,43 @@ int DataModel::getSweepIndexFromSweepAngle(float elevation) {
   return i;  
 }
 
+size_t DataModel::getSweepIndexInVolume(RadxVol *vol,
+                                        float sweepAngle,
+                                        int sweepNumber) {
+  double elevation = sweepAngle;
+  
+  // -- use the sweep number
+  vector<RadxSweep *> sweeps = vol->getSweeps();
+  int idx = -1;
+  for (int i = 0; i<sweeps.size(); i++) {
+    if (sweeps.at(i)->getSweepNumber() == sweepNumber) {
+      idx = i;
+    }
+  }
+  if (idx < 0) {
+    // -- use the sweep angle
+    vector<double> *sweepAngles = getSweepAngles();
+    int i = 0;
+    float delta = 0.01;
+    bool found = false;
+    while ((i < sweepAngles->size()) && !found) {
+      if (fabs(sweepAngles->at(i) - elevation) < delta) {
+        found = true;
+      } else {
+        i += 1;
+      }
+    }
+    if (!found) {
+      stringstream ss;
+      ss << "DataModel::getSweepIndexInVolume no sweep found for elevation " <<
+        elevation << " or sweepNumber " << sweepNumber << endl;
+      throw std::invalid_argument(ss.str());
+    }
+    idx = i;
+  }
+  return idx;
+}
+
 double DataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
@@ -1430,7 +2168,7 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int
   return dataVector;
 }
 
-int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
+size_t DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
 
 // TODO: which sweep? 
   _vol->loadRaysFromFields();
@@ -1535,9 +2273,8 @@ void DataModel::getLookAhead(string fileName) {
 
     // end load sweeps into look ahead
 
-    vol.loadFieldsFromRays();
-    _lookAheadFields = vol.getFields();
-
+    getFieldNames(vol, &_lookAheadFieldNames);
+    
     LOG(DEBUG) << "exit";
 }  
 
@@ -1565,7 +2302,7 @@ const string &DataModel::getPathInUse() {
 	return _vol->getPathInUse();
 }
 
-int DataModel::getNSweeps() {
+size_t DataModel::getNSweeps() {
 	return _vol->getNSweeps();
 }
 
@@ -1870,11 +2607,11 @@ vector<string> *DataModel::getPossibleFieldNames(string fileName)
   getLookAhead(fileName);
  
   vector<string> *allFieldNames = new vector<string>;
-  for (vector<RadxField *>::const_iterator iter = _lookAheadFields.begin(); iter != _lookAheadFields.end(); ++iter)
+  for (vector<string>::iterator iter = _lookAheadFieldNames.begin(); iter != _lookAheadFieldNames.end(); ++iter)
   {
-    RadxField *field = *iter;
-    cout << field->getName() << endl;
-    allFieldNames->push_back(field->getName());
+    //string *field = *iter;
+    //cout << field->getName() << endl;
+    allFieldNames->push_back(*iter);
   }
 
     LOG(DEBUG) << "exit";

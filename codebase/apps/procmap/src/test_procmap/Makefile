@@ -44,16 +44,16 @@ TARGET_FILE = test_procmap
 
 HDRS =
 
-SRCS = \
-	parse_args.c \
-	test_mapper.c \
-	test_procmap.c
+CPPC_SRCS = \
+	parse_args.cc \
+	test_mapper.cc \
+	test_procmap.cc
 
 #
 # general targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets

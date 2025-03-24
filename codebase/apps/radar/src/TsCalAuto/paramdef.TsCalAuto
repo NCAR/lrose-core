@@ -165,8 +165,20 @@ paramdef int {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to manually set the siggen.";
-  p_help = "Use for testing etc.";
+  p_help = "The user will be prompted with the required siggen power.";
 } use_manual_siggen_control;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to prompt with attenuation instead of siggen power.";
+  p_help = "On some systems the injected power level is controlled with a variable attenuator instead of by setting the siggen power. If this is set to true, the user will be prompted with the required attenuation in dB.";
+} prompt_user_with_attenuation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Initial attenuation value (dB)";
+  p_help = "This is the variable attenuator setting corresponding to the siggen_sequence_start_power. We use this value to compute the attenuation with which to prompt the user.";
+} variable_attenuation_start_value;
 
 paramdef boolean {
   p_default = false;

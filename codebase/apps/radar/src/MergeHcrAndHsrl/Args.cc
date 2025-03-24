@@ -151,6 +151,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     }
     
   } // i
@@ -166,6 +171,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "Merges field data from HCR and HSRL instruments. HCR is the primary instrument, we merge the HSRL onto the HCR data." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

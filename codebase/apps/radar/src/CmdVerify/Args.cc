@@ -136,6 +136,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     }
       
   } // i
@@ -151,6 +155,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "Reads CMD data from CfRadial files, containing (a) weather only, (b) clutter only, (c) merged. Verifies the performance of CMD against the known truthiness. Also writes data out to ASCII file in column format, for analysis by other apps." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

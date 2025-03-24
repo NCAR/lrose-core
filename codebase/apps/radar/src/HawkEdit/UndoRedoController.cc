@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// UndoRedoController.hh
+// UndoRedoController.cc
 //
 // Coordinates undo and redo activities
 //
@@ -36,7 +36,7 @@
 // 
 ///////////////////////////////////////////////////////////////
 
- #include <iostream>
+#include <iostream>
 
 #include "UndoRedoController.hh"
 
@@ -73,6 +73,10 @@ string UndoRedoController::getCurrentVersion(int fileIndex) {
 
 string UndoRedoController::getNewVersion(int fileIndex) {
   return _model->moveToNextVersion(fileIndex);
+}
+
+void UndoRedoController::getAllPreviousVersions(int fileNum, queue<string> *list) {
+  _model->getAllPreviousVersions(fileNum, list);
 }
 
 void UndoRedoController::waterMarkVersion() {

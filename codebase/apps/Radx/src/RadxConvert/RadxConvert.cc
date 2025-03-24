@@ -794,6 +794,9 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
   if (_params.override_site_name) {
     vol.setSiteName(_params.site_name);
   }
+  if (_params.override_scan_name) {
+    vol.setScanName(_params.scan_name);
+  }
     
   // apply time offset
 
@@ -927,6 +930,16 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.sortSweepsByFixedAngle();
   }
   
+  // combine sweeps if requested
+
+  if (_params.combine_sweeps_by_fixed_angle) {
+    if (_params.debug) {
+      cerr << "DEBUG - combining sweeps by fixed angle, max diff: "
+           << _params.combined_sweep_max_fixed_angle_diff << endl;
+    }
+    vol.combineSweepsByFixedAngle(_params.combined_sweep_max_fixed_angle_diff);
+  }
+  
   // reorder rays by time if requested
 
   if (_params.sort_rays_by_time) {
@@ -991,7 +1004,7 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     _convertAllFields(vol);
   }
 
-  // reload sweep and/or volumen info from rays
+  // reload sweep and/or volume info from rays
 
   if (_params.reload_sweep_info_from_rays) {
     vol.loadSweepInfoFromRays();
@@ -1014,6 +1027,28 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.combineRhi();
   }
 
+  // override sweep type labels
+
+  if (_params.override_sweep_mode_labels) {
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeCoplaneLabel(_params.sweep_mode_labels.coplane_label);
+    vol.setSweepModeRhiLabel(_params.sweep_mode_labels.rhi_label);
+    vol.setSweepModeVertLabel(_params.sweep_mode_labels.vert_label);
+    vol.setSweepModeIdleLabel(_params.sweep_mode_labels.idle_label);
+    vol.setSweepModeAzSurLabel(_params.sweep_mode_labels.az_sur_label);
+    vol.setSweepModeElSurLabel(_params.sweep_mode_labels.el_sur_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+    vol.setSweepModeSectorLabel(_params.sweep_mode_labels.sector_label);
+  }
+  
   // set global attributes
 
   _setGlobalAttr(vol);

@@ -98,6 +98,10 @@ int Args::parse (int argc, char **argv,
       } else {
 	iret = -1;
       }
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
       
     } // if
     
@@ -115,6 +119,10 @@ void Args::_usage(ostream &out,
 		  const string &prog_name)
 
 {
+
+  out << endl;
+  out << "CalCompute computes calibration from a calibration file." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

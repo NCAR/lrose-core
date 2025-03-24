@@ -135,7 +135,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	OK = false;
       }
 
-      
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -150,6 +154,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "RadxDealias reads input radar data from a file, dealiases the velocity data, and writes the results to a file.  The output file contains a new field that contains the unfolded velocity. The unfolded velocity field has the same name with _UNF appended. " << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

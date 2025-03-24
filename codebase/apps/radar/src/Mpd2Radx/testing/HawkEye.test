@@ -1,0 +1,2064 @@
+/**********************************************************************
+ * TDRP params for HawkEye
+ **********************************************************************/
+
+//======================================================================
+//
+// HawkEye is the engineering display for the HAWK moments data.
+//
+// This is a C++ application using the QT GUI toolkit.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// check_ray_alloc /////////////////////////
+//
+// Print out checks on ray memory allocation.
+//
+// If TRUE, the app will keep track of the number of rays allocated and 
+//   freed, and print out that information every 100 rays.
+//
+//
+// Type: boolean
+//
+
+check_ray_alloc = FALSE;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// REALTIME DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Method for reading the input data.
+//
+// 	IWRF_FMQ_INPUT: read IWRF moments from an FMQ.
+// 	IWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.
+// 	SIMULATED_INPUT: internally-generated test pattern data.
+// 	DSR_FMQ_INPUT: deprecated.
+//
+//
+// Type: enum
+// Options:
+//     IWRF_FMQ_INPUT
+//     IWRF_TCP_INPUT
+//     SIMULATED_INPUT
+//     DSR_FMQ_INPUT
+//
+
+input_mode = IWRF_FMQ_INPUT;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from 
+//   an FMQ.
+//
+// Full url is of the form fmqp:://hostname:port:path. Path does not in 
+//   lude the file extension.
+//
+//
+// Type: string
+//
+
+input_fmq_url = "$(DATA_DIR)/fmq/mpd05";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+//
+// If TRUE, the program will seek to the start of the fmq and read the 
+//   entire contents at startup. If FALSE, it will read only new data as 
+//   it arrives.
+//
+//
+// Type: boolean
+//
+
+seek_to_start_of_fmq = TRUE;
+
+///////////// input_tcp_host //////////////////////////
+//
+// IWRF_TCP_INPUT: name of host running IWRF moments server.
+//
+//
+// Type: string
+//
+
+input_tcp_host = "localhost";
+
+///////////// input_tcp_port //////////////////////////
+//
+// IWRF_TCP_INPUT: port for IWRF moments server.
+//
+//
+// Type: int
+//
+
+input_tcp_port = 11000;
+
+///////////// beam_queue_size /////////////////////////
+//
+// Size of the internal queue used to store beams.
+//
+// The reader runs in a separate thread, and stored the beams in a 
+//   queue. The main thread then grabs the available beams from the queue 
+//   as they become available.
+//
+//
+// Type: int
+//
+
+beam_queue_size = 1000;
+
+//======================================================================
+//
+// ARCHIVE MODE.
+//
+//======================================================================
+ 
+///////////// begin_in_archive_mode ///////////////////
+//
+// Option to begin in archive mode.
+//
+// If TRUE, the app will start up and read data from the 
+//   archive_data_url, at the specified start time. If the start time is 
+//   not set, the start time will be set to NOW.
+//
+//
+// Type: boolean
+//
+
+begin_in_archive_mode = TRUE;
+
+///////////// archive_start_time //////////////////////
+//
+// Start time for archive mode.
+//
+// In archive mode, data retrieval starts at this time.
+//
+//
+// Type: string
+//
+
+archive_start_time = "2023 08 01 00 00 00";
+
+///////////// archive_time_span_secs //////////////////
+//
+// Time span in ARCHIVE mode (secs).
+//
+// Archive end time = archive_start_time + archive_time_span.
+//
+//
+// Type: double
+//
+
+archive_time_span_secs = 86400;
+
+///////////// archive_data_url ////////////////////////
+//
+// URL for archive data files.
+//
+// This should point to a CfRadial moments data set.
+//
+//
+// Type: string
+//
+
+archive_data_url = "$(HOME)/data/MPD/cfradial/mpd03";
+
+//======================================================================
+//
+// STATUS TO BE SHOWN IN GUI.
+//
+//======================================================================
+ 
+///////////// show_status_in_gui //////////////////////
+//
+// Indicate which status items to show in GUI.
+//
+// These items are shown in the left panel in the GUI. Setting an item 
+//   to false will hide it in the GUI.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean azimuth;
+//      boolean elevation;
+//      boolean fixed_angle;
+//      boolean volume_number;
+//      boolean sweep_number;
+//      boolean n_samples;
+//      boolean n_gates;
+//      boolean gate_length;
+//      boolean pulse_width;
+//      boolean prf_mode;
+//      boolean prf;
+//      boolean nyquist;
+//      boolean max_range;
+//      boolean unambiguous_range;
+//      boolean measured_power_h;
+//      boolean measured_power_v;
+//      boolean scan_name;
+//      boolean scan_mode;
+//      boolean polarization_mode;
+//      boolean latitude;
+//      boolean longitude;
+//      boolean altitude;
+//      boolean altitude_rate;
+//      boolean sun_elevation;
+//      boolean sun_azimuth;
+//      boolean speed;
+//      boolean heading;
+//      boolean track;
+//   }
+//
+//
+
+show_status_in_gui = {
+    azimuth = FALSE,
+    elevation = TRUE,
+    fixed_angle = FALSE,
+    volume_number = FALSE,
+    sweep_number = FALSE,
+    n_samples = TRUE,
+    n_gates = TRUE,
+    gate_length = TRUE,
+    pulse_width = FALSE,
+    prf_mode = FALSE,
+    prf = FALSE,
+    nyquist = FALSE,
+    max_range = TRUE,
+    unambiguous_range = FALSE,
+    measured_power_h = FALSE,
+    measured_power_v = FALSE,
+    scan_name = FALSE,
+    scan_mode = FALSE,
+    polarization_mode = FALSE,
+    latitude = TRUE,
+    longitude = TRUE,
+    altitude = TRUE,
+    altitude_rate = FALSE,
+    sun_elevation = TRUE,
+    sun_azimuth = TRUE,
+    speed = FALSE,
+    heading = FALSE,
+    track = FALSE
+};
+
+//======================================================================
+//
+// FIELDS TO BE DISPLAYED.
+//
+//======================================================================
+ 
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+//
+// Type: string
+//
+
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
+
+///////////// fields //////////////////////////////////
+//
+// Fields to be displayed.
+//
+// label: appears on the GUI. raw_name: unfiltered field name. 
+//   filtered_name: field with clutter filter applied. units: units string 
+//   for color scale. color_map: name of color map in color_scale_dir. 
+//   shortcut: keyboard character for shortcut. Specified key will select 
+//   raw field. Use ALT-key to get filtered field. .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string raw_name;
+//      string filtered_name;
+//      string units;
+//      string color_map;
+//      string shortcut;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  {
+    label = "AbsRH",
+    raw_name = "AbsRH",
+    filtered_name = "",
+    units = "g/m3",
+    color_map = "abs_humidity.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "BackscatterCoeff",
+    raw_name = "BackscatterCoeff",
+    filtered_name = "",
+    units = "m-1.sr-1",
+    color_map = "hsrl_backscat_coeff.colors",
+    shortcut = "2"
+  }
+  ,
+  {
+    label = "BackscatterRatio",
+    raw_name = "BackscatterRatio",
+    filtered_name = "",
+    units = "",
+    color_map = "backscatter_ratio.colors",
+    shortcut = "3"
+  }
+  ,
+  {
+    label = "MolBackscatter",
+    raw_name = "MolBackscatter",
+    filtered_name = "",
+    units = "m-1.sr-1",
+    color_map = "hsrl_backscat_coeff.colors",
+    shortcut = "4"
+  }
+};
+
+///////////// background_render_mins //////////////////
+//
+// Background rendering time period in minutes.
+//
+// Any field which is viewed will continue to be rendered in the 
+//   background for this number of minutes.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+background_render_mins = 1440;
+
+///////////// use_field_label_in_title ////////////////
+//
+// Option to use field label in the display title.
+//
+// If TRUE, the label will be used in the title. If FALSE, the raw_name 
+//   or filtered name will be used.
+//
+//
+// Type: boolean
+//
+
+use_field_label_in_title = FALSE;
+
+//======================================================================
+//
+// SET MAX RANGE.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range to be used for plotting.
+//
+// If FALSE, the max range of the data will be used. If TRUE, 
+//   max_range_km will override the max range in the data.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 150;
+
+//======================================================================
+//
+// DISPLAY TYPE.
+//
+//======================================================================
+ 
+///////////// display_mode ////////////////////////////
+//
+// Main display mode.
+//
+// 	POLAR_DISPLAY - normal PPI and RHI display. 	BSCAN_DISPLAY - BSCAN 
+//   mode.
+//
+//
+// Type: enum
+// Options:
+//     POLAR_DISPLAY
+//     BSCAN_DISPLAY
+//
+
+display_mode = BSCAN_DISPLAY;
+
+//======================================================================
+//
+// NAMES AND LABELS.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override radar name in the data.
+//
+//
+// Type: boolean
+//
+
+override_radar_name = TRUE;
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name if overridden.
+//
+//
+// Type: string
+//
+
+radar_name = "MPD-05";
+
+///////////// display_site_name ///////////////////////
+//
+// Option to display the site name in the left panel.
+//
+//
+// Type: boolean
+//
+
+display_site_name = FALSE;
+
+///////////// override_site_name //////////////////////
+//
+// Option to override site name in the data.
+//
+//
+// Type: boolean
+//
+
+override_site_name = TRUE;
+
+///////////// site_name ///////////////////////////////
+//
+// Site name if overridden.
+//
+//
+// Type: string
+//
+
+site_name = "GV";
+
+//======================================================================
+//
+// WINDOW DIMENSIONS AND PLOTTING DETAILS.
+//
+//======================================================================
+ 
+///////////// main_window_width ///////////////////////
+//
+// Startup width of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_width = 1400;
+
+///////////// main_window_height //////////////////////
+//
+// Startup height of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_height = 700;
+
+///////////// main_window_start_x /////////////////////
+//
+// Startup X for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_x = 0;
+
+///////////// main_window_start_y /////////////////////
+//
+// Startup Y for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_y = 0;
+
+///////////// color_scale_width ///////////////////////
+//
+// Width of color scale (pixels).
+//
+//
+// Type: int
+//
+
+color_scale_width = 50;
+
+///////////// label_font_size /////////////////////////
+//
+// Basic font size for labels (pixels).
+//
+// Some of the labels are scaled relative to this size.
+//
+//
+// Type: int
+//
+
+label_font_size = 10;
+
+///////////// background_color ////////////////////////
+//
+// Color of main display background.
+//
+//
+// Type: string
+//
+
+background_color = "black";
+
+///////////// text_color //////////////////////////////
+//
+// Color of text annotation in main display.
+//
+//
+// Type: string
+//
+
+text_color = "yellow";
+
+///////////// grid_and_range_ring_color ///////////////
+//
+// Color of grids and range rings.
+//
+//
+// Type: string
+//
+
+grid_and_range_ring_color = "white";
+
+///////////// range_ring_label_font_size //////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+range_ring_label_font_size = 8;
+
+///////////// click_cross_color ///////////////////////
+//
+// Color of cross at click point.
+//
+//
+// Type: string
+//
+
+click_cross_color = "cyan";
+
+///////////// click_cross_size ////////////////////////
+//
+// Size of cross at click point (pixels).
+//
+// Size of cross drawn at click point, to select data.
+//
+//
+// Type: int
+//
+
+click_cross_size = 10;
+
+///////////// click_cross_line_width //////////////////
+//
+// Line width for click cross.
+//
+//
+// Type: int
+//
+
+click_cross_line_width = 1;
+
+//======================================================================
+//
+// PPI MODE DISPLAY.
+//
+//======================================================================
+ 
+///////////// ppi_display_type ////////////////////////
+//
+// Type of display to use for the PPI window.
+//
+// 	PPI_FULL - Display the full 360 degrees of the PPI. This is the 
+//   default.
+// 	PPI_AIRBORN - Use the airborn radar PPI display. This display shows 
+//   just the 180 degrees of radar pointing forward from the nose of the 
+//   plane.
+//
+//
+// Type: enum
+// Options:
+//     PPI_FULL
+//     PPI_AIRBORNE
+//
+
+ppi_display_type = PPI_FULL;
+
+///////////// ppi_aspect_ratio ////////////////////////
+//
+// Aspect ratio (width/height) of PPI window.
+//
+//
+// Type: double
+//
+
+ppi_aspect_ratio = 1;
+
+///////////// ppi_grids_on_at_startup /////////////////
+//
+// Set PPI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_grids_on_at_startup = FALSE;
+
+///////////// ppi_range_rings_on_at_startup ///////////
+//
+// Set PPI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_range_rings_on_at_startup = TRUE;
+
+///////////// ppi_azimuth_lines_on_at_startup /////////
+//
+// Set PPI azimuth lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_azimuth_lines_on_at_startup = TRUE;
+
+///////////// ppi_main_legend_pos /////////////////////
+//
+// Position of main legend in the PPI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+ppi_main_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// ppi_override_rendering_beam_width ///////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally HawkEye determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+ppi_override_rendering_beam_width = FALSE;
+
+///////////// ppi_rendering_beam_width ////////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'ppi_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+ppi_rendering_beam_width = 1;
+
+//======================================================================
+//
+// RHI MODE DISPLAY.
+//
+//======================================================================
+ 
+///////////// rhi_window_width ////////////////////////
+//
+// Startup width of RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_window_width = 500;
+
+///////////// rhi_window_height ///////////////////////
+//
+// Startup height of RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_window_height = 500;
+
+///////////// rhi_window_start_x //////////////////////
+//
+// Startup X for RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_window_start_x = 1000;
+
+///////////// rhi_window_start_y //////////////////////
+//
+// Startup Y for RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_window_start_y = 0;
+
+///////////// rhi_top_margin //////////////////////////
+//
+// Height of top margin in RHI mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+rhi_top_margin = 20;
+
+///////////// rhi_bottom_margin ///////////////////////
+//
+// Height of bottom margin in RHI mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+rhi_bottom_margin = 20;
+
+///////////// rhi_left_margin /////////////////////////
+//
+// Width of left margin in RHI mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+rhi_left_margin = 20;
+
+///////////// rhi_right_margin ////////////////////////
+//
+// Width of right margin in RHI mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+rhi_right_margin = 20;
+
+///////////// rhi_label_font_size /////////////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+rhi_label_font_size = 8;
+
+///////////// rhi_axis_tick_len ///////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+rhi_axis_tick_len = 7;
+
+///////////// rhi_n_ticks_ideal ///////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+rhi_n_ticks_ideal = 7;
+
+///////////// rhi_text_margin /////////////////////////
+//
+// Margin around some text (pixels).
+//
+//
+// Type: int
+//
+
+rhi_text_margin = 5;
+
+///////////// rhi_display_180_degrees /////////////////
+//
+// Flag indicating to display full 180 degrees in RHI window. If set to 
+//   false, the RHI window will just display 90 degrees of the RHI.
+//
+//
+// Type: boolean
+//
+
+rhi_display_180_degrees = FALSE;
+
+///////////// rhi_aspect_ratio ////////////////////////
+//
+// Aspect ratio (width/height) of RHI window.
+//
+//
+// Type: double
+//
+
+rhi_aspect_ratio = 1;
+
+///////////// rhi_max_height_km ///////////////////////
+//
+// Max height of data in RHI window (km).
+//
+//
+// Type: double
+//
+
+rhi_max_height_km = 25;
+
+///////////// rhi_color_scale_width ///////////////////
+//
+// Width of color scale for RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_color_scale_width = 40;
+
+///////////// rhi_grids_on_at_startup /////////////////
+//
+// Set RHI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_grids_on_at_startup = TRUE;
+
+///////////// rhi_range_rings_on_at_startup ///////////
+//
+// Set RHI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_range_rings_on_at_startup = FALSE;
+
+///////////// rhi_elevation_lines_on_at_startup ///////
+//
+// Set RHI elevation lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_elevation_lines_on_at_startup = FALSE;
+
+///////////// rhi_main_legend_pos /////////////////////
+//
+// Position of main legend in the RHI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+rhi_main_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// rhi_beam_queue_size /////////////////////
+//
+// Size of the queue for RHI beams.
+//
+// After the queue reaches this size, older beams are discarded.
+//
+//
+// Type: int
+//
+
+rhi_beam_queue_size = 360;
+
+///////////// rhi_override_rendering_beam_width ///////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally HawkEye determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+rhi_override_rendering_beam_width = FALSE;
+
+///////////// rhi_rendering_beam_width ////////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'rhi_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+rhi_rendering_beam_width = 1;
+
+//======================================================================
+//
+// BSCAN TIME LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_time_span_secs ////////////////////
+//
+// Number of seconds in BSCAN display.
+//
+// In REALTIME mode, when we reach the right-hand side of the display, 
+//   the existing plot will be moved left to make room for more data.
+//
+//
+// Type: double
+//
+
+bscan_time_span_secs = 86400;
+
+///////////// bscan_truncate_start_time ///////////////
+//
+// Option to truncate the plot start time to even seconds.
+//
+// If true, we truncate the start time to the previous second.
+//
+//
+// Type: boolean
+//
+
+bscan_truncate_start_time = FALSE;
+
+///////////// bscan_subsec_precision //////////////////
+//
+// Precision of subseconds in time labels.
+//
+// Number of decimals of precision in time labels. Set to 0 for times in 
+//   integer seconds.
+//
+// Minimum val: 0
+// Maximum val: 9
+//
+// Type: int
+//
+
+bscan_subsec_precision = 3;
+
+//======================================================================
+//
+// BSCAN REALTIME CONTROLS.
+//
+//======================================================================
+ 
+///////////// bscan_realtime_fraction_saved ///////////
+//
+// What fraction of the existing data to save when moving the plot to 
+//   the left.
+//
+// When we reach the right-hand side of the display, we need to move the 
+//   plot to the left. This is the fraction of the plot that is saved 
+//   after the move has taken place.
+//
+//
+// Type: double
+//
+
+bscan_realtime_fraction_saved = 0.5;
+
+///////////// bscan_min_secs_between_reading_beams ////
+//
+// Min time between incoming beams (secs).
+//
+// If beams arrive too fast, we discard some so that the time between 
+//   the beams is at least this long.
+//
+//
+// Type: double
+//
+
+bscan_min_secs_between_reading_beams = 0.1;
+
+///////////// bscan_min_secs_between_rendering_beams //
+//
+// Min time between rendering (secs).
+//
+// Setting this higher makes the display less smooth, but prevents the 
+//   display from taking up too much CPU and/or GPU.
+//
+//
+// Type: double
+//
+
+bscan_min_secs_between_rendering_beams = 0;
+
+//======================================================================
+//
+// BSCAN RANGE AND ALTITUDE LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_specify_range_limits //////////////
+//
+// Specify the min and max range when in range mode.
+//
+// If false, we will use the start range and max range in the data.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_range_limits = TRUE;
+
+///////////// bscan_min_range_km //////////////////////
+//
+// Min range to be plotted (km).
+//
+// Used if 'bscan_specify_range_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_range_km = 0;
+
+///////////// bscan_max_range_km //////////////////////
+//
+// Max range to be plotted (km).
+//
+// Used if 'bscan_specify_range_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_range_km = 12;
+
+///////////// bscan_min_altitude_km ///////////////////
+//
+// Min altitude plotted (km).
+//
+//
+// Type: double
+//
+
+bscan_min_altitude_km = 0.0;
+
+///////////// bscan_max_altitude_km ///////////////////
+//
+// Max altitude plotted (km).
+//
+//
+// Type: double
+//
+
+bscan_max_altitude_km = 10.0;
+
+///////////// bscan_altitude_in_feet //////////////////
+//
+// Use feet for altitude units?.
+//
+//
+// Type: boolean
+//
+
+bscan_altitude_in_feet = FALSE;
+
+///////////// bscan_range_in_feet /////////////////////
+//
+// Use feet for range units?.
+//
+//
+// Type: boolean
+//
+
+bscan_range_in_feet = FALSE;
+
+///////////// bscan_range_axis_mode ///////////////////
+//
+// Options for plotting range in the vertical scale.
+//
+// RANGE_AXIS_UP - instrument is at the bottom, range plotted positively 
+//   upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted 
+//   downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the 
+//   altitude of the gates in earth coordinates.
+//
+//
+// Type: enum
+// Options:
+//     RANGE_AXIS_UP
+//     RANGE_AXIS_DOWN
+//     RANGE_AXIS_ALTITUDE
+//
+
+// bscan_range_axis_mode = RANGE_AXIS_ALTITUDE;
+bscan_range_axis_mode = RANGE_AXIS_UP;
+
+//======================================================================
+//
+// BSCAN ANGLE LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_specify_elevation_limits //////////
+//
+// Specify the min and max elevation angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_elevation_limits = FALSE;
+
+///////////// bscan_min_elevation_deg /////////////////
+//
+// Min elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_elevation_deg = 89;
+
+///////////// bscan_max_elevation_deg /////////////////
+//
+// Max elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_elevation_deg = 91;
+
+///////////// bscan_specify_azimuth_limits ////////////
+//
+// Specify the min and max azimuth angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_azimuth_limits = FALSE;
+
+///////////// bscan_min_azimuth_deg ///////////////////
+//
+// Min azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_azimuth_deg = 89;
+
+///////////// bscan_max_azimuth_deg ///////////////////
+//
+// Max azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_azimuth_deg = 91;
+
+//======================================================================
+//
+// BSCAN CENSOR DATA BELOW SURFACE.
+//
+//======================================================================
+ 
+///////////// bscan_censor_data_below_surface /////////
+//
+// Option to censor data below the measured surface.
+//
+//
+// Type: boolean
+//
+
+bscan_censor_data_below_surface = FALSE;
+
+///////////// bscan_surface_field /////////////////////
+//
+// Name of field used to identify the surface from the data.
+//
+// The surface will be identified at the gate with the maximum value in 
+//   this field.
+//
+//
+// Type: string
+//
+
+bscan_surface_field = "DBZ";
+
+///////////// bscan_min_range_to_surface_km ///////////
+//
+// Minumum range to the surface (km).
+//
+// We will search for the surface echo in the gates beyound this range.
+//
+//
+// Type: double
+//
+
+bscan_min_range_to_surface_km = 0.5;
+
+///////////// bscan_surface_range_margin_km ///////////
+//
+// Margin of data plotted beyond the surface (km).
+//
+// We will censor the data beyond the surface gate, plus this range 
+//   margin.
+//
+//
+// Type: double
+//
+
+bscan_surface_range_margin_km = 0.2;
+
+///////////// bscan_max_field_val_below_surface ///////
+//
+// Maximum value of the surface field, below the measured surface.
+//
+// After finding the range to the surface, we inspect the surface_field 
+//   values below the surface. If we find values that exceed this 
+//   parameter, we conclude that the surface cannot be reliably found.
+//
+//
+// Type: double
+//
+
+bscan_max_field_val_below_surface = 5;
+
+//======================================================================
+//
+// BSCAN MARGINS.
+//
+//======================================================================
+ 
+///////////// bscan_top_margin ////////////////////////
+//
+// Height of top margin in BSCAN mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+bscan_top_margin = 40;
+
+///////////// bscan_bottom_margin /////////////////////
+//
+// Height of bottom margin in BSCAN mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+bscan_bottom_margin = 45;
+
+///////////// bscan_left_margin ///////////////////////
+//
+// Width of left margin in BSCAN mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+bscan_left_margin = 50;
+
+///////////// bscan_right_margin //////////////////////
+//
+// Width of right margin in BSCAN mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+bscan_right_margin = 40;
+
+///////////// bscan_axis_tick_len /////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_tick_len = 6;
+
+///////////// bscan_n_ticks_ideal /////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+bscan_n_ticks_ideal = 10;
+
+///////////// bscan_text_margin ///////////////////////
+//
+// Margin around some text (pixels).
+//
+//
+// Type: int
+//
+
+bscan_text_margin = 5;
+
+//======================================================================
+//
+// BSCAN TITLES, LABELS AND AXES.
+//
+//======================================================================
+ 
+///////////// bscan_title_font_size ///////////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+bscan_title_font_size = 12;
+
+///////////// bscan_axis_label_font_size //////////////
+//
+// Font size of axis labels in bscan (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_label_font_size = 8;
+
+///////////// bscan_axis_values_font_size /////////////
+//
+// Font size of axis values (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_values_font_size = 8;
+
+///////////// bscan_axes_color ////////////////////////
+//
+// Color of axes in bscan.
+//
+//
+// Type: string
+//
+
+bscan_axes_color = "white";
+
+///////////// bscan_grid_color ////////////////////////
+//
+// Color of grid lines on bscan.
+//
+//
+// Type: string
+//
+
+bscan_grid_color = "gray";
+
+///////////// bscan_labels_color //////////////////////
+//
+// Color of labels in bscan.
+//
+//
+// Type: string
+//
+
+bscan_labels_color = "white";
+
+///////////// bscan_draw_time_grid_lines //////////////
+//
+// Option to draw grid lines across plot at regular time intervals.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_time_grid_lines = TRUE;
+
+///////////// bscan_draw_range_grid_lines /////////////
+//
+// Option to draw grid lines across plot at regular range intervals.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_range_grid_lines = TRUE;
+
+///////////// bscan_draw_instrument_height_line ///////
+//
+// Option to draw a line for the instrument location.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_instrument_height_line = FALSE;
+
+///////////// bscan_instrument_height_color ///////////
+//
+// Color of instrument height line in ALTITUDE plot.
+//
+//
+// Type: string
+//
+
+bscan_instrument_height_color = "blue";
+
+//======================================================================
+//
+// DISTANCE SCALE.
+//
+//======================================================================
+ 
+///////////// bscan_add_distance_to_time_axis /////////
+//
+// Option to plot distance as well as time on the time axis.
+//
+// If true, extra tick marks will show the distance in km along the time 
+//   axis, in addition to the time.
+//
+//
+// Type: boolean
+//
+
+bscan_add_distance_to_time_axis = FALSE;
+
+///////////// bscan_n_segments_for_computing_distance /
+//
+// Number of segments to be used for computing distance.
+//
+// We divide the rays into this number of segments and then compute the 
+//   distance travelled during each segment using the change in lat/lon 
+//   position. We keep the number of segments reasonably small to avoid 
+//   unnecessary CPU usage.
+//
+//
+// Type: int
+//
+
+bscan_n_segments_for_computing_distance = 50;
+
+//======================================================================
+//
+// BSCAN LEGENDS.
+//
+//======================================================================
+ 
+///////////// bscan_plot_starting_latlon_as_legend ////
+//
+// Option to plot the starting lat/lon position as a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+bscan_plot_starting_latlon_as_legend = FALSE;
+
+///////////// bscan_starting_latlon_legend_pos ////////
+//
+// Position of lat/lon legend in plot.
+//
+// The starting latitude/longitude will be plotted as a legend in the 
+//   location specified. See 'bscan_plot_starting_latlon_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+bscan_starting_latlon_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// bscan_plot_mean_track_and_speed_as_legend 
+//
+// Option to plot the mean track and speed in a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+bscan_plot_mean_track_and_speed_as_legend = FALSE;
+
+///////////// bscan_mean_track_and_speed_legend_pos ///
+//
+// Position of track/speed legend in plot.
+//
+// The mean track and speed will be plotted as a legend in the location 
+//   specified. See 'bscan_plot_track_and_speed_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+bscan_mean_track_and_speed_legend_pos = LEGEND_TOP_RIGHT;
+
+//======================================================================
+//
+// BSCAN DWELL CONTROLS.
+//
+//======================================================================
+ 
+///////////// bscan_archive_dwell_auto ////////////////
+//
+// Compute dwell from image size and time range.
+//
+// If TRUE, we compute the optimal dwell so that there will be 
+//   approximately 1 dwell for each pixel in the resulting image. If 
+//   FALSE, the dwell is specified below.
+//
+//
+// Type: boolean
+//
+
+bscan_archive_dwell_auto = FALSE;
+
+///////////// bscan_archive_dwell_secs ////////////////
+//
+// Specified dwell time for archive mode (secs).
+//
+//
+// Type: double
+//
+
+bscan_archive_dwell_secs = 0.1;
+
+///////////// bscan_dwell_stats ///////////////////////
+//
+// Method for computing stats on the dwell.
+//
+// Applies to READ_RAYS_IN_INTERVAL mode. MIDDLE refers to the middle 
+//   ray in the dwell sequence.
+//
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//
+
+bscan_dwell_stats = DWELL_STATS_MIDDLE;
+
+//======================================================================
+//
+// SAVING IMAGES TO FILE.
+//
+// In creating files for the field catalog, the file name is of the 
+//   form:
+//
+// 	category.platform.YYYYMMDDHHmm.product_name.ext
+//
+// The following parameters control the output directory, and the 
+//   construction of the file name.
+//
+//======================================================================
+ 
+///////////// images_output_dir ///////////////////////
+//
+// Output directory for images generated by this app.
+//
+//
+// Type: string
+//
+
+images_output_dir = "/tmp/images/HSRL";
+
+///////////// images_write_to_day_dir /////////////////
+//
+// Option to create a subdirectory for each day.
+//
+//
+// Type: boolean
+//
+
+images_write_to_day_dir = TRUE;
+
+///////////// images_file_name_category ///////////////
+//
+// Set the category string.
+//
+// If empty, no category will be included.
+//
+//
+// Type: string
+//
+
+images_file_name_category = "radar";
+
+///////////// images_file_name_platform ///////////////
+//
+// Set the platform string.
+//
+// If empty, no platform will be included.
+//
+//
+// Type: string
+//
+
+images_file_name_platform = "NSF_NCAR_GV_HSRL";
+
+///////////// images_file_name_extension //////////////
+//
+// Set the extension string. This also governs the file format. It 
+//   should be 'png', 'jpg', 'gif' etc.
+//
+// An extension is always required.
+//
+//
+// Type: string
+//
+
+images_file_name_extension = "png";
+
+///////////// images_file_name_delimiter //////////////
+//
+// Set the delimiter between the parts of the file name.
+//
+// NOTE: before the extension the delimited is always a period: '.'.
+//
+//
+// Type: string
+//
+
+images_file_name_delimiter = ".";
+
+///////////// images_include_time_part_in_file_name ///
+//
+// Normally the file name includes a time part: YYYYMMDDHHMMSS.
+//
+// If FALSE, the time part will be omitted.
+//
+//
+// Type: boolean
+//
+
+images_include_time_part_in_file_name = TRUE;
+
+///////////// images_include_seconds_in_time_part /////
+//
+// Normally the time part include the seconds: YYYYMMDDHHMMSS.
+//
+// If FALSE, the SS will be excluuded from the time part.
+//
+//
+// Type: boolean
+//
+
+images_include_seconds_in_time_part = FALSE;
+
+///////////// images_include_field_label_in_file_name /
+//
+// Normally the file name includes the field label (product type).
+//
+// If FALSE, the field label will be omitted.
+//
+//
+// Type: boolean
+//
+
+images_include_field_label_in_file_name = TRUE;
+
+///////////// images_include_scan_type_in_file_name ///
+//
+// Option to include the scan type in the image file name.
+//
+// If TRUE, the scan type will be added to the image file name.
+//
+//
+// Type: boolean
+//
+
+images_include_scan_type_in_file_name = FALSE;
+
+///////////// images_include_scan_id_in_file_name /////
+//
+// Option to include the scan Id in the image file name.
+//
+// If TRUE, the scan Id will be added to the image file name.
+//
+//
+// Type: boolean
+//
+
+images_include_scan_id_in_file_name = FALSE;
+
+///////////// images_write_latest_data_info ///////////
+//
+// Option to write latest_data_info files when an image is created.
+//
+//
+// Type: boolean
+//
+
+images_write_latest_data_info = TRUE;
+
+//======================================================================
+//
+// OPTION TO CREATE IMAGES AUTOMATICALLY.
+//
+//======================================================================
+ 
+///////////// images_auto_create //////////////////////
+//
+// Option to create images automatically.
+//
+//
+// Type: boolean
+//
+
+images_auto_create = FALSE;
+
+///////////// images_creation_mode ////////////////////
+//
+// Mode for controlling auto image creation.
+//
+
+//
+// CREATE_IMAGES_FROM_GUI: create images interactively using the GUI.
+//
+// CREATE_IMAGES_THEN_EXIT: for the specified start time and time span, 
+//   create an output image for every field in the fields array, and then 
+//   exit.
+//
+// CREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then 
+//   generate an image for each field.
+//
+// CREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between 
+//   the start and end times, generate an image for each field.
+//
+//
+// Type: enum
+// Options:
+//     CREATE_IMAGES_THEN_EXIT
+//     CREATE_IMAGES_ON_REALTIME_SCHEDULE
+//     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
+//
+
+images_creation_mode = CREATE_IMAGES_THEN_EXIT;
+
+///////////// images_schedule_interval_secs ///////////
+//
+// Interval at which images are created on schedule (secs).
+//
+// The application waits until the interval has passed, plus any 
+//   specified delay, and then creates the images.
+//
+//
+// Type: int
+//
+
+images_schedule_interval_secs = 60;
+
+///////////// images_schedule_delay_secs //////////////
+//
+// Delay between scheduled time and image creation (secs).
+//
+// In order to ensure that the data has been written, a delay may be 
+//   provided. This allows for the writing application to complete writing 
+//   the data before this application tries to access it.
+//
+//
+// Type: int
+//
+
+images_schedule_delay_secs = 10;
+
+///////////// images_archive_start_time ///////////////
+//
+// Start time for image generation in archive mode.
+//
+// Image generation starts with a seach at this time, and the proceeds 
+//   at increments of images_schedule_interval_secs.
+//
+//
+// Type: string
+//
+
+images_archive_start_time = "1970 01 01 00 00 00";
+
+///////////// images_archive_end_time /////////////////
+//
+// End time for image generation in archive mode.
+//
+// Image generation is terminated when the search time exceeds this end 
+//   time.
+//
+//
+// Type: string
+//
+
+images_archive_end_time = "1970 01 01 00 00 00";
+
+///////////// images_scan_interval_secs ///////////////
+//
+// Time between scans in archive mode (secs).
+//
+// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
+//
+//
+// Type: int
+//
+
+images_scan_interval_secs = 300;
+
+///////////// images_set_sweep_index_list /////////////
+//
+// Option to specify the sweep indexes for the image generation.
+//
+// If TRUE, only the specified sweeps will be processed.
+//
+//
+// Type: boolean
+//
+
+images_set_sweep_index_list = FALSE;
+
+///////////// images_sweep_index_list /////////////////
+//
+// List of valid sweep indexes for image generation.
+//
+// See 'images_set_sweep_index_list'. Images will only be generated for 
+//   the specified sweep indexes.
+//
+//
+// Type: int
+// 1D array - variable length.
+//
+
+images_sweep_index_list = {
+ 0,
+ 1,
+ 2
+};
+
+//======================================================================
+//
+// SIMULATION MODE.
+//
+//======================================================================
+ 
+///////////// sim_sleep_msecs /////////////////////////
+//
+// Number of milliseconds to sleep between beams in simulated input 
+//   mode.
+//
+//
+// Type: int
+//
+
+sim_sleep_msecs = 10;
+
+///////////// sim_n_gates /////////////////////////////
+//
+// Number of gates in simulated data.
+//
+//
+// Type: int
+//
+
+sim_n_gates = 1000;
+
+///////////// sim_start_range_km //////////////////////
+//
+// Start range in simulated mode (km).
+//
+//
+// Type: double
+//
+
+sim_start_range_km = -0.3;
+
+///////////// sim_gate_spacing_km /////////////////////
+//
+// Gate spacing in simulated mode (km).
+//
+//
+// Type: double
+//
+
+sim_gate_spacing_km = 0.02;
+
+//======================================================================
+//
+// CLICK POINT DATA MESSAGING.
+//
+// Writing the click point location to an FMQ in XML format.
+//
+//======================================================================
+ 
+///////////// click_point_fmq_url /////////////////////
+//
+// URL for click point URL.
+//
+// The details of the latest click point are written to an FMQ. The 
+//   format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.
+//
+//
+// Type: string
+//
+
+click_point_fmq_url = "/tmp/fmq/click_point";
+

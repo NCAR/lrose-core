@@ -65,7 +65,7 @@ OPT_FLAG = -O2
 # C++
 
 CPPC = g++
-SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++17 -fPIC
+SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++11 -fPIC
 SYS_CPPC_INCLUDES =
 
 # FORTRAN
@@ -197,7 +197,7 @@ NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
 QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
-QT_CPPC_CFLAGS = -fPIC -std=c++17
+QT_CPPC_CFLAGS = -fPIC -std=c++11
 QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
 #PKG_CONFIG_PATH = /usr/share/pkgconfig,/usr/local/opt/qt/lib/pkgconfig
@@ -216,7 +216,7 @@ QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 #PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
 #QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
 #QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui Qt6Network Qt6Qml)
-#QT_CPPC_CFLAGS = -fPIC -std=c++17
+#QT_CPPC_CFLAGS = -fPIC -std=c++11
 #QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
 
 

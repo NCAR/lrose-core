@@ -82,25 +82,30 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-d") ||
                !strcmp(argv[i], "-debug")) {
       
-      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-v") ||
                !strcmp(argv[i], "-verbose")) {
       
-      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-vv") ||
                !strcmp(argv[i], "-extra")) {
       
-      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      snprintf(tmp_str, BUFSIZ, "debug = DEBUG_EXTRA;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-compute_mean_loc")) {
+
+      snprintf(tmp_str, BUFSIZ, "compute_mean_location = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "instance = %s;", argv[i+1]);
+	snprintf(tmp_str, BUFSIZ, "instance = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
 	
@@ -111,7 +116,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	if (startTime == RadxTime::NEVER) {
 	  OK = false;
 	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
       } else {
@@ -125,13 +130,17 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	if (endTime == RadxTime::NEVER) {
 	  OK = false;
 	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  snprintf(tmp_str, BUFSIZ, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
       } else {
 	OK = false;
       }
 
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     } // if ...
 	
   } // i
@@ -148,6 +157,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 void Args::_usage(ostream &out)
 {
 
+  out << endl;
+  out << "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field." << endl;
+  out << endl;
+
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"
       << "\n"
@@ -155,13 +168,16 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
+      << "  [ -compute_mean_loc ]\n"
+      << "     computes the mean radar location from the input data\n"
+      << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
-      << "           Sets mode to ARCHIVE\n"
+      << "     Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
-      << "           Sets mode to ARCHIVE\n"
+      << "     Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"

@@ -219,6 +219,16 @@ void ConvStratFinder::setUseDualThresholds(double secondary_threshold,
 }
 
 //////////////////////////////////////////////////
+// Set the terrain height field
+
+void ConvStratFinder::setTerrainHtField(const fl32 *ht, fl32 missingVal)
+{
+  assert(_gridSet);
+  _terrainHt = ht;
+  _terrainMissingVal = missingVal;
+}
+
+//////////////////////////////////////////////////
 // Compute the echoType
 
 int ConvStratFinder::computeEchoType(const fl32 *dbz, 
@@ -415,6 +425,9 @@ void ConvStratFinder::_initToMissing()
   _initToMissing(_stratTopKm, _missingFl32);
   _initToMissing(_echoTopKm, _missingFl32);
   _initToMissing(_convDbz, _missingFl32);
+  
+  _terrainHt = NULL;
+  _terrainMissingVal = _missingFl32;
   
 }
 
@@ -863,8 +876,22 @@ void ConvStratFinder::_setEchoType3D()
     for (size_t iy = 0; iy < _ny; iy++) {
 
       int offset2D = iy * _nx + ix;
-      fl32 shallowHtKm = shallowHtGrid[offset2D];
-      fl32 deepHtKm = deepHtGrid[offset2D];
+      fl32 shallowBoundaryKm = shallowHtGrid[offset2D];
+      fl32 deepBoundaryKm = deepHtGrid[offset2D];
+
+      // modify based on terrain if avaiblable
+
+      if (_terrainHt != NULL) {
+        fl32 terrainHtKm = _terrainHt[offset2D] / 1000.0;
+        fl32 minMidHtKm = terrainHtKm + _minHtKmAglForMid;
+        if (shallowBoundaryKm < minMidHtKm) {
+          shallowBoundaryKm = minMidHtKm;
+        }
+        fl32 minDeepHtKm = terrainHtKm + _minHtKmAglForDeep;
+        if (deepBoundaryKm < minDeepHtKm) {
+          deepBoundaryKm = minDeepHtKm;
+        }
+      }
       
       // loop through the planes, accumulating layer info
   
@@ -899,9 +926,9 @@ void ConvStratFinder::_setEchoType3D()
         // assign a height-based stratiform category
         
         double zKm = _zKm[iz];
-        if (zKm <= shallowHtKm) {
+        if (zKm <= shallowBoundaryKm) {
           echoType3D[offset3D] = CATEGORY_STRATIFORM_LOW;
-        } else if (zKm >= deepHtKm) {
+        } else if (zKm >= deepBoundaryKm) {
           echoType3D[offset3D] = CATEGORY_STRATIFORM_HIGH;
         } else {
           echoType3D[offset3D] = CATEGORY_STRATIFORM_MID;
@@ -1399,13 +1426,13 @@ void ConvStratFinder::StormClump::computeGeom()
 
     for (int ix = intvl.begin; ix <= intvl.end; ix++, offset2D++) {
 
-      fl32 shallowHtKm = shallowHtGrid[offset2D];
-      fl32 deepHtKm = deepHtGrid[offset2D];
+      fl32 shallowBoundaryKm = shallowHtGrid[offset2D];
+      fl32 deepBoundaryKm = deepHtGrid[offset2D];
       _volumeKm3 += dVol;
 
-      if (zKm <= shallowHtKm) {
+      if (zKm <= shallowBoundaryKm) {
         _nPtsShallow++;
-      } else if (zKm >= deepHtKm) {
+      } else if (zKm >= deepBoundaryKm) {
         _nPtsDeep++;
       } else {
         _nPtsMid++;

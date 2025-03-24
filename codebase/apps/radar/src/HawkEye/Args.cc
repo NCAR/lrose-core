@@ -294,6 +294,10 @@ int Args::parse (const int argc, const char **argv)
         iret = -1;
       }
 
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     } // if
     
   } // i
@@ -309,6 +313,10 @@ int Args::parse (const int argc, const char **argv)
 void Args::_usage(ostream &out)
 
 {
+
+  out << endl;
+  out << "HawkEye is the engineering display for the HAWK moments data" << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"

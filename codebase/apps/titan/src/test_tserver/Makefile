@@ -47,10 +47,8 @@ LOC_LIBS = \
 
 MODULE_TYPE=program
 
-HDRS = test_tserver.h
-
-SRCS = \
-	test_tserver.c
+CPPC_SRCS = \
+	test_tserver.cc
 
 #
 # standard targets

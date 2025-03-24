@@ -361,6 +361,22 @@ void Mpd2Radx::_setupWrite(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
+// finalize the volume
+
+void Mpd2Radx::_finalizeVol(RadxVol &vol)
+{
+
+  if (strlen(_params.instrument_name) > 0) {
+    vol.setInstrumentName(_params.instrument_name);
+  }
+
+  if (strlen(_params.site_name) > 0) {
+    vol.setSiteName(_params.site_name);
+  }
+
+}
+
+//////////////////////////////////////////////////
 // write out the volume
 
 int Mpd2Radx::_writeVol(RadxVol &vol)
@@ -431,7 +447,7 @@ int Mpd2Radx::_writeVol(RadxVol &vol)
 int Mpd2Radx::_processMpdNcFile(const string &readPath)
 {
    
-  PMU_auto_register("Processing Mpd Hayman file");
+  PMU_auto_register("Processing Mpd netcdf file");
 
   if (_params.debug) {
     cerr << "INFO - Mpd2Radx::_processMpdNcFile" << endl;
@@ -450,6 +466,10 @@ int Mpd2Radx::_processMpdNcFile(const string &readPath)
   
   // vector<RadxRay *> rays = vol.getRays();
 
+  // finalize the volume before writing
+  
+  _finalizeVol(vol);
+  
   // write the file
   if (_writeVol(vol)) {
     cerr << "ERROR - Mpd2Radx::_processMpdNcFile" << endl;

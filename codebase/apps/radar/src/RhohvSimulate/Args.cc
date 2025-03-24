@@ -130,6 +130,11 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -145,6 +150,10 @@ int Args::parse (const int argc, const char **argv)
 void Args::_usage(ostream &out)
 
 {
+
+  out << endl;
+  out << "This app simulates time series data and tests the computation of rhohv for various signal-to-noise ratios." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"

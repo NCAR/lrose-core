@@ -118,6 +118,11 @@ int Args::parse (int argc, char **argv,
 	iret = -1;
       }
 
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -134,6 +139,10 @@ void Args::_usage(ostream &out,
 		  const string &prog_name)
 
 {
+
+  out << endl;
+  out << "PowerInfo2Spdb reads radar power data from UDP writes to an SPDB data base." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

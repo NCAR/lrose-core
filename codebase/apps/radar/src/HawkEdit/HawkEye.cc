@@ -60,7 +60,7 @@ using namespace std;
 // Constructor
 
 HawkEye::HawkEye(int argc, char **argv) :
-        _args("HawkEye")
+        _args("HawkEdit")
 
 {
 
@@ -70,7 +70,7 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   // set programe name
 
-  _progName = strdup("HawkEye");
+  _progName = strdup("HawkEdit");
 
   HawkEyeLogger logger("HawkEdit");
   logger.setDayMode();

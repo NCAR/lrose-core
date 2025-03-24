@@ -95,6 +95,7 @@ private:
   int _nGatesRequested, _startGateRequested;
   int _nGates, _startGate, _endGate;
 
+  double _siggenStartPower;
   time_t _calTime;
   vector<double> _siggenDbm, _waveguideDbmH, _waveguideDbmV;
   vector<double> _hcDbm, _hxDbm, _vcDbm, _vxDbm;
@@ -104,7 +105,7 @@ private:
   double _wavelengthCm, _wavelengthM;
 
   double _prevFreq;
-
+  
   int _testPulsePid;
   
   // results

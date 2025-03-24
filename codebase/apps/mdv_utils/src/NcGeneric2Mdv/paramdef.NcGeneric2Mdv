@@ -444,6 +444,49 @@ paramdef double {
 } remap_offset_origin_longitude;
 
 commentdef {
+  p_header = "OPTIONS TO GET METADATA FROM GLOBAL ATTRIBUTES.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Get the date and time from the global attributes.";
+  p_help = "If true, we read year, month, day, hour, minute, second from global attributes.";
+} get_date_and_time_from_global_attributes;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Get the missing value from the global attributes.";
+  p_help = "If true, we read missing_value from global attributes. Otherwise we get that from the field attributes.";
+} get_missing_value_from_global_attributes;
+
+commentdef {
+  p_header = "OPTION TO SELECT SPECIFIC FIELDS TO PROCESS.";
+  p_text = "Use this to select fields to include, and the rest will be excluded.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify output fields.";
+  p_help = "If true, only the specified fields will be included in the output files.";
+} specify_output_fields;
+
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string long_field_name; 
+  string output_units;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "dbz", "", "reflectivity", ""},
+    { "vel", "vel", "radial velocity", "m/s"}
+  };
+  p_descr = "Fields to be included in the output files.";
+  p_help = "The input_field_name must be specified. If the output_field_name is empty, the input field name will be used unchanged. If the long_field_name is empty, the long name from the input file will be used unchanged. If output_units is empty, the units from the input file will be used.";
+} output_fields[];
+
+commentdef {
   p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
   p_text = "These transforms are fixed. The same transform is applied to all files.";
 }

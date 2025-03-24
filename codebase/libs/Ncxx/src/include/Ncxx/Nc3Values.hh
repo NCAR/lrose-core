@@ -51,6 +51,7 @@
 // Documentation warned this might change and now it has, for
 // consistency with C interface 
 typedef signed char ncbyte;
+typedef unsigned short int ushort;
 
 #define NC3_UNSPECIFIED ((nc_type)0)
 
@@ -69,6 +70,7 @@ enum Nc3Type
     nc3Byte = NC_BYTE, 
     nc3Char = NC_CHAR, 
     nc3Short = NC_SHORT, 
+    nc3Ushort = NC_USHORT, 
     nc3Int = NC_INT,
     nc3Long = NC_LONG,		// deprecated, someday want to use for 64-bit ints
     nc3Float = NC_FLOAT, 
@@ -80,6 +82,7 @@ enum Nc3Type
 static const ncbyte nc3Bad_byte = NC_FILL_BYTE;
 static const char nc3Bad_char = NC_FILL_CHAR;
 static const short nc3Bad_short = NC_FILL_SHORT;
+static const ushort nc3Bad_ushort = NC_FILL_USHORT;
 static const nclong nc3Bad_nclong = FILL_LONG; // deprecated
 static const int nc3Bad_int = NC_FILL_INT;
 static const long nc3Bad_long = FILL_LONG; // deprecated
@@ -113,6 +116,7 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
     virtual ncbyte as_ncbyte( long n ) const;                   \
     virtual char as_char( long n ) const;                       \
     virtual short as_short( long n ) const;                     \
+    virtual ushort as_ushort( long n ) const;                   \
     virtual int as_int( long n ) const;                         \
     virtual int as_nclong( long n ) const;                      \
     virtual long as_long( long n ) const;                       \
@@ -130,6 +134,7 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
 #define _nc__ncbyte nc3Byte
 #define _nc__char nc3Char
 #define _nc__short nc3Short
+#define _nc__ushort nc3Ushort
 #define _nc__int nc3Int
 #define _nc__nclong nc3Long
 #define _nc__long nc3Long
@@ -221,6 +226,14 @@ static const double nc3Bad_double = NC_FILL_DOUBLE;
     return (short) the_values[n];                               \
   }
 
+#define as_ushort_implement(TYPE)                                \
+  ushort Nc3Val(TYPE)::as_ushort( long n ) const                  \
+  {                                                             \
+    if (the_values[n] < 0 || the_values[n] > USHRT_MAX)   \
+      return nc3Bad_ushort;                                      \
+    return (ushort) the_values[n];                               \
+  }
+
 #define NCINT_MIN INT_MIN
 #define NCINT_MAX INT_MAX
 #define as_int_implement(TYPE)                                  \
@@ -299,8 +312,9 @@ public:
   virtual ncbyte as_ncbyte( long n ) const = 0; // nth value as a byte
   virtual char as_char( long n ) const = 0;     // nth value as char
   virtual short as_short( long n ) const = 0;   // nth value as short
+  virtual ushort as_ushort( long n ) const = 0; // nth value as ushort
   virtual int    as_int( long n ) const = 0;    // nth value as int
-  virtual int64_t as_int64( long n ) const = 0;    // nth value as int64
+  virtual int64_t as_int64( long n ) const = 0;  // nth value as int64
   virtual int    as_nclong( long n ) const = 0; // nth value as nclong
   virtual long as_long( long n ) const = 0;     // nth value as long
   virtual float as_float( long n ) const = 0;   // nth value as floating-point
@@ -314,13 +328,14 @@ protected:
 };
 
 declare(Nc3Values,ncbyte)
-  declare(Nc3Values,char)
-  declare(Nc3Values,short)
-  declare(Nc3Values,int)
-  declare(Nc3Values,nclong)
-  declare(Nc3Values,long)
-  declare(Nc3Values,int64_t)
-  declare(Nc3Values,float)
-  declare(Nc3Values,double)
+declare(Nc3Values,char)
+declare(Nc3Values,short)
+declare(Nc3Values,ushort)
+declare(Nc3Values,int)
+declare(Nc3Values,nclong)
+declare(Nc3Values,long)
+declare(Nc3Values,int64_t)
+declare(Nc3Values,float)
+declare(Nc3Values,double)
 
 #endif

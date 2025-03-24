@@ -79,12 +79,6 @@ paramdef string {
   p_help = "This is the SRTM30 data set, in tiles. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon.";
 } srtm30_dem_dir;
 
-paramdef string {
-  p_default = "$(HOME)/data/terrain/WATER";
-  p_descr = "Directory for water layer data in netCDF format.";
-  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
-} water_layer_dir;
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to check terrain and water in adjacent grid cells.";
@@ -96,6 +90,30 @@ paramdef double {
   p_descr = "Margin width in checking for adjacent grid points (km).";
   p_help = "We search around the selected point by this distance.";
 } search_margin_km;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Add water layer data to output file.";
+  p_help = "If true, we read in the water layer for each grid location. This is a 1 or 0. It is 0 for land and 1 for water.";
+} add_water_layer;
+
+paramdef string {
+  p_default = "$(HOME)/data/terrain/WATER";
+  p_descr = "Directory for water layer data in netCDF format.";
+  p_help = "These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.";
+} water_layer_dir;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum height above ground for mid-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_mid;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Minimum height above ground for deep-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_deep;
 
 commentdef {
   p_header = "ALGORITHM PARAMETERS";
@@ -328,6 +346,19 @@ paramdef double {
 
 commentdef {
   p_header = "DATA OUTPUT";
+  p_text = "\n"
+    "  The partition field has the following values:\n"
+    "    CATEGORY_MISSING = 0\n"
+    "    CATEGORY_STRATIFORM_LOW = 14\n"
+    "    CATEGORY_STRATIFORM = 15\n"
+    "    CATEGORY_STRATIFORM_MID = 16\n"
+    "    CATEGORY_STRATIFORM_HIGH = 18\n"
+    "    CATEGORY_MIXED = 25\n"
+    "    CATEGORY_CONVECTIVE_ELEVATED = 32\n"
+    "    CATEGORY_CONVECTIVE_SHALLOW = 34\n"
+    "    CATEGORY_CONVECTIVE = 35\n"
+    "    CATEGORY_CONVECTIVE_MID = 36\n"
+    "    CATEGORY_CONVECTIVE_DEEP = 38";
 }
 
 paramdef string {

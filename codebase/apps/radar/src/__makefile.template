@@ -64,6 +64,7 @@ SUB_DIRS = \
 	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
+	Ts2Moments \
 	Ts2NetCDF \
 	TsCalAuto \
 	TsConvert \

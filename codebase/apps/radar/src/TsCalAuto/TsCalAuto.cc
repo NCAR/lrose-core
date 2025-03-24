@@ -72,7 +72,8 @@ TsCalAuto::TsCalAuto(int argc, char **argv)
   _haveChan1 = false;
   _fmqMode = false;
   _prevFreq = -9999;
-
+  _siggenStartPower = -9999;
+  
   // set programe name
   
   _progName = "TsCalAuto";
@@ -217,6 +218,8 @@ int TsCalAuto::_runFmqMode()
     
     // use specified power sequence
 
+    _siggenStartPower = _params.siggen_sequence_start_power;
+    
     for (int jj = 0; jj < _params.siggen_delta_power_sequence_n; jj++) {
       powerDbm = (_params.siggen_sequence_start_power +
                   _params._siggen_delta_power_sequence[jj]);
@@ -233,6 +236,7 @@ int TsCalAuto::_runFmqMode()
 
     // create power sequence
 
+    _siggenStartPower = _params.siggen_max_power;
     powerDbm = _params.siggen_max_power;
     while (powerDbm >= _params.siggen_min_power) {
     
@@ -1325,15 +1329,32 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
 {
   char input[1024];
 
-  double delta = powerDbm - _params.siggen_max_power;
+  double delta = powerDbm - _siggenStartPower;
 
   if (_params.use_manual_siggen_control) {
-    cerr << "Set siggen power  to " << powerDbm  << " (dBm), delta: " << delta << " (dB)" << endl;
-    fprintf(stdout, "Manual control - hit return when ready ...");
-    if (fgets(input,1023,stdin) == NULL) {
-      cerr << "ERROR - _setSiggenPowerSet - getting user keystroke" << endl;
+    
+    if (_params.prompt_user_with_attenuation) {
+
+      double atten = _params.variable_attenuation_start_value - delta;
+      
+      cout << "Set attenuator to " << atten
+           << " (dB), delta: " << delta
+           << " (dB), hit return when ready" << endl;
+      
+    } else {
+      
+      cout << "Set siggen power to " << powerDbm
+           << " (dBm), delta: " << delta
+           << " (dB), hit return when ready" << endl;
+      
     }
+
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenPower - getting user keystroke" << endl;
+    }
+
   } else {
+
     char buf[1024];
     if (_params.debug) {
       cerr << "======================================================" << endl;
@@ -1341,6 +1362,7 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
     }
     sprintf(buf,"POW %gDBM\n",powerDbm);  // Build SCPI command
     _sendSiggenCmd(buf,input,1024);
+
   }
 
 }

@@ -333,17 +333,24 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
   out << ", ";
   out << sweeps.size();
   out << ", ";
-  
+
+  vector<double> fixedAngles;
   for (size_t ii = 0; ii < sweeps.size(); ii++) {
     const RadxSweep *sweep = sweeps[ii];
-    out << sweep->getFixedAngleDeg();
-    if (ii == sweeps.size() - 1) {
+    if (sweep->getNRays() > 1) {
+      fixedAngles.push_back(sweep->getFixedAngleDeg());
+    }
+  } // ii
+  
+  for (size_t ii = 0; ii < fixedAngles.size(); ii++) {
+    out << fixedAngles[ii];
+    if (ii == fixedAngles.size() - 1) {
       out << endl;
     } else {
       out << ", ";
     }
   }
-  
+
   out.flush();
   
 }

@@ -337,6 +337,18 @@ paramdef string {
   p_help = "See override_site_name.";
 } site_name;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the scan name.";
+  p_help = "If true, the scan name provided will be used.";
+} override_scan_name;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Scan name.";
+  p_help = "See override_scan_name.";
+} scan_name;
+
 commentdef {
   p_header = "OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT";
 }
@@ -724,6 +736,18 @@ paramdef boolean {
   p_descr = "Sort the sweeps by fixed angle.";
   p_help = "For some volumes, the sweep fixed angles may not be in increasing order. This option allows you to reorder the sweeps, and rays, into the correct order.";
 } sort_sweeps_by_fixed_angle;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Combine sweeps with same fixed angle.";
+  p_help = "Combine sweeps with similar fixed angle into a single sweep.";
+} combine_sweeps_by_fixed_angle;
+
+paramdef double {
+  p_default = 0.05;
+  p_descr = "Max diff in fixed angle for combining sweeps (degrees).";
+  p_help = "We check the fixed angle difference between sweeps and combine them if the difference is less than this.";
+} combined_sweep_max_fixed_angle_diff;
 
 paramdef boolean {
   p_default = FALSE;
@@ -1235,6 +1259,50 @@ paramdef boolean {
   p_descr = "Option to include the scan type in the file name.";
   p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
 } include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the labels of the sweep modes.";
+  p_help = "If TRUE, the specified sweep mode labels are used in the file names. See above: include_scan_type_in_file_name.";
+} override_sweep_mode_labels;
+
+typedef struct {
+  string sector_label;
+  string coplane_label;
+  string rhi_label;
+  string vert_label;
+  string idle_label;
+  string az_sur_label;
+  string el_sur_label;
+  string sunscan_label;
+  string sunscan_rhi_label;
+  string cal_label;
+  string man_label;
+  string dbs_label;
+  string traj_label;
+  string par_label;
+} sweep_mode_labels_t;
+
+paramdef struct sweep_mode_labels_t {
+  p_default = {
+    sector_label = "PPI",
+    coplane_label = "COP",
+    rhi_label = "RHI",
+    vert_label = "VER",
+    idle_label = "IDL",
+    az_sur_label = "SUR",
+    el_sur_label = "AIR",
+    sunscan_label = "SUN",
+    sunscan_rhi_label = "SRH",
+    cal_label = "CAL",
+    man_label = "MAN",
+    dbs_label = "DBS",
+    traj_label = "TRJ",
+    par_label = "PAR"
+  };
+  p_descr = "Sets the strings used for the labels for each sweep mode.";
+  p_help = "These are used in the output file name. See 'include_scan_type_in_file_name'.";
+} sweep_mode_labels;
 
 paramdef boolean {
   p_default = false;

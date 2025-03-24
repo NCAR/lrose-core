@@ -334,7 +334,7 @@ thresholded_fields = {
 // Type: string
 //
 
-output_url = "./output";
+output_url = "/tmp/mdv_xml";
 
 ///////////// output_as_forecast //////////////////////
 //
@@ -969,7 +969,7 @@ encoding_type = ENCODING_ASIS;
 //     COMPRESSION_TYPES_N
 //
 
-compression_type = COMPRESSION_BZIP;
+compression_type = COMPRESSION_GZIP_VOL;
 
 ///////////// force_scale_change //////////////////////
 //

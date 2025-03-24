@@ -233,6 +233,10 @@ int Args::parse (const int argc, const char **argv)
       } else {
 	iret = -1;
       }
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
       
     } // if
     
@@ -249,6 +253,10 @@ int Args::parse (const int argc, const char **argv)
 void Args::_usage(ostream &out)
 
 {
+
+  out << endl;
+  out << "IpsAscope is the ascope display for time series data in IPS format. Supports Idependent Pulse Sampling." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"

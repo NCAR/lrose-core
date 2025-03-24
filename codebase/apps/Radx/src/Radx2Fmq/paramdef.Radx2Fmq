@@ -1,0 +1,232 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Radx2Fmq
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2025
+
+commentdef {
+  p_header = "Program name: Radx2Fmq";
+  p_text = "Radx2Fmq reads radial moments data from Radx-supported files and writes the data to a DsRadarQueue beam by beam in Radx format.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL AND DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+commentdef {
+  p_header = "SIMULATING RADAR OPS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to simulate data arriving from a radar.";
+  p_help = "Uses the files specified in FILELIST mode. Radx2Fmq will iterate through the specified files, and restart when the file list is exhausted. The write_delay_msecs parameter will be used to determine the data rate. Times will be set to the current time.";
+} do_simulate;
+
+paramdef int {
+  p_min = 0;
+  p_default = 50;
+  p_descr = "Delay between writing output rays - millisecs.";
+  p_help = "Should normally be 0. Can be set to positive values to simulate the rate at which data would arrive from a radar on a beam-by-beam basis.";
+} sim_delay_msecs;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef int {
+  p_min = 0;
+  p_default = 300;
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be valid. If the input file is older than this, the program waits for new data.";
+} max_realtime_valid_age;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to watch for _latest_data_info file in input dir.";
+  p_help = "For realtime only. If true the program watches for the _latest_data_info file to change. If false, it scans the directory for new file.";
+} use_latest_data_info;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to only process the latest file in the directory.";
+  p_help = "For realtime mode only, and only if use_latest_data_info is false, which implies that the program is scanning the input_dir for new files. If true, only the latest file will be processed. If false, all files younger than max_realtime_valid_age will be processed.";
+} latest_file_only;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "File quiescence when checking for files in realtime mode - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it.";
+} realtime_file_quiescence;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory.";
+} realtime_wait_between_scans;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use."; 
+} realtime_search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} realtime_max_recursion_depth;
+
+commentdef {
+  p_header = "READ CONTROL OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to aggregate sweep files into a volume on read.";
+  p_help = "If false, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
+} aggregate_sweep_files_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set field names";
+} read_set_field_names;
+
+paramdef string {
+  p_default = { "DBZ", "VEL" };
+  p_descr = "Field name list.";
+} read_field_names[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only read sweeos within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} read_set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} read_lower_fixed_angle;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} read_upper_fixed_angle;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set sweep number limits";
+  p_help = "Only read sweeps within the specified sweep number limits.";
+} read_set_sweep_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower sweep number limit.";
+} read_lower_sweep_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper sweep number limit.";
+} read_upper_sweep_num;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to ignore data taken in IDLE mode.";
+  p_help = "If true, on read will ignore files with an IDLE scan mode.";
+} ignore_idle_scan_mode_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove rays for which all data is missing.";
+  p_help = "If true, ray data will be checked. If all fields have missing data at all gates, the ray will be removed after reading.";
+} remove_rays_with_all_data_missing;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove long range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
+} remove_long_range_rays;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove short range rays.";
+  p_help = "Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.";
+} remove_short_range_rays;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "fmq/ncf";
+  p_descr = "Output URL for DsRadarQueue FMQ in Radx format.";
+  p_help = "The URL is of the form 'fmqp:://host::dir/name'. If the output is to the local host you can use just 'dir/name'.";
+} output_url;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} write_blocking;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of slots in output FMQ.";
+} output_n_slots;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_buf_size;

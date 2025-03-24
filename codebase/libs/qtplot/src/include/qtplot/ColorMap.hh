@@ -324,6 +324,10 @@ class DLL_EXPORT ColorMap {
   /// @return The maximum range value
   double rangeMax() const;
 
+  /// @return Check value is within valid range
+
+  bool withinValidRange(double data) const;
+
   /// @return The name of the builtin color maps.
   static std::vector<std::string> builtinMaps();
 
@@ -347,7 +351,9 @@ class DLL_EXPORT ColorMap {
 
   bool isDefault() const { return _isDefault; }
 
-  QImage *getColorScaleLegend();
+  // check whether a color name is valid
+
+  static bool isColorNameValid(QString colorName);
 
  protected:
 
@@ -451,6 +457,7 @@ class DLL_EXPORT ColorMap {
 
   void _computeLut();
   int _getLutIndex(double data) const;
+  int _getLutIndexCheck(double data) const;
 
  private:
 

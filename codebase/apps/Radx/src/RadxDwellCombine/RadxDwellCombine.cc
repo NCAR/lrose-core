@@ -43,6 +43,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxStatusXml.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
@@ -57,6 +58,8 @@ RadxDwellCombine::RadxDwellCombine(int argc, char **argv)
 
   OK = TRUE;
   _nWarnCensorPrint = 0;
+  _momReader = NULL;
+  _outputFmq = NULL;
 
   // set programe name
 
@@ -114,8 +117,13 @@ RadxDwellCombine::~RadxDwellCombine()
 
 {
 
-  _inputFmq.closeMsgQueue();
-  _outputFmq.closeMsgQueue();
+  if (_momReader) {
+    delete _momReader;
+  }
+
+  if (_outputFmq) {
+    delete _outputFmq;
+  }
 
   // unregister process
 
@@ -133,7 +141,7 @@ int RadxDwellCombine::Run()
 
   switch (_params.mode) {
     case Params::FMQ:
-      iret = _runFmq();
+      return _runFmq();
       break;
     case Params::ARCHIVE:
       iret = _runArchive();
@@ -152,7 +160,7 @@ int RadxDwellCombine::Run()
 
   // if we are writing out on time boundaries, there
   // may be unwritten data, so write it now
-
+  
   if (_params.write_output_files_on_time_boundaries) {
     if (_writeSplitVol()) {
       iret = -1;
@@ -164,22 +172,329 @@ int RadxDwellCombine::Run()
 }
 
 //////////////////////////////////////////////////
+// Run in FMQ mode
+
+int RadxDwellCombine::_runFmq()
+{
+
+  // Open the input radar queue
+  
+  if (_openInputFmq()) {
+    return -1;
+  }
+
+  // Open the output fmq
+
+  if (_openOutputFmq()) {
+    return -1;
+  }
+  
+  // loop until read fails
+  
+  int iret = 0;
+  _nRaysRead = 0;
+  _nRaysWritten = 0;
+  RadxTime prevDwellRayTime;
+
+  while (true) {
+    
+    // read in next ray
+    
+    PMU_auto_register("Reading FMQ realtime");
+    RadxRay *inputRay = _readFmqRay();
+    if (inputRay == NULL) {
+      return -1;
+    }
+
+    // add the ray to the dwell volume
+    
+    _dwellVol.addRay(inputRay);
+      
+    // combine rays if combined time exceeds specified dwell
+    
+    const vector<RadxRay *> &raysDwell = _dwellVol.getRays();
+    size_t nRaysDwell = raysDwell.size();
+    if (nRaysDwell > 1) {
+      
+      _dwellStartTime = raysDwell[0]->getRadxTime();
+      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
+      double dwellSecs = (_dwellEndTime - _dwellStartTime);
+      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
+      
+      if (dwellSecs >= _params.dwell_time_secs) {
+        
+        // dwell time exceeded
+        // compute dwell ray and add to volume
+        
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
+        }
+        RadxRay *dwellRay =
+          _dwellVol.computeFieldStats(_globalMethod,
+                                      _namedMethods,
+                                      _params.dwell_stats_max_fraction_missing);
+        RadxTime dwellRayTime(dwellRay->getRadxTime());
+        double deltaSecs = dwellRayTime - prevDwellRayTime;
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          if (deltaSecs < _params.dwell_time_secs * 0.8 ||
+              deltaSecs > _params.dwell_time_secs * 1.2) {
+            cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
+                 << dwellRay->getRadxTime().asString(3) << ", "
+                 << nRaysDwell << ", "
+                 << deltaSecs << endl;
+          }
+        }
+        prevDwellRayTime = dwellRayTime;
+        
+        // create output message from combined ray
+        
+        RadxMsg msg;
+        dwellRay->serialize(msg);
+        if ((_params.debug >= Params::DEBUG_VERBOSE) ||
+            (_params.debug && (_nRaysWritten % 1000 == 0))) {
+          cerr << "Writing ray, time, el, az, rayNum: "
+               << dwellRay->getRadxTime().asString(3) << ", "
+               << dwellRay->getElevationDeg() << ", "
+               << dwellRay->getAzimuthDeg() << ", "
+               << _nRaysWritten << endl;
+        }
+        
+        // write the message
+        
+        if (_outputFmq) {
+          if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                   msg.assembledMsg(), msg.lengthAssembled())) {
+            cerr << "ERROR - _runFmq" << endl;
+            cerr << "  Cannot write ray to output queue" << endl;
+            iret = -1;
+          }
+        } // if (_outputFmq)
+        _nRaysWritten++;
+        
+        // clean up
+        
+        RadxRay::deleteIfUnused(dwellRay);
+        _dwellVol.clearRays();
+        
+      } // if (dwellSecs >= _params.dwell_time_secs)
+      
+    } // if (nRaysDwell > 1)
+    
+  } // while (true)
+  
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Open input fmq
+
+int RadxDwellCombine::_openInputFmq()
+{
+
+  // Instantiate and initialize the input radar queues
+
+  if (_params.debug) {
+    cerr << "DEBUG - opening input fmq for moments: "
+         << _params.input_fmq_url << endl;
+  }
+  
+  _momReader = new IwrfMomReaderFmq(_params.input_fmq_url);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _momReader->setDebug(IWRF_DEBUG_NORM);
+  }
+
+  if (_params.seek_to_end_of_input_fmq) {
+    _momReader->seekToEnd();
+  } else {
+    _momReader->seekToStart();
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Open output fmq
+
+int RadxDwellCombine::_openOutputFmq()
+{
+
+  // create the output FMQ
+  
+  _outputFmq = new DsFmq;
+
+  if (_outputFmq->init(_params.output_fmq_url,
+                       _progName.c_str(),
+                       _params.debug >= Params::DEBUG_VERBOSE,
+                       DsFmq::READ_WRITE, DsFmq::END,
+                       _params.output_fmq_compress,
+                       _params.output_fmq_n_slots,
+                       _params.output_fmq_buf_size)) {
+    cerr << "ERROR - " << _progName << "::_openFmqs" << endl;
+    cerr << "  Cannot open output fmq, URL: " << _params.output_fmq_url << endl;
+    return -1;
+  }
+  if (_params.output_fmq_compress) {
+    _outputFmq->setCompressionMethod(TA_COMPRESSION_GZIP);
+  }
+  if (_params.output_fmq_write_blocking) {
+    _outputFmq->setBlockingWrite();
+  }
+  if (_params.output_fmq_data_mapper_report_interval > 0) {
+    _outputFmq->setRegisterWithDmap(true, _params.output_fmq_data_mapper_report_interval);
+  }
+  // _outputFmq->setSingleWriter();
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Read a ray in FMQ mode
+// Creates ray, must be freed by caller.
+
+RadxRay *RadxDwellCombine::_readFmqRay()
+{
+
+  // read next ray
+  
+  RadxRay *ray = _momReader->readNextRay();
+  if (ray == NULL) {
+    return NULL;
+  }
+  _nRaysRead++;
+  
+  // check for platform update
+  
+  if (_momReader->getPlatformUpdated()) {
+    
+    RadxPlatform platform = _momReader->getPlatform();
+    _platform = platform;
+    _setPlatformMetadata(_platform);
+    _wavelengthM = _platform.getWavelengthM();
+    if (_wavelengthM < 0) {
+      _wavelengthM = 0.003176;
+    }
+    _prt = ray->getPrtSec();
+    _nyquist = ((_wavelengthM / _prt) / 4.0);
+    if (_params.fixed_location_mode) {
+      _platform.setLatitudeDeg(_params.fixed_radar_location.latitudeDeg);
+      _platform.setLongitudeDeg(_params.fixed_radar_location.longitudeDeg);
+      _platform.setAltitudeKm(_params.fixed_radar_location.altitudeKm);
+    }
+    
+    // create message
+    RadxMsg msg;
+    platform.serialize(msg);
+    // write the platform to the output queue
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - _readRay" << endl;
+        cerr << "  Cannot copy platform metadata to output queue" << endl;
+      }
+    }
+
+  } // if (_momReaderShort->getPlatformUpdated())
+
+  // check for calibration update
+  
+  if (_momReader->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _momReader->getRcalibs();
+    _calibs = calibs;
+    for (size_t ii = 0; ii < calibs.size(); ii++) {
+      // create message
+      RadxRcalib calib = calibs[ii];
+      RadxMsg msg;
+      calib.serialize(msg);
+      // write to output queue
+      if (_outputFmq) {
+        if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                                 msg.assembledMsg(), msg.lengthAssembled())) {
+          cerr << "ERROR - _readRay" << endl;
+          cerr << "  Cannot copy calib to output queue" << endl;
+        }
+      }
+    } // ii
+  }
+
+  // check for status xml update
+  
+  if (_momReader->getStatusXmlUpdated()) {
+    const string statusXml = _momReader->getStatusXml();
+    _statusXml = statusXml;
+    // create RadxStatusXml object
+    RadxStatusXml status;
+    status.setXmlStr(statusXml);
+    // create message
+    RadxMsg msg;
+    status.serialize(msg);
+    // write to output queue
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - _readRay" << endl;
+        cerr << "  Cannot copy status xml to output queue" << endl;
+      }
+    }
+  }
+  
+  // update events
+  
+  _events = _momReader->getEvents();
+  for (size_t ii = 0; ii < _events.size(); ii++) {
+    RadxEvent event = _events[ii];
+    RadxMsg msg;
+    event.serialize(msg);
+    // write to output queue
+    if (_outputFmq) {
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - _readRay" << endl;
+        cerr << "  Cannot copy event to output queue" << endl;
+      }
+    }
+  } // ii
+
+  // override location as required
+  
+  if (_params.fixed_location_mode) {
+    RadxGeoref *georef = ray->getGeoreference();
+    if (georef != NULL) {
+      georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
+      georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
+      georef->setAltitudeKmMsl(_params.fixed_radar_location.altitudeKm);
+      georef->setEwVelocity(0.0);
+      georef->setNsVelocity(0.0);
+      georef->setVertVelocity(0.0);
+      georef->setHeading(0.0);
+      georef->setTrack(0.0);
+      georef->setEwWind(0.0);
+      georef->setNsWind(0.0);
+      georef->setVertWind(0.0);
+    }
+  }
+  
+  return ray;
+
+}
+
+//////////////////////////////////////////////////
 // Run in filelist mode
 
 int RadxDwellCombine::_runFilelist()
 {
 
   // loop through the input file list
-
+  
   int iret = 0;
-
+  
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
     string inputPath = _args.inputFileList[ii];
     if (_processFile(inputPath)) {
       iret = -1;
     }
-
   }
 
   return iret;
@@ -422,6 +737,14 @@ int RadxDwellCombine::_processFile(const string &readPath)
 
   _setGlobalAttr(vol);
 
+  // override platform metadata
+  
+  if (_params.override_platform_type || _params.override_primary_axis) {
+    RadxPlatform platform = vol.getPlatform();
+    _setPlatformMetadata(platform);
+    vol.setPlatform(platform);
+  }
+
   // write the file
 
   if (_writeVol(vol)) {
@@ -449,119 +772,6 @@ void RadxDwellCombine::_setupRead(RadxFile &file)
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
-  }
-
-}
-
-//////////////////////////////////////////////////
-// apply linear transform to fields as required
-
-void RadxDwellCombine::_applyLinearTransform(RadxVol &vol)
-{
-
-  for (int ii = 0; ii < _params.transform_fields_n; ii++) {
-    const Params::transform_field_t &tfld = _params._transform_fields[ii];
-    string iname = tfld.input_field_name;
-    double scale = tfld.transform_scale;
-    double offset = tfld.transform_offset;
-    vol.applyLinearTransform(iname, scale, offset);
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////
-// set the field folds attribute on selected fields
-
-void RadxDwellCombine::_setFieldFoldsAttribute(RadxVol &vol)
-{
-
-  for (int ii = 0; ii < _params.field_folds_n; ii++) {
-    
-    const Params::field_folds_t &fld = _params._field_folds[ii];
-
-    vol.setFieldFolds(fld.field_name,
-                      fld.use_nyquist,
-                      fld.fold_limit_lower,
-                      fld.fold_limit_upper);
-
-  } // ii
-  
-}
-
-//////////////////////////////////////////////////
-// rename fields as required
-
-void RadxDwellCombine::_convertFields(RadxVol &vol)
-{
-
-  if (!_params.set_output_fields) {
-    return;
-  }
-
-  for (int ii = 0; ii < _params.output_fields_n; ii++) {
-
-    const Params::output_field_t &ofld = _params._output_fields[ii];
-    
-    string iname = ofld.input_field_name;
-    string oname = ofld.output_field_name;
-    string lname = ofld.long_name;
-    string sname = ofld.standard_name;
-    string ounits = ofld.output_units;
-    
-    Radx::DataType_t dtype = Radx::ASIS;
-    switch(ofld.encoding) {
-      case Params::OUTPUT_ENCODING_FLOAT32:
-        dtype = Radx::FL32;
-        break;
-      case Params::OUTPUT_ENCODING_INT32:
-        dtype = Radx::SI32;
-        break;
-      case Params::OUTPUT_ENCODING_INT16:
-        dtype = Radx::SI16;
-        break;
-      case Params::OUTPUT_ENCODING_INT08:
-        dtype = Radx::SI08;
-        break;
-      case Params::OUTPUT_ENCODING_ASIS:
-        dtype = Radx::ASIS;
-      default: {}
-    }
-
-    if (ofld.output_scaling == Params::SCALING_DYNAMIC) {
-      vol.convertField(iname, dtype, 
-                       oname, ounits, sname, lname);
-    } else {
-      vol.convertField(iname, dtype, 
-                       ofld.output_scale, ofld.output_offset,
-                       oname, ounits, sname, lname);
-    }
-    
-  }
-
-}
-
-//////////////////////////////////////////////////
-// convert all fields to specified output encoding
-
-void RadxDwellCombine::_convertAllFields(RadxVol &vol)
-{
-
-  switch(_params.output_encoding) {
-    case Params::OUTPUT_ENCODING_FLOAT32:
-      vol.convertToFl32();
-      return;
-    case Params::OUTPUT_ENCODING_INT32:
-      vol.convertToSi32();
-      return;
-    case Params::OUTPUT_ENCODING_INT16:
-      vol.convertToSi16();
-      return;
-    case Params::OUTPUT_ENCODING_INT08:
-      vol.convertToSi08();
-      return;
-    case Params::OUTPUT_ENCODING_ASIS:
-    default:
-      return;
   }
 
 }
@@ -675,7 +885,7 @@ int RadxDwellCombine::_writeVol(RadxVol &vol)
 {
 
   // are we writing files on time boundaries
-
+  
   if (_params.write_output_files_on_time_boundaries) {
     return _writeVolOnTimeBoundary(vol);
   }
@@ -868,6 +1078,119 @@ void RadxDwellCombine::_setNextEndOfVolTime(RadxTime &refTime)
   if (_params.debug) {
     cerr << "==>> Next end of vol time: " << _nextEndOfVolTime.asString(3) << endl;
   }
+}
+
+//////////////////////////////////////////////////
+// apply linear transform to fields as required
+
+void RadxDwellCombine::_applyLinearTransform(RadxVol &vol)
+{
+
+  for (int ii = 0; ii < _params.transform_fields_n; ii++) {
+    const Params::transform_field_t &tfld = _params._transform_fields[ii];
+    string iname = tfld.input_field_name;
+    double scale = tfld.transform_scale;
+    double offset = tfld.transform_offset;
+    vol.applyLinearTransform(iname, scale, offset);
+  } // ii
+
+}
+
+////////////////////////////////////////////////////////
+// set the field folds attribute on selected fields
+
+void RadxDwellCombine::_setFieldFoldsAttribute(RadxVol &vol)
+{
+
+  for (int ii = 0; ii < _params.field_folds_n; ii++) {
+    
+    const Params::field_folds_t &fld = _params._field_folds[ii];
+
+    vol.setFieldFolds(fld.field_name,
+                      fld.use_nyquist,
+                      fld.fold_limit_lower,
+                      fld.fold_limit_upper);
+
+  } // ii
+  
+}
+
+//////////////////////////////////////////////////
+// rename fields as required
+
+void RadxDwellCombine::_convertFields(RadxVol &vol)
+{
+
+  if (!_params.set_output_fields) {
+    return;
+  }
+
+  for (int ii = 0; ii < _params.output_fields_n; ii++) {
+
+    const Params::output_field_t &ofld = _params._output_fields[ii];
+    
+    string iname = ofld.input_field_name;
+    string oname = ofld.output_field_name;
+    string lname = ofld.long_name;
+    string sname = ofld.standard_name;
+    string ounits = ofld.output_units;
+    
+    Radx::DataType_t dtype = Radx::ASIS;
+    switch(ofld.encoding) {
+      case Params::OUTPUT_ENCODING_FLOAT32:
+        dtype = Radx::FL32;
+        break;
+      case Params::OUTPUT_ENCODING_INT32:
+        dtype = Radx::SI32;
+        break;
+      case Params::OUTPUT_ENCODING_INT16:
+        dtype = Radx::SI16;
+        break;
+      case Params::OUTPUT_ENCODING_INT08:
+        dtype = Radx::SI08;
+        break;
+      case Params::OUTPUT_ENCODING_ASIS:
+        dtype = Radx::ASIS;
+      default: {}
+    }
+
+    if (ofld.output_scaling == Params::SCALING_DYNAMIC) {
+      vol.convertField(iname, dtype, 
+                       oname, ounits, sname, lname);
+    } else {
+      vol.convertField(iname, dtype, 
+                       ofld.output_scale, ofld.output_offset,
+                       oname, ounits, sname, lname);
+    }
+    
+  }
+
+}
+
+//////////////////////////////////////////////////
+// convert all fields to specified output encoding
+
+void RadxDwellCombine::_convertAllFields(RadxVol &vol)
+{
+
+  switch(_params.output_encoding) {
+    case Params::OUTPUT_ENCODING_FLOAT32:
+      vol.convertToFl32();
+      return;
+    case Params::OUTPUT_ENCODING_INT32:
+      vol.convertToSi32();
+      return;
+    case Params::OUTPUT_ENCODING_INT16:
+      vol.convertToSi16();
+      return;
+    case Params::OUTPUT_ENCODING_INT08:
+      vol.convertToSi08();
+      return;
+    case Params::OUTPUT_ENCODING_ASIS:
+    default:
+      return;
+  }
+
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1091,790 +1414,6 @@ RadxField::StatsMethod_t
 }
 
 
-//////////////////////////////////////////////////
-// Run in FMQ mode
-
-int RadxDwellCombine::_runFmq()
-{
-
-  // Instantiate and initialize the input DsRadar queue and message
-  
-  if (_params.seek_to_end_of_input_fmq) {
-    if (_inputFmq.init(_params.input_fmq_url, _progName.c_str(),
-                       _params.debug >= Params::DEBUG_VERBOSE,
-                       DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url);
-      return -1;
-    }
-  } else {
-    if (_inputFmq.init(_params.input_fmq_url, _progName.c_str(),
-                       _params.debug >= Params::DEBUG_VERBOSE,
-                       DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url);
-      return -1;
-    }
-  }
-
-  // create the output FMQ
-  
-  if (_outputFmq.init(_params.output_fmq_url,
-                      _progName.c_str(),
-                      _params.debug >= Params::DEBUG_VERBOSE,
-                      DsFmq::READ_WRITE, DsFmq::END,
-                      _params.output_fmq_compress,
-                      _params.output_fmq_n_slots,
-                      _params.output_fmq_buf_size)) {
-    cerr << "WARNING - trying to create new fmq" << endl;
-    if (_outputFmq.init(_params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        DsFmq::CREATE, DsFmq::START,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_n_slots,
-                        _params.output_fmq_buf_size)) {
-      cerr << "ERROR - Radx2Dsr" << endl;
-      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
-      return -1;
-    }
-  }
-  
-  if (_params.output_fmq_compress) {
-    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
-  }
-  
-  if (_params.output_fmq_write_blocking) {
-    _outputFmq.setBlockingWrite();
-  }
-  if (_params.output_fmq_data_mapper_report_interval > 0) {
-    _outputFmq.setRegisterWithDmap
-      (true, _params.output_fmq_data_mapper_report_interval);
-  }
-
-  // read messages from the queue and process them
-  
-  _nRaysRead = 0;
-  _nRaysWritten = 0;
-  _needWriteParams = false;
-  RadxTime prevDwellRayTime;
-  int iret = 0;
-  while (true) {
-
-    PMU_auto_register("Reading FMQ");
-
-    bool gotMsg = false;
-    if (_readFmqMsg(gotMsg) || !gotMsg) {
-      umsleep(100);
-      continue;
-    }
-
-    // pass message through if not related to beam
-    
-    if (!(_inputContents & DsRadarMsg::RADAR_BEAM) &&
-        !(_inputContents & DsRadarMsg::RADAR_PARAMS) &&
-        !(_inputContents & DsRadarMsg::PLATFORM_GEOREF)) {
-      if(_outputFmq.putDsMsg(_inputMsg, _inputContents)) {
-        cerr << "ERROR - RadxDwellCombine::_runFmq()" << endl;
-        cerr << "  Cannot copy message to output queue" << endl;
-        cerr << "  URL: " << _params.output_fmq_url << endl;
-        return -1;
-      }
-    }
-
-    // combine rays if combined time exceeds specified dwell
-
-    const vector<RadxRay *> &raysDwell = _dwellVol.getRays();
-    size_t nRaysDwell = raysDwell.size();
-    if (nRaysDwell > 1) {
-      
-      _dwellStartTime = raysDwell[0]->getRadxTime();
-      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
-      double dwellSecs = (_dwellEndTime - _dwellStartTime);
-      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
-      
-      if (dwellSecs >= _params.dwell_time_secs) {
-
-        // dwell time exceeded, so compute dwell ray and add to volume
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
-        }
-        RadxRay *dwellRay = _dwellVol.computeFieldStats(_globalMethod,
-                                                        _namedMethods);
-
-        RadxTime dwellRayTime(dwellRay->getRadxTime());
-        double deltaSecs = dwellRayTime - prevDwellRayTime;
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          if (deltaSecs < _params.dwell_time_secs * 0.8 ||
-              deltaSecs > _params.dwell_time_secs * 1.2) {
-            cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
-                 << dwellRay->getRadxTime().asString(3) << ", "
-                 << nRaysDwell << ", "
-                 << deltaSecs << endl;
-          }
-        }
-
-        prevDwellRayTime = dwellRayTime;
-        
-        // write params if needed
-        if (_needWriteParams) {
-          if (_writeParams(dwellRay)) {
-            return -1; 
-          }
-          _needWriteParams = false;
-        }
-
-        // write out ray
-
-        _writeRay(dwellRay);
-
-        // clean up
-
-        RadxRay::deleteIfUnused(dwellRay);
-        _dwellVol.clearRays();
-        _georefs.clear();
-
-      }
-
-    } // if (nRaysDwell > 1)
-
-  } // while (true)
-  
-  return iret;
-
-}
-
-////////////////////////////////////////////////////////////////////
-// _readFmqMsg()
-//
-// Read a message from the queue, setting the flags about ray_data
-// and _endOfVolume appropriately.
-//
-// Sets gotMsg to true if message was read
-
-int RadxDwellCombine::_readFmqMsg(bool &gotMsg) 
-  
-{
-  
-  PMU_auto_register("Reading radar queue");
-  
-  _inputContents = 0;
-  if (_inputFmq.getDsMsg(_inputMsg, &_inputContents, &gotMsg)) {
-    return -1;
-  }
-  if (!gotMsg) {
-    return -1;
-  }
-  
-  // set radar parameters if avaliable
-  
-  if (_inputContents & DsRadarMsg::RADAR_PARAMS) {
-    _loadRadarParams();
-    _needWriteParams = true;
-  }
-
-  // If we have radar and field params, and there is good ray data,
-  
-  RadxRay *ray = NULL;
-  if (_inputContents & DsRadarMsg::RADAR_BEAM) {
-
-    if (_inputMsg.allParamsSet()) {
-      
-      _nRaysRead++;
-      
-      // crete ray from ray message
-      
-      ray = _createInputRay();
-      
-      // debug print
-      
-      if (_params.debug) {
-        if ((_nRaysRead > 0) && (_nRaysRead % 360 == 0)) {
-          cerr << "==>>    read nRays, latest time, el, az: "
-               << _nRaysRead << ", "
-               << utimstr(ray->getTimeSecs()) << ", "
-               << ray->getElevationDeg() << ", "
-               << ray->getAzimuthDeg() << endl;
-        }
-      }
-      
-      // add the ray to the volume as appropriate
-      
-      _dwellVol.addRay(ray);
-      
-    }
-    
-  } // if (_inputContents ...
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////
-// load radar params
-
-void RadxDwellCombine::_loadRadarParams()
-
-{
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "=========>> got RADAR_PARAMS" << endl;
-  }
-
-  _rparams = _inputMsg.getRadarParams();
-  
-  _dwellVol.setInstrumentName(_rparams.radarName);
-  _dwellVol.setScanName(_rparams.scanTypeName);
-  
-  switch (_rparams.radarType) {
-    case DS_RADAR_AIRBORNE_FORE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_AFT_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_TAIL_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_LOWER_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_UPPER_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_ROOF);
-      break;
-    }
-    case DS_RADAR_SHIPBORNE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
-      break;
-    }
-    case DS_RADAR_VEHICLE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
-      break;
-    }
-    case DS_RADAR_GROUND_TYPE:
-    default:{
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-    }
-  }
-  
-  _dwellVol.setLocation(_rparams.latitude,
-                        _rparams.longitude,
-                        _rparams.altitude);
-
-  _dwellVol.addWavelengthCm(_rparams.wavelength);
-  _dwellVol.setRadarBeamWidthDegH(_rparams.horizBeamWidth);
-  _dwellVol.setRadarBeamWidthDegV(_rparams.vertBeamWidth);
-
-}
-
-////////////////////////////////////////////////////////////////////
-// add an input ray from an incoming message
-
-RadxRay *RadxDwellCombine::_createInputRay()
-
-{
-
-  // input data
-
-  const DsRadarBeam &rbeam = _inputMsg.getRadarBeam();
-  const DsRadarParams &rparams = _inputMsg.getRadarParams();
-  const vector<DsFieldParams *> &fparamsVec = _inputMsg.getFieldParams();
-
-  // create new ray
-
-  RadxRay *ray = new RadxRay;
-
-  // set ray properties
-
-  ray->setTime(rbeam.dataTime, rbeam.nanoSecs);
-  ray->setVolumeNumber(rbeam.volumeNum);
-  ray->setSweepNumber(rbeam.tiltNum);
-
-  int scanMode = rparams.scanMode;
-  if (rbeam.scanMode > 0) {
-    scanMode = rbeam.scanMode;
-  } else {
-    scanMode = rparams.scanMode;
-  }
-
-  ray->setSweepMode(_getRadxSweepMode(scanMode));
-  ray->setPolarizationMode(_getRadxPolarizationMode(rparams.polarization));
-  ray->setPrtMode(_getRadxPrtMode(rparams.prfMode));
-  ray->setFollowMode(_getRadxFollowMode(rparams.followMode));
-
-  double elev = rbeam.elevation;
-  if (elev > 180) {
-    elev -= 360.0;
-  }
-  ray->setElevationDeg(elev);
-
-  double az = rbeam.azimuth;
-  if (az < 0) {
-    az += 360.0;
-  }
-  ray->setAzimuthDeg(az);
-
-  // range geometry
-
-  int nGates = rparams.numGates;
-  ray->setRangeGeom(rparams.startRange, rparams.gateSpacing);
-
-  if (scanMode == DS_RADAR_RHI_MODE ||
-      scanMode == DS_RADAR_EL_SURV_MODE) {
-    ray->setFixedAngleDeg(rbeam.targetAz);
-  } else {
-    ray->setFixedAngleDeg(rbeam.targetElev);
-  }
-
-  ray->setIsIndexed(rbeam.beamIsIndexed);
-  ray->setAngleResDeg(rbeam.angularResolution);
-  ray->setAntennaTransition(rbeam.antennaTransition);
-  ray->setNSamples(rparams.samplesPerBeam);
-  
-  ray->setPulseWidthUsec(rparams.pulseWidth);
-  double prt = 1.0 / rparams.pulseRepFreq;
-  ray->setPrtSec(prt);
-  ray->setPrtRatio(1.0);
-  ray->setNyquistMps(rparams.unambigVelocity);
-
-  ray->setUnambigRangeKm(Radx::missingMetaDouble);
-  ray->setUnambigRange();
-
-  ray->setMeasXmitPowerDbmH(rbeam.measXmitPowerDbmH);
-  ray->setMeasXmitPowerDbmV(rbeam.measXmitPowerDbmV);
-
-  // platform georeference
-  
-  if (_inputContents & DsRadarMsg::PLATFORM_GEOREF) {
-    const DsPlatformGeoref &platformGeoref = _inputMsg.getPlatformGeoref();
-    const ds_iwrf_platform_georef_t &dsGeoref = platformGeoref.getGeoref();
-    _georefs.push_back(platformGeoref);
-    RadxGeoref georef;
-    georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
-    georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
-    georef.setLongitude(dsGeoref.longitude);
-    georef.setLatitude(dsGeoref.latitude);
-    georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);
-    georef.setAltitudeKmAgl(dsGeoref.altitude_agl_km);
-    georef.setEwVelocity(dsGeoref.ew_velocity_mps);
-    georef.setNsVelocity(dsGeoref.ns_velocity_mps);
-    georef.setVertVelocity(dsGeoref.vert_velocity_mps);
-    georef.setHeading(dsGeoref.heading_deg);
-    georef.setRoll(dsGeoref.roll_deg);
-    georef.setPitch(dsGeoref.pitch_deg);
-    georef.setDrift(dsGeoref.drift_angle_deg);
-    georef.setRotation(dsGeoref.rotation_angle_deg);
-    georef.setTilt(dsGeoref.tilt_angle_deg);
-    georef.setEwWind(dsGeoref.ew_horiz_wind_mps);
-    georef.setNsWind(dsGeoref.ns_horiz_wind_mps);
-    georef.setVertWind(dsGeoref.vert_wind_mps);
-    georef.setHeadingRate(dsGeoref.heading_rate_dps);
-    georef.setPitchRate(dsGeoref.pitch_rate_dps);
-    georef.setDriveAngle1(dsGeoref.drive_angle_1_deg);
-    georef.setDriveAngle2(dsGeoref.drive_angle_2_deg);
-    ray->clearGeoref();
-    ray->setGeoref(georef);
-  }
-
-  // load up fields
-
-  int byteWidth = rbeam.byteWidth;
-  
-  for (size_t iparam = 0; iparam < fparamsVec.size(); iparam++) {
-
-    // is this an output field or censoring field?
-
-    const DsFieldParams &fparams = *fparamsVec[iparam];
-    string fieldName = fparams.name;
-    if (_params.set_output_fields && !_isOutputField(fieldName)) {
-      continue;
-    }
-
-    // convert to floats
-    
-    Radx::fl32 *fdata = new Radx::fl32[nGates];
-
-    if (byteWidth == sizeof(fl32)) {
-
-      fl32 *inData = (fl32 *) rbeam.data() + iparam;
-      fl32 inMissing = (fl32) fparams.missingDataValue;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        fl32 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData;
-        }
-      } // igate
-
-    } else if (byteWidth == sizeof(ui16)) {
-
-      ui16 *inData = (ui16 *) rbeam.data() + iparam;
-      ui16 inMissing = (ui16) fparams.missingDataValue;
-      double scale = fparams.scale;
-      double bias = fparams.bias;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        ui16 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData * scale + bias;
-        }
-      } // igate
-
-    } else {
-
-      // byte width 1
-
-      ui08 *inData = (ui08 *) rbeam.data() + iparam;
-      ui08 inMissing = (ui08) fparams.missingDataValue;
-      double scale = fparams.scale;
-      double bias = fparams.bias;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        ui08 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData * scale + bias;
-        }
-      } // igate
-
-    } // if (byteWidth == 4)
-
-    RadxField *field = new RadxField(fparams.name, fparams.units);
-    field->copyRangeGeom(*ray);
-    field->setTypeFl32(Radx::missingFl32);
-    field->addDataFl32(nGates, fdata);
-
-    ray->addField(field);
-
-    delete[] fdata;
-
-  } // iparam
-
-  return ray;
-
-}
-
-//////////////////////////////////////////////////
-// write radar and field parameters
-
-int RadxDwellCombine::_writeParams(const RadxRay *ray)
-
-{
-
-  // radar parameters
-  
-  DsRadarMsg msg;
-  DsRadarParams &rparams = msg.getRadarParams();
-  rparams = _rparams;
-  rparams.numFields = ray->getFields().size();
-  
-  // field parameters - all fields are fl32
-  
-  vector<DsFieldParams* > &fieldParams = msg.getFieldParams();
-  vector<RadxField *> flds = ray->getFields();
-  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-    
-    const RadxField &fld = *flds[ifield];
-    double dsScale = 1.0, dsBias = 0.0;
-    int dsMissing = (int) floor(fld.getMissingFl32() + 0.5);
-    
-    DsFieldParams *fParams = new DsFieldParams(fld.getName().c_str(),
-                                               fld.getUnits().c_str(),
-                                               dsScale, dsBias, sizeof(fl32),
-                                               dsMissing);
-    fieldParams.push_back(fParams);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      fParams->print(cerr);
-    }
-
-  } // ifield
-
-  // put params
-  
-  int content = DsRadarMsg::FIELD_PARAMS | DsRadarMsg::RADAR_PARAMS;
-  if(_outputFmq.putDsMsg(msg, content)) {
-    cerr << "ERROR - RadxDwellCombine::_writeParams()" << endl;
-    cerr << "  Cannot write field params to FMQ" << endl;
-    cerr << "  URL: " << _params.output_fmq_url << endl;
-    return -1;
-  }
-        
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// write ray
-
-int RadxDwellCombine::_writeRay(const RadxRay *ray)
-  
-{
-
-  // write params if needed
-
-  int nGates = ray->getNGates();
-  const vector<RadxField *> &fields = ray->getFields();
-  int nFields = ray->getFields().size();
-  int nPoints = nGates * nFields;
-  
-  // meta-data
-  
-  DsRadarMsg msg;
-  DsRadarBeam &beam = msg.getRadarBeam();
-
-  beam.dataTime = ray->getTimeSecs();
-  beam.nanoSecs = (int) (ray->getNanoSecs() + 0.5);
-  beam.referenceTime = 0;
-
-  beam.byteWidth = sizeof(fl32); // fl32
-
-  beam.volumeNum = ray->getVolumeNumber();
-  beam.tiltNum = ray->getSweepNumber();
-  Radx::SweepMode_t sweepMode = ray->getSweepMode();
-  beam.scanMode = _getDsScanMode(sweepMode);
-  beam.antennaTransition = ray->getAntennaTransition();
-  
-  beam.azimuth = ray->getAzimuthDeg();
-  beam.elevation = ray->getElevationDeg();
-  
-  if (sweepMode == Radx::SWEEP_MODE_RHI ||
-      sweepMode == Radx::SWEEP_MODE_MANUAL_RHI) {
-    beam.targetAz = ray->getFixedAngleDeg();
-  } else {
-    beam.targetElev = ray->getFixedAngleDeg();
-  }
-
-  beam.beamIsIndexed = ray->getIsIndexed();
-  beam.angularResolution = ray->getAngleResDeg();
-  beam.nSamples = ray->getNSamples();
-
-  beam.measXmitPowerDbmH = ray->getMeasXmitPowerDbmH();
-  beam.measXmitPowerDbmV = ray->getMeasXmitPowerDbmV();
-
-  // 4-byte floats
-  
-  fl32 *data = new fl32[nPoints];
-  for (int ifield = 0; ifield < nFields; ifield++) {
-    fl32 *dd = data + ifield;
-    const RadxField *fld = fields[ifield];
-    const Radx::fl32 *fd = (Radx::fl32 *) fld->getData();
-    if (fd == NULL) {
-      cerr << "ERROR - Radx2Dsr::_writeBeam" << endl;
-      cerr << "  NULL data pointer, field name, elev, az: "
-           << fld->getName() << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
-      delete[] data;
-      return -1;
-    }
-    for (int igate = 0; igate < nGates; igate++, dd += nFields, fd++) {
-      *dd = *fd;
-    }
-  }
-  beam.loadData(data, nPoints * sizeof(fl32), sizeof(fl32));
-  delete[] data;
-    
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    beam.print(cerr);
-  }
-  
-  // add georeference if applicable
-
-  int contents = (int) DsRadarMsg::RADAR_BEAM;
-  if (_georefs.size() > 0) {
-    DsPlatformGeoref &georef = msg.getPlatformGeoref();
-    // use mid georef
-    georef = _georefs[_georefs.size() / 2];
-    contents |= DsRadarMsg::PLATFORM_GEOREF;
-  }
-    
-  // put beam
-  
-  if(_outputFmq.putDsMsg(msg, contents)) {
-    cerr << "ERROR - RadxDwellCombine::_writeBeam()" << endl;
-    cerr << "  Cannot write beam to FMQ" << endl;
-    cerr << "  URL: " << _params.output_fmq_url << endl;
-    return -1;
-  }
-
-  // debug print
-  
-  _nRaysWritten++;
-  if (_params.debug) {
-    if (_nRaysWritten % 100 == 0) {
-      cerr << "====>> wrote nRays, latest time, el, az: "
-           << _nRaysWritten << ", "
-           << utimstr(ray->getTimeSecs()) << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
-    }
-  }
-  
-  return 0;
-
-}
-
-////////////////////////////
-// is this an output field?
-
-bool RadxDwellCombine::_isOutputField(const string &name)
-
-{
-
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-    string inputFieldName = _params._output_fields[ifield].input_field_name;
-    if (name == inputFieldName) {
-      return true;
-    }
-  }
-  
-  return false;
-
-}
-
-/////////////////////////////////////////////
-// convert from DsrRadar enums to Radx enums
-
-Radx::SweepMode_t RadxDwellCombine::_getRadxSweepMode(int dsrScanMode)
-
-{
-
-  switch (dsrScanMode) {
-    case DS_RADAR_SECTOR_MODE:
-    case DS_RADAR_FOLLOW_VEHICLE_MODE:
-      return Radx::SWEEP_MODE_SECTOR;
-    case DS_RADAR_COPLANE_MODE:
-      return Radx::SWEEP_MODE_COPLANE;
-    case DS_RADAR_RHI_MODE:
-      return Radx::SWEEP_MODE_RHI;
-    case DS_RADAR_VERTICAL_POINTING_MODE:
-      return Radx::SWEEP_MODE_VERTICAL_POINTING;
-    case DS_RADAR_MANUAL_MODE:
-      return Radx::SWEEP_MODE_POINTING;
-    case DS_RADAR_SURVEILLANCE_MODE:
-      return Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-    case DS_RADAR_EL_SURV_MODE:
-      return Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE;
-    case DS_RADAR_SUNSCAN_MODE:
-      return Radx::SWEEP_MODE_SUNSCAN;
-    case DS_RADAR_SUNSCAN_RHI_MODE:
-      return Radx::SWEEP_MODE_SUNSCAN_RHI;
-    case DS_RADAR_POINTING_MODE:
-      return Radx::SWEEP_MODE_POINTING;
-    default:
-      return Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-  }
-}
-
-Radx::PolarizationMode_t RadxDwellCombine::_getRadxPolarizationMode(int dsrPolMode)
-
-{
-  switch (dsrPolMode) {
-    case DS_POLARIZATION_HORIZ_TYPE:
-      return Radx::POL_MODE_HORIZONTAL;
-    case DS_POLARIZATION_VERT_TYPE:
-      return Radx::POL_MODE_VERTICAL;
-    case DS_POLARIZATION_DUAL_TYPE:
-      return Radx::POL_MODE_HV_SIM;
-    case DS_POLARIZATION_DUAL_HV_ALT:
-      return Radx::POL_MODE_HV_ALT;
-    case DS_POLARIZATION_DUAL_HV_SIM:
-      return Radx::POL_MODE_HV_SIM;
-    case DS_POLARIZATION_RIGHT_CIRC_TYPE:
-    case DS_POLARIZATION_LEFT_CIRC_TYPE:
-      return Radx::POL_MODE_CIRCULAR;
-    case DS_POLARIZATION_ELLIPTICAL_TYPE:
-    default:
-      return Radx::POL_MODE_HORIZONTAL;
-  }
-}
-
-Radx::FollowMode_t RadxDwellCombine::_getRadxFollowMode(int dsrMode)
-
-{
-  switch (dsrMode) {
-    case DS_RADAR_FOLLOW_MODE_SUN:
-      return Radx::FOLLOW_MODE_SUN;
-    case DS_RADAR_FOLLOW_MODE_VEHICLE:
-      return Radx::FOLLOW_MODE_VEHICLE;
-    case DS_RADAR_FOLLOW_MODE_AIRCRAFT:
-      return Radx::FOLLOW_MODE_AIRCRAFT;
-    case DS_RADAR_FOLLOW_MODE_TARGET:
-      return Radx::FOLLOW_MODE_TARGET;
-    case DS_RADAR_FOLLOW_MODE_MANUAL:
-      return Radx::FOLLOW_MODE_MANUAL;
-    default:
-      return Radx::FOLLOW_MODE_NONE;
-  }
-}
-
-Radx::PrtMode_t RadxDwellCombine::_getRadxPrtMode(int dsrMode)
-
-{
-  switch (dsrMode) {
-    case DS_RADAR_PRF_MODE_FIXED:
-      return Radx::PRT_MODE_FIXED;
-    case DS_RADAR_PRF_MODE_STAGGERED_2_3:
-    case DS_RADAR_PRF_MODE_STAGGERED_3_4:
-    case DS_RADAR_PRF_MODE_STAGGERED_4_5:
-      return Radx::PRT_MODE_STAGGERED;
-    default:
-      return Radx::PRT_MODE_FIXED;
-  }
-}
-
-//////////////////////////////////////////////////
-// get Dsr enums from Radx enums
-
-int RadxDwellCombine::_getDsScanMode(Radx::SweepMode_t mode)
-
-{
-  switch (mode) {
-    case Radx::SWEEP_MODE_SECTOR:
-      return DS_RADAR_SECTOR_MODE;
-    case Radx::SWEEP_MODE_COPLANE:
-      return DS_RADAR_COPLANE_MODE;
-    case Radx::SWEEP_MODE_RHI:
-      return DS_RADAR_RHI_MODE;
-    case Radx::SWEEP_MODE_VERTICAL_POINTING:
-      return DS_RADAR_VERTICAL_POINTING_MODE;
-    case Radx::SWEEP_MODE_IDLE:
-      return DS_RADAR_IDLE_MODE;
-    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE:
-      return DS_RADAR_SURVEILLANCE_MODE;
-    case Radx::SWEEP_MODE_SUNSCAN:
-      return DS_RADAR_SUNSCAN_MODE;
-    case Radx::SWEEP_MODE_POINTING:
-      return DS_RADAR_POINTING_MODE;
-    case Radx::SWEEP_MODE_MANUAL_PPI:
-      return DS_RADAR_MANUAL_MODE;
-    case Radx::SWEEP_MODE_MANUAL_RHI:
-      return DS_RADAR_MANUAL_MODE;
-    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
-    default:
-      return DS_RADAR_SURVEILLANCE_MODE;
-  }
-}
-
 ////////////////////////////////////////////////////////////////////
 // censor fields in vol
 
@@ -2083,3 +1622,19 @@ void RadxDwellCombine::_censorRay(RadxRay *ray)
 
 }
 
+////////////////////////////////////////////////////////
+// modify platform metadata
+
+void RadxDwellCombine::_setPlatformMetadata(RadxPlatform &platform)
+  
+{
+
+  if (_params.override_platform_type) {
+    platform.setPlatformType((Radx::PlatformType_t) _params.platform_type);
+  }
+
+  if (_params.override_primary_axis) {
+    platform.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+  }
+
+}

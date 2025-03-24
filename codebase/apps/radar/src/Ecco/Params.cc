@@ -708,18 +708,6 @@
     tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/DEM/uncompressed");
     tt++;
     
-    // Parameter 'water_layer_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("water_layer_dir");
-    tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
-    tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
-    tt->val_offset = (char *) &water_layer_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
-    tt++;
-    
     // Parameter 'check_adjacent_grid_cells'
     // ctype is 'tdrp_bool_t'
     
@@ -742,6 +730,54 @@
     tt->help = tdrpStrDup("We search around the selected point by this distance.");
     tt->val_offset = (char *) &search_margin_km - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'add_water_layer'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_water_layer");
+    tt->descr = tdrpStrDup("Add water layer data to output file.");
+    tt->help = tdrpStrDup("If true, we read in the water layer for each grid location. This is a 1 or 0. It is 0 for land and 1 for water.");
+    tt->val_offset = (char *) &add_water_layer - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'water_layer_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("water_layer_dir");
+    tt->descr = tdrpStrDup("Directory for water layer data in netCDF format.");
+    tt->help = tdrpStrDup("These files match the SRTM30 data set in spatial extent. The data resolution is 30 arc-seconds, or 120 per degree in lat/lon. The data is in bytes: 1 for water, 0 for not water.");
+    tt->val_offset = (char *) &water_layer_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/terrain/WATER");
+    tt++;
+    
+    // Parameter 'min_ht_km_agl_for_mid'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_mid");
+    tt->descr = tdrpStrDup("Minimum height above ground for mid-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_mid - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'min_ht_km_agl_for_deep'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_deep");
+    tt->descr = tdrpStrDup("Minimum height above ground for deep-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_deep - &_start_;
+    tt->single_val.d = 4;
     tt++;
     
     // Parameter 'Comment 4'
@@ -1205,7 +1241,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("\n  The partition field has the following values:\n    CATEGORY_MISSING = 0\n    CATEGORY_STRATIFORM_LOW = 14\n    CATEGORY_STRATIFORM = 15\n    CATEGORY_STRATIFORM_MID = 16\n    CATEGORY_STRATIFORM_HIGH = 18\n    CATEGORY_MIXED = 25\n    CATEGORY_CONVECTIVE_ELEVATED = 32\n    CATEGORY_CONVECTIVE_SHALLOW = 34\n    CATEGORY_CONVECTIVE = 35\n    CATEGORY_CONVECTIVE_MID = 36\n    CATEGORY_CONVECTIVE_DEEP = 38");
     tt++;
     
     // Parameter 'output_url'

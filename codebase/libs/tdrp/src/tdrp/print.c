@@ -679,7 +679,7 @@ char *sprintf_val(int ptype, const enum_def_t *enum_def, const tdrpVal_t *val)
     else if ( val->d == DBL_MAX )
        strcpy(str, MAX_KEYWORD);
     else  
-       sprintf(str, "%g", val->d);
+       sprintf(str, "%.9g", val->d);
     return (str);
     break;
     

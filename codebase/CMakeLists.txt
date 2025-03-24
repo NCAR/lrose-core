@@ -1,6 +1,6 @@
 ###############################################################
 #
-# Top-level CMakeLists file for lrose-core
+# Codebase-level CMakeLists file for lrose-core
 #
 # dir: lrose-core/codebase
 #
@@ -8,7 +8,7 @@
 #
 ###############################################################
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.7)
 
 project (lrose-core)
 
@@ -41,10 +41,25 @@ set(PACKAGE "LROSE-CORE" CACHE STRING "")
 # Finding pkg-config
 find_package(PkgConfig REQUIRED)
 
+set(MINIFORGE_ROOT "$ENV{HOME}/miniforge3")
+if (DEFINED MINIFORGE_DIR)
+  set(MINIFORGE_ROOT "${MINIFORGE_DIR}")
+endif()
+
+if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system includes and libs, use mamba dirs
+  set(MAMBA_INCLUDE_PATH ${MINIFORGE_ROOT}/include)
+  set(MAMBA_LIBRARY_PATH ${MINIFORGE_ROOT}/lib)
+  set(QT_HOST_PATH ${MINIFORGE_ROOT})
+  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
+  set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/usr;/usr/local;/usr/lib64;/lib;/lib64;/opt/homebrew")
+endif(DEFINED MAMBA_BUILD)
+
 find_package (X11)
 if (DEFINED X11_X11_LIB)
   get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)
 endif()
+
 # Finding Qt
 
 find_package (Qt6 COMPONENTS Core QUIET)
@@ -58,16 +73,29 @@ elseif (Qt6_FOUND)
 else ()
   message(FATAL_ERROR, "Qt not found.")
 endif(Qt5_FOUND)
+
 if(APPLE)
-  if (Qt5_FOUND)
-    find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
-  elseif (Qt6_FOUND)
-    find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
-  endif(Qt5_FOUND)
+  if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
+    if (Qt5_FOUND)
+      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+    elseif (Qt6_FOUND)
+      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+    endif(Qt5_FOUND)
+  else ()
+    if (Qt5_FOUND)
+      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
+    elseif (Qt6_FOUND)
+      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
+    endif(Qt5_FOUND)
+  endif(DEFINED MAMBA_BUILD)
 endif(APPLE)
+
 find_package (HDF5)
+
 # find_package (NETCDF)
 # find_package (LROSE)
+
 if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)
   get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)
 endif()
@@ -95,29 +123,38 @@ message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 
 function(makeTdrpParams)
 
-# Add a custom generator for TDRP Params.cc and Params.hh files
-# from their associated paramdef.<app> file
+  # Add a custom generator for TDRP Params.cc and Params.hh files
+  # from their associated paramdef.<app> file
 
-set(TDRP_EXECUTABLE ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen)
-#find_program(TDRP_EXECUTABLE NAMES tdrp_gen PATHS ${CMAKE_INSTALL_PREFIX} /usr/local/lrose PATH_SUFFIXES bin)
+  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen)
 
-add_custom_command (
-OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
-DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
-COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ${TDRP_EXECUTABLE}
--c++
--f paramdef.${PROJECT_NAME}
--prog ${PROJECT_NAME}
--add_ncar_copyright
-COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
-)
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
+
+    # Run tdrp_gen, explicitly using the one from this build instead of
+    # any version that may be in the user's path.
+    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/codebase/libs/tdrp/src &&
+      cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
+        -c++
+        -f paramdef.${PROJECT_NAME}
+        -prog ${PROJECT_NAME}
+        -add_ncar_copyright
+    COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
+  )
 
 endFunction()
 
 enable_testing()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")
+if (Qt5_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")
+else()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 ")
+endif(Qt5_FOUND)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")
 
 # Set RPATH so that executablefinds lrose libraries without needing LD_LIBRARY_PATH

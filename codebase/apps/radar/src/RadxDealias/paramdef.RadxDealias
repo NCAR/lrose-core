@@ -9,10 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_text = "RadxDealias reads input radar data from a file, dealiases the
- velocity data, and writes the results to a file.  The output file contains
- a new field that contains the unfolded velocity. The unfolded velocity
- field has the same name with _UNF appended. ";
+  p_header = "RadxDealias reads input radar data from a file, dealiases the velocity data, and writes the results to a file.  The output file contains a new field that contains the unfolded velocity. The unfolded velocity field has the same name with _UNF appended. ";
 }
 
 commentdef {

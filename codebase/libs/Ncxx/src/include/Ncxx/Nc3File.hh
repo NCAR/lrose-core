@@ -224,6 +224,7 @@ public:
   virtual ncbyte as_ncbyte( long n ) const;    // nth value as an unsgnd char
   virtual char as_char( long n ) const;        // nth value as char
   virtual short as_short( long n ) const;      // nth value as short
+  virtual ushort as_ushort( long n ) const;    // nth value as ushort
   virtual int as_int( long n ) const;	       // nth value as int
   virtual int64_t as_int64( long n ) const;    // nth value as int64
   virtual int as_nclong( long n ) const;       // nth value as nclong (deprecated)
@@ -272,6 +273,8 @@ public:
                long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
   Nc3Bool put( const short* vals,
                long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
+  Nc3Bool put( const ushort* vals,
+               long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
   Nc3Bool put( const int* vals,
                long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
   Nc3Bool put( const long* vals,
@@ -286,6 +289,7 @@ public:
   Nc3Bool put( const ncbyte* vals, const long* counts );
   Nc3Bool put( const char* vals, const long* counts );
   Nc3Bool put( const short* vals, const long* counts );
+  Nc3Bool put( const ushort* vals, const long* counts );
   Nc3Bool put( const int* vals, const long* counts );
   Nc3Bool put( const long* vals, const long* counts );
   Nc3Bool put( const float* vals, const long* counts );
@@ -301,6 +305,8 @@ public:
                long c2=0, long c3=0, long c4=0 ) const;
   Nc3Bool get( short* vals, long c0=0, long c1=0,
                long c2=0, long c3=0, long c4=0 ) const;
+  Nc3Bool get( ushort* vals, long c0=0, long c1=0,
+               long c2=0, long c3=0, long c4=0 ) const;
   Nc3Bool get( int* vals, long c0=0, long c1=0,
                long c2=0, long c3=0, long c4=0 ) const;
   Nc3Bool get( long* vals, long c0=0, long c1=0,
@@ -315,6 +321,7 @@ public:
   Nc3Bool get( ncbyte* vals, const long* counts ) const;
   Nc3Bool get( char* vals, const long* counts ) const;
   Nc3Bool get( short* vals, const long* counts ) const;
+  Nc3Bool get( ushort* vals, const long* counts ) const;
   Nc3Bool get( int* vals, const long* counts ) const;
   Nc3Bool get( long* vals, const long* counts ) const;
   Nc3Bool get( float* vals, const long* counts ) const;

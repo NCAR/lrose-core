@@ -177,7 +177,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       } else {
 	OK = false;
       }
-	
+
+    } else {
+
+      tdrpCheckArgAndWarn(argv[i], stderr);
+      
     }
     
   } // i
@@ -198,6 +202,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
 void Args::_usage(ostream &out)
 {
+
+  out << endl;
+  out << "HsrlMon read UW HSRL raw data files in NetCDF format, extracts data for monitoring, and then writes out text files summarizing the monitoring information. This is intended for transmission to the field catalog." << endl;
+  out << endl;
 
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"

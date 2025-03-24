@@ -122,6 +122,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
       
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -136,6 +141,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
 void Args::_usage(string &prog_name, ostream &out)
 {
+
+  out << endl;
+  out << "TerrainHtServer reads requests from a client, providing a lat/lon position. It returns the terrain height, and whether the location is water or not. XmlRpc protool is used for communication." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

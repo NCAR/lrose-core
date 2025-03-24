@@ -172,6 +172,11 @@ int Args::parse (int argc, char **argv,
 	iret = -1;
       }
 	
+    } else if (argv[i][0] == '-') {
+
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+
     } // if
     
   } // i
@@ -188,6 +193,10 @@ void Args::_usage(ostream &out,
 		  const string &prog_name)
 
 {
+
+  out << endl;
+  out << "QpeVerify reads precip accumulation measurements from SPDB, and compares these with radar-derived QPE values stored in gridded files." << endl;
+  out << endl;
 
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"

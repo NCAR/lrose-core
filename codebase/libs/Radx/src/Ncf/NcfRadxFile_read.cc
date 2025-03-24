@@ -1077,7 +1077,7 @@ int NcfRadxFile::_readRangeVariable()
   }
   _gateSpacingIsConstant = _remap.getGateSpacingIsConstant();
   _geom.setRangeGeom(_remap.getStartRangeKm(), _remap.getGateSpacingKm());
-  
+
   // get attributes and check for geometry
 
   double startRangeKm = Radx::missingMetaDouble;
@@ -1435,7 +1435,7 @@ int NcfRadxFile::_readSweepVariables()
     }
   }
 
-  for (size_t ii = 0; ii < startRayIndexes.size(); ii++) {
+  for (size_t ii = 0; ii < nSweepsInFile; ii++) {
     int startIndex = startRayIndexes[ii];
     int endIndex = endRayIndexes[ii];
     if (startIndex < 0) {
@@ -1454,7 +1454,23 @@ int NcfRadxFile::_readSweepVariables()
       _addErrInt("  sweep_start_ray_index: ", startIndex);
       _addErrInt("  sweep_end_ray_index: ", endIndex);
       iret = -1;
-    }  
+    }
+    if (startIndex >= (int) _nTimesInFile) {
+      cerr << "WARNING: sweep start index exceeds nTimes in file" << endl;
+      cerr << "  sweep index: " << ii << endl;
+      cerr << "  sweep_start_ray_index: " << startIndex << endl;
+      cerr << "  n_times: " << _nTimesInFile << endl;
+      cerr << "  setting start index to: " << _nTimesInFile - 1 << endl;
+      startRayIndexes[ii] = _nTimesInFile - 1;
+    }
+    if (endIndex >= (int) _nTimesInFile) {
+      cerr << "WARNING: sweep end index exceeds nTimes in file" << endl;
+      cerr << "  sweep index: " << ii << endl;
+      cerr << "  sweep_end_ray_index: " << endIndex << endl;
+      cerr << "  n_times: " << _nTimesInFile << endl;
+      cerr << "  setting end index to: " << _nTimesInFile - 1 << endl;
+      endRayIndexes[ii] = _nTimesInFile - 1;
+    }
   }
 
   // fixed angle
@@ -1831,7 +1847,10 @@ int NcfRadxFile::_checkSweepIndices()
   bool isRhi = false;
   if (sweepFirst->getSweepMode() == Radx::SWEEP_MODE_RHI  ||
       sweepFirst->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE ||
-      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_FORE_DOPPLER ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_AFT_DOPPLER ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_APAR_DUALPOL_RHI) {
     isRhi = true;
   }
 
@@ -2248,7 +2267,7 @@ int NcfRadxFile::_readRayNgatesAndOffsets()
     }
     return 0;
   }
-  
+
   // non-constant nGates - read in arrays
 
   int iret = 0;
@@ -2696,7 +2715,7 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
     // check the type
     Nc3Type ftype = var->type();
     if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int &&
-        ftype != nc3Short && ftype != nc3Byte) {
+        ftype != nc3Short && ftype != nc3Byte && ftype != nc3Ushort) {
       // not a valid type
       continue;
     }
@@ -2725,7 +2744,7 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
     }
 
     // set attributes
-    
+
     _readFieldAttributes(var,
                          _fieldName, _fieldUnits,
                          _fieldStandardName, _fieldLongName,
@@ -2776,6 +2795,13 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
       }
       case nc3Short: {
         if (_addSi16FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Ushort: {
+        if (_addUi16FieldToRays(var, _fieldName, _fieldUnits,
                                 _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
@@ -4203,6 +4229,114 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
   }
   
   delete[] data;
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add ui16 fields to _raysFromFile
+// The _raysFromFile array has previously been set up by _createRays()
+// The data will be converted to floats because unsigned shorts are
+// not supported by Radx classes.
+// Returns 0 on success, -1 on failure
+
+int NcfRadxFile::_addUi16FieldToRays(Nc3Var* var,
+                                     const string &name,
+                                     const string &units,
+                                     double scale, double offset,
+                                     bool isQualifier)
+  
+{
+
+  // get data from array
+
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::ui16 *udata = new Radx::ui16[nData];
+  int iret = 0;
+  if (isQualifier) {
+    iret = !var->get(udata, _nTimesInFile);
+  } else if (_nGatesVary) {
+    iret = !var->get(udata, _nPoints);
+  } else {
+    iret = !var->get(udata, _nTimesInFile, _nRangeInFile);
+  }
+  if (iret) {
+    delete[] udata;
+    return -1;
+  }
+  
+  // set missing value
+
+  int missingVal = 65535;
+  Nc3Att *missingValAtt = var->get_att(MISSING_VALUE);
+  if (missingValAtt != NULL) {
+    missingVal = missingValAtt->as_int(0);
+    delete missingValAtt;
+  } else {
+    missingValAtt = var->get_att(FILL_VALUE);
+    if (missingValAtt != NULL) {
+      missingVal = missingValAtt->as_int(0);
+      delete missingValAtt;
+    }
+  }
+
+  // convert unsigned shorts to floats
+  
+  Radx::fl32 *fdata = new Radx::fl32[nData];
+  Radx::fl32 missingFloat = Radx::missingFl32;
+  for (size_t ii = 0; ii < nData; ii++) {
+    int uval = udata[ii];
+    if (uval == missingVal) {
+      fdata[ii] = missingFloat;
+    } else {
+      fdata[ii] = udata[ii] * scale + offset;
+    }
+  }
+  delete[] udata;
+  
+  // load field on rays
+
+  for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
+    
+    size_t rayIndex = _raysToRead[ii].indexInFile;
+
+    if (rayIndex > _nTimesInFile - 1) {
+      cerr << "WARNING - NcfRadxFile::_addUi16FieldToRays" << endl;
+      cerr << "  Trying to access ray beyond data" << endl;
+      cerr << "  Trying to read ray index: " << rayIndex << endl;
+      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  skipping ...." << endl;
+      continue;
+    }
+    
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          fdata + rayIndex,
+                                          true, true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          fdata + startIndex,
+                                          true, false);
+    }
+
+    _setFieldAttributes(field, isQualifier);
+    field->copyRangeGeom(_geom);
+    
+  }
+  
+  delete[] fdata;
   return 0;
   
 }

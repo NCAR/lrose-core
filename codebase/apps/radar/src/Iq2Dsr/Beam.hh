@@ -480,6 +480,7 @@ private:
   void _kdpComputeBringi(bool isFiltered);
 
   void _computeVelocityCorrectedForVertMotion();
+  void _copyVelToCorrectedVel();
   void _computeVelocityCorrectedForMotion();
   double _correctForNyquist(double vel);
   void _computeWidthCorrectedForMotion();
@@ -543,6 +544,7 @@ private:
   double _getCorrectedEl(double el);
 
   void _correctAltitudeForEgm();
+  void _setGeorefForFixedMode();
 
 };
 

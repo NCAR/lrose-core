@@ -535,6 +535,7 @@ void RadxMon::_printSummary(const RadxRay *ray)
   switch(ray->getSweepMode()) {
     case Radx::SWEEP_MODE_SECTOR:
     case Radx::SWEEP_MODE_MANUAL_PPI:
+    case Radx::SWEEP_MODE_APAR_SECTOR_PPI:
       sprintf(scanModeStr, "SECT");
       break;
     case Radx::SWEEP_MODE_COPLANE:
@@ -542,7 +543,13 @@ void RadxMon::_printSummary(const RadxRay *ray)
       break;
     case Radx::SWEEP_MODE_RHI:
     case Radx::SWEEP_MODE_MANUAL_RHI:
+    case Radx::SWEEP_MODE_APAR_DUALPOL_RHI:
       sprintf(scanModeStr, " RHI");
+      isPpi = false;
+      break;
+    case Radx::SWEEP_MODE_APAR_FORE_DOPPLER:
+    case Radx::SWEEP_MODE_APAR_AFT_DOPPLER:
+      sprintf(scanModeStr, " ELDOP");
       isPpi = false;
       break;
     case Radx::SWEEP_MODE_VERTICAL_POINTING:

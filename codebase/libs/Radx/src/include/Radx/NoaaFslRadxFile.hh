@@ -179,10 +179,10 @@ private:
 
   // dimensions
 
-  Nc3Dim *_timeDim;  // "radial"
+  Nc3Dim *_radialDim;  // "radial"
   Nc3Dim *_rangeDim; // "bin"
   Nc3Dim *_sweepDim; // "sweep"
-
+  
   // global att
 
   string _title;
@@ -194,12 +194,14 @@ private:
   string _statusXml;
   
   // times
-  
+
+  double _startTime;
   double _refTimeSecsFile;
-  vector<time_t> _rayTimes;
+  vector<RadxTime> _rayTimes;
   vector<double> _dTimes;
   bool _rayTimesIncrease;
-  size_t _nTimesInFile;
+  size_t _nRadials;
+  size_t _nTimes;
   
   // range
 
@@ -221,6 +223,7 @@ private:
   double _latitudeDeg;
   double _longitudeDeg;
   double _altitudeM;
+  double _gndHtM;
   double _startRangeM;
   double _gateSpacingM;
   double _nyquistVel;
@@ -231,11 +234,19 @@ private:
   double _pulseWidthUsec;
   double _bandWidthHertz;
 
+  double _unambigRangeM;
+  double _azSpeedDegPerSec;
+  double _prfHigh;
+  double _prfLow;
+  double _wavelengthCm;
+  double _angleResDeg;
+  int _nSamples;
+  
   double _sqiThresh;
   double _logThresh;
   double _sigThresh;
   double _csrThresh;
-
+  
   int _dbtThreshFlag;
   int _dbzThreshFlag;
   int _velThreshFlag;
@@ -271,16 +282,10 @@ private:
   int _readScalars();
   int _readSweepAngles();
   int _readTimes();
-  void _clearRayVariables();
-  int _readRayVariables();
+  int _readAzEl();
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(const string &name, string &units,
-                  vector<double> &vals, bool required = true);
-  
-  Nc3Var* _getRayVar(const string &name, bool required);
-
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName);

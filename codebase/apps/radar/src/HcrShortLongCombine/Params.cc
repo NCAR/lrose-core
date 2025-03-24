@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.");
+    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -636,7 +636,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.");
+    tt->help = tdrpStrDup("\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 2;
@@ -647,30 +647,6 @@
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[1].val = ARCHIVE;
     tt->single_val.e = REALTIME;
-    tt++;
-    
-    // Parameter 'input_dir_short'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_short");
-    tt->descr = tdrpStrDup("Input directory short.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
-    tt->val_offset = (char *) &input_dir_short - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
-    tt++;
-    
-    // Parameter 'input_dir_long'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_long");
-    tt->descr = tdrpStrDup("Input directory long.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
-    tt->val_offset = (char *) &input_dir_long - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
     // Parameter 'input_fmq_url_short'
@@ -709,13 +685,191 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'input_dir_short'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir_short");
+    tt->descr = tdrpStrDup("Input directory short.");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
+    tt->val_offset = (char *) &input_dir_short - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
+    tt++;
+    
+    // Parameter 'input_dir_long'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir_long");
+    tt->descr = tdrpStrDup("Input directory long.");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
+    tt->val_offset = (char *) &input_dir_long - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("LIMIT RANGE?");
+    tt->comment_hdr = tdrpStrDup("OVERRIDE PLATFORM TYPE?");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_platform_type'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_platform_type");
+    tt->descr = tdrpStrDup("Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.");
+    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n\tPLATFORM_SHIP - radar is mounted on a ship\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n");
+    tt->val_offset = (char *) &override_platform_type - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'platform_type'
+    // ctype is '_platform_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("platform_type");
+    tt->descr = tdrpStrDup("Platform type.");
+    tt->help = tdrpStrDup("See override_platform_type.");
+    tt->val_offset = (char *) &platform_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("platform_type_t");
+    tt->enum_def.nfields = 11;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PLATFORM_FIXED");
+      tt->enum_def.fields[0].val = PLATFORM_FIXED;
+      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_VEHICLE");
+      tt->enum_def.fields[1].val = PLATFORM_VEHICLE;
+      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_SHIP");
+      tt->enum_def.fields[2].val = PLATFORM_SHIP;
+      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
+      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT_FORE;
+      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
+      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_AFT;
+      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
+      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_TAIL;
+      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
+      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_BELLY;
+      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
+      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_ROOF;
+      tt->enum_def.fields[8].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
+      tt->enum_def.fields[8].val = PLATFORM_AIRCRAFT_NOSE;
+      tt->enum_def.fields[9].name = tdrpStrDup("PLATFORM_SATELLITE_ORBIT");
+      tt->enum_def.fields[9].val = PLATFORM_SATELLITE_ORBIT;
+      tt->enum_def.fields[10].name = tdrpStrDup("PLATFORM_SATELLITE_GEOSTAT");
+      tt->enum_def.fields[10].val = PLATFORM_SATELLITE_GEOSTAT;
+    tt->single_val.e = PLATFORM_AIRCRAFT_FORE;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("OVERRIDE PRIMARY AXIS?");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_primary_axis'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_primary_axis");
+    tt->descr = tdrpStrDup("Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.");
+    tt->help = tdrpStrDup("\tPRIMARY_AXIS_Z - vertical\n\tPRIMARY_AXIS_Y - longitudinal axis of platform\n\tPRIMARY_AXIS_X - lateral axis of platform\n\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n\tPRIMARY_AXIS_X_PRIME - translated lateral\n");
+    tt->val_offset = (char *) &override_primary_axis - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'primary_axis'
+    // ctype is '_primary_axis_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("primary_axis");
+    tt->descr = tdrpStrDup("Platform type.");
+    tt->help = tdrpStrDup("See override_primary_axis.");
+    tt->val_offset = (char *) &primary_axis - &_start_;
+    tt->enum_def.name = tdrpStrDup("primary_axis_t");
+    tt->enum_def.nfields = 6;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PRIMARY_AXIS_Z");
+      tt->enum_def.fields[0].val = PRIMARY_AXIS_Z;
+      tt->enum_def.fields[1].name = tdrpStrDup("PRIMARY_AXIS_Y");
+      tt->enum_def.fields[1].val = PRIMARY_AXIS_Y;
+      tt->enum_def.fields[2].name = tdrpStrDup("PRIMARY_AXIS_X");
+      tt->enum_def.fields[2].val = PRIMARY_AXIS_X;
+      tt->enum_def.fields[3].name = tdrpStrDup("PRIMARY_AXIS_Z_PRIME");
+      tt->enum_def.fields[3].val = PRIMARY_AXIS_Z_PRIME;
+      tt->enum_def.fields[4].name = tdrpStrDup("PRIMARY_AXIS_Y_PRIME");
+      tt->enum_def.fields[4].val = PRIMARY_AXIS_Y_PRIME;
+      tt->enum_def.fields[5].name = tdrpStrDup("PRIMARY_AXIS_X_PRIME");
+      tt->enum_def.fields[5].val = PRIMARY_AXIS_X_PRIME;
+    tt->single_val.e = PRIMARY_AXIS_Y_PRIME;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("OVERRIDE SWEEP MODE?");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_sweep_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_sweep_mode");
+    tt->descr = tdrpStrDup("Option to override the sweep modes in the data.");
+    tt->help = tdrpStrDup("If TRUE, the mode for all sweeps is set to sweep_mode.");
+    tt->val_offset = (char *) &override_sweep_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sweep_mode'
+    // ctype is '_sweep_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("sweep_mode");
+    tt->descr = tdrpStrDup("Sweep mode for all sweeps.");
+    tt->help = tdrpStrDup("See override_sweep_mode.");
+    tt->val_offset = (char *) &sweep_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("sweep_mode_t");
+    tt->enum_def.nfields = 9;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SWEEP_MODE_SECTOR");
+      tt->enum_def.fields[0].val = SWEEP_MODE_SECTOR;
+      tt->enum_def.fields[1].name = tdrpStrDup("SWEEP_MODE_RHI");
+      tt->enum_def.fields[1].val = SWEEP_MODE_RHI;
+      tt->enum_def.fields[2].name = tdrpStrDup("SWEEP_MODE_VERTICAL_POINTING");
+      tt->enum_def.fields[2].val = SWEEP_MODE_VERTICAL_POINTING;
+      tt->enum_def.fields[3].name = tdrpStrDup("SWEEP_MODE_AZIMUTH_SURVEILLANCE");
+      tt->enum_def.fields[3].val = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+      tt->enum_def.fields[4].name = tdrpStrDup("SWEEP_MODE_ELEVATION_SURVEILLANCE");
+      tt->enum_def.fields[4].val = SWEEP_MODE_ELEVATION_SURVEILLANCE;
+      tt->enum_def.fields[5].name = tdrpStrDup("SWEEP_MODE_SUNSCAN");
+      tt->enum_def.fields[5].val = SWEEP_MODE_SUNSCAN;
+      tt->enum_def.fields[6].name = tdrpStrDup("SWEEP_MODE_POINTING");
+      tt->enum_def.fields[6].val = SWEEP_MODE_POINTING;
+      tt->enum_def.fields[7].name = tdrpStrDup("SWEEP_MODE_SUNSCAN_RHI");
+      tt->enum_def.fields[7].val = SWEEP_MODE_SUNSCAN_RHI;
+      tt->enum_def.fields[8].name = tdrpStrDup("SWEEP_MODE_ELECTRONIC_STEERING");
+      tt->enum_def.fields[8].val = SWEEP_MODE_ELECTRONIC_STEERING;
+    tt->single_val.e = SWEEP_MODE_VERTICAL_POINTING;
     tt++;
     
     // Parameter 'set_max_range'
@@ -742,13 +896,91 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE");
+    tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
+    tt++;
+    
+    // Parameter 'fixed_location_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("fixed_location_mode");
+    tt->descr = tdrpStrDup("Option to set fixed location in ground-based mode.");
+    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.");
+    tt->val_offset = (char *) &fixed_location_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fixed_radar_location'
+    // ctype is '_radar_location_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("fixed_radar_location");
+    tt->descr = tdrpStrDup("Radar location if override is set true.");
+    tt->help = tdrpStrDup("The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.");
+    tt->val_offset = (char *) &fixed_radar_location - &_start_;
+    tt->struct_def.name = tdrpStrDup("radar_location_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("latitudeDeg");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &fixed_radar_location.latitudeDeg - (char *) &fixed_radar_location;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("longitudeDeg");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &fixed_radar_location.longitudeDeg - (char *) &fixed_radar_location;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &fixed_radar_location.altitudeKm - (char *) &fixed_radar_location;
+    tt->n_struct_vals = 3;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0;
+      tt->struct_vals[2].d = 0;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
+    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
+    tt++;
+    
+    // Parameter 'compute_mean_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mean_location");
+    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
+    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.");
+    tt->val_offset = (char *) &compute_mean_location - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.");
     tt++;
     
     // Parameter 'dwell_length_secs'
@@ -807,11 +1039,11 @@
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -881,417 +1113,117 @@
       tt->struct_vals[3].e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
-    tt->comment_text = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
+    tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt++;
     
-    // Parameter 'set_output_fields'
+    // Parameter 'perform_velocity_unfolding'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_fields");
-    tt->descr = tdrpStrDup("Set the field names and output encoding");
-    tt->help = tdrpStrDup("If false, all fields will be used.");
-    tt->val_offset = (char *) &set_output_fields - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->param_name = tdrpStrDup("perform_velocity_unfolding");
+    tt->descr = tdrpStrDup("Option to unfold the velocity field.");
+    tt->help = tdrpStrDup("If false, the short vel will be copied to the unfolded field. The vel_unfolded field will be added to the output data set.");
+    tt->val_offset = (char *) &perform_velocity_unfolding - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output field details.");
-    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 9;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->input_field_name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->output_field_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->long_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("standard_name");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->standard_name - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("output_units");
-      tt->struct_def.fields[4].ptype = STRING_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->output_units - (char *) _output_fields;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[5].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[5].ptype = ENUM_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[5].enum_def.nfields = 5;
-        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_ASIS");
-        tt->struct_def.fields[5].enum_def.fields[0].val = OUTPUT_ENCODING_ASIS;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-        tt->struct_def.fields[5].enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-        tt->struct_def.fields[5].enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-        tt->struct_def.fields[5].enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
-        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
-        tt->struct_def.fields[5].enum_def.fields[4].val = OUTPUT_ENCODING_INT08;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("output_scaling_t");
-      tt->struct_def.fields[6].fname = tdrpStrDup("output_scaling");
-      tt->struct_def.fields[6].ptype = ENUM_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_output_fields->output_scaling - (char *) _output_fields;
-        tt->struct_def.fields[6].enum_def.name = tdrpStrDup("output_scaling_t");
-        tt->struct_def.fields[6].enum_def.nfields = 2;
-        tt->struct_def.fields[6].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[6].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[6].enum_def.fields[0].name = tdrpStrDup("SCALING_DYNAMIC");
-        tt->struct_def.fields[6].enum_def.fields[0].val = SCALING_DYNAMIC;
-        tt->struct_def.fields[6].enum_def.fields[1].name = tdrpStrDup("SCALING_SPECIFIED");
-        tt->struct_def.fields[6].enum_def.fields[1].val = SCALING_SPECIFIED;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[7].fname = tdrpStrDup("output_scale");
-      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &_output_fields->output_scale - (char *) _output_fields;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[8].fname = tdrpStrDup("output_offset");
-      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_output_fields->output_offset - (char *) _output_fields;
-    tt->n_struct_vals = 18;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ");
-      tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("reflectivity");
-      tt->struct_vals[3].s = tdrpStrDup("equivalent_reflectivity_factor");
-      tt->struct_vals[4].s = tdrpStrDup("dBZ");
-      tt->struct_vals[5].e = OUTPUT_ENCODING_ASIS;
-      tt->struct_vals[6].e = SCALING_DYNAMIC;
-      tt->struct_vals[7].d = 0.01;
-      tt->struct_vals[8].d = 0;
-      tt->struct_vals[9].s = tdrpStrDup("VEL");
-      tt->struct_vals[10].s = tdrpStrDup("VEL");
-      tt->struct_vals[11].s = tdrpStrDup("radial_velocity");
-      tt->struct_vals[12].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
-      tt->struct_vals[13].s = tdrpStrDup("m/s");
-      tt->struct_vals[14].e = OUTPUT_ENCODING_ASIS;
-      tt->struct_vals[15].e = SCALING_DYNAMIC;
-      tt->struct_vals[16].d = 0.01;
-      tt->struct_vals[17].d = 0;
-    tt++;
-    
-    // Parameter 'exclude_specified_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("exclude_specified_fields");
-    tt->descr = tdrpStrDup("Option to exclude fields in the specified list.");
-    tt->help = tdrpStrDup("If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.");
-    tt->val_offset = (char *) &exclude_specified_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'excluded_fields'
+    // Parameter 'input_vel_raw_field_name_short'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("excluded_fields");
-    tt->descr = tdrpStrDup("List of fields to be excluded.");
-    tt->help = tdrpStrDup("List the names to be excluded");
-    tt->array_offset = (char *) &_excluded_fields - &_start_;
-    tt->array_n_offset = (char *) &excluded_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("VEL");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_short");
+    tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
+    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_short");
     tt++;
     
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_output_encoding_for_all_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_encoding_for_all_fields");
-    tt->descr = tdrpStrDup("Option to set output encoding for all fields");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_output_encoding_for_all_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_encoding'
-    // ctype is '_output_encoding_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_encoding");
-    tt->descr = tdrpStrDup("Output encoding for all fields, if requested.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_encoding - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_encoding_t");
-    tt->enum_def.nfields = 5;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_ASIS");
-      tt->enum_def.fields[0].val = OUTPUT_ENCODING_ASIS;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-      tt->enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-      tt->enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-      tt->enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
-      tt->enum_def.fields[4].val = OUTPUT_ENCODING_INT08;
-    tt->single_val.e = OUTPUT_ENCODING_ASIS;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL2");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_CFRADIAL2;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'output_dir'
+    // Parameter 'input_vel_raw_field_name_long'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Output directory path.");
-    tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_long");
+    tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
+    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_long");
     tt++;
     
-    // Parameter 'output_filename_mode'
-    // ctype is '_filename_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_mode");
-    tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.");
-    tt->val_offset = (char *) &output_filename_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
-      tt->enum_def.fields[0].val = START_AND_END_TIMES;
-      tt->enum_def.fields[1].name = tdrpStrDup("START_TIME_ONLY");
-      tt->enum_def.fields[1].val = START_TIME_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
-      tt->enum_def.fields[2].val = END_TIME_ONLY;
-      tt->enum_def.fields[3].name = tdrpStrDup("SPECIFY_FILE_NAME");
-      tt->enum_def.fields[3].val = SPECIFY_FILE_NAME;
-    tt->single_val.e = START_AND_END_TIMES;
-    tt++;
-    
-    // Parameter 'output_filename_prefix'
+    // Parameter 'input_vel_corr_field_name_short'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_prefix");
-    tt->descr = tdrpStrDup("Optional prefix for output filename.");
-    tt->help = tdrpStrDup("If empty, the standard prefix will be used.");
-    tt->val_offset = (char *) &output_filename_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_short");
+    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
+    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
+    tt->val_offset = (char *) &input_vel_corr_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_short");
     tt++;
     
-    // Parameter 'write_output_files_on_time_boundaries'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_output_files_on_time_boundaries");
-    tt->descr = tdrpStrDup("Option to write the output files on time boundaries.");
-    tt->help = tdrpStrDup("See 'output_file_time_interval_secs'.");
-    tt->val_offset = (char *) &write_output_files_on_time_boundaries - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_file_time_interval_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("output_file_time_interval_secs");
-    tt->descr = tdrpStrDup("Time interval at which files will be written out (secs).");
-    tt->help = tdrpStrDup("See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.");
-    tt->val_offset = (char *) &output_file_time_interval_secs - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'include_instrument_name_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_instrument_name_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the instrument name in the file name.");
-    tt->help = tdrpStrDup("Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.");
-    tt->val_offset = (char *) &include_instrument_name_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'include_subsecs_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_subsecs_in_file_name");
-    tt->descr = tdrpStrDup("Option to include sub-seconds in date-time part of file name.");
-    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.");
-    tt->val_offset = (char *) &include_subsecs_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'include_scan_type_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_scan_type_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the scan type in the file name.");
-    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
-    tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'use_hyphen_in_file_name_datetime_part'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_hyphen_in_file_name_datetime_part");
-    tt->descr = tdrpStrDup("Option to use a hyphen between date and time in filename.");
-    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. Normally an underscore is used.");
-    tt->val_offset = (char *) &use_hyphen_in_file_name_datetime_part - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_filename'
+    // Parameter 'input_vel_corr_field_name_long'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename");
-    tt->descr = tdrpStrDup("Name of output file.");
-    tt->help = tdrpStrDup("Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.");
-    tt->val_offset = (char *) &output_filename - &_start_;
-    tt->single_val.s = tdrpStrDup("cfradial.test.nc");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_long");
+    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
+    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
+    tt->val_offset = (char *) &input_vel_corr_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_long");
     tt++;
     
-    // Parameter 'append_day_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'output_vel_corr_field_name_short'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_day_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the day directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_day_dir_to_output_dir - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_short");
+    tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
+    tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
+    tt->val_offset = (char *) &output_vel_corr_field_name_short - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_short");
     tt++;
     
-    // Parameter 'append_year_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'output_vel_corr_field_name_long'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_year_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the year directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_long");
+    tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
+    tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
+    tt->val_offset = (char *) &output_vel_corr_field_name_long - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_long");
     tt++;
     
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'output_vel_unfolded_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_unfolded_field_name");
+    tt->descr = tdrpStrDup("Name for the unfolded velocity.");
+    tt->help = tdrpStrDup("This is an output field, computed by unfolding the dual-prt vel fields.");
+    tt->val_offset = (char *) &output_vel_unfolded_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_unfold_short");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
+    tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

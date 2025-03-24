@@ -688,10 +688,10 @@ int MDV_write_dataset(FILE *outfile, MDV_dataset_t *dataset,
 int MDV_write_dataset_remote(MDV_dataset_t *dataset,
                              int output_encoding_type,
                              int swap_chunk_data,
-                             char *output_host,
-                             char *output_dir,
-                             char *output_filename,
-                             char *local_tmp_dir)
+                             const char *output_host,
+                             const char *output_dir,
+                             const char *output_filename,
+                             const char *local_tmp_dir)
 {
   static char *routine_name = "MDV_write_dataset_remote";
   
