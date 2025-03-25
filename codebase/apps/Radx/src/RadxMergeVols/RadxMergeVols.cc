@@ -96,6 +96,8 @@ RadxMergeVols::RadxMergeVols(int argc, char **argv)
 
   _serialStartIndex = -1;
   _serialThisIndex = -1;
+  _firstFile = true;
+  _volInProgress = false;
 
 }
 
@@ -496,23 +498,44 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
     // not wanted
     return -1;
   }
-  
-  if (typeNum == 0) {
 
-    // initial vol type, save the volume
+  if (typeNum == 0 && _volInProgress) {
+
+    // indicates we have found the vol type that is not first in the list
+    
+    if (!_firstFile) {
+      // write out current data
+      if (_writeVol(_mergedVol)) {
+        _mergedVol.clear();
+        return -1;
+      }
+    }
+    _firstFile = false;
+
+    // initialize merged vol with the latest vol
     
     _mergedVol.clear();
     _mergedVol = latestVol;
     _mergedVol.setTitle(_params.serial_merge_vol_title);
     _mergedVol.setScanName(_params.serial_merge_scan_name);
 
+    // clear secondary flag - we are starting a new vol
+
+    _volInProgress = false;
+    
     if (_params.debug) {
       cerr << "Init mergeVol from path: " << serialPath << endl;
       cerr << "  title, scanName: " << latestTitle << ", " << latestScanName << endl;
     }
 
   } else {
-
+    
+    if (typeNum != 0) {
+      // indicates we have found the vol type that is not first in the list
+      // so set flag to indicate we have moved past the first vol type
+      _volInProgress = true;
+    }
+    
     // later vol type, copy the rays across
     
     size_t nSweepsSoFar = _mergedVol.getNSweeps();
@@ -532,15 +555,15 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
     }
 
   }
-
-  if (typeNum == _params.serial_vol_types_n - 1) {
-    // last type, write out
-    if (_writeVol(_mergedVol)) {
-      _mergedVol.clear();
-      return -1;
-    }
-    _mergedVol.clear();
-  }
+  
+  // if (typeNum == _params.serial_vol_types_n - 1) {
+  //   // last type, write out
+  //   if (_writeVol(_mergedVol)) {
+  //     _mergedVol.clear();
+  //     return -1;
+  //   }
+  //   _mergedVol.clear();
+  // }
 
   return 0;
 

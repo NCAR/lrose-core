@@ -73,7 +73,10 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  
+
+  bool _firstFile;
+  bool _volInProgress;
+
   int _serialStartIndex;
   int _serialThisIndex;
   RadxVol _mergedVol;
