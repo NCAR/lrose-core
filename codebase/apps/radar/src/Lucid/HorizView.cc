@@ -1529,8 +1529,8 @@ int HorizView::_renderGrid(QPainter &painter,
 
 #endif
 
-  // Decide Proper rendering routine
-
+  // Render with appropriate rendering routine
+  
   Mdvx::Mdvx::projection_type_t projType = mr->proj->getProjType();
   const PjgMath &dataMath = mr->proj->getPjgMath();
   const PjgMath &displayMath = _gd.proj.getPjgMath();

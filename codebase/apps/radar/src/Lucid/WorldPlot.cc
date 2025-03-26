@@ -2526,6 +2526,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
 /////////////////////////////////////////////////////
 // render a data grid in Cartesian rectangular pixels
+// used if there is no distortion
 
 void WorldPlot::renderGridRect(int page,
                                QPainter &painter,
