@@ -686,6 +686,34 @@ void WorldPlot::fillPolygon(QPainter &painter,
 
 }
 
+////////////////////////////////////////////////////////
+// fill a polygon in pixel coords
+
+void WorldPlot::fillPolygonPixelCoords(QPainter &painter,
+                                       const QBrush &brush,
+                                       const QVector<QPointF> &points)
+  
+{
+  
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+  
+  // create a polygon from the points
+  QPolygonF poly(points);
+
+  // add the polygon to a painter path
+  QPainterPath path;
+  path.addPolygon(poly);
+  
+  // fill the path
+
+  painter.fillPath(path, brush);
+  // drawPath(painter, path);
+
+  painter.restore();
+
+}
+
 ///////////////////
 // fill a trapezium
 
@@ -2538,12 +2566,6 @@ void WorldPlot::renderGridRect(int page,
   
   // plot the rectangles for each grid cell
 
-  // {
-  //   QColor color("yelllow");
-  //   QBrush brush(color);
-  //   painter.fillRect(100, 100, 100, 100, brush);
-  // }
-
   fl32 *val = mr->h_fl32_data;
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
@@ -2845,6 +2867,8 @@ void WorldPlot::renderGridDistorted(int page,
   
 {
 
+  cerr << "DDDDDDDDDDDDDDDDDDD ====>> renderGridDistorted, page: " << page << endl;
+
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
 
@@ -2860,46 +2884,45 @@ void WorldPlot::renderGridDistorted(int page,
   double dx = mr->h_fhdr.grid_dx;
   double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
 
-  // initially fill with missing values
-  
-  for(int iy = 0; iy <= ny; iy++) {
-    vector<QPointF> row;
-    for(int ix = 0; ix <= nx; ix++) {
-      QPointF pt = getPixelPointF(-9999.0, -9999.0);
-      row.push_back(pt);
-    } // ix
-    vertices.push_back(row);
-  } // iy
+  // compute the vertices
 
-  // now compute the vertices
+  cerr << "=============>> Data proj" << endl;
+  mr->proj->print(cerr);
+  cerr << "==================================================" << endl;
+  cerr << "=============>> Display proj" << endl;
+  _proj.print(cerr);
+  cerr << "==================================================" << endl;
   
   double yy = lowy;
   for(int iy = 0; iy <= ny; iy++, yy += dy) {
     vector<QPointF> row;
     double xx = lowx;
     for(int ix = 0; ix <= nx; ix++, xx += dx) {
-      QPointF pt = getPixelPointF(xx, yy);
+      // compute lat/lon from data projection
+      double lat, lon;
+      mr->proj->xy2latlon(xx, yy, lat, lon);
+      // compute x(x,y) in display projection
+      double xx1, yy1;
+      _proj.latlon2xy(lat, lon, xx1, yy1);
+      // cerr << "xxxxxxxx xx, yy, lat, lon, xx1, yy1: "
+      //      << xx << ", " << yy << ", "
+      //      << lat << ", " << lon << ", "
+      //      << xx1 << ", " << yy1 << endl;
+      // set pixel space point
+      QPointF pt = getPixelPointF(xx1, yy1);
       row.push_back(pt);
     } // ix
     vertices.push_back(row);
   } // iy
   
-  // plot the rectangles for each grid cell
-
-  // {
-  //   QColor color("yelllow");
-  //   QBrush brush(color);
-  //   painter.fillRect(100, 100, 100, 100, brush);
-  // }
+  // plot the polygons for each grid cell
 
   fl32 *val = mr->h_fl32_data;
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
-  yy = lowy;
-  for(int iy = 0; iy < mr->h_fhdr.ny; iy++, yy += dy) {
-    double xx = lowx;
-    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, xx += dx, val++) {
+  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
+    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
       if (fval == miss || fval == bad) {
         continue;
@@ -2908,15 +2931,14 @@ void WorldPlot::renderGridDistorted(int page,
         continue;
       }
       const QBrush *brush = mr->colorMap->dataBrush(fval);
-      double xx0 = vertices[iy+1][ix].x();
-      double yy0 = vertices[iy+1][ix].y();
-      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
-      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
-      fillRectanglePixelCoords(painter, *brush, xx0, yy0, width, height);
+      QVector<QPointF> points;
+      points.push_back(vertices[iy][ix]);
+      points.push_back(vertices[iy][ix+1]);
+      points.push_back(vertices[iy+1][ix+1]);
+      points.push_back(vertices[iy+1][ix]);
+      fillPolygonPixelCoords(painter, *brush, points);
     } // ix
   } // iy
-  
-  cerr << "====>> ddddddddddddddddddddddd page: " << page << endl;
   
 }
 

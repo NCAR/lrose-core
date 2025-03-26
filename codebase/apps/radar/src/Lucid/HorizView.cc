@@ -1548,12 +1548,9 @@ int HorizView::_renderGrid(QPainter &painter,
                                     start_time, end_time,
                                     is_overlay_field);
   } else if (dataMath == displayMath) {
-    // _zoomWorld.renderGridRect(page, painter, mr,
-    //                           start_time, end_time,
-    //                           is_overlay_field);
-    _zoomWorld.renderGridDistorted(page, painter, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
+    _zoomWorld.renderGridRect(page, painter, mr,
+                              start_time, end_time,
+                              is_overlay_field);
   } else {
     _zoomWorld.renderGridDistorted(page, painter, mr,
                                    start_time, end_time,

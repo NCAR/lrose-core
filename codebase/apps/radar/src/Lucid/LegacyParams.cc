@@ -1214,7 +1214,7 @@ int LegacyParams::_readMainParams()
   _originLongitude = _getDouble("cidd.origin_longitude", 0.0, false);
 
   fprintf(_tdrpFile, "proj_origin_lat = %g;\n", _originLatitude);
-  fprintf(_tdrpFile, "proj_origin_lat = %g;\n", _originLatitude);
+  fprintf(_tdrpFile, "proj_origin_lon = %g;\n", _originLongitude);
 
   // click location on reset
   _getDouble("cidd.reset_click_latitude", _originLatitude, false);

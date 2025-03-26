@@ -337,7 +337,7 @@ int Lucid::_initDataSpace()
   _gd.h_win.reset_click_lon = _params.proj_origin_lon;
 
   // projection
-  
+
   if (_params.proj_type == Params::PROJ_FLAT) {
     
     _gd.display_projection = Mdvx::PROJ_FLAT;

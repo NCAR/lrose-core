@@ -318,6 +318,12 @@ public:
                    const QBrush &brush,
                    const QVector<QPointF> &points);
   
+  // fill a polygon in pixel coords
+  
+  void fillPolygonPixelCoords(QPainter &painter,
+                              const QBrush &brush,
+                              const QVector<QPointF> &points);
+  
   // fill a trapezium
   
   void fillTrap(QPainter &painter,
