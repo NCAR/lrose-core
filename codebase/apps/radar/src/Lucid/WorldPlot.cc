@@ -2957,6 +2957,74 @@ void WorldPlot::renderGridRadarPolar(int page,
 
   cerr << "====>> radar polar radar polar, page: " << page << endl;
   
+  // the data projection type and plot projection type are not the same
+  // so we need to compute the lat/lon of each corner of the grid cells
+
+  // compute the location of the vertices
+  // these are the cell limits in (x, y)
+  
+  vector< vector<QPointF> > vertices;
+  
+  int nx = mr->h_fhdr.nx;
+  int ny = mr->h_fhdr.ny;
+  double dy = mr->h_fhdr.grid_dy;
+  double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
+  double dx = mr->h_fhdr.grid_dx;
+  double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
+  double elevDeg = mr->h_fhdr.grid_minz;
+
+  // compute the vertices
+
+  cerr << "=============>> Data proj" << endl;
+  mr->proj->print(cerr);
+  cerr << "==================================================" << endl;
+  cerr << "=============>> Display proj" << endl;
+  _proj.print(cerr);
+  cerr << "==================================================" << endl;
+  
+  double yy = lowy;
+  for(int iy = 0; iy <= ny; iy++, yy += dy) {
+    vector<QPointF> row;
+    double xx = lowx;
+    for(int ix = 0; ix <= nx; ix++, xx += dx) {
+      // compute lat/lon from data projection
+      double lat, lon;
+      mr->proj->xy2latlon(xx, yy, lat, lon, elevDeg);
+      // compute x(x,y) in display projection
+      double xx1, yy1;
+      _proj.latlon2xy(lat, lon, xx1, yy1, elevDeg);
+      // set pixel space point
+      QPointF pt = getPixelPointF(xx1, yy1);
+      row.push_back(pt);
+    } // ix
+    vertices.push_back(row);
+  } // iy
+  
+  // plot the polygons for each grid cell
+
+  fl32 *val = mr->h_fl32_data;
+  fl32 miss = mr->h_fhdr.missing_data_value;
+  fl32 bad = mr->h_fhdr.bad_data_value;
+  
+  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
+    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
+      fl32 fval = *val;
+      if (fval == miss || fval == bad) {
+        continue;
+      }
+      if (!mr->colorMap->withinValidRange(fval)) {
+        continue;
+      }
+      const QBrush *brush = mr->colorMap->dataBrush(fval);
+      QVector<QPointF> points;
+      points.push_back(vertices[iy][ix]);
+      points.push_back(vertices[iy][ix+1]);
+      points.push_back(vertices[iy+1][ix+1]);
+      points.push_back(vertices[iy+1][ix]);
+      fillPolygonPixelCoords(painter, *brush, points);
+    } // ix
+  } // iy
+  
 
 }
 
