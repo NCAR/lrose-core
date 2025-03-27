@@ -47,6 +47,7 @@
 #include <QTransform>
 #include <QColor>
 #include <QFont>
+#include <QImage>
 #include <toolsa/DateTime.hh>
 #include <Mdv/MdvxProj.hh>
 #include "GlobalData.hh"
@@ -559,31 +560,31 @@ public:
   void updatePixelScales();
 
   // render a data grid in Cartesian rectangular pixels
+  // returns QImage* - owned by this object
 
-  void renderGridRect(int page,
-                      QPainter &painter,
-                      MdvReader *mr,
-                      time_t start_time,
-                      time_t end_time,
-                      bool is_overlay_field);
+  QImage *renderGridRect(int page,
+                         MdvReader *mr,
+                         time_t start_time,
+                         time_t end_time,
+                         bool is_overlay_field);
   
   // render a data grid in distorted polygon
+  // returns QImage* - owned by this object
 
-  void renderGridDistorted(int page,
-                           QPainter &painter,
-                           MdvReader *mr,
-                           time_t start_time,
-                           time_t end_time,
-                           bool is_overlay_field);
+  QImage *renderGridDistorted(int page,
+                              MdvReader *mr,
+                              time_t start_time,
+                              time_t end_time,
+                              bool is_overlay_field);
   
   // render a data grid for polar radar data
-
-  void renderGridRadarPolar(int page,
-                            QPainter &painter,
-                            MdvReader *mr,
-                            time_t start_time,
-                            time_t end_time,
-                            bool is_overlay_field);
+  // returns QImage* - owned by this object
+  
+  QImage *renderGridRadarPolar(int page,
+                               MdvReader *mr,
+                               time_t start_time,
+                               time_t end_time,
+                               bool is_overlay_field);
   
   // print
   
@@ -603,6 +604,7 @@ private:
   
   int _widthPixels;
   int _heightPixels;
+  QImage *_image;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -705,6 +707,10 @@ private:
 
   WorldPlot & _copy(const WorldPlot &rhs);
 
+  // create image canvas for rendering
+  
+  void _createImage();
+  
 };
 
 #endif

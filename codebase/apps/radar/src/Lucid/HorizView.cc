@@ -294,21 +294,29 @@ void HorizView::paintEvent(QPaintEvent *event)
     _savedZooms.clear();
   }
 
-  // fill canvas with background color
+  // make image from this widget, fill canvas with background color
+
+  _fieldImage = new QImage(size(), QImage::Format_RGB32);
+  cerr << "IIIIIIIIIIIIIIIIIII width, height: " << _fieldImage->width() << ", " << _fieldImage->height() << endl;
+  // QPixmap pixmap = grab();
+  // QImage* image = new QImage(pixmap.toImage());
+  QPainter ipainter(_fieldImage);
+  _zoomWorld.fillCanvas(ipainter, _params.background_color);
+
+  // render data grids to image
   
-  QPainter painter(this);
-  _zoomWorld.fillCanvas(painter, _params.background_color);
-  
-  // render data grids
-  
-  _renderGrids(painter);
+  _renderGrids(ipainter);
   
   // render invalid images
   
   if (_renderInvalidImages) {
-    _doRenderInvalidImages(painter, _invalidImagesFrameIndex, _vert);
+    _doRenderInvalidImages(ipainter, _invalidImagesFrameIndex, _vert);
     _renderInvalidImages = false;
   }
+
+  // copy image back into this widget
+  QPainter painter(this);
+  painter.drawImage(0, 0, *_fieldImage);
 
   // set axis areas to background color
 
