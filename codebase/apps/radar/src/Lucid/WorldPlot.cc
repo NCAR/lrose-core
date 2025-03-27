@@ -2972,6 +2972,10 @@ void WorldPlot::renderGridRadarPolar(int page,
   double dx = mr->h_fhdr.grid_dx;
   double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
   double elevDeg = mr->h_fhdr.grid_minz;
+  if (!_params.use_cosine_correction) {
+    // set elevation angle to 0 so cosine correction is not applied
+    elevDeg = 0.0;
+  }
 
   // compute the vertices
 
