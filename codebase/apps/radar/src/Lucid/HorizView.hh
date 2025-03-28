@@ -565,7 +565,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  void _renderGrids(QPainter &painter);
+  void _renderGrids();
 
   void _drawOverlays(QPainter &painter);
 
@@ -598,16 +598,15 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _initProjection();
   
-  int _controlRendering(QPainter &painter, int page,
+  int _controlRendering(int page,
                         time_t start_time, time_t end_time);
   
-  int _renderGrid(QPainter &painter, int page,
+  int _renderGrid(int page,
                   MdvReader *mr,
                   time_t start_time, time_t end_time,
                   bool is_overlay_field);
   
-  void _doRenderInvalidImages(QPainter &painter,
-                              int index, VertView *vert);
+  void _doRenderInvalidImages(int index, VertView *vert);
   
 };
 

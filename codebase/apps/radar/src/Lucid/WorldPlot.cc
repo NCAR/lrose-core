@@ -57,7 +57,7 @@ WorldPlot::WorldPlot() :
 
   _widthPixels = 1000;
   _heightPixels = 1000;
-  _image = nullptr;
+  _gridImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -2528,15 +2528,15 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 /////////////////////////////////////////////////////
 // create image with size of the plot
 
-void WorldPlot::_createImage()
+void WorldPlot::_createGridImage()
 {
-  if (_image == nullptr) {
-    _image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+  if (_gridImage == nullptr) {
+    _gridImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
   } else {
-    if (_image->width() != _widthPixels ||
-        _image->height() != _heightPixels) {
-      delete _image;
-      _image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+    if (_gridImage->width() != _widthPixels ||
+        _gridImage->height() != _heightPixels) {
+      delete _gridImage;
+      _gridImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
     }
   }
 }
@@ -2545,11 +2545,11 @@ void WorldPlot::_createImage()
 // render a data grid in Cartesian rectangular pixels
 // used if there is no distortion
 
-QImage *WorldPlot::renderGridRect(int page,
-                                  MdvReader *mr,
-                                  time_t start_time,
-                                  time_t end_time,
-                                  bool is_overlay_field)
+void WorldPlot::renderGridRect(int page,
+                               MdvReader *mr,
+                               time_t start_time,
+                               time_t end_time,
+                               bool is_overlay_field)
   
 {
 
@@ -2559,9 +2559,13 @@ QImage *WorldPlot::renderGridRect(int page,
 
   // check that image canvas is the correct size
   
-  _createImage();
-  QPainter painter(_image);
+  _createGridImage();
+  QPainter painter(_gridImage);
+
+  // fill with background color
   
+  fillCanvas(painter, _params.background_color);
+   
   // the data projection type and plot projection type are the same
   // so we can use the (x,y) locations unchanged
 
@@ -2612,8 +2616,6 @@ QImage *WorldPlot::renderGridRect(int page,
     } // ix
   } // iy
 
-  return _image;
-  
 #ifdef NOTYET
   
   int i,j;
@@ -2777,7 +2779,7 @@ QImage *WorldPlot::renderGridRect(int page,
 
       case POLYGONS:
         if(( PseudoColor == psc ) && !_params.draw_main_on_top && mr->num_display_pts > _params.image_fill_threshold) {
-          draw_filled_image(xid,x_start,y_start,mr);
+          draw_filled_gridImage(xid,x_start,y_start,mr);
         } else {
           if(gd.debug2) printf("Drawing Rectangle Fill image, field: %s \n",
                                mr->field_label);
@@ -2888,11 +2890,11 @@ QImage *WorldPlot::renderGridRect(int page,
 // render a data grid which is distorted
 // i.e. where the data and display projection do not match
 
-QImage *WorldPlot::renderGridDistorted(int page,
-                                       MdvReader *mr,
-                                       time_t start_time,
-                                       time_t end_time,
-                                       bool is_overlay_field)
+void WorldPlot::renderGridDistorted(int page,
+                                    MdvReader *mr,
+                                    time_t start_time,
+                                    time_t end_time,
+                                    bool is_overlay_field)
   
 {
 
@@ -2902,9 +2904,13 @@ QImage *WorldPlot::renderGridDistorted(int page,
 
   // check that image canvas is the correct size
   
-  _createImage();
-  QPainter painter(_image);
+  _createGridImage();
+  QPainter painter(_gridImage);
   
+  // fill with background color
+  
+  fillCanvas(painter, _params.background_color);
+   
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
 
@@ -2976,18 +2982,16 @@ QImage *WorldPlot::renderGridDistorted(int page,
     } // ix
   } // iy
   
-  return _image;
-  
 }
 
 /////////////////////////////////////////////////////
 // render polar radar grid
 
-QImage *WorldPlot::renderGridRadarPolar(int page,
-                                        MdvReader *mr,
-                                        time_t start_time,
-                                        time_t end_time,
-                                        bool is_overlay_field)
+void WorldPlot::renderGridRadarPolar(int page,
+                                     MdvReader *mr,
+                                     time_t start_time,
+                                     time_t end_time,
+                                     bool is_overlay_field)
   
 {
 
@@ -2997,9 +3001,13 @@ QImage *WorldPlot::renderGridRadarPolar(int page,
   
   // check that image canvas is the correct size
   
-  _createImage();
-  QPainter painter(_image);
+  _createGridImage();
+  QPainter painter(_gridImage);
   
+  // fill with background color
+  
+  fillCanvas(painter, _params.background_color);
+   
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
 
@@ -3071,8 +3079,6 @@ QImage *WorldPlot::renderGridRadarPolar(int page,
       fillPolygonPixelCoords(painter, *brush, points);
     } // ix
   } // iy
-  
-  return _image;
   
 }
 

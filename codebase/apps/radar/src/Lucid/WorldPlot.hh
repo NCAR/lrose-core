@@ -562,30 +562,34 @@ public:
   // render a data grid in Cartesian rectangular pixels
   // returns QImage* - owned by this object
 
-  QImage *renderGridRect(int page,
-                         MdvReader *mr,
-                         time_t start_time,
-                         time_t end_time,
-                         bool is_overlay_field);
+  void renderGridRect(int page,
+                      MdvReader *mr,
+                      time_t start_time,
+                      time_t end_time,
+                      bool is_overlay_field);
   
   // render a data grid in distorted polygon
   // returns QImage* - owned by this object
 
-  QImage *renderGridDistorted(int page,
-                              MdvReader *mr,
-                              time_t start_time,
-                              time_t end_time,
-                              bool is_overlay_field);
+  void renderGridDistorted(int page,
+                           MdvReader *mr,
+                           time_t start_time,
+                           time_t end_time,
+                           bool is_overlay_field);
   
   // render a data grid for polar radar data
   // returns QImage* - owned by this object
   
-  QImage *renderGridRadarPolar(int page,
-                               MdvReader *mr,
-                               time_t start_time,
-                               time_t end_time,
-                               bool is_overlay_field);
+  void renderGridRadarPolar(int page,
+                            MdvReader *mr,
+                            time_t start_time,
+                            time_t end_time,
+                            bool is_overlay_field);
+
+  // get grid image after rendering
   
+  const QImage *getGridImage() const { return _gridImage; }
+
   // print
   
   void print(ostream &out);
@@ -604,7 +608,7 @@ private:
   
   int _widthPixels;
   int _heightPixels;
-  QImage *_image;
+  QImage *_gridImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -709,7 +713,7 @@ private:
 
   // create image canvas for rendering
   
-  void _createImage();
+  void _createGridImage();
   
 };
 
