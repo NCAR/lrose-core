@@ -2526,7 +2526,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 }
 
 /////////////////////////////////////////////////////
-// create image with size of the plot
+// create images with size of the plot
 
 void WorldPlot::_createGridImage()
 {
@@ -2541,6 +2541,37 @@ void WorldPlot::_createGridImage()
   }
 }
                                
+void WorldPlot::_createMapImage()
+{
+  if (_mapImage == nullptr) {
+    _mapImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+  } else {
+    if (_mapImage->width() != _widthPixels ||
+        _mapImage->height() != _heightPixels) {
+      delete _mapImage;
+      _mapImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+    }
+  }
+}
+                               
+// get images after rendering
+  
+const QImage *WorldPlot::getGridImage()
+{
+  if (!_gridImage) {
+    _createGridImage();
+  }
+  return _gridImage;
+}
+
+const QImage *WorldPlot::getMapImage()
+{
+  if (!_mapImage) {
+    _createMapImage();
+  }
+  return _mapImage;
+}
+
 /////////////////////////////////////////////////////
 // render a data grid in Cartesian rectangular pixels
 // used if there is no distortion

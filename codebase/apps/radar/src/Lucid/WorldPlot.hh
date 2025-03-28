@@ -586,9 +586,10 @@ public:
                             time_t end_time,
                             bool is_overlay_field);
 
-  // get grid image after rendering
+  // get images after rendering
   
-  const QImage *getGridImage() const { return _gridImage; }
+  const QImage *getGridImage();
+  const QImage *getMapImage();
 
   // print
   
@@ -608,7 +609,11 @@ private:
   
   int _widthPixels;
   int _heightPixels;
+
+  // images for rendering
+  
   QImage *_gridImage;
+  QImage *_mapImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -711,9 +716,10 @@ private:
 
   WorldPlot & _copy(const WorldPlot &rhs);
 
-  // create image canvas for rendering
+  // create images for rendering
   
   void _createGridImage();
+  void _createMapImage();
   
 };
 
