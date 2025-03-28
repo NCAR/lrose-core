@@ -718,8 +718,7 @@ private:
 
   // create images for rendering
   
-  void _createGridImage();
-  void _createMapImage();
+  void _createImage(QImage* &image);
   
 };
 

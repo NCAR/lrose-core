@@ -2528,28 +2528,15 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 /////////////////////////////////////////////////////
 // create images with size of the plot
 
-void WorldPlot::_createGridImage()
+void WorldPlot::_createImage(QImage* &image)
 {
-  if (_gridImage == nullptr) {
-    _gridImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+  if (image == nullptr) {
+    image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
   } else {
-    if (_gridImage->width() != _widthPixels ||
-        _gridImage->height() != _heightPixels) {
-      delete _gridImage;
-      _gridImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
-    }
-  }
-}
-                               
-void WorldPlot::_createMapImage()
-{
-  if (_mapImage == nullptr) {
-    _mapImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
-  } else {
-    if (_mapImage->width() != _widthPixels ||
-        _mapImage->height() != _heightPixels) {
-      delete _mapImage;
-      _mapImage = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+    if (image->width() != _widthPixels ||
+        image->height() != _heightPixels) {
+      delete image;
+      image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
     }
   }
 }
@@ -2559,7 +2546,7 @@ void WorldPlot::_createMapImage()
 const QImage *WorldPlot::getGridImage()
 {
   if (!_gridImage) {
-    _createGridImage();
+    _createImage(_gridImage);
   }
   return _gridImage;
 }
@@ -2567,7 +2554,7 @@ const QImage *WorldPlot::getGridImage()
 const QImage *WorldPlot::getMapImage()
 {
   if (!_mapImage) {
-    _createMapImage();
+    _createImage(_mapImage);
   }
   return _mapImage;
 }
@@ -2585,12 +2572,10 @@ void WorldPlot::renderGridRect(int page,
 {
 
   cerr << "RRRRRRRRRRRRRRR ====>> renderGridRect, page: " << page << endl;
-  cerr << "111111111111111 _widthPixels: " << _widthPixels << endl;
-  cerr << "111111111111111 _heightPixels: " << _heightPixels << endl;
 
   // check that image canvas is the correct size
   
-  _createGridImage();
+  _createImage(_gridImage);
   QPainter painter(_gridImage);
 
   // fill with background color
@@ -2930,12 +2915,10 @@ void WorldPlot::renderGridDistorted(int page,
 {
 
   cerr << "DDDDDDDDDDDDDDDDDDD ====>> renderGridDistorted, page: " << page << endl;
-  cerr << "111111111111111 _widthPixels: " << _widthPixels << endl;
-  cerr << "111111111111111 _heightPixels: " << _heightPixels << endl;
 
   // check that image canvas is the correct size
   
-  _createGridImage();
+  _createImage(_gridImage);
   QPainter painter(_gridImage);
   
   // fill with background color
@@ -3027,12 +3010,10 @@ void WorldPlot::renderGridRadarPolar(int page,
 {
 
   cerr << "====>> radar polar radar polar, page: " << page << endl;
-  cerr << "111111111111111 _widthPixels: " << _widthPixels << endl;
-  cerr << "111111111111111 _heightPixels: " << _heightPixels << endl;
   
   // check that image canvas is the correct size
   
-  _createGridImage();
+  _createImage(_gridImage);
   QPainter painter(_gridImage);
   
   // fill with background color
