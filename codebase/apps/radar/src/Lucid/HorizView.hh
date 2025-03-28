@@ -598,8 +598,8 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _initProjection();
   
-  int _controlRendering(int page,
-                        time_t start_time, time_t end_time);
+  int _controlRenderGrid(int page,
+                         time_t start_time, time_t end_time);
   
   int _renderGrid(int page,
                   MdvReader *mr,

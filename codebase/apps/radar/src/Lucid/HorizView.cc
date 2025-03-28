@@ -1129,7 +1129,7 @@ void HorizView::_renderGrids()
             _renderFrameIndex, _renderFramePage);
   }
 
-  _controlRendering(_renderFramePage,
+  _controlRenderGrid(_renderFramePage,
                     _gd.movie.frame[_renderFrameIndex].time_start,
                     _gd.movie.frame[_renderFrameIndex].time_end);
   
@@ -1185,7 +1185,7 @@ void HorizView::_doRenderInvalidImages(int index, VertView *vert)
             pdev = _gd.h_win.tmp_pdev;
           }
           QPainter painter(this);
-          _controlRendering(painter,
+          _controlRenderGrid(painter,
                             h_image,
                             _gd.movie.frame[index].time_start,
                             _gd.movie.frame[index].time_end);
@@ -1280,9 +1280,9 @@ void HorizView::_doRenderInvalidImages(int index, VertView *vert)
  *        and its associated overlays and labels  labels. 
  */
 
-int HorizView::_controlRendering(int page,
-                                 time_t start_time,
-                                 time_t end_time)
+int HorizView::_controlRenderGrid(int page,
+                                  time_t start_time,
+                                  time_t end_time)
 {
 
   if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
