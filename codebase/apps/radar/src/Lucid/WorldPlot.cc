@@ -151,12 +151,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
   
-  _createImage(_gridImage);
-  _createImage(_overlayImage);
-  // _gridImage = nullptr;
-  // _overlayImage = nullptr;
-  // _gridImage = new QImage(*rhs._gridImage);
-  // _overlayImage = new QImage(*rhs._overlayImage);
+  _gridImage = nullptr;
+  _overlayImage = nullptr;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;

@@ -759,8 +759,6 @@ int Lucid::_initDataSpace()
     iret = -1;
   }
 
-  cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
-  
   // initialize wind Rendering
 
   _gd.layers.wind_vectors = _params.winds_on_at_startup;
@@ -879,8 +877,6 @@ int Lucid::_initGrids()
   
   for (int ifld = 0; ifld < _params.fields_n; ifld++) {
 
-    cerr << "XXXXXXXXXXXXXXXXXXXXXXXX ifld: " << ifld << endl;
-    
     Params::field_t &fld = _params._fields[ifld];
     
     /* get space for data info */
@@ -897,6 +893,8 @@ int Lucid::_initGrids()
         if(mread->button_name[jj] == '_') {
           mread->button_name[jj] = ' ';
         }
+      } // jj
+      for(int jj = (int) mread->legend_name.size() -1 ; jj >= 0; jj--) {
         if(mread->legend_name[jj] == '_') {
           mread->legend_name[jj] = ' ';
         }

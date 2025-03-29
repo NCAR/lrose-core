@@ -337,7 +337,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
-  // _drawOverlays(painter);
+  _drawOverlays(painter);
 
   //if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
