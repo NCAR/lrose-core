@@ -33,21 +33,13 @@
 ///////////////////////////////////////////////////////////////
 
 #include "GlobalData.hh"
-
-#ifdef JUNK
-#include <toolsa/Path.hh>
-#include <toolsa/TaStr.hh>
-#include <shapelib/shapefil.h>
-#include <string>
-#include <iostream>
-#include <algorithm>
-#endif
-
-using namespace std;
+#include <toolsa/toolsa_macros.h>
 
 // singleton instance is global
 
 GlobalData *GlobalData::_instance = (GlobalData *) NULL;
+
+using namespace std;
 
 //////////////////////////////////////////////////////
 // Constructor

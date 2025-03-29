@@ -314,32 +314,6 @@ class DLL_EXPORT HorizView : public QWidget
   
  protected:
 
-  /////////////////////////
-  // Protected constants //
-  /////////////////////////
-
-  /**
-   * @brief The sine of 45 degrees.  Used for positioning the labels on the
-   *        45 degree lines.
-   */
-
-  static const double SIN_45;
-  
-  /**
-   * @brief The sine of 30 degrees.  Used for positioning the azimuth lines on
-   *        the 30 degree lines.
-   */
-
-  static const double SIN_30;
-  
-  /**
-   * @brief The cosine of 30 degrees.  Used for positioning the azimuth lines on
-   *        the 30 degree lines.
-   */
-
-  static const double COS_30;
-  
-
   ///////////////////////
   // Protected members //
   ///////////////////////

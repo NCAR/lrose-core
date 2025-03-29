@@ -52,12 +52,15 @@ using namespace std;
 
 WorldPlot::WorldPlot() :
         _params(Params::Instance()),
-        _gd(GlobalData::Instance())
+        _gd(GlobalData::Instance()),
+        _scaledLabel(ScaledLabel::DistanceEng)
 {
 
   _widthPixels = 1000;
   _heightPixels = 1000;
+
   _gridImage = nullptr;
+  _overlayImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -114,8 +117,9 @@ WorldPlot::WorldPlot() :
 // copy constructor
 
 WorldPlot::WorldPlot(const WorldPlot &rhs):
-  _params(Params::Instance()),
-  _gd(GlobalData::Instance())
+        _params(Params::Instance()),
+        _gd(GlobalData::Instance()),
+        _scaledLabel(ScaledLabel::DistanceEng)
 
 {
   _copy(rhs);
@@ -146,6 +150,13 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
+  
+  _createImage(_gridImage);
+  _createImage(_overlayImage);
+  // _gridImage = nullptr;
+  // _overlayImage = nullptr;
+  // _gridImage = new QImage(*rhs._gridImage);
+  // _overlayImage = new QImage(*rhs._overlayImage);
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
@@ -934,8 +945,8 @@ void WorldPlot::drawText(QPainter &painter, const string &text,
 	
   QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
   QRect bRect(painter.fontMetrics().boundingRect(ixx, iyy,
-                                    tRect.width() + 2, tRect.height() + 2,
-                                    flags, text.c_str()));
+                                                 tRect.width() + 2, tRect.height() + 2,
+                                                 flags, text.c_str()));
     
   painter.drawText(bRect, flags, text.c_str());
     
@@ -959,8 +970,8 @@ void WorldPlot::drawRotatedText(QPainter &painter, const string &text,
 
   QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
   QRect bRect(painter.fontMetrics().boundingRect(0, 0,
-                                    tRect.width() + 2, tRect.height() + 2,
-                                    flags, text.c_str()));
+                                                 tRect.width() + 2, tRect.height() + 2,
+                                                 flags, text.c_str()));
     
   painter.drawText(bRect, flags, text.c_str());
 
@@ -2551,12 +2562,12 @@ const QImage *WorldPlot::getGridImage()
   return _gridImage;
 }
 
-const QImage *WorldPlot::getMapImage()
+const QImage *WorldPlot::getOverlayImage()
 {
-  if (!_mapImage) {
-    _createImage(_mapImage);
+  if (!_overlayImage) {
+    _createImage(_overlayImage);
   }
-  return _mapImage;
+  return _overlayImage;
 }
 
 /////////////////////////////////////////////////////
@@ -2631,6 +2642,10 @@ void WorldPlot::renderGridRect(int page,
       fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
     } // ix
   } // iy
+
+  // fill margins with background color
+
+  fillMargins(painter, _params.background_color);
 
 #ifdef NOTYET
   
@@ -2942,12 +2957,12 @@ void WorldPlot::renderGridDistorted(int page,
 
   // compute the vertices
 
-  cerr << "=============>> Data proj" << endl;
-  mr->proj->print(cerr);
-  cerr << "==================================================" << endl;
-  cerr << "=============>> Display proj" << endl;
-  _proj.print(cerr);
-  cerr << "==================================================" << endl;
+  // cerr << "=============>> Data proj" << endl;
+  // mr->proj->print(cerr);
+  // cerr << "==================================================" << endl;
+  // cerr << "=============>> Display proj" << endl;
+  // _proj.print(cerr);
+  // cerr << "==================================================" << endl;
   
   double yy = lowy;
   for(int iy = 0; iy <= ny; iy++, yy += dy) {
@@ -2996,6 +3011,10 @@ void WorldPlot::renderGridDistorted(int page,
     } // ix
   } // iy
   
+  // fill margins with background color
+
+  fillMargins(painter, _params.background_color);
+
 }
 
 /////////////////////////////////////////////////////
@@ -3092,7 +3111,293 @@ void WorldPlot::renderGridRadarPolar(int page,
     } // ix
   } // iy
   
+  // fill margins with background color
+
+  fillMargins(painter, _params.background_color);
+
 }
+
+/////////////////////////////////////////////////////
+// draw the overlays - maps, range rings etc.
+
+void WorldPlot::drawOverlays(bool ringsEnabled,
+                             bool azLinesEnabled,
+                             double ringSpacing)
+  
+{
+
+  // check that overlay canvas is the correct size
+  
+  _createImage(_overlayImage);
+  
+  // make transparent
+  
+  _overlayImage->fill(Qt::transparent);
+  
+  // render maps
+  
+  QPainter painter(_overlayImage);
+  _drawMaps(painter);
+
+  // render range rings and az line
+
+  if (ringsEnabled || azLinesEnabled) {
+    _drawRangeRingsAndAzLines(painter,
+                              ringsEnabled, azLinesEnabled,
+                              ringSpacing);
+  }
+
+}
+
+/*************************************************************************
+ * draw map overlays
+ */
+
+void WorldPlot::_drawMaps(QPainter &painter)
+
+{
+
+  painter.save();
+
+  // Loop throughs maps
+  
+  for(int ii = _gd.num_map_overlays - 1; ii >= 0; ii--) {
+    
+    if(!_gd.overlays[ii]->active ||
+       (_gd.overlays[ii]->detail_thresh_min > _gd.h_win.km_across_screen) ||
+       (_gd.overlays[ii]->detail_thresh_max < _gd.h_win.km_across_screen))  {
+      continue;
+    }
+      
+    MapOverlay_t *ov = _gd.overlays[ii];
+
+    // create the pen for this map
+    
+    QPen pen;
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(ov->line_width);
+    pen.setColor(ov->color_name.c_str());
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(pen);
+    
+    QFont mfont(painter.font());
+    mfont.setPointSizeF(_params.maps_font_size);
+    painter.setFont(mfont);
+    
+    // Draw labels
+    
+    for(int jj = 0; jj < ov->num_labels; jj++) {
+      if(ov->geo_label[jj]->proj_x <= -32768.0) {
+        continue;
+      }
+      drawText(painter,
+               ov->geo_label[jj]->display_string,
+               ov->geo_label[jj]->proj_x,
+               ov->geo_label[jj]->proj_y,
+               Qt::AlignCenter);
+    } // jj
+    
+    // draw icons
+    
+    for(int jj = 0; jj < ov->num_icons; jj++) {
+      
+      Geo_feat_icon_t *ic = ov->geo_icon[jj];
+      if(ic->proj_x <= -32768.0) {
+        continue;
+      }
+      
+      int ixx = getIxPixel(ic->proj_x);
+      int iyy = getIyPixel(ic->proj_y);
+
+      // draw the icon
+
+      int minIy = 1.0e6;
+      int maxIy = -1.0e6;
+      for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {
+        if ((ic->icon->x[kk] == 32767) ||
+            (ic->icon->x[kk+1] == 32767)) {
+          continue;
+        }
+        double iconScale = 1.0;
+        int ix1 = ixx + (int) (ic->icon->x[kk] * iconScale + 0.5);
+        int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
+        int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
+        int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
+        minIy = std::min(minIy, iy1);
+        minIy = std::min(minIy, iy2);
+        maxIy = std::max(maxIy, iy1);
+        maxIy = std::max(maxIy, iy2);
+        drawPixelLine(painter, ix1, iy1, ix2, iy2);
+      } // kk
+      
+      // add icon label
+      
+      painter.save();
+      if(_params.map_font_background == Params::MAP_FONT_BACKGROUND_TRANSPARENT) {
+        painter.setBackgroundMode(Qt::TransparentMode);
+      } else {
+        painter.setBackgroundMode(Qt::OpaqueMode);
+      }
+      // int alignment = Qt::AlignHCenter | Qt::AlignBottom;
+      // if (ic->text_y < 0) {
+      //   alignment = Qt::AlignHCenter | Qt::AlignTop;
+      // }
+      // alignment = Qt::AlignCenter;
+      if (ic->text_y < 0) {
+        drawTextScreenCoords(painter, ic->label,
+                             ixx + ic->text_x,
+                             maxIy - ic->text_y,
+                             Qt::AlignCenter);
+      } else {
+        drawTextScreenCoords(painter, ic->label,
+                             ixx + ic->text_x,
+                             minIy - ic->text_y,
+                             Qt::AlignCenter);
+      }
+      // cerr << "IIIIIIII text_x, text_y, label: "
+      //      << ic->text_x << ", " << ic->text_y
+      //      << ", " << ic->label << endl;
+      painter.restore();
+      
+    } // jj
+
+    // draw polylines
+    
+    for(int jj = 0; jj < ov->num_polylines; jj++) {
+      
+      Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
+      QPainterPath polyPath;
+      bool doMove = true;
+      
+      for(int ll = 0; ll < poly->num_points; ll++) {
+        
+        double proj_x = poly->proj_x[ll];
+        double proj_y = poly->proj_y[ll];
+        
+        bool validPoint = true;
+        if (fabs(proj_x) > 32767 || fabs(proj_y) > 32767) {
+          validPoint = false;
+        }
+
+        if (!validPoint || (ll == 0)) {
+          doMove = true;
+        }
+
+        if (validPoint) {
+          QPointF point = getPixelPointF(proj_x, proj_y);
+          if (doMove) {
+            polyPath.moveTo(point);
+            doMove = false;
+          } else {
+            polyPath.lineTo(point);
+          }
+        }
+
+      } // ll
+
+      drawPathClippedScreenCoords(painter, polyPath);
+      // drawPath(painter, polyPath);
+
+    } // jj
+      
+  } // ii
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * _drawRingsAndAzLines()
+ *
+ * draw rings for polar type data fields
+ */
+
+void WorldPlot::_drawRangeRingsAndAzLines(QPainter &painter,
+                                          bool ringsEnabled,
+                                          bool azLinesEnabled,
+                                          double ringSpacing)
+{
+
+  // save painter state
+
+  painter.save();
+  
+  // Draw rings
+  
+  if (ringSpacing > 0.0 && ringsEnabled) {
+    
+    // Set up the painter
+    
+    painter.save();
+    painter.setTransform(getTransform());
+    painter.setPen(_params.grid_and_range_ring_color);
+    
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
+    double ringRange = ringSpacing;
+    while (ringRange <= _params.max_ring_range) {
+      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
+      painter.drawEllipse(rect);
+      ringRange += ringSpacing;
+    }
+    painter.restore();
+
+    // Draw the labels
+    
+    QFont font = painter.font();
+    font.setPointSizeF(_params.range_ring_label_font_size);
+    painter.setFont(font);
+    // painter.setWindow(0, 0, width(), height());
+    
+    ringRange = ringSpacing;
+    while (ringRange <= _params.max_ring_range) {
+      double labelPos = ringRange * Constants::LUCID_SIN_45;
+      const string &labelStr = _scaledLabel.scale(ringRange);
+      drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+      drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+      drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+      drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+      ringRange += ringSpacing;
+    }
+
+  } /* endif - draw rings */
+
+  // Draw the azimuth lines
+  
+  if (azLinesEnabled) {
+    
+    // Set up the painter
+    
+    painter.save();
+    painter.setPen(_params.grid_and_range_ring_color);
+  
+    // Draw the lines along the X and Y axes
+
+    drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
+    drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
+
+    // Draw the lines along the 30 degree lines
+
+    double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
+    double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
+    
+    drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
+    drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
+    drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
+    drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+    
+    painter.restore();
+
+  }
+
+  painter.restore();
+
+}
+  
 
 
 /////////////////////////////////////////////////////

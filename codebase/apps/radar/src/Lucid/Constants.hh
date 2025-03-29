@@ -89,6 +89,10 @@ public:
   static constexpr double LUCID_KM_PER_DEG_AT_EQ = 111.198487;
   static constexpr double LUCID_PSEUDO_RADIUS = 8533.0; // 4/3 earth radius
 
+  static constexpr double LUCID_SIN_45 = 0.707106781;
+  static constexpr double LUCID_SIN_30 = 0.5;
+  static constexpr double LUCID_COS_30 = 0.866025404;
+
 };
 
 #endif

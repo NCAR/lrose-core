@@ -44,10 +44,6 @@
 
 using namespace std;
 
-const double HorizView::SIN_45 = sin(45.0 * DEG_TO_RAD);
-const double HorizView::SIN_30 = sin(30.0 * DEG_TO_RAD);
-const double HorizView::COS_30 = cos(30.0 * DEG_TO_RAD);
-
 HorizView::HorizView(QWidget* parent,
                      GuiManager &manager) :
         QWidget(parent),
@@ -294,16 +290,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     _savedZooms.clear();
   }
 
-  // make image from this widget, fill canvas with background color
-
-  // const QImage *fieldImage = new QImage(size(), QImage::Format_RGB32);
-  // cerr << "IIIIIIIIIIIIIIIIIII width, height: " << _fieldImage->width() << ", " << _fieldImage->height() << endl;
-  // // QPixmap pixmap = grab();
-  // // QImage* image = new QImage(pixmap.toImage());
-  // QPainter ipainter(_fieldImage);
-  // _zoomWorld.fillCanvas(ipainter, _params.background_color);
-  
-  // render data grids to image
+  // render data grids to grid image in WorldPlot
   
   _renderGrids();
   
@@ -314,13 +301,19 @@ void HorizView::paintEvent(QPaintEvent *event)
     _renderInvalidImages = false;
   }
 
-  // copy image back into this widget
+  // render overlays to image in WorldPlot
+  
+  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
+  
+  // copy images back into this widget
+
   QPainter painter(this);
   painter.drawImage(0, 0, *_zoomWorld.getGridImage());
+  // painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
 
   // set axis areas to background color
 
-  _zoomWorld.fillMargins(painter, _params.background_color);
+  // _zoomWorld.fillMargins(painter, _params.background_color);
 
   // title
 
@@ -344,7 +337,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
-  _drawOverlays(painter);
+  // _drawOverlays(painter);
 
   //if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
@@ -728,7 +721,7 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
     
     ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * HorizView::SIN_45;
+      double labelPos = ringRange * Constants::LUCID_SIN_45;
       const string &labelStr = _scaledLabel.scale(ringRange);
       _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
       _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
@@ -797,8 +790,8 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
 
     // Draw the lines along the 30 degree lines
 
-    double end_pos1 = HorizView::SIN_30 * _maxRangeKm;
-    double end_pos2 = HorizView::COS_30 * _maxRangeKm;
+    double end_pos1 = Constants::LUCID_SIN_30 * _maxRangeKm;
+    double end_pos2 = Constants::LUCID_COS_30 * _maxRangeKm;
     
     _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);

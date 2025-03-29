@@ -53,6 +53,7 @@
 #include "GlobalData.hh"
 #include "Params.hh"
 #include "MdvReader.hh"
+#include "ScaledLabel.hh"
 
 class ColorMap;
 
@@ -586,10 +587,14 @@ public:
                             time_t end_time,
                             bool is_overlay_field);
 
+  void drawOverlays(bool ringsEnabled,
+                    bool azLinesEnabled,
+                    double ringSpacing);
+  
   // get images after rendering
   
   const QImage *getGridImage();
-  const QImage *getMapImage();
+  const QImage *getOverlayImage();
 
   // print
   
@@ -613,7 +618,7 @@ private:
   // images for rendering
   
   QImage *_gridImage;
-  QImage *_mapImage;
+  QImage *_overlayImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -700,6 +705,8 @@ private:
   string _axisTextColor;
   string _gridColor;
   
+  ScaledLabel _scaledLabel;
+
   // axis ticks
 
   vector<double> _topTicks;
@@ -719,6 +726,12 @@ private:
   // create images for rendering
   
   void _createImage(QImage* &image);
+  
+  void _drawMaps(QPainter &painter);
+  void _drawRangeRingsAndAzLines(QPainter &painter,
+                                 bool ringsEnabled,
+                                 bool azLinesEnabled,
+                                 double ringSpacing);
   
 };
 

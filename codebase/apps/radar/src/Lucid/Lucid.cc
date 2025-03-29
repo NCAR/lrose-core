@@ -758,6 +758,8 @@ int Lucid::_initDataSpace()
   if (_initGrids()) {
     iret = -1;
   }
+
+  cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
   
   // initialize wind Rendering
 
@@ -876,6 +878,8 @@ int Lucid::_initGrids()
   }
   
   for (int ifld = 0; ifld < _params.fields_n; ifld++) {
+
+    cerr << "XXXXXXXXXXXXXXXXXXXXXXXX ifld: " << ifld << endl;
     
     Params::field_t &fld = _params._fields[ifld];
     
