@@ -1104,7 +1104,7 @@ void VertView::smartBrush(int xPixel, int yPixel)
   QImage qImage;
   qImage.load("/h/eol/brenda/octopus.jpg");
   // get the Image from somewhere ...   
-  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->convertToFormat(QImage::Format_ARGB32);
   //qImage->invertPixels();
   QPainter painter(this);
   painter.drawImage(0, 0, qImage);

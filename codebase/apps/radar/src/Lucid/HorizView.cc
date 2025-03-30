@@ -69,17 +69,22 @@ HorizView::HorizView(QWidget* parent,
 
   // Set up the background color
 
-  QPalette new_palette = palette();
-  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
-  setPalette(new_palette);
+  // QPalette new_palette = palette();
+  // new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+  // setPalette(new_palette);
   
-  setBackgroundRole(QPalette::Dark);
-  setAutoFillBackground(true);
-  setAttribute(Qt::WA_OpaquePaintEvent);
+  // setBackgroundRole(QPalette::Dark);
+  // setAutoFillBackground(true);
+  // setAttribute(Qt::WA_OpaquePaintEvent);
 
+  setAttribute(Qt::WA_TranslucentBackground);
+  setAutoFillBackground(false);
+  
   // create the rubber band
 
-  _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
+  // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+  _rubberBand = new TransparentRubberBand(QRubberBand::Rectangle, this);
+  // _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
   // _rubberBand->setStyleSheet("background: rgba(0, 0, 255, 50); border: 2px solid blue;");
   // _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
   // _rubberBand->setAttribute(Qt::WA_NoSystemBackground);
@@ -88,7 +93,7 @@ HorizView::HorizView(QWidget* parent,
 
   // Allow the widget to get focus
 
-  setFocusPolicy(Qt::StrongFocus);
+  // setFocusPolicy(Qt::StrongFocus);
 
   // Allow the size_t type to be passed to slots
 
@@ -143,6 +148,9 @@ HorizView::HorizView(QWidget* parent,
 
   startTimer(50);
 
+  TestWindow *tw = new TestWindow;
+  tw->show();
+  
 }
 
 /*************************************************************************
@@ -309,7 +317,7 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   QPainter painter(this);
   painter.drawImage(0, 0, *_zoomWorld.getGridImage());
-  // painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
+  painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
 
   // set axis areas to background color
 
@@ -337,7 +345,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
-  _drawOverlays(painter);
+  // _drawOverlays(painter);
 
   //if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);

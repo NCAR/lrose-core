@@ -88,6 +88,125 @@ protected:
   }
 };
 
+class TransparentRubberBand : public QRubberBand
+{
+public:
+  TransparentRubberBand(Shape s, QWidget* parent = nullptr)
+          : QRubberBand(s, parent) {}
+  
+protected:
+  void paintEvent(QPaintEvent* event) override
+  {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    // Draw semi-transparent fill
+    painter.setBrush(QColor(0, 0, 255, 64)); // 64 = ~25% opacity
+    painter.setPen(QPen(Qt::blue, 1));
+    painter.drawRect(rect().adjusted(0, 0, -1, -1)); // avoid overshooting bounds
+  }
+};
+
+class TestWindow : public QWidget {
+
+public:
+
+  TestWindow(QWidget *parent = nullptr) :
+          QWidget(parent), _rb(nullptr)
+  {
+
+    setAttribute(Qt::WA_TranslucentBackground);
+    setAutoFillBackground(false);
+    resize(400, 300);
+    // setFocusPolicy(Qt::StrongFocus);
+  
+    // _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
+    // _rb->setGeometry(100, 80, 150, 100);
+    // _rb->show();
+
+  }
+  
+  void mousePressEvent(QMouseEvent *e) override
+  {
+
+#if QT_VERSION >= 0x060000
+    QPointF pos(e->position());
+#else
+    QPointF pos(e->pos());
+#endif
+
+    origin.setX(pos.x());
+    origin.setY(pos.y());
+    
+    if (!_rb) {
+      // _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
+      _rb = new QRubberBand(QRubberBand::Rectangle, this);
+    }
+    _rb->setGeometry(QRect(origin, QSize()));
+    _rb->show();
+    
+    // _rb->setGeometry(pos.x(), pos.y(), 0, 0);
+    // _rb->show();
+    
+    _mousePressX = origin.x();
+    _mousePressY = origin.y();
+
+    update();
+    
+  }
+
+  void mouseMoveEvent(QMouseEvent * e) override
+  {
+     
+    // Zooming with the mouse
+    
+#if QT_VERSION >= 0x060000
+    QPointF pos(e->position());
+#else
+    QPointF pos(e->pos());
+#endif
+    
+    if (_rb) {
+      QRect rect(origin.x(), origin.y(),
+                 pos.x() - origin.x(),
+                 pos.y() - origin.y());
+      _rb->setGeometry(rect.normalized());
+    }
+    
+    update();
+
+  }
+
+  void mouseReleaseEvent(QMouseEvent *e) override
+  {
+    
+    // hide the rubber band
+
+    if (_rb) {
+      _rb->hide();
+    }
+    update();
+    
+  }
+
+protected:
+  
+  void paintEvent(QPaintEvent *) override {
+    QPainter p(this);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(rect(), Qt::transparent);
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    p.setPen(Qt::red);
+    p.drawRect(50, 50, 200, 150); // draw a rectangle
+  }
+
+  // TransparentRubberBand *_rb;
+  QRubberBand *_rb;
+  QPoint origin;
+  int _mousePressX, _mousePressY;
+  
+};
+
 // Widget representing a horizontal view
 
 class DLL_EXPORT HorizView : public QWidget
@@ -417,7 +536,9 @@ class DLL_EXPORT HorizView : public QWidget
    * @brief Rubber band for zooming.
    */
 
-  CustomRubberBand *_rubberBand;
+  // QRubberBand *_rubberBand;
+  TransparentRubberBand *_rubberBand;
+  // CustomRubberBand *_rubberBand;
 
   /**
    * @brief The current ring spacing in km.  This value is changed when we

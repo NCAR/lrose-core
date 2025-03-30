@@ -199,6 +199,9 @@ GuiManager::GuiManager() :
   last_tick = 0;
   client_seq_num = 0;
 
+  setAttribute(Qt::WA_TranslucentBackground);
+  setAutoFillBackground(false);
+
   // QApplication::setStyle("Fusion");
 
 }

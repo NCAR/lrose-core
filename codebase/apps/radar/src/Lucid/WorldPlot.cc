@@ -2538,12 +2538,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 void WorldPlot::_createImage(QImage* &image)
 {
   if (image == nullptr) {
-    image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+    image = new QImage(_widthPixels, _heightPixels, QImage::Format_ARGB32);
   } else {
     if (image->width() != _widthPixels ||
         image->height() != _heightPixels) {
       delete image;
-      image = new QImage(_widthPixels, _heightPixels, QImage::Format_RGB32);
+      image = new QImage(_widthPixels, _heightPixels, QImage::Format_ARGB32);
     }
   }
 }
