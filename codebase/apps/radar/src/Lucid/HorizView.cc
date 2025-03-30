@@ -44,6 +44,8 @@
 
 using namespace std;
 
+// TestWindow - testing rubber banding behavior for zooms
+
 class TestWindow : public QWidget {
 
 public:
@@ -153,7 +155,7 @@ HorizView::HorizView(QWidget* parent,
         _gridsEnabled(false),
         _angleLinesEnabled(false),
         _scaledLabel(ScaledLabel::DistanceEng),
-        _rubberBand(NULL),
+        _rubberBand(nullptr),
         _ringSpacing(10.0)
         
 {
@@ -178,7 +180,7 @@ HorizView::HorizView(QWidget* parent,
   // create the rubber band
 
   // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
-  _rubberBand = new TransparentRubberBand(QRubberBand::Rectangle, this);
+  // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
   // _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
   // _rubberBand->setStyleSheet("background: rgba(0, 0, 255, 50); border: 2px solid blue;");
   // _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
@@ -254,6 +256,10 @@ HorizView::HorizView(QWidget* parent,
 
 HorizView::~HorizView()
 {
+
+  if (!_rubberBand) {
+    delete _rubberBand;
+  }
 
 }
 
@@ -392,9 +398,9 @@ void HorizView::paintEvent(QPaintEvent *event)
     _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
     _savedZooms.clear();
   }
-
-  // render data grids to grid image in WorldPlot
   
+  // render data grids to grid image in WorldPlot
+
   _renderGrids();
   
   // render invalid images
@@ -438,8 +444,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
   
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
   // _drawOverlays(painter);
 
   //if there are no points, this does nothing
@@ -1964,7 +1968,9 @@ void HorizView::mousePressEvent(QMouseEvent *e)
 
   } else {
 
-
+    if (!_rubberBand) {
+      _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+    }
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
 
@@ -2020,8 +2026,10 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   _zoomCornerY = _mousePressY + moveY;
 
   newRect = newRect.normalized();
-  
-  _rubberBand->setGeometry(newRect);
+
+  if (_rubberBand) {
+    _rubberBand->setGeometry(newRect);
+  }
 
 }
 
@@ -2115,8 +2123,11 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   }
     
   // hide the rubber band
+
+  if (_rubberBand) {
+    _rubberBand->hide();
+  }
   
-  _rubberBand->hide();
   update();
 
 }

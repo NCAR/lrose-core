@@ -436,8 +436,8 @@ class DLL_EXPORT HorizView : public QWidget
    * @brief Rubber band for zooming.
    */
 
-  // QRubberBand *_rubberBand;
-  TransparentRubberBand *_rubberBand;
+  QRubberBand *_rubberBand;
+  // TransparentRubberBand *_rubberBand;
   // CustomRubberBand *_rubberBand;
 
   /**
