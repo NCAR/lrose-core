@@ -156,7 +156,6 @@ HorizView::HorizView(QWidget* parent,
         _ringsEnabled(false),
         _gridsEnabled(false),
         _angleLinesEnabled(false),
-        _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(nullptr),
         _ringSpacing(10.0)
         

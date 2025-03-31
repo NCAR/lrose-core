@@ -70,7 +70,6 @@ VertView::VertView(QWidget* parent,
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridsEnabled(false),
-        _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0)
         
 {

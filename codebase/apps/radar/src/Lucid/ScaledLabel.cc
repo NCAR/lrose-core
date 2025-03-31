@@ -30,58 +30,70 @@
 #include <math.h>
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
+// Create a label that is scaled in engineering units. At
+// construction, ScaledLabel is instructed on the type of
+// conversion it will perform. Subsequent calls to scale(double)
+// will return a string, scaled accordingly.
 //////////////////////////////////////////////////////////////////////
 
-ScaledLabel::ScaledLabel(ScalingType t)
+//////////////////////////////////////////////////////////////////////
+// Constructor
+
+ScaledLabel::ScaledLabel()
 {
-    m_scalingType = t;
-    m_stringStr << std::setiosflags(std::ios_base::fixed);
-    
+
+  m_stringStr << std::setiosflags(std::ios_base::fixed);
+
 }
+
+//////////////////////////////////////////////////////////////////////
+// Destructor
 
 ScaledLabel::~ScaledLabel()
 {
-    
+  
 }
 
 //////////////////////////////////////////////////////////////////////
-std::string
-ScaledLabel::scale(double value) {
-    
-    // value is in km. 
-    
-    double exp = floor(log10(value));
-    std::string units;
-    
-    double scaleFactor;
-    if (exp < -3) {
-        units = "mm";
-        scaleFactor = 0.000001;
-    } else {
-        if (exp < 0) {
-            units = "m";
-            scaleFactor = 0.001;
-        } else {
-            units = "km";
-            scaleFactor = 1;
-        }
-    }
-    
-    double m = value/scaleFactor;
-    if (m >=100) {
-        m_stringStr << std::setprecision(0);
-    } else { 
-        if (m >= 10.0) {
-            m_stringStr << std::setprecision(1);
-        } else {
-            m_stringStr << std::setprecision(2);
-        }
-    }
+// Return scaled string
 
-    m_stringStr.str("");
-    m_stringStr << m << units;
-    return m_stringStr.str();
-    
+//////////////////////////////////////////////////////////////////////
+std::string ScaledLabel::scale(double value)
+{
+  
+  // value is in km. 
+  
+  double exp = floor(log10(value));
+  std::string units;
+  
+  double scaleFactor;
+  if (exp < -3) {
+    units = "mm";
+    scaleFactor = 0.000001;
+  } else {
+    if (exp < 0) {
+      units = "m";
+      scaleFactor = 0.001;
+    } else {
+      units = "km";
+      scaleFactor = 1;
+    }
+  }
+  
+  double m = value/scaleFactor;
+  if (m >=100) {
+    m_stringStr << std::setprecision(0);
+  } else { 
+    if (m >= 10.0) {
+      m_stringStr << std::setprecision(1);
+    } else {
+      m_stringStr << std::setprecision(2);
+    }
+  }
+  
+  m_stringStr.str("");
+  m_stringStr << m << units;
+  return m_stringStr.str();
+  
 }
 

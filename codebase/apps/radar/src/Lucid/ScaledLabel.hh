@@ -40,28 +40,24 @@
 class ScaledLabel  
 {
 public:
-  enum ScalingType {
-    /// Scale for distance, in engineering units, 
-    /// with the appropriate units designation appended.
-    DistanceEng
-  };
-  
+
   // Constructor. 
-  /// The type of scaling to apply.
-  ScaledLabel(ScalingType t);
+
+  ScaledLabel();
   
   //Destructor
+
   virtual ~ScaledLabel();
   
   /// Return a string containing the scaled representation.
   /// Pass in the value to be scaled.
+
   std::string scale(double scale);
   
 protected:
-  /// The type of scaling we are performing.
-  ScalingType m_scalingType;
-  
+
   /// A stringstream used to format numbers
+
   std::ostringstream m_stringStr;
 
 };

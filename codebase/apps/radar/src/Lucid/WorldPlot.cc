@@ -52,8 +52,7 @@ using namespace std;
 
 WorldPlot::WorldPlot() :
         _params(Params::Instance()),
-        _gd(GlobalData::Instance()),
-        _scaledLabel(ScaledLabel::DistanceEng)
+        _gd(GlobalData::Instance())
 {
 
   _widthPixels = 1000;
@@ -118,8 +117,7 @@ WorldPlot::WorldPlot() :
 
 WorldPlot::WorldPlot(const WorldPlot &rhs):
         _params(Params::Instance()),
-        _gd(GlobalData::Instance()),
-        _scaledLabel(ScaledLabel::DistanceEng)
+        _gd(GlobalData::Instance())
 
 {
   _copy(rhs);
