@@ -74,7 +74,6 @@ public:
 protected:
   void paintEvent(QPaintEvent *event) override {
     QRubberBand::paintEvent(event);
-#ifdef NOTNOW
     QPainter painter(this);
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
     // painter.setRenderHint(QPainter::Antialiasing);
@@ -84,7 +83,6 @@ protected:
     painter.setBrush(Qt::NoBrush);
     // Adjust to stay within bounds    
     painter.drawRect(rect().adjusted(0, 0, -1, -1));
-#endif
   }
 };
 
@@ -101,8 +99,8 @@ protected:
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Draw semi-transparent fill
-    painter.setBrush(QColor(0, 0, 255, 64)); // 64 = ~25% opacity
-    painter.setPen(QPen(Qt::blue, 1));
+    painter.setBrush(QColor(0, 0, 255, 32)); // 64 = ~25% opacity
+    // painter.setPen(QPen(Qt::blue, 1));
     painter.drawRect(rect().adjusted(0, 0, -1, -1)); // avoid overshooting bounds
   }
 };

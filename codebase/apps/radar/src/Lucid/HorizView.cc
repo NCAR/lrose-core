@@ -78,8 +78,9 @@ public:
     origin.setY(pos.y());
     
     if (!_rb) {
-      // _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
-      _rb = new QRubberBand(QRubberBand::Rectangle, this);
+      _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
+      // _rb = new QRubberBand(QRubberBand::Rectangle, this);
+      // _rb = new CustomRubberBand(QRubberBand::Rectangle, this);
     }
     _rb->setGeometry(QRect(origin, QSize()));
     _rb->show();
@@ -135,6 +136,7 @@ protected:
   }
 
   // TransparentRubberBand *_rb;
+  // CustomRubberBand *_rb;
   QRubberBand *_rb;
   QPoint origin;
   int _mousePressX, _mousePressY;
@@ -417,6 +419,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   // copy images back into this widget
 
   QPainter painter(this);
+  painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   painter.drawImage(0, 0, *_zoomWorld.getGridImage());
   painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
 
@@ -430,6 +433,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // draw axes
   
+  painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   string projUnits("km");
   if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
     projUnits = "deg";
@@ -450,7 +454,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
 
   _renderFrame = false;
-  
+
 }
 
 
@@ -1969,7 +1973,7 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   } else {
 
     if (!_rubberBand) {
-      _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+      _rubberBand = new TransparentRubberBand(QRubberBand::Rectangle, this);
     }
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
