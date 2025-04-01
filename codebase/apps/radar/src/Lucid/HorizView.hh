@@ -64,47 +64,6 @@ class GuiManager;
 class VertView;
 class QLabel;
 
-// custom rubber band for transparent rectangle
-
-class CustomRubberBand : public QRubberBand {
-public:
-  CustomRubberBand(Shape shape, QWidget *parent = nullptr)
-          : QRubberBand(shape, parent) {}
-  
-protected:
-  void paintEvent(QPaintEvent *event) override {
-    QRubberBand::paintEvent(event);
-    QPainter painter(this);
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    // painter.setRenderHint(QPainter::Antialiasing);
-    // Draw border
-    // painter.setPen(QColor(0xff, 0xff, 0xff));
-    // Transparent background
-    painter.setBrush(Qt::NoBrush);
-    // Adjust to stay within bounds    
-    painter.drawRect(rect().adjusted(0, 0, -1, -1));
-  }
-};
-
-class TransparentRubberBand : public QRubberBand
-{
-public:
-  TransparentRubberBand(Shape s, QWidget* parent = nullptr)
-          : QRubberBand(s, parent) {}
-  
-protected:
-  void paintEvent(QPaintEvent* event) override
-  {
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    // Draw semi-transparent fill
-    painter.setBrush(QColor(0, 0, 255, 32)); // 64 = ~25% opacity
-    // painter.setPen(QPen(Qt::blue, 1));
-    painter.drawRect(rect().adjusted(0, 0, -1, -1)); // avoid overshooting bounds
-  }
-};
-
 // Widget representing a horizontal view
 
 class DLL_EXPORT HorizView : public QWidget

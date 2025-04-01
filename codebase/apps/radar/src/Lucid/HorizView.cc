@@ -49,107 +49,6 @@
 
 using namespace std;
 
-// TestWindow - testing rubber banding behavior for zooms
-
-class TestWindow : public QWidget {
-
-public:
-
-  TestWindow(QWidget *parent = nullptr) :
-          QWidget(parent), _rb(nullptr)
-  {
-
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAutoFillBackground(false);
-    resize(400, 300);
-    // setFocusPolicy(Qt::StrongFocus);
-  
-    // _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
-    // _rb->setGeometry(100, 80, 150, 100);
-    // _rb->show();
-
-  }
-  
-  void mousePressEvent(QMouseEvent *e) override
-  {
-
-#if QT_VERSION >= 0x060000
-    QPointF pos(e->position());
-#else
-    QPointF pos(e->pos());
-#endif
-
-    origin.setX(pos.x());
-    origin.setY(pos.y());
-    
-    if (!_rb) {
-      _rb = new QRubberBand(QRubberBand::Rectangle, this);
-      // _rb = new QRubberBand(QRubberBand::Rectangle, this);
-      // _rb = new CustomRubberBand(QRubberBand::Rectangle, this);
-    }
-    _rb->setGeometry(QRect(origin, QSize()));
-    _rb->show();
-    
-    // _rb->setGeometry(pos.x(), pos.y(), 0, 0);
-    // _rb->show();
-    
-    _mousePressX = origin.x();
-    _mousePressY = origin.y();
-
-  }
-
-  void mouseMoveEvent(QMouseEvent * e) override
-  {
-     
-    // Zooming with the mouse
-    
-#if QT_VERSION >= 0x060000
-    QPointF pos(e->position());
-#else
-    QPointF pos(e->pos());
-#endif
-    
-    if (_rb) {
-      QRect rect(origin.x(), origin.y(),
-                 pos.x() - origin.x(),
-                 pos.y() - origin.y());
-      _rb->setGeometry(rect.normalized());
-    }
-    
-  }
-
-  void mouseReleaseEvent(QMouseEvent *e) override
-  {
-    
-    // hide the rubber band
-
-    if (_rb) {
-      _rb->hide();
-    }
-    
-  }
-
-protected:
-  
-  void paintEvent(QPaintEvent *) override {
-
-    QPainter p(this);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(rect(), Qt::transparent);
-    p.setBrush(Qt::blue);
-    p.drawRect(50, 50, 200, 150); // draw a rectangle
-    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    p.setPen(Qt::red);
-    p.drawRect(50, 50, 200, 150); // draw a rectangle
-
-  }
-
-  QRubberBand *_rb;
-  QPoint origin;
-  int _mousePressX, _mousePressY;
-  
-};
-
 HorizView::HorizView(QWidget* parent,
                      GuiManager &manager) :
         QWidget(parent),
@@ -257,9 +156,6 @@ HorizView::HorizView(QWidget* parent,
 
   // startTimer(50);
 
-  TestWindow *tw = new TestWindow;
-  tw->show();
-  
 }
 
 /*************************************************************************
@@ -396,7 +292,7 @@ void HorizView::updatePixelScales()
 }
 
 /*************************************************************************
- * paintEvent()
+ * print current time - for debugging
  */
 
 void HorizView::_printNow(int ndecimals,
@@ -418,6 +314,10 @@ void HorizView::_printNow(int ndecimals,
   out << "." << std::setw(ndecimals) << std::setfill('0') << fraction << std::endl;
   
 }
+
+/*************************************************************************
+ * paintEvent()
+ */
 
 void HorizView::paintEvent(QPaintEvent *event)
 {
