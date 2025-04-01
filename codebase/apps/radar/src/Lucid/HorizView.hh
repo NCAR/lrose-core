@@ -536,9 +536,9 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _resetWorld(int width, int height);
   
-  // rendering
+  // render the overlays
   
-  void _performRendering();
+  void _renderOverlays();
   
   // get ray closest to click point
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
@@ -600,6 +600,10 @@ class DLL_EXPORT HorizView : public QWidget
                   bool is_overlay_field);
   
   void _doRenderInvalidImages(int index, VertView *vert);
+
+  void _printNow(int ndecimals, ostream &out);
+
+  int _count;
   
 };
 

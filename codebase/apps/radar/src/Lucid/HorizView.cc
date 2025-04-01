@@ -40,6 +40,11 @@
 #include <QPainterPath>
 #include <algorithm>
 
+#include <iostream>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
+
 // #include "GlobalData.hh"
 
 using namespace std;
@@ -78,7 +83,7 @@ public:
     origin.setY(pos.y());
     
     if (!_rb) {
-      _rb = new TransparentRubberBand(QRubberBand::Rectangle, this);
+      _rb = new QRubberBand(QRubberBand::Rectangle, this);
       // _rb = new QRubberBand(QRubberBand::Rectangle, this);
       // _rb = new CustomRubberBand(QRubberBand::Rectangle, this);
     }
@@ -127,16 +132,18 @@ public:
 protected:
   
   void paintEvent(QPaintEvent *) override {
+
     QPainter p(this);
     p.setCompositionMode(QPainter::CompositionMode_Source);
     p.fillRect(rect(), Qt::transparent);
+    p.setBrush(Qt::blue);
+    p.drawRect(50, 50, 200, 150); // draw a rectangle
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.setPen(Qt::red);
     p.drawRect(50, 50, 200, 150); // draw a rectangle
+
   }
 
-  // TransparentRubberBand *_rb;
-  // CustomRubberBand *_rb;
   QRubberBand *_rb;
   QPoint origin;
   int _mousePressX, _mousePressY;
@@ -161,6 +168,7 @@ HorizView::HorizView(QWidget* parent,
         
 {
 
+  _count = 0;
   // mode
 
   _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
@@ -244,7 +252,7 @@ HorizView::HorizView(QWidget* parent,
   // (2) get notified if user zooms in or out so the boundary can be rescaled
   // Todo: investigate implementing a listener pattern instead
 
-  startTimer(50);
+  // startTimer(50);
 
   TestWindow *tw = new TestWindow;
   tw->show();
@@ -270,7 +278,7 @@ HorizView::~HorizView()
 
 void HorizView::clear()
 {
-  _performRendering();
+  _renderOverlays();
   showOpeningFileMsg(false);
 }
 
@@ -345,6 +353,8 @@ void HorizView::configureWorldCoords(int zoomLevel)
 void HorizView::timerEvent(QTimerEvent *event)
 {
 
+  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
+  
   bool doUpdate = false;
   // bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
   // if (isBoundaryEditorVisible) {
@@ -386,13 +396,41 @@ void HorizView::updatePixelScales()
  * paintEvent()
  */
 
+void HorizView::_printNow(int ndecimals,
+                          ostream &out)
+{
+
+  // Get current system time
+  auto now = std::chrono::system_clock::now();
+  
+  // Convert to time_t for calendar time (date + hour:min:sec)
+  auto now_time_t = std::chrono::system_clock::to_time_t(now);
+  
+  // Extract fractional seconds (microseconds)
+  auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+  auto fraction = now_us.time_since_epoch().count() % 1000000; // microseconds part
+  
+  // Format and print time
+  out << std::put_time(std::localtime(&now_time_t), "%H:%M:%S");
+  out << "." << std::setw(ndecimals) << std::setfill('0') << fraction << std::endl;
+  
+}
+
 void HorizView::paintEvent(QPaintEvent *event)
 {
-  
-  if (!_renderFrame) {
-    return;
-  }
 
+  _count++;
+  
+  // if (!_renderFrame) {
+  //   if (_count > 40) {
+  //     return;
+  //   }
+  // }
+
+  _printNow(3, cerr);
+  
+  cerr << "UUUUUUUUUUUUUUUUUUUUUUU _renderFrame, count: " << _renderFrame << ", " << _count << endl;
+  
   if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
                               _gd.h_win.cmax_x, _gd.h_win.cmax_y);
@@ -401,33 +439,36 @@ void HorizView::paintEvent(QPaintEvent *event)
   }
   
   // render data grids to grid image in WorldPlot
-
-  _renderGrids();
+  
+  // _renderGrids();
   
   // render invalid images
   
-  if (_renderInvalidImages) {
-    _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
-    _renderInvalidImages = false;
-  }
-
+  // if (_renderInvalidImages) {
+  //   _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
+  //   _renderInvalidImages = false;
+  // }
+  
   // render overlays to image in WorldPlot
   
-  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
+  cerr << "VVVVVVVVVVVVVVVVVVVVVVVVVV" << endl;
   
-  // copy images back into this widget
-
+  // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
+  
+  // copy rendered images back into this widget
+  
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   painter.drawImage(0, 0, *_zoomWorld.getGridImage());
   painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
-
+  
   // set axis areas to background color
-
-  // _zoomWorld.fillMargins(painter, _params.background_color);
-
+  
+  _zoomWorld.fillMargins(painter, _params.background_color);
+  
   // title
-
+  
+  painter.setPen(_params.foreground_color);
   _zoomWorld.drawTitleTopCenter(painter, _params.horiz_frame_label);
   
   // draw axes
@@ -447,11 +488,12 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
   
-  // _drawOverlays(painter);
-
-  //if there are no points, this does nothing
+  // if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
-
+  
+  _printNow(3, cerr);
+  cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW _renderFrame: " << _renderFrame << endl;
+  
   _renderFrame = false;
 
 }
@@ -463,6 +505,8 @@ void HorizView::paintEvent(QPaintEvent *event)
 const RadxRay *HorizView::_getClosestRay(double x_km, double y_km)
 
 {
+
+#ifdef JUNK
 
   double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
   double radarDisplayAz = 90.0 - clickAz;
@@ -493,6 +537,10 @@ const RadxRay *HorizView::_getClosestRay(double x_km, double y_km)
     LOG(DEBUG) << "Error: No ray found";
   return closestRay;
 
+#endif
+
+  return nullptr;
+  
 }
 
 /*************************************************************************
@@ -1000,12 +1048,14 @@ void HorizView::_refreshImages()
     }
     
   } // ifield
-#endif
   
   // do the rendering
 
-  _performRendering();
+  _renderOverlays();
   update();
+
+#endif
+
 }
 
 /*
@@ -1197,10 +1247,24 @@ void HorizView::_initProjection()
 void HorizView::setFrameForRendering(int page, int index)
 
 {
+
   _renderFrame = true;
   _renderFramePage = page;
   _renderFrameIndex = index;
+
+  // render data grids to grid image in WorldPlot
+  
+  _renderGrids();
+  
+  // render invalid images
+  
+  if (_renderInvalidImages) {
+    _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
+    _renderInvalidImages = false;
+  }
+  
   update(); // call paint event
+  
 }
   
 //////////////////////////////////////////
@@ -1237,7 +1301,7 @@ void HorizView::_renderGrids()
                     _gd.movie.frame[_renderFrameIndex].time_end);
   
   
-  _renderFrame = false;
+  // _renderFrame = false;
 
 }
 
@@ -1794,7 +1858,7 @@ void HorizView::zoomBackView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
-  _performRendering();
+  _renderOverlays();
 }
 
 /*************************************************************************
@@ -1812,7 +1876,7 @@ void HorizView::zoomOutView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
-  _performRendering();
+  _renderOverlays();
 }
 
 /*************************************************************************
@@ -1900,7 +1964,7 @@ void HorizView::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  _performRendering();
+  _renderOverlays();
 }
 
 
@@ -1972,7 +2036,7 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   } else {
 
     if (!_rubberBand) {
-      _rubberBand = new TransparentRubberBand(QRubberBand::Rectangle, this);
+      _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
     }
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
@@ -2092,20 +2156,24 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     	}
       }
     }
-#endif
-
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
     _pointClicked = true;
     _manager.setOverlaysHaveChanged(true);
+
+#endif
     
     // get ray closest to click point
+
+#ifdef JUNK
     
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
     
     // Emit a signal to indicate that the click location has changed
 
     emit locationClicked(x_km, y_km, closestRay);
+
+#endif
     
   } else {
 
@@ -2121,7 +2189,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     // render
     
-    _performRendering();
+    _renderOverlays();
 
   }
     
@@ -2130,9 +2198,9 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   if (_rubberBand) {
     _rubberBand->hide();
   }
-  
-  update();
 
+  return;
+  
 }
 
 /*************************************************************************
@@ -2153,6 +2221,7 @@ void HorizView::_handleZoom()
                             _worldReleaseX, _worldReleaseY);
   
   updatePixelScales();
+  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
@@ -2175,10 +2244,12 @@ void HorizView::_handleZoom()
 
 void HorizView::resizeEvent(QResizeEvent * e)
 {
+
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   updatePixelScales();
-  _performRendering();
+  _renderOverlays();
+
 }
 
 
@@ -2227,8 +2298,10 @@ void HorizView::_setTransform(const QTransform &transform)
  * perform the rendering
  */
 
-void HorizView::_performRendering()
+void HorizView::_renderOverlays()
 {
+
+  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
 
   // start the rendering
   
@@ -2398,6 +2471,7 @@ void HorizView::contextMenuEditor()
 
   // get click location in world coords
   // by using the location stored in class variables
+#ifdef JUNK
   double x_km = _worldPressX;
   double y_km = _worldPressY;
 
@@ -2412,6 +2486,8 @@ void HorizView::contextMenuEditor()
     // ExamineEdit(closestRay);
   }
   LOG(DEBUG_VERBOSE) << "exit";
+#endif
+  
 }
 
 void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)

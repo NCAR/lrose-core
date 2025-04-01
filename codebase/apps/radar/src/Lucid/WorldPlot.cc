@@ -831,7 +831,7 @@ void WorldPlot::fillMargins(QPainter &painter,
   
   fillRectanglePixelCoords(painter, brush,
                            0, _yMinPixel,
-                           _widthPixels, _bottomMargin);
+                           _widthPixels, _bottomMargin + 1);
 
 }
 
