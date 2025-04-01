@@ -243,6 +243,9 @@ HorizView::HorizView(QWidget* parent,
   _invalidImagesFrameIndex = 0;
   _vert = NULL;
 
+  _gridsReady = false;
+  _overlaysReady = false;
+  
   _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
   _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
   _openingFileInfoLabel->setVisible(false);
@@ -459,8 +462,10 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-  painter.drawImage(0, 0, *_zoomWorld.getGridImage());
-  painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
+  if (_gridsReady && _overlaysReady) {
+    painter.drawImage(0, 0, *_zoomWorld.getGridImage());
+    painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
+  }
   
   // set axis areas to background color
   
@@ -488,6 +493,30 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
   
+  // click point cross hairs
+  
+  if (_pointClicked) {
+
+    painter.save();
+
+    int startX = _mouseReleaseX - _params.click_cross_size / 2;
+    int endX = _mouseReleaseX + _params.click_cross_size / 2;
+    int startY = _mouseReleaseY - _params.click_cross_size / 2;
+    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+
+    QPen pen(painter.pen());
+    pen.setColor(_params.click_cross_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.click_cross_line_width);
+    painter.setPen(pen);
+
+    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
+    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+
+    painter.restore();
+    
+  }
+
   // if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
   
@@ -968,7 +997,7 @@ void HorizView::showOpeningFileMsg(bool isVisible)
 {
   _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
   _openingFileInfoLabel->setVisible(isVisible);
-  update();
+  // update();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1300,6 +1329,8 @@ void HorizView::_renderGrids()
                     _gd.movie.frame[_renderFrameIndex].time_start,
                     _gd.movie.frame[_renderFrameIndex].time_end);
   
+
+  _gridsReady = true;
   
   // _renderFrame = false;
 
@@ -1858,6 +1889,7 @@ void HorizView::zoomBackView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
+  _renderGrids();
   _renderOverlays();
 }
 
@@ -1876,6 +1908,7 @@ void HorizView::zoomOutView()
                      _zoomWorld.getYMaxWorld(),
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
+  _renderGrids();
   _renderOverlays();
 }
 
@@ -1964,7 +1997,7 @@ void HorizView::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  _renderOverlays();
+  //   _renderOverlays();
 }
 
 
@@ -2134,6 +2167,8 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
+    update();
+
 #ifdef NOTNOW    
     // If boundary editor active, then interpret boundary mouse release event
     BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
@@ -2156,25 +2191,23 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     	}
       }
     }
+
+#endif
+
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
     _pointClicked = true;
     _manager.setOverlaysHaveChanged(true);
 
-#endif
     
     // get ray closest to click point
 
-#ifdef JUNK
-    
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
     
     // Emit a signal to indicate that the click location has changed
 
     emit locationClicked(x_km, y_km, closestRay);
 
-#endif
-    
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
@@ -2189,6 +2222,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     // render
     
+    _renderGrids();
     _renderOverlays();
 
   }
@@ -2248,6 +2282,7 @@ void HorizView::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   updatePixelScales();
+  _renderGrids();
   _renderOverlays();
 
 }
@@ -2303,6 +2338,8 @@ void HorizView::_renderOverlays()
 
   _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
 
+  _overlaysReady = true;
+  
   // start the rendering
   
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -2321,7 +2358,7 @@ void HorizView::_renderOverlays()
   //   }
   // } // ifield
 
-  update();
+  // update();
 
 }
 

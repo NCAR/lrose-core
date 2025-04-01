@@ -358,6 +358,9 @@ class DLL_EXPORT HorizView : public QWidget
   bool _renderInvalidImages;
   int _invalidImagesFrameIndex;
   VertView *_vert;
+
+  bool _gridsReady;
+  bool _overlaysReady;
   
   /**
    * @brief The index of the field selected for display.
