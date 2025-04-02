@@ -644,11 +644,11 @@ public:
 
   double past_interval_hours;
 
-  tdrp_bool_t always_get_full_domain;
+  tdrp_bool_t clip_to_current_zoom_on_mdv_request;
 
-  tdrp_bool_t do_not_clip_on_mdv_request;
+  tdrp_bool_t decimate_resolution_on_mdv_request;
 
-  tdrp_bool_t do_not_decimate_on_mdv_request;
+  tdrp_bool_t clip_to_current_zoom_on_symprod_request;
 
   tdrp_bool_t check_clipping;
 

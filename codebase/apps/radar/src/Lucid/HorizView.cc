@@ -330,9 +330,8 @@ void HorizView::paintEvent(QPaintEvent *event)
   //   }
   // }
 
-  _printNow(3, cerr);
-  
-  cerr << "UUUUUUUUUUUUUUUUUUUUUUU _renderFrame, count: " << _renderFrame << ", " << _count << endl;
+  // _printNow(3, cerr);
+  // cerr << "UUUUUUUUUUUUUUUUUUUUUUU _renderFrame, count: " << _renderFrame << ", " << _count << endl;
   
   if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
@@ -353,8 +352,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   // }
   
   // render overlays to image in WorldPlot
-  
-  cerr << "VVVVVVVVVVVVVVVVVVVVVVVVVV" << endl;
   
   // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
@@ -420,8 +417,8 @@ void HorizView::paintEvent(QPaintEvent *event)
   // if there are no points, this does nothing
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
   
-  _printNow(3, cerr);
-  cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW _renderFrame: " << _renderFrame << endl;
+  // _printNow(3, cerr);
+  // cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW _renderFrame: " << _renderFrame << endl;
   
   _renderFrame = false;
 
@@ -1173,7 +1170,7 @@ void HorizView::_initProjection()
 //////////////////////////////////////////
 // set flags to control frame rendering
 
-void HorizView::setFrameForRendering(int page, int index)
+void HorizView::triggerGridRendering(int page, int index)
 
 {
 
@@ -2098,7 +2095,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     double y_km = _worldReleaseY;
     _pointClicked = true;
     _manager.setOverlaysHaveChanged(true);
-
     
     // get ray closest to click point
 
@@ -2118,7 +2114,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     // handle the zoom action
 
-    _handleZoom();
+    _handleMouseZoom();
     
     // render
     
@@ -2141,7 +2137,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
  * handle zoom event
  */
 
-void HorizView::_handleZoom()
+void HorizView::_handleMouseZoom()
 {
 
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);

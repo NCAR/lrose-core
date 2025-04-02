@@ -238,20 +238,25 @@ int MdvReader::getHorizPlane()
     h_mdvx->setReadComposite();
   }
   
-  // zoom
+  // clip to zoom limits
 
-  double dlat = _zoomBoxReq.getMaxLat() - _zoomBoxReq.getMinLat();
-  double dlon = _zoomBoxReq.getMaxLon() - _zoomBoxReq.getMinLon();
-  double dlatExtra = fabs(dlat) / 4.0;
-  double dlonExtra = fabs(dlon) / 4.0;
+  if (_params.clip_to_current_zoom_on_mdv_request) {
+    
+    double dlat = _zoomBoxReq.getMaxLat() - _zoomBoxReq.getMinLat();
+    double dlon = _zoomBoxReq.getMaxLon() - _zoomBoxReq.getMinLon();
+    double dlatExtra = fabs(dlat) / 4.0;
+    double dlonExtra = fabs(dlon) / 4.0;
+    
+    h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
+                               _zoomBoxReq.getMinLon() - dlonExtra,
+                               _zoomBoxReq.getMaxLat() + dlatExtra,
+                               _zoomBoxReq.getMaxLon() + dlonExtra);
 
-  h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
-                             _zoomBoxReq.getMinLon() - dlonExtra,
-                             _zoomBoxReq.getMaxLat() + dlatExtra,
-                             _zoomBoxReq.getMaxLon() + dlonExtra);
+  }
   
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
-  if (!_params.do_not_decimate_on_mdv_request) {
+
+  if (_params.decimate_resolution_on_mdv_request) {
     h_mdvx->setReadDecimate(_gd.h_win.img_dim.width * _gd.h_win.img_dim.width);
   }
   
@@ -580,18 +585,14 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
   _computeReqTime(midTime, reqTime);
   
   // compute requested zoom domain
-  
+
   LatLonBox zoomBoxReq;
-  if(!_params.always_get_full_domain) {
+  if(_params.clip_to_current_zoom_on_mdv_request) {
     double min_lat, max_lat, min_lon, max_lon;
     _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
     zoomBoxReq.setLimits(min_lat, max_lat, min_lon, max_lon);
-  } else if (_params.do_not_clip_on_mdv_request) {
-    zoomBoxReq.clearLimits();
   } else {
-    zoomBoxReq.setLimits(-90.0, 90.0,
-                         _gd.h_win.origin_lon - 179.9999,
-                         _gd.h_win.origin_lon + 179.9999);
+    zoomBoxReq.clearLimits();
   }
 
   // check if vlevel has changed
@@ -912,7 +913,7 @@ int MdvReader::_getTimeList(const string &url,
   double min_lat, max_lat, min_lon, max_lon;
   _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
   
-  if (!_params.do_not_clip_on_mdv_request) {
+  if (_params.clip_to_current_zoom_on_mdv_request) {
     mdvx->setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
   }
   
@@ -1101,7 +1102,7 @@ void MdvReader::_getBoundingBox(double &min_lat, double &max_lat,
 
   // set box limits
   
-  if(_params.always_get_full_domain) {
+  if(!_params.clip_to_current_zoom_on_mdv_request) {
 
     // use win limits
     

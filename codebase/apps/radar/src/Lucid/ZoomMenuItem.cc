@@ -84,18 +84,20 @@ void ZoomMenuItem::toggled(bool checked)
       cerr << "==>> Changing to zoom level: " << _zoomParams->label << endl;
     }
     _gd.h_win.zoom_level = _zoomIndex;
-    _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
-    _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
-    _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
-    _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
+    if (_manager != NULL) {
+      _manager->setXyZoom(_gd.h_win.zmin_y[_zoomIndex],
+                          _gd.h_win.zmax_y[_zoomIndex],
+                          _gd.h_win.zmin_x[_zoomIndex],
+                          _gd.h_win.zmax_x[_zoomIndex]); 
+    }
   }
 
-  if (_manager != NULL) {
-    _manager->setXyZoom(_gd.h_win.cmin_y,
-                        _gd.h_win.cmax_y,
-                        _gd.h_win.cmin_x,
-                        _gd.h_win.cmax_x); 
-  }
+  // if (_manager != NULL) {
+  //   _manager->setXyZoom(_gd.h_win.cmin_y,
+  //                       _gd.h_win.cmax_y,
+  //                       _gd.h_win.cmin_x,
+  //                       _gd.h_win.cmax_x); 
+  // }
 
 }
 

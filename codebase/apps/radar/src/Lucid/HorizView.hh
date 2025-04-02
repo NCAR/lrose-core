@@ -198,7 +198,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   // set flags to control rendering
 
-  void setFrameForRendering(int index, int page);
+  void triggerGridRendering(int index, int page);
   
   // set flags to render invalid images
   
@@ -488,11 +488,12 @@ class DLL_EXPORT HorizView : public QWidget
   virtual void resizeEvent(QResizeEvent * event);
 
   // used to detect shift key pressed for boundary editor (switches cursor)
+
   virtual void timerEvent(QTimerEvent * event);
 
-  // handle a zoom change
+  // handle a zoom change from mouse rectangle
 
-  void _handleZoom();
+  void _handleMouseZoom();
   
   // reset the world coords
   

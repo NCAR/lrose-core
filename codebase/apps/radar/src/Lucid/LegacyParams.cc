@@ -1190,9 +1190,27 @@ int LegacyParams::_readMainParams()
   _getString("cidd.scale_units_label", "km");
 
   // data retrieval
-  _getBoolean("cidd.always_get_full_domain", 0);
-  _getBoolean("cidd.do_not_clip_on_mdv_request", 0);
-  _getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
+
+  bool getFullDomain = _getBoolean("cidd.always_get_full_domain", 1, false);
+  if (getFullDomain) {
+    fprintf(_tdrpFile, "clip_to_current_zoom_on_symprod_request = FALSE;\n");
+  } else {
+    fprintf(_tdrpFile, "clip_to_current_zoom_on_symprod_request = TRUE;\n");
+  }
+
+  bool doNotClip = _getBoolean("cidd.do_not_clip_on_mdv_request", 1, false);
+  if (doNotClip) {
+    fprintf(_tdrpFile, "clip_to_current_zoom_on_mdv_request = FALSE;\n");
+  } else {
+    fprintf(_tdrpFile, "clip_to_current_zoom_on_mdv_request = TRUE;\n");
+  }
+
+  bool doNotDecimate = _getBoolean("cidd.do_not_decimate_on_mdv_request", 1, false);
+  if (doNotDecimate) {
+    fprintf(_tdrpFile, "decimate_resolution_on_mdv_request = FALSE;\n");
+  } else {
+    fprintf(_tdrpFile, "decimate_resolution_on_mdv_request = TRUE;\n");
+  }
      
   /* Toggle for enabling a status report window */
   _getBoolean("cidd.enable_status_window", 0);

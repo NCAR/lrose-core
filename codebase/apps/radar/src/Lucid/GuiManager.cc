@@ -202,8 +202,6 @@ GuiManager::GuiManager() :
   setAttribute(Qt::WA_TranslucentBackground);
   setAutoFillBackground(false);
 
-  // QApplication::setStyle("Fusion");
-
 }
 
 // destructor
@@ -241,7 +239,7 @@ int GuiManager::run(QApplication &app)
   
   // set timer running
   
-  _mainTimerId = startTimer(2);
+  _mainTimerId = startTimer(2); // msecs
   
   return app.exec();
 
@@ -268,6 +266,10 @@ void GuiManager::setXyZoom(double minY, double maxY,
 {
   _prevZoomXy = _zoomXy;
   _zoomXy.setLimits(minY, maxY, minX, maxX);
+  _gd.h_win.cmin_y = minY;
+  _gd.h_win.cmax_y = maxY;
+  _gd.h_win.cmin_x = minX;
+  _gd.h_win.cmax_x = maxX;
 }
 
 //////////////////////////////////////////////////////////////
@@ -320,27 +322,11 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _checkAndReadH(mr);
   }
   
-  // _autoCreateFunc();
-  // _ciddTimerFunc(event);
-
-  // if (_gd.redraw_horiz) {
-  //   _horiz->update();
-  //   _gd.redraw_horiz = false;
-  // }
-
-  // if (_archiveMode) {
-  //   if (_archiveRetrievalPending) {
-  //     _handleArchiveData(/*event*/);
-  //     _archiveRetrievalPending = false;
-  //   }
-  // } else {
-  //   _handleRealtimeData(event);
-  // }
-  
 }
 
 //////////////////////////////////////////////////////////////
 // check if we need new H data, and read accordingly
+// then trigger rendering if appropriate
   
 void GuiManager::_checkAndReadH(MdvReader *mr)
 {
@@ -376,7 +362,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (_gd.movie.cur_frame < 0) {
       frameIndex = _gd.movie.num_frames - 1;
     }
-    _horiz->setFrameForRendering(_gd.h_win.page, frameIndex);
+    _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
     if (_gd.h_win.page < _gd.num_datafields) {
       _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
     }
@@ -393,6 +379,7 @@ bool GuiManager::_checkForStateChange()
 {
 
   bool stateHasChanged = false;
+
   if (_fieldHasChanged) {
     stateHasChanged = true;
     _fieldHasChanged = false;

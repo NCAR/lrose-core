@@ -1173,39 +1173,39 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'always_get_full_domain'
+    // Parameter 'clip_to_current_zoom_on_mdv_request'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("always_get_full_domain");
-    tt->descr = tdrpStrDup("Request the outer domain established by domain_limit params.");
-    tt->help = tdrpStrDup("i.e. do not clip the data on request.");
-    tt->val_offset = (char *) &always_get_full_domain - &_start_;
+    tt->param_name = tdrpStrDup("clip_to_current_zoom_on_mdv_request");
+    tt->descr = tdrpStrDup("Clip the MDV request to just larger than the current zoom limits.");
+    tt->help = tdrpStrDup("If TRUE, this will sometimes reduce the volume of data retrieved, for efficiency. But this does mean that a new request is made with every zoom change. If FALSE, the entire data domain is returned on the first request, which means that the data does not need to be requested after each zoom change.");
+    tt->val_offset = (char *) &clip_to_current_zoom_on_mdv_request - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'do_not_clip_on_mdv_request'
+    // Parameter 'decimate_resolution_on_mdv_request'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_not_clip_on_mdv_request");
-    tt->descr = tdrpStrDup("Request the whole earth or Hemisphere, centered on the origin.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &do_not_clip_on_mdv_request - &_start_;
+    tt->param_name = tdrpStrDup("decimate_resolution_on_mdv_request");
+    tt->descr = tdrpStrDup("Decimate the data resolution on the MDV request, to match the pixel resolution of the display.");
+    tt->help = tdrpStrDup("If FALSE, the finest data resolution will be preserved. If TRUE, the data retrieval will decimate the number of data points to approximately match the number of pixels on the display side.");
+    tt->val_offset = (char *) &decimate_resolution_on_mdv_request - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'do_not_decimate_on_mdv_request'
+    // Parameter 'clip_to_current_zoom_on_symprod_request'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_not_decimate_on_mdv_request");
-    tt->descr = tdrpStrDup("Do not decimate on MDV request, get all points from MDV server.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &do_not_decimate_on_mdv_request - &_start_;
+    tt->param_name = tdrpStrDup("clip_to_current_zoom_on_symprod_request");
+    tt->descr = tdrpStrDup("Clip the symbolic product request to just larger than the current zoom limits.");
+    tt->help = tdrpStrDup("If TRUE, this will reduce the volume of data retrieved, for efficiency. But this does mean that a new request is made with every zoom change. If FALSE, the entire data domain is returned on the first request, which means that the data does not need to be requested after each zoom change.");
+    tt->val_offset = (char *) &clip_to_current_zoom_on_symprod_request - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

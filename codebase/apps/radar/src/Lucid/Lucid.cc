@@ -311,9 +311,9 @@ int Lucid::_initDataSpace()
   // if domain follows data, do not clip or decimate
   
   if (_params.domain_follows_data) {
-    _params.always_get_full_domain = pTRUE;
-    _params.do_not_clip_on_mdv_request = pTRUE;
-    _params.do_not_decimate_on_mdv_request = pTRUE;
+    // _params.always_get_full_domain = pTRUE;
+    _params.clip_to_current_zoom_on_mdv_request = pFALSE;
+    _params.decimate_resolution_on_mdv_request = pFALSE;
   }
 
   // Bookmarks for a menu of URLS - Index starts at 1
@@ -3261,7 +3261,7 @@ void Lucid::_getBoundingBox(double &min_lat,
   }
   _gd.proj.setConditionLon2Ref(true, meanLon);
   
-  if(_params.always_get_full_domain) {
+  if(!_params.clip_to_current_zoom_on_mdv_request) {
     _gd.proj.xy2latlon(_gd.h_win.min_x,_gd.h_win.min_y,min_lat,min_lon);
     _gd.proj.xy2latlon(_gd.h_win.max_x,_gd.h_win.max_y,max_lat,max_lon);
   } else {
