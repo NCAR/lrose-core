@@ -3315,10 +3315,6 @@ void WorldPlot::_drawRangeRingsAndAzLines(QPainter &painter,
                                           double ringSpacing)
 {
 
-  // save painter state
-
-  painter.save();
-  
   // Draw rings
   
   if (ringSpacing > 0.0 && ringsEnabled) {
@@ -3390,12 +3386,8 @@ void WorldPlot::_drawRangeRingsAndAzLines(QPainter &painter,
 
   }
 
-  painter.restore();
-
 }
   
-
-
 /////////////////////////////////////////////////////
 // print
 

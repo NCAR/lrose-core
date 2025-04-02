@@ -387,7 +387,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // draw the color scale
 
-  painter.restore();
   int fieldNum = _gd.h_win.page;
   const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
