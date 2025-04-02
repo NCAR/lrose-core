@@ -212,8 +212,9 @@ private:
 
   QAction *_showFieldMenuAct;
   QAction *_showTimeControlAct;
-  QAction *_ringsAct;
   QAction *_gridsAct;
+  QAction *_fixedRingsAct;
+  QAction *_dataRingsAct;
   QAction *_azLinesAct;
   QAction *_showVertAct;
 

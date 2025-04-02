@@ -415,7 +415,7 @@ int MdvReader::getHorizPlane()
   proj->setConditionLon2Origin(true);
     
   // Implemented for MOBILE RADARS - 
-  if(_params.domain_follows_data &&
+  if(_params.zoom_domain_follows_data &&
      this == _gd.mread[_gd.h_win.page] ) { // Only for the primary field
     double dx,locx;
     double dy,locy;

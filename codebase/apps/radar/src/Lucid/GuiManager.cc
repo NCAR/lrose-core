@@ -729,14 +729,6 @@ void GuiManager::_createActions()
   _saveFileAct->setStatusTip(tr("Save File"));
   connect(_saveFileAct, &QAction::triggered, this, &GuiManager::_saveFile);
 
-  // show range rings
-
-  _ringsAct = new QAction(tr("Range Rings"), this);
-  _ringsAct->setStatusTip(tr("Turn range rings on/off"));
-  _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.horiz_range_rings_on_at_startup);
-  connect(_ringsAct, &QAction::triggered, _horiz, &HorizView::setRings);
-
   // show grids
 
   _gridsAct = new QAction(tr("Grids"), this);
@@ -745,14 +737,20 @@ void GuiManager::_createActions()
   _gridsAct->setChecked(_params.horiz_grids_on_at_startup);
   connect(_gridsAct, &QAction::triggered, _horiz, &HorizView::setGrids);
 
-  // show azimuth lines
-  
-  _azLinesAct = new QAction(tr("Az Lines"), this);
-  _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
-  _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.horiz_azimuth_lines_on_at_startup);
-  connect(_azLinesAct, &QAction::triggered, _horiz, &HorizView::setAngleLines);
+  // show range rings
 
+  _fixedRingsAct = new QAction(tr("Fixed range Rings"), this);
+  _fixedRingsAct->setStatusTip(tr("Turn fixed range rings on/off"));
+  _fixedRingsAct->setCheckable(true);
+  _fixedRingsAct->setChecked(_params.plot_range_rings_fixed);
+  connect(_fixedRingsAct, &QAction::triggered, _horiz, &HorizView::setRingsFixed);
+
+  _dataRingsAct = new QAction(tr("Data-driven range Rings"), this);
+  _dataRingsAct->setStatusTip(tr("Turn data-driven range rings on/off"));
+  _dataRingsAct->setCheckable(true);
+  _dataRingsAct->setChecked(_params.plot_range_rings_from_data);
+  connect(_dataRingsAct, &QAction::triggered, _horiz, &HorizView::setRingsDataDriven);
+  
   // show VERT window
 
   _showVertAct = new QAction(tr("Show VERT Window"), this);
@@ -1106,9 +1104,9 @@ void GuiManager::_populateZoomsMenu()
 void GuiManager::_populateOverlaysMenu()
 {
 
-  _overlaysMenu->addAction(_ringsAct);
   _overlaysMenu->addAction(_gridsAct);
-  _overlaysMenu->addAction(_azLinesAct);
+  _overlaysMenu->addAction(_fixedRingsAct);
+  _overlaysMenu->addAction(_dataRingsAct);
   _overlaysMenu->addSeparator();
   _overlaysMenu->addAction(_showVertAct);
 

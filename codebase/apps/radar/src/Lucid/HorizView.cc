@@ -58,10 +58,10 @@ HorizView::HorizView(QWidget* parent,
         _gd(GlobalData::Instance()),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
-        _gridRingsColor(_params.grid_and_range_ring_color),
-        _ringsEnabled(false),
         _gridsEnabled(false),
-        _angleLinesEnabled(false),
+        _gridRingsColor(_params.range_rings_color),
+        _ringsFixedEnabled(false),
+        _ringsDataDrivenEnabled(false),
         _rubberBand(nullptr),
         _ringSpacing(10.0)
         
@@ -125,8 +125,8 @@ HorizView::HorizView(QWidget* parent,
   configureWorldCoords(0);
 
   setGrids(_params.horiz_grids_on_at_startup);
-  setRings(_params.horiz_range_rings_on_at_startup);
-  setAngleLines(_params.horiz_azimuth_lines_on_at_startup);
+  setRingsFixed(_params.plot_range_rings_fixed);
+  setRingsDataDriven(_params.plot_range_rings_from_data);
 
   _isArchiveMode = false;
   _isStartOfSweep = true;
@@ -361,7 +361,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   if (_gridsReady && _overlaysReady) {
     painter.drawImage(0, 0, *_zoomWorld.getGridImage());
-    painter.drawImage(0, 0, *_zoomWorld.getOverlayImage());
+    painter.drawImage(0, 0, *_zoomWorld.getMapsImage());
   }
   
   // set axis areas to background color
@@ -768,10 +768,12 @@ void HorizView::_drawMaps(QPainter &painter)
 void HorizView::_drawRingsAndAzLines(QPainter &painter)
 {
 
+#ifdef JUNK
+  
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
   
-  if (!_ringsEnabled && !_angleLinesEnabled) {
+  if (!_ringsFixedEnabled && !_ringsDataDrivenEnabled) {
     return;
   }
   
@@ -893,6 +895,8 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
   }
 
   painter.restore();
+
+#endif
 
 }
   
@@ -1819,9 +1823,15 @@ void HorizView::zoomOutView()
  * setRings()
  */
 
-void HorizView::setRings(const bool enabled)
+void HorizView::setRingsFixed(const bool enabled)
 {
-  _ringsEnabled = enabled;
+  _ringsFixedEnabled = enabled;
+  _manager.setOverlaysHaveChanged(true);
+}
+
+void HorizView::setRingsDataDriven(const bool enabled)
+{
+  _ringsDataDrivenEnabled = enabled;
   _manager.setOverlaysHaveChanged(true);
 }
 
@@ -1833,17 +1843,6 @@ void HorizView::setRings(const bool enabled)
 void HorizView::setGrids(const bool enabled)
 {
   _gridsEnabled = enabled;
-  _manager.setOverlaysHaveChanged(true);
-}
-
-
-/*************************************************************************
- * setAngleLines()
- */
-
-void HorizView::setAngleLines(const bool enabled)
-{
-  _angleLinesEnabled = enabled;
   _manager.setOverlaysHaveChanged(true);
 }
 
@@ -2157,7 +2156,7 @@ void HorizView::_handleMouseZoom()
                             _worldReleaseX, _worldReleaseY);
   
   updatePixelScales();
-  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
+  // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();

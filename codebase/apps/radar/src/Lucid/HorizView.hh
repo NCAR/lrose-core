@@ -252,14 +252,6 @@ class DLL_EXPORT HorizView : public QWidget
   void resize(const int width, const int height);
 
   /**
-   * @brief Set ring visibility.
-   *
-   * @param[in] enabled    True to show them, false otherwise.
-   */
-
-  void setRings(const bool enabled);
-
-  /**
    * @brief Set grids visibility.
    *
    * @param[in] enabled   True to show them, false otherwise.
@@ -268,13 +260,21 @@ class DLL_EXPORT HorizView : public QWidget
   void setGrids(const bool enabled);
 
   /**
-   * @brief Set azimuth lines visibility.
+   * @brief Set fixed ring visibility.
    *
    * @param[in] enabled    True to show them, false otherwise.
    */
 
-  void setAngleLines(const bool enabled);
+  void setRingsFixed(const bool enabled);
 
+  /**
+   * @brief Set data-driven ring visibility.
+   *
+   * @param[in] enabled    True to show them, false otherwise.
+   */
+
+  void setRingsDataDriven(const bool enabled);
+  
   /**
    * @brief Clear the data in the view.
    */
@@ -334,22 +334,23 @@ class DLL_EXPORT HorizView : public QWidget
   QBrush _backgroundBrush;
 
   /**
-   * @brief The color for the grid and rings.
-   */
-
-  QColor _gridRingsColor;
-
-  /**
-   * @brief True if the ring display is enabled.
-   */
-
-  bool _ringsEnabled;
-
-  /**
    * @brief True if the grids display is enabled.
    */
   
   bool _gridsEnabled;
+  
+  /**
+   * @brief The color for the grid and rings.
+   */
+  
+  QColor _gridRingsColor;
+  
+  /**
+   * @brief True if the ring display is enabled.
+   */
+
+  bool _ringsFixedEnabled;
+  bool _ringsDataDrivenEnabled;
 
   /**
    * @brief True if the angle lines enabled.

@@ -2109,6 +2109,18 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.d = 10000;
     tt++;
     
+    // Parameter 'zoom_domain_follows_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("zoom_domain_follows_data");
+    tt->descr = tdrpStrDup("Plot domain moves with origin of the data set.");
+    tt->help = tdrpStrDup("Intended for mobile platforms. Shift the zoom domain limits as the data origin shifts.");
+    tt->val_offset = (char *) &zoom_domain_follows_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -3027,30 +3039,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'horiz_range_rings_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("horiz_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set HORIZ range rings overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_range_rings_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'horiz_azimuth_lines_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("horiz_azimuth_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set HORIZ azimuth lines overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_azimuth_lines_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'horiz_main_legend_pos'
     // ctype is '_legend_pos_t'
     
@@ -3522,30 +3510,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'vert_range_rings_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set VERT range rings overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_range_rings_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'vert_elevation_lines_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_elevation_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set VERT elevation lines overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_elevation_lines_on_at_startup - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'vert_main_legend_pos'
     // ctype is '_legend_pos_t'
     
@@ -3672,18 +3636,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'grid_and_range_ring_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("grid_and_range_ring_color");
-    tt->descr = tdrpStrDup("Color of grids and range rings.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &grid_and_range_ring_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
     // Parameter 'click_cross_color'
     // ctype is 'char*'
     
@@ -3780,15 +3732,15 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("gray50");
     tt++;
     
-    // Parameter 'range_ring_color'
+    // Parameter 'range_rings_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_color");
+    tt->param_name = tdrpStrDup("range_rings_color");
     tt->descr = tdrpStrDup("Range rings and azimuth lines.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_color - &_start_;
+    tt->val_offset = (char *) &range_rings_color - &_start_;
     tt->single_val.s = tdrpStrDup("grey");
     tt++;
     
@@ -3894,16 +3846,108 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'range_rings'
+    // Parameter 'plot_range_rings_fixed'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_rings");
-    tt->descr = tdrpStrDup("Turn range rings on/off.");
-    tt->help = tdrpStrDup("TRUE means on - i.r. plot range rings. These apply to radars only.");
-    tt->val_offset = (char *) &range_rings - &_start_;
+    tt->param_name = tdrpStrDup("plot_range_rings_fixed");
+    tt->descr = tdrpStrDup("Plot range rings at fixed locations.");
+    tt->help = tdrpStrDup("If TRUE, range rings will be plotted at a set of fixed locations. By default this will be at the origin. See 'plot_fixed_rings_at_origin. Additional locations can be added. See 'plot_fixed_rings_at_added_locations'.");
+    tt->val_offset = (char *) &plot_range_rings_fixed - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'plot_fixed_rings_at_origin'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("plot_fixed_rings_at_origin");
+    tt->descr = tdrpStrDup("Plot fixed range rings at the origin.");
+    tt->help = tdrpStrDup("If TRUE, a set of fixed range rings will be plotted at proj_origin_lat/proj_origin_lon.");
+    tt->val_offset = (char *) &plot_fixed_rings_at_origin - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'plot_fixed_rings_at_added_locations'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("plot_fixed_rings_at_added_locations");
+    tt->descr = tdrpStrDup("Plot fixed range rings at additional specified points.");
+    tt->help = tdrpStrDup("If TRUE, fixed range rings will be plotted at the locations specified by 'fixed_rings_locations.");
+    tt->val_offset = (char *) &plot_fixed_rings_at_added_locations - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fixed_ring_locations'
+    // ctype is '_range_ring_origin_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("fixed_ring_locations");
+    tt->descr = tdrpStrDup("Locations for additional fixed rings.");
+    tt->help = tdrpStrDup("/nlabel: name of radar or point. /nlatitude_deg: latitude of ring origin./nlongitude_deg: longitude of ring origin./n");
+    tt->array_offset = (char *) &_fixed_ring_locations - &_start_;
+    tt->array_n_offset = (char *) &fixed_ring_locations_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(range_ring_origin_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("range_ring_origin_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("label");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_fixed_ring_locations->label - (char *) _fixed_ring_locations;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("latitude_deg");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_fixed_ring_locations->latitude_deg - (char *) _fixed_ring_locations;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("longitude_deg");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_fixed_ring_locations->longitude_deg - (char *) _fixed_ring_locations;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("radar1");
+      tt->struct_vals[1].d = 40;
+      tt->struct_vals[2].d = -105;
+      tt->struct_vals[3].s = tdrpStrDup("radar2");
+      tt->struct_vals[4].d = 38;
+      tt->struct_vals[5].d = -98;
+    tt++;
+    
+    // Parameter 'plot_range_rings_from_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("plot_range_rings_from_data");
+    tt->descr = tdrpStrDup("Plot range rings at origin of data fields.");
+    tt->help = tdrpStrDup("If TRUE, range rings will be plotted at the origin of the data fields read in.");
+    tt->val_offset = (char *) &plot_range_rings_from_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_ring_for_radar_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_ring_for_radar_only");
+    tt->descr = tdrpStrDup("Plot data-driven range rings only for radar data sets.");
+    tt->help = tdrpStrDup("If TRUE, range rings will be plotted at the location of the radar in radar fields.");
+    tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'range_ring_spacing'
@@ -3939,30 +3983,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Plot range rings relative to radar location.");
     tt->help = tdrpStrDup("We get the location from the data. If FALSE, rings are relative to plot origin.");
     tt->val_offset = (char *) &range_ring_follows_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_ring_for_radar_only'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_for_radar_only");
-    tt->descr = tdrpStrDup("Only plot range rings for radar data sets.");
-    tt->help = tdrpStrDup("TRUE turns off rings for non-radar data sets.");
-    tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'domain_follows_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("domain_follows_data");
-    tt->descr = tdrpStrDup("Plot domain moves with origin of the data set.");
-    tt->help = tdrpStrDup("Shift the domain limits if the data origin shifts.");
-    tt->val_offset = (char *) &domain_follows_data - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

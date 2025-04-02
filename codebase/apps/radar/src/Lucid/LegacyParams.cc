@@ -1304,6 +1304,7 @@ int LegacyParams::_readMainParams()
     }
   } // izoom
   fprintf(_tdrpFile, "};\n");
+  _getBoolean("cidd.domain_follows_data", 0, true, "zoom_domain_follows_data");
   fprintf(_tdrpFile, "// </ZOOMS>\n");
   
   // vert axis
@@ -1344,7 +1345,9 @@ int LegacyParams::_readMainParams()
   _getString("cidd.time_frame_color", "yellow");
   _getString("cidd.height_axis_color", "cyan");
   _getString("cidd.height_indicator_color", "red");
-  _getString("cidd.range_ring_color", "grey");
+  _getString("cidd.range_ring_color", "grey", true, "range_rings_color");
+  _getString("cidd.range_ring_color", "grey", true, "horiz_grid_color");
+  _getString("cidd.range_ring_color", "grey", true, "vert_grid_color");
   _getString("cidd.missing_data_color","transparent");
   _getString("cidd.bad_data_color","transparent");
 
@@ -1479,22 +1482,23 @@ int LegacyParams::_readMainParams()
   // _getLong("cidd.vert_legends_delta_y", 0);
 
   // range rings
-  _getBoolean("cidd.range_rings", 0);
+
+  _getBoolean("cidd.range_rings", 0, true, "plot_range_rings_fixed");
+  _getBoolean("cidd.range_ring_follows_data", 0, true, "plot_range_rings_from_data");
+  _getBoolean("cidd.range_ring_for_radar_only", 1, true, "range_rings_for_radar_only");
+  
   _getLong("cidd.range_ring_x_space", 50);
   _getLong("cidd.range_ring_y_space", 15);
   _getBoolean("cidd.range_ring_labels", 1);
   _getDouble("cidd.range_ring_spacing", -1.0);
   _getDouble("cidd.max_ring_range", 1000.0);
-  _getBoolean("cidd.range_ring_follows_data", 0);
-  _getBoolean("cidd.range_ring_for_radar_only", 0);
 
   // Toggle for shifting the display origin - Useful for mobile units.
-  _getBoolean("cidd.domain_follows_data", 0);
 
   // azimuth lines
   _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_interval");
   _getDouble("cidd.azmith_radius", 200.0, true, "azimuth_radius");
-  _getBoolean("cidd.azmith_lines", 0, true, "azimuth_lines");
+  // _getBoolean("cidd.azmith_lines", 0, true, "azimuth_lines", false);
 
   // winds
   // _getBoolean("cidd.wind_mode", 0);

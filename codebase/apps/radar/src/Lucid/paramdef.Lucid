@@ -853,6 +853,12 @@ paramdef double {
   p_help = "";
 } domain_limit_max_y;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot domain moves with origin of the data set.";
+  p_help = "Intended for mobile platforms. Shift the zoom domain limits as the data origin shifts.";
+} zoom_domain_follows_data;
+
 commentdef {
   p_header = "</ZOOM_DOMAINS>";
 }
@@ -1284,16 +1290,6 @@ paramdef boolean {
   p_descr = "Set HORIZ grids overlay on at startup.";
 } horiz_grids_on_at_startup;
 
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ range rings overlay on at startup.";
-} horiz_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
-} horiz_azimuth_lines_on_at_startup;
-
 typedef enum {
   LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
 } legend_pos_t;
@@ -1516,16 +1512,6 @@ paramdef boolean {
   p_descr = "Set VERT grids overlay on at startup.";
 } vert_grids_on_at_startup;
 
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set VERT range rings overlay on at startup.";
-} vert_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set VERT elevation lines overlay on at startup.";
-} vert_elevation_lines_on_at_startup;
-
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of main legend in the VERT plot window";
@@ -1581,11 +1567,6 @@ paramdef string {
 } text_color;
 
 paramdef string {
-  p_default = "white";
-  p_descr = "Color of grids and range rings.";
-} grid_and_range_ring_color;
-
-paramdef string {
   p_default = "cyan";
   p_descr = "Color of cross at click point.";
 } click_cross_color;
@@ -1636,7 +1617,7 @@ paramdef string {
   p_default = "grey";
   p_descr = "Range rings and azimuth lines.";
   p_help = "";
-} range_ring_color;
+} range_rings_color;
 
 paramdef string {
   p_default = "transparent";
@@ -1684,9 +1665,61 @@ commentdef {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Turn range rings on/off.";
-  p_help = "TRUE means on - i.r. plot range rings. These apply to radars only.";
-} range_rings;
+  p_descr = "Plot range rings at fixed locations.";
+  p_help = "If TRUE, range rings will be plotted at a set of fixed locations. By default this will be at the origin. See 'plot_fixed_rings_at_origin. Additional locations can be added. See 'plot_fixed_rings_at_added_locations'.";
+} plot_range_rings_fixed;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot fixed range rings at the origin.";
+  p_help = "If TRUE, a set of fixed range rings will be plotted at proj_origin_lat/proj_origin_lon.";
+} plot_fixed_rings_at_origin;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot fixed range rings at additional specified points.";
+  p_help = "If TRUE, fixed range rings will be plotted at the locations specified by 'fixed_rings_locations.";
+} plot_fixed_rings_at_added_locations;
+
+typedef struct {
+  string label;
+  double latitude_deg;
+  double longitude_deg;
+} range_ring_origin_t;
+
+paramdef struct range_ring_origin_t {
+  p_default = {
+    {
+      label = "radar1",
+      latitude_deg = 40,
+      longitude_deg = -105
+    }
+    ,
+    {
+      label = "radar2",
+      latitude_deg = 38,
+      longitude_deg = -98
+    }
+  };
+  p_descr = "Locations for additional fixed rings.";
+  p_help =
+    "/nlabel: name of radar or point. "
+    "/nlatitude_deg: latitude of ring origin."
+    "/nlongitude_deg: longitude of ring origin."
+    "/n";
+} fixed_ring_locations[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Plot range rings at origin of data fields.";
+  p_help = "If TRUE, range rings will be plotted at the origin of the data fields read in.";
+} plot_range_rings_from_data;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Plot data-driven range rings only for radar data sets.";
+  p_help = "If TRUE, range rings will be plotted at the location of the radar in radar fields.";
+} range_ring_for_radar_only;
 
 paramdef double {
   p_default = 50;
@@ -1703,18 +1736,6 @@ paramdef boolean {
   p_descr = "Plot range rings relative to radar location.";
   p_help = "We get the location from the data. If FALSE, rings are relative to plot origin.";
 } range_ring_follows_data;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Only plot range rings for radar data sets.";
-  p_help = "TRUE turns off rings for non-radar data sets.";
-} range_ring_for_radar_only;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Plot domain moves with origin of the data set.";
-  p_help = "Shift the domain limits if the data origin shifts.";
-} domain_follows_data;
 
 paramdef int {
   p_default = 50;

@@ -59,7 +59,7 @@ WorldPlot::WorldPlot() :
   _heightPixels = 1000;
 
   _gridImage = nullptr;
-  _overlayImage = nullptr;
+  _mapsImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -150,7 +150,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _heightPixels = rhs._heightPixels;
   
   _gridImage = nullptr;
-  _overlayImage = nullptr;
+  _mapsImage = nullptr;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
@@ -2547,7 +2547,8 @@ void WorldPlot::_createImage(QImage* &image)
     }
   }
 }
-                               
+
+////////////////////////////////////////////////////////
 // get images after rendering
   
 const QImage *WorldPlot::getGridImage()
@@ -2558,19 +2559,27 @@ const QImage *WorldPlot::getGridImage()
   return _gridImage;
 }
 
-const QImage *WorldPlot::getOverlayImage()
+const QImage *WorldPlot::getMapsImage()
 {
-  if (!_overlayImage) {
-    _createImage(_overlayImage);
+  if (!_mapsImage) {
+    _createImage(_mapsImage);
   }
-  return _overlayImage;
+  return _mapsImage;
+}
+
+const QImage *WorldPlot::getRingsImage()
+{
+  if (!_ringsImage) {
+    _createImage(_ringsImage);
+  }
+  return _ringsImage;
 }
 
 /////////////////////////////////////////////////////
 // render a data grid in Cartesian rectangular pixels
 // used if there is no distortion
 
-void WorldPlot::renderGridRect(int page,
+void WorldPlot::renderGridRect(int fieldNum,
                                MdvReader *mr,
                                time_t start_time,
                                time_t end_time,
@@ -2578,7 +2587,7 @@ void WorldPlot::renderGridRect(int page,
   
 {
 
-  cerr << "RRRRRRRRRRRRRRR ====>> renderGridRect, page: " << page << endl;
+  cerr << "RRRRRRRRRRRRRRR ====>> renderGridRect, fieldNum: " << fieldNum << endl;
 
   // check that image canvas is the correct size
   
@@ -2917,7 +2926,7 @@ void WorldPlot::renderGridRect(int page,
 // render a data grid which is distorted
 // i.e. where the data and display projection do not match
 
-void WorldPlot::renderGridDistorted(int page,
+void WorldPlot::renderGridDistorted(int fieldNum,
                                     MdvReader *mr,
                                     time_t start_time,
                                     time_t end_time,
@@ -2925,7 +2934,7 @@ void WorldPlot::renderGridDistorted(int page,
   
 {
 
-  cerr << "DDDDDDDDDDDDDDDDDDD ====>> renderGridDistorted, page: " << page << endl;
+  cerr << "DDDDDDDDDDDDDDDDDDD ====>> renderGridDistorted, fieldNum: " << fieldNum << endl;
 
   // check that image canvas is the correct size
   
@@ -3016,7 +3025,7 @@ void WorldPlot::renderGridDistorted(int page,
 /////////////////////////////////////////////////////
 // render polar radar grid
 
-void WorldPlot::renderGridRadarPolar(int page,
+void WorldPlot::renderGridRadarPolar(int fieldNum,
                                      MdvReader *mr,
                                      time_t start_time,
                                      time_t end_time,
@@ -3024,7 +3033,7 @@ void WorldPlot::renderGridRadarPolar(int page,
   
 {
 
-  cerr << "====>> radar polar radar polar, page: " << page << endl;
+  cerr << "====>> radar polar radar polar, fieldNum: " << fieldNum << endl;
   
   // check that image canvas is the correct size
   
@@ -3116,44 +3125,58 @@ void WorldPlot::renderGridRadarPolar(int page,
 /////////////////////////////////////////////////////
 // draw the overlays - maps, range rings etc.
 
-void WorldPlot::drawOverlays(bool ringsEnabled,
-                             bool azLinesEnabled,
-                             double ringSpacing)
+void WorldPlot::drawRangeRings(int fieldNum,
+                               MdvReader *mr,
+                               bool fixedRingsEnabled,
+                               bool dataRingsEnabled,
+                               double ringSpacing)
   
 {
 
+  cerr << "====>> draw range rings, fieldNum: " << fieldNum << endl;
+  
   // check that overlay canvas is the correct size
   
-  _createImage(_overlayImage);
+  _createImage(_ringsImage);
   
   // make transparent
   
-  _overlayImage->fill(Qt::transparent);
+  _ringsImage->fill(Qt::transparent);
   
-  // render maps
+  // get painter
   
-  QPainter painter(_overlayImage);
-  _drawMaps(painter);
-
+  QPainter painter(_ringsImage);
+  
   // render range rings and az line
 
-  if (ringsEnabled || azLinesEnabled) {
-    _drawRangeRingsAndAzLines(painter,
-                              ringsEnabled, azLinesEnabled,
-                              ringSpacing);
-  }
+  if (fixedRingsEnabled) {
 
+    if (_params.plot_fixed_rings_at_origin) {
+      _drawRangeRings(painter,
+                      _params.proj_origin_lat,
+                      _params.proj_origin_lon,
+                      ringSpacing);
+    }
+    
+  }
+  
 }
 
 /*************************************************************************
  * draw map overlays
  */
 
-void WorldPlot::_drawMaps(QPainter &painter)
+void WorldPlot::drawMaps()
 
 {
 
-  painter.save();
+  // check that overlay canvas is the correct size
+  
+  _createImage(_mapsImage);
+  
+  // get painter
+  
+  QPainter painter(_mapsImage);
 
   // Loop throughs maps
   
@@ -3230,7 +3253,8 @@ void WorldPlot::_drawMaps(QPainter &painter)
       // add icon label
       
       painter.save();
-      if(_params.map_font_background == Params::MAP_FONT_BACKGROUND_TRANSPARENT) {
+      if(_params.map_font_background ==
+         Params::MAP_FONT_BACKGROUND_TRANSPARENT) {
         painter.setBackgroundMode(Qt::TransparentMode);
       } else {
         painter.setBackgroundMode(Qt::OpaqueMode);
@@ -3299,93 +3323,83 @@ void WorldPlot::_drawMaps(QPainter &painter)
       
   } // ii
   
-  painter.restore();
-
 }
 
 /*************************************************************************
- * _drawRingsAndAzLines()
+ * _drawRangeRings()
  *
  * draw rings for polar type data fields
  */
 
-void WorldPlot::_drawRangeRingsAndAzLines(QPainter &painter,
-                                          bool ringsEnabled,
-                                          bool azLinesEnabled,
-                                          double ringSpacing)
+void WorldPlot::_drawRangeRings(QPainter &painter,
+                                double originLat,
+                                double originLon,
+                                double ringSpacing)
 {
 
   // Draw rings
   
-  if (ringSpacing > 0.0 && ringsEnabled) {
+  // Set up the painter
+  
+  painter.save();
+  painter.setTransform(getTransform());
+  painter.setPen(_params.range_rings_color);
     
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(getTransform());
-    painter.setPen(_params.grid_and_range_ring_color);
-    
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-
-    double ringRange = ringSpacing;
-    while (ringRange <= _params.max_ring_range) {
-      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-      painter.drawEllipse(rect);
-      ringRange += ringSpacing;
-    }
-    painter.restore();
-
-    // Draw the labels
-    
-    QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
-    painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
-    
-    ringRange = ringSpacing;
-    while (ringRange <= _params.max_ring_range) {
-      double labelPos = ringRange * Constants::LUCID_SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-      drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-      ringRange += ringSpacing;
-    }
-
-  } /* endif - draw rings */
-
+  // set narrow line width
+  QPen pen = painter.pen();
+  pen.setWidth(0);
+  painter.setPen(pen);
+  
+  double ringRange = ringSpacing;
+  while (ringRange <= _params.max_ring_range) {
+    QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
+    painter.drawEllipse(rect);
+    ringRange += ringSpacing;
+  }
+  painter.restore();
+  
+  // Draw the labels
+  
+  QFont font = painter.font();
+  font.setPointSizeF(_params.range_ring_label_font_size);
+  painter.setFont(font);
+  // painter.setWindow(0, 0, width(), height());
+  
+  ringRange = ringSpacing;
+  while (ringRange <= _params.max_ring_range) {
+    double labelPos = ringRange * Constants::LUCID_SIN_45;
+    const string &labelStr = _scaledLabel.scale(ringRange);
+    drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+    ringRange += ringSpacing;
+  }
+  
   // Draw the azimuth lines
   
-  if (azLinesEnabled) {
-    
-    // Set up the painter
-    
-    painter.save();
-    painter.setPen(_params.grid_and_range_ring_color);
+  // Set up the painter
   
-    // Draw the lines along the X and Y axes
-
-    drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
-    drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
-
-    // Draw the lines along the 30 degree lines
-
-    double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
-    double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
-    
-    drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
-    
-    painter.restore();
-
-  }
-
+  painter.save();
+  painter.setPen(_params.range_rings_color);
+  
+  // Draw the lines along the X and Y axes
+  
+  drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
+  drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
+  
+  // Draw the lines along the 30 degree lines
+  
+  double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
+  double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
+  
+  drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
+  drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
+  drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
+  drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+  
+  painter.restore();
+  
 }
   
 /////////////////////////////////////////////////////

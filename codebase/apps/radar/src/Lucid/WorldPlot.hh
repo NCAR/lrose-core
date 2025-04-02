@@ -563,7 +563,7 @@ public:
   // render a data grid in Cartesian rectangular pixels
   // returns QImage* - owned by this object
 
-  void renderGridRect(int page,
+  void renderGridRect(int fieldNum,
                       MdvReader *mr,
                       time_t start_time,
                       time_t end_time,
@@ -572,7 +572,7 @@ public:
   // render a data grid in distorted polygon
   // returns QImage* - owned by this object
 
-  void renderGridDistorted(int page,
+  void renderGridDistorted(int fieldNum,
                            MdvReader *mr,
                            time_t start_time,
                            time_t end_time,
@@ -581,20 +581,27 @@ public:
   // render a data grid for polar radar data
   // returns QImage* - owned by this object
   
-  void renderGridRadarPolar(int page,
+  void renderGridRadarPolar(int fieldNum,
                             MdvReader *mr,
                             time_t start_time,
                             time_t end_time,
                             bool is_overlay_field);
 
-  void drawOverlays(bool ringsEnabled,
-                    bool azLinesEnabled,
-                    double ringSpacing);
+  // overlays
+  
+  void drawMaps();
+  
+  void drawRangeRings(int fieldNum,
+                      MdvReader *mr,
+                      bool fixedRingsEnabled,
+                      bool dataRingsEnabled,
+                      double ringSpacing);
   
   // get images after rendering
   
   const QImage *getGridImage();
-  const QImage *getOverlayImage();
+  const QImage *getMapsImage();
+  const QImage *getRingsImage();
 
   // print
   
@@ -618,7 +625,8 @@ private:
   // images for rendering
   
   QImage *_gridImage;
-  QImage *_overlayImage;
+  QImage *_mapsImage;
+  QImage *_ringsImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -727,11 +735,10 @@ private:
   
   void _createImage(QImage* &image);
   
-  void _drawMaps(QPainter &painter);
-  void _drawRangeRingsAndAzLines(QPainter &painter,
-                                 bool ringsEnabled,
-                                 bool azLinesEnabled,
-                                 double ringSpacing);
+  void _drawRangeRings(QPainter &painter,
+                       double originLat,
+                       double originLon,
+                       double ringSpacing);
   
 };
 

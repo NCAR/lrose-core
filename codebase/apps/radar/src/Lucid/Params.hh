@@ -225,6 +225,12 @@ public:
   } zoom_level_t;
 
   typedef struct {
+    char* label;
+    double latitude_deg;
+    double longitude_deg;
+  } range_ring_origin_t;
+
+  typedef struct {
     char* field_name;
     char* color;
     tdrp_bool_t on_at_startup;
@@ -760,6 +766,8 @@ public:
 
   double domain_limit_max_y;
 
+  tdrp_bool_t zoom_domain_follows_data;
+
   int num_field_menu_cols;
 
   tdrp_bool_t one_click_rhi;
@@ -904,10 +912,6 @@ public:
 
   tdrp_bool_t horiz_grids_on_at_startup;
 
-  tdrp_bool_t horiz_range_rings_on_at_startup;
-
-  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
-
   legend_pos_t horiz_main_legend_pos;
 
   tdrp_bool_t horiz_override_rendering_beam_width;
@@ -980,10 +984,6 @@ public:
 
   tdrp_bool_t vert_grids_on_at_startup;
 
-  tdrp_bool_t vert_range_rings_on_at_startup;
-
-  tdrp_bool_t vert_elevation_lines_on_at_startup;
-
   legend_pos_t vert_main_legend_pos;
 
   int vert_beam_queue_size;
@@ -999,8 +999,6 @@ public:
   char* background_color2;
 
   char* text_color;
-
-  char* grid_and_range_ring_color;
 
   char* click_cross_color;
 
@@ -1018,7 +1016,7 @@ public:
 
   char* height_indicator_color;
 
-  char* range_ring_color;
+  char* range_rings_color;
 
   char* missing_data_color;
 
@@ -1033,17 +1031,24 @@ public:
   char* *_time_tick_colors;
   int time_tick_colors_n;
 
-  tdrp_bool_t range_rings;
+  tdrp_bool_t plot_range_rings_fixed;
+
+  tdrp_bool_t plot_fixed_rings_at_origin;
+
+  tdrp_bool_t plot_fixed_rings_at_added_locations;
+
+  range_ring_origin_t *_fixed_ring_locations;
+  int fixed_ring_locations_n;
+
+  tdrp_bool_t plot_range_rings_from_data;
+
+  tdrp_bool_t range_ring_for_radar_only;
 
   double range_ring_spacing;
 
   double max_ring_range;
 
   tdrp_bool_t range_ring_follows_data;
-
-  tdrp_bool_t range_ring_for_radar_only;
-
-  tdrp_bool_t domain_follows_data;
 
   int range_ring_x_space;
 
@@ -1345,7 +1350,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[428];
+  mutable TDRPtable _table[427];
 
   const char *_className;
 

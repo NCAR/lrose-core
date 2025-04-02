@@ -310,7 +310,7 @@ int Lucid::_initDataSpace()
 
   // if domain follows data, do not clip or decimate
   
-  if (_params.domain_follows_data) {
+  if (_params.zoom_domain_follows_data) {
     // _params.always_get_full_domain = pTRUE;
     _params.clip_to_current_zoom_on_mdv_request = pFALSE;
     _params.decimate_resolution_on_mdv_request = pFALSE;

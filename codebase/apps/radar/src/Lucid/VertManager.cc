@@ -145,7 +145,7 @@ void VertManager::_createActions(VertView *vert)
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.vert_range_rings_on_at_startup);
+  _ringsAct->setChecked(_params.plot_range_rings_from_data);
   // connect(_ringsAct, SIGNAL(triggered(bool)),
   //         vert, SLOT(setRings(bool)));
 
@@ -159,7 +159,7 @@ void VertManager::_createActions(VertView *vert)
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.vert_elevation_lines_on_at_startup);
+  _azLinesAct->setChecked(_params.plot_range_rings_from_data);
   // connect(_azLinesAct, SIGNAL(triggered(bool)),
   //         vert, SLOT(setAngleLines(bool)));
 
