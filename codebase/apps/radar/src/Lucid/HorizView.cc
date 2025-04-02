@@ -368,11 +368,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   _zoomWorld.fillMargins(painter, _params.background_color);
   
-  // title
-  
-  painter.setPen(_params.foreground_color);
-  _zoomWorld.drawTitleTopCenter(painter, _params.horiz_frame_label);
-  
   // draw axes
   
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -389,6 +384,18 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
+  
+  // draw the color scale
+
+  painter.restore();
+  int fieldNum = _gd.h_win.page;
+  const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
+  _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
+
+  // title
+  
+  painter.setPen(_params.foreground_color);
+  _zoomWorld.drawTitleTopCenter(painter, _params.horiz_frame_label);
   
   // click point cross hairs
   

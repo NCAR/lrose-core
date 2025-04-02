@@ -2380,7 +2380,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 {
 
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
-
+  
   int pltHt = _plotHeight;
   int width = _colorScaleWidth - _rightMargin;
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth;
@@ -2437,7 +2437,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     ndecimals = 1;
   }
 
-  // save state
+  // save painter state
 
   painter.save();
 
@@ -2449,8 +2449,9 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   painter.setFont(scaledFont);
   
   // add labels
-
-  painter.setBrush(Qt::black);
+  
+  painter.setPen(_params.foreground_color);
+  painter.setBackground(QBrush(QColor(_params.background_color)));
   painter.setBackgroundMode(Qt::OpaqueMode);
   QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
   int textHt = tRect.height();
@@ -2514,6 +2515,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     QFont ufont(painter.font());
     ufont.setPointSizeF(unitsFontSize);
     painter.setFont(ufont);
+    painter.setBackgroundMode(Qt::TransparentMode);
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
     int iyy = (int) (topY[cmap.size()-1] - patchHt * 1.0);
