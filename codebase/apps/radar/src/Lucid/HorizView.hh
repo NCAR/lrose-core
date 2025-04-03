@@ -319,7 +319,7 @@ class DLL_EXPORT HorizView : public QWidget
   VertView *_vert;
 
   bool _gridsReady;
-  bool _overlaysReady;
+  bool _mapsReady;
   
   /**
    * @brief The index of the field selected for display.
@@ -500,9 +500,9 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _resetWorld(int width, int height);
   
-  // render the overlays
+  // render the maps
   
-  void _renderOverlays();
+  void _renderMaps();
   
   // get ray closest to click point
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);

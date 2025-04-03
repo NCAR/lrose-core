@@ -42,6 +42,8 @@
 
 #include <rapmath/umath.h>
 #include <toolsa/utim.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/sincos.h>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
 
@@ -3122,46 +3124,6 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
 
 }
 
-/////////////////////////////////////////////////////
-// draw the overlays - maps, range rings etc.
-
-void WorldPlot::drawRangeRings(int fieldNum,
-                               MdvReader *mr,
-                               bool fixedRingsEnabled,
-                               bool dataRingsEnabled,
-                               double ringSpacing)
-  
-{
-
-  cerr << "====>> draw range rings, fieldNum: " << fieldNum << endl;
-  
-  // check that overlay canvas is the correct size
-  
-  _createImage(_ringsImage);
-  
-  // make transparent
-  
-  _ringsImage->fill(Qt::transparent);
-  
-  // get painter
-  
-  QPainter painter(_ringsImage);
-  
-  // render range rings and az line
-
-  if (fixedRingsEnabled) {
-
-    if (_params.plot_fixed_rings_at_origin) {
-      _drawRangeRings(painter,
-                      _params.proj_origin_lat,
-                      _params.proj_origin_lon,
-                      ringSpacing);
-    }
-    
-  }
-  
-}
-
 /*************************************************************************
  * draw map overlays
  */
@@ -3325,6 +3287,46 @@ void WorldPlot::drawMaps()
   
 }
 
+/////////////////////////////////////////////////////
+// draw the overlays - maps, range rings etc.
+
+void WorldPlot::drawRangeRings(int fieldNum,
+                               MdvReader *mr,
+                               bool fixedRingsEnabled,
+                               bool dataRingsEnabled,
+                               double ringSpacing)
+  
+{
+
+  cerr << "====>> draw range rings, fieldNum: " << fieldNum << endl;
+  
+  // check that overlay canvas is the correct size
+  
+  _createImage(_ringsImage);
+  
+  // make transparent
+  
+  _ringsImage->fill(Qt::transparent);
+  
+  // get painter
+  
+  QPainter painter(_ringsImage);
+  
+  // render range rings and az line
+  
+  if (fixedRingsEnabled) {
+
+    if (_params.plot_fixed_rings_at_origin) {
+      _drawRangeRings(painter,
+                      _params.proj_origin_lat,
+                      _params.proj_origin_lon,
+                      ringSpacing);
+    }
+    
+  }
+  
+}
+
 /*************************************************************************
  * _drawRangeRings()
  *
@@ -3335,6 +3337,100 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
                                 double originLat,
                                 double originLon,
                                 double ringSpacing)
+{
+
+  painter.save();
+
+  // get origin (x, y) from (lat, lon)
+  
+  double originX, originY;
+  _proj.latlon2xy(originLat, originLon, originX, originY);
+  
+  // Set the ring color
+
+  QPen pen = painter.pen();
+  pen.setWidth(0);
+  pen.setColor(_params.range_rings_color);
+  painter.setPen(_params.range_rings_color);
+
+  // precompute sin/cos values
+
+  vector<double> sinVals, cosVals;
+  for (int iaz = 0; iaz <= 360; iaz++) {
+    double sinVal, cosVal;
+    ta_sincos(iaz * DEG_TO_RAD, &sinVal, &cosVal);
+    sinVals.push_back(sinVal);
+    cosVals.push_back(cosVal);
+  }
+    
+  // Draw rings
+  
+  double ringRange = ringSpacing;
+  while (ringRange <= _params.max_ring_range) {
+    QPainterPath path;
+    for (int iaz = 0; iaz <= 360; iaz++) {
+      double xx = originX + ringRange * sinVals[iaz];
+      double yy = originY + ringRange * cosVals[iaz];
+      if (iaz == 0) {
+        path.moveTo(xx, yy);
+      } else {
+        path.lineTo(xx, yy);
+      }
+    }
+    painter.drawPath(path);
+    ringRange += ringSpacing;
+  }
+  
+  // Draw the labels
+  
+  QFont font = painter.font();
+  font.setPointSizeF(_params.range_ring_label_font_size);
+  painter.setFont(font);
+  // painter.setWindow(0, 0, width(), height());
+  
+  ringRange = ringSpacing;
+  while (ringRange <= _params.max_ring_range) {
+    double labelPos = ringRange * Constants::LUCID_SIN_45;
+    const string &labelStr = _scaledLabel.scale(ringRange);
+    drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+    drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+    ringRange += ringSpacing;
+  }
+  
+  // Draw the azimuth lines
+  
+  // Set up the painter
+  
+  painter.save();
+  painter.setPen(_params.range_rings_color);
+  
+  // Draw the lines along the X and Y axes
+  
+  drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
+  drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
+  
+  // Draw the lines along the 30 degree lines
+  
+  double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
+  double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
+  
+  drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
+  drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
+  drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
+  drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+  
+  painter.restore();
+  
+}
+
+#ifdef LEGACY
+
+void WorldPlot::_drawRangeRings2(QPainter &painter,
+                                 double originLat,
+                                 double originLon,
+                                 double ringSpacing)
 {
 
   // Draw rings
@@ -3401,7 +3497,9 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   painter.restore();
   
 }
-  
+
+#endif
+
 /////////////////////////////////////////////////////
 // print
 

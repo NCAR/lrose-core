@@ -143,7 +143,7 @@ HorizView::HorizView(QWidget* parent,
   _vert = NULL;
 
   _gridsReady = false;
-  _overlaysReady = false;
+  _mapsReady = false;
   
   _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
   _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
@@ -177,7 +177,7 @@ HorizView::~HorizView()
 
 void HorizView::clear()
 {
-  _renderOverlays();
+  _renderMaps();
   showOpeningFileMsg(false);
 }
 
@@ -359,7 +359,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-  if (_gridsReady && _overlaysReady) {
+  if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoomWorld.getGridImage());
     painter.drawImage(0, 0, *_zoomWorld.getMapsImage());
   }
@@ -987,7 +987,7 @@ void HorizView::_refreshImages()
   
   // do the rendering
 
-  _renderOverlays();
+  _renderMaps();
   update();
 
 #endif
@@ -1797,7 +1797,7 @@ void HorizView::zoomBackView()
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
   _renderGrids();
-  _renderOverlays();
+  _renderMaps();
 }
 
 /*************************************************************************
@@ -1816,7 +1816,7 @@ void HorizView::zoomOutView()
                      _zoomWorld.getXMinWorld(),
                      _zoomWorld.getXMaxWorld()); 
   _renderGrids();
-  _renderOverlays();
+  _renderMaps();
 }
 
 /*************************************************************************
@@ -1899,7 +1899,7 @@ void HorizView::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  //   _renderOverlays();
+  //   _renderMaps();
 }
 
 
@@ -2124,7 +2124,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     // render
     
     _renderGrids();
-    _renderOverlays();
+    _renderMaps();
 
   }
     
@@ -2184,7 +2184,7 @@ void HorizView::resizeEvent(QResizeEvent * e)
   _pixmap = _pixmap.scaled(width(), height());
   updatePixelScales();
   _renderGrids();
-  _renderOverlays();
+  _renderMaps();
 
 }
 
@@ -2231,15 +2231,15 @@ void HorizView::_setTransform(const QTransform &transform)
 }
   
 /*************************************************************************
- * perform the rendering
+ * render the maps
  */
 
-void HorizView::_renderOverlays()
+void HorizView::_renderMaps()
 {
 
-  _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
+  _zoomWorld.drawMaps();
 
-  _overlaysReady = true;
+  _mapsReady = true;
   
   // start the rendering
   
