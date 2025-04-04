@@ -109,11 +109,9 @@ public:
   void enableZoomBackButton() const;
   void enableZoomOutButton() const;
   
-  // override event handling
+  // set the xy zoom
 
-  virtual void timerEvent(QTimerEvent * event);
-  virtual void resizeEvent(QResizeEvent * event) override;
-  virtual void keyPressEvent(QKeyEvent* event);
+  void setXyZoom(double minY, double maxY, double minX, double maxX);
 
   // set/get archive mode
   
@@ -126,32 +124,25 @@ public:
   const string &getSelectedFieldName() const { return _selectedName; }
   const string &getSelectedFieldUnits() const { return _selectedUnits; }
 
-  // set the xy zoom
-
-  void setXyZoom(double minY, double maxY, double minX, double maxX);
-
   // set flag to indicate changes
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
   void setOverlaysHaveChanged(bool val) { _overlaysHaveChanged = val; }
   
-  // boundary editor dialog
-  QDialog *_boundaryEditorDialog;
-  QGridLayout *_boundaryEditorDialogLayout;
-
   // set title bar str
 
   void setTitleBarStr(const string &titleStr);
   
+  // override event handling
+
+  virtual void timerEvent(QTimerEvent * event) override;
+  virtual void resizeEvent(QResizeEvent * event) override;
+  virtual void keyPressEvent(QKeyEvent* event) override;
+
 public slots:
 
-  // void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-  //       			QColor gridColor,
-  //       			QColor emphasisColor,
-  //       			QColor annotationColor,
-  //       			QColor backgroundColor);
-  // void setVolume(); // const RadxVol &radarDataVolume);
-
+  void showClick();
+  
 signals:
 
 private:
@@ -219,7 +210,6 @@ private:
   QAction *_gridsAct;
   QAction *_fixedRingsAct;
   QAction *_dataRingsAct;
-  QAction *_azLinesAct;
   QAction *_showVertAct;
 
   QAction *_exitAct;
@@ -308,27 +298,6 @@ private:
   DateTime _imagesEndTime;
   int _imagesScanIntervalSecs;
 
-  // boundary editor
-  
-  string _boundaryDir;
-  void setBoundaryDir();
-  string getBoundaryFilePath(string boundaryFileName);
-
-  // polygon 
-
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorHelpBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QPushButton *_boundaryEditorPolygonBtn;
-  QPushButton *_boundaryEditorCircleBtn;
-  QPushButton *_boundaryEditorBrushBtn;
-  QListWidget *_boundaryEditorList;
-  QLabel *_boundaryEditorInfoLabel;
-  bool forceHide = true;
-  
-  QSlider *_circleRadiusSlider;
-  QSlider *_brushRadiusSlider;
-
   // for timer
   
   int redraw_interv;
@@ -348,7 +317,6 @@ private:
 
   // void _openFile();
   // void _saveFile();
-  string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // local methods
   
@@ -358,28 +326,9 @@ private:
   void _createMenus();
   void _populateMapsMenu();
   void _populateProductsMenu();
-  void _populateOverlaysMenu();
   void _populateWindsMenu();
   void _populateZoomsMenu();
-
-  // draw beam
-
-  void _handleRay(RadxPlatform &platform, RadxRay *ray);
-  
-  // ray handling for display
-
-  void _storeRayLoc(const RadxRay *ray, const double az,
-		    const double beam_width);
-  void _clearRayOverlap(const int start_index, const int end_index);
-
-  // modes
-  
-  void _activateRealtimeRendering();
-  void _activateArchiveRendering();
-
-  // archive mode
-
-  // void _setVlevelPanelVisibility();
+  void _populateOverlaysMenu();
 
   // field menu
 
@@ -410,14 +359,9 @@ private:
   void _setText(char *text, size_t maxTextLen, const char *format, int val);
   void _setText(char *text, size_t maxTextLen, const char *format, double val);
 
-  // swap 2 int items
-
-  void _swap(int &val1, int &val2);
-
   // legacy
   
   void _autoCreateFunc();
-  // void _ciddTimerFunc(QTimerEvent *event);
   void _setField(int value);
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
@@ -431,34 +375,12 @@ private slots:
 
   void _howto();
   void _about();
-  void _showClick();
-  // void _freeze();
   void _zoomBack();
   void _zoomOut();
   void _refresh();
-  // void _changeField(int fieldId, bool guiMode = true);
   void _openFile();
   void _saveFile();
 
-  // vlevels
-
-  // void _createVlevelFrame();
-  // void _createVlevelRadioButtons();
-  // void _clearVlevelRadioButtons();
-  // void _changeVlevel(bool value);
-  // void _changeVlevelRadioButton(int value);
-  
-  // local
-  
-// #ifdef NOTNOW
-//   void _horizLocationClicked(double xkm, double ykm,
-//                              const RadxRay *closestRay);
-//   void _vertLocationClicked(double xkm, double ykm,
-//                             const RadxRay *closestRay);
-//   void _locationClicked(double xkm, double ykm,
-//                         const RadxRay *ray);
-// #endif
-  
   // resize event
   
   void _resizeFinished();
@@ -486,10 +408,6 @@ private slots:
   void _showTimeControl();
   void _placeTimeControl();
 
-  // circle radius slider for BoundaryPointEditor
-  void _circleRadiusSliderValueChanged(int value);
-  void _brushRadiusSliderValueChanged(int value);
-
   // images
 
   void _saveImageToFile(bool interactive = true);
@@ -497,6 +415,7 @@ private slots:
   void _createArchiveImageFiles();
   void _createImageFilesAllLevels();
   void _createImageFiles();
+  string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // open file 
 
@@ -504,10 +423,8 @@ private slots:
   // void _refreshFileChooserDialog();
   // void _showFileChooserDialog();
   
-  // context editing (SOLO)
+  // context editing
   void ShowContextMenu(const QPoint &pos);
-
-  // void _createBoundaryEditorDialog();
   
 };
 

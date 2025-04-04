@@ -99,18 +99,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   virtual void configureWorldCoords(int zoomLevel = 0);
 
-  /**********************************************
-   * turn on archive-style rendering - all fields
-   */
-
-  void activateArchiveRendering();
-
-  /**********************************************************************
-   * turn on reatlime-style rendering - non-selected fields in background
-   */
-
-  void activateRealtimeRendering();
-
   /**
    * @brief Specify the background color.
    *
@@ -172,11 +160,6 @@ class DLL_EXPORT HorizView : public QWidget
                      double elevationDeg,
                      double rangeKm);
 
-  // get plot times
-
-  const DateTime &getPlotStartTime() { return _plotStartTime; }
-  const DateTime &getPlotEndTime() { return _plotEndTime; }
-
   void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
 
   QLabel *_openingFileInfoLabel;
@@ -223,15 +206,6 @@ class DLL_EXPORT HorizView : public QWidget
 
  public slots:
    
-  /**
-   * @brief Slot called when a beam has finished rendering.
-   *
-   * @params[in] field_num   The index of the field that was rendered.  This
-   *                         is used to check if this was the selected field.
-   */
-
-  void displayImage(const size_t field_num);
-
   /**
    * @brief go back to prev zoom
    */
@@ -429,14 +403,6 @@ class DLL_EXPORT HorizView : public QWidget
   bool _isArchiveMode;
   bool _isStartOfSweep;
 
-  // angles and times in archive mode
-
-  DateTime _plotStartTime;
-  DateTime _plotEndTime;
-  // double _meanElev;
-  // double _sumElev;
-  // double _nRays;
-
   // projection
 
   MdvxProj _proj;
@@ -530,13 +496,6 @@ class DLL_EXPORT HorizView : public QWidget
                        int text_x, int text_y,
                        int flags);
     
-  /**
-   * @brief Refresh the images.  Note that this is an expensive method and
-   *        should only be called where needed.
-   */
-
-  virtual void _refreshImages();
-
   // initialize the geographic projection
 
   void _initProjection();

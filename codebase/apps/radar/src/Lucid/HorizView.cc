@@ -57,9 +57,7 @@ HorizView::HorizView(QWidget* parent,
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _selectedField(0),
-        // _backgroundBrush(QColor(_params.background_color)),
         _gridsEnabled(false),
-        // _gridRingsColor(_params.range_rings_color),
         _ringsFixedEnabled(false),
         _ringsDataDrivenEnabled(false),
         _rubberBand(nullptr),
@@ -67,37 +65,15 @@ HorizView::HorizView(QWidget* parent,
         
 {
 
-  // mode
+  // initialize
 
   _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
-
-  // Set up the background color
-
-  // QPalette new_palette = palette();
-  // new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
-  // setPalette(new_palette);
-  
-  // setBackgroundRole(QPalette::Dark);
-  // setAutoFillBackground(true);
-  // setAttribute(Qt::WA_OpaquePaintEvent);
-
   setAttribute(Qt::WA_TranslucentBackground);
   setAutoFillBackground(false);
   
-  // create the rubber band
-
-  // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
-  // _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
-  // _rubberBand = new CustomRubberBand(QRubberBand::Rectangle, this);
-  // _rubberBand->setStyleSheet("background: rgba(0, 0, 255, 50); border: 2px solid blue;");
-  // _rubberBand->setAttribute(Qt::WA_TranslucentBackground);
-  // _rubberBand->setAttribute(Qt::WA_NoSystemBackground);
-  // _rubberBand->setStyleSheet("background: transparent;");
-  // _rubberBand->setStyleSheet("background: transparent; border: 2px dashed rgba(0, 0, 255, 150);");
-
   // Allow the widget to get focus
-
-  // setFocusPolicy(Qt::StrongFocus);
+  
+  setFocusPolicy(Qt::StrongFocus);
 
   // Allow the size_t type to be passed to slots
 
@@ -109,13 +85,20 @@ HorizView::HorizView(QWidget* parent,
   _worldPressY = 0.0;
   _worldReleaseX = 0.0;
   _worldReleaseY = 0.0;
-  _pointClicked = false;
+
   _mousePressX = 0;
   _mousePressY = 0;
   _mouseReleaseX = 0;
   _mouseReleaseY = 0;
+
   _zoomCornerX = 0;
   _zoomCornerY = 0;
+
+  _pointClicked = false;
+  _worldClickX = 0.0;
+  _worldClickY = 0.0;
+  _worldClickLat = 0.0;
+  _worldClickLon = 0.0;
   
   _colorScaleWidth = _params.horiz_color_scale_width;
 
@@ -130,9 +113,6 @@ HorizView::HorizView(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
-  // _plotStartTime.set(0);
-  // _plotEndTime.set(0);
-  
   _renderFrame = false;
   _renderFrameIndex = 0;
   _renderFramePage = 0;
@@ -429,6 +409,8 @@ void HorizView::paintEvent(QPaintEvent *event)
                _worldClickLat, _worldClickLon, _worldClickX, _worldClickY);
     }
     _manager.setTitleBarStr(titleStr);
+
+    _manager.showClick();
              
     cerr << "CCCCCCCCCCCCCCC click lat, lon: " << _worldClickLat << ", " << _worldClickLon << endl;
     
@@ -961,99 +943,6 @@ void HorizView::_drawScreenText(QPainter &painter, const string &text,
   painter.drawText(bRect, flags, text.c_str());
     
 }
-
-/*************************************************************************
- * _refreshImages()
- */
-
-void HorizView::_refreshImages()
-{
-
-#ifdef NOTNOW  
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    
-    FieldRenderer *field = _fieldRenderers[ifield];
-    
-    // If needed, create new image for this field
-    
-    if (size() != field->getImage()->size()) {
-      field->createImage(width(), height());
-    }
-
-    // clear image
-
-    field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-    // set up rendering details
-
-    field->setTransform(_zoomTransform);
-    
-    // Add pointers to the beams to be rendered
-    
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
-
-      std::vector< PpiBeam* >::iterator beam;
-      for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-	(*beam)->setBeingRendered(ifield, true);
-	field->addBeam(*beam);
-      }
-      
-    }
-    
-  } // ifield
-  
-  // do the rendering
-
-  _renderMaps();
-  update();
-
-#endif
-
-}
-
-/*
-  void HorizView::sillyReceived() {
-  LOG(DEBUG_VERBOSE) << "enter";
-  LOG(DEBUG_VERBOSE) << "exit";
-  }
-*/
-/*
-  void HorizView::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
-  {
-  LOG(DEBUG_VERBOSE) << "enter";
-  // connect the new color map with the field                                                                    
-  // find the fieldName in the list of FieldDisplays                                                             
-  
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = 0;
-
-  it = _fields.begin();
-  while ( it != _fields.end() && !found ) {
-  DisplayField *field = *it;
-
-  string name = field->getName();
-  if (name.compare(fieldName) == 0) {
-  found = true;
-  field->replaceColorMap(newColorMap);
-  }
-  fieldId++;
-  it++;
-  }
-  if (!found) {
-  LOG(ERROR) << fieldName;
-  LOG(ERROR) << "ERROR - field not found; no color map change";
-  // TODO: present error message box                                                                           
-  } else {
-  // look up the fieldId from the fieldName                                                                    
-  // change the field variable                                                                                 
-  _changeField(fieldId, true);
-  }
-  
-  LOG(DEBUG_VERBOSE) << "exit";
-  }
-*/
-
 
 #ifdef NOTNOW
 
@@ -1865,48 +1754,6 @@ void HorizView::setGrids(const bool enabled)
 
 
 /*************************************************************************
- * turn on archive-style rendering - all fields
- */
-
-void HorizView::activateArchiveRendering()
-{
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
-  // }
-}
-
-
-/*************************************************************************
- * turn on reatlime-style rendering - non-selected fields in background
- */
-
-void HorizView::activateRealtimeRendering()
-{
-  
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   if (ii != _selectedField) {
-  //     _fieldRenderers[ii]->activateBackgroundRendering();
-  //   }
-  // }
-
-}
-
-/*************************************************************************
- * displayImage()
- */
-
-void HorizView::displayImage(const size_t field_num)
-{
-  // If we weren't rendering the current field, do nothing
-  if (field_num != _selectedField) {
-    return;
-  }
-  cerr << "DISPLAY IMAGE" << endl;
-  update();
-}
-
-
-/*************************************************************************
  * backgroundColor()
  */
 
@@ -2060,8 +1907,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
   _pointClicked = false;
 
-  // QRect rgeom = _rubberBand->geometry();
-
   // If the mouse hasn't moved much, assume we are clicking rather than
   // zooming
 
@@ -2082,36 +1927,9 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     // mouse moved less than 20 pixels, so we interpret that as a click
     // get click location in world coords
-
+    
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-    update();
-
-#ifdef NOTNOW    
-    // If boundary editor active, then interpret boundary mouse release event
-    BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
-    if (_manager._boundaryEditorDialog->isVisible()) {
-      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
-        if (!editor->isAClosedPolygon()) {
-          editor->addPoint(_worldReleaseX, _worldReleaseY);
-        } else { //polygon finished, user may want to insert/delete a point
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-    	}
-      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
-        if (editor->isAClosedPolygon()) {
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-        } else {
-          editor->makeCircle(_worldReleaseX,
-                             _worldReleaseY,
-                             editor->getCircleRadius());
-    	}
-      }
-    }
-
-#endif
 
     _pointClicked = true;
     _worldClickX = _worldReleaseX;
@@ -2127,6 +1945,8 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     emit locationClicked(_worldClickX, _worldClickY, closestRay);
     
+    // update();
+
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred

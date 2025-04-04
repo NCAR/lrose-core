@@ -142,10 +142,6 @@ GuiManager::GuiManager() :
   _vertWindow = NULL;
   _vert = NULL;
 
-  // _vlevelVBoxLayout = NULL;
-  // _vlevelFrame = NULL;
-  // _vlevelPanel = NULL;
-  
   _fieldMenu = NULL;
   _fieldTable = NULL;
   _fieldMenuPlaced = false;
@@ -170,9 +166,6 @@ GuiManager::GuiManager() :
   _timeControl = NULL;
   _timeControlPlaced = false;
 
-  setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
-  _archiveStartTime.set(_params.archive_start_time);
-
   _imagesStartTime.set(_params.images_archive_start_time);
   _imagesEndTime.set(_params.images_archive_end_time);
   _imagesScanIntervalSecs = _params.images_scan_interval_secs;
@@ -185,10 +178,6 @@ GuiManager::GuiManager() :
 
   _setupWindows();
 
-  // set initial field to 0
-
-  // _changeField(0, false);
-
   // init for timer
   
   redraw_interv = _params.redraw_interval;
@@ -199,6 +188,13 @@ GuiManager::GuiManager() :
   last_tick = 0;
   client_seq_num = 0;
 
+  // startup mode
+  
+  setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
+  _archiveStartTime.set(_params.archive_start_time);
+
+  // qt attributes
+  
   setAttribute(Qt::WA_TranslucentBackground);
   setAutoFillBackground(false);
 
@@ -259,7 +255,7 @@ void GuiManager::enableZoomOutButton() const
 }
 
 //////////////////////////////////////////////////
-// set the XY zoom limits
+// respond to zoom action, set the XY zoom limits
 
 void GuiManager::setXyZoom(double minY, double maxY,
                            double minX, double maxX)
@@ -272,6 +268,33 @@ void GuiManager::setXyZoom(double minY, double maxY,
   _gd.h_win.cmax_x = maxX;
 }
 
+/////////////////////////////////////
+// set archive mode
+
+void GuiManager::setArchiveMode(bool state)
+{
+
+  // _setSweepPanelVisibility();
+  
+  if (_horiz) {
+    _horiz->setArchiveMode(state);
+  }
+  if (_vert) {
+    _vert->setArchiveMode(state);
+  }
+
+  _archiveMode = state;
+  
+}
+
+//////////////////////////////////////////////////
+// Set radar name in title bar
+
+void GuiManager::setTitleBarStr(const string &titleStr)
+{
+  setWindowTitle(tr(titleStr.c_str()));
+}
+  
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
@@ -324,104 +347,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
   
 }
 
-//////////////////////////////////////////////////////////////
-// check if we need new H data, and read accordingly
-// then trigger rendering if appropriate
-  
-void GuiManager::_checkAndReadH(MdvReader *mr)
-{
-
-  // check for state change
-  
-  bool stateChanged = _checkForStateChange();
-  
-  // get new data if needed - data is retrieved in a thread
-  
-  int frameIndex = _gd.movie.cur_frame;
-  if (_gd.movie.cur_frame < 0) {
-    frameIndex = _gd.movie.num_frames - 1;
-  }
-
-  if (stateChanged) {
-    mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
-                          _vlevelManager.getRequestedLevel(),
-                          _gd.h_win.page);
-  }
-  
-  // check for new data
-  
-  if (mr->isNewH()) {
-    if (!mr->isValidH()) {
-      cerr << "ERROR - GuiManager::timerEvent" << endl;
-      cerr << "  mr->requestHorizPlane" << endl;
-      cerr << "  time_start: " << DateTime::strm(_gd.movie.frame[frameIndex].time_start) << endl;
-      cerr << "  time_end: " << DateTime::strm(_gd.movie.frame[frameIndex].time_end) << endl;
-      cerr << "  page: " << _gd.h_win.page << endl;
-    }
-    int frameIndex = _gd.movie.cur_frame;
-    if (_gd.movie.cur_frame < 0) {
-      frameIndex = _gd.movie.num_frames - 1;
-    }
-    _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
-    if (_gd.h_win.page < _gd.num_datafields) {
-      _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
-    }
-    _vlevelSelector->update();
-  }
-
-}
-
-///////////////////////////////////////////
-// check for state changes
-
-bool GuiManager::_checkForStateChange()
-
-{
-
-  bool stateHasChanged = false;
-
-  if (_fieldHasChanged) {
-    stateHasChanged = true;
-    _fieldHasChanged = false;
-  }
-  
-  // zoom change?
-  
-  if (_checkForZoomChange()) {
-    stateHasChanged = true;
-  }
-
-  // vlevel change?
-  
-  if (_vlevelHasChanged) {
-    stateHasChanged = true;
-    _vlevelHasChanged = false;
-  }
-
-  // time change
-
-  if (_timeControl->timeHasChanged()) {
-    stateHasChanged = true;
-  }
-
-  // resize?
-
-  if (_resized) {
-    stateHasChanged = true;
-    _resized = false;
-  }
-
-  // overlays?
-
-  if (_overlaysHaveChanged) {
-    stateHasChanged = true;
-    _overlaysHaveChanged = false;
-  }
-
-  return stateHasChanged;
-
-}
-
 ///////////////////////////////////////////////
 // override resize event
 // we use a timer to debounce the resize event
@@ -469,12 +394,11 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     return;
   }
   
-  // for ESC, freeze / unfreeze
+  // trap ESC in case needed
 
-  // if (keychar == 27) {
-  //   _freezeAct->trigger();
-  //   return;
-  // }
+  if (keychar == 27) {
+    // do something
+  }
 
   // check for up/down in vlevels
   
@@ -516,30 +440,19 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
 
 }
 
-///////////////////////////////////
-// swap 2 ints
+/////////////////////////////////////
+// clear display widgets
 
-void GuiManager::_swap(int &val1, int &val2) 
+void GuiManager::_clear()
 {
-  int tmp = val1;
-  val1 = val2;
-  val2 = tmp;
+  if (_horiz) {
+    _horiz->clear();
+  }
+  if (_vert) {
+    _vert->clear();
+  }
 }
 
-// void GuiManager::_moveUpDown() 
-// {
-//   this->setCursor(Qt::WaitCursor);
-//   this->setCursor(Qt::ArrowCursor);
-// }
-
-//////////////////////////////////////////////////
-// Set radar name in title bar
-
-void GuiManager::setTitleBarStr(const string &titleStr)
-{
-  setWindowTitle(tr(titleStr.c_str()));
-}
-  
 //////////////////////////////////////////////////
 // set up windows and widgets
   
@@ -648,16 +561,6 @@ void GuiManager::_setupWindows()
 
 }
 
-//////////////////////////////////////////////////
-// add/remove  vlevel panel (archive mode only)
-
-// void GuiManager::_setVlevelPanelVisibility()
-// {
-//   if (_vlevelPanel != NULL) {
-//     _vlevelPanel->setVisible(true);
-//   }
-// }
-
 //////////////////////////////
 // create actions for menus
 
@@ -670,35 +573,17 @@ void GuiManager::_createActions()
   connect(_showFieldMenuAct, &QAction::triggered,
           this, &GuiManager::_showFieldMenu);
   
-  // freeze display
-  // _freezeAct = new QAction(tr("Freeze"), this);
-  // _freezeAct->setShortcut(tr("Esc"));
-  // _freezeAct->setStatusTip(tr("Freeze display"));
-  // connect(_freezeAct, &QAction::triggered, this, &GuiManager::_freeze);
-  
   // show user click in dialog
   _showClickAct = new QAction(tr("Values"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
-  connect(_showClickAct, &QAction::triggered, this, &GuiManager::_showClick);
+  connect(_showClickAct, &QAction::triggered, this, &GuiManager::showClick);
 
-  // show boundary editor dialog
-  // _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
-  // _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
-  // connect(_showBoundaryEditorAct, &QAction::triggered, this, &GuiManager::showBoundaryEditor);
-  
   // show time control window
   _showTimeControlAct = new QAction(tr("Movie"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
   connect(_showTimeControlAct, &QAction::triggered,
           this, &GuiManager::_showTimeControl);
   
-  // unzoom display
-  
-  // _zoomBackAct = new QAction(tr("Back"), this);
-  // _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
-  // _zoomBackAct->setEnabled(false);
-  // connect(_zoomBackAct, &QAction::triggered, this, &GuiManager::_zoomBack);
-
   // reload data
   
   _reloadAct = new QAction(tr("Reload"), this);
@@ -830,9 +715,7 @@ void GuiManager::_createMenus()
 
   // misc actions
   
-  // menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
-  // menuBar()->addAction(_showBoundaryEditorAct);
   menuBar()->addAction(_reloadAct);
 
   _helpMenu = menuBar()->addMenu(tr("Help"));
@@ -1112,995 +995,6 @@ void GuiManager::_populateOverlaysMenu()
 
 }
 
-/////////////////////////////////////////////////////////////
-// create the vlevel panel
-// buttons will be filled in by createVlevelRadioButtons()
-
-// void GuiManager::_createVlevelFrame()
-// {
-  
-//   _vlevelFrame = new QFrame(_main);
-//   QHBoxLayout *frameLayout = new QHBoxLayout;
-//   _vlevelFrame->setLayout(frameLayout);
-  
-//   _vlevelPanel = new QGroupBox("Z", _vlevelFrame);
-//   frameLayout->addWidget(_vlevelPanel);
-//   _vlevelVBoxLayout = new QVBoxLayout;
-//   _vlevelPanel->setLayout(_vlevelVBoxLayout);
-//   _vlevelPanel->setAlignment(Qt::AlignHCenter);
-  
-//   _vlevelRButtons = new vector<QRadioButton *>();
-  
-  
-// }
-
-/////////////////////////////////////////////////////////////////////
-// create radio buttons
-// this requires that _vlevelManager is up to date with vlevel info
-
-// void GuiManager::_createVlevelRadioButtons() 
-// {
-
-//   // clear previous
-  
-//   _clearVlevelRadioButtons();
-  
-//   // fonts
-  
-//   QLabel dummy;
-//   QFont font = dummy.font();
-//   QFont fontm2 = dummy.font();
-//   int fsize = _params.label_font_size;
-//   int fsizem2 = _params.label_font_size - 2;
-//   font.setPixelSize(fsize);
-//   fontm2.setPixelSize(fsizem2);
-  
-//   // radar and site name
-  
-//   char buf[256];
-//   _vlevelRButtons = new vector<QRadioButton *>();
-  
-//  for (int ielev = 0; ielev < (int) _vlevelManager.getNLevels(); ielev++) {
-    
-//     std::snprintf(buf, 256, "%.2f", _vlevelManager.getLevel(ielev));
-//     QRadioButton *radio1 = new QRadioButton(buf); 
-//     radio1->setFont(fontm2); 
-    
-//     if (ielev == _vlevelManager.getIndexInGui()) {
-//       radio1->setChecked(true);
-//     }
-    
-//     _vlevelRButtons->push_back(radio1);
-//     _vlevelVBoxLayout->addWidget(radio1);
-    
-//     // connect slot for vlevel change
-                              
-//     connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeVlevel(bool)));
-    
-//   }
-
-//   QString title("Z");
-//   if (_vlevelManager.getUnits().size() > 0) {
-//     title += "(";
-//     title += _vlevelManager.getUnits();
-//     title += ")";
-//   }
-//   _vlevelPanel->setTitle(title);
-
-// }
-
-///////////////////////////////////////////////////////////////////
-// create vlevel panel of radio buttons
-
-// void GuiManager::_clearVlevelRadioButtons() 
-// {
-  
-//   QLayoutItem* child;
-//   if (_vlevelVBoxLayout != NULL) {
-//     while (_vlevelVBoxLayout->count() !=0) {
-//       child = _vlevelVBoxLayout->takeAt(0);
-//       if (child->widget() !=0) {
-//         delete child->widget();
-//       }
-//       delete child;
-//     }
-//   }
-  
-// }
-
-/////////////////////////////////////////////////////////////
-// change vlevel
-
-// void GuiManager::_changeVlevel(bool value) {
-  
-//   if (_params.debug) {
-//     cerr << "From GuiManager: the vlevel was changed ";
-//     cerr << endl;
-//   }
-  
-//   if (!value) {
-//     return;
-//   }
-  
-//   for (size_t vlevelIndex = 0; vlevelIndex < _vlevelRButtons->size();
-//        vlevelIndex++) {
-//     if (_vlevelRButtons->at(vlevelIndex)->isChecked()) {
-//       _vlevelManager.setIndexInGui(vlevelIndex);
-//       if (_params.debug) {
-//         cerr << "vlevelRButton " << vlevelIndex << " is checked" << endl;
-//         cerr << "  moving to vlevel index, value: "
-//              << vlevelIndex << ", " << _vlevelManager.getLevel() << endl;
-//       }
-//       // _horiz->setStartOfVlevel(true);
-//       // _vert->setStartOfVlevel(true);
-//       _moveUpDown();
-
-//       _vlevelHasChanged = true;
-//       _gd.redraw_horiz = true;
-      
-//       // reloadBoundaries();
-//       return;
-//     }
-//   }  // ii
-  
-// }
-
-///////////////////////////////////////////////////////////////
-// change vlevel
-// only set the vlevelIndex in one place;
-// here, just move the radio button up or down one step
-// when the radio button is changed, a signal is emitted and
-// the slot that receives the signal will increase the vlevelIndex
-// value = +1 move forward
-// value = -1 move backward in vlevels
-
-// void GuiManager::_changeVlevelRadioButton(int increment)
-
-// {
-  
-//   if (_params.debug) {
-//     cerr << "-->> changing vlevel index by increment: " << increment << endl;
-//   }
-  
-//   if (increment != 0) {
-//     _vlevelManager.changeIndexInGui(increment);
-//     _vlevelRButtons->at(_vlevelManager.getIndexInGui())->setChecked(true);
-//     _gd.redraw_horiz = true;
-//   }
-  
-// }
-
-///////////////////////////////////////
-// set input file list for archive mode
-
-// void GuiManager::setArchiveFileList(const vector<string> &list,
-//                                      bool fromCommandLine /* = true */)
-// {
-
-//   if (fromCommandLine && list.size() > 0) {
-//     // determine start and end time from file list
-//     DateTime startTime, endTime;
-//     NcfRadxFile::getTimeFromPath(list[0], startTime);
-//     NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
-//     // round to nearest five minutes
-//     time_t startTimeSecs = startTime.utime();
-//     startTimeSecs =  (startTimeSecs / 300) * 300;
-//     time_t endTimeSecs = endTime.utime();
-//     endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-//     _timeControl->setArchiveStartTime(startTimeSecs);
-//     _timeControl->setArchiveEndTime(endTimeSecs);
-//     _timeControl->setArchiveScanIndex(0);
-//   }
-
-//   _archiveFileList = list;
-//   setArchiveRetrievalPending();
-
-//   if (_timeControl->getArchiveScanIndex() < 0) {
-//     _timeControl->setArchiveScanIndex(0);
-//   } else if (_timeControl->getArchiveScanIndex() > (int) _archiveFileList.size() - 1) {
-//     _timeControl->setArchiveScanIndex(_archiveFileList.size() - 1);
-//   }
-
-//   _timeControl->setTimeSliderMinimum(0);
-//   if (_archiveFileList.size() <= 1) {
-//     _timeControl->setTimeSliderMaximum(1);
-//   } else {
-//     _timeControl->setTimeSliderMaximum(_archiveFileList.size() - 1);
-//   }
-//   _timeControl->setTimeSliderPosition(_timeControl->getArchiveScanIndex());
-
-//   // check if the paths include a day dir
-
-//   _archiveFilesHaveDayDir = false;
-//   if (list.size() > 0) {
-//     RadxPath path0(list[0]);
-//     RadxPath parentPath(path0.getDirectory());
-//     string parentDir = parentPath.getFile();
-//     int year, month, day;
-//     if (sscanf(parentDir.c_str(), "%4d%2d%2d", &year, &month, &day) == 3) {
-//       _archiveFilesHaveDayDir = true;
-//     }
-//   }
-
-//   if (_archiveFilesHaveDayDir) {
-//     _timeControl->setArchiveEnabled(true);
-//   } else {
-//     _timeControl->setArchiveEnabled(true);
-//   }
-
-//   cerr << "xxxxxxxxxxxxxxxxxxxxxx" << endl;
-//   _timeControl->setGuiFromArchiveStartTime();
-//   _timeControl->setGuiFromArchiveEndTime();
-
-// }
-  
-// ///////////////////////////////////////////////
-// // get archive file list by searching for files
-// // returns 0 on success, -1 on failure
-
-// int GuiManager::loadArchiveFileList()
-
-// {
-//   return 0;
-
-// }
-
-/////////////////////////////
-// apply new, edited  data in archive mode
-// the volume has been updated 
-
-// void GuiManager::_applyDataEdits()
-// {
-
-//   if (_params.debug) {
-//     std::ofstream outfile("/tmp/voldebug_GuiManager_applyDataEdits.txt");
-//     _vol.printWithFieldData(outfile);  
-//     outfile << "_vol = " << &_vol << endl;
-//   }
-
-//   _plotArchiveData();
-// }
-
-/////////////////////////////
-// plot data in archive mode
-
-// void GuiManager::_plotArchiveData()
-
-// {
-
-//   if(_params.debug) {
-//     cerr << "Plotting archive data" << endl;
-//     cerr << "  volume start time: " << _plotStartTime.asString() << endl;
-//   }
-
-// handle the rays
-
-// const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-// for (size_t ii = gsweep.radx->getStartRayIndex();
-//      ii <= gsweep.radx->getEndRayIndex(); ii++) {
-//   RadxRay *ray = rays[ii];
-//   _handleRay(_platform, ray);
-//   if (ii == 0) {
-//     _updateStatusPanel(ray);
-//   }
-// }
-  
-// }
-
-//////////////////////////////////////////////////
-// set up read
-
-// void GuiManager::_setupVolRead(RadxFile &file)
-// {
-
-//   if (_params.debug >= Params::DEBUG_VERBOSE) {
-//     file.setDebug(true);
-//   }
-//   if (_params.debug >= Params::DEBUG_EXTRA) {
-//     file.setDebug(true);
-//     file.setVerbose(true);
-//   }
-
-//   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-//     const DisplayField *field = _fields[ifield];
-//     file.addReadField(field->getName());
-//   }
-
-// }
-
-//////////////////////////////////////////////////////////////
-// handle an incoming ray
-
-// void GuiManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
-  
-// {
-
-//   if (ray->getNGates() < 1) {
-//     return;
-//   }
-
-//   // do we need to reconfigure the HORIZ?
-
-//   _nGates = ray->getNGates();
-//   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-//   _maxRangeKm = maxRange;
-//   _horiz->configureRange(_maxRangeKm);
-//   _vert->configureRange(_maxRangeKm);
-
-//   // create 2D field data vector
-
-//   vector< vector<double> > fieldData;
-//   fieldData.resize(_fields.size());
-  
-//   // fill data vector
-
-//   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-
-//     vector<double> &data = fieldData[ifield];
-//     data.resize(_nGates);
-//     RadxField *rfld = ray->getField(_fields[ifield]->getName());
-
-//     // at this point, we know the data values for the field AND the color map                                                                        
-//     bool haveColorMap = _fields[ifield]->haveColorMap();
-//     Radx::fl32 min = FLT_MAX;;
-//     Radx::fl32 max = FLT_MIN;
-
-//     if (rfld == NULL) {
-//       // fill with missing
-//       for (int igate = 0; igate < _nGates; igate++) {
-//         data[igate] = -9999.0;
-//       }
-//     } else {
-//       rfld->convertToFl32();
-//       const Radx::fl32 *fdata = rfld->getDataFl32();
-//       const Radx::fl32 missingVal = rfld->getMissingFl32();
-//       // we can only look at the data available, so only go to nGates
-//       for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
-//         Radx::fl32 val = *fdata;
-//         if (fabs(val - missingVal) < 0.0001) {
-//           data[igate] = -9999.0;
-//         } else {
-//           data[igate] = val;
-//           if (!haveColorMap) {
-//             // keep track of min and max data values
-// 	    // just display something.  The color scale can be edited as needed, later.
-// 	    bool newMinOrMax = false;
-//             if (val < min) {
-//               min = *fdata;
-// 	      newMinOrMax = true;
-// 	    }
-//             if (val > max) {
-// 	      max = *fdata;
-// 	      newMinOrMax = true;
-// 	    }
-// 	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
-// 	      printf("field index %zu, gate %d \t", ifield, igate);
-// 	      printf("new min, max of data %g, %g\t", min,  max);
-// 	      printf("missing value %g\t", missingVal);
-// 	      printf("current value %g\n", val);
-// 	    }
-//           }
-//         } // end else not missing value
-//       } // end for each gate
-      
-//       if (!haveColorMap) {                              
-//         _fields[ifield]->setColorMapRange(min, max);
-//         _fields[ifield]->changeColorMap(); // just change bounds on existing map
-//       } // end do not have color map
-
-//     } // end else vector not NULL
-//   } // end for each field
-
-//   // Store the ray location (which also sets _startAz and _endAz), then
-//   // draw beam on the HORIZ or VERT, as appropriate
-
-//   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-//       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
-
-//     _vertMode = true;
-
-//     // If this is the first VERT beam we've encountered, automatically open
-//     // the VERT window.  After this, opening and closing the window will be
-//     // left to the user.
-
-//     if (!_vertWindowDisplayed) {
-//       _vertWindow->show();
-//       _vertWindow->resize();
-//       _vertWindowDisplayed = true;
-//     }
-
-//     // Add the beam to the display
-
-//     _vert->addBeam(ray, fieldData, _fields);
-//     _vertWindow->setAzimuth(ray->getAzimuthDeg());
-//     _vertWindow->setElevation(ray->getElevationDeg());
-    
-//   } else {
-
-//     _vertMode = false;
-
-//     // check for elevation surveillance sweep mode
-//     // in this case, set azimuth to rotation if georef is available
-
-//     if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-//       ray->setAnglesForElevSurveillance();
-//     }
-
-//     // Store the ray location using the azimuth angle and the HORIZ location
-//     // table
-
-//     double az = ray->getAzimuthDeg();
-//     _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH());
-
-//     // Save the angle information for the next iteration
-
-//     _prevAz = az;
-//     _prevEl = -9999.0;
-
-//     // Add the beam to the display
-
-//     _horiz->addBeam(ray, _startAz, _endAz, fieldData, _fields);
-
-//   }
-  
-// }
-
-///////////////////////////////////////////////////////////
-// store ray location
-
-// void GuiManager::_storeRayLoc(const RadxRay *ray, 
-//                                const double az,
-//                                const double beam_width)
-// {
-
-// #ifdef NOTNOW
-  
-//   LOG(DEBUG_VERBOSE) << "az = " << az << " beam_width = " << beam_width;
-
-//   // Determine the extent of this ray
-
-//   if (_params.horiz_override_rendering_beam_width) {
-//     double half_angle = _params.horiz_rendering_beam_width / 2.0;
-//     _startAz = az - half_angle - 0.1;
-//     _endAz = az + half_angle + 0.1;
-//   } else if (ray->getIsIndexed()) {
-//     double half_angle = ray->getAngleResDeg() / 2.0;
-//     _startAz = az - half_angle - 0.1;
-//     _endAz = az + half_angle + 0.1;
-//   } else {
-//     double beam_width_min = beam_width;
-//     if (beam_width_min < 0) 
-//       beam_width_min = 10.0;
-
-//     double max_half_angle = beam_width_min / 2.0;
-//     double prev_offset = max_half_angle;
-//     if (_prevAz > 0.0) { // >= 0.0) {
-//       double az_diff = az - _prevAz;
-//       if (az_diff < 0.0)
-// 	az_diff += 360.0;
-//       double half_az_diff = az_diff / 2.0;
-	
-//       if (prev_offset > half_az_diff)
-// 	prev_offset = half_az_diff;
-//     }
-//     _startAz = az - prev_offset - 0.1;
-//     _endAz = az + max_half_angle + 0.1;
-//   }
-    
-//   // store
-//   // HERE !!! fix up negative values here or in clearRayOverlap??
-//   if (_startAz < 0) _startAz += 360.0;
-//   if (_endAz < 0) _endAz += 360.0;
-//   if (_startAz >= 360) _startAz -= 360.0;
-//   if (_endAz >= 360) _endAz -= 360.0;
-    
-//   LOG(DEBUG_VERBOSE) << " startAz = " << _startAz << " endAz = " << _endAz;
-
-//   // compute start and end indices, using modulus to keep with array bounds
-
-//   int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-//   int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
-
-//   // Clear out any rays in the locations list that are overlapped by the
-//   // new ray
-    
-//   if (startIndex > endIndex) {
-
-//     // area crosses the 360; 0 boundary; must break into two sections
-
-//     // first from start index to 360
-    
-//     _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
-
-//     for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = startIndex;
-//       _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
-//     }
-
-//     // then from 0 to end index
-    
-//     _clearRayOverlap(0, endIndex);
-
-//     // Set the locations associated with this ray
-    
-//     for (int ii = 0; ii <= endIndex; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = 0;
-//       _rayLoc[ii].endIndex = endIndex;
-//     }
-
-//   } else { // if (startIndex > endIndex) 
-
-//     _clearRayOverlap(startIndex, endIndex);
-    
-//     // Set the locations associated with this ray
-
-//     for (int ii = startIndex; ii <= endIndex; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = startIndex;
-//       _rayLoc[ii].endIndex = endIndex;
-//     }
-
-//   } // if (startIndex > endIndex)
-
-// #endif
-
-// }
-
- 
-///////////////////////////////////////////////////////////
-// clear any locations that are overlapped by the given ray
-
-// void GuiManager::_clearRayOverlap(const int start_index, const int end_index)
-// {
-
-// #ifdef NOTNOW
-  
-//   LOG(DEBUG_VERBOSE) << "enter" << " start_index=" << start_index <<
-//     " end_index = " << end_index;
-
-//   if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
-//     cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
-//     return;
-//   }
-//   if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
-//     cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
-//     return;
-//   }
-
-//   // Loop through the ray locations, clearing out old information
-
-//   int i = start_index;
-  
-//   while (i <= end_index) {
-
-//     RayLoc &loc = _rayLoc[i];
-    
-//     // If this location isn't active, we can skip it
-
-//     if (!loc.active) {
-//       // LOG(DEBUG_VERBOSE) << "loc NOT active";
-//       ++i;
-//       continue;
-//     }
-    
-//     int loc_start_index = loc.startIndex;
-//     int loc_end_index = loc.endIndex;
-
-//     if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
-//       cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
-//       ++i;
-//       continue;
-//     }
-//     if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
-//       cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
-//       ++i;
-//       continue;
-//     }
-
-//     if (loc_end_index < i) {
-//       cout << " OH NO! We are HERE" << endl;
-//       ++i;
-//       continue;
-//     }
-//     // If we get here, this location is active.  We now have 4 possible
-//     // situations:
-
-//     if (loc.startIndex < start_index && loc.endIndex <= end_index) {
-
-//       // The overlap area covers the end of the current beam.  Reduce the
-//       // current beam down to just cover the area before the overlap area.
-//       LOG(DEBUG_VERBOSE) << "Case 1a:";
-//       LOG(DEBUG_VERBOSE) << " i = " << i;
-//       LOG(DEBUG_VERBOSE) << "clearing from start_index=" << start_index <<
-// 	  " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = start_index; j <= loc_end_index; ++j) {
-
-// 	_rayLoc[j].ray = NULL;
-// 	_rayLoc[j].active = false;
-
-//       }
-
-//       // Update the end indices for the remaining locations in the current
-//       // beam
-//       LOG(DEBUG_VERBOSE) << "Case 1b:";
-//       LOG(DEBUG_VERBOSE) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
-// 	  " to start_index=" << start_index;
-      
-//       for (int j = loc_start_index; j < start_index; ++j)
-// 	_rayLoc[j].endIndex = start_index - 1;
-
-//     } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
-      
-//       // The current beam is bigger than the overlap area.  This should never
-//       // happen, so go ahead and just clear out the locations for the current
-//       // beam.
-//       LOG(DEBUG_VERBOSE) << "Case 2:";
-//       LOG(DEBUG_VERBOSE) << " i = " << i;
-//       LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-// 	  " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
-//         _rayLoc[j].clear();
-//       }
-
-//     } else if (loc.endIndex > end_index) {
-      
-//       // The overlap area covers the beginning of the current beam.  Reduce the
-//       // current beam down to just cover the area after the overlap area.
-
-// 	LOG(DEBUG_VERBOSE) << "Case 3a:";
-// 	LOG(DEBUG_VERBOSE) << " i = " << i;
-// 	LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-// 	  " to end_index=" << end_index;
-
-//       for (int j = loc_start_index; j <= end_index; ++j) {
-// 	_rayLoc[j].ray = NULL;
-// 	_rayLoc[j].active = false;
-//       }
-
-//       // Update the start indices for the remaining locations in the current
-//       // beam
-
-//       LOG(DEBUG_VERBOSE) << "Case 3b:";
-//       LOG(DEBUG_VERBOSE) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
-// 	  " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = end_index + 1; j <= loc_end_index; ++j) {
-// 	_rayLoc[j].startIndex = end_index + 1;
-//       }
-
-//     } else {
-      
-//       // The current beam is completely covered by the overlap area.  Clear
-//       // out all of the locations for the current beam.
-//       LOG(DEBUG_VERBOSE) << "Case 4:";
-//       LOG(DEBUG_VERBOSE) << " i = " << i;
-//       LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
-// 	  " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
-//         _rayLoc[j].clear();
-//       }
-
-//     }
-    
-//     i = loc_end_index + 1;
-
-//   } /* endwhile - i */
-  
-//   LOG(DEBUG_VERBOSE) << "exit ";
-
-// #endif
-  
-// }
-
-////////////////////////////////////////////
-// freeze / unfreeze
-
-// void GuiManager::_freeze()
-// {
-//   if (_frozen) {
-//     _frozen = false;
-//     _freezeAct->setText("Freeze");
-//     _freezeAct->setStatusTip(tr("Click to freeze display, or hit ESC"));
-//   } else {
-//     _frozen = true;
-//     _freezeAct->setText("Unfreeze");
-//     _freezeAct->setStatusTip(tr("Click to unfreeze display, or hit ESC"));
-//   }
-// }
-
-////////////////////////////////////////////
-// unzoom to previous zoom
-
-void GuiManager::_zoomBack()
-{
-  _horiz->zoomBackView();
-  if (_horiz->getSavedZooms().size() == 0) {
-    _zoomBackAct->setEnabled(false);
-    _zoomOutAct->setEnabled(false);
-  }
-  // _gd.redraw_horiz = true;
-}
-
-////////////////////////////////////////////
-// unzoom all the way out
-
-void GuiManager::_zoomOut()
-{
-  _horiz->zoomOutView();
-  _horiz->clearSavedZooms();
-  _zoomBackAct->setEnabled(false);
-  _zoomOutAct->setEnabled(false);
-  // _gd.redraw_horiz = true;
-}
-
-////////////////////////////////////////////
-// refresh
-
-void GuiManager::_refresh()
-{
-  if (_horiz) {
-    _horiz->update();
-  }
-}
-
-////////////////////////////////////////////////////////
-// handle params file
-
-void GuiManager::_openFile() {
-}
-
-void GuiManager::_saveFile() {
-}
-
-
-#ifdef NOTYET
-// TODO: need to add the background changed, etc. 
-void GuiManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-                                          QColor gridColor,
-                                          QColor emphasisColor,
-                                          QColor annotationColor,
-                                          QColor backgroundColor) {
-
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // connect the new color map with the field                                                       
-  // find the fieldName in the list of FieldDisplays                                                
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = -1;
-
-  it = _fields.begin();
-  while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
-
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
-  }
-  if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                              
-  } else {
-    // look up the fieldId from the fieldName                                                       
-    // change the field variable                                                                    
-    _horiz->backgroundColor(backgroundColor);
-    _horiz->gridRingsColor(gridColor);
-    _changeField(fieldId, false);
-  }
-  LOG(DEBUG_VERBOSE) << "exit";
-}
-
-void GuiManager::setVolume() { // const RadxVol &radarDataVolume) {
-
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // _applyDataEdits(); // radarDataVolume);
-
-  LOG(DEBUG_VERBOSE) << "exit";
-
-
-
-}
-#endif
-
-#ifdef NOTNOW
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the HORIZ
-
-void GuiManager::_horizLocationClicked(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
-
-{
-
-  cerr << "1111111111 horizLocationClicked, xkm, km: " << xkm << ", " << ykm << endl;
-  
-  // find the relevant ray
-  // ignore closest ray sent in
-  
-  double azDeg = 0.0;
-  if (xkm != 0 || ykm != 0) {
-    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
-    if (azDeg < 0) {
-      azDeg += 360.0;
-    }
-  }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
-  
-  int rayIndex = ((int) (azDeg * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  if (_params.debug) {
-    cerr << "    rayIndex = " << rayIndex << endl;
-  }
-  
-  const RadxRay *ray = _rayLoc[rayIndex].ray;
-  if (ray == NULL) {
-    // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet..." << endl;
-      cerr << "      active = " << _rayLoc[rayIndex].active << endl;
-      cerr << "      startIndex = " << _rayLoc[rayIndex].startIndex << endl;
-      cerr << "      endIndex = " << _rayLoc[rayIndex].endIndex << endl;
-    }
-    return;
-  }
-
-  _locationClicked(xkm, ykm, ray);
-
-}
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the VERT
-
-void GuiManager::_vertLocationClicked(double xkm, double ykm, 
-                                      const RadxRay *closestRay)
-  
-{
-
-  _locationClicked(xkm, ykm, closestRay);
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
-
-void GuiManager::_locationClicked(double xkm, double ykm,
-                                  const RadxRay *ray)
-  
-{
-
-  if (_params.debug) {
-    cerr << "*** Entering GuiManager::_locationClicked()" << endl;
-  }
-  
-  double rangeKm = sqrt(xkm * xkm + ykm * ykm);
-  int gateNum = (int) 
-    ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
-
-  if (gateNum < 0 || gateNum >= (int) ray->getNGates()) {
-    //user clicked outside of ray
-    return;
-  }
-
-  if (_params.debug) {
-    cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
-    cerr << "  az, el from ray: "
-         << ray->getAzimuthDeg() << ", "
-         << ray->getElevationDeg() << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ray->print(cerr);
-    }
-  }
-
-  DateTime rayTime(ray->getTimeSecs());
-  char text[256];
-  snprintf(text, 256, "%.4d/%.2d/%.2d",
-           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateClicked->setText(text);
-
-  snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
-           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-           ((int) (ray->getNanoSecs() / 1000000)));
-  _timeClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
-  _elevClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
-  _azClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%d", gateNum);
-  _gateNumClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", rangeKm);
-  _rangeClicked->setText(text);
-
-  if (_radarAltKm > -9990) {
-    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
-    _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
-    _altitudeClicked->setText(text);
-  }
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999.0);
-    _fields[ii]->setDialogText("----");
-  }
-
-  vector<RadxField *> rflds = ray->getFields();
-  for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
-    const RadxField *field = rflds[ifield];
-  
-    const string fieldName = field->getName();
-    if (fieldName.size() == 0) {
-      continue;
-    }
-    Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gateNum];
-    const string fieldUnits = field->getUnits();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, selected name: "
-	   << fieldName << ", "
-	   << _selectedName << endl;
-    }
-    if (fieldName == _selectedName) {
-      char text[128];
-      if (fabs(val) < 10000) {
-        snprintf(text, 128, "%g %s", val, fieldUnits.c_str());
-      } else {
-        snprintf(text, 128, "%g %s", -9999.0, fieldUnits.c_str());
-      }
-      _valueLabel->setText(text);
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, units, val: "
-	   << field->getName() << ", "
-	   << field->getUnits() << ", "
-	   << val << endl;
-    }
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      if (_fields[ii]->getName() == fieldName) {
-	_fields[ii]->setSelectValue(val);
-        char text[128];
-        if (fabs(val) > 10000) {
-          snprintf(text, 128, "----");
-        } else if (fabs(val) > 10) {
-          snprintf(text, 128, "%.2f", val);
-        } else {
-          snprintf(text, 128, "%.3f", val);
-        }
-        _fields[ii]->setDialogText(text);
-      }
-    }
-
-  } // ifield
-
-  // update the status panel
-  
-  _updateStatusPanel(ray);
-
-  // write the click location to FMQ
-
-  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
-  
-}
-
-#endif
-  
 //////////////////////////////////////////////
 // get size of table widget
 
@@ -2354,6 +1248,357 @@ void GuiManager::_setField(int value)
 }
 
 
+//////////////////////////////////////////////////////////////
+// check if we need new H data, and read accordingly
+// then trigger rendering if appropriate
+  
+void GuiManager::_checkAndReadH(MdvReader *mr)
+{
+
+  // check for state change
+  
+  bool stateChanged = _checkForStateChange();
+  
+  // get new data if needed - data is retrieved in a thread
+  
+  int frameIndex = _gd.movie.cur_frame;
+  if (_gd.movie.cur_frame < 0) {
+    frameIndex = _gd.movie.num_frames - 1;
+  }
+
+  if (stateChanged) {
+    mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
+                          _vlevelManager.getRequestedLevel(),
+                          _gd.h_win.page);
+  }
+  
+  // check for new data
+  
+  if (mr->isNewH()) {
+    if (!mr->isValidH()) {
+      cerr << "ERROR - GuiManager::timerEvent" << endl;
+      cerr << "  mr->requestHorizPlane" << endl;
+      cerr << "  time_start: " << DateTime::strm(_gd.movie.frame[frameIndex].time_start) << endl;
+      cerr << "  time_end: " << DateTime::strm(_gd.movie.frame[frameIndex].time_end) << endl;
+      cerr << "  page: " << _gd.h_win.page << endl;
+    }
+    int frameIndex = _gd.movie.cur_frame;
+    if (_gd.movie.cur_frame < 0) {
+      frameIndex = _gd.movie.num_frames - 1;
+    }
+    _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
+    if (_gd.h_win.page < _gd.num_datafields) {
+      _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
+    }
+    _vlevelSelector->update();
+  }
+
+}
+
+///////////////////////////////////////////
+// check for state changes
+
+bool GuiManager::_checkForStateChange()
+
+{
+
+  bool stateHasChanged = false;
+
+  if (_fieldHasChanged) {
+    stateHasChanged = true;
+    _fieldHasChanged = false;
+  }
+  
+  // zoom change?
+  
+  if (_checkForZoomChange()) {
+    stateHasChanged = true;
+  }
+
+  // vlevel change?
+  
+  if (_vlevelHasChanged) {
+    stateHasChanged = true;
+    _vlevelHasChanged = false;
+  }
+
+  // time change
+
+  if (_timeControl->timeHasChanged()) {
+    stateHasChanged = true;
+  }
+
+  // resize?
+
+  if (_resized) {
+    stateHasChanged = true;
+    _resized = false;
+  }
+
+  // overlays?
+
+  if (_overlaysHaveChanged) {
+    stateHasChanged = true;
+    _overlaysHaveChanged = false;
+  }
+
+  return stateHasChanged;
+
+}
+
+/////////////////////////////////////////////////////////
+// check for zoom change
+
+bool GuiManager::_checkForZoomChange()
+{
+  if (_zoomXy != _prevZoomXy) {
+    _prevZoomXy = _zoomXy;
+    return true;
+  }
+  return false;
+}
+
+////////////////////////////////////////////
+// unzoom to previous zoom
+
+void GuiManager::_zoomBack()
+{
+  _horiz->zoomBackView();
+  if (_horiz->getSavedZooms().size() == 0) {
+    _zoomBackAct->setEnabled(false);
+    _zoomOutAct->setEnabled(false);
+  }
+  // _gd.redraw_horiz = true;
+}
+
+////////////////////////////////////////////
+// unzoom all the way out
+
+void GuiManager::_zoomOut()
+{
+  _horiz->zoomOutView();
+  _horiz->clearSavedZooms();
+  _zoomBackAct->setEnabled(false);
+  _zoomOutAct->setEnabled(false);
+  // _gd.redraw_horiz = true;
+}
+
+/////////////////////////////////////////////////////////
+// handle first time event
+
+void GuiManager::_handleFirstTimerEvent()
+{
+
+  _horiz->resize(_horizFrame->width(), _horizFrame->height());
+  _horiz->updatePixelScales();
+
+}
+
+////////////////////////////////////////////
+// refresh
+
+void GuiManager::_refresh()
+{
+  if (_horiz) {
+    _horiz->update();
+  }
+}
+
+////////////////////////////////////////////////////////
+// handle params file
+
+void GuiManager::_openFile() {
+}
+
+void GuiManager::_saveFile() {
+}
+
+
+#ifdef NOTNOW
+
+///////////////////////////////////////////////////
+// respond to a change in click location on the HORIZ
+
+void GuiManager::_horizLocationClicked(double xkm, double ykm, 
+                                       const RadxRay *closestRay)
+
+{
+
+  cerr << "1111111111 horizLocationClicked, xkm, km: " << xkm << ", " << ykm << endl;
+  
+  // find the relevant ray
+  // ignore closest ray sent in
+  
+  double azDeg = 0.0;
+  if (xkm != 0 || ykm != 0) {
+    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
+    if (azDeg < 0) {
+      azDeg += 360.0;
+    }
+  }
+  if (_params.debug) {
+    cerr << "    azDeg = " << azDeg << endl;
+  }
+  
+  int rayIndex = ((int) (azDeg * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
+  if (_params.debug) {
+    cerr << "    rayIndex = " << rayIndex << endl;
+  }
+  
+  const RadxRay *ray = _rayLoc[rayIndex].ray;
+  if (ray == NULL) {
+    // no ray data yet
+    if (_params.debug) {
+      cerr << "    No ray data yet..." << endl;
+      cerr << "      active = " << _rayLoc[rayIndex].active << endl;
+      cerr << "      startIndex = " << _rayLoc[rayIndex].startIndex << endl;
+      cerr << "      endIndex = " << _rayLoc[rayIndex].endIndex << endl;
+    }
+    return;
+  }
+
+  _locationClicked(xkm, ykm, ray);
+
+}
+
+///////////////////////////////////////////////////
+// respond to a change in click location on the VERT
+
+void GuiManager::_vertLocationClicked(double xkm, double ykm, 
+                                      const RadxRay *closestRay)
+  
+{
+
+  _locationClicked(xkm, ykm, closestRay);
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// respond to a change in click location on one of the windows
+
+void GuiManager::_locationClicked(double xkm, double ykm,
+                                  const RadxRay *ray)
+  
+{
+
+  if (_params.debug) {
+    cerr << "*** Entering GuiManager::_locationClicked()" << endl;
+  }
+  
+  double rangeKm = sqrt(xkm * xkm + ykm * ykm);
+  int gateNum = (int) 
+    ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
+
+  if (gateNum < 0 || gateNum >= (int) ray->getNGates()) {
+    //user clicked outside of ray
+    return;
+  }
+
+  if (_params.debug) {
+    cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
+    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
+    cerr << "  az, el from ray: "
+         << ray->getAzimuthDeg() << ", "
+         << ray->getElevationDeg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      ray->print(cerr);
+    }
+  }
+
+  DateTime rayTime(ray->getTimeSecs());
+  char text[256];
+  snprintf(text, 256, "%.4d/%.2d/%.2d",
+           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
+  _dateClicked->setText(text);
+
+  snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
+           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+           ((int) (ray->getNanoSecs() / 1000000)));
+  _timeClicked->setText(text);
+  
+  _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
+  _elevClicked->setText(text);
+  
+  _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
+  _azClicked->setText(text);
+  
+  _setText(text, sizeof(text), "%d", gateNum);
+  _gateNumClicked->setText(text);
+  
+  _setText(text, sizeof(text), "%6.2f", rangeKm);
+  _rangeClicked->setText(text);
+
+  if (_radarAltKm > -9990) {
+    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
+    _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
+    _altitudeClicked->setText(text);
+  }
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    _fields[ii]->setSelectValue(-9999.0);
+    _fields[ii]->setDialogText("----");
+  }
+
+  vector<RadxField *> rflds = ray->getFields();
+  for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
+    const RadxField *field = rflds[ifield];
+  
+    const string fieldName = field->getName();
+    if (fieldName.size() == 0) {
+      continue;
+    }
+    Radx::fl32 *data = (Radx::fl32 *) field->getData();
+    double val = data[gateNum];
+    const string fieldUnits = field->getUnits();
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Field name, selected name: "
+	   << fieldName << ", "
+	   << _selectedName << endl;
+    }
+    if (fieldName == _selectedName) {
+      char text[128];
+      if (fabs(val) < 10000) {
+        snprintf(text, 128, "%g %s", val, fieldUnits.c_str());
+      } else {
+        snprintf(text, 128, "%g %s", -9999.0, fieldUnits.c_str());
+      }
+      _valueLabel->setText(text);
+    }
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Field name, units, val: "
+	   << field->getName() << ", "
+	   << field->getUnits() << ", "
+	   << val << endl;
+    }
+    for (size_t ii = 0; ii < _fields.size(); ii++) {
+      if (_fields[ii]->getName() == fieldName) {
+	_fields[ii]->setSelectValue(val);
+        char text[128];
+        if (fabs(val) > 10000) {
+          snprintf(text, 128, "----");
+        } else if (fabs(val) > 10) {
+          snprintf(text, 128, "%.2f", val);
+        } else {
+          snprintf(text, 128, "%.3f", val);
+        }
+        _fields[ii]->setDialogText(text);
+      }
+    }
+
+  } // ifield
+
+  // update the status panel
+  
+  _updateStatusPanel(ray);
+
+  // write the click location to FMQ
+
+  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
+  
+}
+
+#endif
+  
 /////////////////////////////////////
 // show the time controller dialog
 
@@ -2402,111 +1647,6 @@ void GuiManager::_placeTimeControl()
 
   _timeControl->resize(width(), _timeControl->height());
   
-}
-
-////////////////////////////////////////////////////////
-// BoundaryEditor circle (radius) slider has changed value
-
-void GuiManager::_circleRadiusSliderValueChanged(int value)
-{
-  //returns true if existing circle was resized with this new radius
-  // if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
-  //   _horiz->update();
-  // }
-}
-
-// BoundaryEditor brush (size) slider has changed value
-
-void GuiManager::_brushRadiusSliderValueChanged(int value)
-{
-  // BoundaryPointEditor::Instance()->setBrushRadius(value);
-}
-
-// set the directory (_boundaryDir) into which boundary
-// files will be read/written for current radar file (_openFilePath)
-
-void GuiManager::setBoundaryDir()
-{
-  // if (!_openFilePath.empty()) {
-  //   _boundaryDir =
-  //     BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath
-  //     (BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
-  // } else {
-  //   _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-  // }
-}
-
-/////////////////////////////////////
-// clear display widgets
-
-void GuiManager::_clear()
-{
-  if (_horiz) {
-    _horiz->clear();
-  }
-  if (_vert) {
-    _vert->clear();
-  }
-}
-
-/////////////////////////////////////
-// set archive mode
-
-void GuiManager::setArchiveMode(bool state)
-{
-
-  // _setSweepPanelVisibility();
-  
-  if (_horiz) {
-    _horiz->setArchiveMode(state);
-  }
-  if (_vert) {
-    _vert->setArchiveMode(state);
-  }
-
-  if (state) {
-    if (!_archiveMode) {
-      _archiveMode = true;
-      _activateArchiveRendering();
-      // loadArchiveFileList();
-    }
-  } else {
-    if (_archiveMode) {
-      _archiveMode = false;
-      _activateRealtimeRendering();
-    }
-  }
-
-}
-
-/////////////////////////////////////
-// activate realtime rendering
-
-void GuiManager::_activateRealtimeRendering()
-{
-  // _nGates = 1000;
-  // _maxRangeKm = 1000;
-  _clear();
-  if (_horiz) {
-    _horiz->activateRealtimeRendering();
-  }
-  if (_vert) {
-    _vert->activateRealtimeRendering();
-  }
-}
-
-/////////////////////////////////////
-// activate archive rendering
-
-void GuiManager::_activateArchiveRendering()
-{
-  _clear();
-  if (_horiz) {
-    _horiz->activateArchiveRendering();
-  }
-  if (_vert) {
-    _vert->activateArchiveRendering();
-  }
 }
 
 /////////////////////////////////////////////////////
@@ -2653,6 +1793,8 @@ void GuiManager::_createImageFiles()
 
   // set times from plots
 
+#ifdef NOTYET
+  
   if (_vertMode) {
     _plotStartTime = _vert->getPlotStartTime();
     _plotEndTime = _vert->getPlotEndTime();
@@ -2661,8 +1803,6 @@ void GuiManager::_createImageFiles()
     _plotEndTime = _horiz->getPlotEndTime();
   }
 
-#ifdef NOTYET
-  
   // save current field
 
   int fieldNum = _fieldNum;
@@ -2702,12 +1842,13 @@ void GuiManager::_createImageFiles()
 string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
   // set times from plots
+
   if (_vertMode) {
-    _plotStartTime = _vert->getPlotStartTime();
-    _plotEndTime = _vert->getPlotEndTime();
+    // _plotStartTime = _vert->getPlotStartTime();
+    // _plotEndTime = _vert->getPlotEndTime();
   } else {
-    _plotStartTime = _horiz->getPlotStartTime();
-    _plotEndTime = _horiz->getPlotEndTime();
+    // _plotStartTime = _horiz->getPlotStartTime();
+    // _plotEndTime = _horiz->getPlotEndTime();
   }
 
   // compute output dir
@@ -2883,8 +2024,6 @@ void GuiManager::_saveImageToFile(bool interactive)
 
 }
 
-
-
 void GuiManager::ShowContextMenu(const QPoint &pos) {
   _horiz->ShowContextMenu(pos /*, &_vol*/);
 }
@@ -3019,29 +2158,6 @@ void GuiManager::_createBoundaryEditorDialog()
 
 }
 #endif
-
-/////////////////////////////////////////////////////////
-// check for zoom change
-
-bool GuiManager::_checkForZoomChange()
-{
-  if (_zoomXy != _prevZoomXy) {
-    _prevZoomXy = _zoomXy;
-    return true;
-  }
-  return false;
-}
-
-/////////////////////////////////////////////////////////
-// handle first time event
-
-void GuiManager::_handleFirstTimerEvent()
-{
-
-  _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  _horiz->updatePixelScales();
-
-}
 
 /////////////////////////////////////////////////////////
 // read click point from FMQ - i.e. from another app
@@ -3443,8 +2559,9 @@ void GuiManager::_setText(char *text,
 
 /////////////////////////////
 // show data at click point
+// TODO: check HawkEye for example
 
-void GuiManager::_showClick()
+void GuiManager::showClick()
 {
 #ifdef NOTNOW
   if (_clickReportDialog) {
