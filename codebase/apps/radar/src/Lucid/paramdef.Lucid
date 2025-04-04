@@ -1719,7 +1719,7 @@ paramdef boolean {
   p_default = TRUE;
   p_descr = "Plot data-driven range rings only for radar data sets.";
   p_help = "If TRUE, range rings will be plotted at the location of the radar in radar fields.";
-} range_ring_for_radar_only;
+} range_rings_for_radar_only;
 
 paramdef double {
   p_default = 50;

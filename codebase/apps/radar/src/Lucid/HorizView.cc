@@ -514,6 +514,7 @@ void HorizView::_setGridSpacing()
 
 }
 
+#ifdef JUNK
 
 /*************************************************************************
  * _drawOverlays()
@@ -899,7 +900,9 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
 #endif
 
 }
-  
+
+#endif
+
 void HorizView::showOpeningFileMsg(bool isVisible)
 {
   _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
@@ -1239,7 +1242,7 @@ void HorizView::_renderGrids()
 
   _gridsReady = true;
   
-  // _renderFrame = false;
+  _renderFrame = false;
 
 }
 
@@ -2238,7 +2241,6 @@ void HorizView::_renderMaps()
 {
 
   _zoomWorld.drawMaps();
-
   _mapsReady = true;
   
   // start the rendering

@@ -500,10 +500,6 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _resetWorld(int width, int height);
   
-  // render the maps
-  
-  void _renderMaps();
-  
   // get ray closest to click point
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
 
@@ -515,19 +511,17 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _setTransform(const QTransform &transform);
 
-  /**
-   * @brief Render the rings and grid. The current value of _ringsGridColor
-   *        will be used for the color.
-   *
-   * @param[in] painter    Painter to use for rendering.
-   */
+  // render the grid data
 
   void _renderGrids();
-
-  void _drawOverlays(QPainter &painter);
-
-  void _drawMaps(QPainter &painter);
-  void _drawRingsAndAzLines(QPainter &painter);
+  
+  // render the maps
+  
+  void _renderMaps();
+  
+  // void _drawOverlays(QPainter &painter);
+  // void _drawMaps(QPainter &painter);
+  // void _drawRingsAndAzLines(QPainter &painter);
   
   /**
    * @brief Determine a ring spacing which will give even distances, and

@@ -3938,15 +3938,15 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'range_ring_for_radar_only'
+    // Parameter 'range_rings_for_radar_only'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_for_radar_only");
+    tt->param_name = tdrpStrDup("range_rings_for_radar_only");
     tt->descr = tdrpStrDup("Plot data-driven range rings only for radar data sets.");
     tt->help = tdrpStrDup("If TRUE, range rings will be plotted at the location of the radar in radar fields.");
-    tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
+    tt->val_offset = (char *) &range_rings_for_radar_only - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

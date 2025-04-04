@@ -3136,6 +3136,10 @@ void WorldPlot::drawMaps()
   
   _createImage(_mapsImage);
   
+  // make transparent
+  
+  _mapsImage->fill(Qt::transparent);
+  
   // get painter
   
   QPainter painter(_mapsImage);

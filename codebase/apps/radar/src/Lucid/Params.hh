@@ -1042,7 +1042,7 @@ public:
 
   tdrp_bool_t plot_range_rings_from_data;
 
-  tdrp_bool_t range_ring_for_radar_only;
+  tdrp_bool_t range_rings_for_radar_only;
 
   double range_ring_spacing;
 
