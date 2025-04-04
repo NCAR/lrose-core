@@ -3343,6 +3343,8 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
                                 double ringSpacing)
 {
 
+  cerr << "RRRRRRRRRRRRRRR lat, lon, spacing: " << originLat << ", " << originLon << ", " << ringSpacing << endl;
+  
   painter.save();
 
   // get origin (x, y) from (lat, lon)

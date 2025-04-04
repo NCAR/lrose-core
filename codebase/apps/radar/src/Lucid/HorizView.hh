@@ -119,7 +119,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @notes This method is not currently called anywhere.
    */
 
-  void backgroundColor(const QColor &color);
+  // void backgroundColor(const QColor &color);
 
   /**
    * @brief Specify the grid and rings color.
@@ -129,7 +129,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @notes This method is not currently called anywhere.
    */
 
-  void gridRingsColor(const QColor &color);
+  // void gridRingsColor(const QColor &color);
 
   /**
    * @brief Capture an image of the display.
@@ -324,40 +324,30 @@ class DLL_EXPORT HorizView : public QWidget
   /**
    * @brief The index of the field selected for display.
    */
-
+  
   size_t _selectedField;
 
   /**
    * @brief The brush for the background.
    */
 
-  QBrush _backgroundBrush;
+  // QBrush _backgroundBrush;
 
-  /**
-   * @brief True if the grids display is enabled.
-   */
-  
-  bool _gridsEnabled;
-  
   /**
    * @brief The color for the grid and rings.
    */
   
-  QColor _gridRingsColor;
+  // QColor _gridRingsColor;
   
-  /**
-   * @brief True if the ring display is enabled.
-   */
-
+  // @brief True if the grids display is enabled.
+  
+  bool _gridsEnabled;
+  
+  // True if the rings are enabled.
+  
   bool _ringsFixedEnabled;
   bool _ringsDataDrivenEnabled;
-
-  /**
-   * @brief True if the angle lines enabled.
-   */
-  bool _angleLinesEnabled;
-
-
+  
   /**
    * @brief This will create labels wiith nicely scaled values and
    *        approriate units.
@@ -392,6 +382,8 @@ class DLL_EXPORT HorizView : public QWidget
   
   double _worldPressX, _worldPressY;
   double _worldReleaseX, _worldReleaseY;
+  double _worldClickX, _worldClickY;
+  double _worldClickLat, _worldClickLon;
 
   /**
    * @brief Rubber band for zooming.
@@ -561,8 +553,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _printNow(int ndecimals, ostream &out);
 
-  int _count;
-  
 };
 
 

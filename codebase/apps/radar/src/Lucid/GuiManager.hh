@@ -139,6 +139,10 @@ public:
   QDialog *_boundaryEditorDialog;
   QGridLayout *_boundaryEditorDialogLayout;
 
+  // set title bar str
+
+  void setTitleBarStr(const string &titleStr);
+  
 public slots:
 
   // void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
@@ -346,10 +350,6 @@ private:
   // void _saveFile();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
-  // set top bar
-
-  void _setTitleBar();
-  
   // local methods
   
   void _clear();

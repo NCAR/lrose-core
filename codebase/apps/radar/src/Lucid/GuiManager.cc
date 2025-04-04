@@ -535,10 +535,9 @@ void GuiManager::_swap(int &val1, int &val2)
 //////////////////////////////////////////////////
 // Set radar name in title bar
 
-void GuiManager::_setTitleBar()
+void GuiManager::setTitleBarStr(const string &titleStr)
 {
-  string windowTitle = _params.horiz_frame_label;
-  setWindowTitle(tr(windowTitle.c_str()));
+  setWindowTitle(tr(titleStr.c_str()));
 }
   
 //////////////////////////////////////////////////
@@ -621,7 +620,8 @@ void GuiManager::_setupWindows()
 
   // title bar
 
-  _setTitleBar();
+  setTitleBarStr(_params.horiz_frame_label);
+
   setMinimumSize(_params.horiz_window_min_width, _params.horiz_window_min_height);
   // resize(_params.main_window_width, _params.main_window_height);
   // connect(this, &GuiManager::frameResized, _horiz, &HorizView::resize);

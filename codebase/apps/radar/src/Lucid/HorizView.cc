@@ -57,9 +57,9 @@ HorizView::HorizView(QWidget* parent,
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _selectedField(0),
-        _backgroundBrush(QColor(_params.background_color)),
+        // _backgroundBrush(QColor(_params.background_color)),
         _gridsEnabled(false),
-        _gridRingsColor(_params.range_rings_color),
+        // _gridRingsColor(_params.range_rings_color),
         _ringsFixedEnabled(false),
         _ringsDataDrivenEnabled(false),
         _rubberBand(nullptr),
@@ -67,7 +67,6 @@ HorizView::HorizView(QWidget* parent,
         
 {
 
-  _count = 0;
   // mode
 
   _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
@@ -322,16 +321,9 @@ void HorizView::_printNow(int ndecimals,
 void HorizView::paintEvent(QPaintEvent *event)
 {
 
-  _count++;
-  
-  // if (!_renderFrame) {
-  //   if (_count > 40) {
-  //     return;
-  //   }
-  // }
+  int fieldNum = _gd.h_win.page;
 
-  // _printNow(3, cerr);
-  // cerr << "UUUUUUUUUUUUUUUUUUUUUUU _renderFrame, count: " << _renderFrame << ", " << _count << endl;
+  // check zoom
   
   if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
@@ -355,13 +347,24 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
-  // copy rendered images back into this widget
+  // copy rendered grid and map images into this widget
   
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoomWorld.getGridImage());
     painter.drawImage(0, 0, *_zoomWorld.getMapsImage());
+  }
+
+  // render the range rings
+
+  if (_ringsFixedEnabled || _ringsDataDrivenEnabled) {
+    MdvReader *mr = _gd.mread[fieldNum];
+    _zoomWorld.drawRangeRings(fieldNum, mr,
+                              _ringsFixedEnabled,
+                              _ringsDataDrivenEnabled,
+                              _ringSpacing);
+    painter.drawImage(0, 0, *_zoomWorld.getRingsImage());
   }
   
   // set axis areas to background color
@@ -387,7 +390,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   // draw the color scale
 
-  int fieldNum = _gd.h_win.page;
   const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
@@ -415,8 +417,20 @@ void HorizView::paintEvent(QPaintEvent *event)
 
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
+    
     painter.restore();
+
+    char titleStr[1024];
+    if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
+      snprintf(titleStr, 1023, "Click lat,lon: (%.3f, %.3f)",
+               _worldClickLat, _worldClickLon);
+    } else {
+      snprintf(titleStr, 1023, "Click lat,lon:(%.3f, %.3f) x,y:(%.3f, %.3f)",
+               _worldClickLat, _worldClickLon, _worldClickX, _worldClickY);
+    }
+    _manager.setTitleBarStr(titleStr);
+             
+    cerr << "CCCCCCCCCCCCCCC click lat, lon: " << _worldClickLat << ", " << _worldClickLon << endl;
     
   }
 
@@ -1236,8 +1250,8 @@ void HorizView::_renderGrids()
   }
 
   _controlRenderGrid(_renderFramePage,
-                    _gd.movie.frame[_renderFrameIndex].time_start,
-                    _gd.movie.frame[_renderFrameIndex].time_end);
+                     _gd.movie.frame[_renderFrameIndex].time_start,
+                     _gd.movie.frame[_renderFrameIndex].time_end);
   
 
   _gridsReady = true;
@@ -1422,7 +1436,7 @@ int HorizView::_controlRenderGrid(int page,
 
   // RENDER the LAND_USE field first
   if(_gd.layers.earth.landuse_active && _gd.layers.earth.land_use != NULL) {
-    _renderGrid(page, _gd.layers.earth.land_use,start_time,end_time,1);
+    _renderGrid(page, _gd.layers.earth.land_use, start_time, end_time,1);
     // render_grid(xid,_gd.layers.earth.land_use,start_time,end_time,1);
   }
 
@@ -1896,27 +1910,27 @@ void HorizView::displayImage(const size_t field_num)
  * backgroundColor()
  */
 
-void HorizView::backgroundColor(const QColor &color)
-{
-  _backgroundBrush.setColor(color);
-  QPalette new_palette = palette();
-  new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
-  setPalette(new_palette);
-  //   _renderMaps();
-}
+// void HorizView::backgroundColor(const QColor &color)
+// {
+//   _backgroundBrush.setColor(color);
+//   QPalette new_palette = palette();
+//   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
+//   setPalette(new_palette);
+//   //   _renderMaps();
+// }
 
 
 /*************************************************************************
  * gridRingsColor()
  */
 
-void HorizView::gridRingsColor(const QColor &color)
-{
-  LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
-  _gridRingsColor = color;
-  update();
-  LOG(DEBUG_VERBOSE) << "exit";
-}
+// void HorizView::gridRingsColor(const QColor &color)
+// {
+//   LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
+//   _gridRingsColor = color;
+//   update();
+//   LOG(DEBUG_VERBOSE) << "exit";
+// }
 
 
 /*************************************************************************
@@ -2099,19 +2113,20 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
 #endif
 
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
     _pointClicked = true;
+    _worldClickX = _worldReleaseX;
+    _worldClickY = _worldReleaseY;
+    _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
     _manager.setOverlaysHaveChanged(true);
     
     // get ray closest to click point
 
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+    const RadxRay *closestRay = _getClosestRay(_worldClickX, _worldClickY);
     
     // Emit a signal to indicate that the click location has changed
 
-    emit locationClicked(x_km, y_km, closestRay);
-
+    emit locationClicked(_worldClickX, _worldClickY, closestRay);
+    
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
