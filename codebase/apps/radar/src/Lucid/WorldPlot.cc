@@ -62,6 +62,7 @@ WorldPlot::WorldPlot() :
 
   _gridImage = nullptr;
   _mapsImage = nullptr;
+  _ringsImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -153,6 +154,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   
   _gridImage = nullptr;
   _mapsImage = nullptr;
+  _ringsImage = nullptr;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
@@ -2589,8 +2591,6 @@ void WorldPlot::renderGridRect(int fieldNum,
   
 {
 
-  cerr << "RRRRRRRRRRRRRRR ====>> renderGridRect, fieldNum: " << fieldNum << endl;
-
   // check that image canvas is the correct size
   
   _createImage(_gridImage);
@@ -2628,7 +2628,7 @@ void WorldPlot::renderGridRect(int fieldNum,
   
   // plot the rectangles for each grid cell
 
-  fl32 *val = mr->h_fl32_data;
+  fl32 *val = mr->h_fl32_data.data();
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
@@ -2638,10 +2638,10 @@ void WorldPlot::renderGridRect(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap->withinValidRange(fval)) {
+      if (!mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      const QBrush *brush = mr->colorMap->dataBrush(fval);
+      const QBrush *brush = mr->colorMap.dataBrush(fval);
       double xx = vertices[iy+1][ix].x();
       double yy = vertices[iy+1][ix].y();
       double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
@@ -2995,7 +2995,7 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   
   // plot the polygons for each grid cell
 
-  fl32 *val = mr->h_fl32_data;
+  fl32 *val = mr->h_fl32_data.data();
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
@@ -3005,10 +3005,10 @@ void WorldPlot::renderGridDistorted(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap->withinValidRange(fval)) {
+      if (!mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      const QBrush *brush = mr->colorMap->dataBrush(fval);
+      const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);
       points.push_back(vertices[iy][ix+1]);
@@ -3095,7 +3095,7 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   
   // plot the polygons for each grid cell
 
-  fl32 *val = mr->h_fl32_data;
+  fl32 *val = mr->h_fl32_data.data();
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
@@ -3105,10 +3105,10 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap->withinValidRange(fval)) {
+      if (!mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      const QBrush *brush = mr->colorMap->dataBrush(fval);
+      const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);
       points.push_back(vertices[iy][ix+1]);
@@ -3343,8 +3343,6 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
                                 double ringSpacing)
 {
 
-  cerr << "RRRRRRRRRRRRRRR lat, lon, spacing: " << originLat << ", " << originLon << ", " << ringSpacing << endl;
-  
   painter.save();
 
   // get origin (x, y) from (lat, lon)

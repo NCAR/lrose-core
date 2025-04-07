@@ -109,6 +109,8 @@ TimeControl::TimeControl(GuiManager *parent) :
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
 
+  _timeHasChanged = false;
+  
   // create the GUI
   
   _populateGui();

@@ -444,7 +444,7 @@ void VertView::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   int fieldNum = _gd.h_win.page;
-  const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
+  const ColorMap &colorMap(_gd.mread[fieldNum]->colorMap);
   _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
   
   // add legends with time, field name and elevation angle

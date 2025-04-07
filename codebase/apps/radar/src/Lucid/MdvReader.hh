@@ -43,6 +43,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxField.hh>
+#include <qtplot/ColorMap.hh>
 
 #include "GlobalData.hh"
 #include "Params.hh"
@@ -50,7 +52,6 @@
 #include "LatLonBox.hh"
 #include "WayPts.hh"
 
-class ColorMap;
 class MdvReader;
 class ReadVolH;
 
@@ -64,6 +65,7 @@ public:
   
   MdvReader(QObject* parent = nullptr);
 
+#ifdef NOTNOW
   // copy constructor
 
   MdvReader(const MdvReader &rhs);
@@ -71,6 +73,7 @@ public:
   /// assignment
   
   MdvReader& operator=(const MdvReader &rhs);
+#endif
   
   // is the data valid?
   
@@ -117,7 +120,7 @@ public:
   string fieldLabel();
   string heightLabel();
   
-  // public members
+  // public data members
   
   int plane; /* plane of data rendered in horiz visible area */
   int currently_displayed; /* flag indicating if field in field list */
@@ -139,8 +142,8 @@ public:
   double detail_thresh_min; /* Grids are visible when distance (km) across */
   double detail_thresh_max; /* across the screen is between min and max */
   
-  vert_spacing_t vert[Constants::MAX_SECTS]; // Holds min,cent and max for each plane.
-
+  vector<vert_spacing_t> vert; // Holds min,cent and max for each plane.
+  
   double ht_pixel; // Slope of function between elevation height and screen Y
   double y_intercept; // Intercept of function between elevation and screen Y
   
@@ -170,12 +173,12 @@ public:
   double time_allowance; /* Valid while less than this number of minutes out of date */
   // double time_offset; /* Offsets data requests by this amount - minutes*/
   
-  char units_label_cols[Constants::LABEL_LENGTH]; /* units of columns- "km", etc */
-  char units_label_rows[Constants::LABEL_LENGTH]; /* units of rows- "km", etc */
-  char units_label_sects[Constants::LABEL_LENGTH];/* units of sections- "mbar", etc */
-  char vunits_label_cols[Constants::LABEL_LENGTH];/* units of vert columns- "km", etc */
-  char vunits_label_rows[Constants::LABEL_LENGTH];/* units of vert rows- "km", etc */
-  char vunits_label_sects[Constants::LABEL_LENGTH];/* units of vert sections- "mbar", etc */
+  string units_label_cols; /* units of columns- "km", etc */
+  string units_label_rows; /* units of rows- "km", etc */
+  string units_label_sects;/* units of sections- "mbar", etc */
+  string vunits_label_cols;/* units of vert columns- "km", etc */
+  string vunits_label_rows;/* units of vert rows- "km", etc */
+  string vunits_label_sects;/* units of vert sections- "mbar", etc */
 
   string field_units; /* Units label of the data */
   string button_name; /* Field name for buttons, label, - "dbZ" etc - From Config file */
@@ -191,11 +194,12 @@ public:
   // char url[URL_LENGTH]; /* server URL- mdvp:://host:port:dir */
   // char color_file[NAME_LENGTH]; /* color scale file name */
   
-  unsigned short *h_data; /* pointer to Horizontal int8 data */
-  unsigned short *v_data; /* pointer to Vertical d int8 data */ 
+  // vector<unsigned short> h_data; /* pointer to Horizontal int8 data */
+  // vector<unsigned short> v_data; /* pointer to Vertical d int8 data */ 
   
-  fl32 *h_fl32_data; /* pointer to Horizontal fl32 data */
-  fl32 *v_fl32_data; /* pointer to Vertical fl32 data */ 
+  vector<ui32> h_rgba32_data; /* image data - i.e. for maps */
+  vector<fl32> h_fl32_data; /* horizontal fl32 data */
+  vector<fl32> v_fl32_data; /* vertical fl32 data */ 
   
   // time_list_t time_list; // A list of data times
   
@@ -211,7 +215,7 @@ public:
   // MDV Data class sets - One for horizontal, one for vertical
 
   DsMdvx h_mdvx;
-  MdvxField *h_mdvx_int16;
+  MdvxField h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;
   Mdvx::vlevel_header_t h_vhdr;
@@ -222,12 +226,12 @@ public:
   
   
   DsMdvx v_mdvx;
-  MdvxField *v_mdvx_int16;
+  MdvxField v_mdvx_int16;
   Mdvx::master_header_t v_mhdr;
   Mdvx::field_header_t v_fhdr;
   Mdvx::vlevel_header_t v_vhdr;
   
-  ColorMap *colorMap;
+  ColorMap colorMap;
 
 public slots:
   void readDoneH();
@@ -236,8 +240,8 @@ private:
 
   Params &_params;
   GlobalData &_gd;
-
-  QObject *_lucid;
+  QObject &_lucid;
+  
   mutable QMutex _statusMutex;
 
   // data request details
@@ -258,12 +262,16 @@ private:
   double _vLevel;
   bool _readBusyH;
 
+#ifdef NOTNOW
   // for copy constructor and operator=
   
-  MdvReader &_copy(const MdvReader &rhs); 
+  MdvReader &_copy(const MdvReader &rhs);
+#endif
 
-  // data status
+  // private methods
 
+  int _handleHorizReadDone();
+  
   bool _checkRequestChangedH(const DateTime &midTime, double vLevel);
   bool _checkRequestChangedV(const DateTime &midTime);
 
@@ -272,12 +280,12 @@ private:
   
   void _setReadTimes(const string &url,
                      const DateTime &reqTime,
-                     Mdvx *mdvx);
+                     Mdvx &mdvx);
   
   int _getTimeList(const string &url,
                    const DateTime &midTime,
                    int page,
-                   Mdvx *mdvx);
+                   Mdvx &mdvx);
   
   string _getFullUrl();
   

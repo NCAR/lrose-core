@@ -969,27 +969,27 @@ int Lucid::_initGrids()
     // mread->time_list.num_alloc_entries = 0;
     // mread->time_list.num_entries = 0;
     
-    STRcopy(mread->units_label_cols,"KM",Constants::LABEL_LENGTH);
-    STRcopy(mread->units_label_rows,"KM",Constants::LABEL_LENGTH);
-    STRcopy(mread->units_label_sects,"KM",Constants::LABEL_LENGTH);
-
+    mread->units_label_cols = "KM";
+    mread->units_label_rows = "KM";
+    mread->units_label_sects = "KM";
+    
     // instantiate classes
-    mread->h_mdvx = new DsMdvx;
-    mread->v_mdvx = new DsMdvx;
-    mread->h_mdvx_int16 = new MdvxField;
-    mread->v_mdvx_int16 = new MdvxField;
+    // mread->h_mdvx = new DsMdvx;
+    // mread->v_mdvx = new DsMdvx;
+    // mread->h_mdvx_int16 = new MdvxField;
+    // mread->v_mdvx_int16 = new MdvxField;
     // mread->proj = new MdvxProj;
 
-    mread->colorMap = NULL;
+    // mread->colorMap = NULL;
     mread->color_file = fld.color_map;
     string colorscaleCachePath;
     if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
       iret = -1;
     }
-    mread->colorMap = new ColorMap(colorscaleCachePath.c_str(),
-                                   _params.debug >= Params::DEBUG_EXTRA);
-    mread->colorMap->setName(fld.color_map);
-    mread->colorMap->setUnits(mread->field_units);
+    mread->colorMap.setDebug(_params.debug >= Params::DEBUG_EXTRA);
+    mread->colorMap.readMap(colorscaleCachePath);
+    mread->colorMap.setName(fld.color_map);
+    mread->colorMap.setUnits(mread->field_units);
     
   } // ifld
   
@@ -1147,10 +1147,10 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   
   // instantiate classes for data retrieval
   
-  wrec->h_mdvx = new DsMdvx;
-  wrec->v_mdvx = new DsMdvx;
-  wrec->h_mdvx_int16 = new MdvxField;
-  wrec->v_mdvx_int16 = new MdvxField;
+  // wrec->h_mdvx = new DsMdvx;
+  // wrec->v_mdvx = new DsMdvx;
+  // wrec->h_mdvx_int16 = new MdvxField;
+  // wrec->v_mdvx_int16 = new MdvxField;
 
   // projection
   
@@ -1179,10 +1179,10 @@ void Lucid::_initTerrain()
     _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
     _gd.layers.earth.terr->url = _params.terrain_url;
     
-    _gd.layers.earth.terr->h_mdvx = new DsMdvx;
-    _gd.layers.earth.terr->v_mdvx = new DsMdvx;
-    _gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
-    _gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
+    // _gd.layers.earth.terr->h_mdvx = new DsMdvx;
+    // _gd.layers.earth.terr->v_mdvx = new DsMdvx;
+    // _gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
+    // _gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
     // _gd.layers.earth.terr->proj =  new MdvxProj;
 
   }
@@ -1202,10 +1202,10 @@ void Lucid::_initTerrain()
     _gd.layers.earth.land_use->legend_name = _params.terrain_id_label;
     _gd.layers.earth.land_use->url = _params.landuse_url;
     
-    _gd.layers.earth.land_use->h_mdvx = new DsMdvx;
-    _gd.layers.earth.land_use->v_mdvx = new DsMdvx;
-    _gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
-    _gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
+    // _gd.layers.earth.land_use->h_mdvx = new DsMdvx;
+    // _gd.layers.earth.land_use->v_mdvx = new DsMdvx;
+    // _gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
+    // _gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
     // _gd.layers.earth.land_use->proj =  new MdvxProj;
     
     switch(_params.landuse_render_method) {
@@ -1311,8 +1311,8 @@ void Lucid::_initRouteWinds()
     mr->h_fhdr.proj_origin_lat = 0.0;
 
     // instantiate DsMdvx class
-    mr->v_mdvx = new DsMdvx;
-    mr->v_mdvx_int16 = new MdvxField;
+    // mr->v_mdvx = new DsMdvx;
+    // mr->v_mdvx_int16 = new MdvxField;
 
   } // U WINDS
 
@@ -1344,8 +1344,8 @@ void Lucid::_initRouteWinds()
     mr->h_fhdr.proj_origin_lat = 0.0;
     
     // instantiate DsMdvx class
-    mr->v_mdvx = new DsMdvx;
-    mr->v_mdvx_int16 = new MdvxField;
+    // mr->v_mdvx = new DsMdvx;
+    // mr->v_mdvx_int16 = new MdvxField;
 
   } // V WINDS
 

@@ -42,8 +42,6 @@
 #include <QMutexLocker>
 
 #include <toolsa/str.h>
-#include <Mdv/MdvxField.hh>
-#include <qtplot/ColorMap.hh>
 
 ///////////////////////////////////////////////
 // constructor
@@ -51,7 +49,7 @@
 MdvReader::MdvReader(QObject* parent) :
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
-        _lucid(parent)
+        _lucid(*parent)
 {
   
   // initialize
@@ -98,26 +96,26 @@ MdvReader::MdvReader(QObject* parent) :
   
   time_allowance = 0.0;
   
-  MEM_zero(units_label_cols);
-  MEM_zero(units_label_rows);
-  MEM_zero(units_label_sects);
-  MEM_zero(vunits_label_cols);
-  MEM_zero(vunits_label_rows);
-  MEM_zero(vunits_label_sects);
+  // MEM_zero(units_label_cols);
+  // MEM_zero(units_label_rows);
+  // MEM_zero(units_label_sects);
+  // MEM_zero(vunits_label_cols);
+  // MEM_zero(vunits_label_rows);
+  // MEM_zero(vunits_label_sects);
   
-  h_data = NULL;
-  v_data = NULL;
+  // h_data = nullptr;
+  // v_data = nullptr;
   
-  h_fl32_data = NULL;
-  v_fl32_data = NULL;
+  // h_fl32_data = nullptr;
+  // v_fl32_data = nullptr;
   
   h_date.setToNever();
   v_date.setToNever();
   
-  // proj = NULL;
+  // proj = nullptr;
   
-  h_mdvx = NULL;
-  h_mdvx_int16 = NULL;
+  // h_mdvx = nullptr;
+  // h_mdvx_int16 = nullptr;
   
   MEM_zero(h_mhdr);
   MEM_zero(h_fhdr);
@@ -126,14 +124,14 @@ MdvReader::MdvReader(QObject* parent) :
   MEM_zero(ds_fhdr);
   MEM_zero(ds_vhdr);
   
-  v_mdvx = NULL;
-  v_mdvx_int16 = NULL;
+  // v_mdvx = nullptr;
+  // v_mdvx_int16 = nullptr;
   
   MEM_zero(v_mhdr);
   MEM_zero(v_fhdr);
   MEM_zero(v_vhdr);
   
-  colorMap = NULL;
+  // colorMap = nullptr;
   
   _vLevelReq = -9999.0;
   _validH = false;
@@ -147,6 +145,8 @@ MdvReader::MdvReader(QObject* parent) :
   _readBusyH = false;
 
 }
+
+#ifdef NOTNOW
 
 /////////////////////////////
 // Copy constructor
@@ -229,15 +229,15 @@ MdvReader &MdvReader::_copy(const MdvReader &rhs)
   cont_interv = rhs.cont_interv;
   
   time_allowance = rhs.time_allowance;
+
+  units_label_cols = rhs.units_label_cols;
+  units_label_rows = rhs.units_label_rows;
+  units_label_sects = rhs.units_label_sects;
   
-  std::copy(std::begin(rhs.units_label_cols), std::end(rhs.units_label_cols), std::begin(units_label_cols));
-  std::copy(std::begin(rhs.units_label_rows), std::end(rhs.units_label_rows), std::begin(units_label_rows));
-  std::copy(std::begin(rhs.units_label_sects), std::end(rhs.units_label_sects), std::begin(units_label_sects));
-
-  std::copy(std::begin(rhs.vunits_label_cols), std::end(rhs.vunits_label_cols), std::begin(vunits_label_cols));
-  std::copy(std::begin(rhs.vunits_label_rows), std::end(rhs.vunits_label_rows), std::begin(vunits_label_rows));
-  std::copy(std::begin(rhs.vunits_label_sects), std::end(rhs.vunits_label_sects), std::begin(vunits_label_sects));
-
+  vunits_label_cols = rhs.vunits_label_cols;
+  vunits_label_rows = rhs.vunits_label_rows;
+  vunits_label_sects = rhs.vunits_label_sects;
+  
   field_units = rhs.field_units;
   button_name = rhs.button_name;
   legend_name = rhs.legend_name;
@@ -305,6 +305,8 @@ MdvReader &MdvReader::_copy(const MdvReader &rhs)
   
 }
 
+#endif
+
 /**********************************************************************
  * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
  * This is implemented in a thread.
@@ -315,6 +317,9 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
                                   double vLevel,
                                   int page)
 {
+
+  _setValidH(false);
+  _setNewH(false);
   
   if(_gd.debug1) {
     cerr << "=====>>> MdvReader::requestHorizPlane()" << endl;
@@ -343,13 +348,22 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
   
 }
 
-/**********************************************************************
- * REQUEST_HORIZ_DATA_PLANE: Get data for a plane
- */
+////////////////////////////////////////////////////////////////////
+// REQUEST_HORIZ_DATA_PLANE: Get data for a plane
+//
+// This is run in a separate thread.
+// Once complete, the data is copied back to the MdvReader object.
+/////////////////////////////////////////////////////////////////////
 
 int MdvReader::getHorizPlane()
 {
-
+  
+  // initialize
+  
+  h_rgba32_data.clear();
+  h_fl32_data.clear();
+  h_data_valid = 0;
+    
   // Construct URL, check is valid.
   
   string fullUrl(_getFullUrl());
@@ -357,13 +371,13 @@ int MdvReader::getHorizPlane()
   if(!URL.isValid()) {
     cerr << "ERROR - MdvReader::getHorizPlane, field: " << _getFieldName() << endl;
     cerr << "  Bad URL: " << fullUrl << endl;
-    h_data_valid = 1;
     return -1;
   }
-  
-  // clear
-  
-  h_mdvx->clearRead(); 
+
+  /////////////////////////////////////
+  // set up Mdvx object for reading
+
+  h_mdvx.clear();
   
   // get time list
   
@@ -378,7 +392,7 @@ int MdvReader::getHorizPlane()
   // add field to request
   
   string fieldName(_getFieldName());
-  h_mdvx->addReadField(fieldName);
+  h_mdvx.addReadField(fieldName);
   
   // read times
   
@@ -386,10 +400,10 @@ int MdvReader::getHorizPlane()
   
   // vlevel
   
-  h_mdvx->setReadVlevelLimits(_vLevelReq, _vLevelReq);
+  h_mdvx.setReadVlevelLimits(_vLevelReq, _vLevelReq);
   if(composite_mode) {
-    // Ask for data that covers the whole vertical domain 
-    h_mdvx->setReadComposite();
+    // Request column max composite
+    h_mdvx.setReadComposite();
   }
   
   // clip to zoom limits
@@ -401,7 +415,7 @@ int MdvReader::getHorizPlane()
     double dlatExtra = fabs(dlat) / 4.0;
     double dlonExtra = fabs(dlon) / 4.0;
     
-    h_mdvx->setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
+    h_mdvx.setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
                                _zoomBoxReq.getMinLon() - dlonExtra,
                                _zoomBoxReq.getMaxLat() + dlatExtra,
                                _zoomBoxReq.getMaxLon() + dlonExtra);
@@ -411,154 +425,122 @@ int MdvReader::getHorizPlane()
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
 
   if (_params.decimate_resolution_on_mdv_request) {
-    h_mdvx->setReadDecimate(_gd.h_win.img_dim.width * _gd.h_win.img_dim.width);
+    h_mdvx.setReadDecimate(_gd.h_win.img_dim.width * _gd.h_win.img_dim.width);
   }
   
-  h_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
-  h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
+  h_mdvx.setReadEncodingType(Mdvx::ENCODING_ASIS);
+  h_mdvx.setReadCompressionType(Mdvx::COMPRESSION_ASIS);
   if(_params.request_compressed_data) {
     if(_params.request_gzip_vol_compression) {
-      h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
+      h_mdvx.setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
     } else {
-      h_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
+      h_mdvx.setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
     }
   }
 
   // request full field header for vert info
 
-  h_mdvx->setReadFieldFileHeaders();
-
-  // _gd.io_info.mode = DSMDVX_DATA;
-  // _gd.io_info.request_type = HORIZ_REQUEST;    /* Horizontal data access */
-  // _gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
-  // _gd.io_info.busy_status = 0;
-  // _gd.io_info.page = _page;
-  // _gd.io_info.outstanding_request = 1;
-  // _gd.io_info.mr = this;
+  h_mdvx.setReadFieldFileHeaders();
   
   //if(_gd.debug1) {
   fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", _page, fullUrl.c_str());
   // }
+
+  //////////////////////////////////////////
+  // read the volume
   
-  // Initiate the request in thread
-  
-  int iret = h_mdvx->readVolume();
+  int iret = h_mdvx.readVolume();
   if (iret) {
     cerr << "1111111 MdvReader::getHorizPlane, iret: " << ", " << iret << endl;
     qDebug() << "MdvReader::getHorizPlane returned, iret: " << ", " << iret;
-    qDebug() << h_mdvx->getErrStr();
+    qDebug() << h_mdvx.getErrStr();
   }
   iret_h_mdvx_read = iret;
+  last_collected = time(0);
 
-  if (iret) {
+  // uncompress return field
+  
+  if (iret == 0) {
+    MdvxField *hfld = h_mdvx.getFieldByNum(0);
+    if (hfld) {
+      Mdvx::field_header_t fhdr = hfld->getFieldHeader();
+      if(fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+        // Image data, uncompress
+        hfld->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_NONE);
+      } else {
+        // field data, convert to fl32 if needed and uncompress
+        hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+      }
+    } // if (hfld)
+  } // if (iret == 0)
 
-    // error - indicate data is no longer pending
+  return 0;
+  
+}
 
+////////////////////////////////////////////////////////////////////
+// HANDLE READ WHEN IT IS DONE
+// This copies data from the Mdvx object into the reader object.
+// This is run in the main thread.
+/////////////////////////////////////////////////////////////////////
+
+int MdvReader::_handleHorizReadDone()
+{
+
+  // save time
+  
+  last_collected = time(0);
+  
+  if (iret_h_mdvx_read ||
+      h_mdvx.getNFields() < 1 ||
+      h_mdvx.getFieldByNum(0) == nullptr)  {
+    
+    // ERROR
     // Save the master header for the file, even if we couldn't
     // get data for this field.  This is needed in case we are
     // dealing with forecast data
-      
-    h_data = NULL;
-    h_fl32_data = NULL;
-    h_mhdr = h_mdvx->getMasterHeader();
-    h_data_valid = 1;
-    last_collected = time(0);
-      
-    // _gd.io_info.busy_status = 0;
-    // _gd.io_info.outstanding_request = 0;
-    // _gd.io_info.request_type = 0;
-    // _gd.h_win.redraw_flag[_gd.io_info.page] = 1;
-
-    cerr << "1111111111111111111 getHorizPlane ERROR" << endl;
+    
+    h_mhdr = h_mdvx.getMasterHeader();
+    
+    cerr << "1111111111111111111 _handleHorizReadDone ERROR" << endl;
     return -1;
     
-  } else if (h_mdvx->getFieldByNum(0) == NULL) {
-    
-    // _gd.io_info.busy_status = 0;
-    // _gd.io_info.outstanding_request = 0;
-    // _gd.io_info.request_type = 0;
-    // _gd.h_win.redraw_flag[_gd.io_info.page] = 1;
-    h_data_valid = 1;
-    last_collected = time(0);
-
-    cerr << "1111111111111111111 getHorizPlane ERROR" << endl;
-    return -1;
-
   }
 
-  // data is in
-  
-  cerr << "111111111111111111111111111111111111111 getHorizPlane GOT DATA" << endl;
+  ////////////////////////
+  // success - data is in
 
-  if (h_mdvx->getNFields() < 1 || h_mdvx->getFieldByNum(0) == NULL)  {
-    cerr << "1111111111111111111 getHorizPlane ERROR - no fields returned" << endl;
-    return -1;
-  }
+  cerr << "111111111111111111111111111111111111111 _handleHorizReadDone GOT DATA" << endl;
   
-  // Indicate data update is in progress.
+  h_data_valid = 1;
   
-  // _gd.io_info.busy_status = 1;
-  
-  MdvxField *hfld = h_mdvx->getFieldByNum(0);
-  if(hfld->getFieldHeader().encoding_type == Mdvx::ENCODING_RGBA32) {
-    hfld->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_NONE);
-  } else{
-    hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-  }
+  // copy the requested field
+
+  MdvxField *hfld = h_mdvx.getFieldByNum(0);
   Mdvx::field_header_t fhdr = hfld->getFieldHeader();
-  if(fhdr.encoding_type != Mdvx::ENCODING_RGBA32) {
+  int nptsPlane = fhdr.ny * fhdr.nx;
+  
+  if(fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
 
-    *h_mdvx_int16 = *hfld; // Copy for INT16 data
+    // save the data to the rgba32 vector
     
-    if(h_vcm.nentries < 2 || fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
-      
-      h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE);
-
-    } else {
-      
-      // Convert the copy to - Decompressed INT16 - Covering the range of the colorscale
-      double range = (h_vcm.vc[h_vcm.nentries-1]->max - h_vcm.vc[0]->min);
-      double scale = range / (Constants::MAX_COLOR_CELLS -2);
-      double bias = h_vcm.vc[0]->min - (2 * scale); // Preserve 0, 1 as legitimate NAN values
-      
-      h_mdvx_int16->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_NONE,
-                                Mdvx::SCALING_SPECIFIED,scale,bias);
-    }
+    h_rgba32_data.resize(nptsPlane);
+    memcpy(h_rgba32_data.data(), hfld->getVol(), nptsPlane * sizeof(ui32));
     
-    // Record where int8 data is in memory. - Used for fast polygon fills.
-    h_data = (unsigned short *) h_mdvx_int16->getVol();
-    
-    // Convert the AS-IS to 32 bits float. - Used for Contouring, Data reporting.
-    // cerr << "1111111111111111111 getNFields(): " << h_mdvx->getNFields() << endl;
-    // cerr << "11111111111111111 h_mdvx->getFieldByNum(0): " << h_mdvx->getFieldByNum(0) << endl;
-    // hfld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-    // Record where float data is in memory.
-    h_fl32_data = (fl32  *) hfld->getVol();
-      
-    // Find Headers for quick reference
-    h_mhdr = h_mdvx->getMasterHeader();
-    h_fhdr = hfld->getFieldHeader();
-    h_vhdr = hfld->getVlevelHeader();
-    // h_fhdr = h_mdvx_int16->getFieldHeader();
-    // h_vhdr = h_mdvx_int16->getVlevelHeader();
-
   } else {
-      
-    // Decompress
-    hfld->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_NONE);
-      
-    // Record where data is in memory. 
-    h_data = (unsigned short *) hfld->getVol();
-      
-    // Record where float data is in memory.
-    h_fl32_data = (fl32  *) hfld->getVol();
-      
-    // Find Headers for quick reference
-    h_mhdr = h_mdvx->getMasterHeader();
-    h_fhdr = hfld->getFieldHeader();
-    h_vhdr = hfld->getVlevelHeader();
-
-  } // compression
+    
+    // save the data to the fl32 vector
+    
+    h_fl32_data.resize(nptsPlane);
+    memcpy(h_fl32_data.data(), hfld->getVol(), nptsPlane * sizeof(fl32));
+    
+  }
+  
+  // save headers for use later
+  
+  h_mhdr = h_mdvx.getMasterHeader();
+  h_fhdr = hfld->getFieldHeader();
+  h_vhdr = hfld->getVlevelHeader();
     
   // Init projection
 
@@ -569,6 +551,7 @@ int MdvReader::getHorizPlane()
   proj.setConditionLon2Origin(true);
     
   // Implemented for MOBILE RADARS - 
+
   if(_params.zoom_domain_follows_data &&
      this == _gd.mread[_gd.h_win.page] ) { // Only for the primary field
     double dx,locx;
@@ -577,15 +560,15 @@ int MdvReader::getHorizPlane()
       
     if(h_fhdr.proj_origin_lat != _gd.h_win.origin_lat ||
        h_fhdr.proj_origin_lon != _gd.h_win.origin_lon) {
-        
+      
       dx = _gd.h_win.zmax_x[index] - _gd.h_win.zmin_x[index];
       dy = _gd.h_win.zmax_y[index] - _gd.h_win.zmin_y[index];
-        
+      
       switch(_gd.display_projection) {
         case Mdvx::PROJ_LATLON:
           _gd.h_win.origin_lat = h_fhdr.proj_origin_lat;
           _gd.h_win.origin_lon = h_fhdr.proj_origin_lon;
-            
+          
           _gd.h_win.zmin_x[index] = h_fhdr.proj_origin_lon - (dx / 2.0);
           _gd.h_win.zmax_x[index] = h_fhdr.proj_origin_lon + (dx / 2.0);
           _gd.h_win.zmin_y[index] = h_fhdr.proj_origin_lat - (dy / 2.0);
@@ -604,19 +587,13 @@ int MdvReader::getHorizPlane()
           break;
             
       }
+
       /* Set current area to our indicated zoom area */
       _gd.h_win.cmin_x = _gd.h_win.zmin_x[index];
       _gd.h_win.cmax_x = _gd.h_win.zmax_x[index];
       _gd.h_win.cmin_y = _gd.h_win.zmin_y[index];
       _gd.h_win.cmax_y = _gd.h_win.zmax_y[index];
-	
-      // reset_time_list_valid_flags();
-      // reset_data_valid_flags(1,0);
-      // reset_terrain_valid_flags(1,0);
-      // set_redraw_flags(1,0);
-      // h_data_valid = 1;  // This field is still valid, though
-      // _timeListValid = true;
-	
+      
     }
   }
   
@@ -634,79 +611,78 @@ int MdvReader::getHorizPlane()
          << h_fhdr.grid_minx + (h_fhdr.nx - 1) * h_fhdr.grid_dx << ", "
          << h_fhdr.grid_miny + (h_fhdr.ny - 1) * h_fhdr.grid_dy << endl;
   }
-    
+  
   // Punt and use the field headers if the file headers are not avail
-  if(hfld->getFieldHeaderFile() == NULL) 
+  if(hfld->getFieldHeaderFile() == nullptr) {
     ds_fhdr = (hfld->getFieldHeader());
-  else 
+  } else {
     ds_fhdr = *(hfld->getFieldHeaderFile());
-    
-  if(hfld->getVlevelHeaderFile() == NULL) 
-    ds_vhdr = (hfld->getVlevelHeader());
-  else 
-    ds_vhdr = *(hfld->getVlevelHeaderFile());
-    
-  // Recompute the color scale lookup table if necessary
-  if(h_fhdr.scale != h_last_scale ||
-     h_fhdr.bias != h_last_bias   ||
-     h_fhdr.missing_data_value != h_last_missing   ||
-     h_fhdr.bad_data_value != h_last_bad ||
-     h_fhdr.transform_type != h_last_transform ) {
-      
-    if(auto_scale) {
-      _autoscaleVcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
-    }
-      
-    // Update last values
-    h_last_scale = h_fhdr.scale;
-    h_last_bias = h_fhdr.bias;
-    h_last_missing = h_fhdr.missing_data_value;
-    h_last_bad = h_fhdr.bad_data_value;
-    h_last_transform = h_fhdr.transform_type;
   }
     
+  if(hfld->getVlevelHeaderFile() == nullptr) {
+    ds_vhdr = (hfld->getVlevelHeader());
+  } else {
+    ds_vhdr = *(hfld->getVlevelHeaderFile());
+  }
+    
+  // // Recompute the color scale lookup table if necessary
+  // if(h_fhdr.scale != h_last_scale ||
+  //    h_fhdr.bias != h_last_bias ||
+  //    h_fhdr.missing_data_value != h_last_missing ||
+  //    h_fhdr.bad_data_value != h_last_bad ||
+  //    h_fhdr.transform_type != h_last_transform ) {
+      
+  //   if(auto_scale) {
+  //     _autoscaleVcm(&(h_vcm), h_fhdr.min_value, h_fhdr.max_value);
+  //   }
+      
+  //   // Update last values
+  //   h_last_scale = h_fhdr.scale;
+  //   h_last_bias = h_fhdr.bias;
+  //   h_last_missing = h_fhdr.missing_data_value;
+  //   h_last_bad = h_fhdr.bad_data_value;
+  //   h_last_transform = h_fhdr.transform_type;
+
+  // }
+  
   // Compute the vertical levels 
   plane = 0;
-  for(int i=0; i < ds_fhdr.nz; i++) { 
+  vert.resize(ds_fhdr.nz);
+  for(int ii = 0; ii < ds_fhdr.nz; ii++) { 
     // Find out which plane we received
-    if(ds_vhdr.level[i] == h_vhdr.level[0]) plane = i;
-    if(i == 0) { // Lowest plane 
-      double delta = (ds_vhdr.level[i+1] - ds_vhdr.level[i]) / 2.0;
-      vert[i].min = ds_vhdr.level[0] - delta;
-      vert[i].cent = ds_vhdr.level[0];
-      vert[i].max = ds_vhdr.level[0] + delta;
-        
-    } else if (i == ds_fhdr.nz -1) { // highest plane
-      double delta = (ds_vhdr.level[i] - ds_vhdr.level[i-1]) / 2.0;
-      vert[i].min = ds_vhdr.level[i] - delta;
-      vert[i].cent = ds_vhdr.level[i];
-      vert[i].max = ds_vhdr.level[i] + delta;
+    if(ds_vhdr.level[ii] == h_vhdr.level[0]) plane = ii;
+    if(ii == 0) { // Lowest plane 
+      double delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
+      vert[ii].min = ds_vhdr.level[0] - delta;
+      vert[ii].cent = ds_vhdr.level[0];
+      vert[ii].max = ds_vhdr.level[0] + delta;
+      
+    } else if (ii == ds_fhdr.nz -1) { // highest plane
+      double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
+      vert[ii].min = ds_vhdr.level[ii] - delta;
+      vert[ii].cent = ds_vhdr.level[ii];
+      vert[ii].max = ds_vhdr.level[ii] + delta;
         
     } else { // Middle planes
-      double delta = (ds_vhdr.level[i] - ds_vhdr.level[i-1]) / 2.0;
-      vert[i].min = ds_vhdr.level[i] - delta;
-      vert[i].cent = ds_vhdr.level[i];
+      double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
+      vert[ii].min = ds_vhdr.level[ii] - delta;
+      vert[ii].cent = ds_vhdr.level[ii];
         
-      delta = (ds_vhdr.level[i+1] - ds_vhdr.level[i]) / 2.0;
-      vert[i].max = ds_vhdr.level[i] + delta;
+      delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
+      vert[ii].max = ds_vhdr.level[ii] + delta;
     }
-  }
-    
+  } // ii
     
   // Record the dimensional Units of the volume
-  STRcopy(units_label_cols,
-          h_mdvx->projType2XUnits(h_fhdr.proj_type),Constants::LABEL_LENGTH);
-  STRcopy(units_label_rows,
-          h_mdvx->projType2YUnits(h_fhdr.proj_type),Constants::LABEL_LENGTH);
-  STRcopy(units_label_sects,
-          h_mdvx->vertTypeZUnits(h_vhdr.type[0]),Constants::LABEL_LENGTH);
+  
+  units_label_cols = h_mdvx.projType2XUnits(h_fhdr.proj_type);
+  units_label_rows = h_mdvx.projType2YUnits(h_fhdr.proj_type);
+  units_label_sects = h_mdvx.vertTypeZUnits(h_vhdr.type[0]);
     
-  // Record the date
+  // Record the time
+
   h_date.set(h_mhdr.time_centroid);
-  // UTIMunix_to_date(h_mhdr.time_centroid,&h_date);
-    
-  h_data_valid = 1;
-  last_collected = time(0);
+  
   // _gd.h_win.redraw_flag[_gd.io_info.page] = 1;
   // // Indicate its safe to use the data
   // _gd.io_info.busy_status = 0;
@@ -721,7 +697,11 @@ int MdvReader::getHorizPlane()
   // }
 
 
-  cerr << "1111111111111111111 getHorizPlane END" << endl;
+  cerr << "1111111111111111111 _handleHorizReadDone END" << endl;
+
+  // free up
+
+  h_mdvx.clear();
 
   return 0;
   
@@ -811,6 +791,8 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
 int MdvReader::requestVertSection(const DateTime &midTime,
                                   int page)
 {
+
+#ifdef NOTYET
   
   // Construct URL, check is valid.
   
@@ -890,6 +872,8 @@ int MdvReader::requestVertSection(const DateTime &midTime,
   // Initiate the request
   v_mdvx->readVsection();
 
+#endif
+  
   return 0;
 }
 
@@ -931,7 +915,7 @@ void MdvReader::_computeReqTime(const DateTime &midTime,
 
 void MdvReader::_setReadTimes(const string &url,
                               const DateTime &reqTime,
-                              Mdvx *mdvx)
+                              Mdvx &mdvx)
 {
   
   _gd.data_request_time = reqTime.utime();
@@ -940,13 +924,13 @@ void MdvReader::_setReadTimes(const string &url,
     
     case Params::CLOSEST_TO_FRAME_CENTER:
       if(_gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
-        mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                           url,
                           (int) (60 * time_allowance),
                           _gd.model_run_time,
                           reqTime.utime() - _gd.model_run_time);
       } else {
-        mdvx->setReadTime(Mdvx::READ_CLOSEST,
+        mdvx.setReadTime(Mdvx::READ_CLOSEST,
                           url,
                           (int) (60 * time_allowance),
                           reqTime.utime());
@@ -962,13 +946,13 @@ void MdvReader::_setReadTimes(const string &url,
       
     case Params::FIRST_BEFORE_END_OF_FRAME:
       if(_gd.model_run_time != 0 && h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
-        mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                           url,
                           (int) (60 * time_allowance),
                           _gd.model_run_time,
                           (reqTime.utime() - _gd.model_run_time));
       } else {
-        mdvx->setReadTime(Mdvx::READ_FIRST_BEFORE,
+        mdvx.setReadTime(Mdvx::READ_FIRST_BEFORE,
                           url,
                           (int) (60 * time_allowance),
                           reqTime.utime() + 1, 0);
@@ -984,13 +968,13 @@ void MdvReader::_setReadTimes(const string &url,
       
     case Params::FIRST_AFTER_START_OF_FRAME:
       if(_gd.model_run_time != 0 && h_mhdr.data_collection_type ==  Mdvx::DATA_FORECAST) { 
-        mdvx->setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
                           url,
                           (int) (60 * time_allowance),
                           _gd.model_run_time,
                           (reqTime.utime() - _gd.model_run_time));
       } else {
-        mdvx->setReadTime(Mdvx::READ_FIRST_AFTER,
+        mdvx.setReadTime(Mdvx::READ_FIRST_AFTER,
                           url,
                           (int) (60 * time_allowance),
                           reqTime.utime()-1, 0);
@@ -1010,13 +994,12 @@ void MdvReader::_setReadTimes(const string &url,
 
 /**********************************************************************
  * REQUEST_TIME_LIST: Query the server for a data set time list
- *
  */
 
 int MdvReader::_getTimeList(const string &url,
                             const DateTime &midTime,
                             int page,
-                            Mdvx *mdvx)
+                            Mdvx &mdvx)
 {
 
   TimeControl *tc = TimeControl::getInstance();
@@ -1040,12 +1023,12 @@ int MdvReader::_getTimeList(const string &url,
     cerr << "  List end time: " << listEndTime.asString(0) << endl;
   }
 
-  mdvx->clearTimeListMode();
+  mdvx.clearTimeListMode();
   if(_gd.model_run_time != 0 &&
      h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) { 
-    mdvx->setTimeListModeLead(url, _gd.model_run_time);
+    mdvx.setTimeListModeLead(url, _gd.model_run_time);
   } else {
-    mdvx->setTimeListModeValid(url,
+    mdvx.setTimeListModeValid(url,
                                listStartTime.utime(), listEndTime.utime());
   }
   if(_gd.debug1) {
@@ -1068,7 +1051,7 @@ int MdvReader::_getTimeList(const string &url,
   _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
   
   if (_params.clip_to_current_zoom_on_mdv_request) {
-    mdvx->setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
+    mdvx.setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
   }
   
   // Set up the DsMdvx request object
@@ -1094,9 +1077,9 @@ int MdvReader::_getTimeList(const string &url,
   // Limit List requests to given maximum number of days 
   if((_gd.epoch_end - _gd.epoch_start) <
      (_params.climo_max_time_span_days * 1440  * 60)) {
-    if (mdvx->compileTimeList()) {
+    if (mdvx.compileTimeList()) {
       cerr << "ERROR -CIDD:  setTimeListModeValid" << endl;
-      cerr << mdvx->getErrStr();
+      cerr << mdvx.getErrStr();
       _timeListValid = true;
     }  
   } else {
@@ -1395,8 +1378,10 @@ void MdvReader::startReadVolH() {
 ////////////////////////
 // done with H vol read
 
-void MdvReader::readDoneH() {
-  if (h_mdvx->getFieldByNum(0) == nullptr) {
+void MdvReader::readDoneH()
+{
+  int iret = _handleHorizReadDone();
+  if (iret || !h_data_valid) {
     _setValidH(false);
     _setNewH(false);
     _readBusyH = false;
@@ -1489,17 +1474,17 @@ string MdvReader::fieldLabel()
                tlabel.c_str());
     } else {
       // Reverse order of label and value if units are "FL" 
-      if(strcmp(units_label_sects,"FL") == 0) {
-        snprintf(label,2048,"%s: %s %03.0f %s",
+      if(units_label_sects == "FL") {
+        snprintf(label, 2048, "%s: %s %03.0f %s",
                  legend_name.c_str(),
-                 units_label_sects,
+                 units_label_sects.c_str(),
                  vert[plane].cent,
                  tlabel.c_str());
       }else {
         snprintf(label,2048,"%s: %g %s %s",
                  legend_name.c_str(),
                  vert[plane].cent,
-                 units_label_sects,
+                 units_label_sects.c_str(),
                  tlabel.c_str());
       }
     }
@@ -1550,7 +1535,7 @@ string MdvReader::heightLabel()
       
     default:
       snprintf(label,1024,"%g %s", _gd.h_win.cur_ht,
-               units_label_sects);
+               units_label_sects.c_str());
       break;
   }
   
