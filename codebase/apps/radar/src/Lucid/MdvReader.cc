@@ -77,9 +77,6 @@ MdvReader::MdvReader(QObject* parent) :
   ht_pixel = 0.0;
   y_intercept = 0.0;
   
-  last_elev = NULL;
-  elev_size = 0;
-  
   h_last_scale = 0.0;
   h_last_bias = 0.0;
   h_last_missing = 0.0;
@@ -117,7 +114,7 @@ MdvReader::MdvReader(QObject* parent) :
   h_date.setToNever();
   v_date.setToNever();
   
-  proj = NULL;
+  // proj = NULL;
   
   h_mdvx = NULL;
   h_mdvx_int16 = NULL;
@@ -149,6 +146,163 @@ MdvReader::MdvReader(QObject* parent) :
   _vLevel = 0;
   _readBusyH = false;
 
+}
+
+/////////////////////////////
+// Copy constructor
+//
+
+MdvReader::MdvReader(const MdvReader &rhs) :
+        _params(rhs._params),
+        _gd(rhs._gd)
+{
+  _copy(rhs);
+}
+
+/////////////////////////////
+// Assignment
+//
+
+MdvReader &MdvReader::operator=(const MdvReader &rhs)
+{
+  _params = rhs._params;
+  _gd = rhs._gd;
+  return _copy(rhs);
+}
+
+//////////////////////////////////////////////////
+// copy - used by copy constructor and operator =
+//
+
+MdvReader &MdvReader::_copy(const MdvReader &rhs)
+  
+{
+  
+  if (&rhs == this) {
+    return *this;
+  }
+  
+  plane = rhs.plane;
+  currently_displayed = rhs.plane;
+  auto_render = rhs.plane;
+  render_method = rhs.plane;
+  composite_mode = rhs.plane;
+  auto_scale = rhs.plane;
+  use_landuse = rhs.plane;
+  num_display_pts = rhs.plane;
+  last_collected = rhs.last_collected;
+ 
+  h_data_valid = rhs.plane;
+  v_data_valid = rhs.plane;
+
+  vert_type = rhs.plane;
+  
+  detail_thresh_min = rhs.detail_thresh_min;
+  detail_thresh_max = rhs.detail_thresh_max;
+  
+  // vert = rhs.vert;
+  std::copy(std::begin(rhs.vert), std::end(rhs.vert), std::begin(vert));
+ 
+  ht_pixel = rhs.ht_pixel;
+  y_intercept = rhs.y_intercept;
+  
+  h_last_scale = rhs.h_last_scale;
+  h_last_bias = rhs.h_last_bias;
+  h_last_missing = rhs.h_last_missing;
+  h_last_bad = rhs.h_last_bad;
+  h_last_transform = rhs.plane;
+  
+  v_last_scale = rhs.v_last_scale;
+  v_last_bias = rhs.v_last_bias;
+  v_last_missing = rhs.v_last_missing;
+  v_last_bad = rhs.v_last_bad;
+  v_last_transform = rhs.plane;
+  
+  cscale_min = rhs.cscale_min;
+  cscale_delta = rhs.cscale_delta;
+  
+  overlay_min = rhs.overlay_min;
+  overlay_max = rhs.overlay_max;
+  
+  cont_low = rhs.cont_low;
+  cont_high = rhs.cont_high;
+  cont_interv = rhs.cont_interv;
+  
+  time_allowance = rhs.time_allowance;
+  
+  std::copy(std::begin(rhs.units_label_cols), std::end(rhs.units_label_cols), std::begin(units_label_cols));
+  std::copy(std::begin(rhs.units_label_rows), std::end(rhs.units_label_rows), std::begin(units_label_rows));
+  std::copy(std::begin(rhs.units_label_sects), std::end(rhs.units_label_sects), std::begin(units_label_sects));
+
+  std::copy(std::begin(rhs.vunits_label_cols), std::end(rhs.vunits_label_cols), std::begin(vunits_label_cols));
+  std::copy(std::begin(rhs.vunits_label_rows), std::end(rhs.vunits_label_rows), std::begin(vunits_label_rows));
+  std::copy(std::begin(rhs.vunits_label_sects), std::end(rhs.vunits_label_sects), std::begin(vunits_label_sects));
+
+  field_units = rhs.field_units;
+  button_name = rhs.button_name;
+  legend_name = rhs.legend_name;
+  field_label = rhs.field_label;
+  url = rhs.url;
+  color_file = rhs.color_file;
+  
+  // unsigned short *h_data; /* pointer to Horizontal int8 data */
+  // unsigned short *v_data; /* pointer to Vertical d int8 data */ 
+  
+  // fl32 *h_fl32_data; /* pointer to Horizontal fl32 data */
+  // fl32 *v_fl32_data; /* pointer to Vertical fl32 data */ 
+  
+  // time_list_t time_list; // A list of data times
+  
+  // Valcolormap_t h_vcm; /* Data value to X color info */
+  // Valcolormap_t v_vcm; /* Data value to X color info */
+  
+  // DateTime h_date; /* date and time stamp of latest data - Horiz */
+  // DateTime v_date; /* date and time stamp of latest data - Vert */
+  
+  proj = rhs.proj;
+  
+  // MDV Data class sets - One for horizontal, one for vertical
+  
+  // DsMdvx *h_mdvx;
+  // MdvxField *h_mdvx_int16;
+  h_mhdr = rhs.h_mhdr;
+  h_fhdr = rhs.h_fhdr;
+  h_vhdr = rhs.h_vhdr;
+  iret_h_mdvx_read = rhs.iret_h_mdvx_read;
+  
+  ds_fhdr = rhs.ds_fhdr;
+  ds_vhdr = rhs.ds_vhdr;
+  
+  // DsMdvxThreaded *v_mdvx;
+  // DsMdvx *v_mdvx;
+  // MdvxField *v_mdvx_int16;
+  v_mhdr = rhs.v_mhdr;
+  v_fhdr = rhs.v_fhdr;
+  v_vhdr = rhs.v_vhdr;
+  
+  // ColorMap *colorMap;
+
+  _lucid = rhs._lucid;
+  // QMutex _statusMutex;
+
+  _midTime = rhs._midTime;
+  _timeReq = rhs._timeReq;
+  _zoomBoxReq = rhs._zoomBoxReq;
+  _vLevelReq = rhs._vLevelReq;
+  _wayPtsReq = rhs._wayPtsReq;
+
+  _validH = rhs._validH;
+  _validV = rhs._validV;
+  _newH = rhs._newH;
+  _newV = rhs._newV;
+
+  _page = rhs.plane;
+  _timeListValid = rhs._timeListValid;
+  _vLevel = rhs._vLevel;
+  _readBusyH = rhs._readBusyH;
+
+  return *this;
+  
 }
 
 /**********************************************************************
@@ -408,11 +562,11 @@ int MdvReader::getHorizPlane()
     
   // Init projection
 
-  proj->init(h_fhdr);
+  proj.init(h_fhdr);
     
   // condition longitudes to be in same hemisphere
   // as origin
-  proj->setConditionLon2Origin(true);
+  proj.setConditionLon2Origin(true);
     
   // Implemented for MOBILE RADARS - 
   if(_params.zoom_domain_follows_data &&

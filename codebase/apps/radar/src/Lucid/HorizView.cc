@@ -1480,8 +1480,8 @@ int HorizView::_renderGrid(int page,
   
   // Render with appropriate rendering routine
   
-  Mdvx::Mdvx::projection_type_t projType = mr->proj->getProjType();
-  const PjgMath &dataMath = mr->proj->getPjgMath();
+  Mdvx::Mdvx::projection_type_t projType = mr->proj.getProjType();
+  const PjgMath &dataMath = mr->proj.getPjgMath();
   const PjgMath &displayMath = _gd.proj.getPjgMath();
   
   if (_gd.debug) {

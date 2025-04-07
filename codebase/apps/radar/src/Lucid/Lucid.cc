@@ -948,8 +948,8 @@ int Lucid::_initGrids()
       mread->auto_render = fld.auto_render;
     }
     
-    mread->last_elev = (char *)NULL;
-    mread->elev_size = 0;
+    // mread->last_elev = (char *)NULL;
+    // mread->elev_size = 0;
     
     mread->plane = 0;
     mread->h_data_valid = 0;
@@ -966,8 +966,8 @@ int Lucid::_initGrids()
     mread->v_last_transform  = -1;
     mread->h_fhdr.proj_origin_lat  = 0.0;
     mread->h_fhdr.proj_origin_lon  = 0.0;
-    mread->time_list.num_alloc_entries = 0;
-    mread->time_list.num_entries = 0;
+    // mread->time_list.num_alloc_entries = 0;
+    // mread->time_list.num_entries = 0;
     
     STRcopy(mread->units_label_cols,"KM",Constants::LABEL_LENGTH);
     STRcopy(mread->units_label_rows,"KM",Constants::LABEL_LENGTH);
@@ -978,7 +978,7 @@ int Lucid::_initGrids()
     mread->v_mdvx = new DsMdvx;
     mread->h_mdvx_int16 = new MdvxField;
     mread->v_mdvx_int16 = new MdvxField;
-    mread->proj = new MdvxProj;
+    // mread->proj = new MdvxProj;
 
     mread->colorMap = NULL;
     mread->color_file = fld.color_map;
@@ -1101,8 +1101,8 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->v_vcm.nentries = 0;
   wrec->h_fhdr.scale = -1.0;
   wrec->h_last_scale = 0.0;
-  wrec->time_list.num_alloc_entries = 0;
-  wrec->time_list.num_entries = 0;
+  // wrec->time_list.num_alloc_entries = 0;
+  // wrec->time_list.num_entries = 0;
   
   wrec->legend_name = windp.legend_label;
   if (isW) {
@@ -1154,7 +1154,7 @@ void Lucid::_initWindComponent(MdvReader *wrec,
 
   // projection
   
-  wrec->proj = new MdvxProj;
+  // wrec->proj = new MdvxProj;
 
 }
 
@@ -1183,7 +1183,7 @@ void Lucid::_initTerrain()
     _gd.layers.earth.terr->v_mdvx = new DsMdvx;
     _gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
     _gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
-    _gd.layers.earth.terr->proj =  new MdvxProj;
+    // _gd.layers.earth.terr->proj =  new MdvxProj;
 
   }
   
@@ -1206,7 +1206,7 @@ void Lucid::_initTerrain()
     _gd.layers.earth.land_use->v_mdvx = new DsMdvx;
     _gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
     _gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
-    _gd.layers.earth.land_use->proj =  new MdvxProj;
+    // _gd.layers.earth.land_use->proj =  new MdvxProj;
     
     switch(_params.landuse_render_method) {
       default:

@@ -64,6 +64,14 @@ public:
   
   MdvReader(QObject* parent = nullptr);
 
+  // copy constructor
+
+  MdvReader(const MdvReader &rhs);
+
+  /// assignment
+  
+  MdvReader& operator=(const MdvReader &rhs);
+  
   // is the data valid?
   
   bool isValidH() const;
@@ -136,9 +144,6 @@ public:
   double ht_pixel; // Slope of function between elevation height and screen Y
   double y_intercept; // Intercept of function between elevation and screen Y
   
-  char *last_elev; /* last elevation data received from server */
-  int elev_size; /* bytes in last_elev */
-  
   /* Dynamic Values */
   double h_last_scale; /* Horizontal scale factor & bias to restore original value */
   double h_last_bias;
@@ -192,7 +197,7 @@ public:
   fl32 *h_fl32_data; /* pointer to Horizontal fl32 data */
   fl32 *v_fl32_data; /* pointer to Vertical fl32 data */ 
   
-  time_list_t time_list; // A list of data times
+  // time_list_t time_list; // A list of data times
   
   /* Dynamic - Depends on scale & bias factors */
   Valcolormap_t h_vcm; /* Data value to X color info */
@@ -201,11 +206,11 @@ public:
   DateTime h_date; /* date and time stamp of latest data - Horiz */
   DateTime v_date; /* date and time stamp of latest data - Vert */
   
-  MdvxProj *proj; /* Pointer to projection class */
+  MdvxProj proj; /* Pointer to projection class */
   
   // MDV Data class sets - One for horizontal, one for vertical
-  // DsMdvxThreaded *h_mdvx;
-  DsMdvx *h_mdvx;
+
+  DsMdvx h_mdvx;
   MdvxField *h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;
@@ -215,8 +220,8 @@ public:
   Mdvx::field_header_t ds_fhdr; // Data Set's Field header
   Mdvx::vlevel_header_t ds_vhdr; // Vertical height headers
   
-  // DsMdvxThreaded *v_mdvx;
-  DsMdvx *v_mdvx;
+  
+  DsMdvx v_mdvx;
   MdvxField *v_mdvx_int16;
   Mdvx::master_header_t v_mhdr;
   Mdvx::field_header_t v_fhdr;
@@ -252,6 +257,10 @@ private:
   bool _timeListValid;
   double _vLevel;
   bool _readBusyH;
+
+  // for copy constructor and operator=
+  
+  MdvReader &_copy(const MdvReader &rhs); 
 
   // data status
 

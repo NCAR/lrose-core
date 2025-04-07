@@ -2978,7 +2978,7 @@ void WorldPlot::renderGridDistorted(int fieldNum,
     for(int ix = 0; ix <= nx; ix++, xx += dx) {
       // compute lat/lon from data projection
       double lat, lon;
-      mr->proj->xy2latlon(xx, yy, lat, lon);
+      mr->proj.xy2latlon(xx, yy, lat, lon);
       // compute x(x,y) in display projection
       double xx1, yy1;
       _proj.latlon2xy(lat, lon, xx1, yy1);
@@ -3069,7 +3069,7 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   // compute the vertices
 
   // cerr << "=============>> Data proj" << endl;
-  // mr->proj->print(cerr);
+  // mr->proj.print(cerr);
   // cerr << "==================================================" << endl;
   // cerr << "=============>> Display proj" << endl;
   // _proj.print(cerr);
@@ -3082,7 +3082,7 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
     for(int ix = 0; ix <= nx; ix++, xx += dx) {
       // compute lat/lon from data projection
       double lat, lon;
-      mr->proj->xy2latlon(xx, yy, lat, lon, elevDeg);
+      mr->proj.xy2latlon(xx, yy, lat, lon, elevDeg);
       // compute x(x,y) in display projection
       double xx1, yy1;
       _proj.latlon2xy(lat, lon, xx1, yy1, elevDeg);
