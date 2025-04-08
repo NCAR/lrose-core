@@ -59,6 +59,7 @@
 
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
+#include "XyBox.hh"
 
 class GuiManager;
 class VertView;
@@ -141,11 +142,13 @@ class DLL_EXPORT HorizView : public QWidget
 
   QPixmap *getPixmap();
 		      
-  // get zooms
+  // zooms
   
   const WorldPlot &getZoomWorld() const { return _zoomWorld; }
   const vector<WorldPlot> &getSavedZooms() const { return _savedZooms; }
   void clearSavedZooms() { _savedZooms.clear(); }
+  void setXyZoom(double minY, double maxY, double minX, double maxX);
+  bool checkForZoomChange();
   
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -340,6 +343,11 @@ class DLL_EXPORT HorizView : public QWidget
 
   bool _archiveMode;
 
+  // zooms
+
+  XyBox _zoomXy;
+  XyBox _prevZoomXy;
+  
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
    *        panning.

@@ -260,12 +260,7 @@ void GuiManager::enableZoomOutButton() const
 void GuiManager::setXyZoom(double minY, double maxY,
                            double minX, double maxX)
 {
-  _prevZoomXy = _zoomXy;
-  _zoomXy.setLimits(minY, maxY, minX, maxX);
-  _gd.h_win.cmin_y = minY;
-  _gd.h_win.cmax_y = maxY;
-  _gd.h_win.cmin_x = minX;
-  _gd.h_win.cmax_x = maxX;
+  _horiz->setXyZoom(minY, maxY, minX, maxX);
 }
 
 /////////////////////////////////////
@@ -1311,7 +1306,7 @@ bool GuiManager::_checkForStateChange()
   
   // zoom change?
   
-  if (_checkForZoomChange()) {
+  if (_horiz->checkForZoomChange()) {
     stateHasChanged = true;
   }
 
@@ -1346,17 +1341,17 @@ bool GuiManager::_checkForStateChange()
 
 }
 
-/////////////////////////////////////////////////////////
-// check for zoom change
+// /////////////////////////////////////////////////////////
+// // check for zoom change
 
-bool GuiManager::_checkForZoomChange()
-{
-  if (_zoomXy != _prevZoomXy) {
-    _prevZoomXy = _zoomXy;
-    return true;
-  }
-  return false;
-}
+// bool GuiManager::_checkForZoomChange()
+// {
+//   if (_zoomXy != _prevZoomXy) {
+//     _prevZoomXy = _zoomXy;
+//     return true;
+//   }
+//   return false;
+// }
 
 ////////////////////////////////////////////
 // unzoom to previous zoom

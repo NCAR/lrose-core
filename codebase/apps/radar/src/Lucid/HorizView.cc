@@ -210,10 +210,10 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
 
-  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
-                     _zoomWorld.getYMaxWorld(),
-                     _zoomWorld.getXMinWorld(),
-                     _zoomWorld.getXMaxWorld()); 
+  setXyZoom(_zoomWorld.getYMinWorld(),
+            _zoomWorld.getYMaxWorld(),
+            _zoomWorld.getXMinWorld(),
+            _zoomWorld.getXMaxWorld()); 
   
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
@@ -1698,10 +1698,10 @@ void HorizView::zoomBackView()
   }
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
-  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
-                     _zoomWorld.getYMaxWorld(),
-                     _zoomWorld.getXMinWorld(),
-                     _zoomWorld.getXMaxWorld()); 
+  setXyZoom(_zoomWorld.getYMinWorld(),
+            _zoomWorld.getYMaxWorld(),
+            _zoomWorld.getXMinWorld(),
+            _zoomWorld.getXMaxWorld()); 
   _renderGrids();
   _renderMaps();
 }
@@ -1717,12 +1717,38 @@ void HorizView::zoomOutView()
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
-  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
-                     _zoomWorld.getYMaxWorld(),
-                     _zoomWorld.getXMinWorld(),
-                     _zoomWorld.getXMaxWorld()); 
+  setXyZoom(_zoomWorld.getYMinWorld(),
+            _zoomWorld.getYMaxWorld(),
+            _zoomWorld.getXMinWorld(),
+            _zoomWorld.getXMaxWorld()); 
   _renderGrids();
   _renderMaps();
+}
+
+//////////////////////////////////////////////////
+// respond to zoom action, set the XY zoom limits
+
+void HorizView::setXyZoom(double minY, double maxY,
+                          double minX, double maxX)
+{
+  _prevZoomXy = _zoomXy;
+  _zoomXy.setLimits(minY, maxY, minX, maxX);
+  _gd.h_win.cmin_y = minY;
+  _gd.h_win.cmax_y = maxY;
+  _gd.h_win.cmin_x = minX;
+  _gd.h_win.cmax_x = maxX;
+}
+
+/////////////////////////////////////////////////////////
+// check for zoom change
+
+bool HorizView::checkForZoomChange()
+{
+  if (_zoomXy != _prevZoomXy) {
+    _prevZoomXy = _zoomXy;
+    return true;
+  }
+  return false;
 }
 
 /*************************************************************************
@@ -2004,10 +2030,10 @@ void HorizView::_handleMouseZoom()
   _manager.enableZoomBackButton();
   _manager.enableZoomOutButton();
   
-  _manager.setXyZoom(_zoomWorld.getYMinWorld(),
-                     _zoomWorld.getYMaxWorld(),
-                     _zoomWorld.getXMinWorld(),
-                     _zoomWorld.getXMaxWorld());
+  setXyZoom(_zoomWorld.getYMinWorld(),
+            _zoomWorld.getYMaxWorld(),
+            _zoomWorld.getXMinWorld(),
+            _zoomWorld.getXMaxWorld());
   
 }
 

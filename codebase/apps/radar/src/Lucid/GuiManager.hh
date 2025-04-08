@@ -48,7 +48,6 @@
 #include "GlobalData.hh"
 #include "Params.hh"
 #include "VlevelManager.hh"
-#include "XyBox.hh"
 
 #include <QMainWindow>
 #include <QListWidgetItem>
@@ -130,7 +129,7 @@ public:
   void setOverlaysHaveChanged(bool val) { _overlaysHaveChanged = val; }
   
   // set title bar str
-
+  
   void setTitleBarStr(const string &titleStr);
   
   // override event handling
@@ -186,11 +185,6 @@ private:
   VlevelSelector *_vlevelSelector;
   bool _vlevelHasChanged;
 
-  // zooms
-
-  XyBox _zoomXy;
-  XyBox _prevZoomXy;
-  
   // archive mode
   
   bool _archiveMode; // false for realtime mode
@@ -341,7 +335,7 @@ private:
   
   void _checkAndReadH(MdvReader *mr);
   bool _checkForStateChange();
-  bool _checkForZoomChange();
+  // bool _checkForZoomChange();
   void _handleFirstTimerEvent();
   void _readClickPoint();
     
