@@ -3407,7 +3407,6 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   
   // Set up the painter
   
-  painter.save();
   painter.setPen(_params.range_rings_color);
   
   // Draw the lines along the X and Y axes
