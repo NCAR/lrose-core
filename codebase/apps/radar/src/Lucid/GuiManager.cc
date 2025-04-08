@@ -697,7 +697,6 @@ void GuiManager::_createMenus()
   
   _zoomsMenu = menuBar()->addMenu(tr("Zooms"));
   _populateZoomsMenu();
-  // menuBar()->addAction(_zoomBackAct);
   
   // time selector
   
@@ -1341,18 +1340,6 @@ bool GuiManager::_checkForStateChange()
 
 }
 
-// /////////////////////////////////////////////////////////
-// // check for zoom change
-
-// bool GuiManager::_checkForZoomChange()
-// {
-//   if (_zoomXy != _prevZoomXy) {
-//     _prevZoomXy = _zoomXy;
-//     return true;
-//   }
-//   return false;
-// }
-
 ////////////////////////////////////////////
 // unzoom to previous zoom
 
@@ -1363,7 +1350,6 @@ void GuiManager::_zoomBack()
     _zoomBackAct->setEnabled(false);
     _zoomOutAct->setEnabled(false);
   }
-  // _gd.redraw_horiz = true;
 }
 
 ////////////////////////////////////////////
@@ -1375,7 +1361,6 @@ void GuiManager::_zoomOut()
   _horiz->clearSavedZooms();
   _zoomBackAct->setEnabled(false);
   _zoomOutAct->setEnabled(false);
-  // _gd.redraw_horiz = true;
 }
 
 /////////////////////////////////////////////////////////

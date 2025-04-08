@@ -1702,8 +1702,8 @@ void HorizView::zoomBackView()
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
             _zoomWorld.getXMaxWorld()); 
-  _renderGrids();
-  _renderMaps();
+  // _renderGrids();
+  // _renderMaps();
 }
 
 /*************************************************************************
@@ -1721,8 +1721,8 @@ void HorizView::zoomOutView()
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
             _zoomWorld.getXMaxWorld()); 
-  _renderGrids();
-  _renderMaps();
+  // _renderGrids();
+  // _renderMaps();
 }
 
 //////////////////////////////////////////////////
@@ -1737,6 +1737,8 @@ void HorizView::setXyZoom(double minY, double maxY,
   _gd.h_win.cmax_y = maxY;
   _gd.h_win.cmin_x = minX;
   _gd.h_win.cmax_x = maxX;
+  _renderGrids();
+  _renderMaps();
 }
 
 /////////////////////////////////////////////////////////
