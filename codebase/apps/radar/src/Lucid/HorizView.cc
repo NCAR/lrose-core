@@ -123,9 +123,13 @@ HorizView::HorizView(QWidget* parent,
 
   _gridsReady = false;
   _mapsReady = false;
+  _zoomChanged = true;
+  _sizeChanged = true;
   
   _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
-  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
+  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; "
+                                       "color : yellow; qproperty-alignment: "
+                                       "AlignCenter; }");
   _openingFileInfoLabel->setVisible(false);
   
   //fires every 50ms. used for boundary editor to
@@ -200,7 +204,7 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _fullWorld.setGridColor(_params.horiz_grid_color);
 
   // initialize the projection
-
+  
   _initProjection();
   
   // set other members
@@ -215,12 +219,6 @@ void HorizView::configureWorldCoords(int zoomLevel)
             _zoomWorld.getXMinWorld(),
             _zoomWorld.getXMaxWorld()); 
   
-  // Initialize the images used for double-buffering.  For some reason,
-  // the window size is incorrect at this point, but that will be corrected
-  // by the system with a call to resize().
-
-  // _refreshImages();
-
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -234,24 +232,7 @@ void HorizView::timerEvent(QTimerEvent *event)
   cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   
   bool doUpdate = false;
-  // bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-  // if (isBoundaryEditorVisible) {
-  //   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-  // user may have zoomed in or out, so update the polygon point boxes
-  // so they are the right size on screen
-  // doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
-  // }
-  // bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
-
-  // bool isShiftKeyDown =
-  //   (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-
-  // if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
-  //     (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
-  //   this->setCursor(Qt::CrossCursor);
-  // } else {
   this->setCursor(Qt::ArrowCursor);
-  // }
   
   if (doUpdate) {  //only update if something has changed
     update();
@@ -313,9 +294,12 @@ void HorizView::paintEvent(QPaintEvent *event)
   }
   
   // render data grids to grid image in WorldPlot
-  
-  // _renderGrids();
-  
+
+  if (_sizeChanged || _zoomChanged) {
+    _renderGrids();
+    _renderMaps();
+  }
+
   // render invalid images
   
   // if (_renderInvalidImages) {
@@ -337,7 +321,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   }
 
   // render the range rings
-
+  
   if (_ringsFixedEnabled || _ringsDataDrivenEnabled) {
     MdvReader *mr = _gd.mread[fieldNum];
     _zoomWorld.drawRangeRings(fieldNum, mr,
@@ -423,6 +407,8 @@ void HorizView::paintEvent(QPaintEvent *event)
   // cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW _renderFrame: " << _renderFrame << endl;
   
   _renderFrame = false;
+  _sizeChanged = false;
+  _zoomChanged = false;
 
 }
 
@@ -1128,9 +1114,9 @@ void HorizView::setRenderInvalidImages(int index, VertView *vert)
 void HorizView::_renderGrids()
 {
   
-  if (!_renderFrame) {
-    return;
-  }
+  // if (!_renderFrame) {
+  //   return;
+  // }
   
   if(_gd.debug2) {
     fprintf(stderr,
@@ -1702,8 +1688,6 @@ void HorizView::zoomBackView()
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
             _zoomWorld.getXMaxWorld()); 
-  // _renderGrids();
-  // _renderMaps();
 }
 
 /*************************************************************************
@@ -1721,8 +1705,6 @@ void HorizView::zoomOutView()
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
             _zoomWorld.getXMaxWorld()); 
-  // _renderGrids();
-  // _renderMaps();
 }
 
 //////////////////////////////////////////////////
@@ -1737,8 +1719,7 @@ void HorizView::setXyZoom(double minY, double maxY,
   _gd.h_win.cmax_y = maxY;
   _gd.h_win.cmin_x = minX;
   _gd.h_win.cmax_x = maxX;
-  _renderGrids();
-  _renderMaps();
+  _zoomChanged = true;
 }
 
 /////////////////////////////////////////////////////////
@@ -1779,33 +1760,6 @@ void HorizView::setGrids(const bool enabled)
   _gridsEnabled = enabled;
   _manager.setOverlaysHaveChanged(true);
 }
-
-
-/*************************************************************************
- * backgroundColor()
- */
-
-// void HorizView::backgroundColor(const QColor &color)
-// {
-//   _backgroundBrush.setColor(color);
-//   QPalette new_palette = palette();
-//   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
-//   setPalette(new_palette);
-//   //   _renderMaps();
-// }
-
-
-/*************************************************************************
- * gridRingsColor()
- */
-
-// void HorizView::gridRingsColor(const QColor &color)
-// {
-//   LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
-//   _gridRingsColor = color;
-//   update();
-//   LOG(DEBUG_VERBOSE) << "exit";
-// }
 
 
 /*************************************************************************
@@ -1989,9 +1943,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     
     // render
     
-    _renderGrids();
-    _renderMaps();
-
   }
     
   // hide the rubber band
@@ -2022,7 +1973,6 @@ void HorizView::_handleMouseZoom()
                             _worldReleaseX, _worldReleaseY);
   
   updatePixelScales();
-  // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
@@ -2049,9 +1999,8 @@ void HorizView::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
   _pixmap = _pixmap.scaled(width(), height());
   updatePixelScales();
-  _renderGrids();
-  _renderMaps();
-
+  _sizeChanged = true;
+  
 }
 
 
@@ -2063,7 +2012,8 @@ void HorizView::resize(const int width, const int height)
 {
 
   setGeometry(0, 0, width, height);
-
+  _sizeChanged = true;
+  
 }
 
 //////////////////////////////////////////////////////////////
@@ -2077,6 +2027,7 @@ void HorizView::_resetWorld(int width, int height)
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
   _setGridSpacing();
+  _sizeChanged = true;
 
 }
 
@@ -2094,6 +2045,7 @@ void HorizView::_setTransform(const QTransform &transform)
 
   _fullTransform = transform;
   _zoomTransform = transform;
+
 }
   
 /*************************************************************************

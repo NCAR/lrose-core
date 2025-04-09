@@ -98,27 +98,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @brief Configure the CartWidget for world coords
    */
 
-  virtual void configureWorldCoords(int zoomLevel = 0);
-
-  /**
-   * @brief Specify the background color.
-   *
-   * @param[in] color     The background color.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  // void backgroundColor(const QColor &color);
-
-  /**
-   * @brief Specify the grid and rings color.
-   *
-   * @params[in] color   The grid/rings color.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  // void gridRingsColor(const QColor &color);
+  void configureWorldCoords(int zoomLevel = 0);
 
   /**
    * @brief Capture an image of the display.
@@ -295,6 +275,8 @@ class DLL_EXPORT HorizView : public QWidget
   int _invalidImagesFrameIndex;
   VertView *_vert;
 
+  bool _zoomChanged;
+  bool _sizeChanged;
   bool _gridsReady;
   bool _mapsReady;
   

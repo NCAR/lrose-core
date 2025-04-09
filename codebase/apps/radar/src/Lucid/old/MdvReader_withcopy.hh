@@ -65,6 +65,16 @@ public:
   
   MdvReader(QObject* parent = nullptr);
 
+#ifdef NOTNOW
+  // copy constructor
+
+  MdvReader(const MdvReader &rhs);
+
+  /// assignment
+  
+  MdvReader& operator=(const MdvReader &rhs);
+#endif
+  
   // is the data valid?
   
   bool isValidH() const;
@@ -205,7 +215,7 @@ public:
   // MDV Data class sets - One for horizontal, one for vertical
 
   DsMdvx h_mdvx;
-  // MdvxField h_mdvx_int16;
+  MdvxField h_mdvx_int16;
   Mdvx::master_header_t h_mhdr;	
   Mdvx::field_header_t h_fhdr;
   Mdvx::vlevel_header_t h_vhdr;
@@ -216,7 +226,7 @@ public:
   
   
   DsMdvx v_mdvx;
-  // MdvxField v_mdvx_int16;
+  MdvxField v_mdvx_int16;
   Mdvx::master_header_t v_mhdr;
   Mdvx::field_header_t v_fhdr;
   Mdvx::vlevel_header_t v_vhdr;
@@ -251,6 +261,12 @@ private:
   bool _timeListValid;
   double _vLevel;
   bool _readBusyH;
+
+#ifdef NOTNOW
+  // for copy constructor and operator=
+  
+  MdvReader &_copy(const MdvReader &rhs);
+#endif
 
   // private methods
 
