@@ -200,6 +200,7 @@ private:
 
   int _openRead(const string &path);
   void _close();
+  bool _checkForVolKeyword(const string &line);
 
   void _getFieldPaths(const string &primaryPath,
                       vector<string> &fileNames,

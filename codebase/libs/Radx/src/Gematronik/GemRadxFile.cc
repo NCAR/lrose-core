@@ -235,6 +235,15 @@ bool GemRadxFile::isGematronik(const string &path)
     _close();
     return false;
   }
+
+  // check is this a volume?
+  
+  if (_checkForVolKeyword(line)) {
+    _close();
+    return true;
+  }
+  
+  // check if the first line indicates xml version
   if (strstr(line, "xml") != NULL) {
     // first line is xml version, read next line
     if (fgets(line, 1024, _file) == NULL) {
@@ -244,17 +253,35 @@ bool GemRadxFile::isGematronik(const string &path)
   }
   _close();
 
-  if (strncmp(line, "<volume", 7) == 0) {
+  // check is this a volume?
+  
+  if (_checkForVolKeyword(line)) {
     return true;
-  } 
-  if (strncmp(line, "<volfile", 8) == 0) {
-    return true;
-  } 
+  }
   
   return false;
 
 }
 
+////////////////////////////////////////////////////////////
+// Check for volume keywords "<volume" or "<volfile"
+// Returns true on success, false on failure
+
+bool GemRadxFile::_checkForVolKeyword(const string &line)
+  
+{
+
+  if (line.find("<volume") == 0) {
+    return true;
+  } 
+  if (line.find("<volfile") == 0) {
+    return true;
+  }
+
+  return false;
+
+}
+  
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
