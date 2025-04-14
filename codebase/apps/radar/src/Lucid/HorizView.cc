@@ -285,12 +285,23 @@ void HorizView::paintEvent(QPaintEvent *event)
   int fieldNum = _gd.h_win.page;
 
   // check zoom
-  
-  if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
+
+  XyBox currentZoom(_zoomWorld.getYMinWorld(),
+                    _zoomWorld.getYMaxWorld(),
+                    _zoomWorld.getXMinWorld(),
+                    _zoomWorld.getXMaxWorld());
+  if (currentZoom != _zoomXy) {
+    _zoomWorld.setWorldLimits(_zoomXy.getMinX(),
+                              _zoomXy.getMinY(),
+                              _zoomXy.getMaxX(),
+                              _zoomXy.getMaxY());
+    _zoomChanged = true;
+  } else if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
                               _gd.h_win.cmax_x, _gd.h_win.cmax_y);
     _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
     _savedZooms.clear();
+    _zoomChanged = true;
   }
   
   // render data grids to grid image in WorldPlot
@@ -1091,7 +1102,7 @@ void HorizView::triggerGridRendering(int page, int index)
     _renderInvalidImages = false;
   }
   
-  update(); // call paint event
+  // update(); // call paint event
   
 }
   
@@ -1104,7 +1115,7 @@ void HorizView::setRenderInvalidImages(int index, VertView *vert)
   _renderInvalidImages = true;
   _invalidImagesFrameIndex = index;
   _vert = vert;
-  update(); // call paint event
+  // update(); // call paint event
 }
   
 /*************************************************************************
