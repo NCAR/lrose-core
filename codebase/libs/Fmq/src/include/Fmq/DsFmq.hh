@@ -387,8 +387,8 @@ protected:
     MemBuf buf;
   };
 
-// default implementation is 64-bit
-typedef writeData64 writeData;
+  // default implementation is 64-bit
+  typedef writeData64 writeData;
 
 
   deque<writeData *> _writeQueue;
