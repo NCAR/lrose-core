@@ -133,6 +133,7 @@ public:
   
   // destructor
 
+
   virtual ~DsFmqMsg();
   
   // clear all - overriding parent class

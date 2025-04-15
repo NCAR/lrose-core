@@ -604,7 +604,7 @@ void DsFmqMsg::BEtoInitInfo_64()
 void DsFmqMsg::BEfromInfo_64(msgInfo_64_t *info)
 {
   BE_from_array_32(info, sizeof(msgInfo_64_t) - 2*sizeof(si64));
-  BE_from_array_32(&(info->msgTime), 2*sizeof(si64));
+  BE_from_array_64(&(info->msgTime), 2*sizeof(si64));
 }
 
 void DsFmqMsg::BEtoInfo_64(msgInfo_64_t *info)
