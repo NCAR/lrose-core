@@ -730,6 +730,38 @@ int GemRadxFile::_readFields(const string &path)
       units = "dB";
       standardName = "clutter_correction_ratio";
       longName = "clutter_correction_ratio_from_horizontal_polarization";
+    } else if (fieldName.find("V1vu") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_1_vertical_polarization_uncorrected";
+    } else if (fieldName.find("V1u") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_1_horizontal_polarization_uncorrected";
+    } else if (fieldName.find("V1v") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_1_vertical_polarization";
+    } else if (fieldName.find("V1") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_1_horizontal_polarization";
+    } else if (fieldName.find("V2vu") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_2_vertical_polarization_uncorrected";
+    } else if (fieldName.find("V2u") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_2_horizontal_polarization_uncorrected";
+    } else if (fieldName.find("V2v") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_2_vertical_polarization";
+    } else if (fieldName.find("V2") != string::npos) {
+      units = "m/s";
+      standardName = "radial_velocity_of_scatterers_away_from_instrument";
+      longName = "staggered_velocity_2_horizontal_polarization";
     }
 
     // create input field object
@@ -803,12 +835,24 @@ void GemRadxFile::_checkSweepGeometry()
       GemInputField *inputField = _fields[ifield];
       const GemSweepField *sweepField = inputField->getSweepFields()[isweep];
       if (sweepField->getNAngles() != _nAngles[isweep]) {
-        cerr << "WARNING - GemRadxFile::_checkSweepGeometry" << endl;
-        cerr << "  sweep num: " << isweep << endl;
-        cerr << "    sweep field nAngles: " << sweepField->getNAngles() << endl;
-        cerr << "      does not match max nAngles: " << _nAngles[isweep] << endl;
-        cerr << "  ignoring invalid field: " << inputField->getFieldName() << endl;
-        inputField->setInvalid();
+        if ((sweepField->getNAngles() * 2 == _nAngles[isweep]) &&
+            (sweepField->getFieldName()[0] == 'V')) {
+          if (_debug) {
+            cerr << "WARNING - GemRadxFile::_checkSweepGeometry" << endl;
+            cerr << "  sweep num: " << isweep << endl;
+            cerr << "  field name: " << sweepField->getFieldName() << endl;
+            cerr << "  this is a dual PRF field" << endl;
+            cerr << "  vel data will be copied to adjacent rays" << endl;
+          }
+          inputField->setIsDualPrf(true);
+        } else {
+          cerr << "WARNING - GemRadxFile::_checkSweepGeometry" << endl;
+          cerr << "  sweep num: " << isweep << endl;
+          cerr << "    sweep field nAngles: " << sweepField->getNAngles() << endl;
+          cerr << "      does not match max nAngles: " << _nAngles[isweep] << endl;
+          cerr << "  ignoring invalid field: " << inputField->getFieldName() << endl;
+          inputField->setInvalid();
+        }
       }
       if (sweepField->getNGates() != _nGates[isweep]) {
         cerr << "WARNING - GemRadxFile::_checkSweepGeometry" << endl;

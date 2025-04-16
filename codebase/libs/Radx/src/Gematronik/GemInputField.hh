@@ -66,6 +66,11 @@ public:
   void setInvalid() { _isValid = false; }
   bool getIsValid() const { return _isValid; }
 
+  // field dualPrf? Set flag to indicate vel from DualPrf ops
+  
+  void setIsDualPrf(bool val) { _isDualPrf = val; }
+  bool getIsDualPrf() const { return _isDualPrf; }
+
   // get methods
 
   const string &getFileName() const { return _fileName; }
@@ -118,6 +123,7 @@ private:
   bool _debug;
   bool _verbose;
   bool _isValid;
+  bool _isDualPrf;
 
   string _xmlStr;
   string _errStr;
