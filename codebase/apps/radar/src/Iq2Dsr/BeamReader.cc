@@ -2166,6 +2166,9 @@ int BeamReader::_findBeamCenterPpi()
   // center of the data to the closest suitable az
   
   _az = _azIndex * angularRes;
+  if (!_params.center_indexed_beams_startin_at_zero) {
+    _az -= angularRes;
+  }
   
   if (_az >= 360.0) {
     _az -= 360;
@@ -2269,6 +2272,9 @@ int BeamReader::_findBeamCenterRhi()
   // center of the data to the closest suitable el
   
   _el = -180.0 + (_elIndex * angularRes);
+  if (!_params.center_indexed_beams_startin_at_zero) {
+    _el -= angularRes;
+  }
   
   // Check if the elevations at the center of the data straddle
   // the target elevation

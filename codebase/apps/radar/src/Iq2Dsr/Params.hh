@@ -903,6 +903,8 @@ public:
 
   tdrp_bool_t control_beam_indexing_from_time_series;
 
+  tdrp_bool_t center_indexed_beams_startin_at_zero;
+
   tdrp_bool_t discard_non_indexed_beams;
 
   tdrp_bool_t control_n_samples_from_time_series;
@@ -1394,7 +1396,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[322];
+  mutable TDRPtable _table[323];
 
   const char *_className;
 
