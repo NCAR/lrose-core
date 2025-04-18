@@ -2150,7 +2150,11 @@ int BeamReader::_findBeamCenterPpi()
 
   // compute azimuth index
   
-  _azIndex = (int) (midAz1 / angularRes + 0.5);
+  if (_params.center_indexed_beams_starting_at_zero) {
+    _azIndex = (int) (midAz1 / angularRes + 0.5);
+  } else {
+    _azIndex = (int) (midAz1 / angularRes);
+  }
   int nAz = (int) (360.0 / angularRes + 0.5);
   if (_azIndex == nAz) {
     _azIndex = 0;
@@ -2165,9 +2169,10 @@ int BeamReader::_findBeamCenterPpi()
   // compute target azimuth by rounding the azimuth at the
   // center of the data to the closest suitable az
   
-  _az = _azIndex * angularRes;
-  if (!_params.center_indexed_beams_startin_at_zero) {
-    _az -= angularRes;
+  if (_params.center_indexed_beams_starting_at_zero) {
+    _az = _azIndex * angularRes;
+  } else {
+    _az = (_azIndex + 0.5) * angularRes;
   }
   
   if (_az >= 360.0) {
@@ -2256,7 +2261,12 @@ int BeamReader::_findBeamCenterRhi()
   
   // compute elevation index
   
-  _elIndex = (int) ((midEl1 + 180.0) / angularRes + 0.5);
+  if (_params.center_indexed_beams_starting_at_zero) {
+    _elIndex = (int) ((midEl1 + 180.0) / angularRes + 0.5);
+  } else {
+    _elIndex = (int) ((midEl1 + 180.0) / angularRes);
+  }
+  
   int nEl = (int) (360.0 / angularRes + 0.5);
   if (_elIndex == nEl) {
     _elIndex = 0;
@@ -2271,9 +2281,10 @@ int BeamReader::_findBeamCenterRhi()
   // compute target elevation by rounding the elevation at the
   // center of the data to the closest suitable el
   
-  _el = -180.0 + (_elIndex * angularRes);
-  if (!_params.center_indexed_beams_startin_at_zero) {
-    _el -= angularRes;
+  if (_params.center_indexed_beams_starting_at_zero) {
+    _el = -180.0 + (_elIndex * angularRes);
+  } else {
+    _el = -180.0 + ((_elIndex + 0.5) * angularRes);
   }
   
   // Check if the elevations at the center of the data straddle

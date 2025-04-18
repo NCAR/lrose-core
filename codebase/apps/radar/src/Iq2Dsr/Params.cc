@@ -1716,15 +1716,15 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'center_indexed_beams_startin_at_zero'
+    // Parameter 'center_indexed_beams_starting_at_zero'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("center_indexed_beams_startin_at_zero");
+    tt->param_name = tdrpStrDup("center_indexed_beams_starting_at_zero");
     tt->descr = tdrpStrDup("Center indexed beams on 0 deg in azimuth and elevation.");
     tt->help = tdrpStrDup("If true, the first indexed beam will be centered on 0 deg. If false, the edge of the first beam will be on 0, and it will be centered on indexed_resolution / 2.0. The latter is what NEXRAD does, so for a dwell resolution of 1.0 the center of the first beam will be at an azimuth of 0.5 deg. For super-resolution with a beam resolution of 0.5 the first beam will be centered on 0.25 deg.");
-    tt->val_offset = (char *) &center_indexed_beams_startin_at_zero - &_start_;
+    tt->val_offset = (char *) &center_indexed_beams_starting_at_zero - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

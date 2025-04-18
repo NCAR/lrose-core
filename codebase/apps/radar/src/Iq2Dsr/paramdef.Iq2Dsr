@@ -636,7 +636,7 @@ paramdef boolean {
   p_default = true;
   p_descr = "Center indexed beams on 0 deg in azimuth and elevation.";
   p_help = "If true, the first indexed beam will be centered on 0 deg. If false, the edge of the first beam will be on 0, and it will be centered on indexed_resolution / 2.0. The latter is what NEXRAD does, so for a dwell resolution of 1.0 the center of the first beam will be at an azimuth of 0.5 deg. For super-resolution with a beam resolution of 0.5 the first beam will be centered on 0.25 deg.";
-} center_indexed_beams_startin_at_zero;
+} center_indexed_beams_starting_at_zero;
 
 paramdef boolean {
   p_default = false;

@@ -903,7 +903,7 @@ public:
 
   tdrp_bool_t control_beam_indexing_from_time_series;
 
-  tdrp_bool_t center_indexed_beams_startin_at_zero;
+  tdrp_bool_t center_indexed_beams_starting_at_zero;
 
   tdrp_bool_t discard_non_indexed_beams;
 
