@@ -51,6 +51,7 @@
 #include <cstdio>
 #include <sys/stat.h>
 #include <algorithm>
+#include <iomanip>
 #include "GemInputField.hh"
 using namespace std;
 
@@ -964,7 +965,7 @@ int GemRadxFile::_loadSweep(size_t sweepNum,
   double dSecs = 0.0;
 
   for (size_t iangle = 0; iangle < nAngles; iangle++) {
-    
+
     // create new ray
     
     RadxRay *ray = new RadxRay;
@@ -1076,7 +1077,7 @@ int GemRadxFile::_loadSweep(size_t sweepNum,
 
       double samplingRatio =
         (double) sweep.getNSamples() / (double) sweepField0.getNSamples();
-      
+        
       // create field
 
       RadxField *rfield = new RadxField(field.getFieldName(), field.getUnits());
@@ -1104,15 +1105,34 @@ int GemRadxFile::_loadSweep(size_t sweepNum,
       const vector<double> &anglesField = sweepField.getAngles();
       size_t nAnglesField = sweepField.getNAngles();
       size_t angleIndex = iangle;
-      for (size_t jangle = 0; jangle < nAnglesField; jangle++) {
-        double angleField = anglesField[jangle];
-        double angleDiff = fabs(angleField0 - angleField);
-        if (angleDiff > 180.0) {
-          angleDiff = fabs(angleDiff - 360.0);
+
+      if (field.getIsDualPrf()) {
+        // handle dual prt field
+        // find ray with min angle diff
+        double minDiff = 9999;
+        for (size_t jangle = 0; jangle < nAnglesField; jangle++) {
+          double angleField = anglesField[jangle];
+          double angleDiff = fabs(angleField0 - angleField);
+          if (angleDiff > 180.0) {
+            angleDiff = fabs(angleDiff - 360.0);
+          }
+          if (angleDiff < minDiff) {
+            angleIndex = jangle;
+            minDiff = angleDiff;
+          }
         }
-        if (angleDiff < 0.1) {
-          angleIndex = jangle;
-          break;
+      } else {
+        // non-dual prt field - the normal case
+        for (size_t jangle = 0; jangle < nAnglesField; jangle++) {
+          double angleField = anglesField[jangle];
+          double angleDiff = fabs(angleField0 - angleField);
+          if (angleDiff > 180.0) {
+            angleDiff = fabs(angleDiff - 360.0);
+          }
+          if (angleDiff < 0.1) {
+            angleIndex = jangle;
+            break;
+          }
         }
       }
         
