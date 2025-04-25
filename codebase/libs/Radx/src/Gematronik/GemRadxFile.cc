@@ -836,7 +836,8 @@ void GemRadxFile::_checkSweepGeometry()
       GemInputField *inputField = _fields[ifield];
       const GemSweepField *sweepField = inputField->getSweepFields()[isweep];
       if (sweepField->getNAngles() != _nAngles[isweep]) {
-        if ((sweepField->getNAngles() * 2 == _nAngles[isweep]) &&
+        double nAngleRatio = (double) sweepField->getNAngles() / (double) _nAngles[isweep];
+        if ((nAngleRatio > 0.48 && nAngleRatio < 0.52) &&
             (sweepField->getFieldName()[0] == 'V')) {
           if (_debug) {
             cerr << "WARNING - GemRadxFile::_checkSweepGeometry" << endl;
