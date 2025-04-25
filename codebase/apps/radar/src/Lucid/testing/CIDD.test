@@ -100,17 +100,6 @@ field_list = {
 #############################
 # WIDE AREA PRODUCTS
 
-# MRMS mosaic
-
-MRMS_DBZ_3D      MRMS_DBZ_3D      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
-MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
-MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
-3HR_ACCUM_PID      3HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
-3HR_ACCUM_HYBRID   3HR_ACCUM_HYBRID   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_HYBRID  precip_accum.colors  mm  -5 80 5 radial 1 0
-3HR_ACCUM_Z_ZDR    3HR_ACCUM_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_Z_ZDR   precip_accum.colors  mm  -5 80 5 radial 1 0
-3HR_ACCUM_ZH       3HR_ACCUM_ZH       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_ZH      precip_accum.colors  mm  -5 80 5 radial 1 0
-24HR_ACCUM_PID      24HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_24hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
-
 # SURFACE data, LTG rate
 
 Vis   SAT_Vis  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/sat/goes13_1km?use_http=true&gvar_ch1  sat_cloud.colors  albedo   -5   80  5  dcont   1 0
@@ -121,6 +110,17 @@ Temp  SURF_Temp  mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=
 DewPt SURF_DewPt mdvp:://front.eol.ucar.edu:8080:pecan/mdv/surf_interp?use_http=true&DewPoint    temp.colors m -5 80 5 dcont 1 0
 RUC-temp   RUC-temp   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&TMP  temp.colors   C   -5   80  5  dcont   1 0
 RUC-RH     RUC-RH     mdvp:://front.eol.ucar.edu:8080:pecan/mdv/ruc?use_http=true&RH   rh.colors   %   -5   80  5  dcont   1 0
+
+# MRMS mosaic
+
+MRMS_DBZ_3D      MRMS_DBZ_3D      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
+MRMS_DBZ_COMP_3D MRMS_DBZ_COMP_3D mdvp::composite//front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_mosaic?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 cart 1 0
+MRMS_DBZ_COMP_2D MRMS_DBZ_COMP_2D mdvp:://front.eol.ucar.edu:8080:pecan/mdv/radarCart/mrms_comp?use_http=true&DBZ       dbz.colors   dBZ -5 80 5 dcont,comp 1 0
+3HR_ACCUM_PID      3HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_HYBRID   3HR_ACCUM_HYBRID   mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_HYBRID  precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_Z_ZDR    3HR_ACCUM_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_Z_ZDR   precip_accum.colors  mm  -5 80 5 radial 1 0
+3HR_ACCUM_ZH       3HR_ACCUM_ZH       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_3hr?use_http=true&ACCUM_ZH      precip_accum.colors  mm  -5 80 5 radial 1 0
+24HR_ACCUM_PID      24HR_ACCUM_PID      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/qpe_accum_24hr?use_http=true&ACCUM_PID     precip_accum.colors  mm  -5 80 5 radial 1 0
 
 #############################
 # NEXRAD RADIAL MOMENTS

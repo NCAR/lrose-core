@@ -1102,7 +1102,7 @@ void HorizView::triggerGridRendering(int page, int index)
     _renderInvalidImages = false;
   }
   
-  // update(); // call paint event
+  update(); // call paint event
   
 }
   
@@ -1115,7 +1115,7 @@ void HorizView::setRenderInvalidImages(int index, VertView *vert)
   _renderInvalidImages = true;
   _invalidImagesFrameIndex = index;
   _vert = vert;
-  // update(); // call paint event
+  update(); // call paint event
 }
   
 /*************************************************************************
@@ -1731,6 +1731,7 @@ void HorizView::setXyZoom(double minY, double maxY,
   _gd.h_win.cmin_x = minX;
   _gd.h_win.cmax_x = maxX;
   _zoomChanged = true;
+  update();
 }
 
 /////////////////////////////////////////////////////////
@@ -1938,7 +1939,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     emit locationClicked(_worldClickX, _worldClickY, closestRay);
     
-    // update();
+    update();
 
   } else {
 
