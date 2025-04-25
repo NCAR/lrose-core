@@ -44,6 +44,7 @@
 #include <toolsa/utim.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/sincos.h>
+#include <toolsa/pjg_flat.h>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
 
@@ -3319,14 +3320,23 @@ void WorldPlot::drawRangeRings(int fieldNum,
   // render range rings and az line
   
   if (fixedRingsEnabled) {
-
     if (_params.plot_fixed_rings_at_origin) {
       _drawRangeRings(painter,
                       _params.proj_origin_lat,
                       _params.proj_origin_lon,
                       ringSpacing);
     }
-    
+  }
+  
+  if (dataRingsEnabled) {
+    if (mr->isRadar) {
+      cerr << "RRRRRRRRRRRRRRR is radar, name: " << mr->radarParams.radarName << endl;
+      cerr << "RRRRRRRRRRRRRRR lat, lon: " << mr->radarParams.latitude << ", " << mr->radarParams.longitude << endl;
+      _drawRangeRings(painter,
+                      mr->radarParams.latitude,
+                      mr->radarParams.longitude,
+                      ringSpacing);
+    }
   }
   
 }
@@ -3350,14 +3360,16 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   double originX, originY;
   _proj.latlon2xy(originLat, originLon, originX, originY);
   
-  // Set the ring color
+  cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
+    
+    // Set the ring color
 
   QPen pen = painter.pen();
   pen.setWidth(0);
   pen.setColor(_params.range_rings_color);
   painter.setPen(_params.range_rings_color);
 
-  // precompute sin/cos values
+  // precompute sin/cos values for each az angle
 
   vector<double> sinVals, cosVals;
   for (int iaz = 0; iaz <= 360; iaz++) {
@@ -3373,18 +3385,23 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   while (ringRange <= _params.max_ring_range) {
     QPainterPath path;
     for (int iaz = 0; iaz <= 360; iaz++) {
-      double xx = originX + ringRange * sinVals[iaz];
-      double yy = originY + ringRange * cosVals[iaz];
+      double dx = ringRange * sinVals[iaz];
+      double dy = ringRange * cosVals[iaz];
+      double lat2, lon2;
+      PJGLatLonPlusDxDy(originLat, originLon, dx, dy, &lat2, &lon2);
+      double xx2, yy2;
+      _proj.latlon2xy(lat2, lon2, xx2, yy2);
+      cerr << "RRRRRRRRRRRR iaz, xx2, yy2: " << iaz << ", " << xx2 << ", " << yy2 << endl;
       if (iaz == 0) {
-        path.moveTo(xx, yy);
+        path.moveTo(xx2, yy2);
       } else {
-        path.lineTo(xx, yy);
+        path.lineTo(xx2, yy2);
       }
     }
     painter.drawPath(path);
     ringRange += ringSpacing;
   }
-  
+
   // Draw the labels
   
   QFont font = painter.font();

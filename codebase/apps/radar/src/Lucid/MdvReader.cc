@@ -106,6 +106,8 @@ MdvReader::MdvReader(QObject* parent) :
   MEM_zero(v_mhdr);
   MEM_zero(v_fhdr);
   MEM_zero(v_vhdr);
+
+  isRadar = false;
   
   _vLevelReq = -9999.0;
   _validH = false;
@@ -286,6 +288,15 @@ int MdvReader::getHorizPlane()
       }
     } // if (hfld)
   } // if (iret == 0)
+
+  // get radar info if applicable
+  
+  if (mdvxRadar.loadFromMdvx(h_mdvx) == 0) {
+    isRadar = true;
+    radarParams = mdvxRadar.getRadarParams();
+  } else {
+    isRadar = false;
+  }
 
   return 0;
   

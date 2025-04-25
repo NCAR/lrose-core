@@ -44,6 +44,7 @@
 #include <toolsa/mem.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
+#include <Mdv/MdvxRadar.hh>
 #include <qtplot/ColorMap.hh>
 
 #include "GlobalData.hh"
@@ -214,12 +215,19 @@ public:
   Mdvx::field_header_t ds_fhdr; // Data Set's Field header
   Mdvx::vlevel_header_t ds_vhdr; // Vertical height headers
   
-  
   DsMdvx v_mdvx;
   // MdvxField v_mdvx_int16;
   Mdvx::master_header_t v_mhdr;
   Mdvx::field_header_t v_fhdr;
   Mdvx::vlevel_header_t v_vhdr;
+
+  // radar info if applicable
+
+  MdvxRadar mdvxRadar;
+  DsRadarParams radarParams;
+  bool isRadar;
+
+  // color scale
   
   ColorMap colorMap;
 
