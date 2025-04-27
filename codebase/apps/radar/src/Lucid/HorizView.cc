@@ -57,11 +57,11 @@ HorizView::HorizView(QWidget* parent,
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _selectedField(0),
-        _gridsEnabled(false),
-        _ringsFixedEnabled(false),
-        _ringsDataDrivenEnabled(false),
-        _rubberBand(nullptr),
-        _ringSpacing(10.0)
+        // _gridsEnabled(false),
+        // _ringsFixedEnabled(false),
+        // _ringsDataDrivenEnabled(false),
+        _rubberBand(nullptr)
+        // _ringSpacing(10.0)
         
 {
 
@@ -212,7 +212,7 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _setGridSpacing();
+  // _setGridSpacing();
 
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
@@ -333,12 +333,9 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   // render the range rings
   
-  if (_ringsFixedEnabled || _ringsDataDrivenEnabled) {
+  if (_params.plot_range_rings_fixed || _params.plot_range_rings_from_data) {
     MdvReader *mr = _gd.mread[fieldNum];
-    _zoomWorld.drawRangeRings(fieldNum, mr,
-                              _ringsFixedEnabled,
-                              _ringsDataDrivenEnabled,
-                              _ringSpacing);
+    _zoomWorld.drawRangeRingsHoriz(fieldNum, mr);
     painter.drawImage(0, 0, *_zoomWorld.getRingsImage());
   }
   
@@ -358,10 +355,10 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
   _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
   _zoomWorld.setGridColor(_params.horiz_grid_color);
-  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _gridsEnabled);
+  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
   _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
   _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _gridsEnabled);
+  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
   
   // draw the color scale
 
@@ -468,6 +465,8 @@ const RadxRay *HorizView::_getClosestRay(double x_km, double y_km)
   
 }
 
+#ifdef JUNK
+
 /*************************************************************************
  * _setGridSpacing()
  */
@@ -506,8 +505,6 @@ void HorizView::_setGridSpacing()
   }
 
 }
-
-#ifdef JUNK
 
 /*************************************************************************
  * _drawOverlays()
@@ -767,7 +764,7 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
   
-  if (!_ringsFixedEnabled && !_ringsDataDrivenEnabled) {
+  if (!_params.plot_range_rings_fixed && !_params.plot_range_rings_from_data) {
     return;
   }
   
@@ -821,7 +818,7 @@ void HorizView::_drawRingsAndAzLines(QPainter &painter)
   // a
   // // Draw the grid
   
-  // if (_ringSpacing > 0.0 && _gridsEnabled)  {
+  // if (_ringSpacing > 0.0 && _params.horiz_grids_on_at_startup)  {
 
   //   // Set up the painter
     
@@ -1694,7 +1691,7 @@ void HorizView::zoomBackView()
     _isZoomed = false;
   }
   _setTransform(_zoomWorld.getTransform());
-  _setGridSpacing();
+  // _setGridSpacing();
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
@@ -1711,7 +1708,7 @@ void HorizView::zoomOutView()
   _savedZooms.clear();
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _setGridSpacing();
+  // _setGridSpacing();
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
@@ -1752,13 +1749,13 @@ bool HorizView::checkForZoomChange()
 
 void HorizView::setRingsFixed(const bool enabled)
 {
-  _ringsFixedEnabled = enabled;
+  _params.plot_range_rings_fixed = (enabled?pTRUE:pFALSE);
   _manager.setOverlaysHaveChanged(true);
 }
 
 void HorizView::setRingsDataDriven(const bool enabled)
 {
-  _ringsDataDrivenEnabled = enabled;
+  _params.plot_range_rings_from_data = (enabled?pTRUE:pFALSE);
   _manager.setOverlaysHaveChanged(true);
 }
 
@@ -1769,7 +1766,7 @@ void HorizView::setRingsDataDriven(const bool enabled)
 
 void HorizView::setGrids(const bool enabled)
 {
-  _gridsEnabled = enabled;
+  _params.horiz_grids_on_at_startup = (enabled?pTRUE:pFALSE);
   _manager.setOverlaysHaveChanged(true);
 }
 
@@ -1987,7 +1984,7 @@ void HorizView::_handleMouseZoom()
   updatePixelScales();
   
   _setTransform(_zoomWorld.getTransform());
-  _setGridSpacing();
+  // _setGridSpacing();
   
   // enable unzooms
   
@@ -2038,7 +2035,7 @@ void HorizView::_resetWorld(int width, int height)
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
-  _setGridSpacing();
+  // _setGridSpacing();
   _sizeChanged = true;
 
 }

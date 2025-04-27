@@ -3950,28 +3950,40 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'range_ring_spacing'
+    // Parameter 'range_ring_spacing_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_spacing");
+    tt->param_name = tdrpStrDup("range_ring_spacing_km");
     tt->descr = tdrpStrDup("Spacing between range rings (km).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_spacing - &_start_;
+    tt->val_offset = (char *) &range_ring_spacing_km - &_start_;
     tt->single_val.d = 50;
     tt++;
     
-    // Parameter 'max_ring_range'
+    // Parameter 'max_ring_range_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_ring_range");
+    tt->param_name = tdrpStrDup("max_ring_range_km");
     tt->descr = tdrpStrDup("Maximum range ring (km)");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &max_ring_range - &_start_;
+    tt->val_offset = (char *) &max_ring_range_km - &_start_;
     tt->single_val.d = 500;
+    tt++;
+    
+    // Parameter 'min_pixels_per_range_ring'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_pixels_per_range_ring");
+    tt->descr = tdrpStrDup("Minimum ring spacing in pixels.");
+    tt->help = tdrpStrDup("If there are fewer than this number of pixels per ring, the rings are not shown.");
+    tt->val_offset = (char *) &min_pixels_per_range_ring - &_start_;
+    tt->single_val.i = 15;
     tt++;
     
     // Parameter 'range_ring_follows_data'
@@ -4022,40 +4034,16 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'azimuth_lines'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_lines");
-    tt->descr = tdrpStrDup("Draw azimuth lines for a radar location.");
-    tt->help = tdrpStrDup("These complement range rings, to provide guidance on azimuths for radar gates.");
-    tt->val_offset = (char *) &azimuth_lines - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_interval'
+    // Parameter 'azimuth_spacing_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_interval");
-    tt->descr = tdrpStrDup("Interval for azimuth lines.");
-    tt->help = tdrpStrDup("If azimuth lines are on.");
-    tt->val_offset = (char *) &azimuth_interval - &_start_;
+    tt->param_name = tdrpStrDup("azimuth_spacing_deg");
+    tt->descr = tdrpStrDup("Spacing for azimuth lines plotted with range rings (deg).");
+    tt->help = tdrpStrDup("The azimuth lines start at 0, and rotate clockwise from there.");
+    tt->val_offset = (char *) &azimuth_spacing_deg - &_start_;
     tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'azimuth_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_radius");
-    tt->descr = tdrpStrDup("Max radius for azimuth lines.");
-    tt->help = tdrpStrDup("If azimuth lines are on.");
-    tt->val_offset = (char *) &azimuth_radius - &_start_;
-    tt->single_val.d = 200;
     tt++;
     
     // Parameter 'clip_overlay_fields'

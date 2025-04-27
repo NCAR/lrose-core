@@ -1724,12 +1724,18 @@ paramdef boolean {
 paramdef double {
   p_default = 50;
   p_descr = "Spacing between range rings (km).";
-} range_ring_spacing;
+} range_ring_spacing_km;
 
 paramdef double {
   p_default = 500;
   p_descr = "Maximum range ring (km)";
-} max_ring_range;
+} max_ring_range_km;
+
+paramdef int {
+  p_default = 15;
+  p_descr = "Minimum ring spacing in pixels.";
+  p_help = "If there are fewer than this number of pixels per ring, the rings are not shown.";
+} min_pixels_per_range_ring;
 
 paramdef boolean {
   p_default = FALSE;
@@ -1755,23 +1761,11 @@ paramdef boolean {
   p_help = "Label the range for each ring.";
 } range_ring_labels;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Draw azimuth lines for a radar location.";
-  p_help = "These complement range rings, to provide guidance on azimuths for radar gates.";
-} azimuth_lines;
-
 paramdef double {
   p_default = 30;
-  p_descr = "Interval for azimuth lines.";
-  p_help = "If azimuth lines are on.";
-} azimuth_interval;
-
-paramdef double {
-  p_default = 200;
-  p_descr = "Max radius for azimuth lines.";
-  p_help = "If azimuth lines are on.";
-} azimuth_radius;
+  p_descr = "Spacing for azimuth lines plotted with range rings (deg).";
+  p_help = "The azimuth lines start at 0, and rotate clockwise from there.";
+} azimuth_spacing_deg;
 
 paramdef boolean {
   p_default = FALSE;

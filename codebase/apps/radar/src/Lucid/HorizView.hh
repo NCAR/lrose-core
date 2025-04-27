@@ -300,12 +300,12 @@ class DLL_EXPORT HorizView : public QWidget
   
   // @brief True if the grids display is enabled.
   
-  bool _gridsEnabled;
+  // bool _gridsEnabled;
   
   // True if the rings are enabled.
   
-  bool _ringsFixedEnabled;
-  bool _ringsDataDrivenEnabled;
+  // bool _ringsFixedEnabled;
+  // bool _ringsDataDrivenEnabled;
   
   /**
    * @brief This will create labels wiith nicely scaled values and
@@ -319,7 +319,7 @@ class DLL_EXPORT HorizView : public QWidget
    *        labelling of the range rings
    */
 
-  double _maxRangeKm;
+  // double _maxRangeKm;
 
   // archive mode
 
@@ -362,7 +362,7 @@ class DLL_EXPORT HorizView : public QWidget
    *        zoom.
    */
 
-  double _ringSpacing;
+  // double _ringSpacing;
   
   /**
    * @brief The width of the color scale
@@ -478,7 +478,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  virtual void _setGridSpacing();
+  // virtual void _setGridSpacing();
 
   // draw text in screen coords
 

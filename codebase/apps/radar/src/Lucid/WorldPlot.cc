@@ -177,6 +177,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   _xPixelsPerWorld = rhs._xPixelsPerWorld;
   _yPixelsPerWorld = rhs._yPixelsPerWorld;
+  _xPixelsPerKm = rhs._xPixelsPerKm;
+  _yPixelsPerKm = rhs._yPixelsPerKm;
   
   _xMinWindow = rhs._xMinWindow;
   _xMaxWindow = rhs._xMaxWindow;
@@ -409,6 +411,8 @@ void WorldPlot::setYscaleFromXscale()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
+  _computePixPerKm();
+  
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -440,6 +444,8 @@ void WorldPlot::setXscaleFromYscale()
   _yMinWindow = getYWorld(_yPixOffset);
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
+
+  _computePixPerKm();
 
 }
 
@@ -2260,6 +2266,25 @@ string WorldPlot::getAxisLabel(double delta, double val)
     
 }
 
+//////////////////////////////////////////////////////////
+// update X and Y pixel scales to minimize distortion
+
+void WorldPlot::_computePixPerKm()
+{
+
+  if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
+    double meanLat = (_yMaxWorld + _yMinWorld) / 2.0;
+    double aspectCorr = cos(meanLat * DEG_TO_RAD);
+    _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
+    _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
+    cerr << "AAAAAAAAAAAAA aspectCorr: " << aspectCorr << endl;
+  } else {
+    _xPixelsPerKm = _xPixelsPerWorld;
+    _yPixelsPerKm = _yPixelsPerWorld;
+  }
+
+}
+
 ///////////////////////////////////////
 // compute transform from basic values
                               
@@ -2288,6 +2313,8 @@ void WorldPlot::_computeTransform()
   _yMinWindow = getYWorld(_yPixOffset);
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
+
+  _computePixPerKm();
 
 }
 
@@ -3295,16 +3322,18 @@ void WorldPlot::drawMaps()
 /////////////////////////////////////////////////////
 // draw the overlays - maps, range rings etc.
 
-void WorldPlot::drawRangeRings(int fieldNum,
-                               MdvReader *mr,
-                               bool fixedRingsEnabled,
-                               bool dataRingsEnabled,
-                               double ringSpacing)
+void WorldPlot::drawRangeRingsHoriz(int fieldNum,
+                                    MdvReader *mr)
   
 {
-
-  ringSpacing = _params.range_ring_spacing;
-  cerr << "====>> draw range rings, fieldNum: " << fieldNum << endl;
+  
+  double nPixPerRing = _xPixelsPerKm * _params.range_ring_spacing_km;
+  cerr << "AAAAAAAAAAAAA ====>> draw range rings, fieldNum: " << fieldNum << endl;
+  cerr << "AAAAAAAAAAAAA ====>> _xPixelsPerKm, nPixPerRing: " << _xPixelsPerKm << ", " << nPixPerRing << endl;
+  if (nPixPerRing< _params.min_pixels_per_range_ring) {
+    return;
+  }
+  
   
   // check that overlay canvas is the correct size
   
@@ -3320,24 +3349,22 @@ void WorldPlot::drawRangeRings(int fieldNum,
   
   // render range rings and az line
   
-  if (fixedRingsEnabled) {
+  if (_params.plot_range_rings_fixed) {
     if (_params.plot_fixed_rings_at_origin) {
-      _drawRangeRings(painter,
-                      _params.proj_origin_lat,
-                      _params.proj_origin_lon,
-                      ringSpacing);
+      _drawRangeRingsHoriz(painter,
+                           _params.proj_origin_lat,
+                           _params.proj_origin_lon);
     }
   }
   
-  if (dataRingsEnabled) {
+  if (_params.plot_range_rings_from_data) {
     if (mr->isRadar) {
       cerr << "RRRRRRRRRRRRRRR is radar, name: " << mr->radarParams.radarName << endl;
       mr->radarParams.print(cerr);
       cerr << "RRRRRRRRRRRRRRR lat, lon: " << mr->radarParams.latitude << ", " << mr->radarParams.longitude << endl;
-      _drawRangeRings(painter,
-                      mr->radarParams.latitude,
-                      mr->radarParams.longitude,
-                      ringSpacing);
+      _drawRangeRingsHoriz(painter,
+                           mr->radarParams.latitude,
+                           mr->radarParams.longitude);
     }
   }
   
@@ -3349,10 +3376,9 @@ void WorldPlot::drawRangeRings(int fieldNum,
  * draw rings for polar type data fields
  */
 
-void WorldPlot::_drawRangeRings(QPainter &painter,
-                                double originLat,
-                                double originLon,
-                                double ringSpacing)
+void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
+                                     double originLat,
+                                     double originLon)
 {
 
   painter.save();
@@ -3383,9 +3409,9 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
     
   // Draw rings
   
-  double ringRange = ringSpacing;
+  double ringRange = _params.range_ring_spacing_km;
   vector<double> labelX, labelY;
-  while (ringRange <= _params.max_ring_range) {
+  while (ringRange <= _params.max_ring_range_km) {
     QPainterPath path;
     for (size_t iaz = 0; iaz < sinVals.size(); iaz++) {
       double dx = ringRange * sinVals[iaz];
@@ -3408,7 +3434,7 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
     painter.save();
     painter.drawPath(path);
     painter.restore();
-    ringRange += ringSpacing;
+    ringRange += _params.range_ring_spacing_km;
   }
 
   // Draw the labels
@@ -3420,8 +3446,8 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
 
   for (size_t ilabel = 0; ilabel < labelX.size(); ilabel++) {
     int ringNum = ilabel / 4;
-    double ringRange = (ringNum + 1) * ringSpacing;
-    const string &labelStr = _scaledLabel.scale(ringRange);
+    double range = (ringNum + 1) * _params.range_ring_spacing_km;
+    const string &labelStr = _scaledLabel.scale(range);
     drawText(painter, labelStr, labelX[ilabel], labelY[ilabel], Qt::AlignCenter);
   }
 
@@ -3444,13 +3470,13 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   
   // Draw the lines along the X and Y axes
   
-  drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
-  drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
+  drawLine(painter, 0, -_params.max_ring_range_km, 0, _params.max_ring_range_km);
+  drawLine(painter, -_params.max_ring_range_km, 0, _params.max_ring_range_km, 0);
   
   // Draw the lines along the 30 degree lines
   
-  double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
-  double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
+  double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range_km;
+  double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range_km;
   
   drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
   drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);

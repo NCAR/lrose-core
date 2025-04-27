@@ -591,11 +591,8 @@ public:
   
   void drawMaps();
   
-  void drawRangeRings(int fieldNum,
-                      MdvReader *mr,
-                      bool fixedRingsEnabled,
-                      bool dataRingsEnabled,
-                      double ringSpacing);
+  void drawRangeRingsHoriz(int fieldNum,
+                           MdvReader *mr);
   
   // get images after rendering
   
@@ -657,10 +654,12 @@ private:
   int _xMaxPixel;
   int _yMaxPixel;
 
-  // scale in pixels per world coords
+  // scale in pixels per world coords and km
 
   double _xPixelsPerWorld;
   double _yPixelsPerWorld;
+  double _xPixelsPerKm;
+  double _yPixelsPerKm;
 
   // world coord limits of the window
 
@@ -725,6 +724,8 @@ private:
   // affine transform
 
   QTransform _transform;
+
+  void _computePixPerKm();
   void _computeTransform();
 
   // copy method for assignment and copy constructor
@@ -735,10 +736,9 @@ private:
   
   void _createImage(QImage* &image);
   
-  void _drawRangeRings(QPainter &painter,
-                       double originLat,
-                       double originLon,
-                       double ringSpacing);
+  void _drawRangeRingsHoriz(QPainter &painter,
+                            double originLat,
+                            double originLon);
   
 };
 

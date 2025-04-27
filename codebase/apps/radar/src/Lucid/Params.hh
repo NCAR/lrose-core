@@ -1044,9 +1044,11 @@ public:
 
   tdrp_bool_t range_rings_for_radar_only;
 
-  double range_ring_spacing;
+  double range_ring_spacing_km;
 
-  double max_ring_range;
+  double max_ring_range_km;
+
+  int min_pixels_per_range_ring;
 
   tdrp_bool_t range_ring_follows_data;
 
@@ -1056,11 +1058,7 @@ public:
 
   tdrp_bool_t range_ring_labels;
 
-  tdrp_bool_t azimuth_lines;
-
-  double azimuth_interval;
-
-  double azimuth_radius;
+  double azimuth_spacing_deg;
 
   tdrp_bool_t clip_overlay_fields;
 
@@ -1350,7 +1348,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[427];
+  mutable TDRPtable _table[426];
 
   const char *_className;
 
