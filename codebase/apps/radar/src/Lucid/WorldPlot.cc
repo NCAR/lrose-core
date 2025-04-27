@@ -3332,6 +3332,7 @@ void WorldPlot::drawRangeRings(int fieldNum,
   if (dataRingsEnabled) {
     if (mr->isRadar) {
       cerr << "RRRRRRRRRRRRRRR is radar, name: " << mr->radarParams.radarName << endl;
+      mr->radarParams.print(cerr);
       cerr << "RRRRRRRRRRRRRRR lat, lon: " << mr->radarParams.latitude << ", " << mr->radarParams.longitude << endl;
       _drawRangeRings(painter,
                       mr->radarParams.latitude,
@@ -3383,9 +3384,10 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   // Draw rings
   
   double ringRange = ringSpacing;
+  vector<double> labelX, labelY;
   while (ringRange <= _params.max_ring_range) {
     QPainterPath path;
-    for (size_t iaz = 0; iaz <= sinVals.size(); iaz++) {
+    for (size_t iaz = 0; iaz < sinVals.size(); iaz++) {
       double dx = ringRange * sinVals[iaz];
       double dy = ringRange * cosVals[iaz];
       double lat2, lon2;
@@ -3398,12 +3400,10 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
       } else {
         path.lineTo(point);
       }
-      // cerr << "RRRRRRRRRRRR iaz, xx2, yy2: " << iaz << ", " << xx2 << ", " << yy2 << endl;
-      // if (iaz == 0) {
-      //   path.moveTo(xx2, yy2);
-      // } else {
-      //   path.lineTo(xx2, yy2);
-      // }
+      if (iaz == 45 ||iaz == 135 || iaz == 225 || iaz == 315) {
+        labelX.push_back(xx2);
+        labelY.push_back(yy2);
+      }
     }
     painter.save();
     painter.drawPath(path);
@@ -3417,17 +3417,24 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   font.setPointSizeF(_params.range_ring_label_font_size);
   painter.setFont(font);
   // painter.setWindow(0, 0, width(), height());
-  
-  ringRange = ringSpacing;
-  while (ringRange <= _params.max_ring_range) {
-    double labelPos = ringRange * Constants::LUCID_SIN_45;
+
+  for (size_t ilabel = 0; ilabel < labelX.size(); ilabel++) {
+    int ringNum = ilabel / 4;
+    double ringRange = (ringNum + 1) * ringSpacing;
     const string &labelStr = _scaledLabel.scale(ringRange);
-    drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-    ringRange += ringSpacing;
+    drawText(painter, labelStr, labelX[ilabel], labelY[ilabel], Qt::AlignCenter);
   }
+
+  // ringRange = ringSpacing;
+  // while (ringRange <= _params.max_ring_range) {
+  //   double labelPos = ringRange * Constants::LUCID_SIN_45;
+  //   const string &labelStr = _scaledLabel.scale(ringRange);
+  //   drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+  //   drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+  //   drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+  //   drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+  //   ringRange += ringSpacing;
+  // }
   
   // Draw the azimuth lines
   
