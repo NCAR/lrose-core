@@ -3303,6 +3303,7 @@ void WorldPlot::drawRangeRings(int fieldNum,
   
 {
 
+  ringSpacing = _params.range_ring_spacing;
   cerr << "====>> draw range rings, fieldNum: " << fieldNum << endl;
   
   // check that overlay canvas is the correct size
@@ -3384,21 +3385,29 @@ void WorldPlot::_drawRangeRings(QPainter &painter,
   double ringRange = ringSpacing;
   while (ringRange <= _params.max_ring_range) {
     QPainterPath path;
-    for (int iaz = 0; iaz <= 360; iaz++) {
+    for (size_t iaz = 0; iaz <= sinVals.size(); iaz++) {
       double dx = ringRange * sinVals[iaz];
       double dy = ringRange * cosVals[iaz];
       double lat2, lon2;
       PJGLatLonPlusDxDy(originLat, originLon, dx, dy, &lat2, &lon2);
       double xx2, yy2;
       _proj.latlon2xy(lat2, lon2, xx2, yy2);
-      cerr << "RRRRRRRRRRRR iaz, xx2, yy2: " << iaz << ", " << xx2 << ", " << yy2 << endl;
+      QPointF point = getPixelPointF(xx2, yy2);
       if (iaz == 0) {
-        path.moveTo(xx2, yy2);
+        path.moveTo(point);
       } else {
-        path.lineTo(xx2, yy2);
+        path.lineTo(point);
       }
+      // cerr << "RRRRRRRRRRRR iaz, xx2, yy2: " << iaz << ", " << xx2 << ", " << yy2 << endl;
+      // if (iaz == 0) {
+      //   path.moveTo(xx2, yy2);
+      // } else {
+      //   path.lineTo(xx2, yy2);
+      // }
     }
+    painter.save();
     painter.drawPath(path);
+    painter.restore();
     ringRange += ringSpacing;
   }
 
