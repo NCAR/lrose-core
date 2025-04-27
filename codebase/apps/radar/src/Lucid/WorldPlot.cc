@@ -2277,7 +2277,8 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    cerr << "AAAAAAAAAAAAA aspectCorr: " << aspectCorr << endl;
+    cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
+    cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -3331,6 +3332,7 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
   cerr << "AAAAAAAAAAAAA ====>> draw range rings, fieldNum: " << fieldNum << endl;
   cerr << "AAAAAAAAAAAAA ====>> _xPixelsPerKm, nPixPerRing: " << _xPixelsPerKm << ", " << nPixPerRing << endl;
   if (nPixPerRing< _params.min_pixels_per_range_ring) {
+    cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
     return;
   }
   
