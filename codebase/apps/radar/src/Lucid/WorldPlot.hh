@@ -744,7 +744,8 @@ private:
   
   void _drawRangeRingsHoriz(QPainter &painter,
                             double originLat,
-                            double originLon);
+                            double originLon,
+                            double maxRangeKm);
   
 };
 

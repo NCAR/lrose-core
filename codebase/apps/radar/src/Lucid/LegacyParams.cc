@@ -1484,15 +1484,15 @@ int LegacyParams::_readMainParams()
   // range rings
 
   _getBoolean("cidd.range_rings", 0, true, "plot_range_rings_fixed");
-  _getBoolean("cidd.range_ring_follows_data", 0, true, "plot_range_rings_from_data");
+  _getBoolean("cidd.range_ring_follows_data", 1, true, "plot_range_rings_from_data");
   _getBoolean("cidd.range_ring_for_radar_only", 1, true, "range_rings_for_radar_only");
   
   _getLong("cidd.range_ring_x_space", 50);
   _getLong("cidd.range_ring_y_space", 15);
   _getBoolean("cidd.range_ring_labels", 1);
-  _getDouble("cidd.range_ring_spacing", -1.0, "range_ring_spacing_km");
-  _getDouble("cidd.max_ring_range", 1000.0, "max_ring_range_km");
-  _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_spacing");
+  _getDouble("cidd.range_ring_spacing", -1.0, true, "range_ring_spacing_km");
+  _getDouble("cidd.max_ring_range", 1000.0, true, "max_ring_range_km");
+  _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_spacing_deg");
 
   // Toggle for shifting the display origin - Useful for mobile units.
   // azimuth lines

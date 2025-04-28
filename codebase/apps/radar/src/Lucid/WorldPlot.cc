@@ -3376,18 +3376,42 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
     if (_params.plot_fixed_rings_at_origin) {
       _drawRangeRingsHoriz(painter,
                            _params.proj_origin_lat,
-                           _params.proj_origin_lon);
+                           _params.proj_origin_lon,
+                           _params.max_ring_range_km);
+    }
+    if (_params.plot_fixed_rings_at_added_locations) {
+      for (int ii = 0; ii < _params.fixed_ring_locations_n; ii++) {
+        _drawRangeRingsHoriz(painter,
+                             _params._fixed_ring_locations[ii].latitude_deg,
+                             _params._fixed_ring_locations[ii].longitude_deg,
+                             _params.max_ring_range_km);
+      }
     }
   }
   
   if (_params.plot_range_rings_from_data) {
-    if (mr->isRadar) {
-      cerr << "RRRRRRRRRRRRRRR is radar, name: " << mr->radarParams.radarName << endl;
-      mr->radarParams.print(cerr);
-      cerr << "RRRRRRRRRRRRRRR lat, lon: " << mr->radarParams.latitude << ", " << mr->radarParams.longitude << endl;
+    if (_params.range_rings_for_radar_only) {
+      if (mr->isRadar) {
+        const DsRadarParams &rparams = mr->radarParams;
+        cerr << "RRRRRRRRRRRRRRR is radar, name: "
+             << rparams.radarName << endl;
+        rparams.print(cerr);
+        cerr << "RRRRRRRRRRRRRRR lat, lon: "
+             << rparams.latitude << ", " << rparams.longitude << endl;
+        double maxRange = rparams.startRange + rparams.numGates * rparams.gateSpacing;
+        if (maxRange < 0) {
+          maxRange = _params.max_ring_range_km;
+        }
+        _drawRangeRingsHoriz(painter,
+                             rparams.latitude,
+                             rparams.longitude,
+                             maxRange);
+      }
+    } else {
       _drawRangeRingsHoriz(painter,
-                           mr->radarParams.latitude,
-                           mr->radarParams.longitude);
+                           mr->h_fhdr.proj_origin_lat,
+                           mr->h_fhdr.proj_origin_lon,
+                           _params.max_ring_range_km);
     }
   }
   
@@ -3401,7 +3425,8 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
 
 void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
                                      double originLat,
-                                     double originLon)
+                                     double originLon,
+                                     double maxRangeKm)
 {
 
   painter.save();
@@ -3413,7 +3438,7 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   
   cerr << "RRRRRRRRRRRRRRR originLat, originLon: " << originLat << ", " << originLon << endl;
   cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
-    
+  
   // Set the ring color
 
   QPen pen = painter.pen();
@@ -3432,10 +3457,13 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   }
     
   // Draw rings
+
+  double ringSpacing = _params.range_ring_spacing_km;
+  int numRings = (int) (maxRangeKm / ringSpacing + 0.9);
   
-  double ringRange = _params.range_ring_spacing_km;
   vector<double> labelX, labelY;
-  while (ringRange <= _params.max_ring_range_km) {
+  for (int iring = 0; iring < numRings; iring++) {
+    double ringRange = ringSpacing * (iring + 1);
     QPainterPath path;
     for (size_t iaz = 0; iaz < sinVals.size(); iaz++) {
       double dx = ringRange * sinVals[iaz];
@@ -3458,7 +3486,6 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
     painter.save();
     painter.drawPath(path);
     painter.restore();
-    ringRange += _params.range_ring_spacing_km;
   }
 
   // Draw the labels
@@ -3467,10 +3494,10 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   font.setPointSizeF(_params.range_ring_label_font_size);
   painter.setFont(font);
   // painter.setWindow(0, 0, width(), height());
-
+  
   for (size_t ilabel = 0; ilabel < labelX.size(); ilabel++) {
     int ringNum = ilabel / 4;
-    double range = (ringNum + 1) * _params.range_ring_spacing_km;
+    double range = (ringNum + 1) * ringSpacing;
     const string &labelStr = _scaledLabel.scale(range);
     drawText(painter, labelStr, labelX[ilabel], labelY[ilabel], Qt::AlignCenter);
   }
