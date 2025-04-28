@@ -114,7 +114,6 @@ WorldPlot::WorldPlot() :
   _axisTextColor = "white";
   _gridColor = "gray";
 
-  cerr << "dddddddddddddddddddddddddddddd" << endl;
   _computeTransform();
   
 }
@@ -231,7 +230,6 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _leftTicks = rhs._leftTicks;
   _rightTicks = rhs._rightTicks;
 
-  cerr << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" << endl;
   _computeTransform();
 
   return *this;
@@ -254,7 +252,6 @@ void WorldPlot::setWindowGeom(int width,
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
 
-  cerr << "fffffffffffffffffffffffffff" << endl;
   _computeTransform();
 
 }
@@ -286,7 +283,6 @@ void WorldPlot::setWorldLimits(double xMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
-  cerr << "gggggggggggggggggggggggggggggg" << endl;
   _computeTransform();
 
 }
@@ -304,7 +300,6 @@ void WorldPlot::setWorldLimitsX(double xMinWorld,
     _xMaxWorld = MIN(xMinWorld, xMaxWorld);
   }
     
-  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
   _computeTransform();
 
 }
@@ -322,7 +317,6 @@ void WorldPlot::setWorldLimitsY(double yMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
-  cerr << "iiiiiiiiiiiiiiiiiiiiiiiiiiiii" << endl;
   _computeTransform();
 
 }
@@ -373,7 +367,6 @@ void WorldPlot::resize(int width,
   _widthPixels = width;
   _heightPixels = height;
   
-  cerr << "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj" << endl;
   _computeTransform();
   
 }
@@ -388,7 +381,6 @@ void WorldPlot::setWindowOffsets(int xOffset,
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
 
-  cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
   _computeTransform();
 
 }
@@ -423,7 +415,6 @@ void WorldPlot::setYscaleFromXscale()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
   _computePixPerKm();
   
 }
@@ -458,7 +449,6 @@ void WorldPlot::setXscaleFromYscale()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
   _computePixPerKm();
 
 }
@@ -2291,17 +2281,17 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    if (_name != "VlevelSelector") {
-      cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
-      cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
-      cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
-      cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
-      if (meanLat < 30 || meanLat > 45) {
-        cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
-      } else {
-        cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
-      }
-    }
+    // if (_name != "VlevelSelector") {
+    //   cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
+    //   cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
+    //   cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
+    //   cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
+    //   if (meanLat < 30 || meanLat > 45) {
+    //     cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
+    //   } else {
+    //     cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
+    //   }
+    // }
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -2338,10 +2328,10 @@ void WorldPlot::_computeTransform()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  cerr << "cccccccccccccccccccccccccc" << endl;
-  cerr << "ccccccccccccccc _xMinPixel, _xMaxPixel: " << _xMinPixel << ", " << _xMaxPixel << endl;
-  cerr << "ccccccccccccccc _yMinPixel, _yMaxPixel: " << _yMinPixel << ", " << _yMaxPixel << endl;
-  cerr << "ccccccccccccccc _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
+  // cerr << "cccccccccccccccccccccccccc" << endl;
+  // cerr << "ccccccccccccccc _xMinPixel, _xMaxPixel: " << _xMinPixel << ", " << _xMaxPixel << endl;
+  // cerr << "ccccccccccccccc _yMinPixel, _yMaxPixel: " << _yMinPixel << ", " << _yMaxPixel << endl;
+  // cerr << "ccccccccccccccc _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
   
   _computePixPerKm();
 
@@ -2427,7 +2417,6 @@ void WorldPlot::updatePixelScales()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  cerr << "llllllllllllllllllllllllllllll" << endl;
   _computeTransform();
   
 }
@@ -3357,15 +3346,6 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
   
 {
   
-  double nPixPerRing = _xPixelsPerKm * _params.range_ring_spacing_km;
-  cerr << "AAAAAAAAAAAAA ====>> draw range rings, fieldNum: " << fieldNum << endl;
-  cerr << "AAAAAAAAAAAAA ====>> _xPixelsPerKm, nPixPerRing: " << _xPixelsPerKm << ", " << nPixPerRing << endl;
-  if (nPixPerRing< _params.min_pixels_per_range_ring) {
-    cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-    return;
-  }
-  
-  
   // check that overlay canvas is the correct size
   
   _createImage(_ringsImage);
@@ -3373,6 +3353,18 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
   // make transparent
   
   _ringsImage->fill(Qt::transparent);
+
+  // check if rings are too small at this zoom
+  // if so do not render
+  
+  double nPixPerRing = _xPixelsPerKm * _params.range_ring_spacing_km;
+  // cerr << "AAAAAAAAAAAAA ====>> draw range rings, fieldNum: " << fieldNum << endl;
+  // cerr << "AAAAAAAAAAAAA ====>> _xPixelsPerKm, nPixPerRing: " << _xPixelsPerKm << ", " << nPixPerRing << endl;
+  if (nPixPerRing< _params.min_pixels_per_range_ring) {
+    // cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+    return;
+  }
+  
   
   // get painter
   
