@@ -3532,7 +3532,8 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
     int ringNum = ilabel / 4;
     double range = (ringNum + 1) * ringSpacing;
     const string &labelStr = _scaledLabel.scale(range);
-    drawText(painter, labelStr, labelX[ilabel], labelY[ilabel], Qt::AlignCenter);
+    // drawText(painter, labelStr, labelX[ilabel], labelY[ilabel], Qt::AlignCenter);
+    drawTextCentered(painter, labelStr, labelX[ilabel], labelY[ilabel]);
   }
 
   // ringRange = ringSpacing;
