@@ -174,6 +174,8 @@ void HorizView::configureWorldCoords(int zoomLevel)
 
   // set world view
 
+  _fullWorld.setName("fullWorld");
+  
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
   _fullWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
@@ -202,7 +204,7 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisLineColor(_params.horiz_axes_color);
   _fullWorld.setAxisTextColor(_params.horiz_axes_color);
   _fullWorld.setGridColor(_params.horiz_grid_color);
-
+  
   // initialize the projection
   
   _initProjection();
@@ -210,8 +212,11 @@ void HorizView::configureWorldCoords(int zoomLevel)
   // set other members
   
   _zoomWorld = _fullWorld;
+  _zoomWorld.setName("zoomWorld");
+  
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
+
   // _setGridSpacing();
 
   setXyZoom(_zoomWorld.getYMinWorld(),
@@ -1683,8 +1688,10 @@ void HorizView::zoomBackView()
 {
   if (_savedZooms.size() == 0) {
     _zoomWorld = _fullWorld;
+    _zoomWorld.setName("zoomWorld");
   } else {
     _zoomWorld = _savedZooms[_savedZooms.size()-1];
+    _zoomWorld.setName("fromSavedZoom");
     _savedZooms.pop_back();
   }
   if (_savedZooms.size() == 0) {
@@ -1705,6 +1712,7 @@ void HorizView::zoomBackView()
 void HorizView::zoomOutView()
 {
   _zoomWorld = _fullWorld;
+  _zoomWorld.setName("zoomWorld");
   _savedZooms.clear();
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -1945,6 +1953,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     // save current zoom
     
     _savedZooms.push_back(_zoomWorld);
+    _savedZooms[_savedZooms.size()-1].setName("savedZoom");
 
     // handle the zoom action
 
@@ -2034,6 +2043,7 @@ void HorizView::_resetWorld(int width, int height)
 
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
+  _zoomWorld.setName("zoomWorld");
   _setTransform(_fullWorld.getTransform());
   // _setGridSpacing();
   _sizeChanged = true;

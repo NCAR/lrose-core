@@ -58,6 +58,8 @@ WorldPlot::WorldPlot() :
         _gd(GlobalData::Instance())
 {
 
+  _name = "Unknown";
+  
   _widthPixels = 1000;
   _heightPixels = 1000;
 
@@ -111,7 +113,8 @@ WorldPlot::WorldPlot() :
   _axisLineColor = "white";
   _axisTextColor = "white";
   _gridColor = "gray";
-  
+
+  cerr << "dddddddddddddddddddddddddddddd" << endl;
   _computeTransform();
   
 }
@@ -150,6 +153,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
 
   // copy the meta data
 
+  _name = rhs._name;
+  
   _widthPixels = rhs._widthPixels;
   _heightPixels = rhs._heightPixels;
   
@@ -226,6 +231,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _leftTicks = rhs._leftTicks;
   _rightTicks = rhs._rightTicks;
 
+  cerr << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" << endl;
   _computeTransform();
 
   return *this;
@@ -248,6 +254,7 @@ void WorldPlot::setWindowGeom(int width,
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
 
+  cerr << "fffffffffffffffffffffffffff" << endl;
   _computeTransform();
 
 }
@@ -279,6 +286,7 @@ void WorldPlot::setWorldLimits(double xMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
+  cerr << "gggggggggggggggggggggggggggggg" << endl;
   _computeTransform();
 
 }
@@ -296,6 +304,7 @@ void WorldPlot::setWorldLimitsX(double xMinWorld,
     _xMaxWorld = MIN(xMinWorld, xMaxWorld);
   }
     
+  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
   _computeTransform();
 
 }
@@ -313,6 +322,7 @@ void WorldPlot::setWorldLimitsY(double yMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
+  cerr << "iiiiiiiiiiiiiiiiiiiiiiiiiiiii" << endl;
   _computeTransform();
 
 }
@@ -363,6 +373,7 @@ void WorldPlot::resize(int width,
   _widthPixels = width;
   _heightPixels = height;
   
+  cerr << "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj" << endl;
   _computeTransform();
   
 }
@@ -377,6 +388,7 @@ void WorldPlot::setWindowOffsets(int xOffset,
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
 
+  cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
   _computeTransform();
 
 }
@@ -411,6 +423,7 @@ void WorldPlot::setYscaleFromXscale()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
   _computePixPerKm();
   
 }
@@ -445,6 +458,7 @@ void WorldPlot::setXscaleFromYscale()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
+  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
   _computePixPerKm();
 
 }
@@ -2277,8 +2291,17 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
-    cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
+    if (_name != "VlevelSelector") {
+      cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
+      cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
+      cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
+      cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
+      if (meanLat < 30 || meanLat > 45) {
+        cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
+      } else {
+        cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
+      }
+    }
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -2315,6 +2338,11 @@ void WorldPlot::_computeTransform()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
+  cerr << "cccccccccccccccccccccccccc" << endl;
+  cerr << "ccccccccccccccc _xMinPixel, _xMaxPixel: " << _xMinPixel << ", " << _xMaxPixel << endl;
+  cerr << "ccccccccccccccc _yMinPixel, _yMaxPixel: " << _yMinPixel << ", " << _yMaxPixel << endl;
+  cerr << "ccccccccccccccc _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
+  
   _computePixPerKm();
 
 }
@@ -2399,6 +2427,7 @@ void WorldPlot::updatePixelScales()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
+  cerr << "llllllllllllllllllllllllllllll" << endl;
   _computeTransform();
   
 }
@@ -3390,9 +3419,10 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   double originX, originY;
   _proj.latlon2xy(originLat, originLon, originX, originY);
   
+  cerr << "RRRRRRRRRRRRRRR originLat, originLon: " << originLat << ", " << originLon << endl;
   cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
     
-    // Set the ring color
+  // Set the ring color
 
   QPen pen = painter.pen();
   pen.setWidth(0);

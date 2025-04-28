@@ -172,6 +172,7 @@ void VertView::configureWorldCoords(int zoomLevel)
   int legendTextMargin = _params.vert_legend_text_margin;
   int axisTextMargin = _params.vert_axis_text_margin;
   
+  _fullWorld.setName("VertView-full");
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
   _fullWorld.setWorldLimits(0.0, 0.0, 100.0, _maxHeightKm);
@@ -201,6 +202,8 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setGridColor(_params.vert_grid_color);
 
   _zoomWorld = _fullWorld;
+  _zoomWorld.setName("VertView-zoomed");
+  
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
 
@@ -609,6 +612,7 @@ void VertView::unzoomView()
 {
   
   _zoomWorld = _fullWorld;
+  _zoomWorld.setName("VertView-zoomed");
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();

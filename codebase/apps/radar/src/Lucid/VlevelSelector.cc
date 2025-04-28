@@ -48,7 +48,8 @@ VlevelSelector::VlevelSelector(int width,
   
   setMinimumSize(width, 100);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  
+
+  _world.setName("VlevelSelector");
   _world.setLeftMargin(_params.vlevel_selector_left_margin);
   _world.setRightMargin(_params.vlevel_selector_right_margin);
   _world.setTopMargin(_params.vlevel_selector_top_margin);

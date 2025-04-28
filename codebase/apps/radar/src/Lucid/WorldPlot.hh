@@ -76,6 +76,10 @@ public:
   // Assignment.
   
   WorldPlot& operator=(const WorldPlot &rhs);
+
+  // set name for debugging
+
+  void setName(const string &val) { _name = val; }
   
   // set size and location of plotting window within the main canvas
   // side effect - recomputes transform
@@ -609,6 +613,8 @@ private:
 
   Params &_params;
   GlobalData &_gd;
+
+  string _name; // for debug identification
 
   typedef struct {
     double x, y;
