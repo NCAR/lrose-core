@@ -1492,7 +1492,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.range_ring_labels", 1);
   _getDouble("cidd.range_ring_spacing", -1.0, true, "range_ring_spacing_km");
   _getDouble("cidd.max_ring_range", 1000.0, true, "max_ring_range_km");
-  _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_spacing_deg");
+  _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_lines_spacing_deg");
 
   // Toggle for shifting the display origin - Useful for mobile units.
   // azimuth lines

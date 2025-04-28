@@ -731,6 +731,13 @@ private:
 
   QTransform _transform;
 
+  // sines and cosines for range rings
+  
+  vector<double> _azRingsSinVals, _azRingsCosVals;
+  vector<double> _azLinesSinVals, _azLinesCosVals;
+
+  // methods
+  
   void _computePixPerKm();
   void _computeTransform();
 

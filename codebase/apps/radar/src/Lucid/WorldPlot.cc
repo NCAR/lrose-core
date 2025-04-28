@@ -116,6 +116,26 @@ WorldPlot::WorldPlot() :
 
   _computeTransform();
   
+  // precompute sin/cos values for range rings and az lines
+
+  _azRingsSinVals.clear();
+  _azRingsCosVals.clear();
+  for (int iaz = 0; iaz <= 360; iaz++) {
+    double sinVal, cosVal;
+    ta_sincos(iaz * DEG_TO_RAD, &sinVal, &cosVal);
+    _azRingsSinVals.push_back(sinVal);
+    _azRingsCosVals.push_back(cosVal);
+  }
+
+  double az = 0;
+  while (az < 360.0) {
+    double sinVal, cosVal;
+    ta_sincos(az * DEG_TO_RAD, &sinVal, &cosVal);
+    _azLinesSinVals.push_back(sinVal);
+    _azLinesCosVals.push_back(cosVal);
+    az += _params.azimuth_lines_spacing_deg;
+  }
+    
 }
 
 ////////////////////////////////////////
@@ -229,6 +249,11 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _bottomTicks = rhs._bottomTicks;
   _leftTicks = rhs._leftTicks;
   _rightTicks = rhs._rightTicks;
+
+  _azRingsSinVals = rhs._azRingsSinVals;
+  _azRingsCosVals = rhs._azRingsCosVals;
+  _azLinesSinVals = rhs._azLinesSinVals;
+  _azLinesCosVals = rhs._azLinesCosVals;
 
   _computeTransform();
 
@@ -3393,11 +3418,11 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
     if (_params.range_rings_for_radar_only) {
       if (mr->isRadar) {
         const DsRadarParams &rparams = mr->radarParams;
-        cerr << "RRRRRRRRRRRRRRR is radar, name: "
-             << rparams.radarName << endl;
-        rparams.print(cerr);
-        cerr << "RRRRRRRRRRRRRRR lat, lon: "
-             << rparams.latitude << ", " << rparams.longitude << endl;
+        // cerr << "RRRRRRRRRRRRRRR is radar, name: "
+        //      << rparams.radarName << endl;
+        // rparams.print(cerr);
+        // cerr << "RRRRRRRRRRRRRRR lat, lon: "
+        //      << rparams.latitude << ", " << rparams.longitude << endl;
         double maxRange = rparams.startRange + rparams.numGates * rparams.gateSpacing;
         if (maxRange < 0) {
           maxRange = _params.max_ring_range_km;
@@ -3446,16 +3471,6 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   pen.setColor(_params.range_rings_color);
   painter.setPen(_params.range_rings_color);
 
-  // precompute sin/cos values for each az angle
-
-  vector<double> sinVals, cosVals;
-  for (int iaz = 0; iaz <= 360; iaz++) {
-    double sinVal, cosVal;
-    ta_sincos(iaz * DEG_TO_RAD, &sinVal, &cosVal);
-    sinVals.push_back(sinVal);
-    cosVals.push_back(cosVal);
-  }
-    
   // Draw rings
 
   double ringSpacing = _params.range_ring_spacing_km;
@@ -3465,9 +3480,9 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   for (int iring = 0; iring < numRings; iring++) {
     double ringRange = ringSpacing * (iring + 1);
     QPainterPath path;
-    for (size_t iaz = 0; iaz < sinVals.size(); iaz++) {
-      double dx = ringRange * sinVals[iaz];
-      double dy = ringRange * cosVals[iaz];
+    for (size_t iaz = 0; iaz < _azRingsSinVals.size(); iaz++) {
+      double dx = ringRange * _azRingsSinVals[iaz];
+      double dy = ringRange * _azRingsCosVals[iaz];
       double lat2, lon2;
       PJGLatLonPlusDxDy(originLat, originLon, dx, dy, &lat2, &lon2);
       double xx2, yy2;

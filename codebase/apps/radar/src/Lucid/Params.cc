@@ -4034,15 +4034,15 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'azimuth_spacing_deg'
+    // Parameter 'azimuth_lines_spacing_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_spacing_deg");
+    tt->param_name = tdrpStrDup("azimuth_lines_spacing_deg");
     tt->descr = tdrpStrDup("Spacing for azimuth lines plotted with range rings (deg).");
     tt->help = tdrpStrDup("The azimuth lines start at 0, and rotate clockwise from there.");
-    tt->val_offset = (char *) &azimuth_spacing_deg - &_start_;
+    tt->val_offset = (char *) &azimuth_lines_spacing_deg - &_start_;
     tt->single_val.d = 30;
     tt++;
     

@@ -1058,7 +1058,7 @@ public:
 
   tdrp_bool_t range_ring_labels;
 
-  double azimuth_spacing_deg;
+  double azimuth_lines_spacing_deg;
 
   tdrp_bool_t clip_overlay_fields;
 

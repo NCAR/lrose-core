@@ -1765,7 +1765,7 @@ paramdef double {
   p_default = 30;
   p_descr = "Spacing for azimuth lines plotted with range rings (deg).";
   p_help = "The azimuth lines start at 0, and rotate clockwise from there.";
-} azimuth_spacing_deg;
+} azimuth_lines_spacing_deg;
 
 paramdef boolean {
   p_default = FALSE;

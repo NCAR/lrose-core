@@ -661,7 +661,7 @@ cidd.height_axis_color: pink
 cidd.height_indicator_color: gray50
 
 # Range rings and azmiuth lines
-cidd.range_ring_color: gray
+cidd.range_ring_color: white
 
 # 
 # Set the follwing colors to 'transparent' to avoid having these
@@ -783,7 +783,7 @@ cidd.vert_right_margin:      30
 
 
 # Set range_ring_spacing to a negative value to dynamically determing spacing.
-cidd.range_ring_spacing:     25.0
+cidd.range_ring_spacing:     50.0
 cidd.max_ring_range:     150.0
 
 #  Render Range rings at the origin of the data, instead of the origin of the display.
