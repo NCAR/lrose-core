@@ -3471,7 +3471,9 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   pen.setColor(_params.range_rings_color);
   painter.setPen(_params.range_rings_color);
 
-  // Draw rings
+  // Draw rings and azimuth lines
+
+  QPainterPath path;
 
   double ringSpacing = _params.range_ring_spacing_km;
   int numRings = (int) (maxRangeKm / ringSpacing + 0.9);
@@ -3479,7 +3481,6 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   vector<double> labelX, labelY;
   for (int iring = 0; iring < numRings; iring++) {
     double ringRange = ringSpacing * (iring + 1);
-    QPainterPath path;
     for (size_t iaz = 0; iaz < _azRingsSinVals.size(); iaz++) {
       double dx = ringRange * _azRingsSinVals[iaz];
       double dy = ringRange * _azRingsCosVals[iaz];
@@ -3497,11 +3498,28 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
         labelX.push_back(xx2);
         labelY.push_back(yy2);
       }
-    }
-    painter.save();
-    painter.drawPath(path);
-    painter.restore();
-  }
+    } // iaz
+  } // iring
+
+  for (size_t iaz = 0; iaz < _azLinesSinVals.size(); iaz++) {
+    QPointF origin = getPixelPointF(originX, originY);
+    path.moveTo(origin);
+    for (int iring = 0; iring < numRings; iring++) {
+      double ringRange = ringSpacing * (iring + 1);
+      double dx = ringRange * _azLinesSinVals[iaz];
+      double dy = ringRange * _azLinesCosVals[iaz];
+      double lat2, lon2;
+      PJGLatLonPlusDxDy(originLat, originLon, dx, dy, &lat2, &lon2);
+      double xx2, yy2;
+      _proj.latlon2xy(lat2, lon2, xx2, yy2);
+      QPointF point = getPixelPointF(xx2, yy2);
+      path.lineTo(point);
+    } // iring
+  } // iaz
+
+  painter.save();
+  painter.drawPath(path);
+  painter.restore();
 
   // Draw the labels
   
