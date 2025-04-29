@@ -2306,17 +2306,17 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    // if (_name != "VlevelSelector") {
-    //   cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
-    //   cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
-    //   cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
-    //   cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
-    //   if (meanLat < 30 || meanLat > 45) {
-    //     cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
-    //   } else {
-    //     cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
-    //   }
-    // }
+    if (_name != "VlevelSelector") {
+      cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
+      cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
+      cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
+      cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
+      if (meanLat < 30 || meanLat > 45) {
+        cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
+      } else {
+        cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
+      }
+    }
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -3571,81 +3571,6 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   painter.restore();
   
 }
-
-#ifdef LEGACY
-
-void WorldPlot::_drawRangeRings2(QPainter &painter,
-                                 double originLat,
-                                 double originLon,
-                                 double ringSpacing)
-{
-
-  // Draw rings
-  
-  // Set up the painter
-  
-  painter.save();
-  painter.setTransform(getTransform());
-  painter.setPen(_params.range_rings_color);
-    
-  // set narrow line width
-  QPen pen = painter.pen();
-  pen.setWidth(0);
-  painter.setPen(pen);
-  
-  double ringRange = ringSpacing;
-  while (ringRange <= _params.max_ring_range) {
-    QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-    painter.drawEllipse(rect);
-    ringRange += ringSpacing;
-  }
-  painter.restore();
-  
-  // Draw the labels
-  
-  QFont font = painter.font();
-  font.setPointSizeF(_params.range_ring_label_font_size);
-  painter.setFont(font);
-  // painter.setWindow(0, 0, width(), height());
-  
-  ringRange = ringSpacing;
-  while (ringRange <= _params.max_ring_range) {
-    double labelPos = ringRange * Constants::LUCID_SIN_45;
-    const string &labelStr = _scaledLabel.scale(ringRange);
-    drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-    drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-    ringRange += ringSpacing;
-  }
-  
-  // Draw the azimuth lines
-  
-  // Set up the painter
-  
-  painter.save();
-  painter.setPen(_params.range_rings_color);
-  
-  // Draw the lines along the X and Y axes
-  
-  drawLine(painter, 0, -_params.max_ring_range, 0, _params.max_ring_range);
-  drawLine(painter, -_params.max_ring_range, 0, _params.max_ring_range, 0);
-  
-  // Draw the lines along the 30 degree lines
-  
-  double end_pos1 = Constants::LUCID_SIN_30 * _params.max_ring_range;
-  double end_pos2 = Constants::LUCID_COS_30 * _params.max_ring_range;
-  
-  drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-  drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-  drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-  drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
-  
-  painter.restore();
-  
-}
-
-#endif
 
 /////////////////////////////////////////////////////
 // print

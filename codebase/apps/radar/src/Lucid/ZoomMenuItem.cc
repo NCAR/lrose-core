@@ -92,12 +92,5 @@ void ZoomMenuItem::toggled(bool checked)
     }
   }
 
-  // if (_manager != NULL) {
-  //   _manager->setXyZoom(_gd.h_win.cmin_y,
-  //                       _gd.h_win.cmax_y,
-  //                       _gd.h_win.cmin_x,
-  //                       _gd.h_win.cmax_x); 
-  // }
-
 }
 

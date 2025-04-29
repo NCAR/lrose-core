@@ -608,17 +608,6 @@ int Lucid::_initDataSpace()
 
   } // if(strlen(_params.demo_time) < 8 && (_gd.movie.mode != ARCHIVE_MODE))
 
-#ifdef CHECK_LATER
-
-  reset_time_points(); // reset movie
-
-  if(_params.html_mode || _gd.movie.num_frames < 3 ) {
-    _params.bot_margin_render_style = _gd.uparams->getLong("cidd.bot_margin_render_style", 1);
-  } else {
-    _params.bot_margin_render_style = _gd.uparams->getLong("cidd.bot_margin_render_style", 2);
-  }
-#endif
-
   /////////////////////////////////////////////////
   // zooms
   
@@ -825,37 +814,6 @@ int Lucid::_initDataSpace()
   // initialize symbolic products
 
   _initSymprods();
-
-#ifdef NOTNOW
-  
-  /////////////////////
-  // fonts
-
-  if(_params.num_fonts > MAX_FONTS) {
-    _params.num_fonts = MAX_FONTS;
-    fprintf(stderr,"Cidd: Warning. Too Many Fonts. Limited to %d Fonts\n",MAX_FONTS);
-  }
-
-  // Make sure specified font for Winds, Contours and Products are within range.
-  if(_gd.prod.prod_font_num < 0) _gd.prod.prod_font_num = 0;
-  if(_gd.prod.prod_font_num >= _params.num_fonts) _gd.prod.prod_font_num = _params.num_fonts -1;
-  
-  for(i=0;i < _params.num_fonts; i++) {
-    snprintf(p_name,"cidd.font%d",i+1);
-    f_name = _gd.uparams->getString(
-            p_name, "fixed");
-    _gd.fontst[i] = (XFontStruct *) XLoadQueryFont(dpy,f_name);
-    if(_gd.fontst[i] != NULL) {
-      _gd.ciddfont[i]  = _gd.fontst[i]->fid;
-    } else {
-      fprintf(stderr,"Can't load font: %s\n",f_name);
-      fprintf(stderr,"Using 'fixed' instead\n");
-      _gd.fontst[i]  = (XFontStruct *) XLoadQueryFont(dpy,"fixed");
-      _gd.ciddfont[i]  = _gd.fontst[i]->fid;
-    }
-  }    
-
-#endif
 
   return iret;
   
@@ -1348,75 +1306,6 @@ void Lucid::_initRouteWinds()
     // mr->v_mdvx_int16 = new MdvxField;
 
   } // V WINDS
-
-#ifdef NOTNOW
-  
-  // TURB Met Record
-
-  if(strlen(_params.route_turb_url) > 1) {
-
-    MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route TURB\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.turb = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_TURB";
-    mr->button_name  = "ROUTE_TURB";
-    mr->url = _params.route_turb_url;
-    
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-
-    // instantiate DsMdvx class
-    mr->v_mdvx = new DsMdvx;
-    mr->v_mdvx_int16 = new MdvxField;
-    
-  } // TURB
-
-  // ICING met Record
-  
-  if(strlen(_params.route_icing_url) > 1) {
-
-    MdvReader *mr = new MdvReader;
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route ICING\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.icing = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_ICING";
-    mr->button_name = "ROUTE_ICING";
-    mr->url = _params.route_icing_url;
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-
-    // instantiate DsMdvx class
-    mr->v_mdvx = new DsMdvx;
-    mr->v_mdvx_int16 = new MdvxField;
-
-  } // ICING
-
-#endif
 
   // How many are route are defined in the file
   _gd.layers.route_wind.num_predef_routes = _params.route_paths_n;
