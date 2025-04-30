@@ -45,8 +45,6 @@
 #include <chrono>
 #include <ctime>
 
-// #include "GlobalData.hh"
-
 using namespace std;
 
 HorizView::HorizView(QWidget* parent,
@@ -57,11 +55,7 @@ HorizView::HorizView(QWidget* parent,
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _selectedField(0),
-        // _gridsEnabled(false),
-        // _ringsFixedEnabled(false),
-        // _ringsDataDrivenEnabled(false),
         _rubberBand(nullptr)
-        // _ringSpacing(10.0)
         
 {
 
@@ -113,7 +107,6 @@ HorizView::HorizView(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
-  _renderFrame = false;
   _renderFrameIndex = 0;
   _renderFramePage = 0;
 
@@ -126,17 +119,9 @@ HorizView::HorizView(QWidget* parent,
   _zoomChanged = true;
   _sizeChanged = true;
   
-  _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
-  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; "
-                                       "color : yellow; qproperty-alignment: "
-                                       "AlignCenter; }");
-  _openingFileInfoLabel->setVisible(false);
-  
   //fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
-  // Todo: investigate implementing a listener pattern instead
-
   // startTimer(50);
 
 }
@@ -161,7 +146,6 @@ HorizView::~HorizView()
 void HorizView::clear()
 {
   _renderMaps();
-  showOpeningFileMsg(false);
 }
 
 /*************************************************************************
@@ -215,7 +199,7 @@ void HorizView::configureWorldCoords(int zoomLevel)
   _zoomWorld.setName("zoomWorld");
   
   _isZoomed = false;
-  _setTransform(_zoomWorld.getTransform());
+  // _setTransform(_zoomWorld.getTransform());
 
   // _setGridSpacing();
 
@@ -234,8 +218,6 @@ void HorizView::configureWorldCoords(int zoomLevel)
 void HorizView::timerEvent(QTimerEvent *event)
 {
 
-  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
-  
   bool doUpdate = false;
   this->setCursor(Qt::ArrowCursor);
   
@@ -301,12 +283,18 @@ void HorizView::paintEvent(QPaintEvent *event)
                               _zoomXy.getMaxX(),
                               _zoomXy.getMaxY());
     _zoomChanged = true;
+    cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
+    _zoomWorld.print(cerr);
+    cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
   } else if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
                               _gd.h_win.cmax_x, _gd.h_win.cmax_y);
     _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
     _savedZooms.clear();
     _zoomChanged = true;
+    cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+    _zoomWorld.print(cerr);
+    cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
   }
   
   // render data grids to grid image in WorldPlot
@@ -322,10 +310,6 @@ void HorizView::paintEvent(QPaintEvent *event)
   //   _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
   //   _renderInvalidImages = false;
   // }
-  
-  // render overlays to image in WorldPlot
-  
-  // _zoomWorld.drawOverlays(_ringsEnabled, _angleLinesEnabled, _ringSpacing);
   
   // copy rendered grid and map images into this widget
   
@@ -413,600 +397,10 @@ void HorizView::paintEvent(QPaintEvent *event)
     
   }
 
-  // if there are no points, this does nothing
-  // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
-  
-  // _printNow(3, cerr);
-  // cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW _renderFrame: " << _renderFrame << endl;
-  
-  _renderFrame = false;
   _sizeChanged = false;
   _zoomChanged = false;
 
 }
-
-
-////////////////////////////////////////////////////////////////////////////
-// get ray closest to click point
-
-const RadxRay *HorizView::_getClosestRay(double x_km, double y_km)
-
-{
-
-#ifdef JUNK
-
-  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
-  double radarDisplayAz = 90.0 - clickAz;
-  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-             << x_km << "," << y_km; 
-  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
-             << x_km << y_km;
-
-  // double minDiff = 1.0e99;
-  const RadxRay *closestRay = NULL;
-  // for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
-  //   const RadxRay *ray = _ppiBeams[ii]->getRay();
-  //   double rayAz = ray->getAzimuthDeg();
-  //   double diff = fabs(radarDisplayAz - rayAz);
-  //   if (diff > 180.0) {
-  //     diff = fabs(diff - 360.0);
-  //   }
-  //   if (diff < minDiff) {
-  //     closestRay = ray;
-  //     minDiff = diff;
-  //   }
-  // }
-
-  if (closestRay != NULL)
-    LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
-  else
-    LOG(DEBUG) << "Error: No ray found";
-  return closestRay;
-
-#endif
-
-  return nullptr;
-  
-}
-
-#ifdef JUNK
-
-/*************************************************************************
- * _setGridSpacing()
- */
-
-void HorizView::_setGridSpacing()
-{
-
-  double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-  double yRange = _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld();
-  double diagonal = sqrt(xRange * xRange + yRange * yRange);
-
-  if (diagonal <= 1.0) {
-    _ringSpacing = 0.05;
-  } else if (diagonal <= 2.0) {
-    _ringSpacing = 0.1;
-  } else if (diagonal <= 5.0) {
-    _ringSpacing = 0.2;
-  } else if (diagonal <= 10.0) {
-    _ringSpacing = 0.5;
-  } else if (diagonal <= 20.0) {
-    _ringSpacing = 1.0;
-  } else if (diagonal <= 50.0) {
-    _ringSpacing = 2.0;
-  } else if (diagonal <= 100.0) {
-    _ringSpacing = 5.0;
-  } else if (diagonal <= 200.0) {
-    _ringSpacing = 10.0;
-  } else if (diagonal <= 300.0) {
-    _ringSpacing = 20.0;
-  } else if (diagonal <= 400.0) {
-    _ringSpacing = 25.0;
-  } else if (diagonal <= 500.0) {
-    _ringSpacing = 50.0;
-  } else {
-    _ringSpacing = 50.0;
-  }
-
-}
-
-/*************************************************************************
- * _drawOverlays()
- */
-
-void HorizView::_drawOverlays(QPainter &painter)
-{
-
-  // draw the maps
-
-  _drawMaps(painter);
-  
-  // draw rings and azimith lines for polar data sets
-
-  _drawRingsAndAzLines(painter);
-  
-  // click point cross hairs
-  
-  if (_pointClicked) {
-
-    painter.save();
-
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
-
-    QPen pen(painter.pen());
-    pen.setColor(_params.click_cross_color);
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(_params.click_cross_line_width);
-    painter.setPen(pen);
-
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
-    painter.restore();
-    
-  }
-
-  // draw the color scale
-
-  int fieldNum = _gd.h_win.page;
-  const ColorMap &colorMap = *(_gd.mread[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
-
-  // add the legends
-  
-  {
-    
-    painter.save();
-    MdvReader *mr = _gd.mread[_renderFramePage];
-    
-    vector<string> legends;
-    legends.push_back(mr->fieldLabel());
-    
-    painter.setPen(QColor(_params.horiz_legend_color)); // Qt::darkMagenta); // Qt::yellow);
-    painter.setBrush(Qt::black);
-    painter.setBackgroundMode(Qt::OpaqueMode);
-
-    QFont lfont(painter.font());
-    lfont.setPointSizeF(_params.horiz_legend_font_size);
-    lfont.setBold(true);
-    painter.setFont(lfont);
-    
-    switch (_params.horiz_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-    
-    painter.restore();
-
-  }
-  
-}
-
-/*************************************************************************
- * draw map overlays
- */
-
-void HorizView::_drawMaps(QPainter &painter)
-
-{
-
-  painter.save();
-
-  // Loop throughs maps
-  
-  for(int ii = _gd.num_map_overlays - 1; ii >= 0; ii--) {
-    
-    if(!_gd.overlays[ii]->active ||
-       (_gd.overlays[ii]->detail_thresh_min > _gd.h_win.km_across_screen) ||
-       (_gd.overlays[ii]->detail_thresh_max < _gd.h_win.km_across_screen))  {
-      continue;
-    }
-      
-    MapOverlay_t *ov = _gd.overlays[ii];
-
-    // create the pen for this map
-    
-    QPen pen;
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(ov->line_width);
-    pen.setColor(ov->color_name.c_str());
-    pen.setCapStyle(Qt::RoundCap);
-    pen.setJoinStyle(Qt::RoundJoin);
-    painter.setPen(pen);
-    
-    QFont mfont(painter.font());
-    mfont.setPointSizeF(_params.maps_font_size);
-    painter.setFont(mfont);
-    
-    // Draw labels
-    
-    for(int jj = 0; jj < ov->num_labels; jj++) {
-      if(ov->geo_label[jj]->proj_x <= -32768.0) {
-        continue;
-      }
-      _zoomWorld.drawText(painter,
-                          ov->geo_label[jj]->display_string,
-                          ov->geo_label[jj]->proj_x,
-                          ov->geo_label[jj]->proj_y,
-                          Qt::AlignCenter);
-    } // jj
-    
-    // draw icons
-    
-    for(int jj = 0; jj < ov->num_icons; jj++) {
-      
-      Geo_feat_icon_t *ic = ov->geo_icon[jj];
-      if(ic->proj_x <= -32768.0) {
-        continue;
-      }
-      
-      int ixx = _zoomWorld.getIxPixel(ic->proj_x);
-      int iyy = _zoomWorld.getIyPixel(ic->proj_y);
-
-      // draw the icon
-
-      int minIy = 1.0e6;
-      int maxIy = -1.0e6;
-      for(int kk = 0; kk < ic->icon->num_points - 1; kk++) {
-        if ((ic->icon->x[kk] == 32767) ||
-            (ic->icon->x[kk+1] == 32767)) {
-          continue;
-        }
-        double iconScale = 1.0;
-        int ix1 = ixx + (int) (ic->icon->x[kk] * iconScale + 0.5);
-        int ix2 = ixx + (int) (ic->icon->x[kk+1] * iconScale + 0.5);
-        int iy1 = iyy + (int) (ic->icon->y[kk] * iconScale + 0.5);
-        int iy2 = iyy + (int) (ic->icon->y[kk+1] * iconScale + 0.5);
-        minIy = std::min(minIy, iy1);
-        minIy = std::min(minIy, iy2);
-        maxIy = std::max(maxIy, iy1);
-        maxIy = std::max(maxIy, iy2);
-        _zoomWorld.drawPixelLine(painter, ix1, iy1, ix2, iy2);
-      } // kk
-      
-      // add icon label
-      
-      painter.save();
-      if(_params.map_font_background == Params::MAP_FONT_BACKGROUND_TRANSPARENT) {
-        painter.setBackgroundMode(Qt::TransparentMode);
-      } else {
-        painter.setBackgroundMode(Qt::OpaqueMode);
-      }
-      // int alignment = Qt::AlignHCenter | Qt::AlignBottom;
-      // if (ic->text_y < 0) {
-      //   alignment = Qt::AlignHCenter | Qt::AlignTop;
-      // }
-      // alignment = Qt::AlignCenter;
-      if (ic->text_y < 0) {
-        _zoomWorld.drawTextScreenCoords(painter, ic->label,
-                                        ixx + ic->text_x,
-                                        maxIy - ic->text_y,
-                                        Qt::AlignCenter);
-      } else {
-        _zoomWorld.drawTextScreenCoords(painter, ic->label,
-                                        ixx + ic->text_x,
-                                        minIy - ic->text_y,
-                                        Qt::AlignCenter);
-      }
-      // cerr << "IIIIIIII text_x, text_y, label: "
-      //      << ic->text_x << ", " << ic->text_y
-      //      << ", " << ic->label << endl;
-      painter.restore();
-      
-    } // jj
-
-    // draw polylines
-    
-    for(int jj = 0; jj < ov->num_polylines; jj++) {
-      
-      Geo_feat_polyline_t *poly = ov->geo_polyline[jj];
-      QPainterPath polyPath;
-      bool doMove = true;
-      
-      for(int ll = 0; ll < poly->num_points; ll++) {
-        
-        double proj_x = poly->proj_x[ll];
-        double proj_y = poly->proj_y[ll];
-        
-        bool validPoint = true;
-        if (fabs(proj_x) > 32767 || fabs(proj_y) > 32767) {
-          validPoint = false;
-        }
-
-        if (!validPoint || (ll == 0)) {
-          doMove = true;
-        }
-
-        if (validPoint) {
-          QPointF point = _zoomWorld.getPixelPointF(proj_x, proj_y);
-          if (doMove) {
-            polyPath.moveTo(point);
-            doMove = false;
-          } else {
-            polyPath.lineTo(point);
-          }
-        }
-
-      } // ll
-
-      _zoomWorld.drawPathClippedScreenCoords(painter, polyPath);
-      // _zoomWorld.drawPath(painter, polyPath);
-
-    } // jj
-      
-  } // ii
-  
-  painter.restore();
-
-}
-
-/*************************************************************************
- * _drawRingsAndAzLines()
- *
- * draw rings for polar type data fields
- */
-
-void HorizView::_drawRingsAndAzLines(QPainter &painter)
-{
-
-#ifdef JUNK
-  
-  // Don't try to draw rings if we haven't been configured yet or if the
-  // rings or grids aren't enabled.
-  
-  if (!_params.plot_range_rings_fixed && !_params.plot_range_rings_from_data) {
-    return;
-  }
-  
-  // save painter state
-
-  painter.save();
-
-  // Draw rings
-
-  if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
-  
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-
-    double ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-      painter.drawEllipse(rect);
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    // Draw the labels
-    
-    QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
-    painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
-    
-    ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * Constants::LUCID_SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-      ringRange += _ringSpacing;
-    }
-
-  } /* endif - draw rings */
-
-  // a
-  // // Draw the grid
-  
-  // if (_ringSpacing > 0.0 && _params.horiz_grids_on_at_startup)  {
-
-  //   // Set up the painter
-    
-  //   painter.save();
-  //   painter.setTransform(_zoomTransform);
-  //   painter.setPen(_gridRingsColor);
-  
-  //   double ringRange = _ringSpacing;
-  //   double maxRingRange = ringRange;
-  //   while (ringRange <= _maxRangeKm) {
-
-  //     _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
-  //     _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
-  //     _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
-  //     _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
-      
-  //     maxRingRange = ringRange;
-  //     ringRange += _ringSpacing;
-  //   }
-  //   painter.restore();
-
-  //   _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
-  //   _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
-
-  //   if (_params.proj_type == Params::PROJ_LATLON) {
-  //     _zoomWorld.drawAxisLeft(painter, "deg", true, true, true, true);
-  //     _zoomWorld.drawAxisRight(painter, "deg", true, true, true, true);
-  //     _zoomWorld.drawAxisTop(painter, "deg", true, true, true, true);
-  //     _zoomWorld.drawAxisBottom(painter, "deg", true, true, true, true);
-  //   } else {
-  //     _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
-  //     _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
-  //     _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
-  //     _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
-  //   }
-    
-  // }
-  
-  // Draw the azimuth lines
-  
-  if (_angleLinesEnabled) {
-    
-    // Set up the painter
-    
-    painter.save();
-    painter.setPen(_gridRingsColor);
-  
-    // Draw the lines along the X and Y axes
-
-    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
-    // Draw the lines along the 30 degree lines
-
-    double end_pos1 = Constants::LUCID_SIN_30 * _maxRangeKm;
-    double end_pos2 = Constants::LUCID_COS_30 * _maxRangeKm;
-    
-    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
-    
-    painter.restore();
-
-  }
-
-  painter.restore();
-
-#endif
-
-}
-
-#endif
-
-void HorizView::showOpeningFileMsg(bool isVisible)
-{
-  _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
-  _openingFileInfoLabel->setVisible(isVisible);
-  // update();
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Draw text, with (X, Y) in screen space
-//
-// Flags give the justification in Qt, and are or'd from the following:
-//    Qt::AlignLeft aligns to the left border.
-//    Qt::AlignRight aligns to the right border.
-//    Qt::AlignJustify produces justified text.
-//    Qt::AlignHCenter aligns horizontally centered.
-//    Qt::AlignTop aligns to the top border.
-//    Qt::AlignBottom aligns to the bottom border.
-//    Qt::AlignVCenter aligns vertically centered
-//    Qt::AlignCenter (== Qt::AlignHCenter | Qt::AlignVCenter)
-//    Qt::TextSingleLine ignores newline characters in the text.
-//    Qt::TextExpandTabs expands tabs (see below)
-//    Qt::TextShowMnemonic interprets "&x" as x; i.e., underlined.
-//    Qt::TextWordWrap breaks the text to fit the rectangle.
-
-// draw text in world coords
-
-void HorizView::_drawScreenText(QPainter &painter, const string &text,
-                                int text_x, int text_y,
-                                int flags)
-  
-{
-
-  int ixx = text_x;
-  int iyy = text_y;
-	
-  QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
-  QRect bRect(painter.fontMetrics().
-              boundingRect(ixx, iyy,
-                           tRect.width() + 2, tRect.height() + 2,
-                           flags, text.c_str()));
-    
-  painter.drawText(bRect, flags, text.c_str());
-    
-}
-
-#ifdef NOTNOW
-
-void HorizView::ExamineEdit(const RadxRay *closestRay) {
-  
-
-  // get an version of the ray that we can edit
-  // we'll need the az, and sweep number to get a list from
-  // the volume
-
-  vector<RadxRay *> rays = _vol->getRays();
-  // find that ray
-  bool foundIt = false;
-  RadxRay *closestRayToEdit = NULL;
-  vector<RadxRay *>::iterator r;
-  r=rays.begin();
-  int idx = 0;
-  while(r<rays.end()) {
-    RadxRay *rayr = *r;
-    if (closestRay->getAzimuthDeg() == rayr->getAzimuthDeg()) {
-      if (closestRay->getElevationDeg() == rayr->getElevationDeg()) {
-        foundIt = true;
-        closestRayToEdit = *r;
-        LOG(DEBUG_VERBOSE) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
-        closestRay->print(cout); 
-      }
-    }
-    r += 1;
-    idx += 1;
-  }  
-  if (!foundIt || closestRayToEdit == NULL)
-    throw "couldn't find closest ray";
-
-  
-  //RadxRay *closestRayCopy = new RadxRay(*closestRay);
-
-  // create the view
-  SpreadSheetView *sheetView;
-  sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
-
-  // create the model
-
-  // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
-  //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
-  
-  // create the controller
-  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
-
-  // finish the other connections ..
-  //sheetView->addController(sheetController);
-  // model->setController(sheetController);
-
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  connect(sheetControl, SIGNAL(volumeChanged()),
-  	  &_manager, SLOT(setVolume()));
-  
-  sheetView->init();
-  sheetView->show();
-  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
-  
-}
-#endif
 
 /*************************************************************************
  * react to click point from remote display - Sprite
@@ -1089,7 +483,6 @@ void HorizView::triggerGridRendering(int page, int index)
 
 {
 
-  _renderFrame = true;
   _renderFramePage = page;
   _renderFrameIndex = index;
 
@@ -1127,10 +520,6 @@ void HorizView::setRenderInvalidImages(int index, VertView *vert)
 void HorizView::_renderGrids()
 {
   
-  // if (!_renderFrame) {
-  //   return;
-  // }
-  
   if(_gd.debug2) {
     fprintf(stderr,
             "Rendering Horizontal movie_frame %d - field: %d\n",
@@ -1144,8 +533,6 @@ void HorizView::_renderGrids()
 
   _gridsReady = true;
   
-  _renderFrame = false;
-
 }
 
 /************************************************************************
@@ -1697,8 +1084,6 @@ void HorizView::zoomBackView()
   if (_savedZooms.size() == 0) {
     _isZoomed = false;
   }
-  _setTransform(_zoomWorld.getTransform());
-  // _setGridSpacing();
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
@@ -1715,8 +1100,6 @@ void HorizView::zoomOutView()
   _zoomWorld.setName("zoomWorld");
   _savedZooms.clear();
   _isZoomed = false;
-  _setTransform(_zoomWorld.getTransform());
-  // _setGridSpacing();
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
             _zoomWorld.getXMinWorld(),
@@ -1936,13 +1319,9 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
     _manager.setOverlaysHaveChanged(true);
     
-    // get ray closest to click point
-
-    const RadxRay *closestRay = _getClosestRay(_worldClickX, _worldClickY);
-    
     // Emit a signal to indicate that the click location has changed
 
-    emit locationClicked(_worldClickX, _worldClickY, closestRay);
+    emit locationClicked(_worldClickX, _worldClickY);
     
     update();
 
@@ -1991,9 +1370,6 @@ void HorizView::_handleMouseZoom()
                             _worldReleaseX, _worldReleaseY);
   
   updatePixelScales();
-  
-  _setTransform(_zoomWorld.getTransform());
-  // _setGridSpacing();
   
   // enable unzooms
   
@@ -2044,8 +1420,6 @@ void HorizView::_resetWorld(int width, int height)
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
   _zoomWorld.setName("zoomWorld");
-  _setTransform(_fullWorld.getTransform());
-  // _setGridSpacing();
   _sizeChanged = true;
 
 }
@@ -2054,19 +1428,6 @@ void HorizView::_resetWorld(int width, int height)
  * Protected methods
  *************************************************************************/
 
-////////////////////
-// set the transform
-
-void HorizView::_setTransform(const QTransform &transform)
-{
-  // float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
-  // BoundaryPointEditor::Instance()->setWorldScale(worldScale);
-
-  _fullTransform = transform;
-  _zoomTransform = transform;
-
-}
-  
 /*************************************************************************
  * render the maps
  */
@@ -2077,26 +1438,6 @@ void HorizView::_renderMaps()
   _zoomWorld.drawMaps();
   _mapsReady = true;
   
-  // start the rendering
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->signalRunToStart();
-  //   }
-  // } // ifield
-
-  // wait for rendering to complete
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->waitForRunToComplete();
-  //   }
-  // } // ifield
-
-  // update();
-
 }
 
 void HorizView::informationMessage()
@@ -2181,45 +1522,6 @@ void HorizView::contextMenuParameterColors()
   
 }
 
-#ifdef NOTNOW
-  
-void HorizView::contextMenuParameterColors()
-{
-  /*
-    LOG(DEBUG_VERBOSE) << "enter";
-
-    //DisplayField selectedField;
-
-    const DisplayField &field = _manager.getSelectedField();
-    const ColorMap &colorMapForSelectedField = field.getColorMap();
-    ParameterColorView *parameterColorView = new ParameterColorView(this);
-    vector<DisplayField> displayFields = _manager.getDisplayFields();
-    DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
-    FieldColorController fieldColorController(parameterColorView, displayFieldModel);
-    // connect some signals and slots in order to retrieve information
-    // and send changes back to display 
-    connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-    connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
-
-    // TODO: move this call to the controller?
-    parameterColorView.exec();
-
-    if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?
-    }
-  
-    // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
-    delete parameterColorView;
-    delete parameterColorModel;
-
-    LOG(DEBUG_VERBOSE) << "exit ";
-  */
-  informationMessage();
-   
-}
-
-#endif
-
 void HorizView::contextMenuView()
 {
   informationMessage();
@@ -2235,7 +1537,6 @@ void HorizView::contextMenuExamine()
 void HorizView::contextMenuDataWidget()
 {
   informationMessage();
-
   //  notImplemented();                                                                                                   
 }
 

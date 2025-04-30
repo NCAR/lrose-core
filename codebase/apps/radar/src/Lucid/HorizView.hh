@@ -145,9 +145,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
 
-  QLabel *_openingFileInfoLabel;
-  void showOpeningFileMsg(bool isVisible);
-
   // adjust pixel scale to suit window size etc.
 
   virtual void updatePixelScales();
@@ -181,7 +178,7 @@ class DLL_EXPORT HorizView : public QWidget
 
  signals:
  
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void locationClicked(double xkm, double ykm);
 
   //////////////
   // Qt slots //
@@ -267,7 +264,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   // flags for controlling rendering
 
-  bool _renderFrame;
   int _renderFrameIndex;
   int _renderFramePage;
   
@@ -287,39 +283,11 @@ class DLL_EXPORT HorizView : public QWidget
   size_t _selectedField;
 
   /**
-   * @brief The brush for the background.
-   */
-
-  // QBrush _backgroundBrush;
-
-  /**
-   * @brief The color for the grid and rings.
-   */
-  
-  // QColor _gridRingsColor;
-  
-  // @brief True if the grids display is enabled.
-  
-  // bool _gridsEnabled;
-  
-  // True if the rings are enabled.
-  
-  // bool _ringsFixedEnabled;
-  // bool _ringsDataDrivenEnabled;
-  
-  /**
    * @brief This will create labels wiith nicely scaled values and
    *        approriate units.
    */
 
   ScaledLabel _scaledLabel;
-
-  /**
-   * @brief The maximum range of the beams, in km.  It affects the
-   *        labelling of the range rings
-   */
-
-  // double _maxRangeKm;
 
   // archive mode
 
@@ -354,15 +322,6 @@ class DLL_EXPORT HorizView : public QWidget
    */
 
   QRubberBand *_rubberBand;
-  // TransparentRubberBand *_rubberBand;
-  // CustomRubberBand *_rubberBand;
-
-  /**
-   * @brief The current ring spacing in km.  This value is changed when we
-   *        zoom.
-   */
-
-  // double _ringSpacing;
   
   /**
    * @brief The width of the color scale
@@ -375,7 +334,6 @@ class DLL_EXPORT HorizView : public QWidget
    *        PPI windows and RHI windows.
    */
 
-  QTransform _fullTransform;
   WorldPlot _fullWorld;
   
   /**
@@ -384,7 +342,6 @@ class DLL_EXPORT HorizView : public QWidget
    */
 
   bool _isZoomed;
-  QTransform _zoomTransform;
   WorldPlot _zoomWorld;
   vector<WorldPlot> _savedZooms;
   
@@ -448,17 +405,6 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _resetWorld(int width, int height);
   
-  // get ray closest to click point
-  virtual const RadxRay *_getClosestRay(double x_km, double y_km);
-
-  /**
-   * @brief Initialize the full window transform to use for the widget.
-   *
-   * @param[in] window    The full window to use for the widget.
-   */
-
-  void _setTransform(const QTransform &transform);
-
   // render the grid data
 
   void _renderGrids();
@@ -467,25 +413,6 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _renderMaps();
   
-  // void _drawOverlays(QPainter &painter);
-  // void _drawMaps(QPainter &painter);
-  // void _drawRingsAndAzLines(QPainter &painter);
-  
-  /**
-   * @brief Determine a ring spacing which will give even distances, and
-   *        fit a reasonable number of rings in the display.
-   *
-   * @return Returns the ring spacing in kilometers.
-   */
-
-  // virtual void _setGridSpacing();
-
-  // draw text in screen coords
-
-  void _drawScreenText(QPainter &painter, const string &text,
-                       int text_x, int text_y,
-                       int flags);
-    
   // initialize the geographic projection
 
   void _initProjection();
