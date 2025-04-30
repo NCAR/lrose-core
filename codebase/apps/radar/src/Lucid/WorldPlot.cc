@@ -349,10 +349,10 @@ void WorldPlot::setWorldLimitsY(double yMinWorld,
 ///////////////////////////////////////////////////////
 // set zoom limits from pixel space
 
-void WorldPlot::setZoomLimits(int xMin,
-                              int yMin,
-                              int xMax,
-                              int yMax)
+void WorldPlot::setPixelLimits(int xMin,
+                               int yMin,
+                               int xMax,
+                               int yMax)
   
 {
   setWorldLimits(getXWorld(xMin),
@@ -361,8 +361,8 @@ void WorldPlot::setZoomLimits(int xMin,
                  getYWorld(yMax));
 }
 
-void WorldPlot::setZoomLimitsX(int xMin,
-                               int xMax)
+void WorldPlot::setPixelLimitsX(int xMin,
+                                int xMax)
   
 {
   setWorldLimits(getXWorld(xMin),
@@ -371,8 +371,8 @@ void WorldPlot::setZoomLimitsX(int xMin,
                  _yMaxWorld);
 }
 
-void WorldPlot::setZoomLimitsY(int yMin,
-                               int yMax)
+void WorldPlot::setPixelLimitsY(int yMin,
+                                int yMax)
   
 {
   setWorldLimits(_xMinWorld,

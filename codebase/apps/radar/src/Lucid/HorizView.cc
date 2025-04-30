@@ -1369,6 +1369,11 @@ void HorizView::_handleMouseZoom()
   _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
                             _worldReleaseX, _worldReleaseY);
   
+  _zoomChanged = true;
+  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  _zoomWorld.print(cerr);
+  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  
   updatePixelScales();
   
   // enable unzooms

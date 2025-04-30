@@ -107,16 +107,16 @@ public:
 
   // set zoom limits from pixel space
   
-  void setZoomLimits(int xMin,
-                     int yMin,
-                     int xMax,
-                     int yMax);
-  
-  void setZoomLimitsX(int xMin,
-                      int xMax);
-
-  void setZoomLimitsY(int yMin,
+  void setPixelLimits(int xMin,
+                      int yMin,
+                      int xMax,
                       int yMax);
+  
+  void setPixelLimitsX(int xMin,
+                       int xMax);
+
+  void setPixelLimitsY(int yMin,
+                       int yMax);
 
   // set margins
 
