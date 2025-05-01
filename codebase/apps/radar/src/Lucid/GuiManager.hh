@@ -105,8 +105,7 @@ public:
 
   // enable the unzoom actions
   
-  void enableZoomBackButton() const;
-  void enableZoomOutButton() const;
+  void enableUnzoomButtons(bool val) const;
   
   // set the xy zoom
 

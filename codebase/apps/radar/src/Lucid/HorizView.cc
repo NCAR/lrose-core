@@ -1378,8 +1378,7 @@ void HorizView::_handleMouseZoom()
   
   // enable unzooms
   
-  _manager.enableZoomBackButton();
-  _manager.enableZoomOutButton();
+  _manager.enableUnzoomButtons(true);
   
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),

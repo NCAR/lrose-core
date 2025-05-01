@@ -500,8 +500,8 @@ cidd.xsect_start_page:      1
 
 #
 # The Outer most domain:
-cidd.num_zoom_levels:       6
-cidd.start_zoom_level:      3
+cidd.num_zoom_levels:       4
+cidd.start_zoom_level:      2
 
 # The number of Cached images for zooms.
 cidd.num_cache_zooms:       0

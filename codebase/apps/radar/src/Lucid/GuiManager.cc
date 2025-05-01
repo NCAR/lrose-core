@@ -242,16 +242,23 @@ int GuiManager::run(QApplication &app)
 }
 
 //////////////////////////////////////////////////
-// enable the zoom button - called by Widgets
+// enable the unzoom buttons
 
-void GuiManager::enableZoomBackButton() const
+void GuiManager::enableUnzoomButtons(bool val) const
 {
-  _zoomBackAct->setEnabled(true);
-}
-
-void GuiManager::enableZoomOutButton() const
-{
-  _zoomOutAct->setEnabled(true);
+  _zoomBackAct->setEnabled(val);
+  _zoomOutAct->setEnabled(val);
+  if (val) {
+    // disable zoom menu items
+    for (size_t ii = 0; ii < _zoomMenuItems.size(); ii++) {
+      _zoomMenuItems[ii]->getAction()->setEnabled(false);
+    }
+  } else {
+    // enable zoom menu items
+    for (size_t ii = 0; ii < _zoomMenuItems.size(); ii++) {
+      _zoomMenuItems[ii]->getAction()->setEnabled(true);
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -1347,8 +1354,7 @@ void GuiManager::_zoomBack()
 {
   _horiz->zoomBackView();
   if (_horiz->getSavedZooms().size() == 0) {
-    _zoomBackAct->setEnabled(false);
-    _zoomOutAct->setEnabled(false);
+    enableUnzoomButtons(false);
   }
 }
 
@@ -1359,8 +1365,7 @@ void GuiManager::_zoomOut()
 {
   _horiz->zoomOutView();
   _horiz->clearSavedZooms();
-  _zoomBackAct->setEnabled(false);
-  _zoomOutAct->setEnabled(false);
+  enableUnzoomButtons(false);
 }
 
 /////////////////////////////////////////////////////////
