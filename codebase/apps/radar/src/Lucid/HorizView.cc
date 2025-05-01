@@ -1073,14 +1073,15 @@ void HorizView::setArchiveMode(bool state)
 
 void HorizView::zoomBackView()
 {
+
   if (_savedZooms.size() == 0) {
-    _zoomWorld = _fullWorld;
-    _zoomWorld.setName("zoomWorld");
-  } else {
-    _zoomWorld = _savedZooms[_savedZooms.size()-1];
-    _zoomWorld.setName("fromSavedZoom");
-    _savedZooms.pop_back();
+    zoomOutView();
+    return;
   }
+  
+  _zoomWorld = _savedZooms[_savedZooms.size()-1];
+  // _zoomWorld.setName("fromSavedZoom");
+  _savedZooms.pop_back();
   if (_savedZooms.size() == 0) {
     _isZoomed = false;
   }
@@ -1331,8 +1332,10 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
     // save current zoom
     
+    char zoomName[1024];
+    snprintf(zoomName, 1024, "saved-zoom-%d", (int) _savedZooms.size());
     _savedZooms.push_back(_zoomWorld);
-    _savedZooms[_savedZooms.size()-1].setName("savedZoom");
+    _savedZooms[_savedZooms.size()-1].setName(zoomName);
 
     // handle the zoom action
 
