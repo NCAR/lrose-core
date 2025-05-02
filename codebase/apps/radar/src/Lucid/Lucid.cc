@@ -2487,7 +2487,8 @@ int Lucid::_initZooms()
     
     // convert from latlon if needed
 
-    if (_params.zoom_limits_in_latlon && _gd.proj.getProjType() != Mdvx::PROJ_LATLON) {
+    if (_params.zoom_limits_in_latlon &&
+        _gd.proj.getProjType() != Mdvx::PROJ_LATLON) {
       
       double minLon = minx;
       double maxLon = maxx;

@@ -1353,7 +1353,7 @@ bool GuiManager::_checkForStateChange()
 void GuiManager::_zoomBack()
 {
   _horiz->zoomBackView();
-  if (_horiz->getSavedZooms().size() == 0) {
+  if (_horiz->getCustomZooms().size() == 0) {
     enableUnzoomButtons(false);
   }
 }
@@ -1364,7 +1364,7 @@ void GuiManager::_zoomBack()
 void GuiManager::_zoomOut()
 {
   _horiz->zoomOutView();
-  _horiz->clearSavedZooms();
+  _horiz->clearCustomZooms();
   enableUnzoomButtons(false);
 }
 

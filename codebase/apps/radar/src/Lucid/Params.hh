@@ -116,6 +116,11 @@ public:
   } climo_mode_t;
 
   typedef enum {
+    ZOOM_LIMITS_IN_KM = 0,
+    ZOOM_LIMITS_IN_DEG = 1
+  } zoom_units_t;
+
+  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -222,6 +227,7 @@ public:
     double min_y;
     double max_x;
     double max_y;
+    zoom_units_t units;
   } zoom_level_t;
 
   typedef struct {

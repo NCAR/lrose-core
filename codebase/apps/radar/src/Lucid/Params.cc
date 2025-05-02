@@ -1948,7 +1948,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("zoom_levels");
     tt->descr = tdrpStrDup("Pre-defined zoom levels.");
-    tt->help = tdrpStrDup("/nlabel: label in GUI for selecting zoom level. /nmin_x: X value of SW corner./nmin_y: Y value of SW corner./nmax_x: X value of NE corner./nmax_y: Y value of NE corner./n");
+    tt->help = tdrpStrDup("/nlabel: label in GUI for selecting zoom level. /nmin_x: X value of SW corner./nmin_y: Y value of SW corner./nmax_x: X value of NE corner./nmax_y: Y value of NE corner./nunits: the units for the zoom limits for this entry./n");
     tt->array_offset = (char *) &_zoom_levels - &_start_;
     tt->array_n_offset = (char *) &zoom_levels_n - &_start_;
     tt->is_array = TRUE;
@@ -1956,7 +1956,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->array_elem_size = sizeof(zoom_level_t);
     tt->array_n = 3;
     tt->struct_def.name = tdrpStrDup("zoom_level_t");
-    tt->struct_def.nfields = 5;
+    tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1984,7 +1984,20 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
         (char *) &_zoom_levels->max_y - (char *) _zoom_levels;
-    tt->n_struct_vals = 15;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("zoom_units_t");
+      tt->struct_def.fields[5].fname = tdrpStrDup("units");
+      tt->struct_def.fields[5].ptype = ENUM_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_zoom_levels->units - (char *) _zoom_levels;
+        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("zoom_units_t");
+        tt->struct_def.fields[5].enum_def.nfields = 2;
+        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("ZOOM_LIMITS_IN_KM");
+        tt->struct_def.fields[5].enum_def.fields[0].val = ZOOM_LIMITS_IN_KM;
+        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("ZOOM_LIMITS_IN_DEG");
+        tt->struct_def.fields[5].enum_def.fields[1].val = ZOOM_LIMITS_IN_DEG;
+    tt->n_struct_vals = 18;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("100km");
@@ -1992,16 +2005,19 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[2].d = -100;
       tt->struct_vals[3].d = 100;
       tt->struct_vals[4].d = 100;
-      tt->struct_vals[5].s = tdrpStrDup("200km");
-      tt->struct_vals[6].d = -200;
+      tt->struct_vals[5].e = ZOOM_LIMITS_IN_KM;
+      tt->struct_vals[6].s = tdrpStrDup("200km");
       tt->struct_vals[7].d = -200;
-      tt->struct_vals[8].d = 200;
+      tt->struct_vals[8].d = -200;
       tt->struct_vals[9].d = 200;
-      tt->struct_vals[10].s = tdrpStrDup("300km");
-      tt->struct_vals[11].d = -300;
-      tt->struct_vals[12].d = -300;
-      tt->struct_vals[13].d = 300;
-      tt->struct_vals[14].d = 300;
+      tt->struct_vals[10].d = 200;
+      tt->struct_vals[11].e = ZOOM_LIMITS_IN_KM;
+      tt->struct_vals[12].s = tdrpStrDup("300km");
+      tt->struct_vals[13].d = -300;
+      tt->struct_vals[14].d = -300;
+      tt->struct_vals[15].d = 300;
+      tt->struct_vals[16].d = 300;
+      tt->struct_vals[17].e = ZOOM_LIMITS_IN_KM;
     tt++;
     
     // Parameter 'start_zoom_label'

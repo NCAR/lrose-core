@@ -756,12 +756,18 @@ commentdef {
   p_text = "These are the pre-defined zoom levels.";
 }
 
+typedef enum {
+  ZOOM_LIMITS_IN_KM = 0,
+  ZOOM_LIMITS_IN_DEG = 1
+} zoom_units_t;
+
 typedef struct {
   string label;
   double min_x;
   double min_y;
   double max_x;
   double max_y;
+  zoom_units_t units;
 } zoom_level_t;
 
 paramdef struct zoom_level_t {
@@ -771,7 +777,8 @@ paramdef struct zoom_level_t {
       min_x = -100,
       min_y = -100,
       max_x = 100,
-      max_y = 100
+      max_y = 100,
+      units = ZOOM_LIMITS_IN_KM
     }
     ,
     {
@@ -779,7 +786,8 @@ paramdef struct zoom_level_t {
       min_x = -200,
       min_y = -200,
       max_x = 200,
-      max_y = 200
+      max_y = 200,
+      units = ZOOM_LIMITS_IN_KM
     }
     ,
     {
@@ -787,7 +795,8 @@ paramdef struct zoom_level_t {
       min_x = -300,
       min_y = -300,
       max_x = 300,
-      max_y = 300
+      max_y = 300,
+      units = ZOOM_LIMITS_IN_KM
     }
   };
   p_descr = "Pre-defined zoom levels.";
@@ -797,6 +806,7 @@ paramdef struct zoom_level_t {
     "/nmin_y: Y value of SW corner."
     "/nmax_x: X value of NE corner."
     "/nmax_y: Y value of NE corner."
+    "/nunits: the units for the zoom limits for this entry."
     "/n";
 } zoom_levels[];
 

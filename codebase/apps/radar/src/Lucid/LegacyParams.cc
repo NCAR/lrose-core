@@ -1248,8 +1248,11 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "// <ZOOMS>\n");
 
   int startZoomLevel = _getLong("cidd.start_zoom_level", 1, false);
-  _getBoolean("cidd.zoom_limits_in_latlon",0);
-  _getLong("cidd.num_cache_zooms",1);
+  bool zoomLimitsInLatlon = _getBoolean("cidd.zoom_limits_in_latlon", 0, false);
+  if (projTypeStr == "LAT_LON") {
+    zoomLimitsInLatlon = true;
+  }
+  _getLong("cidd.num_cache_zooms", 1, false);
   _getDouble("cidd.min_zoom_threshold", 5.0);
   int numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
   
@@ -1297,7 +1300,12 @@ int LegacyParams::_readMainParams()
     fprintf(_tdrpFile, "    min_x = %lg,\n", zoom.min_x);
     fprintf(_tdrpFile, "    min_y = %lg,\n", zoom.min_y);
     fprintf(_tdrpFile, "    max_x = %lg,\n", zoom.max_x);
-    fprintf(_tdrpFile, "    max_y = %lg\n", zoom.max_y);
+    fprintf(_tdrpFile, "    max_y = %lg,\n", zoom.max_y);
+    if (zoomLimitsInLatlon) {
+      fprintf(_tdrpFile, "    units = ZOOM_LIMITS_IN_DEG\n");
+    } else {
+      fprintf(_tdrpFile, "    units = ZOOM_LIMITS_IN_KM\n");
+    }
     fprintf(_tdrpFile, "  }\n");
     if (izoom < zooms.size() - 1) {
       fprintf(_tdrpFile, "  ,\n");

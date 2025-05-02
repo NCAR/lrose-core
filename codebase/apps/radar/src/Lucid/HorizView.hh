@@ -125,8 +125,8 @@ class DLL_EXPORT HorizView : public QWidget
   // zooms
   
   const WorldPlot &getZoomWorld() const { return _zoomWorld; }
-  const vector<WorldPlot> &getSavedZooms() const { return _savedZooms; }
-  void clearSavedZooms() { _savedZooms.clear(); }
+  const vector<WorldPlot> &getCustomZooms() const { return _customZooms; }
+  void clearCustomZooms() { _customZooms.clear(); }
   void setXyZoom(double minY, double maxY, double minX, double maxX);
   bool checkForZoomChange();
   
@@ -343,7 +343,8 @@ class DLL_EXPORT HorizView : public QWidget
 
   bool _isZoomed;
   WorldPlot _zoomWorld;
-  vector<WorldPlot> _savedZooms;
+  vector<WorldPlot> _definedZooms;
+  vector<WorldPlot> _customZooms;
   
   // are we in archive mode? and if so are we at the start of a sweep?
 

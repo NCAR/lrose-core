@@ -118,7 +118,52 @@ HorizView::HorizView(QWidget* parent,
   _mapsReady = false;
   _zoomChanged = true;
   _sizeChanged = true;
-  
+
+  // zooms
+
+  for(int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
+
+    double minx = _params._zoom_levels[izoom].min_x;
+    double miny = _params._zoom_levels[izoom].min_y;
+    double maxx = _params._zoom_levels[izoom].max_x;
+    double maxy = _params._zoom_levels[izoom].max_y;
+
+    Params::zoom_units_t units = _params._zoom_levels[izoom].units;
+
+    if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON &&
+        units == Params::ZOOM_LIMITS_IN_KM) {
+
+      // convert km limits to lat/lon
+      
+      double minKmX = minx;
+      double maxKmX = maxx;
+      double minKmY = miny;
+      double maxKmY = maxy;
+      
+      _gd.proj.xy2latlon(minKmX, minKmY, miny, minx);
+      _gd.proj.xy2latlon(maxKmX, maxKmY, maxy, maxx);
+
+    } else if (_gd.proj.getProjType() != Mdvx::PROJ_LATLON &&
+               units == Params::ZOOM_LIMITS_IN_DEG) {
+
+      // convert lat/lon limits to km
+      
+      double minLon = minx;
+      double maxLon = maxx;
+      double minLat = miny;
+      double maxLat = maxy;
+      
+      _gd.proj.latlon2xy(minLat, minLon, minx, miny);
+      _gd.proj.latlon2xy(maxLat, maxLon, maxx, maxy);
+
+    }
+    
+    WorldPlot zoom;
+    zoom.setWorldLimits(minx, miny, maxx, maxy);
+    _definedZooms.push_back(zoom);
+
+  } // izoom
+    
   //fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
@@ -290,7 +335,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
                               _gd.h_win.cmax_x, _gd.h_win.cmax_y);
     _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
-    _savedZooms.clear();
+    _customZooms.clear();
     _zoomChanged = true;
     cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
     _zoomWorld.print(cerr);
@@ -1074,15 +1119,15 @@ void HorizView::setArchiveMode(bool state)
 void HorizView::zoomBackView()
 {
 
-  if (_savedZooms.size() == 0) {
+  if (_customZooms.size() == 0) {
     zoomOutView();
     return;
   }
   
-  _zoomWorld = _savedZooms[_savedZooms.size()-1];
+  _zoomWorld = _customZooms[_customZooms.size()-1];
   // _zoomWorld.setName("fromSavedZoom");
-  _savedZooms.pop_back();
-  if (_savedZooms.size() == 0) {
+  _customZooms.pop_back();
+  if (_customZooms.size() == 0) {
     _isZoomed = false;
   }
   setXyZoom(_zoomWorld.getYMinWorld(),
@@ -1099,7 +1144,7 @@ void HorizView::zoomOutView()
 {
   _zoomWorld = _fullWorld;
   _zoomWorld.setName("zoomWorld");
-  _savedZooms.clear();
+  _customZooms.clear();
   _isZoomed = false;
   setXyZoom(_zoomWorld.getYMinWorld(),
             _zoomWorld.getYMaxWorld(),
@@ -1333,9 +1378,9 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     // save current zoom
     
     char zoomName[1024];
-    snprintf(zoomName, 1024, "saved-zoom-%d", (int) _savedZooms.size());
-    _savedZooms.push_back(_zoomWorld);
-    _savedZooms[_savedZooms.size()-1].setName(zoomName);
+    snprintf(zoomName, 1024, "saved-zoom-%d", (int) _customZooms.size());
+    _customZooms.push_back(_zoomWorld);
+    _customZooms[_customZooms.size()-1].setName(zoomName);
 
     // handle the zoom action
 
