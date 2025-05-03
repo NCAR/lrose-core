@@ -276,15 +276,6 @@ void GuiManager::setXyZoom(double minY, double maxY,
 void GuiManager::setArchiveMode(bool state)
 {
 
-  // _setSweepPanelVisibility();
-  
-  if (_horiz) {
-    _horiz->setArchiveMode(state);
-  }
-  if (_vert) {
-    _vert->setArchiveMode(state);
-  }
-
   _archiveMode = state;
   
 }

@@ -61,7 +61,6 @@ HorizView::HorizView(QWidget* parent,
 
   // initialize
 
-  _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
   setAttribute(Qt::WA_TranslucentBackground);
   setAutoFillBackground(false);
   
@@ -96,16 +95,9 @@ HorizView::HorizView(QWidget* parent,
   
   _colorScaleWidth = _params.horiz_color_scale_width;
 
-  // initialize world view
-
-  configureWorldCoords(0);
-
   setGrids(_params.horiz_grids_on_at_startup);
   setRingsFixed(_params.plot_range_rings_fixed);
   setRingsDataDriven(_params.plot_range_rings_from_data);
-
-  _isArchiveMode = false;
-  _isStartOfSweep = true;
 
   _renderFrameIndex = 0;
   _renderFramePage = 0;
@@ -119,51 +111,15 @@ HorizView::HorizView(QWidget* parent,
   _zoomChanged = true;
   _sizeChanged = true;
 
-  // zooms
+  // initialize the horiz projection
+  
+  _initProjection();
+  
+  // initialize zooms
 
-  for(int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
+  _initZooms();
 
-    double minx = _params._zoom_levels[izoom].min_x;
-    double miny = _params._zoom_levels[izoom].min_y;
-    double maxx = _params._zoom_levels[izoom].max_x;
-    double maxy = _params._zoom_levels[izoom].max_y;
-
-    Params::zoom_units_t units = _params._zoom_levels[izoom].units;
-
-    if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON &&
-        units == Params::ZOOM_LIMITS_IN_KM) {
-
-      // convert km limits to lat/lon
-      
-      double minKmX = minx;
-      double maxKmX = maxx;
-      double minKmY = miny;
-      double maxKmY = maxy;
-      
-      _gd.proj.xy2latlon(minKmX, minKmY, miny, minx);
-      _gd.proj.xy2latlon(maxKmX, maxKmY, maxy, maxx);
-
-    } else if (_gd.proj.getProjType() != Mdvx::PROJ_LATLON &&
-               units == Params::ZOOM_LIMITS_IN_DEG) {
-
-      // convert lat/lon limits to km
-      
-      double minLon = minx;
-      double maxLon = maxx;
-      double minLat = miny;
-      double maxLat = maxy;
-      
-      _gd.proj.latlon2xy(minLat, minLon, minx, miny);
-      _gd.proj.latlon2xy(maxLat, maxLon, maxx, maxy);
-
-    }
-    
-    WorldPlot zoom;
-    zoom.setWorldLimits(minx, miny, maxx, maxy);
-    _definedZooms.push_back(zoom);
-
-  } // izoom
-    
+  // timer??
   //fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
@@ -191,68 +147,6 @@ HorizView::~HorizView()
 void HorizView::clear()
 {
   _renderMaps();
-}
-
-/*************************************************************************
- * configureWorldCoords()
- */
-
-void HorizView::configureWorldCoords(int zoomLevel)
-
-{
-
-  // set world view
-
-  _fullWorld.setName("fullWorld");
-  
-  _fullWorld.setWindowGeom(width(), height(), 0, 0);
-  
-  _fullWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
-                            _gd.h_win.cmax_x, _gd.h_win.cmax_y);
-  
-  _fullWorld.setLeftMargin(_params.horiz_left_margin);
-  _fullWorld.setRightMargin(_params.horiz_right_margin);
-  _fullWorld.setTopMargin(_params.horiz_top_margin);
-  _fullWorld.setBottomMargin(_params.horiz_bot_margin);
-  _fullWorld.setTitleTextMargin(_params.horiz_title_text_margin);
-  _fullWorld.setLegendTextMargin(_params.horiz_legend_text_margin);
-  _fullWorld.setAxisTextMargin(_params.horiz_axis_text_margin);
-  _fullWorld.setColorScaleWidth(_params.horiz_color_scale_width);
-
-  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
-  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
-
-  _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
-  _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
-  _fullWorld.setTickValuesFontSize(_params.horiz_tick_values_font_size);
-  _fullWorld.setLegendFontSize(_params.horiz_legend_font_size);
-
-  _fullWorld.setTitleColor(_params.horiz_title_color);
-  _fullWorld.setAxisLineColor(_params.horiz_axes_color);
-  _fullWorld.setAxisTextColor(_params.horiz_axes_color);
-  _fullWorld.setGridColor(_params.horiz_grid_color);
-  
-  // initialize the projection
-  
-  _initProjection();
-  
-  // set other members
-  
-  _zoomWorld = _fullWorld;
-  _zoomWorld.setName("zoomWorld");
-  
-  _isZoomed = false;
-  // _setTransform(_zoomWorld.getTransform());
-
-  // _setGridSpacing();
-
-  setXyZoom(_zoomWorld.getYMinWorld(),
-            _zoomWorld.getYMaxWorld(),
-            _zoomWorld.getXMinWorld(),
-            _zoomWorld.getXMaxWorld()); 
-  
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -519,6 +413,171 @@ void HorizView::_initProjection()
                           _params.proj_origin_lon);
   }
 
+}
+
+/*************************************************************************
+ * initialize zooms
+ */
+
+void HorizView::_initZooms()
+{
+
+  _zoomLevel = 0;
+  _isZoomed = false;
+  
+  // create defined zooms
+  
+  for(int izoom = 0; izoom < _params.zoom_levels_n; izoom++) {
+
+    const Params::zoom_level_t &zoomLevel = _params._zoom_levels[izoom];
+    
+    double minx = zoomLevel.min_x;
+    double miny = zoomLevel.min_y;
+    double maxx = zoomLevel.max_x;
+    double maxy = zoomLevel.max_y;
+    
+    Params::zoom_units_t units = zoomLevel.units;
+    
+    if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON &&
+        units == Params::ZOOM_LIMITS_IN_KM) {
+      
+      // convert km limits to lat/lon
+      
+      double minKmX = minx;
+      double maxKmX = maxx;
+      double minKmY = miny;
+      double maxKmY = maxy;
+      
+      _gd.proj.xy2latlon(minKmX, minKmY, miny, minx);
+      _gd.proj.xy2latlon(maxKmX, maxKmY, maxy, maxx);
+      
+    } else if (_gd.proj.getProjType() != Mdvx::PROJ_LATLON &&
+               units == Params::ZOOM_LIMITS_IN_DEG) {
+      
+      // convert lat/lon limits to km
+      
+      double minLon = minx;
+      double maxLon = maxx;
+      double minLat = miny;
+      double maxLat = maxy;
+      
+      _gd.proj.latlon2xy(minLat, minLon, minx, miny);
+      _gd.proj.latlon2xy(maxLat, maxLon, maxx, maxy);
+
+    }
+    
+    WorldPlot world;
+    _initWorld(world, zoomLevel.label);
+    world.setWorldLimits(minx, miny, maxx, maxy);
+    _definedZooms.push_back(world);
+
+    if (strcmp(zoomLevel.label, _params.start_zoom_label) == 0) {
+      _zoomLevel = izoom;
+    }
+    
+  } // izoom
+  
+}
+
+#ifdef JUNK
+
+/*************************************************************************
+ * configureWorldCoords()
+ */
+
+void HorizView::_configureWorldCoords(int zoomLevel)
+
+{
+
+  // set world view
+
+  _fullWorld.setName("fullWorld");
+  
+  _fullWorld.setWindowGeom(width(), height(), 0, 0);
+  
+  _fullWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
+                            _gd.h_win.cmax_x, _gd.h_win.cmax_y);
+  
+  _fullWorld.setLeftMargin(_params.horiz_left_margin);
+  _fullWorld.setRightMargin(_params.horiz_right_margin);
+  _fullWorld.setTopMargin(_params.horiz_top_margin);
+  _fullWorld.setBottomMargin(_params.horiz_bot_margin);
+  _fullWorld.setTitleTextMargin(_params.horiz_title_text_margin);
+  _fullWorld.setLegendTextMargin(_params.horiz_legend_text_margin);
+  _fullWorld.setAxisTextMargin(_params.horiz_axis_text_margin);
+  _fullWorld.setColorScaleWidth(_params.horiz_color_scale_width);
+
+  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
+  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
+  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
+
+  _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.horiz_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.horiz_legend_font_size);
+
+  _fullWorld.setTitleColor(_params.horiz_title_color);
+  _fullWorld.setAxisLineColor(_params.horiz_axes_color);
+  _fullWorld.setAxisTextColor(_params.horiz_axes_color);
+  _fullWorld.setGridColor(_params.horiz_grid_color);
+  
+  // set other members
+  
+  // _zoomWorld = _fullWorld;
+  // _zoomWorld.setName("zoomWorld");
+  
+  // _isZoomed = false;
+
+  // // _setGridSpacing();
+
+  // setXyZoom(_zoomWorld.getYMinWorld(),
+  //           _zoomWorld.getYMaxWorld(),
+  //           _zoomWorld.getXMinWorld(),
+  //           _zoomWorld.getXMaxWorld()); 
+  
+}
+#endif
+
+/*************************************************************************
+ * initialize WorldPlot()
+ */
+
+void HorizView::_initWorld(WorldPlot &world,
+                           const string &name)
+
+{
+
+  world.setName(name);
+  world.setWindowGeom(width(), height(), 0, 0);
+  
+  // world.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
+  //                           _gd.h_win.cmax_x, _gd.h_win.cmax_y);
+  
+  world.setLeftMargin(_params.horiz_left_margin);
+  world.setRightMargin(_params.horiz_right_margin);
+  world.setTopMargin(_params.horiz_top_margin);
+  world.setBottomMargin(_params.horiz_bot_margin);
+  world.setTitleTextMargin(_params.horiz_title_text_margin);
+  world.setLegendTextMargin(_params.horiz_legend_text_margin);
+  world.setAxisTextMargin(_params.horiz_axis_text_margin);
+  world.setColorScaleWidth(_params.horiz_color_scale_width);
+
+  world.setXAxisTickLen(_params.horiz_axis_tick_len);
+  world.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
+  world.setYAxisTickLen(_params.horiz_axis_tick_len);
+  world.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
+
+  world.setTitleFontSize(_params.horiz_title_font_size);
+  world.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
+  world.setTickValuesFontSize(_params.horiz_tick_values_font_size);
+  world.setLegendFontSize(_params.horiz_legend_font_size);
+
+  world.setTitleColor(_params.horiz_title_color);
+  world.setAxisLineColor(_params.horiz_axes_color);
+  world.setAxisTextColor(_params.horiz_axes_color);
+  world.setGridColor(_params.horiz_grid_color);
+  
 }
 
 //////////////////////////////////////////
@@ -1101,15 +1160,6 @@ int HorizView::_renderGrid(int page,
 #endif
 
   return Constants::CIDD_SUCCESS;
-}
-
-/*************************************************************************
- * set archive mode
- */
-
-void HorizView::setArchiveMode(bool state)
-{
-  _archiveMode = state;
 }
 
 /*************************************************************************

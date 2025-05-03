@@ -95,12 +95,6 @@ class DLL_EXPORT HorizView : public QWidget
   virtual ~HorizView();
 
   /**
-   * @brief Configure the CartWidget for world coords
-   */
-
-  void configureWorldCoords(int zoomLevel = 0);
-
-  /**
    * @brief Capture an image of the display.
    *
    * @return Returns the image. The caller must delete it when finished
@@ -130,10 +124,6 @@ class DLL_EXPORT HorizView : public QWidget
   void setXyZoom(double minY, double maxY, double minX, double maxX);
   bool checkForZoomChange();
   
-  // are we in archive mode? and if so are we at the start of a sweep?
-
-  void setArchiveMode(bool state);
-
   /**
    * react to click point from remote display - Sprite
    * redraw the click point cursor
@@ -261,7 +251,11 @@ class DLL_EXPORT HorizView : public QWidget
   // pixmap for rendering
   
   QPixmap _pixmap;
+  
+  // color scale
 
+  int _colorScaleWidth;
+  
   // flags for controlling rendering
 
   int _renderFrameIndex;
@@ -270,34 +264,20 @@ class DLL_EXPORT HorizView : public QWidget
   bool _renderInvalidImages;
   int _invalidImagesFrameIndex;
   VertView *_vert;
-
+  
   bool _zoomChanged;
   bool _sizeChanged;
   bool _gridsReady;
   bool _mapsReady;
   
-  /**
-   * @brief The index of the field selected for display.
-   */
+  // The index of the field selected for display.
   
   size_t _selectedField;
 
-  /**
-   * @brief This will create labels wiith nicely scaled values and
-   *        approriate units.
-   */
-
+  // Class to create labels wiith nicely scaled values and approriate units.
+  
   ScaledLabel _scaledLabel;
 
-  // archive mode
-
-  bool _archiveMode;
-
-  // zooms
-
-  XyBox _zoomXy;
-  XyBox _prevZoomXy;
-  
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
    *        panning.
@@ -323,34 +303,18 @@ class DLL_EXPORT HorizView : public QWidget
 
   QRubberBand *_rubberBand;
   
-  /**
-   * @brief The width of the color scale
-   */
+  // zooms
 
-  int _colorScaleWidth;
+  XyBox _zoomXy;
+  XyBox _prevZoomXy;
   
-  /**
-   * @brief The full window rendering dimensions.  These are different for
-   *        PPI windows and RHI windows.
-   */
-
   WorldPlot _fullWorld;
-  
-  /**
-   * @brief The window to use for rendering.  This is where the zoom is
-   *        implemented.
-   */
-
-  bool _isZoomed;
   WorldPlot _zoomWorld;
   vector<WorldPlot> _definedZooms;
   vector<WorldPlot> _customZooms;
+  bool _isZoomed;
+  int _zoomLevel;
   
-  // are we in archive mode? and if so are we at the start of a sweep?
-
-  bool _isArchiveMode;
-  bool _isStartOfSweep;
-
   // projection
 
   MdvxProj _proj;
@@ -414,9 +378,19 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _renderMaps();
   
-  // initialize the geographic projection
+  // initialize horiz projection
 
   void _initProjection();
+
+  // initialize zooms
+
+  void _initZooms();
+  
+  // init world plot
+  
+  void _initWorld(WorldPlot &world, const string &name);
+
+  // grid rendering
   
   int _controlRenderGrid(int page,
                          time_t start_time, time_t end_time);
@@ -428,6 +402,8 @@ class DLL_EXPORT HorizView : public QWidget
   
   void _doRenderInvalidImages(int index, VertView *vert);
 
+  // debug prints
+  
   void _printNow(int ndecimals, ostream &out);
 
 };

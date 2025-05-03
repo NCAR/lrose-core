@@ -99,10 +99,6 @@ class DLL_EXPORT VertView : public QWidget
   
   virtual void configureWorldCoords(int zoomLevel = 0);
 
-  // are we in archive mode? and if so are we at the start of a sweep?
-
-  void setArchiveMode(bool state);
-  
   /**********************************************
    * turn on archive-style rendering - all fields
    */
@@ -312,11 +308,6 @@ class DLL_EXPORT VertView : public QWidget
   
   const VertManager &_vertWindow;
 
-  // are we in archive mode? and if so are we at the start of a sweep?
-
-  bool _isArchiveMode;
-  bool _isStartOfSweep;
-
   // angles and times in archive mode
 
   DateTime _plotStartTime;
@@ -384,10 +375,6 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   QPoint _rubberBandOrigin;
-
-  // archive mode
-
-  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

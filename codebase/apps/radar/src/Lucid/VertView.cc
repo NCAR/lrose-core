@@ -74,10 +74,6 @@ VertView::VertView(QWidget* parent,
         
 {
   
-  // mode
-
-  _archiveMode = _params.start_mode == Params::MODE_ARCHIVE;
-
   // Set up the background color
 
   QPalette new_palette = palette();
@@ -128,11 +124,6 @@ VertView::VertView(QWidget* parent,
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
 
-  // archive mode
-
-  _isArchiveMode = false;
-  _isStartOfSweep = true;
-  
   _plotStartTime.setToZero();
   _plotEndTime.setToZero();
   
@@ -452,6 +443,8 @@ void VertView::_drawOverlays(QPainter &painter)
   
   // add legends with time, field name and elevation angle
 
+#ifdef NOTNOW
+  
   if (_archiveMode) {
     
     vector<string> legends;
@@ -523,6 +516,8 @@ void VertView::_drawOverlays(QPainter &painter)
     painter.restore();
 
   } // if (_archiveMode) {
+
+#endif
 
 }
 
@@ -878,15 +873,6 @@ int VertView::renderVertDisplay(QPaintDevice *pdev,
 }
 
 #endif
-
-/*************************************************************************
- * set archive mode
- */
-
-void VertView::setArchiveMode(bool state)
-{
-  _archiveMode = state;
-}
 
 /*************************************************************************
  * zoomBack the view
