@@ -167,17 +167,6 @@ void HorizView::timerEvent(QTimerEvent *event)
 
 
 /*************************************************************************
- * adjust pixel scale for correct aspect ratio etc
- */
-// void HorizView::updatePixelScales()
-// {
-
-//   // _zoom->setProjection(_gd.proj);
-//   _zoom->updatePixelScales();
-  
-// }
-
-/*************************************************************************
  * print current time - for debugging
  */
 
@@ -478,7 +467,19 @@ void HorizView::_initZooms()
   } // izoom
   
   _zoom = &_definedZooms[_zoomLevel];
+  _updateGlobalCurrentZoom();
+  
+}
 
+////////////////////////////////////////////
+// copy current zoom limits to globals
+
+void HorizView::_updateGlobalCurrentZoom()
+{
+  _gd.h_win.cmin_y = _zoom->getYMinWorld();
+  _gd.h_win.cmax_y = _zoom->getYMaxWorld();
+  _gd.h_win.cmin_x = _zoom->getXMinWorld();
+  _gd.h_win.cmax_x = _zoom->getXMaxWorld();
 }
 
 /*************************************************************************
@@ -1118,6 +1119,7 @@ void HorizView::zoomBackView()
     _customZooms.pop_back();
     _zoom = &_customZooms[_customZooms.size()-1];
   }
+  _updateGlobalCurrentZoom();
   _zoomChanged = true;
   update();
 }
@@ -1130,6 +1132,7 @@ void HorizView::zoomOutView()
 {
   _customZooms.clear();
   _zoom = &_definedZooms[_zoomLevel];
+  _updateGlobalCurrentZoom();
   _zoomChanged = true;
   update();
 }
@@ -1145,22 +1148,10 @@ void HorizView::setZoomIndex(int zoomIndex)
   }
   _zoomLevel = zoomIndex;
   _zoom = &_definedZooms[_zoomLevel];
+  _updateGlobalCurrentZoom();
   _zoomChanged = true;
   update();
 }
-
-// void HorizView::setXyZoom(double minY, double maxY,
-//                           double minX, double maxX)
-// {
-//   _prevZoomXy = _zoomXy;
-//   _zoomXy.setLimits(minY, maxY, minX, maxX);
-//   _gd.h_win.cmin_y = minY;
-//   _gd.h_win.cmax_y = maxY;
-//   _gd.h_win.cmin_x = minX;
-//   _gd.h_win.cmax_x = maxX;
-//   _zoomChanged = true;
-//   update();
-// }
 
 /////////////////////////////////////////////////////////
 // check for zoom change
@@ -1376,6 +1367,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _customZooms.push_back(*_zoom);
     _customZooms[_customZooms.size()-1].setName(zoomName);
     _zoom = &_customZooms[_customZooms.size()-1];
+    _updateGlobalCurrentZoom();
     _zoomChanged = true;
     
     // handle the zoom action
@@ -1415,40 +1407,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 }
 
 /*************************************************************************
- * handle zoom event
- */
-
-// void HorizView::_handleMouseZoom()
-// {
-
-//   _worldPressX = _zoom->getXWorld(_mousePressX);
-//   _worldPressY = _zoom->getYWorld(_mousePressY);
-//   _worldReleaseX = _zoom->getXWorld(_zoomCornerX);
-//   _worldReleaseY = _zoom->getYWorld(_zoomCornerY);
-  
-//   // update world coords transform
-  
-//   _zoom->setWorldLimits(_worldPressX, _worldPressY,
-//                         _worldReleaseX, _worldReleaseY);
-  
-//   cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-//   _zoom->print(cerr);
-//   cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-  
-//   updatePixelScales();
-  
-//   // enable unzooms
-  
-//   _manager.enableUnzoomButtons(true);
-  
-//   setXyZoom(_zoom->getYMinWorld(),
-//             _zoom->getYMaxWorld(),
-//             _zoom->getXMinWorld(),
-//             _zoom->getXMaxWorld());
-  
-// }
-
-/*************************************************************************
  * resizeEvent()
  */
 
@@ -1479,20 +1437,6 @@ void HorizView::resize(const int width, const int height)
   _sizeChanged = true;
   
 }
-
-//////////////////////////////////////////////////////////////
-// reset the pixel size of the world view
-
-// void HorizView::_resetWorld(int width, int height)
-
-// {
-
-//   _fullWorld.resize(width, height);
-//   _zoom = _fullWorld;
-//   _zoom->setName("zoomWorld");
-//   _sizeChanged = true;
-
-// }
 
 /*************************************************************************
  * Protected methods

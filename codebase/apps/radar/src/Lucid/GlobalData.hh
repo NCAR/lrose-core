@@ -264,26 +264,26 @@ public:
 
 // zoom states
 
-class zoom_t {
-public:
-  zoom_t()
-  {
-    zmin_x = 0.0;
-    zmin_y = 0.0;
-    zmax_x = 0.0;
-    zmax_y = 0.0;
-    label = nullptr;
-    parent = nullptr;
-    child = nullptr;
-  }
-  double zmin_x;
-  double zmin_y;
-  double zmax_x;
-  double zmax_y;
-  char *label;
-  zoom_t *parent;
-  zoom_t *child;
-};
+// class zoom_t {
+// public:
+//   zoom_t()
+//   {
+//     zmin_x = 0.0;
+//     zmin_y = 0.0;
+//     zmax_x = 0.0;
+//     zmax_y = 0.0;
+//     label = nullptr;
+//     parent = nullptr;
+//     child = nullptr;
+//   }
+//   double zmin_x;
+//   double zmin_y;
+//   double zmax_x;
+//   double zmax_y;
+//   char *label;
+//   zoom_t *parent;
+//   zoom_t *child;
+// };
  
 ///////////////////////////////////////////////////////////////
 // Wind Vectors
@@ -549,9 +549,9 @@ public:
     cmin_y = cmax_y = 0.0;
     cur_ht = 0.0;
     
-    zmin_x = zmax_x = nullptr;
-    zmin_y = zmax_y = nullptr;
-    zmin_ht = zmax_ht = 0.0;
+    // zmin_x = zmax_x = nullptr;
+    // zmin_y = zmax_y = nullptr;
+    // zmin_ht = zmax_ht = 0.0;
     
     km_across_screen = 0.0;
     
@@ -607,9 +607,9 @@ public:
   double cmin_y,cmax_y; /* Y limits of current display area */
   double cur_ht; /* Z Height of current display area */
 
-  double *zmin_x,*zmax_x; /* X limits of zoomed display area */
-  double *zmin_y,*zmax_y; /* Y limits of zoomed display area */
-  double zmin_ht,zmax_ht; /* Z limits of zoomed display area */
+  // double *zmin_x,*zmax_x; /* X limits of zoomed display area */
+  // double *zmin_y,*zmax_y; /* Y limits of zoomed display area */
+  // double zmin_ht,zmax_ht; /* Z limits of zoomed display area */
 
   double km_across_screen; /* Approx. distance across the window (KM) */
 

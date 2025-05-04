@@ -3330,7 +3330,7 @@ void WorldPlot::drawMaps()
         
         double proj_x = poly->proj_x[ll];
         double proj_y = poly->proj_y[ll];
-        
+
         bool validPoint = true;
         if (fabs(proj_x) > 32767 || fabs(proj_y) > 32767) {
           validPoint = false;

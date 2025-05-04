@@ -231,9 +231,9 @@ int MdvReader::getHorizPlane()
     double dlonExtra = fabs(dlon) / 4.0;
     
     h_mdvx.setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
-                               _zoomBoxReq.getMinLon() - dlonExtra,
-                               _zoomBoxReq.getMaxLat() + dlatExtra,
-                               _zoomBoxReq.getMaxLon() + dlonExtra);
+                              _zoomBoxReq.getMinLon() - dlonExtra,
+                              _zoomBoxReq.getMaxLat() + dlatExtra,
+                              _zoomBoxReq.getMaxLon() + dlonExtra);
 
   }
   
@@ -376,50 +376,46 @@ int MdvReader::_handleHorizReadDone()
     
   // Implemented for MOBILE RADARS - 
 
-  if(_params.zoom_domain_follows_data &&
-     this == _gd.mread[_gd.h_win.page] ) { // Only for the primary field
+  if (_params.zoom_domain_follows_data &&
+      this == _gd.mread[_gd.h_win.page]) { // Only for the primary field
+
     double dx,locx;
     double dy,locy;
-    int index = _gd.h_win.zoom_level;
+    // int index = _gd.h_win.zoom_level;
       
     if(h_fhdr.proj_origin_lat != _gd.h_win.origin_lat ||
        h_fhdr.proj_origin_lon != _gd.h_win.origin_lon) {
-      
-      dx = _gd.h_win.zmax_x[index] - _gd.h_win.zmin_x[index];
-      dy = _gd.h_win.zmax_y[index] - _gd.h_win.zmin_y[index];
-      
+
+      dx = _gd.h_win.cmax_x - _gd.h_win.cmin_x;
+      dy = _gd.h_win.cmax_y - _gd.h_win.cmin_y;
+
       switch(_gd.display_projection) {
         case Mdvx::PROJ_LATLON:
           _gd.h_win.origin_lat = h_fhdr.proj_origin_lat;
           _gd.h_win.origin_lon = h_fhdr.proj_origin_lon;
-          
-          _gd.h_win.zmin_x[index] = h_fhdr.proj_origin_lon - (dx / 2.0);
-          _gd.h_win.zmax_x[index] = h_fhdr.proj_origin_lon + (dx / 2.0);
-          _gd.h_win.zmin_y[index] = h_fhdr.proj_origin_lat - (dy / 2.0);
-          _gd.h_win.zmax_y[index] = h_fhdr.proj_origin_lat + (dy / 2.0);
-            
+          _gd.h_win.cmin_x = h_fhdr.proj_origin_lon - (dx / 2.0);
+          _gd.h_win.cmax_x = h_fhdr.proj_origin_lon + (dx / 2.0);
+          _gd.h_win.cmin_y = h_fhdr.proj_origin_lat - (dy / 2.0);
+          _gd.h_win.cmax_y = h_fhdr.proj_origin_lat + (dy / 2.0);
           break;
-            
         default:
           _gd.proj.latlon2xy(h_fhdr.proj_origin_lat,h_fhdr.proj_origin_lon,locx,locy);
-            
-          _gd.h_win.zmin_x[index] = locx - (dx / 2.0);
-          _gd.h_win.zmax_x[index] = locx + (dx / 2.0);
-          _gd.h_win.zmin_y[index] = locy - (dy / 2.0);
-          _gd.h_win.zmax_y[index] = locy + (dy / 2.0);
-            
+          _gd.h_win.cmin_x = locx - (dx / 2.0);
+          _gd.h_win.cmax_x = locx + (dx / 2.0);
+          _gd.h_win.cmin_y = locy - (dy / 2.0);
+          _gd.h_win.cmax_y = locy + (dy / 2.0);
           break;
-            
       }
-
+      
       /* Set current area to our indicated zoom area */
-      _gd.h_win.cmin_x = _gd.h_win.zmin_x[index];
-      _gd.h_win.cmax_x = _gd.h_win.zmax_x[index];
-      _gd.h_win.cmin_y = _gd.h_win.zmin_y[index];
-      _gd.h_win.cmax_y = _gd.h_win.zmax_y[index];
+      // _gd.h_win.cmin_x = _gd.h_win.zmin_x;
+      // _gd.h_win.cmax_x = _gd.h_win.zmax_x;
+      // _gd.h_win.cmin_y = _gd.h_win.zmin_y;
+      // _gd.h_win.cmax_y = _gd.h_win.zmax_y;
       
     }
-  }
+
+  } // if (_params.zoom_domain_follows_data
   
   if (_gd.debug1) {
     cerr << "nx, ny: "

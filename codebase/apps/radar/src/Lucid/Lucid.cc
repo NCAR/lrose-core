@@ -676,10 +676,10 @@ int Lucid::_initDataSpace()
   
   // init current zoom
   
-  _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
-  _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
-  _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
-  _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
+  // _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
+  // _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
+  // _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
+  // _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
 
   if(_gd.debug) {
     printf("CUR X: %g,%g   Y: %g,%g,\n",
@@ -706,24 +706,24 @@ int Lucid::_initDataSpace()
 
   /* Automatically define the Custom Zoom levels */
 
-  for(int ii = 0; ii <= Constants::NUM_CUSTOM_ZOOMS; ii++) {
-    _gd.h_win.zmin_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_x[0] + 
-      ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-    _gd.h_win.zmax_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_x[0] - 
-      ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-    _gd.h_win.zmin_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_y[0] + 
-      ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-    _gd.h_win.zmax_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_y[0] - 
-      ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-    _gd.h_win.num_zoom_levels++;
-  }
+  // for(int ii = 0; ii <= Constants::NUM_CUSTOM_ZOOMS; ii++) {
+  //   _gd.h_win.zmin_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_x[0] + 
+  //     ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
+  //   _gd.h_win.zmax_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_x[0] - 
+  //     ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
+  //   _gd.h_win.zmin_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_y[0] + 
+  //     ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
+  //   _gd.h_win.zmax_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_y[0] - 
+  //     ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
+  //   _gd.h_win.num_zoom_levels++;
+  // }
 
   // vertical section
   
-  _gd.v_win.zmin_x = (double *) calloc(sizeof(double), 1);
-  _gd.v_win.zmax_x = (double *) calloc(sizeof(double), 1);
-  _gd.v_win.zmin_y = (double *) calloc(sizeof(double), 1);
-  _gd.v_win.zmax_y = (double *) calloc(sizeof(double), 1);
+  // _gd.v_win.zmin_x = (double *) calloc(sizeof(double), 1);
+  // _gd.v_win.zmax_x = (double *) calloc(sizeof(double), 1);
+  // _gd.v_win.zmin_y = (double *) calloc(sizeof(double), 1);
+  // _gd.v_win.zmax_y = (double *) calloc(sizeof(double), 1);
 
   _gd.v_win.origin_lat = _params.proj_origin_lat;
   _gd.v_win.origin_lon = _params.proj_origin_lon;
@@ -2421,7 +2421,7 @@ int Lucid::_initStationLoc()
 int Lucid::_initZooms()
 
 {
-  
+
   if (_params.zoom_levels_n < 1) {
     cerr << "ERROR - no zoom levels specified" << endl;
     cerr << "  This must be corrected in the params file: " << _paramsPathUsed.getPath() << endl;
@@ -2457,14 +2457,14 @@ int Lucid::_initZooms()
   _gd.h_win.zoom_level = _gd.h_win.start_zoom_level;
   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
   
-  _gd.h_win.zmin_x =
-    (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  _gd.h_win.zmax_x =
-    (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  _gd.h_win.zmin_y =
-    (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  _gd.h_win.zmax_y =
-    (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
+  // _gd.h_win.zmin_x =
+  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
+  // _gd.h_win.zmax_x =
+  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
+  // _gd.h_win.zmin_y =
+  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
+  // _gd.h_win.zmax_y =
+  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
 
   if (_gd.display_projection == Mdvx::PROJ_LATLON) {
     _gd.h_win.min_x = max(_params.domain_limit_min_x, -360.0);
@@ -2509,13 +2509,13 @@ int Lucid::_initZooms()
 
     }
     
-    _gd.h_win.zmin_x[izoom] = minx;
-    _gd.h_win.zmin_y[izoom] = miny;
-    _gd.h_win.zmax_x[izoom] = maxx;
-    _gd.h_win.zmax_y[izoom] = maxy;
+    // _gd.h_win.zmin_x[izoom] = minx;
+    // _gd.h_win.zmin_y[izoom] = miny;
+    // _gd.h_win.zmax_x[izoom] = maxx;
+    // _gd.h_win.zmax_y[izoom] = maxy;
     
-    double delta_x = _gd.h_win.zmax_x[izoom] - _gd.h_win.zmin_x[izoom];
-    double delta_y = _gd.h_win.zmax_y[izoom] - _gd.h_win.zmin_y[izoom];
+    double delta_x = maxx - minx;
+    double delta_y = maxy - miny;
 
     double max_delta_x = _gd.h_win.max_x - _gd.h_win.min_x;
     double max_delta_y = _gd.h_win.max_y - _gd.h_win.min_y;
@@ -2529,24 +2529,24 @@ int Lucid::_initZooms()
 
     // trap bogus values
 
-    if(_gd.h_win.zmin_x[izoom] < _gd.h_win.min_x) {
-      _gd.h_win.zmin_x[izoom] = _gd.h_win.min_x;
-      _gd.h_win.zmax_x[izoom] =  _gd.h_win.min_x + delta_x;
+    if(minx < _gd.h_win.min_x) {
+      minx = _gd.h_win.min_x;
+      maxx =  _gd.h_win.min_x + delta_x;
     }
 
-    if(_gd.h_win.zmin_y[izoom] < _gd.h_win.min_y) {
-      _gd.h_win.zmin_y[izoom] = _gd.h_win.min_y;
-      _gd.h_win.zmax_y[izoom] =  _gd.h_win.min_y + delta_y;
+    if(miny < _gd.h_win.min_y) {
+      miny = _gd.h_win.min_y;
+      maxy =  _gd.h_win.min_y + delta_y;
     }
 
-    if(_gd.h_win.zmax_x[izoom] > _gd.h_win.max_x) {
-      _gd.h_win.zmax_x[izoom] = _gd.h_win.max_x;
-      _gd.h_win.zmin_x[izoom] =  _gd.h_win.max_x - delta_x;
+    if(maxx > _gd.h_win.max_x) {
+      maxx = _gd.h_win.max_x;
+      minx =  _gd.h_win.max_x - delta_x;
     }
 
-    if(_gd.h_win.zmax_y[izoom] > _gd.h_win.max_y) {
-      _gd.h_win.zmax_y[izoom] = _gd.h_win.max_y;
-      _gd.h_win.zmin_y[izoom] =  _gd.h_win.max_y - delta_y;
+    if(maxy > _gd.h_win.max_y) {
+      maxy = _gd.h_win.max_y;
+      miny =  _gd.h_win.max_y - delta_y;
     }
 
     // if(_params.horiz_aspect_ratio <= 0.0) {
@@ -2554,7 +2554,7 @@ int Lucid::_initZooms()
     // }
     
     _gd.aspect_correction =
-      cos(((_gd.h_win.zmax_y[izoom] + _gd.h_win.zmin_y[izoom])/2.0) * Constants::LUCID_DEG_TO_RAD);
+      cos(((maxy + miny)/2.0) * Constants::LUCID_DEG_TO_RAD);
 
     /* Make sure domains are consistant with the window aspect ratio */
 
@@ -2565,17 +2565,17 @@ int Lucid::_initZooms()
     // delta_x /= _params.aspect_ratio;
 
     if(delta_x > delta_y) {
-      _gd.h_win.zmax_y[izoom] += ((delta_x - delta_y) /2.0) ;
-      _gd.h_win.zmin_y[izoom] -= ((delta_x - delta_y) /2.0) ;
+      maxy += ((delta_x - delta_y) /2.0) ;
+      miny -= ((delta_x - delta_y) /2.0) ;
     } else {
-      _gd.h_win.zmax_x[izoom] += ((delta_y - delta_x) /2.0) ;
-      _gd.h_win.zmin_x[izoom] -= ((delta_y - delta_x) /2.0) ;
+      maxx += ((delta_y - delta_x) /2.0) ;
+      minx -= ((delta_y - delta_x) /2.0) ;
     }
     
     if(_gd.debug) {
       printf(" ZOOM: %d --  X: %g,%g   Y: %g,%g,  Delta: %g,%g\n", izoom,
-             _gd.h_win.zmin_x[izoom],_gd.h_win.zmax_x[izoom],
-             _gd.h_win.zmin_y[izoom],_gd.h_win.zmax_y[izoom],
+             minx,maxx,
+             miny,maxy,
              delta_x,delta_y);
     }
     

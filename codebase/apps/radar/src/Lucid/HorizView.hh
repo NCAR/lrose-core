@@ -122,7 +122,6 @@ class DLL_EXPORT HorizView : public QWidget
   const vector<WorldPlot> &getCustomZooms() const { return _customZooms; }
   void clearCustomZooms() { _customZooms.clear(); }
   void setZoomIndex(int zoomIndex);
-  // void setXyZoom(double minY, double maxY, double minX, double maxX);
   bool checkForZoomChange();
   
   /**
@@ -362,14 +361,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   virtual void timerEvent(QTimerEvent * event);
 
-  // handle a zoom change from mouse rectangle
-
-  // void _handleMouseZoom();
-  
-  // reset the world coords
-  
-  // void _resetWorld(int width, int height);
-  
   // render the grid data
 
   void _renderGrids();
@@ -385,6 +376,7 @@ class DLL_EXPORT HorizView : public QWidget
   // initialize zooms
 
   void _initZooms();
+  void _updateGlobalCurrentZoom();
   
   // init world plot
   
