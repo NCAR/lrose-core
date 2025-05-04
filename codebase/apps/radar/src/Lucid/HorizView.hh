@@ -118,10 +118,11 @@ class DLL_EXPORT HorizView : public QWidget
 		      
   // zooms
   
-  const WorldPlot &getZoomWorld() const { return _zoomWorld; }
+  const WorldPlot *getZoomWorld() const { return _zoom; }
   const vector<WorldPlot> &getCustomZooms() const { return _customZooms; }
   void clearCustomZooms() { _customZooms.clear(); }
-  void setXyZoom(double minY, double maxY, double minX, double maxX);
+  void setZoomIndex(int zoomIndex);
+  // void setXyZoom(double minY, double maxY, double minX, double maxX);
   bool checkForZoomChange();
   
   /**
@@ -137,7 +138,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   // adjust pixel scale to suit window size etc.
 
-  virtual void updatePixelScales();
+  // virtual void updatePixelScales();
 
   // override QWidget methods
   
@@ -305,14 +306,13 @@ class DLL_EXPORT HorizView : public QWidget
   
   // zooms
 
-  XyBox _zoomXy;
-  XyBox _prevZoomXy;
+  // XyBox _zoomXy;
+  // XyBox _prevZoomXy;
   
-  WorldPlot _fullWorld;
-  WorldPlot _zoomWorld;
+  // WorldPlot _fullWorld;
+  WorldPlot *_zoom;
   vector<WorldPlot> _definedZooms;
   vector<WorldPlot> _customZooms;
-  bool _isZoomed;
   int _zoomLevel;
   
   // projection
@@ -364,11 +364,11 @@ class DLL_EXPORT HorizView : public QWidget
 
   // handle a zoom change from mouse rectangle
 
-  void _handleMouseZoom();
+  // void _handleMouseZoom();
   
   // reset the world coords
   
-  void _resetWorld(int width, int height);
+  // void _resetWorld(int width, int height);
   
   // render the grid data
 

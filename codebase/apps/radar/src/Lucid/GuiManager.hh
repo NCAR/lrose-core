@@ -107,9 +107,11 @@ public:
   
   void enableUnzoomButtons(bool val) const;
   
-  // set the xy zoom
+  // set the zoom level
 
-  void setXyZoom(double minY, double maxY, double minX, double maxX);
+  void setZoomIndex(int zoomIndex);
+
+  // void setXyZoom(double minY, double maxY, double minX, double maxX);
 
   // set/get archive mode
   

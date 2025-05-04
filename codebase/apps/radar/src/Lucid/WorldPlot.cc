@@ -388,11 +388,10 @@ void WorldPlot::resize(int width,
                        int height)
 
 {
-    
+  
   _widthPixels = width;
   _heightPixels = height;
-  
-  _computeTransform();
+  updatePixelScales();
   
 }
 
@@ -405,8 +404,7 @@ void WorldPlot::setWindowOffsets(int xOffset,
 
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
-
-  _computeTransform();
+  updatePixelScales();
 
 }
 

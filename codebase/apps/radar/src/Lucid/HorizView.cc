@@ -169,13 +169,13 @@ void HorizView::timerEvent(QTimerEvent *event)
 /*************************************************************************
  * adjust pixel scale for correct aspect ratio etc
  */
-void HorizView::updatePixelScales()
-{
+// void HorizView::updatePixelScales()
+// {
 
-  _zoomWorld.setProjection(_gd.proj);
-  _zoomWorld.updatePixelScales();
+//   // _zoom->setProjection(_gd.proj);
+//   _zoom->updatePixelScales();
   
-}
+// }
 
 /*************************************************************************
  * print current time - for debugging
@@ -212,29 +212,29 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   // check zoom
 
-  XyBox currentZoom(_zoomWorld.getYMinWorld(),
-                    _zoomWorld.getYMaxWorld(),
-                    _zoomWorld.getXMinWorld(),
-                    _zoomWorld.getXMaxWorld());
-  if (currentZoom != _zoomXy) {
-    _zoomWorld.setWorldLimits(_zoomXy.getMinX(),
-                              _zoomXy.getMinY(),
-                              _zoomXy.getMaxX(),
-                              _zoomXy.getMaxY());
-    _zoomChanged = true;
-    cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
-    _zoomWorld.print(cerr);
-    cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
-  } else if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
-    _zoomWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
-                              _gd.h_win.cmax_x, _gd.h_win.cmax_y);
-    _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
-    _customZooms.clear();
-    _zoomChanged = true;
-    cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-    _zoomWorld.print(cerr);
-    cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-  }
+  // XyBox currentZoom(_zoom->getYMinWorld(),
+  //                   _zoom->getYMaxWorld(),
+  //                   _zoom->getXMinWorld(),
+  //                   _zoom->getXMaxWorld());
+  // if (currentZoom != _zoomXy) {
+  //   _zoom->setWorldLimits(_zoomXy.getMinX(),
+  //                             _zoomXy.getMinY(),
+  //                             _zoomXy.getMaxX(),
+  //                             _zoomXy.getMaxY());
+  //   _zoomChanged = true;
+  //   cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
+  //   _zoom->print(cerr);
+  //   cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
+  // } else if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
+  //   _zoom->setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
+  //                             _gd.h_win.cmax_x, _gd.h_win.cmax_y);
+  //   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
+  //   _customZooms.clear();
+  //   _zoomChanged = true;
+  //   cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+  //   _zoom->print(cerr);
+  //   cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+  // }
   
   // render data grids to grid image in WorldPlot
 
@@ -242,7 +242,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     _renderGrids();
     _renderMaps();
   }
-
+  
   // render invalid images
   
   // if (_renderInvalidImages) {
@@ -255,48 +255,48 @@ void HorizView::paintEvent(QPaintEvent *event)
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   if (_gridsReady && _mapsReady) {
-    painter.drawImage(0, 0, *_zoomWorld.getGridImage());
-    painter.drawImage(0, 0, *_zoomWorld.getMapsImage());
+    painter.drawImage(0, 0, *_zoom->getGridImage());
+    painter.drawImage(0, 0, *_zoom->getMapsImage());
   }
 
   // render the range rings
   
   if (_params.plot_range_rings_fixed || _params.plot_range_rings_from_data) {
     MdvReader *mr = _gd.mread[fieldNum];
-    _zoomWorld.drawRangeRingsHoriz(fieldNum, mr);
-    painter.drawImage(0, 0, *_zoomWorld.getRingsImage());
+    _zoom->drawRangeRingsHoriz(fieldNum, mr);
+    painter.drawImage(0, 0, *_zoom->getRingsImage());
   }
   
   // set axis areas to background color
   
-  _zoomWorld.fillMargins(painter, _params.background_color);
+  _zoom->fillMargins(painter, _params.background_color);
   
   // draw axes
   
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   string projUnits("km");
-  if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON) {
+  if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
     projUnits = "deg";
   }
-  _zoomWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
-  _zoomWorld.setXAxisLabelsInside(_params.horiz_tick_values_inside);
-  _zoomWorld.setAxisLineColor(_params.horiz_axes_color);
-  _zoomWorld.setAxisTextColor(_params.horiz_axes_color);
-  _zoomWorld.setGridColor(_params.horiz_grid_color);
-  _zoomWorld.drawAxisLeft(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
-  _zoomWorld.drawAxisTop(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisRight(painter, projUnits, true, true, false, false);
-  _zoomWorld.drawAxisBottom(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
+  _zoom->setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _zoom->setXAxisLabelsInside(_params.horiz_tick_values_inside);
+  _zoom->setAxisLineColor(_params.horiz_axes_color);
+  _zoom->setAxisTextColor(_params.horiz_axes_color);
+  _zoom->setGridColor(_params.horiz_grid_color);
+  _zoom->drawAxisLeft(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
+  _zoom->drawAxisTop(painter, projUnits, true, true, false, false);
+  _zoom->drawAxisRight(painter, projUnits, true, true, false, false);
+  _zoom->drawAxisBottom(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
   
   // draw the color scale
 
   const ColorMap &colorMap(_gd.mread[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
+  _zoom->drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
 
   // title
   
   painter.setPen(_params.foreground_color);
-  _zoomWorld.drawTitleTopCenter(painter, _params.horiz_frame_label);
+  _zoom->drawTitleTopCenter(painter, _params.horiz_frame_label);
   
   // click point cross hairs
   
@@ -356,8 +356,8 @@ void HorizView::setClickPoint(double azimuthDeg,
   double y_km =
     rangeKm * cos(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
 
-  _mouseReleaseX = _zoomWorld.getIxPixel(x_km);
-  _mouseReleaseY = _zoomWorld.getIyPixel(y_km);
+  _mouseReleaseX = _zoom->getIxPixel(x_km);
+  _mouseReleaseY = _zoom->getIyPixel(y_km);
   _pointClicked = true;
 
   update();
@@ -423,7 +423,7 @@ void HorizView::_initZooms()
 {
 
   _zoomLevel = 0;
-  _isZoomed = false;
+  _zoomChanged = true;
   
   // create defined zooms
   
@@ -438,7 +438,7 @@ void HorizView::_initZooms()
     
     Params::zoom_units_t units = zoomLevel.units;
     
-    if (_gd.proj.getProjType() == Mdvx::PROJ_LATLON &&
+    if (_proj.getProjType() == Mdvx::PROJ_LATLON &&
         units == Params::ZOOM_LIMITS_IN_KM) {
       
       // convert km limits to lat/lon
@@ -448,10 +448,10 @@ void HorizView::_initZooms()
       double minKmY = miny;
       double maxKmY = maxy;
       
-      _gd.proj.xy2latlon(minKmX, minKmY, miny, minx);
-      _gd.proj.xy2latlon(maxKmX, maxKmY, maxy, maxx);
+      _proj.xy2latlon(minKmX, minKmY, miny, minx);
+      _proj.xy2latlon(maxKmX, maxKmY, maxy, maxx);
       
-    } else if (_gd.proj.getProjType() != Mdvx::PROJ_LATLON &&
+    } else if (_proj.getProjType() != Mdvx::PROJ_LATLON &&
                units == Params::ZOOM_LIMITS_IN_DEG) {
       
       // convert lat/lon limits to km
@@ -461,8 +461,8 @@ void HorizView::_initZooms()
       double minLat = miny;
       double maxLat = maxy;
       
-      _gd.proj.latlon2xy(minLat, minLon, minx, miny);
-      _gd.proj.latlon2xy(maxLat, maxLon, maxx, maxy);
+      _proj.latlon2xy(minLat, minLon, minx, miny);
+      _proj.latlon2xy(maxLat, maxLon, maxx, maxy);
 
     }
     
@@ -470,74 +470,16 @@ void HorizView::_initZooms()
     _initWorld(world, zoomLevel.label);
     world.setWorldLimits(minx, miny, maxx, maxy);
     _definedZooms.push_back(world);
-
+    
     if (strcmp(zoomLevel.label, _params.start_zoom_label) == 0) {
       _zoomLevel = izoom;
     }
     
   } // izoom
   
+  _zoom = &_definedZooms[_zoomLevel];
+
 }
-
-#ifdef JUNK
-
-/*************************************************************************
- * configureWorldCoords()
- */
-
-void HorizView::_configureWorldCoords(int zoomLevel)
-
-{
-
-  // set world view
-
-  _fullWorld.setName("fullWorld");
-  
-  _fullWorld.setWindowGeom(width(), height(), 0, 0);
-  
-  _fullWorld.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
-                            _gd.h_win.cmax_x, _gd.h_win.cmax_y);
-  
-  _fullWorld.setLeftMargin(_params.horiz_left_margin);
-  _fullWorld.setRightMargin(_params.horiz_right_margin);
-  _fullWorld.setTopMargin(_params.horiz_top_margin);
-  _fullWorld.setBottomMargin(_params.horiz_bot_margin);
-  _fullWorld.setTitleTextMargin(_params.horiz_title_text_margin);
-  _fullWorld.setLegendTextMargin(_params.horiz_legend_text_margin);
-  _fullWorld.setAxisTextMargin(_params.horiz_axis_text_margin);
-  _fullWorld.setColorScaleWidth(_params.horiz_color_scale_width);
-
-  _fullWorld.setXAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setXNTicksIdeal(_params.horiz_n_ticks_ideal);
-  _fullWorld.setYAxisTickLen(_params.horiz_axis_tick_len);
-  _fullWorld.setYNTicksIdeal(_params.horiz_n_ticks_ideal);
-
-  _fullWorld.setTitleFontSize(_params.horiz_title_font_size);
-  _fullWorld.setAxisLabelFontSize(_params.horiz_axis_label_font_size);
-  _fullWorld.setTickValuesFontSize(_params.horiz_tick_values_font_size);
-  _fullWorld.setLegendFontSize(_params.horiz_legend_font_size);
-
-  _fullWorld.setTitleColor(_params.horiz_title_color);
-  _fullWorld.setAxisLineColor(_params.horiz_axes_color);
-  _fullWorld.setAxisTextColor(_params.horiz_axes_color);
-  _fullWorld.setGridColor(_params.horiz_grid_color);
-  
-  // set other members
-  
-  // _zoomWorld = _fullWorld;
-  // _zoomWorld.setName("zoomWorld");
-  
-  // _isZoomed = false;
-
-  // // _setGridSpacing();
-
-  // setXyZoom(_zoomWorld.getYMinWorld(),
-  //           _zoomWorld.getYMaxWorld(),
-  //           _zoomWorld.getXMinWorld(),
-  //           _zoomWorld.getXMaxWorld()); 
-  
-}
-#endif
 
 /*************************************************************************
  * initialize WorldPlot()
@@ -550,9 +492,6 @@ void HorizView::_initWorld(WorldPlot &world,
 
   world.setName(name);
   world.setWindowGeom(width(), height(), 0, 0);
-  
-  // world.setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
-  //                           _gd.h_win.cmax_x, _gd.h_win.cmax_y);
   
   world.setLeftMargin(_params.horiz_left_margin);
   world.setRightMargin(_params.horiz_right_margin);
@@ -577,6 +516,8 @@ void HorizView::_initWorld(WorldPlot &world,
   world.setAxisLineColor(_params.horiz_axes_color);
   world.setAxisTextColor(_params.horiz_axes_color);
   world.setGridColor(_params.horiz_grid_color);
+
+  world.setProjection(_proj);
   
 }
 
@@ -972,7 +913,7 @@ int HorizView::_renderGrid(int page,
   
   Mdvx::Mdvx::projection_type_t projType = mr->proj.getProjType();
   const PjgMath &dataMath = mr->proj.getPjgMath();
-  const PjgMath &displayMath = _gd.proj.getPjgMath();
+  const PjgMath &displayMath = _proj.getPjgMath();
   
   if (_gd.debug) {
     cerr << "-->> data projection <<--" << endl;
@@ -983,15 +924,15 @@ int HorizView::_renderGrid(int page,
   }
 
   if (projType == Mdvx::PROJ_POLAR_RADAR) {
-    _zoomWorld.renderGridRadarPolar(page, mr,
+    _zoom->renderGridRadarPolar(page, mr,
                                     start_time, end_time,
                                     is_overlay_field);
   } else if (dataMath == displayMath) {
-    _zoomWorld.renderGridRect(page, mr,
+    _zoom->renderGridRect(page, mr,
                               start_time, end_time,
                               is_overlay_field);
   } else {
-    _zoomWorld.renderGridDistorted(page, mr,
+    _zoom->renderGridDistorted(page, mr,
                                    start_time, end_time,
                                    is_overlay_field);
   }
@@ -1067,17 +1008,17 @@ int HorizView::_renderGrid(int page,
   switch(mr->h_fhdr.proj_type) {
     default: // Projections which need only matching types and origins.
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
+      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
         if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoomWorld.renderGridRect(page, mr,
+        _zoom->renderGridRect(page, mr,
                                   start_time, end_time,
                                   is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoomWorld.renderGridDistorted(page, mr,
+        _zoom->renderGridDistorted(page, mr,
                                        start_time, end_time,
                                        is_overlay_field);
       }
@@ -1085,19 +1026,19 @@ int HorizView::_renderGrid(int page,
 
     case  Mdvx::PROJ_FLAT: // Needs to test Param 1
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
-         (fabs(_gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
+         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
         
         if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoomWorld.renderGridRect(page, mr,
+        _zoom->renderGridRect(page, mr,
                                   start_time, end_time,
                                   is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoomWorld.renderGridDistorted(page, mr,
+        _zoom->renderGridDistorted(page, mr,
                                        start_time, end_time,
                                        is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
@@ -1109,19 +1050,19 @@ int HorizView::_renderGrid(int page,
     case  Mdvx::PROJ_OBLIQUE_STEREO:
     case  Mdvx::PROJ_MERCATOR:
       // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _gd.proj.getProjType() &&
-         (fabs(_gd.proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(_gd.proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
+      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
+         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
+         (fabs(_proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
          (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
          (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
         if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoomWorld.renderGridRect(page, mr,
+        _zoom->renderGridRect(page, mr,
                                   start_time, end_time,
                                   is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else { // Must use polygon rendering
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoomWorld.renderGridDistorted(page, mr,
+        _zoom->renderGridDistorted(page, mr,
                                        start_time, end_time,
                                        is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
@@ -1129,15 +1070,15 @@ int HorizView::_renderGrid(int page,
       break;
       
     case  Mdvx::PROJ_LATLON:
-      if(mr->h_fhdr.proj_type == _gd.proj.getProjType()) {
+      if(mr->h_fhdr.proj_type == _proj.getProjType()) {
         if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoomWorld.renderGridRect(page, mr,
+        _zoom->renderGridRect(page, mr,
                                   start_time, end_time,
                                   is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
       } else {
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoomWorld.renderGridDistorted(page, mr,
+        _zoom->renderGridDistorted(page, mr,
                                        start_time, end_time,
                                        is_overlay_field);
         if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
@@ -1168,22 +1109,17 @@ int HorizView::_renderGrid(int page,
 
 void HorizView::zoomBackView()
 {
-
-  if (_customZooms.size() == 0) {
-    zoomOutView();
-    return;
+  if (_customZooms.size() <= 1) {
+    // go back to defined zooms
+    _customZooms.clear();
+    _zoom = &_definedZooms[_zoomLevel];
+  } else {
+    // go back to previous custom zoom
+    _customZooms.pop_back();
+    _zoom = &_customZooms[_customZooms.size()-1];
   }
-  
-  _zoomWorld = _customZooms[_customZooms.size()-1];
-  // _zoomWorld.setName("fromSavedZoom");
-  _customZooms.pop_back();
-  if (_customZooms.size() == 0) {
-    _isZoomed = false;
-  }
-  setXyZoom(_zoomWorld.getYMinWorld(),
-            _zoomWorld.getYMaxWorld(),
-            _zoomWorld.getXMinWorld(),
-            _zoomWorld.getXMaxWorld()); 
+  _zoomChanged = true;
+  update();
 }
 
 /*************************************************************************
@@ -1192,42 +1128,51 @@ void HorizView::zoomBackView()
 
 void HorizView::zoomOutView()
 {
-  _zoomWorld = _fullWorld;
-  _zoomWorld.setName("zoomWorld");
   _customZooms.clear();
-  _isZoomed = false;
-  setXyZoom(_zoomWorld.getYMinWorld(),
-            _zoomWorld.getYMaxWorld(),
-            _zoomWorld.getXMinWorld(),
-            _zoomWorld.getXMaxWorld()); 
-}
-
-//////////////////////////////////////////////////
-// respond to zoom action, set the XY zoom limits
-
-void HorizView::setXyZoom(double minY, double maxY,
-                          double minX, double maxX)
-{
-  _prevZoomXy = _zoomXy;
-  _zoomXy.setLimits(minY, maxY, minX, maxX);
-  _gd.h_win.cmin_y = minY;
-  _gd.h_win.cmax_y = maxY;
-  _gd.h_win.cmin_x = minX;
-  _gd.h_win.cmax_x = maxX;
+  _zoom = &_definedZooms[_zoomLevel];
   _zoomChanged = true;
   update();
 }
+
+//////////////////////////////////////////////////
+// set zoom index in _definedZooms
+// called from GuiManager in response to zoom menu selection
+
+void HorizView::setZoomIndex(int zoomIndex)
+{
+  if (zoomIndex > (int) _definedZooms.size() - 1) {
+    zoomIndex = (int) _definedZooms.size() - 1;
+  }
+  _zoomLevel = zoomIndex;
+  _zoom = &_definedZooms[_zoomLevel];
+  _zoomChanged = true;
+  update();
+}
+
+// void HorizView::setXyZoom(double minY, double maxY,
+//                           double minX, double maxX)
+// {
+//   _prevZoomXy = _zoomXy;
+//   _zoomXy.setLimits(minY, maxY, minX, maxX);
+//   _gd.h_win.cmin_y = minY;
+//   _gd.h_win.cmax_y = maxY;
+//   _gd.h_win.cmin_x = minX;
+//   _gd.h_win.cmax_x = maxX;
+//   _zoomChanged = true;
+//   update();
+// }
 
 /////////////////////////////////////////////////////////
 // check for zoom change
 
 bool HorizView::checkForZoomChange()
 {
-  if (_zoomXy != _prevZoomXy) {
-    _prevZoomXy = _zoomXy;
+  if (_zoomChanged) {
+    _zoomChanged = false; // reset state
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
 /*************************************************************************
@@ -1305,8 +1250,8 @@ void HorizView::mousePressEvent(QMouseEvent *e)
     _mousePressX = pos.x();
     _mousePressY = pos.y();
 
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _worldPressX = _zoom->getXWorld(_mousePressX);
+    _worldPressY = _zoom->getYWorld(_mousePressY);
 
     emit customContextMenuRequested(pos.toPoint()); // , closestRay);
 
@@ -1321,8 +1266,8 @@ void HorizView::mousePressEvent(QMouseEvent *e)
     _mousePressX = pos.x();
     _mousePressY = pos.y();
 
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _worldPressX = _zoom->getXWorld(_mousePressX);
+    _worldPressY = _zoom->getYWorld(_mousePressY);
   }
 }
 
@@ -1351,7 +1296,7 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   // of the window
 
   double aspectRatio =
-    (double) _zoomWorld.getPlotHeight() / (double) _zoomWorld.getPlotWidth();
+    (double) _zoom->getPlotHeight() / (double) _zoom->getPlotWidth();
   
   double dx = fabs(deltaY / aspectRatio);
   double dy = fabs(dx * aspectRatio);
@@ -1406,8 +1351,8 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     // mouse moved less than 20 pixels, so we interpret that as a click
     // get click location in world coords
     
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+    _worldReleaseX = _zoom->getXWorld(_mouseReleaseX);
+    _worldReleaseY = _zoom->getYWorld(_mouseReleaseY);
 
     _pointClicked = true;
     _worldClickX = _worldReleaseX;
@@ -1424,20 +1369,41 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
-
     // save current zoom
     
     char zoomName[1024];
     snprintf(zoomName, 1024, "saved-zoom-%d", (int) _customZooms.size());
-    _customZooms.push_back(_zoomWorld);
+    _customZooms.push_back(*_zoom);
     _customZooms[_customZooms.size()-1].setName(zoomName);
-
+    _zoom = &_customZooms[_customZooms.size()-1];
+    _zoomChanged = true;
+    
     // handle the zoom action
-
-    _handleMouseZoom();
+    
+    _worldPressX = _zoom->getXWorld(_mousePressX);
+    _worldPressY = _zoom->getYWorld(_mousePressY);
+    _worldReleaseX = _zoom->getXWorld(_zoomCornerX);
+    _worldReleaseY = _zoom->getYWorld(_zoomCornerY);
+    
+    // update world coords transform
+    
+    _zoom->setWorldLimits(_worldPressX, _worldPressY,
+                          _worldReleaseX, _worldReleaseY);
+    
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    _zoom->print(cerr);
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    
+    _zoom->updatePixelScales();
+    
+    // enable unzooms
+    
+    _manager.enableUnzoomButtons(true);
     
     // render
     
+    update();
+  
   }
     
   // hide the rubber band
@@ -1445,8 +1411,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   if (_rubberBand) {
     _rubberBand->hide();
   }
-
-  return;
   
 }
 
@@ -1454,36 +1418,35 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
  * handle zoom event
  */
 
-void HorizView::_handleMouseZoom()
-{
+// void HorizView::_handleMouseZoom()
+// {
 
-  _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-  _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-  _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+//   _worldPressX = _zoom->getXWorld(_mousePressX);
+//   _worldPressY = _zoom->getYWorld(_mousePressY);
+//   _worldReleaseX = _zoom->getXWorld(_zoomCornerX);
+//   _worldReleaseY = _zoom->getYWorld(_zoomCornerY);
   
-  // update world coords transform
+//   // update world coords transform
   
-  _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
-                            _worldReleaseX, _worldReleaseY);
+//   _zoom->setWorldLimits(_worldPressX, _worldPressY,
+//                         _worldReleaseX, _worldReleaseY);
   
-  _zoomChanged = true;
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-  _zoomWorld.print(cerr);
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+//   cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+//   _zoom->print(cerr);
+//   cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
   
-  updatePixelScales();
+//   updatePixelScales();
   
-  // enable unzooms
+//   // enable unzooms
   
-  _manager.enableUnzoomButtons(true);
+//   _manager.enableUnzoomButtons(true);
   
-  setXyZoom(_zoomWorld.getYMinWorld(),
-            _zoomWorld.getYMaxWorld(),
-            _zoomWorld.getXMinWorld(),
-            _zoomWorld.getXMaxWorld());
+//   setXyZoom(_zoom->getYMinWorld(),
+//             _zoom->getYMaxWorld(),
+//             _zoom->getXMinWorld(),
+//             _zoom->getXMaxWorld());
   
-}
+// }
 
 /*************************************************************************
  * resizeEvent()
@@ -1492,9 +1455,14 @@ void HorizView::_handleMouseZoom()
 void HorizView::resizeEvent(QResizeEvent * e)
 {
 
-  _resetWorld(width(), height());
+  for (size_t ii = 0; ii < _definedZooms.size(); ii++) {
+    _definedZooms[ii].resize(width(), height());
+  }
+  for (size_t ii = 0; ii < _customZooms.size(); ii++) {
+    _customZooms[ii].resize(width(), height());
+  }
   _pixmap = _pixmap.scaled(width(), height());
-  updatePixelScales();
+  // updatePixelScales();
   _sizeChanged = true;
   
 }
@@ -1515,16 +1483,16 @@ void HorizView::resize(const int width, const int height)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void HorizView::_resetWorld(int width, int height)
+// void HorizView::_resetWorld(int width, int height)
 
-{
+// {
 
-  _fullWorld.resize(width, height);
-  _zoomWorld = _fullWorld;
-  _zoomWorld.setName("zoomWorld");
-  _sizeChanged = true;
+//   _fullWorld.resize(width, height);
+//   _zoom = _fullWorld;
+//   _zoom->setName("zoomWorld");
+//   _sizeChanged = true;
 
-}
+// }
 
 /*************************************************************************
  * Protected methods
@@ -1537,7 +1505,7 @@ void HorizView::_resetWorld(int width, int height)
 void HorizView::_renderMaps()
 {
 
-  _zoomWorld.drawMaps();
+  _zoom->drawMaps();
   _mapsReady = true;
   
 }

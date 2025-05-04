@@ -262,13 +262,18 @@ void GuiManager::enableUnzoomButtons(bool val) const
 }
 
 //////////////////////////////////////////////////
-// respond to zoom action, set the XY zoom limits
+// respond to zoom action, set the zoom index
 
-void GuiManager::setXyZoom(double minY, double maxY,
-                           double minX, double maxX)
+void GuiManager::setZoomIndex(int zoomIndex)
 {
-  _horiz->setXyZoom(minY, maxY, minX, maxX);
+  _horiz->setZoomIndex(zoomIndex);
 }
+
+// void GuiManager::setXyZoom(double minY, double maxY,
+//                            double minX, double maxX)
+// {
+//   _horiz->setXyZoom(minY, maxY, minX, maxX);
+// }
 
 /////////////////////////////////////
 // set archive mode
@@ -331,7 +336,7 @@ void GuiManager::timerEvent(QTimerEvent *event)
   }
 
   // is previous read still busy?
-
+  
   MdvReader *mr = _gd.mread[_fieldNum];
   if (!mr->getReadBusyH()) {
     // read the H data if needed
@@ -1364,10 +1369,7 @@ void GuiManager::_zoomOut()
 
 void GuiManager::_handleFirstTimerEvent()
 {
-
   _horiz->resize(_horizFrame->width(), _horizFrame->height());
-  _horiz->updatePixelScales();
-
 }
 
 ////////////////////////////////////////////
