@@ -277,7 +277,7 @@ void WorldPlot::setWindowGeom(int width,
   _xPixOffset = xOffset;
   _yPixOffset = yOffset;
 
-  _computeTransform();
+  updatePixelScales();
 
 }
 
@@ -308,7 +308,7 @@ void WorldPlot::setWorldLimits(double xMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
-  _computeTransform();
+  updatePixelScales();
 
 }
 
@@ -325,7 +325,7 @@ void WorldPlot::setWorldLimitsX(double xMinWorld,
     _xMaxWorld = MIN(xMinWorld, xMaxWorld);
   }
     
-  _computeTransform();
+  updatePixelScales();
 
 }
 
@@ -342,7 +342,7 @@ void WorldPlot::setWorldLimitsY(double yMinWorld,
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
 
-  _computeTransform();
+  updatePixelScales();
 
 }
 
@@ -2304,17 +2304,17 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    if (_name != "VlevelSelector") {
-      cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
-      cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
-      cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
-      cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
-      if (meanLat < 30 || meanLat > 45) {
-        cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
-      } else {
-        cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
-      }
-    }
+    // if (_name != "VlevelSelector") {
+    //   cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
+    //   cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
+    //   cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
+    //   cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
+    //   if (meanLat < 30 || meanLat > 45) {
+    //     cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
+    //   } else {
+    //     cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
+    //   }
+    // }
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -2396,10 +2396,13 @@ void WorldPlot::updatePixelScales()
   // adjust the world coords of the corners, based on the shape
 
   double plotAspect = fabs(_xPixelsPerWorld / _yPixelsPerWorld);
+
+  // cerr << "AAAAAAAAAA _xPixelsPerWorld, _yPixelsPerWorld, plotAspect, aspectCorr: " << _xPixelsPerWorld << ", " <<  _yPixelsPerWorld << ", " <<  plotAspect << ", " <<  aspectCorr << endl;
   
   if (plotAspect < aspectCorr) {
     // adjust y pixel scale
-    _xPixelsPerWorld = _yPixelsPerWorld * aspectCorr;
+    // _xPixelsPerWorld = _yPixelsPerWorld * aspectCorr;
+    _xPixelsPerWorld = (_yPixelsPerWorld * plotAspect) / aspectCorr;
     if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
     } else {
@@ -2411,7 +2414,8 @@ void WorldPlot::updatePixelScales()
     _yMaxWorld = yMean + yHalf;
   } else {
     // adjust x pixel scale
-    _yPixelsPerWorld = _xPixelsPerWorld / aspectCorr;
+    // _yPixelsPerWorld = _xPixelsPerWorld / aspectCorr;
+    _yPixelsPerWorld = (_xPixelsPerWorld / plotAspect) * aspectCorr;
     if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
     } else {
@@ -2430,6 +2434,8 @@ void WorldPlot::updatePixelScales()
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
   
+  // cerr << "BBBBBBBBBBBB _xPixelsPerWorld, _yPixelsPerWorld, plotAspect, aspectCorr: " << _xPixelsPerWorld << ", " <<  _yPixelsPerWorld << ", " <<  plotAspect << ", " <<  aspectCorr << endl;
+  
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
@@ -2440,7 +2446,9 @@ void WorldPlot::updatePixelScales()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  _computeTransform();
+  _computePixPerKm();
+
+  // _computeTransform();
   
 }
 
@@ -3459,8 +3467,8 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   double originX, originY;
   _proj.latlon2xy(originLat, originLon, originX, originY);
   
-  cerr << "RRRRRRRRRRRRRRR originLat, originLon: " << originLat << ", " << originLon << endl;
-  cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
+  // cerr << "RRRRRRRRRRRRRRR originLat, originLon: " << originLat << ", " << originLon << endl;
+  // cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
   
   // Set the ring color
 

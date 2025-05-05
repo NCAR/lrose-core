@@ -1382,9 +1382,9 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _zoom->setWorldLimits(_worldPressX, _worldPressY,
                           _worldReleaseX, _worldReleaseY);
     
-    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    _zoom->print(cerr);
-    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    // _zoom->print(cerr);
+    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
     
     _zoom->updatePixelScales();
     
