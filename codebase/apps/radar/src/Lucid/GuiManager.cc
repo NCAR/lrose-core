@@ -392,10 +392,11 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     return;
   }
   
-  // trap ESC in case needed
+  // trap ESC - reset some items
 
   if (keychar == 27) {
-    // do something
+    // zoom out
+    _zoomOut();
   }
 
   // check for up/down in vlevels
