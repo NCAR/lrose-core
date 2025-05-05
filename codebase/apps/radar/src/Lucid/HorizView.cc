@@ -199,32 +199,6 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   int fieldNum = _gd.h_win.page;
 
-  // check zoom
-
-  // XyBox currentZoom(_zoom->getYMinWorld(),
-  //                   _zoom->getYMaxWorld(),
-  //                   _zoom->getXMinWorld(),
-  //                   _zoom->getXMaxWorld());
-  // if (currentZoom != _zoomXy) {
-  //   _zoom->setWorldLimits(_zoomXy.getMinX(),
-  //                             _zoomXy.getMinY(),
-  //                             _zoomXy.getMaxX(),
-  //                             _zoomXy.getMaxY());
-  //   _zoomChanged = true;
-  //   cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
-  //   _zoom->print(cerr);
-  //   cerr << "zzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
-  // } else if (_gd.h_win.zoom_level != _gd.h_win.prev_zoom_level) {
-  //   _zoom->setWorldLimits(_gd.h_win.cmin_x, _gd.h_win.cmin_y,
-  //                             _gd.h_win.cmax_x, _gd.h_win.cmax_y);
-  //   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
-  //   _customZooms.clear();
-  //   _zoomChanged = true;
-  //   cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-  //   _zoom->print(cerr);
-  //   cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-  // }
-  
   // render data grids to grid image in WorldPlot
 
   if (_sizeChanged || _zoomChanged) {
@@ -272,10 +246,12 @@ void HorizView::paintEvent(QPaintEvent *event)
   _zoom->setAxisLineColor(_params.horiz_axes_color);
   _zoom->setAxisTextColor(_params.horiz_axes_color);
   _zoom->setGridColor(_params.horiz_grid_color);
-  _zoom->drawAxisLeft(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
+  _zoom->drawAxisLeft(painter, projUnits, true, true, true,
+                      _params.horiz_grids_on_at_startup);
   _zoom->drawAxisTop(painter, projUnits, true, true, false, false);
   _zoom->drawAxisRight(painter, projUnits, true, true, false, false);
-  _zoom->drawAxisBottom(painter, projUnits, true, true, true, _params.horiz_grids_on_at_startup);
+  _zoom->drawAxisBottom(painter, projUnits, true, true, true,
+                        _params.horiz_grids_on_at_startup);
   
   // draw the color scale
 
@@ -1382,10 +1358,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _zoom->setWorldLimits(_worldPressX, _worldPressY,
                           _worldReleaseX, _worldReleaseY);
     
-    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    // _zoom->print(cerr);
-    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    
     _zoom->updatePixelScales();
     
     // enable unzooms
@@ -1420,7 +1392,6 @@ void HorizView::resizeEvent(QResizeEvent * e)
     _customZooms[ii].resize(width(), height());
   }
   _pixmap = _pixmap.scaled(width(), height());
-  // updatePixelScales();
   _sizeChanged = true;
   
 }

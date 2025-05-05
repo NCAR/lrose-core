@@ -2304,17 +2304,6 @@ void WorldPlot::_computePixPerKm()
     double aspectCorr = cos(meanLat * DEG_TO_RAD);
     _xPixelsPerKm = (_xPixelsPerWorld / KM_PER_DEG_AT_EQ) / aspectCorr;
     _yPixelsPerKm = _yPixelsPerWorld / KM_PER_DEG_AT_EQ;
-    // if (_name != "VlevelSelector") {
-    //   cerr << "AAAAAAAAAAAA WorldPlot name: " << _name << endl;
-    //   cerr << "AAAAAAAAAAAAA _yMinWorld, _yMaxWorld: " << _yMinWorld << ", " << _yMaxWorld << endl;
-    //   cerr << "AAAAAAAAAAAAA meanLat, aspectCorr: " << meanLat << ", " << aspectCorr << endl;
-    //   cerr << "AAAAAAAAAAAAA xPixelsPerKm, yPixelsPerKm: " << _xPixelsPerKm << ", " << _yPixelsPerKm << endl;
-    //   if (meanLat < 30 || meanLat > 45) {
-    //     cerr << "BBBBBBBBBBBBBB ====>> meanLat: " << meanLat << endl;
-    //   } else {
-    //     cerr << "CCCCCCCCCCCCCCCCCCC ====>> meanLat: " << meanLat << endl;
-    //   }
-    // }
   } else {
     _xPixelsPerKm = _xPixelsPerWorld;
     _yPixelsPerKm = _yPixelsPerWorld;
@@ -2351,11 +2340,6 @@ void WorldPlot::_computeTransform()
   _xMaxWindow = getXWorld(_xPixOffset + _widthPixels);
   _yMaxWindow = getYWorld(_yPixOffset + _heightPixels);
 
-  // cerr << "cccccccccccccccccccccccccc" << endl;
-  // cerr << "ccccccccccccccc _xMinPixel, _xMaxPixel: " << _xMinPixel << ", " << _xMaxPixel << endl;
-  // cerr << "ccccccccccccccc _yMinPixel, _yMaxPixel: " << _yMinPixel << ", " << _yMaxPixel << endl;
-  // cerr << "ccccccccccccccc _xPixelsPerWorld, _yPixelsPerWorld: " << _xPixelsPerWorld << ", " << _yPixelsPerWorld << endl;
-  
   _computePixPerKm();
 
 }
@@ -2397,11 +2381,8 @@ void WorldPlot::updatePixelScales()
 
   double plotAspect = fabs(_xPixelsPerWorld / _yPixelsPerWorld);
 
-  // cerr << "AAAAAAAAAA _xPixelsPerWorld, _yPixelsPerWorld, plotAspect, aspectCorr: " << _xPixelsPerWorld << ", " <<  _yPixelsPerWorld << ", " <<  plotAspect << ", " <<  aspectCorr << endl;
-  
   if (plotAspect < aspectCorr) {
     // adjust y pixel scale
-    // _xPixelsPerWorld = _yPixelsPerWorld * aspectCorr;
     _xPixelsPerWorld = (_yPixelsPerWorld * plotAspect) / aspectCorr;
     if (_yPixelsPerWorld > 0) {
       _yPixelsPerWorld = fabs(_xPixelsPerWorld);
@@ -2414,7 +2395,6 @@ void WorldPlot::updatePixelScales()
     _yMaxWorld = yMean + yHalf;
   } else {
     // adjust x pixel scale
-    // _yPixelsPerWorld = _xPixelsPerWorld / aspectCorr;
     _yPixelsPerWorld = (_xPixelsPerWorld / plotAspect) * aspectCorr;
     if (_xPixelsPerWorld > 0) {
       _xPixelsPerWorld = fabs(_yPixelsPerWorld);
@@ -2434,8 +2414,6 @@ void WorldPlot::updatePixelScales()
   _yPixelsPerWorld =
     (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
   
-  // cerr << "BBBBBBBBBBBB _xPixelsPerWorld, _yPixelsPerWorld, plotAspect, aspectCorr: " << _xPixelsPerWorld << ", " <<  _yPixelsPerWorld << ", " <<  plotAspect << ", " <<  aspectCorr << endl;
-  
   _transform.reset();
   _transform.translate(_xMinPixel, _yMinPixel);
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
@@ -2448,8 +2426,6 @@ void WorldPlot::updatePixelScales()
 
   _computePixPerKm();
 
-  // _computeTransform();
-  
 }
 
 /////////////////////////////////////////////////////
@@ -3389,10 +3365,7 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
   // if so do not render
   
   double nPixPerRing = _xPixelsPerKm * _params.range_ring_spacing_km;
-  // cerr << "AAAAAAAAAAAAA ====>> draw range rings, fieldNum: " << fieldNum << endl;
-  // cerr << "AAAAAAAAAAAAA ====>> _xPixelsPerKm, nPixPerRing: " << _xPixelsPerKm << ", " << nPixPerRing << endl;
   if (nPixPerRing< _params.min_pixels_per_range_ring) {
-    // cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
     return;
   }
   
@@ -3424,11 +3397,6 @@ void WorldPlot::drawRangeRingsHoriz(int fieldNum,
     if (_params.range_rings_for_radar_only) {
       if (mr->isRadar) {
         const DsRadarParams &rparams = mr->radarParams;
-        // cerr << "RRRRRRRRRRRRRRR is radar, name: "
-        //      << rparams.radarName << endl;
-        // rparams.print(cerr);
-        // cerr << "RRRRRRRRRRRRRRR lat, lon: "
-        //      << rparams.latitude << ", " << rparams.longitude << endl;
         double maxRange = rparams.startRange + rparams.numGates * rparams.gateSpacing;
         if (maxRange < 0) {
           maxRange = _params.max_ring_range_km;
@@ -3466,9 +3434,6 @@ void WorldPlot::_drawRangeRingsHoriz(QPainter &painter,
   
   double originX, originY;
   _proj.latlon2xy(originLat, originLon, originX, originY);
-  
-  // cerr << "RRRRRRRRRRRRRRR originLat, originLon: " << originLat << ", " << originLon << endl;
-  // cerr << "RRRRRRRRRRRRRRR originX, originY: " << originX << ", " << originY << endl;
   
   // Set the ring color
 

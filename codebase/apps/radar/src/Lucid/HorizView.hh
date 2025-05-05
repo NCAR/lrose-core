@@ -88,31 +88,19 @@ class DLL_EXPORT HorizView : public QWidget
   HorizView(QWidget* parent,
             GuiManager &manager);
 
-  /**
-   * @brief Destructor.
-   */
+  // Destructor.
 
   virtual ~HorizView();
 
-  /**
-   * @brief Capture an image of the display.
-   *
-   * @return Returns the image. The caller must delete it when finished
-   *         with it.
-   *
-   * @notes This method is not currently called anywhere.
-   */
+  // Capture an image of the display.
+  // Returns the image. The caller must delete it when finished
+  // with it.
 
   QImage *getImage();
 
-  /**
-   * @brief Capture a pixmap of the display.
-   *
-   * @return Returns the pixmap. The caller must delete it when finished
-   *         with it.
-   *
-   * @notes This method is not currently called anywhere.
-   */
+  // Capture a pixmap of the display.
+  // Returns the pixmap. The caller must delete it when finished
+  // with it.
 
   QPixmap *getPixmap();
 		      
@@ -124,31 +112,21 @@ class DLL_EXPORT HorizView : public QWidget
   void setZoomIndex(int zoomIndex);
   bool checkForZoomChange();
   
-  /**
-   * react to click point from remote display - Sprite
-   * redraw the click point cursor
-   */
+  // react to click point from remote display - Sprite
+  // redraw the click point cursor
 
   void setClickPoint(double azimuthDeg,
                      double elevationDeg,
                      double rangeKm);
 
+  // display the context menu
+  
   void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
 
-  // adjust pixel scale to suit window size etc.
-
-  // virtual void updatePixelScales();
-
-  // override QWidget methods
-  
-  /**
-   * @brief The method that is called when a repaint event is triggered.
-   *
-   * @param[in] event   The repaint event.
-   */
+  // The method that is called when a repaint event is triggered.
 
   void paintEvent(QPaintEvent *event);
-
+  
   // set flags to control rendering
 
   void triggerGridRendering(int index, int page);
@@ -176,55 +154,36 @@ class DLL_EXPORT HorizView : public QWidget
 
  public slots:
    
-  /**
-   * @brief go back to prev zoom
-   */
+  // go back to prev zoom
 
   void zoomBackView();
 
-  /**
-   * @brief unzoom all the way
-   */
+  // unzoom all the way
 
   void zoomOutView();
 
-  /**
-   * @brief Resize the window.
-   *
-   */
+  // Resize the window.
 
   void resize(const int width, const int height);
 
-  /**
-   * @brief Set grids visibility.
-   *
-   * @param[in] enabled   True to show them, false otherwise.
-   */
+  // Set grids visibility.
 
   void setGrids(const bool enabled);
 
-  /**
-   * @brief Set fixed ring visibility.
-   *
-   * @param[in] enabled    True to show them, false otherwise.
-   */
+  // Set fixed ring visibility.
 
   void setRingsFixed(const bool enabled);
 
-  /**
-   * @brief Set data-driven ring visibility.
-   *
-   * @param[in] enabled    True to show them, false otherwise.
-   */
-
+  // Set data-driven ring visibility.
+  
   void setRingsDataDriven(const bool enabled);
   
-  /**
-   * @brief Clear the data in the view.
-   */
+  // Clear the data in the view.
 
   void clear();
 
+  // context menu handling
+  
   virtual void contextMenuCancel();
   virtual void contextMenuParameterColors();
   virtual void contextMenuView();
@@ -237,10 +196,6 @@ class DLL_EXPORT HorizView : public QWidget
   ///////////////////////
   // Protected members //
   ///////////////////////
-
-  /**
-   * @brief Parent widget.
-   */
 
   QWidget *_parent;
   GuiManager &_manager;
@@ -278,37 +233,27 @@ class DLL_EXPORT HorizView : public QWidget
   
   ScaledLabel _scaledLabel;
 
-  /**
-   * @brief Last X,Y location of the mouse during mouse move events; used for
-   *        panning.
-   */
+  // Last X,Y location of the mouse during mouse move events; used for
+  // panning.
 
   bool _pointClicked;
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
   int _zoomCornerX, _zoomCornerY;
   
-  /**
-   * @brief Location world of the latest click point.
-   */
+  // Location world of the latest click point.
   
   double _worldPressX, _worldPressY;
   double _worldReleaseX, _worldReleaseY;
   double _worldClickX, _worldClickY;
   double _worldClickLat, _worldClickLon;
-
-  /**
-   * @brief Rubber band for zooming.
-   */
+  
+  // Rubber band for zooming.
 
   QRubberBand *_rubberBand;
   
   // zooms
 
-  // XyBox _zoomXy;
-  // XyBox _prevZoomXy;
-  
-  // WorldPlot _fullWorld;
   WorldPlot *_zoom;
   vector<WorldPlot> _definedZooms;
   vector<WorldPlot> _customZooms;
@@ -322,43 +267,27 @@ class DLL_EXPORT HorizView : public QWidget
   // Protected methods //
   ///////////////////////
 
-  /**
-   * @brief Capture mouse move event for panning/zooming.
-   *
-   * @param[in] event   The mouse event.
-   */
+  // Capture mouse move event for panning/zooming.
 
-  virtual void mouseMoveEvent(QMouseEvent* event);
+  virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-  /**
-   * @brief Capture mouse press event which signals the start of
-   *        panning/zooming.
-   *
-   * @param[in] event    The mouse press event.
-   */
+  // Capture mouse press event which signals the start of
+  // panning/zooming.
 
-  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mousePressEvent(QMouseEvent* event) override;
 
-  /**
-   * @brief Capture mouse release event which signals the start of
-   * panning/zooming.
-   *
-   * @param[in] event    The mouse event.
-   */
+  // Capture mouse release event which signals the start of
+  // panning/zooming.
 
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
-  /**
-   * @brief Handle a resize event. A timer is used to prevent refreshes until
-   *        the resize is finished.
-   *
-   * @brief event   The resize event.
-   */
+  // Handle a resize event. A timer is used to prevent refreshes until
+  // the resize is finished.
 
-  virtual void resizeEvent(QResizeEvent * event);
+  virtual void resizeEvent(QResizeEvent * event) override;
 
   // used to detect shift key pressed for boundary editor (switches cursor)
-
+  
   virtual void timerEvent(QTimerEvent * event);
 
   // render the grid data
