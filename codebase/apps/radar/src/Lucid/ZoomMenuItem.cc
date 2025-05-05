@@ -85,10 +85,6 @@ void ZoomMenuItem::toggled(bool checked)
     }
     _gd.h_win.zoom_level = _zoomIndex;
     if (_manager != NULL) {
-      // _manager->setXyZoom(_gd.h_win.zmin_y[_zoomIndex],
-      //                     _gd.h_win.zmax_y[_zoomIndex],
-      //                     _gd.h_win.zmin_x[_zoomIndex],
-      //                     _gd.h_win.zmax_x[_zoomIndex]); 
       _manager->setZoomIndex(_zoomIndex); 
     }
   }

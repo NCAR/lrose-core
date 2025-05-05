@@ -704,27 +704,8 @@ int Lucid::_initDataSpace()
 
   _gd.h_win.route.total_length = _gd.h_win.route.seg_length[0];
 
-  /* Automatically define the Custom Zoom levels */
-
-  // for(int ii = 0; ii <= Constants::NUM_CUSTOM_ZOOMS; ii++) {
-  //   _gd.h_win.zmin_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_x[0] + 
-  //     ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-  //   _gd.h_win.zmax_x[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_x[0] - 
-  //     ((_gd.h_win.zmax_x[0] -_gd.h_win.zmin_x[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-  //   _gd.h_win.zmin_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmin_y[0] + 
-  //     ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-  //   _gd.h_win.zmax_y[_gd.h_win.num_zoom_levels] = _gd.h_win.zmax_y[0] - 
-  //     ((_gd.h_win.zmax_y[0] -_gd.h_win.zmin_y[0]) / ( Constants::NUM_CUSTOM_ZOOMS - ii  + 2.0));
-  //   _gd.h_win.num_zoom_levels++;
-  // }
-
   // vertical section
   
-  // _gd.v_win.zmin_x = (double *) calloc(sizeof(double), 1);
-  // _gd.v_win.zmax_x = (double *) calloc(sizeof(double), 1);
-  // _gd.v_win.zmin_y = (double *) calloc(sizeof(double), 1);
-  // _gd.v_win.zmax_y = (double *) calloc(sizeof(double), 1);
-
   _gd.v_win.origin_lat = _params.proj_origin_lat;
   _gd.v_win.origin_lon = _params.proj_origin_lon;
   _gd.v_win.min_x = _gd.h_win.min_x;
@@ -2457,15 +2438,6 @@ int Lucid::_initZooms()
   _gd.h_win.zoom_level = _gd.h_win.start_zoom_level;
   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
   
-  // _gd.h_win.zmin_x =
-  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  // _gd.h_win.zmax_x =
-  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  // _gd.h_win.zmin_y =
-  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-  // _gd.h_win.zmax_y =
-  //   (double *) calloc(sizeof(double),_gd.h_win.num_zoom_levels+Constants::NUM_CUSTOM_ZOOMS + 1);
-
   if (_gd.display_projection == Mdvx::PROJ_LATLON) {
     _gd.h_win.min_x = max(_params.domain_limit_min_x, -360.0);
     _gd.h_win.max_x = min(_params.domain_limit_max_x, 360.0);
