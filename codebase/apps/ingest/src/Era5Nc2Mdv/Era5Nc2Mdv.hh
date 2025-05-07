@@ -89,6 +89,7 @@ private:
   vector<double> _lat, _lon;
   vector<DateTime> _dataTimes;
   int _deltaTimeSecs;
+  size_t _nLevels;
   vector<double> _levels;
   vector<string> _fieldNames;
 
@@ -110,7 +111,8 @@ private:
   
   // private methods
 
-  int _setGeom(const vector<string> &pathsAtTime);
+  int _setGeomFromFirstFile(const vector<string> &pathsAtTime);
+  int _checkGeom(const vector<string> &pathsAtTime);
   int _createVol(const vector<string> &pathsAtTime, size_t timeIndex);
   void _printGeom(ostream &out);
   
@@ -124,6 +126,9 @@ private:
   int _convertTempToC(DsMdvx &mdvx);
   void _renameFields(DsMdvx &mdvx);
 
+  void _printDataTimes(const string &label,
+                       const vector<DateTime> &times,
+                       ostream &out);
 };
 
 #endif

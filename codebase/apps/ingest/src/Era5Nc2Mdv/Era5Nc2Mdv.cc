@@ -63,7 +63,7 @@ Era5Nc2Mdv::Era5Nc2Mdv(int argc, char **argv)
   // g is 9.80665 for Era5 conversion from geopotential to height in meters  
 
   _g = 9.80665;
-
+  
   // set programe name
 
   _progName = "Era5Nc2Mdv";
@@ -173,16 +173,21 @@ Era5Nc2Mdv::~Era5Nc2Mdv()
 // 3-D volumes.
 //
 // The files we are reading are in NetCDF format,
-// with one file per field and level.
+// with one file per field.
+//
+// For some data sets every level is in a separate file.
+// For some data sets the files include all levels.
+//
 // Each file contains multiple times, usually
 // one per hour for a day - i.e. 24 times.
+//
 // We read one file, which we call the 'seed'
 // and then create a list of file paths for
 // that same time. And then we read all the
 // data in that list, to create 3-D volumes
 // containing multiple fields.
 
-int Era5Nc2Mdv::Run ()
+int Era5Nc2Mdv::Run()
 {
   
   // get first file in list, as initial seed
@@ -233,9 +238,16 @@ int Era5Nc2Mdv::Run ()
 
     // set the geometry for this time set
 
-    if (_setGeom(pathsAtTime)) {
+    if (_setGeomFromFirstFile(pathsAtTime)) {
       cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
-      cerr << "  cannot set geom" << endl;
+      cerr << "  cannot set geom from first file" << endl;
+      cerr << "  seed time: " << DateTime::strm(seedTime) << endl;
+      return -1;
+    }
+    
+    if (_checkGeom(pathsAtTime)) {
+      cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
+      cerr << "  geometry is not constant" << endl;
       cerr << "  seed time: " << DateTime::strm(seedTime) << endl;
       return -1;
     }
@@ -262,9 +274,47 @@ int Era5Nc2Mdv::Run ()
 }
 
 //////////////////////////////////
-// set the geometry for this time
+// set the geometry from first file
 
-int Era5Nc2Mdv::_setGeom(const vector<string> &pathsAtTime)
+int Era5Nc2Mdv::_setGeomFromFirstFile(const vector<string> &pathsAtTime)
+  
+{
+
+  // check we have at least 1 file
+  
+  if (pathsAtTime.size() < 1) {
+    cerr << "ERROR - Era5Nc2Mdv::_setGeomFromFirstFile()" << endl;
+    cerr << "  no paths at this time" << endl;
+    return -1;
+  }
+
+  // read first file
+  
+  Era5File eraFile(_params);
+  if (eraFile.readFromPath(pathsAtTime[0], 0)) {
+    cerr << "ERROR - Era5Nc2Mdv::_setGeomFromFirstFile" << endl;
+    cerr << "  File path: " << pathsAtTime[0] << endl;
+    cerr << eraFile.getErrStr() << endl;
+    return -1;
+  }
+
+  _nTimesInFile = eraFile.getNTimesInFile();
+  _nLat = eraFile.getNLat();
+  _nLon = eraFile.getNLon();
+  _lat = eraFile.getLat();
+  _lon = eraFile.getLon();
+  _dataTimes = eraFile.getDataTimes();
+  _nLevels = eraFile.getNLevels();
+  _levels = eraFile.getLevels();
+
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////////////
+// check the file geometries for this time
+
+int Era5Nc2Mdv::_checkGeom(const vector<string> &pathsAtTime)
 
 {
 
@@ -274,77 +324,94 @@ int Era5Nc2Mdv::_setGeom(const vector<string> &pathsAtTime)
   set<double> levelsSet;
   set<string> fieldNamesSet;
 
-  for (size_t ii = 0; ii < pathsAtTime.size(); ii++) {
+  for (size_t ii = 1; ii < pathsAtTime.size(); ii++) {
     
     // read file metadata
     
     Era5File eraFile(_params);
     if (eraFile.readFromPath(pathsAtTime[ii], 0)) {
-      cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom" << endl;
       cerr << "  File path: " << pathsAtTime[ii] << endl;
       cerr << eraFile.getErrStr() << endl;
       return -1;
     }
 
-    // check geometry is constant
-    
-    if (ii == 0) {
-      _nTimesInFile = eraFile.getNTimesInFile();
-      _nLat = eraFile.getNLat();
-      _nLon = eraFile.getNLon();
-      _lat = eraFile.getLat();
-      _lon = eraFile.getLon();
-      _dataTimes = eraFile.getDataTimes();
-    } else {
-      if (_nTimesInFile != eraFile.getNTimesInFile()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  number of times not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
-      if (_nLat != eraFile.getNLat()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  number of latitudes not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
-      if (_nLon != eraFile.getNLon()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  number of longitudes not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
-      if (_lat != eraFile.getLat()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  latitudes not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
-      if (_lon != eraFile.getLon()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  longitudes not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
-      if (_dataTimes != eraFile.getDataTimes()) {
-        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
-        cerr << "  data times not constant" << endl;
-        cerr << "  file path: " << pathsAtTime[ii] << endl;
-        return -1;
-      }
+    if (_nTimesInFile != eraFile.getNTimesInFile()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  number of times not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
     }
-
-    levelsSet.insert(eraFile.getLevel());
+    if (_nLat != eraFile.getNLat()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  number of latitudes not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+    if (_nLon != eraFile.getNLon()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  number of longitudes not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+    if (_lat != eraFile.getLat()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  latitudes not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+    if (_lon != eraFile.getLon()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  longitudes not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+    if (_dataTimes != eraFile.getDataTimes()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  data times not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      _printDataTimes("first-file", _dataTimes, cerr);
+      _printDataTimes("this-file", eraFile.getDataTimes(), cerr);
+      return -1;
+    }
+    if (_nLevels != eraFile.getNLevels()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  nLevels not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+    if (_levels != eraFile.getLevels()) {
+      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+      cerr << "  nLevels not constant" << endl;
+      cerr << "  file path: " << pathsAtTime[ii] << endl;
+      cerr << "  field name: " << eraFile.getFieldName() << endl;
+      return -1;
+    }
+  
+    if (_nLevels == 1) {
+      levelsSet.insert(eraFile.getLevel(0));
+    }
+    
     fieldNamesSet.insert(eraFile.getFieldName());
 
   } // ii
 
   // copy level set to vectors
 
-  _levels.clear();
-  for (auto ii = levelsSet.begin(); ii != levelsSet.end(); ii++) {
-    _levels.push_back(*ii);
+  if (_nLevels == 1) {
+    _levels.clear();
+    for (auto ii = levelsSet.begin(); ii != levelsSet.end(); ii++) {
+      _levels.push_back(*ii);
+    }
   }
+  
   // reverse the order, so that high pressures are first
   std::reverse(_levels.begin(), _levels.end());
 
@@ -356,7 +423,7 @@ int Era5Nc2Mdv::_setGeom(const vector<string> &pathsAtTime)
   }
 
   // set geom
-
+  
   _deltaTimeSecs =
     (int) ((_dataTimes[_dataTimes.size()-1] - _dataTimes[0]) /
            (_dataTimes.size()-1.0) + 0.5);
@@ -449,24 +516,59 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
     
     field->setFieldNameLong(eraFile.getLongName().c_str());
     field->setUnits(eraFile.getUnits().c_str());
-    
-    int levelNum = _getLevelIndex(eraFile.getLevel());
-    int nLatLon = _nLat * _nLon;
-    long offset = nLatLon * levelNum;
-    const float *inData = eraFile.getFieldData().data();
-    float *outData = (float *) field->getVol() + offset;
 
-    if (_inverty) {
-      // copy in reverse row order
-      for (size_t ilat = 0; ilat < _nLat; ilat++) {
-        int jlat = _nLat - ilat - 1;
-        const float *source = inData + jlat * _nLon;
-        float *dest = outData + ilat * _nLon;
-        memcpy(dest, source, _nLon * sizeof(float));
+    // set the field data
+
+    if (eraFile.getNLevels() == 1) {
+
+      // only 1 level per file
+      
+      int levelNum = _getLevelIndex(eraFile.getLevel(0));
+      int nLatLon = _nLat * _nLon;
+      long offset = nLatLon * levelNum;
+      const float *inData = eraFile.getFieldData().data();
+      float *outData = (float *) field->getVol() + offset;
+      
+      if (_inverty) {
+        // copy in reverse row order
+        for (size_t ilat = 0; ilat < _nLat; ilat++) {
+          int jlat = _nLat - ilat - 1;
+          const float *source = inData + jlat * _nLon;
+          float *dest = outData + ilat * _nLon;
+          memcpy(dest, source, _nLon * sizeof(float));
+        }
+      } else {
+        // copy array unchanged
+        memcpy(outData, inData, nLatLon * sizeof(float));
       }
+
     } else {
-      // copy array unchanged
-      memcpy(outData, inData, nLatLon * sizeof(float));
+      
+      // all levels in a single file
+
+      for (size_t levelNum = 0; levelNum < _nLevels; levelNum++) {
+        
+        int nLatLon = _nLat * _nLon;
+        long offset = nLatLon * levelNum;
+        cerr << "XXXXXXXXXX levelNum, offset, _inverty: " << levelNum << ", " << offset << ", " << _inverty << endl;
+        const float *inData = eraFile.getFieldData().data() + offset;
+        float *outData = (float *) field->getVol() + offset;
+        
+        if (_inverty) {
+          // copy in reverse row order
+          for (size_t ilat = 0; ilat < _nLat; ilat++) {
+            int jlat = _nLat - ilat - 1;
+            const float *source = inData + jlat * _nLon;
+            float *dest = outData + ilat * _nLon;
+            memcpy(dest, source, _nLon * sizeof(float));
+          }
+        } else {
+          // copy array unchanged
+          memcpy(outData, inData, nLatLon * sizeof(float));
+        }
+
+      }
+
     }
     
   } // ipath
@@ -817,6 +919,26 @@ void Era5Nc2Mdv::_renameFields(DsMdvx &mdvx)
     field->setUnits(ofld.output_units);
     
   }
-    
+  
 }
+
+////////////////////////////////////////////////////////
+// Print data times array
+
+void Era5Nc2Mdv::_printDataTimes(const string &label,
+                                 const vector<DateTime> &times,
+                                 ostream &out)
+
+{
+
+  out << "========>> DataTimes, label: " << label << " <<===========" << endl;
+
+  for (size_t ii = 0; ii < times.size(); ii++) {
+    out << "index, time: " << ii << ", " << times[ii].asString(0) << endl;
+  } // ii
+  
+  out << "==========================================================" << endl;
+  
+}
+
 

@@ -79,7 +79,8 @@ void Era5File::clear()
   _levelDim.setNull();
   
   _nTimesInFile = 0;
-  _nPoints = 0;
+  _nPointsPlane = 0;
+  _nPointsVol = 0;
 
   _dataSource.clear();
   _history.clear();
@@ -121,7 +122,8 @@ int Era5File::readFromPath(const string &path,
   
   clear();
   _nTimesInFile = 0;
-  _nPoints = 0;
+  _nPointsPlane = 0;
+  _nPointsVol = 0;
   
   // open file
 
@@ -164,7 +166,7 @@ int Era5File::readFromPath(const string &path,
 
   // read level
   
-  if (_readLevel()) {
+  if (_readLevels()) {
     _addErrStr(errStr);
     return -1;
   }
@@ -202,8 +204,9 @@ int Era5File::_readDimensions()
   // read required dimensions
 
   _nTimesInFile = 0;
-  _nPoints = 0;
-
+  _nPointsPlane = 0;
+  _nPointsVol = 0;
+  
   try {
     
     _timeDim = _file.getDim("time");
@@ -226,7 +229,11 @@ int Era5File::_readDimensions()
 
   }
 
-  _nPoints = _nLat * _nLon;
+  _nPointsPlane = _nLat * _nLon;
+  _nPointsVol = _nPointsPlane * _nLevels;
+
+  cerr << "NNNNNNNNNNNNNNNNNNNN _nPointsPlane: " << _nPointsPlane << endl;
+  cerr << "NNNNNNNNNNNNNNNNNNNN _nPointsVol: " << _nPointsVol << endl;
 
   return 0;
 
@@ -324,11 +331,17 @@ int Era5File::_readTimes()
   int year, month, day, hour, min, sec;
   if (sscanf(units.c_str(),
              "hours since %4d-%2d-%2d %2d:%2d:%2d",
-             &year, &month, &day, &hour, &min, &sec) != 6) {
+             &year, &month, &day, &hour, &min, &sec) == 6) {
+    _refTime.set(year, month, day, hour, min, sec);
+  } else if (sscanf(units.c_str(),
+                    "hours since %4d-%2d-%2d",
+                    &year, &month, &day) == 3) {
+    hour = min = sec = 0;
+    _refTime.set(year, month, day, hour, min, sec);
+  } else {
     _addErrStr("ERROR - Era5File::_readTimes");
     _addErrStr("  Bad time units string: ", units);
   }
-  _refTime.set(year, month, day, hour, min, sec);
 
   // read the time array
   
@@ -432,13 +445,13 @@ int Era5File::_readLatLon()
 }
 
 ///////////////////////////////////////
-// read the levels - should be only 1
+// read the levels
 
-int Era5File::_readLevel()
+int Era5File::_readLevels()
 
 {
 
-  _level.clear();
+  _levels.clear();
   
   _levelVar = _file.getVar("level");
   if (_levelVar.isNull() || _levelVar.numVals() < 1) {
@@ -460,17 +473,17 @@ int Era5File::_readLevel()
     _addErrStr("  levelitude has incorrect dimension, name: ", _levelVar.getName());
     return -1;
   }
-
-  if (_nLevels != 1) {
-    _addErrStr("ERROR - Era5File::_readLevel");
-    _addErrStr("  Should be only 1 level");
-    _addErrInt("  nLevels: ", _nLevels);
-    return -1;
-  }
   
-  _level.resize(_nLevels);
+  // if (_nLevels != 1) {
+  //   _addErrStr("ERROR - Era5File::_readLevel");
+  //   _addErrStr("  Should be only 1 level");
+  //   _addErrInt("  nLevels: ", _nLevels);
+  //   return -1;
+  // }
+  
+  _levels.resize(_nLevels);
   try {
-    _levelVar.getVal(_level.data());
+    _levelVar.getVal(_levels.data());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Era5File::_readLevel");
     _addErrStr("  getVal fails, cannot get level array, var name: ",
@@ -646,13 +659,13 @@ int Era5File::_readFieldVariable(string fieldName,
 
   vector<size_t> count;
   count.push_back(1);
-  count.push_back(1);
+  count.push_back(_nLevels);
   count.push_back(_nLat);
   count.push_back(_nLon);
 
   // get the data
   
-  _fieldData.resize(_nPoints);
+  _fieldData.resize(_nPointsVol);
   try {
     var.getVal(start, count, _fieldData.data());
   } catch (NcxxException& e) {
@@ -679,7 +692,8 @@ void Era5File::printData(ostream &out)
   out << "  _nLevels: " << _nLevels << endl;
   out << "  _nLat: " << _nLat << endl;
   out << "  _nLon: " << _nLon << endl;
-  out << "  _nPoints: " << _nPoints << endl;
+  out << "  _nPointsPlane: " << _nPointsPlane << endl;
+  out << "  _nPointsVol: " << _nPointsVol << endl;
   
   out << "  _refTime: " << _refTime.asString() << endl;
   for (size_t ii = 0; ii < _iTimes.size(); ii++) {

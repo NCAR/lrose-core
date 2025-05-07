@@ -97,7 +97,8 @@ public:
   size_t getNLevels() const { return _nLevels; }
   size_t getNLat() const { return _nLat; }
   size_t getNLon() const { return _nLon; }
-  size_t getNPoints() const { return _nPoints; }
+  size_t getNPointsPlane() const { return _nPointsPlane; }
+  size_t getNPointsVol() const { return _nPointsVol; }
   
   string getDataSource() const { return _dataSource; }
   string getHistory() const { return _history; }
@@ -111,13 +112,14 @@ public:
 
   const vector<double> &getLon() const { return _lon; }
   const vector<double> &getLat() const { return _lat; }
-  double getLevel() const {
-    if (_level.size() > 0) {
-      return _level[0];
+   double getLevel(int index) const {
+    if (index < (int) _levels.size()) {
+      return _levels[index];
     } else {
       return -9999.0;
     }
   }
+  const vector<double> &getLevels() const { return _levels; }
   int getTimeIndex() const { return _timeIndex; }
   string getFieldName() const { return _fieldName; }
   string getLongName() const { return _longName; }
@@ -156,7 +158,8 @@ private:
   size_t _nTimesInFile;
   size_t _nLevels;
   size_t _nLat, _nLon;
-  size_t _nPoints;
+  size_t _nPointsPlane;
+  size_t _nPointsVol;
 
   // global attributes
 
@@ -181,7 +184,7 @@ private:
   // levels
   
   NcxxVar _levelVar;
-  vector<double> _level;
+  vector<double> _levels;
   
   // field data
 
@@ -201,7 +204,7 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
   int _readLatLon();
-  int _readLevel();
+  int _readLevels();
   int _readField(int timeIndex);
   int _readFieldVariable(string fieldName,
                          int timeIndex,
