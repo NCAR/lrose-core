@@ -129,6 +129,9 @@ private:
   void _printDataTimes(const string &label,
                        const vector<DateTime> &times,
                        ostream &out);
+  void _printLevels(const string &label,
+                    const vector<double> &levels,
+                    ostream &out);
 };
 
 #endif

@@ -232,9 +232,6 @@ int Era5File::_readDimensions()
   _nPointsPlane = _nLat * _nLon;
   _nPointsVol = _nPointsPlane * _nLevels;
 
-  cerr << "NNNNNNNNNNNNNNNNNNNN _nPointsPlane: " << _nPointsPlane << endl;
-  cerr << "NNNNNNNNNNNNNNNNNNNN _nPointsVol: " << _nPointsVol << endl;
-
   return 0;
 
 }

@@ -385,14 +385,20 @@ int Era5Nc2Mdv::_checkGeom(const vector<string> &pathsAtTime)
       cerr << "  nLevels not constant" << endl;
       cerr << "  file path: " << pathsAtTime[ii] << endl;
       cerr << "  field name: " << eraFile.getFieldName() << endl;
+      cerr << "  nLevels first: " << _nLevels << endl;
+      cerr << "  nLevels this: " << eraFile.getNLevels() << endl;
       return -1;
     }
-    if (_levels != eraFile.getLevels()) {
-      cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
-      cerr << "  nLevels not constant" << endl;
-      cerr << "  file path: " << pathsAtTime[ii] << endl;
-      cerr << "  field name: " << eraFile.getFieldName() << endl;
-      return -1;
+    if (_nLevels > 1) {
+      if (_levels != eraFile.getLevels()) {
+        cerr << "ERROR - Era5Nc2Mdv::_checkGeom()" << endl;
+        cerr << "  levels not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        cerr << "  field name: " << eraFile.getFieldName() << endl;
+        _printLevels("first-file", _levels, cerr);
+        _printLevels("this-file", eraFile.getLevels(), cerr);
+        return -1;
+      }
     }
   
     if (_nLevels == 1) {
@@ -550,7 +556,7 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
         
         int nLatLon = _nLat * _nLon;
         long offset = nLatLon * levelNum;
-        cerr << "XXXXXXXXXX levelNum, offset, _inverty: " << levelNum << ", " << offset << ", " << _inverty << endl;
+        // cerr << "XXXXXXXXXX levelNum, offset, _inverty: " << levelNum << ", " << offset << ", " << _inverty << endl;
         const float *inData = eraFile.getFieldData().data() + offset;
         float *outData = (float *) field->getVol() + offset;
         
@@ -570,7 +576,11 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
       }
 
     }
-    
+
+    // cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
+    // _printLevels("createVol", _levels, cerr);
+    // cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
+
   } // ipath
 
   // convert temp field units to C
@@ -768,6 +778,8 @@ MdvxField *Era5Nc2Mdv::_createMdvxField(const string &fieldName)
   field->setFieldName(fieldName.c_str());
   field->setTransform("");
 
+  cerr  << "FFFFFFFFFFFFFF createdField, name: " << fieldName << endl;
+  
   return field;
 
 }
@@ -935,6 +947,25 @@ void Era5Nc2Mdv::_printDataTimes(const string &label,
 
   for (size_t ii = 0; ii < times.size(); ii++) {
     out << "index, time: " << ii << ", " << times[ii].asString(0) << endl;
+  } // ii
+  
+  out << "==========================================================" << endl;
+  
+}
+
+////////////////////////////////////////////////////////
+// Print levels array
+
+void Era5Nc2Mdv::_printLevels(const string &label,
+                              const vector<double> &levels,
+                              ostream &out)
+
+{
+
+  out << "========>> levels, label: " << label << " <<===========" << endl;
+
+  for (size_t ii = 0; ii < levels.size(); ii++) {
+    out << "index, level: " << ii << ", " << levels[ii] << endl;
   } // ii
   
   out << "==========================================================" << endl;
