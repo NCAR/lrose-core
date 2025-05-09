@@ -90,7 +90,7 @@ private:
   vector<DateTime> _dataTimes;
   int _deltaTimeSecs;
   size_t _nLevels;
-  vector<double> _levels;
+  vector<double> _fileLevels, _levels;
   vector<string> _fieldNames;
 
   string _dataSource;
@@ -112,7 +112,7 @@ private:
   // private methods
 
   int _setGeomFromFirstFile(const vector<string> &pathsAtTime);
-  int _checkGeom(const vector<string> &pathsAtTime);
+  int _adjustGeom(const vector<string> &pathsAtTime);
   int _createVol(const vector<string> &pathsAtTime, size_t timeIndex);
   void _printGeom(ostream &out);
   
@@ -120,7 +120,8 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
   MdvxField *_createMdvxField(const string &fieldName);
-  int _getLevelIndex(double level);
+  int _getOutputLevelIndex(double level);
+  int _getFileLevelIndex(double level);
   int _addHeightField(DsMdvx &mdvx);
   int _addPressureField(DsMdvx &mdvx);
   int _convertTempToC(DsMdvx &mdvx);

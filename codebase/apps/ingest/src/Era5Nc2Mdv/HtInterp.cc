@@ -131,7 +131,7 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
   int nptsXy = ny * nx;
   int nptsOut = nzOut * nptsXy;
   interpPts.resize(nptsOut);
-  
+
   // load up interp pt data
   
   fl32 *htsVol = (fl32 *) htFld->getVol();
@@ -147,7 +147,6 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
       int zIndex = 0;
       for (int iz = 0; iz < nzIn; iz++, zIndex += nptsXy) {
         double ht = htsVol[zIndex + yxIndex];
-        // cerr << " -->>iz,ht:" << iz << "," << ht; 
         hts.push_back(ht);
       } // iz
       
