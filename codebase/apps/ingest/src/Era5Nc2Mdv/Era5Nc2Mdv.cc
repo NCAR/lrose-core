@@ -217,6 +217,7 @@ int Era5Nc2Mdv::Run()
     // create set of paths at the seed time
     
     vector<string> pathsAtTime;
+    pathsAtTime.push_back(seedPath);
     while ((inputPath = _input->next()) != NULL) {
       
       time_t fileTime;
