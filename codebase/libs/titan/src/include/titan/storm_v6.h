@@ -50,6 +50,14 @@ extern "C" {
 #define STORM_FILE_MINOR_REV_V6 1
 
   /*
+   * number of sides in polygon
+   */
+  
+#ifndef N_POLY_SIDES
+#define N_POLY_SIDES 72
+#endif
+
+  /*
    * Storm file formats.
    *
    * There are two files for each date - a header file and a data file.

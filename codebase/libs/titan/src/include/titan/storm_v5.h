@@ -57,6 +57,12 @@ extern "C" {
 #define UNION_NEXRAD_HDA 2
 
   /*
+   * number of sides in polygon
+   */
+  
+#define N_POLY_SIDES 72
+
+  /*
    * Storm file formats.
    *
    * There are two files for each date - a header file and a data file.
