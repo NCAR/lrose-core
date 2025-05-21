@@ -37,6 +37,7 @@ The latest release can be found at:
 | [Topaz](https://github.com/nsf-lrose/lrose-topaz) | LROSE year 4 |
 | [Jade](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20230814) | LROSE final Jade release |
 | [Colette](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20230814) | LROSE Colette spring 2024 release |
+| [Colette](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20250105) | LROSE Colette spring 2025 release |
 
 
 ### INSTALLING FROM DOWNLOADS
