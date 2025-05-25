@@ -1029,7 +1029,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTIONS TO USE DUAL THRESHOLDS.");
+    tt->comment_hdr = tdrpStrDup("OPTION TO THRESHOLD ON CONVECTIVITY.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'threshold_using_convectivity'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_using_convectivity");
+    tt->descr = tdrpStrDup("Option to threshold storms on convectivity in addition to reflectivity.");
+    tt->help = tdrpStrDup("The Ecco algorithm performs convective/stratiform partitioning.\n\nSee:\n\thttps://doi.org/10.1175/JTECH-D-22-0018.1.\n\nConvectivity is a concept introduced by Ecco. Convectivity ranges from 0 to 1 - higher values suggest convective regions, lower values stratiform regions.\n\nThe values suggested by Ecco are:\n\t0.0 to 0.4: stratiform.\n\t0.4 to 0.5: mixed.\n\t0.5 to 1.0: convective.\n\nThis section gives you the option to constrain storms to regions of higher convectivity. This allows you to avoid stratiform regions and concentrate tracking convective storms.");
+    tt->val_offset = (char *) &threshold_using_convectivity - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("OPTION TO USE DUAL THRESHOLDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1111,11 +1132,11 @@
     tt->single_val.s = tdrpStrDup("mdv/dual_threshold");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("LIMITS TO BASE, TOP, STORM SIZE.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1168,11 +1189,11 @@
     tt->single_val.d = 1e+09;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OPTIONS TO CHECK RANGE LIMITS AND SECOND TRIP.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1247,237 +1268,6 @@
     tt->min_val.d = 1;
     tt->max_val.d = 90;
     tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("OPTION TO IDENTIFY CONVECTIVE REGIONS.");
-    tt->comment_text = tdrpStrDup("Titan is generally intended for identifying and tracking convective storms. Regions of stratiform rain, especially with embedded bright-band, can confuse the algorithm and lead to the identification of large blobs, often close to the radar. Using this option to identify convective regions prior to storm identification can help mitigate this problem.");
-    tt++;
-    
-    // Parameter 'identify_convective_regions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("identify_convective_regions");
-    tt->descr = tdrpStrDup("Option to identify convective regions prior to storm identification.");
-    tt->help = tdrpStrDup("If TRUE, an algorithm will be run to identify the convective regions first, and then remove the non-convective regions before we identify the storms. The parameters in this section control the algorithm that finds the convective regions.");
-    tt->val_offset = (char *) &identify_convective_regions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'convection_finder_min_valid_height'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_valid_height");
-    tt->descr = tdrpStrDup("Min height used in analysis (km).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &convection_finder_min_valid_height - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'convection_finder_max_valid_height'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_max_valid_height");
-    tt->descr = tdrpStrDup("Max height used in analysis (km).");
-    tt->help = tdrpStrDup("Only data at or below this altitude is used.");
-    tt->val_offset = (char *) &convection_finder_max_valid_height - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'convection_finder_min_valid_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_valid_dbz");
-    tt->descr = tdrpStrDup("Minimum reflectivity threshold for this analysis (dBZ).");
-    tt->help = tdrpStrDup("Reflectivity below this threshold is set to missing.");
-    tt->val_offset = (char *) &convection_finder_min_valid_dbz - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'dbz_threshold_for_definite_convection'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_threshold_for_definite_convection");
-    tt->descr = tdrpStrDup("Reflectivity value that indicates definite convection.");
-    tt->help = tdrpStrDup("If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.");
-    tt->val_offset = (char *) &dbz_threshold_for_definite_convection - &_start_;
-    tt->single_val.d = 53;
-    tt++;
-    
-    // Parameter 'convection_finder_background_dbz_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_background_dbz_radius_km");
-    tt->descr = tdrpStrDup("Radius for computing background reflectivity (km).");
-    tt->help = tdrpStrDup("The background dbz at a point is the mean within this specified radius of the point.");
-    tt->val_offset = (char *) &convection_finder_background_dbz_radius_km - &_start_;
-    tt->single_val.d = 11;
-    tt++;
-    
-    // Parameter 'conv_radius_function'
-    // ctype is '_conv_radius_function_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("conv_radius_function");
-    tt->descr = tdrpStrDup("End points of the linear function to compute the radius from the background reflectivity.");
-    tt->help = tdrpStrDup("The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.");
-    tt->val_offset = (char *) &conv_radius_function - &_start_;
-    tt->struct_def.name = tdrpStrDup("conv_radius_function_t");
-    tt->struct_def.nfields = 4;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("min_dbz");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &conv_radius_function.min_dbz - (char *) &conv_radius_function;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("max_dbz");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &conv_radius_function.max_dbz - (char *) &conv_radius_function;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("min_radius_km");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &conv_radius_function.min_radius_km - (char *) &conv_radius_function;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("max_radius_km");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &conv_radius_function.max_radius_km - (char *) &conv_radius_function;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 22.5;
-      tt->struct_vals[1].d = 42.5;
-      tt->struct_vals[2].d = 1;
-      tt->struct_vals[3].d = 5;
-    tt++;
-    
-    // Parameter 'convective_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convective_radius_km");
-    tt->descr = tdrpStrDup("Radius of convective influence (km).");
-    tt->help = tdrpStrDup("Given definite convection at a point (see above), we set all points within this radius to be convective.");
-    tt->val_offset = (char *) &convective_radius_km - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'convection_finder_texture_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_texture_radius_km");
-    tt->descr = tdrpStrDup("Radius for texture analysis (km).");
-    tt->help = tdrpStrDup("We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.");
-    tt->val_offset = (char *) &convection_finder_texture_radius_km - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'convection_finder_min_valid_fraction_for_texture'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_valid_fraction_for_texture");
-    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
-    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
-    tt->val_offset = (char *) &convection_finder_min_valid_fraction_for_texture - &_start_;
-    tt->single_val.d = 0.33;
-    tt++;
-    
-    // Parameter 'convection_finder_min_texture_value'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_texture_value");
-    tt->descr = tdrpStrDup("Minimum texture value for convection at a point.");
-    tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.");
-    tt->val_offset = (char *) &convection_finder_min_texture_value - &_start_;
-    tt->single_val.d = 15;
-    tt++;
-    
-    // Parameter 'convection_finder_min_convectivity_for_convective'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_convectivity_for_convective");
-    tt->descr = tdrpStrDup("Minimum convectivity for convective at a point.");
-    tt->help = tdrpStrDup("If the convectivity at a point exceeds this value, we set the convective flag at this point.");
-    tt->val_offset = (char *) &convection_finder_min_convectivity_for_convective - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'convection_finder_max_convectivity_for_stratiform'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_max_convectivity_for_stratiform");
-    tt->descr = tdrpStrDup("Maximum convectivity for stratiform at a point.");
-    tt->help = tdrpStrDup("If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.");
-    tt->val_offset = (char *) &convection_finder_max_convectivity_for_stratiform - &_start_;
-    tt->single_val.d = 0.4;
-    tt++;
-    
-    // Parameter 'convection_finder_min_overlap_for_convective_clumps'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_min_overlap_for_convective_clumps");
-    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
-    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
-    tt->val_offset = (char *) &convection_finder_min_overlap_for_convective_clumps - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'convection_finder_write_debug_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_write_debug_files");
-    tt->descr = tdrpStrDup("Option to write out the gridded fields computed for the convective filter.");
-    tt->help = tdrpStrDup("For debugging and analysis purposes it is useful to be able to write out and displa y the grids computed in this step.");
-    tt->val_offset = (char *) &convection_finder_write_debug_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'convection_finder_output_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("convection_finder_output_url");
-    tt->descr = tdrpStrDup("Output URL.");
-    tt->help = tdrpStrDup("Output files are written to this URL.");
-    tt->val_offset = (char *) &convection_finder_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/convection");
     tt++;
     
     // Parameter 'Comment 12'
@@ -2720,6 +2510,246 @@
     tt->help = tdrpStrDup("During this period, the Titan storm motion is replaced by a linear combination of the Titan motion and the field tracker motion.");
     tt->val_offset = (char *) &field_tracker_transition_period_secs - &_start_;
     tt->single_val.i = 900;
+    tt++;
+    
+    // Parameter 'Comment 28'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 28");
+    tt->comment_hdr = tdrpStrDup("DEPRECATED PARAMETER SECTIONS");
+    tt->comment_text = tdrpStrDup("The deprecated parameters sections are grouped here, at the end. We recommend you do not use these sections. They are included for backward compatibility.");
+    tt++;
+    
+    // Parameter 'Comment 29'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 29");
+    tt->comment_hdr = tdrpStrDup("OPTION TO IDENTIFY CONVECTIVE REGIONS - DEPRECATED.");
+    tt->comment_text = tdrpStrDup("NOTE - this has been deprecated. The recommended alternative is to run Ecco, and then threshold Titan storms using both reflectivity and convectivity. See 'threshold_on_convectivity'.\n\nTitan is generally intended for identifying and tracking convective storms. Regions of stratiform rain, especially with embedded bright-band, can confuse the algorithm and lead to the identification of large blobs, often close to the radar. Using this option to identify convective regions prior to storm identification can help mitigate this problem.");
+    tt++;
+    
+    // Parameter 'identify_convective_regions'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("identify_convective_regions");
+    tt->descr = tdrpStrDup("Option to identify convective regions prior to storm identification.");
+    tt->help = tdrpStrDup("If TRUE, an algorithm will be run to identify the convective regions first, and then remove the non-convective regions before we identify the storms. The parameters in this section control the algorithm that finds the convective regions.");
+    tt->val_offset = (char *) &identify_convective_regions - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'convection_finder_min_valid_height'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_valid_height");
+    tt->descr = tdrpStrDup("Min height used in analysis (km).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &convection_finder_min_valid_height - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'convection_finder_max_valid_height'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_max_valid_height");
+    tt->descr = tdrpStrDup("Max height used in analysis (km).");
+    tt->help = tdrpStrDup("Only data at or below this altitude is used.");
+    tt->val_offset = (char *) &convection_finder_max_valid_height - &_start_;
+    tt->single_val.d = 25;
+    tt++;
+    
+    // Parameter 'convection_finder_min_valid_dbz'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_valid_dbz");
+    tt->descr = tdrpStrDup("Minimum reflectivity threshold for this analysis (dBZ).");
+    tt->help = tdrpStrDup("Reflectivity below this threshold is set to missing.");
+    tt->val_offset = (char *) &convection_finder_min_valid_dbz - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'dbz_threshold_for_definite_convection'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("dbz_threshold_for_definite_convection");
+    tt->descr = tdrpStrDup("Reflectivity value that indicates definite convection.");
+    tt->help = tdrpStrDup("If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.");
+    tt->val_offset = (char *) &dbz_threshold_for_definite_convection - &_start_;
+    tt->single_val.d = 53;
+    tt++;
+    
+    // Parameter 'convection_finder_background_dbz_radius_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_background_dbz_radius_km");
+    tt->descr = tdrpStrDup("Radius for computing background reflectivity (km).");
+    tt->help = tdrpStrDup("The background dbz at a point is the mean within this specified radius of the point.");
+    tt->val_offset = (char *) &convection_finder_background_dbz_radius_km - &_start_;
+    tt->single_val.d = 11;
+    tt++;
+    
+    // Parameter 'conv_radius_function'
+    // ctype is '_conv_radius_function_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("conv_radius_function");
+    tt->descr = tdrpStrDup("End points of the linear function to compute the radius from the background reflectivity.");
+    tt->help = tdrpStrDup("The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.");
+    tt->val_offset = (char *) &conv_radius_function - &_start_;
+    tt->struct_def.name = tdrpStrDup("conv_radius_function_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_dbz");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &conv_radius_function.min_dbz - (char *) &conv_radius_function;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_dbz");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &conv_radius_function.max_dbz - (char *) &conv_radius_function;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_radius_km");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &conv_radius_function.min_radius_km - (char *) &conv_radius_function;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("max_radius_km");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &conv_radius_function.max_radius_km - (char *) &conv_radius_function;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 22.5;
+      tt->struct_vals[1].d = 42.5;
+      tt->struct_vals[2].d = 1;
+      tt->struct_vals[3].d = 5;
+    tt++;
+    
+    // Parameter 'convective_radius_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convective_radius_km");
+    tt->descr = tdrpStrDup("Radius of convective influence (km).");
+    tt->help = tdrpStrDup("Given definite convection at a point (see above), we set all points within this radius to be convective.");
+    tt->val_offset = (char *) &convective_radius_km - &_start_;
+    tt->single_val.d = 5;
+    tt++;
+    
+    // Parameter 'convection_finder_texture_radius_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_texture_radius_km");
+    tt->descr = tdrpStrDup("Radius for texture analysis (km).");
+    tt->help = tdrpStrDup("We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.");
+    tt->val_offset = (char *) &convection_finder_texture_radius_km - &_start_;
+    tt->single_val.d = 5;
+    tt++;
+    
+    // Parameter 'convection_finder_min_valid_fraction_for_texture'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_valid_fraction_for_texture");
+    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
+    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
+    tt->val_offset = (char *) &convection_finder_min_valid_fraction_for_texture - &_start_;
+    tt->single_val.d = 0.33;
+    tt++;
+    
+    // Parameter 'convection_finder_min_texture_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_texture_value");
+    tt->descr = tdrpStrDup("Minimum texture value for convection at a point.");
+    tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.");
+    tt->val_offset = (char *) &convection_finder_min_texture_value - &_start_;
+    tt->single_val.d = 15;
+    tt++;
+    
+    // Parameter 'convection_finder_min_convectivity_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_convectivity_for_convective");
+    tt->descr = tdrpStrDup("Minimum convectivity for convective at a point.");
+    tt->help = tdrpStrDup("If the convectivity at a point exceeds this value, we set the convective flag at this point.");
+    tt->val_offset = (char *) &convection_finder_min_convectivity_for_convective - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'convection_finder_max_convectivity_for_stratiform'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_max_convectivity_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum convectivity for stratiform at a point.");
+    tt->help = tdrpStrDup("If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.");
+    tt->val_offset = (char *) &convection_finder_max_convectivity_for_stratiform - &_start_;
+    tt->single_val.d = 0.4;
+    tt++;
+    
+    // Parameter 'convection_finder_min_overlap_for_convective_clumps'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_overlap_for_convective_clumps");
+    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
+    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
+    tt->val_offset = (char *) &convection_finder_min_overlap_for_convective_clumps - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'convection_finder_write_debug_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_write_debug_files");
+    tt->descr = tdrpStrDup("Option to write out the gridded fields computed for the convective filter.");
+    tt->help = tdrpStrDup("For debugging and analysis purposes it is useful to be able to write out and displa y the grids computed in this step.");
+    tt->val_offset = (char *) &convection_finder_write_debug_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'convection_finder_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_output_url");
+    tt->descr = tdrpStrDup("Output URL.");
+    tt->help = tdrpStrDup("Output files are written to this URL.");
+    tt->val_offset = (char *) &convection_finder_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/convection");
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -130,13 +130,6 @@ public:
   } dual_threshold_t;
 
   typedef struct {
-    double min_dbz;
-    double max_dbz;
-    double min_radius_km;
-    double max_radius_km;
-  } conv_radius_function_t;
-
-  typedef struct {
     double coeff;
     double expon;
   } zr_t;
@@ -154,6 +147,13 @@ public:
     double min_val;
     double max_val;
   } sounding_data_range_t;
+
+  typedef struct {
+    double min_dbz;
+    double max_dbz;
+    double min_radius_km;
+    double max_radius_km;
+  } conv_radius_function_t;
 
   ///////////////////////////
   // Member functions
@@ -497,6 +497,8 @@ public:
 
   double tops_dbz_threshold;
 
+  tdrp_bool_t threshold_using_convectivity;
+
   tdrp_bool_t use_dual_threshold;
 
   dual_threshold_t dual_threshold;
@@ -522,38 +524,6 @@ public:
   double sectrip_horiz_aspect;
 
   double sectrip_orientation_error;
-
-  tdrp_bool_t identify_convective_regions;
-
-  double convection_finder_min_valid_height;
-
-  double convection_finder_max_valid_height;
-
-  double convection_finder_min_valid_dbz;
-
-  double dbz_threshold_for_definite_convection;
-
-  double convection_finder_background_dbz_radius_km;
-
-  conv_radius_function_t conv_radius_function;
-
-  double convective_radius_km;
-
-  double convection_finder_texture_radius_km;
-
-  double convection_finder_min_valid_fraction_for_texture;
-
-  double convection_finder_min_texture_value;
-
-  double convection_finder_min_convectivity_for_convective;
-
-  double convection_finder_max_convectivity_for_stratiform;
-
-  int convection_finder_min_overlap_for_convective_clumps;
-
-  tdrp_bool_t convection_finder_write_debug_files;
-
-  char* convection_finder_output_url;
 
   double hail_dbz_threshold;
 
@@ -701,6 +671,38 @@ public:
 
   int field_tracker_transition_period_secs;
 
+  tdrp_bool_t identify_convective_regions;
+
+  double convection_finder_min_valid_height;
+
+  double convection_finder_max_valid_height;
+
+  double convection_finder_min_valid_dbz;
+
+  double dbz_threshold_for_definite_convection;
+
+  double convection_finder_background_dbz_radius_km;
+
+  conv_radius_function_t conv_radius_function;
+
+  double convective_radius_km;
+
+  double convection_finder_texture_radius_km;
+
+  double convection_finder_min_valid_fraction_for_texture;
+
+  double convection_finder_min_texture_value;
+
+  double convection_finder_min_convectivity_for_convective;
+
+  double convection_finder_max_convectivity_for_stratiform;
+
+  int convection_finder_min_overlap_for_convective_clumps;
+
+  tdrp_bool_t convection_finder_write_debug_files;
+
+  char* convection_finder_output_url;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -708,7 +710,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[154];
+  mutable TDRPtable _table[157];
 
   const char *_className;
 
