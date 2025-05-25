@@ -499,6 +499,12 @@ public:
 
   tdrp_bool_t threshold_using_convectivity;
 
+  char* convectivity_field_name;
+
+  double low_convectivity_threshold;
+
+  double high_convectivity_threshold;
+
   tdrp_bool_t use_dual_threshold;
 
   dual_threshold_t dual_threshold;
@@ -710,7 +716,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[157];
+  mutable TDRPtable _table[160];
 
   const char *_className;
 

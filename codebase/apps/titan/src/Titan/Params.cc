@@ -1045,6 +1045,42 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'convectivity_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("convectivity_field_name");
+    tt->descr = tdrpStrDup("Name of convectivity field in the input data.");
+    tt->help = tdrpStrDup("To compute this field, you must first run the Ecco application. Save out both the reflecivity convectivity fields.");
+    tt->val_offset = (char *) &convectivity_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Convectivity3D");
+    tt++;
+    
+    // Parameter 'low_convectivity_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("low_convectivity_threshold");
+    tt->descr = tdrpStrDup("Lower convectivity threshold for storm identification.");
+    tt->help = tdrpStrDup("This threshold will be applied in addion to low_dbz_threshold.");
+    tt->val_offset = (char *) &low_convectivity_threshold - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'high_convectivity_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("high_convectivity_threshold");
+    tt->descr = tdrpStrDup("Upper convectivity threshold for storm identification.");
+    tt->help = tdrpStrDup("This threshold will be applied in addion to high_dbz_threshold.");
+    tt->val_offset = (char *) &high_convectivity_threshold - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));

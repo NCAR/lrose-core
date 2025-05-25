@@ -222,6 +222,24 @@ paramdef boolean {
   p_help = "The Ecco algorithm performs convective/stratiform partitioning.\n\nSee:\n\thttps://doi.org/10.1175/JTECH-D-22-0018.1.\n\nConvectivity is a concept introduced by Ecco. Convectivity ranges from 0 to 1 - higher values suggest convective regions, lower values stratiform regions.\n\nThe values suggested by Ecco are:\n\t0.0 to 0.4: stratiform.\n\t0.4 to 0.5: mixed.\n\t0.5 to 1.0: convective.\n\nThis section gives you the option to constrain storms to regions of higher convectivity. This allows you to avoid stratiform regions and concentrate tracking convective storms.";
 } threshold_using_convectivity;
 
+paramdef string {
+  p_default = "Convectivity3D";
+  p_descr = "Name of convectivity field in the input data.";
+  p_help = "To compute this field, you must first run the Ecco application. Save out both the reflecivity convectivity fields.";
+} convectivity_field_name;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Lower convectivity threshold for storm identification.";
+  p_help = "This threshold will be applied in addion to low_dbz_threshold.";
+} low_convectivity_threshold;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Upper convectivity threshold for storm identification.";
+  p_help = "This threshold will be applied in addion to high_dbz_threshold.";
+} high_convectivity_threshold;
+
 commentdef {
   p_header = "OPTION TO USE DUAL THRESHOLDS.";
 }
