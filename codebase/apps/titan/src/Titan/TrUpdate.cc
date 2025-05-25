@@ -125,7 +125,7 @@ int StormTrack::_handleCombined(date_time_t *dtime,
 
   Point_d *pos_corr, *corr;
 
-  date_time_t *time_origin = NULL;
+  date_time_t *time_origin = nullptr;
   TrStorm::track_match_t *match;
   TrTrack::props_t *combined_history;
   TrTrack::props_t *contribution;

@@ -57,8 +57,8 @@ Verify::Verify(const string &prog_name, const Params &params,
 
   _missing = -9999.0;
   _nptsPlaneAlloc = 0;
-  _allStormsGrid = NULL;
-  _validStormsGrid = NULL;
+  _allStormsGrid = nullptr;
+  _validStormsGrid = nullptr;
 
 }
 

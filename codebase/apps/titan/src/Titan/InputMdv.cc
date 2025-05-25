@@ -49,12 +49,16 @@ InputMdv::InputMdv(const string &prog_name, const Params &params) :
 
 {
 
-  dbzField = NULL;
-  velField = NULL;
-  dbzVol = NULL;
-  velVol = NULL;
-  compDbz = NULL;
+  dbzField = nullptr;
+  dbzVol = nullptr;
+  compDbz = nullptr;
   dbzMiss = -9999;
+  
+  velField = nullptr;
+  velVol = nullptr;
+
+  convVol = nullptr;
+  convMiss = -9999;
 
 }
 
@@ -111,6 +115,10 @@ int InputMdv::read(time_t data_time)
     cerr << "  Use field names instead" << endl;
   }
 
+  if (_params.apply_convectivity_threshold) {
+    mdvx.addReadField(_params.convectivity_field_name);
+  }
+  
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
   mdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
 
@@ -139,8 +147,9 @@ int InputMdv::read(time_t data_time)
   
   const Mdvx::master_header_t &mhdr = mdvx.getMasterHeader();
 
-  dbzField = NULL;
-  velField = NULL;
+  dbzField = nullptr;
+  velField = nullptr;
+  convField = nullptr;
 
   if (useFieldNames) {
     dbzField = mdvx.getField(_params.dbz_field.name);
@@ -153,19 +162,26 @@ int InputMdv::read(time_t data_time)
       velField = mdvx.getField(_params.vel_field.num);
     }
   }
+  convField = mdvx.getField(_params.convectivity_field_name);
 
-  if (dbzField == NULL) {
+  if (dbzField == nullptr) {
     cerr << "ERROR - InputMdv::read()" << endl;
     cerr << "  Cannot find dbz field: " << _params.dbz_field.name << endl;
     return -1;
   }
   if (_params.vel_available) {
-    if (velField == NULL) {
+    if (velField == nullptr) {
       cerr << "ERROR - InputMdv::read()" << endl;
       cerr << "  Cannot find vel field: " << _params.vel_field.name << endl;
       return -1;
     }
-  } else {
+  }
+  if (_params.apply_convectivity_threshold) {
+    if (convField == nullptr) {
+      cerr << "ERROR - InputMdv::read()" << endl;
+      cerr << "  Cannot find convectivity field: " << _params.convectivity_field_name << endl;
+      return -1;
+    }
   }
 
   if (_params.negate_dbz_field) {
@@ -280,6 +296,9 @@ int InputMdv::read(time_t data_time)
   dbzVol = (fl32 *) dbzField->getVol();
   if (velField) {
     velVol = (fl32 *) velField->getVol();
+  }
+  if (convField) {
+    convVol = (fl32 *) convField->getVol();
   }
   
   return 0;

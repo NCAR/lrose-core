@@ -59,8 +59,8 @@ Identify::Identify(const string &prog_name, const Params &params,
 
 {
 
-  _props = NULL;
-  _verify = NULL;
+  _props = nullptr;
+  _verify = nullptr;
   
   if (_params.create_verification_files) {
     _verify = new Verify(_progName, _params, _inputMdv);
@@ -394,7 +394,7 @@ int Identify::_writeDualThreshMdv()
   
 {
 
-  if (_clumping.getDualThreshDbzCompOutputGrid() == NULL) {
+  if (_clumping.getDualThreshDbzCompOutputGrid() == nullptr) {
     return -1;
   }
 

@@ -443,7 +443,7 @@ int TrConsolidate::_consolidate(TitanTrackFile &tfile,
    */
   
   ufree((char *) tfile._simples_per_complex[higher_track_num]);
-  tfile._simples_per_complex[higher_track_num] = NULL;
+  tfile._simples_per_complex[higher_track_num] = nullptr;
       
   /*
    * reduce number of complex tracks by 1

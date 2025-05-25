@@ -61,9 +61,9 @@ Area::Area(const string &prog_name, const Params &params,
   // grids
 
   _nGridAlloc = 0;
-  _compGrid = NULL;
-  _precipGrid = NULL;
-  _dbzForPrecip = NULL;
+  _compGrid = nullptr;
+  _precipGrid = nullptr;
+  _dbzForPrecip = nullptr;
 
   // ellipse comps
 

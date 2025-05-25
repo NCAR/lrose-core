@@ -49,20 +49,20 @@ Boundary::Boundary(const string &prog_name, const Params &params) :
 
   OK = TRUE;
 
-  _rowh = NULL;
+  _rowh = nullptr;
   _nRowsAlloc = 0;
-  _intervals = NULL;
+  _intervals = nullptr;
   _nIntervalsAlloc = 0;
   
-  _starRays = NULL;
-  _rays = NULL;
-  _radii = NULL;
+  _starRays = nullptr;
+  _rays = nullptr;
+  _radii = nullptr;
   _nRaysAlloc = 0;
 
 
-  _bdryList = NULL;
-  _bdryPts = NULL;
-  _nodes = NULL;
+  _bdryList = nullptr;
+  _bdryPts = nullptr;
+  _nodes = nullptr;
   _nNodesAlloc = 0;
 
 }

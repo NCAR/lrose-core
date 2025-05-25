@@ -47,14 +47,14 @@ using namespace std;
 
 // Global variables - instance
 
-Sounding *Sounding::_instance = NULL;
+Sounding *Sounding::_instance = nullptr;
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor - private, called by inst()
 
 Sounding::Sounding()
 {
-  _params = NULL;
+  _params = nullptr;
   _tempProfile.clear();
 }
 
@@ -72,7 +72,7 @@ Sounding::~Sounding()
 Sounding &Sounding::inst()
 {
 
-  if (_instance == (Sounding *)NULL) {
+  if (_instance == (Sounding *)nullptr) {
     _instance = new Sounding();
   }
 
@@ -93,7 +93,7 @@ int Sounding::retrieveTempProfile(time_t profileTime)
          << DateTime::strm(profileTime) << endl;
   }
 
-  assert(_params != NULL);
+  assert(_params != nullptr);
   
   time_t retrievedTime = profileTime;
   _tempProfile.clear();

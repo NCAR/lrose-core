@@ -154,8 +154,8 @@ void Props::init()
   // For this test, it is only necessary to consider x and y, since the
   // elevation angle will be low.
 
-  DsRadarParams *radar = NULL;
-  DsRadarElev *elevs = NULL;
+  DsRadarParams *radar = nullptr;
+  DsRadarElev *elevs = nullptr;
   MdvxRadar mdvxRadar;
   if (mdvxRadar.loadFromMdvx(_inputMdv.mdvx) == 0) {
     radar = &mdvxRadar.getRadarParams();
@@ -414,7 +414,7 @@ int Props::_computeFirstPass(const ClumpProps &cprops)
 		 intvl.begin + cprops.minIx());
     
     fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
-    fl32 *vel_ptr = NULL;
+    fl32 *vel_ptr = nullptr;
     if (_params.vel_available) {
       vel_ptr = _inputMdv.velVol + jz * nptsPlane + index;
     }
@@ -704,7 +704,7 @@ void Props::_computeSecondPass(const ClumpProps &cprops)
     int index = ((iy + cprops.minIy()) * grid.nx +
 		 intvl.begin + cprops.minIx());
 
-    fl32 *vel_ptr = NULL;
+    fl32 *vel_ptr = nullptr;
     if (_params.vel_available) {
       vel_ptr = _inputMdv.velVol + jz * nptsPlane + index;
     }

@@ -907,7 +907,7 @@ int StormTrack::_saveCurrentState()
 
   // open state file
 
-  if ((fp = fopen(_stateFilePath.c_str(), "w")) == NULL) {
+  if ((fp = fopen(_stateFilePath.c_str(), "w")) == nullptr) {
     fprintf(stderr, "%s::StormTrack::_saveCurrentState\n",
 	    _progName.c_str());
     fprintf(stderr, "Cannot create state file\n");
@@ -1024,7 +1024,7 @@ int StormTrack::_readPrevState()
       
   // open state file
 
-  if ((fp = fopen(_stateFilePath.c_str(), "r")) == NULL)
+  if ((fp = fopen(_stateFilePath.c_str(), "r")) == nullptr)
     return (-1);
   
   // read  flag - if not TRUE, return because the file was not
@@ -1638,7 +1638,7 @@ int StormTrack::_setHeaderValid(int scan_num,
    * header. Set valid flag.
    */
   
-  state_tag = time(NULL);
+  state_tag = time(nullptr);
   _tfile._header.modify_code = state_tag;
   _tfile._header.file_valid = true;
   

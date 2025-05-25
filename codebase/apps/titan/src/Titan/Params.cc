@@ -187,7 +187,7 @@
   //     in the parameter file itself.
   //
   //   char **params_path_p:
-  //     If this is non-NULL, it is set to point to the path
+  //     If this is non-nullptr, it is set to point to the path
   //     of the params file used.
   //
   //   bool defer_exit: normally, if the command args contain a 
@@ -390,9 +390,9 @@
 
   int Params::loadDefaults(int expand_env)
   {
-    if (tdrpLoad(NULL,
+    if (tdrpLoad(nullptr,
                  _table, &_start_,
-                 NULL, expand_env, FALSE)) {
+                 nullptr, expand_env, FALSE)) {
       return (-1);
     } else {
       return (0);
@@ -438,7 +438,7 @@
   //
   // Return TRUE if all set, FALSE if not.
   //
-  // If out is non-NULL, prints out warning messages for those
+  // If out is non-nullptr, prints out warning messages for those
   // parameters which are not set.
   //
 
@@ -1033,15 +1033,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'threshold_using_convectivity'
+    // Parameter 'apply_convectivity_threshold'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("threshold_using_convectivity");
+    tt->param_name = tdrpStrDup("apply_convectivity_threshold");
     tt->descr = tdrpStrDup("Option to threshold storms on convectivity in addition to reflectivity.");
     tt->help = tdrpStrDup("The Ecco algorithm performs convective/stratiform partitioning.\n\nSee:\n\thttps://doi.org/10.1175/JTECH-D-22-0018.1.\n\nConvectivity is a concept introduced by Ecco. Convectivity ranges from 0 to 1 - higher values suggest convective regions, lower values stratiform regions.\n\nThe values suggested by Ecco are:\n\t0.0 to 0.4: stratiform.\n\t0.4 to 0.5: mixed.\n\t0.5 to 1.0: convective.\n\nThis section gives you the option to constrain storms to regions of higher convectivity. This allows you to avoid stratiform regions and concentrate tracking convective storms.");
-    tt->val_offset = (char *) &threshold_using_convectivity - &_start_;
+    tt->val_offset = (char *) &apply_convectivity_threshold - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -2788,9 +2788,9 @@
     tt->single_val.s = tdrpStrDup("mdv/convection");
     tt++;
     
-    // trailing entry has param_name set to NULL
+    // trailing entry has param_name set to nullptr
     
-    tt->param_name = NULL;
+    tt->param_name = nullptr;
     
     return;
   

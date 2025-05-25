@@ -45,10 +45,10 @@ TrStorm::TrStorm()
 
 {
 
-  match_array = NULL;
+  match_array = nullptr;
   // _n_match_alloc = 0;
 
-  proj_runs = NULL;
+  proj_runs = nullptr;
   // _n_proj_runs_alloc = 0;
 
   MEM_zero(status);

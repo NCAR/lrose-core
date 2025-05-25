@@ -67,6 +67,7 @@ public:
 
   MdvxField *dbzField;
   MdvxField *velField;
+  MdvxField *convField;
 
   MdvxProj proj;
 
@@ -87,6 +88,9 @@ public:
   fl32 *compDbz;
   fl32 dbzMiss;
 
+  fl32 *convVol;
+  fl32 convMiss;
+  
   // read file for given time
   int read(time_t data_time);
 
@@ -99,7 +103,6 @@ private:
   void _setDzConstant();
   void _copyCoord2Grid(const Mdvx::coord_t &coord,
 		       titan_grid_t &grid);
-
   void _computeComposite();
   void _removeStratiform();
 

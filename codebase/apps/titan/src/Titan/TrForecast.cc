@@ -1456,8 +1456,8 @@ void TrForecast::_load_speed_and_dirn(TitanStormFile &sfile,
 
   DsMdvx fieldTrackerData;
   _useFieldTracker = false;
-  MdvxField *uField = NULL;
-  MdvxField *vField = NULL;
+  MdvxField *uField = nullptr;
+  MdvxField *vField = nullptr;
   MdvxProj fieldProj;
   if (allow_field_tracker &&
       _params.override_early_storm_motion_using_field_tracker) {
@@ -1602,7 +1602,7 @@ int TrForecast::_load_field_tracker_data(const TitanStormFile &sfile,
     
     // in realtime mode, wait a while
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     double delaySecs = (double) now - (double) stormTime;
     if (delaySecs > _params.field_tracker_realtime_wait_secs) {
       cerr << "ERROR - TrForecast::_load_field_tracker_data" << endl;
@@ -1623,14 +1623,14 @@ int TrForecast::_load_field_tracker_data(const TitanStormFile &sfile,
   uField = fieldTrackerData.getField(_params.field_tracker_U_motion_name);
   vField = fieldTrackerData.getField(_params.field_tracker_V_motion_name);
   
-  if (uField == NULL) {
+  if (uField == nullptr) {
     cerr << "ERROR - TrForecast::_load_field_tracker_data" << endl;
     cerr << "  Cannot find U motion field: " << _params.field_tracker_U_motion_name << endl;
     cerr << "  file: " << fieldTrackerData.getPathInUse() << endl;
     return -1;
   }
   
-  if (vField == NULL) {
+  if (vField == nullptr) {
     cerr << "ERROR - TrForecast::_load_field_tracker_data" << endl;
     cerr << "  Cannot find V motion field: " << _params.field_tracker_V_motion_name << endl;
     cerr << "  file: " << fieldTrackerData.getPathInUse() << endl;

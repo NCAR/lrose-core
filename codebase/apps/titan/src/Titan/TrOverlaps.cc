@@ -50,10 +50,10 @@ TrOverlaps::TrOverlaps(const string &prog_name, const Params &params) :
 {
 
   _n_tmp_grid_alloc = 0;
-  _tmp_grid_array = NULL;
+  _tmp_grid_array = nullptr;
 
   _n_overlap_grid_alloc = 0;
-  _overlap_grid_array = NULL;
+  _overlap_grid_array = nullptr;
 
 }
 
@@ -216,7 +216,7 @@ void TrOverlaps::init_tmp_grid(int nbytes)
 {
 
   if (nbytes > _n_tmp_grid_alloc) {
-    if (_tmp_grid_array == NULL) {
+    if (_tmp_grid_array == nullptr) {
       _tmp_grid_array = (ui08 *) umalloc(nbytes);
     } else {
       _tmp_grid_array = (ui08 *) urealloc(_tmp_grid_array, nbytes);
@@ -239,7 +239,7 @@ void TrOverlaps::init_overlap_grid(int nbytes)
 {
 
   if (nbytes > _n_overlap_grid_alloc) {
-    if (_overlap_grid_array == NULL) {
+    if (_overlap_grid_array == nullptr) {
       _overlap_grid_array = (ui08 *) umalloc(nbytes);
     } else {
       _overlap_grid_array = (ui08 *) urealloc(_overlap_grid_array, nbytes);

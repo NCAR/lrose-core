@@ -497,7 +497,7 @@ public:
 
   double tops_dbz_threshold;
 
-  tdrp_bool_t threshold_using_convectivity;
+  tdrp_bool_t apply_convectivity_threshold;
 
   char* convectivity_field_name;
 

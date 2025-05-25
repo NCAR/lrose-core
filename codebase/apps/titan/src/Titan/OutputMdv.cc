@@ -64,7 +64,7 @@ OutputMdv::OutputMdv(const string &prog_name,
 
   Mdvx::master_header_t mhdr = _inputMdv.mdvx.getMasterHeader();
 
-  mhdr.time_gen = time(NULL);
+  mhdr.time_gen = time(nullptr);
   mhdr.data_dimension = 2;
   mhdr.n_fields = 0;
   mhdr.max_nz = 1;

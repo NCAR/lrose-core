@@ -294,7 +294,7 @@ int TitanDriver::_runRetrack ()
 
   char *stormPath;
 
-  while ((stormPath = input.next()) != NULL) {
+  while ((stormPath = input.next()) != nullptr) {
     
     if (_params.debug) {
       cerr << "Retracking file: " << stormPath << endl;
