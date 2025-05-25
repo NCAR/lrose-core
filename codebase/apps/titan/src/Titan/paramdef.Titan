@@ -214,12 +214,13 @@ paramdef double {
 
 commentdef {
   p_header = "OPTION TO THRESHOLD ON CONVECTIVITY.";
+  p_text = "Prerequisite: Ecco has previously been run on this data set.\n\nTitan is generally intended for identifying and tracking convective storms. Regions of stratiform rain, especially with embedded bright-band, can confuse the algorithm and lead to the identification of large entities, often close to the radar. Using this option to identify convective regions prior to storm identification can help mitigate this problem.\n\nThis section gives you the option to constrain storms to regions of higher convectivity. This allows you to avoid stratiform regions and concentrate tracking convective storms.";
 }
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to threshold storms on convectivity in addition to reflectivity.";
-  p_help = "The Ecco algorithm performs convective/stratiform partitioning.\n\nSee:\n\thttps://doi.org/10.1175/JTECH-D-22-0018.1.\n\nConvectivity is a concept introduced by Ecco. Convectivity ranges from 0 to 1 - higher values suggest convective regions, lower values stratiform regions.\n\nThe values suggested by Ecco are:\n\t0.0 to 0.4: stratiform.\n\t0.4 to 0.5: mixed.\n\t0.5 to 1.0: convective.\n\nThis section gives you the option to constrain storms to regions of higher convectivity. This allows you to avoid stratiform regions and concentrate tracking convective storms.";
+  p_help = "This assumes that the Ecco algorithm has been run on this data set. The Ecco algorithm performs convective/stratiform partitioning.\n\nSee:\n\thttps://doi.org/10.1175/JTECH-D-22-0018.1.\n\nConvectivity is a concept introduced by Ecco. Convectivity ranges from 0 to 1 - higher values suggest convective regions, lower values stratiform regions.\n\nThe values suggested by Ecco are:\n\t0.0 to 0.4: stratiform.\n\t0.4 to 0.5: mixed.\n\t0.5 to 1.0: convective.";
 } apply_convectivity_threshold;
 
 paramdef string {
@@ -239,6 +240,118 @@ paramdef double {
   p_descr = "Upper convectivity threshold for storm identification.";
   p_help = "This threshold will be applied in addion to high_dbz_threshold.";
 } high_convectivity_threshold;
+
+commentdef {
+  p_header = "OPTION TO IDENTIFY CONVECTIVE REGIONS IN PLACE.";
+  p_text = "The recommended alternative is to run Ecco, and then threshold Titan storms using both reflectivity and convectivity. See 'apply_convectivity_threshold' above.\n\nThis procedure uses the same method as Ecco, but has fewer options than running Ecco itself. For example it does not support the temperature profile option. Ecco has an option to read in model data from which to determine the temperature profile.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to identify convective regions prior to storm identification.";
+  p_help = "If TRUE, an algorithm will be run to identify the convective regions first, and then remove the non-convective regions before we identify the storms. The parameters in this section control the algorithm that finds the convective regions.";
+} identify_convective_regions;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min height used in analysis (km).";	
+  P_help = "Only data at or above this altitude is used.";
+} convection_finder_min_valid_height;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height used in analysis (km).";	
+  p_help = "Only data at or below this altitude is used.";
+} convection_finder_max_valid_height;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
+  p_help = "Reflectivity below this threshold is set to missing.";
+} convection_finder_min_valid_dbz;
+
+paramdef double {
+  p_default = 53;
+  p_descr = "Reflectivity value that indicates definite convection.";
+  p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
+} dbz_threshold_for_definite_convection;
+
+paramdef double {
+  p_default = 11.0;
+  p_descr = "Radius for computing background reflectivity (km).";
+  p_help = "The background dbz at a point is the mean within this specified radius of the point.";
+} convection_finder_background_dbz_radius_km;
+
+typedef struct {
+  double min_dbz;
+  double max_dbz;
+  double min_radius_km;
+  double max_radius_km;
+} conv_radius_function_t;
+
+paramdef struct conv_radius_function_t {
+  p_default = { min_dbz = 22.5,
+                max_dbz = 42.5,
+                min_radius_km = 1.0,
+                max_radius_km = 5.0
+  };
+  p_descr = "End points of the linear function to compute the radius from the background reflectivity.";
+  p_help = "The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.";
+} conv_radius_function;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Radius of convective influence (km).";
+  p_help = "Given definite convection at a point (see above), we set all points within this radius to be convective.";
+} convective_radius_km;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Radius for texture analysis (km).";
+  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
+} convection_finder_texture_radius_km;
+
+paramdef double {
+  p_default = 0.33;
+  p_descr = "Minimum fraction of surroundingpoints for texture computations.";
+  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.";
+} convection_finder_min_valid_fraction_for_texture;
+
+paramdef double {
+  p_default = 15.0;
+  p_descr = "Minimum texture value for convection at a point.";
+  p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
+} convection_finder_min_texture_value;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum convectivity for convective at a point.";
+  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
+} convection_finder_min_convectivity_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum convectivity for stratiform at a point.";
+  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
+} convection_finder_max_convectivity_for_stratiform;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum grid overlap in convective regions.";
+  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} convection_finder_min_overlap_for_convective_clumps;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write out the gridded fields computed for the convective filter.";
+  p_help = "For debugging and analysis purposes it is useful to be able to write out and displa y the grids computed in this step.";
+} convection_finder_write_debug_files;
+
+paramdef string {
+  p_default = "mdv/convection";
+  p_descr = "Output URL.";
+  p_help = "Output files are written to this URL.";
+} convection_finder_output_url;
 
 commentdef {
   p_header = "OPTION TO USE DUAL THRESHOLDS.";
@@ -929,121 +1042,4 @@ paramdef int {
   p_descr = "Time period, from the end of the initial period, during which a combination of the Titan motion and field tracker motion is used (secs).";
   p_help = "During this period, the Titan storm motion is replaced by a linear combination of the Titan motion and the field tracker motion.";
 } field_tracker_transition_period_secs;
-
-commentdef {
-  p_header = "DEPRECATED PARAMETER SECTIONS";
-  p_text = "The deprecated parameters sections are grouped here, at the end. We recommend you do not use these sections. They are included for backward compatibility.";
-}
-
-commentdef {
-  p_header = "OPTION TO IDENTIFY CONVECTIVE REGIONS - DEPRECATED.";
-  p_text = "NOTE - this has been deprecated. The recommended alternative is to run Ecco, and then threshold Titan storms using both reflectivity and convectivity. See 'threshold_on_convectivity'.\n\nTitan is generally intended for identifying and tracking convective storms. Regions of stratiform rain, especially with embedded bright-band, can confuse the algorithm and lead to the identification of large blobs, often close to the radar. Using this option to identify convective regions prior to storm identification can help mitigate this problem.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to identify convective regions prior to storm identification.";
-  p_help = "If TRUE, an algorithm will be run to identify the convective regions first, and then remove the non-convective regions before we identify the storms. The parameters in this section control the algorithm that finds the convective regions.";
-} identify_convective_regions;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Min height used in analysis (km).";	
-  P_help = "Only data at or above this altitude is used.";
-} convection_finder_min_valid_height;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Max height used in analysis (km).";	
-  p_help = "Only data at or below this altitude is used.";
-} convection_finder_max_valid_height;
-
-paramdef double {
-  p_default = 10.0;
-  p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
-  p_help = "Reflectivity below this threshold is set to missing.";
-} convection_finder_min_valid_dbz;
-
-paramdef double {
-  p_default = 53;
-  p_descr = "Reflectivity value that indicates definite convection.";
-  p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
-} dbz_threshold_for_definite_convection;
-
-paramdef double {
-  p_default = 11.0;
-  p_descr = "Radius for computing background reflectivity (km).";
-  p_help = "The background dbz at a point is the mean within this specified radius of the point.";
-} convection_finder_background_dbz_radius_km;
-
-typedef struct {
-  double min_dbz;
-  double max_dbz;
-  double min_radius_km;
-  double max_radius_km;
-} conv_radius_function_t;
-
-paramdef struct conv_radius_function_t {
-  p_default = { min_dbz = 22.5,
-                max_dbz = 42.5,
-                min_radius_km = 1.0,
-                max_radius_km = 5.0
-  };
-  p_descr = "End points of the linear function to compute the radius from the background reflectivity.";
-  p_help = "The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.";
-} conv_radius_function;
-
-paramdef double {
-  p_default = 5.0;
-  p_descr = "Radius of convective influence (km).";
-  p_help = "Given definite convection at a point (see above), we set all points within this radius to be convective.";
-} convective_radius_km;
-
-paramdef double {
-  p_default = 5.0;
-  p_descr = "Radius for texture analysis (km).";
-  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
-} convection_finder_texture_radius_km;
-
-paramdef double {
-  p_default = 0.33;
-  p_descr = "Minimum fraction of surroundingpoints for texture computations.";
-  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.";
-} convection_finder_min_valid_fraction_for_texture;
-
-paramdef double {
-  p_default = 15.0;
-  p_descr = "Minimum texture value for convection at a point.";
-  p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
-} convection_finder_min_texture_value;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Minimum convectivity for convective at a point.";
-  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
-} convection_finder_min_convectivity_for_convective;
-
-paramdef double {
-  p_default = 0.4;
-  p_descr = "Maximum convectivity for stratiform at a point.";
-  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
-} convection_finder_max_convectivity_for_stratiform;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Minimum grid overlap in convective regions.";
-  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
-} convection_finder_min_overlap_for_convective_clumps;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to write out the gridded fields computed for the convective filter.";
-  p_help = "For debugging and analysis purposes it is useful to be able to write out and displa y the grids computed in this step.";
-} convection_finder_write_debug_files;
-
-paramdef string {
-  p_default = "mdv/convection";
-  p_descr = "Output URL.";
-  p_help = "Output files are written to this URL.";
-} convection_finder_output_url;
 

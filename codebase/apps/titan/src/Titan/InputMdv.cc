@@ -205,8 +205,10 @@ int InputMdv::read(time_t data_time)
   }
 
   // if required, find the convective regions
-  
-  if (_params.identify_convective_regions) {
+
+  if (_params.apply_convectivity_threshold) {
+    _applyConvectivityThreshold();
+  } else if (_params.identify_convective_regions) {
     if (_convFinder.run(mdvx, *dbzField)) {
       cerr << "WARNING - InputMdv" << endl;
       cerr << "  Cannot identify convective regions - this will be disabled" << endl;
@@ -454,8 +456,8 @@ void InputMdv::_removeStratiform()
 {
 
   const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
-
-  fl32 *dbz = (fl32 *) dbzField->getVol();
+  
+  fl32 *dbz = dbzVol;
   const ui08 *partition = _convFinder.getConvStrat().getEchoType3D();
   for (int iz = 0; iz < fhdr.nz; iz++) {
     for (int iy = 0; iy < fhdr.ny; iy++) {
@@ -472,4 +474,36 @@ void InputMdv::_removeStratiform()
 
 }
 
+/////////////////////////////////////////////
+// apply convectivity threshold to dbz field
 
+void InputMdv::_applyConvectivityThreshold()
+
+{
+
+  if (convVol == nullptr) {
+    cerr << "WARNING - InputMdv::_applyConvectivityThreshold()" << endl;
+    cerr << "  Convectivity field is missing." << endl;
+    cerr << "  Thresholding on convectivity will not be performed" << endl;
+    return;
+  }
+  
+  const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
+  fl32 *dbz = dbzVol;
+  fl32 *conv = convVol;
+
+  double minConv = _params.low_convectivity_threshold;
+  double maxConv = _params.high_convectivity_threshold;
+  
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    for (int iy = 0; iy < fhdr.ny; iy++) {
+      for (int ix = 0; ix < fhdr.nx; ix++, dbz++, conv++) {
+        double convValue = *conv;
+        if (convValue < minConv || convValue > maxConv) {
+          *dbz = dbzMiss;
+        }
+      } // ix
+    } // iy
+  } // iz
+
+}

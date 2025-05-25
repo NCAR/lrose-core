@@ -105,6 +105,7 @@ private:
 		       titan_grid_t &grid);
   void _computeComposite();
   void _removeStratiform();
+  void _applyConvectivityThreshold();
 
 };
 
