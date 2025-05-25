@@ -257,7 +257,10 @@ extern "C" {
     fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
                             * See precip_computation_mode */
 
-    si32 spare[4];
+    fl32 low_convectivity_threshold;   /* used if convectivity thresholds applied */
+    fl32 high_convectivity_threshold;  /* otherwise missing */
+
+    si32 spare[2];
 
   } storm_file_params_v5_t;
 
@@ -442,7 +445,8 @@ extern "C" {
     fl32 vil_from_maxz;
     fl32 ltg_count;               /* ltg strike count in x minutes before storm
                                    * time with x km of storm */
-    fl32 spare[1];
+
+    fl32 convectivity_median;   /* used if convectivity thresholds applied */
 
     union {
       si32 spare[4];              /* add your union here */
@@ -472,7 +476,7 @@ extern "C" {
     fl32 rad_vel_mean;		/* m/s */
     fl32 rad_vel_sd;		/* m/s */
     fl32 vorticity;		/* /s */
-    fl32 spare[1];
+    fl32 convectivity_median;   /* used if convectivity thresholds applied */
 
   } storm_file_layer_props_v5_t;
 

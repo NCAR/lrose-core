@@ -223,10 +223,10 @@ void RfPrintStormLayer(FILE *out,
   
   fprintf(out, "\n");
   
-  fprintf(out, "%s%5s %5s %7s %9s %7s %12s\n", spacer,
-	  "Layer", "z", "mass", "rvel_mean", "rvel_sd", "vorticity");
-  fprintf(out, "%s%5s %5s %7s %9s %7s %12s\n",
-	  spacer, " ", "(km)", "(ktons)", "(m/s)", "(m/s)", "(/s)");
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n", spacer,
+	  "Layer", "z", "mass", "rvel_mean", "rvel_sd", "vorticity", "convectivity");
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n",
+	  spacer, " ", "(km)", "(ktons)", "(m/s)", "(m/s)", "(/s)", " ");
   
   l = layer;
     
@@ -234,13 +234,14 @@ void RfPrintStormLayer(FILE *out,
        ilayer < (gprops->base_layer + gprops->n_layers);
        ilayer++, l++) {
     
-    fprintf(out, "%s%5d %5g %7.1f %9.2f %7.2f %12.2e\n",
+    fprintf(out, "%s%5d %5g %7.1f %9.2f %7.2f %12.2e %15.2e\n",
 	    spacer, ilayer,
 	    (scan->min_z + (double) ilayer * scan->delta_z),
 	    l->mass,
 	    l->rad_vel_mean,
 	    l->rad_vel_sd,
-	    l->vorticity);
+	    l->vorticity,
+            l->convectivity_median);
     
   } /* ilayer */
   
@@ -312,10 +313,10 @@ void RfPrintStormLayerXML(FILE *out,
   
   fprintf(out, "\n");
   
-  fprintf(out, "%s%5s %5s %7s %9s %7s %12s\n", spacer,
-	  "Layer", "z", "mass", "rvel_mean", "rvel_sd", "vorticity");
-  fprintf(out, "%s%5s %5s %7s %9s %7s %12s\n",
-	  spacer, " ", "(km)", "(ktons)", "(m/s)", "(m/s)", "(/s)");
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n", spacer,
+	  "Layer", "z", "mass", "rvel_mean", "rvel_sd", "vorticity", "convectivity");
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n",
+	  spacer, " ", "(km)", "(ktons)", "(m/s)", "(m/s)", "(/s)", " ");
   
   l = layer;
     
@@ -323,13 +324,14 @@ void RfPrintStormLayerXML(FILE *out,
        ilayer < (gprops->base_layer + gprops->n_layers);
        ilayer++, l++) {
     
-    fprintf(out, "%s%5d %5g %7.1f %9.2f %7.2f %12.2e\n",
+    fprintf(out, "%s%5d %5g %7.1f %9.2f %7.2f %12.2e %15.2e\n",
 	    spacer, ilayer,
 	    (scan->min_z + (double) ilayer * scan->delta_z),
 	    l->mass,
 	    l->rad_vel_mean,
 	    l->rad_vel_sd,
-	    l->vorticity);
+	    l->vorticity,
+            l->convectivity_median);
     
   } /* ilayer */
   
@@ -446,6 +448,11 @@ void RfPrintStormParams(FILE *out,
     fprintf(out, "%s  Precip computed from column max\n", spacer);
   }
   
+  fprintf(out, "%s  Low convectivity threshold  : %g\n", spacer,
+	  params->low_convectivity_threshold);
+  fprintf(out, "%s  High convectivity threshold : %g\n", spacer,
+	  params->high_convectivity_threshold);
+
   fprintf(out, "\n");
 
   return;
@@ -564,7 +571,9 @@ void RfPrintStormProps(FILE *out,
 	  gprops->rad_vel_sd);
   fprintf(out, "%s  vorticity (/s)                  : %.2e\n", spacer,
 	  gprops->vorticity);
-  
+  fprintf(out, "%s  convectivity_median             : %.2e\n", spacer,
+	  gprops->convectivity_median);
+
   fprintf(out, "%s  precip area (km2)               : %g\n", spacer,
 	  gprops->precip_area);
   fprintf(out, "%s  precip area centroid x %s    : %g\n", spacer,
@@ -717,6 +726,8 @@ void RfPrintStormPropsXML(FILE *out,
 	  gprops->rad_vel_sd);
   fprintf(out, "%s  <vorticity unit=\"s-1\"> %g </vorticity> \n", spacer,
 	  gprops->vorticity);
+  fprintf(out, "%s  <convectivity_median unit=\" \"> %g </convectivity_median> \n", spacer,
+	  gprops->convectivity_median);
   
   fprintf(out, "%s  <precip_area unit=\"km2\"> %g </precip_area> \n", spacer,
 	  gprops->precip_area);

@@ -218,6 +218,7 @@ string Titan2Xml::stormGlobalProps(string tag,
   xml += TaXml::writeDouble("rad_vel_mean", level + 1, gprops.rad_vel_mean);
   xml += TaXml::writeDouble("rad_vel_sd", level + 1, gprops.rad_vel_sd);
   xml += TaXml::writeDouble("vorticity", level + 1, gprops.vorticity);
+  xml += TaXml::writeDouble("convectivity_median", level + 1, gprops.convectivity_median);
   xml += TaXml::writeDouble("precip_area", level + 1, gprops.precip_area);
   xml += TaXml::writeDouble("precip_area_centroid_x", level + 1, gprops.precip_area_centroid_x);
   xml += TaXml::writeDouble("precip_area_centroid_y", level + 1, gprops.precip_area_centroid_y);
@@ -308,6 +309,7 @@ string Titan2Xml::stormLayerProps(string tag,
   xml += TaXml::writeDouble("rad_vel_mean", level + 1, lprops.rad_vel_mean);
   xml += TaXml::writeDouble("rad_vel_sd", level + 1, lprops.rad_vel_sd);
   xml += TaXml::writeDouble("vorticity", level + 1, lprops.vorticity);
+  xml += TaXml::writeDouble("convectivity_median", level + 1, lprops.convectivity_median);
   
   xml += TaXml::writeEndTag(tag, level);
 
