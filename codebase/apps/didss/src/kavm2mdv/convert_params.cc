@@ -39,7 +39,7 @@
 #include "kavm2mdv.h"
 #include "kavm2mdv_tdrp.h"
 
-#include <mdv/mdv_macros.h>
+#include <Mdv/mdv/mdv_macros.h>
 using namespace std;
 
 int convert_param_mdv_encoding_type(int param_encoding_type)

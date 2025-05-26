@@ -38,7 +38,6 @@ TARGET_FILE = view_colormap
 LOC_INCLUDES = $(SYS_X_INCLUDES)
 LOC_CFLAGS =
 LOC_LDFLAGS = $(SYS_X_LDFLAGS)
-#LOC_LIBS = -ltitan -ltoolsa -lX11 -lm -lpthread
 LOC_LIBS = \
 	-ltoolsa -lX11 -lbz2 -lz \
 	-lpthread -lm
