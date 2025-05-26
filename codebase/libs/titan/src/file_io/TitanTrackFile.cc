@@ -532,7 +532,7 @@ int TitanTrackFile::OpenFiles(const char *mode,
     // the data file name
 
     char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN);
+    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
 
     // if dir path has slash, get pointer to that and end the sting
     // immediately after
@@ -556,7 +556,7 @@ int TitanTrackFile::OpenFiles(const char *mode,
     }
 
     char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, _header_file_path.c_str(), MAX_PATH_LEN);
+    strncpy(tmp_path, _header_file_path.c_str(), MAX_PATH_LEN - 1);
     
     char *chptr;
     if ((chptr = strrchr(tmp_path, '.')) == NULL) {

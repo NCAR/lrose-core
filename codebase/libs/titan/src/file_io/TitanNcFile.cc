@@ -22,16 +22,14 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////
-// TitanStormFile.cc
+// TitanNcFile.cc
 //
-// TitanStormFile class
+// This class handles the NetCDF file IO for TITAN.
 //
-// This class handles the file IO for TITAN storms.
-//
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Jan 2001
+// May 2025.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -39,7 +37,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <dataport/bigend.h>
-#include <titan/TitanStormFile.hh>
+#include <titan/TitanNcFile.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
@@ -53,7 +51,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////
 // Constructor
 
-TitanStormFile::TitanStormFile()
+TitanNcFile::TitanNcFile()
 
 {
 
@@ -85,7 +83,7 @@ TitanStormFile::TitanStormFile()
 ////////////////////////////////////////////////////////////
 // destructor
 
-TitanStormFile::~TitanStormFile()
+TitanNcFile::~TitanNcFile()
 
 {
   FreeAll();
@@ -95,7 +93,7 @@ TitanStormFile::~TitanStormFile()
 ////////////////////
 // clear error string
 
-void TitanStormFile::_clearErrStr()
+void TitanNcFile::_clearErrStr()
 {
   _errStr = "";
   TaStr::AddStr(_errStr, "ERROR at time: ", DateTime::str());
@@ -107,7 +105,7 @@ void TitanStormFile::_clearErrStr()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocLayers(int n_layers)
+void TitanNcFile::AllocLayers(int n_layers)
      
 {
   if (n_layers > _max_layers) {
@@ -118,7 +116,7 @@ void TitanStormFile::AllocLayers(int n_layers)
   }
 }
 
-void TitanStormFile::FreeLayers()
+void TitanNcFile::FreeLayers()
      
 {
   if (_lprops) {
@@ -134,7 +132,7 @@ void TitanStormFile::FreeLayers()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocHist(int n_dbz_intervals)
+void TitanNcFile::AllocHist(int n_dbz_intervals)
      
 {
 
@@ -147,7 +145,7 @@ void TitanStormFile::AllocHist(int n_dbz_intervals)
 
 }
 
-void TitanStormFile::FreeHist()
+void TitanNcFile::FreeHist()
      
 {
 
@@ -165,7 +163,7 @@ void TitanStormFile::FreeHist()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocRuns(int n_runs)
+void TitanNcFile::AllocRuns(int n_runs)
      
 {
 
@@ -178,7 +176,7 @@ void TitanStormFile::AllocRuns(int n_runs)
 
 }
 
-void TitanStormFile::FreeRuns()
+void TitanNcFile::FreeRuns()
      
 {
 
@@ -196,7 +194,7 @@ void TitanStormFile::FreeRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocProjRuns(int n_proj_runs)
+void TitanNcFile::AllocProjRuns(int n_proj_runs)
      
 {
 
@@ -209,7 +207,7 @@ void TitanStormFile::AllocProjRuns(int n_proj_runs)
 
 }
 
-void TitanStormFile::FreeProjRuns()
+void TitanNcFile::FreeProjRuns()
      
 {
 
@@ -227,7 +225,7 @@ void TitanStormFile::FreeProjRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocGprops(int nstorms)
+void TitanNcFile::AllocGprops(int nstorms)
      
 {
   
@@ -239,7 +237,7 @@ void TitanStormFile::AllocGprops(int nstorms)
 
 }
 
-void TitanStormFile::FreeGprops()
+void TitanNcFile::FreeGprops()
      
 {
 
@@ -257,7 +255,7 @@ void TitanStormFile::FreeGprops()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocScanOffsets(int n_scans_needed)
+void TitanNcFile::AllocScanOffsets(int n_scans_needed)
      
 {
 
@@ -272,7 +270,7 @@ void TitanStormFile::AllocScanOffsets(int n_scans_needed)
 
 }
 
-void TitanStormFile::FreeScanOffsets()
+void TitanNcFile::FreeScanOffsets()
      
 {
 
@@ -290,7 +288,7 @@ void TitanStormFile::FreeScanOffsets()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::FreeAll()
+void TitanNcFile::FreeAll()
      
 {
 
@@ -312,14 +310,14 @@ void TitanStormFile::FreeAll()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::OpenFiles(const char *mode,
+int TitanNcFile::OpenFiles(const char *mode,
 			      const char *header_file_path,
 			      const char *data_file_ext /* = NULL*/ )
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::OpenFiles\n";
+  _errStr += "ERROR - TitanNcFile::OpenFiles\n";
 
   // close files
   
@@ -476,7 +474,7 @@ int TitanStormFile::OpenFiles(const char *mode,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::CloseFiles()
+void TitanNcFile::CloseFiles()
      
 {
 
@@ -506,7 +504,7 @@ void TitanStormFile::CloseFiles()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::FlushFiles()
+void TitanNcFile::FlushFiles()
   
 {
   
@@ -523,12 +521,12 @@ void TitanStormFile::FlushFiles()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::LockHeaderFile(const char *mode)
+int TitanNcFile::LockHeaderFile(const char *mode)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::LockHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::LockHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _header_file_path);
   
   if (ta_lock_file_procmap(_header_file_path.c_str(),
@@ -551,12 +549,12 @@ int TitanStormFile::LockHeaderFile(const char *mode)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::UnlockHeaderFile()
+int TitanNcFile::UnlockHeaderFile()
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::UnlockHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::UnlockHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _header_file_path);
   
   if (ta_unlock_file(_header_file_path.c_str(),
@@ -580,14 +578,14 @@ int TitanStormFile::UnlockHeaderFile()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadHeader(bool clear_error_str /* = true*/ )
+int TitanNcFile::ReadHeader(bool clear_error_str /* = true*/ )
      
 {
 
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanStormFile::ReadHeader\n";
+  _errStr += "ERROR - TitanNcFile::ReadHeader\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _header_file_path);
 
   // rewind file
@@ -665,12 +663,12 @@ int TitanStormFile::ReadHeader(bool clear_error_str /* = true*/ )
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadProjRuns(int storm_num)
+int TitanNcFile::ReadProjRuns(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::ReadProjRuns\n";
+  _errStr += "ERROR - TitanNcFile::ReadProjRuns\n";
 
   // return early if nstorms is zero
   
@@ -721,12 +719,12 @@ int TitanStormFile::ReadProjRuns(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadProps(int storm_num)
+int TitanNcFile::ReadProps(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::ReadProps\n";
+  _errStr += "ERROR - TitanNcFile::ReadProps\n";
   TaStr::AddStr(_errStr, "  Reading storm props from file: ", _data_file_path);
   TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
   TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
@@ -844,12 +842,12 @@ int TitanStormFile::ReadProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
+int TitanNcFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::ReadScan\n";
+  _errStr += "ERROR - TitanNcFile::ReadScan\n";
   TaStr::AddStr(_errStr, "  Reading scan from file: ", _data_file_path);
   TaStr::AddInt(_errStr, "  Scan number: ", scan_num);
 
@@ -925,12 +923,12 @@ int TitanStormFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::SeekEndData()
+int TitanNcFile::SeekEndData()
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::SeekEndData\n";
+  _errStr += "ERROR - TitanNcFile::SeekEndData\n";
   TaStr::AddStr(_errStr, "  File: ", _data_file_path);
 
   if (fseek(_data_file, 0L, SEEK_END)) {
@@ -954,12 +952,12 @@ int TitanStormFile::SeekEndData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::SeekStartData()
+int TitanNcFile::SeekStartData()
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::SeekStartData\n";
+  _errStr += "ERROR - TitanNcFile::SeekStartData\n";
   TaStr::AddStr(_errStr, "  File: ", _data_file_path);
 
   if (fseek(_data_file, R_FILE_LABEL_LEN, SEEK_SET) != 0) {
@@ -985,12 +983,12 @@ int TitanStormFile::SeekStartData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::WriteHeader()
+int TitanNcFile::WriteHeader()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::WriteHeader\n";
+  _errStr += "ERROR - TitanNcFile::WriteHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _header_file_path);
 
   // get data file size
@@ -1099,12 +1097,12 @@ int TitanStormFile::WriteHeader()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::WriteProps(int storm_num)
+int TitanNcFile::WriteProps(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::WriteProps\n";
+  _errStr += "ERROR - TitanNcFile::WriteProps\n";
   TaStr::AddStr(_errStr, "  File: ", _data_file_path);
 
   int n_layers = _gprops[storm_num].n_layers;
@@ -1238,12 +1236,12 @@ int TitanStormFile::WriteProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::WriteScan(int scan_num)
+int TitanNcFile::WriteScan(int scan_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::WriteScan\n";
+  _errStr += "ERROR - TitanNcFile::WriteScan\n";
   TaStr::AddStr(_errStr, "  File: ", _data_file_path);
   
   // Move to the end of the file before beginning the write.
@@ -1326,7 +1324,7 @@ int TitanStormFile::WriteScan(int scan_num)
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::_convert_ellipse_2km(const titan_grid_t &tgrid,
+void TitanNcFile::_convert_ellipse_2km(const titan_grid_t &tgrid,
 					  double centroid_x,
 					  double centroid_y,
 					  fl32 &orientation,
@@ -1393,7 +1391,7 @@ void TitanStormFile::_convert_ellipse_2km(const titan_grid_t &tgrid,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::GpropsEllipses2Km(const storm_file_scan_header_t &scan,
+void TitanNcFile::GpropsEllipses2Km(const storm_file_scan_header_t &scan,
 				       storm_file_global_props_t &gprops)
      
 {
@@ -1426,7 +1424,7 @@ void TitanStormFile::GpropsEllipses2Km(const storm_file_scan_header_t &scan,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
+void TitanNcFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 				     storm_file_global_props_t &gprops)
   
 {
@@ -1521,12 +1519,12 @@ void TitanStormFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanStormFile::TruncateHeaderFile(int length)
+int TitanNcFile::TruncateHeaderFile(int length)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::TruncateHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::TruncateHeaderFile\n";
   return (_truncate(_header_file, _header_file_path, length));
 
 }
@@ -1536,12 +1534,12 @@ int TitanStormFile::TruncateHeaderFile(int length)
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanStormFile::TruncateDataFile(int length)
+int TitanNcFile::TruncateDataFile(int length)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::TruncateDataFile\n";
+  _errStr += "ERROR - TitanNcFile::TruncateDataFile\n";
   return (_truncate(_data_file, _data_file_path, length));
 
 }
@@ -1553,11 +1551,11 @@ int TitanStormFile::TruncateDataFile(int length)
 // Returns 0 on success, -1 on failure
 //
 
-int TitanStormFile::_truncate(FILE *&fd, const string &path, int length)
+int TitanNcFile::_truncate(FILE *&fd, const string &path, int length)
      
 {
   
-  TaStr::AddStr(_errStr, "ERROR - ", "TitanStormFile::_truncate");
+  TaStr::AddStr(_errStr, "ERROR - ", "TitanNcFile::_truncate");
   TaStr::AddStr(_errStr, "  File: ", path);
   
   // close the buffered file

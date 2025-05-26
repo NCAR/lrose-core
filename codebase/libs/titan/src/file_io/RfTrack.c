@@ -941,7 +941,7 @@ int RfOpenTrackFiles(track_file_handle_t *t_handle,
   char file_label[R_FILE_LABEL_LEN];
   char calling_sequence[MAX_SEQ];
   char tmp_path[MAX_PATH_LEN];
-  char data_file_path[MAX_PATH_LEN];
+  char data_file_path[MAX_PATH_LEN * 2];
   char *chptr;
 
   /*
@@ -987,7 +987,7 @@ int RfOpenTrackFiles(track_file_handle_t *t_handle,
      * the data file name
      */
 
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN);
+    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
 
     /*
      * if dir path has slash, get pointer to that and end the sting
@@ -996,7 +996,7 @@ int RfOpenTrackFiles(track_file_handle_t *t_handle,
     
     if ((chptr = strrchr(tmp_path, '/')) != NULL) {
       *(chptr + 1) = '\0';
-      sprintf(data_file_path, "%s%s", tmp_path,
+      snprintf(data_file_path, MAX_PATH_LEN * 2, "%s%s", tmp_path,
 	      t_handle->header->data_file_name);
     } else {
       strcpy(data_file_path, t_handle->header->data_file_name);
@@ -1016,7 +1016,7 @@ int RfOpenTrackFiles(track_file_handle_t *t_handle,
       return (R_FAILURE);
     }
 
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN);
+    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
     
     if ((chptr = strrchr(tmp_path, '.')) == NULL) {
       fprintf(stderr, "ERROR - %s:%s\n",

@@ -544,7 +544,7 @@ int RfOpenStormFiles(storm_file_handle_t *s_handle,
   char file_label[R_FILE_LABEL_LEN];
   char calling_sequence[MAX_SEQ];
   char tmp_path[MAX_PATH_LEN];
-  char data_file_path[MAX_PATH_LEN];
+  char data_file_path[MAX_PATH_LEN * 2];
   char *chptr;
 
   /*
@@ -590,7 +590,7 @@ int RfOpenStormFiles(storm_file_handle_t *s_handle,
      * the data file name
      */
 
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN);
+    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
 
     /*
      * if dir path has slash, get pointer to that and end the sting
@@ -599,8 +599,8 @@ int RfOpenStormFiles(storm_file_handle_t *s_handle,
     
     if ((chptr = strrchr(tmp_path, '/')) != NULL) {
       *(chptr + 1) = '\0';
-      sprintf(data_file_path, "%s%s", tmp_path,
-	      s_handle->header->data_file_name);
+      snprintf(data_file_path, MAX_PATH_LEN * 2, "%s%s", tmp_path,
+               s_handle->header->data_file_name);
     } else {
       strcpy(data_file_path, s_handle->header->data_file_name);
     }
@@ -618,7 +618,7 @@ int RfOpenStormFiles(storm_file_handle_t *s_handle,
       return (R_FAILURE);
     }
 
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN);
+    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
     
     if ((chptr = strrchr(tmp_path, '.')) == NULL) {
       fprintf(stderr, "ERROR - %s\n", calling_sequence);
@@ -1480,17 +1480,17 @@ int RfWriteStormHeader(storm_file_handle_t *s_handle,
    */
 
   if ((cptr = strrchr(s_handle->header_file_path, '/')) != NULL)
-    strncpy(s_handle->header->header_file_name, (cptr + 1), R_LABEL_LEN);
+    strncpy(s_handle->header->header_file_name, (cptr + 1), R_LABEL_LEN - 1);
   else
     strncpy(s_handle->header->header_file_name,
-	    s_handle->header_file_path, R_LABEL_LEN);
+	    s_handle->header_file_path, R_LABEL_LEN - 1);
       
   
   if ((cptr = strrchr(s_handle->data_file_path, '/')) != NULL)
-    strncpy(s_handle->header->data_file_name, (cptr + 1), R_LABEL_LEN);
+    strncpy(s_handle->header->data_file_name, (cptr + 1), R_LABEL_LEN - 1);
   else
     strncpy(s_handle->header->data_file_name,
-	    s_handle->data_file_path, R_LABEL_LEN);
+	    s_handle->data_file_path, R_LABEL_LEN - 1);
       
   
   /*
