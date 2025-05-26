@@ -37,6 +37,7 @@
 #define TitanNcFile_HH
 
 #include <titan/storm.h>
+#include <titan/track.h>
 #include <string>
 using namespace std;
 
@@ -53,10 +54,10 @@ public:
   
   virtual ~TitanNcFile();
 
-  // data access
+  // storm data access
 
-  const storm_file_header_t &header() const { return _header; }
-  const storm_file_params_t &params() const { return _header.params; }
+  const storm_file_header_t &storm_header() const { return _storm_header; }
+  const storm_file_params_t &storm_params() const { return _storm_header.params; }
   const storm_file_scan_header_t &scan() const { return _scan; }
   const storm_file_global_props_t *gprops() const { return _gprops; }
   const storm_file_layer_props_t *lprops() const { return _lprops; }
@@ -66,10 +67,34 @@ public:
   const int *scan_offsets() const { return _scan_offsets; }
   int storm_num() const { return _storm_num; }
   
-  const string &header_file_path() { return _header_file_path; }
-  const string &header_file_label() { return _header_file_label; }
-  const string &data_file_path() { return _data_file_path; }
-  const string &data_file_label() { return _data_file_label; }
+  const string &storm_header_file_path() { return _storm_header_file_path; }
+  const string &storm_header_file_label() { return _storm_header_file_label; }
+  const string &storm_data_file_path() { return _storm_data_file_path; }
+  const string &storm_data_file_label() { return _storm_data_file_label; }
+
+  // track data access
+
+  const track_file_header_t &track_header() const { return _track_header; }
+  const track_file_params_t &track_params() const { return _track_header.params; }
+  const simple_track_params_t &simple_params() const;
+  const complex_track_params_t &complex_params() const;
+  const track_file_entry_t &entry() const { return _entry; }
+  const track_file_entry_t *scan_entries() const { return _scan_entries; }
+  const track_file_scan_index_t *scan_index() const { return _scan_index; }
+  const track_utime_t *track_utime() const { return _track_utime; }
+  int n_scan_entries() { return _n_scan_entries; }
+  
+  const string &track_header_file_path() { return _track_header_file_path; }
+  const string &track_header_file_label() { return _track_header_file_label; }
+  const string &track_data_file_path() { return _track_data_file_path; }
+  const string &track_data_file_label() { return _track_data_file_label; }
+
+  const si32 *complex_track_nums() { return _complex_track_nums; }
+  const si32 *complex_track_offsets() { return _complex_track_offsets; }
+  const si32 *simple_track_offsets() { return _simple_track_offsets; }
+  const si32 *nsimples_per_complex() { return _nsimples_per_complex; }
+  const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
+  si32 **simples_per_complex() { return _simples_per_complex; }
 
   ///////////////////////////////////////////////////////////////////
   // error string
@@ -78,56 +103,69 @@ public:
 
   // public functions
 
-  // memory allocation and freeing
+  // memory allocation and freeing - storms
 
   void AllocLayers(int n_layers);
   void FreeLayers();
-
   void AllocHist(int n_dbz_intervals);
   void FreeHist();
-
   void AllocRuns(int n_runs);
   void FreeRuns();
-
   void AllocProjRuns(int n_proj_runs);
   void FreeProjRuns();
-
   void AllocGprops(int nstorms);
   void FreeGprops();
-
   void AllocScanOffsets(int n_scans_needed);
   void FreeScanOffsets();
-
-  void FreeAll();
+  void FreeStormsAll();
     
+  // memory allocation and freeing - tracks
+
+  void AllocSimpleArrays(int n_simple_needed);
+  void FreeSimpleArrays();
+  void AllocComplexArrays(int n_complex_needed);
+  void FreeComplexArrays();
+  void AllocSimplesPerComplex(int n_simple_needed);
+  void FreeSimplesPerComplex();
+  void AllocScanEntries(int n_entries_needed);
+  void FreeScanEntries();
+  void AllocScanIndex(int n_scans_needed);
+  void FreeScanIndex();
+  void AllocUtime();
+  void FreeUtime();
+  void FreeTracksAll();
+
+  /////////////////////////////////////////////////////
+  // Storms
+  
   // Open the storm header and data files
   
-  int OpenFiles(const char *mode,
-		const char *header_file_path,
-		const char *data_file_ext = NULL);
+  int OpenStormFiles(const char *mode,
+                     const char *header_file_path,
+                     const char *data_file_ext = NULL);
   
   // Close the storm header and data files
 
-  void CloseFiles();
+  void CloseStormFiles();
      
   // Flush the storm header and data files
 
-  void FlushFiles();
+  void FlushStormFiles();
   
   // Put an advisory lock on the header file
   // Mode is "w" - write lock, or "r" - read lock.
   // returns 0 on success, -1 on failure
 
-  int LockHeaderFile(const char *mode);
+  int LockStormHeaderFile(const char *mode);
 
   // Remove advisory lock from the header file
   // returns 0 on success, -1 on failure
 
-  int UnlockHeaderFile();
+  int UnlockStormHeaderFile();
   
   // read the storm file header
 
-  int ReadHeader(bool clear_error_str = true);
+  int ReadStormHeader(bool clear_error_str = true);
      
   // read in the storm projected area runs
   // Space for the array is allocated.
@@ -152,17 +190,17 @@ public:
   // seek to the end of the storm data in data file
   // returns 0 on success, -1 on failure
 
-  int SeekEndData();
+  int SeekStormEndData();
 
   // seek to the start of the storm data in data file
   // returns 0 on success, -1 on failure
 
-  int SeekStartData();
+  int SeekStormStartData();
   
   // write the storm_file_header_t structure to a storm file.
   // returns 0 on success, -1 on failure
   
-  int WriteHeader();
+  int WriteStormHeader();
      
   // write the storm layer property and histogram data for a storm,
   // at the end of the file.
@@ -174,7 +212,7 @@ public:
   // in a storm properties file.
   // Performs the writes from the end of the file.
   // returns 0 on success, -1 on failure
-
+  
   int WriteScan(int scan_num);
      
   // Convert the ellipse data (orientation, major_radius and minor_radius)
@@ -201,28 +239,28 @@ public:
   // Truncate header file
   // Returns 0 on success, -1 on failure.
 
-  int TruncateHeaderFile(int length);
+  int TruncateStormHeaderFile(int length);
 
   // Truncate data file
   // Returns 0 on success, -1 on failure.
 
-  int TruncateDataFile(int length);
+  int TruncateStormDataFile(int length);
 
 protected:
 
-  // file details
+  // storm file details
   
-  string _header_file_path;
-  string _header_file_label;
-  string _data_file_path;
-  string _data_file_label;
+  string _storm_header_file_path;
+  string _storm_header_file_label;
+  string _storm_data_file_path;
+  string _storm_data_file_label;
 
-  FILE *_header_file;
-  FILE *_data_file;
+  FILE *_storm_header_file;
+  FILE *_storm_data_file;
 
-  // data
+  // storm data
 
-  storm_file_header_t _header;
+  storm_file_header_t _storm_header;
   storm_file_scan_header_t _scan;
   storm_file_global_props_t *_gprops;
   storm_file_layer_props_t *_lprops;
@@ -232,7 +270,7 @@ protected:
   si32 *_scan_offsets;
   int _storm_num;
 
-  // memory allocation
+  // storm memory allocation
 
   int _max_scans;
   int _max_storms;
@@ -241,14 +279,55 @@ protected:
   int _max_runs;
   int _max_proj_runs;
 
+  // track file
+  
+  string _track_header_file_path;
+  string _track_header_file_label;
+  string _track_data_file_path;
+  string _track_data_file_label;
+  
+  FILE *_track_header_file;
+  FILE *_track_data_file;
+
+  bool _first_entry;  // set to TRUE if first entry of a track
+  
+  // track data
+
+  track_file_header_t _track_header;
+  simple_track_params_t _simple_params;
+  complex_track_params_t _complex_params;
+  track_file_entry_t _entry;
+
+  track_file_scan_index_t *_scan_index;
+  track_file_entry_t *_scan_entries;
+  track_utime_t *_track_utime;
+  
+  si32 *_complex_track_nums;
+  si32 *_complex_track_offsets;
+  si32 *_simple_track_offsets;
+  si32 *_nsimples_per_complex;
+  si32 *_simples_per_complex_offsets;
+  si32 **_simples_per_complex;
+  int _n_scan_entries;
+  
+  // track memory allocation control
+
+  int _n_simple_allocated;
+  int _n_complex_allocated;
+  int _n_simples_per_complex_allocated;
+  int _n_scan_entries_allocated;
+  int _n_scan_index_allocated;
+  int _n_utime_allocated;
+  int _lowest_avail_complex_slot;
+
   // errors
-
+  
   string _errStr;
-
+  
   // functions
-
+  
   void _clearErrStr();
-
+  
   void _convert_ellipse_2km(const titan_grid_t &tgrid,
 			    double centroid_x,
 			    double centroid_y,
@@ -256,7 +335,7 @@ protected:
 			    fl32 &minor_radius,
 			    fl32 &major_radius);
 
-  int _truncate(FILE *&fd, const string &path, int length);
+  int _truncateStormFiles(FILE *&fd, const string &path, int length);
 
 public:
 
