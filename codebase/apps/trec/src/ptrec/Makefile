@@ -39,13 +39,13 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ptrec
 
-LOC_INCLUDES = 
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS = 
 #LOC_CFLAGS = -O3
 LOC_LDFLAGS = 
 LOC_LIBS = \
-	-ldsserver -ldidss -lcidd -lmdv \
-	-lrapformats -ltitan -ltoolsa -lpthread -ldataport \
+	-ldsserver -ldidss -lcidd -lMdv \
+	-lrapformats -ltoolsa -lpthread -ldataport \
 	-ltdrp -lbz2 -lz -lm
 
 HDRS = \
