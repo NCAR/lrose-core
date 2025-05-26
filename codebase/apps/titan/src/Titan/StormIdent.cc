@@ -632,6 +632,9 @@ void StormIdent::_loadStormParams(storm_file_params_t *sparams)
     sparams->precip_plane_ht = _params.base_threshold;
   }
 
+  sparams->low_convectivity_threshold = _params.low_convectivity_threshold;
+  sparams->high_convectivity_threshold = _params.high_convectivity_threshold;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
