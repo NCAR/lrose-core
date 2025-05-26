@@ -96,11 +96,6 @@ public:
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
   si32 **simples_per_complex() { return _simples_per_complex; }
 
-  ///////////////////////////////////////////////////////////////////
-  // error string
-  
-  const string &getErrStr() { return (_errStr); }
-
   // public functions
 
   // memory allocation and freeing - storms
@@ -245,6 +240,141 @@ public:
   // Returns 0 on success, -1 on failure.
 
   int TruncateStormDataFile(int length);
+
+  /////////////////////////////////////////////////////
+  // Tracks
+  
+  // Open the track header and data files
+  // Returns 0 on success, -1 on error
+
+  int OpenTrackFiles(const char *mode,
+                     const char *header_file_path,
+                     const char *data_file_ext = NULL);
+  
+  // Close the storm header and data files
+
+  void CloseTrackFiles();
+     
+  // Flush the storm header and data files
+
+  void FlushTrackFiles();
+  
+  // Put an advisory lock on the header file.
+  // Mode is "w" - write lock, or "r" - read lock.
+  // returns 0 on success, -1 on failure
+
+  int LockTrackHeaderFile(const char *mode);
+
+  // Remove advisory lock from the header file
+  // returns 0 on success, -1 on failure
+
+  int UnlockTrackHeaderFile();
+  
+  // read in the track_file_header_t structure from a track file.
+  // Read in associated arrays (complex_track_nums, complex_track_offsets,
+  //   simple_track_offsets, scan_index, nsimples_per_complex,
+  //   simples_per_complex_offsets)
+  // returns 0 on success, -1 on failure
+
+  int ReadTrackHeader(bool clear_error_str = true);
+     
+  // Read in the track_file_header_t and scan_index array.
+  // returns 0 on success, -1 on failure
+
+  int ReadScanIndex(bool clear_error_str = true);
+     
+  // reads in the parameters for a complex track
+  // For normal reads, read_simples_per_complex should be set true. This
+  // is only set FALSE in Titan, which creates the track files.
+  // returns 0 on success, -1 on failure
+  
+  int ReadComplexParams(int track_num, bool read_simples_per_complex,
+			bool clear_error_str = true);
+     
+  // read in the parameters for a simple track
+  // returns 0 on success, -1 on failure
+
+  int ReadSimpleParams(int track_num,
+		       bool clear_error_str = true);
+     
+  // read in an entry for a track
+  // If first_entry is set to TRUE, then the first entry is read in. If not
+  // the next entry is read in.
+  // returns 0 on success, -1 on failure
+  
+  int ReadEntry();
+  
+  // read in the array of simple tracks for each complex track
+  // returns 0 on success, -1 on failure
+  
+  int ReadSimplesPerComplex();
+  
+  // read in entries for a scan
+  // returns 0 on success, -1 on failure
+
+  int ReadScanEntries(int scan_num);
+     
+  // read in track_utime_t array
+  // Returns 0 on success or -1 on error
+
+  int ReadUtime();
+     
+  // Reinitialize headers and arrays
+
+  void Reinit();
+
+  // Set a complex params slot in the file available for
+  // reuse, by setting the offset to its negative value.
+  // returns 0 on success, -1 on failure
+
+  int ReuseComplexSlot(int track_num);
+     
+  // prepare a simple track for reading by reading in the simple track
+  // params and setting the first_entry flag
+  // returns 0 on success, -1 on failure
+
+  int RewindSimple(int track_num);
+     
+  // rewrite an entry for a track in the track data file
+  // The entry is written at the file offset of the original entry
+  // returns 0 on success, -1 on failure
+  
+  int RewriteEntry();
+     
+  // seek to the end of the track file data
+
+  int SeekTrackEndData();
+
+  // seek to the start of data in track data file
+
+  int SeekTrackStartData();
+     
+  // write the track_file_header_t structure to a track data file
+  // returns 0 on success, -1 on failure
+
+  int WriteTrackHeader();
+
+  // write simple track params at the end of the file
+  // returns 0 on success, -1 on failure
+  
+  int WriteSimpleParams(int track_num);
+     
+  // write complex track params
+  // returns 0 on success, -1 on failure
+  
+  int WriteComplexParams(int track_num);
+     
+  // write an entry for a track in the track data file
+  // The entry is written at the end of the file
+  // returns offset of last entry written on success, -1 on failure
+  
+  long WriteEntry(int prev_in_track_offset,
+		  int prev_in_scan_offset);
+     
+  ///////////////////////////////////////////////////////////////////
+  // error string
+  
+  const string &getErrStr() { return (_errStr); }
 
 protected:
 
