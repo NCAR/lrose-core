@@ -32,9 +32,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <mdv/mdv_print.h>
-#include <mdv/mdv_read.h>
-#include <mdv/mdv_user.h>
+#include <Mdv/mdv/mdv_print.h>
+#include <Mdv/mdv/mdv_read.h>
+#include <Mdv/mdv/mdv_user.h>
 #include <titan/radar.h>
 
 
