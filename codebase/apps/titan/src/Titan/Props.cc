@@ -42,7 +42,6 @@
 #include <toolsa/pmu.h>
 #include <euclid/ClumpProps.hh>
 #include <rapmath/math_macros.h>
-#include <rapmath/DistNormal.hh>
 #include <rapmath/umath.h>
 #include <physics/vil.h>
 #include <Mdv/MdvxRadar.hh>
@@ -257,7 +256,7 @@ int Props::compute(const ClumpProps &cprops, int storm_num)
   for (int ii = 0; ii < _nzValid; ii++) {
     _layer[ii].htKm = _minValidZ + ii * _inputMdv.grid.dz;
   }
-
+  
   // first pass through the clumps, computing the relevant things
   // from which to compute the storm properties.
   // Also, count the number of data runs for this storm.
@@ -379,6 +378,10 @@ void Props::_alloc(int nz, int nhist)
     
   _sfile.AllocLayers(_inputMdv.grid.nz);
   _sfile.AllocHist(_nDbzHistIntervals);
+
+  if (nz > (int) _distribLayers.size()) {
+    _distribLayers.resize(nz);
+  }
 
 }
 
@@ -1141,15 +1144,14 @@ void Props::_computeConvectivityMedian(const ClumpProps &cprops)
   // Convectivity ranges from 0 to 1.
   // We use 100 bins, width 0.01.
   
-  DistNormal distribGlobal;
-  distribGlobal.setHistRange(0.0, 1.0);
-  distribGlobal.setHistNBins(100);
-  vector<DistNormal> distribLayers;
-  for (int iz = 0; iz < _nLayers; iz++) {
-    DistNormal distrib;
+  _distribGlobal.clearValues();
+  _distribGlobal.setHistRange(0.0, 1.0);
+  _distribGlobal.setHistNBins(100);
+  for (size_t iz = 0; iz < _distribLayers.size(); iz++) {
+    DistNormal &distrib = _distribLayers[iz];
+    distrib.clearValues();
     distrib.setHistRange(0.0, 1.0);
     distrib.setHistNBins(100);
-    distribLayers.push_back(distrib);
   }
 
   // accumulate convectivity data in DistNormals
@@ -1168,20 +1170,20 @@ void Props::_computeConvectivityMedian(const ClumpProps &cprops)
     fl32 *conv_ptr = _inputMdv.convVol + jz * nptsPlane + index;
     
     for (int ix = intvl.begin; ix <= intvl.end; ix++, conv_ptr++) {
-      fl32 conv = *conv_ptr;
-      distribGlobal.addValue(conv);
-      distribLayers[iz].addValue(conv);
+      double conv = *conv_ptr;
+      _distribGlobal.addValue(conv);
+      _distribLayers[iz].addValue(conv);
     }
 
   } // intv
   
   // compute the median values, set in the structs
 
-  distribGlobal.computeHistogram();
-  _gprops.convectivity_median = distribGlobal.getHistMedian();
+  _distribGlobal.computeHistogram();
+  _gprops.convectivity_median = _distribGlobal.getHistMedian();
 
   for (int iz = 0; iz < _nLayers; iz++) {
-    DistNormal &distrib = distribLayers[iz];
+    DistNormal &distrib = _distribLayers[iz];
     distrib.computeHistogram();
     _layer[iz].convectivity_median = distrib.getHistMedian();
   }
