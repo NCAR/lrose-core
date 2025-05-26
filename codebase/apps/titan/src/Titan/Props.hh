@@ -77,6 +77,7 @@ typedef struct {
   double vol_centroid_az;
   double vol_centroid_range;
   double vorticity;
+  double convectivity_median;
 
   double htKm;
   
@@ -190,6 +191,7 @@ private:
   void _tiltCompute(const ClumpProps &cprops);
   void _dbzGradientCompute(const ClumpProps &cprops);
   int _checkSecondTrip();
+  void _computeConvectivityMedian(const ClumpProps &cprops);
      
   void _loadGprops(storm_file_global_props_t *gprops,
 		   int storm_num,

@@ -42,6 +42,7 @@
 #include <toolsa/pmu.h>
 #include <euclid/ClumpProps.hh>
 #include <rapmath/math_macros.h>
+#include <rapmath/DistNormal.hh>
 #include <rapmath/umath.h>
 #include <physics/vil.h>
 #include <Mdv/MdvxRadar.hh>
@@ -291,11 +292,17 @@ int Props::compute(const ClumpProps &cprops, int storm_num)
   _dbzGradientCompute(cprops);
 
   // decide whether this is a second trip echo
-   
+  
   if (_params.check_second_trip) {
     _secondTrip = _checkSecondTrip();
   }
-      
+
+  // compute convectivity median if needed
+
+  if (_params.apply_convectivity_threshold) {
+    _computeConvectivityMedian(cprops);
+  }
+  
   // write valid_storms verification file
   
   if (_verify) {
@@ -892,7 +899,7 @@ int Props::_storeRuns(const ClumpProps &cprops)
 
 }
 
-//////////////////
+//////////////////////////////////////////////////////////////
 // _tiltCompute()
 //
 // Compute tilt from  principal component analysis
@@ -1115,6 +1122,72 @@ int Props::_checkSecondTrip()
 
 }
 
+/////////////////////////////////////////////////////////
+// Compute median convectivity median property
+// for global props and layer props
+
+void Props::_computeConvectivityMedian(const ClumpProps &cprops)
+  
+{
+  
+  if (_inputMdv.convVol == nullptr) {
+    return;
+  }
+  
+  const titan_grid_t &grid = _inputMdv.grid;
+  int nptsPlane = grid.nx * grid.ny;
+  
+  // create DistNormal objects for computing histograms
+  // Convectivity ranges from 0 to 1.
+  // We use 100 bins, width 0.01.
+  
+  DistNormal distribGlobal;
+  distribGlobal.setHistRange(0.0, 1.0);
+  distribGlobal.setHistNBins(100);
+  vector<DistNormal> distribLayers;
+  for (int iz = 0; iz < _nLayers; iz++) {
+    DistNormal distrib;
+    distrib.setHistRange(0.0, 1.0);
+    distrib.setHistNBins(100);
+    distribLayers.push_back(distrib);
+  }
+
+  // accumulate convectivity data in DistNormals
+  
+  for (size_t intv = 0; intv < cprops.nIntervals(); intv++) {
+    
+    const Interval intvl = cprops.intvLocal(intv);
+    
+    int iz = intvl.plane;
+    int jz = iz + _inputMdv.minValidLayer;
+    int iy = intvl.row_in_plane;
+    
+    int index = ((iy + cprops.minIy()) * grid.nx +
+		 intvl.begin + cprops.minIx());
+    
+    fl32 *conv_ptr = _inputMdv.convVol + jz * nptsPlane + index;
+    
+    for (int ix = intvl.begin; ix <= intvl.end; ix++, conv_ptr++) {
+      fl32 conv = *conv_ptr;
+      distribGlobal.addValue(conv);
+      distribLayers[iz].addValue(conv);
+    }
+
+  } // intv
+  
+  // compute the median values, set in the structs
+
+  distribGlobal.computeHistogram();
+  _gprops.convectivity_median = distribGlobal.getHistMedian();
+
+  for (int iz = 0; iz < _nLayers; iz++) {
+    DistNormal &distrib = distribLayers[iz];
+    distrib.computeHistogram();
+    _layer[iz].convectivity_median = distrib.getHistMedian();
+  }
+
+}
+
 /***************************************************************************
  * load_props.c
  *
@@ -1182,6 +1255,7 @@ void Props::_loadLprops(layer_stats_t *layer,
   lprops->rad_vel_mean = layer->vel_mean;
   lprops->rad_vel_sd = layer->vel_sd;
   lprops->vorticity = layer->vorticity;
+  lprops->convectivity_median = layer->convectivity_median;
   
 }
 
