@@ -38,6 +38,7 @@
 #include <physics/ZxRelation.hh>
 #include <titan/storm.h>
 #include <titan/TitanStormFile.hh>
+#include <rapmath/DistNormal.hh>
 #include "Worker.hh"
 #include "Area.hh"
 using namespace std;
@@ -182,6 +183,11 @@ private:
   double _htMinus20;
   double _ht45AboveFreezing;
 
+  // computing the median convectivity
+
+  DistNormal _distribGlobal;
+  vector<DistNormal> _distribLayers;
+  
   // methods
 
   void _alloc(int nz, int nhist);

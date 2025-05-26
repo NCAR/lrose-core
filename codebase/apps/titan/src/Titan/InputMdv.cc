@@ -162,40 +162,62 @@ int InputMdv::read(time_t data_time)
       velField = mdvx.getField(_params.vel_field.num);
     }
   }
-  convField = mdvx.getField(_params.convectivity_field_name);
 
+  // check for dbz field
+  
   if (dbzField == nullptr) {
     cerr << "ERROR - InputMdv::read()" << endl;
     cerr << "  Cannot find dbz field: " << _params.dbz_field.name << endl;
     return -1;
   }
+  // set the dbz volume to the start of the first valid plane
+  // since this is where the clumping should start
+  dbzVol = (fl32 *) dbzField->getVol();
+  const Mdvx::field_header_t &dbzFhdr = dbzField->getFieldHeader();
+  dbzMiss = dbzFhdr.missing_data_value;
+
+  // check for vel field
+  
   if (_params.vel_available) {
     if (velField == nullptr) {
       cerr << "ERROR - InputMdv::read()" << endl;
       cerr << "  Cannot find vel field: " << _params.vel_field.name << endl;
       return -1;
     }
+    velVol = (fl32 *) velField->getVol();
+    const Mdvx::field_header_t &velFhdr = velField->getFieldHeader();
+    velMiss = velFhdr.missing_data_value;
   }
+
+  // check for convectivity field
+
+  convField = mdvx.getField(_params.convectivity_field_name);
   if (_params.apply_convectivity_threshold) {
     if (convField == nullptr) {
       cerr << "ERROR - InputMdv::read()" << endl;
-      cerr << "  Cannot find convectivity field: " << _params.convectivity_field_name << endl;
+      cerr << "  Cannot find convectivity field: "
+           << _params.convectivity_field_name << endl;
       return -1;
     }
+    convVol = (fl32 *) convField->getVol();
+    const Mdvx::field_header_t &convFhdr = convField->getFieldHeader();
+    convMiss = convFhdr.missing_data_value;
   }
 
+  // set the field pointers
+  
+  _setFieldPointers();
+
+  // negate reflectivity field if requested
+  // this applies to e.g. sat IR temps used as dbz
+  
   if (_params.negate_dbz_field) {
     dbzField->negate();
   }
 
-  // set missing value
-  
-  const Mdvx::field_header_t &dbzFhdr = dbzField->getFieldHeader();
-  dbzMiss = dbzFhdr.missing_data_value;
+  // create composite grid for reflectivity
 
-  // create composite grid
-
-  _computeComposite();
+  _computeDbzComposite();
 
   // check that the vertical levels are evenly spaced, since TITAN
   // requires that
@@ -203,6 +225,10 @@ int InputMdv::read(time_t data_time)
   if (!dbzField->isDzConstant()) {
     _setDzConstant();
   }
+
+  // reset the field pointers - they may have been updated by _setDzConstant()
+  
+  _setFieldPointers();
 
   // if required, find the convective regions
 
@@ -292,19 +318,39 @@ int InputMdv::read(time_t data_time)
     specifiedPrecipLayer = coord.nz - 1;
   }
   
-  // set the dbz volume to the start of the first valid plane
-  // since this is where the clumping should start
+  // reset the field pointers
   
-  dbzVol = (fl32 *) dbzField->getVol();
-  if (velField) {
-    velVol = (fl32 *) velField->getVol();
-  }
-  if (convField) {
-    convVol = (fl32 *) convField->getVol();
-  }
-  
+  _setFieldPointers();
+
   return 0;
   
+}
+
+//////////////////////////////////////////////////////////////////////
+// reset the field pointers
+
+void InputMdv::_setFieldPointers()
+
+{
+
+  if (dbzField) {
+    dbzVol = (fl32 *) dbzField->getVol();
+    const Mdvx::field_header_t &dbzFhdr = dbzField->getFieldHeader();
+    dbzMiss = dbzFhdr.missing_data_value;
+  }
+
+  if (velField) {
+    velVol = (fl32 *) velField->getVol();
+    const Mdvx::field_header_t &velFhdr = velField->getFieldHeader();
+    velMiss = velFhdr.missing_data_value;
+  }
+
+  if (convField) {
+    convVol = (fl32 *) convField->getVol();
+    const Mdvx::field_header_t &convFhdr = convField->getFieldHeader();
+    convMiss = convFhdr.missing_data_value;
+  }
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -418,7 +464,7 @@ void InputMdv::_copyCoord2Grid(const Mdvx::coord_t &coord,
 /////////////////////////////////////////////
 // create composite grid
 
-void InputMdv::_computeComposite()
+void InputMdv::_computeDbzComposite()
 
 {
 
@@ -498,8 +544,8 @@ void InputMdv::_applyConvectivityThreshold()
   for (int iz = 0; iz < fhdr.nz; iz++) {
     for (int iy = 0; iy < fhdr.ny; iy++) {
       for (int ix = 0; ix < fhdr.nx; ix++, dbz++, conv++) {
-        double convValue = *conv;
-        if (convValue < minConv || convValue > maxConv) {
+        fl32 convValue = *conv;
+        if (convValue == convMiss || convValue < minConv || convValue > maxConv) {
           *dbz = dbzMiss;
         }
       } // ix
