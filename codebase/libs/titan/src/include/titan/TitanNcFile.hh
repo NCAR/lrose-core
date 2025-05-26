@@ -38,7 +38,10 @@
 
 #include <titan/storm.h>
 #include <titan/track.h>
+#include <Ncxx/Ncxx.hh>
+#include <Ncxx/NcxxFile.hh>
 #include <string>
+
 using namespace std;
 
 class TitanNcFile
@@ -130,6 +133,14 @@ public:
   void FreeUtime();
   void FreeTracksAll();
 
+  /////////////////////////////////////////////////////
+  // NetCDF FileIO
+  
+  int openNcFile(const string &path,
+                 NcxxFile::FileMode mode);
+  
+  void closeNcFile();
+     
   /////////////////////////////////////////////////////
   // Storms
   
@@ -376,7 +387,39 @@ public:
   
   const string &getErrStr() { return (_errStr); }
 
+  /// add integer value to error string, with label
+  
+  void _addErrInt(string label, int iarg,
+                  bool cr = true);
+  
+  /// add double value to error string, with label
+  
+  void _addErrDbl(string label, double darg,
+                  string format = "%g", bool cr = true);
+
+  /// add string value to error string, with label
+  
+  void _addErrStr(string label, string strarg = "",
+                  bool cr = true);
+
 protected:
+
+  // format version
+
+  string _convention;
+  string _version;
+  
+  // netcdf file
+  
+  NcxxFile _ncFile;
+  string _tmpPath;
+
+  // dimensions
+  
+  NcxxDim _scans;
+  NcxxDim _storms;
+  NcxxDim _simpleTracks;
+  NcxxDim _complexTracks;
 
   // storm file details
   

@@ -59,16 +59,16 @@ TitanNcFile::TitanNcFile()
   
   MEM_zero(_storm_header);
   MEM_zero(_scan);
-  _gprops = NULL;
-  _lprops = NULL;
-  _hist = NULL;
-  _runs = NULL;
-  _proj_runs = NULL;
-  _scan_offsets = NULL;
+  _gprops = nullptr;
+  _lprops = nullptr;
+  _hist = nullptr;
+  _runs = nullptr;
+  _proj_runs = nullptr;
+  _scan_offsets = nullptr;
   _storm_num = 0;
 
-  _storm_header_file = NULL;
-  _storm_data_file = NULL;
+  _storm_header_file = nullptr;
+  _storm_data_file = nullptr;
 
   _storm_header_file_label = STORM_HEADER_FILE_TYPE;
   _storm_data_file_label = STORM_DATA_FILE_TYPE;
@@ -87,22 +87,22 @@ TitanNcFile::TitanNcFile()
   MEM_zero(_complex_params);
   MEM_zero(_entry);
 
-  _scan_index = NULL;
-  _scan_entries = NULL;
-  _track_utime = NULL;
+  _scan_index = nullptr;
+  _scan_entries = nullptr;
+  _track_utime = nullptr;
   
-  _complex_track_nums = NULL;
-  _complex_track_offsets = NULL;
-  _simple_track_offsets = NULL;
-  _nsimples_per_complex = NULL;
-  _simples_per_complex_offsets = NULL;
-  _simples_per_complex = NULL;
+  _complex_track_nums = nullptr;
+  _complex_track_offsets = nullptr;
+  _simple_track_offsets = nullptr;
+  _nsimples_per_complex = nullptr;
+  _simples_per_complex_offsets = nullptr;
+  _simples_per_complex = nullptr;
 
   _track_header_file_label = TRACK_HEADER_FILE_TYPE;
   _track_data_file_label = TRACK_DATA_FILE_TYPE;
 
-  _track_header_file = NULL;
-  _track_data_file = NULL;
+  _track_header_file = nullptr;
+  _track_data_file = nullptr;
 
   _first_entry = true;
 
@@ -116,6 +116,10 @@ TitanNcFile::TitanNcFile()
   _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
+  _convention = "TitanStormTracking";
+  _version = "1.0";
+
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -124,19 +128,103 @@ TitanNcFile::TitanNcFile()
 TitanNcFile::~TitanNcFile()
 
 {
+
   FreeStormsAll();
   CloseStormFiles();
   FreeTracksAll();
   CloseTrackFiles();
+
+  closeNcFile();
+  
 }
 
+/////////////////////////////////////////
+// Open file
+
+int TitanNcFile::openNcFile(const string &path,
+                            NcxxFile::FileMode mode)
+
+{
+
+  // open file
+  
+  try {
+    _ncFile.open(path, mode);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - TitanNcFile::openNcFile");
+    _addErrStr("  Cannot open file: ", path);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+
+  return 0;
+  
+}
+  
+void TitanNcFile::closeNcFile()
+
+{
+
+  _ncFile.close();
+  
+}
+     
 ////////////////////
-// clear error string
+// error string
 
 void TitanNcFile::_clearErrStr()
 {
   _errStr = "";
-  TaStr::AddStr(_errStr, "ERROR at time: ", DateTime::str());
+  _addErrStr("ERROR at time: ", DateTime::str());
+}
+
+///////////////////////////////////////////////
+// add labelled integer value to error string,
+// with optional following carriage return.
+
+void TitanNcFile::_addErrInt(string label,
+                             int iarg, bool cr)
+{
+  _errStr += label;
+  char str[32];
+  sprintf(str, "%d", iarg);
+  _errStr += str;
+  if (cr) {
+    _errStr += "\n";
+  }
+}
+
+///////////////////////////////////////////////
+// add labelled double value to error string,
+// with optional following carriage return.
+// Default format is %g.
+
+void TitanNcFile::_addErrDbl(string label, double darg,
+                             string format, bool cr)
+  
+{
+  _errStr += label;
+  char str[128];
+  sprintf(str, format.c_str(), darg);
+  _errStr += str;
+  if (cr) {
+    _errStr += "\n";
+  }
+}
+
+////////////////////////////////////////
+// add labelled string to error string
+// with optional following carriage return.
+
+void TitanNcFile::_addErrStr(string label,
+                             string strarg, bool cr)
+
+{
+  _errStr += label;
+  _errStr += strarg;
+  if (cr) {
+    _errStr += "\n";
+  }
 }
 
 //////////////////////////////////////////////////////////////
@@ -161,7 +249,7 @@ void TitanNcFile::FreeLayers()
 {
   if (_lprops) {
     ufree(_lprops);
-    _lprops = NULL;
+    _lprops = nullptr;
     _max_layers = 0;
   }
 }
@@ -191,7 +279,7 @@ void TitanNcFile::FreeHist()
 
   if (_hist) {
     ufree (_hist);
-    _hist = NULL;
+    _hist = nullptr;
     _max_dbz_intervals = 0;
   }
 
@@ -222,7 +310,7 @@ void TitanNcFile::FreeRuns()
 
   if (_runs) {
     ufree ((char *) _runs);
-    _runs = NULL;
+    _runs = nullptr;
     _max_runs = 0;
   }
 
@@ -253,7 +341,7 @@ void TitanNcFile::FreeProjRuns()
 
   if (_proj_runs) {
     ufree ((char *) _proj_runs);
-    _proj_runs = NULL;
+    _proj_runs = nullptr;
     _max_proj_runs = 0;
   }
 
@@ -283,7 +371,7 @@ void TitanNcFile::FreeGprops()
 
   if (_gprops) {
     ufree ((char *) _gprops);
-    _gprops = NULL;
+    _gprops = nullptr;
     _max_storms = 0;
   }
 
@@ -316,7 +404,7 @@ void TitanNcFile::FreeScanOffsets()
 
   if (_scan_offsets) {
     ufree(_scan_offsets);
-    _scan_offsets = NULL;
+    _scan_offsets = nullptr;
     _max_scans = 0;
   }
 
@@ -352,7 +440,7 @@ void TitanNcFile::FreeStormsAll()
 
 int TitanNcFile::OpenStormFiles(const char *mode,
                                 const char *header_file_path,
-                                const char *data_file_ext /* = NULL*/ )
+                                const char *data_file_ext /* = nullptr*/ )
      
 {
 
@@ -367,7 +455,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
   
   char hdr_file_path[MAX_PATH_LEN];
   STRncopy(hdr_file_path, header_file_path, MAX_PATH_LEN);
-  if ((_storm_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == NULL) {
+  if ((_storm_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == nullptr) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  Cannot open header file: ",
 		  header_file_path);
@@ -396,7 +484,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
     // immediately after
     
     char *chptr;
-    if ((chptr = strrchr(tmp_path, '/')) != NULL) {
+    if ((chptr = strrchr(tmp_path, '/')) != nullptr) {
       *(chptr + 1) = '\0';
       _storm_data_file_path = tmp_path;
       _storm_data_file_path += _storm_header.data_file_name;
@@ -408,7 +496,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
     
     // file opened for writing, use ext to compute file name
     
-    if (data_file_ext == NULL) {
+    if (data_file_ext == nullptr) {
       _errStr += "Must provide data file extension for file creation\n";
       return -1;
     }
@@ -417,7 +505,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
     strncpy(tmp_path, _storm_header_file_path.c_str(), MAX_PATH_LEN - 1);
 
     char *chptr;
-    if ((chptr = strrchr(tmp_path, '.')) == NULL) {
+    if ((chptr = strrchr(tmp_path, '.')) == nullptr) {
       TaStr::AddStr(_errStr, "  Header file must have extension : ",
 		    _storm_header_file_path);
       return -1;
@@ -434,7 +522,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
   char dat_file_path[MAX_PATH_LEN];
   STRncopy(dat_file_path, _storm_data_file_path.c_str(), MAX_PATH_LEN);
     
-  if ((_storm_data_file = ta_fopen_uncompress(dat_file_path, mode)) == NULL) {
+  if ((_storm_data_file = ta_fopen_uncompress(dat_file_path, mode)) == nullptr) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  Cannot open storm data file: ",
 		  _storm_data_file_path);
@@ -524,16 +612,16 @@ void TitanNcFile::CloseStormFiles()
 
   // close the header file
   
-  if (_storm_header_file != NULL) {
+  if (_storm_header_file != nullptr) {
     fclose(_storm_header_file);
-    _storm_header_file = (FILE *) NULL;
+    _storm_header_file = (FILE *) nullptr;
   }
 
   // close the data file
   
-  if (_storm_data_file != NULL) {
+  if (_storm_data_file != nullptr) {
     fclose(_storm_data_file);
-    _storm_data_file = (FILE *) NULL;
+    _storm_data_file = (FILE *) nullptr;
   }
   
 }
@@ -1049,21 +1137,21 @@ int TitanNcFile::WriteStormHeader()
   
   // set file time to gmt
   
-  _storm_header.file_time = time(NULL);
+  _storm_header.file_time = time(nullptr);
   
   // copy in the file names, checking whether the path has a
   // delimiter or not, and only copying after the delimiter
   
   const char *hptr = strrchr(_storm_header_file_path.c_str(), '/');
 
-  if (hptr != NULL) {
+  if (hptr != nullptr) {
     strncpy(_storm_header.header_file_name, (hptr + 1), R_LABEL_LEN - 1);
   } else {
     strncpy(_storm_header.header_file_name, _storm_header_file_path.c_str(), R_LABEL_LEN - 1);
   }
   
   const char *dptr = strrchr(_storm_data_file_path.c_str(), '/');
-  if (dptr != NULL) {
+  if (dptr != nullptr) {
     strncpy(_storm_header.data_file_name, (dptr + 1), R_LABEL_LEN - 1);
   } else {
     strncpy(_storm_header.data_file_name, _storm_data_file_path.c_str(), R_LABEL_LEN - 1);
@@ -1517,7 +1605,7 @@ void TitanNcFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 				    tgrid.proj_origin_lon,
 				    tgrid.proj_params.lc2.lat1,
 				    tgrid.proj_params.lc2.lat2);
-      if (ps != NULL) {
+      if (ps != nullptr) {
 	PJGs_lc2_xy2latlon(ps,
 			   gprops.vol_centroid_x,
 			   gprops.vol_centroid_y,
@@ -1628,7 +1716,7 @@ int TitanNcFile::_truncateStormFiles(FILE *&fd, const string &path, int length)
   
   // re-open the file for buffered i/o
   
-  if ((fd = fopen(path.c_str(), "r+")) == NULL) {
+  if ((fd = fopen(path.c_str(), "r+")) == nullptr) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  ", "Cannot reopen file.");
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
@@ -1710,32 +1798,32 @@ void TitanNcFile::FreeSimpleArrays()
   
   if (_simples_per_complex) {
     for (int i = 0; i < _n_simples_per_complex_allocated; i++) {
-      if(_simples_per_complex[i] != NULL) {
+      if(_simples_per_complex[i] != nullptr) {
 	ufree(_simples_per_complex[i]);
       }
     }
     ufree(_simples_per_complex);
-    _simples_per_complex = NULL;
+    _simples_per_complex = nullptr;
   }
   
   if (_simple_track_offsets) {
     ufree(_simple_track_offsets);
-    _simple_track_offsets = NULL;
+    _simple_track_offsets = nullptr;
   }
 
   if (_nsimples_per_complex) {
     ufree(_nsimples_per_complex);
-    _nsimples_per_complex = NULL;
+    _nsimples_per_complex = nullptr;
   }
 
   if (_simples_per_complex_offsets) {
     ufree(_simples_per_complex_offsets);
-    _simples_per_complex_offsets = NULL;
+    _simples_per_complex_offsets = nullptr;
   }
 
   if (_complex_track_offsets) {
     ufree(_complex_track_offsets);
-    _complex_track_offsets = NULL;
+    _complex_track_offsets = nullptr;
   }
 
   _n_simple_allocated = 0;
@@ -1789,7 +1877,7 @@ void TitanNcFile::FreeComplexArrays()
 
   if (_complex_track_nums) {
     ufree(_complex_track_nums);
-    _complex_track_nums = NULL;
+    _complex_track_nums = nullptr;
     _n_complex_allocated = 0;
   }
 
@@ -1843,13 +1931,13 @@ void TitanNcFile::FreeSimplesPerComplex()
 {
   if (_simples_per_complex) {
     for (int i = 0; i < _n_simples_per_complex_allocated; i++) {
-      if (_simples_per_complex[i] != NULL) {
+      if (_simples_per_complex[i] != nullptr) {
 	ufree(_simples_per_complex[i]);
-	_simples_per_complex[i] = NULL;
+	_simples_per_complex[i] = nullptr;
       }
     }
     ufree(_simples_per_complex);
-    _simples_per_complex = NULL;
+    _simples_per_complex = nullptr;
     _n_simples_per_complex_allocated = 0;
   }
 }
@@ -1891,7 +1979,7 @@ void TitanNcFile::FreeScanEntries()
   
   if (_scan_entries) {
     ufree(_scan_entries);
-    _scan_entries = NULL;
+    _scan_entries = nullptr;
     _n_scan_entries_allocated = 0;
   }
 
@@ -1945,7 +2033,7 @@ void TitanNcFile::FreeScanIndex()
 {
   if (_scan_index) {
     ufree(_scan_index);
-    _scan_index = NULL;
+    _scan_index = nullptr;
     _n_scan_index_allocated = 0;
   }
 }
@@ -1989,7 +2077,7 @@ void TitanNcFile::FreeUtime()
 {
   if (_track_utime) {
     ufree(_track_utime);
-    _track_utime = NULL;
+    _track_utime = nullptr;
     _n_utime_allocated = 0;
   }
 }
@@ -2025,7 +2113,7 @@ void TitanNcFile::FreeTracksAll()
 
 int TitanNcFile::OpenTrackFiles(const char *mode,
                                 const char *header_file_path,
-                                const char *data_file_ext /* = NULL*/ )
+                                const char *data_file_ext /* = nullptr*/ )
   
 {
   
@@ -2040,7 +2128,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
   
   char hdr_file_path[MAX_PATH_LEN];
   STRncopy(hdr_file_path, header_file_path, MAX_PATH_LEN);
-  if ((_track_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == NULL) {
+  if ((_track_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == nullptr) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  Cannot open header file: ", header_file_path);
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
@@ -2068,7 +2156,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
     // immediately after
     
     char *chptr;
-    if ((chptr = strrchr(tmp_path, '/')) != NULL) {
+    if ((chptr = strrchr(tmp_path, '/')) != nullptr) {
       *(chptr + 1) = '\0';
       _track_data_file_path = tmp_path;
       _track_data_file_path += _track_header.data_file_name;
@@ -2080,7 +2168,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
 
     // file opened for writing, use ext to compute file name
 
-    if (data_file_ext == NULL) {
+    if (data_file_ext == nullptr) {
       _errStr += "Must provide data file extension for file creation\n";
       return -1;
     }
@@ -2089,7 +2177,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
     strncpy(tmp_path, _track_header_file_path.c_str(), MAX_PATH_LEN - 1);
     
     char *chptr;
-    if ((chptr = strrchr(tmp_path, '.')) == NULL) {
+    if ((chptr = strrchr(tmp_path, '.')) == nullptr) {
       TaStr::AddStr(_errStr, "  Header file must have extension : ",
 		    _track_header_file_path);
       return -1;
@@ -2106,7 +2194,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
   char dat_file_path[MAX_PATH_LEN];
   STRncopy(dat_file_path, _track_data_file_path.c_str(), MAX_PATH_LEN);
     
-  if ((_track_data_file = ta_fopen_uncompress(dat_file_path, mode)) == NULL) {
+  if ((_track_data_file = ta_fopen_uncompress(dat_file_path, mode)) == nullptr) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  Cannot open data file: ",
 		  _track_data_file_path);
@@ -2197,16 +2285,16 @@ void TitanNcFile::CloseTrackFiles()
 
   // close the header file
   
-  if (_track_header_file != NULL) {
+  if (_track_header_file != nullptr) {
     fclose(_track_header_file);
-    _track_header_file = (FILE *) NULL;
+    _track_header_file = (FILE *) nullptr;
   }
 
   // close the data file
   
-  if (_track_data_file != NULL) {
+  if (_track_data_file != nullptr) {
     fclose(_track_data_file);
-    _track_data_file = (FILE *) NULL;
+    _track_data_file = (FILE *) nullptr;
   }
   
 }
@@ -2615,7 +2703,7 @@ int TitanNcFile::ReadComplexParams(int track_num,
     
     AllocSimplesPerComplex(track_num + 1);
 
-    if (_simples_per_complex[track_num] == NULL) {
+    if (_simples_per_complex[track_num] == nullptr) {
       _simples_per_complex[track_num] = (si32 *) umalloc
 	(nsimples * sizeof(si32));
     } else {
@@ -3120,7 +3208,7 @@ int TitanNcFile::WriteTrackHeader()
   
   // set file time to gmt
   
-  _track_header.file_time = time(NULL);
+  _track_header.file_time = time(nullptr);
   
   // copy file label
   
