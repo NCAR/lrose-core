@@ -1,0 +1,71 @@
+/*********************************************************
+ * parameter definitions for Tstorms2NetCDF
+ *
+ * Mike Dixon, EOL, NCAR
+ * P.O.Box 3000, Boulder, CO, USA, 80307-3000
+ *
+ * May 2025
+ */
+
+commentdef {
+  p_header = "Tstorms2NetCDF program";
+  p_text = "Tstorms2NetCDF reads native TITAN binary data files, converts the data into NetCDF format, and writes the data out in NetCDF files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = REALTIME;
+  p_descr = "Operational mode";
+  p_help = "In REALTIME mode, the program is run on output from each volume scan as it becomes available. In ARCHIVE mode, all of the scans in a series of track files are processed. In FILELIST mode, the program processes a list of files specified on the command line.";
+} input_mode;
+
+commentdef {
+  p_header = "DATA INPUT.";
+}
+
+paramdef string {
+  p_default = "titan/storms";
+  p_descr = "Directory for input TITAN storm data.";
+  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.";
+} input_dir;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Max valid age of input data in realtime mode (secs).";
+  p_help = "REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program will wait for data more recent than this.";
+} max_realtime_valid_age;
+
+commentdef {
+  p_header = "OUTPUT DETAILS";
+  p_text = "Details for the output NetCDF files.";
+}
+	
+paramdef string {
+  p_default = "./output/netcdf";
+  p_descr = "Output dir for NetCDF files.";
+} output_dir;
+
