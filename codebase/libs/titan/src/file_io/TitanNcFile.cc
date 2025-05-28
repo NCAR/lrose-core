@@ -33,7 +33,6 @@
 //
 ////////////////////////////////////////////////////////////////
 
-
 #include <fcntl.h>
 #include <cerrno>
 #include <dataport/bigend.h>
@@ -156,6 +155,22 @@ int TitanNcFile::openNcFile(const string &path,
     _addErrStr("  exception: ", e.what());
     return -1;
   }
+
+  // add groups
+
+  _scansGroup = _ncFile.addGroup(SCANS);
+  _stormsGroup = _ncFile.addGroup(STORMS);
+  _tracksGroup = _ncFile.addGroup(TRACKS);
+
+  _stormGpropsGroup = _stormsGroup.addGroup(GPROPS);
+  _stormLpropsGroup = _stormsGroup.addGroup(LPROPS);
+  _stormHistGroup = _stormsGroup.addGroup(HIST);
+  _stormRunsGroup = _stormsGroup.addGroup(RUNS);
+  _stormProjRunsGroup = _stormsGroup.addGroup(PROJ_RUNS);
+
+  _simpleTrackGroup = _tracksGroup.addGroup(SIMPLE);
+  _complexTrackGroup = _tracksGroup.addGroup(COMPLEX);
+  _trackEntryGroup = _tracksGroup.addGroup(ENTRY);
 
   return 0;
   

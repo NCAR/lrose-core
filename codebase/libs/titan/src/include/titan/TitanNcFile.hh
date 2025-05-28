@@ -421,6 +421,26 @@ protected:
   NcxxDim _simpleTracks;
   NcxxDim _complexTracks;
 
+  // top level groups
+  
+  NcxxGroup _scansGroup;
+  NcxxGroup _stormsGroup;
+  NcxxGroup _tracksGroup;
+
+  // storms group
+  
+  NcxxGroup _stormGpropsGroup;
+  NcxxGroup _stormLpropsGroup;
+  NcxxGroup _stormHistGroup;
+  NcxxGroup _stormRunsGroup;
+  NcxxGroup _stormProjRunsGroup;
+
+  // tracks group
+  
+  NcxxGroup _simpleTrackGroup;
+  NcxxGroup _complexTrackGroup;
+  NcxxGroup _trackEntryGroup;
+  
   // storm file details
   
   string _storm_header_file_path;
@@ -526,7 +546,83 @@ private:
 
   TitanNcFile(const TitanNcFile & orig);
   TitanNcFile & operator = (const TitanNcFile & other);
+
+public:
   
+  // strings for netcdf groups
+
+  static constexpr const char* SCANS = "scans";
+  static constexpr const char* STORMS = "storms";
+  static constexpr const char* TRACKS = "tracks";
+  static constexpr const char* GPROPS = "gprops";
+  static constexpr const char* LPROPS = "lprops";
+  static constexpr const char* HIST = "hist";
+  static constexpr const char* RUNS = "runs";
+  static constexpr const char* PROJ_RUNS = "proj_runs";
+  static constexpr const char* SIMPLE = "simple";
+  static constexpr const char* COMPLEX = "complex";
+  static constexpr const char* ENTRY = "entry";
+  
+  // strings for storm identification parameters
+
+  static constexpr const char* LOW_DBZ_THRESHOLD = "low_dbz_threshold";
+  static constexpr const char* HIGH_DBZ_THRESHOLD = "high_dbz_threshold";
+  static constexpr const char* DBZ_HIST_INTERVAL = "dbz_hist_interval";
+  static constexpr const char* HAIL_DBZ_THRESHOLD = "hail_dbz_threshold";
+  static constexpr const char* BASE_THRESHOLD = "base_threshold";
+  static constexpr const char* TOP_THRESHOLD = "top_threshold";
+  static constexpr const char* MIN_STORM_SIZE = "min_storm_size";
+  static constexpr const char* MAX_STORM_SIZE = "max_storm_size";
+  static constexpr const char* MORPHOLOGY_EROSION_THRESHOLD = "morphology_erosion_threshold";
+  static constexpr const char* MORPHOLOGY_REFL_DIVISOR = "morphology_refl_divisor";
+  static constexpr const char* MIN_RADAR_TOPS = "min_radar_tops";
+  static constexpr const char* TOPS_EDGE_MARGIN = "tops_edge_margin";
+  static constexpr const char* Z_P_COEFF = "z_p_coeff";
+  static constexpr const char* Z_P_EXPONENT = "z_p_exponent";
+  static constexpr const char* Z_M_COEFF = "z_m_coeff";
+  static constexpr const char* Z_M_EXPONENT = "z_m_exponent";
+  static constexpr const char* SECTRIP_VERT_ASPECT = "sectrip_vert_aspect";
+  static constexpr const char* SECTRIP_HORIZ_ASPECT = "sectrip_horiz_aspect";
+  static constexpr const char* SECTRIP_ORIENTATION_ERROR = "sectrip_orientation_error";
+  static constexpr const char* POLY_START_AZ = "poly_start_az";
+  static constexpr const char* POLY_DELTA_AZ = "poly_delta_az";
+  static constexpr const char* CHECK_MORPHOLOGY = "check_morphology";
+  static constexpr const char* CHECK_TOPS = "check_tops";
+  static constexpr const char* VEL_AVAILABLE = "vel_available";
+  static constexpr const char* N_POLY_SIDES_ = "n_poly_sides";
+  static constexpr const char* LTG_COUNT_TIME = "ltg_count_time";
+  static constexpr const char* LTG_COUNT_MARGIN_KM = "ltg_count_margin_km";
+  static constexpr const char* HAIL_Z_M_COEFF = "hail_z_m_coeff";
+  static constexpr const char* HAIL_Z_M_EXPONENT = "hail_z_m_exponent";
+  static constexpr const char* HAIL_MASS_DBZ_THRESHOLD = "hail_mass_dbz_threshold";
+  static constexpr const char* GPROPS_UNION_TYPE = "gprops_union_type";
+  static constexpr const char* TOPS_DBZ_THRESHOLD = "tops_dbz_threshold";
+  static constexpr const char* PRECIP_COMPUTATION_MODE = "precip_computation_mode";
+  static constexpr const char* PRECIP_PLANE_HT = "precip_plane_ht";
+  static constexpr const char* LOW_CONVECTIVITY_THRESHOLD = "low_convectivity_threshold";
+  static constexpr const char* HIGH_CONVECTIVITY_THRESHOLD = "high_convectivity_threshold";
+
+  // strings for tracking parameters
+
+  static constexpr const char* FORECAST_WEIGHTS = "forecast_weights";  
+  static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
+  static constexpr const char* WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
+  static constexpr const char* MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
+  static constexpr const char* MAX_TRACKING_SPEED = "max_tracking_speed";
+  static constexpr const char* MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
+  static constexpr const char* PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
+  static constexpr const char* SMOOTHING_RADIUS = "smoothing_radius";
+  static constexpr const char* MIN_FRACTION_OVERLAP = "min_fraction_overlap";
+  static constexpr const char* MIN_SUM_FRACTION_OVERLAP = "min_sum_fraction_overlap";
+  static constexpr const char* SCALE_FORECASTS_BY_HISTORY = "scale_forecasts_by_history";
+  static constexpr const char* USE_RUNS_FOR_OVERLAPS = "use_runs_for_overlaps";
+  static constexpr const char* GRID_TYPE = "grid_type";
+  static constexpr const char* NWEIGHTS_FORECAST = "nweights_forecast";
+  static constexpr const char* FORECAST_TYPE = "forecast_type";
+  static constexpr const char* MAX_DELTA_TIME = "max_delta_time";
+  static constexpr const char* MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
+  static constexpr const char* SPATIAL_SMOOTHING = "spatial_smoothing";
+
 };
 
 #endif
