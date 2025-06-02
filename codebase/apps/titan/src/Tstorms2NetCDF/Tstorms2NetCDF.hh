@@ -85,14 +85,17 @@ private:
 
   DsInputPath *_input;
 
-  int _processInput(const char *input_file_path);
+  TitanStormFile _sFile;
+  TitanTrackFile _tFile;
 
-  int _loadScanTimes(const char *input_file_path,
-		     vector<time_t> &scanTimes);
+  vector<time_t> _scanTimes;
+    
+  int _processInputFile(const char *input_file_path);
 
-  int _openInput(const char *input_file_path,
-		 TitanTrackFile &tFile,
-		 TitanStormFile &sFile);
+  int _loadScanTimes();
+
+  int _openInputFiles(const char *input_file_path);
+  void _closeInputFiles();
 
   int _processTime(time_t valid_time,
 		   time_t expire_time);

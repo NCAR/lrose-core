@@ -640,6 +640,7 @@ codebase/apps/titan/src/TitanSelect/TitanSelect
 codebase/apps/titan/src/TitanVectors2Mdv/TitanVectors2Mdv
 codebase/apps/titan/src/TstormTemporalSmooth/TstormTemporalSmooth
 codebase/apps/titan/src/Tstorms2GenPoly/Tstorms2GenPoly
+codebase/apps/titan/src/Tstorms2NetCDF/Tstorms2NetCDF
 codebase/apps/titan/src/Tstorms2Shapefile/Tstorms2Shapefile
 codebase/apps/titan/src/Tstorms2Spdb/Tstorms2Spdb
 codebase/apps/titan/src/Tstorms2Xml/Tstorms2Xml

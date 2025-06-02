@@ -155,22 +155,56 @@ int TitanNcFile::openNcFile(const string &path,
     _addErrStr("  exception: ", e.what());
     return -1;
   }
+  
+  // groups
+  
+  if (mode == NcxxFile::FileMode::read) {
 
-  // add groups
+    // get groups
+    
+    try {
+      _scansGroup = _ncFile.getGroup(SCANS);
+      _stormsGroup = _ncFile.getGroup(STORMS);
+      _tracksGroup = _ncFile.getGroup(TRACKS);
+      _stormGpropsGroup = _stormsGroup.getGroup(GPROPS);
+      _stormLpropsGroup = _stormsGroup.getGroup(LPROPS);
+      _stormHistGroup = _stormsGroup.getGroup(HIST);
+      _stormRunsGroup = _stormsGroup.getGroup(RUNS);
+      _stormProjRunsGroup = _stormsGroup.getGroup(PROJ_RUNS);
+      _simpleTrackGroup = _tracksGroup.getGroup(SIMPLE);
+      _complexTrackGroup = _tracksGroup.getGroup(COMPLEX);
+      _trackEntryGroup = _tracksGroup.getGroup(ENTRY);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - TitanNcFile::openNcFile");
+      _addErrStr("  Cannot get groups, path: ", path);
+      _addErrStr("  exception: ", e.what());
+      return -1;
+    }
 
-  _scansGroup = _ncFile.addGroup(SCANS);
-  _stormsGroup = _ncFile.addGroup(STORMS);
-  _tracksGroup = _ncFile.addGroup(TRACKS);
+  } else {
 
-  _stormGpropsGroup = _stormsGroup.addGroup(GPROPS);
-  _stormLpropsGroup = _stormsGroup.addGroup(LPROPS);
-  _stormHistGroup = _stormsGroup.addGroup(HIST);
-  _stormRunsGroup = _stormsGroup.addGroup(RUNS);
-  _stormProjRunsGroup = _stormsGroup.addGroup(PROJ_RUNS);
+    // create groups
+    
+    try {
+      _scansGroup = _ncFile.addGroup(SCANS);
+      _stormsGroup = _ncFile.addGroup(STORMS);
+      _tracksGroup = _ncFile.addGroup(TRACKS);
+      _stormGpropsGroup = _stormsGroup.addGroup(GPROPS);
+      _stormLpropsGroup = _stormsGroup.addGroup(LPROPS);
+      _stormHistGroup = _stormsGroup.addGroup(HIST);
+      _stormRunsGroup = _stormsGroup.addGroup(RUNS);
+      _stormProjRunsGroup = _stormsGroup.addGroup(PROJ_RUNS);
+      _simpleTrackGroup = _tracksGroup.addGroup(SIMPLE);
+      _complexTrackGroup = _tracksGroup.addGroup(COMPLEX);
+      _trackEntryGroup = _tracksGroup.addGroup(ENTRY);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - TitanNcFile::openNcFile");
+      _addErrStr("  Cannot add groups, path: ", path);
+      _addErrStr("  exception: ", e.what());
+      return -1;
+    }
 
-  _simpleTrackGroup = _tracksGroup.addGroup(SIMPLE);
-  _complexTrackGroup = _tracksGroup.addGroup(COMPLEX);
-  _trackEntryGroup = _tracksGroup.addGroup(ENTRY);
+  }
 
   return 0;
   

@@ -69,7 +69,7 @@ public:
   enum FileMode
     {
       read,	//!< File exists, open read-only.
-      write,      //!< File exists, open for writing.
+      write,    //!< File exists, open for writing.
       replace,	//!< Create new file, even if already exists.
       newFile	//!< Create new file, fail if already exists.
     };

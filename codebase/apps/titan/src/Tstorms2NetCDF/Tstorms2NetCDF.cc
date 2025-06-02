@@ -210,11 +210,11 @@ int Tstorms2NetCDF::Run ()
     if (_params.debug) {
       cerr << "Processing input file: " << inputFilePath << endl;
     }
-
-    _processInput(inputFilePath);
+    
+    _processInputFile(inputFilePath);
     
   }
-
+  
   return 0;
 
 }
@@ -222,31 +222,38 @@ int Tstorms2NetCDF::Run ()
 //////////////////////////////////////////////////
 // process input data
 
-int Tstorms2NetCDF::_processInput(const char *input_file_path)
+int Tstorms2NetCDF::_processInputFile(const char *input_file_path)
 
 {
 
-  // load up scan times
+  // open input files based on the provided path
 
-  vector<time_t> scanTimes;
-  if (_loadScanTimes(input_file_path, scanTimes)) {
+  if (_openInputFiles(input_file_path)) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot open input files, input_path: " << input_file_path << endl;
     return -1;
   }
-
+  
+  // load up scan times
+  
+  if (_loadScanTimes()) {
+    return -1;
+  }
+  
   if (_params.input_mode == Params::REALTIME) {
-
+    
     // REALTIME mode - find the scan which matches the latest data info
     // and only process that scan
 
     time_t valid_time = _input->getLdataInfo().getLatestTime();
 
-    for (size_t iscan = 0; iscan < scanTimes.size(); iscan++) {
-      if (scanTimes[iscan] == valid_time) {
+    for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
+      if (_scanTimes[iscan] == valid_time) {
 	time_t expire_time;
 	if (iscan == 0) {
 	  expire_time = valid_time;
 	} else {
-	  expire_time = valid_time + (valid_time - scanTimes[iscan - 1]);
+	  expire_time = valid_time + (valid_time - _scanTimes[iscan - 1]);
 	}
 	_processTime(valid_time, expire_time);
 	break;
@@ -257,16 +264,16 @@ int Tstorms2NetCDF::_processInput(const char *input_file_path)
 
     // ARCHIVE or FILELIST mode
     
-    for (size_t iscan = 0; iscan < scanTimes.size(); iscan++) {
-      time_t valid_time = scanTimes[iscan];
+    for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
+      time_t valid_time = _scanTimes[iscan];
       time_t expire_time;
-      if (scanTimes.size() == 1) {
+      if (_scanTimes.size() == 1) {
 	expire_time = valid_time;
       } else {
-	if (iscan == scanTimes.size() - 1) {
-	  expire_time = valid_time + (valid_time - scanTimes[iscan - 1]);
+	if (iscan == _scanTimes.size() - 1) {
+	  expire_time = valid_time + (valid_time - _scanTimes[iscan - 1]);
 	} else {
-	  expire_time = scanTimes[iscan + 1];
+	  expire_time = _scanTimes[iscan + 1];
 	}
       }
       if (_params.input_mode == Params::ARCHIVE) {
@@ -281,6 +288,8 @@ int Tstorms2NetCDF::_processInput(const char *input_file_path)
 
   }
 
+  _closeInputFiles();
+  
   return 0;
 
 }
@@ -288,46 +297,31 @@ int Tstorms2NetCDF::_processInput(const char *input_file_path)
 //////////////////////////////////////////////////
 // load up scan times from storm file
 
-int Tstorms2NetCDF::_loadScanTimes(const char *input_file_path,
-                                   vector<time_t> &scanTimes)
+int Tstorms2NetCDF::_loadScanTimes()
 
 {
 
-  TitanTrackFile tFile;
-  TitanStormFile sFile;
-
-  // open files
-
-  if (_openInput(input_file_path, tFile, sFile)) {
-    return -1;
-  }
-
-  int nScans = sFile.header().n_scans;
+  _scanTimes.clear();
+  int nScans = _sFile.header().n_scans;
   for (int i = 0; i < nScans; i++) {
     // read in scan
-    if (sFile.ReadScan(i)) {
+    if (_sFile.ReadScan(i)) {
       cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
-      cerr << "  " << sFile.getErrStr() << endl;
+      cerr << "  " << _sFile.getErrStr() << endl;
       return -1;
     }
-    scanTimes.push_back(sFile.scan().time);
+    _scanTimes.push_back(_sFile.scan().time);
   }
-
-  // close files
-
-  tFile.CloseFiles();
-  sFile.CloseFiles();
 
   return 0;
 
 }
 
 //////////////////////////////////////////////////
-// open track and storm files
+// open track and storm files,
+// given the trigger path
 
-int Tstorms2NetCDF::_openInput(const char *input_file_path,
-                               TitanTrackFile &tFile,
-                               TitanStormFile &sFile)
+int Tstorms2NetCDF::_openInputFiles(const char *input_file_path)
 
 {
 
@@ -342,36 +336,48 @@ int Tstorms2NetCDF::_openInput(const char *input_file_path,
       *sh = 't';
     }
   }
-
-  if (tFile.OpenFiles("r", track_file_path)) {
+  
+  if (_tFile.OpenFiles("r", track_file_path)) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
-    cerr << "  " << tFile.getErrStr() << endl;
+    cerr << "  " << _tFile.getErrStr() << endl;
     return -1;
   }
 
   Path stormPath(track_file_path);
-  stormPath.setFile(tFile.header().storm_header_file_name);
+  stormPath.setFile(_tFile.header().storm_header_file_name);
 
-  if (sFile.OpenFiles("r", stormPath.getPath().c_str())) {
+  if (_sFile.OpenFiles("r", stormPath.getPath().c_str())) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
-    cerr << "  " << sFile.getErrStr() << endl;
+    cerr << "  " << _sFile.getErrStr() << endl;
     return -1;
   }
   
   // lock files
 
-  if (tFile.LockHeaderFile("r")) {
+  if (_tFile.LockHeaderFile("r")) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
-    cerr << "  " << tFile.getErrStr() << endl;
+    cerr << "  " << _tFile.getErrStr() << endl;
     return -1;
   }
-  if (sFile.LockHeaderFile("r")) {
+  if (_sFile.LockHeaderFile("r")) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
-    cerr << "  " << sFile.getErrStr() << endl;
+    cerr << "  " << _sFile.getErrStr() << endl;
     return -1;
   }
   
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// close track and storm input files
+
+void Tstorms2NetCDF::_closeInputFiles()
+
+{
+
+  _sFile.CloseFiles();
+  _tFile.CloseFiles();
 
 }
 
@@ -412,7 +418,9 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
 
   // write to NetCDF
 
-  _writeNetcdfFile(start_time, end_time, titan);
+  if (_writeNetcdfFile(start_time, end_time, titan)) {
+    return -1;
+  }
 
 #ifdef JUNK
   
@@ -432,10 +440,32 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
   if (_params.write_to_xml_files) {
     _writeXmlFile(valid_time, xml);
   }
+
+#endif
   
   return 0;
 
 }
+  
+//////////////////////////////////////
+// write out netcdf file
+
+int Tstorms2NetCDF::_writeNetcdfFile(time_t start_time,
+                                     time_t end_time,
+                                     const DsTitan &titan)
+
+{
+
+  // storm parameters
+  
+  const storm_file_params_t &stormParams = titan.storm_params();
+  
+  return 0;
+  
+}
+
+  
+#ifdef JUNK
   
 ////////////////////////////
 // write XML to ASCII file
@@ -1888,3 +1918,5 @@ int Tstorms2NetCDF::_storeXmlFromFile()
   return 0;
 
 }
+
+#endif
