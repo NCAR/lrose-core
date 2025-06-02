@@ -146,4 +146,10 @@ public:
                                  char spacer,
                                  vector<string> &toks);
   
+  // Replace substring
+
+  static void replaceSubStr(std::string &str,
+                            const std::string &from,
+                            const std::string &to);
+  
 };

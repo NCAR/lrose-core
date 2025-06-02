@@ -240,3 +240,22 @@ void TaStr::tokenizeAllowEmpty(const string &str,
   }
 
 }
+
+///////////////////////////////////////////////////////
+// Replaces substring
+
+void TaStr::replaceSubStr(std::string &str,
+                          const std::string &from,
+                          const std::string &to)
+{
+
+  if (from.empty()) return;  // Avoid infinite loop
+  
+  std::size_t pos = 0;
+  while ((pos = str.find(from, pos)) != std::string::npos) {
+    str.replace(pos, from.length(), to);
+    pos += to.length();  // Move past the replacement
+  }
+
+}
+
