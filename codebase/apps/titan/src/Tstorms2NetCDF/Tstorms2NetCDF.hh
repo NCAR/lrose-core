@@ -49,7 +49,8 @@
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
 #include <titan/DsTitan.hh>
-using namespace std;
+#include <filesystem>
+using Fpath = std::filesystem::path;
 
 ////////////////////////
 // This class
@@ -78,24 +79,29 @@ protected:
   
 private:
 
-  string _progName;
+  std::string _progName;
   char *_paramsPath;
   Args _args;
   Params _params;
 
   DsInputPath *_input;
+  Fpath _inputPath;
+  Fpath _stormHeaderPath;
+  Fpath _stormDataPath;
+  Fpath _trackHeaderPath;
+  Fpath _trackDataPath;
 
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
 
   vector<time_t> _scanTimes;
     
-  int _processInputFile(const char *input_file_path);
+  int _processInputPath();
 
-  int _loadScanTimes();
-
-  int _openInputFiles(const char *input_file_path);
+  int _openInputFiles();
   void _closeInputFiles();
+  
+  int _loadScanTimes();
 
   int _processTime(time_t valid_time,
 		   time_t expire_time);
@@ -118,7 +124,7 @@ private:
                  time_t valid_time,
                  time_t expire_time,
                  const DsTitan &titan,
-                 string &xml);
+                 std::string &xml);
   
   void _addWxmlObs(const storm_file_params_t &stormParams,
                    const simple_track_params_t &SimpleParams,
@@ -126,46 +132,46 @@ private:
                    bool isCurrent,
                    bool checkForParents,
                    bool checkForChildren,
-                   string &xml);
+                   std::string &xml);
   
   void _addWxmlForecast(int leadTime,
                         const storm_file_params_t &stormParams,
                         const simple_track_params_t &SimpleParams,
                         const TitanTrackEntry &TrackEntry,
-                        string &xml);
+                        std::string &xml);
 
   void _addEllipse(const TitanTrackEntry &TrackEntry,
 		   double latCent, double lonCent,
 		   double Speed, double Direction,
 		   int leadTime, double linealGrowth,
-		   string &xml);
+		   std::string &xml);
   
   void _addPolygon(const storm_file_params_t &sParams,
 		   const TitanTrackEntry &TrackEntry,
 		   double latCent, double lonCent,
 		   double Speed, double Direction,
 		   int leadTime, bool grow,
-		   string &xml);
+		   std::string &xml);
   
   void _addMovingPoint(double latCent, double lonCent,
 		       double Speed, double Direction,
-		       string &xml);
+		       std::string &xml);
   
-  void _addWxmlHeader(string &xml);
-  void _addWxmlTrailer(string &xml);
+  void _addWxmlHeader(std::string &xml);
+  void _addWxmlTrailer(std::string &xml);
 
-  void _addNowcastHeader(string &xml, time_t valid_time, time_t expire_time);
-  void _addNowcastTrailer(string &xml);
+  void _addNowcastHeader(std::string &xml, time_t valid_time, time_t expire_time);
+  void _addNowcastTrailer(std::string &xml);
     
-  void _addTstormsHeader(string &xml);
+  void _addTstormsHeader(std::string &xml);
 
-  void _addTstormsTrailer(string &xml);
+  void _addTstormsTrailer(std::string &xml);
 
-  void _addStormDataHeader(string &xml,
+  void _addStormDataHeader(std::string &xml,
                            time_t valid_time,
                            const storm_file_params_t &stormParams);
 
-  void _addStormDataTrailer(string &xml);
+  void _addStormDataTrailer(std::string &xml);
   
   void _addTstormsObs(const storm_file_params_t &stormParams,
                       const simple_track_params_t &SimpleParams,
@@ -173,13 +179,13 @@ private:
                       bool isCurrent,
                       bool checkForParents,
                       bool checkForChildren,
-                      string &xml);
+                      std::string &xml);
   
   void _addTstormsForecast(int leadTime,
                            const storm_file_params_t &stormParams,
                            const simple_track_params_t &SimpleParams,
                            const TitanTrackEntry &TrackEntry,
-                           string &xml);
+                           std::string &xml);
   
   int _storeXmlFromFile();
 

@@ -39,6 +39,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
+
 #include <toolsa/ucopyright.h>
 #include <toolsa/pmu.h>
 #include <toolsa/pjg.h>
@@ -53,7 +54,9 @@
 #include <Spdb/DsSpdb.hh>
 #include <rapformats/tstorm_hull_smooth.h>
 #include "Tstorms2NetCDF.hh"
+
 using namespace std;
+
 
 // Constructor
 
@@ -206,12 +209,14 @@ int Tstorms2NetCDF::Run ()
 
   char *inputFilePath;
   while ((inputFilePath = _input->next()) != NULL) {
+
+    _inputPath = inputFilePath;
     
     if (_params.debug) {
-      cerr << "Processing input file: " << inputFilePath << endl;
+      cerr << "Processing input path: " << _inputPath << endl;
     }
     
-    _processInputFile(inputFilePath);
+    _processInputPath();
     
   }
   
@@ -222,15 +227,15 @@ int Tstorms2NetCDF::Run ()
 //////////////////////////////////////////////////
 // process input data
 
-int Tstorms2NetCDF::_processInputFile(const char *input_file_path)
+int Tstorms2NetCDF::_processInputPath()
 
 {
 
   // open input files based on the provided path
 
-  if (_openInputFiles(input_file_path)) {
+  if (_openInputFiles()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-    cerr << "  Cannot open input files, input_path: " << input_file_path << endl;
+    cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
     return -1;
   }
   
@@ -239,6 +244,16 @@ int Tstorms2NetCDF::_processInputFile(const char *input_file_path)
   if (_loadScanTimes()) {
     return -1;
   }
+
+  // read storm file header
+
+  if (_sFile.ReadHeader()) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot read storm file header, input_path: " << _inputPath << endl;
+    return -1;
+  }
+
+#ifdef JUNK
   
   if (_params.input_mode == Params::REALTIME) {
     
@@ -288,31 +303,10 @@ int Tstorms2NetCDF::_processInputFile(const char *input_file_path)
 
   }
 
+#endif
+
   _closeInputFiles();
   
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// load up scan times from storm file
-
-int Tstorms2NetCDF::_loadScanTimes()
-
-{
-
-  _scanTimes.clear();
-  int nScans = _sFile.header().n_scans;
-  for (int i = 0; i < nScans; i++) {
-    // read in scan
-    if (_sFile.ReadScan(i)) {
-      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
-      cerr << "  " << _sFile.getErrStr() << endl;
-      return -1;
-    }
-    _scanTimes.push_back(_sFile.scan().time);
-  }
-
   return 0;
 
 }
@@ -321,32 +315,25 @@ int Tstorms2NetCDF::_loadScanTimes()
 // open track and storm files,
 // given the trigger path
 
-int Tstorms2NetCDF::_openInputFiles(const char *input_file_path)
-
+int Tstorms2NetCDF::_openInputFiles()
+  
 {
 
-  char track_file_path[MAX_PATH_LEN];
-  STRncopy(track_file_path, input_file_path, MAX_PATH_LEN);
-  if (_params.input_mode == Params::REALTIME) {
-    // In Realtime mode the latest data info file has
-    // the storm file in it instead of the track file so
-    // we need to change the 'sh' to a 'th'.
-    char *sh = strstr(track_file_path, "sh");
-    if (sh) {
-      *sh = 't';
-    }
-  }
+  // set paths by replacing the extensions
   
-  if (_tFile.OpenFiles("r", track_file_path)) {
+  Fpath inputPath(_inputPath);
+  _stormHeaderPath = inputPath.replace_extension(".sh5");
+  _stormDataPath = inputPath.replace_extension(".sd5");
+  _trackHeaderPath = inputPath.replace_extension(".th5");
+  _trackDataPath = inputPath.replace_extension(".td5");
+    
+  if (_tFile.OpenFiles("r", _trackHeaderPath.string().c_str())) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
     cerr << "  " << _tFile.getErrStr() << endl;
     return -1;
   }
-
-  Path stormPath(track_file_path);
-  stormPath.setFile(_tFile.header().storm_header_file_name);
-
-  if (_sFile.OpenFiles("r", stormPath.getPath().c_str())) {
+  
+  if (_sFile.OpenFiles("r", _stormHeaderPath.string().c_str())) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
     cerr << "  " << _sFile.getErrStr() << endl;
     return -1;
@@ -378,6 +365,29 @@ void Tstorms2NetCDF::_closeInputFiles()
 
   _sFile.CloseFiles();
   _tFile.CloseFiles();
+
+}
+
+//////////////////////////////////////////////////
+// load up scan times from storm file
+
+int Tstorms2NetCDF::_loadScanTimes()
+
+{
+
+  _scanTimes.clear();
+  int nScans = _sFile.header().n_scans;
+  for (int i = 0; i < nScans; i++) {
+    // read in scan
+    if (_sFile.ReadScan(i)) {
+      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
+      cerr << "  " << _sFile.getErrStr() << endl;
+      return -1;
+    }
+    _scanTimes.push_back(_sFile.scan().time);
+  }
+
+  return 0;
 
 }
 
