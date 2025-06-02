@@ -230,12 +230,31 @@ int Tstorms2NetCDF::Run ()
 int Tstorms2NetCDF::_processInputPath()
 
 {
-
+  
+  // set paths by replacing the extensions
+  
+  Fpath inputPath(_inputPath);
+  _stormHeaderPath = inputPath.replace_extension(".sh5");
+  _stormDataPath = inputPath.replace_extension(".sd5");
+  _trackHeaderPath = inputPath.replace_extension(".th5");
+  _trackDataPath = inputPath.replace_extension(".td5");
+  _ncFilePath = inputPath.replace_extension(".nc");
+    
   // open input files based on the provided path
 
   if (_openInputFiles()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
+    return -1;
+  }
+
+  // open netcdf file
+
+  string junk(_ncFilePath.string());
+  if (_ncFile.openNcFile(junk, NcxxFile::FileMode::write)) {
+    // if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::write)) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
     return -1;
   }
   
@@ -319,14 +338,6 @@ int Tstorms2NetCDF::_openInputFiles()
   
 {
 
-  // set paths by replacing the extensions
-  
-  Fpath inputPath(_inputPath);
-  _stormHeaderPath = inputPath.replace_extension(".sh5");
-  _stormDataPath = inputPath.replace_extension(".sd5");
-  _trackHeaderPath = inputPath.replace_extension(".th5");
-  _trackDataPath = inputPath.replace_extension(".td5");
-    
   if (_tFile.OpenFiles("r", _trackHeaderPath.string().c_str())) {
     cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
     cerr << "  " << _tFile.getErrStr() << endl;
@@ -413,6 +424,9 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
   }
   
   // read into the DsTitan object
+
+#ifdef JUNK
+  
   
   DsTitan titan;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -428,12 +442,10 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
 
   // write to NetCDF
 
-  if (_writeNetcdfFile(start_time, end_time, titan)) {
+  if (_writeNetcdfFile(start_time, end_time)) {
     return -1;
   }
 
-#ifdef JUNK
-  
   string xml;
   if (_params.xml_format == Params::TSTORMS_FORMAT) {
     _loadTstormsXml(start_time, end_time,
@@ -461,14 +473,13 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
 // write out netcdf file
 
 int Tstorms2NetCDF::_writeNetcdfFile(time_t start_time,
-                                     time_t end_time,
-                                     const DsTitan &titan)
+                                     time_t end_time)
 
 {
 
   // storm parameters
   
-  const storm_file_params_t &stormParams = titan.storm_params();
+  // const storm_file_params_t &stormParams = titan.storm_params();
   
   return 0;
   

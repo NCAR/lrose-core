@@ -41,8 +41,8 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_LIBS = \
 	-ltitan -lMdv -lSpdb -lrapformats \
 	-ldsserver -ldidss -leuclid -lrapmath \
-	-ltoolsa -ldataport -ltdrp -lRadx \
-	-lNcxx -lphysics -lpthread $(NETCDF4_LIBS) \
+	-ltoolsa -ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lpthread $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

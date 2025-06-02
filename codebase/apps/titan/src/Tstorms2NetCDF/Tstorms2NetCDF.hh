@@ -48,7 +48,8 @@
 #include <rapformats/tstorm_spdb.h>
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
-#include <titan/DsTitan.hh>
+#include <titan/TitanNcFile.hh>
+// #include <titan/DsTitan.hh>
 #include <filesystem>
 using Fpath = std::filesystem::path;
 
@@ -90,9 +91,11 @@ private:
   Fpath _stormDataPath;
   Fpath _trackHeaderPath;
   Fpath _trackDataPath;
+  Fpath _ncFilePath;
 
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
+  TitanNcFile _ncFile;
 
   vector<time_t> _scanTimes;
     
@@ -107,8 +110,7 @@ private:
 		   time_t expire_time);
   
   int _writeNetcdfFile(time_t start_time,
-                       time_t end_time,
-                       const DsTitan &titan);
+                       time_t end_time);
 
 #ifdef JUNK
 
