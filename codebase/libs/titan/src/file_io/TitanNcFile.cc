@@ -206,6 +206,12 @@ int TitanNcFile::openNcFile(const string &path,
 
   }
 
+  _fileTimeVar = _stormsGroup.getVar("file_time");
+  if (_fileTimeVar.isNull()) {
+    // _fileTimeVar = _stormsGroup.addVar("file_time");
+  }
+  
+
   return 0;
   
 }
@@ -684,7 +690,7 @@ void TitanNcFile::CloseStormFiles()
 void TitanNcFile::FlushStormFiles()
   
 {
-  
+
   fflush(_storm_header_file);
   fflush(_storm_data_file);
 
@@ -1160,102 +1166,103 @@ int TitanNcFile::SeekStormStartData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteStormHeader()
+int TitanNcFile::WriteStormHeader(const storm_file_header_t &storm_file_header)
      
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanNcFile::WriteStormHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
-
+  
+  storm_file_header_t header = storm_file_header;
+  
   // get data file size
 
-  fflush(_storm_data_file);
-  struct stat data_stat;
-  ta_stat(_storm_data_file_path.c_str(), &data_stat);
-  _storm_header.data_file_size = data_stat.st_size;
+  // fflush(_storm_data_file);
+  // struct stat data_stat;
+  // ta_stat(_storm_data_file_path.c_str(), &data_stat);
+  // header.data_file_size = data_stat.st_size;
   
   // copy file label
   
-  char file_label[R_FILE_LABEL_LEN];
-  MEM_zero(file_label);
-  strcpy(file_label, STORM_HEADER_FILE_TYPE);
-
-  _storm_header.major_rev = STORM_FILE_MAJOR_REV;
-  _storm_header.minor_rev = STORM_FILE_MINOR_REV;
+  // char file_label[R_FILE_LABEL_LEN];
+  // MEM_zero(file_label);
+  // strcpy(file_label, STORM_HEADER_FILE_TYPE);
+  
+  header.major_rev = STORM_FILE_MAJOR_REV;
+  header.minor_rev = STORM_FILE_MINOR_REV;
   
   // set file time to gmt
   
-  _storm_header.file_time = time(nullptr);
+  header.file_time = time(nullptr);
   
   // copy in the file names, checking whether the path has a
   // delimiter or not, and only copying after the delimiter
   
-  const char *hptr = strrchr(_storm_header_file_path.c_str(), '/');
+  // const char *hptr = strrchr(_storm_header_file_path.c_str(), '/');
 
-  if (hptr != nullptr) {
-    strncpy(_storm_header.header_file_name, (hptr + 1), R_LABEL_LEN - 1);
-  } else {
-    strncpy(_storm_header.header_file_name, _storm_header_file_path.c_str(), R_LABEL_LEN - 1);
-  }
+  // if (hptr != nullptr) {
+  //   strncpy(header.header_file_name, (hptr + 1), R_LABEL_LEN - 1);
+  // } else {
+  //   strncpy(header.header_file_name, _storm_header_file_path.c_str(), R_LABEL_LEN - 1);
+  // }
   
-  const char *dptr = strrchr(_storm_data_file_path.c_str(), '/');
-  if (dptr != nullptr) {
-    strncpy(_storm_header.data_file_name, (dptr + 1), R_LABEL_LEN - 1);
-  } else {
-    strncpy(_storm_header.data_file_name, _storm_data_file_path.c_str(), R_LABEL_LEN - 1);
-  }
+  // const char *dptr = strrchr(_storm_data_file_path.c_str(), '/');
+  // if (dptr != nullptr) {
+  //   strncpy(header.data_file_name, (dptr + 1), R_LABEL_LEN - 1);
+  // } else {
+  //   strncpy(header.data_file_name, _storm_data_file_path.c_str(), R_LABEL_LEN - 1);
+  // }
       
   // make local copies of the global file header and scan offsets
   
-  storm_file_header_t header = _storm_header;
-  int n_scans = _storm_header.n_scans;
+  int n_scans = header.n_scans;
 
-  TaArray<si32> offsetArray;
-  si32 *scan_offsets = offsetArray.alloc(n_scans);
-  memcpy (scan_offsets, _scan_offsets, n_scans * sizeof(si32));
+  // TaArray<si32> offsetArray;
+  // si32 *scan_offsets = offsetArray.alloc(n_scans);
+  // memcpy (scan_offsets, _scan_offsets, n_scans * sizeof(si32));
   
   // encode the header and scan offset array into network byte order
   
-  ustr_clear_to_end(header.header_file_name, R_LABEL_LEN);
-  ustr_clear_to_end(header.data_file_name, R_LABEL_LEN);
-  header.nbytes_char = STORM_FILE_HEADER_NBYTES_CHAR;
-  BE_from_array_32(&header,
-		   (sizeof(storm_file_header_t) - header.nbytes_char));
-  BE_from_array_32(scan_offsets, n_scans * sizeof(si32));
+  // ustr_clear_to_end(header.header_file_name, R_LABEL_LEN);
+  // ustr_clear_to_end(header.data_file_name, R_LABEL_LEN);
+  // header.nbytes_char = STORM_FILE_HEADER_NBYTES_CHAR;
+  // BE_from_array_32(&header,
+  //       	   (sizeof(storm_file_header_t) - header.nbytes_char));
+  // BE_from_array_32(scan_offsets, n_scans * sizeof(si32));
   
   // write label to file
   
-  fseek(_storm_header_file, 0, SEEK_SET);
-  ustr_clear_to_end(file_label, R_FILE_LABEL_LEN);
+  // fseek(_storm_header_file, 0, SEEK_SET);
+  // ustr_clear_to_end(file_label, R_FILE_LABEL_LEN);
 
-  if (ufwrite(file_label, sizeof(char), R_FILE_LABEL_LEN,
-	      _storm_header_file) != R_FILE_LABEL_LEN) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing label");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  // if (ufwrite(file_label, sizeof(char), R_FILE_LABEL_LEN,
+  //             _storm_header_file) != R_FILE_LABEL_LEN) {
+  //   int errNum = errno;
+  //   TaStr::AddStr(_errStr, "  ", "Writing label");
+  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //   return -1;
+  // }
   
-  // write header to file
+  // // write header to file
   
-  if (ufwrite(&header, sizeof(storm_file_header_t),
-	      1, _storm_header_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing header");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  // if (ufwrite(&header, sizeof(storm_file_header_t),
+  //             1, _storm_header_file) != 1) {
+  //   int errNum = errno;
+  //   TaStr::AddStr(_errStr, "  ", "Writing header");
+  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //   return -1;
+  // }
   
-  // write scan offsets to file
+  // // write scan offsets to file
   
-  if (ufwrite(scan_offsets, sizeof(si32),
-	      n_scans, _storm_header_file) != n_scans) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing scan offsets");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  // if (ufwrite(scan_offsets, sizeof(si32),
+  //             n_scans, _storm_header_file) != n_scans) {
+  //   int errNum = errno;
+  //   TaStr::AddStr(_errStr, "  ", "Writing scan offsets");
+  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //   return -1;
+  // }
   
   // flush the file buffer
   

@@ -169,6 +169,24 @@ public:
 
   int UnlockStormHeaderFile();
   
+  // write the storm_file_header_t structure to a storm file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteStormHeader(const storm_file_header_t &storm_header);
+  
+  // write the storm layer property and histogram data for a storm,
+  // at the end of the file.
+  // returns 0 on success, -1 on failure
+
+  int WriteProps(int storm_num);
+
+  // write scan header and global properties for a particular scan
+  // in a storm properties file.
+  // Performs the writes from the end of the file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteScan(int scan_num);
+     
   // read the storm file header
 
   int ReadStormHeader(bool clear_error_str = true);
@@ -203,24 +221,6 @@ public:
 
   int SeekStormStartData();
   
-  // write the storm_file_header_t structure to a storm file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteStormHeader();
-     
-  // write the storm layer property and histogram data for a storm,
-  // at the end of the file.
-  // returns 0 on success, -1 on failure
-
-  int WriteProps(int storm_num);
-
-  // write scan header and global properties for a particular scan
-  // in a storm properties file.
-  // Performs the writes from the end of the file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteScan(int scan_num);
-     
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
   // This applies to structs which were derived from lat-lon grids, for
@@ -440,6 +440,12 @@ protected:
   NcxxGroup _simpleTrackGroup;
   NcxxGroup _complexTrackGroup;
   NcxxGroup _trackEntryGroup;
+
+  // storm header variables
+
+  NcxxVar _fileTimeVar;
+  NcxxVar _startTimeVar;
+  NcxxVar _endTimeVar;
   
   // storm file details
   
