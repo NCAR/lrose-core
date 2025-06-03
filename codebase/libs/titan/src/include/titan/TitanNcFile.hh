@@ -169,24 +169,6 @@ public:
 
   int UnlockStormHeaderFile();
   
-  // write the storm_file_header_t structure to a storm file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteStormHeader(const storm_file_header_t &storm_header);
-  
-  // write the storm layer property and histogram data for a storm,
-  // at the end of the file.
-  // returns 0 on success, -1 on failure
-
-  int WriteProps(int storm_num);
-
-  // write scan header and global properties for a particular scan
-  // in a storm properties file.
-  // Performs the writes from the end of the file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteScan(int scan_num);
-     
   // read the storm file header
 
   int ReadStormHeader(bool clear_error_str = true);
@@ -221,6 +203,24 @@ public:
 
   int SeekStormStartData();
   
+  // write the storm_file_header_t structure to a storm file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteStormHeader(const storm_file_header_t &storm_file_header);
+     
+  // write the storm layer property and histogram data for a storm,
+  // at the end of the file.
+  // returns 0 on success, -1 on failure
+
+  int WriteProps(int storm_num);
+
+  // write scan header and global properties for a particular scan
+  // in a storm properties file.
+  // Performs the writes from the end of the file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteScan(int scan_num);
+     
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
   // This applies to structs which were derived from lat-lon grids, for
@@ -441,11 +441,9 @@ protected:
   NcxxGroup _complexTrackGroup;
   NcxxGroup _trackEntryGroup;
 
-  // storm header variables
+  // netcdf variables
 
   NcxxVar _fileTimeVar;
-  NcxxVar _startTimeVar;
-  NcxxVar _endTimeVar;
   
   // storm file details
   
@@ -554,8 +552,10 @@ private:
   TitanNcFile & operator = (const TitanNcFile & other);
 
 public:
+
+  // strings for netcdf
   
-  // strings for netcdf groups
+  // groups
 
   static constexpr const char* SCANS = "scans";
   static constexpr const char* STORMS = "storms";
@@ -568,8 +568,15 @@ public:
   static constexpr const char* SIMPLE = "simple";
   static constexpr const char* COMPLEX = "complex";
   static constexpr const char* ENTRY = "entry";
+
+  // top-level attributes
+
+  static constexpr const char* FILE_TIME = "file_time";
+  static constexpr const char* START_TIME = "start_time";
+  static constexpr const char* END_TIME = "end_time";
+  static constexpr const char* N_SCANS = "n_scans";
   
-  // strings for storm identification parameters
+  // storm identification parameters
 
   static constexpr const char* LOW_DBZ_THRESHOLD = "low_dbz_threshold";
   static constexpr const char* HIGH_DBZ_THRESHOLD = "high_dbz_threshold";
@@ -608,7 +615,147 @@ public:
   static constexpr const char* LOW_CONVECTIVITY_THRESHOLD = "low_convectivity_threshold";
   static constexpr const char* HIGH_CONVECTIVITY_THRESHOLD = "high_convectivity_threshold";
 
-  // strings for tracking parameters
+  // scan details
+
+  static constexpr const char* SCAN_MIN_Z = "scan_min_z";
+  static constexpr const char* SCAN_DELTA_Z = "scan_delta_z";
+  static constexpr const char* SCAN_NUM = "scan_num";
+  static constexpr const char* SCAN_NSTORMS = "scan_nstorms";
+  static constexpr const char* SCAN_TIME = "scan_time";
+  static constexpr const char* SCAN_GPROPS_OFFSET = "scan_gprops_offset";
+  static constexpr const char* SCAN_FIRST_OFFSET = "scan_first_offset";
+  static constexpr const char* SCAN_LAST_OFFSET = "scan_last_offset";
+  static constexpr const char* SCAN_HT_OF_FREEZING = "scan_ht_of_freezing";
+  
+  // grid and projection details
+  
+  static constexpr const char* GRID_NX = "grid_nx";
+  static constexpr const char* GRID_NY = "grid_ny";
+  static constexpr const char* GRID_NZ = "grid_nz";
+  static constexpr const char* GRID_MINX = "grid_minx";
+  static constexpr const char* GRID_MINY = "grid_miny";
+  static constexpr const char* GRID_MINZ = "grid_minz";
+  static constexpr const char* GRID_DX = "grid_dx";
+  static constexpr const char* GRID_DY = "grid_dy";
+  static constexpr const char* GRID_DZ = "grid_dz";
+  static constexpr const char* GRID_DZ_CONSTANT = "grid_dz_constant";
+  static constexpr const char* PROJ_TYPE = "proj_type";
+  static constexpr const char* PROJ_ORIGIN_LAT = "proj_origin_lat";
+  static constexpr const char* PROJ_ORIGIN_LON = "proj_origin_lon";
+  static constexpr const char* PROJ_LAT1 = "proj_lat1";
+  static constexpr const char* PROJ_LAT2 = "proj_lat2";
+  static constexpr const char* PROJ_TANGENT_LAT = "proj_tangent_lat";
+  static constexpr const char* PROJ_TANGENT_LON = "proj_tangent_lon";
+  static constexpr const char* PROJ_POLE_TYPE = "proj_pole_type";
+  static constexpr const char* PROJ_CENTRAL_SCALE = "proj_central_scale";
+  static constexpr const char* GRID_SENSOR_X = "grid_sensor_x";
+  static constexpr const char* GRID_SENSOR_Y = "grid_sensor_y";
+  static constexpr const char* GRID_SENSOR_Z = "grid_sensor_z";
+  static constexpr const char* GRID_SENSOR_LAT = "grid_sensor_lat";
+  static constexpr const char* GRID_SENSOR_LON = "grid_sensor_lon";
+  static constexpr const char* GRID_UNITSX = "grid_unitsx";
+  static constexpr const char* GRID_UNITSY = "grid_unitsy";
+  static constexpr const char* GRID_UNITSZ = "grid_unitsz";
+
+  // storm global properties
+  
+  static constexpr const char* VOL_CENTROID_X = "vol_centroid_x";
+  static constexpr const char* VOL_CENTROID_Y = "vol_centroid_y";
+  static constexpr const char* VOL_CENTROID_Z = "vol_centroid_z";
+  static constexpr const char* REFL_CENTROID_X = "refl_centroid_x";
+  static constexpr const char* REFL_CENTROID_Y = "refl_centroid_y";
+  static constexpr const char* REFL_CENTROID_Z = "refl_centroid_z";
+  static constexpr const char* TOP = "top";
+  static constexpr const char* BASE = "base";
+  static constexpr const char* VOLUME = "volume";
+  static constexpr const char* AREA_MEAN = "area_mean";
+  static constexpr const char* PRECIP_FLUX = "precip_flux";
+  static constexpr const char* MASS = "mass";
+  static constexpr const char* TILT_ANGLE = "tilt_angle";
+  static constexpr const char* TILT_DIRN = "tilt_dirn";
+  static constexpr const char* DBZ_MAX = "dbz_max";
+  static constexpr const char* DBZ_MEAN = "dbz_mean";
+  static constexpr const char* DBZ_MAX_GRADIENT = "dbz_max_gradient";
+  static constexpr const char* DBZ_MEAN_GRADIENT = "dbz_mean_gradient";
+  static constexpr const char* HT_OF_DBZ_MAX = "ht_of_dbz_max";
+  static constexpr const char* RAD_VEL_MEAN = "rad_vel_mean";
+  static constexpr const char* RAD_VEL_SD = "rad_vel_sd";
+  static constexpr const char* VORTICITY = "vorticity";
+  static constexpr const char* PRECIP_AREA = "precip_area";
+  static constexpr const char* PRECIP_AREA_CENTROID_X = "precip_area_centroid_x";
+  static constexpr const char* PRECIP_AREA_CENTROID_Y = "precip_area_centroid_y";
+  static constexpr const char* PRECIP_AREA_ORIENTATION = "precip_area_orientation";
+  static constexpr const char* PRECIP_AREA_MINOR_RADIUS = "precip_area_minor_radius";
+  static constexpr const char* PRECIP_AREA_MAJOR_RADIUS = "precip_area_major_radius";
+  static constexpr const char* PROJ_AREA = "proj_area";
+  static constexpr const char* PROJ_AREA_CENTROID_X = "proj_area_centroid_x";
+  static constexpr const char* PROJ_AREA_CENTROID_Y = "proj_area_centroid_y";
+  static constexpr const char* PROJ_AREA_ORIENTATION = "proj_area_orientation";
+  static constexpr const char* PROJ_AREA_MINOR_RADIUS = "proj_area_minor_radius";
+  static constexpr const char* PROJ_AREA_MAJOR_RADIUS = "proj_area_major_radius";
+  static constexpr const char* PROJ_AREA_POLYGON = "proj_area_polygon";
+  static constexpr const char* STORM_NUM = "storm_num";
+  static constexpr const char* N_LAYERS = "n_layers";
+  static constexpr const char* BASE_LAYER = "base_layer";
+  static constexpr const char* N_DBZ_INTERVALS = "n_dbz_intervals";
+  static constexpr const char* N_RUNS = "n_runs";
+  static constexpr const char* N_PROJ_RUNS = "n_proj_runs";
+  static constexpr const char* TOP_MISSING = "top_missing";
+  static constexpr const char* RANGE_LIMITED = "range_limited";
+  static constexpr const char* SECOND_TRIP = "second_trip";
+  static constexpr const char* HAIL_PRESENT = "hail_present";
+  static constexpr const char* ANOM_PROP = "anom_prop";
+  static constexpr const char* BOUNDING_MIN_IX = "bounding_min_ix";
+  static constexpr const char* BOUNDING_MIN_IY = "bounding_min_iy";
+  static constexpr const char* BOUNDING_MAX_IX = "bounding_max_ix";
+  static constexpr const char* BOUNDING_MAX_IY = "bounding_max_iy";
+  static constexpr const char* LAYER_PROPS_OFFSET = "layer_props_offset";
+  static constexpr const char* DBZ_HIST_OFFSET = "dbz_hist_offset";
+  static constexpr const char* RUNS_OFFSET = "runs_offset";
+  static constexpr const char* PROJ_RUNS_OFFSET = "proj_runs_offset";
+  static constexpr const char* VIL_FROM_MAXZ = "vil_from_maxz";
+  static constexpr const char* LTG_COUNT = "ltg_count";
+  static constexpr const char* CONVECTIVITY_MEDIAN = "convectivity_median";
+  static constexpr const char* HAIL_FOKRCATEGORY = "hail_FOKRcategory";
+  static constexpr const char* HAIL_WALDVOGELPROBABILITY = "hail_waldvogelProbability";
+  static constexpr const char* HAIL_HAILMASSALOFT = "hail_hailMassAloft";
+  static constexpr const char* HAIL_VIHM = "hail_vihm";
+  static constexpr const char* HAIL_POH = "hail_poh";
+  static constexpr const char* HAIL_SHI = "hail_shi";
+  static constexpr const char* HAIL_POSH = "hail_posh";
+  static constexpr const char* HAIL_MEHS = "hail_mehs";
+
+  // storm layer properties
+  
+  static constexpr const char* LAYER_VOL_CENTROID_X = "layer_vol_centroid_x";
+  static constexpr const char* LAYER_VOL_CENTROID_Y = "layer_vol_centroid_y";
+  static constexpr const char* LAYER_REFL_CENTROID_X = "layer_refl_centroid_x";
+  static constexpr const char* LAYER_REFL_CENTROID_Y = "layer_refl_centroid_y";
+  static constexpr const char* LAYER_AREA = "layer_area";
+  static constexpr const char* LAYER_DBZ_MAX = "layer_dbz_max";
+  static constexpr const char* LAYER_DBZ_MEAN = "layer_dbz_mean";
+  static constexpr const char* LAYER_MASS = "layer_mass";
+  static constexpr const char* LAYER_RAD_VEL_MEAN = "layer_rad_vel_mean";
+  static constexpr const char* LAYER_RAD_VEL_SD = "layer_rad_vel_sd";
+  static constexpr const char* LAYER_VORTICITY = "layer_vorticity";
+  static constexpr const char* LAYER_CONVECTIVITY_MEDIAN = "layer_convectivity_median";
+
+  // storm dbz histogram
+
+  static constexpr const char* HIST_PERCENT_VOLUME = "hist_percent_volume";
+  static constexpr const char* HIST_PERCENT_AREA = "hist_percent_area";
+
+  // storm runs
+  
+  static constexpr const char* RUN_IX = "run_ix";
+  static constexpr const char* RUN_IY = "run_iy";
+  static constexpr const char* RUN_IZ = "run_iz";
+  static constexpr const char* RUN_N = "run_n";
+
+  // tracking parameters
+
+  static constexpr const char* FILE_VALID = "file_valid";
+  static constexpr const char* MODIFY_CODE = "modify_code";
 
   static constexpr const char* FORECAST_WEIGHTS = "forecast_weights";  
   static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
@@ -629,8 +776,172 @@ public:
   static constexpr const char* MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
   static constexpr const char* SPATIAL_SMOOTHING = "spatial_smoothing";
 
+  static constexpr const char* N_SIMPLE_TRACKS = "n_simple_tracks";
+  static constexpr const char* N_COMPLEX_TRACKS = "n_complex_tracks";
+
+  static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
+  static constexpr const char* TRACKING_N_SCANS = "tracking_n_scans";
+  static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
+  static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
+  static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
+  static constexpr const char* TRACK_MAX_PARENTS = "track_max_parents";
+  static constexpr const char* TRACK_MAX_CHILDREN = "track_max_children";
+  static constexpr const char* TRACK_MAX_NWEIGHTS_FORECAST = "track_max_nweights_forecast";
+
+  // verification contingency stats
+  
+  static constexpr const char* ELLIPSE_VERIFY_N_SUCCESS = "ellipse_verify_n_success";
+  static constexpr const char* ELLIPSE_VERIFY_N_FAILURE = "ellipse_verify_n_failure";
+  static constexpr const char* ELLIPSE_VERIFY_N_FALSE_ALARM = "ellipse_verify_n_false_alarm";
+  static constexpr const char* POLYGON_VERIFY_N_SUCCESS = "polygon_verify_n_success";
+  static constexpr const char* POLYGON_VERIFY_N_FAILURE = "polygon_verify_n_failure";
+  static constexpr const char* POLYGON_VERIFY_N_FALSE_ALARM = "polygon_verify_n_false_alarm";
+
+  // forecast bias
+  
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_X = "forecast_bias_proj_area_centroid_x";
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_Y = "forecast_bias_proj_area_centroid_y";
+  static constexpr const char* FORECAST_BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
+  static constexpr const char* FORECAST_BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
+  static constexpr const char* FORECAST_BIAS_TOP = "forecast_bias_top";
+  static constexpr const char* FORECAST_BIAS_DBZ_MAX = "forecast_bias_dbz_max";
+  static constexpr const char* FORECAST_BIAS_VOLUME = "forecast_bias_volume";
+  static constexpr const char* FORECAST_BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
+  static constexpr const char* FORECAST_BIAS_MASS = "forecast_bias_mass";
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA = "forecast_bias_proj_area";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_bias_smoothed_proj_area_centroid_x";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_bias_smoothed_proj_area_centroid_y";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
+
+  // forecast rmse
+  
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_X = "forecast_rmse_proj_area_centroid_x";
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_Y = "forecast_rmse_proj_area_centroid_y";
+  static constexpr const char* FORECAST_RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
+  static constexpr const char* FORECAST_RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
+  static constexpr const char* FORECAST_RMSE_TOP = "forecast_rmse_top";
+  static constexpr const char* FORECAST_RMSE_DBZ_MAX = "forecast_rmse_dbz_max";
+  static constexpr const char* FORECAST_RMSE_VOLUME = "forecast_rmse_volume";
+  static constexpr const char* FORECAST_RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
+  static constexpr const char* FORECAST_RMSE_MASS = "forecast_rmse_mass";
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA = "forecast_rmse_proj_area";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_rmse_smoothed_proj_area_centroid_x";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_rmse_smoothed_proj_area_centroid_y";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
+
+  // track verification
+  
+  static constexpr const char* VERIFICATION_PERFORMED = "verification_performed";
+  static constexpr const char* VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
+  static constexpr const char* VERIFY_END_TIME = "verify_end_time";
+  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN = "verify_forecast_lead_time_margin";
+  static constexpr const char* VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
+  static constexpr const char* VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
+  static constexpr const char* VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
+
+  // track forecast properties
+  
+  static constexpr const char* FORECAST_PROJ_AREA_CENTROID_X = "forecast_proj_area_centroid_x";
+  static constexpr const char* FORECAST_PROJ_AREA_CENTROID_Y = "forecast_proj_area_centroid_y";
+  static constexpr const char* FORECAST_VOL_CENTROID_Z = "forecast_vol_centroid_z";
+  static constexpr const char* FORECAST_REFL_CENTROID_Z = "forecast_refl_centroid_z";
+  static constexpr const char* FORECAST_TOP = "forecast_top";
+  static constexpr const char* FORECAST_DBZ_MAX = "forecast_dbz_max";
+  static constexpr const char* FORECAST_VOLUME = "forecast_volume";
+  static constexpr const char* FORECAST_PRECIP_FLUX = "forecast_precip_flux";
+  static constexpr const char* FORECAST_MASS = "forecast_mass";
+  static constexpr const char* FORECAST_PROJ_AREA = "forecast_proj_area";
+  static constexpr const char* FORECAST_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_smoothed_proj_area_centroid_x";
+  static constexpr const char* FORECAST_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_smoothed_proj_area_centroid_y";
+  static constexpr const char* FORECAST_SMOOTHED_SPEED = "forecast_smoothed_speed";
+  static constexpr const char* FORECAST_SMOOTHED_DIRECTION = "forecast_smoothed_direction";
+
+  // simple tracks
+
+  static constexpr const char* SIMPLE_TRACK_NUM = "simple_track_num";
+  static constexpr const char* LAST_DESCENDANT_SIMPLE_TRACK_NUM = "last_descendant_simple_track_num";
+  static constexpr const char* SIMPLE_START_SCAN = "simple_start_scan";
+  static constexpr const char* SIMPLE_END_SCAN = "simple_end_scan";
+  static constexpr const char* SIMPLE_LAST_DESCENDANT_END_SCAN = "simple_last_descendant_end_scan";
+  static constexpr const char* SIMPLE_SCAN_ORIGIN = "simple_scan_origin";
+  static constexpr const char* SIMPLE_START_TIME = "simple_start_time";
+  static constexpr const char* SIMPLE_END_TIME = "simple_end_time";
+  static constexpr const char* SIMPLE_LAST_DESCENDANT_END_TIME = "simple_last_descendant_end_time";
+  static constexpr const char* SIMPLE_TIME_ORIGIN = "simple_time_origin";
+  static constexpr const char* SIMPLE_HISTORY_IN_SCANS = "simple_history_in_scans";
+  static constexpr const char* SIMPLE_HISTORY_IN_SECS = "simple_history_in_secs";
+  static constexpr const char* SIMPLE_DURATION_IN_SCANS = "simple_duration_in_scans";
+  static constexpr const char* SIMPLE_DURATION_IN_SECS = "simple_duration_in_secs";
+  static constexpr const char* SIMPLE_NPARENTS = "simple_nparents";
+  static constexpr const char* SIMPLE_NCHILDREN = "simple_nchildren";
+  static constexpr const char* SIMPLE_PARENT = "simple_parent";
+  static constexpr const char* SIMPLE_CHILD = "simple_child";
+  static constexpr const char* COMPLEX_TRACK_NUM_FOR_SIMPLE = "complex_track_num_for_simple";
+  static constexpr const char* SIMPLE_FIRST_ENTRY_OFFSET = "simple_first_entry_offset";
+  
+  // complex tracks
+
+  static constexpr const char* VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
+  static constexpr const char* VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
+  static constexpr const char* COMPLEX_TRACK_NUM = "complex_track_num";
+  static constexpr const char* COMPLEX_START_SCAN = "complex_start_scan";
+  static constexpr const char* COMPLEX_END_SCAN = "complex_end_scan";
+  static constexpr const char* COMPLEX_DURATION_IN_SCANS = "complex_duration_in_scans";
+  static constexpr const char* COMPLEX_DURATION_IN_SECS = "complex_duration_in_secs";
+  static constexpr const char* COMPLEX_START_TIME = "complex_start_time";
+  static constexpr const char* COMPLEX_END_TIME = "complex_end_time";
+  static constexpr const char* COMPLEX_N_SIMPLE_TRACKS = "complex_n_simple_tracks";
+  static constexpr const char* COMPLEX_N_TOP_MISSING = "complex_n_top_missing";
+  static constexpr const char* COMPLEX_N_RANGE_LIMITED = "complex_n_range_limited";
+  static constexpr const char* COMPLEX_START_MISSING = "complex_start_missing";
+  static constexpr const char* COMPLEX_END_MISSING = "complex_end_missing";
+  static constexpr const char* COMPLEX_N_SAMPLES_FOR_FORECAST_STATS = "complex_n_samples_for_forecast_stats";
+  
+  // verification contingency stats
+  
+  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_SUCCESS = "complex_ellipse_verify_n_success";
+  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_FAILURE = "complex_ellipse_verify_n_failure";
+  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_FALSE_ALARM = "complex_ellipse_verify_n_false_alarm";
+  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_SUCCESS = "complex_polygon_verify_n_success";
+  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_FAILURE = "complex_polygon_verify_n_failure";
+  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_FALSE_ALARM = "complex_polygon_verify_n_false_alarm";
+
+  // forecast bias
+  
+  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA_CENTROID_X = "complex_forecast_bias_proj_area_centroid_x";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA_CENTROID_Y = "complex_forecast_bias_proj_area_centroid_y";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_VOL_CENTROID_Z = "complex_forecast_bias_vol_centroid_z";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_REFL_CENTROID_Z = "complex_forecast_bias_refl_centroid_z";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_TOP = "complex_forecast_bias_top";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_DBZ_MAX = "complex_forecast_bias_dbz_max";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_VOLUME = "complex_forecast_bias_volume";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_PRECIP_FLUX = "complex_forecast_bias_precip_flux";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_MASS = "complex_forecast_bias_mass";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA = "complex_forecast_bias_proj_area";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "complex_forecast_bias_smoothed_proj_area_centroid_x";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "complex_forecast_bias_smoothed_proj_area_centroid_y";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_SPEED = "complex_forecast_bias_smoothed_speed";
+  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_DIRECTION = "complex_forecast_bias_smoothed_direction";
+
+  // forecast rmse
+  
+  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA_CENTROID_X = "complex_forecast_rmse_proj_area_centroid_x";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA_CENTROID_Y = "complex_forecast_rmse_proj_area_centroid_y";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_VOL_CENTROID_Z = "complex_forecast_rmse_vol_centroid_z";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_REFL_CENTROID_Z = "complex_forecast_rmse_refl_centroid_z";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_TOP = "complex_forecast_rmse_top";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_DBZ_MAX = "complex_forecast_rmse_dbz_max";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_VOLUME = "complex_forecast_rmse_volume";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_PRECIP_FLUX = "complex_forecast_rmse_precip_flux";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_MASS = "complex_forecast_rmse_mass";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA = "complex_forecast_rmse_proj_area";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "complex_forecast_rmse_smoothed_proj_area_centroid_x";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "complex_forecast_rmse_smoothed_proj_area_centroid_y";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_SPEED = "complex_forecast_rmse_smoothed_speed";
+  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_DIRECTION = "complex_forecast_rmse_smoothed_direction";
+  
 };
 
 #endif
-
-
