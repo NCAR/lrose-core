@@ -142,6 +142,13 @@ public:
   void closeNcFile();
      
   /////////////////////////////////////////////////////
+  // get or add scalar variable
+  
+  NcxxVar _getScalarVar(const std::string& name,
+                        const NcxxType& ncType,
+                        NcxxGroup &group);
+  
+  /////////////////////////////////////////////////////
   // Storms
   
   // Open the storm header and data files
@@ -414,6 +421,7 @@ protected:
   NcxxFile _ncFile;
   string _tmpPath;
 
+  ////////////////////////////////////////////////////////
   // dimensions
   
   NcxxDim _scans;
@@ -421,6 +429,9 @@ protected:
   NcxxDim _simpleTracks;
   NcxxDim _complexTracks;
 
+  ////////////////////////////////////////////////////////
+  // groups
+  
   // top level groups
   
   NcxxGroup _scansGroup;
@@ -441,9 +452,380 @@ protected:
   NcxxGroup _complexTrackGroup;
   NcxxGroup _trackEntryGroup;
 
+  ////////////////////////////////////////////////////////
   // netcdf variables
 
-  NcxxVar _fileTimeVar;
+  NcxxVar _file_time_var;
+  NcxxVar _start_time_var;
+  NcxxVar _end_time_var;
+  NcxxVar _n_scans_var;
+  
+  // storm identification parameters
+
+  NcxxVar _low_dbz_threshold_var;
+  NcxxVar _high_dbz_threshold_var;
+  NcxxVar _dbz_hist_interval_var;
+  NcxxVar _hail_dbz_threshold_var;
+  NcxxVar _base_threshold_var;
+  NcxxVar _top_threshold_var;
+  NcxxVar _min_storm_size_var;
+  NcxxVar _max_storm_size_var;
+  NcxxVar _morphology_erosion_threshold_var;
+  NcxxVar _morphology_refl_divisor_var;
+  NcxxVar _min_radar_tops_var;
+  NcxxVar _tops_edge_margin_var;
+  NcxxVar _z_p_coeff_var;
+  NcxxVar _z_p_exponent_var;
+  NcxxVar _z_m_coeff_var;
+  NcxxVar _z_m_exponent_var;
+  NcxxVar _sectrip_vert_aspect_var;
+  NcxxVar _sectrip_horiz_aspect_var;
+  NcxxVar _sectrip_orientation_error_var;
+  NcxxVar _poly_start_az_var;
+  NcxxVar _poly_delta_az_var;
+  NcxxVar _check_morphology_var;
+  NcxxVar _check_tops_var;
+  NcxxVar _vel_available_var;
+  NcxxVar _n_poly_sides_var;
+  NcxxVar _ltg_count_time_var;
+  NcxxVar _ltg_count_margin_km_var;
+  NcxxVar _hail_z_m_coeff_var;
+  NcxxVar _hail_z_m_exponent_var;
+  NcxxVar _hail_mass_dbz_threshold_var;
+  NcxxVar _gprops_union_type_var;
+  NcxxVar _tops_dbz_threshold_var;
+  NcxxVar _precip_computation_mode_var;
+  NcxxVar _precip_plane_ht_var;
+  NcxxVar _low_convectivity_threshold_var;
+  NcxxVar _high_convectivity_threshold_var;
+
+  // scan details
+
+  NcxxVar _scan_min_z_var;
+  NcxxVar _scan_delta_z_var;
+  NcxxVar _scan_num_var;
+  NcxxVar _scan_nstorms_var;
+  NcxxVar _scan_time_var;
+  NcxxVar _scan_gprops_offset_var;
+  NcxxVar _scan_first_offset_var;
+  NcxxVar _scan_last_offset_var;
+  NcxxVar _scan_ht_of_freezing_var;
+  
+  // grid and projection details
+  
+  NcxxVar _grid_nx_var;
+  NcxxVar _grid_ny_var;
+  NcxxVar _grid_nz_var;
+  NcxxVar _grid_minx_var;
+  NcxxVar _grid_miny_var;
+  NcxxVar _grid_minz_var;
+  NcxxVar _grid_dx_var;
+  NcxxVar _grid_dy_var;
+  NcxxVar _grid_dz_var;
+  NcxxVar _grid_dz_constant_var;
+  NcxxVar _grid_sensor_x_var;
+  NcxxVar _grid_sensor_y_var;
+  NcxxVar _grid_sensor_z_var;
+  NcxxVar _grid_sensor_lat_var;
+  NcxxVar _grid_sensor_lon_var;
+  NcxxVar _grid_unitsx_var;
+  NcxxVar _grid_unitsy_var;
+  NcxxVar _grid_unitsz_var;
+
+  NcxxVar _proj_type_var;
+  NcxxVar _proj_origin_lat_var;
+  NcxxVar _proj_origin_lon_var;
+  NcxxVar _proj_lat1_var;
+  NcxxVar _proj_lat2_var;
+  NcxxVar _proj_tangent_lat_var;
+  NcxxVar _proj_tangent_lon_var;
+  NcxxVar _proj_pole_type_var;
+  NcxxVar _proj_central_scale_var;
+
+  // storm global properties
+  
+  NcxxVar _vol_centroid_x_var;
+  NcxxVar _vol_centroid_y_var;
+  NcxxVar _vol_centroid_z_var;
+  NcxxVar _refl_centroid_x_var;
+  NcxxVar _refl_centroid_y_var;
+  NcxxVar _refl_centroid_z_var;
+  NcxxVar _top_var;
+  NcxxVar _base_var;
+  NcxxVar _volume_var;
+  NcxxVar _area_mean_var;
+  NcxxVar _precip_flux_var;
+  NcxxVar _mass_var;
+  NcxxVar _tilt_angle_var;
+  NcxxVar _tilt_dirn_var;
+  NcxxVar _dbz_max_var;
+  NcxxVar _dbz_mean_var;
+  NcxxVar _dbz_max_gradient_var;
+  NcxxVar _dbz_mean_gradient_var;
+  NcxxVar _ht_of_dbz_max_var;
+  NcxxVar _rad_vel_mean_var;
+  NcxxVar _rad_vel_sd_var;
+  NcxxVar _vorticity_var;
+  NcxxVar _precip_area_var;
+  NcxxVar _precip_area_centroid_x_var;
+  NcxxVar _precip_area_centroid_y_var;
+  NcxxVar _precip_area_orientation_var;
+  NcxxVar _precip_area_minor_radius_var;
+  NcxxVar _precip_area_major_radius_var;
+  NcxxVar _proj_area_var;
+  NcxxVar _proj_area_centroid_x_var;
+  NcxxVar _proj_area_centroid_y_var;
+  NcxxVar _proj_area_orientation_var;
+  NcxxVar _proj_area_minor_radius_var;
+  NcxxVar _proj_area_major_radius_var;
+  NcxxVar _proj_area_polygon_var;
+  NcxxVar _storm_num_var;
+  NcxxVar _n_layers_var;
+  NcxxVar _base_layer_var;
+  NcxxVar _n_dbz_intervals_var;
+  NcxxVar _n_runs_var;
+  NcxxVar _n_proj_runs_var;
+  NcxxVar _top_missing_var;
+  NcxxVar _range_limited_var;
+  NcxxVar _second_trip_var;
+  NcxxVar _hail_present_var;
+  NcxxVar _anom_prop_var;
+  NcxxVar _bounding_min_ix_var;
+  NcxxVar _bounding_min_iy_var;
+  NcxxVar _bounding_max_ix_var;
+  NcxxVar _bounding_max_iy_var;
+  NcxxVar _layer_props_offset_var;
+  NcxxVar _dbz_hist_offset_var;
+  NcxxVar _runs_offset_var;
+  NcxxVar _proj_runs_offset_var;
+  NcxxVar _vil_from_maxz_var;
+  NcxxVar _ltg_count_var;
+  NcxxVar _convectivity_median_var;
+  NcxxVar _hail_FOKRcategory_var;
+  NcxxVar _hail_waldvogelProbability_var;
+  NcxxVar _hail_hailMassAloft_var;
+  NcxxVar _hail_vihm_var;
+  NcxxVar _hail_poh_var;
+  NcxxVar _hail_shi_var;
+  NcxxVar _hail_posh_var;
+  NcxxVar _hail_mehs_var;
+
+  // storm layer properties
+  
+  NcxxVar _layer_vol_centroid_x_var;
+  NcxxVar _layer_vol_centroid_y_var;
+  NcxxVar _layer_refl_centroid_x_var;
+  NcxxVar _layer_refl_centroid_y_var;
+  NcxxVar _layer_area_var;
+  NcxxVar _layer_dbz_max_var;
+  NcxxVar _layer_dbz_mean_var;
+  NcxxVar _layer_mass_var;
+  NcxxVar _layer_rad_vel_mean_var;
+  NcxxVar _layer_rad_vel_sd_var;
+  NcxxVar _layer_vorticity_var;
+  NcxxVar _layer_convectivity_median_var;
+
+  // storm dbz histogram
+
+  NcxxVar _hist_percent_volume_var;
+  NcxxVar _hist_percent_area_var;
+
+  // storm runs
+  
+  NcxxVar _run_ix_var;
+  NcxxVar _run_iy_var;
+  NcxxVar _run_iz_var;
+  NcxxVar _run_n_var;
+
+  // tracking parameters
+
+  NcxxVar _tracking_valid_var;
+  NcxxVar _tracking_modify_code_var;
+  
+  NcxxVar _tracking_forecast_weights_var;
+  NcxxVar _tracking_weight_distance_var;
+  NcxxVar _tracking_weight_delta_cube_root_volume_var;
+  NcxxVar _tracking_merge_split_search_ratio_var;
+  NcxxVar _tracking_max_speed_var;
+  NcxxVar _tracking_max_speed_for_valid_forecast_var;
+  NcxxVar _tracking_parabolic_growth_period_var;
+  NcxxVar _tracking_smoothing_radius_var;
+  NcxxVar _tracking_min_fraction_overlap_var;
+  NcxxVar _tracking_min_sum_fraction_overlap_var;
+  NcxxVar _tracking_scale_forecasts_by_history_var;
+  NcxxVar _tracking_use_runs_for_overlaps_var;
+  NcxxVar _tracking_grid_type_var;
+  NcxxVar _tracking_nweights_forecast_var;
+  NcxxVar _tracking_forecast_type_var;
+  NcxxVar _tracking_max_delta_time_var;
+  NcxxVar _tracking_min_history_for_valid_forecast_var;
+  NcxxVar _tracking_spatial_smoothing_var;
+
+  NcxxVar _n_simple_tracks_var;
+  NcxxVar _n_complex_tracks_var;
+
+  NcxxVar _tracking_n_samples_for_forecast_stats_var;
+  NcxxVar _tracking_n_scans_var;
+  NcxxVar _tracking_last_scan_num_var;
+  NcxxVar _max_simple_track_num_var;
+  NcxxVar _max_complex_track_num_var;
+  NcxxVar _tracking_max_parents_var;
+  NcxxVar _tracking_max_children_var;
+  NcxxVar _tracking_max_nweights_forecast_var;
+
+  // verification contingency stats
+  
+  NcxxVar _ellipse_verify_n_success_var;
+  NcxxVar _ellipse_verify_n_failure_var;
+  NcxxVar _ellipse_verify_n_false_alarm_var;
+  NcxxVar _polygon_verify_n_success_var;
+  NcxxVar _polygon_verify_n_failure_var;
+  NcxxVar _polygon_verify_n_false_alarm_var;
+
+  // track forecast properties
+  
+  NcxxVar _forecast_proj_area_centroid_x_var;
+  NcxxVar _forecast_proj_area_centroid_y_var;
+  NcxxVar _forecast_vol_centroid_z_var;
+  NcxxVar _forecast_refl_centroid_z_var;
+  NcxxVar _forecast_top_var;
+  NcxxVar _forecast_dbz_max_var;
+  NcxxVar _forecast_volume_var;
+  NcxxVar _forecast_precip_flux_var;
+  NcxxVar _forecast_mass_var;
+  NcxxVar _forecast_proj_area_var;
+  NcxxVar _forecast_smoothed_proj_area_centroid_x_var;
+  NcxxVar _forecast_smoothed_proj_area_centroid_y_var;
+  NcxxVar _forecast_smoothed_speed_var;
+  NcxxVar _forecast_smoothed_direction_var;
+
+  // simple tracks
+
+  NcxxVar _simple_track_num_var;
+  NcxxVar _last_descendant_simple_track_num_var;
+  NcxxVar _simple_start_scan_var;
+  NcxxVar _simple_end_scan_var;
+  NcxxVar _simple_last_descendant_end_scan_var;
+  NcxxVar _simple_scan_origin_var;
+  NcxxVar _simple_start_time_var;
+  NcxxVar _simple_end_time_var;
+  NcxxVar _simple_last_descendant_end_time_var;
+  NcxxVar _simple_time_origin_var;
+  NcxxVar _simple_history_in_scans_var;
+  NcxxVar _simple_history_in_secs_var;
+  NcxxVar _simple_duration_in_scans_var;
+  NcxxVar _simple_duration_in_secs_var;
+  NcxxVar _simple_nparents_var;
+  NcxxVar _simple_nchildren_var;
+  NcxxVar _simple_parent_var;
+  NcxxVar _simple_child_var;
+  NcxxVar _complex_track_num_for_simple_var;
+  NcxxVar _simple_first_entry_offset_var;
+  
+  // complex tracks
+
+  NcxxVar _volume_at_start_of_sampling_var;
+  NcxxVar _volume_at_end_of_sampling_var;
+  NcxxVar _complex_track_num_var;
+  NcxxVar _complex_start_scan_var;
+  NcxxVar _complex_end_scan_var;
+  NcxxVar _complex_duration_in_scans_var;
+  NcxxVar _complex_duration_in_secs_var;
+  NcxxVar _complex_start_time_var;
+  NcxxVar _complex_end_time_var;
+  NcxxVar _complex_n_simple_tracks_var;
+  NcxxVar _complex_n_top_missing_var;
+  NcxxVar _complex_n_range_limited_var;
+  NcxxVar _complex_start_missing_var;
+  NcxxVar _complex_end_missing_var;
+  NcxxVar _complex_n_samples_for_forecast_stats_var;
+  
+  // forecast bias
+  
+  NcxxVar _forecast_bias_proj_area_centroid_x_var;
+  NcxxVar _forecast_bias_proj_area_centroid_y_var;
+  NcxxVar _forecast_bias_vol_centroid_z_var;
+  NcxxVar _forecast_bias_refl_centroid_z_var;
+  NcxxVar _forecast_bias_top_var;
+  NcxxVar _forecast_bias_dbz_max_var;
+  NcxxVar _forecast_bias_volume_var;
+  NcxxVar _forecast_bias_precip_flux_var;
+  NcxxVar _forecast_bias_mass_var;
+  NcxxVar _forecast_bias_proj_area_var;
+  NcxxVar _forecast_bias_smoothed_proj_area_centroid_x_var;
+  NcxxVar _forecast_bias_smoothed_proj_area_centroid_y_var;
+  NcxxVar _forecast_bias_smoothed_speed_var;
+  NcxxVar _forecast_bias_smoothed_direction_var;
+
+  // forecast rmse
+  
+  NcxxVar _forecast_rmse_proj_area_centroid_x_var;
+  NcxxVar _forecast_rmse_proj_area_centroid_y_var;
+  NcxxVar _forecast_rmse_vol_centroid_z_var;
+  NcxxVar _forecast_rmse_refl_centroid_z_var;
+  NcxxVar _forecast_rmse_top_var;
+  NcxxVar _forecast_rmse_dbz_max_var;
+  NcxxVar _forecast_rmse_volume_var;
+  NcxxVar _forecast_rmse_precip_flux_var;
+  NcxxVar _forecast_rmse_mass_var;
+  NcxxVar _forecast_rmse_proj_area_var;
+  NcxxVar _forecast_rmse_smoothed_proj_area_centroid_x_var;
+  NcxxVar _forecast_rmse_smoothed_proj_area_centroid_y_var;
+  NcxxVar _forecast_rmse_smoothed_speed_var;
+  NcxxVar _forecast_rmse_smoothed_direction_var;
+
+  // track verification
+  
+  NcxxVar _verification_performed_var;
+  NcxxVar _verify_forecast_lead_time_var;
+  NcxxVar _verify_end_time_var;
+  NcxxVar _verify_forecast_lead_time_margin_var;
+  NcxxVar _verify_forecast_min_history_var;
+  NcxxVar _verify_before_forecast_time_var;
+  NcxxVar _verify_after_track_dies_var;
+
+  // verification contingency stats
+  
+  NcxxVar _complex_ellipse_verify_n_success_var;
+  NcxxVar _complex_ellipse_verify_n_failure_var;
+  NcxxVar _complex_ellipse_verify_n_false_alarm_var;
+  NcxxVar _complex_polygon_verify_n_success_var;
+  NcxxVar _complex_polygon_verify_n_failure_var;
+  NcxxVar _complex_polygon_verify_n_false_alarm_var;
+
+  // forecast bias
+  
+  NcxxVar _complex_forecast_bias_proj_area_centroid_x_var;
+  NcxxVar _complex_forecast_bias_proj_area_centroid_y_var;
+  NcxxVar _complex_forecast_bias_vol_centroid_z_var;
+  NcxxVar _complex_forecast_bias_refl_centroid_z_var;
+  NcxxVar _complex_forecast_bias_top_var;
+  NcxxVar _complex_forecast_bias_dbz_max_var;
+  NcxxVar _complex_forecast_bias_volume_var;
+  NcxxVar _complex_forecast_bias_precip_flux_var;
+  NcxxVar _complex_forecast_bias_mass_var;
+  NcxxVar _complex_forecast_bias_proj_area_var;
+  NcxxVar _complex_forecast_bias_smoothed_proj_area_centroid_x_var;
+  NcxxVar _complex_forecast_bias_smoothed_proj_area_centroid_y_var;
+  NcxxVar _complex_forecast_bias_smoothed_speed_var;
+  NcxxVar _complex_forecast_bias_smoothed_direction_var;
+
+  // forecast rmse
+  
+  NcxxVar _complex_forecast_rmse_proj_area_centroid_x_var;
+  NcxxVar _complex_forecast_rmse_proj_area_centroid_y_var;
+  NcxxVar _complex_forecast_rmse_vol_centroid_z_var;
+  NcxxVar _complex_forecast_rmse_refl_centroid_z_var;
+  NcxxVar _complex_forecast_rmse_top_var;
+  NcxxVar _complex_forecast_rmse_dbz_max_var;
+  NcxxVar _complex_forecast_rmse_volume_var;
+  NcxxVar _complex_forecast_rmse_precip_flux_var;
+  NcxxVar _complex_forecast_rmse_mass_var;
+  NcxxVar _complex_forecast_rmse_proj_area_var;
+  NcxxVar _complex_forecast_rmse_smoothed_proj_area_centroid_x_var;
+  NcxxVar _complex_forecast_rmse_smoothed_proj_area_centroid_y_var;
+  NcxxVar _complex_forecast_rmse_smoothed_speed_var;
+  NcxxVar _complex_forecast_rmse_smoothed_direction_var;
   
   // storm file details
   
@@ -639,6 +1021,15 @@ public:
   static constexpr const char* GRID_DY = "grid_dy";
   static constexpr const char* GRID_DZ = "grid_dz";
   static constexpr const char* GRID_DZ_CONSTANT = "grid_dz_constant";
+  static constexpr const char* GRID_SENSOR_X = "grid_sensor_x";
+  static constexpr const char* GRID_SENSOR_Y = "grid_sensor_y";
+  static constexpr const char* GRID_SENSOR_Z = "grid_sensor_z";
+  static constexpr const char* GRID_SENSOR_LAT = "grid_sensor_lat";
+  static constexpr const char* GRID_SENSOR_LON = "grid_sensor_lon";
+  static constexpr const char* GRID_UNITSX = "grid_unitsx";
+  static constexpr const char* GRID_UNITSY = "grid_unitsy";
+  static constexpr const char* GRID_UNITSZ = "grid_unitsz";
+
   static constexpr const char* PROJ_TYPE = "proj_type";
   static constexpr const char* PROJ_ORIGIN_LAT = "proj_origin_lat";
   static constexpr const char* PROJ_ORIGIN_LON = "proj_origin_lon";
@@ -648,14 +1039,6 @@ public:
   static constexpr const char* PROJ_TANGENT_LON = "proj_tangent_lon";
   static constexpr const char* PROJ_POLE_TYPE = "proj_pole_type";
   static constexpr const char* PROJ_CENTRAL_SCALE = "proj_central_scale";
-  static constexpr const char* GRID_SENSOR_X = "grid_sensor_x";
-  static constexpr const char* GRID_SENSOR_Y = "grid_sensor_y";
-  static constexpr const char* GRID_SENSOR_Z = "grid_sensor_z";
-  static constexpr const char* GRID_SENSOR_LAT = "grid_sensor_lat";
-  static constexpr const char* GRID_SENSOR_LON = "grid_sensor_lon";
-  static constexpr const char* GRID_UNITSX = "grid_unitsx";
-  static constexpr const char* GRID_UNITSY = "grid_unitsy";
-  static constexpr const char* GRID_UNITSZ = "grid_unitsz";
 
   // storm global properties
   
@@ -754,39 +1137,39 @@ public:
 
   // tracking parameters
 
-  static constexpr const char* FILE_VALID = "file_valid";
-  static constexpr const char* MODIFY_CODE = "modify_code";
-
-  static constexpr const char* FORECAST_WEIGHTS = "forecast_weights";  
-  static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
-  static constexpr const char* WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
-  static constexpr const char* MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
-  static constexpr const char* MAX_TRACKING_SPEED = "max_tracking_speed";
-  static constexpr const char* MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
-  static constexpr const char* PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
-  static constexpr const char* SMOOTHING_RADIUS = "smoothing_radius";
-  static constexpr const char* MIN_FRACTION_OVERLAP = "min_fraction_overlap";
-  static constexpr const char* MIN_SUM_FRACTION_OVERLAP = "min_sum_fraction_overlap";
-  static constexpr const char* SCALE_FORECASTS_BY_HISTORY = "scale_forecasts_by_history";
-  static constexpr const char* USE_RUNS_FOR_OVERLAPS = "use_runs_for_overlaps";
-  static constexpr const char* GRID_TYPE = "grid_type";
-  static constexpr const char* NWEIGHTS_FORECAST = "nweights_forecast";
-  static constexpr const char* FORECAST_TYPE = "forecast_type";
-  static constexpr const char* MAX_DELTA_TIME = "max_delta_time";
-  static constexpr const char* MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
-  static constexpr const char* SPATIAL_SMOOTHING = "spatial_smoothing";
+  static constexpr const char* TRACKING_VALID = "tracking_valid";
+  static constexpr const char* TRACKING_MODIFY_CODE = "tracking_modify_code";
+  
+  static constexpr const char* TRACKING_FORECAST_WEIGHTS = "tracking_forecast_weights";  
+  static constexpr const char* TRACKING_WEIGHT_DISTANCE = "tracking_weight_distance";
+  static constexpr const char* TRACKING_WEIGHT_DELTA_CUBE_ROOT_VOLUME = "tracking_weight_delta_cube_root_volume";
+  static constexpr const char* TRACKING_MERGE_SPLIT_SEARCH_RATIO = "tracking_merge_split_search_ratio";
+  static constexpr const char* TRACKING_MAX_SPEED = "tracking_max_speed";
+  static constexpr const char* TRACKING_MAX_SPEED_FOR_VALID_FORECAST = "tracking_max_speed_for_valid_forecast";
+  static constexpr const char* TRACKING_PARABOLIC_GROWTH_PERIOD = "tracking_parabolic_growth_period";
+  static constexpr const char* TRACKING_SMOOTHING_RADIUS = "tracking_smoothing_radius";
+  static constexpr const char* TRACKING_MIN_FRACTION_OVERLAP = "tracking_min_fraction_overlap";
+  static constexpr const char* TRACKING_MIN_SUM_FRACTION_OVERLAP = "tracking_min_sum_fraction_overlap";
+  static constexpr const char* TRACKING_SCALE_FORECASTS_BY_HISTORY = "tracking_scale_forecasts_by_history";
+  static constexpr const char* TRACKING_USE_RUNS_FOR_OVERLAPS = "tracking_use_runs_for_overlaps";
+  static constexpr const char* TRACKING_GRID_TYPE = "tracking_grid_type";
+  static constexpr const char* TRACKING_NWEIGHTS_FORECAST = "tracking_nweights_forecast";
+  static constexpr const char* TRACKING_FORECAST_TYPE = "tracking_forecast_type";
+  static constexpr const char* TRACKING_MAX_DELTA_TIME = "tracking_max_delta_time";
+  static constexpr const char* TRACKING_MIN_HISTORY_FOR_VALID_FORECAST = "tracking_min_history_for_valid_forecast";
+  static constexpr const char* TRACKING_SPATIAL_SMOOTHING = "tracking_spatial_smoothing";
 
   static constexpr const char* N_SIMPLE_TRACKS = "n_simple_tracks";
   static constexpr const char* N_COMPLEX_TRACKS = "n_complex_tracks";
 
-  static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
+  static constexpr const char* TRACKING_N_SAMPLES_FOR_FORECAST_STATS = "tracking_n_samples_for_forecast_stats";
   static constexpr const char* TRACKING_N_SCANS = "tracking_n_scans";
-  static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
+  static constexpr const char* TRACKING_LAST_SCAN_NUM = "tracking_last_scan_num";
   static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
   static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
-  static constexpr const char* TRACK_MAX_PARENTS = "track_max_parents";
-  static constexpr const char* TRACK_MAX_CHILDREN = "track_max_children";
-  static constexpr const char* TRACK_MAX_NWEIGHTS_FORECAST = "track_max_nweights_forecast";
+  static constexpr const char* TRACKING_MAX_PARENTS = "tracking_max_parents";
+  static constexpr const char* TRACKING_MAX_CHILDREN = "tracking_max_children";
+  static constexpr const char* TRACKING_MAX_NWEIGHTS_FORECAST = "tracking_max_nweights_forecast";
 
   // verification contingency stats
   
@@ -796,50 +1179,6 @@ public:
   static constexpr const char* POLYGON_VERIFY_N_SUCCESS = "polygon_verify_n_success";
   static constexpr const char* POLYGON_VERIFY_N_FAILURE = "polygon_verify_n_failure";
   static constexpr const char* POLYGON_VERIFY_N_FALSE_ALARM = "polygon_verify_n_false_alarm";
-
-  // forecast bias
-  
-  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_X = "forecast_bias_proj_area_centroid_x";
-  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_Y = "forecast_bias_proj_area_centroid_y";
-  static constexpr const char* FORECAST_BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
-  static constexpr const char* FORECAST_BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
-  static constexpr const char* FORECAST_BIAS_TOP = "forecast_bias_top";
-  static constexpr const char* FORECAST_BIAS_DBZ_MAX = "forecast_bias_dbz_max";
-  static constexpr const char* FORECAST_BIAS_VOLUME = "forecast_bias_volume";
-  static constexpr const char* FORECAST_BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
-  static constexpr const char* FORECAST_BIAS_MASS = "forecast_bias_mass";
-  static constexpr const char* FORECAST_BIAS_PROJ_AREA = "forecast_bias_proj_area";
-  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_bias_smoothed_proj_area_centroid_x";
-  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_bias_smoothed_proj_area_centroid_y";
-  static constexpr const char* FORECAST_BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
-  static constexpr const char* FORECAST_BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
-
-  // forecast rmse
-  
-  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_X = "forecast_rmse_proj_area_centroid_x";
-  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_Y = "forecast_rmse_proj_area_centroid_y";
-  static constexpr const char* FORECAST_RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
-  static constexpr const char* FORECAST_RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
-  static constexpr const char* FORECAST_RMSE_TOP = "forecast_rmse_top";
-  static constexpr const char* FORECAST_RMSE_DBZ_MAX = "forecast_rmse_dbz_max";
-  static constexpr const char* FORECAST_RMSE_VOLUME = "forecast_rmse_volume";
-  static constexpr const char* FORECAST_RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
-  static constexpr const char* FORECAST_RMSE_MASS = "forecast_rmse_mass";
-  static constexpr const char* FORECAST_RMSE_PROJ_AREA = "forecast_rmse_proj_area";
-  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_rmse_smoothed_proj_area_centroid_x";
-  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_rmse_smoothed_proj_area_centroid_y";
-  static constexpr const char* FORECAST_RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
-  static constexpr const char* FORECAST_RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
-
-  // track verification
-  
-  static constexpr const char* VERIFICATION_PERFORMED = "verification_performed";
-  static constexpr const char* VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
-  static constexpr const char* VERIFY_END_TIME = "verify_end_time";
-  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN = "verify_forecast_lead_time_margin";
-  static constexpr const char* VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
-  static constexpr const char* VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
-  static constexpr const char* VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
 
   // track forecast properties
   
@@ -899,6 +1238,50 @@ public:
   static constexpr const char* COMPLEX_END_MISSING = "complex_end_missing";
   static constexpr const char* COMPLEX_N_SAMPLES_FOR_FORECAST_STATS = "complex_n_samples_for_forecast_stats";
   
+  // forecast bias
+  
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_X = "forecast_bias_proj_area_centroid_x";
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_Y = "forecast_bias_proj_area_centroid_y";
+  static constexpr const char* FORECAST_BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
+  static constexpr const char* FORECAST_BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
+  static constexpr const char* FORECAST_BIAS_TOP = "forecast_bias_top";
+  static constexpr const char* FORECAST_BIAS_DBZ_MAX = "forecast_bias_dbz_max";
+  static constexpr const char* FORECAST_BIAS_VOLUME = "forecast_bias_volume";
+  static constexpr const char* FORECAST_BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
+  static constexpr const char* FORECAST_BIAS_MASS = "forecast_bias_mass";
+  static constexpr const char* FORECAST_BIAS_PROJ_AREA = "forecast_bias_proj_area";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_bias_smoothed_proj_area_centroid_x";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_bias_smoothed_proj_area_centroid_y";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
+  static constexpr const char* FORECAST_BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
+
+  // forecast rmse
+  
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_X = "forecast_rmse_proj_area_centroid_x";
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA_CENTROID_Y = "forecast_rmse_proj_area_centroid_y";
+  static constexpr const char* FORECAST_RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
+  static constexpr const char* FORECAST_RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
+  static constexpr const char* FORECAST_RMSE_TOP = "forecast_rmse_top";
+  static constexpr const char* FORECAST_RMSE_DBZ_MAX = "forecast_rmse_dbz_max";
+  static constexpr const char* FORECAST_RMSE_VOLUME = "forecast_rmse_volume";
+  static constexpr const char* FORECAST_RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
+  static constexpr const char* FORECAST_RMSE_MASS = "forecast_rmse_mass";
+  static constexpr const char* FORECAST_RMSE_PROJ_AREA = "forecast_rmse_proj_area";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_rmse_smoothed_proj_area_centroid_x";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_rmse_smoothed_proj_area_centroid_y";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
+  static constexpr const char* FORECAST_RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
+
+  // track verification
+  
+  static constexpr const char* VERIFICATION_PERFORMED = "verification_performed";
+  static constexpr const char* VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
+  static constexpr const char* VERIFY_END_TIME = "verify_end_time";
+  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN = "verify_forecast_lead_time_margin";
+  static constexpr const char* VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
+  static constexpr const char* VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
+  static constexpr const char* VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
+
   // verification contingency stats
   
   static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_SUCCESS = "complex_ellipse_verify_n_success";

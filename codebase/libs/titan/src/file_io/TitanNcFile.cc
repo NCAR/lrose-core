@@ -206,10 +206,12 @@ int TitanNcFile::openNcFile(const string &path,
 
   }
 
-  _fileTimeVar = _stormsGroup.getVar("file_time");
-  if (_fileTimeVar.isNull()) {
-    // _fileTimeVar = _stormsGroup.addVar("file_time");
-  }
+  // create variables
+  
+  _file_time_var = _getScalarVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
+  _start_time_var = _getScalarVar(START_TIME, NcxxType::nc_INT64, _ncFile);
+  _end_time_var = _getScalarVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+  _n_scans_var = _getScalarVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   
 
   return 0;
@@ -224,6 +226,20 @@ void TitanNcFile::closeNcFile()
   
 }
      
+/////////////////////////////////////////
+// get or add scalar variable
+
+NcxxVar TitanNcFile::_getScalarVar(const std::string& name,
+                                   const NcxxType& ncType,
+                                   NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    var = group.addVar(name, ncType);
+  }
+  return var;
+}
+
 ////////////////////
 // error string
 
