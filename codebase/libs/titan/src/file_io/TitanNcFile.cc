@@ -156,62 +156,28 @@ int TitanNcFile::openNcFile(const string &path,
     return -1;
   }
   
-  // groups
+  // set up groups
   
-  if (mode == NcxxFile::FileMode::read) {
+  _scansGroup = _setGroup(SCANS, _ncFile);
+  _stormsGroup = _setGroup(STORMS, _ncFile);
+  _tracksGroup = _setGroup(TRACKS, _ncFile);
 
-    // get groups
-    
-    try {
-      _scansGroup = _ncFile.getGroup(SCANS);
-      _stormsGroup = _ncFile.getGroup(STORMS);
-      _tracksGroup = _ncFile.getGroup(TRACKS);
-      _stormGpropsGroup = _stormsGroup.getGroup(GPROPS);
-      _stormLpropsGroup = _stormsGroup.getGroup(LPROPS);
-      _stormHistGroup = _stormsGroup.getGroup(HIST);
-      _stormRunsGroup = _stormsGroup.getGroup(RUNS);
-      _stormProjRunsGroup = _stormsGroup.getGroup(PROJ_RUNS);
-      _simpleTrackGroup = _tracksGroup.getGroup(SIMPLE);
-      _complexTrackGroup = _tracksGroup.getGroup(COMPLEX);
-      _trackEntryGroup = _tracksGroup.getGroup(ENTRY);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - TitanNcFile::openNcFile");
-      _addErrStr("  Cannot get groups, path: ", path);
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
+  _stormGpropsGroup = _setGroup(GPROPS, _stormsGroup);
+  _stormLpropsGroup = _setGroup(LPROPS, _stormsGroup);
+  _stormHistGroup = _setGroup(HIST, _stormsGroup);
+  _stormRunsGroup = _setGroup(RUNS, _stormsGroup);
+  _stormProjRunsGroup = _setGroup(PROJ_RUNS, _stormsGroup);
 
-  } else {
+  _simpleTrackGroup = _setGroup(SIMPLE, _tracksGroup);
+  _complexTrackGroup = _setGroup(COMPLEX, _tracksGroup);
+  _trackEntryGroup = _setGroup(ENTRY, _tracksGroup);
 
-    // create groups
-    
-    try {
-      _scansGroup = _ncFile.addGroup(SCANS);
-      _stormsGroup = _ncFile.addGroup(STORMS);
-      _tracksGroup = _ncFile.addGroup(TRACKS);
-      _stormGpropsGroup = _stormsGroup.addGroup(GPROPS);
-      _stormLpropsGroup = _stormsGroup.addGroup(LPROPS);
-      _stormHistGroup = _stormsGroup.addGroup(HIST);
-      _stormRunsGroup = _stormsGroup.addGroup(RUNS);
-      _stormProjRunsGroup = _stormsGroup.addGroup(PROJ_RUNS);
-      _simpleTrackGroup = _tracksGroup.addGroup(SIMPLE);
-      _complexTrackGroup = _tracksGroup.addGroup(COMPLEX);
-      _trackEntryGroup = _tracksGroup.addGroup(ENTRY);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - TitanNcFile::openNcFile");
-      _addErrStr("  Cannot add groups, path: ", path);
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
-
-  }
-
-  // create variables
+  // set up variables
   
-  _file_time_var = _getScalarVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
-  _start_time_var = _getScalarVar(START_TIME, NcxxType::nc_INT64, _ncFile);
-  _end_time_var = _getScalarVar(END_TIME, NcxxType::nc_INT64, _ncFile);
-  _n_scans_var = _getScalarVar(N_SCANS, NcxxType::nc_INT, _ncFile);
+  _topLevel.file_time = _setVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevel.start_time = _setVar(START_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevel.end_time = _setVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevel.n_scans = _setVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   
 
   return 0;
@@ -227,11 +193,34 @@ void TitanNcFile::closeNcFile()
 }
      
 /////////////////////////////////////////
-// get or add scalar variable
+// set group relative to a parent group
 
-NcxxVar TitanNcFile::_getScalarVar(const std::string& name,
-                                   const NcxxType& ncType,
-                                   NcxxGroup &group)
+NcxxGroup TitanNcFile::_setGroup(const std::string& name,
+                                 NcxxGroup &parent)
+{
+
+  NcxxGroup group;
+  try {
+    // see if group exists
+    NcxxGroup group = _ncFile.getGroup(name);
+    return group;
+  } catch (NcxxException& e) {
+    // if not, add it
+    NcxxGroup group = _ncFile.addGroup(SCANS);
+    return group;
+  }
+
+  // if (mode == NcxxFile::FileMode::read) {
+  // }
+
+}
+
+/////////////////////////////////////////
+// set scalar variable
+
+NcxxVar TitanNcFile::_setVar(const std::string& name,
+                             const NcxxType& ncType,
+                             NcxxGroup &group)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {

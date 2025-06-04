@@ -103,7 +103,7 @@ int read_case_track_file(case_track_handle_t *handle,
   
   FILE *case_file;
 
-  assert(handle->init_flag = CASE_TRACK_HANDLE_INIT_FLAG);
+  assert(handle->init_flag == CASE_TRACK_HANDLE_INIT_FLAG);
   
   /*
    * open case file
@@ -252,7 +252,7 @@ int case_tracks_find_case(case_track_handle_t *handle,
   int i;
   case_track_t *this_case;
 
-  assert(handle->init_flag = CASE_TRACK_HANDLE_INIT_FLAG);
+  assert(handle->init_flag == CASE_TRACK_HANDLE_INIT_FLAG);
 
   this_case = handle->cases;
   for (i = 0; i < handle->n_cases; i++, this_case++) {

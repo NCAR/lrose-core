@@ -97,7 +97,7 @@ static void update_dobson_field_params(MDV_field_header_t *field_hdr,
  *
  **************************************************************************/
 
-#define MAX_SEQ  256
+#define MAX_SEQ  2048
 
 int RfReadMDVVolume(vol_file_handle_t *vindex,
 		    const char *calling_routine)
@@ -768,14 +768,14 @@ static void update_dobson_field_params(MDV_field_header_t *field_hdr,
 {
   static char *this_routine = "update_dobson_field_params";
   
-  char calling_sequence[MAX_SEQ];
+  char calling_sequence[MAX_SEQ * 2];
   
   /*
    * Set up calling sequence.
    */
 
-  sprintf(calling_sequence, "%s:%s",
-	  calling_routine, this_routine);
+  snprintf(calling_sequence, MAX_SEQ * 2 - 1, "%s:%s",
+           calling_routine, this_routine);
   
   field_params->nbytes_char = N_FIELD_PARAMS_LABELS * R_LABEL_LEN;
   switch (field_hdr->encoding_type)

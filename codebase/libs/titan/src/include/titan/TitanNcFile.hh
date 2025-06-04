@@ -140,13 +140,19 @@ public:
                  NcxxFile::FileMode mode);
   
   void closeNcFile();
-     
-  /////////////////////////////////////////////////////
-  // get or add scalar variable
   
-  NcxxVar _getScalarVar(const std::string& name,
-                        const NcxxType& ncType,
-                        NcxxGroup &group);
+  /////////////////////////////////////////
+  // set group relative to a parent group
+  
+  NcxxGroup _setGroup(const std::string& name,
+                      NcxxGroup &parent);
+  
+  /////////////////////////////////////////////////////
+  // set scalar variable
+  
+  NcxxVar _setVar(const std::string& name,
+                  const NcxxType& ncType,
+                  NcxxGroup &group);
   
   /////////////////////////////////////////////////////
   // Storms
@@ -160,17 +166,17 @@ public:
   // Close the storm header and data files
 
   void CloseStormFiles();
-     
+  
   // Flush the storm header and data files
-
+  
   void FlushStormFiles();
   
   // Put an advisory lock on the header file
   // Mode is "w" - write lock, or "r" - read lock.
   // returns 0 on success, -1 on failure
-
+  
   int LockStormHeaderFile(const char *mode);
-
+  
   // Remove advisory lock from the header file
   // returns 0 on success, -1 on failure
 
@@ -192,7 +198,7 @@ public:
   // returns 0 on success, -1 on failure
 
   int ReadScan(int scan_num, int storm_num = -1);
-     
+  
   // read in the seconday storm property data (lprops, hist, runs)
   // for a given storm in a scan.
   // Space for the arrays of structures is allocated as required.
@@ -336,7 +342,7 @@ public:
   // Returns 0 on success or -1 on error
 
   int ReadUtime();
-     
+  
   // Reinitialize headers and arrays
 
   void Reinit();
@@ -453,379 +459,393 @@ protected:
   NcxxGroup _trackEntryGroup;
 
   ////////////////////////////////////////////////////////
-  // netcdf variables
+  // classes for netcdf variables
 
-  NcxxVar _file_time_var;
-  NcxxVar _start_time_var;
-  NcxxVar _end_time_var;
-  NcxxVar _n_scans_var;
+  // top level
+
+  class TopLevelVars
+  {
+  public:
+    NcxxVar file_time;
+    NcxxVar start_time;
+    NcxxVar end_time;
+    NcxxVar n_scans;
+  };
+
+  // scan vars
+
+  class ScanVars
+  {
+  public:
+    // scan details
+    NcxxVar scan_min_z;
+    NcxxVar scan_delta_z;
+    NcxxVar scan_num;
+    NcxxVar scan_nstorms;
+    NcxxVar scan_time;
+    NcxxVar scan_gprops_offset;
+    NcxxVar scan_first_offset;
+    NcxxVar scan_last_offset;
+    NcxxVar scan_ht_of_freezing;
+    // grid details
+    NcxxVar grid_nx;
+    NcxxVar grid_ny;
+    NcxxVar grid_nz;
+    NcxxVar grid_minx;
+    NcxxVar grid_miny;
+    NcxxVar grid_minz;
+    NcxxVar grid_dx;
+    NcxxVar grid_dy;
+    NcxxVar grid_dz;
+    NcxxVar grid_dz_constant;
+    NcxxVar grid_sensor_x;
+    NcxxVar grid_sensor_y;
+    NcxxVar grid_sensor_z;
+    NcxxVar grid_sensor_lat;
+    NcxxVar grid_sensor_lon;
+    NcxxVar grid_unitsx;
+    NcxxVar grid_unitsy;
+    NcxxVar grid_unitsz;
+    // projection details
+    NcxxVar proj_type;
+    NcxxVar proj_origin_lat;
+    NcxxVar proj_origin_lon;
+    NcxxVar proj_lat1;
+    NcxxVar proj_lat2;
+    NcxxVar proj_tangent_lat;
+    NcxxVar proj_tangent_lon;
+    NcxxVar proj_pole_type;
+    NcxxVar proj_central_scale;
+  };
+
+  // storm identification parameter vars
+
+  class StormParamsVars
+  {
+  public:
+    NcxxVar low_dbz_threshold;
+    NcxxVar high_dbz_threshold;
+    NcxxVar dbz_hist_interval;
+    NcxxVar hail_dbz_threshold;
+    NcxxVar base_threshold;
+    NcxxVar top_threshold;
+    NcxxVar min_storm_size;
+    NcxxVar max_storm_size;
+    NcxxVar morphology_erosion_threshold;
+    NcxxVar morphology_refl_divisor;
+    NcxxVar min_radar_tops;
+    NcxxVar tops_edge_margin;
+    NcxxVar z_p_coeff;
+    NcxxVar z_p_exponent;
+    NcxxVar z_m_coeff;
+    NcxxVar z_m_exponent;
+    NcxxVar sectrip_vert_aspect;
+    NcxxVar sectrip_horiz_aspect;
+    NcxxVar sectrip_orientation_error;
+    NcxxVar poly_start_az;
+    NcxxVar poly_delta_az;
+    NcxxVar check_morphology;
+    NcxxVar check_tops;
+    NcxxVar vel_available;
+    NcxxVar n_poly_sides;
+    NcxxVar ltg_count_time;
+    NcxxVar ltg_count_margin_km;
+    NcxxVar hail_z_m_coeff;
+    NcxxVar hail_z_m_exponent;
+    NcxxVar hail_mass_dbz_threshold;
+    NcxxVar gprops_union_type;
+    NcxxVar tops_dbz_threshold;
+    NcxxVar precip_computation_mode;
+    NcxxVar precip_plane_ht;
+    NcxxVar low_convectivity_threshold;
+    NcxxVar high_convectivity_threshold;
+  };
+
+  // storm global properties vars
   
-  // storm identification parameters
+  class StormGpropsVars
+  {
+  public:
+    NcxxVar vol_centroid_x;
+    NcxxVar vol_centroid_y;
+    NcxxVar vol_centroid_z;
+    NcxxVar refl_centroid_x;
+    NcxxVar refl_centroid_y;
+    NcxxVar refl_centroid_z;
+    NcxxVar top;
+    NcxxVar base;
+    NcxxVar volume;
+    NcxxVar area_mean;
+    NcxxVar precip_flux;
+    NcxxVar mass;
+    NcxxVar tilt_angle;
+    NcxxVar tilt_dirn;
+    NcxxVar dbz_max;
+    NcxxVar dbz_mean;
+    NcxxVar dbz_max_gradient;
+    NcxxVar dbz_mean_gradient;
+    NcxxVar ht_of_dbz_max;
+    NcxxVar rad_vel_mean;
+    NcxxVar rad_vel_sd;
+    NcxxVar vorticity;
+    NcxxVar precip_area;
+    NcxxVar precip_area_centroid_x;
+    NcxxVar precip_area_centroid_y;
+    NcxxVar precip_area_orientation;
+    NcxxVar precip_area_minor_radius;
+    NcxxVar precip_area_major_radius;
+    NcxxVar proj_area;
+    NcxxVar proj_area_centroid_x;
+    NcxxVar proj_area_centroid_y;
+    NcxxVar proj_area_orientation;
+    NcxxVar proj_area_minor_radius;
+    NcxxVar proj_area_major_radius;
+    NcxxVar proj_area_polygon;
+    NcxxVar storm_num;
+    NcxxVar n_layers;
+    NcxxVar base_layer;
+    NcxxVar n_dbz_intervals;
+    NcxxVar n_runs;
+    NcxxVar n_proj_runs;
+    NcxxVar top_missing;
+    NcxxVar range_limited;
+    NcxxVar second_trip;
+    NcxxVar hail_present;
+    NcxxVar anom_prop;
+    NcxxVar bounding_min_ix;
+    NcxxVar bounding_min_iy;
+    NcxxVar bounding_max_ix;
+    NcxxVar bounding_max_iy;
+    NcxxVar layer_props_offset;
+    NcxxVar dbz_hist_offset;
+    NcxxVar runs_offset;
+    NcxxVar proj_runs_offset;
+    NcxxVar vil_from_maxz;
+    NcxxVar ltg_count;
+    NcxxVar convectivity_median;
+    NcxxVar hail_FOKRcategory;
+    NcxxVar hail_waldvogelProbability;
+    NcxxVar hail_hailMassAloft;
+    NcxxVar hail_vihm;
+    NcxxVar hail_poh;
+    NcxxVar hail_shi;
+    NcxxVar hail_posh;
+    NcxxVar hail_mehs;
+  };
 
-  NcxxVar _low_dbz_threshold_var;
-  NcxxVar _high_dbz_threshold_var;
-  NcxxVar _dbz_hist_interval_var;
-  NcxxVar _hail_dbz_threshold_var;
-  NcxxVar _base_threshold_var;
-  NcxxVar _top_threshold_var;
-  NcxxVar _min_storm_size_var;
-  NcxxVar _max_storm_size_var;
-  NcxxVar _morphology_erosion_threshold_var;
-  NcxxVar _morphology_refl_divisor_var;
-  NcxxVar _min_radar_tops_var;
-  NcxxVar _tops_edge_margin_var;
-  NcxxVar _z_p_coeff_var;
-  NcxxVar _z_p_exponent_var;
-  NcxxVar _z_m_coeff_var;
-  NcxxVar _z_m_exponent_var;
-  NcxxVar _sectrip_vert_aspect_var;
-  NcxxVar _sectrip_horiz_aspect_var;
-  NcxxVar _sectrip_orientation_error_var;
-  NcxxVar _poly_start_az_var;
-  NcxxVar _poly_delta_az_var;
-  NcxxVar _check_morphology_var;
-  NcxxVar _check_tops_var;
-  NcxxVar _vel_available_var;
-  NcxxVar _n_poly_sides_var;
-  NcxxVar _ltg_count_time_var;
-  NcxxVar _ltg_count_margin_km_var;
-  NcxxVar _hail_z_m_coeff_var;
-  NcxxVar _hail_z_m_exponent_var;
-  NcxxVar _hail_mass_dbz_threshold_var;
-  NcxxVar _gprops_union_type_var;
-  NcxxVar _tops_dbz_threshold_var;
-  NcxxVar _precip_computation_mode_var;
-  NcxxVar _precip_plane_ht_var;
-  NcxxVar _low_convectivity_threshold_var;
-  NcxxVar _high_convectivity_threshold_var;
-
-  // scan details
-
-  NcxxVar _scan_min_z_var;
-  NcxxVar _scan_delta_z_var;
-  NcxxVar _scan_num_var;
-  NcxxVar _scan_nstorms_var;
-  NcxxVar _scan_time_var;
-  NcxxVar _scan_gprops_offset_var;
-  NcxxVar _scan_first_offset_var;
-  NcxxVar _scan_last_offset_var;
-  NcxxVar _scan_ht_of_freezing_var;
+  // storm layer properties vars
   
-  // grid and projection details
+  class StormLpropsVars
+  {
+  public:
+    NcxxVar vol_centroid_x;
+    NcxxVar vol_centroid_y;
+    NcxxVar refl_centroid_x;
+    NcxxVar refl_centroid_y;
+    NcxxVar area;
+    NcxxVar dbz_max;
+    NcxxVar dbz_mean;
+    NcxxVar mass;
+    NcxxVar rad_vel_mean;
+    NcxxVar rad_vel_sd;
+    NcxxVar vorticity;
+    NcxxVar convectivity_median;
+  };
+
+  // storm dbz histograms vars
   
-  NcxxVar _grid_nx_var;
-  NcxxVar _grid_ny_var;
-  NcxxVar _grid_nz_var;
-  NcxxVar _grid_minx_var;
-  NcxxVar _grid_miny_var;
-  NcxxVar _grid_minz_var;
-  NcxxVar _grid_dx_var;
-  NcxxVar _grid_dy_var;
-  NcxxVar _grid_dz_var;
-  NcxxVar _grid_dz_constant_var;
-  NcxxVar _grid_sensor_x_var;
-  NcxxVar _grid_sensor_y_var;
-  NcxxVar _grid_sensor_z_var;
-  NcxxVar _grid_sensor_lat_var;
-  NcxxVar _grid_sensor_lon_var;
-  NcxxVar _grid_unitsx_var;
-  NcxxVar _grid_unitsy_var;
-  NcxxVar _grid_unitsz_var;
-
-  NcxxVar _proj_type_var;
-  NcxxVar _proj_origin_lat_var;
-  NcxxVar _proj_origin_lon_var;
-  NcxxVar _proj_lat1_var;
-  NcxxVar _proj_lat2_var;
-  NcxxVar _proj_tangent_lat_var;
-  NcxxVar _proj_tangent_lon_var;
-  NcxxVar _proj_pole_type_var;
-  NcxxVar _proj_central_scale_var;
-
-  // storm global properties
+  class StormHistVars
+  {
+  public:
+    NcxxVar percent_volume;
+    NcxxVar percent_area;
+  };
   
-  NcxxVar _vol_centroid_x_var;
-  NcxxVar _vol_centroid_y_var;
-  NcxxVar _vol_centroid_z_var;
-  NcxxVar _refl_centroid_x_var;
-  NcxxVar _refl_centroid_y_var;
-  NcxxVar _refl_centroid_z_var;
-  NcxxVar _top_var;
-  NcxxVar _base_var;
-  NcxxVar _volume_var;
-  NcxxVar _area_mean_var;
-  NcxxVar _precip_flux_var;
-  NcxxVar _mass_var;
-  NcxxVar _tilt_angle_var;
-  NcxxVar _tilt_dirn_var;
-  NcxxVar _dbz_max_var;
-  NcxxVar _dbz_mean_var;
-  NcxxVar _dbz_max_gradient_var;
-  NcxxVar _dbz_mean_gradient_var;
-  NcxxVar _ht_of_dbz_max_var;
-  NcxxVar _rad_vel_mean_var;
-  NcxxVar _rad_vel_sd_var;
-  NcxxVar _vorticity_var;
-  NcxxVar _precip_area_var;
-  NcxxVar _precip_area_centroid_x_var;
-  NcxxVar _precip_area_centroid_y_var;
-  NcxxVar _precip_area_orientation_var;
-  NcxxVar _precip_area_minor_radius_var;
-  NcxxVar _precip_area_major_radius_var;
-  NcxxVar _proj_area_var;
-  NcxxVar _proj_area_centroid_x_var;
-  NcxxVar _proj_area_centroid_y_var;
-  NcxxVar _proj_area_orientation_var;
-  NcxxVar _proj_area_minor_radius_var;
-  NcxxVar _proj_area_major_radius_var;
-  NcxxVar _proj_area_polygon_var;
-  NcxxVar _storm_num_var;
-  NcxxVar _n_layers_var;
-  NcxxVar _base_layer_var;
-  NcxxVar _n_dbz_intervals_var;
-  NcxxVar _n_runs_var;
-  NcxxVar _n_proj_runs_var;
-  NcxxVar _top_missing_var;
-  NcxxVar _range_limited_var;
-  NcxxVar _second_trip_var;
-  NcxxVar _hail_present_var;
-  NcxxVar _anom_prop_var;
-  NcxxVar _bounding_min_ix_var;
-  NcxxVar _bounding_min_iy_var;
-  NcxxVar _bounding_max_ix_var;
-  NcxxVar _bounding_max_iy_var;
-  NcxxVar _layer_props_offset_var;
-  NcxxVar _dbz_hist_offset_var;
-  NcxxVar _runs_offset_var;
-  NcxxVar _proj_runs_offset_var;
-  NcxxVar _vil_from_maxz_var;
-  NcxxVar _ltg_count_var;
-  NcxxVar _convectivity_median_var;
-  NcxxVar _hail_FOKRcategory_var;
-  NcxxVar _hail_waldvogelProbability_var;
-  NcxxVar _hail_hailMassAloft_var;
-  NcxxVar _hail_vihm_var;
-  NcxxVar _hail_poh_var;
-  NcxxVar _hail_shi_var;
-  NcxxVar _hail_posh_var;
-  NcxxVar _hail_mehs_var;
-
-  // storm layer properties
+  // storm runs vars
   
-  NcxxVar _layer_vol_centroid_x_var;
-  NcxxVar _layer_vol_centroid_y_var;
-  NcxxVar _layer_refl_centroid_x_var;
-  NcxxVar _layer_refl_centroid_y_var;
-  NcxxVar _layer_area_var;
-  NcxxVar _layer_dbz_max_var;
-  NcxxVar _layer_dbz_mean_var;
-  NcxxVar _layer_mass_var;
-  NcxxVar _layer_rad_vel_mean_var;
-  NcxxVar _layer_rad_vel_sd_var;
-  NcxxVar _layer_vorticity_var;
-  NcxxVar _layer_convectivity_median_var;
-
-  // storm dbz histogram
-
-  NcxxVar _hist_percent_volume_var;
-  NcxxVar _hist_percent_area_var;
-
-  // storm runs
+  class StormRunsVars
+  {
+  public:
+    NcxxVar ix;
+    NcxxVar iy;
+    NcxxVar iz;
+    NcxxVar n;
+  };
   
-  NcxxVar _run_ix_var;
-  NcxxVar _run_iy_var;
-  NcxxVar _run_iz_var;
-  NcxxVar _run_n_var;
+  // tracking state vars
 
-  // tracking parameters
+  class TrackingStateVars
+  {
+  public:
+    NcxxVar tracking_valid;
+    NcxxVar tracking_modify_code;
+    NcxxVar n_simple_tracks;
+    NcxxVar n_complex_tracks;
+    NcxxVar tracking_n_samples_for_forecast_stats;
+    NcxxVar tracking_last_scan_num;
+    NcxxVar max_simple_track_num;
+    NcxxVar max_complex_track_num;
+    NcxxVar tracking_max_parents;
+    NcxxVar tracking_max_children;
+    NcxxVar tracking_max_nweights_forecast;
+  };
 
-  NcxxVar _tracking_valid_var;
-  NcxxVar _tracking_modify_code_var;
+  // tracking parameter vars
+
+  class TrackingParamsVars
+  {
+  public:
+    NcxxVar tracking_forecast_weights;
+    NcxxVar tracking_weight_distance;
+    NcxxVar tracking_weight_delta_cube_root_volume;
+    NcxxVar tracking_merge_split_search_ratio;
+    NcxxVar tracking_max_speed;
+    NcxxVar tracking_max_speed_for_valid_forecast;
+    NcxxVar tracking_parabolic_growth_period;
+    NcxxVar tracking_smoothing_radius;
+    NcxxVar tracking_min_fraction_overlap;
+    NcxxVar tracking_min_sum_fraction_overlap;
+    NcxxVar tracking_scale_forecasts_by_history;
+    NcxxVar tracking_use_runs_for_overlaps;
+    NcxxVar tracking_grid_type;
+    NcxxVar tracking_nweights_forecast;
+    NcxxVar tracking_forecast_type;
+    NcxxVar tracking_max_delta_time;
+    NcxxVar tracking_min_history_for_valid_forecast;
+    NcxxVar tracking_spatial_smoothing;
+  };
   
-  NcxxVar _tracking_forecast_weights_var;
-  NcxxVar _tracking_weight_distance_var;
-  NcxxVar _tracking_weight_delta_cube_root_volume_var;
-  NcxxVar _tracking_merge_split_search_ratio_var;
-  NcxxVar _tracking_max_speed_var;
-  NcxxVar _tracking_max_speed_for_valid_forecast_var;
-  NcxxVar _tracking_parabolic_growth_period_var;
-  NcxxVar _tracking_smoothing_radius_var;
-  NcxxVar _tracking_min_fraction_overlap_var;
-  NcxxVar _tracking_min_sum_fraction_overlap_var;
-  NcxxVar _tracking_scale_forecasts_by_history_var;
-  NcxxVar _tracking_use_runs_for_overlaps_var;
-  NcxxVar _tracking_grid_type_var;
-  NcxxVar _tracking_nweights_forecast_var;
-  NcxxVar _tracking_forecast_type_var;
-  NcxxVar _tracking_max_delta_time_var;
-  NcxxVar _tracking_min_history_for_valid_forecast_var;
-  NcxxVar _tracking_spatial_smoothing_var;
+  // verification vars
 
-  NcxxVar _n_simple_tracks_var;
-  NcxxVar _n_complex_tracks_var;
+  class ContingencyVars
+  {
+  public:
+    NcxxVar n_success;
+    NcxxVar n_failure;
+    NcxxVar n_false_alarm;
+  };
 
-  NcxxVar _tracking_n_samples_for_forecast_stats_var;
-  NcxxVar _tracking_n_scans_var;
-  NcxxVar _tracking_last_scan_num_var;
-  NcxxVar _max_simple_track_num_var;
-  NcxxVar _max_complex_track_num_var;
-  NcxxVar _tracking_max_parents_var;
-  NcxxVar _tracking_max_children_var;
-  NcxxVar _tracking_max_nweights_forecast_var;
+  // simple track vars
 
-  // verification contingency stats
+  class SimpleTrackVars
+  {
+  public:
+    NcxxVar simple_track_num;
+    NcxxVar last_descendant_simple_track_num;
+    NcxxVar simple_start_scan;
+    NcxxVar simple_end_scan;
+    NcxxVar simple_last_descendant_end_scan;
+    NcxxVar simple_scan_origin;
+    NcxxVar simple_start_time;
+    NcxxVar simple_end_time;
+    NcxxVar simple_last_descendant_end_time;
+    NcxxVar simple_time_origin;
+    NcxxVar simple_history_in_scans;
+    NcxxVar simple_history_in_secs;
+    NcxxVar simple_duration_in_scans;
+    NcxxVar simple_duration_in_secs;
+    NcxxVar simple_nparents;
+    NcxxVar simple_nchildren;
+    NcxxVar simple_parent;
+    NcxxVar simple_child;
+    NcxxVar complex_track_num_for_simple;
+    NcxxVar simple_first_entry_offset;
+  };
   
-  NcxxVar _ellipse_verify_n_success_var;
-  NcxxVar _ellipse_verify_n_failure_var;
-  NcxxVar _ellipse_verify_n_false_alarm_var;
-  NcxxVar _polygon_verify_n_success_var;
-  NcxxVar _polygon_verify_n_failure_var;
-  NcxxVar _polygon_verify_n_false_alarm_var;
+  // complex track vars
 
+  class ComplexTrackVars
+  {
+  public:
+    NcxxVar volume_at_start_of_sampling;
+    NcxxVar volume_at_end_of_sampling;
+    NcxxVar complex_track_num;
+    NcxxVar complex_start_scan;
+    NcxxVar complex_end_scan;
+    NcxxVar complex_duration_in_scans;
+    NcxxVar complex_duration_in_secs;
+    NcxxVar complex_start_time;
+    NcxxVar complex_end_time;
+    NcxxVar complex_n_simple_tracks;
+    NcxxVar complex_n_top_missing;
+    NcxxVar complex_n_range_limited;
+    NcxxVar complex_start_missing;
+    NcxxVar complex_end_missing;
+    NcxxVar complex_n_samples_for_forecast_stats;
+  };
+  
   // track forecast properties
   
-  NcxxVar _forecast_proj_area_centroid_x_var;
-  NcxxVar _forecast_proj_area_centroid_y_var;
-  NcxxVar _forecast_vol_centroid_z_var;
-  NcxxVar _forecast_refl_centroid_z_var;
-  NcxxVar _forecast_top_var;
-  NcxxVar _forecast_dbz_max_var;
-  NcxxVar _forecast_volume_var;
-  NcxxVar _forecast_precip_flux_var;
-  NcxxVar _forecast_mass_var;
-  NcxxVar _forecast_proj_area_var;
-  NcxxVar _forecast_smoothed_proj_area_centroid_x_var;
-  NcxxVar _forecast_smoothed_proj_area_centroid_y_var;
-  NcxxVar _forecast_smoothed_speed_var;
-  NcxxVar _forecast_smoothed_direction_var;
-
-  // simple tracks
-
-  NcxxVar _simple_track_num_var;
-  NcxxVar _last_descendant_simple_track_num_var;
-  NcxxVar _simple_start_scan_var;
-  NcxxVar _simple_end_scan_var;
-  NcxxVar _simple_last_descendant_end_scan_var;
-  NcxxVar _simple_scan_origin_var;
-  NcxxVar _simple_start_time_var;
-  NcxxVar _simple_end_time_var;
-  NcxxVar _simple_last_descendant_end_time_var;
-  NcxxVar _simple_time_origin_var;
-  NcxxVar _simple_history_in_scans_var;
-  NcxxVar _simple_history_in_secs_var;
-  NcxxVar _simple_duration_in_scans_var;
-  NcxxVar _simple_duration_in_secs_var;
-  NcxxVar _simple_nparents_var;
-  NcxxVar _simple_nchildren_var;
-  NcxxVar _simple_parent_var;
-  NcxxVar _simple_child_var;
-  NcxxVar _complex_track_num_for_simple_var;
-  NcxxVar _simple_first_entry_offset_var;
-  
-  // complex tracks
-
-  NcxxVar _volume_at_start_of_sampling_var;
-  NcxxVar _volume_at_end_of_sampling_var;
-  NcxxVar _complex_track_num_var;
-  NcxxVar _complex_start_scan_var;
-  NcxxVar _complex_end_scan_var;
-  NcxxVar _complex_duration_in_scans_var;
-  NcxxVar _complex_duration_in_secs_var;
-  NcxxVar _complex_start_time_var;
-  NcxxVar _complex_end_time_var;
-  NcxxVar _complex_n_simple_tracks_var;
-  NcxxVar _complex_n_top_missing_var;
-  NcxxVar _complex_n_range_limited_var;
-  NcxxVar _complex_start_missing_var;
-  NcxxVar _complex_end_missing_var;
-  NcxxVar _complex_n_samples_for_forecast_stats_var;
-  
-  // forecast bias
-  
-  NcxxVar _forecast_bias_proj_area_centroid_x_var;
-  NcxxVar _forecast_bias_proj_area_centroid_y_var;
-  NcxxVar _forecast_bias_vol_centroid_z_var;
-  NcxxVar _forecast_bias_refl_centroid_z_var;
-  NcxxVar _forecast_bias_top_var;
-  NcxxVar _forecast_bias_dbz_max_var;
-  NcxxVar _forecast_bias_volume_var;
-  NcxxVar _forecast_bias_precip_flux_var;
-  NcxxVar _forecast_bias_mass_var;
-  NcxxVar _forecast_bias_proj_area_var;
-  NcxxVar _forecast_bias_smoothed_proj_area_centroid_x_var;
-  NcxxVar _forecast_bias_smoothed_proj_area_centroid_y_var;
-  NcxxVar _forecast_bias_smoothed_speed_var;
-  NcxxVar _forecast_bias_smoothed_direction_var;
-
-  // forecast rmse
-  
-  NcxxVar _forecast_rmse_proj_area_centroid_x_var;
-  NcxxVar _forecast_rmse_proj_area_centroid_y_var;
-  NcxxVar _forecast_rmse_vol_centroid_z_var;
-  NcxxVar _forecast_rmse_refl_centroid_z_var;
-  NcxxVar _forecast_rmse_top_var;
-  NcxxVar _forecast_rmse_dbz_max_var;
-  NcxxVar _forecast_rmse_volume_var;
-  NcxxVar _forecast_rmse_precip_flux_var;
-  NcxxVar _forecast_rmse_mass_var;
-  NcxxVar _forecast_rmse_proj_area_var;
-  NcxxVar _forecast_rmse_smoothed_proj_area_centroid_x_var;
-  NcxxVar _forecast_rmse_smoothed_proj_area_centroid_y_var;
-  NcxxVar _forecast_rmse_smoothed_speed_var;
-  NcxxVar _forecast_rmse_smoothed_direction_var;
+  class ForecastPropsVars
+  {
+  public:
+    NcxxVar forecast_proj_area_centroid_x;
+    NcxxVar forecast_proj_area_centroid_y;
+    NcxxVar forecast_vol_centroid_z;
+    NcxxVar forecast_refl_centroid_z;
+    NcxxVar forecast_top;
+    NcxxVar forecast_dbz_max;
+    NcxxVar forecast_volume;
+    NcxxVar forecast_precip_flux;
+    NcxxVar forecast_mass;
+    NcxxVar forecast_proj_area;
+    NcxxVar forecast_smoothed_proj_area_centroid_x;
+    NcxxVar forecast_smoothed_proj_area_centroid_y;
+    NcxxVar forecast_smoothed_speed;
+    NcxxVar forecast_smoothed_direction;
+  };
 
   // track verification
   
-  NcxxVar _verification_performed_var;
-  NcxxVar _verify_forecast_lead_time_var;
-  NcxxVar _verify_end_time_var;
-  NcxxVar _verify_forecast_lead_time_margin_var;
-  NcxxVar _verify_forecast_min_history_var;
-  NcxxVar _verify_before_forecast_time_var;
-  NcxxVar _verify_after_track_dies_var;
+  class TrackVerifyVars
+  {
+  public:
+    NcxxVar verification_performed;
+    NcxxVar verify_forecast_lead_time;
+    NcxxVar verify_end_time;
+    NcxxVar verify_forecast_lead_time_margin;
+    NcxxVar verify_forecast_min_history;
+    NcxxVar verify_before_forecast_time;
+    NcxxVar verify_after_track_dies;
+  };
 
-  // verification contingency stats
+  //////////////////////////////////
+  // netcdf variables - grouped
   
-  NcxxVar _complex_ellipse_verify_n_success_var;
-  NcxxVar _complex_ellipse_verify_n_failure_var;
-  NcxxVar _complex_ellipse_verify_n_false_alarm_var;
-  NcxxVar _complex_polygon_verify_n_success_var;
-  NcxxVar _complex_polygon_verify_n_failure_var;
-  NcxxVar _complex_polygon_verify_n_false_alarm_var;
+  TopLevelVars _topLevel;
+  ScanVars _scanVars;
 
-  // forecast bias
+  // storm identification
   
-  NcxxVar _complex_forecast_bias_proj_area_centroid_x_var;
-  NcxxVar _complex_forecast_bias_proj_area_centroid_y_var;
-  NcxxVar _complex_forecast_bias_vol_centroid_z_var;
-  NcxxVar _complex_forecast_bias_refl_centroid_z_var;
-  NcxxVar _complex_forecast_bias_top_var;
-  NcxxVar _complex_forecast_bias_dbz_max_var;
-  NcxxVar _complex_forecast_bias_volume_var;
-  NcxxVar _complex_forecast_bias_precip_flux_var;
-  NcxxVar _complex_forecast_bias_mass_var;
-  NcxxVar _complex_forecast_bias_proj_area_var;
-  NcxxVar _complex_forecast_bias_smoothed_proj_area_centroid_x_var;
-  NcxxVar _complex_forecast_bias_smoothed_proj_area_centroid_y_var;
-  NcxxVar _complex_forecast_bias_smoothed_speed_var;
-  NcxxVar _complex_forecast_bias_smoothed_direction_var;
+  StormParamsVars _sparamsVars;
+  StormGpropsVars _gpropsVars;
+  StormLpropsVars _lpropsVars;
+  StormHistVars _histVars;
+  StormRunsVars _runsVars;
+  StormRunsVars _projRunsVars;
 
-  // forecast rmse
+  // tracking
   
-  NcxxVar _complex_forecast_rmse_proj_area_centroid_x_var;
-  NcxxVar _complex_forecast_rmse_proj_area_centroid_y_var;
-  NcxxVar _complex_forecast_rmse_vol_centroid_z_var;
-  NcxxVar _complex_forecast_rmse_refl_centroid_z_var;
-  NcxxVar _complex_forecast_rmse_top_var;
-  NcxxVar _complex_forecast_rmse_dbz_max_var;
-  NcxxVar _complex_forecast_rmse_volume_var;
-  NcxxVar _complex_forecast_rmse_precip_flux_var;
-  NcxxVar _complex_forecast_rmse_mass_var;
-  NcxxVar _complex_forecast_rmse_proj_area_var;
-  NcxxVar _complex_forecast_rmse_smoothed_proj_area_centroid_x_var;
-  NcxxVar _complex_forecast_rmse_smoothed_proj_area_centroid_y_var;
-  NcxxVar _complex_forecast_rmse_smoothed_speed_var;
-  NcxxVar _complex_forecast_rmse_smoothed_direction_var;
+  TrackingStateVars _tstateVars;
+  TrackingParamsVars _tparamsVars;
+  SimpleTrackVars _simpleVars;
+  ComplexTrackVars _complexVars;
+  
+  // verification - global
+
+  ContingencyVars _ellipseVerifyGlobal;
+  ContingencyVars _polygonVerifyGlobal;
+
+  ForecastPropsVars _forecastPropsGlobal;
+  ForecastPropsVars _forecastBiasGlobal;
+  ForecastPropsVars _forecastRmseGlobal;
+
+  TrackVerifyVars _trackVerifyVars;
+  
+  // verification - per complex track
+
+  ContingencyVars _ellipseVerifyComplex;
+  ContingencyVars _polygonVerifyComplex;
   
   // storm file details
   
@@ -1163,7 +1183,6 @@ public:
   static constexpr const char* N_COMPLEX_TRACKS = "n_complex_tracks";
 
   static constexpr const char* TRACKING_N_SAMPLES_FOR_FORECAST_STATS = "tracking_n_samples_for_forecast_stats";
-  static constexpr const char* TRACKING_N_SCANS = "tracking_n_scans";
   static constexpr const char* TRACKING_LAST_SCAN_NUM = "tracking_last_scan_num";
   static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
   static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
@@ -1237,7 +1256,43 @@ public:
   static constexpr const char* COMPLEX_START_MISSING = "complex_start_missing";
   static constexpr const char* COMPLEX_END_MISSING = "complex_end_missing";
   static constexpr const char* COMPLEX_N_SAMPLES_FOR_FORECAST_STATS = "complex_n_samples_for_forecast_stats";
+
+  // track entry
+
+  static constexpr const char* ENTRY_TIME = "entry_time";
+  static constexpr const char* ENTRY_TIME_ORIGIN = "entry_time_origin";
+  static constexpr const char* ENTRY_SCAN_ORIGIN = "entry_scan_origin";
+  static constexpr const char* ENTRY_SCAN_NUM = "entry_scan_num";
+  static constexpr const char* ENTRY_STORM_NUM = "entry_storm_num";
+  static constexpr const char* ENTRY_SIMPLE_TRACK_NUM = "entry_simple_track_num";
+  static constexpr const char* ENTRY_COMPLEX_TRACK_NUM = "entry_complex_track_num";
+  static constexpr const char* ENTRY_HISTORY_IN_SCANS = "entry_history_in_scans";
+  static constexpr const char* ENTRY_HISTORY_IN_SECS = "entry_history_in_secs";
+  static constexpr const char* ENTRY_DURATION_IN_SCANS = "entry_duration_in_scans";
+  static constexpr const char* ENTRY_DURATION_IN_SECS = "entry_duration_in_secs";
+  static constexpr const char* ENTRY_FORECAST_VALID = "entry_forecast_valid";
+  static constexpr const char* ENTRY_PREV_ENTRY_OFFSET = "entry_prev_entry_offset";
+  static constexpr const char* ENTRY_THIS_ENTRY_OFFSET = "entry_this_entry_offset";
+  static constexpr const char* ENTRY_NEXT_ENTRY_OFFSET = "entry_next_entry_offset";
+  static constexpr const char* ENTRY_NEXT_SCAN_ENTRY_OFFSET = "entry_next_scan_entry_offset";
+
+  // entry dval_dt
   
+  static constexpr const char* ENTRY_DVAL_DT_PROJ_AREA_CENTROID_X = "entry_dval_dt_proj_area_centroid_x";
+  static constexpr const char* ENTRY_DVAL_DT_PROJ_AREA_CENTROID_Y = "entry_dval_dt_proj_area_centroid_y";
+  static constexpr const char* ENTRY_DVAL_DT_VOL_CENTROID_Z = "entry_dval_dt_vol_centroid_z";
+  static constexpr const char* ENTRY_DVAL_DT_REFL_CENTROID_Z = "entry_dval_dt_refl_centroid_z";
+  static constexpr const char* ENTRY_DVAL_DT_TOP = "entry_dval_dt_top";
+  static constexpr const char* ENTRY_DVAL_DT_DBZ_MAX = "entry_dval_dt_dbz_max";
+  static constexpr const char* ENTRY_DVAL_DT_VOLUME = "entry_dval_dt_volume";
+  static constexpr const char* ENTRY_DVAL_DT_PRECIP_FLUX = "entry_dval_dt_precip_flux";
+  static constexpr const char* ENTRY_DVAL_DT_MASS = "entry_dval_dt_mass";
+  static constexpr const char* ENTRY_DVAL_DT_PROJ_AREA = "entry_dval_dt_proj_area";
+  static constexpr const char* ENTRY_DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X = "entry_dval_dt_smoothed_proj_area_centroid_x";
+  static constexpr const char* ENTRY_DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y = "entry_dval_dt_smoothed_proj_area_centroid_y";
+  static constexpr const char* ENTRY_DVAL_DT_SMOOTHED_SPEED = "entry_dval_dt_smoothed_speed";
+  static constexpr const char* ENTRY_DVAL_DT_SMOOTHED_DIRECTION = "entry_dval_dt_smoothed_direction";
+
   // forecast bias
   
   static constexpr const char* FORECAST_BIAS_PROJ_AREA_CENTROID_X = "forecast_bias_proj_area_centroid_x";
