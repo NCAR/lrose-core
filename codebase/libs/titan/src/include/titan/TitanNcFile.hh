@@ -320,24 +320,24 @@ private:
   public:
     NcxxVar simple_track_num;
     NcxxVar last_descendant_simple_track_num;
-    NcxxVar simple_start_scan;
-    NcxxVar simple_end_scan;
-    NcxxVar simple_last_descendant_end_scan;
-    NcxxVar simple_scan_origin;
-    NcxxVar simple_start_time;
-    NcxxVar simple_end_time;
-    NcxxVar simple_last_descendant_end_time;
-    NcxxVar simple_time_origin;
-    NcxxVar simple_history_in_scans;
-    NcxxVar simple_history_in_secs;
-    NcxxVar simple_duration_in_scans;
-    NcxxVar simple_duration_in_secs;
-    NcxxVar simple_nparents;
-    NcxxVar simple_nchildren;
-    NcxxVar simple_parent;
-    NcxxVar simple_child;
-    NcxxVar complex_track_num_for_simple;
-    NcxxVar simple_first_entry_offset;
+    NcxxVar start_scan;
+    NcxxVar end_scan;
+    NcxxVar last_descendant_end_scan;
+    NcxxVar scan_origin;
+    NcxxVar start_time;
+    NcxxVar end_time;
+    NcxxVar last_descendant_end_time;
+    NcxxVar time_origin;
+    NcxxVar history_in_scans;
+    NcxxVar history_in_secs;
+    NcxxVar duration_in_scans;
+    NcxxVar duration_in_secs;
+    NcxxVar nparents;
+    NcxxVar nchildren;
+    NcxxVar parent;
+    NcxxVar child;
+    NcxxVar complex_track_num;
+    NcxxVar first_entry_offset;
   };
   
   // complex track vars
@@ -348,18 +348,18 @@ private:
     NcxxVar volume_at_start_of_sampling;
     NcxxVar volume_at_end_of_sampling;
     NcxxVar complex_track_num;
-    NcxxVar complex_start_scan;
-    NcxxVar complex_end_scan;
-    NcxxVar complex_duration_in_scans;
-    NcxxVar complex_duration_in_secs;
-    NcxxVar complex_start_time;
-    NcxxVar complex_end_time;
-    NcxxVar complex_n_simple_tracks;
-    NcxxVar complex_n_top_missing;
-    NcxxVar complex_n_range_limited;
-    NcxxVar complex_start_missing;
-    NcxxVar complex_end_missing;
-    NcxxVar complex_n_samples_for_forecast_stats;
+    NcxxVar start_scan;
+    NcxxVar end_scan;
+    NcxxVar duration_in_scans;
+    NcxxVar duration_in_secs;
+    NcxxVar start_time;
+    NcxxVar end_time;
+    NcxxVar n_simple_tracks;
+    NcxxVar n_top_missing;
+    NcxxVar n_range_limited;
+    NcxxVar start_missing;
+    NcxxVar end_missing;
+    NcxxVar n_samples_for_forecast_stats;
   };
   
   // track forecast properties
@@ -1257,42 +1257,32 @@ public:
 
   static constexpr const char* SIMPLE_TRACK_NUM = "simple_track_num";
   static constexpr const char* LAST_DESCENDANT_SIMPLE_TRACK_NUM = "last_descendant_simple_track_num";
-  static constexpr const char* SIMPLE_START_SCAN = "simple_start_scan";
-  static constexpr const char* SIMPLE_END_SCAN = "simple_end_scan";
-  static constexpr const char* SIMPLE_LAST_DESCENDANT_END_SCAN = "simple_last_descendant_end_scan";
-  static constexpr const char* SIMPLE_SCAN_ORIGIN = "simple_scan_origin";
-  static constexpr const char* SIMPLE_START_TIME = "simple_start_time";
-  static constexpr const char* SIMPLE_END_TIME = "simple_end_time";
-  static constexpr const char* SIMPLE_LAST_DESCENDANT_END_TIME = "simple_last_descendant_end_time";
-  static constexpr const char* SIMPLE_TIME_ORIGIN = "simple_time_origin";
-  static constexpr const char* SIMPLE_HISTORY_IN_SCANS = "simple_history_in_scans";
-  static constexpr const char* SIMPLE_HISTORY_IN_SECS = "simple_history_in_secs";
-  static constexpr const char* SIMPLE_DURATION_IN_SCANS = "simple_duration_in_scans";
-  static constexpr const char* SIMPLE_DURATION_IN_SECS = "simple_duration_in_secs";
-  static constexpr const char* SIMPLE_NPARENTS = "simple_nparents";
-  static constexpr const char* SIMPLE_NCHILDREN = "simple_nchildren";
-  static constexpr const char* SIMPLE_PARENT = "simple_parent";
-  static constexpr const char* SIMPLE_CHILD = "simple_child";
-  static constexpr const char* COMPLEX_TRACK_NUM_FOR_SIMPLE = "complex_track_num_for_simple";
-  static constexpr const char* SIMPLE_FIRST_ENTRY_OFFSET = "simple_first_entry_offset";
+  static constexpr const char* START_SCAN = "start_scan";
+  static constexpr const char* END_SCAN = "end_scan";
+  static constexpr const char* LAST_DESCENDANT_END_SCAN = "last_descendant_end_scan";
+  static constexpr const char* SCAN_ORIGIN = "scan_origin";
+  static constexpr const char* LAST_DESCENDANT_END_TIME = "last_descendant_end_time";
+  static constexpr const char* TIME_ORIGIN = "time_origin";
+  static constexpr const char* HISTORY_IN_SCANS = "history_in_scans";
+  static constexpr const char* HISTORY_IN_SECS = "history_in_secs";
+  static constexpr const char* DURATION_IN_SCANS = "duration_in_scans";
+  static constexpr const char* DURATION_IN_SECS = "duration_in_secs";
+  static constexpr const char* NPARENTS = "nparents";
+  static constexpr const char* NCHILDREN = "nchildren";
+  static constexpr const char* PARENT = "parent";
+  static constexpr const char* CHILD = "child";
+  static constexpr const char* FIRST_ENTRY_OFFSET = "first_entry_offset";
   
   // complex tracks
 
   static constexpr const char* VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
   static constexpr const char* VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
   static constexpr const char* COMPLEX_TRACK_NUM = "complex_track_num";
-  static constexpr const char* COMPLEX_START_SCAN = "complex_start_scan";
-  static constexpr const char* COMPLEX_END_SCAN = "complex_end_scan";
-  static constexpr const char* COMPLEX_DURATION_IN_SCANS = "complex_duration_in_scans";
-  static constexpr const char* COMPLEX_DURATION_IN_SECS = "complex_duration_in_secs";
-  static constexpr const char* COMPLEX_START_TIME = "complex_start_time";
-  static constexpr const char* COMPLEX_END_TIME = "complex_end_time";
-  static constexpr const char* COMPLEX_N_SIMPLE_TRACKS = "complex_n_simple_tracks";
-  static constexpr const char* COMPLEX_N_TOP_MISSING = "complex_n_top_missing";
-  static constexpr const char* COMPLEX_N_RANGE_LIMITED = "complex_n_range_limited";
-  static constexpr const char* COMPLEX_START_MISSING = "complex_start_missing";
-  static constexpr const char* COMPLEX_END_MISSING = "complex_end_missing";
-  static constexpr const char* COMPLEX_N_SAMPLES_FOR_FORECAST_STATS = "complex_n_samples_for_forecast_stats";
+  static constexpr const char* N_SIMPLE_TRACKS = "n_simple_tracks";
+  static constexpr const char* N_TOP_MISSING = "n_top_missing";
+  static constexpr const char* N_RANGE_LIMITED = "n_range_limited";
+  static constexpr const char* START_MISSING = "start_missing";
+  static constexpr const char* END_MISSING = "end_missing";
 
   // track entry
 

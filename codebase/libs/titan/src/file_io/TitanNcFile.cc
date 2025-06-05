@@ -518,7 +518,52 @@ void TitanNcFile::_setUpVars()
   _tstateVars.max_nweights_forecast = _getVar(MAX_NWEIGHTS_FORECAST_, NcxxType::nc_INT, _tracksGroup);
 
   // simple tracks
+
+  _simpleVars.simple_track_num = _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.last_descendant_simple_track_num =
+    _getVar(LAST_DESCENDANT_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.scan_origin = _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.last_descendant_end_scan =
+    _getVar(LAST_DESCENDANT_END_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.last_descendant_end_time =
+    _getVar(LAST_DESCENDANT_END_TIME, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.time_origin = _getVar(TIME_ORIGIN, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.history_in_scans = _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.history_in_secs = _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.nparents = _getVar(NPARENTS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.nchildren = _getVar(NCHILDREN, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.parent = _getVar(PARENT, NcxxType::nc_INT, _n_simple, _max_parents, _simpleGroup);
+  _simpleVars.child = _getVar(CHILD, NcxxType::nc_INT, _n_simple, _max_children, _simpleGroup);
+  _simpleVars.first_entry_offset = _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT64, _n_simple, _simpleGroup);
   
+  // complex tracks
+
+  _complexVars.volume_at_start_of_sampling =
+    _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.volume_at_end_of_sampling =
+    _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.start_missing = _getVar(START_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.end_missing = _getVar(END_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.n_samples_for_forecast_stats =
+    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+
 }
 
 /////////////////////////////////////////
