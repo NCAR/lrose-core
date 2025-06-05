@@ -473,6 +473,44 @@ void TitanNcFile::_setUpVars()
   _projRunsVars.run_iy = _getVar(RUN_IY, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   _projRunsVars.run_iz = _getVar(RUN_IZ, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   _projRunsVars.run_len = _getVar(RUN_LEN, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
+
+  // tracking parameters
+
+  _tparamsVars.forecast_weights = _getVar(FORECAST_WEIGHTS, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.weight_distance = _getVar(WEIGHT_DISTANCE, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.weight_delta_cube_root_volume
+    = _getVar(WEIGHT_DELTA_CUBE_ROOT_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.merge_split_search_ratio = _getVar(MERGE_SPLIT_SEARCH_RATIO, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.max_speed = _getVar(MAX_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.max_speed_for_valid_forecast =
+    _getVar(MAX_SPEED_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.parabolic_growth_period = _getVar(PARABOLIC_GROWTH_PERIOD, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.smoothing_radius = _getVar(SMOOTHING_RADIUS, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.min_fraction_overlap = _getVar(MIN_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.min_sum_fraction_overlap = _getVar(MIN_SUM_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.scale_forecasts_by_history =
+    _getVar(SCALE_FORECASTS_BY_HISTORY, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.use_runs_for_overlaps = _getVar(USE_RUNS_FOR_OVERLAPS, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.grid_type = _getVar(GRID_TYPE, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.nweights_forecast = _getVar(NWEIGHTS_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.forecast_type = _getVar(FORECAST_TYPE, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.max_delta_time = _getVar(MAX_DELTA_TIME, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.min_history_for_valid_forecast
+    = _getVar(MIN_HISTORY_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.spatial_smoothing = _getVar(SPATIAL_SMOOTHING, NcxxType::nc_FLOAT, _tracksGroup);
+
+  // tracking state
+  
+  _tstateVars.tracking_valid = _getVar(TRACKING_VALID, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.tracking_modify_code = _getVar(TRACKING_MODIFY_CODE, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.n_samples_for_forecast_stats =
+    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.last_scan_num = _getVar(LAST_SCAN_NUM, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.max_simple_track_num = _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.max_complex_track_num = _getVar(MAX_COMPLEX_TRACK_NUM, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.max_parents = _getVar(MAX_PARENTS_, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.max_children = _getVar(MAX_CHILDREN_, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.max_nweights_forecast = _getVar(MAX_NWEIGHTS_FORECAST_, NcxxType::nc_INT, _tracksGroup);
   
 }
 

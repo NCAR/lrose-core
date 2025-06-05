@@ -262,6 +262,31 @@ private:
     NcxxVar run_len;
   };
   
+  // tracking parameter vars
+
+  class TrackingParamsVars
+  {
+  public:
+    NcxxVar forecast_weights;
+    NcxxVar weight_distance;
+    NcxxVar weight_delta_cube_root_volume;
+    NcxxVar merge_split_search_ratio;
+    NcxxVar max_speed;
+    NcxxVar max_speed_for_valid_forecast;
+    NcxxVar parabolic_growth_period;
+    NcxxVar smoothing_radius;
+    NcxxVar min_fraction_overlap;
+    NcxxVar min_sum_fraction_overlap;
+    NcxxVar scale_forecasts_by_history;
+    NcxxVar use_runs_for_overlaps;
+    NcxxVar grid_type;
+    NcxxVar nweights_forecast;
+    NcxxVar forecast_type;
+    NcxxVar max_delta_time;
+    NcxxVar min_history_for_valid_forecast;
+    NcxxVar spatial_smoothing;
+  };
+  
   // tracking state vars
 
   class TrackingStateVars
@@ -269,42 +294,15 @@ private:
   public:
     NcxxVar tracking_valid;
     NcxxVar tracking_modify_code;
-    NcxxVar n_simple_tracks;
-    NcxxVar n_complex_tracks;
-    NcxxVar tracking_n_samples_for_forecast_stats;
-    NcxxVar tracking_last_scan_num;
+    NcxxVar n_samples_for_forecast_stats;
+    NcxxVar last_scan_num;
     NcxxVar max_simple_track_num;
     NcxxVar max_complex_track_num;
-    NcxxVar tracking_max_parents;
-    NcxxVar tracking_max_children;
-    NcxxVar tracking_max_nweights_forecast;
+    NcxxVar max_parents;
+    NcxxVar max_children;
+    NcxxVar max_nweights_forecast;
   };
 
-  // tracking parameter vars
-
-  class TrackingParamsVars
-  {
-  public:
-    NcxxVar tracking_forecast_weights;
-    NcxxVar tracking_weight_distance;
-    NcxxVar tracking_weight_delta_cube_root_volume;
-    NcxxVar tracking_merge_split_search_ratio;
-    NcxxVar tracking_max_speed;
-    NcxxVar tracking_max_speed_for_valid_forecast;
-    NcxxVar tracking_parabolic_growth_period;
-    NcxxVar tracking_smoothing_radius;
-    NcxxVar tracking_min_fraction_overlap;
-    NcxxVar tracking_min_sum_fraction_overlap;
-    NcxxVar tracking_scale_forecasts_by_history;
-    NcxxVar tracking_use_runs_for_overlaps;
-    NcxxVar tracking_grid_type;
-    NcxxVar tracking_nweights_forecast;
-    NcxxVar tracking_forecast_type;
-    NcxxVar tracking_max_delta_time;
-    NcxxVar tracking_min_history_for_valid_forecast;
-    NcxxVar tracking_spatial_smoothing;
-  };
-  
   // verification vars
 
   class ContingencyVars
@@ -845,7 +843,7 @@ protected:
   NcxxGroup _complexGroup;
   NcxxGroup _entriesGroup;
 
-  //////////////////////////////////
+  /////////////////////////////////////////////////////////////////
   // netcdf variables - grouped
   
   TopLevelVars _topLevelVars;
@@ -862,12 +860,12 @@ protected:
 
   // tracking
   
-  TrackingStateVars _tstateVars;
   TrackingParamsVars _tparamsVars;
+  TrackingStateVars _tstateVars;
   SimpleTrackVars _simpleVars;
   ComplexTrackVars _complexVars;
   
-  // verification - global
+  // tracking verification - global
 
   ContingencyVars _ellipseVerifyGlobalVars;
   ContingencyVars _polygonVerifyGlobalVars;
@@ -878,10 +876,12 @@ protected:
 
   TrackVerifyVars _trackVerifyVars;
   
-  // verification - per complex track
+  // tracking verification - per complex track
 
   ContingencyVars _ellipseVerifyComplexVars;
   ContingencyVars _polygonVerifyComplexVars;
+
+  //////////////////////////////////////////////////////////////
   
   // storm file details
   
@@ -1188,35 +1188,32 @@ public:
   static constexpr const char* TRACKING_VALID = "tracking_valid";
   static constexpr const char* TRACKING_MODIFY_CODE = "tracking_modify_code";
   
-  static constexpr const char* TRACKING_FORECAST_WEIGHTS = "tracking_forecast_weights";  
-  static constexpr const char* TRACKING_WEIGHT_DISTANCE = "tracking_weight_distance";
-  static constexpr const char* TRACKING_WEIGHT_DELTA_CUBE_ROOT_VOLUME = "tracking_weight_delta_cube_root_volume";
-  static constexpr const char* TRACKING_MERGE_SPLIT_SEARCH_RATIO = "tracking_merge_split_search_ratio";
-  static constexpr const char* TRACKING_MAX_SPEED = "tracking_max_speed";
-  static constexpr const char* TRACKING_MAX_SPEED_FOR_VALID_FORECAST = "tracking_max_speed_for_valid_forecast";
-  static constexpr const char* TRACKING_PARABOLIC_GROWTH_PERIOD = "tracking_parabolic_growth_period";
-  static constexpr const char* TRACKING_SMOOTHING_RADIUS = "tracking_smoothing_radius";
-  static constexpr const char* TRACKING_MIN_FRACTION_OVERLAP = "tracking_min_fraction_overlap";
-  static constexpr const char* TRACKING_MIN_SUM_FRACTION_OVERLAP = "tracking_min_sum_fraction_overlap";
-  static constexpr const char* TRACKING_SCALE_FORECASTS_BY_HISTORY = "tracking_scale_forecasts_by_history";
-  static constexpr const char* TRACKING_USE_RUNS_FOR_OVERLAPS = "tracking_use_runs_for_overlaps";
-  static constexpr const char* TRACKING_GRID_TYPE = "tracking_grid_type";
-  static constexpr const char* TRACKING_NWEIGHTS_FORECAST = "tracking_nweights_forecast";
-  static constexpr const char* TRACKING_FORECAST_TYPE = "tracking_forecast_type";
-  static constexpr const char* TRACKING_MAX_DELTA_TIME = "tracking_max_delta_time";
-  static constexpr const char* TRACKING_MIN_HISTORY_FOR_VALID_FORECAST = "tracking_min_history_for_valid_forecast";
-  static constexpr const char* TRACKING_SPATIAL_SMOOTHING = "tracking_spatial_smoothing";
+  static constexpr const char* FORECAST_WEIGHTS = "forecast_weights";  
+  static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
+  static constexpr const char* WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
+  static constexpr const char* MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
+  static constexpr const char* MAX_SPEED = "max_speed";
+  static constexpr const char* MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
+  static constexpr const char* PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
+  static constexpr const char* SMOOTHING_RADIUS = "smoothing_radius";
+  static constexpr const char* MIN_FRACTION_OVERLAP = "min_fraction_overlap";
+  static constexpr const char* MIN_SUM_FRACTION_OVERLAP = "min_sum_fraction_overlap";
+  static constexpr const char* SCALE_FORECASTS_BY_HISTORY = "scale_forecasts_by_history";
+  static constexpr const char* USE_RUNS_FOR_OVERLAPS = "use_runs_for_overlaps";
+  static constexpr const char* GRID_TYPE = "grid_type";
+  static constexpr const char* NWEIGHTS_FORECAST = "nweights_forecast";
+  static constexpr const char* FORECAST_TYPE = "forecast_type";
+  static constexpr const char* MAX_DELTA_TIME = "max_delta_time";
+  static constexpr const char* MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
+  static constexpr const char* SPATIAL_SMOOTHING = "spatial_smoothing";
 
-  static constexpr const char* N_SIMPLE_TRACKS = "n_simple_tracks";
-  static constexpr const char* N_COMPLEX_TRACKS = "n_complex_tracks";
-
-  static constexpr const char* TRACKING_N_SAMPLES_FOR_FORECAST_STATS = "tracking_n_samples_for_forecast_stats";
-  static constexpr const char* TRACKING_LAST_SCAN_NUM = "tracking_last_scan_num";
+  static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
+  static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
   static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
   static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
-  static constexpr const char* TRACKING_MAX_PARENTS = "tracking_max_parents";
-  static constexpr const char* TRACKING_MAX_CHILDREN = "tracking_max_children";
-  static constexpr const char* TRACKING_MAX_NWEIGHTS_FORECAST = "tracking_max_nweights_forecast";
+  static constexpr const char* MAX_PARENTS_ = "max_parents";
+  static constexpr const char* MAX_CHILDREN_ = "max_children";
+  static constexpr const char* MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";
 
   // verification contingency stats
   
