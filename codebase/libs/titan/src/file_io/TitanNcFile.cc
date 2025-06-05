@@ -564,6 +564,25 @@ void TitanNcFile::_setUpVars()
   _complexVars.n_samples_for_forecast_stats =
     _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
 
+  // track entries
+
+  _entryVars.time = _getVar(TIME, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.time_origin = _getVar(TIME_ORIGIN, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.scan_origin = _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.scan_num = _getVar(SCAN_NUM, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.simple_track_num = _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.history_in_scans = _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.history_in_secs = _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.forecast_valid = _getVar(FORECAST_VALID, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.prev_entry_offset = _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+
 }
 
 /////////////////////////////////////////

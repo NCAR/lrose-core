@@ -303,16 +303,6 @@ private:
     NcxxVar max_nweights_forecast;
   };
 
-  // verification vars
-
-  class ContingencyVars
-  {
-  public:
-    NcxxVar n_success;
-    NcxxVar n_failure;
-    NcxxVar n_false_alarm;
-  };
-
   // simple track vars
 
   class SimpleTrackVars
@@ -383,6 +373,29 @@ private:
     NcxxVar forecast_smoothed_direction;
   };
 
+  // track entry vars
+  
+  class TrackEntryVars
+  {
+  public:
+    NcxxVar time;
+    NcxxVar time_origin;
+    NcxxVar scan_origin;
+    NcxxVar scan_num;
+    NcxxVar storm_num;
+    NcxxVar simple_track_num;
+    NcxxVar complex_track_num;
+    NcxxVar history_in_scans;
+    NcxxVar history_in_secs;
+    NcxxVar duration_in_scans;
+    NcxxVar duration_in_secs;
+    NcxxVar forecast_valid;
+    NcxxVar prev_entry_offset;
+    NcxxVar this_entry_offset;
+    NcxxVar next_entry_offset;
+    NcxxVar next_scan_entry_offset;
+  };
+  
   // track verification
   
   class TrackVerifyVars
@@ -395,6 +408,16 @@ private:
     NcxxVar verify_forecast_min_history;
     NcxxVar verify_before_forecast_time;
     NcxxVar verify_after_track_dies;
+  };
+
+  // contingency table vars
+  
+  class ContingencyVars
+  {
+  public:
+    NcxxVar n_success;
+    NcxxVar n_failure;
+    NcxxVar n_false_alarm;
   };
 
 public:
@@ -875,6 +898,7 @@ protected:
   TrackingStateVars _tstateVars;
   SimpleTrackVars _simpleVars;
   ComplexTrackVars _complexVars;
+  TrackEntryVars _entryVars;
   
   // tracking verification - global
 
@@ -1020,6 +1044,7 @@ public:
 
   // top-level dimensions attributes
 
+  static constexpr const char* TIME = "time";
   static constexpr const char* FILE_TIME = "file_time";
   static constexpr const char* START_TIME = "start_time";
   static constexpr const char* END_TIME = "end_time";
@@ -1286,22 +1311,11 @@ public:
 
   // track entry
 
-  static constexpr const char* ENTRY_TIME = "entry_time";
-  static constexpr const char* ENTRY_TIME_ORIGIN = "entry_time_origin";
-  static constexpr const char* ENTRY_SCAN_ORIGIN = "entry_scan_origin";
-  static constexpr const char* ENTRY_SCAN_NUM = "entry_scan_num";
-  static constexpr const char* ENTRY_STORM_NUM = "entry_storm_num";
-  static constexpr const char* ENTRY_SIMPLE_TRACK_NUM = "entry_simple_track_num";
-  static constexpr const char* ENTRY_COMPLEX_TRACK_NUM = "entry_complex_track_num";
-  static constexpr const char* ENTRY_HISTORY_IN_SCANS = "entry_history_in_scans";
-  static constexpr const char* ENTRY_HISTORY_IN_SECS = "entry_history_in_secs";
-  static constexpr const char* ENTRY_DURATION_IN_SCANS = "entry_duration_in_scans";
-  static constexpr const char* ENTRY_DURATION_IN_SECS = "entry_duration_in_secs";
-  static constexpr const char* ENTRY_FORECAST_VALID = "entry_forecast_valid";
-  static constexpr const char* ENTRY_PREV_ENTRY_OFFSET = "entry_prev_entry_offset";
-  static constexpr const char* ENTRY_THIS_ENTRY_OFFSET = "entry_this_entry_offset";
-  static constexpr const char* ENTRY_NEXT_ENTRY_OFFSET = "entry_next_entry_offset";
-  static constexpr const char* ENTRY_NEXT_SCAN_ENTRY_OFFSET = "entry_next_scan_entry_offset";
+  static constexpr const char* FORECAST_VALID = "forecast_valid";
+  static constexpr const char* PREV_ENTRY_OFFSET = "entry_prev_entry_offset";
+  static constexpr const char* THIS_ENTRY_OFFSET = "this_entry_offset";
+  static constexpr const char* NEXT_ENTRY_OFFSET = "next_entry_offset";
+  static constexpr const char* NEXT_SCAN_ENTRY_OFFSET = "next_scan_entry_offset";
 
   // entry dval_dt
   
