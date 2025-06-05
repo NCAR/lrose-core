@@ -156,30 +156,14 @@ int TitanNcFile::openNcFile(const string &path,
     return -1;
   }
   
-  // set up groups
+  // set up netcdf groups
+
+  _setUpGroups();
+
+  // set up netcdf variables
+
+  _setUpVars();
   
-  _scansGroup = _setGroup(SCANS, _ncFile);
-  _stormsGroup = _setGroup(STORMS, _ncFile);
-  _tracksGroup = _setGroup(TRACKS, _ncFile);
-
-  _stormGpropsGroup = _setGroup(GPROPS, _stormsGroup);
-  _stormLpropsGroup = _setGroup(LPROPS, _stormsGroup);
-  _stormHistGroup = _setGroup(HIST, _stormsGroup);
-  _stormRunsGroup = _setGroup(RUNS, _stormsGroup);
-  _stormProjRunsGroup = _setGroup(PROJ_RUNS, _stormsGroup);
-
-  _simpleTrackGroup = _setGroup(SIMPLE, _tracksGroup);
-  _complexTrackGroup = _setGroup(COMPLEX, _tracksGroup);
-  _trackEntryGroup = _setGroup(ENTRY, _tracksGroup);
-
-  // set up variables
-  
-  _topLevel.file_time = _setVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevel.start_time = _setVar(START_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevel.end_time = _setVar(END_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevel.n_scans = _setVar(N_SCANS, NcxxType::nc_INT, _ncFile);
-  
-
   return 0;
   
 }
@@ -193,9 +177,31 @@ void TitanNcFile::closeNcFile()
 }
      
 /////////////////////////////////////////
-// set group relative to a parent group
+// set up groups
 
-NcxxGroup TitanNcFile::_setGroup(const std::string& name,
+void TitanNcFile::_setUpGroups()
+{
+
+  _scansGroup = _getGroup(SCANS, _ncFile);
+  _stormsGroup = _getGroup(STORMS, _ncFile);
+  _tracksGroup = _getGroup(TRACKS, _ncFile);
+
+  _gpropsGroup = _getGroup(GPROPS, _stormsGroup);
+  _lpropsGroup = _getGroup(LPROPS, _stormsGroup);
+  _histGroup = _getGroup(HIST, _stormsGroup);
+  _runsGroup = _getGroup(RUNS, _stormsGroup);
+  _projRunsGroup = _getGroup(PROJ_RUNS, _stormsGroup);
+
+  _simpleGroup = _getGroup(SIMPLE, _tracksGroup);
+  _complexGroup = _getGroup(COMPLEX, _tracksGroup);
+  _entriesGroup = _getGroup(ENTRIES, _tracksGroup);
+
+}
+
+/////////////////////////////////////////
+// get group relative to a parent group
+
+NcxxGroup TitanNcFile::_getGroup(const std::string& name,
                                  NcxxGroup &parent)
 {
 
@@ -216,15 +222,209 @@ NcxxGroup TitanNcFile::_setGroup(const std::string& name,
 }
 
 /////////////////////////////////////////
+// set up dimensions
+
+void TitanNcFile::_setUpDims()
+
+{
+
+  _n_scans = _getDim(N_SCANS, _scansGroup);
+  _n_storms = _getDim(N_STORMS, _stormsGroup);
+  _n_simple = _getDim(N_SIMPLE, _simpleGroup);
+  _n_complex = _getDim(N_COMPLEX, _complexGroup);
+  _n_entries = _getDim(N_ENTRIES, _entriesGroup);
+  _n_poly = _getDim(N_POLY, N_POLY_SIDES, _stormsGroup);
+  
+}
+
+/////////////////////////////////////////
+// get dimension
+
+NcxxDim TitanNcFile::_getDim(const std::string& name,
+                             NcxxGroup &group)
+{
+  NcxxDim dim = group.getDim(name, NcxxGroup::All);
+  if (dim.isNull()) {
+    dim = group.addDim(name);
+  }
+  return dim;
+}
+
+NcxxDim TitanNcFile::_getDim(const std::string& name,
+                             size_t dimSize,
+                             NcxxGroup &group)
+{
+  NcxxDim dim = group.getDim(name, NcxxGroup::All);
+  if (dim.isNull()) {
+    dim = group.addDim(name, dimSize);
+  }
+  return dim;
+}
+
+/////////////////////////////////////////
+// set up variables
+
+void TitanNcFile::_setUpVars()
+
+{
+
+  // top level
+  
+  _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
+  
+  // scans
+
+  _scanVars.scan_min_z = _getVar(SCAN_MIN_Z, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.scan_delta_z = _getVar(SCAN_DELTA_Z, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.scan_num = _getVar(SCAN_NUM, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.scan_nstorms = _getVar(SCAN_NSTORMS, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.scan_time = _getVar(SCAN_TIME, NcxxType::nc_INT64, _n_scans, _scansGroup);
+  _scanVars.scan_gprops_offset = _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
+  _scanVars.scan_first_offset = _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
+  _scanVars.scan_last_offset = _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
+  _scanVars.scan_ht_of_freezing = _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_nx = _getVar(GRID_NX, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.grid_ny = _getVar(GRID_NY, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.grid_nz = _getVar(GRID_NZ, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.grid_minx = _getVar(GRID_MINX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_miny = _getVar(GRID_MINY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_minz = _getVar(GRID_MINZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_dx = _getVar(GRID_DX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_dy = _getVar(GRID_DY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_dz = _getVar(GRID_DZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_dz_constant = _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_x = _getVar(GRID_SENSOR_X, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_y = _getVar(GRID_SENSOR_Y, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_z = _getVar(GRID_SENSOR_Z, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_lat = _getVar(GRID_SENSOR_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_lon = _getVar(GRID_SENSOR_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_unitsx = _getVar(GRID_UNITSX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_unitsy = _getVar(GRID_UNITSY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_central_scale = _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+
+  // storm params
+
+  // storm global props
+
+  _gpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.vol_centroid_z = _getVar(VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.refl_centroid_z = _getVar(REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.top = _getVar(TOP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.base = _getVar(BASE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.volume = _getVar(VOLUME, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.area_mean = _getVar(AREA_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_flux = _getVar(PRECIP_FLUX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.tilt_angle = _getVar(TILT_ANGLE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.tilt_dirn = _getVar(TILT_DIRN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_max_gradient = _getVar(DBZ_MAX_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_mean_gradient = _getVar(DBZ_MEAN_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.ht_of_dbz_max = _getVar(HT_OF_DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area = _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_centroid_x = _getVar(PRECIP_AREA_CENTROID_X,
+                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_centroid_y = _getVar(PRECIP_AREA_CENTROID_Y,
+                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_orientation = _getVar(PRECIP_AREA_ORIENTATION,
+                                                NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_minor_radius = _getVar(PRECIP_AREA_MINOR_RADIUS,
+                                                 NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_major_radius = _getVar(PRECIP_AREA_MAJOR_RADIUS,
+                                                 NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area = _getVar(PROJ_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_centroid_x = _getVar(PROJ_AREA_CENTROID_X,
+                                             NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_centroid_y = _getVar(PROJ_AREA_CENTROID_Y,
+                                             NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_orientation = _getVar(PROJ_AREA_ORIENTATION,
+                                              NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_minor_radius = _getVar(PROJ_AREA_MINOR_RADIUS,
+                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_major_radius = _getVar(PROJ_AREA_MAJOR_RADIUS,
+                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_polygon = _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_layers = _getVar(N_LAYERS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.base_layer = _getVar(BASE_LAYER, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_dbz_intervals = _getVar(N_DBZ_INTERVALS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_runs = _getVar(N_RUNS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_proj_runs = _getVar(N_PROJ_RUNS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.top_missing = _getVar(TOP_MISSING, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.range_limited = _getVar(RANGE_LIMITED, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.second_trip = _getVar(SECOND_TRIP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_present = _getVar(HAIL_PRESENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.anom_prop = _getVar(ANOM_PROP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_min_ix = _getVar(BOUNDING_MIN_IX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_min_iy = _getVar(BOUNDING_MIN_IY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_max_ix = _getVar(BOUNDING_MAX_IX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_max_iy = _getVar(BOUNDING_MAX_IY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.vil_from_maxz = _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.ltg_count = _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_FOKRcategory = _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_waldvogelProbability = _getVar(HAIL_WALDVOGELPROBABILITY,
+                                                  NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_hailMassAloft = _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_vihm = _getVar(HAIL_VIHM, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_poh = _getVar(HAIL_POH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_shi = _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_posh = _getVar(HAIL_POSH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_mehs = _getVar(HAIL_MEHS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  
+
+  
+  
+}
+
+/////////////////////////////////////////
 // set scalar variable
 
-NcxxVar TitanNcFile::_setVar(const std::string& name,
+NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxType& ncType,
                              NcxxGroup &group)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType);
+  }
+  return var;
+}
+
+/////////////////////////////////////////
+// set array variable
+
+NcxxVar TitanNcFile::_getVar(const std::string& name,
+                             const NcxxType& ncType,
+                             const NcxxDim& dim,
+                             NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    var = group.addVar(name, ncType, dim);
   }
   return var;
 }

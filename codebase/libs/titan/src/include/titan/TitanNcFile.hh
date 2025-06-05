@@ -47,419 +47,10 @@ using namespace std;
 class TitanNcFile
 {
 
-public:
+private:
   
-  // constructor
-  
-  TitanNcFile();
-  
-  // destructor
-  
-  virtual ~TitanNcFile();
-
-  // storm data access
-
-  const storm_file_header_t &storm_header() const { return _storm_header; }
-  const storm_file_params_t &storm_params() const { return _storm_header.params; }
-  const storm_file_scan_header_t &scan() const { return _scan; }
-  const storm_file_global_props_t *gprops() const { return _gprops; }
-  const storm_file_layer_props_t *lprops() const { return _lprops; }
-  const storm_file_dbz_hist_t *hist() const { return _hist; }
-  const storm_file_run_t *runs() const { return _runs; }
-  const storm_file_run_t *proj_runs() const { return _proj_runs; }
-  const int *scan_offsets() const { return _scan_offsets; }
-  int storm_num() const { return _storm_num; }
-  
-  const string &storm_header_file_path() { return _storm_header_file_path; }
-  const string &storm_header_file_label() { return _storm_header_file_label; }
-  const string &storm_data_file_path() { return _storm_data_file_path; }
-  const string &storm_data_file_label() { return _storm_data_file_label; }
-
-  // track data access
-
-  const track_file_header_t &track_header() const { return _track_header; }
-  const track_file_params_t &track_params() const { return _track_header.params; }
-  const simple_track_params_t &simple_params() const;
-  const complex_track_params_t &complex_params() const;
-  const track_file_entry_t &entry() const { return _entry; }
-  const track_file_entry_t *scan_entries() const { return _scan_entries; }
-  const track_file_scan_index_t *scan_index() const { return _scan_index; }
-  const track_utime_t *track_utime() const { return _track_utime; }
-  int n_scan_entries() { return _n_scan_entries; }
-  
-  const string &track_header_file_path() { return _track_header_file_path; }
-  const string &track_header_file_label() { return _track_header_file_label; }
-  const string &track_data_file_path() { return _track_data_file_path; }
-  const string &track_data_file_label() { return _track_data_file_label; }
-
-  const si32 *complex_track_nums() { return _complex_track_nums; }
-  const si32 *complex_track_offsets() { return _complex_track_offsets; }
-  const si32 *simple_track_offsets() { return _simple_track_offsets; }
-  const si32 *nsimples_per_complex() { return _nsimples_per_complex; }
-  const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
-  si32 **simples_per_complex() { return _simples_per_complex; }
-
-  // public functions
-
-  // memory allocation and freeing - storms
-
-  void AllocLayers(int n_layers);
-  void FreeLayers();
-  void AllocHist(int n_dbz_intervals);
-  void FreeHist();
-  void AllocRuns(int n_runs);
-  void FreeRuns();
-  void AllocProjRuns(int n_proj_runs);
-  void FreeProjRuns();
-  void AllocGprops(int nstorms);
-  void FreeGprops();
-  void AllocScanOffsets(int n_scans_needed);
-  void FreeScanOffsets();
-  void FreeStormsAll();
-    
-  // memory allocation and freeing - tracks
-
-  void AllocSimpleArrays(int n_simple_needed);
-  void FreeSimpleArrays();
-  void AllocComplexArrays(int n_complex_needed);
-  void FreeComplexArrays();
-  void AllocSimplesPerComplex(int n_simple_needed);
-  void FreeSimplesPerComplex();
-  void AllocScanEntries(int n_entries_needed);
-  void FreeScanEntries();
-  void AllocScanIndex(int n_scans_needed);
-  void FreeScanIndex();
-  void AllocUtime();
-  void FreeUtime();
-  void FreeTracksAll();
-
-  /////////////////////////////////////////////////////
-  // NetCDF FileIO
-  
-  int openNcFile(const string &path,
-                 NcxxFile::FileMode mode);
-  
-  void closeNcFile();
-  
-  /////////////////////////////////////////
-  // set group relative to a parent group
-  
-  NcxxGroup _setGroup(const std::string& name,
-                      NcxxGroup &parent);
-  
-  /////////////////////////////////////////////////////
-  // set scalar variable
-  
-  NcxxVar _setVar(const std::string& name,
-                  const NcxxType& ncType,
-                  NcxxGroup &group);
-  
-  /////////////////////////////////////////////////////
-  // Storms
-  
-  // Open the storm header and data files
-  
-  int OpenStormFiles(const char *mode,
-                     const char *header_file_path,
-                     const char *data_file_ext = NULL);
-  
-  // Close the storm header and data files
-
-  void CloseStormFiles();
-  
-  // Flush the storm header and data files
-  
-  void FlushStormFiles();
-  
-  // Put an advisory lock on the header file
-  // Mode is "w" - write lock, or "r" - read lock.
-  // returns 0 on success, -1 on failure
-  
-  int LockStormHeaderFile(const char *mode);
-  
-  // Remove advisory lock from the header file
-  // returns 0 on success, -1 on failure
-
-  int UnlockStormHeaderFile();
-  
-  // read the storm file header
-
-  int ReadStormHeader(bool clear_error_str = true);
-     
-  // read in the storm projected area runs
-  // Space for the array is allocated.
-  // returns 0 on success, -1 on failure
-
-  int ReadProjRuns(int storm_num);
-     
-  // Read in the scan info and global props for a particular scan
-  // in a storm properties file.
-  // If storm num is set, only the gprops for that storm is swapped
-  // returns 0 on success, -1 on failure
-
-  int ReadScan(int scan_num, int storm_num = -1);
-  
-  // read in the seconday storm property data (lprops, hist, runs)
-  // for a given storm in a scan.
-  // Space for the arrays of structures is allocated as required.
-  // returns 0 on success, -1 on failure
-
-  int ReadProps(int storm_num);
-     
-  // seek to the end of the storm data in data file
-  // returns 0 on success, -1 on failure
-
-  int SeekStormEndData();
-
-  // seek to the start of the storm data in data file
-  // returns 0 on success, -1 on failure
-
-  int SeekStormStartData();
-  
-  // write the storm_file_header_t structure to a storm file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteStormHeader(const storm_file_header_t &storm_file_header);
-     
-  // write the storm layer property and histogram data for a storm,
-  // at the end of the file.
-  // returns 0 on success, -1 on failure
-
-  int WriteProps(int storm_num);
-
-  // write scan header and global properties for a particular scan
-  // in a storm properties file.
-  // Performs the writes from the end of the file.
-  // returns 0 on success, -1 on failure
-  
-  int WriteScan(int scan_num);
-     
-  // Convert the ellipse data (orientation, major_radius and minor_radius)
-  // for a a gprops struct to local (km) values.
-  // This applies to structs which were derived from lat-lon grids, for
-  // which some of the fields are in deg instead of km.
-  // It is a no-op for other projections.
-  //
-  // See Note 3 in storms.h
-
-  void GpropsEllipses2Km(const storm_file_scan_header_t &scan,
-			 storm_file_global_props_t &gprops);
-  
-     
-  // Convert the (x,y) km locations in a gprops struct to lat-lon.
-  // This applies to structs which were computed for non-latlon 
-  // grids. It is a no-op for lat-lon grids.
-  //
-  // See Note 3 in storms.h
-  
-  void GpropsXY2LatLon(const storm_file_scan_header_t &scan,
-		       storm_file_global_props_t &gprops);
-  
-  // Truncate header file
-  // Returns 0 on success, -1 on failure.
-
-  int TruncateStormHeaderFile(int length);
-
-  // Truncate data file
-  // Returns 0 on success, -1 on failure.
-
-  int TruncateStormDataFile(int length);
-
-  /////////////////////////////////////////////////////
-  // Tracks
-  
-  // Open the track header and data files
-  // Returns 0 on success, -1 on error
-
-  int OpenTrackFiles(const char *mode,
-                     const char *header_file_path,
-                     const char *data_file_ext = NULL);
-  
-  // Close the storm header and data files
-
-  void CloseTrackFiles();
-     
-  // Flush the storm header and data files
-
-  void FlushTrackFiles();
-  
-  // Put an advisory lock on the header file.
-  // Mode is "w" - write lock, or "r" - read lock.
-  // returns 0 on success, -1 on failure
-
-  int LockTrackHeaderFile(const char *mode);
-
-  // Remove advisory lock from the header file
-  // returns 0 on success, -1 on failure
-
-  int UnlockTrackHeaderFile();
-  
-  // read in the track_file_header_t structure from a track file.
-  // Read in associated arrays (complex_track_nums, complex_track_offsets,
-  //   simple_track_offsets, scan_index, nsimples_per_complex,
-  //   simples_per_complex_offsets)
-  // returns 0 on success, -1 on failure
-
-  int ReadTrackHeader(bool clear_error_str = true);
-     
-  // Read in the track_file_header_t and scan_index array.
-  // returns 0 on success, -1 on failure
-
-  int ReadScanIndex(bool clear_error_str = true);
-     
-  // reads in the parameters for a complex track
-  // For normal reads, read_simples_per_complex should be set true. This
-  // is only set FALSE in Titan, which creates the track files.
-  // returns 0 on success, -1 on failure
-  
-  int ReadComplexParams(int track_num, bool read_simples_per_complex,
-			bool clear_error_str = true);
-     
-  // read in the parameters for a simple track
-  // returns 0 on success, -1 on failure
-
-  int ReadSimpleParams(int track_num,
-		       bool clear_error_str = true);
-     
-  // read in an entry for a track
-  // If first_entry is set to TRUE, then the first entry is read in. If not
-  // the next entry is read in.
-  // returns 0 on success, -1 on failure
-  
-  int ReadEntry();
-  
-  // read in the array of simple tracks for each complex track
-  // returns 0 on success, -1 on failure
-  
-  int ReadSimplesPerComplex();
-  
-  // read in entries for a scan
-  // returns 0 on success, -1 on failure
-
-  int ReadScanEntries(int scan_num);
-     
-  // read in track_utime_t array
-  // Returns 0 on success or -1 on error
-
-  int ReadUtime();
-  
-  // Reinitialize headers and arrays
-
-  void Reinit();
-
-  // Set a complex params slot in the file available for
-  // reuse, by setting the offset to its negative value.
-  // returns 0 on success, -1 on failure
-
-  int ReuseComplexSlot(int track_num);
-     
-  // prepare a simple track for reading by reading in the simple track
-  // params and setting the first_entry flag
-  // returns 0 on success, -1 on failure
-
-  int RewindSimple(int track_num);
-     
-  // rewrite an entry for a track in the track data file
-  // The entry is written at the file offset of the original entry
-  // returns 0 on success, -1 on failure
-  
-  int RewriteEntry();
-     
-  // seek to the end of the track file data
-
-  int SeekTrackEndData();
-
-  // seek to the start of data in track data file
-
-  int SeekTrackStartData();
-     
-  // write the track_file_header_t structure to a track data file
-  // returns 0 on success, -1 on failure
-
-  int WriteTrackHeader();
-
-  // write simple track params at the end of the file
-  // returns 0 on success, -1 on failure
-  
-  int WriteSimpleParams(int track_num);
-     
-  // write complex track params
-  // returns 0 on success, -1 on failure
-  
-  int WriteComplexParams(int track_num);
-     
-  // write an entry for a track in the track data file
-  // The entry is written at the end of the file
-  // returns offset of last entry written on success, -1 on failure
-  
-  long WriteEntry(int prev_in_track_offset,
-		  int prev_in_scan_offset);
-     
-  ///////////////////////////////////////////////////////////////////
-  // error string
-  
-  const string &getErrStr() { return (_errStr); }
-
-  /// add integer value to error string, with label
-  
-  void _addErrInt(string label, int iarg,
-                  bool cr = true);
-  
-  /// add double value to error string, with label
-  
-  void _addErrDbl(string label, double darg,
-                  string format = "%g", bool cr = true);
-
-  /// add string value to error string, with label
-  
-  void _addErrStr(string label, string strarg = "",
-                  bool cr = true);
-
-protected:
-
-  // format version
-
-  string _convention;
-  string _version;
-  
-  // netcdf file
-  
-  NcxxFile _ncFile;
-  string _tmpPath;
-
   ////////////////////////////////////////////////////////
-  // dimensions
-  
-  NcxxDim _scans;
-  NcxxDim _storms;
-  NcxxDim _simpleTracks;
-  NcxxDim _complexTracks;
-
-  ////////////////////////////////////////////////////////
-  // groups
-  
-  // top level groups
-  
-  NcxxGroup _scansGroup;
-  NcxxGroup _stormsGroup;
-  NcxxGroup _tracksGroup;
-
-  // storms group
-  
-  NcxxGroup _stormGpropsGroup;
-  NcxxGroup _stormLpropsGroup;
-  NcxxGroup _stormHistGroup;
-  NcxxGroup _stormRunsGroup;
-  NcxxGroup _stormProjRunsGroup;
-
-  // tracks group
-  
-  NcxxGroup _simpleTrackGroup;
-  NcxxGroup _complexTrackGroup;
-  NcxxGroup _trackEntryGroup;
-
-  ////////////////////////////////////////////////////////
-  // classes for netcdf variables
+  // inner classes for netcdf variables
 
   // top level
 
@@ -809,10 +400,452 @@ protected:
     NcxxVar verify_after_track_dies;
   };
 
+public:
+  
+  // constructor
+  
+  TitanNcFile();
+  
+  // destructor
+  
+  virtual ~TitanNcFile();
+
+  // storm data access
+
+  const storm_file_header_t &storm_header() const { return _storm_header; }
+  const storm_file_params_t &storm_params() const { return _storm_header.params; }
+  const storm_file_scan_header_t &scan() const { return _scan; }
+  const storm_file_global_props_t *gprops() const { return _gprops; }
+  const storm_file_layer_props_t *lprops() const { return _lprops; }
+  const storm_file_dbz_hist_t *hist() const { return _hist; }
+  const storm_file_run_t *runs() const { return _runs; }
+  const storm_file_run_t *proj_runs() const { return _proj_runs; }
+  const int *scan_offsets() const { return _scan_offsets; }
+  int storm_num() const { return _storm_num; }
+  
+  const string &storm_header_file_path() { return _storm_header_file_path; }
+  const string &storm_header_file_label() { return _storm_header_file_label; }
+  const string &storm_data_file_path() { return _storm_data_file_path; }
+  const string &storm_data_file_label() { return _storm_data_file_label; }
+
+  // track data access
+
+  const track_file_header_t &track_header() const { return _track_header; }
+  const track_file_params_t &track_params() const { return _track_header.params; }
+  const simple_track_params_t &simple_params() const;
+  const complex_track_params_t &complex_params() const;
+  const track_file_entry_t &entry() const { return _entry; }
+  const track_file_entry_t *scan_entries() const { return _scan_entries; }
+  const track_file_scan_index_t *scan_index() const { return _scan_index; }
+  const track_utime_t *track_utime() const { return _track_utime; }
+  int n_scan_entries() { return _n_scan_entries; }
+  
+  const string &track_header_file_path() { return _track_header_file_path; }
+  const string &track_header_file_label() { return _track_header_file_label; }
+  const string &track_data_file_path() { return _track_data_file_path; }
+  const string &track_data_file_label() { return _track_data_file_label; }
+
+  const si32 *complex_track_nums() { return _complex_track_nums; }
+  const si32 *complex_track_offsets() { return _complex_track_offsets; }
+  const si32 *simple_track_offsets() { return _simple_track_offsets; }
+  const si32 *nsimples_per_complex() { return _nsimples_per_complex; }
+  const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
+  si32 **simples_per_complex() { return _simples_per_complex; }
+
+  // public functions
+
+  // memory allocation and freeing - storms
+
+  void AllocLayers(int n_layers);
+  void FreeLayers();
+  void AllocHist(int n_dbz_intervals);
+  void FreeHist();
+  void AllocRuns(int n_runs);
+  void FreeRuns();
+  void AllocProjRuns(int n_proj_runs);
+  void FreeProjRuns();
+  void AllocGprops(int nstorms);
+  void FreeGprops();
+  void AllocScanOffsets(int n_scans_needed);
+  void FreeScanOffsets();
+  void FreeStormsAll();
+    
+  // memory allocation and freeing - tracks
+
+  void AllocSimpleArrays(int n_simple_needed);
+  void FreeSimpleArrays();
+  void AllocComplexArrays(int n_complex_needed);
+  void FreeComplexArrays();
+  void AllocSimplesPerComplex(int n_simple_needed);
+  void FreeSimplesPerComplex();
+  void AllocScanEntries(int n_entries_needed);
+  void FreeScanEntries();
+  void AllocScanIndex(int n_scans_needed);
+  void FreeScanIndex();
+  void AllocUtime();
+  void FreeUtime();
+  void FreeTracksAll();
+
+  /////////////////////////////////////////////////////
+  // NetCDF FileIO
+  
+  int openNcFile(const string &path,
+                 NcxxFile::FileMode mode);
+  
+  void closeNcFile();
+
+  /////////////////////////////////////////////////////
+  // set up groups
+
+  void _setUpGroups();
+  
+  // get group relative to a parent group
+  
+  NcxxGroup _getGroup(const std::string& name,
+                      NcxxGroup &parent);
+  
+  /////////////////////////////////////////////////////
+  // set up dimensions
+
+  void _setUpDims();
+  
+  // get dim relative to a parent group
+  
+  NcxxDim _getDim(const std::string& name,
+                  NcxxGroup &parent);
+  
+  NcxxDim _getDim(const std::string& name,
+                  size_t dimSize,
+                  NcxxGroup &parent);
+  
+  /////////////////////////////////////////////////////
+  // set up variables
+
+  void _setUpVars();
+  
+  // get scalar variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  NcxxGroup &group);
+  
+  // get array variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  const NcxxDim& dim,
+                  NcxxGroup &group);
+  
+  /////////////////////////////////////////////////////
+  // Storms
+  
+  // Open the storm header and data files
+  
+  int OpenStormFiles(const char *mode,
+                     const char *header_file_path,
+                     const char *data_file_ext = NULL);
+  
+  // Close the storm header and data files
+
+  void CloseStormFiles();
+  
+  // Flush the storm header and data files
+  
+  void FlushStormFiles();
+  
+  // Put an advisory lock on the header file
+  // Mode is "w" - write lock, or "r" - read lock.
+  // returns 0 on success, -1 on failure
+  
+  int LockStormHeaderFile(const char *mode);
+  
+  // Remove advisory lock from the header file
+  // returns 0 on success, -1 on failure
+
+  int UnlockStormHeaderFile();
+  
+  // read the storm file header
+
+  int ReadStormHeader(bool clear_error_str = true);
+     
+  // read in the storm projected area runs
+  // Space for the array is allocated.
+  // returns 0 on success, -1 on failure
+
+  int ReadProjRuns(int storm_num);
+     
+  // Read in the scan info and global props for a particular scan
+  // in a storm properties file.
+  // If storm num is set, only the gprops for that storm is swapped
+  // returns 0 on success, -1 on failure
+
+  int ReadScan(int scan_num, int storm_num = -1);
+  
+  // read in the seconday storm property data (lprops, hist, runs)
+  // for a given storm in a scan.
+  // Space for the arrays of structures is allocated as required.
+  // returns 0 on success, -1 on failure
+
+  int ReadProps(int storm_num);
+     
+  // seek to the end of the storm data in data file
+  // returns 0 on success, -1 on failure
+
+  int SeekStormEndData();
+
+  // seek to the start of the storm data in data file
+  // returns 0 on success, -1 on failure
+
+  int SeekStormStartData();
+  
+  // write the storm_file_header_t structure to a storm file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteStormHeader(const storm_file_header_t &storm_file_header);
+     
+  // write the storm layer property and histogram data for a storm,
+  // at the end of the file.
+  // returns 0 on success, -1 on failure
+
+  int WriteProps(int storm_num);
+
+  // write scan header and global properties for a particular scan
+  // in a storm properties file.
+  // Performs the writes from the end of the file.
+  // returns 0 on success, -1 on failure
+  
+  int WriteScan(int scan_num);
+     
+  // Convert the ellipse data (orientation, major_radius and minor_radius)
+  // for a a gprops struct to local (km) values.
+  // This applies to structs which were derived from lat-lon grids, for
+  // which some of the fields are in deg instead of km.
+  // It is a no-op for other projections.
+  //
+  // See Note 3 in storms.h
+
+  void GpropsEllipses2Km(const storm_file_scan_header_t &scan,
+			 storm_file_global_props_t &gprops);
+  
+     
+  // Convert the (x,y) km locations in a gprops struct to lat-lon.
+  // This applies to structs which were computed for non-latlon 
+  // grids. It is a no-op for lat-lon grids.
+  //
+  // See Note 3 in storms.h
+  
+  void GpropsXY2LatLon(const storm_file_scan_header_t &scan,
+		       storm_file_global_props_t &gprops);
+  
+  // Truncate header file
+  // Returns 0 on success, -1 on failure.
+
+  int TruncateStormHeaderFile(int length);
+
+  // Truncate data file
+  // Returns 0 on success, -1 on failure.
+
+  int TruncateStormDataFile(int length);
+
+  /////////////////////////////////////////////////////
+  // Tracks
+  
+  // Open the track header and data files
+  // Returns 0 on success, -1 on error
+
+  int OpenTrackFiles(const char *mode,
+                     const char *header_file_path,
+                     const char *data_file_ext = NULL);
+  
+  // Close the storm header and data files
+
+  void CloseTrackFiles();
+     
+  // Flush the storm header and data files
+
+  void FlushTrackFiles();
+  
+  // Put an advisory lock on the header file.
+  // Mode is "w" - write lock, or "r" - read lock.
+  // returns 0 on success, -1 on failure
+
+  int LockTrackHeaderFile(const char *mode);
+
+  // Remove advisory lock from the header file
+  // returns 0 on success, -1 on failure
+
+  int UnlockTrackHeaderFile();
+  
+  // read in the track_file_header_t structure from a track file.
+  // Read in associated arrays (complex_track_nums, complex_track_offsets,
+  //   simple_track_offsets, scan_index, nsimples_per_complex,
+  //   simples_per_complex_offsets)
+  // returns 0 on success, -1 on failure
+
+  int ReadTrackHeader(bool clear_error_str = true);
+     
+  // Read in the track_file_header_t and scan_index array.
+  // returns 0 on success, -1 on failure
+
+  int ReadScanIndex(bool clear_error_str = true);
+     
+  // reads in the parameters for a complex track
+  // For normal reads, read_simples_per_complex should be set true. This
+  // is only set FALSE in Titan, which creates the track files.
+  // returns 0 on success, -1 on failure
+  
+  int ReadComplexParams(int track_num, bool read_simples_per_complex,
+			bool clear_error_str = true);
+     
+  // read in the parameters for a simple track
+  // returns 0 on success, -1 on failure
+
+  int ReadSimpleParams(int track_num,
+		       bool clear_error_str = true);
+     
+  // read in an entry for a track
+  // If first_entry is set to TRUE, then the first entry is read in. If not
+  // the next entry is read in.
+  // returns 0 on success, -1 on failure
+  
+  int ReadEntry();
+  
+  // read in the array of simple tracks for each complex track
+  // returns 0 on success, -1 on failure
+  
+  int ReadSimplesPerComplex();
+  
+  // read in entries for a scan
+  // returns 0 on success, -1 on failure
+
+  int ReadScanEntries(int scan_num);
+     
+  // read in track_utime_t array
+  // Returns 0 on success or -1 on error
+
+  int ReadUtime();
+  
+  // Reinitialize headers and arrays
+
+  void Reinit();
+
+  // Set a complex params slot in the file available for
+  // reuse, by setting the offset to its negative value.
+  // returns 0 on success, -1 on failure
+
+  int ReuseComplexSlot(int track_num);
+     
+  // prepare a simple track for reading by reading in the simple track
+  // params and setting the first_entry flag
+  // returns 0 on success, -1 on failure
+
+  int RewindSimple(int track_num);
+     
+  // rewrite an entry for a track in the track data file
+  // The entry is written at the file offset of the original entry
+  // returns 0 on success, -1 on failure
+  
+  int RewriteEntry();
+     
+  // seek to the end of the track file data
+
+  int SeekTrackEndData();
+
+  // seek to the start of data in track data file
+
+  int SeekTrackStartData();
+     
+  // write the track_file_header_t structure to a track data file
+  // returns 0 on success, -1 on failure
+
+  int WriteTrackHeader();
+
+  // write simple track params at the end of the file
+  // returns 0 on success, -1 on failure
+  
+  int WriteSimpleParams(int track_num);
+     
+  // write complex track params
+  // returns 0 on success, -1 on failure
+  
+  int WriteComplexParams(int track_num);
+     
+  // write an entry for a track in the track data file
+  // The entry is written at the end of the file
+  // returns offset of last entry written on success, -1 on failure
+  
+  long WriteEntry(int prev_in_track_offset,
+		  int prev_in_scan_offset);
+     
+  ///////////////////////////////////////////////////////////////////
+  // error string
+  
+  const string &getErrStr() { return (_errStr); }
+
+  /// add integer value to error string, with label
+  
+  void _addErrInt(string label, int iarg,
+                  bool cr = true);
+  
+  /// add double value to error string, with label
+  
+  void _addErrDbl(string label, double darg,
+                  string format = "%g", bool cr = true);
+
+  /// add string value to error string, with label
+  
+  void _addErrStr(string label, string strarg = "",
+                  bool cr = true);
+
+protected:
+
+  // format version
+
+  string _convention;
+  string _version;
+  
+  // netcdf file
+  
+  NcxxFile _ncFile;
+  string _tmpPath;
+
+  ////////////////////////////////////////////////////////
+  // dimensions
+  
+  NcxxDim _n_scans;
+  NcxxDim _n_storms;
+  NcxxDim _n_simple;
+  NcxxDim _n_complex;
+  NcxxDim _n_entries;
+  NcxxDim _n_poly;
+
+  ////////////////////////////////////////////////////////
+  // groups
+  
+  // top level groups
+  
+  NcxxGroup _scansGroup;
+  NcxxGroup _stormsGroup;
+  NcxxGroup _tracksGroup;
+  
+  // storms group
+  
+  NcxxGroup _gpropsGroup;
+  NcxxGroup _lpropsGroup;
+  NcxxGroup _histGroup;
+  NcxxGroup _runsGroup;
+  NcxxGroup _projRunsGroup;
+
+  // tracks group
+  
+  NcxxGroup _simpleGroup;
+  NcxxGroup _complexGroup;
+  NcxxGroup _entriesGroup;
+
   //////////////////////////////////
   // netcdf variables - grouped
   
-  TopLevelVars _topLevel;
+  TopLevelVars _topLevelVars;
   ScanVars _scanVars;
 
   // storm identification
@@ -833,19 +866,19 @@ protected:
   
   // verification - global
 
-  ContingencyVars _ellipseVerifyGlobal;
-  ContingencyVars _polygonVerifyGlobal;
+  ContingencyVars _ellipseVerifyGlobalVars;
+  ContingencyVars _polygonVerifyGlobalVars;
 
-  ForecastPropsVars _forecastPropsGlobal;
-  ForecastPropsVars _forecastBiasGlobal;
-  ForecastPropsVars _forecastRmseGlobal;
+  ForecastPropsVars _forecastPropsGlobalVars;
+  ForecastPropsVars _forecastBiasGlobalVars;
+  ForecastPropsVars _forecastRmseGlobalVars;
 
   TrackVerifyVars _trackVerifyVars;
   
   // verification - per complex track
 
-  ContingencyVars _ellipseVerifyComplex;
-  ContingencyVars _polygonVerifyComplex;
+  ContingencyVars _ellipseVerifyComplexVars;
+  ContingencyVars _polygonVerifyComplexVars;
   
   // storm file details
   
@@ -969,14 +1002,19 @@ public:
   static constexpr const char* PROJ_RUNS = "proj_runs";
   static constexpr const char* SIMPLE = "simple";
   static constexpr const char* COMPLEX = "complex";
-  static constexpr const char* ENTRY = "entry";
+  static constexpr const char* ENTRIES = "entries";
 
-  // top-level attributes
+  // top-level dimensions attributes
 
   static constexpr const char* FILE_TIME = "file_time";
   static constexpr const char* START_TIME = "start_time";
   static constexpr const char* END_TIME = "end_time";
   static constexpr const char* N_SCANS = "n_scans";
+  static constexpr const char* N_STORMS = "n_storms";
+  static constexpr const char* N_SIMPLE = "n_simple";
+  static constexpr const char* N_COMPLEX = "n_complex";
+  static constexpr const char* N_ENTRIES = "n_entries";
+  static constexpr const char* N_POLY = "n_poly";
   
   // storm identification parameters
 
