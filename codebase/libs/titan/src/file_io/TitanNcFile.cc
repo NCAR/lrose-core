@@ -234,6 +234,10 @@ void TitanNcFile::_setUpDims()
   _n_complex = _getDim(N_COMPLEX, _complexGroup);
   _n_entries = _getDim(N_ENTRIES, _entriesGroup);
   _n_poly = _getDim(N_POLY, N_POLY_SIDES, _stormsGroup);
+  _n_layers = _getDim(N_LAYERS, _lpropsGroup);
+  _n_runs = _getDim(N_RUNS, _runsGroup);
+  _n_proj_runs = _getDim(N_PROJ_RUNS, _projRunsGroup);
+  _n_hist = _getDim(N_HIST, _histGroup);
   
 }
 
@@ -435,6 +439,40 @@ void TitanNcFile::_setUpVars()
   _gpropsVars.hail_shi = _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_posh = _getVar(HAIL_POSH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_mehs = _getVar(HAIL_MEHS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  
+  // storm layer props
+
+  _lpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.area = _getVar(AREA, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+
+  // reflectivity histograms
+
+  _histVars.percent_volume = _getVar(PERCENT_VOLUME, NcxxType::nc_FLOAT, _n_hist, _histGroup);
+  _histVars.percent_area = _getVar(PERCENT_AREA, NcxxType::nc_FLOAT, _n_hist, _histGroup);
+
+  // storm runs
+
+  _runsVars.run_ix = _getVar(RUN_IX, NcxxType::nc_INT, _n_runs, _runsGroup);
+  _runsVars.run_iy = _getVar(RUN_IY, NcxxType::nc_INT, _n_runs, _runsGroup);
+  _runsVars.run_iz = _getVar(RUN_IZ, NcxxType::nc_INT, _n_runs, _runsGroup);
+  _runsVars.run_len = _getVar(RUN_LEN, NcxxType::nc_INT, _n_runs, _runsGroup);
+  
+  // storm proj runs
+
+  _projRunsVars.run_ix = _getVar(RUN_IX, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
+  _projRunsVars.run_iy = _getVar(RUN_IY, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
+  _projRunsVars.run_iz = _getVar(RUN_IZ, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
+  _projRunsVars.run_len = _getVar(RUN_LEN, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   
 }
 

@@ -256,10 +256,10 @@ private:
   class StormRunsVars
   {
   public:
-    NcxxVar ix;
-    NcxxVar iy;
-    NcxxVar iz;
-    NcxxVar n;
+    NcxxVar run_ix;
+    NcxxVar run_iy;
+    NcxxVar run_iz;
+    NcxxVar run_len;
   };
   
   // tracking state vars
@@ -817,7 +817,11 @@ protected:
   NcxxDim _n_complex;
   NcxxDim _n_entries;
   NcxxDim _n_poly;
-
+  NcxxDim _n_layers;
+  NcxxDim _n_runs;
+  NcxxDim _n_proj_runs;
+  NcxxDim _n_hist;
+  
   ////////////////////////////////////////////////////////
   // groups
   
@@ -1014,7 +1018,11 @@ public:
   static constexpr const char* N_COMPLEX = "n_complex";
   static constexpr const char* N_ENTRIES = "n_entries";
   static constexpr const char* N_POLY = "n_poly";
-  
+  static constexpr const char* N_LAYERS = "n_layers";
+  static constexpr const char* N_RUNS = "n_runs";
+  static constexpr const char* N_PROJ_RUNS = "n_proj_runs";
+  static constexpr const char* N_HIST = "n_hist";
+
   // storm identification parameters
 
   static constexpr const char* LOW_DBZ_THRESHOLD = "low_dbz_threshold";
@@ -1108,6 +1116,7 @@ public:
   static constexpr const char* TOP = "top";
   static constexpr const char* BASE = "base";
   static constexpr const char* VOLUME = "volume";
+  static constexpr const char* AREA = "area";
   static constexpr const char* AREA_MEAN = "area_mean";
   static constexpr const char* PRECIP_FLUX = "precip_flux";
   static constexpr const char* MASS = "mass";
@@ -1135,11 +1144,8 @@ public:
   static constexpr const char* PROJ_AREA_MAJOR_RADIUS = "proj_area_major_radius";
   static constexpr const char* PROJ_AREA_POLYGON = "proj_area_polygon";
   static constexpr const char* STORM_NUM = "storm_num";
-  static constexpr const char* N_LAYERS = "n_layers";
   static constexpr const char* BASE_LAYER = "base_layer";
   static constexpr const char* N_DBZ_INTERVALS = "n_dbz_intervals";
-  static constexpr const char* N_RUNS = "n_runs";
-  static constexpr const char* N_PROJ_RUNS = "n_proj_runs";
   static constexpr const char* TOP_MISSING = "top_missing";
   static constexpr const char* RANGE_LIMITED = "range_limited";
   static constexpr const char* SECOND_TRIP = "second_trip";
@@ -1165,32 +1171,17 @@ public:
   static constexpr const char* HAIL_POSH = "hail_posh";
   static constexpr const char* HAIL_MEHS = "hail_mehs";
 
-  // storm layer properties
-  
-  static constexpr const char* LAYER_VOL_CENTROID_X = "layer_vol_centroid_x";
-  static constexpr const char* LAYER_VOL_CENTROID_Y = "layer_vol_centroid_y";
-  static constexpr const char* LAYER_REFL_CENTROID_X = "layer_refl_centroid_x";
-  static constexpr const char* LAYER_REFL_CENTROID_Y = "layer_refl_centroid_y";
-  static constexpr const char* LAYER_AREA = "layer_area";
-  static constexpr const char* LAYER_DBZ_MAX = "layer_dbz_max";
-  static constexpr const char* LAYER_DBZ_MEAN = "layer_dbz_mean";
-  static constexpr const char* LAYER_MASS = "layer_mass";
-  static constexpr const char* LAYER_RAD_VEL_MEAN = "layer_rad_vel_mean";
-  static constexpr const char* LAYER_RAD_VEL_SD = "layer_rad_vel_sd";
-  static constexpr const char* LAYER_VORTICITY = "layer_vorticity";
-  static constexpr const char* LAYER_CONVECTIVITY_MEDIAN = "layer_convectivity_median";
-
   // storm dbz histogram
 
-  static constexpr const char* HIST_PERCENT_VOLUME = "hist_percent_volume";
-  static constexpr const char* HIST_PERCENT_AREA = "hist_percent_area";
+  static constexpr const char* PERCENT_VOLUME = "percent_volume";
+  static constexpr const char* PERCENT_AREA = "percent_area";
 
   // storm runs
   
   static constexpr const char* RUN_IX = "run_ix";
   static constexpr const char* RUN_IY = "run_iy";
   static constexpr const char* RUN_IZ = "run_iz";
-  static constexpr const char* RUN_N = "run_n";
+  static constexpr const char* RUN_LEN = "run_len";
 
   // tracking parameters
 
