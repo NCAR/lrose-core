@@ -526,11 +526,19 @@ public:
                   const NcxxType& ncType,
                   NcxxGroup &group);
   
-  // get array variable
+  // get 1D array variable
   
   NcxxVar _getVar(const std::string& name,
                   const NcxxType& ncType,
                   const NcxxDim& dim,
+                  NcxxGroup &group);
+  
+  // get 2D array variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  const NcxxDim& dim0,
+                  const NcxxDim& dim1,
                   NcxxGroup &group);
   
   /////////////////////////////////////////////////////
@@ -819,6 +827,9 @@ protected:
   NcxxDim _n_runs;
   NcxxDim _n_proj_runs;
   NcxxDim _n_hist;
+  NcxxDim _max_forecast_weights;
+  NcxxDim _max_parents;
+  NcxxDim _max_children;
   
   ////////////////////////////////////////////////////////
   // groups
@@ -1022,6 +1033,7 @@ public:
   static constexpr const char* N_RUNS = "n_runs";
   static constexpr const char* N_PROJ_RUNS = "n_proj_runs";
   static constexpr const char* N_HIST = "n_hist";
+  static constexpr const char* MAX_FORECAST_WEIGHTS = "max_forecast_weights";
 
   // storm identification parameters
 

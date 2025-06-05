@@ -238,6 +238,9 @@ void TitanNcFile::_setUpDims()
   _n_runs = _getDim(N_RUNS, _runsGroup);
   _n_proj_runs = _getDim(N_PROJ_RUNS, _projRunsGroup);
   _n_hist = _getDim(N_HIST, _histGroup);
+  _max_forecast_weights = _getDim(MAX_FORECAST_WEIGHTS, MAX_NWEIGHTS_FORECAST, _tracksGroup);
+  _max_parents = _getDim(MAX_PARENTS_, MAX_PARENTS, _tracksGroup);
+  _max_children = _getDim(MAX_CHILDREN_, MAX_CHILDREN, _tracksGroup);
   
 }
 
@@ -292,29 +295,29 @@ void TitanNcFile::_setUpVars()
   _scanVars.grid_nx = _getVar(GRID_NX, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_ny = _getVar(GRID_NY, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_nz = _getVar(GRID_NZ, NcxxType::nc_INT, _n_scans, _scansGroup);
-  _scanVars.grid_minx = _getVar(GRID_MINX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_miny = _getVar(GRID_MINY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_minz = _getVar(GRID_MINZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_dx = _getVar(GRID_DX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_dy = _getVar(GRID_DY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_dz = _getVar(GRID_DZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_minx = _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_miny = _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_minz = _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_dx = _getVar(GRID_DX, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_dy = _getVar(GRID_DY, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_dz = _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_dz_constant = _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _n_scans, _scansGroup);
-  _scanVars.grid_sensor_x = _getVar(GRID_SENSOR_X, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_sensor_y = _getVar(GRID_SENSOR_Y, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_sensor_z = _getVar(GRID_SENSOR_Z, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_sensor_lat = _getVar(GRID_SENSOR_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_sensor_lon = _getVar(GRID_SENSOR_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_unitsx = _getVar(GRID_UNITSX, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_unitsy = _getVar(GRID_UNITSY, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_x = _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_y = _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_z = _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_lat = _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_sensor_lon = _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.grid_unitsx = _getVar(GRID_UNITSX, NcxxType::nc_STRING, _n_scans, _scansGroup);
+  _scanVars.grid_unitsy = _getVar(GRID_UNITSY, NcxxType::nc_STRING, _n_scans, _scansGroup);
+  _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _n_scans, _scansGroup);
+  _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.proj_central_scale = _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
 
   // storm params
@@ -354,7 +357,7 @@ void TitanNcFile::_setUpVars()
   _sparamsVars.hail_mass_dbz_threshold = _getVar(HAIL_MASS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
   _sparamsVars.gprops_union_type = _getVar(GPROPS_UNION_TYPE, NcxxType::nc_FLOAT, _gpropsGroup);
   _sparamsVars.tops_dbz_threshold = _getVar(TOPS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
-  _sparamsVars.precip_computation_mode = _getVar(PRECIP_COMPUTATION_MODE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.precip_computation_mode = _getVar(PRECIP_COMPUTATION_MODE, NcxxType::nc_INT, _gpropsGroup);
   _sparamsVars.precip_plane_ht = _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _gpropsGroup);
   _sparamsVars.low_convectivity_threshold =
     _getVar(LOW_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
@@ -407,7 +410,8 @@ void TitanNcFile::_setUpVars()
     _getVar(PROJ_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.proj_area_major_radius =
     _getVar(PROJ_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_polygon = _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_polygon =
+    _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _n_poly, _gpropsGroup);
   _gpropsVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.n_layers = _getVar(N_LAYERS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.base_layer = _getVar(BASE_LAYER, NcxxType::nc_INT, _n_storms, _gpropsGroup);
@@ -476,7 +480,8 @@ void TitanNcFile::_setUpVars()
 
   // tracking parameters
 
-  _tparamsVars.forecast_weights = _getVar(FORECAST_WEIGHTS, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.forecast_weights =
+    _getVar(FORECAST_WEIGHTS, NcxxType::nc_FLOAT, _max_forecast_weights, _tracksGroup);
   _tparamsVars.weight_distance = _getVar(WEIGHT_DISTANCE, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.weight_delta_cube_root_volume
     = _getVar(WEIGHT_DELTA_CUBE_ROOT_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
@@ -489,15 +494,15 @@ void TitanNcFile::_setUpVars()
   _tparamsVars.min_fraction_overlap = _getVar(MIN_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.min_sum_fraction_overlap = _getVar(MIN_SUM_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.scale_forecasts_by_history =
-    _getVar(SCALE_FORECASTS_BY_HISTORY, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.use_runs_for_overlaps = _getVar(USE_RUNS_FOR_OVERLAPS, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.grid_type = _getVar(GRID_TYPE, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.nweights_forecast = _getVar(NWEIGHTS_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.forecast_type = _getVar(FORECAST_TYPE, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.max_delta_time = _getVar(MAX_DELTA_TIME, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(SCALE_FORECASTS_BY_HISTORY, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.use_runs_for_overlaps = _getVar(USE_RUNS_FOR_OVERLAPS, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.grid_type = _getVar(GRID_TYPE, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.nweights_forecast = _getVar(NWEIGHTS_FORECAST, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.forecast_type = _getVar(FORECAST_TYPE, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.max_delta_time = _getVar(MAX_DELTA_TIME, NcxxType::nc_INT, _tracksGroup);
   _tparamsVars.min_history_for_valid_forecast
-    = _getVar(MIN_HISTORY_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.spatial_smoothing = _getVar(SPATIAL_SMOOTHING, NcxxType::nc_FLOAT, _tracksGroup);
+    = _getVar(MIN_HISTORY_FOR_VALID_FORECAST, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.spatial_smoothing = _getVar(SPATIAL_SMOOTHING, NcxxType::nc_INT, _tracksGroup);
 
   // tracking state
   
@@ -511,11 +516,13 @@ void TitanNcFile::_setUpVars()
   _tstateVars.max_parents = _getVar(MAX_PARENTS_, NcxxType::nc_INT, _tracksGroup);
   _tstateVars.max_children = _getVar(MAX_CHILDREN_, NcxxType::nc_INT, _tracksGroup);
   _tstateVars.max_nweights_forecast = _getVar(MAX_NWEIGHTS_FORECAST_, NcxxType::nc_INT, _tracksGroup);
+
+  // simple tracks
   
 }
 
 /////////////////////////////////////////
-// set scalar variable
+// get scalar variable
 
 NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxType& ncType,
@@ -529,7 +536,7 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
 }
 
 /////////////////////////////////////////
-// set array variable
+// get array variable
 
 NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxType& ncType,
@@ -539,6 +546,25 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType, dim);
+  }
+  return var;
+}
+
+/////////////////////////////////////////
+// get 2D array variable
+
+NcxxVar TitanNcFile::_getVar(const std::string& name,
+                             const NcxxType& ncType,
+                             const NcxxDim& dim0,
+                             const NcxxDim& dim1,
+                             NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    std::vector<NcxxDim> dimVec;
+    dimVec.push_back(dim0);
+    dimVec.push_back(dim1);
+    var = group.addVar(name, ncType, dimVec);
   }
   return var;
 }
