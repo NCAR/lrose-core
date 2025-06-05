@@ -273,7 +273,6 @@ void TitanNcFile::_setUpVars()
   _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   
   // scans
 
@@ -316,6 +315,48 @@ void TitanNcFile::_setUpVars()
 
   // storm params
 
+  _sparamsVars.low_dbz_threshold = _getVar(LOW_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.high_dbz_threshold = _getVar(HIGH_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.dbz_hist_interval = _getVar(DBZ_HIST_INTERVAL, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.hail_dbz_threshold = _getVar(HAIL_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.base_threshold = _getVar(BASE_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.top_threshold = _getVar(TOP_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.min_storm_size = _getVar(MIN_STORM_SIZE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.max_storm_size = _getVar(MAX_STORM_SIZE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.morphology_erosion_threshold =
+    _getVar(MORPHOLOGY_EROSION_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.morphology_refl_divisor =
+    _getVar(MORPHOLOGY_REFL_DIVISOR, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.min_radar_tops = _getVar(MIN_RADAR_TOPS, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.tops_edge_margin = _getVar(TOPS_EDGE_MARGIN, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.z_p_coeff = _getVar(Z_P_COEFF, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.z_p_exponent = _getVar(Z_P_EXPONENT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.z_m_coeff = _getVar(Z_M_COEFF, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.z_m_exponent = _getVar(Z_M_EXPONENT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.sectrip_vert_aspect = _getVar(SECTRIP_VERT_ASPECT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.sectrip_horiz_aspect = _getVar(SECTRIP_HORIZ_ASPECT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.sectrip_orientation_error =
+    _getVar(SECTRIP_ORIENTATION_ERROR, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.poly_start_az = _getVar(POLY_START_AZ, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.poly_delta_az = _getVar(POLY_DELTA_AZ, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.check_morphology = _getVar(CHECK_MORPHOLOGY, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.check_tops = _getVar(CHECK_TOPS, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.vel_available = _getVar(VEL_AVAILABLE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.n_poly_sides = _getVar(N_POLY_SIDES_, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.ltg_count_time = _getVar(LTG_COUNT_TIME, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.ltg_count_margin_km = _getVar(LTG_COUNT_MARGIN_KM, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.hail_z_m_coeff = _getVar(HAIL_Z_M_COEFF, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.hail_z_m_exponent = _getVar(HAIL_Z_M_EXPONENT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.hail_mass_dbz_threshold = _getVar(HAIL_MASS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.gprops_union_type = _getVar(GPROPS_UNION_TYPE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.tops_dbz_threshold = _getVar(TOPS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.precip_computation_mode = _getVar(PRECIP_COMPUTATION_MODE, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.precip_plane_ht = _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.low_convectivity_threshold =
+    _getVar(LOW_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+  _sparamsVars.high_convectivity_threshold =
+    _getVar(HIGH_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _gpropsGroup);
+
   // storm global props
 
   _gpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
@@ -341,62 +382,59 @@ void TitanNcFile::_setUpVars()
   _gpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.precip_area = _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area_centroid_x = _getVar(PRECIP_AREA_CENTROID_X,
-                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area_centroid_y = _getVar(PRECIP_AREA_CENTROID_Y,
-                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area_orientation = _getVar(PRECIP_AREA_ORIENTATION,
-                                                NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area_minor_radius = _getVar(PRECIP_AREA_MINOR_RADIUS,
-                                                 NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area_major_radius = _getVar(PRECIP_AREA_MAJOR_RADIUS,
-                                                 NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_centroid_x =
+    _getVar(PRECIP_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_centroid_y =
+    _getVar(PRECIP_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_orientation =
+    _getVar(PRECIP_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_minor_radius =
+    _getVar(PRECIP_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.precip_area_major_radius =
+    _getVar(PRECIP_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.proj_area = _getVar(PROJ_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_centroid_x = _getVar(PROJ_AREA_CENTROID_X,
-                                             NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_centroid_y = _getVar(PROJ_AREA_CENTROID_Y,
-                                             NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_orientation = _getVar(PROJ_AREA_ORIENTATION,
-                                              NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_minor_radius = _getVar(PROJ_AREA_MINOR_RADIUS,
-                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area_major_radius = _getVar(PROJ_AREA_MAJOR_RADIUS,
-                                               NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_centroid_x =
+    _getVar(PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_centroid_y =
+    _getVar(PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_orientation =
+    _getVar(PROJ_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_minor_radius =
+    _getVar(PROJ_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_area_major_radius =
+    _getVar(PROJ_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.proj_area_polygon = _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.n_layers = _getVar(N_LAYERS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.base_layer = _getVar(BASE_LAYER, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.n_dbz_intervals = _getVar(N_DBZ_INTERVALS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.n_runs = _getVar(N_RUNS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.n_proj_runs = _getVar(N_PROJ_RUNS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.top_missing = _getVar(TOP_MISSING, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.range_limited = _getVar(RANGE_LIMITED, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.second_trip = _getVar(SECOND_TRIP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.hail_present = _getVar(HAIL_PRESENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.anom_prop = _getVar(ANOM_PROP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.bounding_min_ix = _getVar(BOUNDING_MIN_IX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.bounding_min_iy = _getVar(BOUNDING_MIN_IY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.bounding_max_ix = _getVar(BOUNDING_MAX_IX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.bounding_max_iy = _getVar(BOUNDING_MAX_IY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_layers = _getVar(N_LAYERS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.base_layer = _getVar(BASE_LAYER, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_dbz_intervals = _getVar(N_DBZ_INTERVALS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_runs = _getVar(N_RUNS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.n_proj_runs = _getVar(N_PROJ_RUNS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.top_missing = _getVar(TOP_MISSING, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.range_limited = _getVar(RANGE_LIMITED, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.second_trip = _getVar(SECOND_TRIP, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_present = _getVar(HAIL_PRESENT, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.anom_prop = _getVar(ANOM_PROP, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_min_ix = _getVar(BOUNDING_MIN_IX, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_min_iy = _getVar(BOUNDING_MIN_IY, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_max_ix = _getVar(BOUNDING_MAX_IX, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.bounding_max_iy = _getVar(BOUNDING_MAX_IY, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
+  _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
   _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.vil_from_maxz = _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.ltg_count = _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_FOKRcategory = _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.hail_waldvogelProbability = _getVar(HAIL_WALDVOGELPROBABILITY,
-                                                  NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_waldvogelProbability =
+    _getVar(HAIL_WALDVOGELPROBABILITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_hailMassAloft = _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_vihm = _getVar(HAIL_VIHM, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_poh = _getVar(HAIL_POH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_shi = _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_posh = _getVar(HAIL_POSH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_mehs = _getVar(HAIL_MEHS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  
-
-  
   
 }
 
