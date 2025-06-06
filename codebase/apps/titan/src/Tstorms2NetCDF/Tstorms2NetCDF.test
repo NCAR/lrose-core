@@ -1,0 +1,104 @@
+/**********************************************************************
+ * TDRP params for ./Tstorms2NetCDF
+ **********************************************************************/
+
+//======================================================================
+//
+// Tstorms2NetCDF program.
+//
+// Tstorms2NetCDF reads native TITAN binary data files, converts the 
+//   data into NetCDF format, and writes the data out in NetCDF files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+// Type: string
+
+instance = "test";
+
+///////////// input_mode //////////////////////////////
+//
+// Operational mode.
+//
+// In REALTIME mode, the program is run on output from each volume scan 
+//   as it becomes available. In ARCHIVE mode, all of the scans in a 
+//   series of track files are processed. In FILELIST mode, the program 
+//   processes a list of files specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+
+input_mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input TITAN storm data.
+//
+// If this path is not absolute (starts with /) or relative (starts with 
+//   .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.
+//
+// Type: string
+
+input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max valid age of input data in realtime mode (secs).
+//
+// REALTIME mode only. This the max valid age for input data. In 
+//   REALTIME mode, the program will wait for data more recent than this.
+//
+// Type: int
+
+max_realtime_valid_age = 360;
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+// Details for the output NetCDF files.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output dir for NetCDF files.
+//
+// Type: string
+
+output_dir = "/tmp/output/netcdf";
+
