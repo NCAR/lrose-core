@@ -162,11 +162,15 @@ int TitanNcFile::openNcFile(const string &path,
     _addErrStr("  exception: ", e.what());
     return -1;
   }
-  
+
   // set up netcdf groups
 
   _setUpGroups();
 
+  // set up the dimensions
+
+  _setUpDims();
+  
   // set up netcdf variables
 
   _setUpVars();
@@ -212,19 +216,13 @@ NcxxGroup TitanNcFile::_getGroup(const std::string& name,
                                  NcxxGroup &parent)
 {
 
-  NcxxGroup group;
-  try {
-    // see if group exists
-    NcxxGroup group = _ncFile.getGroup(name);
-    return group;
-  } catch (NcxxException& e) {
-    // if not, add it
-    NcxxGroup group = _ncFile.addGroup(SCANS);
-    return group;
+  // get group if it exists
+  NcxxGroup group = _ncFile.getGroup(name);
+  if (group.isNull()) {
+    // group does not exist, create it
+    group = _ncFile.addGroup(name);
   }
-
-  // if (mode == NcxxFile::FileMode::read) {
-  // }
+  return group;
 
 }
 
@@ -288,8 +286,6 @@ void TitanNcFile::_setUpVars()
   _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
 
-  return;
-  
   // scans
 
   _scanVars.scan_min_z = _getVar(SCAN_MIN_Z, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
@@ -736,7 +732,6 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxType& ncType,
                              NcxxGroup &group)
 {
-  cerr << "11111111111111111 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType);
@@ -752,7 +747,6 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxDim& dim,
                              NcxxGroup &group)
 {
-  cerr << "222222222222222 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType, dim);
@@ -769,7 +763,6 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxDim& dim1,
                              NcxxGroup &group)
 {
-  cerr << "33333333333333333333 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     std::vector<NcxxDim> dimVec;
