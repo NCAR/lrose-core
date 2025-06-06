@@ -1253,22 +1253,6 @@ public:
   static constexpr const char* MAX_CHILDREN_ = "max_children";
   static constexpr const char* MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";
 
-  // verification contingency stats
-  
-  static constexpr const char* ELLIPSE_FORECAST_N_SUCCESS = "ellipse_forecast_n_success";
-  static constexpr const char* ELLIPSE_FORECAST_N_FAILURE = "ellipse_forecast_n_failure";
-  static constexpr const char* ELLIPSE_FORECAST_N_FALSE_ALARM = "ellipse_forecast_n_false_alarm";
-  static constexpr const char* POLYGON_FORECAST_N_SUCCESS = "polygon_forecast_n_success";
-  static constexpr const char* POLYGON_FORECAST_N_FAILURE = "polygon_forecast_n_failure";
-  static constexpr const char* POLYGON_FORECAST_N_FALSE_ALARM = "polygon_forecast_n_false_alarm";
-
-  // track forecast properties
-  
-  static constexpr const char* SMOOTHED_PROJ_AREA_CENTROID_X = "smoothed_proj_area_centroid_x";
-  static constexpr const char* SMOOTHED_PROJ_AREA_CENTROID_Y = "smoothed_proj_area_centroid_y";
-  static constexpr const char* SMOOTHED_SPEED = "smoothed_speed";
-  static constexpr const char* SMOOTHED_DIRECTION = "smoothed_direction";
-
   // simple tracks
 
   static constexpr const char* SIMPLE_TRACK_NUM = "simple_track_num";
@@ -1310,8 +1294,10 @@ public:
 
   // entry dval_dt
   
-  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_X = "entry_dval_dt_proj_area_centroid_x";
-  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_Y = "entry_dval_dt_proj_area_centroid_y";
+  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_X =
+    "entry_dval_dt_proj_area_centroid_x";
+  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_Y =
+    "entry_dval_dt_proj_area_centroid_y";
   static constexpr const char* DVAL_DT_VOL_CENTROID_Z = "entry_dval_dt_vol_centroid_z";
   static constexpr const char* DVAL_DT_REFL_CENTROID_Z = "entry_dval_dt_refl_centroid_z";
   static constexpr const char* DVAL_DT_TOP = "entry_dval_dt_top";
@@ -1320,15 +1306,19 @@ public:
   static constexpr const char* DVAL_DT_PRECIP_FLUX = "entry_dval_dt_precip_flux";
   static constexpr const char* DVAL_DT_MASS = "entry_dval_dt_mass";
   static constexpr const char* DVAL_DT_PROJ_AREA = "entry_dval_dt_proj_area";
-  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X = "entry_dval_dt_smoothed_proj_area_centroid_x";
-  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y = "entry_dval_dt_smoothed_proj_area_centroid_y";
+  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X =
+    "entry_dval_dt_smoothed_proj_area_centroid_x";
+  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y =
+    "entry_dval_dt_smoothed_proj_area_centroid_y";
   static constexpr const char* DVAL_DT_SMOOTHED_SPEED = "entry_dval_dt_smoothed_speed";
   static constexpr const char* DVAL_DT_SMOOTHED_DIRECTION = "entry_dval_dt_smoothed_direction";
 
   // forecast bias
   
-  static constexpr const char* BIAS_PROJ_AREA_CENTROID_X = "forecast_bias_proj_area_centroid_x";
-  static constexpr const char* BIAS_PROJ_AREA_CENTROID_Y = "forecast_bias_proj_area_centroid_y";
+  static constexpr const char* BIAS_PROJ_AREA_CENTROID_X =
+    "forecast_bias_proj_area_centroid_x";
+  static constexpr const char* BIAS_PROJ_AREA_CENTROID_Y =
+    "forecast_bias_proj_area_centroid_y";
   static constexpr const char* BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
   static constexpr const char* BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
   static constexpr const char* BIAS_TOP = "forecast_bias_top";
@@ -1337,15 +1327,19 @@ public:
   static constexpr const char* BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
   static constexpr const char* BIAS_MASS = "forecast_bias_mass";
   static constexpr const char* BIAS_PROJ_AREA = "forecast_bias_proj_area";
-  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_bias_smoothed_proj_area_centroid_x";
-  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_bias_smoothed_proj_area_centroid_y";
+  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_X =
+    "forecast_bias_smoothed_proj_area_centroid_x";
+  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y =
+    "forecast_bias_smoothed_proj_area_centroid_y";
   static constexpr const char* BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
   static constexpr const char* BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
 
   // forecast rmse
   
-  static constexpr const char* RMSE_PROJ_AREA_CENTROID_X = "forecast_rmse_proj_area_centroid_x";
-  static constexpr const char* RMSE_PROJ_AREA_CENTROID_Y = "forecast_rmse_proj_area_centroid_y";
+  static constexpr const char* RMSE_PROJ_AREA_CENTROID_X =
+    "forecast_rmse_proj_area_centroid_x";
+  static constexpr const char* RMSE_PROJ_AREA_CENTROID_Y =
+    "forecast_rmse_proj_area_centroid_y";
   static constexpr const char* RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
   static constexpr const char* RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
   static constexpr const char* RMSE_TOP = "forecast_rmse_top";
@@ -1354,64 +1348,33 @@ public:
   static constexpr const char* RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
   static constexpr const char* RMSE_MASS = "forecast_rmse_mass";
   static constexpr const char* RMSE_PROJ_AREA = "forecast_rmse_proj_area";
-  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "forecast_rmse_smoothed_proj_area_centroid_x";
-  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "forecast_rmse_smoothed_proj_area_centroid_y";
+  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_X =
+    "forecast_rmse_smoothed_proj_area_centroid_x";
+  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y =
+    "forecast_rmse_smoothed_proj_area_centroid_y";
   static constexpr const char* RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
   static constexpr const char* RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
+
+  // verification contingency stats
+  
+  static constexpr const char* ELLIPSE_FORECAST_N_SUCCESS = "ellipse_forecast_n_success";
+  static constexpr const char* ELLIPSE_FORECAST_N_FAILURE = "ellipse_forecast_n_failure";
+  static constexpr const char* ELLIPSE_FORECAST_N_FALSE_ALARM = "ellipse_forecast_n_false_alarm";
+  static constexpr const char* POLYGON_FORECAST_N_SUCCESS = "polygon_forecast_n_success";
+  static constexpr const char* POLYGON_FORECAST_N_FAILURE = "polygon_forecast_n_failure";
+  static constexpr const char* POLYGON_FORECAST_N_FALSE_ALARM = "polygon_forecast_n_false_alarm";
 
   // track verification
   
   static constexpr const char* VERIFICATION_PERFORMED = "verification_performed";
   static constexpr const char* VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
   static constexpr const char* VERIFY_END_TIME = "verify_end_time";
-  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN = "verify_forecast_lead_time_margin";
+  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN =
+    "verify_forecast_lead_time_margin";
   static constexpr const char* VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
   static constexpr const char* VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
   static constexpr const char* VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
 
-  // verification contingency stats
-  
-  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_SUCCESS = "complex_ellipse_verify_n_success";
-  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_FAILURE = "complex_ellipse_verify_n_failure";
-  static constexpr const char* COMPLEX_ELLIPSE_VERIFY_N_FALSE_ALARM = "complex_ellipse_verify_n_false_alarm";
-  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_SUCCESS = "complex_polygon_verify_n_success";
-  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_FAILURE = "complex_polygon_verify_n_failure";
-  static constexpr const char* COMPLEX_POLYGON_VERIFY_N_FALSE_ALARM = "complex_polygon_verify_n_false_alarm";
-
-  // forecast bias
-  
-  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA_CENTROID_X = "complex_forecast_bias_proj_area_centroid_x";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA_CENTROID_Y = "complex_forecast_bias_proj_area_centroid_y";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_VOL_CENTROID_Z = "complex_forecast_bias_vol_centroid_z";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_REFL_CENTROID_Z = "complex_forecast_bias_refl_centroid_z";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_TOP = "complex_forecast_bias_top";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_DBZ_MAX = "complex_forecast_bias_dbz_max";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_VOLUME = "complex_forecast_bias_volume";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_PRECIP_FLUX = "complex_forecast_bias_precip_flux";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_MASS = "complex_forecast_bias_mass";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_PROJ_AREA = "complex_forecast_bias_proj_area";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_X = "complex_forecast_bias_smoothed_proj_area_centroid_x";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y = "complex_forecast_bias_smoothed_proj_area_centroid_y";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_SPEED = "complex_forecast_bias_smoothed_speed";
-  static constexpr const char* COMPLEX_FORECAST_BIAS_SMOOTHED_DIRECTION = "complex_forecast_bias_smoothed_direction";
-
-  // forecast rmse
-  
-  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA_CENTROID_X = "complex_forecast_rmse_proj_area_centroid_x";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA_CENTROID_Y = "complex_forecast_rmse_proj_area_centroid_y";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_VOL_CENTROID_Z = "complex_forecast_rmse_vol_centroid_z";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_REFL_CENTROID_Z = "complex_forecast_rmse_refl_centroid_z";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_TOP = "complex_forecast_rmse_top";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_DBZ_MAX = "complex_forecast_rmse_dbz_max";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_VOLUME = "complex_forecast_rmse_volume";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_PRECIP_FLUX = "complex_forecast_rmse_precip_flux";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_MASS = "complex_forecast_rmse_mass";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_PROJ_AREA = "complex_forecast_rmse_proj_area";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_X = "complex_forecast_rmse_smoothed_proj_area_centroid_x";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y = "complex_forecast_rmse_smoothed_proj_area_centroid_y";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_SPEED = "complex_forecast_rmse_smoothed_speed";
-  static constexpr const char* COMPLEX_FORECAST_RMSE_SMOOTHED_DIRECTION = "complex_forecast_rmse_smoothed_direction";
-  
 };
 
 #endif
