@@ -128,10 +128,10 @@ TitanNcFile::~TitanNcFile()
 
 {
 
-  FreeStormsAll();
-  CloseStormFiles();
-  FreeTracksAll();
-  CloseTrackFiles();
+  freeStormsAll();
+  closeStormFiles();
+  freeTracksAll();
+  closeTrackFiles();
 
   closeNcFile();
   
@@ -145,6 +145,13 @@ int TitanNcFile::openNcFile(const string &path,
 
 {
 
+  // ensure the directory exists
+  
+  // if (mode == NcxxFile::FileMode::write) {
+  Path filePath(path);
+  filePath.makeDirRecurse();
+  // }
+  
   // open file
   
   try {
@@ -280,6 +287,8 @@ void TitanNcFile::_setUpVars()
   _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+
+  return;
   
   // scans
 
@@ -727,6 +736,7 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxType& ncType,
                              NcxxGroup &group)
 {
+  cerr << "11111111111111111 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType);
@@ -742,6 +752,7 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxDim& dim,
                              NcxxGroup &group)
 {
+  cerr << "222222222222222 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType, dim);
@@ -758,6 +769,7 @@ NcxxVar TitanNcFile::_getVar(const std::string& name,
                              const NcxxDim& dim1,
                              NcxxGroup &group)
 {
+  cerr << "33333333333333333333 var name: " << name << endl;
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     std::vector<NcxxDim> dimVec;
@@ -832,7 +844,7 @@ void TitanNcFile::_addErrStr(string label,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocLayers(int n_layers)
+void TitanNcFile::allocLayers(int n_layers)
      
 {
   if (n_layers > _max_layers) {
@@ -843,7 +855,7 @@ void TitanNcFile::AllocLayers(int n_layers)
   }
 }
 
-void TitanNcFile::FreeLayers()
+void TitanNcFile::freeLayers()
      
 {
   if (_lprops) {
@@ -859,7 +871,7 @@ void TitanNcFile::FreeLayers()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocHist(int n_dbz_intervals)
+void TitanNcFile::allocHist(int n_dbz_intervals)
      
 {
 
@@ -872,7 +884,7 @@ void TitanNcFile::AllocHist(int n_dbz_intervals)
 
 }
 
-void TitanNcFile::FreeHist()
+void TitanNcFile::freeHist()
      
 {
 
@@ -890,7 +902,7 @@ void TitanNcFile::FreeHist()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocRuns(int n_runs)
+void TitanNcFile::allocRuns(int n_runs)
      
 {
 
@@ -903,7 +915,7 @@ void TitanNcFile::AllocRuns(int n_runs)
 
 }
 
-void TitanNcFile::FreeRuns()
+void TitanNcFile::freeRuns()
      
 {
 
@@ -921,7 +933,7 @@ void TitanNcFile::FreeRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocProjRuns(int n_proj_runs)
+void TitanNcFile::allocProjRuns(int n_proj_runs)
      
 {
 
@@ -934,7 +946,7 @@ void TitanNcFile::AllocProjRuns(int n_proj_runs)
 
 }
 
-void TitanNcFile::FreeProjRuns()
+void TitanNcFile::freeProjRuns()
      
 {
 
@@ -952,7 +964,7 @@ void TitanNcFile::FreeProjRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocGprops(int nstorms)
+void TitanNcFile::allocGprops(int nstorms)
      
 {
   
@@ -964,7 +976,7 @@ void TitanNcFile::AllocGprops(int nstorms)
 
 }
 
-void TitanNcFile::FreeGprops()
+void TitanNcFile::freeGprops()
      
 {
 
@@ -982,7 +994,7 @@ void TitanNcFile::FreeGprops()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocScanOffsets(int n_scans_needed)
+void TitanNcFile::allocScanOffsets(int n_scans_needed)
      
 {
 
@@ -997,7 +1009,7 @@ void TitanNcFile::AllocScanOffsets(int n_scans_needed)
 
 }
 
-void TitanNcFile::FreeScanOffsets()
+void TitanNcFile::freeScanOffsets()
      
 {
 
@@ -1011,20 +1023,20 @@ void TitanNcFile::FreeScanOffsets()
 
 //////////////////////////////////////////////////////////////
 //
-// Free all arrays
+// free all arrays
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeStormsAll()
+void TitanNcFile::freeStormsAll()
      
 {
 
-  FreeLayers();
-  FreeHist();
-  FreeRuns();
-  FreeProjRuns();
-  FreeGprops();
-  FreeScanOffsets();
+  freeLayers();
+  freeHist();
+  freeRuns();
+  freeProjRuns();
+  freeGprops();
+  freeScanOffsets();
 
 }
 
@@ -1037,7 +1049,7 @@ void TitanNcFile::FreeStormsAll()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::OpenStormFiles(const char *mode,
+int TitanNcFile::openStormFiles(const char *mode,
                                 const char *header_file_path,
                                 const char *data_file_ext /* = nullptr*/ )
      
@@ -1048,7 +1060,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
 
   // close files
   
-  CloseStormFiles();
+  closeStormFiles();
   
   // open the header file - file path may change if it is compressed
   
@@ -1069,7 +1081,7 @@ int TitanNcFile::OpenStormFiles(const char *mode,
 
     // read the header if the file is opened for reading
     
-    if (ReadStormHeader(false)) {
+    if (readStormHeader(false)) {
       return -1;
     }
 
@@ -1197,17 +1209,17 @@ int TitanNcFile::OpenStormFiles(const char *mode,
 
 //////////////////////////////////////////////////////////////
 //
-// Closes the storm header and data files
+// closes the storm header and data files
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::CloseStormFiles()
+void TitanNcFile::closeStormFiles()
      
 {
 
   // unlock the header file
 
-  UnlockStormHeaderFile();
+  unlockStormHeaderFile();
 
   // close the header file
   
@@ -1231,7 +1243,7 @@ void TitanNcFile::CloseStormFiles()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::FlushStormFiles()
+void TitanNcFile::flushStormFiles()
   
 {
 
@@ -1248,12 +1260,12 @@ void TitanNcFile::FlushStormFiles()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::LockStormHeaderFile(const char *mode)
+int TitanNcFile::lockStormHeaderFile(const char *mode)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::LockStormHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::lockStormHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
   
   if (ta_lock_file_procmap(_storm_header_file_path.c_str(),
@@ -1276,12 +1288,12 @@ int TitanNcFile::LockStormHeaderFile(const char *mode)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::UnlockStormHeaderFile()
+int TitanNcFile::unlockStormHeaderFile()
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::UnlockStormHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::unlockStormHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
   
   if (ta_unlock_file(_storm_header_file_path.c_str(),
@@ -1305,14 +1317,14 @@ int TitanNcFile::UnlockStormHeaderFile()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadStormHeader(bool clear_error_str /* = true*/ )
+int TitanNcFile::readStormHeader(bool clear_error_str /* = true*/ )
      
 {
 
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanNcFile::ReadStormHeader\n";
+  _errStr += "ERROR - TitanNcFile::readStormHeader\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _storm_header_file_path);
 
   // rewind file
@@ -1362,7 +1374,7 @@ int TitanNcFile::ReadStormHeader(bool clear_error_str /* = true*/ )
   
   int n_scans = _storm_header.n_scans;
   
-  AllocScanOffsets(n_scans);
+  allocScanOffsets(n_scans);
   
   // read in scan offsets
   
@@ -1390,12 +1402,12 @@ int TitanNcFile::ReadStormHeader(bool clear_error_str /* = true*/ )
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadProjRuns(int storm_num)
+int TitanNcFile::readProjRuns(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadProjRuns\n";
+  _errStr += "ERROR - TitanNcFile::readProjRuns\n";
 
   // return early if nstorms is zero
   
@@ -1411,7 +1423,7 @@ int TitanNcFile::ReadProjRuns(int storm_num)
   
   int n_proj_runs = _gprops[storm_num].n_proj_runs;
 
-  AllocProjRuns(n_proj_runs);
+  allocProjRuns(n_proj_runs);
   
   // move to proj_run data position in file
   
@@ -1446,12 +1458,12 @@ int TitanNcFile::ReadProjRuns(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadProps(int storm_num)
+int TitanNcFile::readProps(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadProps\n";
+  _errStr += "ERROR - TitanNcFile::readProps\n";
   TaStr::AddStr(_errStr, "  Reading storm props from file: ", _storm_data_file_path);
   TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
   TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
@@ -1467,10 +1479,10 @@ int TitanNcFile::ReadProps(int storm_num)
   int n_runs = _gprops[storm_num].n_runs;
   int n_proj_runs = _gprops[storm_num].n_proj_runs;
 
-  AllocLayers(n_layers);
-  AllocHist(n_dbz_intervals);
-  AllocRuns(n_runs);
-  AllocProjRuns(n_proj_runs);
+  allocLayers(n_layers);
+  allocHist(n_dbz_intervals);
+  allocRuns(n_runs);
+  allocProjRuns(n_proj_runs);
 
   // return early if nstorms is zero
   
@@ -1569,12 +1581,12 @@ int TitanNcFile::ReadProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
+int TitanNcFile::readScan(int scan_num, int storm_num /* = -1*/ )
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadScan\n";
+  _errStr += "ERROR - TitanNcFile::readScan\n";
   TaStr::AddStr(_errStr, "  Reading scan from file: ", _storm_data_file_path);
   TaStr::AddInt(_errStr, "  Scan number: ", scan_num);
 
@@ -1605,7 +1617,7 @@ int TitanNcFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
   // allocate or reallocate
   
   int nstorms = scan.nstorms;
-  AllocGprops(nstorms);
+  allocGprops(nstorms);
   
   // copy scan header into storm file index
 
@@ -1650,18 +1662,18 @@ int TitanNcFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::SeekStormEndData()
+int TitanNcFile::seekStormEndData()
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::SeekStormEndData\n";
+  _errStr += "ERROR - TitanNcFile::seekStormEndData\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
 
   if (fseek(_storm_data_file, 0L, SEEK_END)) {
 
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Seek failed");
+    TaStr::AddStr(_errStr, "  ", "seek failed");
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
 
@@ -1679,18 +1691,18 @@ int TitanNcFile::SeekStormEndData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::SeekStormStartData()
+int TitanNcFile::seekStormStartData()
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::SeekStormStartData\n";
+  _errStr += "ERROR - TitanNcFile::seekStormStartData\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
 
   if (fseek(_storm_data_file, R_FILE_LABEL_LEN, SEEK_SET) != 0) {
     
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Seek failed");
+    TaStr::AddStr(_errStr, "  ", "seek failed");
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
 
@@ -1710,12 +1722,12 @@ int TitanNcFile::SeekStormStartData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteStormHeader(const storm_file_header_t &storm_file_header)
+int TitanNcFile::writeStormHeader(const storm_file_header_t &storm_file_header)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteStormHeader\n";
+  _errStr += "ERROR - TitanNcFile::writeStormHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
   
   storm_file_header_t header = storm_file_header;
@@ -1761,6 +1773,10 @@ int TitanNcFile::WriteStormHeader(const storm_file_header_t &storm_file_header)
   // make local copies of the global file header and scan offsets
   
   int n_scans = header.n_scans;
+
+  _topLevelVars.file_time.putVal((long long) header.file_time);
+  _topLevelVars.start_time.putVal((long long) header.start_time);
+  _topLevelVars.end_time.putVal((long long) header.end_time);
 
   // TaArray<si32> offsetArray;
   // si32 *scan_offsets = offsetArray.alloc(n_scans);
@@ -1810,7 +1826,7 @@ int TitanNcFile::WriteStormHeader(const storm_file_header_t &storm_file_header)
   
   // flush the file buffer
   
-  FlushStormFiles();
+  flushStormFiles();
 
   return 0;
   
@@ -1825,12 +1841,12 @@ int TitanNcFile::WriteStormHeader(const storm_file_header_t &storm_file_header)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteProps(int storm_num)
+int TitanNcFile::writeProps(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteProps\n";
+  _errStr += "ERROR - TitanNcFile::writeProps\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
 
   int n_layers = _gprops[storm_num].n_layers;
@@ -1964,12 +1980,12 @@ int TitanNcFile::WriteProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteScan(int scan_num)
+int TitanNcFile::writeScan(int scan_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteScan\n";
+  _errStr += "ERROR - TitanNcFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
   
   // Move to the end of the file before beginning the write.
@@ -2009,7 +2025,7 @@ int TitanNcFile::WriteScan(int scan_num)
   
   // get scan position in file
   
-  AllocScanOffsets(scan_num + 1);
+  allocScanOffsets(scan_num + 1);
   long offset = ftell(_storm_data_file);
   _scan_offsets[scan_num] = offset;
   
@@ -2119,7 +2135,7 @@ void TitanNcFile::_convert_ellipse_2km(const titan_grid_t &tgrid,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::GpropsEllipses2Km(const storm_file_scan_header_t &scan,
+void TitanNcFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
 				       storm_file_global_props_t &gprops)
      
 {
@@ -2152,7 +2168,7 @@ void TitanNcFile::GpropsEllipses2Km(const storm_file_scan_header_t &scan,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
+void TitanNcFile::gpropsXY2LatLon(const storm_file_scan_header_t &scan,
 				     storm_file_global_props_t &gprops)
   
 {
@@ -2247,12 +2263,12 @@ void TitanNcFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanNcFile::TruncateStormHeaderFile(int length)
+int TitanNcFile::truncateStormHeaderFile(int length)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::TruncateStormHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::truncateStormHeaderFile\n";
   return (_truncateStormFiles(_storm_header_file, _storm_header_file_path, length));
 
 }
@@ -2262,12 +2278,12 @@ int TitanNcFile::TruncateStormHeaderFile(int length)
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanNcFile::TruncateStormDataFile(int length)
+int TitanNcFile::truncateStormDataFile(int length)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::TruncateStormDataFile\n";
+  _errStr += "ERROR - TitanNcFile::truncateStormDataFile\n";
   return (_truncateStormFiles(_storm_data_file, _storm_data_file_path, length));
 
 }
@@ -2342,13 +2358,13 @@ const complex_track_params_t &TitanNcFile::complex_params() const {
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocSimpleArrays()
+// TitanNcFile::allocSimpleArrays()
 //
 // allocate space for the simple track arrays.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocSimpleArrays(int n_simple_needed)
+void TitanNcFile::allocSimpleArrays(int n_simple_needed)
      
 {
 
@@ -2386,13 +2402,13 @@ void TitanNcFile::AllocSimpleArrays(int n_simple_needed)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeSimpleArrays()
+// TitanNcFile::freeSimpleArrays()
 //
 // free space for the simple track arrays.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeSimpleArrays()
+void TitanNcFile::freeSimpleArrays()
      
 {
   
@@ -2432,13 +2448,13 @@ void TitanNcFile::FreeSimpleArrays()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocComplexArrays()
+// TitanNcFile::allocComplexArrays()
 //
 // allocate space for the complex track arrays.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocComplexArrays(int n_complex_needed)
+void TitanNcFile::allocComplexArrays(int n_complex_needed)
      
 {
 
@@ -2465,13 +2481,13 @@ void TitanNcFile::AllocComplexArrays(int n_complex_needed)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeComplexArrays()
+// TitanNcFile::freeComplexArrays()
 //
-// Free space for the complex track arrays.
+// free space for the complex track arrays.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeComplexArrays()
+void TitanNcFile::freeComplexArrays()
      
 {
 
@@ -2485,14 +2501,14 @@ void TitanNcFile::FreeComplexArrays()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocSimplesPerComplex()
+// TitanNcFile::allocSimplesPerComplex()
 //
 // allocate space for the array of pointers to simples_per_complex
 //
 ///////////////////////////////////////////////////////////////////////////
 
 
-void TitanNcFile::AllocSimplesPerComplex(int n_simple_needed)
+void TitanNcFile::allocSimplesPerComplex(int n_simple_needed)
      
 {
 
@@ -2521,12 +2537,12 @@ void TitanNcFile::AllocSimplesPerComplex(int n_simple_needed)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeSimplesPerComplex()
+// TitanNcFile::freeSimplesPerComplex()
 //
 ///////////////////////////////////////////////////////////////////////////
 
 
-void TitanNcFile::FreeSimplesPerComplex()
+void TitanNcFile::freeSimplesPerComplex()
      
 {
   if (_simples_per_complex) {
@@ -2544,13 +2560,13 @@ void TitanNcFile::FreeSimplesPerComplex()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocScanEntries()
+// TitanNcFile::allocScanEntries()
 //
 // allocate mem for scan entries array
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocScanEntries(int n_entries_needed)
+void TitanNcFile::allocScanEntries(int n_entries_needed)
   
 {
   
@@ -2567,13 +2583,13 @@ void TitanNcFile::AllocScanEntries(int n_entries_needed)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeScanEntries()
+// TitanNcFile::freeScanEntries()
 //
 // free scan entries
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeScanEntries()
+void TitanNcFile::freeScanEntries()
      
 {
   
@@ -2587,13 +2603,13 @@ void TitanNcFile::FreeScanEntries()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocScanIndex()
+// TitanNcFile::allocScanIndex()
 //
 // allocate space for the scan index
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocScanIndex(int n_scans_needed)
+void TitanNcFile::allocScanIndex(int n_scans_needed)
      
 {
 
@@ -2622,13 +2638,13 @@ void TitanNcFile::AllocScanIndex(int n_scans_needed)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeScanIndex()
+// TitanNcFile::freeScanIndex()
 //
 // free space for the scan index
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeScanIndex()
+void TitanNcFile::freeScanIndex()
      
 {
   if (_scan_index) {
@@ -2640,13 +2656,13 @@ void TitanNcFile::FreeScanIndex()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::AllocUtime()
+// TitanNcFile::allocUtime()
 //
 // allocate array of track_utime_t structs
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::AllocUtime()
+void TitanNcFile::allocUtime()
      
 {
 
@@ -2666,13 +2682,13 @@ void TitanNcFile::AllocUtime()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeUtime()
+// TitanNcFile::freeUtime()
 //
 // free space for the utime array
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeUtime()
+void TitanNcFile::freeUtime()
      
 {
   if (_track_utime) {
@@ -2684,22 +2700,22 @@ void TitanNcFile::FreeUtime()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// TitanNcFile::FreeAll()
+// TitanNcFile::freeAll()
 //
 // free all arrays
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::FreeTracksAll()
+void TitanNcFile::freeTracksAll()
   
 {
 
-  FreeSimpleArrays();
-  FreeComplexArrays();
-  FreeSimplesPerComplex();
-  FreeScanEntries();
-  FreeScanIndex();
-  FreeUtime();
+  freeSimpleArrays();
+  freeComplexArrays();
+  freeSimplesPerComplex();
+  freeScanEntries();
+  freeScanIndex();
+  freeUtime();
 
 }
 
@@ -2711,18 +2727,18 @@ void TitanNcFile::FreeTracksAll()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::OpenTrackFiles(const char *mode,
+int TitanNcFile::openTrackFiles(const char *mode,
                                 const char *header_file_path,
                                 const char *data_file_ext /* = nullptr*/ )
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::OpenFiles\n";
+  _errStr += "ERROR - TitanNcFile::openFiles\n";
 
   // close files
 
-  CloseTrackFiles();
+  closeTrackFiles();
 
   // open the header file - file path may change if it is compressed
   
@@ -2742,7 +2758,7 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
 
     // read the header if the file is opened for reading
    
-    if (ReadTrackHeader(false)) {
+    if (readTrackHeader(false)) {
       return -1;
     }
     
@@ -2871,17 +2887,17 @@ int TitanNcFile::OpenTrackFiles(const char *mode,
 
 //////////////////////////////////////////////////////////////
 //
-// Closes the track header and data files
+// closes the track header and data files
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::CloseTrackFiles()
+void TitanNcFile::closeTrackFiles()
      
 {
 
   // unlock the header file
 
-  UnlockTrackHeaderFile();
+  unlockTrackHeaderFile();
 
   // close the header file
   
@@ -2901,11 +2917,11 @@ void TitanNcFile::CloseTrackFiles()
 
 //////////////////////////////////////////////////////////////
 //
-// Flush the track header and data files
+// flush the track header and data files
 //
 //////////////////////////////////////////////////////////////
 
-void TitanNcFile::FlushTrackFiles()
+void TitanNcFile::flushTrackFiles()
   
 {
   
@@ -2916,7 +2932,7 @@ void TitanNcFile::FlushTrackFiles()
 
 //////////////////////////////////////////////////////////////
 //
-// TitanNcFile::LockHeaderFile()
+// TitanNcFile::lockHeaderFile()
 //
 // Put an advisory lock on the header file
 //
@@ -2924,12 +2940,12 @@ void TitanNcFile::FlushTrackFiles()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::LockTrackHeaderFile(const char *mode)
+int TitanNcFile::lockTrackHeaderFile(const char *mode)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::LockTrackHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::lockTrackHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _track_header_file_path);
   
   if (ta_lock_file_procmap(_track_header_file_path.c_str(),
@@ -2946,7 +2962,7 @@ int TitanNcFile::LockTrackHeaderFile(const char *mode)
 
 //////////////////////////////////////////////////////////////
 //
-// TitanNcFile::UnlockHeaderFile()
+// TitanNcFile::unlockHeaderFile()
 //
 // Remove advisory lock from the header file
 //
@@ -2954,12 +2970,12 @@ int TitanNcFile::LockTrackHeaderFile(const char *mode)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::UnlockTrackHeaderFile()
+int TitanNcFile::unlockTrackHeaderFile()
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::UnlockTrackHeaderFile\n";
+  _errStr += "ERROR - TitanNcFile::unlockTrackHeaderFile\n";
   TaStr::AddStr(_errStr, "  File: ", _track_header_file_path);
   
   if (ta_unlock_file(_track_header_file_path.c_str(),
@@ -2983,14 +2999,14 @@ int TitanNcFile::UnlockTrackHeaderFile()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadTrackHeader(bool clear_error_str /* = true*/ )
+int TitanNcFile::readTrackHeader(bool clear_error_str /* = true*/ )
      
 {
   
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanNcFile::ReadTrackHeader\n";
+  _errStr += "ERROR - TitanNcFile::readTrackHeader\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_header_file_path);
 
   // rewind file
@@ -3071,9 +3087,9 @@ int TitanNcFile::ReadTrackHeader(bool clear_error_str /* = true*/ )
 
   // alloc arrays
 
-  AllocComplexArrays(n_complex_tracks);
-  AllocSimpleArrays(n_simple_tracks);
-  AllocScanIndex(n_scans);
+  allocComplexArrays(n_complex_tracks);
+  allocSimpleArrays(n_simple_tracks);
+  allocScanIndex(n_scans);
   
   // read in complex track num array
 
@@ -3160,14 +3176,14 @@ int TitanNcFile::ReadTrackHeader(bool clear_error_str /* = true*/ )
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadScanIndex(bool clear_error_str /* = true*/ )
+int TitanNcFile::readScanIndex(bool clear_error_str /* = true*/ )
      
 {
   
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanNcFile::ReadScanIndex\n";
+  _errStr += "ERROR - TitanNcFile::readScanIndex\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_header_file_path);
 
   // rewind file
@@ -3232,7 +3248,7 @@ int TitanNcFile::ReadScanIndex(bool clear_error_str /* = true*/ )
 
   // alloc array
 
-  AllocScanIndex(n_scans);
+  allocScanIndex(n_scans);
 
   // read in scan index array
   
@@ -3261,7 +3277,7 @@ int TitanNcFile::ReadScanIndex(bool clear_error_str /* = true*/ )
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadComplexParams(int track_num,
+int TitanNcFile::readComplexParams(int track_num,
 				      bool read_simples_per_complex,
 				      bool clear_error_str /* = true*/ )
      
@@ -3270,7 +3286,7 @@ int TitanNcFile::ReadComplexParams(int track_num,
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanNcFile::ReadComplexParams\n";
+  _errStr += "ERROR - TitanNcFile::readComplexParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
   TaStr::AddInt(_errStr, "  track_num", track_num);
 
@@ -3301,7 +3317,7 @@ int TitanNcFile::ReadComplexParams(int track_num,
     
     int nsimples = _nsimples_per_complex[track_num];
     
-    AllocSimplesPerComplex(track_num + 1);
+    allocSimplesPerComplex(track_num + 1);
 
     if (_simples_per_complex[track_num] == nullptr) {
       _simples_per_complex[track_num] = (si32 *) umalloc
@@ -3338,7 +3354,7 @@ int TitanNcFile::ReadComplexParams(int track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadSimpleParams(int track_num,
+int TitanNcFile::readSimpleParams(int track_num,
 				     bool clear_error_str /* = true*/ )
      
 {
@@ -3346,7 +3362,7 @@ int TitanNcFile::ReadSimpleParams(int track_num,
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanNcFile::ReadSimpleParams\n";
+  _errStr += "ERROR - TitanNcFile::readSimpleParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
   TaStr::AddInt(_errStr, "  track_num", track_num);
 
@@ -3380,12 +3396,12 @@ int TitanNcFile::ReadSimpleParams(int track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadEntry()
+int TitanNcFile::readEntry()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadEntry\n";
+  _errStr += "ERROR - TitanNcFile::readEntry\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
 
   // move to the entry offset in the file
@@ -3426,12 +3442,12 @@ int TitanNcFile::ReadEntry()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadSimplesPerComplex()
+int TitanNcFile::readSimplesPerComplex()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadSimplesPerComplex\n";
+  _errStr += "ERROR - TitanNcFile::readSimplesPerComplex\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
 
   for (int itrack = 0; itrack < _track_header.n_complex_tracks; itrack++) {
@@ -3439,7 +3455,7 @@ int TitanNcFile::ReadSimplesPerComplex()
     int complex_num = _complex_track_nums[itrack];
     int nsimples = _nsimples_per_complex[complex_num];
 
-    AllocSimplesPerComplex(complex_num + 1);
+    allocSimplesPerComplex(complex_num + 1);
 
     _simples_per_complex[complex_num] = (si32 *) urealloc
       (_simples_per_complex[complex_num],
@@ -3473,18 +3489,18 @@ int TitanNcFile::ReadSimplesPerComplex()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadScanEntries(int scan_num)
+int TitanNcFile::readScanEntries(int scan_num)
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadScanEntries\n";
+  _errStr += "ERROR - TitanNcFile::readScanEntries\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
 
   // allocate as necessary
   
   _n_scan_entries = _scan_index[scan_num].n_entries;
-  AllocScanEntries(_n_scan_entries);
+  allocScanEntries(_n_scan_entries);
 
   track_file_entry_t *entry = _scan_entries;
   int next_entry_offset = _scan_index[scan_num].first_entry_offset;
@@ -3524,15 +3540,15 @@ int TitanNcFile::ReadScanEntries(int scan_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReadUtime()
+int TitanNcFile::readUtime()
      
 {
 
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::ReadUtime\n";
+  _errStr += "ERROR - TitanNcFile::readUtime\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _track_data_file_path);
 
-  AllocUtime();
+  allocUtime();
   
   // read the complex and simple track params and load up
   // the start and end julian time arrays - these are used to
@@ -3542,7 +3558,7 @@ int TitanNcFile::ReadUtime()
     
     int complex_track_num = _complex_track_nums[itrack];
     
-    if (ReadComplexParams(complex_track_num, true, false)) {
+    if (readComplexParams(complex_track_num, true, false)) {
       return -1;
     }
     
@@ -3558,7 +3574,7 @@ int TitanNcFile::ReadUtime()
     
     int simple_track_num = itrack;
     
-    if (ReadSimpleParams(simple_track_num, false)) {
+    if (readSimpleParams(simple_track_num, false)) {
       return -1;
     }
     
@@ -3580,7 +3596,7 @@ int TitanNcFile::ReadUtime()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanNcFile::Reinit()
+void TitanNcFile::reinit()
      
 {
   
@@ -3629,7 +3645,7 @@ void TitanNcFile::Reinit()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::ReuseComplexSlot(int track_num)
+int TitanNcFile::reuseComplexSlot(int track_num)
      
 {
 
@@ -3662,7 +3678,7 @@ int TitanNcFile::ReuseComplexSlot(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::RewindSimple(int track_num)
+int TitanNcFile::rewindSimple(int track_num)
      
 {
 
@@ -3671,7 +3687,7 @@ int TitanNcFile::RewindSimple(int track_num)
   
   // read in simple track params
   
-  if (ReadSimpleParams(track_num, false)) {
+  if (readSimpleParams(track_num, false)) {
     return -1;
   }
 
@@ -3693,7 +3709,7 @@ int TitanNcFile::RewindSimple(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::RewriteEntry()
+int TitanNcFile::rewriteEntry()
      
 {
   
@@ -3731,18 +3747,18 @@ int TitanNcFile::RewriteEntry()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::SeekTrackEndData()
+int TitanNcFile::seekTrackEndData()
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::SeekTrackEndData\n";
+  _errStr += "ERROR - TitanNcFile::seekTrackEndData\n";
   TaStr::AddStr(_errStr, "  File: ", _track_data_file_path);
 
   if (fseek(_track_data_file, 0L, SEEK_END) != 0) {
     
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Seek failed");
+    TaStr::AddStr(_errStr, "  ", "seek failed");
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
     
@@ -3760,18 +3776,18 @@ int TitanNcFile::SeekTrackEndData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::SeekTrackStartData()
+int TitanNcFile::seekTrackStartData()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::SeekTrackStartData\n";
+  _errStr += "ERROR - TitanNcFile::seekTrackStartData\n";
   TaStr::AddStr(_errStr, "  File: ", _track_data_file_path);
 
   if (fseek(_track_data_file, R_FILE_LABEL_LEN, SEEK_SET) != 0) {
     
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Seek failed");
+    TaStr::AddStr(_errStr, "  ", "seek failed");
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
     
@@ -3791,12 +3807,12 @@ int TitanNcFile::SeekTrackStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteTrackHeader()
+int TitanNcFile::writeTrackHeader()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteTrackHeader\n";
+  _errStr += "ERROR - TitanNcFile::writeTrackHeader\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _track_header_file_path);
   
   // get data file size
@@ -4005,7 +4021,7 @@ int TitanNcFile::WriteTrackHeader()
   
   // flush the file buffer
   
-  FlushTrackFiles();
+  flushTrackFiles();
 
   return 0;
   
@@ -4019,12 +4035,12 @@ int TitanNcFile::WriteTrackHeader()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteSimpleParams(int track_num)
+int TitanNcFile::writeSimpleParams(int track_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteSimpleParams\n";
+  _errStr += "ERROR - TitanNcFile::writeSimpleParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
   
   // Go to the end of the file.
@@ -4078,12 +4094,12 @@ int TitanNcFile::WriteSimpleParams(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanNcFile::WriteComplexParams(int track_num)
+int TitanNcFile::writeComplexParams(int track_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteSimpleParams\n";
+  _errStr += "ERROR - TitanNcFile::writeSimpleParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
   
   if (_complex_track_offsets[track_num] == 0) {
@@ -4172,13 +4188,13 @@ int TitanNcFile::WriteComplexParams(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-long TitanNcFile::WriteEntry(int prev_in_track_offset,
+long TitanNcFile::writeEntry(int prev_in_track_offset,
 				int prev_in_scan_offset)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanNcFile::WriteEntry\n";
+  _errStr += "ERROR - TitanNcFile::writeEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
 
   long file_mark;

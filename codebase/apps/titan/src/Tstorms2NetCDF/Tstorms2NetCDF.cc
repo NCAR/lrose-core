@@ -231,30 +231,36 @@ int Tstorms2NetCDF::_processInputPath()
 
 {
   
-  // set paths by replacing the extensions
+  // set input paths by replacing the extensions
   
   Fpath inputPath(_inputPath);
   _stormHeaderPath = inputPath.replace_extension(".sh5");
   _stormDataPath = inputPath.replace_extension(".sd5");
   _trackHeaderPath = inputPath.replace_extension(".th5");
   _trackDataPath = inputPath.replace_extension(".td5");
-  _ncFilePath = inputPath.replace_extension(".nc");
-    
+
+  // compute output path
+  
+  string filename = "titan_";
+  filename.append(inputPath.filename());
+  _ncFilePath = _params.output_dir;
+  _ncFilePath.append(filename);
+  _ncFilePath = _ncFilePath.replace_extension(".nc");
+  
   // open input files based on the provided path
 
   if (_openInputFiles()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
     cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
     return -1;
   }
 
-  // open netcdf file
+  // open netcdf file for writing
 
-  string junk(_ncFilePath.string());
-  if (_ncFile.openNcFile(junk, NcxxFile::FileMode::write)) {
-    // if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::write)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+  if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
     cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
+    cerr << "  Error: " << _ncFile.getErrStr() << endl;
     return -1;
   }
   
@@ -267,10 +273,14 @@ int Tstorms2NetCDF::_processInputPath()
   // read storm file header
 
   if (_sFile.ReadHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
     cerr << "  Cannot read storm file header, input_path: " << _inputPath << endl;
     return -1;
   }
+
+  // write the storm header
+
+  _ncFile.writeStormHeader(_sFile.header());
 
 #ifdef JUNK
   

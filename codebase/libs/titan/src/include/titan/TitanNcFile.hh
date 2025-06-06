@@ -479,35 +479,35 @@ public:
 
   // memory allocation and freeing - storms
 
-  void AllocLayers(int n_layers);
-  void FreeLayers();
-  void AllocHist(int n_dbz_intervals);
-  void FreeHist();
-  void AllocRuns(int n_runs);
-  void FreeRuns();
-  void AllocProjRuns(int n_proj_runs);
-  void FreeProjRuns();
-  void AllocGprops(int nstorms);
-  void FreeGprops();
-  void AllocScanOffsets(int n_scans_needed);
-  void FreeScanOffsets();
-  void FreeStormsAll();
+  void allocLayers(int n_layers);
+  void freeLayers();
+  void allocHist(int n_dbz_intervals);
+  void freeHist();
+  void allocRuns(int n_runs);
+  void freeRuns();
+  void allocProjRuns(int n_proj_runs);
+  void freeProjRuns();
+  void allocGprops(int nstorms);
+  void freeGprops();
+  void allocScanOffsets(int n_scans_needed);
+  void freeScanOffsets();
+  void freeStormsAll();
     
   // memory allocation and freeing - tracks
 
-  void AllocSimpleArrays(int n_simple_needed);
-  void FreeSimpleArrays();
-  void AllocComplexArrays(int n_complex_needed);
-  void FreeComplexArrays();
-  void AllocSimplesPerComplex(int n_simple_needed);
-  void FreeSimplesPerComplex();
-  void AllocScanEntries(int n_entries_needed);
-  void FreeScanEntries();
-  void AllocScanIndex(int n_scans_needed);
-  void FreeScanIndex();
-  void AllocUtime();
-  void FreeUtime();
-  void FreeTracksAll();
+  void allocSimpleArrays(int n_simple_needed);
+  void freeSimpleArrays();
+  void allocComplexArrays(int n_complex_needed);
+  void freeComplexArrays();
+  void allocSimplesPerComplex(int n_simple_needed);
+  void freeSimplesPerComplex();
+  void allocScanEntries(int n_entries_needed);
+  void freeScanEntries();
+  void allocScanIndex(int n_scans_needed);
+  void freeScanIndex();
+  void allocUtime();
+  void freeUtime();
+  void freeTracksAll();
 
   /////////////////////////////////////////////////////
   // NetCDF FileIO
@@ -518,134 +518,84 @@ public:
   void closeNcFile();
 
   /////////////////////////////////////////////////////
-  // set up groups
-
-  void _setUpGroups();
-  
-  // get group relative to a parent group
-  
-  NcxxGroup _getGroup(const std::string& name,
-                      NcxxGroup &parent);
-  
-  /////////////////////////////////////////////////////
-  // set up dimensions
-
-  void _setUpDims();
-  
-  // get dim relative to a parent group
-  
-  NcxxDim _getDim(const std::string& name,
-                  NcxxGroup &parent);
-  
-  NcxxDim _getDim(const std::string& name,
-                  size_t dimSize,
-                  NcxxGroup &parent);
-  
-  /////////////////////////////////////////////////////
-  // set up variables
-
-  void _setUpVars();
-  
-  // get scalar variable
-  
-  NcxxVar _getVar(const std::string& name,
-                  const NcxxType& ncType,
-                  NcxxGroup &group);
-  
-  // get 1D array variable
-  
-  NcxxVar _getVar(const std::string& name,
-                  const NcxxType& ncType,
-                  const NcxxDim& dim,
-                  NcxxGroup &group);
-  
-  // get 2D array variable
-  
-  NcxxVar _getVar(const std::string& name,
-                  const NcxxType& ncType,
-                  const NcxxDim& dim0,
-                  const NcxxDim& dim1,
-                  NcxxGroup &group);
-  
-  /////////////////////////////////////////////////////
   // Storms
   
   // Open the storm header and data files
   
-  int OpenStormFiles(const char *mode,
+  int openStormFiles(const char *mode,
                      const char *header_file_path,
                      const char *data_file_ext = NULL);
   
   // Close the storm header and data files
 
-  void CloseStormFiles();
+  void closeStormFiles();
   
   // Flush the storm header and data files
   
-  void FlushStormFiles();
+  void flushStormFiles();
   
   // Put an advisory lock on the header file
   // Mode is "w" - write lock, or "r" - read lock.
   // returns 0 on success, -1 on failure
   
-  int LockStormHeaderFile(const char *mode);
+  int lockStormHeaderFile(const char *mode);
   
   // Remove advisory lock from the header file
   // returns 0 on success, -1 on failure
 
-  int UnlockStormHeaderFile();
+  int unlockStormHeaderFile();
   
   // read the storm file header
 
-  int ReadStormHeader(bool clear_error_str = true);
+  int readStormHeader(bool clear_error_str = true);
      
   // read in the storm projected area runs
   // Space for the array is allocated.
   // returns 0 on success, -1 on failure
 
-  int ReadProjRuns(int storm_num);
+  int readProjRuns(int storm_num);
      
   // Read in the scan info and global props for a particular scan
   // in a storm properties file.
   // If storm num is set, only the gprops for that storm is swapped
   // returns 0 on success, -1 on failure
 
-  int ReadScan(int scan_num, int storm_num = -1);
+  int readScan(int scan_num, int storm_num = -1);
   
   // read in the seconday storm property data (lprops, hist, runs)
   // for a given storm in a scan.
   // Space for the arrays of structures is allocated as required.
   // returns 0 on success, -1 on failure
 
-  int ReadProps(int storm_num);
+  int readProps(int storm_num);
      
   // seek to the end of the storm data in data file
   // returns 0 on success, -1 on failure
 
-  int SeekStormEndData();
+  int seekStormEndData();
 
   // seek to the start of the storm data in data file
   // returns 0 on success, -1 on failure
 
-  int SeekStormStartData();
+  int seekStormStartData();
   
   // write the storm_file_header_t structure to a storm file.
   // returns 0 on success, -1 on failure
   
-  int WriteStormHeader(const storm_file_header_t &storm_file_header);
+  int writeStormHeader(const storm_file_header_t &storm_file_header);
      
   // write the storm layer property and histogram data for a storm,
   // at the end of the file.
   // returns 0 on success, -1 on failure
 
-  int WriteProps(int storm_num);
+  int writeProps(int storm_num);
 
   // write scan header and global properties for a particular scan
   // in a storm properties file.
   // Performs the writes from the end of the file.
   // returns 0 on success, -1 on failure
   
-  int WriteScan(int scan_num);
+  int writeScan(int scan_num);
      
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
@@ -655,7 +605,7 @@ public:
   //
   // See Note 3 in storms.h
 
-  void GpropsEllipses2Km(const storm_file_scan_header_t &scan,
+  void gpropsEllipses2Km(const storm_file_scan_header_t &scan,
 			 storm_file_global_props_t &gprops);
   
      
@@ -665,18 +615,18 @@ public:
   //
   // See Note 3 in storms.h
   
-  void GpropsXY2LatLon(const storm_file_scan_header_t &scan,
+  void gpropsXY2LatLon(const storm_file_scan_header_t &scan,
 		       storm_file_global_props_t &gprops);
   
   // Truncate header file
   // Returns 0 on success, -1 on failure.
 
-  int TruncateStormHeaderFile(int length);
+  int truncateStormHeaderFile(int length);
 
   // Truncate data file
   // Returns 0 on success, -1 on failure.
 
-  int TruncateStormDataFile(int length);
+  int truncateStormDataFile(int length);
 
   /////////////////////////////////////////////////////
   // Tracks
@@ -684,28 +634,28 @@ public:
   // Open the track header and data files
   // Returns 0 on success, -1 on error
 
-  int OpenTrackFiles(const char *mode,
+  int openTrackFiles(const char *mode,
                      const char *header_file_path,
                      const char *data_file_ext = NULL);
   
   // Close the storm header and data files
 
-  void CloseTrackFiles();
+  void closeTrackFiles();
      
   // Flush the storm header and data files
 
-  void FlushTrackFiles();
+  void flushTrackFiles();
   
   // Put an advisory lock on the header file.
   // Mode is "w" - write lock, or "r" - read lock.
   // returns 0 on success, -1 on failure
 
-  int LockTrackHeaderFile(const char *mode);
+  int lockTrackHeaderFile(const char *mode);
 
   // Remove advisory lock from the header file
   // returns 0 on success, -1 on failure
 
-  int UnlockTrackHeaderFile();
+  int unlockTrackHeaderFile();
   
   // read in the track_file_header_t structure from a track file.
   // Read in associated arrays (complex_track_nums, complex_track_offsets,
@@ -713,25 +663,25 @@ public:
   //   simples_per_complex_offsets)
   // returns 0 on success, -1 on failure
 
-  int ReadTrackHeader(bool clear_error_str = true);
+  int readTrackHeader(bool clear_error_str = true);
      
   // Read in the track_file_header_t and scan_index array.
   // returns 0 on success, -1 on failure
 
-  int ReadScanIndex(bool clear_error_str = true);
+  int readScanIndex(bool clear_error_str = true);
      
   // reads in the parameters for a complex track
   // For normal reads, read_simples_per_complex should be set true. This
   // is only set FALSE in Titan, which creates the track files.
   // returns 0 on success, -1 on failure
   
-  int ReadComplexParams(int track_num, bool read_simples_per_complex,
+  int readComplexParams(int track_num, bool read_simples_per_complex,
 			bool clear_error_str = true);
      
   // read in the parameters for a simple track
   // returns 0 on success, -1 on failure
 
-  int ReadSimpleParams(int track_num,
+  int readSimpleParams(int track_num,
 		       bool clear_error_str = true);
      
   // read in an entry for a track
@@ -739,73 +689,73 @@ public:
   // the next entry is read in.
   // returns 0 on success, -1 on failure
   
-  int ReadEntry();
+  int readEntry();
   
   // read in the array of simple tracks for each complex track
   // returns 0 on success, -1 on failure
   
-  int ReadSimplesPerComplex();
+  int readSimplesPerComplex();
   
   // read in entries for a scan
   // returns 0 on success, -1 on failure
 
-  int ReadScanEntries(int scan_num);
+  int readScanEntries(int scan_num);
      
   // read in track_utime_t array
   // Returns 0 on success or -1 on error
 
-  int ReadUtime();
+  int readUtime();
   
   // Reinitialize headers and arrays
 
-  void Reinit();
+  void reinit();
 
   // Set a complex params slot in the file available for
   // reuse, by setting the offset to its negative value.
   // returns 0 on success, -1 on failure
 
-  int ReuseComplexSlot(int track_num);
+  int reuseComplexSlot(int track_num);
      
   // prepare a simple track for reading by reading in the simple track
   // params and setting the first_entry flag
   // returns 0 on success, -1 on failure
 
-  int RewindSimple(int track_num);
+  int rewindSimple(int track_num);
      
   // rewrite an entry for a track in the track data file
   // The entry is written at the file offset of the original entry
   // returns 0 on success, -1 on failure
   
-  int RewriteEntry();
+  int rewriteEntry();
      
   // seek to the end of the track file data
 
-  int SeekTrackEndData();
+  int seekTrackEndData();
 
   // seek to the start of data in track data file
 
-  int SeekTrackStartData();
+  int seekTrackStartData();
      
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
-  int WriteTrackHeader();
+  int writeTrackHeader();
 
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
   
-  int WriteSimpleParams(int track_num);
+  int writeSimpleParams(int track_num);
      
   // write complex track params
   // returns 0 on success, -1 on failure
   
-  int WriteComplexParams(int track_num);
+  int writeComplexParams(int track_num);
      
   // write an entry for a track in the track data file
   // The entry is written at the end of the file
   // returns offset of last entry written on success, -1 on failure
   
-  long WriteEntry(int prev_in_track_offset,
+  long writeEntry(int prev_in_track_offset,
 		  int prev_in_scan_offset);
      
   ///////////////////////////////////////////////////////////////////
@@ -996,6 +946,56 @@ protected:
   string _errStr;
   
   // functions
+  
+  /////////////////////////////////////////////////////
+  // set up groups
+
+  void _setUpGroups();
+  
+  // get group relative to a parent group
+  
+  NcxxGroup _getGroup(const std::string& name,
+                      NcxxGroup &parent);
+  
+  /////////////////////////////////////////////////////
+  // set up dimensions
+
+  void _setUpDims();
+  
+  // get dim relative to a parent group
+  
+  NcxxDim _getDim(const std::string& name,
+                  NcxxGroup &parent);
+  
+  NcxxDim _getDim(const std::string& name,
+                  size_t dimSize,
+                  NcxxGroup &parent);
+  
+  /////////////////////////////////////////////////////
+  // set up variables
+
+  void _setUpVars();
+  
+  // get scalar variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  NcxxGroup &group);
+  
+  // get 1D array variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  const NcxxDim& dim,
+                  NcxxGroup &group);
+  
+  // get 2D array variable
+  
+  NcxxVar _getVar(const std::string& name,
+                  const NcxxType& ncType,
+                  const NcxxDim& dim0,
+                  const NcxxDim& dim1,
+                  NcxxGroup &group);
   
   void _clearErrStr();
   
