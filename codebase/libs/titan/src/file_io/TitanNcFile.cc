@@ -517,6 +517,63 @@ void TitanNcFile::_setUpVars()
   _tstateVars.max_children = _getVar(MAX_CHILDREN_, NcxxType::nc_INT, _tracksGroup);
   _tstateVars.max_nweights_forecast = _getVar(MAX_NWEIGHTS_FORECAST_, NcxxType::nc_INT, _tracksGroup);
 
+  // global bias for forecasts
+
+  _globalBiasVars.proj_area_centroid_x =
+    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.proj_area_centroid_y =
+    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.smoothed_proj_area_centroid_x =
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.smoothed_proj_area_centroid_y =
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup);
+
+  // global rmse for forecasts
+
+  _globalRmseVars.proj_area_centroid_x =
+    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.proj_area_centroid_y =
+    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.smoothed_proj_area_centroid_x =
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.smoothed_proj_area_centroid_y =
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup);
+
+  // global track verification contingency tables
+
+  _globalVerifyVars.ellipse_forecast_n_success =
+    _getVar(ELLIPSE_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalVerifyVars.ellipse_forecast_n_failure =
+    _getVar(ELLIPSE_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalVerifyVars.ellipse_forecast_n_false_alarm =
+    _getVar(ELLIPSE_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalVerifyVars.polygon_forecast_n_success =
+    _getVar(POLYGON_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalVerifyVars.polygon_forecast_n_failure =
+    _getVar(POLYGON_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _tracksGroup);
+  _globalVerifyVars.polygon_forecast_n_false_alarm =
+    _getVar(POLYGON_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _tracksGroup);
+
   // simple tracks
 
   _simpleVars.simple_track_num = _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _n_simple, _simpleGroup);
@@ -564,6 +621,63 @@ void TitanNcFile::_setUpVars()
   _complexVars.n_samples_for_forecast_stats =
     _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
 
+  // bias for forecasts per complex track
+
+  _complexBiasVars.proj_area_centroid_x =
+    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.proj_area_centroid_y =
+    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.smoothed_proj_area_centroid_x =
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.smoothed_proj_area_centroid_y =
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+
+  // rmse for forecasts per complex track
+
+  _complexRmseVars.proj_area_centroid_x =
+    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.proj_area_centroid_y =
+    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.smoothed_proj_area_centroid_x =
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.smoothed_proj_area_centroid_y =
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+
+  // verification contingency tables per complex track
+
+  _complexVerifyVars.ellipse_forecast_n_success =
+    _getVar(ELLIPSE_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVerifyVars.ellipse_forecast_n_failure =
+    _getVar(ELLIPSE_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm =
+    _getVar(ELLIPSE_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVerifyVars.polygon_forecast_n_success =
+    _getVar(POLYGON_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVerifyVars.polygon_forecast_n_failure =
+    _getVar(POLYGON_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVerifyVars.polygon_forecast_n_false_alarm =
+    _getVar(POLYGON_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+
   // track entries
 
   _entryVars.time = _getVar(TIME, NcxxType::nc_INT, _n_entries, _entriesGroup);
@@ -582,6 +696,27 @@ void TitanNcFile::_setUpVars()
   _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+
+  // track entry dval_dt for forecasts
+
+  _entryDvalDtVars.proj_area_centroid_x =
+    _getVar(DVAL_DT_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.proj_area_centroid_y =
+    _getVar(DVAL_DT_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.vol_centroid_z = _getVar(DVAL_DT_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.refl_centroid_z = _getVar(DVAL_DT_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.top = _getVar(DVAL_DT_TOP, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.dbz_max = _getVar(DVAL_DT_DBZ_MAX, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.volume = _getVar(DVAL_DT_VOLUME, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.precip_flux = _getVar(DVAL_DT_PRECIP_FLUX, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.mass = _getVar(DVAL_DT_MASS, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.proj_area = _getVar(DVAL_DT_PROJ_AREA, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.smoothed_proj_area_centroid_x =
+    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.smoothed_proj_area_centroid_y =
+    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.smoothed_speed = _getVar(DVAL_DT_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
+  _entryDvalDtVars.smoothed_direction = _getVar(DVAL_DT_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
 
 }
 
