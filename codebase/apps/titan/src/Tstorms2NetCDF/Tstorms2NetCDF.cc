@@ -286,8 +286,6 @@ int Tstorms2NetCDF::_processInputPath()
 
   _ncFile.writeStormHeader(_sFile.header());
 
-#ifdef JUNK
-  
   if (_params.input_mode == Params::REALTIME) {
     
     // REALTIME mode - find the scan which matches the latest data info
@@ -335,8 +333,6 @@ int Tstorms2NetCDF::_processInputPath()
     }
 
   }
-
-#endif
 
   _closeInputFiles();
   
@@ -437,24 +433,35 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
     cerr << "  End time: " << DateTime::str(end_time) << endl;
   }
   
-  // read into the DsTitan object
+  // // read into the DsTitan object
+
+  // DsTitan titan;
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //   titan.setDebug(true);
+  // }
+  // titan.setReadClosest(valid_time, 0);
+  // titan.setReadAllInFile();
+  // if (titan.read(_params.input_dir)) {
+  //   cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+  //   cerr << titan.getErrStr() << endl;
+  //   return -1;
+  // }
+
+  // read in scan
+
+  int scanNum = _sFile.scan().scan_num;
+  if (_sFile.ReadScan(scanNum)) {
+    cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+    cerr << "  Cannot read scan, num, input_path: " << scanNum << ", " << _inputPath << endl;
+    return -1;
+  }
+  
+  // write the scan to NetCDF
+  
+  _ncFile.writeScan(_sFile.scan());
 
 #ifdef JUNK
   
-  DsTitan titan;
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    titan.setDebug(true);
-  }
-  titan.setReadClosest(valid_time, 0);
-  titan.setReadAllInFile();
-  if (titan.read(_params.input_dir)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
-    cerr << titan.getErrStr() << endl;
-    return -1;
-  }
-
-  // write to NetCDF
-
   if (_writeNetcdfFile(start_time, end_time)) {
     return -1;
   }

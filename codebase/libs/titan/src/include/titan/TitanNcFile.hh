@@ -104,6 +104,7 @@ private:
     NcxxVar proj_type;
     NcxxVar proj_origin_lat;
     NcxxVar proj_origin_lon;
+    NcxxVar proj_rotation;
     NcxxVar proj_lat1;
     NcxxVar proj_lat2;
     NcxxVar proj_tangent_lat;
@@ -599,7 +600,7 @@ public:
   // Performs the writes from the end of the file.
   // returns 0 on success, -1 on failure
   
-  int writeScan(int scan_num);
+  int writeScan(const storm_file_scan_header_t &sheader);
      
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
@@ -1140,6 +1141,7 @@ public:
   static constexpr const char* PROJ_TYPE = "proj_type";
   static constexpr const char* PROJ_ORIGIN_LAT = "proj_origin_lat";
   static constexpr const char* PROJ_ORIGIN_LON = "proj_origin_lon";
+  static constexpr const char* PROJ_ROTATION = "proj_rotation";
   static constexpr const char* PROJ_LAT1 = "proj_lat1";
   static constexpr const char* PROJ_LAT2 = "proj_lat2";
   static constexpr const char* PROJ_TANGENT_LAT = "proj_tangent_lat";

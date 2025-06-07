@@ -2022,13 +2022,63 @@ int TitanNcFile::writeProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanNcFile::writeScan(int scan_num)
+int TitanNcFile::writeScan(const storm_file_scan_header_t &scanHeader)
      
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanNcFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
+
+  size_t scanNum= scanHeader.scan_num;
+  std::vector<size_t> index;
+  index.push_back(scanNum);
+  
+  _scanVars.scan_min_z.putVal(index, scanHeader.min_z);
+  _scanVars.scan_delta_z.putVal(index, scanHeader.delta_z);
+  _scanVars.scan_num.putVal(index, scanHeader.scan_num);
+  _scanVars.scan_nstorms.putVal(index, scanHeader.nstorms);
+  _scanVars.scan_time.putVal(index, scanHeader.time);
+  _scanVars.scan_gprops_offset.putVal(index, scanHeader.gprops_offset);
+  _scanVars.scan_first_offset.putVal(index, scanHeader.first_offset);
+  _scanVars.scan_last_offset.putVal(index, scanHeader.last_offset);
+  _scanVars.scan_ht_of_freezing.putVal(index, scanHeader.ht_of_freezing);
+
+  // grid details
+  _scanVars.grid_nx.putVal(index, scanHeader.grid.nx);
+  _scanVars.grid_ny.putVal(index, scanHeader.grid.ny);
+  _scanVars.grid_nz.putVal(index, scanHeader.grid.nz);
+  _scanVars.grid_minx.putVal(index, scanHeader.grid.minx);
+  _scanVars.grid_miny.putVal(index, scanHeader.grid.miny);
+  _scanVars.grid_minz.putVal(index, scanHeader.grid.minz);
+  _scanVars.grid_dx.putVal(index, scanHeader.grid.dx);
+  _scanVars.grid_dy.putVal(index, scanHeader.grid.dy);
+  _scanVars.grid_dz.putVal(index, scanHeader.grid.dz);
+  _scanVars.grid_dz_constant.putVal(index, scanHeader.grid.dz_constant);
+  _scanVars.grid_sensor_x.putVal(index, scanHeader.grid.sensor_x);
+  _scanVars.grid_sensor_y.putVal(index, scanHeader.grid.sensor_y);
+  _scanVars.grid_sensor_z.putVal(index, scanHeader.grid.sensor_z);
+  _scanVars.grid_sensor_lat.putVal(index, scanHeader.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.putVal(index, scanHeader.grid.sensor_lon);
+  _scanVars.grid_unitsx.putVal(index, scanHeader.grid.unitsx);
+  _scanVars.grid_unitsy.putVal(index, scanHeader.grid.unitsy);
+  _scanVars.grid_unitsz.putVal(index, scanHeader.grid.unitsz);
+
+  // projection details
+
+  _scanVars.proj_type.putVal(index, scanHeader.grid.proj_type);
+  _scanVars.proj_origin_lat.putVal(index, scanHeader.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.putVal(index, scanHeader.grid.proj_origin_lon);
+  _scanVars.proj_rotation.putVal(index, scanHeader.grid.proj_params.flat.rotation);
+  _scanVars.proj_lat1.putVal(index, scanHeader.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.putVal(index, scanHeader.grid.proj_params.lc2.lat2);
+  // _scanVars.proj_tangent_lat.putVal(0.0);
+  // _scanVars.proj_tangent_lon.putVal(0.0);
+  // _scanVars.proj_pole_type.putVal(0);
+  // _scanVars.proj_central_scale.putVal(1.0);
+
+
+#ifdef JUNK
   
   // Move to the end of the file before beginning the write.
 
@@ -2099,6 +2149,8 @@ int TitanNcFile::writeScan(int scan_num)
     return -1;
   }
 
+#endif
+  
   return 0;
   
 }
