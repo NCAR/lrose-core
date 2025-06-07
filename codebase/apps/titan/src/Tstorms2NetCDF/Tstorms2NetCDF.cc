@@ -263,6 +263,10 @@ int Tstorms2NetCDF::_processInputPath()
     cerr << "  Error: " << _ncFile.getErrStr() << endl;
     return -1;
   }
+
+  if (_params.debug) {
+    cerr << "Tstorms2NetCDF - writing NetCDF file: " << _ncFilePath << endl;
+  }
   
   // load up scan times
   
@@ -436,7 +440,6 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
   // read into the DsTitan object
 
 #ifdef JUNK
-  
   
   DsTitan titan;
   if (_params.debug >= Params::DEBUG_VERBOSE) {

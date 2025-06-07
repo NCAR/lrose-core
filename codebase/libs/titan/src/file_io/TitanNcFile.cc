@@ -289,6 +289,10 @@ void TitanNcFile::_setUpVars()
   _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.n_storms = _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.n_simple = _getVar(N_SIMPLE, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.n_complex = _getVar(N_COMPLEX, NcxxType::nc_INT, _ncFile);
 
   // scans
 
@@ -1770,12 +1774,53 @@ int TitanNcFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   // make local copies of the global file header and scan offsets
   
   int n_scans = header.n_scans;
-
+  
   _topLevelVars.file_time.putVal((long long) header.file_time);
   _topLevelVars.start_time.putVal((long long) header.start_time);
-  _topLevelVars.end_time.putVal((long long) header.end_time);
+  // _topLevelVars.end_time.putVal((long long) header.end_time);
+  _topLevelVars.end_time.putVal(header.end_time);
+  _topLevelVars.n_scans.putVal(n_scans);
 
-  // TaArray<si32> offsetArray;
+  const storm_file_params_t &sparams(header.params);
+  
+  _sparamsVars.low_dbz_threshold.putVal(sparams.low_dbz_threshold);
+  _sparamsVars.high_dbz_threshold.putVal(sparams.high_dbz_threshold);
+  _sparamsVars.dbz_hist_interval.putVal(sparams.dbz_hist_interval);
+  _sparamsVars.hail_dbz_threshold.putVal(sparams.hail_dbz_threshold);
+  _sparamsVars.base_threshold.putVal(sparams.base_threshold);
+  _sparamsVars.top_threshold.putVal(sparams.top_threshold);
+  _sparamsVars.min_storm_size.putVal(sparams.min_storm_size);
+  _sparamsVars.max_storm_size.putVal(sparams.max_storm_size);
+  _sparamsVars.morphology_erosion_threshold.putVal(sparams.morphology_erosion_threshold);
+  _sparamsVars.morphology_refl_divisor.putVal(sparams.morphology_refl_divisor);
+  _sparamsVars.min_radar_tops.putVal(sparams.min_radar_tops);
+  _sparamsVars.tops_edge_margin.putVal(sparams.tops_edge_margin);
+  _sparamsVars.z_p_coeff.putVal(sparams.z_p_coeff);
+  _sparamsVars.z_p_exponent.putVal(sparams.z_p_exponent);
+  _sparamsVars.z_m_coeff.putVal(sparams.z_m_coeff);
+  _sparamsVars.z_m_exponent.putVal(sparams.z_m_exponent);
+  _sparamsVars.sectrip_vert_aspect.putVal(sparams.sectrip_vert_aspect);
+  _sparamsVars.sectrip_horiz_aspect.putVal(sparams.sectrip_horiz_aspect);
+  _sparamsVars.sectrip_orientation_error.putVal(sparams.sectrip_orientation_error);
+  _sparamsVars.poly_start_az.putVal(sparams.poly_start_az);
+  _sparamsVars.poly_delta_az.putVal(sparams.poly_delta_az);
+  _sparamsVars.check_morphology.putVal(sparams.check_morphology);
+  _sparamsVars.check_tops.putVal(sparams.check_tops);
+  _sparamsVars.vel_available.putVal(sparams.vel_available);
+  _sparamsVars.n_poly_sides.putVal(sparams.n_poly_sides);
+  _sparamsVars.ltg_count_time.putVal(sparams.ltg_count_time);
+  _sparamsVars.ltg_count_margin_km.putVal(sparams.ltg_count_margin_km);
+  _sparamsVars.hail_z_m_coeff.putVal(sparams.hail_z_m_coeff);
+  _sparamsVars.hail_z_m_exponent.putVal(sparams.hail_z_m_exponent);
+  _sparamsVars.hail_mass_dbz_threshold.putVal(sparams.hail_mass_dbz_threshold);
+  _sparamsVars.gprops_union_type.putVal(sparams.gprops_union_type);
+  _sparamsVars.tops_dbz_threshold.putVal(sparams.tops_dbz_threshold);
+  _sparamsVars.precip_computation_mode.putVal(sparams.precip_computation_mode);
+  _sparamsVars.precip_plane_ht.putVal(sparams.precip_plane_ht);
+  _sparamsVars.low_convectivity_threshold.putVal(sparams.low_convectivity_threshold);
+  _sparamsVars.high_convectivity_threshold.putVal(sparams.high_convectivity_threshold);
+
+    // TaArray<si32> offsetArray;
   // si32 *scan_offsets = offsetArray.alloc(n_scans);
   // memcpy (scan_offsets, _scan_offsets, n_scans * sizeof(si32));
   

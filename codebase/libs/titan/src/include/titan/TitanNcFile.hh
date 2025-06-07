@@ -60,6 +60,10 @@ private:
     NcxxVar file_time;
     NcxxVar start_time;
     NcxxVar end_time;
+    NcxxVar n_scans;
+    NcxxVar n_storms;
+    NcxxVar n_simple;
+    NcxxVar n_complex;
   };
 
   // scan vars
