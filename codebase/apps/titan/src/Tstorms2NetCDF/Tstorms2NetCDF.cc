@@ -301,7 +301,7 @@ int Tstorms2NetCDF::_processInputPath()
 	} else {
 	  expire_time = valid_time + (valid_time - _scanTimes[iscan - 1]);
 	}
-	_processTime(valid_time, expire_time);
+	_processTime(iscan, valid_time, expire_time);
 	break;
       }
     }
@@ -324,11 +324,11 @@ int Tstorms2NetCDF::_processInputPath()
       }
       if (_params.input_mode == Params::ARCHIVE) {
 	if (valid_time >= _args.startTime && valid_time <= _args.endTime) {
-	  _processTime(valid_time, expire_time);
+	  _processTime(iscan, valid_time, expire_time);
 	}
       } else {
 	// FILELIST mode - process all scans
-	_processTime(valid_time, expire_time);
+	_processTime(iscan, valid_time, expire_time);
       }
     }
 
@@ -415,7 +415,8 @@ int Tstorms2NetCDF::_loadScanTimes()
 /////////////////////
 // process this scan
 
-int Tstorms2NetCDF::_processTime(time_t valid_time,
+int Tstorms2NetCDF::_processTime(int scan_num,
+                                 time_t valid_time,
                                  time_t expire_time)
   
 {
@@ -449,13 +450,15 @@ int Tstorms2NetCDF::_processTime(time_t valid_time,
 
   // read in scan
 
-  int scanNum = _sFile.scan().scan_num;
-  if (_sFile.ReadScan(scanNum)) {
+  if (_sFile.ReadScan(scan_num)) {
     cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
-    cerr << "  Cannot read scan, num, input_path: " << scanNum << ", " << _inputPath << endl;
+    cerr << "  Cannot read scan, num, input_path: " << scan_num << ", " << _inputPath << endl;
     return -1;
   }
   
+  int scanNum = _sFile.scan().scan_num;
+  cerr << "0000000000000000 scanNum: " << scanNum << endl;
+
   // write the scan to NetCDF
   
   _ncFile.writeScan(_sFile.scan());

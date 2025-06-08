@@ -106,7 +106,8 @@ private:
   
   int _loadScanTimes();
 
-  int _processTime(time_t valid_time,
+  int _processTime(int scan_num,
+                   time_t valid_time,
 		   time_t expire_time);
   
   int _writeNetcdfFile(time_t start_time,
