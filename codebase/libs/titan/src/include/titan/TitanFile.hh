@@ -600,7 +600,9 @@ public:
   // Performs the writes from the end of the file.
   // returns 0 on success, -1 on failure
   
-  int writeScan(const storm_file_scan_header_t &sheader);
+  int writeScan(const storm_file_header_t &storm_file_header,
+                const storm_file_scan_header_t &sheader,
+                const storm_file_global_props_t *gprops);
      
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.

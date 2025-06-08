@@ -435,7 +435,7 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   }
   
   // read in scan
-
+  
   if (_sFile.ReadScan(scan_num)) {
     cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
     cerr << "  Cannot read scan, num, input_path: " << scan_num << ", " << _inputPath << endl;
@@ -444,7 +444,7 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   
   // write the scan to NetCDF
   
-  _ncFile.writeScan(_sFile.scan());
+  _ncFile.writeScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
 
 #ifdef JUNK
   

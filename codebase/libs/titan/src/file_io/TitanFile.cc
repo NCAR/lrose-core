@@ -362,16 +362,16 @@ void TitanFile::_setUpVars()
     _getVar(SECTRIP_ORIENTATION_ERROR, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.poly_start_az = _getVar(POLY_START_AZ, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.poly_delta_az = _getVar(POLY_DELTA_AZ, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.check_morphology = _getVar(CHECK_MORPHOLOGY, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.check_tops = _getVar(CHECK_TOPS, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.vel_available = _getVar(VEL_AVAILABLE, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.n_poly_sides = _getVar(N_POLY_SIDES_, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.ltg_count_time = _getVar(LTG_COUNT_TIME, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.check_morphology = _getVar(CHECK_MORPHOLOGY, NcxxType::nc_INT, _stormsGroup);
+  _sparamsVars.check_tops = _getVar(CHECK_TOPS, NcxxType::nc_INT, _stormsGroup);
+  _sparamsVars.vel_available = _getVar(VEL_AVAILABLE, NcxxType::nc_INT, _stormsGroup);
+  _sparamsVars.n_poly_sides = _getVar(N_POLY_SIDES_, NcxxType::nc_INT, _stormsGroup);
+  _sparamsVars.ltg_count_time = _getVar(LTG_COUNT_TIME, NcxxType::nc_INT64, _stormsGroup);
   _sparamsVars.ltg_count_margin_km = _getVar(LTG_COUNT_MARGIN_KM, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.hail_z_m_coeff = _getVar(HAIL_Z_M_COEFF, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.hail_z_m_exponent = _getVar(HAIL_Z_M_EXPONENT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.hail_mass_dbz_threshold = _getVar(HAIL_MASS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.gprops_union_type = _getVar(GPROPS_UNION_TYPE, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.gprops_union_type = _getVar(GPROPS_UNION_TYPE, NcxxType::nc_INT, _stormsGroup);
   _sparamsVars.tops_dbz_threshold = _getVar(TOPS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.precip_computation_mode = _getVar(PRECIP_COMPUTATION_MODE, NcxxType::nc_INT, _stormsGroup);
   _sparamsVars.precip_plane_ht = _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _stormsGroup);
@@ -2018,15 +2018,16 @@ int TitanFile::writeProps(int storm_num)
 
 //////////////////////////////////////////////////////////////
 //
-// write scan header and global properties for a particular scan
-// in a storm properties file.
-// Performs the writes from the end of the file.
+// write scan header and storm global properties
+// for a particular scan.
 //
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeScan(const storm_file_scan_header_t &scanHeader)
+int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
+                         const storm_file_scan_header_t &scanHeader,
+			 const storm_file_global_props_t *gprops)
      
 {
   
@@ -2035,57 +2036,156 @@ int TitanFile::writeScan(const storm_file_scan_header_t &scanHeader)
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
   
   size_t scanNum= scanHeader.scan_num;
-
-  std::vector<size_t> index;
-  index.push_back(scanNum);
-
-  // scan details
   
-  _scanVars.scan_min_z.putVal(index, scanHeader.min_z);
-  _scanVars.scan_delta_z.putVal(index, scanHeader.delta_z);
-  _scanVars.scan_num.putVal(index, scanHeader.scan_num);
-  _scanVars.scan_nstorms.putVal(index, scanHeader.nstorms);
-  _scanVars.scan_time.putVal(index, scanHeader.time);
-  _scanVars.scan_gprops_offset.putVal(index, scanHeader.gprops_offset);
-  _scanVars.scan_first_offset.putVal(index, scanHeader.first_offset);
-  _scanVars.scan_last_offset.putVal(index, scanHeader.last_offset);
-  _scanVars.scan_ht_of_freezing.putVal(index, scanHeader.ht_of_freezing);
+  std::vector<size_t> scanIndex;
+  scanIndex.push_back(scanNum);
 
-  // grid details
-
-  _scanVars.grid_nx.putVal(index, scanHeader.grid.nx);
-  _scanVars.grid_ny.putVal(index, scanHeader.grid.ny);
-  _scanVars.grid_nz.putVal(index, scanHeader.grid.nz);
-  _scanVars.grid_minx.putVal(index, scanHeader.grid.minx);
-  _scanVars.grid_miny.putVal(index, scanHeader.grid.miny);
-  _scanVars.grid_minz.putVal(index, scanHeader.grid.minz);
-  _scanVars.grid_dx.putVal(index, scanHeader.grid.dx);
-  _scanVars.grid_dy.putVal(index, scanHeader.grid.dy);
-  _scanVars.grid_dz.putVal(index, scanHeader.grid.dz);
-  _scanVars.grid_dz_constant.putVal(index, scanHeader.grid.dz_constant);
-  _scanVars.grid_sensor_x.putVal(index, scanHeader.grid.sensor_x);
-  _scanVars.grid_sensor_y.putVal(index, scanHeader.grid.sensor_y);
-  _scanVars.grid_sensor_z.putVal(index, scanHeader.grid.sensor_z);
-  _scanVars.grid_sensor_lat.putVal(index, scanHeader.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.putVal(index, scanHeader.grid.sensor_lon);
+  // write scan details
   
-  _scanVars.grid_unitsx.putVal(index, std::string(scanHeader.grid.unitsx));
-  _scanVars.grid_unitsy.putVal(index, std::string(scanHeader.grid.unitsy));
-  _scanVars.grid_unitsz.putVal(index, std::string(scanHeader.grid.unitsz));
+  _scanVars.scan_min_z.putVal(scanIndex, scanHeader.min_z);
+  _scanVars.scan_delta_z.putVal(scanIndex, scanHeader.delta_z);
+  _scanVars.scan_num.putVal(scanIndex, scanHeader.scan_num);
+  _scanVars.scan_nstorms.putVal(scanIndex, scanHeader.nstorms);
+  _scanVars.scan_time.putVal(scanIndex, scanHeader.time);
+  _scanVars.scan_gprops_offset.putVal(scanIndex, scanHeader.gprops_offset);
+  _scanVars.scan_first_offset.putVal(scanIndex, scanHeader.first_offset);
+  _scanVars.scan_last_offset.putVal(scanIndex, scanHeader.last_offset);
+  _scanVars.scan_ht_of_freezing.putVal(scanIndex, scanHeader.ht_of_freezing);
 
-  // projection details
+  // write grid details
+
+  _scanVars.grid_nx.putVal(scanIndex, scanHeader.grid.nx);
+  _scanVars.grid_ny.putVal(scanIndex, scanHeader.grid.ny);
+  _scanVars.grid_nz.putVal(scanIndex, scanHeader.grid.nz);
+  _scanVars.grid_minx.putVal(scanIndex, scanHeader.grid.minx);
+  _scanVars.grid_miny.putVal(scanIndex, scanHeader.grid.miny);
+  _scanVars.grid_minz.putVal(scanIndex, scanHeader.grid.minz);
+  _scanVars.grid_dx.putVal(scanIndex, scanHeader.grid.dx);
+  _scanVars.grid_dy.putVal(scanIndex, scanHeader.grid.dy);
+  _scanVars.grid_dz.putVal(scanIndex, scanHeader.grid.dz);
+  _scanVars.grid_dz_constant.putVal(scanIndex, scanHeader.grid.dz_constant);
+  _scanVars.grid_sensor_x.putVal(scanIndex, scanHeader.grid.sensor_x);
+  _scanVars.grid_sensor_y.putVal(scanIndex, scanHeader.grid.sensor_y);
+  _scanVars.grid_sensor_z.putVal(scanIndex, scanHeader.grid.sensor_z);
+  _scanVars.grid_sensor_lat.putVal(scanIndex, scanHeader.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.putVal(scanIndex, scanHeader.grid.sensor_lon);
   
-  _scanVars.proj_type.putVal(index, scanHeader.grid.proj_type);
-  _scanVars.proj_origin_lat.putVal(index, scanHeader.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.putVal(index, scanHeader.grid.proj_origin_lon);
-  _scanVars.proj_rotation.putVal(index, scanHeader.grid.proj_params.flat.rotation);
+  _scanVars.grid_unitsx.putVal(scanIndex, std::string(scanHeader.grid.unitsx));
+  _scanVars.grid_unitsy.putVal(scanIndex, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_unitsz.putVal(scanIndex, std::string(scanHeader.grid.unitsz));
 
-  _scanVars.proj_lat1.putVal(index, scanHeader.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.putVal(index, scanHeader.grid.proj_params.lc2.lat2);
-  _scanVars.proj_tangent_lat.putVal(index, 0.0);
-  _scanVars.proj_tangent_lon.putVal(index, 0.0);
-  _scanVars.proj_pole_type.putVal(index, 0);
-  _scanVars.proj_central_scale.putVal(index, 1.0);
+  // write projection details
+  
+  _scanVars.proj_type.putVal(scanIndex, scanHeader.grid.proj_type);
+  _scanVars.proj_origin_lat.putVal(scanIndex, scanHeader.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.putVal(scanIndex, scanHeader.grid.proj_origin_lon);
+  _scanVars.proj_rotation.putVal(scanIndex, scanHeader.grid.proj_params.flat.rotation);
+
+  _scanVars.proj_lat1.putVal(scanIndex, scanHeader.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.putVal(scanIndex, scanHeader.grid.proj_params.lc2.lat2);
+  _scanVars.proj_tangent_lat.putVal(scanIndex, 0.0);
+  _scanVars.proj_tangent_lon.putVal(scanIndex, 0.0);
+  _scanVars.proj_pole_type.putVal(scanIndex, 0);
+  _scanVars.proj_central_scale.putVal(scanIndex, 1.0);
+
+  // write storm global props
+
+  const storm_file_params_t &sparams(storm_file_header.params);
+  _topLevelVars.n_storms.putVal(scanHeader.nstorms);
+  for (int istorm = 0; istorm < scanHeader.nstorms; istorm++) {
+    
+    std::vector<size_t> stormIndex;
+    stormIndex.push_back(istorm);
+
+    const storm_file_global_props_t &gp = gprops[istorm];
+    
+    _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
+    _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
+    _gpropsVars.vol_centroid_z.putVal(stormIndex, gp.vol_centroid_z);
+    _gpropsVars.refl_centroid_x.putVal(stormIndex, gp.refl_centroid_x);
+    _gpropsVars.refl_centroid_y.putVal(stormIndex, gp.refl_centroid_y);
+    _gpropsVars.refl_centroid_z.putVal(stormIndex, gp.refl_centroid_z);
+    _gpropsVars.top.putVal(stormIndex, gp.top);
+    _gpropsVars.base.putVal(stormIndex, gp.base);
+    _gpropsVars.volume.putVal(stormIndex, gp.volume);
+    _gpropsVars.area_mean.putVal(stormIndex, gp.area_mean);
+    _gpropsVars.precip_flux.putVal(stormIndex, gp.precip_flux);
+    _gpropsVars.mass.putVal(stormIndex, gp.mass);
+    _gpropsVars.tilt_angle.putVal(stormIndex, gp.tilt_angle);
+    _gpropsVars.tilt_dirn.putVal(stormIndex, gp.tilt_dirn);
+    _gpropsVars.dbz_max.putVal(stormIndex, gp.dbz_max);
+    _gpropsVars.dbz_mean.putVal(stormIndex, gp.dbz_mean);
+    _gpropsVars.dbz_max_gradient.putVal(stormIndex, gp.dbz_max_gradient);
+    _gpropsVars.dbz_mean_gradient.putVal(stormIndex, gp.dbz_mean_gradient);
+    _gpropsVars.ht_of_dbz_max.putVal(stormIndex, gp.ht_of_dbz_max);
+    _gpropsVars.rad_vel_mean.putVal(stormIndex, gp.rad_vel_mean);
+    _gpropsVars.rad_vel_sd.putVal(stormIndex, gp.rad_vel_sd);
+    _gpropsVars.vorticity.putVal(stormIndex, gp.vorticity);
+    _gpropsVars.precip_area.putVal(stormIndex, gp.precip_area);
+    _gpropsVars.precip_area_centroid_x.putVal(stormIndex, gp.precip_area_centroid_x);
+    _gpropsVars.precip_area_centroid_y.putVal(stormIndex, gp.precip_area_centroid_y);
+    _gpropsVars.precip_area_orientation.putVal(stormIndex, gp.precip_area_orientation);
+    _gpropsVars.precip_area_minor_radius.putVal(stormIndex, gp.precip_area_minor_radius);
+    _gpropsVars.precip_area_major_radius.putVal(stormIndex, gp.precip_area_major_radius);
+    _gpropsVars.proj_area.putVal(stormIndex, gp.proj_area);
+    _gpropsVars.proj_area_centroid_x.putVal(stormIndex, gp.proj_area_centroid_x);
+    _gpropsVars.proj_area_centroid_y.putVal(stormIndex, gp.proj_area_centroid_y);
+    _gpropsVars.proj_area_orientation.putVal(stormIndex, gp.proj_area_orientation);
+    _gpropsVars.proj_area_minor_radius.putVal(stormIndex, gp.proj_area_minor_radius);
+    _gpropsVars.proj_area_major_radius.putVal(stormIndex, gp.proj_area_major_radius);
+
+    std::vector<size_t> polyIndex;
+    polyIndex.push_back(istorm);
+    polyIndex.push_back(0);
+
+    std::vector<size_t> polyCount;
+    polyCount.push_back(1);
+    polyCount.push_back(N_POLY_SIDES);
+    
+    _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
+
+    _gpropsVars.storm_num.putVal(stormIndex, gp.storm_num);
+    _gpropsVars.n_layers.putVal(stormIndex, gp.n_layers);
+    _gpropsVars.base_layer.putVal(stormIndex, gp.base_layer);
+    _gpropsVars.n_dbz_intervals.putVal(stormIndex, gp.n_dbz_intervals);
+    _gpropsVars.n_runs.putVal(stormIndex, gp.n_runs);
+    _gpropsVars.n_proj_runs.putVal(stormIndex, gp.n_proj_runs);
+    _gpropsVars.top_missing.putVal(stormIndex, gp.top_missing);
+    _gpropsVars.range_limited.putVal(stormIndex, gp.range_limited);
+    _gpropsVars.second_trip.putVal(stormIndex, gp.second_trip);
+    _gpropsVars.hail_present.putVal(stormIndex, gp.hail_present);
+    _gpropsVars.anom_prop.putVal(stormIndex, gp.anom_prop);
+    _gpropsVars.bounding_min_ix.putVal(stormIndex, gp.bounding_min_ix);
+    _gpropsVars.bounding_min_iy.putVal(stormIndex, gp.bounding_min_iy);
+    _gpropsVars.bounding_max_ix.putVal(stormIndex, gp.bounding_max_ix);
+    _gpropsVars.bounding_max_iy.putVal(stormIndex, gp.bounding_max_iy);
+    _gpropsVars.layer_props_offset.putVal(stormIndex, gp.layer_props_offset);
+    _gpropsVars.dbz_hist_offset.putVal(stormIndex, gp.dbz_hist_offset);
+    _gpropsVars.runs_offset.putVal(stormIndex, gp.runs_offset);
+    _gpropsVars.proj_runs_offset.putVal(stormIndex, gp.proj_runs_offset);
+    _gpropsVars.vil_from_maxz.putVal(stormIndex, gp.vil_from_maxz);
+    _gpropsVars.ltg_count.putVal(stormIndex, gp.ltg_count);
+    _gpropsVars.convectivity_median.putVal(stormIndex, gp.convectivity_median);
+
+    if (sparams.gprops_union_type == UNION_HAIL) {
+      
+      _gpropsVars.hail_FOKRcategory.putVal(stormIndex, gp.add_on.hail_metrics.FOKRcategory);
+      _gpropsVars.hail_waldvogelProbability.putVal(stormIndex, gp.add_on.hail_metrics.waldvogelProbability);
+      _gpropsVars.hail_hailMassAloft.putVal(stormIndex, gp.add_on.hail_metrics.hailMassAloft);
+      _gpropsVars.hail_vihm.putVal(stormIndex, gp.add_on.hail_metrics.vihm);
+
+    } else if (sparams.gprops_union_type == UNION_NEXRAD_HDA) {
+      
+      _gpropsVars.hail_poh.putVal(stormIndex, gp.add_on.hda.poh);
+      _gpropsVars.hail_shi.putVal(stormIndex, gp.add_on.hda.shi);
+      _gpropsVars.hail_posh.putVal(stormIndex, gp.add_on.hda.posh);
+      _gpropsVars.hail_mehs.putVal(stormIndex, gp.add_on.hda.mehs);
+      
+    }
+
+  }
+
+  
 
 
 #ifdef JUNK
