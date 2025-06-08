@@ -42,7 +42,7 @@ SRCS = \
 	RfZr.c
 
 CPPC_SRCS = \
-	TitanNcFile.cc \
+	TitanFile.cc \
 	TitanStormFile.cc \
 	TitanTrackFile.cc
 

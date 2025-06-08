@@ -48,7 +48,7 @@
 #include <rapformats/tstorm_spdb.h>
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
-#include <titan/TitanNcFile.hh>
+#include <titan/TitanFile.hh>
 // #include <titan/DsTitan.hh>
 #include <filesystem>
 using Fpath = std::filesystem::path;
@@ -95,7 +95,7 @@ private:
 
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
-  TitanNcFile _ncFile;
+  TitanFile _ncFile;
 
   vector<time_t> _scanTimes;
     

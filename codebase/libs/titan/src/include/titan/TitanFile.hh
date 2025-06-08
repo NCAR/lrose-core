@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////////
-// <titan/TitanNcFile.hh>
+// <titan/TitanFile.hh>
 //
 // TITAN C++ NetCDF file io
 //
@@ -33,8 +33,8 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#ifndef TitanNcFile_HH
-#define TitanNcFile_HH
+#ifndef TitanFile_HH
+#define TitanFile_HH
 
 #include <titan/storm.h>
 #include <titan/track.h>
@@ -44,7 +44,7 @@
 
 using namespace std;
 
-class TitanNcFile
+class TitanFile
 {
 
 private:
@@ -432,11 +432,11 @@ public:
   
   // constructor
   
-  TitanNcFile();
+  TitanFile();
   
   // destructor
   
-  virtual ~TitanNcFile();
+  virtual ~TitanFile();
 
   // storm data access
 
@@ -1027,8 +1027,8 @@ private:
   
   // Private methods with no bodies. Copy and assignment not implemented.
 
-  TitanNcFile(const TitanNcFile & orig);
-  TitanNcFile & operator = (const TitanNcFile & other);
+  TitanFile(const TitanFile & orig);
+  TitanFile & operator = (const TitanFile & other);
 
 public:
 
