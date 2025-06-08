@@ -427,27 +427,13 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   time_t start_time = valid_time;
   
   if (_params.debug) {
-    cerr << "Processing: " << endl;
+    cerr << "Processing time: " << endl;
     cerr << "  Valid time: " << DateTime::str(valid_time) << endl;
     cerr << "  Expire time: " << DateTime::str(expire_time) << endl;
     cerr << "  Start time: " << DateTime::str(start_time) << endl;
     cerr << "  End time: " << DateTime::str(end_time) << endl;
   }
   
-  // // read into the DsTitan object
-
-  // DsTitan titan;
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   titan.setDebug(true);
-  // }
-  // titan.setReadClosest(valid_time, 0);
-  // titan.setReadAllInFile();
-  // if (titan.read(_params.input_dir)) {
-  //   cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
-  //   cerr << titan.getErrStr() << endl;
-  //   return -1;
-  // }
-
   // read in scan
 
   if (_sFile.ReadScan(scan_num)) {
@@ -456,9 +442,6 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     return -1;
   }
   
-  int scanNum = _sFile.scan().scan_num;
-  cerr << "0000000000000000 scanNum: " << scanNum << endl;
-
   // write the scan to NetCDF
   
   _ncFile.writeScan(_sFile.scan());

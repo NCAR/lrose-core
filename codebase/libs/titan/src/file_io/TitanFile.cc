@@ -305,6 +305,7 @@ void TitanFile::_setUpVars()
   _scanVars.scan_first_offset = _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
   _scanVars.scan_last_offset = _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
   _scanVars.scan_ht_of_freezing = _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+
   _scanVars.grid_nx = _getVar(GRID_NX, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_ny = _getVar(GRID_NY, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_nz = _getVar(GRID_NZ, NcxxType::nc_INT, _n_scans, _scansGroup);
@@ -323,10 +324,11 @@ void TitanFile::_setUpVars()
   _scanVars.grid_unitsx = _getVar(GRID_UNITSX, NcxxType::nc_STRING, _n_scans, _scansGroup);
   _scanVars.grid_unitsy = _getVar(GRID_UNITSY, NcxxType::nc_STRING, _n_scans, _scansGroup);
   _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _n_scans, _scansGroup);
+
   _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_rotation = _getVar(PROJ_ROTATION, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_rotation = _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
   _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
@@ -2031,61 +2033,59 @@ int TitanFile::writeScan(const storm_file_scan_header_t &scanHeader)
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
-
+  
   size_t scanNum= scanHeader.scan_num;
 
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  cerr << "111111111111 Writing scan header, scanNum: " << scanNum << endl;
-  // }
+  std::vector<size_t> index;
+  index.push_back(scanNum);
 
-  std::vector<size_t> loc;
-  loc.push_back(scanNum);
+  // scan details
   
-  _scanVars.scan_min_z.putVal(loc, scanHeader.min_z);
-  _scanVars.scan_delta_z.putVal(loc, scanHeader.delta_z);
-
-  _scanVars.scan_num.putVal(loc, scanHeader.scan_num);
-  _scanVars.scan_nstorms.putVal(loc, scanHeader.nstorms);
-  _scanVars.scan_time.putVal(loc, scanHeader.time);
-  _scanVars.scan_gprops_offset.putVal(loc, scanHeader.gprops_offset);
-  _scanVars.scan_first_offset.putVal(loc, scanHeader.first_offset);
-  _scanVars.scan_last_offset.putVal(loc, scanHeader.last_offset);
-  _scanVars.scan_ht_of_freezing.putVal(loc, scanHeader.ht_of_freezing);
+  _scanVars.scan_min_z.putVal(index, scanHeader.min_z);
+  _scanVars.scan_delta_z.putVal(index, scanHeader.delta_z);
+  _scanVars.scan_num.putVal(index, scanHeader.scan_num);
+  _scanVars.scan_nstorms.putVal(index, scanHeader.nstorms);
+  _scanVars.scan_time.putVal(index, scanHeader.time);
+  _scanVars.scan_gprops_offset.putVal(index, scanHeader.gprops_offset);
+  _scanVars.scan_first_offset.putVal(index, scanHeader.first_offset);
+  _scanVars.scan_last_offset.putVal(index, scanHeader.last_offset);
+  _scanVars.scan_ht_of_freezing.putVal(index, scanHeader.ht_of_freezing);
 
   // grid details
-  _scanVars.grid_nx.putVal(loc, scanHeader.grid.nx);
-  _scanVars.grid_ny.putVal(loc, scanHeader.grid.ny);
-  _scanVars.grid_nz.putVal(loc, scanHeader.grid.nz);
-  _scanVars.grid_minx.putVal(loc, scanHeader.grid.minx);
-  _scanVars.grid_miny.putVal(loc, scanHeader.grid.miny);
-  _scanVars.grid_minz.putVal(loc, scanHeader.grid.minz);
-  _scanVars.grid_dx.putVal(loc, scanHeader.grid.dx);
-  _scanVars.grid_dy.putVal(loc, scanHeader.grid.dy);
-  _scanVars.grid_dz.putVal(loc, scanHeader.grid.dz);
-  _scanVars.grid_dz_constant.putVal(loc, scanHeader.grid.dz_constant);
-  _scanVars.grid_sensor_x.putVal(loc, scanHeader.grid.sensor_x);
-  _scanVars.grid_sensor_y.putVal(loc, scanHeader.grid.sensor_y);
-  _scanVars.grid_sensor_z.putVal(loc, scanHeader.grid.sensor_z);
-  _scanVars.grid_sensor_lat.putVal(loc, scanHeader.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.putVal(loc, scanHeader.grid.sensor_lon);
 
-  // _scanVars.grid_unitsx.putVal(loc, scanHeader.grid.unitsx);
-  // _scanVars.grid_unitsy.putVal(loc, scanHeader.grid.unitsy);
-  // _scanVars.grid_unitsz.putVal(loc, scanHeader.grid.unitsz);
+  _scanVars.grid_nx.putVal(index, scanHeader.grid.nx);
+  _scanVars.grid_ny.putVal(index, scanHeader.grid.ny);
+  _scanVars.grid_nz.putVal(index, scanHeader.grid.nz);
+  _scanVars.grid_minx.putVal(index, scanHeader.grid.minx);
+  _scanVars.grid_miny.putVal(index, scanHeader.grid.miny);
+  _scanVars.grid_minz.putVal(index, scanHeader.grid.minz);
+  _scanVars.grid_dx.putVal(index, scanHeader.grid.dx);
+  _scanVars.grid_dy.putVal(index, scanHeader.grid.dy);
+  _scanVars.grid_dz.putVal(index, scanHeader.grid.dz);
+  _scanVars.grid_dz_constant.putVal(index, scanHeader.grid.dz_constant);
+  _scanVars.grid_sensor_x.putVal(index, scanHeader.grid.sensor_x);
+  _scanVars.grid_sensor_y.putVal(index, scanHeader.grid.sensor_y);
+  _scanVars.grid_sensor_z.putVal(index, scanHeader.grid.sensor_z);
+  _scanVars.grid_sensor_lat.putVal(index, scanHeader.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.putVal(index, scanHeader.grid.sensor_lon);
+  
+  _scanVars.grid_unitsx.putVal(index, std::string(scanHeader.grid.unitsx));
+  _scanVars.grid_unitsy.putVal(index, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_unitsz.putVal(index, std::string(scanHeader.grid.unitsz));
 
   // projection details
   
-  _scanVars.proj_type.putVal(loc, scanHeader.grid.proj_type);
-  _scanVars.proj_origin_lat.putVal(loc, scanHeader.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.putVal(loc, scanHeader.grid.proj_origin_lon);
-  _scanVars.proj_rotation.putVal(loc, scanHeader.grid.proj_params.flat.rotation);
+  _scanVars.proj_type.putVal(index, scanHeader.grid.proj_type);
+  _scanVars.proj_origin_lat.putVal(index, scanHeader.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.putVal(index, scanHeader.grid.proj_origin_lon);
+  _scanVars.proj_rotation.putVal(index, scanHeader.grid.proj_params.flat.rotation);
 
-  _scanVars.proj_lat1.putVal(loc, scanHeader.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.putVal(loc, scanHeader.grid.proj_params.lc2.lat2);
-  // _scanVars.proj_tangent_lat.putVal(0.0);
-  // _scanVars.proj_tangent_lon.putVal(0.0);
-  // _scanVars.proj_pole_type.putVal(0);
-  // _scanVars.proj_central_scale.putVal(1.0);
+  _scanVars.proj_lat1.putVal(index, scanHeader.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.putVal(index, scanHeader.grid.proj_params.lc2.lat2);
+  _scanVars.proj_tangent_lat.putVal(index, 0.0);
+  _scanVars.proj_tangent_lon.putVal(index, 0.0);
+  _scanVars.proj_pole_type.putVal(index, 0);
+  _scanVars.proj_central_scale.putVal(index, 1.0);
 
 
 #ifdef JUNK
