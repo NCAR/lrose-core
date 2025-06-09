@@ -427,9 +427,7 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   time_t start_time = valid_time;
   
   if (_params.debug) {
-    cerr << "Processing time: " << endl;
-    cerr << "  Valid time: " << DateTime::str(valid_time) << endl;
-    cerr << "  Expire time: " << DateTime::str(expire_time) << endl;
+    cerr << "Processing scan time: " << endl;
     cerr << "  Start time: " << DateTime::str(start_time) << endl;
     cerr << "  End time: " << DateTime::str(end_time) << endl;
   }
@@ -453,11 +451,17 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   //   * runs and proj_runs
 
   int nStorms = _sFile.scan().nstorms;
-  for (int istorm = 0; istorm < nStorms; istorm++) {
 
+  if (_params.debug) {
+    cerr << "  n_storms: " << nStorms << endl;
+  }
+
+  for (int istorm = 0; istorm < nStorms; istorm++) {
+    
     if (_sFile.ReadProps(istorm)) {
       cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
-      cerr << "  Cannot read properties, storm num: " << scan_num << ", " << _inputPath << endl;
+      cerr << "  Cannot read properties, storm num: "
+           << scan_num << ", " << _inputPath << endl;
       return -1;
     }
 
