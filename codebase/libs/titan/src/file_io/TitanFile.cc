@@ -1774,6 +1774,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.start_time.putVal((int64_t) header.start_time);
   _topLevelVars.end_time.putVal((int64_t) header.end_time);
   _topLevelVars.n_scans.putVal((int) _n_scans.getSize());
+  _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
   
   const storm_file_params_t &sparams(header.params);
   
@@ -2072,9 +2073,6 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 
   } // istorm
 
-  _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
-  
-  
 #ifdef JUNK
   
   // Move to the end of the file before beginning the write.
