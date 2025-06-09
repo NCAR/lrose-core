@@ -282,10 +282,6 @@ int Tstorms2NetCDF::_processInputPath()
     return -1;
   }
 
-  // write the storm header
-
-  _ncFile.writeStormHeader(_sFile.header());
-
   if (_params.input_mode == Params::REALTIME) {
     
     // REALTIME mode - find the scan which matches the latest data info
@@ -333,6 +329,10 @@ int Tstorms2NetCDF::_processInputPath()
     }
 
   }
+
+  // write the storm header
+
+  _ncFile.writeStormHeader(_sFile.header());
 
   _closeInputFiles();
   
@@ -441,10 +441,6 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     return -1;
   }
   
-  // write the scan and global properties to NetCDF
-  
-  _ncFile.writeScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
-  
   // for each storm in the scan read in the secondary properties, i.e.:
   //   * layer properties
   //   * dbz histograms
@@ -466,6 +462,7 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     }
 
     // write out secondary properties
+    // side-effect - sets offsets vectors
     
     _ncFile.writeSecProps(istorm,
                           _sFile.header(), _sFile.scan(), _sFile.gprops(),
@@ -474,6 +471,11 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     
   }
 
+  // write the scan and global properties to NetCDF
+  // the appropriate offsets have been set by writeSecProps()
+  
+  _ncFile.writeScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
+  
 #ifdef JUNK
   
   if (_writeNetcdfFile(start_time, end_time)) {

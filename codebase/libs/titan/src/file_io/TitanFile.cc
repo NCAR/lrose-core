@@ -1744,6 +1744,9 @@ int TitanFile::seekStormStartData()
 //
 // write the storm_file_header_t structure to a storm file.
 //
+// NOTE: should be called after writeSecProps() and writeScan(),
+// so that appropriate n_scans can be determined.
+//
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
@@ -1767,12 +1770,10 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   
   // make local copies of the global file header and scan offsets
   
-  int n_scans = header.n_scans;
-  
-  _topLevelVars.file_time.putVal(header.file_time);
-  _topLevelVars.start_time.putVal(header.start_time);
-  _topLevelVars.end_time.putVal(header.end_time);
-  _topLevelVars.n_scans.putVal(n_scans);
+  _topLevelVars.file_time.putVal((int64_t) header.file_time);
+  _topLevelVars.start_time.putVal((int64_t) header.start_time);
+  _topLevelVars.end_time.putVal((int64_t) header.end_time);
+  _topLevelVars.n_scans.putVal((int) _n_scans.getSize());
   
   const storm_file_params_t &sparams(header.params);
   
@@ -1872,6 +1873,9 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
 // write scan header and storm global properties
 // for a particular scan.
 //
+// NOTE: writeSecProps() must be called first, so that
+// the appropriate offsets can be set.
+//
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
@@ -1886,8 +1890,9 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
   _errStr += "ERROR - TitanFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
   
-  size_t scanNum = scanHeader.scan_num;
+  // scan storage index
   
+  size_t scanNum = scanHeader.scan_num;
   std::vector<size_t> scanIndex;
   scanIndex.push_back(scanNum);
 
@@ -1898,9 +1903,6 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
   _scanVars.scan_num.putVal(scanIndex, scanHeader.scan_num);
   _scanVars.scan_nstorms.putVal(scanIndex, scanHeader.nstorms);
   _scanVars.scan_time.putVal(scanIndex, scanHeader.time);
-  _scanVars.scan_gprops_offset.putVal(scanIndex, scanHeader.gprops_offset);
-  _scanVars.scan_first_offset.putVal(scanIndex, scanHeader.first_offset);
-  _scanVars.scan_last_offset.putVal(scanIndex, scanHeader.last_offset);
   _scanVars.scan_ht_of_freezing.putVal(scanIndex, scanHeader.ht_of_freezing);
 
   // write grid details
@@ -1939,13 +1941,27 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
   _scanVars.proj_pole_type.putVal(scanIndex, 0);
   _scanVars.proj_central_scale.putVal(scanIndex, 1.0);
 
+  // write gprops offset
+  
+  _scanVars.scan_gprops_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
+
   // write storm global props
 
   const storm_file_params_t &sparams(storm_file_header.params);
 
-  // save existing dimensions as offsets
-
   for (int istorm = 0; istorm < scanHeader.nstorms; istorm++) {
+
+    // write first and last gprops offsets for this scan
+    // first_offset is the offset of the first storm in the scan
+    // last_offset is the offset of the last storm in the scan
+    // NOTE: last_offset is the offset OF the last storm, NOT one beyond
+    
+    if (istorm == 0) {
+      _scanVars.scan_first_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
+    }
+    _scanVars.scan_last_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
+
+    // write the global props
     
     const storm_file_global_props_t &gp = gprops[istorm];
     
@@ -2003,10 +2019,6 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     _gpropsVars.bounding_min_iy.putVal(stormIndex, gp.bounding_min_iy);
     _gpropsVars.bounding_max_ix.putVal(stormIndex, gp.bounding_max_ix);
     _gpropsVars.bounding_max_iy.putVal(stormIndex, gp.bounding_max_iy);
-    _gpropsVars.layer_props_offset.putVal(stormIndex, gp.layer_props_offset);
-    _gpropsVars.dbz_hist_offset.putVal(stormIndex, gp.dbz_hist_offset);
-    _gpropsVars.runs_offset.putVal(stormIndex, gp.runs_offset);
-    _gpropsVars.proj_runs_offset.putVal(stormIndex, gp.proj_runs_offset);
     _gpropsVars.vil_from_maxz.putVal(stormIndex, gp.vil_from_maxz);
     _gpropsVars.ltg_count.putVal(stormIndex, gp.ltg_count);
 
@@ -2042,7 +2054,22 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     polyCount.push_back(N_POLY_SIDES);
     
     _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
+
+    // offsets into layers, histograms and runs
     
+    if (istorm < (int) _layerOffsets.size()) {
+      _gpropsVars.layer_props_offset.putVal(stormIndex, _layerOffsets[istorm]);
+    }
+    if (istorm < (int) _histOffsets.size()) {
+      _gpropsVars.dbz_hist_offset.putVal(stormIndex, _histOffsets[istorm]);
+    }
+    if (istorm < (int) _runsOffsets.size()) {
+      _gpropsVars.runs_offset.putVal(stormIndex, _runsOffsets[istorm]);
+    }
+    if (istorm < (int) _projRunsOffsets.size()) {
+      _gpropsVars.proj_runs_offset.putVal(stormIndex, _projRunsOffsets[istorm]);
+    }
+
   } // istorm
 
   _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
@@ -2130,6 +2157,12 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 // write the secondary storm properties:
 //   layers, dbz histograms, runs and proj_runs
 //
+// this must be called before writeScan(), so that the offsets
+// can be set appropriately
+//
+// NOTE: must be called, for all storms in a scan, before writeScan(),
+// so that the appropriate offsets can be set.
+//
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
@@ -2145,11 +2178,19 @@ int TitanFile::writeSecProps(int storm_num,
   
 {
 
+  // ensure we have space for the offsets
+  
+  _layerOffsets.resize(storm_num + 1);
+  _histOffsets.resize(storm_num + 1);
+  _runsOffsets.resize(storm_num + 1);
+  _projRunsOffsets.resize(storm_num + 1);
+  
   const storm_file_params_t &sparams(storm_file_header.params);
   const storm_file_global_props_t &gp = gprops[storm_num];
 
   // write layers
 
+  _layerOffsets[storm_num] = _n_layers.getSize();
   int nLayers = gp.n_layers;
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &ll = lprops[ilayer];
@@ -2175,6 +2216,7 @@ int TitanFile::writeSecProps(int storm_num,
 
   // write histograms
 
+  _histOffsets[storm_num] = _n_hist.getSize();
   int nHist = gp.n_dbz_intervals;
   for (int ihist = 0; ihist < nHist; ihist++) {
     const storm_file_dbz_hist_t &hh = hist[ihist];
@@ -2187,6 +2229,7 @@ int TitanFile::writeSecProps(int storm_num,
   
   // write runs
   
+  _runsOffsets[storm_num] = _n_runs.getSize();
   int nRuns = gp.n_runs;
   for (int irun = 0; irun < nRuns; irun++) {
     const storm_file_run_t &run = runs[irun];
@@ -2199,6 +2242,7 @@ int TitanFile::writeSecProps(int storm_num,
     _runsVars.run_len.putVal(runIndex, run.n);
   }
   
+  _projRunsOffsets[storm_num] = _n_proj_runs.getSize();
   int nProjRuns = gp.n_proj_runs;
   for (int irun = 0; irun < nProjRuns; irun++) {
     const storm_file_run_t &run = proj_runs[irun];

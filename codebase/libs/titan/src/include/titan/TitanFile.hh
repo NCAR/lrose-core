@@ -36,11 +36,13 @@
 #ifndef TitanFile_HH
 #define TitanFile_HH
 
+#include <string>
+#include <cstdint>
+
 #include <titan/storm.h>
 #include <titan/track.h>
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxFile.hh>
-#include <string>
 
 using namespace std;
 
@@ -585,13 +587,20 @@ public:
   int seekStormStartData();
   
   // write the storm_file_header_t structure to a storm file.
+  //
+  // NOTE: should be called after writeSecProps() and writeScan(),
+  // so that appropriate n_scans can be determined.
+  //
   // returns 0 on success, -1 on failure
   
   int writeStormHeader(const storm_file_header_t &storm_file_header);
   
-  // write scan header and global properties for a particular scan
-  // in a storm properties file.
-  // Performs the writes from the end of the file.
+  // write scan header and storm global properties
+  // for a particular scan.
+  //
+  // NOTE: writeSecProps() must be called first, so that
+  // the appropriate offsets can be set.
+  //
   // returns 0 on success, -1 on failure
   
   int writeScan(const storm_file_header_t &storm_file_header,
@@ -600,6 +609,13 @@ public:
      
   // write the secondary storm properties:
   //   layers, dbz histograms, runs and proj_runs
+  //
+  // this must be called before writeScan(), so that the offsets
+  // can be set appropriately
+  //
+  // NOTE: must be called, for all storms in a scan, before writeScan(),
+  // so that the appropriate offsets can be set.
+  //
   // returns 0 on success, -1 on failure
 
   int writeSecProps(int storm_num,
@@ -882,6 +898,13 @@ protected:
   ShapeVerifyVars _complexVerifyVars;
 
   //////////////////////////////////////////////////////////////
+
+  // offsets for various items
+
+  vector<int64_t> _layerOffsets;
+  vector<int64_t> _histOffsets;
+  vector<int64_t> _runsOffsets;
+  vector<int64_t> _projRunsOffsets;
   
   // storm file details
   
