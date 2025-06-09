@@ -434,17 +434,39 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     cerr << "  End time: " << DateTime::str(end_time) << endl;
   }
   
-  // read in scan
+  // read in scan, and global properties for the storms
   
   if (_sFile.ReadScan(scan_num)) {
     cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
-    cerr << "  Cannot read scan, num, input_path: " << scan_num << ", " << _inputPath << endl;
+    cerr << "  Cannot read scan and gprops, input_path: " << _inputPath << endl;
+    cerr << "    scan_num: " << scan_num << endl;
     return -1;
   }
   
-  // write the scan to NetCDF
+  // write the scan and global properties to NetCDF
   
   _ncFile.writeScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
+  
+  // for each storm in the scan read in the secondary properties, i.e.:
+  //   * layer properties
+  //   * dbz histograms
+  //   * runs and proj_runs
+
+  int nStorms = _sFile.scan().nstorms;
+  for (int istorm = 0; istorm < nStorms; istorm++) {
+
+    if (_sFile.ReadProps(istorm)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+      cerr << "  Cannot read properties, storm num: " << scan_num << ", " << _inputPath << endl;
+      return -1;
+    }
+
+    _ncFile.writeStormProps(istorm,
+                            _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                            _sFile.lprops(), _sFile.hist(),
+                            _sFile.runs(), _sFile.proj_runs());
+    
+  }
 
 #ifdef JUNK
   
@@ -462,7 +484,7 @@ int Tstorms2NetCDF::_processTime(int scan_num,
               valid_time, expire_time,
               titan, xml);
   }
-
+  
   // write to files as needed
 
   if (_params.write_to_xml_files) {

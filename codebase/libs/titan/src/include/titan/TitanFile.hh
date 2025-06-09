@@ -588,13 +588,7 @@ public:
   // returns 0 on success, -1 on failure
   
   int writeStormHeader(const storm_file_header_t &storm_file_header);
-     
-  // write the storm layer property and histogram data for a storm,
-  // at the end of the file.
-  // returns 0 on success, -1 on failure
-
-  int writeProps(int storm_num);
-
+  
   // write scan header and global properties for a particular scan
   // in a storm properties file.
   // Performs the writes from the end of the file.
@@ -604,6 +598,19 @@ public:
                 const storm_file_scan_header_t &sheader,
                 const storm_file_global_props_t *gprops);
      
+  // write the storm layer property, histogram and runs
+  // for a storm
+  // returns 0 on success, -1 on failure
+
+  int writeStormProps(int storm_num,
+                      const storm_file_header_t &storm_file_header,
+                      const storm_file_scan_header_t &sheader,
+                      const storm_file_global_props_t *gprops,
+                      const storm_file_layer_props_t *lprops,
+                      const storm_file_dbz_hist_t *hist,
+                      const storm_file_run_t *runs,
+                      const storm_file_run_t *proj_runs);
+
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
   // This applies to structs which were derived from lat-lon grids, for
@@ -807,9 +814,9 @@ protected:
   NcxxDim _n_entries;
   NcxxDim _n_poly;
   NcxxDim _n_layers;
+  NcxxDim _n_hist;
   NcxxDim _n_runs;
   NcxxDim _n_proj_runs;
-  NcxxDim _n_hist;
   NcxxDim _max_forecast_weights;
   NcxxDim _max_parents;
   NcxxDim _max_children;
