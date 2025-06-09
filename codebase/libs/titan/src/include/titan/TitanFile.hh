@@ -598,18 +598,18 @@ public:
                 const storm_file_scan_header_t &sheader,
                 const storm_file_global_props_t *gprops);
      
-  // write the storm layer property, histogram and runs
-  // for a storm
+  // write the secondary storm properties:
+  //   layers, dbz histograms, runs and proj_runs
   // returns 0 on success, -1 on failure
 
-  int writeStormProps(int storm_num,
-                      const storm_file_header_t &storm_file_header,
-                      const storm_file_scan_header_t &sheader,
-                      const storm_file_global_props_t *gprops,
-                      const storm_file_layer_props_t *lprops,
-                      const storm_file_dbz_hist_t *hist,
-                      const storm_file_run_t *runs,
-                      const storm_file_run_t *proj_runs);
+  int writeSecProps(int storm_num,
+                    const storm_file_header_t &storm_file_header,
+                    const storm_file_scan_header_t &sheader,
+                    const storm_file_global_props_t *gprops,
+                    const storm_file_layer_props_t *lprops,
+                    const storm_file_dbz_hist_t *hist,
+                    const storm_file_run_t *runs,
+                    const storm_file_run_t *proj_runs);
 
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.

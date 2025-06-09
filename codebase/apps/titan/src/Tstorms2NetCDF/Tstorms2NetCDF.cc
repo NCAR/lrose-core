@@ -461,10 +461,12 @@ int Tstorms2NetCDF::_processTime(int scan_num,
       return -1;
     }
 
-    _ncFile.writeStormProps(istorm,
-                            _sFile.header(), _sFile.scan(), _sFile.gprops(),
-                            _sFile.lprops(), _sFile.hist(),
-                            _sFile.runs(), _sFile.proj_runs());
+    // write out secondary properties
+    
+    _ncFile.writeSecProps(istorm,
+                          _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                          _sFile.lprops(), _sFile.hist(),
+                          _sFile.runs(), _sFile.proj_runs());
     
   }
 

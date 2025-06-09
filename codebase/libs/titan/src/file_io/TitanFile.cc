@@ -1919,15 +1919,14 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 
   // save existing dimensions as offsets
 
-  int gpropsOffset = _n_storms.getSize();
-  
   for (int istorm = 0; istorm < scanHeader.nstorms; istorm++) {
     
     const storm_file_global_props_t &gp = gprops[istorm];
     
+    int gpropsOffset = _n_storms.getSize();
     std::vector<size_t> stormIndex;
-    stormIndex.push_back(gpropsOffset + gp.storm_num);
-
+    stormIndex.push_back(gpropsOffset);
+    
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
     _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
     _gpropsVars.vol_centroid_z.putVal(stormIndex, gp.vol_centroid_z);
@@ -1963,16 +1962,6 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     _gpropsVars.proj_area_minor_radius.putVal(stormIndex, gp.proj_area_minor_radius);
     _gpropsVars.proj_area_major_radius.putVal(stormIndex, gp.proj_area_major_radius);
 
-    std::vector<size_t> polyIndex;
-    polyIndex.push_back(gpropsOffset + gp.storm_num);
-    polyIndex.push_back(0);
-    
-    std::vector<size_t> polyCount;
-    polyCount.push_back(1);
-    polyCount.push_back(N_POLY_SIDES);
-    
-    _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
-    
     _gpropsVars.storm_num.putVal(stormIndex, gp.storm_num);
     _gpropsVars.n_layers.putVal(stormIndex, gp.n_layers);
     _gpropsVars.base_layer.putVal(stormIndex, gp.base_layer);
@@ -2016,6 +2005,18 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
       
     }
 
+    // polygons are 2D variables
+    
+    std::vector<size_t> polyIndex;
+    polyIndex.push_back(gpropsOffset);
+    polyIndex.push_back(0);
+    
+    std::vector<size_t> polyCount;
+    polyCount.push_back(1);
+    polyCount.push_back(N_POLY_SIDES);
+    
+    _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
+    
   } // istorm
 
   _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
@@ -2100,21 +2101,21 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 
 //////////////////////////////////////////////////////////////
 //
-// write the storm layer property and histogram data for a storm,
-// at the end of the file.
+// write the secondary storm properties:
+//   layers, dbz histograms, runs and proj_runs
 //
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeStormProps(int storm_num,
-                               const storm_file_header_t &storm_file_header,
-                               const storm_file_scan_header_t &sheader,
-                               const storm_file_global_props_t *gprops,
-                               const storm_file_layer_props_t *lprops,
-                               const storm_file_dbz_hist_t *hist,
-                               const storm_file_run_t *runs,
-                               const storm_file_run_t *proj_runs)
+int TitanFile::writeSecProps(int storm_num,
+                             const storm_file_header_t &storm_file_header,
+                             const storm_file_scan_header_t &sheader,
+                             const storm_file_global_props_t *gprops,
+                             const storm_file_layer_props_t *lprops,
+                             const storm_file_dbz_hist_t *hist,
+                             const storm_file_run_t *runs,
+                             const storm_file_run_t *proj_runs)
   
 {
 
@@ -2122,7 +2123,6 @@ int TitanFile::writeStormProps(int storm_num,
 
   // save existing dimensions as offsets
 
-  int lpropsOffset = _n_layers.getSize();
   int histOffset = _n_hist.getSize();
   int runsOffset = _n_runs.getSize();
   int projRunsOffset = _n_proj_runs.getSize();
@@ -2139,8 +2139,9 @@ int TitanFile::writeStormProps(int storm_num,
 
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &lp = lprops[ilayer];
+    int lpropsOffset = _n_layers.getSize();
     std::vector<size_t> layerIndex;
-    layerIndex.push_back(lpropsOffset + ilayer);
+    layerIndex.push_back(lpropsOffset);
     _lpropsVars.vol_centroid_x.putVal(layerIndex, lp.vol_centroid_x);
     _lpropsVars.vol_centroid_y.putVal(layerIndex, lp.vol_centroid_y);
     _lpropsVars.refl_centroid_x.putVal(layerIndex, lp.refl_centroid_x);
