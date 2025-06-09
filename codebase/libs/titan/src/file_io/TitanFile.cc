@@ -234,20 +234,16 @@ void TitanFile::_setUpDims()
 {
 
   _n_scans = _getDim(N_SCANS, _scansGroup);
-  // _n_storms = _getDim(N_STORMS, _stormsGroup);
   _n_storms = _getDim(N_STORMS, _gpropsGroup);
   _n_simple = _getDim(N_SIMPLE, _simpleGroup);
   _n_complex = _getDim(N_COMPLEX, _complexGroup);
   _n_entries = _getDim(N_ENTRIES, _entriesGroup);
-  // _n_poly = _getDim(N_POLY, N_POLY_SIDES, _stormsGroup);
   _n_poly = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
   _n_layers = _getDim(N_LAYERS, _lpropsGroup);
   _n_runs = _getDim(N_RUNS, _runsGroup);
   _n_proj_runs = _getDim(N_PROJ_RUNS, _projRunsGroup);
   _n_hist = _getDim(N_HIST, _histGroup);
   _max_forecast_weights = _getDim(MAX_FORECAST_WEIGHTS, MAX_NWEIGHTS_FORECAST, _tracksGroup);
-  // _max_parents = _getDim(MAX_PARENTS_, MAX_PARENTS, _tracksGroup);
-  // _max_children = _getDim(MAX_CHILDREN_, MAX_CHILDREN, _tracksGroup);
   _max_parents = _getDim(MAX_PARENTS_, MAX_PARENTS, _simpleGroup);
   _max_children = _getDim(MAX_CHILDREN_, MAX_CHILDREN, _simpleGroup);
   
@@ -1233,7 +1229,7 @@ void TitanFile::closeStormFiles()
   }
 
   // close the data file
-  
+   
   if (_storm_data_file != nullptr) {
     fclose(_storm_data_file);
     _storm_data_file = (FILE *) nullptr;
@@ -1736,19 +1732,6 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   
   storm_file_header_t header = storm_file_header;
   
-  // get data file size
-
-  // fflush(_storm_data_file);
-  // struct stat data_stat;
-  // ta_stat(_storm_data_file_path.c_str(), &data_stat);
-  // header.data_file_size = data_stat.st_size;
-  
-  // copy file label
-  
-  // char file_label[R_FILE_LABEL_LEN];
-  // MEM_zero(file_label);
-  // strcpy(file_label, STORM_HEADER_FILE_TYPE);
-  
   header.major_rev = STORM_FILE_MAJOR_REV;
   header.minor_rev = STORM_FILE_MINOR_REV;
   
@@ -1756,39 +1739,19 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   
   header.file_time = time(nullptr);
   
-  // copy in the file names, checking whether the path has a
-  // delimiter or not, and only copying after the delimiter
-  
-  // const char *hptr = strrchr(_storm_header_file_path.c_str(), '/');
-
-  // if (hptr != nullptr) {
-  //   strncpy(header.header_file_name, (hptr + 1), R_LABEL_LEN - 1);
-  // } else {
-  //   strncpy(header.header_file_name, _storm_header_file_path.c_str(), R_LABEL_LEN - 1);
-  // }
-  
-  // const char *dptr = strrchr(_storm_data_file_path.c_str(), '/');
-  // if (dptr != nullptr) {
-  //   strncpy(header.data_file_name, (dptr + 1), R_LABEL_LEN - 1);
-  // } else {
-  //   strncpy(header.data_file_name, _storm_data_file_path.c_str(), R_LABEL_LEN - 1);
-  // }
-      
   // make local copies of the global file header and scan offsets
   
   int n_scans = header.n_scans;
   
-  _topLevelVars.file_time.putVal((long long) header.file_time);
-  _topLevelVars.start_time.putVal((long long) header.start_time);
-  // _topLevelVars.end_time.putVal((long long) header.end_time);
+  _topLevelVars.file_time.putVal(header.file_time);
+  _topLevelVars.start_time.putVal(header.start_time);
   _topLevelVars.end_time.putVal(header.end_time);
   _topLevelVars.n_scans.putVal(n_scans);
-
+  
   const storm_file_params_t &sparams(header.params);
   
   _sparamsVars.low_dbz_threshold.putVal(sparams.low_dbz_threshold);
   _sparamsVars.high_dbz_threshold.putVal(sparams.high_dbz_threshold);
-
   _sparamsVars.dbz_hist_interval.putVal(sparams.dbz_hist_interval);
   _sparamsVars.hail_dbz_threshold.putVal(sparams.hail_dbz_threshold);
   _sparamsVars.base_threshold.putVal(sparams.base_threshold);
@@ -1824,7 +1787,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _sparamsVars.low_convectivity_threshold.putVal(sparams.low_convectivity_threshold);
   _sparamsVars.high_convectivity_threshold.putVal(sparams.high_convectivity_threshold);
 
-    // TaArray<si32> offsetArray;
+  // TaArray<si32> offsetArray;
   // si32 *scan_offsets = offsetArray.alloc(n_scans);
   // memcpy (scan_offsets, _scan_offsets, n_scans * sizeof(si32));
   
@@ -1872,7 +1835,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   
   // flush the file buffer
   
-  flushStormFiles();
+  // flushStormFiles();
 
   return 0;
   
@@ -1897,7 +1860,7 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
   _errStr += "ERROR - TitanFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
   
-  size_t scanNum= scanHeader.scan_num;
+  size_t scanNum = scanHeader.scan_num;
   
   std::vector<size_t> scanIndex;
   scanIndex.push_back(scanNum);
@@ -1962,12 +1925,8 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     
     const storm_file_global_props_t &gp = gprops[istorm];
     
-    cerr << "111111111111111111111 istorm, storm_num: " << istorm << ", " << gp.storm_num << endl;
-    cerr << "111111111111111111111 gpropsOffset: " << gpropsOffset << endl;
-
     std::vector<size_t> stormIndex;
     stormIndex.push_back(gpropsOffset + gp.storm_num);
-
 
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
     _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
@@ -2009,11 +1968,11 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     polyIndex.push_back(0);
     
     std::vector<size_t> polyCount;
-    polyCount.push_back(gpropsOffset + gp.storm_num);
+    polyCount.push_back(1);
     polyCount.push_back(N_POLY_SIDES);
     
-    // _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
-
+    _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
+    
     _gpropsVars.storm_num.putVal(stormIndex, gp.storm_num);
     _gpropsVars.n_layers.putVal(stormIndex, gp.n_layers);
     _gpropsVars.base_layer.putVal(stormIndex, gp.base_layer);
@@ -2035,7 +1994,11 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
     _gpropsVars.proj_runs_offset.putVal(stormIndex, gp.proj_runs_offset);
     _gpropsVars.vil_from_maxz.putVal(stormIndex, gp.vil_from_maxz);
     _gpropsVars.ltg_count.putVal(stormIndex, gp.ltg_count);
-    _gpropsVars.convectivity_median.putVal(stormIndex, gp.convectivity_median);
+
+    if (sparams.low_convectivity_threshold != 0.0 ||
+        sparams.high_convectivity_threshold != 0.0) {
+      _gpropsVars.convectivity_median.putVal(stormIndex, gp.convectivity_median);
+    }
 
     if (sparams.gprops_union_type == UNION_HAIL) {
       
@@ -2155,8 +2118,8 @@ int TitanFile::writeStormProps(int storm_num,
   
 {
 
-  cerr << "SSSSSSSSSSSSSSSSSSSSSSSSS storm_num: " << storm_num << endl;
-  
+  const storm_file_params_t &sparams(storm_file_header.params);
+
   // save existing dimensions as offsets
 
   int lpropsOffset = _n_layers.getSize();
@@ -2189,7 +2152,10 @@ int TitanFile::writeStormProps(int storm_num,
     _lpropsVars.rad_vel_mean.putVal(layerIndex, lp.rad_vel_mean);
     _lpropsVars.rad_vel_sd.putVal(layerIndex, lp.rad_vel_sd);
     _lpropsVars.vorticity.putVal(layerIndex, lp.vorticity);
-    _lpropsVars.convectivity_median.putVal(layerIndex, lp.convectivity_median);
+    if (sparams.low_convectivity_threshold != 0.0 ||
+        sparams.high_convectivity_threshold != 0.0) {
+      _lpropsVars.convectivity_median.putVal(layerIndex, lp.convectivity_median);
+    }
   }
 
   
