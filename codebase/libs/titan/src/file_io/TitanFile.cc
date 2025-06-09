@@ -2120,45 +2120,80 @@ int TitanFile::writeSecProps(int storm_num,
 {
 
   const storm_file_params_t &sparams(storm_file_header.params);
-
-  // save existing dimensions as offsets
-
-  int histOffset = _n_hist.getSize();
-  int runsOffset = _n_runs.getSize();
-  int projRunsOffset = _n_proj_runs.getSize();
-
-  // get array sizes for this storm
-
   const storm_file_global_props_t &gp = gprops[storm_num];
-  int nLayers = gp.n_layers;
-  int nHist = gp.n_dbz_intervals;
-  int nRuns = gp.n_runs;
-  int nProjRuns = gp.n_proj_runs;
-  
+
   // write layers
 
+  int nLayers = gp.n_layers;
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
-    const storm_file_layer_props_t &lp = lprops[ilayer];
+    const storm_file_layer_props_t &ll = lprops[ilayer];
     int lpropsOffset = _n_layers.getSize();
     std::vector<size_t> layerIndex;
     layerIndex.push_back(lpropsOffset);
-    _lpropsVars.vol_centroid_x.putVal(layerIndex, lp.vol_centroid_x);
-    _lpropsVars.vol_centroid_y.putVal(layerIndex, lp.vol_centroid_y);
-    _lpropsVars.refl_centroid_x.putVal(layerIndex, lp.refl_centroid_x);
-    _lpropsVars.refl_centroid_y.putVal(layerIndex, lp.refl_centroid_y);
-    _lpropsVars.area.putVal(layerIndex, lp.area);
-    _lpropsVars.dbz_max.putVal(layerIndex, lp.dbz_max);
-    _lpropsVars.dbz_mean.putVal(layerIndex, lp.dbz_mean);
-    _lpropsVars.mass.putVal(layerIndex, lp.mass);
-    _lpropsVars.rad_vel_mean.putVal(layerIndex, lp.rad_vel_mean);
-    _lpropsVars.rad_vel_sd.putVal(layerIndex, lp.rad_vel_sd);
-    _lpropsVars.vorticity.putVal(layerIndex, lp.vorticity);
+    _lpropsVars.vol_centroid_x.putVal(layerIndex, ll.vol_centroid_x);
+    _lpropsVars.vol_centroid_y.putVal(layerIndex, ll.vol_centroid_y);
+    _lpropsVars.refl_centroid_x.putVal(layerIndex, ll.refl_centroid_x);
+    _lpropsVars.refl_centroid_y.putVal(layerIndex, ll.refl_centroid_y);
+    _lpropsVars.area.putVal(layerIndex, ll.area);
+    _lpropsVars.dbz_max.putVal(layerIndex, ll.dbz_max);
+    _lpropsVars.dbz_mean.putVal(layerIndex, ll.dbz_mean);
+    _lpropsVars.mass.putVal(layerIndex, ll.mass);
+    _lpropsVars.rad_vel_mean.putVal(layerIndex, ll.rad_vel_mean);
+    _lpropsVars.rad_vel_sd.putVal(layerIndex, ll.rad_vel_sd);
+    _lpropsVars.vorticity.putVal(layerIndex, ll.vorticity);
     if (sparams.low_convectivity_threshold != 0.0 ||
         sparams.high_convectivity_threshold != 0.0) {
-      _lpropsVars.convectivity_median.putVal(layerIndex, lp.convectivity_median);
+      _lpropsVars.convectivity_median.putVal(layerIndex, ll.convectivity_median);
     }
   }
 
+  // write histograms
+
+  int nHist = gp.n_dbz_intervals;
+  for (int ihist = 0; ihist < nHist; ihist++) {
+    const storm_file_dbz_hist_t &hh = hist[ihist];
+    int histOffset = _n_hist.getSize();
+    std::vector<size_t> histIndex;
+    histIndex.push_back(histOffset);
+    _histVars.percent_volume.putVal(histIndex, hh.percent_volume);
+    _histVars.percent_area.putVal(histIndex, hh.percent_area);
+  }
+  
+  // write runs
+  
+  int nRuns = gp.n_runs;
+  for (int irun = 0; irun < nRuns; irun++) {
+    const storm_file_run_t &run = runs[irun];
+    int runOffset = _n_runs.getSize();
+    std::vector<size_t> runIndex;
+    runIndex.push_back(runOffset);
+    _runsVars.run_ix.putVal(runIndex, run.ix);
+    _runsVars.run_iy.putVal(runIndex, run.iy);
+    _runsVars.run_iz.putVal(runIndex, run.iz);
+    _runsVars.run_len.putVal(runIndex, run.n);
+  }
+  
+  int nProjRuns = gp.n_proj_runs;
+  for (int irun = 0; irun < nProjRuns; irun++) {
+    const storm_file_run_t &run = proj_runs[irun];
+    int runOffset = _n_proj_runs.getSize();
+    std::vector<size_t> runIndex;
+    runIndex.push_back(runOffset);
+    _projRunsVars.run_ix.putVal(runIndex, run.ix);
+    _projRunsVars.run_iy.putVal(runIndex, run.iy);
+    _projRunsVars.run_iz.putVal(runIndex, run.iz);
+    _projRunsVars.run_len.putVal(runIndex, run.n);
+  }
+  
+  // save existing dimensions as offsets
+
+  // int runsOffset = _n_runs.getSize();
+  // int projRunsOffset = _n_proj_runs.getSize();
+
+  // get array sizes for this storm
+
+  // int nRuns = gp.n_runs;
+  // int nProjRuns = gp.n_proj_runs;
   
 #ifdef JUNK
   
