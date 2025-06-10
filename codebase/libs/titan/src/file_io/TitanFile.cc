@@ -1881,10 +1881,10 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
-                         const storm_file_scan_header_t &scanHeader,
-			 const storm_file_global_props_t *gprops)
-     
+int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
+                              const storm_file_scan_header_t &scanHeader,
+                              const storm_file_global_props_t *gprops)
+  
 {
   
   _clearErrStr();
@@ -2152,7 +2152,7 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 
 //////////////////////////////////////////////////////////////
 //
-// write the secondary storm properties:
+// write the auxiliary storm properties:
 //   layers, dbz histograms, runs and proj_runs
 //
 // this must be called before writeScan(), so that the offsets
@@ -2165,14 +2165,14 @@ int TitanFile::writeScan(const storm_file_header_t &storm_file_header,
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeSecProps(int storm_num,
-                             const storm_file_header_t &storm_file_header,
-                             const storm_file_scan_header_t &sheader,
-                             const storm_file_global_props_t *gprops,
-                             const storm_file_layer_props_t *lprops,
-                             const storm_file_dbz_hist_t *hist,
-                             const storm_file_run_t *runs,
-                             const storm_file_run_t *proj_runs)
+int TitanFile::writeStormAuxProps(int storm_num,
+                                  const storm_file_header_t &storm_file_header,
+                                  const storm_file_scan_header_t &sheader,
+                                  const storm_file_global_props_t *gprops,
+                                  const storm_file_layer_props_t *lprops,
+                                  const storm_file_dbz_hist_t *hist,
+                                  const storm_file_run_t *runs,
+                                  const storm_file_run_t *proj_runs)
   
 {
 

@@ -464,17 +464,17 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     // write out secondary properties
     // side-effect - sets offsets vectors
     
-    _ncFile.writeSecProps(istorm,
-                          _sFile.header(), _sFile.scan(), _sFile.gprops(),
-                          _sFile.lprops(), _sFile.hist(),
-                          _sFile.runs(), _sFile.proj_runs());
+    _ncFile.writeStormAuxProps(istorm,
+                               _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                               _sFile.lprops(), _sFile.hist(),
+                               _sFile.runs(), _sFile.proj_runs());
     
   }
 
   // write the scan and global properties to NetCDF
   // the appropriate offsets have been set by writeSecProps()
   
-  _ncFile.writeScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
+  _ncFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
   
 #ifdef JUNK
   
