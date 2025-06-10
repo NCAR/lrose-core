@@ -181,21 +181,6 @@ int Tstorms2NetCDF::Run ()
       return -1;
     }
 
-  } else if (_params.input_mode == Params::REALTIME) {
-
-    // REALTIME mode
-    
-    string inDir;
-    RapDataDir.fillPath(_params.input_dir, inDir);
-    if (_params.debug) {
-      cerr << "Input dir: " << inDir << endl;
-    }
-    _input = new DsInputPath(_progName,
-			     _params.debug >= Params::DEBUG_VERBOSE,
-			     inDir,
-			     _params.max_realtime_valid_age,
-			     PMU_auto_register);
-    
   } else {
 
     cerr << "ERROR - unknown input_mode: " << _params.input_mode << endl;
@@ -216,7 +201,7 @@ int Tstorms2NetCDF::Run ()
       cerr << "Processing input path: " << _inputPath << endl;
     }
     
-    _processInputPath();
+    _processInputFile();
     
   }
   
@@ -227,7 +212,7 @@ int Tstorms2NetCDF::Run ()
 //////////////////////////////////////////////////
 // process input data
 
-int Tstorms2NetCDF::_processInputPath()
+int Tstorms2NetCDF::_processInputFile()
 
 {
   
@@ -282,57 +267,32 @@ int Tstorms2NetCDF::_processInputPath()
     return -1;
   }
 
-  if (_params.input_mode == Params::REALTIME) {
-    
-    // REALTIME mode - find the scan which matches the latest data info
-    // and only process that scan
+  // read track file header
 
-    time_t valid_time = _input->getLdataInfo().getLatestTime();
-
-    for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
-      if (_scanTimes[iscan] == valid_time) {
-	time_t expire_time;
-	if (iscan == 0) {
-	  expire_time = valid_time;
-	} else {
-	  expire_time = valid_time + (valid_time - _scanTimes[iscan - 1]);
-	}
-	_processTime(iscan, valid_time, expire_time);
-	break;
-      }
-    }
-
-  } else {
-
-    // ARCHIVE or FILELIST mode
-    
-    for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
-      time_t valid_time = _scanTimes[iscan];
-      time_t expire_time;
-      if (_scanTimes.size() == 1) {
-	expire_time = valid_time;
-      } else {
-	if (iscan == _scanTimes.size() - 1) {
-	  expire_time = valid_time + (valid_time - _scanTimes[iscan - 1]);
-	} else {
-	  expire_time = _scanTimes[iscan + 1];
-	}
-      }
-      if (_params.input_mode == Params::ARCHIVE) {
-	if (valid_time >= _args.startTime && valid_time <= _args.endTime) {
-	  _processTime(iscan, valid_time, expire_time);
-	}
-      } else {
-	// FILELIST mode - process all scans
-	_processTime(iscan, valid_time, expire_time);
-      }
-    }
-
+  if (_tFile.ReadHeader()) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
+    cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
+    return -1;
   }
 
-  // write the storm header
+  // loop through the scans
+  
+  for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
+    time_t scan_time = _scanTimes[iscan];
+    if (_params.input_mode == Params::ARCHIVE) {
+      if (scan_time >= _args.startTime && scan_time <= _args.endTime) {
+        _processScan(iscan, scan_time);
+      }
+    } else {
+      // FILELIST mode - process all scans
+      _processScan(iscan, scan_time);
+    }
+  }
+  
+  // write the storm header and track header
 
   _ncFile.writeStormHeader(_sFile.header());
+  _ncFile.writeTrackHeader(_tFile.header());
 
   _closeInputFiles();
   
@@ -415,16 +375,15 @@ int Tstorms2NetCDF::_loadScanTimes()
 /////////////////////
 // process this scan
 
-int Tstorms2NetCDF::_processTime(int scan_num,
-                                 time_t valid_time,
-                                 time_t expire_time)
+int Tstorms2NetCDF::_processScan(int scan_num,
+                                 time_t scan_time)
   
 {
 
   PMU_auto_register("Reading data....");
   
-  time_t end_time = valid_time;
-  time_t start_time = valid_time;
+  time_t end_time = scan_time;
+  time_t start_time = scan_time;
   
   if (_params.debug) {
     cerr << "Processing scan time: " << endl;
@@ -441,23 +400,23 @@ int Tstorms2NetCDF::_processTime(int scan_num,
     return -1;
   }
   
-  // for each storm in the scan read in the secondary properties, i.e.:
-  //   * layer properties
-  //   * dbz histograms
-  //   * runs and proj_runs
-
   int nStorms = _sFile.scan().nstorms;
-
   if (_params.debug) {
     cerr << "  n_storms: " << nStorms << endl;
   }
+
+  // for each storm in the scan read in the secondary properties, i.e.:
+  //   * layer properties
+  //   * dbz histograms
+  //   * runs
+  //   * proj_runs
 
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
     if (_sFile.ReadProps(istorm)) {
       cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
       cerr << "  Cannot read properties, storm num: "
-           << scan_num << ", " << _inputPath << endl;
+           << istorm << ", " << _inputPath << endl;
       return -1;
     }
 
@@ -476,51 +435,9 @@ int Tstorms2NetCDF::_processTime(int scan_num,
   
   _ncFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
   
-#ifdef JUNK
-  
-  if (_writeNetcdfFile(start_time, end_time)) {
-    return -1;
-  }
-
-  string xml;
-  if (_params.xml_format == Params::TSTORMS_FORMAT) {
-    _loadTstormsXml(start_time, end_time,
-                    valid_time, expire_time,
-                    titan, xml);
-  } else {
-    _loadWxml(start_time, end_time,
-              valid_time, expire_time,
-              titan, xml);
-  }
-  
-  // write to files as needed
-
-  if (_params.write_to_xml_files) {
-    _writeXmlFile(valid_time, xml);
-  }
-
-#endif
-  
   return 0;
 
 }
-  
-//////////////////////////////////////
-// write out netcdf file
-
-int Tstorms2NetCDF::_writeNetcdfFile(time_t start_time,
-                                     time_t end_time)
-
-{
-
-  // storm parameters
-  
-  // const storm_file_params_t &stormParams = titan.storm_params();
-  
-  return 0;
-  
-}
-
   
 #ifdef JUNK
   

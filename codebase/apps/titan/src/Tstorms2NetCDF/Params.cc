@@ -612,20 +612,18 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
-    tt->descr = tdrpStrDup("Operational mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program is run on output from each volume scan as it becomes available. In ARCHIVE mode, all of the scans in a series of track files are processed. In FILELIST mode, the program processes a list of files specified on the command line.");
+    tt->descr = tdrpStrDup("Input file mode");
+    tt->help = tdrpStrDup("In ARCHIVE mode, all of the scans in a series of track files are processed. In FILELIST mode, the program processes a list of files specified on the command line.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[0].val = ARCHIVE;
-      tt->enum_def.fields[1].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[1].val = REALTIME;
-      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = REALTIME;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[1].val = FILELIST;
+    tt->single_val.e = ARCHIVE;
     tt++;
     
     // Parameter 'Comment 2'
@@ -644,21 +642,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
     tt->descr = tdrpStrDup("Directory for input TITAN storm data.");
-    tt->help = tdrpStrDup("If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.");
+    tt->help = tdrpStrDup("For ARCHIVE mode only - we search for the files in this directory between the specified start and end times. If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $DATA_DIR.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("titan/storms");
-    tt++;
-    
-    // Parameter 'max_realtime_valid_age'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_valid_age");
-    tt->descr = tdrpStrDup("Max valid age of input data in realtime mode (secs).");
-    tt->help = tdrpStrDup("REALTIME mode only. This the max valid age for input data. In REALTIME mode, the program will wait for data more recent than this.");
-    tt->val_offset = (char *) &max_realtime_valid_age - &_start_;
-    tt->single_val.i = 360;
     tt++;
     
     // Parameter 'Comment 3'

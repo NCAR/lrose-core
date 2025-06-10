@@ -64,8 +64,8 @@ private:
     NcxxVar end_time;
     NcxxVar n_scans;
     NcxxVar n_storms;
-    NcxxVar n_simple;
-    NcxxVar n_complex;
+    NcxxVar max_simple_track_num;
+    NcxxVar max_complex_track_num;
   };
 
   // scan vars
@@ -278,7 +278,7 @@ private:
     NcxxVar weight_distance;
     NcxxVar weight_delta_cube_root_volume;
     NcxxVar merge_split_search_ratio;
-    NcxxVar max_speed;
+    NcxxVar max_tracking_speed;
     NcxxVar max_speed_for_valid_forecast;
     NcxxVar parabolic_growth_period;
     NcxxVar smoothing_radius;
@@ -769,7 +769,7 @@ public:
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
-  int writeTrackHeader();
+  int writeTrackHeader(const track_file_header_t &track_file_header);
 
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
@@ -818,7 +818,7 @@ protected:
   // netcdf file
   
   NcxxFile _ncFile;
-  string _tmpPath;
+  string _filePath;
 
   ////////////////////////////////////////////////////////
   // dimensions
@@ -1089,7 +1089,9 @@ public:
   static constexpr const char* N_SCANS = "n_scans";
   static constexpr const char* N_STORMS = "n_storms";
   static constexpr const char* N_SIMPLE = "n_simple";
+  static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
   static constexpr const char* N_COMPLEX = "n_complex";
+  static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
   static constexpr const char* N_ENTRIES = "n_entries";
   static constexpr const char* N_POLY = "n_poly";
   static constexpr const char* N_LAYERS = "n_layers";
@@ -1268,7 +1270,7 @@ public:
   static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
   static constexpr const char* WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
   static constexpr const char* MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
-  static constexpr const char* MAX_SPEED = "max_speed";
+  static constexpr const char* MAX_TRACKING_SPEED = "max_tracking_speed";
   static constexpr const char* MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
   static constexpr const char* PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
   static constexpr const char* SMOOTHING_RADIUS = "smoothing_radius";
@@ -1285,8 +1287,8 @@ public:
 
   static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
   static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
-  static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
-  static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
+  // static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
+  // static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
   static constexpr const char* MAX_PARENTS_ = "max_parents";
   static constexpr const char* MAX_CHILDREN_ = "max_children";
   static constexpr const char* MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";

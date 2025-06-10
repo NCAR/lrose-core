@@ -43,17 +43,15 @@ instance = "test";
 
 ///////////// input_mode //////////////////////////////
 //
-// Operational mode.
+// Input file mode.
 //
-// In REALTIME mode, the program is run on output from each volume scan 
-//   as it becomes available. In ARCHIVE mode, all of the scans in a 
-//   series of track files are processed. In FILELIST mode, the program 
-//   processes a list of files specified on the command line.
+// In ARCHIVE mode, all of the scans in a series of track files are 
+//   processed. In FILELIST mode, the program processes a list of files 
+//   specified on the command line.
 //
 // Type: enum
 // Options:
 //     ARCHIVE
-//     REALTIME
 //     FILELIST
 
 input_mode = ARCHIVE;
@@ -68,23 +66,14 @@ input_mode = ARCHIVE;
 //
 // Directory for input TITAN storm data.
 //
-// If this path is not absolute (starts with /) or relative (starts with 
-//   .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.
+// For ARCHIVE mode only - we search for the files in this directory 
+//   between the specified start and end times. If this path is not 
+//   absolute (starts with /) or relative (starts with .) it will be taken 
+//   relative to $DATA_DIR.
 //
 // Type: string
 
 input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
-
-///////////// max_realtime_valid_age //////////////////
-//
-// Max valid age of input data in realtime mode (secs).
-//
-// REALTIME mode only. This the max valid age for input data. In 
-//   REALTIME mode, the program will wait for data more recent than this.
-//
-// Type: int
-
-max_realtime_valid_age = 360;
 
 //======================================================================
 //

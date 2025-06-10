@@ -75,8 +75,7 @@ public:
 
   typedef enum {
     ARCHIVE = 0,
-    REALTIME = 1,
-    FILELIST = 2
+    FILELIST = 1
   } input_mode_t;
 
   ///////////////////////////
@@ -381,8 +380,6 @@ public:
 
   char* input_dir;
 
-  int max_realtime_valid_age;
-
   char* output_dir;
 
   char _end_; // end of data region
@@ -392,7 +389,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[11];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 

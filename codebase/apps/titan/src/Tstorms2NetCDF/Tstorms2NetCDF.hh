@@ -99,20 +99,16 @@ private:
 
   vector<time_t> _scanTimes;
     
-  int _processInputPath();
+  int _processInputFile();
 
   int _openInputFiles();
   void _closeInputFiles();
   
   int _loadScanTimes();
 
-  int _processTime(int scan_num,
-                   time_t valid_time,
-		   time_t expire_time);
+  int _processScan(int scan_num,
+                   time_t scan_time);
   
-  int _writeNetcdfFile(time_t start_time,
-                       time_t end_time);
-
 #ifdef JUNK
 
   void _loadTstormsXml(time_t start_time,

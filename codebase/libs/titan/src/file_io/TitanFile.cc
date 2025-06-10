@@ -69,8 +69,8 @@ TitanFile::TitanFile()
   _storm_header_file = nullptr;
   _storm_data_file = nullptr;
 
-  _storm_header_file_label = STORM_HEADER_FILE_TYPE;
-  _storm_data_file_label = STORM_DATA_FILE_TYPE;
+  // _storm_header_file_label = STORM_HEADER_FILE_TYPE;
+  // _storm_data_file_label = STORM_DATA_FILE_TYPE;
 
   _max_scans = 0;
   _max_storms = 0;
@@ -97,8 +97,8 @@ TitanFile::TitanFile()
   _simples_per_complex_offsets = nullptr;
   _simples_per_complex = nullptr;
 
-  _track_header_file_label = TRACK_HEADER_FILE_TYPE;
-  _track_data_file_label = TRACK_DATA_FILE_TYPE;
+  // _track_header_file_label = TRACK_HEADER_FILE_TYPE;
+  // _track_data_file_label = TRACK_DATA_FILE_TYPE;
 
   _track_header_file = nullptr;
   _track_data_file = nullptr;
@@ -141,11 +141,13 @@ TitanFile::~TitanFile()
 // Open file
 
 int TitanFile::openNcFile(const string &path,
-                            NcxxFile::FileMode mode)
-
+                          NcxxFile::FileMode mode)
+  
 {
 
   // ensure the directory exists
+
+  _filePath = path;
   
   // if (mode == NcxxFile::FileMode::write) {
   Path filePath(path);
@@ -287,8 +289,8 @@ void TitanFile::_setUpVars()
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.n_storms = _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
-  _topLevelVars.n_simple = _getVar(N_SIMPLE, NcxxType::nc_INT, _ncFile);
-  _topLevelVars.n_complex = _getVar(N_COMPLEX, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.max_simple_track_num = _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.max_complex_track_num = _getVar(MAX_COMPLEX_TRACK_NUM, NcxxType::nc_INT, _ncFile);
 
   // scans
 
@@ -524,7 +526,7 @@ void TitanFile::_setUpVars()
   _tparamsVars.weight_delta_cube_root_volume
     = _getVar(WEIGHT_DELTA_CUBE_ROOT_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.merge_split_search_ratio = _getVar(MERGE_SPLIT_SEARCH_RATIO, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.max_speed = _getVar(MAX_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.max_tracking_speed = _getVar(MAX_TRACKING_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.max_speed_for_valid_forecast =
     _getVar(MAX_SPEED_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.parabolic_growth_period = _getVar(PARABOLIC_GROWTH_PERIOD, NcxxType::nc_FLOAT, _tracksGroup);
@@ -1757,12 +1759,11 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeStormHeader\n";
-  TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
+  TaStr::AddStr(_errStr, "  File: ", _filePath);
+  
+  // make copy
   
   storm_file_header_t header = storm_file_header;
-  
-  header.major_rev = STORM_FILE_MAJOR_REV;
-  header.minor_rev = STORM_FILE_MINOR_REV;
   
   // set file time to gmt
   
@@ -4138,42 +4139,54 @@ int TitanFile::seekTrackStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeTrackHeader()
+int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
      
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeTrackHeader\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _track_header_file_path);
-  
-  // get data file size
+  TaStr::AddStr(_errStr, "  File: ", _filePath);
 
-  fflush(_track_data_file);
-  struct stat data_stat;
-  ta_stat (_track_data_file_path.c_str(), &data_stat);
-  _track_header.data_file_size = data_stat.st_size;
+  // make copy
   
-  // set file time to gmt
+  track_file_header_t header = track_file_header;
+  const track_file_params_t &tparams(header.params);
   
-  _track_header.file_time = time(nullptr);
+  // set top level vars
   
-  // copy file label
+  _topLevelVars.max_simple_track_num.putVal((int) header.max_simple_track_num);
+  _topLevelVars.max_complex_track_num.putVal((int) header.max_complex_track_num);
   
-  char label[R_FILE_LABEL_LEN];
-  MEM_zero(label);
-  strcpy(label, _track_header_file_label.c_str());
+  _tparamsVars.forecast_weights.putVal(tparams.forecast_weights);
+  _tparamsVars.weight_distance.putVal(tparams.weight_distance);
+  _tparamsVars.weight_delta_cube_root_volume.putVal(tparams.weight_delta_cube_root_volume);
+  _tparamsVars.merge_split_search_ratio.putVal(tparams.merge_split_search_ratio);
+  _tparamsVars.max_tracking_speed.putVal(tparams.max_tracking_speed);
+  _tparamsVars.max_speed_for_valid_forecast.putVal(tparams.max_speed_for_valid_forecast);
+  _tparamsVars.parabolic_growth_period.putVal(tparams.parabolic_growth_period);
+  _tparamsVars.smoothing_radius.putVal(tparams.smoothing_radius);
+  _tparamsVars.min_fraction_overlap.putVal(tparams.min_fraction_overlap);
+  _tparamsVars.min_sum_fraction_overlap.putVal(tparams.min_sum_fraction_overlap);
+  _tparamsVars.scale_forecasts_by_history.putVal(tparams.scale_forecasts_by_history);
+  _tparamsVars.use_runs_for_overlaps.putVal(tparams.use_runs_for_overlaps);
+  _tparamsVars.grid_type.putVal(tparams.grid_type);
+  _tparamsVars.nweights_forecast.putVal(tparams.nweights_forecast);
+  _tparamsVars.forecast_type.putVal(tparams.forecast_type);
+  _tparamsVars.max_delta_time.putVal(tparams.max_delta_time);
+  _tparamsVars.min_history_for_valid_forecast.putVal(tparams.min_history_for_valid_forecast);
+  _tparamsVars.spatial_smoothing.putVal(tparams.spatial_smoothing);
   
-  // move to start of file and write label
-  
-  fseek(_track_header_file, (si32) 0, SEEK_SET);
-  
-  if (ufwrite(label, sizeof(char), R_FILE_LABEL_LEN,
-	      _track_header_file) != R_FILE_LABEL_LEN) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing file label.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  _tstateVars.tracking_valid.putVal(header.file_valid);
+  _tstateVars.tracking_modify_code.putVal(header.modify_code);
+  _tstateVars.n_samples_for_forecast_stats.putVal(header.n_samples_for_forecast_stats);
+  _tstateVars.last_scan_num.putVal(header.last_scan_num);
+  _tstateVars.max_simple_track_num.putVal(header.max_simple_track_num);
+  _tstateVars.max_complex_track_num.putVal(header.max_complex_track_num);
+  _tstateVars.max_parents.putVal(header.max_parents);
+  _tstateVars.max_children.putVal(header.max_children);
+  _tstateVars.max_nweights_forecast.putVal(header.max_nweights_forecast);
+
+#ifdef JUNK
   
   // create local arrays
 
@@ -4353,6 +4366,8 @@ int TitanFile::writeTrackHeader()
   // flush the file buffer
   
   flushTrackFiles();
+
+#endif
 
   return 0;
   
