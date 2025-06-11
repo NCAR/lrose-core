@@ -779,7 +779,8 @@ public:
   // write complex track params
   // returns 0 on success, -1 on failure
   
-  int writeComplexParams(int track_num);
+  int writeComplexParams(int cindex,
+                         const complex_track_params_t &cparams);
      
   // write an entry for a track in the track data file
   // The entry is written at the end of the file

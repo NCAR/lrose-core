@@ -646,20 +646,20 @@ void TitanFile::_setUpVars()
     _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
   _complexVars.volume_at_end_of_sampling =
     _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.start_missing = _getVar(START_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.end_missing = _getVar(END_MISSING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+  _complexVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _n_complex, _complexGroup);
+  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _n_complex, _complexGroup);
+  _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.start_missing = _getVar(START_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexVars.end_missing = _getVar(END_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
   _complexVars.n_samples_for_forecast_stats =
-    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_INT, _n_complex, _complexGroup);
 
   // bias for forecasts per complex track
 
@@ -4434,95 +4434,159 @@ int TitanFile::writeSimpleParams(int track_num)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// write complex track params
+// write complex track params.
 //
-// returns 0 on success, -1 on failure
+// You need to call readTrackHeader() first.
+//
+// returns 0 on success, -1 on failure.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeComplexParams(int track_num)
-     
+int TitanFile::writeComplexParams(int cindex,
+                                  const complex_track_params_t &cparams)
+  
 {
-  
+
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeSimpleParams\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
+  _errStr += "ERROR - TitanFile::writeComplexParams\n";
+  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  if (_complex_track_offsets[track_num] == 0) {
-    
-    // params have not been written before.
-    //
-    // Two steps: 1) look for a slot which has been freed
-    //               up when a complex track was consolidated.
-    //            2) If no available slot, use end of file
-    
-    int lowest_avail_slot = _lowest_avail_complex_slot;
-    si32 *offset_p = _complex_track_offsets + lowest_avail_slot;
-    si32 avail_offset;
-    bool slot_found = false;
-      
-    for (int i = lowest_avail_slot; i < track_num; i++) {
-      
-      if (*offset_p < 0) {
-	
-	// avail slot found
-	
-	avail_offset = -(*offset_p);
-	*offset_p = 0;
-	_lowest_avail_complex_slot = i + 1;
-	slot_found = true;
-	break;
-	
-      } // if (*offset_p < 0) 
-      
-      offset_p++;
-      
-    } // i 
-    
-    if (slot_found) {
-      
-      _complex_track_offsets[track_num] = avail_offset;
-      fseek(_track_data_file, avail_offset, SEEK_SET);
-      
-    } else {
-      
-      fseek(_track_data_file, 0, SEEK_END);
-      _complex_track_offsets[track_num] = ftell(_track_data_file);
-      _lowest_avail_complex_slot = track_num + 1;
-      
-    }
-    
-  } else {
-    
-    // params have been stored before, so go to the stored offset
-    
-    fseek(_track_data_file, _complex_track_offsets[track_num], SEEK_SET);
-    
-  }
+  std::vector<size_t> index;
+  index.push_back(cindex);
+
+  _complexVars.volume_at_start_of_sampling.putVal(index, cparams.volume_at_start_of_sampling);
+  _complexVars.volume_at_end_of_sampling.putVal(index, cparams.volume_at_end_of_sampling);
+  _complexVars.complex_track_num.putVal(index, cparams.complex_track_num);
+  _complexVars.start_scan.putVal(index, cparams.start_scan);
+  _complexVars.end_scan.putVal(index, cparams.end_scan);
+  _complexVars.duration_in_scans.putVal(index, cparams.duration_in_scans);
+  _complexVars.duration_in_secs.putVal(index, cparams.duration_in_secs);
+  _complexVars.start_time.putVal(index, cparams.start_time);
+  _complexVars.end_time.putVal(index, cparams.end_time);
+  _complexVars.n_simple_tracks.putVal(index, cparams.n_simple_tracks);
+  _complexVars.n_top_missing.putVal(index, cparams.n_top_missing);
+  _complexVars.n_range_limited.putVal(index, cparams.n_range_limited);
+  _complexVars.start_missing.putVal(index, cparams.start_missing);
+  _complexVars.end_missing.putVal(index, cparams.end_missing);
+  _complexVars.n_samples_for_forecast_stats.putVal(index, cparams.n_samples_for_forecast_stats);
+
+  _complexVerifyVars.ellipse_forecast_n_success.putVal(index, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_failure.putVal(index, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(index, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_success.putVal(index, cparams.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_failure.putVal(index, cparams.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(index, cparams.polygon_verify.n_success);
   
-  // copy track params, encode and write to file
+  _complexBiasVars.proj_area_centroid_x.putVal(index, cparams.forecast_bias.proj_area_centroid_x);
+  _complexBiasVars.proj_area_centroid_y.putVal(index, cparams.forecast_bias.proj_area_centroid_y);
+  _complexBiasVars.vol_centroid_z.putVal(index, cparams.forecast_bias.vol_centroid_z);
+  _complexBiasVars.refl_centroid_z.putVal(index, cparams.forecast_bias.refl_centroid_z);
+  _complexBiasVars.top.putVal(index, cparams.forecast_bias.top);
+  _complexBiasVars.dbz_max.putVal(index, cparams.forecast_bias.dbz_max);
+  _complexBiasVars.volume.putVal(index, cparams.forecast_bias.volume);
+  _complexBiasVars.precip_flux.putVal(index, cparams.forecast_bias.precip_flux);
+  _complexBiasVars.mass.putVal(index, cparams.forecast_bias.mass);
+  _complexBiasVars.proj_area.putVal(index, cparams.forecast_bias.proj_area);
+  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(index, cparams.forecast_bias.smoothed_proj_area_centroid_x);
+  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(index, cparams.forecast_bias.smoothed_proj_area_centroid_y);
+  _complexBiasVars.smoothed_speed.putVal(index, cparams.forecast_bias.smoothed_speed);
+  _complexBiasVars.smoothed_direction.putVal(index, cparams.forecast_bias.smoothed_direction);
   
-  complex_track_params_t complex_params = _complex_params;
-  
-  BE_from_array_32(&complex_params,
-		   sizeof(complex_track_params_t));
-  
-  if (ufwrite(&complex_params, sizeof(complex_track_params_t),
-	      1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing complex track params.");
-    TaStr::AddInt(_errStr, "  track_num", track_num);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // flush the file buffer
-  
-  fflush(_track_data_file);
+  _complexRmseVars.proj_area_centroid_x.putVal(index, cparams.forecast_rmse.proj_area_centroid_x);
+  _complexRmseVars.proj_area_centroid_y.putVal(index, cparams.forecast_rmse.proj_area_centroid_y);
+  _complexRmseVars.vol_centroid_z.putVal(index, cparams.forecast_rmse.vol_centroid_z);
+  _complexRmseVars.refl_centroid_z.putVal(index, cparams.forecast_rmse.refl_centroid_z);
+  _complexRmseVars.top.putVal(index, cparams.forecast_rmse.top);
+  _complexRmseVars.dbz_max.putVal(index, cparams.forecast_rmse.dbz_max);
+  _complexRmseVars.volume.putVal(index, cparams.forecast_rmse.volume);
+  _complexRmseVars.precip_flux.putVal(index, cparams.forecast_rmse.precip_flux);
+  _complexRmseVars.mass.putVal(index, cparams.forecast_rmse.mass);
+  _complexRmseVars.proj_area.putVal(index, cparams.forecast_rmse.proj_area);
+  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(index, cparams.forecast_rmse.smoothed_proj_area_centroid_x);
+  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(index, cparams.forecast_rmse.smoothed_proj_area_centroid_y);
+  _complexRmseVars.smoothed_speed.putVal(index, cparams.forecast_rmse.smoothed_speed);
+  _complexRmseVars.smoothed_direction.putVal(index, cparams.forecast_rmse.smoothed_direction);
   
   return 0;
-  
+
 }
+
+  
+//   if (_complex_track_offsets[track_num] == 0) {
+    
+//     // params have not been written before.
+//     //
+//     // Two steps: 1) look for a slot which has been freed
+//     //               up when a complex track was consolidated.
+//     //            2) If no available slot, use end of file
+    
+//     int lowest_avail_slot = _lowest_avail_complex_slot;
+//     si32 *offset_p = _complex_track_offsets + lowest_avail_slot;
+//     si32 avail_offset;
+//     bool slot_found = false;
+      
+//     for (int i = lowest_avail_slot; i < track_num; i++) {
+      
+//       if (*offset_p < 0) {
+	
+// 	// avail slot found
+	
+// 	avail_offset = -(*offset_p);
+// 	*offset_p = 0;
+// 	_lowest_avail_complex_slot = i + 1;
+// 	slot_found = true;
+// 	break;
+	
+//       } // if (*offset_p < 0) 
+      
+//       offset_p++;
+      
+//     } // i 
+    
+//     if (slot_found) {
+      
+//       _complex_track_offsets[track_num] = avail_offset;
+//       fseek(_track_data_file, avail_offset, SEEK_SET);
+      
+//     } else {
+      
+//       fseek(_track_data_file, 0, SEEK_END);
+//       _complex_track_offsets[track_num] = ftell(_track_data_file);
+//       _lowest_avail_complex_slot = track_num + 1;
+      
+//     }
+    
+//   } else {
+    
+//     // params have been stored before, so go to the stored offset
+    
+//     fseek(_track_data_file, _complex_track_offsets[track_num], SEEK_SET);
+    
+//   }
+  
+//   // copy track params, encode and write to file
+  
+//   complex_track_params_t complex_params = _complex_params;
+  
+//   BE_from_array_32(&complex_params,
+// 		   sizeof(complex_track_params_t));
+  
+//   if (ufwrite(&complex_params, sizeof(complex_track_params_t),
+// 	      1, _track_data_file) != 1) {
+//     int errNum = errno;
+//     TaStr::AddStr(_errStr, "  ", "Writing complex track params.");
+//     TaStr::AddInt(_errStr, "  track_num", track_num);
+//     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+//     return -1;
+//   }
+  
+//   // flush the file buffer
+  
+//   fflush(_track_data_file);
+  
+//   return 0;
+  
+// }
 
 ///////////////////////////////////////////////////////////////////////////
 //

@@ -235,7 +235,7 @@ int Tstorms2NetCDF::_processInputFile()
   // open input files based on the provided path
 
   if (_openInputFiles()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
     return -1;
   }
@@ -243,7 +243,7 @@ int Tstorms2NetCDF::_processInputFile()
   // open netcdf file for writing
 
   if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
     cerr << "  Error: " << _ncFile.getErrStr() << endl;
     return -1;
@@ -262,16 +262,8 @@ int Tstorms2NetCDF::_processInputFile()
   // read storm file header
 
   if (_sFile.ReadHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot read storm file header, input_path: " << _inputPath << endl;
-    return -1;
-  }
-
-  // read track file header
-
-  if (_tFile.ReadHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputPath" << endl;
-    cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
     return -1;
   }
 
@@ -289,11 +281,46 @@ int Tstorms2NetCDF::_processInputFile()
     }
   }
   
-  // write the storm header and track header
+  // write the storm header
 
   _ncFile.writeStormHeader(_sFile.header());
+
+  // read track file header
+
+  if (_tFile.ReadHeader()) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
+    return -1;
+  }
+  const track_file_header_t &theader = _tFile.header();
+
+  // get the complex track numbers array
+  
+  const si32 *complexTrackNums = _tFile.complex_track_nums();
+
+  // loop through complex tracks, reading parameters for each
+
+  for (int ii = 0; ii < theader.n_complex_tracks; ii++) {
+
+    int complexNum = complexTrackNums[ii];
+    if (_tFile.ReadComplexParams(complexNum, true)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "  Cannot read complex params, input_path: " << _inputPath << endl;
+      cerr << "  index, complex_num: " << ii << ", " << complexNum << endl;
+      return -1;
+    }
+    _ncFile.writeComplexParams(ii, _tFile.complex_params());
+  }
+
+  // const si32 *complexTrackNums = complex_track_nums() { return _complex_track_nums; }
+  // const complex_track_params_t &cparams() = _tfile.complex_params();
+  
+  // write the track header
+  
   _ncFile.writeTrackHeader(_tFile.header());
 
+  // close
+  
   _closeInputFiles();
   
   return 0;
