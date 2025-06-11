@@ -268,7 +268,7 @@ int Tstorms2NetCDF::_processInputFile()
   }
 
   // loop through the scans
-  
+
   for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
     time_t scan_time = _scanTimes[iscan];
     if (_params.input_mode == Params::ARCHIVE) {
@@ -292,8 +292,13 @@ int Tstorms2NetCDF::_processInputFile()
     cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
     return -1;
   }
+  if (_tFile.ReadSimplesPerComplex()) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot read simples_per_complex, input_path: " << _inputPath << endl;
+    return -1;
+  }
   const track_file_header_t &theader = _tFile.header();
-
+  
   // get the complex track numbers array
   
   const si32 *complexTrackNums = _tFile.complex_track_nums();

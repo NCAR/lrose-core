@@ -239,6 +239,7 @@ void TitanFile::_setUpDims()
   _n_storms = _getDim(N_STORMS, _gpropsGroup);
   _n_simple = _getDim(N_SIMPLE, _simpleGroup);
   _n_complex = _getDim(N_COMPLEX, _complexGroup);
+  _max_complex = _getDim(MAX_COMPLEX, _complexGroup);
   _n_entries = _getDim(N_ENTRIES, _entriesGroup);
   _n_poly = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
   _n_layers = _getDim(N_LAYERS, _lpropsGroup);
@@ -273,6 +274,62 @@ NcxxDim TitanFile::_getDim(const std::string& name,
     dim = group.addDim(name, dimSize);
   }
   return dim;
+}
+
+/////////////////////////////////////////
+// get scalar variable
+
+NcxxVar TitanFile::_getVar(const std::string& name,
+                             const NcxxType& ncType,
+                             NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    var = group.addVar(name, ncType);
+  }
+  var.setDefaultFillValue();
+  // if (ncType == NcxxType::nc_FLOAT) {
+  //   var.setCompression(false, true, 4);
+  // }
+  return var;
+}
+
+/////////////////////////////////////////
+// get array variable
+
+NcxxVar TitanFile::_getVar(const std::string& name,
+                             const NcxxType& ncType,
+                             const NcxxDim& dim,
+                             NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    var = group.addVar(name, ncType, dim);
+  }
+  var.setDefaultFillValue();
+  // var.setCompression(false, true, 4);
+  return var;
+}
+
+/////////////////////////////////////////
+// get 2D array variable
+
+NcxxVar TitanFile::_getVar(const std::string& name,
+                             const NcxxType& ncType,
+                             const NcxxDim& dim0,
+                             const NcxxDim& dim1,
+                             NcxxGroup &group)
+{
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
+    std::vector<NcxxDim> dimVec;
+    dimVec.push_back(dim0);
+    dimVec.push_back(dim1);
+    var = group.addVar(name, ncType, dimVec);
+  }
+  var.setDefaultFillValue();
+  // var.setCompression(false, true, 4);
+  return var;
 }
 
 /////////////////////////////////////////
@@ -444,7 +501,7 @@ void TitanFile::_setUpVars()
   _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
   _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
   _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
   _gpropsVars.vil_from_maxz = _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.ltg_count = _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
@@ -642,85 +699,88 @@ void TitanFile::_setUpVars()
   _simpleVars.n_simples_per_complex = _getVar(N_SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.simples_per_complex = _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.simples_per_complex_offsets =
-    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.complex_track_offsets =
+    _getVar(COMPLEX_TRACK_OFFSETS, NcxxType::nc_INT64, _n_simple, _simpleGroup);
   
   // complex tracks
 
-  _complexVars.volume_at_start_of_sampling =
-    _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexVars.volume_at_end_of_sampling =
-    _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
   _complexVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _n_complex, _complexGroup);
-  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _n_complex, _complexGroup);
-  _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.start_missing = _getVar(START_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexVars.end_missing = _getVar(END_MISSING, NcxxType::nc_INT, _n_complex, _complexGroup);
+
+  _complexVars.volume_at_start_of_sampling =
+    _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexVars.volume_at_end_of_sampling =
+    _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup);
+  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup);
+  _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.start_missing = _getVar(START_MISSING, NcxxType::nc_INT, _max_complex, _complexGroup);
+  _complexVars.end_missing = _getVar(END_MISSING, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.n_samples_for_forecast_stats =
-    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_INT, _n_complex, _complexGroup);
+    _getVar(N_SAMPLES_FOR_FORECAST_STATS, NcxxType::nc_INT, _max_complex, _complexGroup);
 
   // bias for forecasts per complex track
 
   _complexBiasVars.proj_area_centroid_x =
-    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexBiasVars.proj_area_centroid_y =
-    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexBiasVars.smoothed_proj_area_centroid_x =
-    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexBiasVars.smoothed_proj_area_centroid_y =
-    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
 
   // rmse for forecasts per complex track
 
   _complexRmseVars.proj_area_centroid_x =
-    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexRmseVars.proj_area_centroid_y =
-    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexRmseVars.smoothed_proj_area_centroid_x =
-    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexRmseVars.smoothed_proj_area_centroid_y =
-    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
-  _complexRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+  _complexRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
 
   // verification contingency tables per complex track
 
   _complexVerifyVars.ellipse_forecast_n_success =
-    _getVar(ELLIPSE_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(ELLIPSE_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexVerifyVars.ellipse_forecast_n_failure =
-    _getVar(ELLIPSE_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(ELLIPSE_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexVerifyVars.ellipse_forecast_n_false_alarm =
-    _getVar(ELLIPSE_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(ELLIPSE_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexVerifyVars.polygon_forecast_n_success =
-    _getVar(POLYGON_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(POLYGON_FORECAST_N_SUCCESS, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexVerifyVars.polygon_forecast_n_failure =
-    _getVar(POLYGON_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(POLYGON_FORECAST_N_FAILURE, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexVerifyVars.polygon_forecast_n_false_alarm =
-    _getVar(POLYGON_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _n_complex, _complexGroup);
+    _getVar(POLYGON_FORECAST_N_FALSE_ALARM, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
 
   // track entries
 
@@ -736,10 +796,10 @@ void TitanFile::_setUpVars()
   _entryVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.forecast_valid = _getVar(FORECAST_VALID, NcxxType::nc_INT, _n_entries, _entriesGroup);
-  _entryVars.prev_entry_offset = _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
-  _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
-  _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
-  _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.prev_entry_offset = _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
+  _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
+  _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
+  _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
 
   // track entry dval_dt for forecasts
 
@@ -762,54 +822,6 @@ void TitanFile::_setUpVars()
   _entryDvalDtVars.smoothed_speed = _getVar(DVAL_DT_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
   _entryDvalDtVars.smoothed_direction = _getVar(DVAL_DT_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _n_entries, _entriesGroup);
 
-}
-
-/////////////////////////////////////////
-// get scalar variable
-
-NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             NcxxGroup &group)
-{
-  NcxxVar var = group.getVar(name);
-  if (var.isNull()) {
-    var = group.addVar(name, ncType);
-  }
-  return var;
-}
-
-/////////////////////////////////////////
-// get array variable
-
-NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             const NcxxDim& dim,
-                             NcxxGroup &group)
-{
-  NcxxVar var = group.getVar(name);
-  if (var.isNull()) {
-    var = group.addVar(name, ncType, dim);
-  }
-  return var;
-}
-
-/////////////////////////////////////////
-// get 2D array variable
-
-NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             const NcxxDim& dim0,
-                             const NcxxDim& dim1,
-                             NcxxGroup &group)
-{
-  NcxxVar var = group.getVar(name);
-  if (var.isNull()) {
-    std::vector<NcxxDim> dimVec;
-    dimVec.push_back(dim0);
-    dimVec.push_back(dim1);
-    var = group.addVar(name, ncType, dimVec);
-  }
-  return var;
 }
 
 ////////////////////
@@ -4007,6 +4019,82 @@ int TitanFile::reuseComplexSlot(int track_num)
 
 ///////////////////////////////////////////////////////////////////////////
 //
+// Clear a complex params slot in the file available for
+// reuse, by setting the values to missing.
+//
+// returns 0 on success, -1 on failure
+//
+///////////////////////////////////////////////////////////////////////////
+
+int TitanFile::clearComplexSlot(int complex_track_num)
+  
+{
+
+  std::vector<size_t> varIndex;
+  varIndex.push_back(complex_track_num);
+
+  _complexVars.volume_at_start_of_sampling.putVal(varIndex, Ncxx::missingFloat);
+  _complexVars.volume_at_end_of_sampling.putVal(varIndex, Ncxx::missingFloat);
+  _complexVars.start_scan.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.end_scan.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.duration_in_scans.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.duration_in_secs.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.start_time.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.end_time.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.n_simple_tracks.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.n_top_missing.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.n_range_limited.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.start_missing.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.end_missing.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.n_samples_for_forecast_stats.putVal(varIndex, Ncxx::missingInt);
+
+  _complexVerifyVars.ellipse_forecast_n_success.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.ellipse_forecast_n_failure.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.polygon_forecast_n_success.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.polygon_forecast_n_failure.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(varIndex, Ncxx::missingInt);
+  
+  _complexBiasVars.proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.vol_centroid_z.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.refl_centroid_z.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.top.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.dbz_max.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.volume.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.precip_flux.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.mass.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.proj_area.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.smoothed_speed.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.smoothed_direction.putVal(varIndex, Ncxx::missingFloat);
+  
+  _complexRmseVars.proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.vol_centroid_z.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.refl_centroid_z.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.top.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.dbz_max.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.volume.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.precip_flux.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.mass.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.proj_area.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.smoothed_speed.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.smoothed_direction.putVal(varIndex, Ncxx::missingFloat);
+
+  if (complex_track_num < _lowest_avail_complex_slot) {
+    _lowest_avail_complex_slot = complex_track_num;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
 // prepare a simple track for reading by reading in the simple track
 // params and setting the first_entry flag
 //
@@ -4441,61 +4529,87 @@ int TitanFile::writeComplexParams(int cindex,
   _errStr += "ERROR - TitanFile::writeComplexParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  std::vector<size_t> index;
-  index.push_back(cindex);
-
-  _complexVars.volume_at_start_of_sampling.putVal(index, cparams.volume_at_start_of_sampling);
-  _complexVars.volume_at_end_of_sampling.putVal(index, cparams.volume_at_end_of_sampling);
-  _complexVars.complex_track_num.putVal(index, cparams.complex_track_num);
-  _complexVars.start_scan.putVal(index, cparams.start_scan);
-  _complexVars.end_scan.putVal(index, cparams.end_scan);
-  _complexVars.duration_in_scans.putVal(index, cparams.duration_in_scans);
-  _complexVars.duration_in_secs.putVal(index, cparams.duration_in_secs);
-  _complexVars.start_time.putVal(index, cparams.start_time);
-  _complexVars.end_time.putVal(index, cparams.end_time);
-  _complexVars.n_simple_tracks.putVal(index, cparams.n_simple_tracks);
-  _complexVars.n_top_missing.putVal(index, cparams.n_top_missing);
-  _complexVars.n_range_limited.putVal(index, cparams.n_range_limited);
-  _complexVars.start_missing.putVal(index, cparams.start_missing);
-  _complexVars.end_missing.putVal(index, cparams.end_missing);
-  _complexVars.n_samples_for_forecast_stats.putVal(index, cparams.n_samples_for_forecast_stats);
-
-  _complexVerifyVars.ellipse_forecast_n_success.putVal(index, cparams.ellipse_verify.n_success);
-  _complexVerifyVars.ellipse_forecast_n_failure.putVal(index, cparams.ellipse_verify.n_success);
-  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(index, cparams.ellipse_verify.n_success);
-  _complexVerifyVars.polygon_forecast_n_success.putVal(index, cparams.polygon_verify.n_success);
-  _complexVerifyVars.polygon_forecast_n_failure.putVal(index, cparams.polygon_verify.n_success);
-  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(index, cparams.polygon_verify.n_success);
+  // complex_track_num has dimension _n_complex
+  // the track numbers are monotonically increasing, but will have gaps
+  // due to mergers and splits
   
-  _complexBiasVars.proj_area_centroid_x.putVal(index, cparams.forecast_bias.proj_area_centroid_x);
-  _complexBiasVars.proj_area_centroid_y.putVal(index, cparams.forecast_bias.proj_area_centroid_y);
-  _complexBiasVars.vol_centroid_z.putVal(index, cparams.forecast_bias.vol_centroid_z);
-  _complexBiasVars.refl_centroid_z.putVal(index, cparams.forecast_bias.refl_centroid_z);
-  _complexBiasVars.top.putVal(index, cparams.forecast_bias.top);
-  _complexBiasVars.dbz_max.putVal(index, cparams.forecast_bias.dbz_max);
-  _complexBiasVars.volume.putVal(index, cparams.forecast_bias.volume);
-  _complexBiasVars.precip_flux.putVal(index, cparams.forecast_bias.precip_flux);
-  _complexBiasVars.mass.putVal(index, cparams.forecast_bias.mass);
-  _complexBiasVars.proj_area.putVal(index, cparams.forecast_bias.proj_area);
-  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(index, cparams.forecast_bias.smoothed_proj_area_centroid_x);
-  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(index, cparams.forecast_bias.smoothed_proj_area_centroid_y);
-  _complexBiasVars.smoothed_speed.putVal(index, cparams.forecast_bias.smoothed_speed);
-  _complexBiasVars.smoothed_direction.putVal(index, cparams.forecast_bias.smoothed_direction);
+  std::vector<size_t> numIndex;
+  numIndex.push_back(cindex);
+  _complexVars.complex_track_num.putVal(numIndex, cparams.complex_track_num);
+
+  // write the complex offset for retrieving the complex params later
   
-  _complexRmseVars.proj_area_centroid_x.putVal(index, cparams.forecast_rmse.proj_area_centroid_x);
-  _complexRmseVars.proj_area_centroid_y.putVal(index, cparams.forecast_rmse.proj_area_centroid_y);
-  _complexRmseVars.vol_centroid_z.putVal(index, cparams.forecast_rmse.vol_centroid_z);
-  _complexRmseVars.refl_centroid_z.putVal(index, cparams.forecast_rmse.refl_centroid_z);
-  _complexRmseVars.top.putVal(index, cparams.forecast_rmse.top);
-  _complexRmseVars.dbz_max.putVal(index, cparams.forecast_rmse.dbz_max);
-  _complexRmseVars.volume.putVal(index, cparams.forecast_rmse.volume);
-  _complexRmseVars.precip_flux.putVal(index, cparams.forecast_rmse.precip_flux);
-  _complexRmseVars.mass.putVal(index, cparams.forecast_rmse.mass);
-  _complexRmseVars.proj_area.putVal(index, cparams.forecast_rmse.proj_area);
-  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(index, cparams.forecast_rmse.smoothed_proj_area_centroid_x);
-  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(index, cparams.forecast_rmse.smoothed_proj_area_centroid_y);
-  _complexRmseVars.smoothed_speed.putVal(index, cparams.forecast_rmse.smoothed_speed);
-  _complexRmseVars.smoothed_direction.putVal(index, cparams.forecast_rmse.smoothed_direction);
+  std::vector<size_t> offsetIndex;
+  offsetIndex.push_back(cparams.complex_track_num);
+  _simpleVars.complex_track_offsets.putVal(offsetIndex, cparams.complex_track_num);
+
+  // the complex track params are indexed from the complex track number
+  // these arrays will have gaps
+  
+  std::vector<size_t> varIndex;
+  varIndex.push_back(cparams.complex_track_num);
+
+  _complexVars.volume_at_start_of_sampling.putVal(varIndex, cparams.volume_at_start_of_sampling);
+  _complexVars.volume_at_end_of_sampling.putVal(varIndex, cparams.volume_at_end_of_sampling);
+  _complexVars.start_scan.putVal(varIndex, cparams.start_scan);
+  _complexVars.end_scan.putVal(varIndex, cparams.end_scan);
+  _complexVars.duration_in_scans.putVal(varIndex, cparams.duration_in_scans);
+  _complexVars.duration_in_secs.putVal(varIndex, cparams.duration_in_secs);
+  _complexVars.start_time.putVal(varIndex, cparams.start_time);
+  _complexVars.end_time.putVal(varIndex, cparams.end_time);
+  _complexVars.n_simple_tracks.putVal(varIndex, cparams.n_simple_tracks);
+  _complexVars.n_top_missing.putVal(varIndex, cparams.n_top_missing);
+  _complexVars.n_range_limited.putVal(varIndex, cparams.n_range_limited);
+  _complexVars.start_missing.putVal(varIndex, cparams.start_missing);
+  _complexVars.end_missing.putVal(varIndex, cparams.end_missing);
+  _complexVars.n_samples_for_forecast_stats.putVal(varIndex, cparams.n_samples_for_forecast_stats);
+
+  _complexVerifyVars.ellipse_forecast_n_success.putVal(varIndex, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_failure.putVal(varIndex, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(varIndex, cparams.ellipse_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_success.putVal(varIndex, cparams.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_failure.putVal(varIndex, cparams.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(varIndex, cparams.polygon_verify.n_success);
+  
+  _complexBiasVars.proj_area_centroid_x.putVal(varIndex, cparams.forecast_bias.proj_area_centroid_x);
+  _complexBiasVars.proj_area_centroid_y.putVal(varIndex, cparams.forecast_bias.proj_area_centroid_y);
+  _complexBiasVars.vol_centroid_z.putVal(varIndex, cparams.forecast_bias.vol_centroid_z);
+  _complexBiasVars.refl_centroid_z.putVal(varIndex, cparams.forecast_bias.refl_centroid_z);
+  _complexBiasVars.top.putVal(varIndex, cparams.forecast_bias.top);
+  _complexBiasVars.dbz_max.putVal(varIndex, cparams.forecast_bias.dbz_max);
+  _complexBiasVars.volume.putVal(varIndex, cparams.forecast_bias.volume);
+  _complexBiasVars.precip_flux.putVal(varIndex, cparams.forecast_bias.precip_flux);
+  _complexBiasVars.mass.putVal(varIndex, cparams.forecast_bias.mass);
+  _complexBiasVars.proj_area.putVal(varIndex, cparams.forecast_bias.proj_area);
+  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(varIndex, cparams.forecast_bias.smoothed_proj_area_centroid_x);
+  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(varIndex, cparams.forecast_bias.smoothed_proj_area_centroid_y);
+  _complexBiasVars.smoothed_speed.putVal(varIndex, cparams.forecast_bias.smoothed_speed);
+  _complexBiasVars.smoothed_direction.putVal(varIndex, cparams.forecast_bias.smoothed_direction);
+  
+  _complexRmseVars.proj_area_centroid_x.putVal(varIndex, cparams.forecast_rmse.proj_area_centroid_x);
+  _complexRmseVars.proj_area_centroid_y.putVal(varIndex, cparams.forecast_rmse.proj_area_centroid_y);
+  _complexRmseVars.vol_centroid_z.putVal(varIndex, cparams.forecast_rmse.vol_centroid_z);
+  _complexRmseVars.refl_centroid_z.putVal(varIndex, cparams.forecast_rmse.refl_centroid_z);
+  _complexRmseVars.top.putVal(varIndex, cparams.forecast_rmse.top);
+  _complexRmseVars.dbz_max.putVal(varIndex, cparams.forecast_rmse.dbz_max);
+  _complexRmseVars.volume.putVal(varIndex, cparams.forecast_rmse.volume);
+  _complexRmseVars.precip_flux.putVal(varIndex, cparams.forecast_rmse.precip_flux);
+  _complexRmseVars.mass.putVal(varIndex, cparams.forecast_rmse.mass);
+  _complexRmseVars.proj_area.putVal(varIndex, cparams.forecast_rmse.proj_area);
+  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(varIndex, cparams.forecast_rmse.smoothed_proj_area_centroid_x);
+  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(varIndex, cparams.forecast_rmse.smoothed_proj_area_centroid_y);
+  _complexRmseVars.smoothed_speed.putVal(varIndex, cparams.forecast_rmse.smoothed_speed);
+  _complexRmseVars.smoothed_direction.putVal(varIndex, cparams.forecast_rmse.smoothed_direction);
+
+  // {
+  //   bool fillMode;
+  //   float fillValueFloat;
+  //   _globalBiasVars.smoothed_direction.getFillModeParameters(fillMode, fillValueFloat);
+  //   cerr << "FFFFFFFFFFFF fillMode, fillValue: " << fillMode << ", " << fillValueFloat << endl;
+  //   int fillValueInt;
+  //   _complexVars.duration_in_secs.getFillModeParameters(fillMode, fillValueInt);
+  //   cerr << "IIIIIIIIIIIIIII fillMode, fillValue: " << fillMode << ", " << fillValueInt << endl;
+  // }
   
   return 0;
 

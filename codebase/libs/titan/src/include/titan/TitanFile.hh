@@ -340,6 +340,7 @@ private:
     NcxxVar n_simples_per_complex;
     NcxxVar simples_per_complex;
     NcxxVar simples_per_complex_offsets;
+    NcxxVar complex_track_offsets;
 
   };
   
@@ -348,9 +349,9 @@ private:
   class ComplexTrackVars
   {
   public:
+    NcxxVar complex_track_num;
     NcxxVar volume_at_start_of_sampling;
     NcxxVar volume_at_end_of_sampling;
-    NcxxVar complex_track_num;
     NcxxVar start_scan;
     NcxxVar end_scan;
     NcxxVar duration_in_scans;
@@ -752,6 +753,11 @@ public:
 
   int reuseComplexSlot(int track_num);
      
+  // Clear a complex params slot in the file available for
+  // reuse, by setting the values to missing.
+
+  int clearComplexSlot(int complex_track_num);
+  
   // prepare a simple track for reading by reading in the simple track
   // params and setting the first_entry flag
   // returns 0 on success, -1 on failure
@@ -835,6 +841,7 @@ protected:
   NcxxDim _n_storms;
   NcxxDim _n_simple;
   NcxxDim _n_complex;
+  NcxxDim _max_complex;
   NcxxDim _n_entries;
   NcxxDim _n_poly;
   NcxxDim _n_layers;
@@ -1016,11 +1023,6 @@ protected:
                   size_t dimSize,
                   NcxxGroup &parent);
   
-  /////////////////////////////////////////////////////
-  // set up variables
-
-  void _setUpVars();
-  
   // get scalar variable
   
   NcxxVar _getVar(const std::string& name,
@@ -1042,7 +1044,17 @@ protected:
                   const NcxxDim& dim1,
                   NcxxGroup &group);
   
+  /////////////////////////////////////////////////////
+  // set up variables
+
+  void _setUpVars();
+
+  /////////////////////////////////////////////////////
+  // clear error string
+  
   void _clearErrStr();
+
+  // units conversion
   
   void _convertEllipse2Km(const titan_grid_t &tgrid,
                           double centroid_x,
@@ -1050,6 +1062,8 @@ protected:
                           fl32 &orientation,
                           fl32 &minor_radius,
                           fl32 &major_radius);
+
+  // truncate when rerunning
   
   int _truncateStormFiles(FILE *&fd, const string &path, int length);
   
@@ -1295,8 +1309,6 @@ public:
 
   static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
   static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
-  // static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
-  // static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
   static constexpr const char* MAX_PARENTS_ = "max_parents";
   static constexpr const char* MAX_CHILDREN_ = "max_children";
   static constexpr const char* MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";
@@ -1324,6 +1336,7 @@ public:
   static constexpr const char* N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
   static constexpr const char* SIMPLES_PER_COMPLEX = "simples_per_complex";
   static constexpr const char* SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
+  static constexpr const char* COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
 
   // complex tracks
 
@@ -1335,6 +1348,7 @@ public:
   static constexpr const char* N_RANGE_LIMITED = "n_range_limited";
   static constexpr const char* START_MISSING = "start_missing";
   static constexpr const char* END_MISSING = "end_missing";
+  static constexpr const char* MAX_COMPLEX = "max_complex";
 
   // track entry
 
