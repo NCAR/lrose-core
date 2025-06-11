@@ -240,7 +240,7 @@ int Tstorms2NetCDF::_processInputFile()
     return -1;
   }
 
-  // open netcdf file for writing
+  // open output netcdf file for writing
 
   if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
@@ -309,12 +309,24 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << "  index, complex_num: " << ii << ", " << complexNum << endl;
       return -1;
     }
+    // write the complex params
     _ncFile.writeComplexParams(ii, _tFile.complex_params());
   }
-
-  // const si32 *complexTrackNums = complex_track_nums() { return _complex_track_nums; }
-  // const complex_track_params_t &cparams() = _tfile.complex_params();
   
+  // loop through the simple tracks, reading parameters for each
+  
+  for (int ii = 0; ii < theader.n_simple_tracks; ii++) {
+    int simpleNum = ii;
+    if (_tFile.ReadSimpleParams(simpleNum)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "  Cannot read simple params, input_path: " << _inputPath << endl;
+      cerr << "  simple_num: " << simpleNum << endl;
+      return -1;
+    }
+    // write the simple params
+    _ncFile.writeSimpleParams(simpleNum, _tFile.simple_params());
+  }
+
   // write the track header
   
   _ncFile.writeTrackHeader(_tFile.header());
@@ -450,10 +462,10 @@ int Tstorms2NetCDF::_processScan(int scan_num,
     // write out secondary properties
     // side-effect - sets offsets vectors
     
-    _ncFile.writeStormAuxProps(istorm,
-                               _sFile.header(), _sFile.scan(), _sFile.gprops(),
-                               _sFile.lprops(), _sFile.hist(),
-                               _sFile.runs(), _sFile.proj_runs());
+    _ncFile.writeStormAux(istorm,
+                          _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                          _sFile.lprops(), _sFile.hist(),
+                          _sFile.runs(), _sFile.proj_runs());
     
   }
 

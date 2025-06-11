@@ -315,6 +315,7 @@ private:
   class SimpleTrackVars
   {
   public:
+
     NcxxVar simple_track_num;
     NcxxVar last_descendant_simple_track_num;
     NcxxVar start_scan;
@@ -335,6 +336,11 @@ private:
     NcxxVar child;
     NcxxVar complex_track_num;
     NcxxVar first_entry_offset;
+
+    NcxxVar n_simples_per_complex;
+    NcxxVar simples_per_complex;
+    NcxxVar simples_per_complex_offsets;
+
   };
   
   // complex track vars
@@ -618,15 +624,15 @@ public:
   //
   // returns 0 on success, -1 on failure
 
-  int writeStormAuxProps(int storm_num,
-                         const storm_file_header_t &storm_file_header,
-                         const storm_file_scan_header_t &sheader,
-                         const storm_file_global_props_t *gprops,
-                         const storm_file_layer_props_t *lprops,
-                         const storm_file_dbz_hist_t *hist,
-                         const storm_file_run_t *runs,
-                         const storm_file_run_t *proj_runs);
-
+  int writeStormAux(int storm_num,
+                    const storm_file_header_t &storm_file_header,
+                    const storm_file_scan_header_t &sheader,
+                    const storm_file_global_props_t *gprops,
+                    const storm_file_layer_props_t *lprops,
+                    const storm_file_dbz_hist_t *hist,
+                    const storm_file_run_t *runs,
+                    const storm_file_run_t *proj_runs);
+  
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
   // This applies to structs which were derived from lat-lon grids, for
@@ -774,7 +780,8 @@ public:
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
   
-  int writeSimpleParams(int track_num);
+  int writeSimpleParams(int track_num,
+                        const simple_track_params_t &sparams);
      
   // write complex track params
   // returns 0 on success, -1 on failure
@@ -1037,15 +1044,15 @@ protected:
   
   void _clearErrStr();
   
-  void _convert_ellipse_2km(const titan_grid_t &tgrid,
-			    double centroid_x,
-			    double centroid_y,
-			    fl32 &orientation,
-			    fl32 &minor_radius,
-			    fl32 &major_radius);
-
+  void _convertEllipse2Km(const titan_grid_t &tgrid,
+                          double centroid_x,
+                          double centroid_y,
+                          fl32 &orientation,
+                          fl32 &minor_radius,
+                          fl32 &major_radius);
+  
   int _truncateStormFiles(FILE *&fd, const string &path, int length);
-
+  
 public:
 
   // friends for Titan program which writes the storm and track files
@@ -1313,7 +1320,11 @@ public:
   static constexpr const char* PARENT = "parent";
   static constexpr const char* CHILD = "child";
   static constexpr const char* FIRST_ENTRY_OFFSET = "first_entry_offset";
-  
+
+  static constexpr const char* N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
+  static constexpr const char* SIMPLES_PER_COMPLEX = "simples_per_complex";
+  static constexpr const char* SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
+
   // complex tracks
 
   static constexpr const char* VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";

@@ -639,6 +639,10 @@ void TitanFile::_setUpVars()
   _simpleVars.parent = _getVar(PARENT, NcxxType::nc_INT, _n_simple, _max_parents, _simpleGroup);
   _simpleVars.child = _getVar(CHILD, NcxxType::nc_INT, _n_simple, _max_children, _simpleGroup);
   _simpleVars.first_entry_offset = _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.n_simples_per_complex = _getVar(N_SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.simples_per_complex = _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.simples_per_complex_offsets =
+    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _n_simple, _simpleGroup);
   
   // complex tracks
 
@@ -2166,14 +2170,14 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeStormAuxProps(int storm_num,
-                                  const storm_file_header_t &storm_file_header,
-                                  const storm_file_scan_header_t &sheader,
-                                  const storm_file_global_props_t *gprops,
-                                  const storm_file_layer_props_t *lprops,
-                                  const storm_file_dbz_hist_t *hist,
-                                  const storm_file_run_t *runs,
-                                  const storm_file_run_t *proj_runs)
+int TitanFile::writeStormAux(int storm_num,
+                             const storm_file_header_t &storm_file_header,
+                             const storm_file_scan_header_t &sheader,
+                             const storm_file_global_props_t *gprops,
+                             const storm_file_layer_props_t *lprops,
+                             const storm_file_dbz_hist_t *hist,
+                             const storm_file_run_t *runs,
+                             const storm_file_run_t *proj_runs)
   
 {
 
@@ -2400,12 +2404,12 @@ int TitanFile::writeStormAuxProps(int storm_num,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::_convert_ellipse_2km(const titan_grid_t &tgrid,
-					  double centroid_x,
-					  double centroid_y,
-					  fl32 &orientation,
-					  fl32 &minor_radius,
-					  fl32 &major_radius)
+void TitanFile::_convertEllipse2Km(const titan_grid_t &tgrid,
+                                   double centroid_x,
+                                   double centroid_y,
+                                   fl32 &orientation,
+                                   fl32 &minor_radius,
+                                   fl32 &major_radius)
   
 {
 
@@ -2474,14 +2478,14 @@ void TitanFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
   
   // convert the ellipses as appropriate
 
-  _convert_ellipse_2km(scan.grid,
+  _convertEllipse2Km(scan.grid,
 		       gprops.precip_area_centroid_x,
 		       gprops.precip_area_centroid_y,
 		       gprops.precip_area_orientation,
 		       gprops.precip_area_minor_radius,
 		       gprops.precip_area_major_radius);
   
-  _convert_ellipse_2km(scan.grid,
+  _convertEllipse2Km(scan.grid,
 		       gprops.proj_area_centroid_x,
 		       gprops.proj_area_centroid_y,
 		       gprops.proj_area_orientation,
@@ -4381,55 +4385,41 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeSimpleParams(int track_num)
+int TitanFile::writeSimpleParams(int track_num,
+                                 const simple_track_params_t &sparams)
      
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeSimpleParams\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
+  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  // Go to the end of the file.
+  std::vector<size_t> index;
+  index.push_back(track_num);
 
-  fseek(_track_data_file, 0, SEEK_END);
-  long file_mark = ftell(_track_data_file);
-  
-  // if params have been written before, go to the stored offset.
-  // If not, store offset as current file location
-  
-  bool rewrite = true;
-  if (_simple_track_offsets[track_num] == 0) {
-    _simple_track_offsets[track_num] = file_mark;
-    rewrite = false;
-  }
-  
-  // copy track params, encode and write to file
-  
-  simple_track_params_t simple_params = _simple_params;
-  BE_from_array_32(&simple_params,
-		   sizeof(simple_track_params_t));
-  
-  // for rewrite, move to stored offset
-  
-  if (rewrite) {
-    fseek(_track_data_file, _simple_track_offsets[track_num], SEEK_SET);
-  }
-  
-  if (ufwrite(&simple_params, sizeof(simple_track_params_t),
-	      1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing simple track params.");
-    TaStr::AddInt(_errStr, "  track_num", track_num);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // flush the file buffer
-  
-  fflush(_track_data_file);
-  
+  _simpleVars.simple_track_num.putVal(index, sparams.simple_track_num);
+  _simpleVars.last_descendant_simple_track_num.putVal(index, sparams.last_descendant_simple_track_num);
+  _simpleVars.start_scan.putVal(index, sparams.start_scan);
+  _simpleVars.end_scan.putVal(index, sparams.end_scan);
+  _simpleVars.last_descendant_end_scan.putVal(index, sparams.last_descendant_end_scan);
+  _simpleVars.scan_origin.putVal(index, sparams.scan_origin);
+  _simpleVars.start_time.putVal(index, sparams.start_time);
+  _simpleVars.end_time.putVal(index, sparams.end_time);
+  _simpleVars.last_descendant_end_time.putVal(index, sparams.last_descendant_end_time);
+  _simpleVars.time_origin.putVal(index, sparams.time_origin);
+  _simpleVars.history_in_scans.putVal(index, sparams.history_in_scans);
+  _simpleVars.history_in_secs.putVal(index, sparams.history_in_secs);
+  _simpleVars.duration_in_scans.putVal(index, sparams.duration_in_scans);
+  _simpleVars.duration_in_secs.putVal(index, sparams.duration_in_secs);
+  _simpleVars.nparents.putVal(index, sparams.nparents);
+  _simpleVars.nchildren.putVal(index, sparams.nchildren);
+  _simpleVars.parent.putVal(index, sparams.parent);
+  _simpleVars.child.putVal(index, sparams.child);
+  _simpleVars.complex_track_num.putVal(index, sparams.complex_track_num);
+  _simpleVars.first_entry_offset.putVal(index, sparams.first_entry_offset);
+
   return 0;
-  
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
