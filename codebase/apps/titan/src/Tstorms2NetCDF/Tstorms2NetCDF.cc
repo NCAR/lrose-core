@@ -304,10 +304,11 @@ int Tstorms2NetCDF::_processInputFile()
   const si32 *complexTrackNums = _tFile.complex_track_nums();
 
   // loop through complex tracks, reading parameters for each
-
+  
   for (int ii = 0; ii < theader.n_complex_tracks; ii++) {
 
     int complexNum = complexTrackNums[ii];
+    // read complex parameters
     if (_tFile.ReadComplexParams(complexNum, true)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read complex params, input_path: " << _inputPath << endl;
@@ -322,6 +323,7 @@ int Tstorms2NetCDF::_processInputFile()
   
   for (int ii = 0; ii < theader.n_simple_tracks; ii++) {
     int simpleNum = ii;
+    // read simple parameters
     if (_tFile.ReadSimpleParams(simpleNum)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read simple params, input_path: " << _inputPath << endl;
@@ -332,6 +334,16 @@ int Tstorms2NetCDF::_processInputFile()
     _ncFile.writeSimpleTrackParams(simpleNum, _tFile.simple_params());
   }
 
+  // write the simples_per_complex arrays
+
+  vector<si32> simpsPerComplexLin;
+  vector<si32> simpsPerComplexOffsets;
+  _tFile.LoadVecSimplesPerComplex(simpsPerComplexLin, simpsPerComplexOffsets);
+  _ncFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
+                                       _tFile.nsimples_per_complex(),
+                                       simpsPerComplexOffsets.data(),
+                                       simpsPerComplexLin.data());
+  
   // write the track header
   
   _ncFile.writeTrackHeader(_tFile.header());

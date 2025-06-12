@@ -40,6 +40,7 @@
 #include <titan/storm.h>
 #include <titan/track.h>
 #include <string>
+#include <vector>
 using namespace std;
 
 class TitanTrackFile
@@ -162,6 +163,12 @@ public:
   // returns 0 on success, -1 on failure
   
   int ReadSimplesPerComplex();
+  
+  // load vector with simples per complex, in linear order
+  // in memory these are stored in a si32** 2-d array
+  
+  void LoadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
+                                vector<si32> &simpsPerComplexOffsets);
   
   // read in entries for a scan
   // returns 0 on success, -1 on failure
