@@ -288,9 +288,6 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     var = group.addVar(name, ncType);
   }
   var.setDefaultFillValue();
-  // if (ncType == NcxxType::nc_FLOAT) {
-  //   var.setCompression(false, true, 4);
-  // }
   return var;
 }
 
@@ -307,7 +304,7 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     var = group.addVar(name, ncType, dim);
   }
   var.setDefaultFillValue();
-  // var.setCompression(false, true, 4);
+  var.setCompression(false, true, 4);
   return var;
 }
 
@@ -328,7 +325,7 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     var = group.addVar(name, ncType, dimVec);
   }
   var.setDefaultFillValue();
-  // var.setCompression(false, true, 4);
+  var.setCompression(false, true, 4);
   return var;
 }
 
@@ -530,51 +527,25 @@ void TitanFile::_setUpVars()
   _lpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
   _lpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
 
-  _lpropsVars.vol_centroid_x.setCompression(false, true, 4);
-  _lpropsVars.vol_centroid_y.setCompression(false, true, 4);
-  _lpropsVars.refl_centroid_x.setCompression(false, true, 4);
-  _lpropsVars.refl_centroid_y.setCompression(false, true, 4);
-  _lpropsVars.area.setCompression(false, true, 4);
-  _lpropsVars.dbz_max.setCompression(false, true, 4);
-  _lpropsVars.dbz_mean.setCompression(false, true, 4);
-  _lpropsVars.mass.setCompression(false, true, 4);
-  _lpropsVars.rad_vel_mean.setCompression(false, true, 4);
-  _lpropsVars.rad_vel_sd.setCompression(false, true, 4);
-  _lpropsVars.vorticity.setCompression(false, true, 4);
-  _lpropsVars.convectivity_median.setCompression(false, true, 4);
-
-  // reflectivity histograms - set for compression
+  // reflectivity histograms
 
   _histVars.percent_volume = _getVar(PERCENT_VOLUME, NcxxType::nc_FLOAT, _n_hist, _histGroup);
   _histVars.percent_area = _getVar(PERCENT_AREA, NcxxType::nc_FLOAT, _n_hist, _histGroup);
 
-  _histVars.percent_volume.setCompression(false, true, 4);
-  _histVars.percent_area.setCompression(false, true, 4);
-
-  // storm runs - set for compression
+  // storm runs
 
   _runsVars.run_ix = _getVar(RUN_IX, NcxxType::nc_INT, _n_runs, _runsGroup);
   _runsVars.run_iy = _getVar(RUN_IY, NcxxType::nc_INT, _n_runs, _runsGroup);
   _runsVars.run_iz = _getVar(RUN_IZ, NcxxType::nc_INT, _n_runs, _runsGroup);
   _runsVars.run_len = _getVar(RUN_LEN, NcxxType::nc_INT, _n_runs, _runsGroup);
 
-  _runsVars.run_ix.setCompression(false, true, 4);
-  _runsVars.run_iy.setCompression(false, true, 4);
-  _runsVars.run_iz.setCompression(false, true, 4);
-  _runsVars.run_len.setCompression(false, true, 4);
-  
-  // storm proj runs - set for compression
+  // storm proj runs
 
   _projRunsVars.run_ix = _getVar(RUN_IX, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   _projRunsVars.run_iy = _getVar(RUN_IY, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   _projRunsVars.run_iz = _getVar(RUN_IZ, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
   _projRunsVars.run_len = _getVar(RUN_LEN, NcxxType::nc_INT, _n_proj_runs, _projRunsGroup);
 
-  _projRunsVars.run_ix.setCompression(false, true, 4);
-  _projRunsVars.run_iy.setCompression(false, true, 4);
-  _projRunsVars.run_iz.setCompression(false, true, 4);
-  _projRunsVars.run_len.setCompression(false, true, 4);
-  
   // tracking parameters
 
   _tparamsVars.forecast_weights =
