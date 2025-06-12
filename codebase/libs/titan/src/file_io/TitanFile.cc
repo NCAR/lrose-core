@@ -215,7 +215,7 @@ void TitanFile::_setUpGroups()
 // get group relative to a parent group
 
 NcxxGroup TitanFile::_getGroup(const std::string& name,
-                                 NcxxGroup &parent)
+                               NcxxGroup &parent)
 {
 
   // get group if it exists
@@ -4501,8 +4501,23 @@ int TitanFile::writeSimpleParams(int track_num,
   _simpleVars.duration_in_secs.putVal(index, sparams.duration_in_secs);
   _simpleVars.nparents.putVal(index, sparams.nparents);
   _simpleVars.nchildren.putVal(index, sparams.nchildren);
-  _simpleVars.parent.putVal(index, sparams.parent);
-  _simpleVars.child.putVal(index, sparams.child);
+
+  std::vector<size_t> parentIndex;
+  parentIndex.push_back(track_num);
+  parentIndex.push_back(0);
+  std::vector<size_t> parentCount;
+  parentCount.push_back(1);
+  parentCount.push_back(sparams.nparents);
+  _simpleVars.parent.putVal(parentIndex, parentCount, sparams.parent);
+    
+  std::vector<size_t> childIndex;
+  childIndex.push_back(track_num);
+  childIndex.push_back(0);
+  std::vector<size_t> childCount;
+  childCount.push_back(1);
+  childCount.push_back(sparams.nchildren);
+  _simpleVars.child.putVal(childIndex, childCount, sparams.child);
+
   _simpleVars.complex_track_num.putVal(index, sparams.complex_track_num);
   _simpleVars.first_entry_offset.putVal(index, sparams.first_entry_offset);
 
