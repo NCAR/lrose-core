@@ -315,7 +315,7 @@ int Tstorms2NetCDF::_processInputFile()
       return -1;
     }
     // write the complex params
-    _ncFile.writeComplexParams(ii, _tFile.complex_params());
+    _ncFile.writeComplexTrackParams(ii, _tFile.complex_params());
   }
   
   // loop through the simple tracks, reading parameters for each
@@ -329,7 +329,7 @@ int Tstorms2NetCDF::_processInputFile()
       return -1;
     }
     // write the simple params
-    _ncFile.writeSimpleParams(simpleNum, _tFile.simple_params());
+    _ncFile.writeSimpleTrackParams(simpleNum, _tFile.simple_params());
   }
 
   // write the track header

@@ -57,6 +57,10 @@ public:
 
   // data access
 
+  int n_simple_tracks() { return _header.n_simple_tracks; }
+  int n_complex_tracks() { return _header.n_complex_tracks; }
+  int n_scan_entries() { return _n_scan_entries; }
+  
   const track_file_header_t &header() const { return _header; }
   const track_file_params_t &params() const { return _header.params; }
   const simple_track_params_t &simple_params() const;
@@ -65,8 +69,7 @@ public:
   const track_file_entry_t *scan_entries() const { return _scan_entries; }
   const track_file_scan_index_t *scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
-  int n_scan_entries() { return _n_scan_entries; }
-  
+
   const string &header_file_path() { return _header_file_path; }
   const string &header_file_label() { return _header_file_label; }
   const string &data_file_path() { return _data_file_path; }

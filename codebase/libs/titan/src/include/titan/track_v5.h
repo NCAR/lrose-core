@@ -345,7 +345,7 @@ extern "C" {
 
     track_file_params_v5_t params;	/* see above */
 
-    si32 n_simple_tracks;		/* number of simple tracks in file */
+    si32 n_simple_tracks;	/* number of simple tracks in file */
     si32 n_complex_tracks;	/* number of complex tracks in file */
     
     track_file_contingency_data_v5_t ellipse_verify; /* contingency table data for

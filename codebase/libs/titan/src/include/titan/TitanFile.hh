@@ -340,7 +340,6 @@ private:
     NcxxVar n_simples_per_complex;
     NcxxVar simples_per_complex;
     NcxxVar simples_per_complex_offsets;
-    NcxxVar complex_track_offsets;
 
   };
   
@@ -786,21 +785,30 @@ public:
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
   
-  int writeSimpleParams(int track_num,
-                        const simple_track_params_t &sparams);
+  int writeSimpleTrackParams(int track_num,
+                             const simple_track_params_t &sparams);
      
   // write complex track params
   // returns 0 on success, -1 on failure
   
-  int writeComplexParams(int cindex,
-                         const complex_track_params_t &cparams);
+  int writeComplexTrackParams(int cindex,
+                              const complex_track_params_t &cparams);
      
   // write an entry for a track in the track data file
   // The entry is written at the end of the file
   // returns offset of last entry written on success, -1 on failure
   
-  long writeEntry(int prev_in_track_offset,
-		  int prev_in_scan_offset);
+  long writeTrackEntry(int prev_in_track_offset,
+                       int prev_in_scan_offset);
+     
+  // write arrays designating which simple tracks are contained
+  // in each complex track
+  // returns 0 on success, -1 on failure
+  
+  int writeSimplesPerComplexArrays(int n_simple_tracks,
+                                   const si32 *nsimples_per_complex,
+                                   const si32 *simples_per_complex_offsets,
+                                   const si32 *simples_per_complex);
      
   ///////////////////////////////////////////////////////////////////
   // error string

@@ -256,7 +256,7 @@ void TitanFile::_setUpDims()
 // get dimension
 
 NcxxDim TitanFile::_getDim(const std::string& name,
-                             NcxxGroup &group)
+                           NcxxGroup &group)
 {
   NcxxDim dim = group.getDim(name, NcxxGroup::All);
   if (dim.isNull()) {
@@ -266,8 +266,8 @@ NcxxDim TitanFile::_getDim(const std::string& name,
 }
 
 NcxxDim TitanFile::_getDim(const std::string& name,
-                             size_t dimSize,
-                             NcxxGroup &group)
+                           size_t dimSize,
+                           NcxxGroup &group)
 {
   NcxxDim dim = group.getDim(name, NcxxGroup::All);
   if (dim.isNull()) {
@@ -280,8 +280,8 @@ NcxxDim TitanFile::_getDim(const std::string& name,
 // get scalar variable
 
 NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             NcxxGroup &group)
+                           const NcxxType& ncType,
+                           NcxxGroup &group)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
@@ -295,9 +295,9 @@ NcxxVar TitanFile::_getVar(const std::string& name,
 // get array variable
 
 NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             const NcxxDim& dim,
-                             NcxxGroup &group)
+                           const NcxxType& ncType,
+                           const NcxxDim& dim,
+                           NcxxGroup &group)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
@@ -312,10 +312,10 @@ NcxxVar TitanFile::_getVar(const std::string& name,
 // get 2D array variable
 
 NcxxVar TitanFile::_getVar(const std::string& name,
-                             const NcxxType& ncType,
-                             const NcxxDim& dim0,
-                             const NcxxDim& dim1,
-                             NcxxGroup &group)
+                           const NcxxType& ncType,
+                           const NcxxDim& dim0,
+                           const NcxxDim& dim1,
+                           NcxxGroup &group)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
@@ -353,9 +353,9 @@ void TitanFile::_setUpVars()
   _scanVars.scan_num = _getVar(SCAN_NUM, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.scan_nstorms = _getVar(SCAN_NSTORMS, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.scan_time = _getVar(SCAN_TIME, NcxxType::nc_INT64, _n_scans, _scansGroup);
-  _scanVars.scan_gprops_offset = _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
-  _scanVars.scan_first_offset = _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
-  _scanVars.scan_last_offset = _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT64, _n_scans, _scansGroup);
+  _scanVars.scan_gprops_offset = _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.scan_first_offset = _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _scanVars.scan_last_offset = _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.scan_ht_of_freezing = _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
 
   _scanVars.grid_nx = _getVar(GRID_NX, NcxxType::nc_INT, _n_scans, _scansGroup);
@@ -495,10 +495,10 @@ void TitanFile::_setUpVars()
   _gpropsVars.bounding_min_iy = _getVar(BOUNDING_MIN_IY, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.bounding_max_ix = _getVar(BOUNDING_MAX_IX, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.bounding_max_iy = _getVar(BOUNDING_MAX_IY, NcxxType::nc_INT, _n_storms, _gpropsGroup);
-  _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
-  _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_INT64, _n_storms, _gpropsGroup);
+  _gpropsVars.layer_props_offset = _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.dbz_hist_offset = _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.runs_offset = _getVar(RUNS_OFFSET, NcxxType::nc_INT, _n_storms, _gpropsGroup);
+  _gpropsVars.proj_runs_offset = _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.vil_from_maxz = _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.ltg_count = _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
@@ -666,13 +666,11 @@ void TitanFile::_setUpVars()
   _simpleVars.nchildren = _getVar(NCHILDREN, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.parent = _getVar(PARENT, NcxxType::nc_INT, _n_simple, _max_parents, _simpleGroup);
   _simpleVars.child = _getVar(CHILD, NcxxType::nc_INT, _n_simple, _max_children, _simpleGroup);
-  _simpleVars.first_entry_offset = _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.first_entry_offset = _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.n_simples_per_complex = _getVar(N_SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.simples_per_complex = _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.simples_per_complex_offsets =
-    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT64, _n_simple, _simpleGroup);
-  _simpleVars.complex_track_offsets =
-    _getVar(COMPLEX_TRACK_OFFSETS, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _n_simple, _simpleGroup);
   
   // complex tracks
 
@@ -767,10 +765,10 @@ void TitanFile::_setUpVars()
   _entryVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_entries, _entriesGroup);
   _entryVars.forecast_valid = _getVar(FORECAST_VALID, NcxxType::nc_INT, _n_entries, _entriesGroup);
-  _entryVars.prev_entry_offset = _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
-  _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
-  _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
-  _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT64, _n_entries, _entriesGroup);
+  _entryVars.prev_entry_offset = _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.this_entry_offset = _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.next_entry_offset = _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
+  _entryVars.next_scan_entry_offset = _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _n_entries, _entriesGroup);
 
   // track entry dval_dt for forecasts
 
@@ -809,7 +807,7 @@ void TitanFile::_clearErrStr()
 // with optional following carriage return.
 
 void TitanFile::_addErrInt(string label,
-                             int iarg, bool cr)
+                           int iarg, bool cr)
 {
   _errStr += label;
   char str[32];
@@ -826,7 +824,7 @@ void TitanFile::_addErrInt(string label,
 // Default format is %g.
 
 void TitanFile::_addErrDbl(string label, double darg,
-                             string format, bool cr)
+                           string format, bool cr)
   
 {
   _errStr += label;
@@ -843,7 +841,7 @@ void TitanFile::_addErrDbl(string label, double darg,
 // with optional following carriage return.
 
 void TitanFile::_addErrStr(string label,
-                             string strarg, bool cr)
+                           string strarg, bool cr)
 
 {
   _errStr += label;
@@ -1065,8 +1063,8 @@ void TitanFile::freeStormsAll()
 //////////////////////////////////////////////////////////////
 
 int TitanFile::openStormFiles(const char *mode,
-                                const char *header_file_path,
-                                const char *data_file_ext /* = nullptr*/ )
+                              const char *header_file_path,
+                              const char *data_file_ext /* = nullptr*/ )
      
 {
 
@@ -1932,8 +1930,8 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write gprops offset
   
-  _scanVars.scan_gprops_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
-
+  _scanVars.scan_gprops_offset.putVal(scanIndex, (int) _n_storms.getSize());
+  
   // write storm global props
 
   const storm_file_params_t &sparams(storm_file_header.params);
@@ -1946,9 +1944,9 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     // NOTE: last_offset is the offset OF the last storm, NOT one beyond
     
     if (istorm == 0) {
-      _scanVars.scan_first_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
+      _scanVars.scan_first_offset.putVal(scanIndex, (int) _n_storms.getSize());
     }
-    _scanVars.scan_last_offset.putVal(scanIndex, (int64_t) _n_storms.getSize());
+    _scanVars.scan_last_offset.putVal(scanIndex, (int) _n_storms.getSize());
 
     // write the global props
     
@@ -2455,25 +2453,25 @@ void TitanFile::_convertEllipse2Km(const titan_grid_t &tgrid,
 //////////////////////////////////////////////////////////////
 
 void TitanFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
-				       storm_file_global_props_t &gprops)
+                                  storm_file_global_props_t &gprops)
      
 {
   
   // convert the ellipses as appropriate
 
   _convertEllipse2Km(scan.grid,
-		       gprops.precip_area_centroid_x,
-		       gprops.precip_area_centroid_y,
-		       gprops.precip_area_orientation,
-		       gprops.precip_area_minor_radius,
-		       gprops.precip_area_major_radius);
+                     gprops.precip_area_centroid_x,
+                     gprops.precip_area_centroid_y,
+                     gprops.precip_area_orientation,
+                     gprops.precip_area_minor_radius,
+                     gprops.precip_area_major_radius);
   
   _convertEllipse2Km(scan.grid,
-		       gprops.proj_area_centroid_x,
-		       gprops.proj_area_centroid_y,
-		       gprops.proj_area_orientation,
-		       gprops.proj_area_minor_radius,
-		       gprops.proj_area_major_radius);
+                     gprops.proj_area_centroid_x,
+                     gprops.proj_area_centroid_y,
+                     gprops.proj_area_orientation,
+                     gprops.proj_area_minor_radius,
+                     gprops.proj_area_major_radius);
 
 }
 
@@ -2488,7 +2486,7 @@ void TitanFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
 //////////////////////////////////////////////////////////////
 
 void TitanFile::gpropsXY2LatLon(const storm_file_scan_header_t &scan,
-				     storm_file_global_props_t &gprops)
+                                storm_file_global_props_t &gprops)
   
 {
   
@@ -2496,82 +2494,82 @@ void TitanFile::gpropsXY2LatLon(const storm_file_scan_header_t &scan,
 
   switch (tgrid.proj_type) {
     
-  case TITAN_PROJ_LATLON:
-    break;
-    
-  case TITAN_PROJ_FLAT:
-    {
-      double lat, lon;
-      PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
-			tgrid.proj_origin_lon,
-			gprops.vol_centroid_x,
-			gprops.vol_centroid_y,
-			&lat, &lon);
-      gprops.vol_centroid_y = lat;
-      gprops.vol_centroid_x = lon;
-      PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
-			tgrid.proj_origin_lon,
-			gprops.refl_centroid_x,
-			gprops.refl_centroid_y,
-			&lat, &lon);
-      gprops.refl_centroid_y = lat;
-      gprops.refl_centroid_x = lon;
-      PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
-			tgrid.proj_origin_lon,
-			gprops.precip_area_centroid_x,
-			gprops.precip_area_centroid_y,
-			&lat, &lon);
-      gprops.precip_area_centroid_y = lat;
-      gprops.precip_area_centroid_x = lon;
-      PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
-			tgrid.proj_origin_lon,
-			gprops.proj_area_centroid_x,
-			gprops.proj_area_centroid_y,
-			&lat, &lon);
-      gprops.proj_area_centroid_y = lat;
-      gprops.proj_area_centroid_x = lon;
+    case TITAN_PROJ_LATLON:
       break;
-    }
     
-  case TITAN_PROJ_LAMBERT_CONF:
-    {
-      double lat, lon;
-      PJGstruct *ps = PJGs_lc2_init(tgrid.proj_origin_lat,
-				    tgrid.proj_origin_lon,
-				    tgrid.proj_params.lc2.lat1,
-				    tgrid.proj_params.lc2.lat2);
-      if (ps != nullptr) {
-	PJGs_lc2_xy2latlon(ps,
-			   gprops.vol_centroid_x,
-			   gprops.vol_centroid_y,
-			   &lat, &lon);
-	gprops.vol_centroid_y = lat;
-	gprops.vol_centroid_x = lon;
-	PJGs_lc2_xy2latlon(ps,
-			   gprops.refl_centroid_x,
-			   gprops.refl_centroid_y,
-			   &lat, &lon);
-	gprops.refl_centroid_y = lat;
-	gprops.refl_centroid_x = lon;
-	PJGs_lc2_xy2latlon(ps,
-			   gprops.precip_area_centroid_x,
-			   gprops.precip_area_centroid_y,
-			   &lat, &lon);
-	gprops.precip_area_centroid_y = lat;
-	gprops.precip_area_centroid_x = lon;
-	PJGs_lc2_xy2latlon(ps,
-			   gprops.proj_area_centroid_x,
-			   gprops.proj_area_centroid_y,
-			   &lat, &lon);
-	gprops.proj_area_centroid_y = lat;
-	gprops.proj_area_centroid_x = lon;
-	free(ps);
+    case TITAN_PROJ_FLAT:
+      {
+        double lat, lon;
+        PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
+                          tgrid.proj_origin_lon,
+                          gprops.vol_centroid_x,
+                          gprops.vol_centroid_y,
+                          &lat, &lon);
+        gprops.vol_centroid_y = lat;
+        gprops.vol_centroid_x = lon;
+        PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
+                          tgrid.proj_origin_lon,
+                          gprops.refl_centroid_x,
+                          gprops.refl_centroid_y,
+                          &lat, &lon);
+        gprops.refl_centroid_y = lat;
+        gprops.refl_centroid_x = lon;
+        PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
+                          tgrid.proj_origin_lon,
+                          gprops.precip_area_centroid_x,
+                          gprops.precip_area_centroid_y,
+                          &lat, &lon);
+        gprops.precip_area_centroid_y = lat;
+        gprops.precip_area_centroid_x = lon;
+        PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
+                          tgrid.proj_origin_lon,
+                          gprops.proj_area_centroid_x,
+                          gprops.proj_area_centroid_y,
+                          &lat, &lon);
+        gprops.proj_area_centroid_y = lat;
+        gprops.proj_area_centroid_x = lon;
+        break;
       }
-      break;
-    }
+    
+    case TITAN_PROJ_LAMBERT_CONF:
+      {
+        double lat, lon;
+        PJGstruct *ps = PJGs_lc2_init(tgrid.proj_origin_lat,
+                                      tgrid.proj_origin_lon,
+                                      tgrid.proj_params.lc2.lat1,
+                                      tgrid.proj_params.lc2.lat2);
+        if (ps != nullptr) {
+          PJGs_lc2_xy2latlon(ps,
+                             gprops.vol_centroid_x,
+                             gprops.vol_centroid_y,
+                             &lat, &lon);
+          gprops.vol_centroid_y = lat;
+          gprops.vol_centroid_x = lon;
+          PJGs_lc2_xy2latlon(ps,
+                             gprops.refl_centroid_x,
+                             gprops.refl_centroid_y,
+                             &lat, &lon);
+          gprops.refl_centroid_y = lat;
+          gprops.refl_centroid_x = lon;
+          PJGs_lc2_xy2latlon(ps,
+                             gprops.precip_area_centroid_x,
+                             gprops.precip_area_centroid_y,
+                             &lat, &lon);
+          gprops.precip_area_centroid_y = lat;
+          gprops.precip_area_centroid_x = lon;
+          PJGs_lc2_xy2latlon(ps,
+                             gprops.proj_area_centroid_x,
+                             gprops.proj_area_centroid_y,
+                             &lat, &lon);
+          gprops.proj_area_centroid_y = lat;
+          gprops.proj_area_centroid_x = lon;
+          free(ps);
+        }
+        break;
+      }
   
-  default:
-    break;
+    default:
+      break;
     
   } // switch 
   
@@ -3047,8 +3045,8 @@ void TitanFile::freeTracksAll()
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::openTrackFiles(const char *mode,
-                                const char *header_file_path,
-                                const char *data_file_ext /* = nullptr*/ )
+                              const char *header_file_path,
+                              const char *data_file_ext /* = nullptr*/ )
   
 {
   
@@ -3597,8 +3595,8 @@ int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::readComplexParams(int track_num,
-				      bool read_simples_per_complex,
-				      bool clear_error_str /* = true*/ )
+                                 bool read_simples_per_complex,
+                                 bool clear_error_str /* = true*/ )
      
 {
   
@@ -3674,7 +3672,7 @@ int TitanFile::readComplexParams(int track_num,
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::readSimpleParams(int track_num,
-				     bool clear_error_str /* = true*/ )
+                                bool clear_error_str /* = true*/ )
      
 {
   
@@ -4444,8 +4442,8 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeSimpleParams(int track_num,
-                                 const simple_track_params_t &sparams)
+int TitanFile::writeSimpleTrackParams(int track_num,
+                                      const simple_track_params_t &sparams)
      
 {
   
@@ -4506,8 +4504,8 @@ int TitanFile::writeSimpleParams(int track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeComplexParams(int cindex,
-                                  const complex_track_params_t &cparams)
+int TitanFile::writeComplexTrackParams(int cindex,
+                                       const complex_track_params_t &cparams)
   
 {
 
@@ -4527,7 +4525,7 @@ int TitanFile::writeComplexParams(int cindex,
   
   std::vector<size_t> offsetIndex;
   offsetIndex.push_back(cparams.complex_track_num);
-  _simpleVars.complex_track_offsets.putVal(offsetIndex, cparams.complex_track_num);
+  // _simpleVars.complex_track_offsets.putVal(offsetIndex, cparams.complex_track_num);
 
   // the complex track params are indexed from the complex track number
   // these arrays will have gaps
@@ -4688,7 +4686,7 @@ int TitanFile::writeComplexParams(int cindex,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-long TitanFile::writeEntry(int prev_in_track_offset,
+long TitanFile::writeTrackEntry(int prev_in_track_offset,
 				int prev_in_scan_offset)
      
 {
@@ -4831,5 +4829,31 @@ long TitanFile::writeEntry(int prev_in_track_offset,
   }
   
   return (file_mark);
+  
+}
+
+///////////////////////////////////////////////////////////
+// write arrays designating which simple tracks are
+// contained in each complex track
+// returns 0 on success, -1 on failure
+
+int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
+                                            const si32 *nsimples_per_complex,
+                                            const si32 *simples_per_complex_offsets,
+                                            const si32 *simples_per_complex)
+  
+{
+
+  std::vector<size_t> index;
+  index.push_back(0);
+    
+  std::vector<size_t> count;
+  count.push_back(n_simple_tracks);
+  
+  _simpleVars.n_simples_per_complex.putVal(index, count, nsimples_per_complex);
+  _simpleVars.simples_per_complex_offsets.putVal(index, count, simples_per_complex_offsets);
+  _simpleVars.simples_per_complex.putVal(index, count, simples_per_complex);
+  
+  return 0;
   
 }

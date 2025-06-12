@@ -1,0 +1,187 @@
+  /*
+   * Storm file formats.
+   *
+   * There are two files for each date - a header file and a data file.
+   *
+   * Header file.
+   * -----------
+   *
+   * file label - char[R_FILE_LABEL_LEN]
+   *
+   * header - struct storm_file_header_t
+   *
+   * si32 scan_offset[header->n_scans] - file offset of each scan header
+   *
+   * Data file.
+   * ---------
+   *
+   * file label - char[R_FILE_LABEL_LEN]
+   *
+   * for each scan :
+   *
+   *  at scan_offset[iscan]:
+   *    struct storm_file_scan_header_t
+   *
+   *  followed by
+   *
+   *  at scan_header->gprops_offset:
+   *    array of structs storm_file_global_props_t[nstorms],
+   *      where nstorms is scan_header.nstorms
+   *
+   *  followed by
+   *
+   *  for each storm in the scan :
+   *
+   *    at gprops[istorm].layer_props_offset:
+   *      array of structs storm_file_layer_props_t[n_layers],
+   *        where n_layers is gprops[istorm].n_layers
+   * 
+   *    at gprops[istorm].dbz_hist_offset:
+   *      array of structs storm_file_dbz_hist_t[n_dbz_intervals],
+   *        where n_dbz_intervals is gprops[istorm].n_dbz_intervals
+   *
+   *    at gprops[istorm].runs_offset:
+   *      array of structs storm_file_run_t[n_runs],
+   *        where n_runs is gprops[istorm].n_runs
+   *
+   *    at gprops[istorm].proj_runs_offset:
+   *      array of structs storm_file_run_t[n_proj_runs],
+   *        where n_runs is gprops[istorm].n_proj_runs
+   *
+   * NOTE 1.
+   * 
+   * The offsets of scan headers in the file are stored in the array
+   * scan_offset[].
+   *
+   * The global props for the storms are in the 'storm_file_global_props_t'
+   * array, which are pointed to by gprops_offset in the scan header.
+   *
+   * The position of the two arrays of types 'storm_file_layer_props_t',
+   * 'storm_file_dbz_hist_t' and storm_file_run_t are given by the entries
+   * 'layer_props_offset', 'dbz_hist_offset', 'runs_offset' and
+   * 'proj_runs_offset'.
+   *
+   * It is therefore possible to move reasonably directly to the data
+   * for a particular storm, knowing the scan number and the storm number.
+   *
+   * NOTE 2.
+   *
+   * Integer values are stored as IEEE 32-bit intergers.
+   * Floating point values are stored as IEEE 32-bit floats.
+   * All ints and floats are stored in big-endian format.
+   *
+   * NOTE 3.
+   *
+   * The storm data is based on two types of data grid, a local-area
+   * flat grid, and a lot-lon grid. The grid type is either TITAN_PROJ_FLAT
+   * or TITAN_PROJ_LATLON.
+   *
+   * The position and shape properties of the storms are in either
+   * in km or degrees, depending upon which grid was used.
+   * Units are in km for flat grid, degrees for lat-lon grid.
+   *
+   * The area, volume and speed properties are always in km units.
+   */
+
+  /* 
+   * TRACK FILE FORMATS
+   * ------------------
+   *
+   * There are two files for each date - a header file and a data file.
+   *
+   * Header file.
+   * -----------
+   *
+   * file label - char[R_FILE_LABEL_LEN]
+   *
+   * header - struct track_file_header_t
+   *
+   * si32 complex_track[header->n_complex_tracks]
+   *   this stores the numbers of the complex tracks, which are in
+   *   ascending order but not necessarily contiguous.
+   *
+   * si32 complex_track_offset[header->n_complex_tracks]
+   *   these are the file offsets to the complex_track_params_t struct
+   *   for each complex track.
+   *
+   * si32 simple_track_offset[header->n_simple_tracks]
+   *   these are the file offsets to the simple_track_params_t struct
+   *   for each simple track.
+   *
+   * track_file_scan_index_t scan_index[header->n_scans]
+   *   info about the track entry list for a given scan number
+   *
+   * si32 n_simples_per_complex[header->n_simple_tracks]
+   *   This array lists the number of simple tracks per complex track
+   *
+   * si32 simples_per_complex_offsets[header->n_simple_tracks]
+   *   This array lists the offsets for the arrays which contain
+   *   the simple track numbers for each complex track
+   *
+   * For each complex track:
+   *
+   *   si32 simples_per_complex[n_simples_per_complex[icomplex]]
+   *     This array holds the simple track numbers for the
+   *     relevant complex track number. The array offsets are
+   *     stored in simples_per_complex_offsets.
+   *
+   * Data file.
+   * ---------
+   *
+   * file label - char[R_FILE_LABEL_LEN] followed by
+   * track_data (described below).
+   *
+   * The track data is made up of the following structs:
+   *
+   *   complex_track_params_t
+   *   simple_track_params_t
+   *   track_file_entry_t
+   *
+   * Each complex track has a complex_track_params_t struct.
+   * The offset of this struct is obtained from the complex_track_offset
+   * array in the header file.
+   * 
+   * Each complex track is made up of one or more simple tracks.
+   * Each of these has a simple_track_params_t struct pointed at by the
+   * simple_track_offset array in the header file.
+   *
+   * Each simple track is made up of one or more track entries.
+   * The entries for a simple track are stored as a doubly-linked list.
+   * The offset to the first entry in the list is obtained from the
+   * simple_track_params_t struct (first_entry_offset).
+   *
+   * The entries for a given scan are also stored as a singly-linked list.
+   * The offset to the first entry in the list is obtained from the
+   * scan index array in the header file. Using this list allows one
+   * to get data on all of the entries at a given time (scan).
+   *
+   * DATA RETRIEVAL
+   * --------------
+   *
+   * A track is made up of a complex track and one or more simple tracks.
+   * A simple track is a part of a complex track which has no mergers or
+   * splits in it. A complex track is therefore made up of a number of 
+   * simple tracks.
+   *
+   * To retrieve a complex track, find its position in the array by searching
+   * for the track number in complex_track_num[].
+   *
+   * Then read the complex_track_params_t struct at the offset given by
+   * complex_track_offset[].
+   *
+   * Then for each of the simple tracks in the complex track
+   * read the simple_track_params_t at the offset
+   * given by simple_track_offset[].
+   *
+   * The first entry in a simple track is pointed to by first_entry_offset
+   * in the simple params. Read in the first entry. The entries form a
+   * linked list, with the next_entry_offset pointing to the next
+   * entry in the simple track.
+   *
+   * You may also retrieve the entries relevant to a particular scan.
+   * The scan_index array contains the number of entries and the offset to
+   * the first entry for that scan. Read in the first track entry, and then
+   * follow a (second) linked  list to other entries in the scan by using the
+   * next_scan_entry_offset values in the entry.
+   */
+
