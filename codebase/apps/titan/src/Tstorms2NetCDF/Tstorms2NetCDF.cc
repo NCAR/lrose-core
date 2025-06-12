@@ -250,7 +250,7 @@ int Tstorms2NetCDF::_processInputFile()
   }
 
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - writing NetCDF file: " << _ncFilePath << endl;
+    cerr << "Tstorms2NetCDF - opened NetCDF file: " << _ncFilePath << endl;
   }
   
   // load up scan times
@@ -339,6 +339,10 @@ int Tstorms2NetCDF::_processInputFile()
   // close
   
   _closeInputFiles();
+  
+  if (_params.debug) {
+    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _ncFilePath << endl;
+  }
   
   return 0;
 
@@ -429,7 +433,7 @@ int Tstorms2NetCDF::_processScan(int scan_num,
   time_t end_time = scan_time;
   time_t start_time = scan_time;
   
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Processing scan time: " << endl;
     cerr << "  Start time: " << DateTime::str(start_time) << endl;
     cerr << "  End time: " << DateTime::str(end_time) << endl;
@@ -445,7 +449,7 @@ int Tstorms2NetCDF::_processScan(int scan_num,
   }
   
   int nStorms = _sFile.scan().nstorms;
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  n_storms: " << nStorms << endl;
   }
 
