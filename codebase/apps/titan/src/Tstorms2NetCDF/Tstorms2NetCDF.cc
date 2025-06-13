@@ -264,6 +264,7 @@ int Tstorms2NetCDF::_processInputFile()
   if (_sFile.ReadHeader()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot read storm file header, input_path: " << _inputPath << endl;
+    cerr << _sFile.getErrStr() << endl;
     return -1;
   }
 
@@ -290,11 +291,13 @@ int Tstorms2NetCDF::_processInputFile()
   if (_tFile.ReadHeader()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
+    cerr << _tFile.getErrStr() << endl;
     return -1;
   }
   if (_tFile.ReadSimplesPerComplex()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot read simples_per_complex, input_path: " << _inputPath << endl;
+    cerr << _tFile.getErrStr() << endl;
     return -1;
   }
   const track_file_header_t &theader = _tFile.header();
@@ -313,6 +316,7 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read complex params, input_path: " << _inputPath << endl;
       cerr << "  index, complex_num: " << ii << ", " << complexNum << endl;
+      cerr << _tFile.getErrStr() << endl;
       return -1;
     }
     // write the complex params
@@ -328,6 +332,7 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read simple params, input_path: " << _inputPath << endl;
       cerr << "  simple_num: " << simpleNum << endl;
+      cerr << _tFile.getErrStr() << endl;
       return -1;
     }
     // write the simple params
@@ -344,10 +349,41 @@ int Tstorms2NetCDF::_processInputFile()
                                        simpsPerComplexOffsets.data(),
                                        simpsPerComplexLin.data());
   
+  // read in track scan index
+  
+  if (_tFile.ReadScanIndex()) {
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "  Cannot read scan index, input_path: " << _inputPath << endl;
+    cerr << _tFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // loop through the scans
+  
+  for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
+    
+    // read all track entries for this scan
+    
+    if (_tFile.ReadScanEntries(iscan)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "  Cannot read scan index, input_path: " << _inputPath << endl;
+      cerr << _tFile.getErrStr() << endl;
+      return -1;
+    }
+
+    // loop through entries for this scan
+    
+    for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
+      const track_file_entry_t &entry = _tFile.scan_entries()[ientry];
+      _ncFile.writeTrackEntry(theader.params, entry);
+    } // ientry
+
+  } // iscan
+  
   // write the track header
   
   _ncFile.writeTrackHeader(_tFile.header());
-
+  
   // close
   
   _closeInputFiles();
@@ -457,6 +493,7 @@ int Tstorms2NetCDF::_processScan(int scan_num,
     cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
     cerr << "  Cannot read scan and gprops, input_path: " << _inputPath << endl;
     cerr << "    scan_num: " << scan_num << endl;
+    cerr << _sFile.getErrStr() << endl;
     return -1;
   }
   
@@ -477,6 +514,7 @@ int Tstorms2NetCDF::_processScan(int scan_num,
       cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
       cerr << "  Cannot read properties, storm num: "
            << istorm << ", " << _inputPath << endl;
+      cerr << _sFile.getErrStr() << endl;
       return -1;
     }
 

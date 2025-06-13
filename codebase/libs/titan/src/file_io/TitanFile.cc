@@ -4680,155 +4680,226 @@ int TitanFile::writeComplexTrackParams(int cindex,
 //
 // write an entry for a track in the track data file
 //
-// The entry is written at the end of the file
-//
-// returns offset of last entry written on success, -1 on failure
-//
 ///////////////////////////////////////////////////////////////////////////
 
-long TitanFile::writeTrackEntry(int prev_in_track_offset,
-				int prev_in_scan_offset)
-     
+int TitanFile::writeTrackEntry(const track_file_params_t &params,
+                               const track_file_entry_t &entry)
+  
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeEntry\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _track_data_file_path);
+  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
+  
+  int entryOffset = _n_entries.getSize();
+  std::vector<size_t> entryIndex;
+  entryIndex.push_back(entryOffset);
+  
+  _entryVars.time.putVal(entryIndex, entry.time);
+  
+  _entryVars.time.putVal(entryIndex, entry.time);
+  _entryVars.time_origin.putVal(entryIndex, entry.time_origin);
+  _entryVars.scan_origin.putVal(entryIndex, entry.scan_origin);
+  _entryVars.scan_num.putVal(entryIndex, entry.scan_num);
+  _entryVars.storm_num.putVal(entryIndex, entry.storm_num);
+  _entryVars.simple_track_num.putVal(entryIndex, entry.simple_track_num);
+  _entryVars.complex_track_num.putVal(entryIndex, entry.complex_track_num);
+  _entryVars.history_in_scans.putVal(entryIndex, entry.history_in_scans);
+  _entryVars.history_in_secs.putVal(entryIndex, entry.history_in_secs);
+  _entryVars.duration_in_scans.putVal(entryIndex, entry.duration_in_scans);
+  _entryVars.duration_in_secs.putVal(entryIndex, entry.duration_in_secs);
+  _entryVars.forecast_valid.putVal(entryIndex, entry.forecast_valid);
+  _entryVars.prev_entry_offset.putVal(entryIndex, entry.prev_entry_offset);
+  _entryVars.this_entry_offset.putVal(entryIndex, entry.this_entry_offset);
+  _entryVars.next_entry_offset.putVal(entryIndex, entry.next_entry_offset);
+  _entryVars.next_scan_entry_offset.putVal(entryIndex, entry.next_scan_entry_offset);
 
-  long file_mark;
+  return 0;
+  
+  // if (istorm == 0) {
+  //   _scanVars.scan_first_offset.putVal(scanIndex, (int) _n_storms.getSize());
+  // }
+  // _scanVars.scan_last_offset.putVal(scanIndex, (int) _n_storms.getSize());
 
-  // Go to the end of the file and save the file position.
+  //   // write the global props
+    
+  //   const storm_file_global_props_t &gp = gprops[istorm];
+    
+  //   int gpropsOffset = _n_storms.getSize();
+  //   std::vector<size_t> stormIndex;
+  //   stormIndex.push_back(gpropsOffset);
+    
+  //   _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
+  //   _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
+  //   _gpropsVars.vol_centroid_z.putVal(stormIndex, gp.vol_centroid_z);
+  //   _gpropsVars.refl_centroid_x.putVal(stormIndex, gp.refl_centroid_x);
+  //   _gpropsVars.refl_centroid_y.putVal(stormIndex, gp.refl_centroid_y);
+  //   _gpropsVars.refl_centroid_z.putVal(stormIndex, gp.refl_centroid_z);
+  //   _gpropsVars.top.putVal(stormIndex, gp.top);
+  //   _gpropsVars.base.putVal(stormIndex, gp.base);
+  //   _gpropsVars.volume.putVal(stormIndex, gp.volume);
+  //   _gpropsVars.area_mean.putVal(stormIndex, gp.area_mean);
+  //   _gpropsVars.precip_flux.putVal(stormIndex, gp.precip_flux);
+  //   _gpropsVars.mass.putVal(stormIndex, gp.mass);
+  //   _gpropsVars.tilt_angle.putVal(stormIndex, gp.tilt_angle);
+  //   _gpropsVars.tilt_dirn.putVal(stormIndex, gp.tilt_dirn);
+  //   _gpropsVars.dbz_max.putVal(stormIndex, gp.dbz_max);
+  //   _gpropsVars.dbz_mean.putVal(stormIndex, gp.dbz_mean);
+  //   _gpropsVars.dbz_max_gradient.putVal(stormIndex, gp.dbz_max_gradient);
+  //   _gpropsVars.dbz_mean_gradient.putVal(stormIndex, gp.dbz_mean_gradient);
+  //   _gpropsVars.ht_of_dbz_max.putVal(stormIndex, gp.ht_of_dbz_max);
+  //   _gpropsVars.rad_vel_mean.putVal(stormIndex, gp.rad_vel_mean);
+  //   _gpropsVars.rad_vel_sd.putVal(stormIndex, gp.rad_vel_sd);
+  //   _gpropsVars.vorticity.putVal(stormIndex, gp.vorticity);
+  //   _gpropsVars.precip_area.putVal(stormIndex, gp.precip_area);
+  //   _gpropsVars.precip_area_centroid_x.putVal(stormIndex, gp.precip_area_centroid_x);
+  //   _gpropsVars.precip_area_centroid_y.putVal(stormIndex, gp.precip_area_centroid_y);
+  //   _gpropsVars.precip_area_orientation.putVal(stormIndex, gp.precip_area_orientation);
+  //   _gpropsVars.precip_area_minor_radius.putVal(stormIndex, gp.precip_area_minor_radius);
+  //   _gpropsVars.precip_area_major_radius.putVal(stormIndex, gp.precip_area_major_radius);
+  //   _gpropsVars.proj_area.putVal(stormIndex, gp.proj_area);
+  //   _gpropsVars.proj_area_centroid_x.putVal(stormIndex, gp.proj_area_centroid_x);
+  //   _gpropsVars.proj_area_centroid_y.putVal(stormIndex, gp.proj_area_centroid_y);
+  //   _gpropsVars.proj_area_orientation.putVal(stormIndex, gp.proj_area_orientation);
+  //   _gpropsVars.proj_area_minor_radius.putVal(stormIndex, gp.proj_area_minor_radius);
+  //   _gpropsVars.proj_area_major_radius.putVal(stormIndex, gp.proj_area_major_radius);
 
-  fseek(_track_data_file, 0, SEEK_END);
-  file_mark = ftell(_track_data_file);
   
-  // If prev_in_track_offset is non-zero (which indicates that this is not
-  // the first entry in a track) read in the entry at that location,
-  // update the next_entry prev_in_track_offset with the current file
-  // location and write back to file
+
+  // long file_mark;
+
+  // // Go to the end of the file and save the file position.
+
+  // fseek(_track_data_file, 0, SEEK_END);
+  // file_mark = ftell(_track_data_file);
   
-  if (prev_in_track_offset != 0) {
-    
-    // move to the entry prev_in_track_offset in the file
-    
-    fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
-    
-    // read in entry
-    
-    track_file_entry_t entry;
-    if (ufread(&entry, sizeof(track_file_entry_t),
-	       1, _track_data_file) != 1) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ",
-		    "Reading track entry to update in_track_offset");
-      TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-    // store next_entry_offset, swap
-    
-    entry.next_entry_offset = file_mark;
-    BE_from_array_32(&entry.next_entry_offset,
-		     sizeof(entry.next_entry_offset));
-    
-    // move back to offset
-    
-    fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
-    
-    // rewrite entry
-    
-    if (ufwrite(&entry, sizeof(track_file_entry_t),
-		1, _track_data_file) != 1) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ",
-		    "Re-writing track entry.");
-      TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-  } // if (prev_in_track_offset == 0) 
+  // // If prev_in_track_offset is non-zero (which indicates that this is not
+  // // the first entry in a track) read in the entry at that location,
+  // // update the next_entry prev_in_track_offset with the current file
+  // // location and write back to file
   
-  // If prev_in_scan_offset is non-zero (which indicates that this is not
-  // the first entry in a track) read in the entry at that location,
-  // update the next_scan_entry_offset with the current file
-  // location and write back to file
-  
-  if (prev_in_scan_offset != 0) {
+  // if (prev_in_track_offset != 0) {
     
-    // move to the entry prev_in_scan_offset in the file
+  //   // move to the entry prev_in_track_offset in the file
     
-    fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
+  //   fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
     
-    // read in entry
+  //   // read in entry
     
-    track_file_entry_t entry;
-    if (ufread(&entry, sizeof(track_file_entry_t),
-	       1, _track_data_file) != 1) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ",
-		    "Reading track entry to update in_track_offset.");
-      TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
+  //   track_file_entry_t entry;
+  //   if (ufread(&entry, sizeof(track_file_entry_t),
+  //              1, _track_data_file) != 1) {
+  //     int errNum = errno;
+  //     TaStr::AddStr(_errStr, "  ",
+  //       	    "Reading track entry to update in_track_offset");
+  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
+  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //     return -1;
+  //   }
     
-    // store next_entry_offset, swap
+  //   // store next_entry_offset, swap
     
-    entry.next_scan_entry_offset = file_mark;
-    BE_from_array_32(&entry.next_scan_entry_offset,
-		     sizeof(entry.next_scan_entry_offset));
+  //   entry.next_entry_offset = file_mark;
+  //   BE_from_array_32(&entry.next_entry_offset,
+  //       	     sizeof(entry.next_entry_offset));
     
-    // move back to offset
+  //   // move back to offset
     
-    fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
+  //   fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
     
-    // rewrite entry
+  //   // rewrite entry
     
-    if (ufwrite(&entry, sizeof(track_file_entry_t),
-		1, _track_data_file) != 1) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ",
-		    "Re-writing track entry.");
-      TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
+  //   if (ufwrite(&entry, sizeof(track_file_entry_t),
+  //       	1, _track_data_file) != 1) {
+  //     int errNum = errno;
+  //     TaStr::AddStr(_errStr, "  ",
+  //       	    "Re-writing track entry.");
+  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
+  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //     return -1;
+  //   }
     
-  } // if (prev_in_scan_offset == 0) 
+  // } // if (prev_in_track_offset == 0) 
   
-  // go to end of file to write entry structure
+  // // If prev_in_scan_offset is non-zero (which indicates that this is not
+  // // the first entry in a track) read in the entry at that location,
+  // // update the next_scan_entry_offset with the current file
+  // // location and write back to file
   
-  fseek(_track_data_file, 0, SEEK_END);
+  // if (prev_in_scan_offset != 0) {
+    
+  //   // move to the entry prev_in_scan_offset in the file
+    
+  //   fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
+    
+  //   // read in entry
+    
+  //   track_file_entry_t entry;
+  //   if (ufread(&entry, sizeof(track_file_entry_t),
+  //              1, _track_data_file) != 1) {
+  //     int errNum = errno;
+  //     TaStr::AddStr(_errStr, "  ",
+  //       	    "Reading track entry to update in_track_offset.");
+  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
+  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //     return -1;
+  //   }
+    
+  //   // store next_entry_offset, swap
+    
+  //   entry.next_scan_entry_offset = file_mark;
+  //   BE_from_array_32(&entry.next_scan_entry_offset,
+  //       	     sizeof(entry.next_scan_entry_offset));
+    
+  //   // move back to offset
+    
+  //   fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
+    
+  //   // rewrite entry
+    
+  //   if (ufwrite(&entry, sizeof(track_file_entry_t),
+  //       	1, _track_data_file) != 1) {
+  //     int errNum = errno;
+  //     TaStr::AddStr(_errStr, "  ",
+  //       	    "Re-writing track entry.");
+  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
+  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //     return -1;
+  //   }
+    
+  // } // if (prev_in_scan_offset == 0) 
   
-  // copy entry to local variable
+  // // go to end of file to write entry structure
   
-  track_file_entry_t entry = _entry;
+  // fseek(_track_data_file, 0, SEEK_END);
   
-  // set entry offsets
+  // // copy entry to local variable
   
-  entry.prev_entry_offset = prev_in_track_offset;
-  entry.this_entry_offset = file_mark;
-  entry.next_entry_offset = 0;
+  // track_file_entry_t entry = _entry;
   
-  // swap
+  // // set entry offsets
   
-  BE_from_array_32(&entry, sizeof(track_file_entry_t));
+  // entry.prev_entry_offset = prev_in_track_offset;
+  // entry.this_entry_offset = file_mark;
+  // entry.next_entry_offset = 0;
   
-  // write entry
+  // // swap
   
-  if (ufwrite(&entry, sizeof(track_file_entry_t),
-	      1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ",
-		  "Writing track entry.");
-    TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  // BE_from_array_32(&entry, sizeof(track_file_entry_t));
   
-  return (file_mark);
+  // // write entry
+  
+  // if (ufwrite(&entry, sizeof(track_file_entry_t),
+  //             1, _track_data_file) != 1) {
+  //   int errNum = errno;
+  //   TaStr::AddStr(_errStr, "  ",
+  //       	  "Writing track entry.");
+  //   TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
+  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  //   return -1;
+  // }
+  
+  // return (file_mark);
   
 }
 
