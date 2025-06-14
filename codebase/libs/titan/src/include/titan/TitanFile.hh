@@ -1080,6 +1080,14 @@ protected:
   
   int _truncateStormFiles(FILE *&fd, const string &path, int length);
   
+  // get the offset of storm or entry props, given the
+  // scan_num and storm_num.
+  //
+  // First we read the scan first offset, and then add the
+  // storm_num.
+  
+  int _getStormEntryOffset(int scan_num, int storm_num);
+  
 public:
 
   // friends for Titan program which writes the storm and track files

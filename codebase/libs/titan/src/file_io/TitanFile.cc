@@ -4655,12 +4655,10 @@ int TitanFile::writeTrackEntry(const track_file_params_t &params,
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
-  
-  int entryOffset = _n_entries.getSize();
+
+  int entryOffset = _getStormEntryOffset(entry.scan_num, entry.storm_num);
   std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
-  
-  _entryVars.time.putVal(entryIndex, entry.time);
-  
+
   _entryVars.time.putVal(entryIndex, entry.time);
   _entryVars.time_origin.putVal(entryIndex, entry.time_origin);
   _entryVars.scan_origin.putVal(entryIndex, entry.scan_origin);
@@ -4889,3 +4887,22 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
   return 0;
   
 }
+
+///////////////////////////////////////////////////////////
+// get the offset of storm or entry props, given the
+// scan_num and storm_num.
+//
+// First we read the scan first offset, and then add the
+// storm_num.
+
+int TitanFile::_getStormEntryOffset(int scan_num,
+                                    int storm_num)
+{
+  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  int scanFirstOffset;
+  _scanVars.scan_first_offset.getVal(scanIndex, &scanFirstOffset);
+  int entryOffset = scanFirstOffset + storm_num;
+  return entryOffset;
+}
+  
+  
