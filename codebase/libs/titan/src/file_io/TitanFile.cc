@@ -1880,8 +1880,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   // scan storage index
   
   size_t scanNum = scanHeader.scan_num;
-  std::vector<size_t> scanIndex;
-  scanIndex.push_back(scanNum);
+  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scanNum);
 
   // write scan details
   
@@ -1953,8 +1952,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     const storm_file_global_props_t &gp = gprops[istorm];
     
     int gpropsOffset = _n_storms.getSize();
-    std::vector<size_t> stormIndex;
-    stormIndex.push_back(gpropsOffset);
+    std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
     
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
     _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
@@ -2032,13 +2030,8 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
     // polygons are 2D variables
     
-    std::vector<size_t> polyIndex;
-    polyIndex.push_back(gpropsOffset);
-    polyIndex.push_back(0);
-    
-    std::vector<size_t> polyCount;
-    polyCount.push_back(1);
-    polyCount.push_back(N_POLY_SIDES);
+    std::vector<size_t> polyIndex = NcxxVar::makeIndex(gpropsOffset, 0);
+    std::vector<size_t> polyCount = NcxxVar::makeIndex(1, N_POLY_SIDES);
     
     _gpropsVars.proj_area_polygon.putVal(polyIndex, polyCount, gp.proj_area_polygon);
 
@@ -2179,8 +2172,7 @@ int TitanFile::writeStormAux(int storm_num,
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &ll = lprops[ilayer];
     int lpropsOffset = _n_layers.getSize();
-    std::vector<size_t> layerIndex;
-    layerIndex.push_back(lpropsOffset);
+    std::vector<size_t> layerIndex = NcxxVar::makeIndex(lpropsOffset);
     _lpropsVars.vol_centroid_x.putVal(layerIndex, ll.vol_centroid_x);
     _lpropsVars.vol_centroid_y.putVal(layerIndex, ll.vol_centroid_y);
     _lpropsVars.refl_centroid_x.putVal(layerIndex, ll.refl_centroid_x);
@@ -2205,8 +2197,7 @@ int TitanFile::writeStormAux(int storm_num,
   for (int ihist = 0; ihist < nHist; ihist++) {
     const storm_file_dbz_hist_t &hh = hist[ihist];
     int histOffset = _n_hist.getSize();
-    std::vector<size_t> histIndex;
-    histIndex.push_back(histOffset);
+    std::vector<size_t> histIndex = NcxxVar::makeIndex(histOffset);
     _histVars.percent_volume.putVal(histIndex, hh.percent_volume);
     _histVars.percent_area.putVal(histIndex, hh.percent_area);
   }
@@ -2218,8 +2209,7 @@ int TitanFile::writeStormAux(int storm_num,
   for (int irun = 0; irun < nRuns; irun++) {
     const storm_file_run_t &run = runs[irun];
     int runOffset = _n_runs.getSize();
-    std::vector<size_t> runIndex;
-    runIndex.push_back(runOffset);
+    std::vector<size_t> runIndex = NcxxVar::makeIndex(runOffset);
     _runsVars.run_ix.putVal(runIndex, run.ix);
     _runsVars.run_iy.putVal(runIndex, run.iy);
     _runsVars.run_iz.putVal(runIndex, run.iz);
@@ -2230,24 +2220,13 @@ int TitanFile::writeStormAux(int storm_num,
   int nProjRuns = gp.n_proj_runs;
   for (int irun = 0; irun < nProjRuns; irun++) {
     const storm_file_run_t &run = proj_runs[irun];
-    int runOffset = _n_proj_runs.getSize();
-    std::vector<size_t> runIndex;
-    runIndex.push_back(runOffset);
-    _projRunsVars.run_ix.putVal(runIndex, run.ix);
-    _projRunsVars.run_iy.putVal(runIndex, run.iy);
-    _projRunsVars.run_iz.putVal(runIndex, run.iz);
-    _projRunsVars.run_len.putVal(runIndex, run.n);
+    int projRunOffset = _n_proj_runs.getSize();
+    std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunOffset);
+    _projRunsVars.run_ix.putVal(projRunIndex, run.ix);
+    _projRunsVars.run_iy.putVal(projRunIndex, run.iy);
+    _projRunsVars.run_iz.putVal(projRunIndex, run.iz);
+    _projRunsVars.run_len.putVal(projRunIndex, run.n);
   }
-  
-  // save existing dimensions as offsets
-
-  // int runsOffset = _n_runs.getSize();
-  // int projRunsOffset = _n_proj_runs.getSize();
-
-  // get array sizes for this storm
-
-  // int nRuns = gp.n_runs;
-  // int nProjRuns = gp.n_proj_runs;
   
 #ifdef JUNK
   
@@ -3999,8 +3978,7 @@ int TitanFile::clearComplexSlot(int complex_track_num)
   
 {
 
-  std::vector<size_t> varIndex;
-  varIndex.push_back(complex_track_num);
+  std::vector<size_t> varIndex = NcxxVar::makeIndex(complex_track_num);
 
   _complexVars.volume_at_start_of_sampling.putVal(varIndex, Ncxx::missingFloat);
   _complexVars.volume_at_end_of_sampling.putVal(varIndex, Ncxx::missingFloat);
@@ -4442,7 +4420,7 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeSimpleTrackParams(int track_num,
+int TitanFile::writeSimpleTrackParams(int simple_track_num,
                                       const simple_track_params_t &sparams)
      
 {
@@ -4451,44 +4429,35 @@ int TitanFile::writeSimpleTrackParams(int track_num,
   _errStr += "ERROR - TitanFile::writeSimpleParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  std::vector<size_t> index;
-  index.push_back(track_num);
+  std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
 
-  _simpleVars.simple_track_num.putVal(index, sparams.simple_track_num);
-  _simpleVars.last_descendant_simple_track_num.putVal(index, sparams.last_descendant_simple_track_num);
-  _simpleVars.start_scan.putVal(index, sparams.start_scan);
-  _simpleVars.end_scan.putVal(index, sparams.end_scan);
-  _simpleVars.last_descendant_end_scan.putVal(index, sparams.last_descendant_end_scan);
-  _simpleVars.scan_origin.putVal(index, sparams.scan_origin);
-  _simpleVars.start_time.putVal(index, sparams.start_time);
-  _simpleVars.end_time.putVal(index, sparams.end_time);
-  _simpleVars.last_descendant_end_time.putVal(index, sparams.last_descendant_end_time);
-  _simpleVars.time_origin.putVal(index, sparams.time_origin);
-  _simpleVars.history_in_scans.putVal(index, sparams.history_in_scans);
-  _simpleVars.history_in_secs.putVal(index, sparams.history_in_secs);
-  _simpleVars.duration_in_scans.putVal(index, sparams.duration_in_scans);
-  _simpleVars.duration_in_secs.putVal(index, sparams.duration_in_secs);
-  _simpleVars.nparents.putVal(index, sparams.nparents);
-  _simpleVars.nchildren.putVal(index, sparams.nchildren);
+  _simpleVars.simple_track_num.putVal(simpleIndex, sparams.simple_track_num);
+  _simpleVars.last_descendant_simple_track_num.putVal(simpleIndex, sparams.last_descendant_simple_track_num);
+  _simpleVars.start_scan.putVal(simpleIndex, sparams.start_scan);
+  _simpleVars.end_scan.putVal(simpleIndex, sparams.end_scan);
+  _simpleVars.last_descendant_end_scan.putVal(simpleIndex, sparams.last_descendant_end_scan);
+  _simpleVars.scan_origin.putVal(simpleIndex, sparams.scan_origin);
+  _simpleVars.start_time.putVal(simpleIndex, sparams.start_time);
+  _simpleVars.end_time.putVal(simpleIndex, sparams.end_time);
+  _simpleVars.last_descendant_end_time.putVal(simpleIndex, sparams.last_descendant_end_time);
+  _simpleVars.time_origin.putVal(simpleIndex, sparams.time_origin);
+  _simpleVars.history_in_scans.putVal(simpleIndex, sparams.history_in_scans);
+  _simpleVars.history_in_secs.putVal(simpleIndex, sparams.history_in_secs);
+  _simpleVars.duration_in_scans.putVal(simpleIndex, sparams.duration_in_scans);
+  _simpleVars.duration_in_secs.putVal(simpleIndex, sparams.duration_in_secs);
+  _simpleVars.nparents.putVal(simpleIndex, sparams.nparents);
+  _simpleVars.nchildren.putVal(simpleIndex, sparams.nchildren);
 
-  std::vector<size_t> parentIndex;
-  parentIndex.push_back(track_num);
-  parentIndex.push_back(0);
-  std::vector<size_t> parentCount;
-  parentCount.push_back(1);
-  parentCount.push_back(sparams.nparents);
+  std::vector<size_t> parentIndex = NcxxVar::makeIndex(simple_track_num, 0);
+  std::vector<size_t> parentCount = NcxxVar::makeIndex(1, sparams.nparents);
   _simpleVars.parent.putVal(parentIndex, parentCount, sparams.parent);
-    
-  std::vector<size_t> childIndex;
-  childIndex.push_back(track_num);
-  childIndex.push_back(0);
-  std::vector<size_t> childCount;
-  childCount.push_back(1);
-  childCount.push_back(sparams.nchildren);
+  
+  std::vector<size_t> childIndex = NcxxVar::makeIndex(simple_track_num, 0);
+  std::vector<size_t> childCount = NcxxVar::makeIndex(1, sparams.nchildren);
   _simpleVars.child.putVal(childIndex, childCount, sparams.child);
 
-  _simpleVars.complex_track_num.putVal(index, sparams.complex_track_num);
-  _simpleVars.first_entry_offset.putVal(index, sparams.first_entry_offset);
+  _simpleVars.complex_track_num.putVal(simpleIndex, sparams.complex_track_num);
+  _simpleVars.first_entry_offset.putVal(simpleIndex, sparams.first_entry_offset);
 
   return 0;
 
@@ -4517,21 +4486,17 @@ int TitanFile::writeComplexTrackParams(int cindex,
   // the track numbers are monotonically increasing, but will have gaps
   // due to mergers and splits
   
-  std::vector<size_t> numIndex;
-  numIndex.push_back(cindex);
+  std::vector<size_t> numIndex = NcxxVar::makeIndex(cindex);
   _complexVars.complex_track_num.putVal(numIndex, cparams.complex_track_num);
 
   // write the complex offset for retrieving the complex params later
   
-  std::vector<size_t> offsetIndex;
-  offsetIndex.push_back(cparams.complex_track_num);
-  // _simpleVars.complex_track_offsets.putVal(offsetIndex, cparams.complex_track_num);
-
+  // std::vector<size_t> offsetIndex = NcxxVar::makeIndex(cparams.complex_track_num);
+  
   // the complex track params are indexed from the complex track number
   // these arrays will have gaps
   
-  std::vector<size_t> varIndex;
-  varIndex.push_back(cparams.complex_track_num);
+  std::vector<size_t> varIndex = NcxxVar::makeIndex(cparams.complex_track_num);
 
   _complexVars.volume_at_start_of_sampling.putVal(varIndex, cparams.volume_at_start_of_sampling);
   _complexVars.volume_at_end_of_sampling.putVal(varIndex, cparams.volume_at_end_of_sampling);
@@ -4692,8 +4657,7 @@ int TitanFile::writeTrackEntry(const track_file_params_t &params,
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
   int entryOffset = _n_entries.getSize();
-  std::vector<size_t> entryIndex;
-  entryIndex.push_back(entryOffset);
+  std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
   
   _entryVars.time.putVal(entryIndex, entry.time);
   
@@ -4915,11 +4879,8 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
   
 {
 
-  std::vector<size_t> index;
-  index.push_back(0);
-    
-  std::vector<size_t> count;
-  count.push_back(n_simple_tracks);
+  std::vector<size_t> index = NcxxVar::makeIndex(0);
+  std::vector<size_t> count = NcxxVar::makeIndex(n_simple_tracks);
   
   _simpleVars.n_simples_per_complex.putVal(index, count, nsimples_per_complex);
   _simpleVars.simples_per_complex_offsets.putVal(index, count, simples_per_complex_offsets);

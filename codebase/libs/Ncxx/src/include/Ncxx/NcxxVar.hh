@@ -1741,6 +1741,24 @@ public:
   
   string getDesc() const;
       
+  ////////////////////////////////////////////////////////
+  // make a vector index for use in putVal() and getVal()
+  
+  static vector<size_t> makeIndex(size_t offset)
+  {
+    std::vector<size_t> index;
+    index.push_back(offset);
+    return index;
+  }
+      
+  static vector<size_t> makeIndex(size_t offset1, size_t offset2)
+  {
+    std::vector<size_t> index;
+    index.push_back(offset1);
+    index.push_back(offset2);
+    return index;
+  }
+      
 private:
 
   bool nullObject;
