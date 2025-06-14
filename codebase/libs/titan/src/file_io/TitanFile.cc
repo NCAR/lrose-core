@@ -4678,56 +4678,6 @@ int TitanFile::writeTrackEntry(const track_file_params_t &params,
 
   return 0;
   
-  // if (istorm == 0) {
-  //   _scanVars.scan_first_offset.putVal(scanIndex, (int) _n_storms.getSize());
-  // }
-  // _scanVars.scan_last_offset.putVal(scanIndex, (int) _n_storms.getSize());
-
-  //   // write the global props
-    
-  //   const storm_file_global_props_t &gp = gprops[istorm];
-    
-  //   int gpropsOffset = _n_storms.getSize();
-  //   std::vector<size_t> stormIndex;
-  //   stormIndex.push_back(gpropsOffset);
-    
-  //   _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
-  //   _gpropsVars.vol_centroid_y.putVal(stormIndex, gp.vol_centroid_y);
-  //   _gpropsVars.vol_centroid_z.putVal(stormIndex, gp.vol_centroid_z);
-  //   _gpropsVars.refl_centroid_x.putVal(stormIndex, gp.refl_centroid_x);
-  //   _gpropsVars.refl_centroid_y.putVal(stormIndex, gp.refl_centroid_y);
-  //   _gpropsVars.refl_centroid_z.putVal(stormIndex, gp.refl_centroid_z);
-  //   _gpropsVars.top.putVal(stormIndex, gp.top);
-  //   _gpropsVars.base.putVal(stormIndex, gp.base);
-  //   _gpropsVars.volume.putVal(stormIndex, gp.volume);
-  //   _gpropsVars.area_mean.putVal(stormIndex, gp.area_mean);
-  //   _gpropsVars.precip_flux.putVal(stormIndex, gp.precip_flux);
-  //   _gpropsVars.mass.putVal(stormIndex, gp.mass);
-  //   _gpropsVars.tilt_angle.putVal(stormIndex, gp.tilt_angle);
-  //   _gpropsVars.tilt_dirn.putVal(stormIndex, gp.tilt_dirn);
-  //   _gpropsVars.dbz_max.putVal(stormIndex, gp.dbz_max);
-  //   _gpropsVars.dbz_mean.putVal(stormIndex, gp.dbz_mean);
-  //   _gpropsVars.dbz_max_gradient.putVal(stormIndex, gp.dbz_max_gradient);
-  //   _gpropsVars.dbz_mean_gradient.putVal(stormIndex, gp.dbz_mean_gradient);
-  //   _gpropsVars.ht_of_dbz_max.putVal(stormIndex, gp.ht_of_dbz_max);
-  //   _gpropsVars.rad_vel_mean.putVal(stormIndex, gp.rad_vel_mean);
-  //   _gpropsVars.rad_vel_sd.putVal(stormIndex, gp.rad_vel_sd);
-  //   _gpropsVars.vorticity.putVal(stormIndex, gp.vorticity);
-  //   _gpropsVars.precip_area.putVal(stormIndex, gp.precip_area);
-  //   _gpropsVars.precip_area_centroid_x.putVal(stormIndex, gp.precip_area_centroid_x);
-  //   _gpropsVars.precip_area_centroid_y.putVal(stormIndex, gp.precip_area_centroid_y);
-  //   _gpropsVars.precip_area_orientation.putVal(stormIndex, gp.precip_area_orientation);
-  //   _gpropsVars.precip_area_minor_radius.putVal(stormIndex, gp.precip_area_minor_radius);
-  //   _gpropsVars.precip_area_major_radius.putVal(stormIndex, gp.precip_area_major_radius);
-  //   _gpropsVars.proj_area.putVal(stormIndex, gp.proj_area);
-  //   _gpropsVars.proj_area_centroid_x.putVal(stormIndex, gp.proj_area_centroid_x);
-  //   _gpropsVars.proj_area_centroid_y.putVal(stormIndex, gp.proj_area_centroid_y);
-  //   _gpropsVars.proj_area_orientation.putVal(stormIndex, gp.proj_area_orientation);
-  //   _gpropsVars.proj_area_minor_radius.putVal(stormIndex, gp.proj_area_minor_radius);
-  //   _gpropsVars.proj_area_major_radius.putVal(stormIndex, gp.proj_area_major_radius);
-
-  
-
   // long file_mark;
 
   // // Go to the end of the file and save the file position.
