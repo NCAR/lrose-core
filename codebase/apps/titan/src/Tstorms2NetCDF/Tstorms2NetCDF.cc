@@ -290,7 +290,8 @@ int Tstorms2NetCDF::_processInputFile()
 
   if (_tFile.ReadHeader()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-    cerr << "  Cannot read track file header, input_path: " << _inputPath << endl;
+    cerr << "  Cannot read track file header" << endl;
+    cerr << "    input_path: " << _inputPath << endl;
     cerr << _tFile.getErrStr() << endl;
     return -1;
   }
@@ -314,8 +315,9 @@ int Tstorms2NetCDF::_processInputFile()
     // read complex parameters
     if (_tFile.ReadComplexParams(complexNum, true)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-      cerr << "  Cannot read complex params, input_path: " << _inputPath << endl;
-      cerr << "  index, complex_num: " << ii << ", " << complexNum << endl;
+      cerr << "  Cannot read complex params" << endl;
+      cerr << "    input_path: " << _inputPath << endl;
+      cerr << "    index, complex_num: " << ii << ", " << complexNum << endl;
       cerr << _tFile.getErrStr() << endl;
       return -1;
     }
@@ -330,8 +332,9 @@ int Tstorms2NetCDF::_processInputFile()
     // read simple parameters
     if (_tFile.ReadSimpleParams(simpleNum)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-      cerr << "  Cannot read simple params, input_path: " << _inputPath << endl;
-      cerr << "  simple_num: " << simpleNum << endl;
+      cerr << "  Cannot read simple params" << endl;
+      cerr << "    input_path: " << _inputPath << endl;
+      cerr << "    simple_num: " << simpleNum << endl;
       cerr << _tFile.getErrStr() << endl;
       return -1;
     }
@@ -353,7 +356,8 @@ int Tstorms2NetCDF::_processInputFile()
   
   if (_tFile.ReadScanIndex()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-    cerr << "  Cannot read scan index, input_path: " << _inputPath << endl;
+    cerr << "  Cannot read scan index" << endl;
+    cerr << "    input_path: " << _inputPath << endl;
     cerr << _tFile.getErrStr() << endl;
     return -1;
   }
@@ -366,7 +370,9 @@ int Tstorms2NetCDF::_processInputFile()
     
     if (_tFile.ReadScanEntries(iscan)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-      cerr << "  Cannot read scan index, input_path: " << _inputPath << endl;
+      cerr << "  Cannot read scan entries" << endl;
+      cerr << "    input_path: " << _inputPath << endl;
+      cerr << "    scan num: " << iscan << endl;
       cerr << _tFile.getErrStr() << endl;
       return -1;
     }
@@ -379,6 +385,111 @@ int Tstorms2NetCDF::_processInputFile()
     } // ientry
 
   } // iscan
+
+#ifdef JUNK
+  // read through the simple tracks
+
+  for (int isimple = 0; isimple < theader.n_simple_tracks; isimple++) {
+
+    // get simple track number - this is the same as the index
+    
+    int simpleTrackNum = isimple;
+    
+    // read simple track params
+
+    if (_tFile.ReadSimpleParams(simpleTrackNum)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "  Cannot read simple track params" << endl;
+      cerr << "    input_path: " << _inputPath << endl;
+      cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+      cerr << _tFile.getErrStr() << endl;
+      return -1;
+    }
+    const simple_track_params_t &sparams(_tFile.simple_params());
+
+    // rewind simple track - prepare for reading entries
+
+    if (_tFile.RewindSimple(simpleTrackNum)) {
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "  Cannot rewind simple track" << endl;
+      cerr << "    input_path: " << _inputPath << endl;
+      cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+      cerr << _tFile.getErrStr() << endl;
+      return -1;
+    }
+
+    // loop through the entries, by scan
+
+    track_file_entry_t prevEntry;
+    for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
+      
+      // rewind simple track - prepare for reading entries
+      
+      if (_tFile.ReadEntry()) {
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "  Cannot read simple track entry" << endl;
+        cerr << "    input_path: " << _inputPath << endl;
+        cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+        cerr << _tFile.getErrStr() << endl;
+        return -1;
+      }
+      track_file_entry_t thisEntry(_tFile.entry());
+
+      // set the offsets
+      // for this entry, plus the previous and next entries
+      
+      thisEntry.this_entry_offset =
+        _ncFile.getStormEntryOffset(thisEntry.scan_num, thisEntry.storm_num);
+      if (iscan == sparams.start_scan) {
+        thisEntry.prev_entry_offset = -1;
+      } else {
+        thisEntry.prev_entry_offset = prevEntry.this_entry_offset;
+      }
+      if (iscan == sparams.end_scan) {
+        thisEntry.next_entry_offset = -1;
+      } else {
+        prevEntry.next_entry_offset = thisEntry.this_entry_offset;
+      }
+      
+      if (iscan > sparams.start_scan) {
+
+        // write prev entry for all but the first scan
+      
+        if (_ncFile.writeTrackEntry(theader.params, prevEntry)) {
+          cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+          cerr << "  Cannot write track entry" << endl;
+          cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+          cerr << "    scan num: " << iscan << endl;
+          cerr << _tFile.getErrStr() << endl;
+          return -1;
+        }
+
+      }
+
+      if (iscan == sparams.end_scan) {
+
+        // write this entry for the last scan
+      
+        if (_ncFile.writeTrackEntry(theader.params, thisEntry)) {
+          cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+          cerr << "  Cannot write track entry" << endl;
+          cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+          cerr << "    scan num: " << iscan << endl;
+          cerr << _tFile.getErrStr() << endl;
+          return -1;
+        }
+
+      }
+
+      // save for next time
+      
+      prevEntry = thisEntry;
+      
+    } // iscan
+    
+  } // isimple
+
+#endif
   
   // write the track header
   

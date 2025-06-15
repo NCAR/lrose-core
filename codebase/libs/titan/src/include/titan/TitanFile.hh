@@ -815,6 +815,14 @@ public:
                                    const si32 *simples_per_complex_offsets,
                                    const si32 *simples_per_complex);
      
+  // get the offset of storm or entry props, given the
+  // scan_num and storm_num.
+  //
+  // First we read the scan first offset, and then add the
+  // storm_num.
+  
+  int getStormEntryOffset(int scan_num, int storm_num);
+  
   ///////////////////////////////////////////////////////////////////
   // error string
   
@@ -1079,14 +1087,6 @@ protected:
   // truncate when rerunning
   
   int _truncateStormFiles(FILE *&fd, const string &path, int length);
-  
-  // get the offset of storm or entry props, given the
-  // scan_num and storm_num.
-  //
-  // First we read the scan first offset, and then add the
-  // storm_num.
-  
-  int _getStormEntryOffset(int scan_num, int storm_num);
   
 public:
 
@@ -1374,7 +1374,7 @@ public:
   // track entry
 
   static constexpr const char* FORECAST_VALID = "forecast_valid";
-  static constexpr const char* PREV_ENTRY_OFFSET = "entry_prev_entry_offset";
+  static constexpr const char* PREV_ENTRY_OFFSET = "prev_entry_offset";
   static constexpr const char* THIS_ENTRY_OFFSET = "this_entry_offset";
   static constexpr const char* NEXT_ENTRY_OFFSET = "next_entry_offset";
   static constexpr const char* NEXT_SCAN_ENTRY_OFFSET = "next_scan_entry_offset";

@@ -4656,7 +4656,7 @@ int TitanFile::writeTrackEntry(const track_file_params_t &params,
   _errStr += "ERROR - TitanFile::writeEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
 
-  int entryOffset = _getStormEntryOffset(entry.scan_num, entry.storm_num);
+  int entryOffset = getStormEntryOffset(entry.scan_num, entry.storm_num);
   std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
 
   _entryVars.time.putVal(entryIndex, entry.time);
@@ -4845,8 +4845,8 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
 // First we read the scan first offset, and then add the
 // storm_num.
 
-int TitanFile::_getStormEntryOffset(int scan_num,
-                                    int storm_num)
+int TitanFile::getStormEntryOffset(int scan_num,
+                                   int storm_num)
 {
   std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
   int scanFirstOffset;
