@@ -822,6 +822,12 @@ public:
   
   int getStormEntryOffset(int scan_num, int storm_num);
   
+  // get the next offset in the scan, for a given entry
+  // returns -1 if this is the last entry in a scan
+  
+  int getNextScanEntryOffset(int scan_num,
+                             int storm_num);
+  
   ///////////////////////////////////////////////////////////////////
   // error string
   

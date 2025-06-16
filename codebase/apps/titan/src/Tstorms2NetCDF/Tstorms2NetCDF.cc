@@ -362,31 +362,29 @@ int Tstorms2NetCDF::_processInputFile()
     return -1;
   }
 
-#ifdef JUNK
   // loop through the scans
   
-  for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
+  // for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
     
-    // read all track entries for this scan
+  //   // read all track entries for this scan
     
-    if (_tFile.ReadScanEntries(iscan)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-      cerr << "  Cannot read scan entries" << endl;
-      cerr << "    input_path: " << _inputPath << endl;
-      cerr << "    scan num: " << iscan << endl;
-      cerr << _tFile.getErrStr() << endl;
-      return -1;
-    }
+  //   if (_tFile.ReadScanEntries(iscan)) {
+  //     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+  //     cerr << "  Cannot read scan entries" << endl;
+  //     cerr << "    input_path: " << _inputPath << endl;
+  //     cerr << "    scan num: " << iscan << endl;
+  //     cerr << _tFile.getErrStr() << endl;
+  //     return -1;
+  //   }
 
-    // loop through entries for this scan
+  //   // loop through entries for this scan
     
-    for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
-      track_file_entry_t entry = _tFile.scan_entries()[ientry];
-      _ncFile.writeTrackEntry(theader.params, entry);
-    } // ientry
+  //   for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
+  //     track_file_entry_t entry = _tFile.scan_entries()[ientry];
+  //     _ncFile.writeTrackEntry(theader.params, entry);
+  //   } // ientry
 
-  } // iscan
-#endif
+  // } // iscan
 
   // read through the simple tracks
 
@@ -440,6 +438,8 @@ int Tstorms2NetCDF::_processInputFile()
       track_file_entry_t &entry(entries[ientry]);
       entry.this_entry_offset =
         _ncFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+      entry.next_scan_entry_offset =
+        _ncFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
       if (ientry == 0) {
         sparams.first_entry_offset = entry.this_entry_offset;
       }
@@ -460,7 +460,7 @@ int Tstorms2NetCDF::_processInputFile()
         entry.next_entry_offset = entries[ientry + 1].this_entry_offset;
       }
     } // entry
-
+    
     // write the entries
     
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {

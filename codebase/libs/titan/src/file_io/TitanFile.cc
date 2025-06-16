@@ -4854,4 +4854,24 @@ int TitanFile::getStormEntryOffset(int scan_num,
   return entryOffset;
 }
   
+///////////////////////////////////////////////////////////
+// get the next offset in the scan, for a given entry
+// returns -1 if this is the last entry in a scan
+
+int TitanFile::getNextScanEntryOffset(int scan_num,
+                                      int storm_num)
+{
+  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  int scanFirstOffset;
+  _scanVars.scan_first_offset.getVal(scanIndex, &scanFirstOffset);
+  int scanNStorms;
+  _scanVars.scan_nstorms.getVal(scanIndex, &scanNStorms);
+  if (storm_num < (scanNStorms - 1)) {
+    int nextEntryOffset = scanFirstOffset + storm_num + 1;
+    return nextEntryOffset;
+  } else {
+    return -1;
+  }
+}
+  
   
