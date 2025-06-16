@@ -362,6 +362,7 @@ int Tstorms2NetCDF::_processInputFile()
     return -1;
   }
 
+#ifdef JUNK
   // loop through the scans
   
   for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
@@ -380,13 +381,13 @@ int Tstorms2NetCDF::_processInputFile()
     // loop through entries for this scan
     
     for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
-      const track_file_entry_t &entry = _tFile.scan_entries()[ientry];
+      track_file_entry_t entry = _tFile.scan_entries()[ientry];
       _ncFile.writeTrackEntry(theader.params, entry);
     } // ientry
 
   } // iscan
+#endif
 
-#ifdef JUNK
   // read through the simple tracks
 
   for (int isimple = 0; isimple < theader.n_simple_tracks; isimple++) {
@@ -396,7 +397,7 @@ int Tstorms2NetCDF::_processInputFile()
     int simpleTrackNum = isimple;
     
     // read simple track params
-
+    
     if (_tFile.ReadSimpleParams(simpleTrackNum)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read simple track params" << endl;
@@ -406,9 +407,9 @@ int Tstorms2NetCDF::_processInputFile()
       return -1;
     }
     const simple_track_params_t &sparams(_tFile.simple_params());
-
+    
     // rewind simple track - prepare for reading entries
-
+    
     if (_tFile.RewindSimple(simpleTrackNum)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot rewind simple track" << endl;
@@ -418,13 +419,10 @@ int Tstorms2NetCDF::_processInputFile()
       return -1;
     }
 
-    // loop through the entries, by scan
+    // loop through the entries, by scan, reading entries and storing in vector
 
-    track_file_entry_t prevEntry;
+    vector<track_file_entry_t> entries;
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
-      
-      // rewind simple track - prepare for reading entries
-      
       if (_tFile.ReadEntry()) {
         cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
         cerr << "  Cannot read simple track entry" << endl;
@@ -433,64 +431,50 @@ int Tstorms2NetCDF::_processInputFile()
         cerr << _tFile.getErrStr() << endl;
         return -1;
       }
-      track_file_entry_t thisEntry(_tFile.entry());
+      entries.push_back(_tFile.entry());
+    }
 
-      // set the offsets
-      // for this entry, plus the previous and next entries
-      
-      thisEntry.this_entry_offset =
-        _ncFile.getStormEntryOffset(thisEntry.scan_num, thisEntry.storm_num);
-      if (iscan == sparams.start_scan) {
-        thisEntry.prev_entry_offset = -1;
-      } else {
-        thisEntry.prev_entry_offset = prevEntry.this_entry_offset;
-      }
-      if (iscan == sparams.end_scan) {
-        thisEntry.next_entry_offset = -1;
-      } else {
-        prevEntry.next_entry_offset = thisEntry.this_entry_offset;
-      }
-      
-      if (iscan > sparams.start_scan) {
+    // set the offsets for each entry
 
-        // write prev entry for all but the first scan
-      
-        if (_ncFile.writeTrackEntry(theader.params, prevEntry)) {
-          cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-          cerr << "  Cannot write track entry" << endl;
-          cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
-          cerr << "    scan num: " << iscan << endl;
-          cerr << _tFile.getErrStr() << endl;
-          return -1;
-        }
-
-      }
-
-      if (iscan == sparams.end_scan) {
-
-        // write this entry for the last scan
-      
-        if (_ncFile.writeTrackEntry(theader.params, thisEntry)) {
-          cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-          cerr << "  Cannot write track entry" << endl;
-          cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
-          cerr << "    scan num: " << iscan << endl;
-          cerr << _tFile.getErrStr() << endl;
-          return -1;
-        }
-
-      }
-
-      // save for next time
-      
-      prevEntry = thisEntry;
-      
-    } // iscan
+    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+      track_file_entry_t &entry(entries[ientry]);
+      entry.this_entry_offset =
+        _ncFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+    } // entry
+     
+    // set the prev and next offsets for each entry
     
+    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+      track_file_entry_t &entry(entries[ientry]);
+      if (ientry == 0) {
+        entry.prev_entry_offset = -1;
+      } else {
+        entry.prev_entry_offset = entries[ientry - 1].this_entry_offset;
+      }
+      if (ientry == entries.size() - 1) {
+        entry.next_entry_offset = -1;
+      } else {
+        entry.next_entry_offset = entries[ientry + 1].this_entry_offset;
+      }
+    } // entry
+
+    // write the entries
+    
+    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+      track_file_entry_t &entry(entries[ientry]);
+      if (_ncFile.writeTrackEntry(entry)) {
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "  Cannot write track entry" << endl;
+        cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+        cerr << "    scan num: " << entry.scan_num << endl;
+        cerr << "    storm num: " << entry.storm_num << endl;
+        cerr << _tFile.getErrStr() << endl;
+        return -1;
+      }
+    } // entry
+
   } // isimple
 
-#endif
-  
   // write the track header
   
   _ncFile.writeTrackHeader(_tFile.header());

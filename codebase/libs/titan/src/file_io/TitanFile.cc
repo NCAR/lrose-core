@@ -4647,8 +4647,7 @@ int TitanFile::writeComplexTrackParams(int cindex,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeTrackEntry(const track_file_params_t &params,
-                               const track_file_entry_t &entry)
+int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   
 {
   

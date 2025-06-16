@@ -796,8 +796,7 @@ public:
      
   // write an entry for a track in the track data file
 
-  int writeTrackEntry(const track_file_params_t &params,
-                      const track_file_entry_t &entry);
+  int writeTrackEntry(const track_file_entry_t &entry);
   
   // write an entry for a track in the track data file
   // The entry is written at the end of the file
