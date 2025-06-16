@@ -38,13 +38,14 @@
  **************************************************************************/
 
 #include <toolsa/compress.h>
+#include <toolsa/str.h>
+#include <toolsa/pjg.h>
+#include <toolsa/toolsa_macros.h>
 #include <titan/radar.h>
 #include <titan/file_io.h>
 #include <rapformats/titan_grid.h>
 #include <titan/mdv.h>
 #include <dataport/bigend.h>
-#include <toolsa/pjg.h>
-#include <toolsa/toolsa_macros.h>
 
 #define MAX_SEQ 256
 
@@ -426,10 +427,10 @@ void RfCartParams2TITANGrid(cart_params_t *cart,
     grid->sensor_lon = 0.0;
     
   } /* if (grid_type == TITAN_PROJ_LATLON) */
-      
-  strncpy(grid->unitsx, cart->unitsx, TITAN_GRID_UNITS_LEN);
-  strncpy(grid->unitsy, cart->unitsy, TITAN_GRID_UNITS_LEN);
-  strncpy(grid->unitsz, cart->unitsz, TITAN_GRID_UNITS_LEN);
+
+  STRncopy(grid->unitsx, cart->unitsx, TITAN_GRID_UNITS_LEN);
+  STRncopy(grid->unitsy, cart->unitsy, TITAN_GRID_UNITS_LEN);
+  STRncopy(grid->unitsz, cart->unitsz, TITAN_GRID_UNITS_LEN);
 
   return;
 

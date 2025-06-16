@@ -72,7 +72,7 @@ int RfWriteDobson(vol_file_handle_t *v_handle,
   char calling_sequence[MAX_SEQ];
   char tmp_file_path[MAX_PATH_LEN];
   char file_name[MAX_PATH_LEN];
-  char file_path[MAX_PATH_LEN];
+  char file_path[MAX_PATH_LEN * 4];
   char dir_path[MAX_PATH_LEN];
   
   vol_params_t *vparams;
@@ -92,11 +92,11 @@ int RfWriteDobson(vol_file_handle_t *v_handle,
 
   vparams = v_handle->vol_params;
   
-  sprintf(dir_path, "%s%s%.4d%.2d%.2d",
-	  output_dir, PATH_DELIM,
-	  (int) vparams->mid_time.year,
-	  (int) vparams->mid_time.month,
-	  (int) vparams->mid_time.day);
+  snprintf(dir_path, MAX_PATH_LEN - 1, "%s%s%.4d%.2d%.2d",
+           output_dir, PATH_DELIM,
+           (int) vparams->mid_time.year,
+           (int) vparams->mid_time.month,
+           (int) vparams->mid_time.day);
   
   sprintf(file_name, "%.2d%.2d%.2d.%s",
 	  (int) vparams->mid_time.hour,
@@ -104,8 +104,8 @@ int RfWriteDobson(vol_file_handle_t *v_handle,
 	  (int) vparams->mid_time.sec,
 	  output_file_ext);
     
-  sprintf(file_path, "%s%s%s",
-	  dir_path, PATH_DELIM, file_name);
+  snprintf(file_path, MAX_PATH_LEN * 4 - 1, "%s%s%s",
+           dir_path, PATH_DELIM, file_name);
       
   sprintf(tmp_file_path, "%s%s%s.%ld",
 	  output_dir, PATH_DELIM, TMP_DOB_FILE_NAME,
@@ -196,7 +196,7 @@ int RfWriteDobsonRemote(vol_file_handle_t *v_handle,
 
   char calling_sequence[MAX_SEQ];
   char file_name[MAX_PATH_LEN];
-  char remote_file_path[MAX_PATH_LEN];
+  char remote_file_path[MAX_PATH_LEN * 4];
   char remote_dir_path[MAX_PATH_LEN];
   char tmp_file_path[MAX_PATH_LEN];
   char remote_tmp_file_path[MAX_PATH_LEN];

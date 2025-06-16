@@ -35,6 +35,7 @@
 #include <titan/tdata_index.h>
 #include <dataport/bigend.h>
 #include <toolsa/sockutil.h>
+#include <toolsa/str.h>
 #include <netinet/in.h>
 #include <sys/time.h>
 
@@ -715,7 +716,7 @@ static int connect_to_server(char *host,
       return (SERVER_ERROR);
     
     index->current_port = port;
-    strncpy(index->current_host, host, TDATA_HOST_LEN);
+    STRncopy(index->current_host, host, TDATA_HOST_LEN);
     
     /*
      * set the max message len
