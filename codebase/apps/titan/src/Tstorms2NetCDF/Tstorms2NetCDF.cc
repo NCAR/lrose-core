@@ -328,18 +328,18 @@ int Tstorms2NetCDF::_processInputFile()
   // loop through the simple tracks, reading parameters for each
   
   for (int ii = 0; ii < theader.n_simple_tracks; ii++) {
-    int simpleNum = ii;
+    int simpleTrackNum = ii;
     // read simple parameters
-    if (_tFile.ReadSimpleParams(simpleNum)) {
+    if (_tFile.ReadSimpleParams(simpleTrackNum)) {
       cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
       cerr << "  Cannot read simple params" << endl;
       cerr << "    input_path: " << _inputPath << endl;
-      cerr << "    simple_num: " << simpleNum << endl;
+      cerr << "    simple_num: " << simpleTrackNum << endl;
       cerr << _tFile.getErrStr() << endl;
       return -1;
     }
     // write the simple params
-    _ncFile.writeSimpleTrackParams(simpleNum, _tFile.simple_params());
+    _ncFile.writeSimpleTrackParams(simpleTrackNum, _tFile.simple_params());
   }
 
   // write the simples_per_complex arrays
@@ -406,7 +406,7 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << _tFile.getErrStr() << endl;
       return -1;
     }
-    const simple_track_params_t &sparams(_tFile.simple_params());
+    simple_track_params_t sparams(_tFile.simple_params());
     
     // rewind simple track - prepare for reading entries
     
@@ -420,7 +420,7 @@ int Tstorms2NetCDF::_processInputFile()
     }
 
     // loop through the entries, by scan, reading entries and storing in vector
-
+    
     vector<track_file_entry_t> entries;
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
       if (_tFile.ReadEntry()) {
@@ -440,6 +440,9 @@ int Tstorms2NetCDF::_processInputFile()
       track_file_entry_t &entry(entries[ientry]);
       entry.this_entry_offset =
         _ncFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+      if (ientry == 0) {
+        sparams.first_entry_offset = entry.this_entry_offset;
+      }
     } // entry
      
     // set the prev and next offsets for each entry
@@ -472,7 +475,11 @@ int Tstorms2NetCDF::_processInputFile()
         return -1;
       }
     } // entry
+    
+    // write the updated simple params
 
+    _ncFile.writeSimpleTrackParams(simpleTrackNum, sparams);
+    
   } // isimple
 
   // write the track header
