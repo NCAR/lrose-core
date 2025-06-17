@@ -69,9 +69,6 @@ TitanFile::TitanFile()
   _storm_header_file = nullptr;
   _storm_data_file = nullptr;
 
-  // _storm_header_file_label = STORM_HEADER_FILE_TYPE;
-  // _storm_data_file_label = STORM_DATA_FILE_TYPE;
-
   _max_scans = 0;
   _max_storms = 0;
   _max_layers = 0;
@@ -96,9 +93,6 @@ TitanFile::TitanFile()
   _nsimples_per_complex = nullptr;
   _simples_per_complex_offsets = nullptr;
   _simples_per_complex = nullptr;
-
-  // _track_header_file_label = TRACK_HEADER_FILE_TYPE;
-  // _track_data_file_label = TRACK_DATA_FILE_TYPE;
 
   _track_header_file = nullptr;
   _track_data_file = nullptr;
@@ -339,8 +333,14 @@ void TitanFile::_setUpVars()
   // top level
   
   _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.file_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
+  
   _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.start_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
+
   _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
+  _topLevelVars.end_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
+  
   _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.n_storms = _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_simple_track_num = _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
@@ -361,43 +361,80 @@ void TitanFile::_setUpVars()
   _scanVars.grid_nx = _getVar(GRID_NX, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_ny = _getVar(GRID_NY, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.grid_nz = _getVar(GRID_NZ, NcxxType::nc_INT, _n_scans, _scansGroup);
+
   _scanVars.grid_minx = _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_miny = _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_minz = _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+
   _scanVars.grid_dx = _getVar(GRID_DX, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_dy = _getVar(GRID_DY, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_dz = _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+
   _scanVars.grid_dz_constant = _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _n_scans, _scansGroup);
+
   _scanVars.grid_sensor_x = _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_sensor_y = _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_sensor_z = _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+
   _scanVars.grid_sensor_lat = _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
   _scanVars.grid_sensor_lon = _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+
   _scanVars.grid_unitsx = _getVar(GRID_UNITSX, NcxxType::nc_STRING, _n_scans, _scansGroup);
   _scanVars.grid_unitsy = _getVar(GRID_UNITSY, NcxxType::nc_STRING, _n_scans, _scansGroup);
   _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _n_scans, _scansGroup);
 
   _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
+
   _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lat.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_origin_lon.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_rotation = _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+  _scanVars.proj_rotation.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_lat1.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_lat2.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lat.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
+  _scanVars.proj_tangent_lon.putAtt(UNITS, std::string(DEG));
+
   _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.proj_central_scale = _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
 
   // storm params
 
   _sparamsVars.low_dbz_threshold = _getVar(LOW_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.low_dbz_threshold.putAtt(UNITS, std::string(DBZ));
+
   _sparamsVars.high_dbz_threshold = _getVar(HIGH_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.high_dbz_threshold.putAtt(UNITS, std::string(DBZ));
+  
   _sparamsVars.dbz_hist_interval = _getVar(DBZ_HIST_INTERVAL, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.dbz_hist_interval.putAtt(UNITS, std::string(DBZ));
+  
   _sparamsVars.hail_dbz_threshold = _getVar(HAIL_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.hail_dbz_threshold.putAtt(UNITS, std::string(DBZ));
+  
   _sparamsVars.base_threshold = _getVar(BASE_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.base_threshold.putAtt(UNITS, std::string(KM));
+
   _sparamsVars.top_threshold = _getVar(TOP_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.top_threshold.putAtt(UNITS, std::string(KM));
+
   _sparamsVars.min_storm_size = _getVar(MIN_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.min_storm_size.putAtt(UNITS, std::string(KM3));
+
   _sparamsVars.max_storm_size = _getVar(MAX_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.max_storm_size.putAtt(UNITS, std::string(KM3));
+  
   _sparamsVars.morphology_erosion_threshold =
     _getVar(MORPHOLOGY_EROSION_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.morphology_refl_divisor =
@@ -1912,6 +1949,23 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.grid_unitsx.putVal(scanIndex, std::string(scanHeader.grid.unitsx));
   _scanVars.grid_unitsy.putVal(scanIndex, std::string(scanHeader.grid.unitsy));
   _scanVars.grid_unitsz.putVal(scanIndex, std::string(scanHeader.grid.unitsz));
+
+  _scanVars.scan_min_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.scan_delta_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.scan_ht_of_freezing.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  
+  _scanVars.grid_minx.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
+  _scanVars.grid_miny.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_minz.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.grid_dx.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
+  _scanVars.grid_dy.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_dz.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+
+  _scanVars.grid_sensor_x.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
+  _scanVars.grid_sensor_y.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_sensor_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.grid_sensor_lat.putAtt(UNITS, std::string(DEG));
+  _scanVars.grid_sensor_lon.putAtt(UNITS, std::string(DEG));
 
   // write projection details
   

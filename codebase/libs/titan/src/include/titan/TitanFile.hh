@@ -1114,6 +1114,13 @@ public:
 
   // strings for netcdf
   
+  static constexpr const char* UNITS = "units";
+  static constexpr const char* DEG = "deg";
+  static constexpr const char* DBZ = "dBZ";
+  static constexpr const char* KM = "km";
+  static constexpr const char* KM2 = "km2";
+  static constexpr const char* KM3 = "km3";
+  
   // groups
 
   static constexpr const char* SCANS = "scans";
@@ -1128,7 +1135,7 @@ public:
   static constexpr const char* COMPLEX = "complex";
   static constexpr const char* ENTRIES = "entries";
 
-  // top-level dimensions attributes
+  // top-level dimensions & attributes
 
   static constexpr const char* TIME = "time";
   static constexpr const char* FILE_TIME = "file_time";
