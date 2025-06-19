@@ -275,13 +275,17 @@ NcxxDim TitanFile::_getDim(const std::string& name,
 
 NcxxVar TitanFile::_getVar(const std::string& name,
                            const NcxxType& ncType,
-                           NcxxGroup &group)
+                           NcxxGroup &group,
+                           std::string units /* = "" */)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType);
   }
   var.setDefaultFillValue();
+  if (units.size() > 0) {
+    var.putAtt(UNITS, units);
+  }
   return var;
 }
 
@@ -291,7 +295,8 @@ NcxxVar TitanFile::_getVar(const std::string& name,
 NcxxVar TitanFile::_getVar(const std::string& name,
                            const NcxxType& ncType,
                            const NcxxDim& dim,
-                           NcxxGroup &group)
+                           NcxxGroup &group,
+                           std::string units /* = "" */)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
@@ -299,6 +304,9 @@ NcxxVar TitanFile::_getVar(const std::string& name,
   }
   var.setDefaultFillValue();
   var.setCompression(false, true, 4);
+  if (units.size() > 0) {
+    var.putAtt(UNITS, units);
+  }
   return var;
 }
 
@@ -309,7 +317,8 @@ NcxxVar TitanFile::_getVar(const std::string& name,
                            const NcxxType& ncType,
                            const NcxxDim& dim0,
                            const NcxxDim& dim1,
-                           NcxxGroup &group)
+                           NcxxGroup &group,
+                           std::string units /* = "" */)
 {
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
@@ -320,6 +329,9 @@ NcxxVar TitanFile::_getVar(const std::string& name,
   }
   var.setDefaultFillValue();
   var.setCompression(false, true, 4);
+  if (units.size() > 0) {
+    var.putAtt(UNITS, units);
+  }
   return var;
 }
 
@@ -332,14 +344,9 @@ void TitanFile::_setUpVars()
 
   // top level
   
-  _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevelVars.file_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
-  
-  _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevelVars.start_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
-
-  _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile);
-  _topLevelVars.end_time.putAtt(UNITS, std::string("seconds since 1970-01-01T00:00:00"));
+  _topLevelVars.file_time = _getVar(FILE_TIME, NcxxType::nc_INT64, _ncFile, TIME0);
+  _topLevelVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _ncFile, TIME0);
+  _topLevelVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _ncFile, TIME0);
   
   _topLevelVars.n_scans = _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.n_storms = _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
@@ -385,62 +392,36 @@ void TitanFile::_setUpVars()
 
   _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
 
-  _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_origin_lat.putAtt(UNITS, std::string(DEG));
+  _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
+  _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
+  _scanVars.proj_rotation = _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _n_scans, _scansGroup, DEG);
 
-  _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_origin_lon.putAtt(UNITS, std::string(DEG));
-
-  _scanVars.proj_rotation = _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
-  _scanVars.proj_rotation.putAtt(UNITS, std::string(DEG));
-
-  _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_lat1.putAtt(UNITS, std::string(DEG));
-
-  _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_lat2.putAtt(UNITS, std::string(DEG));
-
-  _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_tangent_lat.putAtt(UNITS, std::string(DEG));
-
-  _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup);
-  _scanVars.proj_tangent_lon.putAtt(UNITS, std::string(DEG));
+  _scanVars.proj_lat1 = _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
+  _scanVars.proj_lat2 = _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
+  _scanVars.proj_tangent_lat = _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
+  _scanVars.proj_tangent_lon = _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
 
   _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.proj_central_scale = _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
 
   // storm params
 
-  _sparamsVars.low_dbz_threshold = _getVar(LOW_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.low_dbz_threshold.putAtt(UNITS, std::string(DBZ));
-
-  _sparamsVars.high_dbz_threshold = _getVar(HIGH_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.high_dbz_threshold.putAtt(UNITS, std::string(DBZ));
+  _sparamsVars.low_dbz_threshold = _getVar(LOW_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
+  _sparamsVars.high_dbz_threshold = _getVar(HIGH_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
+  _sparamsVars.dbz_hist_interval = _getVar(DBZ_HIST_INTERVAL, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
+  _sparamsVars.hail_dbz_threshold = _getVar(HAIL_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
   
-  _sparamsVars.dbz_hist_interval = _getVar(DBZ_HIST_INTERVAL, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.dbz_hist_interval.putAtt(UNITS, std::string(DBZ));
-  
-  _sparamsVars.hail_dbz_threshold = _getVar(HAIL_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.hail_dbz_threshold.putAtt(UNITS, std::string(DBZ));
-  
-  _sparamsVars.base_threshold = _getVar(BASE_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.base_threshold.putAtt(UNITS, std::string(KM));
+  _sparamsVars.base_threshold = _getVar(BASE_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, KM);
+  _sparamsVars.top_threshold = _getVar(TOP_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, KM);
+  _sparamsVars.min_storm_size = _getVar(MIN_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup, KM3);
+  _sparamsVars.max_storm_size = _getVar(MAX_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup, KM3);
 
-  _sparamsVars.top_threshold = _getVar(TOP_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.top_threshold.putAtt(UNITS, std::string(KM));
-
-  _sparamsVars.min_storm_size = _getVar(MIN_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.min_storm_size.putAtt(UNITS, std::string(KM3));
-
-  _sparamsVars.max_storm_size = _getVar(MAX_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.max_storm_size.putAtt(UNITS, std::string(KM3));
-  
   _sparamsVars.morphology_erosion_threshold =
     _getVar(MORPHOLOGY_EROSION_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.morphology_refl_divisor =
     _getVar(MORPHOLOGY_REFL_DIVISOR, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.min_radar_tops = _getVar(MIN_RADAR_TOPS, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.tops_edge_margin = _getVar(TOPS_EDGE_MARGIN, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.min_radar_tops = _getVar(MIN_RADAR_TOPS, NcxxType::nc_FLOAT, _stormsGroup, KM);
+  _sparamsVars.tops_edge_margin = _getVar(TOPS_EDGE_MARGIN, NcxxType::nc_FLOAT, _stormsGroup, KM);
   _sparamsVars.z_p_coeff = _getVar(Z_P_COEFF, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.z_p_exponent = _getVar(Z_P_EXPONENT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.z_m_coeff = _getVar(Z_M_COEFF, NcxxType::nc_FLOAT, _stormsGroup);
@@ -448,22 +429,22 @@ void TitanFile::_setUpVars()
   _sparamsVars.sectrip_vert_aspect = _getVar(SECTRIP_VERT_ASPECT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.sectrip_horiz_aspect = _getVar(SECTRIP_HORIZ_ASPECT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.sectrip_orientation_error =
-    _getVar(SECTRIP_ORIENTATION_ERROR, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.poly_start_az = _getVar(POLY_START_AZ, NcxxType::nc_FLOAT, _stormsGroup);
-  _sparamsVars.poly_delta_az = _getVar(POLY_DELTA_AZ, NcxxType::nc_FLOAT, _stormsGroup);
+    _getVar(SECTRIP_ORIENTATION_ERROR, NcxxType::nc_FLOAT, _stormsGroup, DEG);
+  _sparamsVars.poly_start_az = _getVar(POLY_START_AZ, NcxxType::nc_FLOAT, _stormsGroup, DEG);
+  _sparamsVars.poly_delta_az = _getVar(POLY_DELTA_AZ, NcxxType::nc_FLOAT, _stormsGroup, DEG);
   _sparamsVars.check_morphology = _getVar(CHECK_MORPHOLOGY, NcxxType::nc_INT, _stormsGroup);
   _sparamsVars.check_tops = _getVar(CHECK_TOPS, NcxxType::nc_INT, _stormsGroup);
   _sparamsVars.vel_available = _getVar(VEL_AVAILABLE, NcxxType::nc_INT, _stormsGroup);
   _sparamsVars.n_poly_sides = _getVar(N_POLY_SIDES_, NcxxType::nc_INT, _stormsGroup);
-  _sparamsVars.ltg_count_time = _getVar(LTG_COUNT_TIME, NcxxType::nc_INT64, _stormsGroup);
-  _sparamsVars.ltg_count_margin_km = _getVar(LTG_COUNT_MARGIN_KM, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.ltg_count_time = _getVar(LTG_COUNT_TIME, NcxxType::nc_INT64, _stormsGroup, TIME0);
+  _sparamsVars.ltg_count_margin_km = _getVar(LTG_COUNT_MARGIN_KM, NcxxType::nc_FLOAT, _stormsGroup, KM);
   _sparamsVars.hail_z_m_coeff = _getVar(HAIL_Z_M_COEFF, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.hail_z_m_exponent = _getVar(HAIL_Z_M_EXPONENT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.hail_mass_dbz_threshold = _getVar(HAIL_MASS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.gprops_union_type = _getVar(GPROPS_UNION_TYPE, NcxxType::nc_INT, _stormsGroup);
-  _sparamsVars.tops_dbz_threshold = _getVar(TOPS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.tops_dbz_threshold = _getVar(TOPS_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
   _sparamsVars.precip_computation_mode = _getVar(PRECIP_COMPUTATION_MODE, NcxxType::nc_INT, _stormsGroup);
-  _sparamsVars.precip_plane_ht = _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _stormsGroup);
+  _sparamsVars.precip_plane_ht = _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _stormsGroup, KM);
   _sparamsVars.low_convectivity_threshold =
     _getVar(LOW_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.high_convectivity_threshold =

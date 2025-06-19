@@ -1053,14 +1053,16 @@ protected:
   
   NcxxVar _getVar(const std::string& name,
                   const NcxxType& ncType,
-                  NcxxGroup &group);
+                  NcxxGroup &group,
+                  std::string units = "");
   
   // get 1D array variable
   
   NcxxVar _getVar(const std::string& name,
                   const NcxxType& ncType,
                   const NcxxDim& dim,
-                  NcxxGroup &group);
+                  NcxxGroup &group,
+                  std::string units = "");
   
   // get 2D array variable
   
@@ -1068,7 +1070,8 @@ protected:
                   const NcxxType& ncType,
                   const NcxxDim& dim0,
                   const NcxxDim& dim1,
-                  NcxxGroup &group);
+                  NcxxGroup &group,
+                  std::string units = "");
   
   /////////////////////////////////////////////////////
   // set up variables
@@ -1115,6 +1118,7 @@ public:
   // strings for netcdf
   
   static constexpr const char* UNITS = "units";
+  static constexpr const char* TIME0 = "seconds since 1970-01-01T00:00:00";
   static constexpr const char* DEG = "deg";
   static constexpr const char* DBZ = "dBZ";
   static constexpr const char* KM = "km";
