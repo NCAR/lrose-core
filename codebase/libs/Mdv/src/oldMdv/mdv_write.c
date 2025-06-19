@@ -92,7 +92,7 @@ int MDV_handle_write_to_dir(MDV_handle_t *mdv,
   static char *routine_name = "MDV_handle_write_to_dir";
 
   char file_name[MAX_PATH_LEN];
-  char file_path[MAX_PATH_LEN];
+  char file_path[MAX_PATH_LEN * 3];
   char subdir_path[MAX_PATH_LEN];
   
   struct stat dir_stat;
@@ -105,19 +105,19 @@ int MDV_handle_write_to_dir(MDV_handle_t *mdv,
   time_cent.unix_time = mdv->master_hdr.time_centroid;
   uconvert_from_utime(&time_cent);
   
-  sprintf(subdir_path, "%s%s%.4d%.2d%.2d",
-          output_dir, PATH_DELIM,
-          (int) time_cent.year,
-          (int) time_cent.month,
-          (int) time_cent.day);
+  snprintf(subdir_path, MAX_PATH_LEN, "%s%s%.4d%.2d%.2d",
+           output_dir, PATH_DELIM,
+           (int) time_cent.year,
+           (int) time_cent.month,
+           (int) time_cent.day);
   
-  sprintf(file_name, "%.2d%.2d%.2d.mdv",
+  snprintf(file_name, MAX_PATH_LEN, "%.2d%.2d%.2d.mdv",
           (int) time_cent.hour,
           (int) time_cent.min,
           (int) time_cent.sec);
   
-  sprintf(file_path, "%s%s%s",
-          subdir_path, PATH_DELIM, file_name);
+  snprintf(file_path, MAX_PATH_LEN * 3 - 1, "%s%s%s",
+           subdir_path, PATH_DELIM, file_name);
   
   /*
    * create subdirectory, if needed
@@ -249,9 +249,9 @@ int MDV_handle_write_to_ds_dir(MDV_handle_t *mdv,
   static char *routine_name = "MDV_handle_write_to_ds_dir";
 
   char file_name[MAX_PATH_LEN];
-  char file_path[MAX_PATH_LEN];
+  char file_path[MAX_PATH_LEN * 4];
   char daydir_path[MAX_PATH_LEN];
-  char gendir_path[MAX_PATH_LEN];
+  char gendir_path[MAX_PATH_LEN * 2];
   
   struct stat dir_stat;
 
@@ -270,23 +270,23 @@ int MDV_handle_write_to_ds_dir(MDV_handle_t *mdv,
   time_cent.unix_time = mdv->master_hdr.time_centroid;
   uconvert_from_utime(&time_cent);
   
-  sprintf(daydir_path, "%s%s%.4d%.2d%.2d",
-          output_dir, PATH_DELIM,
-          (int) time_gen.year,
-          (int) time_gen.month,
-          (int) time_gen.day);
-
-  sprintf(gendir_path, "%s%sg_%.2d%.2d%.2d",
-          daydir_path, PATH_DELIM,
-          (int) time_gen.hour,
-          (int) time_gen.min,
-          (int) time_gen.sec);
+  snprintf(daydir_path, MAX_PATH_LEN, "%s%s%.4d%.2d%.2d",
+           output_dir, PATH_DELIM,
+           (int) time_gen.year,
+           (int) time_gen.month,
+           (int) time_gen.day);
   
-  sprintf(file_name, "f_%.8d.mdv",
-          (int) lead_secs);
+  snprintf(gendir_path, MAX_PATH_LEN * 2, "%s%sg_%.2d%.2d%.2d",
+           daydir_path, PATH_DELIM,
+           (int) time_gen.hour,
+           (int) time_gen.min,
+           (int) time_gen.sec);
   
-  sprintf(file_path, "%s%s%s",
-          gendir_path, PATH_DELIM, file_name);
+  snprintf(file_name, MAX_PATH_LEN, "f_%.8d.mdv",
+           (int) lead_secs);
+  
+  snprintf(file_path, MAX_PATH_LEN * 4, "%s%s%s",
+           gendir_path, PATH_DELIM, file_name);
   
   /*
    * create daydirectory, if needed

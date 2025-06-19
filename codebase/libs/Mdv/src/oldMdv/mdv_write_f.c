@@ -324,7 +324,7 @@ static void close_output_file(void)
   date_time_t T;
   char *EncodedFilename;
   char Dir[ MAX_PATH_LEN ];
-  char ldataFilename[ MAX_PATH_LEN ];
+  char ldataFilename[ MAX_PATH_LEN  * 2];
 
   /*
    * Close the output file
@@ -375,7 +375,7 @@ static void close_output_file(void)
        * Contrue the ldatainfo filename.
        *
        */
-      sprintf(ldataFilename,"%s/_latest_data_info",Dir);
+      snprintf(ldataFilename, MAX_PATH_LEN * 2 - 1, "%s/_latest_data_info", Dir);
 
       /*
        *
