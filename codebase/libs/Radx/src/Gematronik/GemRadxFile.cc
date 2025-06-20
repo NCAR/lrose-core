@@ -734,35 +734,35 @@ int GemRadxFile::_readFields(const string &path)
     } else if (fieldName.find("V1vu") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_1_vertical_polarization_uncorrected";
+      longName = "radial_velocity_from_vertical_polarization_high_prf_uncorrected";
     } else if (fieldName.find("V1u") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_1_horizontal_polarization_uncorrected";
+      longName = "radial_velocity_from_horizontal_polarization_high_prf_uncorrected";
     } else if (fieldName.find("V1v") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_1_vertical_polarization";
+      longName = "radial_velocity_from_vertical_polarization_high_prf";
     } else if (fieldName.find("V1") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_1_horizontal_polarization";
+      longName = "radial_velocity_from_horizontal_polarization_high_prf";
     } else if (fieldName.find("V2vu") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_2_vertical_polarization_uncorrected";
+      longName = "radial_velocity_from_vertical_polarization_low_prf_uncorrected";
     } else if (fieldName.find("V2u") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_2_horizontal_polarization_uncorrected";
+      longName = "radial_velocity_from_horizontal_polarization_low_prf_uncorrected";
     } else if (fieldName.find("V2v") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_2_vertical_polarization";
+      longName = "radial_velocity_from_vertical_polarization_low_prf";
     } else if (fieldName.find("V2") != string::npos) {
       units = "m/s";
       standardName = "radial_velocity_of_scatterers_away_from_instrument";
-      longName = "staggered_velocity_2_horizontal_polarization";
+      longName = "radial_velocity_from_horizontal_polarization_low_prf";
     }
 
     // create input field object
