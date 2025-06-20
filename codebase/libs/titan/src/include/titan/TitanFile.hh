@@ -1022,7 +1022,9 @@ protected:
   // units for horizontal grids
 
   string _horizGridUnits;
+  string _horizGridUnitsPerHr;
   string _speedUnits;
+  string _speedUnitsPerHr;
   
   // errors
   
@@ -1083,7 +1085,11 @@ protected:
 
   void _setUpVars();
 
-  /////////////////////////////////////////////////////
+  // update attributes for scan type
+  
+  void _updateScanAttributes(const storm_file_scan_header_t &scanHeader);
+
+/////////////////////////////////////////////////////
   // clear error string
   
   void _clearErrStr();
@@ -1135,8 +1141,18 @@ public:
   const std::string PER_SEC = "/s";
   const std::string M_PER_SEC = "m/s";
   const std::string M3_PER_SEC = "m3/s";
+  const std::string KG_PER_M2 = "kg/m2";
+  
   const std::string KM_PER_HR = "km/hr";
   const std::string DEG_PER_HR = "deg/hr";
+
+  const std::string DBZ_PER_HR = "dBZ/hr";
+  const std::string KM2_PER_HR = "km2/hr";
+  const std::string KM3_PER_HR = "km3/hr";
+  const std::string KTONS_PER_HR = "ktons/hr";
+  const std::string M3_PER_SEC_PER_HR = "(m3/s)/hr";
+  const std::string KM_PER_HR_PER_HR = "(km/hr)/hr";
+  const std::string DEG_PER_HR_PER_HR = "(deg/hr)/hr";
   
   // groups
 
