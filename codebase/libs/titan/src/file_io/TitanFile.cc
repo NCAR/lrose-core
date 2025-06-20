@@ -394,6 +394,7 @@ void TitanFile::_setUpVars()
   _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _n_scans, _scansGroup);
 
   _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
+  _addProjectionFlagAttributes();
   
   _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
   _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
@@ -2237,6 +2238,62 @@ void TitanFile::_updateScanAttributes(const storm_file_scan_header_t &scanHeader
   
 }
 
+//////////////////////////////////////////////////////////////
+// add projection attributes
+
+void TitanFile::_addProjectionFlagAttributes()
+  
+{
+
+  vector<int> flagValues;
+  vector<std::string> flagMeanings;
+
+  flagValues.push_back(TITAN_PROJ_LATLON);
+  flagMeanings.push_back("latlon");
+  
+  flagValues.push_back(TITAN_PROJ_LAMBERT_CONF);
+  flagMeanings.push_back("lambert_conf");
+  
+  flagValues.push_back(TITAN_PROJ_MERCATOR);
+  flagMeanings.push_back("mercator");
+  
+  flagValues.push_back(TITAN_PROJ_POLAR_STEREO);
+  flagMeanings.push_back("polar_stereo");
+  
+  flagValues.push_back(TITAN_PROJ_POLAR_ST_ELLIP);
+  flagMeanings.push_back("polar_st_ellip");
+  
+  flagValues.push_back(TITAN_PROJ_CYL_EQUIDIST);
+  flagMeanings.push_back("cyl_equidist");
+  
+  flagValues.push_back(TITAN_PROJ_FLAT);
+  flagMeanings.push_back("flat");
+  
+  flagValues.push_back(TITAN_PROJ_OBLIQUE_STEREO);
+  flagMeanings.push_back("oblique_stereo");
+  
+  flagValues.push_back(TITAN_PROJ_TRANS_MERCATOR);
+  flagMeanings.push_back("trans_mercator");
+  
+  flagValues.push_back(TITAN_PROJ_ALBERS);
+  flagMeanings.push_back("albers");
+  
+  flagValues.push_back(TITAN_PROJ_LAMBERT_AZIM);
+  flagMeanings.push_back("lambert_azim");
+
+  _scanVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
+                             flagValues.size(), flagValues.data());
+
+  vector<const char *> meanings;
+  for (size_t ii = 0; ii < flagMeanings.size(); ii++) 
+  {
+    meanings.push_back(flagMeanings[ii].c_str());
+  }
+  
+  _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
+                             meanings.size(), meanings.data());
+
+}
 
 //////////////////////////////////////////////////////////////
 //

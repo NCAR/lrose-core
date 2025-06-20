@@ -1089,7 +1089,11 @@ protected:
   
   void _updateScanAttributes(const storm_file_scan_header_t &scanHeader);
 
-/////////////////////////////////////////////////////
+  // add projection flag attributes
+  
+  void _addProjectionFlagAttributes();
+
+  /////////////////////////////////////////////////////
   // clear error string
   
   void _clearErrStr();
@@ -1127,6 +1131,8 @@ private:
 public:
 
   // strings for netcdf
+
+  // attributes
   
   const std::string UNITS = "units";
   const std::string TIME0 = "seconds since 1970-01-01T00:00:00";
@@ -1153,6 +1159,9 @@ public:
   const std::string M3_PER_SEC_PER_HR = "(m3/s)/hr";
   const std::string KM_PER_HR_PER_HR = "(km/hr)/hr";
   const std::string DEG_PER_HR_PER_HR = "(deg/hr)/hr";
+
+  const std::string FLAG_VALUES = "flag_values";
+  const std::string FLAG_MEANINGS = "flag_meanings";
   
   // groups
 
