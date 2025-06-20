@@ -1019,6 +1019,11 @@ protected:
   int _n_utime_allocated;
   int _lowest_avail_complex_slot;
 
+  // units for horizontal grids
+
+  string _horizGridUnits;
+  string _speedUnits;
+  
   // errors
   
   string _errStr;
@@ -1117,366 +1122,374 @@ public:
 
   // strings for netcdf
   
-  static constexpr const char* UNITS = "units";
-  static constexpr const char* TIME0 = "seconds since 1970-01-01T00:00:00";
-  static constexpr const char* DEG = "deg";
-  static constexpr const char* DBZ = "dBZ";
-  static constexpr const char* KM = "km";
-  static constexpr const char* KM2 = "km2";
-  static constexpr const char* KM3 = "km3";
+  const std::string UNITS = "units";
+  const std::string TIME0 = "seconds since 1970-01-01T00:00:00";
+  const std::string SECONDS = "seconds";
+  const std::string DEG = "deg";
+  const std::string DBZ = "dBZ";
+  const std::string DBZ_PER_KM = "dBZ/km";
+  const std::string KM = "km";
+  const std::string KM2 = "km2";
+  const std::string KM3 = "km3";
+  const std::string KTONS = "ktons";
+  const std::string PER_SEC = "/s";
+  const std::string M_PER_SEC = "m/s";
+  const std::string M3_PER_SEC = "m3/s";
+  const std::string KM_PER_HR = "km/hr";
+  const std::string DEG_PER_HR = "deg/hr";
   
   // groups
 
-  static constexpr const char* SCANS = "scans";
-  static constexpr const char* STORMS = "storms";
-  static constexpr const char* TRACKS = "tracks";
-  static constexpr const char* GPROPS = "gprops";
-  static constexpr const char* LPROPS = "lprops";
-  static constexpr const char* HIST = "hist";
-  static constexpr const char* RUNS = "runs";
-  static constexpr const char* PROJ_RUNS = "proj_runs";
-  static constexpr const char* SIMPLE = "simple";
-  static constexpr const char* COMPLEX = "complex";
-  static constexpr const char* ENTRIES = "entries";
+  const std::string SCANS = "scans";
+  const std::string STORMS = "storms";
+  const std::string TRACKS = "tracks";
+  const std::string GPROPS = "gprops";
+  const std::string LPROPS = "lprops";
+  const std::string HIST = "hist";
+  const std::string RUNS = "runs";
+  const std::string PROJ_RUNS = "proj_runs";
+  const std::string SIMPLE = "simple";
+  const std::string COMPLEX = "complex";
+  const std::string ENTRIES = "entries";
 
   // top-level dimensions & attributes
 
-  static constexpr const char* TIME = "time";
-  static constexpr const char* FILE_TIME = "file_time";
-  static constexpr const char* START_TIME = "start_time";
-  static constexpr const char* END_TIME = "end_time";
-  static constexpr const char* N_SCANS = "n_scans";
-  static constexpr const char* N_STORMS = "n_storms";
-  static constexpr const char* N_SIMPLE = "n_simple";
-  static constexpr const char* MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
-  static constexpr const char* N_COMPLEX = "n_complex";
-  static constexpr const char* MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
-  static constexpr const char* N_ENTRIES = "n_entries";
-  static constexpr const char* N_POLY = "n_poly";
-  static constexpr const char* N_LAYERS = "n_layers";
-  static constexpr const char* N_RUNS = "n_runs";
-  static constexpr const char* N_PROJ_RUNS = "n_proj_runs";
-  static constexpr const char* N_HIST = "n_hist";
-  static constexpr const char* MAX_FORECAST_WEIGHTS = "max_forecast_weights";
+  const std::string TIME = "time";
+  const std::string FILE_TIME = "file_time";
+  const std::string START_TIME = "start_time";
+  const std::string END_TIME = "end_time";
+  const std::string N_SCANS = "n_scans";
+  const std::string N_STORMS = "n_storms";
+  const std::string N_SIMPLE = "n_simple";
+  const std::string MAX_SIMPLE_TRACK_NUM = "max_simple_track_num";
+  const std::string N_COMPLEX = "n_complex";
+  const std::string MAX_COMPLEX_TRACK_NUM = "max_complex_track_num";
+  const std::string N_ENTRIES = "n_entries";
+  const std::string N_POLY = "n_poly";
+  const std::string N_LAYERS = "n_layers";
+  const std::string N_RUNS = "n_runs";
+  const std::string N_PROJ_RUNS = "n_proj_runs";
+  const std::string N_HIST = "n_hist";
+  const std::string MAX_FORECAST_WEIGHTS = "max_forecast_weights";
 
   // storm identification parameters
 
-  static constexpr const char* LOW_DBZ_THRESHOLD = "low_dbz_threshold";
-  static constexpr const char* HIGH_DBZ_THRESHOLD = "high_dbz_threshold";
-  static constexpr const char* DBZ_HIST_INTERVAL = "dbz_hist_interval";
-  static constexpr const char* HAIL_DBZ_THRESHOLD = "hail_dbz_threshold";
-  static constexpr const char* BASE_THRESHOLD = "base_threshold";
-  static constexpr const char* TOP_THRESHOLD = "top_threshold";
-  static constexpr const char* MIN_STORM_SIZE = "min_storm_size";
-  static constexpr const char* MAX_STORM_SIZE = "max_storm_size";
-  static constexpr const char* MORPHOLOGY_EROSION_THRESHOLD = "morphology_erosion_threshold";
-  static constexpr const char* MORPHOLOGY_REFL_DIVISOR = "morphology_refl_divisor";
-  static constexpr const char* MIN_RADAR_TOPS = "min_radar_tops";
-  static constexpr const char* TOPS_EDGE_MARGIN = "tops_edge_margin";
-  static constexpr const char* Z_P_COEFF = "z_p_coeff";
-  static constexpr const char* Z_P_EXPONENT = "z_p_exponent";
-  static constexpr const char* Z_M_COEFF = "z_m_coeff";
-  static constexpr const char* Z_M_EXPONENT = "z_m_exponent";
-  static constexpr const char* SECTRIP_VERT_ASPECT = "sectrip_vert_aspect";
-  static constexpr const char* SECTRIP_HORIZ_ASPECT = "sectrip_horiz_aspect";
-  static constexpr const char* SECTRIP_ORIENTATION_ERROR = "sectrip_orientation_error";
-  static constexpr const char* POLY_START_AZ = "poly_start_az";
-  static constexpr const char* POLY_DELTA_AZ = "poly_delta_az";
-  static constexpr const char* CHECK_MORPHOLOGY = "check_morphology";
-  static constexpr const char* CHECK_TOPS = "check_tops";
-  static constexpr const char* VEL_AVAILABLE = "vel_available";
-  static constexpr const char* N_POLY_SIDES_ = "n_poly_sides";
-  static constexpr const char* LTG_COUNT_TIME = "ltg_count_time";
-  static constexpr const char* LTG_COUNT_MARGIN_KM = "ltg_count_margin_km";
-  static constexpr const char* HAIL_Z_M_COEFF = "hail_z_m_coeff";
-  static constexpr const char* HAIL_Z_M_EXPONENT = "hail_z_m_exponent";
-  static constexpr const char* HAIL_MASS_DBZ_THRESHOLD = "hail_mass_dbz_threshold";
-  static constexpr const char* GPROPS_UNION_TYPE = "gprops_union_type";
-  static constexpr const char* TOPS_DBZ_THRESHOLD = "tops_dbz_threshold";
-  static constexpr const char* PRECIP_COMPUTATION_MODE = "precip_computation_mode";
-  static constexpr const char* PRECIP_PLANE_HT = "precip_plane_ht";
-  static constexpr const char* LOW_CONVECTIVITY_THRESHOLD = "low_convectivity_threshold";
-  static constexpr const char* HIGH_CONVECTIVITY_THRESHOLD = "high_convectivity_threshold";
+  const std::string LOW_DBZ_THRESHOLD = "low_dbz_threshold";
+  const std::string HIGH_DBZ_THRESHOLD = "high_dbz_threshold";
+  const std::string DBZ_HIST_INTERVAL = "dbz_hist_interval";
+  const std::string HAIL_DBZ_THRESHOLD = "hail_dbz_threshold";
+  const std::string BASE_THRESHOLD = "base_threshold";
+  const std::string TOP_THRESHOLD = "top_threshold";
+  const std::string MIN_STORM_SIZE = "min_storm_size";
+  const std::string MAX_STORM_SIZE = "max_storm_size";
+  const std::string MORPHOLOGY_EROSION_THRESHOLD = "morphology_erosion_threshold";
+  const std::string MORPHOLOGY_REFL_DIVISOR = "morphology_refl_divisor";
+  const std::string MIN_RADAR_TOPS = "min_radar_tops";
+  const std::string TOPS_EDGE_MARGIN = "tops_edge_margin";
+  const std::string Z_P_COEFF = "z_p_coeff";
+  const std::string Z_P_EXPONENT = "z_p_exponent";
+  const std::string Z_M_COEFF = "z_m_coeff";
+  const std::string Z_M_EXPONENT = "z_m_exponent";
+  const std::string SECTRIP_VERT_ASPECT = "sectrip_vert_aspect";
+  const std::string SECTRIP_HORIZ_ASPECT = "sectrip_horiz_aspect";
+  const std::string SECTRIP_ORIENTATION_ERROR = "sectrip_orientation_error";
+  const std::string POLY_START_AZ = "poly_start_az";
+  const std::string POLY_DELTA_AZ = "poly_delta_az";
+  const std::string CHECK_MORPHOLOGY = "check_morphology";
+  const std::string CHECK_TOPS = "check_tops";
+  const std::string VEL_AVAILABLE = "vel_available";
+  const std::string N_POLY_SIDES_ = "n_poly_sides";
+  const std::string LTG_COUNT_TIME = "ltg_count_time";
+  const std::string LTG_COUNT_MARGIN_KM = "ltg_count_margin_km";
+  const std::string HAIL_Z_M_COEFF = "hail_z_m_coeff";
+  const std::string HAIL_Z_M_EXPONENT = "hail_z_m_exponent";
+  const std::string HAIL_MASS_DBZ_THRESHOLD = "hail_mass_dbz_threshold";
+  const std::string GPROPS_UNION_TYPE = "gprops_union_type";
+  const std::string TOPS_DBZ_THRESHOLD = "tops_dbz_threshold";
+  const std::string PRECIP_COMPUTATION_MODE = "precip_computation_mode";
+  const std::string PRECIP_PLANE_HT = "precip_plane_ht";
+  const std::string LOW_CONVECTIVITY_THRESHOLD = "low_convectivity_threshold";
+  const std::string HIGH_CONVECTIVITY_THRESHOLD = "high_convectivity_threshold";
 
   // scan details
 
-  static constexpr const char* SCAN_MIN_Z = "scan_min_z";
-  static constexpr const char* SCAN_DELTA_Z = "scan_delta_z";
-  static constexpr const char* SCAN_NUM = "scan_num";
-  static constexpr const char* SCAN_NSTORMS = "scan_nstorms";
-  static constexpr const char* SCAN_TIME = "scan_time";
-  static constexpr const char* SCAN_GPROPS_OFFSET = "scan_gprops_offset";
-  static constexpr const char* SCAN_FIRST_OFFSET = "scan_first_offset";
-  static constexpr const char* SCAN_LAST_OFFSET = "scan_last_offset";
-  static constexpr const char* SCAN_HT_OF_FREEZING = "scan_ht_of_freezing";
+  const std::string SCAN_MIN_Z = "scan_min_z";
+  const std::string SCAN_DELTA_Z = "scan_delta_z";
+  const std::string SCAN_NUM = "scan_num";
+  const std::string SCAN_NSTORMS = "scan_nstorms";
+  const std::string SCAN_TIME = "scan_time";
+  const std::string SCAN_GPROPS_OFFSET = "scan_gprops_offset";
+  const std::string SCAN_FIRST_OFFSET = "scan_first_offset";
+  const std::string SCAN_LAST_OFFSET = "scan_last_offset";
+  const std::string SCAN_HT_OF_FREEZING = "scan_ht_of_freezing";
   
   // grid and projection details
   
-  static constexpr const char* GRID_NX = "grid_nx";
-  static constexpr const char* GRID_NY = "grid_ny";
-  static constexpr const char* GRID_NZ = "grid_nz";
-  static constexpr const char* GRID_MINX = "grid_minx";
-  static constexpr const char* GRID_MINY = "grid_miny";
-  static constexpr const char* GRID_MINZ = "grid_minz";
-  static constexpr const char* GRID_DX = "grid_dx";
-  static constexpr const char* GRID_DY = "grid_dy";
-  static constexpr const char* GRID_DZ = "grid_dz";
-  static constexpr const char* GRID_DZ_CONSTANT = "grid_dz_constant";
-  static constexpr const char* GRID_SENSOR_X = "grid_sensor_x";
-  static constexpr const char* GRID_SENSOR_Y = "grid_sensor_y";
-  static constexpr const char* GRID_SENSOR_Z = "grid_sensor_z";
-  static constexpr const char* GRID_SENSOR_LAT = "grid_sensor_lat";
-  static constexpr const char* GRID_SENSOR_LON = "grid_sensor_lon";
-  static constexpr const char* GRID_UNITSX = "grid_unitsx";
-  static constexpr const char* GRID_UNITSY = "grid_unitsy";
-  static constexpr const char* GRID_UNITSZ = "grid_unitsz";
+  const std::string GRID_NX = "grid_nx";
+  const std::string GRID_NY = "grid_ny";
+  const std::string GRID_NZ = "grid_nz";
+  const std::string GRID_MINX = "grid_minx";
+  const std::string GRID_MINY = "grid_miny";
+  const std::string GRID_MINZ = "grid_minz";
+  const std::string GRID_DX = "grid_dx";
+  const std::string GRID_DY = "grid_dy";
+  const std::string GRID_DZ = "grid_dz";
+  const std::string GRID_DZ_CONSTANT = "grid_dz_constant";
+  const std::string GRID_SENSOR_X = "grid_sensor_x";
+  const std::string GRID_SENSOR_Y = "grid_sensor_y";
+  const std::string GRID_SENSOR_Z = "grid_sensor_z";
+  const std::string GRID_SENSOR_LAT = "grid_sensor_lat";
+  const std::string GRID_SENSOR_LON = "grid_sensor_lon";
+  const std::string GRID_UNITSX = "grid_unitsx";
+  const std::string GRID_UNITSY = "grid_unitsy";
+  const std::string GRID_UNITSZ = "grid_unitsz";
 
-  static constexpr const char* PROJ_TYPE = "proj_type";
-  static constexpr const char* PROJ_ORIGIN_LAT = "proj_origin_lat";
-  static constexpr const char* PROJ_ORIGIN_LON = "proj_origin_lon";
-  static constexpr const char* PROJ_ROTATION = "proj_rotation";
-  static constexpr const char* PROJ_LAT1 = "proj_lat1";
-  static constexpr const char* PROJ_LAT2 = "proj_lat2";
-  static constexpr const char* PROJ_TANGENT_LAT = "proj_tangent_lat";
-  static constexpr const char* PROJ_TANGENT_LON = "proj_tangent_lon";
-  static constexpr const char* PROJ_POLE_TYPE = "proj_pole_type";
-  static constexpr const char* PROJ_CENTRAL_SCALE = "proj_central_scale";
+  const std::string PROJ_TYPE = "proj_type";
+  const std::string PROJ_ORIGIN_LAT = "proj_origin_lat";
+  const std::string PROJ_ORIGIN_LON = "proj_origin_lon";
+  const std::string PROJ_ROTATION = "proj_rotation";
+  const std::string PROJ_LAT1 = "proj_lat1";
+  const std::string PROJ_LAT2 = "proj_lat2";
+  const std::string PROJ_TANGENT_LAT = "proj_tangent_lat";
+  const std::string PROJ_TANGENT_LON = "proj_tangent_lon";
+  const std::string PROJ_POLE_TYPE = "proj_pole_type";
+  const std::string PROJ_CENTRAL_SCALE = "proj_central_scale";
 
   // storm global properties
   
-  static constexpr const char* VOL_CENTROID_X = "vol_centroid_x";
-  static constexpr const char* VOL_CENTROID_Y = "vol_centroid_y";
-  static constexpr const char* VOL_CENTROID_Z = "vol_centroid_z";
-  static constexpr const char* REFL_CENTROID_X = "refl_centroid_x";
-  static constexpr const char* REFL_CENTROID_Y = "refl_centroid_y";
-  static constexpr const char* REFL_CENTROID_Z = "refl_centroid_z";
-  static constexpr const char* TOP = "top";
-  static constexpr const char* BASE = "base";
-  static constexpr const char* VOLUME = "volume";
-  static constexpr const char* AREA = "area";
-  static constexpr const char* AREA_MEAN = "area_mean";
-  static constexpr const char* PRECIP_FLUX = "precip_flux";
-  static constexpr const char* MASS = "mass";
-  static constexpr const char* TILT_ANGLE = "tilt_angle";
-  static constexpr const char* TILT_DIRN = "tilt_dirn";
-  static constexpr const char* DBZ_MAX = "dbz_max";
-  static constexpr const char* DBZ_MEAN = "dbz_mean";
-  static constexpr const char* DBZ_MAX_GRADIENT = "dbz_max_gradient";
-  static constexpr const char* DBZ_MEAN_GRADIENT = "dbz_mean_gradient";
-  static constexpr const char* HT_OF_DBZ_MAX = "ht_of_dbz_max";
-  static constexpr const char* RAD_VEL_MEAN = "rad_vel_mean";
-  static constexpr const char* RAD_VEL_SD = "rad_vel_sd";
-  static constexpr const char* VORTICITY = "vorticity";
-  static constexpr const char* PRECIP_AREA = "precip_area";
-  static constexpr const char* PRECIP_AREA_CENTROID_X = "precip_area_centroid_x";
-  static constexpr const char* PRECIP_AREA_CENTROID_Y = "precip_area_centroid_y";
-  static constexpr const char* PRECIP_AREA_ORIENTATION = "precip_area_orientation";
-  static constexpr const char* PRECIP_AREA_MINOR_RADIUS = "precip_area_minor_radius";
-  static constexpr const char* PRECIP_AREA_MAJOR_RADIUS = "precip_area_major_radius";
-  static constexpr const char* PROJ_AREA = "proj_area";
-  static constexpr const char* PROJ_AREA_CENTROID_X = "proj_area_centroid_x";
-  static constexpr const char* PROJ_AREA_CENTROID_Y = "proj_area_centroid_y";
-  static constexpr const char* PROJ_AREA_ORIENTATION = "proj_area_orientation";
-  static constexpr const char* PROJ_AREA_MINOR_RADIUS = "proj_area_minor_radius";
-  static constexpr const char* PROJ_AREA_MAJOR_RADIUS = "proj_area_major_radius";
-  static constexpr const char* PROJ_AREA_POLYGON = "proj_area_polygon";
-  static constexpr const char* STORM_NUM = "storm_num";
-  static constexpr const char* BASE_LAYER = "base_layer";
-  static constexpr const char* N_DBZ_INTERVALS = "n_dbz_intervals";
-  static constexpr const char* TOP_MISSING = "top_missing";
-  static constexpr const char* RANGE_LIMITED = "range_limited";
-  static constexpr const char* SECOND_TRIP = "second_trip";
-  static constexpr const char* HAIL_PRESENT = "hail_present";
-  static constexpr const char* ANOM_PROP = "anom_prop";
-  static constexpr const char* BOUNDING_MIN_IX = "bounding_min_ix";
-  static constexpr const char* BOUNDING_MIN_IY = "bounding_min_iy";
-  static constexpr const char* BOUNDING_MAX_IX = "bounding_max_ix";
-  static constexpr const char* BOUNDING_MAX_IY = "bounding_max_iy";
-  static constexpr const char* LAYER_PROPS_OFFSET = "layer_props_offset";
-  static constexpr const char* DBZ_HIST_OFFSET = "dbz_hist_offset";
-  static constexpr const char* RUNS_OFFSET = "runs_offset";
-  static constexpr const char* PROJ_RUNS_OFFSET = "proj_runs_offset";
-  static constexpr const char* VIL_FROM_MAXZ = "vil_from_maxz";
-  static constexpr const char* LTG_COUNT = "ltg_count";
-  static constexpr const char* CONVECTIVITY_MEDIAN = "convectivity_median";
-  static constexpr const char* HAIL_FOKRCATEGORY = "hail_FOKRcategory";
-  static constexpr const char* HAIL_WALDVOGELPROBABILITY = "hail_waldvogelProbability";
-  static constexpr const char* HAIL_HAILMASSALOFT = "hail_hailMassAloft";
-  static constexpr const char* HAIL_VIHM = "hail_vihm";
-  static constexpr const char* HAIL_POH = "hail_poh";
-  static constexpr const char* HAIL_SHI = "hail_shi";
-  static constexpr const char* HAIL_POSH = "hail_posh";
-  static constexpr const char* HAIL_MEHS = "hail_mehs";
+  const std::string VOL_CENTROID_X = "vol_centroid_x";
+  const std::string VOL_CENTROID_Y = "vol_centroid_y";
+  const std::string VOL_CENTROID_Z = "vol_centroid_z";
+  const std::string REFL_CENTROID_X = "refl_centroid_x";
+  const std::string REFL_CENTROID_Y = "refl_centroid_y";
+  const std::string REFL_CENTROID_Z = "refl_centroid_z";
+  const std::string TOP = "top";
+  const std::string BASE = "base";
+  const std::string VOLUME = "volume";
+  const std::string AREA = "area";
+  const std::string AREA_MEAN = "area_mean";
+  const std::string PRECIP_FLUX = "precip_flux";
+  const std::string MASS = "mass";
+  const std::string TILT_ANGLE = "tilt_angle";
+  const std::string TILT_DIRN = "tilt_dirn";
+  const std::string DBZ_MAX = "dbz_max";
+  const std::string DBZ_MEAN = "dbz_mean";
+  const std::string DBZ_MAX_GRADIENT = "dbz_max_gradient";
+  const std::string DBZ_MEAN_GRADIENT = "dbz_mean_gradient";
+  const std::string HT_OF_DBZ_MAX = "ht_of_dbz_max";
+  const std::string RAD_VEL_MEAN = "rad_vel_mean";
+  const std::string RAD_VEL_SD = "rad_vel_sd";
+  const std::string VORTICITY = "vorticity";
+  const std::string PRECIP_AREA = "precip_area";
+  const std::string PRECIP_AREA_CENTROID_X = "precip_area_centroid_x";
+  const std::string PRECIP_AREA_CENTROID_Y = "precip_area_centroid_y";
+  const std::string PRECIP_AREA_ORIENTATION = "precip_area_orientation";
+  const std::string PRECIP_AREA_MINOR_RADIUS = "precip_area_minor_radius";
+  const std::string PRECIP_AREA_MAJOR_RADIUS = "precip_area_major_radius";
+  const std::string PROJ_AREA = "proj_area";
+  const std::string PROJ_AREA_CENTROID_X = "proj_area_centroid_x";
+  const std::string PROJ_AREA_CENTROID_Y = "proj_area_centroid_y";
+  const std::string PROJ_AREA_ORIENTATION = "proj_area_orientation";
+  const std::string PROJ_AREA_MINOR_RADIUS = "proj_area_minor_radius";
+  const std::string PROJ_AREA_MAJOR_RADIUS = "proj_area_major_radius";
+  const std::string PROJ_AREA_POLYGON = "proj_area_polygon";
+  const std::string STORM_NUM = "storm_num";
+  const std::string BASE_LAYER = "base_layer";
+  const std::string N_DBZ_INTERVALS = "n_dbz_intervals";
+  const std::string TOP_MISSING = "top_missing";
+  const std::string RANGE_LIMITED = "range_limited";
+  const std::string SECOND_TRIP = "second_trip";
+  const std::string HAIL_PRESENT = "hail_present";
+  const std::string ANOM_PROP = "anom_prop";
+  const std::string BOUNDING_MIN_IX = "bounding_min_ix";
+  const std::string BOUNDING_MIN_IY = "bounding_min_iy";
+  const std::string BOUNDING_MAX_IX = "bounding_max_ix";
+  const std::string BOUNDING_MAX_IY = "bounding_max_iy";
+  const std::string LAYER_PROPS_OFFSET = "layer_props_offset";
+  const std::string DBZ_HIST_OFFSET = "dbz_hist_offset";
+  const std::string RUNS_OFFSET = "runs_offset";
+  const std::string PROJ_RUNS_OFFSET = "proj_runs_offset";
+  const std::string VIL_FROM_MAXZ = "vil_from_maxz";
+  const std::string LTG_COUNT = "ltg_count";
+  const std::string CONVECTIVITY_MEDIAN = "convectivity_median";
+  const std::string HAIL_FOKRCATEGORY = "hail_FOKRcategory";
+  const std::string HAIL_WALDVOGELPROBABILITY = "hail_waldvogelProbability";
+  const std::string HAIL_HAILMASSALOFT = "hail_hailMassAloft";
+  const std::string HAIL_VIHM = "hail_vihm";
+  const std::string HAIL_POH = "hail_poh";
+  const std::string HAIL_SHI = "hail_shi";
+  const std::string HAIL_POSH = "hail_posh";
+  const std::string HAIL_MEHS = "hail_mehs";
 
   // storm dbz histogram
 
-  static constexpr const char* PERCENT_VOLUME = "percent_volume";
-  static constexpr const char* PERCENT_AREA = "percent_area";
+  const std::string PERCENT_VOLUME = "percent_volume";
+  const std::string PERCENT_AREA = "percent_area";
 
   // storm runs
   
-  static constexpr const char* RUN_IX = "run_ix";
-  static constexpr const char* RUN_IY = "run_iy";
-  static constexpr const char* RUN_IZ = "run_iz";
-  static constexpr const char* RUN_LEN = "run_len";
+  const std::string RUN_IX = "run_ix";
+  const std::string RUN_IY = "run_iy";
+  const std::string RUN_IZ = "run_iz";
+  const std::string RUN_LEN = "run_len";
 
   // tracking parameters
 
-  static constexpr const char* TRACKING_VALID = "tracking_valid";
-  static constexpr const char* TRACKING_MODIFY_CODE = "tracking_modify_code";
+  const std::string TRACKING_VALID = "tracking_valid";
+  const std::string TRACKING_MODIFY_CODE = "tracking_modify_code";
   
-  static constexpr const char* FORECAST_WEIGHTS = "forecast_weights";  
-  static constexpr const char* WEIGHT_DISTANCE = "weight_distance";
-  static constexpr const char* WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
-  static constexpr const char* MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
-  static constexpr const char* MAX_TRACKING_SPEED = "max_tracking_speed";
-  static constexpr const char* MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
-  static constexpr const char* PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
-  static constexpr const char* SMOOTHING_RADIUS = "smoothing_radius";
-  static constexpr const char* MIN_FRACTION_OVERLAP = "min_fraction_overlap";
-  static constexpr const char* MIN_SUM_FRACTION_OVERLAP = "min_sum_fraction_overlap";
-  static constexpr const char* SCALE_FORECASTS_BY_HISTORY = "scale_forecasts_by_history";
-  static constexpr const char* USE_RUNS_FOR_OVERLAPS = "use_runs_for_overlaps";
-  static constexpr const char* GRID_TYPE = "grid_type";
-  static constexpr const char* NWEIGHTS_FORECAST = "nweights_forecast";
-  static constexpr const char* FORECAST_TYPE = "forecast_type";
-  static constexpr const char* MAX_DELTA_TIME = "max_delta_time";
-  static constexpr const char* MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
-  static constexpr const char* SPATIAL_SMOOTHING = "spatial_smoothing";
+  const std::string FORECAST_WEIGHTS = "forecast_weights";  
+  const std::string WEIGHT_DISTANCE = "weight_distance";
+  const std::string WEIGHT_DELTA_CUBE_ROOT_VOLUME = "weight_delta_cube_root_volume";
+  const std::string MERGE_SPLIT_SEARCH_RATIO = "merge_split_search_ratio";
+  const std::string MAX_TRACKING_SPEED = "max_tracking_speed";
+  const std::string MAX_SPEED_FOR_VALID_FORECAST = "max_speed_for_valid_forecast";
+  const std::string PARABOLIC_GROWTH_PERIOD = "parabolic_growth_period";
+  const std::string SMOOTHING_RADIUS = "smoothing_radius";
+  const std::string MIN_FRACTION_OVERLAP = "min_fraction_overlap";
+  const std::string MIN_SUM_FRACTION_OVERLAP = "min_sum_fraction_overlap";
+  const std::string SCALE_FORECASTS_BY_HISTORY = "scale_forecasts_by_history";
+  const std::string USE_RUNS_FOR_OVERLAPS = "use_runs_for_overlaps";
+  const std::string GRID_TYPE = "grid_type";
+  const std::string NWEIGHTS_FORECAST = "nweights_forecast";
+  const std::string FORECAST_TYPE = "forecast_type";
+  const std::string MAX_DELTA_TIME = "max_delta_time";
+  const std::string MIN_HISTORY_FOR_VALID_FORECAST = "min_history_for_valid_forecast";
+  const std::string SPATIAL_SMOOTHING = "spatial_smoothing";
 
-  static constexpr const char* N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
-  static constexpr const char* LAST_SCAN_NUM = "last_scan_num";
-  static constexpr const char* MAX_PARENTS_ = "max_parents";
-  static constexpr const char* MAX_CHILDREN_ = "max_children";
-  static constexpr const char* MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";
+  const std::string N_SAMPLES_FOR_FORECAST_STATS = "n_samples_for_forecast_stats";
+  const std::string LAST_SCAN_NUM = "last_scan_num";
+  const std::string MAX_PARENTS_ = "max_parents";
+  const std::string MAX_CHILDREN_ = "max_children";
+  const std::string MAX_NWEIGHTS_FORECAST_ = "max_nweights_forecast";
 
   // simple tracks
 
-  static constexpr const char* SIMPLE_TRACK_NUM = "simple_track_num";
-  static constexpr const char* LAST_DESCENDANT_SIMPLE_TRACK_NUM = "last_descendant_simple_track_num";
-  static constexpr const char* START_SCAN = "start_scan";
-  static constexpr const char* END_SCAN = "end_scan";
-  static constexpr const char* LAST_DESCENDANT_END_SCAN = "last_descendant_end_scan";
-  static constexpr const char* SCAN_ORIGIN = "scan_origin";
-  static constexpr const char* LAST_DESCENDANT_END_TIME = "last_descendant_end_time";
-  static constexpr const char* TIME_ORIGIN = "time_origin";
-  static constexpr const char* HISTORY_IN_SCANS = "history_in_scans";
-  static constexpr const char* HISTORY_IN_SECS = "history_in_secs";
-  static constexpr const char* DURATION_IN_SCANS = "duration_in_scans";
-  static constexpr const char* DURATION_IN_SECS = "duration_in_secs";
-  static constexpr const char* NPARENTS = "nparents";
-  static constexpr const char* NCHILDREN = "nchildren";
-  static constexpr const char* PARENT = "parent";
-  static constexpr const char* CHILD = "child";
-  static constexpr const char* FIRST_ENTRY_OFFSET = "first_entry_offset";
+  const std::string SIMPLE_TRACK_NUM = "simple_track_num";
+  const std::string LAST_DESCENDANT_SIMPLE_TRACK_NUM = "last_descendant_simple_track_num";
+  const std::string START_SCAN = "start_scan";
+  const std::string END_SCAN = "end_scan";
+  const std::string LAST_DESCENDANT_END_SCAN = "last_descendant_end_scan";
+  const std::string SCAN_ORIGIN = "scan_origin";
+  const std::string LAST_DESCENDANT_END_TIME = "last_descendant_end_time";
+  const std::string TIME_ORIGIN = "time_origin";
+  const std::string HISTORY_IN_SCANS = "history_in_scans";
+  const std::string HISTORY_IN_SECS = "history_in_secs";
+  const std::string DURATION_IN_SCANS = "duration_in_scans";
+  const std::string DURATION_IN_SECS = "duration_in_secs";
+  const std::string NPARENTS = "nparents";
+  const std::string NCHILDREN = "nchildren";
+  const std::string PARENT = "parent";
+  const std::string CHILD = "child";
+  const std::string FIRST_ENTRY_OFFSET = "first_entry_offset";
 
-  static constexpr const char* N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
-  static constexpr const char* SIMPLES_PER_COMPLEX = "simples_per_complex";
-  static constexpr const char* SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
-  static constexpr const char* COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
+  const std::string N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
+  const std::string SIMPLES_PER_COMPLEX = "simples_per_complex";
+  const std::string SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
+  const std::string COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
 
   // complex tracks
 
-  static constexpr const char* VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
-  static constexpr const char* VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
-  static constexpr const char* COMPLEX_TRACK_NUM = "complex_track_num";
-  static constexpr const char* N_SIMPLE_TRACKS = "n_simple_tracks";
-  static constexpr const char* N_TOP_MISSING = "n_top_missing";
-  static constexpr const char* N_RANGE_LIMITED = "n_range_limited";
-  static constexpr const char* START_MISSING = "start_missing";
-  static constexpr const char* END_MISSING = "end_missing";
-  static constexpr const char* MAX_COMPLEX = "max_complex";
+  const std::string VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
+  const std::string VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
+  const std::string COMPLEX_TRACK_NUM = "complex_track_num";
+  const std::string N_SIMPLE_TRACKS = "n_simple_tracks";
+  const std::string N_TOP_MISSING = "n_top_missing";
+  const std::string N_RANGE_LIMITED = "n_range_limited";
+  const std::string START_MISSING = "start_missing";
+  const std::string END_MISSING = "end_missing";
+  const std::string MAX_COMPLEX = "max_complex";
 
   // track entry
 
-  static constexpr const char* FORECAST_VALID = "forecast_valid";
-  static constexpr const char* PREV_ENTRY_OFFSET = "prev_entry_offset";
-  static constexpr const char* THIS_ENTRY_OFFSET = "this_entry_offset";
-  static constexpr const char* NEXT_ENTRY_OFFSET = "next_entry_offset";
-  static constexpr const char* NEXT_SCAN_ENTRY_OFFSET = "next_scan_entry_offset";
+  const std::string FORECAST_VALID = "forecast_valid";
+  const std::string PREV_ENTRY_OFFSET = "prev_entry_offset";
+  const std::string THIS_ENTRY_OFFSET = "this_entry_offset";
+  const std::string NEXT_ENTRY_OFFSET = "next_entry_offset";
+  const std::string NEXT_SCAN_ENTRY_OFFSET = "next_scan_entry_offset";
 
   // entry dval_dt
   
-  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_X =
+  const std::string DVAL_DT_PROJ_AREA_CENTROID_X =
     "entry_dval_dt_proj_area_centroid_x";
-  static constexpr const char* DVAL_DT_PROJ_AREA_CENTROID_Y =
+  const std::string DVAL_DT_PROJ_AREA_CENTROID_Y =
     "entry_dval_dt_proj_area_centroid_y";
-  static constexpr const char* DVAL_DT_VOL_CENTROID_Z = "entry_dval_dt_vol_centroid_z";
-  static constexpr const char* DVAL_DT_REFL_CENTROID_Z = "entry_dval_dt_refl_centroid_z";
-  static constexpr const char* DVAL_DT_TOP = "entry_dval_dt_top";
-  static constexpr const char* DVAL_DT_DBZ_MAX = "entry_dval_dt_dbz_max";
-  static constexpr const char* DVAL_DT_VOLUME = "entry_dval_dt_volume";
-  static constexpr const char* DVAL_DT_PRECIP_FLUX = "entry_dval_dt_precip_flux";
-  static constexpr const char* DVAL_DT_MASS = "entry_dval_dt_mass";
-  static constexpr const char* DVAL_DT_PROJ_AREA = "entry_dval_dt_proj_area";
-  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X =
+  const std::string DVAL_DT_VOL_CENTROID_Z = "entry_dval_dt_vol_centroid_z";
+  const std::string DVAL_DT_REFL_CENTROID_Z = "entry_dval_dt_refl_centroid_z";
+  const std::string DVAL_DT_TOP = "entry_dval_dt_top";
+  const std::string DVAL_DT_DBZ_MAX = "entry_dval_dt_dbz_max";
+  const std::string DVAL_DT_VOLUME = "entry_dval_dt_volume";
+  const std::string DVAL_DT_PRECIP_FLUX = "entry_dval_dt_precip_flux";
+  const std::string DVAL_DT_MASS = "entry_dval_dt_mass";
+  const std::string DVAL_DT_PROJ_AREA = "entry_dval_dt_proj_area";
+  const std::string DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X =
     "entry_dval_dt_smoothed_proj_area_centroid_x";
-  static constexpr const char* DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y =
+  const std::string DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y =
     "entry_dval_dt_smoothed_proj_area_centroid_y";
-  static constexpr const char* DVAL_DT_SMOOTHED_SPEED = "entry_dval_dt_smoothed_speed";
-  static constexpr const char* DVAL_DT_SMOOTHED_DIRECTION = "entry_dval_dt_smoothed_direction";
+  const std::string DVAL_DT_SMOOTHED_SPEED = "entry_dval_dt_smoothed_speed";
+  const std::string DVAL_DT_SMOOTHED_DIRECTION = "entry_dval_dt_smoothed_direction";
 
   // forecast bias
   
-  static constexpr const char* BIAS_PROJ_AREA_CENTROID_X =
+  const std::string BIAS_PROJ_AREA_CENTROID_X =
     "forecast_bias_proj_area_centroid_x";
-  static constexpr const char* BIAS_PROJ_AREA_CENTROID_Y =
+  const std::string BIAS_PROJ_AREA_CENTROID_Y =
     "forecast_bias_proj_area_centroid_y";
-  static constexpr const char* BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
-  static constexpr const char* BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
-  static constexpr const char* BIAS_TOP = "forecast_bias_top";
-  static constexpr const char* BIAS_DBZ_MAX = "forecast_bias_dbz_max";
-  static constexpr const char* BIAS_VOLUME = "forecast_bias_volume";
-  static constexpr const char* BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
-  static constexpr const char* BIAS_MASS = "forecast_bias_mass";
-  static constexpr const char* BIAS_PROJ_AREA = "forecast_bias_proj_area";
-  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_X =
+  const std::string BIAS_VOL_CENTROID_Z = "forecast_bias_vol_centroid_z";
+  const std::string BIAS_REFL_CENTROID_Z = "forecast_bias_refl_centroid_z";
+  const std::string BIAS_TOP = "forecast_bias_top";
+  const std::string BIAS_DBZ_MAX = "forecast_bias_dbz_max";
+  const std::string BIAS_VOLUME = "forecast_bias_volume";
+  const std::string BIAS_PRECIP_FLUX = "forecast_bias_precip_flux";
+  const std::string BIAS_MASS = "forecast_bias_mass";
+  const std::string BIAS_PROJ_AREA = "forecast_bias_proj_area";
+  const std::string BIAS_SMOOTHED_PROJ_AREA_CENTROID_X =
     "forecast_bias_smoothed_proj_area_centroid_x";
-  static constexpr const char* BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y =
+  const std::string BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y =
     "forecast_bias_smoothed_proj_area_centroid_y";
-  static constexpr const char* BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
-  static constexpr const char* BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
+  const std::string BIAS_SMOOTHED_SPEED = "forecast_bias_smoothed_speed";
+  const std::string BIAS_SMOOTHED_DIRECTION = "forecast_bias_smoothed_direction";
 
   // forecast rmse
   
-  static constexpr const char* RMSE_PROJ_AREA_CENTROID_X =
+  const std::string RMSE_PROJ_AREA_CENTROID_X =
     "forecast_rmse_proj_area_centroid_x";
-  static constexpr const char* RMSE_PROJ_AREA_CENTROID_Y =
+  const std::string RMSE_PROJ_AREA_CENTROID_Y =
     "forecast_rmse_proj_area_centroid_y";
-  static constexpr const char* RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
-  static constexpr const char* RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
-  static constexpr const char* RMSE_TOP = "forecast_rmse_top";
-  static constexpr const char* RMSE_DBZ_MAX = "forecast_rmse_dbz_max";
-  static constexpr const char* RMSE_VOLUME = "forecast_rmse_volume";
-  static constexpr const char* RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
-  static constexpr const char* RMSE_MASS = "forecast_rmse_mass";
-  static constexpr const char* RMSE_PROJ_AREA = "forecast_rmse_proj_area";
-  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_X =
+  const std::string RMSE_VOL_CENTROID_Z = "forecast_rmse_vol_centroid_z";
+  const std::string RMSE_REFL_CENTROID_Z = "forecast_rmse_refl_centroid_z";
+  const std::string RMSE_TOP = "forecast_rmse_top";
+  const std::string RMSE_DBZ_MAX = "forecast_rmse_dbz_max";
+  const std::string RMSE_VOLUME = "forecast_rmse_volume";
+  const std::string RMSE_PRECIP_FLUX = "forecast_rmse_precip_flux";
+  const std::string RMSE_MASS = "forecast_rmse_mass";
+  const std::string RMSE_PROJ_AREA = "forecast_rmse_proj_area";
+  const std::string RMSE_SMOOTHED_PROJ_AREA_CENTROID_X =
     "forecast_rmse_smoothed_proj_area_centroid_x";
-  static constexpr const char* RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y =
+  const std::string RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y =
     "forecast_rmse_smoothed_proj_area_centroid_y";
-  static constexpr const char* RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
-  static constexpr const char* RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
+  const std::string RMSE_SMOOTHED_SPEED = "forecast_rmse_smoothed_speed";
+  const std::string RMSE_SMOOTHED_DIRECTION = "forecast_rmse_smoothed_direction";
 
   // verification contingency stats
   
-  static constexpr const char* ELLIPSE_FORECAST_N_SUCCESS = "ellipse_forecast_n_success";
-  static constexpr const char* ELLIPSE_FORECAST_N_FAILURE = "ellipse_forecast_n_failure";
-  static constexpr const char* ELLIPSE_FORECAST_N_FALSE_ALARM = "ellipse_forecast_n_false_alarm";
-  static constexpr const char* POLYGON_FORECAST_N_SUCCESS = "polygon_forecast_n_success";
-  static constexpr const char* POLYGON_FORECAST_N_FAILURE = "polygon_forecast_n_failure";
-  static constexpr const char* POLYGON_FORECAST_N_FALSE_ALARM = "polygon_forecast_n_false_alarm";
+  const std::string ELLIPSE_FORECAST_N_SUCCESS = "ellipse_forecast_n_success";
+  const std::string ELLIPSE_FORECAST_N_FAILURE = "ellipse_forecast_n_failure";
+  const std::string ELLIPSE_FORECAST_N_FALSE_ALARM = "ellipse_forecast_n_false_alarm";
+  const std::string POLYGON_FORECAST_N_SUCCESS = "polygon_forecast_n_success";
+  const std::string POLYGON_FORECAST_N_FAILURE = "polygon_forecast_n_failure";
+  const std::string POLYGON_FORECAST_N_FALSE_ALARM = "polygon_forecast_n_false_alarm";
 
   // track verification
   
-  static constexpr const char* VERIFICATION_PERFORMED = "verification_performed";
-  static constexpr const char* VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
-  static constexpr const char* VERIFY_END_TIME = "verify_end_time";
-  static constexpr const char* VERIFY_FORECAST_LEAD_TIME_MARGIN =
+  const std::string VERIFICATION_PERFORMED = "verification_performed";
+  const std::string VERIFY_FORECAST_LEAD_TIME = "verify_forecast_lead_time";
+  const std::string VERIFY_END_TIME = "verify_end_time";
+  const std::string VERIFY_FORECAST_LEAD_TIME_MARGIN =
     "verify_forecast_lead_time_margin";
-  static constexpr const char* VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
-  static constexpr const char* VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
-  static constexpr const char* VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
+  const std::string VERIFY_FORECAST_MIN_HISTORY = "verify_forecast_min_history";
+  const std::string VERIFY_BEFORE_FORECAST_TIME = "verify_before_forecast_time";
+  const std::string VERIFY_AFTER_TRACK_DIES = "verify_after_track_dies";
 
 };
 

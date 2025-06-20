@@ -357,7 +357,7 @@ extern "C" {
 
     fl32 top;			/* km */
     fl32 base;			/* km */
-    fl32 volume;			/* km3 */
+    fl32 volume;		/* km3 */
     fl32 area_mean;		/* km2 */
     fl32 precip_flux;		/* m3/s */
     fl32 mass;			/* ktons */
@@ -365,7 +365,7 @@ extern "C" {
     fl32 tilt_angle;		/* deg */
     fl32 tilt_dirn;		/* degT */
 
-    fl32 dbz_max;			/* dbz */
+    fl32 dbz_max;		/* dbz */
     fl32 dbz_mean;		/* dbz */
     fl32 dbz_max_gradient;	/* dbz/km */
     fl32 dbz_mean_gradient;	/* dbz/km */

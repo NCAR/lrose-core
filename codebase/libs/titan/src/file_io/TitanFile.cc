@@ -109,6 +109,9 @@ TitanFile::TitanFile()
   _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
+  _horizGridUnits = KM;
+  _horizGridUnits = KM_PER_HR;
+  
   _convention = "TitanStormTracking";
   _version = "1.0";
 
@@ -143,10 +146,8 @@ int TitanFile::openNcFile(const string &path,
 
   _filePath = path;
   
-  // if (mode == NcxxFile::FileMode::write) {
   Path filePath(path);
   filePath.makeDirRecurse();
-  // }
   
   // open file
   
@@ -452,52 +453,52 @@ void TitanFile::_setUpVars()
 
   // storm global props
 
-  _gpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.vol_centroid_z = _getVar(VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.refl_centroid_z = _getVar(REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.top = _getVar(TOP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.base = _getVar(BASE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.volume = _getVar(VOLUME, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.area_mean = _getVar(AREA_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_flux = _getVar(PRECIP_FLUX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.tilt_angle = _getVar(TILT_ANGLE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.tilt_dirn = _getVar(TILT_DIRN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_max_gradient = _getVar(DBZ_MAX_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.dbz_mean_gradient = _getVar(DBZ_MEAN_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.ht_of_dbz_max = _getVar(HT_OF_DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.precip_area = _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
+  _gpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
+  _gpropsVars.vol_centroid_z = _getVar(VOL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM);
+  _gpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
+  _gpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
+  _gpropsVars.refl_centroid_z = _getVar(REFL_CENTROID_Z, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM);
+  _gpropsVars.top = _getVar(TOP, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM);
+  _gpropsVars.base = _getVar(BASE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM);
+  _gpropsVars.volume = _getVar(VOLUME, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM3);
+  _gpropsVars.area_mean = _getVar(AREA_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM2);
+  _gpropsVars.precip_flux = _getVar(PRECIP_FLUX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, M3_PER_SEC);
+  _gpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KTONS);
+  _gpropsVars.tilt_angle = _getVar(TILT_ANGLE, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DEG);
+  _gpropsVars.tilt_dirn = _getVar(TILT_DIRN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DEG);
+  _gpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DBZ);
+  _gpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DBZ);
+  _gpropsVars.dbz_max_gradient = _getVar(DBZ_MAX_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DBZ_PER_KM);
+  _gpropsVars.dbz_mean_gradient = _getVar(DBZ_MEAN_GRADIENT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DBZ_PER_KM);
+  _gpropsVars.ht_of_dbz_max = _getVar(HT_OF_DBZ_MAX, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM);
+  _gpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, M_PER_SEC);
+  _gpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, M_PER_SEC);
+  _gpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, PER_SEC);
+  _gpropsVars.precip_area = _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM2);
   _gpropsVars.precip_area_centroid_x =
-    _getVar(PRECIP_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PRECIP_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_centroid_y =
-    _getVar(PRECIP_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PRECIP_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_orientation =
-    _getVar(PRECIP_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PRECIP_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DEG);
   _gpropsVars.precip_area_minor_radius =
-    _getVar(PRECIP_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PRECIP_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_major_radius =
-    _getVar(PRECIP_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.proj_area = _getVar(PROJ_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PRECIP_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
+  _gpropsVars.proj_area = _getVar(PROJ_AREA, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KM2);
   _gpropsVars.proj_area_centroid_x =
-    _getVar(PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_centroid_y =
-    _getVar(PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_orientation =
-    _getVar(PROJ_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PROJ_AREA_ORIENTATION, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, DEG);
   _gpropsVars.proj_area_minor_radius =
-    _getVar(PROJ_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PROJ_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_major_radius =
-    _getVar(PROJ_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+    _getVar(PROJ_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_polygon =
-    _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _n_poly, _gpropsGroup);
+    _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT, _n_storms, _n_poly, _gpropsGroup, _horizGridUnits);
   _gpropsVars.storm_num = _getVar(STORM_NUM, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.n_layers = _getVar(N_LAYERS, NcxxType::nc_INT, _n_storms, _gpropsGroup);
   _gpropsVars.base_layer = _getVar(BASE_LAYER, NcxxType::nc_INT, _n_storms, _gpropsGroup);
@@ -523,7 +524,7 @@ void TitanFile::_setUpVars()
   _gpropsVars.hail_FOKRcategory = _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_waldvogelProbability =
     _getVar(HAIL_WALDVOGELPROBABILITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
-  _gpropsVars.hail_hailMassAloft = _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
+  _gpropsVars.hail_hailMassAloft = _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KTONS);
   _gpropsVars.hail_vihm = _getVar(HAIL_VIHM, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_poh = _getVar(HAIL_POH, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_shi = _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
@@ -532,17 +533,17 @@ void TitanFile::_setUpVars()
   
   // storm layer props
   
-  _lpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.area = _getVar(AREA, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
-  _lpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
+  _lpropsVars.vol_centroid_x = _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, _horizGridUnits);
+  _lpropsVars.vol_centroid_y = _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, _horizGridUnits);
+  _lpropsVars.refl_centroid_x = _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, _horizGridUnits);
+  _lpropsVars.refl_centroid_y = _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, _horizGridUnits);
+  _lpropsVars.area = _getVar(AREA, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, KM2);
+  _lpropsVars.dbz_max = _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, DBZ);
+  _lpropsVars.dbz_mean = _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, DBZ);
+  _lpropsVars.mass = _getVar(MASS, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, KTONS);
+  _lpropsVars.rad_vel_mean = _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, M_PER_SEC);
+  _lpropsVars.rad_vel_sd = _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, M_PER_SEC);
+  _lpropsVars.vorticity = _getVar(VORTICITY, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup, PER_SEC);
   _lpropsVars.convectivity_median = _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _n_layers, _lpropsGroup);
 
   // reflectivity histograms
@@ -572,11 +573,11 @@ void TitanFile::_setUpVars()
   _tparamsVars.weight_delta_cube_root_volume
     = _getVar(WEIGHT_DELTA_CUBE_ROOT_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.merge_split_search_ratio = _getVar(MERGE_SPLIT_SEARCH_RATIO, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.max_tracking_speed = _getVar(MAX_TRACKING_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
+  _tparamsVars.max_tracking_speed = _getVar(MAX_TRACKING_SPEED, NcxxType::nc_FLOAT, _tracksGroup, KM_PER_HR);
   _tparamsVars.max_speed_for_valid_forecast =
-    _getVar(MAX_SPEED_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.parabolic_growth_period = _getVar(PARABOLIC_GROWTH_PERIOD, NcxxType::nc_FLOAT, _tracksGroup);
-  _tparamsVars.smoothing_radius = _getVar(SMOOTHING_RADIUS, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(MAX_SPEED_FOR_VALID_FORECAST, NcxxType::nc_FLOAT, _tracksGroup, KM_PER_HR);
+  _tparamsVars.parabolic_growth_period = _getVar(PARABOLIC_GROWTH_PERIOD, NcxxType::nc_FLOAT, _tracksGroup, SECONDS);
+  _tparamsVars.smoothing_radius = _getVar(SMOOTHING_RADIUS, NcxxType::nc_FLOAT, _tracksGroup, KM);
   _tparamsVars.min_fraction_overlap = _getVar(MIN_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.min_sum_fraction_overlap = _getVar(MIN_SUM_FRACTION_OVERLAP, NcxxType::nc_FLOAT, _tracksGroup);
   _tparamsVars.scale_forecasts_by_history =
@@ -585,9 +586,9 @@ void TitanFile::_setUpVars()
   _tparamsVars.grid_type = _getVar(GRID_TYPE, NcxxType::nc_INT, _tracksGroup);
   _tparamsVars.nweights_forecast = _getVar(NWEIGHTS_FORECAST, NcxxType::nc_INT, _tracksGroup);
   _tparamsVars.forecast_type = _getVar(FORECAST_TYPE, NcxxType::nc_INT, _tracksGroup);
-  _tparamsVars.max_delta_time = _getVar(MAX_DELTA_TIME, NcxxType::nc_INT, _tracksGroup);
+  _tparamsVars.max_delta_time = _getVar(MAX_DELTA_TIME, NcxxType::nc_INT, _tracksGroup, SECONDS);
   _tparamsVars.min_history_for_valid_forecast
-    = _getVar(MIN_HISTORY_FOR_VALID_FORECAST, NcxxType::nc_INT, _tracksGroup);
+    = _getVar(MIN_HISTORY_FOR_VALID_FORECAST, NcxxType::nc_INT, _tracksGroup, SECONDS);
   _tparamsVars.spatial_smoothing = _getVar(SPATIAL_SMOOTHING, NcxxType::nc_INT, _tracksGroup);
 
   // tracking state
@@ -606,44 +607,44 @@ void TitanFile::_setUpVars()
   // global bias for forecasts
 
   _globalBiasVars.proj_area_centroid_x =
-    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalBiasVars.proj_area_centroid_y =
-    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
+  _globalBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup, DBZ);
+  _globalBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _tracksGroup, KM3);
+  _globalBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup, M3_PER_SEC);
+  _globalBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _tracksGroup, KTONS);
+  _globalBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup, KM2);
   _globalBiasVars.smoothed_proj_area_centroid_x =
-    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalBiasVars.smoothed_proj_area_centroid_y =
-    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
+  _globalBiasVars.smoothed_speed = _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup, _speedUnits);
+  _globalBiasVars.smoothed_direction = _getVar(BIAS_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup, DEG);
 
   // global rmse for forecasts
 
   _globalRmseVars.proj_area_centroid_x =
-    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(RMSE_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalRmseVars.proj_area_centroid_y =
-    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(RMSE_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
+  _globalRmseVars.vol_centroid_z = _getVar(RMSE_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalRmseVars.refl_centroid_z = _getVar(RMSE_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalRmseVars.top = _getVar(RMSE_TOP, NcxxType::nc_FLOAT, _tracksGroup, KM);
+  _globalRmseVars.dbz_max = _getVar(RMSE_DBZ_MAX, NcxxType::nc_FLOAT, _tracksGroup, DBZ);
+  _globalRmseVars.volume = _getVar(RMSE_VOLUME, NcxxType::nc_FLOAT, _tracksGroup, KM3);
+  _globalRmseVars.precip_flux = _getVar(RMSE_PRECIP_FLUX, NcxxType::nc_FLOAT, _tracksGroup, M3_PER_SEC);
+  _globalRmseVars.mass = _getVar(RMSE_MASS, NcxxType::nc_FLOAT, _tracksGroup, KTONS);
+  _globalRmseVars.proj_area = _getVar(RMSE_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup, KM2);
   _globalRmseVars.smoothed_proj_area_centroid_x =
-    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalRmseVars.smoothed_proj_area_centroid_y =
-    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup);
-  _globalRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup);
+    _getVar(RMSE_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
+  _globalRmseVars.smoothed_speed = _getVar(RMSE_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup, _speedUnits);
+  _globalRmseVars.smoothed_direction = _getVar(RMSE_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _tracksGroup, DEG);
 
   // global track verification contingency tables
 
@@ -669,17 +670,17 @@ void TitanFile::_setUpVars()
   _simpleVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.scan_origin = _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _n_simple, _simpleGroup);
-  _simpleVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup);
-  _simpleVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+  _simpleVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup, TIME0);
+  _simpleVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _n_simple, _simpleGroup, TIME0);
   _simpleVars.last_descendant_end_scan =
     _getVar(LAST_DESCENDANT_END_SCAN, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.last_descendant_end_time =
-    _getVar(LAST_DESCENDANT_END_TIME, NcxxType::nc_INT, _n_simple, _simpleGroup);
-  _simpleVars.time_origin = _getVar(TIME_ORIGIN, NcxxType::nc_INT64, _n_simple, _simpleGroup);
+    _getVar(LAST_DESCENDANT_END_TIME, NcxxType::nc_INT, _n_simple, _simpleGroup, TIME0);
+  _simpleVars.time_origin = _getVar(TIME_ORIGIN, NcxxType::nc_INT64, _n_simple, _simpleGroup, TIME0);
   _simpleVars.history_in_scans = _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _n_simple, _simpleGroup);
-  _simpleVars.history_in_secs = _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.history_in_secs = _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup, SECONDS);
   _simpleVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _n_simple, _simpleGroup);
-  _simpleVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+  _simpleVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _n_simple, _simpleGroup, SECONDS);
   _simpleVars.nparents = _getVar(NPARENTS, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.nchildren = _getVar(NCHILDREN, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.parent = _getVar(PARENT, NcxxType::nc_INT, _n_simple, _max_parents, _simpleGroup);
@@ -695,15 +696,15 @@ void TitanFile::_setUpVars()
   _complexVars.complex_track_num = _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_complex, _complexGroup);
 
   _complexVars.volume_at_start_of_sampling =
-    _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+    _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM3);
   _complexVars.volume_at_end_of_sampling =
-    _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+    _getVar(VOLUME_AT_END_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM3);
   _complexVars.start_scan = _getVar(START_SCAN, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.end_scan = _getVar(END_SCAN, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.duration_in_scans = _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _max_complex, _complexGroup);
-  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _max_complex, _complexGroup);
-  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup);
-  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup);
+  _complexVars.duration_in_secs = _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _max_complex, _complexGroup, SECONDS);
+  _complexVars.start_time = _getVar(START_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup, TIME0);
+  _complexVars.end_time = _getVar(END_TIME, NcxxType::nc_INT64, _max_complex, _complexGroup, TIME0);
   _complexVars.n_simple_tracks = _getVar(N_SIMPLE_TRACKS, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.n_top_missing = _getVar(N_TOP_MISSING, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.n_range_limited = _getVar(N_RANGE_LIMITED, NcxxType::nc_INT, _max_complex, _complexGroup);
@@ -715,14 +716,14 @@ void TitanFile::_setUpVars()
   // bias for forecasts per complex track
 
   _complexBiasVars.proj_area_centroid_x =
-    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _max_complex, _complexGroup, _horizGridUnits);
   _complexBiasVars.proj_area_centroid_y =
-    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
-  _complexBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
-  _complexBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
-  _complexBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
-  _complexBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
-  _complexBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
+    _getVar(BIAS_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _max_complex, _complexGroup, _horizGridUnits);
+  _complexBiasVars.vol_centroid_z = _getVar(BIAS_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM);
+  _complexBiasVars.refl_centroid_z = _getVar(BIAS_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM);
+  _complexBiasVars.top = _getVar(BIAS_TOP, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM);
+  _complexBiasVars.dbz_max = _getVar(BIAS_DBZ_MAX, NcxxType::nc_FLOAT, _max_complex, _complexGroup, DBZ);
+  _complexBiasVars.volume = _getVar(BIAS_VOLUME, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM3);
   _complexBiasVars.precip_flux = _getVar(BIAS_PRECIP_FLUX, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexBiasVars.mass = _getVar(BIAS_MASS, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
   _complexBiasVars.proj_area = _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _max_complex, _complexGroup);
@@ -1894,6 +1895,16 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeScan\n";
   TaStr::AddStr(_errStr, "  File: ", _storm_data_file_path);
+
+  // set horiz units
+  
+  if (scanHeader.grid.proj_type == TITAN_PROJ_LATLON) {
+    _horizGridUnits = DEG;
+    _speedUnits = DEG_PER_HR;
+  } else {
+    _horizGridUnits = KM;
+    _horizGridUnits = KM_PER_HR;
+  }
   
   // scan storage index
   
@@ -1927,27 +1938,27 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.grid_sensor_lat.putVal(scanIndex, scanHeader.grid.sensor_lat);
   _scanVars.grid_sensor_lon.putVal(scanIndex, scanHeader.grid.sensor_lon);
   
-  _scanVars.grid_unitsx.putVal(scanIndex, std::string(scanHeader.grid.unitsx));
-  _scanVars.grid_unitsy.putVal(scanIndex, std::string(scanHeader.grid.unitsy));
+  _scanVars.grid_unitsx.putVal(scanIndex, _horizGridUnits);
+  _scanVars.grid_unitsy.putVal(scanIndex, _horizGridUnits);
   _scanVars.grid_unitsz.putVal(scanIndex, std::string(scanHeader.grid.unitsz));
 
   _scanVars.scan_min_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
   _scanVars.scan_delta_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
-  _scanVars.scan_ht_of_freezing.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.scan_ht_of_freezing.putAtt(UNITS, KM);
   
-  _scanVars.grid_minx.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
-  _scanVars.grid_miny.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
-  _scanVars.grid_minz.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
-  _scanVars.grid_dx.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
-  _scanVars.grid_dy.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
-  _scanVars.grid_dz.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
+  _scanVars.grid_minx.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_miny.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_minz.putAtt(UNITS, KM);
+  _scanVars.grid_dx.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_dy.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_dz.putAtt(UNITS, KM);
 
-  _scanVars.grid_sensor_x.putAtt(UNITS, std::string(scanHeader.grid.unitsx));
-  _scanVars.grid_sensor_y.putAtt(UNITS, std::string(scanHeader.grid.unitsy));
-  _scanVars.grid_sensor_z.putAtt(UNITS, std::string(scanHeader.grid.unitsz));
-  _scanVars.grid_sensor_lat.putAtt(UNITS, std::string(DEG));
-  _scanVars.grid_sensor_lon.putAtt(UNITS, std::string(DEG));
-
+  _scanVars.grid_sensor_x.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_sensor_y.putAtt(UNITS, _horizGridUnits);
+  _scanVars.grid_sensor_z.putAtt(UNITS, KM);
+  _scanVars.grid_sensor_lat.putAtt(UNITS, DEG);
+  _scanVars.grid_sensor_lon.putAtt(UNITS, DEG);
+  
   // write projection details
   
   _scanVars.proj_type.putVal(scanIndex, scanHeader.grid.proj_type);
