@@ -2250,40 +2250,64 @@ void TitanFile::_addProjectionFlagAttributes()
 
   vector<int> flagValues;
   vector<std::string> flagMeanings;
-
+  std::string projTypeNote;
+  char tmp[BUFSIZ];
+  
   flagValues.push_back(TITAN_PROJ_LATLON);
   flagMeanings.push_back("latlon");
+  snprintf(tmp, BUFSIZ, "latlon = %d", TITAN_PROJ_LATLON);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_LAMBERT_CONF);
   flagMeanings.push_back("lambert_conf");
+  snprintf(tmp, BUFSIZ, ", lambert_conf = %d", TITAN_PROJ_LAMBERT_CONF);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_MERCATOR);
   flagMeanings.push_back("mercator");
+  snprintf(tmp, BUFSIZ, ", mercator = %d", TITAN_PROJ_MERCATOR);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_POLAR_STEREO);
   flagMeanings.push_back("polar_stereo");
+  snprintf(tmp, BUFSIZ, ", polar_stereo = %d", TITAN_PROJ_POLAR_STEREO);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_POLAR_ST_ELLIP);
   flagMeanings.push_back("polar_st_ellip");
+  snprintf(tmp, BUFSIZ, ", polar_st_ellip = %d", TITAN_PROJ_POLAR_ST_ELLIP);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_CYL_EQUIDIST);
   flagMeanings.push_back("cyl_equidist");
+  snprintf(tmp, BUFSIZ, ", cyl_equidist = %d", TITAN_PROJ_CYL_EQUIDIST);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_FLAT);
-  flagMeanings.push_back("flat");
+  flagMeanings.push_back("azimuthal_equidistant");
+  snprintf(tmp, BUFSIZ, ", azimuthal_equidistant = %d", TITAN_PROJ_FLAT);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_OBLIQUE_STEREO);
   flagMeanings.push_back("oblique_stereo");
+  snprintf(tmp, BUFSIZ, ", oblique_stereo = %d", TITAN_PROJ_OBLIQUE_STEREO);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_TRANS_MERCATOR);
   flagMeanings.push_back("trans_mercator");
+  snprintf(tmp, BUFSIZ, ", trans_mercator = %d", TITAN_PROJ_TRANS_MERCATOR);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_ALBERS);
   flagMeanings.push_back("albers");
+  snprintf(tmp, BUFSIZ, ", albers = %d", TITAN_PROJ_ALBERS);
+  projTypeNote += tmp;
   
   flagValues.push_back(TITAN_PROJ_LAMBERT_AZIM);
   flagMeanings.push_back("lambert_azim");
-
+  snprintf(tmp, BUFSIZ, ", lambert_azim = %d", TITAN_PROJ_LAMBERT_AZIM);
+  projTypeNote += tmp;
+  
   _scanVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
                              flagValues.size(), flagValues.data());
 
@@ -2296,9 +2320,7 @@ void TitanFile::_addProjectionFlagAttributes()
   _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
                              meanings.size(), meanings.data());
   
-  std::string note = "0 = latlon, 3 = lambert_conf, 4 = mercator, 5 = polar_stereo, 6 = polar_st_ellip, 7 = cyl_equidist, 8 = azimuthal_equidistant, 12 = oblique_stereo, 15 = trans_mercator, 16 = albers, 17 = lambert_azimuthal";
-  
-  _scanVars.proj_type.putAtt(NOTE, note);
+  _scanVars.proj_type.putAtt(NOTE, projTypeNote);
   
   _scanVars.proj_origin_lat.putAtt(NOTE, std::string("Applies to all projection types except latlon"));
   _scanVars.proj_origin_lon.putAtt(NOTE, std::string("Applies to all projection types except latlon"));
