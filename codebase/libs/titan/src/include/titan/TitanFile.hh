@@ -1162,6 +1162,7 @@ public:
 
   const std::string FLAG_VALUES = "flag_values";
   const std::string FLAG_MEANINGS = "flag_meanings";
+  const std::string NOTE = "note";
   
   // groups
 

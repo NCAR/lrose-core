@@ -394,7 +394,6 @@ void TitanFile::_setUpVars()
   _scanVars.grid_unitsz = _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _n_scans, _scansGroup);
 
   _scanVars.proj_type = _getVar(PROJ_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
-  _addProjectionFlagAttributes();
   
   _scanVars.proj_origin_lat = _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
   _scanVars.proj_origin_lon = _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _n_scans, _scansGroup, DEG);
@@ -407,7 +406,11 @@ void TitanFile::_setUpVars()
 
   _scanVars.proj_pole_type = _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _n_scans, _scansGroup);
   _scanVars.proj_central_scale = _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _n_scans, _scansGroup);
+
+  // add projection attributes
   
+  _addProjectionFlagAttributes();
+
   // storm params
 
   _sparamsVars.low_dbz_threshold = _getVar(LOW_DBZ_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup, DBZ);
@@ -2292,6 +2295,21 @@ void TitanFile::_addProjectionFlagAttributes()
   
   _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
                              meanings.size(), meanings.data());
+  
+  std::string note = "0 = latlon, 3 = lambert_conf, 4 = mercator, 5 = polar_stereo, 6 = polar_st_ellip, 7 = cyl_equidist, 8 = azimuthal_equidistant, 12 = oblique_stereo, 15 = trans_mercator, 16 = albers, 17 = lambert_azimuthal";
+  
+  _scanVars.proj_type.putAtt(NOTE, note);
+  
+  _scanVars.proj_origin_lat.putAtt(NOTE, std::string("Applies to all projection types except latlon"));
+  _scanVars.proj_origin_lon.putAtt(NOTE, std::string("Applies to all projection types except latlon"));
+  _scanVars.proj_rotation.putAtt(NOTE, std::string("Applies to azimuthal_equidistant projection only"));
+
+  _scanVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+  _scanVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+  _scanVars.proj_tangent_lat.putAtt(NOTE, std::string("Applies to polar_stereo and oblique_stereo"));
+  _scanVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
+  _scanVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
+  _scanVars.proj_central_scale.putAtt(NOTE, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
 
 }
 
