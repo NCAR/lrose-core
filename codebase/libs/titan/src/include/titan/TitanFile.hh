@@ -573,14 +573,14 @@ public:
   // If storm num is set, only the gprops for that storm is swapped
   // returns 0 on success, -1 on failure
 
-  int readScan(int scan_num, int storm_num = -1);
+  int readStormScan(int scan_num, int storm_num = -1);
   
-  // read in the seconday storm property data (lprops, hist, runs)
+  // read in the auxiliary storm property data (lprops, hist, runs)
   // for a given storm in a scan.
   // Space for the arrays of structures is allocated as required.
   // returns 0 on success, -1 on failure
 
-  int readProps(int storm_num);
+  int readStormAux(int storm_num);
      
   // seek to the end of the storm data in data file
   // returns 0 on success, -1 on failure

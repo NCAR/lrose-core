@@ -1448,7 +1448,7 @@ int TitanFile::readProjRuns(int storm_num)
   int nProjRuns = _gprops[storm_num].n_proj_runs;
   allocProjRuns(nProjRuns);
   
-  // read in runs
+  // read in proj runs
   
   int projRunsOffset = _gprops[storm_num].proj_runs_offset;
   for (int irun = 0; irun < nProjRuns; irun++) {
@@ -1466,18 +1466,20 @@ int TitanFile::readProjRuns(int storm_num)
 
 //////////////////////////////////////////////////////////////
 //
-// read in the storm property data for a given storm in a scan
+// Read the auxiliary storm properties:
+//   layers, dbz histograms, runs and proj_runs
+//
 // Space for the arrays of structures is allocated as required.
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::readProps(int storm_num)
-     
+int TitanFile::readStormAux(int storm_num)
+  
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readProps\n";
+  _errStr += "ERROR - TitanFile::readStormAux\n";
   TaStr::AddStr(_errStr, "  Reading storm props from file: ", _storm_data_file_path);
   TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
   TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
@@ -1488,98 +1490,79 @@ int TitanFile::readProps(int storm_num)
   
   // allocate or realloc mem
   
-  int n_layers = _gprops[storm_num].n_layers;
-  int n_dbz_intervals = _gprops[storm_num].n_dbz_intervals;
-  int n_runs = _gprops[storm_num].n_runs;
-  int n_proj_runs = _gprops[storm_num].n_proj_runs;
+  int nLayers = _gprops[storm_num].n_layers;
+  int nDbzIntervals = _gprops[storm_num].n_dbz_intervals;
+  int nRuns = _gprops[storm_num].n_runs;
+  int nProjRuns = _gprops[storm_num].n_proj_runs;
 
-  allocLayers(n_layers);
-  allocHist(n_dbz_intervals);
-  allocRuns(n_runs);
-  allocProjRuns(n_proj_runs);
+  allocLayers(nLayers);
+  allocHist(nDbzIntervals);
+  allocRuns(nRuns);
+  allocProjRuns(nProjRuns);
 
   // return early if nstorms is zero
   
   if (_scan.nstorms == 0) {
     return 0;
   }
+
+  // get offsets
   
-  // move to layer data position in file
-  
-  fseek(_storm_data_file, _gprops[storm_num].layer_props_offset, SEEK_SET);
-  
+  int layerPropsOffset = _gprops[storm_num].layer_props_offset;
+  int dbzHistOffset = _gprops[storm_num].dbz_hist_offset;
+  int runsOffset = _gprops[storm_num].runs_offset;
+  int projRunsOffset = _gprops[storm_num].proj_runs_offset;
+
   // read in layer props
   
-  if (ufread(_lprops, sizeof(storm_file_layer_props_t),
-	     n_layers, _storm_data_file) != n_layers) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading layer props");
-    TaStr::AddInt(_errStr, "  N layers: ", n_layers);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
+  for (int ilayer = 0; ilayer < nLayers; ilayer++) {
+    storm_file_layer_props_t &ll = _lprops[ilayer];
+    std::vector<size_t> layerIndex = NcxxVar::makeIndex(layerPropsOffset);
+    _lpropsVars.vol_centroid_x.getVal(layerIndex, &ll.vol_centroid_x);
+    _lpropsVars.vol_centroid_y.getVal(layerIndex, &ll.vol_centroid_y);
+    _lpropsVars.refl_centroid_x.getVal(layerIndex, &ll.refl_centroid_x);
+    _lpropsVars.refl_centroid_y.getVal(layerIndex, &ll.refl_centroid_y);
+    _lpropsVars.area.getVal(layerIndex, &ll.area);
+    _lpropsVars.dbz_max.getVal(layerIndex, &ll.dbz_max);
+    _lpropsVars.dbz_mean.getVal(layerIndex, &ll.dbz_mean);
+    _lpropsVars.mass.getVal(layerIndex, &ll.mass);
+    _lpropsVars.rad_vel_mean.getVal(layerIndex, &ll.rad_vel_mean);
+    _lpropsVars.rad_vel_sd.getVal(layerIndex, &ll.rad_vel_sd);
+    _lpropsVars.vorticity.getVal(layerIndex, &ll.vorticity);
+    _lpropsVars.convectivity_median.getVal(layerIndex, &ll.convectivity_median);
   }
-  
-  // decode layer props from network byte order into host byte order
-  
-  BE_to_array_32(_lprops, n_layers * sizeof(storm_file_layer_props_t));
-  
-  // move to hist data position in file
-  
-  fseek(_storm_data_file, _gprops[storm_num].dbz_hist_offset, SEEK_SET);
-  
+
   // read in histogram data
   
-  if (ufread(_hist, sizeof(storm_file_dbz_hist_t),
-	     n_dbz_intervals, _storm_data_file) != n_dbz_intervals) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading dbz histogram");
-    TaStr::AddInt(_errStr, "  N intervals: ", n_dbz_intervals);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
+  for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
+    storm_file_dbz_hist_t &hh = _hist[ihist];
+    std::vector<size_t> histIndex = NcxxVar::makeIndex(dbzHistOffset);
+    _histVars.percent_volume.getVal(histIndex, &hh.percent_volume);
+    _histVars.percent_area.getVal(histIndex, &hh.percent_area);
   }
-  
-  // decode histogram data from network byte order into host byte order
-  
-  BE_to_array_32(_hist, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
-  
-  // move to run data position in file
-  
-  fseek(_storm_data_file, _gprops[storm_num].runs_offset, SEEK_SET);
   
   // read in runs
   
-  if (ufread(_runs, sizeof(storm_file_run_t),
-	     n_runs, _storm_data_file) != n_runs) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading runs");
-    TaStr::AddInt(_errStr, "  N runs: ", n_runs);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode runs from network byte order into host byte order
-  
-  BE_to_array_16(_runs, n_runs * sizeof(storm_file_run_t));
-  
-  // move to proj_run data position in file
-  
-  fseek(_storm_data_file, _gprops[storm_num].proj_runs_offset, SEEK_SET);
-  
-  // read in proj_runs
-  
-  if (ufread(_proj_runs, sizeof(storm_file_run_t),
-	     n_proj_runs, _storm_data_file) != n_proj_runs) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading proj runs");
-    TaStr::AddInt(_errStr, "  N proj runs: ", n_proj_runs);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
+  for (int irun = 0; irun < nRuns; irun++) {
+    storm_file_run_t &run = _runs[irun];
+    std::vector<size_t> runIndex = NcxxVar::makeIndex(runsOffset);
+    _runsVars.run_ix.getVal(runIndex, &run.ix);
+    _runsVars.run_iy.getVal(runIndex, &run.iy);
+    _runsVars.run_iz.getVal(runIndex, &run.iz);
+    _runsVars.run_len.getVal(runIndex, &run.n);
   }
 
-  // decode proj_runs from network byte order into host byte order
+  // read in proj_runs
   
-  BE_to_array_16(_proj_runs, n_proj_runs * sizeof(storm_file_run_t));
-  
+  for (int irun = 0; irun < nProjRuns; irun++) {
+    storm_file_run_t &run = _proj_runs[irun];
+    std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset);
+    _projRunsVars.run_ix.getVal(projRunIndex, &run.ix);
+    _projRunsVars.run_iy.getVal(projRunIndex, &run.iy);
+    _projRunsVars.run_iz.getVal(projRunIndex, &run.iz);
+    _projRunsVars.run_len.getVal(projRunIndex, &run.n);
+  }
+
   return 0;
   
 }
@@ -1595,7 +1578,7 @@ int TitanFile::readProps(int storm_num)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::readScan(int scan_num, int storm_num /* = -1*/ )
+int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
      
 {
   
