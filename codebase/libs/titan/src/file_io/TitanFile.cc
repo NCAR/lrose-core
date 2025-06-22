@@ -3576,50 +3576,43 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     _clearErrStr();
   }
   _errStr += "ERROR - TitanFile::readTrackHeader\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _track_header_file_path);
-
-  // rewind file
+  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
   
-  fseek(_track_header_file, 0L, SEEK_SET);
+  // read in header data
   
-  // read in file label
+  track_file_params_t &tparams = _track_header.params;
   
-  char header_file_label[R_FILE_LABEL_LEN];
-  if (ufread(header_file_label, sizeof(char), R_FILE_LABEL_LEN,
-	     _track_header_file) != R_FILE_LABEL_LEN) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Reading header file label from: ",
-		  _track_header_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
+  _topLevelVars.max_simple_track_num.getVal(&_track_header.max_simple_track_num);
+  _topLevelVars.max_complex_track_num.getVal(&_track_header.max_complex_track_num);
   
-  // check label
+  _tparamsVars.forecast_weights.getVal(&tparams.forecast_weights);
+  _tparamsVars.weight_distance.getVal(&tparams.weight_distance);
+  _tparamsVars.weight_delta_cube_root_volume.getVal(&tparams.weight_delta_cube_root_volume);
+  _tparamsVars.merge_split_search_ratio.getVal(&tparams.merge_split_search_ratio);
+  _tparamsVars.max_tracking_speed.getVal(&tparams.max_tracking_speed);
+  _tparamsVars.max_speed_for_valid_forecast.getVal(&tparams.max_speed_for_valid_forecast);
+  _tparamsVars.parabolic_growth_period.getVal(&tparams.parabolic_growth_period);
+  _tparamsVars.smoothing_radius.getVal(&tparams.smoothing_radius);
+  _tparamsVars.min_fraction_overlap.getVal(&tparams.min_fraction_overlap);
+  _tparamsVars.min_sum_fraction_overlap.getVal(&tparams.min_sum_fraction_overlap);
+  _tparamsVars.scale_forecasts_by_history.getVal(&tparams.scale_forecasts_by_history);
+  _tparamsVars.use_runs_for_overlaps.getVal(&tparams.use_runs_for_overlaps);
+  _tparamsVars.grid_type.getVal(&tparams.grid_type);
+  _tparamsVars.nweights_forecast.getVal(&tparams.nweights_forecast);
+  _tparamsVars.forecast_type.getVal(&tparams.forecast_type);
+  _tparamsVars.max_delta_time.getVal(&tparams.max_delta_time);
+  _tparamsVars.min_history_for_valid_forecast.getVal(&tparams.min_history_for_valid_forecast);
+  _tparamsVars.spatial_smoothing.getVal(&tparams.spatial_smoothing);
   
-  if (_track_header_file_label != header_file_label) {
-    _errStr +=
-      "  Header file does not contain correct label.\n";
-    TaStr::AddStr(_errStr, "  File label is: ", header_file_label);
-    TaStr::AddStr(_errStr, "  Should be: ", _track_header_file_label);
-    return -1;
-  }
-    
-  // read in header
-  
-  if (ufread(&_track_header, sizeof(track_file_header_t),
-	     1, _track_header_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading file header");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode the structure into host byte order - the file
-  // is stored in network byte order
-  
-  si32 nbytes_char = _track_header.nbytes_char;
-  BE_to_array_32(&nbytes_char, sizeof(si32));
-  BE_to_array_32(&_track_header, (sizeof(track_file_header_t) - nbytes_char));
+  _tstateVars.tracking_valid.getVal(&_track_header.file_valid);
+  _tstateVars.tracking_modify_code.getVal(&_track_header.modify_code);
+  _tstateVars.n_samples_for_forecast_stats.getVal(&_track_header.n_samples_for_forecast_stats);
+  _tstateVars.last_scan_num.getVal(&_track_header.last_scan_num);
+  _tstateVars.max_simple_track_num.getVal(&_track_header.max_simple_track_num);
+  _tstateVars.max_complex_track_num.getVal(&_track_header.max_complex_track_num);
+  _tstateVars.max_parents.getVal(&_track_header.max_parents);
+  _tstateVars.max_children.getVal(&_track_header.max_children);
+  _tstateVars.max_nweights_forecast.getVal(&_track_header.max_nweights_forecast);
 
   int n_complex_tracks = _track_header.n_complex_tracks;
   int n_simple_tracks = _track_header.n_simple_tracks;
@@ -3661,16 +3654,10 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   allocScanIndex(n_scans);
   
   // read in complex track num array
-
-  if (ufread(_complex_track_nums, sizeof(si32),
-	     n_complex_tracks, _track_header_file) != n_complex_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading complex track nums");
-    TaStr::AddInt(_errStr, "  n_complex_tracks", n_complex_tracks);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  BE_to_array_32(_complex_track_nums, n_complex_tracks * sizeof(si32));
+  
+  std::vector<size_t> compNumIndex = NcxxVar::makeIndex(0);
+  std::vector<size_t> compNumCount = NcxxVar::makeIndex(n_complex_tracks);
+  _complexVars.complex_track_num.getVal(compNumIndex, compNumCount, _complex_track_nums);
   
   // read in complex track offsets
   
