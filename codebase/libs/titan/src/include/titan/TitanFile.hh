@@ -959,6 +959,8 @@ protected:
 
   // storm data
 
+  int _nScans, _nStorms;
+
   storm_file_header_t _storm_header;
   storm_file_scan_header_t _scan;
   storm_file_global_props_t *_gprops;

@@ -1363,71 +1363,56 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
     _clearErrStr();
   }
   _errStr += "ERROR - TitanFile::readStormHeader\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _storm_header_file_path);
+  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
-  // rewind file
+  // top level vars
   
-  fseek(_storm_header_file, 0L, SEEK_SET);
+  _topLevelVars.file_time.getVal(&_storm_header.file_time);
+  _topLevelVars.start_time.getVal(&_storm_header.start_time);
+  _topLevelVars.end_time.getVal(&_storm_header.end_time);
+  _topLevelVars.n_scans.getVal(&_nScans);
+  _topLevelVars.n_storms.getVal(&_nStorms);
+
+  // storm params
   
-  // read in header file label
-  
-  char header_file_label[R_FILE_LABEL_LEN];
-  if (ufread(header_file_label, sizeof(char), R_FILE_LABEL_LEN,
-	     _storm_header_file) != R_FILE_LABEL_LEN) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Reading header file label from: ",
-		  _storm_header_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // check label
-  
-  if (_storm_header_file_label != header_file_label) {
-    _errStr +=
-      "  Header file does not contain correct label.\n";
-    TaStr::AddStr(_errStr, "  File label is: ", header_file_label);
-    TaStr::AddStr(_errStr, "  Should be: ", _storm_header_file_label);
-    return -1;
-  }
-    
-  // read in header
-  
-  if (ufread(&_storm_header, sizeof(storm_file_header_t),
-	     1, _storm_header_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading storm file header structure");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode the structure into host byte order - the file
-  // is stored in network byte order
-  
-  si32 nbytes_char = _storm_header.nbytes_char;
-  BE_to_array_32(&nbytes_char, sizeof(si32));
-  BE_to_array_32(&_storm_header, (sizeof(storm_file_header_t) - nbytes_char));
-  
-  // allocate space for scan offsets array
-  
-  int n_scans = _storm_header.n_scans;
-  
-  allocScanOffsets(n_scans);
-  
-  // read in scan offsets
-  
-  if (ufread(_scan_offsets, sizeof(si32), n_scans,
-	     _storm_header_file) != n_scans) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading storm file scan offsets");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode the offset array from network byte order into host byte order
-  
-  BE_to_array_32(_scan_offsets, n_scans * sizeof(si32));
-  
+  storm_file_params_t &sparams = _storm_header.params;
+  _sparamsVars.low_dbz_threshold.getVal(&sparams.low_dbz_threshold);
+  _sparamsVars.high_dbz_threshold.getVal(&sparams.high_dbz_threshold);
+  _sparamsVars.dbz_hist_interval.getVal(&sparams.dbz_hist_interval);
+  _sparamsVars.hail_dbz_threshold.getVal(&sparams.hail_dbz_threshold);
+  _sparamsVars.base_threshold.getVal(&sparams.base_threshold);
+  _sparamsVars.top_threshold.getVal(&sparams.top_threshold);
+  _sparamsVars.min_storm_size.getVal(&sparams.min_storm_size);
+  _sparamsVars.max_storm_size.getVal(&sparams.max_storm_size);
+  _sparamsVars.morphology_erosion_threshold.getVal(&sparams.morphology_erosion_threshold);
+  _sparamsVars.morphology_refl_divisor.getVal(&sparams.morphology_refl_divisor);
+  _sparamsVars.min_radar_tops.getVal(&sparams.min_radar_tops);
+  _sparamsVars.tops_edge_margin.getVal(&sparams.tops_edge_margin);
+  _sparamsVars.z_p_coeff.getVal(&sparams.z_p_coeff);
+  _sparamsVars.z_p_exponent.getVal(&sparams.z_p_exponent);
+  _sparamsVars.z_m_coeff.getVal(&sparams.z_m_coeff);
+  _sparamsVars.z_m_exponent.getVal(&sparams.z_m_exponent);
+  _sparamsVars.sectrip_vert_aspect.getVal(&sparams.sectrip_vert_aspect);
+  _sparamsVars.sectrip_horiz_aspect.getVal(&sparams.sectrip_horiz_aspect);
+  _sparamsVars.sectrip_orientation_error.getVal(&sparams.sectrip_orientation_error);
+  _sparamsVars.poly_start_az.getVal(&sparams.poly_start_az);
+  _sparamsVars.poly_delta_az.getVal(&sparams.poly_delta_az);
+  _sparamsVars.check_morphology.getVal(&sparams.check_morphology);
+  _sparamsVars.check_tops.getVal(&sparams.check_tops);
+  _sparamsVars.vel_available.getVal(&sparams.vel_available);
+  _sparamsVars.n_poly_sides.getVal(&sparams.n_poly_sides);
+  _sparamsVars.ltg_count_time.getVal(&sparams.ltg_count_time);
+  _sparamsVars.ltg_count_margin_km.getVal(&sparams.ltg_count_margin_km);
+  _sparamsVars.hail_z_m_coeff.getVal(&sparams.hail_z_m_coeff);
+  _sparamsVars.hail_z_m_exponent.getVal(&sparams.hail_z_m_exponent);
+  _sparamsVars.hail_mass_dbz_threshold.getVal(&sparams.hail_mass_dbz_threshold);
+  _sparamsVars.gprops_union_type.getVal(&sparams.gprops_union_type);
+  _sparamsVars.tops_dbz_threshold.getVal(&sparams.tops_dbz_threshold);
+  _sparamsVars.precip_computation_mode.getVal(&sparams.precip_computation_mode);
+  _sparamsVars.precip_plane_ht.getVal(&sparams.precip_plane_ht);
+  _sparamsVars.low_convectivity_threshold.getVal(&sparams.low_convectivity_threshold);
+  _sparamsVars.high_convectivity_threshold.getVal(&sparams.high_convectivity_threshold);
+
   return 0;
   
 }
@@ -1445,6 +1430,7 @@ int TitanFile::readProjRuns(int storm_num)
 {
   
   _clearErrStr();
+
   _errStr += "ERROR - TitanFile::readProjRuns\n";
 
   // return early if nstorms is zero
@@ -1459,31 +1445,21 @@ int TitanFile::readProjRuns(int storm_num)
   
   // allocate mem
   
-  int n_proj_runs = _gprops[storm_num].n_proj_runs;
-
-  allocProjRuns(n_proj_runs);
+  int nProjRuns = _gprops[storm_num].n_proj_runs;
+  allocProjRuns(nProjRuns);
   
-  // move to proj_run data position in file
+  // read in runs
   
-  fseek(_storm_data_file, _gprops[storm_num].proj_runs_offset, SEEK_SET);
-  
-  // read in proj_runs
-  
-  if (ufread(_proj_runs, sizeof(storm_file_run_t), n_proj_runs,
-	     _storm_data_file) != n_proj_runs) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Reading proj runs, file: ", _storm_data_file_path);
-    TaStr::AddInt(_errStr, "  N runs: ", n_proj_runs);
-    TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
-    TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
+  int projRunsOffset = _gprops[storm_num].proj_runs_offset;
+  for (int irun = 0; irun < nProjRuns; irun++) {
+    storm_file_run_t &run = _proj_runs[irun];
+    std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset);
+    _projRunsVars.run_ix.getVal(projRunIndex, &run.ix);
+    _projRunsVars.run_iy.getVal(projRunIndex, &run.iy);
+    _projRunsVars.run_iz.getVal(projRunIndex, &run.iz);
+    _projRunsVars.run_len.getVal(projRunIndex, &run.n);
   }
-  
-  // decode proj_runs from network byte order into host byte order
-  
-  BE_to_array_16(_proj_runs, n_proj_runs * sizeof(storm_file_run_t));
-  
+
   return 0;
   
 }
