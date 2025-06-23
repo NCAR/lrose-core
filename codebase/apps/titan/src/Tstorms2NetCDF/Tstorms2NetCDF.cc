@@ -344,13 +344,13 @@ int Tstorms2NetCDF::_processInputFile()
 
   // write the simples_per_complex arrays
 
-  vector<si32> simpsPerComplexLin;
+  vector<si32> simpsPerComplex1D;
   vector<si32> simpsPerComplexOffsets;
-  _tFile.LoadVecSimplesPerComplex(simpsPerComplexLin, simpsPerComplexOffsets);
+  _tFile.LoadVecSimplesPerComplex(simpsPerComplex1D, simpsPerComplexOffsets);
   _ncFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
                                        _tFile.nsimples_per_complex(),
                                        simpsPerComplexOffsets.data(),
-                                       simpsPerComplexLin.data());
+                                       simpsPerComplex1D.data());
   
   // read in track scan index
   

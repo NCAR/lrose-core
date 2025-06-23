@@ -338,7 +338,7 @@ private:
     NcxxVar first_entry_offset;
 
     NcxxVar n_simples_per_complex;
-    NcxxVar simples_per_complex;
+    NcxxVar simples_per_complex_1D;
     NcxxVar simples_per_complex_offsets;
 
   };
@@ -484,9 +484,10 @@ public:
   const si32 *complex_track_nums() { return _complex_track_nums; }
   const si32 *complex_track_offsets() { return _complex_track_offsets; }
   const si32 *simple_track_offsets() { return _simple_track_offsets; }
-  const si32 *nsimples_per_complex() { return _nsimples_per_complex; }
+  const si32 *n_simples_per_complex() { return _n_simples_per_complex; }
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
-  si32 **simples_per_complex() { return _simples_per_complex; }
+  si32 *simples_per_complex_1D() { return _simples_per_complex_1D; }
+  si32 **simples_per_complex() { return _simples_per_complex_2D; }
 
   // public functions
 
@@ -633,27 +634,6 @@ public:
                     const storm_file_run_t *runs,
                     const storm_file_run_t *proj_runs);
   
-  // Convert the ellipse data (orientation, major_radius and minor_radius)
-  // for a a gprops struct to local (km) values.
-  // This applies to structs which were derived from lat-lon grids, for
-  // which some of the fields are in deg instead of km.
-  // It is a no-op for other projections.
-  //
-  // See Note 3 in storms.h
-
-  void gpropsEllipses2Km(const storm_file_scan_header_t &scan,
-			 storm_file_global_props_t &gprops);
-  
-     
-  // Convert the (x,y) km locations in a gprops struct to lat-lon.
-  // This applies to structs which were computed for non-latlon 
-  // grids. It is a no-op for lat-lon grids.
-  //
-  // See Note 3 in storms.h
-  
-  void gpropsXY2LatLon(const storm_file_scan_header_t &scan,
-		       storm_file_global_props_t &gprops);
-  
   // Truncate header file
   // Returns 0 on success, -1 on failure.
 
@@ -695,7 +675,7 @@ public:
   
   // read in the track_file_header_t structure from a track file.
   // Read in associated arrays (complex_track_nums, complex_track_offsets,
-  //   simple_track_offsets, scan_index, nsimples_per_complex,
+  //   simple_track_offsets, scan_index, n_simples_per_complex,
   //   simples_per_complex_offsets)
   // returns 0 on success, -1 on failure
 
@@ -730,7 +710,7 @@ public:
   // read in the array of simple tracks for each complex track
   // returns 0 on success, -1 on failure
   
-  int readSimplesPerComplex();
+  int readSimplesPerComplex(bool clear_error_str = false);
   
   // read in entries for a scan
   // returns 0 on success, -1 on failure
@@ -810,9 +790,9 @@ public:
   // returns 0 on success, -1 on failure
   
   int writeSimplesPerComplexArrays(int n_simple_tracks,
-                                   const si32 *nsimples_per_complex,
+                                   const si32 *n_simples_per_complex,
                                    const si32 *simples_per_complex_offsets,
-                                   const si32 *simples_per_complex);
+                                   const si32 *simples_per_complex_1D);
      
   // get the offset of storm or entry props, given the
   // scan_num and storm_num.
@@ -827,6 +807,27 @@ public:
   
   int getNextScanEntryOffset(int scan_num,
                              int storm_num);
+  
+  // Convert the ellipse data (orientation, major_radius and minor_radius)
+  // for a a gprops struct to local (km) values.
+  // This applies to structs which were derived from lat-lon grids, for
+  // which some of the fields are in deg instead of km.
+  // It is a no-op for other projections.
+  //
+  // See Note 3 in storms.h
+
+  void gpropsEllipses2Km(const storm_file_scan_header_t &scan,
+			 storm_file_global_props_t &gprops);
+  
+     
+  // Convert the (x,y) km locations in a gprops struct to lat-lon.
+  // This applies to structs which were computed for non-latlon 
+  // grids. It is a no-op for lat-lon grids.
+  //
+  // See Note 3 in storms.h
+  
+  void gpropsXY2LatLon(const storm_file_scan_header_t &scan,
+		       storm_file_global_props_t &gprops);
   
   ///////////////////////////////////////////////////////////////////
   // error string
@@ -1006,9 +1007,10 @@ protected:
   si32 *_complex_track_nums;
   si32 *_complex_track_offsets;
   si32 *_simple_track_offsets;
-  si32 *_nsimples_per_complex;
+  si32 *_n_simples_per_complex;
   si32 *_simples_per_complex_offsets;
-  si32 **_simples_per_complex;
+  si32 *_simples_per_complex_1D;
+  si32 **_simples_per_complex_2D;
   int _n_scan_entries;
   
   // track memory allocation control
