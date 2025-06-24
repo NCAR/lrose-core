@@ -3645,9 +3645,9 @@ int TitanFile::lockTrackHeaderFile(const char *mode)
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::lockTrackHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _track_header_file_path);
+  TaStr::AddStr(_errStr, "  File: ", _filePath);
   
-  if (ta_lock_file_procmap(_track_header_file_path.c_str(),
+  if (ta_lock_file_procmap(_filePath.c_str(),
 			   _track_header_file, mode)) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  ", "Cannot lock file");
@@ -3675,9 +3675,9 @@ int TitanFile::unlockTrackHeaderFile()
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::unlockTrackHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _track_header_file_path);
+  TaStr::AddStr(_errStr, "  File: ", _filePath);
   
-  if (ta_unlock_file(_track_header_file_path.c_str(),
+  if (ta_unlock_file(_filePath.c_str(),
 		     _track_header_file)) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  ", "Cannot unlock file");
@@ -3815,7 +3815,7 @@ int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
     _clearErrStr();
   }
   _errStr += "ERROR - TitanFile::readScanIndex\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _track_header_file_path);
+  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
   // rewind file
   
@@ -3828,7 +3828,7 @@ int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
 	     _track_header_file) != R_FILE_LABEL_LEN) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  Reading header file label from: ",
-		  _track_header_file_path);
+		  _filePath);
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
   }
