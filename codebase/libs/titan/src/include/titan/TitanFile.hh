@@ -741,13 +741,13 @@ public:
   // params and setting the first_entry flag
   // returns 0 on success, -1 on failure
 
-  int rewindSimple(int track_num);
+  int rewindSimpleTrack(int track_num);
      
   // rewrite an entry for a track in the track data file
   // The entry is written at the file offset of the original entry
   // returns 0 on success, -1 on failure
   
-  int rewriteEntry();
+  int rewriteTrackEntry();
      
   // seek to the end of the track file data
 

@@ -4007,7 +4007,7 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readSimpleTrackParams(int track_num,
+int TitanFile::readSimpleTrackParams(int simple_track_num,
                                      bool clear_error_str /* = true*/ )
      
 {
@@ -4017,23 +4017,40 @@ int TitanFile::readSimpleTrackParams(int track_num,
   }
   _errStr += "ERROR - TitanFile::readSimpleParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  track_num", track_num);
+  TaStr::AddInt(_errStr, "  simple_track_num", simple_track_num);
+  
+  std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
+  simple_track_params_t &sp(_simple_params);
 
-  // move to offset in file
+  _simpleVars.simple_track_num.getVal(simpleIndex, &sp.simple_track_num);
+  _simpleVars.last_descendant_simple_track_num.getVal
+    (simpleIndex, &sp.last_descendant_simple_track_num);
+  _simpleVars.start_scan.getVal(simpleIndex, &sp.start_scan);
+  _simpleVars.end_scan.getVal(simpleIndex, &sp.end_scan);
+  _simpleVars.last_descendant_end_scan.getVal(simpleIndex, &sp.last_descendant_end_scan);
+  _simpleVars.scan_origin.getVal(simpleIndex, &sp.scan_origin);
+  _simpleVars.start_time.getVal(simpleIndex, &sp.start_time);
+  _simpleVars.end_time.getVal(simpleIndex, &sp.end_time);
+  _simpleVars.last_descendant_end_time.getVal(simpleIndex, &sp.last_descendant_end_time);
+  _simpleVars.time_origin.getVal(simpleIndex, &sp.time_origin);
+  _simpleVars.history_in_scans.getVal(simpleIndex, &sp.history_in_scans);
+  _simpleVars.history_in_secs.getVal(simpleIndex, &sp.history_in_secs);
+  _simpleVars.duration_in_scans.getVal(simpleIndex, &sp.duration_in_scans);
+  _simpleVars.duration_in_secs.getVal(simpleIndex, &sp.duration_in_secs);
+  _simpleVars.nparents.getVal(simpleIndex, &sp.nparents);
+  _simpleVars.nchildren.getVal(simpleIndex, &sp.nchildren);
+
+  std::vector<size_t> parentIndex = NcxxVar::makeIndex(simple_track_num, 0);
+  std::vector<size_t> parentCount = NcxxVar::makeIndex(1, sp.nparents);
+  _simpleVars.parent.getVal(parentIndex, parentCount, &sp.parent);
   
-  fseek(_track_data_file, _simple_track_offsets[track_num], SEEK_SET);
-  
-  // read in params
-  
-  if (ufread(&_simple_params, sizeof(simple_track_params_t),
-	     1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading simple_track_params");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  BE_to_array_32(&_simple_params, sizeof(simple_track_params_t));
-  
+  std::vector<size_t> childIndex = NcxxVar::makeIndex(simple_track_num, 0);
+  std::vector<size_t> childCount = NcxxVar::makeIndex(1, sp.nchildren);
+  _simpleVars.child.getVal(childIndex, childCount, &sp.child);
+
+  _simpleVars.complex_track_num.getVal(simpleIndex, &sp.complex_track_num);
+  _simpleVars.first_entry_offset.getVal(simpleIndex, &sp.first_entry_offset);
+
   return 0;
   
 }
@@ -4059,30 +4076,33 @@ int TitanFile::readTrackEntry()
 
   // move to the entry offset in the file
   
-  long offset;
+  int entryOffset;
   if (_first_entry) {
-    offset = _simple_params.first_entry_offset;
+    entryOffset = _simple_params.first_entry_offset;
     _first_entry = false;
   } else {
-    offset = _entry.next_entry_offset;
+    entryOffset = _entry.next_entry_offset;
   }
   
-  fseek(_track_data_file, offset, SEEK_SET);
+  std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
   
-  // read in entry
-  
-  if (ufread(&_entry, sizeof(track_file_entry_t),
-	     1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading track entry");
-    TaStr::AddInt(_errStr, "  Simple track num: ",
-		  _simple_params.simple_track_num);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  BE_to_array_32(&_entry, sizeof(track_file_entry_t));
-  
+  _entryVars.time.getVal(entryIndex, &_entry.time);
+  _entryVars.time_origin.getVal(entryIndex, &_entry.time_origin);
+  _entryVars.scan_origin.getVal(entryIndex, &_entry.scan_origin);
+  _entryVars.scan_num.getVal(entryIndex, &_entry.scan_num);
+  _entryVars.storm_num.getVal(entryIndex, &_entry.storm_num);
+  _entryVars.simple_track_num.getVal(entryIndex, &_entry.simple_track_num);
+  _entryVars.complex_track_num.getVal(entryIndex, &_entry.complex_track_num);
+  _entryVars.history_in_scans.getVal(entryIndex, &_entry.history_in_scans);
+  _entryVars.history_in_secs.getVal(entryIndex, &_entry.history_in_secs);
+  _entryVars.duration_in_scans.getVal(entryIndex, &_entry.duration_in_scans);
+  _entryVars.duration_in_secs.getVal(entryIndex, &_entry.duration_in_secs);
+  _entryVars.forecast_valid.getVal(entryIndex, &_entry.forecast_valid);
+  _entryVars.prev_entry_offset.getVal(entryIndex, &_entry.prev_entry_offset);
+  _entryVars.this_entry_offset.getVal(entryIndex, &_entry.this_entry_offset);
+  _entryVars.next_entry_offset.getVal(entryIndex, &_entry.next_entry_offset);
+  _entryVars.next_scan_entry_offset.getVal(entryIndex, &_entry.next_scan_entry_offset);
+
   return 0;
   
 }
@@ -4420,7 +4440,7 @@ int TitanFile::clearComplexSlot(int complex_track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::rewindSimple(int track_num)
+int TitanFile::rewindSimpleTrack(int track_num)
      
 {
 
@@ -4451,34 +4471,16 @@ int TitanFile::rewindSimple(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::rewriteEntry()
+int TitanFile::rewriteTrackEntry()
      
 {
   
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::RewriteEntry\n";
+  // _clearErrStr();
+  _errStr += "ERROR - TitanFile::rewriteTrackEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
-
-  // code copy into network byte order
   
   track_file_entry_t entry = _entry;
-  BE_to_array_32(&entry, sizeof(track_file_entry_t));
-  
-  // move to entry offset
-  
-  fseek(_track_data_file, _entry.this_entry_offset, SEEK_SET);
-  
-  // write entry
-  
-  if (ufwrite(&entry, sizeof(track_file_entry_t),
-	      1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing track entry");
-    TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
+  return writeTrackEntry(entry);
   return 0;
   
 }
