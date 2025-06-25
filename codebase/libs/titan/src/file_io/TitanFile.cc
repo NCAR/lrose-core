@@ -745,7 +745,6 @@ void TitanFile::_setUpVars()
   // tracking parameters
 
   _tparamsVars.forecast_weights =
-    
     _getVar(FORECAST_WEIGHTS, NcxxType::nc_FLOAT, _max_forecast_weights, _tracksGroup);
   _tparamsVars.weight_distance =
     _getVar(WEIGHT_DISTANCE, NcxxType::nc_FLOAT, _tracksGroup);
@@ -930,11 +929,16 @@ void TitanFile::_setUpVars()
     _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _n_simple, _simpleGroup);
   _simpleVars.simples_per_complex_offsets =
     _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _n_simple, _simpleGroup);
+
+  // array of complex track nums - these are in increasing order, no gaps
   
-  // complex tracks
+  _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _n_complex, _complexGroup);
+  _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
+
+  // params for each complex track
 
   _complexVars.complex_track_num =
-    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _n_complex, _complexGroup);
+    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _max_complex, _complexGroup);
   _complexVars.volume_at_start_of_sampling =
     _getVar(VOLUME_AT_START_OF_SAMPLING, NcxxType::nc_FLOAT, _max_complex, _complexGroup, KM3);
   _complexVars.volume_at_end_of_sampling =
@@ -3784,11 +3788,15 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   allocScanIndex(n_scans);
   
   // read in complex track num array
+  // complex_track_nums has dimension _n_complex.
+  // The track numbers are monotonically increasing, but will have gaps
+  // due to mergers and splits which means multiple simple tracks in
+  // a complex track.
   
   std::vector<size_t> compNumIndex = NcxxVar::makeIndex(0);
   std::vector<size_t> compNumCount = NcxxVar::makeIndex(n_complex_tracks);
-  _complexVars.complex_track_num.getVal(compNumIndex, compNumCount, _complex_track_nums);
-  
+  _complexTrackNumsVar.getVal(compNumIndex, compNumCount, _complex_track_nums);
+
   // read in simples_per_complex 1D array, create 2D array
   
   if (readSimplesPerComplex(false)) {
@@ -3908,9 +3916,9 @@ int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readComplexParams(int track_num,
-                                 bool read_simples_per_complex,
-                                 bool clear_error_str /* = true*/ )
+int TitanFile::readComplexTrackParams(int complex_track_num,
+                                      bool read_simples_per_complex,
+                                      bool clear_error_str /* = true*/ )
      
 {
   
@@ -3919,60 +3927,74 @@ int TitanFile::readComplexParams(int track_num,
   }
   _errStr += "ERROR - TitanFile::readComplexParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  track_num", track_num);
+  TaStr::AddInt(_errStr, "  track_num", complex_track_num);
 
-  // move to offset in file
+  // the complex track params are indexed from the complex track number
+  // these arrays will have gaps
   
-  if (_complex_track_offsets[track_num] == 0) {
-    return -1;
-  }
+  std::vector<size_t> varIndex = NcxxVar::makeIndex(complex_track_num);
+  complex_track_params_t &cp(_complex_params);
+  _complexVars.complex_track_num.getVal(varIndex, &cp.complex_track_num);
+  _complexVars.volume_at_start_of_sampling.getVal(varIndex, &cp.volume_at_start_of_sampling);
+  _complexVars.volume_at_end_of_sampling.getVal(varIndex, &cp.volume_at_end_of_sampling);
+  _complexVars.start_scan.getVal(varIndex, &cp.start_scan);
+  _complexVars.end_scan.getVal(varIndex, &cp.end_scan);
+  _complexVars.duration_in_scans.getVal(varIndex, &cp.duration_in_scans);
+  _complexVars.duration_in_secs.getVal(varIndex, &cp.duration_in_secs);
+  _complexVars.start_time.getVal(varIndex, &cp.start_time);
+  _complexVars.end_time.getVal(varIndex, &cp.end_time);
+  _complexVars.n_simple_tracks.getVal(varIndex, &cp.n_simple_tracks);
+  _complexVars.n_top_missing.getVal(varIndex, &cp.n_top_missing);
+  _complexVars.n_range_limited.getVal(varIndex, &cp.n_range_limited);
+  _complexVars.start_missing.getVal(varIndex, &cp.start_missing);
+  _complexVars.end_missing.getVal(varIndex, &cp.end_missing);
+  _complexVars.n_samples_for_forecast_stats.getVal(varIndex, &cp.n_samples_for_forecast_stats);
+
+  _complexVerifyVars.ellipse_forecast_n_success.getVal(varIndex, &cp.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_failure.getVal(varIndex, &cp.ellipse_verify.n_success);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm.getVal(varIndex, &cp.ellipse_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_success.getVal(varIndex, &cp.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_failure.getVal(varIndex, &cp.polygon_verify.n_success);
+  _complexVerifyVars.polygon_forecast_n_false_alarm.getVal(varIndex, &cp.polygon_verify.n_success);
   
-  fseek(_track_data_file, _complex_track_offsets[track_num], SEEK_SET);
+  _complexBiasVars.proj_area_centroid_x.getVal(varIndex, &cp.forecast_bias.proj_area_centroid_x);
+  _complexBiasVars.proj_area_centroid_y.getVal(varIndex, &cp.forecast_bias.proj_area_centroid_y);
+  _complexBiasVars.vol_centroid_z.getVal(varIndex, &cp.forecast_bias.vol_centroid_z);
+  _complexBiasVars.refl_centroid_z.getVal(varIndex, &cp.forecast_bias.refl_centroid_z);
+  _complexBiasVars.top.getVal(varIndex, &cp.forecast_bias.top);
+  _complexBiasVars.dbz_max.getVal(varIndex, &cp.forecast_bias.dbz_max);
+  _complexBiasVars.volume.getVal(varIndex, &cp.forecast_bias.volume);
+  _complexBiasVars.precip_flux.getVal(varIndex, &cp.forecast_bias.precip_flux);
+  _complexBiasVars.mass.getVal(varIndex, &cp.forecast_bias.mass);
+  _complexBiasVars.proj_area.getVal(varIndex, &cp.forecast_bias.proj_area);
+  _complexBiasVars.smoothed_proj_area_centroid_x.getVal(varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_x);
+  _complexBiasVars.smoothed_proj_area_centroid_y.getVal(varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_y);
+  _complexBiasVars.smoothed_speed.getVal(varIndex, &cp.forecast_bias.smoothed_speed);
+  _complexBiasVars.smoothed_direction.getVal(varIndex, &cp.forecast_bias.smoothed_direction);
   
-  // read in params
-  
-  if (ufread(&_complex_params, sizeof(complex_track_params_t),
-	     1, _track_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading complex_track_params");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  BE_to_array_32(&_complex_params, sizeof(complex_track_params_t));
+  _complexRmseVars.proj_area_centroid_x.getVal(varIndex, &cp.forecast_rmse.proj_area_centroid_x);
+  _complexRmseVars.proj_area_centroid_y.getVal(varIndex, &cp.forecast_rmse.proj_area_centroid_y);
+  _complexRmseVars.vol_centroid_z.getVal(varIndex, &cp.forecast_rmse.vol_centroid_z);
+  _complexRmseVars.refl_centroid_z.getVal(varIndex, &cp.forecast_rmse.refl_centroid_z);
+  _complexRmseVars.top.getVal(varIndex, &cp.forecast_rmse.top);
+  _complexRmseVars.dbz_max.getVal(varIndex, &cp.forecast_rmse.dbz_max);
+  _complexRmseVars.volume.getVal(varIndex, &cp.forecast_rmse.volume);
+  _complexRmseVars.precip_flux.getVal(varIndex, &cp.forecast_rmse.precip_flux);
+  _complexRmseVars.mass.getVal(varIndex, &cp.forecast_rmse.mass);
+  _complexRmseVars.proj_area.getVal(varIndex, &cp.forecast_rmse.proj_area);
+  _complexRmseVars.smoothed_proj_area_centroid_x.getVal(varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_x);
+  _complexRmseVars.smoothed_proj_area_centroid_y.getVal(varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_y);
+  _complexRmseVars.smoothed_speed.getVal(varIndex, &cp.forecast_rmse.smoothed_speed);
+  _complexRmseVars.smoothed_direction.getVal(varIndex, &cp.forecast_rmse.smoothed_direction);
   
   // If read_simples_per_complex is set,
   // read in simples_per_complex array, which indicates which
   // simple tracks are part of this complex track.
 
   if (read_simples_per_complex) {
-    
-    int n_simples = _n_simples_per_complex[track_num];
-    
-    allocSimplesPerComplex(track_num + 1);
+    return readSimplesPerComplex(false);
+  }
 
-    if (_simples_per_complex_2D[track_num] == nullptr) {
-      _simples_per_complex_2D[track_num] = (si32 *) umalloc
-	(n_simples * sizeof(si32));
-    } else {
-      _simples_per_complex_2D[track_num] = (si32 *) urealloc
-	(_simples_per_complex_2D[track_num],
-	 n_simples * sizeof(si32));
-    }
-    
-    fseek(_track_header_file, _simples_per_complex_offsets[track_num], SEEK_SET);
-  
-    if (ufread(_simples_per_complex_2D[track_num],
-	       sizeof(si32), n_simples, _track_header_file) != n_simples) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ", "Reading simples per complex for");
-      TaStr::AddStr(_errStr, "  ", "  complex track params.");
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    BE_to_array_32(_simples_per_complex_2D[track_num], n_simples * sizeof(si32));
-
-  } //   if (read_simples_per_complex) 
-  
   return 0;
   
 }
@@ -3985,8 +4007,8 @@ int TitanFile::readComplexParams(int track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readSimpleParams(int track_num,
-                                bool clear_error_str /* = true*/ )
+int TitanFile::readSimpleTrackParams(int track_num,
+                                     bool clear_error_str /* = true*/ )
      
 {
   
@@ -4027,7 +4049,7 @@ int TitanFile::readSimpleParams(int track_num,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readEntry()
+int TitanFile::readTrackEntry()
      
 {
   
@@ -4200,7 +4222,7 @@ int TitanFile::readUtime()
     
     int complex_track_num = _complex_track_nums[icomp];
     
-    if (readComplexParams(complex_track_num, true, false)) {
+    if (readComplexTrackParams(complex_track_num, true, false)) {
       return -1;
     }
     
@@ -4216,7 +4238,7 @@ int TitanFile::readUtime()
     
     int simple_track_num = isimp;
     
-    if (readSimpleParams(simple_track_num, false)) {
+    if (readSimpleTrackParams(simple_track_num, false)) {
       return -1;
     }
     
@@ -4328,6 +4350,7 @@ int TitanFile::clearComplexSlot(int complex_track_num)
 
   std::vector<size_t> varIndex = NcxxVar::makeIndex(complex_track_num);
 
+  _complexVars.complex_track_num.putVal(varIndex, Ncxx::missingInt);
   _complexVars.volume_at_start_of_sampling.putVal(varIndex, Ncxx::missingFloat);
   _complexVars.volume_at_end_of_sampling.putVal(varIndex, Ncxx::missingFloat);
   _complexVars.start_scan.putVal(varIndex, Ncxx::missingInt);
@@ -4406,7 +4429,7 @@ int TitanFile::rewindSimple(int track_num)
   
   // read in simple track params
   
-  if (readSimpleParams(track_num, false)) {
+  if (readSimpleTrackParams(track_num, false)) {
     return -1;
   }
 
@@ -4830,22 +4853,17 @@ int TitanFile::writeComplexTrackParams(int cindex,
   _errStr += "ERROR - TitanFile::writeComplexParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  // complex_track_num has dimension _n_complex
+  // complex_track_nums array has dimension _n_complex
   // the track numbers are monotonically increasing, but will have gaps
   // due to mergers and splits
   
   std::vector<size_t> numIndex = NcxxVar::makeIndex(cindex);
-  _complexVars.complex_track_num.putVal(numIndex, cparams.complex_track_num);
-
-  // write the complex offset for retrieving the complex params later
+  _complexTrackNumsVar.putVal(numIndex, cparams.complex_track_num);
   
-  // std::vector<size_t> offsetIndex = NcxxVar::makeIndex(cparams.complex_track_num);
-  
-  // the complex track params are indexed from the complex track number
-  // these arrays will have gaps
+  // variables with dimension _max_complex
   
   std::vector<size_t> varIndex = NcxxVar::makeIndex(cparams.complex_track_num);
-
+  _complexVars.complex_track_num.putVal(varIndex, cparams.complex_track_num);
   _complexVars.volume_at_start_of_sampling.putVal(varIndex, cparams.volume_at_start_of_sampling);
   _complexVars.volume_at_end_of_sampling.putVal(varIndex, cparams.volume_at_end_of_sampling);
   _complexVars.start_scan.putVal(varIndex, cparams.start_scan);

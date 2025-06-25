@@ -317,6 +317,7 @@ private:
   public:
 
     NcxxVar simple_track_num;
+    NcxxVar complex_track_num;
     NcxxVar last_descendant_simple_track_num;
     NcxxVar start_scan;
     NcxxVar end_scan;
@@ -334,7 +335,6 @@ private:
     NcxxVar nchildren;
     NcxxVar parent;
     NcxxVar child;
-    NcxxVar complex_track_num;
     NcxxVar first_entry_offset;
 
     NcxxVar n_simples_per_complex;
@@ -691,21 +691,21 @@ public:
   // is only set FALSE in Titan, which creates the track files.
   // returns 0 on success, -1 on failure
   
-  int readComplexParams(int track_num, bool read_simples_per_complex,
-			bool clear_error_str = true);
-     
+  int readComplexTrackParams(int track_num, bool read_simples_per_complex,
+                             bool clear_error_str = true);
+  
   // read in the parameters for a simple track
   // returns 0 on success, -1 on failure
 
-  int readSimpleParams(int track_num,
-		       bool clear_error_str = true);
+  int readSimpleTrackParams(int track_num,
+                            bool clear_error_str = true);
      
   // read in an entry for a track
   // If first_entry is set to TRUE, then the first entry is read in. If not
   // the next entry is read in.
   // returns 0 on success, -1 on failure
   
-  int readEntry();
+  int readTrackEntry();
   
   // read in the array of simple tracks for each complex track
   // returns 0 on success, -1 on failure
@@ -923,6 +923,7 @@ protected:
   TrackingStateVars _tstateVars;
   TrackingVerifyVars _tverifyVars;
   SimpleTrackVars _simpleVars;
+  NcxxVar _complexTrackNumsVar;
   ComplexTrackVars _complexVars;
   TrackEntryVars _entryVars;
   
@@ -1423,6 +1424,7 @@ public:
   const std::string VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
   const std::string VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
   const std::string COMPLEX_TRACK_NUM = "complex_track_num";
+  const std::string COMPLEX_TRACK_NUMS = "complex_track_nums";
   const std::string N_SIMPLE_TRACKS = "n_simple_tracks";
   const std::string N_TOP_MISSING = "n_top_missing";
   const std::string N_RANGE_LIMITED = "n_range_limited";
