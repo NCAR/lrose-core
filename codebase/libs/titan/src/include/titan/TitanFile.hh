@@ -1115,6 +1115,10 @@ protected:
   // truncate when rerunning
   
   int _truncateStormFiles(FILE *&fd, const string &path, int length);
+
+  // read entry at given offset
+
+  int _readTrackEntry(track_file_entry_t &entry, int entryOffset);
   
 public:
 

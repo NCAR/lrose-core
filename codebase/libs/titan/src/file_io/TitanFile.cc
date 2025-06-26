@@ -4070,7 +4070,7 @@ int TitanFile::readTrackEntry()
   _errStr += "ERROR - TitanFile::readEntry\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
-  // move to the entry offset in the file
+  // set entry offset in the file
   
   int entryOffset;
   if (_first_entry) {
@@ -4079,25 +4079,36 @@ int TitanFile::readTrackEntry()
   } else {
     entryOffset = _entry.next_entry_offset;
   }
+
+  // do the read
+
+  return _readTrackEntry(_entry, entryOffset);
+  
+}
+
+int TitanFile::_readTrackEntry(track_file_entry_t &entry,
+                               int entryOffset)
+     
+{
   
   std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
   
-  _entryVars.time.getVal(entryIndex, &_entry.time);
-  _entryVars.time_origin.getVal(entryIndex, &_entry.time_origin);
-  _entryVars.scan_origin.getVal(entryIndex, &_entry.scan_origin);
-  _entryVars.scan_num.getVal(entryIndex, &_entry.scan_num);
-  _entryVars.storm_num.getVal(entryIndex, &_entry.storm_num);
-  _entryVars.simple_track_num.getVal(entryIndex, &_entry.simple_track_num);
-  _entryVars.complex_track_num.getVal(entryIndex, &_entry.complex_track_num);
-  _entryVars.history_in_scans.getVal(entryIndex, &_entry.history_in_scans);
-  _entryVars.history_in_secs.getVal(entryIndex, &_entry.history_in_secs);
-  _entryVars.duration_in_scans.getVal(entryIndex, &_entry.duration_in_scans);
-  _entryVars.duration_in_secs.getVal(entryIndex, &_entry.duration_in_secs);
-  _entryVars.forecast_valid.getVal(entryIndex, &_entry.forecast_valid);
-  _entryVars.prev_entry_offset.getVal(entryIndex, &_entry.prev_entry_offset);
-  _entryVars.this_entry_offset.getVal(entryIndex, &_entry.this_entry_offset);
-  _entryVars.next_entry_offset.getVal(entryIndex, &_entry.next_entry_offset);
-  _entryVars.next_scan_entry_offset.getVal(entryIndex, &_entry.next_scan_entry_offset);
+  _entryVars.time.getVal(entryIndex, &entry.time);
+  _entryVars.time_origin.getVal(entryIndex, &entry.time_origin);
+  _entryVars.scan_origin.getVal(entryIndex, &entry.scan_origin);
+  _entryVars.scan_num.getVal(entryIndex, &entry.scan_num);
+  _entryVars.storm_num.getVal(entryIndex, &entry.storm_num);
+  _entryVars.simple_track_num.getVal(entryIndex, &entry.simple_track_num);
+  _entryVars.complex_track_num.getVal(entryIndex, &entry.complex_track_num);
+  _entryVars.history_in_scans.getVal(entryIndex, &entry.history_in_scans);
+  _entryVars.history_in_secs.getVal(entryIndex, &entry.history_in_secs);
+  _entryVars.duration_in_scans.getVal(entryIndex, &entry.duration_in_scans);
+  _entryVars.duration_in_secs.getVal(entryIndex, &entry.duration_in_secs);
+  _entryVars.forecast_valid.getVal(entryIndex, &entry.forecast_valid);
+  _entryVars.prev_entry_offset.getVal(entryIndex, &entry.prev_entry_offset);
+  _entryVars.this_entry_offset.getVal(entryIndex, &entry.this_entry_offset);
+  _entryVars.next_entry_offset.getVal(entryIndex, &entry.next_entry_offset);
+  _entryVars.next_scan_entry_offset.getVal(entryIndex, &entry.next_scan_entry_offset);
 
   return 0;
   
@@ -4180,36 +4191,28 @@ int TitanFile::readScanEntries(int scan_num)
   _errStr += "ERROR - TitanFile::readScanEntries\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
+  // get nstorms
+
+  int nStorms;
+  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  _scanVars.scan_nstorms.getVal(scanIndex, &nStorms);
+  
   // allocate as necessary
   
-  _n_scan_entries = _scan_index[scan_num].n_entries;
+  _n_scan_entries = nStorms;
   allocScanEntries(_n_scan_entries);
-
+  
+  // loop through storms, reading in the entries
+  
   track_file_entry_t *entry = _scan_entries;
-  int next_entry_offset = _scan_index[scan_num].first_entry_offset;
   
-  for (int ientry = 0; ientry < _n_scan_entries; ientry++, entry++) {
-    
-    // move to the next entry offset in the file
-    
-    fseek(_track_data_file, next_entry_offset, SEEK_SET);
-  
-    // read in entry
-  
-    if (ufread(entry, sizeof(track_file_entry_t),
-	       1, _track_data_file) != 1) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ", "Reading track entry");
-      TaStr::AddInt(_errStr, "  ientry: ", ientry);
-      TaStr::AddInt(_errStr, "  scan_num: ", scan_num);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
+  for (int istorm = 0; istorm < nStorms; istorm++, entry++) {
+    int entryOffset = getNextScanEntryOffset(scan_num, istorm);
+    // read entry into _entry
+    if (_readTrackEntry(*entry, entryOffset)) {
       return -1;
     }
-  
-    BE_to_array_32(entry, sizeof(track_file_entry_t));
-    next_entry_offset = entry->next_scan_entry_offset;
-
-  } // ientry 
+  } // istorm
   
   return 0;
   
