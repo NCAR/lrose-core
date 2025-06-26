@@ -4221,6 +4221,8 @@ int TitanFile::readScanEntries(int scan_num)
 ///////////////////////////////////////////////////////////////////////////
 //
 // read in track_utime_t array
+// the start and end time arrays are used to
+// determine if a track is a valid candidate for display
 //
 // Returns 0 on success or -1 on error
 //
@@ -4236,42 +4238,41 @@ int TitanFile::readUtime()
 
   allocUtime();
   
-  // read the complex and simple track params and load up
-  // the start and end julian time arrays - these are used to
-  // determine if a track is a valid candidate for display
+  int nSimple = _track_header.n_simple_tracks;
+  int nComplex = _track_header.n_complex_tracks;
+  vector<si64> startTime, endTime;
+  startTime.resize(nSimple);
+  std::vector<size_t> index = NcxxVar::makeIndex(0);
+  std::vector<size_t> count = NcxxVar::makeIndex(nSimple);
   
-  for (int icomp = 0; icomp < _track_header.n_complex_tracks; icomp++) {
-    
-    int complex_track_num = _complex_track_nums[icomp];
-    
-    if (readComplexTrackParams(complex_track_num, true, false)) {
-      return -1;
-    }
-    
-    time_t start_time = _complex_params.start_time;
-    time_t end_time = _complex_params.end_time;
-    
-    _track_utime[complex_track_num].start_complex = start_time;
-    _track_utime[complex_track_num].end_complex = end_time;
-
-  } // icomp 
+  // read the start and end times for the simple tracks
   
-  for (int isimp = 0; isimp < _track_header.n_simple_tracks; isimp++) {
-    
-    int simple_track_num = isimp;
-    
-    if (readSimpleTrackParams(simple_track_num, false)) {
-      return -1;
-    }
-    
-    time_t start_time = _simple_params.start_time;
-    time_t end_time = _simple_params.end_time;
-    
-    _track_utime[simple_track_num].start_simple = start_time;
-    _track_utime[simple_track_num].end_simple = end_time;
-
+  _simpleVars.start_time.getVal(index, count, startTime.data());
+  _simpleVars.end_time.getVal(index, count, endTime.data());
+  
+  // set the start and end times in the simple track params
+  
+  for (int isimp = 0; isimp < nSimple; isimp++) {
+    int simpleTrackNum = isimp;
+    _track_utime[simpleTrackNum].start_simple = startTime[isimp];
+    _track_utime[simpleTrackNum].end_simple = endTime[isimp];
   } // isimp 
 
+  // read the start and end times for the complex tracks
+  
+  _complexVars.start_time.getVal(index, count, startTime.data());
+  _complexVars.end_time.getVal(index, count, endTime.data());
+
+  // set the start and end times in the complex track params
+  
+  for (int icomp = 0; icomp < nComplex; icomp++) {
+    int complexTrackNum = _complex_track_nums[icomp];
+    if (complexTrackNum < nSimple) {
+      _track_utime[complexTrackNum].start_complex = startTime[complexTrackNum];
+      _track_utime[complexTrackNum].end_complex = endTime[complexTrackNum];
+    }
+  } // icomp 
+  
   return 0;
 
 }
@@ -4807,7 +4808,8 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
   std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
 
   _simpleVars.simple_track_num.putVal(simpleIndex, sparams.simple_track_num);
-  _simpleVars.last_descendant_simple_track_num.putVal(simpleIndex, sparams.last_descendant_simple_track_num);
+  _simpleVars.last_descendant_simple_track_num.putVal(simpleIndex,
+                                                      sparams.last_descendant_simple_track_num);
   _simpleVars.start_scan.putVal(simpleIndex, sparams.start_scan);
   _simpleVars.end_scan.putVal(simpleIndex, sparams.end_scan);
   _simpleVars.last_descendant_end_scan.putVal(simpleIndex, sparams.last_descendant_end_scan);
