@@ -477,10 +477,8 @@ void TitanFile::_setUpVars()
     _getVar(MAX_STORM_SIZE, NcxxType::nc_FLOAT, _stormsGroup, KM3);
 
   _sparamsVars.morphology_erosion_threshold =
-    
     _getVar(MORPHOLOGY_EROSION_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.morphology_refl_divisor =
-    
     _getVar(MORPHOLOGY_REFL_DIVISOR, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.min_radar_tops =
     _getVar(MIN_RADAR_TOPS, NcxxType::nc_FLOAT, _stormsGroup, KM);
@@ -499,7 +497,6 @@ void TitanFile::_setUpVars()
   _sparamsVars.sectrip_horiz_aspect =
     _getVar(SECTRIP_HORIZ_ASPECT, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.sectrip_orientation_error =
-    
     _getVar(SECTRIP_ORIENTATION_ERROR, NcxxType::nc_FLOAT, _stormsGroup, DEG);
   _sparamsVars.poly_start_az =
     _getVar(POLY_START_AZ, NcxxType::nc_FLOAT, _stormsGroup, DEG);
@@ -532,10 +529,8 @@ void TitanFile::_setUpVars()
   _sparamsVars.precip_plane_ht =
     _getVar(PRECIP_PLANE_HT, NcxxType::nc_FLOAT, _stormsGroup, KM);
   _sparamsVars.low_convectivity_threshold =
-    
     _getVar(LOW_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
   _sparamsVars.high_convectivity_threshold =
-    
     _getVar(HIGH_CONVECTIVITY_THRESHOLD, NcxxType::nc_FLOAT, _stormsGroup);
 
   // storm global props
@@ -671,7 +666,6 @@ void TitanFile::_setUpVars()
   _gpropsVars.hail_FOKRcategory =
     _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_waldvogelProbability =
-    
     _getVar(HAIL_WALDVOGELPROBABILITY, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup);
   _gpropsVars.hail_hailMassAloft =
     _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _n_storms, _gpropsGroup, KTONS);
@@ -825,10 +819,8 @@ void TitanFile::_setUpVars()
   _globalBiasVars.proj_area =
     _getVar(BIAS_PROJ_AREA, NcxxType::nc_FLOAT, _tracksGroup, KM2);
   _globalBiasVars.smoothed_proj_area_centroid_x =
-    
     _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalBiasVars.smoothed_proj_area_centroid_y =
-    
     _getVar(BIAS_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalBiasVars.smoothed_speed =
     _getVar(BIAS_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _tracksGroup, _speedUnits);
@@ -3967,8 +3959,10 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
   _complexBiasVars.precip_flux.getVal(varIndex, &cp.forecast_bias.precip_flux);
   _complexBiasVars.mass.getVal(varIndex, &cp.forecast_bias.mass);
   _complexBiasVars.proj_area.getVal(varIndex, &cp.forecast_bias.proj_area);
-  _complexBiasVars.smoothed_proj_area_centroid_x.getVal(varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_x);
-  _complexBiasVars.smoothed_proj_area_centroid_y.getVal(varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_y);
+  _complexBiasVars.smoothed_proj_area_centroid_x.getVal
+    (varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_x);
+  _complexBiasVars.smoothed_proj_area_centroid_y.getVal
+    (varIndex, &cp.forecast_bias.smoothed_proj_area_centroid_y);
   _complexBiasVars.smoothed_speed.getVal(varIndex, &cp.forecast_bias.smoothed_speed);
   _complexBiasVars.smoothed_direction.getVal(varIndex, &cp.forecast_bias.smoothed_direction);
   
@@ -3982,8 +3976,10 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
   _complexRmseVars.precip_flux.getVal(varIndex, &cp.forecast_rmse.precip_flux);
   _complexRmseVars.mass.getVal(varIndex, &cp.forecast_rmse.mass);
   _complexRmseVars.proj_area.getVal(varIndex, &cp.forecast_rmse.proj_area);
-  _complexRmseVars.smoothed_proj_area_centroid_x.getVal(varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_x);
-  _complexRmseVars.smoothed_proj_area_centroid_y.getVal(varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_y);
+  _complexRmseVars.smoothed_proj_area_centroid_x.getVal
+    (varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_x);
+  _complexRmseVars.smoothed_proj_area_centroid_y.getVal
+    (varIndex, &cp.forecast_rmse.smoothed_proj_area_centroid_y);
   _complexRmseVars.smoothed_speed.getVal(varIndex, &cp.forecast_rmse.smoothed_speed);
   _complexRmseVars.smoothed_direction.getVal(varIndex, &cp.forecast_rmse.smoothed_direction);
   
@@ -4008,7 +4004,7 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::readSimpleTrackParams(int simple_track_num,
-                                     bool clear_error_str /* = true*/ )
+                                     bool clear_error_str /* = true */)
      
 {
   
@@ -4124,10 +4120,13 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
   }
   _errStr += "ERROR - TitanFile::readSimplesPerComplex\n";
 
-  // read in n_simples_per_complex
+  // set up index and count for retrievals
   
   std::vector<size_t> nSimpIndex = NcxxVar::makeIndex(0);
   std::vector<size_t> nSimpCount = NcxxVar::makeIndex(_track_header.n_simple_tracks);
+
+  // read in n_simples_per_complex
+  
   _simpleVars.n_simples_per_complex.getVal(nSimpIndex, nSimpCount, _n_simples_per_complex);
 
   // read in simples_per_complex_offsets
