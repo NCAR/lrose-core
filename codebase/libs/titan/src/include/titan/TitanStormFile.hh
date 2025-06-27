@@ -164,6 +164,17 @@ public:
   // returns 0 on success, -1 on failure
   
   int WriteHeader();
+  int WriteHeader(const storm_file_header_t &storm_file_header);
+     
+  // write scan header and global properties for a particular scan
+  // in a storm properties file.
+  // Performs the writes from the end of the file.
+  // returns 0 on success, -1 on failure
+
+  int WriteScan(const storm_file_scan_header_t &scanHeader,
+                const storm_file_global_props_t *gprops);
+
+  int WriteScan(int scan_num);
      
   // write the storm layer property and histogram data for a storm,
   // at the end of the file.
@@ -171,13 +182,6 @@ public:
 
   int WriteProps(int storm_num);
 
-  // write scan header and global properties for a particular scan
-  // in a storm properties file.
-  // Performs the writes from the end of the file.
-  // returns 0 on success, -1 on failure
-
-  int WriteScan(int scan_num);
-     
   // Convert the ellipse data (orientation, major_radius and minor_radius)
   // for a a gprops struct to local (km) values.
   // This applies to structs which were derived from lat-lon grids, for

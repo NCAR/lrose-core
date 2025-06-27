@@ -2043,13 +2043,15 @@ int TitanFile::seekStormStartData()
 int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
      
 {
+
+  if (_isLegacyV5Format) {
+    return _sFile.WriteHeader(storm_file_header);
+  }
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeStormHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _filePath);
 
-  // set global attributes
-  
   // make copy
   
   storm_file_header_t header = storm_file_header;
@@ -2104,57 +2106,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _sparamsVars.precip_plane_ht.putVal(sparams.precip_plane_ht);
   _sparamsVars.low_convectivity_threshold.putVal(sparams.low_convectivity_threshold);
   _sparamsVars.high_convectivity_threshold.putVal(sparams.high_convectivity_threshold);
-
-  // TaArray<si32> offsetArray;
-  // si32 *scan_offsets = offsetArray.alloc(n_scans);
-  // memcpy (scan_offsets, _scan_offsets, n_scans * sizeof(si32));
   
-  // encode the header and scan offset array into network byte order
-  
-  // ustr_clear_to_end(header.header_file_name, R_LABEL_LEN);
-  // ustr_clear_to_end(header.data_file_name, R_LABEL_LEN);
-  // header.nbytes_char = STORM_FILE_HEADER_NBYTES_CHAR;
-  // BE_from_array_32(&header,
-  //       	   (sizeof(storm_file_header_t) - header.nbytes_char));
-  // BE_from_array_32(scan_offsets, n_scans * sizeof(si32));
-  
-  // write label to file
-  
-  // fseek(_storm_header_file, 0, SEEK_SET);
-  // ustr_clear_to_end(file_label, R_FILE_LABEL_LEN);
-
-  // if (ufwrite(file_label, sizeof(char), R_FILE_LABEL_LEN,
-  //             _storm_header_file) != R_FILE_LABEL_LEN) {
-  //   int errNum = errno;
-  //   TaStr::AddStr(_errStr, "  ", "Writing label");
-  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //   return -1;
-  // }
-  
-  // // write header to file
-  
-  // if (ufwrite(&header, sizeof(storm_file_header_t),
-  //             1, _storm_header_file) != 1) {
-  //   int errNum = errno;
-  //   TaStr::AddStr(_errStr, "  ", "Writing header");
-  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //   return -1;
-  // }
-  
-  // // write scan offsets to file
-  
-  // if (ufwrite(scan_offsets, sizeof(si32),
-  //             n_scans, _storm_header_file) != n_scans) {
-  //   int errNum = errno;
-  //   TaStr::AddStr(_errStr, "  ", "Writing scan offsets");
-  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //   return -1;
-  // }
-  
-  // flush the file buffer
-  
-  // flushStormFiles();
-
   return 0;
   
 }
@@ -2176,6 +2128,10 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
                               const storm_file_global_props_t *gprops)
   
 {
+  
+  if (_isLegacyV5Format) {
+    return _sFile.WriteScan(scanHeader, gprops);
+  }
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeScan\n";
@@ -2364,79 +2320,6 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   } // istorm
 
-#ifdef JUNK
-  
-  // Move to the end of the file before beginning the write.
-
-  fseek(_storm_data_file, 0, SEEK_END);
-
-  // if nstorms is greater than zero, write global props to file
-  
-  int nstorms = _scan.nstorms;
-  
-  if (nstorms > 0) {
-    
-    // get gprops position in file
-    
-    _scan.gprops_offset = ftell(_storm_data_file);
-    
-    // make local copy of gprops and encode into network byte order
-
-    TaArray<storm_file_global_props_t> gpropsArray;
-    storm_file_global_props_t *gprops = gpropsArray.alloc(nstorms);
-    memcpy (gprops, _gprops, nstorms * sizeof(storm_file_global_props_t));
-    BE_from_array_32(gprops,
-		     nstorms * sizeof(storm_file_global_props_t));
-    
-    // write in global props
-    
-    if (ufwrite(gprops, sizeof(storm_file_global_props_t),
-		nstorms, _storm_data_file) != nstorms) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ", "Writing gprops");
-      TaStr::AddInt(_errStr, "  nstorms: ", nstorms);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-
-  } // if (nstorms > 0) 
-  
-  // get scan position in file
-  
-  allocScanOffsets(scan_num + 1);
-  long offset = ftell(_storm_data_file);
-  _scan_offsets[scan_num] = offset;
-  
-  // set last scan offset
-  
-  _scan.last_offset = offset + sizeof(storm_file_scan_header_t) - 1;
-  
-  // copy scan header to local variable, and encode. Note that the 
-  // character data at the end of the struct is not encoded
-  
-  storm_file_scan_header_t scan = _scan;
-  scan.grid.nbytes_char =  TITAN_N_GRID_LABELS * TITAN_GRID_UNITS_LEN;
-  scan.nbytes_char = scan.grid.nbytes_char;
-  
-  ustr_clear_to_end(scan.grid.unitsx, TITAN_GRID_UNITS_LEN);
-  ustr_clear_to_end(scan.grid.unitsy, TITAN_GRID_UNITS_LEN);
-  ustr_clear_to_end(scan.grid.unitsz, TITAN_GRID_UNITS_LEN);
-
-  BE_from_array_32(&scan,
-		   (sizeof(storm_file_scan_header_t) - scan.nbytes_char));
-  
-  // write scan struct
-  
-  if (ufwrite(&scan, sizeof(storm_file_scan_header_t), 1,
-	      _storm_data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing scan header");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-#endif
-  
   return 0;
   
 }
