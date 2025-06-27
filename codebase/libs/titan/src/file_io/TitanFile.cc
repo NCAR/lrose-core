@@ -117,6 +117,10 @@ TitanFile::TitanFile()
   
   _convention = "TitanStormTracking";
   _version = "1.0";
+  _title = "";
+  _institution = "";
+  _source = "";
+  _comment = "";
 
 
 }
@@ -163,6 +167,18 @@ int TitanFile::openNcFile(const string &path,
     return -1;
   }
 
+  // add global attributes
+
+  if (mode != NcxxFile::read) {
+    _ncFile.putAtt(VERSION, _version);
+    _ncFile.putAtt(CONVENTION, _convention);
+    _ncFile.putAtt(TITLE, _title);
+    _ncFile.putAtt(INSTITUTION, _institution);
+    _ncFile.putAtt(SOURCE, _source);
+    _ncFile.putAtt(COMMENT, _comment);
+  }
+  
+  
   // set up netcdf groups
 
   _setUpGroups();
@@ -2142,6 +2158,8 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeStormHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _filePath);
+
+  // set global attributes
   
   // make copy
   

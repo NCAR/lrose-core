@@ -39,7 +39,8 @@
 #include <string>
 #include <cstdint>
 
-#include <titan/storm.h>
+#include <titan/TitanStormFile.hh>
+#include <titan/TitanTrackFile.hh>
 #include <titan/track.h>
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxFile.hh>
@@ -445,6 +446,13 @@ public:
   // destructor
   
   virtual ~TitanFile();
+
+  // set global attributes for output netcdf file
+
+  void setTitle(const string &val) { _title = val; }
+  void setInstitution(const string &val) { _institution = val; }
+  void setSource(const string &val) { _source = val; }
+  void setComment(const string &val) { _comment = val; }
 
   // storm data access
 
@@ -855,12 +863,21 @@ protected:
 
   string _convention;
   string _version;
+  string _title;
+  string _institution;
+  string _source;
+  string _comment;
   
   // netcdf file
   
   NcxxFile _ncFile;
   string _filePath;
 
+  // legacy files
+  
+  TitanStormFile _sFile;
+  TitanTrackFile _tFile;
+  
   ////////////////////////////////////////////////////////
   // dimensions
   
@@ -1143,6 +1160,13 @@ public:
 
   // attributes
   
+  const std::string VERSION = "version";
+  const std::string CONVENTION = "convention";
+  const std::string TITLE = "title";
+  const std::string INSTITUTION = "institution";
+  const std::string SOURCE = "source";
+  const std::string COMMENT = "comment";
+
   const std::string UNITS = "units";
   const std::string TIME0 = "seconds since 1970-01-01T00:00:00";
   const std::string SECONDS = "seconds";
