@@ -534,10 +534,17 @@ public:
   /////////////////////////////////////////////////////
   // NetCDF FileIO
   
-  int openNcFile(const string &path,
-                 NcxxFile::FileMode mode);
+  int openFile(const string &path,
+               NcxxFile::FileMode mode);
   
-  void closeNcFile();
+  // Open file from dir and date
+  
+  int openFile(const string &dir,
+               time_t date,
+               NcxxFile::FileMode mode,
+               bool isLegacyV5Format = false);
+  
+  void closeFile();
 
   /////////////////////////////////////////////////////
   // Storms
@@ -867,16 +874,20 @@ protected:
   string _institution;
   string _source;
   string _comment;
-  
+ 
   // netcdf file
   
   NcxxFile _ncFile;
   string _filePath;
+  string _lockPath;
 
   // legacy files
   
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
+  bool _isLegacyV5Format;
+  string _stormHeaderPath;
+  string _trackHeaderPath;
   
   ////////////////////////////////////////////////////////
   // dimensions
@@ -1053,8 +1064,14 @@ protected:
   string _errStr;
   
   // functions
+
+  int _openLegacyFiles(const string &path,
+                       NcxxFile::FileMode mode);
   
-  /////////////////////////////////////////////////////
+  // set global attributes
+  
+  void _setGlobalAttributes();
+  
   // set up groups
 
   void _setUpGroups();

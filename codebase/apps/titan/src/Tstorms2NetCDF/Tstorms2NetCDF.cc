@@ -126,6 +126,8 @@ Tstorms2NetCDF::~Tstorms2NetCDF()
     delete _input;
   }
 
+  _ncFile.closeFile();
+
   // unregister process
 
   PMU_auto_unregister();
@@ -242,7 +244,7 @@ int Tstorms2NetCDF::_processInputFile()
 
   // open output netcdf file for writing
 
-  if (_ncFile.openNcFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
+  if (_ncFile.openFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
     cerr << "  Error: " << _ncFile.getErrStr() << endl;

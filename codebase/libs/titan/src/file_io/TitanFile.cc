@@ -35,6 +35,10 @@
 
 #include <fcntl.h>
 #include <cerrno>
+
+#include <filesystem>
+using Fpath = std::filesystem::path;
+
 #include <dataport/bigend.h>
 #include <titan/TitanFile.hh>
 #include <toolsa/TaStr.hh>
@@ -45,6 +49,7 @@
 #include <toolsa/pjg.h>
 #include <toolsa/sincos.h>
 #include <toolsa/TaArray.hh>
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////
@@ -114,6 +119,12 @@ TitanFile::TitanFile()
   _horizGridUnitsPerHr = KM_PER_HR;
   _speedUnits = KM_PER_HR;
   _speedUnitsPerHr = KM_PER_HR_PER_HR;
+
+  // legacy v5 file?
+  
+  _isLegacyV5Format = false;
+
+  // attributes
   
   _convention = "TitanStormTracking";
   _version = "1.0";
@@ -137,31 +148,43 @@ TitanFile::~TitanFile()
   freeTracksAll();
   closeTrackFiles();
 
-  closeNcFile();
+  closeFile();
   
 }
 
 /////////////////////////////////////////
-// Open file
+// Open file from path
 
-int TitanFile::openNcFile(const string &path,
-                          NcxxFile::FileMode mode)
+int TitanFile::openFile(const string &path,
+                        NcxxFile::FileMode mode)
   
 {
+  
+  _filePath = path;
+  Path filePath(path);
+  
+  // file format
 
+  if (filePath.getExt() == "nc") {
+    _isLegacyV5Format = false;
+    _lockPath = filePath.getDirectory() + PATH_DELIM + "." + filePath.getFile() + ".lock";
+  } else {
+    _isLegacyV5Format = true;
+    return _openLegacyFiles(path, mode);
+  }
+  
   // ensure the directory exists
 
-  _filePath = path;
-  
-  Path filePath(path);
-  filePath.makeDirRecurse();
+  if (mode != NcxxFile::read) {
+    filePath.makeDirRecurse();
+  }
   
   // open file
   
   try {
     _ncFile.open(path, mode);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - TitanFile::openNcFile");
+    _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr("  Cannot open file: ", path);
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -170,14 +193,8 @@ int TitanFile::openNcFile(const string &path,
   // add global attributes
 
   if (mode != NcxxFile::read) {
-    _ncFile.putAtt(VERSION, _version);
-    _ncFile.putAtt(CONVENTION, _convention);
-    _ncFile.putAtt(TITLE, _title);
-    _ncFile.putAtt(INSTITUTION, _institution);
-    _ncFile.putAtt(SOURCE, _source);
-    _ncFile.putAtt(COMMENT, _comment);
+    _setGlobalAttributes();
   }
-  
   
   // set up netcdf groups
 
@@ -195,14 +212,96 @@ int TitanFile::openNcFile(const string &path,
   
 }
   
-void TitanFile::closeNcFile()
+/////////////////////////////////////////
+// Open file from dir and date
+
+int TitanFile::openFile(const string &dir,
+                        time_t date,
+                        NcxxFile::FileMode mode,
+                        bool isLegacyV5Format /* = false */)
+  
+{
+
+  // compute path
+  
+  DateTime dtime(date);
+  string pathStr = dir + PATH_DELIM + "titan_" + dtime.getDateStrPlain();
+  if (isLegacyV5Format) {
+    pathStr.append(".th5");
+  } else {
+    pathStr.append(".nc");
+  }
+
+  return openFile(pathStr, mode);
+
+}
+  
+/////////////////////////////////////////////////////////
+// Open legacy files from path
+
+int TitanFile::_openLegacyFiles(const string &path,
+                                NcxxFile::FileMode mode)
+  
+{
+  
+  Fpath basePath(path);
+  string stormHeaderPath = basePath.replace_extension(".sh5").string();
+  string trackHeaderPath = basePath.replace_extension(".th5").string();
+  string fmode("r");
+  switch (mode) {
+    case NcxxFile::read:
+      fmode = "r";
+      break;
+    case NcxxFile::write:
+      fmode = "w+";
+      break;
+    case NcxxFile::replace:
+    case NcxxFile::newFile:
+      fmode = "w";
+      break;
+  }
+  if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str())) {
+    _addErrStr("ERROR - TitanFile::openFile");
+    _addErrStr(" Opening storm files, header path: ", stormHeaderPath);
+    return -1;
+  }
+  if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.c_str())) {
+    _addErrStr("ERROR - TitanFile::openFile");
+    _addErrStr(" Opening track files, header path: ", trackHeaderPath);
+    return -1;
+  }
+  return 0;
+}
+
+//////////////////////////////////////////////////////////
+// close file
+
+void TitanFile::closeFile()
 
 {
 
-  _ncFile.close();
+  if (_isLegacyV5Format) {
+    _sFile.CloseFiles();
+    _tFile.CloseFiles();
+  } else {
+    _ncFile.close();
+  }
   
 }
      
+/////////////////////////////////////////
+// set global attributes
+
+void TitanFile::_setGlobalAttributes()
+{
+  _ncFile.putAtt(VERSION, _version);
+  _ncFile.putAtt(CONVENTION, _convention);
+  _ncFile.putAtt(TITLE, _title);
+  _ncFile.putAtt(INSTITUTION, _institution);
+  _ncFile.putAtt(SOURCE, _source);
+  _ncFile.putAtt(COMMENT, _comment);
+}
+
 /////////////////////////////////////////
 // set up groups
 
