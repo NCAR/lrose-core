@@ -1659,8 +1659,11 @@ int TitanFile::readProjRuns(int storm_num)
 {
   
   _clearErrStr();
-
   _errStr += "ERROR - TitanFile::readProjRuns\n";
+
+  if (_isLegacyV5Format) {
+    return _sFile.ReadProjRuns(storm_num);
+  }
 
   // return early if nstorms is zero
   
@@ -1707,6 +1710,10 @@ int TitanFile::readStormAux(int storm_num)
   
 {
   
+  if (_isLegacyV5Format) {
+    return _sFile.ReadProps(storm_num);
+  }
+
   _clearErrStr();
   _errStr += "ERROR - TitanFile::readStormAux\n";
   TaStr::AddStr(_errStr, "  Reading storm props from file: ", _filePath);
@@ -1811,6 +1818,10 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
      
 {
   
+  if (_isLegacyV5Format) {
+    return _sFile.ReadScan(scan_num, storm_num);
+  }
+
   _clearErrStr();
   _errStr += "ERROR - TitanFile::readScan\n";
   TaStr::AddStr(_errStr, "  Reading scan from file: ", _filePath);
