@@ -71,9 +71,6 @@ TitanFile::TitanFile()
   _scan_offsets = nullptr;
   _storm_num = 0;
 
-  _storm_header_file = nullptr;
-  _storm_data_file = nullptr;
-
   _max_scans = 0;
   _max_storms = 0;
   _max_layers = 0;
@@ -88,7 +85,7 @@ TitanFile::TitanFile()
   MEM_zero(_complex_params);
   MEM_zero(_entry);
 
-  _scan_index = nullptr;
+  // _scan_index = nullptr;
   _scan_entries = nullptr;
   _track_utime = nullptr;
   
@@ -99,9 +96,6 @@ TitanFile::TitanFile()
   _simples_per_complex_offsets = nullptr;
   _simples_per_complex_1D = nullptr;
   _simples_per_complex_2D = nullptr;
-
-  _track_header_file = nullptr;
-  _track_data_file = nullptr;
 
   _first_entry = true;
 
@@ -143,12 +137,9 @@ TitanFile::~TitanFile()
 
 {
 
-  freeStormsAll();
-  closeStormFiles();
-  freeTracksAll();
-  closeTrackFiles();
-
   closeFile();
+  freeStormsAll();
+  freeTracksAll();
   
 }
 
@@ -180,7 +171,8 @@ int TitanFile::openFile(const string &path,
   }
   
   // open file
-  
+
+  _ncFile.close();
   try {
     _ncFile.open(path, mode);
   } catch (NcxxException& e) {
@@ -207,6 +199,17 @@ int TitanFile::openFile(const string &path,
   // set up netcdf variables
 
   _setUpVars();
+
+  // open lock file at the low level
+
+  _lockId = open(_lockPath.c_str(), O_CREAT | O_RDWR, 0666);
+  if (_lockId < 0) {
+    int errNum = errno;
+    _addErrStr("ERROR - TitanFile::openFile");
+    _addErrStr("  Cannot open lock file: ", _lockPath);
+    _addErrStr(strerror(errNum));
+    return -1;
+  }
   
   return 0;
   
@@ -1497,236 +1500,43 @@ void TitanFile::freeStormsAll()
 
 //////////////////////////////////////////////////////////////
 //
-// Opens the storm header and data files
-//
-// The storm header file path must have been set
+// Flush the file to force writes to disk
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::openStormFiles(const char *mode,
-                              const char *header_file_path,
-                              const char *data_file_ext /* = nullptr*/ )
-     
+void TitanFile::flushFile()
+  
 {
 
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::OpenStormFiles\n";
-
-  // close files
-  
-  closeStormFiles();
-  
-  // open the header file - file path may change if it is compressed
-  
-  char hdr_file_path[MAX_PATH_LEN];
-  STRncopy(hdr_file_path, header_file_path, MAX_PATH_LEN);
-  if ((_storm_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == nullptr) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Cannot open header file: ",
-		  header_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  _storm_header_file_path = hdr_file_path;
-  
-  // compute the data file name
-   
-  if (*mode == 'r') {
-
-    // read the header if the file is opened for reading
-    
-    if (readStormHeader(false)) {
-      return -1;
-    }
-
-    // compute the file path from the header file path and
-    // the data file name
-    
-    char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, _storm_header_file_path.c_str(), MAX_PATH_LEN - 1);
-    
-    // if dir path has slash, get pointer to that and end the sting
-    // immediately after
-    
-    char *chptr;
-    if ((chptr = strrchr(tmp_path, '/')) != nullptr) {
-      *(chptr + 1) = '\0';
-      _storm_data_file_path = tmp_path;
-      _storm_data_file_path += _storm_header.data_file_name;
-    } else {
-      _storm_data_file_path = _storm_header.data_file_name;
-    }
-    
+  if (_isLegacyV5Format) {
+    _ncFile.sync();
   } else {
-    
-    // file opened for writing, use ext to compute file name
-    
-    if (data_file_ext == nullptr) {
-      _errStr += "Must provide data file extension for file creation\n";
-      return -1;
-    }
-
-    char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, _storm_header_file_path.c_str(), MAX_PATH_LEN - 1);
-
-    char *chptr;
-    if ((chptr = strrchr(tmp_path, '.')) == nullptr) {
-      TaStr::AddStr(_errStr, "  Header file must have extension : ",
-		    _storm_header_file_path);
-      return -1;
-    }
-    
-    *(chptr + 1) = '\0';
-    _storm_data_file_path = tmp_path;
-    _storm_data_file_path += data_file_ext;
-
-  } // if (*mode == 'r') 
-    
-  // open the data file - file path may change if it is compressed
-  
-  char dat_file_path[MAX_PATH_LEN];
-  STRncopy(dat_file_path, _storm_data_file_path.c_str(), MAX_PATH_LEN);
-    
-  if ((_storm_data_file = ta_fopen_uncompress(dat_file_path, mode)) == nullptr) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Cannot open storm data file: ",
-		  _storm_data_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
+    _sFile.FlushFiles();
+    _tFile.FlushFiles();
   }
-  _storm_data_file_path = dat_file_path;
-
-  // In write mode, write file labels
-  
-  if (*mode == 'w') {
-    
-    // header file
-    
-    char header_file_label[R_FILE_LABEL_LEN];
-    MEM_zero(header_file_label);
-    strcpy(header_file_label, _storm_header_file_label.c_str());
-    
-    if (ufwrite(header_file_label, 1, R_FILE_LABEL_LEN,
-		_storm_header_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Writing header file label to: ",
-		    _storm_header_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-
-    // data file
-    
-    char data_file_label[R_FILE_LABEL_LEN];
-    MEM_zero(data_file_label);
-    strcpy(data_file_label, STORM_DATA_FILE_TYPE);
-    _storm_data_file_label = data_file_label;
-    
-    if (ufwrite(data_file_label, 1, R_FILE_LABEL_LEN,
-		_storm_data_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Writing data file label to: ",
-		    _storm_data_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-  } else {
-    
-    // read mode - read in data file label
-    
-    char data_file_label[R_FILE_LABEL_LEN];
-    if (ufread(data_file_label, sizeof(char), R_FILE_LABEL_LEN,
-	       _storm_data_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Reading data file label from: ",
-		    _storm_data_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-    // check label
-    
-    if (_storm_data_file_label != data_file_label) {
-      _errStr +=
-	"  Data file does not have the correct label\n";
-      TaStr::AddStr(_errStr, "  File label is: ", data_file_label);
-      TaStr::AddStr(_errStr, "  Should be: ", _storm_data_file_label);
-      return -1;
-    }
-    
-  } // if (*mode == 'w') 
-
-  return 0;
 
 }
 
 //////////////////////////////////////////////////////////////
 //
-// closes the storm header and data files
-//
-//////////////////////////////////////////////////////////////
-
-void TitanFile::closeStormFiles()
-     
-{
-
-  // unlock the header file
-
-  unlockStormHeaderFile();
-
-  // close the header file
-  
-  if (_storm_header_file != nullptr) {
-    fclose(_storm_header_file);
-    _storm_header_file = (FILE *) nullptr;
-  }
-
-  // close the data file
-   
-  if (_storm_data_file != nullptr) {
-    fclose(_storm_data_file);
-    _storm_data_file = (FILE *) nullptr;
-  }
-  
-}
-
-//////////////////////////////////////////////////////////////
-//
-// Flush the storm header and data files
-//
-//////////////////////////////////////////////////////////////
-
-void TitanFile::flushStormFiles()
-  
-{
-
-  fflush(_storm_header_file);
-  fflush(_storm_data_file);
-
-}
-
-//////////////////////////////////////////////////////////////
-//
-// Put an advisory lock on the header file
+// Put an advisory lock on the file
 //
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::lockStormHeaderFile(const char *mode)
+int TitanFile::lockFile(const char *mode)
   
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::lockStormHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
+  _errStr += "ERROR - TitanFile::lockFile\n";
+  TaStr::AddStr(_errStr, "  File: ", _lockPath);
   
-  if (ta_lock_file_procmap(_storm_header_file_path.c_str(),
-			   _storm_header_file, mode)) {
+  if (ta_lock_file_procmap_fd(_lockPath.c_str(), _lockId, mode)) {
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot lock file");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
+    _addErrStr("Cannot lock file: ", _lockPath);
+    _addErrStr(strerror(errNum));
     return -1;
   }
 
@@ -1736,25 +1546,24 @@ int TitanFile::lockStormHeaderFile(const char *mode)
 
 //////////////////////////////////////////////////////////////
 //
-// Remove advisory lock from the header file
+// Remove advisory lock from the lock file
 //
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::unlockStormHeaderFile()
+int TitanFile::unlockFile()
   
 {
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::unlockStormHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _storm_header_file_path);
+  TaStr::AddStr(_errStr, "  File: ", _lockPath);
   
-  if (ta_unlock_file(_storm_header_file_path.c_str(),
-		     _storm_header_file)) {
+  if (ta_unlock_file_fd(_lockPath.c_str(), _lockId)) {
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot unlock file");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
+    _addErrStr("Cannot unlock file: ", _lockPath);
+    _addErrStr(strerror(errNum));
     return -1;
   }
 
@@ -1774,6 +1583,10 @@ int TitanFile::unlockStormHeaderFile()
 int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
      
 {
+
+  if (_isLegacyV5Format) {
+    return _sFile.ReadHeader(clear_error_str);
+  }
 
   if (clear_error_str) {
     _clearErrStr();
@@ -2190,24 +2003,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 int TitanFile::seekStormEndData()
      
 {
-
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::seekStormEndData\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-
-  if (fseek(_storm_data_file, 0L, SEEK_END)) {
-
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "seek failed");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-
-  } else {
-
-    return 0;
-
-  }
-
+  return 0;
 }
 
 //////////////////////////////////////////////////////////////
@@ -2219,24 +2015,7 @@ int TitanFile::seekStormEndData()
 int TitanFile::seekStormStartData()
      
 {
-
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::seekStormStartData\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-
-  if (fseek(_storm_data_file, R_FILE_LABEL_LEN, SEEK_SET) != 0) {
-    
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "seek failed");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-
-  } else {
-
-    return 0;
-
-  }
-
+  return 0;
 }
 
 //////////////////////////////////////////////////////////////
@@ -3062,88 +2841,15 @@ int TitanFile::writeStormAux(int storm_num,
 }
 
 ///////////////////////////////////////////////////////////////
-// Truncate header file
+// Truncate file when rerunning
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanFile::truncateStormHeaderFile(int length)
+int TitanFile::truncateFile(int scan_num)
   
 {
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::truncateStormHeaderFile\n";
-  return (_truncateStormFiles(_storm_header_file, _storm_header_file_path, length));
-
-}
-
-///////////////////////////////////////////////////////////////
-// Truncate data file
-//
-// Returns 0 on success, -1 on failure.
-
-int TitanFile::truncateStormDataFile(int length)
-  
-{
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::truncateStormDataFile\n";
-  return (_truncateStormFiles(_storm_data_file, _filePath, length));
-
-}
-
-///////////////////////////////////////////////////
-//
-// Truncate open file - close, truncate and reopen
-//
-// Returns 0 on success, -1 on failure
-//
-
-int TitanFile::_truncateStormFiles(FILE *&fd, const string &path, int length)
-     
-{
-  
-  TaStr::AddStr(_errStr, "ERROR - ", "TitanFile::_truncate");
-  TaStr::AddStr(_errStr, "  File: ", path);
-  
-  // close the buffered file
-  
-  fclose(fd);
-  
-  // open for low-level io
-  
-  int low_fd;
-  if ((low_fd = open(path.c_str(), O_WRONLY)) < 0) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ",
-		  "Cannot open file - low level - for truncation.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // truncate the file
-  
-  if (ftruncate(low_fd, length) != 0) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot truncate file.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return(-1);
-  }
-  
-  // close low-level io
-  
-  close(low_fd);
-  
-  // re-open the file for buffered i/o
-  
-  if ((fd = fopen(path.c_str(), "r+")) == nullptr) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot reopen file.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return(-1);
-  }
-
-  return (0);
-  
+  // TO-DO - set latest scan num value
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -3421,32 +3127,32 @@ void TitanFile::freeScanEntries()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::allocScanIndex(int n_scans_needed)
+// void TitanFile::allocScanIndex(int n_scans_needed)
      
-{
+// {
 
-  if (_n_scan_index_allocated < n_scans_needed) {
+//   if (_n_scan_index_allocated < n_scans_needed) {
 
-    // allocate the required space plus a buffer so that 
-    // we do not do too many reallocs
+//     // allocate the required space plus a buffer so that 
+//     // we do not do too many reallocs
       
-    int n_start = _n_scan_index_allocated;
-    int n_realloc = n_scans_needed + N_ALLOC;
-    _n_scan_index_allocated = n_realloc;
+//     int n_start = _n_scan_index_allocated;
+//     int n_realloc = n_scans_needed + N_ALLOC;
+//     _n_scan_index_allocated = n_realloc;
 
-    _scan_index = (track_file_scan_index_t *) urealloc
-      (_scan_index, n_realloc * sizeof(track_file_scan_index_t));
+//     _scan_index = (track_file_scan_index_t *) urealloc
+//       (_scan_index, n_realloc * sizeof(track_file_scan_index_t));
       
-    // initialize new elements to zero
+//     // initialize new elements to zero
   
-    int n_new = _n_scan_index_allocated - n_start;
+//     int n_new = _n_scan_index_allocated - n_start;
 
-    memset (_scan_index + n_start, 0,
-	    n_new * sizeof(track_file_scan_index_t));
+//     memset (_scan_index + n_start, 0,
+// 	    n_new * sizeof(track_file_scan_index_t));
   
-  } // if (_n_scan_index_allocated < n_scans_needed) 
+//   } // if (_n_scan_index_allocated < n_scans_needed) 
 
-}
+// }
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -3456,15 +3162,15 @@ void TitanFile::allocScanIndex(int n_scans_needed)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::freeScanIndex()
+// void TitanFile::freeScanIndex()
      
-{
-  if (_scan_index) {
-    ufree(_scan_index);
-    _scan_index = nullptr;
-    _n_scan_index_allocated = 0;
-  }
-}
+// {
+//   if (_scan_index) {
+//     ufree(_scan_index);
+//     _scan_index = nullptr;
+//     _n_scan_index_allocated = 0;
+//   }
+// }
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -3526,279 +3232,8 @@ void TitanFile::freeTracksAll()
   freeComplexArrays();
   freeSimplesPerComplex();
   freeScanEntries();
-  freeScanIndex();
+  // freeScanIndex();
   freeUtime();
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// Open the track header and data files
-//
-// Returns 0 on success, -1 on error
-//
-///////////////////////////////////////////////////////////////////////////
-
-int TitanFile::openTrackFiles(const char *mode,
-                              const char *header_file_path,
-                              const char *data_file_ext /* = nullptr*/ )
-  
-{
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::openFiles\n";
-
-  // close files
-
-  closeTrackFiles();
-
-  // open the header file - file path may change if it is compressed
-  
-  char hdr_file_path[MAX_PATH_LEN];
-  STRncopy(hdr_file_path, header_file_path, MAX_PATH_LEN);
-  if ((_track_header_file = ta_fopen_uncompress(hdr_file_path, mode)) == nullptr) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Cannot open header file: ", header_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  _track_header_file_path = hdr_file_path;
-  
-  // compute the data file name
-   
-  if (*mode == 'r') {
-
-    // read the header if the file is opened for reading
-   
-    if (readTrackHeader(false)) {
-      return -1;
-    }
-    
-    // compute the file path from the header file path and
-    // the data file name
-
-    char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, header_file_path, MAX_PATH_LEN - 1);
-
-    // if dir path has slash, get pointer to that and end the sting
-    // immediately after
-    
-    char *chptr;
-    if ((chptr = strrchr(tmp_path, '/')) != nullptr) {
-      *(chptr + 1) = '\0';
-      _track_data_file_path = tmp_path;
-      _track_data_file_path += _track_header.data_file_name;
-    } else {
-      _track_data_file_path = _track_header.data_file_name;
-    }
-
-  } else {
-
-    // file opened for writing, use ext to compute file name
-
-    if (data_file_ext == nullptr) {
-      _errStr += "Must provide data file extension for file creation\n";
-      return -1;
-    }
-
-    char tmp_path[MAX_PATH_LEN];
-    strncpy(tmp_path, _track_header_file_path.c_str(), MAX_PATH_LEN - 1);
-    
-    char *chptr;
-    if ((chptr = strrchr(tmp_path, '.')) == nullptr) {
-      TaStr::AddStr(_errStr, "  Header file must have extension : ",
-		    _track_header_file_path);
-      return -1;
-    }
-    
-    *(chptr + 1) = '\0';
-    _track_data_file_path = tmp_path;
-    _track_data_file_path += data_file_ext;
-
-  } // if (*mode == 'r') 
-    
-  // open the data file
-  
-  char dat_file_path[MAX_PATH_LEN];
-  STRncopy(dat_file_path, _track_data_file_path.c_str(), MAX_PATH_LEN);
-    
-  if ((_track_data_file = ta_fopen_uncompress(dat_file_path, mode)) == nullptr) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Cannot open data file: ",
-		  _track_data_file_path);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  _track_data_file_path = dat_file_path;
-
-  // In write mode, write file labels
-   
-  if (*mode == 'w') {
-
-    // header file
-    
-    char header_file_label[R_FILE_LABEL_LEN];
-    MEM_zero(header_file_label);
-    strcpy(header_file_label, TRACK_HEADER_FILE_TYPE);
-    _track_header_file_label = header_file_label;
-    
-    if (ufwrite(header_file_label, 1, R_FILE_LABEL_LEN,
-		_track_header_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Writing header file label to: ",
-		    _track_header_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-
-    // data file
-
-    char data_file_label[R_FILE_LABEL_LEN];
-    MEM_zero(data_file_label);
-    strcpy(data_file_label, TRACK_DATA_FILE_TYPE);
-    _track_data_file_label = data_file_label;
-    
-    if (ufwrite(data_file_label, 1, R_FILE_LABEL_LEN,
-		_track_data_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Writing data file label to: ",
-		    _track_data_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-
-  } else {
-    
-    // read mode - read in data file label
-    
-    char data_file_label[R_FILE_LABEL_LEN];
-    if (ufread(data_file_label, sizeof(char), R_FILE_LABEL_LEN,
-	       _track_data_file) != R_FILE_LABEL_LEN) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  Reading data file label from: ",
-		    _track_data_file_path);
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-    // check label
-    
-    if (_track_data_file_label != data_file_label) {
-      _errStr +=
-	"  Data file does not have the correct label\n";
-      TaStr::AddStr(_errStr, "  File label is: ", data_file_label);
-      TaStr::AddStr(_errStr, "  Should be: ", _track_data_file_label);
-      return -1;
-    }
-    
-  } // if (*mode == 'w') 
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////////
-//
-// closes the track header and data files
-//
-//////////////////////////////////////////////////////////////
-
-void TitanFile::closeTrackFiles()
-     
-{
-
-  // unlock the header file
-
-  unlockTrackHeaderFile();
-
-  // close the header file
-  
-  if (_track_header_file != nullptr) {
-    fclose(_track_header_file);
-    _track_header_file = (FILE *) nullptr;
-  }
-
-  // close the data file
-  
-  if (_track_data_file != nullptr) {
-    fclose(_track_data_file);
-    _track_data_file = (FILE *) nullptr;
-  }
-  
-}
-
-//////////////////////////////////////////////////////////////
-//
-// flush the track header and data files
-//
-//////////////////////////////////////////////////////////////
-
-void TitanFile::flushTrackFiles()
-  
-{
-  
-  fflush(_track_header_file);
-  fflush(_track_data_file);
-
-}
-
-//////////////////////////////////////////////////////////////
-//
-// TitanFile::lockHeaderFile()
-//
-// Put an advisory lock on the header file
-//
-// returns 0 on success, -1 on failure
-//
-//////////////////////////////////////////////////////////////
-
-int TitanFile::lockTrackHeaderFile(const char *mode)
-  
-{
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::lockTrackHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-  
-  if (ta_lock_file_procmap(_filePath.c_str(),
-			   _track_header_file, mode)) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot lock file");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////////
-//
-// TitanFile::unlockHeaderFile()
-//
-// Remove advisory lock from the header file
-//
-// returns 0 on success, -1 on failure
-//
-//////////////////////////////////////////////////////////////
-
-int TitanFile::unlockTrackHeaderFile()
-  
-{
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::unlockTrackHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-  
-  if (ta_unlock_file(_filePath.c_str(),
-		     _track_header_file)) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Cannot unlock file");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-  return 0;
 
 }
 
@@ -3820,9 +3255,9 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   }
   _errStr += "ERROR - TitanFile::readTrackHeader\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
-  
+   
   // read in header data
-  
+   
   track_file_params_t &tparams = _track_header.params;
   
   _topLevelVars.max_simple_track_num.getVal(&_track_header.max_simple_track_num);
@@ -3859,7 +3294,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   int n_complex_tracks = _track_header.n_complex_tracks;
   int n_simple_tracks = _track_header.n_simple_tracks;
-  int n_scans = _track_header.n_scans;
+  //  int n_scans = _track_header.n_scans;
   
   // check that the constants in use when the file was written are
   // less than or the same as those in use now
@@ -3894,7 +3329,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   allocComplexArrays(n_complex_tracks);
   allocSimpleArrays(n_simple_tracks);
-  allocScanIndex(n_scans);
+  // allocScanIndex(n_scans);
   
   // read in complex track num array
   // complex_track_nums has dimension _n_complex.
@@ -3924,95 +3359,43 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
+// int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
      
-{
+// {
   
-  if (clear_error_str) {
-    _clearErrStr();
-  }
-  _errStr += "ERROR - TitanFile::readScanIndex\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+//   if (clear_error_str) {
+//     _clearErrStr();
+//   }
+//   _errStr += "ERROR - TitanFile::readScanIndex\n";
+//   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
-  // rewind file
+//   if (readTrackHeader(clear_error_str)) {
+//     return -1;
+//   }
   
-  fseek(_track_header_file, 0L, SEEK_SET);
+//   int n_complex_tracks = _track_header.n_complex_tracks;
+//   int n_simple_tracks = _track_header.n_simple_tracks;
+//   int n_scans = _track_header.n_scans;
   
-  // read in file label
-  
-  char header_file_label[R_FILE_LABEL_LEN];
-  if (ufread(header_file_label, sizeof(char), R_FILE_LABEL_LEN,
-	     _track_header_file) != R_FILE_LABEL_LEN) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  Reading header file label from: ",
-		  _filePath);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // check label
-  
-  if (_track_header_file_label != header_file_label) {
-    _errStr +=
-      "  Header file does not contain correct label.\n";
-    TaStr::AddStr(_errStr, "  File label is: ", header_file_label);
-    TaStr::AddStr(_errStr, "  Should be: ", _track_header_file_label);
-    return -1;
-  }
-    
-  // read in header
-  
-  if (ufread(&_track_header, sizeof(track_file_header_t),
-	     1, _track_header_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading file header");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode the structure into host byte order - the file
-  // is stored in network byte order
-  
-  si32 nbytes_char = _track_header.nbytes_char;
-  BE_to_array_32(&nbytes_char, sizeof(si32));
-  BE_to_array_32(&_track_header, (sizeof(track_file_header_t) - nbytes_char));
+//   // alloc array
 
-  int n_complex_tracks = _track_header.n_complex_tracks;
-  int n_simple_tracks = _track_header.n_simple_tracks;
-  int n_scans = _track_header.n_scans;
-  
-  // seek ahead
+//   allocScanIndex(n_scans);
 
-  long nbytesSkip = (n_complex_tracks * sizeof(si32) +
-		     2 * n_simple_tracks * sizeof(si32));
-		    
-  if (fseek(_track_header_file, nbytesSkip, SEEK_CUR)) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Seeking over  arrays");
-    TaStr::AddInt(_errStr, "  Cannot seek ahead by nbytes: ", nbytesSkip);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-  // alloc array
-
-  allocScanIndex(n_scans);
-
-  // read in scan index array
+//   // read in scan index array
   
-  if (ufread(_scan_index, sizeof(track_file_scan_index_t),
-	     n_scans, _track_header_file) != n_scans) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading scan index array");
-    TaStr::AddInt(_errStr, "  n_scans", n_scans);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  BE_to_array_32(_scan_index, n_scans * sizeof(track_file_scan_index_t));
+//   if (ufread(_scan_index, sizeof(track_file_scan_index_t),
+// 	     n_scans, _track_header_file) != n_scans) {
+//     int errNum = errno;
+//     TaStr::AddStr(_errStr, "  ", "Reading scan index array");
+//     TaStr::AddInt(_errStr, "  n_scans", n_scans);
+//     TaStr::AddStr(_errStr, "  ", strerror(errNum));
+//     return -1;
+//   }
+//   BE_to_array_32(_scan_index, n_scans * sizeof(track_file_scan_index_t));
   
-  return 0;
+//   return 0;
   
-}
+// }
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -4417,10 +3800,10 @@ void TitanFile::reinit()
     memset(_scan_entries, 0, _n_scan_entries * sizeof(track_file_entry_t));
   }
   
-  if (_n_scan_index_allocated > 0) {
-    memset(_scan_index, 0,
-	   _n_scan_index_allocated * sizeof(track_file_scan_index_t));
-  }
+  // if (_n_scan_index_allocated > 0) {
+  //   memset(_scan_index, 0,
+  //          _n_scan_index_allocated * sizeof(track_file_scan_index_t));
+  // }
   
   if (_n_simple_allocated > 0) {
     memset (_simple_track_offsets, 0,
@@ -4614,24 +3997,7 @@ int TitanFile::rewriteTrackEntry()
 int TitanFile::seekTrackEndData()
   
 {
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::seekTrackEndData\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-
-  if (fseek(_track_data_file, 0L, SEEK_END) != 0) {
-    
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "seek failed");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-    
-  } else {
-
-    return 0;
-
-  }
-
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -4643,24 +4009,7 @@ int TitanFile::seekTrackEndData()
 int TitanFile::seekTrackStartData()
      
 {
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::seekTrackStartData\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-
-  if (fseek(_track_data_file, R_FILE_LABEL_LEN, SEEK_SET) != 0) {
-    
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "seek failed");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-    
-  } else {
-    
-    return 0;
-    
-  }
-
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////

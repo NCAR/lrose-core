@@ -467,11 +467,6 @@ public:
   const int *scan_offsets() const { return _scan_offsets; }
   int storm_num() const { return _storm_num; }
   
-  const string &storm_header_file_path() { return _storm_header_file_path; }
-  const string &storm_header_file_label() { return _storm_header_file_label; }
-  const string &storm_data_file_path() { return _storm_data_file_path; }
-  const string &storm_data_file_label() { return _storm_data_file_label; }
-
   // track data access
 
   const track_file_header_t &track_header() const { return _track_header; }
@@ -480,15 +475,10 @@ public:
   const complex_track_params_t &complex_params() const;
   const track_file_entry_t &entry() const { return _entry; }
   const track_file_entry_t *scan_entries() const { return _scan_entries; }
-  const track_file_scan_index_t *scan_index() const { return _scan_index; }
+  // const track_file_scan_index_t *scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
   
-  const string &track_header_file_path() { return _track_header_file_path; }
-  const string &track_header_file_label() { return _track_header_file_label; }
-  const string &track_data_file_path() { return _track_data_file_path; }
-  const string &track_data_file_label() { return _track_data_file_label; }
-
   const si32 *complex_track_nums() { return _complex_track_nums; }
   const si32 *complex_track_offsets() { return _complex_track_offsets; }
   const si32 *simple_track_offsets() { return _simple_track_offsets; }
@@ -525,8 +515,8 @@ public:
   void freeSimplesPerComplex();
   void allocScanEntries(int n_entries_needed);
   void freeScanEntries();
-  void allocScanIndex(int n_scans_needed);
-  void freeScanIndex();
+  // void allocScanIndex(int n_scans_needed);
+  // void freeScanIndex();
   void allocUtime();
   void freeUtime();
   void freeTracksAll();
@@ -559,20 +549,20 @@ public:
 
   void closeStormFiles();
   
-  // Flush the storm header and data files
+  // Flush the file forcing write
   
-  void flushStormFiles();
+  void flushFile();
   
-  // Put an advisory lock on the header file
+  // Put an advisory lock on the lock file
   // Mode is "w" - write lock, or "r" - read lock.
   // returns 0 on success, -1 on failure
   
-  int lockStormHeaderFile(const char *mode);
+  int lockFile(const char *mode);
   
-  // Remove advisory lock from the header file
+  // Remove advisory lock from the lock file
   // returns 0 on success, -1 on failure
 
-  int unlockStormHeaderFile();
+  int unlockFile();
   
   // read the storm file header
 
@@ -649,44 +639,12 @@ public:
                     const storm_file_run_t *runs,
                     const storm_file_run_t *proj_runs);
   
-  // Truncate header file
-  // Returns 0 on success, -1 on failure.
-
-  int truncateStormHeaderFile(int length);
-
-  // Truncate data file
-  // Returns 0 on success, -1 on failure.
-
-  int truncateStormDataFile(int length);
+  // truncate when rerunning
+  
+  int truncateFile(int scan_num);
 
   /////////////////////////////////////////////////////
   // Tracks
-  
-  // Open the track header and data files
-  // Returns 0 on success, -1 on error
-
-  int openTrackFiles(const char *mode,
-                     const char *header_file_path,
-                     const char *data_file_ext = NULL);
-  
-  // Close the storm header and data files
-
-  void closeTrackFiles();
-     
-  // Flush the storm header and data files
-
-  void flushTrackFiles();
-  
-  // Put an advisory lock on the header file.
-  // Mode is "w" - write lock, or "r" - read lock.
-  // returns 0 on success, -1 on failure
-
-  int lockTrackHeaderFile(const char *mode);
-
-  // Remove advisory lock from the header file
-  // returns 0 on success, -1 on failure
-
-  int unlockTrackHeaderFile();
   
   // read in the track_file_header_t structure from a track file.
   // Read in associated arrays (complex_track_nums, complex_track_offsets,
@@ -699,7 +657,7 @@ public:
   // Read in the track_file_header_t and scan_index array.
   // returns 0 on success, -1 on failure
 
-  int readScanIndex(bool clear_error_str = true);
+  // int readScanIndex(bool clear_error_str = true);
      
   // reads in the parameters for a complex track
   // For normal reads, read_simples_per_complex should be set true. This
@@ -880,14 +838,13 @@ protected:
   NcxxFile _ncFile;
   string _filePath;
   string _lockPath;
+  int _lockId;
 
   // legacy files
   
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
   bool _isLegacyV5Format;
-  string _stormHeaderPath;
-  string _trackHeaderPath;
   
   ////////////////////////////////////////////////////////
   // dimensions
@@ -977,16 +934,6 @@ protected:
   vector<int64_t> _runsOffsets;
   vector<int64_t> _projRunsOffsets;
   
-  // storm file details
-  
-  string _storm_header_file_path;
-  string _storm_header_file_label;
-  string _storm_data_file_path;
-  string _storm_data_file_label;
-
-  FILE *_storm_header_file;
-  FILE *_storm_data_file;
-
   // storm data
 
   int _nScans, _nStorms;
@@ -1002,23 +949,13 @@ protected:
   int _storm_num;
 
   // storm memory allocation
-
+  
   int _max_scans;
   int _max_storms;
   int _max_layers;
   int _max_dbz_intervals;
   int _max_runs;
   int _max_proj_runs;
-
-  // track file
-  
-  string _track_header_file_path;
-  string _track_header_file_label;
-  string _track_data_file_path;
-  string _track_data_file_label;
-  
-  FILE *_track_header_file;
-  FILE *_track_data_file;
 
   bool _first_entry;  // set to TRUE if first entry of a track
   
@@ -1029,7 +966,7 @@ protected:
   complex_track_params_t _complex_params;
   track_file_entry_t _entry;
 
-  track_file_scan_index_t *_scan_index;
+  // track_file_scan_index_t *_scan_index;
   track_file_entry_t *_scan_entries;
   track_utime_t *_track_utime;
   
@@ -1145,10 +1082,6 @@ protected:
                           fl32 &orientation,
                           fl32 &minor_radius,
                           fl32 &major_radius);
-
-  // truncate when rerunning
-  
-  int _truncateStormFiles(FILE *&fd, const string &path, int length);
 
   // read entry at given offset
 
