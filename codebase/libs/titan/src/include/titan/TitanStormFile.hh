@@ -180,6 +180,13 @@ public:
   // at the end of the file.
   // returns 0 on success, -1 on failure
 
+  int WriteProps(int storm_num,
+                 const storm_file_global_props_t *gprops,
+                 const storm_file_layer_props_t *lprops,
+                 const storm_file_dbz_hist_t *hist,
+                 const storm_file_run_t *runs,
+                 const storm_file_run_t *proj_runs);
+
   int WriteProps(int storm_num);
 
   // Convert the ellipse data (orientation, major_radius and minor_radius)

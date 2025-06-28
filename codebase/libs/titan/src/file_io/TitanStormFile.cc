@@ -1111,6 +1111,7 @@ int TitanStormFile::WriteScan(const storm_file_scan_header_t &scanHeader,
 {
   _scan = scanHeader;
   int nstorms = _scan.nstorms;
+  AllocGprops(nstorms);
   memcpy (_gprops, gprops, nstorms * sizeof(storm_file_global_props_t));
   return WriteScan(scanHeader.scan_num);
 }
@@ -1204,6 +1205,45 @@ int TitanStormFile::WriteScan(int scan_num)
 //
 //////////////////////////////////////////////////////////////
 
+int TitanStormFile::WriteProps(int storm_num,
+                               const storm_file_global_props_t *gprops,
+                               const storm_file_layer_props_t *lprops,
+                               const storm_file_dbz_hist_t *hist,
+                               const storm_file_run_t *runs,
+                               const storm_file_run_t *proj_runs)
+{
+
+  // get array sizes
+  
+  int n_layers = gprops[storm_num].n_layers;
+  int n_dbz_intervals = gprops[storm_num].n_dbz_intervals;
+  int n_runs = gprops[storm_num].n_runs;
+  int n_proj_runs = gprops[storm_num].n_proj_runs;
+
+  // allocate memory
+  
+  AllocLayers(n_layers);
+  AllocHist(n_dbz_intervals);
+  AllocRuns(n_runs);
+  AllocProjRuns(n_proj_runs);
+
+  // copy the layer, hist and runs data into this object
+  
+  memcpy (_lprops, lprops,
+          n_layers * sizeof(storm_file_layer_props_t));
+  memcpy (_hist, hist,
+          n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
+  memcpy (_runs, runs,
+          n_runs * sizeof(storm_file_run_t));
+  memcpy (_proj_runs, proj_runs,
+          n_proj_runs * sizeof(storm_file_run_t));
+
+  // call WriteProps()
+
+  return WriteProps(storm_num);
+  
+}
+  
 int TitanStormFile::WriteProps(int storm_num)
      
 {

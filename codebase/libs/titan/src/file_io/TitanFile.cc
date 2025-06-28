@@ -2532,6 +2532,10 @@ int TitanFile::writeStormAux(int storm_num,
   
 {
 
+  if (_isLegacyV5Format) {
+    return _sFile.WriteProps(storm_num, gprops, lprops, hist, runs, proj_runs);
+  }
+  
   // ensure we have space for the offsets
   
   _layerOffsets.resize(storm_num + 1);
@@ -2605,131 +2609,6 @@ int TitanFile::writeStormAux(int storm_num,
     _projRunsVars.run_len.putVal(projRunIndex, run.n);
   }
   
-#ifdef JUNK
-  
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeProps\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
-
-  int n_layers = _gprops[storm_num].n_layers;
-  int n_dbz_intervals = _gprops[storm_num].n_dbz_intervals;
-  int n_runs = _gprops[storm_num].n_runs;
-  int n_proj_runs = _gprops[storm_num].n_proj_runs;
-  
-  // set layer props offset
-  
-  fseek(_storm_data_file, 0, SEEK_END);
-  int offset = ftell(_storm_data_file);
-  _gprops[storm_num].layer_props_offset = offset;
-  
-  // if this is the first storm, store the first_offset value
-  // in the scan header
-  
-  if (storm_num == 0) {
-    _scan.first_offset = offset;
-  }
-  
-  // copy layer props to local array
-  
-  TaArray<storm_file_layer_props_t> lpropsArray;
-  storm_file_layer_props_t *lprops = lpropsArray.alloc(n_layers);
-  memcpy (lprops, _lprops,
-          n_layers * sizeof(storm_file_layer_props_t));
-  
-  // code layer props into network byte order from host byte order
-  
-  BE_from_array_32(lprops, n_layers * sizeof(storm_file_layer_props_t));
-  
-  // write layer props
-  
-  if (ufwrite(lprops, sizeof(storm_file_layer_props_t),
-	      n_layers, _storm_data_file) != n_layers) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing layers");
-    TaStr::AddInt(_errStr, "  n_layers: ", n_layers);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // set dbz hist offset
-  
-  _gprops[storm_num].dbz_hist_offset = ftell(_storm_data_file);
-  
-  // copy histogram data to local variable
-
-  TaArray<storm_file_dbz_hist_t> histArray;
-  storm_file_dbz_hist_t *hist = histArray.alloc(n_dbz_intervals);
-  memcpy (hist, _hist, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
-  
-  // encode histogram data to network byte order from host byte order
-  
-  BE_from_array_32(hist, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
-  
-  // write in histogram data
-  
-  if (ufwrite(hist, sizeof(storm_file_dbz_hist_t),
-	      n_dbz_intervals, _storm_data_file) != n_dbz_intervals) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing hist");
-    TaStr::AddInt(_errStr, "  n_dbz_intervals: ", n_dbz_intervals);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // set runs offset
-  
-  _gprops[storm_num].runs_offset = ftell(_storm_data_file);
-  
-  // copy runs to local array
-
-  TaArray<storm_file_run_t> runsArray;
-  storm_file_run_t *runs = runsArray.alloc(n_runs);
-  memcpy (runs, _runs, n_runs * sizeof(storm_file_run_t));
-  
-  // code run props into network byte order from host byte order
-  
-  BE_from_array_16(runs, n_runs * sizeof(storm_file_run_t));
-  
-  // write runs
-  
-  if (ufwrite(runs, sizeof(storm_file_run_t),
-	      n_runs, _storm_data_file) != n_runs) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing runs");
-    TaStr::AddInt(_errStr, "  n_runs: ", n_runs);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // set proj_runs offset
-  
-  _gprops[storm_num].proj_runs_offset = ftell(_storm_data_file);
-  
-  // copy proj_runs to local array
-
-  TaArray<storm_file_run_t> projRunsArray;
-  storm_file_run_t *proj_runs = projRunsArray.alloc(n_proj_runs);
-  memcpy (proj_runs, _proj_runs,
-          n_proj_runs * sizeof(storm_file_run_t));
-  
-  // code run props into network byte order from host byte order
-  
-  BE_from_array_16(proj_runs,
-		   n_proj_runs * sizeof(storm_file_run_t));
-  
-  // write proj_runs
-  
-  if (ufwrite(proj_runs, sizeof(storm_file_run_t),
-	      n_proj_runs, _storm_data_file) != n_proj_runs) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing proj_runs");
-    TaStr::AddInt(_errStr, "  n_proj_runs: ", n_proj_runs);
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-#endif
-
   return 0;
   
 }
