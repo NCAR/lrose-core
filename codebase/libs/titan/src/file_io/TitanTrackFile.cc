@@ -1607,6 +1607,12 @@ int TitanTrackFile::SeekStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
+int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header)
+{
+  _header = track_file_header;
+  return WriteHeader();
+}
+
 int TitanTrackFile::WriteHeader()
      
 {
@@ -1664,7 +1670,7 @@ int TitanTrackFile::WriteHeader()
   
   track_file_header_t header = _header;
   
-  memcpy (complex_track_nums,_complex_track_nums,
+  memcpy (complex_track_nums, _complex_track_nums,
           n_complex_tracks *  sizeof(si32));
   
   memcpy (complex_track_offsets, _complex_track_offsets,

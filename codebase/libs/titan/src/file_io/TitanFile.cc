@@ -1586,6 +1586,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
 
   if (_isLegacyV5Format) {
     if (_sFile.ReadHeader(clear_error_str)) {
+      _errStr = _sFile.getErrStr();
       return -1;
     }
     _storm_header = _sFile.header();
@@ -1667,6 +1668,7 @@ int TitanFile::readProjRuns(int storm_num)
 
   if (_isLegacyV5Format) {
     if (_sFile.ReadProjRuns(storm_num)) {
+      _errStr = _sFile.getErrStr();
       return -1;
     }
     int nProjRuns = _gprops[storm_num].n_proj_runs;
@@ -1721,17 +1723,11 @@ int TitanFile::readStormAux(int storm_num)
 {
   
   if (_isLegacyV5Format) {
-    if (_sFile.ReadProps(storm_num)) {
-      return -1;
-    }
-    return 0;
-  }
-
-  if (_isLegacyV5Format) {
 
     // read
     
-    if (_sFile.ReadProjRuns(storm_num)) {
+    if (_sFile.ReadProps(storm_num)) {
+      _errStr = _sFile.getErrStr();
       return -1;
     }
 
@@ -1862,6 +1858,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   if (_isLegacyV5Format) {
     if (_sFile.ReadScan(scan_num, storm_num)) {
+      _errStr = _sFile.getErrStr();
       return -1;
     }
     _scan = _sFile.scan();
@@ -2063,6 +2060,13 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 int TitanFile::seekStormEndData()
      
 {
+  if (_isLegacyV5Format) {
+    if (_sFile.SeekEndData()) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
   return 0;
 }
 
@@ -2075,6 +2079,13 @@ int TitanFile::seekStormEndData()
 int TitanFile::seekStormStartData()
      
 {
+  if (_isLegacyV5Format) {
+    if (_sFile.SeekStartData()) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
   return 0;
 }
 
@@ -2094,7 +2105,11 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
 {
 
   if (_isLegacyV5Format) {
-    return _sFile.WriteHeader(storm_file_header);
+    if (_sFile.WriteHeader(storm_file_header)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
   }
   
   _clearErrStr();
@@ -2179,7 +2194,11 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 {
   
   if (_isLegacyV5Format) {
-    return _sFile.WriteScan(scanHeader, gprops);
+    if (_sFile.WriteScan(scanHeader, gprops)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
   }
   
   _clearErrStr();
@@ -2582,9 +2601,13 @@ int TitanFile::writeStormAux(int storm_num,
 {
 
   if (_isLegacyV5Format) {
-    return _sFile.WriteProps(storm_num, gprops, lprops, hist, runs, proj_runs);
+    if (_sFile.WriteProps(storm_num, gprops, lprops, hist, runs, proj_runs)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
   }
-  
+
   // ensure we have space for the offsets
   
   _layerOffsets.resize(storm_num + 1);
@@ -3071,9 +3094,10 @@ void TitanFile::freeTracksAll()
 int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
      
 {
-  
+
   if (_isLegacyV5Format) {
     if (_tFile.ReadHeader(clear_error_str)) {
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     _track_header = _tFile.header();
@@ -3082,6 +3106,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     allocComplexArrays(n_complex_tracks);
     allocSimpleArrays(n_simple_tracks);
     if (_tFile.ReadSimplesPerComplex()) {
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     return 0;
@@ -3251,6 +3276,16 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
      
 {
   
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadComplexParams(complex_track_num,
+                                 read_simples_per_complex,
+                                 clear_error_str)) {
+      return -1;
+    }
+    _complex_params = _tFile.complex_params();
+    return 0;
+  }
+
   if (clear_error_str) {
     _clearErrStr();
   }
@@ -3345,6 +3380,16 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
      
 {
   
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadComplexParams(simple_track_num,
+                                 clear_error_str)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    _simple_params = _tFile.simple_params();
+    return 0;
+  }
+
   if (clear_error_str) {
     _clearErrStr();
   }
@@ -3403,6 +3448,15 @@ int TitanFile::readTrackEntry()
      
 {
   
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadEntry()) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    _entry = _tFile.entry();
+    return 0;
+  }
+
   _clearErrStr();
   _errStr += "ERROR - TitanFile::readEntry\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
@@ -3466,6 +3520,7 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
   if (_isLegacyV5Format) {
     // legacy read
     if (_tFile.ReadSimplesPerComplex()) {
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     // copy over data from _tFile object
@@ -3544,6 +3599,17 @@ int TitanFile::readScanEntries(int scan_num)
      
 {
 
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadScanEntries(scan_num)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    _n_scan_entries = _tFile.n_scan_entries();
+    allocScanEntries(_n_scan_entries);
+    memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
+    return 0;
+  }
+
   _clearErrStr();
   _errStr += "ERROR - TitanFile::readScanEntries\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
@@ -3588,6 +3654,18 @@ int TitanFile::readScanEntries(int scan_num)
 int TitanFile::readUtime()
      
 {
+
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadUtime()) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    _n_scan_entries = _tFile.n_scan_entries();
+    allocScanEntries(_n_scan_entries);
+    memcpy(_scan_entries, _tFile.scan_entries(),
+           _n_scan_entries * sizeof(track_file_entry_t));
+    return 0;
+  }
 
   _clearErrStr();
   _errStr += "ERROR - TitanFile::readUtime\n";
@@ -3691,26 +3769,24 @@ void TitanFile::reinit()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::reuseComplexSlot(int track_num)
+int TitanFile::reuseComplexSlot(int complex_track_num)
      
 {
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.ReuseComplexSlot(complex_track_num)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
 
-  _clearErrStr();
-  _errStr += "ERROR - TitanFile::ReuseComplexSlot\n";
-
-  si32 *offset = _complex_track_offsets + track_num;
-
-  if (*offset <= 0) {
-    TaStr::AddStr(_errStr, "  ", "Slot for track not available");
-    TaStr::AddInt(_errStr, "  track_num: ", track_num);
+  // in the NetCDF implementation, we just clear the slot
+  
+  if (clearComplexSlot(complex_track_num)) {
     return -1;
   }
   
-  *offset *= -1;
-  
-  if (track_num < _lowest_avail_complex_slot)
-    _lowest_avail_complex_slot = track_num;
-
   return 0;
 
 }
@@ -3800,16 +3876,25 @@ int TitanFile::clearComplexSlot(int complex_track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::rewindSimpleTrack(int track_num)
+int TitanFile::rewindSimpleTrack(int simple_track_num)
      
 {
 
+  if (_isLegacyV5Format) {
+    if (_tFile.RewindSimple(simple_track_num)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    _first_entry = TRUE;
+    return 0;
+  }
+  
   _clearErrStr();
   _errStr += "ERROR - TitanFile::RewindSimpleTrack\n";
   
   // read in simple track params
   
-  if (readSimpleTrackParams(track_num, false)) {
+  if (readSimpleTrackParams(simple_track_num, false)) {
     return -1;
   }
 
@@ -3835,12 +3920,21 @@ int TitanFile::rewriteTrackEntry()
      
 {
   
-  // _clearErrStr();
+  if (_isLegacyV5Format) {
+    if (_tFile.RewriteEntry()) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
+  
   _errStr += "ERROR - TitanFile::rewriteTrackEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
   
-  track_file_entry_t entry = _entry;
-  return writeTrackEntry(entry);
+  if (writeTrackEntry(_entry)) {
+    return -1;
+  }
+  
   return 0;
   
 }
@@ -3854,6 +3948,14 @@ int TitanFile::rewriteTrackEntry()
 int TitanFile::seekTrackEndData()
   
 {
+  if (_isLegacyV5Format) {
+    if (_tFile.SeekEndData()) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
+  
   return 0;
 }
 
@@ -3866,6 +3968,15 @@ int TitanFile::seekTrackEndData()
 int TitanFile::seekTrackStartData()
      
 {
+
+  if (_isLegacyV5Format) {
+    if (_tFile.SeekStartData()) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
+  
   return 0;
 }
 
@@ -3880,6 +3991,14 @@ int TitanFile::seekTrackStartData()
 int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
      
 {
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.WriteHeader(track_file_header)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeTrackHeader\n";

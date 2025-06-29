@@ -213,6 +213,7 @@ public:
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
+  int WriteHeader(const track_file_header_t &track_file_header);
   int WriteHeader();
 
   // write simple track params at the end of the file
