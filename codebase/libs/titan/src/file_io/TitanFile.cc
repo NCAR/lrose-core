@@ -1585,7 +1585,11 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
 {
 
   if (_isLegacyV5Format) {
-    return _sFile.ReadHeader(clear_error_str);
+    if (_sFile.ReadHeader(clear_error_str)) {
+      return -1;
+    }
+    _storm_header = _sFile.header();
+    return 0;
   }
 
   if (clear_error_str) {
@@ -1662,7 +1666,13 @@ int TitanFile::readProjRuns(int storm_num)
   _errStr += "ERROR - TitanFile::readProjRuns\n";
 
   if (_isLegacyV5Format) {
-    return _sFile.ReadProjRuns(storm_num);
+    if (_sFile.ReadProjRuns(storm_num)) {
+      return -1;
+    }
+    int nProjRuns = _gprops[storm_num].n_proj_runs;
+    allocProjRuns(nProjRuns);
+    memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
+    return 0;
   }
 
   // return early if nstorms is zero
@@ -1711,7 +1721,39 @@ int TitanFile::readStormAux(int storm_num)
 {
   
   if (_isLegacyV5Format) {
-    return _sFile.ReadProps(storm_num);
+    if (_sFile.ReadProps(storm_num)) {
+      return -1;
+    }
+    return 0;
+  }
+
+  if (_isLegacyV5Format) {
+
+    // read
+    
+    if (_sFile.ReadProjRuns(storm_num)) {
+      return -1;
+    }
+
+    // copy over the data
+    
+    int nLayers = _gprops[storm_num].n_layers;
+    int nDbzIntervals = _gprops[storm_num].n_dbz_intervals;
+    int nRuns = _gprops[storm_num].n_runs;
+    int nProjRuns = _gprops[storm_num].n_proj_runs;
+    
+    allocLayers(nLayers);
+    allocHist(nDbzIntervals);
+    allocRuns(nRuns);
+    allocProjRuns(nProjRuns);
+    
+    memcpy(_lprops, _sFile.lprops(), nLayers * sizeof(storm_file_layer_props_t));
+    memcpy(_hist, _sFile.hist(), nDbzIntervals * sizeof(storm_file_dbz_hist_t));
+    memcpy(_runs, _sFile.runs(), nRuns * sizeof(storm_file_run_t));
+    memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
+
+    return 0;
+    
   }
 
   _clearErrStr();
@@ -1819,7 +1861,14 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 {
   
   if (_isLegacyV5Format) {
-    return _sFile.ReadScan(scan_num, storm_num);
+    if (_sFile.ReadScan(scan_num, storm_num)) {
+      return -1;
+    }
+    _scan = _sFile.scan();
+    int nStorms = _scan.nstorms;
+    allocGprops(nStorms);
+    memcpy(_gprops, _sFile.gprops(), nStorms * sizeof(storm_file_global_props_t));
+    return 0;
   }
 
   _clearErrStr();
@@ -2816,7 +2865,7 @@ void TitanFile::allocSimplesPerComplex(int n_simple_needed)
       (_simples_per_complex_2D, n_realloc * sizeof(si32 *));
     
     // initialize new elements to zero
-  
+    
     int n_new = n_realloc - n_start;
 
     memset (_simples_per_complex_2D + n_start,
@@ -3023,6 +3072,21 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
      
 {
   
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadHeader(clear_error_str)) {
+      return -1;
+    }
+    _track_header = _tFile.header();
+    int n_complex_tracks = _track_header.n_complex_tracks;
+    int n_simple_tracks = _track_header.n_simple_tracks;
+    allocComplexArrays(n_complex_tracks);
+    allocSimpleArrays(n_simple_tracks);
+    if (_tFile.ReadSimplesPerComplex()) {
+      return -1;
+    }
+    return 0;
+  }
+
   if (clear_error_str) {
     _clearErrStr();
   }
@@ -3398,6 +3462,26 @@ int TitanFile::_readTrackEntry(track_file_entry_t &entry,
 int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
      
 {
+
+  if (_isLegacyV5Format) {
+    // legacy read
+    if (_tFile.ReadSimplesPerComplex()) {
+      return -1;
+    }
+    // copy over data from _tFile object
+    for (int itrack = 0; itrack < _tFile.header().n_complex_tracks; itrack++) {
+      int complex_num = _tFile.complex_track_nums()[itrack];
+      int nsimples = _tFile.nsimples_per_complex()[complex_num];
+      allocSimplesPerComplex(complex_num + 1);
+      _simples_per_complex_2D[complex_num] = (si32 *) urealloc
+        (_simples_per_complex_2D[complex_num],
+         (nsimples * sizeof(si32)));
+      memcpy(_simples_per_complex_2D[complex_num],
+             _tFile.simples_per_complex()[complex_num],
+             nsimples * sizeof(si32));
+    } // itrack 
+    return 0;
+  }
 
   if (clear_error_str) {
     _clearErrStr();
