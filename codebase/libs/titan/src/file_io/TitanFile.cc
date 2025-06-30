@@ -2104,6 +2104,12 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
      
 {
 
+  // save state
+  
+  _storm_header = storm_file_header;
+
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_sFile.WriteHeader(storm_file_header)) {
       _errStr = _sFile.getErrStr();
@@ -2116,23 +2122,19 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _errStr += "ERROR - TitanFile::writeStormHeader\n";
   TaStr::AddStr(_errStr, "  File: ", _filePath);
 
-  // make copy
-  
-  storm_file_header_t header = storm_file_header;
-  
   // set file time to gmt
   
-  header.file_time = time(nullptr);
+  _storm_header.file_time = time(nullptr);
   
   // make local copies of the global file header and scan offsets
   
-  _topLevelVars.file_time.putVal((int64_t) header.file_time);
-  _topLevelVars.start_time.putVal((int64_t) header.start_time);
-  _topLevelVars.end_time.putVal((int64_t) header.end_time);
+  _topLevelVars.file_time.putVal((int64_t) _storm_header.file_time);
+  _topLevelVars.start_time.putVal((int64_t) _storm_header.start_time);
+  _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
   _topLevelVars.n_scans.putVal((int) _n_scans.getSize());
   _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
   
-  const storm_file_params_t &sparams(header.params);
+  const storm_file_params_t &sparams(_storm_header.params);
   
   _sparamsVars.low_dbz_threshold.putVal(sparams.low_dbz_threshold);
   _sparamsVars.high_dbz_threshold.putVal(sparams.high_dbz_threshold);
@@ -2192,6 +2194,15 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
                               const storm_file_global_props_t *gprops)
   
 {
+
+  // save state
+
+  _storm_header = storm_file_header;
+  _scan = scanHeader;
+  allocGprops(_scan.nstorms);
+  memcpy(_gprops, gprops, _scan.nstorms * sizeof(storm_file_global_props_t));
+    
+  // handle legacy format case
   
   if (_isLegacyV5Format) {
     if (_sFile.WriteScan(scanHeader, gprops)) {
@@ -2207,53 +2218,53 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // update attributes that depend on scan type
   
-  _updateScanAttributes(scanHeader);
+  _updateScanAttributes(_scan);
   
   // scan storage index
   
-  size_t scanNum = scanHeader.scan_num;
+  size_t scanNum = _scan.scan_num;
   std::vector<size_t> scanIndex = NcxxVar::makeIndex(scanNum);
 
   // write scan details
   
-  _scanVars.scan_min_z.putVal(scanIndex, scanHeader.min_z);
-  _scanVars.scan_delta_z.putVal(scanIndex, scanHeader.delta_z);
-  _scanVars.scan_num.putVal(scanIndex, scanHeader.scan_num);
-  _scanVars.scan_nstorms.putVal(scanIndex, scanHeader.nstorms);
-  _scanVars.scan_time.putVal(scanIndex, scanHeader.time);
-  _scanVars.scan_ht_of_freezing.putVal(scanIndex, scanHeader.ht_of_freezing);
+  _scanVars.scan_min_z.putVal(scanIndex, _scan.min_z);
+  _scanVars.scan_delta_z.putVal(scanIndex, _scan.delta_z);
+  _scanVars.scan_num.putVal(scanIndex, _scan.scan_num);
+  _scanVars.scan_nstorms.putVal(scanIndex, _scan.nstorms);
+  _scanVars.scan_time.putVal(scanIndex, _scan.time);
+  _scanVars.scan_ht_of_freezing.putVal(scanIndex, _scan.ht_of_freezing);
 
   // write grid details
 
-  _scanVars.grid_nx.putVal(scanIndex, scanHeader.grid.nx);
-  _scanVars.grid_ny.putVal(scanIndex, scanHeader.grid.ny);
-  _scanVars.grid_nz.putVal(scanIndex, scanHeader.grid.nz);
-  _scanVars.grid_minx.putVal(scanIndex, scanHeader.grid.minx);
-  _scanVars.grid_miny.putVal(scanIndex, scanHeader.grid.miny);
-  _scanVars.grid_minz.putVal(scanIndex, scanHeader.grid.minz);
-  _scanVars.grid_dx.putVal(scanIndex, scanHeader.grid.dx);
-  _scanVars.grid_dy.putVal(scanIndex, scanHeader.grid.dy);
-  _scanVars.grid_dz.putVal(scanIndex, scanHeader.grid.dz);
-  _scanVars.grid_dz_constant.putVal(scanIndex, scanHeader.grid.dz_constant);
-  _scanVars.grid_sensor_x.putVal(scanIndex, scanHeader.grid.sensor_x);
-  _scanVars.grid_sensor_y.putVal(scanIndex, scanHeader.grid.sensor_y);
-  _scanVars.grid_sensor_z.putVal(scanIndex, scanHeader.grid.sensor_z);
-  _scanVars.grid_sensor_lat.putVal(scanIndex, scanHeader.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.putVal(scanIndex, scanHeader.grid.sensor_lon);
+  _scanVars.grid_nx.putVal(scanIndex, _scan.grid.nx);
+  _scanVars.grid_ny.putVal(scanIndex, _scan.grid.ny);
+  _scanVars.grid_nz.putVal(scanIndex, _scan.grid.nz);
+  _scanVars.grid_minx.putVal(scanIndex, _scan.grid.minx);
+  _scanVars.grid_miny.putVal(scanIndex, _scan.grid.miny);
+  _scanVars.grid_minz.putVal(scanIndex, _scan.grid.minz);
+  _scanVars.grid_dx.putVal(scanIndex, _scan.grid.dx);
+  _scanVars.grid_dy.putVal(scanIndex, _scan.grid.dy);
+  _scanVars.grid_dz.putVal(scanIndex, _scan.grid.dz);
+  _scanVars.grid_dz_constant.putVal(scanIndex, _scan.grid.dz_constant);
+  _scanVars.grid_sensor_x.putVal(scanIndex, _scan.grid.sensor_x);
+  _scanVars.grid_sensor_y.putVal(scanIndex, _scan.grid.sensor_y);
+  _scanVars.grid_sensor_z.putVal(scanIndex, _scan.grid.sensor_z);
+  _scanVars.grid_sensor_lat.putVal(scanIndex, _scan.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.putVal(scanIndex, _scan.grid.sensor_lon);
   
   _scanVars.grid_unitsx.putVal(scanIndex, _horizGridUnits);
   _scanVars.grid_unitsy.putVal(scanIndex, _horizGridUnits);
-  _scanVars.grid_unitsz.putVal(scanIndex, std::string(scanHeader.grid.unitsz));
-
+  _scanVars.grid_unitsz.putVal(scanIndex, std::string(_scan.grid.unitsz));
+  
   // write projection details
   
-  _scanVars.proj_type.putVal(scanIndex, scanHeader.grid.proj_type);
-  _scanVars.proj_origin_lat.putVal(scanIndex, scanHeader.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.putVal(scanIndex, scanHeader.grid.proj_origin_lon);
-  _scanVars.proj_rotation.putVal(scanIndex, scanHeader.grid.proj_params.flat.rotation);
+  _scanVars.proj_type.putVal(scanIndex, _scan.grid.proj_type);
+  _scanVars.proj_origin_lat.putVal(scanIndex, _scan.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.putVal(scanIndex, _scan.grid.proj_origin_lon);
+  _scanVars.proj_rotation.putVal(scanIndex, _scan.grid.proj_params.flat.rotation);
 
-  _scanVars.proj_lat1.putVal(scanIndex, scanHeader.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.putVal(scanIndex, scanHeader.grid.proj_params.lc2.lat2);
+  _scanVars.proj_lat1.putVal(scanIndex, _scan.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.putVal(scanIndex, _scan.grid.proj_params.lc2.lat2);
   _scanVars.proj_tangent_lat.putVal(scanIndex, 0.0);
   _scanVars.proj_tangent_lon.putVal(scanIndex, 0.0);
   _scanVars.proj_pole_type.putVal(scanIndex, 0);
@@ -2264,10 +2275,10 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.scan_gprops_offset.putVal(scanIndex, (int) _n_storms.getSize());
   
   // write storm global props
+  
+  const storm_file_params_t &sparams(_storm_header.params);
 
-  const storm_file_params_t &sparams(storm_file_header.params);
-
-  for (int istorm = 0; istorm < scanHeader.nstorms; istorm++) {
+  for (int istorm = 0; istorm < _scan.nstorms; istorm++) {
 
     // write first and last gprops offsets for this scan
     // first_offset is the offset of the first storm in the scan
@@ -2281,7 +2292,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
     // write the global props
     
-    const storm_file_global_props_t &gp = gprops[istorm];
+    const storm_file_global_props_t &gp = _gprops[istorm];
     
     int gpropsOffset = _n_storms.getSize();
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
