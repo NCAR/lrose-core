@@ -2611,6 +2611,28 @@ int TitanFile::writeStormAux(int storm_num,
   
 {
 
+  // save state
+
+  const storm_file_params_t &sparams(storm_file_header.params);
+  const storm_file_global_props_t &gp = gprops[storm_num];
+
+  int nLayers = gp.n_layers;
+  int nDbzIntervals = gp.n_dbz_intervals;
+  int nRuns = gp.n_runs;
+  int nProjRuns = gp.n_proj_runs;
+    
+  allocLayers(nLayers);
+  allocHist(nDbzIntervals);
+  allocRuns(nRuns);
+  allocProjRuns(nProjRuns);
+    
+  memcpy(_lprops, lprops, nLayers * sizeof(storm_file_layer_props_t));
+  memcpy(_hist, hist, nDbzIntervals * sizeof(storm_file_dbz_hist_t));
+  memcpy(_runs, runs, nRuns * sizeof(storm_file_run_t));
+  memcpy(_proj_runs, proj_runs, nProjRuns * sizeof(storm_file_run_t));
+
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_sFile.WriteProps(storm_num, gprops, lprops, hist, runs, proj_runs)) {
       _errStr = _sFile.getErrStr();
@@ -2626,13 +2648,10 @@ int TitanFile::writeStormAux(int storm_num,
   _runsOffsets.resize(storm_num + 1);
   _projRunsOffsets.resize(storm_num + 1);
   
-  const storm_file_params_t &sparams(storm_file_header.params);
-  const storm_file_global_props_t &gp = gprops[storm_num];
 
   // write layers
 
   _layerOffsets[storm_num] = _n_layers.getSize();
-  int nLayers = gp.n_layers;
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &ll = lprops[ilayer];
     int lpropsOffset = _n_layers.getSize();
@@ -2657,8 +2676,7 @@ int TitanFile::writeStormAux(int storm_num,
   // write histograms
 
   _histOffsets[storm_num] = _n_hist.getSize();
-  int nHist = gp.n_dbz_intervals;
-  for (int ihist = 0; ihist < nHist; ihist++) {
+  for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
     const storm_file_dbz_hist_t &hh = hist[ihist];
     int histOffset = _n_hist.getSize();
     std::vector<size_t> histIndex = NcxxVar::makeIndex(histOffset);
@@ -2669,7 +2687,6 @@ int TitanFile::writeStormAux(int storm_num,
   // write runs
   
   _runsOffsets[storm_num] = _n_runs.getSize();
-  int nRuns = gp.n_runs;
   for (int irun = 0; irun < nRuns; irun++) {
     const storm_file_run_t &run = runs[irun];
     int runOffset = _n_runs.getSize();
@@ -2681,7 +2698,6 @@ int TitanFile::writeStormAux(int storm_num,
   }
   
   _projRunsOffsets[storm_num] = _n_proj_runs.getSize();
-  int nProjRuns = gp.n_proj_runs;
   for (int irun = 0; irun < nProjRuns; irun++) {
     const storm_file_run_t &run = proj_runs[irun];
     int projRunOffset = _n_proj_runs.getSize();
