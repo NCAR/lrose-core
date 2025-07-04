@@ -3122,17 +3122,22 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
      
 {
 
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_tFile.ReadHeader(clear_error_str)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
+    // save state
     _track_header = _tFile.header();
     int n_complex_tracks = _track_header.n_complex_tracks;
     int n_simple_tracks = _track_header.n_simple_tracks;
     allocComplexArrays(n_complex_tracks);
     allocSimpleArrays(n_simple_tracks);
-    if (_tFile.ReadSimplesPerComplex()) {
+    memcpy(_complex_track_nums, _tFile.complex_track_nums(), n_complex_tracks * sizeof(si32));
+    // read in simples per complex
+    if (readSimplesPerComplex()) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -3146,7 +3151,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
    
   // read in header data
-   
+  
   track_file_params_t &tparams = _track_header.params;
   
   _topLevelVars.max_simple_track_num.getVal(&_track_header.max_simple_track_num);
@@ -3232,7 +3237,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   // read in simples_per_complex 1D array, create 2D array
   
-  if (readSimplesPerComplex(false)) {
+  if (readSimplesPerComplex()) {
     return -1;
   }
 
@@ -3303,13 +3308,22 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
      
 {
   
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_tFile.ReadComplexParams(complex_track_num,
-                                 read_simples_per_complex,
+                                 false,
                                  clear_error_str)) {
+      _errStr = _tFile.getErrStr();
       return -1;
     }
+    // save state
     _complex_params = _tFile.complex_params();
+    if (read_simples_per_complex) {
+      if (readSimplesPerComplex()) {
+        return -1;
+      }
+    }
     return 0;
   }
 
@@ -3387,7 +3401,7 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
   // simple tracks are part of this complex track.
 
   if (read_simples_per_complex) {
-    return readSimplesPerComplex(false);
+    return readSimplesPerComplex();
   }
 
   return 0;
@@ -3406,6 +3420,8 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
                                      bool clear_error_str /* = true */)
      
 {
+  
+  // handle legacy format
   
   if (_isLegacyV5Format) {
     if (_tFile.ReadComplexParams(simple_track_num,
@@ -3475,6 +3491,8 @@ int TitanFile::readTrackEntry()
      
 {
   
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_tFile.ReadEntry()) {
       _errStr = _tFile.getErrStr();
@@ -3534,13 +3552,13 @@ int TitanFile::_readTrackEntry(track_file_entry_t &entry,
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// read in the array of simple tracks for each complex track
+// read in the array of simple track numbers for each complex track
 //
 // returns 0 on success, -1 on failure
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
+int TitanFile::readSimplesPerComplex()
      
 {
 
@@ -3551,10 +3569,10 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
       return -1;
     }
     // copy over data from _tFile object
+    allocSimplesPerComplex(_tFile.header().max_complex_track_num + 1);
     for (int itrack = 0; itrack < _tFile.header().n_complex_tracks; itrack++) {
       int complex_num = _tFile.complex_track_nums()[itrack];
       int nsimples = _tFile.nsimples_per_complex()[complex_num];
-      allocSimplesPerComplex(complex_num + 1);
       _simples_per_complex_2D[complex_num] = (si32 *) urealloc
         (_simples_per_complex_2D[complex_num],
          (nsimples * sizeof(si32)));
@@ -3565,9 +3583,6 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
     return 0;
   }
 
-  if (clear_error_str) {
-    _clearErrStr();
-  }
   _errStr += "ERROR - TitanFile::readSimplesPerComplex\n";
 
   // set up index and count for retrievals
@@ -3577,7 +3592,8 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
 
   // read in n_simples_per_complex
   
-  _simpleVars.n_simples_per_complex.getVal(nSimpIndex, nSimpCount, _n_simples_per_complex);
+  _simpleVars.n_simples_per_complex.getVal
+    (nSimpIndex, nSimpCount, _n_simples_per_complex);
 
   // read in simples_per_complex_offsets
   
@@ -3591,13 +3607,13 @@ int TitanFile::readSimplesPerComplex(bool clear_error_str /* = false */)
 
   // create simples_per_complex_2D
   
+  allocSimplesPerComplex(_track_header.max_complex_track_num + 1);
+    
   for (int icomp = 0; icomp < _track_header.n_complex_tracks; icomp++) {
 
     int complex_num = _complex_track_nums[icomp];
     int n_simples = _n_simples_per_complex[complex_num];
     int simples_offset = _simples_per_complex_offsets[complex_num];
-    
-    allocSimplesPerComplex(complex_num + 1);
     
     _simples_per_complex_2D[complex_num] = (si32 *) urealloc
       (_simples_per_complex_2D[complex_num],
@@ -3626,11 +3642,14 @@ int TitanFile::readScanEntries(int scan_num)
      
 {
 
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_tFile.ReadScanEntries(scan_num)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
+    // save state
     _n_scan_entries = _tFile.n_scan_entries();
     allocScanEntries(_n_scan_entries);
     memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
@@ -3682,11 +3701,14 @@ int TitanFile::readUtime()
      
 {
 
+  // handle legacy format
+  
   if (_isLegacyV5Format) {
     if (_tFile.ReadUtime()) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
+    // save state
     _n_scan_entries = _tFile.n_scan_entries();
     allocScanEntries(_n_scan_entries);
     memcpy(_scan_entries, _tFile.scan_entries(),
@@ -4018,6 +4040,12 @@ int TitanFile::seekTrackStartData()
 int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
      
 {
+
+  // save state
+
+  _track_header = track_file_header;
+  
+  // handle legacy format
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteHeader(track_file_header)) {
@@ -4033,13 +4061,12 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
 
   // make copy
   
-  track_file_header_t header = track_file_header;
-  const track_file_params_t &tparams(header.params);
+  const track_file_params_t &tparams(_track_header.params);
   
   // set top level vars
   
-  _topLevelVars.max_simple_track_num.putVal((int) header.max_simple_track_num);
-  _topLevelVars.max_complex_track_num.putVal((int) header.max_complex_track_num);
+  _topLevelVars.max_simple_track_num.putVal((int) _track_header.max_simple_track_num);
+  _topLevelVars.max_complex_track_num.putVal((int) _track_header.max_complex_track_num);
   
   _tparamsVars.forecast_weights.putVal(tparams.forecast_weights);
   _tparamsVars.weight_distance.putVal(tparams.weight_distance);
@@ -4060,15 +4087,15 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   _tparamsVars.min_history_for_valid_forecast.putVal(tparams.min_history_for_valid_forecast);
   _tparamsVars.spatial_smoothing.putVal(tparams.spatial_smoothing);
   
-  _tstateVars.tracking_valid.putVal(header.file_valid);
-  _tstateVars.tracking_modify_code.putVal(header.modify_code);
-  _tstateVars.n_samples_for_forecast_stats.putVal(header.n_samples_for_forecast_stats);
-  _tstateVars.last_scan_num.putVal(header.last_scan_num);
-  _tstateVars.max_simple_track_num.putVal(header.max_simple_track_num);
-  _tstateVars.max_complex_track_num.putVal(header.max_complex_track_num);
-  _tstateVars.max_parents.putVal(header.max_parents);
-  _tstateVars.max_children.putVal(header.max_children);
-  _tstateVars.max_nweights_forecast.putVal(header.max_nweights_forecast);
+  _tstateVars.tracking_valid.putVal(_track_header.file_valid);
+  _tstateVars.tracking_modify_code.putVal(_track_header.modify_code);
+  _tstateVars.n_samples_for_forecast_stats.putVal(_track_header.n_samples_for_forecast_stats);
+  _tstateVars.last_scan_num.putVal(_track_header.last_scan_num);
+  _tstateVars.max_simple_track_num.putVal(_track_header.max_simple_track_num);
+  _tstateVars.max_complex_track_num.putVal(_track_header.max_complex_track_num);
+  _tstateVars.max_parents.putVal(_track_header.max_parents);
+  _tstateVars.max_children.putVal(_track_header.max_children);
+  _tstateVars.max_nweights_forecast.putVal(_track_header.max_nweights_forecast);
 
 #ifdef JUNK
   
@@ -4269,6 +4296,20 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
                                       const simple_track_params_t &sparams)
      
 {
+
+  // save state
+
+  _simple_params = sparams;
+
+  // handle legacy format
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.WriteSimpleParams(sparams)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeSimpleParams\n";
@@ -4324,6 +4365,20 @@ int TitanFile::writeComplexTrackParams(int cindex,
   
 {
 
+  // save state
+
+  _complex_params = cparams;
+
+  // handle legacy format
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.WriteComplexParams(cparams)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
+  
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeComplexParams\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
@@ -4404,84 +4459,6 @@ int TitanFile::writeComplexTrackParams(int cindex,
   return 0;
 
 }
-
-  
-//   if (_complex_track_offsets[track_num] == 0) {
-    
-//     // params have not been written before.
-//     //
-//     // Two steps: 1) look for a slot which has been freed
-//     //               up when a complex track was consolidated.
-//     //            2) If no available slot, use end of file
-    
-//     int lowest_avail_slot = _lowest_avail_complex_slot;
-//     si32 *offset_p = _complex_track_offsets + lowest_avail_slot;
-//     si32 avail_offset;
-//     bool slot_found = false;
-      
-//     for (int i = lowest_avail_slot; i < track_num; i++) {
-      
-//       if (*offset_p < 0) {
-	
-// 	// avail slot found
-	
-// 	avail_offset = -(*offset_p);
-// 	*offset_p = 0;
-// 	_lowest_avail_complex_slot = i + 1;
-// 	slot_found = true;
-// 	break;
-	
-//       } // if (*offset_p < 0) 
-      
-//       offset_p++;
-      
-//     } // i 
-    
-//     if (slot_found) {
-      
-//       _complex_track_offsets[track_num] = avail_offset;
-//       fseek(_track_data_file, avail_offset, SEEK_SET);
-      
-//     } else {
-      
-//       fseek(_track_data_file, 0, SEEK_END);
-//       _complex_track_offsets[track_num] = ftell(_track_data_file);
-//       _lowest_avail_complex_slot = track_num + 1;
-      
-//     }
-    
-//   } else {
-    
-//     // params have been stored before, so go to the stored offset
-    
-//     fseek(_track_data_file, _complex_track_offsets[track_num], SEEK_SET);
-    
-//   }
-  
-//   // copy track params, encode and write to file
-  
-//   complex_track_params_t complex_params = _complex_params;
-  
-//   BE_from_array_32(&complex_params,
-// 		   sizeof(complex_track_params_t));
-  
-//   if (ufwrite(&complex_params, sizeof(complex_track_params_t),
-// 	      1, _track_data_file) != 1) {
-//     int errNum = errno;
-//     TaStr::AddStr(_errStr, "  ", "Writing complex track params.");
-//     TaStr::AddInt(_errStr, "  track_num", track_num);
-//     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-//     return -1;
-//   }
-  
-//   // flush the file buffer
-  
-//   fflush(_track_data_file);
-  
-//   return 0;
-  
-// }
-
 ///////////////////////////////////////////////////////////////////////////
 //
 // write an entry for a track in the track data file

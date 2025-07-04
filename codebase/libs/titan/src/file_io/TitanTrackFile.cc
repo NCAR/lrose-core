@@ -1080,34 +1080,11 @@ int TitanTrackFile::ReadComplexParams(int track_num,
   // simple tracks are part of this complex track.
 
   if (read_simples_per_complex) {
-    
-    int nsimples = _nsimples_per_complex[track_num];
-    
-    AllocSimplesPerComplex(track_num + 1);
-
-    if (_simples_per_complex[track_num] == NULL) {
-      _simples_per_complex[track_num] = (si32 *) umalloc
-	(nsimples * sizeof(si32));
-    } else {
-      _simples_per_complex[track_num] = (si32 *) urealloc
-	(_simples_per_complex[track_num],
-	 nsimples * sizeof(si32));
-    }
-    
-    fseek(_header_file, _simples_per_complex_offsets[track_num], SEEK_SET);
-  
-    if (ufread(_simples_per_complex[track_num],
-	       sizeof(si32), nsimples, _header_file) != nsimples) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ", "Reading simples per complex for");
-      TaStr::AddStr(_errStr, "  ", "  complex track params.");
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
+    if (ReadSimplesPerComplex(track_num)) {
       return -1;
     }
-    BE_to_array_32(_simples_per_complex[track_num], nsimples * sizeof(si32));
-
-  } //   if (read_simples_per_complex) 
-  
+  }
+    
   return 0;
   
 }
@@ -1247,6 +1224,45 @@ int TitanTrackFile::ReadSimplesPerComplex()
   
 }
 
+///////////////////////////////////////////////////////////////////////////
+// read in the array of simple tracks for specified complex track
+//
+// returns 0 on success, -1 on failure
+///////////////////////////////////////////////////////////////////////////
+
+int TitanTrackFile::ReadSimplesPerComplex(int complex_track_num)
+     
+{
+  
+  int nsimples = _nsimples_per_complex[complex_track_num];
+  
+  AllocSimplesPerComplex(complex_track_num + 1);
+
+  if (_simples_per_complex[complex_track_num] == NULL) {
+    _simples_per_complex[complex_track_num] = (si32 *) umalloc
+      (nsimples * sizeof(si32));
+  } else {
+    _simples_per_complex[complex_track_num] = (si32 *) urealloc
+      (_simples_per_complex[complex_track_num],
+       nsimples * sizeof(si32));
+  }
+    
+  fseek(_header_file, _simples_per_complex_offsets[complex_track_num], SEEK_SET);
+  
+  if (ufread(_simples_per_complex[complex_track_num],
+             sizeof(si32), nsimples, _header_file) != nsimples) {
+    int errNum = errno;
+    TaStr::AddStr(_errStr, "  ", "Reading simples per complex for");
+    TaStr::AddStr(_errStr, "  ", "  complex track params.");
+    TaStr::AddStr(_errStr, "  ", strerror(errNum));
+    return -1;
+  }
+  BE_to_array_32(_simples_per_complex[complex_track_num], nsimples * sizeof(si32));
+
+  return 0;
+    
+}
+  
 ///////////////////////////////////////////////////////////////////////////
 //
 // load vector with simples per complex, in linear order
@@ -1841,6 +1857,13 @@ int TitanTrackFile::WriteHeader()
 //
 ///////////////////////////////////////////////////////////////////////////
 
+int TitanTrackFile::WriteSimpleParams(const simple_track_params_t &sparams)
+     
+{
+  _simple_params = sparams;
+  return WriteSimpleParams(sparams.simple_track_num);
+}
+  
 int TitanTrackFile::WriteSimpleParams(int track_num)
      
 {
@@ -1900,6 +1923,12 @@ int TitanTrackFile::WriteSimpleParams(int track_num)
 //
 ///////////////////////////////////////////////////////////////////////////
 
+int TitanTrackFile::WriteComplexParams(const complex_track_params_t &cparams)
+{
+  _complex_params = cparams;
+  return WriteComplexParams(cparams.complex_track_num);
+}
+  
 int TitanTrackFile::WriteComplexParams(int track_num)
      
 {

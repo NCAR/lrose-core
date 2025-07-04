@@ -683,7 +683,7 @@ public:
   // read in the array of simple tracks for each complex track
   // returns 0 on success, -1 on failure
   
-  int readSimplesPerComplex(bool clear_error_str = false);
+  int readSimplesPerComplex();
   
   // read in entries for a scan
   // returns 0 on success, -1 on failure

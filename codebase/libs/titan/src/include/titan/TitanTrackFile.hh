@@ -164,7 +164,12 @@ public:
   
   int ReadSimplesPerComplex();
   
-  // load vector with simples per complex, in linear order
+  // read in the array of simple tracks for specified complex track
+  // returns 0 on success, -1 on failure
+
+  int ReadSimplesPerComplex(int complex_track_num);
+
+// load vector with simples per complex, in linear order
   // in memory these are stored in a si32** 2-d array
   
   void LoadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
@@ -219,11 +224,13 @@ public:
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
   
+  int WriteSimpleParams(const simple_track_params_t &sparams);
   int WriteSimpleParams(int track_num);
      
   // write complex track params
   // returns 0 on success, -1 on failure
   
+  int WriteComplexParams(const complex_track_params_t &cparams);
   int WriteComplexParams(int track_num);
      
   // write an entry for a track in the track data file
