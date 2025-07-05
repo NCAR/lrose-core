@@ -452,7 +452,7 @@ int Tstorms2NetCDF::_processInputFile()
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
       if (ientry == 0) {
-        entry.prev_entry_offset = -1;
+        entry.prev_entry_offset = 0;
       } else {
         entry.prev_entry_offset = entries[ientry - 1].this_entry_offset;
       }

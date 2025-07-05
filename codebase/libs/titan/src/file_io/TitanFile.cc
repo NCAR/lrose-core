@@ -4049,7 +4049,7 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteHeader(track_file_header)) {
-      _errStr = _sFile.getErrStr();
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     return 0;
@@ -4097,189 +4097,6 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   _tstateVars.max_children.putVal(_track_header.max_children);
   _tstateVars.max_nweights_forecast.putVal(_track_header.max_nweights_forecast);
 
-#ifdef JUNK
-  
-  // create local arrays
-
-  int n_complex_tracks = _track_header.n_complex_tracks;
-  int n_simple_tracks = _track_header.n_simple_tracks;
-  int n_scans = _track_header.n_scans;
-
-  TaArray<si32> nums, coffsets, soffsets, n_simples, simples; 
-  si32 *complex_track_nums = nums.alloc(n_complex_tracks);
-  si32 *complex_track_offsets = coffsets.alloc(n_simple_tracks);
-  si32 *simple_track_offsets = soffsets.alloc(n_simple_tracks);
-  si32 *n_simples_per_complex = n_simples.alloc(n_simple_tracks);
-  si32 *simples_per_complex_offsets = simples.alloc(n_simple_tracks);
-
-  TaArray<track_file_scan_index_t> sindexArray;
-  track_file_scan_index_t *scan_index = sindexArray.alloc(n_scans);
-
-  // copy the header and arrays to local variables
-  
-  track_file_header_t header = _track_header;
-  
-  memcpy (complex_track_nums,_complex_track_nums,
-          n_complex_tracks *  sizeof(si32));
-  
-  memcpy (complex_track_offsets, _complex_track_offsets,
-          n_simple_tracks *  sizeof(si32));
-  
-  memcpy (simple_track_offsets, _simple_track_offsets,
-          n_simple_tracks *  sizeof(si32));
-  
-  memcpy (n_simples_per_complex, _n_simples_per_complex,
-          n_simple_tracks *  sizeof(si32));
-  
-  memcpy (scan_index, _scan_index,
-          n_scans *  sizeof(track_file_scan_index_t));
-  
-  // code into network byte order
-  
-  header.nbytes_char = (TITAN_N_GRID_LABELS * TITAN_GRID_UNITS_LEN +
-                        TRACK_FILE_HEADER_NBYTES_CHAR);
-  
-  ustr_clear_to_end(header.header_file_name, R_LABEL_LEN);
-  ustr_clear_to_end(header.data_file_name, R_LABEL_LEN);
-  ustr_clear_to_end(header.storm_header_file_name, R_LABEL_LEN);
-  ustr_clear_to_end(header.verify.grid.unitsx, TITAN_GRID_UNITS_LEN);
-  ustr_clear_to_end(header.verify.grid.unitsy, TITAN_GRID_UNITS_LEN);
-  ustr_clear_to_end(header.verify.grid.unitsz, TITAN_GRID_UNITS_LEN);
-
-  BE_from_array_32(&header,
-		   sizeof(track_file_header_t) - header.nbytes_char);
-  
-  BE_from_array_32(complex_track_nums,
-		   n_complex_tracks *  sizeof(si32));
-  
-  BE_from_array_32(complex_track_offsets,
-		   n_simple_tracks *  sizeof(si32));
-    
-  BE_from_array_32(simple_track_offsets,
-		   n_simple_tracks *  sizeof(si32));
-  
-  BE_from_array_32(n_simples_per_complex,
-		   n_simple_tracks *  sizeof(si32));
-  
-  BE_from_array_32(scan_index,
-		   n_scans *  sizeof(track_file_scan_index_t));
-  
-  // write header
-  
-  if (ufwrite(&header, sizeof(track_file_header_t),
-	      1, _track_header_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing header.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // write in complex track num array
-  
-  if (ufwrite(complex_track_nums, sizeof(si32),
-	      n_complex_tracks, _track_header_file) != n_complex_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing complex_track_nums.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // write in complex track offset
-  
-  if (ufwrite(complex_track_offsets, sizeof(si32),
-	      n_simple_tracks, _track_header_file) != n_simple_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing complex_track_offsets.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // write in simple track offset
-  
-  if (ufwrite(simple_track_offsets, sizeof(si32), n_simple_tracks,
-	      _track_header_file) != n_simple_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing simple_track_offsets.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // write in scan index
-  
-  if (ufwrite(scan_index, sizeof(track_file_scan_index_t),
-	      n_scans, _track_header_file) != n_scans) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing scan_index.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-
-  // write in n_simples_per_complex
-
-  if (ufwrite(n_simples_per_complex, sizeof(si32),
-	      n_simple_tracks, _track_header_file) != n_simple_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing n_simples_per_complex.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  long offsets_pos = ftell(_track_header_file);
-  
-  // seek ahead of the simples_per_complex_offsets array
-  
-  fseek(_track_header_file, n_simple_tracks * sizeof(si32), SEEK_CUR);
-
-  // clear offsets array
-
-  memset(simples_per_complex_offsets, 0, n_simple_tracks * sizeof(si32));
-  
-  // loop through complex tracks
-
-  for (int icomplex = 0; icomplex < n_complex_tracks; icomplex++) {
-
-    int complex_num = _complex_track_nums[icomplex];
-    int n_simples = _n_simples_per_complex[complex_num];
-    simples_per_complex_offsets[complex_num] = ftell(_track_header_file);
-
-    TaArray<si32> simpleArray;
-    si32 *simples_per_complex = simpleArray.alloc(n_simples);
-    memcpy(simples_per_complex, _simples_per_complex[complex_num],
-	   n_simples * sizeof(si32));
-    BE_from_array_32(simples_per_complex, n_simples * sizeof(si32));
-		     
-    // write out simple tracks array
-    
-    if (ufwrite(simples_per_complex, sizeof(si32), n_simples,
-		_track_header_file) != n_simples) {
-      int errNum = errno;
-      TaStr::AddStr(_errStr, "  ", "Writing simples_per_complex.");
-      TaStr::AddStr(_errStr, "  ", strerror(errNum));
-      return -1;
-    }
-    
-  } // icomplex 
-
-  // write out simples_per_complex_offsets
-  
-  fseek(_track_header_file, offsets_pos, SEEK_SET);
-  BE_from_array_32(simples_per_complex_offsets,
-		   n_simple_tracks * sizeof(si32));
-  
-  if (ufwrite(simples_per_complex_offsets, sizeof(si32), n_simple_tracks,
-	      _track_header_file) != n_simple_tracks) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Writing simples_per_complex_offsets.");
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // flush the file buffer
-  
-  flushTrackFiles();
-
-#endif
-
   return 0;
   
 }
@@ -4305,7 +4122,7 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteSimpleParams(sparams)) {
-      _errStr = _sFile.getErrStr();
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     return 0;
@@ -4373,7 +4190,7 @@ int TitanFile::writeComplexTrackParams(int cindex,
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteComplexParams(cparams)) {
-      _errStr = _sFile.getErrStr();
+      _errStr = _tFile.getErrStr();
       return -1;
     }
     return 0;
@@ -4462,12 +4279,28 @@ int TitanFile::writeComplexTrackParams(int cindex,
 ///////////////////////////////////////////////////////////////////////////
 //
 // write an entry for a track in the track data file
+// on success returns the offset of the entry written
+// -1 on failure
 //
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   
 {
+  
+  // save state
+
+  _entry = entry;
+
+  // handle legacy format
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.WriteEntry(entry)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
   
   _clearErrStr();
   _errStr += "ERROR - TitanFile::writeEntry\n";
@@ -4493,142 +4326,7 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   _entryVars.next_entry_offset.putVal(entryIndex, entry.next_entry_offset);
   _entryVars.next_scan_entry_offset.putVal(entryIndex, entry.next_scan_entry_offset);
 
-  return 0;
-  
-  // long file_mark;
-
-  // // Go to the end of the file and save the file position.
-
-  // fseek(_track_data_file, 0, SEEK_END);
-  // file_mark = ftell(_track_data_file);
-  
-  // // If prev_in_track_offset is non-zero (which indicates that this is not
-  // // the first entry in a track) read in the entry at that location,
-  // // update the next_entry prev_in_track_offset with the current file
-  // // location and write back to file
-  
-  // if (prev_in_track_offset != 0) {
-    
-  //   // move to the entry prev_in_track_offset in the file
-    
-  //   fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
-    
-  //   // read in entry
-    
-  //   track_file_entry_t entry;
-  //   if (ufread(&entry, sizeof(track_file_entry_t),
-  //              1, _track_data_file) != 1) {
-  //     int errNum = errno;
-  //     TaStr::AddStr(_errStr, "  ",
-  //       	    "Reading track entry to update in_track_offset");
-  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //     return -1;
-  //   }
-    
-  //   // store next_entry_offset, swap
-    
-  //   entry.next_entry_offset = file_mark;
-  //   BE_from_array_32(&entry.next_entry_offset,
-  //       	     sizeof(entry.next_entry_offset));
-    
-  //   // move back to offset
-    
-  //   fseek(_track_data_file, prev_in_track_offset, SEEK_SET);
-    
-  //   // rewrite entry
-    
-  //   if (ufwrite(&entry, sizeof(track_file_entry_t),
-  //       	1, _track_data_file) != 1) {
-  //     int errNum = errno;
-  //     TaStr::AddStr(_errStr, "  ",
-  //       	    "Re-writing track entry.");
-  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //     return -1;
-  //   }
-    
-  // } // if (prev_in_track_offset == 0) 
-  
-  // // If prev_in_scan_offset is non-zero (which indicates that this is not
-  // // the first entry in a track) read in the entry at that location,
-  // // update the next_scan_entry_offset with the current file
-  // // location and write back to file
-  
-  // if (prev_in_scan_offset != 0) {
-    
-  //   // move to the entry prev_in_scan_offset in the file
-    
-  //   fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
-    
-  //   // read in entry
-    
-  //   track_file_entry_t entry;
-  //   if (ufread(&entry, sizeof(track_file_entry_t),
-  //              1, _track_data_file) != 1) {
-  //     int errNum = errno;
-  //     TaStr::AddStr(_errStr, "  ",
-  //       	    "Reading track entry to update in_track_offset.");
-  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //     return -1;
-  //   }
-    
-  //   // store next_entry_offset, swap
-    
-  //   entry.next_scan_entry_offset = file_mark;
-  //   BE_from_array_32(&entry.next_scan_entry_offset,
-  //       	     sizeof(entry.next_scan_entry_offset));
-    
-  //   // move back to offset
-    
-  //   fseek(_track_data_file, prev_in_scan_offset, SEEK_SET);
-    
-  //   // rewrite entry
-    
-  //   if (ufwrite(&entry, sizeof(track_file_entry_t),
-  //       	1, _track_data_file) != 1) {
-  //     int errNum = errno;
-  //     TaStr::AddStr(_errStr, "  ",
-  //       	    "Re-writing track entry.");
-  //     TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-  //     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //     return -1;
-  //   }
-    
-  // } // if (prev_in_scan_offset == 0) 
-  
-  // // go to end of file to write entry structure
-  
-  // fseek(_track_data_file, 0, SEEK_END);
-  
-  // // copy entry to local variable
-  
-  // track_file_entry_t entry = _entry;
-  
-  // // set entry offsets
-  
-  // entry.prev_entry_offset = prev_in_track_offset;
-  // entry.this_entry_offset = file_mark;
-  // entry.next_entry_offset = 0;
-  
-  // // swap
-  
-  // BE_from_array_32(&entry, sizeof(track_file_entry_t));
-  
-  // // write entry
-  
-  // if (ufwrite(&entry, sizeof(track_file_entry_t),
-  //             1, _track_data_file) != 1) {
-  //   int errNum = errno;
-  //   TaStr::AddStr(_errStr, "  ",
-  //       	  "Writing track entry.");
-  //   TaStr::AddInt(_errStr, "  offset: ", _entry.this_entry_offset);
-  //   TaStr::AddStr(_errStr, "  ", strerror(errNum));
-  //   return -1;
-  // }
-  
-  // return (file_mark);
+  return entryOffset;
   
 }
 

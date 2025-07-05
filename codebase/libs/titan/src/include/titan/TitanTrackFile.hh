@@ -233,6 +233,19 @@ public:
   int WriteComplexParams(const complex_track_params_t &cparams);
   int WriteComplexParams(int track_num);
      
+  // Write an entry for a track in the track data file
+  // The entry is written at the end of the file
+  //
+  // returns offset of last entry written on success, -1 on failure
+  //
+  // Use of this method assumes that the entries for a simple track
+  // will be written in time order, so that the offsets can be set
+  // accordingly.
+  //
+  ///////////////////////////////////////////////////////////////////////////
+  
+  long WriteEntry(const track_file_entry_t &entry);
+     
   // write an entry for a track in the track data file
   // The entry is written at the end of the file
   // returns offset of last entry written on success, -1 on failure
@@ -277,7 +290,12 @@ protected:
   si32 *_simples_per_complex_offsets;
   si32 **_simples_per_complex;
   int _n_scan_entries;
+
+  // track entry offsets
   
+  long _prev_in_track_offset;
+  long _prev_in_scan_offset;
+
   // memory allocation control
 
   int _n_simple_allocated;

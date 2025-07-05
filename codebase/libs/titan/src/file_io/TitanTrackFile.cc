@@ -70,6 +70,9 @@ TitanTrackFile::TitanTrackFile()
   _simples_per_complex_offsets = NULL;
   _simples_per_complex = NULL;
 
+  _prev_in_track_offset = 0;
+  _prev_in_scan_offset = 0;
+
   _header_file_label = TRACK_HEADER_FILE_TYPE;
   _data_file_label = TRACK_DATA_FILE_TYPE;
 
@@ -2013,6 +2016,52 @@ int TitanTrackFile::WriteComplexParams(int track_num)
   
 }
 
+///////////////////////////////////////////////////////////////////////////
+//
+// write an entry for a track in the track data file
+//
+// The entry is written at the end of the file
+//
+// returns offset of last entry written on success, -1 on failure
+//
+// Use of this method assumes that the entries for a simple track
+// will be written in time order, so that the offsets can be set
+// accordingly.
+//
+///////////////////////////////////////////////////////////////////////////
+
+long TitanTrackFile::WriteEntry(const track_file_entry_t &entry)
+     
+{
+
+  // save state
+  
+  _entry = entry;
+
+  // set initial offsets if needed
+  
+  if (entry.storm_num == 0) {
+    // first entry in a scan
+    _prev_in_scan_offset = 0;
+  }
+  if (entry.duration_in_scans == 0) {
+    // first entry in a simple track
+    _prev_in_track_offset = 0;
+  }
+
+  // do the write
+  
+  long writeOffset = WriteEntry(_prev_in_track_offset, _prev_in_scan_offset);
+
+  // save offsets for next time
+  
+  _prev_in_track_offset = writeOffset;
+  _prev_in_scan_offset = writeOffset;
+
+  return writeOffset;
+       
+}
+  
 ///////////////////////////////////////////////////////////////////////////
 //
 // write an entry for a track in the track data file

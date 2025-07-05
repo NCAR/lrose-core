@@ -748,7 +748,9 @@ public:
                               const complex_track_params_t &cparams);
      
   // write an entry for a track in the track data file
-
+  // on success returns the offset of the entry written
+  // -1 on failure
+  
   int writeTrackEntry(const track_file_entry_t &entry);
   
   // write an entry for a track in the track data file
