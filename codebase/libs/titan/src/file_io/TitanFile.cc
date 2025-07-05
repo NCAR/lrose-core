@@ -152,10 +152,11 @@ int TitanFile::openFile(const string &path,
 {
   
   _filePath = path;
-  Path filePath(path);
+  _fileMode = mode;
   
   // file format
 
+  Path filePath(path);
   if (filePath.getExt() == "nc") {
     _isLegacyV5Format = false;
     _lockPath = filePath.getDirectory() + PATH_DELIM + "." + filePath.getFile() + ".lock";
@@ -264,14 +265,29 @@ int TitanFile::_openLegacyFiles(const string &path,
       fmode = "w";
       break;
   }
-  if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str())) {
+  
+  if (fmode != "r") {
+    Path stormPath(stormHeaderPath);
+    stormPath.makeDirRecurse();
+  }
+
+  cerr << "11111111111111111111111111111" << endl;
+  cerr << "  stormHeaderPath: " << stormHeaderPath << endl;
+  cerr << "  fmode: " << fmode << endl;
+  
+  if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str(), "sd5")) {
     _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr(" Opening storm files, header path: ", stormHeaderPath);
+    cerr << "aaaaaaaaaaaaa errStr: " << _errStr << endl;
     return -1;
   }
-  if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.c_str())) {
+
+  cerr << "222222222222222222222222222222" << endl;
+  cerr << "  trackHeaderPath: " << trackHeaderPath << endl;
+  if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.c_str(), "td5")) {
     _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr(" Opening track files, header path: ", trackHeaderPath);
+    cerr << "bbbbbbbbbbbbb errStr: " << _errStr << endl;
     return -1;
   }
   return 0;
@@ -298,12 +314,14 @@ void TitanFile::closeFile()
 
 void TitanFile::_setGlobalAttributes()
 {
-  _ncFile.putAtt(VERSION, _version);
-  _ncFile.putAtt(CONVENTION, _convention);
-  _ncFile.putAtt(TITLE, _title);
-  _ncFile.putAtt(INSTITUTION, _institution);
-  _ncFile.putAtt(SOURCE, _source);
-  _ncFile.putAtt(COMMENT, _comment);
+  if (_fileMode != NcxxFile::read) {
+    _ncFile.putAtt(VERSION, _version);
+    _ncFile.putAtt(CONVENTION, _convention);
+    _ncFile.putAtt(TITLE, _title);
+    _ncFile.putAtt(INSTITUTION, _institution);
+    _ncFile.putAtt(SOURCE, _source);
+    _ncFile.putAtt(COMMENT, _comment);
+  }
 }
 
 /////////////////////////////////////////
@@ -404,10 +422,10 @@ NcxxVar TitanFile::_getVar(const std::string& name,
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType);
-  }
-  var.setDefaultFillValue();
-  if (units.size() > 0) {
-    var.putAtt(UNITS, units);
+    var.setDefaultFillValue();
+    if (units.size() > 0) {
+      var.putAtt(UNITS, units);
+    }
   }
   return var;
 }
@@ -424,11 +442,11 @@ NcxxVar TitanFile::_getVar(const std::string& name,
   NcxxVar var = group.getVar(name);
   if (var.isNull()) {
     var = group.addVar(name, ncType, dim);
-  }
-  var.setDefaultFillValue();
-  var.setCompression(false, true, 4);
-  if (units.size() > 0) {
-    var.putAtt(UNITS, units);
+    var.setDefaultFillValue();
+    var.setCompression(false, true, 4);
+    if (units.size() > 0) {
+      var.putAtt(UNITS, units);
+    }
   }
   return var;
 }
@@ -449,11 +467,11 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     dimVec.push_back(dim0);
     dimVec.push_back(dim1);
     var = group.addVar(name, ncType, dimVec);
-  }
-  var.setDefaultFillValue();
-  var.setCompression(false, true, 4);
-  if (units.size() > 0) {
-    var.putAtt(UNITS, units);
+    var.setDefaultFillValue();
+    var.setCompression(false, true, 4);
+    if (units.size() > 0) {
+      var.putAtt(UNITS, units);
+    }
   }
   return var;
 }
@@ -1044,7 +1062,9 @@ void TitanFile::_setUpVars()
   // array of complex track nums - these are in increasing order, no gaps
   
   _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _n_complex, _complexGroup);
-  _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
+  if (_fileMode != NcxxFile::read) {
+    _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
+  }
 
   // params for each complex track
 
@@ -2425,6 +2445,11 @@ void TitanFile::_updateScanAttributes(const storm_file_scan_header_t &scanHeader
     _speedUnitsPerHr = KM_PER_HR_PER_HR;
   }
 
+  if (_fileMode == NcxxFile::read) {
+    // not for read-only
+    return;
+  }
+  
   // update relevant attributes
   
   _scanVars.grid_minx.putAtt(UNITS, _horizGridUnits);
@@ -2554,8 +2579,10 @@ void TitanFile::_addProjectionFlagAttributes()
   snprintf(tmp, BUFSIZ, ", lambert_azim = %d", TITAN_PROJ_LAMBERT_AZIM);
   projTypeNote += tmp;
   
-  _scanVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
-                             flagValues.size(), flagValues.data());
+  if (_fileMode != NcxxFile::read) {
+    _scanVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
+                               flagValues.size(), flagValues.data());
+  }
 
   vector<const char *> meanings;
   for (size_t ii = 0; ii < flagMeanings.size(); ii++) 
@@ -2563,26 +2590,30 @@ void TitanFile::_addProjectionFlagAttributes()
     meanings.push_back(flagMeanings[ii].c_str());
   }
   
-  _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
-                             meanings.size(), meanings.data());
-  
-  _scanVars.proj_type.putAtt(NOTE, projTypeNote);
-  
-  _scanVars.proj_origin_lat.putAtt
-    (NOTE, std::string("Applies to all projection types except latlon"));
-  _scanVars.proj_origin_lon.putAtt
-    (NOTE, std::string("Applies to all projection types except latlon"));
-  _scanVars.proj_rotation.putAtt
-    (NOTE, std::string("Applies to azimuthal_equidistant projection only"));
+  if (_fileMode != NcxxFile::read) {
 
-  _scanVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
-  _scanVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
-  _scanVars.proj_tangent_lat.putAtt
-    (NOTE, std::string("Applies to polar_stereo and oblique_stereo"));
-  _scanVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
-  _scanVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
-  _scanVars.proj_central_scale.putAtt
-    (NOTE, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
+    _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
+                               meanings.size(), meanings.data());
+    
+    _scanVars.proj_type.putAtt(NOTE, projTypeNote);
+  
+    _scanVars.proj_origin_lat.putAtt
+      (NOTE, std::string("Applies to all projection types except latlon"));
+    _scanVars.proj_origin_lon.putAtt
+      (NOTE, std::string("Applies to all projection types except latlon"));
+    _scanVars.proj_rotation.putAtt
+      (NOTE, std::string("Applies to azimuthal_equidistant projection only"));
+    
+    _scanVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+    _scanVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+    _scanVars.proj_tangent_lat.putAtt
+      (NOTE, std::string("Applies to polar_stereo and oblique_stereo"));
+    _scanVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
+    _scanVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
+    _scanVars.proj_central_scale.putAtt
+      (NOTE, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
+
+  }
 
 }
 

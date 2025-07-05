@@ -159,7 +159,7 @@ int Tstorms2NetCDF::Run ()
         _input->setSearchExt("th5");
       }
     } else {
-      cerr << "ERROR - Tstorms2NetCDF" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::Run()" << endl;
       cerr <<
 	"  In FILELIST mode, you must specify "
 	"files on the command line" << endl;
@@ -185,7 +185,7 @@ int Tstorms2NetCDF::Run ()
         _input->setSearchExt("th5");
       }
     } else {
-      cerr << "ERROR - Tstorms2NetCDF" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::Run()" << endl;
       cerr <<
 	"  In ARCHIVE mode, you must specify "
 	"start and end times on the command line" << endl;
@@ -240,7 +240,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   // open input files based on the provided path
 
   if (_openInputFilesLegacy()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
     return -1;
   }
@@ -253,7 +253,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   
   if (_outFile.openFile(_params.output_dir, dataTime,
                         NcxxFile::FileMode::replace, false)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot open output netcdf file: " << _outFile.getPathInUse() << endl;
     cerr << "  Error: " << _outFile.getErrStr() << endl;
     return -1;
@@ -272,7 +272,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   // read storm file header
 
   if (_sFile.ReadHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot read storm file header, input_path: " << _inputPath << endl;
     cerr << _sFile.getErrStr() << endl;
     return -1;
@@ -299,14 +299,14 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   // read track file header
 
   if (_tFile.ReadHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot read track file header" << endl;
     cerr << "    input_path: " << _inputPath << endl;
     cerr << _tFile.getErrStr() << endl;
     return -1;
   }
   if (_tFile.ReadSimplesPerComplex()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot read simples_per_complex, input_path: " << _inputPath << endl;
     cerr << _tFile.getErrStr() << endl;
     return -1;
@@ -324,7 +324,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     int complexNum = complexTrackNums[ii];
     // read complex parameters
     if (_tFile.ReadComplexParams(complexNum, true)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
       cerr << "  Cannot read complex params" << endl;
       cerr << "    input_path: " << _inputPath << endl;
       cerr << "    index, complex_num: " << ii << ", " << complexNum << endl;
@@ -341,7 +341,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     int simpleTrackNum = ii;
     // read simple parameters
     if (_tFile.ReadSimpleParams(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
       cerr << "  Cannot read simple params" << endl;
       cerr << "    input_path: " << _inputPath << endl;
       cerr << "    simple_num: " << simpleTrackNum << endl;
@@ -365,7 +365,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   // read in track scan index
   
   if (_tFile.ReadScanIndex()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot read scan index" << endl;
     cerr << "    input_path: " << _inputPath << endl;
     cerr << _tFile.getErrStr() << endl;
@@ -383,7 +383,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     // read simple track params
     
     if (_tFile.ReadSimpleParams(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
       cerr << "  Cannot read simple track params" << endl;
       cerr << "    input_path: " << _inputPath << endl;
       cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -395,7 +395,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     // rewind simple track - prepare for reading entries
     
     if (_tFile.RewindSimple(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
       cerr << "  Cannot rewind simple track" << endl;
       cerr << "    input_path: " << _inputPath << endl;
       cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -408,7 +408,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     vector<track_file_entry_t> entries;
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
       if (_tFile.ReadEntry()) {
-        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
         cerr << "  Cannot read simple track entry" << endl;
         cerr << "    input_path: " << _inputPath << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -452,7 +452,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
       if (_outFile.writeTrackEntry(entry) < 0) {
-        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
         cerr << "  Cannot write track entry" << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
         cerr << "    scan num: " << entry.scan_num << endl;
@@ -493,13 +493,13 @@ int Tstorms2NetCDF::_openInputFilesLegacy()
 {
 
   if (_tFile.OpenFiles("r", _trackHeaderPath.string().c_str())) {
-    cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_openInputFilesLegacy" << endl;
     cerr << "  " << _tFile.getErrStr() << endl;
     return -1;
   }
   
   if (_sFile.OpenFiles("r", _stormHeaderPath.string().c_str())) {
-    cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_openInputFilesLegacy" << endl;
     cerr << "  " << _sFile.getErrStr() << endl;
     return -1;
   }
@@ -507,12 +507,12 @@ int Tstorms2NetCDF::_openInputFilesLegacy()
   // lock files
 
   if (_tFile.LockHeaderFile("r")) {
-    cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_openInputFilesLegacy" << endl;
     cerr << "  " << _tFile.getErrStr() << endl;
     return -1;
   }
   if (_sFile.LockHeaderFile("r")) {
-    cerr << "ERROR - Tstorms2NetCDF::_openInput" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_openInputFilesLegacy" << endl;
     cerr << "  " << _sFile.getErrStr() << endl;
     return -1;
   }
@@ -545,7 +545,7 @@ int Tstorms2NetCDF::_loadScanTimesLegacy()
   for (int i = 0; i < nScans; i++) {
     // read in scan
     if (_sFile.ReadScan(i)) {
-      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimesLegacy" << endl;
       cerr << "  " << _sFile.getErrStr() << endl;
       return -1;
     }
@@ -578,7 +578,7 @@ int Tstorms2NetCDF::_processScanLegacy(int scan_num,
   // read in scan, and global properties for the storms
   
   if (_sFile.ReadScan(scan_num)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processScanLegacy" << endl;
     cerr << "  Cannot read scan and gprops, input_path: " << _inputPath << endl;
     cerr << "    scan_num: " << scan_num << endl;
     cerr << _sFile.getErrStr() << endl;
@@ -599,7 +599,7 @@ int Tstorms2NetCDF::_processScanLegacy(int scan_num,
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
     if (_sFile.ReadProps(istorm)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processScanLegacy" << endl;
       cerr << "  Cannot read properties, storm num: "
            << istorm << ", " << _inputPath << endl;
       cerr << _sFile.getErrStr() << endl;
@@ -635,7 +635,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   // open input file based on the provided path
 
   if (_inFile.openFile(_inputPath, NcxxFile::FileMode::read)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
     cerr << "  Cannot open input file: " << _inputPath << endl;
     cerr << "  Error: " << _inFile.getErrStr() << endl;
     return -1;
@@ -650,7 +650,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   bool writeLegacy = true;
   if (_outFile.openFile(_params.output_dir, dataTime,
                         NcxxFile::FileMode::replace, writeLegacy)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
     cerr << "  Cannot open output legacy files: " << _outFile.getPathInUse() << endl;
     cerr << "  Error: " << _outFile.getErrStr() << endl;
     return -1;
@@ -663,7 +663,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   // read storm header
   
   if (_inFile.readStormHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
     cerr << "  Cannot read storm header, input_path: " << _inFile.getPathInUse() << endl;
     cerr << _inFile.getErrStr() << endl;
     return -1;
@@ -696,14 +696,14 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   // read track header
   
   if (_inFile.readTrackHeader()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
     cerr << "  Cannot read track header" << endl;
     cerr << "    input_path: " << _inFile.getPathInUse() << endl;
     cerr << _inFile.getErrStr() << endl;
     return -1;
   }
   if (_inFile.readSimplesPerComplex()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
     cerr << "  Cannot read simples_per_complex, input_path: " << _inFile.getPathInUse() << endl;
     cerr << _inFile.getErrStr() << endl;
     return -1;
@@ -721,7 +721,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     int complexNum = complexTrackNums[ii];
     // read complex parameters
     if (_inFile.readComplexTrackParams(complexNum, true)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
       cerr << "  Cannot read complex params" << endl;
       cerr << "    input_path: " << _inFile.getPathInUse() << endl;
       cerr << "    index, complex_num: " << ii << ", " << complexNum << endl;
@@ -738,7 +738,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     int simpleTrackNum = ii;
     // read simple parameters
     if (_inFile.readSimpleTrackParams(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
       cerr << "  Cannot read simple params" << endl;
       cerr << "    input_path: " << _inFile.getPathInUse() << endl;
       cerr << "    simple_num: " << simpleTrackNum << endl;
@@ -762,7 +762,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   // read in track scan index
   
   // if (_inFile.readScanIndex()) {
-  //   cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+  //   cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
   //   cerr << "  Cannot read scan index" << endl;
   //   cerr << "    input_path: " << _inFile.getPathInUse() << endl;
   //   cerr << _inFile.getErrStr() << endl;
@@ -780,7 +780,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     // read simple track params
     
     if (_inFile.readSimpleTrackParams(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
       cerr << "  Cannot read simple track params" << endl;
       cerr << "    input_path: " << _inFile.getPathInUse() << endl;
       cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -792,7 +792,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     // rewind simple track - prepare for reading entries
     
     if (_inFile.rewindSimpleTrack(simpleTrackNum)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
       cerr << "  Cannot rewind simple track" << endl;
       cerr << "    input_path: " << _inFile.getPathInUse() << endl;
       cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -805,7 +805,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     vector<track_file_entry_t> entries;
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
       if (_inFile.readTrackEntry()) {
-        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
         cerr << "  Cannot read simple track entry" << endl;
         cerr << "    input_path: " << _inFile.getPathInUse() << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -849,7 +849,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
       if (_outFile.writeTrackEntry(entry)) {
-        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+        cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
         cerr << "  Cannot write track entry" << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
         cerr << "    scan num: " << entry.scan_num << endl;
@@ -893,7 +893,7 @@ int Tstorms2NetCDF::_loadScanTimesNetcdf()
   for (int i = 0; i < nScans; i++) {
     // read in scan
     if (_inFile.readStormScan(i)) {
-      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_loadScanTimesNetcdf" << endl;
       cerr << "  " << _inFile.getErrStr() << endl;
       return -1;
     }
@@ -926,7 +926,7 @@ int Tstorms2NetCDF::_processScanNetcdf(int scan_num,
   // read in scan, and global properties for the storms
   
   if (_inFile.readStormScan(scan_num)) {
-    cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+    cerr << "ERROR - Tstorms2NetCDF::_processScanNetcdf" << endl;
     cerr << "  Cannot read scan and gprops, input_path: " << _inFile.getPathInUse() << endl;
     cerr << "    scan_num: " << scan_num << endl;
     cerr << _inFile.getErrStr() << endl;
@@ -947,7 +947,7 @@ int Tstorms2NetCDF::_processScanNetcdf(int scan_num,
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
     if (_inFile.readStormAux(istorm)) {
-      cerr << "ERROR - Tstorms2NetCDF::_processTime" << endl;
+      cerr << "ERROR - Tstorms2NetCDF::_processScanNetcdf" << endl;
       cerr << "  Cannot read aux properties, storm num: "
            << istorm << ", " << _inFile.getPathInUse() << endl;
       cerr << _inFile.getErrStr() << endl;

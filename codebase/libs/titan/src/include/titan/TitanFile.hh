@@ -851,7 +851,8 @@ protected:
   string _filePath;
   string _lockPath;
   int _lockId;
-
+  NcxxFile::FileMode _fileMode;
+  
   // legacy files
   
   TitanStormFile _sFile;
