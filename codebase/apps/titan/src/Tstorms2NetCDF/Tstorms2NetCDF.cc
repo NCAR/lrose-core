@@ -49,6 +49,7 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaXml.hh>
 #include <didss/RapDataDir.hh>
+#include <didss/DataFileNames.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <titan/TitanSpdb.hh>
 #include <Spdb/DsSpdb.hh>
@@ -126,7 +127,7 @@ Tstorms2NetCDF::~Tstorms2NetCDF()
     delete _input;
   }
 
-  _ncFile.closeFile();
+  _outFile.closeFile();
 
   // unregister process
 
@@ -234,18 +235,8 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   
   Fpath inputPath(_inputPath);
   _stormHeaderPath = inputPath.replace_extension(".sh5");
-  _stormDataPath = inputPath.replace_extension(".sd5");
   _trackHeaderPath = inputPath.replace_extension(".th5");
-  _trackDataPath = inputPath.replace_extension(".td5");
 
-  // compute output path
-  
-  string filename = "titan_";
-  filename.append(inputPath.filename());
-  _ncFilePath = _params.output_dir;
-  _ncFilePath.append(filename);
-  _ncFilePath = _ncFilePath.replace_extension(".nc");
-  
   // open input files based on the provided path
 
   if (_openInputFilesLegacy()) {
@@ -256,15 +247,20 @@ int Tstorms2NetCDF::_processInputFileLegacy()
 
   // open output netcdf file for writing
 
-  if (_ncFile.openFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
+  time_t dataTime;
+  bool dateOnly;
+  DataFileNames::getDataTime(_inputPath, dataTime, dateOnly);
+  
+  if (_outFile.openFile(_params.output_dir, dataTime,
+                        NcxxFile::FileMode::replace, false)) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-    cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
-    cerr << "  Error: " << _ncFile.getErrStr() << endl;
+    cerr << "  Cannot open output netcdf file: " << _outFile.getPathInUse() << endl;
+    cerr << "  Error: " << _outFile.getErrStr() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - opened NetCDF file: " << _ncFilePath << endl;
+    cerr << "Tstorms2NetCDF - opened NetCDF file: " << _outFile.getPathInUse() << endl;
   }
   
   // load up scan times
@@ -298,7 +294,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   
   // write the storm header
 
-  _ncFile.writeStormHeader(_sFile.header());
+  _outFile.writeStormHeader(_sFile.header());
 
   // read track file header
 
@@ -336,7 +332,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
       return -1;
     }
     // write the complex params
-    _ncFile.writeComplexTrackParams(ii, _tFile.complex_params());
+    _outFile.writeComplexTrackParams(ii, _tFile.complex_params());
   }
   
   // loop through the simple tracks, reading parameters for each
@@ -353,7 +349,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
       return -1;
     }
     // write the simple params
-    _ncFile.writeSimpleTrackParams(simpleTrackNum, _tFile.simple_params());
+    _outFile.writeSimpleTrackParams(simpleTrackNum, _tFile.simple_params());
   }
 
   // write the simples_per_complex arrays
@@ -361,10 +357,10 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   vector<si32> simpsPerComplex1D;
   vector<si32> simpsPerComplexOffsets;
   _tFile.LoadVecSimplesPerComplex(simpsPerComplex1D, simpsPerComplexOffsets);
-  _ncFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
-                                       _tFile.nsimples_per_complex(),
-                                       simpsPerComplexOffsets.data(),
-                                       simpsPerComplex1D.data());
+  _outFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
+                                        _tFile.nsimples_per_complex(),
+                                        simpsPerComplexOffsets.data(),
+                                        simpsPerComplex1D.data());
   
   // read in track scan index
   
@@ -375,30 +371,6 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     cerr << _tFile.getErrStr() << endl;
     return -1;
   }
-
-  // loop through the scans
-  
-  // for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
-    
-  //   // read all track entries for this scan
-    
-  //   if (_tFile.ReadScanEntries(iscan)) {
-  //     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-  //     cerr << "  Cannot read scan entries" << endl;
-  //     cerr << "    input_path: " << _inputPath << endl;
-  //     cerr << "    scan num: " << iscan << endl;
-  //     cerr << _tFile.getErrStr() << endl;
-  //     return -1;
-  //   }
-
-  //   // loop through entries for this scan
-    
-  //   for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
-  //     track_file_entry_t entry = _tFile.scan_entries()[ientry];
-  //     _ncFile.writeTrackEntry(theader.params, entry);
-  //   } // ientry
-
-  // } // iscan
 
   // read through the simple tracks
 
@@ -451,9 +423,9 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
       entry.this_entry_offset =
-        _ncFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+        _outFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
       entry.next_scan_entry_offset =
-        _ncFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
+        _outFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
       if (ientry == 0) {
         sparams.first_entry_offset = entry.this_entry_offset;
       }
@@ -479,7 +451,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
-      if (_ncFile.writeTrackEntry(entry)) {
+      if (_outFile.writeTrackEntry(entry) < 0) {
         cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
         cerr << "  Cannot write track entry" << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -492,20 +464,20 @@ int Tstorms2NetCDF::_processInputFileLegacy()
     
     // write the updated simple params
 
-    _ncFile.writeSimpleTrackParams(simpleTrackNum, sparams);
+    _outFile.writeSimpleTrackParams(simpleTrackNum, sparams);
     
   } // isimple
 
   // write the track header
   
-  _ncFile.writeTrackHeader(_tFile.header());
+  _outFile.writeTrackHeader(_tFile.header());
   
   // close
   
   _closeInputFilesLegacy();
   
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _ncFilePath << endl;
+    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _outFile.getPathInUse() << endl;
   }
   
   return 0;
@@ -637,17 +609,17 @@ int Tstorms2NetCDF::_processScanLegacy(int scan_num,
     // write out secondary properties
     // side-effect - sets offsets vectors
     
-    _ncFile.writeStormAux(istorm,
-                          _sFile.header(), _sFile.scan(), _sFile.gprops(),
-                          _sFile.lprops(), _sFile.hist(),
-                          _sFile.runs(), _sFile.proj_runs());
+    _outFile.writeStormAux(istorm,
+                           _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                           _sFile.lprops(), _sFile.hist(),
+                           _sFile.runs(), _sFile.proj_runs());
     
   }
 
   // write the scan and global properties to NetCDF
   // the appropriate offsets have been set by writeSecProps()
   
-  _ncFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
+  _outFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
   
   return 0;
 
@@ -664,37 +636,32 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   
   Fpath inputPath(_inputPath);
   _stormHeaderPath = inputPath.replace_extension(".sh5");
-  _stormDataPath = inputPath.replace_extension(".sd5");
   _trackHeaderPath = inputPath.replace_extension(".th5");
-  _trackDataPath = inputPath.replace_extension(".td5");
-
-  // compute output path
-  
-  string filename = "titan_";
-  filename.append(inputPath.filename());
-  _ncFilePath = _params.output_dir;
-  _ncFilePath.append(filename);
-  _ncFilePath = _ncFilePath.replace_extension(".nc");
   
   // open input files based on the provided path
 
-  if (_openInputFilesNetcdf()) {
+  if (_openInputFileNetcdf()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
     cerr << "  Cannot open input files, input_path: " << _inputPath << endl;
     return -1;
   }
 
   // open output netcdf file for writing
-
-  if (_ncFile.openFile(_ncFilePath.string(), NcxxFile::FileMode::replace)) {
+  
+  time_t dataTime;
+  bool dateOnly;
+  DataFileNames::getDataTime(_inputPath, dataTime, dateOnly);
+  
+  if (_outFile.openFile(_params.output_dir, dataTime,
+                        NcxxFile::FileMode::replace, true)) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-    cerr << "  Cannot open output netcdf file: " << _ncFilePath << endl;
-    cerr << "  Error: " << _ncFile.getErrStr() << endl;
+    cerr << "  Cannot open output netcdf file: " << _outFile.getPathInUse() << endl;
+    cerr << "  Error: " << _outFile.getErrStr() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - opened NetCDF file: " << _ncFilePath << endl;
+    cerr << "Tstorms2NetCDF - opened output file: " << _outFile.getPathInUse() << endl;
   }
   
   // load up scan times
@@ -728,7 +695,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   
   // write the storm header
 
-  _ncFile.writeStormHeader(_sFile.header());
+  _outFile.writeStormHeader(_sFile.header());
 
   // read track file header
 
@@ -766,7 +733,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
       return -1;
     }
     // write the complex params
-    _ncFile.writeComplexTrackParams(ii, _tFile.complex_params());
+    _outFile.writeComplexTrackParams(ii, _tFile.complex_params());
   }
   
   // loop through the simple tracks, reading parameters for each
@@ -783,7 +750,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
       return -1;
     }
     // write the simple params
-    _ncFile.writeSimpleTrackParams(simpleTrackNum, _tFile.simple_params());
+    _outFile.writeSimpleTrackParams(simpleTrackNum, _tFile.simple_params());
   }
 
   // write the simples_per_complex arrays
@@ -791,10 +758,10 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   vector<si32> simpsPerComplex1D;
   vector<si32> simpsPerComplexOffsets;
   _tFile.LoadVecSimplesPerComplex(simpsPerComplex1D, simpsPerComplexOffsets);
-  _ncFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
-                                       _tFile.nsimples_per_complex(),
-                                       simpsPerComplexOffsets.data(),
-                                       simpsPerComplex1D.data());
+  _outFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
+                                        _tFile.nsimples_per_complex(),
+                                        simpsPerComplexOffsets.data(),
+                                        simpsPerComplex1D.data());
   
   // read in track scan index
   
@@ -805,30 +772,6 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     cerr << _tFile.getErrStr() << endl;
     return -1;
   }
-
-  // loop through the scans
-  
-  // for (int iscan = 0; iscan < _tFile.header().n_scans; iscan++) {
-    
-  //   // read all track entries for this scan
-    
-  //   if (_tFile.ReadScanEntries(iscan)) {
-  //     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-  //     cerr << "  Cannot read scan entries" << endl;
-  //     cerr << "    input_path: " << _inputPath << endl;
-  //     cerr << "    scan num: " << iscan << endl;
-  //     cerr << _tFile.getErrStr() << endl;
-  //     return -1;
-  //   }
-
-  //   // loop through entries for this scan
-    
-  //   for (int ientry = 0; ientry < _tFile.n_scan_entries(); ientry++) {
-  //     track_file_entry_t entry = _tFile.scan_entries()[ientry];
-  //     _ncFile.writeTrackEntry(theader.params, entry);
-  //   } // ientry
-
-  // } // iscan
 
   // read through the simple tracks
 
@@ -881,9 +824,9 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
       entry.this_entry_offset =
-        _ncFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+        _outFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
       entry.next_scan_entry_offset =
-        _ncFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
+        _outFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
       if (ientry == 0) {
         sparams.first_entry_offset = entry.this_entry_offset;
       }
@@ -909,7 +852,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     
     for (size_t ientry = 0; ientry < entries.size(); ientry++) {
       track_file_entry_t &entry(entries[ientry]);
-      if (_ncFile.writeTrackEntry(entry)) {
+      if (_outFile.writeTrackEntry(entry)) {
         cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
         cerr << "  Cannot write track entry" << endl;
         cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
@@ -922,20 +865,20 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     
     // write the updated simple params
 
-    _ncFile.writeSimpleTrackParams(simpleTrackNum, sparams);
+    _outFile.writeSimpleTrackParams(simpleTrackNum, sparams);
     
   } // isimple
 
   // write the track header
   
-  _ncFile.writeTrackHeader(_tFile.header());
+  _outFile.writeTrackHeader(_tFile.header());
   
   // close
   
-  _closeInputFilesNetcdf();
+  _closeInputFileNetcdf();
   
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _ncFilePath << endl;
+    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _outFile.getPathInUse() << endl;
   }
   
   return 0;
@@ -946,7 +889,7 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
 // open track and storm files,
 // given the trigger path
 
-int Tstorms2NetCDF::_openInputFilesNetcdf()
+int Tstorms2NetCDF::_openInputFileNetcdf()
   
 {
 
@@ -982,7 +925,7 @@ int Tstorms2NetCDF::_openInputFilesNetcdf()
 //////////////////////////////////////////////////
 // close track and storm input files
 
-void Tstorms2NetCDF::_closeInputFilesNetcdf()
+void Tstorms2NetCDF::_closeInputFileNetcdf()
 
 {
 
@@ -1067,17 +1010,17 @@ int Tstorms2NetCDF::_processScanNetcdf(int scan_num,
     // write out secondary properties
     // side-effect - sets offsets vectors
     
-    _ncFile.writeStormAux(istorm,
-                          _sFile.header(), _sFile.scan(), _sFile.gprops(),
-                          _sFile.lprops(), _sFile.hist(),
-                          _sFile.runs(), _sFile.proj_runs());
+    _outFile.writeStormAux(istorm,
+                           _sFile.header(), _sFile.scan(), _sFile.gprops(),
+                           _sFile.lprops(), _sFile.hist(),
+                           _sFile.runs(), _sFile.proj_runs());
     
   }
 
   // write the scan and global properties to NetCDF
   // the appropriate offsets have been set by writeSecProps()
   
-  _ncFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
+  _outFile.writeStormScan(_sFile.header(), _sFile.scan(), _sFile.gprops());
   
   return 0;
 

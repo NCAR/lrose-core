@@ -536,6 +536,10 @@ public:
   
   void closeFile();
 
+  // get path in use
+  
+  const string getPathInUse() const { return _filePath; }
+
   /////////////////////////////////////////////////////
   // Storms
   

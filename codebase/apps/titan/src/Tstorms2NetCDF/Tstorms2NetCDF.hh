@@ -88,14 +88,12 @@ private:
   DsInputPath *_input;
   Fpath _inputPath;
   Fpath _stormHeaderPath;
-  Fpath _stormDataPath;
   Fpath _trackHeaderPath;
-  Fpath _trackDataPath;
-  Fpath _ncFilePath;
-
+  
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
-  TitanFile _ncFile;
+  TitanFile _inFile;
+  TitanFile _outFile;
   
   vector<time_t> _scanTimes;
 
@@ -111,8 +109,8 @@ private:
   // netCDF processing - convert from NetCDF back to legacy
   
   int _processInputFileNetcdf();
-  int _openInputFilesNetcdf();
-  void _closeInputFilesNetcdf();
+  int _openInputFileNetcdf();
+  void _closeInputFileNetcdf();
   int _loadScanTimesNetcdf();
   int _processScanNetcdf(int scan_num,
                          time_t scan_time);
