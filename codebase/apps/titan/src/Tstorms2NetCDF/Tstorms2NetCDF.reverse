@@ -1,0 +1,111 @@
+/**********************************************************************
+ * TDRP params for Tstorms2NetCDF
+ **********************************************************************/
+
+//======================================================================
+//
+// Tstorms2NetCDF program.
+//
+// Tstorms2NetCDF reads native TITAN binary data files, converts the 
+//   data into NetCDF format, and writes the data out in NetCDF files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+// Type: string
+
+instance = "reverse";
+
+///////////// input_mode //////////////////////////////
+//
+// Input file mode.
+//
+// In ARCHIVE mode, all of the scans in a series of track files are 
+//   processed. In FILELIST mode, the program processes a list of files 
+//   specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+
+input_mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input TITAN storm data.
+//
+// For ARCHIVE mode only - we search for the files in this directory 
+//   between the specified start and end times. If this path is not 
+//   absolute (starts with /) or relative (starts with .) it will be taken 
+//   relative to $DATA_DIR.
+//
+// Type: string
+
+input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+// Details for the output NetCDF files.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output dir for NetCDF files.
+//
+// Type: string
+
+output_dir = "/tmp/output/titan_legacy";
+
+//======================================================================
+//
+// OPTION TO REVERSE SENSE OF CONVERSION.
+//
+// Read NetCDF, write legacy files.
+//
+//======================================================================
+ 
+///////////// convert_to_legacy ///////////////////////
+//
+// Option to reverse the sense of the conversion - for testing.
+//
+// If TRUE, read NetCDF files, write legacy files.
+//
+// Type: boolean
+
+convert_to_legacy = TRUE;
+
