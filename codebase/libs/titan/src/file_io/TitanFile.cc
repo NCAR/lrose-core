@@ -229,7 +229,8 @@ int TitanFile::openFile(const string &dir,
   
   DateTime dtime(date);
   string pathStr = dir + PATH_DELIM + "titan_" + dtime.getDateStrPlain();
-  if (isLegacyV5Format) {
+  _isLegacyV5Format = isLegacyV5Format;
+  if (_isLegacyV5Format) {
     pathStr.append(".th5");
   } else {
     pathStr.append(".nc");

@@ -668,6 +668,27 @@
     tt->single_val.s = tdrpStrDup("./output/netcdf");
     tt++;
     
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("OPTION TO REVERSE SENSE OF CONVERSION");
+    tt->comment_text = tdrpStrDup("Read NetCDF, write legacy files.");
+    tt++;
+    
+    // Parameter 'convert_to_legacy'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_legacy");
+    tt->descr = tdrpStrDup("Option to reverse the sense of the conversion - for testing.");
+    tt->help = tdrpStrDup("If TRUE, read NetCDF files, write legacy files.");
+    tt->val_offset = (char *) &convert_to_legacy - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

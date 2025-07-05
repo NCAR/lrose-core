@@ -96,100 +96,27 @@ private:
   TitanStormFile _sFile;
   TitanTrackFile _tFile;
   TitanFile _ncFile;
-
+  
   vector<time_t> _scanTimes;
-    
-  int _processInputFile();
 
-  int _openInputFiles();
-  void _closeInputFiles();
+  // legacy processing - convert to NetCDF
   
-  int _loadScanTimes();
-
-  int _processScan(int scan_num,
-                   time_t scan_time);
+  int _processInputFileLegacy();
+  int _openInputFilesLegacy();
+  void _closeInputFilesLegacy();
+  int _loadScanTimesLegacy();
+  int _processScanLegacy(int scan_num,
+                         time_t scan_time);
   
-#ifdef JUNK
-
-  void _loadTstormsXml(time_t start_time,
-                       time_t end_time,
-                       time_t valid_time,
-                       time_t expire_time,
-                       const DsTitan &titan,
-                       string &xml);
+  // netCDF processing - convert from NetCDF back to legacy
   
-  void _loadWxml(time_t start_time,
-                 time_t end_time,
-                 time_t valid_time,
-                 time_t expire_time,
-                 const DsTitan &titan,
-                 std::string &xml);
+  int _processInputFileNetcdf();
+  int _openInputFilesNetcdf();
+  void _closeInputFilesNetcdf();
+  int _loadScanTimesNetcdf();
+  int _processScanNetcdf(int scan_num,
+                         time_t scan_time);
   
-  void _addWxmlObs(const storm_file_params_t &stormParams,
-                   const simple_track_params_t &SimpleParams,
-                   const TitanTrackEntry &TrackEntry,
-                   bool isCurrent,
-                   bool checkForParents,
-                   bool checkForChildren,
-                   std::string &xml);
-  
-  void _addWxmlForecast(int leadTime,
-                        const storm_file_params_t &stormParams,
-                        const simple_track_params_t &SimpleParams,
-                        const TitanTrackEntry &TrackEntry,
-                        std::string &xml);
-
-  void _addEllipse(const TitanTrackEntry &TrackEntry,
-		   double latCent, double lonCent,
-		   double Speed, double Direction,
-		   int leadTime, double linealGrowth,
-		   std::string &xml);
-  
-  void _addPolygon(const storm_file_params_t &sParams,
-		   const TitanTrackEntry &TrackEntry,
-		   double latCent, double lonCent,
-		   double Speed, double Direction,
-		   int leadTime, bool grow,
-		   std::string &xml);
-  
-  void _addMovingPoint(double latCent, double lonCent,
-		       double Speed, double Direction,
-		       std::string &xml);
-  
-  void _addWxmlHeader(std::string &xml);
-  void _addWxmlTrailer(std::string &xml);
-
-  void _addNowcastHeader(std::string &xml, time_t valid_time, time_t expire_time);
-  void _addNowcastTrailer(std::string &xml);
-    
-  void _addTstormsHeader(std::string &xml);
-
-  void _addTstormsTrailer(std::string &xml);
-
-  void _addStormDataHeader(std::string &xml,
-                           time_t valid_time,
-                           const storm_file_params_t &stormParams);
-
-  void _addStormDataTrailer(std::string &xml);
-  
-  void _addTstormsObs(const storm_file_params_t &stormParams,
-                      const simple_track_params_t &SimpleParams,
-                      const TitanTrackEntry &TrackEntry,
-                      bool isCurrent,
-                      bool checkForParents,
-                      bool checkForChildren,
-                      std::string &xml);
-  
-  void _addTstormsForecast(int leadTime,
-                           const storm_file_params_t &stormParams,
-                           const simple_track_params_t &SimpleParams,
-                           const TitanTrackEntry &TrackEntry,
-                           std::string &xml);
-  
-  int _storeXmlFromFile();
-
-#endif
-
 };
 
 #endif

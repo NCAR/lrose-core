@@ -63,3 +63,14 @@ paramdef string {
   p_descr = "Output dir for NetCDF files.";
 } output_dir;
 
+commentdef {
+  p_header = "OPTION TO REVERSE SENSE OF CONVERSION";
+  p_text = "Read NetCDF, write legacy files.";
+}
+	
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to reverse the sense of the conversion - for testing.";
+  p_help = "If TRUE, read NetCDF files, write legacy files.";
+} convert_to_legacy;
+

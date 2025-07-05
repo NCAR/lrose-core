@@ -382,6 +382,8 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t convert_to_legacy;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -389,7 +391,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[10];
+  mutable TDRPtable _table[12];
 
   const char *_className;
 

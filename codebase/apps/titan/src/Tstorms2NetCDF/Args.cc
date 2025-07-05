@@ -86,14 +86,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-tstorms_xml")) {
+    } else if (!strcmp(argv[i], "-reverse")) {
       
-      sprintf(tmp_str, "xml_format = TSTORMS_FORMAT;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-w_xml")) {
-      
-      sprintf(tmp_str, "xml_format = WXML_FORMAT;");
+      sprintf(tmp_str, "convert_to_legacy = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-start")) {
@@ -150,27 +145,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
       
-    } else if (!strcmp(argv[i], "-spdb_url")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "spdb_url = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-
-    } else if (!strcmp(argv[i], "-xml_file")) {
-      
-      if (i < argc - 1) {
-        xmlFilePath = argv[++i];
-      } else {
-	iret = -1;
-      }
-      
-      sprintf(tmp_str, "input_mode = XML;");
-      TDRP_add_override(&override, tmp_str);
-
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
@@ -213,16 +187,11 @@ void Args::_usage(string &prog_name, ostream &out)
       << "         sets input_mode to ARCHIVE\n"
       << "       [ -f ? ?] input track file list (.th5 files)\n"
       << "         sets input_mode to FILELIST\n"
+      << "       [ -reverse ] reverse sense\n"
+      << "                    convert from netcdf back to legacy\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "         sets input_mode to ARCHIVE\n"
-      << "       [ -spdb_url ?] specify SPDB url\n"
-      << "       [ -valid \"yyyy mm dd hh mm ss\"] valid time\n"
-      << "         sets validTime for XML data. See also -xml.\n"
       << "       [ -verbose ] print verbose debug messages\n"
-      << "       [ -w_xml ] set spdb data_type to TSTORMS_WXML_PROD_TYPE\n"
-      << "       [ -tstorms_xml ] set data_type to TSTORMS_XML_PROD_TYPE\n"
-      << "       [ -xml_file ?] read XML from file, store in SPDB\n"
-      << "         sets input_mode to XML\n"
 
       << endl;
   
