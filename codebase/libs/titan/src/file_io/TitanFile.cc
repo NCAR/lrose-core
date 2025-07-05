@@ -3633,6 +3633,40 @@ int TitanFile::readSimplesPerComplex()
 
 ///////////////////////////////////////////////////////////////////////////
 //
+// load vector with simples per complex, in linear order
+//
+// in memory these are stored in a si32** 2-d array
+//
+///////////////////////////////////////////////////////////////////////////
+
+void TitanFile::loadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
+                                         vector<si32> &simpsPerComplexOffsets)
+  
+{
+
+  simpsPerComplexLin.clear();
+  simpsPerComplexOffsets.resize(_track_header.n_simple_tracks);
+  int count = 0;
+  
+  for (int itrack = 0; itrack < _track_header.n_complex_tracks; itrack++) {
+    
+    int complex_num = _complex_track_nums[itrack];
+    int nsimples = _n_simples_per_complex[complex_num];
+    si32 *simples = _simples_per_complex_2D[complex_num];
+
+    for (int ii = 0; ii < nsimples; ii++) {
+      simpsPerComplexLin.push_back(simples[ii]);
+    }
+
+    simpsPerComplexOffsets[complex_num] = count;
+    count += nsimples;
+    
+  } // itrack 
+  
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
 // read in entries for a scan
 //
 // returns 0 on success, -1 on failure

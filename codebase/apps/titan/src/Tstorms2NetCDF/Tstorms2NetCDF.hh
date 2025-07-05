@@ -109,8 +109,6 @@ private:
   // netCDF processing - convert from NetCDF back to legacy
   
   int _processInputFileNetcdf();
-  int _openInputFileNetcdf();
-  void _closeInputFileNetcdf();
   int _loadScanTimesNetcdf();
   int _processScanNetcdf(int scan_num,
                          time_t scan_time);

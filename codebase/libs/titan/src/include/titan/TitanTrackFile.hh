@@ -169,7 +169,7 @@ public:
 
   int ReadSimplesPerComplex(int complex_track_num);
 
-// load vector with simples per complex, in linear order
+  // load vector with simples per complex, in linear order
   // in memory these are stored in a si32** 2-d array
   
   void LoadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,

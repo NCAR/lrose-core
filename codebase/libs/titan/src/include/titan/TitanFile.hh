@@ -689,6 +689,12 @@ public:
   
   int readSimplesPerComplex();
   
+  // load vector with simples per complex, in linear order
+  // in memory these are stored in a si32** 2-d array
+  
+  void loadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
+                                vector<si32> &simpsPerComplexOffsets);
+  
   // read in entries for a scan
   // returns 0 on success, -1 on failure
 
