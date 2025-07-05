@@ -4408,6 +4408,10 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
   
 {
 
+  if (_isLegacyV5Format) {
+    return 0;
+  }
+
   std::vector<size_t> index = NcxxVar::makeIndex(0);
   std::vector<size_t> count = NcxxVar::makeIndex(n_simple_tracks);
   
