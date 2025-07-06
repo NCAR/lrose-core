@@ -475,7 +475,7 @@ public:
   const complex_track_params_t &complex_params() const;
   const track_file_entry_t &entry() const { return _entry; }
   const track_file_entry_t *scan_entries() const { return _scan_entries; }
-  // const track_file_scan_index_t *scan_index() const { return _scan_index; }
+  const track_file_scan_index_t *scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
   
@@ -515,8 +515,8 @@ public:
   void freeSimplesPerComplex();
   void allocScanEntries(int n_entries_needed);
   void freeScanEntries();
-  // void allocScanIndex(int n_scans_needed);
-  // void freeScanIndex();
+  void allocScanIndex(int n_scans_needed);
+  void freeScanIndex();
   void allocUtime();
   void freeUtime();
   void freeTracksAll();
@@ -661,7 +661,7 @@ public:
   // Read in the track_file_header_t and scan_index array.
   // returns 0 on success, -1 on failure
 
-  // int readScanIndex(bool clear_error_str = true);
+  int readScanIndex(bool clear_error_str = true);
      
   // reads in the parameters for a complex track
   // For normal reads, read_simples_per_complex should be set true. This
@@ -979,7 +979,7 @@ protected:
   complex_track_params_t _complex_params;
   track_file_entry_t _entry;
 
-  // track_file_scan_index_t *_scan_index;
+  track_file_scan_index_t *_scan_index;
   track_file_entry_t *_scan_entries;
   track_utime_t *_track_utime;
   

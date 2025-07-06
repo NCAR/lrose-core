@@ -85,7 +85,7 @@ TitanFile::TitanFile()
   MEM_zero(_complex_params);
   MEM_zero(_entry);
 
-  // _scan_index = nullptr;
+  _scan_index = nullptr;
   _scan_entries = nullptr;
   _track_utime = nullptr;
   
@@ -3031,32 +3031,32 @@ void TitanFile::freeScanEntries()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-// void TitanFile::allocScanIndex(int n_scans_needed)
+void TitanFile::allocScanIndex(int n_scans_needed)
      
-// {
+{
 
-//   if (_n_scan_index_allocated < n_scans_needed) {
-
-//     // allocate the required space plus a buffer so that 
-//     // we do not do too many reallocs
-      
-//     int n_start = _n_scan_index_allocated;
-//     int n_realloc = n_scans_needed + N_ALLOC;
-//     _n_scan_index_allocated = n_realloc;
-
-//     _scan_index = (track_file_scan_index_t *) urealloc
-//       (_scan_index, n_realloc * sizeof(track_file_scan_index_t));
-      
-//     // initialize new elements to zero
+  if (_n_scan_index_allocated < n_scans_needed) {
+    
+    // allocate the required space plus a buffer so that 
+    // we do not do too many reallocs
+    
+    int n_start = _n_scan_index_allocated;
+    int n_realloc = n_scans_needed + N_ALLOC;
+    _n_scan_index_allocated = n_realloc;
+    
+    _scan_index = (track_file_scan_index_t *) urealloc
+      (_scan_index, n_realloc * sizeof(track_file_scan_index_t));
+    
+    // initialize new elements to zero
   
-//     int n_new = _n_scan_index_allocated - n_start;
+    int n_new = _n_scan_index_allocated - n_start;
 
-//     memset (_scan_index + n_start, 0,
-// 	    n_new * sizeof(track_file_scan_index_t));
-  
-//   } // if (_n_scan_index_allocated < n_scans_needed) 
+    memset (_scan_index + n_start, 0,
+	    n_new * sizeof(track_file_scan_index_t));
+    
+  } // if (_n_scan_index_allocated < n_scans_needed) 
 
-// }
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -3066,15 +3066,15 @@ void TitanFile::freeScanEntries()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-// void TitanFile::freeScanIndex()
+void TitanFile::freeScanIndex()
      
-// {
-//   if (_scan_index) {
-//     ufree(_scan_index);
-//     _scan_index = nullptr;
-//     _n_scan_index_allocated = 0;
-//   }
-// }
+{
+  if (_scan_index) {
+    ufree(_scan_index);
+    _scan_index = nullptr;
+    _n_scan_index_allocated = 0;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -3220,7 +3220,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   int n_complex_tracks = _track_header.n_complex_tracks;
   int n_simple_tracks = _track_header.n_simple_tracks;
-  //  int n_scans = _track_header.n_scans;
+  int n_scans = _track_header.n_scans;
   
   // check that the constants in use when the file was written are
   // less than or the same as those in use now
@@ -3255,7 +3255,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   allocComplexArrays(n_complex_tracks);
   allocSimpleArrays(n_simple_tracks);
-  // allocScanIndex(n_scans);
+  allocScanIndex(n_scans);
   
   // read in complex track num array
   // complex_track_nums has dimension _n_complex.
@@ -3285,43 +3285,64 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 //
 ///////////////////////////////////////////////////////////////////////////
 
-// int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
-     
-// {
+int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
   
-//   if (clear_error_str) {
-//     _clearErrStr();
-//   }
-//   _errStr += "ERROR - TitanFile::readScanIndex\n";
-//   TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+{
+  
+  // handle legacy format
+  
+  if (_isLegacyV5Format) {
+    if (_tFile.ReadScanIndex(clear_error_str)) {
+      _errStr = _tFile.getErrStr();
+      return -1;
+    }
+    // save state
+    int n_scans = _tFile.header().n_scans;
+    allocScanIndex(n_scans);
+    memcpy(_scan_index, _tFile.scan_index(), n_scans * sizeof(track_file_scan_index_t));
+    return 0;
+  }
 
-//   if (readTrackHeader(clear_error_str)) {
-//     return -1;
-//   }
-  
-//   int n_complex_tracks = _track_header.n_complex_tracks;
-//   int n_simple_tracks = _track_header.n_simple_tracks;
-//   int n_scans = _track_header.n_scans;
-  
-//   // alloc array
+  if (clear_error_str) {
+    _clearErrStr();
+  }
+  _errStr += "ERROR - TitanFile::readScanIndex\n";
+  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
 
-//   allocScanIndex(n_scans);
+  if (readTrackHeader(clear_error_str)) {
+    return -1;
+  }
+  
+  // alloc memory
 
-//   // read in scan index array
+  // int n_scans = _track_header.n_scans;
+  allocScanIndex(_nScans);
+  vector<int64_t> utimes(_nScans, 0);
+  vector<int32_t> n_storms(_nScans, 0);
+  vector<int32_t> first_entry_offsets(_nScans, 0);
   
-//   if (ufread(_scan_index, sizeof(track_file_scan_index_t),
-// 	     n_scans, _track_header_file) != n_scans) {
-//     int errNum = errno;
-//     TaStr::AddStr(_errStr, "  ", "Reading scan index array");
-//     TaStr::AddInt(_errStr, "  n_scans", n_scans);
-//     TaStr::AddStr(_errStr, "  ", strerror(errNum));
-//     return -1;
-//   }
-//   BE_to_array_32(_scan_index, n_scans * sizeof(track_file_scan_index_t));
+  // initialize read
   
-//   return 0;
+  std::vector<size_t> readIndex = NcxxVar::makeIndex(0);
+  std::vector<size_t> readCount = NcxxVar::makeIndex(_nScans);
   
-// }
+  // read scan details
+  
+  _scanVars.scan_nstorms.getVal(readIndex, readCount, n_storms.data());
+  _scanVars.scan_time.getVal(readIndex, readCount, utimes.data());
+  _scanVars.scan_first_offset.getVal(readIndex, readCount, first_entry_offsets.data());
+
+  // load up scan index array
+  
+  for (int iscan = 0; iscan < _nScans; iscan++) {
+    _scan_index[iscan].utime = utimes[iscan];
+    _scan_index[iscan].n_entries = n_storms[iscan];
+    _scan_index[iscan].first_entry_offset = first_entry_offsets[iscan];
+  }
+  
+  return 0;
+  
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //
