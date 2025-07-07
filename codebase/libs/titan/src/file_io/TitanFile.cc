@@ -1656,6 +1656,8 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
   _topLevelVars.end_time.getVal(&_storm_header.end_time);
   _topLevelVars.n_scans.getVal(&_nScans);
   _topLevelVars.n_storms.getVal(&_nStorms);
+  _storm_header.n_scans = _nScans;
+  _track_header.n_scans = _nScans;
 
   // storm params
   
@@ -1924,6 +1926,8 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   _addErrInt("  Scan number: ", scan_num);
 
   // check
+
+  cerr << "rrrrrrrrrrrrrr scan_num, _max_scans: " << scan_num << ", " << _max_scans << endl;
   
   if (scan_num >= _max_scans) {
     return -1;
@@ -1986,6 +1990,8 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   int nStorms = _scan.nstorms;
   allocGprops(nStorms);
+
+  cerr << "ssssssssssssss nStorms: " << nStorms << endl;
   
   // return early if nstorms is zero
   
