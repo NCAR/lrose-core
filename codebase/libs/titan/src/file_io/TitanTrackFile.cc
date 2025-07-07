@@ -180,17 +180,9 @@ void TitanTrackFile::AllocSimpleArrays(int n_simple_needed)
 void TitanTrackFile::FreeSimpleArrays()
      
 {
-  
-  if (_simples_per_complex) {
-    for (int i = 0; i < _n_simples_per_complex_allocated; i++) {
-      if(_simples_per_complex[i] != NULL) {
-	ufree(_simples_per_complex[i]);
-      }
-    }
-    ufree(_simples_per_complex);
-    _simples_per_complex = NULL;
-  }
-  
+
+  FreeSimplesPerComplex();
+     
   if (_simple_track_offsets) {
     ufree(_simple_track_offsets);
     _simple_track_offsets = NULL;
@@ -1196,12 +1188,12 @@ int TitanTrackFile::ReadSimplesPerComplex()
   _errStr += "ERROR - TitanTrackFile::ReadSimplesPerComplex\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _data_file_path);
 
+  AllocSimplesPerComplex(_header.n_simple_tracks);
+
   for (int itrack = 0; itrack < _header.n_complex_tracks; itrack++) {
 
     int complex_num = _complex_track_nums[itrack];
     int nsimples = _nsimples_per_complex[complex_num];
-
-    AllocSimplesPerComplex(complex_num + 1);
 
     _simples_per_complex[complex_num] = (si32 *) urealloc
       (_simples_per_complex[complex_num],

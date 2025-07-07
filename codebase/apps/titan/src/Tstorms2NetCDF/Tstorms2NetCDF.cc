@@ -364,7 +364,7 @@ int Tstorms2NetCDF::_processInputFileLegacy()
   
   // read in track scan index
   
-  if (_inFile.readScanIndex()) {
+  if (_inFile.readTrackScanIndex()) {
     cerr << "ERROR - Tstorms2NetCDF::_processInputFileLegacy" << endl;
     cerr << "  Cannot read scan index" << endl;
     cerr << "    input_path: " << _inputPath << endl;

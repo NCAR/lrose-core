@@ -480,8 +480,8 @@ public:
   int n_scan_entries() { return _n_scan_entries; }
   
   const si32 *complex_track_nums() { return _complex_track_nums; }
-  const si32 *complex_track_offsets() { return _complex_track_offsets; }
-  const si32 *simple_track_offsets() { return _simple_track_offsets; }
+  // const si32 *complex_track_offsets() { return _complex_track_offsets; }
+  // const si32 *simple_track_offsets() { return _simple_track_offsets; }
   const si32 *n_simples_per_complex() { return _n_simples_per_complex; }
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
   si32 *simples_per_complex_1D() { return _simples_per_complex_1D; }
@@ -511,8 +511,8 @@ public:
   void freeSimpleArrays();
   void allocComplexArrays(int n_complex_needed);
   void freeComplexArrays();
-  void allocSimplesPerComplex2D(int n_simple_needed);
-  void freeSimplesPerComplex2D();
+  // void allocSimplesPerComplex2D(int n_simple_needed);
+  // void freeSimplesPerComplex2D();
   void allocScanEntries(int n_entries_needed);
   void freeScanEntries();
   void allocScanIndex(int n_scans_needed);
@@ -651,8 +651,8 @@ public:
   // Tracks
   
   // read in the track_file_header_t structure from a track file.
-  // Read in associated arrays (complex_track_nums, complex_track_offsets,
-  //   simple_track_offsets, scan_index, n_simples_per_complex,
+  // Read in associated arrays (complex_track_nums,
+  //   scan_index, n_simples_per_complex,
   //   simples_per_complex_offsets)
   // returns 0 on success, -1 on failure
 
@@ -661,7 +661,7 @@ public:
   // Read in the track_file_header_t and scan_index array.
   // returns 0 on success, -1 on failure
 
-  int readScanIndex(bool clear_error_str = true);
+  int readTrackScanIndex(bool clear_error_str = true);
      
   // reads in the parameters for a complex track
   // For normal reads, read_simples_per_complex should be set true. This
@@ -984,8 +984,8 @@ protected:
   track_utime_t *_track_utime;
   
   si32 *_complex_track_nums;
-  si32 *_complex_track_offsets;
-  si32 *_simple_track_offsets;
+  // si32 *_complex_track_offsets;
+  // si32 *_simple_track_offsets;
   si32 *_n_simples_per_complex;
   si32 *_simples_per_complex_offsets;
   si32 *_simples_per_complex_1D;
@@ -996,7 +996,7 @@ protected:
 
   int _n_simple_allocated;
   int _n_complex_allocated;
-  int _n_simples_per_complex_allocated;
+  int _n_simples_per_complex_2D_allocated;
   int _n_scan_entries_allocated;
   int _n_scan_index_allocated;
   int _n_utime_allocated;
@@ -1408,7 +1408,7 @@ public:
   const std::string N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
   const std::string SIMPLES_PER_COMPLEX = "simples_per_complex";
   const std::string SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
-  const std::string COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
+  // const std::string COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
 
   // complex tracks
 
