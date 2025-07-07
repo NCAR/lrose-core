@@ -9,13 +9,13 @@
 #ifndef UI_SCOPEPLOT_H
 #define UI_SCOPEPLOT_H
 
-#include <QtCore/QVariant>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
+#include <QVariant>
+#include <QAction>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QHeaderView>
+#include <QVBoxLayout>
+#include <QWidget>
 #include <qwt/qwt_plot.h>
 
 QT_BEGIN_NAMESPACE

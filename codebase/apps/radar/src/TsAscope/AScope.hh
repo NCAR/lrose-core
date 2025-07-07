@@ -227,7 +227,7 @@ public slots:
   /// must determine which of the two families of
   /// plots, _tsPlotInfo, or _productPlotInfo, the
   /// previous and new plot types belong to.
-  virtual void plotTypeSlot(int plotType);
+  void plotTypeSlot();
 
   /// call to save the current plotting parameters for the
   /// current plot type, and reload the parameters for the
@@ -259,8 +259,8 @@ public slots:
   void pauseSlot(bool p);
 
   /// Select the channel
-  /// @param c The channel (0-3)
-  void channelSlot(int c);
+  /// @param b The button
+  void channelSlot(QAbstractButton *b);
 
   /// Select the gate
   /// @param index The index from the combo box of the selected gate.

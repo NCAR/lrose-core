@@ -39,9 +39,10 @@ TARGET_FILE = TsAscope
 LOC_INCLUDES = $(QT_INCLUDES)
 
 LOC_LIBS = \
-	-lradar -lFmq -ldsserver -ldidss \
-	-lRadx -lNcxx -lrapformats \
-	-ltoolsa -ldataport -ltdrp \
+	-ldsdata -lradar -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
 	-lqwt-qt5 -lfftw3 -lbz2 -lz -lpthread
 

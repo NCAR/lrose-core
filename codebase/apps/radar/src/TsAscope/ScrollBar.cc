@@ -189,7 +189,7 @@ int ScrollBar::extent() const
   return style().pixelMetric(QStyle::PM_ScrollBarExtent, this);
 #else
   QStyleOptionSlider opt;
-  opt.init(this);
+  //opt.init(this);
   opt.subControls = QStyle::SC_None;
   opt.activeSubControls = QStyle::SC_None;
   opt.orientation = orientation();

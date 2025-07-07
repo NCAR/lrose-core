@@ -116,7 +116,7 @@ AScope::AScope(const Params &params, QWidget* parent) :
   connect(_gateNumEditor,      SIGNAL(returnPressed()),      this, SLOT(setGateNumber()));
   connect(_alongBeamCheck,  SIGNAL(toggled(bool)),        this, SLOT(alongBeamSlot(bool)));
   connect(_blockSizeCombo,  SIGNAL(activated(int)),       this, SLOT(blockSizeSlot(int)));
-  connect(_chanButtonGroup, SIGNAL(buttonReleased(int)),  this, SLOT(channelSlot(int)));
+  connect(_chanButtonGroup, SIGNAL(buttonReleased(QAbstractButton*)), this, SLOT(channelSlot(QAbstractButton*)));
   
   connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
   connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
@@ -157,8 +157,7 @@ AScope::AScope(const Params &params, QWidget* parent) :
   _redPalette.setColor(this->backgroundRole(), QColor("red"));
 
   // The initial plot type will be I and Q timeseries
-  plotTypeSlot(TS_IANDQ_PLOT);
-
+  plotTypeSlot();
 
   // start the statistics timer
   int interval = (int)(1000/_refreshRateHz);
@@ -267,7 +266,7 @@ void AScope::saveImageSlot()
   d.setFileMode(QFileDialog::AnyFile);
   d.setViewMode(QFileDialog::Detail);
   d.setAcceptMode(QFileDialog::AcceptSave);
-  d.setConfirmOverwrite(true);
+  //d.setConfirmOverwrite(true);
   d.setDefaultSuffix("png");
   d.setDirectory(f);
 
@@ -439,7 +438,7 @@ double AScope::powerSpectrum(
 }
 
 ////////////////////////////////////////////////////////////////////
-void AScope::plotTypeSlot(int plotType) 
+void AScope::plotTypeSlot()
 {
 
   // find out the index of the current page
@@ -575,7 +574,7 @@ QButtonGroup* AScope::addTSTypeTab(
   _typeTab->insertTab(-1, pPage, tabName.c_str());
 
   // connect the button released signal to our plot type change slot.
-  connect(pGroup, SIGNAL(buttonReleased(int)), this, SLOT(plotTypeSlot(int)));
+  connect(pGroup, SIGNAL(buttonReleased(QAbstractButton*)), this, SLOT(plotTypeSlot()));
 
   return pGroup;
 }
@@ -787,9 +786,9 @@ void AScope::pauseSlot(bool p)
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::channelSlot(int c) 
+void AScope::channelSlot(QAbstractButton* b)
 {
-  _channel = c;
+  _channel = _chanButtonGroup->id(b);
 }
 
 //////////////////////////////////////////////////////////////////////

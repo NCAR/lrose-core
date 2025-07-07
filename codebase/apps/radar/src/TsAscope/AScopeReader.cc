@@ -200,16 +200,16 @@ IwrfTsPulse *AScopeReader::_getNextPulse()
 {
   
   IwrfTsPulse *pulse = NULL;
-  
+
   while (pulse == NULL) {
     pulse = _pulseReader->getNextPulse(true);
     if (pulse == NULL) {
       if (_pulseReader->getTimedOut()) {
-	// No data yet; return to event loop
-	return NULL;
+    // No data yet; return to event loop
+    return NULL;
       }
       if (_pulseReader->endOfFile()) {
-	cout << "# NOTE: end of file encountered" << endl;
+    cout << "# NOTE: end of file encountered" << endl;
       }
       return NULL;
     }

@@ -24,6 +24,7 @@
 #include "ScopePlot.hh"
 #include <QPainter>
 #include <QPixmap>
+#include <QStack>
 
 #include <iostream>
 #include <stdlib.h>
@@ -93,13 +94,13 @@ void
   ScopePlot::initCurve()
 {
 
-  if ( _curveId1 > 0 )
+  if ( _curveId1 )
   {
     delete _curveId1;
     _curveId1 = 0;
   }
 
-  if ( _curveId2 > 0 )
+  if ( _curveId2 )
   {
     delete _curveId2;
     _curveId2 = 0;
@@ -542,7 +543,7 @@ void
 ////////////////////////////////////////////////////////////////////////
 void
   ScopePlot::saveImageToFile(std::string filePath) {
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
 
   pixmap.save(filePath.c_str(), "PNG", 100);
 }

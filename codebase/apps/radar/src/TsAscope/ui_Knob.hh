@@ -9,15 +9,15 @@
 #ifndef UI_KNOB_H
 #define UI_KNOB_H
 
-#include <QtCore/QVariant>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLCDNumber>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
+#include <QVariant>
+#include <QAction>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QHeaderView>
+#include <QLCDNumber>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QWidget>
 #include <qwt/qwt_knob.h>
 
 QT_BEGIN_NAMESPACE

@@ -42,7 +42,7 @@
 /// A Time series reader for the AScope. It reads IWRF data and translates
 /// DDS samples to AScope::TimeSeries.
 
-Q_DECLARE_METATYPE(AScope::TimeSeries)
+//Q_DECLARE_METATYPE(AScope::TimeSeries)
   
 class AScopeReader : public QObject
 {
