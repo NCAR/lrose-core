@@ -272,23 +272,15 @@ int TitanFile::_openLegacyFiles(const string &path,
     stormPath.makeDirRecurse();
   }
 
-  cerr << "11111111111111111111111111111" << endl;
-  cerr << "  stormHeaderPath: " << stormHeaderPath << endl;
-  cerr << "  fmode: " << fmode << endl;
-  
   if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str(), "sd5")) {
     _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr(" Opening storm files, header path: ", stormHeaderPath);
-    cerr << "aaaaaaaaaaaaa errStr: " << _errStr << endl;
     return -1;
   }
 
-  cerr << "222222222222222222222222222222" << endl;
-  cerr << "  trackHeaderPath: " << trackHeaderPath << endl;
   if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.c_str(), "td5")) {
     _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr(" Opening track files, header path: ", trackHeaderPath);
-    cerr << "bbbbbbbbbbbbb errStr: " << _errStr << endl;
     return -1;
   }
   return 0;
@@ -1647,6 +1639,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
       return -1;
     }
     _storm_header = _sFile.header();
+    _nScans = _storm_header.n_scans;
     return 0;
   }
 

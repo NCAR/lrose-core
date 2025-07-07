@@ -625,6 +625,8 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     return -1;
   }
 
+  cerr << "ppppppppppppp nScans: " << _inFile.nScans() << endl;
+
   // load up scan times
   
   if (_loadScanTimesNetcdf()) {
@@ -633,6 +635,8 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
 
   // loop through the scans
 
+  cerr << "nnnnnnnnnnnnn _scanTimes.size(): " << _scanTimes.size() << endl;
+  
   for (size_t iscan = 0; iscan < _scanTimes.size(); iscan++) {
     time_t scan_time = _scanTimes[iscan];
     if (_params.input_mode == Params::ARCHIVE) {
@@ -658,12 +662,12 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
     cerr << _inFile.getErrStr() << endl;
     return -1;
   }
-  if (_inFile.readSimplesPerComplex()) {
-    cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
-    cerr << "  Cannot read simples_per_complex, input_path: " << _inFile.getPathInUse() << endl;
-    cerr << _inFile.getErrStr() << endl;
-    return -1;
-  }
+  // if (_inFile.readSimplesPerComplex()) {
+  //   cerr << "ERROR - Tstorms2NetCDF::_processInputFileNetcdf" << endl;
+  //   cerr << "  Cannot read simples_per_complex, input_path: " << _inFile.getPathInUse() << endl;
+  //   cerr << _inFile.getErrStr() << endl;
+  //   return -1;
+  // }
   const track_file_header_t &theader = _inFile.track_header();
   
   // get the complex track numbers array
@@ -830,7 +834,8 @@ int Tstorms2NetCDF::_processInputFileNetcdf()
   _inFile.closeFile();
   
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _outFile.getPathInUse() << endl;
+    cerr << "Tstorms2NetCDF - wrote legacy tracking file: "
+         << _outFile.getPathInUse() << endl;
   }
   
   return 0;
@@ -846,6 +851,7 @@ int Tstorms2NetCDF::_loadScanTimesNetcdf()
 
   _scanTimes.clear();
   int nScans = _inFile.storm_header().n_scans;
+  cerr << "qqqqqqqqqqqqq nScans: " << nScans << endl;
   for (int i = 0; i < nScans; i++) {
     // read in scan
     if (_inFile.readStormScan(i)) {

@@ -454,6 +454,11 @@ public:
   void setSource(const string &val) { _source = val; }
   void setComment(const string &val) { _comment = val; }
 
+  // top level attributes 
+
+  int nScans() const { return _nScans; }
+  int nStorms() const { return _nStorms; }
+
   // storm data access
 
   const storm_file_header_t &storm_header() const { return _storm_header; }
