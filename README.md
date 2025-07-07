@@ -76,6 +76,8 @@ For details on builds and the code development environment, see:
 | -------------- |:-------------:|
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
 | [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Dual-polarization apps |
+| [Wiki](http://wiki.lrose.net/index.php/Main_Page) | LROSE wiki |
+| [Quickstart guide](http://wiki.lrose.net/index.php/Lrose_quickstart) | LROSE Quickstart Guide |
 
 ### DOIs
 
