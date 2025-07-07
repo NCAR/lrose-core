@@ -1551,11 +1551,28 @@ int TitanFile::lockFile(const char *mode)
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::lockFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _lockPath);
+
+  // handle legacy format
   
+  if (_isLegacyV5Format) {
+    if (_sFile.LockHeaderFile(mode)) {
+      _addErrStr("ERROR - TitanFile::lockFile");
+      _addErrStr("Cannot lock storm header file");
+      _addErrStr(_sFile.getErrStr());
+      return -1;
+    }
+    if (_tFile.LockHeaderFile(mode)) {
+      _addErrStr("ERROR - TitanFile::lockFile");
+      _addErrStr("Cannot lock track header file");
+      _addErrStr(_tFile.getErrStr());
+      return -1;
+    }
+    return 0;
+  }
+
   if (ta_lock_file_procmap_fd(_lockPath.c_str(), _lockId, mode)) {
     int errNum = errno;
+    _addErrStr("ERROR - TitanFile::lockFile");
     _addErrStr("Cannot lock file: ", _lockPath);
     _addErrStr(strerror(errNum));
     return -1;
@@ -1577,9 +1594,27 @@ int TitanFile::unlockFile()
   
 {
   
+  // handle legacy format
+  
+  if (_isLegacyV5Format) {
+    if (_sFile.UnlockHeaderFile()) {
+      _addErrStr("ERROR - TitanFile::lockFile");
+      _addErrStr("Cannot unlock storm header file");
+      _addErrStr(_sFile.getErrStr());
+      return -1;
+    }
+    if (_tFile.UnlockHeaderFile()) {
+      _addErrStr("ERROR - TitanFile::lockFile");
+      _addErrStr("Cannot unlock track header file");
+      _addErrStr(_tFile.getErrStr());
+      return -1;
+    }
+    return 0;
+  }
+
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::unlockStormHeaderFile\n";
-  TaStr::AddStr(_errStr, "  File: ", _lockPath);
+  _addErrStr("ERROR - TitanFile::unlockStormHeaderFile");
+  _addErrStr("  File: ", _lockPath);
   
   if (ta_unlock_file_fd(_lockPath.c_str(), _lockId)) {
     int errNum = errno;
@@ -1617,8 +1652,8 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanFile::readStormHeader\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readStormHeader");
+  _addErrStr("  Reading from file: ", _filePath);
 
   // top level vars
   
@@ -1685,7 +1720,7 @@ int TitanFile::readProjRuns(int storm_num)
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readProjRuns\n";
+  _addErrStr("ERROR - TitanFile::readProjRuns");
 
   if (_isLegacyV5Format) {
     if (_sFile.ReadProjRuns(storm_num)) {
@@ -1774,10 +1809,10 @@ int TitanFile::readStormAux(int storm_num)
   }
 
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readStormAux\n";
-  TaStr::AddStr(_errStr, "  Reading storm props from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
-  TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
+  _addErrStr("ERROR - TitanFile::readStormAux");
+  _addErrStr("  Reading storm props from file: ", _filePath);
+  _addErrInt("  Storm number: ", storm_num);
+  _addErrInt("  Scan number: ", _scan.scan_num);
   
   // store storm number
   
@@ -1890,9 +1925,9 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   }
 
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readScan\n";
-  TaStr::AddStr(_errStr, "  Reading scan from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  Scan number: ", scan_num);
+  _addErrStr("ERROR - TitanFile::readScan");
+  _addErrStr("  Reading scan from file: ", _filePath);
+  _addErrInt("  Scan number: ", scan_num);
 
   // check
   
@@ -2140,8 +2175,8 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeStormHeader\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeStormHeader");
+  _addErrStr("  File: ", _filePath);
 
   // set file time to gmt
   
@@ -2234,8 +2269,8 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeScan\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeScan");
+  _addErrStr("  File: ", _filePath);
 
   // update attributes that depend on scan type
   
@@ -2930,7 +2965,7 @@ void TitanFile::freeComplexArrays()
 ///////////////////////////////////////////////////////////////////////////
 
 
-void TitanFile::allocSimplesPerComplex(int n_simple_needed)
+void TitanFile::allocSimplesPerComplex2D(int n_simple_needed)
      
 {
 
@@ -2964,7 +2999,7 @@ void TitanFile::allocSimplesPerComplex(int n_simple_needed)
 ///////////////////////////////////////////////////////////////////////////
 
 
-void TitanFile::freeSimplesPerComplex()
+void TitanFile::freeSimplesPerComplex2D()
      
 {
   if (_simples_per_complex_2D) {
@@ -3134,9 +3169,9 @@ void TitanFile::freeTracksAll()
 
   freeSimpleArrays();
   freeComplexArrays();
-  freeSimplesPerComplex();
+  freeSimplesPerComplex2D();
   freeScanEntries();
-  // freeScanIndex();
+  freeScanIndex();
   freeUtime();
 
 }
@@ -3167,7 +3202,8 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     int n_simple_tracks = _track_header.n_simple_tracks;
     allocComplexArrays(n_complex_tracks);
     allocSimpleArrays(n_simple_tracks);
-    memcpy(_complex_track_nums, _tFile.complex_track_nums(), n_complex_tracks * sizeof(si32));
+    memcpy(_complex_track_nums, _tFile.complex_track_nums(),
+           n_complex_tracks * sizeof(si32));
     // read in simples per complex
     if (readSimplesPerComplex()) {
       _errStr = _tFile.getErrStr();
@@ -3179,8 +3215,8 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanFile::readTrackHeader\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readTrackHeader");
+  _addErrStr("  Reading from file: ", _filePath);
    
   // read in header data
   
@@ -3226,28 +3262,28 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   // less than or the same as those in use now
   
   if (_track_header.max_parents != MAX_PARENTS) {
-    TaStr::AddStr(_errStr, "  ", "MAX_PARENTS has changed");
-    TaStr::AddInt(_errStr, "  _track_header.max_parents: ", _track_header.max_parents);
-    TaStr::AddInt(_errStr, "  MAX_PARENTS: ", MAX_PARENTS);
-    TaStr::AddStr(_errStr, "  ", "Fix header and recompile");
+    _addErrStr("  ", "MAX_PARENTS has changed");
+    _addErrInt("  _track_header.max_parents: ", _track_header.max_parents);
+    _addErrInt("  MAX_PARENTS: ", MAX_PARENTS);
+    _addErrStr("  ", "Fix header and recompile");
     return -1;
   }
 
   if (_track_header.max_children != MAX_CHILDREN) {
-    TaStr::AddStr(_errStr, "  ", "MAX_CHILDREN has changed");
-    TaStr::AddInt(_errStr, "  _track_header.max_children: ", _track_header.max_children);
-    TaStr::AddInt(_errStr, "  MAX_CHILDREN: ", MAX_CHILDREN);
-    TaStr::AddStr(_errStr, "  ", "Fix header and recompile");
+    _addErrStr("  ", "MAX_CHILDREN has changed");
+    _addErrInt("  _track_header.max_children: ", _track_header.max_children);
+    _addErrInt("  MAX_CHILDREN: ", MAX_CHILDREN);
+    _addErrStr("  ", "Fix header and recompile");
     return -1;
   }
 
   if (_track_header.max_nweights_forecast != MAX_NWEIGHTS_FORECAST) {
-    TaStr::AddStr(_errStr, "  ", "MAX_NWEIGHTS_FORECAST has changed");
-    TaStr::AddInt(_errStr, "  _track_header.max_nweights_forecast: ",
+    _addErrStr("  ", "MAX_NWEIGHTS_FORECAST has changed");
+    _addErrInt("  _track_header.max_nweights_forecast: ",
 		  _track_header.max_nweights_forecast);
-    TaStr::AddInt(_errStr, "  MAX_NWEIGHTS_FORECAST: ",
+    _addErrInt("  MAX_NWEIGHTS_FORECAST: ",
 		  MAX_NWEIGHTS_FORECAST);
-    TaStr::AddStr(_errStr, "  ", "Fix header and recompile");
+    _addErrStr("  ", "Fix header and recompile");
     return -1;
   }
 
@@ -3306,8 +3342,8 @@ int TitanFile::readScanIndex(bool clear_error_str /* = true*/ )
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanFile::readScanIndex\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readScanIndex");
+  _addErrStr("  Reading from file: ", _filePath);
 
   if (readTrackHeader(clear_error_str)) {
     return -1;
@@ -3383,9 +3419,9 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanFile::readComplexParams\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  track_num", complex_track_num);
+  _addErrStr("ERROR - TitanFile::readComplexTrackParams");
+  _addErrStr("  Reading from file: ", _filePath);
+  _addErrInt("  track_num", complex_track_num);
 
   // the complex track params are indexed from the complex track number
   // these arrays will have gaps
@@ -3477,8 +3513,8 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.ReadComplexParams(simple_track_num,
-                                 clear_error_str)) {
+    if (_tFile.ReadSimpleParams(simple_track_num,
+                                clear_error_str)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -3489,9 +3525,9 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
   if (clear_error_str) {
     _clearErrStr();
   }
-  _errStr += "ERROR - TitanFile::readSimpleParams\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
-  TaStr::AddInt(_errStr, "  simple_track_num", simple_track_num);
+  _addErrStr("ERROR - TitanFile::readSimpleTrackParams");
+  _addErrStr("  Reading from file: ", _filePath);
+  _addErrInt("  simple_track_num", simple_track_num);
   
   std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
   simple_track_params_t &sp(_simple_params);
@@ -3556,8 +3592,8 @@ int TitanFile::readTrackEntry()
   }
 
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readEntry\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readEntry");
+  _addErrStr("  Reading from file: ", _filePath);
 
   // set entry offset in the file
   
@@ -3621,11 +3657,16 @@ int TitanFile::readSimplesPerComplex()
       _errStr = _tFile.getErrStr();
       return -1;
     }
+
+    // cerr << "nnnnnnnnnnnnnnnnn max_complex_track_num: " << _tFile.header().max_complex_track_num << endl;
+    // cerr << "nnnnnnnnnnnnnnnnn n_simple_tracks: " << _tFile.header().n_simple_tracks << endl;
+
     // copy over data from _tFile object
-    allocSimplesPerComplex(_tFile.header().max_complex_track_num + 1);
+    allocSimplesPerComplex2D(_tFile.header().max_complex_track_num + 1);
     for (int itrack = 0; itrack < _tFile.header().n_complex_tracks; itrack++) {
       int complex_num = _tFile.complex_track_nums()[itrack];
       int nsimples = _tFile.nsimples_per_complex()[complex_num];
+      cerr << "eeeeeeeee itrack, complex_num, nsimples: " << itrack << ", " << complex_num << ", " << nsimples << endl;
       _simples_per_complex_2D[complex_num] = (si32 *) urealloc
         (_simples_per_complex_2D[complex_num],
          (nsimples * sizeof(si32)));
@@ -3636,7 +3677,7 @@ int TitanFile::readSimplesPerComplex()
     return 0;
   }
 
-  _errStr += "ERROR - TitanFile::readSimplesPerComplex\n";
+  _addErrStr("ERROR - TitanFile::readSimplesPerComplex");
 
   // set up index and count for retrievals
   
@@ -3658,10 +3699,17 @@ int TitanFile::readSimplesPerComplex()
   _simpleVars.simples_per_complex_1D.getVal
     (nSimpIndex, nSimpCount, _simples_per_complex_1D);
 
-  // create simples_per_complex_2D
+  // allocate 2D array
   
-  allocSimplesPerComplex(_track_header.max_complex_track_num + 1);
+  allocSimplesPerComplex2D(_track_header.max_complex_track_num + 1);
     
+  // fill simples_per_complex_2D
+
+  cerr << "aaaaaaaaaaaaaaaaaaaaa _track_header.max_complex_track_num: "
+       << _track_header.max_complex_track_num << endl;
+  cerr << "aaaaaaaaaaaaaaaaaaaaa _track_header.n_complex_tracks: "
+       << _track_header.n_complex_tracks << endl;
+  
   for (int icomp = 0; icomp < _track_header.n_complex_tracks; icomp++) {
 
     int complex_num = _complex_track_nums[icomp];
@@ -3744,8 +3792,8 @@ int TitanFile::readScanEntries(int scan_num)
   }
 
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readScanEntries\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readScanEntries");
+  _addErrStr("  Reading from file: ", _filePath);
 
   // get nstorms
 
@@ -3804,8 +3852,8 @@ int TitanFile::readUtime()
   }
 
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::readUtime\n";
-  TaStr::AddStr(_errStr, "  Reading from file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::readUtime");
+  _addErrStr("  Reading from file: ", _filePath);
 
   allocUtime();
   
@@ -4026,7 +4074,7 @@ int TitanFile::rewindSimpleTrack(int simple_track_num)
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::RewindSimpleTrack\n";
+  _addErrStr("ERROR - TitanFile::RewindSimpleTrack");
   
   // read in simple track params
   
@@ -4064,8 +4112,8 @@ int TitanFile::rewriteTrackEntry()
     return 0;
   }
   
-  _errStr += "ERROR - TitanFile::rewriteTrackEntry\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::rewriteTrackEntry");
+  _addErrStr("  Writing to file: ", _filePath);
   
   if (writeTrackEntry(_entry)) {
     return -1;
@@ -4143,8 +4191,8 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeTrackHeader\n";
-  TaStr::AddStr(_errStr, "  File: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeTrackHeader");
+  _addErrStr("  File: ", _filePath);
 
   // make copy
   
@@ -4216,8 +4264,8 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeSimpleParams\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeSimpleParams");
+  _addErrStr("  Writing to file: ", _filePath);
   
   std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
 
@@ -4284,8 +4332,8 @@ int TitanFile::writeComplexTrackParams(int cindex,
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeComplexParams\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeComplexParams");
+  _addErrStr("  Writing to file: ", _filePath);
   
   // complex_track_nums array has dimension _n_complex
   // the track numbers are monotonically increasing, but will have gaps
@@ -4390,8 +4438,8 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   }
   
   _clearErrStr();
-  _errStr += "ERROR - TitanFile::writeEntry\n";
-  TaStr::AddStr(_errStr, "  Writing to file: ", _filePath);
+  _addErrStr("ERROR - TitanFile::writeEntry");
+  _addErrStr("  Writing to file: ", _filePath);
 
   int entryOffset = getStormEntryOffset(entry.scan_num, entry.storm_num);
   std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);

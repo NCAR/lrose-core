@@ -45,11 +45,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <didss/DsInputPath.hh>
-#include <rapformats/tstorm_spdb.h>
-#include <titan/TitanStormFile.hh>
-#include <titan/TitanTrackFile.hh>
 #include <titan/TitanFile.hh>
-// #include <titan/DsTitan.hh>
 #include <filesystem>
 using Fpath = std::filesystem::path;
 
@@ -87,11 +83,7 @@ private:
 
   DsInputPath *_input;
   Fpath _inputPath;
-  Fpath _stormHeaderPath;
-  Fpath _trackHeaderPath;
   
-  TitanStormFile _sFile;
-  TitanTrackFile _tFile;
   TitanFile _inFile;
   TitanFile _outFile;
   
@@ -100,8 +92,6 @@ private:
   // legacy processing - convert to NetCDF
   
   int _processInputFileLegacy();
-  int _openInputFilesLegacy();
-  void _closeInputFilesLegacy();
   int _loadScanTimesLegacy();
   int _processScanLegacy(int scan_num,
                          time_t scan_time);

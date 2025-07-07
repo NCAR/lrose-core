@@ -511,8 +511,8 @@ public:
   void freeSimpleArrays();
   void allocComplexArrays(int n_complex_needed);
   void freeComplexArrays();
-  void allocSimplesPerComplex(int n_simple_needed);
-  void freeSimplesPerComplex();
+  void allocSimplesPerComplex2D(int n_simple_needed);
+  void freeSimplesPerComplex2D();
   void allocScanEntries(int n_entries_needed);
   void freeScanEntries();
   void allocScanIndex(int n_scans_needed);

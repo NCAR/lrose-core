@@ -1057,7 +1057,7 @@ int TitanTrackFile::ReadComplexParams(int track_num,
   }
   _errStr += "ERROR - TitanTrackFile::ReadComplexParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _data_file_path);
-  TaStr::AddInt(_errStr, "  track_num", track_num);
+  TaStr::AddInt(_errStr, "  track_num: ", track_num);
 
   // move to offset in file
   
@@ -1110,7 +1110,7 @@ int TitanTrackFile::ReadSimpleParams(int track_num,
   }
   _errStr += "ERROR - TitanTrackFile::ReadSimpleParams\n";
   TaStr::AddStr(_errStr, "  Reading from file: ", _data_file_path);
-  TaStr::AddInt(_errStr, "  track_num", track_num);
+  TaStr::AddInt(_errStr, "  track_num: ", track_num);
 
   // move to offset in file
   
@@ -2003,7 +2003,7 @@ int TitanTrackFile::WriteComplexParams(int track_num)
 	      1, _data_file) != 1) {
     int errNum = errno;
     TaStr::AddStr(_errStr, "  ", "Writing complex track params.");
-    TaStr::AddInt(_errStr, "  track_num", track_num);
+    TaStr::AddInt(_errStr, "  track_num: ", track_num);
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
   }
