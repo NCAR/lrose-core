@@ -867,20 +867,20 @@ protected:
   ////////////////////////////////////////////////////////
   // dimensions
   
-  NcxxDim _n_scans;
-  NcxxDim _n_storms;
-  NcxxDim _n_simple;
-  NcxxDim _n_complex;
-  NcxxDim _max_complex;
-  NcxxDim _n_entries;
-  NcxxDim _n_poly;
-  NcxxDim _n_layers;
-  NcxxDim _n_hist;
-  NcxxDim _n_runs;
-  NcxxDim _n_proj_runs;
-  NcxxDim _max_forecast_weights;
-  NcxxDim _max_parents;
-  NcxxDim _max_children;
+  NcxxDim _nScansDim;
+  NcxxDim _nStormsDim;
+  NcxxDim _nSimpleDim;
+  NcxxDim _nComplexDim;
+  NcxxDim _maxComplexDim;
+  NcxxDim _nEntriesDim;
+  NcxxDim _nPolyDim;
+  NcxxDim _nLayersDim;
+  NcxxDim _nHistDim;
+  NcxxDim _nRunsDim;
+  NcxxDim _nProjRunsDim;
+  NcxxDim _maxFcastWtsDim;
+  NcxxDim _maxParentsDim;
+  NcxxDim _maxChildrenDim;
   
   ////////////////////////////////////////////////////////
   // groups
