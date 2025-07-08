@@ -867,17 +867,17 @@ protected:
   ////////////////////////////////////////////////////////
   // dimensions
   
-  NcxxDim _nScansDim;
-  NcxxDim _nStormsDim;
-  NcxxDim _nSimpleDim;
-  NcxxDim _nComplexDim;
+  NcxxDim _scansDim;
+  NcxxDim _stormsDim;
+  NcxxDim _simpleDim;
+  NcxxDim _complexDim;
   NcxxDim _maxComplexDim;
-  NcxxDim _nEntriesDim;
-  NcxxDim _nPolyDim;
-  NcxxDim _nLayersDim;
-  NcxxDim _nHistDim;
-  NcxxDim _nRunsDim;
-  NcxxDim _nProjRunsDim;
+  NcxxDim _entriesDim;
+  NcxxDim _polyDim;
+  NcxxDim _layersDim;
+  NcxxDim _histDim;
+  NcxxDim _runsDim;
+  NcxxDim _projRunsDim;
   NcxxDim _maxFcastWtsDim;
   NcxxDim _maxParentsDim;
   NcxxDim _maxChildrenDim;

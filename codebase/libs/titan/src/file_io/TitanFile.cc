@@ -366,17 +366,17 @@ void TitanFile::_setUpDims()
 
 {
 
-  _nScansDim = _getDim(N_SCANS, _scansGroup);
-  _nStormsDim = _getDim(N_STORMS, _gpropsGroup);
-  _nSimpleDim = _getDim(N_SIMPLE, _simpleGroup);
-  _nComplexDim = _getDim(N_COMPLEX, _complexGroup);
+  _scansDim = _getDim(N_SCANS, _scansGroup);
+  _stormsDim = _getDim(N_STORMS, _gpropsGroup);
+  _simpleDim = _getDim(N_SIMPLE, _simpleGroup);
+  _complexDim = _getDim(N_COMPLEX, _complexGroup);
   _maxComplexDim = _getDim(MAX_COMPLEX, _complexGroup);
-  _nEntriesDim = _getDim(N_ENTRIES, _entriesGroup);
-  _nPolyDim = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
-  _nLayersDim = _getDim(N_LAYERS, _lpropsGroup);
-  _nRunsDim = _getDim(N_RUNS, _runsGroup);
-  _nProjRunsDim = _getDim(N_PROJ_RUNS, _projRunsGroup);
-  _nHistDim = _getDim(N_HIST, _histGroup);
+  _entriesDim = _getDim(N_ENTRIES, _entriesGroup);
+  _polyDim = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
+  _layersDim = _getDim(N_LAYERS, _lpropsGroup);
+  _histDim = _getDim(N_HIST, _histGroup);
+  _runsDim = _getDim(N_RUNS, _runsGroup);
+  _projRunsDim = _getDim(N_PROJ_RUNS, _projRunsGroup);
   _maxFcastWtsDim = _getDim(MAX_FORECAST_WEIGHTS, MAX_NWEIGHTS_FORECAST, _tracksGroup);
   _maxParentsDim = _getDim(MAX_PARENTS_, MAX_PARENTS, _simpleGroup);
   _maxChildrenDim = _getDim(MAX_CHILDREN_, MAX_CHILDREN, _simpleGroup);
@@ -500,90 +500,90 @@ void TitanFile::_setUpVars()
   // scans
 
   _scanVars.scan_min_z =
-    _getVar(SCAN_MIN_Z, NcxxType::nc_FLOAT, _nScansDim, _scansGroup, KM);
+    _getVar(SCAN_MIN_Z, NcxxType::nc_FLOAT, _scansDim, _scansGroup, KM);
   _scanVars.scan_delta_z =
-    _getVar(SCAN_DELTA_Z, NcxxType::nc_FLOAT, _nScansDim, _scansGroup, KM);
+    _getVar(SCAN_DELTA_Z, NcxxType::nc_FLOAT, _scansDim, _scansGroup, KM);
   _scanVars.scan_num =
-    _getVar(SCAN_NUM, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(SCAN_NUM, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_nstorms =
-    _getVar(SCAN_NSTORMS, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(SCAN_NSTORMS, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_time =
-    _getVar(SCAN_TIME, NcxxType::nc_INT64, _nScansDim, _scansGroup);
+    _getVar(SCAN_TIME, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_gprops_offset =
-    _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_first_offset =
-    _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_last_offset =
-    _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_ht_of_freezing =
-    _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _nScansDim, _scansGroup, KM);
+    _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _scansDim, _scansGroup, KM);
 
   _scanVars.grid_nx =
-    _getVar(GRID_NX, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(GRID_NX, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.grid_ny =
-    _getVar(GRID_NY, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(GRID_NY, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.grid_nz =
-    _getVar(GRID_NZ, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(GRID_NZ, NcxxType::nc_INT, _scansDim, _scansGroup);
 
   _scanVars.grid_minx =
-    _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_miny =
-    _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_minz =
-    _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, KM);
+    _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
 
   _scanVars.grid_dx =
-    _getVar(GRID_DX, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_DX, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_dy =
-    _getVar(GRID_DY, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_DY, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_dz =
-    _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, KM);
+    _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
 
   _scanVars.grid_dz_constant =
-    _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _scansDim, _scansGroup);
 
   _scanVars.grid_sensor_x =
-    _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_sensor_y =
-    _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, _horizGridUnits);
+    _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
   _scanVars.grid_sensor_z =
-    _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, KM);
+    _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
 
   _scanVars.grid_sensor_lat =
-    _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.grid_sensor_lon =
-    _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
 
   _scanVars.grid_unitsx =
-    _getVar(GRID_UNITSX, NcxxType::nc_STRING, _nScansDim, _scansGroup);
+    _getVar(GRID_UNITSX, NcxxType::nc_STRING, _scansDim, _scansGroup);
   _scanVars.grid_unitsy =
-    _getVar(GRID_UNITSY, NcxxType::nc_STRING, _nScansDim, _scansGroup);
+    _getVar(GRID_UNITSY, NcxxType::nc_STRING, _scansDim, _scansGroup);
   _scanVars.grid_unitsz =
-    _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _nScansDim, _scansGroup);
+    _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _scansDim, _scansGroup);
 
   _scanVars.proj_type =
-    _getVar(PROJ_TYPE, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(PROJ_TYPE, NcxxType::nc_INT, _scansDim, _scansGroup);
   
   _scanVars.proj_origin_lat =
-    _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.proj_origin_lon =
-    _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.proj_rotation =
-    _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _scansDim, _scansGroup, DEG);
 
   _scanVars.proj_lat1 =
-    _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.proj_lat2 =
-    _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.proj_tangent_lat =
-    _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
   _scanVars.proj_tangent_lon =
-    _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _nScansDim, _scansGroup, DEG);
+    _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
 
   _scanVars.proj_pole_type =
-    _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _nScansDim, _scansGroup);
+    _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.proj_central_scale =
-    _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _nScansDim, _scansGroup);
+    _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _scansDim, _scansGroup);
 
   // add projection attributes
   
@@ -669,205 +669,205 @@ void TitanFile::_setUpVars()
   // storm global props
 
   _gpropsVars.vol_centroid_x =
-    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.vol_centroid_y =
-    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.vol_centroid_z =
-    _getVar(VOL_CENTROID_Z, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM);
+    _getVar(VOL_CENTROID_Z, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM);
   _gpropsVars.refl_centroid_x =
-    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.refl_centroid_y =
-    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.refl_centroid_z =
-    _getVar(REFL_CENTROID_Z, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM);
+    _getVar(REFL_CENTROID_Z, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM);
   _gpropsVars.top =
-    _getVar(TOP, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM);
+    _getVar(TOP, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM);
   _gpropsVars.base =
-    _getVar(BASE, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM);
+    _getVar(BASE, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM);
   _gpropsVars.volume =
-    _getVar(VOLUME, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM3);
+    _getVar(VOLUME, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM3);
   _gpropsVars.area_mean =
-    _getVar(AREA_MEAN, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM2);
+    _getVar(AREA_MEAN, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM2);
   _gpropsVars.precip_flux =
-    _getVar(PRECIP_FLUX, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, M3_PER_SEC);
+    _getVar(PRECIP_FLUX, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, M3_PER_SEC);
   _gpropsVars.mass =
-    _getVar(MASS, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KTONS);
+    _getVar(MASS, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KTONS);
   _gpropsVars.tilt_angle =
-    _getVar(TILT_ANGLE, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DEG);
+    _getVar(TILT_ANGLE, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DEG);
   _gpropsVars.tilt_dirn =
-    _getVar(TILT_DIRN, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DEG);
+    _getVar(TILT_DIRN, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DEG);
   _gpropsVars.dbz_max =
-    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DBZ);
+    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DBZ);
   _gpropsVars.dbz_mean =
-    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DBZ);
+    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DBZ);
   _gpropsVars.dbz_max_gradient =
-    _getVar(DBZ_MAX_GRADIENT, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DBZ_PER_KM);
+    _getVar(DBZ_MAX_GRADIENT, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DBZ_PER_KM);
   _gpropsVars.dbz_mean_gradient =
-    _getVar(DBZ_MEAN_GRADIENT, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, DBZ_PER_KM);
+    _getVar(DBZ_MEAN_GRADIENT, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, DBZ_PER_KM);
   _gpropsVars.ht_of_dbz_max =
-    _getVar(HT_OF_DBZ_MAX, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM);
+    _getVar(HT_OF_DBZ_MAX, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM);
   _gpropsVars.rad_vel_mean =
-    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, M_PER_SEC);
   _gpropsVars.rad_vel_sd =
-    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, M_PER_SEC);
   _gpropsVars.vorticity =
-    _getVar(VORTICITY, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, PER_SEC);
+    _getVar(VORTICITY, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, PER_SEC);
   _gpropsVars.precip_area =
-    _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KM2);
+    _getVar(PRECIP_AREA, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KM2);
 
   _gpropsVars.precip_area_centroid_x =
     _getVar(PRECIP_AREA_CENTROID_X, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_centroid_y =
     _getVar(PRECIP_AREA_CENTROID_Y, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_orientation =
     _getVar(PRECIP_AREA_ORIENTATION, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, DEG);
+            _stormsDim, _gpropsGroup, DEG);
   _gpropsVars.precip_area_minor_radius =
     _getVar(PRECIP_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.precip_area_major_radius =
     _getVar(PRECIP_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
 
   _gpropsVars.proj_area = _getVar(PROJ_AREA, NcxxType::nc_FLOAT,
-                                  _nStormsDim, _gpropsGroup, KM2);
+                                  _stormsDim, _gpropsGroup, KM2);
   _gpropsVars.proj_area_centroid_x =
     _getVar(PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_centroid_y =
     _getVar(PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_orientation =
     _getVar(PROJ_AREA_ORIENTATION, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, DEG);
+            _stormsDim, _gpropsGroup, DEG);
   _gpropsVars.proj_area_minor_radius =
     _getVar(PROJ_AREA_MINOR_RADIUS, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_major_radius =
     _getVar(PROJ_AREA_MAJOR_RADIUS, NcxxType::nc_FLOAT,
-            _nStormsDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _gpropsGroup, _horizGridUnits);
   _gpropsVars.proj_area_polygon =
     _getVar(PROJ_AREA_POLYGON, NcxxType::nc_FLOAT,
-            _nStormsDim, _nPolyDim, _gpropsGroup, _horizGridUnits);
+            _stormsDim, _polyDim, _gpropsGroup, _horizGridUnits);
 
   _gpropsVars.storm_num =
-    _getVar(STORM_NUM, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(STORM_NUM, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.n_layers =
-    _getVar(N_LAYERS, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(N_LAYERS, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.base_layer =
-    _getVar(BASE_LAYER, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(BASE_LAYER, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.n_dbz_intervals =
-    _getVar(N_DBZ_INTERVALS, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(N_DBZ_INTERVALS, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.n_runs =
-    _getVar(N_RUNS, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(N_RUNS, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.n_proj_runs =
-    _getVar(N_PROJ_RUNS, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(N_PROJ_RUNS, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.top_missing =
-    _getVar(TOP_MISSING, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(TOP_MISSING, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.range_limited =
-    _getVar(RANGE_LIMITED, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(RANGE_LIMITED, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.second_trip =
-    _getVar(SECOND_TRIP, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(SECOND_TRIP, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_present =
-    _getVar(HAIL_PRESENT, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_PRESENT, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.anom_prop =
-    _getVar(ANOM_PROP, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(ANOM_PROP, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.bounding_min_ix =
-    _getVar(BOUNDING_MIN_IX, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(BOUNDING_MIN_IX, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.bounding_min_iy =
-    _getVar(BOUNDING_MIN_IY, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(BOUNDING_MIN_IY, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.bounding_max_ix =
-    _getVar(BOUNDING_MAX_IX, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(BOUNDING_MAX_IX, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.bounding_max_iy =
-    _getVar(BOUNDING_MAX_IY, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(BOUNDING_MAX_IY, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.layer_props_offset =
-    _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(LAYER_PROPS_OFFSET, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.dbz_hist_offset =
-    _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(DBZ_HIST_OFFSET, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.runs_offset =
-    _getVar(RUNS_OFFSET, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(RUNS_OFFSET, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.proj_runs_offset =
-    _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_INT, _nStormsDim, _gpropsGroup);
+    _getVar(PROJ_RUNS_OFFSET, NcxxType::nc_INT, _stormsDim, _gpropsGroup);
   _gpropsVars.vil_from_maxz =
-    _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KG_PER_M2);
+    _getVar(VIL_FROM_MAXZ, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KG_PER_M2);
   _gpropsVars.ltg_count =
-    _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(LTG_COUNT, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.convectivity_median =
-    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_FOKRcategory =
-    _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_FOKRCATEGORY, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_waldvogelProbability =
-    _getVar(HAIL_WALDVOGELPROBABILITY, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_WALDVOGELPROBABILITY, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_hailMassAloft =
-    _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup, KTONS);
+    _getVar(HAIL_HAILMASSALOFT, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup, KTONS);
   _gpropsVars.hail_vihm =
-    _getVar(HAIL_VIHM, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_VIHM, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_poh =
-    _getVar(HAIL_POH, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_POH, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_shi =
-    _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_SHI, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_posh =
-    _getVar(HAIL_POSH, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_POSH, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   _gpropsVars.hail_mehs =
-    _getVar(HAIL_MEHS, NcxxType::nc_FLOAT, _nStormsDim, _gpropsGroup);
+    _getVar(HAIL_MEHS, NcxxType::nc_FLOAT, _stormsDim, _gpropsGroup);
   
   // storm layer props
   
   _lpropsVars.vol_centroid_x =
-    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
   _lpropsVars.vol_centroid_y =
-    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
   _lpropsVars.refl_centroid_x =
-    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
   _lpropsVars.refl_centroid_y =
-    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
   _lpropsVars.area =
-    _getVar(AREA, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, KM2);
+    _getVar(AREA, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, KM2);
   _lpropsVars.dbz_max =
-    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, DBZ);
+    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, DBZ);
   _lpropsVars.dbz_mean =
-    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, DBZ);
+    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, DBZ);
   _lpropsVars.mass =
-    _getVar(MASS, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, KTONS);
+    _getVar(MASS, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, KTONS);
   _lpropsVars.rad_vel_mean =
-    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, M_PER_SEC);
   _lpropsVars.rad_vel_sd =
-    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, M_PER_SEC);
   _lpropsVars.vorticity =
-    _getVar(VORTICITY, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup, PER_SEC);
+    _getVar(VORTICITY, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, PER_SEC);
   _lpropsVars.convectivity_median =
-    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _nLayersDim, _lpropsGroup);
+    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup);
 
   // reflectivity histograms
 
   _histVars.percent_volume =
-    _getVar(PERCENT_VOLUME, NcxxType::nc_FLOAT, _nHistDim, _histGroup);
+    _getVar(PERCENT_VOLUME, NcxxType::nc_FLOAT, _histDim, _histGroup);
   _histVars.percent_area =
-    _getVar(PERCENT_AREA, NcxxType::nc_FLOAT, _nHistDim, _histGroup);
+    _getVar(PERCENT_AREA, NcxxType::nc_FLOAT, _histDim, _histGroup);
 
   // storm runs
 
   _runsVars.run_ix =
-    _getVar(RUN_IX, NcxxType::nc_INT, _nRunsDim, _runsGroup);
+    _getVar(RUN_IX, NcxxType::nc_INT, _runsDim, _runsGroup);
   _runsVars.run_iy =
-    _getVar(RUN_IY, NcxxType::nc_INT, _nRunsDim, _runsGroup);
+    _getVar(RUN_IY, NcxxType::nc_INT, _runsDim, _runsGroup);
   _runsVars.run_iz =
-    _getVar(RUN_IZ, NcxxType::nc_INT, _nRunsDim, _runsGroup);
+    _getVar(RUN_IZ, NcxxType::nc_INT, _runsDim, _runsGroup);
   _runsVars.run_len =
-    _getVar(RUN_LEN, NcxxType::nc_INT, _nRunsDim, _runsGroup);
+    _getVar(RUN_LEN, NcxxType::nc_INT, _runsDim, _runsGroup);
 
   // storm proj runs
 
   _projRunsVars.run_ix =
-    _getVar(RUN_IX, NcxxType::nc_INT, _nProjRunsDim, _projRunsGroup);
+    _getVar(RUN_IX, NcxxType::nc_INT, _projRunsDim, _projRunsGroup);
   _projRunsVars.run_iy =
-    _getVar(RUN_IY, NcxxType::nc_INT, _nProjRunsDim, _projRunsGroup);
+    _getVar(RUN_IY, NcxxType::nc_INT, _projRunsDim, _projRunsGroup);
   _projRunsVars.run_iz =
-    _getVar(RUN_IZ, NcxxType::nc_INT, _nProjRunsDim, _projRunsGroup);
+    _getVar(RUN_IZ, NcxxType::nc_INT, _projRunsDim, _projRunsGroup);
   _projRunsVars.run_len =
-    _getVar(RUN_LEN, NcxxType::nc_INT, _nProjRunsDim, _projRunsGroup);
+    _getVar(RUN_LEN, NcxxType::nc_INT, _projRunsDim, _projRunsGroup);
 
   // tracking parameters
 
@@ -1009,55 +1009,55 @@ void TitanFile::_setUpVars()
   // simple tracks
 
   _simpleVars.simple_track_num =
-    _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.complex_track_num =
-    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.last_descendant_simple_track_num =
-    _getVar(LAST_DESCENDANT_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(LAST_DESCENDANT_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.start_scan =
-    _getVar(START_SCAN, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(START_SCAN, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.end_scan =
-    _getVar(END_SCAN, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(END_SCAN, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.scan_origin =
-    _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.start_time =
-    _getVar(START_TIME, NcxxType::nc_INT64, _nSimpleDim, _simpleGroup, TIME0);
+    _getVar(START_TIME, NcxxType::nc_INT64, _simpleDim, _simpleGroup, TIME0);
   _simpleVars.end_time =
-    _getVar(END_TIME, NcxxType::nc_INT64, _nSimpleDim, _simpleGroup, TIME0);
+    _getVar(END_TIME, NcxxType::nc_INT64, _simpleDim, _simpleGroup, TIME0);
   _simpleVars.last_descendant_end_scan =
-    _getVar(LAST_DESCENDANT_END_SCAN, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(LAST_DESCENDANT_END_SCAN, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.last_descendant_end_time =
-    _getVar(LAST_DESCENDANT_END_TIME, NcxxType::nc_INT, _nSimpleDim, _simpleGroup, TIME0);
+    _getVar(LAST_DESCENDANT_END_TIME, NcxxType::nc_INT, _simpleDim, _simpleGroup, TIME0);
   _simpleVars.time_origin =
-    _getVar(TIME_ORIGIN, NcxxType::nc_INT64, _nSimpleDim, _simpleGroup, TIME0);
+    _getVar(TIME_ORIGIN, NcxxType::nc_INT64, _simpleDim, _simpleGroup, TIME0);
   _simpleVars.history_in_scans =
-    _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup, SCANS);
+    _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _simpleDim, _simpleGroup, SCANS);
   _simpleVars.history_in_secs =
-    _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup, SECONDS);
+    _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _simpleDim, _simpleGroup, SECONDS);
   _simpleVars.duration_in_scans =
-    _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup, SCANS);
+    _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _simpleDim, _simpleGroup, SCANS);
   _simpleVars.duration_in_secs =
-    _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup, SECONDS);
+    _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _simpleDim, _simpleGroup, SECONDS);
   _simpleVars.nparents =
-    _getVar(NPARENTS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(NPARENTS, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.nchildren =
-    _getVar(NCHILDREN, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(NCHILDREN, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.parent =
-    _getVar(PARENT, NcxxType::nc_INT, _nSimpleDim, _maxParentsDim, _simpleGroup);
+    _getVar(PARENT, NcxxType::nc_INT, _simpleDim, _maxParentsDim, _simpleGroup);
   _simpleVars.child =
-    _getVar(CHILD, NcxxType::nc_INT, _nSimpleDim, _maxChildrenDim, _simpleGroup);
+    _getVar(CHILD, NcxxType::nc_INT, _simpleDim, _maxChildrenDim, _simpleGroup);
   _simpleVars.first_entry_offset =
-    _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(FIRST_ENTRY_OFFSET, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.n_simples_per_complex =
-    _getVar(N_SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(N_SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.simples_per_complex_1D =
-    _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(SIMPLES_PER_COMPLEX, NcxxType::nc_INT, _simpleDim, _simpleGroup);
   _simpleVars.simples_per_complex_offsets =
-    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _nSimpleDim, _simpleGroup);
+    _getVar(SIMPLES_PER_COMPLEX_OFFSETS, NcxxType::nc_INT, _simpleDim, _simpleGroup);
 
   // array of complex track nums - these are in increasing order, no gaps
   
-  _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _nComplexDim, _complexGroup);
+  _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _complexDim, _complexGroup);
   if (_fileMode != NcxxFile::read) {
     _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
   }
@@ -1183,73 +1183,73 @@ void TitanFile::_setUpVars()
   // track entries
 
   _entryVars.time =
-    _getVar(TIME, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(TIME, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.time_origin =
-    _getVar(TIME_ORIGIN, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(TIME_ORIGIN, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.scan_origin =
-    _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(SCAN_ORIGIN, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.scan_num =
-    _getVar(SCAN_NUM, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(SCAN_NUM, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.storm_num =
-    _getVar(STORM_NUM, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(STORM_NUM, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.simple_track_num =
-    _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(SIMPLE_TRACK_NUM, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.complex_track_num =
-    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(COMPLEX_TRACK_NUM, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.history_in_scans =
-    _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(HISTORY_IN_SCANS, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.history_in_secs =
-    _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(HISTORY_IN_SECS, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.duration_in_scans =
-    _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(DURATION_IN_SCANS, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.duration_in_secs =
-    _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(DURATION_IN_SECS, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.forecast_valid =
-    _getVar(FORECAST_VALID, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(FORECAST_VALID, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.prev_entry_offset =
-    _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(PREV_ENTRY_OFFSET, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.this_entry_offset =
-    _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(THIS_ENTRY_OFFSET, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.next_entry_offset =
-    _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(NEXT_ENTRY_OFFSET, NcxxType::nc_INT, _entriesDim, _entriesGroup);
   _entryVars.next_scan_entry_offset =
-    _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _nEntriesDim, _entriesGroup);
+    _getVar(NEXT_SCAN_ENTRY_OFFSET, NcxxType::nc_INT, _entriesDim, _entriesGroup);
 
   // track entry dval_dt for forecasts - these are rates
   
   _entryDvalDtVars.proj_area_centroid_x =
-    _getVar(DVAL_DT_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, _horizGridUnitsPerHr);
   _entryDvalDtVars.proj_area_centroid_y =
-    _getVar(DVAL_DT_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, _horizGridUnitsPerHr);
   _entryDvalDtVars.vol_centroid_z =
-    _getVar(DVAL_DT_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KM_PER_HR);
+    _getVar(DVAL_DT_VOL_CENTROID_Z, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KM_PER_HR);
   _entryDvalDtVars.refl_centroid_z =
-    _getVar(DVAL_DT_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KM_PER_HR);
+    _getVar(DVAL_DT_REFL_CENTROID_Z, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KM_PER_HR);
   _entryDvalDtVars.top =
-    _getVar(DVAL_DT_TOP, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KM_PER_HR);
+    _getVar(DVAL_DT_TOP, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KM_PER_HR);
   _entryDvalDtVars.dbz_max =
-    _getVar(DVAL_DT_DBZ_MAX, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, DBZ_PER_HR);
+    _getVar(DVAL_DT_DBZ_MAX, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, DBZ_PER_HR);
   _entryDvalDtVars.volume =
-    _getVar(DVAL_DT_VOLUME, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KM3_PER_HR);
+    _getVar(DVAL_DT_VOLUME, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KM3_PER_HR);
   _entryDvalDtVars.precip_flux =
-    _getVar(DVAL_DT_PRECIP_FLUX, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, M3_PER_SEC_PER_HR);
+    _getVar(DVAL_DT_PRECIP_FLUX, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, M3_PER_SEC_PER_HR);
   _entryDvalDtVars.mass =
-    _getVar(DVAL_DT_MASS, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KTONS_PER_HR);
+    _getVar(DVAL_DT_MASS, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KTONS_PER_HR);
   _entryDvalDtVars.proj_area =
-    _getVar(DVAL_DT_PROJ_AREA, NcxxType::nc_FLOAT, _nEntriesDim, _entriesGroup, KM2_PER_HR);
+    _getVar(DVAL_DT_PROJ_AREA, NcxxType::nc_FLOAT, _entriesDim, _entriesGroup, KM2_PER_HR);
   _entryDvalDtVars.smoothed_proj_area_centroid_x =
-    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, _horizGridUnitsPerHr);
   _entryDvalDtVars.smoothed_proj_area_centroid_y =
-    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_SMOOTHED_PROJ_AREA_CENTROID_Y, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, _horizGridUnitsPerHr);
   _entryDvalDtVars.smoothed_speed =
-    _getVar(DVAL_DT_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_SMOOTHED_SPEED, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, _speedUnitsPerHr);
   _entryDvalDtVars.smoothed_direction =
-    _getVar(DVAL_DT_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _nEntriesDim,
+    _getVar(DVAL_DT_SMOOTHED_DIRECTION, NcxxType::nc_FLOAT, _entriesDim,
             _entriesGroup, DEG_PER_HR);
 
 }
@@ -2190,8 +2190,8 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.file_time.putVal((int64_t) _storm_header.file_time);
   _topLevelVars.start_time.putVal((int64_t) _storm_header.start_time);
   _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
-  _topLevelVars.n_scans.putVal((int) _nScansDim.getSize());
-  // _topLevelVars.n_storms.putVal((int) _nStormsDim.getSize());
+  _topLevelVars.n_scans.putVal((int) _scansDim.getSize());
+  // _topLevelVars.n_storms.putVal((int) _stormsDim.getSize());
   
   const storm_file_params_t &sparams(_storm_header.params);
   
@@ -2331,7 +2331,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write gprops offset
   
-  _scanVars.scan_gprops_offset.putVal(scanIndex, (int) _nStormsDim.getSize());
+  _scanVars.scan_gprops_offset.putVal(scanIndex, (int) _stormsDim.getSize());
   
   // write storm global props
   
@@ -2345,15 +2345,15 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     // NOTE: last_offset is the offset OF the last storm, NOT one beyond
     
     if (istorm == 0) {
-      _scanVars.scan_first_offset.putVal(scanIndex, (int) _nStormsDim.getSize());
+      _scanVars.scan_first_offset.putVal(scanIndex, (int) _stormsDim.getSize());
     }
-    _scanVars.scan_last_offset.putVal(scanIndex, (int) _nStormsDim.getSize());
+    _scanVars.scan_last_offset.putVal(scanIndex, (int) _stormsDim.getSize());
 
     // write the global props
     
     const storm_file_global_props_t &gp = _gprops[istorm];
     
-    int gpropsOffset = _nStormsDim.getSize();
+    int gpropsOffset = _stormsDim.getSize();
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
     
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
@@ -2721,10 +2721,10 @@ int TitanFile::writeStormAux(int storm_num,
 
   // write layers
 
-  _layerOffsets[storm_num] = _nLayersDim.getSize();
+  _layerOffsets[storm_num] = _layersDim.getSize();
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &ll = lprops[ilayer];
-    int lpropsOffset = _nLayersDim.getSize();
+    int lpropsOffset = _layersDim.getSize();
     std::vector<size_t> layerIndex = NcxxVar::makeIndex(lpropsOffset);
     _lpropsVars.vol_centroid_x.putVal(layerIndex, ll.vol_centroid_x);
     _lpropsVars.vol_centroid_y.putVal(layerIndex, ll.vol_centroid_y);
@@ -2745,10 +2745,10 @@ int TitanFile::writeStormAux(int storm_num,
 
   // write histograms
 
-  _histOffsets[storm_num] = _nHistDim.getSize();
+  _histOffsets[storm_num] = _histDim.getSize();
   for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
     const storm_file_dbz_hist_t &hh = hist[ihist];
-    int histOffset = _nHistDim.getSize();
+    int histOffset = _histDim.getSize();
     std::vector<size_t> histIndex = NcxxVar::makeIndex(histOffset);
     _histVars.percent_volume.putVal(histIndex, hh.percent_volume);
     _histVars.percent_area.putVal(histIndex, hh.percent_area);
@@ -2756,10 +2756,10 @@ int TitanFile::writeStormAux(int storm_num,
   
   // write runs
   
-  _runsOffsets[storm_num] = _nRunsDim.getSize();
+  _runsOffsets[storm_num] = _runsDim.getSize();
   for (int irun = 0; irun < nRuns; irun++) {
     const storm_file_run_t &run = runs[irun];
-    int runOffset = _nRunsDim.getSize();
+    int runOffset = _runsDim.getSize();
     std::vector<size_t> runIndex = NcxxVar::makeIndex(runOffset);
     _runsVars.run_ix.putVal(runIndex, run.ix);
     _runsVars.run_iy.putVal(runIndex, run.iy);
@@ -2767,10 +2767,10 @@ int TitanFile::writeStormAux(int storm_num,
     _runsVars.run_len.putVal(runIndex, run.n);
   }
   
-  _projRunsOffsets[storm_num] = _nProjRunsDim.getSize();
+  _projRunsOffsets[storm_num] = _projRunsDim.getSize();
   for (int irun = 0; irun < nProjRuns; irun++) {
     const storm_file_run_t &run = proj_runs[irun];
-    int projRunOffset = _nProjRunsDim.getSize();
+    int projRunOffset = _projRunsDim.getSize();
     std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunOffset);
     _projRunsVars.run_ix.putVal(projRunIndex, run.ix);
     _projRunsVars.run_iy.putVal(projRunIndex, run.iy);
