@@ -64,7 +64,7 @@ private:
     NcxxVar start_time;
     NcxxVar end_time;
     NcxxVar n_scans;
-    NcxxVar n_storms;
+    // NcxxVar n_storms;
     NcxxVar max_simple_track_num;
     NcxxVar max_complex_track_num;
   };
@@ -457,7 +457,7 @@ public:
   // top level attributes 
 
   int nScans() const { return _nScans; }
-  int nStorms() const { return _nStorms; }
+  // int nStorms() const { return _nStorms; }
 
   // storm data access
 
@@ -954,7 +954,8 @@ protected:
   
   // storm data
 
-  int _nScans, _nStorms;
+  int _nScans;
+  // int _nStorms;
 
   storm_file_header_t _storm_header;
   storm_file_scan_header_t _scan;

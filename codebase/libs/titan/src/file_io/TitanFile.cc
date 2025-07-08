@@ -79,6 +79,9 @@ TitanFile::TitanFile()
   _max_runs = 0;
   _max_proj_runs = 0;
 
+  _nScans = 0;
+  // _nStorms = 0;
+
   // tracks
 
   MEM_zero(_track_header);
@@ -487,8 +490,8 @@ void TitanFile::_setUpVars()
   
   _topLevelVars.n_scans =
     _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
-  _topLevelVars.n_storms =
-    _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
+  // _topLevelVars.n_storms =
+  //   _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_simple_track_num =
     _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_complex_track_num =
@@ -1655,7 +1658,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
   _topLevelVars.start_time.getVal(&_storm_header.start_time);
   _topLevelVars.end_time.getVal(&_storm_header.end_time);
   _topLevelVars.n_scans.getVal(&_nScans);
-  _topLevelVars.n_storms.getVal(&_nStorms);
+  // _topLevelVars.n_storms.getVal(&_nStorms);
   _storm_header.n_scans = _nScans;
   _track_header.n_scans = _nScans;
 
@@ -2188,7 +2191,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.start_time.putVal((int64_t) _storm_header.start_time);
   _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
   _topLevelVars.n_scans.putVal((int) _n_scans.getSize());
-  _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
+  // _topLevelVars.n_storms.putVal((int) _n_storms.getSize());
   
   const storm_file_params_t &sparams(_storm_header.params);
   
@@ -3204,6 +3207,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     }
     // save state
     _track_header = _tFile.header();
+    assert(_nScans == _track_header.n_scans);
     int n_complex_tracks = _track_header.n_complex_tracks;
     int n_simple_tracks = _track_header.n_simple_tracks;
     allocComplexArrays(n_complex_tracks);
@@ -3264,10 +3268,6 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   _tstateVars.max_children.getVal(&_track_header.max_children);
   _tstateVars.max_nweights_forecast.getVal(&_track_header.max_nweights_forecast);
 
-  int n_complex_tracks = _track_header.n_complex_tracks;
-  int n_simple_tracks = _track_header.n_simple_tracks;
-  int n_scans = _track_header.n_scans;
-  
   // check that the constants in use when the file was written are
   // less than or the same as those in use now
   
@@ -3299,9 +3299,13 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   // alloc arrays
 
+  int n_complex_tracks = _track_header.n_complex_tracks;
+  int n_simple_tracks = _track_header.n_simple_tracks;
+  // int n_scans = _track_header.n_scans;
+  
   allocComplexArrays(n_complex_tracks);
   allocSimpleArrays(n_simple_tracks);
-  allocScanIndex(n_scans);
+  allocScanIndex(_nScans);
   
   // read in complex track num array
   // complex_track_nums has dimension _n_complex.
