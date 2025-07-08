@@ -69,13 +69,13 @@ TitanFile::TitanFile()
   _hist = nullptr;
   _runs = nullptr;
   _proj_runs = nullptr;
-  _scan_offsets = nullptr;
-  _storm_num = 0;
+  //  _scan_offsets = nullptr;
+  // _storm_num = 0;
 
   _max_scans = 0;
   _max_storms = 0;
   _max_layers = 0;
-  _max_dbz_intervals = 0;
+  _max_hist = 0;
   _max_runs = 0;
   _max_proj_runs = 0;
 
@@ -422,6 +422,7 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     if (units.size() > 0) {
       var.putAtt(UNITS, units);
     }
+    _setFillValue(var);
   }
   return var;
 }
@@ -443,6 +444,7 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     if (units.size() > 0) {
       var.putAtt(UNITS, units);
     }
+    _setFillValue(var);
   }
   return var;
 }
@@ -468,8 +470,44 @@ NcxxVar TitanFile::_getVar(const std::string& name,
     if (units.size() > 0) {
       var.putAtt(UNITS, units);
     }
+    _setFillValue(var);
   }
   return var;
+}
+
+////////////////////////////////////////
+// set default fill value, based on type
+// throws NcxxException on error
+
+void TitanFile::_setFillValue(NcxxVar &var)
+  
+{
+
+  nc_type vtype = var.getType().getId();
+  if (vtype == NC_DOUBLE) {
+    var.addScalarAttr("_FillValue", -999999.0);
+    return;
+  }
+  if (vtype == NC_FLOAT) {
+    var.addScalarAttr("_FillValue", -999999.0f);
+    return;
+  }
+  if (vtype == NC_INT) {
+    var.addScalarAttr("_FillValue", -999999);
+    return;
+  }
+  if (vtype == NC_LONG) {
+    var.addScalarAttr("_FillValue", -999999);
+    return;
+  }
+  if (vtype == NC_SHORT) {
+    var.addScalarAttr("_FillValue", -9999);
+    return;
+  }
+  if (vtype == NC_UBYTE) {
+    var.addScalarAttr("_FillValue", -99);
+    return;
+  }
 }
 
 /////////////////////////////////////////
@@ -1345,15 +1383,15 @@ void TitanFile::freeLayers()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocHist(int n_dbz_intervals)
+void TitanFile::allocHist(int n_hist)
      
 {
 
-  if (n_dbz_intervals > _max_dbz_intervals) {
-    _max_dbz_intervals = n_dbz_intervals;
+  if (n_hist > _max_hist) {
+    _max_hist = n_hist;
     _hist = (storm_file_dbz_hist_t *)
-      urealloc(_hist, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
-    memset(_hist, 0, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
+      urealloc(_hist, n_hist * sizeof(storm_file_dbz_hist_t));
+    memset(_hist, 0, n_hist * sizeof(storm_file_dbz_hist_t));
   }
 
 }
@@ -1365,7 +1403,7 @@ void TitanFile::freeHist()
   if (_hist) {
     ufree (_hist);
     _hist = nullptr;
-    _max_dbz_intervals = 0;
+    _max_hist = 0;
   }
 
 }
@@ -1468,32 +1506,32 @@ void TitanFile::freeGprops()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocScanOffsets(int n_scans_needed)
+// void TitanFile::allocScanOffsets(int n_scans_needed)
      
-{
+// {
 
-  // allocate the required space plus a buffer so that 
-  // we do not do too many reallocs
+//   // allocate the required space plus a buffer so that 
+//   // we do not do too many reallocs
   
-  if (n_scans_needed > _max_scans) {
-    _max_scans = n_scans_needed + 100;
-    _scan_offsets = (si32 *) urealloc
-      (_scan_offsets, (_max_scans * sizeof(si32)));
-  }
+//   if (n_scans_needed > _max_scans) {
+//     _max_scans = n_scans_needed + 100;
+//     _scan_offsets = (si32 *) urealloc
+//       (_scan_offsets, (_max_scans * sizeof(si32)));
+//   }
 
-}
+// }
 
-void TitanFile::freeScanOffsets()
+// void TitanFile::freeScanOffsets()
      
-{
+// {
 
-  if (_scan_offsets) {
-    ufree(_scan_offsets);
-    _scan_offsets = nullptr;
-    _max_scans = 0;
-  }
+//   if (_scan_offsets) {
+//     ufree(_scan_offsets);
+//     _scan_offsets = nullptr;
+//     _max_scans = 0;
+//   }
 
-}
+// }
 
 //////////////////////////////////////////////////////////////
 //
@@ -1510,7 +1548,7 @@ void TitanFile::freeStormsAll()
   freeRuns();
   freeProjRuns();
   freeGprops();
-  freeScanOffsets();
+  // freeScanOffsets();
 
 }
 
@@ -1739,8 +1777,7 @@ int TitanFile::readProjRuns(int storm_num)
   }
   
   // store storm number
-  
-  _storm_num = storm_num;
+  // _storm_num = storm_num;
   
   // allocate mem
   
@@ -1814,8 +1851,7 @@ int TitanFile::readStormAux(int storm_num)
   _addErrInt("  Scan number: ", _scan.scan_num);
   
   // store storm number
-  
-  _storm_num = storm_num;
+  // _storm_num = storm_num;
   
   // allocate or realloc mem
   

@@ -469,8 +469,8 @@ public:
   const storm_file_dbz_hist_t *hist() const { return _hist; }
   const storm_file_run_t *runs() const { return _runs; }
   const storm_file_run_t *proj_runs() const { return _proj_runs; }
-  const int *scan_offsets() const { return _scan_offsets; }
-  int storm_num() const { return _storm_num; }
+  // const int *scan_offsets() const { return _scan_offsets; }
+  // int storm_num() const { return _storm_num; }
   
   // track data access
 
@@ -498,7 +498,7 @@ public:
 
   void allocLayers(int n_layers);
   void freeLayers();
-  void allocHist(int n_dbz_intervals);
+  void allocHist(int n_hist);
   void freeHist();
   void allocRuns(int n_runs);
   void freeRuns();
@@ -506,8 +506,8 @@ public:
   void freeProjRuns();
   void allocGprops(int nstorms);
   void freeGprops();
-  void allocScanOffsets(int n_scans_needed);
-  void freeScanOffsets();
+  // void allocScanOffsets(int n_scans_needed);
+  // void freeScanOffsets();
   void freeStormsAll();
     
   // memory allocation and freeing - tracks
@@ -964,15 +964,15 @@ protected:
   storm_file_dbz_hist_t *_hist;
   storm_file_run_t *_runs;
   storm_file_run_t *_proj_runs;
-  si32 *_scan_offsets;
-  int _storm_num;
+  // si32 *_scan_offsets;
+  // int _storm_num;
 
   // storm memory allocation
   
   int _max_scans;
   int _max_storms;
   int _max_layers;
-  int _max_dbz_intervals;
+  int _max_hist;
   int _max_runs;
   int _max_proj_runs;
 
@@ -1074,6 +1074,8 @@ protected:
                   const NcxxDim& dim1,
                   NcxxGroup &group,
                   std::string units = "");
+  
+  void _setFillValue(NcxxVar &var);
   
   /////////////////////////////////////////////////////
   // set up variables
