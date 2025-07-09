@@ -626,6 +626,17 @@ void TitanFile::_setUpVars()
   _scanVars.proj_central_scale =
     _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _scansDim, _scansGroup);
 
+  _scanVars.scan_gprops_offset_0 =
+    _getVar(SCAN_GPROPS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+  _scanVars.scan_lprops_offset_0 =
+    _getVar(SCAN_LPROPS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+  _scanVars.scan_hist_offset_0 =
+    _getVar(SCAN_HIST_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+  _scanVars.scan_runs_offset_0 =
+    _getVar(SCAN_RUNS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+  _scanVars.scan_proj_runs_offset_0 =
+    _getVar(SCAN_PROJ_RUNS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+
   // add projection attributes
   
   _addProjectionFlagAttributes();
@@ -2323,9 +2334,12 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   // scan storage index
   
   size_t scanNum = _scan.scan_num;
+  _nScans = scanNum + 1;
   std::vector<size_t> scanPos = NcxxVar::makeIndex(scanNum);
 
   // write scan details
+  
+  _topLevelVars.n_scans.putVal(_nScans);
   
   _scanVars.scan_min_z.putVal(scanPos, _scan.min_z);
   _scanVars.scan_delta_z.putVal(scanPos, _scan.delta_z);
@@ -2824,17 +2838,19 @@ int TitanFile::writeStormAux(int storm_num,
 }
 
 ///////////////////////////////////////////////////////////////
-// Truncate file when rerunning.
+// Truncate storm data when rerunning.
 // Keep this scan, set subsequent scans to missing.
+// CLear all track data.
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanFile::truncateFile(int lastGoodScanNum)
+int TitanFile::truncateStormData(int lastGoodScanNum)
   
 {
-
+  
   int nScansInFile = _scansDim.getSize();
   for (int ii = lastGoodScanNum + 1; ii < nScansInFile; ii++) {
+    cerr << "jjjjjjjjjjjjjj ii = " << ii << endl;
     _clearScan(ii);
   }
   
