@@ -78,9 +78,8 @@ TitanFile::TitanFile()
   _max_hist = 0;
   _max_runs = 0;
   _max_proj_runs = 0;
-
+  
   _nScans = 0;
-  // _nStorms = 0;
 
   // tracks
 
@@ -485,27 +484,31 @@ void TitanFile::_setFillValue(NcxxVar &var)
 
   nc_type vtype = var.getType().getId();
   if (vtype == NC_DOUBLE) {
-    var.addScalarAttr("_FillValue", -999999.0);
+    var.addScalarAttr("_FillValue", missingDouble);
     return;
   }
   if (vtype == NC_FLOAT) {
-    var.addScalarAttr("_FillValue", -999999.0f);
+    var.addScalarAttr("_FillValue", missingFloat);
+    return;
+  }
+  if (vtype == NC_INT64) {
+    var.addScalarAttr("_FillValue", missingInt64);
     return;
   }
   if (vtype == NC_INT) {
-    var.addScalarAttr("_FillValue", -999999);
+    var.addScalarAttr("_FillValue", missingInt32);
     return;
   }
   if (vtype == NC_LONG) {
-    var.addScalarAttr("_FillValue", -999999);
+    var.addScalarAttr("_FillValue", missingInt32);
     return;
   }
   if (vtype == NC_SHORT) {
-    var.addScalarAttr("_FillValue", -9999);
+    var.addScalarAttr("_FillValue", missingInt16);
     return;
   }
   if (vtype == NC_UBYTE) {
-    var.addScalarAttr("_FillValue", -99);
+    var.addScalarAttr("_FillValue", missingInt08);
     return;
   }
 }
@@ -1974,56 +1977,56 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   // scan header storage index in file
   
-  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
 
   // read scan details
   
-  _scanVars.scan_min_z.getVal(scanIndex, &_scan.min_z);
-  _scanVars.scan_delta_z.getVal(scanIndex, &_scan.delta_z);
-  _scanVars.scan_num.getVal(scanIndex, &_scan.scan_num);
-  _scanVars.scan_nstorms.getVal(scanIndex, &_scan.nstorms);
-  _scanVars.scan_time.getVal(scanIndex, &_scan.time);
-  _scanVars.scan_ht_of_freezing.getVal(scanIndex, &_scan.ht_of_freezing);
+  _scanVars.scan_min_z.getVal(scanPos, &_scan.min_z);
+  _scanVars.scan_delta_z.getVal(scanPos, &_scan.delta_z);
+  _scanVars.scan_num.getVal(scanPos, &_scan.scan_num);
+  _scanVars.scan_nstorms.getVal(scanPos, &_scan.nstorms);
+  _scanVars.scan_time.getVal(scanPos, &_scan.time);
+  _scanVars.scan_ht_of_freezing.getVal(scanPos, &_scan.ht_of_freezing);
 
   // read grid details
 
-  _scanVars.grid_nx.getVal(scanIndex, &_scan.grid.nx);
-  _scanVars.grid_ny.getVal(scanIndex, &_scan.grid.ny);
-  _scanVars.grid_nz.getVal(scanIndex, &_scan.grid.nz);
-  _scanVars.grid_minx.getVal(scanIndex, &_scan.grid.minx);
-  _scanVars.grid_miny.getVal(scanIndex, &_scan.grid.miny);
-  _scanVars.grid_minz.getVal(scanIndex, &_scan.grid.minz);
-  _scanVars.grid_dx.getVal(scanIndex, &_scan.grid.dx);
-  _scanVars.grid_dy.getVal(scanIndex, &_scan.grid.dy);
-  _scanVars.grid_dz.getVal(scanIndex, &_scan.grid.dz);
-  _scanVars.grid_dz_constant.getVal(scanIndex, &_scan.grid.dz_constant);
-  _scanVars.grid_sensor_x.getVal(scanIndex, &_scan.grid.sensor_x);
-  _scanVars.grid_sensor_y.getVal(scanIndex, &_scan.grid.sensor_y);
-  _scanVars.grid_sensor_z.getVal(scanIndex, &_scan.grid.sensor_z);
-  _scanVars.grid_sensor_lat.getVal(scanIndex, &_scan.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.getVal(scanIndex, &_scan.grid.sensor_lon);
+  _scanVars.grid_nx.getVal(scanPos, &_scan.grid.nx);
+  _scanVars.grid_ny.getVal(scanPos, &_scan.grid.ny);
+  _scanVars.grid_nz.getVal(scanPos, &_scan.grid.nz);
+  _scanVars.grid_minx.getVal(scanPos, &_scan.grid.minx);
+  _scanVars.grid_miny.getVal(scanPos, &_scan.grid.miny);
+  _scanVars.grid_minz.getVal(scanPos, &_scan.grid.minz);
+  _scanVars.grid_dx.getVal(scanPos, &_scan.grid.dx);
+  _scanVars.grid_dy.getVal(scanPos, &_scan.grid.dy);
+  _scanVars.grid_dz.getVal(scanPos, &_scan.grid.dz);
+  _scanVars.grid_dz_constant.getVal(scanPos, &_scan.grid.dz_constant);
+  _scanVars.grid_sensor_x.getVal(scanPos, &_scan.grid.sensor_x);
+  _scanVars.grid_sensor_y.getVal(scanPos, &_scan.grid.sensor_y);
+  _scanVars.grid_sensor_z.getVal(scanPos, &_scan.grid.sensor_z);
+  _scanVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
 
   char units[1024];
-  _scanVars.grid_unitsx.getVal(scanIndex, units);
+  _scanVars.grid_unitsx.getVal(scanPos, units);
   STRncopy(_scan.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsy.getVal(scanIndex, units);
+  _scanVars.grid_unitsy.getVal(scanPos, units);
   STRncopy(_scan.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsz.getVal(scanIndex, units);
+  _scanVars.grid_unitsz.getVal(scanPos, units);
   STRncopy(_scan.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
   
   // read projection details
   
-  _scanVars.proj_type.getVal(scanIndex, &_scan.grid.proj_type);
-  _scanVars.proj_origin_lat.getVal(scanIndex, &_scan.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.getVal(scanIndex, &_scan.grid.proj_origin_lon);
-  _scanVars.proj_rotation.getVal(scanIndex, &_scan.grid.proj_params.flat.rotation);
+  _scanVars.proj_type.getVal(scanPos, &_scan.grid.proj_type);
+  _scanVars.proj_origin_lat.getVal(scanPos, &_scan.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.getVal(scanPos, &_scan.grid.proj_origin_lon);
+  _scanVars.proj_rotation.getVal(scanPos, &_scan.grid.proj_params.flat.rotation);
 
-  _scanVars.proj_lat1.getVal(scanIndex, &_scan.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.getVal(scanIndex, &_scan.grid.proj_params.lc2.lat2);
-  // _scanVars.proj_tangent_lat.getVal(scanIndex, 0.0);
-  // _scanVars.proj_tangent_lon.getVal(scanIndex, 0.0);
-  // _scanVars.proj_pole_type.getVal(scanIndex, 0);
-  // _scanVars.proj_central_scale.getVal(scanIndex, 1.0);
+  _scanVars.proj_lat1.getVal(scanPos, &_scan.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.getVal(scanPos, &_scan.grid.proj_params.lc2.lat2);
+  // _scanVars.proj_tangent_lat.getVal(scanPos, 0.0);
+  // _scanVars.proj_tangent_lon.getVal(scanPos, 0.0);
+  // _scanVars.proj_pole_type.getVal(scanPos, 0);
+  // _scanVars.proj_central_scale.getVal(scanPos, 1.0);
 
   // allocate or reallocate
   
@@ -2202,6 +2205,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   // save state
   
   _storm_header = storm_file_header;
+  _nScans = _storm_header.n_scans;
 
   // handle legacy format
   
@@ -2226,7 +2230,8 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.file_time.putVal((int64_t) _storm_header.file_time);
   _topLevelVars.start_time.putVal((int64_t) _storm_header.start_time);
   _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
-  _topLevelVars.n_scans.putVal((int) _scansDim.getSize());
+  _topLevelVars.n_scans.putVal(_nScans);
+  // _topLevelVars.n_scans.putVal((int) _scansDim.getSize());
   // _topLevelVars.n_storms.putVal((int) _stormsDim.getSize());
   
   const storm_file_params_t &sparams(_storm_header.params);
@@ -2318,56 +2323,56 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   // scan storage index
   
   size_t scanNum = _scan.scan_num;
-  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scanNum);
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scanNum);
 
   // write scan details
   
-  _scanVars.scan_min_z.putVal(scanIndex, _scan.min_z);
-  _scanVars.scan_delta_z.putVal(scanIndex, _scan.delta_z);
-  _scanVars.scan_num.putVal(scanIndex, _scan.scan_num);
-  _scanVars.scan_nstorms.putVal(scanIndex, _scan.nstorms);
-  _scanVars.scan_time.putVal(scanIndex, _scan.time);
-  _scanVars.scan_ht_of_freezing.putVal(scanIndex, _scan.ht_of_freezing);
+  _scanVars.scan_min_z.putVal(scanPos, _scan.min_z);
+  _scanVars.scan_delta_z.putVal(scanPos, _scan.delta_z);
+  _scanVars.scan_num.putVal(scanPos, _scan.scan_num);
+  _scanVars.scan_nstorms.putVal(scanPos, _scan.nstorms);
+  _scanVars.scan_time.putVal(scanPos, _scan.time);
+  _scanVars.scan_ht_of_freezing.putVal(scanPos, _scan.ht_of_freezing);
 
   // write grid details
 
-  _scanVars.grid_nx.putVal(scanIndex, _scan.grid.nx);
-  _scanVars.grid_ny.putVal(scanIndex, _scan.grid.ny);
-  _scanVars.grid_nz.putVal(scanIndex, _scan.grid.nz);
-  _scanVars.grid_minx.putVal(scanIndex, _scan.grid.minx);
-  _scanVars.grid_miny.putVal(scanIndex, _scan.grid.miny);
-  _scanVars.grid_minz.putVal(scanIndex, _scan.grid.minz);
-  _scanVars.grid_dx.putVal(scanIndex, _scan.grid.dx);
-  _scanVars.grid_dy.putVal(scanIndex, _scan.grid.dy);
-  _scanVars.grid_dz.putVal(scanIndex, _scan.grid.dz);
-  _scanVars.grid_dz_constant.putVal(scanIndex, _scan.grid.dz_constant);
-  _scanVars.grid_sensor_x.putVal(scanIndex, _scan.grid.sensor_x);
-  _scanVars.grid_sensor_y.putVal(scanIndex, _scan.grid.sensor_y);
-  _scanVars.grid_sensor_z.putVal(scanIndex, _scan.grid.sensor_z);
-  _scanVars.grid_sensor_lat.putVal(scanIndex, _scan.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.putVal(scanIndex, _scan.grid.sensor_lon);
+  _scanVars.grid_nx.putVal(scanPos, _scan.grid.nx);
+  _scanVars.grid_ny.putVal(scanPos, _scan.grid.ny);
+  _scanVars.grid_nz.putVal(scanPos, _scan.grid.nz);
+  _scanVars.grid_minx.putVal(scanPos, _scan.grid.minx);
+  _scanVars.grid_miny.putVal(scanPos, _scan.grid.miny);
+  _scanVars.grid_minz.putVal(scanPos, _scan.grid.minz);
+  _scanVars.grid_dx.putVal(scanPos, _scan.grid.dx);
+  _scanVars.grid_dy.putVal(scanPos, _scan.grid.dy);
+  _scanVars.grid_dz.putVal(scanPos, _scan.grid.dz);
+  _scanVars.grid_dz_constant.putVal(scanPos, _scan.grid.dz_constant);
+  _scanVars.grid_sensor_x.putVal(scanPos, _scan.grid.sensor_x);
+  _scanVars.grid_sensor_y.putVal(scanPos, _scan.grid.sensor_y);
+  _scanVars.grid_sensor_z.putVal(scanPos, _scan.grid.sensor_z);
+  _scanVars.grid_sensor_lat.putVal(scanPos, _scan.grid.sensor_lat);
+  _scanVars.grid_sensor_lon.putVal(scanPos, _scan.grid.sensor_lon);
   
-  _scanVars.grid_unitsx.putVal(scanIndex, _horizGridUnits);
-  _scanVars.grid_unitsy.putVal(scanIndex, _horizGridUnits);
-  _scanVars.grid_unitsz.putVal(scanIndex, std::string(_scan.grid.unitsz));
+  _scanVars.grid_unitsx.putVal(scanPos, _horizGridUnits);
+  _scanVars.grid_unitsy.putVal(scanPos, _horizGridUnits);
+  _scanVars.grid_unitsz.putVal(scanPos, std::string(_scan.grid.unitsz));
   
   // write projection details
   
-  _scanVars.proj_type.putVal(scanIndex, _scan.grid.proj_type);
-  _scanVars.proj_origin_lat.putVal(scanIndex, _scan.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.putVal(scanIndex, _scan.grid.proj_origin_lon);
-  _scanVars.proj_rotation.putVal(scanIndex, _scan.grid.proj_params.flat.rotation);
+  _scanVars.proj_type.putVal(scanPos, _scan.grid.proj_type);
+  _scanVars.proj_origin_lat.putVal(scanPos, _scan.grid.proj_origin_lat);
+  _scanVars.proj_origin_lon.putVal(scanPos, _scan.grid.proj_origin_lon);
+  _scanVars.proj_rotation.putVal(scanPos, _scan.grid.proj_params.flat.rotation);
 
-  _scanVars.proj_lat1.putVal(scanIndex, _scan.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.putVal(scanIndex, _scan.grid.proj_params.lc2.lat2);
-  _scanVars.proj_tangent_lat.putVal(scanIndex, 0.0);
-  _scanVars.proj_tangent_lon.putVal(scanIndex, 0.0);
-  _scanVars.proj_pole_type.putVal(scanIndex, 0);
-  _scanVars.proj_central_scale.putVal(scanIndex, 1.0);
+  _scanVars.proj_lat1.putVal(scanPos, _scan.grid.proj_params.lc2.lat1);
+  _scanVars.proj_lat2.putVal(scanPos, _scan.grid.proj_params.lc2.lat2);
+  _scanVars.proj_tangent_lat.putVal(scanPos, 0.0);
+  _scanVars.proj_tangent_lon.putVal(scanPos, 0.0);
+  _scanVars.proj_pole_type.putVal(scanPos, 0);
+  _scanVars.proj_central_scale.putVal(scanPos, 1.0);
 
   // write gprops offset
   
-  _scanVars.scan_gprops_offset.putVal(scanIndex, (int) _stormsDim.getSize());
+  _scanVars.scan_gprops_offset.putVal(scanPos, (int) _stormsDim.getSize());
   
   // write storm global props
   
@@ -2381,9 +2386,9 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     // NOTE: last_offset is the offset OF the last storm, NOT one beyond
     
     if (istorm == 0) {
-      _scanVars.scan_first_offset.putVal(scanIndex, (int) _stormsDim.getSize());
+      _scanVars.scan_first_offset.putVal(scanPos, (int) _stormsDim.getSize());
     }
-    _scanVars.scan_last_offset.putVal(scanIndex, (int) _stormsDim.getSize());
+    _scanVars.scan_last_offset.putVal(scanPos, (int) _stormsDim.getSize());
 
     // write the global props
     
@@ -2819,15 +2824,81 @@ int TitanFile::writeStormAux(int storm_num,
 }
 
 ///////////////////////////////////////////////////////////////
-// Truncate file when rerunning
+// Truncate file when rerunning.
+// Keep this scan, set subsequent scans to missing.
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanFile::truncateFile(int scan_num)
+int TitanFile::truncateFile(int lastGoodScanNum)
   
 {
-  // TO-DO - set latest scan num value
+
+  int nScansInFile = _scansDim.getSize();
+  for (int ii = lastGoodScanNum + 1; ii < nScansInFile; ii++) {
+    _clearScan(ii);
+  }
+  
   return 0;
+
+}
+
+////////////////////////////////////////////////////
+// clear scan params
+
+void TitanFile::_clearScan(int scanNum)
+  
+{
+  
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scanNum);
+
+  // write scan details
+  
+  _scanVars.scan_min_z.putVal(scanPos, missingFloat);
+  _scanVars.scan_delta_z.putVal(scanPos, missingFloat);
+  _scanVars.scan_num.putVal(scanPos, missingInt32);
+  _scanVars.scan_nstorms.putVal(scanPos, missingInt32);
+  _scanVars.scan_time.putVal(scanPos, missingInt64);
+  _scanVars.scan_gprops_offset.putVal(scanPos, missingInt32);
+  _scanVars.scan_first_offset.putVal(scanPos, missingInt32);
+  _scanVars.scan_last_offset.putVal(scanPos, missingInt32);
+  _scanVars.scan_ht_of_freezing.putVal(scanPos, missingFloat);
+
+  // write grid details
+
+  _scanVars.grid_nx.putVal(scanPos, missingInt32);
+  _scanVars.grid_ny.putVal(scanPos, missingInt32);
+  _scanVars.grid_nz.putVal(scanPos, missingInt32);
+  _scanVars.grid_minx.putVal(scanPos, missingFloat);
+  _scanVars.grid_miny.putVal(scanPos, missingFloat);
+  _scanVars.grid_minz.putVal(scanPos, missingFloat);
+  _scanVars.grid_dx.putVal(scanPos, missingFloat);
+  _scanVars.grid_dy.putVal(scanPos, missingFloat);
+  _scanVars.grid_dz.putVal(scanPos, missingFloat);
+  _scanVars.grid_dz_constant.putVal(scanPos, missingInt32);
+  _scanVars.grid_sensor_x.putVal(scanPos, missingFloat);
+  _scanVars.grid_sensor_y.putVal(scanPos, missingFloat);
+  _scanVars.grid_sensor_z.putVal(scanPos, missingFloat);
+  _scanVars.grid_sensor_lat.putVal(scanPos, missingDouble);
+  _scanVars.grid_sensor_lon.putVal(scanPos, missingDouble);
+  
+  _scanVars.grid_unitsx.putVal(scanPos, "");
+  _scanVars.grid_unitsy.putVal(scanPos, "");
+  _scanVars.grid_unitsz.putVal(scanPos, "");
+  
+  // write projection details
+  
+  _scanVars.proj_type.putVal(scanPos, missingInt32);
+  _scanVars.proj_origin_lat.putVal(scanPos, missingDouble);
+  _scanVars.proj_origin_lon.putVal(scanPos, missingDouble);
+  _scanVars.proj_rotation.putVal(scanPos, missingFloat);
+
+  _scanVars.proj_lat1.putVal(scanPos, missingDouble);
+  _scanVars.proj_lat2.putVal(scanPos, missingDouble);
+  _scanVars.proj_tangent_lat.putVal(scanPos, missingDouble);
+  _scanVars.proj_tangent_lon.putVal(scanPos, missingDouble);
+  _scanVars.proj_pole_type.putVal(scanPos, missingInt32);
+  _scanVars.proj_central_scale.putVal(scanPos, missingFloat);
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -3865,8 +3936,8 @@ int TitanFile::readScanEntries(int scan_num)
   // get nstorms
 
   int nStorms;
-  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
-  _scanVars.scan_nstorms.getVal(scanIndex, &nStorms);
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
+  _scanVars.scan_nstorms.getVal(scanPos, &nStorms);
   
   // allocate as necessary
   
@@ -4569,9 +4640,9 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
 int TitanFile::getStormEntryOffset(int scan_num,
                                    int storm_num)
 {
-  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
   int scanFirstOffset;
-  _scanVars.scan_first_offset.getVal(scanIndex, &scanFirstOffset);
+  _scanVars.scan_first_offset.getVal(scanPos, &scanFirstOffset);
   int entryOffset = scanFirstOffset + storm_num;
   return entryOffset;
 }
@@ -4583,11 +4654,11 @@ int TitanFile::getStormEntryOffset(int scan_num,
 int TitanFile::getNextScanEntryOffset(int scan_num,
                                       int storm_num)
 {
-  std::vector<size_t> scanIndex = NcxxVar::makeIndex(scan_num);
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
   int scanFirstOffset;
-  _scanVars.scan_first_offset.getVal(scanIndex, &scanFirstOffset);
+  _scanVars.scan_first_offset.getVal(scanPos, &scanFirstOffset);
   int scanNStorms;
-  _scanVars.scan_nstorms.getVal(scanIndex, &scanNStorms);
+  _scanVars.scan_nstorms.getVal(scanPos, &scanNStorms);
   if (storm_num < (scanNStorms - 1)) {
     int nextEntryOffset = scanFirstOffset + storm_num + 1;
     return nextEntryOffset;

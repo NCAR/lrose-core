@@ -650,7 +650,7 @@ public:
   
   // truncate when rerunning
   
-  int truncateFile(int scan_num);
+  int truncateFile(int lastGoodScanNum);
 
   /////////////////////////////////////////////////////
   // Tracks
@@ -945,6 +945,11 @@ protected:
 
   //////////////////////////////////////////////////////////////
 
+  // top level
+  
+  int _nScans;
+  // int _nStorms;
+
   // offsets for various items
 
   vector<int64_t> _layerOffsets;
@@ -953,9 +958,6 @@ protected:
   vector<int64_t> _projRunsOffsets;
   
   // storm data
-
-  int _nScans;
-  // int _nStorms;
 
   storm_file_header_t _storm_header;
   storm_file_scan_header_t _scan;
@@ -1107,7 +1109,11 @@ protected:
   // read entry at given offset
 
   int _readTrackEntry(track_file_entry_t &entry, int entryOffset);
+
+  // clear for truncation
   
+  void _clearScan(int scanNum);
+
 public:
 
   // friends for Titan program which writes the storm and track files
@@ -1126,6 +1132,15 @@ private:
   TitanFile & operator = (const TitanFile & other);
 
 public:
+
+  // missing values
+  
+  static constexpr double missingDouble = -999999.0;
+  static constexpr float missingFloat = -999999.0f;
+  static constexpr int64_t missingInt64 = -999999;
+  static constexpr int32_t missingInt32 = -999999;
+  static constexpr int16_t missingInt16 = -32768;
+  static constexpr int8_t missingInt08 = -128;
 
   // strings for netcdf
 
