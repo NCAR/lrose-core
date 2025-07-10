@@ -1980,8 +1980,6 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 
   // check
 
-  cerr << "rrrrrrrrrrrrrr scan_num, _max_scans: " << scan_num << ", " << _max_scans << endl;
-  
   if (scan_num >= _max_scans) {
     return -1;
   }
@@ -2044,8 +2042,6 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   int nStorms = _scan.nstorms;
   allocGprops(nStorms);
 
-  cerr << "ssssssssssssss nStorms: " << nStorms << endl;
-  
   // return early if nstorms is zero
   
   if (nStorms == 0) {
@@ -2848,11 +2844,13 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
   
 {
   
+  _nScans = lastGoodScanNum + 1;
   int nScansInFile = _scansDim.getSize();
-  for (int ii = lastGoodScanNum + 1; ii < nScansInFile; ii++) {
-    cerr << "jjjjjjjjjjjjjj ii = " << ii << endl;
+  for (int ii = _nScans; ii < nScansInFile; ii++) {
     _clearScan(ii);
   }
+
+  _topLevelVars.n_scans.putVal(_nScans);
   
   return 0;
 
@@ -2897,9 +2895,9 @@ void TitanFile::_clearScan(int scanNum)
   _scanVars.grid_sensor_lat.putVal(scanPos, missingDouble);
   _scanVars.grid_sensor_lon.putVal(scanPos, missingDouble);
   
-  _scanVars.grid_unitsx.putVal(scanPos, "");
-  _scanVars.grid_unitsy.putVal(scanPos, "");
-  _scanVars.grid_unitsz.putVal(scanPos, "");
+  _scanVars.grid_unitsx.putVal(scanPos, string(""));
+  _scanVars.grid_unitsy.putVal(scanPos, string(""));
+  _scanVars.grid_unitsz.putVal(scanPos, string(""));
   
   // write projection details
   
@@ -3087,65 +3085,6 @@ void TitanFile::freeComplexArrays()
   }
 
 }
-
-///////////////////////////////////////////////////////////////////////////
-//
-// TitanFile::allocSimplesPerComplex()
-//
-// allocate space for the array of pointers to simples_per_complex
-//
-///////////////////////////////////////////////////////////////////////////
-
-
-// void TitanFile::allocSimplesPerComplex2D(int n_simple_needed)
-     
-// {
-
-//   if (_n_simples_per_complex_2D_allocated < n_simple_needed) {
-    
-//     // allocate the required space plus a buffer so that 
-//     // we do not do too many reallocs
-    
-//     int n_start = _n_simples_per_complex_2D_allocated;
-//     int n_realloc = n_simple_needed + N_ALLOC;
-//     _n_simples_per_complex_2D_allocated = n_realloc;
-    
-//     _simples_per_complex_2D = (si32 **) urealloc
-//       (_simples_per_complex_2D, n_realloc * sizeof(si32 *));
-    
-//     // initialize new elements to zero
-    
-//     int n_new = n_realloc - n_start;
-
-//     memset (_simples_per_complex_2D + n_start,
-// 	    0, n_new * sizeof(si32 *));
-  
-//   } // if (_n_simples_per_complex_2D_allocated < n_simple_needed) 
-
-// }
-
-///////////////////////////////////////////////////////////////////////////
-//
-// TitanFile::freeSimplesPerComplex()
-//
-///////////////////////////////////////////////////////////////////////////
-
-
-// void TitanFile::freeSimplesPerComplex2D()
-     
-// {
-//   if (_simples_per_complex_2D) {
-//     for (int i = 0; i < _n_simples_per_complex_2D_allocated; i++) {
-//       if (_simples_per_complex_2D[i] != nullptr) {
-// 	ufree(_simples_per_complex_2D[i]);
-// 	_simples_per_complex_2D[i] = nullptr;
-//       }
-//     }
-//     ufree(_simples_per_complex_2D);
-//     _simples_per_complex_2D = nullptr;
-//     _n_simples_per_complex_2D_allocated = 0;
-//   }
-// }
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -3853,16 +3792,7 @@ int TitanFile::readSimplesPerComplex()
   _simpleVars.simples_per_complex_1D.getVal
     (nSimpIndex, nSimpCount, _simples_per_complex_1D);
 
-  // allocate 2D array
-  
-  // allocSimplesPerComplex2D(_track_header.max_complex_track_num + 1);
-  
   // fill simples_per_complex_2D
-  
-  cerr << "aaaaaaaaaaaaaaaaaaaaa _track_header.max_complex_track_num: "
-       << _track_header.max_complex_track_num << endl;
-  cerr << "aaaaaaaaaaaaaaaaaaaaa _track_header.n_complex_tracks: "
-       << _track_header.n_complex_tracks << endl;
   
   for (int icomp = 0; icomp < _track_header.n_complex_tracks; icomp++) {
 

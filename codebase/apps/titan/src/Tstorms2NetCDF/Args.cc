@@ -76,12 +76,14 @@ int Args::parse(int argc, char **argv, string &prog_name)
       _usage(prog_name, cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
@@ -182,7 +184,7 @@ void Args::_usage(string &prog_name, ostream &out)
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
+      << "       [ -d, -debug ] print debug messages\n"
       << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "         sets input_mode to ARCHIVE\n"
       << "       [ -f ? ?] input track file list (.th5 files)\n"
@@ -191,7 +193,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "                    convert from netcdf back to legacy\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "         sets input_mode to ARCHIVE\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
 
       << endl;
   

@@ -525,7 +525,7 @@ int Tstorms2NetCDF::_processScanLegacy(int scan_num,
   time_t start_time = scan_time;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Processing scan time: " << endl;
+    cerr << "Processing scan num: " << scan_num << endl;
     cerr << "  Start time: " << DateTime::str(start_time) << endl;
     cerr << "  End time: " << DateTime::str(end_time) << endl;
   }
