@@ -80,6 +80,7 @@ TitanFile::TitanFile()
   _max_proj_runs = 0;
   
   _nScans = 0;
+  _nStorms = 0;
 
   // tracks
 
@@ -531,8 +532,8 @@ void TitanFile::_setUpVars()
   
   _topLevelVars.n_scans =
     _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
-  // _topLevelVars.n_storms =
-  //   _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.n_storms =
+    _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_simple_track_num =
     _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_complex_track_num =
@@ -1710,7 +1711,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
   _topLevelVars.start_time.getVal(&_storm_header.start_time);
   _topLevelVars.end_time.getVal(&_storm_header.end_time);
   _topLevelVars.n_scans.getVal(&_nScans);
-  // _topLevelVars.n_storms.getVal(&_nStorms);
+  _topLevelVars.n_storms.getVal(&_nStorms);
   _storm_header.n_scans = _nScans;
   _track_header.n_scans = _nScans;
 
@@ -2239,6 +2240,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
   _topLevelVars.n_scans.putVal(_nScans);
   // _topLevelVars.n_scans.putVal((int) _scansDim.getSize());
+  _topLevelVars.n_storms.putVal(_nStorms);
   // _topLevelVars.n_storms.putVal((int) _stormsDim.getSize());
   
   const storm_file_params_t &sparams(_storm_header.params);
@@ -2382,7 +2384,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write gprops offset
   
-  _scanVars.scan_gprops_offset.putVal(scanPos, (int) _stormsDim.getSize());
+  _scanVars.scan_gprops_offset.putVal(scanPos, _nStorms);
   
   // write storm global props
   
@@ -2396,15 +2398,16 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     // NOTE: last_offset is the offset OF the last storm, NOT one beyond
     
     if (istorm == 0) {
-      _scanVars.scan_first_offset.putVal(scanPos, (int) _stormsDim.getSize());
+      _scanVars.scan_first_offset.putVal(scanPos, _nStorms);
     }
-    _scanVars.scan_last_offset.putVal(scanPos, (int) _stormsDim.getSize());
+    _scanVars.scan_last_offset.putVal(scanPos, _nStorms);
 
     // write the global props
     
     const storm_file_global_props_t &gp = _gprops[istorm];
     
-    int gpropsOffset = _stormsDim.getSize();
+    int gpropsOffset = _nStorms;
+    // int gpropsOffset = _stormsDim.getSize();
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
     
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
@@ -2506,6 +2509,9 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     if (istorm < (int) _projRunsOffsets.size()) {
       _gpropsVars.proj_runs_offset.putVal(stormIndex, _projRunsOffsets[istorm]);
     }
+
+    _nStorms++;
+    _topLevelVars.n_storms.putVal(_nStorms);
 
   } // istorm
 
