@@ -120,7 +120,7 @@ private:
     NcxxVar proj_central_scale;
     // indices for first data for each scan
     NcxxVar scan_gprops_offset_0;
-    NcxxVar scan_lprops_offset_0;
+    NcxxVar scan_layer_offset_0;
     NcxxVar scan_hist_offset_0;
     NcxxVar scan_runs_offset_0;
     NcxxVar scan_proj_runs_offset_0;
@@ -1124,6 +1124,8 @@ protected:
   // clear for truncation
   
   void _clearScan(int scanNum);
+  void _clearGroupVars(NcxxGroup &group, NcxxDim &dim, int startIndex);
+  void _clear1DVar(NcxxVar &var, int startIndex);
 
 public:
 
@@ -1288,7 +1290,7 @@ public:
   // initial index for data in each scan
   
   const std::string SCAN_GPROPS_OFFSET_0 = "scan_gprops_offset_0";
-  const std::string SCAN_LPROPS_OFFSET_0 = "scan_lprops_offset_0";
+  const std::string SCAN_LAYER_OFFSET_0 = "scan_layer_offset_0";
   const std::string SCAN_HIST_OFFSET_0 = "scan_hist_offset_0";
   const std::string SCAN_RUNS_OFFSET_0 = "scan_runs_offset_0";
   const std::string SCAN_PROJ_RUNS_OFFSET_0 = "scan_proj_runs_offset_0";

@@ -643,8 +643,8 @@ void TitanFile::_setUpVars()
 
   _scanVars.scan_gprops_offset_0 =
     _getVar(SCAN_GPROPS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
-  _scanVars.scan_lprops_offset_0 =
-    _getVar(SCAN_LPROPS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+  _scanVars.scan_layer_offset_0 =
+    _getVar(SCAN_LAYER_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_hist_offset_0 =
     _getVar(SCAN_HIST_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
   _scanVars.scan_runs_offset_0 =
@@ -2264,6 +2264,8 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.sum_hist.putVal(_sumHist);
   _topLevelVars.sum_runs.putVal(_sumRuns);
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
+
+  cerr << "11111111111111 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
   
   const storm_file_params_t &sparams(_storm_header.params);
   
@@ -2404,9 +2406,12 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.proj_pole_type.putVal(scanPos, 0);
   _scanVars.proj_central_scale.putVal(scanPos, 1.0);
 
-  // write gprops offset
+  // write scan offsets
   
   _scanVars.scan_gprops_offset.putVal(scanPos, _sumStorms);
+  _scanVars.scan_gprops_offset_0.putVal(scanPos, _sumStorms);
+
+  cerr << "2222222222222222 scanNum, nstorms, _sumStorms, _sumLayers: " << scanNum << ", " << _scan.nstorms << ", " << _sumStorms << ", " << _sumLayers << endl;
   
   // write storm global props
   
@@ -2536,6 +2541,8 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   } // istorm
 
+  cerr << "333333333333333 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
+  
   return 0;
   
 }
@@ -2789,6 +2796,14 @@ int TitanFile::writeStormAux(int storm_num,
     return 0;
   }
 
+  // save scan offsets
+  
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(sheader.scan_num);
+  _scanVars.scan_layer_offset_0.putVal(scanPos, _sumLayers);
+  _scanVars.scan_hist_offset_0.putVal(scanPos, _sumHist);
+  _scanVars.scan_runs_offset_0.putVal(scanPos, _sumRuns);
+  _scanVars.scan_proj_runs_offset_0.putVal(scanPos, _sumProjRuns);
+  
   // ensure we have space for the offsets
   
   _layerOffsets.resize(storm_num + 1);
@@ -2863,6 +2878,8 @@ int TitanFile::writeStormAux(int storm_num,
   }
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
   
+  cerr << "444444444444444444 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
+  
   return 0;
   
 }
@@ -2878,18 +2895,119 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
   
 {
   
-  _nScans = lastGoodScanNum + 1;
-  int nScansInFile = _scansDim.getSize();
-  for (int ii = _nScans; ii < nScansInFile; ii++) {
-    _clearScan(ii);
+  if (lastGoodScanNum >= (int) _scansDim.getSize() - 1) {
+    // last good scan num is at end of file
+    // so no trucation needed
+    return 0;
   }
+  _nScans = lastGoodScanNum + 1;
 
+  // read the offsets at the start of the scan after the last good one
+  
+  std::vector<size_t> scanPos = NcxxVar::makeIndex(_nScans);
+  _scanVars.scan_gprops_offset_0.getVal(scanPos, &_sumStorms);
+  _scanVars.scan_layer_offset_0.getVal(scanPos, &_sumLayers);
+  _scanVars.scan_hist_offset_0.getVal(scanPos, &_sumHist);
+  _scanVars.scan_runs_offset_0.getVal(scanPos, &_sumRuns);
+  _scanVars.scan_proj_runs_offset_0.getVal(scanPos, &_sumProjRuns);
+
+  // clear the scans
+
+  _clearGroupVars(_scansGroup, _scansDim, _nScans);
+  
+  // for (size_t ii = _nScans; ii < _scansDim.getSize(); ii++) {
+  //   _clearScan(ii);
+  // }
+  
+  // clear the gprops
+
+  _clearGroupVars(_gpropsGroup, _stormsDim, _sumStorms);
+  
+  // update the top level status vars
+  
   _topLevelVars.n_scans.putVal(_nScans);
+  _topLevelVars.sum_storms.putVal(_sumStorms);
+  _topLevelVars.sum_layers.putVal(_sumLayers);
+  _topLevelVars.sum_hist.putVal(_sumHist);
+  _topLevelVars.sum_runs.putVal(_sumRuns);
+  _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
   
   return 0;
 
 }
 
+////////////////////////////////////////////////////
+// clear vars in group, from given index to end
+
+void TitanFile::_clearGroupVars(NcxxGroup &group,
+                                NcxxDim &dim,
+                                int startIndex)
+  
+{
+
+  // get set of vars in group
+  
+  const std::multimap<std::string, NcxxVar> &vars = group.getVars();
+
+  // loop through vars
+  
+  for (auto ii : vars) {
+
+    string name(ii.first);
+    NcxxVar var(ii.second);
+
+    std::vector<NcxxDim> varDims = var.getDims();
+
+    if (varDims.size() == 1) {
+      if (varDims[0] == dim) {
+        _clear1DVar(var, startIndex);
+      }
+    }
+
+
+  } // ii
+  
+}
+
+void TitanFile::_clear1DVar(NcxxVar &var,
+                            int startIndex)
+  
+{
+
+  NcxxDim dim = var.getDim(0);
+
+  for (int ii = startIndex; ii < (int) dim.getSize(); ii++) {
+    std::vector<size_t> index = NcxxVar::makeIndex(ii);
+    nc_type vtype = var.getType().getId();
+    switch (vtype) {
+      case NC_DOUBLE:
+        var.putVal(index, missingDouble);
+        break;
+      case NC_FLOAT:
+        var.putVal(index, missingFloat);
+        break;
+      case NC_INT64:
+        var.putVal(index, missingInt64);
+        break;
+      case NC_INT:
+        var.putVal(index, missingInt32);
+        break;
+      case NC_SHORT:
+        var.putVal(index, missingInt16);
+        break;
+      case NC_UBYTE:
+        var.putVal(index, missingInt08);
+        break;
+      case NC_STRING:
+        var.putVal(index, string(""));
+        break;
+      default: {}
+    } // switch
+  } // ii
+    
+}
+
+  
 ////////////////////////////////////////////////////
 // clear scan params
 
@@ -2899,8 +3017,6 @@ void TitanFile::_clearScan(int scanNum)
   
   std::vector<size_t> scanPos = NcxxVar::makeIndex(scanNum);
 
-  // write scan details
-  
   _scanVars.scan_min_z.putVal(scanPos, missingFloat);
   _scanVars.scan_delta_z.putVal(scanPos, missingFloat);
   _scanVars.scan_num.putVal(scanPos, missingInt32);
@@ -2911,7 +3027,11 @@ void TitanFile::_clearScan(int scanNum)
   _scanVars.scan_last_offset.putVal(scanPos, missingInt32);
   _scanVars.scan_ht_of_freezing.putVal(scanPos, missingFloat);
 
-  // write grid details
+  _scanVars.scan_gprops_offset_0.putVal(scanPos, missingInt32);
+  _scanVars.scan_layer_offset_0.putVal(scanPos, missingInt32);
+  _scanVars.scan_hist_offset_0.putVal(scanPos, missingInt32);
+  _scanVars.scan_runs_offset_0.putVal(scanPos, missingInt32);
+  _scanVars.scan_proj_runs_offset_0.putVal(scanPos, missingInt32);
 
   _scanVars.grid_nx.putVal(scanPos, missingInt32);
   _scanVars.grid_ny.putVal(scanPos, missingInt32);
@@ -2932,8 +3052,6 @@ void TitanFile::_clearScan(int scanNum)
   _scanVars.grid_unitsx.putVal(scanPos, string(""));
   _scanVars.grid_unitsy.putVal(scanPos, string(""));
   _scanVars.grid_unitsz.putVal(scanPos, string(""));
-  
-  // write projection details
   
   _scanVars.proj_type.putVal(scanPos, missingInt32);
   _scanVars.proj_origin_lat.putVal(scanPos, missingDouble);
