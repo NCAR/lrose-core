@@ -80,7 +80,11 @@ TitanFile::TitanFile()
   _max_proj_runs = 0;
   
   _nScans = 0;
-  _nStorms = 0;
+  _sumStorms = 0;
+  _sumLayers = 0;
+  _sumHist = 0;
+  _sumRuns = 0;
+  _sumProjRuns = 0;
 
   // tracks
 
@@ -532,8 +536,18 @@ void TitanFile::_setUpVars()
   
   _topLevelVars.n_scans =
     _getVar(N_SCANS, NcxxType::nc_INT, _ncFile);
-  _topLevelVars.n_storms =
-    _getVar(N_STORMS, NcxxType::nc_INT, _ncFile);
+
+  _topLevelVars.sum_storms =
+    _getVar(SUM_STORMS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.sum_layers =
+    _getVar(SUM_LAYERS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.sum_hist =
+    _getVar(SUM_HIST, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.sum_runs =
+    _getVar(SUM_RUNS, NcxxType::nc_INT, _ncFile);
+  _topLevelVars.sum_proj_runs =
+    _getVar(SUM_PROJ_RUNS, NcxxType::nc_INT, _ncFile);
+
   _topLevelVars.max_simple_track_num =
     _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
   _topLevelVars.max_complex_track_num =
@@ -1710,10 +1724,16 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
   _topLevelVars.file_time.getVal(&_storm_header.file_time);
   _topLevelVars.start_time.getVal(&_storm_header.start_time);
   _topLevelVars.end_time.getVal(&_storm_header.end_time);
+
   _topLevelVars.n_scans.getVal(&_nScans);
-  _topLevelVars.n_storms.getVal(&_nStorms);
   _storm_header.n_scans = _nScans;
   _track_header.n_scans = _nScans;
+
+  _topLevelVars.sum_storms.getVal(&_sumStorms);
+  _topLevelVars.sum_layers.getVal(&_sumLayers);
+  _topLevelVars.sum_hist.getVal(&_sumHist);
+  _topLevelVars.sum_runs.getVal(&_sumRuns);
+  _topLevelVars.sum_proj_runs.getVal(&_sumProjRuns);
 
   // storm params
   
@@ -2239,9 +2259,11 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.start_time.putVal((int64_t) _storm_header.start_time);
   _topLevelVars.end_time.putVal((int64_t) _storm_header.end_time);
   _topLevelVars.n_scans.putVal(_nScans);
-  // _topLevelVars.n_scans.putVal((int) _scansDim.getSize());
-  _topLevelVars.n_storms.putVal(_nStorms);
-  // _topLevelVars.n_storms.putVal((int) _stormsDim.getSize());
+  _topLevelVars.sum_storms.putVal(_sumStorms);
+  _topLevelVars.sum_layers.putVal(_sumLayers);
+  _topLevelVars.sum_hist.putVal(_sumHist);
+  _topLevelVars.sum_runs.putVal(_sumRuns);
+  _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
   
   const storm_file_params_t &sparams(_storm_header.params);
   
@@ -2384,7 +2406,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write gprops offset
   
-  _scanVars.scan_gprops_offset.putVal(scanPos, _nStorms);
+  _scanVars.scan_gprops_offset.putVal(scanPos, _sumStorms);
   
   // write storm global props
   
@@ -2398,16 +2420,15 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
     // NOTE: last_offset is the offset OF the last storm, NOT one beyond
     
     if (istorm == 0) {
-      _scanVars.scan_first_offset.putVal(scanPos, _nStorms);
+      _scanVars.scan_first_offset.putVal(scanPos, _sumStorms);
     }
-    _scanVars.scan_last_offset.putVal(scanPos, _nStorms);
+    _scanVars.scan_last_offset.putVal(scanPos, _sumStorms);
 
     // write the global props
     
     const storm_file_global_props_t &gp = _gprops[istorm];
     
-    int gpropsOffset = _nStorms;
-    // int gpropsOffset = _stormsDim.getSize();
+    int gpropsOffset = _sumStorms;
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
     
     _gpropsVars.vol_centroid_x.putVal(stormIndex, gp.vol_centroid_x);
@@ -2510,8 +2531,8 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
       _gpropsVars.proj_runs_offset.putVal(stormIndex, _projRunsOffsets[istorm]);
     }
 
-    _nStorms++;
-    _topLevelVars.n_storms.putVal(_nStorms);
+    _sumStorms++;
+    _topLevelVars.sum_storms.putVal(_sumStorms);
 
   } // istorm
 
@@ -2775,13 +2796,12 @@ int TitanFile::writeStormAux(int storm_num,
   _runsOffsets.resize(storm_num + 1);
   _projRunsOffsets.resize(storm_num + 1);
   
-
   // write layers
 
-  _layerOffsets[storm_num] = _layersDim.getSize();
+  _layerOffsets[storm_num] = _sumLayers;
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     const storm_file_layer_props_t &ll = lprops[ilayer];
-    int lpropsOffset = _layersDim.getSize();
+    int lpropsOffset = _sumLayers;
     std::vector<size_t> layerIndex = NcxxVar::makeIndex(lpropsOffset);
     _lpropsVars.vol_centroid_x.putVal(layerIndex, ll.vol_centroid_x);
     _lpropsVars.vol_centroid_y.putVal(layerIndex, ll.vol_centroid_y);
@@ -2798,42 +2818,50 @@ int TitanFile::writeStormAux(int storm_num,
         sparams.high_convectivity_threshold != 0.0) {
       _lpropsVars.convectivity_median.putVal(layerIndex, ll.convectivity_median);
     }
+    _sumLayers++;
   }
+  _topLevelVars.sum_layers.putVal(_sumLayers);
 
   // write histograms
 
-  _histOffsets[storm_num] = _histDim.getSize();
+  _histOffsets[storm_num] = _sumHist;
   for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
     const storm_file_dbz_hist_t &hh = hist[ihist];
-    int histOffset = _histDim.getSize();
+    int histOffset = _sumHist;
     std::vector<size_t> histIndex = NcxxVar::makeIndex(histOffset);
     _histVars.percent_volume.putVal(histIndex, hh.percent_volume);
     _histVars.percent_area.putVal(histIndex, hh.percent_area);
+    _sumHist++;
   }
+  _topLevelVars.sum_hist.putVal(_sumHist);
   
   // write runs
   
-  _runsOffsets[storm_num] = _runsDim.getSize();
+  _runsOffsets[storm_num] = _sumRuns;
   for (int irun = 0; irun < nRuns; irun++) {
     const storm_file_run_t &run = runs[irun];
-    int runOffset = _runsDim.getSize();
+    int runOffset = _sumRuns;
     std::vector<size_t> runIndex = NcxxVar::makeIndex(runOffset);
     _runsVars.run_ix.putVal(runIndex, run.ix);
     _runsVars.run_iy.putVal(runIndex, run.iy);
     _runsVars.run_iz.putVal(runIndex, run.iz);
     _runsVars.run_len.putVal(runIndex, run.n);
+    _sumRuns++;
   }
+  _topLevelVars.sum_runs.putVal(_sumRuns);
   
-  _projRunsOffsets[storm_num] = _projRunsDim.getSize();
+  _projRunsOffsets[storm_num] = _sumProjRuns;
   for (int irun = 0; irun < nProjRuns; irun++) {
     const storm_file_run_t &run = proj_runs[irun];
-    int projRunOffset = _projRunsDim.getSize();
+    int projRunOffset = _sumProjRuns;
     std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunOffset);
     _projRunsVars.run_ix.putVal(projRunIndex, run.ix);
     _projRunsVars.run_iy.putVal(projRunIndex, run.iy);
     _projRunsVars.run_iz.putVal(projRunIndex, run.iz);
     _projRunsVars.run_len.putVal(projRunIndex, run.n);
+    _sumProjRuns++;
   }
+  _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
   
   return 0;
   

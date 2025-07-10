@@ -64,7 +64,11 @@ private:
     NcxxVar start_time;
     NcxxVar end_time;
     NcxxVar n_scans;
-    NcxxVar n_storms;
+    NcxxVar sum_storms;
+    NcxxVar sum_layers;
+    NcxxVar sum_hist;
+    NcxxVar sum_runs;
+    NcxxVar sum_proj_runs;
     NcxxVar max_simple_track_num;
     NcxxVar max_complex_track_num;
   };
@@ -460,10 +464,9 @@ public:
   void setSource(const string &val) { _source = val; }
   void setComment(const string &val) { _comment = val; }
 
-  // top level attributes 
+  // top level vars
 
   int nScans() const { return _nScans; }
-  int nStorms() const { return _nStorms; }
 
   // storm data access
 
@@ -952,7 +955,11 @@ protected:
   // top level
   
   int _nScans;
-  int _nStorms;
+  int _sumStorms;
+  int _sumLayers;
+  int _sumHist;
+  int _sumRuns;
+  int _sumProjRuns;
 
   // offsets for various items
 
@@ -1220,6 +1227,12 @@ public:
   const std::string N_PROJ_RUNS = "n_proj_runs";
   const std::string N_HIST = "n_hist";
   const std::string MAX_FORECAST_WEIGHTS = "max_forecast_weights";
+
+  const std::string SUM_STORMS = "sum_storms";
+  const std::string SUM_LAYERS = "sum_layers";
+  const std::string SUM_HIST = "sum_hist";
+  const std::string SUM_RUNS = "sum_runs";
+  const std::string SUM_PROJ_RUNS = "sum_proj_runs";
 
   // storm identification parameters
 
