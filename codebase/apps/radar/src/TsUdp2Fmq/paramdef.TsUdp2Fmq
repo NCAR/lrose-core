@@ -1,0 +1,217 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions TsUdp2Fmq
+//
+// RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2007
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "TsUdp2Fmq reads raw time-series data via UDP. It saves the time series data out to a file message queue (FMQ), which can be read by multiple clients.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to only register with the process mapper during the write.";
+  p_help = "Sometimes the reader keeps registering, but no data is being written to the FMQ. If this parameter is true, we only register with procmap during the write. So if no writes are occurring, no registrations will occur and the auto_restarter will kill and restart this application. This makes it robust when the reading hangs for some reason.";
+} do_not_register_on_read;
+
+commentdef {
+  p_header = "UDP DETAILS";
+};
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "UDP port to listen on.";
+} udp_port;
+
+commentdef {
+  p_header = "FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Path to output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_path;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+commentdef {
+  p_header = "CORRECT THE SWEEP NUMBER";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to correct the sweep number relative to the start of a volume.";
+  p_help = "Some radars set the sweep number to always increase, without resetting to 0 when a new volume starts. If this parameter is TRUE, the sweep number will be corrected so that it is zero at the start of each volume.";
+} zero_sweep_number_at_start_of_vol;
+
+commentdef {
+  p_header = "RADAR POSITION - Mobile Radar Support";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to update the radar's position from info in a position file";
+} update_position;
+
+paramdef string {
+  p_default = "/var/log/positions";
+  p_descr = "Path Mobile Radar position and heading file";
+  p_help = "This file contains records: Heading Lat Lon Altitude(m) Time(YYYYMMDD.HHMMSS)"; 
+} position_file_path;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Interval at which to check on position file changes (secs).";
+  p_help = "The position file will be checked at this interval, and if it has changed the new position information will be read in.";
+} position_check_interval;
+
+commentdef {
+  p_header = "SWEEP NUMBER";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to delay the change of the sweep number in sector scan mode.";
+  p_help = "On some systems (e.g. those which use a PMAC) the scan flags are updated at the start of the antenna transition. This means that the entire transition is included in the new sweep. If this parameter is set to TRUE, and the scan mode is SECTOR, the sweep num change is delayed until the antenna  changes direction. This means that the first half of the transition will be flagged as the previous sweep, and the second half as the next sweep. In non-sector mode, this parameter is ignored."; 
+} delay_sweep_num_change_in_sector_scan;
+
+commentdef {
+  p_header = "OVERRIDE CALIBRATION";
+  p_text = "Limited calibration information is passed down from the drx. This option allows you to override this calibration information with that from a file on disk.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override calibration, with values from local xml file.";
+  p_help = "If true, the calibration will be read in from an xml file. Calibration packets arriving from the drx will be replaced with the local information.";
+} override_calibration;
+
+paramdef string {
+  p_default = "./cal.xml";
+  p_descr = "File path for calibration to be used for override.";
+  p_help = "See 'override_calibration'.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "IQ DATA SCALING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply a scale and bias to each I and Q value before writing.";
+  p_help = "NOTE - this only applies to IQ data stored as FLOAT-32s.";
+} apply_scale;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scale constant for I and Q data.";
+  p_help = "Applies if apply_scale == TRUE. Value written = Value_in * scale + bias.";
+} scale;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Bias for I and Q data.";
+  p_help = "Applies if apply_scale == TRUE. Value written = Value_in * scale + bias.";
+} bias;
+
+commentdef {
+  p_header = "OUTPUT FMQ MESSAGE DETAILS";
+  p_text = "The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.";
+};
+
+paramdef int {
+  p_default = "200";
+  p_descr = "Number of pulses per output message.";
+  p_help = "The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.";
+} n_pulses_per_message;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "The xmit_power packet will be written each time this number of pulses is written.";
+} n_pulses_per_power_info;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Write end of vol event when data stops.";
+  p_descr = "This will be written if no data arrives for a certain period of time.";
+} write_end_of_vol_when_data_stops;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of secs before writing end of vol.";
+  p_help = "See 'write_end_of_vol_when_data_stops'";
+} nsecs_no_data_for_end_of_vol;
+
+commentdef {
+  p_header = "IGNORE PULSES IF TIME GOES BACKWARDS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "This applies to older version of the HIQ.";
+  p_help = "If true, check that the time goes forwards. If not, ignore the pulse.";
+} ignore_pulse_if_time_goes_backwards;
+
+commentdef {
+  p_header = "ANGLE DEBUGGING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the azimuth based on time.";
+  p_help = "This is intended for trouble-shooting. If this is set to true, the azimuth is set to a value computed from the time.";
+} compute_azimuth_from_time;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Simulated seconds per revolution.";
+  p_help = "The simulated azimuth will be 0 at the start of each revolution.";
+} simulated_secs_per_rev;
+
