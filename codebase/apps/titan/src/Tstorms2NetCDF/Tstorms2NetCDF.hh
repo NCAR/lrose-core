@@ -89,19 +89,10 @@ private:
   
   vector<time_t> _scanTimes;
 
-  // legacy processing - convert to NetCDF
-  
-  int _processInputFileLegacy();
-  int _loadScanTimesLegacy();
-  int _processScanLegacy(int scan_num,
-                         time_t scan_time);
-  
-  // netCDF processing - convert from NetCDF back to legacy
-  
-  int _processInputFileNetcdf();
-  int _loadScanTimesNetcdf();
-  int _processScanNetcdf(int scan_num,
-                         time_t scan_time);
+  int _processInputFile();
+  int _loadScanTimes();
+  int _processScan(int scan_num,
+                   time_t scan_time);
   
 };
 

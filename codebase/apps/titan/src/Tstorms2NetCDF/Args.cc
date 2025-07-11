@@ -88,11 +88,24 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-reverse")) {
+    } else if (!strcmp(argv[i], "-to_legacy")) {
       
       sprintf(tmp_str, "convert_to_legacy = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-truncate")) {
+      
+      sprintf(tmp_str, "test_truncation = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+
+      if (i < argc - 1) {
+	snprintf(tmp_str, 256, "truncation_scan_number = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	sprintf(tmp_str, "truncation_scan_number = 0;");
+	TDRP_add_override(&override, tmp_str);
+      }
+	
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -189,10 +202,10 @@ void Args::_usage(string &prog_name, ostream &out)
       << "         sets input_mode to ARCHIVE\n"
       << "       [ -f ? ?] input track file list (.th5 files)\n"
       << "         sets input_mode to FILELIST\n"
-      << "       [ -reverse ] reverse sense\n"
-      << "                    convert from netcdf back to legacy\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "         sets input_mode to ARCHIVE\n"
+      << "       [ -to_legacy ] reverse sense\n"
+      << "          convert from netcdf, write legacy files\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
 
       << endl;

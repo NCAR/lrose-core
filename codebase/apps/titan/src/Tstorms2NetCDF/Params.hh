@@ -384,6 +384,10 @@ public:
 
   tdrp_bool_t convert_to_legacy;
 
+  tdrp_bool_t test_truncation;
+
+  int truncation_scan_number;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -391,7 +395,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[12];
+  mutable TDRPtable _table[15];
 
   const char *_className;
 

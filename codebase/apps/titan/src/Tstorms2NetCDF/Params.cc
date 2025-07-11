@@ -689,6 +689,39 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("OPTION TO TEST TRUNCATION OPTION");
+    tt->comment_text = tdrpStrDup("Truncation is used by Titan when it reprocesses scans that have previously been handled.");
+    tt++;
+    
+    // Parameter 'test_truncation'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("test_truncation");
+    tt->descr = tdrpStrDup("Option to test the truncation option.");
+    tt->help = tdrpStrDup("If TRUE, the output data will be truncated at the specified scan number.");
+    tt->val_offset = (char *) &test_truncation - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'truncation_scan_number'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("truncation_scan_number");
+    tt->descr = tdrpStrDup("Scan number for truncation test.");
+    tt->help = tdrpStrDup("This scan will be kept. The storm data for all subsequent scans will be set to missing. All tracking data will be set to missing.");
+    tt->val_offset = (char *) &truncation_scan_number - &_start_;
+    tt->single_val.i = -1;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

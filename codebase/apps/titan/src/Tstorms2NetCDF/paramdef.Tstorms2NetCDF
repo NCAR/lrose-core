@@ -74,3 +74,20 @@ paramdef boolean {
   p_help = "If TRUE, read NetCDF files, write legacy files.";
 } convert_to_legacy;
 
+commentdef {
+  p_header = "OPTION TO TEST TRUNCATION OPTION";
+  p_text = "Truncation is used by Titan when it reprocesses scans that have previously been handled.";
+}
+	
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to test the truncation option.";
+  p_help = "If TRUE, the output data will be truncated at the specified scan number.";
+} test_truncation;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Scan number for truncation test.";
+  p_help = "This scan will be kept. The storm data for all subsequent scans will be set to missing. All tracking data will be set to missing.";
+} truncation_scan_number;
+
