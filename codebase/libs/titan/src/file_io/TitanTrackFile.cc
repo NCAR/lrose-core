@@ -1921,6 +1921,7 @@ int TitanTrackFile::WriteSimpleParams(int track_num)
 int TitanTrackFile::WriteComplexParams(const complex_track_params_t &cparams)
 {
   _complex_params = cparams;
+  AllocSimpleArrays(cparams.complex_track_num + 1);
   return WriteComplexParams(cparams.complex_track_num);
 }
   

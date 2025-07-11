@@ -1206,6 +1206,7 @@ int TitanStormFile::WriteScan(int scan_num)
 //////////////////////////////////////////////////////////////
 
 int TitanStormFile::WriteProps(int storm_num,
+                               int n_storms,
                                const storm_file_global_props_t *gprops,
                                const storm_file_layer_props_t *lprops,
                                const storm_file_dbz_hist_t *hist,
@@ -1222,6 +1223,7 @@ int TitanStormFile::WriteProps(int storm_num,
 
   // allocate memory
   
+  AllocGprops(n_storms);
   AllocLayers(n_layers);
   AllocHist(n_dbz_intervals);
   AllocRuns(n_runs);
@@ -1229,6 +1231,8 @@ int TitanStormFile::WriteProps(int storm_num,
 
   // copy the layer, hist and runs data into this object
   
+  memcpy (_gprops, gprops,
+          n_storms * sizeof(storm_file_global_props_t));
   memcpy (_lprops, lprops,
           n_layers * sizeof(storm_file_layer_props_t));
   memcpy (_hist, hist,

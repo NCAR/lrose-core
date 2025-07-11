@@ -2783,7 +2783,8 @@ int TitanFile::writeStormAux(int storm_num,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_sFile.WriteProps(storm_num, gprops, lprops, hist, runs, proj_runs)) {
+    if (_sFile.WriteProps(storm_num, sheader.nstorms,
+                          gprops, lprops, hist, runs, proj_runs)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }

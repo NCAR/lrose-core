@@ -181,6 +181,7 @@ public:
   // returns 0 on success, -1 on failure
 
   int WriteProps(int storm_num,
+                 int n_storms,
                  const storm_file_global_props_t *gprops,
                  const storm_file_layer_props_t *lprops,
                  const storm_file_dbz_hist_t *hist,
