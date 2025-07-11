@@ -1011,6 +1011,11 @@ protected:
   si32 **_simples_per_complex_2D;
   int _n_scan_entries;
   
+  // track entry offsets
+  
+  long _prev_in_track_offset;
+  long _prev_in_scan_offset;
+
   // track memory allocation control
 
   int _n_simple_allocated;

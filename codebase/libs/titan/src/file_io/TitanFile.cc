@@ -117,6 +117,9 @@ TitanFile::TitanFile()
   _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
+  _prev_in_track_offset = 0;
+  _prev_in_scan_offset = 0;
+
   _horizGridUnits = KM;
   _horizGridUnitsPerHr = KM_PER_HR;
   _speedUnits = KM_PER_HR;
@@ -4650,16 +4653,28 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteEntry(entry)) {
+    int writeOffset = _tFile.WriteEntry(entry);
+    if (writeOffset < 0) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
-    return 0;
+    return writeOffset;
   }
   
   _clearErrStr();
   _addErrStr("ERROR - TitanFile::writeEntry");
   _addErrStr("  Writing to file: ", _filePath);
+
+  // set initial offsets if needed
+  
+  if (entry.storm_num == 0) {
+    // first entry in a scan
+    _prev_in_scan_offset = -1;
+  }
+  if (entry.duration_in_scans == 0) {
+    // first entry in a simple track
+    _prev_in_track_offset = -1;
+  }
 
   int entryOffset = getStormEntryOffset(entry.scan_num, entry.storm_num);
   std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
