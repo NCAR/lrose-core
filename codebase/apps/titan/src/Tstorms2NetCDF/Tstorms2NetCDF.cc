@@ -220,9 +220,9 @@ int Tstorms2NetCDF::Run ()
     
   }
   
-  if (!_params.convert_to_legacy) {
-    _outFile.truncateStormData(50);
-  }
+  // if (!_params.convert_to_legacy) {
+  //   _outFile.truncateStormData(_outFile.nScans() - 5);
+  // }
   
   return 0;
 

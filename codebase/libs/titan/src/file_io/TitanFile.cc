@@ -335,7 +335,7 @@ void TitanFile::_setUpGroups()
   _tracksGroup = _getGroup(TRACKS, _ncFile);
 
   _gpropsGroup = _getGroup(GPROPS, _stormsGroup);
-  _lpropsGroup = _getGroup(LPROPS, _stormsGroup);
+  _layersGroup = _getGroup(LAYERS, _stormsGroup);
   _histGroup = _getGroup(HIST, _stormsGroup);
   _runsGroup = _getGroup(RUNS, _stormsGroup);
   _projRunsGroup = _getGroup(PROJ_RUNS, _stormsGroup);
@@ -377,7 +377,7 @@ void TitanFile::_setUpDims()
   _maxComplexDim = _getDim(MAX_COMPLEX, _complexGroup);
   _entriesDim = _getDim(N_ENTRIES, _entriesGroup);
   _polyDim = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
-  _layersDim = _getDim(N_LAYERS, _lpropsGroup);
+  _layersDim = _getDim(N_LAYERS, _layersGroup);
   _histDim = _getDim(N_HIST, _histGroup);
   _runsDim = _getDim(N_RUNS, _runsGroup);
   _projRunsDim = _getDim(N_PROJ_RUNS, _projRunsGroup);
@@ -883,29 +883,29 @@ void TitanFile::_setUpVars()
   // storm layer props
   
   _lpropsVars.vol_centroid_x =
-    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _layersGroup, _horizGridUnits);
   _lpropsVars.vol_centroid_y =
-    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(VOL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _layersGroup, _horizGridUnits);
   _lpropsVars.refl_centroid_x =
-    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_X, NcxxType::nc_FLOAT, _layersDim, _layersGroup, _horizGridUnits);
   _lpropsVars.refl_centroid_y =
-    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, _horizGridUnits);
+    _getVar(REFL_CENTROID_Y, NcxxType::nc_FLOAT, _layersDim, _layersGroup, _horizGridUnits);
   _lpropsVars.area =
-    _getVar(AREA, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, KM2);
+    _getVar(AREA, NcxxType::nc_FLOAT, _layersDim, _layersGroup, KM2);
   _lpropsVars.dbz_max =
-    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, DBZ);
+    _getVar(DBZ_MAX, NcxxType::nc_FLOAT, _layersDim, _layersGroup, DBZ);
   _lpropsVars.dbz_mean =
-    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, DBZ);
+    _getVar(DBZ_MEAN, NcxxType::nc_FLOAT, _layersDim, _layersGroup, DBZ);
   _lpropsVars.mass =
-    _getVar(MASS, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, KTONS);
+    _getVar(MASS, NcxxType::nc_FLOAT, _layersDim, _layersGroup, KTONS);
   _lpropsVars.rad_vel_mean =
-    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_MEAN, NcxxType::nc_FLOAT, _layersDim, _layersGroup, M_PER_SEC);
   _lpropsVars.rad_vel_sd =
-    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, M_PER_SEC);
+    _getVar(RAD_VEL_SD, NcxxType::nc_FLOAT, _layersDim, _layersGroup, M_PER_SEC);
   _lpropsVars.vorticity =
-    _getVar(VORTICITY, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup, PER_SEC);
+    _getVar(VORTICITY, NcxxType::nc_FLOAT, _layersDim, _layersGroup, PER_SEC);
   _lpropsVars.convectivity_median =
-    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _layersDim, _lpropsGroup);
+    _getVar(CONVECTIVITY_MEDIAN, NcxxType::nc_FLOAT, _layersDim, _layersGroup);
 
   // reflectivity histograms
 
@@ -2265,8 +2265,6 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.sum_runs.putVal(_sumRuns);
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
 
-  cerr << "11111111111111 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
-  
   const storm_file_params_t &sparams(_storm_header.params);
   
   _sparamsVars.low_dbz_threshold.putVal(sparams.low_dbz_threshold);
@@ -2411,8 +2409,6 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.scan_gprops_offset.putVal(scanPos, _sumStorms);
   _scanVars.scan_gprops_offset_0.putVal(scanPos, _sumStorms);
 
-  cerr << "2222222222222222 scanNum, nstorms, _sumStorms, _sumLayers: " << scanNum << ", " << _scan.nstorms << ", " << _sumStorms << ", " << _sumLayers << endl;
-  
   // write storm global props
   
   const storm_file_params_t &sparams(_storm_header.params);
@@ -2541,8 +2537,6 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   } // istorm
 
-  cerr << "333333333333333 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
-  
   return 0;
   
 }
@@ -2878,8 +2872,6 @@ int TitanFile::writeStormAux(int storm_num,
   }
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
   
-  cerr << "444444444444444444 _sumStorms, _sumLayers: " << _sumStorms << ", " << _sumLayers << endl;
-  
   return 0;
   
 }
@@ -2913,15 +2905,21 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
 
   // clear the scans
 
-  _clearGroupVars(_scansGroup, _scansDim, _nScans);
+  _clearGroupVars(_scansGroup, _nScans);
   
-  // for (size_t ii = _nScans; ii < _scansDim.getSize(); ii++) {
-  //   _clearScan(ii);
-  // }
-  
-  // clear the gprops
+  // clear the storm properties from this scan forward
 
-  _clearGroupVars(_gpropsGroup, _stormsDim, _sumStorms);
+  _clearGroupVars(_gpropsGroup, _sumStorms);
+  _clearGroupVars(_layersGroup, _sumLayers);
+  _clearGroupVars(_histGroup, _sumHist);
+  _clearGroupVars(_runsGroup, _sumRuns);
+  _clearGroupVars(_projRunsGroup, _sumProjRuns);
+
+  // clear all of the track properties
+  
+  _clearGroupVars(_simpleGroup, 0);
+  _clearGroupVars(_complexGroup, 0);
+  _clearGroupVars(_entriesGroup, 0);
   
   // update the top level status vars
   
@@ -2940,7 +2938,6 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
 // clear vars in group, from given index to end
 
 void TitanFile::_clearGroupVars(NcxxGroup &group,
-                                NcxxDim &dim,
                                 int startIndex)
   
 {
@@ -2956,14 +2953,11 @@ void TitanFile::_clearGroupVars(NcxxGroup &group,
     string name(ii.first);
     NcxxVar var(ii.second);
 
-    std::vector<NcxxDim> varDims = var.getDims();
-
-    if (varDims.size() == 1) {
-      if (varDims[0] == dim) {
-        _clear1DVar(var, startIndex);
-      }
+    if (var.getDimCount() == 1) {
+      _clear1DVar(var, startIndex);
+    } else if (var.getDimCount() == 2) {
+      _clear2DVar(var, startIndex);
     }
-
 
   } // ii
   
@@ -3007,64 +3001,45 @@ void TitanFile::_clear1DVar(NcxxVar &var,
     
 }
 
-  
-////////////////////////////////////////////////////
-// clear scan params
-
-void TitanFile::_clearScan(int scanNum)
+void TitanFile::_clear2DVar(NcxxVar &var,
+                            int startIndex)
   
 {
-  
-  std::vector<size_t> scanPos = NcxxVar::makeIndex(scanNum);
 
-  _scanVars.scan_min_z.putVal(scanPos, missingFloat);
-  _scanVars.scan_delta_z.putVal(scanPos, missingFloat);
-  _scanVars.scan_num.putVal(scanPos, missingInt32);
-  _scanVars.scan_nstorms.putVal(scanPos, missingInt32);
-  _scanVars.scan_time.putVal(scanPos, missingInt64);
-  _scanVars.scan_gprops_offset.putVal(scanPos, missingInt32);
-  _scanVars.scan_first_offset.putVal(scanPos, missingInt32);
-  _scanVars.scan_last_offset.putVal(scanPos, missingInt32);
-  _scanVars.scan_ht_of_freezing.putVal(scanPos, missingFloat);
+  NcxxDim dim0 = var.getDim(0);
+  NcxxDim dim1 = var.getDim(1);
 
-  _scanVars.scan_gprops_offset_0.putVal(scanPos, missingInt32);
-  _scanVars.scan_layer_offset_0.putVal(scanPos, missingInt32);
-  _scanVars.scan_hist_offset_0.putVal(scanPos, missingInt32);
-  _scanVars.scan_runs_offset_0.putVal(scanPos, missingInt32);
-  _scanVars.scan_proj_runs_offset_0.putVal(scanPos, missingInt32);
-
-  _scanVars.grid_nx.putVal(scanPos, missingInt32);
-  _scanVars.grid_ny.putVal(scanPos, missingInt32);
-  _scanVars.grid_nz.putVal(scanPos, missingInt32);
-  _scanVars.grid_minx.putVal(scanPos, missingFloat);
-  _scanVars.grid_miny.putVal(scanPos, missingFloat);
-  _scanVars.grid_minz.putVal(scanPos, missingFloat);
-  _scanVars.grid_dx.putVal(scanPos, missingFloat);
-  _scanVars.grid_dy.putVal(scanPos, missingFloat);
-  _scanVars.grid_dz.putVal(scanPos, missingFloat);
-  _scanVars.grid_dz_constant.putVal(scanPos, missingInt32);
-  _scanVars.grid_sensor_x.putVal(scanPos, missingFloat);
-  _scanVars.grid_sensor_y.putVal(scanPos, missingFloat);
-  _scanVars.grid_sensor_z.putVal(scanPos, missingFloat);
-  _scanVars.grid_sensor_lat.putVal(scanPos, missingDouble);
-  _scanVars.grid_sensor_lon.putVal(scanPos, missingDouble);
-  
-  _scanVars.grid_unitsx.putVal(scanPos, string(""));
-  _scanVars.grid_unitsy.putVal(scanPos, string(""));
-  _scanVars.grid_unitsz.putVal(scanPos, string(""));
-  
-  _scanVars.proj_type.putVal(scanPos, missingInt32);
-  _scanVars.proj_origin_lat.putVal(scanPos, missingDouble);
-  _scanVars.proj_origin_lon.putVal(scanPos, missingDouble);
-  _scanVars.proj_rotation.putVal(scanPos, missingFloat);
-
-  _scanVars.proj_lat1.putVal(scanPos, missingDouble);
-  _scanVars.proj_lat2.putVal(scanPos, missingDouble);
-  _scanVars.proj_tangent_lat.putVal(scanPos, missingDouble);
-  _scanVars.proj_tangent_lon.putVal(scanPos, missingDouble);
-  _scanVars.proj_pole_type.putVal(scanPos, missingInt32);
-  _scanVars.proj_central_scale.putVal(scanPos, missingFloat);
-
+  for (int ii = startIndex; ii < (int) dim0.getSize(); ii++) {
+    for (int jj = 0; jj < (int) dim1.getSize(); jj++) {
+      std::vector<size_t> index = NcxxVar::makeIndex(ii, jj);
+      nc_type vtype = var.getType().getId();
+      switch (vtype) {
+        case NC_DOUBLE:
+          var.putVal(index, missingDouble);
+          break;
+        case NC_FLOAT:
+          var.putVal(index, missingFloat);
+          break;
+        case NC_INT64:
+          var.putVal(index, missingInt64);
+          break;
+        case NC_INT:
+          var.putVal(index, missingInt32);
+          break;
+        case NC_SHORT:
+          var.putVal(index, missingInt16);
+          break;
+        case NC_UBYTE:
+          var.putVal(index, missingInt08);
+          break;
+        case NC_STRING:
+          var.putVal(index, string(""));
+          break;
+        default: {}
+      } // switch
+    } // jj
+  } // ii
+    
 }
 
 ////////////////////////////////////////////////////////////

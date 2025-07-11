@@ -901,7 +901,7 @@ protected:
   // storms group
   
   NcxxGroup _gpropsGroup;
-  NcxxGroup _lpropsGroup;
+  NcxxGroup _layersGroup;
   NcxxGroup _histGroup;
   NcxxGroup _runsGroup;
   NcxxGroup _projRunsGroup;
@@ -1121,11 +1121,11 @@ protected:
 
   int _readTrackEntry(track_file_entry_t &entry, int entryOffset);
 
-  // clear for truncation
+  // clear groups for truncation
   
-  void _clearScan(int scanNum);
-  void _clearGroupVars(NcxxGroup &group, NcxxDim &dim, int startIndex);
+  void _clearGroupVars(NcxxGroup &group, int startIndex);
   void _clear1DVar(NcxxVar &var, int startIndex);
+  void _clear2DVar(NcxxVar &var, int startIndex);
 
 public:
 
@@ -1202,7 +1202,7 @@ public:
   const std::string STORMS = "storms";
   const std::string TRACKS = "tracks";
   const std::string GPROPS = "gprops";
-  const std::string LPROPS = "lprops";
+  const std::string LAYERS = "layers";
   const std::string HIST = "hist";
   const std::string RUNS = "runs";
   const std::string PROJ_RUNS = "proj_runs";
