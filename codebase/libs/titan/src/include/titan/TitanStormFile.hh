@@ -210,6 +210,12 @@ public:
   void GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 		       storm_file_global_props_t &gprops);
   
+  // Truncate storm data when rerunning.
+  // Keep this scan, set subsequent scans to missing.
+  // Returns 0 on success, -1 on failure
+
+  int TruncateData(int current_scan_num);
+     
   // Truncate header file
   // Returns 0 on success, -1 on failure.
 

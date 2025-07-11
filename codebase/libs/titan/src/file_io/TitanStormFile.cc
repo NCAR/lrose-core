@@ -1571,6 +1571,93 @@ void TitanStormFile::GpropsXY2LatLon(const storm_file_scan_header_t &scan,
 }
 
 ///////////////////////////////////////////////////////////////
+// Truncate storm data when rerunning.
+// Keep this scan, set subsequent scans to missing.
+//
+// Returns 0 on success, -1 on failure
+
+int TitanStormFile::TruncateData(int current_scan_num)
+     
+{
+
+  // read in header
+  
+  if (ReadHeader()) {
+    TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+    TaStr::AddStr(_errStr, " Reading header");
+    return -1;
+  }
+  
+  // read in last valid scan
+  
+  if (ReadScan(current_scan_num)) {
+    TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+    TaStr::AddInt(_errStr, "  Reading in last valid scan #: ", current_scan_num);
+    return -1;
+  }
+  
+  // check whether file will need truncation
+  
+  bool trunc_flag;
+  int init_data_len = 0;
+  int init_header_len = 0;
+  if (current_scan_num < _header.n_scans - 1) {
+    init_data_len = _scan.last_offset + 1;
+    init_header_len = (R_FILE_LABEL_LEN + sizeof(storm_file_header_t) +
+		       (current_scan_num + 1) * sizeof(si32));
+    trunc_flag = TRUE;
+  } else {
+    trunc_flag =  FALSE;
+  }
+  
+  // copy scan time to header as end time
+  
+  _header.end_time = _scan.time;
+  
+  // set other parameters
+  
+  _header.n_scans = current_scan_num + 1;
+  
+  // write storm file header
+  
+  if (WriteHeader()) {
+    TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+    TaStr::AddStr(_errStr, " Rewriting header");
+    return -1;
+  }
+  
+  // truncate if necessary, and position the file
+  
+  if (trunc_flag) {
+    
+    if (TruncateHeaderFile(init_header_len)) {
+      TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+      return -1;
+    }
+
+    if (TruncateDataFile(init_data_len)) {
+      TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+      return -1;
+    }
+    
+  }
+  
+  // position at end of file
+  
+  if (SeekEndData()) {
+    TaStr::AddStr(_errStr, "TitanStormFile::truncateData");
+    return -1;
+  }
+  
+  // flush the buffer
+  
+  FlushFiles();
+  
+  return (0);
+  
+}
+
+///////////////////////////////////////////////////////////////
 // Truncate header file
 //
 // Returns 0 on success, -1 on failure.

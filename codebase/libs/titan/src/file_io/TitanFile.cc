@@ -2879,7 +2879,7 @@ int TitanFile::writeStormAux(int storm_num,
 ///////////////////////////////////////////////////////////////
 // Truncate storm data when rerunning.
 // Keep this scan, set subsequent scans to missing.
-// CLear all track data.
+// Clear all track data.
 //
 // Returns 0 on success, -1 on failure.
 
@@ -2887,6 +2887,14 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
   
 {
   
+  if (_isLegacyV5Format) {
+    if (_sFile.TruncateData(lastGoodScanNum)) {
+      _errStr = _sFile.getErrStr();
+      return -1;
+    }
+    return 0;
+  }
+
   if (lastGoodScanNum >= (int) _scansDim.getSize() - 1) {
     // last good scan num is at end of file
     // so no trucation needed
