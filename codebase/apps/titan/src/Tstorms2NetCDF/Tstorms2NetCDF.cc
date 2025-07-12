@@ -406,9 +406,8 @@ int Tstorms2NetCDF::_processInputFile()
       return -1;
     }
 
-    // loop through the entries, by scan, reading entries and storing in vector
+    // loop through the entries, by scan, reading entries and writing out
     
-    vector<track_file_entry_t> entries;
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
       if (_inFile.readTrackEntry()) {
         cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
@@ -418,52 +417,55 @@ int Tstorms2NetCDF::_processInputFile()
         cerr << _inFile.getErrStr() << endl;
         return -1;
       }
-      entries.push_back(_inFile.entry());
-    }
-
-    // set the offsets for each entry
-
-    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
-      track_file_entry_t &entry(entries[ientry]);
-      entry.this_entry_offset =
-        _outFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
-      entry.next_scan_entry_offset =
-        _outFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
-      if (ientry == 0) {
-        sparams.first_entry_offset = entry.this_entry_offset;
+      int writeOffset = _outFile.writeTrackEntry(_inFile.entry());
+      if (iscan == sparams.start_scan) {
+        sparams.first_entry_offset = writeOffset;
       }
-    } // entry
+    } // iscan
+
+    // // set the offsets for each entry
+
+    // for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+    //   track_file_entry_t &entry(entries[ientry]);
+    //   entry.this_entry_offset =
+    //     _outFile.getStormEntryOffset(entry.scan_num, entry.storm_num);
+    //   entry.next_scan_entry_offset =
+    //     _outFile.getNextScanEntryOffset(entry.scan_num, entry.storm_num);
+    //   if (ientry == 0) {
+    //     sparams.first_entry_offset = entry.this_entry_offset;
+    //   }
+    // } // entry
      
-    // set the prev and next offsets for each entry
+    // // set the prev and next offsets for each entry
     
-    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
-      track_file_entry_t &entry(entries[ientry]);
-      if (ientry == 0) {
-        entry.prev_entry_offset = 0;
-      } else {
-        entry.prev_entry_offset = entries[ientry - 1].this_entry_offset;
-      }
-      if (ientry == entries.size() - 1) {
-        entry.next_entry_offset = -1;
-      } else {
-        entry.next_entry_offset = entries[ientry + 1].this_entry_offset;
-      }
-    } // entry
+    // for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+    //   track_file_entry_t &entry(entries[ientry]);
+    //   if (ientry == 0) {
+    //     entry.prev_entry_offset = 0;
+    //   } else {
+    //     entry.prev_entry_offset = entries[ientry - 1].this_entry_offset;
+    //   }
+    //   if (ientry == entries.size() - 1) {
+    //     entry.next_entry_offset = -1;
+    //   } else {
+    //     entry.next_entry_offset = entries[ientry + 1].this_entry_offset;
+    //   }
+    // } // entry
     
-    // write the entries
+    // // write the entries
     
-    for (size_t ientry = 0; ientry < entries.size(); ientry++) {
-      track_file_entry_t &entry(entries[ientry]);
-      if (_outFile.writeTrackEntry(entry) < 0) {
-        cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
-        cerr << "  Cannot write track entry" << endl;
-        cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
-        cerr << "    scan num: " << entry.scan_num << endl;
-        cerr << "    storm num: " << entry.storm_num << endl;
-        cerr << _inFile.getErrStr() << endl;
-        return -1;
-      }
-    } // entry
+    // for (size_t ientry = 0; ientry < entries.size(); ientry++) {
+    //   track_file_entry_t &entry(entries[ientry]);
+    //   if (_outFile.writeTrackEntry(entry) < 0) {
+    //     cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;
+    //     cerr << "  Cannot write track entry" << endl;
+    //     cerr << "    simpleTrackNum: " << simpleTrackNum << endl;
+    //     cerr << "    scan num: " << entry.scan_num << endl;
+    //     cerr << "    storm num: " << entry.storm_num << endl;
+    //     cerr << _inFile.getErrStr() << endl;
+    //     return -1;
+    //   }
+    // } // entry
     
     // write the updated simple params
     

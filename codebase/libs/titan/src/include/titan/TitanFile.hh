@@ -776,12 +776,12 @@ public:
   int writeTrackEntry(const track_file_entry_t &entry);
   
   // write an entry for a track in the track data file
-  // The entry is written at the end of the file
-  // returns offset of last entry written on success, -1 on failure
+  // on success returns the offset of the entry written
+  // -1 on failure
+
+  // int writeTrackEntry(int prev_in_track_offset,
+  //                     int prev_in_scan_offset);
   
-  long writeTrackEntry(int prev_in_track_offset,
-                       int prev_in_scan_offset);
-     
   // write arrays designating which simple tracks are contained
   // in each complex track
   // returns 0 on success, -1 on failure
@@ -797,7 +797,7 @@ public:
   // First we read the scan first offset, and then add the
   // storm_num.
   
-  int getStormEntryOffset(int scan_num, int storm_num);
+  int getScanEntryOffset(int scan_num, int storm_num);
   
   // get the next offset in the scan, for a given entry
   // returns -1 if this is the last entry in a scan
@@ -1014,7 +1014,7 @@ protected:
   // track entry offsets
   
   long _prev_in_track_offset;
-  long _prev_in_scan_offset;
+  // long _prev_in_scan_offset;
 
   // track memory allocation control
 

@@ -118,7 +118,7 @@ TitanFile::TitanFile()
   _n_utime_allocated = 0;
 
   _prev_in_track_offset = 0;
-  _prev_in_scan_offset = 0;
+  // _prev_in_scan_offset = 0;
 
   _horizGridUnits = KM;
   _horizGridUnitsPerHr = KM_PER_HR;
@@ -4665,38 +4665,49 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   _addErrStr("ERROR - TitanFile::writeEntry");
   _addErrStr("  Writing to file: ", _filePath);
 
-  // set initial offsets if needed
+  // compute offset for this and next entry
   
-  if (entry.storm_num == 0) {
-    // first entry in a scan
-    _prev_in_scan_offset = -1;
-  }
+  int thisEntryOffset = getScanEntryOffset(_entry.scan_num, _entry.storm_num);
+  int nextScanEntryOffset = getNextScanEntryOffset(_entry.scan_num, _entry.storm_num);
+  
+  // set initial prev offset
+  
   if (entry.duration_in_scans == 0) {
-    // first entry in a simple track
+    // first entry in a simple track - initialize
     _prev_in_track_offset = -1;
+  } else {
+    // store this_offset as next_offset of prev entry
+    std::vector<size_t> prevIndex = NcxxVar::makeIndex(_prev_in_track_offset);
+    _entryVars.next_entry_offset.putVal(prevIndex, thisEntryOffset);
   }
 
-  int entryOffset = getStormEntryOffset(entry.scan_num, entry.storm_num);
-  std::vector<size_t> entryIndex = NcxxVar::makeIndex(entryOffset);
+  // do the write
+  
+  std::vector<size_t> thisIndex = NcxxVar::makeIndex(thisEntryOffset);
+  _entryVars.time.putVal(thisIndex, entry.time);
+  _entryVars.time_origin.putVal(thisIndex, entry.time_origin);
+  _entryVars.scan_origin.putVal(thisIndex, entry.scan_origin);
+  _entryVars.scan_num.putVal(thisIndex, entry.scan_num);
+  _entryVars.storm_num.putVal(thisIndex, entry.storm_num);
+  _entryVars.simple_track_num.putVal(thisIndex, entry.simple_track_num);
+  _entryVars.complex_track_num.putVal(thisIndex, entry.complex_track_num);
+  _entryVars.history_in_scans.putVal(thisIndex, entry.history_in_scans);
+  _entryVars.history_in_secs.putVal(thisIndex, entry.history_in_secs);
+  _entryVars.duration_in_scans.putVal(thisIndex, entry.duration_in_scans);
+  _entryVars.duration_in_secs.putVal(thisIndex, entry.duration_in_secs);
+  _entryVars.forecast_valid.putVal(thisIndex, entry.forecast_valid);
+  _entryVars.prev_entry_offset.putVal(thisIndex, _prev_in_track_offset);
+  _entryVars.this_entry_offset.putVal(thisIndex, thisEntryOffset);
+  _entryVars.next_entry_offset.putVal(-1);
+  _entryVars.next_scan_entry_offset.putVal(thisIndex, nextScanEntryOffset);
 
-  _entryVars.time.putVal(entryIndex, entry.time);
-  _entryVars.time_origin.putVal(entryIndex, entry.time_origin);
-  _entryVars.scan_origin.putVal(entryIndex, entry.scan_origin);
-  _entryVars.scan_num.putVal(entryIndex, entry.scan_num);
-  _entryVars.storm_num.putVal(entryIndex, entry.storm_num);
-  _entryVars.simple_track_num.putVal(entryIndex, entry.simple_track_num);
-  _entryVars.complex_track_num.putVal(entryIndex, entry.complex_track_num);
-  _entryVars.history_in_scans.putVal(entryIndex, entry.history_in_scans);
-  _entryVars.history_in_secs.putVal(entryIndex, entry.history_in_secs);
-  _entryVars.duration_in_scans.putVal(entryIndex, entry.duration_in_scans);
-  _entryVars.duration_in_secs.putVal(entryIndex, entry.duration_in_secs);
-  _entryVars.forecast_valid.putVal(entryIndex, entry.forecast_valid);
-  _entryVars.prev_entry_offset.putVal(entryIndex, entry.prev_entry_offset);
-  _entryVars.this_entry_offset.putVal(entryIndex, entry.this_entry_offset);
-  _entryVars.next_entry_offset.putVal(entryIndex, entry.next_entry_offset);
-  _entryVars.next_scan_entry_offset.putVal(entryIndex, entry.next_scan_entry_offset);
+  // save offset for next time
+  
+  _prev_in_track_offset = thisEntryOffset;
 
-  return entryOffset;
+  // return this offset
+  
+  return thisEntryOffset;
   
 }
 
@@ -4734,8 +4745,8 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
 // First we read the scan first offset, and then add the
 // storm_num.
 
-int TitanFile::getStormEntryOffset(int scan_num,
-                                   int storm_num)
+int TitanFile::getScanEntryOffset(int scan_num,
+                                  int storm_num)
 {
   std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
   int scanFirstOffset;
