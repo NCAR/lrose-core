@@ -72,7 +72,7 @@ TitanFile::TitanFile()
   //  _scan_offsets = nullptr;
   // _storm_num = 0;
 
-  _max_scans = 0;
+  // _max_scans = 0;
   _max_storms = 0;
   _max_layers = 0;
   _max_hist = 0;
@@ -376,7 +376,6 @@ void TitanFile::_setUpDims()
   _scansDim = _getDim(N_SCANS, _scansGroup);
   _stormsDim = _getDim(N_STORMS, _gpropsGroup);
   _simpleDim = _getDim(N_SIMPLE, _simpleGroup);
-  _complexDim = _getDim(N_COMPLEX, _complexGroup);
   _maxComplexDim = _getDim(MAX_COMPLEX, _complexGroup);
   _entriesDim = _getDim(N_ENTRIES, _entriesGroup);
   _polyDim = _getDim(N_POLY, N_POLY_SIDES, _gpropsGroup);
@@ -980,6 +979,10 @@ void TitanFile::_setUpVars()
 
   // tracking state
   
+  _tstateVars.n_simple_tracks =
+    _getVar(N_SIMPLE_TRACKS, NcxxType::nc_INT, _tracksGroup);
+  _tstateVars.n_complex_tracks =
+    _getVar(N_COMPLEX_TRACKS, NcxxType::nc_INT, _tracksGroup);
   _tstateVars.tracking_valid =
     _getVar(TRACKING_VALID, NcxxType::nc_INT, _tracksGroup);
   _tstateVars.tracking_modify_code =
@@ -1127,7 +1130,7 @@ void TitanFile::_setUpVars()
 
   // array of complex track nums - these are in increasing order, no gaps
   
-  _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _complexDim, _complexGroup);
+  _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _maxComplexDim, _complexGroup);
   if (_fileMode != NcxxFile::read) {
     _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
   }
@@ -2004,9 +2007,11 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 
   // check
 
-  if (scan_num >= _max_scans) {
-    return -1;
-  }
+  // cerr << "1111111111111 scan_num, _max_scans: " << scan_num << ", " << _max_scans << endl;
+  
+  // if (scan_num >= _max_scans) {
+  //   return -1;
+  // }
   
   // scan header storage index in file
   
@@ -2020,6 +2025,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   _scanVars.scan_nstorms.getVal(scanPos, &_scan.nstorms);
   _scanVars.scan_time.getVal(scanPos, &_scan.time);
   _scanVars.scan_ht_of_freezing.getVal(scanPos, &_scan.ht_of_freezing);
+  _scanVars.scan_gprops_offset.getVal(scanPos, &_scan.gprops_offset);
 
   // read grid details
 
@@ -2039,12 +2045,12 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   _scanVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
   _scanVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
 
-  char units[1024];
-  _scanVars.grid_unitsx.getVal(scanPos, units);
+  char units[10000];
+  _scanVars.grid_unitsx.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsy.getVal(scanPos, units);
+  _scanVars.grid_unitsy.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsz.getVal(scanPos, units);
+  _scanVars.grid_unitsz.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
   
   // read projection details
@@ -2074,10 +2080,10 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   // read in global props
   
-  _layerOffsets.resize(nStorms);
-  _histOffsets.resize(nStorms);
-  _runsOffsets.resize(nStorms);
-  _projRunsOffsets.resize(nStorms);
+  // _layerOffsets.resize(nStorms);
+  // _histOffsets.resize(nStorms);
+  // _runsOffsets.resize(nStorms);
+  // _projRunsOffsets.resize(nStorms);
 
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
@@ -2169,10 +2175,17 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 
     // offsets into layers, histograms and runs
     
-    _gpropsVars.layer_props_offset.getVal(stormIndex, &_layerOffsets[istorm]);
-    _gpropsVars.dbz_hist_offset.getVal(stormIndex, &_histOffsets[istorm]);
-    _gpropsVars.runs_offset.getVal(stormIndex, &_runsOffsets[istorm]);
-    _gpropsVars.proj_runs_offset.getVal(stormIndex, &_projRunsOffsets[istorm]);
+    _gpropsVars.layer_props_offset.getVal(stormIndex, &gp.layer_props_offset);
+    _gpropsVars.dbz_hist_offset.getVal(stormIndex, &gp.dbz_hist_offset);
+    _gpropsVars.runs_offset.getVal(stormIndex, &gp.runs_offset);
+    _gpropsVars.proj_runs_offset.getVal(stormIndex, &gp.proj_runs_offset);
+    
+    // _layerOffsets[istorm] = gp.layer_props_offset;
+    // _histOffsets[istorm] = gp.dbz_hist_offset;
+    // _runsOffsets[istorm] = gp.runs_offset;
+    // _projRunsOffsets[istorm] = gp.proj_runs_offset;
+
+    // cerr << "aaaaaaaaaa istorm offsets layer, hist, runs, proj_runs: " << istorm << ", " <<  _layerOffsets[istorm] << ", " << _histOffsets[istorm] << ", " << _runsOffsets[istorm] << ", " << _projRunsOffsets[istorm] << endl;
 
   } // istorm
 
@@ -2347,7 +2360,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   }
   
   _clearErrStr();
-  _addErrStr("ERROR - TitanFile::writeScan");
+  _addErrStr("ERROR - TitanFile::writeStormScan");
   _addErrStr("  File: ", _filePath);
 
   // update attributes that depend on scan type
@@ -2887,7 +2900,7 @@ int TitanFile::writeStormAux(int storm_num,
 //
 // Returns 0 on success, -1 on failure.
 
-int TitanFile::truncateStormData(int lastGoodScanNum)
+int TitanFile::truncateData(int lastGoodScanNum)
   
 {
   
@@ -2932,6 +2945,9 @@ int TitanFile::truncateStormData(int lastGoodScanNum)
   _clearGroupVars(_simpleGroup, 0);
   _clearGroupVars(_complexGroup, 0);
   _clearGroupVars(_entriesGroup, 0);
+  _track_header.n_simple_tracks = 0;
+  _track_header.n_complex_tracks = 0;
+  _track_header.n_scans = _nScans;
   
   // update the top level status vars
   
@@ -3409,16 +3425,14 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     // save state
     _track_header = _tFile.header();
     assert(_nScans == _track_header.n_scans);
-    int n_complex_tracks = _track_header.n_complex_tracks;
-    int n_simple_tracks = _track_header.n_simple_tracks;
-    allocComplexArrays(n_complex_tracks);
-    allocSimpleArrays(n_simple_tracks);
+    allocComplexArrays(_track_header.n_complex_tracks);
+    allocSimpleArrays(_track_header.n_simple_tracks);
     memcpy(_complex_track_nums, _tFile.complex_track_nums(),
-           n_complex_tracks * sizeof(si32));
+           _track_header.n_complex_tracks * sizeof(si32));
     memcpy(_n_simples_per_complex, _tFile.nsimples_per_complex(),
-           n_simple_tracks * sizeof(si32));
+           _track_header.n_simple_tracks * sizeof(si32));
     memcpy(_simples_per_complex_offsets, _tFile.simples_per_complex_offsets(),
-           n_simple_tracks * sizeof(si32));
+           _track_header.n_simple_tracks * sizeof(si32));
     // read in simples per complex
     if (readSimplesPerComplex()) {
       _errStr = _tFile.getErrStr();
@@ -3459,6 +3473,8 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   _tparamsVars.min_history_for_valid_forecast.getVal(&tparams.min_history_for_valid_forecast);
   _tparamsVars.spatial_smoothing.getVal(&tparams.spatial_smoothing);
   
+  _tstateVars.n_simple_tracks.getVal(&_track_header.n_simple_tracks);
+  _tstateVars.n_complex_tracks.getVal(&_track_header.n_complex_tracks);
   _tstateVars.tracking_valid.getVal(&_track_header.file_valid);
   _tstateVars.tracking_modify_code.getVal(&_track_header.modify_code);
   _tstateVars.n_samples_for_forecast_stats.getVal(&_track_header.n_samples_for_forecast_stats);
@@ -3500,12 +3516,8 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
 
   // alloc arrays
 
-  int n_complex_tracks = _track_header.n_complex_tracks;
-  int n_simple_tracks = _track_header.n_simple_tracks;
-  // int n_scans = _track_header.n_scans;
-  
-  allocComplexArrays(n_complex_tracks);
-  allocSimpleArrays(n_simple_tracks);
+  allocComplexArrays(_track_header.n_complex_tracks);
+  allocSimpleArrays(_track_header.n_simple_tracks);
   allocScanIndex(_nScans);
   
   // read in complex track num array
@@ -3515,7 +3527,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   // a complex track.
   
   std::vector<size_t> compNumIndex = NcxxVar::makeIndex(0);
-  std::vector<size_t> compNumCount = NcxxVar::makeIndex(n_complex_tracks);
+  std::vector<size_t> compNumCount = NcxxVar::makeIndex(_track_header.n_complex_tracks);
   _complexTrackNumsVar.getVal(compNumIndex, compNumCount, _complex_track_nums);
 
   // read in simples_per_complex 1D array, create 2D array
@@ -4406,7 +4418,10 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteHeader(track_file_header)) {
+    if (_tFile.WriteHeader(track_file_header,
+                           _complex_track_nums,
+                           _n_simples_per_complex,
+                           _simples_per_complex_offsets)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -4445,6 +4460,8 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
   _tparamsVars.min_history_for_valid_forecast.putVal(tparams.min_history_for_valid_forecast);
   _tparamsVars.spatial_smoothing.putVal(tparams.spatial_smoothing);
   
+  _tstateVars.n_simple_tracks.putVal(_track_header.n_simple_tracks);
+  _tstateVars.n_complex_tracks.putVal(_track_header.n_complex_tracks);
   _tstateVars.tracking_valid.putVal(_track_header.file_valid);
   _tstateVars.tracking_modify_code.putVal(_track_header.modify_code);
   _tstateVars.n_samples_for_forecast_stats.putVal(_track_header.n_samples_for_forecast_stats);
@@ -4558,9 +4575,9 @@ int TitanFile::writeComplexTrackParams(int cindex,
   _addErrStr("ERROR - TitanFile::writeComplexParams");
   _addErrStr("  Writing to file: ", _filePath);
   
-  // complex_track_nums array has dimension _n_complex
-  // the track numbers are monotonically increasing, but will have gaps
-  // due to mergers and splits
+  // complex_track_nums are monotonically increasing, with no gaps
+  // however the maxComplex dimension may be larger than the number of
+  // complex tracks, if there are mergers and splits
   
   std::vector<size_t> numIndex = NcxxVar::makeIndex(cindex);
   _complexTrackNumsVar.putVal(numIndex, cparams.complex_track_num);

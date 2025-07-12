@@ -1618,9 +1618,22 @@ int TitanTrackFile::SeekStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header)
+int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
+                                si32 *complex_track_nums,
+                                si32 *n_simples_per_complex,
+                                si32 *simples_per_complex_offsets)
 {
+  // save state to local variables
   _header = track_file_header;
+  AllocSimpleArrays(_header.n_simple_tracks);
+  AllocComplexArrays(_header.n_complex_tracks);
+  memcpy(_complex_track_nums, complex_track_nums,
+         _header.n_complex_tracks *  sizeof(si32));
+  memcpy(_nsimples_per_complex, n_simples_per_complex,
+         _header.n_simple_tracks *  sizeof(si32));
+  memcpy(_simples_per_complex_offsets, simples_per_complex_offsets,
+         _header.n_simple_tracks *  sizeof(si32));
+  // call in-class method
   return WriteHeader();
 }
 

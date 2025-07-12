@@ -218,7 +218,11 @@ public:
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
-  int WriteHeader(const track_file_header_t &track_file_header);
+  int WriteHeader(const track_file_header_t &track_file_header,
+                  si32 *complex_track_nums,
+                  si32 *n_simples_per_complex,
+                  si32 *simples_per_complex_offsets);
+
   int WriteHeader();
 
   // write simple track params at the end of the file

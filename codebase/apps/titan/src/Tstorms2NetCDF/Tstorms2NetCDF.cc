@@ -477,10 +477,10 @@ int Tstorms2NetCDF::_processInputFile()
   
   _outFile.writeTrackHeader(_inFile.track_header());
 
-  // truncate test if requested
+  // test truncate if requested
   
   if (_params.test_truncation) {
-    _outFile.truncateStormData(_params.truncation_scan_number);
+    _outFile.truncateData(_params.truncation_scan_number);
   }
   
   // close

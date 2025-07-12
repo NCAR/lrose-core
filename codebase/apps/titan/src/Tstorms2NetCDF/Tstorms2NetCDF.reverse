@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for Tstorms2NetCDF
+ * TDRP params for ./Tstorms2NetCDF
  **********************************************************************/
 
 //======================================================================
@@ -73,7 +73,7 @@ input_mode = ARCHIVE;
 //
 // Type: string
 
-input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+input_dir = "/tmp/output/netcdf";
 
 //======================================================================
 //
@@ -108,4 +108,35 @@ output_dir = "/tmp/output/titan_legacy";
 // Type: boolean
 
 convert_to_legacy = TRUE;
+
+//======================================================================
+//
+// OPTION TO TEST TRUNCATION OPTION.
+//
+// Truncation is used by Titan when it reprocesses scans that have 
+//   previously been handled.
+//
+//======================================================================
+ 
+///////////// test_truncation /////////////////////////
+//
+// Option to test the truncation option.
+//
+// If TRUE, the output data will be truncated at the specified scan 
+//   number.
+//
+// Type: boolean
+
+test_truncation = FALSE;
+
+///////////// truncation_scan_number //////////////////
+//
+// Scan number for truncation test.
+//
+// This scan will be kept. The storm data for all subsequent scans will 
+//   be set to missing. All tracking data will be set to missing.
+//
+// Type: int
+
+truncation_scan_number = -1;
 

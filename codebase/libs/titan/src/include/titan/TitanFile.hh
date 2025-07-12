@@ -310,6 +310,8 @@ private:
   class TrackingStateVars
   {
   public:
+    NcxxVar n_simple_tracks;
+    NcxxVar n_complex_tracks;
     NcxxVar tracking_valid;
     NcxxVar tracking_modify_code;
     NcxxVar n_samples_for_forecast_stats;
@@ -656,8 +658,10 @@ public:
                     const storm_file_run_t *proj_runs);
   
   // truncate when rerunning
+  // truncates storm data at the specified scan and
+  // sets all tracking data to missing
   
-  int truncateStormData(int lastGoodScanNum);
+  int truncateData(int lastGoodScanNum);
 
   /////////////////////////////////////////////////////
   // Tracks
@@ -877,7 +881,6 @@ protected:
   NcxxDim _scansDim;
   NcxxDim _stormsDim;
   NcxxDim _simpleDim;
-  NcxxDim _complexDim;
   NcxxDim _maxComplexDim;
   NcxxDim _entriesDim;
   NcxxDim _polyDim;
@@ -982,7 +985,7 @@ protected:
 
   // storm memory allocation
   
-  int _max_scans;
+  // int _max_scans;
   int _max_storms;
   int _max_layers;
   int _max_hist;
@@ -1409,7 +1412,7 @@ public:
   const std::string RUN_IZ = "run_iz";
   const std::string RUN_LEN = "run_len";
 
-  // tracking parameters
+  // tracking
 
   const std::string TRACKING_VALID = "tracking_valid";
   const std::string TRACKING_MODIFY_CODE = "tracking_modify_code";
@@ -1441,6 +1444,7 @@ public:
 
   // simple tracks
 
+  const std::string N_SIMPLE_TRACKS = "n_simple_tracks";
   const std::string SIMPLE_TRACK_NUM = "simple_track_num";
   const std::string LAST_DESCENDANT_SIMPLE_TRACK_NUM = "last_descendant_simple_track_num";
   const std::string START_SCAN = "start_scan";
@@ -1462,15 +1466,14 @@ public:
   const std::string N_SIMPLES_PER_COMPLEX = "n_simples_per_complex";
   const std::string SIMPLES_PER_COMPLEX = "simples_per_complex";
   const std::string SIMPLES_PER_COMPLEX_OFFSETS = "simples_per_complex_offsets";
-  // const std::string COMPLEX_TRACK_OFFSETS = "complex_track_offsets";
-
+  
   // complex tracks
 
+  const std::string N_COMPLEX_TRACKS = "n_complex_tracks";
   const std::string VOLUME_AT_START_OF_SAMPLING = "volume_at_start_of_sampling";
   const std::string VOLUME_AT_END_OF_SAMPLING = "volume_at_end_of_sampling";
   const std::string COMPLEX_TRACK_NUM = "complex_track_num";
   const std::string COMPLEX_TRACK_NUMS = "complex_track_nums";
-  const std::string N_SIMPLE_TRACKS = "n_simple_tracks";
   const std::string N_TOP_MISSING = "n_top_missing";
   const std::string N_RANGE_LIMITED = "n_range_limited";
   const std::string START_MISSING = "start_missing";
