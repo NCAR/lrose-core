@@ -1013,9 +1013,8 @@ protected:
   
   // track entry offsets
   
-  long _prev_in_track_offset;
-  // long _prev_in_scan_offset;
-
+  long _prevEntryOffset;
+  
   // track memory allocation control
 
   int _n_simple_allocated;

@@ -2037,7 +2037,7 @@ long TitanTrackFile::WriteEntry(const track_file_entry_t &entry)
     // first entry in a scan
     _prev_in_scan_offset = 0;
   }
-  if (entry.duration_in_scans == 0) {
+  if (entry.duration_in_secs == 0) {
     // first entry in a simple track
     _prev_in_track_offset = 0;
   }

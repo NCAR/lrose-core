@@ -117,7 +117,7 @@ TitanFile::TitanFile()
   _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
-  _prev_in_track_offset = 0;
+  _prevEntryOffset = 0;
   // _prev_in_scan_offset = 0;
 
   _horizGridUnits = KM;
@@ -4672,12 +4672,12 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   
   // set initial prev offset
   
-  if (entry.duration_in_scans == 0) {
+  if (entry.duration_in_secs == 0) {
     // first entry in a simple track - initialize
-    _prev_in_track_offset = -1;
+    _prevEntryOffset = -1;
   } else {
     // store this_offset as next_offset of prev entry
-    std::vector<size_t> prevIndex = NcxxVar::makeIndex(_prev_in_track_offset);
+    std::vector<size_t> prevIndex = NcxxVar::makeIndex(_prevEntryOffset);
     _entryVars.next_entry_offset.putVal(prevIndex, thisEntryOffset);
   }
 
@@ -4696,14 +4696,19 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   _entryVars.duration_in_scans.putVal(thisIndex, entry.duration_in_scans);
   _entryVars.duration_in_secs.putVal(thisIndex, entry.duration_in_secs);
   _entryVars.forecast_valid.putVal(thisIndex, entry.forecast_valid);
-  _entryVars.prev_entry_offset.putVal(thisIndex, _prev_in_track_offset);
+  _entryVars.prev_entry_offset.putVal(thisIndex, _prevEntryOffset);
   _entryVars.this_entry_offset.putVal(thisIndex, thisEntryOffset);
   _entryVars.next_entry_offset.putVal(-1);
   _entryVars.next_scan_entry_offset.putVal(thisIndex, nextScanEntryOffset);
 
+  if (entry.duration_in_secs == 0) {
+    cerr << "===================================================" << endl;
+  }
+  cerr << "11111111111 scan, storm, _prevEntryOffset, thisEntryOffset: " << _entry.scan_num << ", " << _entry.storm_num << ", " << _prevEntryOffset << ", " << thisEntryOffset << endl;
+  
   // save offset for next time
   
-  _prev_in_track_offset = thisEntryOffset;
+  _prevEntryOffset = thisEntryOffset;
 
   // return this offset
   
