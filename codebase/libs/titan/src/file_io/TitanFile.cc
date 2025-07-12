@@ -4698,14 +4698,9 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   _entryVars.forecast_valid.putVal(thisIndex, entry.forecast_valid);
   _entryVars.prev_entry_offset.putVal(thisIndex, _prevEntryOffset);
   _entryVars.this_entry_offset.putVal(thisIndex, thisEntryOffset);
-  _entryVars.next_entry_offset.putVal(-1);
+  _entryVars.next_entry_offset.putVal(thisIndex, -1);
   _entryVars.next_scan_entry_offset.putVal(thisIndex, nextScanEntryOffset);
 
-  if (entry.duration_in_secs == 0) {
-    cerr << "===================================================" << endl;
-  }
-  cerr << "11111111111 scan, storm, _prevEntryOffset, thisEntryOffset: " << _entry.scan_num << ", " << _entry.storm_num << ", " << _prevEntryOffset << ", " << thisEntryOffset << endl;
-  
   // save offset for next time
   
   _prevEntryOffset = thisEntryOffset;
