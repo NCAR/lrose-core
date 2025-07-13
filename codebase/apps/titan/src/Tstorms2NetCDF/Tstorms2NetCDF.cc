@@ -475,7 +475,10 @@ int Tstorms2NetCDF::_processInputFile()
 
   // write the track header
   
-  _outFile.writeTrackHeader(_inFile.track_header());
+  _outFile.writeTrackHeader(_inFile.track_header(),
+                            _inFile.complex_track_nums(),
+                            _inFile.n_simples_per_complex(),
+                            (const si32**) _inFile.simples_per_complex_2D());
 
   // test truncate if requested
   
@@ -572,16 +575,22 @@ int Tstorms2NetCDF::_processScan(int scan_num,
     // side-effect - sets offsets vectors
     
     _outFile.writeStormAux(istorm,
-                           _inFile.storm_header(), _inFile.scan(), _inFile.gprops(),
-                           _inFile.lprops(), _inFile.hist(),
-                           _inFile.runs(), _inFile.proj_runs());
+                           _inFile.storm_header(),
+                           _inFile.scan(),
+                           _inFile.gprops(),
+                           _inFile.lprops(),
+                           _inFile.hist(),
+                           _inFile.runs(),
+                           _inFile.proj_runs());
     
   }
 
   // write the scan and global properties to NetCDF
   // the appropriate offsets have been set by writeSecProps()
   
-  _outFile.writeStormScan(_inFile.storm_header(), _inFile.scan(), _inFile.gprops());
+  _outFile.writeStormScan(_inFile.storm_header(),
+                          _inFile.scan(),
+                          _inFile.gprops());
   
   return 0;
 

@@ -501,7 +501,7 @@ public:
   const si32 *n_simples_per_complex() { return _n_simples_per_complex; }
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
   si32 *simples_per_complex_1D() { return _simples_per_complex_1D; }
-  si32 **simples_per_complex() { return _simples_per_complex_2D; }
+  si32 **simples_per_complex_2D() { return _simples_per_complex_2D; }
 
   // public functions
 
@@ -759,7 +759,10 @@ public:
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
-  int writeTrackHeader(const track_file_header_t &track_file_header);
+  int writeTrackHeader(const track_file_header_t &track_file_header,
+                       const si32 *complex_track_nums,
+                       const si32 *n_simples_per_complex,
+                       const si32 **simples_per_complex_2D);
 
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure

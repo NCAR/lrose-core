@@ -4407,7 +4407,10 @@ int TitanFile::seekTrackStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
+int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
+                                const si32 *complex_track_nums,
+                                const si32 *n_simples_per_complex,
+                                const si32 **simples_per_complex_2D)
      
 {
 
@@ -4415,13 +4418,30 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header)
 
   _track_header = track_file_header;
   
+  allocSimpleArrays(_track_header.n_simple_tracks);
+  allocComplexArrays(_track_header.n_complex_tracks);
+
+  memcpy(_n_simples_per_complex, n_simples_per_complex,
+         _track_header.n_simple_tracks *  sizeof(si32));
+
+  for (int ii = 0; ii < _track_header.n_complex_tracks; ii++) {
+    int complex_num = complex_track_nums[ii];
+    int nsimples = n_simples_per_complex[complex_num];
+    _simples_per_complex_2D[complex_num] = (si32 *) urealloc
+      (_simples_per_complex_2D[complex_num],
+       (nsimples * sizeof(si32)));
+    memcpy(_simples_per_complex_2D[complex_num],
+           simples_per_complex_2D[complex_num],
+           nsimples * sizeof(si32));
+  }
+  
   // handle legacy format
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteHeader(track_file_header,
                            _complex_track_nums,
                            _n_simples_per_complex,
-                           _simples_per_complex_offsets)) {
+                           (const si32**) _simples_per_complex_2D)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
