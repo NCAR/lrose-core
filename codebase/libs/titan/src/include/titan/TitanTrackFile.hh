@@ -79,7 +79,7 @@ public:
   const si32 *complex_track_nums() { return _complex_track_nums; }
   const si32 *complex_track_offsets() { return _complex_track_offsets; }
   const si32 *simple_track_offsets() { return _simple_track_offsets; }
-  const si32 *nsimples_per_complex() { return _nsimples_per_complex; }
+  const si32 *nsimples_per_complex() { return _n_simples_per_complex; }
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
   si32 **simples_per_complex() { return _simples_per_complex; }
 
@@ -234,7 +234,8 @@ public:
   // write complex track params
   // returns 0 on success, -1 on failure
   
-  int WriteComplexParams(const complex_track_params_t &cparams);
+  int WriteComplexParams(int complex_index,
+                         const complex_track_params_t &cparams);
   int WriteComplexParams(int track_num);
      
   // Write an entry for a track in the track data file
@@ -290,7 +291,7 @@ protected:
   si32 *_complex_track_nums;
   si32 *_complex_track_offsets;
   si32 *_simple_track_offsets;
-  si32 *_nsimples_per_complex;
+  si32 *_n_simples_per_complex;
   si32 *_simples_per_complex_offsets;
   si32 **_simples_per_complex;
   int _n_scan_entries;

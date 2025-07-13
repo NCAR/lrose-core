@@ -768,9 +768,10 @@ public:
                              const simple_track_params_t &sparams);
      
   // write complex track params
+  // complex_index is the index of this track in the complex_track_nums array
   // returns 0 on success, -1 on failure
   
-  int writeComplexTrackParams(int cindex,
+  int writeComplexTrackParams(int complex_index,
                               const complex_track_params_t &cparams);
      
   // write an entry for a track in the track data file

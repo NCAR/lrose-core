@@ -4546,13 +4546,13 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
 //
 // write complex track params.
 //
-// You need to call readTrackHeader() first.
+// complex_index is the index of this track in the complex_track_nums array
 //
 // returns 0 on success, -1 on failure.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeComplexTrackParams(int cindex,
+int TitanFile::writeComplexTrackParams(int complex_index,
                                        const complex_track_params_t &cparams)
   
 {
@@ -4564,7 +4564,7 @@ int TitanFile::writeComplexTrackParams(int cindex,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteComplexParams(cparams)) {
+    if (_tFile.WriteComplexParams(complex_index, cparams)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -4579,7 +4579,7 @@ int TitanFile::writeComplexTrackParams(int cindex,
   // however the maxComplex dimension may be larger than the number of
   // complex tracks, if there are mergers and splits
   
-  std::vector<size_t> numIndex = NcxxVar::makeIndex(cindex);
+  std::vector<size_t> numIndex = NcxxVar::makeIndex(complex_index);
   _complexTrackNumsVar.putVal(numIndex, cparams.complex_track_num);
   
   // variables with dimension _maxComplexDim
