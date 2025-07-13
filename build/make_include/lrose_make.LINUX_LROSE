@@ -60,6 +60,7 @@ CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS) -fPIC
 PROFILE_FLAG = -pg
 DEBUG_FLAG = -g
+# DEBUG_FLAG = -g -fsanitize=address
 OPT_FLAG = -O2
 
 # C++

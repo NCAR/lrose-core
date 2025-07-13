@@ -1634,11 +1634,12 @@ int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
   // save state to local variables
   _header = track_file_header;
   cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
-  AllocSimpleArrays(_header.n_simple_tracks);
+  // AllocSimpleArrays(_header.n_simple_tracks);
+  AllocSimplesPerComplex(_header.n_simple_tracks);
   cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
   AllocComplexArrays(_header.n_complex_tracks);
-  // memcpy(_complex_track_nums, complex_track_nums,
-  //        _header.n_complex_tracks *  sizeof(si32));
+  memcpy(_complex_track_nums, complex_track_nums,
+         _header.n_complex_tracks *  sizeof(si32));
   memcpy(_n_simples_per_complex, n_simples_per_complex,
          _header.n_simple_tracks *  sizeof(si32));
   for (int ii = 0; ii < _header.n_complex_tracks; ii++) {
