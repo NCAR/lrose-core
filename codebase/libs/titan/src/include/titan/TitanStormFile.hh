@@ -67,15 +67,15 @@ public:
   const int *scan_offsets() const { return _scan_offsets; }
   int storm_num() const { return _storm_num; }
   
-  const string &header_file_path() { return _header_file_path; }
-  const string &header_file_label() { return _header_file_label; }
-  const string &data_file_path() { return _data_file_path; }
-  const string &data_file_label() { return _data_file_label; }
+  const string &header_file_path() const { return _header_file_path; }
+  const string &header_file_label() const { return _header_file_label; }
+  const string &data_file_path() const { return _data_file_path; }
+  const string &data_file_label() const { return _data_file_label; }
 
   ///////////////////////////////////////////////////////////////////
   // error string
   
-  const string &getErrStr() { return (_errStr); }
+  const string &getErrStr() const { return (_errStr); }
 
   // public functions
 

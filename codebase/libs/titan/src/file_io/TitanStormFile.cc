@@ -482,7 +482,9 @@ void TitanStormFile::CloseFiles()
 
   // unlock the header file
 
-  UnlockHeaderFile();
+  if (_header_file != NULL) {
+    UnlockHeaderFile();
+  }
 
   // close the header file
   
@@ -608,7 +610,7 @@ int TitanStormFile::ReadHeader(bool clear_error_str /* = true*/ )
   
   // check label
   
-  if (_header_file_label != header_file_label) {
+  if (_header_file_label != string(header_file_label)) {
     _errStr +=
       "  Header file does not contain correct label.\n";
     TaStr::AddStr(_errStr, "  File label is: ", header_file_label);

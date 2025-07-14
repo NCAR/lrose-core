@@ -281,7 +281,7 @@ int TitanFile::_openLegacyFiles(const string &path,
     Path stormPath(stormHeaderPath);
     stormPath.makeDirRecurse();
   }
-
+  
   if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str(), "sd5")) {
     _addErrStr("ERROR - TitanFile::openFile");
     _addErrStr(" Opening storm files, header path: ", stormHeaderPath);
@@ -311,7 +311,42 @@ void TitanFile::closeFile()
   }
   
 }
-     
+
+/////////////////////////////////////////
+// get paths
+
+string TitanFile::getStormFileHeaderPath() const {
+  if (_isLegacyV5Format) {
+    return _sFile.header_file_path();
+  } else {
+    return "NA";
+  }
+}
+
+string TitanFile::getStormFileDataPath() const {
+  if (_isLegacyV5Format) {
+    return _sFile.data_file_path();
+  } else {
+    return "NA";
+  }
+}
+
+string TitanFile::getTrackFileHeaderPath() const {
+  if (_isLegacyV5Format) {
+    return _tFile.header_file_path();
+  } else {
+    return "NA";
+  }
+}
+
+string TitanFile::getTrackFileDataPath() const {
+  if (_isLegacyV5Format) {
+    return _tFile.data_file_path();
+  } else {
+    return "NA";
+  }
+}
+
 /////////////////////////////////////////
 // set global attributes
 

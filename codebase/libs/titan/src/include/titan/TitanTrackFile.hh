@@ -71,17 +71,17 @@ public:
   const track_file_scan_index_t *scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
 
-  const string &header_file_path() { return _header_file_path; }
-  const string &header_file_label() { return _header_file_label; }
-  const string &data_file_path() { return _data_file_path; }
-  const string &data_file_label() { return _data_file_label; }
+  const string &header_file_path() const { return _header_file_path; }
+  const string &header_file_label() const { return _header_file_label; }
+  const string &data_file_path() const { return _data_file_path; }
+  const string &data_file_label() const { return _data_file_label; }
 
-  const si32 *complex_track_nums() { return _complex_track_nums; }
-  const si32 *complex_track_offsets() { return _complex_track_offsets; }
-  const si32 *simple_track_offsets() { return _simple_track_offsets; }
-  const si32 *nsimples_per_complex() { return _n_simples_per_complex; }
-  const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
-  si32 **simples_per_complex() { return _simples_per_complex; }
+  const si32 *complex_track_nums() const { return _complex_track_nums; }
+  const si32 *complex_track_offsets() const { return _complex_track_offsets; }
+  const si32 *simple_track_offsets() const { return _simple_track_offsets; }
+  const si32 *nsimples_per_complex() const { return _n_simples_per_complex; }
+  const si32 *simples_per_complex_offsets() const { return _simples_per_complex_offsets; }
+  si32 **simples_per_complex() const { return _simples_per_complex; }
 
   // memory allocation and freeing
 
@@ -261,7 +261,7 @@ public:
   ///////////////////////////////////////////////////////////////////
   // error string
   
-  const string &getErrStr() { return (_errStr); }
+  const string &getErrStr() const { return (_errStr); }
 
 protected:
 

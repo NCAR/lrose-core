@@ -189,7 +189,7 @@ int PrintTitanFiles::_printStormFile()
   
   // open storm properties files
   
-  if (sfile.OpenFiles("r", _args.path.c_str())) {
+  if (sfile.OpenFiles("r", _args.path.c_str(), "sd5")) {
     cerr << "ERROR - PrintTitanFiles::_printStormFile" << endl;
     cerr << sfile.getErrStr() << endl;
     return -1;
@@ -307,7 +307,7 @@ int PrintTitanFiles::_printTrackFile()
   // open track properties files
   
   TitanTrackFile tfile;
-  if (tfile.OpenFiles("r", _args.path.c_str())) {
+  if (tfile.OpenFiles("r", _args.path.c_str(), "td5")) {
     cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
     cerr << tfile.getErrStr() << endl;
     return -1;

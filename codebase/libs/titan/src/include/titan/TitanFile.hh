@@ -552,8 +552,12 @@ public:
 
   // get path in use
   
-  const string getPathInUse() const { return _filePath; }
-
+  string getPathInUse() const { return _filePath; }
+  string getStormFileHeaderPath() const;
+  string getStormFileDataPath() const;
+  string getTrackFileHeaderPath() const;
+  string getTrackFileDataPath() const;
+  
   /////////////////////////////////////////////////////
   // Storms
   

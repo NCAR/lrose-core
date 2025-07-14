@@ -262,7 +262,15 @@ int Tstorms2NetCDF::_processInputFile()
   }
 
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - opened output file: " << _outFile.getPathInUse() << endl;
+    if (writeLegacy) {
+      cerr << "Tstorms2NetCDF - opened output files: " << endl;
+      cerr << "  " << _outFile.getStormFileHeaderPath() << endl;
+      cerr << "  " << _outFile.getStormFileDataPath() << endl;
+      cerr << "  " << _outFile.getTrackFileHeaderPath() << endl;
+      cerr << "  " << _outFile.getTrackFileDataPath() << endl;
+    } else {
+      cerr << "Tstorms2NetCDF - opened output file: " << _outFile.getPathInUse() << endl;
+    }
   }
   
   // read storm header
@@ -491,7 +499,15 @@ int Tstorms2NetCDF::_processInputFile()
   _inFile.closeFile();
   
   if (_params.debug) {
-    cerr << "Tstorms2NetCDF - wrote NetCDF file: " << _outFile.getPathInUse() << endl;
+    if (writeLegacy) {
+      cerr << "Tstorms2NetCDF - wrote output files: " << endl;
+      cerr << "  " << _outFile.getStormFileHeaderPath() << endl;
+      cerr << "  " << _outFile.getStormFileDataPath() << endl;
+      cerr << "  " << _outFile.getTrackFileHeaderPath() << endl;
+      cerr << "  " << _outFile.getTrackFileDataPath() << endl;
+    } else {
+      cerr << "Tstorms2NetCDF - wrote output file: " << _outFile.getPathInUse() << endl;
+    }
   }
   
   return 0;

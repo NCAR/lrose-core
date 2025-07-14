@@ -45,6 +45,7 @@
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>
 #include <toolsa/TaArray.hh>
+#include <toolsa/Path.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////////////
@@ -137,8 +138,6 @@ void TitanTrackFile::AllocSimpleArrays(int n_simple_needed)
      
 {
 
-  cerr << "11111111111111111 AllocSimpleArrays, n_simple_needed, _n_simple_allocated: " << n_simple_needed << ", " << _n_simple_allocated << endl;
-  
   if (_n_simple_allocated < n_simple_needed) {
     
     int n_start = _n_simple_allocated;
@@ -146,8 +145,6 @@ void TitanTrackFile::AllocSimpleArrays(int n_simple_needed)
     int n_realloc = n_simple_needed + N_ALLOC;
     _n_simple_allocated = n_realloc;
 
-    cerr << "aaaaaaa n_start, n_realloc: " << n_start << ", " << n_realloc << endl;
-    
     _simple_track_offsets = (si32 *) urealloc
       (_simple_track_offsets, n_realloc * sizeof(si32));
       
@@ -171,8 +168,6 @@ void TitanTrackFile::AllocSimpleArrays(int n_simple_needed)
   
   } // if (_n_simple_allocated < n_simple_needed) 
 
-  cerr << "22222222222222222 AllocSimpleArrays, n_simple_needed, _n_simple_allocated: " << n_simple_needed << ", " << _n_simple_allocated << endl;
-  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -664,7 +659,9 @@ void TitanTrackFile::CloseFiles()
 
   // unlock the header file
 
-  UnlockHeaderFile();
+  if (_header_file != NULL) {
+    UnlockHeaderFile();
+  }
 
   // close the header file
   
@@ -794,7 +791,7 @@ int TitanTrackFile::ReadHeader(bool clear_error_str /* = true*/ )
   
   // check label
   
-  if (_header_file_label != header_file_label) {
+  if (_header_file_label != string(header_file_label)) {
     _errStr +=
       "  Header file does not contain correct label.\n";
     TaStr::AddStr(_errStr, "  File label is: ", header_file_label);
@@ -854,11 +851,9 @@ int TitanTrackFile::ReadHeader(bool clear_error_str /* = true*/ )
 
   // alloc arrays
 
-  cerr << "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj" << endl;
   AllocComplexArrays(n_complex_tracks);
   AllocSimpleArrays(n_simple_tracks);
   AllocScanIndex(n_scans);
-  cerr << "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj" << endl;
   
   // read in complex track num array
 
@@ -1633,10 +1628,7 @@ int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
 {
   // save state to local variables
   _header = track_file_header;
-  cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
-  // AllocSimpleArrays(_header.n_simple_tracks);
   AllocSimplesPerComplex(_header.n_simple_tracks);
-  cerr << "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << endl;
   AllocComplexArrays(_header.n_complex_tracks);
   memcpy(_complex_track_nums, complex_track_nums,
          _header.n_complex_tracks *  sizeof(si32));
@@ -1676,6 +1668,22 @@ int TitanTrackFile::WriteHeader()
   // set file time to gmt
   
   _header.file_time = time(NULL);
+
+  // set file names if not set
+
+  if (strlen(_header.header_file_name) == 0) {
+    Path hpath(_header_file_path);
+    STRncopy(_header.header_file_name, hpath.getFile().c_str(), R_LABEL_LEN);
+    if (strlen(_header.storm_header_file_name) == 0) {
+      Path spath(hpath);
+      spath.setExt("sh5");
+      STRncopy(_header.storm_header_file_name, spath.getFile().c_str(), R_LABEL_LEN);
+    }
+  }
+  if (strlen(_header.data_file_name) == 0) {
+    Path dpath(_data_file_path);
+    STRncopy(_header.data_file_name, dpath.getFile().c_str(), R_LABEL_LEN);
+  }
   
   // copy file label
   
@@ -1897,10 +1905,7 @@ int TitanTrackFile::WriteSimpleParams(int track_num)
      
 {
 
-  cerr << "xxxxxxxxxxxx WriteSimpleParams, track_num: " << track_num << endl;
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
   AllocSimpleArrays(track_num + 1);
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
   
   _clearErrStr();
   _errStr += "ERROR - TitanTrackFile::WriteSimpleParams\n";
@@ -1963,10 +1968,8 @@ int TitanTrackFile::WriteComplexParams(int complex_index,
   _complex_params = cparams;
   AllocComplexArrays(complex_index + 1);
   _complex_track_nums[complex_index] = cparams.complex_track_num;
-  cerr << "lllllllllllllllllllllllllll" << endl;
   AllocSimpleArrays(cparams.n_simple_tracks);
   AllocSimpleArrays(cparams.complex_track_num + 1);
-  cerr << "lllllllllllllllllllllllllll" << endl;
   _n_simples_per_complex[cparams.complex_track_num] = cparams.n_simple_tracks;
   return WriteComplexParams(cparams.complex_track_num);
 }
