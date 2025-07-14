@@ -1960,6 +1960,7 @@ int TitanFile::readStormAux(int storm_num)
     storm_file_layer_props_t &ll = _lprops[ilayer];
     std::vector<size_t> layerIndex = NcxxVar::makeIndex(layerPropsOffset);
     _lpropsVars.vol_centroid_x.getVal(layerIndex, &ll.vol_centroid_x);
+    cerr << "11111111111 vol_centroid_x: " << ll.vol_centroid_x << endl;
     _lpropsVars.vol_centroid_y.getVal(layerIndex, &ll.vol_centroid_y);
     _lpropsVars.refl_centroid_x.getVal(layerIndex, &ll.refl_centroid_x);
     _lpropsVars.refl_centroid_y.getVal(layerIndex, &ll.refl_centroid_y);
@@ -1970,7 +1971,11 @@ int TitanFile::readStormAux(int storm_num)
     _lpropsVars.rad_vel_mean.getVal(layerIndex, &ll.rad_vel_mean);
     _lpropsVars.rad_vel_sd.getVal(layerIndex, &ll.rad_vel_sd);
     _lpropsVars.vorticity.getVal(layerIndex, &ll.vorticity);
-    _lpropsVars.convectivity_median.getVal(layerIndex, &ll.convectivity_median);
+    float fval;
+    _lpropsVars.convectivity_median.getVal(layerIndex, &fval);
+    if (fval != missingFloat) {
+      ll.convectivity_median = fval;
+    }
   }
 
   // read in histogram data
@@ -2080,14 +2085,14 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   _scanVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
   _scanVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
 
-  char units[10000];
+  char *units;
   _scanVars.grid_unitsx.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
   _scanVars.grid_unitsy.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
   _scanVars.grid_unitsz.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
-  
+
   // read projection details
   
   _scanVars.proj_type.getVal(scanPos, &_scan.grid.proj_type);
@@ -2179,7 +2184,11 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
     _gpropsVars.bounding_max_iy.getVal(stormIndex, &gp.bounding_max_iy);
     _gpropsVars.vil_from_maxz.getVal(stormIndex, &gp.vil_from_maxz);
     _gpropsVars.ltg_count.getVal(stormIndex, &gp.ltg_count);
-    _gpropsVars.convectivity_median.getVal(stormIndex, &gp.convectivity_median);
+    float fval;
+    _gpropsVars.convectivity_median.getVal(stormIndex, &fval);
+    if (fval != missingFloat) {
+      gp.convectivity_median = fval;
+    }
 
     if (_storm_header.params.gprops_union_type == UNION_HAIL) {
       

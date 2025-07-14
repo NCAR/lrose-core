@@ -1233,16 +1233,20 @@ int TitanStormFile::WriteProps(int storm_num,
 
   // copy the layer, hist and runs data into this object
   
-  memcpy (_gprops, gprops,
-          n_storms * sizeof(storm_file_global_props_t));
-  memcpy (_lprops, lprops,
-          n_layers * sizeof(storm_file_layer_props_t));
-  memcpy (_hist, hist,
-          n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
-  memcpy (_runs, runs,
-          n_runs * sizeof(storm_file_run_t));
-  memcpy (_proj_runs, proj_runs,
-          n_proj_runs * sizeof(storm_file_run_t));
+  memcpy(_gprops, gprops,
+         n_storms * sizeof(storm_file_global_props_t));
+  memcpy(_lprops, lprops,
+         n_layers * sizeof(storm_file_layer_props_t));
+  memcpy(_hist, hist,
+         n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
+  memcpy(_runs, runs,
+         n_runs * sizeof(storm_file_run_t));
+  memcpy(_proj_runs, proj_runs,
+         n_proj_runs * sizeof(storm_file_run_t));
+
+  for (int ii = 0; ii < n_layers; ii++) {
+    cerr << "222222222222 vol_centroid_x: " << _lprops[ii].vol_centroid_x << endl;
+  }
 
   // call WriteProps()
 
