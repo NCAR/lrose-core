@@ -36,9 +36,9 @@
 #ifndef TitanStormFile_HH
 #define TitanStormFile_HH
 
-
 #include <titan/storm.h>
 #include <string>
+#include <vector>
 using namespace std;
 
 class TitanStormFile
@@ -179,7 +179,8 @@ public:
   // write the storm layer property and histogram data for a storm,
   // at the end of the file.
   // returns 0 on success, -1 on failure
-
+  // side-effect: updates write offsets for later use
+  
   int WriteProps(int storm_num,
                  int n_storms,
                  const storm_file_global_props_t *gprops,
@@ -251,6 +252,13 @@ protected:
   si32 *_scan_offsets;
   int _storm_num;
 
+  // offsets for auxiliary storm properties
+
+  vector<int64_t> _layerOffsets;
+  vector<int64_t> _histOffsets;
+  vector<int64_t> _runsOffsets;
+  vector<int64_t> _projRunsOffsets;
+  
   // memory allocation
 
   int _max_scans;

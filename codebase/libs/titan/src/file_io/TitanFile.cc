@@ -1958,9 +1958,8 @@ int TitanFile::readStormAux(int storm_num)
   
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
     storm_file_layer_props_t &ll = _lprops[ilayer];
-    std::vector<size_t> layerIndex = NcxxVar::makeIndex(layerPropsOffset);
+    std::vector<size_t> layerIndex = NcxxVar::makeIndex(layerPropsOffset + ilayer);
     _lpropsVars.vol_centroid_x.getVal(layerIndex, &ll.vol_centroid_x);
-    cerr << "11111111111 vol_centroid_x: " << ll.vol_centroid_x << endl;
     _lpropsVars.vol_centroid_y.getVal(layerIndex, &ll.vol_centroid_y);
     _lpropsVars.refl_centroid_x.getVal(layerIndex, &ll.refl_centroid_x);
     _lpropsVars.refl_centroid_y.getVal(layerIndex, &ll.refl_centroid_y);
@@ -1982,7 +1981,7 @@ int TitanFile::readStormAux(int storm_num)
   
   for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
     storm_file_dbz_hist_t &hh = _hist[ihist];
-    std::vector<size_t> histIndex = NcxxVar::makeIndex(dbzHistOffset);
+    std::vector<size_t> histIndex = NcxxVar::makeIndex(dbzHistOffset + ihist);
     _histVars.percent_volume.getVal(histIndex, &hh.percent_volume);
     _histVars.percent_area.getVal(histIndex, &hh.percent_area);
   }
@@ -1991,7 +1990,7 @@ int TitanFile::readStormAux(int storm_num)
   
   for (int irun = 0; irun < nRuns; irun++) {
     storm_file_run_t &run = _runs[irun];
-    std::vector<size_t> runIndex = NcxxVar::makeIndex(runsOffset);
+    std::vector<size_t> runIndex = NcxxVar::makeIndex(runsOffset + irun);
     _runsVars.run_ix.getVal(runIndex, &run.ix);
     _runsVars.run_iy.getVal(runIndex, &run.iy);
     _runsVars.run_iz.getVal(runIndex, &run.iz);
@@ -2002,7 +2001,7 @@ int TitanFile::readStormAux(int storm_num)
   
   for (int irun = 0; irun < nProjRuns; irun++) {
     storm_file_run_t &run = _proj_runs[irun];
-    std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset);
+    std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset + irun);
     _projRunsVars.run_ix.getVal(projRunIndex, &run.ix);
     _projRunsVars.run_iy.getVal(projRunIndex, &run.iy);
     _projRunsVars.run_iz.getVal(projRunIndex, &run.iz);
@@ -2045,14 +2044,6 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   _addErrStr("  Reading scan from file: ", _filePath);
   _addErrInt("  Scan number: ", scan_num);
 
-  // check
-
-  // cerr << "1111111111111 scan_num, _max_scans: " << scan_num << ", " << _max_scans << endl;
-  
-  // if (scan_num >= _max_scans) {
-  //   return -1;
-  // }
-  
   // scan header storage index in file
   
   std::vector<size_t> scanPos = NcxxVar::makeIndex(scan_num);
@@ -2224,13 +2215,6 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
     _gpropsVars.runs_offset.getVal(stormIndex, &gp.runs_offset);
     _gpropsVars.proj_runs_offset.getVal(stormIndex, &gp.proj_runs_offset);
     
-    // _layerOffsets[istorm] = gp.layer_props_offset;
-    // _histOffsets[istorm] = gp.dbz_hist_offset;
-    // _runsOffsets[istorm] = gp.runs_offset;
-    // _projRunsOffsets[istorm] = gp.proj_runs_offset;
-
-    // cerr << "aaaaaaaaaa istorm offsets layer, hist, runs, proj_runs: " << istorm << ", " <<  _layerOffsets[istorm] << ", " << _histOffsets[istorm] << ", " << _runsOffsets[istorm] << ", " << _projRunsOffsets[istorm] << endl;
-
   } // istorm
 
   return 0;
@@ -2456,8 +2440,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
   _scanVars.proj_origin_lat.putVal(scanPos, _scan.grid.proj_origin_lat);
   _scanVars.proj_origin_lon.putVal(scanPos, _scan.grid.proj_origin_lon);
   _scanVars.proj_rotation.putVal(scanPos, _scan.grid.proj_params.flat.rotation);
-
-  _scanVars.proj_lat1.putVal(scanPos, _scan.grid.proj_params.lc2.lat1);
+_scanVars.proj_lat1.putVal(scanPos, _scan.grid.proj_params.lc2.lat1);
   _scanVars.proj_lat2.putVal(scanPos, _scan.grid.proj_params.lc2.lat2);
   _scanVars.proj_tangent_lat.putVal(scanPos, 0.0);
   _scanVars.proj_tangent_lon.putVal(scanPos, 0.0);
@@ -2861,10 +2844,10 @@ int TitanFile::writeStormAux(int storm_num,
   
   // ensure we have space for the offsets
   
-  _layerOffsets.resize(storm_num + 1);
-  _histOffsets.resize(storm_num + 1);
-  _runsOffsets.resize(storm_num + 1);
-  _projRunsOffsets.resize(storm_num + 1);
+  _layerOffsets.resize(sheader.nstorms);
+  _histOffsets.resize(sheader.nstorms);
+  _runsOffsets.resize(sheader.nstorms);
+  _projRunsOffsets.resize(sheader.nstorms);
   
   // write layers
 

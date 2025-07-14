@@ -972,13 +972,6 @@ protected:
   int _sumRuns;
   int _sumProjRuns;
 
-  // offsets for various items
-
-  vector<int64_t> _layerOffsets;
-  vector<int64_t> _histOffsets;
-  vector<int64_t> _runsOffsets;
-  vector<int64_t> _projRunsOffsets;
-  
   // storm data
 
   storm_file_header_t _storm_header;
@@ -991,6 +984,13 @@ protected:
   // si32 *_scan_offsets;
   // int _storm_num;
 
+  // offsets for auxiliary storm properties
+
+  vector<int64_t> _layerOffsets;
+  vector<int64_t> _histOffsets;
+  vector<int64_t> _runsOffsets;
+  vector<int64_t> _projRunsOffsets;
+  
   // storm memory allocation
   
   // int _max_scans;

@@ -35,7 +35,6 @@
 //
 ////////////////////////////////////////////////////////////////
 
-
 #include <fcntl.h>
 #include <cerrno>
 #include <dataport/bigend.h>
@@ -773,6 +772,27 @@ int TitanStormFile::ReadProps(int storm_num)
   // decode layer props from network byte order into host byte order
   
   BE_to_array_32(_lprops, n_layers * sizeof(storm_file_layer_props_t));
+
+  // set convectivity to 0 if not valid
+  // (convectivity only added as a property in March 2025)
+  
+  bool convectivityIsValid = true;
+  for (int ii = 0; ii < n_layers; ii++) {
+    if (_lprops[ii].convectivity_median < 0.0 ||
+        _lprops[ii].convectivity_median > 1.0) {
+      convectivityIsValid = false;
+      break;
+    }
+  }
+  for (int ii = 0; ii < n_layers; ii++) {
+    if (!convectivityIsValid) {
+      _lprops[ii].convectivity_median = 0.0;
+    } else {
+      if (_lprops[ii].convectivity_median < 0.01) {
+        _lprops[ii].convectivity_median = 0.0;
+      }
+    }
+  }
   
   // move to hist data position in file
   
@@ -916,6 +936,34 @@ int TitanStormFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
   } else {
     BE_to_array_32(_gprops, nstorms * sizeof(storm_file_global_props_t));
   }
+
+  // set convectivity to 0 if not valid
+  // (convectivity only added as a property in March 2025)
+  
+  if (storm_num >= 0) {
+    if (_gprops[storm_num].convectivity_median < 0.01 ||
+        _gprops[storm_num].convectivity_median > 1.0) {
+      _gprops[storm_num].convectivity_median = 0.0;
+    }
+  } else {
+    bool convectivityIsValid = true;
+    for (int ii = 0; ii < nstorms; ii++) {
+      if (_gprops[ii].convectivity_median < 0.0 ||
+          _gprops[ii].convectivity_median > 1.0) {
+        convectivityIsValid = false;
+        break;
+      }
+    }
+    for (int ii = 0; ii < nstorms; ii++) {
+      if (!convectivityIsValid) {
+        _gprops[ii].convectivity_median = 0.0;
+      } else {
+        if (_gprops[ii].convectivity_median < 0.01) {
+          _gprops[ii].convectivity_median = 0.0;
+        }
+      }
+    }
+  } // if (storm_num >= 0
   
   return 0;
   
@@ -1139,11 +1187,28 @@ int TitanStormFile::WriteScan(int scan_num)
     
     _scan.gprops_offset = ftell(_data_file);
     
-    // make local copy of gprops and encode into network byte order
-
+    // make local copy of gprops
+    
     TaArray<storm_file_global_props_t> gpropsArray;
     storm_file_global_props_t *gprops = gpropsArray.alloc(nstorms);
-    memcpy (gprops, _gprops, nstorms * sizeof(storm_file_global_props_t));
+    memcpy(gprops, _gprops, nstorms * sizeof(storm_file_global_props_t));
+
+    // copy in the offsets if available
+    
+    if ((int) _layerOffsets.size() == nstorms &&
+        (int) _histOffsets.size() == nstorms &&
+        (int) _runsOffsets.size() == nstorms &&
+        (int) _projRunsOffsets.size() == nstorms) {
+      for (int ii = 0; ii < nstorms; ii++) {
+        gprops[ii].layer_props_offset = _layerOffsets[ii];
+        gprops[ii].dbz_hist_offset = _histOffsets[ii];
+        gprops[ii].runs_offset = _runsOffsets[ii];
+        gprops[ii].proj_runs_offset = _projRunsOffsets[ii];
+      } // ii
+    } // if
+    
+    // encode into network byte order
+    
     BE_from_array_32(gprops,
 		     nstorms * sizeof(storm_file_global_props_t));
     
@@ -1205,6 +1270,8 @@ int TitanStormFile::WriteScan(int scan_num)
 //
 // returns 0 on success, -1 on failure
 //
+// side-effect: updates write offsets for later use by WriteScan().
+//
 //////////////////////////////////////////////////////////////
 
 int TitanStormFile::WriteProps(int storm_num,
@@ -1215,7 +1282,7 @@ int TitanStormFile::WriteProps(int storm_num,
                                const storm_file_run_t *runs,
                                const storm_file_run_t *proj_runs)
 {
-
+  
   // get array sizes
   
   int n_layers = gprops[storm_num].n_layers;
@@ -1231,6 +1298,11 @@ int TitanStormFile::WriteProps(int storm_num,
   AllocRuns(n_runs);
   AllocProjRuns(n_proj_runs);
 
+  _layerOffsets.resize(n_storms);
+  _histOffsets.resize(n_storms);
+  _runsOffsets.resize(n_storms);
+  _projRunsOffsets.resize(n_storms);
+  
   // copy the layer, hist and runs data into this object
   
   memcpy(_gprops, gprops,
@@ -1244,13 +1316,11 @@ int TitanStormFile::WriteProps(int storm_num,
   memcpy(_proj_runs, proj_runs,
          n_proj_runs * sizeof(storm_file_run_t));
 
-  for (int ii = 0; ii < n_layers; ii++) {
-    cerr << "222222222222 vol_centroid_x: " << _lprops[ii].vol_centroid_x << endl;
-  }
-
   // call WriteProps()
 
-  return WriteProps(storm_num);
+  int iret = WriteProps(storm_num);
+
+  return iret;
   
 }
   
@@ -1272,7 +1342,10 @@ int TitanStormFile::WriteProps(int storm_num)
   fseek(_data_file, 0, SEEK_END);
   int offset = ftell(_data_file);
   _gprops[storm_num].layer_props_offset = offset;
-  
+  if ((int) _layerOffsets.size() > storm_num) {
+    _layerOffsets[storm_num] = offset;
+  }
+
   // if this is the first storm, store the first_offset value
   // in the scan header
   
@@ -1304,7 +1377,11 @@ int TitanStormFile::WriteProps(int storm_num)
   
   // set dbz hist offset
   
-  _gprops[storm_num].dbz_hist_offset = ftell(_data_file);
+  offset = ftell(_data_file);
+  _gprops[storm_num].dbz_hist_offset = offset;
+  if ((int) _histOffsets.size() > storm_num) {
+    _histOffsets[storm_num] = offset;
+  }
   
   // copy histogram data to local variable
 
@@ -1329,7 +1406,11 @@ int TitanStormFile::WriteProps(int storm_num)
   
   // set runs offset
   
-  _gprops[storm_num].runs_offset = ftell(_data_file);
+  offset = ftell(_data_file);
+  _gprops[storm_num].runs_offset = offset;
+  if ((int) _runsOffsets.size() > storm_num) {
+    _runsOffsets[storm_num] = offset;
+  }
   
   // copy runs to local array
 
@@ -1354,7 +1435,12 @@ int TitanStormFile::WriteProps(int storm_num)
   
   // set proj_runs offset
   
-  _gprops[storm_num].proj_runs_offset = ftell(_data_file);
+  offset = ftell(_data_file);
+  _gprops[storm_num].proj_runs_offset = offset;
+  if ((int) _projRunsOffsets.size() > storm_num) {
+    _projRunsOffsets[storm_num] = offset;
+  }
+  
   
   // copy proj_runs to local array
 
