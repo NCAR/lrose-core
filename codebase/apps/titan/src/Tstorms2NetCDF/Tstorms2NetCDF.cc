@@ -415,7 +415,7 @@ int Tstorms2NetCDF::_processInputFile()
     }
 
     // loop through the entries, by scan, reading entries and writing out
-    
+
     for (int iscan = sparams.start_scan; iscan <= sparams.end_scan; iscan++) {
       if (_inFile.readTrackEntry()) {
         cerr << "ERROR - Tstorms2NetCDF::_processInputFile" << endl;

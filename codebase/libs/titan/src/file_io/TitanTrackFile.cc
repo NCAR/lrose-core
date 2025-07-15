@@ -676,7 +676,7 @@ void TitanTrackFile::CloseFiles()
     fclose(_data_file);
     _data_file = (FILE *) NULL;
   }
-  
+
 }
 
 //////////////////////////////////////////////////////////////
@@ -1626,6 +1626,7 @@ int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
                                 const si32 *n_simples_per_complex,
                                 const si32 **simples_per_complex)
 {
+
   // save state to local variables
   _header = track_file_header;
   AllocSimplesPerComplex(_header.n_simple_tracks);
@@ -2094,7 +2095,11 @@ long TitanTrackFile::WriteEntry(const track_file_entry_t &entry)
   // do the write
   
   long writeOffset = WriteEntry(_prev_in_track_offset, _prev_in_scan_offset);
-
+  if (writeOffset < 0) {
+    TaStr::AddStr(_errStr, "TitanTrackFile::WriteTrackEntry()");
+    return -1;
+  }
+  
   // save offsets for next time
   
   _prev_in_track_offset = writeOffset;
@@ -2131,17 +2136,17 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
      
 {
   
+  // swap
+  
   _clearErrStr();
   _errStr += "ERROR - TitanTrackFile::WriteEntry\n";
   TaStr::AddStr(_errStr, "  Writing to file: ", _data_file_path);
 
-  long file_mark;
-
   // Go to the end of the file and save the file position.
 
   fseek(_data_file, 0, SEEK_END);
-  file_mark = ftell(_data_file);
-  
+  long file_end_mark = ftell(_data_file);
+
   // If prev_in_track_offset is non-zero (which indicates that this is not
   // the first entry in a track) read in the entry at that location,
   // update the next_entry prev_in_track_offset with the current file
@@ -2154,10 +2159,10 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     fseek(_data_file, prev_in_track_offset, SEEK_SET);
     
     // read in entry
-    
+
     track_file_entry_t entry;
     if (ufread(&entry, sizeof(track_file_entry_t),
-	       1, _data_file) != 1) {
+               1, _data_file) != 1) {
       int errNum = errno;
       TaStr::AddStr(_errStr, "  ",
 		    "Reading track entry to update in_track_offset");
@@ -2168,7 +2173,7 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     
     // store next_entry_offset, swap
     
-    entry.next_entry_offset = file_mark;
+    entry.next_entry_offset = file_end_mark;
     BE_from_array_32(&entry.next_entry_offset,
 		     sizeof(entry.next_entry_offset));
     
@@ -2188,7 +2193,9 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
       return -1;
     }
     
-  } // if (prev_in_track_offset == 0) 
+  } // if (prev_in_track_offset == 0)
+
+  FlushFiles();
   
   // If prev_in_scan_offset is non-zero (which indicates that this is not
   // the first entry in a track) read in the entry at that location,
@@ -2205,7 +2212,7 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     
     track_file_entry_t entry;
     if (ufread(&entry, sizeof(track_file_entry_t),
-	       1, _data_file) != 1) {
+               1, _data_file) != 1) {
       int errNum = errno;
       TaStr::AddStr(_errStr, "  ",
 		    "Reading track entry to update in_track_offset.");
@@ -2216,7 +2223,7 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     
     // store next_entry_offset, swap
     
-    entry.next_scan_entry_offset = file_mark;
+    entry.next_scan_entry_offset = file_end_mark;
     BE_from_array_32(&entry.next_scan_entry_offset,
 		     sizeof(entry.next_scan_entry_offset));
     
@@ -2227,7 +2234,7 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     // rewrite entry
     
     if (ufwrite(&entry, sizeof(track_file_entry_t),
-		1, _data_file) != 1) {
+        	1, _data_file) != 1) {
       int errNum = errno;
       TaStr::AddStr(_errStr, "  ",
 		    "Re-writing track entry.");
@@ -2238,6 +2245,8 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     
   } // if (prev_in_scan_offset == 0) 
   
+  FlushFiles();
+
   // go to end of file to write entry structure
   
   fseek(_data_file, 0, SEEK_END);
@@ -2249,9 +2258,9 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
   // set entry offsets
   
   entry.prev_entry_offset = prev_in_track_offset;
-  entry.this_entry_offset = file_mark;
+  entry.this_entry_offset = file_end_mark;
   entry.next_entry_offset = 0;
-  
+
   // swap
   
   BE_from_array_32(&entry, sizeof(track_file_entry_t));
@@ -2268,6 +2277,6 @@ long TitanTrackFile::WriteEntry(int prev_in_track_offset,
     return -1;
   }
   
-  return (file_mark);
+  return file_end_mark;
   
 }

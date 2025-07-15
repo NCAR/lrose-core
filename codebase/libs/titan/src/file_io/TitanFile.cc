@@ -269,11 +269,10 @@ int TitanFile::_openLegacyFiles(const string &path,
       fmode = "r";
       break;
     case NcxxFile::write:
-      fmode = "w+";
-      break;
     case NcxxFile::replace:
     case NcxxFile::newFile:
-      fmode = "w";
+    default:
+      fmode = "w+";
       break;
   }
   
@@ -4447,10 +4446,13 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
   
   allocSimpleArrays(_track_header.n_simple_tracks);
   allocComplexArrays(_track_header.n_complex_tracks);
+  
+  memcpy(_complex_track_nums, complex_track_nums,
+         _track_header.n_complex_tracks *  sizeof(si32));
 
   memcpy(_n_simples_per_complex, n_simples_per_complex,
          _track_header.n_simple_tracks *  sizeof(si32));
-
+  
   for (int ii = 0; ii < _track_header.n_complex_tracks; ii++) {
     int complex_num = complex_track_nums[ii];
     int nsimples = n_simples_per_complex[complex_num];
