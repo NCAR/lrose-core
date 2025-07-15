@@ -1036,8 +1036,23 @@ void TitanFile::_setUpVars()
   _tstateVars.max_nweights_forecast =
     _getVar(MAX_NWEIGHTS_FORECAST_, NcxxType::nc_INT, _tracksGroup);
 
+  _tverifyVars.verification_performed =
+    _getVar(VERIFICATION_PERFORMED, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_forecast_lead_time =
+    _getVar(VERIFY_FORECAST_LEAD_TIME, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_end_time =
+    _getVar(VERIFY_END_TIME, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_forecast_lead_time_margin =
+    _getVar(VERIFY_FORECAST_LEAD_TIME_MARGIN, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_forecast_min_history =
+    _getVar(VERIFY_FORECAST_MIN_HISTORY, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_before_forecast_time =
+    _getVar(VERIFY_BEFORE_FORECAST_TIME, NcxxType::nc_INT, _tracksGroup);
+  _tverifyVars.verify_after_track_dies =
+    _getVar(VERIFY_AFTER_TRACK_DIES, NcxxType::nc_INT, _tracksGroup);
+  
   // global bias for forecasts
-
+  
   _globalBiasVars.proj_area_centroid_x =
     _getVar(BIAS_PROJ_AREA_CENTROID_X, NcxxType::nc_FLOAT, _tracksGroup, _horizGridUnits);
   _globalBiasVars.proj_area_centroid_y =
@@ -3511,6 +3526,62 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   _tstateVars.max_children.getVal(&_track_header.max_children);
   _tstateVars.max_nweights_forecast.getVal(&_track_header.max_nweights_forecast);
 
+  _tverifyVars.verification_performed.getVal(&_track_header.verify.verification_performed);
+  _tverifyVars.verify_forecast_lead_time.getVal(&_track_header.verify.forecast_lead_time);
+  _tverifyVars.verify_end_time.getVal(&_track_header.verify.end_time);
+  _tverifyVars.verify_forecast_lead_time_margin.getVal
+    (&_track_header.verify.forecast_lead_time_margin);
+  _tverifyVars.verify_forecast_min_history.getVal(&_track_header.verify.forecast_min_history);
+  _tverifyVars.verify_before_forecast_time.getVal(&_track_header.verify.verify_before_forecast_time);
+  _tverifyVars.verify_after_track_dies.getVal(&_track_header.verify.verify_after_track_dies);
+
+  _globalBiasVars.proj_area_centroid_x.getVal
+    (&_track_header.forecast_bias.proj_area_centroid_x);
+  _globalBiasVars.proj_area_centroid_y.getVal
+    (&_track_header.forecast_bias.proj_area_centroid_y);
+  _globalBiasVars.vol_centroid_z.getVal(&_track_header.forecast_bias.vol_centroid_z);
+  _globalBiasVars.refl_centroid_z.getVal(&_track_header.forecast_bias.refl_centroid_z);
+  _globalBiasVars.top.getVal(&_track_header.forecast_bias.top);
+  _globalBiasVars.dbz_max.getVal(&_track_header.forecast_bias.dbz_max);
+  _globalBiasVars.volume.getVal(&_track_header.forecast_bias.volume);
+  _globalBiasVars.precip_flux.getVal(&_track_header.forecast_bias.precip_flux);
+  _globalBiasVars.mass.getVal(&_track_header.forecast_bias.mass);
+  _globalBiasVars.proj_area.getVal(&_track_header.forecast_bias.proj_area);
+  _globalBiasVars.smoothed_proj_area_centroid_x.getVal
+    (&_track_header.forecast_bias.smoothed_proj_area_centroid_x);
+  _globalBiasVars.smoothed_proj_area_centroid_y.getVal
+    (&_track_header.forecast_bias.smoothed_proj_area_centroid_y);
+  _globalBiasVars.smoothed_speed.getVal(&_track_header.forecast_bias.smoothed_speed);
+  _globalBiasVars.smoothed_direction.getVal
+    (&_track_header.forecast_bias.smoothed_direction);
+  
+  _globalRmseVars.proj_area_centroid_x.getVal
+    (&_track_header.forecast_rmse.proj_area_centroid_x);
+  _globalRmseVars.proj_area_centroid_y.getVal
+    (&_track_header.forecast_rmse.proj_area_centroid_y);
+  _globalRmseVars.vol_centroid_z.getVal(&_track_header.forecast_rmse.vol_centroid_z);
+  _globalRmseVars.refl_centroid_z.getVal(&_track_header.forecast_rmse.refl_centroid_z);
+  _globalRmseVars.top.getVal(&_track_header.forecast_rmse.top);
+  _globalRmseVars.dbz_max.getVal(&_track_header.forecast_rmse.dbz_max);
+  _globalRmseVars.volume.getVal(&_track_header.forecast_rmse.volume);
+  _globalRmseVars.precip_flux.getVal(&_track_header.forecast_rmse.precip_flux);
+  _globalRmseVars.mass.getVal(&_track_header.forecast_rmse.mass);
+  _globalRmseVars.proj_area.getVal(&_track_header.forecast_rmse.proj_area);
+  _globalRmseVars.smoothed_proj_area_centroid_x.getVal
+    (&_track_header.forecast_rmse.smoothed_proj_area_centroid_x);
+  _globalRmseVars.smoothed_proj_area_centroid_y.getVal
+    (&_track_header.forecast_rmse.smoothed_proj_area_centroid_y);
+  _globalRmseVars.smoothed_speed.getVal(&_track_header.forecast_rmse.smoothed_speed);
+  _globalRmseVars.smoothed_direction.getVal
+    (&_track_header.forecast_rmse.smoothed_direction);
+  
+  _globalVerifyVars.ellipse_forecast_n_success.getVal(&_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.ellipse_forecast_n_failure.getVal(&_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.ellipse_forecast_n_false_alarm.getVal(&_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_success.getVal(&_track_header.polygon_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_failure.getVal(&_track_header.polygon_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_false_alarm.getVal(&_track_header.polygon_verify.n_success);
+
   // check that the constants in use when the file was written are
   // less than or the same as those in use now
   
@@ -4540,6 +4611,62 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
   _tstateVars.max_parents.putVal(_track_header.max_parents);
   _tstateVars.max_children.putVal(_track_header.max_children);
   _tstateVars.max_nweights_forecast.putVal(_track_header.max_nweights_forecast);
+
+  _tverifyVars.verification_performed.putVal(_track_header.verify.verification_performed);
+  _tverifyVars.verify_forecast_lead_time.putVal(_track_header.verify.forecast_lead_time);
+  _tverifyVars.verify_end_time.putVal(_track_header.verify.end_time);
+  _tverifyVars.verify_forecast_lead_time_margin.putVal
+    (_track_header.verify.forecast_lead_time_margin);
+  _tverifyVars.verify_forecast_min_history.putVal(_track_header.verify.forecast_min_history);
+  _tverifyVars.verify_before_forecast_time.putVal(_track_header.verify.verify_before_forecast_time);
+  _tverifyVars.verify_after_track_dies.putVal(_track_header.verify.verify_after_track_dies);
+
+  _globalBiasVars.proj_area_centroid_x.putVal
+    (&_track_header.forecast_bias.proj_area_centroid_x);
+  _globalBiasVars.proj_area_centroid_y.putVal
+    (&_track_header.forecast_bias.proj_area_centroid_y);
+  _globalBiasVars.vol_centroid_z.putVal(&_track_header.forecast_bias.vol_centroid_z);
+  _globalBiasVars.refl_centroid_z.putVal(&_track_header.forecast_bias.refl_centroid_z);
+  _globalBiasVars.top.putVal(&_track_header.forecast_bias.top);
+  _globalBiasVars.dbz_max.putVal(&_track_header.forecast_bias.dbz_max);
+  _globalBiasVars.volume.putVal(&_track_header.forecast_bias.volume);
+  _globalBiasVars.precip_flux.putVal(&_track_header.forecast_bias.precip_flux);
+  _globalBiasVars.mass.putVal(&_track_header.forecast_bias.mass);
+  _globalBiasVars.proj_area.putVal(&_track_header.forecast_bias.proj_area);
+  _globalBiasVars.smoothed_proj_area_centroid_x.putVal
+    (&_track_header.forecast_bias.smoothed_proj_area_centroid_x);
+  _globalBiasVars.smoothed_proj_area_centroid_y.putVal
+    (&_track_header.forecast_bias.smoothed_proj_area_centroid_y);
+  _globalBiasVars.smoothed_speed.putVal(&_track_header.forecast_bias.smoothed_speed);
+  _globalBiasVars.smoothed_direction.putVal
+    (&_track_header.forecast_bias.smoothed_direction);
+  
+  _globalRmseVars.proj_area_centroid_x.putVal
+    (_track_header.forecast_rmse.proj_area_centroid_x);
+  _globalRmseVars.proj_area_centroid_y.putVal
+    (_track_header.forecast_rmse.proj_area_centroid_y);
+  _globalRmseVars.vol_centroid_z.putVal(_track_header.forecast_rmse.vol_centroid_z);
+  _globalRmseVars.refl_centroid_z.putVal(_track_header.forecast_rmse.refl_centroid_z);
+  _globalRmseVars.top.putVal(_track_header.forecast_rmse.top);
+  _globalRmseVars.dbz_max.putVal(_track_header.forecast_rmse.dbz_max);
+  _globalRmseVars.volume.putVal(_track_header.forecast_rmse.volume);
+  _globalRmseVars.precip_flux.putVal(_track_header.forecast_rmse.precip_flux);
+  _globalRmseVars.mass.putVal(_track_header.forecast_rmse.mass);
+  _globalRmseVars.proj_area.putVal(_track_header.forecast_rmse.proj_area);
+  _globalRmseVars.smoothed_proj_area_centroid_x.putVal
+    (_track_header.forecast_rmse.smoothed_proj_area_centroid_x);
+  _globalRmseVars.smoothed_proj_area_centroid_y.putVal
+    (_track_header.forecast_rmse.smoothed_proj_area_centroid_y);
+  _globalRmseVars.smoothed_speed.putVal(_track_header.forecast_rmse.smoothed_speed);
+  _globalRmseVars.smoothed_direction.putVal
+    (_track_header.forecast_rmse.smoothed_direction);
+  
+  _globalVerifyVars.ellipse_forecast_n_success.putVal(_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.ellipse_forecast_n_failure.putVal(_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.ellipse_forecast_n_false_alarm.putVal(_track_header.ellipse_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_success.putVal(_track_header.polygon_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_failure.putVal(_track_header.polygon_verify.n_success);
+  _globalVerifyVars.polygon_forecast_n_false_alarm.putVal(_track_header.polygon_verify.n_success);
 
   return 0;
   
