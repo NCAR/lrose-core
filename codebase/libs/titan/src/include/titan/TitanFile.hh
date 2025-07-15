@@ -88,7 +88,17 @@ private:
     NcxxVar scan_first_offset;
     NcxxVar scan_last_offset;
     NcxxVar scan_ht_of_freezing;
-    // grid details
+    // indices for first data for each scan
+    NcxxVar scan_gprops_offset_0;
+    NcxxVar scan_layer_offset_0;
+    NcxxVar scan_hist_offset_0;
+    NcxxVar scan_runs_offset_0;
+    NcxxVar scan_proj_runs_offset_0;
+  };
+
+  class GridVars
+  {
+  public:
     NcxxVar grid_nx;
     NcxxVar grid_ny;
     NcxxVar grid_nz;
@@ -118,12 +128,6 @@ private:
     NcxxVar proj_tangent_lon;
     NcxxVar proj_pole_type;
     NcxxVar proj_central_scale;
-    // indices for first data for each scan
-    NcxxVar scan_gprops_offset_0;
-    NcxxVar scan_layer_offset_0;
-    NcxxVar scan_hist_offset_0;
-    NcxxVar scan_runs_offset_0;
-    NcxxVar scan_proj_runs_offset_0;
   };
 
   // storm identification parameter vars
@@ -928,7 +932,8 @@ protected:
   
   TopLevelVars _topLevelVars;
   ScanVars _scanVars;
-
+  GridVars _scanGridVars;
+  
   // storm identification
   
   StormParamsVars _sparamsVars;
@@ -943,6 +948,7 @@ protected:
   TrackingParamsVars _tparamsVars;
   TrackingStateVars _tstateVars;
   TrackingVerifyVars _tverifyVars;
+  GridVars _tverifyGridVars;
   SimpleTrackVars _simpleVars;
   NcxxVar _complexTrackNumsVar;
   ComplexTrackVars _complexVars;

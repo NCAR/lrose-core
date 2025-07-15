@@ -610,71 +610,61 @@ void TitanFile::_setUpVars()
   _scanVars.scan_ht_of_freezing =
     _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _scansDim, _scansGroup, KM);
 
-  _scanVars.grid_nx =
+  _scanGridVars.grid_nx =
     _getVar(GRID_NX, NcxxType::nc_INT, _scansDim, _scansGroup);
-  _scanVars.grid_ny =
+  _scanGridVars.grid_ny =
     _getVar(GRID_NY, NcxxType::nc_INT, _scansDim, _scansGroup);
-  _scanVars.grid_nz =
+  _scanGridVars.grid_nz =
     _getVar(GRID_NZ, NcxxType::nc_INT, _scansDim, _scansGroup);
-
-  _scanVars.grid_minx =
+  _scanGridVars.grid_minx =
     _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_miny =
+  _scanGridVars.grid_miny =
     _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_minz =
+  _scanGridVars.grid_minz =
     _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
-
-  _scanVars.grid_dx =
+  _scanGridVars.grid_dx =
     _getVar(GRID_DX, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_dy =
+  _scanGridVars.grid_dy =
     _getVar(GRID_DY, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_dz =
+  _scanGridVars.grid_dz =
     _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
-
-  _scanVars.grid_dz_constant =
+  _scanGridVars.grid_dz_constant =
     _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _scansDim, _scansGroup);
-
-  _scanVars.grid_sensor_x =
+  _scanGridVars.grid_sensor_x =
     _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_sensor_y =
+  _scanGridVars.grid_sensor_y =
     _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, _horizGridUnits);
-  _scanVars.grid_sensor_z =
+  _scanGridVars.grid_sensor_z =
     _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, KM);
-
-  _scanVars.grid_sensor_lat =
+  _scanGridVars.grid_sensor_lat =
     _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.grid_sensor_lon =
+  _scanGridVars.grid_sensor_lon =
     _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-
-  _scanVars.grid_unitsx =
+  _scanGridVars.grid_unitsx =
     _getVar(GRID_UNITSX, NcxxType::nc_STRING, _scansDim, _scansGroup);
-  _scanVars.grid_unitsy =
+  _scanGridVars.grid_unitsy =
     _getVar(GRID_UNITSY, NcxxType::nc_STRING, _scansDim, _scansGroup);
-  _scanVars.grid_unitsz =
+  _scanGridVars.grid_unitsz =
     _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _scansDim, _scansGroup);
-
-  _scanVars.proj_type =
+  _scanGridVars.proj_type =
     _getVar(PROJ_TYPE, NcxxType::nc_INT, _scansDim, _scansGroup);
-  
-  _scanVars.proj_origin_lat =
+  _scanGridVars.proj_origin_lat =
     _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.proj_origin_lon =
+  _scanGridVars.proj_origin_lon =
     _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.proj_rotation =
+  _scanGridVars.proj_rotation =
     _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _scansDim, _scansGroup, DEG);
-
-  _scanVars.proj_lat1 =
+  _scanGridVars.proj_lat1 =
     _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.proj_lat2 =
+  _scanGridVars.proj_lat2 =
     _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.proj_tangent_lat =
+  _scanGridVars.proj_tangent_lat =
     _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-  _scanVars.proj_tangent_lon =
+  _scanGridVars.proj_tangent_lon =
     _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _scansDim, _scansGroup, DEG);
-
-  _scanVars.proj_pole_type =
+  _scanGridVars.proj_pole_type =
     _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _scansDim, _scansGroup);
-  _scanVars.proj_central_scale =
+  _scanGridVars.proj_central_scale =
     _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _scansDim, _scansGroup);
 
   _scanVars.scan_gprops_offset_0 =
@@ -1051,6 +1041,63 @@ void TitanFile::_setUpVars()
   _tverifyVars.verify_after_track_dies =
     _getVar(VERIFY_AFTER_TRACK_DIES, NcxxType::nc_INT, _tracksGroup);
   
+  _tverifyGridVars.grid_nx =
+    _getVar(GRID_NX, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.grid_ny =
+    _getVar(GRID_NY, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.grid_nz =
+    _getVar(GRID_NZ, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.grid_minx =
+    _getVar(GRID_MINX, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_miny =
+    _getVar(GRID_MINY, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_minz =
+    _getVar(GRID_MINZ, NcxxType::nc_DOUBLE, _tracksGroup, KM);
+  _tverifyGridVars.grid_dx =
+    _getVar(GRID_DX, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_dy =
+    _getVar(GRID_DY, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_dz =
+    _getVar(GRID_DZ, NcxxType::nc_DOUBLE, _tracksGroup, KM);
+  _tverifyGridVars.grid_dz_constant =
+    _getVar(GRID_DZ_CONSTANT, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.grid_sensor_x =
+    _getVar(GRID_SENSOR_X, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_sensor_y =
+    _getVar(GRID_SENSOR_Y, NcxxType::nc_DOUBLE, _tracksGroup, _horizGridUnits);
+  _tverifyGridVars.grid_sensor_z =
+    _getVar(GRID_SENSOR_Z, NcxxType::nc_DOUBLE, _tracksGroup, KM);
+  _tverifyGridVars.grid_sensor_lat =
+    _getVar(GRID_SENSOR_LAT, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.grid_sensor_lon =
+    _getVar(GRID_SENSOR_LON, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.grid_unitsx =
+    _getVar(GRID_UNITSX, NcxxType::nc_STRING, _tracksGroup);
+  _tverifyGridVars.grid_unitsy =
+    _getVar(GRID_UNITSY, NcxxType::nc_STRING, _tracksGroup);
+  _tverifyGridVars.grid_unitsz =
+    _getVar(GRID_UNITSZ, NcxxType::nc_STRING, _tracksGroup);
+  _tverifyGridVars.proj_type =
+    _getVar(PROJ_TYPE, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.proj_origin_lat =
+    _getVar(PROJ_ORIGIN_LAT, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_origin_lon =
+    _getVar(PROJ_ORIGIN_LON, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_rotation =
+    _getVar(PROJ_ROTATION, NcxxType::nc_FLOAT, _tracksGroup, DEG);
+  _tverifyGridVars.proj_lat1 =
+    _getVar(PROJ_LAT1, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_lat2 =
+    _getVar(PROJ_LAT2, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_tangent_lat =
+    _getVar(PROJ_TANGENT_LAT, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_tangent_lon =
+    _getVar(PROJ_TANGENT_LON, NcxxType::nc_DOUBLE, _tracksGroup, DEG);
+  _tverifyGridVars.proj_pole_type =
+    _getVar(PROJ_POLE_TYPE, NcxxType::nc_INT, _tracksGroup);
+  _tverifyGridVars.proj_central_scale =
+    _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _tracksGroup);
+
   // global bias for forecasts
   
   _globalBiasVars.proj_area_centroid_x =
@@ -2074,43 +2121,38 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 
   // read grid details
 
-  _scanVars.grid_nx.getVal(scanPos, &_scan.grid.nx);
-  _scanVars.grid_ny.getVal(scanPos, &_scan.grid.ny);
-  _scanVars.grid_nz.getVal(scanPos, &_scan.grid.nz);
-  _scanVars.grid_minx.getVal(scanPos, &_scan.grid.minx);
-  _scanVars.grid_miny.getVal(scanPos, &_scan.grid.miny);
-  _scanVars.grid_minz.getVal(scanPos, &_scan.grid.minz);
-  _scanVars.grid_dx.getVal(scanPos, &_scan.grid.dx);
-  _scanVars.grid_dy.getVal(scanPos, &_scan.grid.dy);
-  _scanVars.grid_dz.getVal(scanPos, &_scan.grid.dz);
-  _scanVars.grid_dz_constant.getVal(scanPos, &_scan.grid.dz_constant);
-  _scanVars.grid_sensor_x.getVal(scanPos, &_scan.grid.sensor_x);
-  _scanVars.grid_sensor_y.getVal(scanPos, &_scan.grid.sensor_y);
-  _scanVars.grid_sensor_z.getVal(scanPos, &_scan.grid.sensor_z);
-  _scanVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
-
+  _scanGridVars.grid_nx.getVal(scanPos, &_scan.grid.nx);
+  _scanGridVars.grid_ny.getVal(scanPos, &_scan.grid.ny);
+  _scanGridVars.grid_nz.getVal(scanPos, &_scan.grid.nz);
+  _scanGridVars.grid_minx.getVal(scanPos, &_scan.grid.minx);
+  _scanGridVars.grid_miny.getVal(scanPos, &_scan.grid.miny);
+  _scanGridVars.grid_minz.getVal(scanPos, &_scan.grid.minz);
+  _scanGridVars.grid_dx.getVal(scanPos, &_scan.grid.dx);
+  _scanGridVars.grid_dy.getVal(scanPos, &_scan.grid.dy);
+  _scanGridVars.grid_dz.getVal(scanPos, &_scan.grid.dz);
+  _scanGridVars.grid_dz_constant.getVal(scanPos, &_scan.grid.dz_constant);
+  _scanGridVars.grid_sensor_x.getVal(scanPos, &_scan.grid.sensor_x);
+  _scanGridVars.grid_sensor_y.getVal(scanPos, &_scan.grid.sensor_y);
+  _scanGridVars.grid_sensor_z.getVal(scanPos, &_scan.grid.sensor_z);
+  _scanGridVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
+  _scanGridVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
   char *units;
-  _scanVars.grid_unitsx.getVal(scanPos, &units);
+  _scanGridVars.grid_unitsx.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsy.getVal(scanPos, &units);
+  _scanGridVars.grid_unitsy.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
-  _scanVars.grid_unitsz.getVal(scanPos, &units);
+  _scanGridVars.grid_unitsz.getVal(scanPos, &units);
   STRncopy(_scan.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
-
-  // read projection details
-  
-  _scanVars.proj_type.getVal(scanPos, &_scan.grid.proj_type);
-  _scanVars.proj_origin_lat.getVal(scanPos, &_scan.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.getVal(scanPos, &_scan.grid.proj_origin_lon);
-  _scanVars.proj_rotation.getVal(scanPos, &_scan.grid.proj_params.flat.rotation);
-
-  _scanVars.proj_lat1.getVal(scanPos, &_scan.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.getVal(scanPos, &_scan.grid.proj_params.lc2.lat2);
-  // _scanVars.proj_tangent_lat.getVal(scanPos, 0.0);
-  // _scanVars.proj_tangent_lon.getVal(scanPos, 0.0);
-  // _scanVars.proj_pole_type.getVal(scanPos, 0);
-  // _scanVars.proj_central_scale.getVal(scanPos, 1.0);
+  _scanGridVars.proj_type.getVal(scanPos, &_scan.grid.proj_type);
+  _scanGridVars.proj_origin_lat.getVal(scanPos, &_scan.grid.proj_origin_lat);
+  _scanGridVars.proj_origin_lon.getVal(scanPos, &_scan.grid.proj_origin_lon);
+  _scanGridVars.proj_rotation.getVal(scanPos, &_scan.grid.proj_params.flat.rotation);
+  _scanGridVars.proj_lat1.getVal(scanPos, &_scan.grid.proj_params.lc2.lat1);
+  _scanGridVars.proj_lat2.getVal(scanPos, &_scan.grid.proj_params.lc2.lat2);
+  // _scanGridVars.proj_tangent_lat.getVal(scanPos, 0.0);
+  // _scanGridVars.proj_tangent_lon.getVal(scanPos, 0.0);
+  // _scanGridVars.proj_pole_type.getVal(scanPos, 0);
+  // _scanGridVars.proj_central_scale.getVal(scanPos, 1.0);
 
   // allocate or reallocate
   
@@ -2428,38 +2470,38 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write grid details
 
-  _scanVars.grid_nx.putVal(scanPos, _scan.grid.nx);
-  _scanVars.grid_ny.putVal(scanPos, _scan.grid.ny);
-  _scanVars.grid_nz.putVal(scanPos, _scan.grid.nz);
-  _scanVars.grid_minx.putVal(scanPos, _scan.grid.minx);
-  _scanVars.grid_miny.putVal(scanPos, _scan.grid.miny);
-  _scanVars.grid_minz.putVal(scanPos, _scan.grid.minz);
-  _scanVars.grid_dx.putVal(scanPos, _scan.grid.dx);
-  _scanVars.grid_dy.putVal(scanPos, _scan.grid.dy);
-  _scanVars.grid_dz.putVal(scanPos, _scan.grid.dz);
-  _scanVars.grid_dz_constant.putVal(scanPos, _scan.grid.dz_constant);
-  _scanVars.grid_sensor_x.putVal(scanPos, _scan.grid.sensor_x);
-  _scanVars.grid_sensor_y.putVal(scanPos, _scan.grid.sensor_y);
-  _scanVars.grid_sensor_z.putVal(scanPos, _scan.grid.sensor_z);
-  _scanVars.grid_sensor_lat.putVal(scanPos, _scan.grid.sensor_lat);
-  _scanVars.grid_sensor_lon.putVal(scanPos, _scan.grid.sensor_lon);
+  _scanGridVars.grid_nx.putVal(scanPos, _scan.grid.nx);
+  _scanGridVars.grid_ny.putVal(scanPos, _scan.grid.ny);
+  _scanGridVars.grid_nz.putVal(scanPos, _scan.grid.nz);
+  _scanGridVars.grid_minx.putVal(scanPos, _scan.grid.minx);
+  _scanGridVars.grid_miny.putVal(scanPos, _scan.grid.miny);
+  _scanGridVars.grid_minz.putVal(scanPos, _scan.grid.minz);
+  _scanGridVars.grid_dx.putVal(scanPos, _scan.grid.dx);
+  _scanGridVars.grid_dy.putVal(scanPos, _scan.grid.dy);
+  _scanGridVars.grid_dz.putVal(scanPos, _scan.grid.dz);
+  _scanGridVars.grid_dz_constant.putVal(scanPos, _scan.grid.dz_constant);
+  _scanGridVars.grid_sensor_x.putVal(scanPos, _scan.grid.sensor_x);
+  _scanGridVars.grid_sensor_y.putVal(scanPos, _scan.grid.sensor_y);
+  _scanGridVars.grid_sensor_z.putVal(scanPos, _scan.grid.sensor_z);
+  _scanGridVars.grid_sensor_lat.putVal(scanPos, _scan.grid.sensor_lat);
+  _scanGridVars.grid_sensor_lon.putVal(scanPos, _scan.grid.sensor_lon);
   
-  _scanVars.grid_unitsx.putVal(scanPos, _horizGridUnits);
-  _scanVars.grid_unitsy.putVal(scanPos, _horizGridUnits);
-  _scanVars.grid_unitsz.putVal(scanPos, std::string(_scan.grid.unitsz));
+  _scanGridVars.grid_unitsx.putVal(scanPos, _horizGridUnits);
+  _scanGridVars.grid_unitsy.putVal(scanPos, _horizGridUnits);
+  _scanGridVars.grid_unitsz.putVal(scanPos, std::string(_scan.grid.unitsz));
   
   // write projection details
   
-  _scanVars.proj_type.putVal(scanPos, _scan.grid.proj_type);
-  _scanVars.proj_origin_lat.putVal(scanPos, _scan.grid.proj_origin_lat);
-  _scanVars.proj_origin_lon.putVal(scanPos, _scan.grid.proj_origin_lon);
-  _scanVars.proj_rotation.putVal(scanPos, _scan.grid.proj_params.flat.rotation);
-_scanVars.proj_lat1.putVal(scanPos, _scan.grid.proj_params.lc2.lat1);
-  _scanVars.proj_lat2.putVal(scanPos, _scan.grid.proj_params.lc2.lat2);
-  _scanVars.proj_tangent_lat.putVal(scanPos, 0.0);
-  _scanVars.proj_tangent_lon.putVal(scanPos, 0.0);
-  _scanVars.proj_pole_type.putVal(scanPos, 0);
-  _scanVars.proj_central_scale.putVal(scanPos, 1.0);
+  _scanGridVars.proj_type.putVal(scanPos, _scan.grid.proj_type);
+  _scanGridVars.proj_origin_lat.putVal(scanPos, _scan.grid.proj_origin_lat);
+  _scanGridVars.proj_origin_lon.putVal(scanPos, _scan.grid.proj_origin_lon);
+  _scanGridVars.proj_rotation.putVal(scanPos, _scan.grid.proj_params.flat.rotation);
+  _scanGridVars.proj_lat1.putVal(scanPos, _scan.grid.proj_params.lc2.lat1);
+  _scanGridVars.proj_lat2.putVal(scanPos, _scan.grid.proj_params.lc2.lat2);
+  _scanGridVars.proj_tangent_lat.putVal(scanPos, 0.0);
+  _scanGridVars.proj_tangent_lon.putVal(scanPos, 0.0);
+  _scanGridVars.proj_pole_type.putVal(scanPos, 0);
+  _scanGridVars.proj_central_scale.putVal(scanPos, 1.0);
 
   // write scan offsets
   
@@ -2626,12 +2668,12 @@ void TitanFile::_updateScanAttributes(const storm_file_scan_header_t &scanHeader
   
   // update relevant attributes
   
-  _scanVars.grid_minx.putAtt(UNITS, _horizGridUnits);
-  _scanVars.grid_miny.putAtt(UNITS, _horizGridUnits);
-  _scanVars.grid_dx.putAtt(UNITS, _horizGridUnits);
-  _scanVars.grid_dy.putAtt(UNITS, _horizGridUnits);
-  _scanVars.grid_sensor_x.putAtt(UNITS, _horizGridUnits);
-  _scanVars.grid_sensor_y.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_minx.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_miny.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_dx.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_dy.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_sensor_x.putAtt(UNITS, _horizGridUnits);
+  _scanGridVars.grid_sensor_y.putAtt(UNITS, _horizGridUnits);
   
   _gpropsVars.vol_centroid_x.putAtt(UNITS, _horizGridUnits);
   _gpropsVars.vol_centroid_y.putAtt(UNITS, _horizGridUnits);
@@ -2754,8 +2796,8 @@ void TitanFile::_addProjectionFlagAttributes()
   projTypeNote += tmp;
   
   if (_fileMode != NcxxFile::read) {
-    _scanVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
-                               flagValues.size(), flagValues.data());
+    _scanGridVars.proj_type.putAtt(FLAG_VALUES, NcxxType::nc_INT,
+                                   flagValues.size(), flagValues.data());
   }
 
   vector<const char *> meanings;
@@ -2766,25 +2808,25 @@ void TitanFile::_addProjectionFlagAttributes()
   
   if (_fileMode != NcxxFile::read) {
 
-    _scanVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
-                               meanings.size(), meanings.data());
+    _scanGridVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
+                                   meanings.size(), meanings.data());
     
-    _scanVars.proj_type.putAtt(NOTE, projTypeNote);
-  
-    _scanVars.proj_origin_lat.putAtt
+    _scanGridVars.proj_type.putAtt(NOTE, projTypeNote);
+    
+    _scanGridVars.proj_origin_lat.putAtt
       (NOTE, std::string("Applies to all projection types except latlon"));
-    _scanVars.proj_origin_lon.putAtt
+    _scanGridVars.proj_origin_lon.putAtt
       (NOTE, std::string("Applies to all projection types except latlon"));
-    _scanVars.proj_rotation.putAtt
+    _scanGridVars.proj_rotation.putAtt
       (NOTE, std::string("Applies to azimuthal_equidistant projection only"));
     
-    _scanVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
-    _scanVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
-    _scanVars.proj_tangent_lat.putAtt
+    _scanGridVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+    _scanGridVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+    _scanGridVars.proj_tangent_lat.putAtt
       (NOTE, std::string("Applies to polar_stereo and oblique_stereo"));
-    _scanVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
-    _scanVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
-    _scanVars.proj_central_scale.putAtt
+    _scanGridVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
+    _scanGridVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
+    _scanGridVars.proj_central_scale.putAtt
       (NOTE, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
 
   }
@@ -3526,6 +3568,8 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   _tstateVars.max_children.getVal(&_track_header.max_children);
   _tstateVars.max_nweights_forecast.getVal(&_track_header.max_nweights_forecast);
 
+  // track verification
+
   _tverifyVars.verification_performed.getVal(&_track_header.verify.verification_performed);
   _tverifyVars.verify_forecast_lead_time.getVal(&_track_header.verify.forecast_lead_time);
   _tverifyVars.verify_end_time.getVal(&_track_header.verify.end_time);
@@ -3534,6 +3578,37 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   _tverifyVars.verify_forecast_min_history.getVal(&_track_header.verify.forecast_min_history);
   _tverifyVars.verify_before_forecast_time.getVal(&_track_header.verify.verify_before_forecast_time);
   _tverifyVars.verify_after_track_dies.getVal(&_track_header.verify.verify_after_track_dies);
+
+  _tverifyGridVars.grid_nx.getVal(&_track_header.verify.grid.nx);
+  _tverifyGridVars.grid_ny.getVal(&_track_header.verify.grid.ny);
+  _tverifyGridVars.grid_nz.getVal(&_track_header.verify.grid.nz);
+  _tverifyGridVars.grid_minx.getVal(&_track_header.verify.grid.minx);
+  _tverifyGridVars.grid_miny.getVal(&_track_header.verify.grid.miny);
+  _tverifyGridVars.grid_minz.getVal(&_track_header.verify.grid.minz);
+  _tverifyGridVars.grid_dx.getVal(&_track_header.verify.grid.dx);
+  _tverifyGridVars.grid_dy.getVal(&_track_header.verify.grid.dy);
+  _tverifyGridVars.grid_dz.getVal(&_track_header.verify.grid.dz);
+  _tverifyGridVars.grid_dz_constant.getVal(&_track_header.verify.grid.dz_constant);
+  _tverifyGridVars.grid_sensor_x.getVal(&_track_header.verify.grid.sensor_x);
+  _tverifyGridVars.grid_sensor_y.getVal(&_track_header.verify.grid.sensor_y);
+  _tverifyGridVars.grid_sensor_z.getVal(&_track_header.verify.grid.sensor_z);
+  _tverifyGridVars.grid_sensor_lat.getVal(&_track_header.verify.grid.sensor_lat);
+  _tverifyGridVars.grid_sensor_lon.getVal(&_track_header.verify.grid.sensor_lon);
+  char *units;
+  _tverifyGridVars.grid_unitsx.getVal(&units);
+  STRncopy(_track_header.verify.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
+  _tverifyGridVars.grid_unitsy.getVal(&units);
+  STRncopy(_track_header.verify.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
+  _tverifyGridVars.grid_unitsz.getVal(&units);
+  STRncopy(_track_header.verify.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
+  _tverifyGridVars.proj_type.getVal(&_track_header.verify.grid.proj_type);
+  _tverifyGridVars.proj_origin_lat.getVal(&_track_header.verify.grid.proj_origin_lat);
+  _tverifyGridVars.proj_origin_lon.getVal(&_track_header.verify.grid.proj_origin_lon);
+  _tverifyGridVars.proj_rotation.getVal(&_track_header.verify.grid.proj_params.flat.rotation);
+  _tverifyGridVars.proj_lat1.getVal(&_track_header.verify.grid.proj_params.lc2.lat1);
+  _tverifyGridVars.proj_lat2.getVal(&_track_header.verify.grid.proj_params.lc2.lat2);
+
+  // bias and rmse for verification
 
   _globalBiasVars.proj_area_centroid_x.getVal
     (&_track_header.forecast_bias.proj_area_centroid_x);
@@ -3604,9 +3679,9 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   if (_track_header.max_nweights_forecast != MAX_NWEIGHTS_FORECAST) {
     _addErrStr("  ", "MAX_NWEIGHTS_FORECAST has changed");
     _addErrInt("  _track_header.max_nweights_forecast: ",
-		  _track_header.max_nweights_forecast);
+               _track_header.max_nweights_forecast);
     _addErrInt("  MAX_NWEIGHTS_FORECAST: ",
-		  MAX_NWEIGHTS_FORECAST);
+               MAX_NWEIGHTS_FORECAST);
     _addErrStr("  ", "Fix header and recompile");
     return -1;
   }
@@ -4620,6 +4695,35 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
   _tverifyVars.verify_forecast_min_history.putVal(_track_header.verify.forecast_min_history);
   _tverifyVars.verify_before_forecast_time.putVal(_track_header.verify.verify_before_forecast_time);
   _tverifyVars.verify_after_track_dies.putVal(_track_header.verify.verify_after_track_dies);
+
+  _tverifyGridVars.grid_nx.putVal(_track_header.verify.grid.nx);
+  _tverifyGridVars.grid_ny.putVal(_track_header.verify.grid.ny);
+  _tverifyGridVars.grid_nz.putVal(_track_header.verify.grid.nz);
+  _tverifyGridVars.grid_minx.putVal(_track_header.verify.grid.minx);
+  _tverifyGridVars.grid_miny.putVal(_track_header.verify.grid.miny);
+  _tverifyGridVars.grid_minz.putVal(_track_header.verify.grid.minz);
+  _tverifyGridVars.grid_dx.putVal(_track_header.verify.grid.dx);
+  _tverifyGridVars.grid_dy.putVal(_track_header.verify.grid.dy);
+  _tverifyGridVars.grid_dz.putVal(_track_header.verify.grid.dz);
+  _tverifyGridVars.grid_dz_constant.putVal(_track_header.verify.grid.dz_constant);
+  _tverifyGridVars.grid_sensor_x.putVal(_track_header.verify.grid.sensor_x);
+  _tverifyGridVars.grid_sensor_y.putVal(_track_header.verify.grid.sensor_y);
+  _tverifyGridVars.grid_sensor_z.putVal(_track_header.verify.grid.sensor_z);
+  _tverifyGridVars.grid_sensor_lat.putVal(_track_header.verify.grid.sensor_lat);
+  _tverifyGridVars.grid_sensor_lon.putVal(_track_header.verify.grid.sensor_lon);
+  _tverifyGridVars.grid_unitsx.putVal(_track_header.verify.grid.unitsx);
+  _tverifyGridVars.grid_unitsy.putVal(_track_header.verify.grid.unitsy);
+  _tverifyGridVars.grid_unitsz.putVal(_track_header.verify.grid.unitsz);
+  _tverifyGridVars.proj_type.putVal(_track_header.verify.grid.proj_type);
+  _tverifyGridVars.proj_origin_lat.putVal(_track_header.verify.grid.proj_origin_lat);
+  _tverifyGridVars.proj_origin_lon.putVal(_track_header.verify.grid.proj_origin_lon);
+  _tverifyGridVars.proj_rotation.putVal(_track_header.verify.grid.proj_params.flat.rotation);
+  _tverifyGridVars.proj_lat1.putVal(_track_header.verify.grid.proj_params.lc2.lat1);
+  _tverifyGridVars.proj_lat2.putVal(_track_header.verify.grid.proj_params.lc2.lat2);
+  _tverifyGridVars.proj_tangent_lat.putVal(0.0);
+  _tverifyGridVars.proj_tangent_lon.putVal(0.0);
+  _tverifyGridVars.proj_pole_type.putVal(0);
+  _tverifyGridVars.proj_central_scale.putVal(1.0);
 
   _globalBiasVars.proj_area_centroid_x.putVal
     (&_track_header.forecast_bias.proj_area_centroid_x);
