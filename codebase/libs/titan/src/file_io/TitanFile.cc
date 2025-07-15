@@ -4711,9 +4711,9 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
   _tverifyGridVars.grid_sensor_z.putVal(_track_header.verify.grid.sensor_z);
   _tverifyGridVars.grid_sensor_lat.putVal(_track_header.verify.grid.sensor_lat);
   _tverifyGridVars.grid_sensor_lon.putVal(_track_header.verify.grid.sensor_lon);
-  _tverifyGridVars.grid_unitsx.putVal(_track_header.verify.grid.unitsx);
-  _tverifyGridVars.grid_unitsy.putVal(_track_header.verify.grid.unitsy);
-  _tverifyGridVars.grid_unitsz.putVal(_track_header.verify.grid.unitsz);
+  _tverifyGridVars.grid_unitsx.putStringScalar(_track_header.verify.grid.unitsx);
+  _tverifyGridVars.grid_unitsy.putStringScalar(_track_header.verify.grid.unitsy);
+  _tverifyGridVars.grid_unitsz.putStringScalar(_track_header.verify.grid.unitsz);
   _tverifyGridVars.proj_type.putVal(_track_header.verify.grid.proj_type);
   _tverifyGridVars.proj_origin_lat.putVal(_track_header.verify.grid.proj_origin_lat);
   _tverifyGridVars.proj_origin_lon.putVal(_track_header.verify.grid.proj_origin_lon);
