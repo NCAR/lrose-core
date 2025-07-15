@@ -3888,6 +3888,26 @@ int TitanFile::_readTrackEntry(track_file_entry_t &entry,
   _entryVars.next_entry_offset.getVal(entryIndex, &entry.next_entry_offset);
   _entryVars.next_scan_entry_offset.getVal(entryIndex, &entry.next_scan_entry_offset);
 
+  _entryDvalDtVars.proj_area_centroid_x.getVal
+    (entryIndex, &entry.dval_dt.proj_area_centroid_x);
+  _entryDvalDtVars.proj_area_centroid_y.getVal
+    (entryIndex, &entry.dval_dt.proj_area_centroid_y);
+  _entryDvalDtVars.vol_centroid_z.getVal(entryIndex, &entry.dval_dt.vol_centroid_z);
+  _entryDvalDtVars.refl_centroid_z.getVal(entryIndex, &entry.dval_dt.refl_centroid_z);
+  _entryDvalDtVars.top.getVal(entryIndex, &entry.dval_dt.top);
+  _entryDvalDtVars.dbz_max.getVal(entryIndex, &entry.dval_dt.dbz_max);
+  _entryDvalDtVars.volume.getVal(entryIndex, &entry.dval_dt.volume);
+  _entryDvalDtVars.precip_flux.getVal(entryIndex, &entry.dval_dt.precip_flux);
+  _entryDvalDtVars.mass.getVal(entryIndex, &entry.dval_dt.mass);
+  _entryDvalDtVars.proj_area.getVal(entryIndex, &entry.dval_dt.proj_area);
+  _entryDvalDtVars.smoothed_proj_area_centroid_x.getVal
+    (entryIndex, &entry.dval_dt.smoothed_proj_area_centroid_x);
+  _entryDvalDtVars.smoothed_proj_area_centroid_y.getVal
+    (entryIndex, &entry.dval_dt.smoothed_proj_area_centroid_y);
+  _entryDvalDtVars.smoothed_speed.getVal(entryIndex, &entry.dval_dt.smoothed_speed);
+  _entryDvalDtVars.smoothed_direction.getVal
+    (entryIndex, &entry.dval_dt.smoothed_direction);
+  
   return 0;
   
 }
@@ -4767,6 +4787,26 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   _entryVars.next_entry_offset.putVal(thisIndex, -1);
   _entryVars.next_scan_entry_offset.putVal(thisIndex, nextScanEntryOffset);
 
+  _entryDvalDtVars.proj_area_centroid_x.putVal
+    (thisIndex, entry.dval_dt.proj_area_centroid_x);
+  _entryDvalDtVars.proj_area_centroid_y.putVal
+    (thisIndex, entry.dval_dt.proj_area_centroid_y);
+  _entryDvalDtVars.vol_centroid_z.putVal(thisIndex, entry.dval_dt.vol_centroid_z);
+  _entryDvalDtVars.refl_centroid_z.putVal(thisIndex, entry.dval_dt.refl_centroid_z);
+  _entryDvalDtVars.top.putVal(thisIndex, entry.dval_dt.top);
+  _entryDvalDtVars.dbz_max.putVal(thisIndex, entry.dval_dt.dbz_max);
+  _entryDvalDtVars.volume.putVal(thisIndex, entry.dval_dt.volume);
+  _entryDvalDtVars.precip_flux.putVal(thisIndex, entry.dval_dt.precip_flux);
+  _entryDvalDtVars.mass.putVal(thisIndex, entry.dval_dt.mass);
+  _entryDvalDtVars.proj_area.putVal(thisIndex, entry.dval_dt.proj_area);
+  _entryDvalDtVars.smoothed_proj_area_centroid_x.putVal
+    (thisIndex, entry.dval_dt.smoothed_proj_area_centroid_x);
+  _entryDvalDtVars.smoothed_proj_area_centroid_y.putVal
+    (thisIndex, entry.dval_dt.smoothed_proj_area_centroid_y);
+  _entryDvalDtVars.smoothed_speed.putVal(thisIndex, entry.dval_dt.smoothed_speed);
+  _entryDvalDtVars.smoothed_direction.putVal
+    (thisIndex, entry.dval_dt.smoothed_direction);
+  
   // save offset for next time
   
   _prevEntryOffset = thisEntryOffset;
