@@ -484,8 +484,6 @@ public:
   const storm_file_dbz_hist_t *hist() const { return _hist; }
   const storm_file_run_t *runs() const { return _runs; }
   const storm_file_run_t *proj_runs() const { return _proj_runs; }
-  // const int *scan_offsets() const { return _scan_offsets; }
-  // int storm_num() const { return _storm_num; }
   
   // track data access
 
@@ -500,8 +498,6 @@ public:
   int n_scan_entries() { return _n_scan_entries; }
   
   const si32 *complex_track_nums() { return _complex_track_nums; }
-  // const si32 *complex_track_offsets() { return _complex_track_offsets; }
-  // const si32 *simple_track_offsets() { return _simple_track_offsets; }
   const si32 *n_simples_per_complex() { return _n_simples_per_complex; }
   const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
   si32 *simples_per_complex_1D() { return _simples_per_complex_1D; }
@@ -521,8 +517,6 @@ public:
   void freeProjRuns();
   void allocGprops(int nstorms);
   void freeGprops();
-  // void allocScanOffsets(int n_scans_needed);
-  // void freeScanOffsets();
   void freeStormsAll();
     
   // memory allocation and freeing - tracks
@@ -987,8 +981,6 @@ protected:
   storm_file_dbz_hist_t *_hist;
   storm_file_run_t *_runs;
   storm_file_run_t *_proj_runs;
-  // si32 *_scan_offsets;
-  // int _storm_num;
 
   // offsets for auxiliary storm properties
 
@@ -999,7 +991,6 @@ protected:
   
   // storm memory allocation
   
-  // int _max_scans;
   int _max_storms;
   int _max_layers;
   int _max_hist;
@@ -1020,8 +1011,6 @@ protected:
   track_utime_t *_track_utime;
   
   si32 *_complex_track_nums;
-  // si32 *_complex_track_offsets;
-  // si32 *_simple_track_offsets;
   si32 *_n_simples_per_complex;
   si32 *_simples_per_complex_offsets;
   si32 *_simples_per_complex_1D;

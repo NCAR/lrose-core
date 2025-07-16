@@ -69,10 +69,7 @@ TitanFile::TitanFile()
   _hist = nullptr;
   _runs = nullptr;
   _proj_runs = nullptr;
-  //  _scan_offsets = nullptr;
-  // _storm_num = 0;
 
-  // _max_scans = 0;
   _max_storms = 0;
   _max_layers = 0;
   _max_hist = 0;
@@ -98,8 +95,6 @@ TitanFile::TitanFile()
   _track_utime = nullptr;
   
   _complex_track_nums = nullptr;
-  // _complex_track_offsets = nullptr;
-  // _simple_track_offsets = nullptr;
   _n_simples_per_complex = nullptr;
   _simples_per_complex_offsets = nullptr;
   _simples_per_complex_1D = nullptr;
@@ -118,7 +113,6 @@ TitanFile::TitanFile()
   _n_utime_allocated = 0;
 
   _prevEntryOffset = 0;
-  // _prev_in_scan_offset = 0;
 
   _horizGridUnits = KM;
   _horizGridUnitsPerHr = KM_PER_HR;
@@ -1633,39 +1627,6 @@ void TitanFile::freeGprops()
 
 //////////////////////////////////////////////////////////////
 //
-// allocate space for the scan offset array.
-//
-//////////////////////////////////////////////////////////////
-
-// void TitanFile::allocScanOffsets(int n_scans_needed)
-     
-// {
-
-//   // allocate the required space plus a buffer so that 
-//   // we do not do too many reallocs
-  
-//   if (n_scans_needed > _max_scans) {
-//     _max_scans = n_scans_needed + 100;
-//     _scan_offsets = (si32 *) urealloc
-//       (_scan_offsets, (_max_scans * sizeof(si32)));
-//   }
-
-// }
-
-// void TitanFile::freeScanOffsets()
-     
-// {
-
-//   if (_scan_offsets) {
-//     ufree(_scan_offsets);
-//     _scan_offsets = nullptr;
-//     _max_scans = 0;
-//   }
-
-// }
-
-//////////////////////////////////////////////////////////////
-//
 // free all arrays
 //
 //////////////////////////////////////////////////////////////
@@ -1679,7 +1640,6 @@ void TitanFile::freeStormsAll()
   freeRuns();
   freeProjRuns();
   freeGprops();
-  // freeScanOffsets();
 
 }
 
@@ -2167,11 +2127,6 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   // read in global props
   
-  // _layerOffsets.resize(nStorms);
-  // _histOffsets.resize(nStorms);
-  // _runsOffsets.resize(nStorms);
-  // _projRunsOffsets.resize(nStorms);
-
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
     storm_file_global_props_t &gp = _gprops[istorm];
@@ -3199,18 +3154,13 @@ void TitanFile::allocSimpleArrays(int n_simple_needed)
     _simples_per_complex_2D = (si32 **) urealloc
       (_simples_per_complex_2D, n_realloc * sizeof(si32 *));
     
-    // _complex_track_offsets = (si32 *) urealloc
-    //   (_complex_track_offsets, n_realloc * sizeof(si32));
-    
     // initialize new elements to zero
   
     int n_new = _n_simple_allocated - n_start;
 
-    // memset (_simple_track_offsets + n_start, 0, n_new * sizeof(si32));
     memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(si32));
     memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(si32));
     memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(si32));
-    // memset (_complex_track_offsets + n_start, 0, n_new * sizeof(si32));
     memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(si32 *));
   
   } // if (_n_simple_allocated < n_simple_needed) 
@@ -3229,11 +3179,6 @@ void TitanFile::freeSimpleArrays()
      
 {
   
-  // if (_simple_track_offsets) {
-  //   ufree(_simple_track_offsets);
-  //   _simple_track_offsets = nullptr;
-  // }
-
   if (_n_simples_per_complex) {
     ufree(_n_simples_per_complex);
     _n_simples_per_complex = nullptr;
@@ -3248,13 +3193,6 @@ void TitanFile::freeSimpleArrays()
     ufree(_simples_per_complex_1D);
     _simples_per_complex_1D = nullptr;
   }
-
-  // if (_complex_track_offsets) {
-  //   ufree(_complex_track_offsets);
-  //   _complex_track_offsets = nullptr;
-  // }
-
-  //   freeSimplesPerComplex2D();
 
   if (_simples_per_complex_2D) {
     for (int i = 0; i < _n_simple_allocated; i++) {
@@ -3478,7 +3416,6 @@ void TitanFile::freeTracksAll()
 
   freeSimpleArrays();
   freeComplexArrays();
-  // freeSimplesPerComplex2D();
   freeScanEntries();
   freeScanIndex();
   freeUtime();
@@ -4346,22 +4283,13 @@ void TitanFile::reinit()
     memset(_scan_entries, 0, _n_scan_entries * sizeof(track_file_entry_t));
   }
   
-  // if (_n_scan_index_allocated > 0) {
-  //   memset(_scan_index, 0,
-  //          _n_scan_index_allocated * sizeof(track_file_scan_index_t));
-  // }
-  
   if (_n_simple_allocated > 0) {
-    // memset (_simple_track_offsets, 0,
-    //         _n_simple_allocated * sizeof(si32));
     memset (_n_simples_per_complex, 0,
 	    _n_simple_allocated * sizeof(si32));
     memset (_simples_per_complex_offsets, 0,
 	    _n_simple_allocated * sizeof(si32));
     memset (_simples_per_complex_1D, 0,
 	    _n_simple_allocated * sizeof(si32));
-    // memset (_complex_track_offsets, 0,
-    //         _n_simple_allocated * sizeof(si32));
   }
     
   if (_n_utime_allocated > 0) {
@@ -4938,16 +4866,6 @@ int TitanFile::writeComplexTrackParams(int complex_index,
   _complexRmseVars.smoothed_speed.putVal(varIndex, cparams.forecast_rmse.smoothed_speed);
   _complexRmseVars.smoothed_direction.putVal(varIndex, cparams.forecast_rmse.smoothed_direction);
 
-  // {
-  //   bool fillMode;
-  //   float fillValueFloat;
-  //   _globalBiasVars.smoothed_direction.getFillModeParameters(fillMode, fillValueFloat);
-  //   cerr << "FFFFFFFFFFFF fillMode, fillValue: " << fillMode << ", " << fillValueFloat << endl;
-  //   int fillValueInt;
-  //   _complexVars.duration_in_secs.getFillModeParameters(fillMode, fillValueInt);
-  //   cerr << "IIIIIIIIIIIIIII fillMode, fillValue: " << fillMode << ", " << fillValueInt << endl;
-  // }
-  
   return 0;
 
 }
