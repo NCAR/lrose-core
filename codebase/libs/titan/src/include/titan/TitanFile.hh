@@ -1156,15 +1156,6 @@ private:
 
 public:
 
-  // missing values
-  
-  static constexpr double missingDouble = -999999.0;
-  static constexpr float missingFloat = -999999.0f;
-  static constexpr int64_t missingInt64 = -999999;
-  static constexpr int32_t missingInt32 = -999999;
-  static constexpr int16_t missingInt16 = -32768;
-  static constexpr int8_t missingInt08 = -128;
-
   // strings for netcdf
 
   // attributes

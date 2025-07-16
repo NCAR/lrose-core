@@ -41,6 +41,7 @@
 using Fpath = std::filesystem::path;
 
 #include <dataport/bigend.h>
+#include <titan/TitanData.hh>
 #include <titan/TitanFile.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
@@ -519,31 +520,31 @@ void TitanFile::_setFillValue(NcxxVar &var)
 
   nc_type vtype = var.getType().getId();
   if (vtype == NC_DOUBLE) {
-    var.addScalarAttr("_FillValue", missingDouble);
+    var.addScalarAttr("_FillValue", TitanData::missingFl64);
     return;
   }
   if (vtype == NC_FLOAT) {
-    var.addScalarAttr("_FillValue", missingFloat);
+    var.addScalarAttr("_FillValue", TitanData::missingFl32);
     return;
   }
   if (vtype == NC_INT64) {
-    var.addScalarAttr("_FillValue", missingInt64);
+    var.addScalarAttr("_FillValue", TitanData::missingInt64);
     return;
   }
   if (vtype == NC_INT) {
-    var.addScalarAttr("_FillValue", missingInt32);
+    var.addScalarAttr("_FillValue", TitanData::missingInt32);
     return;
   }
   if (vtype == NC_LONG) {
-    var.addScalarAttr("_FillValue", missingInt32);
+    var.addScalarAttr("_FillValue", TitanData::missingInt32);
     return;
   }
   if (vtype == NC_SHORT) {
-    var.addScalarAttr("_FillValue", missingInt16);
+    var.addScalarAttr("_FillValue", TitanData::missingInt16);
     return;
   }
   if (vtype == NC_UBYTE) {
-    var.addScalarAttr("_FillValue", missingInt08);
+    var.addScalarAttr("_FillValue", TitanData::missingInt08);
     return;
   }
 }
@@ -1993,7 +1994,7 @@ int TitanFile::readStormAux(int storm_num)
     _lpropsVars.vorticity.getVal(layerIndex, &ll.vorticity);
     float fval;
     _lpropsVars.convectivity_median.getVal(layerIndex, &fval);
-    if (fval != missingFloat) {
+    if (fval != TitanData::missingFl32) {
       ll.convectivity_median = fval;
     }
   }
@@ -2188,7 +2189,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
     _gpropsVars.ltg_count.getVal(stormIndex, &gp.ltg_count);
     float fval;
     _gpropsVars.convectivity_median.getVal(stormIndex, &fval);
-    if (fval != missingFloat) {
+    if (fval != TitanData::missingFl32) {
       gp.convectivity_median = fval;
     }
 
@@ -3041,22 +3042,22 @@ void TitanFile::_clear1DVar(NcxxVar &var,
     nc_type vtype = var.getType().getId();
     switch (vtype) {
       case NC_DOUBLE:
-        var.putVal(index, missingDouble);
+        var.putVal(index, TitanData::missingFl64);
         break;
       case NC_FLOAT:
-        var.putVal(index, missingFloat);
+        var.putVal(index, TitanData::missingFl32);
         break;
       case NC_INT64:
-        var.putVal(index, missingInt64);
+        var.putVal(index, TitanData::missingInt64);
         break;
       case NC_INT:
-        var.putVal(index, missingInt32);
+        var.putVal(index, TitanData::missingInt32);
         break;
       case NC_SHORT:
-        var.putVal(index, missingInt16);
+        var.putVal(index, TitanData::missingInt16);
         break;
       case NC_UBYTE:
-        var.putVal(index, missingInt08);
+        var.putVal(index, TitanData::missingInt08);
         break;
       case NC_STRING:
         var.putVal(index, string(""));
@@ -3081,22 +3082,22 @@ void TitanFile::_clear2DVar(NcxxVar &var,
       nc_type vtype = var.getType().getId();
       switch (vtype) {
         case NC_DOUBLE:
-          var.putVal(index, missingDouble);
+          var.putVal(index, TitanData::missingFl64);
           break;
         case NC_FLOAT:
-          var.putVal(index, missingFloat);
+          var.putVal(index, TitanData::missingFl32);
           break;
         case NC_INT64:
-          var.putVal(index, missingInt64);
+          var.putVal(index, TitanData::missingInt64);
           break;
         case NC_INT:
-          var.putVal(index, missingInt32);
+          var.putVal(index, TitanData::missingInt32);
           break;
         case NC_SHORT:
-          var.putVal(index, missingInt16);
+          var.putVal(index, TitanData::missingInt16);
           break;
         case NC_UBYTE:
-          var.putVal(index, missingInt08);
+          var.putVal(index, TitanData::missingInt08);
           break;
         case NC_STRING:
           var.putVal(index, string(""));
@@ -4345,58 +4346,58 @@ int TitanFile::clearComplexSlot(int complex_track_num)
 
   std::vector<size_t> varIndex = NcxxVar::makeIndex(complex_track_num);
 
-  _complexVars.complex_track_num.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.volume_at_start_of_sampling.putVal(varIndex, Ncxx::missingFloat);
-  _complexVars.volume_at_end_of_sampling.putVal(varIndex, Ncxx::missingFloat);
-  _complexVars.start_scan.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.end_scan.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.duration_in_scans.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.duration_in_secs.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.start_time.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.end_time.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.n_simple_tracks.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.n_top_missing.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.n_range_limited.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.start_missing.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.end_missing.putVal(varIndex, Ncxx::missingInt);
-  _complexVars.n_samples_for_forecast_stats.putVal(varIndex, Ncxx::missingInt);
+  _complexVars.complex_track_num.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.volume_at_start_of_sampling.putVal(varIndex, TitanData::missingFl32);
+  _complexVars.volume_at_end_of_sampling.putVal(varIndex, TitanData::missingFl32);
+  _complexVars.start_scan.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.end_scan.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.duration_in_scans.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.duration_in_secs.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.start_time.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.end_time.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.n_simple_tracks.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.n_top_missing.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.n_range_limited.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.start_missing.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.end_missing.putVal(varIndex, TitanData::missingInt32);
+  _complexVars.n_samples_for_forecast_stats.putVal(varIndex, TitanData::missingInt32);
 
-  _complexVerifyVars.ellipse_forecast_n_success.putVal(varIndex, Ncxx::missingInt);
-  _complexVerifyVars.ellipse_forecast_n_failure.putVal(varIndex, Ncxx::missingInt);
-  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(varIndex, Ncxx::missingInt);
-  _complexVerifyVars.polygon_forecast_n_success.putVal(varIndex, Ncxx::missingInt);
-  _complexVerifyVars.polygon_forecast_n_failure.putVal(varIndex, Ncxx::missingInt);
-  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(varIndex, Ncxx::missingInt);
+  _complexVerifyVars.ellipse_forecast_n_success.putVal(varIndex, TitanData::missingInt32);
+  _complexVerifyVars.ellipse_forecast_n_failure.putVal(varIndex, TitanData::missingInt32);
+  _complexVerifyVars.ellipse_forecast_n_false_alarm.putVal(varIndex, TitanData::missingInt32);
+  _complexVerifyVars.polygon_forecast_n_success.putVal(varIndex, TitanData::missingInt32);
+  _complexVerifyVars.polygon_forecast_n_failure.putVal(varIndex, TitanData::missingInt32);
+  _complexVerifyVars.polygon_forecast_n_false_alarm.putVal(varIndex, TitanData::missingInt32);
   
-  _complexBiasVars.proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.vol_centroid_z.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.refl_centroid_z.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.top.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.dbz_max.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.volume.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.precip_flux.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.mass.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.proj_area.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.smoothed_speed.putVal(varIndex, Ncxx::missingFloat);
-  _complexBiasVars.smoothed_direction.putVal(varIndex, Ncxx::missingFloat);
+  _complexBiasVars.proj_area_centroid_x.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.proj_area_centroid_y.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.vol_centroid_z.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.refl_centroid_z.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.top.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.dbz_max.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.volume.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.precip_flux.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.mass.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.proj_area.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.smoothed_proj_area_centroid_x.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.smoothed_proj_area_centroid_y.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.smoothed_speed.putVal(varIndex, TitanData::missingFl32);
+  _complexBiasVars.smoothed_direction.putVal(varIndex, TitanData::missingFl32);
   
-  _complexRmseVars.proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.vol_centroid_z.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.refl_centroid_z.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.top.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.dbz_max.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.volume.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.precip_flux.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.mass.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.proj_area.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.smoothed_speed.putVal(varIndex, Ncxx::missingFloat);
-  _complexRmseVars.smoothed_direction.putVal(varIndex, Ncxx::missingFloat);
+  _complexRmseVars.proj_area_centroid_x.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.proj_area_centroid_y.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.vol_centroid_z.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.refl_centroid_z.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.top.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.dbz_max.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.volume.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.precip_flux.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.mass.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.proj_area.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.smoothed_proj_area_centroid_x.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.smoothed_proj_area_centroid_y.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.smoothed_speed.putVal(varIndex, TitanData::missingFl32);
+  _complexRmseVars.smoothed_direction.putVal(varIndex, TitanData::missingFl32);
 
   if (complex_track_num < _lowest_avail_complex_slot) {
     _lowest_avail_complex_slot = complex_track_num;

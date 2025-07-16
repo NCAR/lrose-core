@@ -40,121 +40,147 @@
 #include <titan/storm.h>
 #include <titan/track.h>
 
-/*
- * StormFileParams
- * these are the parameters that govern the operations of the
- * identification algorithm
- */
-
-class StormFileParams {
+class TitanData {
 
 public:
 
-  StormFileParams() {
-  }
+  // missing values
+  
+  static constexpr double missingFl64 = -999999.0;
+  static constexpr float missingFl32 = -999999.0f;
+  static constexpr int64_t missingInt64 = -999999;
+  static constexpr int32_t missingInt32 = -999999;
+  static constexpr int16_t missingInt16 = -32768;
+  static constexpr int8_t missingInt08 = -128;
 
-  // data fields
+  /*
+   * StormFileParams
+   * these are the parameters that govern the operations of the
+   * identification algorithm
+   */
   
-  fl32 low_dbz_threshold;	/* dbz - low limit for dbz 
+  class StormParams {
+    
+  public:
+
+    // mode for computing precip
+    // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
+    // TITAN_PRECIP_AT_SPECIFIED_HT: precip computed at specified height
+    // TITAN_PRECIP_AT_LOWEST_VALID_HT: precip computed at lowest valid CAPPI
+    // TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL: precip computed from lowest non-missing dbz
+
+    typedef enum {
+      PRECIP_FROM_COLUMN_MAX = 0,
+      PRECIP_AT_SPECIFIED_HT = 1,
+      PRECIP_AT_LOWEST_VALID_HT = 2,
+      PRECIP_FROM_LOWEST_AVAILABLE_REFL = 3
+    } precip_mode_t;
+
+    
+    StormParams();
+    
+    // data fields
+    
+    fl32 low_dbz_threshold;	/* dbz - low limit for dbz 
 				 * values */
-  
-  fl32 high_dbz_threshold;	/* dbz - high limit for dbz 
+    
+    fl32 high_dbz_threshold;	/* dbz - high limit for dbz 
 				 * values */
-  
-  fl32 dbz_hist_interval;	/* dbz */
-  
-  fl32 hail_dbz_threshold;	/* dbz - threshold above which
+    
+    fl32 dbz_hist_interval;	/* dbz */
+    
+    fl32 hail_dbz_threshold;	/* dbz - threshold above which
 				 * precip is assumed to be hail */
-
-  fl32 base_threshold;	/* km - min ht for storm base -
-                         * echo below this is ignored */
-
-  fl32 top_threshold;		/* km - max ht for storm top -
+    
+    fl32 base_threshold;	/* km - min ht for storm base -
+                                 * echo below this is ignored */
+    
+    fl32 top_threshold;		/* km - max ht for storm top -
 				 * echo above this is ignored */
-
-  fl32 min_storm_size;   	/* km2 or km3 - min size for
+    
+    fl32 min_storm_size;   	/* km2 or km3 - min size for
 				 * storm definition (km2 for 2D
 				 * data; km3 for 3D data) */
-
-  fl32 max_storm_size;	/* km2 or km3 - max size for
-                         * storm definition (km2 for 2D
-                         * data; km3 for 3D data) */
-
-  fl32 morphology_erosion_threshold; /* threshold to which morphology
-                                      * erosion is performed (km) */
-
-  fl32 morphology_refl_divisor; /* The morphology field is obtained
-                                 * by adding the euclidean distance
-                                 * to storm edge (km) to the
-                                 * reflectivity excess (above
-                                 * threshold) divided by this
-                                 * value (dbz/km) */
-  
-  fl32 min_radar_tops;	/* (km) min tops for valid radar data -
-                         * if checked */
-
-  fl32 tops_edge_margin;	/* (km) margin placed on min_tops
+    
+    fl32 max_storm_size;	/* km2 or km3 - max size for
+                                 * storm definition (km2 for 2D
+                                 * data; km3 for 3D data) */
+    
+    fl32 morphology_erosion_threshold; /* threshold to which morphology
+                                        * erosion is performed (km) */
+    
+    fl32 morphology_refl_divisor; /* The morphology field is obtained
+                                   * by adding the euclidean distance
+                                   * to storm edge (km) to the
+                                   * reflectivity excess (above
+                                   * threshold) divided by this
+                                   * value (dbz/km) */
+    
+    fl32 min_radar_tops;	/* (km) min tops for valid radar data -
+                                 * if checked */
+    
+    fl32 tops_edge_margin;	/* (km) margin placed on min_tops
 				 * field to allow for tilted
 				 * storms */
-
-  fl32 z_p_coeff;		/* Z - precip coeficient */
-  fl32 z_p_exponent;		/* Z - precip exponent */
-  fl32 z_m_coeff;		/* Z - mass coeficient */
-  fl32 z_m_exponent;		/* Z - mass exponent */
-
-  fl32 sectrip_vert_aspect;	/* - vertical aspect ratio
+    
+    fl32 z_p_coeff;		/* Z - precip coeficient */
+    fl32 z_p_exponent;		/* Z - precip exponent */
+    fl32 z_m_coeff;		/* Z - mass coeficient */
+    fl32 z_m_exponent;		/* Z - mass exponent */
+    
+    fl32 sectrip_vert_aspect;	/* - vertical aspect ratio
 				 * threshold above which storm
 				 * is considered to be second trip */
-
-  fl32 sectrip_horiz_aspect;	/* - horizontal aspect ratio
+    
+    fl32 sectrip_horiz_aspect;	/* - horizontal aspect ratio
 				 * threshold above which storm
 				 * is considered to be second trip */
-
-  fl32 sectrip_orientation_error; /* deg - error in ellipse
-                                   * orientation from radar within which
-                                   * storm is considered decond trip */
-
-  fl32 poly_start_az;		/* deg azimuth from T.N. for
+    
+    fl32 sectrip_orientation_error; /* deg - error in ellipse
+                                     * orientation from radar within which
+                                     * storm is considered decond trip */
+    
+    fl32 poly_start_az;		/* deg azimuth from T.N. for
 				 * first polygon point */
-
-  fl32 poly_delta_az;		/* deg azimuth delta between
+    
+    fl32 poly_delta_az;		/* deg azimuth delta between
 				 * polygon points (pos is
 				 * counterclockwise) */
-
-  si32 check_morphology;	/* check_morphology flag */
-
-  si32 check_tops;		/* check_tops flag */
-
-  si32 vel_available;		/* vel data availability flag */
-
-  si32 n_poly_sides;		/* number of sides in storm shape
+    
+    si32 check_morphology;	/* check_morphology flag */
+    
+    si32 check_tops;		/* check_tops flag */
+    
+    si32 vel_available;		/* vel data availability flag */
+    
+    si32 n_poly_sides;		/* number of sides in storm shape
 				 * polygons */
+    
+    fl32 ltg_count_time;        /* number of seconds over which the ltg
+                                 * strikes are counted. */
+    
+    fl32 ltg_count_margin_km;   /* margin from storm edge to describe
+                                 * outer region for counting ltg strikes */
+    
+    fl32 hail_z_m_coeff;        /* Z - mass coeficient */
+    
+    fl32 hail_z_m_exponent;     /* Z - mass exponent */
+    
+    fl32 hail_mass_dbz_threshold; /* dbz - threshold above which
+                                   * hail mass is calculated */
+    
+    fl32 tops_dbz_threshold;	/* dbz threshold for computing storm tops */
+    
+    fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
+                            * See precip_computation_mode */
+    
+    precip_mode_t precip_computation_mode;
+    
+  }; // StormParams
 
-  fl32 ltg_count_time;        /* number of seconds over which the ltg
-                               * strikes are counted. */
+}; // TitanData
 
-  fl32 ltg_count_margin_km;   /* margin from storm edge to describe
-                               * outer region for counting ltg strikes */
-
-  fl32 hail_z_m_coeff;        /* Z - mass coeficient */
-
-  fl32 hail_z_m_exponent;     /* Z - mass exponent */
-
-  fl32 hail_mass_dbz_threshold; /* dbz - threshold above which
-                                 * hail mass is calculated */
-
-  fl32 tops_dbz_threshold;	/* dbz threshold for computing storm tops */
-
-  si32 precip_computation_mode; /* mode for computing precip */
-  /* TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ */
-  /* TITAN_PRECIP_AT_SPECIFIED_HT: precip computed at specified height */
-  /* TITAN_PRECIP_AT_LOWEST_VALID_HT: precip computed at lowest valid CAPPI */
-  /* TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL: precip computed from lowest non-missing dbz */
-
-  fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
-                          * See precip_computation_mode */
-
-}; // StormFileParams
+#ifdef JUNK
 
   /*
    * storm_file_header_t - structure for header in storm properties
@@ -1019,4 +1045,6 @@ public:
                                    const char *spacer,
                                    const track_file_verify_v6_t *verify);
 
-#endif
+#endif // JUNK
+
+#endif // TitanData_hh
