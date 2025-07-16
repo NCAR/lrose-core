@@ -453,6 +453,11 @@ int PrintTitanFiles::_printTrackFull(TitanStormFile &sfile,
   const track_file_params_t &tparams = tfile.header().params;
   const track_file_verify_t &verify = tfile.header().verify;
 
+  bool printVerification = verify.verification_performed;
+  if (_args.printVerification) {
+    printVerification = true;
+  }
+  
   /*
    * complex tracks
    */
@@ -474,7 +479,7 @@ int PrintTitanFiles::_printTrackFull(TitanStormFile &sfile,
     }
     
     RfPrintComplexTrackParams(stdout, "    ",
-			      verify.verification_performed,
+			      printVerification,
 			      &tparams,
 			      &tfile.complex_params(),
 			      tfile.simples_per_complex()[complex_track_num]);
@@ -600,6 +605,10 @@ int PrintTitanFiles::_printTrackSummary(TitanStormFile &sfile,
 {
 
   const track_file_verify_t &verify = tfile.header().verify;
+  bool printVerification = verify.verification_performed;
+  if (_args.printVerification) {
+    printVerification = true;
+  }
 
   // complex tracks
   
@@ -630,7 +639,7 @@ int PrintTitanFiles::_printTrackSummary(TitanStormFile &sfile,
     }
     
     RfPrintComplexTrackParams(stdout, "    ",
-			      verify.verification_performed,
+			      printVerification,
 			      &tfile.header().params,
 			      &tfile.complex_params(),
 			      tfile.simples_per_complex()[complex_track_num]);
@@ -1440,6 +1449,11 @@ int PrintTitanFiles::_printTracksXml()
 
   const track_file_header_t &theader = tfile.header();
   const track_file_verify_t &verify = theader.verify;
+  bool printVerification = verify.verification_performed;
+  if (_args.printVerification) {
+    printVerification = true;
+  }
+
 
   if (tfile.ReadSimplesPerComplex()) {
     cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
@@ -1502,7 +1516,7 @@ int PrintTitanFiles::_printTracksXml()
     }
     
     xml += Titan2Xml::complexTrackParams("complex_track_params", 2,
-                                         verify.verification_performed,
+                                         printVerification,
                                          tfile.complex_params());
     
     // simple tracks in this complex track

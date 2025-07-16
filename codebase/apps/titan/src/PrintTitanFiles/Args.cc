@@ -65,6 +65,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
   printSummary = false;
   printCsvTable = false;
   printAsXml = false;
+  printVerification = false;
   csvTableType = 1;
   minDuration = 0;
   trackNum = -1;
@@ -116,6 +117,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-xml")) {
       
       printAsXml = true;
+
+    } else if (!strcmp(argv[i], "-verify")) {
+      
+      printVerification = true;
       
     } else if (!strcmp(argv[i], "-md")) {
       
@@ -198,6 +203,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -tn ? ] print full listing for this track number\n"
       << "     (as applicable)\n"
+      << "\n"
+      << "  [ -verify ] force print of verify structs\n"
       << "\n"
       << "  [ -xml ] print as XML instead of normal ASCII.\n"
       << "\n"

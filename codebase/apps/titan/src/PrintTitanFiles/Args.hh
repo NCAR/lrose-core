@@ -60,6 +60,7 @@ public:
   bool printFull;
   bool printCsvTable;
   bool printAsXml;
+  bool printVerification;
   int csvTableType;
   int minDuration;
   int trackNum;
