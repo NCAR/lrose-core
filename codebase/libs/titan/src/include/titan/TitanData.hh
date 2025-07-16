@@ -54,7 +54,7 @@ public:
   static constexpr int8_t missingInt08 = -128;
 
   /*
-   * StormFileParams
+   * storm data params
    * these are the parameters that govern the operations of the
    * identification algorithm
    */
@@ -63,11 +63,17 @@ public:
     
   public:
 
+    // methods
+    
+    StormParams();
+    void setFromLegacy(const storm_file_params_t &params);
+    void convertToLegacy(storm_file_params_t &params);
+    
     // mode for computing precip
     // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
     // TITAN_PRECIP_AT_SPECIFIED_HT: precip computed at specified height
     // TITAN_PRECIP_AT_LOWEST_VALID_HT: precip computed at lowest valid CAPPI
-    // TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL: precip computed from lowest non-missing dbz
+    // TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL: precip computed from lowest level with non-missing dbz
 
     typedef enum {
       PRECIP_FROM_COLUMN_MAX = 0,
@@ -76,10 +82,6 @@ public:
       PRECIP_FROM_LOWEST_AVAILABLE_REFL = 3
     } precip_mode_t;
 
-    StormParams();
-    void setFromLegacy(const storm_file_params_t &params);
-    void convertToLegacy(storm_file_params_t &params);
-    
     // data fields
     
     fl32 low_dbz_threshold;	/* dbz - low limit for dbz 
@@ -178,6 +180,29 @@ public:
     precip_mode_t precip_computation_mode;
     
   }; // StormParams
+
+  // storm data header
+
+  class StormHeader {
+    
+  public:
+
+    // methods
+    
+    StormHeader();
+    void setFromLegacy(const storm_file_header_t &hdr);
+    void convertToLegacy(storm_file_header_t &hdr);
+
+    // data
+
+    time_t file_time;    /* filetime - time of last write */
+    time_t start_time;   /* start_time - time of first scan */
+    time_t end_time;     /* end_time - time of last scan */
+    int n_scans;     /* number of completed scans in file */
+    StormParams params; /* see above */
+    
+    
+  };
 
 }; // TitanData
 

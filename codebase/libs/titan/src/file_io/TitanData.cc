@@ -175,4 +175,40 @@ void TitanData::StormParams::convertToLegacy(storm_file_params_t &params)
   
 }
 
+////////////////////////////////////////////////////////////
+// StormHeader
+
+TitanData::StormHeader::StormHeader()
+
+{
+
+  file_time = 0;
+  start_time = 0;
+  end_time = 0;
+  n_scans = 0;
+  
+}
+
+void TitanData::StormHeader::setFromLegacy(const storm_file_header_t &hdr)
+{
+
+  file_time = hdr.file_time;
+  start_time = hdr.start_time;
+  end_time = hdr.end_time;
+  n_scans = hdr.n_scans;
+  params.setFromLegacy(hdr.params);
+  
+}
+
+void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr)
+{
+
+  hdr.file_time = file_time;
+  hdr.start_time = start_time;
+  hdr.end_time = end_time;
+  hdr.n_scans = n_scans;
+  params.convertToLegacy(hdr.params);
+  
+}
+
     
