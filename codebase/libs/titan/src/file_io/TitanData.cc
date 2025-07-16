@@ -39,7 +39,7 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////
-// StormParams constructor
+// StormParams
 
 TitanData::StormParams::StormParams()
 
@@ -77,3 +77,102 @@ TitanData::StormParams::StormParams()
 
 }
 
+void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
+{
+
+  low_dbz_threshold = params.low_dbz_threshold;
+  high_dbz_threshold = params.high_dbz_threshold;
+  dbz_hist_interval = params.dbz_hist_interval;
+  hail_dbz_threshold = params.hail_dbz_threshold;
+  base_threshold = params.base_threshold;
+  top_threshold = params.top_threshold;
+  min_storm_size = params.min_storm_size;
+  max_storm_size = params.max_storm_size;
+  morphology_erosion_threshold = params.morphology_erosion_threshold;
+  morphology_refl_divisor = params.morphology_refl_divisor;
+  min_radar_tops = params.min_radar_tops;
+  tops_edge_margin = params.tops_edge_margin;
+  z_p_coeff = params.z_p_coeff;
+  z_p_exponent = params.z_p_exponent;
+  z_m_coeff = params.z_m_coeff;
+  z_m_exponent = params.z_m_exponent;
+  sectrip_vert_aspect = params.sectrip_vert_aspect;
+  sectrip_horiz_aspect = params.sectrip_horiz_aspect;
+  sectrip_orientation_error = params.sectrip_orientation_error;
+  poly_start_az = params.poly_start_az;
+  poly_delta_az = params.poly_delta_az;
+  ltg_count_time = params.ltg_count_time;
+  ltg_count_margin_km = params.ltg_count_margin_km;
+  hail_z_m_coeff = params.hail_z_m_coeff;
+  hail_z_m_exponent = params.hail_z_m_exponent;
+  hail_mass_dbz_threshold = params.hail_mass_dbz_threshold;
+  tops_dbz_threshold = params.tops_dbz_threshold;
+  precip_plane_ht = params.precip_plane_ht;
+
+  switch (params.precip_computation_mode) {
+    case TITAN_PRECIP_FROM_COLUMN_MAX:
+      precip_computation_mode = PRECIP_FROM_COLUMN_MAX;
+      break;
+    case TITAN_PRECIP_AT_SPECIFIED_HT:
+      precip_computation_mode = PRECIP_AT_SPECIFIED_HT;
+      break;
+    case TITAN_PRECIP_AT_LOWEST_VALID_HT:
+      precip_computation_mode = PRECIP_AT_LOWEST_VALID_HT;
+      break;
+    case TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL:
+      precip_computation_mode = PRECIP_FROM_LOWEST_AVAILABLE_REFL;
+      break;
+  }
+
+}
+
+void TitanData::StormParams::convertToLegacy(storm_file_params_t &params)
+{
+
+  params.low_dbz_threshold = low_dbz_threshold;
+  params.high_dbz_threshold = high_dbz_threshold;
+  params.dbz_hist_interval = dbz_hist_interval;
+  params.hail_dbz_threshold = hail_dbz_threshold;
+  params.base_threshold = base_threshold;
+  params.top_threshold = top_threshold;
+  params.min_storm_size = min_storm_size;
+  params.max_storm_size = max_storm_size;
+  params.morphology_erosion_threshold = morphology_erosion_threshold;
+  params.morphology_refl_divisor = morphology_refl_divisor;
+  params.min_radar_tops = min_radar_tops;
+  params.tops_edge_margin = tops_edge_margin;
+  params.z_p_coeff = z_p_coeff;
+  params.z_p_exponent = z_p_exponent;
+  params.z_m_coeff = z_m_coeff;
+  params.z_m_exponent = z_m_exponent;
+  params.sectrip_vert_aspect = sectrip_vert_aspect;
+  params.sectrip_horiz_aspect = sectrip_horiz_aspect;
+  params.sectrip_orientation_error = sectrip_orientation_error;
+  params.poly_start_az = poly_start_az;
+  params.poly_delta_az = poly_delta_az;
+  params.ltg_count_time = ltg_count_time;
+  params.ltg_count_margin_km = ltg_count_margin_km;
+  params.hail_z_m_coeff = hail_z_m_coeff;
+  params.hail_z_m_exponent = hail_z_m_exponent;
+  params.hail_mass_dbz_threshold = hail_mass_dbz_threshold;
+  params.tops_dbz_threshold = tops_dbz_threshold;
+  params.precip_plane_ht = precip_plane_ht;
+
+  switch (precip_computation_mode) {
+    case PRECIP_FROM_COLUMN_MAX:
+      params.precip_computation_mode = TITAN_PRECIP_FROM_COLUMN_MAX;
+      break;
+    case PRECIP_AT_SPECIFIED_HT:
+      params.precip_computation_mode = TITAN_PRECIP_AT_SPECIFIED_HT;
+      break;
+    case PRECIP_AT_LOWEST_VALID_HT:
+      params.precip_computation_mode = TITAN_PRECIP_AT_LOWEST_VALID_HT;
+      break;
+    case PRECIP_FROM_LOWEST_AVAILABLE_REFL:
+      params.precip_computation_mode = TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL;
+      break;
+  }
+  
+}
+
+    

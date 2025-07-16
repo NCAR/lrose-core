@@ -77,8 +77,8 @@ public:
     } precip_mode_t;
 
     StormParams();
-    setFromLegacy(const storm_file_params_t &params);
-    convertToLegacy(storm_file_params_t &params);
+    void setFromLegacy(const storm_file_params_t &params);
+    void convertToLegacy(storm_file_params_t &params);
     
     // data fields
     
