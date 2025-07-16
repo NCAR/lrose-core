@@ -76,8 +76,9 @@ public:
       PRECIP_FROM_LOWEST_AVAILABLE_REFL = 3
     } precip_mode_t;
 
-    
     StormParams();
+    setFromLegacy(const storm_file_params_t &params);
+    convertToLegacy(storm_file_params_t &params);
     
     // data fields
     
