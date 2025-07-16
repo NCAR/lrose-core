@@ -38,6 +38,7 @@
 #define TitanData_hh
 
 #include <titan/storm.h>
+#include <titan/track.h>
 
 /*
  * StormFileParams
@@ -48,6 +49,11 @@
 class StormFileParams {
 
 public:
+
+  StormFileParams() {
+  }
+
+  // data fields
   
   fl32 low_dbz_threshold;	/* dbz - low limit for dbz 
 				 * values */
@@ -148,8 +154,6 @@ public:
   fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
                           * See precip_computation_mode */
 
-  si32 spare[31];
-    
 }; // StormFileParams
 
   /*
