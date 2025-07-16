@@ -1222,7 +1222,7 @@ void TitanFile::_setUpVars()
   
   _complexTrackNumsVar = _getVar(COMPLEX_TRACK_NUMS, NcxxType::nc_INT, _maxComplexDim, _complexGroup);
   if (_fileMode != NcxxFile::read) {
-    _complexTrackNumsVar.putAtt(NOTE, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
+    _complexTrackNumsVar.putAtt(COMMENT, "Array of complex track numbers. Monotonically increasing numbers. There will be gaps in the sequence because some complex tracks have multiple simple tracks. The complex track number is derived from the track number of the first simple track.");
   }
 
   // params for each complex track
@@ -2766,23 +2766,23 @@ void TitanFile::_addProjectionFlagAttributes()
     _scanGridVars.proj_type.putAtt(FLAG_MEANINGS, NcxxType::nc_STRING,
                                    meanings.size(), meanings.data());
     
-    _scanGridVars.proj_type.putAtt(NOTE, projTypeNote);
+    _scanGridVars.proj_type.putAtt(COMMENT, projTypeNote);
     
     _scanGridVars.proj_origin_lat.putAtt
-      (NOTE, std::string("Applies to all projection types except latlon"));
+      (COMMENT, std::string("Applies to all projection types except latlon"));
     _scanGridVars.proj_origin_lon.putAtt
-      (NOTE, std::string("Applies to all projection types except latlon"));
+      (COMMENT, std::string("Applies to all projection types except latlon"));
     _scanGridVars.proj_rotation.putAtt
-      (NOTE, std::string("Applies to azimuthal_equidistant projection only"));
+      (COMMENT, std::string("Applies to azimuthal_equidistant projection only"));
     
-    _scanGridVars.proj_lat1.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
-    _scanGridVars.proj_lat2.putAtt(NOTE, std::string("Applies to lambert_conf and albers"));
+    _scanGridVars.proj_lat1.putAtt(COMMENT, std::string("Applies to lambert_conf and albers"));
+    _scanGridVars.proj_lat2.putAtt(COMMENT, std::string("Applies to lambert_conf and albers"));
     _scanGridVars.proj_tangent_lat.putAtt
-      (NOTE, std::string("Applies to polar_stereo and oblique_stereo"));
-    _scanGridVars.proj_tangent_lon.putAtt(NOTE, std::string("Applies to oblique_stereo"));
-    _scanGridVars.proj_pole_type.putAtt(NOTE, std::string("0 = north, 1 = south"));
+      (COMMENT, std::string("Applies to polar_stereo and oblique_stereo"));
+    _scanGridVars.proj_tangent_lon.putAtt(COMMENT, std::string("Applies to oblique_stereo"));
+    _scanGridVars.proj_pole_type.putAtt(COMMENT, std::string("0 = north, 1 = south"));
     _scanGridVars.proj_central_scale.putAtt
-      (NOTE, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
+      (COMMENT, std::string("Applies to polar_stereo, oblique_stereo, trans_mercator"));
 
   }
 
