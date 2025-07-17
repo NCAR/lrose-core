@@ -67,7 +67,7 @@ public:
     
     StormParams();
     void setFromLegacy(const storm_file_params_t &params);
-    void convertToLegacy(storm_file_params_t &params);
+    void convertToLegacy(storm_file_params_t &params) const;
     
     // mode for computing precip
     // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
@@ -193,7 +193,7 @@ public:
     
     StormHeader();
     void setFromLegacy(const storm_file_header_t &hdr);
-    void convertToLegacy(storm_file_header_t &hdr);
+    void convertToLegacy(storm_file_header_t &hdr) const;
 
     // data
 
@@ -219,8 +219,8 @@ public:
     void convertToLegacy(storm_file_scan_header_t &hdr) const;
     static void setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
                               vector<TitanData::ScanHeader> &scans);
-    void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
-                         storm_file_scan_header_t *legacyHdrs);
+    static void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
+                                storm_file_scan_header_t *legacyHdrs);
     
     // data
     
@@ -243,6 +243,143 @@ public:
     Mdvx::coord_t grid;           /* cartesian params for this scan */
 
   };
+
+  /////////////////////////////////////////////////////////////
+  // storm global properties
+
+  class StormGprops {
+    
+  public:
+
+    // methods
+    
+    StormGprops();
+    void setFromLegacy(const storm_file_params_t &params,
+                       const storm_file_global_props_t &gprops);
+    void convertToLegacy(storm_file_global_props_t &gprops) const;
+    static void setFromLegacy(const storm_file_params_t &params,
+                              const storm_file_global_props_t *legacyGprops,
+                              vector<TitanData::StormGprops> &gprops);
+    static void convertToLegacy(const vector<TitanData::StormGprops> &gprops,
+                                storm_file_global_props_t *legacyGprops);
+
+    // data
+    
+    static constexpr int GPROPS_N_POLY_SIDES = 72;
+    
+    si64 layer_props_offset;	/* posn in file of layer props data */
+    si64 dbz_hist_offset;	/* posn in file of dbz hist data */
+    si64 runs_offset;		/* posn in file of runs data */
+    si64 proj_runs_offset;	/* posn in file of proj area runs data */
+
+    fl32 vol_centroid_x;	/* (km or deg) (NOTE 3) */
+    fl32 vol_centroid_y;	/* (km or deg) (NOTE 3) */
+    fl32 vol_centroid_z;	/* km */
+
+    fl32 refl_centroid_x;	/* (km or deg) (NOTE 3) */
+    fl32 refl_centroid_y;	/* (km or deg) (NOTE 3) */
+    fl32 refl_centroid_z;	/* km */
+
+    fl32 top;			/* km */
+    fl32 base;			/* km */
+    fl32 volume;		/* km3 */
+    fl32 area_mean;		/* km2 */
+    fl32 precip_flux;		/* m3/s */
+    fl32 mass;			/* ktons */
+
+    fl32 tilt_angle;		/* deg */
+    fl32 tilt_dirn;		/* degT */
+
+    fl32 dbz_max;		/* dbz */
+    fl32 dbz_mean;		/* dbz */
+    fl32 dbz_max_gradient;	/* dbz/km */
+    fl32 dbz_mean_gradient;	/* dbz/km */
+    fl32 ht_of_dbz_max;		/* km */
+
+    fl32 rad_vel_mean;		/* m/s */
+    fl32 rad_vel_sd;		/* m/s */
+    fl32 vorticity;		/* /s */
+
+    fl32 precip_area; /* km2 */
+    fl32 precip_area_centroid_x; /* (km or deg) (NOTE 3) */
+    fl32 precip_area_centroid_y; /* (km or deg) (NOTE 3) */
+    fl32 precip_area_orientation; /* degT */
+    fl32 precip_area_minor_radius; /* (km or deg)(NOTE 3) - minor radius
+                                    * of precip area ellipse */
+    fl32 precip_area_major_radius; /* (km or deg) (NOTE 3)  - standard dev
+                                    * of precip area along the major axis
+                                    * of the precip area shape */
+    
+    fl32 proj_area;		/* km2 */
+    fl32 proj_area_centroid_x;	/* (km or deg) (NOTE 3) */
+    fl32 proj_area_centroid_y;	/* (km or deg) (NOTE 3) */
+    fl32 proj_area_orientation;	/* degT */
+    fl32 proj_area_minor_radius;	/* (km or deg) (NOTE 3) - minor radius
+                                         * of proj area ellipse */
+    fl32 proj_area_major_radius;	/* (km or deg) (NOTE 3)  - standard dev
+                                         * of proj area along the major axis of the
+                                         * proj area shape */
+    
+    fl32 proj_area_polygon[GPROPS_N_POLY_SIDES]; /* in grid units, the length of
+                                                  * rays from the proj area
+                                                  * centroid to the polygon
+                                                  * vertices (NOTE 3) */
+
+    si32 storm_num;
+
+    si32 n_layers;		/* the number of layers in this storm */
+
+    si32 base_layer;		/* the layer number of the storm base */
+
+    si32 n_dbz_intervals;		/* the number of intervals in the
+                                         * dbz distribution histograms */
+
+    si32 n_runs;			/* number of runs above threshold for
+                                         * this storm */
+
+    si32 n_proj_runs;		/* number of runs in the projected area
+				 * for this storm */
+
+    si32 top_missing;		/* flag to indicate that top of storm was
+				 * not sampled: set to 1 of top missing,
+				 * 0 otherwise */
+
+    si32 range_limited;		/* flag to indicate that storm was not
+				 * fully sampled because of range limitations:
+				 * set to 1 of range-limited,
+				 * 0 otherwise */
+
+    si32 second_trip;		/* flag to indicate that storm is probably
+				 * second trip */
+
+    si32 hail_present;		/* flag to indicate dBZ values above the
+				 * hail threshold */
+
+    si32 anom_prop;               /* flag to indicate anomalous propagation */
+
+    si32 bounding_min_ix;         /* proj_area (x,y) bounding box */
+    si32 bounding_min_iy;         /* in grid coords */
+    si32 bounding_max_ix;
+    si32 bounding_max_iy;
+  
+    fl32 vil_from_maxz;
+    fl32 ltg_count;               /* ltg strike count in x minutes before storm
+                                   * time with x km of storm */
+    // titan_hail_t hail_metrics;  /* hail indicies from titan/titan_hail.h */
+
+    // hail metrics
+    
+    si32 FOKRcategory;            /*  category 0-4 */
+    fl32 waldvogelProbability;    /* 0 <= probability <= 1.0 */
+    fl32 hailMassAloft;           /* ktons */
+    fl32 vihm;                    /* kg/m2 (from maxz) */
+    
+    fl32 poh; /* Waldvogel Probability (%) */
+    fl32 shi; /* Severe Hail Index (J.m-1.s-1) */
+    fl32 posh; /* probability of severe hail (%) */
+    fl32 mehs; /* Maximum Expected Hail Size (mm) */
+    
+  };  // StormGprops
 
 }; // TitanData
 

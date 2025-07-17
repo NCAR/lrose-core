@@ -46,34 +46,36 @@ TitanData::StormParams::StormParams()
 
 {
 
-  low_dbz_threshold = missingFl32;
-  high_dbz_threshold = missingFl32;
-  dbz_hist_interval = missingFl32;
-  hail_dbz_threshold = missingFl32;
-  base_threshold = missingFl32;
-  top_threshold = missingFl32;
-  min_storm_size = missingFl32;
-  max_storm_size = missingFl32;
-  morphology_erosion_threshold = missingFl32;
-  morphology_refl_divisor = missingFl32;
-  min_radar_tops = missingFl32;
-  tops_edge_margin = missingFl32;
-  z_p_coeff = missingFl32;
-  z_p_exponent = missingFl32;
-  z_m_coeff = missingFl32;
-  z_m_exponent = missingFl32;
-  sectrip_vert_aspect = missingFl32;
-  sectrip_horiz_aspect = missingFl32;
-  sectrip_orientation_error = missingFl32;
-  poly_start_az = missingFl32;
-  poly_delta_az = missingFl32;
-  ltg_count_time = missingFl32;
-  ltg_count_margin_km = missingFl32;
-  hail_z_m_coeff = missingFl32;
-  hail_z_m_exponent = missingFl32;
-  hail_mass_dbz_threshold = missingFl32;
-  tops_dbz_threshold = missingFl32;
-  precip_plane_ht = missingFl32;
+  // initialize to 0
+  
+  low_dbz_threshold = 0.0;
+  high_dbz_threshold = 0.0;
+  dbz_hist_interval = 0.0;
+  hail_dbz_threshold = 0.0;
+  base_threshold = 0.0;
+  top_threshold = 0.0;
+  min_storm_size = 0.0;
+  max_storm_size = 0.0;
+  morphology_erosion_threshold = 0.0;
+  morphology_refl_divisor = 0.0;
+  min_radar_tops = 0.0;
+  tops_edge_margin = 0.0;
+  z_p_coeff = 0.0;
+  z_p_exponent = 0.0;
+  z_m_coeff = 0.0;
+  z_m_exponent = 0.0;
+  sectrip_vert_aspect = 0.0;
+  sectrip_horiz_aspect = 0.0;
+  sectrip_orientation_error = 0.0;
+  poly_start_az = 0.0;
+  poly_delta_az = 0.0;
+  ltg_count_time = 0.0;
+  ltg_count_margin_km = 0.0;
+  hail_z_m_coeff = 0.0;
+  hail_z_m_exponent = 0.0;
+  hail_mass_dbz_threshold = 0.0;
+  tops_dbz_threshold = 0.0;
+  precip_plane_ht = 0.0;
   precip_computation_mode = PRECIP_FROM_COLUMN_MAX;
 
 }
@@ -127,7 +129,7 @@ void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
 
 }
 
-void TitanData::StormParams::convertToLegacy(storm_file_params_t &params)
+void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
 {
 
   params.low_dbz_threshold = low_dbz_threshold;
@@ -183,6 +185,8 @@ TitanData::StormHeader::StormHeader()
 
 {
 
+  // initialize to 0
+  
   file_time = 0;
   start_time = 0;
   end_time = 0;
@@ -201,7 +205,7 @@ void TitanData::StormHeader::setFromLegacy(const storm_file_header_t &hdr)
   
 }
 
-void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr)
+void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr) const
 {
 
   hdr.file_time = file_time;
@@ -219,6 +223,8 @@ TitanData::ScanHeader::ScanHeader()
 
 {
 
+  // initialize to 0
+  
   time = 0;
   gprops_offset = 0;
   first_offset = 0;
@@ -370,6 +376,297 @@ void TitanData::ScanHeader::convertToLegacy(const vector<TitanData::ScanHeader> 
 {
   for (size_t ii = 0; ii < scans.size(); ii++) {
     scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
+    
+////////////////////////////////////////////////////////////
+// Storm Global Properties
+
+TitanData::StormGprops::StormGprops()
+
+{
+
+  // initialize to 0
+  
+  layer_props_offset = 0;
+  dbz_hist_offset = 0;
+  runs_offset = 0;
+  proj_runs_offset = 0;
+
+  vol_centroid_x = 0.0;
+  vol_centroid_y = 0.0;
+  vol_centroid_z = 0.0;
+  
+  refl_centroid_x = 0.0;
+  refl_centroid_y = 0.0;
+  refl_centroid_z = 0.0;
+  
+  top = 0.0;
+  base = 0.0;
+  volume = 0.0;
+  area_mean = 0.0;
+  precip_flux = 0.0;
+  mass = 0.0;
+
+  tilt_angle = 0.0;
+  tilt_dirn = 0.0;
+
+  dbz_max = 0.0;
+  dbz_mean = 0.0;
+  dbz_max_gradient = 0.0;
+  dbz_mean_gradient = 0.0;
+  ht_of_dbz_max = 0.0;
+
+  rad_vel_mean = 0.0;
+  rad_vel_sd = 0.0;
+  vorticity = 0.0;
+
+  precip_area = 0.0;
+  precip_area_centroid_x = 0.0;
+  precip_area_centroid_y = 0.0;
+  precip_area_orientation = 0.0;
+  precip_area_minor_radius = 0.0;
+  precip_area_major_radius = 0.0;
+    
+  proj_area = 0.0;
+  proj_area_centroid_x = 0.0;
+  proj_area_centroid_y = 0.0;
+  proj_area_orientation = 0.0;
+  proj_area_minor_radius = 0.0;
+  proj_area_major_radius = 0.0;
+
+  MEM_zero(proj_area_polygon);
+
+  storm_num = 0;
+  n_layers = 0;
+  base_layer = 0;
+  n_dbz_intervals = 0;
+  n_runs = 0;
+  n_proj_runs = 0;
+  top_missing = 0;
+  range_limited = 0;
+  second_trip = 0;
+  hail_present = 0;
+  anom_prop = 0;
+  bounding_min_ix = 0;
+  bounding_min_iy = 0;
+  bounding_max_ix = 0;
+  bounding_max_iy = 0;
+  
+  vil_from_maxz = 0.0;
+  ltg_count = 0.0;
+  
+  FOKRcategory = 0;
+  waldvogelProbability = 0.0;
+  hailMassAloft = 0.0;
+  vihm = 0.0;
+  
+  poh = 0.0;
+  shi = 0.0;
+  posh = 0.0;
+  mehs = 0.0;
+
+}
+
+void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
+                                           const storm_file_global_props_t &gprops)
+{
+
+  layer_props_offset = gprops.layer_props_offset;
+  dbz_hist_offset = gprops.dbz_hist_offset;
+  runs_offset = gprops.runs_offset;
+  proj_runs_offset = gprops.proj_runs_offset;
+
+  vol_centroid_x = gprops.vol_centroid_x;
+  vol_centroid_y = gprops.vol_centroid_y;
+  vol_centroid_z = gprops.vol_centroid_z;
+  
+  refl_centroid_x = gprops.refl_centroid_x;
+  refl_centroid_y = gprops.refl_centroid_y;
+  refl_centroid_z = gprops.refl_centroid_z;
+  
+  top = gprops.top;
+  base = gprops.base;
+  volume = gprops.volume;
+  area_mean = gprops.area_mean;
+  precip_flux = gprops.precip_flux;
+  mass = gprops.mass;
+
+  tilt_angle = gprops.tilt_angle;
+  tilt_dirn = gprops.tilt_dirn;
+
+  dbz_max = gprops.dbz_max;
+  dbz_mean = gprops.dbz_mean;
+  dbz_max_gradient = gprops.dbz_max_gradient;
+  dbz_mean_gradient = gprops.dbz_mean_gradient;
+  ht_of_dbz_max = gprops.ht_of_dbz_max;
+
+  rad_vel_mean = gprops.rad_vel_mean;
+  rad_vel_sd = gprops.rad_vel_sd;
+  vorticity = gprops.vorticity;
+
+  precip_area = gprops.precip_area;
+  precip_area_centroid_x = gprops.precip_area_centroid_x;
+  precip_area_centroid_y = gprops.precip_area_centroid_y;
+  precip_area_orientation = gprops.precip_area_orientation;
+  precip_area_minor_radius = gprops.precip_area_minor_radius;
+  precip_area_major_radius = gprops.precip_area_major_radius;
+    
+  proj_area = gprops.proj_area;
+  proj_area_centroid_x = gprops.proj_area_centroid_x;
+  proj_area_centroid_y = gprops.proj_area_centroid_y;
+  proj_area_orientation = gprops.proj_area_orientation;
+  proj_area_minor_radius = gprops.proj_area_minor_radius;
+  proj_area_major_radius = gprops.proj_area_major_radius;
+
+  assert(GPROPS_N_POLY_SIDES == N_POLY_SIDES);
+  memcpy(proj_area_polygon, gprops.proj_area_polygon, N_POLY_SIDES * sizeof(si32));
+
+  storm_num = gprops.storm_num;
+  n_layers = gprops.n_layers;
+  base_layer = gprops.base_layer;
+  n_dbz_intervals = gprops.n_dbz_intervals;
+  n_runs = gprops.n_runs;
+  n_proj_runs = gprops.n_proj_runs;
+  top_missing = gprops.top_missing;
+  range_limited = gprops.range_limited;
+  second_trip = gprops.second_trip;
+  hail_present = gprops.hail_present;
+  anom_prop = gprops.anom_prop;
+  bounding_min_ix = gprops.bounding_min_ix;
+  bounding_min_iy = gprops.bounding_min_iy;
+  bounding_max_ix = gprops.bounding_max_ix;
+  bounding_max_iy = gprops.bounding_max_iy;
+  
+  vil_from_maxz = gprops.vil_from_maxz;
+  ltg_count = gprops.ltg_count;
+
+  FOKRcategory = 0;
+  waldvogelProbability = 0.0;
+  hailMassAloft = 0.0;
+  vihm = 0.0;
+  poh = 0.0;
+  shi = 0.0;
+  posh = 0.0;
+  mehs = 0.0;
+
+  if (params.gprops_union_type == UNION_HAIL) {
+    FOKRcategory = gprops.add_on.hail_metrics.FOKRcategory;
+    waldvogelProbability = gprops.add_on.hail_metrics.waldvogelProbability;
+    hailMassAloft = gprops.add_on.hail_metrics.hailMassAloft;
+    vihm = gprops.add_on.hail_metrics.vihm;
+  } else if (params.gprops_union_type == UNION_NEXRAD_HDA) {
+    poh = gprops.add_on.hda.poh;
+    shi = gprops.add_on.hda.shi;
+    posh = gprops.add_on.hda.posh;
+    mehs = gprops.add_on.hda.mehs;
+  }
+
+}
+
+void TitanData::StormGprops::convertToLegacy(storm_file_global_props_t &gprops) const
+{
+
+  gprops.layer_props_offset = layer_props_offset;
+  gprops.dbz_hist_offset = dbz_hist_offset;
+  gprops.runs_offset = runs_offset;
+  gprops.proj_runs_offset = proj_runs_offset;
+
+  gprops.vol_centroid_x = vol_centroid_x;
+  gprops.vol_centroid_y = vol_centroid_y;
+  gprops.vol_centroid_z = vol_centroid_z;
+  
+  gprops.refl_centroid_x = refl_centroid_x;
+  gprops.refl_centroid_y = refl_centroid_y;
+  gprops.refl_centroid_z = refl_centroid_z;
+  
+  gprops.top = top;
+  gprops.base = base;
+  gprops.volume = volume;
+  gprops.area_mean = area_mean;
+  gprops.precip_flux = precip_flux;
+  gprops.mass = mass;
+
+  gprops.tilt_angle = tilt_angle;
+  gprops.tilt_dirn = tilt_dirn;
+
+  gprops.dbz_max = dbz_max;
+  gprops.dbz_mean = dbz_mean;
+  gprops.dbz_max_gradient = dbz_max_gradient;
+  gprops.dbz_mean_gradient = dbz_mean_gradient;
+  gprops.ht_of_dbz_max = ht_of_dbz_max;
+
+  gprops.rad_vel_mean = rad_vel_mean;
+  gprops.rad_vel_sd = rad_vel_sd;
+  gprops.vorticity = vorticity;
+
+  gprops.precip_area = precip_area;
+  gprops.precip_area_centroid_x = precip_area_centroid_x;
+  gprops.precip_area_centroid_y = precip_area_centroid_y;
+  gprops.precip_area_orientation = precip_area_orientation;
+  gprops.precip_area_minor_radius = precip_area_minor_radius;
+  gprops.precip_area_major_radius = precip_area_major_radius;
+    
+  gprops.proj_area = proj_area;
+  gprops.proj_area_centroid_x = proj_area_centroid_x;
+  gprops.proj_area_centroid_y = proj_area_centroid_y;
+  gprops.proj_area_orientation = proj_area_orientation;
+  gprops.proj_area_minor_radius = proj_area_minor_radius;
+  gprops.proj_area_major_radius = proj_area_major_radius;
+
+  assert(GPROPS_N_POLY_SIDES == N_POLY_SIDES);
+  memcpy(gprops.proj_area_polygon, proj_area_polygon, N_POLY_SIDES * sizeof(si32));
+
+  gprops.storm_num = storm_num;
+  gprops.n_layers = n_layers;
+  gprops.base_layer = base_layer;
+  gprops.n_dbz_intervals = n_dbz_intervals;
+  gprops.n_runs = n_runs;
+  gprops.n_proj_runs = n_proj_runs;
+  gprops.top_missing = top_missing;
+  gprops.range_limited = range_limited;
+  gprops.second_trip = second_trip;
+  gprops.hail_present = hail_present;
+  gprops.anom_prop = anom_prop;
+  gprops.bounding_min_ix = bounding_min_ix;
+  gprops.bounding_min_iy = bounding_min_iy;
+  gprops.bounding_max_ix = bounding_max_ix;
+  gprops.bounding_max_iy = bounding_max_iy;
+  
+  gprops.vil_from_maxz = vil_from_maxz;
+  gprops.ltg_count = ltg_count;
+
+  if (FOKRcategory != 0 ||
+      waldvogelProbability != 0.0 ||
+      hailMassAloft != 0.0 ||
+      vihm != 0.0) {
+    gprops.add_on.hail_metrics.FOKRcategory = FOKRcategory;
+    gprops.add_on.hail_metrics.waldvogelProbability = waldvogelProbability;
+    gprops.add_on.hail_metrics.hailMassAloft = hailMassAloft;
+    gprops.add_on.hail_metrics.vihm = vihm;
+  } else {
+    gprops.add_on.hda.poh = poh;
+    gprops.add_on.hda.shi = shi;
+    gprops.add_on.hda.posh = posh;
+    gprops.add_on.hda.mehs = mehs;
+  }
+  
+}
+
+void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
+                                           const storm_file_global_props_t *legacyGprops,
+                                           vector<TitanData::StormGprops> &gprops)
+{
+  for (size_t ii = 0; ii < gprops.size(); ii++) {
+    gprops[ii].setFromLegacy(params, legacyGprops[ii]);
+  }
+}
+
+void TitanData::StormGprops::convertToLegacy(const vector<TitanData::StormGprops> &gprops,
+                                             storm_file_global_props_t *legacyGprops)
+{
+  for (size_t ii = 0; ii < gprops.size(); ii++) {
+    gprops[ii].convertToLegacy(legacyGprops[ii]);
   }
 }
     
