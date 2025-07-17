@@ -750,3 +750,49 @@ void TitanData::StormLprops::convertToLegacy(const vector<TitanData::StormLprops
   }
 }
     
+////////////////////////////////////////////////////////////
+// Storm Dbz Histograms
+
+TitanData::StormDbzHist::StormDbzHist()
+
+{
+
+  // initialize to 0
+  
+  percent_volume = 0;
+  percent_area = 0;
+
+}
+
+void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &lprops)
+{
+
+  percent_volume = lprops.percent_volume;
+  percent_area = lprops.percent_area;
+
+}
+
+void TitanData::StormDbzHist::convertToLegacy(storm_file_dbz_hist_t &lprops) const
+{
+
+  lprops.percent_volume = percent_volume;
+  lprops.percent_area = percent_area;
+  
+}
+
+void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t *legacyHist,
+                                            vector<TitanData::StormDbzHist> &hist)
+{
+  for (size_t ii = 0; ii < hist.size(); ii++) {
+    hist[ii].setFromLegacy(legacyHist[ii]);
+  }
+}
+
+void TitanData::StormDbzHist::convertToLegacy(const vector<TitanData::StormDbzHist> &hist,
+                                              storm_file_dbz_hist_t *legacyHist)
+{
+  for (size_t ii = 0; ii < hist.size(); ii++) {
+    hist[ii].convertToLegacy(legacyHist[ii]);
+  }
+}
+    

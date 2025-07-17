@@ -400,8 +400,6 @@ public:
 
     // data
     
-    static constexpr int GPROPS_N_POLY_SIDES = 72;
-    
     fl32 vol_centroid_x;	/* (km or deg) (NOTE 3) */
     fl32 vol_centroid_y;	/* (km or deg) (NOTE 3) */
     fl32 refl_centroid_x;	/* (km or deg) (NOTE 3) */
@@ -416,6 +414,30 @@ public:
     fl32 convectivity_median;   /* used if convectivity thresholds applied */
     
   };  // StormLprops
+
+  /////////////////////////////////////////////////////////////
+  // storm dbz histograms
+
+  class StormDbzHist {
+    
+  public:
+    
+    // methods
+    
+    StormDbzHist();
+    void setFromLegacy(const storm_file_dbz_hist_t &hist);
+    void convertToLegacy(storm_file_dbz_hist_t &hist) const;
+    static void setFromLegacy(const storm_file_dbz_hist_t *legacyHist,
+                              vector<TitanData::StormDbzHist> &hist);
+    static void convertToLegacy(const vector<TitanData::StormDbzHist> &hist,
+                                storm_file_dbz_hist_t *legacyHist);
+
+    // data
+    
+    fl32 percent_volume;
+    fl32 percent_area;
+    
+  };  // StormDbzHist
 
 }; // TitanData
 
