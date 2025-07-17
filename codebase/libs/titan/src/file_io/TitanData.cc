@@ -670,3 +670,83 @@ void TitanData::StormGprops::convertToLegacy(const vector<TitanData::StormGprops
   }
 }
     
+////////////////////////////////////////////////////////////
+// Storm Layer Properties
+
+TitanData::StormLprops::StormLprops()
+
+{
+
+  // initialize to 0
+  
+  vol_centroid_x = 0.0;
+  vol_centroid_y = 0.0;
+  refl_centroid_x = 0.0;
+  refl_centroid_y = 0.0;
+  
+  area = 0.0;
+  dbz_max = 0.0;
+  dbz_mean = 0.0;
+  rad_vel_mean = 0.0;
+  rad_vel_sd = 0.0;
+  vorticity = 0.0;
+  convectivity_median = 0.0;
+
+}
+
+void TitanData::StormLprops::setFromLegacy(const storm_file_layer_props_t &lprops)
+{
+
+  vol_centroid_x = lprops.vol_centroid_x;
+  vol_centroid_y = lprops.vol_centroid_y;
+  refl_centroid_x = lprops.refl_centroid_x;
+  refl_centroid_y = lprops.refl_centroid_y;
+  
+  area = lprops.area;
+  dbz_max = lprops.dbz_max;
+  dbz_mean = lprops.dbz_mean;
+  mass = lprops.mass;
+
+  rad_vel_mean = lprops.rad_vel_mean;
+  rad_vel_sd = lprops.rad_vel_sd;
+  vorticity = lprops.vorticity;
+  convectivity_median = lprops.convectivity_median;
+
+}
+
+void TitanData::StormLprops::convertToLegacy(storm_file_layer_props_t &lprops) const
+{
+
+  lprops.vol_centroid_x = vol_centroid_x;
+  lprops.vol_centroid_y = vol_centroid_y;
+  lprops.refl_centroid_x = refl_centroid_x;
+  lprops.refl_centroid_y = refl_centroid_y;
+  
+  lprops.area = area;
+  lprops.dbz_max = dbz_max;
+  lprops.dbz_mean = dbz_mean;
+  lprops.mass = mass;
+
+  lprops.rad_vel_mean = rad_vel_mean;
+  lprops.rad_vel_sd = rad_vel_sd;
+  lprops.vorticity = vorticity;
+  lprops.convectivity_median = convectivity_median;
+
+}
+
+void TitanData::StormLprops::setFromLegacy(const storm_file_layer_props_t *legacyLprops,
+                                           vector<TitanData::StormLprops> &lprops)
+{
+  for (size_t ii = 0; ii < lprops.size(); ii++) {
+    lprops[ii].setFromLegacy(legacyLprops[ii]);
+  }
+}
+
+void TitanData::StormLprops::convertToLegacy(const vector<TitanData::StormLprops> &lprops,
+                                             storm_file_layer_props_t *legacyLprops)
+{
+  for (size_t ii = 0; ii < lprops.size(); ii++) {
+    lprops[ii].convertToLegacy(legacyLprops[ii]);
+  }
+}
+    

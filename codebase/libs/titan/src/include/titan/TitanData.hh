@@ -381,6 +381,42 @@ public:
     
   };  // StormGprops
 
+  /////////////////////////////////////////////////////////////
+  // storm layer properties
+
+  class StormLprops {
+    
+  public:
+    
+    // methods
+    
+    StormLprops();
+    void setFromLegacy(const storm_file_layer_props_t &lprops);
+    void convertToLegacy(storm_file_layer_props_t &lprops) const;
+    static void setFromLegacy(const storm_file_layer_props_t *legacyLprops,
+                              vector<TitanData::StormLprops> &lprops);
+    static void convertToLegacy(const vector<TitanData::StormLprops> &lprops,
+                                storm_file_layer_props_t *legacyLprops);
+
+    // data
+    
+    static constexpr int GPROPS_N_POLY_SIDES = 72;
+    
+    fl32 vol_centroid_x;	/* (km or deg) (NOTE 3) */
+    fl32 vol_centroid_y;	/* (km or deg) (NOTE 3) */
+    fl32 refl_centroid_x;	/* (km or deg) (NOTE 3) */
+    fl32 refl_centroid_y;	/* (km or deg) (NOTE 3) */
+    fl32 area;		/* km2 */
+    fl32 dbz_max;		/* dbz */
+    fl32 dbz_mean;		/* dbz */
+    fl32 mass;			/* ktons */
+    fl32 rad_vel_mean;		/* m/s */
+    fl32 rad_vel_sd;		/* m/s */
+    fl32 vorticity;		/* /s */
+    fl32 convectivity_median;   /* used if convectivity thresholds applied */
+    
+  };  // StormLprops
+
 }; // TitanData
 
 #ifdef JUNK
