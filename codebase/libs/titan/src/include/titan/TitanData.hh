@@ -37,6 +37,7 @@
 #ifndef TitanData_hh
 #define TitanData_hh
 
+#include <Mdv/Mdvx.hh>
 #include <titan/storm.h>
 #include <titan/track.h>
 
@@ -53,11 +54,10 @@ public:
   static constexpr int16_t missingInt16 = -32768;
   static constexpr int8_t missingInt08 = -128;
 
-  /*
-   * storm data params
-   * these are the parameters that govern the operations of the
-   * identification algorithm
-   */
+  /////////////////////////////////////////////////////////////
+  // storm data params
+  // these are the parameters that govern the operations of the
+  // identification algorithm
   
   class StormParams {
     
@@ -181,6 +181,7 @@ public:
     
   }; // StormParams
 
+  /////////////////////////////////////////////////////////////
   // storm data header
 
   class StormHeader {
@@ -201,54 +202,46 @@ public:
     int n_scans;     /* number of completed scans in file */
     StormParams params; /* see above */
     
+  };
+
+  /////////////////////////////////////////////////////////////
+  // scan header
+  
+  class ScanHeader {
     
+  public:
+    
+    // methods
+    
+    ScanHeader();
+    void setFromLegacy(const storm_file_scan_header_t &hdr);
+    void convertToLegacy(storm_file_scan_header_t &hdr);
+    
+    // data
+    
+    time_t time;
+
+    si64 gprops_offset;		/* file offset for the gprops array */
+    si64 first_offset;		/* offset of first byte for data for
+				 * this scan */
+    si64 last_offset;		/* offset of last byte for data for
+				 * this scan */
+    
+    fl32 min_z;			/* km - msl ht of lowest layer in storm */
+    fl32 delta_z;		/* km - layer thickness */
+    
+    int scan_num;
+    int nstorms;
+    
+    fl32 ht_of_freezing;          /* Height of freezing in km */
+
+    Mdvx::coord_t grid;           /* cartesian params for this scan */
+
   };
 
 }; // TitanData
 
 #ifdef JUNK
-
-  /*
-   * storm_file_header_t - structure for header in storm properties
-   * file
-   */
-
-#define STORM_FILE_HEADER_NBYTES_CHAR_V6 (2 * RF_FILE_NAME_LEN)
-
-  typedef struct {
-
-    si64 file_time;    /* filetime - time of last write */
-    si64 start_time;   /* start_time - time of first scan */
-    si64 end_time;     /* end_time - time of last scan */
-
-    si64 data_file_size;  /* current file size in bytes - this refers
-                           * to completed scans - if the program fails 
-                           * while  writing a scan, the actual file
-                           * may be longer, but the data for the 
-                           * last scan will be unusable. Note that
-                           * n_scans, file_size and end_timer are
-                           * updated after the full scan has been
-                           * written to the file */
-
-    si64 spare64[4];
-
-    storm_file_params_v6_t params; /* see above */
-
-    si32 major_rev;
-    si32 minor_rev;
-    
-    si32 n_scans;     /* number of completed scans in file */
-
-    si32 nbytes_char;	/* number of char bytes at end of
-                         * the struct =
-                         * N_STORM_HEADER_LABELS * R_LABEL_LEN */
-  
-    si32 spare32[132];
-    
-    char header_file_name[RF_FILE_NAME_LEN];
-    char data_file_name[RF_FILE_NAME_LEN];
-
-  } storm_file_header_v6_t;
 
   /*
    * storm_file_scan_t - structure for header for a scan in a storm props

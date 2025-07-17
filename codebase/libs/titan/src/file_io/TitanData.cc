@@ -211,4 +211,67 @@ void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr)
   
 }
 
+////////////////////////////////////////////////////////////
+// ScanHeader
+
+TitanData::ScanHeader::ScanHeader()
+
+{
+
+  time = 0;
+  gprops_offset = 0;
+  first_offset = 0;
+  last_offset = 0;
+  min_z = 0.0;
+  delta_z = 0.0;
+  scan_num = 0;
+  nstorms = 0;
+  ht_of_freezing = 0.0;
+  
+  MEM_zero(grid);
+  grid.proj_type = Mdvx::PROJ_LATLON;
+  grid.nx = 1;
+  grid.ny = 1;
+  grid.nz = 1;
+  grid.dx = 1.0;
+  grid.dy = 1.0;
+  grid.dz = 1.0;
+  grid.dz_constant = 1;
+  
+}
+
+void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t &hdr)
+{
+
+  time = hdr.time;
+  gprops_offset = hdr.gprops_offset;
+  first_offset = hdr.first_offset;
+  last_offset = hdr.last_offset;
+  min_z = hdr.min_z;
+  delta_z = hdr.delta_z;
+  scan_num = hdr.scan_num;
+  nstorms = hdr.nstorms;
+  ht_of_freezing = hdr.ht_of_freezing;
+
+  // grid
+  
+}
+
+void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr)
+{
+
+  hdr.time = time;
+  hdr.gprops_offset = gprops_offset;
+  hdr.first_offset = first_offset;
+  hdr.last_offset = last_offset;
+  hdr.min_z = min_z;
+  hdr.delta_z = delta_z;
+  hdr.scan_num = scan_num;
+  hdr.nstorms = nstorms;
+  hdr.ht_of_freezing = ht_of_freezing;
+
+  // grid
+  
+}
+
     
