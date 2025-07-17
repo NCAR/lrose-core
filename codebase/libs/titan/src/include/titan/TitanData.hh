@@ -73,7 +73,8 @@ public:
     // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
     // TITAN_PRECIP_AT_SPECIFIED_HT: precip computed at specified height
     // TITAN_PRECIP_AT_LOWEST_VALID_HT: precip computed at lowest valid CAPPI
-    // TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL: precip computed from lowest level with non-missing dbz
+    // TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL:
+    //   precip computed from lowest level with non-missing dbz
 
     typedef enum {
       PRECIP_FROM_COLUMN_MAX = 0,
@@ -215,7 +216,11 @@ public:
     
     ScanHeader();
     void setFromLegacy(const storm_file_scan_header_t &hdr);
-    void convertToLegacy(storm_file_scan_header_t &hdr);
+    void convertToLegacy(storm_file_scan_header_t &hdr) const;
+    static void setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
+                              vector<TitanData::ScanHeader> &scans);
+    void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
+                         storm_file_scan_header_t *legacyHdrs);
     
     // data
     

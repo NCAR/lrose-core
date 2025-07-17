@@ -35,6 +35,7 @@
 
 #include <cassert>
 #include <titan/TitanData.hh>
+#include <toolsa/str.h>
 
 using namespace std;
 
@@ -254,10 +255,51 @@ void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t &hdr)
   ht_of_freezing = hdr.ht_of_freezing;
 
   // grid
+
+  grid.proj_origin_lat = hdr.grid.proj_origin_lat;
+  grid.proj_origin_lon = hdr.grid.proj_origin_lon;
+
+  grid.minx = hdr.grid.minx;
+  grid.miny = hdr.grid.miny;
+  grid.minz = hdr.grid.minz;
+
+  grid.dx = hdr.grid.dx;
+  grid.dy = hdr.grid.dy;
+  grid.dz = hdr.grid.dz;
+  grid.dz_constant = hdr.grid.dz_constant;
+  
+  grid.nx = hdr.grid.nx;
+  grid.ny = hdr.grid.ny;
+  grid.nz = hdr.grid.nz;
+
+  grid.sensor_x = hdr.grid.sensor_x;
+  grid.sensor_y = hdr.grid.sensor_y;
+  grid.sensor_z = hdr.grid.sensor_z;
+  grid.sensor_lat = hdr.grid.sensor_lat;
+  grid.sensor_lon = hdr.grid.sensor_lon;
+
+  STRncopy(grid.unitsx, hdr.grid.unitsx, MDV64_COORD_UNITS_LEN);
+  STRncopy(grid.unitsy, hdr.grid.unitsy, MDV64_COORD_UNITS_LEN);
+  STRncopy(grid.unitsz, hdr.grid.unitsz, MDV64_COORD_UNITS_LEN);
+
+  switch (hdr.grid.proj_type) {
+    case TITAN_PROJ_FLAT:
+      grid.proj_type = Mdvx::PROJ_FLAT;
+      grid.proj_params.flat.rotation = hdr.grid.proj_params.flat.rotation;
+      break;
+    case TITAN_PROJ_LAMBERT_CONF:
+      grid.proj_type = Mdvx::PROJ_LAMBERT_CONF;
+      grid.proj_params.lc2.lat1 = hdr.grid.proj_params.lc2.lat1;
+      grid.proj_params.lc2.lat2 = hdr.grid.proj_params.lc2.lat2;
+      break;
+    case TITAN_PROJ_LATLON:
+    default:
+      grid.proj_type = Mdvx::PROJ_LATLON;
+  }
   
 }
 
-void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr)
+void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr) const
 {
 
   hdr.time = time;
@@ -271,7 +313,63 @@ void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr)
   hdr.ht_of_freezing = ht_of_freezing;
 
   // grid
+
+  hdr.grid.proj_origin_lat = grid.proj_origin_lat;
+  hdr.grid.proj_origin_lon = grid.proj_origin_lon;
+
+  hdr.grid.minx = grid.minx;
+  hdr.grid.miny = grid.miny;
+  hdr.grid.minz = grid.minz;
+
+  hdr.grid.dx = grid.dx;
+  hdr.grid.dy = grid.dy;
+  hdr.grid.dz = grid.dz;
+  hdr.grid.dz_constant = grid.dz_constant;
+  
+  hdr.grid.nx = grid.nx;
+  hdr.grid.ny = grid.ny;
+  hdr.grid.nz = grid.nz;
+
+  hdr.grid.sensor_x = grid.sensor_x;
+  hdr.grid.sensor_y = grid.sensor_y;
+  hdr.grid.sensor_z = grid.sensor_z;
+  hdr.grid.sensor_lat = grid.sensor_lat;
+  hdr.grid.sensor_lon = grid.sensor_lon;
+
+  STRncopy(hdr.grid.unitsx, grid.unitsx, TITAN_GRID_UNITS_LEN);
+  STRncopy(hdr.grid.unitsy, grid.unitsy, TITAN_GRID_UNITS_LEN);
+  STRncopy(hdr.grid.unitsz, grid.unitsz, TITAN_GRID_UNITS_LEN);
+
+  switch (grid.proj_type) {
+    case Mdvx::PROJ_FLAT:
+      hdr.grid.proj_type = TITAN_PROJ_FLAT;
+      hdr.grid.proj_params.flat.rotation = grid.proj_params.flat.rotation;
+      break;
+    case Mdvx::PROJ_LAMBERT_CONF:
+      hdr.grid.proj_type = TITAN_PROJ_LAMBERT_CONF;
+      hdr.grid.proj_params.lc2.lat1 = grid.proj_params.lc2.lat1;
+      hdr.grid.proj_params.lc2.lat2 = grid.proj_params.lc2.lat2;
+      break;
+    case Mdvx::PROJ_LATLON:
+    default:
+      hdr.grid.proj_type = TITAN_PROJ_LATLON;
+  }
   
 }
-
+    
+void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
+                                          vector<TitanData::ScanHeader> &scans)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  }
+}
+    
+void TitanData::ScanHeader::convertToLegacy(const vector<TitanData::ScanHeader> &scans,
+                                            storm_file_scan_header_t *legacyHdrs)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
     
