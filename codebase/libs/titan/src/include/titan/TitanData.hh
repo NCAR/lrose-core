@@ -439,6 +439,32 @@ public:
     
   };  // StormDbzHist
 
+  /////////////////////////////////////////////////////////////
+  // storm runs - contiguous grid cells in a row
+
+  class StormRun {
+    
+  public:
+    
+    // methods
+    
+    StormRun();
+    void setFromLegacy(const storm_file_run_t &run);
+    void convertToLegacy(storm_file_run_t &run) const;
+    static void setFromLegacy(const storm_file_run_t *legacyRun,
+                              vector<TitanData::StormRun> &run);
+    static void convertToLegacy(const vector<TitanData::StormRun> &run,
+                                storm_file_run_t *legacyRun);
+
+    // data
+    
+    si32 run_ix;
+    si32 run_iy;
+    si32 run_iz;
+    si32 run_len;
+    
+  };  // StormRun
+
 }; // TitanData
 
 #ifdef JUNK

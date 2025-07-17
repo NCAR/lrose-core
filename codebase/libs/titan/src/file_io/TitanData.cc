@@ -764,19 +764,19 @@ TitanData::StormDbzHist::StormDbzHist()
 
 }
 
-void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &lprops)
+void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &hist)
 {
 
-  percent_volume = lprops.percent_volume;
-  percent_area = lprops.percent_area;
+  percent_volume = hist.percent_volume;
+  percent_area = hist.percent_area;
 
 }
 
-void TitanData::StormDbzHist::convertToLegacy(storm_file_dbz_hist_t &lprops) const
+void TitanData::StormDbzHist::convertToLegacy(storm_file_dbz_hist_t &hist) const
 {
 
-  lprops.percent_volume = percent_volume;
-  lprops.percent_area = percent_area;
+  hist.percent_volume = percent_volume;
+  hist.percent_area = percent_area;
   
 }
 
@@ -793,6 +793,58 @@ void TitanData::StormDbzHist::convertToLegacy(const vector<TitanData::StormDbzHi
 {
   for (size_t ii = 0; ii < hist.size(); ii++) {
     hist[ii].convertToLegacy(legacyHist[ii]);
+  }
+}
+    
+////////////////////////////////////////////////////////////
+// Storm Run - contiguous grid cells in a row
+
+TitanData::StormRun::StormRun()
+  
+{
+
+  // initialize to 0
+  
+  run_ix = 0;
+  run_iy = 0;
+  run_iz = 0;
+  run_len = 0;
+
+}
+
+void TitanData::StormRun::setFromLegacy(const storm_file_run_t &run)
+{
+
+  run_ix = run.ix;
+  run_iy = run.iy;
+  run_iz = run.iz;
+  run_len = run.n;
+
+}
+
+void TitanData::StormRun::convertToLegacy(storm_file_run_t &run) const
+{
+
+  run.ix = run_ix;
+  run.iy = run_iy;
+  run.iz = run_iz;
+  run.n = run_len;
+  
+}
+
+void TitanData::StormRun::setFromLegacy(const storm_file_run_t *legacyRun,
+                                        vector<TitanData::StormRun> &run)
+{
+  for (size_t ii = 0; ii < run.size(); ii++) {
+    run[ii].setFromLegacy(legacyRun[ii]);
+  }
+}
+
+void TitanData::StormRun::convertToLegacy(const vector<TitanData::StormRun> &run,
+                                              storm_file_run_t *legacyRun)
+{
+  for (size_t ii = 0; ii < run.size(); ii++) {
+    run[ii].convertToLegacy(legacyRun[ii]);
   }
 }
     
