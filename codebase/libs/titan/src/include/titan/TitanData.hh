@@ -710,6 +710,73 @@ public:
     
   };
 
+  /////////////////////////////////////////////////////////////
+  // simple track parameters
+
+  class SimpleTrackParams {
+    
+  public:
+    
+    // methods
+    
+    SimpleTrackParams();
+    void setFromLegacy(const simple_track_params_t &fvecify);
+    void convertToLegacy(simple_track_params_t &fvecify) const;
+    static void setFromLegacy(const simple_track_params_t *legacyParams,
+                              vector<TitanData::SimpleTrackParams> &params);
+    static void convertToLegacy(const vector<TitanData::SimpleTrackParams> &params,
+                                simple_track_params_t *legacyParams);
+    
+    // data
+    
+    static constexpr int MAX_PARENTS_ = 8;
+    static constexpr int MAX_CHILDREN_ = 8;
+    
+    time_t start_time;		/* for the simple track only */
+    time_t end_time;		/* for the simple track only */
+
+    time_t last_descendant_end_time; /* end time for the last descendant
+                                      * of this storm */
+
+    time_t time_origin;		/* time for first storm in any branch which
+				 * led to this entry */
+
+    int first_entry_offset;	/* file offset of first track entry struct */
+
+    int simple_track_num;
+    int complex_track_num;	/* number of track complex if track is part
+				 * of a complex */
+
+    int last_descendant_simple_track_num; /* simple track num of last
+                                           * descendant of this storm */
+
+    int start_scan;
+    int end_scan;
+    int last_descendant_end_scan; /* end scan of last descendant
+                                   * of this storm */
+
+    int scan_origin;		/* scan for first storm in any branch which
+				 * led to this simple track */
+
+    int history_in_scans;	/* number of scans of history data for
+				 * making forecast - in the case of a merger
+				 * or a split, this will be longer than the
+				 * duration in scans */
+
+    int history_in_secs;       /* time in secs since the start of the
+                                 * earliest branch of this storm */
+    
+    int duration_in_scans;	/* duration of this simple track */
+    int duration_in_secs;	/* duration of this simple track */
+
+    int nparents;
+    int nchildren;
+    
+    int parent[MAX_PARENTS_]; /* track numbers of parents */
+    int child[MAX_CHILDREN_];   /* track numbers of children */
+    
+  };  // SimpleTrackParams
+
 }; // TitanData
 
 #ifdef JUNK

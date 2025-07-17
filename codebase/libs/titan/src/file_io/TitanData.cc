@@ -1239,3 +1239,95 @@ void TitanData::TrackHeader::convertToLegacy(track_file_header_t &hdr) const
   
 }
 
+////////////////////////////////////////////////////////////
+// simple track parameters
+
+TitanData::SimpleTrackParams::SimpleTrackParams()
+  
+{
+
+  // initialize to 0
+  
+  start_time = 0;
+  end_time = 0;
+  last_descendant_end_time = 0;
+  time_origin = 0;
+  first_entry_offset = 0;
+  simple_track_num = 0;
+  complex_track_num = 0;
+  last_descendant_simple_track_num = 0;
+  start_scan = 0;
+  end_scan = 0;
+  last_descendant_end_scan = 0;
+  scan_origin = 0;
+  history_in_scans = 0;
+  history_in_secs = 0;
+  duration_in_scans = 0;
+  duration_in_secs = 0;
+  nparents = 0;
+  nchildren = 0;
+  MEM_zero(parent);
+  MEM_zero(child);
+  
+}
+
+void TitanData::SimpleTrackParams::setFromLegacy(const simple_track_params_t &params)
+{
+
+  start_time = params.start_time;
+  end_time = params.end_time;
+  last_descendant_end_time = params.last_descendant_end_time;
+  time_origin = params.time_origin;
+  first_entry_offset = params.first_entry_offset;
+  simple_track_num = params.simple_track_num;
+  complex_track_num = params.complex_track_num;
+  last_descendant_simple_track_num = params.last_descendant_simple_track_num;
+  start_scan = params.start_scan;
+  end_scan = params.end_scan;
+  last_descendant_end_scan = params.last_descendant_end_scan;
+  scan_origin = params.scan_origin;
+  history_in_scans = params.history_in_scans;
+  history_in_secs = params.history_in_secs;
+  duration_in_scans = params.duration_in_scans;
+  duration_in_secs = params.duration_in_secs;
+  nparents = params.nparents;
+  nchildren = params.nchildren;
+  for (int ii = 0; ii < std::min(MAX_PARENTS, MAX_PARENTS_); ii++) {
+    parent[ii] = params.parent[ii];
+  }
+  for (int ii = 0; ii < std::min(MAX_CHILDREN, MAX_CHILDREN_); ii++) {
+    child[ii] = params.child[ii];
+  }
+  
+}
+
+void TitanData::SimpleTrackParams::convertToLegacy(simple_track_params_t &params) const
+{
+
+  params.start_time = start_time;
+  params.end_time = end_time;
+  params.last_descendant_end_time = last_descendant_end_time;
+  params.time_origin = time_origin;
+  params.first_entry_offset = first_entry_offset;
+  params.simple_track_num = simple_track_num;
+  params.complex_track_num = complex_track_num;
+  params.last_descendant_simple_track_num = last_descendant_simple_track_num;
+  params.start_scan = start_scan;
+  params.end_scan = end_scan;
+  params.last_descendant_end_scan = last_descendant_end_scan;
+  params.scan_origin = scan_origin;
+  params.history_in_scans = history_in_scans;
+  params.history_in_secs = history_in_secs;
+  params.duration_in_scans = duration_in_scans;
+  params.duration_in_secs = duration_in_secs;
+  params.nparents = nparents;
+  params.nchildren = nchildren;
+  for (int ii = 0; ii < std::min(MAX_PARENTS, MAX_PARENTS_); ii++) {
+    params.parent[ii] = parent[ii];
+  }
+  for (int ii = 0; ii < std::min(MAX_CHILDREN, MAX_CHILDREN_); ii++) {
+    params.child[ii] = child[ii];
+  }
+
+}
+
