@@ -465,6 +465,251 @@ public:
     
   };  // StormRun
 
+  /////////////////////////////////////////////////////////////
+  // track forecast properties
+
+  class TrackFcastProps {
+    
+  public:
+    
+    // methods
+    
+    TrackFcastProps();
+    void setFromLegacy(const track_file_forecast_props_t &fprops);
+    void convertToLegacy(track_file_forecast_props_t &fprops) const;
+
+    // data
+    
+    fl32 proj_area_centroid_x;	/* km/hr or deg/hr */
+    fl32 proj_area_centroid_y;	/* km/hr or deg/hr */
+    fl32 vol_centroid_z;          /* km/hr */
+    fl32 refl_centroid_z;         /* km/hr */
+    fl32 top;			/* km/hr */
+    fl32 dbz_max;			/* dbz/hr */
+    fl32 volume;			/* km3/hr */
+    fl32 precip_flux;             /* (m3/s)/hr */
+    fl32 mass;                    /* ktons/hr */
+    fl32 proj_area;		/* km2/hr */
+    fl32 smoothed_proj_area_centroid_x; /* km/hr or deg/hr */
+    fl32 smoothed_proj_area_centroid_y; /* km/hr or deg/hr */
+    fl32 smoothed_speed;
+    fl32 smoothed_direction;
+    
+  };  // TrackFcastProps
+
+  /////////////////////////////////////////////////////////////
+  // track forecast verification
+
+  class TrackVerify {
+    
+  public:
+    
+    // methods
+    
+    TrackVerify();
+    void setFromLegacy(const track_file_verify_t &fvecify);
+    void convertToLegacy(track_file_verify_t &fvecify) const;
+
+    // data
+    
+    time_t end_time;		/* last scan time for which verification
+				 * has been performed */
+    
+    bool verification_performed;	/* set to 1 if true, i.e. if
+                                         * verification has been performed,
+                                         * 0 if false */
+
+    int forecast_lead_time;	/* lead time for forecast 
+				 * verification (secs) */
+
+    int forecast_lead_time_margin; /* the accuracy with which the forecast
+                                    * time is used (secs). For a scan to
+                                    * be used, its time must fall within
+                                    * this margin of the forecast time */
+
+    int forecast_min_history;	/* min history for valid forecasts -
+				 * (secs) - when track duration is less
+				 * than this, forecast is not
+				 * considered valid */
+
+    bool verify_before_forecast_time; /* include in the analysis those
+                                       * scans in a track which have
+                                       * a duration less than the 
+                                       * forecast lead time - the
+                                       * default should be false */
+
+    bool verify_after_track_dies; /* include in the analysis those
+                                   * scans after a track has died -
+                                   * the default should be true */
+  
+    Mdvx::coord_t grid;          /* describes the cartesian grid
+                                  * used for verification */
+
+  };  // TrackVerify
+
+  /////////////////////////////////////////////////////////////
+  // contingency data for track forecast verification
+
+  class TrackContingency {
+    
+  public:
+    
+    // methods
+    
+    TrackContingency();
+    void setFromLegacy(const track_file_contingency_data_t &cont);
+    void convertToLegacy(track_file_contingency_data_t &cont) const;
+
+    // data
+    
+    int n_success;
+    int n_failure;
+    int n_false_alarm;
+
+  }; // TrackContingency
+
+  /////////////////////////////////////////////////////////////
+  // tracking parameters
+
+  class TrackParams {
+    
+  public:
+    
+    // methods
+    
+    TrackParams();
+    void setFromLegacy(const track_file_params_t &fvecify);
+    void convertToLegacy(track_file_params_t &fvecify) const;
+    
+    // data
+    
+    static constexpr int MAX_NWEIGHTS_FCAST = 10;
+    static constexpr int N_MOVEMENT_PROPS_FCAST = 5;
+    static constexpr int N_GROWTH_PROPS_FCAST = 5;
+    static constexpr int N_TOTAL_PROPS_FCAST = 14;
+    
+    fl32 forecast_weights[MAX_NWEIGHTS_FCAST];
+  
+    fl32 weight_distance;		      /* weight for distance moved
+                                               * in tracking algorithm */
+
+    fl32 weight_delta_cube_root_volume; /* weight for delta of
+                                         * cube root of volume in
+                                         * tracking algorithm */
+
+    fl32 merge_split_search_ratio;      /* ratio of search radii used
+                                         * when searching for mergers or
+                                         * splits */
+
+    fl32 max_tracking_speed;	      /* km/hr */
+
+    fl32 max_speed_for_valid_forecast;  /* km/hr */
+
+    fl32 parabolic_growth_period;  /* number of seconds for positive growth -
+                                    * this is used with the PARABOLA
+                                    * trend growth forecast */
+
+    fl32 smoothing_radius;	      /* km */
+    
+    fl32 min_fraction_overlap;     /* This is the min individual fraction
+                                    * overlap for a valid match */
+
+    fl32 min_sum_fraction_overlap; /* When detetmining the overlap of a
+                                    * storm at successive times, we sum
+                                    * the overlap as a fraction of the
+                                    * storm area at time1 and time2. This is
+                                    * the min sum for a valid match */
+
+    bool scale_forecasts_by_history;  /* flag for scaling the forecasts
+                                       * based on the ratio of the history
+                                       * to min_history_for_valid_forecast */
+
+    bool use_runs_for_overlaps;   /* flag for using runs to find the overlaps
+                                   * for mergers and splits */
+
+    int grid_type;		/* TITAN_PROJ_FLAT or TITAN_PROJ_LATLON */
+
+    int nweights_forecast;	/* number of weighted points to be used in
+				 * the forecast data */
+  
+    int forecast_type;		/* FORECAST_BY_TREND,
+				 * FORECAST_BY_PARABOLA, or
+				 * FORECAST_BY_REGRESSION */
+
+    int max_delta_time;		/* secs */
+
+    int min_history_for_valid_forecast; /* secs */
+
+    bool spatial_smoothing;	/* TRUE or FALSE */
+    
+  };  // TrackParams
+
+  /////////////////////////////////////////////////////////////
+  // track data header
+
+  class TrackHeader {
+    
+  public:
+
+    // methods
+    
+    TrackHeader();
+    void setFromLegacy(const track_file_header_t &hdr);
+    void convertToLegacy(track_file_header_t &hdr) const;
+
+    // data
+    
+    bool file_valid;		/* set to 0 when file is under
+				 * modification, 1 when modification is
+				 * successfully complete */
+    
+    int modify_code;		/* a unique code inserted when file
+				 * modification begins  - used for 
+				 * restarting tracking after program
+				 * is stopped for any reason */
+
+    int n_simple_tracks;	/* number of simple tracks in file */
+    int n_complex_tracks;	/* number of complex tracks in file */
+
+    int n_samples_for_forecast_stats;
+
+    int n_scans;			/* the number of scans in the file */
+
+    int last_scan_num;		/* the number of the last scan
+				 * in the file = n_scans - 1 */
+
+    int max_simple_track_num;	/* the highest simple track num in
+				 * the file */
+
+    int max_complex_track_num;	/* the highest complex track num in
+				 * the file */
+
+    int max_parents;
+    int max_children;
+    int max_nweights_forecast;
+
+    TrackParams params;	/* see above */
+
+    TrackVerify verify; /* see above - has character data at the end -
+                         * GRID_LABEL_LEN * N_GRID_STRUCT_LABELS
+                         * bytes */
+    
+    TrackContingency ellipse_verify; /* contingency table data for
+                                      * forecast verification 
+                                      * using ellipses */
+    
+    TrackContingency polygon_verify; /* contingency table data for
+                                      * forecast verification 
+                                      * using polygons */
+    
+    TrackFcastProps forecast_bias; /* bias error for
+                                    * forecast props */
+  
+    TrackFcastProps forecast_rmse; /* root mean squared error for
+                                    * forecast props */
+    
+  };
+
 }; // TitanData
 
 #ifdef JUNK
@@ -486,26 +731,6 @@ public:
 #define N_MOVEMENT_PROPS_FORECAST_V6 5
 #define N_GROWTH_PROPS_FORECAST_V6 5
 #define N_TOTAL_PROPS_FORECAST_V6 14
-
-  typedef struct {
-
-    fl32 proj_area_centroid_x;	/* km/hr or deg/hr */
-    fl32 proj_area_centroid_y;	/* km/hr or deg/hr */
-    fl32 vol_centroid_z;          /* km/hr */
-    fl32 refl_centroid_z;         /* km/hr */
-    fl32 top;			/* km/hr */
-    fl32 dbz_max;			/* dbz/hr */
-    fl32 volume;			/* km3/hr */
-    fl32 precip_flux;             /* (m3/s)/hr */
-    fl32 mass;                    /* ktons/hr */
-    fl32 proj_area;		/* km2/hr */
-    fl32 smoothed_proj_area_centroid_x; /* km/hr or deg/hr */
-    fl32 smoothed_proj_area_centroid_y; /* km/hr or deg/hr */
-    fl32 smoothed_speed;
-    fl32 smoothed_direction;
-    fl32 spare[4];
-
-  } track_file_forecast_props_v6_t;
 
   /*
    * track file params - some of these are the parameters set by the user via

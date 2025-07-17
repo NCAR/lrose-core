@@ -848,3 +848,394 @@ void TitanData::StormRun::convertToLegacy(const vector<TitanData::StormRun> &run
   }
 }
     
+////////////////////////////////////////////////////////////
+// track forecast properties
+
+TitanData::TrackFcastProps::TrackFcastProps()
+  
+{
+
+  // initialize to 0
+  
+  proj_area_centroid_x = 0.0;
+  proj_area_centroid_y = 0.0;
+  vol_centroid_z = 0.0;
+  refl_centroid_z = 0.0;
+  top = 0.0;
+  dbz_max = 0.0;
+  volume = 0.0;
+  precip_flux = 0.0;
+  mass = 0.0;
+  proj_area = 0.0;
+  smoothed_proj_area_centroid_x = 0.0;
+  smoothed_proj_area_centroid_y = 0.0;
+  smoothed_speed = 0.0;
+  smoothed_direction = 0.0;
+
+}
+
+void TitanData::TrackFcastProps::setFromLegacy(const track_file_forecast_props_t &fprops)
+{
+
+  proj_area_centroid_x = fprops.proj_area_centroid_x;
+  proj_area_centroid_y = fprops.proj_area_centroid_y;
+  vol_centroid_z = fprops.vol_centroid_z;
+  refl_centroid_z = fprops.refl_centroid_z;
+  top = fprops.top;
+  dbz_max = fprops.dbz_max;
+  volume = fprops.volume;
+  precip_flux = fprops.precip_flux;
+  mass = fprops.mass;
+  proj_area = fprops.proj_area;
+  smoothed_proj_area_centroid_x = fprops.smoothed_proj_area_centroid_x;
+  smoothed_proj_area_centroid_y = fprops.smoothed_proj_area_centroid_y;
+  smoothed_speed = fprops.smoothed_speed;
+  smoothed_direction = fprops.smoothed_direction;
+
+}
+
+void TitanData::TrackFcastProps::convertToLegacy(track_file_forecast_props_t &fprops) const
+{
+
+  fprops.proj_area_centroid_x = proj_area_centroid_x;
+  fprops.proj_area_centroid_y = proj_area_centroid_y;
+  fprops.vol_centroid_z = vol_centroid_z;
+  fprops.refl_centroid_z = refl_centroid_z;
+  fprops.top = top;
+  fprops.dbz_max = dbz_max;
+  fprops.volume = volume;
+  fprops.precip_flux = precip_flux;
+  fprops.mass = mass;
+  fprops.proj_area = proj_area;
+  fprops.smoothed_proj_area_centroid_x = smoothed_proj_area_centroid_x;
+  fprops.smoothed_proj_area_centroid_y = smoothed_proj_area_centroid_y;
+  fprops.smoothed_speed = smoothed_speed;
+  fprops.smoothed_direction = smoothed_direction;
+
+}
+
+////////////////////////////////////////////////////////////
+// track forecast verification
+
+TitanData::TrackVerify::TrackVerify()
+  
+{
+
+  // initialize to 0
+  
+  end_time = 0;
+  verification_performed = false;
+  forecast_lead_time = 0;
+  forecast_lead_time_margin = 0;
+  forecast_min_history = 0;
+  verify_before_forecast_time = false;
+  verify_after_track_dies = false;
+  
+  MEM_zero(grid);
+  grid.proj_type = Mdvx::PROJ_LATLON;
+  grid.nx = 1;
+  grid.ny = 1;
+  grid.nz = 1;
+  grid.dx = 1.0;
+  grid.dy = 1.0;
+  grid.dz = 1.0;
+  grid.dz_constant = 1;
+  
+}
+
+void TitanData::TrackVerify::setFromLegacy(const track_file_verify_t &verify)
+{
+
+  end_time = verify.end_time;
+  verification_performed = verify.verification_performed;
+  forecast_lead_time = verify.forecast_lead_time;
+  forecast_lead_time_margin = verify.forecast_lead_time_margin;
+  forecast_min_history = verify.forecast_min_history;
+  verify_before_forecast_time = verify.verify_before_forecast_time;
+  verify_after_track_dies = verify.verify_after_track_dies;
+  
+  // grid
+
+  grid.proj_origin_lat = verify.grid.proj_origin_lat;
+  grid.proj_origin_lon = verify.grid.proj_origin_lon;
+
+  grid.minx = verify.grid.minx;
+  grid.miny = verify.grid.miny;
+  grid.minz = verify.grid.minz;
+
+  grid.dx = verify.grid.dx;
+  grid.dy = verify.grid.dy;
+  grid.dz = verify.grid.dz;
+  grid.dz_constant = verify.grid.dz_constant;
+  
+  grid.nx = verify.grid.nx;
+  grid.ny = verify.grid.ny;
+  grid.nz = verify.grid.nz;
+
+  grid.sensor_x = verify.grid.sensor_x;
+  grid.sensor_y = verify.grid.sensor_y;
+  grid.sensor_z = verify.grid.sensor_z;
+  grid.sensor_lat = verify.grid.sensor_lat;
+  grid.sensor_lon = verify.grid.sensor_lon;
+
+  STRncopy(grid.unitsx, verify.grid.unitsx, MDV64_COORD_UNITS_LEN);
+  STRncopy(grid.unitsy, verify.grid.unitsy, MDV64_COORD_UNITS_LEN);
+  STRncopy(grid.unitsz, verify.grid.unitsz, MDV64_COORD_UNITS_LEN);
+
+  switch (verify.grid.proj_type) {
+    case TITAN_PROJ_FLAT:
+      grid.proj_type = Mdvx::PROJ_FLAT;
+      grid.proj_params.flat.rotation = verify.grid.proj_params.flat.rotation;
+      break;
+    case TITAN_PROJ_LAMBERT_CONF:
+      grid.proj_type = Mdvx::PROJ_LAMBERT_CONF;
+      grid.proj_params.lc2.lat1 = verify.grid.proj_params.lc2.lat1;
+      grid.proj_params.lc2.lat2 = verify.grid.proj_params.lc2.lat2;
+      break;
+    case TITAN_PROJ_LATLON:
+    default:
+      grid.proj_type = Mdvx::PROJ_LATLON;
+  }
+}
+
+void TitanData::TrackVerify::convertToLegacy(track_file_verify_t &verify) const
+{
+
+  verify.end_time = end_time;
+  verify.verification_performed = verification_performed;
+  verify.forecast_lead_time = forecast_lead_time;
+  verify.forecast_lead_time_margin = forecast_lead_time_margin;
+  verify.forecast_min_history = forecast_min_history;
+  verify.verify_before_forecast_time = verify_before_forecast_time;
+  verify.verify_after_track_dies = verify_after_track_dies;
+  
+  // grid
+
+  verify.grid.proj_origin_lat = grid.proj_origin_lat;
+  verify.grid.proj_origin_lon = grid.proj_origin_lon;
+
+  verify.grid.minx = grid.minx;
+  verify.grid.miny = grid.miny;
+  verify.grid.minz = grid.minz;
+
+  verify.grid.dx = grid.dx;
+  verify.grid.dy = grid.dy;
+  verify.grid.dz = grid.dz;
+  verify.grid.dz_constant = grid.dz_constant;
+  
+  verify.grid.nx = grid.nx;
+  verify.grid.ny = grid.ny;
+  verify.grid.nz = grid.nz;
+
+  verify.grid.sensor_x = grid.sensor_x;
+  verify.grid.sensor_y = grid.sensor_y;
+  verify.grid.sensor_z = grid.sensor_z;
+  verify.grid.sensor_lat = grid.sensor_lat;
+  verify.grid.sensor_lon = grid.sensor_lon;
+
+  STRncopy(verify.grid.unitsx, grid.unitsx, TITAN_GRID_UNITS_LEN);
+  STRncopy(verify.grid.unitsy, grid.unitsy, TITAN_GRID_UNITS_LEN);
+  STRncopy(verify.grid.unitsz, grid.unitsz, TITAN_GRID_UNITS_LEN);
+
+  switch (grid.proj_type) {
+    case Mdvx::PROJ_FLAT:
+      verify.grid.proj_type = TITAN_PROJ_FLAT;
+      verify.grid.proj_params.flat.rotation = grid.proj_params.flat.rotation;
+      break;
+    case Mdvx::PROJ_LAMBERT_CONF:
+      verify.grid.proj_type = TITAN_PROJ_LAMBERT_CONF;
+      verify.grid.proj_params.lc2.lat1 = grid.proj_params.lc2.lat1;
+      verify.grid.proj_params.lc2.lat2 = grid.proj_params.lc2.lat2;
+      break;
+    case Mdvx::PROJ_LATLON:
+    default:
+      verify.grid.proj_type = TITAN_PROJ_LATLON;
+  }
+  
+}
+
+////////////////////////////////////////////////////////////
+// contingency results for verification
+
+TitanData::TrackContingency::TrackContingency()
+  
+{
+
+  // initialize to 0
+  
+  n_success = 0;
+  n_failure = 0;
+  n_false_alarm = 0;
+
+}
+
+void TitanData::TrackContingency::setFromLegacy(const track_file_contingency_data_t &cont)
+{
+
+  n_success = cont.n_success;
+  n_failure = cont.n_failure;
+  n_false_alarm = cont.n_false_alarm;
+
+}
+
+void TitanData::TrackContingency::convertToLegacy(track_file_contingency_data_t &cont) const
+{
+
+  cont.n_success = n_success;
+  cont.n_failure = n_failure;
+  cont.n_false_alarm = n_false_alarm;
+
+}
+
+////////////////////////////////////////////////////////////
+// tracking parameters
+
+TitanData::TrackParams::TrackParams()
+  
+{
+
+  // initialize to 0
+  
+  MEM_zero(forecast_weights);
+  weight_distance = 0.0;
+  weight_delta_cube_root_volume = 0.0;
+  merge_split_search_ratio = 0.0;
+  max_tracking_speed = 0.0;
+  max_speed_for_valid_forecast = 0.0;
+  parabolic_growth_period = 0.0;
+  smoothing_radius = 0.0;
+  min_fraction_overlap = 0.0;
+  min_sum_fraction_overlap = 0.0;
+  scale_forecasts_by_history = false;
+  use_runs_for_overlaps = false;
+  grid_type = 0;
+  nweights_forecast = 0;
+  forecast_type = 0;
+  max_delta_time = 0;
+  min_history_for_valid_forecast = 0;
+  spatial_smoothing = false;
+
+}
+
+void TitanData::TrackParams::setFromLegacy(const track_file_params_t &params)
+{
+
+  memcpy(forecast_weights, params.forecast_weights, MAX_NWEIGHTS_FCAST * sizeof(fl32));
+  weight_distance = params.weight_distance;
+  weight_delta_cube_root_volume = params.weight_delta_cube_root_volume;
+  merge_split_search_ratio = params.merge_split_search_ratio;
+  max_tracking_speed = params.max_tracking_speed;
+  max_speed_for_valid_forecast = params.max_speed_for_valid_forecast;
+  parabolic_growth_period = params.parabolic_growth_period;
+  smoothing_radius = params.smoothing_radius;
+  min_fraction_overlap = params.min_fraction_overlap;
+  min_sum_fraction_overlap = params.min_sum_fraction_overlap;
+  scale_forecasts_by_history = params.scale_forecasts_by_history;
+  use_runs_for_overlaps = params.use_runs_for_overlaps;
+  grid_type = params.grid_type;
+  nweights_forecast = params.nweights_forecast;
+  forecast_type = params.forecast_type;
+  max_delta_time = params.max_delta_time;
+  min_history_for_valid_forecast = params.min_history_for_valid_forecast;
+  spatial_smoothing = params.spatial_smoothing;
+
+}
+
+void TitanData::TrackParams::convertToLegacy(track_file_params_t &params) const
+{
+
+  memcpy(params.forecast_weights, forecast_weights, MAX_NWEIGHTS_FCAST * sizeof(fl32));
+  params.weight_distance = weight_distance;
+  params.weight_delta_cube_root_volume = weight_delta_cube_root_volume;
+  params.merge_split_search_ratio = merge_split_search_ratio;
+  params.max_tracking_speed = max_tracking_speed;
+  params.max_speed_for_valid_forecast = max_speed_for_valid_forecast;
+  params.parabolic_growth_period = parabolic_growth_period;
+  params.smoothing_radius = smoothing_radius;
+  params.min_fraction_overlap = min_fraction_overlap;
+  params.min_sum_fraction_overlap = min_sum_fraction_overlap;
+  params.scale_forecasts_by_history = scale_forecasts_by_history;
+  params.use_runs_for_overlaps = use_runs_for_overlaps;
+  params.grid_type = grid_type;
+  params.nweights_forecast = nweights_forecast;
+  params.forecast_type = forecast_type;
+  params.max_delta_time = max_delta_time;
+  params.min_history_for_valid_forecast = min_history_for_valid_forecast;
+  params.spatial_smoothing = spatial_smoothing;
+
+}
+
+////////////////////////////////////////////////////////////
+// TrackHeader
+
+TitanData::TrackHeader::TrackHeader()
+
+{
+
+  // initialize to 0
+  
+  file_valid = false;
+  modify_code = 0;
+  n_simple_tracks = 0;
+  n_complex_tracks = 0;
+  n_samples_for_forecast_stats = 0;
+  n_scans = 0;
+  last_scan_num = 0;
+  max_simple_track_num = 0;
+  max_complex_track_num = 0;
+  max_parents = 0;
+  max_children = 0;
+  max_nweights_forecast = 0;
+  
+}
+
+void TitanData::TrackHeader::setFromLegacy(const track_file_header_t &hdr)
+{
+
+  file_valid = hdr.file_valid;
+  modify_code = hdr.modify_code;
+  n_simple_tracks = hdr.n_simple_tracks;
+  n_complex_tracks = hdr.n_complex_tracks;
+  n_samples_for_forecast_stats = hdr.n_samples_for_forecast_stats;
+  n_scans = hdr.n_scans;
+  last_scan_num = hdr.last_scan_num;
+  max_simple_track_num = hdr.max_simple_track_num;
+  max_complex_track_num = hdr.max_complex_track_num;
+  max_parents = hdr.max_parents;
+  max_children = hdr.max_children;
+  max_nweights_forecast = hdr.max_nweights_forecast;
+
+  params.setFromLegacy(hdr.params);
+  verify.setFromLegacy(hdr.verify);
+  ellipse_verify.setFromLegacy(hdr.ellipse_verify);
+  polygon_verify.setFromLegacy(hdr.polygon_verify);
+  forecast_bias.setFromLegacy(hdr.forecast_bias);
+  forecast_rmse.setFromLegacy(hdr.forecast_rmse);
+  
+}
+
+void TitanData::TrackHeader::convertToLegacy(track_file_header_t &hdr) const
+{
+
+  hdr.file_valid = file_valid;
+  hdr.modify_code = modify_code;
+  hdr.n_simple_tracks = n_simple_tracks;
+  hdr.n_complex_tracks = n_complex_tracks;
+  hdr.n_samples_for_forecast_stats = n_samples_for_forecast_stats;
+  hdr.n_scans = n_scans;
+  hdr.last_scan_num = last_scan_num;
+  hdr.max_simple_track_num = max_simple_track_num;
+  hdr.max_complex_track_num = max_complex_track_num;
+  hdr.max_parents = max_parents;
+  hdr.max_children = max_children;
+  hdr.max_nweights_forecast = max_nweights_forecast;
+  
+  params.convertToLegacy(hdr.params);
+  verify.convertToLegacy(hdr.verify);
+  ellipse_verify.convertToLegacy(hdr.ellipse_verify);
+  polygon_verify.convertToLegacy(hdr.polygon_verify);
+  forecast_bias.convertToLegacy(hdr.forecast_bias);
+  forecast_rmse.convertToLegacy(hdr.forecast_rmse);
+  
+}
+
