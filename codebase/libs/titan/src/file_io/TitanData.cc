@@ -994,7 +994,6 @@ void TitanData::StormLprops::convertToLegacy(const vector<TitanData::StormLprops
     
 void TitanData::StormLprops::print(FILE *out,
                                    const char *spacer,
-                                   const StormParams &params,
                                    const ScanHeader &scan,
                                    const StormGprops &gprops,
                                    const vector<StormLprops> &lprops)

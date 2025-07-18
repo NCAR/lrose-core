@@ -416,7 +416,6 @@ public:
     static void convertToLegacy(const vector<TitanData::StormLprops> &lprops,
                                 storm_file_layer_props_t *legacyLprops);
     static void print(FILE *out, const char *spacer,
-                      const StormParams &params,
                       const ScanHeader &scan,
                       const StormGprops &gprops,
                       const vector<StormLprops> &lprops);
