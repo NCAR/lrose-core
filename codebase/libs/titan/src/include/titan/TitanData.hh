@@ -905,6 +905,31 @@ public:
                               * value */
   };  // TrackEntry
 
+  /////////////////////////////////////////////////////////////
+  // index of track in scan 
+
+  class TrackScanIndex {
+    
+  public:
+    
+    // methods
+    
+    TrackScanIndex();
+    void setFromLegacy(const track_file_scan_index_t &index);
+    void convertToLegacy(track_file_scan_index_t &index) const;
+    static void setFromLegacy(const track_file_scan_index_t *legacyIndex,
+                              vector<TitanData::TrackScanIndex> &index);
+    static void convertToLegacy(const vector<TitanData::TrackScanIndex> &index,
+                                track_file_scan_index_t *legacyIndex);
+    
+    // data
+    
+    time_t utime;
+    int first_entry_offset;
+    int n_entries;
+
+  };  // TrackScanIndex
+
 }; // TitanData
 
 #ifdef JUNK

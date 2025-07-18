@@ -1538,3 +1538,54 @@ void TitanData::TrackEntry::convertToLegacy
   }
 }
     
+////////////////////////////////////////////////////////////
+// index of track in scan
+
+TitanData::TrackScanIndex::TrackScanIndex()
+  
+{
+
+  // initialize to 0
+  
+  utime = 0;
+  first_entry_offset = 0;
+  n_entries = 0;
+
+}
+
+void TitanData::TrackScanIndex::setFromLegacy(const track_file_scan_index_t &index)
+{
+
+  utime = index.utime;
+  first_entry_offset = index.first_entry_offset;
+  n_entries = index.n_entries;
+  
+}
+
+void TitanData::TrackScanIndex::convertToLegacy(track_file_scan_index_t &index) const
+{
+
+  index.utime = utime;
+  index.first_entry_offset = first_entry_offset;
+  index.n_entries = n_entries;
+  
+}
+
+void TitanData::TrackScanIndex::setFromLegacy
+  (const track_file_scan_index_t *legacyHdrs,
+   vector<TitanData::TrackScanIndex> &scans)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  }
+}
+
+void TitanData::TrackScanIndex::convertToLegacy
+  (const vector<TitanData::TrackScanIndex> &scans,
+   track_file_scan_index_t *legacyHdrs)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
+    
