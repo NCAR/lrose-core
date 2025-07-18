@@ -53,6 +53,14 @@ public:
   static constexpr int32_t missingInt32 = -999999;
   static constexpr int16_t missingInt16 = -32768;
   static constexpr int8_t missingInt08 = -128;
+  
+  static std::string BOOL_STR(bool a) {
+    if (a) {
+      return "true";
+    } else {
+      return "false";
+    }
+  }
 
   /////////////////////////////////////////////////////////////
   // storm data params
@@ -68,7 +76,8 @@ public:
     StormParams();
     void setFromLegacy(const storm_file_params_t &params);
     void convertToLegacy(storm_file_params_t &params) const;
-    
+    void print(FILE *out, const char *spacer);
+
     // mode for computing precip
     // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
     // TITAN_PRECIP_AT_SPECIFIED_HT: precip computed at specified height
@@ -178,6 +187,9 @@ public:
     fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
                             * See precip_computation_mode */
     
+    fl32 low_convectivity_threshold;   /* used if convectivity thresholds applied */
+    fl32 high_convectivity_threshold;  /* otherwise missing */
+
     precip_mode_t precip_computation_mode;
     
   }; // StormParams
@@ -194,6 +206,7 @@ public:
     StormHeader();
     void setFromLegacy(const storm_file_header_t &hdr);
     void convertToLegacy(storm_file_header_t &hdr) const;
+    void print(FILE *out, const char *spacer);
 
     // data
 

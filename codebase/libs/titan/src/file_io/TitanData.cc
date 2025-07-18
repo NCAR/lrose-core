@@ -76,6 +76,8 @@ TitanData::StormParams::StormParams()
   hail_mass_dbz_threshold = 0.0;
   tops_dbz_threshold = 0.0;
   precip_plane_ht = 0.0;
+  low_convectivity_threshold = 0.0;
+  high_convectivity_threshold = 0.0;
   precip_computation_mode = PRECIP_FROM_COLUMN_MAX;
 
 }
@@ -111,6 +113,8 @@ void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
   hail_mass_dbz_threshold = params.hail_mass_dbz_threshold;
   tops_dbz_threshold = params.tops_dbz_threshold;
   precip_plane_ht = params.precip_plane_ht;
+  low_convectivity_threshold = params.low_convectivity_threshold;
+  high_convectivity_threshold = params.high_convectivity_threshold;
 
   switch (params.precip_computation_mode) {
     case TITAN_PRECIP_FROM_COLUMN_MAX:
@@ -160,6 +164,8 @@ void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
   params.hail_mass_dbz_threshold = hail_mass_dbz_threshold;
   params.tops_dbz_threshold = tops_dbz_threshold;
   params.precip_plane_ht = precip_plane_ht;
+  params.low_convectivity_threshold = low_convectivity_threshold;
+  params.high_convectivity_threshold = high_convectivity_threshold;
 
   switch (precip_computation_mode) {
     case PRECIP_FROM_COLUMN_MAX:
@@ -176,6 +182,95 @@ void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
       break;
   }
   
+}
+
+void TitanData::StormParams::print(FILE *out, const char *spacer)
+{
+
+  fprintf(out, "%sStorm file parameters : \n", spacer);
+  fprintf(out, "%s  Low dBZ threshold : %g\n", spacer,
+	  low_dbz_threshold);
+  fprintf(out, "%s  High dBZ threshold : %g\n", spacer,
+	  high_dbz_threshold);
+  fprintf(out, "%s  Hail dBZ threshold : %g\n", spacer,
+	  hail_dbz_threshold);
+  fprintf(out, "%s  Hail mass dBZ threshold : %g\n", spacer,
+	  hail_mass_dbz_threshold);
+  fprintf(out, "%s  Dbz hist interval : %g\n", spacer,
+	  dbz_hist_interval);
+  fprintf(out, "%s  Top threshold (km) : %g\n", spacer,
+	  top_threshold);
+  fprintf(out, "%s  Base threshold (km) : %g\n", spacer,
+	  base_threshold);
+  fprintf(out, "%s  Min storm size (km2 or km3) : %g\n", spacer,
+	  min_storm_size);
+  fprintf(out, "%s  Max storm size (km2 or km3) : %g\n", spacer,
+	  max_storm_size);
+  fprintf(out, "%s  Check morphology? : %s\n", spacer,
+	  BOOL_STR(check_morphology).c_str());
+  fprintf(out, "%s  Morphology_erosion_threshold (km) : %g\n", spacer,
+	  morphology_erosion_threshold);
+  fprintf(out, "%s  Morphology_refl_divisor (dbz/km) : %g\n", spacer,
+	  morphology_refl_divisor);
+  fprintf(out, "%s  Check tops? : %s\n", spacer,
+	  BOOL_STR(check_tops).c_str());
+  fprintf(out, "%s  Min_radar_tops (km) : %g\n", spacer,
+	  min_radar_tops);
+  fprintf(out, "%s  Tops_edge_margin (km) : %g\n", spacer,
+	  tops_edge_margin);
+  fprintf(out, "%s  Z-R coefficient : %g\n", spacer,
+	  z_p_coeff);
+  fprintf(out, "%s  Z-R exponent : %g\n", spacer,
+	  z_p_exponent);
+  fprintf(out, "%s  Z-M coefficient : %g\n", spacer,
+	  z_m_coeff);
+  fprintf(out, "%s  Z-M exponent : %g\n", spacer,
+	  z_m_exponent);
+  fprintf(out, "%s  Hail Z-M coefficient : %g\n", spacer,
+	  hail_z_m_coeff);
+  fprintf(out, "%s  Hail Z-M exponent : %g\n", spacer,
+	  hail_z_m_exponent);
+  fprintf(out, "%s  Sectrip vert aspect : %g\n", spacer,
+	  sectrip_vert_aspect);
+  fprintf(out, "%s  Sectrip horiz aspect : %g\n", spacer,
+	  sectrip_horiz_aspect);
+  fprintf(out, "%s  Sectrip orientation error : %g\n", spacer,
+	  sectrip_orientation_error);
+  fprintf(out, "%s  Velocity data available? : %s\n", spacer,
+	  BOOL_STR(vel_available).c_str());
+  fprintf(out, "%s  N_poly_sides : %ld\n", spacer,
+	  (long) n_poly_sides);
+  fprintf(out, "%s  Poly_start_az : %g\n", spacer,
+	  poly_start_az);
+  fprintf(out, "%s  Poly_delta_az : %g\n", spacer,
+	  poly_delta_az);
+  if (tops_dbz_threshold == 0.0) {
+    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer,
+	    low_dbz_threshold);
+  } else {
+    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer,
+	    tops_dbz_threshold);
+  }
+
+  if (precip_computation_mode == PRECIP_AT_LOWEST_VALID_HT) {
+    fprintf(out, "%s  Precip computed for lowest valid CAPPI ht\n", spacer);
+  } else if (precip_computation_mode == PRECIP_AT_SPECIFIED_HT) {
+    fprintf(out, "%s  Precip computed from specified ht (km): %g\n",
+            spacer, precip_plane_ht);
+  } else if (precip_computation_mode == PRECIP_FROM_LOWEST_AVAILABLE_REFL) {
+    fprintf(out, "%s  Precip computed from lowest available reflectivity\n",
+            spacer);
+  } else {
+    fprintf(out, "%s  Precip computed from column max\n", spacer);
+  }
+  
+  fprintf(out, "%s  Low convectivity threshold  : %g\n", spacer,
+	  low_convectivity_threshold);
+  fprintf(out, "%s  High convectivity threshold : %g\n", spacer,
+	  high_convectivity_threshold);
+
+  fprintf(out, "\n");
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -214,6 +309,28 @@ void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr) const
   hdr.n_scans = n_scans;
   params.convertToLegacy(hdr.params);
   
+}
+
+void TitanData::StormHeader::print(FILE *out, const char *spacer)
+{
+
+  char spacer2[128];
+  sprintf(spacer2, "%s  ", spacer);
+  
+  fprintf(out, "%sStorm file header :\n", spacer);
+  fprintf(out, "%s  Dates and times : \n", spacer);
+  fprintf(out, "%s    File   : %s\n",  spacer,
+	  utimstr(file_time));
+  fprintf(out, "%s    Start  : %s\n",  spacer,
+	  utimstr(start_time));
+  fprintf(out, "%s    End    : %s\n",  spacer,
+	  utimstr(end_time));
+  fprintf(out, "%s  Number of scans : %d\n", spacer,
+	  n_scans);
+  fprintf(out, "\n");
+
+  params.print(out, spacer);
+
 }
 
 ////////////////////////////////////////////////////////////
