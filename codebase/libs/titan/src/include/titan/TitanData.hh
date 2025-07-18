@@ -234,6 +234,7 @@ public:
                               vector<TitanData::ScanHeader> &scans);
     static void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
                                 storm_file_scan_header_t *legacyHdrs);
+    void print(FILE *out, const char *spacer);
     
     // data
     
@@ -942,6 +943,10 @@ public:
     int n_entries;
 
   };  // TrackScanIndex
+
+  // print coord grid struct
+  
+  static void printMdvCoord(FILE *out, const char *spacer, const Mdvx::coord_t &coord);
 
 }; // TitanData
 

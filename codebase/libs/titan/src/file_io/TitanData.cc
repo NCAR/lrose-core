@@ -496,6 +496,25 @@ void TitanData::ScanHeader::convertToLegacy(const vector<TitanData::ScanHeader> 
   }
 }
     
+void TitanData::ScanHeader::print(FILE *out,
+                                  const char *spacer)
+     
+{
+  
+  fprintf(out, "%sScan number %d\n", spacer, scan_num);
+  fprintf(out, "%snstorms : %d\n", spacer, nstorms);
+  fprintf(out, "%sTime: %s\n", spacer, utimestr(udate_time(time)));
+  fprintf(out, "%sMin z (km) : %g\n", spacer, min_z);
+  fprintf(out, "%sDelta z (km) : %g\n", spacer, delta_z);
+  fprintf(out, "%sHeight of freezing (km) : %g\n", spacer, ht_of_freezing);
+  fprintf(out, "\n");
+  
+  printMdvCoord(out, spacer, grid);
+
+  fprintf(out, "\n");
+  
+}
+
 ////////////////////////////////////////////////////////////
 // Storm Global Properties
 
@@ -1706,3 +1725,79 @@ void TitanData::TrackScanIndex::convertToLegacy
   }
 }
     
+////////////////////////////////////////////////////
+// printGrid()
+//
+// Print grid coord struct
+
+void TitanData::printMdvCoord(FILE *out, const char *spacer, const Mdvx::coord_t &coord)
+     
+{
+  
+  fprintf(out, "%sMdvx::coord_t grid\n", spacer);
+  fprintf(out, "%s------------------\n", spacer);
+
+  fprintf(out, "%s  projType: %s\n", spacer, Mdvx::projType2Str(coord.proj_type));
+  fprintf(out, "%s  proj_origin_lat: %g\n", spacer, coord.proj_origin_lat);
+  fprintf(out, "%s  proj_origin_lon: %g\n", spacer, coord.proj_origin_lon);
+
+  switch (coord.proj_type) {
+    case Mdvx::PROJ_FLAT:
+      fprintf(out, "%s  rotation: %g\n", spacer, coord.proj_params.flat.rotation);
+      break;
+    case Mdvx::PROJ_LAMBERT_CONF:
+      fprintf(out, "%s  lat1: %g\n", spacer, coord.proj_params.lc2.lat1);
+      fprintf(out, "%s  lat2: %g\n", spacer, coord.proj_params.lc2.lat2);
+      break;
+    case Mdvx::PROJ_POLAR_STEREO:
+      fprintf(out, "%s  tan_lon: %g\n", spacer, coord.proj_params.ps.tan_lon);
+      if (coord.proj_params.ps.pole_type == 0) {
+        fprintf(out, "%s  pole: north\n", spacer);
+      } else {
+        fprintf(out, "%s  pole: south\n", spacer);
+      }
+      fprintf(out, "%s  central_scale: %g\n", spacer, coord.proj_params.ps.central_scale);
+      break;
+    case Mdvx::PROJ_OBLIQUE_STEREO:
+      fprintf(out, "%s  tan_lat: %g\n", spacer, coord.proj_params.os.tan_lat);
+      fprintf(out, "%s  tan_lon: %g\n", spacer, coord.proj_params.os.tan_lon);
+      fprintf(out, "%s  central_scale: %g\n", spacer, coord.proj_params.os.central_scale);
+      break;
+    case Mdvx::PROJ_TRANS_MERCATOR:
+      fprintf(out, "%s  central_scale: %g\n", spacer, coord.proj_params.tmerc.central_scale);
+      break;
+    case Mdvx::PROJ_ALBERS:
+      fprintf(out, "%s  lat1: %g\n", spacer, coord.proj_params.albers.lat1);
+      fprintf(out, "%s  lat2: %g\n", spacer, coord.proj_params.albers.lat2);
+      break;
+    default: {}
+  }
+
+  fprintf(out, "%s  nx, ny, nz : %d, %d, %d\n",
+	  spacer,
+	  coord.nx, coord.ny, coord.nz);
+
+  fprintf(out, "%s  minx, miny, minz : %g, %g, %g\n",
+	  spacer,
+	  coord.minx, coord.miny, coord.minz);
+  
+  fprintf(out, "%s  dx, dy, dz : %g, %g, %g\n", spacer,
+	  coord.dx, coord.dy, coord.dz);
+  
+  fprintf(out, "%s  sensor_x, sensor_y, sensor_z : %g, %g, %g\n",
+	  spacer,
+	  coord.sensor_x, coord.sensor_y, coord.sensor_z);
+  
+  fprintf(out, "%s  sensor_lat, sensor_lon : %g, %g\n",
+	  spacer,
+	  coord.sensor_lat, coord.sensor_lon);
+  
+  fprintf(out, "%s  dz_constant: %s\n", spacer,
+	  BOOL_STR(coord.dz_constant).c_str());
+
+  fprintf(out, "%s  x units : %s\n", spacer, coord.unitsx);
+  fprintf(out, "%s  y units : %s\n", spacer, coord.unitsy);
+  fprintf(out, "%s  z units : %s\n", spacer, coord.unitsz);
+  
+}
+
