@@ -453,6 +453,11 @@ public:
                               vector<TitanData::StormDbzHist> &hist);
     static void convertToLegacy(const vector<TitanData::StormDbzHist> &hist,
                                 storm_file_dbz_hist_t *legacyHist);
+    static void print(FILE *out, const char *spacer,
+                      const StormParams &params,
+                      const StormGprops &gprops,
+                      const vector<StormDbzHist> &hist);
+      
 
     // data
     

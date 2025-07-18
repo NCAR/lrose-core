@@ -1114,6 +1114,41 @@ void TitanData::StormDbzHist::convertToLegacy(const vector<TitanData::StormDbzHi
   }
 }
     
+/*-----------------------------
+ */
+
+void TitanData::StormDbzHist::print(FILE *out,
+                                    const char *spacer,
+                                    const StormParams &params,
+                                    const StormGprops &gprops,
+                                    const vector<StormDbzHist> &hist)
+     
+{
+
+  if (hist.size() == 0) {
+    return;
+  }
+    
+  fprintf(out, "%sDbz histograms : \n", spacer);
+  fprintf(out, "%s%10s %10s %12s %12s\n", spacer,
+	  "Low dbz", "High Dbz", "% volume", "% area");
+  
+  for (size_t ii = 0; ii < hist.size(); ii++) {
+    
+    fprintf(out, "%s%10.1f %10.1f %12.2f %12.2f\n", spacer,
+	    (params.low_dbz_threshold + (double) ii * params.dbz_hist_interval),
+	    (params.low_dbz_threshold + (double) (ii + 1) * params.dbz_hist_interval),
+	    hist[ii].percent_volume,
+	    hist[ii].percent_area);
+    
+  } // ii
+
+  fprintf(out, "\n");
+
+  return;
+
+}
+
 ////////////////////////////////////////////////////////////
 // Storm Run - contiguous grid cells in a row
 
