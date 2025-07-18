@@ -844,6 +844,67 @@ public:
     
   };  // ComplexTrackParams
 
+  /////////////////////////////////////////////////////////////
+  // track entry
+
+  class TrackEntry {
+    
+  public:
+    
+    // methods
+    
+    TrackEntry();
+    void setFromLegacy(const track_file_entry_t &fvecify);
+    void convertToLegacy(track_file_entry_t &fvecify) const;
+    static void setFromLegacy(const track_file_entry_t *legacyParams,
+                              vector<TitanData::TrackEntry> &params);
+    static void convertToLegacy(const vector<TitanData::TrackEntry> &params,
+                                track_file_entry_t *legacyParams);
+    
+    // data
+    
+    time_t time;		/* time for this entry */
+    time_t time_origin;		/* time for first storm in any branch which
+				 * led to this entry */
+
+    int prev_entry_offset;	/* track file offset to previous entry in
+				 * in track - doubly linked list */
+
+    int this_entry_offset;	/* track file offset to this entry */
+
+    int next_entry_offset;	/* track file offset to next entry in
+				 * track - doubly linked list */
+
+    int next_scan_entry_offset;	/* offset to next entry in this scan */
+
+    int scan_origin;		/* scan for first storm in any branch which
+				 * led to this entry */
+
+    int scan_num;		/* scan number in storm file */
+    int storm_num;		/* storm number in scan */
+
+    int simple_track_num;	/* simple track number - should match the
+				 * number in the simple_params struct */
+    int complex_track_num;
+
+    int history_in_scans;	/* number of scans of history data for
+				 * making forecast - in the case of a merger
+				 * or a split, this will be longer than the
+				 * duration in scans */
+
+    int history_in_secs;		/* time in secs since the start of the
+                                         * earliest branch of this storm */
+
+    int duration_in_scans;	/* duration of the simple track */
+    int duration_in_secs;	/* duration of the simple track */
+
+    bool forecast_valid;	/* flag to indicate if the forecast is
+                                 * valid */
+
+    TrackFcastProps dval_dt; /* rate of change of each forecast
+                              * value */
+  };  // TrackEntry
+
 }; // TitanData
 
 #ifdef JUNK

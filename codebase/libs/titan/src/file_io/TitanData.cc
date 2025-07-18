@@ -1444,3 +1444,97 @@ void TitanData::ComplexTrackParams::convertToLegacy
   }
 }
     
+////////////////////////////////////////////////////////////
+// track entry
+
+TitanData::TrackEntry::TrackEntry()
+  
+{
+
+  // initialize to 0
+  
+  time = 0;
+  time_origin = 0;
+  prev_entry_offset = 0;
+  this_entry_offset = 0;
+  next_entry_offset = 0;
+  next_scan_entry_offset = 0;
+  scan_origin = 0;
+  scan_num = 0;
+  storm_num = 0;
+  simple_track_num = 0;
+  complex_track_num = 0;
+  history_in_scans = 0;
+  history_in_secs = 0;
+  duration_in_scans = 0;
+  duration_in_secs = 0;
+  forecast_valid = false;
+
+}
+
+void TitanData::TrackEntry::setFromLegacy(const track_file_entry_t &entry)
+{
+
+  time = entry.time;
+  time_origin = entry.time_origin;
+  prev_entry_offset = entry.prev_entry_offset;
+  this_entry_offset = entry.this_entry_offset;
+  next_entry_offset = entry.next_entry_offset;
+  next_scan_entry_offset = entry.next_scan_entry_offset;
+  scan_origin = entry.scan_origin;
+  scan_num = entry.scan_num;
+  storm_num = entry.storm_num;
+  simple_track_num = entry.simple_track_num;
+  complex_track_num = entry.complex_track_num;
+  history_in_scans = entry.history_in_scans;
+  history_in_secs = entry.history_in_secs;
+  duration_in_scans = entry.duration_in_scans;
+  duration_in_secs = entry.duration_in_secs;
+  forecast_valid = entry.forecast_valid;
+
+  dval_dt.setFromLegacy(entry.dval_dt);
+  
+}
+
+void TitanData::TrackEntry::convertToLegacy(track_file_entry_t &entry) const
+{
+
+  entry.time = time;
+  entry.time_origin = time_origin;
+  entry.prev_entry_offset = prev_entry_offset;
+  entry.this_entry_offset = this_entry_offset;
+  entry.next_entry_offset = next_entry_offset;
+  entry.next_scan_entry_offset = next_scan_entry_offset;
+  entry.scan_origin = scan_origin;
+  entry.scan_num = scan_num;
+  entry.storm_num = storm_num;
+  entry.simple_track_num = simple_track_num;
+  entry.complex_track_num = complex_track_num;
+  entry.history_in_scans = history_in_scans;
+  entry.history_in_secs = history_in_secs;
+  entry.duration_in_scans = duration_in_scans;
+  entry.duration_in_secs = duration_in_secs;
+  entry.forecast_valid = forecast_valid;
+
+  dval_dt.convertToLegacy(entry.dval_dt);
+  
+}
+
+void TitanData::TrackEntry::setFromLegacy
+  (const track_file_entry_t *legacyHdrs,
+   vector<TitanData::TrackEntry> &scans)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  }
+}
+
+void TitanData::TrackEntry::convertToLegacy
+  (const vector<TitanData::TrackEntry> &scans,
+   track_file_entry_t *legacyHdrs)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
+    
