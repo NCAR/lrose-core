@@ -276,6 +276,9 @@ public:
                               vector<TitanData::StormGprops> &gprops);
     static void convertToLegacy(const vector<TitanData::StormGprops> &gprops,
                                 storm_file_global_props_t *legacyGprops);
+    void print(FILE *out, const char *spacer,
+               const StormParams &params, const ScanHeader &scan);
+     
 
     // data
     
@@ -379,7 +382,8 @@ public:
     fl32 vil_from_maxz;
     fl32 ltg_count;               /* ltg strike count in x minutes before storm
                                    * time with x km of storm */
-    // titan_hail_t hail_metrics;  /* hail indicies from titan/titan_hail.h */
+
+    fl32 convectivity_median;     /* used if convectivity thresholds applied */
 
     // hail metrics
     
@@ -411,6 +415,11 @@ public:
                               vector<TitanData::StormLprops> &lprops);
     static void convertToLegacy(const vector<TitanData::StormLprops> &lprops,
                                 storm_file_layer_props_t *legacyLprops);
+    static void print(FILE *out, const char *spacer,
+                      const StormParams &params,
+                      const ScanHeader &scan,
+                      const StormGprops &gprops,
+                      const vector<StormLprops> &lprops);
 
     // data
     

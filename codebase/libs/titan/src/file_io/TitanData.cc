@@ -591,6 +591,7 @@ TitanData::StormGprops::StormGprops()
   
   vil_from_maxz = 0.0;
   ltg_count = 0.0;
+  convectivity_median = 0.0;
   
   FOKRcategory = 0;
   waldvogelProbability = 0.0;
@@ -676,6 +677,7 @@ void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
   
   vil_from_maxz = gprops.vil_from_maxz;
   ltg_count = gprops.ltg_count;
+  convectivity_median = gprops.convectivity_median;
 
   FOKRcategory = 0;
   waldvogelProbability = 0.0;
@@ -771,6 +773,7 @@ void TitanData::StormGprops::convertToLegacy(storm_file_global_props_t &gprops) 
   
   gprops.vil_from_maxz = vil_from_maxz;
   gprops.ltg_count = ltg_count;
+  gprops.convectivity_median = convectivity_median;
 
   if (FOKRcategory != 0 ||
       waldvogelProbability != 0.0 ||
@@ -805,7 +808,110 @@ void TitanData::StormGprops::convertToLegacy(const vector<TitanData::StormGprops
     gprops[ii].convertToLegacy(legacyGprops[ii]);
   }
 }
-    
+
+void TitanData::StormGprops::print(FILE *out,
+                                   const char *spacer,
+                                   const StormParams &params,
+                                   const ScanHeader &scan)
+     
+{
+
+  const char *loc_label;
+  si32 i;
+  
+  if (scan.grid.proj_type == TITAN_PROJ_FLAT) {
+    loc_label = "(km) ";
+  } else {
+    loc_label = "(deg)";
+  }
+
+  fprintf(out, "%sGLOBAL STORM PROPERTIES - storm number %ld\n", spacer, (long) storm_num);
+  
+  fprintf(out, "%s  number of layers                : %ld\n", spacer, (long) n_layers);
+  fprintf(out, "%s  base layer number               : %ld\n", spacer, (long) base_layer);
+  fprintf(out, "%s  number of dbz intervals         : %ld\n", spacer, (long) n_dbz_intervals);
+  fprintf(out, "%s  number of runs                  : %ld\n", spacer, (long) n_runs);
+  fprintf(out, "%s  number of proj runs             : %ld\n", spacer, (long) n_proj_runs);
+  
+  fprintf(out, "%s  range_limited                   : %ld\n", spacer, (long) range_limited);
+  fprintf(out, "%s  top_missing                     : %ld\n", spacer, (long) top_missing);
+  fprintf(out, "%s  second_trip                     : %ld\n", spacer, (long) second_trip);
+  fprintf(out, "%s  hail_present                    : %ld\n", spacer, (long) hail_present);
+  fprintf(out, "%s  anom_prop                       : %ld\n", spacer, (long) anom_prop);
+  
+  fprintf(out, "%s  vol_centroid_x %s            : %g\n", spacer, loc_label, vol_centroid_x);
+  fprintf(out, "%s  vol_centroid_y %s            : %g\n", spacer, loc_label, vol_centroid_y);
+  fprintf(out, "%s  vol_centroid_z (km)             : %g\n", spacer, vol_centroid_z);
+  
+  fprintf(out, "%s  refl_centroid_x %s           : %g\n", spacer, loc_label, refl_centroid_x);
+  fprintf(out, "%s  refl_centroid_y %s           : %g\n", spacer, loc_label, refl_centroid_y);
+  fprintf(out, "%s  refl_centroid_z (km)            : %g\n", spacer, refl_centroid_z);
+  
+  fprintf(out, "%s  top (km)                        : %g\n", spacer, top);
+  fprintf(out, "%s  base (km)                       : %g\n", spacer, base);
+  fprintf(out, "%s  volume (km3)                    : %g\n", spacer, volume);
+  fprintf(out, "%s  mean area (km2)                 : %g\n", spacer, area_mean);
+  fprintf(out, "%s  precip flux (m3/s)              : %g\n", spacer, precip_flux);
+  fprintf(out, "%s  mass (ktons)                    : %g\n", spacer, mass);
+  fprintf(out, "%s  vil_from_maxz(kg/m2)            : %g\n", spacer, vil_from_maxz);
+  
+  fprintf(out, "%s  vihm_from_maxz (kg/m2)          : %g\n", spacer, vihm);
+  fprintf(out, "%s  Hail mass aloft (ktons)         : %g\n", spacer, hailMassAloft);
+  fprintf(out, "%s  Waldvogel probability of hail   : %g\n", spacer, waldvogelProbability);
+  fprintf(out, "%s  FOKR storm category          : %d\n", spacer, FOKRcategory);
+  fprintf(out, "%s  POH       (%%) : %g\n", spacer, poh);
+  fprintf(out, "%s  SHI (Jm-1s-1) : %g\n", spacer, shi);
+  fprintf(out, "%s  POSH      (%%) : %g\n", spacer, posh);
+  fprintf(out, "%s  MEHS     (mm) : %g\n", spacer, mehs);
+  
+  fprintf(out, "%s  tilt angle (deg)                : %g\n", spacer, tilt_angle);
+  fprintf(out, "%s  tilt direction (deg)            : %g\n", spacer, tilt_dirn);
+  
+  fprintf(out, "%s  dbz max                         : %g\n", spacer, dbz_max);
+  fprintf(out, "%s  dbz mean                        : %g\n", spacer, dbz_mean);
+  fprintf(out, "%s  dbz max gradient                : %g\n", spacer, dbz_max_gradient);
+  fprintf(out, "%s  dbz mean gradient               : %g\n", spacer, dbz_mean_gradient);
+  fprintf(out, "%s  height of max dbz               : %g\n", spacer, ht_of_dbz_max);
+  
+  fprintf(out, "%s  rad_vel_mean (m/s)              : %g\n", spacer, rad_vel_mean);
+  fprintf(out, "%s  rad_vel_sd (m/s)                : %g\n", spacer, rad_vel_sd);
+  fprintf(out, "%s  vorticity (/s)                  : %.2e\n", spacer, vorticity);
+  fprintf(out, "%s  convectivity_median             : %.2e\n", spacer, convectivity_median);
+
+  fprintf(out, "%s  precip area (km2)               : %g\n", spacer, precip_area);
+  fprintf(out, "%s  precip area centroid x %s    : %g\n",
+          spacer, loc_label, precip_area_centroid_x);
+  fprintf(out, "%s  precip area centroid y %s    : %g\n",
+          spacer, loc_label, precip_area_centroid_y);
+  fprintf(out, "%s  precip area orientation (deg)   : %g\n", spacer, precip_area_orientation);
+  fprintf(out, "%s  precip area minor radius %s  : %g\n",
+          spacer, loc_label, precip_area_minor_radius);
+  fprintf(out, "%s  precip area major radius %s  : %g\n",
+          spacer, loc_label, precip_area_major_radius);
+  
+  fprintf(out, "%s  proj. area (km2)                : %g\n", spacer, proj_area);
+  fprintf(out, "%s  proj. area centroid x %s     : %g\n", spacer, loc_label, proj_area_centroid_x);
+  fprintf(out, "%s  proj. area centroid y %s     : %g\n", spacer, loc_label, proj_area_centroid_y);
+  fprintf(out, "%s  proj. area orientation (deg)    : %g\n", spacer, proj_area_orientation);
+  fprintf(out, "%s  proj. area minor radius %s   : %g\n",
+          spacer, loc_label, proj_area_minor_radius);
+  fprintf(out, "%s  proj. area major radius %s   : %g\n",
+          spacer, loc_label, proj_area_major_radius);
+  
+  fprintf(out, "%s  bounding_min_ix                 : %ld\n", spacer, (long) bounding_min_ix);
+  fprintf(out, "%s  bounding_min_iy                 : %ld\n", spacer, (long) bounding_min_iy);
+  fprintf(out, "%s  bounding_max_ix                 : %ld\n", spacer, (long) bounding_max_ix);
+  fprintf(out, "%s  bounding_max_iy                 : %ld\n", spacer, (long) bounding_max_iy);
+  
+  fprintf(out, "%s\n    Proj. area polygon rays:\n", spacer);
+  for (i = 0; i < N_POLY_SIDES; i++) {
+    fprintf(out, "%s    side %ld : %g\n", spacer, (long) i, proj_area_polygon[i]);
+  }
+  
+  fprintf(out, "\n");
+
+}
+
 ////////////////////////////////////////////////////////////
 // Storm Layer Properties
 
@@ -886,6 +992,83 @@ void TitanData::StormLprops::convertToLegacy(const vector<TitanData::StormLprops
   }
 }
     
+void TitanData::StormLprops::print(FILE *out,
+                                   const char *spacer,
+                                   const StormParams &params,
+                                   const ScanHeader &scan,
+                                   const StormGprops &gprops,
+                                   const vector<StormLprops> &lprops)
+  
+{
+
+  if (gprops.n_layers == 0) {
+    return;
+  }
+  const char *loc_label;
+  if (scan.grid.proj_type == TITAN_PROJ_FLAT) {
+    loc_label = "(km) ";
+  } else {
+    loc_label = "(deg)";
+  }
+
+  /*
+   * layer properties
+   */
+  
+  fprintf(out, "%s%5s %5s %7s %7s %7s %7s %6s %6s %7s\n",
+	  spacer,
+	  "Layer", "z", "x-cent", "y-cent", "x-Zcent", "y-Zcent", "area",
+	  "max Z", "mean Z");
+  fprintf(out, "%s%5s %5s %7s %7s %7s %7s %6s %6s %7s\n",
+	  spacer, " ", "(km)", loc_label, loc_label, loc_label, loc_label,
+	  "(km2)", "(dbz)", "(dbz)");
+  
+  for (int ilayer = gprops.base_layer, ii = 0;
+       ilayer < (gprops.base_layer + gprops.n_layers);
+       ilayer++, ii++) {
+    
+    fprintf(out, "%s%5d %5g %7.1f %7.1f %7.1f %7.1f "
+	    "%6.1f %6.1f %7.1f\n",
+	    spacer, ilayer,
+	    (scan.min_z + (double) ilayer * scan.delta_z),
+	    lprops[ii].vol_centroid_x,
+	    lprops[ii].vol_centroid_y,
+	    lprops[ii].refl_centroid_x,
+	    lprops[ii].refl_centroid_y,
+	    lprops[ii].area,
+	    lprops[ii].dbz_max,
+	    lprops[ii].dbz_mean);
+    
+  } /* ilayer */
+  
+  fprintf(out, "\n");
+  
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n", spacer,
+	  "Layer", "z", "mass", "rvel_mean", "rvel_sd", "vorticity", "convectivity");
+  fprintf(out, "%s%5s %5s %7s %9s %7s %12s %15s\n",
+	  spacer, " ", "(km)", "(ktons)", "(m/s)", "(m/s)", "(/s)", " ");
+  
+  for (int ilayer = gprops.base_layer, ii = 0;
+       ilayer < (gprops.base_layer + gprops.n_layers);
+       ilayer++, ii++) {
+    
+    fprintf(out, "%s%5d %5g %7.1f %9.2f %7.2f %12.2e %15.2e\n",
+	    spacer, ilayer,
+	    (scan.min_z + (double) ilayer * scan.delta_z),
+	    lprops[ii].mass,
+	    lprops[ii].rad_vel_mean,
+	    lprops[ii].rad_vel_sd,
+	    lprops[ii].vorticity,
+            lprops[ii].convectivity_median);
+    
+  } /* ilayer */
+  
+  fprintf(out, "\n");
+  
+  return;
+
+}
+
 ////////////////////////////////////////////////////////////
 // Storm Dbz Histograms
 
