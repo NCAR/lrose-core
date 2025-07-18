@@ -1331,3 +1331,116 @@ void TitanData::SimpleTrackParams::convertToLegacy(simple_track_params_t &params
 
 }
 
+void TitanData::SimpleTrackParams::setFromLegacy(const simple_track_params_t *legacyHdrs,
+                                                 vector<TitanData::SimpleTrackParams> &scans)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  }
+}
+
+void TitanData::SimpleTrackParams::convertToLegacy(const vector<TitanData::SimpleTrackParams> &scans,
+                                                   simple_track_params_t *legacyHdrs)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
+    
+////////////////////////////////////////////////////////////
+// complex track parameters
+
+TitanData::ComplexTrackParams::ComplexTrackParams()
+  
+{
+
+  // initialize to 0
+  
+  start_time = 0;
+  end_time = 0;
+  complex_track_num = 0;
+  n_simple_tracks = 0;
+  start_scan = 0;
+  end_scan = 0;
+  duration_in_scans = 0;
+  duration_in_secs = 0;
+  volume_at_start_of_sampling = 0.0;
+  volume_at_end_of_sampling = 0.0;
+  n_top_missing = 0;
+  n_range_limited = 0;
+  start_missing = 0;
+  end_missing = 0;
+  n_samples_for_forecast_stats = 0;
+
+}
+
+void TitanData::ComplexTrackParams::setFromLegacy(const complex_track_params_t &params)
+{
+
+  start_time = params.start_time;
+  end_time = params.end_time;
+  complex_track_num = params.complex_track_num;
+  n_simple_tracks = params.n_simple_tracks;
+  start_scan = params.start_scan;
+  end_scan = params.end_scan;
+  duration_in_scans = params.duration_in_scans;
+  duration_in_secs = params.duration_in_secs;
+  volume_at_start_of_sampling = params.volume_at_start_of_sampling;
+  volume_at_end_of_sampling = params.volume_at_end_of_sampling;
+  n_top_missing = params.n_top_missing;
+  n_range_limited = params.n_range_limited;
+  start_missing = params.start_missing;
+  end_missing = params.end_missing;
+  n_samples_for_forecast_stats = params.n_samples_for_forecast_stats;
+
+  ellipse_verify.setFromLegacy(params.ellipse_verify);
+  polygon_verify.setFromLegacy(params.polygon_verify);
+  forecast_bias.setFromLegacy(params.forecast_bias);
+  forecast_rmse.setFromLegacy(params.forecast_rmse);
+  
+}
+
+void TitanData::ComplexTrackParams::convertToLegacy(complex_track_params_t &params) const
+{
+
+  params.start_time = start_time;
+  params.end_time = end_time;
+  params.complex_track_num = complex_track_num;
+  params.n_simple_tracks = n_simple_tracks;
+  params.start_scan = start_scan;
+  params.end_scan = end_scan;
+  params.duration_in_scans = duration_in_scans;
+  params.duration_in_secs = duration_in_secs;
+  params.volume_at_start_of_sampling = volume_at_start_of_sampling;
+  params.volume_at_end_of_sampling = volume_at_end_of_sampling;
+  params.n_top_missing = n_top_missing;
+  params.n_range_limited = n_range_limited;
+  params.start_missing = start_missing;
+  params.end_missing = end_missing;
+  params.n_samples_for_forecast_stats = n_samples_for_forecast_stats;
+
+  ellipse_verify.convertToLegacy(params.ellipse_verify);
+  polygon_verify.convertToLegacy(params.polygon_verify);
+  forecast_bias.convertToLegacy(params.forecast_bias);
+  forecast_rmse.convertToLegacy(params.forecast_rmse);
+  
+}
+
+void TitanData::ComplexTrackParams::setFromLegacy
+  (const complex_track_params_t *legacyHdrs,
+   vector<TitanData::ComplexTrackParams> &scans)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  }
+}
+
+void TitanData::ComplexTrackParams::convertToLegacy
+  (const vector<TitanData::ComplexTrackParams> &scans,
+   complex_track_params_t *legacyHdrs)
+{
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  }
+}
+    

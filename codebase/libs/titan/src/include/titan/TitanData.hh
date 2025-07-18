@@ -777,6 +777,73 @@ public:
     
   };  // SimpleTrackParams
 
+  /////////////////////////////////////////////////////////////
+  // complex track parameters
+
+  class ComplexTrackParams {
+    
+  public:
+    
+    // methods
+    
+    ComplexTrackParams();
+    void setFromLegacy(const complex_track_params_t &fvecify);
+    void convertToLegacy(complex_track_params_t &fvecify) const;
+    static void setFromLegacy(const complex_track_params_t *legacyParams,
+                              vector<TitanData::ComplexTrackParams> &params);
+    static void convertToLegacy(const vector<TitanData::ComplexTrackParams> &params,
+                                complex_track_params_t *legacyParams);
+    
+    // data
+    
+    time_t start_time;
+    time_t end_time;
+    
+    int complex_track_num;
+
+    int n_simple_tracks; /* number of simple tracks in this
+                          * complex track */
+
+    int start_scan;
+    int end_scan;
+
+    int duration_in_scans;
+    int duration_in_secs;
+
+    fl32 volume_at_start_of_sampling; /* km3 */
+    fl32 volume_at_end_of_sampling;   /* km3 */
+    
+    /*
+     * the following are flags to indicate status:
+     * a) number of scans for which top was not completely sampled
+     * b) number of scans for which storm sampling was incomplete
+     *    due to range
+     * c) storm existed when sampling began - start volume stored
+     * d) storm existed when sampling ended - end volume stored
+     */
+
+    int n_top_missing;
+    int n_range_limited;
+    int start_missing;
+    int end_missing;
+    int n_samples_for_forecast_stats;
+
+    TrackContingency ellipse_verify; /* contingency table data for
+                                      * forecast verification 
+                                      * using ellipses */
+    
+    TrackContingency polygon_verify; /* contingency table data for
+                                      * forecast verification 
+                                      * using polygons */
+    
+    TrackFcastProps forecast_bias; /* bias error for
+                                    * forecast props */
+  
+    TrackFcastProps forecast_rmse; /* root mean squared error for
+                                    * forecast props */
+    
+  };  // ComplexTrackParams
+
 }; // TitanData
 
 #ifdef JUNK
