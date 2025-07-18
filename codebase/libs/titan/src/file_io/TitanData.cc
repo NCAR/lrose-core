@@ -1568,7 +1568,7 @@ void TitanData::TrackScanIndex::convertToLegacy(track_file_scan_index_t &index) 
   index.utime = utime;
   index.first_entry_offset = first_entry_offset;
   index.n_entries = n_entries;
-  
+
 }
 
 void TitanData::TrackScanIndex::setFromLegacy
