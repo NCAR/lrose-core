@@ -315,7 +315,7 @@ void TitanData::StormHeader::print(FILE *out, const char *spacer)
 {
 
   char spacer2[128];
-  sprintf(spacer2, "%s  ", spacer);
+  snprintf(spacer2, 128, "%s  ", spacer);
   
   fprintf(out, "%sStorm file header :\n", spacer);
   fprintf(out, "%s  Dates and times : \n", spacer);
@@ -1203,7 +1203,7 @@ void TitanData::StormRun::convertToLegacy(const vector<TitanData::StormRun> &run
     
 void TitanData::StormRun::print(FILE *out,
                                 const char *spacer,
-                                const string &label,
+                                const char *label,
                                 const StormGprops &gprops,
                                 const vector<StormRun> &runs)
   
@@ -1218,7 +1218,7 @@ void TitanData::StormRun::print(FILE *out,
     npts += runs[ii].run_len;
   }
 
-  fprintf(out, "%s%s - nGridPts: %d\n", spacer, label.c_str(), npts);
+  fprintf(out, "%s%s - nGridPts: %d\n", spacer, label, npts);
   fprintf(out, "%s%8s %8s %8s %8s %8s\n", spacer,
 	  "ix", "n", "maxx", "iy", "iz");
   
@@ -1306,6 +1306,33 @@ void TitanData::TrackFcastProps::convertToLegacy(track_file_forecast_props_t &fp
   fprops.smoothed_proj_area_centroid_y = smoothed_proj_area_centroid_y;
   fprops.smoothed_speed = smoothed_speed;
   fprops.smoothed_direction = smoothed_direction;
+  
+}
+
+void TitanData::TrackFcastProps::print(FILE *out,
+                                       const char *label,
+                                       const char *space)
+  
+{
+  
+  fprintf(out, "%s%s\n", space, label);
+  fprintf(out, "  %sProj_Area_centroid_x : %g\n", space, proj_area_centroid_x);
+  fprintf(out, "  %sProj_Area_centroid_y : %g\n", space, proj_area_centroid_y);
+  fprintf(out, "  %sVol_centroid_z : %g\n", space, vol_centroid_z);
+  fprintf(out, "  %sRefl_centroid_z : %g\n", space, refl_centroid_z);
+  fprintf(out, "  %sDbz_max : %g\n", space, dbz_max);
+  fprintf(out, "  %sTop : %g\n", space, top);
+  fprintf(out, "  %sVolume : %g\n", space, volume);
+  fprintf(out, "  %sPrecip_flux : %g\n", space, precip_flux);
+  fprintf(out, "  %sMass : %g\n", space, mass);
+  fprintf(out, "  %sProj_Area : %g\n", space, proj_area);
+  fprintf(out, "  %sSmoothed_proj_area_centroid_x : %g\n", space, smoothed_proj_area_centroid_x);
+  fprintf(out, "  %sSmoothed_proj_area_centroid_y : %g\n", space, smoothed_proj_area_centroid_y);
+  fprintf(out, "  %sSpeed : %g\n", space, smoothed_speed);
+  fprintf(out, "  %sDirection : %g\n", space, smoothed_direction);
+  fprintf(out, "\n");
+
+  return;
 
 }
 
@@ -1449,6 +1476,34 @@ void TitanData::TrackVerify::convertToLegacy(track_file_verify_t &verify) const
   
 }
 
+void TitanData::TrackVerify::print(FILE *out,
+                                   const char *spacer)
+     
+{
+
+  fprintf(out, "%sVerification params :\n", spacer);
+  
+  fprintf(out, "%s  forecast_lead_time (secs) : %ld\n", spacer,
+	  (long) forecast_lead_time);
+  
+  fprintf(out, "%s  forecast_lead_time_margin (secs) : %ld\n", spacer,
+	  (long) forecast_lead_time_margin);
+  
+  fprintf(out, "%s  forecast_min_history (secs) : %ld\n", spacer,
+	  (long) forecast_min_history);
+  
+  fprintf(out, "%s  verify_before_forecast_time : %s\n", spacer, 
+	  BOOL_STR(verify_before_forecast_time).c_str());
+  
+  fprintf(out, "%s  verify_after_track_dies : %s\n", spacer, 
+	  BOOL_STR(verify_after_track_dies).c_str());
+  
+  char spacer2[128];
+  snprintf(spacer2, 128, "%s  ", spacer);
+  printMdvCoord(out, spacer2, grid);
+  
+}
+
 ////////////////////////////////////////////////////////////
 // contingency results for verification
 
@@ -1479,6 +1534,46 @@ void TitanData::TrackContingency::convertToLegacy(track_file_contingency_data_t 
   cont.n_success = n_success;
   cont.n_failure = n_failure;
   cont.n_false_alarm = n_false_alarm;
+
+}
+
+void TitanData::TrackContingency::print(FILE *out,
+                                        const char *label,
+                                        const char *spacer)
+     
+{
+
+  fprintf(out, "\n%s%s\n\n", spacer, label);
+  
+  fprintf(out, "  %sn_success : %d\n", spacer, n_success);
+  fprintf(out, "  %sn_failure : %d\n", spacer,n_failure);
+  fprintf(out, "  %sn_false_alarm : %d\n", spacer, n_false_alarm);
+
+  double denom = n_success + n_failure;
+
+  if (denom == 0) {
+    fprintf(out, "  %sPOD not computed\n", spacer);
+  } else {
+    fprintf(out, "  %sPOD = %g\n", spacer, n_success / denom);
+  }
+  
+  denom = n_success + n_false_alarm;
+
+  if (denom == 0) {
+    fprintf(out, "  %sFAR not computed\n", spacer);
+  } else {
+    fprintf(out, "  %sFAR = %g\n", spacer,
+	    n_false_alarm / denom);
+  }
+
+  denom = n_success + n_failure + n_false_alarm;
+
+  if (denom == 0) {
+    fprintf(out, "  %sCSI not computed\n", spacer);
+  } else {
+    fprintf(out, "  %sCSI = %g\n", spacer,
+	    n_success / denom);
+  }
 
 }
 

@@ -482,7 +482,7 @@ public:
                               vector<TitanData::StormRun> &run);
     static void convertToLegacy(const vector<TitanData::StormRun> &run,
                                 storm_file_run_t *legacyRun);
-    static void print(FILE *out, const char *spacer, const string &label,
+    static void print(FILE *out, const char *spacer, const char *label,
                       const StormGprops &gprops, const vector<StormRun> &runs);
      
 
@@ -507,7 +507,8 @@ public:
     TrackFcastProps();
     void setFromLegacy(const track_file_forecast_props_t &fprops);
     void convertToLegacy(track_file_forecast_props_t &fprops) const;
-
+    void print(FILE *out, const char *label, const char *space);
+  
     // data
     
     fl32 proj_area_centroid_x;	/* km/hr or deg/hr */
@@ -539,6 +540,8 @@ public:
     TrackVerify();
     void setFromLegacy(const track_file_verify_t &verify);
     void convertToLegacy(track_file_verify_t &verify) const;
+    void print(FILE *out, const char *spacer);
+     
 
     // data
     
@@ -589,6 +592,7 @@ public:
     TrackContingency();
     void setFromLegacy(const track_file_contingency_data_t &cont);
     void convertToLegacy(track_file_contingency_data_t &cont) const;
+    void print(FILE *out, const char *label, const char *spacer);
 
     // data
     
