@@ -525,7 +525,7 @@ public:
     TrackFcastProps();
     void setFromLegacy(const track_file_forecast_props_t &fprops);
     void convertToLegacy(track_file_forecast_props_t &fprops) const;
-    void print(FILE *out, const char *label, const char *space);
+    void print(FILE *out, const char *label, const char *spacer);
   
     // data
     
@@ -558,7 +558,7 @@ public:
     TrackVerify();
     void setFromLegacy(const track_file_verify_t &verify);
     void convertToLegacy(track_file_verify_t &verify) const;
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *label, const char *spacer);
      
 
     // data
@@ -623,13 +623,13 @@ public:
   /////////////////////////////////////////////////////////////
   // tracking parameters
 
-  class TrackParams {
+  class TrackingParams {
     
   public:
     
     // methods
     
-    TrackParams();
+    TrackingParams();
     void setFromLegacy(const track_file_params_t &params);
     void convertToLegacy(track_file_params_t &params) const;
     void print(FILE *out, const char *spacer);
@@ -695,7 +695,7 @@ public:
 
     bool spatial_smoothing;	/* TRUE or FALSE */
     
-  };  // TrackParams
+  };  // TrackingParams
 
   /////////////////////////////////////////////////////////////
   // track data header
@@ -742,7 +742,7 @@ public:
     int max_children;
     int max_nweights_forecast;
 
-    TrackParams params;	/* see above */
+    TrackingParams params;	/* see above */
 
     TrackVerify verify; /* see above - has character data at the end -
                          * GRID_LABEL_LEN * N_GRID_STRUCT_LABELS
@@ -848,7 +848,10 @@ public:
                               vector<TitanData::ComplexTrackParams> &params);
     static void convertToLegacy(const vector<TitanData::ComplexTrackParams> &params,
                                 complex_track_params_t *legacyParams);
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer,
+               int verification_performed,
+               const vector<int> &simples_per_complex);
+     
     
     // data
     

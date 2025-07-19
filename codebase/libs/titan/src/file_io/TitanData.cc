@@ -188,68 +188,40 @@ void TitanData::StormParams::print(FILE *out, const char *spacer)
 {
 
   fprintf(out, "%sStorm file parameters : \n", spacer);
-  fprintf(out, "%s  Low dBZ threshold : %g\n", spacer,
-	  low_dbz_threshold);
-  fprintf(out, "%s  High dBZ threshold : %g\n", spacer,
-	  high_dbz_threshold);
-  fprintf(out, "%s  Hail dBZ threshold : %g\n", spacer,
-	  hail_dbz_threshold);
-  fprintf(out, "%s  Hail mass dBZ threshold : %g\n", spacer,
-	  hail_mass_dbz_threshold);
-  fprintf(out, "%s  Dbz hist interval : %g\n", spacer,
-	  dbz_hist_interval);
-  fprintf(out, "%s  Top threshold (km) : %g\n", spacer,
-	  top_threshold);
-  fprintf(out, "%s  Base threshold (km) : %g\n", spacer,
-	  base_threshold);
-  fprintf(out, "%s  Min storm size (km2 or km3) : %g\n", spacer,
-	  min_storm_size);
-  fprintf(out, "%s  Max storm size (km2 or km3) : %g\n", spacer,
-	  max_storm_size);
-  fprintf(out, "%s  Check morphology? : %s\n", spacer,
-	  BOOL_STR(check_morphology).c_str());
+  fprintf(out, "%s  Low dBZ threshold : %g\n", spacer, low_dbz_threshold);
+  fprintf(out, "%s  High dBZ threshold : %g\n", spacer, high_dbz_threshold);
+  fprintf(out, "%s  Hail dBZ threshold : %g\n", spacer, hail_dbz_threshold);
+  fprintf(out, "%s  Hail mass dBZ threshold : %g\n", spacer, hail_mass_dbz_threshold);
+  fprintf(out, "%s  Dbz hist interval : %g\n", spacer, dbz_hist_interval);
+  fprintf(out, "%s  Top threshold (km) : %g\n", spacer, top_threshold);
+  fprintf(out, "%s  Base threshold (km) : %g\n", spacer, base_threshold);
+  fprintf(out, "%s  Min storm size (km2 or km3) : %g\n", spacer, min_storm_size);
+  fprintf(out, "%s  Max storm size (km2 or km3) : %g\n", spacer, max_storm_size);
+  fprintf(out, "%s  Check morphology? : %s\n", spacer, BOOL_STR(check_morphology).c_str());
   fprintf(out, "%s  Morphology_erosion_threshold (km) : %g\n", spacer,
 	  morphology_erosion_threshold);
   fprintf(out, "%s  Morphology_refl_divisor (dbz/km) : %g\n", spacer,
 	  morphology_refl_divisor);
-  fprintf(out, "%s  Check tops? : %s\n", spacer,
-	  BOOL_STR(check_tops).c_str());
-  fprintf(out, "%s  Min_radar_tops (km) : %g\n", spacer,
-	  min_radar_tops);
-  fprintf(out, "%s  Tops_edge_margin (km) : %g\n", spacer,
-	  tops_edge_margin);
-  fprintf(out, "%s  Z-R coefficient : %g\n", spacer,
-	  z_p_coeff);
-  fprintf(out, "%s  Z-R exponent : %g\n", spacer,
-	  z_p_exponent);
-  fprintf(out, "%s  Z-M coefficient : %g\n", spacer,
-	  z_m_coeff);
-  fprintf(out, "%s  Z-M exponent : %g\n", spacer,
-	  z_m_exponent);
-  fprintf(out, "%s  Hail Z-M coefficient : %g\n", spacer,
-	  hail_z_m_coeff);
-  fprintf(out, "%s  Hail Z-M exponent : %g\n", spacer,
-	  hail_z_m_exponent);
-  fprintf(out, "%s  Sectrip vert aspect : %g\n", spacer,
-	  sectrip_vert_aspect);
-  fprintf(out, "%s  Sectrip horiz aspect : %g\n", spacer,
-	  sectrip_horiz_aspect);
-  fprintf(out, "%s  Sectrip orientation error : %g\n", spacer,
-	  sectrip_orientation_error);
-  fprintf(out, "%s  Velocity data available? : %s\n", spacer,
-	  BOOL_STR(vel_available).c_str());
-  fprintf(out, "%s  N_poly_sides : %ld\n", spacer,
-	  (long) n_poly_sides);
-  fprintf(out, "%s  Poly_start_az : %g\n", spacer,
-	  poly_start_az);
-  fprintf(out, "%s  Poly_delta_az : %g\n", spacer,
-	  poly_delta_az);
+  fprintf(out, "%s  Check tops? : %s\n", spacer, BOOL_STR(check_tops).c_str());
+  fprintf(out, "%s  Min_radar_tops (km) : %g\n", spacer, min_radar_tops);
+  fprintf(out, "%s  Tops_edge_margin (km) : %g\n", spacer, tops_edge_margin);
+  fprintf(out, "%s  Z-R coefficient : %g\n", spacer, z_p_coeff);
+  fprintf(out, "%s  Z-R exponent : %g\n", spacer, z_p_exponent);
+  fprintf(out, "%s  Z-M coefficient : %g\n", spacer, z_m_coeff);
+  fprintf(out, "%s  Z-M exponent : %g\n", spacer, z_m_exponent);
+  fprintf(out, "%s  Hail Z-M coefficient : %g\n", spacer, hail_z_m_coeff);
+  fprintf(out, "%s  Hail Z-M exponent : %g\n", spacer, hail_z_m_exponent);
+  fprintf(out, "%s  Sectrip vert aspect : %g\n", spacer, sectrip_vert_aspect);
+  fprintf(out, "%s  Sectrip horiz aspect : %g\n", spacer, sectrip_horiz_aspect);
+  fprintf(out, "%s  Sectrip orientation error : %g\n", spacer, sectrip_orientation_error);
+  fprintf(out, "%s  Velocity data available? : %s\n", spacer, BOOL_STR(vel_available).c_str());
+  fprintf(out, "%s  N_poly_sides : %d\n", spacer, n_poly_sides);
+  fprintf(out, "%s  Poly_start_az : %g\n", spacer, poly_start_az);
+  fprintf(out, "%s  Poly_delta_az : %g\n", spacer, poly_delta_az);
   if (tops_dbz_threshold == 0.0) {
-    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer,
-	    low_dbz_threshold);
+    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer, low_dbz_threshold);
   } else {
-    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer,
-	    tops_dbz_threshold);
+    fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer, tops_dbz_threshold);
   }
 
   if (precip_computation_mode == PRECIP_AT_LOWEST_VALID_HT) {
@@ -264,10 +236,8 @@ void TitanData::StormParams::print(FILE *out, const char *spacer)
     fprintf(out, "%s  Precip computed from column max\n", spacer);
   }
   
-  fprintf(out, "%s  Low convectivity threshold  : %g\n", spacer,
-	  low_convectivity_threshold);
-  fprintf(out, "%s  High convectivity threshold : %g\n", spacer,
-	  high_convectivity_threshold);
+  fprintf(out, "%s  Low convectivity threshold  : %g\n", spacer, low_convectivity_threshold);
+  fprintf(out, "%s  High convectivity threshold : %g\n", spacer, high_convectivity_threshold);
 
   fprintf(out, "\n");
 
@@ -319,14 +289,10 @@ void TitanData::StormHeader::print(FILE *out, const char *spacer)
   
   fprintf(out, "%sStorm file header :\n", spacer);
   fprintf(out, "%s  Dates and times : \n", spacer);
-  fprintf(out, "%s    File   : %s\n",  spacer,
-	  utimstr(file_time));
-  fprintf(out, "%s    Start  : %s\n",  spacer,
-	  utimstr(start_time));
-  fprintf(out, "%s    End    : %s\n",  spacer,
-	  utimstr(end_time));
-  fprintf(out, "%s  Number of scans : %d\n", spacer,
-	  n_scans);
+  fprintf(out, "%s    File   : %s\n",  spacer, utimstr(file_time));
+  fprintf(out, "%s    Start  : %s\n",  spacer, utimstr(start_time));
+  fprintf(out, "%s    End    : %s\n",  spacer, utimstr(end_time));
+  fprintf(out, "%s  Number of scans : %d\n", spacer, n_scans);
   fprintf(out, "\n");
 
   params.print(out, spacer);
@@ -825,19 +791,19 @@ void TitanData::StormGprops::print(FILE *out,
     loc_label = "(deg)";
   }
 
-  fprintf(out, "%sGLOBAL STORM PROPERTIES - storm number %ld\n", spacer, (long) storm_num);
+  fprintf(out, "%sGLOBAL STORM PROPERTIES - storm number %d\n", spacer, storm_num);
   
-  fprintf(out, "%s  number of layers                : %ld\n", spacer, (long) n_layers);
-  fprintf(out, "%s  base layer number               : %ld\n", spacer, (long) base_layer);
-  fprintf(out, "%s  number of dbz intervals         : %ld\n", spacer, (long) n_dbz_intervals);
-  fprintf(out, "%s  number of runs                  : %ld\n", spacer, (long) n_runs);
-  fprintf(out, "%s  number of proj runs             : %ld\n", spacer, (long) n_proj_runs);
+  fprintf(out, "%s  number of layers                : %d\n", spacer, n_layers);
+  fprintf(out, "%s  base layer number               : %d\n", spacer, base_layer);
+  fprintf(out, "%s  number of dbz intervals         : %d\n", spacer, n_dbz_intervals);
+  fprintf(out, "%s  number of runs                  : %d\n", spacer, n_runs);
+  fprintf(out, "%s  number of proj runs             : %d\n", spacer, n_proj_runs);
   
-  fprintf(out, "%s  range_limited                   : %ld\n", spacer, (long) range_limited);
-  fprintf(out, "%s  top_missing                     : %ld\n", spacer, (long) top_missing);
-  fprintf(out, "%s  second_trip                     : %ld\n", spacer, (long) second_trip);
-  fprintf(out, "%s  hail_present                    : %ld\n", spacer, (long) hail_present);
-  fprintf(out, "%s  anom_prop                       : %ld\n", spacer, (long) anom_prop);
+  fprintf(out, "%s  range_limited                   : %d\n", spacer, range_limited);
+  fprintf(out, "%s  top_missing                     : %d\n", spacer, top_missing);
+  fprintf(out, "%s  second_trip                     : %d\n", spacer, second_trip);
+  fprintf(out, "%s  hail_present                    : %d\n", spacer, hail_present);
+  fprintf(out, "%s  anom_prop                       : %d\n", spacer, anom_prop);
   
   fprintf(out, "%s  vol_centroid_x %s            : %g\n", spacer, loc_label, vol_centroid_x);
   fprintf(out, "%s  vol_centroid_y %s            : %g\n", spacer, loc_label, vol_centroid_y);
@@ -898,14 +864,14 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  proj. area major radius %s   : %g\n",
           spacer, loc_label, proj_area_major_radius);
   
-  fprintf(out, "%s  bounding_min_ix                 : %ld\n", spacer, (long) bounding_min_ix);
-  fprintf(out, "%s  bounding_min_iy                 : %ld\n", spacer, (long) bounding_min_iy);
-  fprintf(out, "%s  bounding_max_ix                 : %ld\n", spacer, (long) bounding_max_ix);
-  fprintf(out, "%s  bounding_max_iy                 : %ld\n", spacer, (long) bounding_max_iy);
+  fprintf(out, "%s  bounding_min_ix                 : %d\n", spacer, bounding_min_ix);
+  fprintf(out, "%s  bounding_min_iy                 : %d\n", spacer, bounding_min_iy);
+  fprintf(out, "%s  bounding_max_ix                 : %d\n", spacer, bounding_max_ix);
+  fprintf(out, "%s  bounding_max_iy                 : %d\n", spacer, bounding_max_iy);
   
   fprintf(out, "%s\n    Proj. area polygon rays:\n", spacer);
   for (i = 0; i < N_POLY_SIDES; i++) {
-    fprintf(out, "%s    side %ld : %g\n", spacer, (long) i, proj_area_polygon[i]);
+    fprintf(out, "%s    side %d : %g\n", spacer, i, proj_area_polygon[i]);
   }
   
   fprintf(out, "\n");
@@ -1477,26 +1443,18 @@ void TitanData::TrackVerify::convertToLegacy(track_file_verify_t &verify) const
 }
 
 void TitanData::TrackVerify::print(FILE *out,
-                                   const char *spacer)
-     
+                                   const char *spacer,
+                                   const char *label)
+  
 {
-
-  fprintf(out, "%sVerification params :\n", spacer);
   
-  fprintf(out, "%s  forecast_lead_time (secs) : %ld\n", spacer,
-	  (long) forecast_lead_time);
-  
-  fprintf(out, "%s  forecast_lead_time_margin (secs) : %ld\n", spacer,
-	  (long) forecast_lead_time_margin);
-  
-  fprintf(out, "%s  forecast_min_history (secs) : %ld\n", spacer,
-	  (long) forecast_min_history);
-  
-  fprintf(out, "%s  verify_before_forecast_time : %s\n", spacer, 
-	  BOOL_STR(verify_before_forecast_time).c_str());
-  
-  fprintf(out, "%s  verify_after_track_dies : %s\n", spacer, 
-	  BOOL_STR(verify_after_track_dies).c_str());
+  fprintf(out, "%sVerification params : %s\n", spacer, label);
+  fprintf(out, "%s  forecast_lead_time (secs) : %d\n", spacer, forecast_lead_time);
+  fprintf(out, "%s  forecast_lead_time_margin (secs) : %d\n", spacer, forecast_lead_time_margin);
+  fprintf(out, "%s  forecast_min_history (secs) : %d\n", spacer, forecast_min_history);
+  fprintf(out, "%s  verify_before_forecast_time : %s\n", spacer,
+          BOOL_STR(verify_before_forecast_time).c_str());
+  fprintf(out, "%s  verify_after_track_dies : %s\n", spacer, BOOL_STR(verify_after_track_dies).c_str());
   
   char spacer2[128];
   snprintf(spacer2, 128, "%s  ", spacer);
@@ -1580,7 +1538,7 @@ void TitanData::TrackContingency::print(FILE *out,
 ////////////////////////////////////////////////////////////
 // tracking parameters
 
-TitanData::TrackParams::TrackParams()
+TitanData::TrackingParams::TrackingParams()
   
 {
 
@@ -1607,7 +1565,7 @@ TitanData::TrackParams::TrackParams()
 
 }
 
-void TitanData::TrackParams::setFromLegacy(const track_file_params_t &params)
+void TitanData::TrackingParams::setFromLegacy(const track_file_params_t &params)
 {
 
   memcpy(forecast_weights, params.forecast_weights, MAX_NWEIGHTS_FCAST * sizeof(fl32));
@@ -1631,7 +1589,7 @@ void TitanData::TrackParams::setFromLegacy(const track_file_params_t &params)
 
 }
 
-void TitanData::TrackParams::convertToLegacy(track_file_params_t &params) const
+void TitanData::TrackingParams::convertToLegacy(track_file_params_t &params) const
 {
 
   memcpy(params.forecast_weights, forecast_weights, MAX_NWEIGHTS_FCAST * sizeof(fl32));
@@ -1655,7 +1613,7 @@ void TitanData::TrackParams::convertToLegacy(track_file_params_t &params) const
 
 }
 
-void TitanData::TrackParams::print(FILE *out,
+void TitanData::TrackingParams::print(FILE *out,
                                    const char *spacer)
   
 {
@@ -1668,8 +1626,7 @@ void TitanData::TrackParams::print(FILE *out,
     fprintf(out, "%s  Gridtype : latlon\n", spacer);
   }
   
-  fprintf(out, "%s  Nweights_forecast : %ld\n", spacer,
-	  (long) nweights_forecast);
+  fprintf(out, "%s  Nweights_forecast : %d\n", spacer, nweights_forecast);
   fprintf(out, "%s  Forecast type : %s\n", spacer,
 	  FORECAST_TYPE_STR((forecast_t) forecast_type).c_str());
 
@@ -1679,46 +1636,22 @@ void TitanData::TrackParams::print(FILE *out,
 	    forecast_weights[i]);
   }
   fprintf(out, "\n");
-  
-  fprintf(out, "%s  Parabolic_growth_period : %g\n", spacer,
-	  parabolic_growth_period);
-  
-  fprintf(out, "%s  Weight_distance : %g\n", spacer,
-	  weight_distance);
-  
-  fprintf(out, "%s  Weight_delta_cube_root_volume : %g\n", spacer,
-	  weight_delta_cube_root_volume);
-  
-  fprintf(out, "%s  Max tracking speed (km/hr) : %g\n", spacer,
-	  max_tracking_speed);
-
-  fprintf(out, "%s  Max delta time (secs) : %ld\n", spacer,
-	  (long) max_delta_time);
-
-  fprintf(out, "%s  Min history for valid forecast (secs) : %ld\n", spacer,
-	  (long) min_history_for_valid_forecast);
-
-  fprintf(out, "%s  Max speed for valid forecast (km/hr) : %g\n", spacer,
-	  max_speed_for_valid_forecast);
-
+  fprintf(out, "%s  Parabolic_growth_period : %g\n", spacer, parabolic_growth_period);
+  fprintf(out, "%s  Weight_distance : %g\n", spacer, weight_distance);
+  fprintf(out, "%s  Weight_delta_cube_root_volume : %g\n", spacer, weight_delta_cube_root_volume);
+  fprintf(out, "%s  Max tracking speed (km/hr) : %g\n", spacer, max_tracking_speed);
+  fprintf(out, "%s  Max delta time (secs) : %d\n", spacer, max_delta_time);
+  fprintf(out, "%s  Min history for valid forecast (secs) : %d\n", spacer, min_history_for_valid_forecast);
+  fprintf(out, "%s  Max speed for valid forecast (km/hr) : %g\n", spacer, max_speed_for_valid_forecast);
   fprintf(out, "%s  Spatial smoothing : %s\n", spacer,
-	  (spatial_smoothing? "TRUE" : "FALSE"));
-
+          (spatial_smoothing? "TRUE" : "FALSE"));
   fprintf(out, "%s  Use_runs_for_overlaps : %s\n", spacer,
-	  (use_runs_for_overlaps? "TRUE" : "FALSE"));
-
+          (use_runs_for_overlaps? "TRUE" : "FALSE"));
   fprintf(out, "%s  Scale_forecasts_by_history : %s\n", spacer,
-	  (scale_forecasts_by_history? "TRUE" : "FALSE"));
-  
-  fprintf(out, "%s  Smoothing radius (km) : %g\n", spacer,
-	  smoothing_radius);
-
-  fprintf(out, "%s  Min_fraction_overlap : %g\n", spacer,
-	  min_fraction_overlap);
-
-  fprintf(out, "%s  Min_sum_fraction_overlap : %g\n", spacer,
-	  min_sum_fraction_overlap);
-
+          (scale_forecasts_by_history? "TRUE" : "FALSE"));
+  fprintf(out, "%s  Smoothing radius (km) : %g\n", spacer, smoothing_radius);
+  fprintf(out, "%s  Min_fraction_overlap : %g\n", spacer, min_fraction_overlap);
+  fprintf(out, "%s  Min_sum_fraction_overlap : %g\n", spacer, min_sum_fraction_overlap);
   fprintf(out, "\n");
 
   return;
@@ -1808,47 +1741,24 @@ void TitanData::TrackHeader::print(FILE *out,
   snprintf(spacer2, 128, "%s  ", spacer);
   
   params.print(out, spacer);
-
   fprintf(out, "%sTRACK FILE HEADER :\n", spacer);
-
-  fprintf(out, "%s  Number of simple tracks : %ld\n",
-	  spacer, (long) n_simple_tracks);
-
-  fprintf(out, "%s  Number of complex tracks : %ld\n",
-	  spacer, (long) n_complex_tracks);
-  
-  fprintf(out, "%s  n_samples_for_forecast_stats : %ld\n",
-	  spacer, (long) n_samples_for_forecast_stats);
-
-  fprintf(out, "%s  n_scans : %ld\n",
-	  spacer, (long) n_scans);
-
-  fprintf(out, "%s  last_scan_num : %ld\n",
-	  spacer, (long) last_scan_num);
-
-  fprintf(out, "%s  max_simple_track_num : %ld\n",
-	  spacer, (long) max_simple_track_num);
-
-  fprintf(out, "%s  max_complex_track_num : %ld\n",
-	  spacer, (long) max_complex_track_num);
-
-  fprintf(out, "%s  max_parents : %ld\n", spacer,
-	  (long) max_parents);
-
-  fprintf(out, "%s  max_children : %ld\n", spacer,
-	  (long) max_children);
-
-  fprintf(out, "%s  max_nweights_forecast : %ld\n", spacer,
-	  (long) max_nweights_forecast);
-
+  fprintf(out, "%s  Number of simple tracks : %d\n", spacer, n_simple_tracks);
+  fprintf(out, "%s  Number of complex tracks : %d\n", spacer, n_complex_tracks);
+  fprintf(out, "%s  n_samples_for_forecast_stats : %d\n", spacer, n_samples_for_forecast_stats);
+  fprintf(out, "%s  n_scans : %d\n", spacer, n_scans);
+  fprintf(out, "%s  last_scan_num : %d\n", spacer, last_scan_num);
+  fprintf(out, "%s  max_simple_track_num : %d\n", spacer, max_simple_track_num);
+  fprintf(out, "%s  max_complex_track_num : %d\n", spacer, max_complex_track_num);
+  fprintf(out, "%s  max_parents : %d\n", spacer, max_parents);
+  fprintf(out, "%s  max_children : %d\n", spacer, max_children);
+  fprintf(out, "%s  max_nweights_forecast : %d\n", spacer, max_nweights_forecast);
   fprintf(out, "\n");
   
   if (verify.verification_performed) {
-    ellipse_verify.print(out, "  Ellipse verify:", spacer2);
-    polygon_verify.print(out, "  Polygon verify:", spacer2);
-    forecast_bias.print(out, "  Forecast bias:", spacer2);
-    forecast_rmse.print(out, "  Forecast bias:", spacer2);
-    verify.print(out, spacer2);
+    ellipse_verify.print(out, "Ellipses", spacer2);
+    polygon_verify.print(out, "Polygons", spacer2);
+    forecast_bias.print(out, "  Forecast bias", spacer2);
+    forecast_rmse.print(out, "  Forecast RMSE", spacer2);
     fprintf(out, "\n");
   }
   
@@ -1968,46 +1878,31 @@ void TitanData::SimpleTrackParams::print(FILE *out,
      
 {
 
-  fprintf(out, "%sSIMPLE_TRACK_NUM : %ld\n", spacer,
-	  (long) simple_track_num);
-  
-  fprintf(out, "%s  last_descendant_simple_track_num : %ld\n", spacer,
-	  (long) last_descendant_simple_track_num);
-  
-  fprintf(out, "%s  start_scan : %ld\n", spacer, (long) start_scan);
-  fprintf(out, "%s  end_scan : %ld\n", spacer, (long) end_scan);
-  fprintf(out, "%s  last_descendant_end_scan : %ld\n", spacer,
-	  (long) last_descendant_end_scan);
-  fprintf(out, "%s  scan_origin : %ld\n", spacer, (long) scan_origin);
-  
-  fprintf(out, "%s  start_time : %s\n", spacer,
-	  utimstr(start_time));
-  fprintf(out, "%s  end_time : %s\n", spacer,
-	  utimstr(end_time));
-  fprintf(out, "%s  last_descendant_end_time : %s\n", spacer,
-	  utimstr(last_descendant_end_time));
-  fprintf(out, "%s  time_origin : %s\n", spacer,
-	  utimstr(time_origin));
-  
-  fprintf(out, "%s  history_in_scans : %ld\n", spacer,
-	  (long) history_in_scans);
-  fprintf(out, "%s  history_in_secs : %ld\n", spacer,
-	  (long) history_in_secs);
-  fprintf(out, "%s  duration_in_scans : %ld\n", spacer,
-	  (long) duration_in_scans);
-  fprintf(out, "%s  duration_in_secs : %ld\n", spacer,
-	  (long) duration_in_secs);
-  
-  fprintf(out, "%s  nparents : %ld\n", spacer, (long) nparents);
-  fprintf(out, "%s  nchildren : %ld\n", spacer, (long) nchildren);
+  fprintf(out, "%sSIMPLE_TRACK_NUM : %d\n", spacer, simple_track_num);
+  fprintf(out, "%s  last_descendant_simple_track_num : %d\n", spacer,
+	  last_descendant_simple_track_num);
+  fprintf(out, "%s  start_scan : %d\n", spacer, start_scan);
+  fprintf(out, "%s  end_scan : %d\n", spacer, end_scan);
+  fprintf(out, "%s  last_descendant_end_scan : %d\n", spacer, last_descendant_end_scan);
+  fprintf(out, "%s  scan_origin : %d\n", spacer, scan_origin);
+  fprintf(out, "%s  start_time : %s\n", spacer, utimstr(start_time));
+  fprintf(out, "%s  end_time : %s\n", spacer, utimstr(end_time));
+  fprintf(out, "%s  last_descendant_end_time : %s\n", spacer, utimstr(last_descendant_end_time));
+  fprintf(out, "%s  time_origin : %s\n", spacer, utimstr(time_origin));
+  fprintf(out, "%s  history_in_scans : %d\n", spacer, history_in_scans);
+  fprintf(out, "%s  history_in_secs : %d\n", spacer, history_in_secs);
+  fprintf(out, "%s  duration_in_scans : %d\n", spacer, duration_in_scans);
+  fprintf(out, "%s  duration_in_secs : %d\n", spacer, duration_in_secs);
+  fprintf(out, "%s  nparents : %d\n", spacer, nparents);
+  fprintf(out, "%s  nchildren : %d\n", spacer, nchildren);
   
   if (nparents > 0) {
     fprintf(out, "%s  parents :", spacer);  
     for (int i = 0; i < nparents; i++) {
       if (i == nparents - 1)
-	fprintf(out, " %ld\n", (long) parent[i]);
+	fprintf(out, " %d\n", parent[i]);
       else
-	fprintf(out, " %ld,", (long) parent[i]);
+	fprintf(out, " %d,", parent[i]);
     } /* i */
   } /* if */
   
@@ -2015,17 +1910,14 @@ void TitanData::SimpleTrackParams::print(FILE *out,
     fprintf(out, "%s  children :", spacer);  
     for (int i = 0; i < nchildren; i++) {
       if (i == nchildren - 1)
-	fprintf(out, " %ld\n", (long) child[i]);
+	fprintf(out, " %d\n", child[i]);
       else
-	fprintf(out, " %ld,", (long) child[i]);
+	fprintf(out, " %d,", child[i]);
     } /* i */
   } /* if */
   
-  fprintf(out, "%s  complex_track_num : %ld\n", spacer,
-	  (long) complex_track_num);
-  fprintf(out, "%s  first_entry_offset : %ld\n", spacer,
-	  (long) first_entry_offset);
-  
+  fprintf(out, "%s  complex_track_num : %d\n", spacer, complex_track_num);
+  fprintf(out, "%s  first_entry_offset : %d\n", spacer, first_entry_offset);
   fprintf(out, "\n");
 
 }
@@ -2127,6 +2019,59 @@ void TitanData::ComplexTrackParams::convertToLegacy
   }
 }
     
+void TitanData::ComplexTrackParams::print(FILE *out,
+                                          const char *spacer,
+                                          int verification_performed,
+                                          const vector<int> &simples_per_complex)
+     
+{
+  
+  char spacer2[128];
+  snprintf(spacer2, 128, "%s  ", spacer);
+  
+  fprintf(out, "%sCOMPLEX_TRACK_NUM : %d\n", spacer, complex_track_num);
+  fprintf(out, "%s  n_simple_tracks : %d\n", spacer, n_simple_tracks);
+  
+  if (simples_per_complex.size() > 0) {
+    fprintf(out, "%s  simple_track_nums :", spacer);  
+    for (size_t ii = 0; ii < simples_per_complex.size(); ii++) {
+      if (ii == simples_per_complex.size() - 1) {
+	fprintf(out, " %d\n", simples_per_complex[ii]);
+      } else {
+	fprintf(out, " %d,", simples_per_complex[ii]);
+      }
+    } /* ii */
+  } /* if */
+  
+  fprintf(out, "%s  start_scan : %d\n", spacer, start_scan);
+  fprintf(out, "%s  end_scan : %d\n", spacer, end_scan);
+  fprintf(out, "%s  duration_in_scans : %d\n", spacer, duration_in_scans);
+  fprintf(out, "%s  duration_in_secs : %d\n", spacer, duration_in_secs);
+  fprintf(out, "%s  start_time : %s\n", spacer, utimstr(start_time));
+  fprintf(out, "%s  end_time : %s\n", spacer, utimstr(end_time));
+  
+  if (verification_performed) {
+
+    fprintf(out, "%s  n_top_missing : %d\n", spacer, n_top_missing);
+    fprintf(out, "%s  n_range_limited : %d\n", spacer, n_range_limited);
+    fprintf(out, "%s  start_missing : %d\n", spacer, start_missing);
+    fprintf(out, "%s  end_missing : %d\n", spacer, end_missing);
+    fprintf(out, "%s  volume_at_start_of_sampling : %g\n", spacer, volume_at_start_of_sampling);
+    fprintf(out, "%s  volume_at_end_of_sampling : %g\n", spacer, volume_at_end_of_sampling);
+
+    ellipse_verify.print(out, "Ellipses", spacer2);
+    polygon_verify.print(out, "Polygons", spacer2);
+    forecast_bias.print(out, "  Forecast bias", spacer2);
+    forecast_rmse.print(out, "  Forecast RMSE", spacer2);
+
+    fprintf(out, "\n");
+  
+  } // if (verification_performed)
+  
+  fprintf(out, "\n");
+  
+}
+
 ////////////////////////////////////////////////////////////
 // track entry
 
