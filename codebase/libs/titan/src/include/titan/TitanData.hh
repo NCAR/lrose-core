@@ -54,6 +54,12 @@ public:
   static constexpr int16_t missingInt16 = -32768;
   static constexpr int8_t missingInt08 = -128;
   
+  typedef enum {
+    FCAST_BY_TREND = 1,
+    FCAST_BY_PARABOLA = 2,
+    FCAST_BY_REGRESSION  = 3
+  } forecast_t;
+
   static std::string BOOL_STR(bool a) {
     if (a) {
       return "true";
@@ -61,7 +67,19 @@ public:
       return "false";
     }
   }
-
+  
+  static std::string FORECAST_TYPE_STR(forecast_t a) {
+    switch (a) {
+      case FCAST_BY_TREND:
+      default:
+        return "trend";
+      case FCAST_BY_PARABOLA:
+        return "parabola";
+      case FCAST_BY_REGRESSION:
+        return "regression";
+    }
+  }
+  
   /////////////////////////////////////////////////////////////
   // storm data params
   // these are the parameters that govern the operations of the
@@ -614,6 +632,7 @@ public:
     TrackParams();
     void setFromLegacy(const track_file_params_t &params);
     void convertToLegacy(track_file_params_t &params) const;
+    void print(FILE *out, const char *spacer);
     
     // data
     

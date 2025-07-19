@@ -1655,6 +1655,76 @@ void TitanData::TrackParams::convertToLegacy(track_file_params_t &params) const
 
 }
 
+void TitanData::TrackParams::print(FILE *out,
+                                   const char *spacer)
+  
+{
+  
+  fprintf(out, "%sTRACK FILE PARAMETERS:\n", spacer);
+
+  if (grid_type == Mdvx::PROJ_FLAT) {
+    fprintf(out, "%s  Gridtype : flat\n", spacer);
+  } else if (grid_type == Mdvx::PROJ_LATLON) {
+    fprintf(out, "%s  Gridtype : latlon\n", spacer);
+  }
+  
+  fprintf(out, "%s  Nweights_forecast : %ld\n", spacer,
+	  (long) nweights_forecast);
+  fprintf(out, "%s  Forecast type : %s\n", spacer,
+	  FORECAST_TYPE_STR((forecast_t) forecast_type).c_str());
+
+  fprintf(out, "%s  Forecast weights :", spacer);
+  for (int i = 0; i < nweights_forecast; i++) {
+    fprintf(out, " %.2f",
+	    forecast_weights[i]);
+  }
+  fprintf(out, "\n");
+  
+  fprintf(out, "%s  Parabolic_growth_period : %g\n", spacer,
+	  parabolic_growth_period);
+  
+  fprintf(out, "%s  Weight_distance : %g\n", spacer,
+	  weight_distance);
+  
+  fprintf(out, "%s  Weight_delta_cube_root_volume : %g\n", spacer,
+	  weight_delta_cube_root_volume);
+  
+  fprintf(out, "%s  Max tracking speed (km/hr) : %g\n", spacer,
+	  max_tracking_speed);
+
+  fprintf(out, "%s  Max delta time (secs) : %ld\n", spacer,
+	  (long) max_delta_time);
+
+  fprintf(out, "%s  Min history for valid forecast (secs) : %ld\n", spacer,
+	  (long) min_history_for_valid_forecast);
+
+  fprintf(out, "%s  Max speed for valid forecast (km/hr) : %g\n", spacer,
+	  max_speed_for_valid_forecast);
+
+  fprintf(out, "%s  Spatial smoothing : %s\n", spacer,
+	  (spatial_smoothing? "TRUE" : "FALSE"));
+
+  fprintf(out, "%s  Use_runs_for_overlaps : %s\n", spacer,
+	  (use_runs_for_overlaps? "TRUE" : "FALSE"));
+
+  fprintf(out, "%s  Scale_forecasts_by_history : %s\n", spacer,
+	  (scale_forecasts_by_history? "TRUE" : "FALSE"));
+  
+  fprintf(out, "%s  Smoothing radius (km) : %g\n", spacer,
+	  smoothing_radius);
+
+  fprintf(out, "%s  Min_fraction_overlap : %g\n", spacer,
+	  min_fraction_overlap);
+
+  fprintf(out, "%s  Min_sum_fraction_overlap : %g\n", spacer,
+	  min_sum_fraction_overlap);
+
+  fprintf(out, "\n");
+
+  return;
+  
+}
+
 ////////////////////////////////////////////////////////////
 // TrackHeader
 

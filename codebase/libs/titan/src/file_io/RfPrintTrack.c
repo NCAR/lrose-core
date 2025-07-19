@@ -39,7 +39,7 @@
 
 #define BOOL_STR(a) (a == FALSE ? "false" : "true")
 
-#define FORECAST_TYPE_STR(a) \
+#define FORECAST_TYPE_STR(a)        \
 (a == FORECAST_BY_TREND ? "trend" : \
  a == FORECAST_BY_PARABOLA ? "parabola" : \
  a == FORECAST_BY_REGRESSION ? "regression" : \
