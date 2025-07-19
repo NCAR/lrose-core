@@ -919,6 +919,7 @@ public:
                               vector<TitanData::TrackEntry> &entry);
     static void convertToLegacy(const vector<TitanData::TrackEntry> &entry,
                                 track_file_entry_t *legacyEntry);
+    void print(FILE *out, const char *spacer, int entry_num);
     
     // data
     
@@ -980,6 +981,8 @@ public:
                               vector<TitanData::TrackScanIndex> &index);
     static void convertToLegacy(const vector<TitanData::TrackScanIndex> &index,
                                 track_file_scan_index_t *legacyIndex);
+    static void print(FILE *out, const char *spacer,
+                      const vector<TrackScanIndex> &indexes);
     
     // data
     
@@ -988,6 +991,16 @@ public:
     int n_entries;
 
   };  // TrackScanIndex
+
+  // print track arrays
+  
+  static void printTrackArrays(FILE *out, const char *spacer,
+                               const TrackHeader &header,
+                               const vector<int> &complex_track_nums,
+                               const vector<int> &nsimples_per_complex,
+                               const vector<int> &simples_per_complex_offsets,
+                               const vector<vector<int> > &simples_per_complex,
+                               const vector<TrackScanIndex> &scan_index);
 
   // print coord grid struct
   

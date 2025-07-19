@@ -2166,6 +2166,39 @@ void TitanData::TrackEntry::convertToLegacy
   }
 }
     
+void TitanData::TrackEntry::print(FILE *out,
+                                  const char *spacer,
+                                  int entry_num)
+     
+{
+
+  char spacer2[128];
+  snprintf(spacer2, 128, "%s  ", spacer);
+  
+  fprintf(out, "%sENTRY NUMBER : %d\n", spacer, entry_num);
+  fprintf(out, "%s  time : %s\n", spacer, utimstr(time));
+  fprintf(out, "%s  time_origin : %s\n", spacer, utimstr(time_origin));
+  fprintf(out, "%s  scan_origin in storm file : %d\n", spacer, scan_origin);
+  fprintf(out, "%s  scan_num in storm file : %d\n", spacer, scan_num);
+  fprintf(out, "%s  storm_num in storm file : %d\n", spacer, storm_num);
+  fprintf(out, "%s  simple_track_num : %d\n", spacer, simple_track_num);
+  fprintf(out, "%s  complex_track_num : %d\n", spacer, complex_track_num);
+  fprintf(out, "%s  history_in_scans : %d\n", spacer, history_in_scans);
+  fprintf(out, "%s  history_in_secs : %d\n", spacer, history_in_secs);
+  fprintf(out, "%s  duration_in_scans : %d\n", spacer, duration_in_scans);
+  fprintf(out, "%s  duration_in_secs : %d\n", spacer, duration_in_secs);
+  fprintf(out, "%s  forecast_valid : %s\n", spacer, BOOL_STR(forecast_valid).c_str());
+  fprintf(out, "%s  prev_entry_offset : %d\n", spacer, prev_entry_offset);
+  fprintf(out, "%s  this_entry_offset : %d\n", spacer, this_entry_offset);
+  fprintf(out, "%s  next_entry_offset : %d\n", spacer, next_entry_offset);
+  fprintf(out, "\n");
+
+  dval_dt.print(out, "  Entry dval_dt", spacer2);
+
+  return;
+  
+}
+
 ////////////////////////////////////////////////////////////
 // index of track in scan
 
@@ -2217,6 +2250,91 @@ void TitanData::TrackScanIndex::convertToLegacy
   }
 }
     
+void TitanData::TrackScanIndex::print(FILE *out, const char *spacer,
+                                      const vector<TrackScanIndex> &indexes)
+
+{
+
+  fprintf(out, "\n");
+  fprintf(out, "%sSCAN_ENTRY_OFFSETS (time, n_entries, offset):\n", spacer);
+  for (size_t ii = 0; ii< indexes.size(); ii++) {
+    fprintf(out, "%s  %s %d %d\n", spacer,
+	    utimstr(indexes[ii].utime),
+	    indexes[ii].n_entries,
+	    indexes[ii].first_entry_offset);
+  }
+  fprintf(out, "\n");
+
+}
+    
+////////////////////////////////////////////////////
+// print track arrays
+
+void TitanData::printTrackArrays(FILE *out, const char *spacer,
+                                 const TrackHeader &header,
+                                 const vector<int> &complex_track_nums,
+                                 const vector<int> &nsimples_per_complex,
+                                 const vector<int> &simples_per_complex_offsets,
+                                 const vector<vector<int> > &simples_per_complex,
+                                 const vector<TrackScanIndex> &scan_index)
+
+{
+
+  fprintf(out, "%sTracking arrays:\n", spacer);
+  fprintf(out, "%s----------------\n\n", spacer);
+  
+  /*
+   * write out complex_track nums
+   */
+
+  fprintf(out, "\n");
+  fprintf(out, "%sCOMPLEX_TRACK_NUMS: ", spacer);
+  for (size_t ii = 0; ii < complex_track_nums.size(); ii++) {
+    fprintf(out, "%d ", complex_track_nums[ii]);
+  }
+  fprintf(out, "\n");
+
+  TrackScanIndex::print(out, spacer, scan_index);
+  
+  fprintf(out, "\n");
+  fprintf(out, "%sSIMPLES_PER_COMPLEX_OFFSETS: ", spacer);
+  for (size_t ii = 0; ii < complex_track_nums.size(); ii++) {
+    int complex_num = complex_track_nums[ii];
+    fprintf(out, "%d ", simples_per_complex_offsets[complex_num]);
+  }
+  fprintf(out, "\n");
+  
+  /*
+   * write out nsimples_per_complex
+   */
+  
+  fprintf(out, "\n");
+  fprintf(out, "%sNSIMPLES_PER_COMPLEX: ", spacer);
+  for (size_t ii = 0; ii < complex_track_nums.size(); ii++) {
+    int complex_num = complex_track_nums[ii];
+    fprintf(out, "%d ", nsimples_per_complex[complex_num]);
+  }
+  fprintf(out, "\n");
+  fprintf(out, "\n");
+  
+  /*
+   * write out nsimples_per_complex
+   */
+  
+  for (size_t icomplex = 0; icomplex < complex_track_nums.size(); icomplex++) {
+    int complex_num = complex_track_nums[icomplex];
+    fprintf(out, "%sSIMPLES_PER_COMPLEX, track %d: ", spacer, complex_num);
+    int nsimples = nsimples_per_complex[complex_num];
+    for (int ii = 0; ii < nsimples; ii++) {
+      fprintf(out, "%d ", simples_per_complex[complex_num][ii]);
+    }
+    fprintf(out, "\n");
+  } /* icomplex */
+
+  fprintf(out, "\n\n");
+
+}
+
 ////////////////////////////////////////////////////
 // printGrid()
 //
