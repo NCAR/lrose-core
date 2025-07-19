@@ -709,6 +709,7 @@ public:
     TrackHeader();
     void setFromLegacy(const track_file_header_t &hdr);
     void convertToLegacy(track_file_header_t &hdr) const;
+    void print(FILE *out, const char *spacer);
 
     // data
     

@@ -1799,6 +1799,62 @@ void TitanData::TrackHeader::convertToLegacy(track_file_header_t &hdr) const
   
 }
 
+void TitanData::TrackHeader::print(FILE *out,
+                                   const char *spacer)
+     
+{
+
+  char spacer2[128];
+  snprintf(spacer2, 128, "%s  ", spacer);
+  
+  params.print(out, spacer);
+
+  fprintf(out, "%sTRACK FILE HEADER :\n", spacer);
+
+  fprintf(out, "%s  Number of simple tracks : %ld\n",
+	  spacer, (long) n_simple_tracks);
+
+  fprintf(out, "%s  Number of complex tracks : %ld\n",
+	  spacer, (long) n_complex_tracks);
+  
+  fprintf(out, "%s  n_samples_for_forecast_stats : %ld\n",
+	  spacer, (long) n_samples_for_forecast_stats);
+
+  fprintf(out, "%s  n_scans : %ld\n",
+	  spacer, (long) n_scans);
+
+  fprintf(out, "%s  last_scan_num : %ld\n",
+	  spacer, (long) last_scan_num);
+
+  fprintf(out, "%s  max_simple_track_num : %ld\n",
+	  spacer, (long) max_simple_track_num);
+
+  fprintf(out, "%s  max_complex_track_num : %ld\n",
+	  spacer, (long) max_complex_track_num);
+
+  fprintf(out, "%s  max_parents : %ld\n", spacer,
+	  (long) max_parents);
+
+  fprintf(out, "%s  max_children : %ld\n", spacer,
+	  (long) max_children);
+
+  fprintf(out, "%s  max_nweights_forecast : %ld\n", spacer,
+	  (long) max_nweights_forecast);
+
+  fprintf(out, "\n");
+  
+  if (verify.verification_performed) {
+    ellipse_verify.print(out, "  Ellipse verify:", spacer2);
+    polygon_verify.print(out, "  Polygon verify:", spacer2);
+    forecast_bias.print(out, "  Forecast bias:", spacer2);
+    forecast_rmse.print(out, "  Forecast bias:", spacer2);
+    verify.print(out, spacer2);
+    fprintf(out, "\n");
+  }
+  
+  return;
+
+}
 ////////////////////////////////////////////////////////////
 // simple track parameters
 
