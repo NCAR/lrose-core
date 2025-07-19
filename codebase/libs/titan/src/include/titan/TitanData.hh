@@ -780,6 +780,7 @@ public:
                               vector<TitanData::SimpleTrackParams> &params);
     static void convertToLegacy(const vector<TitanData::SimpleTrackParams> &params,
                                 simple_track_params_t *legacyParams);
+    void print(FILE *out, const char *spacer);
     
     // data
     
@@ -847,6 +848,7 @@ public:
                               vector<TitanData::ComplexTrackParams> &params);
     static void convertToLegacy(const vector<TitanData::ComplexTrackParams> &params,
                                 complex_track_params_t *legacyParams);
+    void print(FILE *out, const char *spacer);
     
     // data
     

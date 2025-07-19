@@ -1963,6 +1963,73 @@ void TitanData::SimpleTrackParams::convertToLegacy(const vector<TitanData::Simpl
   }
 }
     
+void TitanData::SimpleTrackParams::print(FILE *out,
+                                         const char *spacer)
+     
+{
+
+  fprintf(out, "%sSIMPLE_TRACK_NUM : %ld\n", spacer,
+	  (long) simple_track_num);
+  
+  fprintf(out, "%s  last_descendant_simple_track_num : %ld\n", spacer,
+	  (long) last_descendant_simple_track_num);
+  
+  fprintf(out, "%s  start_scan : %ld\n", spacer, (long) start_scan);
+  fprintf(out, "%s  end_scan : %ld\n", spacer, (long) end_scan);
+  fprintf(out, "%s  last_descendant_end_scan : %ld\n", spacer,
+	  (long) last_descendant_end_scan);
+  fprintf(out, "%s  scan_origin : %ld\n", spacer, (long) scan_origin);
+  
+  fprintf(out, "%s  start_time : %s\n", spacer,
+	  utimstr(start_time));
+  fprintf(out, "%s  end_time : %s\n", spacer,
+	  utimstr(end_time));
+  fprintf(out, "%s  last_descendant_end_time : %s\n", spacer,
+	  utimstr(last_descendant_end_time));
+  fprintf(out, "%s  time_origin : %s\n", spacer,
+	  utimstr(time_origin));
+  
+  fprintf(out, "%s  history_in_scans : %ld\n", spacer,
+	  (long) history_in_scans);
+  fprintf(out, "%s  history_in_secs : %ld\n", spacer,
+	  (long) history_in_secs);
+  fprintf(out, "%s  duration_in_scans : %ld\n", spacer,
+	  (long) duration_in_scans);
+  fprintf(out, "%s  duration_in_secs : %ld\n", spacer,
+	  (long) duration_in_secs);
+  
+  fprintf(out, "%s  nparents : %ld\n", spacer, (long) nparents);
+  fprintf(out, "%s  nchildren : %ld\n", spacer, (long) nchildren);
+  
+  if (nparents > 0) {
+    fprintf(out, "%s  parents :", spacer);  
+    for (int i = 0; i < nparents; i++) {
+      if (i == nparents - 1)
+	fprintf(out, " %ld\n", (long) parent[i]);
+      else
+	fprintf(out, " %ld,", (long) parent[i]);
+    } /* i */
+  } /* if */
+  
+  if (nchildren > 0) {
+    fprintf(out, "%s  children :", spacer);  
+    for (int i = 0; i < nchildren; i++) {
+      if (i == nchildren - 1)
+	fprintf(out, " %ld\n", (long) child[i]);
+      else
+	fprintf(out, " %ld,", (long) child[i]);
+    } /* i */
+  } /* if */
+  
+  fprintf(out, "%s  complex_track_num : %ld\n", spacer,
+	  (long) complex_track_num);
+  fprintf(out, "%s  first_entry_offset : %ld\n", spacer,
+	  (long) first_entry_offset);
+  
+  fprintf(out, "\n");
+
+}
+
 ////////////////////////////////////////////////////////////
 // complex track parameters
 
