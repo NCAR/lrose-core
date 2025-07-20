@@ -575,9 +575,9 @@ void TitanFile::_setUpVars()
   _topLevelVars.sum_hist =
     _getVar(SUM_HIST, NcxxType::nc_INT, _ncFile);
   _topLevelVars.sum_runs =
-    _getVar(SUM_RUNS, NcxxType::nc_INT, _ncFile);
+    _getVar(SUM_RUNS, NcxxType::nc_INT64, _ncFile);
   _topLevelVars.sum_proj_runs =
-    _getVar(SUM_PROJ_RUNS, NcxxType::nc_INT, _ncFile);
+    _getVar(SUM_PROJ_RUNS, NcxxType::nc_INT64, _ncFile);
 
   _topLevelVars.max_simple_track_num =
     _getVar(MAX_SIMPLE_TRACK_NUM, NcxxType::nc_INT, _ncFile);
@@ -597,11 +597,11 @@ void TitanFile::_setUpVars()
   _scanVars.scan_time =
     _getVar(SCAN_TIME, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_gprops_offset =
-    _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_GPROPS_OFFSET, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_first_offset =
-    _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_FIRST_OFFSET, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_last_offset =
-    _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_LAST_OFFSET, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_ht_of_freezing =
     _getVar(SCAN_HT_OF_FREEZING, NcxxType::nc_FLOAT, _scansDim, _scansGroup, KM);
 
@@ -663,15 +663,15 @@ void TitanFile::_setUpVars()
     _getVar(PROJ_CENTRAL_SCALE, NcxxType::nc_FLOAT, _scansDim, _scansGroup);
 
   _scanVars.scan_gprops_offset_0 =
-    _getVar(SCAN_GPROPS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_GPROPS_OFFSET_0, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_layer_offset_0 =
-    _getVar(SCAN_LAYER_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_LAYER_OFFSET_0, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_hist_offset_0 =
-    _getVar(SCAN_HIST_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_HIST_OFFSET_0, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_runs_offset_0 =
-    _getVar(SCAN_RUNS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_RUNS_OFFSET_0, NcxxType::nc_INT64, _scansDim, _scansGroup);
   _scanVars.scan_proj_runs_offset_0 =
-    _getVar(SCAN_PROJ_RUNS_OFFSET_0, NcxxType::nc_INT, _scansDim, _scansGroup);
+    _getVar(SCAN_PROJ_RUNS_OFFSET_0, NcxxType::nc_INT64, _scansDim, _scansGroup);
 
   // add projection attributes
   

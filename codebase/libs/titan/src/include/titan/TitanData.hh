@@ -37,6 +37,7 @@
 #ifndef TitanData_hh
 #define TitanData_hh
 
+#include <cstdint>
 #include <Mdv/Mdvx.hh>
 #include <titan/storm.h>
 #include <titan/track.h>
@@ -178,13 +179,13 @@ public:
 				 * polygon points (pos is
 				 * counterclockwise) */
     
-    si32 check_morphology;	/* check_morphology flag */
+    bool check_morphology;	/* check_morphology flag */
     
-    si32 check_tops;		/* check_tops flag */
+    bool check_tops;		/* check_tops flag */
     
-    si32 vel_available;		/* vel data availability flag */
+    bool vel_available;		/* vel data availability flag */
     
-    si32 n_poly_sides;		/* number of sides in storm shape
+    int32_t n_poly_sides;	/* number of sides in storm shape
 				 * polygons */
     
     fl32 ltg_count_time;        /* number of seconds over which the ltg
@@ -231,8 +232,8 @@ public:
     time_t file_time;    /* filetime - time of last write */
     time_t start_time;   /* start_time - time of first scan */
     time_t end_time;     /* end_time - time of last scan */
-    int n_scans;     /* number of completed scans in file */
-    StormParams params; /* see above */
+    int32_t n_scans;     /* number of completed scans in file */
+    StormParams params;  /* see above */
     
   };
 
@@ -258,17 +259,17 @@ public:
     
     time_t time;
 
-    si64 gprops_offset;		/* file offset for the gprops array */
-    si64 first_offset;		/* offset of first byte for data for
+    int64_t gprops_offset;	/* file offset for the gprops array */
+    int64_t first_offset;	/* offset of first byte for data for
 				 * this scan */
-    si64 last_offset;		/* offset of last byte for data for
+    int64_t last_offset;	/* offset of last byte for data for
 				 * this scan */
     
     fl32 min_z;			/* km - msl ht of lowest layer in storm */
     fl32 delta_z;		/* km - layer thickness */
     
-    int scan_num;
-    int nstorms;
+    int32_t scan_num;
+    int32_t nstorms;
     
     fl32 ht_of_freezing;          /* Height of freezing in km */
 
@@ -300,12 +301,12 @@ public:
 
     // data
     
-    static constexpr int GPROPS_N_POLY_SIDES = 72;
+    static constexpr int32_t GPROPS_N_POLY_SIDES = 72;
     
-    si64 layer_props_offset;	/* posn in file of layer props data */
-    si64 dbz_hist_offset;	/* posn in file of dbz hist data */
-    si64 runs_offset;		/* posn in file of runs data */
-    si64 proj_runs_offset;	/* posn in file of proj area runs data */
+    int64_t layer_props_offset;	/* posn in file of layer props data */
+    int64_t dbz_hist_offset;	/* posn in file of dbz hist data */
+    int64_t runs_offset;	/* posn in file of runs data */
+    int64_t proj_runs_offset;	/* posn in file of proj area runs data */
 
     fl32 vol_centroid_x;	/* (km or deg) (NOTE 3) */
     fl32 vol_centroid_y;	/* (km or deg) (NOTE 3) */
@@ -360,42 +361,42 @@ public:
                                                   * centroid to the polygon
                                                   * vertices (NOTE 3) */
 
-    si32 storm_num;
+    int32_t storm_num;
 
-    si32 n_layers;		/* the number of layers in this storm */
+    int32_t n_layers;		/* the number of layers in this storm */
 
-    si32 base_layer;		/* the layer number of the storm base */
+    int32_t base_layer;		/* the layer number of the storm base */
 
-    si32 n_dbz_intervals;		/* the number of intervals in the
-                                         * dbz distribution histograms */
+    int32_t n_dbz_intervals;	/* the number of intervals in the
+                                 * dbz distribution histograms */
 
-    si32 n_runs;			/* number of runs above threshold for
-                                         * this storm */
+    int64_t n_runs;		/* number of runs above threshold for
+                                 * this storm */
 
-    si32 n_proj_runs;		/* number of runs in the projected area
+    int64_t n_proj_runs;	/* number of runs in the projected area
 				 * for this storm */
 
-    si32 top_missing;		/* flag to indicate that top of storm was
+    bool top_missing;		/* flag to indicate that top of storm was
 				 * not sampled: set to 1 of top missing,
 				 * 0 otherwise */
 
-    si32 range_limited;		/* flag to indicate that storm was not
+    bool range_limited;		/* flag to indicate that storm was not
 				 * fully sampled because of range limitations:
 				 * set to 1 of range-limited,
 				 * 0 otherwise */
 
-    si32 second_trip;		/* flag to indicate that storm is probably
+    bool second_trip;		/* flag to indicate that storm is probably
 				 * second trip */
 
-    si32 hail_present;		/* flag to indicate dBZ values above the
+    bool hail_present;		/* flag to indicate dBZ values above the
 				 * hail threshold */
 
-    si32 anom_prop;               /* flag to indicate anomalous propagation */
-
-    si32 bounding_min_ix;         /* proj_area (x,y) bounding box */
-    si32 bounding_min_iy;         /* in grid coords */
-    si32 bounding_max_ix;
-    si32 bounding_max_iy;
+    bool anom_prop;               /* flag to indicate anomalous propagation */
+    
+    int32_t bounding_min_ix;         /* proj_area (x,y) bounding box */
+    int32_t bounding_min_iy;         /* in grid coords */
+    int32_t bounding_max_ix;
+    int32_t bounding_max_iy;
   
     fl32 vil_from_maxz;
     fl32 ltg_count;               /* ltg strike count in x minutes before storm
@@ -405,7 +406,7 @@ public:
 
     // hail metrics
     
-    si32 FOKRcategory;            /*  category 0-4 */
+    int32_t FOKRcategory;            /*  category 0-4 */
     fl32 waldvogelProbability;    /* 0 <= probability <= 1.0 */
     fl32 hailMassAloft;           /* ktons */
     fl32 vihm;                    /* kg/m2 (from maxz) */
@@ -506,10 +507,10 @@ public:
 
     // data
     
-    si32 run_ix;
-    si32 run_iy;
-    si32 run_iz;
-    si32 run_len;
+    int32_t run_ix;
+    int32_t run_iy;
+    int32_t run_iz;
+    int32_t run_len;
     
   };  // StormRun
 
@@ -570,18 +571,18 @@ public:
                                          * verification has been performed,
                                          * 0 if false */
 
-    int forecast_lead_time;	/* lead time for forecast 
+    int32_t forecast_lead_time;	/* lead time for forecast 
 				 * verification (secs) */
 
-    int forecast_lead_time_margin; /* the accuracy with which the forecast
-                                    * time is used (secs). For a scan to
-                                    * be used, its time must fall within
-                                    * this margin of the forecast time */
+    int32_t forecast_lead_time_margin; /* the accuracy with which the forecast
+                                        * time is used (secs). For a scan to
+                                        * be used, its time must fall within
+                                        * this margin of the forecast time */
 
-    int forecast_min_history;	/* min history for valid forecasts -
-				 * (secs) - when track duration is less
-				 * than this, forecast is not
-				 * considered valid */
+    int32_t forecast_min_history;	/* min history for valid forecasts -
+                                         * (secs) - when track duration is less
+                                         * than this, forecast is not
+                                         * considered valid */
 
     bool verify_before_forecast_time; /* include in the analysis those
                                        * scans in a track which have
@@ -614,9 +615,9 @@ public:
 
     // data
     
-    int n_success;
-    int n_failure;
-    int n_false_alarm;
+    fl32 n_success;
+    fl32 n_failure;
+    fl32 n_false_alarm;
 
   }; // TrackContingency
 
@@ -636,10 +637,10 @@ public:
     
     // data
     
-    static constexpr int MAX_NWEIGHTS_FCAST = 10;
-    static constexpr int N_MOVEMENT_PROPS_FCAST = 5;
-    static constexpr int N_GROWTH_PROPS_FCAST = 5;
-    static constexpr int N_TOTAL_PROPS_FCAST = 14;
+    static constexpr int32_t MAX_NWEIGHTS_FCAST = 10;
+    static constexpr int32_t N_MOVEMENT_PROPS_FCAST = 5;
+    static constexpr int32_t N_GROWTH_PROPS_FCAST = 5;
+    static constexpr int32_t N_TOTAL_PROPS_FCAST = 14;
     
     fl32 forecast_weights[MAX_NWEIGHTS_FCAST];
   
@@ -680,18 +681,18 @@ public:
     bool use_runs_for_overlaps;   /* flag for using runs to find the overlaps
                                    * for mergers and splits */
 
-    int grid_type;		/* TITAN_PROJ_FLAT or TITAN_PROJ_LATLON */
+    int32_t grid_type;		/* TITAN_PROJ_FLAT or TITAN_PROJ_LATLON */
 
-    int nweights_forecast;	/* number of weighted points to be used in
+    int32_t nweights_forecast;	/* number of weighted points to be used in
 				 * the forecast data */
   
-    int forecast_type;		/* FORECAST_BY_TREND,
+    int32_t forecast_type;	/* FORECAST_BY_TREND,
 				 * FORECAST_BY_PARABOLA, or
 				 * FORECAST_BY_REGRESSION */
 
-    int max_delta_time;		/* secs */
+    int32_t max_delta_time;		/* secs */
 
-    int min_history_for_valid_forecast; /* secs */
+    int32_t min_history_for_valid_forecast; /* secs */
 
     bool spatial_smoothing;	/* TRUE or FALSE */
     
@@ -717,30 +718,30 @@ public:
 				 * modification, 1 when modification is
 				 * successfully complete */
     
-    int modify_code;		/* a unique code inserted when file
+    int32_t modify_code;	/* a unique code inserted when file
 				 * modification begins  - used for 
 				 * restarting tracking after program
 				 * is stopped for any reason */
 
-    int n_simple_tracks;	/* number of simple tracks in file */
-    int n_complex_tracks;	/* number of complex tracks in file */
+    int32_t n_simple_tracks;	/* number of simple tracks in file */
+    int32_t n_complex_tracks;	/* number of complex tracks in file */
 
-    int n_samples_for_forecast_stats;
+    int32_t n_samples_for_forecast_stats;
 
-    int n_scans;			/* the number of scans in the file */
+    int32_t n_scans;			/* the number of scans in the file */
 
-    int last_scan_num;		/* the number of the last scan
-				 * in the file = n_scans - 1 */
+    int32_t last_scan_num;		/* the number of the last scan
+                                         * in the file = n_scans - 1 */
 
-    int max_simple_track_num;	/* the highest simple track num in
-				 * the file */
+    int32_t max_simple_track_num;	/* the highest simple track num in
+                                         * the file */
 
-    int max_complex_track_num;	/* the highest complex track num in
-				 * the file */
+    int32_t max_complex_track_num;	/* the highest complex track num in
+                                         * the file */
 
-    int max_parents;
-    int max_children;
-    int max_nweights_forecast;
+    int32_t max_parents;
+    int32_t max_children;
+    int32_t max_nweights_forecast;
 
     TrackingParams params;	/* see above */
 
@@ -784,8 +785,8 @@ public:
     
     // data
     
-    static constexpr int MAX_PARENTS_ = 8;
-    static constexpr int MAX_CHILDREN_ = 8;
+    static constexpr int32_t MAX_PARENTS_ = 8;
+    static constexpr int32_t MAX_CHILDREN_ = 8;
     
     time_t start_time;		/* for the simple track only */
     time_t end_time;		/* for the simple track only */
@@ -796,39 +797,39 @@ public:
     time_t time_origin;		/* time for first storm in any branch which
 				 * led to this entry */
 
-    int first_entry_offset;	/* file offset of first track entry struct */
+    int64_t first_entry_offset;	/* file offset of first track entry struct */
 
-    int simple_track_num;
-    int complex_track_num;	/* number of track complex if track is part
+    int32_t simple_track_num;
+    int32_t complex_track_num;	/* number of track complex if track is part
 				 * of a complex */
 
-    int last_descendant_simple_track_num; /* simple track num of last
-                                           * descendant of this storm */
+    int32_t last_descendant_simple_track_num; /* simple track num of last
+                                               * descendant of this storm */
 
-    int start_scan;
-    int end_scan;
-    int last_descendant_end_scan; /* end scan of last descendant
-                                   * of this storm */
+    int32_t start_scan;
+    int32_t end_scan;
+    int32_t last_descendant_end_scan; /* end scan of last descendant
+                                       * of this storm */
 
-    int scan_origin;		/* scan for first storm in any branch which
-				 * led to this simple track */
+    int32_t scan_origin;		/* scan for first storm in any branch which
+                                         * led to this simple track */
 
-    int history_in_scans;	/* number of scans of history data for
+    int32_t history_in_scans;	/* number of scans of history data for
 				 * making forecast - in the case of a merger
 				 * or a split, this will be longer than the
 				 * duration in scans */
 
-    int history_in_secs;       /* time in secs since the start of the
-                                 * earliest branch of this storm */
+    int32_t history_in_secs;       /* time in secs since the start of the
+                                    * earliest branch of this storm */
     
-    int duration_in_scans;	/* duration of this simple track */
-    int duration_in_secs;	/* duration of this simple track */
+    int32_t duration_in_scans;	/* duration of this simple track */
+    int32_t duration_in_secs;	/* duration of this simple track */
 
-    int nparents;
-    int nchildren;
+    int32_t nparents;
+    int32_t nchildren;
     
-    int parent[MAX_PARENTS_]; /* track numbers of parents */
-    int child[MAX_CHILDREN_];   /* track numbers of children */
+    int32_t parent[MAX_PARENTS_]; /* track numbers of parents */
+    int32_t child[MAX_CHILDREN_];   /* track numbers of children */
     
   };  // SimpleTrackParams
 
@@ -849,7 +850,7 @@ public:
     static void convertToLegacy(const vector<TitanData::ComplexTrackParams> &params,
                                 complex_track_params_t *legacyParams);
     void print(FILE *out, const char *spacer,
-               int verification_performed,
+               bool verification_performed,
                const vector<int> &simples_per_complex);
      
     
@@ -858,16 +859,16 @@ public:
     time_t start_time;
     time_t end_time;
     
-    int complex_track_num;
+    int32_t complex_track_num;
 
-    int n_simple_tracks; /* number of simple tracks in this
-                          * complex track */
+    int32_t n_simple_tracks; /* number of simple tracks in this
+                              * complex track */
 
-    int start_scan;
-    int end_scan;
+    int32_t start_scan;
+    int32_t end_scan;
 
-    int duration_in_scans;
-    int duration_in_secs;
+    int32_t duration_in_scans;
+    int32_t duration_in_secs;
 
     fl32 volume_at_start_of_sampling; /* km3 */
     fl32 volume_at_end_of_sampling;   /* km3 */
@@ -881,11 +882,11 @@ public:
      * d) storm existed when sampling ended - end volume stored
      */
 
-    int n_top_missing;
-    int n_range_limited;
-    int start_missing;
-    int end_missing;
-    int n_samples_for_forecast_stats;
+    int32_t n_top_missing;
+    int32_t n_range_limited;
+    int32_t start_missing;
+    int32_t end_missing;
+    int32_t n_samples_for_forecast_stats;
 
     TrackContingency ellipse_verify; /* contingency table data for
                                       * forecast verification 
@@ -927,36 +928,36 @@ public:
     time_t time_origin;		/* time for first storm in any branch which
 				 * led to this entry */
 
-    int prev_entry_offset;	/* track file offset to previous entry in
+    int64_t prev_entry_offset;	/* track file offset to previous entry in
 				 * in track - doubly linked list */
 
-    int this_entry_offset;	/* track file offset to this entry */
+    int64_t this_entry_offset;	/* track file offset to this entry */
 
-    int next_entry_offset;	/* track file offset to next entry in
+    int64_t next_entry_offset;	/* track file offset to next entry in
 				 * track - doubly linked list */
 
-    int next_scan_entry_offset;	/* offset to next entry in this scan */
+    int64_t next_scan_entry_offset;	/* offset to next entry in this scan */
 
-    int scan_origin;		/* scan for first storm in any branch which
-				 * led to this entry */
+    int32_t scan_origin;		/* scan for first storm in any branch which
+                                         * led to this entry */
 
-    int scan_num;		/* scan number in storm file */
-    int storm_num;		/* storm number in scan */
+    int32_t scan_num;		/* scan number in storm file */
+    int32_t storm_num;		/* storm number in scan */
 
-    int simple_track_num;	/* simple track number - should match the
+    int32_t simple_track_num;	/* simple track number - should match the
 				 * number in the simple_params struct */
-    int complex_track_num;
+    int32_t complex_track_num;
 
-    int history_in_scans;	/* number of scans of history data for
+    int32_t history_in_scans;	/* number of scans of history data for
 				 * making forecast - in the case of a merger
 				 * or a split, this will be longer than the
 				 * duration in scans */
 
-    int history_in_secs;		/* time in secs since the start of the
+    int32_t history_in_secs;		/* time in secs since the start of the
                                          * earliest branch of this storm */
 
-    int duration_in_scans;	/* duration of the simple track */
-    int duration_in_secs;	/* duration of the simple track */
+    int32_t duration_in_scans;	/* duration of the simple track */
+    int32_t duration_in_secs;	/* duration of the simple track */
 
     bool forecast_valid;	/* flag to indicate if the forecast is
                                  * valid */
@@ -987,8 +988,8 @@ public:
     // data
     
     time_t utime;
-    int first_entry_offset;
-    int n_entries;
+    int64_t first_entry_offset;
+    int32_t n_entries;
 
   };  // TrackScanIndex
 

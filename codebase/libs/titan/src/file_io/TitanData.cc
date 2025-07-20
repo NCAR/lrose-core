@@ -796,8 +796,8 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  number of layers                : %d\n", spacer, n_layers);
   fprintf(out, "%s  base layer number               : %d\n", spacer, base_layer);
   fprintf(out, "%s  number of dbz intervals         : %d\n", spacer, n_dbz_intervals);
-  fprintf(out, "%s  number of runs                  : %d\n", spacer, n_runs);
-  fprintf(out, "%s  number of proj runs             : %d\n", spacer, n_proj_runs);
+  fprintf(out, "%s  number of runs                  : %ld\n", spacer, n_runs);
+  fprintf(out, "%s  number of proj runs             : %ld\n", spacer, n_proj_runs);
   
   fprintf(out, "%s  range_limited                   : %d\n", spacer, range_limited);
   fprintf(out, "%s  top_missing                     : %d\n", spacer, top_missing);
@@ -1503,9 +1503,9 @@ void TitanData::TrackContingency::print(FILE *out,
 
   fprintf(out, "\n%s%s\n\n", spacer, label);
   
-  fprintf(out, "  %sn_success : %d\n", spacer, n_success);
-  fprintf(out, "  %sn_failure : %d\n", spacer,n_failure);
-  fprintf(out, "  %sn_false_alarm : %d\n", spacer, n_false_alarm);
+  fprintf(out, "  %sn_success : %g\n", spacer, n_success);
+  fprintf(out, "  %sn_failure : %g\n", spacer,n_failure);
+  fprintf(out, "  %sn_false_alarm : %g\n", spacer, n_false_alarm);
 
   double denom = n_success + n_failure;
 
@@ -1917,7 +1917,7 @@ void TitanData::SimpleTrackParams::print(FILE *out,
   } /* if */
   
   fprintf(out, "%s  complex_track_num : %d\n", spacer, complex_track_num);
-  fprintf(out, "%s  first_entry_offset : %d\n", spacer, first_entry_offset);
+  fprintf(out, "%s  first_entry_offset : %ld\n", spacer, first_entry_offset);
   fprintf(out, "\n");
 
 }
@@ -2021,7 +2021,7 @@ void TitanData::ComplexTrackParams::convertToLegacy
     
 void TitanData::ComplexTrackParams::print(FILE *out,
                                           const char *spacer,
-                                          int verification_performed,
+                                          bool verification_performed,
                                           const vector<int> &simples_per_complex)
      
 {
@@ -2188,9 +2188,9 @@ void TitanData::TrackEntry::print(FILE *out,
   fprintf(out, "%s  duration_in_scans : %d\n", spacer, duration_in_scans);
   fprintf(out, "%s  duration_in_secs : %d\n", spacer, duration_in_secs);
   fprintf(out, "%s  forecast_valid : %s\n", spacer, BOOL_STR(forecast_valid).c_str());
-  fprintf(out, "%s  prev_entry_offset : %d\n", spacer, prev_entry_offset);
-  fprintf(out, "%s  this_entry_offset : %d\n", spacer, this_entry_offset);
-  fprintf(out, "%s  next_entry_offset : %d\n", spacer, next_entry_offset);
+  fprintf(out, "%s  prev_entry_offset : %ld\n", spacer, prev_entry_offset);
+  fprintf(out, "%s  this_entry_offset : %ld\n", spacer, this_entry_offset);
+  fprintf(out, "%s  next_entry_offset : %ld\n", spacer, next_entry_offset);
   fprintf(out, "\n");
 
   dval_dt.print(out, "  Entry dval_dt", spacer2);
@@ -2258,7 +2258,7 @@ void TitanData::TrackScanIndex::print(FILE *out, const char *spacer,
   fprintf(out, "\n");
   fprintf(out, "%sSCAN_ENTRY_OFFSETS (time, n_entries, offset):\n", spacer);
   for (size_t ii = 0; ii< indexes.size(); ii++) {
-    fprintf(out, "%s  %s %d %d\n", spacer,
+    fprintf(out, "%s  %s %d %ld\n", spacer,
 	    utimstr(indexes[ii].utime),
 	    indexes[ii].n_entries,
 	    indexes[ii].first_entry_offset);

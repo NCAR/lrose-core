@@ -969,8 +969,8 @@ protected:
   int _sumStorms;
   int _sumLayers;
   int _sumHist;
-  int _sumRuns;
-  int _sumProjRuns;
+  int64_t _sumRuns;
+  int64_t _sumProjRuns;
 
   // storm data
 
@@ -994,8 +994,8 @@ protected:
   int _max_storms;
   int _max_layers;
   int _max_hist;
-  int _max_runs;
-  int _max_proj_runs;
+  int64_t _max_runs;
+  int64_t _max_proj_runs;
 
   bool _first_entry;  // set to TRUE if first entry of a track
   
