@@ -63,7 +63,7 @@ TitanFile::TitanFile()
 
   // storms
   
-  MEM_zero(_storm_header);
+  // MEM_zero(_storm_header);
   MEM_zero(_scan);
   _gprops = nullptr;
   _lprops = nullptr;
@@ -1755,7 +1755,7 @@ int TitanFile::unlockFile()
 
 //////////////////////////////////////////////////////////////
 //
-// reads in the storm_file_header_t structure from a storm
+// reads in the TitanData::StormHeader object from a storm
 // properties file.
 //
 // returns 0 on success, -1 on failure
@@ -1771,7 +1771,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
       _errStr = _sFile.getErrStr();
       return -1;
     }
-    _storm_header = _sFile.header();
+    _storm_header.setFromLegacy(_sFile.header());
     _nScans = _storm_header.n_scans;
     return 0;
   }
@@ -1800,7 +1800,7 @@ int TitanFile::readStormHeader(bool clear_error_str /* = true*/ )
 
   // storm params
   
-  storm_file_params_t &sparams = _storm_header.params;
+  TitanData::StormParams &sparams = _storm_header.params;
   _sparamsVars.low_dbz_threshold.getVal(&sparams.low_dbz_threshold);
   _sparamsVars.high_dbz_threshold.getVal(&sparams.high_dbz_threshold);
   _sparamsVars.dbz_hist_interval.getVal(&sparams.dbz_hist_interval);
@@ -1903,7 +1903,7 @@ int TitanFile::readProjRuns(int storm_num)
 // Read the auxiliary storm properties:
 //   layers, dbz histograms, runs and proj_runs
 //
-// Space for the arrays of structures is allocated as required.
+// Space for the arrays of objects is allocated as required.
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
@@ -2193,25 +2193,25 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
       gp.convectivity_median = fval;
     }
 
-    if (_storm_header.params.gprops_union_type == UNION_HAIL) {
+    // if (_storm_header.params.gprops_union_type == UNION_HAIL) {
       
-      _gpropsVars.hail_FOKRcategory.getVal
-        (stormIndex, &gp.add_on.hail_metrics.FOKRcategory);
-      _gpropsVars.hail_waldvogelProbability.getVal
-        (stormIndex, &gp.add_on.hail_metrics.waldvogelProbability);
-      _gpropsVars.hail_hailMassAloft.getVal
-        (stormIndex, &gp.add_on.hail_metrics.hailMassAloft);
-      _gpropsVars.hail_vihm.getVal
-        (stormIndex, &gp.add_on.hail_metrics.vihm);
-
-    } else if (_storm_header.params.gprops_union_type == UNION_NEXRAD_HDA) {
+    _gpropsVars.hail_FOKRcategory.getVal
+      (stormIndex, &gp.add_on.hail_metrics.FOKRcategory);
+    _gpropsVars.hail_waldvogelProbability.getVal
+      (stormIndex, &gp.add_on.hail_metrics.waldvogelProbability);
+    _gpropsVars.hail_hailMassAloft.getVal
+      (stormIndex, &gp.add_on.hail_metrics.hailMassAloft);
+    _gpropsVars.hail_vihm.getVal
+      (stormIndex, &gp.add_on.hail_metrics.vihm);
+    
+    // } else if (_storm_header.params.gprops_union_type == UNION_NEXRAD_HDA) {
       
-      _gpropsVars.hail_poh.getVal(stormIndex, &gp.add_on.hda.poh);
-      _gpropsVars.hail_shi.getVal(stormIndex, &gp.add_on.hda.shi);
-      _gpropsVars.hail_posh.getVal(stormIndex, &gp.add_on.hda.posh);
-      _gpropsVars.hail_mehs.getVal(stormIndex, &gp.add_on.hda.mehs);
-      
-    }
+    _gpropsVars.hail_poh.getVal(stormIndex, &gp.add_on.hda.poh);
+    _gpropsVars.hail_shi.getVal(stormIndex, &gp.add_on.hda.shi);
+    _gpropsVars.hail_posh.getVal(stormIndex, &gp.add_on.hda.posh);
+    _gpropsVars.hail_mehs.getVal(stormIndex, &gp.add_on.hda.mehs);
+    
+    // }
 
     // polygons are 2D variables
     
@@ -2273,7 +2273,7 @@ int TitanFile::seekStormStartData()
 
 //////////////////////////////////////////////////////////////
 //
-// write the storm_file_header_t structure to a storm file.
+// write the TitanData::StormHeader object to a storm file.
 //
 // NOTE: should be called after writeSecProps() and writeScan(),
 // so that appropriate n_scans can be determined.
@@ -2282,7 +2282,7 @@ int TitanFile::seekStormStartData()
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
+int TitanFile::writeStormHeader(const TitanData::StormHeader &storm_file_header)
      
 {
 
@@ -2294,7 +2294,9 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_sFile.WriteHeader(storm_file_header)) {
+    storm_file_header_t legacyHdr;
+    storm_file_header.convertToLegacy(legacyHdr);
+    if (_sFile.WriteHeader(legacyHdr)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
@@ -2321,7 +2323,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
   _topLevelVars.sum_runs.putVal(_sumRuns);
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);
 
-  const storm_file_params_t &sparams(_storm_header.params);
+  const TitanData::StormParams &sparams(_storm_header.params);
   
   _sparamsVars.low_dbz_threshold.putVal(sparams.low_dbz_threshold);
   _sparamsVars.high_dbz_threshold.putVal(sparams.high_dbz_threshold);
@@ -2376,7 +2378,7 @@ int TitanFile::writeStormHeader(const storm_file_header_t &storm_file_header)
 //
 //////////////////////////////////////////////////////////////
 
-int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
+int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
                               const storm_file_scan_header_t &scanHeader,
                               const storm_file_global_props_t *gprops)
   
@@ -2466,7 +2468,7 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
 
   // write storm global props
   
-  const storm_file_params_t &sparams(_storm_header.params);
+  const TitanData::StormParams &sparams(_storm_header.params);
 
   for (int istorm = 0; istorm < _scan.nstorms; istorm++) {
 
@@ -2545,25 +2547,25 @@ int TitanFile::writeStormScan(const storm_file_header_t &storm_file_header,
       _gpropsVars.convectivity_median.putVal(stormIndex, gp.convectivity_median);
     }
 
-    if (sparams.gprops_union_type == UNION_HAIL) {
+    // if (sparams.gprops_union_type == UNION_HAIL) {
       
-      _gpropsVars.hail_FOKRcategory.putVal
-        (stormIndex, gp.add_on.hail_metrics.FOKRcategory);
-      _gpropsVars.hail_waldvogelProbability.putVal
-        (stormIndex, gp.add_on.hail_metrics.waldvogelProbability);
-      _gpropsVars.hail_hailMassAloft.putVal
-        (stormIndex, gp.add_on.hail_metrics.hailMassAloft);
-      _gpropsVars.hail_vihm.putVal
-        (stormIndex, gp.add_on.hail_metrics.vihm);
+    _gpropsVars.hail_FOKRcategory.putVal
+      (stormIndex, gp.add_on.hail_metrics.FOKRcategory);
+    _gpropsVars.hail_waldvogelProbability.putVal
+      (stormIndex, gp.add_on.hail_metrics.waldvogelProbability);
+    _gpropsVars.hail_hailMassAloft.putVal
+      (stormIndex, gp.add_on.hail_metrics.hailMassAloft);
+    _gpropsVars.hail_vihm.putVal
+      (stormIndex, gp.add_on.hail_metrics.vihm);
+    
+    // } else if (sparams.gprops_union_type == UNION_NEXRAD_HDA) {
       
-    } else if (sparams.gprops_union_type == UNION_NEXRAD_HDA) {
-      
-      _gpropsVars.hail_poh.putVal(stormIndex, gp.add_on.hda.poh);
-      _gpropsVars.hail_shi.putVal(stormIndex, gp.add_on.hda.shi);
-      _gpropsVars.hail_posh.putVal(stormIndex, gp.add_on.hda.posh);
-      _gpropsVars.hail_mehs.putVal(stormIndex, gp.add_on.hda.mehs);
-      
-    }
+    _gpropsVars.hail_poh.putVal(stormIndex, gp.add_on.hda.poh);
+    _gpropsVars.hail_shi.putVal(stormIndex, gp.add_on.hda.shi);
+    _gpropsVars.hail_posh.putVal(stormIndex, gp.add_on.hda.posh);
+    _gpropsVars.hail_mehs.putVal(stormIndex, gp.add_on.hda.mehs);
+    
+    // }
 
     // polygons are 2D variables
     
@@ -2805,7 +2807,7 @@ void TitanFile::_addProjectionFlagAttributes()
 //////////////////////////////////////////////////////////////
 
 int TitanFile::writeStormAux(int storm_num,
-                             const storm_file_header_t &storm_file_header,
+                             const TitanData::StormHeader &storm_file_header,
                              const storm_file_scan_header_t &sheader,
                              const storm_file_global_props_t *gprops,
                              const storm_file_layer_props_t *lprops,
@@ -2817,7 +2819,7 @@ int TitanFile::writeStormAux(int storm_num,
 
   // save state
 
-  const storm_file_params_t &sparams(storm_file_header.params);
+  const TitanData::StormParams sparams(storm_file_header.params);
   const storm_file_global_props_t &gp = gprops[storm_num];
 
   int nLayers = gp.n_layers;
@@ -3425,7 +3427,7 @@ void TitanFile::freeTracksAll()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// Read in the track_file_header_t structure from a track file.
+// Read in the track_file_header_t object from a track file.
 // Read in associated arrays.
 //
 // returns 0 on success, -1 on failure
@@ -4522,7 +4524,7 @@ int TitanFile::seekTrackStartData()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// write the track_file_header_t structure to a track data file
+// write the track_file_header_t object to a track data file
 //
 // returns 0 on success, -1 on failure
 //

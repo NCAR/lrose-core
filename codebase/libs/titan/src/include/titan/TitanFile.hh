@@ -39,6 +39,7 @@
 #include <string>
 #include <cstdint>
 
+#include <titan/TitanData.hh>
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
 #include <titan/track.h>
@@ -476,8 +477,8 @@ public:
 
   // storm data access
 
-  const storm_file_header_t &storm_header() const { return _storm_header; }
-  const storm_file_params_t &storm_params() const { return _storm_header.params; }
+  const TitanData::StormHeader &storm_header() const { return _storm_header; }
+  const TitanData::StormParams &storm_params() const { return _storm_header.params; }
   const storm_file_scan_header_t &scan() const { return _scan; }
   const storm_file_global_props_t *gprops() const { return _gprops; }
   const storm_file_layer_props_t *lprops() const { return _lprops; }
@@ -618,14 +619,14 @@ public:
 
   int seekStormStartData();
   
-  // write the storm_file_header_t structure to a storm file.
+  // write the TitanData::StormHeader structure to a storm file.
   //
   // NOTE: should be called after writeSecProps() and writeScan(),
   // so that appropriate n_scans can be determined.
   //
   // returns 0 on success, -1 on failure
   
-  int writeStormHeader(const storm_file_header_t &storm_file_header);
+  int writeStormHeader(const TitanData::StormHeader &storm_file_header);
   
   // write scan header and storm global properties
   // for a particular scan.
@@ -635,7 +636,7 @@ public:
   //
   // returns 0 on success, -1 on failure
   
-  int writeStormScan(const storm_file_header_t &storm_file_header,
+  int writeStormScan(const TitanData::StormHeader &storm_file_header,
                      const storm_file_scan_header_t &sheader,
                      const storm_file_global_props_t *gprops);
   
@@ -651,7 +652,7 @@ public:
   // returns 0 on success, -1 on failure
 
   int writeStormAux(int storm_num,
-                    const storm_file_header_t &storm_file_header,
+                    const TitanData::StormHeader &storm_file_header,
                     const storm_file_scan_header_t &sheader,
                     const storm_file_global_props_t *gprops,
                     const storm_file_layer_props_t *lprops,
@@ -974,7 +975,7 @@ protected:
 
   // storm data
 
-  storm_file_header_t _storm_header;
+  TitanData::StormHeader _storm_header;
   storm_file_scan_header_t _scan;
   storm_file_global_props_t *_gprops;
   storm_file_layer_props_t *_lprops;

@@ -179,11 +179,11 @@ public:
 				 * polygon points (pos is
 				 * counterclockwise) */
     
-    bool check_morphology;	/* check_morphology flag */
+    int32_t check_morphology;	/* check_morphology flag */
     
-    bool check_tops;		/* check_tops flag */
+    int32_t check_tops;		/* check_tops flag */
     
-    bool vel_available;		/* vel data availability flag */
+    int32_t vel_available;		/* vel data availability flag */
     
     int32_t n_poly_sides;	/* number of sides in storm shape
 				 * polygons */
@@ -201,6 +201,8 @@ public:
     fl32 hail_mass_dbz_threshold; /* dbz - threshold above which
                                    * hail mass is calculated */
     
+    int32_t gprops_union_type;  /* interpretation of add_on union in gprops */
+
     fl32 tops_dbz_threshold;	/* dbz threshold for computing storm tops */
     
     fl32 precip_plane_ht;  /* CAPPI ht for which precip is computed (km MSL)
@@ -376,22 +378,22 @@ public:
     int64_t n_proj_runs;	/* number of runs in the projected area
 				 * for this storm */
 
-    bool top_missing;		/* flag to indicate that top of storm was
-				 * not sampled: set to 1 of top missing,
-				 * 0 otherwise */
+    int32_t top_missing;		/* flag to indicate that top of storm was
+                                         * not sampled: set to 1 of top missing,
+                                         * 0 otherwise */
 
-    bool range_limited;		/* flag to indicate that storm was not
-				 * fully sampled because of range limitations:
-				 * set to 1 of range-limited,
-				 * 0 otherwise */
+    int32_t range_limited;		/* flag to indicate that storm was not
+                                         * fully sampled because of range limitations:
+                                         * set to 1 of range-limited,
+                                         * 0 otherwise */
 
-    bool second_trip;		/* flag to indicate that storm is probably
-				 * second trip */
+    int32_t second_trip;		/* flag to indicate that storm is probably
+                                         * second trip */
 
-    bool hail_present;		/* flag to indicate dBZ values above the
-				 * hail threshold */
+    int32_t hail_present;		/* flag to indicate dBZ values above the
+                                         * hail threshold */
 
-    bool anom_prop;               /* flag to indicate anomalous propagation */
+    int32_t anom_prop;               /* flag to indicate anomalous propagation */
     
     int32_t bounding_min_ix;         /* proj_area (x,y) bounding box */
     int32_t bounding_min_iy;         /* in grid coords */
@@ -567,7 +569,7 @@ public:
     time_t end_time;		/* last scan time for which verification
 				 * has been performed */
     
-    bool verification_performed;	/* set to 1 if true, i.e. if
+    int32_t verification_performed;	/* set to 1 if true, i.e. if
                                          * verification has been performed,
                                          * 0 if false */
 
@@ -584,15 +586,15 @@ public:
                                          * than this, forecast is not
                                          * considered valid */
 
-    bool verify_before_forecast_time; /* include in the analysis those
-                                       * scans in a track which have
-                                       * a duration less than the 
-                                       * forecast lead time - the
-                                       * default should be false */
+    int32_t verify_before_forecast_time; /* include in the analysis those
+                                          * scans in a track which have
+                                          * a duration less than the 
+                                          * forecast lead time - the
+                                          * default should be false */
 
-    bool verify_after_track_dies; /* include in the analysis those
-                                   * scans after a track has died -
-                                   * the default should be true */
+    int32_t verify_after_track_dies; /* include in the analysis those
+                                      * scans after a track has died -
+                                      * the default should be true */
   
     Mdvx::coord_t grid;          /* describes the cartesian grid
                                   * used for verification */
@@ -674,12 +676,12 @@ public:
                                     * storm area at time1 and time2. This is
                                     * the min sum for a valid match */
 
-    bool scale_forecasts_by_history;  /* flag for scaling the forecasts
-                                       * based on the ratio of the history
-                                       * to min_history_for_valid_forecast */
+    int32_t scale_forecasts_by_history;  /* flag for scaling the forecasts
+                                          * based on the ratio of the history
+                                          * to min_history_for_valid_forecast */
 
-    bool use_runs_for_overlaps;   /* flag for using runs to find the overlaps
-                                   * for mergers and splits */
+    int32_t use_runs_for_overlaps;   /* flag for using runs to find the overlaps
+                                      * for mergers and splits */
 
     int32_t grid_type;		/* TITAN_PROJ_FLAT or TITAN_PROJ_LATLON */
 
@@ -694,7 +696,7 @@ public:
 
     int32_t min_history_for_valid_forecast; /* secs */
 
-    bool spatial_smoothing;	/* TRUE or FALSE */
+    int32_t spatial_smoothing;	/* TRUE or FALSE */
     
   };  // TrackingParams
 
@@ -714,7 +716,7 @@ public:
 
     // data
     
-    bool file_valid;		/* set to 0 when file is under
+    int32_t file_valid;		/* set to 0 when file is under
 				 * modification, 1 when modification is
 				 * successfully complete */
     
@@ -936,10 +938,10 @@ public:
     int64_t next_entry_offset;	/* track file offset to next entry in
 				 * track - doubly linked list */
 
-    int64_t next_scan_entry_offset;	/* offset to next entry in this scan */
+    int64_t next_scan_entry_offset; /* offset to next entry in this scan */
 
-    int32_t scan_origin;		/* scan for first storm in any branch which
-                                         * led to this entry */
+    int32_t scan_origin;	/* scan for first storm in any branch which
+                                 * led to this entry */
 
     int32_t scan_num;		/* scan number in storm file */
     int32_t storm_num;		/* storm number in scan */
@@ -959,7 +961,7 @@ public:
     int32_t duration_in_scans;	/* duration of the simple track */
     int32_t duration_in_secs;	/* duration of the simple track */
 
-    bool forecast_valid;	/* flag to indicate if the forecast is
+    int32_t forecast_valid;	/* flag to indicate if the forecast is
                                  * valid */
 
     TrackFcastProps dval_dt; /* rate of change of each forecast

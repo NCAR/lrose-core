@@ -69,11 +69,16 @@ TitanData::StormParams::StormParams()
   sectrip_orientation_error = 0.0;
   poly_start_az = 0.0;
   poly_delta_az = 0.0;
+  check_morphology = 0;
+  check_tops = 0;
+  vel_available = 0;
+  n_poly_sides = 0;    
   ltg_count_time = 0.0;
   ltg_count_margin_km = 0.0;
   hail_z_m_coeff = 0.0;
   hail_z_m_exponent = 0.0;
   hail_mass_dbz_threshold = 0.0;
+  gprops_union_type = 0;
   tops_dbz_threshold = 0.0;
   precip_plane_ht = 0.0;
   low_convectivity_threshold = 0.0;
@@ -106,11 +111,16 @@ void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
   sectrip_orientation_error = params.sectrip_orientation_error;
   poly_start_az = params.poly_start_az;
   poly_delta_az = params.poly_delta_az;
+  check_morphology = params.check_morphology;
+  check_tops = params.check_tops;
+  vel_available = params.vel_available;
+  n_poly_sides = params.n_poly_sides;
   ltg_count_time = params.ltg_count_time;
   ltg_count_margin_km = params.ltg_count_margin_km;
   hail_z_m_coeff = params.hail_z_m_coeff;
   hail_z_m_exponent = params.hail_z_m_exponent;
   hail_mass_dbz_threshold = params.hail_mass_dbz_threshold;
+  gprops_union_type = params.gprops_union_type;
   tops_dbz_threshold = params.tops_dbz_threshold;
   precip_plane_ht = params.precip_plane_ht;
   low_convectivity_threshold = params.low_convectivity_threshold;
@@ -157,11 +167,16 @@ void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
   params.sectrip_orientation_error = sectrip_orientation_error;
   params.poly_start_az = poly_start_az;
   params.poly_delta_az = poly_delta_az;
+  params.check_morphology = check_morphology;
+  params.check_tops = check_tops;
+  params.vel_available = vel_available;
+  params.n_poly_sides = n_poly_sides;
   params.ltg_count_time = ltg_count_time;
   params.ltg_count_margin_km = ltg_count_margin_km;
   params.hail_z_m_coeff = hail_z_m_coeff;
   params.hail_z_m_exponent = hail_z_m_exponent;
   params.hail_mass_dbz_threshold = hail_mass_dbz_threshold;
+  params.gprops_union_type = gprops_union_type;
   params.tops_dbz_threshold = tops_dbz_threshold;
   params.precip_plane_ht = precip_plane_ht;
   params.low_convectivity_threshold = low_convectivity_threshold;
@@ -218,6 +233,20 @@ void TitanData::StormParams::print(FILE *out, const char *spacer)
   fprintf(out, "%s  N_poly_sides : %d\n", spacer, n_poly_sides);
   fprintf(out, "%s  Poly_start_az : %g\n", spacer, poly_start_az);
   fprintf(out, "%s  Poly_delta_az : %g\n", spacer, poly_delta_az);
+
+  switch(gprops_union_type) {
+    case UNION_HAIL:
+      fprintf(out, "%s  Storm properties union type : HAIL\n", spacer );
+      break;
+    case UNION_NEXRAD_HDA:
+      fprintf(out, "%s  Storm properties union type : NEXRAD HDAL\n",
+              spacer );
+      break;
+    default:
+      fprintf(out, "%s  Storm properties union type : NONE\n", spacer );
+      break;
+  }
+
   if (tops_dbz_threshold == 0.0) {
     fprintf(out, "%s  Tops dBZ threshold : %g\n", spacer, low_dbz_threshold);
   } else {
