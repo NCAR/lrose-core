@@ -2400,20 +2400,20 @@ void TitanData::TrackScanIndex::convertToLegacy(track_file_scan_index_t &index) 
 }
 
 void TitanData::TrackScanIndex::setFromLegacy
-  (const track_file_scan_index_t *legacyHdrs,
+  (const track_file_scan_index_t *legacyScans,
    vector<TitanData::TrackScanIndex> &scans)
 {
   for (size_t ii = 0; ii < scans.size(); ii++) {
-    scans[ii].setFromLegacy(legacyHdrs[ii]);
+    scans[ii].setFromLegacy(legacyScans[ii]);
   }
 }
 
 void TitanData::TrackScanIndex::convertToLegacy
   (const vector<TitanData::TrackScanIndex> &scans,
-   track_file_scan_index_t *legacyHdrs)
+   track_file_scan_index_t *legacyScans)
 {
   for (size_t ii = 0; ii < scans.size(); ii++) {
-    scans[ii].convertToLegacy(legacyHdrs[ii]);
+    scans[ii].convertToLegacy(legacyScans[ii]);
   }
 }
     

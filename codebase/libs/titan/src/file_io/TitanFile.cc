@@ -83,7 +83,7 @@ TitanFile::TitanFile()
   // MEM_zero(_complex_params);
   // MEM_zero(_entry);
 
-  _scan_index = nullptr;
+  // _scan_index = nullptr;
   // _scan_entries = nullptr;
   _track_utime = nullptr;
   
@@ -102,7 +102,7 @@ TitanFile::TitanFile()
   _n_complex_allocated = 0;
   _n_simples_per_complex_2D_allocated = 0;
   // _n_scan_entries_allocated = 0;
-  _n_scan_index_allocated = 0;
+  // _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
   _prevEntryOffset = 0;
@@ -3303,28 +3303,11 @@ void TitanFile::freeScanEntries()
 void TitanFile::allocScanIndex(int n_scans_needed)
      
 {
-
-  if (_n_scan_index_allocated < n_scans_needed) {
-    
-    // allocate the required space plus a buffer so that 
-    // we do not do too many reallocs
-    
-    int n_start = _n_scan_index_allocated;
-    int n_realloc = n_scans_needed + N_ALLOC;
-    _n_scan_index_allocated = n_realloc;
-    
-    _scan_index = (track_file_scan_index_t *) urealloc
-      (_scan_index, n_realloc * sizeof(track_file_scan_index_t));
-    
-    // initialize new elements to zero
   
-    int n_new = _n_scan_index_allocated - n_start;
-
-    memset (_scan_index + n_start, 0,
-	    n_new * sizeof(track_file_scan_index_t));
-    
-  } // if (_n_scan_index_allocated < n_scans_needed) 
-
+  if (n_scans_needed > (int) _scan_index.size()) {
+    _scan_index.resize(n_scans_needed);
+  }
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3338,11 +3321,7 @@ void TitanFile::allocScanIndex(int n_scans_needed)
 void TitanFile::freeScanIndex()
      
 {
-  if (_scan_index) {
-    ufree(_scan_index);
-    _scan_index = nullptr;
-    _n_scan_index_allocated = 0;
-  }
+  _scan_index.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3658,7 +3637,7 @@ int TitanFile::readTrackScanIndex(bool clear_error_str /* = true*/ )
     // save state
     int n_scans = _tFile.header().n_scans;
     allocScanIndex(n_scans);
-    memcpy(_scan_index, _tFile.scan_index(), n_scans * sizeof(track_file_scan_index_t));
+    TitanData::TrackScanIndex::setFromLegacy(_tFile.scan_index(), _scan_index);
     return 0;
   }
 

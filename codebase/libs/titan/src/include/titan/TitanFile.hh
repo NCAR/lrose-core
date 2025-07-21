@@ -495,7 +495,7 @@ public:
   const TitanData::ComplexTrackParams &complex_params() const;
   const TitanData::TrackEntry &entry() const { return _entry; }
   const vector<TitanData::TrackEntry> &scan_entries() const { return _scan_entries; }
-  const track_file_scan_index_t *scan_index() const { return _scan_index; }
+  const vector<TitanData::TrackScanIndex> &scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
   
@@ -1001,7 +1001,7 @@ protected:
   TitanData::ComplexTrackParams _complex_params;
   TitanData::TrackEntry _entry;
   
-  track_file_scan_index_t *_scan_index;
+  vector<TitanData::TrackScanIndex> _scan_index;
   vector<TitanData::TrackEntry> _scan_entries;
   track_utime_t *_track_utime;
   
@@ -1022,7 +1022,7 @@ protected:
   int _n_complex_allocated;
   int _n_simples_per_complex_2D_allocated;
   // int _n_scan_entries_allocated;
-  int _n_scan_index_allocated;
+  // int _n_scan_index_allocated;
   int _n_utime_allocated;
   int _lowest_avail_complex_slot;
 
