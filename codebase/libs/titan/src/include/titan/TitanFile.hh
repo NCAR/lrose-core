@@ -481,7 +481,7 @@ public:
   const TitanData::StormHeader &storm_header() const { return _storm_header; }
   const TitanData::StormParams &storm_params() const { return _storm_header.params; }
   const TitanData::ScanHeader &scan() const { return _scan; }
-  const storm_file_global_props_t *gprops() const { return _gprops; }
+  const vector<TitanData::StormGprops> &gprops() const { return _gprops; }
   const storm_file_layer_props_t *lprops() const { return _lprops; }
   const storm_file_dbz_hist_t *hist() const { return _hist; }
   const storm_file_run_t *runs() const { return _runs; }
@@ -639,7 +639,7 @@ public:
   
   int writeStormScan(const TitanData::StormHeader &storm_file_header,
                      const TitanData::ScanHeader &sheader,
-                     const storm_file_global_props_t *gprops);
+                     const vector<TitanData::StormGprops> &gprops);
   
   // write the auxiliary storm properties:
   //   layers, dbz histograms, runs and proj_runs
@@ -655,7 +655,7 @@ public:
   int writeStormAux(int storm_num,
                     const TitanData::StormHeader &storm_file_header,
                     const TitanData::ScanHeader &sheader,
-                    const storm_file_global_props_t *gprops,
+                    const vector<TitanData::StormGprops> &gprops,
                     const storm_file_layer_props_t *lprops,
                     const storm_file_dbz_hist_t *hist,
                     const storm_file_run_t *runs,
@@ -978,7 +978,7 @@ protected:
 
   TitanData::StormHeader _storm_header;
   TitanData::ScanHeader _scan;
-  storm_file_global_props_t *_gprops;
+  vector<TitanData::StormGprops> _gprops;
   storm_file_layer_props_t *_lprops;
   storm_file_dbz_hist_t *_hist;
   storm_file_run_t *_runs;

@@ -609,15 +609,15 @@ TitanData::StormGprops::StormGprops()
   ltg_count = 0.0;
   convectivity_median = 0.0;
   
-  FOKRcategory = 0;
-  waldvogelProbability = 0.0;
+  hailFOKRcategory = 0;
+  hailWaldvogelProb = 0.0;
   hailMassAloft = 0.0;
-  vihm = 0.0;
+  hailVertIntgMass = 0.0;
   
-  poh = 0.0;
-  shi = 0.0;
-  posh = 0.0;
-  mehs = 0.0;
+  hda_poh = 0.0;
+  hda_shi = 0.0;
+  hda_posh = 0.0;
+  hda_mehs = 0.0;
 
 }
 
@@ -695,25 +695,25 @@ void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
   ltg_count = gprops.ltg_count;
   convectivity_median = gprops.convectivity_median;
 
-  FOKRcategory = 0;
-  waldvogelProbability = 0.0;
+  hailFOKRcategory = 0;
+  hailWaldvogelProb = 0.0;
   hailMassAloft = 0.0;
-  vihm = 0.0;
-  poh = 0.0;
-  shi = 0.0;
-  posh = 0.0;
-  mehs = 0.0;
+  hailVertIntgMass = 0.0;
+  hda_poh = 0.0;
+  hda_shi = 0.0;
+  hda_posh = 0.0;
+  hda_mehs = 0.0;
 
   if (params.gprops_union_type == UNION_HAIL) {
-    FOKRcategory = gprops.add_on.hail_metrics.FOKRcategory;
-    waldvogelProbability = gprops.add_on.hail_metrics.waldvogelProbability;
+    hailFOKRcategory = gprops.add_on.hail_metrics.FOKRcategory;
+    hailWaldvogelProb = gprops.add_on.hail_metrics.waldvogelProbability;
     hailMassAloft = gprops.add_on.hail_metrics.hailMassAloft;
-    vihm = gprops.add_on.hail_metrics.vihm;
+    hailVertIntgMass = gprops.add_on.hail_metrics.vihm;
   } else if (params.gprops_union_type == UNION_NEXRAD_HDA) {
-    poh = gprops.add_on.hda.poh;
-    shi = gprops.add_on.hda.shi;
-    posh = gprops.add_on.hda.posh;
-    mehs = gprops.add_on.hda.mehs;
+    hda_poh = gprops.add_on.hda.poh;
+    hda_shi = gprops.add_on.hda.shi;
+    hda_posh = gprops.add_on.hda.posh;
+    hda_mehs = gprops.add_on.hda.mehs;
   }
 
 }
@@ -798,19 +798,19 @@ void TitanData::StormGprops::convertToLegacy(storm_file_global_props_t &gprops) 
   gprops.ltg_count = ltg_count;
   gprops.convectivity_median = convectivity_median;
 
-  if (FOKRcategory != 0 ||
-      waldvogelProbability != 0.0 ||
+  if (hailFOKRcategory != 0 ||
+      hailWaldvogelProb != 0.0 ||
       hailMassAloft != 0.0 ||
-      vihm != 0.0) {
-    gprops.add_on.hail_metrics.FOKRcategory = FOKRcategory;
-    gprops.add_on.hail_metrics.waldvogelProbability = waldvogelProbability;
+      hailVertIntgMass != 0.0) {
+    gprops.add_on.hail_metrics.FOKRcategory = hailFOKRcategory;
+    gprops.add_on.hail_metrics.waldvogelProbability = hailWaldvogelProb;
     gprops.add_on.hail_metrics.hailMassAloft = hailMassAloft;
-    gprops.add_on.hail_metrics.vihm = vihm;
+    gprops.add_on.hail_metrics.vihm = hailVertIntgMass;
   } else {
-    gprops.add_on.hda.poh = poh;
-    gprops.add_on.hda.shi = shi;
-    gprops.add_on.hda.posh = posh;
-    gprops.add_on.hda.mehs = mehs;
+    gprops.add_on.hda.poh = hda_poh;
+    gprops.add_on.hda.shi = hda_shi;
+    gprops.add_on.hda.posh = hda_posh;
+    gprops.add_on.hda.mehs = hda_mehs;
   }
   
 }
@@ -878,14 +878,14 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  mass (ktons)                    : %g\n", spacer, mass);
   fprintf(out, "%s  vil_from_maxz(kg/m2)            : %g\n", spacer, vil_from_maxz);
   
-  fprintf(out, "%s  vihm_from_maxz (kg/m2)          : %g\n", spacer, vihm);
+  fprintf(out, "%s  vihm_from_maxz (kg/m2)          : %g\n", spacer, hailVertIntgMass);
   fprintf(out, "%s  Hail mass aloft (ktons)         : %g\n", spacer, hailMassAloft);
-  fprintf(out, "%s  Waldvogel probability of hail   : %g\n", spacer, waldvogelProbability);
-  fprintf(out, "%s  FOKR storm category          : %d\n", spacer, FOKRcategory);
-  fprintf(out, "%s  POH       (%%) : %g\n", spacer, poh);
-  fprintf(out, "%s  SHI (Jm-1s-1) : %g\n", spacer, shi);
-  fprintf(out, "%s  POSH      (%%) : %g\n", spacer, posh);
-  fprintf(out, "%s  MEHS     (mm) : %g\n", spacer, mehs);
+  fprintf(out, "%s  Waldvogel probability of hail   : %g\n", spacer, hailWaldvogelProb);
+  fprintf(out, "%s  FOKR storm category             : %d\n", spacer, hailFOKRcategory);
+  fprintf(out, "%s  POH (%%)                        : %g\n", spacer, hda_poh);
+  fprintf(out, "%s  SHI (Jm-1s-1)                   : %g\n", spacer, hda_shi);
+  fprintf(out, "%s  POSH (%%)                       : %g\n", spacer, hda_posh);
+  fprintf(out, "%s  MEHS (mm)                       : %g\n", spacer, hda_mehs);
   
   fprintf(out, "%s  tilt angle (deg)                : %g\n", spacer, tilt_angle);
   fprintf(out, "%s  tilt direction (deg)            : %g\n", spacer, tilt_dirn);
@@ -902,7 +902,7 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  convectivity_median             : %.2e\n", spacer, convectivity_median);
 
   fprintf(out, "%s  precip area (km2)               : %g\n", spacer, precip_area);
-  fprintf(out, "%s  precip area centroid x %s    : %g\n",
+  fprintf(out, "%s  precip area centroid x %s       : %g\n",
           spacer, loc_label, precip_area_centroid_x);
   fprintf(out, "%s  precip area centroid y %s    : %g\n",
           spacer, loc_label, precip_area_centroid_y);
@@ -913,12 +913,12 @@ void TitanData::StormGprops::print(FILE *out,
           spacer, loc_label, precip_area_major_radius);
   
   fprintf(out, "%s  proj. area (km2)                : %g\n", spacer, proj_area);
-  fprintf(out, "%s  proj. area centroid x %s     : %g\n", spacer, loc_label, proj_area_centroid_x);
-  fprintf(out, "%s  proj. area centroid y %s     : %g\n", spacer, loc_label, proj_area_centroid_y);
+  fprintf(out, "%s  proj. area centroid x %s        : %g\n", spacer, loc_label, proj_area_centroid_x);
+  fprintf(out, "%s  proj. area centroid y %s        : %g\n", spacer, loc_label, proj_area_centroid_y);
   fprintf(out, "%s  proj. area orientation (deg)    : %g\n", spacer, proj_area_orientation);
-  fprintf(out, "%s  proj. area minor radius %s   : %g\n",
+  fprintf(out, "%s  proj. area minor radius %s      : %g\n",
           spacer, loc_label, proj_area_minor_radius);
-  fprintf(out, "%s  proj. area major radius %s   : %g\n",
+  fprintf(out, "%s  proj. area major radius %s      : %g\n",
           spacer, loc_label, proj_area_major_radius);
   
   fprintf(out, "%s  bounding_min_ix                 : %d\n", spacer, bounding_min_ix);

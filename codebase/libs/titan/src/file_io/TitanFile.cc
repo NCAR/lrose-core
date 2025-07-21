@@ -65,7 +65,7 @@ TitanFile::TitanFile()
   
   // MEM_zero(_storm_header);
   // MEM_zero(_scan);
-  _gprops = nullptr;
+  // _gprops = nullptr;
   _lprops = nullptr;
   _hist = nullptr;
   _runs = nullptr;
@@ -1606,10 +1606,9 @@ void TitanFile::allocGprops(int nstorms)
      
 {
   
-  if (nstorms > _max_storms) {
+  if (nstorms > (int) _gprops.size()) {
     _max_storms = nstorms;
-    _gprops = (storm_file_global_props_t *)
-      urealloc(_gprops, nstorms * sizeof(storm_file_global_props_t));
+    _gprops.resize(nstorms);
   }
 
 }
@@ -1618,11 +1617,8 @@ void TitanFile::freeGprops()
      
 {
 
-  if (_gprops) {
-    ufree ((char *) _gprops);
-    _gprops = nullptr;
-    _max_storms = 0;
-  }
+  _gprops.clear();
+  _max_storms = 0;
 
 }
 
@@ -2057,7 +2053,9 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
     _scan.setFromLegacy(_sFile.scan());
     int nStorms = _scan.nstorms;
     allocGprops(nStorms);
-    memcpy(_gprops, _sFile.gprops(), nStorms * sizeof(storm_file_global_props_t));
+    TitanData::StormGprops::setFromLegacy(_sFile.params(),
+                                          _sFile.gprops(),
+                                          _gprops);
     return 0;
   }
 
@@ -2130,7 +2128,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
   
   for (int istorm = 0; istorm < nStorms; istorm++) {
     
-    storm_file_global_props_t &gp = _gprops[istorm];
+    TitanData::StormGprops &gp = _gprops[istorm];
     
     int gpropsOffset = _scan.gprops_offset + istorm;
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
@@ -2195,21 +2193,17 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
 
     // if (_storm_header.params.gprops_union_type == UNION_HAIL) {
       
-    _gpropsVars.hail_FOKRcategory.getVal
-      (stormIndex, &gp.add_on.hail_metrics.FOKRcategory);
-    _gpropsVars.hail_waldvogelProbability.getVal
-      (stormIndex, &gp.add_on.hail_metrics.waldvogelProbability);
-    _gpropsVars.hail_hailMassAloft.getVal
-      (stormIndex, &gp.add_on.hail_metrics.hailMassAloft);
-    _gpropsVars.hail_vihm.getVal
-      (stormIndex, &gp.add_on.hail_metrics.vihm);
+    _gpropsVars.hail_FOKRcategory.getVal(stormIndex, &gp.hailFOKRcategory);
+    _gpropsVars.hail_waldvogelProbability.getVal(stormIndex, &gp.hailWaldvogelProb);
+    _gpropsVars.hail_hailMassAloft.getVal(stormIndex, &gp.hailMassAloft);
+    _gpropsVars.hail_vihm.getVal(stormIndex, &gp.hailVertIntgMass);
     
     // } else if (_storm_header.params.gprops_union_type == UNION_NEXRAD_HDA) {
       
-    _gpropsVars.hail_poh.getVal(stormIndex, &gp.add_on.hda.poh);
-    _gpropsVars.hail_shi.getVal(stormIndex, &gp.add_on.hda.shi);
-    _gpropsVars.hail_posh.getVal(stormIndex, &gp.add_on.hda.posh);
-    _gpropsVars.hail_mehs.getVal(stormIndex, &gp.add_on.hda.mehs);
+    _gpropsVars.hail_poh.getVal(stormIndex, &gp.hda_poh);
+    _gpropsVars.hail_shi.getVal(stormIndex, &gp.hda_shi);
+    _gpropsVars.hail_posh.getVal(stormIndex, &gp.hda_posh);
+    _gpropsVars.hail_mehs.getVal(stormIndex, &gp.hda_mehs);
     
     // }
 
@@ -2380,7 +2374,7 @@ int TitanFile::writeStormHeader(const TitanData::StormHeader &storm_file_header)
 
 int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
                               const TitanData::ScanHeader &scanHeader,
-                              const storm_file_global_props_t *gprops)
+                              const vector<TitanData::StormGprops> &gprops)
   
 {
 
@@ -2389,13 +2383,16 @@ int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
   _storm_header = storm_file_header;
   _scan = scanHeader;
   allocGprops(_scan.nstorms);
-  memcpy(_gprops, gprops, _scan.nstorms * sizeof(storm_file_global_props_t));
+  _gprops = gprops;
     
   // handle legacy format case
   
   if (_isLegacyV5Format) {
-    
-    if (_sFile.WriteScan(_scan.convertToLegacy(), gprops)) {
+
+    vector<storm_file_global_props_t> gpropsLegacy;
+    gpropsLegacy.resize(gprops.size());
+    TitanData::StormGprops::convertToLegacy(gprops, gpropsLegacy.data());
+    if (_sFile.WriteScan(_scan.convertToLegacy(), gpropsLegacy.data())) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
@@ -2485,7 +2482,7 @@ int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
 
     // write the global props
     
-    const storm_file_global_props_t &gp = _gprops[istorm];
+    const TitanData::StormGprops &gp = _gprops[istorm];
     
     int gpropsOffset = _sumStorms;
     std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
@@ -2550,21 +2547,17 @@ int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
 
     // if (sparams.gprops_union_type == UNION_HAIL) {
       
-    _gpropsVars.hail_FOKRcategory.putVal
-      (stormIndex, gp.add_on.hail_metrics.FOKRcategory);
-    _gpropsVars.hail_waldvogelProbability.putVal
-      (stormIndex, gp.add_on.hail_metrics.waldvogelProbability);
-    _gpropsVars.hail_hailMassAloft.putVal
-      (stormIndex, gp.add_on.hail_metrics.hailMassAloft);
-    _gpropsVars.hail_vihm.putVal
-      (stormIndex, gp.add_on.hail_metrics.vihm);
+    _gpropsVars.hail_FOKRcategory.putVal(stormIndex, gp.hailFOKRcategory);
+    _gpropsVars.hail_waldvogelProbability.putVal(stormIndex, gp.hailWaldvogelProb);
+    _gpropsVars.hail_hailMassAloft.putVal(stormIndex, gp.hailMassAloft);
+    _gpropsVars.hail_vihm.putVal(stormIndex, gp.hailVertIntgMass);
     
     // } else if (sparams.gprops_union_type == UNION_NEXRAD_HDA) {
       
-    _gpropsVars.hail_poh.putVal(stormIndex, gp.add_on.hda.poh);
-    _gpropsVars.hail_shi.putVal(stormIndex, gp.add_on.hda.shi);
-    _gpropsVars.hail_posh.putVal(stormIndex, gp.add_on.hda.posh);
-    _gpropsVars.hail_mehs.putVal(stormIndex, gp.add_on.hda.mehs);
+    _gpropsVars.hail_poh.putVal(stormIndex, gp.hda_poh);
+    _gpropsVars.hail_shi.putVal(stormIndex, gp.hda_shi);
+    _gpropsVars.hail_posh.putVal(stormIndex, gp.hda_posh);
+    _gpropsVars.hail_mehs.putVal(stormIndex, gp.hda_mehs);
     
     // }
 
@@ -2810,7 +2803,7 @@ void TitanFile::_addProjectionFlagAttributes()
 int TitanFile::writeStormAux(int storm_num,
                              const TitanData::StormHeader &storm_file_header,
                              const TitanData::ScanHeader &sheader,
-                             const storm_file_global_props_t *gprops,
+                             const vector<TitanData::StormGprops> &gprops,
                              const storm_file_layer_props_t *lprops,
                              const storm_file_dbz_hist_t *hist,
                              const storm_file_run_t *runs,
@@ -2821,7 +2814,7 @@ int TitanFile::writeStormAux(int storm_num,
   // save state
 
   const TitanData::StormParams sparams(storm_file_header.params);
-  const storm_file_global_props_t &gp = gprops[storm_num];
+  const TitanData::StormGprops &gp = gprops[storm_num];
 
   int nLayers = gp.n_layers;
   int nDbzIntervals = gp.n_dbz_intervals;
@@ -2841,8 +2834,11 @@ int TitanFile::writeStormAux(int storm_num,
   // handle legacy format
   
   if (_isLegacyV5Format) {
+    vector<storm_file_global_props_t> gpropsLegacy;
+    gpropsLegacy.resize(gprops.size());
+    TitanData::StormGprops::convertToLegacy(gprops, gpropsLegacy.data());
     if (_sFile.WriteProps(storm_num, sheader.nstorms,
-                          gprops, lprops, hist, runs, proj_runs)) {
+                          gpropsLegacy.data(), lprops, hist, runs, proj_runs)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }

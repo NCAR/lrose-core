@@ -412,15 +412,15 @@ public:
 
     // hail metrics
     
-    int32_t FOKRcategory;            /*  category 0-4 */
-    fl32 waldvogelProbability;    /* 0 <= probability <= 1.0 */
-    fl32 hailMassAloft;           /* ktons */
-    fl32 vihm;                    /* kg/m2 (from maxz) */
+    int32_t hailFOKRcategory;      /*  category 0-4 */
+    fl32 hailWaldvogelProb;        /* 0 <= probability <= 1.0 */
+    fl32 hailMassAloft;            /* ktons */
+    fl32 hailVertIntgMass;         /* kg/m2 (from maxz) */
     
-    fl32 poh; /* Waldvogel Probability (%) */
-    fl32 shi; /* Severe Hail Index (J.m-1.s-1) */
-    fl32 posh; /* probability of severe hail (%) */
-    fl32 mehs; /* Maximum Expected Hail Size (mm) */
+    fl32 hda_poh; /* Waldvogel Probability (%) */
+    fl32 hda_shi; /* Severe Hail Index (J.m-1.s-1) */
+    fl32 hda_posh; /* probability of severe hail (%) */
+    fl32 hda_mehs; /* Maximum Expected Hail Size (mm) */
     
   };  // StormGprops
 
