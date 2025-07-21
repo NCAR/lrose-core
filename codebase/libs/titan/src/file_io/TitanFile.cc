@@ -66,7 +66,7 @@ TitanFile::TitanFile()
   // MEM_zero(_storm_header);
   // MEM_zero(_scan);
   // _gprops = nullptr;
-  _lprops = nullptr;
+  // _lprops = nullptr;
   _hist = nullptr;
   _runs = nullptr;
   _proj_runs = nullptr;
@@ -1485,22 +1485,17 @@ void TitanFile::_addErrStr(string label,
 void TitanFile::allocLayers(int n_layers)
      
 {
-  if (n_layers > _max_layers) {
+  if (n_layers > (int) _lprops.size()) {
+    _lprops.resize(n_layers);
     _max_layers = n_layers;
-    _lprops = (storm_file_layer_props_t *)
-      urealloc(_lprops, n_layers * sizeof(storm_file_layer_props_t));
-    memset(_lprops, 0, n_layers * sizeof(storm_file_layer_props_t));
   }
 }
 
 void TitanFile::freeLayers()
      
 {
-  if (_lprops) {
-    ufree(_lprops);
-    _lprops = nullptr;
-    _max_layers = 0;
-  }
+  _lprops.clear();
+  _max_layers = 0;
 }
 
 //////////////////////////////////////////////////////////////
@@ -1929,7 +1924,9 @@ int TitanFile::readStormAux(int storm_num)
     allocRuns(nRuns);
     allocProjRuns(nProjRuns);
     
-    memcpy(_lprops, _sFile.lprops(), nLayers * sizeof(storm_file_layer_props_t));
+    TitanData::StormLprops::setFromLegacy(_sFile.lprops(), _lprops);
+    // memcpy(_lprops, _sFile.lprops(), nLayers * sizeof(storm_file_layer_props_t));
+    
     memcpy(_hist, _sFile.hist(), nDbzIntervals * sizeof(storm_file_dbz_hist_t));
     memcpy(_runs, _sFile.runs(), nRuns * sizeof(storm_file_run_t));
     memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
@@ -1975,7 +1972,7 @@ int TitanFile::readStormAux(int storm_num)
   // read in layer props
   
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
-    storm_file_layer_props_t &ll = _lprops[ilayer];
+    TitanData::StormLprops &ll = _lprops[ilayer];
     std::vector<size_t> layerIndex = NcxxVar::makeIndex(layerPropsOffset + ilayer);
     _lpropsVars.vol_centroid_x.getVal(layerIndex, &ll.vol_centroid_x);
     _lpropsVars.vol_centroid_y.getVal(layerIndex, &ll.vol_centroid_y);
@@ -2288,8 +2285,6 @@ int TitanFile::writeStormHeader(const TitanData::StormHeader &storm_file_header)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    // storm_file_header_t legacyHdr;
-    // storm_file_header.convertToLegacy(legacyHdr);
     if (_sFile.WriteHeader(storm_file_header.convertToLegacy())) {
       _errStr = _sFile.getErrStr();
       return -1;
@@ -2804,7 +2799,7 @@ int TitanFile::writeStormAux(int storm_num,
                              const TitanData::StormHeader &storm_file_header,
                              const TitanData::ScanHeader &sheader,
                              const vector<TitanData::StormGprops> &gprops,
-                             const storm_file_layer_props_t *lprops,
+                             const vector<TitanData::StormLprops> &lprops,
                              const storm_file_dbz_hist_t *hist,
                              const storm_file_run_t *runs,
                              const storm_file_run_t *proj_runs)
@@ -2826,7 +2821,7 @@ int TitanFile::writeStormAux(int storm_num,
   allocRuns(nRuns);
   allocProjRuns(nProjRuns);
     
-  memcpy(_lprops, lprops, nLayers * sizeof(storm_file_layer_props_t));
+  _lprops = lprops;
   memcpy(_hist, hist, nDbzIntervals * sizeof(storm_file_dbz_hist_t));
   memcpy(_runs, runs, nRuns * sizeof(storm_file_run_t));
   memcpy(_proj_runs, proj_runs, nProjRuns * sizeof(storm_file_run_t));
@@ -2834,15 +2829,25 @@ int TitanFile::writeStormAux(int storm_num,
   // handle legacy format
   
   if (_isLegacyV5Format) {
+
     vector<storm_file_global_props_t> gpropsLegacy;
     gpropsLegacy.resize(gprops.size());
     TitanData::StormGprops::convertToLegacy(gprops, gpropsLegacy.data());
+
+    vector<storm_file_layer_props_t> lpropsLegacy;
+    lpropsLegacy.resize(lprops.size());
+    TitanData::StormLprops::convertToLegacy(lprops, lpropsLegacy.data());
+
     if (_sFile.WriteProps(storm_num, sheader.nstorms,
-                          gpropsLegacy.data(), lprops, hist, runs, proj_runs)) {
+                          gpropsLegacy.data(),
+                          lpropsLegacy.data(),
+                          hist, runs, proj_runs)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
+
     return 0;
+
   }
 
   // save scan offsets
@@ -2864,7 +2869,7 @@ int TitanFile::writeStormAux(int storm_num,
 
   _layerOffsets[storm_num] = _sumLayers;
   for (int ilayer = 0; ilayer < nLayers; ilayer++) {
-    const storm_file_layer_props_t &ll = lprops[ilayer];
+    const TitanData::StormLprops &ll = lprops[ilayer];
     int lpropsOffset = _sumLayers;
     std::vector<size_t> layerIndex = NcxxVar::makeIndex(lpropsOffset);
     _lpropsVars.vol_centroid_x.putVal(layerIndex, ll.vol_centroid_x);

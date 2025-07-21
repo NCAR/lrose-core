@@ -482,7 +482,7 @@ public:
   const TitanData::StormParams &storm_params() const { return _storm_header.params; }
   const TitanData::ScanHeader &scan() const { return _scan; }
   const vector<TitanData::StormGprops> &gprops() const { return _gprops; }
-  const storm_file_layer_props_t *lprops() const { return _lprops; }
+  const vector<TitanData::StormLprops> &lprops() const { return _lprops; }
   const storm_file_dbz_hist_t *hist() const { return _hist; }
   const storm_file_run_t *runs() const { return _runs; }
   const storm_file_run_t *proj_runs() const { return _proj_runs; }
@@ -656,7 +656,7 @@ public:
                     const TitanData::StormHeader &storm_file_header,
                     const TitanData::ScanHeader &sheader,
                     const vector<TitanData::StormGprops> &gprops,
-                    const storm_file_layer_props_t *lprops,
+                    const vector<TitanData::StormLprops> &lprops,
                     const storm_file_dbz_hist_t *hist,
                     const storm_file_run_t *runs,
                     const storm_file_run_t *proj_runs);
@@ -979,7 +979,7 @@ protected:
   TitanData::StormHeader _storm_header;
   TitanData::ScanHeader _scan;
   vector<TitanData::StormGprops> _gprops;
-  storm_file_layer_props_t *_lprops;
+  vector<TitanData::StormLprops> _lprops;
   storm_file_dbz_hist_t *_hist;
   storm_file_run_t *_runs;
   storm_file_run_t *_proj_runs;
