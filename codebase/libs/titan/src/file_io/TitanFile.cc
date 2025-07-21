@@ -67,7 +67,7 @@ TitanFile::TitanFile()
   // MEM_zero(_scan);
   // _gprops = nullptr;
   // _lprops = nullptr;
-  _hist = nullptr;
+  // _hist = nullptr;
   _runs = nullptr;
   _proj_runs = nullptr;
 
@@ -1508,24 +1508,19 @@ void TitanFile::allocHist(int n_hist)
      
 {
 
-  if (n_hist > _max_hist) {
+  if (n_hist > (int) _hist.size()) {
+    _hist.resize(n_hist);
     _max_hist = n_hist;
-    _hist = (storm_file_dbz_hist_t *)
-      urealloc(_hist, n_hist * sizeof(storm_file_dbz_hist_t));
-    memset(_hist, 0, n_hist * sizeof(storm_file_dbz_hist_t));
   }
-
+  
 }
 
 void TitanFile::freeHist()
      
 {
 
-  if (_hist) {
-    ufree (_hist);
-    _hist = nullptr;
-    _max_hist = 0;
-  }
+  _hist.clear();
+  _max_hist = 0;
 
 }
 
@@ -1925,9 +1920,10 @@ int TitanFile::readStormAux(int storm_num)
     allocProjRuns(nProjRuns);
     
     TitanData::StormLprops::setFromLegacy(_sFile.lprops(), _lprops);
+    TitanData::StormDbzHist::setFromLegacy(_sFile.hist(), _hist);
+
     // memcpy(_lprops, _sFile.lprops(), nLayers * sizeof(storm_file_layer_props_t));
-    
-    memcpy(_hist, _sFile.hist(), nDbzIntervals * sizeof(storm_file_dbz_hist_t));
+    // memcpy(_hist, _sFile.hist(), nDbzIntervals * sizeof(storm_file_dbz_hist_t));
     memcpy(_runs, _sFile.runs(), nRuns * sizeof(storm_file_run_t));
     memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
 
@@ -1995,7 +1991,7 @@ int TitanFile::readStormAux(int storm_num)
   // read in histogram data
   
   for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
-    storm_file_dbz_hist_t &hh = _hist[ihist];
+    TitanData::StormDbzHist &hh = _hist[ihist];
     std::vector<size_t> histIndex = NcxxVar::makeIndex(dbzHistOffset + ihist);
     _histVars.percent_volume.getVal(histIndex, &hh.percent_volume);
     _histVars.percent_area.getVal(histIndex, &hh.percent_area);
@@ -2800,7 +2796,7 @@ int TitanFile::writeStormAux(int storm_num,
                              const TitanData::ScanHeader &sheader,
                              const vector<TitanData::StormGprops> &gprops,
                              const vector<TitanData::StormLprops> &lprops,
-                             const storm_file_dbz_hist_t *hist,
+                             const vector<TitanData::StormDbzHist> &hist,
                              const storm_file_run_t *runs,
                              const storm_file_run_t *proj_runs)
   
@@ -2822,7 +2818,7 @@ int TitanFile::writeStormAux(int storm_num,
   allocProjRuns(nProjRuns);
     
   _lprops = lprops;
-  memcpy(_hist, hist, nDbzIntervals * sizeof(storm_file_dbz_hist_t));
+  _hist = hist;
   memcpy(_runs, runs, nRuns * sizeof(storm_file_run_t));
   memcpy(_proj_runs, proj_runs, nProjRuns * sizeof(storm_file_run_t));
 
@@ -2838,10 +2834,15 @@ int TitanFile::writeStormAux(int storm_num,
     lpropsLegacy.resize(lprops.size());
     TitanData::StormLprops::convertToLegacy(lprops, lpropsLegacy.data());
 
+    vector<storm_file_dbz_hist_t> histLegacy;
+    histLegacy.resize(hist.size());
+    TitanData::StormDbzHist::convertToLegacy(hist, histLegacy.data());
+    
     if (_sFile.WriteProps(storm_num, sheader.nstorms,
                           gpropsLegacy.data(),
                           lpropsLegacy.data(),
-                          hist, runs, proj_runs)) {
+                          histLegacy.data(),
+                          runs, proj_runs)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
@@ -2895,7 +2896,7 @@ int TitanFile::writeStormAux(int storm_num,
 
   _histOffsets[storm_num] = _sumHist;
   for (int ihist = 0; ihist < nDbzIntervals; ihist++) {
-    const storm_file_dbz_hist_t &hh = hist[ihist];
+    const TitanData::StormDbzHist &hh = hist[ihist];
     int histOffset = _sumHist;
     std::vector<size_t> histIndex = NcxxVar::makeIndex(histOffset);
     _histVars.percent_volume.putVal(histIndex, hh.percent_volume);
