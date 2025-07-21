@@ -401,7 +401,7 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << _inFile.getErrStr() << endl;
       return -1;
     }
-    simple_track_params_t sparams(_inFile.simple_params());
+    TitanData::SimpleTrackParams sparams(_inFile.simple_params());
     
     // rewind simple track - prepare for reading entries
     

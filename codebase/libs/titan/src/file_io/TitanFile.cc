@@ -79,8 +79,8 @@ TitanFile::TitanFile()
   // tracks
 
   // MEM_zero(_track_header);
-  MEM_zero(_simple_params);
-  MEM_zero(_complex_params);
+  // MEM_zero(_simple_params);
+  // MEM_zero(_complex_params);
   MEM_zero(_entry);
 
   _scan_index = nullptr;
@@ -3107,11 +3107,11 @@ void TitanFile::_clear2DVar(NcxxVar &var,
 ////////////////////////////////////////////////////////////
 // track data access
 
-const simple_track_params_t &TitanFile::simple_params() const { 
+const TitanData::SimpleTrackParams &TitanFile::simple_params() const { 
   return _simple_params;
 }
 
-const complex_track_params_t &TitanFile::complex_params() const {
+const TitanData::ComplexTrackParams &TitanFile::complex_params() const {
   return _complex_params;
 }
 
@@ -3739,7 +3739,7 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
       return -1;
     }
     // save state
-    _complex_params = _tFile.complex_params();
+    _complex_params.setFromLegacy(_tFile.complex_params());
     if (read_simples_per_complex) {
       if (readSimplesPerComplex()) {
         return -1;
@@ -3759,7 +3759,7 @@ int TitanFile::readComplexTrackParams(int complex_track_num,
   // these arrays will have gaps
   
   std::vector<size_t> varIndex = NcxxVar::makeIndex(complex_track_num);
-  complex_track_params_t &cp(_complex_params);
+  TitanData::ComplexTrackParams &cp(_complex_params);
   _complexVars.complex_track_num.getVal(varIndex, &cp.complex_track_num);
   _complexVars.volume_at_start_of_sampling.getVal(varIndex, &cp.volume_at_start_of_sampling);
   _complexVars.volume_at_end_of_sampling.getVal(varIndex, &cp.volume_at_end_of_sampling);
@@ -3850,7 +3850,7 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
       _errStr = _tFile.getErrStr();
       return -1;
     }
-    _simple_params = _tFile.simple_params();
+    _simple_params.setFromLegacy(_tFile.simple_params());
     return 0;
   }
 
@@ -3862,7 +3862,7 @@ int TitanFile::readSimpleTrackParams(int simple_track_num,
   _addErrInt("  simple_track_num", simple_track_num);
   
   std::vector<size_t> simpleIndex = NcxxVar::makeIndex(simple_track_num);
-  simple_track_params_t &sp(_simple_params);
+  TitanData::SimpleTrackParams &sp(_simple_params);
 
   _simpleVars.simple_track_num.getVal(simpleIndex, &sp.simple_track_num);
   _simpleVars.last_descendant_simple_track_num.getVal
@@ -4267,8 +4267,8 @@ void TitanFile::reinit()
 {
   
   _track_header.initialize();
-  MEM_zero(_complex_params);
-  MEM_zero(_simple_params);
+  _complex_params.initialize();
+  _simple_params.initialize();
   MEM_zero(_entry);
   
   if (_n_complex_allocated > 0) {
@@ -4709,7 +4709,7 @@ int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::writeSimpleTrackParams(int simple_track_num,
-                                      const simple_track_params_t &sparams)
+                                      const TitanData::SimpleTrackParams &sparams)
      
 {
 
@@ -4720,7 +4720,7 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteSimpleParams(sparams)) {
+    if (_tFile.WriteSimpleParams(sparams.convertToLegacy())) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -4777,7 +4777,7 @@ int TitanFile::writeSimpleTrackParams(int simple_track_num,
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::writeComplexTrackParams(int complex_index,
-                                       const complex_track_params_t &cparams)
+                                       const TitanData::ComplexTrackParams &cparams)
   
 {
 
@@ -4788,7 +4788,7 @@ int TitanFile::writeComplexTrackParams(int complex_index,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteComplexParams(complex_index, cparams)) {
+    if (_tFile.WriteComplexParams(complex_index, cparams.convertToLegacy())) {
       _errStr = _tFile.getErrStr();
       return -1;
     }

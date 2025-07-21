@@ -491,8 +491,8 @@ public:
 
   const TitanData::TrackHeader &track_header() const { return _track_header; }
   const TitanData::TrackingParams &track_params() const { return _track_header.params; }
-  const simple_track_params_t &simple_params() const;
-  const complex_track_params_t &complex_params() const;
+  const TitanData::SimpleTrackParams &simple_params() const;
+  const TitanData::ComplexTrackParams &complex_params() const;
   const track_file_entry_t &entry() const { return _entry; }
   const track_file_entry_t *scan_entries() const { return _scan_entries; }
   const track_file_scan_index_t *scan_index() const { return _scan_index; }
@@ -772,14 +772,14 @@ public:
   // returns 0 on success, -1 on failure
   
   int writeSimpleTrackParams(int track_num,
-                             const simple_track_params_t &sparams);
+                             const TitanData::SimpleTrackParams &sparams);
      
   // write complex track params
   // complex_index is the index of this track in the complex_track_nums array
   // returns 0 on success, -1 on failure
   
   int writeComplexTrackParams(int complex_index,
-                              const complex_track_params_t &cparams);
+                              const TitanData::ComplexTrackParams &cparams);
      
   // write an entry for a track in the track data file
   // on success returns the offset of the entry written
@@ -1004,10 +1004,10 @@ protected:
   // track data
 
   TitanData::TrackHeader _track_header;
-  simple_track_params_t _simple_params;
-  complex_track_params_t _complex_params;
+  TitanData::SimpleTrackParams _simple_params;
+  TitanData::ComplexTrackParams _complex_params;
   track_file_entry_t _entry;
-
+  
   track_file_scan_index_t *_scan_index;
   track_file_entry_t *_scan_entries;
   track_utime_t *_track_utime;
