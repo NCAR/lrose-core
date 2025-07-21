@@ -315,7 +315,7 @@ int Tstorms2NetCDF::_processInputFile()
     cerr << _inFile.getErrStr() << endl;
     return -1;
   }
-  const track_file_header_t &theader = _inFile.track_header();
+  const TitanData::TrackHeader &theader = _inFile.track_header();
   
   // get the complex track numbers array
   

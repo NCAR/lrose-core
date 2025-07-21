@@ -93,6 +93,7 @@ public:
     // methods
     
     StormParams();
+    void initialize();
     void setFromLegacy(const storm_file_params_t &params);
     storm_file_params_t convertToLegacy() const;
     void convertToLegacy(storm_file_params_t &params) const;
@@ -226,6 +227,7 @@ public:
     // methods
     
     StormHeader();
+    void initialize();
     void setFromLegacy(const storm_file_header_t &hdr);
     storm_file_header_t convertToLegacy() const;
     void convertToLegacy(storm_file_header_t &hdr) const;
@@ -251,6 +253,7 @@ public:
     // methods
     
     ScanHeader();
+    void initialize();
     void setFromLegacy(const storm_file_scan_header_t &hdr);
     storm_file_scan_header_t convertToLegacy() const;
     void convertToLegacy(storm_file_scan_header_t &hdr) const;
@@ -292,6 +295,7 @@ public:
     // methods
     
     StormGprops();
+    void initialize();
     void setFromLegacy(const storm_file_params_t &params,
                        const storm_file_global_props_t &gprops);
     storm_file_global_props_t convertToLegacy() const;
@@ -434,6 +438,7 @@ public:
     // methods
     
     StormLprops();
+    void initialize();
     void setFromLegacy(const storm_file_layer_props_t &lprops);
     storm_file_layer_props_t convertToLegacy() const;
     void convertToLegacy(storm_file_layer_props_t &lprops) const;
@@ -473,6 +478,7 @@ public:
     // methods
     
     StormDbzHist();
+    void initialize();
     void setFromLegacy(const storm_file_dbz_hist_t &hist);
     storm_file_dbz_hist_t convertToLegacy() const;
     void convertToLegacy(storm_file_dbz_hist_t &hist) const;
@@ -503,6 +509,7 @@ public:
     // methods
     
     StormRun();
+    void initialize();
     void setFromLegacy(const storm_file_run_t &run);
     storm_file_run_t convertToLegacy() const;
     void convertToLegacy(storm_file_run_t &run) const;
@@ -533,6 +540,7 @@ public:
     // methods
     
     TrackFcastProps();
+    void initialize();
     void setFromLegacy(const track_file_forecast_props_t &fprops);
     track_file_forecast_props_t convertToLegacy() const;
     void convertToLegacy(track_file_forecast_props_t &fprops) const;
@@ -567,6 +575,7 @@ public:
     // methods
     
     TrackVerify();
+    void initialize();
     void setFromLegacy(const track_file_verify_t &verify);
     track_file_verify_t convertToLegacy() const;
     void convertToLegacy(track_file_verify_t &verify) const;
@@ -619,6 +628,7 @@ public:
     // methods
     
     TrackContingency();
+    void initialize();
     void setFromLegacy(const track_file_contingency_data_t &cont);
     track_file_contingency_data_t convertToLegacy() const;
     void convertToLegacy(track_file_contingency_data_t &cont) const;
@@ -642,6 +652,7 @@ public:
     // methods
     
     TrackingParams();
+    void initialize();
     void setFromLegacy(const track_file_params_t &params);
     track_file_params_t convertToLegacy() const;
     void convertToLegacy(track_file_params_t &params) const;
@@ -720,6 +731,7 @@ public:
     // methods
     
     TrackHeader();
+    void initialize();
     void setFromLegacy(const track_file_header_t &hdr);
     track_file_header_t convertToLegacy() const;
     void convertToLegacy(track_file_header_t &hdr) const;
@@ -788,6 +800,7 @@ public:
     // methods
     
     SimpleTrackParams();
+    void initialize();
     void setFromLegacy(const simple_track_params_t &params);
     simple_track_params_t convertToLegacy() const;
     void convertToLegacy(simple_track_params_t &params) const;
@@ -857,6 +870,7 @@ public:
     // methods
     
     ComplexTrackParams();
+    void initialize();
     void setFromLegacy(const complex_track_params_t &params);
     complex_track_params_t convertToLegacy() const;
     void convertToLegacy(complex_track_params_t &params) const;
@@ -929,6 +943,7 @@ public:
     // methods
     
     TrackEntry();
+    void initialize();
     void setFromLegacy(const track_file_entry_t &entry);
     track_file_entry_t convertToLegacy() const;
     void convertToLegacy(track_file_entry_t &entry) const;
@@ -992,6 +1007,7 @@ public:
     // methods
     
     TrackScanIndex();
+    void initialize();
     void setFromLegacy(const track_file_scan_index_t &index);
     track_file_scan_index_t convertToLegacy() const;
     void convertToLegacy(track_file_scan_index_t &index) const;

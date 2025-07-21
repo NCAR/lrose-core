@@ -489,8 +489,8 @@ public:
   
   // track data access
 
-  const track_file_header_t &track_header() const { return _track_header; }
-  const track_file_params_t &track_params() const { return _track_header.params; }
+  const TitanData::TrackHeader &track_header() const { return _track_header; }
+  const TitanData::TrackingParams &track_params() const { return _track_header.params; }
   const simple_track_params_t &simple_params() const;
   const complex_track_params_t &complex_params() const;
   const track_file_entry_t &entry() const { return _entry; }
@@ -763,7 +763,7 @@ public:
   // write the track_file_header_t structure to a track data file
   // returns 0 on success, -1 on failure
 
-  int writeTrackHeader(const track_file_header_t &track_file_header,
+  int writeTrackHeader(const TitanData::TrackHeader &track_file_header,
                        const si32 *complex_track_nums,
                        const si32 *n_simples_per_complex,
                        const si32 **simples_per_complex_2D);
@@ -1003,7 +1003,7 @@ protected:
   
   // track data
 
-  track_file_header_t _track_header;
+  TitanData::TrackHeader _track_header;
   simple_track_params_t _simple_params;
   complex_track_params_t _complex_params;
   track_file_entry_t _entry;

@@ -1671,7 +1671,7 @@ int TitanTrackFile::WriteHeader()
   _header.file_time = time(NULL);
 
   // set file names if not set
-
+  
   if (strlen(_header.header_file_name) == 0) {
     Path hpath(_header_file_path);
     STRncopy(_header.header_file_name, hpath.getFile().c_str(), R_LABEL_LEN);
@@ -1721,7 +1721,7 @@ int TitanTrackFile::WriteHeader()
   track_file_scan_index_t *scan_index = sindexArray.alloc(n_scans);
 
   // copy the header and arrays to local variables
-  
+
   track_file_header_t header = _header;
   
   memcpy (complex_track_nums, _complex_track_nums,

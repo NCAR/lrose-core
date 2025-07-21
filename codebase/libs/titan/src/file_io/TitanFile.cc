@@ -63,14 +63,6 @@ TitanFile::TitanFile()
 
   // storms
   
-  // MEM_zero(_storm_header);
-  // MEM_zero(_scan);
-  // _gprops = nullptr;
-  // _lprops = nullptr;
-  // _hist = nullptr;
-  // _runs = nullptr;
-  // _proj_runs = nullptr;
-
   _max_storms = 0;
   _max_layers = 0;
   _max_hist = 0;
@@ -86,7 +78,7 @@ TitanFile::TitanFile()
 
   // tracks
 
-  MEM_zero(_track_header);
+  // MEM_zero(_track_header);
   MEM_zero(_simple_params);
   MEM_zero(_complex_params);
   MEM_zero(_entry);
@@ -3447,7 +3439,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
       return -1;
     }
     // save state
-    _track_header = _tFile.header();
+    _track_header.setFromLegacy(_tFile.header());
     assert(_nScans == _track_header.n_scans);
     allocComplexArrays(_track_header.n_complex_tracks);
     allocSimpleArrays(_track_header.n_simple_tracks);
@@ -3473,7 +3465,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
    
   // read in header data
   
-  track_file_params_t &tparams = _track_header.params;
+  TitanData::TrackingParams &tparams = _track_header.params;
   
   _topLevelVars.max_simple_track_num.getVal(&_track_header.max_simple_track_num);
   _topLevelVars.max_complex_track_num.getVal(&_track_header.max_complex_track_num);
@@ -4274,7 +4266,7 @@ void TitanFile::reinit()
      
 {
   
-  MEM_zero(_track_header);
+  _track_header.initialize();
   MEM_zero(_complex_params);
   MEM_zero(_simple_params);
   MEM_zero(_entry);
@@ -4531,7 +4523,7 @@ int TitanFile::seekTrackStartData()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
+int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
                                 const si32 *complex_track_nums,
                                 const si32 *n_simples_per_complex,
                                 const si32 **simples_per_complex_2D)
@@ -4565,7 +4557,7 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    if (_tFile.WriteHeader(track_file_header,
+    if (_tFile.WriteHeader(_track_header.convertToLegacy(),
                            _complex_track_nums,
                            _n_simples_per_complex,
                            (const si32**) _simples_per_complex_2D)) {
@@ -4581,7 +4573,7 @@ int TitanFile::writeTrackHeader(const track_file_header_t &track_file_header,
 
   // make copy
   
-  const track_file_params_t &tparams(_track_header.params);
+  const TitanData::TrackingParams &tparams(_track_header.params);
   
   // set top level vars
   

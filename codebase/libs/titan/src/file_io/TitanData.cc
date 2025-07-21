@@ -43,11 +43,12 @@ using namespace std;
 // StormParams
 
 TitanData::StormParams::StormParams()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::StormParams::initialize()
+{
   low_dbz_threshold = 0.0;
   high_dbz_threshold = 0.0;
   dbz_hist_interval = 0.0;
@@ -84,7 +85,6 @@ TitanData::StormParams::StormParams()
   low_convectivity_threshold = 0.0;
   high_convectivity_threshold = 0.0;
   precip_computation_mode = PRECIP_FROM_COLUMN_MAX;
-
 }
 
 void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
@@ -146,6 +146,7 @@ void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
 storm_file_params_t TitanData::StormParams::convertToLegacy() const
 {
   storm_file_params_t sparams;
+  MEM_zero(sparams);
   convertToLegacy(sparams);
   return sparams;
 }
@@ -283,16 +284,16 @@ void TitanData::StormParams::print(FILE *out, const char *spacer)
 // StormHeader
 
 TitanData::StormHeader::StormHeader()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::StormHeader::initialize()
+{
   file_time = 0;
   start_time = 0;
   end_time = 0;
   n_scans = 0;
-  
 }
 
 void TitanData::StormHeader::setFromLegacy(const storm_file_header_t &hdr)
@@ -320,6 +321,7 @@ void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr) const
 storm_file_header_t TitanData::StormHeader::convertToLegacy() const
 {
   storm_file_header_t hdr;
+  MEM_zero(hdr);
   convertToLegacy(hdr);
   return hdr;
 }
@@ -346,11 +348,12 @@ void TitanData::StormHeader::print(FILE *out, const char *spacer)
 // ScanHeader
 
 TitanData::ScanHeader::ScanHeader()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::ScanHeader::initialize()
+{
   time = 0;
   gprops_offset = 0;
   first_offset = 0;
@@ -370,7 +373,6 @@ TitanData::ScanHeader::ScanHeader()
   grid.dy = 1.0;
   grid.dz = 1.0;
   grid.dz_constant = 1;
-  
 }
 
 void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t &hdr)
@@ -434,6 +436,7 @@ void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t &hdr)
 storm_file_scan_header_t TitanData::ScanHeader::convertToLegacy() const
 {
   storm_file_scan_header_t scan;
+  MEM_zero(scan);
   convertToLegacy(scan);
   return scan;
 }
@@ -535,11 +538,13 @@ void TitanData::ScanHeader::print(FILE *out,
 // Storm Global Properties
 
 TitanData::StormGprops::StormGprops()
+{
+  initialize();
+}
 
+void TitanData::StormGprops::initialize()
 {
 
-  // initialize to 0
-  
   layer_props_offset = 0;
   dbz_hist_offset = 0;
   runs_offset = 0;
@@ -721,6 +726,7 @@ void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
 storm_file_global_props_t TitanData::StormGprops::convertToLegacy() const
 {
   storm_file_global_props_t gprops;
+  MEM_zero(gprops);
   convertToLegacy(gprops);
   return gprops;
 }
@@ -939,16 +945,16 @@ void TitanData::StormGprops::print(FILE *out,
 // Storm Layer Properties
 
 TitanData::StormLprops::StormLprops()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::StormLprops::initialize()
+{
   vol_centroid_x = 0.0;
   vol_centroid_y = 0.0;
   refl_centroid_x = 0.0;
   refl_centroid_y = 0.0;
-  
   area = 0.0;
   dbz_max = 0.0;
   dbz_mean = 0.0;
@@ -956,7 +962,6 @@ TitanData::StormLprops::StormLprops()
   rad_vel_sd = 0.0;
   vorticity = 0.0;
   convectivity_median = 0.0;
-
 }
 
 void TitanData::StormLprops::setFromLegacy(const storm_file_layer_props_t &lprops)
@@ -982,6 +987,7 @@ void TitanData::StormLprops::setFromLegacy(const storm_file_layer_props_t &lprop
 storm_file_layer_props_t TitanData::StormLprops::convertToLegacy() const
 {
   storm_file_layer_props_t lprops;
+  MEM_zero(lprops);
   convertToLegacy(lprops);
   return lprops;
 }
@@ -1102,14 +1108,14 @@ void TitanData::StormLprops::print(FILE *out,
 // Storm Dbz Histograms
 
 TitanData::StormDbzHist::StormDbzHist()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
-  percent_volume = 0;
-  percent_area = 0;
-
+void TitanData::StormDbzHist::initialize()
+{
+  percent_volume = 0.0;
+  percent_area = 0.0;
 }
 
 void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &hist)
@@ -1123,6 +1129,7 @@ void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &hist)
 storm_file_dbz_hist_t TitanData::StormDbzHist::convertToLegacy() const
 {
   storm_file_dbz_hist_t hist;
+  MEM_zero(hist);
   convertToLegacy(hist);
   return hist;
 }
@@ -1190,16 +1197,16 @@ void TitanData::StormDbzHist::print(FILE *out,
 // Storm Run - contiguous grid cells in a row
 
 TitanData::StormRun::StormRun()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::StormRun::initialize()
+{
   run_ix = 0;
   run_iy = 0;
   run_iz = 0;
   run_len = 0;
-
 }
 
 void TitanData::StormRun::setFromLegacy(const storm_file_run_t &run)
@@ -1215,6 +1222,7 @@ void TitanData::StormRun::setFromLegacy(const storm_file_run_t &run)
 storm_file_run_t TitanData::StormRun::convertToLegacy() const
 {
   storm_file_run_t run;
+  MEM_zero(run);
   convertToLegacy(run);
   return run;
 }
@@ -1291,11 +1299,12 @@ void TitanData::StormRun::print(FILE *out,
 // track forecast properties
 
 TitanData::TrackFcastProps::TrackFcastProps()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::TrackFcastProps::initialize()
+{
   proj_area_centroid_x = 0.0;
   proj_area_centroid_y = 0.0;
   vol_centroid_z = 0.0;
@@ -1310,7 +1319,6 @@ TitanData::TrackFcastProps::TrackFcastProps()
   smoothed_proj_area_centroid_y = 0.0;
   smoothed_speed = 0.0;
   smoothed_direction = 0.0;
-
 }
 
 void TitanData::TrackFcastProps::setFromLegacy(const track_file_forecast_props_t &fprops)
@@ -1336,6 +1344,7 @@ void TitanData::TrackFcastProps::setFromLegacy(const track_file_forecast_props_t
 track_file_forecast_props_t TitanData::TrackFcastProps::convertToLegacy() const
 {
   track_file_forecast_props_t fprops;
+  MEM_zero(fprops);
   convertToLegacy(fprops);
   return fprops;
 }
@@ -1391,11 +1400,12 @@ void TitanData::TrackFcastProps::print(FILE *out,
 // track forecast verification
 
 TitanData::TrackVerify::TrackVerify()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::TrackVerify::initialize()
+{
   end_time = 0;
   verification_performed = false;
   forecast_lead_time = 0;
@@ -1403,7 +1413,6 @@ TitanData::TrackVerify::TrackVerify()
   forecast_min_history = 0;
   verify_before_forecast_time = false;
   verify_after_track_dies = false;
-  
   MEM_zero(grid);
   grid.proj_type = Mdvx::PROJ_LATLON;
   grid.nx = 1;
@@ -1413,7 +1422,6 @@ TitanData::TrackVerify::TrackVerify()
   grid.dy = 1.0;
   grid.dz = 1.0;
   grid.dz_constant = 1;
-  
 }
 
 void TitanData::TrackVerify::setFromLegacy(const track_file_verify_t &verify)
@@ -1474,6 +1482,7 @@ void TitanData::TrackVerify::setFromLegacy(const track_file_verify_t &verify)
 track_file_verify_t TitanData::TrackVerify::convertToLegacy() const
 {
   track_file_verify_t verify;
+  MEM_zero(verify);
   convertToLegacy(verify);
   return verify;
 }
@@ -1558,15 +1567,15 @@ void TitanData::TrackVerify::print(FILE *out,
 // contingency results for verification
 
 TitanData::TrackContingency::TrackContingency()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
-  n_success = 0;
-  n_failure = 0;
-  n_false_alarm = 0;
-
+void TitanData::TrackContingency::initialize()
+{
+  n_success = 0.0;
+  n_failure = 0.0;
+  n_false_alarm = 0.0;
 }
 
 void TitanData::TrackContingency::setFromLegacy(const track_file_contingency_data_t &cont)
@@ -1581,6 +1590,7 @@ void TitanData::TrackContingency::setFromLegacy(const track_file_contingency_dat
 track_file_contingency_data_t TitanData::TrackContingency::convertToLegacy() const
 {
   track_file_contingency_data_t cont;
+  MEM_zero(cont);
   convertToLegacy(cont);
   return cont;
 }
@@ -1638,11 +1648,12 @@ void TitanData::TrackContingency::print(FILE *out,
 // tracking parameters
 
 TitanData::TrackingParams::TrackingParams()
-  
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::TrackingParams::initialize()
+{
   MEM_zero(forecast_weights);
   weight_distance = 0.0;
   weight_delta_cube_root_volume = 0.0;
@@ -1661,7 +1672,6 @@ TitanData::TrackingParams::TrackingParams()
   max_delta_time = 0;
   min_history_for_valid_forecast = 0;
   spatial_smoothing = false;
-
 }
 
 void TitanData::TrackingParams::setFromLegacy(const track_file_params_t &params)
@@ -1691,6 +1701,7 @@ void TitanData::TrackingParams::setFromLegacy(const track_file_params_t &params)
 track_file_params_t TitanData::TrackingParams::convertToLegacy() const
 {
   track_file_params_t params;
+  MEM_zero(params);
   convertToLegacy(params);
   return params;
 }
@@ -1768,11 +1779,12 @@ void TitanData::TrackingParams::print(FILE *out,
 // TrackHeader
 
 TitanData::TrackHeader::TrackHeader()
-
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::TrackHeader::initialize()
+{
   file_valid = false;
   modify_code = 0;
   n_simple_tracks = 0;
@@ -1785,7 +1797,12 @@ TitanData::TrackHeader::TrackHeader()
   max_parents = 0;
   max_children = 0;
   max_nweights_forecast = 0;
-  
+  params.initialize();
+  verify.initialize();
+  ellipse_verify.initialize();
+  polygon_verify.initialize();
+  forecast_bias.initialize();
+  forecast_rmse.initialize();
 }
 
 void TitanData::TrackHeader::setFromLegacy(const track_file_header_t &hdr)
@@ -1816,6 +1833,7 @@ void TitanData::TrackHeader::setFromLegacy(const track_file_header_t &hdr)
 track_file_header_t TitanData::TrackHeader::convertToLegacy() const
 {
   track_file_header_t hdr;
+  MEM_zero(hdr);
   convertToLegacy(hdr);
   return hdr;
 }
@@ -1882,11 +1900,12 @@ void TitanData::TrackHeader::print(FILE *out,
 // simple track parameters
 
 TitanData::SimpleTrackParams::SimpleTrackParams()
-  
 {
+  initialize();
+}
 
-  // initialize to 0
-  
+void TitanData::SimpleTrackParams::initialize()
+{
   start_time = 0;
   end_time = 0;
   last_descendant_end_time = 0;
@@ -1907,7 +1926,6 @@ TitanData::SimpleTrackParams::SimpleTrackParams()
   nchildren = 0;
   MEM_zero(parent);
   MEM_zero(child);
-  
 }
 
 void TitanData::SimpleTrackParams::setFromLegacy(const simple_track_params_t &params)
@@ -1943,6 +1961,7 @@ void TitanData::SimpleTrackParams::setFromLegacy(const simple_track_params_t &pa
 simple_track_params_t TitanData::SimpleTrackParams::convertToLegacy() const
 {
   simple_track_params_t params;
+  MEM_zero(params);
   convertToLegacy(params);
   return params;
 }
@@ -2046,11 +2065,12 @@ void TitanData::SimpleTrackParams::print(FILE *out,
 // complex track parameters
 
 TitanData::ComplexTrackParams::ComplexTrackParams()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::ComplexTrackParams::initialize()
+{
   start_time = 0;
   end_time = 0;
   complex_track_num = 0;
@@ -2066,7 +2086,10 @@ TitanData::ComplexTrackParams::ComplexTrackParams()
   start_missing = 0;
   end_missing = 0;
   n_samples_for_forecast_stats = 0;
-
+  ellipse_verify.initialize();
+  polygon_verify.initialize();
+  forecast_bias.initialize();
+  forecast_rmse.initialize();
 }
 
 void TitanData::ComplexTrackParams::setFromLegacy(const complex_track_params_t &params)
@@ -2098,6 +2121,7 @@ void TitanData::ComplexTrackParams::setFromLegacy(const complex_track_params_t &
 complex_track_params_t TitanData::ComplexTrackParams::convertToLegacy() const
 {
   complex_track_params_t params;
+  MEM_zero(params);
   convertToLegacy(params);
   return params;
 }
@@ -2203,11 +2227,12 @@ void TitanData::ComplexTrackParams::print(FILE *out,
 // track entry
 
 TitanData::TrackEntry::TrackEntry()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::TrackEntry::initialize()
+{
   time = 0;
   time_origin = 0;
   prev_entry_offset = 0;
@@ -2224,7 +2249,6 @@ TitanData::TrackEntry::TrackEntry()
   duration_in_scans = 0;
   duration_in_secs = 0;
   forecast_valid = false;
-
 }
 
 void TitanData::TrackEntry::setFromLegacy(const track_file_entry_t &entry)
@@ -2254,6 +2278,7 @@ void TitanData::TrackEntry::setFromLegacy(const track_file_entry_t &entry)
 track_file_entry_t TitanData::TrackEntry::convertToLegacy() const
 {
   track_file_entry_t entry;
+  MEM_zero(entry);
   convertToLegacy(entry);
   return entry;
 }
@@ -2337,15 +2362,15 @@ void TitanData::TrackEntry::print(FILE *out,
 // index of track in scan
 
 TitanData::TrackScanIndex::TrackScanIndex()
-  
 {
-
-  // initialize to 0
+  initialize();
+}
   
+void TitanData::TrackScanIndex::initialize()
+{
   utime = 0;
   first_entry_offset = 0;
   n_entries = 0;
-
 }
 
 void TitanData::TrackScanIndex::setFromLegacy(const track_file_scan_index_t &index)
@@ -2360,6 +2385,7 @@ void TitanData::TrackScanIndex::setFromLegacy(const track_file_scan_index_t &ind
 track_file_scan_index_t TitanData::TrackScanIndex::convertToLegacy() const
 {
   track_file_scan_index_t index;
+  MEM_zero(index);
   convertToLegacy(index);
   return index;
 }
