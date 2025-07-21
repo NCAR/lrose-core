@@ -496,7 +496,7 @@ public:
   const TitanData::TrackEntry &entry() const { return _entry; }
   const vector<TitanData::TrackEntry> &scan_entries() const { return _scan_entries; }
   const vector<TitanData::TrackScanIndex> &scan_index() const { return _scan_index; }
-  const track_utime_t *track_utime() const { return _track_utime; }
+  const vector<TitanData::TrackUtime_t> &track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
   
   const si32 *complex_track_nums() { return _complex_track_nums; }
@@ -1003,7 +1003,7 @@ protected:
   
   vector<TitanData::TrackScanIndex> _scan_index;
   vector<TitanData::TrackEntry> _scan_entries;
-  track_utime_t *_track_utime;
+  vector<TitanData::TrackUtime_t> _track_utime;
   
   si32 *_complex_track_nums;
   si32 *_n_simples_per_complex;
@@ -1023,7 +1023,7 @@ protected:
   int _n_simples_per_complex_2D_allocated;
   // int _n_scan_entries_allocated;
   // int _n_scan_index_allocated;
-  int _n_utime_allocated;
+  // int _n_utime_allocated;
   int _lowest_avail_complex_slot;
 
   // units for horizontal grids

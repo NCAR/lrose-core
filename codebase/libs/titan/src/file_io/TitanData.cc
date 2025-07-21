@@ -2435,6 +2435,44 @@ void TitanData::TrackScanIndex::print(FILE *out, const char *spacer,
 }
     
 ////////////////////////////////////////////////////
+// utimes - start and end tracks
+
+void TitanData::initialize(TrackUtime_t &utime)
+{
+  utime.start_simple = 0;
+  utime.end_simple = 0;
+  utime.start_simple = 0;
+  utime.end_simple = 0;
+}
+
+void TitanData::initialize(vector<TrackUtime_t> &utimes)
+{
+  for (size_t ii = 0; ii < utimes.size(); ii++) {
+    initialize(utimes[ii]);
+  }
+}
+
+// copy from legacy to current utime
+
+void TitanData::setUtimeFromLegacy(const track_utime_t &legacy, TrackUtime_t &current)
+{
+  current.start_simple = legacy.start_simple;
+  current.end_simple = legacy.end_simple;
+  current.start_simple = legacy.start_simple;
+  current.end_simple = legacy.end_simple;
+}
+
+// copy from new to legacy utime
+
+void TitanData::convertUtimeToLegacy(const TrackUtime_t &current, track_utime_t &legacy)
+{
+  legacy.start_simple = current.start_simple;
+  legacy.end_simple = current.end_simple;
+  legacy.start_simple = current.start_simple;
+  legacy.end_simple = current.end_simple;
+}
+
+////////////////////////////////////////////////////
 // print track arrays
 
 void TitanData::printTrackArrays(FILE *out, const char *spacer,

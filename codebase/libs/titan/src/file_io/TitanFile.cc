@@ -78,15 +78,6 @@ TitanFile::TitanFile()
 
   // tracks
 
-  // MEM_zero(_track_header);
-  // MEM_zero(_simple_params);
-  // MEM_zero(_complex_params);
-  // MEM_zero(_entry);
-
-  // _scan_index = nullptr;
-  // _scan_entries = nullptr;
-  _track_utime = nullptr;
-  
   _complex_track_nums = nullptr;
   _n_simples_per_complex = nullptr;
   _simples_per_complex_offsets = nullptr;
@@ -103,7 +94,7 @@ TitanFile::TitanFile()
   _n_simples_per_complex_2D_allocated = 0;
   // _n_scan_entries_allocated = 0;
   // _n_scan_index_allocated = 0;
-  _n_utime_allocated = 0;
+  // _n_utime_allocated = 0;
 
   _prevEntryOffset = 0;
 
@@ -3335,19 +3326,8 @@ void TitanFile::freeScanIndex()
 void TitanFile::allocUtime()
      
 {
-
-  if (_n_utime_allocated < _track_header.max_simple_track_num + 1) {
-      
-    _n_utime_allocated = _track_header.max_simple_track_num + 1;
-    
-    _track_utime = (track_utime_t *) urealloc
-      (_track_utime, _n_utime_allocated * sizeof(track_utime_t));
-    
-    memset (_track_utime, 0,
-	    _n_utime_allocated * sizeof(track_utime_t));
-      
-  }
-
+  int n_needed = _track_header.max_simple_track_num + 1;
+  _track_utime.resize(n_needed);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3361,11 +3341,7 @@ void TitanFile::allocUtime()
 void TitanFile::freeUtime()
      
 {
-  if (_track_utime) {
-    ufree(_track_utime);
-    _track_utime = nullptr;
-    _n_utime_allocated = 0;
-  }
+  _track_utime.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -4259,10 +4235,9 @@ void TitanFile::reinit()
     memset (_simples_per_complex_1D, 0,
 	    _n_simple_allocated * sizeof(si32));
   }
-    
-  if (_n_utime_allocated > 0) {
-    memset(_track_utime, 0,
-	   _n_utime_allocated * sizeof(track_utime_t));
+  
+  if (_track_utime.size() > 0) {
+    TitanData::initialize(_track_utime);
   }
 
 }

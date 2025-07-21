@@ -1026,6 +1026,31 @@ public:
 
   };  // TrackScanIndex
 
+  /*
+   * structure for the arrays which keep track of the start end end times
+   * of the simple and complex tracks
+   */
+  
+  typedef struct {
+    
+    int32_t start_simple;
+    int32_t end_simple;
+    int32_t start_complex;
+    int32_t end_complex;
+    
+  } TrackUtime_t;
+
+  static void initialize(TrackUtime_t &utime);
+  static void initialize(vector<TrackUtime_t> &utimes);
+    
+  // copy from legacy to new utime
+  
+  static void setUtimeFromLegacy(const track_utime_t &legacy, TrackUtime_t &current);
+
+  // copy from new to legacy utime
+  
+  static void convertUtimeToLegacy(const TrackUtime_t &current, track_utime_t &legacy);
+
   // print track arrays
   
   static void printTrackArrays(FILE *out, const char *spacer,
