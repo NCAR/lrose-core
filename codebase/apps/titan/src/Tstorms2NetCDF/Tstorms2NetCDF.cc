@@ -319,8 +319,8 @@ int Tstorms2NetCDF::_processInputFile()
   
   // get the complex track numbers array
   
-  const si32 *complexTrackNums = _inFile.complex_track_nums();
-
+  const int32_t *complexTrackNums = _inFile.complex_track_nums().data();
+  
   // loop through complex tracks, reading parameters for each
   
   for (int icomp = 0; icomp < theader.n_complex_tracks; icomp++) {
@@ -365,12 +365,12 @@ int Tstorms2NetCDF::_processInputFile()
 
   // write the simples_per_complex arrays
 
-  vector<si32> simpsPerComplex1D;
-  vector<si32> simpsPerComplexOffsets;
+  vector<int32_t> simpsPerComplex1D;
+  vector<int32_t> simpsPerComplexOffsets;
   _inFile.loadVecSimplesPerComplex(simpsPerComplex1D, simpsPerComplexOffsets);
   _outFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
                                         _inFile.n_simples_per_complex(),
-                                        simpsPerComplexOffsets.data(),
+                                        simpsPerComplexOffsets,
                                         simpsPerComplex1D.data());
   
   // read in track scan index
@@ -486,7 +486,7 @@ int Tstorms2NetCDF::_processInputFile()
   _outFile.writeTrackHeader(_inFile.track_header(),
                             _inFile.complex_track_nums(),
                             _inFile.n_simples_per_complex(),
-                            (const si32**) _inFile.simples_per_complex_2D());
+                            (const int32_t**) _inFile.simples_per_complex_2D());
 
   // test truncate if requested
   

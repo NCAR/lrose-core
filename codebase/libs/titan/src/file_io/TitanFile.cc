@@ -38,6 +38,7 @@
 #include <cassert>
 
 #include <filesystem>
+#include <algorithm>
 using Fpath = std::filesystem::path;
 
 #include <dataport/bigend.h>
@@ -78,19 +79,19 @@ TitanFile::TitanFile()
 
   // tracks
 
-  _complex_track_nums = nullptr;
-  _n_simples_per_complex = nullptr;
-  _simples_per_complex_offsets = nullptr;
+  // _complex_track_nums = nullptr;
+  // _n_simples_per_complex = nullptr;
+  // _simples_per_complex_offsets = nullptr;
   _simples_per_complex_1D = nullptr;
   _simples_per_complex_2D = nullptr;
 
   _first_entry = true;
 
-  _n_scan_entries = 0;
+  // _n_scan_entries = 0;
   _lowest_avail_complex_slot = 0;
 
   _n_simple_allocated = 0;
-  _n_complex_allocated = 0;
+  // _n_complex_allocated = 0;
   _n_simples_per_complex_2D_allocated = 0;
   // _n_scan_entries_allocated = 0;
   // _n_scan_index_allocated = 0;
@@ -3095,19 +3096,6 @@ void TitanFile::_clear2DVar(NcxxVar &var,
     
 }
 
-////////////////////////////////////////////////////////////
-// track data access
-
-const TitanData::SimpleTrackParams &TitanFile::simple_params() const { 
-  return _simple_params;
-}
-
-const TitanData::ComplexTrackParams &TitanFile::complex_params() const {
-  return _complex_params;
-}
-
-#define N_ALLOC 20
-
 ///////////////////////////////////////////////////////////////////////////
 //
 // TitanFile::allocSimpleArrays()
@@ -3119,37 +3107,30 @@ const TitanData::ComplexTrackParams &TitanFile::complex_params() const {
 void TitanFile::allocSimpleArrays(int n_simple_needed)
      
 {
-
+  
   if (_n_simple_allocated < n_simple_needed) {
     
-    int n_start = _n_simple_allocated;
-    int n_realloc = n_simple_needed + N_ALLOC;
-    _n_simple_allocated = n_realloc;
+    _n_simples_per_complex.resize(n_simple_needed, 0);
+    _simples_per_complex_offsets.resize(n_simple_needed, 0);
     
-    // _simple_track_offsets = (si32 *) urealloc
-    //   (_simple_track_offsets, n_realloc * sizeof(si32));
-      
-    _n_simples_per_complex = (si32 *) urealloc
-      (_n_simples_per_complex, n_realloc * sizeof(si32));
+    _simples_per_complex_1D = (int32_t *) urealloc
+      (_simples_per_complex_1D, n_simple_needed * sizeof(int32_t));
     
-    _simples_per_complex_offsets = (si32 *) urealloc
-      (_simples_per_complex_offsets, n_realloc * sizeof(si32));
-    
-    _simples_per_complex_1D = (si32 *) urealloc
-      (_simples_per_complex_1D, n_realloc * sizeof(si32));
-    
-    _simples_per_complex_2D = (si32 **) urealloc
-      (_simples_per_complex_2D, n_realloc * sizeof(si32 *));
+    _simples_per_complex_2D = (int32_t **) urealloc
+      (_simples_per_complex_2D, n_simple_needed * sizeof(int32_t *));
     
     // initialize new elements to zero
-  
-    int n_new = _n_simple_allocated - n_start;
+    
+    int n_start = _n_simple_allocated;
+    int n_new = n_simple_needed - _n_simple_allocated;
 
-    memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(si32));
-    memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(si32));
-    memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(si32));
-    memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(si32 *));
+    // memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(int32_t));
+    // memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(int32_t));
+    memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(int32_t));
+    memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(int32_t *));
   
+    _n_simple_allocated = n_simple_needed;
+
   } // if (_n_simple_allocated < n_simple_needed) 
 
 }
@@ -3166,15 +3147,8 @@ void TitanFile::freeSimpleArrays()
      
 {
   
-  if (_n_simples_per_complex) {
-    ufree(_n_simples_per_complex);
-    _n_simples_per_complex = nullptr;
-  }
-
-  if (_simples_per_complex_offsets) {
-    ufree(_simples_per_complex_offsets);
-    _simples_per_complex_offsets = nullptr;
-  }
+  _n_simples_per_complex.clear();
+  _simples_per_complex_offsets.clear();
 
   if (_simples_per_complex_1D) {
     ufree(_simples_per_complex_1D);
@@ -3208,23 +3182,8 @@ void TitanFile::allocComplexArrays(int n_complex_needed)
      
 {
 
-  if (_n_complex_allocated < n_complex_needed) {
-
-    // allocate the required space plus a buffer so that 
-    // we do not do too many reallocs
-    
-    int n_start = _n_complex_allocated;
-    int n_realloc = n_complex_needed + N_ALLOC;
-    _n_complex_allocated = n_realloc;
-    
-    _complex_track_nums = (si32 *) urealloc
-      (_complex_track_nums, n_realloc * sizeof(si32));
-
-    // initialize new elements to zero
-  
-    int n_new = n_realloc - n_start;
-    memset (_complex_track_nums + n_start, 0, n_new * sizeof(si32));
-    
+  if (n_complex_needed > (int) _complex_track_nums.size()) {
+    _complex_track_nums.resize(n_complex_needed, 0);
   }
 
 }
@@ -3240,13 +3199,7 @@ void TitanFile::allocComplexArrays(int n_complex_needed)
 void TitanFile::freeComplexArrays()
      
 {
-
-  if (_complex_track_nums) {
-    ufree(_complex_track_nums);
-    _complex_track_nums = nullptr;
-    _n_complex_allocated = 0;
-  }
-
+  _complex_track_nums.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3263,7 +3216,6 @@ void TitanFile::allocScanEntries(int n_entries_needed)
   
   if (n_entries_needed > (int) _scan_entries.size()) {
     _scan_entries.resize(n_entries_needed);
-    // _n_scan_entries_allocated = n_entries_needed;
   }
 
 }
@@ -3280,7 +3232,6 @@ void TitanFile::freeScanEntries()
      
 {
   _scan_entries.clear();
-  // _n_scan_entries_allocated = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3389,12 +3340,12 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
     assert(_nScans == _track_header.n_scans);
     allocComplexArrays(_track_header.n_complex_tracks);
     allocSimpleArrays(_track_header.n_simple_tracks);
-    memcpy(_complex_track_nums, _tFile.complex_track_nums(),
-           _track_header.n_complex_tracks * sizeof(si32));
-    memcpy(_n_simples_per_complex, _tFile.nsimples_per_complex(),
-           _track_header.n_simple_tracks * sizeof(si32));
-    memcpy(_simples_per_complex_offsets, _tFile.simples_per_complex_offsets(),
-           _track_header.n_simple_tracks * sizeof(si32));
+    memcpy(_complex_track_nums.data(), _tFile.complex_track_nums(),
+           _track_header.n_complex_tracks * sizeof(int32_t));
+    memcpy(_n_simples_per_complex.data(), _tFile.nsimples_per_complex(),
+           _track_header.n_simple_tracks * sizeof(int32_t));
+    memcpy(_simples_per_complex_offsets.data(), _tFile.simples_per_complex_offsets(),
+           _track_header.n_simple_tracks * sizeof(int32_t));
     // read in simples per complex
     if (readSimplesPerComplex()) {
       _errStr = _tFile.getErrStr();
@@ -3579,7 +3530,7 @@ int TitanFile::readTrackHeader(bool clear_error_str /* = true*/ )
   
   std::vector<size_t> compNumIndex = NcxxVar::makeIndex(0);
   std::vector<size_t> compNumCount = NcxxVar::makeIndex(_track_header.n_complex_tracks);
-  _complexTrackNumsVar.getVal(compNumIndex, compNumCount, _complex_track_nums);
+  _complexTrackNumsVar.getVal(compNumIndex, compNumCount, _complex_track_nums.data());
 
   // read in simples_per_complex 1D array, create 2D array
   
@@ -3964,12 +3915,12 @@ int TitanFile::readSimplesPerComplex()
     for (int itrack = 0; itrack < _track_header.n_complex_tracks; itrack++) {
       int complex_num = _tFile.complex_track_nums()[itrack];
       int nsimples = _tFile.nsimples_per_complex()[complex_num];
-      _simples_per_complex_2D[complex_num] = (si32 *) urealloc
+      _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
         (_simples_per_complex_2D[complex_num],
-         (nsimples * sizeof(si32)));
+         (nsimples * sizeof(int32_t)));
       memcpy(_simples_per_complex_2D[complex_num],
              _tFile.simples_per_complex()[complex_num],
-             nsimples * sizeof(si32));
+             nsimples * sizeof(int32_t));
     } // itrack
 
     // fill 1D array
@@ -3980,7 +3931,7 @@ int TitanFile::readSimplesPerComplex()
       int nsimples = _n_simples_per_complex[complex_num];
       memcpy(_simples_per_complex_1D + offset,
              _simples_per_complex_2D[complex_num],
-             nsimples * sizeof(si32));
+             nsimples * sizeof(int32_t));
       offset += nsimples;
     } // itrack
     
@@ -4002,12 +3953,12 @@ int TitanFile::readSimplesPerComplex()
   // read in n_simples_per_complex
   
   _simpleVars.n_simples_per_complex.getVal
-    (nSimpIndex, nSimpCount, _n_simples_per_complex);
+    (nSimpIndex, nSimpCount, _n_simples_per_complex.data());
   
   // read in simples_per_complex_offsets
   
   _simpleVars.simples_per_complex_offsets.getVal
-    (nSimpIndex, nSimpCount, _simples_per_complex_offsets);
+    (nSimpIndex, nSimpCount, _simples_per_complex_offsets.data());
   
   // read in simples_per_complex 1D array
   
@@ -4022,9 +3973,9 @@ int TitanFile::readSimplesPerComplex()
     int n_simples = _n_simples_per_complex[complex_num];
     int simples_offset = _simples_per_complex_offsets[complex_num];
     
-    _simples_per_complex_2D[complex_num] = (si32 *) urealloc
+    _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
       (_simples_per_complex_2D[complex_num],
-       (n_simples * sizeof(si32)));
+       (n_simples * sizeof(int32_t)));
     
     for (int isimp = 0; isimp < n_simples; isimp++) {
       _simples_per_complex_2D[complex_num][isimp] =
@@ -4041,12 +3992,12 @@ int TitanFile::readSimplesPerComplex()
 //
 // load vector with simples per complex, in linear order
 //
-// in memory these are stored in a si32** 2-d array
+// in memory these are stored in a int32_t** 2-d array
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::loadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
-                                         vector<si32> &simpsPerComplexOffsets)
+void TitanFile::loadVecSimplesPerComplex(vector<int32_t> &simpsPerComplexLin,
+                                         vector<int32_t> &simpsPerComplexOffsets)
   
 {
 
@@ -4058,7 +4009,7 @@ void TitanFile::loadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
     
     int complex_num = _complex_track_nums[itrack];
     int nsimples = _n_simples_per_complex[complex_num];
-    si32 *simples = _simples_per_complex_2D[complex_num];
+    int32_t *simples = _simples_per_complex_2D[complex_num];
 
     for (int ii = 0; ii < nsimples; ii++) {
       simpsPerComplexLin.push_back(simples[ii]);
@@ -4091,10 +4042,10 @@ int TitanFile::readScanEntries(int scan_num)
       return -1;
     }
     // save state
-    _n_scan_entries = _tFile.n_scan_entries();
-    allocScanEntries(_n_scan_entries);
+    // int n_scan_entries = _tFile.n_scan_entries();
+    allocScanEntries(_tFile.n_scan_entries());
     TitanData::TrackEntry::setFromLegacy(_tFile.scan_entries(), _scan_entries);
-    // memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
+     // memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
     return 0;
   }
 
@@ -4110,8 +4061,8 @@ int TitanFile::readScanEntries(int scan_num)
   
   // allocate as necessary
   
-  _n_scan_entries = nStorms;
-  allocScanEntries(_n_scan_entries);
+  // _n_scan_entries = nStorms;
+  allocScanEntries(nStorms);
   
   // loop through storms, reading in the entries
   
@@ -4151,8 +4102,8 @@ int TitanFile::readUtime()
       return -1;
     }
     // save state
-    _n_scan_entries = _tFile.n_scan_entries();
-    allocScanEntries(_n_scan_entries);
+    // int n_scan_entries = _tFile.n_scan_entries();
+    allocScanEntries(_tFile.n_scan_entries());
     TitanData::TrackEntry::setFromLegacy(_tFile.scan_entries(), _scan_entries);
     // memcpy(_scan_entries, _tFile.scan_entries(),
     //        _n_scan_entries * sizeof(track_file_entry_t));
@@ -4219,21 +4170,18 @@ void TitanFile::reinit()
   _simple_params.initialize();
   _entry.initialize();
   
-  if (_n_complex_allocated > 0) {
-    memset(_complex_track_nums, 0, _n_complex_allocated * sizeof(si32));
-  }
+  std::fill(_complex_track_nums.begin(), _complex_track_nums.end(), 0);
+  std::fill(_n_simples_per_complex.begin(), _n_simples_per_complex.end(), 0);
+  std::fill(_simples_per_complex_offsets.begin(),
+            _simples_per_complex_offsets.end(), 0);
 
   for (size_t ii = 0; ii < _scan_entries.size(); ii++) {
     _scan_entries[ii].initialize();
   }
   
   if (_n_simple_allocated > 0) {
-    memset (_n_simples_per_complex, 0,
-	    _n_simple_allocated * sizeof(si32));
-    memset (_simples_per_complex_offsets, 0,
-	    _n_simple_allocated * sizeof(si32));
     memset (_simples_per_complex_1D, 0,
-	    _n_simple_allocated * sizeof(si32));
+	    _n_simple_allocated * sizeof(int32_t));
   }
   
   if (_track_utime.size() > 0) {
@@ -4471,9 +4419,9 @@ int TitanFile::seekTrackStartData()
 ///////////////////////////////////////////////////////////////////////////
 
 int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
-                                const si32 *complex_track_nums,
-                                const si32 *n_simples_per_complex,
-                                const si32 **simples_per_complex_2D)
+                                const vector<int32_t> &complex_track_nums,
+                                const vector<int32_t> &n_simples_per_complex,
+                                const int32_t **simples_per_complex_2D)
      
 {
 
@@ -4484,30 +4432,27 @@ int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
   allocSimpleArrays(_track_header.n_simple_tracks);
   allocComplexArrays(_track_header.n_complex_tracks);
   
-  memcpy(_complex_track_nums, complex_track_nums,
-         _track_header.n_complex_tracks *  sizeof(si32));
-
-  memcpy(_n_simples_per_complex, n_simples_per_complex,
-         _track_header.n_simple_tracks *  sizeof(si32));
+  _complex_track_nums = complex_track_nums;
+  _n_simples_per_complex = n_simples_per_complex;
   
   for (int ii = 0; ii < _track_header.n_complex_tracks; ii++) {
     int complex_num = complex_track_nums[ii];
     int nsimples = n_simples_per_complex[complex_num];
-    _simples_per_complex_2D[complex_num] = (si32 *) urealloc
+    _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
       (_simples_per_complex_2D[complex_num],
-       (nsimples * sizeof(si32)));
+       (nsimples * sizeof(int32_t)));
     memcpy(_simples_per_complex_2D[complex_num],
            simples_per_complex_2D[complex_num],
-           nsimples * sizeof(si32));
+           nsimples * sizeof(int32_t));
   }
   
   // handle legacy format
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteHeader(_track_header.convertToLegacy(),
-                           _complex_track_nums,
-                           _n_simples_per_complex,
-                           (const si32**) _simples_per_complex_2D)) {
+                           _complex_track_nums.data(),
+                           _n_simples_per_complex.data(),
+                           (const int32_t**) _simples_per_complex_2D)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }
@@ -4915,9 +4860,9 @@ int TitanFile::writeTrackEntry(const TitanData::TrackEntry &entry)
 // returns 0 on success, -1 on failure
 
 int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
-                                            const si32 *n_simples_per_complex,
-                                            const si32 *simples_per_complex_offsets,
-                                            const si32 *simples_per_complex_1D)
+                                            const vector<int32_t> &n_simples_per_complex,
+                                            const vector<int32_t> &simples_per_complex_offsets,
+                                            const int32_t *simples_per_complex_1D)
   
 {
 
@@ -4928,9 +4873,12 @@ int TitanFile::writeSimplesPerComplexArrays(int n_simple_tracks,
   std::vector<size_t> index = NcxxVar::makeIndex(0);
   std::vector<size_t> count = NcxxVar::makeIndex(n_simple_tracks);
   
-  _simpleVars.n_simples_per_complex.putVal(index, count, n_simples_per_complex);
-  _simpleVars.simples_per_complex_offsets.putVal(index, count, simples_per_complex_offsets);
-  _simpleVars.simples_per_complex_1D.putVal(index, count, simples_per_complex_1D);
+  _simpleVars.n_simples_per_complex.putVal
+    (index, count, n_simples_per_complex.data());
+  _simpleVars.simples_per_complex_offsets.putVal
+    (index, count, simples_per_complex_offsets.data());
+  _simpleVars.simples_per_complex_1D.putVal
+    (index, count, simples_per_complex_1D);
   
   return 0;
   

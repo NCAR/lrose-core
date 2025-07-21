@@ -491,19 +491,21 @@ public:
 
   const TitanData::TrackHeader &track_header() const { return _track_header; }
   const TitanData::TrackingParams &track_params() const { return _track_header.params; }
-  const TitanData::SimpleTrackParams &simple_params() const;
-  const TitanData::ComplexTrackParams &complex_params() const;
+  const TitanData::SimpleTrackParams &simple_params() const { return _simple_params; }
+  const TitanData::ComplexTrackParams &complex_params() const { return _complex_params; }
   const TitanData::TrackEntry &entry() const { return _entry; }
   const vector<TitanData::TrackEntry> &scan_entries() const { return _scan_entries; }
   const vector<TitanData::TrackScanIndex> &scan_index() const { return _scan_index; }
   const vector<TitanData::TrackUtime_t> &track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
   
-  const si32 *complex_track_nums() { return _complex_track_nums; }
-  const si32 *n_simples_per_complex() { return _n_simples_per_complex; }
-  const si32 *simples_per_complex_offsets() { return _simples_per_complex_offsets; }
-  si32 *simples_per_complex_1D() { return _simples_per_complex_1D; }
-  si32 **simples_per_complex_2D() { return _simples_per_complex_2D; }
+  const vector<int32_t> &complex_track_nums() { return _complex_track_nums; }
+  const vector<int32_t> &n_simples_per_complex() { return _n_simples_per_complex; }
+  const vector<int32_t> &simples_per_complex_offsets() {
+    return _simples_per_complex_offsets;
+  }
+  int32_t *simples_per_complex_1D() { return _simples_per_complex_1D; }
+  int32_t **simples_per_complex_2D() { return _simples_per_complex_2D; }
 
   // public functions
 
@@ -710,10 +712,10 @@ public:
   int readSimplesPerComplex();
   
   // load vector with simples per complex, in linear order
-  // in memory these are stored in a si32** 2-d array
+  // in memory these are stored in a int32_t** 2-d array
   
-  void loadVecSimplesPerComplex(vector<si32> &simpsPerComplexLin,
-                                vector<si32> &simpsPerComplexOffsets);
+  void loadVecSimplesPerComplex(vector<int32_t> &simpsPerComplexLin,
+                                vector<int32_t> &simpsPerComplexOffsets);
   
   // read in entries for a scan
   // returns 0 on success, -1 on failure
@@ -764,9 +766,9 @@ public:
   // returns 0 on success, -1 on failure
 
   int writeTrackHeader(const TitanData::TrackHeader &track_file_header,
-                       const si32 *complex_track_nums,
-                       const si32 *n_simples_per_complex,
-                       const si32 **simples_per_complex_2D);
+                       const vector<int32_t> &complex_track_nums,
+                       const vector<int32_t> &n_simples_per_complex,
+                       const int32_t **simples_per_complex_2D);
 
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
@@ -792,9 +794,9 @@ public:
   // returns 0 on success, -1 on failure
   
   int writeSimplesPerComplexArrays(int n_simple_tracks,
-                                   const si32 *n_simples_per_complex,
-                                   const si32 *simples_per_complex_offsets,
-                                   const si32 *simples_per_complex_1D);
+                                   const vector<int32_t> &n_simples_per_complex,
+                                   const vector<int32_t> &simples_per_complex_offsets,
+                                   const int32_t *simples_per_complex_1D);
      
   // get the offset of storm or entry props, given the
   // scan_num and storm_num.
@@ -1005,11 +1007,11 @@ protected:
   vector<TitanData::TrackEntry> _scan_entries;
   vector<TitanData::TrackUtime_t> _track_utime;
   
-  si32 *_complex_track_nums;
-  si32 *_n_simples_per_complex;
-  si32 *_simples_per_complex_offsets;
-  si32 *_simples_per_complex_1D;
-  si32 **_simples_per_complex_2D;
+  vector<int32_t> _complex_track_nums;
+  vector<int32_t> _n_simples_per_complex;
+  vector<int32_t> _simples_per_complex_offsets;
+  int32_t *_simples_per_complex_1D;
+  int32_t **_simples_per_complex_2D;
   int _n_scan_entries;
   
   // track entry offsets
@@ -1019,11 +1021,7 @@ protected:
   // track memory allocation control
 
   int _n_simple_allocated;
-  int _n_complex_allocated;
   int _n_simples_per_complex_2D_allocated;
-  // int _n_scan_entries_allocated;
-  // int _n_scan_index_allocated;
-  // int _n_utime_allocated;
   int _lowest_avail_complex_slot;
 
   // units for horizontal grids
