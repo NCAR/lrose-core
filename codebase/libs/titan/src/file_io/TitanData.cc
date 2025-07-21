@@ -2308,20 +2308,20 @@ void TitanData::TrackEntry::convertToLegacy(track_file_entry_t &entry) const
 }
 
 void TitanData::TrackEntry::setFromLegacy
-  (const track_file_entry_t *legacyHdrs,
-   vector<TitanData::TrackEntry> &scans)
+  (const track_file_entry_t *legacyEntries,
+   vector<TitanData::TrackEntry> &entries)
 {
-  for (size_t ii = 0; ii < scans.size(); ii++) {
-    scans[ii].setFromLegacy(legacyHdrs[ii]);
+  for (size_t ii = 0; ii < entries.size(); ii++) {
+    entries[ii].setFromLegacy(legacyEntries[ii]);
   }
 }
 
 void TitanData::TrackEntry::convertToLegacy
-  (const vector<TitanData::TrackEntry> &scans,
-   track_file_entry_t *legacyHdrs)
+  (const vector<TitanData::TrackEntry> &entries,
+   track_file_entry_t *legacyEntries)
 {
-  for (size_t ii = 0; ii < scans.size(); ii++) {
-    scans[ii].convertToLegacy(legacyHdrs[ii]);
+  for (size_t ii = 0; ii < entries.size(); ii++) {
+    entries[ii].convertToLegacy(legacyEntries[ii]);
   }
 }
     

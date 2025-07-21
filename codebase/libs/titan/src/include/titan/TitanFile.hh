@@ -493,8 +493,8 @@ public:
   const TitanData::TrackingParams &track_params() const { return _track_header.params; }
   const TitanData::SimpleTrackParams &simple_params() const;
   const TitanData::ComplexTrackParams &complex_params() const;
-  const track_file_entry_t &entry() const { return _entry; }
-  const track_file_entry_t *scan_entries() const { return _scan_entries; }
+  const TitanData::TrackEntry &entry() const { return _entry; }
+  const vector<TitanData::TrackEntry> &scan_entries() const { return _scan_entries; }
   const track_file_scan_index_t *scan_index() const { return _scan_index; }
   const track_utime_t *track_utime() const { return _track_utime; }
   int n_scan_entries() { return _n_scan_entries; }
@@ -785,14 +785,7 @@ public:
   // on success returns the offset of the entry written
   // -1 on failure
   
-  int writeTrackEntry(const track_file_entry_t &entry);
-  
-  // write an entry for a track in the track data file
-  // on success returns the offset of the entry written
-  // -1 on failure
-
-  // int writeTrackEntry(int prev_in_track_offset,
-  //                     int prev_in_scan_offset);
+  int writeTrackEntry(const TitanData::TrackEntry &entry);
   
   // write arrays designating which simple tracks are contained
   // in each complex track
@@ -999,17 +992,17 @@ protected:
   int64_t _max_runs;
   int64_t _max_proj_runs;
 
-  bool _first_entry;  // set to TRUE if first entry of a track
-  
   // track data
 
+  bool _first_entry;  // set to TRUE if first entry of a track
+  
   TitanData::TrackHeader _track_header;
   TitanData::SimpleTrackParams _simple_params;
   TitanData::ComplexTrackParams _complex_params;
-  track_file_entry_t _entry;
+  TitanData::TrackEntry _entry;
   
   track_file_scan_index_t *_scan_index;
-  track_file_entry_t *_scan_entries;
+  vector<TitanData::TrackEntry> _scan_entries;
   track_utime_t *_track_utime;
   
   si32 *_complex_track_nums;
@@ -1028,7 +1021,7 @@ protected:
   int _n_simple_allocated;
   int _n_complex_allocated;
   int _n_simples_per_complex_2D_allocated;
-  int _n_scan_entries_allocated;
+  // int _n_scan_entries_allocated;
   int _n_scan_index_allocated;
   int _n_utime_allocated;
   int _lowest_avail_complex_slot;
@@ -1138,7 +1131,7 @@ protected:
 
   // read entry at given offset
 
-  int _readTrackEntry(track_file_entry_t &entry, int entryOffset);
+  int _readTrackEntry(TitanData::TrackEntry &entry, int entryOffset);
 
   // clear groups for truncation
   

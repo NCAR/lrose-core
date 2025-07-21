@@ -81,10 +81,10 @@ TitanFile::TitanFile()
   // MEM_zero(_track_header);
   // MEM_zero(_simple_params);
   // MEM_zero(_complex_params);
-  MEM_zero(_entry);
+  // MEM_zero(_entry);
 
   _scan_index = nullptr;
-  _scan_entries = nullptr;
+  // _scan_entries = nullptr;
   _track_utime = nullptr;
   
   _complex_track_nums = nullptr;
@@ -101,7 +101,7 @@ TitanFile::TitanFile()
   _n_simple_allocated = 0;
   _n_complex_allocated = 0;
   _n_simples_per_complex_2D_allocated = 0;
-  _n_scan_entries_allocated = 0;
+  // _n_scan_entries_allocated = 0;
   _n_scan_index_allocated = 0;
   _n_utime_allocated = 0;
 
@@ -3270,13 +3270,9 @@ void TitanFile::allocScanEntries(int n_entries_needed)
   
 {
   
-  if (n_entries_needed > _n_scan_entries_allocated) {
-    
-    _scan_entries = (track_file_entry_t *) urealloc
-      (_scan_entries, n_entries_needed * sizeof(track_file_entry_t));
-    
-    _n_scan_entries_allocated = n_entries_needed;
-    
+  if (n_entries_needed > (int) _scan_entries.size()) {
+    _scan_entries.resize(n_entries_needed);
+    // _n_scan_entries_allocated = n_entries_needed;
   }
 
 }
@@ -3292,13 +3288,8 @@ void TitanFile::allocScanEntries(int n_entries_needed)
 void TitanFile::freeScanEntries()
      
 {
-  
-  if (_scan_entries) {
-    ufree(_scan_entries);
-    _scan_entries = nullptr;
-    _n_scan_entries_allocated = 0;
-  }
-
+  _scan_entries.clear();
+  // _n_scan_entries_allocated = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3919,7 +3910,7 @@ int TitanFile::readTrackEntry()
       _errStr = _tFile.getErrStr();
       return -1;
     }
-    _entry = _tFile.entry();
+    _entry.setFromLegacy(_tFile.entry());
     return 0;
   }
 
@@ -3943,7 +3934,7 @@ int TitanFile::readTrackEntry()
   
 }
 
-int TitanFile::_readTrackEntry(track_file_entry_t &entry,
+int TitanFile::_readTrackEntry(TitanData::TrackEntry &entry,
                                int entryOffset)
      
 {
@@ -4147,7 +4138,8 @@ int TitanFile::readScanEntries(int scan_num)
     // save state
     _n_scan_entries = _tFile.n_scan_entries();
     allocScanEntries(_n_scan_entries);
-    memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
+    TitanData::TrackEntry::setFromLegacy(_tFile.scan_entries(), _scan_entries);
+    // memcpy(_scan_entries, _tFile.scan_entries(), _n_scan_entries * sizeof(track_file_entry_t));
     return 0;
   }
 
@@ -4168,12 +4160,12 @@ int TitanFile::readScanEntries(int scan_num)
   
   // loop through storms, reading in the entries
   
-  track_file_entry_t *entry = _scan_entries;
+  // vector<TitanData::TrackEntry> &entries = _scan_entries;
   
-  for (int istorm = 0; istorm < nStorms; istorm++, entry++) {
+  for (int istorm = 0; istorm < nStorms; istorm++) {
     int entryOffset = getNextScanEntryOffset(scan_num, istorm);
     // read entry into _entry
-    if (_readTrackEntry(*entry, entryOffset)) {
+    if (_readTrackEntry(_scan_entries[istorm], entryOffset)) {
       return -1;
     }
   } // istorm
@@ -4206,8 +4198,9 @@ int TitanFile::readUtime()
     // save state
     _n_scan_entries = _tFile.n_scan_entries();
     allocScanEntries(_n_scan_entries);
-    memcpy(_scan_entries, _tFile.scan_entries(),
-           _n_scan_entries * sizeof(track_file_entry_t));
+    TitanData::TrackEntry::setFromLegacy(_tFile.scan_entries(), _scan_entries);
+    // memcpy(_scan_entries, _tFile.scan_entries(),
+    //        _n_scan_entries * sizeof(track_file_entry_t));
     return 0;
   }
 
@@ -4269,14 +4262,14 @@ void TitanFile::reinit()
   _track_header.initialize();
   _complex_params.initialize();
   _simple_params.initialize();
-  MEM_zero(_entry);
+  _entry.initialize();
   
   if (_n_complex_allocated > 0) {
     memset(_complex_track_nums, 0, _n_complex_allocated * sizeof(si32));
   }
 
-  if (_n_scan_entries_allocated > 0) {
-    memset(_scan_entries, 0, _n_scan_entries * sizeof(track_file_entry_t));
+  for (size_t ii = 0; ii < _scan_entries.size(); ii++) {
+    _scan_entries[ii].initialize();
   }
   
   if (_n_simple_allocated > 0) {
@@ -4873,7 +4866,7 @@ int TitanFile::writeComplexTrackParams(int complex_index,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
+int TitanFile::writeTrackEntry(const TitanData::TrackEntry &entry)
   
 {
   
@@ -4884,7 +4877,7 @@ int TitanFile::writeTrackEntry(const track_file_entry_t &entry)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    int writeOffset = _tFile.WriteEntry(entry);
+    int writeOffset = _tFile.WriteEntry(entry.convertToLegacy());
     if (writeOffset < 0) {
       _errStr = _tFile.getErrStr();
       return -1;
