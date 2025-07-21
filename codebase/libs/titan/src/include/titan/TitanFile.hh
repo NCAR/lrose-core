@@ -43,6 +43,7 @@
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
 #include <titan/track.h>
+#include <Mdv/MdvxProj.hh>
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxFile.hh>
 
@@ -479,7 +480,7 @@ public:
 
   const TitanData::StormHeader &storm_header() const { return _storm_header; }
   const TitanData::StormParams &storm_params() const { return _storm_header.params; }
-  const storm_file_scan_header_t &scan() const { return _scan; }
+  const TitanData::ScanHeader &scan() const { return _scan; }
   const storm_file_global_props_t *gprops() const { return _gprops; }
   const storm_file_layer_props_t *lprops() const { return _lprops; }
   const storm_file_dbz_hist_t *hist() const { return _hist; }
@@ -637,7 +638,7 @@ public:
   // returns 0 on success, -1 on failure
   
   int writeStormScan(const TitanData::StormHeader &storm_file_header,
-                     const storm_file_scan_header_t &sheader,
+                     const TitanData::ScanHeader &sheader,
                      const storm_file_global_props_t *gprops);
   
   // write the auxiliary storm properties:
@@ -653,7 +654,7 @@ public:
 
   int writeStormAux(int storm_num,
                     const TitanData::StormHeader &storm_file_header,
-                    const storm_file_scan_header_t &sheader,
+                    const TitanData::ScanHeader &sheader,
                     const storm_file_global_props_t *gprops,
                     const storm_file_layer_props_t *lprops,
                     const storm_file_dbz_hist_t *hist,
@@ -824,7 +825,7 @@ public:
   //
   // See Note 3 in storms.h
 
-  void gpropsEllipses2Km(const storm_file_scan_header_t &scan,
+  void gpropsEllipses2Km(const TitanData::ScanHeader &scan,
 			 storm_file_global_props_t &gprops);
   
      
@@ -834,7 +835,7 @@ public:
   //
   // See Note 3 in storms.h
   
-  void gpropsXY2LatLon(const storm_file_scan_header_t &scan,
+  void gpropsXY2LatLon(const TitanData::ScanHeader &scan,
 		       storm_file_global_props_t &gprops);
   
   ///////////////////////////////////////////////////////////////////
@@ -976,7 +977,7 @@ protected:
   // storm data
 
   TitanData::StormHeader _storm_header;
-  storm_file_scan_header_t _scan;
+  TitanData::ScanHeader _scan;
   storm_file_global_props_t *_gprops;
   storm_file_layer_props_t *_lprops;
   storm_file_dbz_hist_t *_hist;
@@ -1108,7 +1109,7 @@ protected:
 
   // update attributes for scan type
   
-  void _updateScanAttributes(const storm_file_scan_header_t &scanHeader);
+  void _updateScanAttributes(const TitanData::ScanHeader &scanHeader);
 
   // add projection flag attributes
   
@@ -1121,6 +1122,13 @@ protected:
 
   // units conversion
   
+  void _convertEllipse2Km(const Mdvx::coord_t &tgrid,
+                          double centroid_x,
+                          double centroid_y,
+                          fl32 &orientation,
+                          fl32 &minor_radius,
+                          fl32 &major_radius);
+
   void _convertEllipse2Km(const titan_grid_t &tgrid,
                           double centroid_x,
                           double centroid_y,

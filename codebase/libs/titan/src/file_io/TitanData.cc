@@ -310,6 +310,13 @@ void TitanData::StormHeader::convertToLegacy(storm_file_header_t &hdr) const
   
 }
 
+storm_file_header_t TitanData::StormHeader::convertToLegacy() const
+{
+  storm_file_header_t hdr;
+  convertToLegacy(hdr);
+  return hdr;
+}
+
 void TitanData::StormHeader::print(FILE *out, const char *spacer)
 {
 
@@ -475,6 +482,13 @@ void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr) const
   
 }
     
+storm_file_scan_header_t TitanData::ScanHeader::convertToLegacy() const
+{
+  storm_file_scan_header_t scan;
+  convertToLegacy(scan);
+  return scan;
+}
+
 void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
                                           vector<TitanData::ScanHeader> &scans)
 {

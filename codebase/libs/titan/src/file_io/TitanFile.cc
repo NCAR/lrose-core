@@ -64,7 +64,7 @@ TitanFile::TitanFile()
   // storms
   
   // MEM_zero(_storm_header);
-  MEM_zero(_scan);
+  // MEM_zero(_scan);
   _gprops = nullptr;
   _lprops = nullptr;
   _hist = nullptr;
@@ -2054,7 +2054,7 @@ int TitanFile::readStormScan(int scan_num, int storm_num /* = -1*/ )
       _errStr = _sFile.getErrStr();
       return -1;
     }
-    _scan = _sFile.scan();
+    _scan.setFromLegacy(_sFile.scan());
     int nStorms = _scan.nstorms;
     allocGprops(nStorms);
     memcpy(_gprops, _sFile.gprops(), nStorms * sizeof(storm_file_global_props_t));
@@ -2294,9 +2294,9 @@ int TitanFile::writeStormHeader(const TitanData::StormHeader &storm_file_header)
   // handle legacy format
   
   if (_isLegacyV5Format) {
-    storm_file_header_t legacyHdr;
-    storm_file_header.convertToLegacy(legacyHdr);
-    if (_sFile.WriteHeader(legacyHdr)) {
+    // storm_file_header_t legacyHdr;
+    // storm_file_header.convertToLegacy(legacyHdr);
+    if (_sFile.WriteHeader(storm_file_header.convertToLegacy())) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
@@ -2379,7 +2379,7 @@ int TitanFile::writeStormHeader(const TitanData::StormHeader &storm_file_header)
 //////////////////////////////////////////////////////////////
 
 int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
-                              const storm_file_scan_header_t &scanHeader,
+                              const TitanData::ScanHeader &scanHeader,
                               const storm_file_global_props_t *gprops)
   
 {
@@ -2394,7 +2394,8 @@ int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
   // handle legacy format case
   
   if (_isLegacyV5Format) {
-    if (_sFile.WriteScan(scanHeader, gprops)) {
+    
+    if (_sFile.WriteScan(_scan.convertToLegacy(), gprops)) {
       _errStr = _sFile.getErrStr();
       return -1;
     }
@@ -2601,7 +2602,7 @@ int TitanFile::writeStormScan(const TitanData::StormHeader &storm_file_header,
 //////////////////////////////////////////////////////////////
 // update attributes for scan type
 
-void TitanFile::_updateScanAttributes(const storm_file_scan_header_t &scanHeader)
+void TitanFile::_updateScanAttributes(const TitanData::ScanHeader &scanHeader)
 
 {
 
@@ -2808,7 +2809,7 @@ void TitanFile::_addProjectionFlagAttributes()
 
 int TitanFile::writeStormAux(int storm_num,
                              const TitanData::StormHeader &storm_file_header,
-                             const storm_file_scan_header_t &sheader,
+                             const TitanData::ScanHeader &sheader,
                              const storm_file_global_props_t *gprops,
                              const storm_file_layer_props_t *lprops,
                              const storm_file_dbz_hist_t *hist,
@@ -5041,6 +5042,61 @@ int TitanFile::getNextScanEntryOffset(int scan_num,
 //
 //////////////////////////////////////////////////////////////
 
+void TitanFile::_convertEllipse2Km(const Mdvx::coord_t &tgrid,
+                                   double centroid_x,
+                                   double centroid_y,
+                                   fl32 &orientation,
+                                   fl32 &minor_radius,
+                                   fl32 &major_radius)
+  
+{
+
+  // only convert for latlon projection
+  
+  if (tgrid.proj_type == TITAN_PROJ_LATLON) {
+    
+    double centroid_lon, centroid_lat;
+    double major_orient_rad, major_lon, major_lat;
+    double minor_orient_rad, minor_lon, minor_lat;
+    double dist, theta;
+    double orientation_km, major_radius_km, minor_radius_km;
+    double sin_major, cos_major;
+    double sin_minor, cos_minor;
+
+    centroid_lon = centroid_x;
+    centroid_lat = centroid_y;
+    
+    major_orient_rad = orientation * DEG_TO_RAD;
+    ta_sincos(major_orient_rad, &sin_major, &cos_major);
+    major_lon = centroid_lon + major_radius * sin_major;
+    major_lat = centroid_lat + major_radius * cos_major;
+    
+    minor_orient_rad = (orientation + 270.0) * DEG_TO_RAD;
+    ta_sincos(minor_orient_rad, &sin_minor, &cos_minor);
+    minor_lon = centroid_lon + minor_radius * sin_minor;
+    minor_lat = centroid_lat + minor_radius * cos_minor;
+
+    PJGLatLon2RTheta(centroid_lat, centroid_lon,
+		     major_lat, major_lon,
+		     &dist, &theta);
+
+    orientation_km = theta;
+    major_radius_km = dist;
+    
+    PJGLatLon2RTheta(centroid_lat, centroid_lon,
+		     minor_lat, minor_lon,
+		     &dist, &theta);
+    
+    minor_radius_km = dist;
+    
+    orientation = orientation_km;
+    major_radius = major_radius_km;
+    minor_radius = minor_radius_km;
+
+  }
+
+}
+		     
 void TitanFile::_convertEllipse2Km(const titan_grid_t &tgrid,
                                    double centroid_x,
                                    double centroid_y,
@@ -5108,7 +5164,7 @@ void TitanFile::_convertEllipse2Km(const titan_grid_t &tgrid,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
+void TitanFile::gpropsEllipses2Km(const TitanData::ScanHeader &scan,
                                   storm_file_global_props_t &gprops)
      
 {
@@ -5141,19 +5197,19 @@ void TitanFile::gpropsEllipses2Km(const storm_file_scan_header_t &scan,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::gpropsXY2LatLon(const storm_file_scan_header_t &scan,
+void TitanFile::gpropsXY2LatLon(const TitanData::ScanHeader &scan,
                                 storm_file_global_props_t &gprops)
   
 {
   
-  const titan_grid_t  &tgrid = scan.grid;
+  const Mdvx::coord_t &tgrid = scan.grid;
 
   switch (tgrid.proj_type) {
     
-    case TITAN_PROJ_LATLON:
+    case Mdvx::PROJ_LATLON:
       break;
     
-    case TITAN_PROJ_FLAT:
+    case Mdvx::PROJ_FLAT:
       {
         double lat, lon;
         PJGLatLonPlusDxDy(tgrid.proj_origin_lat,
@@ -5187,7 +5243,7 @@ void TitanFile::gpropsXY2LatLon(const storm_file_scan_header_t &scan,
         break;
       }
     
-    case TITAN_PROJ_LAMBERT_CONF:
+    case Mdvx::PROJ_LAMBERT_CONF:
       {
         double lat, lon;
         PJGstruct *ps = PJGs_lc2_init(tgrid.proj_origin_lat,

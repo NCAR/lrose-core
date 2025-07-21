@@ -227,6 +227,7 @@ public:
     StormHeader();
     void setFromLegacy(const storm_file_header_t &hdr);
     void convertToLegacy(storm_file_header_t &hdr) const;
+    storm_file_header_t convertToLegacy() const;
     void print(FILE *out, const char *spacer);
 
     // data
@@ -251,6 +252,7 @@ public:
     ScanHeader();
     void setFromLegacy(const storm_file_scan_header_t &hdr);
     void convertToLegacy(storm_file_scan_header_t &hdr) const;
+    storm_file_scan_header_t convertToLegacy() const;
     static void setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
                               vector<TitanData::ScanHeader> &scans);
     static void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
