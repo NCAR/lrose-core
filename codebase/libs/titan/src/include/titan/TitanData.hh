@@ -94,6 +94,7 @@ public:
     
     StormParams();
     void setFromLegacy(const storm_file_params_t &params);
+    storm_file_params_t convertToLegacy() const;
     void convertToLegacy(storm_file_params_t &params) const;
     void print(FILE *out, const char *spacer);
 
@@ -226,8 +227,8 @@ public:
     
     StormHeader();
     void setFromLegacy(const storm_file_header_t &hdr);
-    void convertToLegacy(storm_file_header_t &hdr) const;
     storm_file_header_t convertToLegacy() const;
+    void convertToLegacy(storm_file_header_t &hdr) const;
     void print(FILE *out, const char *spacer);
 
     // data
@@ -251,8 +252,8 @@ public:
     
     ScanHeader();
     void setFromLegacy(const storm_file_scan_header_t &hdr);
-    void convertToLegacy(storm_file_scan_header_t &hdr) const;
     storm_file_scan_header_t convertToLegacy() const;
+    void convertToLegacy(storm_file_scan_header_t &hdr) const;
     static void setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
                               vector<TitanData::ScanHeader> &scans);
     static void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
@@ -293,6 +294,7 @@ public:
     StormGprops();
     void setFromLegacy(const storm_file_params_t &params,
                        const storm_file_global_props_t &gprops);
+    storm_file_global_props_t convertToLegacy() const;
     void convertToLegacy(storm_file_global_props_t &gprops) const;
     static void setFromLegacy(const storm_file_params_t &params,
                               const storm_file_global_props_t *legacyGprops,
@@ -433,6 +435,7 @@ public:
     
     StormLprops();
     void setFromLegacy(const storm_file_layer_props_t &lprops);
+    storm_file_layer_props_t convertToLegacy() const;
     void convertToLegacy(storm_file_layer_props_t &lprops) const;
     static void setFromLegacy(const storm_file_layer_props_t *legacyLprops,
                               vector<TitanData::StormLprops> &lprops);
@@ -471,6 +474,7 @@ public:
     
     StormDbzHist();
     void setFromLegacy(const storm_file_dbz_hist_t &hist);
+    storm_file_dbz_hist_t convertToLegacy() const;
     void convertToLegacy(storm_file_dbz_hist_t &hist) const;
     static void setFromLegacy(const storm_file_dbz_hist_t *legacyHist,
                               vector<TitanData::StormDbzHist> &hist);
@@ -500,6 +504,7 @@ public:
     
     StormRun();
     void setFromLegacy(const storm_file_run_t &run);
+    storm_file_run_t convertToLegacy() const;
     void convertToLegacy(storm_file_run_t &run) const;
     static void setFromLegacy(const storm_file_run_t *legacyRun,
                               vector<TitanData::StormRun> &run);
@@ -529,6 +534,7 @@ public:
     
     TrackFcastProps();
     void setFromLegacy(const track_file_forecast_props_t &fprops);
+    track_file_forecast_props_t convertToLegacy() const;
     void convertToLegacy(track_file_forecast_props_t &fprops) const;
     void print(FILE *out, const char *label, const char *spacer);
   
@@ -562,10 +568,10 @@ public:
     
     TrackVerify();
     void setFromLegacy(const track_file_verify_t &verify);
+    track_file_verify_t convertToLegacy() const;
     void convertToLegacy(track_file_verify_t &verify) const;
     void print(FILE *out, const char *label, const char *spacer);
      
-
     // data
     
     time_t end_time;		/* last scan time for which verification
@@ -614,6 +620,7 @@ public:
     
     TrackContingency();
     void setFromLegacy(const track_file_contingency_data_t &cont);
+    track_file_contingency_data_t convertToLegacy() const;
     void convertToLegacy(track_file_contingency_data_t &cont) const;
     void print(FILE *out, const char *label, const char *spacer);
 
@@ -636,6 +643,7 @@ public:
     
     TrackingParams();
     void setFromLegacy(const track_file_params_t &params);
+    track_file_params_t convertToLegacy() const;
     void convertToLegacy(track_file_params_t &params) const;
     void print(FILE *out, const char *spacer);
     
@@ -713,6 +721,7 @@ public:
     
     TrackHeader();
     void setFromLegacy(const track_file_header_t &hdr);
+    track_file_header_t convertToLegacy() const;
     void convertToLegacy(track_file_header_t &hdr) const;
     void print(FILE *out, const char *spacer);
 
@@ -780,6 +789,7 @@ public:
     
     SimpleTrackParams();
     void setFromLegacy(const simple_track_params_t &params);
+    simple_track_params_t convertToLegacy() const;
     void convertToLegacy(simple_track_params_t &params) const;
     static void setFromLegacy(const simple_track_params_t *legacyParams,
                               vector<TitanData::SimpleTrackParams> &params);
@@ -848,6 +858,7 @@ public:
     
     ComplexTrackParams();
     void setFromLegacy(const complex_track_params_t &params);
+    complex_track_params_t convertToLegacy() const;
     void convertToLegacy(complex_track_params_t &params) const;
     static void setFromLegacy(const complex_track_params_t *legacyParams,
                               vector<TitanData::ComplexTrackParams> &params);
@@ -919,6 +930,7 @@ public:
     
     TrackEntry();
     void setFromLegacy(const track_file_entry_t &entry);
+    track_file_entry_t convertToLegacy() const;
     void convertToLegacy(track_file_entry_t &entry) const;
     static void setFromLegacy(const track_file_entry_t *legacyEntry,
                               vector<TitanData::TrackEntry> &entry);
@@ -981,6 +993,7 @@ public:
     
     TrackScanIndex();
     void setFromLegacy(const track_file_scan_index_t &index);
+    track_file_scan_index_t convertToLegacy() const;
     void convertToLegacy(track_file_scan_index_t &index) const;
     static void setFromLegacy(const track_file_scan_index_t *legacyIndex,
                               vector<TitanData::TrackScanIndex> &index);

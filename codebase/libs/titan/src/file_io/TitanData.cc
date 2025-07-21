@@ -143,6 +143,13 @@ void TitanData::StormParams::setFromLegacy(const storm_file_params_t &params)
 
 }
 
+storm_file_params_t TitanData::StormParams::convertToLegacy() const
+{
+  storm_file_params_t sparams;
+  convertToLegacy(sparams);
+  return sparams;
+}
+
 void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
 {
 
@@ -424,6 +431,13 @@ void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t &hdr)
   
 }
 
+storm_file_scan_header_t TitanData::ScanHeader::convertToLegacy() const
+{
+  storm_file_scan_header_t scan;
+  convertToLegacy(scan);
+  return scan;
+}
+
 void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr) const
 {
 
@@ -482,13 +496,6 @@ void TitanData::ScanHeader::convertToLegacy(storm_file_scan_header_t &hdr) const
   
 }
     
-storm_file_scan_header_t TitanData::ScanHeader::convertToLegacy() const
-{
-  storm_file_scan_header_t scan;
-  convertToLegacy(scan);
-  return scan;
-}
-
 void TitanData::ScanHeader::setFromLegacy(const storm_file_scan_header_t *legacyHdrs,
                                           vector<TitanData::ScanHeader> &scans)
 {
@@ -709,6 +716,13 @@ void TitanData::StormGprops::setFromLegacy(const storm_file_params_t &params,
     mehs = gprops.add_on.hda.mehs;
   }
 
+}
+
+storm_file_global_props_t TitanData::StormGprops::convertToLegacy() const
+{
+  storm_file_global_props_t gprops;
+  convertToLegacy(gprops);
+  return gprops;
 }
 
 void TitanData::StormGprops::convertToLegacy(storm_file_global_props_t &gprops) const
@@ -965,6 +979,13 @@ void TitanData::StormLprops::setFromLegacy(const storm_file_layer_props_t &lprop
 
 }
 
+storm_file_layer_props_t TitanData::StormLprops::convertToLegacy() const
+{
+  storm_file_layer_props_t lprops;
+  convertToLegacy(lprops);
+  return lprops;
+}
+
 void TitanData::StormLprops::convertToLegacy(storm_file_layer_props_t &lprops) const
 {
 
@@ -1099,6 +1120,13 @@ void TitanData::StormDbzHist::setFromLegacy(const storm_file_dbz_hist_t &hist)
 
 }
 
+storm_file_dbz_hist_t TitanData::StormDbzHist::convertToLegacy() const
+{
+  storm_file_dbz_hist_t hist;
+  convertToLegacy(hist);
+  return hist;
+}
+
 void TitanData::StormDbzHist::convertToLegacy(storm_file_dbz_hist_t &hist) const
 {
 
@@ -1182,6 +1210,13 @@ void TitanData::StormRun::setFromLegacy(const storm_file_run_t &run)
   run_iz = run.iz;
   run_len = run.n;
 
+}
+
+storm_file_run_t TitanData::StormRun::convertToLegacy() const
+{
+  storm_file_run_t run;
+  convertToLegacy(run);
+  return run;
 }
 
 void TitanData::StormRun::convertToLegacy(storm_file_run_t &run) const
@@ -1296,6 +1331,13 @@ void TitanData::TrackFcastProps::setFromLegacy(const track_file_forecast_props_t
   smoothed_speed = fprops.smoothed_speed;
   smoothed_direction = fprops.smoothed_direction;
 
+}
+
+track_file_forecast_props_t TitanData::TrackFcastProps::convertToLegacy() const
+{
+  track_file_forecast_props_t fprops;
+  convertToLegacy(fprops);
+  return fprops;
 }
 
 void TitanData::TrackFcastProps::convertToLegacy(track_file_forecast_props_t &fprops) const
@@ -1429,6 +1471,13 @@ void TitanData::TrackVerify::setFromLegacy(const track_file_verify_t &verify)
   }
 }
 
+track_file_verify_t TitanData::TrackVerify::convertToLegacy() const
+{
+  track_file_verify_t verify;
+  convertToLegacy(verify);
+  return verify;
+}
+
 void TitanData::TrackVerify::convertToLegacy(track_file_verify_t &verify) const
 {
 
@@ -1527,6 +1576,13 @@ void TitanData::TrackContingency::setFromLegacy(const track_file_contingency_dat
   n_failure = cont.n_failure;
   n_false_alarm = cont.n_false_alarm;
 
+}
+
+track_file_contingency_data_t TitanData::TrackContingency::convertToLegacy() const
+{
+  track_file_contingency_data_t cont;
+  convertToLegacy(cont);
+  return cont;
 }
 
 void TitanData::TrackContingency::convertToLegacy(track_file_contingency_data_t &cont) const
@@ -1630,6 +1686,13 @@ void TitanData::TrackingParams::setFromLegacy(const track_file_params_t &params)
   min_history_for_valid_forecast = params.min_history_for_valid_forecast;
   spatial_smoothing = params.spatial_smoothing;
 
+}
+
+track_file_params_t TitanData::TrackingParams::convertToLegacy() const
+{
+  track_file_params_t params;
+  convertToLegacy(params);
+  return params;
 }
 
 void TitanData::TrackingParams::convertToLegacy(track_file_params_t &params) const
@@ -1750,6 +1813,13 @@ void TitanData::TrackHeader::setFromLegacy(const track_file_header_t &hdr)
   
 }
 
+track_file_header_t TitanData::TrackHeader::convertToLegacy() const
+{
+  track_file_header_t hdr;
+  convertToLegacy(hdr);
+  return hdr;
+}
+
 void TitanData::TrackHeader::convertToLegacy(track_file_header_t &hdr) const
 {
 
@@ -1868,6 +1938,13 @@ void TitanData::SimpleTrackParams::setFromLegacy(const simple_track_params_t &pa
     child[ii] = params.child[ii];
   }
   
+}
+
+simple_track_params_t TitanData::SimpleTrackParams::convertToLegacy() const
+{
+  simple_track_params_t params;
+  convertToLegacy(params);
+  return params;
 }
 
 void TitanData::SimpleTrackParams::convertToLegacy(simple_track_params_t &params) const
@@ -2016,6 +2093,13 @@ void TitanData::ComplexTrackParams::setFromLegacy(const complex_track_params_t &
   forecast_bias.setFromLegacy(params.forecast_bias);
   forecast_rmse.setFromLegacy(params.forecast_rmse);
   
+}
+
+complex_track_params_t TitanData::ComplexTrackParams::convertToLegacy() const
+{
+  complex_track_params_t params;
+  convertToLegacy(params);
+  return params;
 }
 
 void TitanData::ComplexTrackParams::convertToLegacy(complex_track_params_t &params) const
@@ -2167,6 +2251,13 @@ void TitanData::TrackEntry::setFromLegacy(const track_file_entry_t &entry)
   
 }
 
+track_file_entry_t TitanData::TrackEntry::convertToLegacy() const
+{
+  track_file_entry_t entry;
+  convertToLegacy(entry);
+  return entry;
+}
+
 void TitanData::TrackEntry::convertToLegacy(track_file_entry_t &entry) const
 {
 
@@ -2264,6 +2355,13 @@ void TitanData::TrackScanIndex::setFromLegacy(const track_file_scan_index_t &ind
   first_entry_offset = index.first_entry_offset;
   n_entries = index.n_entries;
   
+}
+
+track_file_scan_index_t TitanData::TrackScanIndex::convertToLegacy() const
+{
+  track_file_scan_index_t index;
+  convertToLegacy(index);
+  return index;
 }
 
 void TitanData::TrackScanIndex::convertToLegacy(track_file_scan_index_t &index) const
