@@ -504,34 +504,36 @@ public:
   const vector<int32_t> &simples_per_complex_offsets() {
     return _simples_per_complex_offsets;
   }
-  int32_t *simples_per_complex_1D() { return _simples_per_complex_1D; }
-  int32_t **simples_per_complex_2D() { return _simples_per_complex_2D; }
+  const vector<int32_t> &simples_per_complex_1D() { return _simples_per_complex_1D; }
+  const vector<vector<int32_t> > &simples_per_complex_2D() {
+    return _simples_per_complex_2D;
+  }
 
   // public functions
 
   // memory allocation and freeing - storms
 
-  void allocLayers(int n_layers);
+  void allocLayers(size_t n_layers);
   void freeLayers();
-  void allocHist(int n_hist);
+  void allocHist(size_t n_hist);
   void freeHist();
-  void allocRuns(int n_runs);
+  void allocRuns(size_t n_runs);
   void freeRuns();
-  void allocProjRuns(int n_proj_runs);
+  void allocProjRuns(size_t n_proj_runs);
   void freeProjRuns();
-  void allocGprops(int nstorms);
+  void allocGprops(size_t nstorms);
   void freeGprops();
   void freeStormsAll();
     
   // memory allocation and freeing - tracks
 
-  void allocSimpleArrays(int n_simple_needed);
+  void allocSimpleArrays(size_t n_simple_needed);
   void freeSimpleArrays();
-  void allocComplexArrays(int n_complex_needed);
+  void allocComplexArrays(size_t n_complex_needed);
   void freeComplexArrays();
-  void allocScanEntries(int n_entries_needed);
+  void allocScanEntries(size_t n_entries_needed);
   void freeScanEntries();
-  void allocScanIndex(int n_scans_needed);
+  void allocScanIndex(size_t n_scans_needed);
   void freeScanIndex();
   void allocUtime();
   void freeUtime();
@@ -768,7 +770,7 @@ public:
   int writeTrackHeader(const TitanData::TrackHeader &track_file_header,
                        const vector<int32_t> &complex_track_nums,
                        const vector<int32_t> &n_simples_per_complex,
-                       const int32_t **simples_per_complex_2D);
+                       const vector<vector<int32_t> > &simples_per_complex_2D);
 
   // write simple track params at the end of the file
   // returns 0 on success, -1 on failure
@@ -1010,8 +1012,8 @@ protected:
   vector<int32_t> _complex_track_nums;
   vector<int32_t> _n_simples_per_complex;
   vector<int32_t> _simples_per_complex_offsets;
-  int32_t *_simples_per_complex_1D;
-  int32_t **_simples_per_complex_2D;
+  vector<int32_t> _simples_per_complex_1D;
+  vector<vector<int32_t> > _simples_per_complex_2D;
   int _n_scan_entries;
   
   // track entry offsets
@@ -1020,8 +1022,8 @@ protected:
   
   // track memory allocation control
 
-  int _n_simple_allocated;
-  int _n_simples_per_complex_2D_allocated;
+  // int _n_simple_allocated;
+  // int _n_simples_per_complex_2D_allocated;
   int _lowest_avail_complex_slot;
 
   // units for horizontal grids

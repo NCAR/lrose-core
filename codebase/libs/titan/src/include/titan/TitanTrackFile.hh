@@ -223,6 +223,11 @@ public:
                   const si32 *n_simples_per_complex,
                   const si32 **simples_per_complex);
 
+  int WriteHeader(const track_file_header_t &track_file_header,
+                  const vector<si32> &complex_track_nums,
+                  const vector<si32> &n_simples_per_complex,
+                  const vector<vector<si32> > &simples_per_complex);
+
   int WriteHeader();
 
   // write simple track params at the end of the file

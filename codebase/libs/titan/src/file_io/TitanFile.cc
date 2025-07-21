@@ -82,17 +82,17 @@ TitanFile::TitanFile()
   // _complex_track_nums = nullptr;
   // _n_simples_per_complex = nullptr;
   // _simples_per_complex_offsets = nullptr;
-  _simples_per_complex_1D = nullptr;
-  _simples_per_complex_2D = nullptr;
+  // _simples_per_complex_1D = nullptr;
+  // _simples_per_complex_2D = nullptr;
 
   _first_entry = true;
 
   // _n_scan_entries = 0;
   _lowest_avail_complex_slot = 0;
 
-  _n_simple_allocated = 0;
+  // _n_simple_allocated = 0;
   // _n_complex_allocated = 0;
-  _n_simples_per_complex_2D_allocated = 0;
+  // _n_simples_per_complex_2D_allocated = 0;
   // _n_scan_entries_allocated = 0;
   // _n_scan_index_allocated = 0;
   // _n_utime_allocated = 0;
@@ -1466,10 +1466,10 @@ void TitanFile::_addErrStr(string label,
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocLayers(int n_layers)
+void TitanFile::allocLayers(size_t n_layers)
      
 {
-  if (n_layers > (int) _lprops.size()) {
+  if (n_layers > _lprops.size()) {
     _lprops.resize(n_layers);
     _max_layers = n_layers;
   }
@@ -1488,11 +1488,11 @@ void TitanFile::freeLayers()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocHist(int n_hist)
+void TitanFile::allocHist(size_t n_hist)
      
 {
 
-  if (n_hist > (int) _hist.size()) {
+  if (n_hist > _hist.size()) {
     _hist.resize(n_hist);
     _max_hist = n_hist;
   }
@@ -1514,11 +1514,11 @@ void TitanFile::freeHist()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocRuns(int n_runs)
+void TitanFile::allocRuns(size_t n_runs)
      
 {
-
-  if (n_runs > _max_runs) {
+  
+  if ((int64_t) n_runs > _max_runs) {
     _runs.resize(n_runs);
     _max_runs = n_runs;
   }
@@ -1540,11 +1540,11 @@ void TitanFile::freeRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocProjRuns(int n_proj_runs)
+void TitanFile::allocProjRuns(size_t n_proj_runs)
      
 {
 
-  if (n_proj_runs > _max_proj_runs) {
+  if ((int64_t) n_proj_runs > _max_proj_runs) {
     _proj_runs.resize(n_proj_runs);
     _max_proj_runs = n_proj_runs;
   }
@@ -1566,11 +1566,11 @@ void TitanFile::freeProjRuns()
 //
 //////////////////////////////////////////////////////////////
 
-void TitanFile::allocGprops(int nstorms)
+void TitanFile::allocGprops(size_t nstorms)
      
 {
   
-  if (nstorms > (int) _gprops.size()) {
+  if (nstorms > _gprops.size()) {
     _max_storms = nstorms;
     _gprops.resize(nstorms);
   }
@@ -3104,34 +3104,42 @@ void TitanFile::_clear2DVar(NcxxVar &var,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::allocSimpleArrays(int n_simple_needed)
-     
+void TitanFile::allocSimpleArrays(size_t n_simple_needed)
+  
 {
   
-  if (_n_simple_allocated < n_simple_needed) {
-    
+  if (n_simple_needed > _n_simples_per_complex.size()) {
     _n_simples_per_complex.resize(n_simple_needed, 0);
-    _simples_per_complex_offsets.resize(n_simple_needed, 0);
-    
-    _simples_per_complex_1D = (int32_t *) urealloc
-      (_simples_per_complex_1D, n_simple_needed * sizeof(int32_t));
-    
-    _simples_per_complex_2D = (int32_t **) urealloc
-      (_simples_per_complex_2D, n_simple_needed * sizeof(int32_t *));
-    
-    // initialize new elements to zero
-    
-    int n_start = _n_simple_allocated;
-    int n_new = n_simple_needed - _n_simple_allocated;
-
-    // memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(int32_t));
-    // memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(int32_t));
-    memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(int32_t));
-    memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(int32_t *));
+  }
   
-    _n_simple_allocated = n_simple_needed;
+  if (n_simple_needed > _simples_per_complex_offsets.size()) {
+    _simples_per_complex_offsets.resize(n_simple_needed, 0);
+  }
+  
+  if (n_simple_needed > _simples_per_complex_1D.size()) {
+    _simples_per_complex_1D.resize(n_simple_needed, 0);
+  }
+  
+  if (n_simple_needed > _simples_per_complex_2D.size()) {
+    _simples_per_complex_2D.resize(n_simple_needed);
+  }
 
-  } // if (_n_simple_allocated < n_simple_needed) 
+  // _simples_per_complex_2D = (int32_t **) urealloc
+  //     (_simples_per_complex_2D, n_simple_needed * sizeof(int32_t *));
+    
+  //   // initialize new elements to zero
+    
+  //   int n_start = _n_simple_allocated;
+  //   int n_new = n_simple_needed - _n_simple_allocated;
+
+  //   // memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(int32_t));
+  //   // memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(int32_t));
+  //   memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(int32_t));
+  //   memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(int32_t *));
+  
+  //   _n_simple_allocated = n_simple_needed;
+
+  // } // if (_n_simple_allocated < n_simple_needed) 
 
 }
 
@@ -3149,25 +3157,13 @@ void TitanFile::freeSimpleArrays()
   
   _n_simples_per_complex.clear();
   _simples_per_complex_offsets.clear();
-
-  if (_simples_per_complex_1D) {
-    ufree(_simples_per_complex_1D);
-    _simples_per_complex_1D = nullptr;
-  }
-
-  if (_simples_per_complex_2D) {
-    for (int i = 0; i < _n_simple_allocated; i++) {
-      if (_simples_per_complex_2D[i] != nullptr) {
-	ufree(_simples_per_complex_2D[i]);
-	_simples_per_complex_2D[i] = nullptr;
-      }
-    }
-    ufree(_simples_per_complex_2D);
-    _simples_per_complex_2D = nullptr;
-  }
+  _simples_per_complex_1D.clear();
   
-  _n_simple_allocated = 0;
-
+  for (size_t ii = 0; ii < _simples_per_complex_2D.size(); ii++) {
+    _simples_per_complex_2D[ii].clear();
+  }
+  _simples_per_complex_2D.clear();
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3178,11 +3174,11 @@ void TitanFile::freeSimpleArrays()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::allocComplexArrays(int n_complex_needed)
+void TitanFile::allocComplexArrays(size_t n_complex_needed)
      
 {
 
-  if (n_complex_needed > (int) _complex_track_nums.size()) {
+  if (n_complex_needed > _complex_track_nums.size()) {
     _complex_track_nums.resize(n_complex_needed, 0);
   }
 
@@ -3210,11 +3206,11 @@ void TitanFile::freeComplexArrays()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::allocScanEntries(int n_entries_needed)
+void TitanFile::allocScanEntries(size_t n_entries_needed)
   
 {
   
-  if (n_entries_needed > (int) _scan_entries.size()) {
+  if (n_entries_needed > _scan_entries.size()) {
     _scan_entries.resize(n_entries_needed);
   }
 
@@ -3242,11 +3238,11 @@ void TitanFile::freeScanEntries()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TitanFile::allocScanIndex(int n_scans_needed)
+void TitanFile::allocScanIndex(size_t n_scans_needed)
      
 {
   
-  if (n_scans_needed > (int) _scan_index.size()) {
+  if (n_scans_needed > _scan_index.size()) {
     _scan_index.resize(n_scans_needed);
   }
   
@@ -3277,7 +3273,7 @@ void TitanFile::freeScanIndex()
 void TitanFile::allocUtime()
      
 {
-  int n_needed = _track_header.max_simple_track_num + 1;
+  size_t n_needed = _track_header.max_simple_track_num + 1;
   _track_utime.resize(n_needed);
 }
 
@@ -3915,12 +3911,11 @@ int TitanFile::readSimplesPerComplex()
     for (int itrack = 0; itrack < _track_header.n_complex_tracks; itrack++) {
       int complex_num = _tFile.complex_track_nums()[itrack];
       int nsimples = _tFile.nsimples_per_complex()[complex_num];
-      _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
-        (_simples_per_complex_2D[complex_num],
-         (nsimples * sizeof(int32_t)));
-      memcpy(_simples_per_complex_2D[complex_num],
-             _tFile.simples_per_complex()[complex_num],
-             nsimples * sizeof(int32_t));
+      _simples_per_complex_2D[complex_num].resize(nsimples);
+      for (int ii = 0; ii < nsimples; ii++) {
+        _simples_per_complex_2D[complex_num][ii] =
+          _tFile.simples_per_complex()[complex_num][ii];
+      }
     } // itrack
 
     // fill 1D array
@@ -3929,10 +3924,10 @@ int TitanFile::readSimplesPerComplex()
     for (int itrack = 0; itrack < _track_header.n_complex_tracks; itrack++) {
       int complex_num = _complex_track_nums[itrack];
       int nsimples = _n_simples_per_complex[complex_num];
-      memcpy(_simples_per_complex_1D + offset,
-             _simples_per_complex_2D[complex_num],
-             nsimples * sizeof(int32_t));
-      offset += nsimples;
+      for (int ii = 0; ii < nsimples; ii++) {
+        _simples_per_complex_1D[offset + ii] = _simples_per_complex_2D[complex_num][ii];
+        offset += nsimples;
+      }
     } // itrack
     
     return 0;
@@ -3963,8 +3958,8 @@ int TitanFile::readSimplesPerComplex()
   // read in simples_per_complex 1D array
   
   _simpleVars.simples_per_complex_1D.getVal
-    (nSimpIndex, nSimpCount, _simples_per_complex_1D);
-
+    (nSimpIndex, nSimpCount, _simples_per_complex_1D.data());
+  
   // fill simples_per_complex_2D
   
   for (int icomp = 0; icomp < _track_header.n_complex_tracks; icomp++) {
@@ -3973,9 +3968,7 @@ int TitanFile::readSimplesPerComplex()
     int n_simples = _n_simples_per_complex[complex_num];
     int simples_offset = _simples_per_complex_offsets[complex_num];
     
-    _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
-      (_simples_per_complex_2D[complex_num],
-       (n_simples * sizeof(int32_t)));
+    _simples_per_complex_2D[complex_num].resize(n_simples, 0);
     
     for (int isimp = 0; isimp < n_simples; isimp++) {
       _simples_per_complex_2D[complex_num][isimp] =
@@ -4009,7 +4002,7 @@ void TitanFile::loadVecSimplesPerComplex(vector<int32_t> &simpsPerComplexLin,
     
     int complex_num = _complex_track_nums[itrack];
     int nsimples = _n_simples_per_complex[complex_num];
-    int32_t *simples = _simples_per_complex_2D[complex_num];
+    vector<int32_t> &simples = _simples_per_complex_2D[complex_num];
 
     for (int ii = 0; ii < nsimples; ii++) {
       simpsPerComplexLin.push_back(simples[ii]);
@@ -4171,17 +4164,17 @@ void TitanFile::reinit()
   _entry.initialize();
   
   std::fill(_complex_track_nums.begin(), _complex_track_nums.end(), 0);
+
   std::fill(_n_simples_per_complex.begin(), _n_simples_per_complex.end(), 0);
+
   std::fill(_simples_per_complex_offsets.begin(),
             _simples_per_complex_offsets.end(), 0);
 
+  std::fill(_simples_per_complex_1D.begin(),
+            _simples_per_complex_1D.end(), 0);
+  
   for (size_t ii = 0; ii < _scan_entries.size(); ii++) {
     _scan_entries[ii].initialize();
-  }
-  
-  if (_n_simple_allocated > 0) {
-    memset (_simples_per_complex_1D, 0,
-	    _n_simple_allocated * sizeof(int32_t));
   }
   
   if (_track_utime.size() > 0) {
@@ -4421,8 +4414,8 @@ int TitanFile::seekTrackStartData()
 int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
                                 const vector<int32_t> &complex_track_nums,
                                 const vector<int32_t> &n_simples_per_complex,
-                                const int32_t **simples_per_complex_2D)
-     
+                                const vector<vector<int32_t> > &simples_per_complex_2D)
+  
 {
 
   // save state
@@ -4438,21 +4431,19 @@ int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
   for (int ii = 0; ii < _track_header.n_complex_tracks; ii++) {
     int complex_num = complex_track_nums[ii];
     int nsimples = n_simples_per_complex[complex_num];
-    _simples_per_complex_2D[complex_num] = (int32_t *) urealloc
-      (_simples_per_complex_2D[complex_num],
-       (nsimples * sizeof(int32_t)));
-    memcpy(_simples_per_complex_2D[complex_num],
-           simples_per_complex_2D[complex_num],
-           nsimples * sizeof(int32_t));
+    _simples_per_complex_2D[complex_num].resize(nsimples);
+    for (int jj = 0; jj < nsimples; jj++) {
+      _simples_per_complex_2D[complex_num][jj] = simples_per_complex_2D[complex_num][jj];
+    }
   }
   
   // handle legacy format
   
   if (_isLegacyV5Format) {
     if (_tFile.WriteHeader(_track_header.convertToLegacy(),
-                           _complex_track_nums.data(),
-                           _n_simples_per_complex.data(),
-                           (const int32_t**) _simples_per_complex_2D)) {
+                           _complex_track_nums,
+                           _n_simples_per_complex,
+                           _simples_per_complex_2D)) {
       _errStr = _tFile.getErrStr();
       return -1;
     }

@@ -486,7 +486,7 @@ int Tstorms2NetCDF::_processInputFile()
   _outFile.writeTrackHeader(_inFile.track_header(),
                             _inFile.complex_track_nums(),
                             _inFile.n_simples_per_complex(),
-                            (const int32_t**) _inFile.simples_per_complex_2D());
+                            _inFile.simples_per_complex_2D());
 
   // test truncate if requested
   

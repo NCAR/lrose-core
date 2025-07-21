@@ -1645,11 +1645,38 @@ int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
            simples_per_complex[complex_num],
            nsimples * sizeof(si32));
   }
-  // memcpy(_simples_per_complex_offsets, simples_per_complex_offsets,
-  //        _header.n_simple_tracks *  sizeof(si32));
   // call in-class method
   return WriteHeader();
 }
+
+int TitanTrackFile::WriteHeader(const track_file_header_t &track_file_header,
+                                const vector<si32> &complex_track_nums,
+                                const vector<si32> &n_simples_per_complex,
+                                const vector<vector<si32> > &simples_per_complex)
+{
+
+  // save state to local variables
+  _header = track_file_header;
+  AllocSimplesPerComplex(_header.n_simple_tracks);
+  AllocComplexArrays(_header.n_complex_tracks);
+  memcpy(_complex_track_nums, complex_track_nums.data(),
+         _header.n_complex_tracks *  sizeof(si32));
+  memcpy(_n_simples_per_complex, n_simples_per_complex.data(),
+         _header.n_simple_tracks *  sizeof(si32));
+  for (int ii = 0; ii < _header.n_complex_tracks; ii++) {
+    int complex_num = complex_track_nums[ii];
+    int nsimples = n_simples_per_complex[complex_num];
+    _simples_per_complex[complex_num] = (si32 *) urealloc
+      (_simples_per_complex[complex_num],
+       (nsimples * sizeof(si32)));
+    memcpy(_simples_per_complex[complex_num],
+           simples_per_complex[complex_num].data(),
+           nsimples * sizeof(si32));
+  }
+  // call in-class method
+  return WriteHeader();
+}
+
 
 int TitanTrackFile::WriteHeader()
      
