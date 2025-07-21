@@ -55,7 +55,7 @@ class TitanFile
 private:
   
   ////////////////////////////////////////////////////////
-  // inner classes for netcdf variables
+  // inner classes to logically group netcdf variables
 
   // top level
 
