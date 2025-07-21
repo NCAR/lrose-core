@@ -68,8 +68,8 @@ TitanFile::TitanFile()
   // _gprops = nullptr;
   // _lprops = nullptr;
   // _hist = nullptr;
-  _runs = nullptr;
-  _proj_runs = nullptr;
+  // _runs = nullptr;
+  // _proj_runs = nullptr;
 
   _max_storms = 0;
   _max_layers = 0;
@@ -1535,10 +1535,8 @@ void TitanFile::allocRuns(int n_runs)
 {
 
   if (n_runs > _max_runs) {
+    _runs.resize(n_runs);
     _max_runs = n_runs;
-    _runs = (storm_file_run_t *)
-      urealloc(_runs, n_runs * sizeof(storm_file_run_t));
-    memset(_runs, 0, n_runs * sizeof(storm_file_run_t));
   }
 
 }
@@ -1547,11 +1545,8 @@ void TitanFile::freeRuns()
      
 {
 
-  if (_runs) {
-    ufree ((char *) _runs);
-    _runs = nullptr;
-    _max_runs = 0;
-  }
+  _runs.clear();
+  _max_runs = 0;
 
 }
 
@@ -1566,10 +1561,8 @@ void TitanFile::allocProjRuns(int n_proj_runs)
 {
 
   if (n_proj_runs > _max_proj_runs) {
+    _proj_runs.resize(n_proj_runs);
     _max_proj_runs = n_proj_runs;
-    _proj_runs = (storm_file_run_t *)
-      urealloc((char *) _proj_runs,
-	       n_proj_runs * sizeof(storm_file_run_t));
   }
 
 }
@@ -1578,11 +1571,8 @@ void TitanFile::freeProjRuns()
      
 {
 
-  if (_proj_runs) {
-    ufree ((char *) _proj_runs);
-    _proj_runs = nullptr;
-    _max_proj_runs = 0;
-  }
+  _proj_runs.clear();
+  _max_proj_runs = 0;
 
 }
 
@@ -1850,7 +1840,7 @@ int TitanFile::readProjRuns(int storm_num)
     }
     int nProjRuns = _gprops[storm_num].n_proj_runs;
     allocProjRuns(nProjRuns);
-    memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
+    TitanData::StormRun::setFromLegacy(_sFile.proj_runs(), _proj_runs);
     return 0;
   }
 
@@ -1859,9 +1849,6 @@ int TitanFile::readProjRuns(int storm_num)
   if (_scan.nstorms == 0) {
     return 0;
   }
-  
-  // store storm number
-  // _storm_num = storm_num;
   
   // allocate mem
   
@@ -1872,12 +1859,12 @@ int TitanFile::readProjRuns(int storm_num)
   
   int projRunsOffset = _gprops[storm_num].proj_runs_offset;
   for (int irun = 0; irun < nProjRuns; irun++) {
-    storm_file_run_t &run = _proj_runs[irun];
+    TitanData::StormRun &run = _proj_runs[irun];
     std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset);
-    _projRunsVars.run_ix.getVal(projRunIndex, &run.ix);
-    _projRunsVars.run_iy.getVal(projRunIndex, &run.iy);
-    _projRunsVars.run_iz.getVal(projRunIndex, &run.iz);
-    _projRunsVars.run_len.getVal(projRunIndex, &run.n);
+    _projRunsVars.run_ix.getVal(projRunIndex, &run.run_ix);
+    _projRunsVars.run_iy.getVal(projRunIndex, &run.run_iy);
+    _projRunsVars.run_iz.getVal(projRunIndex, &run.run_iz);
+    _projRunsVars.run_len.getVal(projRunIndex, &run.run_len);
   }
 
   return 0;
@@ -1921,11 +1908,13 @@ int TitanFile::readStormAux(int storm_num)
     
     TitanData::StormLprops::setFromLegacy(_sFile.lprops(), _lprops);
     TitanData::StormDbzHist::setFromLegacy(_sFile.hist(), _hist);
-
+    TitanData::StormRun::setFromLegacy(_sFile.runs(), _runs);
+    TitanData::StormRun::setFromLegacy(_sFile.proj_runs(), _proj_runs);
+    
     // memcpy(_lprops, _sFile.lprops(), nLayers * sizeof(storm_file_layer_props_t));
     // memcpy(_hist, _sFile.hist(), nDbzIntervals * sizeof(storm_file_dbz_hist_t));
-    memcpy(_runs, _sFile.runs(), nRuns * sizeof(storm_file_run_t));
-    memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
+    // memcpy(_runs, _sFile.runs(), nRuns * sizeof(storm_file_run_t));
+    // memcpy(_proj_runs, _sFile.proj_runs(), nProjRuns * sizeof(storm_file_run_t));
 
     return 0;
     
@@ -2000,23 +1989,23 @@ int TitanFile::readStormAux(int storm_num)
   // read in runs
   
   for (int irun = 0; irun < nRuns; irun++) {
-    storm_file_run_t &run = _runs[irun];
+    TitanData::StormRun &run = _runs[irun];
     std::vector<size_t> runIndex = NcxxVar::makeIndex(runsOffset + irun);
-    _runsVars.run_ix.getVal(runIndex, &run.ix);
-    _runsVars.run_iy.getVal(runIndex, &run.iy);
-    _runsVars.run_iz.getVal(runIndex, &run.iz);
-    _runsVars.run_len.getVal(runIndex, &run.n);
+    _runsVars.run_ix.getVal(runIndex, &run.run_ix);
+    _runsVars.run_iy.getVal(runIndex, &run.run_iy);
+    _runsVars.run_iz.getVal(runIndex, &run.run_iz);
+    _runsVars.run_len.getVal(runIndex, &run.run_len);
   }
 
   // read in proj_runs
   
   for (int irun = 0; irun < nProjRuns; irun++) {
-    storm_file_run_t &run = _proj_runs[irun];
+    TitanData::StormRun &run = _proj_runs[irun];
     std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunsOffset + irun);
-    _projRunsVars.run_ix.getVal(projRunIndex, &run.ix);
-    _projRunsVars.run_iy.getVal(projRunIndex, &run.iy);
-    _projRunsVars.run_iz.getVal(projRunIndex, &run.iz);
-    _projRunsVars.run_len.getVal(projRunIndex, &run.n);
+    _projRunsVars.run_ix.getVal(projRunIndex, &run.run_ix);
+    _projRunsVars.run_iy.getVal(projRunIndex, &run.run_iy);
+    _projRunsVars.run_iz.getVal(projRunIndex, &run.run_iz);
+    _projRunsVars.run_len.getVal(projRunIndex, &run.run_len);
   }
 
   return 0;
@@ -2797,8 +2786,8 @@ int TitanFile::writeStormAux(int storm_num,
                              const vector<TitanData::StormGprops> &gprops,
                              const vector<TitanData::StormLprops> &lprops,
                              const vector<TitanData::StormDbzHist> &hist,
-                             const storm_file_run_t *runs,
-                             const storm_file_run_t *proj_runs)
+                             const vector<TitanData::StormRun> &runs,
+                             const vector<TitanData::StormRun> &proj_runs)
   
 {
 
@@ -2819,8 +2808,8 @@ int TitanFile::writeStormAux(int storm_num,
     
   _lprops = lprops;
   _hist = hist;
-  memcpy(_runs, runs, nRuns * sizeof(storm_file_run_t));
-  memcpy(_proj_runs, proj_runs, nProjRuns * sizeof(storm_file_run_t));
+  _runs = runs;
+  _proj_runs = proj_runs;
 
   // handle legacy format
   
@@ -2838,12 +2827,21 @@ int TitanFile::writeStormAux(int storm_num,
     histLegacy.resize(hist.size());
     TitanData::StormDbzHist::convertToLegacy(hist, histLegacy.data());
     
+    vector<storm_file_run_t> runsLegacy;
+    runsLegacy.resize(runs.size());
+    TitanData::StormRun::convertToLegacy(runs, runsLegacy.data());
+    
+    vector<storm_file_run_t> projRunsLegacy;
+    projRunsLegacy.resize(proj_runs.size());
+    TitanData::StormRun::convertToLegacy(proj_runs, projRunsLegacy.data());
+    
     if (_sFile.WriteProps(storm_num, sheader.nstorms,
                           gpropsLegacy.data(),
                           lpropsLegacy.data(),
                           histLegacy.data(),
-                          runs, proj_runs)) {
-      _errStr = _sFile.getErrStr();
+                          runsLegacy.data(),
+                          projRunsLegacy.data())) {
+          _errStr = _sFile.getErrStr();
       return -1;
     }
 
@@ -2909,26 +2907,26 @@ int TitanFile::writeStormAux(int storm_num,
   
   _runsOffsets[storm_num] = _sumRuns;
   for (int irun = 0; irun < nRuns; irun++) {
-    const storm_file_run_t &run = runs[irun];
+    const TitanData::StormRun &run = runs[irun];
     int runOffset = _sumRuns;
     std::vector<size_t> runIndex = NcxxVar::makeIndex(runOffset);
-    _runsVars.run_ix.putVal(runIndex, run.ix);
-    _runsVars.run_iy.putVal(runIndex, run.iy);
-    _runsVars.run_iz.putVal(runIndex, run.iz);
-    _runsVars.run_len.putVal(runIndex, run.n);
+    _runsVars.run_ix.putVal(runIndex, run.run_ix);
+    _runsVars.run_iy.putVal(runIndex, run.run_iy);
+    _runsVars.run_iz.putVal(runIndex, run.run_iz);
+    _runsVars.run_len.putVal(runIndex, run.run_len);
     _sumRuns++;
   }
   _topLevelVars.sum_runs.putVal(_sumRuns);
   
   _projRunsOffsets[storm_num] = _sumProjRuns;
   for (int irun = 0; irun < nProjRuns; irun++) {
-    const storm_file_run_t &run = proj_runs[irun];
+    const TitanData::StormRun &run = proj_runs[irun];
     int projRunOffset = _sumProjRuns;
     std::vector<size_t> projRunIndex = NcxxVar::makeIndex(projRunOffset);
-    _projRunsVars.run_ix.putVal(projRunIndex, run.ix);
-    _projRunsVars.run_iy.putVal(projRunIndex, run.iy);
-    _projRunsVars.run_iz.putVal(projRunIndex, run.iz);
-    _projRunsVars.run_len.putVal(projRunIndex, run.n);
+    _projRunsVars.run_ix.putVal(projRunIndex, run.run_ix);
+    _projRunsVars.run_iy.putVal(projRunIndex, run.run_iy);
+    _projRunsVars.run_iz.putVal(projRunIndex, run.run_iz);
+    _projRunsVars.run_len.putVal(projRunIndex, run.run_len);
     _sumProjRuns++;
   }
   _topLevelVars.sum_proj_runs.putVal(_sumProjRuns);

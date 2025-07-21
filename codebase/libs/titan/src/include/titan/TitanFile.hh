@@ -484,8 +484,8 @@ public:
   const vector<TitanData::StormGprops> &gprops() const { return _gprops; }
   const vector<TitanData::StormLprops> &lprops() const { return _lprops; }
   const vector<TitanData::StormDbzHist> &hist() const { return _hist; }
-  const storm_file_run_t *runs() const { return _runs; }
-  const storm_file_run_t *proj_runs() const { return _proj_runs; }
+  const vector<TitanData::StormRun> &runs() const { return _runs; }
+  const vector<TitanData::StormRun> &proj_runs() const { return _proj_runs; }
   
   // track data access
 
@@ -658,8 +658,8 @@ public:
                     const vector<TitanData::StormGprops> &gprops,
                     const vector<TitanData::StormLprops> &lprops,
                     const vector<TitanData::StormDbzHist> &hist,
-                    const storm_file_run_t *runs,
-                    const storm_file_run_t *proj_runs);
+                    const vector<TitanData::StormRun> &runs,
+                    const vector<TitanData::StormRun> &proj_runs);
   
   // truncate when rerunning
   // truncates storm data at the specified scan and
@@ -981,8 +981,8 @@ protected:
   vector<TitanData::StormGprops> _gprops;
   vector<TitanData::StormLprops> _lprops;
   vector<TitanData::StormDbzHist> _hist;
-  storm_file_run_t *_runs;
-  storm_file_run_t *_proj_runs;
+  vector<TitanData::StormRun> _runs;
+  vector<TitanData::StormRun> _proj_runs;
 
   // offsets for auxiliary storm properties
 
