@@ -109,7 +109,7 @@ int PrintTitanFiles::Run()
       return -1;
     }
   }
-
+  
   if (_printNcFile()) {
     return -1;
   }
@@ -303,7 +303,7 @@ int PrintTitanFiles::_printNcFile()
   fprintf(stdout, "STORM FILE\n");
   fprintf(stdout, "==========\n");
   fprintf(stdout, "\n");
-  TitanData::StormHeader().print(stdout, "  ");
+  tFile.stormHeader().print(stdout, "  ");
 
   /*
    * loop through scans

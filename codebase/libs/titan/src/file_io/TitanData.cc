@@ -887,9 +887,9 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  Hail mass aloft (ktons)         : %g\n", spacer, hailMassAloft);
   fprintf(out, "%s  Waldvogel probability of hail   : %g\n", spacer, hailWaldvogelProb);
   fprintf(out, "%s  FOKR storm category             : %d\n", spacer, hailFOKRcategory);
-  fprintf(out, "%s  POH (%%)                        : %g\n", spacer, hda_poh);
+  fprintf(out, "%s  POH (%%)                         : %g\n", spacer, hda_poh);
   fprintf(out, "%s  SHI (Jm-1s-1)                   : %g\n", spacer, hda_shi);
-  fprintf(out, "%s  POSH (%%)                       : %g\n", spacer, hda_posh);
+  fprintf(out, "%s  POSH (%%)                        : %g\n", spacer, hda_posh);
   fprintf(out, "%s  MEHS (mm)                       : %g\n", spacer, hda_mehs);
   
   fprintf(out, "%s  tilt angle (deg)                : %g\n", spacer, tilt_angle);
@@ -907,7 +907,7 @@ void TitanData::StormGprops::print(FILE *out,
   fprintf(out, "%s  convectivity_median             : %.2e\n", spacer, convectivity_median);
 
   fprintf(out, "%s  precip area (km2)               : %g\n", spacer, precip_area);
-  fprintf(out, "%s  precip area centroid x %s       : %g\n",
+  fprintf(out, "%s  precip area centroid x %s    : %g\n",
           spacer, loc_label, precip_area_centroid_x);
   fprintf(out, "%s  precip area centroid y %s    : %g\n",
           spacer, loc_label, precip_area_centroid_y);
@@ -918,12 +918,12 @@ void TitanData::StormGprops::print(FILE *out,
           spacer, loc_label, precip_area_major_radius);
   
   fprintf(out, "%s  proj. area (km2)                : %g\n", spacer, proj_area);
-  fprintf(out, "%s  proj. area centroid x %s        : %g\n", spacer, loc_label, proj_area_centroid_x);
-  fprintf(out, "%s  proj. area centroid y %s        : %g\n", spacer, loc_label, proj_area_centroid_y);
+  fprintf(out, "%s  proj. area centroid x %s     : %g\n", spacer, loc_label, proj_area_centroid_x);
+  fprintf(out, "%s  proj. area centroid y %s     : %g\n", spacer, loc_label, proj_area_centroid_y);
   fprintf(out, "%s  proj. area orientation (deg)    : %g\n", spacer, proj_area_orientation);
-  fprintf(out, "%s  proj. area minor radius %s      : %g\n",
+  fprintf(out, "%s  proj. area minor radius %s   : %g\n",
           spacer, loc_label, proj_area_minor_radius);
-  fprintf(out, "%s  proj. area major radius %s      : %g\n",
+  fprintf(out, "%s  proj. area major radius %s   : %g\n",
           spacer, loc_label, proj_area_major_radius);
   
   fprintf(out, "%s  bounding_min_ix                 : %d\n", spacer, bounding_min_ix);
