@@ -207,7 +207,7 @@ void TitanData::StormParams::convertToLegacy(storm_file_params_t &params) const
   
 }
 
-void TitanData::StormParams::print(FILE *out, const char *spacer)
+void TitanData::StormParams::print(FILE *out, const char *spacer) const
 {
 
   fprintf(out, "%sStorm file parameters : \n", spacer);
@@ -326,7 +326,7 @@ storm_file_header_t TitanData::StormHeader::convertToLegacy() const
   return hdr;
 }
 
-void TitanData::StormHeader::print(FILE *out, const char *spacer)
+void TitanData::StormHeader::print(FILE *out, const char *spacer) const
 {
 
   char spacer2[128];
@@ -515,8 +515,7 @@ void TitanData::ScanHeader::convertToLegacy(const vector<TitanData::ScanHeader> 
   }
 }
     
-void TitanData::ScanHeader::print(FILE *out,
-                                  const char *spacer)
+void TitanData::ScanHeader::print(FILE *out, const char *spacer) const
      
 {
   
@@ -841,8 +840,8 @@ void TitanData::StormGprops::convertToLegacy(const vector<TitanData::StormGprops
 void TitanData::StormGprops::print(FILE *out,
                                    const char *spacer,
                                    const StormParams &params,
-                                   const ScanHeader &scan)
-     
+                                   const ScanHeader &scan) const
+  
 {
 
   const char *loc_label;
@@ -1371,7 +1370,7 @@ void TitanData::TrackFcastProps::convertToLegacy(track_file_forecast_props_t &fp
 
 void TitanData::TrackFcastProps::print(FILE *out,
                                        const char *label,
-                                       const char *space)
+                                       const char *space) const
   
 {
   
@@ -1545,7 +1544,7 @@ void TitanData::TrackVerify::convertToLegacy(track_file_verify_t &verify) const
 
 void TitanData::TrackVerify::print(FILE *out,
                                    const char *spacer,
-                                   const char *label)
+                                   const char *label) const
   
 {
   
@@ -1606,7 +1605,7 @@ void TitanData::TrackContingency::convertToLegacy(track_file_contingency_data_t 
 
 void TitanData::TrackContingency::print(FILE *out,
                                         const char *label,
-                                        const char *spacer)
+                                        const char *spacer) const
      
 {
 
@@ -1731,7 +1730,7 @@ void TitanData::TrackingParams::convertToLegacy(track_file_params_t &params) con
 }
 
 void TitanData::TrackingParams::print(FILE *out,
-                                   const char *spacer)
+                                      const char *spacer) const
   
 {
   
@@ -1864,7 +1863,7 @@ void TitanData::TrackHeader::convertToLegacy(track_file_header_t &hdr) const
 }
 
 void TitanData::TrackHeader::print(FILE *out,
-                                   const char *spacer)
+                                   const char *spacer) const
      
 {
 
@@ -2013,7 +2012,7 @@ void TitanData::SimpleTrackParams::convertToLegacy(const vector<TitanData::Simpl
 }
     
 void TitanData::SimpleTrackParams::print(FILE *out,
-                                         const char *spacer)
+                                         const char *spacer) const
      
 {
 
@@ -2173,7 +2172,7 @@ void TitanData::ComplexTrackParams::convertToLegacy
 void TitanData::ComplexTrackParams::print(FILE *out,
                                           const char *spacer,
                                           bool verification_performed,
-                                          const vector<int> &simples_per_complex)
+                                          const vector<int> &simples_per_complex) const
      
 {
   
@@ -2327,8 +2326,8 @@ void TitanData::TrackEntry::convertToLegacy
     
 void TitanData::TrackEntry::print(FILE *out,
                                   const char *spacer,
-                                  int entry_num)
-     
+                                  int entry_num) const
+  
 {
 
   char spacer2[128];

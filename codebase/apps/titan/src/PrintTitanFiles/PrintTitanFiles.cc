@@ -44,7 +44,10 @@
 #include <toolsa/str.h>
 #include <toolsa/sincos.h>
 #include <toolsa/TaXml.hh>
+#include <titan/TitanFile.hh>
 #include <titan/Titan2Xml.hh>
+#include <titan/TitanStormFile.hh>
+#include <titan/TitanTrackFile.hh>
 #include <cerrno>
 #include <vector>
 #include <map>
@@ -102,7 +105,13 @@ int PrintTitanFiles::Run()
   
   if (_args.printLegacy) {
     // print using legacy mode
-    return _printLegacy();
+    if (_printLegacy()) {
+      return -1;
+    }
+  }
+
+  if (_printNcFile()) {
+    return -1;
   }
   
   return 0;
@@ -261,7 +270,116 @@ int PrintTitanFiles::_readLabel(char *label)
 
 
 //////////////////////////////////////////////////
-// printStormFile
+// printStormFile - legacy version
+
+#define BOOL_STR(a) (a == 0? "false" : "true")
+
+int PrintTitanFiles::_printNcFile()
+  
+{
+
+  // open file
+  
+  TitanFile tFile;
+  if (tFile.openFile(_ncFilePath.getPath(), NcxxFile::read)) {
+    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+    cerr << tFile.getErrStr() << endl;
+    return -1;
+  }
+
+  //  read in storm properties file header
+
+  if (tFile.readStormHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+    cerr << tFile.getErrStr() << endl;
+    return -1;
+  }
+
+  int n_scans = tFile.stormHeader().n_scans;
+  const TitanData::StormParams &sparams = tFile.stormHeader().params;
+  
+  // print out header
+  
+  fprintf(stdout, "STORM FILE\n");
+  fprintf(stdout, "==========\n");
+  fprintf(stdout, "\n");
+  TitanData::StormHeader().print(stdout, "  ");
+
+  /*
+   * loop through scans
+   */
+  
+  for (int iscan = 0; iscan < n_scans; iscan++) {
+
+    /*
+     * read in scan info
+     */
+
+    if (tFile.readStormScan(iscan)) {
+      cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+      cerr << tFile.getErrStr() << endl;
+      return -1;
+    }
+
+    const TitanData::ScanHeader &scan = tFile.scan();
+    
+    /*
+     * print out s_handle.scan info
+     */
+
+    if (_args.printSummary) {
+      
+      printf("Scan, time, nstorms : %4d %s %4d\n",
+	     scan.scan_num, utimstr(scan.time), scan.nstorms);
+
+    } else {
+      
+      scan.print(stdout, "    ");
+      
+      if (_args.printFull) {
+        
+	for (int istorm = 0; istorm < scan.nstorms; istorm++) {
+	  
+	  if (tFile.readStormAux(istorm)) {
+	    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+	    cerr << tFile.getErrStr() << endl;
+	    return -1;
+	  }
+
+          const TitanData::StormGprops &gprops = tFile.gprops()[istorm];
+          gprops.print(stdout, "      ",
+                       tFile.stormParams(), scan);
+
+          TitanData::StormLprops::print(stdout, "      ", scan, gprops,
+                                        tFile.lprops());
+	  
+          TitanData::StormDbzHist::print(stdout, "      ", sparams, gprops,
+                                         tFile.hist());
+          
+          TitanData::StormRun::print(stdout, "      ", "3D runs", gprops,
+                                     tFile.runs());
+          
+          TitanData::StormRun::print(stdout, "      ", "Proj runs", gprops,
+                                     tFile.projRuns());
+          
+	} // istorm
+
+      } // f (_args.printFull)
+
+    } // if (_args.printSummary)
+
+  } // iscan
+  
+  // close files
+
+  tFile.closeFile();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// printStormFile - legacy version
 
 #define BOOL_STR(a) (a == 0? "false" : "true")
 
@@ -382,7 +500,7 @@ int PrintTitanFiles::_printStormFileLegacy()
 }
 
 //////////////////////////////////////////////////
-// printTrackFile
+// printTrackFile - legacy version
 
 int PrintTitanFiles::_printTrackFileLegacy()
 

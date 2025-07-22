@@ -43,9 +43,10 @@
 
 #include "Args.hh"
 #include <toolsa/Path.hh>
-#include <titan/TitanStormFile.hh>
-#include <titan/TitanTrackFile.hh>
 using namespace std;
+
+class TitanStormFile;
+class TitanTrackFile;
 
 class PrintTitanFiles {
   
@@ -85,6 +86,7 @@ private:
   
   int _printLegacy();
 
+  int _printNcFile();
   int _printStormFile();
   int _printTrackFile();
 

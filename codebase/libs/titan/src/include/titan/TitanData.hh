@@ -97,7 +97,7 @@ public:
     void setFromLegacy(const storm_file_params_t &params);
     storm_file_params_t convertToLegacy() const;
     void convertToLegacy(storm_file_params_t &params) const;
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
 
     // mode for computing precip
     // TITAN_PRECIP_FROM_COLUMN_MAX: precip computed from col-max dBZ
@@ -231,7 +231,7 @@ public:
     void setFromLegacy(const storm_file_header_t &hdr);
     storm_file_header_t convertToLegacy() const;
     void convertToLegacy(storm_file_header_t &hdr) const;
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
 
     // data
 
@@ -261,7 +261,7 @@ public:
                               vector<TitanData::ScanHeader> &scans);
     static void convertToLegacy(const vector<TitanData::ScanHeader> &scans,
                                 storm_file_scan_header_t *legacyHdrs);
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
     
     // data
     
@@ -306,7 +306,7 @@ public:
     static void convertToLegacy(const vector<TitanData::StormGprops> &gprops,
                                 storm_file_global_props_t *legacyGprops);
     void print(FILE *out, const char *spacer,
-               const StormParams &params, const ScanHeader &scan);
+               const StormParams &params, const ScanHeader &scan) const;
      
 
     // data
@@ -544,7 +544,7 @@ public:
     void setFromLegacy(const track_file_forecast_props_t &fprops);
     track_file_forecast_props_t convertToLegacy() const;
     void convertToLegacy(track_file_forecast_props_t &fprops) const;
-    void print(FILE *out, const char *label, const char *spacer);
+    void print(FILE *out, const char *label, const char *spacer) const;
   
     // data
     
@@ -579,7 +579,7 @@ public:
     void setFromLegacy(const track_file_verify_t &verify);
     track_file_verify_t convertToLegacy() const;
     void convertToLegacy(track_file_verify_t &verify) const;
-    void print(FILE *out, const char *label, const char *spacer);
+    void print(FILE *out, const char *label, const char *spacer) const;
      
     // data
     
@@ -632,7 +632,7 @@ public:
     void setFromLegacy(const track_file_contingency_data_t &cont);
     track_file_contingency_data_t convertToLegacy() const;
     void convertToLegacy(track_file_contingency_data_t &cont) const;
-    void print(FILE *out, const char *label, const char *spacer);
+    void print(FILE *out, const char *label, const char *spacer) const;
 
     // data
     
@@ -656,7 +656,7 @@ public:
     void setFromLegacy(const track_file_params_t &params);
     track_file_params_t convertToLegacy() const;
     void convertToLegacy(track_file_params_t &params) const;
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
     
     // data
     
@@ -735,7 +735,7 @@ public:
     void setFromLegacy(const track_file_header_t &hdr);
     track_file_header_t convertToLegacy() const;
     void convertToLegacy(track_file_header_t &hdr) const;
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
 
     // data
     
@@ -808,7 +808,7 @@ public:
                               vector<TitanData::SimpleTrackParams> &params);
     static void convertToLegacy(const vector<TitanData::SimpleTrackParams> &params,
                                 simple_track_params_t *legacyParams);
-    void print(FILE *out, const char *spacer);
+    void print(FILE *out, const char *spacer) const;
     
     // data
     
@@ -880,7 +880,7 @@ public:
                                 complex_track_params_t *legacyParams);
     void print(FILE *out, const char *spacer,
                bool verification_performed,
-               const vector<int> &simples_per_complex);
+               const vector<int> &simples_per_complex) const;
      
     
     // data
@@ -951,7 +951,7 @@ public:
                               vector<TitanData::TrackEntry> &entry);
     static void convertToLegacy(const vector<TitanData::TrackEntry> &entry,
                                 track_file_entry_t *legacyEntry);
-    void print(FILE *out, const char *spacer, int entry_num);
+    void print(FILE *out, const char *spacer, int entry_num) const;
     
     // data
     
