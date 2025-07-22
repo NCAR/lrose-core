@@ -47,6 +47,7 @@ using namespace std;
 
 class TitanStormFile;
 class TitanTrackFile;
+class TitanFile;
 
 class PrintTitanFiles {
   
@@ -87,11 +88,15 @@ private:
   int _printLegacy();
 
   int _printNcFile();
-  int _printStormFile();
-  int _printTrackFile();
+  int _printStormsNc(TitanFile &tFile);
+  int _printTracksNc(TitanFile &tFile);
+
+  int _printTrackFullNc(TitanFile &tFile);
+  int _printTrackSummaryNc(TitanFile &tFile);
 
   int _printStormFileLegacy();
   int _printTrackFileLegacy();
+
   int _printTrackFullLegacy(TitanStormFile &sfile, TitanTrackFile &tfile);
   int _printTrackSummaryLegacy(TitanStormFile &sfile, TitanTrackFile &tfile);
 

@@ -495,7 +495,7 @@ public:
   const TitanData::ComplexTrackParams &complexParams() const { return _complex_params; }
   const TitanData::TrackEntry &entry() const { return _entry; }
   const vector<TitanData::TrackEntry> &scanEntries() const { return _scan_entries; }
-  const vector<TitanData::TrackScanIndex> &scanIndices() const { return _scan_index; }
+  const vector<TitanData::TrackScanIndex> &scanIndexes() const { return _scan_index; }
   const vector<TitanData::TrackUtime_t> &trackUtime() const { return _track_utime; }
   int nScanEntries() { return _n_scan_entries; }
   

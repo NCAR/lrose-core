@@ -287,8 +287,34 @@ int PrintTitanFiles::_printNcFile()
     return -1;
   }
 
-  //  read in storm properties file header
+  // print storms
 
+  if (_args.dataChoice == Args::printStorms ||
+      _args.dataChoice == Args::printBoth) {
+    _printStormsNc(tFile);
+  }
+  
+  // print tracks
+
+  if (_args.dataChoice == Args::printTracks ||
+      _args.dataChoice == Args::printBoth) {
+    _printTracksNc(tFile);
+  }
+  
+  // close file
+
+  tFile.closeFile();
+
+  return 0;
+
+}
+
+int PrintTitanFiles::_printStormsNc(TitanFile &tFile)
+  
+{
+
+  //  read in storm properties file header
+  
   if (tFile.readStormHeader()) {
     cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
     cerr << tFile.getErrStr() << endl;
@@ -361,10 +387,116 @@ int PrintTitanFiles::_printNcFile()
 
   } // iscan
   
-  // close files
+  return 0;
 
-  tFile.closeFile();
+}
 
+int PrintTitanFiles::_printTracksNc(TitanFile &tFile)
+  
+{
+
+  // read in track properties file header
+  
+  if (tFile.readTrackHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+    cerr << tFile.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (tFile.readSimplesPerComplex()) {
+    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+    cerr << tFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // print out header
+  
+  if (_args.printCsvTable) {
+      
+    if (_args.csvTableType == 1) {
+      // table type 1
+      printf("%%timestep; id;  centerx;  centery; volume;"
+             "  boxxmin;  boxxmax;  boxymin;  boxymax;"
+             " lwpmean;  lwpmin;  lwpmax\n");
+    } else if (_args.csvTableType == 2) {
+      // table type 2
+      printf("%%timestep; idstep1; idstep2;  weight\n");
+    } else if (_args.csvTableType == 3) {
+      // table type 3
+      printf("%%timestep; nstorms\n");
+    } else if (_args.csvTableType == 4) {
+      // table type 4
+      printf("%%complex_track_num; duration_in_scans; duration_in_secs\n");
+    } else if (_args.csvTableType == 5) {
+      // table type 5
+      printf("%%complex_track_num; simple_track_num; "
+             "duration_in_scans; duration_in_secs\n");
+    }
+
+  } else {
+    
+    printf("TRACK FILE\n");
+    printf("==========\n");
+    printf("\n");
+
+    tFile.trackHeader().print(stdout, "  ");
+
+  }
+
+  if (_args.printFull) {
+    TitanData::printTrackArrays(stdout, "  ",
+                                tFile.trackHeader(),
+                                tFile.complexTrackNums(),
+                                tFile.nSimplesPerComplex(),
+                                tFile.simplesPerComplexOffsets(),
+                                tFile.simplesPerComplex2D(),
+                                tFile.scanIndexes());
+  }
+
+#ifdef JUNK
+  // read in storm header
+  
+  if (sfile.ReadHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
+    cerr << sfile.getErrStr() << endl;
+    return -1;
+  }
+
+  // if full listing, print out track info
+  
+  if (_args.printFull) {
+    if (_printTrackFullLegacy(sfile, tfile)) {
+      return -1;
+    }
+  } else if (_args.printSummary) {
+    if (_printTrackSummaryLegacy(sfile, tfile)) {
+      return -1;
+    }
+  } else if (_args.printCsvTable) {
+    if (_args.csvTableType == 1) {
+      if (_printCsvTableType1(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 2) {
+      if (_printCsvTableType2(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 3) {
+      if (_printCsvTableType3(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 4) {
+      if (_printCsvTableType4(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 5) {
+      if (_printCsvTableType5(sfile, tfile)) {
+        return -1;
+      }
+    }
+  }
+#endif
+    
   return 0;
 
 }
