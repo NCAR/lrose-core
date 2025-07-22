@@ -66,9 +66,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
   printCsvTable = false;
   printAsXml = false;
   printVerification = false;
+  printLegacy = false;
   csvTableType = 1;
   minDuration = 0;
   trackNum = -1;
+  dataChoice = not_set;
 
   // loop through args
   
@@ -93,6 +95,22 @@ int Args::parse(int argc, char **argv, string &prog_name)
       printSummary = true;
       printFull = false;
       printCsvTable = false;
+      
+    } else if (!strcmp(argv[i], "-legacy")) {
+      
+      printLegacy = true;
+      
+    } else if (!strcmp(argv[i], "-storms")) {
+      
+      dataChoice = printStorms;
+      
+    } else if (!strcmp(argv[i], "-tracks")) {
+      
+      dataChoice = printTracks;
+      
+    } else if (!strcmp(argv[i], "-both")) {
+      
+      dataChoice = printBoth;
       
     } else if (!strcmp(argv[i], "-csv_table")) {
       
@@ -196,7 +214,7 @@ void Args::_usage(ostream &out)
       << "  [ -summary ] print summary listing (as applicable).\n"
       << "\n"
       << "  [ -csv_table ? ] print CSV table file for intercomparison study.\n"
-      << "                   specify table num (1 or 2)\n"
+      << "    specify table num (1 or 2)\n"
       << "\n"
       << "  [ -md ? ] min duration (secs). Print summary of tracks\n"
       << "     exceeding min duration (as applicable)\n"
@@ -207,6 +225,18 @@ void Args::_usage(ostream &out)
       << "  [ -verify ] force print of verify structs\n"
       << "\n"
       << "  [ -xml ] print as XML instead of normal ASCII.\n"
+      << "\n"
+      << "  [ -legacy ] print using legacy code.\n"
+      << "    Default is to use new TitanData classes with new data, legacy with old data.\n"
+      << "\n"
+      << "  [ -storms ] print storms only.\n"
+      << "    Default if printing .sh5 files.\n"
+      << "\n"
+      << "  [ -tracks ] print trackss only.\n"
+      << "    Default if printing .th5 files.\n"
+      << "\n"
+      << "  [ -both ] print storms and tracks.\n"
+      << "    Default if printing .nc files.\n"
       << "\n"
       << endl;
 

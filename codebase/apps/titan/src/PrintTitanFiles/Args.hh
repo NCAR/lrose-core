@@ -61,9 +61,19 @@ public:
   bool printCsvTable;
   bool printAsXml;
   bool printVerification;
+  bool printLegacy;
   int csvTableType;
   int minDuration;
   int trackNum;
+
+  typedef enum {
+    printStorms,
+    printTracks,
+    printBoth,
+    not_set
+  } data_choice_t;
+
+  data_choice_t dataChoice;
   
 protected:
   

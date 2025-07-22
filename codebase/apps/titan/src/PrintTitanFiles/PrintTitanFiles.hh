@@ -42,6 +42,7 @@
 #define PrintTitanFiles_H
 
 #include "Args.hh"
+#include <toolsa/Path.hh>
 #include <titan/TitanStormFile.hh>
 #include <titan/TitanTrackFile.hh>
 using namespace std;
@@ -70,12 +71,28 @@ private:
 
   string _progName;
   Args _args;
+
+  bool _isNcFile;
+  bool _isStormFile;
+  bool _isTrackFile;
+
+  Path _ncFilePath;
+  Path _stormFilePath;
+  Path _trackFilePath;
   
+  int _setPrintDetails();
   int _readLabel(char *label);
+  
+  int _printLegacy();
+
   int _printStormFile();
   int _printTrackFile();
-  int _printTrackFull(TitanStormFile &sfile, TitanTrackFile &tfile);
-  int _printTrackSummary(TitanStormFile &sfile, TitanTrackFile &tfile);
+
+  int _printStormFileLegacy();
+  int _printTrackFileLegacy();
+  int _printTrackFullLegacy(TitanStormFile &sfile, TitanTrackFile &tfile);
+  int _printTrackSummaryLegacy(TitanStormFile &sfile, TitanTrackFile &tfile);
+
   int _printCsvTableType1(TitanStormFile &sfile, TitanTrackFile &tfile);
   int _printCsvTableType2(TitanStormFile &sfile, TitanTrackFile &tfile);
   int _printCsvTableType3(TitanStormFile &sfile, TitanTrackFile &tfile);

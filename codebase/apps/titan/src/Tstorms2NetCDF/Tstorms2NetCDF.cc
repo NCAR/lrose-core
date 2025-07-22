@@ -153,11 +153,6 @@ int Tstorms2NetCDF::Run ()
       _input = new DsInputPath(_progName,
 			       _params.debug >= Params::DEBUG_VERBOSE,
 			       _args.inputFileList);
-      // if (_params.convert_to_legacy) {
-      //   _input->setSearchExt("nc");
-      // } else {
-      //   _input->setSearchExt("th5");
-      // }
     } else {
       cerr << "ERROR - Tstorms2NetCDF::Run()" << endl;
       cerr <<

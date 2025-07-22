@@ -42,7 +42,6 @@
 #include "Args.hh"
 #include <toolsa/file_io.h>
 #include <toolsa/str.h>
-#include <toolsa/Path.hh>
 #include <toolsa/sincos.h>
 #include <toolsa/TaXml.hh>
 #include <titan/Titan2Xml.hh>
@@ -60,6 +59,9 @@ PrintTitanFiles::PrintTitanFiles(int argc, char **argv)
   // initialize
 
   OK = true;
+  _isNcFile = false;
+  _isStormFile = false;
+  _isTrackFile = false;
   
   // set programe name
   
@@ -92,50 +94,132 @@ PrintTitanFiles::~PrintTitanFiles()
 int PrintTitanFiles::Run()
 {
 
-  // read the file label
-
-  char file_label[R_FILE_LABEL_LEN];
-  if (_readLabel(file_label)) {
+  // set the print details
+  
+  if (_setPrintDetails()) {
     return -1;
   }
   
-  // show info for given file type
+  if (_args.printLegacy) {
+    // print using legacy mode
+    return _printLegacy();
+  }
+  
+  return 0;
 
-  if (!strcmp(file_label, STORM_HEADER_FILE_TYPE)) {
+}
 
+//////////////////////////////////////////////////
+// Print using legacy methods
+
+int PrintTitanFiles::_printLegacy()
+{
+
+  if (_args.dataChoice == Args::not_set) {
+    cerr << "ERROR - " << _progName << endl;
+    cerr << "Unknown file type: " << _args.path << endl;
+    return -1;
+  }
+  
+  // print info for given file type
+
+  if (_args.dataChoice == Args::printBoth ||
+      _args.dataChoice == Args::printStorms) {
     if (_args.printAsXml) {
       if (_printStormsXml()) {
         return -1;
       }
     } else {
-      if (_printStormFile()) {
+      if (_printStormFileLegacy()) {
         return -1;
       }
     }
-
-  } else if (!strcmp(file_label, TRACK_HEADER_FILE_TYPE)) {
-
+  } // if (_args.dataChoice ...
+  
+  if (_args.dataChoice == Args::printBoth ||
+      _args.dataChoice == Args::printTracks) {
     if (_args.printAsXml) {
       if (_printTracksXml()) {
         return -1;
       }
     } else {
-      if (_printTrackFile()) {
+      if (_printTrackFileLegacy()) {
         return -1;
       }
     }
-
-  } else {
-
-    cerr << "ERROR - " << _progName << endl;
-    cerr << "Unknown file type: " << _args.path << endl;
-    return -1;
-
-  }
-
+  } // if (_args.dataChoice ...
+  
   return 0;
 
 }
+
+//////////////////////////////////////////////////
+// set print method details
+
+int PrintTitanFiles::_setPrintDetails()
+{
+
+  // file format
+  
+  Path inputPath(_args.path);
+  if (inputPath.getExt() == "nc") {
+    _isNcFile = true;
+    if (_args.dataChoice == Args::not_set) {
+      _args.dataChoice = Args::printBoth;
+    }
+    _ncFilePath = inputPath;
+  } else if (inputPath.getExt() == "sh5") {
+    _isStormFile = true;
+    if (_args.dataChoice == Args::not_set) {
+      _args.dataChoice = Args::printStorms;
+    }
+    _stormFilePath = inputPath;
+    _trackFilePath = inputPath.getDirectory() + PATH_DELIM + inputPath.getBase() + ".th5";
+    _args.printLegacy = true;
+  } else if (inputPath.getExt() == "th5") {
+    _isTrackFile = true;
+    if (_args.dataChoice == Args::not_set) {
+      _args.dataChoice = Args::printTracks;
+    }
+    _trackFilePath = inputPath;
+    _stormFilePath = inputPath.getDirectory() + PATH_DELIM + inputPath.getBase() + ".sh5";
+    _args.printLegacy = true;
+  } else {
+    cerr << "ERROR - PrintTitanFiles::_setPrintDetails" << endl;
+    cerr << "  Bad input file: " << inputPath.getPath() << endl;
+    return -1;
+  }
+  
+  // read the file label
+
+  if (_isStormFile) {
+    char file_label[R_FILE_LABEL_LEN];
+    if (_readLabel(file_label)) {
+      return -1;
+    }
+    if (strcmp(file_label, STORM_HEADER_FILE_TYPE)) {
+      cerr << "ERROR - PrintTitanFiles::_setPrintDetails" << endl;
+      cerr << "  Bad storm file: " << inputPath.getPath() << endl;
+      cerr << "  Header label is incorrect: " << file_label << endl;
+      return -1;
+    }
+  } else if (_isTrackFile) {
+    char file_label[R_FILE_LABEL_LEN];
+    if (_readLabel(file_label)) {
+      return -1;
+    }
+    if (strcmp(file_label, TRACK_HEADER_FILE_TYPE)) {
+      cerr << "ERROR - PrintTitanFiles::_setPrintDetails" << endl;
+      cerr << "  Bad track file: " << inputPath.getPath() << endl;
+      cerr << "  Header label is incorrect: " << file_label << endl;
+      return -1;
+    }
+  }
+    
+  return 0;
+
+}
+
 
 //////////////////////////////////////////////////
 // read label
@@ -181,7 +265,7 @@ int PrintTitanFiles::_readLabel(char *label)
 
 #define BOOL_STR(a) (a == 0? "false" : "true")
 
-int PrintTitanFiles::_printStormFile()
+int PrintTitanFiles::_printStormFileLegacy()
 
 {
 
@@ -189,7 +273,7 @@ int PrintTitanFiles::_printStormFile()
   
   // open storm properties files
   
-  if (sfile.OpenFiles("r", _args.path.c_str(), "sd5")) {
+  if (sfile.OpenFiles("r", _stormFilePath.getPath().c_str(), "sd5")) {
     cerr << "ERROR - PrintTitanFiles::_printStormFile" << endl;
     cerr << sfile.getErrStr() << endl;
     return -1;
@@ -300,14 +384,14 @@ int PrintTitanFiles::_printStormFile()
 //////////////////////////////////////////////////
 // printTrackFile
 
-int PrintTitanFiles::_printTrackFile()
+int PrintTitanFiles::_printTrackFileLegacy()
 
 {
 
   // open track properties files
   
   TitanTrackFile tfile;
-  if (tfile.OpenFiles("r", _args.path.c_str(), "td5")) {
+  if (tfile.OpenFiles("r", _trackFilePath.getPath().c_str(), "td5")) {
     cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
     cerr << tfile.getErrStr() << endl;
     return -1;
@@ -400,11 +484,11 @@ int PrintTitanFiles::_printTrackFile()
   // if full listing, print out track info
   
   if (_args.printFull) {
-    if (_printTrackFull(sfile, tfile)) {
+    if (_printTrackFullLegacy(sfile, tfile)) {
       return -1;
     }
   } else if (_args.printSummary) {
-    if (_printTrackSummary(sfile, tfile)) {
+    if (_printTrackSummaryLegacy(sfile, tfile)) {
       return -1;
     }
   } else if (_args.printCsvTable) {
@@ -443,8 +527,8 @@ int PrintTitanFiles::_printTrackFile()
 /////////////////////////////////////////////////////////////////////
 // Print track in full
 
-int PrintTitanFiles::_printTrackFull(TitanStormFile &sfile,
-                                     TitanTrackFile &tfile)
+int PrintTitanFiles::_printTrackFullLegacy(TitanStormFile &sfile,
+                                           TitanTrackFile &tfile)
   
 
 {
@@ -598,8 +682,8 @@ int PrintTitanFiles::_printTrackFull(TitanStormFile &sfile,
 /////////////////////////////////////////////////////////////////////
 // Print track in summary
 
-int PrintTitanFiles::_printTrackSummary(TitanStormFile &sfile,
-                                        TitanTrackFile &tfile)
+int PrintTitanFiles::_printTrackSummaryLegacy(TitanStormFile &sfile,
+                                              TitanTrackFile &tfile)
   
 
 {
