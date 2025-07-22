@@ -478,34 +478,34 @@ public:
 
   // storm data access
 
-  const TitanData::StormHeader &storm_header() const { return _storm_header; }
-  const TitanData::StormParams &storm_params() const { return _storm_header.params; }
+  const TitanData::StormHeader &stormHeader() const { return _storm_header; }
+  const TitanData::StormParams &stormParams() const { return _storm_header.params; }
   const TitanData::ScanHeader &scan() const { return _scan; }
   const vector<TitanData::StormGprops> &gprops() const { return _gprops; }
   const vector<TitanData::StormLprops> &lprops() const { return _lprops; }
   const vector<TitanData::StormDbzHist> &hist() const { return _hist; }
   const vector<TitanData::StormRun> &runs() const { return _runs; }
-  const vector<TitanData::StormRun> &proj_runs() const { return _proj_runs; }
+  const vector<TitanData::StormRun> &projRuns() const { return _proj_runs; }
   
   // track data access
 
-  const TitanData::TrackHeader &track_header() const { return _track_header; }
-  const TitanData::TrackingParams &track_params() const { return _track_header.params; }
-  const TitanData::SimpleTrackParams &simple_params() const { return _simple_params; }
-  const TitanData::ComplexTrackParams &complex_params() const { return _complex_params; }
+  const TitanData::TrackHeader &trackHeader() const { return _track_header; }
+  const TitanData::TrackingParams &trackParams() const { return _track_header.params; }
+  const TitanData::SimpleTrackParams &simpleParams() const { return _simple_params; }
+  const TitanData::ComplexTrackParams &complexParams() const { return _complex_params; }
   const TitanData::TrackEntry &entry() const { return _entry; }
-  const vector<TitanData::TrackEntry> &scan_entries() const { return _scan_entries; }
-  const vector<TitanData::TrackScanIndex> &scan_index() const { return _scan_index; }
-  const vector<TitanData::TrackUtime_t> &track_utime() const { return _track_utime; }
-  int n_scan_entries() { return _n_scan_entries; }
+  const vector<TitanData::TrackEntry> &scanEntries() const { return _scan_entries; }
+  const vector<TitanData::TrackScanIndex> &scanIndices() const { return _scan_index; }
+  const vector<TitanData::TrackUtime_t> &trackUtime() const { return _track_utime; }
+  int nScanEntries() { return _n_scan_entries; }
   
-  const vector<int32_t> &complex_track_nums() { return _complex_track_nums; }
-  const vector<int32_t> &n_simples_per_complex() { return _n_simples_per_complex; }
-  const vector<int32_t> &simples_per_complex_offsets() {
+  const vector<int32_t> &complexTrackNums() { return _complex_track_nums; }
+  const vector<int32_t> &nSimplesPerComplex() { return _n_simples_per_complex; }
+  const vector<int32_t> &simplesPerComplexOffsets() {
     return _simples_per_complex_offsets;
   }
-  const vector<int32_t> &simples_per_complex_1D() { return _simples_per_complex_1D; }
-  const vector<vector<int32_t> > &simples_per_complex_2D() {
+  const vector<int32_t> &simplesPerComplex1D() { return _simples_per_complex_1D; }
+  const vector<vector<int32_t> > &simplesPerComplex2D() {
     return _simples_per_complex_2D;
   }
 

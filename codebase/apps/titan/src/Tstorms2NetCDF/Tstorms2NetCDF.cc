@@ -304,7 +304,7 @@ int Tstorms2NetCDF::_processInputFile()
   
   // write the storm header
 
-  _outFile.writeStormHeader(_inFile.storm_header());
+  _outFile.writeStormHeader(_inFile.stormHeader());
 
   // read track header
   
@@ -315,11 +315,11 @@ int Tstorms2NetCDF::_processInputFile()
     cerr << _inFile.getErrStr() << endl;
     return -1;
   }
-  const TitanData::TrackHeader &theader = _inFile.track_header();
+  const TitanData::TrackHeader &theader = _inFile.trackHeader();
   
   // get the complex track numbers array
   
-  const int32_t *complexTrackNums = _inFile.complex_track_nums().data();
+  const int32_t *complexTrackNums = _inFile.complexTrackNums().data();
   
   // loop through complex tracks, reading parameters for each
   
@@ -338,7 +338,7 @@ int Tstorms2NetCDF::_processInputFile()
     }
 
     // write the complex params
-    _outFile.writeComplexTrackParams(icomp, _inFile.complex_params());
+    _outFile.writeComplexTrackParams(icomp, _inFile.complexParams());
 
   } // icomp
   
@@ -359,7 +359,7 @@ int Tstorms2NetCDF::_processInputFile()
     }
 
     // write the simple params
-    _outFile.writeSimpleTrackParams(simpleTrackNum, _inFile.simple_params());
+    _outFile.writeSimpleTrackParams(simpleTrackNum, _inFile.simpleParams());
 
   } // isimple
 
@@ -369,7 +369,7 @@ int Tstorms2NetCDF::_processInputFile()
   vector<int32_t> simpsPerComplexOffsets;
   _inFile.loadVecSimplesPerComplex(simpsPerComplex1D, simpsPerComplexOffsets);
   _outFile.writeSimplesPerComplexArrays(theader.n_simple_tracks,
-                                        _inFile.n_simples_per_complex(),
+                                        _inFile.nSimplesPerComplex(),
                                         simpsPerComplexOffsets,
                                         simpsPerComplex1D.data());
   
@@ -401,7 +401,7 @@ int Tstorms2NetCDF::_processInputFile()
       cerr << _inFile.getErrStr() << endl;
       return -1;
     }
-    TitanData::SimpleTrackParams sparams(_inFile.simple_params());
+    TitanData::SimpleTrackParams sparams(_inFile.simpleParams());
     
     // rewind simple track - prepare for reading entries
     
@@ -483,10 +483,10 @@ int Tstorms2NetCDF::_processInputFile()
 
   // write the track header
   
-  _outFile.writeTrackHeader(_inFile.track_header(),
-                            _inFile.complex_track_nums(),
-                            _inFile.n_simples_per_complex(),
-                            _inFile.simples_per_complex_2D());
+  _outFile.writeTrackHeader(_inFile.trackHeader(),
+                            _inFile.complexTrackNums(),
+                            _inFile.nSimplesPerComplex(),
+                            _inFile.simplesPerComplex2D());
 
   // test truncate if requested
   
@@ -522,7 +522,7 @@ int Tstorms2NetCDF::_loadScanTimes()
 {
 
   _scanTimes.clear();
-  int nScans = _inFile.storm_header().n_scans;
+  int nScans = _inFile.stormHeader().n_scans;
   for (int i = 0; i < nScans; i++) {
     // read in scan
     if (_inFile.readStormScan(i)) {
@@ -591,20 +591,20 @@ int Tstorms2NetCDF::_processScan(int scan_num,
     // side-effect - sets offsets vectors
     
     _outFile.writeStormAux(istorm,
-                           _inFile.storm_header(),
+                           _inFile.stormHeader(),
                            _inFile.scan(),
                            _inFile.gprops(),
                            _inFile.lprops(),
                            _inFile.hist(),
                            _inFile.runs(),
-                           _inFile.proj_runs());
+                           _inFile.projRuns());
     
   }
 
   // write the scan and global properties to NetCDF
   // the appropriate offsets have been set by writeSecProps()
   
-  _outFile.writeStormScan(_inFile.storm_header(),
+  _outFile.writeStormScan(_inFile.stormHeader(),
                           _inFile.scan(),
                           _inFile.gprops());
   
