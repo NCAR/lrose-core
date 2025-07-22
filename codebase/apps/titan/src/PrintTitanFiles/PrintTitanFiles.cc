@@ -347,20 +347,11 @@ int PrintTitanFiles::_printNcFile()
 	  }
 
           const TitanData::StormGprops &gprops = tFile.gprops()[istorm];
-          gprops.print(stdout, "      ",
-                       tFile.stormParams(), scan);
-
-          TitanData::StormLprops::print(stdout, "      ", scan, gprops,
-                                        tFile.lprops());
-	  
-          TitanData::StormDbzHist::print(stdout, "      ", sparams, gprops,
-                                         tFile.hist());
-          
-          TitanData::StormRun::print(stdout, "      ", "3D runs", gprops,
-                                     tFile.runs());
-          
-          TitanData::StormRun::print(stdout, "      ", "Proj runs", gprops,
-                                     tFile.projRuns());
+          gprops.print(stdout, "      ", tFile.stormParams(), scan);
+          TitanData::StormLprops::print(stdout, "      ", scan, gprops, tFile.lprops());
+          TitanData::StormDbzHist::print(stdout, "      ", sparams, gprops, tFile.hist());
+          TitanData::StormRun::printRuns(stdout, "      ", gprops, tFile.runs());
+          TitanData::StormRun::printProjRuns(stdout, "      ", gprops, tFile.projRuns());
           
 	} // istorm
 

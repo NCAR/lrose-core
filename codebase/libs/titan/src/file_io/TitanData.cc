@@ -1176,7 +1176,7 @@ void TitanData::StormDbzHist::print(FILE *out,
   fprintf(out, "%s%10s %10s %12s %12s\n", spacer,
 	  "Low dbz", "High Dbz", "% volume", "% area");
   
-  for (size_t ii = 0; ii < hist.size(); ii++) {
+  for (int ii = 0; ii < gprops.n_dbz_intervals; ii++) {
     
     fprintf(out, "%s%10.1f %10.1f %12.2f %12.2f\n", spacer,
 	    (params.low_dbz_threshold + (double) ii * params.dbz_hist_interval),
@@ -1252,11 +1252,10 @@ void TitanData::StormRun::convertToLegacy(const vector<TitanData::StormRun> &run
   }
 }
     
-void TitanData::StormRun::print(FILE *out,
-                                const char *spacer,
-                                const char *label,
-                                const StormGprops &gprops,
-                                const vector<StormRun> &runs)
+void TitanData::StormRun::printRuns(FILE *out,
+                                    const char *spacer,
+                                    const StormGprops &gprops,
+                                    const vector<StormRun> &runs)
   
 {
   
@@ -1265,15 +1264,15 @@ void TitanData::StormRun::print(FILE *out,
   }
   
   int npts = 0;
-  for (size_t ii = 0; ii < runs.size(); ii++) {
+  for (int ii = 0; ii < gprops.n_runs; ii++) {
     npts += runs[ii].run_len;
   }
-
-  fprintf(out, "%s%s - nGridPts: %d\n", spacer, label, npts);
+  
+  fprintf(out, "%s3D runs - nGridPts: %d\n", spacer, npts);
   fprintf(out, "%s%8s %8s %8s %8s %8s\n", spacer,
 	  "ix", "n", "maxx", "iy", "iz");
   
-  for (size_t ii = 0; ii < runs.size(); ii++) {
+  for (int ii = 0; ii < gprops.n_runs; ii++) {
     fprintf(out, "%s%8d %8d %8d %8d %8d",
 	    spacer,
 	    runs[ii].run_ix, runs[ii].run_len,
@@ -1283,6 +1282,47 @@ void TitanData::StormRun::print(FILE *out,
 	(runs[ii].run_ix + runs[ii].run_len - 1) > gprops.bounding_max_ix ||
 	runs[ii].run_iy < gprops.bounding_min_iy ||
 	runs[ii].run_iy > gprops.bounding_max_iy) {
+      fprintf(out, "\a *** Bounds exceeded");
+    }
+    fprintf(out, "\n");
+  } // ii
+  
+  fprintf(out, "\n");
+
+  return;
+  
+}
+
+void TitanData::StormRun::printProjRuns(FILE *out,
+                                        const char *spacer,
+                                        const StormGprops &gprops,
+                                        const vector<StormRun> &projRuns)
+  
+{
+  
+  if (projRuns.size() == 0) {
+    return;
+  }
+  
+  int npts = 0;
+  for (int ii = 0; ii < gprops.n_proj_runs; ii++) {
+    npts += projRuns[ii].run_len;
+  }
+  
+  fprintf(out, "%sProjected 2D runs - nGridPts: %d\n", spacer, npts);
+  fprintf(out, "%s%8s %8s %8s %8s %8s\n", spacer,
+	  "ix", "n", "maxx", "iy", "iz");
+  
+  for (int ii = 0; ii < gprops.n_proj_runs; ii++) {
+    fprintf(out, "%s%8d %8d %8d %8d %8d",
+	    spacer,
+	    projRuns[ii].run_ix, projRuns[ii].run_len,
+	    (projRuns[ii].run_ix + projRuns[ii].run_len - 1),
+	    projRuns[ii].run_iy, projRuns[ii].run_iz);
+    if (projRuns[ii].run_ix < gprops.bounding_min_ix ||
+	(projRuns[ii].run_ix + projRuns[ii].run_len - 1) > gprops.bounding_max_ix ||
+	projRuns[ii].run_iy < gprops.bounding_min_iy ||
+	projRuns[ii].run_iy > gprops.bounding_max_iy) {
       fprintf(out, "\a *** Bounds exceeded");
     }
     fprintf(out, "\n");

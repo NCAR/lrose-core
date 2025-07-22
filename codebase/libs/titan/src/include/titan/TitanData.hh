@@ -517,9 +517,13 @@ public:
                               vector<TitanData::StormRun> &run);
     static void convertToLegacy(const vector<TitanData::StormRun> &run,
                                 storm_file_run_t *legacyRun);
-    static void print(FILE *out, const char *spacer, const char *label,
-                      const StormGprops &gprops, const vector<StormRun> &runs);
-     
+    static void printRuns(FILE *out, const char *spacer,
+                          const StormGprops &gprops,
+                          const vector<StormRun> &runs);
+    static void printProjRuns(FILE *out, const char *spacer,
+                              const StormGprops &gprops,
+                              const vector<StormRun> &projRuns);
+    
 
     // data
     
