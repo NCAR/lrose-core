@@ -1735,7 +1735,7 @@ void TitanData::TrackingParams::print(FILE *out,
   
 {
   
-  fprintf(out, "%sTRACK FILE PARAMETERS:\n", spacer);
+  fprintf(out, "%sTRACKING PARAMETERS:\n", spacer);
 
   if (grid_type == Mdvx::PROJ_FLAT) {
     fprintf(out, "%s  Gridtype : flat\n", spacer);

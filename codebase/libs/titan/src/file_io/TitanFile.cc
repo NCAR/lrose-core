@@ -3119,27 +3119,10 @@ void TitanFile::allocSimpleArrays(size_t n_simple_needed)
   if (n_simple_needed > _simples_per_complex_1D.size()) {
     _simples_per_complex_1D.resize(n_simple_needed, 0);
   }
-  
+
   if (n_simple_needed > _simples_per_complex_2D.size()) {
     _simples_per_complex_2D.resize(n_simple_needed);
   }
-
-  // _simples_per_complex_2D = (int32_t **) urealloc
-  //     (_simples_per_complex_2D, n_simple_needed * sizeof(int32_t *));
-    
-  //   // initialize new elements to zero
-    
-  //   int n_start = _n_simple_allocated;
-  //   int n_new = n_simple_needed - _n_simple_allocated;
-
-  //   // memset (_n_simples_per_complex + n_start, 0, n_new * sizeof(int32_t));
-  //   // memset (_simples_per_complex_offsets + n_start, 0, n_new * sizeof(int32_t));
-  //   memset (_simples_per_complex_1D + n_start, 0, n_new * sizeof(int32_t));
-  //   memset (_simples_per_complex_2D + n_start, 0, n_new * sizeof(int32_t *));
-  
-  //   _n_simple_allocated = n_simple_needed;
-
-  // } // if (_n_simple_allocated < n_simple_needed) 
 
 }
 
@@ -3925,8 +3908,8 @@ int TitanFile::readSimplesPerComplex()
       int complex_num = _complex_track_nums[itrack];
       int nsimples = _n_simples_per_complex[complex_num];
       for (int ii = 0; ii < nsimples; ii++) {
-        _simples_per_complex_1D[offset + ii] = _simples_per_complex_2D[complex_num][ii];
-        offset += nsimples;
+        _simples_per_complex_1D[offset] = _simples_per_complex_2D[complex_num][ii];
+        offset++;
       }
     } // itrack
     
@@ -4455,7 +4438,7 @@ int TitanFile::writeTrackHeader(const TitanData::TrackHeader &track_file_header,
   _addErrStr("  File: ", _filePath);
 
   // make copy
-  
+
   const TitanData::TrackingParams &tparams(_track_header.params);
   
   // set top level vars
