@@ -112,7 +112,6 @@ endif()
 # link libs
 
 link_libraries (dsdata)
-link_libraries (titan)
 link_libraries (Mdv)
 link_libraries (Spdb)
 link_libraries (Fmq)
