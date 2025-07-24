@@ -215,7 +215,7 @@ int TrTrack::start_complex_track(TitanTrackFile &tfile,
     = (si32 *) umalloc (sizeof(si32));
   tfile._simples_per_complex[status.simple_track_num][0] =
     status.simple_track_num;
-  tfile._nsimples_per_complex[status.simple_track_num] =
+  tfile._n_simples_per_complex[status.simple_track_num] =
     ct_params.n_simple_tracks;
 
   ct_params.start_scan = st_params.start_scan;
@@ -293,7 +293,7 @@ int TrTrack::augment_complex_track(TitanTrackFile &tfile)
   ct_params.n_simple_tracks++;
   status.n_simple_tracks = ct_params.n_simple_tracks;
 
-  tfile._nsimples_per_complex[status.complex_track_num] =
+  tfile._n_simples_per_complex[status.complex_track_num] =
     ct_params.n_simple_tracks;
 
   /*
