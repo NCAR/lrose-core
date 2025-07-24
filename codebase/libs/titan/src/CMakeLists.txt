@@ -88,6 +88,8 @@ set (SRCS
       ./file_io/RfUncompress.c
       ./file_io/RfUtilities.c
       ./file_io/RfZr.c
+      ./file_io/TitanData.cc
+      ./file_io/TitanFile.cc
       ./file_io/TitanStormFile.cc
       ./file_io/TitanTrackFile.cc
       ./mdv/RfDobson.c
