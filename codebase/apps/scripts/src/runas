@@ -1,0 +1,67 @@
+#!/bin/bash
+# Author: carheden
+# Date: Thu Jul 26 16:54:07 UTC 2012
+# Changelog:
+# carheden - Fri Dec 11 16:32:57 UTC 2015
+#   Added fallback to just run sudo if writing /tmp files failed (such as when /tmp is full)
+#
+# Purpose: A script to let users run as shared accounts without having shared passwords.
+# Can't we stop using shared passwords around here already!!!
+#
+# Source:
+# The golden master of this script is ususall in the git repo at ssh://nsap-git/git/ral-rpms/SOURCES/runas
+# Newer versions might also be in the working copy at nsap-admin:/usr/src/redhat/SOURCES/runas if we haven't pushed
+# the that upstream recently.
+#
+
+
+PATH=/bin:/usr/bin
+
+mytmp=${TMPDIR-/tmp}
+
+user=$1
+shift;
+if [[ -z "$user" ]]; then
+        cat <<EOF
+Usage: $0 <username> [command] [args...]
+EOF
+        exit 1
+fi
+getent passwd "${user}" > /dev/null
+if [[ $? -ne 0 ]]; then
+        echo "$user: No such user on this system"
+        exit 1
+fi
+tgtshell=$(getent passwd "${user}" | cut -f7 -d:)
+# A fallback in case X11 stuff fails, such as when ${mytmp} is full
+nox() {
+    if [ $# -eq 0 ]; then
+            exec /usr/bin/sudo -H -u $user $tgtshell
+    else
+            exec /usr/bin/sudo -H -u $user "$@"
+    fi
+        exit 1 # Should be unreachable of course, but...
+}
+
+# Short-circuit if we don't need X11 forwarding
+[ -z "${DISPLAY}" ] && nox "$@"
+
+
+# Hey, this ain't safe!
+cat <<EOF 1>&2
+
+!!!!!! WARNING !!!!!!
+You're running as another user with X11 forwarding. Other people who can also
+access the $user account could, in theory, access your local console for all
+sorts of bad purposes.
+!!!!!! WARNING !!!!!!
+
+EOF
+
+
+tmpscript="${mytmp}/.$user$$"
+cat <<EOF | sudo -H -u $user /bin/bash -c "umask 0077; tee $tmpscript" >/dev/null
+#!/bin/bash
+
+EOF
+
