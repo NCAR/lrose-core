@@ -387,6 +387,14 @@ public:
 
   char* water_flag_field_name;
 
+  tdrp_bool_t use_titan_for_selection;
+
+  char* titan_data_dir;
+
+  int min_titan_track_duration_secs;
+
+  int min_titan_storm_volume_km3;
+
   tdrp_bool_t set_month_range;
 
   int min_month;
@@ -434,7 +442,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

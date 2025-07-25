@@ -685,6 +685,54 @@
     tt->single_val.s = tdrpStrDup("WaterFlag");
     tt++;
     
+    // Parameter 'use_titan_for_selection'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_titan_for_selection");
+    tt->descr = tdrpStrDup("Option to use Titan tracks to select data for use in climatology.");
+    tt->help = tdrpStrDup("Ecco sometimes identifies small spurious regions that contaminate the climatology. We can run Titan on the Ecco output, and then using the Titan output to select only significant storms. This helps to mask out non-storm data.");
+    tt->val_offset = (char *) &use_titan_for_selection - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'titan_data_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("titan_data_dir");
+    tt->descr = tdrpStrDup("Directory for titan data.");
+    tt->help = tdrpStrDup("This directory will contain the titan storm and track files.");
+    tt->val_offset = (char *) &titan_data_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("${HOME}/data/titan");
+    tt++;
+    
+    // Parameter 'min_titan_track_duration_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_titan_track_duration_secs");
+    tt->descr = tdrpStrDup("Minimum duration of titan track for it to be valid for climatology.");
+    tt->help = tdrpStrDup("We only use tracks that meet or exceed this overall duration.");
+    tt->val_offset = (char *) &min_titan_track_duration_secs - &_start_;
+    tt->single_val.i = 1800;
+    tt++;
+    
+    // Parameter 'min_titan_storm_volume_km3'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_titan_storm_volume_km3");
+    tt->descr = tdrpStrDup("Minimum volume of storm for it to be valid for climatology.");
+    tt->help = tdrpStrDup("We only use titan storms that meet or exceed this volume. This test is applied at each scan time.");
+    tt->val_offset = (char *) &min_titan_storm_volume_km3 - &_start_;
+    tt->single_val.i = 100;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
