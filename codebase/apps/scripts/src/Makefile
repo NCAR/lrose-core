@@ -27,6 +27,7 @@ SCRIPTS = \
 	pull_files_ftp.py \
 	push_files_ftp.py \
 	push_spdb_files_ftp.py \
+	runas \
 	rm_baks \
 	rm_CMakeLists \
 	rm_core \
