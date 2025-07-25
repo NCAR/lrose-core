@@ -387,14 +387,6 @@ public:
 
   char* water_flag_field_name;
 
-  tdrp_bool_t use_titan_for_selection;
-
-  char* titan_data_dir;
-
-  int min_titan_track_duration_secs;
-
-  int min_titan_storm_volume_km3;
-
   tdrp_bool_t set_month_range;
 
   int min_month;
@@ -431,6 +423,14 @@ public:
 
   double radar_coverage_min_ht_fraction;
 
+  tdrp_bool_t censor_using_titan;
+
+  char* titan_data_dir;
+
+  int min_titan_track_duration_secs;
+
+  int min_titan_storm_volume_km3;
+
   tdrp_bool_t write_hour_of_day_stats;
 
   char* hour_of_day_stats_dir;
@@ -442,7 +442,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[41];
 
   const char *_className;
 

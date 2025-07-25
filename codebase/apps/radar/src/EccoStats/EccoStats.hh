@@ -85,6 +85,7 @@ private:
   DsInputPath *_eccoPaths;
   DsMdvx _eccoMdvx, _statsMdvx;
   DsMdvx _mrmsMdvx, _covMdvx;
+  time_t _eccoValidTime;
   time_t _firstEccoTime, _lastEccoTime;
 
   MdvxProj _proj;
@@ -135,8 +136,6 @@ private:
   fl32 **_terrainHt;
   fl32 **_waterFlag;
 
-  // fl32 **_sumCovMinHt;
-  // fl32 **_sumCovMaxHt;
   fl32 **_sumCovHtFrac;
   fl32 **_countCov;
 
@@ -144,6 +143,9 @@ private:
   double **_lon;
   
   int **_hourOfDay; // hour of day index
+
+  bool _censorUsingTitan;
+  int ***_titanMask;
   
   int _computeEccoStats();
 
@@ -165,6 +167,7 @@ private:
   void _addCoverageFields();
   int _readMrms();
   int _readCoverage();
+  int _readTitan();
   
   MdvxField *_make3DField(fl32 ***data,
                           string fieldName,

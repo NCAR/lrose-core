@@ -135,6 +135,8 @@ EccoStats::EccoStats(int argc, char **argv)
     _agNy = 1;
   }
 
+  _censorUsingTitan = _params.censor_using_titan;
+
 }
 
 // destructor
@@ -198,7 +200,7 @@ int EccoStats::_computeEccoStats()
 
       // first file, initialize grid
 
-      _firstEccoTime = _eccoMdvx.getValidTime();
+      _firstEccoTime = _eccoValidTime;
 
       _inNx = fhdr.nx;
       _inNy = fhdr.ny;
@@ -232,7 +234,7 @@ int EccoStats::_computeEccoStats()
       }
 
     }
-    _lastEccoTime = _eccoMdvx.getValidTime();
+    _lastEccoTime = _eccoValidTime;
     fileCount++;
     
     // update the stats, based on the data in the ecco file
@@ -303,14 +305,14 @@ void EccoStats::_initArraysToNull()
   _terrainHt = NULL;
   _waterFlag = NULL;
 
-  // _sumCovMinHt = NULL;
-  // _sumCovMaxHt = NULL;
   _sumCovHtFrac = NULL;
   _countCov = NULL;
 
   _lat = NULL;
   _lon = NULL;
   _hourOfDay = NULL;
+
+  _titanMask = NULL;
 
 }
 
@@ -361,8 +363,6 @@ void EccoStats::_allocArrays()
 
   // coverage
   
-  // _sumCovMinHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
-  // _sumCovMaxHt = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _sumCovHtFrac = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
   _countCov = (fl32 **) ucalloc2(_ny, _nx, sizeof(fl32));
 
@@ -375,6 +375,12 @@ void EccoStats::_allocArrays()
   
   _hourOfDay = (int **) ucalloc2(_ny, _nx, sizeof(int));
 
+  // titan mask
+
+  if (_params.censor_using_titan) {
+    _titanMask = (int ***) ucalloc3(_nz, _ny, _nx, sizeof(int));
+  }
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -416,8 +422,6 @@ void EccoStats::_freeArrays()
   ufree2((void **) _terrainHt);
   ufree2((void **) _waterFlag);
 
-  // ufree2((void **) _sumCovMinHt);
-  // ufree2((void **) _sumCovMaxHt);
   ufree2((void **) _sumCovHtFrac);
   ufree2((void **) _countCov);
 
@@ -426,6 +430,10 @@ void EccoStats::_freeArrays()
 
   ufree2((void **) _hourOfDay);
   
+  if (_params.censor_using_titan) {
+    ufree3((void ***) _titanMask);
+  }
+
 }
 
 /////////////////////////////////////////////////////////
@@ -571,7 +579,7 @@ void EccoStats::_updateStats()
 
   // compute hour of day array
   
-  DateTime fileTime(_eccoMdvx.getValidTime());
+  DateTime fileTime(_eccoValidTime);
   
   for (int iy = 0; iy < _ny; iy++) {
     for (int ix = 0; ix < _nx; ix++) {
@@ -596,20 +604,6 @@ void EccoStats::_updateStats()
     covHtFrac2D = (fl32 *) _covHtFractionField->getVol();
   }
   
-  // fl32 *covMinHt2D = NULL;
-  // fl32 covMinHtMiss = -9999;
-  // if (_covMinHtField != NULL) {
-  //   covMinHtMiss = _covMinHtField->getFieldHeader().missing_data_value;
-  //   covMinHt2D = (fl32 *) _covMinHtField->getVol();
-  // }
-  
-  // fl32 *covMaxHt2D = NULL;
-  // fl32 covMaxHtMiss = -9999;
-  // if (_covMaxHtField != NULL) {
-  //   covMaxHtMiss = _covMaxHtField->getFieldHeader().missing_data_value;
-  //   covMaxHt2D = (fl32 *) _covMaxHtField->getVol();
-  // }
-  
   // loop through 2D grid space
   
   size_t offset = 0;
@@ -627,16 +621,6 @@ void EccoStats::_updateStats()
       if (covHtFrac2D != NULL) {
         fl32 covHtFrac = covHtFrac2D[offset];
         if (covHtFrac != covHtFracMiss) {
-          // min coverage height
-          // fl32 covMinHt = covMinHt2D[offset];
-          // if (covMinHt != covMinHtMiss) {
-          //   _sumCovMinHt[iy][ix] += covMinHt;
-          // }
-          // max coverage height
-          // fl32 covMaxHt = covMaxHt2D[offset];
-          // if (covMaxHt != covMaxHtMiss) {
-          //   _sumCovMaxHt[iy][ix] += covMaxHt;
-          // }
           // ht fraction
           _sumCovHtFrac[iy][ix] += covHtFrac;
           _countCov[iy][ix]++;
@@ -761,6 +745,7 @@ int EccoStats::_readEcco(const char *path)
     cerr << _eccoMdvx.getErrStr() << endl;
     return -1;
   }
+  _eccoValidTime = _eccoMdvx.getValidTime();
 
   _eccoTypeField = _eccoMdvx.getField(_params.ecco_type_comp_field_name);
   _convectivityField = _eccoMdvx.getField(_params.convectivity_comp_field_name);
@@ -797,6 +782,17 @@ int EccoStats::_readEcco(const char *path)
       // failure - skip
       cerr << "ERROR - EccoStats::_readEcco()" << endl;
       return -1;
+    }
+  }
+
+  // read the titan data if requested
+
+  _censorUsingTitan = _params.censor_using_titan;
+  if (_params.censor_using_titan) {
+    if (_readTitan()) {
+      // failure - skip
+      cerr << "WARNING - no Titan masking" << endl;
+      _censorUsingTitan = false;
     }
   }
 
@@ -1253,24 +1249,6 @@ void EccoStats::_addFieldsToStats()
                                            _covHtFractionField->getFieldHeader().missing_data_value));
   }
   
-  // if (_covMinHtField != NULL) {
-  //   _statsMdvx.addField(_computeCov2DField(_sumCovMinHt,
-  //                                          _countCov,
-  //                                          _params.coverage_min_ht_field_name,
-  //                                          "min_ht_of_radar_coverage",
-  //                                          "km",
-  //                                          _covMinHtField->getFieldHeader().missing_data_value));
-  // }
-  
-  // if (_covMaxHtField != NULL) {
-  //   _statsMdvx.addField(_computeCov2DField(_sumCovMaxHt,
-  //                                          _countCov,
-  //                                          _params.coverage_max_ht_field_name,
-  //                                          "max_ht_of_radar_coverage",
-  //                                          "km",
-  //                                          _covMaxHtField->getFieldHeader().missing_data_value));
-  // }
-
 }
 
 /////////////////////////////////////////////////////////
@@ -1841,6 +1819,18 @@ int EccoStats::_readCoverage()
   
   return 0;
 
+}
+
+/////////////////////////////////////////////////////////
+// read in the titan data, create mask
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_readTitan()
+  
+{
+  
+  return 0;
+  
 }
 
 /////////////////////////////////////////////////////////

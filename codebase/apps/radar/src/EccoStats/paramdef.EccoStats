@@ -68,30 +68,6 @@ paramdef string {
   p_help = "Set to empty if you do not want to copy the water flag to the output files.";
 } water_flag_field_name;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to use Titan tracks to select data for use in climatology.";
-  p_help = "Ecco sometimes identifies small spurious regions that contaminate the climatology. We can run Titan on the Ecco output, and then using the Titan output to select only significant storms. This helps to mask out non-storm data.";
-} use_titan_for_selection;
-
-paramdef string {
-  p_default = "${HOME}/data/titan";
-  p_descr = "Directory for titan data.";
-  p_help = "This directory will contain the titan storm and track files.";
-} titan_data_dir;
-
-paramdef int {
-  p_default = 1800;
-  p_descr = "Minimum duration of titan track for it to be valid for climatology.";
-  p_help = "We only use tracks that meet or exceed this overall duration.";
-} min_titan_track_duration_secs;
-
-paramdef int {
-  p_default = 100;
-  p_descr = "Minimum volume of storm for it to be valid for climatology.";
-  p_help = "We only use titan storms that meet or exceed this volume. This test is applied at each scan time.";
-} min_titan_storm_volume_km3;
-
 commentdef {
   p_header = "CLIMATOLOGY DETAILS";
 }
@@ -229,6 +205,34 @@ paramdef double {
   p_descr = "Minimum fraction of height coverage for stats to be valid.";
   p_help = "We only accumulate the counts for a column if the coverage height fraction exceeds this threshold.";
 } radar_coverage_min_ht_fraction;
+
+commentdef {
+  p_header = "CENSOR USING TITAN STORM TRACKS";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use Titan tracks to mask data for use in climatology.";
+  p_help = "Ecco sometimes identifies small spurious regions that contaminate the climatology. We can run Titan on the Ecco output, and then using the Titan output to select only significant storms. This helps to mask out non-storm data.";
+} censor_using_titan;
+
+paramdef string {
+  p_default = "${HOME}/data/titan";
+  p_descr = "Directory for titan data.";
+  p_help = "This directory will contain the titan storm and track files.";
+} titan_data_dir;
+
+paramdef int {
+  p_default = 1800;
+  p_descr = "Minimum duration of titan track for it to be valid for climatology.";
+  p_help = "We only use tracks that meet or exceed this overall duration.";
+} min_titan_track_duration_secs;
+
+paramdef int {
+  p_default = 100;
+  p_descr = "Minimum volume of storm for it to be valid for climatology.";
+  p_help = "We only use titan storms that meet or exceed this volume. This test is applied at each scan time.";
+} min_titan_storm_volume_km3;
 
 commentdef {
   p_header = "WRITE HOUR-OF-DAY SUMMARIES TO SEPARATE FILES";
