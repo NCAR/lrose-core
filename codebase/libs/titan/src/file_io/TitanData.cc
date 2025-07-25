@@ -2391,7 +2391,7 @@ void TitanData::TrackEntry::print(FILE *out,
   fprintf(out, "%s  next_entry_offset : %ld\n", spacer, next_entry_offset);
   fprintf(out, "\n");
 
-  dval_dt.print(out, "  Entry dval_dt", spacer2);
+  dval_dt.print(out, "Entry dval_dt", spacer2);
 
   return;
   
