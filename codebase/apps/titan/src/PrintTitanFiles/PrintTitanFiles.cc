@@ -174,7 +174,7 @@ int PrintTitanFiles::_setPrintDetails()
   if (inputPath.getExt() == "nc") {
     _isNcFile = true;
     if (_args.dataChoice == Args::not_set) {
-      _args.dataChoice = Args::printBoth;
+      _args.dataChoice = Args::printStorms;
     }
     _ncFilePath = inputPath;
   } else if (inputPath.getExt() == "sh5") {
