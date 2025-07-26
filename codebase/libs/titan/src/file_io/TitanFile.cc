@@ -231,6 +231,60 @@ int TitanFile::openFile(const string &dir,
 
 }
   
+/////////////////////////////////////////////////////////////
+// Find the best request file day for the given request time
+//
+// This finds the day for which the Titan files:
+//  (a) include the request time.
+//  (b) maximize the lag from the start time to the request time.
+//
+// This makes sure that:
+//  (a) the file is valid
+//  (b) the tracks have the largest history
+//
+// We need this strategy because:
+//   (a) the start time can be anywhere is a day
+//   (b) there is a time overlap between sequential titan files
+//       so there may be multiple days files that include
+//       the request time
+//
+// Returns 0 on success, -1 on failure.
+
+int TitanFile::_findBestDay(const string &dir,
+                            time_t requestTime,
+                            time_t &bestDayTime)
+  
+{
+
+#ifdef JUNK
+  // search from one day before to one day after the request time
+
+  for (int iday = -1; iday <= 1; iday++) {
+
+    time_t searchTime = requestTime + ii * SECS_IN_DAY;
+    DateTime stime(searchTime);
+    string pathStr = dir + PATH_DELIM + "titan_" + dtime.getDateStrPlain();
+
+  } // iday
+
+  
+  // compute path
+  
+  _isLegacyV5Format = isLegacyV5Format;
+  if (_isLegacyV5Format) {
+    pathStr.append(".th5");
+  } else {
+    pathStr.append(".nc");
+  }
+
+  return openFile(pathStr, mode);
+
+#endif
+
+  return 0;
+
+}
+  
 /////////////////////////////////////////////////////////
 // Open legacy files from path
 

@@ -1039,6 +1039,10 @@ protected:
   
   // functions
 
+  int _findBestDay(const string &dir,
+                   time_t requestTime,
+                   time_t &bestDayTime);
+  
   int _openLegacyFiles(const string &path,
                        NcxxFile::FileMode mode);
   
