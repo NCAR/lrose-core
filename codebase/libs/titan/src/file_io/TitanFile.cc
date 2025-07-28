@@ -135,6 +135,7 @@ TitanFile::~TitanFile()
 
 /////////////////////////////////////////
 // Open file from path
+// returns 0 on success, -1 on failure
 
 int TitanFile::openFile(const string &path,
                         NcxxFile::FileMode mode)
@@ -208,9 +209,10 @@ int TitanFile::openFile(const string &path,
   
 /////////////////////////////////////////
 // Open file from dir and date
+// returns 0 on success, -1 on failure
 
 int TitanFile::openFile(const string &dir,
-                        time_t date,
+                        time_t requestTime,
                         NcxxFile::FileMode mode,
                         bool isLegacyV5Format /* = false */)
   
@@ -218,7 +220,7 @@ int TitanFile::openFile(const string &dir,
 
   // compute path
   
-  DateTime dtime(date);
+  DateTime dtime(requestTime);
   string pathStr = dir + PATH_DELIM + "titan_" + dtime.getDateStrPlain();
   _isLegacyV5Format = isLegacyV5Format;
   if (_isLegacyV5Format) {
@@ -228,6 +230,31 @@ int TitanFile::openFile(const string &dir,
   }
 
   return openFile(pathStr, mode);
+
+}
+  
+/////////////////////////////////////////
+// Open best file from dir and date.
+// Only intended for existing files.
+// Opens the file with the longest history at the requested time.
+// sets _isLegacyFormat.
+// returns 0 on success, -1 on failure
+
+int TitanFile::openBestDayFile(const string &dir,
+                               time_t requestTime,
+                               NcxxFile::FileMode mode)
+  
+{
+
+  string bestDayPath;
+  time_t bestDayTime;
+  bool isLegacyFormat;
+  
+  if (_findBestDay(dir, requestTime, bestDayTime, bestDayPath, isLegacyFormat)) {
+    return -1;
+  }
+
+  return openFile(bestDayPath, mode);
 
 }
   
@@ -252,39 +279,102 @@ int TitanFile::openFile(const string &dir,
 
 int TitanFile::_findBestDay(const string &dir,
                             time_t requestTime,
-                            time_t &bestDayTime)
+                            time_t &bestDayTime,
+                            string &bestPath,
+                            bool &isLegacyFormat)
   
 {
 
-#ifdef JUNK
   // search from one day before to one day after the request time
-
+  
   for (int iday = -1; iday <= 1; iday++) {
 
-    time_t searchTime = requestTime + ii * SECS_IN_DAY;
-    DateTime stime(searchTime);
-    string pathStr = dir + PATH_DELIM + "titan_" + dtime.getDateStrPlain();
+    time_t searchTime = requestTime + iday * SECS_IN_DAY;
+    
+    string dayPath;
+    if (_dayFileExists(dir, searchTime, dayPath, isLegacyFormat)) {
+      TitanFile tFile;
+      if (tFile.openFile(dayPath, NcxxFile::read)) {
+        continue;
+      }
+      if (tFile.readStormHeader()) {
+        continue;
+      }
+      const TitanData::StormHeader &header = tFile.stormHeader();
+      if (header.start_time <= requestTime && header.end_time >= requestTime) {
+        DateTime best(searchTime);
+        best.setHour(12);
+        best.setMin(0);
+        best.setSec(0);
+        bestDayTime = best.utime();
+        bestPath = dayPath;
+        return 0;
+      }
+    }
 
   } // iday
 
-  
-  // compute path
-  
-  _isLegacyV5Format = isLegacyV5Format;
-  if (_isLegacyV5Format) {
-    pathStr.append(".th5");
-  } else {
-    pathStr.append(".nc");
-  }
-
-  return openFile(pathStr, mode);
-
-#endif
-
-  return 0;
+  return -1;
 
 }
   
+/////////////////////////////////////////////////////////
+// Check if files exist for requested time
+// returns true if file exists for this day
+
+bool TitanFile::_dayFileExists(const string &dir,
+                               time_t requestTime,
+                               string &dayPath,
+                               bool &isLegacyFormat)
+  
+{
+
+  // init
+  
+  isLegacyFormat = false;
+
+  // compute nc path
+  DateTime dtime(requestTime * SECS_IN_DAY);
+  char ncPath[MAX_PATH_LEN];
+  snprintf(ncPath, MAX_PATH_LEN,
+           "%s%stitan_%.4d%.2d%.2d.%s",
+           dir.c_str(), PATH_DELIM,
+           dtime.getYear(), dtime.getMonth(), dtime.getDay(), "nc");
+
+  // check if nc path exists
+  
+  if (ta_stat_exists(ncPath)) {
+    dayPath = ncPath;
+    isLegacyFormat = false;
+    return true;
+  }
+
+  // compute legacy paths
+  
+  char stormPath[MAX_PATH_LEN];
+  char trackPath[MAX_PATH_LEN];
+  snprintf(stormPath, MAX_PATH_LEN,
+           "%s%s%.4d%.2d%.2d.%s",
+           dir.c_str(), PATH_DELIM,
+           dtime.getYear(), dtime.getMonth(), dtime.getDay(),
+           STORM_HEADER_FILE_EXT);
+  snprintf(trackPath, MAX_PATH_LEN,
+           "%s%s%.4d%.2d%.2d.%s",
+           dir.c_str(), PATH_DELIM,
+           dtime.getYear(), dtime.getMonth(), dtime.getDay(),
+           TRACK_HEADER_FILE_EXT);
+  
+  if (ta_stat_exists(stormPath) &&
+      ta_stat_exists(trackPath)) {
+    dayPath = stormPath;
+    isLegacyFormat = true;
+    return true;
+  }
+
+  return false;
+  
+}
+
 /////////////////////////////////////////////////////////
 // Open legacy files from path
 

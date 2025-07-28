@@ -541,16 +541,30 @@ public:
 
   /////////////////////////////////////////////////////
   // NetCDF FileIO
+  // returns 0 on success, -1 on failure
   
   int openFile(const string &path,
                NcxxFile::FileMode mode);
   
   // Open file from dir and date
+  // returns 0 on success, -1 on failure
   
   int openFile(const string &dir,
-               time_t date,
+               time_t requestTime,
                NcxxFile::FileMode mode,
                bool isLegacyV5Format = false);
+
+  // Open best file from dir and date.
+  // Only intended for existing files.
+  // Opens the file with the longest history at the requested time.
+  // sets _isLegacyFormat.
+  // returns 0 on success, -1 on failure
+  
+  int openBestDayFile(const string &dir,
+                      time_t requestTime,
+                      NcxxFile::FileMode mode);
+  
+  // close file
   
   void closeFile();
 
@@ -564,16 +578,6 @@ public:
   
   /////////////////////////////////////////////////////
   // Storms
-  
-  // Open the storm header and data files
-  
-  int openStormFiles(const char *mode,
-                     const char *header_file_path,
-                     const char *data_file_ext = NULL);
-  
-  // Close the storm header and data files
-
-  void closeStormFiles();
   
   // Flush the file forcing write
   
@@ -1041,7 +1045,14 @@ protected:
 
   int _findBestDay(const string &dir,
                    time_t requestTime,
-                   time_t &bestDayTime);
+                   time_t &bestDayTime,
+                   string &bestPath,
+                   bool &isLegacyFormat);
+  
+  bool _dayFileExists(const string &dir,
+                      time_t requestTime,
+                      string &pathFound,
+                      bool &isLegacyFormat);
   
   int _openLegacyFiles(const string &path,
                        NcxxFile::FileMode mode);
