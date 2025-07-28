@@ -184,7 +184,7 @@ int EccoStats::_computeEccoStats()
   int fileCount = 0;
   char *nextPath = NULL;
   while ((nextPath = _eccoPaths->next()) != NULL) {
-    
+
     // do the read
 
     if (_readEcco(nextPath)) {
@@ -192,6 +192,12 @@ int EccoStats::_computeEccoStats()
       cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
       iret = -1;
       continue;
+    }
+
+    if (_eccoTypeField == NULL) {
+      cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
+      cerr << "  _eccoTypeField is NULL" << endl;
+      return -1;
     }
     
     // if this is the first file, allocate and initialize the arrays
@@ -249,6 +255,12 @@ int EccoStats::_computeEccoStats()
     }
 
   } // while
+
+  if (fileCount < 1) {
+    cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
+    cerr << "  No input files found to process" << endl;
+    return -1;
+  }
 
   // add the fields to the output file
 
@@ -1830,6 +1842,8 @@ int EccoStats::_readTitan()
   
 {
 
+  cerr << "0000000000000000000000000000000 validTime: " << DateTime::str(_eccoValidTime) << endl;
+    
   // open titan file for the ecco valid time
   
   TitanFile tFile;
@@ -1842,11 +1856,57 @@ int EccoStats::_readTitan()
     return -1;
   }
   
-  // read
+  // read scan headers
 
   if (tFile.readStormHeader()) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
     cerr << "  Cannot read storm header, file: " << tFile.getPathInUse() << endl;
+    return -1;
+  }
+  if (tFile.readScanHeaders()) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot read scan headers, file: " << tFile.getPathInUse() << endl;
+    return -1;
+  }
+
+  // find closest scan in time
+  
+  int bestScan = 0;
+  time_t bestScanTime = 0;
+  double minDeltaSecs = 1.0e99;
+  DateTime valid(_eccoValidTime);
+  const vector<TitanData::ScanHeader> &scans = tFile.scans();
+  for (size_t ii = 0; ii < scans.size(); ii++) {
+    DateTime scanTime(scans[ii].time);
+    double deltaSecs = fabs(scanTime - valid);
+    if (deltaSecs < minDeltaSecs) {
+      bestScan = ii;
+      bestScanTime = scanTime.utime();
+      minDeltaSecs = deltaSecs;
+    }
+  }
+
+  cerr << "111111111111111111111 minDeltaSecs: " << minDeltaSecs << endl;
+  cerr << "111111111111111111111 best scan time: " << DateTime::strm(bestScanTime) << endl;
+  
+
+  if (minDeltaSecs > 10) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot find titan data for Ecco valid time: "
+         << DateTime::str(_eccoValidTime) << endl;
+    cerr << "  Closest scan time: "
+         << DateTime::str(bestScanTime) << endl;
+    return -1;
+  }
+  
+  // read the scan in
+
+  if (tFile.readScan(bestScan)) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot read scan, file: " << tFile.getPathInUse() << endl;
+    cerr << "    scan_num: " << bestScan << endl;
+    cerr << "    scan_time: " << DateTime::strm(bestScanTime) << endl;
+    cerr << tFile.getErrStr() << endl;
     return -1;
   }
 
@@ -1856,11 +1916,11 @@ int EccoStats::_readTitan()
   
   tFile.closeFile();
 
-    cerr << "ERROR - EccoStats::_readCoverage" << endl;
-    cerr << "  Coverage nx,ny grid does not match Ecco, file: " << _covMdvx.getPathInUse() << endl;
-    cerr << "  COV nx, ny: " << fhdrCov.nx << ", " << fhdrCov.ny << endl;
-    cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
-    return -1;
+    // cerr << "ERROR - EccoStats::_readCoverage" << endl;
+    // cerr << "  Coverage nx,ny grid does not match Ecco, file: " << _covMdvx.getPathInUse() << endl;
+    // cerr << "  COV nx, ny: " << fhdrCov.nx << ", " << fhdrCov.ny << endl;
+    // cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
+    // return -1;
   
   return 0;
   

@@ -234,7 +234,7 @@ int TitanFile::openBestDayFile(const string &dir,
   string bestDayPath;
   time_t bestDayTime;
   bool isLegacyFormat;
-  
+
   if (_findBestDay(dir, requestTime, bestDayTime, bestDayPath, isLegacyFormat)) {
     return -1;
   }
@@ -272,7 +272,7 @@ int TitanFile::_findBestDay(const string &dir,
 
   // search from one day before to one day after the request time
   
-  for (int iday = -1; iday <= 1; iday++) {
+  for (int iday = -2; iday <= 2; iday++) {
 
     time_t searchTime = requestTime + iday * SECS_IN_DAY;
     
@@ -319,7 +319,7 @@ bool TitanFile::_dayFileExists(const string &dir,
   isLegacyFormat = false;
 
   // compute nc path
-  DateTime dtime(requestTime * SECS_IN_DAY);
+  DateTime dtime(requestTime);
   char ncPath[MAX_PATH_LEN];
   snprintf(ncPath, MAX_PATH_LEN,
            "%s%stitan_%.4d%.2d%.2d.%s",
@@ -327,7 +327,7 @@ bool TitanFile::_dayFileExists(const string &dir,
            dtime.getYear(), dtime.getMonth(), dtime.getDay(), "nc");
 
   // check if nc path exists
-  
+
   if (ta_stat_exists(ncPath)) {
     dayPath = ncPath;
     isLegacyFormat = false;
@@ -348,7 +348,7 @@ bool TitanFile::_dayFileExists(const string &dir,
            dir.c_str(), PATH_DELIM,
            dtime.getYear(), dtime.getMonth(), dtime.getDay(),
            TRACK_HEADER_FILE_EXT);
-  
+
   if (ta_stat_exists(stormPath) &&
       ta_stat_exists(trackPath)) {
     dayPath = stormPath;

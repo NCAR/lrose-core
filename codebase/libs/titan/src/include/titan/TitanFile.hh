@@ -481,6 +481,7 @@ public:
   const TitanData::StormHeader &stormHeader() const { return _storm_header; }
   const TitanData::StormParams &stormParams() const { return _storm_header.params; }
   const TitanData::ScanHeader &scan() const { return _scan; }
+  const vector<TitanData::ScanHeader> &scans() const { return _scans; }
   const vector<TitanData::StormGprops> &gprops() const { return _gprops; }
   const vector<TitanData::StormLprops> &lprops() const { return _lprops; }
   const vector<TitanData::StormDbzHist> &hist() const { return _hist; }

@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ../EccoStats
+ * TDRP params for EccoStats
  **********************************************************************/
 
 //======================================================================
@@ -202,7 +202,7 @@ aggregate_nx = 10;
 //
 // Type: string
 
-stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats.test/summary";
+stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats/testing";
 
 ///////////// stats_data_set_info /////////////////////
 //
@@ -330,7 +330,57 @@ censor_based_on_radar_coverage = TRUE;
 //
 // Type: double
 
-radar_coverage_min_ht_fraction = 0.8;
+radar_coverage_min_ht_fraction = 0.7;
+
+//======================================================================
+//
+// CENSOR USING TITAN STORM TRACKS.
+//
+//======================================================================
+ 
+///////////// censor_using_titan //////////////////////
+//
+// Option to use Titan tracks to mask data for use in climatology.
+//
+// Ecco sometimes identifies small spurious regions that contaminate the 
+//   climatology. We can run Titan on the Ecco output, and then using the 
+//   Titan output to select only significant storms. This helps to mask 
+//   out non-storm data.
+//
+// Type: boolean
+
+censor_using_titan = TRUE;
+
+///////////// titan_data_dir //////////////////////////
+//
+// Directory for titan data.
+//
+// This directory will contain the titan storm and track files.
+//
+// Type: string
+
+titan_data_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+
+///////////// min_titan_track_duration_secs ///////////
+//
+// Minimum duration of titan track for it to be valid for climatology.
+//
+// We only use tracks that meet or exceed this overall duration.
+//
+// Type: int
+
+min_titan_track_duration_secs = 1800;
+
+///////////// min_titan_storm_volume_km3 //////////////
+//
+// Minimum volume of storm for it to be valid for climatology.
+//
+// We only use titan storms that meet or exceed this volume. This test 
+//   is applied at each scan time.
+//
+// Type: int
+
+min_titan_storm_volume_km3 = 100;
 
 //======================================================================
 //
@@ -358,6 +408,5 @@ write_hour_of_day_stats = TRUE;
 //
 // Type: string
 
-hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats.test/hourly";
-
+hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/test";
 
