@@ -513,6 +513,8 @@ public:
 
   // memory allocation and freeing - storms
 
+  void allocScans(size_t n_scans);
+  void freeScans();
   void allocLayers(size_t n_layers);
   void freeLayers();
   void allocHist(size_t n_hist);
@@ -598,18 +600,18 @@ public:
 
   int readStormHeader(bool clear_error_str = true);
      
-  // read in the storm projected area runs
-  // Space for the array is allocated.
+  // Read in the scan headers for the file.
+  // Assumes readStormHeader() has been successfully executed.
   // returns 0 on success, -1 on failure
 
-  int readProjRuns(int storm_num);
-     
+  int readScanHeaders();
+  
   // Read in the scan info and global props for a particular scan
   // in a storm properties file.
   // If storm num is set, only the gprops for that storm is swapped
   // returns 0 on success, -1 on failure
 
-  int readStormScan(int scan_num, int storm_num = -1);
+  int readScan(int scan_num, int storm_num = -1);
   
   // read in the auxiliary storm property data (lprops, hist, runs)
   // for a given storm in a scan.
@@ -617,6 +619,12 @@ public:
   // returns 0 on success, -1 on failure
 
   int readStormAux(int storm_num);
+     
+  // read in the storm projected area runs
+  // Space for the array is allocated.
+  // returns 0 on success, -1 on failure
+
+  int readProjRuns(int storm_num);
      
   // seek to the end of the storm data in data file
   // returns 0 on success, -1 on failure
@@ -979,6 +987,7 @@ protected:
 
   TitanData::StormHeader _storm_header;
   TitanData::ScanHeader _scan;
+  vector<TitanData::ScanHeader> _scans;
   vector<TitanData::StormGprops> _gprops;
   vector<TitanData::StormLprops> _lprops;
   vector<TitanData::StormDbzHist> _hist;
@@ -1144,6 +1153,10 @@ protected:
                           fl32 &minor_radius,
                           fl32 &major_radius);
 
+  // read in scan header for specified scan
+  
+  int _readScanHeader(TitanData::ScanHeader &scan, int scanNum);
+  
   // read entry at given offset
 
   int _readTrackEntry(TitanData::TrackEntry &entry, int entryOffset);

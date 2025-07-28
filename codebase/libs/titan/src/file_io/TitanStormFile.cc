@@ -58,6 +58,7 @@ TitanStormFile::TitanStormFile()
 
   MEM_zero(_header);
   MEM_zero(_scan);
+  _scans = NULL;
   _gprops = NULL;
   _lprops = NULL;
   _hist = NULL;
@@ -252,32 +253,40 @@ void TitanStormFile::FreeGprops()
 
 //////////////////////////////////////////////////////////////
 //
-// allocate space for the scan offset array.
+// allocate space for the scan array.
 //
 //////////////////////////////////////////////////////////////
 
-void TitanStormFile::AllocScanOffsets(int n_scans_needed)
-     
+void TitanStormFile::AllocScanArrays(int n_scans_needed)
+  
 {
 
   // allocate the required space plus a buffer so that 
   // we do not do too many reallocs
   
   if (n_scans_needed > _max_scans) {
-    _max_scans = n_scans_needed + 100;
+
     _scan_offsets = (si32 *) urealloc
-      (_scan_offsets, (_max_scans * sizeof(si32)));
+      (_scan_offsets, (n_scans_needed * sizeof(si32)));
+    
+    _scans = (storm_file_scan_header_t *)
+      urealloc(_scans, n_scans_needed * sizeof(storm_file_scan_header_t));
+
+    _max_scans = n_scans_needed;
+
   }
 
 }
 
-void TitanStormFile::FreeScanOffsets()
+void TitanStormFile::FreeScanArrays()
      
 {
 
   if (_scan_offsets) {
     ufree(_scan_offsets);
+    ufree(_scans);
     _scan_offsets = NULL;
+    _scans = NULL;
     _max_scans = 0;
   }
 
@@ -298,7 +307,7 @@ void TitanStormFile::FreeAll()
   FreeRuns();
   FreeProjRuns();
   FreeGprops();
-  FreeScanOffsets();
+  FreeScanArrays();
 
 }
 
@@ -637,8 +646,7 @@ int TitanStormFile::ReadHeader(bool clear_error_str /* = true*/ )
   // allocate space for scan offsets array
   
   int n_scans = _header.n_scans;
-  
-  AllocScanOffsets(n_scans);
+  AllocScanArrays(n_scans);
   
   // read in scan offsets
   
@@ -660,55 +668,168 @@ int TitanStormFile::ReadHeader(bool clear_error_str /* = true*/ )
 
 //////////////////////////////////////////////////////////////
 //
-// read in the storm projected area runs
-// Space for the array is allocated.
+// Read in all the scan headers for the file.
+// Assumes ReadHeader() has been successfully executed.
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadProjRuns(int storm_num)
+int TitanStormFile::ReadScanHeaders()
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::ReadProjRuns\n";
+  _errStr += "ERROR - TitanStormFile::ReadScanHeaders\n";
+  TaStr::AddStr(_errStr, "  Reading scan headers file: ", _data_file_path);
 
-  // return early if nstorms is zero
+  // allocate space for scan offsets array
   
-  if (_scan.nstorms == 0) {
-    return 0;
+  int n_scans = _header.n_scans;
+  AllocScanArrays(n_scans);
+
+  // loop through scans
+
+  for (int iscan = 0; iscan < n_scans; iscan++) {
+
+    // move to scan position in file
+    
+    fseek(_data_file, _scan_offsets[iscan], SEEK_SET);
+  
+    // read in scan struct
+    
+    storm_file_scan_header_t scan;
+    if (ufread(&scan, sizeof(storm_file_scan_header_t),
+               1, _data_file) != 1) {
+      int errNum = errno;
+      TaStr::AddStr(_errStr, "  ", strerror(errNum));
+      return -1;
+    }
+  
+    // decode the scan struct from network byte order into host byte order
+    
+    si32 nbytes_char = scan.nbytes_char;
+    BE_to_array_32(&nbytes_char, sizeof(si32));
+    BE_to_array_32(&scan, (sizeof(storm_file_scan_header_t) - nbytes_char));
+
+    // copy into array
+
+    _scans[iscan] = scan;
+    
+  } // iscan
+
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+//
+// Read in the scan info for a particular scan in a storm properties
+// file.
+//
+// If storm num is set, only the gprops for that storm is swapped
+//
+// returns 0 on success, -1 on failure
+//
+//////////////////////////////////////////////////////////////
+
+int TitanStormFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
+     
+{
+  
+  _clearErrStr();
+  _errStr += "ERROR - TitanStormFile::ReadScan\n";
+  TaStr::AddStr(_errStr, "  Reading scan from file: ", _data_file_path);
+  TaStr::AddInt(_errStr, "  Scan number: ", scan_num);
+
+  // move to scan position in file
+  
+  if (_scan_offsets && scan_num < _max_scans) {
+    fseek(_data_file, _scan_offsets[scan_num], SEEK_SET);
+  } else {
+    return -1;
   }
   
-  // store storm number
+  // read in scan struct
   
-  _storm_num = storm_num;
-  
-  // allocate mem
-  
-  int n_proj_runs = _gprops[storm_num].n_proj_runs;
-
-  AllocProjRuns(n_proj_runs);
-  
-  // move to proj_run data position in file
-  
-  fseek(_data_file, _gprops[storm_num].proj_runs_offset, SEEK_SET);
-  
-  // read in proj_runs
-  
-  if (ufread(_proj_runs, sizeof(storm_file_run_t), n_proj_runs,
-	     _data_file) != n_proj_runs) {
+  storm_file_scan_header_t scan;
+  if (ufread(&scan, sizeof(storm_file_scan_header_t),
+	     1, _data_file) != 1) {
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  Reading proj runs, file: ", _data_file_path);
-    TaStr::AddInt(_errStr, "  N runs: ", n_proj_runs);
-    TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
-    TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
   }
   
-  // decode proj_runs from network byte order into host byte order
+  // decode the scan struct from network byte order into host byte order
   
-  BE_to_array_16(_proj_runs, n_proj_runs * sizeof(storm_file_run_t));
+  si32 nbytes_char = scan.nbytes_char;
+  BE_to_array_32(&nbytes_char, sizeof(si32));
+  BE_to_array_32(&scan, (sizeof(storm_file_scan_header_t) - nbytes_char));
+  
+  // allocate or reallocate
+  
+  int nstorms = scan.nstorms;
+  AllocGprops(nstorms);
+  
+  // copy scan header into storm file index
+
+  _scan = scan;
+  
+  // return early if nstorms is zero
+  
+  if (nstorms == 0) {
+    return 0;
+  }
+  
+  // move to gprops position in file
+  
+  fseek(_data_file, _scan.gprops_offset, SEEK_SET);
+  
+  // read in global props
+  
+  if (ufread(_gprops, sizeof(storm_file_global_props_t),
+	     nstorms, _data_file) != nstorms) {
+    int errNum = errno;
+    TaStr::AddStr(_errStr, "  ", "Reading gprops");
+    TaStr::AddInt(_errStr, "  nstorms: ", nstorms);
+    TaStr::AddStr(_errStr, "  ", strerror(errNum));
+    return -1;
+  }
+  
+  // decode global props from network byte order into host byte order
+
+  if (storm_num >= 0) {
+    BE_to_array_32(_gprops + storm_num, sizeof(storm_file_global_props_t));
+  } else {
+    BE_to_array_32(_gprops, nstorms * sizeof(storm_file_global_props_t));
+  }
+
+  // set convectivity to 0 if not valid
+  // (convectivity only added as a property in March 2025)
+  
+  if (storm_num >= 0) {
+    if (_gprops[storm_num].convectivity_median < 0.01 ||
+        _gprops[storm_num].convectivity_median > 1.0) {
+      _gprops[storm_num].convectivity_median = 0.0;
+    }
+  } else {
+    bool convectivityIsValid = true;
+    for (int ii = 0; ii < nstorms; ii++) {
+      if (_gprops[ii].convectivity_median < 0.0 ||
+          _gprops[ii].convectivity_median > 1.0) {
+        convectivityIsValid = false;
+        break;
+      }
+    }
+    for (int ii = 0; ii < nstorms; ii++) {
+      if (!convectivityIsValid) {
+        _gprops[ii].convectivity_median = 0.0;
+      } else {
+        if (_gprops[ii].convectivity_median < 0.01) {
+          _gprops[ii].convectivity_median = 0.0;
+        }
+      }
+    }
+  } // if (storm_num >= 0
   
   return 0;
   
@@ -857,113 +978,55 @@ int TitanStormFile::ReadProps(int storm_num)
 
 //////////////////////////////////////////////////////////////
 //
-// Read in the scan info for a particular scan in a storm properties
-// file.
-//
-// If storm num is set, only the gprops for that storm is swapped
-//
+// read in the storm projected area runs
+// Space for the array is allocated.
 // returns 0 on success, -1 on failure
 //
 //////////////////////////////////////////////////////////////
 
-int TitanStormFile::ReadScan(int scan_num, int storm_num /* = -1*/ )
+int TitanStormFile::ReadProjRuns(int storm_num)
      
 {
   
   _clearErrStr();
-  _errStr += "ERROR - TitanStormFile::ReadScan\n";
-  TaStr::AddStr(_errStr, "  Reading scan from file: ", _data_file_path);
-  TaStr::AddInt(_errStr, "  Scan number: ", scan_num);
+  _errStr += "ERROR - TitanStormFile::ReadProjRuns\n";
 
-  // move to scan position in file
-  
-  if (_scan_offsets && scan_num < _max_scans) {
-    fseek(_data_file, _scan_offsets[scan_num], SEEK_SET);
-  } else {
-    return -1;
-  }
-  
-  // read in scan struct
-  
-  storm_file_scan_header_t scan;
-  if (ufread(&scan, sizeof(storm_file_scan_header_t),
-	     1, _data_file) != 1) {
-    int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", strerror(errNum));
-    return -1;
-  }
-  
-  // decode the scan struct from network byte order into host byte order
-  
-  si32 nbytes_char = scan.nbytes_char;
-  BE_to_array_32(&nbytes_char, sizeof(si32));
-  BE_to_array_32(&scan, (sizeof(storm_file_scan_header_t) - nbytes_char));
-  
-  // allocate or reallocate
-  
-  int nstorms = scan.nstorms;
-  AllocGprops(nstorms);
-  
-  // copy scan header into storm file index
-
-  _scan = scan;
-  
   // return early if nstorms is zero
   
-  if (nstorms == 0) {
+  if (_scan.nstorms == 0) {
     return 0;
   }
   
-  // move to gprops position in file
+  // store storm number
   
-  fseek(_data_file, _scan.gprops_offset, SEEK_SET);
+  _storm_num = storm_num;
   
-  // read in global props
+  // allocate mem
   
-  if (ufread(_gprops, sizeof(storm_file_global_props_t),
-	     nstorms, _data_file) != nstorms) {
+  int n_proj_runs = _gprops[storm_num].n_proj_runs;
+
+  AllocProjRuns(n_proj_runs);
+  
+  // move to proj_run data position in file
+  
+  fseek(_data_file, _gprops[storm_num].proj_runs_offset, SEEK_SET);
+  
+  // read in proj_runs
+  
+  if (ufread(_proj_runs, sizeof(storm_file_run_t), n_proj_runs,
+	     _data_file) != n_proj_runs) {
     int errNum = errno;
-    TaStr::AddStr(_errStr, "  ", "Reading gprops");
-    TaStr::AddInt(_errStr, "  nstorms: ", nstorms);
+    TaStr::AddStr(_errStr, "  Reading proj runs, file: ", _data_file_path);
+    TaStr::AddInt(_errStr, "  N runs: ", n_proj_runs);
+    TaStr::AddInt(_errStr, "  Storm number: ", storm_num);
+    TaStr::AddInt(_errStr, "  Scan number: ", _scan.scan_num);
     TaStr::AddStr(_errStr, "  ", strerror(errNum));
     return -1;
   }
   
-  // decode global props from network byte order into host byte order
-
-  if (storm_num >= 0) {
-    BE_to_array_32(_gprops + storm_num, sizeof(storm_file_global_props_t));
-  } else {
-    BE_to_array_32(_gprops, nstorms * sizeof(storm_file_global_props_t));
-  }
-
-  // set convectivity to 0 if not valid
-  // (convectivity only added as a property in March 2025)
+  // decode proj_runs from network byte order into host byte order
   
-  if (storm_num >= 0) {
-    if (_gprops[storm_num].convectivity_median < 0.01 ||
-        _gprops[storm_num].convectivity_median > 1.0) {
-      _gprops[storm_num].convectivity_median = 0.0;
-    }
-  } else {
-    bool convectivityIsValid = true;
-    for (int ii = 0; ii < nstorms; ii++) {
-      if (_gprops[ii].convectivity_median < 0.0 ||
-          _gprops[ii].convectivity_median > 1.0) {
-        convectivityIsValid = false;
-        break;
-      }
-    }
-    for (int ii = 0; ii < nstorms; ii++) {
-      if (!convectivityIsValid) {
-        _gprops[ii].convectivity_median = 0.0;
-      } else {
-        if (_gprops[ii].convectivity_median < 0.01) {
-          _gprops[ii].convectivity_median = 0.0;
-        }
-      }
-    }
-  } // if (storm_num >= 0
+  BE_to_array_16(_proj_runs, n_proj_runs * sizeof(storm_file_run_t));
   
   return 0;
   
@@ -1227,7 +1290,7 @@ int TitanStormFile::WriteScan(int scan_num)
   
   // get scan position in file
   
-  AllocScanOffsets(scan_num + 1);
+  AllocScanArrays(scan_num + 1);
   long offset = ftell(_data_file);
   _scan_offsets[scan_num] = offset;
   

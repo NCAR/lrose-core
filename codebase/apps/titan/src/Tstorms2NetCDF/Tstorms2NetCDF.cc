@@ -520,7 +520,7 @@ int Tstorms2NetCDF::_loadScanTimes()
   int nScans = _inFile.stormHeader().n_scans;
   for (int i = 0; i < nScans; i++) {
     // read in scan
-    if (_inFile.readStormScan(i)) {
+    if (_inFile.readScan(i)) {
       cerr << "ERROR - Tstorms2NetCDF::_loadScanTimes" << endl;
       cerr << "  " << _inFile.getErrStr() << endl;
       return -1;
@@ -553,7 +553,7 @@ int Tstorms2NetCDF::_processScan(int scan_num,
   
   // read in scan, and global properties for the storms
   
-  if (_inFile.readStormScan(scan_num)) {
+  if (_inFile.readScan(scan_num)) {
     cerr << "ERROR - Tstorms2NetCDF::_processScan" << endl;
     cerr << "  Cannot read scan and gprops, input_path: " << _inputPath << endl;
     cerr << "    scan_num: " << scan_num << endl;

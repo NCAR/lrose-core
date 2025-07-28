@@ -42,6 +42,7 @@
 #include <radar/ConvStratFinder.hh>
 #include <didss/DsInputPath.hh>
 #include <didss/DataFileNames.hh>
+#include <titan/TitanFile.hh>
 #include "EccoStats.hh"
 using namespace std;
 
@@ -1828,6 +1829,38 @@ int EccoStats::_readCoverage()
 int EccoStats::_readTitan()
   
 {
+
+  // open titan file for the ecco valid time
+  
+  TitanFile tFile;
+  if (tFile.openBestDayFile(_params.titan_data_dir,
+                            _eccoValidTime,
+                            NcxxFile::read)) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot open titan file for time: "
+         << DateTime::strm(_eccoValidTime) << endl;
+    return -1;
+  }
+  
+  // read
+
+  if (tFile.readStormHeader()) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot read storm header, file: " << tFile.getPathInUse() << endl;
+    return -1;
+  }
+
+  // check geometry
+  
+  // close titan file
+  
+  tFile.closeFile();
+
+    cerr << "ERROR - EccoStats::_readCoverage" << endl;
+    cerr << "  Coverage nx,ny grid does not match Ecco, file: " << _covMdvx.getPathInUse() << endl;
+    cerr << "  COV nx, ny: " << fhdrCov.nx << ", " << fhdrCov.ny << endl;
+    cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
+    return -1;
   
   return 0;
   

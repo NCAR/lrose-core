@@ -59,6 +59,7 @@ public:
   const storm_file_header_t &header() const { return _header; }
   const storm_file_params_t &params() const { return _header.params; }
   const storm_file_scan_header_t &scan() const { return _scan; }
+  const storm_file_scan_header_t *scans() const { return _scans; }
   const storm_file_global_props_t *gprops() const { return _gprops; }
   const storm_file_layer_props_t *lprops() const { return _lprops; }
   const storm_file_dbz_hist_t *hist() const { return _hist; }
@@ -96,8 +97,8 @@ public:
   void AllocGprops(int nstorms);
   void FreeGprops();
 
-  void AllocScanOffsets(int n_scans_needed);
-  void FreeScanOffsets();
+  void AllocScanArrays(int n_scans_needed);
+  void FreeScanArrays();
 
   void FreeAll();
     
@@ -130,11 +131,10 @@ public:
 
   int ReadHeader(bool clear_error_str = true);
      
-  // read in the storm projected area runs
-  // Space for the array is allocated.
+  // Read in all the scan headers for the file.
   // returns 0 on success, -1 on failure
 
-  int ReadProjRuns(int storm_num);
+  int ReadScanHeaders();
      
   // Read in the scan info and global props for a particular scan
   // in a storm properties file.
@@ -149,6 +149,12 @@ public:
   // returns 0 on success, -1 on failure
 
   int ReadProps(int storm_num);
+     
+  // read in the storm projected area runs
+  // Space for the array is allocated.
+  // returns 0 on success, -1 on failure
+
+  int ReadProjRuns(int storm_num);
      
   // seek to the end of the storm data in data file
   // returns 0 on success, -1 on failure
@@ -244,6 +250,7 @@ protected:
 
   storm_file_header_t _header;
   storm_file_scan_header_t _scan;
+  storm_file_scan_header_t *_scans;
   storm_file_global_props_t *_gprops;
   storm_file_layer_props_t *_lprops;
   storm_file_dbz_hist_t *_hist;

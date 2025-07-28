@@ -341,7 +341,7 @@ int PrintTitanFiles::_printStormsNc(TitanFile &tFile)
      * read in scan info
      */
 
-    if (tFile.readStormScan(iscan)) {
+    if (tFile.readScan(iscan)) {
       cerr << "ERROR - PrintTitanFiles::_printNcFile" << endl;
       cerr << tFile.getErrStr() << endl;
       return -1;
@@ -555,7 +555,7 @@ int PrintTitanFiles::_printTrackFullNc(TitanFile &tFile)
 	  
 	  // read in storm props
 	  
-	  if (tFile.readStormScan(entry.scan_num)) {
+	  if (tFile.readScan(entry.scan_num)) {
 	    cerr << "ERROR - PrintTitanFiles::_printTrackFull" << endl;
 	    cerr << tFile.getErrStr() << endl;
 	    return -1;
@@ -694,7 +694,7 @@ int PrintTitanFiles::_printTrackSummaryNc(TitanFile &tFile)
 
         // read in scan info
         
-        if (tFile.readStormScan(entry.scan_num)) {
+        if (tFile.readScan(entry.scan_num)) {
           cerr << "ERROR - PrintTitanFiles::_printTrackSummary" << endl;
           cerr << tFile.getErrStr() << endl;
           return -1;
