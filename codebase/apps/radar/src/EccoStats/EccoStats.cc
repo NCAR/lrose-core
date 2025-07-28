@@ -1842,7 +1842,10 @@ int EccoStats::_readTitan()
   
 {
 
-  cerr << "0000000000000000000000000000000 validTime: " << DateTime::str(_eccoValidTime) << endl;
+  if (_params.debug) {
+    cerr << "Reading titan data, validTime: " << DateTime::str(_eccoValidTime) << endl;
+    cerr << "Titan dir: " << _params.titan_data_dir << endl;
+  }
     
   // open titan file for the ecco valid time
   
@@ -1886,10 +1889,6 @@ int EccoStats::_readTitan()
     }
   }
 
-  cerr << "111111111111111111111 minDeltaSecs: " << minDeltaSecs << endl;
-  cerr << "111111111111111111111 best scan time: " << DateTime::strm(bestScanTime) << endl;
-  
-
   if (minDeltaSecs > 10) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
     cerr << "  Cannot find titan data for Ecco valid time: "
@@ -1899,6 +1898,10 @@ int EccoStats::_readTitan()
     return -1;
   }
   
+  if (_params.debug) {
+    cerr << "Found titan data, scan time: " << DateTime::str(bestScanTime) << endl;
+  }
+
   // read the scan in
 
   if (tFile.readScan(bestScan)) {
@@ -1911,17 +1914,25 @@ int EccoStats::_readTitan()
   }
 
   // check geometry
-  
+
+  const Mdvx::field_header_t &fhdrEcco = _eccoTypeField->getFieldHeader();
+  const TitanData::ScanHeader &scan = tFile.scan();
+  if (scan.grid.nx != fhdrEcco.nx ||
+      scan.grid.ny != fhdrEcco.ny ||
+      scan.grid.nz != fhdrEcco.nz) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Titan nx,ny grid does not match Ecco, file: " << tFile.getPathInUse() << endl;
+    cerr << "  TITAN nx, ny, nz: "
+         << scan.grid.nx << ", " << scan.grid.ny << ", " << scan.grid.nz << endl;
+    cerr << "  Ecco  nx, ny, nz: "
+         << fhdrEcco.nx << ", " << fhdrEcco.ny << ", " << fhdrEcco.nz << endl;
+    return -1;
+  }
+
   // close titan file
   
   tFile.closeFile();
 
-    // cerr << "ERROR - EccoStats::_readCoverage" << endl;
-    // cerr << "  Coverage nx,ny grid does not match Ecco, file: " << _covMdvx.getPathInUse() << endl;
-    // cerr << "  COV nx, ny: " << fhdrCov.nx << ", " << fhdrCov.ny << endl;
-    // cerr << "  Ecco nx, ny: " << fhdrEcco.nx << ", " << fhdrEcco.ny << endl;
-    // return -1;
-  
   return 0;
   
 }
