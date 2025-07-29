@@ -687,7 +687,7 @@ public:
   /////////////////////////////////////////////////////
   // Tracks
   
-  // read in the track_file_header_t structure from a track file.
+  // read in the TrackHeader from a track file.
   // Read in associated arrays (complex_track_nums,
   //   scan_index, n_simples_per_complex,
   //   simples_per_complex_offsets)

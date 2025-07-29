@@ -3559,7 +3559,7 @@ void TitanFile::freeTracksAll()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// Read in the track_file_header_t object from a track file.
+// Read in the TrackHeader object from a track file.
 // Read in associated arrays.
 //
 // returns 0 on success, -1 on failure
