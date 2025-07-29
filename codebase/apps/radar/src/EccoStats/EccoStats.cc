@@ -1874,7 +1874,7 @@ int EccoStats::_readTitan()
 
   // find closest scan in time
   
-  int bestScan = 0;
+  int scanNum = 0;
   time_t bestScanTime = 0;
   double minDeltaSecs = 1.0e99;
   DateTime valid(_eccoValidTime);
@@ -1883,7 +1883,7 @@ int EccoStats::_readTitan()
     DateTime scanTime(scans[ii].time);
     double deltaSecs = fabs(scanTime - valid);
     if (deltaSecs < minDeltaSecs) {
-      bestScan = ii;
+      scanNum = ii;
       bestScanTime = scanTime.utime();
       minDeltaSecs = deltaSecs;
     }
@@ -1902,31 +1902,56 @@ int EccoStats::_readTitan()
     cerr << "Found titan data, scan time: " << DateTime::str(bestScanTime) << endl;
   }
 
-  // read the scan in
+  // read in the scan that matches the Ecco data volume
 
-  if (tFile.readScan(bestScan)) {
+  if (tFile.readScan(scanNum)) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
     cerr << "  Cannot read scan, file: " << tFile.getPathInUse() << endl;
-    cerr << "    scan_num: " << bestScan << endl;
+    cerr << "    scan_num: " << scanNum << endl;
     cerr << "    scan_time: " << DateTime::strm(bestScanTime) << endl;
     cerr << tFile.getErrStr() << endl;
     return -1;
   }
 
-  // check geometry
+  // check geometry to ensure Ecco and Titan grids match
 
-  const Mdvx::field_header_t &fhdrEcco = _eccoTypeField->getFieldHeader();
-  const TitanData::ScanHeader &scan = tFile.scan();
-  if (scan.grid.nx != fhdrEcco.nx ||
-      scan.grid.ny != fhdrEcco.ny ||
-      scan.grid.nz != fhdrEcco.nz) {
+  MdvxProj projEcco(_eccoTypeField->getFieldHeader());
+  MdvxProj projTitan(tFile.scan().grid);
+  if (projEcco != projTitan) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
-    cerr << "  Titan nx,ny grid does not match Ecco, file: " << tFile.getPathInUse() << endl;
-    cerr << "  TITAN nx, ny, nz: "
-         << scan.grid.nx << ", " << scan.grid.ny << ", " << scan.grid.nz << endl;
-    cerr << "  Ecco  nx, ny, nz: "
-         << fhdrEcco.nx << ", " << fhdrEcco.ny << ", " << fhdrEcco.nz << endl;
+    cerr << "  grids for Ecco and Titan do not match, file: " << tFile.getPathInUse() << endl;
+    cerr << "================= Ecco projection ===========================" << endl;
+    projEcco.print(cerr);
+    cerr << "================= Titan projection ==========================" << endl;
+    projTitan.print(cerr);
+    cerr << "=============================================================" << endl;
     return -1;
+  }
+
+  // read tracking header
+
+  if (tFile.readTrackHeader()) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot read track header, file: " << tFile.getPathInUse() << endl;
+    return -1;
+  }
+
+  // read in all of the track entries for this scan
+
+  if (tFile.readScanEntries(scanNum)) {
+    cerr << "ERROR - EccoStats::_readTitan" << endl;
+    cerr << "  Cannot read scan entries, scan, file: "
+         << scanNum << ", " << tFile.getPathInUse() << endl;
+    return -1;
+  }
+
+  const vector<TitanData::TrackEntry> &scanEntries = tFile.scanEntries();
+  cerr << "11111111111111 nStorms: " << tFile.scan().nstorms << endl;
+  cerr << "11111111111111 scanEntries.size(): " << scanEntries.size() << endl;
+  for (size_t ii = 0; ii < scanEntries.size(); ii++) {
+    cerr << "2222222222222222222222222222222 ii: " << ii << endl;
+    scanEntries[ii].print(stderr, "", ii);
+    cerr << "2222222222222222222222222222222" << endl;
   }
 
   // close titan file
@@ -1939,6 +1964,7 @@ int EccoStats::_readTitan()
 
 /////////////////////////////////////////////////////////
 // create a 3d field
+// third dimension is time
 
 MdvxField *EccoStats::_make3DField(fl32 ***data,
                                    string fieldName,
