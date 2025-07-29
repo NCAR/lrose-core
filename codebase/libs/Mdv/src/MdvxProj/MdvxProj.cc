@@ -160,6 +160,7 @@ MdvxProj &MdvxProj::operator=(const MdvxProj &rhs)
 
 ///////////////////////////////////////////////////
 // equality operator
+// just check the 2D (x,y) sense
 
 bool MdvxProj::operator==(const MdvxProj &other) const {
 
@@ -176,16 +177,18 @@ bool MdvxProj::operator==(const MdvxProj &other) const {
   if (_coord.ny != other._coord.ny) {
     return false;
   }
-  if (fabs(_coord.dx - other._coord.dx) > 0.0001) {
+
+  double maxError = 1.0e-4;
+  if (fabs(_coord.dx - other._coord.dx) > maxError) {
     return false;
   }
-  if (fabs(_coord.dy - other._coord.dy) > 0.0001) {
+  if (fabs(_coord.dy - other._coord.dy) > maxError) {
     return false;
   }
-  if (fabs(_coord.minx - other._coord.minx) > 0.0001) {
+  if (fabs(_coord.minx - other._coord.minx) > maxError) {
     return false;
   }
-  if (fabs(_coord.miny - other._coord.miny) > 0.0001) {
+  if (fabs(_coord.miny - other._coord.miny) > maxError) {
     return false;
   }
   return true;
