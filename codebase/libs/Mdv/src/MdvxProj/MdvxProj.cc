@@ -176,16 +176,16 @@ bool MdvxProj::operator==(const MdvxProj &other) const {
   if (_coord.ny != other._coord.ny) {
     return false;
   }
-  if (_coord.dx != other._coord.dx) {
+  if (fabs(_coord.dx - other._coord.dx) > 0.0001) {
     return false;
   }
-  if (_coord.dy != other._coord.dy) {
+  if (fabs(_coord.dy - other._coord.dy) > 0.0001) {
     return false;
   }
-  if (_coord.minx != other._coord.minx) {
+  if (fabs(_coord.minx - other._coord.minx) > 0.0001) {
     return false;
   }
-  if (_coord.miny != other._coord.miny) {
+  if (fabs(_coord.miny - other._coord.miny) > 0.0001) {
     return false;
   }
   return true;
