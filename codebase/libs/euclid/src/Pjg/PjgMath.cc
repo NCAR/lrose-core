@@ -148,10 +148,13 @@ PjgMath *PjgMath::newDeepCopy()
 
 bool PjgMath::operator==(const PjgMath &other) const
 {
+
+  double maxError = 1.0e-4;
   
   if (_proj_type != other._proj_type) {
     return false;
   }
+
   if (_proj_type == PjgTypes::PROJ_LATLON) {
     if (_origin_lon * other._origin_lon >= 0) {
       // origins have same sign
@@ -160,46 +163,93 @@ bool PjgMath::operator==(const PjgMath &other) const
       return false;
     }
   }
-  if (_origin_lat != other._origin_lat) {
+
+  if (fabs(_origin_lat - other._origin_lat) > maxError) {
     return false;
   }
-  if (_origin_lon != other._origin_lon) {
+
+  if (fabs(_origin_lon - other._origin_lon) > maxError) {
     return false;
   }
-  if (_lat1 != other._lat1) {
+
+  if (_proj_type == PjgTypes::PROJ_AZIM_EQUIDIST) {
+    if (fabs(_rotation - other._rotation) > maxError) {
+      return false;
+    }
+  }
+
+  if (_proj_type == PjgTypes::PROJ_LC1 ||
+      _proj_type == PjgTypes::PROJ_LC2 ||
+      _proj_type == PjgTypes::PROJ_ALBERS) {
+    if (fabs(_lat1 - other._lat1) > maxError) {
+      return false;
+    }
+    if (fabs(_lat2 - other._lat2) > maxError) {
+      return false;
+    }
+  }
+
+  if (_proj_type == PjgTypes::PROJ_STEREOGRAPHIC) {
+    if (fabs(_tangent_lon - other._tangent_lon) > maxError) {
+      return false;
+    }
+    if (fabs(_central_scale - other._central_scale) > maxError) {
+      return false;
+    }
+    if (_pole_is_north  != other._pole_is_north ) {
+      return false;
+    }
+  }
+
+  if (_proj_type == PjgTypes::PROJ_STEREOGRAPHIC) {
+    if (fabs(_tangent_lat - other._tangent_lat) > maxError) {
+      return false;
+    }
+    if (fabs(_tangent_lon - other._tangent_lon) > maxError) {
+      return false;
+    }
+    if (_pole_is_north  != other._pole_is_north ) {
+      return false;
+    }
+  }
+  
+  if (_proj_type == PjgTypes::PROJ_OBLIQUE_STEREO) {
+    if (fabs(_tangent_lat - other._tangent_lat) > maxError) {
+      return false;
+    }
+    if (fabs(_tangent_lon - other._tangent_lon) > maxError) {
+      return false;
+    }
+    if (fabs(_central_scale - other._central_scale) > maxError) {
+      return false;
+    }
+  }
+
+  if (_proj_type == PjgTypes::PROJ_TRANS_MERCATOR) {
+    if (fabs(_central_scale - other._central_scale) > maxError) {
+      return false;
+    }
+  }
+
+  if (_proj_type == PjgTypes::PROJ_VERT_PERSP) {
+    if (fabs(_persp_radius - other._persp_radius) > maxError) {
+      return false;
+    }
+  }
+
+  if (fabs(_offset_lat - other._offset_lat) > maxError) {
     return false;
   }
-  if (_lat2 != other._lat2) {
+
+  if (fabs(_offset_lon - other._offset_lon) > maxError) {
     return false;
   }
-  if (_rotation != other._rotation) {
+
+  if (fabs(_false_northing - other._false_northing) > maxError) {
     return false;
   }
-  if (_tangent_lat != other._tangent_lat) {
-    return false;
-  }
-  if (_tangent_lon != other._tangent_lon) {
-    return false;
-  }
-  if (_pole_is_north  != other._pole_is_north ) {
-    return false;
-  }
-  if (_central_scale != other._central_scale) {
-    return false;
-  }
-  if (_persp_radius != other._persp_radius) {
-    return false;
-  }
-  if (_offset_lat != other._offset_lat) {
-    return false;
-  }
-  if (_offset_lon != other._offset_lon) {
-    return false;
-  }
-  if (_false_northing != other._false_northing) {
-    return false;
-  }
-  if (_false_easting != other._false_easting) {
+
+  if (fabs(_false_easting - other._false_easting) > maxError) {
     return false;
   }
   
