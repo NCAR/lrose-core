@@ -1950,7 +1950,21 @@ int EccoStats::_readTitan()
   cerr << "11111111111111 scanEntries.size(): " << scanEntries.size() << endl;
   for (size_t ii = 0; ii < scanEntries.size(); ii++) {
     cerr << "2222222222222222222222222222222 ii: " << ii << endl;
-    scanEntries[ii].print(stderr, "", ii);
+    // scanEntries[ii].print(stderr, "", ii);
+    int complexNum = scanEntries[ii].complex_track_num;
+    // cerr << "2222222222222222222222222222222" << endl;
+    if (tFile.readComplexTrackParams(complexNum, true)) {
+      cerr << "ERROR - EccoStats::_readTitan" << endl;
+      cerr << "  Cannot read complex track num: "
+           << complexNum << endl;
+      return -1;
+    }
+    int durationInSecs = tFile.complexParams().duration_in_secs;
+    int nSimpleTracks = tFile.complexParams().n_simple_tracks;
+    // tFile.complexParams().print(stderr, "", false, tFile.simplesPerComplex2D()[complexNum]);
+    cerr << "  complexNum: " << complexNum << endl;
+    cerr << "    durationInSecs: " << durationInSecs << endl;
+    cerr << "    nSimpleTracks: " << nSimpleTracks << endl;
     cerr << "2222222222222222222222222222222" << endl;
   }
 
