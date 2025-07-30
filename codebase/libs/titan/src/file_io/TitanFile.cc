@@ -2095,49 +2095,6 @@ int TitanFile::readScan(int scan_num, int storm_num /* = -1*/ )
     return -1;
   }
   
-  // _scanVars.scan_min_z.getVal(scanPos, &_scan.min_z);
-  // _scanVars.scan_delta_z.getVal(scanPos, &_scan.delta_z);
-  // _scanVars.scan_num.getVal(scanPos, &_scan.scan_num);
-  // _scanVars.scan_nstorms.getVal(scanPos, &_scan.nstorms);
-  // _scanVars.scan_time.getVal(scanPos, &_scan.time);
-  // _scanVars.scan_ht_of_freezing.getVal(scanPos, &_scan.ht_of_freezing);
-  // _scanVars.scan_gprops_offset.getVal(scanPos, &_scan.gprops_offset);
-
-  // // read grid details
-
-  // _scanGridVars.grid_nx.getVal(scanPos, &_scan.grid.nx);
-  // _scanGridVars.grid_ny.getVal(scanPos, &_scan.grid.ny);
-  // _scanGridVars.grid_nz.getVal(scanPos, &_scan.grid.nz);
-  // _scanGridVars.grid_minx.getVal(scanPos, &_scan.grid.minx);
-  // _scanGridVars.grid_miny.getVal(scanPos, &_scan.grid.miny);
-  // _scanGridVars.grid_minz.getVal(scanPos, &_scan.grid.minz);
-  // _scanGridVars.grid_dx.getVal(scanPos, &_scan.grid.dx);
-  // _scanGridVars.grid_dy.getVal(scanPos, &_scan.grid.dy);
-  // _scanGridVars.grid_dz.getVal(scanPos, &_scan.grid.dz);
-  // _scanGridVars.grid_dz_constant.getVal(scanPos, &_scan.grid.dz_constant);
-  // _scanGridVars.grid_sensor_x.getVal(scanPos, &_scan.grid.sensor_x);
-  // _scanGridVars.grid_sensor_y.getVal(scanPos, &_scan.grid.sensor_y);
-  // _scanGridVars.grid_sensor_z.getVal(scanPos, &_scan.grid.sensor_z);
-  // _scanGridVars.grid_sensor_lat.getVal(scanPos, &_scan.grid.sensor_lat);
-  // _scanGridVars.grid_sensor_lon.getVal(scanPos, &_scan.grid.sensor_lon);
-  // char *units;
-  // _scanGridVars.grid_unitsx.getVal(scanPos, &units);
-  // STRncopy(_scan.grid.unitsx, units, TITAN_GRID_UNITS_LEN);
-  // _scanGridVars.grid_unitsy.getVal(scanPos, &units);
-  // STRncopy(_scan.grid.unitsy, units, TITAN_GRID_UNITS_LEN);
-  // _scanGridVars.grid_unitsz.getVal(scanPos, &units);
-  // STRncopy(_scan.grid.unitsz, units, TITAN_GRID_UNITS_LEN);
-  // _scanGridVars.proj_type.getVal(scanPos, &_scan.grid.proj_type);
-  // _scanGridVars.proj_origin_lat.getVal(scanPos, &_scan.grid.proj_origin_lat);
-  // _scanGridVars.proj_origin_lon.getVal(scanPos, &_scan.grid.proj_origin_lon);
-  // _scanGridVars.proj_rotation.getVal(scanPos, &_scan.grid.proj_params.flat.rotation);
-  // _scanGridVars.proj_lat1.getVal(scanPos, &_scan.grid.proj_params.lc2.lat1);
-  // _scanGridVars.proj_lat2.getVal(scanPos, &_scan.grid.proj_params.lc2.lat2);
-  // _scanGridVars.proj_tangent_lat.getVal(scanPos, 0.0);
-  // _scanGridVars.proj_tangent_lon.getVal(scanPos, 0.0);
-  // _scanGridVars.proj_pole_type.getVal(scanPos, 0);
-  // _scanGridVars.proj_central_scale.getVal(scanPos, 1.0);
-
   // allocate or reallocate
   
   int nStorms = _scan.nstorms;
@@ -2148,108 +2105,130 @@ int TitanFile::readScan(int scan_num, int storm_num /* = -1*/ )
   if (nStorms == 0) {
     return 0;
   }
-  
-  // read in global props
-  
-  for (int istorm = 0; istorm < nStorms; istorm++) {
-    
-    TitanData::StormGprops &gp = _gprops[istorm];
-    
-    int gpropsOffset = _scan.gprops_offset + istorm;
-    std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
-    
-    _gpropsVars.vol_centroid_x.getVal(stormIndex, &gp.vol_centroid_x);
-    _gpropsVars.vol_centroid_y.getVal(stormIndex, &gp.vol_centroid_y);
-    _gpropsVars.vol_centroid_z.getVal(stormIndex, &gp.vol_centroid_z);
-    _gpropsVars.refl_centroid_x.getVal(stormIndex, &gp.refl_centroid_x);
-    _gpropsVars.refl_centroid_y.getVal(stormIndex, &gp.refl_centroid_y);
-    _gpropsVars.refl_centroid_z.getVal(stormIndex, &gp.refl_centroid_z);
-    _gpropsVars.top.getVal(stormIndex, &gp.top);
-    _gpropsVars.base.getVal(stormIndex, &gp.base);
-    _gpropsVars.volume.getVal(stormIndex, &gp.volume);
-    _gpropsVars.area_mean.getVal(stormIndex, &gp.area_mean);
-    _gpropsVars.precip_flux.getVal(stormIndex, &gp.precip_flux);
-    _gpropsVars.mass.getVal(stormIndex, &gp.mass);
-    _gpropsVars.tilt_angle.getVal(stormIndex, &gp.tilt_angle);
-    _gpropsVars.tilt_dirn.getVal(stormIndex, &gp.tilt_dirn);
-    _gpropsVars.dbz_max.getVal(stormIndex, &gp.dbz_max);
-    _gpropsVars.dbz_mean.getVal(stormIndex, &gp.dbz_mean);
-    _gpropsVars.dbz_max_gradient.getVal(stormIndex, &gp.dbz_max_gradient);
-    _gpropsVars.dbz_mean_gradient.getVal(stormIndex, &gp.dbz_mean_gradient);
-    _gpropsVars.ht_of_dbz_max.getVal(stormIndex, &gp.ht_of_dbz_max);
-    _gpropsVars.rad_vel_mean.getVal(stormIndex, &gp.rad_vel_mean);
-    _gpropsVars.rad_vel_sd.getVal(stormIndex, &gp.rad_vel_sd);
-    _gpropsVars.vorticity.getVal(stormIndex, &gp.vorticity);
-    _gpropsVars.precip_area.getVal(stormIndex, &gp.precip_area);
-    _gpropsVars.precip_area_centroid_x.getVal(stormIndex, &gp.precip_area_centroid_x);
-    _gpropsVars.precip_area_centroid_y.getVal(stormIndex, &gp.precip_area_centroid_y);
-    _gpropsVars.precip_area_orientation.getVal(stormIndex, &gp.precip_area_orientation);
-    _gpropsVars.precip_area_minor_radius.getVal(stormIndex, &gp.precip_area_minor_radius);
-    _gpropsVars.precip_area_major_radius.getVal(stormIndex, &gp.precip_area_major_radius);
-    _gpropsVars.proj_area.getVal(stormIndex, &gp.proj_area);
-    _gpropsVars.proj_area_centroid_x.getVal(stormIndex, &gp.proj_area_centroid_x);
-    _gpropsVars.proj_area_centroid_y.getVal(stormIndex, &gp.proj_area_centroid_y);
-    _gpropsVars.proj_area_orientation.getVal(stormIndex, &gp.proj_area_orientation);
-    _gpropsVars.proj_area_minor_radius.getVal(stormIndex, &gp.proj_area_minor_radius);
-    _gpropsVars.proj_area_major_radius.getVal(stormIndex, &gp.proj_area_major_radius);
 
-    _gpropsVars.storm_num.getVal(stormIndex, &gp.storm_num);
-    _gpropsVars.n_layers.getVal(stormIndex, &gp.n_layers);
-    _gpropsVars.base_layer.getVal(stormIndex, &gp.base_layer);
-    _gpropsVars.n_dbz_intervals.getVal(stormIndex, &gp.n_dbz_intervals);
-    _gpropsVars.n_runs.getVal(stormIndex, &gp.n_runs);
-    _gpropsVars.n_proj_runs.getVal(stormIndex, &gp.n_proj_runs);
-    _gpropsVars.top_missing.getVal(stormIndex, &gp.top_missing);
-    _gpropsVars.range_limited.getVal(stormIndex, &gp.range_limited);
-    _gpropsVars.second_trip.getVal(stormIndex, &gp.second_trip);
-    _gpropsVars.hail_present.getVal(stormIndex, &gp.hail_present);
-    _gpropsVars.anom_prop.getVal(stormIndex, &gp.anom_prop);
-    _gpropsVars.bounding_min_ix.getVal(stormIndex, &gp.bounding_min_ix);
-    _gpropsVars.bounding_min_iy.getVal(stormIndex, &gp.bounding_min_iy);
-    _gpropsVars.bounding_max_ix.getVal(stormIndex, &gp.bounding_max_ix);
-    _gpropsVars.bounding_max_iy.getVal(stormIndex, &gp.bounding_max_iy);
-    _gpropsVars.vil_from_maxz.getVal(stormIndex, &gp.vil_from_maxz);
-    _gpropsVars.ltg_count.getVal(stormIndex, &gp.ltg_count);
-    float fval;
-    _gpropsVars.convectivity_median.getVal(stormIndex, &fval);
-    if (fval != TitanData::missingFl32) {
-      gp.convectivity_median = fval;
+  if (storm_num >= 0) {
+
+    // read in gprops for single storm
+    if (_readGprops(storm_num)) {
+      return -1;
     }
 
-    // if (_storm_header.params.gprops_union_type == UNION_HAIL) {
-      
-    _gpropsVars.hail_FOKRcategory.getVal(stormIndex, &gp.hailFOKRcategory);
-    _gpropsVars.hail_waldvogelProbability.getVal(stormIndex, &gp.hailWaldvogelProb);
-    _gpropsVars.hail_hailMassAloft.getVal(stormIndex, &gp.hailMassAloft);
-    _gpropsVars.hail_vihm.getVal(stormIndex, &gp.hailVertIntgMass);
+  } else {
+  
+    // read in global props for all storms in scan
     
-    // } else if (_storm_header.params.gprops_union_type == UNION_NEXRAD_HDA) {
-      
-    _gpropsVars.hail_poh.getVal(stormIndex, &gp.hda_poh);
-    _gpropsVars.hail_shi.getVal(stormIndex, &gp.hda_shi);
-    _gpropsVars.hail_posh.getVal(stormIndex, &gp.hda_posh);
-    _gpropsVars.hail_mehs.getVal(stormIndex, &gp.hda_mehs);
-    
-    // }
+    for (int istorm = 0; istorm < nStorms; istorm++) {
+      if (_readGprops(istorm)) {
+        return -1;
+      }
+    }
 
-    // polygons are 2D variables
-    
-    std::vector<size_t> polyIndex = NcxxVar::makeIndex(gpropsOffset, 0);
-    std::vector<size_t> polyCount = NcxxVar::makeIndex(1, N_POLY_SIDES);
-    
-    _gpropsVars.proj_area_polygon.getVal(polyIndex, polyCount, &gp.proj_area_polygon);
-
-    // offsets into layers, histograms and runs
-    
-    _gpropsVars.layer_props_offset.getVal(stormIndex, &gp.layer_props_offset);
-    _gpropsVars.dbz_hist_offset.getVal(stormIndex, &gp.dbz_hist_offset);
-    _gpropsVars.runs_offset.getVal(stormIndex, &gp.runs_offset);
-    _gpropsVars.proj_runs_offset.getVal(stormIndex, &gp.proj_runs_offset);
-    
-  } // istorm
+  } // if (storm_num >= 0)
 
   return 0;
   
+}
+
+//////////////////////////////////////////////////////////////
+//
+// Read in the global properties for a specified storm.
+// Assumes the scan header has been read
+// Returns 0 on success, -1 on failure
+//
+//////////////////////////////////////////////////////////////
+
+int TitanFile::_readGprops(int stormNum)
+
+{
+  
+  TitanData::StormGprops &gp = _gprops[stormNum];
+  int gpropsOffset = _scan.gprops_offset + stormNum;
+  std::vector<size_t> stormIndex = NcxxVar::makeIndex(gpropsOffset);
+    
+  _gpropsVars.vol_centroid_x.getVal(stormIndex, &gp.vol_centroid_x);
+  _gpropsVars.vol_centroid_y.getVal(stormIndex, &gp.vol_centroid_y);
+  _gpropsVars.vol_centroid_z.getVal(stormIndex, &gp.vol_centroid_z);
+  _gpropsVars.refl_centroid_x.getVal(stormIndex, &gp.refl_centroid_x);
+  _gpropsVars.refl_centroid_y.getVal(stormIndex, &gp.refl_centroid_y);
+  _gpropsVars.refl_centroid_z.getVal(stormIndex, &gp.refl_centroid_z);
+  _gpropsVars.top.getVal(stormIndex, &gp.top);
+  _gpropsVars.base.getVal(stormIndex, &gp.base);
+  _gpropsVars.volume.getVal(stormIndex, &gp.volume);
+  _gpropsVars.area_mean.getVal(stormIndex, &gp.area_mean);
+  _gpropsVars.precip_flux.getVal(stormIndex, &gp.precip_flux);
+  _gpropsVars.mass.getVal(stormIndex, &gp.mass);
+  _gpropsVars.tilt_angle.getVal(stormIndex, &gp.tilt_angle);
+  _gpropsVars.tilt_dirn.getVal(stormIndex, &gp.tilt_dirn);
+  _gpropsVars.dbz_max.getVal(stormIndex, &gp.dbz_max);
+  _gpropsVars.dbz_mean.getVal(stormIndex, &gp.dbz_mean);
+  _gpropsVars.dbz_max_gradient.getVal(stormIndex, &gp.dbz_max_gradient);
+  _gpropsVars.dbz_mean_gradient.getVal(stormIndex, &gp.dbz_mean_gradient);
+  _gpropsVars.ht_of_dbz_max.getVal(stormIndex, &gp.ht_of_dbz_max);
+  _gpropsVars.rad_vel_mean.getVal(stormIndex, &gp.rad_vel_mean);
+  _gpropsVars.rad_vel_sd.getVal(stormIndex, &gp.rad_vel_sd);
+  _gpropsVars.vorticity.getVal(stormIndex, &gp.vorticity);
+  _gpropsVars.precip_area.getVal(stormIndex, &gp.precip_area);
+  _gpropsVars.precip_area_centroid_x.getVal(stormIndex, &gp.precip_area_centroid_x);
+  _gpropsVars.precip_area_centroid_y.getVal(stormIndex, &gp.precip_area_centroid_y);
+  _gpropsVars.precip_area_orientation.getVal(stormIndex, &gp.precip_area_orientation);
+  _gpropsVars.precip_area_minor_radius.getVal(stormIndex, &gp.precip_area_minor_radius);
+  _gpropsVars.precip_area_major_radius.getVal(stormIndex, &gp.precip_area_major_radius);
+  _gpropsVars.proj_area.getVal(stormIndex, &gp.proj_area);
+  _gpropsVars.proj_area_centroid_x.getVal(stormIndex, &gp.proj_area_centroid_x);
+  _gpropsVars.proj_area_centroid_y.getVal(stormIndex, &gp.proj_area_centroid_y);
+  _gpropsVars.proj_area_orientation.getVal(stormIndex, &gp.proj_area_orientation);
+  _gpropsVars.proj_area_minor_radius.getVal(stormIndex, &gp.proj_area_minor_radius);
+  _gpropsVars.proj_area_major_radius.getVal(stormIndex, &gp.proj_area_major_radius);
+
+  _gpropsVars.storm_num.getVal(stormIndex, &gp.storm_num);
+  _gpropsVars.n_layers.getVal(stormIndex, &gp.n_layers);
+  _gpropsVars.base_layer.getVal(stormIndex, &gp.base_layer);
+  _gpropsVars.n_dbz_intervals.getVal(stormIndex, &gp.n_dbz_intervals);
+  _gpropsVars.n_runs.getVal(stormIndex, &gp.n_runs);
+  _gpropsVars.n_proj_runs.getVal(stormIndex, &gp.n_proj_runs);
+  _gpropsVars.top_missing.getVal(stormIndex, &gp.top_missing);
+  _gpropsVars.range_limited.getVal(stormIndex, &gp.range_limited);
+  _gpropsVars.second_trip.getVal(stormIndex, &gp.second_trip);
+  _gpropsVars.hail_present.getVal(stormIndex, &gp.hail_present);
+  _gpropsVars.anom_prop.getVal(stormIndex, &gp.anom_prop);
+  _gpropsVars.bounding_min_ix.getVal(stormIndex, &gp.bounding_min_ix);
+  _gpropsVars.bounding_min_iy.getVal(stormIndex, &gp.bounding_min_iy);
+  _gpropsVars.bounding_max_ix.getVal(stormIndex, &gp.bounding_max_ix);
+  _gpropsVars.bounding_max_iy.getVal(stormIndex, &gp.bounding_max_iy);
+  _gpropsVars.vil_from_maxz.getVal(stormIndex, &gp.vil_from_maxz);
+  _gpropsVars.ltg_count.getVal(stormIndex, &gp.ltg_count);
+  float fval;
+  _gpropsVars.convectivity_median.getVal(stormIndex, &fval);
+  if (fval != TitanData::missingFl32) {
+    gp.convectivity_median = fval;
+  }
+
+  _gpropsVars.hail_FOKRcategory.getVal(stormIndex, &gp.hailFOKRcategory);
+  _gpropsVars.hail_waldvogelProbability.getVal(stormIndex, &gp.hailWaldvogelProb);
+  _gpropsVars.hail_hailMassAloft.getVal(stormIndex, &gp.hailMassAloft);
+  _gpropsVars.hail_vihm.getVal(stormIndex, &gp.hailVertIntgMass);
+    
+  _gpropsVars.hail_poh.getVal(stormIndex, &gp.hda_poh);
+  _gpropsVars.hail_shi.getVal(stormIndex, &gp.hda_shi);
+  _gpropsVars.hail_posh.getVal(stormIndex, &gp.hda_posh);
+  _gpropsVars.hail_mehs.getVal(stormIndex, &gp.hda_mehs);
+    
+  // polygons are 2D variables
+    
+  std::vector<size_t> polyIndex = NcxxVar::makeIndex(gpropsOffset, 0);
+  std::vector<size_t> polyCount = NcxxVar::makeIndex(1, N_POLY_SIDES);
+    
+  _gpropsVars.proj_area_polygon.getVal(polyIndex, polyCount, &gp.proj_area_polygon);
+
+  // offsets into layers, histograms and runs
+    
+  _gpropsVars.layer_props_offset.getVal(stormIndex, &gp.layer_props_offset);
+  _gpropsVars.dbz_hist_offset.getVal(stormIndex, &gp.dbz_hist_offset);
+  _gpropsVars.runs_offset.getVal(stormIndex, &gp.runs_offset);
+  _gpropsVars.proj_runs_offset.getVal(stormIndex, &gp.proj_runs_offset);
+    
+  return 0;
+
 }
 
 //////////////////////////////////////////////////////////////

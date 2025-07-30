@@ -1903,6 +1903,7 @@ int EccoStats::_readTitan()
   }
 
   // read in the scan that matches the Ecco data volume
+  // also reads in global props for all storms
 
   if (tFile.readScan(scanNum)) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
@@ -1944,29 +1945,62 @@ int EccoStats::_readTitan()
          << scanNum << ", " << tFile.getPathInUse() << endl;
     return -1;
   }
-
+  
   const vector<TitanData::TrackEntry> &scanEntries = tFile.scanEntries();
-  cerr << "11111111111111 nStorms: " << tFile.scan().nstorms << endl;
-  cerr << "11111111111111 scanEntries.size(): " << scanEntries.size() << endl;
-  for (size_t ii = 0; ii < scanEntries.size(); ii++) {
-    cerr << "2222222222222222222222222222222 ii: " << ii << endl;
-    // scanEntries[ii].print(stderr, "", ii);
-    int complexNum = scanEntries[ii].complex_track_num;
-    // cerr << "2222222222222222222222222222222" << endl;
+  // cerr << "11111111111111 nStorms: " << tFile.scan().nstorms << endl;
+  // cerr << "11111111111111 scanEntries.size(): " << scanEntries.size() << endl;
+  for (size_t iscan = 0; iscan < scanEntries.size(); iscan++) {
+    const TitanData::TrackEntry &entry = scanEntries[iscan];
+    int complexNum = entry.complex_track_num;
     if (tFile.readComplexTrackParams(complexNum, true)) {
       cerr << "ERROR - EccoStats::_readTitan" << endl;
       cerr << "  Cannot read complex track num: "
            << complexNum << endl;
       return -1;
     }
-    int durationInSecs = tFile.complexParams().duration_in_secs;
-    int nSimpleTracks = tFile.complexParams().n_simple_tracks;
-    // tFile.complexParams().print(stderr, "", false, tFile.simplesPerComplex2D()[complexNum]);
+    int trackDurationSecs = tFile.complexParams().duration_in_secs;
+    int stormNum = entry.storm_num;
+    const TitanData::StormGprops &gprops = tFile.gprops()[stormNum];
+    double stormVol = gprops.volume;
+    int nProjRuns = gprops.n_proj_runs;
+    if (stormVol < _params.min_titan_storm_volume_km3 ||
+        trackDurationSecs < _params.min_titan_track_duration_secs) {
+      // storm and track entry do not meet requirements
+      continue;
+    }
+
+    // read in auxiliary props - lprops, hist, runs
+    
+    if (tFile.readStormAux(stormNum)) {
+      cerr << "ERROR - EccoStats::_readTitan" << endl;
+      cerr << "  Cannot read storm aux props, storm_num, file: "
+           << stormNum << ", " << tFile.getPathInUse() << endl;
+      return -1;
+    }
+    
+    const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
+    
+    cerr << "2222222222222222222222222222222 iscan: " << iscan << endl;
     cerr << "  complexNum: " << complexNum << endl;
-    cerr << "    durationInSecs: " << durationInSecs << endl;
-    cerr << "    nSimpleTracks: " << nSimpleTracks << endl;
+    cerr << "    durationInSecs: " << trackDurationSecs << endl;
+    cerr << "    stormNum: " << stormNum << endl;
+    cerr << "    volume: " << stormVol << endl;
+    cerr << "    nProjRuns: " << nProjRuns << endl;
+    cerr << "    projRuns.size(): " << projRuns.size() << endl;
     cerr << "2222222222222222222222222222222" << endl;
-  }
+
+    // loop through the proj runs
+
+    for (int irun = 0; irun < nProjRuns; irun++) {
+      const TitanData::StormRun &run = projRuns[irun];
+      cerr << "333333 ix, iy, iz, len: "
+           << run.run_ix << ", "
+           << run.run_iy << ", "
+           << run.run_iz << ", "
+           << run.run_len << endl;
+    } // irun
+    
+  } // iscan
 
   // close titan file
   

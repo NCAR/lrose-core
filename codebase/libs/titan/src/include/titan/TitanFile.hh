@@ -1157,6 +1157,11 @@ protected:
   // read in scan header for specified scan
   
   int _readScanHeader(TitanData::ScanHeader &scan, int scanNum);
+
+  // read global props for specified storm
+  // assumes scan header has been read
+  
+  int _readGprops(int stormNum);
   
   // read entry at given offset
 
